@@ -1,0 +1,1 @@
+fceu_SOURCES	+=	drivers/common/args.c drivers/common/cheat.c drivers/common/config.c drivers/common/vidblit.c drivers/common/hq2x.c drivers/common/hq3x.c drivers/common/scale2x.c drivers/common/scale3x.c drivers/common/scalebit.c
