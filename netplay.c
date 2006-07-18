@@ -24,7 +24,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+//#include <unistd.h> //mbg merge 7/17/06 removed
 #include <zlib.h>
 
 #include "types.h"
@@ -80,7 +80,10 @@ int FCEUI_NetplayStart(int nlocal, int divisor)
 
 int FCEUNET_SendCommand(uint8 cmd, uint32 len)
 {
- uint8 buf[numlocal + 1 + 4];
+ //mbg merge 7/17/06 changed to alloca
+ //uint8 buf[numlocal + 1 + 4];
+ uint8 *buf = (uint8*)_alloca(numlocal+1+4);
+ 
 
  buf[0] = 0xFF;
  FCEU_en32lsb(&buf[numlocal], len);
@@ -99,7 +102,7 @@ void FCEUI_NetplayText(uint8 *text)
 {
  uint32 len;
 
- len = strlen(text);
+ len = strlen((char*)text); //mbg merge 7/17/06 added cast
 
  if(!FCEUNET_SendCommand(FCEUNPCMD_TEXT,len)) return;
 
@@ -119,13 +122,13 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 
  fstat(fileno(fp),&sb);
  len = sb.st_size;
- buf = malloc(len);
+ buf = (char*)malloc(len); //mbg merge 7/17/06 added cast
  fread(buf, 1, len, fp);
  fclose(fp);
 
- cbuf = malloc(4 + len + len / 1000 + 12);
- FCEU_en32lsb(cbuf, len);
- compress2(cbuf + 4, &clen, buf, len, 7);
+ cbuf = (char*)malloc(4 + len + len / 1000 + 12); //mbg merge 7/17/06 added cast
+ FCEU_en32lsb((uint8*)cbuf, len); //mbg merge 7/17/06 added cast
+ compress2((uint8*)cbuf + 4, &clen, (uint8*)buf, len, 7); //mbg merge 7/17/06 added casts
  free(buf);
 
  //printf("Sending file: %s, %d, %d\n",fn,len,clen);
@@ -169,7 +172,7 @@ static FILE *FetchFile(uint32 remlen)
                                 fn = FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
                                 if((fp = fopen(fn,"w+b")))
                                 {
-                                 cbuf = malloc(clen);
+                                 cbuf = (char *)malloc(clen); //mbg merge 7/17/06 added cast
                                  if(!FCEUD_RecvData(cbuf, clen))
 				 {
 				  NetError();
@@ -180,7 +183,7 @@ static FILE *FetchFile(uint32 remlen)
 				  return(0);
 				 }
                              
-                                 len = FCEU_de32lsb(cbuf);
+                                 len = FCEU_de32lsb((uint8*)cbuf); //mbg merge 7/17/06 added cast
          if(len > 500000)    // Another sanity check
 				 {
 				  NetError();
@@ -190,8 +193,8 @@ static FILE *FetchFile(uint32 remlen)
 				  free(fn);
 				  return(0);
 				 }
-                                 buf = malloc(len);
-                                 uncompress(buf, &len, cbuf + 4, clen - 4);
+                                 buf = (char *)malloc(len); //mbg merge 7/17/06 added cast
+                                 uncompress((uint8*)buf, &len, (uint8*)cbuf + 4, clen - 4); //mbg merge 7/17/06 added casts
                                 
                                  fwrite(buf, 1, len, fp);
                                  free(buf);
@@ -244,7 +247,7 @@ void NetplayUpdate(uint8 *joyp)
 			 NetError();
 			 return;
 			}
-			tbuf = malloc(len + 1);
+			tbuf = (uint8*)malloc(len + 1); //mbg merge 7/17/06 added cast
 			tbuf[len] = 0;
                         if(!FCEUD_RecvData(tbuf, len))
                         {

@@ -55,22 +55,23 @@ HANDLE mapXBuf;
 
 void FCEU_KillVirtualVideo(void)
 {
- if(xbsave)
- {
-  free(xbsave);
-  xbsave=0;
- }
- if(XBuf)
- {
-	UnmapViewOfFile(XBuf);
-	CloseHandle(mapXBuf);
-	mapXBuf=NULL;
- }
- if(XBackBuf)
- {
-  free(XBackBuf);
-  XBackBuf=0;
- }
+	//mbg merge TODO 7/17/06 temporarily removed
+ //if(xbsave)
+ //{
+ // free(xbsave);
+ // xbsave=0;
+ //}
+ //if(XBuf)
+ //{
+	//UnmapViewOfFile(XBuf);
+	//CloseHandle(mapXBuf);
+	//mapXBuf=NULL;
+ //}
+ //if(XBackBuf)
+ //{
+ // free(XBackBuf);
+ // XBackBuf=0;
+ //}
 }
 
 int FCEU_InitVirtualVideo(void)
@@ -227,7 +228,7 @@ void FCEU_PutImage(void)
 		{
 			int controller, c, color;
 			int i, j;
-			char * t=XBuf+(FSettings.LastSLine-9)*256 + 20;
+			uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
 			if(input_display > 4) input_display = 4;
 			for(controller = 0; controller < input_display; controller++, t += 56)
 			{

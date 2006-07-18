@@ -11,7 +11,7 @@
 #define DIRECTSOUND_VERSION  0x0700
 #define DIRECTDRAW_VERSION 0x0700
 #define DIRECTINPUT_VERSION     0x700
-#define FCEUDEF_DEBUGGER
+//#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 removing conditional compiles
 #include "../../types.h"
 #include "../../general.h"
 #include "../../driver.h"

@@ -73,8 +73,8 @@ void FASTAPASS(3) FCEU_memmove(void *d, void *s, uint32 l)
  {
   uint8 *tmpd, *tmps;  
 
-  tmpd = d;
-  tmps = s;
+  tmpd = (uint8*)d; //mbg merge 7/17/06 added cast
+  tmps = (uint8*)s; //mbg merge 7/17/06 added cast
 
   for(x=l;x;x--)  // This could be optimized further, though(more tests could be performed).
   {
@@ -87,8 +87,8 @@ void FASTAPASS(3) FCEU_memmove(void *d, void *s, uint32 l)
  {
   uint32 *tmpd, *tmps;
 
-  tmpd = d;
-  tmps = s;
+  tmpd = (uint32*)d; //mbg merge 7/17/06 added cast
+  tmps = (uint32*)s; //mbg merge 7/17/06 added cast
 
   for(x=l>>2;x;x--)
   {

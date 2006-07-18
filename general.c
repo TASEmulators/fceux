@@ -25,7 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+//#include <unistd.h> //mbg merge 7/17/06 - removed
 
 #include "types.h"
 #include "fceu.h"
@@ -74,7 +74,7 @@ static int asprintf(char **strp, const char *fmt, ...)
  int ret;
 
  va_start(ap,fmt);
- if(!(*strp=malloc(2048)))
+ if(!(*strp=(char*)malloc(2048))) //mbg merge 7/17/06 cast to char*
   return(0);
  ret=vsnprintf(*strp,2048,fmt,ap);
  va_end(ap);

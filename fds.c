@@ -74,7 +74,7 @@ static uint8 *diskdatao[8]={0,0,0,0,0,0,0,0};
 
 static uint8 *diskdata[8]={0,0,0,0,0,0,0,0};
 
-static unsigned int TotalSides;
+static int TotalSides; //mbg merge 7/17/06 - unsignedectomy
 static uint8 DiskWritten=0;    /* Set to 1 if disk was written to. */
 static uint8 writeskip;
 static uint32 DiskPtr;
@@ -532,7 +532,7 @@ static void RenderSound(void)
 
 static void RenderSoundHQ(void)
 {
- int32 x;
+ uint32 x; //mbg merge 7/17/06 - made this unsigned
   
  if(!(SPSG[0x9]&0x80))
   for(x=FBC;x<SOUNDTS;x++)

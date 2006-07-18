@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h> //mbgm erge 7/17/06 removed
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -16,6 +16,7 @@
 #include "general.h"
 #include "video.h"
 #include "movie.h"
+#include "memory.h" //mbg merge 7/17/06 added
 
 #define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
 #define MOVIE_VERSION           2 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
@@ -294,7 +295,7 @@ static const char* convertToFCM(const char *fname, char *buffer)
 			if(file)
 			{
 				fseek(file, 12, SEEK_SET);
-				int frames=0;
+				uint32 frames=0; //mbg merge 7/17/06 changed to uint32
 				read32le(&frames, file);
 				if(frames)
 				{
@@ -345,6 +346,8 @@ static const char* convertToFCM(const char *fname, char *buffer)
 	return fname;
 }
 
+void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
+void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
 static void ResetInputTypes()
 {
 #ifdef WIN32
@@ -839,7 +842,7 @@ void FCEUI_SelectMovieNext(int n)
 int FCEUI_SelectMovie(int w, int show)
 {
  int oldslot=CurrentMovie;
- if(w == -1) { MovieShow = 0; return; }
+ if(w == -1) { MovieShow = 0; return 0; } //mbg merge 7/17/06 had to add return value
  FCEUI_SelectState(-1,0);
 
  CurrentMovie=w;
@@ -855,6 +858,7 @@ int FCEUI_SelectMovie(int w, int show)
   else
    FCEU_DispMessage("-select movie-");
  }
+ return 0; //mbg merge 7/17/06 had to add return value
 }
 
 int movcounter=0;
@@ -1127,7 +1131,7 @@ int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
  {
   char str[256];
   size_t r;
-  int p;
+  uint32 p; //mbg merge 7/17/06 change to uint32
   int p2=0;
   char last_c=32;
 
@@ -1374,7 +1378,7 @@ static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)
  metadata_length = (int)savestateoffset - MOVIE_V1_HEADER_SIZE;
  if(metadata_length > 0)
  {
-  int i;
+  //int i; //mbg merge 7/17/06 removed
 
   metadata_length >>= 1;
   if(metadata_length >= MOVIE_MAX_METADATA)
@@ -1393,12 +1397,10 @@ static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)
 	 while(ptr<ptr_end && c_ptr<metadata_length)
 	 {
 		 uint16 c=(tmp[c_ptr<<1] | (tmp[(c_ptr<<1)+1] << 8));
-		 switch(c)
-		 {
-		 case 0 ... 0x7f:
+		 //mbg merge 7/17/06 changed to if..elseif
+		 if(c<=0x7f)
 			 *ptr++ = (char)(c&0x7f);
-			 break;
-		 case 0x80 ... 0x7ff:
+		 else if(c<=0x7FF)
 			 if(ptr+1>=ptr_end)
 				 ptr_end=ptr;
 			 else
@@ -1406,8 +1408,7 @@ static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)
 				 *ptr++=(0xc0 | (c>>6));
 				 *ptr++=(0x80 | (c & 0x3f));
 			 }
-			 break;
-		 case 0x800 ... 0xffff:
+		 else
 			 if(ptr+2>=ptr_end)
 				 ptr_end=ptr;
 			 else
@@ -1416,8 +1417,7 @@ static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)
 				 *ptr++=(0x80 | ((c>>6) & 0x3f));
 				 *ptr++=(0x80 | (c & 0x3f));
 			 }
-			 break;
-		 }
+
 		 c_ptr++;
 	 }
 	 *ptr='\0';

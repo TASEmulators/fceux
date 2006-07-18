@@ -28,7 +28,7 @@
 #undef LPCWAVEFORMATEX
 #include <dsound.h>
 #include <dinput.h>
-#include <dir.h>
+//#include <dir.h> //mbg merge 7/17/06 removed
 #include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
@@ -187,11 +187,12 @@ static int soundquality=0;
 extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display, input_display;
 
-static unsigned int srendline,erendline;
-static unsigned int srendlinen=8;
-static unsigned int erendlinen=231;
-static unsigned int srendlinep=0;
-static unsigned int erendlinep=239;
+//mbg merge 7/17/06 why did these have to be unsigned
+static int srendline,erendline;
+static int srendlinen=8;
+static int erendlinen=231;
+static int srendlinep=0;
+static int erendlinep=239;
 
 
 static unsigned int totallines;

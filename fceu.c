@@ -250,9 +250,10 @@ char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record
 
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 {
-#ifdef WIN32
-	StopSound();
-#endif
+	//mbg merge 7/17/07 - why is this here
+//#ifdef WIN32
+//	StopSound();
+//#endif
 
     FCEUFILE *fp;
 	char *ipsfn;
@@ -262,7 +263,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	RewindStatus[0] = RewindStatus[1] = 0;
 	RewindStatus[2] = RewindStatus[3] = 0;
 
-	FCEUGameInfo = malloc(sizeof(FCEUGI));
+	FCEUGameInfo = (FCEUGI*)malloc(sizeof(FCEUGI));
 	memset(FCEUGameInfo, 0, sizeof(FCEUGI));
 
 	FCEUGameInfo->soundchan = 0;

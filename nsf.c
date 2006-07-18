@@ -218,9 +218,9 @@ int NSFLoad(FCEUFILE *fp)
  FCEU_printf(" Starting song:  %d / %d\n\n",NSFHeader.StartingSong,NSFHeader.TotalSongs);
 
  if(NSFHeader.SoundChip&4)
-  ExWRAM=FCEU_gmalloc(32768+8192);
+  ExWRAM=(uint8*)FCEU_gmalloc(32768+8192); //mbg merge 7/17/06 added cast
  else
-  ExWRAM=FCEU_gmalloc(8192);
+  ExWRAM=(uint8*)FCEU_gmalloc(8192); //mbg merge 7/17/06 added cast
 
  FCEUI_SetVidSystem(NSFHeader.VideoSystem);
 
@@ -561,8 +561,8 @@ int FCEUI_NSFChange(int amount)
 /* Returns total songs */
 int FCEUI_NSFGetInfo(uint8 *name, uint8 *artist, uint8 *copyright, int maxlen)
 {
- strncpy(name,NSFHeader.SongName,maxlen);
- strncpy(artist,NSFHeader.Artist,maxlen);
- strncpy(copyright,NSFHeader.Copyright,maxlen);
+ strncpy((char*)name,(char*)NSFHeader.SongName,maxlen); //mbg merge 7/17/06 added casts
+ strncpy((char*)artist,(char*)NSFHeader.Artist,maxlen); //mbg merge 7/17/06 added casts
+ strncpy((char*)copyright,(char*)NSFHeader.Copyright,maxlen); //mbg merge 7/17/06 added casts
  return(NSFHeader.TotalSongs);
 }

@@ -434,19 +434,26 @@ SFORMAT FCEUCTRL_STATEINFO[]={
   { 0 }
  };
 
-
 void FCEU_DoSimpleCommand(int cmd)
 {
- switch(cmd)
- {
-   case FCEUNPCMD_FDSINSERT: FCEU_FDSInsert();break;
-   case FCEUNPCMD_FDSSELECT: FCEU_FDSSelect();break;
-//   case FCEUNPCMD_FDSEJECT: FCEU_FDSEject();break;
-   case FCEUNPCMD_VSUNICOIN: FCEU_VSUniCoin(); break;
-   case FCEUNPCMD_VSUNIDIP0 ... (FCEUNPCMD_VSUNIDIP0 + 7): FCEU_VSUniToggleDIP(cmd - FCEUNPCMD_VSUNIDIP0);break;
-   case FCEUNPCMD_POWER: PowerNES();break;
-   case FCEUNPCMD_RESET: ResetNES();break;
- }
+	switch(cmd)
+	{
+	case FCEUNPCMD_FDSINSERT: FCEU_FDSInsert();break;
+	case FCEUNPCMD_FDSSELECT: FCEU_FDSSelect();break;
+		//   case FCEUNPCMD_FDSEJECT: FCEU_FDSEject();break;
+	case FCEUNPCMD_VSUNICOIN: FCEU_VSUniCoin(); break;
+	case FCEUNPCMD_VSUNIDIP0: //mbg merge 7/17/06 removed case range syntax
+	case FCEUNPCMD_VSUNIDIP0+1:
+	case FCEUNPCMD_VSUNIDIP0+2:
+	case FCEUNPCMD_VSUNIDIP0+3:
+	case FCEUNPCMD_VSUNIDIP0+4:
+	case FCEUNPCMD_VSUNIDIP0+5:
+	case FCEUNPCMD_VSUNIDIP0+6:
+	case FCEUNPCMD_VSUNIDIP0+7:
+		FCEU_VSUniToggleDIP(cmd - FCEUNPCMD_VSUNIDIP0);break;
+	case FCEUNPCMD_POWER: PowerNES();break;
+	case FCEUNPCMD_RESET: ResetNES();break;
+	}
 }
 
 void FCEU_QSimpleCommand(int cmd)
@@ -466,10 +473,11 @@ void FCEUI_FDSSelect(void)
  FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
 } 
 
-int FCEUI_FDSInsert(void)
+//mbg merge 7/17/06 changed to void fn(void) to make it an EMUCMDFN
+void FCEUI_FDSInsert(void)
 { 
  FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
- return(1);
+ //return(1);
 }
 
 /*

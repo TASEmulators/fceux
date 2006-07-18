@@ -102,7 +102,7 @@ extern uint8 Exit;
 extern uint8 pale;
 extern uint8 vsdip;
 
-#define FCEUDEF_DEBUGGER
+//#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 - cleaning out conditional compiles 
 
 #define JOY_A   1
 #define JOY_B   2

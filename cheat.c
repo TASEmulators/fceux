@@ -236,7 +236,7 @@ void FCEU_LoadGameCheats(FILE *override)
    char *neo=&tbuf[4+2+2+1+1+1];
    if(sscanf(tbuf,"%04x%*[:]%02x%*[:]%02x",&addr,&val,&compare)!=3)
     continue;
-   namebuf=malloc(strlen(neo)+1);
+   namebuf=(char *)malloc(strlen(neo)+1);
    strcpy(namebuf,neo);
   }
   else 
@@ -244,11 +244,11 @@ void FCEU_LoadGameCheats(FILE *override)
    char *neo=&tbuf[4+2+1+1];
    if(sscanf(tbuf,"%04x%*[:]%02x",&addr,&val)!=2)
     continue;
-   namebuf=malloc(strlen(neo)+1);
+   namebuf=(char *)malloc(strlen(neo)+1);
    strcpy(namebuf,neo);
   }
 
-  for(x=0;x<strlen(namebuf);x++)
+  for(x=0;x<(int)strlen(namebuf);x++)
   {
    if(namebuf[x]==10 || namebuf[x]==13)
    {

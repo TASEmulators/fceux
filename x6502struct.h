@@ -1,6 +1,5 @@
 #ifndef _X6502STRUCTH
-
-#include "fceu.h"
+#define _X6502STRUCTH
 
 typedef struct __X6502 {
   int32 tcount;     /* Temporary cycle counter */
@@ -24,5 +23,5 @@ typedef struct __X6502 {
 	#endif
 
 } X6502;
-#define _X6502STRUCTH
+
 #endif

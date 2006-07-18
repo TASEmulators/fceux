@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h> //mbg merge 7/17/06 - removed
 
 #include <zlib.h>
 #include "unzip.h"
@@ -289,7 +289,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 
    fd = dup(fileno( (FILE *)t));
 
-   fclose(t);
+   fclose((FILE*)t); //mbg merge 7/17/06 - cast to FILE*
 
    lseek(fd, 0, SEEK_SET);
 
@@ -420,7 +420,7 @@ int FCEU_fseek(FCEUFILE *fp, long offset, int whence)
 
   switch(whence)
   {
-   case SEEK_SET:if(offset>=wz->size)
+   case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
                   return(-1);
                  wz->location=offset;break;
    case SEEK_CUR:if(offset+wz->location>wz->size)
@@ -460,12 +460,12 @@ void FCEU_rewind(FCEUFILE *fp)
  }
  else
   /* Rewind */
-  fseek(fp->fp,0,SEEK_SET);
+  fseek((FILE*)fp->fp,0,SEEK_SET); //mbg merge 7/17/06 - added cast to FILE*
 }
 
 int FCEU_read16le(uint16 *val, FCEUFILE *fp)
 {
- uint8 t[2];
+ uint8 t[4]; //mbg merge 7/17/06 - changed size from 2 to 4 to avoid dangerous problem with uint32* poking
 
  if(fp->type>=1)
  {

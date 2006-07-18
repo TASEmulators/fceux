@@ -16,7 +16,10 @@ static long wsize;
 */
 void FCEU_WriteWaveData(int32 *Buffer, int Count)
 {
- int16 temp[Count];  /* Yay.  Is this the first use of this "feature" of C in FCE Ultra? */
+	//mbg merge 7/17/06 changed to alloca
+ //int16 temp[Count];  /* Yay.  Is this the first use of this "feature" of C in FCE Ultra? */
+ int16 *temp = (int16*)_alloca(Count*2);
+
  int16 *dest;
  int x;
 
@@ -47,7 +50,9 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
 	 extern int bittage;
 	 if(!bittage)
 	 {
-		 int8 temp2[Count];
+		 //mbg merge 7/17/06 changed to alloca
+		 //int8 temp2[Count];
+		 int8 *temp2 = (int8*)_alloca(Count);
 		 int P;
 		 for(P=0;P<Count;P++)
 			 *(((uint8*)temp2)+P)=((int8)(temp[P]>>8))^128;

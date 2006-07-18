@@ -75,7 +75,7 @@ static uint32 mallocedsizes[32];
 
 static int FixRomSize(uint32 size, uint32 minimum)
 {
-  int x=1;
+  uint32 x=1; //mbg merge 7/17/06 made uint
 
   if(size<minimum)
    return minimum;
@@ -157,8 +157,8 @@ static int NAME(FCEUFILE *fp)
 
  if(!FCEUGameInfo->name)
  {
-  FCEUGameInfo->name=malloc(strlen(namebuf)+1);
-  strcpy(FCEUGameInfo->name,namebuf);
+  FCEUGameInfo->name=(uint8*)malloc(strlen(namebuf)+1); //mbg merge 7/17/06 added cast
+  strcpy((char*)FCEUGameInfo->name,namebuf); //mbg merge 7/17/06 added cast
  }
  return(1);
 }

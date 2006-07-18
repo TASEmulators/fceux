@@ -180,7 +180,7 @@ static OPS optable[NUMOPS]=
 
 uint16 FCEUI_Disassemble(void *XA, uint16 a, char *stringo)
 {
- X6502 *X=XA;
+ X6502 *X=(X6502*)XA;
  uint8 buf;
  unsigned int arg;
  int32 info;

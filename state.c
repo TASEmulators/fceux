@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h> //mbg merge 7/17/06 removed
 
 #include "types.h"
 #include "x6502.h"
@@ -205,6 +205,8 @@ static int ReadStateChunk(FILE *st, SFORMAT *sf, int size)
 
 static int read_sfcpuc=0, read_snd=0;
 
+void FCEUD_BlitScreen(uint8 *XBuf); //mbg merge 7/17/06 YUCKY had to add
+void UpdateFCEUWindow(void);  //mbg merge 7/17/06 YUCKY had to add
 static int ReadStateChunks(FILE *st, int32 totalsize)
 {
  int t;
@@ -615,7 +617,7 @@ void FCEUI_SelectStateNext(int n)
 int FCEUI_SelectState(int w, int show)
 {
  int oldstate=CurrentState;
- if(w == -1) { StateShow = 0; return; }
+ if(w == -1) { StateShow = 0; return 0; } //mbg merge 7/17/06 had to make return a value
  FCEUI_SelectMovie(-1,0);
 
  CurrentState=w;

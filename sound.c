@@ -540,7 +540,7 @@ fhcnt-=cycles*48;
 
 void RDoPCM(void)
 {
- int32 V;
+ uint32 V; //mbg merge 7/17/06 made uint32
 
  for(V=ChannelBC[4];V<SOUNDTS;V++)
   WaveHi[V]+=RawDALatch<<16;
@@ -708,7 +708,7 @@ static void RDoSQLQ(void)
 
 static void RDoTriangle(void)
 {
- int32 V;
+ uint32 V; //mbg merge 7/17/06 made uitn32
  int32 tcout;
 
  tcout=(tristep&0xF);
@@ -876,7 +876,7 @@ static void RDoTriangleNoisePCMLQ(void)
 
 static void RDoNoise(void)
 {
- int32 V;
+ uint32 V; //mbg merge 7/17/06 made uint32
  int32 outo;
  uint32 amptab[2];
 
