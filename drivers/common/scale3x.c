@@ -32,6 +32,7 @@
  * - derivative works of the program are allowed.
  */
 
+ #include "../../types.h" //mbg merge 7/17/06 added to get rid of __restrict__ in msvc
 #include "scale3x.h"
 
 #include <assert.h>

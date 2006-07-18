@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <windowsx.h>
+#include <commctrl.h> //bbit edited:this line added   //mbg merge 7/17/06 removing conditional compiles
 
 #ifndef WIN32
 #define WIN32
@@ -15,6 +16,7 @@
 #include "../../types.h"
 #include "../../general.h"
 #include "../../driver.h"
+#include "../common/vidblit.h" //mbg merge 7/17/06 added
 #include "../common/config.h"
 
 /* Message logging(non-netplay messages, usually) for all. */

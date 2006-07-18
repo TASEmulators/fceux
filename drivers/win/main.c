@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-//
+
 
 #include "common.h"
 
@@ -33,6 +33,8 @@
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
 
+#include "../../types.h" //mbg merge 7/17/06 added
+#include "../../fceu.h" //mbg merge 7/17/06 added
 #include "input.h"
 #include "netplay.h"
 #include "joystick.h"
@@ -187,15 +189,13 @@ static int soundquality=0;
 extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display, input_display;
 
-//mbg merge 7/17/06 why did these have to be unsigned
+//mbg merge 7/17/06 did these have to be unsigned?
 static int srendline,erendline;
 static int srendlinen=8;
 static int erendlinen=231;
 static int srendlinep=0;
 static int erendlinep=239;
-
-
-static unsigned int totallines;
+static int totallines;
 
 static void FixFL(void)
 {
@@ -222,10 +222,52 @@ void FCEUD_PrintError(char *s)
  if(fullscreen)ShowCursorAbs(0);
 }
 
+
+//---------------------------
+//mbg merge 6/29/06 - new aboutbox
+
+//generate an msvc-compatible compiler version string if necessary
+#ifdef MSVC
+ #ifdef _M_X64
+   #define _MSVC_ARCH "x64"
+ #else
+   #define _MSVC_ARCH "x86"
+ #endif
+ #ifdef _DEBUG
+  #define _MSVC_BUILD "debug"
+ #else 
+  #define _MSVC_BUILD "release"
+ #endif
+ #define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
+ #define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
+ #define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
+ #define _Py_STRINGIZE2(X) #X
+ //re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
+#else
+  #define __COMPILER__STRING__ "gcc " __VERSION__
+#endif
+
 void ShowAboutBox(void)
 {
- sprintf(TempArray,"FCE Ultra "FCEU_VERSION"\n\nhttp://fceultra.sourceforge.net\nlukeg.50webs.com/fceu.html\n\n"__TIME__"\n"__DATE__"\n""gcc "__VERSION__);
- MessageBox(hAppWnd,TempArray,"About FCE Ultra",MB_OK);
+sprintf(TempArray,
+
+"FCEUX  "FCEU_VERSION_STRING"\n\
+~CAST~\n\
+FCE - Bero\n\
+FCEU - Xodnizel\n\
+FCEU XD - Bbitmaster & Parasyte\n\
+FCEU XD SP - Sebastian Porst\n\
+FCEU MM - CaH4e3\n\
+FCEU TAS - blip & nitsuja\n\
+FCEU TAS+ - Luke Gustafson\n\
+\n\
+"__TIME__"\n\
+"__DATE__"\n\
+" __COMPILER__STRING__
+
+);
+
+ MessageBox(hAppWnd,TempArray,"About FCEUXD SP",MB_OK);
 }
 
 
@@ -593,8 +635,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 			buffer is used.
 			*/
 			int skipthis = 0;
-			
-			doagain: //mbg merge 6/30/06
 
 			if(!(eoptions&EO_NOTHROTTLE) || fps_scale != 256)
 				if(!NoWaiting)
@@ -614,26 +654,9 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 					skipcount++;
 				}
 			}
-
-			
-			//mbg merge 6/30/06
-			if(userpause)
-			{
-				StopSound();
-				Sleep(50);
-				BlockingCheck();
-				goto doagain;
-			}
 		}
-
-		 UpdateFCEUWindow();
-		 FCEUD_UpdateInput();
-		 PPUViewDoBlit();
-		 //mbg merge 6/29/06
-		 UpdateMemoryView(0);
-		 UpdateCDLogger();
-		 UpdateLogWindow();
-		 NTViewDoBlit(0);
+		UpdateFCEUWindow();
+		FCEUD_UpdateInput();
 
 	} // end of !(old sound code) block
 }

@@ -117,7 +117,7 @@ void UpdateJoysticks(void)
 
 int DTestButtonJoy(ButtConfig *bc)
 {
- int x;
+ uint32 x; //mbg merge 7/17/06 changed to uint
 
  for(x=0;x<bc->NumC;x++)
  {
@@ -332,7 +332,7 @@ int KillJoysticks (void)
 
 void JoyClearBC(ButtConfig *bc)
 {
- int x;
+ uint32 x; //mbg merge 7/17/06 changed to uint
  for(x=0; x<bc->NumC; x++)
   if(bc->ButtType[x] == BUTTC_JOYSTICK)
    bc->DeviceNum[x] = FindByGUID(bc->DeviceInstance[x]);
@@ -342,7 +342,7 @@ static int GetARange(LPDIRECTINPUTDEVICE7 dev, LONG which, LONG *min, LONG *max)
 {
     HRESULT dival;
     DIPROPRANGE diprg;
-    int r;
+    //int r; //mbg merge 7/17/06 removed
 
     memset(&diprg,0,sizeof(DIPROPRANGE));
     diprg.diph.dwSize=sizeof(DIPROPRANGE);
@@ -362,10 +362,13 @@ static int GetARange(LPDIRECTINPUTDEVICE7 dev, LONG which, LONG *min, LONG *max)
 
 static BOOL CALLBACK JoystickFound(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
- HRESULT dival;
+ //HRESULT dival; //mbg merge 7/17/06 removed
  int n = numjoysticks;
 
- if(DI_OK != IDirectInput7_CreateDeviceEx(lpDI,&lpddi->guidInstance,&IID_IDirectInputDevice7,(LPVOID *)&Joysticks[n],0))
+ //mbg merge 7/17/06 changed:
+ if(DI_OK != IDirectInput7_CreateDeviceEx(lpDI,lpddi->guidInstance,IID_IDirectInputDevice7,(LPVOID *)&Joysticks[n],0))
+ //if(DI_OK != IDirectInput7_CreateDeviceEx(lpDI,&lpddi->guidInstance,&IID_IDirectInputDevice7,(LPVOID *)&Joysticks[n],0))
+ 
  {
   FCEU_printf("Device creation of a joystick failed during init.\n");
   return(DIENUM_CONTINUE);

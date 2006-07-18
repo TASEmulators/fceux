@@ -50,6 +50,7 @@
 /**
  * Apply the Scale2x effect on a group of rows. Used internally.
  */
+//mbg merge 7/17/06 added a bunch of casts
 static inline void stage_scale2x(void* dst0, void* dst1, const void* src0, const void* src1, const void* src2, unsigned pixel, unsigned pixel_per_row)
 {
 	switch (pixel) {
@@ -58,9 +59,9 @@ static inline void stage_scale2x(void* dst0, void* dst1, const void* src0, const
 		case 2 : scale2x_16_mmx(dst0, dst1, src0, src1, src2, pixel_per_row); break;
 		case 4 : scale2x_32_mmx(dst0, dst1, src0, src1, src2, pixel_per_row); break;
 #else
-		case 1 : scale2x_8_def(dst0, dst1, src0, src1, src2, pixel_per_row); break;
-		case 2 : scale2x_16_def(dst0, dst1, src0, src1, src2, pixel_per_row); break;
-		case 4 : scale2x_32_def(dst0, dst1, src0, src1, src2, pixel_per_row); break;
+		case 1 : scale2x_8_def((scale2x_uint8*)dst0, (scale2x_uint8*)dst1, (scale2x_uint8*)src0, (scale2x_uint8*)src1, (scale2x_uint8*)src2, pixel_per_row); break;
+		case 2 : scale2x_16_def((scale2x_uint16*)dst0, (scale2x_uint16*)dst1, (scale2x_uint16*)src0, (scale2x_uint16*)src1, (scale2x_uint16*)src2, pixel_per_row); break;
+		case 4 : scale2x_32_def((scale2x_uint32*)dst0, (scale2x_uint32*)dst1, (scale2x_uint32*)src0, (scale2x_uint32*)src1, (scale2x_uint32*)src2, pixel_per_row); break;
 #endif
 	}
 }
@@ -68,12 +69,13 @@ static inline void stage_scale2x(void* dst0, void* dst1, const void* src0, const
 /**
  * Apply the Scale3x effect on a group of rows. Used internally.
  */
+//mbg merge 7/17/06 added a bunch of casts
 static inline void stage_scale3x(void* dst0, void* dst1, void* dst2, const void* src0, const void* src1, const void* src2, unsigned pixel, unsigned pixel_per_row)
 {
 	switch (pixel) {
-		case 1 : scale3x_8_def(dst0, dst1, dst2, src0, src1, src2, pixel_per_row); break;
-		case 2 : scale3x_16_def(dst0, dst1, dst2, src0, src1, src2, pixel_per_row); break;
-		case 4 : scale3x_32_def(dst0, dst1, dst2, src0, src1, src2, pixel_per_row); break;
+		case 1 : scale3x_8_def((scale2x_uint8*)dst0, (scale2x_uint8*)dst1, (scale2x_uint8*)dst2, (scale2x_uint8*)src0, (scale2x_uint8*)src1, (scale2x_uint8*)src2, pixel_per_row); break;
+		case 2 : scale3x_16_def((scale2x_uint16*)dst0, (scale2x_uint16*)dst1, (scale2x_uint16*)dst2, (scale2x_uint16*)src0, (scale2x_uint16*)src1, (scale2x_uint16*)src2, pixel_per_row); break;
+		case 4 : scale3x_32_def((scale2x_uint32*)dst0, (scale2x_uint32*)dst1, (scale2x_uint32*)dst2, (scale2x_uint32*)src0, (scale2x_uint32*)src1, (scale2x_uint32*)src2, pixel_per_row); break;
 	}
 }
 

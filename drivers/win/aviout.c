@@ -186,7 +186,7 @@ static int avi_open(const char* filename, const BITMAPINFOHEADER* pbmih, const W
 			// get compression options
 			memset(&avi_file->compress_options[VIDEO_STREAM], 0, sizeof(AVICOMPRESSOPTIONS));
 			avi_file->compress_options_ptr[VIDEO_STREAM] = &avi_file->compress_options[0];
-retryAviSaveOptions:
+//retryAviSaveOptions: //mbg merge 7/17/06 removed
 			error = 0;
 			if(!AVISaveOptions(hAppWnd, 0, 1, &avi_file->streams[VIDEO_STREAM], &avi_file->compress_options_ptr[VIDEO_STREAM]))
 				break;

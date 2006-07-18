@@ -22,27 +22,29 @@
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
 
-#define FCEU_VERSION_NUMERIC 9813
+#define FCEU_VERSION_NUMERIC 9816
 #define FCEU_VERSION_STRING "1.07"
-#define FCEU_VERSION "0.98.13"
-#define FCEUMM_VERSION "0.98.13mm"
-#define FCEUXD_VERSION_STRING "1.0a"
-#define FCEUXDSP_VERSION_STRING "1.07"
+//#define FCEU_VERSION_STRING "1.07"
+//#define FCEU_VERSION "0.98.17"
+//#define FCEUXD_VERSION_STRING "1.0a"
+//#define FCEUXDSP_VERSION_STRING "1.07"
 
 #ifdef MSVC
 typedef unsigned char uint8;
 typedef unsigned short uint16;
-typedef unsigned long  uint32;
+typedef unsigned int uint32;
 typedef signed char int8;
 typedef signed short int16;
-typedef signed long int32;
+typedef signed int int32;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <io.h>
-void* _alloca(size_t amt); //wtf why isnt this in any header
+#include <direct.h>
+#include <malloc.h>
 #define dup _dup
 #define stat _stat
 #define fstat _fstat
+#define mkdir _mkdir
 #define W_OK 2
 #define R_OK 2
 #define X_OK 1
@@ -121,7 +123,7 @@ typedef uint32_t uint32;
  #endif
 #elif MSVC
  #define FP_FASTAPASS(x)
- #define FASTAPASS(x) __fastcall
+ #define FASTAPASS(x)
 #else
  #define FP_FASTAPASS(x)
  #define FASTAPASS(x)

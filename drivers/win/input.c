@@ -29,6 +29,7 @@
 #include "input.h"
 #include "keyboard.h"
 #include "joystick.h"
+#include "../../fceu.h" //mbg merge 7/17/06 added
 
 #include "keyscan.h"
 
@@ -48,7 +49,9 @@ int InitDInput(void)
 {
  HRESULT ddrval;
 
- ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,&IID_IDirectInput7,(LPVOID *)&lpDI,0);
+ //mbg merge 7/17/06 changed:
+ //ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,&IID_IDirectInput7,(LPVOID *)&lpDI,0);
+ ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,IID_IDirectInput7,(LPVOID *)&lpDI,0);
  if(ddrval!=DI_OK)
  {
   FCEUD_PrintError("DirectInput: Error creating DirectInput object.");
@@ -195,6 +198,25 @@ int GetAutoFireDesynch()
 	return DesynchAutoFire;
 }
 
+int DTestButton(ButtConfig *bc)
+{
+ uint32 x;//mbg merge 7/17/06 changed to uint
+
+ for(x=0;x<bc->NumC;x++)
+ {
+  if(bc->ButtType[x]==BUTTC_KEYBOARD)
+  {
+   if(keys_nr[bc->ButtonNum[x]])
+   {
+    return(1);
+   }
+  }
+ }
+ if(DTestButtonJoy(bc)) return(1);
+ return(0);
+}
+
+
 void UpdateGamepad()
 {
  if(FCEUI_IsMovieActive()<0)
@@ -307,6 +329,9 @@ static uint32 UpdatePPadData(int w)
 
 static uint8 fkbkeys[0x48];
 static uint8 suborkbkeys[0x60];
+
+void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
+void GetMouseData(uint32 *md); //mbg merge 7/17/06 yech had to add this
 
 void FCEUD_UpdateInput()
 {
@@ -641,27 +666,10 @@ ARGPSTRUCT InputArgs[]={
 	{0,0,0,0}
 };
 
-int DTestButton(ButtConfig *bc)
-{
- int x;
-
- for(x=0;x<bc->NumC;x++)
- {
-  if(bc->ButtType[x]==BUTTC_KEYBOARD)
-  {
-   if(keys_nr[bc->ButtonNum[x]])
-   {
-    return(1);
-   }
-  }
- }
- if(DTestButtonJoy(bc)) return(1);
- return(0);
-}
 
 static char *MakeButtString(ButtConfig *bc)
 {
- int x;
+ uint32 x; //mbg merge 7/17/06  changed to uint
  char tmpstr[512];
  char *astr;
 
@@ -708,7 +716,7 @@ static char *MakeButtString(ButtConfig *bc)
   }
  }
 
- astr=malloc(strlen(tmpstr) + 1);
+ astr=(char*)malloc(strlen(tmpstr) + 1); //mbg merge 7/17/06 added cast
  strcpy(astr,tmpstr);
  return(astr);
 }
@@ -805,7 +813,7 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
                       }
                       break;
    case WM_INITDIALOG:
-                      SetWindowText(hwndDlg, DWBText);
+                      SetWindowText(hwndDlg, (char*)DWBText); //mbg merge 7/17/06 added cast
                       BeginJoyWait(hwndDlg);
                       SetTimer(hwndDlg,666,25,0);     /* Every 25ms.*/
                       {
@@ -881,6 +889,7 @@ int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc)
  }
  
  EnableWindow(hParent, 1);
+ return 0; //mbg merge TODO 7/17/06  - had to add this return value--is it right?
 }
 
 int DWaitSimpleButton(HWND hParent, const uint8 *text)
@@ -889,7 +898,7 @@ int DWaitSimpleButton(HWND hParent, const uint8 *text)
  int ret = 0;
 
  die = CreateDialog(fceu_hInstance, "DWBDIALOGSIMPLE", hParent, NULL);
- SetWindowText(die, text);
+ SetWindowText(die, (char*)text); //mbg merge 7/17/06 added cast
  EnableWindow(hParent, 0);
  
  ShowWindow(die, 1);
@@ -963,7 +972,7 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
                   char btext[128];
                   btext[0]=0;
                   GetDlgItemText(hwndDlg, b, btext, 128);
-                  DWaitButton(hwndDlg, btext,&DoTBButtons[b - 300]);
+                  DWaitButton(hwndDlg, (uint8*)btext,&DoTBButtons[b - 300]); //mbg merge 7/17/06 added cast
                  }
                  else switch(wParam&0xFFFF)
                  {
@@ -985,12 +994,12 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 }
 
-static void DoTBConfig(HWND hParent, const char *text, char *template, ButtConfig *buttons, int max)
+static void DoTBConfig(HWND hParent, const char *text, char *_template, ButtConfig *buttons, int max)
 {
   DoTBTitle=text;
   DoTBButtons = buttons;
   DoTBMax = max;
-  DialogBox(fceu_hInstance,template,hParent,DoTBCallB);
+  DialogBox(fceu_hInstance,_template,hParent,DoTBCallB);
 }
 
 static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -1127,7 +1136,7 @@ static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 						char btext[128];
 						btext[0]=0;
 						GetDlgItemText(hwndDlg, 112, btext, 128);
-						int button = DWaitSimpleButton(hwndDlg, btext);
+						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 
 						if(button)
 						{
 						    if(!GetKeyNameText(button<<16,btext,128))
@@ -1145,7 +1154,7 @@ static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 						char btext[128];
 						btext[0]=0;
 						GetDlgItemText(hwndDlg, 114, btext, 128);
-						int button = DWaitSimpleButton(hwndDlg, btext);
+						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 added cast
 						if(button)
 						{
 						    if(!GetKeyNameText(button<<16,btext,128))
@@ -1572,18 +1581,19 @@ static int* ConflictTable=0;
 
 static int ShouldDisplayMapping(int mapn, int filter)
 {
-	switch(filter)
-	{
-	case 0:						return 1;											/* No filter */
-	case 1 ... EMUCMDTYPE_MAX:	return (FCEUI_CommandTable[mapn].type == filter-1);	/* Filter by type */
-	case EMUCMDTYPE_MAX+1:		return FCEUD_CommandMapping[mapn];					/* Assigned */
-	case EMUCMDTYPE_MAX+2:		return !(FCEUD_CommandMapping[mapn]);				/* Unassigned */
-	case EMUCMDTYPE_MAX+3:		return ConflictTable[mapn];							/* Conflicts */
-	default:
-		break;
-	}
-	
-	return 0;
+	//mbg merge 7/17/06 changed to if..elseif
+	if(filter==0) /* No filter */
+		return 1;
+	else if(filter <= EMUCMDTYPE_MAX) /* Filter by type */
+		return (FCEUI_CommandTable[mapn].type == filter-1);	
+	else if(filter == EMUCMDTYPE_MAX+1) /* Assigned */
+		return FCEUD_CommandMapping[mapn];
+	else if(filter == EMUCMDTYPE_MAX+2) /* Unassigned */
+		return !(FCEUD_CommandMapping[mapn]);
+	else if(filter == EMUCMDTYPE_MAX+3) /* Conflicts */
+		return ConflictTable[mapn];
+	else 
+		return 0;
 }
 
 static void PopulateMappingDisplay(HWND hwndDlg)
@@ -1667,7 +1677,7 @@ static BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, 
 		{
 			HWND hwndListView = GetDlgItem(hwndDlg, 1003);
 			LVCOLUMN lv;
-			LVITEM lvi;
+			//LVITEM lvi; //mbg merge 7/17/06 removed
 			int i;
 
 			// Set full row select.

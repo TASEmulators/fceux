@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _SOUND_H_
+#define _SOUND_H_
+
 typedef struct {
 	   void (*Fill)(int Count);	/* Low quality ext sound. */
 
@@ -60,3 +63,6 @@ void FCEUSND_SaveState(void);
 void FCEUSND_LoadState(int version);
 
 void FASTAPASS(1) FCEU_SoundCPUHook(int);
+void FP_FASTAPASS(2) Write_IRQFM (uint32 A, uint8 V); //mbg merge 7/17/06 brought over from latest mmbuild
+
+#endif

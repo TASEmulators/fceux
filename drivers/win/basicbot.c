@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+//mbg merge 7/17/06 this code shouldnt be compiled unless we're doing this (i think)
+#ifdef _USE_SHARED_MEMORY_
 
 #include "common.h"
 
@@ -931,3 +933,5 @@ void CreateBasicBot()
 	SetDlgItemText(hwndBasicBot, 1022, Formula[22]);
 }
 
+
+#endif

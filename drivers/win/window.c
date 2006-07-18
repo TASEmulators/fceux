@@ -213,7 +213,7 @@ void AddRecent(char *fn)
 
  if(rfiles[9]) free(rfiles[9]);
  for(x=9;x;x--) rfiles[x]=rfiles[x-1];
- rfiles[0]=malloc(strlen(fn)+1);
+ rfiles[0]=(char*)malloc(strlen(fn)+1); //mbg merge 7/17/06 added cast
  strcpy(rfiles[0],fn);
  UpdateRMenu(recentmenu, rfiles, 102, 600);
 }
@@ -240,7 +240,7 @@ void AddRecentDir(char *fn)
 
  if(rdirs[9]) free(rdirs[9]);
  for(x=9;x;x--) rdirs[x]=rdirs[x-1];
- rdirs[0]=malloc(strlen(fn)+1);
+ rdirs[0]=(char *)malloc(strlen(fn)+1); //mbg merge 7/17/06 added  cast
  strcpy(rdirs[0],fn);
  UpdateRMenu(recentdmenu, rdirs, 103, 700);
 }
@@ -343,7 +343,7 @@ void LoadNewGamey(HWND hParent, char *initialdir)
  {
   char *tmpdir;
 
-  if((tmpdir=malloc(ofn.nFileOffset+1)))
+  if((tmpdir=(char *)malloc(ofn.nFileOffset+1))) //mbg merge 7/17/06 added cast
   {
    strncpy(tmpdir,ofn.lpstrFile,ofn.nFileOffset);
    tmpdir[ofn.nFileOffset]=0;
@@ -396,6 +396,11 @@ void GetMouseData(uint32 *md)
 static int vchanged=0;
 
 extern void RestartMovieOrReset(int pow);
+
+int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
+void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
+void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
+int FCEUMOV_IsPlaying(void); //mbg merge 7/17/06 YECH had to add
 
 
 void MapInput(void);
@@ -478,10 +483,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  UINT len;
                  char *ftmp;
 
-                 len=DragQueryFile((HANDLE)wParam,0,0,0)+1;
-                 if((ftmp=malloc(len)))
+                 len=DragQueryFile((HDROP)wParam,0,0,0)+1; //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
+                 if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
                  {
-                  DragQueryFile((HANDLE)wParam,0,ftmp,len);
+                  DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
                   ALoad(ftmp);
                   free(ftmp);
                  }                 
@@ -648,7 +653,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		  #endif
 
                   case 204:ConfigAddCheat(hWnd);break;
-                  case 205:CreateMemWatch(hWnd);break;
+					  //mbg merge TODO 7/17/06 - had to remove this
+                  //case 205:CreateMemWatch(hWnd);break;
                   case 100:StopSound();
                            LoadNewGamey(hWnd, 0);
                            break;
@@ -868,8 +874,8 @@ void FixWXY(int pref)
 
 void UpdateFCEUWindow(void)
 {
-  int w,h;
-  RECT wrect;
+  //int w,h; //mbg merge 7/17/06 removed
+ // RECT wrect; //mbg merge 7/17/06 removed
 
   if(vchanged && !fullscreen && !changerecursive && !nofocus)
   {
@@ -922,7 +928,7 @@ int CreateMainWindow(void)
   winclass.hIcon=LoadIcon(fceu_hInstance, "ICON_1");
   winclass.hIconSm=LoadIcon(fceu_hInstance, "ICON_1");
   winclass.hCursor=LoadCursor(NULL, IDC_ARROW);
-  winclass.hbrBackground=GetStockObject(BLACK_BRUSH);
+  winclass.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
   //winclass.lpszMenuName="FCEUMENU";
   winclass.lpszClassName="FCEULTRA";
 
@@ -1295,7 +1301,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
                           continue;
                          }
                          len++; // Add 1 for null character.
-                         if(!(DOvers[x]=malloc(len)))
+                         if(!(DOvers[x]=(char*)malloc(len))) //mbg merge 7/17/06 added cast
                           continue;
                          if(!GetDlgItemText(hwndDlg,100+x,DOvers[x],len))
                          {
@@ -1692,7 +1698,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				globBase[strlen(globBase)-5]='\0';
 
 				extern char FileBase[];
-				char szFindPath[512];
+				//char szFindPath[512]; //mbg merge 7/17/06 removed
 				WIN32_FIND_DATA wfd;
 				HANDLE hFind;
 
@@ -1747,7 +1753,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 						{
 							if(fcm)
 							{
-								int k, count1=0, count2=0;
+								unsigned int k, count1=0, count2=0; //mbg merge 7/17/06 changed to uint
 								for(k=0;k<strlen(md51);k++) count1 += md51[k]-'0';
 								for(k=0;k<strlen(md52);k++) count2 += md52[k]-'0';
 								if(count1 && count2)
@@ -1821,7 +1827,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 							char *pn=FCEU_GetPath(FCEUMKF_MOVIE);
 							char szFile[MAX_PATH]={0};
 							OPENFILENAME ofn;
-							int nRet;
+							//int nRet; //mbg merge 7/17/06 removed
 
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
@@ -1865,7 +1871,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 							// user had made their choice
 							// TODO: warn the user when they open a movie made with a different ROM
 							char* fn=GetReplayPath(hwndDlg);
-							char TempArray[16];
+							//char TempArray[16]; //mbg merge 7/17/06 removed
 							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, 201, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 							
 							char offset1Str[32]={0};

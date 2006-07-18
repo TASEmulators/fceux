@@ -22,7 +22,7 @@
 
 char *ParseArgies(int argc, char *argv[])
 {         
-        int x; 
+        //int x;  //mbg merge 7/17/06 removed
         static ARGPSTRUCT FCEUArgs[]={
          {"-pal",0,&palyo,0},
          {"-noicon",0,&status_icon,0},

@@ -2896,8 +2896,8 @@ int hq2x_InitLUTs(void)
 {
   int i, j, k, r, g, b, Y, u, v;
 
-  if(!(LUT16to32 = malloc(65536*sizeof(int)))) return(0);
-  if(!(RGBtoYUV = malloc(65536*sizeof(int)))) { free(LUT16to32); return(0); }
+  if(!(LUT16to32 = (int*)malloc(65536*sizeof(int)))) return(0); //mbg merge 7/17/06 added cast
+  if(!(RGBtoYUV = (int*)malloc(65536*sizeof(int)))) { free(LUT16to32); return(0); } //mbg merge 7/17/06 added cast
 
   for (i=0; i<65536; i++)
     LUT16to32[i] = ((i & 0xF800) << 8) + ((i & 0x07E0) << 5) + ((i & 0x001F) << 3);

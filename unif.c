@@ -393,6 +393,10 @@ static BMAPPING bmap[] = {
  { "8157", UNL8157_Init,0},
  { "T-262", BMCT262_Init,0},
  { "FK23C", BMCFK23C_Init,0},
+ { "A65AS", BMCA65AS_Init,0},
+ { "C-N22M", UNLCN22M_Init,0},
+ { "EDU2000", UNLEDU2000_Init,0},
+ { "603-5052", UNL6035052_Init,0},
  { "Supervision16in1", Supervision16_Init,0},
  { "NovelDiamond9999999in1", Novel_Init,0},
  { "Super24in1SC03", Super24_Init,0},
@@ -401,8 +405,10 @@ static BMAPPING bmap[] = {
  { "13in1JY110", BMC13in1JY110_Init, 0},
  { "70in1", BMC70in1_Init, 0},
  { "70in1B", BMC70in1B_Init, 0},
- { "GK-192", Mapper58_Init, 0},
+ { "D1038", BMCD1038_Init, 0},
+ { "GK-192", BMCGK192_Init, 0},
  { "SuperHIK8in1", Mapper45_Init,0},
+ { "22211", UNL22211_Init,0},
 
  { "DREAMTECH01", DreamTech01_Init,0},
  { "KONAMI-QTAI", Mapper190_Init,0},
@@ -411,7 +417,6 @@ static BMAPPING bmap[] = {
 
  {0,0,0}
 };
-
 static BFMAPPING bfunc[] = {
  { "CTRL", CTRL },
  { "TVCI", TVCI },

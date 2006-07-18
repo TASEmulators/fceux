@@ -84,7 +84,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
   if(specfilt == 2) multi = 2 * 2;
   else if(specfilt == 4) multi = 3 * 3;
 
-  specbuf8bpp = malloc(256*240*multi);
+  specbuf8bpp = (uint8*)malloc(256*240*multi); //mbg merge 7/17/06 added cast
 
  }
  else if(specfilt == 1 || specfilt == 3) // hq2x and hq3x
@@ -119,8 +119,8 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
     // backshiftr[x] -= backshiftl[x];
     // End iffy code
    }
-   if(specfilt == 1) specbuf32bpp = malloc(256*240*4*sizeof(uint32));
-   else if(specfilt == 3) specbuf32bpp = malloc(256*240*9*sizeof(uint32));
+   if(specfilt == 1) specbuf32bpp = (uint32*)malloc(256*240*4*sizeof(uint32)); //mbg merge 7/17/06 added cast
+   else if(specfilt == 3) specbuf32bpp = (uint32*)malloc(256*240*9*sizeof(uint32)); //mbg merge 7/17/06 added cast
   }
 
   efx=0;
@@ -134,7 +134,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
   else
    hq2x_InitLUTs();
 
-  specbuf=malloc(256*240*sizeof(uint16));
+  specbuf=(uint16*)malloc(256*240*sizeof(uint16)); //mbg merge 7/17/06 added cast
  }
 
  silt = specfilt;

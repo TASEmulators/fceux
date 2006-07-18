@@ -60,8 +60,8 @@ static void FP_FASTAPASS(2) Update(void *data, int arg)
   *(uint8 *)data=0;
   seq=ptr=0;
   have=1;
-  strcpy(bdata,(uint8 *)data+1);
-  strcpy(&bdata[13],"SUNSOFT");
+  strcpy((char*)bdata,(char *)data+1); //mbg merge 7/17/06 added casts
+  strcpy((char*)&bdata[13],"SUNSOFT"); //mbg merge 7/17/06 added cast
  }
 }
 

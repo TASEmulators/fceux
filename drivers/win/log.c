@@ -71,7 +71,7 @@ void AddLogText(char *text,int newline)
   t++;
  }
 
- if(!(logtext[logcount&63]=malloc(strlen(text)+1+x+newline*2)))
+ if(!(logtext[logcount&63]=(char*)malloc(strlen(text)+1+x+newline*2))) //mbg merge 7/17/06 added cast
   return;
 
  t=logtext[logcount&63];

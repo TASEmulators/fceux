@@ -149,7 +149,9 @@ static int InitializeDDraw(int fs)
          return 0;
         }
 
-        ddrval = IDirectDraw_QueryInterface(lpDD,&IID_IDirectDraw7,(LPVOID *)&lpDD7);
+		//mbg merge 7/17/06 changed:
+		ddrval = IDirectDraw_QueryInterface(lpDD,IID_IDirectDraw7,(LPVOID *)&lpDD7);
+        //ddrval = IDirectDraw_QueryInterface(lpDD,&IID_IDirectDraw7,(LPVOID *)&lpDD7);
         IDirectDraw_Release(lpDD);
 
         if (ddrval != DD_OK)
@@ -183,10 +185,11 @@ static int GetBPP(void)
 
         if(ddpix.dwFlags&DDPF_RGB)
         {
-         bpp=ddpix.DUMMYUNIONNAMEN(1).dwRGBBitCount;
-         CBM[0]=ddpix.DUMMYUNIONNAMEN(2).dwRBitMask;
-         CBM[1]=ddpix.DUMMYUNIONNAMEN(3).dwGBitMask;
-         CBM[2]=ddpix.DUMMYUNIONNAMEN(4).dwBBitMask;
+			//mbg merge 7/17/06 removed silly dummy union stuff now that we have c++
+         bpp=ddpix.dwRGBBitCount;
+         CBM[0]=ddpix.dwRBitMask;
+         CBM[1]=ddpix.dwGBitMask;
+         CBM[2]=ddpix.dwBBitMask;
         }
         else
         {
@@ -467,8 +470,7 @@ void FCEUD_BlitScreen(uint8 *XBuf)
 
 static void FixPaletteHi(void)
 {
-   int x;
-   SetPaletteBlitToHigh(color_palette);
+   SetPaletteBlitToHigh((uint8*)color_palette); //mbg merge 7/17/06 added cast
 }
 
 static void BlitScreenWindow(unsigned char *XBuf)
@@ -505,8 +507,9 @@ static void BlitScreenWindow(unsigned char *XBuf)
   return;
  }
 
- pitch=ddsdback.DUMMYUNIONNAMEN(1).lPitch;
- ScreenLoc=ddsdback.lpSurface;
+ //mbg merge 7/17/06 removing dummyunion stuff
+ pitch=ddsdback.lPitch;
+ ScreenLoc=(unsigned char*)ddsdback.lpSurface; //mbg merge 7/17/06 added cst
  if(veflags&1)
  {
   memset(ScreenLoc,0,pitch*240);
@@ -531,8 +534,8 @@ static void BlitScreenFull(uint8 *XBuf)
 {
   static int pitch;
   char *ScreenLoc;
-  unsigned long x;
-  uint8 y;
+  //unsigned long x; //mbg merge 7/17/06 removed
+  //uint8 y; //mbg merge 7/17/06 removed
   RECT srect,drect;
   LPDIRECTDRAWSURFACE7 lpDDSVPrimary;
   int specmul;    // Special scaler size multiplier
@@ -573,8 +576,8 @@ static void BlitScreenFull(uint8 *XBuf)
    if(ddrval==DDERR_SURFACELOST) RestoreDD(1);
    return;
   }
-  ScreenLoc=ddsdback.lpSurface;
-  pitch=ddsdback.DUMMYUNIONNAMEN(1).lPitch;
+  ScreenLoc=(char *)ddsdback.lpSurface; //mbg merge 7/17/06 added cast
+  pitch=ddsdback.lPitch; //mbg merge 7/17/06 removed dummyunion stuff
 
   srect.top=0;
   srect.left=0;
@@ -605,8 +608,8 @@ static void BlitScreenFull(uint8 *XBuf)
    return;
   }
 
-  ScreenLoc=ddsd.lpSurface;
-  pitch=ddsd.DUMMYUNIONNAMEN(1).lPitch;
+  ScreenLoc=(char*)ddsd.lpSurface; //mbg merge 7/17/06 added cast
+  pitch=ddsd.lPitch; //mbg merge 7/17/06 removing dummyunion stuff
  }
 
  if(veflags&1)
@@ -624,6 +627,8 @@ static void BlitScreenFull(uint8 *XBuf)
   veflags&=~1;
  }
 
+ //mbg 6/29/06 merge
+#ifndef MSVC
  if(vmod==5)
  {
   if(eoptions&EO_CLIPSIDES)
@@ -723,6 +728,8 @@ static void BlitScreenFull(uint8 *XBuf)
   }
  }
  else
+ #endif 
+ //mbg 6/29/06 merge
  {
   if(!(vmodes[vmod].flags&VMDF_DXBLT))
   {  
@@ -734,15 +741,15 @@ static void BlitScreenFull(uint8 *XBuf)
 
   if(bpp>=16)
   {
-   Blit8ToHigh(XBuf+srendline*256+VNSCLIP,ScreenLoc, VNSWID, totallines, pitch,specmul,specmul);
+   Blit8ToHigh(XBuf+srendline*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID, totallines, pitch,specmul,specmul); //mbg merge 7/17/06 added cast
   }
   else
   {
    XBuf+=srendline*256+VNSCLIP;
    if(vmodes[vmod].special)
-    Blit8To8(XBuf,ScreenLoc, VNSWID, totallines, pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special);
+    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, totallines, pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
    else
-    Blit8To8(XBuf,ScreenLoc, VNSWID, totallines, pitch,1,1,0,0);
+    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, totallines, pitch,1,1,0,0); //mbg merge 7/17/06 added cast
   }
  }
 
@@ -754,7 +761,7 @@ static void BlitScreenFull(uint8 *XBuf)
   {
    if(IDirectDrawSurface7_Lock(lpDDSVPrimary,NULL,&ddsd, 0, NULL)==DD_OK)
    {
-    memset(ddsd.lpSurface,0,ddsd.DUMMYUNIONNAMEN(1).lPitch*vmodes[vmod].y);
+    memset(ddsd.lpSurface,0,ddsd.lPitch*vmodes[vmod].y); //mbg merge 7/17/06 removing dummyunion stuff
     IDirectDrawSurface7_Unlock(lpDDSVPrimary, NULL);
     veflags&=~2;
    }
@@ -895,7 +902,7 @@ BOOL SetDlgItemDouble(HWND hDlg, int item, double value)
 {
  char buf[8];
  sprintf(buf,"%.6f",value);
- SetDlgItemText(hDlg, item, buf);
+ return SetDlgItemText(hDlg, item, buf); //mbg merge 7/17/06 added this return value
 }
 
 double GetDlgItemDouble(HWND hDlg, int item)

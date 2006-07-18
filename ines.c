@@ -47,9 +47,11 @@
 
 extern SFORMAT FCEUVSUNI_STATEINFO[];
 
-static uint8 *trainerpoo=0;
-static uint8 *ROM=NULL;
-static uint8 *VROM=NULL;
+//mbg merge 6/29/06 - these need to be global
+uint8 *trainerpoo=0;
+uint8 *ROM=NULL;
+uint8 *VROM=NULL;
+
 
 #ifdef _USE_SHARED_MEMORY_
 HANDLE mapROM, mapVROM;
@@ -64,6 +66,7 @@ uint8 iNESIRQa=0;
 
 uint32 ROM_size=0;
 uint32 VROM_size=0;
+char LoadedRomFName[2048]; //mbg merge 7/17/06 added
 
 static void iNESPower(void);
 static int NewiNES_Init(int num);
@@ -84,7 +87,7 @@ static DECLFR(TrainerRead)
  return(trainerpoo[A&0x1FF]);
 }
 
-static void iNESGI(int h)
+void iNESGI(int h) //bbit edited: removed static keyword
 {
  switch(h)
  {
@@ -227,6 +230,7 @@ static void SetInput(void)
 	 {0x4318a2f8,-1,SI_ZAPPER,0},  /* Barker Bill's Trick Shooting */
 	 {0x5ee6008e,-1,SI_ZAPPER,0},  /* Mechanized Attack */
 	 {0x3e58a87e,-1,SI_ZAPPER,0},  /* Freedom Force */
+    {0xe9a7fe9e,-1,SI_MOUSE,0}, /* Educational Computer 2000 */ //mbg merge 7/17/06 added -- appears to be from newer MM build
    {0x851eb9be,SI_GAMEPAD,SI_ZAPPER,0},  /* Shooting Range */
    {0x74bea652,SI_GAMEPAD,SI_ZAPPER,0},  /* Supergun 3-in-1 */
 	 {0x32fb0583,-1,SI_ARKANOID,0}, /* Arkanoid(NES) */
@@ -694,6 +698,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	}
 	FCEU_LoadGameSave(&iNESCart);
 
+	strcpy(LoadedRomFName,name); //bbit edited: line added
 	GameInterface=iNESGI;
 	FCEU_printf("\n");
 
@@ -711,6 +716,47 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 			FCEUI_SetVidSystem(0);
 	}
 	return 1;
+}
+
+
+//bbit edited: the whole function below was added
+int iNesSave(){
+	FILE *fp;
+	char name[2048];
+
+	if(FCEUGameInfo->type != GIT_CART)return 0;
+	if(GameInterface!=iNESGI)return 0;
+
+	strcpy(name,LoadedRomFName);
+	if (strcmp(name+strlen(name)-4,".nes") != 0) { //para edit
+		strcat(name,".nes");
+	}
+
+	fp = fopen(name,"wb");
+
+	if(fwrite(&head,1,16,fp)!=16)return 0;
+
+	if(head.ROM_type&4) 	/* Trainer */
+	{
+ 	 fwrite(trainerpoo,512,1,fp);
+	}
+
+	fwrite(ROM,0x4000,head.ROM_size,fp);
+
+	if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
+	fclose(fp);
+
+	return 1;
+}
+
+//para edit: added function below
+char *iNesShortFName() {
+	char *ret;
+
+	if (!(ret = strrchr(LoadedRomFName,'\\'))) {
+		if (!(ret = strrchr(LoadedRomFName,'/'))) return 0;
+	}
+	return ret+1;
 }
 
 void FASTAPASS(2) VRAM_BANK1(uint32 A, uint8 V)
@@ -826,211 +872,263 @@ static void NONE_init(void)
         else
 	 setvram8(CHRRAM);
 }
-/*
 void (*MapInitTab[256])(void)=
 {
-    0,0,
-//    Mapper2_init,Mapper3_init,
-    0,0,
-    0,0,
-    Mapper6_init,Mapper7_init,Mapper8_init,Mapper9_init,
-    Mapper10_init,Mapper11_init,
-    0,
-//    Mapper13_init,
     0,
     0,
-    Mapper15_init,Mapper16_init,Mapper17_init,Mapper18_init,
-    0,0,
-	Mapper21_init,Mapper22_init,Mapper23_init,Mapper24_init,
-    Mapper25_init,Mapper26_init,Mapper27_init,
-    0,0,0,0,
-    Mapper32_init,Mapper33_init,Mapper34_init,
-    0,0,0,0,0,
-    Mapper40_init,Mapper41_init,Mapper42_init,Mapper43_init,
-    0,0,
-    Mapper46_init,
-    0,
-    Mapper48_init,
-    0,
-    Mapper50_init,Mapper51_init,
-    0,0,0,0,0,
-    Mapper57_init,Mapper58_init,Mapper59_init,Mapper60_init,
-    Mapper61_init,Mapper62_init,
-    0,
-    Mapper64_init,Mapper65_init,Mapper66_init,Mapper67_init,
-    Mapper68_init,Mapper69_init,Mapper70_init,Mapper71_init,
-    Mapper72_init,Mapper73_init,
-    0,
-    Mapper75_init,Mapper76_init,Mapper77_init,Mapper78_init,
-    Mapper79_init,Mapper80_init,
-    0,
-    Mapper82_init,Mapper83_init,
-    0,
-	Mapper85_init,Mapper86_init,Mapper87_init,Mapper88_init,
-    Mapper89_init,
-    0,
-    Mapper91_init,Mapper92_init,Mapper93_init,Mapper94_init,
-    0,
-    Mapper96_init,Mapper97_init,
-    0,
-    Mapper99_init,
-    0,0,0,0,0,0,0,
-    Mapper107_init,
-    0,0,0,0,
-    0,Mapper113_init,
-    0,0,0,
-    Mapper117_init,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    Mapper140_init,
-    0,0,0,
-    Mapper144_init,
-    0,0,0,0,0,0,
-    Mapper151_init,Mapper152_init,Mapper153_init,Mapper154_init,
-    0,
-    Mapper156_init,Mapper157_init,Mapper158_init,0,
-    0,0,0,0,0,0,
-    Mapper166_init,Mapper167_init,
-    0,0,0,0,0,0,0,0,0,0,0,0,
-    Mapper180_init,
-    0,0,0,
-    Mapper184_init,Mapper185_init,
-    0,0,0,
-    Mapper189_init,
-    0,
-//    Mapper191_init,
+    0, //Mapper2_init,
+    0, //Mapper3_init,
     0,
     0,
-    Mapper193_init,
-    0,0,0,0,0,0,
-    Mapper200_init,Mapper201_init,Mapper202_init,Mapper203_init,
-    Mapper204_init,
-    0,0,
-    Mapper207_init,
-    0,0,0,
-    Mapper211_init,Mapper212_init,Mapper213_init,Mapper214_init,
-    0,0,0,0,0,0,0,0,0,0,
-    Mapper225_init,Mapper226_init,Mapper227_init,Mapper228_init,
-    Mapper229_init,Mapper230_init,Mapper231_init,Mapper232_init,
-    0,
-    Mapper234_init,Mapper235_init,
-    0,0,0,0,
-    Mapper240_init,Mapper241_init,Mapper242_init,0,
-    Mapper244_init,
-    0,
-    Mapper246_init,
-    0,0,0,0,0,0,0,0,
-    Mapper255_init
-};
-*/
-void (*MapInitTab[256])(void)=
-{
-    0,0, //Mapper2_init,Mapper3_init,
-    0,0,
-    0,0,
     Mapper6_init,
     0,//Mapper7_init,
-    Mapper8_init,Mapper9_init,
+    Mapper8_init,
+    Mapper9_init,
     Mapper10_init,
     0, //Mapper11_init,
+    0, 
     0, //Mapper13_init,
     0,
+    Mapper15_init,
+    Mapper16_init,
+    Mapper17_init,
+    Mapper18_init,
     0,
-    Mapper15_init,Mapper16_init,Mapper17_init,Mapper18_init,
-    0,0,
-    Mapper21_init,Mapper22_init,Mapper23_init,Mapper24_init,
-    Mapper25_init,Mapper26_init,Mapper27_init,
-    0,0,0,0,
-    Mapper32_init,Mapper33_init,Mapper34_init,
-    0,0,0,0,0,
-    Mapper40_init,Mapper41_init,Mapper42_init,Mapper43_init,
-    0,0,
+    0,
+    Mapper21_init,
+    Mapper22_init,
+    Mapper23_init,
+    Mapper24_init,
+    Mapper25_init,
+    Mapper26_init,
+    Mapper27_init,
+    0,
+    0,
+    0,
+    0,
+    Mapper32_init,
+    Mapper33_init,
+    Mapper34_init,
+    0,
+    0,
+    0,
+    0,
+    0,
+    Mapper40_init,
+    Mapper41_init,
+    Mapper42_init,
+    0, //Mapper43_init,
+    0,
+    0,
     Mapper46_init,
     0,
     Mapper48_init,
     0,
-    Mapper50_init,Mapper51_init,
-    0,0,0,0,0,
+    Mapper50_init,
+    Mapper51_init,
+    0,
+    0,
+    0,
+    0,
+    0,
     0,//    Mapper57_init,
     0,//    Mapper58_init,
-    Mapper59_init,Mapper60_init,
-    Mapper61_init,Mapper62_init,
+    Mapper59_init,
+    0,// Mapper60_init,
+    Mapper61_init,
+    Mapper62_init,
     0,
-    Mapper64_init,Mapper65_init,
+    Mapper64_init,
+    Mapper65_init,
     0,//Mapper66_init,
     Mapper67_init,
-    Mapper68_init,Mapper69_init,
+    Mapper68_init,
+    Mapper69_init,
     0,//Mapper70_init,
     Mapper71_init,
-    Mapper72_init,Mapper73_init,
+    Mapper72_init,
+    Mapper73_init,
     0,
-    Mapper75_init,Mapper76_init,Mapper77_init,
+    Mapper75_init,
+    Mapper76_init,
+    Mapper77_init,
     0, //Mapper78_init,
-    Mapper79_init,Mapper80_init,
+    Mapper79_init,
+    Mapper80_init,
     0,
-    Mapper82_init,Mapper83_init,
+    Mapper82_init,
+    Mapper83_init,
     0,
-    Mapper85_init,Mapper86_init,
+    Mapper85_init,
+    Mapper86_init,
     0, //Mapper87_init,
     0, //Mapper88_init,
     Mapper89_init,
     0,
-    Mapper91_init,Mapper92_init,
+    Mapper91_init,
+    Mapper92_init,
     0, //Mapper93_init,
     0, //Mapper94_init,
     0,
-    Mapper96_init,Mapper97_init,
+    Mapper96_init,
+    Mapper97_init,
     0,
     Mapper99_init,
-    0,0,0,0,0,0,0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     0, //Mapper107_init,
-    0,0,0,0,
-    0,Mapper113_init,
-    0,0,0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, // Mapper113_init,
+    0,
+    0,
+    0, //Mapper116_init,
     0, //Mapper117_init,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     0, //Mapper140_init,
-    0,0,0,
+    0,
+    0,
+    0,
     0, //Mapper144_init,
-    0,0,0,0,0,0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     Mapper151_init,
     0, //Mapper152_init,
     Mapper153_init,
     0, //Mapper154_init,
     0,
-    Mapper156_init,Mapper157_init,Mapper158_init,0,
-    0,0,0,0,0,0,
-    Mapper166_init,Mapper167_init,
-    0,0,0,0,0,0,0,0,0,0,0,0,
-    Mapper180_init,
-    0,0,0,
-    Mapper184_init,
+    Mapper156_init,
+    Mapper157_init,
+    0, //Mapper158_init, removed
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    Mapper166_init,
+    Mapper167_init,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, //Mapper180_init,
+    0,
+    0,
+    0,
+    0, //Mapper184_init,
     0, //Mapper185_init,
-    0,0,0,
+    0,
+    0,
+    0,
     0, //Mapper189_init,
-    0, 
+    0,
     0, //Mapper191_init,
     0,
     Mapper193_init,
-    0,0,0,0,0,0,
-    Mapper200_init,Mapper201_init,Mapper202_init,Mapper203_init,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0, //Mapper200_init,
+    Mapper201_init,
+    Mapper202_init,
+    Mapper203_init,
     Mapper204_init,
-    0,0,
+    0,
+    0,
     Mapper207_init,
-    0,0,0,
+    0,
+    0,
+    0,
     0, //Mapper211_init,
-    Mapper212_init,Mapper213_init,Mapper214_init,
-    0,0,0,0,0,0,0,0,0,0,
-    Mapper225_init,Mapper226_init,Mapper227_init,Mapper228_init,
-    Mapper229_init,Mapper230_init,Mapper231_init,Mapper232_init,
+    Mapper212_init,
+    Mapper213_init,
+    Mapper214_init,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    Mapper225_init,
+    0, //Mapper226_init,
+    Mapper227_init,
+    Mapper228_init,
+    Mapper229_init,
+    Mapper230_init,
+    Mapper231_init,
+    Mapper232_init,
     0,
     Mapper234_init,
     0, //Mapper235_init,
-    0,0,0,0,
-    Mapper240_init,Mapper241_init,Mapper242_init,0,
+    0,
+    0,
+    0,
+    0,
+    0, //Mapper240_init,
+    Mapper241_init,
+    Mapper242_init,
+    0,
     Mapper244_init,
     0,
     Mapper246_init,
-    0,0,0,0,0,0,0,0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     Mapper255_init
 };
 
@@ -1215,7 +1313,7 @@ static BMAPPING bmap[] = {
 };
 */
 static BMAPPING bmap[] = {
-    {0,   NROM_Init},   
+    {0,   NROM_Init},
     {1,   Mapper1_Init},
     {2,   UNROM_Init},
     {3,   CNROM_Init},
@@ -1227,13 +1325,15 @@ static BMAPPING bmap[] = {
     {13,  CPROM_Init},
     {19,  Mapper19_Init},
     {37,  Mapper37_Init},
+    {43,  Mapper43_Init},
     {44,  Mapper44_Init},
     {45,  Mapper45_Init},
     {47,  Mapper47_Init},
     {49,  Mapper49_Init},
     {52,  Mapper52_Init},
     {57,  Mapper57_Init},
-    {58,  Mapper58_Init},
+    {58,  BMCGK192_Init},
+    {60,  BMCD1038_Init},
     {66,  MHROM_Init},
     {70,  Mapper70_Init},
     {74,  Mapper74_Init},
@@ -1247,12 +1347,14 @@ static BMAPPING bmap[] = {
     {105, Mapper105_Init},
     {107, Mapper107_Init},
     {112, Mapper112_Init},
+    {113, Mapper113_Init},
     {114, Mapper114_Init},
     {115, Mapper115_Init},
     {116, Mapper116_Init},
     {117, Mapper117_Init},
-    {118, Mapper118_Init},
+    {118, TKSROM_Init},
     {119, Mapper119_Init},
+    {132, UNL22211_Init},
     {133, SA72008_Init},
     {137, S8259D_Init},
     {138, S8259B_Init},
@@ -1274,9 +1376,11 @@ static BMAPPING bmap[] = {
     {163, Mapper163_Init},
     {164, Mapper164_Init},
     {165, Mapper165_Init},
+    {180, Mapper180_Init},
     {181, Mapper181_Init},
     {182, Mapper182_Init},
     {183, Mapper183_Init},
+    {184, Mapper184_Init},
     {185, Mapper185_Init},
     {186, Mapper186_Init},
     {187, Mapper187_Init},
@@ -1285,8 +1389,10 @@ static BMAPPING bmap[] = {
     {191, Mapper191_Init},
     {192, Mapper192_Init},
     {194, Mapper194_Init},
+    {195, Mapper195_Init},
     {198, Mapper198_Init},
     {199, Mapper199_Init},
+    {200, Mapper200_Init},
     {205, Mapper205_Init},
     {206, DEIROM_Init},
     {208, Mapper208_Init},
@@ -1296,11 +1402,16 @@ static BMAPPING bmap[] = {
     {215, Mapper215_Init},
     {216, Mapper216_Init},
     {217, Mapper217_Init},
-    {218, UNLSonic_Init},
+
+    {218, UNLA9711_Init},
     {219, UNLSL1632_Init},
-//    {220, Mapper220_Init},
+    {220, UNLCN22M_Init},
+    {221, BMCFK23C_Init},
+
     {222, Mapper222_Init},
+    {226, Mapper226_Init},
     {235, Mapper235_Init},
+    {240, Mapper240_Init},
     {243, S74LS374NA_Init},
     {245, Mapper245_Init},
     {249, Mapper249_Init},

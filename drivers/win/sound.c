@@ -81,7 +81,7 @@ void CheckDStatus(void)
   }
 }
 
-static uint32_t RawCanWrite(void)
+static uint32 RawCanWrite(void)
 {
  DWORD CurWritePos,CurPlayPos=0;
 
@@ -99,14 +99,14 @@ static uint32_t RawCanWrite(void)
      assume DirectSound has wrapped around.
  */
 
- if(((int32_t)ToWritePos-(int32_t)CurWritePos) >= (DSBufferSize/2))
+ if(((int32)ToWritePos-(int32)CurWritePos) >= (DSBufferSize/2))
  {
   CurWritePos+=DSBufferSize;
   //FCEU_printf("Fixit: %d,%d,%d\n",ToWritePos,CurWritePos,CurWritePos-DSBufferSize);
  }
  if(ToWritePos<CurWritePos)
  {
-  int32_t howmuch=(int32_t)CurWritePos-(int32_t)ToWritePos;
+  int32 howmuch=(int32)CurWritePos-(int32)ToWritePos;
   if(howmuch > BufHowMuch)      /* Oopsie.  Severe buffer overflow... */
   {
    //FCEU_printf("Ack");
@@ -130,9 +130,9 @@ int32 GetMaxSound(void)
  return( BufHowMuch >> bittage);
 }
 
-static int RawWrite(void *data, uint32_t len)
+static int RawWrite(void *data, uint32 len)
 {
- uint32_t cw;
+ //uint32 cw; //mbg merge 7/17/06 removed
 
  //printf("Pre: %d\n",SexyALI_DSound_RawCanWrite(device));
  //fflush(stdout);
@@ -148,7 +148,7 @@ static int RawWrite(void *data, uint32_t len)
  {
   VOID *LockPtr[2]={0,0};
   DWORD LockLen[2]={0,0};
-  int32_t curlen;
+  uint32 curlen; //mbg merge 7/17/06 changed to uint
 
   // THIS LIMITS THE EMULATION SPEED
   if((!NoWaiting) || (soundoptions&SO_OLDUP))
@@ -182,7 +182,7 @@ static int RawWrite(void *data, uint32_t len)
    {
 	/* not mute */
     memcpy(LockPtr[0],data,LockLen[0]);
-    memcpy(LockPtr[1],data+LockLen[0],len-LockLen[0]);
+    memcpy(LockPtr[1],(char*)data+LockLen[0],len-LockLen[0]); //mbg merge 7/17/06 added cast
    }
   }
   else if(LockPtr[0])
@@ -204,7 +204,7 @@ static int RawWrite(void *data, uint32_t len)
   ToWritePos=(ToWritePos+curlen)%DSBufferSize;
 
   len-=curlen;
-  (uint8_t *) data+=curlen;
+  data=(uint8 *)data+curlen; //mbg merge 7/17/06 reworked to be type proper
 
   if(len && !NoWaiting && (fps_scale <= 256 || (soundoptions&SO_OLDUP)))
    Sleep(1); // do some extra sleeping if we think there's time and we're not scaling up the FPS or in turbo mode

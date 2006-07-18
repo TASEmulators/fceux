@@ -134,7 +134,9 @@ int KeyboardInitialize(void)
  if(lpdid)
   return(1);
 
- ddrval=IDirectInput7_CreateDeviceEx(lpDI, &GUID_SysKeyboard,&IID_IDirectInputDevice7, (LPVOID *)&lpdid,0);
+ //mbg merge 7/17/06 changed:
+ ddrval=IDirectInput7_CreateDeviceEx(lpDI, GUID_SysKeyboard,IID_IDirectInputDevice7, (LPVOID *)&lpdid,0);
+ //ddrval=IDirectInput7_CreateDeviceEx(lpDI, &GUID_SysKeyboard,&IID_IDirectInputDevice7, (LPVOID *)&lpdid,0);
  if(ddrval != DI_OK)
  {
   FCEUD_PrintError("DirectInput: Error creating keyboard device.");

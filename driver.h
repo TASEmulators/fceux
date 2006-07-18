@@ -78,6 +78,7 @@ void FCEUI_DisableFourScore(int s);
 #define SI_POWERPADA  3
 #define SI_POWERPADB  4
 #define SI_ARKANOID   5
+#define SI_MOUSE   6 //mbg merge 7/17/06 added
 
 #define SIFC_NONE      0
 #define SIFC_ARKANOID  1

@@ -86,17 +86,25 @@ void BMC70in1B_Init(CartInfo *info);
 void BMC13in1JY110_Init(CartInfo *info);
 void BMCT262_Init(CartInfo *info);
 void BMCFK23C_Init(CartInfo *info);
+void BMCD1038_Init(CartInfo *info);
+void BMCA65AS_Init(CartInfo *info);
+void BMCGK192_Init(CartInfo *info);
 
 void DreamTech01_Init(CartInfo *info);
 void Mapper190_Init(CartInfo *info);
 void UNLCC21_Init(CartInfo *info);
+void UNLCN22M_Init(CartInfo *info);
 void UNLSL1632_Init(CartInfo *info);
 void UNLKOF97_Init(CartInfo *info);
-void UNLSonic_Init(CartInfo *info);
+void UNLA9711_Init(CartInfo *info);
 void UNLSHeroes_Init(CartInfo *info);
 void UNLH2288_Init(CartInfo *info);
 void UNL8237_Init(CartInfo *info);
 void UNL8157_Init(CartInfo *info);
+void UNL22211_Init(CartInfo *info);
+
+void UNLEDU2000_Init(CartInfo *info);
+void UNL6035052_Init(CartInfo *info);
 
 extern uint8 *UNIFchrrama;  // Meh.  So I can stop CHR RAM
          // bank switcherooing with certain boards...

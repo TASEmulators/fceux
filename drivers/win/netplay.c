@@ -109,104 +109,12 @@ static void GetSettings(HWND hwndDlg)
                           }
                           if(buf[0])
                           {
-                           *strs[x] = malloc(strlen(buf) + 1);
+                           *strs[x] = (char*)malloc(strlen(buf) + 1); //mbg merge 7/17/06 added cast
                            strcpy(*strs[x], buf);
                           }
                          }
                          remotetport = GetDlgItemInt(hwndDlg,201,0,0);                         
                          netlocalplayers=1 + SendDlgItemMessage(hwndDlg,204,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-}
-static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  switch(uMsg)
-  {
-   case WM_CLOSE:
-                        GetSettings(hwndDlg);
-                        DestroyWindow(hwndDlg);
-                        netwin=0;
-                        FCEUD_NetworkClose();
-                        break;
-   case WM_COMMAND:
-                   if(HIWORD(wParam)==BN_CLICKED)
-                   {
-                    switch(LOWORD(wParam))
-                    {
-                     case 250:
-                        if(FCEUDnetplay)
-                        {
-                         FCEUD_NetworkClose();
-                         SetDlgItemText(hwndDlg,250,"Connect");
-                         FixCDis(hwndDlg,1);
-                        }
-                        else if(GI)
-                        {
-                         GetSettings(hwndDlg);
-                         if(FCEUD_NetworkConnect())
-                         {
-                          SetDlgItemText(hwndDlg,250,"Disconnect");
-                          FixCDis(hwndDlg,0);
-                         }
-                        }
-                        break;
-                    }
-                   }
-                   else if(HIWORD(wParam)==EN_CHANGE && Socket!=INVALID_SOCKET)
-                   {
-                    char buf[1024];
-                    int t;
-
-
-                    t=GetDlgItemText(hwndDlg,102,buf,1024);
-                    buf[1023]=0;
-
-                    if(strchr(buf,'\r'))
-                    {
-                     char *src,*dest;
-
-                     src=dest=buf;
-                    
-                     while(*src)
-                     {
-                      if(*src != '\n' && *src != '\r')
-                      {
-                       *dest = *src;
-                       dest++;
-                      }
-                      src++;
-                     }
-                     *dest = 0;
-                     FCEUI_NetplayText(buf);
-                     SetDlgItemText(hwndDlg,102,"");                    
-                    }
-                   }
-                   break;
-   case WM_INITDIALOG:
-                   if(netplayhost)
-                    SetDlgItemText(hwndDlg,200,netplayhost);
-                   SetDlgItemInt(hwndDlg,201,remotetport,0);
-                   if(netplaynick)
-                    SetDlgItemText(hwndDlg,203,netplaynick);
-                   if(netgamekey)
-                    SetDlgItemText(hwndDlg,205,netgamekey);
-                   if(netpassword)
-                    SetDlgItemText(hwndDlg,206,netpassword);
-
-                   {
-                    int x;
-                    char buf[8];
-                    for(x=0;x<4;x++)
-                    {
-                     sprintf(buf,"%d",x+1);
-                     SendDlgItemMessage(hwndDlg,204,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
-                    }
-                    SendDlgItemMessage(hwndDlg,204,CB_SETCURSEL,netlocalplayers-1,(LPARAM)(LPSTR)0);
-                   }
-
-
-                   break;
-  }
-
- return 0;
 }
 
 static void NetStatAdd(char *text)
@@ -218,7 +126,7 @@ static void NetStatAdd(char *text)
  if(!netwin) return;
  if(netstattcount>=64) free(netstatt[netstattcount&63]);
 
- if(!(netstatt[netstattcount&63]=malloc(strlen(text)+1)))
+ if(!(netstatt[netstattcount&63]=(char*)malloc(strlen(text)+1))) //mbg merge 7/17/06 added cast
   return;
  strcpy(netstatt[netstattcount&63],text);
  netstattcount++;
@@ -234,7 +142,7 @@ static void NetStatAdd(char *text)
   }
 
   totallen++;   // NULL
-  textbuf = malloc(totallen);
+  textbuf = (char *)malloc(totallen); //mbg merge 7/17/06 added cast
   textbuf[0] = 0;
 
   for(x=netstattcount&63;;)
@@ -254,7 +162,7 @@ static void NetStatAdd(char *text)
     totallen += 2;
   }
   totallen++;
-  textbuf = malloc(totallen);
+  textbuf = (char*)malloc(totallen); //mbg merge 7/17/06 added cast
   textbuf[0] = 0;
   for(x=0;x<netstattcount;x++)
   {
@@ -270,13 +178,13 @@ static void NetStatAdd(char *text)
 
 void FCEUD_NetplayText(uint8 *text)
 {
- NetStatAdd(text);
+ NetStatAdd((char*)text); //mbg merge 7/17/06 added cast
 }
 
 int FCEUD_NetworkConnect(void)
 {
  WSADATA WSAData;
- SOCKADDR_IN sockin;    /* I want to play with fighting robots. */
+ SOCKADDR_IN sockin;    /* I want to play with fighting robots. */  /* clack clack clack razzzzzzzzzz */
  SOCKET TSocket;
  int netdivisor;
 
@@ -341,7 +249,7 @@ int FCEUD_NetworkConnect(void)
    uint32 sblen;
 
    sblen = 4 + 16 + 16 + 64 + 1 + (netplaynick?strlen(netplaynick):0);
-   sendbuf = malloc(sblen);
+   sendbuf = (uint8*)malloc(sblen); //mbg merge 7/17/06 added cast
    memset(sendbuf, 0, sblen);
                            
    en32(sendbuf, sblen - 4);
@@ -353,7 +261,7 @@ int FCEUD_NetworkConnect(void)
 
     md5_starts(&md5);
     md5_update(&md5, GI->MD5, 16);
-    md5_update(&md5, netgamekey, strlen(netgamekey));
+    md5_update(&md5, (uint8*)netgamekey, strlen(netgamekey)); //mbg merge 7/17/06 added cast
     md5_finish(&md5, md5out);
     memcpy(sendbuf + 4, md5out, 16);
    }
@@ -366,7 +274,7 @@ int FCEUD_NetworkConnect(void)
     uint8 md5out[16];
    
     md5_starts(&md5);
-    md5_update(&md5, netpassword, strlen(netpassword));
+    md5_update(&md5, (uint8*)netpassword, strlen(netpassword));  //mbg merge 7/17/06 added cast
     md5_finish(&md5, md5out);
     memcpy(sendbuf + 4 + 16, md5out, 16);
    }
@@ -377,7 +285,7 @@ int FCEUD_NetworkConnect(void)
    if(netplaynick)
     memcpy(sendbuf + 4 + 16 + 16 + 64 + 1,netplaynick,strlen(netplaynick));
 
-   send(Socket, sendbuf, sblen, 0);
+   send(Socket, (char*)sendbuf, sblen, 0); //mbg merge 7/17/06 added cast
    free(sendbuf);
 
    recv_tcpwrap(buf, 1);
@@ -390,7 +298,7 @@ int FCEUD_NetworkConnect(void)
  NetStatAdd("*** Connection established.");
 
  FCEUDnetplay = 1;
- int tcpopt = 1;
+ char tcpopt = 1; //mbg merge 7/17/06 changed to char
  if(setsockopt(TSocket, IPPROTO_TCP, TCP_NODELAY, &tcpopt, sizeof(int)))
   puts("Nodelay fail");
 
@@ -400,7 +308,7 @@ int FCEUD_NetworkConnect(void)
 
 int FCEUD_SendData(void *data, uint32 len)
 {
- send(Socket, data, len ,0);
+ send(Socket, (char*)data, len ,0); //mbg merge 7/17/06 added cast
  return(1);
 } 
 
@@ -425,7 +333,7 @@ static int recv_tcpwrap(uint8 *buf, int len)
    case SOCKET_ERROR:return(0);
   }
 
-  t=recv(Socket,buf,len,0);
+  t=recv(Socket,(char*)buf,len,0); //mbg merge 7/17/06 added csat
   if(t<=0) return(0);
   len -= t;
   buf += t;
@@ -456,7 +364,7 @@ int FCEUD_RecvData(void *data, uint32 len)
 
   if(FD_ISSET(Socket,&funfun))
   {
-   if(recv_tcpwrap(data,len)>0)
+   if(recv_tcpwrap((uint8*)data,len)>0) //mbg merge 7/17/06 added cast
    {    
     unsigned long beefie;
     if(!ioctlsocket(Socket,FIONREAD,&beefie))
@@ -473,12 +381,6 @@ int FCEUD_RecvData(void *data, uint32 len)
   return 0;
 }
 
-void ShowNetplayConsole(void)
-{
- if(!netwin)
-  netwin=CreateDialog(fceu_hInstance,"NETMOO",0,NetCon);
-}
-
 CFGSTRUCT NetplayConfig[]={
         AC(remotetport),
         AC(netlocalplayers),
@@ -488,3 +390,104 @@ CFGSTRUCT NetplayConfig[]={
         ACS(netpassword),
         ENDCFGSTRUCT
 };
+
+
+static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  switch(uMsg)
+  {
+   case WM_CLOSE:
+                        GetSettings(hwndDlg);
+                        DestroyWindow(hwndDlg);
+                        netwin=0;
+                        FCEUD_NetworkClose();
+                        break;
+   case WM_COMMAND:
+                   if(HIWORD(wParam)==BN_CLICKED)
+                   {
+                    switch(LOWORD(wParam))
+                    {
+                     case 250:
+                        if(FCEUDnetplay)
+                        {
+                         FCEUD_NetworkClose();
+                         SetDlgItemText(hwndDlg,250,"Connect");
+                         FixCDis(hwndDlg,1);
+                        }
+                        else if(GI)
+                        {
+                         GetSettings(hwndDlg);
+                         if(FCEUD_NetworkConnect())
+                         {
+                          SetDlgItemText(hwndDlg,250,"Disconnect");
+                          FixCDis(hwndDlg,0);
+                         }
+                        }
+                        break;
+                    }
+                   }
+                   else if(HIWORD(wParam)==EN_CHANGE && Socket!=INVALID_SOCKET)
+                   {
+                    char buf[1024];
+                    int t;
+
+
+                    t=GetDlgItemText(hwndDlg,102,buf,1024);
+                    buf[1023]=0;
+
+                    if(strchr(buf,'\r'))
+                    {
+                     char *src,*dest;
+
+                     src=dest=buf;
+                    
+                     while(*src)
+                     {
+                      if(*src != '\n' && *src != '\r')
+                      {
+                       *dest = *src;
+                       dest++;
+                      }
+                      src++;
+                     }
+                     *dest = 0;
+                     FCEUI_NetplayText((uint8*)buf); //mbg merge 7/17/06 added cast
+                     SetDlgItemText(hwndDlg,102,"");                    
+                    }
+                   }
+                   break;
+   case WM_INITDIALOG:
+                   if(netplayhost)
+                    SetDlgItemText(hwndDlg,200,netplayhost);
+                   SetDlgItemInt(hwndDlg,201,remotetport,0);
+                   if(netplaynick)
+                    SetDlgItemText(hwndDlg,203,netplaynick);
+                   if(netgamekey)
+                    SetDlgItemText(hwndDlg,205,netgamekey);
+                   if(netpassword)
+                    SetDlgItemText(hwndDlg,206,netpassword);
+
+                   {
+                    int x;
+                    char buf[8];
+                    for(x=0;x<4;x++)
+                    {
+                     sprintf(buf,"%d",x+1);
+                     SendDlgItemMessage(hwndDlg,204,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
+                    }
+                    SendDlgItemMessage(hwndDlg,204,CB_SETCURSEL,netlocalplayers-1,(LPARAM)(LPSTR)0);
+                   }
+
+
+                   break;
+  }
+
+ return 0;
+}
+
+
+void ShowNetplayConsole(void)
+{
+ if(!netwin)
+  netwin=CreateDialog(fceu_hInstance,"NETMOO",0,NetCon);
+}
