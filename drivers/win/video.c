@@ -934,7 +934,8 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
         switch(uMsg)
         {
-         case WM_INITDIALOG:                
+         case WM_INITDIALOG:      
+			 SetDlgItemText(hwndDlg,65454,"For the custom video mode settings to be in effect, the \"Custom\" video mode needs to be selected.  If you select a sync method, and sound is disabled, you may want to disable speed throttling(in the \"Timing\" window).  If you use \"wait for vblank\", you should use the \"lazy\" form.\x0AAllowing more than 8 sprites per scanline can cause graphics corruption in some games, including \"Solstice\".");
                 for(x=0;x<11;x++)
                  SendDlgItemMessage(hwndDlg,100,CB_ADDSTRING,0,(LPARAM)(LPSTR)vmstr[x]);
                 SendDlgItemMessage(hwndDlg,100,CB_SETCURSEL,vmod,(LPARAM)(LPSTR)0);

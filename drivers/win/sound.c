@@ -148,7 +148,11 @@ static int RawWrite(void *data, uint32 len)
  {
   VOID *LockPtr[2]={0,0};
   DWORD LockLen[2]={0,0};
-  uint32 curlen; //mbg merge 7/17/06 changed to uint
+  
+  //mbg merge 7/17/06 changed to uint
+  //mbg merge 7/18/06 was causing a crash when fastforwarding unless this was initialized to len
+  uint32 curlen=len; 
+
 
   // THIS LIMITS THE EMULATION SPEED
   if((!NoWaiting) || (soundoptions&SO_OLDUP))

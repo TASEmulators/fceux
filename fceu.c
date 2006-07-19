@@ -68,7 +68,12 @@ writefunc BWrite[0x10000];
 static readfunc *AReadG;
 static writefunc *BWriteG;
 static int RWWrap=0;
+
+//mbg merge 7/18/06 docs
+//bit0 indicates whether emulation is paused
+//bit1 indicates whether emulation is in frame step mode
 static int EmulationPaused=0;
+
 static int RewindStatus[4] = {0, 0, 0, 0}; //is it safe to load rewind state
 static int RewindIndex = 0; //which rewind state we're on
 int EnableRewind = 0; //is rewind enabled
@@ -725,6 +730,12 @@ int32 FCEUI_GetDesiredFPS(void)
 int FCEUI_EmulationPaused(void)
 {
  return (EmulationPaused&1);
+}
+
+//mbg merge 7/18/06 added
+//ideally maybe we shouldnt be using this, but i need it for quick merging
+void FCEUI_SetEmulationPaused(int val) {
+	EmulationPaused = val;
 }
 
 void FCEUI_ToggleEmulationPause(void)

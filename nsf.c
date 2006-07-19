@@ -90,7 +90,7 @@ static uint16 PlayAddr;
 static uint16 InitAddr;
 static uint16 LoadAddr;
 
-static NSF_HEADER NSFHeader;
+NSF_HEADER NSFHeader; //mbg merge 6/29/06 - needs to be global
 
 void NSFMMC5_Close(void);
 static uint8 *ExWRAM=0;

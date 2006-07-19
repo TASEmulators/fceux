@@ -35,6 +35,7 @@
 
 #include "../../types.h" //mbg merge 7/17/06 added
 #include "../../fceu.h" //mbg merge 7/17/06 added
+#include "../../debugger.h"  //mbg merge 7/18/06 added
 #include "input.h"
 #include "netplay.h"
 #include "joystick.h"
@@ -166,7 +167,8 @@ static int winwidth,winheight;
 static int ismaximized = 0;
 
 static volatile int nofocus=0;
-static volatile int userpause=0;
+//static volatile int userpause=0; //mbg merge 7/18/06 removed. this has been replaced with FCEU_EmulationPaused stuff
+static volatile int _userpause=0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
 #define SO_FORCE8BIT  1
 #define SO_SECONDARY  2
@@ -351,6 +353,12 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 void ApplyDefaultCommandMapping(void);
 
+//mbg merge 7/18/06 - the function that contains the code that used to just be UpdateMemWatch()
+void _updateMemWatch() {
+	//UpdateMemWatch()
+	//but soon we will do more!
+}
+
 int main(int argc,char *argv[])
 {
 	char *t;
@@ -435,7 +443,7 @@ doloopy:
 			if(FCEUI_EmulationPaused() & 1)
 			{
 				if(stopCount==0)
-					UpdateMemWatch();
+					_updateMemWatch();
 
 				stopCount++;
 				if(stopCount > 8)
@@ -459,7 +467,7 @@ doloopy:
 			}
 			else
 			{
-				//UpdateMemWatch();
+				//_updateMemWatch();
 				stopCount=0;
 			}
 		}
@@ -524,7 +532,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		{
 			skipcount = 0;
 			FCEUD_BlitScreen(XBuf);
-			UpdateMemWatch();
+			_updateMemWatch();
 		}
 		else
 			skipcount++;
@@ -563,7 +571,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 				{
 					skipcount = 0;
 					FCEUD_BlitScreen(XBuf);
-					UpdateMemWatch();
+					_updateMemWatch();
 				}
 				else
 				{
@@ -647,7 +655,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 				if((!skipthis && !NoWaiting) || (skipcount >= maxskip))
 				{
 					FCEUD_BlitScreen(XBuf);
-					UpdateMemWatch();
+					_updateMemWatch();
 					skipcount = 0;
 				}
 				else

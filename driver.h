@@ -276,6 +276,7 @@ void FCEUI_FDSSelect(void);
 int FCEUI_DatachSet(const uint8 *rcode);
 
 int FCEUI_EmulationPaused(void);
+void FCEUI_SetEmulationPaused(int val); //mbg merge 7/18/06 added
 void FCEUI_ToggleEmulationPause(void);
 void FCEUI_FrameAdvance(void);
 

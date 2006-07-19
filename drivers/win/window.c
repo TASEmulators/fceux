@@ -507,6 +507,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  }
                  switch(wParam)
                  {
+					 //-------
+					//mbg merge 7/18/06 added XD tools
+				 case ID_DEBUG_DEBUGGER:
+					 DoDebug(0);
+					 break;
+
 				 case 40004:
 					 SetAutoFirePattern(1,1);
 					 CheckedAutoFirePattern = wParam;
@@ -630,7 +636,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				  case 40003: FCEU_SetBotMode(1^FCEU_BotMode());
 					          UpdateMenu(); break;
 				  case 40002: CreateBasicBot();break;
-				  case 40028: DoMemmo(0); break;
+				  // case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
                   case 320:StopSound();ConfigDirectories();break;
                   case 327:StopSound();ConfigGUI();break;
                   case 321:StopSound();ConfigInput(hWnd);break;
@@ -649,10 +655,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			
 
 		  #ifdef FCEUDEF_DEBUGGER
-		  case 203:BeginDSeq(hWnd);break;
+		  //case 203:BeginDSeq(hWnd);break; //mbg merge 7/18/06 removed as part of old debugger
 		  #endif
 
-                  case 204:ConfigAddCheat(hWnd);break;
+                  //case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
 					  //mbg merge TODO 7/17/06 - had to remove this
                   //case 205:CreateMemWatch(hWnd);break;
                   case 100:StopSound();
@@ -661,7 +667,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 101:if(GI)
                            {
 			    #ifdef FCEUDEF_DEBUGGER
-			    KillDebugger();
+			    //KillDebugger(); //mbg merge 7/18/06 removed as part of old debugger
 			    #endif
                             FCEUI_CloseGame();                            
                             GI=0;
@@ -671,7 +677,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 110:FCEUD_SaveStateAs();break;
                   case 111:FCEUD_LoadStateFrom();break;
 
-                  case 120:
+                  case 40120: //mbg merge 7/18/06 changed ID from 120
                            {
                             MENUITEMINFO mi;
                             char *str;
@@ -885,7 +891,7 @@ void UpdateFCEUWindow(void)
 
   BlockingCheck();
   #ifdef FCEUDEF_DEBUGGER
-  UpdateDebugger();
+  //UpdateDebugger(); //mbg merge 7/18/06 removed as part of old debugger
   #endif
 
   if(!(eoptions&EO_BGRUN))
@@ -895,10 +901,10 @@ void UpdateFCEUWindow(void)
     Sleep(75);
     BlockingCheck();
    }
- if(userpause)
+ if(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
  {
   StopSound();
-  while(userpause)
+  while(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
   {
    Sleep(50);
    BlockingCheck();   
@@ -1260,6 +1266,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 
   switch(uMsg){
    case WM_INITDIALOG:                
+	   SetDlgItemText(hwndDlg,65508,"The settings in the \"Individual Directory Overrides\" group will override the settings in the \"Base Directory Override\" group.  To delete an override, delete the text from the text edit control.  Note that the directory the configuration file is in cannot be overridden");
                 for(x=0;x<6;x++)
                  SetDlgItemText(hwndDlg,100+x,DOvers[x]);
                 if(eoptions&EO_SNAPNAME)

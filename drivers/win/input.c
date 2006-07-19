@@ -1016,6 +1016,7 @@ static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
   
   switch(uMsg) {
    case WM_INITDIALOG:                
+	   SetDlgItemText(hwndDlg,65488,"Select the device you want to be enabled on input ports 1 and 2, and the Famicom expansion port.  You may configure the device listed above each drop-down list by pressing \"Configure\", if applicable.  The device currently being emulated on the each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.  If you select a device to be on the emulated Famicom Expansion Port, you should probably have emulated gamepads on the emulated NES-style input ports.");
                 for(x=0;x<2;x++)        
                 {
                  int y;

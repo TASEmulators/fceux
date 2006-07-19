@@ -42,6 +42,7 @@ typedef struct {
         } NSF_HEADER;
 void NSF_init(void);
 void DrawNSF(uint8 *XBuf);
+extern NSF_HEADER NSFHeader; //mbg merge 6/29/06
 void NSFDealloc(void);
 void NSFDodo(void);
 void DoNSFFrame(void);

@@ -117,7 +117,7 @@ static CFGSTRUCT fceuconfig[]={
 	AC(autoHoldClearKey),
 	AC(frame_display),
 	AC(input_display),
-	ACS(MemWatchDir),
+	//ACS(MemWatchDir), //mbg merge 7/18/06 removed
 	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
 		ENDCFGSTRUCT
