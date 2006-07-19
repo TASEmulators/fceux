@@ -24,7 +24,7 @@
 #include "input.h"
 #include "keyboard.h"
 
-HRESULT  ddrval;
+static HRESULT  ddrval; //mbg merge 7/17/06 made static
 
 static LPDIRECTINPUTDEVICE7 lpdid=0;
 

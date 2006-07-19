@@ -396,7 +396,7 @@ static void ShowRes(void)
 static int ShowShortList(char *moe[], int n, int def)
 {
  int x,c;
- unsigned int baa;
+ int baa; //mbg merge 7/17/06 made to normal int
  char tmp[16];
 
  red:

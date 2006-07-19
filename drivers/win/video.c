@@ -135,7 +135,7 @@ static int InitializeDDraw(int fs)
 	{
 		CloseHandle(mapColorPalette);
 		mapColorPalette = NULL;
-		color_palette = malloc(256 * sizeof(PALETTEENTRY));
+		color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY)); //mbg merge 7/18/06 added cast
 	}
 	else
 		color_palette   = (PALETTEENTRY *)MapViewOfFile(mapColorPalette, FILE_MAP_WRITE, 0, 0, 0);

@@ -57,7 +57,7 @@ static uint8 LastStrobe;
 
 static int BotMode = 0;
 #ifdef _USE_SHARED_MEMORY_
-static int BotPointer = 0;
+static uint32 BotPointer = 0; //mbg merge 7/18/06 changed to uint32
 #endif
 
 /* This function is a quick hack to get the NSF player to use emulated gamepad

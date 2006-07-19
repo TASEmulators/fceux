@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-
+#include "../../fceu.h" //mbg merge 7/18/06 added
 #include "memwatch.h"
 
 static HWND hwndMemWatch=0;
@@ -229,13 +229,13 @@ static void SaveMemWatch()
 	ofn.lpstrInitialDir=MemWatchDir;
 	if(GetSaveFileName(&ofn))
 	{
-		int i,j;
+		int i; //mbg merge 7/18/06 removed unused decl for j
 
 		//Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
 			free(MemWatchDir);
-			MemWatchDir=malloc(strlen(ofn.lpstrFile)+1);
+			MemWatchDir=(char*)malloc(strlen(ofn.lpstrFile)+1); //mbg merge 7/18/06 added cast
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
@@ -308,7 +308,7 @@ static void LoadMemWatch()
 		if(ofn.nFileOffset < 1024)
 		{
 			free(MemWatchDir);
-			MemWatchDir=malloc(strlen(ofn.lpstrFile)+1);
+			MemWatchDir=(char*)malloc(strlen(ofn.lpstrFile)+1); //mbg merge 7/18/06 added cast
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}

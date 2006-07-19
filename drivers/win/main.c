@@ -260,11 +260,12 @@ FCEU XD SP - Sebastian Porst\n\
 FCEU MM - CaH4e3\n\
 FCEU TAS - blip & nitsuja\n\
 FCEU TAS+ - Luke Gustafson\n\
+FCEUX\n\
+ - CaH4e3, Luke Gustafson\n\
+ - Matthew Gambrell, Sebastian Porst\n\
 \n\
-"__TIME__"\n\
-"__DATE__"\n\
+"__TIME__" "__DATE__"\n\
 " __COMPILER__STRING__
-
 );
 
  MessageBox(hAppWnd,TempArray,"About FCEUXD SP",MB_OK);

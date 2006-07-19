@@ -9,6 +9,7 @@ static int discallb(uint16 a, char *s);
 static void crs(HWND hParent);
 static void Disyou(uint16 a);
 static void UpdateDMem(uint16 a);
+int BlockingCheck(void); //mbg merge 7/18/06 yech had to add this
 
 static HWND mwin=0;
 static int32 cmsi;
@@ -457,11 +458,11 @@ static uint8 kbuf[(16*3-1+6+2)*16+1];
 static void sexycallb(uint16 a, uint8 v)
 {
  if((a&15)==15)
-  sprintf(kbuf+strlen(kbuf),"%02X\r\n",v);
+  sprintf((char*)kbuf+strlen((char*)kbuf),"%02X\r\n",v); //mbg merge 7/18/06 added casts
  else if((a&15)==0)
-  sprintf(kbuf+strlen(kbuf),"%03xx: %02X ",a>>4,v);
+  sprintf((char*)kbuf+strlen((char*)kbuf),"%03xx: %02X ",a>>4,v); //mbg merge 7/18/06 added casts
  else
-  sprintf(kbuf+strlen(kbuf),"%02X ",v);
+  sprintf((char*)kbuf+strlen((char*)kbuf),"%02X ",v); //mbg merge 7/18/06 added casts
 }
 
 static void MDSSI(void)
@@ -482,7 +483,7 @@ static void UpdateDMem(uint16 a)
 {
  kbuf[0]=0;
  FCEUI_MemDump(a<<4,256,sexycallb);
- SetDlgItemText(mwin,100,kbuf);
+ SetDlgItemText(mwin,100,(char*)kbuf); //mbg merge 7/18/06 added cast
 }
 
 int CreateDumpSave(uint32 a1, uint32 a2)
