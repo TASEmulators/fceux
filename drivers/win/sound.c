@@ -281,6 +281,83 @@ int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
 	return iCount;
 }
 
+/*
+//mbg merge 7/19/06 an experiment in understanding the sound update code
+int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
+{
+#define WSD_BUFSIZE (2 * 96000 / 50)
+
+	int P;
+	int iCount=0;
+	static int16 MBuffer[WSD_BUFSIZE*2];
+
+	//if(!(soundoptions&SO_OLDUP))
+	//{
+		//shouldnt the sound be stopped?
+		//if(FCEUI_EmulationPaused())
+		//	memset(MBuffer, 0, WSD_BUFSIZE); // slow and/or unnecessary
+
+		//why?
+		//if(FCEUI_EmulationPaused()) scale >>= 1;
+		// limit frequency change to between 50% and 200%
+		//if(scale > 512) scale = 512;
+		//if(scale < 128) scale = 128;
+	//}
+
+	int silence = FCEUI_EmulationPaused() | silencer;
+
+	for(;Count>0;Count-=WSD_BUFSIZE)
+	{
+		//int amt = (soundoptions&SO_OLDUP) ? Count : (Count > WSD_BUFSIZE ? WSD_BUFSIZE : Count);
+		int amt = (Count > WSD_BUFSIZE ? WSD_BUFSIZE : Count);
+
+		if(!bittage)
+		{
+			if(silence)
+				for(P=0;P<amt;P++)
+					*(((uint8*)MBuffer)+P)=((int8)(Buffer[0]>>8))^128;
+			else if(scale == 256) // exactly 100% speed
+				for(P=0;P<amt;P++)
+					*(((uint8*)MBuffer)+P)=((int8)(Buffer[P]>>8))^128;
+			else // change sound frequency
+				for(P=0;P<amt;P++)
+					*(((uint8*)MBuffer)+P)=((int8)(Buffer[P*scale/256]>>8))^128;
+
+			RawWrite(MBuffer,amt);
+		}
+		else // force 8-bit sound is off:
+		{
+			if(silence)
+				for(P=0;P<amt;P++)
+					MBuffer[P]=Buffer[0];
+			else if(scale == 256) // exactly 100% speed
+				for(P=0;P<amt;P++)
+					MBuffer[P]=Buffer[P];
+			else // change sound frequency
+				for(int chan=0;chan<2;chan++) {
+					int16 *dest = MBuffer+chan;
+					int32 *src = Buffer+chan;
+					int work = amt>>1;
+					for(P=0;P<work;P++) {
+						//interpolate
+						int loc = P*scale;
+						int mix = src[(loc>>8)<<1];
+						mix += ((src[((loc>>8)+1)<<1]-mix)*(loc&255))>>8;
+						dest[P<<1] = mix;
+					}
+				}
+
+			RawWrite(MBuffer,amt * 2);
+		}
+
+		iCount+=amt;
+	}
+
+	// FCEUI_AviSoundUpdate((void*)MBuffer, Count);
+	return iCount;
+}
+*/
+
 int InitSound()
 {
  DSCAPS dscaps;

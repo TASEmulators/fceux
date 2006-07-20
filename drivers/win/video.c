@@ -900,7 +900,7 @@ static int RecalcCustom(void)
 
 BOOL SetDlgItemDouble(HWND hDlg, int item, double value)
 {
- char buf[8];
+ char buf[9]; //mbg merge 7/19/06 changed to 9 to leave room for \0
  sprintf(buf,"%.6f",value);
  return SetDlgItemText(hDlg, item, buf); //mbg merge 7/17/06 added this return value
 }

@@ -1234,12 +1234,14 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								break;
 							case 105: //Step Into
+								//mbg merge 7/19/06 also put the whole block inside the if (previously only updateregs was... was it a bug?)
 								//mbg merge 7/18/06 changed pausing check and set
-								if (FCEUI_EmulationPaused())
+								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-								step = 1;
-								FCEUI_SetEmulationPaused(0);
-								UpdateDebugger();
+									step = 1;
+									FCEUI_SetEmulationPaused(0);
+									UpdateDebugger();
+								}
 								break;
 							case 106: //Step Out
 								//mbg merge 7/18/06 changed pausing check and set

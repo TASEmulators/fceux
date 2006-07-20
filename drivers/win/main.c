@@ -284,6 +284,8 @@ FCEUX\n\
  MessageBox(hAppWnd,TempArray,"About FCEUXD SP",MB_OK);
 }
 
+//mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
+int closeGame = 0;
 
 void DoFCEUExit(void)
 {
@@ -293,6 +295,8 @@ void DoFCEUExit(void)
                 "You can never really exit, you know.",
                 "E-x-i-t?"
                };
+
+ KillDebugger(); //mbg merge 7/19/06 added
 
  if(exiting)    /* Eh, oops.  I'll need to try to fix this later. */
   return;
@@ -306,11 +310,7 @@ void DoFCEUExit(void)
  FCEUD_AviStop();
 
  exiting=1;
- if(GI)
- {
-  FCEUI_CloseGame();
-  GI=0;
- }
+ closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 }
 
 void DoPriority(void)
@@ -451,6 +451,14 @@ doloopy:
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0);
 			xbsave = gfx;
 			FCEUD_Update(gfx, sound, ssize);
+
+			 //mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
+			 if(closeGame)
+			 {
+				FCEUI_CloseGame();
+				GI = 0;
+			 }
+
 			
 
 			//mbg merge 7/19/06 
@@ -517,6 +525,208 @@ void _updateWindow() {
 	NTViewDoBlit(0);
 }
 
+//void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
+//{
+//	static int skipcount = 0;
+//	int temp_fps_scale=(NoWaiting&1)?(256*16):fps_scale;
+//	int maxskip = (temp_fps_scale<=256) ? 0 : temp_fps_scale>>8;
+//
+//	int ocount = Count;
+//	// apply frame scaling to Count
+//	Count = (Count<<8)/temp_fps_scale;
+//
+//	//Disable sound and throttling for BotMode--we want max speed!
+//	if(FCEU_BotMode())
+//	{
+//		if(XBuf && (skipcount >= 64))
+//		{
+//			skipcount = 0;
+//			FCEUD_BlitScreen(XBuf);
+//		}
+//		else
+//		{
+//			skipcount++;
+//		}
+//		UpdateFCEUWindow();
+//		FCEUD_UpdateInput();
+//		return;
+//	}
+//
+//	if(!(soundoptions&SO_OLDUP) && soundo && temp_fps_scale >= 64)
+//	{
+//		// sounds better with FPS scaling, and is much less code than the other version...
+//
+//		int32 writeSize = GetWriteSound();
+//		int32 writeCount = Count;
+///*
+//		// prevents delay when exiting fast-forward
+//		if((NoWaiting&1) && writeCount>writeSize)
+//			writeCount=writeSize;
+//*/
+//
+//		if(Buffer && (writeCount))
+//			FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
+//
+//		if(XBuf && (skipcount >= maxskip))
+//		{
+//			skipcount = 0;
+//			FCEUD_BlitScreen(XBuf);
+//			_updateMemWatch();
+//		}
+//		else
+//			skipcount++;
+//
+//		_updateWindow();
+//	}
+//	else
+//	{
+//		// I don't understand this code, so I kept it around as an option ("old sound update")
+//		// in case it's doing something clever and necessary that I can't fathom
+//		// (oops, also it seems to be important for speeds <25% so it's always used then)
+//
+//		const int soundScale = !(soundoptions&SO_OLDUP) ? temp_fps_scale : 256;
+//
+//		if(Count)
+//		{
+//			int32 can=GetWriteSound();
+//			static int uflow=0;
+//			int32 tmpcan;
+//			extern int FCEUDnetplay;
+//
+//			// don't underflow when scaling fps
+//			if(can >= GetMaxSound() && fps_scale<=256) uflow=1;	// Go into massive underflow mode. 
+//
+//			if(can > Count) can=Count;
+//			else uflow=0;
+//
+//			FCEUD_WriteSoundData(Buffer,soundScale,can);
+//
+//			tmpcan = GetWriteSound();
+//			// don't underflow when scaling fps
+//			if(fps_scale>256 || ((tmpcan < Count*0.90) && !uflow) || (skipcount >= maxskip))
+//			{
+//				if(XBuf && (skipcount >= maxskip))
+//				{
+//					skipcount = 0;
+//					FCEUD_BlitScreen(XBuf);
+//					_updateMemWatch();
+//				}
+//				else
+//				{
+//					skipcount++;
+//					//FCEU_printf("Skipped0");
+//					//	FCEU_PrintError("Skipped0");
+//				}
+//				Buffer+=can;
+//				Count-=can;
+//				if(Count)
+//				{
+//					if(NoWaiting)
+//					{
+//						can=GetWriteSound(); 
+//						if(Count>can) Count=can;
+//						FCEUD_WriteSoundData(Buffer,soundScale,Count);
+//					}
+//					else
+//					{
+//						int cnum=0;
+//						extern int silencer;
+//						while(Count>0)
+//						{
+//							FCEUD_WriteSoundData(Buffer,soundScale,(Count<ocount) ? Count : ocount);
+//							if(!(soundoptions&SO_OLDUP))
+//							{
+//								cnum++;
+//								if(cnum>2)
+//									silencer=1;
+//							}
+//							Count -= ocount;
+//							// prevent long updates from interfering with gui responsiveness:
+//
+//							//mbg merge 7/19/06 
+//							//UpdateFCEUWindow();
+//							//FCEUD_UpdateInput();
+//							_updateWindow();
+//						}
+//						silencer=0;
+//					}
+//				}
+//			}
+//			else
+//			{
+//				skipcount++;
+//				//FCEU_printf("Skipped");
+//#ifdef NETWORK
+//				if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 0.90)))
+//				{
+//					if(Count > tmpcan) Count=tmpcan;
+//					while(tmpcan > 0)
+//					{
+//						//printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
+//						FCEUD_WriteSoundData(Buffer,soundScale,(Count <= tmpcan)?Count : tmpcan);
+//						tmpcan -= Count;
+//					}
+//				}
+//#endif
+//			}
+//		}
+//		else
+//		{
+//			/* This complex statement deserves some explanation.
+//			Make sure this special speed throttling hasn't been disabled by the user
+//			first. Second, we don't want to throttle the speed if the fast-forward
+//			button is pressed down(or during certain network play conditions).
+//
+//			Now, if we're at this point, we'll throttle speed if sound is disabled.
+//			Otherwise, it gets a bit more complicated.  We'll throttle speed if focus
+//			to FCE Ultra has been lost and we're writing to the primary sound buffer
+//			because our sound code won't block.  Blocking does seem to work when
+//			writing to a secondary buffer, so we won't throttle when a secondary
+//			buffer is used.
+//			*/
+//
+//			//doagain: //mbg merge 6/30/06
+//
+//			int skipthis = 0;
+//
+//			if(!(eoptions&EO_NOTHROTTLE) || fps_scale != 256)
+//				if(!NoWaiting)
+//					if(!soundo || (soundo && nofocus && !(soundoptions&SO_SECONDARY)) || FCEUI_EmulationPaused() )
+//						skipthis = SpeedThrottle();
+//
+//			if(XBuf)
+//			{
+//				if((!skipthis && !NoWaiting) || (skipcount >= maxskip))
+//				{
+//					FCEUD_BlitScreen(XBuf);
+//					_updateMemWatch();
+//					skipcount = 0;
+//				}
+//				else
+//				{
+//					skipcount++;
+//				}
+//			}
+//
+//			//mbg merge 7/19/06 - since tasbuild we have code in main that attempts to do stuff like this
+//		    //mbg merge 6/30/06
+//			//if(FCEUI_EmulationPaused())
+//			//{
+//			//	StopSound();
+//			//	Sleep(50);
+//			//	BlockingCheck();
+//			//	goto doagain;
+//			//}
+//		}
+//
+//		//mbg merge 7/19/06 
+//		//UpdateFCEUWindow();
+//		//FCEUD_UpdateInput();
+//		_updateWindow();
+//
+//	} // end of !(old sound code) block
+//}
+
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	static int skipcount = 0;
@@ -527,6 +737,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	// apply frame scaling to Count
 	Count = (Count<<8)/temp_fps_scale;
 
+	//mbg merge 7/19/06 - leaving this untouched but untested
 	//Disable sound and throttling for BotMode--we want max speed!
 	if(FCEU_BotMode())
 	{
@@ -544,180 +755,120 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		return;
 	}
 
-	if(!(soundoptions&SO_OLDUP) && soundo && temp_fps_scale >= 64)
-	{
-		// sounds better with FPS scaling, and is much less code than the other version...
-
+	//mbg naive code
+	if(soundo && Buffer && Count) {
 		int32 writeSize = GetWriteSound();
 		int32 writeCount = Count;
-/*
-		// prevents delay when exiting fast-forward
-		if((NoWaiting&1) && writeCount>writeSize)
-			writeCount=writeSize;
-*/
-
-		if(Buffer && (writeCount))
-			FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
-
-		if(XBuf && (skipcount >= maxskip))
-		{
-			skipcount = 0;
-			FCEUD_BlitScreen(XBuf);
-			_updateMemWatch();
-		}
-		else
-			skipcount++;
-
-		_updateWindow();
+		FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
 	}
-	else
+
+	if(XBuf)
+		FCEUD_BlitScreen(XBuf);
+	_updateWindow();
+
+	//delay until we unpause
+	while(FCEUI_EmulationPaused())
 	{
-		// I don't understand this code, so I kept it around as an option ("old sound update")
-		// in case it's doing something clever and necessary that I can't fathom
-		// (oops, also it seems to be important for speeds <25% so it's always used then)
+		Sleep(50);
+		BlockingCheck();
+	}
+	
 
-		const int soundScale = !(soundoptions&SO_OLDUP) ? temp_fps_scale : 256;
+//	if(soundo) //&& temp_fps_scale >= 64
+//	{
+//		// sounds better with FPS scaling, and is much less code than the other version...
+//
+//		int32 writeSize = GetWriteSound();
+//		int32 writeCount = Count;
+///*
+//		// prevents delay when exiting fast-forward
+//		if((NoWaiting&1) && writeCount>writeSize)
+//			writeCount=writeSize;
+//*/
+//
+//		if(Buffer && (writeCount))
+//			FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
+//
+//		if(XBuf && (skipcount >= maxskip))
+//		{
+//			skipcount = 0;
+//			FCEUD_BlitScreen(XBuf);
+//			_updateMemWatch();
+//		}
+//		else
+//			skipcount++;
+//
+//		_updateWindow();
+//	}
+	
+//#ifdef NETWORK
+//				if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 0.90)))
+//				{
+//					if(Count > tmpcan) Count=tmpcan;
+//					while(tmpcan > 0)
+//					{
+//						//printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
+//						FCEUD_WriteSoundData(Buffer,soundScale,(Count <= tmpcan)?Count : tmpcan);
+//						tmpcan -= Count;
+//					}
+//				}
+//#endif
+	//	{
+	//		/* This complex statement deserves some explanation.
+	//		Make sure this special speed throttling hasn't been disabled by the user
+	//		first. Second, we don't want to throttle the speed if the fast-forward
+	//		button is pressed down(or during certain network play conditions).
 
-		if(Count)
-		{
-			int32 can=GetWriteSound();
-			static int uflow=0;
-			int32 tmpcan;
-			extern int FCEUDnetplay;
+	//		Now, if we're at this point, we'll throttle speed if sound is disabled.
+	//		Otherwise, it gets a bit more complicated.  We'll throttle speed if focus
+	//		to FCE Ultra has been lost and we're writing to the primary sound buffer
+	//		because our sound code won't block.  Blocking does seem to work when
+	//		writing to a secondary buffer, so we won't throttle when a secondary
+	//		buffer is used.
+	//		*/
 
-			// don't underflow when scaling fps
-			if(can >= GetMaxSound() && fps_scale<=256) uflow=1;	// Go into massive underflow mode. 
+	//		//doagain: //mbg merge 6/30/06
 
-			if(can > Count) can=Count;
-			else uflow=0;
+	//		int skipthis = 0;
 
-			FCEUD_WriteSoundData(Buffer,soundScale,can);
+	//		if(!(eoptions&EO_NOTHROTTLE) || fps_scale != 256)
+	//			if(!NoWaiting)
+	//				if(!soundo || (soundo && nofocus && !(soundoptions&SO_SECONDARY)) || FCEUI_EmulationPaused() )
+	//					skipthis = SpeedThrottle();
 
-			tmpcan = GetWriteSound();
-			// don't underflow when scaling fps
-			if(fps_scale>256 || ((tmpcan < Count*0.90) && !uflow) || (skipcount >= maxskip))
-			{
-				if(XBuf && (skipcount >= maxskip))
-				{
-					skipcount = 0;
-					FCEUD_BlitScreen(XBuf);
-					_updateMemWatch();
-				}
-				else
-				{
-					skipcount++;
-					//FCEU_printf("Skipped0");
-					//	FCEU_PrintError("Skipped0");
-				}
-				Buffer+=can;
-				Count-=can;
-				if(Count)
-				{
-					if(NoWaiting)
-					{
-						can=GetWriteSound(); 
-						if(Count>can) Count=can;
-						FCEUD_WriteSoundData(Buffer,soundScale,Count);
-					}
-					else
-					{
-						int cnum=0;
-						extern int silencer;
-						while(Count>0)
-						{
-							FCEUD_WriteSoundData(Buffer,soundScale,(Count<ocount) ? Count : ocount);
-							if(!(soundoptions&SO_OLDUP))
-							{
-								cnum++;
-								if(cnum>2)
-									silencer=1;
-							}
-							Count -= ocount;
-							// prevent long updates from interfering with gui responsiveness:
+	//		if(XBuf)
+	//		{
+	//			if((!skipthis && !NoWaiting) || (skipcount >= maxskip))
+	//			{
+	//				FCEUD_BlitScreen(XBuf);
+	//				_updateMemWatch();
+	//				skipcount = 0;
+	//			}
+	//			else
+	//			{
+	//				skipcount++;
+	//			}
+	//		}
 
-							//mbg merge 7/19/06 
-							//UpdateFCEUWindow();
-							//FCEUD_UpdateInput();
-							_updateWindow();
-						}
-						silencer=0;
-					}
-				}
-			}
-			else
-			{
-				skipcount++;
-				//FCEU_printf("Skipped");
-#ifdef NETWORK
-				if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 0.90)))
-				{
-					if(Count > tmpcan) Count=tmpcan;
-					while(tmpcan > 0)
-					{
-						//printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
-						FCEUD_WriteSoundData(Buffer,soundScale,(Count <= tmpcan)?Count : tmpcan);
-						tmpcan -= Count;
-					}
-				}
-#endif
-			}
-		}
-		else
-		{
-			/* This complex statement deserves some explanation.
-			Make sure this special speed throttling hasn't been disabled by the user
-			first. Second, we don't want to throttle the speed if the fast-forward
-			button is pressed down(or during certain network play conditions).
+	//		//mbg merge 7/19/06 - since tasbuild we have code in main that attempts to do stuff like this
+	//	    //mbg merge 6/30/06
+	//		//if(FCEUI_EmulationPaused())
+	//		//{
+	//		//	StopSound();
+	//		//	Sleep(50);
+	//		//	BlockingCheck();
+	//		//	goto doagain;
+	//		//}
+	//	}
 
-			Now, if we're at this point, we'll throttle speed if sound is disabled.
-			Otherwise, it gets a bit more complicated.  We'll throttle speed if focus
-			to FCE Ultra has been lost and we're writing to the primary sound buffer
-			because our sound code won't block.  Blocking does seem to work when
-			writing to a secondary buffer, so we won't throttle when a secondary
-			buffer is used.
-			*/
+	//	//mbg merge 7/19/06 
+	//	//UpdateFCEUWindow();
+	//	//FCEUD_UpdateInput();
+	//	_updateWindow();
 
-			//doagain: //mbg merge 6/30/06
-
-			int skipthis = 0;
-
-			if(!(eoptions&EO_NOTHROTTLE) || fps_scale != 256)
-				if(!NoWaiting)
-					if(!soundo || (soundo && nofocus && !(soundoptions&SO_SECONDARY)) || FCEUI_EmulationPaused() )
-						skipthis = SpeedThrottle();
-
-			if(XBuf)
-			{
-				if((!skipthis && !NoWaiting) || (skipcount >= maxskip))
-				{
-					FCEUD_BlitScreen(XBuf);
-					_updateMemWatch();
-					skipcount = 0;
-				}
-				else
-				{
-					skipcount++;
-				}
-			}
-
-			//mbg merge 7/19/06 - since tasbuild we have code in main that attempts to do stuff like this
-		    //mbg merge 6/30/06
-			//if(FCEUI_EmulationPaused())
-			//{
-			//	StopSound();
-			//	Sleep(50);
-			//	BlockingCheck();
-			//	goto doagain;
-			//}
-		}
-
-		//mbg merge 7/19/06 
-		//UpdateFCEUWindow();
-		//FCEUD_UpdateInput();
-		_updateWindow();
-
-	} // end of !(old sound code) block
+	//} // end of !(old sound code) block
 }
+
 
 /*
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
