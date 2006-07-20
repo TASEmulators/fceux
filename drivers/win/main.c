@@ -43,6 +43,16 @@
 #include "cheat.h"
 #include "debug.h"
 
+//------
+//mbg merge 7/19/06 added
+#include "..\..\ppuview.h"
+#include "..\..\ntview.h"
+#include "..\..\debugger.h"
+#include "..\..\memview.h"
+#include "..\..\cdlogger.h"
+#include "..\..\tracer.h"
+//-----
+
 //#include "memwatch.h" //mbg merge 7/19/06 removed-memwatch is gone
 #include "basicbot.h"
 

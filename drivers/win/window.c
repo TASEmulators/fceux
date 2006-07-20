@@ -401,7 +401,7 @@ int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
 void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 int FCEUMOV_IsPlaying(void); //mbg merge 7/17/06 YECH had to add
-
+void DoPPUView();//mbg merge 7/19/06 yech had to add
 
 void MapInput(void);
 
@@ -509,10 +509,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  {
 					 //-------
 					//mbg merge 7/18/06 added XD tools
-				 case ID_DEBUG_DEBUGGER:
-					 DoDebug(0);
-					 break;
-
+				 case ID_DEBUG_DEBUGGER: DoDebug(0); break;
+				 case ID_DEBUG_PPUVIEWER: DoPPUView(); break;
+				 case ID_DEBUG_NAMETABLEVIEWER: DoNTView(); break;
+				 case ID_DEBUG_HEXEDITOR: DoMemView(); break;
+				 case ID_DEBUG_TRACELOGGER: DoTracer(); break;
+				 case ID_TOOLS_GAMEGENIEDECODER: DoGGConv(); break;
+				 case ID_DEBUG_CDLOGGER: DoCDLogger(); break;
+				 
 				 case 40004:
 					 SetAutoFirePattern(1,1);
 					 CheckedAutoFirePattern = wParam;
