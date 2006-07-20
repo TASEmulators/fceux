@@ -33,6 +33,7 @@
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
 
+#include "../../ppuview.h" //mbg merge 7/19/06 added
 #include "../../types.h" //mbg merge 7/17/06 added
 #include "../../fceu.h" //mbg merge 7/17/06 added
 #include "../../debugger.h"  //mbg merge 7/18/06 added
@@ -363,6 +364,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 void ApplyDefaultCommandMapping(void);
 
+
 //mbg merge 7/18/06 - the function that contains the code that used to just be UpdateMemWatch()
 void _updateMemWatch() {
 	//UpdateMemWatch()
@@ -449,7 +451,12 @@ doloopy:
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0);
 			xbsave = gfx;
 			FCEUD_Update(gfx, sound, ssize);
-			static int stopCount=0;
+			
+
+			//mbg merge 7/19/06 
+			//--------this code was added by tasbuild
+			//it catches a paused condition and 
+			/*static int stopCount=0;
 			if(FCEUI_EmulationPaused() & 1)
 			{
 				if(stopCount==0)
@@ -461,7 +468,9 @@ doloopy:
 					StopSound();
 					stopCount = 0;
 				}
+
 				//if in bot mode, don't idle.  eat the CPU up :)
+				//mbg - why should we do this? does bot mode set the paused flag? that doesnt seem right...
 				if(!FCEU_BotMode())
 				{
 					int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
@@ -479,7 +488,8 @@ doloopy:
 			{
 				//_updateMemWatch();
 				stopCount=0;
-			}
+			}*/
+			//-----------------------------------
 		}
 		xbsave = NULL;
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
@@ -494,6 +504,17 @@ doloopy:
 	timeEndPeriod(1);
 	FCEUI_Kill();
 	return(0);
+}
+
+//mbg merge 7/19/06 - the function that contains the code that used to just be UpdateFCEUWindow() and FCEUD_UpdateInput()
+void _updateWindow() {
+	UpdateFCEUWindow();
+	FCEUD_UpdateInput();
+	PPUViewDoBlit();
+	UpdateMemoryView(0);
+	UpdateCDLogger();
+	UpdateLogWindow();
+	NTViewDoBlit(0);
 }
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
@@ -547,8 +568,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		else
 			skipcount++;
 
-		UpdateFCEUWindow();
-		FCEUD_UpdateInput();
+		_updateWindow();
 	}
 	else
 	{
@@ -614,8 +634,11 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 							}
 							Count -= ocount;
 							// prevent long updates from interfering with gui responsiveness:
-							UpdateFCEUWindow();
-							FCEUD_UpdateInput();
+
+							//mbg merge 7/19/06 
+							//UpdateFCEUWindow();
+							//FCEUD_UpdateInput();
+							_updateWindow();
 						}
 						silencer=0;
 					}
@@ -653,6 +676,9 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 			writing to a secondary buffer, so we won't throttle when a secondary
 			buffer is used.
 			*/
+
+			//doagain: //mbg merge 6/30/06
+
 			int skipthis = 0;
 
 			if(!(eoptions&EO_NOTHROTTLE) || fps_scale != 256)
@@ -673,9 +699,22 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 					skipcount++;
 				}
 			}
+
+			//mbg merge 7/19/06 - since tasbuild we have code in main that attempts to do stuff like this
+		    //mbg merge 6/30/06
+			//if(FCEUI_EmulationPaused())
+			//{
+			//	StopSound();
+			//	Sleep(50);
+			//	BlockingCheck();
+			//	goto doagain;
+			//}
 		}
-		UpdateFCEUWindow();
-		FCEUD_UpdateInput();
+
+		//mbg merge 7/19/06 
+		//UpdateFCEUWindow();
+		//FCEUD_UpdateInput();
+		_updateWindow();
 
 	} // end of !(old sound code) block
 }

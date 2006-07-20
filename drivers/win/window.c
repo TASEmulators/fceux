@@ -514,7 +514,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				 case ID_DEBUG_NAMETABLEVIEWER: DoNTView(); break;
 				 case ID_DEBUG_HEXEDITOR: DoMemView(); break;
 				 case ID_DEBUG_TRACELOGGER: DoTracer(); break;
-				 case ID_TOOLS_GAMEGENIEDECODER: DoGGConv(); break;
+				 case ID_DEBUG_GAMEGENIEDECODER: DoGGConv(); break;
 				 case ID_DEBUG_CDLOGGER: DoCDLogger(); break;
 				 
 				 case 40004:
@@ -894,9 +894,11 @@ void UpdateFCEUWindow(void)
   }
 
   BlockingCheck();
-  #ifdef FCEUDEF_DEBUGGER
-  //UpdateDebugger(); //mbg merge 7/18/06 removed as part of old debugger
-  #endif
+
+  //mbg merge 7/18/06 removed as part of old debugger
+  //#ifdef FCEUDEF_DEBUGGER
+  //UpdateDebugger(); 
+  //#endif
 
   if(!(eoptions&EO_BGRUN))
    while(nofocus)
@@ -905,15 +907,17 @@ void UpdateFCEUWindow(void)
     Sleep(75);
     BlockingCheck();
    }
- if(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
- {
-  StopSound();
-  while(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
-  {
-   Sleep(50);
-   BlockingCheck();   
-  }
- }
+
+   //mbg merge 7/19/06 removing this since I think its not used
+ //if(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
+ //{
+ // StopSound();
+ // while(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
+ // {
+ //  Sleep(50);
+ //  BlockingCheck();   
+ // }
+ //}
 }
 
 void ByebyeWindow(void)
