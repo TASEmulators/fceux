@@ -51,6 +51,7 @@ extern SFORMAT FCEUVSUNI_STATEINFO[];
 uint8 *trainerpoo=0;
 uint8 *ROM=NULL;
 uint8 *VROM=NULL;
+iNES_HEADER head;
 
 
 #ifdef _USE_SHARED_MEMORY_
@@ -75,8 +76,6 @@ void (*MapClose)(void);
 void (*MapperReset)(void);
 
 static int MapperNo=0;
-
-static iNES_HEADER head;
 
 /*  MapperReset() is called when the NES is reset(with the reset button).  
     Mapperxxx_init is called when the NES has been powered on.

@@ -43,7 +43,7 @@
 #include "cheat.h"
 #include "debug.h"
 
-#include "memwatch.h"
+//#include "memwatch.h" //mbg merge 7/19/06 removed-memwatch is gone
 #include "basicbot.h"
 
 #define VNSCLIP  ((eoptions&EO_CLIPSIDES)?8:0)
@@ -253,7 +253,7 @@ void ShowAboutBox(void)
 {
 sprintf(TempArray,
 
-"FCEUX  "FCEU_VERSION_STRING"\n\
+FCEU_NAME_AND_VERSION"\n\
 ~CAST~\n\
 FCE - Bero\n\
 FCEU - Xodnizel\n\

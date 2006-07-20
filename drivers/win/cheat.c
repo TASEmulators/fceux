@@ -25,6 +25,9 @@
 #include "..\..\fceu.h"
 #include "..\..\cart.h"
 
+HWND hCheat; //mbg merge 7/19/06 had to add 
+int CheatWindow,CheatStyle; //mbg merge 7/19/06 had to add
+
 #define GGLISTSIZE 128 //hopefully this is enough for all cases
 
 int selcheat;
