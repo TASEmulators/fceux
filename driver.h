@@ -13,6 +13,9 @@ extern "C" {
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
 
+//mbg 7/23/06
+char *FCEUD_GetCompilerString();
+
 /* This makes me feel dirty for some reason. */
 void FCEU_printf(char *format, ...);
 #define FCEUI_printf FCEU_printf

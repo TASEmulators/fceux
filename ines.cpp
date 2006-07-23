@@ -82,7 +82,7 @@ static int MapperNo=0;
 */
 
 
-static int DECLFR(TrainerRead)
+static DECLFR(TrainerRead)
 {
  return(trainerpoo[A&0x1FF]);
 }

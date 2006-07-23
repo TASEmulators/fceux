@@ -27,6 +27,9 @@ void SetAutoFirePattern(int onframes, int offframes);
 void AutoFire(void);
 void FCEUI_Rewind(void);
 
+//mbg 7/23/06
+char *FCEUI_GetAboutString();
+
 extern uint64 timestampbase;
 extern uint32 MMC5HackVROMMask;
 extern uint8 *MMC5HackExNTARAMPtr;

@@ -239,49 +239,29 @@ void FCEUD_PrintError(char *s)
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
 
-//generate an msvc-compatible compiler version string if necessary
-#ifdef MSVC
- #ifdef _M_X64
-   #define _MSVC_ARCH "x64"
- #else
-   #define _MSVC_ARCH "x86"
- #endif
- #ifdef _DEBUG
-  #define _MSVC_BUILD "debug"
- #else 
-  #define _MSVC_BUILD "release"
- #endif
- #define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
- #define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
- #define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
- #define _Py_STRINGIZE2(X) #X
- //re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
+#ifdef _M_X64
+  #define _MSVC_ARCH "x64"
 #else
-  #define __COMPILER__STRING__ "gcc " __VERSION__
+  #define _MSVC_ARCH "x86"
 #endif
+#ifdef _DEBUG
+ #define _MSVC_BUILD "debug"
+#else 
+ #define _MSVC_BUILD "release"
+#endif
+#define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
+#define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
+#define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
+#define _Py_STRINGIZE2(X) #X
+//re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
+
+char *FCEUD_GetCompilerString() {
+	return 	__COMPILER__STRING__;
+}
 
 void ShowAboutBox(void)
 {
-sprintf(TempArray,
-
-FCEU_NAME_AND_VERSION"\n\
-~CAST~\n\
-FCE - Bero\n\
-FCEU - Xodnizel\n\
-FCEU XD - Bbitmaster & Parasyte\n\
-FCEU XD SP - Sebastian Porst\n\
-FCEU MM - CaH4e3\n\
-FCEU TAS - blip & nitsuja\n\
-FCEU TAS+ - Luke Gustafson\n\
-FCEUX\n\
- - CaH4e3, Luke Gustafson\n\
- - Matthew Gambrell, Sebastian Porst\n\
-\n\
-"__TIME__" "__DATE__"\n\
-" __COMPILER__STRING__
-);
-
- MessageBox(hAppWnd,TempArray,"About FCEUXD SP",MB_OK);
+ MessageBox(hAppWnd,FCEUI_GetAboutString(),FCEU_NAME,MB_OK);
 }
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
