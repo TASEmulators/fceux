@@ -22,15 +22,20 @@
 
 #include "x6502struct.h"
 
-#ifdef FCEUDEF_DEBUGGER
+//-----------
+//mbg 6/30/06 - some of this was removed to mimic XD
+//#ifdef FCEUDEF_DEBUGGER
 void X6502_Debug(void (*CPUHook)(X6502 *),
-                uint8 (*ReadHook)(X6502 *, unsigned int),
-                void (*WriteHook)(X6502 *, unsigned int, uint8));
+    uint8 (*ReadHook)(X6502 *, unsigned int),
+    void (*WriteHook)(X6502 *, unsigned int, uint8));
 
-extern void (*X6502_Run)(int32 cycles);
-#else
-void X6502_Run(int32 cycles);
-#endif
+//extern void (*X6502_Run)(int32 cycles);
+//#else
+//void X6502_Run(int32 cycles);
+//#endif
+void X6502_RunDebug(int32 cycles);
+#define X6502_Run(x) X6502_RunDebug(x)
+//------------
 
 extern uint32 timestamp;
 extern X6502 X;
