@@ -1,0 +1,1 @@
+fceu_SOURCES	+=	input/cursor.c input/zapper.c input/powerpad.c input/arkanoid.c input/shadow.c input/fkb.c input/fkb.h input/hypershot.c input/mahjong.c input/oekakids.c input/ftrainer.c input/quiz.c input/toprider.c input/bworld.c
