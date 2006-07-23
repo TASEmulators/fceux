@@ -51,7 +51,7 @@ extern SFORMAT FCEUVSUNI_STATEINFO[];
 uint8 *trainerpoo=0;
 uint8 *ROM=NULL;
 uint8 *VROM=NULL;
-iNES_HEADER head;
+iNES_HEADER head ;
 
 
 #ifdef _USE_SHARED_MEMORY_
@@ -81,10 +81,12 @@ static int MapperNo=0;
     Mapperxxx_init is called when the NES has been powered on.
 */
 
-static DECLFR(TrainerRead)
+
+static int DECLFR(TrainerRead)
 {
  return(trainerpoo[A&0x1FF]);
 }
+
 
 void iNESGI(int h) //bbit edited: removed static keyword
 {
