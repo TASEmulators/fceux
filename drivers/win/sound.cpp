@@ -743,4 +743,4 @@ void FCEUD_SoundVolumeAdjust(int n)
 	FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
 
-#include "wave.c"
+#include "wave.cpp"

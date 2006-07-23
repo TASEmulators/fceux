@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "state.c"      /* Save/Load state AS */
+#include "state.cpp"      /* Save/Load state AS */
 
 extern char *md5_asciistr(uint8 digest[16]);
 extern FCEUGI *FCEUGameInfo;

@@ -311,13 +311,13 @@ void DoPriority(void)
 
 static int changerecursive=0;
 
-#include "throttle.c"
+#include "throttle.cpp"
 
-#include "sound.c"
-#include "video.c"
-#include "window.c"
-#include "config.c"
-#include "args.c"
+#include "sound.cpp"
+#include "video.cpp"
+#include "window.cpp"
+#include "config.cpp"
+#include "args.cpp"
 
 int DriverInitialize(void)
 {
