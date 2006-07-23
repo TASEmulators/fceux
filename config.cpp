@@ -2,6 +2,7 @@
 #include "fceu.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static char *aboutString = 0;
 
