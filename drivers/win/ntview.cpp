@@ -20,12 +20,12 @@
 
 #include "common.h"
 #include "ntview.h"
+#include "debugger.h"
 #include "..\..\fceu.h"
 #include "..\..\debug.h"
 #define INESPRIV
 #include "..\..\cart.h"
 #include "..\..\ines.h"
-#include "debugger.h"
 #include "..\..\palette.h"
 #include "..\..\ppu.h"
 

@@ -20,16 +20,16 @@
 
 #include "common.h"
 #include "..\..\types.h"
-#include "memview.h"
 #include "..\..\debug.h"
-#include "debugger.h"
-#include "cdlogger.h"
 #include "..\..\fceu.h"
 #include "..\..\cheat.h"
 #include "..\..\cart.h"
 #include "..\..\ines.h"
-#include "cheat.h"
+#include "memview.h"
+#include "debugger.h"
+#include "cdlogger.h"
 #include "memviewsp.h"
+#include "cheat.h"
 #include <assert.h>
 //#include "string.h"
 
