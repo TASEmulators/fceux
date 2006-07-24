@@ -21,6 +21,7 @@
 #include "common.h"
 #include "..\..\ntview.h"
 #include "..\..\fceu.h"
+#include "..\..\debug.h"
 #define INESPRIV
 #include "..\..\cart.h"
 #include "..\..\ines.h"

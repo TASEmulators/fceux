@@ -22,6 +22,7 @@
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
+#include "debug.h"
 #include "sound.h"
 
 X6502 X;

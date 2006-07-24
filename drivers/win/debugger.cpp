@@ -23,6 +23,7 @@
 #include "debugger.h"
 #include "..\..\x6502.h"
 #include "..\..\fceu.h"
+#include "..\..\debug.h"
 #include "..\..\nsf.h"
 #include "..\..\cart.h"
 #include "..\..\ines.h"

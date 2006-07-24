@@ -21,7 +21,8 @@
 #include "common.h"
 #include "debuggersp.h"
 #include "debugger.h"
-#include "..\..\conddebug.h"
+#include "../../debug.h"
+#include "../../conddebug.h"
 
 #include <stdio.h>
 #include <string.h>

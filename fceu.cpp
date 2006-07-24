@@ -78,6 +78,9 @@ static int RewindStatus[4] = {0, 0, 0, 0}; //is it safe to load rewind state
 static int RewindIndex = 0; //which rewind state we're on
 int EnableRewind = 0; //is rewind enabled
 
+//a wrapper for unzip.c
+extern "C" FILE *FCEUI_UTF8fopen_C(const char *n, const char *m) { return ::FCEUD_UTF8fopen(n,m); }
+
 static DECLFW(BNull)
 {
 

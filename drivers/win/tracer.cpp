@@ -25,6 +25,7 @@
 #include "..\..\cart.h" //mbg merge 7/19/06 moved after fceu.h
 #include "cdlogger.h"
 #include "..\..\file.h"
+#include "..\..\debug.h"
 #include "tracer.h"
 #include "..\..\memview.h"
 

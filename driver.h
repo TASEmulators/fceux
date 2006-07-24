@@ -5,9 +5,13 @@
 
 #include "types.h"
 #include "git.h"
-#include "debug.h"
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
+#ifdef __cplusplus
+extern "C"
+#endif
+FILE *FCEUI_UTF8fopen_C(const char *fn, const char *mode);
+
 
 //mbg 7/23/06
 char *FCEUD_GetCompilerString();

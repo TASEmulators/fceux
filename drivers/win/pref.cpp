@@ -26,6 +26,7 @@
 #include "memviewsp.h"
 #include "common.h"
 #include "debugger.h"
+#include "../../debug.h"
 
 extern char symbDebugEnabled;
 
