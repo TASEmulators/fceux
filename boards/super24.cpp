@@ -21,7 +21,8 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 *CHRRAM = NULL;
+//mbg 7/23/06 todo CaH4e3 - should this have been declared here? its in mmc3.cpp also
+//static uint8 *CHRRAM = NULL;
 static int masko8[8]={63,31,15,1,3,0,0,0};
 
 static void Super24PW(uint32 A, uint8 V)

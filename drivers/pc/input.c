@@ -184,7 +184,7 @@ static void KeyboardCommands(void)
    if(keyonly(F7)) 
    {
     if(is_shift)
-     FCEUI_LoadMovie(NULL,0);
+     FCEUI_LoadMovie(NULL,0,0); //mbg merge 7/23/06 loadmovie takes another arg now
     else
      FCEUI_LoadState(NULL);
    }

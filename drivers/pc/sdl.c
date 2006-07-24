@@ -368,7 +368,7 @@ int FCEUSDLmain(int argc, char *argv[])
 int main(int argc, char *argv[])
 #endif
 {
-        FCEUD_Message("\nStarting FCE Ultra "FCEU_VERSION"...\n");
+        FCEUD_Message("\nStarting "FCEU_NAME_AND_VERSION"...\n");
 
         #ifdef WIN32
         /* Taken from win32 sdl_main.c */
