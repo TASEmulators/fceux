@@ -288,7 +288,7 @@ char *BinToASM(int addr, uint8 *opcode) {
 	uint16 tmp,tmp2;
 
 	switch (opcode[0]) {
-		#include "dasm.h"
+		#include "dasm.inc"
 	}
 	
 	return str;
@@ -690,7 +690,7 @@ int ParseASM(unsigned char *output, int addr, char *str) {
 	// 1) Sets opcode[0] on success, else returns 1.
 	// 2) Parses text in *astr to build the rest of the assembled
 	//    data in 'opcode', else returns 1 on error.
-	#include "asm.h"
+	#include "asm.inc"
 
 	memcpy(output,opcode,3);
 	return 0;

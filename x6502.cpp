@@ -24,10 +24,7 @@
 #include "x6502.h"
 #include "fceu.h"
 #include "sound.h"
-//mbg merge 6/29/06
 #include "debug.h"
-//#include "tracer.h" //bbit edited: line added
-//#include "memview.h" //bbit edited: line added
 #include "driver.h"
 
 X6502 X;
@@ -40,24 +37,6 @@ X6502 X;
 uint32 timestamp;
 void FP_FASTAPASS(1) (*MapIRQHook)(int a);
 
-//-------
-//mbg merge 6/29/06
-//bbit edited: a large portion of code was inserted from here on down
-extern uint8 *XBuf;
-//extern void FCEUD_BlitScreen(uint8 *XBuf);
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count); //mbg merge 6/30/06 - do this instead
-
-
-
-
-
-
-
-
-
-
-
-
 #define ADDCYC(x) \
 {     \
  int __x=x;       \
@@ -65,7 +44,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count); //mbg merge 6/30/06 - 
  _count-=__x*48;  \
  timestamp+=__x;  \
 }
-
 
 //mbg 6/30/06 - hooked functions arent being used right now
 ////hooked memory read
@@ -556,7 +534,7 @@ void X6502_Run(int32 cycles)
    _PC++;
    switch(b1)
    {
-    #include "ops.h"
+    #include "ops.inc"
    }
   }
 
