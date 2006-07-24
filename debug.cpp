@@ -69,6 +69,7 @@ uint8 GetPPUMem(uint8 A) {
 	return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 }
 
+
 //---------------------
 
 volatile int codecount, datacount, undefinedcount;

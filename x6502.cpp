@@ -19,21 +19,12 @@
  */
 
 #include <string.h>
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
 #include "sound.h"
-#include "debug.h"
-#include "driver.h"
 
 X6502 X;
-
-//mbg merge 7/19/06 
-//#ifdef FCEUDEF_DEBUGGER
-//void (*X6502_Run)(int32 cycles);
-//#endif
-
 uint32 timestamp;
 void FP_FASTAPASS(1) (*MapIRQHook)(int a);
 
@@ -45,48 +36,26 @@ void FP_FASTAPASS(1) (*MapIRQHook)(int a);
  timestamp+=__x;  \
 }
 
-//mbg 6/30/06 - hooked functions arent being used right now
-////hooked memory read
-//static INLINE uint8 RdMemHook(unsigned int A)
-//{
-// if(X.ReadHook)
-//  return(_DB = X.ReadHook(&X,A) );
-// else
-//  return(_DB=ARead[A](A));
-//}
-//
-////hooked memory write
-//static INLINE void WrMemHook(unsigned int A, uint8 V)
-//{
-// if(X.WriteHook)
-//  X.WriteHook(&X,A,V);
-// else
-//  BWrite[A](A,V);
-//}
-
-//#define RdRAMFast(A) (_DB=RAM[(A)])
-//#define WrRAMFast(A,V) RAM[(A)]=(V)
-
 //normal memory read
-static INLINE uint8 RdMemNorm(unsigned int A)
+static INLINE uint8 RdMem(unsigned int A)
 {
  return(_DB=ARead[A](A));
 }
 
 //normal memory write
-static INLINE void WrMemNorm(unsigned int A, uint8 V)
+static INLINE void WrMem(unsigned int A, uint8 V)
 {
  BWrite[A](A,V);
 }
 
-static INLINE uint8 RdRAMNorm(unsigned int A) 
+static INLINE uint8 RdRAM(unsigned int A) 
 {
   //bbit edited: this was changed so cheat substituion would work
   return(_DB=ARead[A](A));
   // return(_DB=RAM[A]); 
 }
 
-static INLINE void WrRAMNorm(unsigned int A, uint8 V)
+static INLINE void WrRAM(unsigned int A, uint8 V)
 {
  RAM[A]=V;
 }
@@ -389,33 +358,6 @@ void TriggerNMI2(void)
  _IRQlow|=FCEU_IQNMI2;
 }
 
-#ifdef FCEUDEF_DEBUGGER
-/* Called from debugger. */
-void FCEUI_NMI(void)
-{
- _IRQlow|=FCEU_IQNMI;
-}
-
-void FCEUI_IRQ(void)
-{
- _IRQlow|=FCEU_IQTEMP;
-}
-
-void FCEUI_GetIVectors(uint16 *reset, uint16 *irq, uint16 *nmi)
-{
- fceuindbg=1;
-
- *reset=RdMemNorm(0xFFFC);
- *reset|=RdMemNorm(0xFFFD)<<8;
- *nmi=RdMemNorm(0xFFFA);
- *nmi|=RdMemNorm(0xFFFB)<<8;
- *irq=RdMemNorm(0xFFFE);
- *irq|=RdMemNorm(0xFFFF)<<8;
- fceuindbg=0;
-}
-static int debugmode;
-#endif
-
 void X6502_Reset(void)
 {
  _IRQlow=FCEU_IQRESET;
@@ -430,9 +372,6 @@ void X6502_Init(void)
 	 if(!x) ZNTable[x]=Z_FLAG;
    else if(x&0x80) ZNTable[x]=N_FLAG;
 	 else ZNTable[x]=0;
-	#ifdef FCEUDEF_DEBUGGER
-	X6502_Debug(0,0,0);
-	#endif
 }
 
 void X6502_Power(void)
@@ -442,15 +381,15 @@ void X6502_Power(void)
  X6502_Reset();
 }
 
+//causes the code fragment argument to be compiled in if the build includes debugging
+#ifdef FCEUDEF_DEBUGGER
+#define DEBUG(X) X;
+#else
+#define DEBUG(X)
+#endif
 
-//mbg 6/30/06 merge - this function reworked significantly for merge
 void X6502_Run(int32 cycles)
 {
-  #define RdRAM RdRAMNorm
-  #define WrRAM WrRAMNorm
-  #define RdMem RdMemNorm
-  #define WrMem WrMemNorm
-
   if(PAL)
    cycles*=15;    // 15*4=60
   else
@@ -488,7 +427,7 @@ void X6502_Run(int32 cycles)
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));
       _P|=I_FLAG;
-	  if(debug_loggingCD) LogCDVectors(1);
+	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
       _PC=RdMem(0xFFFA);
       _PC|=RdMem(0xFFFB)<<8;
       _IRQlow&=~FCEU_IQNMI;
@@ -503,7 +442,7 @@ void X6502_Run(int32 cycles)
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));
       _P|=I_FLAG;
-	  if(debug_loggingCD) LogCDVectors(1);
+	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
       _PC=RdMem(0xFFFE);
       _PC|=RdMem(0xFFFF)<<8;
      }
@@ -517,10 +456,8 @@ void X6502_Run(int32 cycles)
               //major speed hit.
    }
 
-   //will probably cause a major speed decrease on low-end systems
-   DebugCycle();
-   	
-    
+	//will probably cause a major speed decrease on low-end systems
+	DEBUG( DebugCycle() );
 
    _PI=_P;
    b1=RdMem(_PC);
@@ -537,314 +474,29 @@ void X6502_Run(int32 cycles)
     #include "ops.inc"
    }
   }
-
-  #undef RdRAM
-  #undef WrRAM
-  #undef RdMem
-  #undef WrMem
 }
 
-
-void X6502_Debug(void (*CPUHook)(X6502 *),
-    uint8 (*ReadHook)(X6502 *, unsigned int),
-    void (*WriteHook)(X6502 *, unsigned int, uint8))
+//--------------------------
+//---Called from debuggers
+void FCEUI_NMI(void)
 {
- //mbg 6/30/06 - stubbed out because we don't support the hooked cpu
- //debugmode=(ReadHook || WriteHook || CPUHook)?1:0;
- //X.ReadHook=ReadHook;
- //X.WriteHook=WriteHook;
- //X.CPUHook=CPUHook;
+ _IRQlow|=FCEU_IQNMI;
 }
 
-//mbg 6/30/06 - the non-hooked cpu core and core switching has been removed to mimic XD.
-//this could be put back in later
-/*
-
-//#ifdef FCEUDEF_DEBUGGER
-//X6502 XSave;     // This is getting ugly. 
-//#define RdMemHook(A)  ( X.ReadHook?(_DB=X.ReadHook(&X,A)):(_DB=ARead[A](A)) )
-//#define WrMemHook(A,V)  { if(X.WriteHook) X.WriteHook(&X,A,V); else BWrite[A](A,V); }
-
-
-#ifdef FCEUDEF_DEBUGGER
-void (*X6502_Run)(int32 cycles);
-#endif
-
-#ifdef FCEUDEF_DEBUGGER
-static void X6502_RunDebug(int32 cycles)
+void FCEUI_IRQ(void)
 {
-  #define RdRAM RdMemHook
-  #define WrRAM WrMemHook
-  #define RdMem RdMemHook
-  #define WrMem WrMemHook
-
-  if(PAL)
-   cycles*=15;    // 15*4=60
-  else
-   cycles*=16;    // 16*4=64
-
-  _count+=cycles;
-
-  while(_count>0)
-  {
-   int32 temp;
-   uint8 b1;
-
-   if(_IRQlow)
-   {
-    if(_IRQlow&FCEU_IQRESET)
-    {
-     _PC=RdMem(0xFFFC);
-     _PC|=RdMem(0xFFFD)<<8;
-     _jammed=0;
-     _PI=_P=I_FLAG;
-     _IRQlow&=~FCEU_IQRESET;
-    }
-    else if(_IRQlow&FCEU_IQNMI2)
-    {
-     _IRQlow&=~FCEU_IQNMI2;
-     _IRQlow|=FCEU_IQNMI;
-    }
-    else if(_IRQlow&FCEU_IQNMI)
-    {
-     if(!_jammed)
-     {
-      ADDCYC(7);
-      PUSH(_PC>>8);
-      PUSH(_PC);
-      PUSH((_P&~B_FLAG)|(U_FLAG));
-      _P|=I_FLAG;
-	  if(loggingcodedata)LogCDVectors(1); //mbg 6/29/06 
-      _PC=RdMem(0xFFFA);
-      _PC|=RdMem(0xFFFB)<<8;
-      _IRQlow&=~FCEU_IQNMI;
-     }
-    }
-    else
-    {
-     if(!(_PI&I_FLAG) && !_jammed)
-     {
-      ADDCYC(7);
-      PUSH(_PC>>8);
-      PUSH(_PC);
-      PUSH((_P&~B_FLAG)|(U_FLAG));
-      _P|=I_FLAG;
-	  if(loggingcodedata)LogCDVectors(1); //mbg 6/29/06 
-      _PC=RdMem(0xFFFE);
-      _PC|=RdMem(0xFFFF)<<8;
-     }
-    }
-    _IRQlow&=~(FCEU_IQTEMP);
-    if(_count<=0)
-    {
-     _PI=_P;
-     return;
-    } //Should increase accuracy without a
-       //major speed hit.
-   }
-
-   //---
-   //mbg merge 6/29/06
-   	//will probably cause a major speed decrease on low-end systems
-	if (numWPs | step | stepout | watchpoint[64].flags | badopbreak) breakpoint(); //bbit edited: this line added
-	if(loggingcodedata)LogCDData();
- 	if(logging
-		//|| (hMemView && (EditingMode == 2))
-		)LogInstruction();
-	//---
-
-   if(X.CPUHook) X.CPUHook(&X);
-   //Ok, now the real fun starts.
-   //Do the pre-exec voodoo.
-   if(X.ReadHook || X.WriteHook)
-   {
-    uint32 tsave=timestamp;
-    XSave=X;
-
-    fceuindbg=1;
-    X.preexec=1;
-    b1=RdMem(_PC);
-    _PC++;
-    switch(b1)
-    {
-     #include "ops.h"
-    }
-
-    timestamp=tsave;
-
-    //In case an NMI/IRQ/RESET was triggered by the debugger.
-    //Should we also copy over the other hook variables?
-    XSave.IRQlow=X.IRQlow;
-    XSave.ReadHook=X.ReadHook;
-    XSave.WriteHook=X.WriteHook;
-    XSave.CPUHook=X.CPUHook;
-    X=XSave;
-    fceuindbg=0;
-   }
-
-   _PI=_P;
-   b1=RdMem(_PC);
-   ADDCYC(CycTable[b1]);
-
-   temp=_tcount;
-   _tcount=0;
-   if(MapIRQHook) MapIRQHook(temp);
-
-   FCEU_SoundCPUHook(temp);
-
-   _PC++;
-   switch(b1)
-   {
-    #include "ops.h"
-   }
-  }
-  #undef RdRAM
-  #undef WrRAM
-  #undef RdMem
-  #undef WrMem
-
+ _IRQlow|=FCEU_IQTEMP;
 }
 
-
-static void X6502_RunNormal(int32 cycles)
-#else
-void X6502_Run(int32 cycles)
-#endif
+void FCEUI_GetIVectors(uint16 *reset, uint16 *irq, uint16 *nmi)
 {
-  #define RdRAM RdRAMFast
-  #define WrRAM WrRAMFast
-  #define RdMem RdMemNorm
-  #define WrMem WrMemNorm
+ fceuindbg=1;
 
-  //#if(defined(C80x86) && defined(__GNUC__))
-  //// Gives a nice little speed boost.
-  //register uint16 pbackus asm ("edi");
-  //#else
-  //uint16 pbackus;
-  //#endif
-
-  //pbackus=_PC;
-
-  //#undef _PC
-  //#define _PC pbackus
-
-  if(PAL)
-   cycles*=15;    // 15*4=60
-  else
-   cycles*=16;    // 16*4=64
-
-  _count+=cycles;
-
-  while(_count>0)
-  {
-   int32 temp;
-   uint8 b1;
-
-//   XI.PC=pbackus;
-   if(_IRQlow)
-   {
-    if(_IRQlow&FCEU_IQRESET)
-    {
-     _PC=RdMem(0xFFFC);
-     _PC|=RdMem(0xFFFD)<<8;
-     _jammed=0;
-     _PI=_P=I_FLAG;
-     _IRQlow&=~FCEU_IQRESET;
-    }
-    else if(_IRQlow&FCEU_IQNMI2)
-     {
-     _IRQlow&=~FCEU_IQNMI2;
-     _IRQlow|=FCEU_IQNMI;
-    }
-    else if(_IRQlow&FCEU_IQNMI)
-    {
-     if(!_jammed)
-     {
-      ADDCYC(7);
-      PUSH(_PC>>8);
-      PUSH(_PC);
-      PUSH((_P&~B_FLAG)|(U_FLAG));
-      _P|=I_FLAG;
-	  if(loggingcodedata)LogCDVectors(1); //mbg 6/29/06 
-      _PC=RdMem(0xFFFA);
-      _PC|=RdMem(0xFFFB)<<8;
-      _IRQlow&=~FCEU_IQNMI;
-     }
-    }
-    else
-    {
-     if(!(_PI&I_FLAG) && !_jammed)
-     {
-      ADDCYC(7);
-      PUSH(_PC>>8);
-      PUSH(_PC);
-      PUSH((_P&~B_FLAG)|(U_FLAG));
-      _P|=I_FLAG;
-	  if(loggingcodedata)LogCDVectors(1); //mbg 6/29/06 
-      _PC=RdMem(0xFFFE);
-      _PC|=RdMem(0xFFFF)<<8;
-     }
-    }
-    _IRQlow&=~(FCEU_IQTEMP);
-    if(_count<=0)
-    {
-     _PI=_P;
-     //X.PC=pbackus;
-     return;
-     } //Should increase accuracy without a
-              //major speed hit.
-   }
-
-   //---
-   //mbg merge 6/29/06
-   	//will probably cause a major speed decrease on low-end systems
-	if (numWPs | step | stepout | watchpoint[64].flags | badopbreak) 
-		breakpoint(); //bbit edited: this line added
-	if(loggingcodedata)LogCDData();
- 	if(logging
-	// || (hMemView && (EditingMode == 2))
-		)
-		LogInstruction();
-	//---
-
-   _PI=_P;
-   b1=RdMem(_PC);
-
-   ADDCYC(CycTable[b1]);
-
-   temp=_tcount;
-   _tcount=0;
-   if(MapIRQHook) MapIRQHook(temp);
-   FCEU_SoundCPUHook(temp);
-   //X.PC=pbackus;
-   _PC++;
-   switch(b1)
-   {
-    #include "ops.h"
-   }
-  }
-
-  //#undef _PC
-  //#define _PC X.PC
-  //_PC=pbackus;
-  //#undef RdRAM
-  #undef WrRAM
+ *reset=RdMem(0xFFFC);
+ *reset|=RdMem(0xFFFD)<<8;
+ *nmi=RdMem(0xFFFA);
+ *nmi|=RdMem(0xFFFB)<<8;
+ *irq=RdMem(0xFFFE);
+ *irq|=RdMem(0xFFFF)<<8;
+ fceuindbg=0;
 }
-
-#ifdef FCEUDEF_DEBUGGER
-void X6502_Debug(void (*CPUHook)(X6502 *),
-    uint8 (*ReadHook)(X6502 *, unsigned int),
-    void (*WriteHook)(X6502 *, unsigned int, uint8))
-{
- debugmode=(ReadHook || WriteHook || CPUHook)?1:0;
- X.ReadHook=ReadHook;
- X.WriteHook=WriteHook;
- X.CPUHook=CPUHook;
-
- if(!debugmode)
-  X6502_Run=X6502_RunNormal;
- else
-  X6502_Run=X6502_RunDebug;
-}
-
-#endif*/
