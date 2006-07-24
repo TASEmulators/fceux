@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-#include "..\..\ntview.h"
+#include "ntview.h"
 #include "..\..\fceu.h"
 #include "..\..\debug.h"
 #define INESPRIV
@@ -313,7 +313,9 @@ void DrawNameTable(uint8 *bitmap, uint8 *table, uint8 *tablecache) {
 	}
 }
 
-void UpdateNTView(int drawall) {
+void FCEUD_UpdateNTView(int scanline, int drawall) {
+	if(!NTViewer) return;
+	if(scanline != -1 && scanline != NTViewScanline) return;
 
 	//uint8 *pbitmap = ppuv_palette;
 	if (!hNTView) return;
@@ -594,7 +596,7 @@ void DoNTView() {
 	if (!hNTView) hNTView = CreateDialog(fceu_hInstance,"NTVIEW",NULL,NTViewCallB);
 	if (hNTView) {
 		SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-		UpdateNTView(1);
+		FCEUD_UpdateNTView(-1,1);
 		NTViewDoBlit(1);
 	}
 }

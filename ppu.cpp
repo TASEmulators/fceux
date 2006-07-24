@@ -32,17 +32,12 @@
 #include  "general.h"
 #include  "endian.h"
 #include  "memory.h"
-#ifdef WIN32
-#include  "ppuview.h"
-#endif
 
 #include  "cart.h"
 #include  "palette.h"
 #include  "state.h"
 #include  "video.h"
 #include  "input.h"
-#include "ppuview.h" //bbit edited: this line added
-#include "ntview.h" //bbit edited: this line added
 
 #define VBlankON  (PPU[0]&0x80)   /* Generate VBlank NMI */
 #define Sprite16  (PPU[0]&0x20)   /* Sprites 8x16/8x8  */
@@ -813,7 +808,7 @@ static void DoLine(void)
    GameHBIRQHook();
  }
 
- if ((NTViewer) && (scanline == NTViewScanline)) UpdateNTView(0); //bbit edited:this line added
+ DEBUG(FCEUD_UpdateNTView(scanline,0));
 
  if(SpriteON)
   RefreshSprites();
@@ -1364,9 +1359,7 @@ int FCEUPPU_Loop(int skip)
     for(scanline=0;scanline<240;)       //scanline is incremented in  DoLine.  Evil. :/
     {
      deempcnt[deemp]++;
-//#ifdef WIN32 //mbg merge 7/19/06 ideally this kind of code should work in every driver and just eval to nothing in drivers that dont support it
-     if((PPUViewer) && (scanline == PPUViewScanline)) UpdatePPUView(1);
-//#endif
+	 DEBUG(FCEUD_UpdatePPUView(scanline, 1));
      DoLine();
     }
     if(MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);

@@ -33,6 +33,13 @@
 //#define FCEUXD_VERSION_STRING "1.0a"
 //#define FCEUXDSP_VERSION_STRING "1.07"
 
+//causes the code fragment argument to be compiled in if the build includes debugging
+#ifdef FCEUDEF_DEBUGGER
+#define DEBUG(X) X;
+#else
+#define DEBUG(X)
+#endif
+
 #ifdef MSVC
 typedef unsigned char uint8;
 typedef unsigned short uint16;

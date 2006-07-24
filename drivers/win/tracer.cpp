@@ -27,7 +27,7 @@
 #include "..\..\file.h"
 #include "..\..\debug.h"
 #include "tracer.h"
-#include "..\..\memview.h"
+#include "memview.h"
 
 //#define LOG_SKIP_UNMAPPED 4
 //#define LOG_ADD_PERIODS 8

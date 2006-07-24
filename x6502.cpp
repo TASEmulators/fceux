@@ -382,13 +382,6 @@ void X6502_Power(void)
  X6502_Reset();
 }
 
-//causes the code fragment argument to be compiled in if the build includes debugging
-#ifdef FCEUDEF_DEBUGGER
-#define DEBUG(X) X;
-#else
-#define DEBUG(X)
-#endif
-
 void X6502_Run(int32 cycles)
 {
   if(PAL)

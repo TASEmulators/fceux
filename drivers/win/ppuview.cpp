@@ -113,7 +113,10 @@ void DrawPatternTable(uint8 *bitmap, uint8 *table, uint8 pal) {
 
 }
 
-void UpdatePPUView(int refreshchr) {
+void FCEUD_UpdatePPUView(int scanline, int refreshchr) {
+		if(!PPUViewer) return;
+		if(scanline != -1 && scanline != PPUViewScanline) return;
+
         int x,y,i;
         uint8 *pbitmap = ppuv_palette;
 
@@ -274,7 +277,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                                 if(pindex1 == 7) pindex1 = 0;
                                 else pindex1++;
                         }
-                        UpdatePPUView(0);
+                        FCEUD_UpdatePPUView(-1, 0);
                         PPUViewDoBlit();
                         break;
                 case WM_MOUSEMOVE:
@@ -346,7 +349,7 @@ void DoPPUView() {
         if(!hPPUView) hPPUView = CreateDialog(fceu_hInstance,"PPUVIEW",NULL,PPUViewCallB);
         if(hPPUView) {
                 SetWindowPos(hPPUView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-                UpdatePPUView(1);
+                FCEUD_UpdatePPUView(-1,1);
                 PPUViewDoBlit();
         }
 }

@@ -20,7 +20,7 @@
 
 #include "common.h"
 #include "..\..\types.h"
-#include "..\..\memview.h"
+#include "memview.h"
 #include "..\..\debug.h"
 #include "debugger.h"
 #include "cdlogger.h"

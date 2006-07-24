@@ -33,25 +33,21 @@
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
 
-#include "../../ppuview.h" //mbg merge 7/19/06 added
-#include "../../types.h" //mbg merge 7/17/06 added
-#include "../../fceu.h" //mbg merge 7/17/06 added
-#include "debugger.h"  //mbg merge 7/18/06 added
+#include "../../types.h"
+#include "../../fceu.h"
+#include "ppuview.h"
+#include "debugger.h"
 #include "input.h"
 #include "netplay.h"
 #include "joystick.h"
 #include "keyboard.h"
 #include "cheat.h"
 #include "debug.h"
-
-//------
-//mbg merge 7/19/06 added
-#include "..\..\ppuview.h"
-#include "..\..\ntview.h"
-#include "..\..\memview.h"
+#include "ppuview.h"
+#include "ntview.h"
+#include "memview.h"
 #include "tracer.h"
 #include "cdlogger.h"
-//-----
 
 //#include "memwatch.h" //mbg merge 7/19/06 removed-memwatch is gone
 #include "basicbot.h"
