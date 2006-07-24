@@ -49,7 +49,7 @@
 #include "..\..\ppuview.h"
 #include "..\..\ntview.h"
 #include "..\..\memview.h"
-#include "..\..\tracer.h"
+#include "tracer.h"
 #include "cdlogger.h"
 //-----
 

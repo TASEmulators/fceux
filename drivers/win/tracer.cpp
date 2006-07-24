@@ -25,7 +25,7 @@
 #include "..\..\cart.h" //mbg merge 7/19/06 moved after fceu.h
 #include "cdlogger.h"
 #include "..\..\file.h"
-#include "..\..\tracer.h"
+#include "tracer.h"
 #include "..\..\memview.h"
 
 //#define LOG_SKIP_UNMAPPED 4
@@ -277,7 +277,9 @@ done:
 }*/
 
 //todo: really speed this up
-void LogInstruction(){
+void FCEUD_TraceInstruction(){
+	if(!logging) return;
+
 	char address[7], data[11], disassembly[28], axystate[16], procstatus[12];
 	char str[96];
 	int addr=X.PC;

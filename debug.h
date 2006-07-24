@@ -65,13 +65,19 @@ uint8 GetPPUMem(uint8 A);
 void LogCDVectors(int which);
 void LogCDData();
 extern volatile int codecount, datacount, undefinedcount;
-extern volatile int loggingcodedata;
 extern unsigned char *cdloggerdata;
 
 extern int debug_loggingCD;
 static INLINE void FCEUI_SetLoggingCD(int val) { debug_loggingCD = val; }
 static INLINE int FCEUI_GetLoggingCD() { return debug_loggingCD; }
 //-------
+
+//-------tracing
+//we're letting the win32 driver handle this ittself for now
+//extern int debug_tracing;
+//static INLINE void FCEUI_SetTracing(int val) { debug_tracing = val; }
+//static INLINE int FCEUI_GetTracing() { return debug_tracing; }
+//---------
 
 //--------debugger
 extern int iaPC;

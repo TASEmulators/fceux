@@ -79,9 +79,8 @@ char *cdlogfilename;
 //char loadedcdfile[MAX_PATH];
 static int indirectnext;
 
+//records whether loggingCD is enabled
 int debug_loggingCD;
-//void FCEUI_SetLoggingCD(int val) { debug_loggingCD = val; }
-//int FCEUI_GetLoggingCD(int val) { return debug_loggingCD = val; }
 
 //called by the cpu to perform logging if CDLogging is enabled
 void LogCDVectors(int which){
@@ -412,6 +411,7 @@ void breakpoint() {
 }
 //bbit edited: this is the end of the inserted code
 
+int debug_tracing;
 
 void DebugCycle() {
 	if (numWPs | step | stepout | watchpoint[64].flags | badopbreak) 
@@ -419,5 +419,5 @@ void DebugCycle() {
 	if(debug_loggingCD) LogCDData();
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
  	//if(logging || (hMemView && (EditingMode == 2))) LogInstruction();
-	//if(logging) LogInstruction();
+	FCEUD_TraceInstruction();
 }

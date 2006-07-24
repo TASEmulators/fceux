@@ -311,10 +311,15 @@ int FCEUD_ShowStatusIcon(void);
 void FCEUD_ToggleStatusIcon(void);
 void FCEUD_HideMenuToggle(void);
 
-//new merge-era driver routines here
+//new merge-era driver routines here:
+
 //signals that the cpu core hit a breakpoint
 //this function should not return until the core is ready for the next cycle
 void FCEUD_DebugBreakpoint();
+
+//the driver should log the current instruction, if it wants
+//(we should move the code in the win driver that does this to the shared area)
+void FCEUD_TraceInstruction();
 
 
 #endif /* __DRIVER_H_ */

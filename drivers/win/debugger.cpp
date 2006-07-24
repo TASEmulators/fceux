@@ -26,7 +26,7 @@
 #include "..\..\nsf.h"
 #include "..\..\cart.h"
 #include "..\..\ines.h"
-#include "..\..\tracer.h"
+#include "tracer.h"
 #include "..\..\memview.h"
 #include "cheat.h"
 #include <assert.h>

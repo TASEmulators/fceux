@@ -24,7 +24,7 @@
 #include "..\..\x6502.h"
 #include "..\..\debug.h"
 #include "debugger.h"
-#include "..\..\tracer.h"
+#include "tracer.h"
 #include "cdlogger.h"
 
 #define INESPRIV
