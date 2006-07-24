@@ -82,7 +82,7 @@ int FCEUNET_SendCommand(uint8 cmd, uint32 len)
 {
  //mbg merge 7/17/06 changed to alloca
  //uint8 buf[numlocal + 1 + 4];
- uint8 *buf = (uint8*)_alloca(numlocal+1+4);
+ uint8 *buf = (uint8*)alloca(numlocal+1+4);
  
 
  buf[0] = 0xFF;

@@ -22,6 +22,8 @@
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
 
+#include <stdlib.h>
+
 #define FCEU_VERSION_NUMERIC 9816
 #define FCEU_NAME "FCEUX"
 #define FCEU_VERSION_STRING "1.07"
@@ -47,11 +49,18 @@ typedef signed int int32;
 #define stat _stat
 #define fstat _fstat
 #define mkdir _mkdir
+#define alloca _alloca
 #define W_OK 2
 #define R_OK 2
 #define X_OK 1
 #define F_OK 0
 #else
+
+//mingw32 doesnt prototype this for some reason
+#ifdef __MINGW32__
+void *alloca(size_t);
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

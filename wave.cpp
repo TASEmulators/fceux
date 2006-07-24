@@ -18,7 +18,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
 {
 	//mbg merge 7/17/06 changed to alloca
  //int16 temp[Count];  /* Yay.  Is this the first use of this "feature" of C in FCE Ultra? */
- int16 *temp = (int16*)_alloca(Count*2);
+ int16 *temp = (int16*)alloca(Count*2);
 
  int16 *dest;
  int x;
@@ -52,7 +52,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
 	 {
 		 //mbg merge 7/17/06 changed to alloca
 		 //int8 temp2[Count];
-		 int8 *temp2 = (int8*)_alloca(Count);
+		 int8 *temp2 = (int8*)alloca(Count);
 		 int P;
 		 for(P=0;P<Count;P++)
 			 *(((uint8*)temp2)+P)=((int8)(temp[P]>>8))^128;
