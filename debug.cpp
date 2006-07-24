@@ -1,535 +1,422 @@
-///* FCE Ultra - NES/Famicom Emulator
-// *
-// * Copyright notice for this file:
-// *  Copyright (C) 2003 Xodnizel
-// *
-// * This program is free software; you can redistribute it and/or modify
-// * it under the terms of the GNU General Public License as published by
-// * the Free Software Foundation; either version 2 of the License, or
-// * (at your option) any later version.
-// *
-// * This program is distributed in the hope that it will be useful,
-// * but WITHOUT ANY WARRANTY; without even the implied warranty of
-// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// * GNU General Public License for more details.
-// *
-// * You should have received a copy of the GNU General Public License
-// * along with this program; if not, write to the Free Software
-// * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-// */
-//
-//#include <stdio.h>
-//#include <string.h>
-//#include <stdlib.h>
-//
-//#include "types.h"
-//#include "x6502.h"
-//#include "fceu.h"
-//#include "debug.h"
-//#include "cart.h"
-//
-//
-//void FCEUI_DumpVid(const char *fname, uint32 start, uint32 end)
-//{
-// FILE *fp=FCEUD_UTF8fopen(fname,"wb");
-// fceuindbg=1;
-// start&=0x1FFF;
-// end&=0x1FFF;
-// for(;start<=end;start++)
-//  fputc(VPage[start>>10][start],fp);
-// fclose(fp);
-// fceuindbg=0;
-//}
-//
-//void FCEUI_DumpMem(const char *fname, uint32 start, uint32 end)
-//{
-// FILE *fp=FCEUD_UTF8fopen(fname,"wb");
-// fceuindbg=1;
-// for(;start<=end;start++)
-//  fputc(ARead[start](start),fp);
-// fclose(fp);
-// fceuindbg=0;
-//}
-//
-//void FCEUI_LoadMem(const char *fname, uint32 start, int hl)
-//{
-// int t;
-//
-// FILE *fp=FCEUD_UTF8fopen(fname,"rb");
-// while((t=fgetc(fp))>=0)
-// {
-//  if(start>0xFFFF) break;
-//  if(hl)
-//  {
-//   extern uint8 *Page[32];   
-//   if(Page[start/2048])
-//    Page[start/2048][start]=t;
-//  }
-//  else
-//   BWrite[start](start,t);
-//  start++;
-// }
-// fclose(fp);
-//}
-//
-//#ifdef FCEUDEF_DEBUGGER
-//
-//static char *fstrings[12]=
-//{ 
-//        "#$%02X",       // immediate
-//  "$%04X",  // RELATIVE(jump)
-//  "$%02X",  // Z
-//        "$%02X,X",      // Z,x
-//        "$%02X,Y",      // Z,y
-//  "$%04X",  //ABS
-//        "$%04X,X",      // ABS,x
-//        "$%04X,Y",      // ABS,y
-//        "($%04X)",      // IND
-//        "($%02X,X)",    // INX
-//        "($%02X),Y",    // INY
-//	""
-//};
-//static int flengths[12]={1,1,1,1,1,2,2,2,2,1,1,0};
-//
-//#define IMD(x)  ((0<<16)|x)
-//#define  REL(x)  ((1<<16)|x)
-//#define  ZP(x)  ((2<<16)|x)
-//#define  ZPX(x)  ((3<<16)|x)
-//#define  ZPY(x)  ((4<<16)|x)
-//#define  ABS(x)  ((5<<16)|x)
-//#define  ABX(x)  ((6<<16)|x)
-//#define ABY(x)  ((7<<16)|x)
-//#define  IND(x)  ((8<<16)|x)
-//#define  INX(x)  ((9<<16)|x)
-//#define  INY(x)  ((10<<16)|x)
-//#define IMP(x)  ((11<<16)|x)
-//
-//typedef struct {
-//	char *name;
-//        int type;       /* 1 for read, 2 for write, 3 for r then write. */
-//	int32 modes[10];
-//} OPS;
-//#define NUMOPS 56
-//static OPS optable[NUMOPS]=
-//{
-// {"BRK",0,{IMP(0x00),-1}},
-// {"RTI",0,{IMP(0x40),-1}},
-// {"RTS",0,{IMP(0x60),-1}},
-// {"PHA",2,{IMP(0x48),-1}},
-// {"PHP",2,{IMP(0x08),-1}},
-// {"PLA",1,{IMP(0x68),-1}},
-// {"PLP",1,{IMP(0x28),-1}},
-// {"JMP",0,{ABS(0x4C),IND(0x6C),-1}},
-// {"JSR",0,{ABS(0x20),-1}},
-// {"TAX",0,{IMP(0xAA),-1}},
-// {"TXA",0,{IMP(0x8A),-1}},
-// {"TAY",0,{IMP(0xA8),-1}},
-// {"TYA",0,{IMP(0x98),-1}},
-// {"TSX",0,{IMP(0xBA),-1}},
-// {"TXS",0,{IMP(0x9A),-1}},
-// {"DEX",0,{IMP(0xCA),-1}},
-// {"DEY",0,{IMP(0x88),-1}},
-// {"INX",0,{IMP(0xE8),-1}},
-// {"INY",0,{IMP(0xC8),-1}},
-// {"CLC",0,{IMP(0x18),-1}},
-// {"CLD",0,{IMP(0xD8),-1}},
-// {"CLI",0,{IMP(0x58),-1}},
-// {"CLV",0,{IMP(0xB8),-1}},
-// {"SEC",0,{IMP(0x38),-1}},
-// {"SED",0,{IMP(0xF8),-1}},
-// {"SEI",0,{IMP(0x78),-1}},
-// {"NOP",0,{IMP(0xEA),-1}},
-// {"ASL",1,{IMP(0x0a),ZP(0x06),ZPX(0x16),ABS(0x0E),ABX(0x1E),-1}},
-// {"DEC",3,{ZP(0xc6),ZPX(0xd6),ABS(0xcE),ABX(0xdE),-1}},
-// {"INC",3,{ZP(0xe6),ZPX(0xf6),ABS(0xeE),ABX(0xfE),-1}},
-// {"LSR",3,{IMP(0x4a),ZP(0x46),ZPX(0x56),ABS(0x4E),ABX(0x5E),-1}},
-// {"ROL",3,{IMP(0x2a),ZP(0x26),ZPX(0x36),ABS(0x2E),ABX(0x3E),-1}},
-// {"ROR",3,{IMP(0x6a),ZP(0x66),ZPX(0x76),ABS(0x6E),ABX(0x7E),-1}},
-// {"ADC",1,{IMD(0x69),ZP(0x65),ZPX(0x75),ABS(0x6D),ABX(0x7d),ABY(0x79),
-//	 INX(0x61),INY(0x71),-1}},
-// {"AND",1,{IMD(0x29),ZP(0x25),ZPX(0x35),ABS(0x2D),ABX(0x3d),ABY(0x39),
-//         INX(0x21),INY(0x31),-1}},
-// {"BIT",1,{ZP(0x24),ABS(0x2c),-1}},
-// {"CMP",1,{IMD(0xc9),ZP(0xc5),ZPX(0xd5),ABS(0xcD),ABX(0xdd),ABY(0xd9),
-//         INX(0xc1),INY(0xd1),-1}},
-// {"CPX",1,{IMD(0xe0),ZP(0xe4),ABS(0xec),-1}},
-// {"CPY",1,{IMD(0xc0),ZP(0xc4),ABS(0xcc),-1}},
-// {"EOR",1,{IMD(0x49),ZP(0x45),ZPX(0x55),ABS(0x4D),ABX(0x5d),ABY(0x59),
-//         INX(0x41),INY(0x51),-1}},
-// {"LDA",1,{IMD(0xa9),ZP(0xa5),ZPX(0xb5),ABS(0xaD),ABX(0xbd),ABY(0xb9),
-//         INX(0xa1),INY(0xb1),-1}},
-// {"LDX",1,{IMD(0xa2),ZP(0xa6),ZPY(0xB6),ABS(0xae),ABY(0xbe),-1}},
-// {"LDY",1,{IMD(0xa0),ZP(0xa4),ZPX(0xB4),ABS(0xac),ABX(0xbc),-1}},
-// {"ORA",1,{IMD(0x09),ZP(0x05),ZPX(0x15),ABS(0x0D),ABX(0x1d),ABY(0x19),
-//         INX(0x01),INY(0x11),-1}},
-// {"SBC",1,{IMD(0xEB),IMD(0xe9),ZP(0xe5),ZPX(0xf5),ABS(0xeD),ABX(0xfd),ABY(0xf9),
-//         INX(0xe1),INY(0xf1),-1}},
-// {"STA",2,{ZP(0x85),ZPX(0x95),ABS(0x8D),ABX(0x9d),ABY(0x99),
-//         INX(0x81),INY(0x91),-1}},
-// {"STX",2,{ZP(0x86),ZPY(0x96),ABS(0x8E),-1}},
-// {"STY",2,{ZP(0x84),ZPX(0x94),ABS(0x8C),-1}},
-// {"BCC",1,{REL(0x90),-1}},
-// {"BCS",1,{REL(0xb0),-1}},
-// {"BEQ",1,{REL(0xf0),-1}},
-// {"BNE",1,{REL(0xd0),-1}},
-// {"BMI",1,{REL(0x30),-1}},
-// {"BPL",1,{REL(0x10),-1}},
-// {"BVC",1,{REL(0x50),-1}},
-// {"BVS",1,{REL(0x70),-1}},
-//};
-//
-//uint16 FCEUI_Disassemble(void *XA, uint16 a, char *stringo)
-//{
-// X6502 *X=(X6502*)XA;
-// uint8 buf;
-// unsigned int arg;
-// int32 info;
-// int x;
-// int y;
-//
-// info=-1;
-// fceuindbg=1;
-//
-//  buf=ARead[a](a);
-//  a++;
-//
-//  for(x=0;x<NUMOPS;x++)
-//  {
-//   y=0;
-//   while(optable[x].modes[y]>=0)
-//   {
-//    if((optable[x].modes[y]&0xFF)==buf)
-//    {
-//     info=optable[x].modes[y];
-//     goto endy;
-//    }
-//    y++;
-//   }
-//  }
-//
-//  endy:
-//  sprintf(stringo,"%02X ",buf);
-//  if(info>=0)
-//  {
-//   int z=flengths[(info>>16)];
-//  
-//   if(z)
-//   {
-//    arg=ARead[a](a);
-//    sprintf(stringo+strlen(stringo),"%02X ",arg);
-//    a++;
-//    if(z==2) {arg|=ARead[a](a)<<8;sprintf(stringo+strlen(stringo),"%02X ",arg>>8);a++;}
-//    else
-//     strcat(stringo,"   ");
-//
-//    if((info>>16)==1)   /* Relative branch */
-//     arg=a+(char)arg;
-//    sprintf(stringo+strlen(stringo),"%s ",optable[x].name);
-//    sprintf(stringo+strlen(stringo),fstrings[info>>16],arg);
-///*      
-//        0  "#$%02X",       // immediate
-//  1  "$%04X",  // RELATIVE(jump)
-//  2  "$%02X",  // Z
-//        3  "$%02X,X",      // Z,x
-//        4  "$%02X,Y",      // Z,y
-//  5  "$%04X",  //ABS
-//        6 "$%04X,X",      // ABS,x
-//        7  "$%04X,Y",      // ABS,y
-//        8  "($%04X)",      // IND
-//        9  "($%02X,X)",    // INX
-//        10 "($%02X),Y",    // INY
-//        11 #define IMP(x)  ((11<<16)|x)
-//*/
-//    {
-//     unsigned int tmp;
-//     switch(info>>16)
-//     {
-//      case 2:tmp=arg;
-//             if(optable[x].type&1)
-//             {
-//              sprintf(stringo+strlen(stringo),"    @ $%04X",tmp);
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             }
-//             break;
-//      case 3:tmp=(arg+X->X)&0xff;
-//             sprintf(stringo+strlen(stringo),"    @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//      case 4:tmp=(arg+X->Y)&0xff;
-//             sprintf(stringo+strlen(stringo),"    @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//      case 5:tmp=arg;
-//             if(optable[x].type&1) 
-//             {
-//              sprintf(stringo+strlen(stringo),"  @ $%04X",tmp);
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             }
-//             break;
-//      case 6:tmp=(arg+X->X)&0xffff;
-//             sprintf(stringo+strlen(stringo),"  @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//      case 7:tmp=(arg+X->Y)&0xffff;
-//             sprintf(stringo+strlen(stringo),"  @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//      case 8:tmp=ARead[arg](arg)|(ARead[(arg+1)&0xffff]((arg+1)&0xffff)<<8);
-//             sprintf(stringo+strlen(stringo)," $%04X",tmp);
-//             break;
-//      case 9:tmp=(arg+X->X)&0xFF;
-//             tmp=ARead[tmp](tmp) | (ARead[(tmp+1)&0xFF]((tmp+1)&0xFF)<<8);
-//             sprintf(stringo+strlen(stringo),"  @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//      case 10:tmp=ARead[arg](arg) | (ARead[(arg+1)&0xFF]((arg+1)&0xFF)<<8);
-//             tmp=(tmp+X->Y)&0xFFFF;
-//             sprintf(stringo+strlen(stringo),"  @ $%04X",tmp);
-//             if(optable[x].type&1)
-//              sprintf(stringo+strlen(stringo)," = $%02X",ARead[tmp](tmp));
-//             break;
-//
-//     }
-//    }
-//
-//
-//   }
-//   else
-//   {
-//    strcat(stringo,"      ");
-//    strcat(stringo,optable[x].name);
-//   }
-//  }
-//  else
-//   sprintf(stringo+strlen(stringo),"      .db $%02X",buf);
-// fceuindbg=0;
-// return(a);
-//}
-//
-//void FCEUI_MemDump(uint16 a, int32 len, void (*callb)(uint16 a, uint8 v))
-//{
-// fceuindbg=1;
-// while(len)
-// {
-//  callb(a,ARead[a](a));
-//  a++;
-//  len--;
-// }
-// fceuindbg=0;
-//}
-//
-//uint8 FCEUI_MemSafePeek(uint16 A)
-//{
-// uint8 ret;
-//
-// fceuindbg=1;
-// ret=ARead[A](A);
-// fceuindbg=0;
-// return(ret);
-//}
-//
-//void FCEUI_MemPoke(uint16 a, uint8 v, int hl)
-//{
-// extern uint8 *Page[32];
-// if(hl)
-// {
-//  if(Page[a/2048])
-//   Page[a/2048][a]=v;
-// }
-// else
-//  BWrite[a](a,v);
-//}
-//
-//typedef struct __BPOINT {
-//	struct __BPOINT *next;
-//	void (*Handler)(X6502 *X, int type, unsigned int A);
-//	unsigned int A[2];
-//	int type;
-//} BPOINT;
-//
-//static BPOINT *BreakPoints=NULL;
-//static BPOINT *LastBP=NULL;
-//
-//static void (*CPUHook)(X6502 *)=NULL;
-//
-//static int FindBPoint(X6502 *X, int who, unsigned int A)
-//{
-// BPOINT *tmp;
-//
-// tmp=BreakPoints;
-// while(tmp)
-// {
-//  if(tmp->type&who)
-//  {
-//   if(tmp->type&BPOINT_PC)
-//    if(X->PC!=A) goto don;  /* Doesn't match, so go on. */
-//
-//   if((A>=tmp->A[0]) && (A<=tmp->A[1]))  /* Whee, match. */
-//   {
-//    tmp->Handler(X,tmp->type,A);
-//    return(1);
-//   }
-//  }
-//  don:
-//  tmp=tmp->next;
-// }
-// return(0);
-//}
-//
-//static uint8 ReadHandler(X6502 *X, unsigned int A)
-//{
-// extern X6502 XSave;
-//
-// if(X->preexec)
-//  FindBPoint(&XSave,BPOINT_READ,A);
-// return(ARead[A](A));
-//}
-//
-//static void WriteHandler(X6502 *X, unsigned int A, uint8 V)
-//{
-// extern X6502 XSave;
-//
-// if(X->preexec)
-//  FindBPoint(&XSave,BPOINT_WRITE,A);
-// else
-//  BWrite[A](A,V);
-//}
-//
-//int FCEUI_AddBreakPoint(int type, unsigned int A1, unsigned int A2, 
-//		void (*Handler)(X6502 *, int type, unsigned int A))
-//{
-// BPOINT *tmp;
-//
-// tmp=(BPOINT *)malloc(sizeof(BPOINT));
-//
-// tmp->A[0]=A1;
-// tmp->A[1]=A2;
-// tmp->Handler=Handler;
-// tmp->type=type;
-// tmp->next=0;
-//
-// if(BreakPoints==NULL)
-//  BreakPoints=tmp;
-// else
-//  LastBP->next=tmp;
-//
-// LastBP=tmp;
-//
-// X6502_Debug(CPUHook,ReadHandler,WriteHandler);
-// return(1);
-//}
-//
-//int FCEUI_SetBreakPoint(uint32 w, int type, unsigned int A1, unsigned int A2,
-//                void (*Handler)(X6502 *, int type, unsigned int A))
-//{
-// uint32 x=0;
-// BPOINT *tmp;
-//
-// tmp=BreakPoints;
-//
-// while(tmp)
-// {
-//  if(w==x)
-//  {
-//   tmp->type=type;
-//   tmp->A[0]=A1;
-//   tmp->A[1]=A2;
-//   tmp->Handler=Handler;
-//   return(1);
-//  }
-//  x++;
-//  tmp=tmp->next;
-// }
-// return(0);
-//}
-//
-//int FCEUI_GetBreakPoint(uint32 w, int *type, unsigned int *A1, unsigned int *A2,
-//                void (**Handler)(X6502 *, int type, unsigned int A))
-//{
-// uint32 x=0; 
-// BPOINT *tmp;
-// 
-// tmp=BreakPoints;
-//   
-// while(tmp)
-// {
-//  if(w==x)
-//  {
-//   *type=tmp->type;
-//   *A1=tmp->A[0];
-//   *A2=tmp->A[1];
-//   *Handler=tmp->Handler;
-//   return(1);
-//  }   
-//  x++;
-//  tmp=tmp->next;
-// }
-// return(0);
-//}
-//
-//int FCEUI_ListBreakPoints(int (*callb)(int type, unsigned int A1, unsigned int A2,
-//                void (*Handler)(X6502 *, int type, unsigned int A) ))
-//{
-// BPOINT *tmp;
-// tmp=BreakPoints;
-// while(tmp)
-// {
-//  callb(tmp->type,tmp->A[0],tmp->A[1],tmp->Handler);
-//  tmp=tmp->next;
-// }
-// return(1);
-//}
-//
-//int FCEUI_DeleteBreakPoint(uint32 w)
-//{
-// BPOINT *tmp,*prev=NULL;
-// uint32 x=0;
-//
-// tmp=BreakPoints;
-//
-// while(tmp)
-// {
-//  if(w==x)
-//  {
-//   if(prev)      /* Not the first breakpoint. */
-//   {
-//    if(tmp->next)    /* More breakpoints. */
-//     prev->next=tmp->next;
-//    else      /* This is the last breakpoint. */
-//    {
-//     prev->next=0;
-//     LastBP=prev;
-//    }
-//   }
-//   else        /* The first breakpoint. */
-//   {
-//    if(tmp->next)    /* More breakpoints. */
-//     BreakPoints=tmp->next;
-//    else
-//    {
-//     BreakPoints=LastBP=0;  /* No more breakpoints. */
-//     /* Update the CPU hooks. */
-//     X6502_Debug(CPUHook,BreakPoints?ReadHandler:0,BreakPoints?WriteHandler:0);
-//    }
-//   }
-//   free(tmp);
-//   return(1);
-//  }
-//  prev=tmp;
-//  tmp=tmp->next;
-//  x++;
-// }
-// return(0);
-//}
-//
-//void FCEUI_SetCPUCallback(void (*callb)(X6502 *X))
-//{
-// CPUHook=callb;
-// X6502_Debug(CPUHook,BreakPoints?ReadHandler:0,BreakPoints?WriteHandler:0);
-//}
-//#endif
+#include "types.h"
+#include "x6502.h"
+#include "fceu.h"
+#include "cart.h"
+#include "ines.h"
+#include "debug.h"
+#include "driver.h"
+#include "ppu.h"
+
+#include <stdlib.h>
+
+int GetPRGAddress(int A){
+	unsigned int result;
+	if((A < 0x8000) || (A > 0xFFFF))return -1;
+	result = &Page[A>>11][A]-PRGptr[0];
+	if((result > PRGsize[0]) || (result < 0))return -1;
+	else return result;
+}
+
+int GetNesFileAddress(int A){
+	unsigned int result;
+	if((A < 0x8000) || (A > 0xFFFF))return -1;
+	result = &Page[A>>11][A]-PRGptr[0];
+	if((result > PRGsize[0]) || (result < 0))return -1;
+	else return result+16; //16 bytes for the header remember
+}
+
+int GetRomAddress(int A){
+	int i;
+	uint8 *p = GetNesPRGPointer(A-=16);
+	for(i = 16;i < 32;i++){
+		if((&Page[i][i<<11] <= p) && (&Page[i][(i+1)<<11] > p))break;
+	}
+	if(i == 32)return -1; //not found
+
+	return (i<<11) + (p-&Page[i][i<<11]);
+}
+
+uint8 *GetNesPRGPointer(int A){
+	return PRGptr[0]+A;
+}
+
+uint8 *GetNesCHRPointer(int A){
+	return CHRptr[0]+A;
+}
+
+uint8 GetMem(uint16 A) {
+	if ((A >= 0x2000) && (A < 0x4000)) {
+		switch (A&7) {
+			case 0: return PPU[0];
+			case 1: return PPU[1];
+			case 2: return PPU[2]|(PPUGenLatch&0x1F);
+			case 3: return PPU[3];
+			case 4: return SPRAM[PPU[3]];
+			case 5: return XOffset;
+			case 6: return RefreshAddr&0xFF;
+			case 7: return VRAMBuffer;
+		}
+	}
+	else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF; //fix me
+	return ARead[A](A);
+}
+
+uint8 GetPPUMem(uint8 A) {
+	uint16 tmp=RefreshAddr&0x3FFF;
+
+	if (tmp<0x2000) return VPage[tmp>>10][tmp];
+	if (tmp>=0x3F00) return PALRAM[tmp&0x1F];
+	return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+}
+
+//---------------------
+
+volatile int codecount, datacount, undefinedcount;
+//HWND hCDLogger=0;
+unsigned char *cdloggerdata;
+char *cdlogfilename;
+//char loadedcdfile[MAX_PATH];
+static int indirectnext;
+
+int debug_loggingCD;
+//void FCEUI_SetLoggingCD(int val) { debug_loggingCD = val; }
+//int FCEUI_GetLoggingCD(int val) { return debug_loggingCD = val; }
+
+//called by the cpu to perform logging if CDLogging is enabled
+void LogCDVectors(int which){
+	int i = 0xFFFA+(which*2);
+	int j;
+	j = GetPRGAddress(i);
+	if(j == -1){
+		return;
+	}
+
+	if(cdloggerdata[j] == 0){
+	cdloggerdata[j] |= 0x0E; // we're in the last bank and recording it as data so 0x1110 or 0xE should be what we need
+	datacount++;
+	undefinedcount--;
+	}
+	j++;
+	
+	if(cdloggerdata[j] == 0){
+	cdloggerdata[j] |= 0x0E; // we're in the last bank and recording it as data so 0x1110 or 0xE should be what we need
+	datacount++;
+	undefinedcount--;
+	}
+
+	return;
+}
+
+void LogCDData(){
+	int i, j;
+	uint16 A=0; 
+	uint8 opcode[3] = {0};
+
+	j = GetPRGAddress(_PC);
+
+	opcode[0] = GetMem(_PC);
+	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
+	
+	if(j != -1){
+		for (i = 0; i < opsize[opcode[0]]; i++){
+			if(cdloggerdata[j+i] & 1)continue; //this has been logged so skip
+			cdloggerdata[j+i] |= 1;
+			cdloggerdata[j+i] |=((_PC+i)>>11)&12;
+			if(indirectnext)cdloggerdata[j+i] |= 0x10;
+			codecount++; 
+			if(!(cdloggerdata[j+i] & 0x42))undefinedcount--;
+		}
+	}
+	indirectnext = 0;
+	//log instruction jumped to in an indirect jump
+	if(opcode[0] == 0x6c){
+		indirectnext = 1;
+	}
+
+	switch (optype[opcode[0]]) {
+		case 0: break;
+		case 1:
+			A = (opcode[1]+_X) & 0xFF;
+			A = GetMem(A) | (GetMem(A+1))<<8;
+			break;
+		case 2: A = opcode[1]; break;
+		case 3: A = opcode[1] | opcode[2]<<8; break;
+		case 4: A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1))<<8)+_Y; break;
+		case 5: A = opcode[1]+_X; break;
+		case 6: A = (opcode[1] | opcode[2]<<8)+_Y; break;
+		case 7: A = (opcode[1] | opcode[2]<<8)+_X; break;
+		case 8: A = opcode[1]+_Y; break;
+	}
+
+	//if(opbrktype[opcode[0]] != WP_R)return; //we only want reads
+
+	if((j = GetPRGAddress(A)) == -1)return;
+	//if(j == 0)BreakHit();
+
+
+	if(cdloggerdata[j] & 2)return; 
+	cdloggerdata[j] |= 2;
+	cdloggerdata[j] |=((A/*+i*/)>>11)&12;
+	if((optype[opcode[0]] == 1) || (optype[opcode[0]] == 4))cdloggerdata[j] |= 0x20;
+	datacount++; 
+	if(!(cdloggerdata[j+i] & 1))undefinedcount--;
+	return;
+}
+
+//-----------debugger stuff
+
+int badopbreak;
+int iaPC;
+uint32 iapoffset; //mbg merge 7/18/06 changed from int
+int step,stepout,jsrcount;
+int u; //deleteme
+int skipdebug; //deleteme
+int numWPs; 
+
+void BreakHit() {
+	FCEUI_SetEmulationPaused(1); //mbg merge 7/19/06 changed to use EmulationPaused()
+	
+	//MBG TODO - was this commented out before the gnu refactoring?
+	//if((!logtofile) && (logging))PauseLoggingSequence();
+	
+	FCEUD_DebugBreakpoint();
+}
+/*
+	//very ineffecient, but this shouldn't get executed THAT much
+	if(!(cdloggerdata[GetPRGAddress(0xFFFA)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFA)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	if(!(cdloggerdata[GetPRGAddress(0xFFFB)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFB)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	if(!(cdloggerdata[GetPRGAddress(0xFFFC)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFC)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	if(!(cdloggerdata[GetPRGAddress(0xFFFD)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFD)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	if(!(cdloggerdata[GetPRGAddress(0xFFFE)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFE)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	if(!(cdloggerdata[GetPRGAddress(0xFFFF)] & 2)){
+		cdloggerdata[GetPRGAddress(0xFFFF)]|=2;
+		codecount++;
+		undefinedcount--;
+	}
+	return;
+}
+*/
+
+// ################################## Start of SP CODE ###########################
+
+// Returns the value of a given type or register
+
+int getValue(int type)
+{
+	switch (type)
+	{
+		case 'A': return _A;
+		case 'X': return _X;
+		case 'Y': return _Y;
+		case 'N': return _P & N_FLAG ? 1 : 0;
+		case 'V': return _P & V_FLAG ? 1 : 0;
+		case 'U': return _P & U_FLAG ? 1 : 0;
+		case 'B': return _P & B_FLAG ? 1 : 0;
+		case 'D': return _P & D_FLAG ? 1 : 0;
+		case 'I': return _P & I_FLAG ? 1 : 0;
+		case 'Z': return _P & Z_FLAG ? 1 : 0;
+		case 'C': return _P & C_FLAG ? 1 : 0;
+		case 'P': return _PC;
+	}
+
+	return 0;
+}
+
+// Evaluates a condition
+int evaluate(Condition* c)
+{
+	int f = 0;
+
+	int value1, value2;
+
+	if (c->lhs)
+	{
+		value1 = evaluate(c->lhs);
+	}
+	else
+	{
+		switch(c->type1)
+		{
+			case TYPE_ADDR:
+			case TYPE_NUM: value1 = c->value1; break;
+			default: value1 = getValue(c->value1);
+		}
+	}
+
+	if (c->type1 == TYPE_ADDR)
+	{
+		value1 = GetMem(value1);
+	}
+
+	f = value1;
+
+	if (c->op)
+	{
+		if (c->rhs)
+		{
+			value2 = evaluate(c->rhs);
+		}
+		else
+		{
+			switch(c->type2)
+			{
+				case TYPE_ADDR:
+				case TYPE_NUM: value2 = c->value2; break;
+				default: value2 = getValue(c->type2);
+			}
+		}
+
+		if (c->type2 == TYPE_ADDR)
+		{
+			value2 = GetMem(value2);
+		}
+
+		switch (c->op)
+		{
+			case OP_EQ: f = value1 == value2; break;
+			case OP_NE: f = value1 != value2; break;
+			case OP_GE: f = value1 >= value2; break;
+			case OP_LE: f = value1 <= value2; break;
+			case OP_G: f = value1 > value2; break;
+			case OP_L: f = value1 < value2; break;
+			case OP_MULT: f = value1 * value2; break;
+			case OP_DIV: f = value1 / value2; break;
+			case OP_PLUS: f = value1 + value2; break;
+			case OP_MINUS: f = value1 - value2; break;
+			case OP_OR: f = value1 || value2; break;
+			case OP_AND: f = value1 && value2; break;
+		}
+	}
+
+	return f;
+}
+
+int condition(watchpointinfo* wp)
+{
+	return wp->cond == 0 || evaluate(wp->cond);
+}
+
+// ################################## End of SP CODE ###########################
+
+
+//extern int step;
+//extern int stepout;
+//extern int jsrcount;
+void breakpoint() {
+	int i;
+	uint16 A=0;
+	uint8 brk_type,opcode[3] = {0};
+
+	opcode[0] = GetMem(_PC);
+	
+	if(badopbreak && (opsize[opcode[0]] == 0))BreakHit();
+
+	if (stepout) {
+		if (opcode[0] == 0x20) jsrcount++;
+		else if (opcode[0] == 0x60) {
+			if (jsrcount) jsrcount--;
+			else {
+				stepout = 0;
+				step = 1;
+				return;
+			}
+		}
+	}
+	if (step) {
+		step = 0;
+		BreakHit();
+		return;
+	}
+	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
+		watchpoint[64].address = 0;
+		watchpoint[64].flags = 0;
+		BreakHit();
+		return;
+	}
+
+
+	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
+	brk_type = opbrktype[opcode[0]] | WP_X;
+	switch (optype[opcode[0]]) {
+		case 0: /*A = _PC;*/ break;
+		case 1:
+			A = (opcode[1]+_X) & 0xFF;
+			A = GetMem(A) | (GetMem(A+1))<<8;
+			break;
+		case 2: A = opcode[1]; break;
+		case 3: A = opcode[1] | opcode[2]<<8; break;
+		case 4: A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1))<<8)+_Y; break;
+		case 5: A = opcode[1]+_X; break;
+		case 6: A = (opcode[1] | opcode[2]<<8)+_Y; break;
+		case 7: A = (opcode[1] | opcode[2]<<8)+_X; break;
+		case 8: A = opcode[1]+_Y; break;
+	}
+
+	for (i = 0; i < numWPs; i++) {
+// ################################## Start of SP CODE ###########################
+		if (condition(&watchpoint[i]))
+		{
+// ################################## End of SP CODE ###########################
+			if (watchpoint[i].flags & BT_P) { //PPU Mem breaks
+				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7)) {
+					if (watchpoint[i].endaddress) {
+						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr)) BreakHit();
+					}
+					else if (watchpoint[i].address == RefreshAddr) BreakHit();
+				}
+			}
+			else if (watchpoint[i].flags & BT_S) { //Sprite Mem breaks
+				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 4)) {
+					if (watchpoint[i].endaddress) {
+						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3])) BreakHit();
+					}
+					else if (watchpoint[i].address == PPU[3]) BreakHit();
+				}
+				else if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & WP_W) && (A == 0x4014)) BreakHit(); //Sprite DMA! :P
+			}
+			else { //CPU mem breaks
+				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type)) {
+					if (watchpoint[i].endaddress) {
+						if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit();
+					}
+					else if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address == A)) ||
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
+				}
+			}
+// ################################## Start of SP CODE ###########################
+		}
+// ################################## End of SP CODE ###########################
+	}
+}
+//bbit edited: this is the end of the inserted code
+
+
+void DebugCycle() {
+	if (numWPs | step | stepout | watchpoint[64].flags | badopbreak) 
+		breakpoint();
+	if(debug_loggingCD) LogCDData();
+	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
+ 	//if(logging || (hMemView && (EditingMode == 2))) LogInstruction();
+	//if(logging) LogInstruction();
+}

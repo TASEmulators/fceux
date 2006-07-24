@@ -20,7 +20,7 @@
  
 #include "common.h"
 #include "debuggersp.h"
-#include "..\..\debugger.h"
+#include "debugger.h"
 #include "..\..\conddebug.h"
 
 #include <stdio.h>

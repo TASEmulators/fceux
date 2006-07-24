@@ -24,7 +24,7 @@
 #define INESPRIV
 #include "..\..\cart.h"
 #include "..\..\ines.h"
-#include "..\..\debugger.h"
+#include "debugger.h"
 #include "..\..\palette.h"
 #include "..\..\ppu.h"
 

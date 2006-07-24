@@ -22,9 +22,10 @@
 #include "..\..\fceu.h"
 #include "..\..\cart.h" //mbg merge 7/18/06 moved beneath fceu.h
 #include "..\..\x6502.h"
-#include "..\..\debugger.h"
+#include "..\..\debug.h"
+#include "debugger.h"
 #include "..\..\tracer.h"
-#include "..\..\cdlogger.h"
+#include "cdlogger.h"
 
 #define INESPRIV
 #include "..\..\ines.h"
@@ -39,13 +40,12 @@ extern uint8 *trainerpoo;
 //extern uint8 *ROM;
 //extern uint8 *VROM;
 
-volatile int loggingcodedata;
+//volatile int loggingcodedata;
 //int cdlogger_open;
-volatile int codecount, datacount, undefinedcount;
-HWND hCDLogger=0;
-unsigned char *cdloggerdata;
-char *cdlogfilename;
-char loadedcdfile[MAX_PATH];
+
+HWND hCDLogger;
+char loadedcdfile[1024];
+
 
 BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
@@ -66,7 +66,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 MB_OK);
 									break;
 								}
-			loggingcodedata = 0;
+			FCEUI_SetLoggingCD(0);
 			free(cdloggerdata);
 			cdloggerdata=0;
 			hCDLogger = 0;
@@ -86,7 +86,7 @@ MB_OK);
 							LoadCDLogFile();
 							break;
 						case 105:
-							if(loggingcodedata){
+							if(FCEUI_GetLoggingCD()){
 								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
 									MessageBox(hCDLogger,
 "The Trace logger is currently using this for some of its features.\
@@ -94,12 +94,12 @@ MB_OK);
 MB_OK);
 									break;
 								}
-								loggingcodedata = 0;
+								FCEUI_SetLoggingCD(0);
 								EnableTracerMenuItems();
 								SetDlgItemText(hCDLogger, 105, "Start");
 							}
 							else{
-								loggingcodedata = 1;
+								FCEUI_SetLoggingCD(1);
 								EnableTracerMenuItems();
 								SetDlgItemText(hCDLogger, 105, "Pause");
 							}

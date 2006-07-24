@@ -3,10 +3,6 @@
 
 #include <stdio.h>
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 #include "types.h"
 #include "git.h"
 #include "debug.h"
@@ -315,8 +311,10 @@ int FCEUD_ShowStatusIcon(void);
 void FCEUD_ToggleStatusIcon(void);
 void FCEUD_HideMenuToggle(void);
 
-#ifdef  __cplusplus
-}
-#endif
+//new merge-era driver routines here
+//signals that the cpu core hit a breakpoint
+//this function should not return until the core is ready for the next cycle
+void FCEUD_DebugBreakpoint();
+
 
 #endif /* __DRIVER_H_ */

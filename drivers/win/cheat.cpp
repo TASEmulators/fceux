@@ -21,7 +21,7 @@
 #include "common.h"
 #include "cheat.h"
 #include "..\..\memview.h"
-#include "..\..\debugger.h"
+#include "debugger.h"
 #include "..\..\fceu.h"
 #include "..\..\cart.h"
 

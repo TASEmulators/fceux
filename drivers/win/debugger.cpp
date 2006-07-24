@@ -20,7 +20,7 @@
 
 #include "common.h"
 #include "..\..\xstring.h"
-#include "..\..\debugger.h"
+#include "debugger.h"
 #include "..\..\x6502.h"
 #include "..\..\fceu.h"
 #include "..\..\nsf.h"
@@ -46,7 +46,7 @@ extern int myNumWPs;
 
 //mbg merge 7/18/06 had to add these
 watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
-int childwnd,numWPs; 
+int childwnd;
 
 extern readfunc ARead[0x10000];
 int DbgPosX,DbgPosY;
@@ -57,72 +57,7 @@ HWND hDebug;
 static HFONT hFont,hNewFont;
 static SCROLLINFO si;
 
-int badopbreak;
-int iaPC;
-uint32 iapoffset; //mbg merge 7/18/06 changed from int
-int step,stepout,jsrcount;
-int u; //deleteme
-int skipdebug; //deleteme
-int GetNesFileAddress(int A){
-	unsigned int result;
-	if((A < 0x8000) || (A > 0xFFFF))return -1;
-	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > PRGsize[0]) || (result < 0))return -1;
-	else return result+16; //16 bytes for the header remember
-}
 
-int GetPRGAddress(int A){
-	unsigned int result;
-	if((A < 0x8000) || (A > 0xFFFF))return -1;
-	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > PRGsize[0]) || (result < 0))return -1;
-	else return result;
-}
-
-int GetRomAddress(int A){
-	int i;
-	uint8 *p = GetNesPRGPointer(A-=16);
-	for(i = 16;i < 32;i++){
-		if((&Page[i][i<<11] <= p) && (&Page[i][(i+1)<<11] > p))break;
-	}
-	if(i == 32)return -1; //not found
-
-	return (i<<11) + (p-&Page[i][i<<11]);
-
-}
-
-uint8 *GetNesPRGPointer(int A){
-	return PRGptr[0]+A;
-}
-
-uint8 *GetNesCHRPointer(int A){
-	return CHRptr[0]+A;
-}
-
-uint8 GetMem(uint16 A) {
-	if ((A >= 0x2000) && (A < 0x4000)) {
-		switch (A&7) {
-			case 0: return PPU[0];
-			case 1: return PPU[1];
-			case 2: return PPU[2]|(PPUGenLatch&0x1F);
-			case 3: return PPU[3];
-			case 4: return SPRAM[PPU[3]];
-			case 5: return XOffset;
-			case 6: return RefreshAddr&0xFF;
-			case 7: return VRAMBuffer;
-		}
-	}
-	else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF; //fix me
-	return ARead[A](A);
-}
-
-uint8 GetPPUMem(uint8 A) {
-	uint16 tmp=RefreshAddr&0x3FFF;
-
-	if (tmp<0x2000) return VPage[tmp>>10][tmp];
-	if (tmp>=0x3F00) return PALRAM[tmp&0x1F];
-	return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
-}
 
 
 BOOL CenterWindow(HWND hwndDlg) {
@@ -559,6 +494,17 @@ void UpdateRegs(HWND hwndDlg) {
 	X.X = GetEditHex(hwndDlg,305);
 	X.Y = GetEditHex(hwndDlg,306);
 	X.PC = GetEditHex(hwndDlg,307);
+}
+
+void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count); //HACK
+void FCEUD_DebugBreakpoint() {
+	DoDebug(1);
+	UpdateLogWindow();
+	if(hMemView)UpdateMemoryView(0);
+	//mbg merge 6/30/06 - this architecture has changed
+	FCEUD_Update(0,0,0);
+	//FCEUD_BlitScreen(XBuf+8); //this looks odd, I know. but the pause routine is in here!!
+	//if(logging)LogInstruction(); //logging might have been started while we were paused
 }
 
 void UpdateDebugger() {

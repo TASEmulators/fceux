@@ -19,11 +19,11 @@
  */
 
 #include "common.h"
-#include "..\..\debugger.h"
+#include "debugger.h"
 #include "..\..\x6502.h"
 #include "..\..\fceu.h"
 #include "..\..\cart.h" //mbg merge 7/19/06 moved after fceu.h
-#include "..\..\cdlogger.h"
+#include "cdlogger.h"
 #include "..\..\file.h"
 #include "..\..\tracer.h"
 #include "..\..\memview.h"
@@ -297,7 +297,7 @@ void LogInstruction(){
 	} else {
 		if((logging_options & LOG_NEW_INSTRUCTIONS) ||
 			(logging_options & LOG_NEW_DATA)){
-			if(loggingcodedata)unloggedlines++;
+			if(FCEUI_GetLoggingCD())unloggedlines++;
 			return;
 			}
 	}
@@ -506,7 +506,7 @@ void EnableTracerMenuItems(void){
 	}
 
 /*
-	if(loggingcodedata){
+	if(FCEUI_GetLoggingCD()){
 			EnableWindow(GetDlgItem(hTracer,114),TRUE);
 		if(logging_options & LOG_NEW_INSTRUCTIONS){
 			EnableWindow(GetDlgItem(hTracer,115),TRUE);
@@ -525,14 +525,14 @@ void EnableTracerMenuItems(void){
 
 //this returns 1 if the CD logger is activated when needed, or 0 if the user selected no, not to activate it
 int PromptForCDLogger(void){
-	if((logging_options & (LOG_NEW_INSTRUCTIONS|LOG_NEW_DATA)) && (!loggingcodedata)){
+	if((logging_options & (LOG_NEW_INSTRUCTIONS|LOG_NEW_DATA)) && (!FCEUI_GetLoggingCD())){
 		StopSound();
 		if(MessageBox(hTracer,"In order for some of the features you have selected to take effect,\
  the Code/Data Logger must also be running.\
  Would you like to Start the Code/Data Logger Now?","Start Code/Data Logger?",
 			MB_YESNO) == IDYES){
 				DoCDLogger();
-				loggingcodedata = 1;
+				FCEUI_SetLoggingCD(1);
 				//EnableTracerMenuItems();
 				SetDlgItemText(hCDLogger, 105, "Pause");
 				return 1;
