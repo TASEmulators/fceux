@@ -548,7 +548,7 @@ FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
     return(fopen(fn,mode));
 }
 
-static char s_linuxCompilerString[4] = "g++";
+static char *s_linuxCompilerString = "g++ " __VERSION__;
 char *FCEUD_GetCompilerString() {
     return (char *)s_linuxCompilerString;
 }
