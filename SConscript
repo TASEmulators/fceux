@@ -62,4 +62,4 @@ LINKFLAGS = sdl_libflags.read();
 LINKFLAGS = " -lz " + LINKFLAGS.rstrip(os.linesep);
 sdl_libflags.close();
 
-env.Program('fceu', file_list, CCFLAGS=CCFLAGS, LIBPATH=LINKFLAGS)
+env.Program('fceu', file_list, CCFLAGS=CCFLAGS, LIBS = ['SDL', 'pthread', 'z'], LIBPATH = '/usr/lib')
