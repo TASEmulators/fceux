@@ -33,7 +33,7 @@ int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
 int InputType[3]={0,0,0};
 static int cspec=0;
    
-int gametype=0;
+extern int gametype;
 
 /* Necessary for proper GUI functioning(configuring when a game isn't loaded). */
 void InputUserActiveFix(void)

@@ -8,6 +8,7 @@ include $(srcdir)/input/Makefile.am.inc
 include $(srcdir)/mappers/Makefile.am.inc
 # include mbshare/Makefile.am.inc
 include $(srcdir)/drivers/common/Makefile.am.inc
+include $(srcdir)/drivers/pc/Makefile.am.inc
 
 fceu_SOURCES	+=	$(sexyal_SOURCES)
 fceu_SOURCES    +=  $(fceud_SOURCES)

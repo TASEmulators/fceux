@@ -70,7 +70,7 @@ int eoptions=0;
 
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
-int gametype;
+int gametype = 0;
 
 FCEUGI *CurGame=NULL;
 
@@ -543,11 +543,8 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 
 /* Maybe ifndef WXWINDOWS would be better? ^_^ */
-#ifndef EXTGUI
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
- return(fopen(fn,mode));
+    return(fopen(fn,mode));
 }
 
-
-#endif

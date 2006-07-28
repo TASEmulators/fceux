@@ -21,13 +21,13 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 chrcmd[8], prg0, prg1, brk, mirr;
+static uint8 chrcmd[8], prg0, prg1, brck, mirr;
 static SFORMAT StateRegs[]=
 {
   {chrcmd, 8, "CHRCMD"},
   {&prg0, 1, "PRG0"},
   {&prg1, 1, "PRG1"},
-  {&brk, 1, "BRK"},
+  {&brck, 1, "BRK"},
   {&mirr, 1, "MIRR"},
   {0}
 };
@@ -54,9 +54,9 @@ static DECLFW(UNLSL1632CMDWrite)
 //  FCEU_printf("bs %04x %02x %3d\n",A,V,scanline);     
   if((A&0xA131)==0xA131)
   {
-    brk=V;
+    brck=V;
   }
-  if(brk&2)
+  if(brck&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
@@ -86,7 +86,7 @@ static DECLFW(UNLSL1632CMDWrite)
 
 static void StateRestore(int version)
 {
-  if(brk&2)
+  if(brck&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
