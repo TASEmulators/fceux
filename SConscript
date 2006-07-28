@@ -35,11 +35,10 @@ boards/SConscript
 input/SConscript
 fir/SConscript
 mappers/SConscript
-palettes/SConscript
 drivers/common/SConscript
 drivers/pc/SConscript
 """))
-
+#palettes/SConscript
 Import('file_list')
 
 # XXX path separator fixed right now
