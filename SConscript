@@ -285,7 +285,7 @@ palettes/SConscript
 drivers/common/SConscript
 drivers/pc/SConscript
 """))
+
 Import('file_list')
 env = Environment()
-#env.Program('fceu', boards_file_list + input_file_list + fir_file_list + mappers_file_list + palettes_file_list + common_file_list + pc_file_list + file_list )
-env.Program('fceu', file_list)
+env.Program('fceu', file_list, LIBS='SDL', LIBPATH='.')
