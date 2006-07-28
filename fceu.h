@@ -41,13 +41,10 @@ extern uint8 MMC5HackSPScroll;
 extern uint8 MMC5HackSPPage;
 
 #ifdef _USE_SHARED_MEMORY_
+extern  uint32 *BotInput;
+#endif
 extern  uint8  *RAM;            //shared memory modifications
 extern  uint8  *GameMemBlock;   //shared memory modifications
-extern  uint32 *BotInput;
-#else
-extern uint8 RAM[0x800];
-extern uint8 GameMemBlock[131072];
-#endif
 
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];

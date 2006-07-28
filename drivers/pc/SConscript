@@ -10,20 +10,21 @@ sdl.cpp
 sdl.h
 sdl-icon.h
 sdl-joystick.cpp
-sdl-netplay.cpp
-sdl-netplay.h
-sdl-opengl.cpp
-sdl-opengl.h
 sdl-sound.cpp
 sdl-throttle.cpp
 sdl-video.cpp
 sdl-video.h
-throttle.cpp
 throttle.h
 unix-netplay.cpp
 unix-netplay.h
 usage.h
 """)
+
+# XXX need to deal with opengl configuration and testing at some point
+#sdl-opengl.cpp
+#sdl-opengl.h
+
+
 for x in range(len(my_list)):
   my_list[x] = 'drivers/pc/' + my_list[x]
 file_list = my_list + file_list

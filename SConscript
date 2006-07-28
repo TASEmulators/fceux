@@ -26,7 +26,7 @@ vsuni.cpp
 wave.cpp
 x6502.cpp
 movie.cpp
-unzip.cpp""")
+unzip.c""")
 
 boards_file_list = Split("""
 01-222.cpp
@@ -82,9 +82,10 @@ super24.cpp
 supervision.cpp
 t-262.cpp
 tengen.cpp
-mapinc.h
-mmc3.h
 """)
+#mapinc.h
+#mmc3.h
+
 
 for x in range(len(boards_file_list)):
   boards_file_list[x] = 'boards/' + boards_file_list[x]
@@ -107,7 +108,6 @@ arkanoid.cpp
 bworld.cpp
 cursor.cpp
 fkb.cpp
-fkb.h
 ftrainer.cpp
 hypershot.cpp
 mahjong.cpp
@@ -116,12 +116,15 @@ oekakids.cpp
 powerpad.cpp
 quiz.cpp
 shadow.cpp
-share.h
 suborkb.cpp
-suborkb.h
 toprider.cpp
 zapper.cpp
 """)
+# fkb.h
+# share.h
+# suborkb.h
+
+
 for x in range(len(input_file_list)):
   input_file_list[x] = 'input/' + input_file_list[x]
   
@@ -200,76 +203,80 @@ __226.cpp
 97.cpp
 99.cpp
 emu2413.c
-emu2413.h
-emutypes.h
-mapinc.h
 mmc2and4.cpp
 simple.cpp
-vrc7tone.h
 """)
+# emu2413.h
+# emutypes.h
+# mapinc.h
+# vrc7tone.h
+
 for x in range(len(mappers_file_list)):
   mappers_file_list[x] = 'mappers/' + mappers_file_list[x]
   
 palettes_file_list = Split("""
 conv.c
-palettes.h
-rp2c04001.h 
-rp2c04002.h 
-rp2c04003.h
-rp2c05004.h
 """)
+# palettes.h
+# rp2c04001.h 
+# rp2c04002.h 
+# rp2c04003.h
+# rp2c05004.h
+
 for x in range(len(palettes_file_list)):
   palettes_file_list[x] = 'palettes/' + palettes_file_list[x]
   
 common_file_list = Split("""
 args.cpp
-args.h
 cheat.cpp
-cheat.h
 config.cpp
-config.h
 hq2x.cpp
-hq2x.h
 hq3x.cpp
-hq3x.h
 scale2x.cpp
-scale2x.h
 scale3x.cpp
-scale3x.h
 scalebit.cpp
-scalebit.h
 vidblit.cpp
-vidblit.h
 """)
+# args.h
+# cheat.h
+# vidblit.h
+# scalebit.h
+# scale3x.h
+# scale2x.h
+# config.h
+# hq2x.h
+# hq3x.h
 
 for x in range(len(common_file_list)):
   common_file_list[x] = 'drivers/common/' + common_file_list[x]
   
 pc_file_list = Split("""
-dface.h
 input.cpp
-input.h
-keyscan.h
 main.cpp
-main.h
 sdl.cpp
-sdl.h
-sdl-icon.h
 sdl-joystick.cpp
 sdl-netplay.cpp
-sdl-netplay.h
 sdl-opengl.cpp
-sdl-opengl.h
 sdl-sound.cpp
 sdl-throttle.cpp
 sdl-video.cpp
-sdl-video.h
 throttle.cpp
-throttle.h
 unix-netplay.cpp
-unix-netplay.h
-usage.h
 """)
+
+# main.h
+# dface.h
+# input.h
+# keyscan.h
+# sdl.h
+# sdl-icon.h
+# sdl-netplay.h
+# sdl-opengl.h
+# sdl-video.h
+# throttle.h
+# unix-netplay.h
+# usage.h
+
 
 for x in range(len(pc_file_list)):
   pc_file_list[x] = 'drivers/pc/' + pc_file_list[x]
@@ -287,5 +294,26 @@ drivers/pc/SConscript
 """))
 
 Import('file_list')
-env = Environment()
-env.Program('fceu', file_list, LIBS='SDL', LIBPATH='.')
+
+# XXX path separator fixed right now
+opts = Options()
+opts.Add('PSS_STYLE', 'Path separator style', 1)
+opts.Add('LSB_FIRST', 'Least significant byte first?', 1)
+
+env = Environment(options = opts,
+                  CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
+                              'LSB_FIRST' : '${LSB_FIRST}'})
+
+# use sdl-config to get the cflags and libpath
+import os;
+sdl_cflags = os.popen("sdl-config --cflags");
+CCFLAGS = sdl_cflags.read();
+CCFLAGS = CCFLAGS.rstrip(os.linesep);
+sdl_cflags.close();
+
+sdl_libflags = os.popen("sdl-config --libs");
+LINKFLAGS = sdl_libflags.read();
+LINKFLAGS = LINKFLAGS.rstrip(os.linesep);
+sdl_libflags.close();
+
+env.Program('fceu', file_list, CCFLAGS=CCFLAGS, LIBPATH=LINKFLAGS)

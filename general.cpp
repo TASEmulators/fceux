@@ -67,20 +67,21 @@ if(which < FCEUIOD__COUNT)
  }
 }
 
-#ifndef HAVE_ASPRINTF
-static int asprintf(char **strp, const char *fmt, ...)
-{
- va_list ap;
- int ret;
+// XXX commented out for now... Linux has asprintf()
+// #ifndef HAVE_ASPRINTF
+// static int asprintf(char **strp, const char *fmt, ...)
+// {
+//  va_list ap;
+//  int ret;
 
- va_start(ap,fmt);
- if(!(*strp=(char*)malloc(2048))) //mbg merge 7/17/06 cast to char*
-  return(0);
- ret=vsnprintf(*strp,2048,fmt,ap);
- va_end(ap);
- return(ret);
-}
-#endif
+//  va_start(ap,fmt);
+//  if(!(*strp=(char*)malloc(2048))) //mbg merge 7/17/06 cast to char*
+//   return(0);
+//  ret=vsnprintf(*strp,2048,fmt,ap);
+//  va_end(ap);
+//  return(ret);
+// }
+// #endif
 
 char* FCEU_GetPath(int type)
 {

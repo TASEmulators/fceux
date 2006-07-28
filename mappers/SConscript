@@ -82,6 +82,6 @@ simple.cpp
 vrc7tone.h
 """)
 for x in range(len(my_list)):
-  my_list[x] = 'mappers' + my_list[x]
+  my_list[x] = 'mappers/' + my_list[x]
 file_list = my_list + file_list
 Export('file_list')

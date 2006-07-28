@@ -24,7 +24,6 @@ void FCEUD_GetPalette(uint8 i,uint8 *r, uint8 *g, uint8 *b);
 void FCEUD_PrintError(char *s);
 void FCEUD_Message(char *s);
 
-#ifdef NETWORK
 /* Network interface */
 
 /* Call only when a game is loaded. */
@@ -52,7 +51,6 @@ void FCEUI_NetplayText(uint8 *text);
    side.
 */
 void FCEUD_NetworkClose(void);
-#endif
 
 int FCEUI_BeginWaveRecord(char *fn);
 int FCEUI_EndWaveRecord(void);
