@@ -52,14 +52,25 @@ env = Environment(options = opts,
 
 # use sdl-config to get the cflags and libpath
 import os;
-sdl_cflags = os.popen("sdl-config --cflags");
-CCFLAGS = sdl_cflags.read();
-CCFLAGS = CCFLAGS.rstrip(os.linesep);
-sdl_cflags.close();
+sdl_cflags_pipe = os.popen("sdl-config --cflags");
+sdl_cflags = sdl_cflags_pipe.read();
+sdl_cflags = sdl_cflags.rstrip(os.linesep);
+sdl_cflags_pipe.close();
 
-sdl_libflags = os.popen("sdl-config --libs");
-LINKFLAGS = sdl_libflags.read();
-LINKFLAGS = " -lz " + LINKFLAGS.rstrip(os.linesep);
-sdl_libflags.close();
+sdl_libpath = [];
+sdl_libs = [];
 
-env.Program('fceu', file_list, CCFLAGS=CCFLAGS, LIBS = ['SDL', 'pthread', 'z'], LIBPATH = '/usr/lib')
+sdl_libflags_pipe = os.popen("sdl-config --libs");
+sdl_libflags = sdl_libflags_pipe.read();
+for flag in sdl_libflags.split(' '):
+    if flag.find("-L") == 0:
+        sdl_libpath.append(flag.strip("-L"));
+    else:
+        sdl_libs.append(flag.strip("-l"));
+sdl_libflags_pipe.close();
+
+# add zlib
+libs = sdl_libs;
+libs.append('z');
+
+env.Program('fceu', file_list, CCFLAGS=sdl_cflags, LIBS=libs, LIBPATH=sdl_libpath)
