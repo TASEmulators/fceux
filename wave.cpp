@@ -32,6 +32,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
  dest=temp;
  x=Count;
 
+ //mbg 7/28/06 - we appear to be guaranteeing little endian
  while(x--)
  {
   int16 tmp=*Buffer;

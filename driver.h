@@ -321,10 +321,10 @@ void FCEUD_DebugBreakpoint();
 //(we should move the code in the win driver that does this to the shared area)
 void FCEUD_TraceInstruction();
 
-//the driver might should update its NTView
+//the driver might should update its NTView (only used if debugging support is compiled in)
 void FCEUD_UpdateNTView(int scanline, int drawall);
 
-//the driver might should update its PPUView
+//the driver might should update its PPUView (only used if debugging support is compiled in)
 void FCEUD_UpdatePPUView(int scanline, int drawall);
 
 #endif /* __DRIVER_H_ */

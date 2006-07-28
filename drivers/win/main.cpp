@@ -35,6 +35,7 @@
 
 #include "../../types.h"
 #include "../../fceu.h"
+#include "../../state.h"
 #include "ppuview.h"
 #include "debugger.h"
 #include "input.h"
@@ -346,6 +347,74 @@ void _updateMemWatch() {
 	//but soon we will do more!
 }
 
+#ifdef _USE_SHARED_MEMORY_
+HANDLE mapGameMemBlock;
+HANDLE mapRAM;
+HANDLE mapBotInput;
+uint32 *BotInput;
+void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM) {
+
+	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
+	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		//mbg 7/38/06 - is this the proper error handling?
+		//do we need to indicate to user somehow that this failed in this emu instance?
+		CloseHandle(mapGameMemBlock);
+		mapGameMemBlock = NULL;
+		*GameMemBlock = (uint8 *) malloc(131072);
+		*RAM = (uint8 *) malloc(2048);
+	}
+	else
+	{
+		*GameMemBlock    = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0);
+
+		// set up shared memory mappings
+		mapRAM          = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
+		*RAM             = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
+	}
+
+	// Give RAM pointer to state structure
+	//mbg 7/28/06 - wtf?
+	extern SFORMAT SFCPU[];
+	SFCPU[6].v = *RAM;
+
+	//Bot input
+	mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, 4096, "fceu.BotInput");
+	BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
+	BotInput[0] = 0;
+}
+
+void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM) {
+	//clean up shared memory 
+	if(mapRAM)
+	{
+		UnmapViewOfFile(mapRAM);
+		CloseHandle(mapRAM);
+		RAM = NULL;
+	}
+	else
+	{
+		free(RAM);
+		RAM = NULL;
+	}
+	if(mapGameMemBlock)
+	{
+		UnmapViewOfFile(mapGameMemBlock);
+		CloseHandle(mapGameMemBlock);
+		GameMemBlock = NULL;
+	}
+	else
+	{
+		free(GameMemBlock);
+		GameMemBlock = NULL;
+	}
+
+	UnmapViewOfFile(mapBotInput);
+	CloseHandle(mapBotInput);
+	BotInput = NULL;
+}
+#endif
+
 int main(int argc,char *argv[])
 {
 	char *t;
@@ -359,6 +428,7 @@ int main(int argc,char *argv[])
 
 	if(!FCEUI_Initialize())
 		goto doexito;
+
 	ApplyDefaultCommandMapping();
 
 	srand(GetTickCount());        // rand() is used for some GUI sillyness.
@@ -423,6 +493,12 @@ doloopy:
 	        uint8 *gfx=0;
 			int32 *sound=0;
 			int32 ssize=0;
+
+			#ifdef _USE_SHARED_MEMORY_
+			UpdateBasicBot();
+			#endif
+			FCEU_UpdateBot();
+
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0);
 			xbsave = gfx;
 			FCEUD_Update(gfx, sound, ssize);

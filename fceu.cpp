@@ -22,11 +22,6 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<stdarg.h>
-
-#ifdef _USE_SHARED_MEMORY_
-#include <windows.h>
-#endif
-
 #include	"types.h"
 #include	"x6502.h"
 #include	"fceu.h"
@@ -35,25 +30,23 @@
 #include	"netplay.h"
 #include	"general.h"
 #include	"endian.h"
-#include        "memory.h"
+#include    "memory.h"
 
 #include	"cart.h"
 #include	"nsf.h"
 #include	"fds.h"
 #include	"ines.h"
 #include	"unif.h"
-#include        "cheat.h"
+#include    "cheat.h"
 #include	"palette.h"
 #include	"state.h"
 #include	"movie.h"
-#include        "video.h"
+#include     "video.h"
 #include	"input.h"
 #include	"file.h"
 #include	"crc32.h"
 #include	"vsuni.h"
-#ifdef _USE_SHARED_MEMORY_
-#include    "drivers/win/basicbot.h"
-#endif
+
 
 uint64 timestampbase;
 
@@ -177,20 +170,34 @@ void FASTAPASS(3) SetWriteHandler(int32 start, int32 end, writefunc func)
     BWrite[x]=func;
 }
 
-#ifdef _USE_SHARED_MEMORY_
-HANDLE mapGameMemBlock;
 uint8 *GameMemBlock;
-HANDLE mapRAM;
 uint8 *RAM;
-HANDLE mapBotInput;
-uint32 *BotInput;
-#else
-uint8 GameMemBlock[131072];
-uint8 RAM[0x800];
-#endif //_USE_SHARED_MEMORY_
+
+//---------
+//windows might need to allocate these differently, so we have some special code
+
+static void AllocBuffers() {
+	#ifdef _USE_SHARED_MEMORY_
+	void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM);
+	win_AllocBuffers(&GameMemBlock, &RAM);
+	#else 
+	GameMemBlock = (uint8*)FCEU_gmalloc(131072);
+	RAM = (uint8*)FCEU_gmalloc(0x800);
+	#endif
+}
+
+static void FreeBuffers() {
+	#ifdef _USE_SHARED_MEMORY_
+	void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM);
+	win_FreeBuffers(GameMemBlock, RAM);
+	#else 
+	FCEU_free(GameMemBlock);
+	FCEU_free(RAM);
+	#endif
+}
+//------
 
 uint8 PAL=0;
-
 
 static DECLFW(BRAML)
 {  
@@ -342,38 +349,11 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 
 int FCEUI_Initialize(void)
 {
-#ifdef _USE_SHARED_MEMORY_
-	// set up shared memory mappings
-	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
-	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		CloseHandle(mapGameMemBlock);
-		mapGameMemBlock = NULL;
-		GameMemBlock = (uint8 *) malloc(131072);
-		RAM = (uint8 *) malloc(2048);
-	}
-	else
-	{
-		GameMemBlock    = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0);
-
-		// set up shared memory mappings
-		mapRAM          = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
-		RAM             = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
-	}
-
-	// Give RAM pointer to state structure
-	extern SFORMAT SFCPU[];
-	SFCPU[6].v = RAM;
-
-	//Bot input
-	mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, 4096, "fceu.BotInput");
-	BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
-	BotInput[0] = 0;
-
-#endif //_USE_SHARED_MEMORY_
-
 	if(!FCEU_InitVirtualVideo())
 		return 0;
+
+	AllocBuffers();
+
 	memset(&FSettings,0,sizeof(FSettings));
 	FSettings.UsrFirstSLine[0]=8;
 	FSettings.UsrFirstSLine[1]=0;
@@ -389,36 +369,7 @@ void FCEUI_Kill(void)
 {
 	FCEU_KillVirtualVideo();
 	FCEU_KillGenie();
-
-#ifdef _USE_SHARED_MEMORY_
-	//clean up shared memory 
-	if(mapRAM)
-	{
-		UnmapViewOfFile(mapRAM);
-		CloseHandle(mapRAM);
-		RAM = NULL;
-	}
-	else
-	{
-		free(RAM);
-		RAM = NULL;
-	}
-	if(mapGameMemBlock)
-	{
-		UnmapViewOfFile(mapGameMemBlock);
-		CloseHandle(mapGameMemBlock);
-		GameMemBlock = NULL;
-	}
-	else
-	{
-		free(GameMemBlock);
-		GameMemBlock = NULL;
-	}
-
-	UnmapViewOfFile(mapBotInput);
-	CloseHandle(mapBotInput);
-	BotInput = NULL;
-#endif
+	FreeBuffers();
 }
 
 int rapidAlternator = 0;
@@ -479,12 +430,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 {
  int r,ssize;
 
-#ifdef _USE_SHARED_MEMORY_
- UpdateBasicBot();
-#endif
-
- FCEU_UpdateBot();
-
  if(EmulationPaused&2)
   EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
  else if(EmulationPaused&1 || FCEU_BotMode())
@@ -525,11 +470,12 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
  if(EmulationPaused&2)
  {
   EmulationPaused = 1;          // restore paused flag
-#ifdef WIN32
-  #define SO_MUTEFA     16
-  extern int soundoptions;
-  if(soundoptions&SO_MUTEFA)
-#endif
+  //mbg merge 7/28/06 don't like the looks of this...
+//#ifdef WIN32
+//  #define SO_MUTEFA     16
+//  extern int soundoptions;
+//  if(soundoptions&SO_MUTEFA)
+//#endif
 	*SoundBufSize=0;              // keep sound muted
  }
 }

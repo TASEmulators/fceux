@@ -37,6 +37,7 @@ DSBUFFERDESC DSBufferDesc;
 WAVEFORMATEX wfa;
 WAVEFORMATEX wf;
 
+//bittag=1 -> 8bit output
 int bittage;
 static int mute=0;				/* TODO:  add to config? add to GUI. */
 
