@@ -6,7 +6,6 @@ fceu_SOURCES 	= 	cart.cpp cheat.cpp crc32.cpp config.cpp debug.cpp endian.cpp fc
 include $(srcdir)/boards/Makefile.am.inc
 include $(srcdir)/input/Makefile.am.inc
 include $(srcdir)/mappers/Makefile.am.inc
-# include mbshare/Makefile.am.inc
 include $(srcdir)/drivers/common/Makefile.am.inc
 include $(srcdir)/drivers/pc/Makefile.am.inc
 

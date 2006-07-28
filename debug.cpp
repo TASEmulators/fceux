@@ -165,6 +165,7 @@ void LogCDData(){
 
 //-----------debugger stuff
 
+watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
 int badopbreak;
 int iaPC;
 uint32 iapoffset; //mbg merge 7/18/06 changed from int

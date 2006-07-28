@@ -45,8 +45,6 @@ extern int myNumWPs;
 
 // ################################## End of SP CODE ###########################
 
-//mbg merge 7/18/06 had to add these
-watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
 int childwnd;
 
 extern readfunc ARead[0x10000];
