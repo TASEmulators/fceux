@@ -1,23 +1,13 @@
 Import('file_list')
 my_list =  Split("""
-dface.h
 input.cpp
-input.h
-keyscan.h
 main.cpp
-main.h
 sdl.cpp
-sdl.h
-sdl-icon.h
 sdl-joystick.cpp
 sdl-sound.cpp
 sdl-throttle.cpp
 sdl-video.cpp
-sdl-video.h
-throttle.h
 unix-netplay.cpp
-unix-netplay.h
-usage.h
 """)
 
 # XXX need to deal with opengl configuration and testing at some point

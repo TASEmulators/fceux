@@ -74,12 +74,8 @@ __226.cpp
 97.cpp
 99.cpp
 emu2413.c
-emu2413.h
-emutypes.h
-mapinc.h
 mmc2and4.cpp
 simple.cpp
-vrc7tone.h
 """)
 for x in range(len(my_list)):
   my_list[x] = 'mappers/' + my_list[x]

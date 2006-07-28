@@ -1,11 +1,6 @@
 Import('file_list')
 my_list =  Split("""
 conv.c
-palettes.h
-rp2c04001.h 
-rp2c04002.h 
-rp2c04003.h
-rp2c05004.h
 """)
 for x in range(len(my_list)):
   my_list[x] = 'palettes/' + my_list[x]

@@ -1,23 +1,14 @@
 Import('file_list')
 my_list = Split("""
 args.cpp
-args.h
 cheat.cpp
-cheat.h
 config.cpp
-config.h
 hq2x.cpp
-hq2x.h
 hq3x.cpp
-hq3x.h
 scale2x.cpp
-scale2x.h
 scale3x.cpp
-scale3x.h
 scalebit.cpp
-scalebit.h
 vidblit.cpp
-vidblit.h
 """)
 for x in range(len(my_list)):
   my_list[x] = 'drivers/common/' + my_list[x]

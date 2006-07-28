@@ -4,7 +4,6 @@ arkanoid.cpp
 bworld.cpp
 cursor.cpp
 fkb.cpp
-fkb.h
 ftrainer.cpp
 hypershot.cpp
 mahjong.cpp
@@ -13,9 +12,7 @@ oekakids.cpp
 powerpad.cpp
 quiz.cpp
 shadow.cpp
-share.h
 suborkb.cpp
-suborkb.h
 toprider.cpp
 zapper.cpp
 """)

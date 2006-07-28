@@ -53,8 +53,6 @@ super24.cpp
 supervision.cpp
 t-262.cpp
 tengen.cpp
-mapinc.h
-mmc3.h
 """)
 for x in range(len(my_list)):
   my_list[x] = 'boards/' + my_list[x]

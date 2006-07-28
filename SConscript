@@ -60,7 +60,7 @@ sdl_cflags.close();
 
 sdl_libflags = os.popen("sdl-config --libs");
 LINKFLAGS = sdl_libflags.read();
-LINKFLAGS = LINKFLAGS.rstrip(os.linesep);
+LINKFLAGS = " -lz " + LINKFLAGS.rstrip(os.linesep);
 sdl_libflags.close();
 
 env.Program('fceu', file_list, CCFLAGS=CCFLAGS, LIBPATH=LINKFLAGS)

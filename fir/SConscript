@@ -1,11 +1,5 @@
 Import('file_list')
 my_list = Split("""
-c44100ntsc.h
-c44100pal.h
-c48000ntsc.h
-c48000pal.h
-c96000ntsc.h 
-c96000pal.h
 """)
 for x in range(len(my_list)):
   my_list[x] = 'fir/' + my_list[x]
