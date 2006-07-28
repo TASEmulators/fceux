@@ -156,7 +156,7 @@ static void CreateDirs(void)
  int x;
 
  #ifdef WIN32
- mkdir(DrBaseDirectory);
+ mkdir((char *)DrBaseDirectory);
  for(x=0;x<6;x++)
  {
   sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);

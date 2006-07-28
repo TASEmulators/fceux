@@ -232,10 +232,10 @@ uint8 *GetBaseDirectory(void)
   #ifdef WIN32
   char *sa;
 
-  ret=malloc(MAX_PATH+1);
-  GetModuleFileName(NULL,ret,MAX_PATH+1);
+  ret=(uint8*)malloc(MAX_PATH+1);
+  GetModuleFileName(NULL,(char*)ret,MAX_PATH+1);
 
-  sa=strrchr(ret,'\\');
+  sa=strrchr((char*)ret,'\\');
   if(sa)
    *sa = 0; 
   #else

@@ -19,23 +19,32 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+//todo - ensure that #ifdef WIN32 makes sense
+//consider changing this to use sdl net stuff?
+
 #include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
+
 #include <stdlib.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <netdb.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include "main.h"
 #include "dface.h"
 #include "unix-netplay.h"
+
+#ifdef WIN32
+#include <winsock.h>
+#else
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#endif
 
 #include "../../md5.h"
 
@@ -95,8 +104,10 @@ int FCEUD_NetworkConnect(void)
  int tcpopt = 1;  
   #ifdef BEOS
   if(setsockopt(TSocket, SOL_SOCKET, TCP_NODELAY, &tcpopt, sizeof(int)))
-  #else
- if(setsockopt(TSocket, SOL_TCP, TCP_NODELAY, &tcpopt, sizeof(int)))
+  #elif WIN32
+  if(setsockopt(TSocket, SOL_TCP, TCP_NODELAY, (char*)&tcpopt, sizeof(int)))
+  #else 
+  if(setsockopt(TSocket, SOL_TCP, TCP_NODELAY, &tcpopt, sizeof(int)))
   #endif
   puts("Nodelay fail");
  }
@@ -175,10 +186,18 @@ int FCEUD_NetworkConnect(void)
    if(netplaynick)
     memcpy(sendbuf + 4 + 16 + 16 + 64 + 1,netplaynick,strlen(netplaynick));
 
+  #ifdef WIN32
+  send(Socket, (char*)sendbuf, sblen, 0);
+  #else
   send(Socket, sendbuf, sblen, 0);
+  #endif
   free(sendbuf);
 
+  #ifdef WIN32
+  recv(Socket, (char*)buf, 1, 0);
+  #else
   recv(Socket, buf, 1, MSG_WAITALL);
+  #endif
   netdivisor = buf[0];
  }
 
@@ -193,7 +212,9 @@ int FCEUD_NetworkConnect(void)
 int FCEUD_SendData(void *data, uint32 len)
 {
  int check;
+#ifndef WIN32
  if(!ioctl(fileno(stdin),FIONREAD,&check))
+#endif
  if(check)
  {
   char buf[1024];
@@ -203,7 +224,11 @@ int FCEUD_SendData(void *data, uint32 len)
    *f=0;
   FCEUI_NetplayText((uint8 *)buf);
  }
+ #ifdef WIN32
+ send(Socket, (char*)data, len ,0);
+ #else
  send(Socket, data, len ,0);
+ #endif
  return(1);
 }
 
@@ -230,7 +255,11 @@ int FCEUD_RecvData(void *data, uint32 len)
 
   if(FD_ISSET(Socket,&funfun))
   {
+   #ifdef WIN32
+   if(recv(Socket,(char*)data,len,0) == len)
+   #else 
    if(recv(Socket,data,len,MSG_WAITALL) == len)
+   #endif
    {
     //unsigned long beefie;
 
