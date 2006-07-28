@@ -1,0 +1,25 @@
+Import('file_list')
+my_list =  Split("""
+arkanoid.cpp
+bworld.cpp
+cursor.cpp
+fkb.cpp
+fkb.h
+ftrainer.cpp
+hypershot.cpp
+mahjong.cpp
+mouse.cpp
+oekakids.cpp
+powerpad.cpp
+quiz.cpp
+shadow.cpp
+share.h
+suborkb.cpp
+suborkb.h
+toprider.cpp
+zapper.cpp
+""")
+for x in range(len(my_list)):
+  my_list[x] = 'input' + my_list[x]
+file_list = my_list + file_list
+Export('file_list')
