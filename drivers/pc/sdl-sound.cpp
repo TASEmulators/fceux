@@ -280,7 +280,7 @@ int InitSound(FCEUGI *gi)
 
  if(BufferSize < spec.samples) BufferSize = spec.samples;
 
- Buffer = malloc(sizeof(int) * BufferSize);
+ Buffer = (int *)malloc(sizeof(int) * BufferSize);
  BufferRead = BufferWrite = BufferIn = 0;
 
  //printf("SDL Size: %d, Internal size: %d\n",spec.samples,BufferSize);
@@ -332,7 +332,7 @@ int KillSound(void)
  SDL_QuitSubSystem(SDL_INIT_AUDIO);
  if(Buffer)
  {
-  free(Buffer);
+  free((void *)Buffer);
   Buffer = 0;
  }
  return(0);

@@ -247,7 +247,7 @@ static void KeyboardCommands(void)
      {
       if(InputType[2] == SIFC_BWORLD)
       {
-       strcpy(&BWorldData[1],bbuf);
+       strcpy((char *)&BWorldData[1],(char *)bbuf);
        BWorldData[0]=1;
       }
       else
@@ -359,7 +359,7 @@ static uint32 powerpadbuf[2]={0,0};
 static uint32 UpdatePPadData(int w)
 {
  if(FCEUI_IsMovieActive()<0)
-   return;
+   return 0;
 
  uint32 r=0;
  ButtConfig *ppadtsc=powerpadsc[w];
@@ -590,7 +590,7 @@ static void subcon(char *text, ButtConfig *bc)
 
  for(wc=0;wc<MAXBUTTCONFIG;wc++)
  {
-  sprintf(buf,"%s (%d)",text,wc+1);
+  sprintf((char *)buf,"%s (%d)",text,wc+1);
   DWaitButton(buf,bc,wc);
 
   if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
@@ -611,22 +611,22 @@ void ConfigDevice(int which, int arg)
   case FCFGD_QUIZKING:
    for(x=0;x<6;x++)
    {
-    sprintf(buf,"Quiz King Buzzer #%d", x+1);
-    subcon(buf,&QuizKingButtons[x]);
+    sprintf((char *)buf,"Quiz King Buzzer #%d", x+1);
+    subcon((char *)buf,&QuizKingButtons[x]);
    }
    break;
   case FCFGD_HYPERSHOT:
    for(x=0;x<4;x++)
    {
-    sprintf(buf,"Hyper Shot %d: %s",((x&2)>>1)+1,(x&1)?"JUMP":"RUN");
-    subcon(buf,&HyperShotButtons[x]);
+    sprintf((char *)buf,"Hyper Shot %d: %s",((x&2)>>1)+1,(x&1)?"JUMP":"RUN");
+    subcon((char *)buf,&HyperShotButtons[x]);
    } 
    break;
   case FCFGD_POWERPAD:
    for(x=0;x<12;x++)
    {
-    sprintf(buf,"PowerPad %d: %d", (arg&1)+1,x+11);
-    subcon(buf,&powerpadsc[arg&1][x]);
+    sprintf((char *)buf,"PowerPad %d: %d", (arg&1)+1,x+11);
+    subcon((char *)buf,&powerpadsc[arg&1][x]);
    }
    break;
 
@@ -635,8 +635,8 @@ void ConfigDevice(int which, int arg)
    char *str[10]={"A","B","SELECT","START","UP","DOWN","LEFT","RIGHT","Rapid A","Rapid B"};
    for(x=0;x<10;x++)
    {
-    sprintf(buf,"GamePad #%d: %s",arg+1,str[x]);
-    subcon(buf,&GamePadConfig[arg][x]);
+    sprintf((char *)buf,"GamePad #%d: %s",arg+1,str[x]);
+    subcon((char *)buf,&GamePadConfig[arg][x]);
    }
   }
   break;

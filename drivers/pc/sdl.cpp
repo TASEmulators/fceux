@@ -219,13 +219,13 @@ uint8 *GetBaseDirectory(void)
  uint8 *ol;
  uint8 *ret; 
 
- ol=getenv("HOME");
+ ol=(uint8 *)getenv("HOME");
 
  if(ol)
  {
-  ret=malloc(strlen(ol)+1+strlen("./fceultra"));
-  strcpy(ret,ol);
-  strcat(ret,"/.fceultra");
+  ret=(uint8 *)malloc(strlen((char *)ol)+1+strlen("./fceultra"));
+  strcpy((char *)ret,(char *)ol);
+  strcat((char *)ret,"/.fceultra");
  }
  else
  {
@@ -239,7 +239,7 @@ uint8 *GetBaseDirectory(void)
   if(sa)
    *sa = 0; 
   #else
-  ret=malloc(1);
+  ret=(uint8 *)malloc(sizeof(uint8));
   ret[0]=0;
   #endif
   printf("%s\n",ret);
@@ -311,9 +311,9 @@ int DWaitButton(const uint8 *text, ButtConfig *bc, int wb)
  static int32 LastAx[64][64];
  int x,y;
 
- SDL_WM_SetCaption(text,0);
+ SDL_WM_SetCaption((const char *)text,0);
  #ifndef EXTGUI
- puts(text);
+ puts((const char *)text);
  #endif
  for(x=0;x<64;x++) 
   for(y=0;y<64;y++)

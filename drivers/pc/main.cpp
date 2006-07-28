@@ -163,7 +163,7 @@ static void CreateDirs(void)
   mkdir(tdir);
  }
  #else
- mkdir(DrBaseDirectory,S_IRWXU);
+ mkdir((char *)DrBaseDirectory,S_IRWXU);
  for(x=0;x<6;x++)
  {
   sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
@@ -357,7 +357,7 @@ int CLImain(int argc, char *argv[])
          return(0);
 
         DrBaseDirectory=GetBaseDirectory();
-	FCEUI_SetBaseDirectory(DrBaseDirectory);
+	FCEUI_SetBaseDirectory((char *)DrBaseDirectory);
 
 	CreateDirs();
 

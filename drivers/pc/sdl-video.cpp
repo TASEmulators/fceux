@@ -43,7 +43,7 @@ extern int sdlhaveogl;
 static int usingogl;
 static double exs,eys;
 #else
-static int exs,eys;
+static double exs,eys;
 #endif
 static int eefx;
 
@@ -232,7 +232,8 @@ int InitVideo(FCEUGI *gi)
   GUI_SetVideo(_fullscreen, (NWIDTH*exs), tlines*eys);
   #endif
 
-  screen = SDL_SetVideoMode((NWIDTH*exs), tlines*eys, desbpp, flags);
+  screen = SDL_SetVideoMode((int)(NWIDTH*exs), (int)(tlines*eys),
+                            desbpp, flags);
  }
  curbpp=screen->format->BitsPerPixel;
  if(!screen)
@@ -254,7 +255,7 @@ int InitVideo(FCEUGI *gi)
  }
 
  if(gi->name)
-  SDL_WM_SetCaption(gi->name,gi->name);
+  SDL_WM_SetCaption((const char *)gi->name, (const char *)gi->name);
  else
   SDL_WM_SetCaption("FCE Ultra","FCE Ultra");
 
@@ -371,28 +372,33 @@ void BlitScreen(uint8 *XBuf)
 
  if(_fullscreen)
  {
-  xo=(((TmpScreen->w-NWIDTH*exs))/2);
+  xo=(int)(((TmpScreen->w-NWIDTH*exs))/2);
   dest+=xo*(curbpp>>3);
   if(TmpScreen->h>(tlines*eys))
   {
-   yo=((TmpScreen->h-tlines*eys)/2);
+   yo=(int)((TmpScreen->h-tlines*eys)/2);
    dest+=yo*TmpScreen->pitch;
   }
  }
 
  if(curbpp>8)
  {
-  if(BlitBuf)
-   Blit8ToHigh(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,1,1);
-  else
-   Blit8ToHigh(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,exs,eys);
+     if(BlitBuf) {
+         Blit8ToHigh(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,1,1);
+     } else {
+         Blit8ToHigh(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,
+                     (int)exs,(int)eys);
+     }
  }
  else
  {
-  if(BlitBuf)
-   Blit8To8(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,1,1,0,sponge);
-  else
-   Blit8To8(XBuf+NOFFSET,dest, NWIDTH, tlines, TmpScreen->pitch,exs,eys,eefx,sponge);
+     if(BlitBuf) {
+         Blit8To8(XBuf+NOFFSET,dest, NWIDTH, tlines,
+                  TmpScreen->pitch, 1, 1, 0, sponge);
+     } else {
+         Blit8To8(XBuf+NOFFSET, dest, NWIDTH, tlines,
+                  TmpScreen->pitch, (int)exs, (int)eys, eefx, sponge);
+     }
  }
  if(SDL_MUSTLOCK(TmpScreen))
   SDL_UnlockSurface(TmpScreen);
@@ -409,13 +415,13 @@ void BlitScreen(uint8 *XBuf)
 
   drect.x=0;
   drect.y=0;
-  drect.w=exs*NWIDTH;
-  drect.h=eys*tlines;
+  drect.w=(Uint16)(exs*NWIDTH);
+  drect.h=(Uint16)(eys*tlines);
 
   SDL_BlitSurface(BlitBuf, &srect,screen,&drect);
  }
 
- SDL_UpdateRect(screen, xo, yo, NWIDTH*exs, tlines*eys);
+ SDL_UpdateRect(screen, xo, yo, (Uint32)(NWIDTH*exs), (Uint32)(tlines*eys));
 
  if(screen->flags&SDL_DOUBLEBUF)
   SDL_Flip(screen);
@@ -423,8 +429,8 @@ void BlitScreen(uint8 *XBuf)
 
 uint32 PtoV(uint16 x, uint16 y)
 {
- y=(double)y/eys;
- x=(double)x/exs;
+ y=(uint16)((double)y/eys);
+ x=(uint16)((double)x/exs);
  if(eoptions&EO_CLIPSIDES)
   x+=8;
  y+=srendline;
