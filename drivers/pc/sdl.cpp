@@ -4,9 +4,7 @@
 
 #include "sdl.h"
 #include "sdl-video.h"
-#ifdef NETWORK
 #include "unix-netplay.h"
-#endif
 
 DSETTINGS Settings;
 CFGSTRUCT DriverConfig[]={
@@ -29,13 +27,11 @@ CFGSTRUCT DriverConfig[]={
 	AC(_fullscreen),
         AC(_xres),
 	AC(_yres),
-	#ifdef NETWORK
         ACS(netplaynick),
 	AC(netlocalplayers),
 	AC(tport),
 	ACS(netpassword),
 	ACS(netgamekey),
-	#endif
         ENDCFGSTRUCT
 };
 
@@ -85,13 +81,11 @@ ARGPSTRUCT DriverArgs[]={
          {"-yres",0,&_yres,0},
          {"-fs",0,&_fullscreen,0},
          //{"-fshack",0,&_fshack,0x4001},
-	 #ifdef NETWORK
          {"-connect",0,&netplayhost,0x4001},
          {"-netport",0,&tport,0},
 	 {"-netlocalplayers",0,&netlocalplayers,0},
 	 {"-netnick",0,&netplaynick,0x4001},
 	 {"-netpassword",0,&netpassword,0x4001},
-	 #endif
          {0,0,0,0}
 };
 

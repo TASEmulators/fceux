@@ -1,6 +1,5 @@
 Import('file_list')
 my_list =  Split("""
-conv.c
 """)
 for x in range(len(my_list)):
   my_list[x] = 'palettes/' + my_list[x]

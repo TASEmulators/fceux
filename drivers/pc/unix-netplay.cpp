@@ -1,4 +1,3 @@
-#ifdef NETWORK
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
@@ -317,5 +316,3 @@ void FCEUD_NetplayText(uint8 *text)
  puts(tot);
  free(tot);
 }
-#endif
-

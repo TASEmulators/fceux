@@ -458,9 +458,7 @@ static void DriverKill(void)
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
- #ifdef NETWORK
  extern int FCEUDnetplay;
- #endif
 
  int ocount = Count;
  // apply frame scaling to Count
@@ -506,7 +504,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
     }
    }
   } //else puts("Skipped");
-  #ifdef NETWORK
   else if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8)))
   {
    if(Count > tmpcan) Count=tmpcan;
@@ -517,7 +514,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
     tmpcan -= Count;
    }
   }
-  #endif
 
  }
  else

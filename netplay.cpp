@@ -88,13 +88,11 @@ int FCEUNET_SendCommand(uint8 cmd, uint32 len)
  buf[0] = 0xFF;
  FCEU_en32lsb(&buf[numlocal], len);
  buf[numlocal + 4] = cmd;
- #ifdef NETWORK
  if(!FCEUD_SendData(buf,numlocal + 1 + 4)) 
  {
   NetError();
   return(0);
  }
- #endif
  return(1);
 }
 
@@ -135,7 +133,6 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 
  len = clen + 4;
 
- #ifdef NETWORK
  if(!FCEUNET_SendCommand(cmd,len))
  {
   free(cbuf);
@@ -147,7 +144,6 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
   free(cbuf);
   return(0);
  }
- #endif
  free(cbuf);
 
  return(1);
@@ -217,7 +213,6 @@ void NetplayUpdate(uint8 *joyp)
  /* This shouldn't happen, but just in case.  0xFF is used as a command escape elsewhere. */
  if(joypb[0] == 0xFF) 
   joypb[0] = 0xF;
- #ifdef NETWORK
  if(!netdcount)
   if(!FCEUD_SendData(joypb,numlocal))
   {
@@ -325,7 +320,6 @@ void NetplayUpdate(uint8 *joyp)
 			    break;
   }
  } while(buf[4]);
- #endif
 
  netdcount=(netdcount+1)%netdivisor;
 
