@@ -18,10 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
 #include "../../driver.h"
 #include "../common/config.h"
 #include "../common/args.h"
@@ -48,8 +44,4 @@ extern long soundrate;
 extern long soundbufsize;
 
 int CLImain(int argc, char *argv[]);
-
-#ifdef  __cplusplus
-}
-#endif
 

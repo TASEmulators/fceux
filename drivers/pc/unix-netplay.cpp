@@ -138,7 +138,7 @@ int FCEUD_NetworkConnect(void)
   uint32 sblen;
 
    sblen = 4 + 16 + 16 + 64 + 1 + (netplaynick?strlen(netplaynick):0);
-   sendbuf = malloc(sblen);
+   sendbuf = (uint8 *)malloc(sblen);
    memset(sendbuf, 0, sblen);
                            
    en32(sendbuf, sblen - 4);
@@ -150,7 +150,7 @@ int FCEUD_NetworkConnect(void)
 
     md5_starts(&md5);
     md5_update(&md5, CurGame->MD5, 16);
-    md5_update(&md5, netgamekey, strlen(netgamekey));
+    md5_update(&md5, (uint8 *)netgamekey, strlen(netgamekey));
     md5_finish(&md5, md5out);
     memcpy(sendbuf + 4, md5out, 16);
    }
@@ -163,7 +163,7 @@ int FCEUD_NetworkConnect(void)
     uint8 md5out[16];
    
     md5_starts(&md5);
-    md5_update(&md5, netpassword, strlen(netpassword));
+    md5_update(&md5, (uint8 *)netpassword, strlen(netpassword));
     md5_finish(&md5, md5out);
     memcpy(sendbuf + 4 + 16, md5out, 16);
    }
@@ -201,7 +201,7 @@ int FCEUD_SendData(void *data, uint32 len)
   fgets(buf,1024,stdin);
   if((f=strrchr(buf,'\n')))
    *f=0;
-  FCEUI_NetplayText(buf);
+  FCEUI_NetplayText((uint8 *)buf);
  }
  send(Socket, data, len ,0);
  return(1);
@@ -275,9 +275,9 @@ void FCEUD_NetworkClose(void)
 
 void FCEUD_NetplayText(uint8 *text)
 {
- char *tot = malloc(strlen(text) + 1);
+ char *tot = (char *)malloc(strlen((const char *)text) + 1);
  char *tmp;
- strcpy(tot, text);
+ strcpy(tot, (const char *)text);
  tmp = tot;
 
  while(*tmp)

@@ -1,6 +1,3 @@
-#ifdef  __cplusplus
-extern "C" {
-#endif
 #include "../common/args.h"
 #include "../common/config.h"
 
@@ -65,8 +62,5 @@ void Giggles(int);
 void DoFun(void);
 
 int FCEUD_NetworkConnect(void);
-#ifdef  __cplusplus
-}
-#endif
 
 

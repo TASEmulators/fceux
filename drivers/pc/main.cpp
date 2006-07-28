@@ -548,3 +548,14 @@ FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
     return(fopen(fn,mode));
 }
 
+static char s_linuxCompilerString[4] = "g++";
+char *FCEUD_GetCompilerString() {
+    return (char *)s_linuxCompilerString;
+}
+
+void FCEUD_DebugBreakpoint() {
+    return;
+}
+void FCEUD_TraceInstruction() {
+    return;
+}
