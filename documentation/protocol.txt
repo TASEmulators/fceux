@@ -1,0 +1,90 @@
+FCE Ultra 0.91+ network play protocol.
+Description v 0.0.1
+--------------------------------------
+
+In FCE Ultra, all data is sent to the server, and then the server
+distributes, every emulated frame(60hz on NTSC), the collated data to the 
+clients.
+
+The server should not block when it is receiving UDP data from the clients.
+If no UDP data is available, then just go on.
+
+The clients MUST block until the input data packet comes on every emulated
+frame.
+
+Packets from the server to the client are sent out over both TCP and UDP.
+Duplicate packets should be discarded.  Out-of-order packets can either
+be cached, or discarded(what I recommend, as caching code gets a little
+complex and wouldn't yield any benefit from what I've observed).
+In the case of client->server UDP communications, the server should just use
+the data from the UDP packet that has the highest packet number count, and
+the server should then set its internal incoming packet counter to that
+number(to prevent out-of-order packets from totally screwing up user input).
+
+The "magic number"(used with UDP packets) is meant to reduce the chance of a hostile remote host
+from disrupting the network play, without resorting to using extreme amounts
+of network bandwidth.  The server generates the magic number, and it is best 
+if the magic number is as random as possible.
+UDP packets received with an incorrect magic number should be discarded, of
+course.
+
+Initialization, server->client:
+
+uint32		Local UDP port(what the server is listening on).
+uint32		Player number(0-3) for client.
+uint32		Magic number(for UDP).
+
+
+Initialization, client->server
+
+uint32		Local UDP port(that the client is listening on).
+
+
+Structure of UDP packet data:
+
+uint32		CRC32		- Includes magic number, packet counter, and 
+				  data.  For reference, CRC32 is calculated 
+				  with the zlib function crc32().
+uint32		Magic number
+uint32		Packet counter(linear, starts at 0).
+uint8[variable]	Data.
+
+Structure of tcp packet data:
+
+uint32		Packet counter("	").
+uint8[variable]	Data.
+
+
+
+Data format of server->client communications:
+
+	uint8[4]	Controller data
+	uint8		Command byte.  0 if no command. Otherwise(in decimal):
+
+			1	Select FDS disk side.
+			2	Insert/eject FDS disk.
+			10	Toggle VS Unisystem dip switch editing.
+			11 ... 18 Toggle VS Unisystem dip switches.
+			19	Insert VS Unisystem coin.
+			30	Reset NES.
+			31	Power toggle NES.
+			40	Save state(not implemented correctly).
+			41	Load state(not implemented correctly).
+			42 ... 50	Select save state slot(minus 42).
+
+	Special message communications occurs if the "Packet counter" is 
+	0xFFFFFFFF(only with TCP):
+	
+	uint32	Length of text data, minus the null character(the null
+		character is sent, though).
+	uint8[variable]	Text data.  Convert all characters <32 to space, and
+			then display the text message(it's one line) as is.
+
+Structure of client->server communication:
+
+	uint8		Controller data(for this client).
+
+	Over tcp channel, a text message can be sent.  It is one line,
+	null terminated(remember the data and parse it and display it and 
+	distribute it to the clients once the null byte is received).  
+	Maximum size of message(including the null byte) should be 256 bytes.

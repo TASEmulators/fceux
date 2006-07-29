@@ -1,0 +1,33 @@
+Subject: [nesdev] Re: the skinny on nes scrolling
+Date: Tue, 13 Apr 1999 17:48:54 -0600
+From: loopy <zxcvzxcv@netzero.net>
+Reply-To: nesdev@onelist.com
+To: nesdev@onelist.com
+
+From: loopy <zxcvzxcv@netzero.net>
+
+(more notes on ppu logic)
+
+you can think of bits 0,1,2,3,4 of the vram address as the "x scroll"(*8)
+that the ppu increments as it draws.  as it wraps from 31 to 0, bit 10 is
+switched.  you should see how this causes horizontal wrapping between name
+tables (0,1) and (2,3).
+
+you can think of bits 5,6,7,8,9 as the "y scroll"(*8).  this functions
+slightly different from the X.  it wraps to 0 and bit 11 is switched when
+it's incremented from _29_ instead of 31.  there are some odd side effects
+from this.. if you manually set the value above 29 (from either 2005 or
+2006), the wrapping from 29 obviously won't happen, and attrib data will be
+used as name table data.  the "y scroll" still wraps to 0 from 31, but
+without switching bit 11.  this explains why writing 240+ to 'Y' in 2005
+appeared as a negative scroll value.
+
+________________________________________________________
+NetZero - We believe in a FREE Internet.  Shouldn't you?
+Get your FREE Internet Access and Email at
+http://www.netzero.net/download.html
+
+------------------------------------------------------------------------
+Looking for a new hobby?  Want to make a new friend?
+http://www.ONElist.com
+Come join one of the 115,000 e-mail communities at ONElist!

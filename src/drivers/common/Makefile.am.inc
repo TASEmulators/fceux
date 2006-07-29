@@ -1,0 +1,1 @@
+fceu_SOURCES	+=	drivers/common/args.cpp drivers/common/cheat.cpp drivers/common/config.cpp drivers/common/vidblit.cpp drivers/common/hq2x.cpp drivers/common/hq3x.cpp drivers/common/scale2x.cpp drivers/common/scale3x.cpp drivers/common/scalebit.cpp

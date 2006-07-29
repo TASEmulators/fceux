@@ -1,0 +1,702 @@
+<html>
+ <head>
+  <title>FCE Ultra General Documentation</title>
+ </head>
+ <body>
+  <center><h1>FCE Ultra General Documentation</h1></center>
+  <center><i>Last updated November 12, 2003<br />Valid as of FCE Ultra 0.97</i></center>
+ <p>
+ <b>Table of Contents:</b>
+ <ul>
+  <li /><a href="#intro">Introduction</a>
+  <ul>
+   <li/><a href="#intro-history">History of FCE Ultra</a>
+ </ul>
+  <li /><a href="#features">Core Features</a>
+  <ul>
+   <li /><a href="#features-cpu">CPU</a>
+   <li /><a href="#features-ppu">PPU</a>
+   <ul>
+    <li /><a href="#features-ppu-palettes">Palettes</a>
+   </ul>
+   <li /><a href="#features-sound">Sound</a>
+   <li /><a href="#features-input">Input</a>
+   <ul>
+    <li /><a href="#features-input-zapper">Zapper</a>
+   </ul>
+   <li /><a href="#features-expansion">File Formats/Expansion Hardware</a>
+   <ul>
+    <li /><a href="#features-expansion-ines">iNES Format</a>
+    <li /><a href="#features-expansion-unif">UNIF</a>
+    <li /><a href="#features-expansion-fds">Famicom Disk System</a>
+    <li /><a href="#features-expansion-genie">Game Genie</a>
+    <li /><a href="#features-expansion-vs">VS Unisystem</a>
+   </ul>
+   <li /><a href="#features-ips">Automatic IPS Patching</a>
+  </ul>
+  <li /><a href="#using">Using FCE Ultra</a>
+  <ul>
+   <li /><a href="#using-keys">Key Assignments</a>
+   <ul />
+    <li /><a href="#using-keys-vs">VS Unisystem</a>
+    <li /><a href="#using-keys-fds">Famicom Disk System</a>
+    <li /><a href="#using-keys-gamepad">Game Pad</a>
+    <li /><a href="#using-keys-powerpad">Power Pad</a>
+    <li /><a href="#using-keys-fkb">Family Keyboard</a>
+   </ul>
+   <li /><a href="#using-cli">Command-line Ports</a>
+   <ul>
+    <li /><a href="#using-cli-sdl">SDL</a>
+    <li /><a href="#using-cli-dos">DOS</a>
+    <li /><a href="#using-cli-svgalib">Linux SVGAlib</a>
+   </ul>
+   <li /><a href="#using-win">MS Windows Port</a>
+  </ul>
+  <li /><a href="cheat.html">Cheat Guide</a>
+  <li /><a href="netplay.html">Network Play</a>
+  <li /><a href="#credits">Credits</a>
+ </ul>
+ </p>
+ <hr width="100%">
+ <a name="intro"><h2>Introduction</h2></a>
+ <p>
+        FCE Ultra is an NTSC and PAL Famicom/NES emulator for various
+        platforms. It is based upon Bero's original FCE source code.  Current   
+        features include good PPU, CPU, pAPU, expansion chip, and joystick 
+        emulation.  Also a feature unique to this emulator(at the current
+        time) is authentic Game Genie emulation.  Save states and snapshot
+        features also have been implemented.  
+ </p>
+ <p>
+ This document has been arranged to keep user interface details and emulation
+ details as separate as possible, though this has not been accomplished entirely.
+ </p>
+ <p>
+ In several places references are made to the "base directory".  If you
+ are running a port on a UN*X-like system(Linux/*BSD/Mac OSX/SunOS/etc.), the
+ base directory is "~/.fceultra", or in other words, 
+ "your home directory plus .fceultra".  For all other ports(including DOS and
+MS Windows), the base directory is the directory that the executable is in.
+ </p>
+ <a name="intro-history"><h3>History of FCE Ultra</h3></a>
+ <p>
+ <i>This section is a work-in-progress.  Some details may be incorrect.</i><br/>
+ Bero originally wrote a NES emulator that was referred to as <a href="http://www.geocities.co.jp/Playtown/2004/fce.htm">FCE</a>.
+ This name was apparently meant only to serve as a temporary name, but its usage remained.  Xodnizel originally ported it to
+ Linux SVGAlib, and made a few improvements.  This code base was abandoned,
+ and work began anew, under DOS, with the original FCE source code.  
+ At the end of November, 1998, FCE Ultra Beta 1 was released.
+ </p>
+ <p>
+ FCE Ultra remained DOS-only until version 0.18, when it was ported to Linux
+ SVGAlib, and released as a staticly-linked executable.  The first MS Windows
+ port was released as version 0.25.
+ </p>
+ <p>
+ The source code of 0.40 was released on November 12, 2000.  It retained
+ the simple license of FCE for a long time, which stated that " This software is freeware.you can use it non-commercially."
+ Almost two years later, in June 2002, 0.80 was released, and FCE Ultra was relicensed under the GNU GPL.
+ </p>
+ <hr width="100%">
+ <a name="features"><h2>Core Features</h2></a>
+ <a name="features-cpu"><h3>CPU</h3></a>
+ <p>
+ All official instructions of the NES' CPU, the 2A03, which is compatible(mostly)
+ with the 6502, are emulated.  "Unofficial" instructions are also emulated,
+ though probably not as accurately as the more well-defined official instructions.
+ </p>
+ <hr width="90%">
+ <a name="features-ppu"><h3>PPU</h3></a>
+ <p>
+ </p>
+ <a name="features-ppu-palettes"><h4>Palettes</h4></a>
+ <p>
+ FCE Ultra has many palette features, including loading a custom palette
+ to replace the default NES palette.  The palette from an NTSC NES can
+ also be generated on-the-fly.
+ </p>
+ <p>
+ First, a note on on the format of external palettes; Palette files are expected to contain 64 8-bit RGB triplets(each in
+ that order; red comes first in the triplet in the file, then green,
+ then blue).  Each 8-bit value represents brightness for that particular
+ color.  0 is minimum, 255 is maximum.
+ </p>
+ <p>
+        Palettes can be set on a per-game basis.  To do this, put a palette
+        file in the "gameinfo" directory with the same base filename
+	as the game you wish to associate with and add the extension "pal".
+        Examples:
+	<pre>        
+                File name:              Palette file name:
+                 BigBad.nes              BigBad.pal
+                 BigBad.zip              BigBad.pal
+                 BigBad.Better.nes       BigBad.Better.pal
+	</pre>
+ </p>
+ <p>
+       With so many ways to choose a palette, figuring out which one will
+        be active may be difficult.  Here's a list of what palettes will
+        be used, in order from highest priority to least priority(if a 
+        condition doesn't exist for a higher priority palette, the emulator 
+        will continue down its list of palettes).
+	<ul>
+        <li />NSF Palette(for NSFs only)
+        <li />Palette loaded from the "gameinfo" directory.
+        <li />NTSC Color Emulation(only for NTSC NES games).
+        <li />VS Unisystem palette(if the game is a VS Unisystem game and a palette is available).
+        <li />Custom global palette.
+        <li />Default NES palette. 
+	</ul>
+ </p>
+ <p>
+ <hr width="90%">
+ <a name="features-sound"><h3>Sound</h3></a>
+ <p>
+ All 5 internal sound channels are supported(2x rectangle, triangle, noise,
+ and DMC/PCM).  Sound channels are emulated with CPU instruction granularity.
+ There are two sound quality options.  Low-quality sound, the default sound
+ quality option, generates sound data at 16x the playback rate and averages
+ those samples together to 1 sample.  This method works fairly well and
+ is reasonably fast, but there is still some aliasing and sound distortion.
+ All sample rates between 8192Hz and 96000Hz are supported.
+ </p><p>
+ The high-quality sound emulation is much more CPU intensive, but the
+ quality is worth it, if your machine is fast enough.  Sound data is
+ generated at the NES' CPU clock rate(about 1.8MHz for the NTSC NES), and
+ then resampled to the output sample rate.  Custom-designed 483rd order
+ Parks-McClellan algorithm filter coefficients are used.  Supported playback rates are
+ 44100Hz, 48000Hz, and 96000Hz.  The following filter statistics apply
+ for NTSC emulation.  
+ <p>
+ <table border>
+ <tr><th>Rate:</th><th>Passband Upper Bound(Hz):</th><th>Passband ripple(dB):</th><th>Transition bandwidth(Hz):</th><th>Stopband attenuation(dB):</th></tr>
+ <tr><td>44100</td><td>11982.5</td><td>0.20</td><td>10067.5</td><td>66.4</td></tr>
+ <tr><td>48000</td><td>13932.5</td><td>0.10</td><td>10067.5</td><td>60.0</td></tr>
+ <tr><td>96000</td><td>30000.0</td><td>0.01</td><td>18000.0</td><td>103.0</td></tr>
+ </table>
+ </p>
+ <p>
+ In addition to improved tonal quality, the high-quality sound emulation
+ also simulates deficiencies present in the NES' D/A converter, which
+ causes the sound output to be non-linear(for example, 16+16 might create
+ an output equivalent to 25).  Emulation of this is necessary for the 
+ DMC/PCM sound channel to sound correct.  For example, without this feature,
+ the drums in "Crystalis" are excessively fuzzy.
+ </p>
+ <p>
+ The "highest" sound quality mode is similar to the normal high-quality mode,
+ but the filters are of a higher order(1024 coefficients).  Ripple is
+ reduced, the upper bound of the passband is higher, and the stopband
+ attenuation is slightly higher.  The highest-quality mode filter coefficients
+ were created using "gmeteor".  The parameters used to create these filters
+ can be found in the source code distribution.
+ </p>
+ <p>
+ Besides the 5 internal NES sound channels, FCE Ultra emulates the extra
+ sound capabilities of the Konami VRCVI, Konami VRCVII, Namco 106, Nintendo MMC5, and the Sunsoft FME-07 chips.  The extra sound
+ channel in the Famicom Disk System is also emulated, but the support for
+ its FM capabilities is limited.
+ </p>
+ <hr width="90%">
+ <a name="features-input"><h3>Input</h3></a>
+ <p>
+  FCE Ultra emulates the standard NES gamepad, the Four-Score multiplayer
+  adapter, the Zapper, the Power Pad,  and the Arkanoid controller.  The 
+  Famicom version of the Arkanoid controller, the "Space Shadow" gun, the 
+  Famicom 4-player adapter, and the Family Keyboard are also emulated.
+ </p>
+ <a name="features-input-zapper"><h4>Zapper</h4></a>
+ <p>
+        Most Zapper NES games expect the Zapper to be plugged into port 2.
+        and most VS Unisystem games expect the Zapper to be plugged
+        into port 1.
+ </p><p>
+        The left mouse button is the emulated trigger button for the
+        Zapper.  The right mouse button is also emulated as the trigger,
+        but as long as you have the right mouse button held down, no color
+        detection will take place, which is effectively like pulling the
+        trigger while the Zapper is pointed away from the television screen.
+        Note that you must hold the right button down for a short
+        time to have the desired effect.
+ </p>
+ <hr width="90%">
+ <a name="features-expansion"><h3>File Formats/Expansion Hardware</h3></a>
+ <p>
+ FCE Ultra supports the iNES, FDS(raw and with a header), UNIF, and NSF file
+ formats.  FDS ROM images in the iNES format are not supported; it would
+ be silly to do so and storing them in that format is nonsensical.
+ </p>
+ <p>
+ FCE Ultra supports loading ROM/disk images from some types of compressed files.
+ FCE Ultra can load data from both PKZIP-format files and
+ gzip-format files.  Only the "deflate" algorithm is supported, but
+ this is the most widely used algorithm for these formats.
+ A compressed FDS disk image will only be saved back to disk if it
+ uses the gzip format.
+ </p>
+ <p>
+ All files in a PKZIP format archive will be scanned for the
+        followings extensions:  .nes, .fds, .nsf, .unf, .nez, .unif  
+        The first compressed file to have one of these extensions will be
+        loaded. If no compressed file has one of these extensions, the
+        first compressed file will be loaded.
+ </p>
+ <a name="features-expansion-ines"><h4>iNES Format</h4></a>
+ <p>
+ The battery-backed RAM, vertical/horizontal mirroring, four-screen
+ name table layout, and 8-bit mapper number capabilities of the iNES
+ format are supported.  The 512-byte trainer capability is also supported,
+ but it is deprecated.  Common header corruption conditions are cleaned(let's
+ go on a DiskDude hunt), though not all conditions can be automatically
+ detected and fixed.  In addition, a few common header inaccuracies for
+ games are also corrected(detected by CRC32 value).  Note that these
+ fixes are not written back to the storage medium.
+ </p>
+ <p>
+ Support for the recent VS System bit and "number of 8kB RAM banks" 
+ is not implemented.  Too many iNES headers are corrupt where this new data
+ is stored, causing problems for those games.
+ </p>
+ <p>
+ The following table lists iNES-format "mappers" supported well in FCE Ultra.
+ </p><p>
+ <table width="100%" border>
+ <tr><th>Number:</th><th>Description:</th><th>Game Examples:</th></tr>
+ <tr><td>0</td><td>No bankswitching</td><td>Donkey Kong, Mario Bros</td></tr>
+ <tr><td>1</td><td>Nintendo MMC1</td><td>MegaMan 2, Final Fantasy</td></tr>
+ <tr><td>2</td><td>Simple 16KB PROM Switch(UNROM)</td><td>MegaMan, Archon, 1944</td></tr>
+ <tr><td>3</td><td>Simple 8KB VROM Switch(CNROM)</td><td>Spy Hunter, Gradius</td></tr>
+ <tr><td>4</td><td>Nintendo MMC3</td><td>Super Mario Bros. 3, Recca, Final Fantasy 3</td></tr>
+ <tr><td>5</td><td>Nintendo MMC5</td><td>Castlevania 3, Just Breed, Bandit Kings of Ancient China</td></tr>
+ <tr><td>6</td><td>FFE F4 Series(hacked, bootleg)</td><td></td></tr>
+ <tr><td>7</td><td>AOROM</td><td>Battle Toads, Time Lord</td></tr>
+ <tr><td>8</td><td>FFE F3 Series(hacked, bootleg)</td><td></td></tr>
+ <tr><td>9</td><td>Nintendo MMC2</td><td>Punchout!</td></tr>
+ <tr><td>10</td><td>Nintendo MMC4</td><td>Fire Emblem, Fire Emblem Gaiden</td></tr>
+ <tr><td>11</td><td>Color Dreams</td><td>Crystal Mines, Bible Adventures</td></tr>
+ <tr><td>12</td><td>??</td><td>Dragon Ball Z 5 ("bootleg" original)</td></tr>
+ <tr><td>13</td><td>CPROM</td><td>Videomation</td></tr>
+ <tr><td>15</td><td>Multi-cart(bootleg)</td><td>100-in-1: Contra Function 16</td></tr>
+ <tr><td>16</td><td>Bandai ??</td><td>Dragon Ball Z, SD Gundam Gaiden</td></tr>
+ <tr><td>17</td><td>FFE F8 Series(hacked, bootleg)</td><td></td></tr>
+ <tr><td>18</td><td>Jaleco SS806</td><td>Pizza Pop, Plasma Ball</td></tr>
+ <tr><td>19</td><td>Namco 106</td><td>Splatter House, Mappy Kids</td></tr>
+ <tr><td>21</td><td>Konami VRC4 2A</td><td>WaiWai World 2, Ganbare Goemon Gaiden 2</td></tr>
+ <tr><td>22</td><td>Konami VRC4 1B</td><td>Twinbee 3</td></tr>
+ <tr><td>23</td><td>Konami VRC2B</td><td>WaiWai World, Crisis Force</td></tr>
+ <tr><td>24</td><td>Konami VRC6</td><td>Akumajou Densetsu</td></tr>
+ <tr><td>25<td>Konami VRC4</td><td>Gradius 2, Bio Miracle:Boku tte Upa</td></tr>
+ <tr><td>26</td><td>Konami VRC6 A0-A1 Swap</td><td>Esper Dream 2, Madara</td></tr>
+ <tr><td>32</td><td>IREM G-101</td><td>Image Fight 2, Perman</td></tr>
+ <tr><td>33</td><td>Taito TC0190/TC0350</td><td>Don Doko Don</td></tr>
+ <tr><td>34</td><td>NINA-001 and BNROM</td><td>Impossible Mission 2, Deadly Towers, Bug Honey</td></tr>
+ <tr><td>40</td><td>(bootleg)</td><td>Super Mario Bros. 2</td></tr>
+ <tr><td>41</td><td>Caltron 6-in-1</td><td>Caltron 6-in-1</td></tr>
+ <tr><td>42</td><td>(bootleg)</td><td>Mario Baby</td></tr>
+ <tr><td>44</td><td>Multi-cart(bootleg)</td><td>Super HiK 7 in 1</td></tr>
+ <tr><td>45</td><td>Multi-cart(bootleg)</td><td>Super 1000000 in 1</td></tr>
+ <tr><td>46</td><td>Game Station</td><td>Rumble Station</td></tr>
+ <tr><td>47</td><td>NES-QJ</td><td>Nintendo World Cup/Super Spike V-Ball</td></tr>
+ <tr><td>48</td><td>Taito TC190V</td><td>Flintstones</td></tr>
+ <tr><td>49</td><td>Multi-cart(bootleg)</td><td>Super HiK 4 in 1</td></tr>
+ <tr><td>50</td><td>(bootleg)</td><td>Super Mario Bros. 2</td></tr>
+ <tr><td>51</td><td>Multi-cart(bootleg)</td><td>11 in 1 Ball Games</td></tr>
+ <tr><td>52</td><td>Multi-cart(bootleg)</td><td>Mario Party 7 in 1</td></tr>
+ <tr><td>57</td><td>Multi-cart(bootleg)</td><td>Game Star GK-54</td></tr>
+ <tr><td>60</td><td>Multi-cart(bootleg)</td><td>4 in 1(Reset-selected)</td></tr>
+ <tr><td>61</td><td>Multi-cart(bootleg)</td><td>20 in 1</td></tr>
+ <tr><td>62</td><td>Multi-cart(bootleg)</td><td>Super 700 in 1</td></tr>
+ <tr><td>64</td><td>Tengen RAMBO 1</td><td>Klax, Rolling Thunder, Skull and Crossbones</td></tr>
+ <tr><td>65</td><td>IREM H-3001</td><td>Daiku no Gensan 2</td></tr>
+ <tr><td>66</td><td>GNROM</td><td>SMB/Duck Hunt</td></tr>
+ <tr><td>67</td><td>Sunsoft ??</td><td>Fantasy Zone 2</td></tr>
+ <tr><td>68</td><td>Sunsoft ??</td><td>After Burner 2, Nantetta Baseball</td></tr>
+ <tr><td>69</td><td>Sunsoft FME-7</td><td>Batman: Return of the Joker, Hebereke</td>
+ <tr><td>70</td><td>??</td><td>Kamen Rider Club</td></tr>
+ <tr><td>71</td><td>Camerica</td><td>Fire Hawk, Linus Spacehead</td></tr>
+ <tr><td>72</td><td>Jaleco ??</td><td>Pinball Quest</td></tr>
+ <tr><td>73</td><td>Konami VRC3</td><td>Salamander</td></tr>
+ <tr><td>74</td><td>Taiwanese MMC3 CHR ROM w/ VRAM</td><td>Super Robot Wars 2</td></tr>
+ <tr><td>75</td><td>Jaleco SS8805/Konami VRC1</td><td>Tetsuwan Atom, King Kong 2</td></tr>
+ <tr><td>76</td><td>Namco 109</td><td>Megami Tensei</td></tr>
+ <tr><td>77</td><td>IREM ??</td><td>Napoleon Senki</td></tr>
+ <tr><td>78</td><td>Irem 74HC161/32</td><td>Holy Diver</td></tr>
+ <tr><td>79</td><td>NINA-06/NINA-03</td><td>F15 City War, Krazy Kreatures, Tiles of Fate</td></tr>
+ <tr><td>80</td><td>Taito X-005</td><td>Minelvation Saga</td></tr>
+ <tr><td>82</td><td>Taito ??</td><td>Kyuukyoku Harikiri Stadium - Heisei Gannen Ban</td><tr/>
+ <tr><td>83</td><td>Multi-cart(bootleg)</td><td>Dragon Ball Party</td></tr>
+ <tr><td>85</td><td>Konami VRC7</td><td>Lagrange Point</td></tr>
+ <tr><td>86</td><td>Jaleco ??</td><td>More Pro Baseball</td></tr>
+ <tr><td>87</td><td>??</td><td>Argus</td></tr>
+ <tr><td>88</td><td>Namco 118</td><td>Dragon Spirit</td></tr>
+ <tr><td>89</td><td>Sunsoft ??</td><td>Mito Koumon</td></tr>
+ <tr><td>90</td><td>??</td><td>Super Mario World</td></tr>
+ <tr><td>91</td><td>??</td><td>Mari Street Fighter 3 Turbo</td></tr>
+ <tr><td>92</td><td>Jaleco ??</td><td>MOERO Pro Soccer</td></tr>
+ <tr><td>93</td><td>??</td><td>Fantasy Zone</td></tr>
+ <tr><td>94</td><td>??</td><td>Senjou no Ookami</td></tr>
+ <tr><td>95</td><td>Namco ??</td><td>Dragon Buster</td></tr>
+ <tr><td>96</td><td>Bandai ??</td><td>Oeka Kids</td></tr>
+ <tr><td>97</td><td>??</td><td>Kaiketsu Yanchamaru</td></tr>
+ <tr><td>99</td><td>VS System 8KB VROM Switch</td><td>VS SMB, VS Excite Bike</td></tr>
+ <tr><td>105</td><td>NES-EVENT</td><td>Nintendo World Championships</td></tr>
+ <tr><td>107</td><td>??</td><td>Magic Dragon</td></tr>
+ <tr><td>112</td><td>Asder</td><td>Sango Fighter, Hwang Di</td></tr>
+ <tr><td>113</td><td>MB-91</td><td>Deathbots</td></tr>
+ <tr><td>114</td><td>??</td><td>The Lion King</td></tr>
+ <tr><td>115</td><td>??</td><td>Yuu Yuu Hakusho Final</td></tr>
+ <tr><td>117</td><td>??</td><td>San Guo Zhi 4</td></tr>
+ <tr><td>118</td><td>MMC3-TLSROM/TKSROM Board</td><td>Ys 3, Goal! 2, NES Play Action Football</td></tr>
+ <tr><td>119</td><td>MMC3-TQROM Board</td><td>High Speed, Pin*Bot</td></tr>
+ <tr><td>140</td><td>Jaleco ??</td><td>Bio Senshi Dan</td></tr>
+ <tr><td>144</td><td>??</td><td>Death Race</td></tr>
+ <tr><td>151</td><td>Konami VS System Expansion</td><td>VS The Goonies, VS Gradius</td></tr>
+ <tr><td>152</td><td>??</td><td>Arkanoid 2, Saint Seiya Ougon Densetsu</td></tr>
+ <tr><td>153</td><td>Bandai ??</td><td>Famicom Jump 2</td></tr>
+ <tr><td>154</td><td>Namco ??</td><td>Devil Man</td></tr>
+ <tr><td>155</td><td>MMC1 w/o normal WRAM disable</td><td>The Money Game, Tatakae!! Rahmen Man</td></tr>
+ <tr><td>156</td><td>??</td><td>(TBA)</td></tr>
+ <tr><td>158</td><td nowrap>RAMBO 1 Derivative</td><td>Alien Syndrome</td></tr>
+ <tr><td>180</td><td>??</td><td>Crazy Climber</td></tr>
+ <tr><td>182</td><td>??</td><td>Super Donkey Kong</td></tr>
+ <tr><td>184</td><td>??</td><td>Wing of Madoola, The</td></tr>
+ <tr><td>189</td><td>??</td><td>Thunder Warrior, Street Fighter 2 (Yoko)</td></tr>
+ <tr><td>193</td><td>Mega Soft</td><td>Fighting Hero</td></tr>
+ <tr><td>200</td><td>Multi-cart(bootleg)</td><td>1200-in-1</td></tr>
+ <tr><td>201</td><td>Multi-cart(bootleg)</td><td>21-in-1</td></tr>
+ <tr><td>202</td><td>Multi-cart(bootleg)</td><td>150 in 1</td></tr>
+ <tr><td>203</td><td>Multi-cart(bootleg)</td><td>35 in 1</td></tr>
+ <tr><td>225</td><td>Multi-cart(bootleg)</td><td>58-in-1/110-in-1/52 Games</td></tr>
+ <tr><td>226</td><td>Multi-cart(bootleg)</td><td>76-in-1</td></tr>
+ <tr><td>227</td><td>Multi-cart(bootleg)</td><td>1200-in-1</td></tr>
+ <tr><td>228</td><td>Action 52</td><td>Action 52, Cheetahmen 2</td></tr>
+ <tr><td>229</td><td>Multi-cart(bootleg)</td><td>31-in-1</td></tr>
+ <tr><td>230</td><td>Multi-cart(bootleg)</td><td>22 Games</td></tr>
+ <tr><td>231</td><td>Multi-cart(bootleg)</td><td>20-in-1</td></tr>
+ <tr><td>232</td><td>BIC-48</td><td>Quattro Arcade, Quattro Sports</td></tr>
+ <tr><td>234</td><td>Multi-cart ??</td><td>Maxi-15</td></tr>
+ <tr><td>235</td><td>Multi-cart(bootleg)</td><td>Golden Game 150 in 1</td></tr>
+ <tr><td>240</td><td>??</td><td>Gen Ke Le Zhuan, Shen Huo Le Zhuan</td></tr>
+ <tr><td>242</td><td>??</td><td>Wai Xing Zhan Shi</td></tr>
+ <tr><td>244</td><td>??</td><td>Decathalon</td></tr>
+ <tr><td>246</td><td>??</td><td>Fong Shen Ban</td></tr>
+ <tr><td>248</td><td>??</td><td>Bao Qing Tian</td></tr>
+ <tr><td>249</td><td>Waixing ??</td><td>??</td></tr>
+ <tr><td>250</td><td>??</td><td>Time Diver Avenger</td></tr>
+ </table>
+ </p>
+ <p>
+ <a name="features-expansion-unif"><h4>UNIF</h4></a>
+ </p> 
+ <p>
+ FCE Ultra supports the following UNIF boards.  The prefixes HVC-, NES-, BTL-, and BMC- are omitted, since they are currently ignored in FCE Ultra's UNIF loader.
+ </p>
+ <p>
+ <table border width="100%">
+ <tr><th colspan="2">Group:</th></tr>
+ <tr><th>Name:</th><th>Game Examples:</th></tr>
+ <tr><th colspan="2">Bootleg:</th></tr>
+ <tr><td>MARIO1-MALEE2</td><td>Super Mario Bros. Malee 2</td></tr>
+ <tr><td>NovelDiamond9999999in1</td><td>Novel Diamond 999999 in 1</td></tr>
+ <tr><td>Super24in1SC03</td><td>Super 24 in 1</td></tr>
+ <tr><td>Supervision16in1</td><td>Supervision 16-in-1</td></tr>
+ <tr><th colspan="2">Unlicensed:</th></tr>
+ <tr><td>Sachen-8259A</td><td>Super Cartridge Version 1</td></tr>
+ <tr><td>Sachen-8259B</td><td>Silver Eagle</td></tr>
+ <tr><td>Sachen-74LS374N</td><td>Auto Upturn</td></tr>
+ <tr><td>SA-016-1M</td><td>Master Chu and the Drunkard Hu</td></tr>
+ <tr><td>SA-72007</td><td>Sidewinder</td></tr>
+ <tr><td>SA-72008</td><td>Jovial Race</td></tr>
+ <tr><td>SA-0036</td><td>Mahjong 16</td></tr>
+ <tr><td>SA-0037</td><td>Mahjong Trap</td></tr>
+ <tr><td>TC-U01-1.5M</td><td>Challenge of the Dragon</td></tr>
+ <tr><td>8237</td><td>Pocahontas Part 2</td></tr>
+ <tr><th colspan="2">MMC1:</th></tr>
+ <tr><td>SAROM</td><td>Dragon Warrior</td></tr>
+ <tr><td>SBROM</td><td>Dance Aerobics</td></tr>
+ <tr><td>SCROM</td><td>Orb 3D</td></tr>
+ <tr><td>SEROM</td><td>Boulderdash</td></tr>
+ <tr><td>SGROM</td><td>Defender of the Crown</td></tr>
+ <tr><td>SKROM</td><td>Dungeon Magic</td></tr>
+ <tr><td>SLROM</td><td>Castlevania 2</td></tr>
+ <tr><td>SL1ROM</td><td>Sky Shark</td></tr>
+ <tr><td>SNROM</td><td>Shingen the Ruler</td></tr>
+ <tr><td>SOROM</td><td>Nobunaga's Ambition</td></tr>
+ <tr><th colspan="2">MMC3:</th></tr>
+ <tr><td>TFROM</td><td>Legacy of the Wizard</td></tr>
+ <tr><td>TGROM</td><td>Megaman 4</td></tr>
+ <tr><td>TKROM</td><td>Kirby's Adventure</td></tr>
+ <tr><td>TKSROM</td><td>Ys 3</td></tr>
+ <tr><td>TLROM</td><td>Super Spike V'Ball</td></tr>
+ <tr><td>TLSROM</td><td>Goal! 2</td></tr>
+ <tr><td>TR1ROM</td><td>Gauntlet</td></tr>
+ <tr><td>TQROM</td><td>Pinbot</td></tr>
+ <tr><td>TSROM</td><td>Super Mario Bros. 3</td></tr>
+ <tr><td>TVROM</td><td>Rad Racer 2</td></tr>
+ <tr><th colspan="2">MMC5:</th></tr>
+ <tr><td>EKROM</td><td>Gemfire</td></tr>
+ <tr><td>ELROM</td><td>Castlevania 3</td></tr>
+ <tr><td>ETROM</td><td>Nobunaga's Ambition 2</td></tr>
+ <tr><td>EWROM</td><td>Romance of the Three Kingdoms 2</td></tr>
+ <tr><th colspan="2">MMC6:</th></tr>
+ <tr><td>HKROM</td><td>Star Tropics</td></tr>
+ <tr><th colspan="2">Nintendo Discrete Logic:</th></tr>
+ <tr><td>CNROM</td><td>Gotcha</td></tr>
+ <tr><td>CPROM</td><td>Videomation</td></tr>
+ <tr><td>GNROM</td><td>Super Mario Bros./Duck Hunt</td></tr>
+ <tr><td>MHROM</td><td></td></tr>
+ <tr><td>NROM-128</td><td>Mario Bros.</td></tr>
+ <tr><td>NROM-256</td><td>Super Mario Bros.</td></tr>
+ <tr><td>RROM-128</td><td></td></tr>
+ <tr><td>UNROM</td><td>Megaman</td></tr>
+ </table>
+ </p>
+ <a name="features-expansion-fds"><h4>Famicom Disk System</h4></a>
+ <p>
+        You will need the FDS BIOS ROM image in the base FCE Ultra directory.
+        It must be named "disksys.rom".  FCE Ultra will not load FDS games
+	without this file.
+ </p>
+        Two types of FDS disk images are supported:  disk images with the
+        FWNES-style header, and disk images with no header.  The number
+	of sides on headerless disk images is calculated by the total file
+	size, so don't put extraneous data at the end of the file.
+ <p>
+        You should make backups of all of your FDS games you use with FCE
+        Ultra.  This is because FCE Ultra will write the disk image back to
+        the storage medium, and the disk image in RAM might have been corrupted
+        because of inaccurate emulation(this case is not likely to occur, but
+        it could occur).
+ </p>
+ <a name="features-expansion-genie"><h4>Game Genie</h4></a>
+ <p>
+        The Game Genie ROM image is loaded from the file "gg.rom" in the
+        base directory the first time Game Genie emulation is enabled and
+        a ROM image is loaded since the time FCE Ultra has run.
+</p><p>
+        The ROM image may either be the 24592 byte iNES-format image, or
+        the 4352 raw ROM image.
+</p><p>
+        Remember that enabling/disabling Game Genie emulation will not take
+        effect until a new game is loaded(this statement shouldn't concern
+        any of the "run once" command-line driven ports).
+ </p>
+ <a name="features-expansion-vs"><h4>VS Unisystem</h4></a>
+ <p>
+FCE Ultra currently only supports VS Unisystem ROM images in the
+iNES format.  DIP switches and coin insertion are both emulated.  
+The following games are supported, and have palettes provided(though not 
+necessarily 100% accurate or complete):
+	<ul>
+         <li />Dr. Mario
+         <li />VS Castlevania
+	 <li />VS Duck Hunt
+         <li />VS Excitebike
+         <li />VS Gradius
+	 <li />VS Golf
+	 <li />VS Hogan's Alley
+         <li />VS Ice Climber
+         <li />VS Pinball
+         <li />VS Platoon
+         <li />VS RBI Baseball
+         <li />VS Sky Kid
+         <li />VS Slalom
+	 <li />VS Star Luster
+	 <li />VS Stroke and Match Golf
+         <li />VS Super Mario Bros
+	 <li />VS Tetris
+         <li />VS The Goonies
+	</ul>
+ </p>
+ <a name="features-ips"><h3>Automatic IPS Patching</h3></a>
+ <p>
+        Place the IPS file in the same directory as the file to load,
+        and name it filename.ips.
+</p>
+	<pre>
+        Examples:       Boat.nes - Boat.nes.ips
+                        Boat.zip - Boat.zip.ips
+                        Boat.nes.gz - Boat.nes.gz.ips
+                        Boat     - Boat.ips
+        </pre>
+	<p>
+        Some operating systems and environments will hide file extensions.
+        Keep this in mind if you are having trouble.
+	</p>
+	<p>
+        Patching is supported for all supported formats(iNES, FDS, UNIF, and
+        NSF), but it will probably only be useful for the iNES format.  It
+        can be used with the FDS format, but be warned that it will permanently 
+        patch your disk image, as the disk image is written back to disk
+        when the game is unloaded(unless the disk image is in a zip file, in
+        which case it isn't written back to disk).  UNIF files can't be
+        patched well with the IPS format because they are chunk-based with no
+        fixed offsets.
+ </p>
+ <hr width="100%">
+ <a name="using"><h2>Using FCE Ultra</h2></a>
+ <p>
+ 
+ </p>
+ <a name="using-keys"><h3>Key Assignments</h3></a>
+ <p>
+ <table border>
+ <tr><th>Key:</th><th>Action:</th></tr>
+ <tr><td>F5</td><td>Save state.</td></tr>
+ <tr><td>F7</td><td>Load state.</td></tr>
+ <tr><td>0-9</td><td>Select save state slot.</td></tr>
+ <tr><td>F9</td><td>Save screen snapshot.</td></tr>
+ <tr><td>F10</td><td>Reset.</td></tr>
+ <tr><td>F11</td><td>Hard reset(toggle power switch).</td></tr>
+ <tr><td>F12</td><td>Exit.</td></tr>
+ </table>
+ </p>
+ <a name="using-keys-vs"><h4>VS Unisystem</h4></a>
+ <p>  
+ <table border>
+ <tr><th>Key:</th><th>Action:</th></tr>
+ <tr><td>F8</td><td>Insert coin.</td></tr>
+ <tr><td>F6</td><td>Show/Hide dip switches.</td></tr>
+ <tr><td>1-8</td><td>Toggle dip switches(when dip switches are shown).</td></tr>
+ </table>
+ </p> 
+ <a name="using-keys-fds"><h4>Famicom Disk System</h4></a>
+ <p>
+ <table border>
+ <tr><th>Key:</th><th>Action:</th></tr>
+ <tr><td>F6</td><td>Select disk and disk side.</td></tr>
+ <tr><td>F8</td><td>Eject or Insert disk.</td></tr>
+ </table>
+ </p>
+ <a name="using-keys-gamepad"><h4>Game Pad</h4></a>
+ <p>  
+ <table border>
+ <tr><th>Key:</th><th nowrap>Button on Emulated Gamepad:</th></tr>
+ <tr><td>Left Control</td><td>B</td></tr>
+ <tr><td>Left Alt</td><td>A</td></tr>
+ <tr><td>Enter/Return</td><td>Start</td></tr>
+ <tr><td>Tab</td><td>Select</td></tr>
+ <tr><td>Cursor Down</td><td>Down</td></tr>
+ <tr><td>Cursor Up</td><td>Up</td></tr>
+ <tr><td>Cursor Left</td><td>Left</td></tr>
+ <tr><td>Cursor Right</td><td>Right</td></tr>
+ </table>
+ </p> 
+ <a name="using-keys-powerpad"><h4>Power Pad</h4></a>
+ <p>  
+ <table border>
+  <tr><th colspan="4">Side B</th></tr>
+  <tr><td width="25%">O</td><td width="25%">P</td>
+	<td width="25%">[</td><td width="25%">]</td></tr>
+  <tr><td>K</td><td>L</td><td>;</td><td>'</td></tr>
+  <tr><td>M</td><td>,</td><td>.</td><td>/</td></tr>
+ </table>
+ <br />
+ <table border>
+  <tr><th colspan="4">Side A</th></tr>           
+  <tr><td width="25%"></td><td width="25%">P</td>
+        <td width="25%">[</td><td width="25%"></td></tr>
+  <tr><td>K</td><td>L</td><td>;</td><td>'</td></tr>
+  <tr><td></td><td>,</td><td>.</td><td></td></tr>
+ </table>
+ </p> 
+ <a name="using-keys-fkb"><h4>Family Keyboard</h4></a>
+ <p>  
+         All emulated keys are mapped to the closest open key on the PC
+          keyboard, with a few exceptions.  The emulated "@" key is
+          mapped to the "`"(grave) key, and the emulated "kana" key
+          is mapped to the "Insert" key(in the 3x2 key block above the
+          cursor keys).
+ </p> 
+ <p>
+ To enable or disable Family Keyboard input, press the "Scroll Lock" key.
+ When Family Keyboard input is enabled, FCE Ultra will also attempt
+ to prevent any key presses from being passed to the GUI or system.
+ </p>
+ <a name="using-cli"><h3>Command-line</h3></a>
+ <p>
+  FCE Ultra supports arguments passed on the command line.  <b>The MS Windows
+  port only allows for a file name to be specified, however.</b>  Arguments
+  are taken in the form of "-parameter value".  Some arguments are valueless.
+  Arguments that have both a parameter and a value will be saved in the
+  configuration file, with the exception being the network-play arguments.
+  All ports other than the MS Windows one recognize the following parameters:
+  </p>
+  <p>
+  <table border>
+   <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
+   <tr><td>-cpalette x</td><td>string</td><td>0</td><td>Load a custom global palette from file "x".  Specifying "0" will cause FCE Ultra to stop using the custom global palette.</td></tr>
+   <tr><td>-ntsccol x</td><td>boolean</td><td>0</td><td>If value is true, enable automatic generation and use of an NTSC NES' colors.</td></tr>
+   <tr><td>-pal x</td><td>boolean</td><td>0</td><td>If value is true, emulate a PAL NES.  Otherwise emulate an NTSC NES.</td></tr>
+   <tr><td>-sound x</td><td>integer</td><td>48000(44100 for DOS)</td><td>Sets the playback rate.  If it is zero, sound emulation(and output) is disabled.</td></tr>
+   <tr><td>-soundvol x</td><td>integer</td><td>100</td><td>Sound volume.</td></tr>
+   <tr><td>-soundq x</td><td>boolean</td><td>0</td><td>If value is true, enable high-quality sound emulation.</td></tr>
+   <tr><td>-input1 x <br /><i>and</i><br />-input2 x</td><td>string</td><td>gamepad</td><td>Select input device for input port 1 or 2.  Valid strings are "none", "gamepad", "zapper", "powerpada", and "powerpadb".</td></tr>
+   <tr><td>-fcexp x</td><td>string</td><td>none</td><td>Select Famicom expansion port device.  Valid strings are "none", "shadow", "arkanoid", "4player", and "fkb".</td></tr>
+   <tr><td>-nofs x</td><td>boolean</td><td>0</td><td>If value is true, disable four-score emulation.</td></tr>
+   <tr><td>-gg</td><td>boolean</td><td>0</td><td>Enable Game Genie emulation.</td></tr>
+   <tr><td>-subase x</td><td>boolean</td><td>0</td><td>If value is true, Save extra game data files under the base directory.</td></tr>
+   <tr><td nowrap>-snapname x</td><td>boolean</td><td>0</td><td>If value is true, use an alternate naming scheme(file base and numeric) for screen snapshots.</td></tr>
+   <tr><td nowrap>-nothrottle x</td><td>boolean</td><td>0</td><td>If value is true, disable the speed throttling that is used when sound emulation is disabled.</td></tr>
+   <tr><td>-clipsides x</td><td>boolean</td><td>0</td><td>If value is true, clip leftmost and rightmost 8 columns of pixels of the video output.</td></tr>
+   <tr><td>-slstart x</td><td>integer</td><td>8</td>
+	<td>First scanline to be rendered in NTSC emulation mode(when PAL emulation is disabled).</td></tr>
+   <tr><td>-slend x</td><td>integer</td><td>231</td>
+	<td>Last scanline to be rendered in NTSC emulation mode.</td></tr>
+     <tr><td nowrap>-slstartp x</td><td>integer</td><td>0</td>
+        <td>First scanline to be rendered in PAL emulation mode.</td></tr>
+   <tr><td>-slendp x</td><td>integer</td><td>239</td>
+        <td>Last scanline to be rendered in PAL emulation mode.</td></tr>
+  </table>
+ </p>
+ <a name="using-cli-sdl"><h4>SDL</h4></a>
+ <p>   
+ <table border>
+  <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
+  <tr><td>-joyx y</td><td>integer,integer</td><td>0</td><td>Enable joystick #y for virtual joystick #x(both starting at "1").</td></tr>
+  <tr><td>-stretchx/-stretchy x</td><td>boolean</td><td>0/0</td><td>Stretch to fill surface on x or y axis(fullscreen, only with OpenGL).</td></tr>
+  <tr><td>-fs</td><td>boolean</td><td>0</td><td>Full screen mode.</td></tr>
+ </table>
+ </p>
+ <a name="using-cli-dos"><h4>DOS</h4></a>
+ <p>
+ <table border>
+ </table>
+ </p>
+ <a name="using-cli-dos"><h4>Linux SVGAlib</h4></a> 
+ <p>
+ <table border>
+ </table>
+ </p>   
+ <hr width="100%">
+ <a name="credits"><h2>Credits</h2></a>
+ <p>
+ <table border width="100%">
+  <tr><th>Name:</th><th>Contribution(s):</th></tr>
+  <tr><td>\Firebug\</td><td>High-level mapper information.</td></tr>
+  <tr><td>Bero</td><td>Original FCE source code.</td></tr>
+  <tr><td>Brad Taylor</td><td>NES sound information.</td></tr>
+  <tr><td>Chris Hickman</td><td>Archaic Ruins.</td></tr>
+  <tr><td>Donald Moore</td><td>DC PasoFami NES packs.</td></tr>
+  <tr><td>Fredrik Olson</td><td>NES four-player adapter information.</td></tr>
+  <tr><td>Gilles Vollant</td><td>PKZIP file loading functions.</td></tr>
+  <tr><td>goroh</td><td>Various documents.</td></tr>
+  <tr><td>Info-ZIP</td><td><a href="http://www.gzip.org/zlib/">ZLIB</a></td></tr>
+  <tr><td>Jeremy Chadwick</td><td>General NES information.</td></tr>
+  <tr><td>Justin Smith</td><td>Good stuff.</td></tr>
+  <tr><td>Kevin Horton</td><td>Low-level NES information and sound information.</td></tr>
+  <tr><td>Ki</td><td>Various technical information.</td></tr>
+  <tr><td>Mark Knibbs</td><td>Various NES information.</td></tr>
+  <tr><td>Marat Fayzullin</td><td>General NES information.</td></tr>
+  <tr><td>Matthew Conte</td><td>Sound information.</td></tr>
+  <tr><td>nori</td><td>FDS sound information.</td></tr>
+  <tr><td>Quietust</td><td>VRC7 sound translation code by The Quietust (quietust at ircN dort org).</td></tr>
+  <tr><td>R. Hoelscher</td><td>Famicom four-player adapter information.</td></tr>
+  <tr><td>Rob Mocca</td><td>DC PasoFami NES packs, testing.</td></tr>
+  <tr><td>Sean Whalen</td><td>Node 99</td></tr>
+  <tr><td>Tatsuyuki Satoh</td><td>OPL2 emulator used for the VRCVII sound emulation.</td></tr>
+  <tr><td>TheRedEye</td><td>ROM images, testing.</td></tr>
+ </table>
+ </p>
+ </body>
+</html>
