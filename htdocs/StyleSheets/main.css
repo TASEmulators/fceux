@@ -1,0 +1,77 @@
+@media all {         
+
+	.center {
+		text-align: center;
+	}
+
+    .image {
+            border-width:0px;
+    }
+
+	.navbox { 
+		background: #e0e0e0; 
+		border: 1px solid black; 
+		color: #000000;
+		font-weight: bold; 
+		padding-top: 0.3em; 
+		padding-bottom: 0.3em; 
+		padding-left: 1%;
+		padding-right: 1%;
+		text-align: center; 
+		width: 98%; 
+	}
+
+	.navbox a {
+		 white-space: nowrap;
+	}
+
+	.naventry {
+		 white-space: nowrap;
+	}
+
+	.mainbox {
+		background: #e0e0e0;
+		border: 1px solid black;
+		color: #000000;
+		margin-top: 1.5em;
+	}
+
+	.boxhead { 
+                background: #444444;
+		color: #b0b4e4;
+		font-size: larger; 
+		font-weight: bolder;
+		margin: 1px;
+		padding: 0.25em;
+	}
+
+	.boxsubhead {
+                background: #444444;
+                color: #b0b4e4;
+		font-size: 100%;
+                font-weight: bolder;
+                padding: 0.25em;
+	}
+
+	.boxbody {
+		margin: 1px;
+		padding: 0.25em;
+	}
+
+	.sflogo {
+		 border: none;
+		 position: absolute;
+		 right: 0px;		
+		 top: 0px;
+	}
+}
+
+@media print {
+	.sflogo {
+		display: none;
+	}
+
+	.boxhead {
+		border-bottom: 1px solid black;
+	}
+}
