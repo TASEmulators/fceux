@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <unistd.h> //mbgm erge 7/17/06 removed
-#ifdef WIN32
+#ifdef MSVC
 #include <windows.h>
 #endif
 
@@ -235,7 +235,7 @@ void FCEUI_StopMovie(void)
  if(current > 0) StopRecording();
 }
 
-#ifdef WIN32
+#ifdef MSVC
 #include "process.h"
 void executeCommand(const char* cmd)
 {
@@ -255,7 +255,7 @@ void executeCommand(const char* cmd)
 int justAutoConverted=0;
 static const char* convertToFCM(const char *fname, char *buffer)
 {
-#ifdef WIN32
+#ifdef MSVC
 	justAutoConverted=0;
 
 	// convert to fcm if not already
@@ -350,7 +350,7 @@ void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
 void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
 static void ResetInputTypes()
 {
-#ifdef WIN32
+#ifdef MSVC
  extern int UsrInputType[3];
  UsrInputType[0] = SI_GAMEPAD;
  UsrInputType[1] = SI_GAMEPAD;
@@ -867,7 +867,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 {
 	int frameDisplayOn = current != 0 && frame_display;
 	extern int howlong;
-#if WIN32
+#if MSVC
 	extern int32 fps_scale;
 #else
 	int32 fps_scale=256;

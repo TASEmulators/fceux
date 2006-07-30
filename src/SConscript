@@ -65,12 +65,26 @@ sdl_libflags = sdl_libflags_pipe.read();
 for flag in sdl_libflags.split(' '):
     if flag.find("-L") == 0:
         sdl_libpath.append(flag.strip("-L"));
-    else:
+    elif flag.find("-l") == 0:
         sdl_libs.append(flag.strip("-l"));
+    else:
+        env['LINKFLAGS'] += " " + flag;
 sdl_libflags_pipe.close();
 
 # add zlib
 libs = sdl_libs;
 libs.append('z');
 
-env.Program('fceu', file_list, CCFLAGS=sdl_cflags, LIBS=libs, LIBPATH=sdl_libpath)
+# include sdl cflags
+env['CCFLAGS'] += sdl_cflags;
+
+#special flags for cygwin
+print "platform: " + env['PLATFORM']
+if env['PLATFORM'] == 'cygwin':
+  env['CCFLAGS'] += " -mno-cygwin"
+  #env['LINKFLAGS'] += " -mno-cygwin"
+  libs.extend(['ddraw','dinput','dsound','gdi32','dxguid','winmm','shell32','wsock32','comdlg32','ole32']);
+ 
+print env['CCFLAGS']
+
+env.Program('fceu', file_list, LIBS=libs, LIBPATH=sdl_libpath)

@@ -1,5 +1,10 @@
 Items to be completed before 2.0 release
 
+FASTAPASS / FP_FASTAPASS / Are these archaic? They suck - ??
+
+Doxygen integration - ??
+ * website integration
+
 Linux build - soules
  * clean-up scons files to manage SDL variables properly
  * go through #def variables and figure out which we need and which we don't

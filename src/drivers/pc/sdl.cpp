@@ -202,9 +202,9 @@ char *GetKeyboard(void)
 #include <windows.h>
 
  /* Stupid SDL */
- #ifdef main
- #undef main
- #endif
+ //#ifdef main
+ //#undef main
+ //#endif
 #endif
 
 #ifndef EXTGUI

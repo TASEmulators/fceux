@@ -23,7 +23,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
  int16 *dest;
  int x;
 
-#ifndef WIN32
+#ifndef MSVC
  if(!soundlog) return;
 #else
  if(!soundlog && !FCEUI_AviIsRecording()) return;
@@ -45,7 +45,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
  if(soundlog)
 	 wsize+=fwrite(temp,1,Count*sizeof(int16),soundlog);
 
-#ifdef WIN32
+#ifdef MSVC
  if(FCEUI_AviIsRecording())
  {
 	 extern int bittage;
