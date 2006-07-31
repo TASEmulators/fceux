@@ -3,10 +3,16 @@ opts = Options()
 opts.Add('PSS_STYLE', 'Path separator style', 1)
 opts.Add('LSB_FIRST', 'Least significant byte first?', 1)
 
-#Import('env')
 env = Environment(options = opts,
                   CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
                               'LSB_FIRST' : '${LSB_FIRST}'})
+
+#bring in environment CCFLAGS and LINKFLAGS
+import os
+if os.environ.has_key('CCFLAGS'):
+  env['CCFLAGS'] = os.environ['CCFLAGS'];
+if os.environ.has_key('LINKFLAGS'):
+  env['LINKFLAGS'] = os.environ['LINKFLAGS'];
 
 print "platform: ", env['PLATFORM']
 
@@ -25,7 +31,7 @@ if not conf.CheckLib('z'):
   print 'Did not find libz.a or z.lib, exiting!'
   Exit(1)
 if conf.CheckFunc('asprintf'):
-  conf.env['CCFLAGS'].append("-DHAVE_ASPRINTF");
+  conf.env['CCFLAGS'] += " -DHAVE_ASPRINTF";
 
 
 env = conf.Finish()

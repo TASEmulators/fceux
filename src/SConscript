@@ -62,7 +62,7 @@ for flag in sdl_libflags.split(' '):
         sdl_libs.append(flag.strip("-l"));
     else:
         print "extra link flag: ", flag;
-        env['LINKFLAGS'] += flag;
+        env['LINKFLAGS'] += " " + flag;
         
 sdl_libflags_pipe.close();
 
@@ -71,7 +71,7 @@ env['LIBS'].append('z');
 env['LIBS'].extend(sdl_libs);
 
 # include sdl cflags
-env['CCFLAGS'] += sdl_cflags;
+env['CCFLAGS'] += " " + sdl_cflags;
 
 print env['LINKFLAGS']
 
