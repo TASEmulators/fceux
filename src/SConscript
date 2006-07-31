@@ -41,15 +41,8 @@ drivers/pc/SConscript
 #palettes/SConscript
 Import('file_list')
 
-# XXX path separator fixed right now
-opts = Options()
-opts.Add('PSS_STYLE', 'Path separator style', 1)
-opts.Add('LSB_FIRST', 'Least significant byte first?', 1)
-
-env = Environment(options = opts,
-                  CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
-                              'LSB_FIRST' : '${LSB_FIRST}'})
-
+Import('env')
+                              
 # use sdl-config to get the cflags and libpath
 import os;
 sdl_cflags_pipe = os.popen("sdl-config --cflags");
@@ -68,23 +61,18 @@ for flag in sdl_libflags.split(' '):
     elif flag.find("-l") == 0:
         sdl_libs.append(flag.strip("-l"));
     else:
-        env['LINKFLAGS'] += " " + flag;
+        print "extra link flag: ", flag;
+        env['LINKFLAGS'] += flag;
+        
 sdl_libflags_pipe.close();
 
 # add zlib
-libs = sdl_libs;
-libs.append('z');
+env['LIBS'].append('z');
+env['LIBS'].extend(sdl_libs);
 
 # include sdl cflags
 env['CCFLAGS'] += sdl_cflags;
 
-#special flags for cygwin
-print "platform: " + env['PLATFORM']
-if env['PLATFORM'] == 'cygwin':
-  env['CCFLAGS'] += " -mno-cygwin"
-  #env['LINKFLAGS'] += " -mno-cygwin"
-  libs.extend(['ddraw','dinput','dsound','gdi32','dxguid','winmm','shell32','wsock32','comdlg32','ole32']);
- 
-print env['CCFLAGS']
+print env['LINKFLAGS']
 
-env.Program('fceu', file_list, LIBS=libs, LIBPATH=sdl_libpath)
+env.Program('fceu', file_list, LIBPATH=sdl_libpath)
