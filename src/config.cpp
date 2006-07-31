@@ -1,11 +1,16 @@
-#include "types.h"
-#include "fceu.h"
+/// \file
+/// \brief A poorly documented file.
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+#include "fceu.h"
+
 static char *aboutString = 0;
 
+///returns a string suitable for use in an aboutbox
 char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
 	FCEU_NAME_AND_VERSION"\n\
@@ -23,12 +28,11 @@ FCEUX\n\
 \n\
 "__TIME__" "__DATE__"\n";
 
-		char *compilerString = FCEUD_GetCompilerString();
+	char *compilerString = FCEUD_GetCompilerString();
 
 	//allocate the string and concatenate the template with the compiler string
 	if(aboutString) free(aboutString);
 	aboutString = (char*)malloc(strlen(aboutTemplate) + strlen(compilerString) + 1);
-	strcpy(aboutString,aboutTemplate);
-	strcat(aboutString,compilerString);
+	sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
 	return aboutString;
 }

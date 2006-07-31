@@ -867,7 +867,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 {
 	int frameDisplayOn = current != 0 && frame_display;
 	extern int howlong;
-#if MSVC
+#if MSVC	
 	extern int32 fps_scale;
 #else
 	int32 fps_scale=256;
