@@ -28,51 +28,21 @@ x6502.cpp
 movie.cpp
 unzip.c""")
 
-Export('file_list')
+subdirs = Split("""
+boards
+drivers/common
+drivers/sdl
+fir
+input
+mappers""")
+#palettes
 
-SConscript(Split("""
-boards/SConscript
-input/SConscript
-fir/SConscript
-mappers/SConscript
-drivers/common/SConscript
-drivers/sdl/SConscript
-"""))
-#palettes/SConscript
-Import('file_list')
+for dir in subdirs:
+  subdir_files = SConscript('%s/SConscript' % dir)
+  file_list.append(subdir_files)
 
 Import('env')
-                              
-# use sdl-config to get the cflags and libpath
-import os;
-sdl_cflags_pipe = os.popen("sdl-config --cflags");
-sdl_cflags = sdl_cflags_pipe.read();
-sdl_cflags = sdl_cflags.rstrip(os.linesep);
-sdl_cflags_pipe.close();
-
-sdl_libpath = [];
-sdl_libs = [];
-
-sdl_libflags_pipe = os.popen("sdl-config --libs");
-sdl_libflags = sdl_libflags_pipe.read();
-for flag in sdl_libflags.split(' '):
-    if flag.find("-L") == 0:
-        sdl_libpath.append(flag.strip("-L"));
-    elif flag.find("-l") == 0:
-        sdl_libs.append(flag.strip("-l"));
-    else:
-        print "extra link flag: ", flag;
-        env['LINKFLAGS'] += " " + flag;
-        
-sdl_libflags_pipe.close();
-
-# add zlib and sdl libs
-env['LIBS'].append('z');
-env['LIBS'].extend(sdl_libs);
-
-# include sdl cflags
-env['CCFLAGS'] += " " + sdl_cflags;
 
 print env['LINKFLAGS']
 
-env.Program('fceu', file_list, LIBPATH=sdl_libpath)
+env.Program('fceu', file_list)

@@ -1,4 +1,3 @@
-Import('file_list')
 my_list =  Split("""
 arkanoid.cpp
 bworld.cpp
@@ -16,7 +15,7 @@ suborkb.cpp
 toprider.cpp
 zapper.cpp
 """)
+
 for x in range(len(my_list)):
   my_list[x] = 'input/' + my_list[x]
-file_list = my_list + file_list
-Export('file_list')
+Return('my_list')

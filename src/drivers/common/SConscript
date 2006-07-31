@@ -1,4 +1,3 @@
-Import('file_list')
 my_list = Split("""
 args.cpp
 cheat.cpp
@@ -10,7 +9,7 @@ scale3x.cpp
 scalebit.cpp
 vidblit.cpp
 """)
+
 for x in range(len(my_list)):
   my_list[x] = 'drivers/common/' + my_list[x]
-file_list = my_list + file_list
-Export('file_list')
+Return('my_list')

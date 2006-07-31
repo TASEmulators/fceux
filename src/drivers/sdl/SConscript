@@ -1,4 +1,3 @@
-Import('file_list')
 my_list =  Split("""
 input.cpp
 main.cpp
@@ -14,8 +13,6 @@ unix-netplay.cpp
 #sdl-opengl.cpp
 #sdl-opengl.h
 
-
 for x in range(len(my_list)):
   my_list[x] = 'drivers/sdl/' + my_list[x]
-file_list = my_list + file_list
-Export('file_list')
+Return('my_list')

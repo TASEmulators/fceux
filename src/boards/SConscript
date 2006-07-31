@@ -1,4 +1,3 @@
-Import('file_list')
 my_list =  Split("""
 01-222.cpp
 112.cpp
@@ -54,8 +53,7 @@ supervision.cpp
 t-262.cpp
 tengen.cpp
 """)
+
 for x in range(len(my_list)):
   my_list[x] = 'boards/' + my_list[x]
-file_list = my_list + file_list
-
-Export('file_list')
+Return('my_list')
