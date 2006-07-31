@@ -89,6 +89,7 @@
 #define SCAN_BL_PAGEDOWN	(0x51|0x80)
 #define SCAN_BL_CURSORRIGHT	(0x4D|0x80)
 
+#define SCAN_PRINTSCREEN 0xB7
 #define SCAN_SCROLLLOCK         0x46
 /* Keys often found in the key pad area. */
 #define SCAN_NUMLOCK		0x45

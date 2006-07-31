@@ -287,10 +287,11 @@ int FCEUI_AviIsRecording(void);
 void FCEUD_AviRecordTo(void);
 void FCEUD_AviStop(void);
 
-/* Command input mapping */
+///A callback that the emu core uses to poll the state of a given emulator command key 
 typedef int TestCommandState(int cmd);
+///Signals the emu core to poll for emulator commands and take actions
 void FCEUI_HandleEmuCommands(TestCommandState* testfn);
-void FCEUD_CmdOpen(void);
+
 
 /* Emulation speed */
 enum EMUSPEED_SET
@@ -309,6 +310,9 @@ int FCEUD_ShowStatusIcon(void);
 void FCEUD_ToggleStatusIcon(void);
 void FCEUD_HideMenuToggle(void);
 
+///signals the driver to perform a file open GUI operation
+void FCEUD_CmdOpen(void);
+
 //new merge-era driver routines here:
 
 //signals that the cpu core hit a breakpoint
@@ -324,5 +328,6 @@ void FCEUD_UpdateNTView(int scanline, int drawall);
 
 //the driver might should update its PPUView (only used if debugging support is compiled in)
 void FCEUD_UpdatePPUView(int scanline, int drawall);
+
 
 #endif /* __DRIVER_H_ */
