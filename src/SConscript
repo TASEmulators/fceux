@@ -36,7 +36,7 @@ input/SConscript
 fir/SConscript
 mappers/SConscript
 drivers/common/SConscript
-drivers/pc/SConscript
+drivers/sdl/SConscript
 """))
 #palettes/SConscript
 Import('file_list')
