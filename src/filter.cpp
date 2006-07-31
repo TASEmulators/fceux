@@ -1,3 +1,6 @@
+/// \file
+/// \brief Sound filtering code
+
 #include <math.h>
 #include <stdio.h>
 #include "types.h"

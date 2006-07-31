@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \file
+/// \brief This file contains all code for coordinating the mapping in of the address space external to the NES.
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,12 +34,6 @@
 #include "x6502.h"
 
 #include "general.h"
-
-/*
-   This file contains all code for coordinating the mapping in of the
-   address space external to the NES.
-   It's also (ab)used by the NSF code.
-*/
 
 uint8 *Page[32],*VPage[8];
 uint8 **VPageR=VPage;

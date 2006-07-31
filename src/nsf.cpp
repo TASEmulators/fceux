@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \file
+/// \brief implements a built-in NSF player.  This is a perk--not a part of the emu core
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

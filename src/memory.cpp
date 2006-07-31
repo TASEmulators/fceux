@@ -18,13 +18,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <stdlib.h>
+/// \file
+/// \brief memory management services provided by FCEU core
 
+#include <stdlib.h>
 #include "types.h"
 #include "fceu.h"
 #include "memory.h"
 #include "general.h"
 
+///allocates the specified number of bytes. exits process if this fails
 void *FCEU_gmalloc(uint32 size)
 {
  void *ret;
@@ -37,6 +40,7 @@ void *FCEU_gmalloc(uint32 size)
  return ret;
 }
 
+///allocates the specified number of bytes. returns null if this fails
 void *FCEU_malloc(uint32 size)
 {
  void *ret;
@@ -49,52 +53,14 @@ void *FCEU_malloc(uint32 size)
  return ret;
 }
 
-void FCEU_free(void *ptr)    // Might do something with this and FCEU_malloc later...
-{
- free(ptr);
-}
-
+///frees memory allocated with FCEU_gmalloc
 void FCEU_gfree(void *ptr)
 {
  free(ptr);
 }
 
-void FASTAPASS(3) FCEU_memmove(void *d, void *s, uint32 l)
+///frees memory allocated with FCEU_malloc
+void FCEU_free(void *ptr)    // Might do something with this and FCEU_malloc later...
 {
- uint32 x;
- int t;
-
- /* Type really doesn't matter. */
- t=(int)d;
- t|=(int)s;
- t|=(int)l;
-
- if(t&3)    // Not 4-byte aligned and/or length is not a multiple of 4.
- {
-  uint8 *tmpd, *tmps;  
-
-  tmpd = (uint8*)d; //mbg merge 7/17/06 added cast
-  tmps = (uint8*)s; //mbg merge 7/17/06 added cast
-
-  for(x=l;x;x--)  // This could be optimized further, though(more tests could be performed).
-  {
-   *tmpd=*tmps;
-   tmpd++;
-   tmps++;
-  }
- }
- else
- {
-  uint32 *tmpd, *tmps;
-
-  tmpd = (uint32*)d; //mbg merge 7/17/06 added cast
-  tmps = (uint32*)s; //mbg merge 7/17/06 added cast
-
-  for(x=l>>2;x;x--)
-  {
-   *tmpd=*tmps;
-   tmpd++;
-   tmps++;
-  }
- }
+ free(ptr);
 }

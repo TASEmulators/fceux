@@ -1,5 +1,5 @@
 /// \file
-/// \brief A poorly documented file.
+/// \brief Contains methods related to the build configuration
 
 #include <string.h>
 #include <stdio.h>

@@ -1,15 +1,12 @@
-/*
- * RFC 1321 compliant MD5 implementation,
- * by Christophe Devine <devine@cr0.net>;
- * this program is licensed under the GPL.
- */
+/// \file
+/// brief RFC 1321 compliant MD5 implementation,
+/// RFC 1321 compliant MD5 implementation,
+/// by Christophe Devine <devine@cr0.net>;
+/// this program is licensed under the GPL.
 
-/* Modified October 3, 2003, to remove testing code, and add
-   include of "types.h".
- 
-   Added simple MD5 to ASCII string conversion function.
-   -Xodnizel
-*/
+//Modified October 3, 2003, to remove testing code, and add include of "types.h".
+//Added simple MD5 to ASCII string conversion function.
+// -Xodnizel   
 
 #include <string.h>
 #include "types.h"
