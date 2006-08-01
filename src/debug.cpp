@@ -1,3 +1,6 @@
+/// \file 
+/// \brief Implements core debugging facilities
+
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -79,7 +82,6 @@ char *cdlogfilename;
 //char loadedcdfile[MAX_PATH];
 static int indirectnext;
 
-//records whether loggingCD is enabled
 int debug_loggingCD;
 
 //called by the cpu to perform logging if CDLogging is enabled
@@ -166,13 +168,15 @@ void LogCDData(){
 //-----------debugger stuff
 
 watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
-int badopbreak;
 int iaPC;
 uint32 iapoffset; //mbg merge 7/18/06 changed from int
-int step,stepout,jsrcount;
 int u; //deleteme
 int skipdebug; //deleteme
 int numWPs; 
+
+static DebuggerState dbgstate;
+
+DebuggerState &FCEUI_Debugger() { return dbgstate; }
 
 void BreakHit() {
 	FCEUI_SetEmulationPaused(1); //mbg merge 7/19/06 changed to use EmulationPaused()
@@ -320,41 +324,45 @@ int condition(watchpointinfo* wp)
 // ################################## End of SP CODE ###########################
 
 
-//extern int step;
-//extern int stepout;
-//extern int jsrcount;
+///fires a breakpoint
 void breakpoint() {
 	int i;
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
 
+	//inspect the current opcode
 	opcode[0] = GetMem(_PC);
 	
-	if(badopbreak && (opsize[opcode[0]] == 0))BreakHit();
+	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
+	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit();
 
-	if (stepout) {
-		if (opcode[0] == 0x20) jsrcount++;
+	//if we're stepping out, track the nest level
+	if (dbgstate.stepout) {
+		if (opcode[0] == 0x20) dbgstate.jsrcount++;
 		else if (opcode[0] == 0x60) {
-			if (jsrcount) jsrcount--;
+			if (dbgstate.jsrcount) dbgstate.jsrcount--;
 			else {
-				stepout = 0;
-				step = 1;
+				dbgstate.stepout = false;
+				dbgstate.step = true;
 				return;
 			}
 		}
 	}
-	if (step) {
-		step = 0;
+
+	//if we're stepping, then we'll always want to break
+	if (dbgstate.step) {
+		dbgstate.step = false;
 		BreakHit();
 		return;
 	}
+
+	//check the step over address and break if we've hit it
 	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
 		watchpoint[64].address = 0;
 		watchpoint[64].flags = 0;
 		BreakHit();
 		return;
 	}
-
 
 	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
 	brk_type = opbrktype[opcode[0]] | WP_X;
@@ -414,8 +422,9 @@ void breakpoint() {
 
 int debug_tracing;
 
+
 void DebugCycle() {
-	if (numWPs | step | stepout | watchpoint[64].flags | badopbreak) 
+	if (numWPs || dbgstate.step || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak) 
 		breakpoint();
 	if(debug_loggingCD) LogCDData();
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway

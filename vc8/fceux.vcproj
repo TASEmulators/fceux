@@ -356,6 +356,10 @@
 			Name="src"
 			>
 			<File
+				RelativePath="..\src\asm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\cart.cpp"
 				>
 			</File>
@@ -1386,6 +1390,10 @@
 				<Filter
 					Name="win"
 					>
+					<File
+						RelativePath="..\src\asm.h"
+						>
+					</File>
 					<File
 						RelativePath="..\src\drivers\win\aviout.cpp"
 						>

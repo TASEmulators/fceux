@@ -51,6 +51,27 @@ static DECLFR(NSF_read);
 
 static int vismode=1;
 
+//mbg 7/31/06 todo - no reason this couldnt be assembled on the fly from actual asm source code. thatd be less obscure.
+//here it is disassembled, for reference
+/*
+00:8000:8D F4 3F  STA $3FF4 = #$00
+00:8003:A2 FF     LDX #$FF
+00:8005:9A        TXS
+00:8006:AD F0 3F  LDA $3FF0 = #$00
+00:8009:F0 09     BEQ $8014
+00:800B:AD F1 3F  LDA $3FF1 = #$00
+00:800E:AE F3 3F  LDX $3FF3 = #$00
+00:8011:20 00 00  JSR $0000
+00:8014:A9 00     LDA #$00
+00:8016:AA        TAX
+00:8017:A8        TAY
+00:8018:20 00 00  JSR $0000
+00:801B:8D F5 EF  STA $EFF5 = #$FF
+00:801E:90 FE     BCC $801E
+00:8020:8D F3 3F  STA $3FF3 = #$00
+00:8023:18        CLC
+00:8024:90 FE     BCC $8024
+*/
 static uint8 NSFROM[0x30+6]=
 {
 /* 0x00 - NMI */

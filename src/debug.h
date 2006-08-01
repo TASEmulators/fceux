@@ -90,4 +90,31 @@ extern uint8 *vnapage[4],*VPage[8];
 extern uint8 PPU[4],PALRAM[0x20],SPRAM[0x100],VRAMBuffer,PPUGenLatch,XOffset;
 extern uint32 RefreshAddr;
 
+extern int debug_loggingCD;
+extern int numWPs; 
+
+///encapsulates the operational state of the debugger core
+class DebuggerState {
+public:
+	///indicates whether the debugger is stepping through a single instruction
+	bool step;
+	///indicates whether the debugger is stepping out of a function call
+	bool stepout;
+	///indicates whether the debugger should break on bad opcodes
+	bool badopbreak;
+	///counts the nest level of the call stack while stepping out
+	int jsrcount;
+
+	///resets the debugger state to an empty, non-debugging state
+	void reset() {
+		numWPs = 0;
+		step = false;
+		stepout = false;
+		jsrcount = 0;
+	}
+};
+
+///retrieves the core's DebuggerState
+DebuggerState &FCEUI_Debugger();
+
 #endif

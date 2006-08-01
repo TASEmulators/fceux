@@ -27,6 +27,7 @@
 #include "..\..\nsf.h"
 #include "..\..\cart.h"
 #include "..\..\ines.h"
+#include "..\..\asm.h"
 #include "tracer.h"
 #include "memview.h"
 #include "cheat.h"
@@ -282,17 +283,6 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	return FALSE; //TRUE;
 }
 
-char *BinToASM(int addr, uint8 *opcode) {
-	static char str[64]={0},chr[5]={0};
-	uint16 tmp,tmp2;
-
-	switch (opcode[0]) {
-		#include "dasm.inc"
-	}
-	
-	return str;
-}
-
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 // ################################## Start of SP CODE ###########################
 
@@ -353,7 +343,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 			
 // ################################## Start of SP CODE ###########################
 
-			a = BinToASM(addr,opcode);
+			a = Disassemble(addr,opcode);
 			
 			if (symbDebugEnabled)
 			{
@@ -396,7 +386,7 @@ char *DisassembleLine(int addr) {
 				strcat(str,"   "); //pad output to align ASM
 				size++;
 			}
-			strcat(strcat(str," "),BinToASM(addr,opcode));
+			strcat(strcat(str," "),Disassemble(addr,opcode));
 		}
 	}
 	if ((c=strchr(str,'='))) *(c-1) = 0;
@@ -429,7 +419,7 @@ char *DisassembleData(int addr, uint8 *opcode) {
 				strcat(str,"   "); //pad output to align ASM
 				size++;
 			}
-			strcat(strcat(str," "),BinToASM(addr,opcode));
+			strcat(strcat(str," "),Disassemble(addr,opcode));
 		}
 	}
 	if ((c=strchr(str,'='))) *(c-1) = 0;
@@ -643,10 +633,7 @@ void DeleteBreak(int sel) {
 
 void KillDebugger() {
 	SendDlgItemMessage(hDebug,302,LB_RESETCONTENT,0,0);
-	numWPs = 0;
-	step = 0;
-	stepout = 0;
-	jsrcount = 0;
+	FCEUI_Debugger().reset();
 	FCEUI_SetEmulationPaused(0); //mbg merge 7/18/06 changed from userpause
 }
 
@@ -659,40 +646,6 @@ int AddAsmHistory(HWND hwndDlg, int id, char *str) {
 		return 0;
 	}
 	return 1;
-}
-
-int ParseASM(unsigned char *output, int addr, char *str) {
-	unsigned char opcode[3] = { 0,0,0 };
-	char astr[128],ins[4];
-
-	if ((!strlen(str)) || (strlen(str) > 0x127)) return 1;
-
-	strcpy(astr,str);
-	str_ucase(astr);
-	sscanf(astr,"%3s",ins); //get instruction
-	if (strlen(ins) != 3) return 1;
-	strcpy(astr,strstr(astr,ins)+3); //heheh, this is probably a bad idea, but let's do it anyway!
-	if ((astr[0] != ' ') && (astr[0] != 0)) return 1;
-
-	//remove all whitespace
-	str_strip(astr,STRIP_SP|STRIP_TAB|STRIP_CR|STRIP_LF);
-
-	//repair syntax
-	chr_replace(astr,'[','(');	//brackets
-	chr_replace(astr,']',')');
-	chr_replace(astr,'{','(');
-	chr_replace(astr,'}',')');
-	chr_replace(astr,';',0);	//comments
-	str_replace(astr,"0X","$");	//miscellaneous
-
-	//This does the following:
-	// 1) Sets opcode[0] on success, else returns 1.
-	// 2) Parses text in *astr to build the rest of the assembled
-	//    data in 'opcode', else returns 1 on error.
-	#include "asm.inc"
-
-	memcpy(output,opcode,3);
-	return 0;
 }
 
 BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -781,7 +734,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							count = 0;
 							for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
 							GetDlgItemText(hwndDlg,100,str,21);
-							if (!ParseASM(patchdata[patchlen],(iaPC+count),str)) {
+							if (!Assemble(patchdata[patchlen],(iaPC+count),str)) {
 								count = iaPC;
 								for (i = 0; i <= patchlen; i++) count += opsize[patchdata[i][0]];
 								if (count > 0x10000) { //note: don't use 0xFFFF!
@@ -967,7 +920,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			
 // ################################## End of SP CODE ###########################
 
-			badopbreak = 0;
+			FCEUI_Debugger().badopbreak = false;
 			debugger_open = 1;
 			FillBreakList(hwndDlg);
 			break;
@@ -975,7 +928,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 		case WM_QUIT:
 			exitdebug:
-			badopbreak = 0;
+			FCEUI_Debugger().badopbreak = 0;
 			debugger_open = 0;
 			DeleteObject(hNewFont);
 			DestroyWindow(hwndDlg);
@@ -1183,7 +1136,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									step = 1;
+									FCEUI_Debugger().step = true;
 									FCEUI_SetEmulationPaused(0);
 									UpdateDebugger();
 								}
@@ -1191,11 +1144,12 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case 106: //Step Out
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused() > 0) {
+									DebuggerState &dbgstate = FCEUI_Debugger();
 									UpdateRegs(hwndDlg);
-									if ((stepout) && (MessageBox(hwndDlg,"Step Out is currently in process. Cancel it and setup a new Step Out watch?","Step Out Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
-									if (GetMem(X.PC) == 0x20) jsrcount = 1;
-									else jsrcount = 0;
-									stepout = 1;
+									if ((dbgstate.stepout) && (MessageBox(hwndDlg,"Step Out is currently in process. Cancel it and setup a new Step Out watch?","Step Out Already Active",MB_YESNO|MB_ICONINFORMATION) != IDYES)) break;
+									if (GetMem(X.PC) == 0x20) dbgstate.jsrcount = 1;
+									else dbgstate.jsrcount = 0;
+									dbgstate.stepout = 1;
 									FCEUI_SetEmulationPaused(0);
 									UpdateDebugger();
 								}
@@ -1209,7 +1163,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 										watchpoint[64].address = (tmp+3);
 										watchpoint[64].flags = WP_E|WP_X;
 									}
-									else step = 1;
+									else FCEUI_Debugger().step = true;
 									FCEUI_SetEmulationPaused(0);
 								}
 								break;
@@ -1231,7 +1185,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								break;
 
 							case 110: //Break on bad opcode
-								badopbreak ^=1;
+								FCEUI_Debugger().badopbreak ^=1;
 								break;
 							case 200: X.P^=N_FLAG; UpdateDebugger(); break;
 							case 201: X.P^=V_FLAG; UpdateDebugger(); break;

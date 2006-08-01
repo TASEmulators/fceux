@@ -689,12 +689,12 @@ void FCEUI_SetEmulationPaused(int val) {
 
 void FCEUI_ToggleEmulationPause(void)
 {
- EmulationPaused = (EmulationPaused&1)^1;
+	EmulationPaused = (EmulationPaused&1)^1;
 }
 
 void FCEUI_FrameAdvance(void)
 {
-  EmulationPaused |= 1|2;
+	EmulationPaused |= 1|2;
 }
 
 static int RewindCounter = 0;

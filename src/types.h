@@ -25,15 +25,11 @@
 #include <stdlib.h>
 
 #define FCEU_VERSION_NUMERIC 9816
-#define FCEU_NAME "FCEUX"
-#define FCEU_VERSION_STRING "1.07"
+#define FCEU_NAME "FCE Ultra"
+#define FCEU_VERSION_STRING "1.9.9"
 #define FCEU_NAME_AND_VERSION FCEU_NAME " " FCEU_VERSION_STRING
-//#define FCEU_VERSION_STRING "1.07"
-//#define FCEU_VERSION "0.98.17"
-//#define FCEUXD_VERSION_STRING "1.0a"
-//#define FCEUXDSP_VERSION_STRING "1.07"
 
-//causes the code fragment argument to be compiled in if the build includes debugging
+///causes the code fragment argument to be compiled in if the build includes debugging
 #ifdef FCEUDEF_DEBUGGER
 #define DEBUG(X) X;
 #else

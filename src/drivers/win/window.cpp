@@ -779,16 +779,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  break; /* Hopefully this won't break DInput... */
 	       }
 	      }
-			   /*
-               if(!(lParam&0x40000000))
-                switch( wParam )
-                {
-                  case VK_F11:FCEUI_PowerNES();break;
-                  case VK_F12:DoFCEUExit();break;
-                  //case VK_F2:userpause^=1;break;
-                  case VK_F3:ToggleHideMenu();break;
-                }
-			   */
                 goto proco;
     case WM_CLOSE:
     case WM_DESTROY:

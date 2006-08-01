@@ -7,10 +7,8 @@
 
 //extern volatile int userpause; //mbg merge 7/18/06 removed for merging
 extern int scanline; //current scanline! :D
-extern int badopbreak;
 extern HWND hDebug;
 
-extern int step,stepout,jsrcount;
 extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern
 
 BOOL CenterWindow(HWND hwndDlg);
@@ -19,8 +17,6 @@ void UpdatePatcher(HWND hwndDlg);
 int GetEditHex(HWND hwndDlg, int id);
 
 extern void AddBreakList();
-
-char *BinToASM(int addr, uint8 *opcode);
 
 void UpdateDebugger();
 void DoDebug(uint8 halt);

@@ -23,9 +23,10 @@
 #include "..\..\x6502.h"
 #include "..\..\fceu.h"
 #include "..\..\cart.h" //mbg merge 7/19/06 moved after fceu.h
-#include "cdlogger.h"
 #include "..\..\file.h"
 #include "..\..\debug.h"
+#include "..\..\asm.h"
+#include "cdlogger.h"
 #include "tracer.h"
 #include "memview.h"
 
@@ -321,20 +322,20 @@ void FCEUD_TraceInstruction(){
 			case 1:
 				opcode[0]=GetMem(addr++);
 				sprintf(data, "%02X        ", opcode[0]);
-				strcpy(disassembly,BinToASM(addr,opcode));
+				strcpy(disassembly,Disassemble(addr,opcode));
 				break;
 			case 2:
 				opcode[0]=GetMem(addr++);
 				opcode[1]=GetMem(addr++);
 				sprintf(data, "%02X %02X     ", opcode[0],opcode[1]);
-				strcpy(disassembly,BinToASM(addr,opcode));
+				strcpy(disassembly,Disassemble(addr,opcode));
 				break;
 			case 3:
 				opcode[0]=GetMem(addr++);
 				opcode[1]=GetMem(addr++);
 				opcode[2]=GetMem(addr++);
 				sprintf(data, "%02X %02X %02X  ", opcode[0],opcode[1],opcode[2]);
-				strcpy(disassembly,BinToASM(addr,opcode));
+				strcpy(disassembly,Disassemble(addr,opcode));
 				break;
 		}
 	}
