@@ -48,8 +48,8 @@ static int usingogl;
 static double exs,eys;
 static int eefx;
 
-#define NWIDTH	(256-((eoptions&EO_CLIPSIDES)?16:0))
-#define NOFFSET	(eoptions&EO_CLIPSIDES?8:0)
+#define NWIDTH	(256 - ((eoptions & EO_CLIPSIDES) ? 16 : 0))
+#define NOFFSET	(eoptions & EO_CLIPSIDES ? 8 : 0)
 
 
 static int paletterefresh;
