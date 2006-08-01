@@ -2,7 +2,9 @@ Items to be completed before 2.0 release
 
 FASTAPASS / FP_FASTAPASS / Are these archaic? They suck - ??
 
-Doxygen integration - ??
+Make ALL Debugging code conditional - zeromus
+
+Doxygen integration - DONE
  * website integration
 
 Linux build - soules
@@ -23,16 +25,11 @@ Commandline parsing - lukas
 Configfile parsing - lukas
  * verify in windows - zeromus
 
-Merge garnet and sf repos - zeromus
- * Ensure gnome frontend is in repo
- 
 Do we really need vc7 project? Cah4e3? - zeromus
 
 Source code docs cleaning - zeromus
 Homepage docs - zeromus
 Move to sourceforge SVN = zeromus
-
-Move to scons - lukas
 
 Freenode registration - lukas
  * homepage update
@@ -40,8 +37,13 @@ Freenode registration - lukas
 Default hotkey philosophy (there are different philosophies from XD and TAS) - ALL
 
 Netplay - FUTURE STUFF
-  Move server code into tree
+  Move server code into tree - DONE
   Ensure netplay compiles
+  
+Move to scons - DONE
+  
+Merge garnet and sf repos - DONE
+ * Ensure gnome frontend is in repo - DONE
 
 --strategic--
 

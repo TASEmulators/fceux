@@ -412,51 +412,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\src\crc32.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\src\debug.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\endian.cpp"
 				>
 			</File>
 			<File
@@ -476,23 +432,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\general.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\ines.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\input.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\md5.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\memory.cpp"
 				>
 			</File>
 			<File
@@ -528,18 +472,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\unzip.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\src\video.cpp"
 				>
 			</File>
@@ -553,10 +485,6 @@
 			</File>
 			<File
 				RelativePath="..\src\x6502.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\xstring.cpp"
 				>
 			</File>
 			<Filter
@@ -1989,6 +1917,110 @@
 				</File>
 				<File
 					RelativePath="..\src\x6502struct.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="utils"
+				>
+				<File
+					RelativePath="..\src\utils\crc32.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\utils\crc32.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\endian.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\endian.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\general.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\general.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\md5.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\md5.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\memory.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\memory.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\unzip.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							CompileAs="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\utils\unzip.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\xstring.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\utils\xstring.h"
 					>
 				</File>
 			</Filter>
