@@ -1,4 +1,5 @@
 file_list = Split("""
+asm.cpp
 cart.cpp
 cheat.cpp
 crc32.cpp
