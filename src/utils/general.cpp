@@ -18,16 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "types.h"
-#include "crc32.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "../types.h"
 
-#include <zlib.h>
-uint32 CalcCRC32(uint32 crc, uint8 *buf, uint32 len)
+uint32 uppow2(uint32 n)
 {
- return(crc32(crc,buf,len));
+ int x;
+
+ for(x=31;x>=0;x--)
+  if(n&(1<<x))
+  {
+   if((1<<x)!=n)
+    return(1<<(x+1));
+   break;
+  }
+ return n;
 }
 
-uint32 FCEUI_CRC32(uint32 crc, uint8 *buf, uint32 len)
-{
- return(CalcCRC32(crc,buf,len));
-}

@@ -36,12 +36,12 @@
 #define INESPRIV
 #include "ines.h"
 #include "unif.h"
-#include "general.h"
 #include "state.h"
 #include "file.h"
-#include "memory.h"
-#include "crc32.h"
-#include "md5.h"
+#include "utils/general.h"
+#include "utils/memory.h"
+#include "utils/crc32.h"
+#include "utils/md5.h"
 #include "cheat.h"
 #include "vsuni.h"
 

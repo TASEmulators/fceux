@@ -14,7 +14,7 @@
 #define DIRECTINPUT_VERSION     0x700
 //#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 removing conditional compiles
 #include "../../types.h"
-#include "../../general.h"
+#include "../../file.h"
 #include "../../driver.h"
 #include "../common/vidblit.h" //mbg merge 7/17/06 added
 #include "../common/config.h"

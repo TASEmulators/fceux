@@ -22,7 +22,7 @@
 #   include <errno.h>
 #endif
 
-#include "driver.h"
+#include "../driver.h"
 
 #ifndef local
 #  define local static

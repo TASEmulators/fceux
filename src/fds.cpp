@@ -27,12 +27,12 @@
 #include "fceu.h"
 #include "fds.h"
 #include "sound.h"
-#include "general.h"
+#include "file.h"
+#include "utils/md5.h"
+#include "utils/memory.h"
 #include "state.h"
 #include "file.h"
-#include "memory.h"
 #include "cart.h"
-#include "md5.h"
 #include "netplay.h"
 
 /*  TODO:  Add code to put a delay in between the time a disk is inserted

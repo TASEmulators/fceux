@@ -315,18 +315,21 @@ void FCEUD_CmdOpen(void);
 
 //new merge-era driver routines here:
 
-//signals that the cpu core hit a breakpoint
-//this function should not return until the core is ready for the next cycle
+///signals that the cpu core hit a breakpoint. this function should not return until the core is ready for the next cycle
 void FCEUD_DebugBreakpoint();
 
-//the driver should log the current instruction, if it wants
-//(we should move the code in the win driver that does this to the shared area)
+///the driver should log the current instruction, if it wants (we should move the code in the win driver that does this to the shared area)
 void FCEUD_TraceInstruction();
 
-//the driver might should update its NTView (only used if debugging support is compiled in)
+///the driver might should update its NTView (only used if debugging support is compiled in)
 void FCEUD_UpdateNTView(int scanline, int drawall);
 
-//the driver might should update its PPUView (only used if debugging support is compiled in)
+///the driver might should update its PPUView (only used if debugging support is compiled in)
 void FCEUD_UpdatePPUView(int scanline, int drawall);
+
+#ifdef __cplusplus
+extern "C" 
+#endif 
+FILE *FCEUI_UTF8fopen_C(const char *n, const char *m);
 
 #endif /* __DRIVER_H_ */

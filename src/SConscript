@@ -2,19 +2,14 @@ file_list = Split("""
 asm.cpp
 cart.cpp
 cheat.cpp
-crc32.cpp
 config.cpp
 debug.cpp
-endian.cpp
 fceu.cpp
 fds.cpp
 file.cpp 
 filter.cpp 
-general.cpp
 ines.cpp
 input.cpp
-md5.cpp
-memory.cpp
 netplay.cpp
 nsf.cpp
 palette.cpp
@@ -26,9 +21,8 @@ video.cpp
 vsuni.cpp
 wave.cpp
 x6502.cpp
-xstring.cpp
 movie.cpp
-unzip.c""")
+""")
 
 subdirs = Split("""
 boards
@@ -36,6 +30,7 @@ drivers/common
 drivers/sdl
 fir
 input
+utils
 mappers""")
 #palettes
 

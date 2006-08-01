@@ -30,10 +30,11 @@
 #include "ppu.h"
 
 #include "cart.h"
-#include "memory.h"
 #include "x6502.h"
 
-#include "general.h"
+#include "file.h"
+#include "utils/memory.h"
+
 
 uint8 *Page[32],*VPage[8];
 uint8 **VPageR=VPage;

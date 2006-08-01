@@ -27,7 +27,7 @@
 #include "x6502.h"
 #include "cheat.h"
 #include "fceu.h"
-#include "general.h"
+#include "file.h"
 #include "cart.h"
 #include "memory.h"
 

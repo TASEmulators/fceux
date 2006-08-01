@@ -5,7 +5,7 @@
 #define INESPRIV
 #include "../cart.h"
 #include "../ines.h"
-#include "../memory.h"
+#include "../utils/memory.h"
 #include "../sound.h"
 #include "../state.h"
 #include <string.h>

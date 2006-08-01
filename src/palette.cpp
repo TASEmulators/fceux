@@ -23,8 +23,8 @@
 #include <math.h> 
 
 #include "types.h"
+#include "file.h"
 #include "fceu.h"
-#include "general.h"
 #include "driver.h"
 
 #include "palette.h"

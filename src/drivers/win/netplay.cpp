@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-#include "../../md5.h"
+#include "../../utils/md5.h"
 
 static int recv_tcpwrap(uint8 *buf, int len);
 static void NetStatAdd(char *text);

@@ -45,7 +45,7 @@
 #include <netdb.h>
 #endif
 
-#include "../../md5.h"
+#include "../../utils/md5.h"
 
 #ifndef socklen_t
 #define socklen_t int

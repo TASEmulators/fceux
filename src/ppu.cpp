@@ -29,9 +29,9 @@
 #include  "ppu.h"
 #include  "nsf.h"
 #include  "sound.h"
-#include  "general.h"
-#include  "endian.h"
-#include  "memory.h"
+#include  "file.h"
+#include  "utils/endian.h"
+#include  "utils/memory.h"
 
 #include  "cart.h"
 #include  "palette.h"

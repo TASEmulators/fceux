@@ -22,7 +22,7 @@
 /// \brief contains file I/O functions that write/read data LSB first.
 
 #include <stdio.h>
-#include "types.h"
+#include "../types.h"
 #include "endian.h"
 
 ///endian-flips count bytes.  count should be even and nonzero.

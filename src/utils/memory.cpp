@@ -22,10 +22,9 @@
 /// \brief memory management services provided by FCEU core
 
 #include <stdlib.h>
-#include "types.h"
-#include "fceu.h"
+#include "../types.h"
+#include "../fceu.h"
 #include "memory.h"
-#include "general.h"
 
 ///allocates the specified number of bytes. exits process if this fails
 void *FCEU_gmalloc(uint32 size)

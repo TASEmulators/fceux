@@ -28,13 +28,13 @@
 #include <zlib.h>
 
 #include "types.h"
+#include "file.h"
+#include "utils/endian.h"
 #include "netplay.h"
-#include  "fceu.h"
-#include "general.h"
+#include "fceu.h"
 #include "state.h"
 #include "cheat.h"
 #include "input.h"
-#include "endian.h"
 
 int FCEUnetplay=0;
 

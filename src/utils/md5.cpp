@@ -9,7 +9,7 @@
 // -Xodnizel   
 
 #include <string.h>
-#include "types.h"
+#include "../types.h"
 #include "md5.h"
 
 #define GET_UINT32(n,b,i)           \

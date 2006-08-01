@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "types.h"
-#include "xstring.h"
+#include "utils/xstring.h"
 #include "debug.h"
 #include "asm.h"
 #include "x6502.h"

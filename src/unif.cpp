@@ -32,13 +32,12 @@
 #include  "cart.h"
 #include  "unif.h"
 #include  "ines.h"
-#include  "general.h"
+#include  "utils/endian.h"
+#include  "utils/memory.h"
+#include  "utils/md5.h"
 #include  "state.h"
-#include  "endian.h"
 #include  "file.h"
-#include  "memory.h"
 #include  "input.h"
-#include  "md5.h"
 
 typedef struct {
            char ID[4];

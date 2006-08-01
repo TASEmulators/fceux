@@ -7,16 +7,16 @@
 #endif
 
 #include "types.h"
-#include "endian.h"
+#include "utils/endian.h"
 #include "palette.h"
 #include "input.h"
 #include "fceu.h"
 #include "driver.h"
 #include "state.h"
-#include "general.h"
+#include "file.h"
 #include "video.h"
 #include "movie.h"
-#include "memory.h" //mbg merge 7/17/06 added
+#include "utils/memory.h" //mbg merge 7/17/06 added
 
 #define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
 #define MOVIE_VERSION           2 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)

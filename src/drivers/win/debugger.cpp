@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-#include "..\..\xstring.h"
+#include "..\..\utils/xstring.h"
 #include "debugger.h"
 #include "..\..\x6502.h"
 #include "..\..\fceu.h"
