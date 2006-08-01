@@ -26,6 +26,7 @@ video.cpp
 vsuni.cpp
 wave.cpp
 x6502.cpp
+xstring.cpp
 movie.cpp
 unzip.c""")
 
