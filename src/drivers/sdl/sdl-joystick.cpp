@@ -65,7 +65,7 @@ int KillJoysticks (void)
 {
 	int n;			/* joystick index */
 
-	if(!jinited) return(0);
+	if(!jinited) return(-1);
 	for (n = 0; n < MAX_JOYSTICKS; n++)
 	{
 		if (Joysticks[n] != 0)
@@ -73,7 +73,7 @@ int KillJoysticks (void)
 		Joysticks[n]=0;
 	}
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-	return(1);
+	return(0);
 }
 
 /* Initialize joysticks. */

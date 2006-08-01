@@ -57,10 +57,6 @@ void ParseGIInput(FCEUGI *gi)
  if(gi->inputfc>=0)
   InputType[2]=gi->inputfc;
  cspec = gi->cspecial;
-
- #ifdef EXTGUI
- Giggles(gi->cspecial);
- #endif
 }
 
 
@@ -83,23 +79,17 @@ static void UpdateTopRider(void);
 static uint32 JSreturn=0;
 int NoWaiting=1;
 
-#ifndef EXTGUI
 static void DoCheatSeq(void)
 {
- #if defined(DOS) || defined(SDL)
  SilenceSound(1);
- #endif
  KillKeyboard();
  KillVideo();
 
  DoConsoleCheatConfig();
  InitVideo(CurGame);
  InitKeyboard();
- #if defined(DOS) || defined(SDL)
  SilenceSound(0);
- #endif
 }
-#endif
 
 #include "keyscan.h"
 static char *keys=0;
@@ -171,9 +161,7 @@ static void KeyboardCommands(void)
   if(keyonly(F9)) FCEUI_SaveSnapshot();
   if(gametype!=GIT_NSF)
   {
-   #ifndef EXTGUI
    if(keyonly(F2)) DoCheatSeq();
-   #endif
    if(keyonly(F5)) 
    {
     if(is_shift)
@@ -201,13 +189,7 @@ static void KeyboardCommands(void)
   if(keyonly(F10)) FCEUI_ResetNES();
   if(keyonly(F11)) FCEUI_PowerNES();
 
-  #ifdef EXTGUI
-  if(keyonly(F3)) GUI_Hide(-1);
-  if(KEY(F12)) GUI_RequestExit();
-  if(KEY(ESCAPE)) CloseGame();
-  #else
   if(KEY(F12) || KEY(ESCAPE)) CloseGame();
-  #endif
 
   if(gametype==GIT_VSUNI)
   {

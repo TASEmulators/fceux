@@ -80,7 +80,6 @@ static void ParseGI(FCEUGI *gi)
  gametype=gi->type;
 }
 
-#ifndef EXTGUI
 void FCEUD_PrintError(char *s)
 {
  puts(s);
@@ -90,7 +89,6 @@ void FCEUD_Message(char *s)
 {
  fputs(s,stdout);
 }
-#endif
 
 static char *cpalette=0;
 static void LoadCPalette(void)
@@ -107,9 +105,6 @@ static void LoadCPalette(void)
  FCEUI_SetPaletteArray(tmpp);
  fclose(fp);
 }
-#ifdef EXTGUI
-extern CFGSTRUCT GUIConfig;
-#endif
 static CFGSTRUCT fceuconfig[]={
 	AC(soundrate),
 	AC(soundq),
@@ -125,9 +120,6 @@ static CFGSTRUCT fceuconfig[]={
 	ACA(erendlinev),
 	ADDCFGSTRUCT(InputConfig),
 	ADDCFGSTRUCT(DriverConfig),
-	#ifdef EXTGUI
-	ADDCFGSTRUCT(GUIConfig),
-	#endif
 	ENDCFGSTRUCT
 };
 
@@ -297,9 +289,6 @@ int LoadGame(const char *path)
 	 }
 	}
 	isloaded=1;
-	#ifdef EXTGUI
-	if(eoptions&EO_AUTOHIDE) GUI_Hide(1);
-	#endif
 
 	FCEUD_NetworkConnect();
 	return 1;
@@ -317,9 +306,6 @@ int CloseGame(void)
 	if(soundrecfn)
          FCEUI_EndWaveRecord();
 
-	#ifdef EXTGUI
-	GUI_Hide(0);
-	#endif
 	InputUserActiveFix();
 	return(1);
 }
@@ -361,11 +347,7 @@ int CLImain(int argc, char *argv[])
 
 	CreateDirs();
 
-	#ifdef EXTGUI
-	if(argc==2 && !strcmp(argv[1],"-help")) // I hope no one has a game named "-help" :b
-	#else
         if(argc<=1) 
-	#endif
         {
          ShowUsage(argv[0]);
          return(0);
@@ -378,10 +360,6 @@ int CLImain(int argc, char *argv[])
 	 LoadCPalette();
 
 	/* All the config files and arguments are parsed now. */
-	#ifdef EXTGUI
-        return(1);
-
-	#else
         if(!LoadGame(argv[argc-1]))
         {
          DriverKill();
@@ -391,13 +369,6 @@ int CLImain(int argc, char *argv[])
 	while(CurGame)
 	 DoFun();
 
-	#if(0)
-	{
-	 int x;
-	 for(x=1;x<argc;x++) 
-         { LoadGame(argv[x]); while(CurGame) DoFun(); }
-	}
-	#endif
 
         CloseGame();
         
@@ -405,7 +376,6 @@ int CLImain(int argc, char *argv[])
 
         FCEUI_Kill();
 
-	#endif
         return(1);
 }
 

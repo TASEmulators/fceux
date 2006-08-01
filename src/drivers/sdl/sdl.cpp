@@ -140,9 +140,6 @@ void GetMouseData(uint32 *d)
  uint32 t;
 
  t=SDL_GetMouseState(&x,&y);
- #ifdef EXTGUI
- GUI_GetMouseState(&t,&x,&y);
- #endif
 
  d[2]=0;
  if(t&SDL_BUTTON(1))
@@ -192,9 +189,6 @@ static uint8 *KeyState=NULL;
 char *GetKeyboard(void)
 {
  KeyState=SDL_GetKeyState(0);
- #ifdef EXTGUI
- { char *tmp=GUI_GetKeyboard(); if(tmp) KeyState=tmp; }
- #endif
  return((char *)KeyState);
 }
 
@@ -207,7 +201,6 @@ char *GetKeyboard(void)
  //#endif
 #endif
 
-#ifndef EXTGUI
 uint8 *GetBaseDirectory(void)
 {
  uint8 *ol;
@@ -240,7 +233,6 @@ uint8 *GetBaseDirectory(void)
  }
  return(ret);
 }
-#endif
 
 #ifdef OPENGL
 int sdlhaveogl;
@@ -295,8 +287,8 @@ void ButtonConfigEnd(void)
  extern FCEUGI *CurGame;
  KillJoysticks();
  SDL_QuitSubSystem(SDL_INIT_VIDEO); 
- if(bcpv) InitVideo(CurGame);
- if(bcpj) InitJoysticks();
+ if(!bcpv) InitVideo(CurGame);
+ if(!bcpj) InitJoysticks();
 }
 
 int DWaitButton(const uint8 *text, ButtConfig *bc, int wb)
@@ -306,9 +298,7 @@ int DWaitButton(const uint8 *text, ButtConfig *bc, int wb)
  int x,y;
 
  SDL_WM_SetCaption((const char *)text,0);
- #ifndef EXTGUI
  puts((const char *)text);
- #endif
  for(x=0;x<64;x++) 
   for(y=0;y<64;y++)
    LastAx[x][y]=0x100000;
@@ -356,41 +346,39 @@ int DWaitButton(const uint8 *text, ButtConfig *bc, int wb)
  return(0);
 }
 
-#ifdef EXTGUI
-int FCEUSDLmain(int argc, char *argv[])
-#else
-int main(int argc, char *argv[])
-#endif
+int
+main(int argc,
+     char *argv[])
 {
-        FCEUD_Message("\nStarting "FCEU_NAME_AND_VERSION"...\n");
+    FCEUD_Message("\nStarting "FCEU_NAME_AND_VERSION"...\n");
 
-        #ifdef WIN32
-        /* Taken from win32 sdl_main.c */
-        SDL_SetModuleHandle(GetModuleHandle(NULL));
-        #endif
+#ifdef WIN32
+    /* Taken from win32 sdl_main.c */
+    SDL_SetModuleHandle(GetModuleHandle(NULL));
+#endif
 
-	if(SDL_Init(SDL_INIT_VIDEO)) /* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
+    if(SDL_Init(SDL_INIT_VIDEO)) /* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
 	{
-	 printf("Could not initialize SDL: %s.\n", SDL_GetError());
-	 return(-1);
+            printf("Could not initialize SDL: %s.\n", SDL_GetError());
+            return(-1);
 	}
 
-	#ifdef OPENGL
- 	 #ifdef APPLEOPENGL
-	 sdlhaveogl = 1;	/* Stupid something...  Hack. */
-	 #else
-	 if(!SDL_GL_LoadLibrary(0)) sdlhaveogl=1;
-	 else sdlhaveogl=0;
-	 #endif
-	#endif
+#ifdef OPENGL
+#ifdef APPLEOPENGL
+    sdlhaveogl = 1;	/* Stupid something...  Hack. */
+#else
+    if(!SDL_GL_LoadLibrary(0)) sdlhaveogl=1;
+    else sdlhaveogl=0;
+#endif
+#endif
 
-	SetDefaults();
+    SetDefaults();
 
-	{
-	 int ret=CLImain(argc,argv);
-	 SDL_Quit();
-	 return(ret?0:-1);
-	}
+    {
+        int ret=CLImain(argc,argv);
+        SDL_Quit();
+        return(ret?0:-1);
+    }
 }
 
 
@@ -418,6 +406,6 @@ DUMMY(FCEUD_ToggleStatusIcon)
 DUMMY(FCEUD_AviRecordTo)
 DUMMY(FCEUD_AviStop)
 void FCEUI_AviVideoUpdate(const unsigned char* buffer) {FCEU_DispMessage("Not implemented.");} 
-int FCEUD_ShowStatusIcon(void) {FCEU_DispMessage("Not implemented."); return 0; } 
+int FCEUD_ShowStatusIcon(void) {return 0;} 
 int FCEUI_AviIsRecording(void) {return 0;}
 
