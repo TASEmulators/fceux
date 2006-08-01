@@ -19,7 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/* PK: SDL joystick input stuff */
+/// \file
+/// \brief Handles joystick input using the SDL.
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,69 +32,88 @@
 #define MAX_JOYSTICKS	32
 static SDL_Joystick *Joysticks[MAX_JOYSTICKS] = {NULL};
 
-int DTestButtonJoy(ButtConfig *bc)
+/**
+ * Updates a single input button configuration on the joystick.
+ */
+int
+DTestButtonJoy(ButtConfig *bc)
 {
- int x;
+    int x;
 
- for(x=0;x<bc->NumC;x++)
- {
-  if(bc->ButtonNum[x]&0x8000)	/* Axis "button" */
-  {
-	int pos;
-        pos = SDL_JoystickGetAxis(Joysticks[bc->DeviceNum[x]], bc->ButtonNum[x]&16383);
-        if ((bc->ButtonNum[x]&0x4000) && pos <= -16383)
-	 return(1);
-        else if (!(bc->ButtonNum[x]&0x4000) && pos >= 16363)
-	 return(1);
-  }
-  else if(bc->ButtonNum[x]&0x2000)	/* Hat "button" */
-  {
-   if( SDL_JoystickGetHat(Joysticks[bc->DeviceNum[x]],(bc->ButtonNum[x]>>8)&0x1F) & (bc->ButtonNum[x]&0xFF))
-    return(1);
-  }
-  else
-   if(SDL_JoystickGetButton(Joysticks[bc->DeviceNum[x]], bc->ButtonNum[x] )) 
-    return(1);
- }
- return(0);
+    for(x = 0; x < bc->NumC; x++) {
+        if(bc->ButtonNum[x] & 0x8000) {
+            /* Axis "button" */
+            int pos;
+            pos = SDL_JoystickGetAxis(Joysticks[bc->DeviceNum[x]],
+                                      bc->ButtonNum[x] & 16383);
+            if ((bc->ButtonNum[x] & 0x4000) && pos <= -16383) {
+                return(1);
+            } else if (!(bc->ButtonNum[x] & 0x4000) && pos >= 16363) {
+                return(1);
+            }
+        } else if(bc->ButtonNum[x] & 0x2000) {
+            /* Hat "button" */
+            if(SDL_JoystickGetHat(Joysticks[bc->DeviceNum[x]],
+                                  (((bc->ButtonNum[x] >> 8) & 0x1F) & 
+                                   (bc->ButtonNum[x]&0xFF)))) {
+                return(1);
+            } else if(SDL_JoystickGetButton(Joysticks[bc->DeviceNum[x]],
+                                            bc->ButtonNum[x])) { 
+                return(1);
+            }
+        }
+    }
+    return(0);
 }
 
-static int jinited=0;
+static int jinited = 0;
 
-/* Cleanup opened joysticks. */
-int KillJoysticks (void)
+/**
+ * Shutdown the SDL joystick subsystem.
+ */
+int
+KillJoysticks()
 {
-	int n;			/* joystick index */
+    int n;  /* joystick index */
 
-	if(!jinited) return(-1);
-	for (n = 0; n < MAX_JOYSTICKS; n++)
-	{
-		if (Joysticks[n] != 0)
- 	  	 SDL_JoystickClose(Joysticks[n]);
-		Joysticks[n]=0;
-	}
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
-	return(0);
+    if(!jinited) {
+        return(-1);
+    }
+
+    for(n = 0; n < MAX_JOYSTICKS; n++) {
+        if (Joysticks[n] != 0) {
+            SDL_JoystickClose(Joysticks[n]);
+        }
+        Joysticks[n]=0;
+    }
+    SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+    return(0);
 }
 
-/* Initialize joysticks. */
-int InitJoysticks (void)
+/**
+ * Initialize the SDL joystick subsystem.
+ */
+int
+InitJoysticks()
 {
-	int n;			/* joystick index */
-	int total;
+    int n; /* joystick index */
+    int total;
 
-        SDL_InitSubSystem(SDL_INIT_JOYSTICK);
-	total=SDL_NumJoysticks();
-	if(total>MAX_JOYSTICKS) total=MAX_JOYSTICKS;
+    SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 
-	for (n = 0; n < total; n++)
-	{
- 	 /* Open the joystick under SDL. */
-	 Joysticks[n] = SDL_JoystickOpen(n);
-	 //printf("Could not open joystick %d: %s.\n",
-	 //joy[n] - 1, SDL_GetError());
- 	 continue;
-	}
-	jinited=1;
-	return(1);
+    total = SDL_NumJoysticks();
+    if(total>MAX_JOYSTICKS) {
+        total = MAX_JOYSTICKS;
+    }
+
+    for(n = 0; n < total; n++) {
+        /* Open the joystick under SDL. */
+        Joysticks[n] = SDL_JoystickOpen(n);
+        //printf("Could not open joystick %d: %s.\n",
+        //joy[n] - 1, SDL_GetError());
+        continue;
+    }
+
+    jinited = 1;
+    return(1);
 }
