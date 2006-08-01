@@ -272,9 +272,13 @@ void FCEUI_FDSSelect(void);
 
 int FCEUI_DatachSet(const uint8 *rcode);
 
+///returns flags indicating whether emulation is paused (bit0) and whether it is single-stepping (bit1)
 int FCEUI_EmulationPaused(void);
-void FCEUI_SetEmulationPaused(int val); //mbg merge 7/18/06 added
+///sets the EmulationPaused flags
+void FCEUI_SetEmulationPaused(int val);
+///toggles the paused bit (bit0) for EmulationPaused. caused FCEUD_DebugUpdate() to fire if the emulation pauses
 void FCEUI_ToggleEmulationPause(void);
+
 void FCEUI_FrameAdvance(void);
 
 /* AVI Output */

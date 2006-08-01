@@ -36,6 +36,7 @@
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../state.h"
+#include "../../debug.h"
 #include "ppuview.h"
 #include "debugger.h"
 #include "input.h"
@@ -66,7 +67,6 @@ void FixWXY(int pref);
 int SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
-
 
 HWND hAppWnd=0;
 HINSTANCE fceu_hInstance;
@@ -817,11 +817,20 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		FCEUD_BlitScreen(XBuf);
 	_updateWindow();
 
-	//delay until we unpause
-	while(FCEUI_EmulationPaused())
+	//delay until we unpause. we will only stick here if we're paused by a breakpoint or debug command
+	while(FCEUI_EmulationPaused() && inDebugger)
 	{
 		Sleep(50);
 		BlockingCheck();
+	}
+
+	//something of a hack, but straightforward:
+	//if we were paused, but not in the debugger, then unpause ourselves and step.
+	//this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
+	//cut off execution as soon as it makes it into the main cpu cycle loop
+	if(FCEUI_EmulationPaused() && !inDebugger) {
+		FCEUI_ToggleEmulationPause();
+		FCEUI_Debugger().step = 1;
 	}
 	
 

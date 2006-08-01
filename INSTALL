@@ -1,3 +1,3 @@
 To compile and install FCE Ultra, follow these steps:
-  1.  Ensure that SCons is installed on your system.
+  1.  Ensure that SCons and SDL are installed on your system.
   2.  Run "scons"

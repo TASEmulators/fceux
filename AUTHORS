@@ -1,28 +1,68 @@
-A list of people who have contributed code to FCE Ultra, or have had their code placed in
-FCE Ultra by others.
-Please note that the "Contributions" field may not be all inclusive;
-the coder may have done more than what is listed.
+A list of people who have contributed code to FCE Ultra, or have had their code 
+placed in FCE Ultra by others.
 
-Name/Alias	Contributions			Contact Information
-------------------------------------------------------------------------------
-Aaron Oneal	Many changes to compile		http://www.morphgear.com
-		with MSVC and first frame
-		skipping code.
+-----------------------------------------
+<2.0 - These authors contributed exclusively to pre-2.0 versions,
+       but much of their code remains in 2.0 builds
 
-Lukas Sabota  build system    punkrockguy318 at comcast.net
+BERO - bero at geocities.co.jp
+Base FCE code.
 
-BERO		Base FCE code.			bero at geocities.co.jp
+Xodnizel
+Most of the base FCE Ultra code
 
-CaH4e3 		Some mapper code.		CaH4e3 at mail dot ru
+Aaron Oneal	- http://www.morphgear.com
+Many changes to compile with MSVC and first frame skipping code
 
-Joe Nahmias	man pages.
+Joe Nahmias	
+Man pages
 
-Mitsutaka 	YM2413 emulator.
- Okazaki
+Paul Kuliniewicz - kuliniew at purdue.edu
+Various code for the official SDL port.
 
-Paul 		Various code for the official	kuliniew at purdue.edu
- Kuliniewicz	SDL port.
+Quietust - quietust at ircN dot org
+VRC7 "translation" code.
 
-Quietust	VRC7 "translation" code.	quietust at ircN dot org
+Ben Parnell
+Windows debugging tools 
 
-Xodnizel        Most of the FCE Ultra code.     http://xodnizel.net/
+Parasyte & bbitmaster
+Enhanced Windows debugging tools
+
+blip & nitsuja
+Rerecording support
+
+-----------------------------------------
+>= 2.0 - Incorporates new contributions from:
+
+CaH4e3 - CaH4e3 at mail dot ru
+Mappers
+
+Luke Gustafson - document thyself
+Windows TAS and movie recording enhancements
+
+SP - document thyself
+Enhanced Windows debugging tools
+
+zeromus - mgambrell at gmail dot com
+Core architecture refactoring
+Windows driver maintenance
+
+Lukas Sabota - punkrockguy318 at comcast.net 
+Build system
+
+Soules - document thyself
+
+Radsaq - document thyself
+
+-----------------------------------------
+Included components:
+
+Mitsutaka Okazaki
+YM2413 emulator.
+
+Andrea Mazzoleni
+Scale2x/Scale3x scalers
+
+Gilles Vollant
+unzip.c PKZIP fileio

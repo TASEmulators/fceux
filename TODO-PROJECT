@@ -26,10 +26,10 @@ Configfile parsing - lukas
  * verify in windows - zeromus
 
 Do we really need vc7 project? Cah4e3? - zeromus
-
 Source code docs cleaning - zeromus
 Homepage docs - zeromus
-Move to sourceforge SVN = zeromus
+
+What is the proper gnu way to do CREDITS from the homepage? e.g. Marat Fayzullin - General NES information
 
 Freenode registration - lukas
  * homepage update
@@ -39,11 +39,15 @@ Default hotkey philosophy (there are different philosophies from XD and TAS) - A
 Netplay - FUTURE STUFF
   Move server code into tree - DONE
   Ensure netplay compiles
+  verify netplay
+
+----done-----
   
 Move to scons - DONE
   
 Merge garnet and sf repos - DONE
  * Ensure gnome frontend is in repo - DONE
+ * Move to sourceforge SVN - DONE
 
 --strategic--
 

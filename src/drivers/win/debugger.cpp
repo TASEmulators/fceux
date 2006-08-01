@@ -485,8 +485,12 @@ void UpdateRegs(HWND hwndDlg) {
 	X.PC = GetEditHex(hwndDlg,307);
 }
 
+///indicates whether we're under the control of the debugger
+bool inDebugger = false;
+
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count); //HACK
 void FCEUD_DebugBreakpoint() {
+	inDebugger = true;
 	DoDebug(1);
 	UpdateLogWindow();
 	if(hMemView)UpdateMemoryView(0);
@@ -494,6 +498,7 @@ void FCEUD_DebugBreakpoint() {
 	FCEUD_Update(0,0,0);
 	//FCEUD_BlitScreen(XBuf+8); //this looks odd, I know. but the pause routine is in here!!
 	//if(logging)LogInstruction(); //logging might have been started while we were paused
+	inDebugger = false;
 }
 
 void UpdateDebugger() {
@@ -1128,7 +1133,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
 									FCEUI_ToggleEmulationPause(); 
-									UpdateDebugger();
 								}
 								break;
 							case 105: //Step Into
@@ -1151,7 +1155,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									else dbgstate.jsrcount = 0;
 									dbgstate.stepout = 1;
 									FCEUI_SetEmulationPaused(0);
-									UpdateDebugger();
+									//UpdateDebugger();
 								}
 								break;
 							case 107: //Step Over
