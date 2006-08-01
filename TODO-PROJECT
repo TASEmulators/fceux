@@ -17,8 +17,6 @@ Windows build - zeromus
  * verify debugging
  * verify avi writing
 
-Investigate OSX build [ http://www.lamer0.com/ ] - zeromus
-
 Commandline parsing - lukas
  * verify in windows - zeromus
 
@@ -42,6 +40,8 @@ Netplay - FUTURE STUFF
   verify netplay
 
 ----done-----
+
+Investigate OSX build [ http://www.lamer0.com/ ] - zeromus [posted on blog...]
   
 Move to scons - DONE
   
@@ -50,6 +50,10 @@ Merge garnet and sf repos - DONE
  * Move to sourceforge SVN - DONE
 
 --strategic--
+
+Politics:
+ * aboutbox credits
+ * AUTHORS
 
 Release:
  * Press Release - ??
