@@ -18,11 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \file
+/// \brief various string manipulation utilities
+
 #include "xstring.h"
 
-
-//Upper case routine
-// Returns number of characters modified
+///Upper case routine. Returns number of characters modified
 int str_ucase(char *str) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 
@@ -37,8 +38,7 @@ int str_ucase(char *str) {
 }
 
 
-//Lower case routine
-// Returns number of characters modified
+///Lower case routine. Returns number of characters modified
 int str_lcase(char *str) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 
@@ -53,9 +53,10 @@ int str_lcase(char *str) {
 }
 
 
-//White space-trimming routine
-// Removes whitespace from left side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
-// Returns number of characters removed
+///White space-trimming routine
+
+///Removes whitespace from left side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
+///Returns number of characters removed
 int str_ltrim(char *str, int flags) {
 	unsigned int i=0; //mbg merge 7/17/06 changed to unsigned int
 
@@ -83,9 +84,10 @@ int str_ltrim(char *str, int flags) {
 }
 
 
-//White space-trimming routine
-// Removes whitespace from right side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
-// Returns number of characters removed
+///White space-trimming routine
+
+///Removes whitespace from right side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
+///Returns number of characters removed
 int str_rtrim(char *str, int flags) {
 	unsigned int i=0; //mbg merge 7/17/06 changed to unsigned int
 
@@ -116,9 +118,10 @@ int str_rtrim(char *str, int flags) {
 }
 
 
-//White space-stripping routine
-// Removes whitespace depending on the flags set (See STRIP_x definitions in xstring.h)
-// Returns number of characters removed, or -1 on error
+///White space-stripping routine
+
+///Removes whitespace depending on the flags set (See STRIP_x definitions in xstring.h)
+///Returns number of characters removed, or -1 on error
 int str_strip(char *str, int flags) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 	char *astr,chr;
@@ -142,9 +145,10 @@ int str_strip(char *str, int flags) {
 }
 
 
-//Character replacement routine
-// Replaces all instances of 'search' with 'replace'
-// Returns number of characters modified
+///Character replacement routine
+
+///Replaces all instances of 'search' with 'replace'
+///Returns number of characters modified
 int chr_replace(char *str, char search, char replace) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 
@@ -159,9 +163,10 @@ int chr_replace(char *str, char search, char replace) {
 }
 
 
-//Sub-String replacement routine
-// Replaces all instances of 'search' with 'replace'
-// Returns number of sub-strings modified, or -1 on error
+///Sub-String replacement routine
+
+///Replaces all instances of 'search' with 'replace'
+///Returns number of sub-strings modified, or -1 on error
 int str_replace(char *str, char *search, char *replace) {
 	unsigned int i=0,j=0; //mbg merge 7/17/06 changed to unsigned int
 	int searchlen,replacelen;
