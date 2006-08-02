@@ -4,10 +4,12 @@ import os
 opts = Options()
 opts.Add('PSS_STYLE', 'Path separator style', 1)
 opts.Add('LSB_FIRST', 'Least significant byte first?', 1)
+opts.Add('FRAMESKIP', 'Enable frameskipping', 1)
 
 env = Environment(options = opts,
                   CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
-                              'LSB_FIRST' : '${LSB_FIRST}'})
+                              'LSB_FIRST' : '${LSB_FIRST}',
+                              'FRAMESKIP' : '${FRAMESKIP}'})
 
 if os.environ.has_key('CC'):
   env.Replace(CC = os.environ['CC'])

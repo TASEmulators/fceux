@@ -74,37 +74,53 @@ int gametype = 0;
 
 FCEUGI *CurGame=NULL;
 
-static void ParseGI(FCEUGI *gi)
+/**
+ * Wrapper for ParseGIInput().
+ */
+static void
+ParseGI(FCEUGI *gi)
 {
- ParseGIInput(gi);
- gametype=gi->type;
+    ParseGIInput(gi);
+    gametype = gi->type;
 }
 
-void FCEUD_PrintError(char *s)
+/**
+ * Prints an error string to STDOUT.
+ */
+void
+FCEUD_PrintError(char *s)
 {
- puts(s);
+    puts(s);
 }
 
+/**
+ * Prints the given string to STDOUT.
+ */
 void FCEUD_Message(char *s)
 {
- fputs(s,stdout);
+    fputs(s, stdout);
 }
 
 static char *cpalette=0;
-static void LoadCPalette(void)
+/**
+ * Read a custom pallete from a file and load it into the core.
+ */
+static void
+LoadCPalette()
 {
- uint8 tmpp[192];
- FILE *fp;
+    uint8 tmpp[192];
+    FILE *fp;
 
- if(!(fp=FCEUD_UTF8fopen(cpalette,"rb")))
- {
-  printf(" Error loading custom palette from file: %s\n",cpalette);
-  return;
- }
- fread(tmpp,1,192,fp);
- FCEUI_SetPaletteArray(tmpp);
- fclose(fp);
+    if(!(fp = FCEUD_UTF8fopen(cpalette, "rb"))) {
+        printf(" Error loading custom palette from file: %s\n", cpalette);
+        return;
+    }
+    fread(tmpp, 1, 192, fp);
+    FCEUI_SetPaletteArray(tmpp);
+    fclose(fp);
 }
+
+
 static CFGSTRUCT fceuconfig[]={
 	AC(soundrate),
 	AC(soundq),
@@ -123,405 +139,463 @@ static CFGSTRUCT fceuconfig[]={
 	ENDCFGSTRUCT
 };
 
-static void SaveConfig(void)
+/**
+ * Wrapper for SaveFCEUConfig() that sets the path.  Hopefully
+ * obsolete with new configuration system.
+ */
+static void
+SaveConfig()
 {	
-	char tdir[2048];
-	sprintf(tdir,"%s"PSS"fceu98.cfg",DrBaseDirectory);
-	FCEUI_GetNTSCTH(&ntsctint, &ntschue);
-        SaveFCEUConfig(tdir,fceuconfig);
+    char tdir[2048];
+    sprintf(tdir,"%s"PSS"fceu98.cfg", DrBaseDirectory);
+    FCEUI_GetNTSCTH(&ntsctint, &ntschue);
+    SaveFCEUConfig(tdir, fceuconfig);
 }
 
-static void LoadConfig(void)
+/**
+ * Wrapper for LoadFCEUConfig() that sets the path.  Hopefully
+ * obsolete with the new configuration system.
+ */
+static void
+LoadConfig()
 {
-	char tdir[2048];
-        sprintf(tdir,"%s"PSS"fceu98.cfg",DrBaseDirectory);
-	FCEUI_GetNTSCTH(&ntsctint, &ntschue);	/* Get default settings for if
-					   no config file exists. */
-        LoadFCEUConfig(tdir,fceuconfig);
-	InputUserActiveFix();
+    char tdir[2048];
+    sprintf(tdir,"%s"PSS"fceu98.cfg",DrBaseDirectory);
+
+    /* Get default settings for if no config file exists. */
+    FCEUI_GetNTSCTH(&ntsctint, &ntschue);	
+    LoadFCEUConfig(tdir,fceuconfig);
+    InputUserActiveFix();
 }
 
-static void CreateDirs(void)
+/**
+ * Creates the subdirectories used for saving snapshots, movies, game
+ * saves, etc.  Hopefully obsolete with new configuration system.
+ */
+static void
+CreateDirs(void)
 {
- char *subs[7]={"fcs","fcm","snaps","gameinfo","sav","cheats","movie"};
- char tdir[2048];
- int x;
+    char *subs[7]={"fcs","fcm","snaps","gameinfo","sav","cheats","movie"};
+    char tdir[2048];
+    int x;
 
- #ifdef WIN32
- mkdir((char *)DrBaseDirectory);
- for(x=0;x<6;x++)
- {
-  sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
-  mkdir(tdir);
- }
- #else
- mkdir((char *)DrBaseDirectory,S_IRWXU);
- for(x=0;x<6;x++)
- {
-  sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
-  mkdir(tdir,S_IRWXU);
- }
- #endif
+#ifdef WIN32
+    mkdir((char *)DrBaseDirectory);
+    for(x = 0; x < 6; x++) {
+        sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
+        mkdir(tdir);
+    }
+#else
+    mkdir((char *)DrBaseDirectory,S_IRWXU);
+    for(x = 0; x < 6; x++) {
+        sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
+        mkdir(tdir,S_IRWXU);
+    }
+#endif
 }
 
 #ifndef WIN32
-static void SetSignals(void (*t)(int))
+/**
+ * Capture and handle signals sent to FCEU.
+ */
+static void
+SetSignals(void (*t)(int))
 {
-  int sigs[11]={SIGINT,SIGTERM,SIGHUP,SIGPIPE,SIGSEGV,SIGFPE,SIGKILL,SIGALRM,SIGABRT,SIGUSR1,SIGUSR2};
-  int x;
-  for(x=0;x<11;x++)
-   signal(sigs[x],t);
+    // XXX soules - why do we capture these?  Seems unnecessary.
+    int sigs[11]={SIGINT,SIGTERM,SIGHUP,SIGPIPE,SIGSEGV,SIGFPE,SIGKILL,SIGALRM,SIGABRT,SIGUSR1,SIGUSR2};
+    int x;
+    for(x = 0; x < 11; x++) {
+        signal(sigs[x], t);
+    }
 }
 
-static void CloseStuff(int signum)
+static void
+CloseStuff(int signum)
 {
-	DriverKill();
-        printf("\nSignal %d has been caught and dealt with...\n",signum);
-        switch(signum)
-        {
-         case SIGINT:printf("How DARE you interrupt me!\n");break;
-         case SIGTERM:printf("MUST TERMINATE ALL HUMANS\n");break;
-         case SIGHUP:printf("Reach out and hang-up on someone.\n");break;
-         case SIGPIPE:printf("The pipe has broken!  Better watch out for floods...\n");break;
-         case SIGSEGV:printf("Iyeeeeeeeee!!!  A segmentation fault has occurred.  Have a fluffy day.\n");break;
-	 /* So much SIGBUS evil. */
-	 #ifdef SIGBUS
-	 #if(SIGBUS!=SIGSEGV)
-         case SIGBUS:printf("I told you to be nice to the driver.\n");break;
-	 #endif
-	 #endif
-         case SIGFPE:printf("Those darn floating points.  Ne'er know when they'll bite!\n");break;
-         case SIGALRM:printf("Don't throw your clock at the meowing cats!\n");break;
-         case SIGABRT:printf("Abort, Retry, Ignore, Fail?\n");break;
-         case SIGUSR1:
-         case SIGUSR2:printf("Killing your processes is not nice.\n");break;
-        }
-        exit(1);
+    // XXX soules - again, not clear why this is necessary
+    DriverKill();
+    printf("\nSignal %d has been caught and dealt with...\n",signum);
+    switch(signum) {
+    case SIGINT:printf("How DARE you interrupt me!\n");break;
+    case SIGTERM:printf("MUST TERMINATE ALL HUMANS\n");break;
+    case SIGHUP:printf("Reach out and hang-up on someone.\n");break;
+    case SIGPIPE:printf("The pipe has broken!  Better watch out for floods...\n");break;
+    case SIGSEGV:printf("Iyeeeeeeeee!!!  A segmentation fault has occurred.  Have a fluffy day.\n");break;
+        /* So much SIGBUS evil. */
+#ifdef SIGBUS
+#if(SIGBUS!=SIGSEGV)
+    case SIGBUS:printf("I told you to be nice to the driver.\n");break;
+#endif
+#endif
+    case SIGFPE:printf("Those darn floating points.  Ne'er know when they'll bite!\n");break;
+    case SIGALRM:printf("Don't throw your clock at the meowing cats!\n");break;
+    case SIGABRT:printf("Abort, Retry, Ignore, Fail?\n");break;
+    case SIGUSR1:
+    case SIGUSR2:printf("Killing your processes is not nice.\n");break;
+    }
+    exit(1);
 }
 #endif
 
-static void DoArgs(int argc, char *argv[])
+/**
+ * Handles arguments passed to FCEU.  Hopefully obsolete with new
+ * configuration system.
+ */
+static void
+DoArgs(int argc,
+       char *argv[])
 {
-	int x;
+    int x;
 
-        static ARGPSTRUCT FCEUArgs[]={
-	 {"-soundbufsize",0,&soundbufsize,0},
-	 {"-soundrate",0,&soundrate,0},
-	 {"-soundq",0,&soundq,0},
+    static ARGPSTRUCT FCEUArgs[]={
+        {"-soundbufsize",0,&soundbufsize,0},
+        {"-soundrate",0,&soundrate,0},
+        {"-soundq",0,&soundq,0},
 #ifdef FRAMESKIP
-	 {"-frameskip",0,&frameskip,0},
+        {"-frameskip",0,&frameskip,0},
 #endif
-         {"-sound",0,&_sound,0},
-         {"-soundvol",0,&soundvol,0},
-         {"-cpalette",0,&cpalette,0x4001},
-	 {"-soundrecord",0,&soundrecfn,0x4001},
+        {"-sound",0,&_sound,0},
+        {"-soundvol",0,&soundvol,0},
+        {"-cpalette",0,&cpalette,0x4001},
+        {"-soundrecord",0,&soundrecfn,0x4001},
 
-         {"-ntsccol",0,&ntsccol,0},
-         {"-pal",0,&eoptions,0x8000|EO_PAL},
+        {"-ntsccol",0,&ntsccol,0},
+        {"-pal",0,&eoptions,0x8000|EO_PAL},
 
-	 {"-lowpass",0,&eoptions,0x8000|EO_LOWPASS},
-         {"-gg",0,&eoptions,0x8000|EO_GAMEGENIE},
-         {"-no8lim",0,&eoptions,0x8001},
-         {"-snapname",0,&eoptions,0x8000|EO_SNAPNAME},
-	 {"-nofs",0,&eoptions,0x8000|EO_NOFOURSCORE},
-         {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},
-	 {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
-         {"-slstart",0,&srendlinev[0],0},{"-slend",0,&erendlinev[0],0},
-         {"-slstartp",0,&srendlinev[1],0},{"-slendp",0,&erendlinev[1],0},
-	 {0,(int *)InputArgs,0,0},
-	 {0,(int *)DriverArgs,0,0},
-	 {0,0,0,0}
-        };
+        {"-lowpass",0,&eoptions,0x8000|EO_LOWPASS},
+        {"-gg",0,&eoptions,0x8000|EO_GAMEGENIE},
+        {"-no8lim",0,&eoptions,0x8001},
+        {"-snapname",0,&eoptions,0x8000|EO_SNAPNAME},
+        {"-nofs",0,&eoptions,0x8000|EO_NOFOURSCORE},
+        {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},
+        {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
+        {"-slstart",0,&srendlinev[0],0},{"-slend",0,&erendlinev[0],0},
+        {"-slstartp",0,&srendlinev[1],0},{"-slendp",0,&erendlinev[1],0},
+        {0,(int *)InputArgs,0,0},
+        {0,(int *)DriverArgs,0,0},
+        {0,0,0,0}
+    };
 
-	ParseArguments(argc, argv, FCEUArgs);
-	if(cpalette)
-	{
-  	 if(cpalette[0]=='0')
-	  if(cpalette[1]==0)
-	  {
-	   free(cpalette);
-	   cpalette=0;
-	  }
-	}
-	FCEUI_SetVidSystem((eoptions&EO_PAL)?1:0);
-	FCEUI_SetGameGenie((eoptions&EO_GAMEGENIE)?1:0);
-	FCEUI_SetLowPass((eoptions&EO_LOWPASS)?1:0);
+    ParseArguments(argc, argv, FCEUArgs);
+    if(cpalette) {
+        if(cpalette[0] == '0') {
+            if(cpalette[1] == 0) {
+                free(cpalette);
+                cpalette=0;
+            }
+        }
+    }
 
-        FCEUI_DisableSpriteLimitation(eoptions&1);
-	FCEUI_SetSnapName(eoptions&EO_SNAPNAME);
+    FCEUI_SetVidSystem((eoptions&EO_PAL)?1:0);
+    FCEUI_SetGameGenie((eoptions&EO_GAMEGENIE)?1:0);
+    FCEUI_SetLowPass((eoptions&EO_LOWPASS)?1:0);
 
-	for(x=0;x<2;x++)
-	{
-         if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
-         if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
-	}
+    FCEUI_DisableSpriteLimitation(eoptions&1);
+    FCEUI_SetSnapName(eoptions&EO_SNAPNAME);
 
-        FCEUI_SetRenderedLines(srendlinev[0],erendlinev[0],srendlinev[1],erendlinev[1]);
-	DoDriverArgs();
+    for(x = 0; x < 2; x++) {
+        if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
+        if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
+    }
+
+    FCEUI_SetRenderedLines(srendlinev[0],erendlinev[0],srendlinev[1],erendlinev[1]);
+    DoDriverArgs();
 }
 
 #include "usage.h"
 
-/* Loads a game, given a full path/filename.  The driver code must be
-   initialized after the game is loaded, because the emulator code
-   provides data necessary for the driver code(number of scanlines to
-   render, what virtual input devices to use, etc.).
-*/
+/**
+ * Loads a game, given a full path/filename.  The driver code must be
+ * initialized after the game is loaded, because the emulator code
+ * provides data necessary for the driver code(number of scanlines to
+ * render, what virtual input devices to use, etc.).
+ */
 int LoadGame(const char *path)
 {
-	FCEUGI *tmp;
+    FCEUGI *tmp;
 
-	CloseGame();
-        if(!(tmp=FCEUI_LoadGame(path,1)))
-	 return 0;
-	CurGame=tmp;
-        ParseGI(tmp);
-        RefreshThrottleFPS();
+    CloseGame();
+    if(!(tmp = FCEUI_LoadGame(path, 1))) {
+        return 0;
+    }
+    CurGame=tmp;
+    ParseGI(tmp);
+    RefreshThrottleFPS();
 
-        if(!DriverInitialize(tmp))
-         return(0);  
-	if(soundrecfn)
-	{
-	 if(!FCEUI_BeginWaveRecord(soundrecfn))
-	 {
- 	  free(soundrecfn);
-	  soundrecfn=0;
-	 }
-	}
-	isloaded=1;
+    if(!DriverInitialize(tmp)) {
+        return(0);
+    }
+    if(soundrecfn) {
+        if(!FCEUI_BeginWaveRecord(soundrecfn)) {
+            free(soundrecfn);
+            soundrecfn=0;
+        }
+    }
+    isloaded=1;
 
-	FCEUD_NetworkConnect();
-	return 1;
+    FCEUD_NetworkConnect();
+    return 1;
 }
 
-/* Closes a game.  Frees memory, and deinitializes the drivers. */
-int CloseGame(void)
+/**
+ * Closes a game.  Frees memory, and deinitializes the drivers.
+ */
+int
+CloseGame()
 {
-	if(!isloaded) return(0);
-	FCEUI_CloseGame();
-	DriverKill();
-	isloaded=0;
-	CurGame=0;
+    if(!isloaded) {
+        return(0);
+    }
+    FCEUI_CloseGame();
+    DriverKill();
+    isloaded=0;
+    CurGame=0;
 
-	if(soundrecfn)
-         FCEUI_EndWaveRecord();
+    if(soundrecfn) {
+        FCEUI_EndWaveRecord();
+    }
 
-	InputUserActiveFix();
-	return(1);
+    InputUserActiveFix();
+    return(1);
 }
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 void DoFun(void)
 {
-         uint8 *gfx;  
-         int32 *sound;
-         int32 ssize;
-         static int fskipc=0;
-         static int opause=0;
+    uint8 *gfx;  
+    int32 *sound;
+    int32 ssize;
+    static int fskipc=0;
+    static int opause=0;
          
-         #ifdef FRAMESKIP
-         fskipc=(fskipc+1)%(frameskip+1);
-         #endif
+#ifdef FRAMESKIP
+    fskipc=(fskipc+1)%(frameskip+1);
+#endif
          
-         if(NoWaiting) {gfx=0;}
-         FCEUI_Emulate(&gfx, &sound, &ssize, fskipc);
-         FCEUD_Update(gfx, sound, ssize);
+    if(NoWaiting) {
+        gfx = 0;
+    }
+    FCEUI_Emulate(&gfx, &sound, &ssize, fskipc);
+    FCEUD_Update(gfx, sound, ssize);
 
-         if(opause!=FCEUI_EmulationPaused())
-         {
-          opause=FCEUI_EmulationPaused();
-		  SilenceSound(opause);
-         }
-}   
+    if(opause!=FCEUI_EmulationPaused()) {
+        opause=FCEUI_EmulationPaused();
+        SilenceSound(opause);
+    }
+}
 
-int CLImain(int argc, char *argv[])
+/**
+ * Common Layer Interface main() loop.  This should get merged into
+ * the SDL main() loop since we're only supporting SDL now.
+ */
+int
+CLImain(int argc,
+        char *argv[])
 {
-	int ret;
+    int ret;
 
-	if(!(ret=FCEUI_Initialize()))
-         return(0);
+    if(!(ret=FCEUI_Initialize())) {
+        return(0);
+    }
 
-        DrBaseDirectory=GetBaseDirectory();
-	FCEUI_SetBaseDirectory((char *)DrBaseDirectory);
+    DrBaseDirectory=GetBaseDirectory();
+    FCEUI_SetBaseDirectory((char *)DrBaseDirectory);
 
-	CreateDirs();
+    CreateDirs();
 
-        if(argc<=1) 
-        {
-         ShowUsage(argv[0]);
-         return(0);
-        }
+    if(argc<=1)  {
+        ShowUsage(argv[0]);
+        return(0);
+    }
 
-        LoadConfig();
-        DoArgs(argc-2,&argv[1]);
-	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
-	if(cpalette)
-	 LoadCPalette();
+    LoadConfig();
+    DoArgs(argc-2,&argv[1]);
+    FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+    if(cpalette) {
+        LoadCPalette();
+    }
 
-	/* All the config files and arguments are parsed now. */
-        if(!LoadGame(argv[argc-1]))
-        {
-         DriverKill();
-         return(0);
-        }
+    /* All the config files and arguments are parsed now. */
+    if(!LoadGame(argv[argc-1])) {
+        DriverKill();
+        return(0);
+    }
 
-	while(CurGame)
-	 DoFun();
+    while(CurGame) {
+        DoFun();
+    }
 
-
-        CloseGame();
+    CloseGame();
         
-	SaveConfig();
+    SaveConfig();
 
-        FCEUI_Kill();
+    FCEUI_Kill();
 
-        return(1);
+    return(1);
 }
 
-static int DriverInitialize(FCEUGI *gi)
+/**
+ * Initialize all of the subsystem drivers: video, audio, joystick,
+ * keyboard, mouse.
+ */
+static int
+DriverInitialize(FCEUGI *gi)
 {
-	#ifndef WIN32
-	SetSignals(CloseStuff);
-	#endif
+#ifndef WIN32
+    SetSignals(CloseStuff);
+#endif
 
-	/* Initialize video before all else, due to some wacko dependencies
-	   in the SexyAL code(DirectSound) that need to be fixed.
-	*/
+    /* Initialize video before all else, due to some wacko dependencies
+       in the SexyAL code(DirectSound) that need to be fixed.
+    */
 
-        if(InitVideo(gi) < 0) return 0;
-        inited|=4;
+    if(InitVideo(gi) < 0) return 0;
+    inited|=4;
 
-	if(InitSound(gi))
-	 inited|=1;
+    if(InitSound(gi))
+        inited|=1;
 
-	if(InitJoysticks())
-	 inited|=2;
+    if(InitJoysticks())
+        inited|=2;
 
-	if(!InitKeyboard()) return 0;
-	inited|=8;
+    if(!InitKeyboard()) return 0;
+    inited|=8;
 
-	InitOtherInput();
-	return 1;
+    InitOtherInput();
+    return 1;
 }
 
-static void DriverKill(void)
+/**
+ * Shut down all of the subsystem drivers: video, audio, joystick,
+ * keyboard.
+ */
+static void
+DriverKill()
 {
- SaveConfig();
+    SaveConfig();
 
- #ifndef WIN32
- SetSignals(SIG_IGN);
- #endif
+#ifndef WIN32
+    SetSignals(SIG_IGN);
+#endif
 
- if(inited&2)
-  KillJoysticks();
- if(inited&8)
-  KillKeyboard();
- if(inited&4)
-  KillVideo();
- if(inited&1)
-  KillSound();
- if(inited&16)
-  KillMouse();
- inited=0;
+    if(inited&2)
+        KillJoysticks();
+    if(inited&8)
+        KillKeyboard();
+    if(inited&4)
+        KillVideo();
+    if(inited&1)
+        KillSound();
+    if(inited&16)
+        KillMouse();
+    inited=0;
 }
 
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
+/**
+ * Update the video, audio, and input subsystems with the provided
+ * video (XBuf) and audio (Buffer) information.
+ */
+void
+FCEUD_Update(uint8 *XBuf,
+             int32 *Buffer,
+             int Count)
 {
- extern int FCEUDnetplay;
+    extern int FCEUDnetplay;
 
- int ocount = Count;
- // apply frame scaling to Count
- Count = (Count<<8)/fps_scale;
- if(Count)
- {
-  int32 can=GetWriteSound();
-  static int uflow=0;
-  int32 tmpcan;
+    int ocount = Count;
+    // apply frame scaling to Count
+    Count = (Count<<8)/fps_scale;
+    if(Count) {
+        int32 can=GetWriteSound();
+        static int uflow=0;
+        int32 tmpcan;
 
-  // don't underflow when scaling fps
-  if(can >= GetMaxSound() && fps_scale<=256) uflow=1;	/* Go into massive underflow mode. */
+        // don't underflow when scaling fps
+        if(can >= GetMaxSound() && fps_scale<=256) uflow=1;	/* Go into massive underflow mode. */
 
-  if(can > Count) can=Count;
-  else uflow=0;
+        if(can > Count) can=Count;
+        else uflow=0;
 
-  WriteSound(Buffer,can);
+        WriteSound(Buffer,can);
 
-  //if(uflow) puts("Underflow");
-  tmpcan = GetWriteSound();
-  // don't underflow when scaling fps
-  if(fps_scale>256 || ((tmpcan < Count*0.90) && !uflow))
-  {
-   if(XBuf && (inited&4) && !(NoWaiting & 2))
-    BlitScreen(XBuf);
-   Buffer+=can;
-   Count-=can;
-   if(Count)
-   {
-    if(NoWaiting)
-    {
-     can=GetWriteSound(); 
-     if(Count>can) Count=can;
-     WriteSound(Buffer,Count);
+        //if(uflow) puts("Underflow");
+        tmpcan = GetWriteSound();
+        // don't underflow when scaling fps
+        if(fps_scale>256 || ((tmpcan < Count*0.90) && !uflow)) {
+            if(XBuf && (inited&4) && !(NoWaiting & 2))
+                BlitScreen(XBuf);
+            Buffer+=can;
+            Count-=can;
+            if(Count) {
+                if(NoWaiting) {
+                    can=GetWriteSound(); 
+                    if(Count>can) Count=can;
+                    WriteSound(Buffer,Count);
+                } else {
+                    while(Count>0) {
+                        WriteSound(Buffer,(Count<ocount) ? Count : ocount);
+                        Count -= ocount;
+                    }
+                }
+            }
+        } //else puts("Skipped");
+        else if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8))) {
+            if(Count > tmpcan) Count=tmpcan;
+            while(tmpcan > 0) {
+                //    printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
+                WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
+                tmpcan -= Count;
+            }
+        }
+
+    } else {
+        if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
+            SpeedThrottle();
+        if(XBuf && (inited&4)) {
+            BlitScreen(XBuf);
+        }
     }
-    else
-    {
-     while(Count>0)
-     {
-      WriteSound(Buffer,(Count<ocount) ? Count : ocount);
-      Count -= ocount;
-     }
-    }
-   }
-  } //else puts("Skipped");
-  else if(!NoWaiting && FCEUDnetplay && (uflow || tmpcan >= (Count * 1.8)))
-  {
-   if(Count > tmpcan) Count=tmpcan;
-   while(tmpcan > 0)
-   {
-//    printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
-    WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
-    tmpcan -= Count;
-   }
-  }
-
- }
- else
- {
-  if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-   SpeedThrottle();
-  if(XBuf && (inited&4))
-  {
-   BlitScreen(XBuf);
-  }
- }
- FCEUD_UpdateInput();
- //if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
- // SpeedThrottle();
- //if(XBuf && (inited&4))
- //{
- // BlitScreen(XBuf);
- //}
- //if(Count)
- // WriteSound(Buffer,Count,NoWaiting);
- //FCEUD_UpdateInput();
+    FCEUD_UpdateInput();
+    //if(!Count && !NoWaiting && !(eoptions&EO_NOTHROTTLE))
+    // SpeedThrottle();
+    //if(XBuf && (inited&4))
+    //{
+    // BlitScreen(XBuf);
+    //}
+    //if(Count)
+    // WriteSound(Buffer,Count,NoWaiting);
+    //FCEUD_UpdateInput();
 }
 
 
 /* Maybe ifndef WXWINDOWS would be better? ^_^ */
+/**
+ * Opens a file to be read a byte at a time.
+ */
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode)
 {
     return(fopen(fn,mode));
 }
 
 static char *s_linuxCompilerString = "g++ " __VERSION__;
+/**
+ * Returns the compiler string.
+ */
 char *FCEUD_GetCompilerString() {
     return (char *)s_linuxCompilerString;
 }
 
+/**
+ * Unimplemented.
+ */
 void FCEUD_DebugBreakpoint() {
     return;
 }
+
+/**
+ * Unimplemented.
+ */
 void FCEUD_TraceInstruction() {
     return;
 }
