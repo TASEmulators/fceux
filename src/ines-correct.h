@@ -43,7 +43,7 @@
     {0x1500e835,48,8},  /* Jetsons (J) */
 
   {0x637134e8,193,1},  /* Fighting Hero */
-  {0xcbf4366f,158,8},  /* Alien Syndrome (U.S. unlicensed) */
+  {0xcbf4366f,118,8},  /* Alien Syndrome (U.S. unlicensed) */
   {0xb19a55dd,64,8},  /* Road Runner */
   //{0x3eafd012,116,-1},  /* AV Girl Fighting */
   {0x1d0f4d6b,2,1},  /* Black Bass thinging */
@@ -199,15 +199,37 @@
    {0x555a555e,191,-1},
    {0x98c1cd4b,192,-1},/* Ying Lie Qun Xia Zhuan (Chinese) */
    {0x442f1a29,192,-1},/* Young chivalry */
+   {0xa9115bc1,192,-1},
+   {0x4c7bbb0e,192,-1},
+   {0xa145fae6,192,-1},
    {0xa925226c,194,-1},/* Dai-2-Ji - Super Robot Taisen (As) */
-   {0xd5224fde,198,-1},/* [074]Crystalis (c) */
-   {0x1bc0be6c,198,-1},/* Captain Tsubasa Vol 2 - Super Striker (C) */
-   {0xdd431ba7,199,-1},/* Tenchi wo kurau 2 (c) */
-   {0x28192599,199,-1},
-   {0x700705f4,199,-1},
-   {0x9a2cf02c,199,-1},
-   {0xd8b401a7,199,-1},
+   {0xd5224fde,195,-1},/* Crystalis (c) */
+   {0x1bc0be6c,195,-1},/* Captain Tsubasa Vol 2 - Super Striker (C) */
+   {0x33c5df92,195,-1},
+   {0xdd431ba7,198,-1},/* Tenchi wo kurau 2 (c) */
+   {0x28192599,198,-1},
+   {0x700705f4,198,-1},
+   {0x9a2cf02c,198,-1},
+   {0xd8b401a7,198,-1},
+   {0x19b9e732,198,-1},
+   {0xd871d3e6,199,-1},/* Dragon Ball Z 2 - Gekishin Freeza! (C) */
+   {0xed481b7c,199,-1},/* Dragon Ball Z Gaiden - Saiya Jin Zetsumetsu Keikaku (C) */
+   {0x44c20420,199,-1},/* San Guo Zhi 2 (C) */
 
    {0x1f1326d4,218,-1},
    {0xa1dc16c0,116,-1},
+   
+   {0xcc868d4e,149,-1}, /* 16 Mahjong [p1][!] */
+   {0x48239b42,146,-1}, /* Mahjong Companion (Sachen) [!] */
+   {0xb6a727fa,146,-1}, /* Papillion (As) [!] */
+   {0xa62b79e1,146,-1}, /* Side Winder (HES) [!] */
+   {0x73fb55ac,150,-1}, /* 2-in-1 Cosmo Cop + Cyber Monster (Sachen) [!] */
+   {0xddcbda16,150,-1}, /* 2-in-1 Tough Cop + Super Tough Cop (Sachen) [!] */
+   {0x29582ca1,150,-1},
+   {0x40dbf7a2,150,-1},
+   {0x5aefbc94,133,-1}, /* Jovial Race (Sachen) [a1][!] */
+   
+   {0x22d6d5bd,4,1},
+   {0x6a03d3f3,114,-1},
+   
    {0,-1,-1}

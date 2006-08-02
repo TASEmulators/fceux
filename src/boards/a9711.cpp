@@ -25,16 +25,20 @@ static uint8 m_perm[8] = {0, 1, 0, 3, 0, 5, 6, 7};
 
 static void UNLA9711PW(uint32 A, uint8 V)
 {
-  if(EXPREGS[0]&0x20)
+  if((EXPREGS[0]&0xFF) == 0x37)
   {
-    uint8 bank=EXPREGS[0]&0x1F;
-    if(EXPREGS[0]&0x20)
-      setprg32(0x8000,bank>>2);
-    else
-    {
+    setprg8(0x8000, 0x13);
+    setprg8(0xA000, 0x13);
+    setprg8(0xC000, 0x13);
+    setprg8(0xE000, 0x0);
+//    uint8 bank=EXPREGS[0]&0x1F;
+//   if(EXPREGS[0]&0x20)
+//      setprg32(0x8000,bank>>2);
+//    else
+//    {
 //      setprg16(0x8000,bank);
-      setprg16(0xC000,bank);
-    }
+//      setprg16(0xC000,bank);
+//    }
   }
   else
     setprg8(A,V&0x3F);
@@ -47,7 +51,7 @@ static DECLFW(UNLA9711Write8000)
 //    MMC3_CMDWrite(A,V);
 //  else
 //    MMC3_CMDWrite(A,m_perm[V&7]);
-  if(V!=0x86) MMC3_CMDWrite(A,V);
+//  if(V!=0x86) MMC3_CMDWrite(A,V);
 }
 
 static DECLFW(UNLA9711WriteLo)

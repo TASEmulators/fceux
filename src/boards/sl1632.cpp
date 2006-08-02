@@ -21,24 +21,24 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 chrcmd[8], prg0, prg1, brck, mirr;
+static uint8 chrcmd[8], prg0, prg1, brk, latc, mirr;
 static SFORMAT StateRegs[]=
 {
   {chrcmd, 8, "CHRCMD"},
   {&prg0, 1, "PRG0"},
   {&prg1, 1, "PRG1"},
-  {&brck, 1, "BRK"},
+  {&brk, 1, "BRK"},
   {&mirr, 1, "MIRR"},
   {0}
 };
 
 static void Sync(void)
 {
-  int i;
   setprg8(0x8000,prg0);
   setprg8(0xA000,prg1);
   setprg8(0xC000,~1);
   setprg8(0xE000,~0);
+  int i;
   for(i=0; i<8; i++)
      setchr1(i<<10,chrcmd[i]);
   setmirror(mirr^1);
@@ -46,22 +46,35 @@ static void Sync(void)
 
 static void UNLSL1632CW(uint32 A, uint8 V)
 {
-  setchr1(A,V);
+  int cbase=(MMC3_cmd&0x80)<<5;
+  int page0=(brk&0x08)<<5;
+  int page1=(brk&0x20)<<3;
+  int page2=(brk&0x80)<<1;
+  setchr1(cbase^0x0000,page0|(DRegBuf[0]&(~1)));
+  setchr1(cbase^0x0400,page0|DRegBuf[0]|1);
+  setchr1(cbase^0x0800,page0|(DRegBuf[1]&(~1)));
+  setchr1(cbase^0x0C00,page0|DRegBuf[1]|1);
+  setchr1(cbase^0x1000,page1|DRegBuf[2]);
+  setchr1(cbase^0x1400,page1|DRegBuf[3]);
+  setchr1(cbase^0x1800,page2|DRegBuf[4]);
+  setchr1(cbase^0x1c00,page2|DRegBuf[5]);
 }
 
 static DECLFW(UNLSL1632CMDWrite)
 {
-//  FCEU_printf("bs %04x %02x %3d\n",A,V,scanline);     
   if((A&0xA131)==0xA131)
   {
-    brck=V;
+    brk=V;
+    latc = brk;
   }
-  if(brck&2)
+  if(brk&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
     if(A<0xC000)
+    {
       MMC3_CMDWrite(A,V);
+    }
     else
       MMC3_IRQWrite(A,V);
   }
@@ -86,7 +99,7 @@ static DECLFW(UNLSL1632CMDWrite)
 
 static void StateRestore(int version)
 {
-  if(brck&2)
+  if(brk&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
@@ -104,7 +117,7 @@ static void UNLSL1632Power(void)
 
 void UNLSL1632_Init(CartInfo *info)
 {
-  GenMMC3_Init(info, 256, 256, 0, 0);
+  GenMMC3_Init(info, 256, 512, 0, 0);
   cwrap=UNLSL1632CW;
   info->Power=UNLSL1632Power;
   GameStateRestore=StateRestore;

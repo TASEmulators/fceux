@@ -25,6 +25,7 @@ static uint8 IRQCount, IRQPre;
 static uint8 IRQa;
 static uint8 prg_reg[2];
 static uint8 chr_reg[8];
+static uint8 mirr;
 
 static SFORMAT StateRegs[]=
 {
@@ -32,6 +33,7 @@ static SFORMAT StateRegs[]=
   {&IRQa, 1, "IRQA"},
   {prg_reg, 2, "PRG"},
   {chr_reg, 8, "CHR"},
+  {&mirr, 1, "MIRR"},
   {0}
 };
 
@@ -40,7 +42,7 @@ static void M222IRQ(void)
   if(IRQa)
   {
     IRQCount++;
-    if((IRQCount)>=240)
+    if(IRQCount>=240)
     {
       X6502_IRQBegin(FCEU_IQEXT);
       IRQa=0;
@@ -50,11 +52,12 @@ static void M222IRQ(void)
 
 static void Sync(void)
 {
-  int i;
   setprg8(0x8000,prg_reg[0]);
   setprg8(0xA000,prg_reg[1]);
+  int i;
   for(i=0; i<8; i++)
      setchr1(i<<10,chr_reg[i]);     
+  setmirror(mirr^1);   
 }
 
 static DECLFW(M222Write)
@@ -62,6 +65,7 @@ static DECLFW(M222Write)
   switch(A&0xF003)
   {
     case 0x8000: prg_reg[0]=V; break;
+    case 0x9000: mirr=V&1;     break;
     case 0xA000: prg_reg[1]=V; break;
     case 0xB000: chr_reg[0]=V; break;
     case 0xB002: chr_reg[1]=V; break;
@@ -75,9 +79,8 @@ static DECLFW(M222Write)
 //  /  case 0xF001: FCEU_printf("%04x:%02x %d\n",A,V,scanline); IRQCount=V; break;
 //    case 0xF002: FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
 //    case 0xD001: IRQa=V; X6502_IRQEnd(FCEU_IQEXT); FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
-   case 0xC001: IRQPre=0; FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
-    case 0xF000: IRQPre=8; IRQCount=V; IRQa=V; X6502_IRQEnd(FCEU_IQEXT); FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
-    default: FCEU_printf("%04x:%02x %d\n",A,V,scanline);
+//    case 0xC001: IRQPre=16; FCEU_printf("%04x:%02x %d\n",A,V,scanline); break;
+    case 0xF000: IRQCount=V; IRQa=V; X6502_IRQEnd(FCEU_IQEXT); break;
   }
   Sync();
 }

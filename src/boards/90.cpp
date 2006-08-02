@@ -20,7 +20,7 @@
  */
 
 #include "mapinc.h"
-#define DEBUG90
+//#define DEBUG90
 
 // Mapper 090 is simpliest mapper hardware and have not extended nametable control and latched chr banks in 4k mode
 // Mapper 209 much compicated hardware with decribed above features disabled by default and switchable by command
@@ -38,7 +38,6 @@ static uint8 IRQa;           // $c002, $c003, and $c000
 
 static uint8 mul[2];
 static uint8 regie;
-static uint8 regie2;
 
 static uint8 tkcom[4];
 static uint8 prgb[4];
@@ -185,54 +184,50 @@ static void tekvrom(void)
 
 static DECLFW(M90TekWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
-  switch(A&0x5805)
+  switch(A&0x5C03)
   {
     case 0x5800: mul[0]=V; break;
     case 0x5801: mul[1]=V; break;
     case 0x5803: regie=V; break;
-//    case 0x5803: regie2=V; break;
-//    default: regie=V; break;
   }
 }
 
 static DECLFR(M90TekRead)
 {
-  switch(A&0x5805)
+  switch(A&0x5C03)
   {
-    case 0x5000: return tekker;
     case 0x5800: return (mul[0]*mul[1]);
     case 0x5801: return((mul[0]*mul[1])>>8);
     case 0x5803: return (regie);
-//    case 0x5804: return (regie2);
+    default: return tekker;
   }
   return(0xff);
 }
 
 static DECLFW(M90PRGWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
+//  FCEU_printf("bs %04x %02x\n",A,V);
   prgb[A&3]=V;
   tekprom();
 }
 
 static DECLFW(M90CHRlowWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
+//  FCEU_printf("bs %04x %02x\n",A,V);
   chrlow[A&7]=V;
   tekvrom();
 }
 
 static DECLFW(M90CHRhiWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
+//  FCEU_printf("bs %04x %02x\n",A,V);
   chrhigh[A&7]=V;
   tekvrom();
 }
 
 static DECLFW(M90NTWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
+//  FCEU_printf("bs %04x %02x\n",A,V);
   if(A&4)
   {
     names[A&3]&=0x00FF;
@@ -248,7 +243,7 @@ static DECLFW(M90NTWrite)
 
 static DECLFW(M90IRQWrite)
 {
-  FCEU_printf("bs %04x %02x\n",A,V);
+//  FCEU_printf("bs %04x %02x\n",A,V);
   switch(A&7)
   {
     case 00: //FCEU_printf("%s IRQ (C000)\n",V&1?"Enable":"Disable");
@@ -287,7 +282,7 @@ static DECLFW(M90IRQWrite)
 
 static DECLFW(M90ModeWrite)
 {
-    FCEU_printf("bs %04x %02x\n",A,V);
+//    FCEU_printf("bs %04x %02x\n",A,V);
     tkcom[A&3]=V;
     tekprom();
     tekvrom();
@@ -328,7 +323,7 @@ static DECLFW(M90ModeWrite)
 
 static DECLFW(M90DummyWrite)
 {
-    FCEU_printf("bs %04x %02x\n",A,V);
+//    FCEU_printf("bs %04x %02x\n",A,V);
 }
 
 static void CCL(void)

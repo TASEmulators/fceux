@@ -628,7 +628,7 @@ static void M47Power(void)
 
 void Mapper47_Init(CartInfo *info)
 {
- GenMMC3_Init(info, 512, 256, 8, info->battery);
+ GenMMC3_Init(info, 512, 256, 8, 0);
  pwrap=M47PW;
  cwrap=M47CW;
  info->Power=M47Power;
@@ -1159,6 +1159,24 @@ void Mapper195_Init(CartInfo *info)
  AddExState(wramtw, wramsize, 0, "WRAMTW");
 }
 
+// ---------------------------- Mapper 197 -------------------------------
+
+static void M197CW(uint32 A, uint8 V)
+{
+  if(A==0x0000)
+    setchr4(0x0000,V>>1);
+  else if(A==0x1000)
+    setchr2(0x1000,V);
+  else if(A==0x1400)
+    setchr2(0x1800,V);
+}
+
+void Mapper197_Init(CartInfo *info)
+{
+ GenMMC3_Init(info, 128, 512, 8, 0);
+ cwrap=M197CW;
+}
+
 // ---------------------------- Mapper 198 -------------------------------
 
 static void M198PW(uint32 A, uint8 V)
@@ -1169,21 +1187,10 @@ static void M198PW(uint32 A, uint8 V)
     setprg8(A,V);
 }
 
-static void M198CW(uint32 A, uint8 V)
-{
-  if(A==0x0000)
-    setchr4(0x0000,V>>1);
-  else if(A==0x1000)
-    setchr2(0x1000,V);
-  else if(A==0x1400)
-    setchr2(0x1800,V);
-}
-
 void Mapper198_Init(CartInfo *info)
 {
  GenMMC3_Init(info, 1024, 256, 8, info->battery);
  pwrap=M198PW;
- cwrap=M198CW;
  info->Power=M195Power;
  info->Close=M195Close;
  wramsize=4096;
@@ -1292,17 +1299,17 @@ static DECLFW(M215ExWrite)
 // FCEU_printf("bs %04x %02x (%04x)\n",A,V,A&0x5007);
  switch(A)
  {
-  case 0x6000:
+//  case 0x6000:
   case 0x5000:
        EXPREGS[0]=V;
        FixMMC3PRG(MMC3_cmd);
        break;
-  case 0x6001:
+//  case 0x6001:
   case 0x5001:
        EXPREGS[1]=V;
        FixMMC3CHR(MMC3_cmd);
        break;
-  case 0x6007:
+//  case 0x6007:
   case 0x5007:
        EXPREGS[2]=V;
        MMC3RegReset();
