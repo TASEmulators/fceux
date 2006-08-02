@@ -69,22 +69,31 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib"
+				PreprocessorDefinitions="WIN32;NDEBUG;MSVC;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="comctl32.lib vfw32.lib dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
 				OutputFile="$(OutDir)/fceu.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -397,6 +406,18 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\common\cheat.cpp">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\drivers\common\cheat.h">
@@ -470,6 +491,12 @@
 							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)\$(InputName)2.obj"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\cheat.h">
@@ -493,6 +520,12 @@
 					RelativePath="..\src\drivers\win\input.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
@@ -541,6 +574,12 @@
 					RelativePath="..\src\drivers\win\netplay.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
 						<Tool
 							Name="VCCLCompilerTool"
 							ObjectFile="$(IntDir)\$(InputName)1.obj"/>
@@ -892,6 +931,12 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\utils\crc32.h">
@@ -1007,6 +1052,12 @@
 			RelativePath="..\src\config.cpp">
 			<FileConfiguration
 				Name="Debug|Win32">
+				<Tool
+					Name="VCCLCompilerTool"
+					ObjectFile="$(IntDir)\$(InputName)1.obj"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32">
 				<Tool
 					Name="VCCLCompilerTool"
 					ObjectFile="$(IntDir)\$(InputName)1.obj"/>
