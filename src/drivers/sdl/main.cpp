@@ -389,7 +389,7 @@ static int DriverInitialize(FCEUGI *gi)
 	   in the SexyAL code(DirectSound) that need to be fixed.
 	*/
 
-        if(!InitVideo(gi)) return 0;
+        if(InitVideo(gi) < 0) return 0;
         inited|=4;
 
 	if(InitSound(gi))

@@ -33,6 +33,9 @@ static unsigned int BufferRead;
 static unsigned int BufferWrite;
 static volatile unsigned int BufferIn;
 
+/**
+ * Callback from the SDL to get and play audio data.
+ */
 static void
 fillaudio(void *udata,
           uint8 *stream,
@@ -101,15 +104,21 @@ InitSound(FCEUGI *gi)
     SDL_PauseAudio(0);
     FCEUI_Sound(soundrate);
     return(1);
-} 
+}
 
 
+/**
+ * Returns the size of the audio buffer.
+ */
 uint32
 GetMaxSound(void)
 {
     return(BufferSize);
 }
 
+/**
+ * Returns the amount of free space in the audio buffer.
+ */
 uint32
 GetWriteSound(void)
 {

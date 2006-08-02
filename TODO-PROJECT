@@ -8,7 +8,7 @@ Doxygen integration - DONE
  * website integration
 
 Linux build - soules
- * clean-up scons files to manage SDL variables properly
+ * clean up button configuration code
  * go through #def variables and figure out which we need and which we don't
  * lots of testing and code clean-up
 

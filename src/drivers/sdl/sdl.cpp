@@ -6,6 +6,10 @@
 #include "sdl-video.h"
 #include "unix-netplay.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 DSETTINGS Settings;
 CFGSTRUCT DriverConfig[]={
 	#ifdef OPENGL
@@ -109,129 +113,157 @@ static void SetDefaults(void)
 #endif
 }
 
+/**
+ * Unimplemented.
+ */
 void DoDriverArgs(void)
 {
-	#ifdef BROKEN
-        if(_fshack)
-        {
-         if(_fshack[0]=='0')
-          if(_fshack[1]==0)
-          {
-           free(_fshack);
-           _fshack=0;
-          }
+
+}
+
+/**
+ * Unimplemented.  Returns 0.
+ */
+int
+InitMouse(void)
+{
+    return 0;
+}
+
+/**
+ * Unimplemented.
+ */
+void
+KillMouse()
+{ }
+
+/**
+ * Return the state of the mouse buttons.  Input 'd' is an array of 3
+ * integers that store <x, y, button state>.
+ */
+void
+GetMouseData(uint32 *d)
+{
+    int x,y;
+    uint32 t;
+
+    // XXX soules - why don't we do this when a movie is active?
+    if(FCEUI_IsMovieActive() < 0)
+        return;
+
+    // retrieve the state of the mouse from SDL
+    t = SDL_GetMouseState(&x, &y);
+
+    d[2] = 0;
+    if(t & SDL_BUTTON(1)) {
+        d[2] |= 0x1;
+    }
+    if(t & SDL_BUTTON(3)) {
+        d[2] |= 0x2;
+    }
+
+    // get the mouse position from the SDL video driver
+    t = PtoV(x, y);
+    d[0] = t & 0xFFFF;
+    d[1] = (t >> 16) & 0xFFFF;
+}
+
+/**
+ * Unimplemented.  Returns 1.
+ */
+int
+InitKeyboard()
+{
+    return 1;
+}
+
+/**
+ * Unimplemented.  Returns 1.
+ */
+int
+UpdateKeyboard()
+{
+    return 1;
+}
+
+/**
+ * Unimplemented.
+ */
+void
+KillKeyboard()
+{
+
+}
+
+
+/**
+ * Handles outstanding SDL events.
+ */
+void
+UpdatePhysicalInput()
+{
+    SDL_Event event;
+
+    // loop, handling all pending events
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+        case SDL_QUIT:
+            CloseGame();
+            puts("Quit");
+            break;
+        default:
+            // do nothing
+            break;
         }
-	#endif
+    }
+    //SDL_PumpEvents();
 }
 
-int InitMouse(void)
+/**
+ * Get and return the keyboard state from the SDL.
+ */
+static uint8 *KeyState = NULL;
+char *
+GetKeyboard()
 {
- return(0);
+    KeyState = SDL_GetKeyState(0);
+    return ((char *)KeyState);
 }
 
-void KillMouse(void){}
-
-void GetMouseData(uint32 *d)
+/**
+ * Attempts to locate FCEU's application directory.  This will
+ * hopefully become obsolete once the new configuration system is in
+ * place.
+ */
+uint8 *
+GetBaseDirectory()
 {
- if(FCEUI_IsMovieActive()<0)
-   return;
+    uint8 *ol;
+    uint8 *ret; 
 
- int x,y;
- uint32 t;
+    ol=(uint8 *)getenv("HOME");
 
- t=SDL_GetMouseState(&x,&y);
-
- d[2]=0;
- if(t&SDL_BUTTON(1))
-  d[2]|=1;
- if(t&SDL_BUTTON(3))
-  d[2]|=2;
- t=PtoV(x,y); 
- d[0]=t&0xFFFF;
- d[1]=(t>>16)&0xFFFF;
-}
-
-int InitKeyboard(void)
-{
- return(1);
-}
-
-int UpdateKeyboard(void)
-{
- return(1);
-}
-
-void KillKeyboard(void)
-{
-
-}
-
-
-void UpdatePhysicalInput(void)
-{
- SDL_Event event;
-
- while(SDL_PollEvent(&event))
- {
-  switch(event.type)
-  {
-   //case SDL_SYSWMEVENT: puts("Nifty keen");break;
-   //case SDL_VIDEORESIZE: puts("Okie dokie");break;
-   case SDL_QUIT: CloseGame();puts("Quit");break;
-  }
-  //printf("Event: %d\n",event.type);
-  //fflush(stdout);
- }
- //SDL_PumpEvents();
-}
-
-static uint8 *KeyState=NULL;
-char *GetKeyboard(void)
-{
- KeyState=SDL_GetKeyState(0);
- return((char *)KeyState);
-}
-
+    if(ol) {
+        ret=(uint8 *)malloc(strlen((char *)ol)+1+strlen("./fceultra"));
+        strcpy((char *)ret,(char *)ol);
+        strcat((char *)ret,"/.fceultra");
+    } else {
 #ifdef WIN32
-#include <windows.h>
+        char *sa;
 
- /* Stupid SDL */
- //#ifdef main
- //#undef main
- //#endif
+        ret=(uint8*)malloc(MAX_PATH+1);
+        GetModuleFileName(NULL,(char*)ret,MAX_PATH+1);
+
+        sa=strrchr((char*)ret,'\\');
+        if(sa)
+            *sa = 0; 
+#else
+        ret=(uint8 *)malloc(sizeof(uint8));
+        ret[0]=0;
 #endif
-
-uint8 *GetBaseDirectory(void)
-{
- uint8 *ol;
- uint8 *ret; 
-
- ol=(uint8 *)getenv("HOME");
-
- if(ol)
- {
-  ret=(uint8 *)malloc(strlen((char *)ol)+1+strlen("./fceultra"));
-  strcpy((char *)ret,(char *)ol);
-  strcat((char *)ret,"/.fceultra");
- }
- else
- {
-  #ifdef WIN32
-  char *sa;
-
-  ret=(uint8*)malloc(MAX_PATH+1);
-  GetModuleFileName(NULL,(char*)ret,MAX_PATH+1);
-
-  sa=strrchr((char*)ret,'\\');
-  if(sa)
-   *sa = 0; 
-  #else
-  ret=(uint8 *)malloc(sizeof(uint8));
-  ret[0]=0;
-  #endif
-  printf("%s\n",ret);
- }
- return(ret);
+        printf("%s\n",ret);
+    }
+    return(ret);
 }
 
 #ifdef OPENGL
@@ -239,113 +271,156 @@ int sdlhaveogl;
 #endif
 
 
+/**
+ * Involved with updating the button configuration, but not entirely
+ * sure how yet - soules.
+ */
 int DTestButton(ButtConfig *bc)
 {
- int x;
+    int x;
 
- for(x=0;x<bc->NumC;x++)
- {
-  if(bc->ButtType[x]==BUTTC_KEYBOARD)
-  {
-   if(KeyState[bc->ButtonNum[x]])
-    return(1);
-  }
-  else if(bc->ButtType[x]==BUTTC_JOYSTICK)
-  {
-   if(DTestButtonJoy(bc))
-    return(1);
-  }
- }
- return(0);
+    for(x = 0; x < bc->NumC; x++) {
+        if(bc->ButtType[x] == BUTTC_KEYBOARD) {
+            if(KeyState[bc->ButtonNum[x]]) {
+                return(1);
+            }
+        } else if(bc->ButtType[x] == BUTTC_JOYSTICK) {
+            if(DTestButtonJoy(bc)) {
+                return(1);
+            }
+        }
+    }
+    return(0);
 }
 
 static int bcpv,bcpj;
 
-int ButtonConfigBegin(void)
+/**
+ *  Begin configuring the buttons by placing the video and joystick
+ *  subsystems into a well-known state.  Button configuration really
+ *  needs to be cleaned up after the new config system is in place.
+ */
+int
+ButtonConfigBegin()
 {
- SDL_Surface *screen;
- SDL_QuitSubSystem(SDL_INIT_VIDEO);
- bcpv=KillVideo();
- bcpj=KillJoysticks();
+    SDL_Surface *screen;
+
+    // XXX soules - why are we doing this right before KillVideo()?
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
+    // shut down the video and joystick subsystems
+    bcpv=KillVideo();
+    bcpj=KillJoysticks();
  
- if(!(SDL_WasInit(SDL_INIT_VIDEO)&SDL_INIT_VIDEO))
-  if(SDL_InitSubSystem(SDL_INIT_VIDEO)==-1)
-  {
-   FCEUD_Message(SDL_GetError());
-   return(0);
-  } 
+    // reactivate the video subsystem
+    if(!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if(SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
+                FCEUD_Message(SDL_GetError());
+                return(0);
+        }
+    }
+
+    // set the screen and notify the user of button configuration
+    screen = SDL_SetVideoMode(300, 1, 8, 0); 
+    SDL_WM_SetCaption("Button Config",0);
+
+    // XXX soules - why did we shut this down?
+    // initialize the joystick subsystem
+    InitJoysticks();
  
- screen = SDL_SetVideoMode(300, 1, 8, 0); 
- SDL_WM_SetCaption("Button Config",0);
- InitJoysticks();
- 
- return(1);
+    return(1);
 }
 
-void ButtonConfigEnd(void)
+/**
+ *  Finish configuring the buttons by reverting the video and joystick
+ *  subsystems to their previous state.  Button configuration really
+ *  needs to be cleaned up after the new config system is in place.
+ */
+void
+ButtonConfigEnd()
 { 
- extern FCEUGI *CurGame;
- KillJoysticks();
- SDL_QuitSubSystem(SDL_INIT_VIDEO); 
- if(!bcpv) InitVideo(CurGame);
- if(!bcpj) InitJoysticks();
+    extern FCEUGI *CurGame;
+
+    // shutdown the joystick and video subsystems
+    KillJoysticks();
+    SDL_QuitSubSystem(SDL_INIT_VIDEO); 
+
+    // re-initialize joystick and video subsystems if they were active before
+    if(!bcpv) {
+        InitVideo(CurGame);
+    }
+    if(!bcpj) {
+        InitJoysticks();
+    }
 }
 
-int DWaitButton(const uint8 *text, ButtConfig *bc, int wb)
+/**
+ * Waits for a button input and returns the information as to which
+ * button was pressed.  Used in button configuration.
+ */
+int
+DWaitButton(const uint8 *text,
+            ButtConfig *bc,
+            int wb)
 {
- SDL_Event event;
- static int32 LastAx[64][64];
- int x,y;
+    SDL_Event event;
+    static int32 LastAx[64][64];
+    int x,y;
 
- SDL_WM_SetCaption((const char *)text,0);
- puts((const char *)text);
- for(x=0;x<64;x++) 
-  for(y=0;y<64;y++)
-   LastAx[x][y]=0x100000;
+    SDL_WM_SetCaption((const char *)text,0);
+    puts((const char *)text);
+    for(x = 0; x < 64; x++) {
+        for(y = 0; y < 64; y++) {
+            LastAx[x][y]=0x100000;
+        }
+    }
 
- while(SDL_WaitEvent(&event))
- {
-  switch(event.type)
-  {
-   case SDL_KEYDOWN:bc->ButtType[wb]=BUTTC_KEYBOARD;
-		    bc->DeviceNum[wb]=0;
-		    bc->ButtonNum[wb]=event.key.keysym.sym;
-		    return(1);
-   case SDL_JOYBUTTONDOWN:bc->ButtType[wb]=BUTTC_JOYSTICK;
-			  bc->DeviceNum[wb]=event.jbutton.which;
-			  bc->ButtonNum[wb]=event.jbutton.button; 
-			  return(1);
-   case SDL_JOYHATMOTION:if(event.jhat.value != SDL_HAT_CENTERED)
-			 {
-			  bc->ButtType[wb]=BUTTC_JOYSTICK;
-			  bc->DeviceNum[wb]=event.jhat.which;
-			  bc->ButtonNum[wb]=0x2000|((event.jhat.hat&0x1F)<<8)|event.jhat.value;
-			  return(1);
-			 }
-			 break;
-   case SDL_JOYAXISMOTION: 
-	if(LastAx[event.jaxis.which][event.jaxis.axis]==0x100000)
-	{
-	 if(abs(event.jaxis.value)<1000)
- 	  LastAx[event.jaxis.which][event.jaxis.axis]=event.jaxis.value;
-	}
-	else
-	{
-	 if(abs(LastAx[event.jaxis.which][event.jaxis.axis]-event.jaxis.value)>=8192)
-	 {
-	  bc->ButtType[wb]=BUTTC_JOYSTICK;
-	  bc->DeviceNum[wb]=event.jaxis.which;
-	  bc->ButtonNum[wb]=0x8000|(event.jaxis.axis)|((event.jaxis.value<0)?0x4000:0);
-	  return(1);
-	 }
-	}
-	break;
-  }
- }
+    while(SDL_WaitEvent(&event)) {
+        switch(event.type) {
+        case SDL_KEYDOWN:
+            bc->ButtType[wb]  = BUTTC_KEYBOARD;
+            bc->DeviceNum[wb] = 0;
+            bc->ButtonNum[wb] = event.key.keysym.sym;
+            return(1);
+        case SDL_JOYBUTTONDOWN:
+            bc->ButtType[wb]  = BUTTC_JOYSTICK;
+            bc->DeviceNum[wb] = event.jbutton.which;
+            bc->ButtonNum[wb] = event.jbutton.button; 
+            return(1);
+        case SDL_JOYHATMOTION:
+            if(event.jhat.value != SDL_HAT_CENTERED) {
+                bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                bc->DeviceNum[wb] = event.jhat.which;
+                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
+                                     event.jhat.value);
+                return(1);
+            }
+            break;
+        case SDL_JOYAXISMOTION: 
+            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
+                if(abs(event.jaxis.value) < 1000) {
+                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
+                }
+            } else {
+                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
+                    bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                    bc->DeviceNum[wb] = event.jaxis.which;
+                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
+                                         ((event.jaxis.value < 0)
+                                          ? 0x4000 : 0));
+                    return(1);
+                }
+            }
+            break;
+        }
+    }
 
- return(0);
+    return(0);
 }
 
+/**
+ * The main loop for the SDL.
+ */
 int
 main(int argc,
      char *argv[])
@@ -357,11 +432,11 @@ main(int argc,
     SDL_SetModuleHandle(GetModuleHandle(NULL));
 #endif
 
-    if(SDL_Init(SDL_INIT_VIDEO)) /* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
-	{
-            printf("Could not initialize SDL: %s.\n", SDL_GetError());
-            return(-1);
-	}
+    /* SDL_INIT_VIDEO Needed for (joystick config) event processing? */
+    if(SDL_Init(SDL_INIT_VIDEO)) {
+        printf("Could not initialize SDL: %s.\n", SDL_GetError());
+        return(-1);
+    }
 
 #ifdef OPENGL
 #ifdef APPLEOPENGL
@@ -375,21 +450,30 @@ main(int argc,
     SetDefaults();
 
     {
-        int ret=CLImain(argc,argv);
+        int ret = CLImain(argc, argv);
         SDL_Quit();
-        return(ret?0:-1);
+        return (ret) ? 0 : -1;
     }
 }
 
 
-uint64 FCEUD_GetTime(void)
+/**
+ * Get the time in ticks.
+ */
+uint64
+FCEUD_GetTime()
 {
- return(SDL_GetTicks());
+    return SDL_GetTicks();
 }
 
-uint64 FCEUD_GetTimeFreq(void)
+/**
+ * Get the tick frequency in Hz.
+ */
+uint64
+FCEUD_GetTimeFreq(void)
 {
- return(1000);
+    // SDL_GetTicks() is in milliseconds
+    return 1000;
 }
 
 // dummy functions
