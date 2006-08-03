@@ -35,28 +35,40 @@ static int cspec=0;
    
 extern int gametype;
 
-/* Necessary for proper GUI functioning(configuring when a game isn't loaded). */
-void InputUserActiveFix(void)
+/**
+ * Necessary for proper GUI functioning (configuring when a game isn't loaded).
+ */
+void
+InputUserActiveFix()
 {
- int x;
- for(x=0;x<3;x++) InputType[x]=UsrInputType[x];
+    int x;
+    for(x = 0; x < 3; x++) {
+        InputType[x] = UsrInputType[x];
+    }
 }
 
-void ParseGIInput(FCEUGI *gi)
+/**
+ * Parse game information and configure the input devices accordingly.
+ */
+void
+ParseGIInput(FCEUGI *gi)
 {
- gametype=gi->type;
+    gametype=gi->type;
  
- InputType[0]=UsrInputType[0];
- InputType[1]=UsrInputType[1];
- InputType[2]=UsrInputType[2];
+    InputType[0] = UsrInputType[0];
+    InputType[1] = UsrInputType[1];
+    InputType[2] = UsrInputType[2];
  
- if(gi->input[0]>=0)
-  InputType[0]=gi->input[0];
- if(gi->input[1]>=0)
-  InputType[1]=gi->input[1];
- if(gi->inputfc>=0)
-  InputType[2]=gi->inputfc;
- cspec = gi->cspecial;
+    if(gi->input[0]>=0) {
+        InputType[0] = gi->input[0];
+    }
+    if(gi->input[1]>=0) {
+        InputType[1] = gi->input[1];
+    }
+    if(gi->inputfc>=0) {
+        InputType[2] = gi->inputfc;
+    }
+    cspec = gi->cspecial;
 }
 
 
@@ -79,16 +91,21 @@ static void UpdateTopRider(void);
 static uint32 JSreturn=0;
 int NoWaiting=1;
 
-static void DoCheatSeq(void)
+/**
+ * Configure cheat devices (game genie, etc.).  Restarts the keyboard
+ * and video subsystems.
+ */
+static void
+DoCheatSeq()
 {
- SilenceSound(1);
- KillKeyboard();
- KillVideo();
+    SilenceSound(1);
+    KillKeyboard();
+    KillVideo();
 
- DoConsoleCheatConfig();
- InitVideo(CurGame);
- InitKeyboard();
- SilenceSound(0);
+    DoConsoleCheatConfig();
+    InitVideo(CurGame);
+    InitKeyboard();
+    SilenceSound(0);
 }
 
 #include "keyscan.h"
@@ -98,168 +115,230 @@ static int DIPS=0;
 static uint8 keyonce[MKK_COUNT];
 #define KEY(__a) keys[MKK(__a)]
 
-static int _keyonly(int a)
+static int
+_keyonly(int a)
 {
- if(keys[a])
- {
-  if(!keyonce[a]) 
-  {
-   keyonce[a]=1;
-   return(1);
-  }
- }
- else
-  keyonce[a]=0;
- return(0);
+    if(keys[a]) {
+        if(!keyonce[a]) {
+            keyonce[a] = 1;
+            return(1);
+        }
+    } else {
+        keyonce[a] = 0;
+    }
+    return(0);
 }
 
 #define keyonly(__a) _keyonly(MKK(__a))
 
 static int cidisabled=0;
 
-static void KeyboardCommands(void)
+/**
+ * Parse keyboard commands and execute accordingly.
+ */
+static void
+KeyboardCommands()
 {
-  int is_shift, is_alt;
+    int is_shift, is_alt;
 
-  keys=GetKeyboard(); 
+    // get the keyboard input
+    keys = GetKeyboard(); 
 
-  if(InputType[2]==SIFC_FKB)
-  {
-   if(keyonly(SCROLLLOCK)) 
-   {
-    cidisabled^=1;
-    FCEUI_DispMessage("Family Keyboard %sabled.",cidisabled?"en":"dis");
-   }
-   #ifdef SDL
-   SDL_WM_GrabInput(cidisabled?SDL_GRAB_ON:SDL_GRAB_OFF);
-   #endif
-   if(cidisabled) return;
-  }
-
-  is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
-  is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
-
-  if(keyonly(F4))
-  {
-   if(is_shift) FCEUI_SetRenderDisable(-1, 2);
-   else FCEUI_SetRenderDisable(2, -1);
-  }
-  #ifdef SDL
-  if(keyonly(ENTER) && is_alt) ToggleFS();
-  #endif
-
-  NoWaiting&=~1;
-  if(KEY(GRAVE))
-   NoWaiting|=1;
-
-  if(gametype==GIT_FDS)
-  {
-   if(keyonly(F6)) FCEUI_FDSSelect();
-   if(keyonly(F8)) FCEUI_FDSInsert();
-  }
-
-  if(keyonly(F9)) FCEUI_SaveSnapshot();
-  if(gametype!=GIT_NSF)
-  {
-   if(keyonly(F2)) DoCheatSeq();
-   if(keyonly(F5)) 
-   {
-    if(is_shift)
-     FCEUI_SaveMovie(NULL,0,NULL);
-    else
-     FCEUI_SaveState(NULL);
-   }
-   if(keyonly(F7)) 
-   {
-    if(is_shift)
-     FCEUI_LoadMovie(NULL,0,0); //mbg merge 7/23/06 loadmovie takes another arg now
-    else
-     FCEUI_LoadState(NULL);
-   }
-  }
-
-  if(keyonly(F1)) FCEUI_ToggleTileView();
-
-  if(keyonly(MINUS)) DecreaseEmulationSpeed();
-  if(keyonly(EQUAL)) IncreaseEmulationSpeed();
-  if(keyonly(BACKSPACE)) FCEUI_MovieToggleFrameDisplay();
-  if(keyonly(BACKSLASH)) FCEUI_ToggleEmulationPause();
-  if(keyonly(RIGHTCONTROL)) FCEUI_FrameAdvance();
-
-  if(keyonly(F10)) FCEUI_ResetNES();
-  if(keyonly(F11)) FCEUI_PowerNES();
-
-  if(KEY(F12) || KEY(ESCAPE)) CloseGame();
-
-  if(gametype==GIT_VSUNI)
-  {
-	if(keyonly(F8)) FCEUI_VSUniCoin();
-	if(keyonly(F6))
-        {
-	 DIPS^=1;
-	 FCEUI_VSUniToggleDIPView();
-	}
-	if(!(DIPS&1)) goto DIPSless;
-	if(keyonly(1)) FCEUI_VSUniToggleDIP(0);
-	if(keyonly(2)) FCEUI_VSUniToggleDIP(1);
-	if(keyonly(3)) FCEUI_VSUniToggleDIP(2);
-	if(keyonly(4)) FCEUI_VSUniToggleDIP(3);
-	if(keyonly(5)) FCEUI_VSUniToggleDIP(4);
-	if(keyonly(6)) FCEUI_VSUniToggleDIP(5);
-	if(keyonly(7)) FCEUI_VSUniToggleDIP(6);
-	if(keyonly(8)) FCEUI_VSUniToggleDIP(7);
-  }
-  else
-  {
-   static uint8 bbuf[32];
-   static int bbuft;
-   static int barcoder = 0;
-
-   if(keyonly(H)) FCEUI_NTSCSELHUE();
-   if(keyonly(T)) FCEUI_NTSCSELTINT();
-   if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
-   if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
-
-   if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH))
-   {
-    if(keyonly(F8)) 
-    {
-     barcoder ^= 1;
-     if(!barcoder)
-     {
-      if(InputType[2] == SIFC_BWORLD)
-      {
-       strcpy((char *)&BWorldData[1],(char *)bbuf);
-       BWorldData[0]=1;
-      }
-      else
-       FCEUI_DatachSet(bbuf);
-      FCEUI_DispMessage("Barcode Entered");
-     } 
-     else { bbuft = 0; FCEUI_DispMessage("Enter Barcode");}
+    // check if the family keyboard is enabled
+    if(InputType[2] == SIFC_FKB) {
+        if(keyonly(SCROLLLOCK)) {
+            cidisabled ^= 1;
+            FCEUI_DispMessage("Family Keyboard %sabled.",
+                              cidisabled ? "en" : "dis");
+        }
+        SDL_WM_GrabInput(cidisabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
+        if(cidisabled) {
+            return;
+        }
     }
-   } else barcoder = 0;
 
-	#define SSM(x)		\
-	{ if(barcoder) { if(bbuft < 13) {bbuf[bbuft++] = '0' + x; bbuf[bbuft] = 0;} FCEUI_DispMessage("Barcode: %s",bbuf);}	\
-	else { 			\
-	 if(is_shift) FCEUI_SelectMovie(x,1); 	\
-	 else FCEUI_SelectState(x,1); 	\
-	} }
+    is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
+    is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
 
-   DIPSless:
-   if(keyonly(0)) SSM(0);
-   if(keyonly(1)) SSM(1);
-   if(keyonly(2)) SSM(2);
-   if(keyonly(3)) SSM(3);
-   if(keyonly(4)) SSM(4);
-   if(keyonly(5)) SSM(5);
-   if(keyonly(6)) SSM(6);
-   if(keyonly(7)) SSM(7);
-   if(keyonly(8)) SSM(8);
-   if(keyonly(9)) SSM(9);
-   #undef SSM
- }
+    // f4 controls rendering
+    if(keyonly(F4)) {
+        if(is_shift) {
+            FCEUI_SetRenderDisable(-1, 2);
+        } else {
+            FCEUI_SetRenderDisable(2, -1);
+        }
+    }
+
+    // Alt-Enter to toggle full-screen
+    if(keyonly(ENTER) && is_alt) {
+        ToggleFS();
+    }
+
+    // Toggle throttling
+    NoWaiting &= ~1;
+    if(KEY(GRAVE)) {
+        NoWaiting |= 1;
+    }
+
+    // Famicom disk-system games
+    if(gametype==GIT_FDS) {
+        if(keyonly(F6)) {
+            FCEUI_FDSSelect();
+        }
+        if(keyonly(F8)) {
+            FCEUI_FDSInsert();
+        }
+    }
+
+    // f9 is save snapshot key
+    if(keyonly(F9)) {
+        FCEUI_SaveSnapshot();
+    }
+
+    // if not NES Sound Format
+    if(gametype != GIT_NSF) {
+        // f2 to enable cheats
+        if(keyonly(F2)) {
+            DoCheatSeq();
+        }
+
+        // f5 to save state, Shift-f5 to save movie
+        if(keyonly(F5)) {
+            if(is_shift) {
+                FCEUI_SaveMovie(NULL,0,NULL);
+            } else {
+                FCEUI_SaveState(NULL);
+            }
+        }
+
+        // f7 to load state, Shift-f7 to load movie
+        if(keyonly(F7)) {
+            if(is_shift) {
+                //mbg merge 7/23/06 loadmovie takes another arg now
+                FCEUI_LoadMovie(NULL,0,0);
+            } else {
+                FCEUI_LoadState(NULL);
+            }
+        }
+    }
+
+    // f1 to toggle tile view
+    if(keyonly(F1)) {
+        FCEUI_ToggleTileView();
+    }
+
+    // - to decrease speed, = to increase speed
+    if(keyonly(MINUS)) {
+        DecreaseEmulationSpeed();
+    }
+    if(keyonly(EQUAL)) {
+        IncreaseEmulationSpeed();
+    }
+
+    if(keyonly(BACKSPACE)) {
+        FCEUI_MovieToggleFrameDisplay();
+    }
+    if(keyonly(BACKSLASH)) {
+        FCEUI_ToggleEmulationPause();
+    }
+    if(keyonly(RIGHTCONTROL)) {
+        FCEUI_FrameAdvance();
+    }
+
+    // f10 reset, f11 power
+    if(keyonly(F10)) {
+        FCEUI_ResetNES();
+    }
+    if(keyonly(F11)) {
+        FCEUI_PowerNES();
+    }
+
+    // F12 or Esc close game
+    if(KEY(F12) || KEY(ESCAPE)) {
+        CloseGame();
+    }
+
+    // VS Unisystem games
+    if(gametype == GIT_VSUNI) {
+        // insert coin
+        if(keyonly(F8)) FCEUI_VSUniCoin();
+
+        // toggle dipswitch display
+        if(keyonly(F6)) {
+            DIPS^=1;
+            FCEUI_VSUniToggleDIPView();
+        }
+        if(!(DIPS&1)) goto DIPSless;
+
+        // toggle the various dipswitches
+        if(keyonly(1)) FCEUI_VSUniToggleDIP(0);
+        if(keyonly(2)) FCEUI_VSUniToggleDIP(1);
+        if(keyonly(3)) FCEUI_VSUniToggleDIP(2);
+        if(keyonly(4)) FCEUI_VSUniToggleDIP(3);
+        if(keyonly(5)) FCEUI_VSUniToggleDIP(4);
+        if(keyonly(6)) FCEUI_VSUniToggleDIP(5);
+        if(keyonly(7)) FCEUI_VSUniToggleDIP(6);
+        if(keyonly(8)) FCEUI_VSUniToggleDIP(7);
+    } else {
+        static uint8 bbuf[32];
+        static int bbuft;
+        static int barcoder = 0;
+
+        if(keyonly(H)) FCEUI_NTSCSELHUE();
+        if(keyonly(T)) FCEUI_NTSCSELTINT();
+        if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
+        if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
+
+        if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
+            if(keyonly(F8)) {
+                barcoder ^= 1;
+                if(!barcoder) {
+                    if(InputType[2] == SIFC_BWORLD) {
+                        strcpy((char *)&BWorldData[1], (char *)bbuf);
+                        BWorldData[0] = 1;
+                    } else {
+                        FCEUI_DatachSet(bbuf);
+                    }
+                    FCEUI_DispMessage("Barcode Entered");
+                } else { 
+                    bbuft = 0;
+                    FCEUI_DispMessage("Enter Barcode");
+                }
+            }
+        } else {
+            barcoder = 0;
+        }
+
+#define SSM(x)                                    \
+do {                                              \
+    if(barcoder) {                                \
+        if(bbuft < 13) {                          \
+            bbuf[bbuft++] = '0' + x;              \
+            bbuf[bbuft] = 0;                      \
+        }                                         \
+        FCEUI_DispMessage("Barcode: %s", bbuf);   \
+    } else {                                      \
+        if(is_shift) {                            \
+            FCEUI_SelectMovie(x,1);               \
+        } else {                                  \
+            FCEUI_SelectState(x,1);               \
+	}                                         \
+    }                                             \
+} while(0)
+
+    DIPSless:
+        if(keyonly(0)) SSM(0);
+        if(keyonly(1)) SSM(1);
+        if(keyonly(2)) SSM(2);
+        if(keyonly(3)) SSM(3);
+        if(keyonly(4)) SSM(4);
+        if(keyonly(5)) SSM(5);
+        if(keyonly(6)) SSM(6);
+        if(keyonly(7)) SSM(7);
+        if(keyonly(8)) SSM(8);
+        if(keyonly(9)) SSM(9);
+#undef SSM
+    }
 }
 
 #define MK(x)   {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
@@ -287,38 +366,51 @@ ButtConfig GamePadConfig[4][10]={
 };
 
 
-static void UpdateGamepad(void)
+/**
+ * Update the gamepad button configurations.
+ */
+static void
+UpdateGamepad(void)
 {
- if(FCEUI_IsMovieActive()<0)
-   return;
+    // don't update during movie playback
+    if(FCEUI_IsMovieActive() < 0) {
+        return;
+    }
 
- static int rapid=0;
- uint32 JS=0;
- int x;
- int wg;
+    static int rapid=0;
+    uint32 JS=0;
+    int x;
+    int wg;
 
- rapid^=1;
+    rapid ^= 1;
 
- for(wg=0;wg<4;wg++)
- {
-  for(x=0;x<8;x++)
-   if(DTestButton(&GamePadConfig[wg][x]))
-    JS|=(1<<x)<<(wg<<3);
+    // go through each of the four game pads
+    for(wg = 0; wg < 4; wg++) {
+        // the 4 directional buttons, start, select, a, b
+        for(x = 0; x < 8; x++) {
+            if(DTestButton(&GamePadConfig[wg][x])) {
+                JS |= (1 << x) << (wg << 3);
+            }
+        }
 
-  if(rapid)
-   for(x=0;x<2;x++)
-     if(DTestButton(&GamePadConfig[wg][8+x]))
-      JS|=(1<<x)<<(wg<<3);
-  }
+        // rapid-fire a, rapid-fire b
+        if(rapid) {
+            for(x = 0; x < 2; x++) {
+                if(DTestButton(&GamePadConfig[wg][8+x])) {
+                    JS |= (1 << x) << (wg << 3);
+                }
+            }
+        }
+    }
 
-//  for(x=0;x<32;x+=8)	/* Now, test to see if anything weird(up+down at same time)
-//			   is happening, and correct */
-//  {
-//   if((JS & (0xC0<<x) ) == (0xC0<<x) ) JS&=~(0xC0<<x);
-//   if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
-//  }
+    //  for(x=0;x<32;x+=8)	/* Now, test to see if anything weird(up+down at same time)
+    //			   is happening, and correct */
+    //  {
+    //   if((JS & (0xC0<<x) ) == (0xC0<<x) ) JS&=~(0xC0<<x);
+    //   if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
+    //  }
 
-  JSreturn=JS;
+    JSreturn = JS;
 }
 
 ButtConfig powerpadsc[2][12]={
@@ -338,112 +430,190 @@ ButtConfig powerpadsc[2][12]={
 
 static uint32 powerpadbuf[2]={0,0};
 
-static uint32 UpdatePPadData(int w)
+/**
+ * Update power pad button configuration.
+ */
+static uint32
+UpdatePPadData(int w)
 {
- if(FCEUI_IsMovieActive()<0)
-   return 0;
+    // don't update if a movie is playing
+    if(FCEUI_IsMovieActive() < 0) {
+        return 0;
+    }
 
- uint32 r=0;
- ButtConfig *ppadtsc=powerpadsc[w];
- int x;
+    uint32 r = 0;
+    ButtConfig *ppadtsc = powerpadsc[w];
+    int x;
 
- for(x=0;x<12;x++)
-  if(DTestButton(&ppadtsc[x])) r|=1<<x;
+    // update each of the 12 buttons
+    for(x = 0; x < 12; x++) {
+        if(DTestButton(&ppadtsc[x])) {
+            r |= 1 << x;
+        }
+    }
 
- return r;
+    return r;
 }
 
 static uint32 MouseData[3]={0,0,0};
 static uint8 fkbkeys[0x48];
 
-void FCEUD_UpdateInput(void)
+/**
+ * Update all of the input devices required for the active game.
+ */
+void
+FCEUD_UpdateInput()
 {
-  int x;
-  int t=0;
+    int x;
+    int t = 0;
 
-  UpdatePhysicalInput();
-  KeyboardCommands();
+    UpdatePhysicalInput();
+    KeyboardCommands();
 
-  for(x=0;x<2;x++)
-   switch(InputType[x])
-   {
-    case SI_GAMEPAD:t|=1;break;
-    case SI_ARKANOID:t|=2;break;
-    case SI_ZAPPER:t|=2;break;
-    case SI_POWERPADA:
-    case SI_POWERPADB:powerpadbuf[x]=UpdatePPadData(x);break;
-   }
+    for(x = 0; x < 2; x++) {
+        switch(InputType[x]) {
+        case SI_GAMEPAD:
+            t |= 1;
+            break;
+        case SI_ARKANOID:
+            t |= 2;
+            break;
+        case SI_ZAPPER:
+            t |= 2;
+            break;
+        case SI_POWERPADA:
+        case SI_POWERPADB:
+            powerpadbuf[x] = UpdatePPadData(x);
+            break;
+        }
+    }
 
-  switch(InputType[2])
-  {
-   case SIFC_ARKANOID:t|=2;break;
-   case SIFC_SHADOW:t|=2;break;
-   case SIFC_FKB:if(cidisabled) UpdateFKB();break;
-   case SIFC_HYPERSHOT: UpdateHyperShot();break;
-   case SIFC_MAHJONG: UpdateMahjong();break;
-   case SIFC_QUIZKING: UpdateQuizKing();break;
-   case SIFC_FTRAINERB:
-   case SIFC_FTRAINERA: UpdateFTrainer();break;
-   case SIFC_TOPRIDER: UpdateTopRider();break;
-   case SIFC_OEKAKIDS:t|=2;break;
+    switch(InputType[2]) {
+    case SIFC_ARKANOID:
+        t |= 2;
+        break;
+    case SIFC_SHADOW:
+        t |= 2;
+        break;
+    case SIFC_FKB:
+        if(cidisabled) {
+            UpdateFKB();
+        }
+        break;
+    case SIFC_HYPERSHOT:
+        UpdateHyperShot();
+        break;
+    case SIFC_MAHJONG:
+        UpdateMahjong();
+        break;
+    case SIFC_QUIZKING:
+        UpdateQuizKing();
+        break;
+    case SIFC_FTRAINERB:
+    case SIFC_FTRAINERA:
+        UpdateFTrainer();
+        break;
+    case SIFC_TOPRIDER:
+        UpdateTopRider();
+        break;
+    case SIFC_OEKAKIDS:
+        t |= 2;
+        break;
+    }
 
-  }
+    if(t & 1) {
+        UpdateGamepad();
+    }
 
-  if(t&1)
-   UpdateGamepad();
-
-  if(t&2)
-   GetMouseData(MouseData);
+    if(t & 2) {
+        GetMouseData(MouseData);
+    }
 }
 
-void InitOtherInput(void)
+/**
+ * Initialize "other" input devices?  Not entirely sure what this does yet.
+ */
+void
+InitOtherInput()
 {
-   void *InputDPtr;
+    void *InputDPtr;
 
-   int t;
-   int x;
-   int attrib;
+    int t;
+    int x;
+    int attrib;
 
-   for(t=0,x=0;x<2;x++)
-   {
-    attrib=0;
-    InputDPtr=0;
-    switch(InputType[x])
-    {
-     case SI_POWERPADA:
-     case SI_POWERPADB:InputDPtr=&powerpadbuf[x];break;
-     case SI_GAMEPAD:InputDPtr=&JSreturn;break;     
-     case SI_ARKANOID:InputDPtr=MouseData;t|=1;break;
-     case SI_ZAPPER:InputDPtr=MouseData;
-                                t|=1;
-                                attrib=1;
-                                break;
+    for(t = 0, x = 0; x < 2; x++) {
+        attrib    = 0;
+        InputDPtr = 0;
+
+        switch(InputType[x]) {
+        case SI_POWERPADA:
+        case SI_POWERPADB:
+            InputDPtr = &powerpadbuf[x];
+            break;
+        case SI_GAMEPAD:
+            InputDPtr = &JSreturn;
+            break;     
+        case SI_ARKANOID:
+            InputDPtr = MouseData;
+            t |= 1;
+            break;
+        case SI_ZAPPER:
+            InputDPtr = MouseData;
+            t |= 1;
+            attrib = 1;
+            break;
+        }
+        FCEUI_SetInput(x, InputType[x], InputDPtr, attrib);
     }
-    FCEUI_SetInput(x,InputType[x],InputDPtr,attrib);
-   }
 
-   attrib=0;
-   InputDPtr=0;
-   switch(InputType[2])
-   {
-    case SIFC_SHADOW:InputDPtr=MouseData;t|=1;attrib=1;break;
-    case SIFC_OEKAKIDS:InputDPtr=MouseData;t|=1;attrib=1;break;
-    case SIFC_ARKANOID:InputDPtr=MouseData;t|=1;break;
-    case SIFC_FKB:InputDPtr=fkbkeys;break;
-    case SIFC_HYPERSHOT:InputDPtr=&HyperShotData;break;
-    case SIFC_MAHJONG:InputDPtr=&MahjongData;break;
-    case SIFC_QUIZKING:InputDPtr=&QuizKingData;break;
-    case SIFC_TOPRIDER:InputDPtr=&TopRiderData;break;
-    case SIFC_BWORLD:InputDPtr=BWorldData;break;
+    attrib    = 0;
+    InputDPtr = 0;
+    switch(InputType[2]) {
+    case SIFC_SHADOW:
+        InputDPtr = MouseData;
+        t |= 1;
+        attrib = 1;
+        break;
+    case SIFC_OEKAKIDS:
+        InputDPtr = MouseData;
+        t |= 1;
+        attrib = 1;
+        break;
+    case SIFC_ARKANOID:
+        InputDPtr = MouseData;
+        t |= 1;
+        break;
+    case SIFC_FKB:
+        InputDPtr = fkbkeys;
+        break;
+    case SIFC_HYPERSHOT:
+        InputDPtr = &HyperShotData;
+        break;
+    case SIFC_MAHJONG:
+        InputDPtr = &MahjongData;
+        break;
+    case SIFC_QUIZKING:
+        InputDPtr = &QuizKingData;
+        break;
+    case SIFC_TOPRIDER:
+        InputDPtr = &TopRiderData;
+        break;
+    case SIFC_BWORLD:
+        InputDPtr = BWorldData;
+        break;
     case SIFC_FTRAINERA:
-    case SIFC_FTRAINERB:InputDPtr=&FTrainerData;break;
-   }
+    case SIFC_FTRAINERB:
+        InputDPtr = &FTrainerData;
+        break;
+    }
 
-   FCEUI_SetInputFC(InputType[2],InputDPtr,attrib);
-   FCEUI_DisableFourScore(eoptions&EO_NOFOURSCORE);
+    FCEUI_SetInputFC(InputType[2], InputDPtr, attrib);
+    FCEUI_DisableFourScore(eoptions & EO_NOFOURSCORE);
 
-   if(t) 
-    InitMouse();
+    if(t) {
+        InitMouse();
+    }
 }
 
 
@@ -462,17 +632,21 @@ ButtConfig fkbmap[0x48]=
  MK(CURSORUP),MK(CURSORLEFT),MK(CURSORRIGHT),MK(CURSORDOWN)
 };
 
-static void UpdateFKB(void)
+/**
+ * Update the button configuration for the Family KeyBoard.
+ */
+static void
+UpdateFKB()
 {
- int x;
+    int x;
 
- for(x=0;x<0x48;x++)
- {
-  fkbkeys[x]=0;
+    for(x = 0; x < 0x48; x++) {
+        fkbkeys[x] = 0;
 
-  if(DTestButton(&fkbmap[x]))
-   fkbkeys[x]=1;
- }
+        if(DTestButton(&fkbmap[x])) {
+            fkbkeys[x] = 1;
+        }
+    }
 }
 
 static ButtConfig HyperShotButtons[4]=
@@ -480,16 +654,20 @@ static ButtConfig HyperShotButtons[4]=
  MK(Q),MK(W),MK(E),MK(R)
 };
 
-static void UpdateHyperShot(void)
+/**
+ * Update the button configuration for the HyperShot input device.
+ */
+static void
+UpdateHyperShot()
 {
- int x;
+    int x;
 
- HyperShotData=0;
- for(x=0;x<0x4;x++)
- {
-  if(DTestButton(&HyperShotButtons[x]))
-   HyperShotData|=1<<x;
- }
+    HyperShotData=0;
+    for(x = 0; x < 0x4; x++) {
+        if(DTestButton(&HyperShotButtons[x])) {
+            HyperShotData |= 1 << x;
+        }
+    }
 }
 
 static ButtConfig MahjongButtons[21]=
@@ -499,16 +677,20 @@ static ButtConfig MahjongButtons[21]=
  MK(Z),MK(X),MK(C),MK(V),MK(B),MK(N),MK(M)
 };
 
-static void UpdateMahjong(void)
+/**
+ * Update the button configuration for the Mahjong input device.
+ */
+static void
+UpdateMahjong()
 {
- int x;
+    int x;
         
- MahjongData=0;
- for(x=0;x<21;x++)
- {  
-  if(DTestButton(&MahjongButtons[x]))
-   MahjongData|=1<<x;
- }
+    MahjongData=0;
+    for(x = 0; x < 21; x++) {
+        if(DTestButton(&MahjongButtons[x])) {
+            MahjongData |= 1 << x;
+        }
+    }
 }
 
 ButtConfig QuizKingButtons[6]=
@@ -516,18 +698,21 @@ ButtConfig QuizKingButtons[6]=
  MK(Q),MK(W),MK(E),MK(R),MK(T),MK(Y)
 };
 
-static void UpdateQuizKing(void)
+/**
+ * Update the button configuration for the QuizKing input device.
+ */
+static void
+UpdateQuizKing()
 {
- int x;
+    int x;
 
- QuizKingData=0;
+    QuizKingData=0;
 
- for(x=0;x<6;x++)
- {
-  if(DTestButton(&QuizKingButtons[x]))
-   QuizKingData|=1<<x;
- }
-
+    for(x = 0; x < 6; x++) {
+        if(DTestButton(&QuizKingButtons[x])) {
+            QuizKingData |= 1 << x;
+        }
+    }
 }
 
 ButtConfig TopRiderButtons[8]=
@@ -535,13 +720,19 @@ ButtConfig TopRiderButtons[8]=
  MK(Q),MK(W),MK(E),MK(R),MK(T),MK(Y),MK(U),MK(I)
 };
 
-static void UpdateTopRider(void)
+/**
+ * Update the button configuration for the TopRider input device.
+ */
+static void
+UpdateTopRider()
 {
- int x;
- TopRiderData=0;
- for(x=0;x<8;x++)
-  if(DTestButton(&TopRiderButtons[x]))
-   TopRiderData|=1<<x;
+    int x;
+    TopRiderData=0;
+    for(x = 0; x < 8; x++) {
+        if(DTestButton(&TopRiderButtons[x])) {
+            TopRiderData |= (1 << x);
+        }
+    }
 }
 
 ButtConfig FTrainerButtons[12]=
@@ -552,79 +743,90 @@ ButtConfig FTrainerButtons[12]=
                                MK(M),MK(COMMA),MK(PERIOD),MK(SLASH)
 };
 
-static void UpdateFTrainer(void)
+/**
+ * Update the button configuration for the FTrainer input device.
+ */
+static void
+UpdateFTrainer()
 {
- int x;
+    int x;
+    FTrainerData = 0;
 
- FTrainerData=0;
-
- for(x=0;x<12;x++)
- {
-  if(DTestButton(&FTrainerButtons[x]))
-   FTrainerData|=1<<x;
- }
+    for(x = 0; x < 12; x++) {
+        if(DTestButton(&FTrainerButtons[x])) {
+            FTrainerData |= (1 << x);
+        }
+    }
 }
 
-static void subcon(char *text, ButtConfig *bc)
+/**
+ * I think this function takes in button inputs until either it sees
+ * two of the same button presses in a row or gets four inputs and
+ * then saves the total number of button presses.  Needs an overhaul.
+ */
+static void
+subcon(char *text,
+       ButtConfig *bc)
 {
- uint8 buf[256];
- int wc;
+    uint8 buf[256];
+    int wc;
 
- for(wc=0;wc<MAXBUTTCONFIG;wc++)
- {
-  sprintf((char *)buf,"%s (%d)",text,wc+1);
-  DWaitButton(buf,bc,wc);
+    for(wc = 0; wc < MAXBUTTCONFIG; wc++) {
+        sprintf((char *)buf, "%s (%d)", text, wc + 1);
+        DWaitButton(buf, bc, wc);
 
-  if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
-                bc->ButtonNum[wc]==bc->ButtonNum[wc-1])   
-         break;
- }
- bc->NumC=wc;
+        if(wc &&
+           bc->ButtType[wc] == bc->ButtType[wc - 1] &&
+           bc->DeviceNum[wc] == bc->DeviceNum[wc - 1] &&
+           bc->ButtonNum[wc]==bc->ButtonNum[wc-1]) {
+            break;
+        }
+    }
+    bc->NumC = wc;
 }
 
-void ConfigDevice(int which, int arg)
+/**
+ * Update the button configuration for a specified device.
+ */
+void
+ConfigDevice(int which,
+             int arg)
 {
- uint8 buf[256];
- int x;
+    uint8 buf[256];
+    int x;
+    char *str[10]={"A","B","SELECT","START","UP","DOWN","LEFT","RIGHT","Rapid A","Rapid B"};
 
- ButtonConfigBegin();
- switch(which)
- {
-  case FCFGD_QUIZKING:
-   for(x=0;x<6;x++)
-   {
-    sprintf((char *)buf,"Quiz King Buzzer #%d", x+1);
-    subcon((char *)buf,&QuizKingButtons[x]);
-   }
-   break;
-  case FCFGD_HYPERSHOT:
-   for(x=0;x<4;x++)
-   {
-    sprintf((char *)buf,"Hyper Shot %d: %s",((x&2)>>1)+1,(x&1)?"JUMP":"RUN");
-    subcon((char *)buf,&HyperShotButtons[x]);
-   } 
-   break;
-  case FCFGD_POWERPAD:
-   for(x=0;x<12;x++)
-   {
-    sprintf((char *)buf,"PowerPad %d: %d", (arg&1)+1,x+11);
-    subcon((char *)buf,&powerpadsc[arg&1][x]);
-   }
-   break;
+    ButtonConfigBegin();
+    switch(which) {
+    case FCFGD_QUIZKING:
+        for(x = 0; x < 6; x++) {
+            sprintf((char *)buf, "Quiz King Buzzer #%d", x+1);
+            subcon((char *)buf, &QuizKingButtons[x]);
+        }
+        break;
+    case FCFGD_HYPERSHOT:
+        for(x = 0; x < 4; x++) {
+            sprintf((char *)buf, "Hyper Shot %d: %s",
+                    ((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
+            subcon((char *)buf, &HyperShotButtons[x]);
+        }
+        break;
+    case FCFGD_POWERPAD:
+        for(x = 0; x < 12; x++) {
+            sprintf((char *)buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
+            subcon((char *)buf, &powerpadsc[arg&1][x]);
+        }
+        break;
 
-  case FCFGD_GAMEPAD:
-  {
-   char *str[10]={"A","B","SELECT","START","UP","DOWN","LEFT","RIGHT","Rapid A","Rapid B"};
-   for(x=0;x<10;x++)
-   {
-    sprintf((char *)buf,"GamePad #%d: %s",arg+1,str[x]);
-    subcon((char *)buf,&GamePadConfig[arg][x]);
-   }
-  }
-  break;
- }
+    case FCFGD_GAMEPAD:
+        for(x = 0; x < 10; x++) {
+            sprintf((char *)buf, "GamePad #%d: %s", arg + 1, str[x]);
+            subcon((char *)buf, &GamePadConfig[arg][x]);
+        }
+        break;
+    }
 
- ButtonConfigEnd();
+    ButtonConfigEnd();
 }
 
 
@@ -641,56 +843,79 @@ CFGSTRUCT InputConfig[]={
 };
 
 
-static void InputCfg(char *text)
+/**
+ * Update the button configuration for a device, specified by a text string.
+ */
+static void
+InputCfg(char *text)
 {
-         if(!strncasecmp(text,"gamepad",strlen("gamepad")))
-         {
-          ConfigDevice(FCFGD_GAMEPAD,(text[strlen("gamepad")]-'1')&3);
-         }
-         else if(!strncasecmp(text,"powerpad",strlen("powerpad")))
-         {
-          ConfigDevice(FCFGD_POWERPAD,(text[strlen("powerpad")]-'1')&1);
-         }
-         else if(!strcasecmp(text,"hypershot"))
-          ConfigDevice(FCFGD_HYPERSHOT,0);
-         else if(!strcasecmp(text,"quizking"))
-          ConfigDevice(FCFGD_QUIZKING,0);
+    if(!strncasecmp(text, "gamepad", strlen("gamepad"))) {
+        ConfigDevice(FCFGD_GAMEPAD, (text[strlen("gamepad")] - '1') & 3);
+    } else if(!strncasecmp(text, "powerpad", strlen("powerpad"))) {
+        ConfigDevice(FCFGD_POWERPAD, (text[strlen("powerpad")] - '1') & 1);
+    } else if(!strcasecmp(text,"hypershot")) {
+        ConfigDevice(FCFGD_HYPERSHOT, 0);
+    } else if(!strcasecmp(text,"quizking")) {
+        ConfigDevice(FCFGD_QUIZKING, 0);
+    }
 }
 
-static void FCExp(char *text)
+/**
+ * Specify a FamiCom Expansion device as the 3rd input device.  Takes
+ * a text string describing the device.
+ */
+static void
+FCExp(char *text)
 {
-        static char *fccortab[11]={"none","arkanoid","shadow","4player","fkb","hypershot",
-                        "mahjong","quizking","ftrainera","ftrainerb","oekakids"};
+    static char *fccortab[11]={"none","arkanoid","shadow","4player","fkb","hypershot",
+                               "mahjong","quizking","ftrainera","ftrainerb","oekakids"};
            
-        static int fccortabi[11]={SIFC_NONE,SIFC_ARKANOID,SIFC_SHADOW,
-                                 SIFC_4PLAYER,SIFC_FKB,SIFC_HYPERSHOT,SIFC_MAHJONG,SIFC_QUIZKING,
-                                 SIFC_FTRAINERA,SIFC_FTRAINERB,SIFC_OEKAKIDS};
-	int y;
-	for(y=0;y<11;y++)
-	 if(!strcmp(fccortab[y],text))
-	  UsrInputType[2]=fccortabi[y];
+    static int fccortabi[11]={SIFC_NONE,SIFC_ARKANOID,SIFC_SHADOW,
+                              SIFC_4PLAYER,SIFC_FKB,SIFC_HYPERSHOT,SIFC_MAHJONG,SIFC_QUIZKING,
+                              SIFC_FTRAINERA,SIFC_FTRAINERB,SIFC_OEKAKIDS};
+ 
+    int y;
+    for(y = 0; y < 11; y++) {
+        if(!strcmp(fccortab[y], text)) {
+            UsrInputType[2] = fccortabi[y];
+        }
+    }
 }
 
 static char *cortab[6]={"none","gamepad","zapper","powerpada","powerpadb","arkanoid"};
 static int cortabi[6]={SI_NONE,SI_GAMEPAD,
                                SI_ZAPPER,SI_POWERPADA,SI_POWERPADB,SI_ARKANOID};
 
-static void Input1(char *text)
+/**
+ * Set the 1st user-specified input device.  Specified as a text
+ * string.
+ */
+static void
+Input1(char *text)
 {
-	int y;
+    int y;
 
-	for(y=0;y<6;y++)
-	 if(!strcmp(cortab[y],text))
-	  UsrInputType[0]=cortabi[y];
+    for(y = 0; y < 6; y++) {
+        if(!strcmp(cortab[y], text)) {
+            UsrInputType[0] = cortabi[y];
+        }
+    }
 }
 
-static void Input2(char *text)
+/**
+ * Set the 2nd user-specified input device.  Specified as a text
+ * string.
+ */
+static void
+Input2(char *text)
 {
-	int y;
+    int y;
 
-	for(y=0;y<6;y++)
-	 if(!strcmp(cortab[y],text))
-	  UsrInputType[1]=cortabi[y];
+    for(y = 0; y < 6; y++) {
+        if(!strcmp(cortab[y], text)) {
+            UsrInputType[1] = cortabi[y];
+        }
+    }
 }
 
 ARGPSTRUCT InputArgs[]={

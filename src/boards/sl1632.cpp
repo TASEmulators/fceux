@@ -21,13 +21,14 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 chrcmd[8], prg0, prg1, brk, latc, mirr;
+// brk is a system call in *nix, and is an illegal variable name - soules
+static uint8 chrcmd[8], prg0, prg1, bbrk, latc, mirr;
 static SFORMAT StateRegs[]=
 {
   {chrcmd, 8, "CHRCMD"},
   {&prg0, 1, "PRG0"},
   {&prg1, 1, "PRG1"},
-  {&brk, 1, "BRK"},
+  {&bbrk, 1, "BRK"},
   {&mirr, 1, "MIRR"},
   {0}
 };
@@ -47,9 +48,9 @@ static void Sync(void)
 static void UNLSL1632CW(uint32 A, uint8 V)
 {
   int cbase=(MMC3_cmd&0x80)<<5;
-  int page0=(brk&0x08)<<5;
-  int page1=(brk&0x20)<<3;
-  int page2=(brk&0x80)<<1;
+  int page0=(bbrk&0x08)<<5;
+  int page1=(bbrk&0x20)<<3;
+  int page2=(bbrk&0x80)<<1;
   setchr1(cbase^0x0000,page0|(DRegBuf[0]&(~1)));
   setchr1(cbase^0x0400,page0|DRegBuf[0]|1);
   setchr1(cbase^0x0800,page0|(DRegBuf[1]&(~1)));
@@ -64,10 +65,10 @@ static DECLFW(UNLSL1632CMDWrite)
 {
   if((A&0xA131)==0xA131)
   {
-    brk=V;
-    latc = brk;
+    bbrk=V;
+    latc = bbrk;
   }
-  if(brk&2)
+  if(bbrk&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
@@ -99,7 +100,7 @@ static DECLFW(UNLSL1632CMDWrite)
 
 static void StateRestore(int version)
 {
-  if(brk&2)
+  if(bbrk&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);

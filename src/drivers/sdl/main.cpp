@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/// \file
+/// \brief A set of functions for dealing with the main execution loop.  Much of this code will likely be dispersed to sdl.cpp and other files since we no longer support non-SDL and non-Windows builds.
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <signal.h>
