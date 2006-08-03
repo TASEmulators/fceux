@@ -11,7 +11,7 @@ extern HWND hDebug;
 
 extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern
 
-BOOL CenterWindow(HWND hwndDlg);
+void CenterWindow(HWND hwndDlg);
 void DoPatcher(int address,HWND hParent);
 void UpdatePatcher(HWND hwndDlg);
 int GetEditHex(HWND hwndDlg, int id);

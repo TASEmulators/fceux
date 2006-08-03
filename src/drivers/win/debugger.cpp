@@ -59,28 +59,27 @@ static SCROLLINFO si;
 
 
 
-
-BOOL CenterWindow(HWND hwndDlg) {
-    HWND hwndParent;
-    RECT rect, rectP;
-    int width, height;
-    int screenwidth, screenheight;
-    int x, y;
-
+/**
+* Centers a window relative to its parent window.
+*
+* @param hwndDlg Handle of the window to center.
+**/
+void CenterWindow(HWND hwndDlg) {
+	//TODO: This function should probably moved into the generic Win32 window file
     //move the window relative to its parent
-    hwndParent = GetParent(hwndDlg);
+    HWND hwndParent = GetParent(hwndDlg);
 
     GetWindowRect(hwndDlg, &rect);
     GetWindowRect(hwndParent, &rectP);
 
-    width  = rect.right  - rect.left;
-    height = rect.bottom - rect.top;
+    unsigned int width  = rect.right  - rect.left;
+    unsigned height = rect.bottom - rect.top;
 
     x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
     y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
 
-    screenwidth  = GetSystemMetrics(SM_CXSCREEN);
-    screenheight = GetSystemMetrics(SM_CYSCREEN);
+    unsigned screenwidth  = GetSystemMetrics(SM_CXSCREEN);
+    unsigned screenheight = GetSystemMetrics(SM_CYSCREEN);
 
     //make sure that the dialog box never moves outside of the screen
     if(x < 0) x = 0;
@@ -89,8 +88,6 @@ BOOL CenterWindow(HWND hwndDlg) {
     if(y + height > screenheight) y = screenheight - height;
 
     MoveWindow(hwndDlg, x, y, width, height, FALSE);
-
-    return TRUE;
 }
 
 int NewBreak(HWND hwndDlg, int num, int enable) {
