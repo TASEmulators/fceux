@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-void ShowUsage(char *prog)
+static void ShowUsage(char *prog)
 {
 printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 puts("Options:");

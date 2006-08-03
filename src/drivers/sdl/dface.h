@@ -10,7 +10,6 @@ extern ARGPSTRUCT DriverArgs[];
 extern char *DriverUsage;
 
 void DoDriverArgs(void);
-uint8 *GetBaseDirectory(void);
 
 int InitSound(FCEUGI *gi);
 void WriteSound(int32 *Buffer, int Count);

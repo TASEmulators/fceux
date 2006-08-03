@@ -1,6 +1,6 @@
 my_list =  Split("""
 input.cpp
-main.cpp
+config.cpp
 sdl.cpp
 sdl-joystick.cpp
 sdl-sound.cpp
