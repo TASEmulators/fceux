@@ -24,6 +24,8 @@
 #include "dface.h"
 #include "input.h"
 
+#include "sdl-video.h"
+
 #include "../common/cheat.h"
 
 /** GLOBALS **/
@@ -102,12 +104,10 @@ static void
 DoCheatSeq()
 {
     SilenceSound(1);
-    KillKeyboard();
     KillVideo();
 
     DoConsoleCheatConfig();
     InitVideo(CurGame);
-    InitKeyboard();
     SilenceSound(0);
 }
 
@@ -135,6 +135,17 @@ _keyonly(int a)
 #define keyonly(__a) _keyonly(MKK(__a))
 
 static int cidisabled=0;
+
+/**
+ * Get and return the keyboard state from the SDL.
+ */
+static uint8 *KeyState = NULL;
+static char *
+GetKeyboard()
+{
+    KeyState = SDL_GetKeyState(0);
+    return ((char *)KeyState);
+}
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -367,6 +378,212 @@ static ButtConfig GamePadConfig[4][10]={
         /* Gamepad 4 */
         GPZ()
 };
+
+
+/**
+ * Return the state of the mouse buttons.  Input 'd' is an array of 3
+ * integers that store <x, y, button state>.
+ */
+static void
+GetMouseData(uint32 *d)
+{
+    int x,y;
+    uint32 t;
+
+    // XXX soules - why don't we do this when a movie is active?
+    if(FCEUI_IsMovieActive() < 0)
+        return;
+
+    // retrieve the state of the mouse from SDL
+    t = SDL_GetMouseState(&x, &y);
+
+    d[2] = 0;
+    if(t & SDL_BUTTON(1)) {
+        d[2] |= 0x1;
+    }
+    if(t & SDL_BUTTON(3)) {
+        d[2] |= 0x2;
+    }
+
+    // get the mouse position from the SDL video driver
+    t = PtoV(x, y);
+    d[0] = t & 0xFFFF;
+    d[1] = (t >> 16) & 0xFFFF;
+}
+
+/**
+ * Handles outstanding SDL events.
+ */
+static void
+UpdatePhysicalInput()
+{
+    SDL_Event event;
+
+    // loop, handling all pending events
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+        case SDL_QUIT:
+            CloseGame();
+            puts("Quit");
+            break;
+        default:
+            // do nothing
+            break;
+        }
+    }
+    //SDL_PumpEvents();
+}
+
+
+static int bcpv,bcpj;
+
+/**
+ *  Begin configuring the buttons by placing the video and joystick
+ *  subsystems into a well-known state.  Button configuration really
+ *  needs to be cleaned up after the new config system is in place.
+ */
+static int
+ButtonConfigBegin()
+{
+    SDL_Surface *screen;
+
+    // XXX soules - why are we doing this right before KillVideo()?
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
+    // shut down the video and joystick subsystems
+    bcpv=KillVideo();
+    bcpj=KillJoysticks();
+ 
+    // reactivate the video subsystem
+    if(!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if(SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
+                FCEUD_Message(SDL_GetError());
+                return(0);
+        }
+    }
+
+    // set the screen and notify the user of button configuration
+    screen = SDL_SetVideoMode(300, 1, 8, 0); 
+    SDL_WM_SetCaption("Button Config",0);
+
+    // XXX soules - why did we shut this down?
+    // initialize the joystick subsystem
+    InitJoysticks();
+ 
+    return(1);
+}
+
+/**
+ *  Finish configuring the buttons by reverting the video and joystick
+ *  subsystems to their previous state.  Button configuration really
+ *  needs to be cleaned up after the new config system is in place.
+ */
+static void
+ButtonConfigEnd()
+{ 
+    extern FCEUGI *CurGame;
+
+    // shutdown the joystick and video subsystems
+    KillJoysticks();
+    SDL_QuitSubSystem(SDL_INIT_VIDEO); 
+
+    // re-initialize joystick and video subsystems if they were active before
+    if(!bcpv) {
+        InitVideo(CurGame);
+    }
+    if(!bcpj) {
+        InitJoysticks();
+    }
+}
+
+/**
+ * Involved with updating the button configuration, but not entirely
+ * sure how yet - soules.
+ */
+static int
+DTestButton(ButtConfig *bc)
+{
+    int x;
+
+    for(x = 0; x < bc->NumC; x++) {
+        if(bc->ButtType[x] == BUTTC_KEYBOARD) {
+            if(KeyState[bc->ButtonNum[x]]) {
+                return(1);
+            }
+        } else if(bc->ButtType[x] == BUTTC_JOYSTICK) {
+            if(DTestButtonJoy(bc)) {
+                return(1);
+            }
+        }
+    }
+    return(0);
+}
+
+
+/**
+ * Waits for a button input and returns the information as to which
+ * button was pressed.  Used in button configuration.
+ */
+static int
+DWaitButton(const uint8 *text,
+            ButtConfig *bc,
+            int wb)
+{
+    SDL_Event event;
+    static int32 LastAx[64][64];
+    int x,y;
+
+    SDL_WM_SetCaption((const char *)text,0);
+    puts((const char *)text);
+    for(x = 0; x < 64; x++) {
+        for(y = 0; y < 64; y++) {
+            LastAx[x][y]=0x100000;
+        }
+    }
+
+    while(SDL_WaitEvent(&event)) {
+        switch(event.type) {
+        case SDL_KEYDOWN:
+            bc->ButtType[wb]  = BUTTC_KEYBOARD;
+            bc->DeviceNum[wb] = 0;
+            bc->ButtonNum[wb] = event.key.keysym.sym;
+            return(1);
+        case SDL_JOYBUTTONDOWN:
+            bc->ButtType[wb]  = BUTTC_JOYSTICK;
+            bc->DeviceNum[wb] = event.jbutton.which;
+            bc->ButtonNum[wb] = event.jbutton.button; 
+            return(1);
+        case SDL_JOYHATMOTION:
+            if(event.jhat.value != SDL_HAT_CENTERED) {
+                bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                bc->DeviceNum[wb] = event.jhat.which;
+                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
+                                     event.jhat.value);
+                return(1);
+            }
+            break;
+        case SDL_JOYAXISMOTION: 
+            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
+                if(abs(event.jaxis.value) < 1000) {
+                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
+                }
+            } else {
+                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
+                    bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                    bc->DeviceNum[wb] = event.jaxis.which;
+                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
+                                         ((event.jaxis.value < 0)
+                                          ? 0x4000 : 0));
+                    return(1);
+                }
+            }
+            break;
+        }
+    }
+
+    return(0);
+}
+
 
 
 /**
@@ -613,10 +830,6 @@ InitOtherInput()
 
     FCEUI_SetInputFC(InputType[2], InputDPtr, attrib);
     FCEUI_DisableFourScore(eoptions & EO_NOFOURSCORE);
-
-    if(t) {
-        InitMouse();
-    }
 }
 
 

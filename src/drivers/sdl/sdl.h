@@ -3,8 +3,6 @@
 #include "dface.h"
 #include "input.h"
 
-int DTestButtonJoy(ButtConfig *bc);
-
 typedef struct {
         int xres;
         int yres;

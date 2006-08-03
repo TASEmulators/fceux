@@ -28,116 +28,6 @@
 #endif
 
 
-/**
- * Unimplemented.  Returns 0.
- */
-int
-InitMouse(void)
-{
-    return 0;
-}
-
-/**
- * Unimplemented.
- */
-void
-KillMouse()
-{ }
-
-/**
- * Return the state of the mouse buttons.  Input 'd' is an array of 3
- * integers that store <x, y, button state>.
- */
-void
-GetMouseData(uint32 *d)
-{
-    int x,y;
-    uint32 t;
-
-    // XXX soules - why don't we do this when a movie is active?
-    if(FCEUI_IsMovieActive() < 0)
-        return;
-
-    // retrieve the state of the mouse from SDL
-    t = SDL_GetMouseState(&x, &y);
-
-    d[2] = 0;
-    if(t & SDL_BUTTON(1)) {
-        d[2] |= 0x1;
-    }
-    if(t & SDL_BUTTON(3)) {
-        d[2] |= 0x2;
-    }
-
-    // get the mouse position from the SDL video driver
-    t = PtoV(x, y);
-    d[0] = t & 0xFFFF;
-    d[1] = (t >> 16) & 0xFFFF;
-}
-
-/**
- * Unimplemented.  Returns 1.
- */
-int
-InitKeyboard()
-{
-    return 1;
-}
-
-/**
- * Unimplemented.  Returns 1.
- */
-int
-UpdateKeyboard()
-{
-    return 1;
-}
-
-/**
- * Unimplemented.
- */
-void
-KillKeyboard()
-{
-
-}
-
-
-/**
- * Handles outstanding SDL events.
- */
-void
-UpdatePhysicalInput()
-{
-    SDL_Event event;
-
-    // loop, handling all pending events
-    while(SDL_PollEvent(&event)) {
-        switch(event.type) {
-        case SDL_QUIT:
-            CloseGame();
-            puts("Quit");
-            break;
-        default:
-            // do nothing
-            break;
-        }
-    }
-    //SDL_PumpEvents();
-}
-
-/**
- * Get and return the keyboard state from the SDL.
- */
-static uint8 *KeyState = NULL;
-char *
-GetKeyboard()
-{
-    KeyState = SDL_GetKeyState(0);
-    return ((char *)KeyState);
-}
-
-
 #ifdef OPENGL
 int sdlhaveogl;
 #endif
@@ -147,22 +37,8 @@ extern int32 fps_scale;
 
 int CloseGame(void);
 
-int soundvol=100;
-long soundq=0;
-int _sound=1;
-long soundrate=48000;
-#ifdef WIN32
-long soundbufsize=52;
-#else
-long soundbufsize=24;
-#endif
-
 static int inited=0;
 static int isloaded=0;	// Is game loaded?
-
-int srendlinev[2]={8,0};
-int erendlinev[2]={231,239};
-
 
 int eoptions=0;
 
@@ -172,15 +48,6 @@ int gametype = 0;
 
 FCEUGI *CurGame=NULL;
 
-/**
- * Wrapper for ParseGIInput().
- */
-static void
-ParseGI(FCEUGI *gi)
-{
-    ParseGIInput(gi);
-    gametype = gi->type;
-}
 
 /**
  * Prints an error string to STDOUT.
@@ -260,8 +127,8 @@ int LoadGame(const char *path)
     if(!(tmp = FCEUI_LoadGame(path, 1))) {
         return 0;
     }
-    CurGame=tmp;
-    ParseGI(tmp);
+    CurGame = tmp;
+    ParseGIInput(tmp);
     RefreshThrottleFPS();
 
     if(!DriverInitialize(tmp)) {
@@ -273,7 +140,7 @@ int LoadGame(const char *path)
             soundrecfn=0;
         }
     }
-    isloaded=1;
+    isloaded = 1;
 
     FCEUD_NetworkConnect();
     return 1;
@@ -290,8 +157,8 @@ CloseGame()
     }
     FCEUI_CloseGame();
     DriverKill();
-    isloaded=0;
-    CurGame=0;
+    isloaded = 0;
+    CurGame = 0;
 
     if(soundrecfn) {
         FCEUI_EndWaveRecord();
@@ -308,13 +175,13 @@ void DoFun(void)
     uint8 *gfx;  
     int32 *sound;
     int32 ssize;
-    static int fskipc=0;
-    static int opause=0;
+    static int fskipc = 0;
+    static int opause = 0;
          
 #ifdef FRAMESKIP
-    fskipc=(fskipc+1)%(frameskip+1);
+    fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
-         
+
     if(NoWaiting) {
         gfx = 0;
     }
@@ -329,14 +196,14 @@ void DoFun(void)
 
 
 /**
- * Initialize all of the subsystem drivers: video, audio, joystick,
- * keyboard, mouse.
+ * Initialize all of the subsystem drivers: video, audio, and joystick.
  */
 static int
 DriverInitialize(FCEUGI *gi)
 {
 #ifndef WIN32
-    SetSignals(CloseStuff);
+    // XXX soules - capturing all these signals seems pointless
+    //SetSignals(CloseStuff);
 #endif
 
     /* Initialize video before all else, due to some wacko dependencies
@@ -352,16 +219,12 @@ DriverInitialize(FCEUGI *gi)
     if(InitJoysticks())
         inited|=2;
 
-    if(!InitKeyboard()) return 0;
-    inited|=8;
-
     InitOtherInput();
     return 1;
 }
 
 /**
- * Shut down all of the subsystem drivers: video, audio, joystick,
- * keyboard.
+ * Shut down all of the subsystem drivers: video, audio, and joystick.
  */
 static void
 DriverKill()
@@ -369,19 +232,16 @@ DriverKill()
     SaveConfig();
 
 #ifndef WIN32
-    SetSignals(SIG_IGN);
+    // XXX soules - capturing all these signals seems pointless
+    //SetSignals(SIG_IGN);
 #endif
 
     if(inited&2)
         KillJoysticks();
-    if(inited&8)
-        KillKeyboard();
     if(inited&4)
         KillVideo();
     if(inited&1)
         KillSound();
-    if(inited&16)
-        KillMouse();
     inited=0;
 }
 
@@ -493,153 +353,6 @@ void FCEUD_TraceInstruction() {
     return;
 }
 
-
-/**
- * Involved with updating the button configuration, but not entirely
- * sure how yet - soules.
- */
-int DTestButton(ButtConfig *bc)
-{
-    int x;
-
-    for(x = 0; x < bc->NumC; x++) {
-        if(bc->ButtType[x] == BUTTC_KEYBOARD) {
-            if(KeyState[bc->ButtonNum[x]]) {
-                return(1);
-            }
-        } else if(bc->ButtType[x] == BUTTC_JOYSTICK) {
-            if(DTestButtonJoy(bc)) {
-                return(1);
-            }
-        }
-    }
-    return(0);
-}
-
-static int bcpv,bcpj;
-
-/**
- *  Begin configuring the buttons by placing the video and joystick
- *  subsystems into a well-known state.  Button configuration really
- *  needs to be cleaned up after the new config system is in place.
- */
-int
-ButtonConfigBegin()
-{
-    SDL_Surface *screen;
-
-    // XXX soules - why are we doing this right before KillVideo()?
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-    // shut down the video and joystick subsystems
-    bcpv=KillVideo();
-    bcpj=KillJoysticks();
- 
-    // reactivate the video subsystem
-    if(!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if(SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
-                FCEUD_Message(SDL_GetError());
-                return(0);
-        }
-    }
-
-    // set the screen and notify the user of button configuration
-    screen = SDL_SetVideoMode(300, 1, 8, 0); 
-    SDL_WM_SetCaption("Button Config",0);
-
-    // XXX soules - why did we shut this down?
-    // initialize the joystick subsystem
-    InitJoysticks();
- 
-    return(1);
-}
-
-/**
- *  Finish configuring the buttons by reverting the video and joystick
- *  subsystems to their previous state.  Button configuration really
- *  needs to be cleaned up after the new config system is in place.
- */
-void
-ButtonConfigEnd()
-{ 
-    extern FCEUGI *CurGame;
-
-    // shutdown the joystick and video subsystems
-    KillJoysticks();
-    SDL_QuitSubSystem(SDL_INIT_VIDEO); 
-
-    // re-initialize joystick and video subsystems if they were active before
-    if(!bcpv) {
-        InitVideo(CurGame);
-    }
-    if(!bcpj) {
-        InitJoysticks();
-    }
-}
-
-/**
- * Waits for a button input and returns the information as to which
- * button was pressed.  Used in button configuration.
- */
-int
-DWaitButton(const uint8 *text,
-            ButtConfig *bc,
-            int wb)
-{
-    SDL_Event event;
-    static int32 LastAx[64][64];
-    int x,y;
-
-    SDL_WM_SetCaption((const char *)text,0);
-    puts((const char *)text);
-    for(x = 0; x < 64; x++) {
-        for(y = 0; y < 64; y++) {
-            LastAx[x][y]=0x100000;
-        }
-    }
-
-    while(SDL_WaitEvent(&event)) {
-        switch(event.type) {
-        case SDL_KEYDOWN:
-            bc->ButtType[wb]  = BUTTC_KEYBOARD;
-            bc->DeviceNum[wb] = 0;
-            bc->ButtonNum[wb] = event.key.keysym.sym;
-            return(1);
-        case SDL_JOYBUTTONDOWN:
-            bc->ButtType[wb]  = BUTTC_JOYSTICK;
-            bc->DeviceNum[wb] = event.jbutton.which;
-            bc->ButtonNum[wb] = event.jbutton.button; 
-            return(1);
-        case SDL_JOYHATMOTION:
-            if(event.jhat.value != SDL_HAT_CENTERED) {
-                bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                bc->DeviceNum[wb] = event.jhat.which;
-                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
-                                     event.jhat.value);
-                return(1);
-            }
-            break;
-        case SDL_JOYAXISMOTION: 
-            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
-                if(abs(event.jaxis.value) < 1000) {
-                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
-                }
-            } else {
-                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
-                    bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                    bc->DeviceNum[wb] = event.jaxis.which;
-                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
-                                         ((event.jaxis.value < 0)
-                                          ? 0x4000 : 0));
-                    return(1);
-                }
-            }
-            break;
-        }
-    }
-
-    return(0);
-}
 
 /**
  * The main loop for the SDL.

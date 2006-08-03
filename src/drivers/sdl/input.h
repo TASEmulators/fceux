@@ -34,5 +34,7 @@ extern ButtConfig FTrainerButtons[12];
 void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);
 
+int DTestButtonJoy(ButtConfig *bc);
+
 void FCEUD_UpdateInput(void);
 #endif

@@ -34,11 +34,8 @@ extern int eoptions;
 #define EO_LOWPASS	512
 #define EO_AUTOHIDE	1024
 
-extern int srendlinev[2],erendlinev[2];
 extern int NoWaiting;
 
-extern int soundvol;
-extern long soundq;
 extern int _sound;
 extern long soundrate;
 extern long soundbufsize;

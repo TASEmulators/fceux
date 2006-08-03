@@ -32,6 +32,21 @@ char *soundrecfn;
 int   ntsccol, ntschue, ntsctint;
 char *DrBaseDirectory;
 
+static int srendlinev[2]={8,0};
+static int erendlinev[2]={231,239};
+
+static int soundvol=100;
+static long soundq=0;
+
+int _sound=1;
+long soundrate=48000;
+#ifdef WIN32
+long soundbufsize=52;
+#else
+long soundbufsize=24;
+#endif
+
+
 DSETTINGS Settings;
 CFGSTRUCT DriverConfig[]={
 	#ifdef OPENGL
