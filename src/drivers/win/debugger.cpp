@@ -68,6 +68,8 @@ void CenterWindow(HWND hwndDlg) {
 	//TODO: This function should probably moved into the generic Win32 window file
     //move the window relative to its parent
     HWND hwndParent = GetParent(hwndDlg);
+	RECT rect;
+	RECT rectP;
 
     GetWindowRect(hwndDlg, &rect);
     GetWindowRect(hwndParent, &rectP);
@@ -75,8 +77,8 @@ void CenterWindow(HWND hwndDlg) {
     unsigned int width  = rect.right  - rect.left;
     unsigned height = rect.bottom - rect.top;
 
-    x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
-    y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
+    unsigned x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
+    unsigned y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
 
     unsigned screenwidth  = GetSystemMetrics(SM_CXSCREEN);
     unsigned screenheight = GetSystemMetrics(SM_CYSCREEN);
