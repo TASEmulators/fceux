@@ -26,11 +26,15 @@
 
 #include "../common/cheat.h"
 
+/** GLOBALS **/
+int NoWaiting=1;
+
+
 /* UsrInputType[] is user-specified.  InputType[] is current
         (game loading can override user settings)
 */
-int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
-int InputType[3]={0,0,0};
+static int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
+static int InputType[3]={0,0,0};
 static int cspec=0;
    
 extern int gametype;
@@ -89,7 +93,6 @@ static void UpdateFTrainer(void);
 static void UpdateTopRider(void);
 
 static uint32 JSreturn=0;
-int NoWaiting=1;
 
 /**
  * Configure cheat devices (game genie, etc.).  Restarts the keyboard
@@ -348,7 +351,7 @@ do {                                              \
 
 #define GPZ()   {MKZ(), MKZ(), MKZ(), MKZ()}
 
-ButtConfig GamePadConfig[4][10]={
+static ButtConfig GamePadConfig[4][10]={
         /* Gamepad 1 */
         { 
 	 MK(KP3), MK(KP2), MK(TAB), MK(ENTER), MK(W),MK(Z),
@@ -413,7 +416,7 @@ UpdateGamepad(void)
     JSreturn = JS;
 }
 
-ButtConfig powerpadsc[2][12]={
+static ButtConfig powerpadsc[2][12]={
                               {
                                MK(O),MK(P),MK(BRACKET_LEFT),
                                MK(BRACKET_RIGHT),MK(K),MK(L),MK(SEMICOLON),
@@ -617,7 +620,7 @@ InitOtherInput()
 }
 
 
-ButtConfig fkbmap[0x48]=
+static ButtConfig fkbmap[0x48]=
 {
  MK(F1),MK(F2),MK(F3),MK(F4),MK(F5),MK(F6),MK(F7),MK(F8),
  MK(1),MK(2),MK(3),MK(4),MK(5),MK(6),MK(7),MK(8),MK(9),MK(0),
@@ -693,7 +696,7 @@ UpdateMahjong()
     }
 }
 
-ButtConfig QuizKingButtons[6]=
+static ButtConfig QuizKingButtons[6]=
 {
  MK(Q),MK(W),MK(E),MK(R),MK(T),MK(Y)
 };
@@ -715,7 +718,7 @@ UpdateQuizKing()
     }
 }
 
-ButtConfig TopRiderButtons[8]=
+static ButtConfig TopRiderButtons[8]=
 {
  MK(Q),MK(W),MK(E),MK(R),MK(T),MK(Y),MK(U),MK(I)
 };
@@ -735,7 +738,7 @@ UpdateTopRider()
     }
 }
 
-ButtConfig FTrainerButtons[12]=
+static ButtConfig FTrainerButtons[12]=
 {
                                MK(O),MK(P),MK(BRACKET_LEFT),
                                MK(BRACKET_RIGHT),MK(K),MK(L),MK(SEMICOLON),
@@ -830,19 +833,6 @@ ConfigDevice(int which,
 }
 
 
-CFGSTRUCT InputConfig[]={
-        ACA(UsrInputType),
-        AC(powerpadsc),
-        AC(QuizKingButtons),
-        AC(FTrainerButtons),
-        AC(HyperShotButtons),
-        AC(MahjongButtons),
-        AC(GamePadConfig),
-        AC(fkbmap),
-        ENDCFGSTRUCT
-};
-
-
 /**
  * Update the button configuration for a device, specified by a text string.
  */
@@ -918,6 +908,20 @@ Input2(char *text)
     }
 }
 
+/** GLOBALS **/
+
+CFGSTRUCT InputConfig[]={
+        ACA(UsrInputType),
+        AC(powerpadsc),
+        AC(QuizKingButtons),
+        AC(FTrainerButtons),
+        AC(HyperShotButtons),
+        AC(MahjongButtons),
+        AC(GamePadConfig),
+        AC(fkbmap),
+        ENDCFGSTRUCT
+};
+
 ARGPSTRUCT InputArgs[]={
 	{"-inputcfg",0,(void *)InputCfg,0x2000},
 	{"-fcexp",0,(void *)FCExp,0x2000},
@@ -925,3 +929,4 @@ ARGPSTRUCT InputArgs[]={
 	{"-input2",0,(void *)Input2,0x2000},
 	{0,0,0,0}
 };
+
