@@ -25,29 +25,54 @@ static int left,right,top,bottom; // right and bottom are not inclusive.
 static int scanlines;
 static void *HiBuffer;
 
-void APIENTRY (*p_glBindTexture)(GLenum target,GLuint texture);
-void APIENTRY (*p_glColorTableEXT)(GLenum target, GLenum internalformat,  GLsizei width, GLenum format, GLenum type, const GLvoid *table);
-void APIENTRY (*p_glTexImage2D)( GLenum target, GLint level,
-                                    GLint internalFormat,
-                                    GLsizei width, GLsizei height, GLint border,
-                                    GLenum format, GLenum type,
-                                    const GLvoid *pixels );
-void APIENTRY (*p_glBegin)(GLenum mode);
-void APIENTRY (*p_glVertex2f)(GLfloat x, GLfloat y);
-void APIENTRY (*p_glTexCoord2f)(GLfloat s, GLfloat t);
-void APIENTRY (*p_glEnd)(void);
-void APIENTRY (*p_glEnable)(GLenum cap);
-void APIENTRY (*p_glBlendFunc)(GLenum sfactor, GLenum dfactor);
-const GLubyte* APIENTRY (*p_glGetString)(GLenum name);
-void APIENTRY (*p_glViewport)(GLint x, GLint y,GLsizei width, GLsizei height);
-void APIENTRY (*p_glGenTextures)(GLsizei n, GLuint *textures);
-void APIENTRY (*p_glDeleteTextures)(GLsizei n,const GLuint *textures);
-void APIENTRY (*p_glTexParameteri)(GLenum target, GLenum pname, GLint param);
-void APIENTRY (*p_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-void APIENTRY (*p_glLoadIdentity)(void);
-void APIENTRY (*p_glClear)(GLbitfield mask);
-void APIENTRY (*p_glMatrixMode)(GLenum mode);
-void APIENTRY (*p_glDisable)(GLenum cap);
+typedef void APIENTRY (*glBindTexture_Func)(GLenum target,GLuint texture);
+typedef void APIENTRY (*glColorTableEXT_Func)(GLenum target,
+        GLenum internalformat,  GLsizei width, GLenum format, GLenum type,
+        const GLvoid *table);
+typedef void APIENTRY (*glTexImage2D_Func)(GLenum target, GLint level,
+        GLint internalFormat,
+        GLsizei width, GLsizei height, GLint border,
+        GLenum format, GLenum type,
+        const GLvoid *pixels);
+typedef void APIENTRY (*glBegin_Func)(GLenum mode);
+typedef void APIENTRY (*glVertex2f_Func)(GLfloat x, GLfloat y);
+typedef void APIENTRY (*glTexCoord2f_Func)(GLfloat s, GLfloat t);
+typedef void APIENTRY (*glEnd_Func)(void);
+typedef void APIENTRY (*glEnable_Func)(GLenum cap);
+typedef void APIENTRY (*glBlendFunc_Func)(GLenum sfactor, GLenum dfactor);
+typedef const GLubyte* APIENTRY (*glGetString_Func)(GLenum name);
+typedef void APIENTRY (*glViewport_Func)(GLint x, GLint y,GLsizei width,
+        GLsizei height);
+typedef void APIENTRY (*glGenTextures_Func)(GLsizei n, GLuint *textures);
+typedef void APIENTRY (*glDeleteTextures_Func)(GLsizei n,
+        const GLuint *textures);
+typedef void APIENTRY (*glTexParameteri_Func)(GLenum target, GLenum pname,
+        GLint param);
+typedef void APIENTRY (*glClearColor_Func)(GLclampf red, GLclampf green,
+        GLclampf blue, GLclampf alpha);
+typedef void APIENTRY (*glLoadIdentity_Func)(void);
+typedef void APIENTRY (*glClear_Func)(GLbitfield mask);
+typedef void APIENTRY (*glMatrixMode_Func)(GLenum mode);
+typedef void APIENTRY (*glDisable_Func)(GLenum cap);
+glBindTexture_Func p_glBindTexture;
+glColorTableEXT_Func p_glColorTableEXT;
+glTexImage2D_Func p_glTexImage2D;
+glBegin_Func p_glBegin;
+glVertex2f_Func p_glVertex2f;
+glTexCoord2f_Func p_glTexCoord2f;
+glEnd_Func p_glEnd;
+glEnable_Func p_glEnable;
+glBlendFunc_Func p_glBlendFunc;
+glGetString_Func p_glGetString;
+glViewport_Func p_glViewport;
+glGenTextures_Func p_glGenTextures;
+glDeleteTextures_Func p_glDeleteTextures;
+glTexParameteri_Func p_glTexParameteri;
+glClearColor_Func p_glClearColor;
+glLoadIdentity_Func p_glLoadIdentity;
+glClear_Func p_glClear;
+glMatrixMode_Func p_glMatrixMode;
+glDisable_Func p_glDisable;
 
 void SetOpenGLPalette(uint8 *data)
 {
@@ -139,9 +164,9 @@ int InitOpenGL(int l, int r, int t, int b, double xscale,double yscale, int efx,
 {
  const char *extensions;
 
- #define LFG(x) if(!(p_##x = SDL_GL_GetProcAddress(#x))) return(0);
+ #define LFG(x) if(!(p_##x = (x##_Func) SDL_GL_GetProcAddress(#x))) return(0);
 
- #define LFGN(x) p_##x = SDL_GL_GetProcAddress(#x)
+ #define LFGN(x) p_##x = (x##_Func) SDL_GL_GetProcAddress(#x)
 
  LFG(glBindTexture);
  LFGN(glColorTableEXT);

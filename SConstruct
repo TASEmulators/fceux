@@ -2,9 +2,12 @@ import os
 
 # XXX path separator fixed right now
 opts = Options()
-opts.Add('PSS_STYLE', 'Path separator style', 1)
-opts.Add('LSB_FIRST', 'Least significant byte first?', 1)
-opts.Add('FRAMESKIP', 'Enable frameskipping', 1)
+opts.AddOptions(
+  BoolOption('PSS_STYLE', 'Path separator style', 1),
+  BoolOption('LSB_FIRST', 'Least significant byte first?', 1),
+  BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
+  BoolOption('OPENGL',    'Enable OpenGL support', 1)
+)
 
 env = Environment(options = opts,
                   CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
@@ -34,11 +37,13 @@ conf = Configure(env)
 if not conf.CheckLib('SDL'):
   print 'Did not find libSDL or SDL.lib, exiting!'
   Exit(1)
-if not conf.CheckLib('z'):
+if not conf.CheckLib('z', autoadd=1):
   print 'Did not find libz or z.lib, exiting!'
   Exit(1)
 if conf.CheckFunc('asprintf'):
   conf.env.Append(CCFLAGS = " -DHAVE_ASPRINTF")
+if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
+  conf.env.Append(CCFLAGS = " -DOPENGL")
 
 env = conf.Finish()
 

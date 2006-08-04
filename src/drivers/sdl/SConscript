@@ -9,9 +9,9 @@ sdl-video.cpp
 unix-netplay.cpp
 """)
 
-# XXX need to deal with opengl configuration and testing at some point
-#sdl-opengl.cpp
-#sdl-opengl.h
+Import('env')
+if 'GL' in env['LIBS']:
+  my_list.append('sdl-opengl.cpp')
 
 for x in range(len(my_list)):
   my_list[x] = 'drivers/sdl/' + my_list[x]

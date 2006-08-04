@@ -34,11 +34,12 @@ utils
 mappers""")
 #palettes
 
+Import('env')
+Export('env')
+
 for dir in subdirs:
   subdir_files = SConscript('%s/SConscript' % dir)
   file_list.append(subdir_files)
-
-Import('env')
 
 print env['LINKFLAGS']
 
