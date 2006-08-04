@@ -33,7 +33,7 @@
 static SDL_Joystick *Joysticks[MAX_JOYSTICKS] = {NULL};
 
 /**
- * Updates a single input button configuration on the joystick?
+ * Tests if the given button is active on the joystick.
  */
 int
 DTestButtonJoy(ButtConfig *bc)

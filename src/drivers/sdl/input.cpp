@@ -35,9 +35,9 @@ int NoWaiting=1;
 /* UsrInputType[] is user-specified.  InputType[] is current
         (game loading can override user settings)
 */
-static int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
-static int InputType[3]={0,0,0};
-static int cspec=0;
+static int UsrInputType[3] = {SI_GAMEPAD, SI_GAMEPAD, SIFC_NONE};
+static int InputType[3]    = {0, 0, 0};
+static int cspec = 0;
    
 extern int gametype;
 
@@ -78,13 +78,12 @@ ParseGIInput(FCEUGI *gi)
 }
 
 
-static uint8 QuizKingData=0;
-static uint8 HyperShotData=0;
-static uint32 MahjongData=0;
-static uint32 FTrainerData=0;
-static uint8 TopRiderData=0;
-
-static uint8 BWorldData[1+13+1];
+static uint8  QuizKingData  = 0;
+static uint8  HyperShotData = 0;
+static uint32 MahjongData   = 0;
+static uint32 FTrainerData  = 0;
+static uint8  TopRiderData  = 0;
+static uint8  BWorldData[1+13+1];
 
 static void UpdateFKB(void);
 static void UpdateGamepad(void);
@@ -112,16 +111,16 @@ DoCheatSeq()
 }
 
 #include "keyscan.h"
-static char *keys=0;
-static int DIPS=0;
+static uint8 *g_keyState = 0;
+static int    DIPS = 0;
 
 static uint8 keyonce[MKK_COUNT];
-#define KEY(__a) keys[MKK(__a)]
+#define KEY(__a) g_keyState[MKK(__a)]
 
 static int
 _keyonly(int a)
 {
-    if(keys[a]) {
+    if(g_keyState[a]) {
         if(!keyonce[a]) {
             keyonce[a] = 1;
             return(1);
@@ -134,18 +133,7 @@ _keyonly(int a)
 
 #define keyonly(__a) _keyonly(MKK(__a))
 
-static int cidisabled=0;
-
-/**
- * Get and return the keyboard state from the SDL.
- */
-static uint8 *KeyState = NULL;
-static char *
-GetKeyboard()
-{
-    KeyState = SDL_GetKeyState(0);
-    return ((char *)KeyState);
-}
+static int g_fkbEnabled = 0;
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -156,17 +144,17 @@ KeyboardCommands()
     int is_shift, is_alt;
 
     // get the keyboard input
-    keys = GetKeyboard(); 
+    g_keyState = SDL_GetKeyState(NULL);
 
     // check if the family keyboard is enabled
     if(InputType[2] == SIFC_FKB) {
         if(keyonly(SCROLLLOCK)) {
-            cidisabled ^= 1;
+            g_fkbEnabled ^= 1;
             FCEUI_DispMessage("Family Keyboard %sabled.",
-                              cidisabled ? "en" : "dis");
+                              g_fkbEnabled ? "en" : "dis");
         }
-        SDL_WM_GrabInput(cidisabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
-        if(cidisabled) {
+        SDL_WM_GrabInput(g_fkbEnabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
+        if(g_fkbEnabled) {
             return;
         }
     }
@@ -355,30 +343,6 @@ do {                                              \
     }
 }
 
-#define MK(x)   {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
-#define MK2(x1,x2)	{{BUTTC_KEYBOARD},{0},{MKK(x1),MKK(x2)},2}
-
-#define MKZ()   {{0},{0},{0},0}
-
-#define GPZ()   {MKZ(), MKZ(), MKZ(), MKZ()}
-
-static ButtConfig GamePadConfig[4][10]={
-        /* Gamepad 1 */
-        { 
-	 MK(KP3), MK(KP2), MK(TAB), MK(ENTER), MK(W),MK(Z),
-                MK(A), MK(S), MKZ(), MKZ()
-	},
-
-        /* Gamepad 2 */
-        GPZ(),
-
-        /* Gamepad 3 */
-        GPZ(),
-  
-        /* Gamepad 4 */
-        GPZ()
-};
-
 
 /**
  * Return the state of the mouse buttons.  Input 'd' is an array of 3
@@ -390,7 +354,7 @@ GetMouseData(uint32 *d)
     int x,y;
     uint32 t;
 
-    // XXX soules - why don't we do this when a movie is active?
+    // Don't get input when a movie is playing back
     if(FCEUI_IsMovieActive() < 0)
         return;
 
@@ -497,8 +461,7 @@ ButtonConfigEnd()
 }
 
 /**
- * Involved with updating the button configuration, but not entirely
- * sure how yet - soules.
+ * Tests to see if a specified button is currently pressed.
  */
 static int
 DTestButton(ButtConfig *bc)
@@ -507,7 +470,7 @@ DTestButton(ButtConfig *bc)
 
     for(x = 0; x < bc->NumC; x++) {
         if(bc->ButtType[x] == BUTTC_KEYBOARD) {
-            if(KeyState[bc->ButtonNum[x]]) {
+            if(g_keyState[bc->ButtonNum[x]]) {
                 return(1);
             }
         } else if(bc->ButtType[x] == BUTTC_JOYSTICK) {
@@ -520,74 +483,30 @@ DTestButton(ButtConfig *bc)
 }
 
 
-/**
- * Waits for a button input and returns the information as to which
- * button was pressed.  Used in button configuration.
- */
-static int
-DWaitButton(const uint8 *text,
-            ButtConfig *bc,
-            int wb)
-{
-    SDL_Event event;
-    static int32 LastAx[64][64];
-    int x,y;
-
-    SDL_WM_SetCaption((const char *)text,0);
-    puts((const char *)text);
-    for(x = 0; x < 64; x++) {
-        for(y = 0; y < 64; y++) {
-            LastAx[x][y]=0x100000;
-        }
-    }
-
-    while(SDL_WaitEvent(&event)) {
-        switch(event.type) {
-        case SDL_KEYDOWN:
-            bc->ButtType[wb]  = BUTTC_KEYBOARD;
-            bc->DeviceNum[wb] = 0;
-            bc->ButtonNum[wb] = event.key.keysym.sym;
-            return(1);
-        case SDL_JOYBUTTONDOWN:
-            bc->ButtType[wb]  = BUTTC_JOYSTICK;
-            bc->DeviceNum[wb] = event.jbutton.which;
-            bc->ButtonNum[wb] = event.jbutton.button; 
-            return(1);
-        case SDL_JOYHATMOTION:
-            if(event.jhat.value != SDL_HAT_CENTERED) {
-                bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                bc->DeviceNum[wb] = event.jhat.which;
-                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
-                                     event.jhat.value);
-                return(1);
-            }
-            break;
-        case SDL_JOYAXISMOTION: 
-            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
-                if(abs(event.jaxis.value) < 1000) {
-                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
-                }
-            } else {
-                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
-                    bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                    bc->DeviceNum[wb] = event.jaxis.which;
-                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
-                                         ((event.jaxis.value < 0)
-                                          ? 0x4000 : 0));
-                    return(1);
-                }
-            }
-            break;
-        }
-    }
-
-    return(0);
-}
 
 
+#define MK(x)       {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
+#define MK2(x1,x2)  {{BUTTC_KEYBOARD},{0},{MKK(x1),MKK(x2)},2}
+#define MKZ()       {{0},{0},{0},0}
+#define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
+
+static ButtConfig GamePadConfig[4][10]={
+        /* Gamepad 1 */
+        { MK(KP3), MK(KP2), MK(TAB), MK(ENTER),
+          MK(W), MK(Z), MK(A), MK(S), MKZ(), MKZ() },
+
+        /* Gamepad 2 */
+        GPZ(),
+
+        /* Gamepad 3 */
+        GPZ(),
+  
+        /* Gamepad 4 */
+        GPZ()
+};
 
 /**
- * Update the gamepad button configurations.
+ * Update the status of the gamepad input devices.
  */
 static void
 UpdateGamepad(void)
@@ -651,7 +570,7 @@ static ButtConfig powerpadsc[2][12]={
 static uint32 powerpadbuf[2]={0,0};
 
 /**
- * Update power pad button configuration.
+ * Update the status of the power pad input device.
  */
 static uint32
 UpdatePPadData(int w)
@@ -716,7 +635,7 @@ FCEUD_UpdateInput()
         t |= 2;
         break;
     case SIFC_FKB:
-        if(cidisabled) {
+        if(g_fkbEnabled) {
             UpdateFKB();
         }
         break;
@@ -751,10 +670,10 @@ FCEUD_UpdateInput()
 }
 
 /**
- * Initialize "other" input devices?  Not entirely sure what this does yet.
+ * Initialize the input device interface between the emulation and the driver.
  */
 void
-InitOtherInput()
+InitInputInterface()
 {
     void *InputDPtr;
 
@@ -849,7 +768,7 @@ static ButtConfig fkbmap[0x48]=
 };
 
 /**
- * Update the button configuration for the Family KeyBoard.
+ * Update the status of the Family KeyBoard.
  */
 static void
 UpdateFKB()
@@ -871,7 +790,7 @@ static ButtConfig HyperShotButtons[4]=
 };
 
 /**
- * Update the button configuration for the HyperShot input device.
+ * Update the status of the HyperShot input device.
  */
 static void
 UpdateHyperShot()
@@ -894,14 +813,14 @@ static ButtConfig MahjongButtons[21]=
 };
 
 /**
- * Update the button configuration for the Mahjong input device.
+ * Update the status of for the Mahjong input device.
  */
 static void
 UpdateMahjong()
 {
     int x;
         
-    MahjongData=0;
+    MahjongData = 0;
     for(x = 0; x < 21; x++) {
         if(DTestButton(&MahjongButtons[x])) {
             MahjongData |= 1 << x;
@@ -915,7 +834,7 @@ static ButtConfig QuizKingButtons[6]=
 };
 
 /**
- * Update the button configuration for the QuizKing input device.
+ * Update the status of the QuizKing input device.
  */
 static void
 UpdateQuizKing()
@@ -937,7 +856,7 @@ static ButtConfig TopRiderButtons[8]=
 };
 
 /**
- * Update the button configuration for the TopRider input device.
+ * Update the status of the TopRider input device.
  */
 static void
 UpdateTopRider()
@@ -960,7 +879,7 @@ static ButtConfig FTrainerButtons[12]=
 };
 
 /**
- * Update the button configuration for the FTrainer input device.
+ * Update the status of the FTrainer input device.
  */
 static void
 UpdateFTrainer()
@@ -976,12 +895,78 @@ UpdateFTrainer()
 }
 
 /**
- * I think this function takes in button inputs until either it sees
- * two of the same button presses in a row or gets four inputs and
- * then saves the total number of button presses.  Needs an overhaul.
+ * Waits for a button input and returns the information as to which
+ * button was pressed.  Used in button configuration.
+ */
+static int
+DWaitButton(const uint8 *text,
+            ButtConfig *bc,
+            int wb)
+{
+    SDL_Event event;
+    static int32 LastAx[64][64];
+    int x,y;
+
+    SDL_WM_SetCaption((const char *)text,0);
+    puts((const char *)text);
+    for(x = 0; x < 64; x++) {
+        for(y = 0; y < 64; y++) {
+            LastAx[x][y]=0x100000;
+        }
+    }
+
+    while(SDL_WaitEvent(&event)) {
+        switch(event.type) {
+        case SDL_KEYDOWN:
+            bc->ButtType[wb]  = BUTTC_KEYBOARD;
+            bc->DeviceNum[wb] = 0;
+            bc->ButtonNum[wb] = event.key.keysym.sym;
+            return(1);
+        case SDL_JOYBUTTONDOWN:
+            bc->ButtType[wb]  = BUTTC_JOYSTICK;
+            bc->DeviceNum[wb] = event.jbutton.which;
+            bc->ButtonNum[wb] = event.jbutton.button; 
+            return(1);
+        case SDL_JOYHATMOTION:
+            if(event.jhat.value != SDL_HAT_CENTERED) {
+                bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                bc->DeviceNum[wb] = event.jhat.which;
+                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
+                                     event.jhat.value);
+                return(1);
+            }
+            break;
+        case SDL_JOYAXISMOTION: 
+            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
+                if(abs(event.jaxis.value) < 1000) {
+                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
+                }
+            } else {
+                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
+                    bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                    bc->DeviceNum[wb] = event.jaxis.which;
+                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
+                                         ((event.jaxis.value < 0)
+                                          ? 0x4000 : 0));
+                    return(1);
+                }
+            }
+            break;
+        }
+    }
+
+    return(0);
+}
+
+/**
+ * This function takes in button inputs until either it sees two of
+ * the same button presses in a row or gets four inputs and then saves
+ * the total number of button presses.  Each of the keys pressed is
+ * used as input for the specified button, thus allowing up to four
+ * possible settings for each input button.
  */
 static void
-subcon(char *text,
+ConfigButton(char *text,
        ButtConfig *bc)
 {
     uint8 buf[256];
@@ -1017,27 +1002,27 @@ ConfigDevice(int which,
     case FCFGD_QUIZKING:
         for(x = 0; x < 6; x++) {
             sprintf((char *)buf, "Quiz King Buzzer #%d", x+1);
-            subcon((char *)buf, &QuizKingButtons[x]);
+            ConfigButton((char *)buf, &QuizKingButtons[x]);
         }
         break;
     case FCFGD_HYPERSHOT:
         for(x = 0; x < 4; x++) {
             sprintf((char *)buf, "Hyper Shot %d: %s",
                     ((x & 2) >> 1) + 1, (x & 1) ? "JUMP" : "RUN");
-            subcon((char *)buf, &HyperShotButtons[x]);
+            ConfigButton((char *)buf, &HyperShotButtons[x]);
         }
         break;
     case FCFGD_POWERPAD:
         for(x = 0; x < 12; x++) {
             sprintf((char *)buf, "PowerPad %d: %d", (arg & 1) + 1, x + 11);
-            subcon((char *)buf, &powerpadsc[arg&1][x]);
+            ConfigButton((char *)buf, &powerpadsc[arg&1][x]);
         }
         break;
 
     case FCFGD_GAMEPAD:
         for(x = 0; x < 10; x++) {
             sprintf((char *)buf, "GamePad #%d: %s", arg + 1, str[x]);
-            subcon((char *)buf, &GamePadConfig[arg][x]);
+            ConfigButton((char *)buf, &GamePadConfig[arg][x]);
         }
         break;
     }

@@ -140,7 +140,7 @@ SetDefaults(void)
     _xres=640;
     _yres=480;
     _fullscreen=0;
-    _xscale=2.50;
+    _xscale=2;
     _yscale=2;
     _xscalefs=_yscalefs=2;
     _efx=_efxfs=0;

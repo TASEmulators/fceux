@@ -22,7 +22,7 @@ void ParseGIInput(FCEUGI *GI);
 #define FCFGD_HYPERSHOT 3
 #define FCFGD_QUIZKING  4
 
-void InitOtherInput(void);
+void InitInputInterface(void);
 void InputUserActiveFix(void);
 #ifdef EXTGUI
 extern ButtConfig GamePadConfig[4][10];

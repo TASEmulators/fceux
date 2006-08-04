@@ -33,8 +33,9 @@
 #include "dface.h"
 
 SDL_Surface *screen;
-SDL_Surface *BlitBuf;		// Used as a buffer when using hardware-accelerated blits.
-SDL_Surface *IconSurface=NULL;
+
+static SDL_Surface *BlitBuf;  // Buffer when using hardware-accelerated blits.
+static SDL_Surface *IconSurface=NULL;
 
 static int curbpp;
 static int srendline,erendline;

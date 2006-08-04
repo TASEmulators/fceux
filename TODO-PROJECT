@@ -8,9 +8,10 @@ Doxygen integration - DONE
  * website integration
 
 Linux build - soules
- * clean up button configuration code
  * go through #def variables and figure out which we need and which we don't
+   - check OpenGL code
  * lots of testing and code clean-up
+ * figure out why its running 640x480 instead of 512x448
 
 Windows build - zeromus
  * verify rerecording

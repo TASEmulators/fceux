@@ -219,7 +219,7 @@ DriverInitialize(FCEUGI *gi)
     if(InitJoysticks())
         inited|=2;
 
-    InitOtherInput();
+    InitInputInterface();
     return 1;
 }
 
