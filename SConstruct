@@ -1,18 +1,17 @@
 import os
+import sys
 
 # XXX path separator fixed right now
 opts = Options()
 opts.AddOptions(
   BoolOption('PSS_STYLE', 'Path separator style', 1),
-  BoolOption('LSB_FIRST', 'Least significant byte first?', 1),
+  BoolOption('LSB_FIRST', 'Least significant byte first?', None),
   BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
   BoolOption('OPENGL',    'Enable OpenGL support', 1)
 )
 
 env = Environment(options = opts,
-                  CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}',
-                              'LSB_FIRST' : '${LSB_FIRST}',
-                              'FRAMESKIP' : '${FRAMESKIP}'})
+                  CPPDEFINES={'PSS_STYLE' : '${PSS_STYLE}'})
 
 if os.environ.has_key('CC'):
   env.Replace(CC = os.environ['CC'])
@@ -46,6 +45,17 @@ if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
   conf.env.Append(CCFLAGS = " -DOPENGL")
 
 env = conf.Finish()
+
+# option specified
+if env.has_key('LSB_FIRST'):
+  if env['LSB_FIRST']:
+    env.Append(CCFLAGS = ' -DLSB_FIRST')
+# option not specified, check host system
+elif sys.byteorder == 'little':
+  env.Append(CCFLAGS = ' -DLSB_FIRST')
+
+if env['FRAMESKIP']:
+  env.Append(CCFLAGS = ' -DFRAMESKIP')
 
 # parse SDL cflags/libs
 env.ParseConfig('sdl-config --cflags --libs')
