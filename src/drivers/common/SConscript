@@ -8,6 +8,7 @@ scale2x.cpp
 scale3x.cpp
 scalebit.cpp
 vidblit.cpp
+configSys.cpp
 """)
 
 for x in range(len(my_list)):
