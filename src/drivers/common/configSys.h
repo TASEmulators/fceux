@@ -8,8 +8,9 @@ class Config {
 private:
     std::string _dir;
 
-    std::map<std::string, std::string> _strOptMap;
-    std::map<std::string, int>         _intOptMap;
+    std::map<std::string, std::string>    _strOptMap;
+    std::map<std::string, int>            _intOptMap;
+    std::map<std::string, void (*)(void)> _fnOptMap;
 
     std::map<char, std::string>        _shortArgMap;
     std::map<std::string, std::string> _longArgMap;
@@ -20,8 +21,9 @@ private:
     int _parseArgs(int, char **);
 
 public:
-    const static int STRING  = 1;
-    const static int INTEGER = 2;
+    const static int STRING   = 1;
+    const static int INTEGER  = 2;
+    const static int FUNCTION = 3;
 
 public:
     Config(std::string d) : _dir(d) { }
@@ -32,15 +34,18 @@ public:
      * parse().
      */
     int addOption(char, const std::string &,
-                  const std::string &, int, int);
+                  const std::string &, int);
     int addOption(char, const std::string &,
-                  const std::string &, int, const std::string &);
+                  const std::string &, const std::string &);
+    int addOption(char, const std::string &,
+                  const std::string &, void (*)(void));
 
     /**
      * Sets a configuration option.  Can be called at any time.
      */
     int setOption(const std::string &, int);
     int setOption(const std::string &, const std::string &);
+    int setOption(const std::string &, void (*)(void));
 
     int getOption(const std::string &, std::string *);
     int getOption(const std::string &, const char **);

@@ -36,6 +36,9 @@ Config::_addOption(char shortArg,
     case(STRING):
         _strOptMap[name] = "";
         break;
+    case(FUNCTION):
+        _fnOptMap[name] = NULL;
+        break;
     default:
         break;
     } 
@@ -55,13 +58,12 @@ int
 Config::addOption(char shortArg,
                   const std::string &longArg,
                   const std::string &name,
-                  int type,
                   int defaultValue)
 {
     int error;
 
     // add the option to the config system
-    error = _addOption(shortArg, longArg, name, type);
+    error = _addOption(shortArg, longArg, name, INTEGER);
     if(error) {
         return error;
     }
@@ -85,13 +87,12 @@ int
 Config::addOption(char shortArg,
                   const std::string &longArg,
                   const std::string &name,
-                  int type,
                   const std::string &defaultValue)
 {
     int error;
 
     // add the option to the config system
-    error = _addOption(shortArg, longArg, name, type);
+    error = _addOption(shortArg, longArg, name, STRING);
     if(error) {
         return error;
     }
@@ -104,6 +105,30 @@ Config::addOption(char shortArg,
 
     return 0;
 }
+
+int
+Config::addOption(char shortArg,
+                  const std::string &longArg,
+                  const std::string &name,
+                  void (*defaultFn)(void))
+{
+    int error;
+
+    // add the option to the config system
+    error = _addOption(shortArg, longArg, name, FUNCTION);
+    if(error) {
+        return error;
+    }
+
+    // set the option to the default value
+    error = setOption(name, defaultFn);
+    if(error) {
+        return error;
+    }
+
+    return 0;
+}
+
 
 /**
  * Sets the specified option to the given integer value.
@@ -144,6 +169,27 @@ Config::setOption(const std::string &name,
     opt_i->second = value;
     return 0;
 }
+
+/**
+ * Sets the specified option to the given function.
+ */
+int
+Config::setOption(const std::string &name,
+                  void (*value)(void))
+{
+    std::map<std::string, void (*)(void)>::iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _fnOptMap.find(name);
+    if(opt_i == _fnOptMap.end()) {
+        return -1;
+    }
+
+    // set the option
+    opt_i->second = value;
+    return 0;
+}
+
 
 int
 Config::getOption(const std::string &name,
@@ -196,7 +242,6 @@ Config::getOption(const std::string &name,
     return 0;
 }
 
-
 /**
  * Parses the command line arguments.  Short args are of the form -f
  * <opt>, long args are of the form --foo <opt>.  Returns < 0 on error,
@@ -210,6 +255,7 @@ Config::_parseArgs(int argc,
     std::map<std::string, std::string>::iterator long_i, str_i;
     std::map<char, std::string>::iterator short_i;
     std::map<std::string, int>::iterator int_i;
+    std::map<std::string, void (*)(void)>::iterator fn_i;
     std::string arg, opt, value;
 
     for(int i = 1; i < argc; i++) {
@@ -244,6 +290,13 @@ Config::_parseArgs(int argc,
             }
 
             opt = short_i->second;
+        }
+
+        // check if its a function, and if so, call the function
+        fn_i  = _fnOptMap.find(opt);
+        if(fn_i != _fnOptMap.end()) {
+            (*(fn_i->second))();
+            continue;
         }
 
         // make sure we've got a value
@@ -288,12 +341,7 @@ Config::parse(int argc,
     }
 
     // parse the arguments
-    error = _parseArgs(argc, argv);
-    if(error) {
-        return error;
-    }
-
-    return 0;
+    return _parseArgs(argc, argv);
 }
 
 
