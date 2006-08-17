@@ -371,6 +371,10 @@ Config::_load()
     try {
         // open the file for reading (create if it doesn't exist)
         config.open(configFile.c_str(), std::ios::in | std::ios::out);
+        if(!config.is_open()) {
+            // XXX file couldn't be opened?
+            return -1;
+        }
 
         while(!config.eof()) {
             // read a line
