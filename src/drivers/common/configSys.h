@@ -39,6 +39,8 @@ public:
                   const std::string &, const std::string &);
     int addOption(char, const std::string &,
                   const std::string &, void (*)(void));
+    int addOption(const std::string &, const std::string &);
+    int addOption(const std::string &, int);
 
     /**
      * Sets a configuration option.  Can be called at any time.

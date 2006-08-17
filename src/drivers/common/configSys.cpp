@@ -129,6 +129,31 @@ Config::addOption(char shortArg,
     return 0;
 }
 
+int
+Config::addOption(const std::string &name,
+                  const std::string &defaultValue)
+{
+    if(_strOptMap.find(name) != _strOptMap.end()) {
+        return -1;
+    }
+
+    // add the option
+    _strOptMap[name] = defaultValue;
+    return 0;
+}
+
+int
+Config::addOption(const std::string &name,
+                  int defaultValue)
+{
+    if(_intOptMap.find(name) != _intOptMap.end()) {
+        return -1;
+    }
+
+    // add the option
+    _intOptMap[name] = defaultValue;
+    return 0;
+}
 
 /**
  * Sets the specified option to the given integer value.
