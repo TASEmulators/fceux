@@ -1,3 +1,6 @@
+#ifndef NSF_H
+#define NSF_H
+
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
@@ -46,3 +49,5 @@ extern NSF_HEADER NSFHeader; //mbg merge 6/29/06
 void NSFDealloc(void);
 void NSFDodo(void);
 void DoNSFFrame(void);
+
+#endif
