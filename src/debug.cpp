@@ -11,6 +11,161 @@
 #include "ppu.h"
 
 #include <stdlib.h>
+#include <string.h>
+
+int offsetStringToInt(unsigned int type, const char* offsetBuffer)
+{
+	int offset = 0;
+
+	if (sscanf(offsetBuffer,"%4X",&offset) == EOF)
+	{
+		return -1;
+	}
+
+	if (type & PPU_BREAKPOINT)
+	{
+		return offset & 0x3FFF;
+	}
+	else if (type & SPRITE_BREAKPOINT)
+	{
+		return offset & 0x00FF;
+	}
+	else // CPU_BREAKPOINTS
+	{
+		if (GI->type == GIT_NSF) { //NSF Breakpoint keywords
+			if (strcmp(offsetBuffer,"LOAD") == 0) return (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
+			if (strcmp(offsetBuffer,"INIT") == 0) return (NSFHeader.InitAddressLow | (NSFHeader.InitAddressHigh<<8));
+			if (strcmp(offsetBuffer,"PLAY") == 0) return (NSFHeader.PlayAddressLow | (NSFHeader.PlayAddressHigh<<8));
+		}
+		else if (GI->type == GIT_FDS) { //FDS Breakpoint keywords
+			if (strcmp(offsetBuffer,"NMI1") == 0) return (GetMem(0xDFF6) | (GetMem(0xDFF7)<<8));
+			if (strcmp(offsetBuffer,"NMI2") == 0) return (GetMem(0xDFF8) | (GetMem(0xDFF9)<<8));
+			if (strcmp(offsetBuffer,"NMI3") == 0) return (GetMem(0xDFFA) | (GetMem(0xDFFB)<<8));
+			if (strcmp(offsetBuffer,"RST") == 0) return (GetMem(0xDFFC) | (GetMem(0xDFFD)<<8));
+			if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) return (GetMem(0xDFFE) | (GetMem(0xDFFF)<<8));
+		}
+		else { //NES Breakpoint keywords
+			if ((strcmp(offsetBuffer,"NMI") == 0) || (strcmp(offsetBuffer,"VBL") == 0)) return (GetMem(0xFFFA) | (GetMem(0xFFFB)<<8));
+			if (strcmp(offsetBuffer,"RST") == 0) return (GetMem(0xFFFC) | (GetMem(0xFFFD)<<8));
+			if ((strcmp(offsetBuffer,"IRQ") == 0) || (strcmp(offsetBuffer,"BRK") == 0)) return (GetMem(0xFFFE) | (GetMem(0xFFFF)<<8));
+		}
+	}
+
+	return offset;
+}
+
+/**
+* Checks whether a breakpoint condition is syntactically valid
+* and creates a breakpoint condition object if everything's OK.
+*
+* @param condition Condition to parse
+* @param num Number of the breakpoint in the BP list the condition belongs to
+* @return 0 in case of an error; 2 if everything went fine
+**/
+int checkCondition(const char* condition, int num)
+{
+	const char* b = condition;
+	
+	// Check if the condition isn't just all spaces.
+	
+	int onlySpaces = 1;
+	
+	while (*b)
+	{
+		if (*b != ' ')
+		{
+			onlySpaces = 0;
+			break;
+		}
+		
+		++b;
+	}
+	
+	// Remove the old breakpoint condition before
+	// adding a new condition.
+	
+	if (watchpoint[num].cond)
+	{
+		freeTree(watchpoint[num].cond);
+		free(watchpoint[num].condText);
+		
+		watchpoint[num].cond = 0;
+		watchpoint[num].condText = 0;
+	}
+			
+	// If there's an actual condition create the BP condition object now
+	
+	if (*condition && !onlySpaces)
+	{
+		Condition* c = generateCondition(condition);
+		
+		// If the creation of the BP condition object was succesful
+		// the condition is apparently valid. It can be added to the
+		// breakpoint now.
+		
+		if (c)
+		{
+			watchpoint[num].cond = c;
+			watchpoint[num].condText = (char*)malloc(strlen(condition) + 1);
+			strcpy(watchpoint[num].condText, condition);
+		}
+		else
+		{
+			watchpoint[num].cond = 0;
+		}
+		
+		return watchpoint[num].cond == 0 ? 2 : 0;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+/**
+* Adds a new breakpoint.
+*
+* @param hwndDlg Handle of the debugger window
+* @param num Number of the breakpoint
+* @param 
+**/
+unsigned int NewBreak(const char* name, int start, int end, unsigned int type, const char* condition, unsigned int num, bool enable)
+{
+	unsigned int brk=0;
+
+	// Finally add breakpoint to the list
+	watchpoint[num].address = start;
+	watchpoint[num].endaddress = 0;
+
+	// Optional end address found
+	if (end != -1)
+	{
+		watchpoint[num].endaddress = end;
+	}
+
+	// Get the breakpoint flags
+	watchpoint[num].flags = 0;
+	if (enable) watchpoint[num].flags|=WP_E;
+	if (type & READ_BREAKPOINT) watchpoint[num].flags|=WP_R;
+	if (type & WRITE_BREAKPOINT) watchpoint[num].flags|=WP_W;
+	if (type & EXECUTE_BREAKPOINT) watchpoint[num].flags|=WP_X;
+	if (type & PPU_BREAKPOINT) {
+		watchpoint[num].flags|=BT_P;
+		watchpoint[num].flags&=~WP_X; //disable execute flag!
+	}
+	if (type & SPRITE_BREAKPOINT) {
+		watchpoint[num].flags|=BT_S;
+		watchpoint[num].flags&=~WP_X; //disable execute flag!
+	}
+
+	if (watchpoint[num].desc)
+		free(watchpoint[num].desc);
+
+	watchpoint[num].desc = (char*)malloc(strlen(name) + 1);
+	strcpy(watchpoint[num].desc, name);
+	
+	return checkCondition(condition, num);
+}
 
 int GetPRGAddress(int A){
 	unsigned int result;

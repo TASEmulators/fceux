@@ -2,6 +2,8 @@
 #define _DEBUG_H_
 
 #include "conddebug.h"
+#include "git.h"
+#include "nsf.h"
 
 //watchpoint stuffs
 #define WP_E       0x01  //watchpoint, enable
@@ -114,7 +116,20 @@ public:
 	}
 };
 
+extern FCEUGI *GI;
+extern NSF_HEADER NSFHeader;
+
 ///retrieves the core's DebuggerState
 DebuggerState &FCEUI_Debugger();
+
+#define CPU_BREAKPOINT 1
+#define PPU_BREAKPOINT 2
+#define SPRITE_BREAKPOINT 4
+#define READ_BREAKPOINT 8
+#define WRITE_BREAKPOINT 16
+#define EXECUTE_BREAKPOINT 32
+
+int offsetStringToInt(unsigned int type, const char* offsetBuffer);
+unsigned int NewBreak(const char* name, int start, int end, unsigned int type, const char* condition, unsigned int num, bool enable);
 
 #endif
