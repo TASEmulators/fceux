@@ -5,6 +5,14 @@
 #include <windows.h>
 //#include "debug.h"
 
+// TODO: Maybe change breakpoint array to std::vector
+// Maximum number of breakpoints supported
+#define MAXIMUM_NUMBER_OF_BREAKPOINTS 64
+
+// Return values for AddBreak
+#define TOO_MANY_BREAKPOINTS 1
+#define INVALID_BREAKPOINT_CONDITION 3
+
 //extern volatile int userpause; //mbg merge 7/18/06 removed for merging
 extern int scanline; //current scanline! :D
 extern HWND hDebug;

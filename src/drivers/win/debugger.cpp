@@ -92,87 +92,110 @@ void CenterWindow(HWND hwndDlg) {
     MoveWindow(hwndDlg, x, y, width, height, FALSE);
 }
 
-int NewBreak(HWND hwndDlg, int num, int enable) {
-	unsigned int brk=0,ppu=0,sprite=0;
-	char str[5];
-	char buffer[201];
+#define START_OFFSET_HANDLE 200
+#define END_OFFSET_HANDLE 201
+#define READ_BREAKPOINT_HANDLE 102
+#define WRITE_BREAKPOINT_HANDLE 103
+#define EXECUTE_BREAKPOINT_HANDLE 104
+#define CPU_BREAKPOINT_HANDLE 105
+#define PPU_BREAKPOINT_HANDLE 106
+#define SPRITE_BREAKPOINT_HANDLE 107
 
-	GetDlgItemText(hwndDlg,200,str,5);
-	if (IsDlgButtonChecked(hwndDlg,106) == BST_CHECKED) ppu = 1;
-	else if (IsDlgButtonChecked(hwndDlg,107) == BST_CHECKED) sprite = 1;
-	if ((!ppu) && (!sprite)) {
-		if (GI->type == GIT_NSF) { //NSF Breakpoint keywords
-			if (strcmp(str,"LOAD") == 0) brk = (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
-			if (strcmp(str,"INIT") == 0) brk = (NSFHeader.InitAddressLow | (NSFHeader.InitAddressHigh<<8));
-			if (strcmp(str,"PLAY") == 0) brk = (NSFHeader.PlayAddressLow | (NSFHeader.PlayAddressHigh<<8));
-		}
-		else if (GI->type == GIT_FDS) { //FDS Breakpoint keywords
-			if (strcmp(str,"NMI1") == 0) brk = (GetMem(0xDFF6) | (GetMem(0xDFF7)<<8));
-			if (strcmp(str,"NMI2") == 0) brk = (GetMem(0xDFF8) | (GetMem(0xDFF9)<<8));
-			if (strcmp(str,"NMI3") == 0) brk = (GetMem(0xDFFA) | (GetMem(0xDFFB)<<8));
-			if (strcmp(str,"RST") == 0) brk = (GetMem(0xDFFC) | (GetMem(0xDFFD)<<8));
-			if ((strcmp(str,"IRQ") == 0) || (strcmp(str,"BRK") == 0)) brk = (GetMem(0xDFFE) | (GetMem(0xDFFF)<<8));
-		}
-		else { //NES Breakpoint keywords
-			if ((strcmp(str,"NMI") == 0) || (strcmp(str,"VBL") == 0)) brk = (GetMem(0xFFFA) | (GetMem(0xFFFB)<<8));
-			if (strcmp(str,"RST") == 0) brk = (GetMem(0xFFFC) | (GetMem(0xFFFD)<<8));
-			if ((strcmp(str,"IRQ") == 0) || (strcmp(str,"BRK") == 0)) brk = (GetMem(0xFFFE) | (GetMem(0xFFFF)<<8));
-		}
+#define INVALID_START_OFFSET 1
+#define INVALID_END_OFFSET 2
+
+#define MAX_NAME_SIZE 200
+#define MAX_CONDITION_SIZE 200
+#define CONDITION_HANDLE 202
+#define NAME_HANDLE 203
+
+unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
+{
+	char startOffsetBuffer[5] = {0};
+	char endOffsetBuffer[5] = {0};
+	unsigned int type = 0;
+
+	GetDlgItemText(hwndDlg, START_OFFSET_HANDLE, startOffsetBuffer, sizeof(startOffsetBuffer));
+	GetDlgItemText(hwndDlg, END_OFFSET_HANDLE, endOffsetBuffer, sizeof(endOffsetBuffer));
+
+	if (IsDlgButtonChecked(hwndDlg, CPU_BREAKPOINT_HANDLE))
+	{
+		type |= CPU_BREAKPOINT;
 	}
-	if ((brk == 0) && (sscanf(str,"%4X",&brk) == EOF)) return 1;
-	if (ppu) brk &= 0x3FFF;
-	if (sprite) brk &= 0x00FF;
-	watchpoint[num].address = brk;
-
-	watchpoint[num].endaddress = 0;
-	GetDlgItemText(hwndDlg,201,str,5);
-	sscanf(str,"%4X",&brk);
-	if (ppu) brk &= 0x3FFF;
-	if (sprite) brk &= 0x00FF;
-	if ((brk != 0) && (watchpoint[num].address < brk)) watchpoint[num].endaddress = brk;
-
-	watchpoint[num].flags = 0;
-	if (enable) watchpoint[num].flags|=WP_E;
-	if (IsDlgButtonChecked(hwndDlg,102) == BST_CHECKED) watchpoint[num].flags|=WP_R;
-	if (IsDlgButtonChecked(hwndDlg,103) == BST_CHECKED) watchpoint[num].flags|=WP_W;
-	if (IsDlgButtonChecked(hwndDlg,104) == BST_CHECKED) watchpoint[num].flags|=WP_X;
-	if (ppu) {
-		watchpoint[num].flags|=BT_P;
-		watchpoint[num].flags&=~WP_X; //disable execute flag!
+	else if (IsDlgButtonChecked(hwndDlg, PPU_BREAKPOINT_HANDLE))
+	{
+		type |= PPU_BREAKPOINT;
 	}
-	if (sprite) {
-		watchpoint[num].flags|=BT_S;
-		watchpoint[num].flags&=~WP_X; //disable execute flag!
+	else
+	{
+		type |= SPRITE_BREAKPOINT;
 	}
 
-// ################################## Start of SP CODE ###########################
+	if (IsDlgButtonChecked(hwndDlg, READ_BREAKPOINT_HANDLE))
+	{
+		type |= READ_BREAKPOINT;
+	}
 
-	buffer[200] = 0;
-	GetDlgItemText(hwndDlg, 203, buffer, 200);
-	
-	if (watchpoint[num].desc)
-		free(watchpoint[num].desc);
+	if (IsDlgButtonChecked(hwndDlg, WRITE_BREAKPOINT_HANDLE))
+	{
+		type |= WRITE_BREAKPOINT;
+	}
 
-	watchpoint[num].desc = (char*)malloc(strlen(buffer));
-	strcpy(watchpoint[num].desc, buffer);
+	if (IsDlgButtonChecked(hwndDlg, EXECUTE_BREAKPOINT_HANDLE))
+	{
+		type |= EXECUTE_BREAKPOINT;
+	}
+
+	int start = offsetStringToInt(type, startOffsetBuffer);
+
+	if (start == -1)
+	{
+		return INVALID_START_OFFSET;
+	}
+
+	int end = offsetStringToInt(type, endOffsetBuffer);
+
+	if (*endOffsetBuffer && end == -1)
+	{
+		return INVALID_END_OFFSET;
+	}
+
+	// Handle breakpoint conditions
+	char name[MAX_NAME_SIZE] = {0};
+	GetDlgItemText(hwndDlg, NAME_HANDLE, name, MAX_NAME_SIZE);
 	
-	GetDlgItemText(hwndDlg, 202, buffer, 200);
-	
-	return checkCondition(buffer, num);
-	
-// ################################## End of SP CODE ###########################
+	char condition[MAX_CONDITION_SIZE] = {0};
+	GetDlgItemText(hwndDlg, CONDITION_HANDLE, condition, MAX_CONDITION_SIZE);
+
+	return NewBreak(name, start, end, type, condition, num, enable);
 }
 
-int AddBreak(HWND hwndDlg) {
-	int val;
-	if (numWPs == 64) return 1;
-	val = NewBreak(hwndDlg,numWPs,1);
-	if (val == 1) return 2;
-	else if (val == 2) return 3;
+/**
+* Adds a new breakpoint to the breakpoint list
+*
+* @param hwndDlg Handle of the debugger window
+* @return 0 (success), 1 (Too many breakpoints), 2 (???), 3 (Invalid breakpoint condition)
+**/
+unsigned int AddBreak(HWND hwndDlg)
+{
+	if (numWPs == MAXIMUM_NUMBER_OF_BREAKPOINTS)
+	{
+		return TOO_MANY_BREAKPOINTS;
+	}
+
+	unsigned val = NewBreakWindows(hwndDlg,numWPs,1);
+	
+	if (val == 1)
+	{
+		return 2;
+	}
+	else if (val == 2)
+	{
+		return INVALID_BREAKPOINT_CONDITION;
+	}
+
 	numWPs++;
-// ################################## Start of SP CODE ###########################
 	myNumWPs++;
-// ################################## End of SP CODE ###########################
 	return 0;
 }
 
@@ -242,8 +265,8 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					switch(LOWORD(wParam)) {
 						case 100:
 							if (WP_edit >= 0) {
-								int tmp = NewBreak(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
-								if (tmp == 2)
+								int tmp = NewBreakWindows(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
+								if (tmp == INVALID_BREAKPOINT_CONDITION)
 								{
 									MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
 									break;
@@ -251,12 +274,12 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 								EndDialog(hwndDlg,1);
 								break;
 							}
-							if ((tmp=AddBreak(hwndDlg)) == 1) {
+							if ((tmp=AddBreak(hwndDlg)) == TOO_MANY_BREAKPOINTS) {
 								MessageBox(hwndDlg, "Too many breakpoints, please delete one and try again", "Breakpoint Error", MB_OK);
 								goto endaddbrk;
 							}
 							if (tmp == 2) goto endaddbrk;
-							else if (tmp == 3)
+							else if (tmp == INVALID_BREAKPOINT_CONDITION)
 							{
 								MessageBox(hwndDlg, "Invalid breakpoint condition", "Error", MB_OK);
 								break;

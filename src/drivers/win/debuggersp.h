@@ -34,7 +34,7 @@ extern unsigned int bookmarks;
 extern unsigned short* bookmarkData;
 extern int debuggerWasActive;
 
-int checkCondition(char* buffer, int num);
+int checkCondition(const char* buffer, int num);
 void loadNameFiles();
 void decorateAddress(unsigned int addr, char* str, const char* chr, UINT);
 void replaceNames(Name* list, char* str);
