@@ -73,8 +73,6 @@ HINSTANCE fceu_hInstance;
 
 HRESULT  ddrval;
 
-FCEUGI *GI=0;
-
 // cheats, misc, nonvol, states, snaps, ..., base
 static char *DOvers[6]={0,0,0,0,0,0};
 static char *defaultds[5]={"cheats","sav","fcs","snaps","movie"};
@@ -486,9 +484,9 @@ int main(int argc,char *argv[])
 
 doloopy:
 	UpdateFCEUWindow();  
-	if(GI)
+	if(GameInfo)
 	{
-		while(GI)
+		while(GameInfo)
 		{
 	        uint8 *gfx=0;
 			int32 *sound=0;
@@ -507,7 +505,7 @@ doloopy:
 			 if(closeGame)
 			 {
 				FCEUI_CloseGame();
-				GI = 0;
+				GameInfo = 0;
 			 }
 
 			

@@ -154,7 +154,7 @@ void MovieFlushHeader(void)
 	write32le(rerecord_count, fp);
 	write32le(frameptr, fp);
 	fseek(fp, 32, SEEK_SET);
-	fwrite(FCEUGameInfo->MD5, 1, 16, fp);	// write ROM checksum
+	fwrite(GameInfo->MD5, 1, 16, fp);	// write ROM checksum
 	write32le(FCEU_VERSION_NUMERIC, fp);	// write emu version used
 
 	// write ROM name used
@@ -356,10 +356,10 @@ static void ResetInputTypes()
  UsrInputType[1] = SI_GAMEPAD;
  UsrInputType[2] = SIFC_NONE;
 
- ParseGIInput(NULL/*FCEUGameInfo*/);
+ ParseGIInput(NULL/*GameInfo*/);
  extern int cspec, gametype;
- cspec=FCEUGameInfo->cspecial;
- gametype=FCEUGameInfo->type;
+ cspec=GameInfo->cspecial;
+ gametype=GameInfo->type;
 
  InitOtherInput();
 #endif
@@ -564,7 +564,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
  write32le(0, fp);                  // leave room for movie data size
  write32le(0, fp);                  // leave room for savestate_offset
  write32le(0, fp);                  // leave room for offset_to_controller_data
- fwrite(FCEUGameInfo->MD5, 1, 16, fp);	// write ROM checksum
+ fwrite(GameInfo->MD5, 1, 16, fp);	// write ROM checksum
  write32le(FCEU_VERSION_NUMERIC, fp);	// write emu version used
  fputs(FileBase, fp);					// write ROM name used
  fputc(0, fp);

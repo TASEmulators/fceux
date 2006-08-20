@@ -584,11 +584,11 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 void DoNTView() {
-	if (!GI) {
+	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Name Table Viewer.");
 		return;
 	}
-	if (GI->type==GIT_NSF) {
+	if (GameInfo->type==GIT_NSF) {
 		FCEUD_PrintError("Sorry, you can't use the Name Table Viewer with NSFs.");
 		return;
 	}

@@ -129,7 +129,7 @@ void FCEU_PutImageDummy(void)
  #ifdef SHOWFPS
  ShowFPS();
  #endif
- if(FCEUGameInfo->type!=GIT_NSF)
+ if(GameInfo->type!=GIT_NSF)
  {
   FCEU_DrawNTSCControlBars(XBuf);
   FCEU_DrawSaveStates(XBuf);
@@ -186,7 +186,7 @@ void FCEU_PutImage(void)
 			DrawMessage();
 		 }
 */
-        if(FCEUGameInfo->type==GIT_NSF)
+        if(GameInfo->type==GIT_NSF)
         {
          DrawNSF(XBuf);
          /* Save snapshot after NSF screen is drawn.  Why would we want to
@@ -212,7 +212,7 @@ void FCEU_PutImage(void)
           ReallySnap();
           dosnapsave=0;
          }
-         if(FCEUGameInfo->type==GIT_VSUNI)
+         if(GameInfo->type==GIT_VSUNI)
           FCEU_VSUniDraw(XBuf);
 		 FCEU_DrawSaveStates(XBuf);
 		 FCEU_DrawMovies(XBuf);

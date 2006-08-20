@@ -291,7 +291,7 @@ static DECLFR(Mapper157_read)
 
 void Mapper157_init(void)
 {
- FCEUGameInfo->cspecial = SIS_DATACH;
+ GameInfo->cspecial = SIS_DATACH;
  MapIRQHook=BarcodeIRQHook;
  SetWriteHandler(0x6000,0xFFFF,Mapper16_write);
  SetReadHandler(0x6000,0x7FFF,Mapper157_read);

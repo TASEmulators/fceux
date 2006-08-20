@@ -15,6 +15,7 @@
 #include "config.h"
 
 #include "../common/cheat.h"
+#include "../../fceu.h"
 
 #include "input.h"
 #include "dface.h"
@@ -45,9 +46,6 @@ int eoptions=0;
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
-
-FCEUGI *CurGame=NULL;
-
 
 /**
  * Prints an error string to STDOUT.
@@ -121,17 +119,14 @@ CloseStuff(int signum)
  */
 int LoadGame(const char *path)
 {
-    FCEUGI *tmp;
-
     CloseGame();
-    if(!(tmp = FCEUI_LoadGame(path, 1))) {
+    if(!FCEUI_LoadGame(path, 1)) {
         return 0;
     }
-    CurGame = tmp;
-    ParseGIInput(tmp);
+    ParseGIInput(GameInfo);
     RefreshThrottleFPS();
 
-    if(!DriverInitialize(tmp)) {
+    if(!DriverInitialize(GameInfo)) {
         return(0);
     }
     if(soundrecfn) {
@@ -158,7 +153,7 @@ CloseGame()
     FCEUI_CloseGame();
     DriverKill();
     isloaded = 0;
-    CurGame = 0;
+    GameInfo = 0;
 
     if(soundrecfn) {
         FCEUI_EndWaveRecord();
@@ -410,7 +405,7 @@ main(int argc,
     }
 
     // loop playing the game
-    while(CurGame) {
+    while(GameInfo) {
         DoFun();
     }
     CloseGame();

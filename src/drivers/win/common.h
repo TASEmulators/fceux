@@ -26,7 +26,6 @@ extern HWND hAppWnd;
 extern HINSTANCE fceu_hInstance;
 
 extern int NoWaiting;
-extern FCEUGI *GI;
 void DSMFix(UINT msg);
 void StopSound(void);
 

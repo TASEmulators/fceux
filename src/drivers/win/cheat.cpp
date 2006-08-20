@@ -488,11 +488,11 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 
 void ConfigCheats(HWND hParent) {
-	if (!GI) {
+	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can manipulate cheats.");
 		return;
 	}
-	if (GI->type==GIT_NSF) {
+	if (GameInfo->type==GIT_NSF) {
 		FCEUD_PrintError("Sorry, you can't cheat with NSFs.");
 		return;
 	}

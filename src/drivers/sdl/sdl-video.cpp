@@ -28,6 +28,7 @@
 #include "sdl.h"
 #include "sdl-opengl.h"
 #include "../common/vidblit.h"
+#include "../../fceu.h"
 
 #include "sdl-icon.h"
 #include "dface.h"
@@ -322,7 +323,6 @@ void
 ToggleFS()
 {
     int error;
-    extern FCEUGI *CurGame;
 
     // shut down the current video system
     KillVideo();
@@ -331,11 +331,11 @@ ToggleFS()
     _fullscreen = !_fullscreen;
 
     // try to initialize the video
-    error = InitVideo(CurGame);
+    error = InitVideo(GameInfo);
     if(error) {
         // if we fail, just continue with what worked before
         _fullscreen = !_fullscreen;
-        InitVideo(CurGame);
+        InitVideo(GameInfo);
     }
 }
 

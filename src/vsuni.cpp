@@ -337,9 +337,9 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring)
    //puts(vs->name);
    *MapperNo = vs->mapper;
    *Mirroring = vs->mirroring;
-   FCEUGameInfo->type = GIT_VSUNI;
-   FCEUGameInfo->cspecial = SIS_VSUNISYSTEM;
-   FCEUGameInfo->inputfc = SIFC_NONE;
+   GameInfo->type = GIT_VSUNI;
+   GameInfo->cspecial = SIS_VSUNISYSTEM;
+   GameInfo->inputfc = SIFC_NONE;
    curppu = vs->ppu;
    curmd5 = md5partial;
 
@@ -360,12 +360,12 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring)
    }
    if(vs->ioption & IOPTION_GUN)
    {
-    FCEUGameInfo->input[0] = SI_ZAPPER;
-    FCEUGameInfo->input[1] = SI_NONE;
+    GameInfo->input[0] = SI_ZAPPER;
+    GameInfo->input[1] = SI_NONE;
    }
    else
    {
-    FCEUGameInfo->input[0] = FCEUGameInfo->input[1] = SI_GAMEPAD;
+    GameInfo->input[0] = GameInfo->input[1] = SI_GAMEPAD;
    }
    curvs = vs;
    return;

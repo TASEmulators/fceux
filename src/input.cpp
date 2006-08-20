@@ -268,7 +268,7 @@ void FCEU_UpdateInput(void)
 				FCExp->Update(InputDataPtrFC,JPAttribFC);
 	}
 
-	if(FCEUGameInfo->type==GIT_VSUNI)
+	if(GameInfo->type==GIT_VSUNI)
 		if(coinon) coinon--;
 
 	if(FCEUnetplay)
@@ -276,7 +276,7 @@ void FCEU_UpdateInput(void)
 
 	FCEUMOV_AddJoy(joy, BotMode);
 
-	if(FCEUGameInfo->type==GIT_VSUNI)
+	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
 }
 
@@ -330,7 +330,7 @@ static void FASTAPASS(1) SetInputStuff(int x)
  	 switch(JPType[x])
 	 {
 	  case SI_GAMEPAD:
-           if(FCEUGameInfo->type==GIT_VSUNI)
+           if(GameInfo->type==GIT_VSUNI)
 	    JPorts[x] = &GPCVS;
 	   else
 	    JPorts[x]=&GPC;
@@ -391,7 +391,7 @@ void InitializeInput(void)
         memset(joy,0,sizeof(joy));
 	LastStrobe = 0;
 
-        if(FCEUGameInfo->type==GIT_VSUNI)
+        if(GameInfo->type==GIT_VSUNI)
         {
          SetReadHandler(0x4016,0x4016,VSUNIRead0);
          SetReadHandler(0x4017,0x4017,VSUNIRead1);
@@ -678,7 +678,7 @@ static void CommandUnImpl(void)
 
 static void CommandToggleDip(void)
 {
-	if (FCEUGameInfo->type==GIT_VSUNI)
+	if (GameInfo->type==GIT_VSUNI)
 		FCEUI_VSUniToggleDIP(execcmd-EMUCMD_VSUNI_TOGGLE_DIP_0);
 }
 

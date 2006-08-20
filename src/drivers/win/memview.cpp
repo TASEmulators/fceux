@@ -685,7 +685,7 @@ void InputData(char *input){
 void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset){
 	SCROLLINFO si;
 	
-	if (GI->type==GIT_NSF) {
+	if (GameInfo->type==GIT_NSF) {
 		FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
 		return;
 	}
@@ -1469,11 +1469,11 @@ void DoMemView() {
 	WNDCLASSEX     wndclass ;
 	//static RECT al;
 
-	if (!GI) {
+	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Memory Viewer.");
 		return;
 	}
-	if (GI->type==GIT_NSF) {
+	if (GameInfo->type==GIT_NSF) {
 		FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
 		return;
 	}

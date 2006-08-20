@@ -211,11 +211,11 @@ void SaveCDLogFile(){ //todo make this button work before you've saved as
 }
 
 void DoCDLogger(){
-	if (!GI) {
+	if (!GameInfo) {
 		FCEUD_PrintError("You must have a game loaded before you can use the Code Data Logger.");
 		return;
 	}
-	if (GI->type==GIT_NSF) { //todo: NSF support!
+	if (GameInfo->type==GIT_NSF) { //todo: NSF support!
 		FCEUD_PrintError("Sorry, you can't yet use the Code Data Logger with NSFs.");
 		return;
 	}

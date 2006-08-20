@@ -154,10 +154,10 @@ static int NAME(FCEUFILE *fp)
  namebuf[index]=0;
  FCEU_printf("%s\n",namebuf);
 
- if(!FCEUGameInfo->name)
+ if(!GameInfo->name)
  {
-  FCEUGameInfo->name=(uint8*)malloc(strlen(namebuf)+1); //mbg merge 7/17/06 added cast
-  strcpy((char*)FCEUGameInfo->name,namebuf); //mbg merge 7/17/06 added cast
+  GameInfo->name=(uint8*)malloc(strlen(namebuf)+1); //mbg merge 7/17/06 added cast
+  strcpy((char*)GameInfo->name,namebuf); //mbg merge 7/17/06 added cast
  }
  return(1);
 }
@@ -201,11 +201,11 @@ static int CTRL(FCEUFILE *fp)
     better than nothing...maybe.
  */
 
- if(t&1) FCEUGameInfo->input[0]=FCEUGameInfo->input[1]=SI_GAMEPAD;
- else FCEUGameInfo->input[0]=FCEUGameInfo->input[1]=SI_NONE;
+ if(t&1) GameInfo->input[0]=GameInfo->input[1]=SI_GAMEPAD;
+ else GameInfo->input[0]=GameInfo->input[1]=SI_NONE;
 
- if(t&2) FCEUGameInfo->input[1]=SI_ZAPPER;
- //else if(t&0x10) FCEUGameInfo->input[1]=SI_POWERPAD;
+ if(t&2) GameInfo->input[1]=SI_ZAPPER;
+ //else if(t&0x10) GameInfo->input[1]=SI_POWERPAD;
 
  return(1);
 }
@@ -220,12 +220,12 @@ static int TVCI(FCEUFILE *fp)
   char *stuffo[3]={"NTSC","PAL","NTSC and PAL"};
   if(t==0)
   {
-   FCEUGameInfo->vidsys=GIV_NTSC;
+   GameInfo->vidsys=GIV_NTSC;
    FCEUI_SetVidSystem(0);
   }
   else if(t==1)
   {
-   FCEUGameInfo->vidsys=GIV_PAL;
+   GameInfo->vidsys=GIV_PAL;
    FCEUI_SetVidSystem(1);
   }
   FCEU_printf(" TV Standard Compatibility: %s\n",stuffo[t]);
@@ -555,7 +555,7 @@ int UNIFLoad(const char *name, FCEUFILE *fp)
           for(x=0;x<16;x++)
            FCEU_printf("%02x",UNIFCart.MD5[x]);
           FCEU_printf("\n");
-	  memcpy(FCEUGameInfo->MD5,UNIFCart.MD5,sizeof(UNIFCart.MD5));
+	  memcpy(GameInfo->MD5,UNIFCart.MD5,sizeof(UNIFCart.MD5));
 	}
 
         if(!InitializeBoard())

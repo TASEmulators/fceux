@@ -57,7 +57,7 @@ extern void (*GameStateRestore)(int version);
 #define GI_CLOSE	3
 
 #include "git.h"
-extern FCEUGI *FCEUGameInfo;
+extern FCEUGI *GameInfo;
 extern int GameAttributes;
 
 extern uint8 PAL;

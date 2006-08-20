@@ -974,7 +974,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 
 	//these messages only get handled when a game is loaded
-	if (GI) {
+	if (GameInfo) {
 		switch(uMsg) {
 			case WM_VSCROLL:
 				//mbg merge 7/18/06 changed pausing check
@@ -1354,6 +1354,6 @@ void DoDebug(uint8 halt) {
 	if (!debugger_open) hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
 	if (hDebug) {
 		SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-		if (GI) UpdateDebugger();
+		if (GameInfo) UpdateDebugger();
 	}
 }

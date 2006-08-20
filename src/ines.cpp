@@ -260,9 +260,9 @@ static void SetInput(void)
  {
   if(moo[x].crc32==iNESGameCRC32)
   {
-   FCEUGameInfo->input[0]=moo[x].input1;
-   FCEUGameInfo->input[1]=moo[x].input2;
-   FCEUGameInfo->inputfc=moo[x].inputfc;
+   GameInfo->input[0]=moo[x].input1;
+   GameInfo->input[1]=moo[x].input2;
+   GameInfo->inputfc=moo[x].inputfc;
    break;
   }
   x++;
@@ -630,7 +630,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
          md5_update(&md5,VROM,VROM_size<<13);
 	}
 	md5_finish(&md5,iNESCart.MD5);
-	memcpy(FCEUGameInfo->MD5,iNESCart.MD5,sizeof(iNESCart.MD5));
+	memcpy(GameInfo->MD5,iNESCart.MD5,sizeof(iNESCart.MD5));
 
 	iNESCart.CRC32=iNESGameCRC32;
 
@@ -725,7 +725,7 @@ int iNesSave(){
 	FILE *fp;
 	char name[2048];
 
-	if(FCEUGameInfo->type != GIT_CART)return 0;
+	if(GameInfo->type != GIT_CART)return 0;
 	if(GameInterface!=iNESGI)return 0;
 
 	strcpy(name,LoadedRomFName);
@@ -1207,7 +1207,7 @@ static void iNESPower(void)
 	NONE_init();
 	ResetExState(0,0);
 
-	if(FCEUGameInfo->type == GIT_VSUNI)
+	if(GameInfo->type == GIT_VSUNI)
 		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
 	AddExState(WRAM, 8192, 0, "WRAM");
@@ -1425,7 +1425,7 @@ static int NewiNES_Init(int num)
 {
  BMAPPING *tmp=bmap;
 
- if(FCEUGameInfo->type == GIT_VSUNI)
+ if(GameInfo->type == GIT_VSUNI)
   AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
  while(tmp->init)

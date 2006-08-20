@@ -602,7 +602,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 if(which < FCEUIOD__COUNT)
  odirs[which]=n;
 
- if(FCEUGameInfo)  /* Rebuild cache of present states/movies. */
+ if(GameInfo)  /* Rebuild cache of present states/movies. */
  {
   if(which==FCEUIOD_STATE)
    FCEUSS_CheckStates();

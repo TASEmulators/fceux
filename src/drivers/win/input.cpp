@@ -65,7 +65,7 @@ static int screenmode=0;
 void InputScreenChanged(int fs)
 {
  int x;
- if(GI)
+ if(GameInfo)
  {
   for(x=0;x<2;x++)
    if(InputType[x]==SI_ZAPPER)
@@ -1181,7 +1181,7 @@ static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 void ConfigInput(HWND hParent)
 {
   DialogBox(fceu_hInstance,"INPUTCONFIG",hParent,InputConCallB);
-  if(GI)
+  if(GameInfo)
    InitOtherInput();
 }
 

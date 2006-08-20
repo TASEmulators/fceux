@@ -27,6 +27,7 @@
 #include "sdl-video.h"
 
 #include "../common/cheat.h"
+#include "../../fceu.h"
 
 /** GLOBALS **/
 int NoWaiting=1;
@@ -106,7 +107,7 @@ DoCheatSeq()
     KillVideo();
 
     DoConsoleCheatConfig();
-    InitVideo(CurGame);
+    InitVideo(GameInfo);
     SilenceSound(0);
 }
 
@@ -445,7 +446,7 @@ ButtonConfigBegin()
 static void
 ButtonConfigEnd()
 { 
-    extern FCEUGI *CurGame;
+    extern FCEUGI *GameInfo;
 
     // shutdown the joystick and video subsystems
     KillJoysticks();
@@ -453,7 +454,7 @@ ButtonConfigEnd()
 
     // re-initialize joystick and video subsystems if they were active before
     if(!bcpv) {
-        InitVideo(CurGame);
+        InitVideo(GameInfo);
     }
     if(!bcpj) {
         InitJoysticks();

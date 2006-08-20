@@ -1282,7 +1282,7 @@ int FCEUPPU_Loop(int skip)
                                    of this delay. 
                                 */
    X6502_Run(12);
-   if(FCEUGameInfo->type==GIT_NSF)
+   if(GameInfo->type==GIT_NSF)
     DoNSFFrame();
    else
    {
@@ -1319,7 +1319,7 @@ int FCEUPPU_Loop(int skip)
     X6502_Run(16-kook);
     kook ^= 1;
    }
-   if(FCEUGameInfo->type==GIT_NSF)
+   if(GameInfo->type==GIT_NSF)
     X6502_Run((256+85)*240);
    #ifdef FRAMESKIP
    else if(skip)

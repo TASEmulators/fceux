@@ -3,8 +3,6 @@
 
 #include "input.h"
 
-extern FCEUGI *CurGame;
-
 extern CFGSTRUCT DriverConfig[];
 extern ARGPSTRUCT DriverArgs[];
 extern char *DriverUsage;

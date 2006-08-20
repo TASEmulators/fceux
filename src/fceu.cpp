@@ -51,7 +51,7 @@
 uint64 timestampbase;
 
 
-FCEUGI *FCEUGameInfo = NULL;
+FCEUGI *GameInfo = NULL;
 void (*GameInterface)(int h);
 
 void (*GameStateRestore)(int version);
@@ -221,29 +221,29 @@ static DECLFR(ARAMH)
 
 static void CloseGame(void)
 {
- if(FCEUGameInfo)
+ if(GameInfo)
  {
   if(FCEUnetplay)
    FCEUD_NetworkClose();
   FCEUI_StopMovie();
-  if(FCEUGameInfo->name)
+  if(GameInfo->name)
   {
-   free(FCEUGameInfo->name);
-   FCEUGameInfo->name=0;
+   free(GameInfo->name);
+   GameInfo->name=0;
   }
-  if(FCEUGameInfo->type!=GIT_NSF)
+  if(GameInfo->type!=GIT_NSF)
    FCEU_FlushGameCheats(0,0);
   GameInterface(GI_CLOSE);
   ResetExState(0,0);
   CloseGenie();
-  free(FCEUGameInfo);
-  FCEUGameInfo = 0;
+  free(GameInfo);
+  GameInfo = 0;
  }
 }
 
 void ResetGameLoaded(void)
 {
-        if(FCEUGameInfo) CloseGame();
+        if(GameInfo) CloseGame();
         GameStateRestore=0;
         PPU_hook=0;
         GameHBIRQHook=0;
@@ -270,7 +270,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 //	StopSound();
 //#endif
 
-    FCEUFILE *fp;
+        FCEUFILE *fp;
 	char *ipsfn;
 	
 	ResetGameLoaded();
@@ -278,17 +278,17 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	RewindStatus[0] = RewindStatus[1] = 0;
 	RewindStatus[2] = RewindStatus[3] = 0;
 
-	FCEUGameInfo = (FCEUGI*)malloc(sizeof(FCEUGI));
-	memset(FCEUGameInfo, 0, sizeof(FCEUGI));
+	GameInfo = (FCEUGI*)malloc(sizeof(FCEUGI));
+	memset(GameInfo, 0, sizeof(FCEUGI));
 
-	FCEUGameInfo->soundchan = 0;
-	FCEUGameInfo->soundrate = 0;
-        FCEUGameInfo->name=0;
-        FCEUGameInfo->type=GIT_CART;
-        FCEUGameInfo->vidsys=GIV_USER;
-        FCEUGameInfo->input[0]=FCEUGameInfo->input[1]=-1;
-        FCEUGameInfo->inputfc=-1;
-        FCEUGameInfo->cspecial=0;
+	GameInfo->soundchan = 0;
+	GameInfo->soundrate = 0;
+        GameInfo->name=0;
+        GameInfo->type=GIT_CART;
+        GameInfo->vidsys=GIV_USER;
+        GameInfo->input[0]=GameInfo->input[1]=-1;
+        GameInfo->inputfc=-1;
+        GameInfo->cspecial=0;
 
 	FCEU_printf("Loading %s...\n\n",name);
 
@@ -324,7 +324,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 
         FCEU_ResetVidSys();
 		
-        if(FCEUGameInfo->type!=GIT_NSF)
+        if(GameInfo->type!=GIT_NSF)
          if(FSettings.GameGenie)
 	  OpenGenie();
 	  PowerNES();
@@ -332,7 +332,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	FCEUSS_CheckStates();
 	FCEUMOV_CheckMovies();
 
-        if(FCEUGameInfo->type!=GIT_NSF)
+        if(GameInfo->type!=GIT_NSF)
         {
          FCEU_LoadGamePalette();
          FCEU_LoadGameCheats(0);
@@ -343,7 +343,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 
 	strcpy(lastLoadedGameName, name);
 
-        return(FCEUGameInfo);
+        return GameInfo;
 }
 
 
@@ -505,7 +505,7 @@ void RestartMovieOrReset(int pow)
 void ResetNES(void)
 {
         FCEUMOV_AddCommand(FCEUNPCMD_RESET);
-        if(!FCEUGameInfo) return;
+        if(!GameInfo) return;
         GameInterface(GI_RESETM2);
         FCEUSND_Reset();
         FCEUPPU_Reset();
@@ -538,7 +538,7 @@ void PowerNES(void)
 {
 	if(!suppressAddPowerCommand)
         FCEUMOV_AddCommand(FCEUNPCMD_POWER);
-    if(!FCEUGameInfo) return;
+    if(!GameInfo) return;
 
 	FCEU_CheatResetRAM();
 	FCEU_CheatAddRAM(2,0,RAM);
@@ -565,7 +565,7 @@ void PowerNES(void)
 	   Needed for the NSF code and VS System code.
 	*/
 	GameInterface(GI_POWER);
-	if(FCEUGameInfo->type==GIT_VSUNI)
+	if(GameInfo->type==GIT_VSUNI)
 	FCEU_VSUniPower();
 
 	timestampbase=0;
@@ -580,9 +580,9 @@ void FCEU_ResetVidSys(void)
 {
  int w;
   
- if(FCEUGameInfo->vidsys==GIV_NTSC)
+ if(GameInfo->vidsys==GIV_NTSC)
   w=0; 
- else if(FCEUGameInfo->vidsys==GIV_PAL)
+ else if(GameInfo->vidsys==GIV_PAL)
   w=1;  
  else
   w=FSettings.PAL;
@@ -642,7 +642,7 @@ void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall)
 void FCEUI_SetVidSystem(int a)
 {
  FSettings.PAL=a?1:0;
- if(FCEUGameInfo)
+ if(GameInfo)
  {
   FCEU_ResetVidSys();
   FCEU_ResetPalette();

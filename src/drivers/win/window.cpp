@@ -21,7 +21,7 @@
 #include "state.cpp"      /* Save/Load state AS */
 
 extern char *md5_asciistr(uint8 digest[16]);
-extern FCEUGI *FCEUGameInfo;
+extern FCEUGI *GameInfo;
 extern int EnableRewind;
 
 void DSMFix(UINT msg)
@@ -288,8 +288,7 @@ void HideFWindow(int h)
 
 void ToggleHideMenu(void)
 { 
- extern FCEUGI *FCEUGameInfo;
- if(!fullscreen && (FCEUGameInfo || tog))
+ if(!fullscreen && (GameInfo || tog))
  {
   tog^=1;
   HideMenu(tog);
@@ -304,7 +303,7 @@ void FCEUD_HideMenuToggle(void)
 
 static void ALoad(char *nameo)
 {
-  if((GI=FCEUI_LoadGame(nameo,1)))
+  if(FCEUI_LoadGame(nameo,1))
   {
    palyo=FCEUI_GetCurrentVidSystem(0,0);
    UpdateMenu();
@@ -319,8 +318,8 @@ static void ALoad(char *nameo)
   }
   else
    StopSound();
-  ParseGIInput(GI);
-  RedoMenuGI(GI);
+  ParseGIInput(GameInfo);
+  RedoMenuGI(GameInfo);
 }
 
 void LoadNewGamey(HWND hParent, char *initialdir)
@@ -668,14 +667,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 100:StopSound();
                            LoadNewGamey(hWnd, 0);
                            break;
-                  case 101:if(GI)
+                  case 101:if(GameInfo)
                            {
 			    #ifdef FCEUDEF_DEBUGGER
 			    //KillDebugger(); //mbg merge 7/18/06 removed as part of old debugger
 			    #endif
                             FCEUI_CloseGame();                            
-                            GI=0;
-                            RedoMenuGI(GI);
+                            GameInfo=0;
+                            RedoMenuGI(GameInfo);
                            }
                            break;
                   case 110:FCEUD_SaveStateAs();break;
@@ -719,18 +718,18 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 
     case WM_SYSCOMMAND:
-               if(GI && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
+               if(GameInfo && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
                 return(0);
 
                if(wParam==SC_KEYMENU)
                {
-                if(GI && InputType[2]==SIFC_FKB && cidisabled)
+                if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
                  break;
                 if(lParam == VK_RETURN || fullscreen || tog) break;
                }
                goto proco;
     case WM_SYSKEYDOWN:
-               if(GI && InputType[2]==SIFC_FKB && cidisabled)
+               if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
                 break; /* Hopefully this won't break DInput... */
 
                 if(fullscreen || tog)
@@ -764,7 +763,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                 goto proco;
 
     case WM_KEYDOWN:
-              if(GI)
+              if(GameInfo)
 	      {
 	       /* Only disable command keys if a game is loaded(and the other
 		  conditions are right, of course). */
@@ -1620,7 +1619,7 @@ static void UpdateReplayDialog(HWND hwndDlg)
 				SetWindowText(GetDlgItem(hwndDlg,307),"FCEU 0.98.10 (blip)");
 			}
 
-			SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(FCEUGameInfo->MD5));
+			SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(GameInfo->MD5));
 			EnableWindow(GetDlgItem(hwndDlg,1),TRUE);                     // enable OK
 			
 			doClear = 0;
@@ -1644,7 +1643,7 @@ static void UpdateReplayDialog(HWND hwndDlg)
 		SetWindowText(GetDlgItem(hwndDlg,305),"");
 		SetWindowText(GetDlgItem(hwndDlg,306),"Nothing (invalid movie)");
 		SetWindowText(GetDlgItem(hwndDlg,307),"");
-		SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(FCEUGameInfo->MD5));
+		SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(GameInfo->MD5));
 		SetDlgItemText(hwndDlg,1003,"");
 		EnableWindow(GetDlgItem(hwndDlg,201),FALSE);
 		SendDlgItemMessage(hwndDlg,201,BM_SETCHECK,BST_UNCHECKED,0);
@@ -1752,7 +1751,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 						char md51 [256];
 						char md52 [256];
-						if(fcm) strcpy(md51, md5_asciistr(FCEUGameInfo->MD5));
+						if(fcm) strcpy(md51, md5_asciistr(GameInfo->MD5));
 						if(fcm) strcpy(md52, md5_asciistr(info.md5_of_rom_used));
 						if(!fcm || strcmp(md51, md52))
 						{
@@ -1912,7 +1911,7 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			char szMd5Text[35];
 
 			GetDlgItemText(hwndDlg, 305, szMd5Text, 35);
-			if(!strlen(szMd5Text) || !strcmp(szMd5Text, "unknown") || !strcmp(szMd5Text, "00000000000000000000000000000000") || !strcmp(szMd5Text, md5_asciistr(FCEUGameInfo->MD5)))
+			if(!strlen(szMd5Text) || !strcmp(szMd5Text, "unknown") || !strcmp(szMd5Text, "00000000000000000000000000000000") || !strcmp(szMd5Text, md5_asciistr(GameInfo->MD5)))
 				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match (or no comparison)
 			else
 				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch

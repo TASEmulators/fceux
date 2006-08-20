@@ -224,7 +224,7 @@ void FCEU_LoadGamePalette(void)
 
 void FCEU_ResetPalette(void)
 {
- if(FCEUGameInfo)
+ if(GameInfo)
  {
    ChoosePalette();
    WritePalette(); 
@@ -233,11 +233,11 @@ void FCEU_ResetPalette(void)
  
 static void ChoosePalette(void)
 {
-    if(FCEUGameInfo->type==GIT_NSF)
+    if(GameInfo->type==GIT_NSF)
      palo=0;
     else if(ipalette)
      palo=palettei;  
-    else if(ntsccol && !PAL && FCEUGameInfo->type!=GIT_VSUNI)
+    else if(ntsccol && !PAL && GameInfo->type!=GIT_VSUNI)
      {
       palo=paletten;
       CalculatePalette();
@@ -252,7 +252,7 @@ void WritePalette(void)
     
     for(x=0;x<7;x++)
      FCEUD_SetPalette(x,unvpalette[x].r,unvpalette[x].g,unvpalette[x].b);
-    if(FCEUGameInfo->type==GIT_NSF)
+    if(GameInfo->type==GIT_NSF)
     {
      //for(x=0;x<128;x++)
      // FCEUD_SetPalette(x,x,0,x);
@@ -276,7 +276,7 @@ static int controllength=0;
 
 void FCEUI_NTSCDEC(void)
 {
-	if(ntsccol && FCEUGameInfo->type!=GIT_VSUNI &&!PAL && FCEUGameInfo->type!=GIT_NSF)
+	if(ntsccol && GameInfo->type!=GIT_VSUNI &&!PAL && GameInfo->type!=GIT_NSF)
         {
          int which;
          if(controlselect)
@@ -298,7 +298,7 @@ void FCEUI_NTSCDEC(void)
 
 void FCEUI_NTSCINC(void)
 {
-                   if(ntsccol && FCEUGameInfo->type!=GIT_VSUNI && !PAL && FCEUGameInfo->type!=GIT_NSF)
+                   if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF)
                      if(controlselect)
                      {
                       if(controllength)
@@ -321,12 +321,12 @@ void FCEUI_NTSCINC(void)
 
 void FCEUI_NTSCSELHUE(void)
 {
- if(ntsccol && FCEUGameInfo->type!=GIT_VSUNI && !PAL && FCEUGameInfo->type!=GIT_NSF){controlselect=1;controllength=360;}
+ if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=1;controllength=360;}
 }
 
 void FCEUI_NTSCSELTINT(void)
 {
- if(ntsccol && FCEUGameInfo->type!=GIT_VSUNI && !PAL && FCEUGameInfo->type!=GIT_NSF){controlselect=2;controllength=360;}
+ if(ntsccol && GameInfo->type!=GIT_VSUNI && !PAL && GameInfo->type!=GIT_NSF){controlselect=2;controllength=360;}
 }
 
 void FCEU_DrawNTSCControlBars(uint8 *XBuf)

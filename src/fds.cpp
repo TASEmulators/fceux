@@ -723,7 +723,7 @@ static int SubLoad(FCEUFILE *fp)
   FCEU_fread(diskdata[x],1,65500,fp);
   md5_update(&md5,diskdata[x],65500);
  }
- md5_finish(&md5,FCEUGameInfo->MD5);
+ md5_finish(&md5,GameInfo->MD5);
  return(1);
 }
 
@@ -816,7 +816,7 @@ int FDSLoad(const char *name, FCEUFILE *fp)
   free(fn);
  }
 
- FCEUGameInfo->type=GIT_FDS;
+ GameInfo->type=GIT_FDS;
  GameInterface=FDSGI;
 
  SelectDisk=0;

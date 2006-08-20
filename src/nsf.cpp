@@ -198,9 +198,9 @@ int NSFLoad(FCEUFILE *fp)
   for(x=0;x<8;x++)
    BSon|=NSFHeader.BankSwitch[x];
 
- FCEUGameInfo->type=GIT_NSF;
- FCEUGameInfo->input[0]=FCEUGameInfo->input[1]=SI_GAMEPAD;
- FCEUGameInfo->cspecial=SIS_NSF;
+ GameInfo->type=GIT_NSF;
+ GameInfo->input[0]=GameInfo->input[1]=SI_GAMEPAD;
+ GameInfo->cspecial=SIS_NSF;
 
  for(x=0;;x++)
  {
@@ -215,9 +215,9 @@ int NSFLoad(FCEUFILE *fp)
  }
 
  if(NSFHeader.VideoSystem==0)
-  FCEUGameInfo->vidsys=GIV_NTSC;
+  GameInfo->vidsys=GIV_NTSC;
  else if(NSFHeader.VideoSystem==1)
-  FCEUGameInfo->vidsys=GIV_PAL;
+  GameInfo->vidsys=GIV_PAL;
 
  GameInterface=NSFGI;
 

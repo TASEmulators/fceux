@@ -116,7 +116,6 @@ public:
 	}
 };
 
-extern FCEUGI *GI;
 extern NSF_HEADER NSFHeader;
 
 ///retrieves the core's DebuggerState

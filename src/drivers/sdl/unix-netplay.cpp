@@ -45,6 +45,7 @@
 #include <netdb.h>
 #endif
 
+#include "../../fceu.h"
 #include "../../utils/md5.h"
 
 #ifndef socklen_t
@@ -159,13 +160,13 @@ int FCEUD_NetworkConnect(void)
     uint8 md5out[16];
 
     md5_starts(&md5);
-    md5_update(&md5, CurGame->MD5, 16);
+    md5_update(&md5, GameInfo->MD5, 16);
     md5_update(&md5, (uint8 *)netgamekey, strlen(netgamekey));
     md5_finish(&md5, md5out);
     memcpy(sendbuf + 4, md5out, 16);
    }
    else
-    memcpy(sendbuf + 4, CurGame->MD5, 16);
+    memcpy(sendbuf + 4, GameInfo->MD5, 16);
 
    if(netpassword)
    {
