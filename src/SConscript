@@ -2,6 +2,7 @@ file_list = Split("""
 asm.cpp
 cart.cpp
 cheat.cpp
+conddebug.cpp
 config.cpp
 debug.cpp
 fceu.cpp
