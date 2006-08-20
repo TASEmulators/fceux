@@ -19,10 +19,8 @@
  */
 
 #include "common.h"
-#include "..\..\palette.h"
-
-
-extern FCEUGI *GameInfo;
+#include "../../palette.h"
+#include "../../fceu.h"
 
 HWND hPPUView;
 
