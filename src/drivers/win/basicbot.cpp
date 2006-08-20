@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-#include "../../fceu.h"
+#include "../../fceu.h" //mbg merge 7/18/06 added
 #include "basicbot.h"
 
 
@@ -872,7 +872,7 @@ void UpdateBasicBot()
 				if(better)
 				{
 					char tempstring[4096];
-					char symbols[16] = "ABET^v<>ABET^v<>";
+					char symbols[] = "ABET^v<>ABET^v<>"; //mbg merge 7/18/06 changed dim to unspecified to leave room for the null
 					int seenplayer2=0;
 					for(i = 0; i < 4; i++)
 					{
@@ -990,7 +990,7 @@ static void SaveBasicBot()
 		if(ofn.nFileOffset < 1024)
 		{
 			free(BasicBotDir);
-			BasicBotDir=malloc(strlen(ofn.lpstrFile)+1);
+			BasicBotDir=(char*)malloc(strlen(ofn.lpstrFile)+1); //mbg merge 7/18/06 added cast
 			strcpy(BasicBotDir,ofn.lpstrFile);
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
@@ -1081,7 +1081,7 @@ static void LoadBasicBot()
 		if(ofn.nFileOffset < 1024)
 		{
 			free(BasicBotDir);
-			BasicBotDir=malloc(strlen(ofn.lpstrFile)+1);
+			BasicBotDir=(char*)malloc(strlen(ofn.lpstrFile)+1); //mbg merge 7/18/06 added cast
 			strcpy(BasicBotDir,ofn.lpstrFile);
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
