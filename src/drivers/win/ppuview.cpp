@@ -22,6 +22,7 @@
 #include "..\..\palette.h"
 
 
+extern FCEUGI *GameInfo;
 
 HWND hPPUView;
 

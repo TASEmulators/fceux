@@ -64,7 +64,8 @@ static SCROLLINFO si;
 *
 * @param hwndDlg Handle of the window to center.
 **/
-void CenterWindow(HWND hwndDlg) {
+void CenterWindow(HWND hwndDlg)
+{
 	//TODO: This function should probably moved into the generic Win32 window file
     //move the window relative to its parent
     HWND hwndParent = GetParent(hwndDlg);
@@ -199,7 +200,8 @@ unsigned int AddBreak(HWND hwndDlg)
 	return 0;
 }
 
-BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
 	char str[8]={0};
 	int tmp;
 
@@ -1346,7 +1348,7 @@ void UpdatePatcher(HWND hwndDlg){
 		EnableWindow(GetDlgItem(hwndDlg,109),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,110),FALSE);
 	}
-	if(FCEUGameInfo->type != GIT_CART)EnableWindow(GetDlgItem(hwndDlg,111),FALSE);
+	if(GameInfo->type != GIT_CART)EnableWindow(GetDlgItem(hwndDlg,111),FALSE);
 	else EnableWindow(GetDlgItem(hwndDlg,111),TRUE);
 }
 
