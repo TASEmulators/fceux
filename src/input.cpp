@@ -33,9 +33,11 @@
 #include "vsuni.h"
 #include "fds.h"
 
-#include "drivers/win/basicbot.h" // qfox: For UpdateExternalButton(), called when the
-                                  //       botmode state changes, to update a label in gui.
-                                  //       Maybe enclose this in ifdef _USE_SHARED_MEMORY_ ?
+#include "drivers/win/basicbot.h" // qfox: For UpdateExternalButton(), called 
+                                  //       when the botmode state changes, to
+                                  //       update a label in gui. Maybe 
+                                  //       enclose this in 
+                                  //       #ifdef _USE_SHARED_MEMORY_ ?
 
 extern INPUTC *FCEU_InitZapper(int w);
 extern INPUTC *FCEU_InitPowerpadA(int w);
