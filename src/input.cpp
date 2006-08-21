@@ -33,11 +33,11 @@
 #include "vsuni.h"
 #include "fds.h"
 
-#include "drivers/win/basicbot.h" // qfox: For UpdateExternalButton(), called 
-                                  //       when the botmode state changes, to
-                                  //       update a label in gui. Maybe 
-                                  //       enclose this in 
-                                  //       #ifdef _USE_SHARED_MEMORY_ ?
+// qfox: For UpdateExternalButton(), called when the 
+//       botmode state changes, to update a label in gui.
+#ifdef WIN32
+	#include "drivers/win/basicbot.h" 
+#endif // WIN32
 
 extern INPUTC *FCEU_InitZapper(int w);
 extern INPUTC *FCEU_InitPowerpadA(int w);
@@ -188,7 +188,10 @@ int FCEU_BotMode()
 void FCEU_SetBotMode(int x)
 {
 	BotMode = x;
-	UpdateExternalButton();
+	#ifdef WIN32
+		// qfox: update gui in basicbot
+		UpdateExternalButton();
+	#endif // WIN32
 }
 
 void FCEU_DrawInput(uint8 *buf)
