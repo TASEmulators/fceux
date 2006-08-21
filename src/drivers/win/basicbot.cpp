@@ -1,3 +1,13 @@
+/**
+ * qfox:
+ * todo: boundrycheck every case in the switch! the string checks might override the boundries and read data its not supposed to. i'm not quite sure if this is an issue in C though.
+ * todo: memi() to fetch a 32bit number? is this desired?
+ * todo: check for existence of argument (low priority)
+ * todo: let the code with errorchecking run through the code first so subsequent evals are faster. -> done when changing to bytecode/interpreter
+ * todo: cleanup "static"s here and there and read up on what they mean in C, i think i've got them confused
+ * todo: fix some button so you can test code without having to run it (so setting external input and opening a rom won't be required to test scriptcode). Code is there but you can't do certain commands when no rom is loaded and nothing is init'ed, so i'll put this on hold.
+ **/
+
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
@@ -21,71 +31,116 @@
 #include "common.h"
 #include "../../fceu.h" //mbg merge 7/18/06 added
 #include "basicbot.h"
+#include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode()
 
-
-
-
-// qfox: v1 will be the last release by Luke, mine will start at v2 and
+// qfox: v0.1.0 will be the last release by Luke, mine will start at v0.2.0 and
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well.
 static char BBversion[] = "0.2.1";
 
-static HWND hwndBasicBot = 0;	// qfox: GUI handle
-static int BotRunning = 0;
-static uint32 rand1=1, 
-	      rand2=0x1337EA75, 
-	      rand3=0x0BADF00D;
-static char Formula[24][1024];  // qfox: These hold the 24 formula's entered in the GUI:
-				//       First 8 are the buttons, in order, for player 1.
-			        //	 Second 8 are the buttons, in order, for player 2.
-			        //	 16=stop condition, 17=maximize function, 18=tie1,
-			        //	 19=tie2, 20=tie3, 21=extra1, 22=extra2, 23=?
-//static int BotInput[1024];        // qfox: missing from original source?
-static int BotCounter[256];     // qfox: The counters. All ints, maybe change this to
-			        //	 another type? Long or something?
-static int EditPlayer = 1, 
-	   BotFrame,
-	   BotLoopVar = 0;
-static int BotAttempts, 
-	   BotFrames, 
-	   BotBestScore[4], 
-	   NewAttempt;
-static int CurrentAttempt[1024],// qfox: A hardcoded limit of 1024 seems small to me. Maybe
-				//	 I'm overlooking something here though, not quite sure
-				//	 yet how things are saved (like, does the 1024 mean 
-				//	 frames?).
-	   BestAttempt[1024], 
-	   AttemptPointer;
-static bool ProcessCode = true;	// qfox: Seems to be a boolean that tells the code whether to 
-			     	//       actually process counter commands. If set to 0, any
-			     	//       of the counter() c() setcounter() resetcounter() rc()
-			     	//       addcounter() and ac() commands will not be executed
-			     	//       and simply ignored. Used for branching (if then else).
-char *BasicBotDir = 0;
-static bool EvaluateError = false;// qfox: Indicates whether an error was thrown.
-static int LastEvalError;         // qfox: Last code thrown by the parser.
-char * GlobalCurrentChar;         // qfox: This little variable will hold the position of the
-                                  //       string we are currently evaluating. I'm pretty sure
-                                  //       Luke used a structure of two arguments, where the
-                                  //       second argument somehow points to the currentchar
-                                  //       pointer (although I can't find where this happens
-                                  //       anywhere in his source) to remember increments 
-                                  //       made in a recursive higher depth (since these
-                                  //       were local variables, going back a depth would mean
-                                  //       loosing the changes). I think he used the second
-                                  //       argument to alter the original pointer. Since there
-                                  //       is only one evaluation-job going on at any single
-                                  //       moment, I think it's easier (better legible) to use
-                                  //       a global variable. Hence, that's what this is for.
+static HWND hwndBasicBot = 0;			// qfox: GUI handle
+static bool BotRunning = false;			// qfox: Is the bot computing or not? I think...
+
+static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
+
+#define BOT_MAXCODE 1024				// qfox: max length of code, 1kb may be too little...
+#define BOT_FORMULAS 21
+static char Formula[BOT_FORMULAS][BOT_MAXCODE];	// qfox: These hold the 21 formula's entered in the GUI:
+static int  CODE_1_A        = 0,
+			CODE_1_B        = 1,
+			CODE_1_SELECT   = 2,
+			CODE_1_START    = 3,
+			CODE_1_UP       = 4,
+			CODE_1_DOWN     = 5,
+			CODE_1_LEFT     = 6,
+			CODE_1_RIGHT    = 7,
+			CODE_2_A        = 8,
+			CODE_2_B        = 9,
+			CODE_2_SELECT   = 10,
+			CODE_2_START    = 11,
+			CODE_2_UP       = 12,
+			CODE_2_DOWN     = 13,
+			CODE_2_LEFT     = 14,
+			CODE_2_RIGHT    = 15,
+			CODE_STOP       = 16,
+			CODE_MAX        = 17,
+			CODE_TIE1       = 18,
+			CODE_TIE2       = 19,
+			CODE_TIE3       = 20;
+static char ExtraCode[BOT_MAXCODE];		// qfox: Contains the extra code, executed after dealing
+										//		 with input.
+
+#define BOT_MAXCOUNTERS 256
+static int BotCounter[BOT_MAXCOUNTERS]; // qfox: The counters. All ints, maybe change this to
+					        			//	 	another type? Long or something?
+
+static bool EditPlayerOne = true;				// qfox: Which player is currently shown in the GUI?
+static int BotFrame,					// qfox: which frame is currently or last computed?
+	   BotLoopVari = 0,					// qfox: used for loop(), "i" returns this value.
+	   BotLoopVarj = 0,					// qfox: used for a loop() inside another loop(), "j" 
+	   									//		 returns this value.
+	   BotLoopVark = 0;					// qfox: used for a loop() inside a already nested 
+	   									//		 loop(), "k" returns this value.
+
+static int BotAttempts, 				// qfox: number of attempts tried so far
+	   BotFrames, 						// qfox: number of frames computed so far
+	   BotBestScore[4]; 				// qfox: maximize, tie1, tie2, tie3
+static bool NewAttempt;					// qfox: tells code to reset certain run-specific info
+
+static int LastButtonPressed;			// qfox: used for lastbutton command (note that this 
+										//		 doesnt work for the very first frame of each attempt...)
+
+static int CurrentAttempt[BOT_MAXFRAMES],//qfox: A hardcoded limit of 1024 seems small to me. Maybe
+										//	 I'm overlooking something here though, not quite sure
+										//	 yet how things are saved (like, does the 1024 mean 
+										//	 frames?).
+	   BestAttempt[BOT_MAXFRAMES], 		// qfox: only the best attempt is saved
+	   AttemptPointer;					// qfox: Is this the same as BotFrame ?
+
+static bool ProcessCode = true;			// qfox: Seems to be a boolean that tells the code whether to 
+								     	//       actually process counter commands. If set to 0, any
+								     	//       of the counter() c() setcounter() resetcounter() rc()
+								     	//       addcounter() and ac() commands will not be executed
+								     	//       and simply ignored. Used for branching (if then else).
+
+char *BasicBotDir = 0;					// qfox: last used load/save dir is put in this var
+
+static bool EvaluateError = false;		// qfox: Indicates whether an error was thrown.
+static int LastEvalError;         		// qfox: Last code thrown by the parser.
+
+char * GlobalCurrentChar;         		// qfox: This little variable will hold the position of the
+	                                    //       string we are currently evaluating. I'm pretty sure
+	                                    //       Luke used a structure of two arguments, where the
+	                                    //       second argument somehow points to the currentchar
+	                                    //       pointer (although I can't find where this happens
+	                                    //       anywhere in his source) to remember increments 
+	                                    //       made in a recursive higher depth (since these
+	                                    //       were local variables, going back a depth would mean
+	                                    //       loosing the changes). I think he used the second
+	                                    //       argument to alter the original pointer. Since there
+	                                    //       is only one evaluation-job going on at any single
+	                                    //       moment, I think it's easier (better legible) to use
+	                                    //       a global variable. Hence, that's what this is for.
+
+bool UpdateFromGUI = false;				// qfox: when this flag is set, the next new attempt will reload
+										//		 the settings from gui to mem. note that this cannot set
+										//		 the settings for both players at once... maybe later.
+
+float AverageScore[4];					// qfox: keep the average scores in here. to prevent overflow
+										//		 this is not a total, but the average is computed after
+										//		 every attempt and put back in here. this shouldn't
+										//		 affect accuracy.
 
 static void SeedRandom(uint32 seed)
 {
 	rand1 = seed;
-	if(rand1 == 0) rand1 = 1; //I forget if this is necessary.
+	if(rand1 == 0) rand1 = 1; // luke: I forget if this is necessary.
 }
 
-//Simulation-quality random numbers: taus88 algorithm
+/**
+ * luke: Simulation-quality random numbers: taus88 algorithm
+ **/
 static unsigned int NextRandom(void)
 {
 	uint32 b;
@@ -98,76 +153,98 @@ static unsigned int NextRandom(void)
 	return (rand1 ^ rand2 ^ rand3);
 }
 
-//Should do something to notify user of an error...  eh
-// qfox: All syntax-errors lead here. Some gui notification should be 
-//       made next, but I don't know about that in C.
+
+/**
+ * qfox: All syntax-errors lead here. Some gui notification should be 
+ *       made next, but I don't know about that in C.
+ **/
 void BotSyntaxError(int errorcode)
 {
      EvaluateError = true;
      LastEvalError = errorcode;
-     debug(errorcode);
+     error(errorcode);
+     StopBasicBot();
 }
-
-//recursively evaluate the formula
-//horribly hacky, not meant to be a real expression evaluator!
-
-// qfox: I am wondering whether Luke went with a function approach first, and changed the
-//	 thing to recursive later on. The breaks are a little confusing. Seems to me like
-//	 any function should return it's own value. Instead, they set "value" and return 0.
-//	 This could bork up in the evaluation when scanning ahead for a number. At least,
-//	 that's what I think. He made a few flaws however, I've tried to fix them.
-//
-//	 Changing the original behaviour, whatever it may be, to the following:
-//	 Calls to EvaluateFormula parse the string for numbers. The code will remain on the
-//	 same "depth" except for: '(' and '?', which will increase the depth by one, until
-//	 a number is found. The ret argument indicates that the code should return immediately
-//	 when a number is determined. Otherwise breaks are used. Anything between braces
-//	 (like function arguments) is being parsed with ret as false. This allows you to
-//	 use the counters like: abs(50 ac(32 ac(5)))
-//	 If ret were true, the code for abs would search for just 50, return and screw up.
-//	 The ')' will ensure the returning of a recursion (perhapse the code should first
-//	 check whether there are as many '(' as ')', before even attempting to parse the
-//	 string).
-//	 Literals are explained below, where they are parsed.
-//
-//	 It is my intention to increase functionality of this parser and change it to create
-//	 bytecode to be fed to a interpreter. This should increase performance, as the code
-//	 currently evaluates all 23 lines completely EVERY frame. This is a lot of useless
-//	 redundant computation. Converting the code to bytecode will eliminate string-parsing,
-//	 error-checking and other overhead, without the risk of compromising the rest of the 
-//	 code. Oh and by bytecode, I think I'll be meaning intcode since it's easier :)
-//	 Think of it the way Java works when compiling and executing binaries.
-
-// todo: boundrycheck every case in the switch! it might overflow and crash.
-// todo: make loop nest-able
-// todo: make code stop running if error is set
-// todo: change error to int, make codes to clarify what went wrong
-// todo: allow fetching (mem) of one byte or one int somehow
-// todo: fix negative number handling (signed numbers)
-// todo: check for existence of argument (low priority)
-// todo: bracket matching, ?: matching.
-// todo: let the code with errorchecking run through the code first so subsequent evals are faster.
-// todo: cleanup "static"s here and there and read up on what they mean in C, i think i've got them confused
 
 /**
- * Parse given string
+ * qfox: I am wondering whether Luke went with a function approach first, and changed the
+ *	 thing to recursive later on. The breaks are a little confusing. Seems to me like
+ *	 any function should return it's own value. Instead, they set "value" and return 0.
+ *	 This could bork up in the evaluation when scanning ahead for a number. At least,
+ *	 that's what I think. He made a few flaws however, I've tried to fix them.
+ *
+ *	 Changing the original behaviour, whatever it may be, to the following:
+ *	 Calls to EvaluateFormula parse the string for numbers. The code will remain on the
+ *	 same "depth" except for: '(' and '?', which will increase the depth by one, until
+ *	 a number is found. The ret argument indicates that the code should return immediately
+ *	 when a number is determined. Otherwise breaks are used. Anything between braces
+ *	 (like function arguments) is being parsed with ret as false. This allows you to
+ *	 use the counters like: abs(50 ac(32 ac(5)))
+ *	 If ret were true, the code for abs would search for just 50, return and screw up.
+ *	 The ')' will ensure the returning of a recursion (perhapse the code should first
+ *	 check whether there are as many '(' as ')', before even attempting to parse the
+ *	 string).
+ *	 Literals are explained below, where they are parsed.
+ *
+ *	 It is my intention to increase functionality of this parser and change it to create
+ *	 bytecode to be fed to a interpreter. This should increase performance, as the code
+ *	 currently evaluates all 23 lines completely EVERY frame. This is a lot of useless
+ *	 redundant computation. Converting the code to bytecode will eliminate string-parsing,
+ *	 error-checking and other overhead, without the risk of compromising the rest of the 
+ *	 code. Oh and by bytecode, I think I'll be meaning intcode since it's easier :)
+ *	 Think of it the way Java works when compiling and executing binaries.
+ **/
+/**
+ * Parse given string and return value of it. this 
+ * function is not called recursively, only once per string!
  * - formula points to the string to be evaluated.
- * - nextposition is absoleted
- * - ret is absoleted
+ * - returns the value of the evaluated string
  */
-static int EvaluateFormula(char * formula, char **nextposition, bool ret)
+static int EvaluateFormula(char * formula)
 {
+	// qfox: reset values
     EvaluateError = false;
-    BotLoopVar = 0;
+    // qfox: reset loop counters
+    BotLoopVari = BotLoopVarj = BotLoopVark = 0;
+    // qfox: set the global pointer to the string at the start of the string
     GlobalCurrentChar = formula;
-    return ParseFormula(ret);
+    
+    // qfox: first we want to quickly check whether the brackets are matching or not
+    // 		 same for ? and :, both are pairs and should not exist alone
+    char * quickscan = formula;
+    // qfox: counters
+    int iifs = 0, bracks = 0;
+    // qfox: until EOL
+    while (*quickscan != 0)
+    {
+    	switch(*quickscan)
+    	{
+    		case '?': ++iifs; break;
+    		case ':': --iifs; break;
+    		case '(': ++bracks; break;
+    		case ')': --bracks; break;
+    		default: break;
+    	}
+    	++quickscan;
+    }
+    if (iifs || bracks)
+    	BotSyntaxError(1004);
+    
+    return ParseFormula(false);
 }
 
+/**
+ * Parse one level of a string, return the value of the right most number
+ * - ret indicates whether the function should return as soon as it determines a number,
+ *       otherwise the code will continue until a ')', ':' or EOL
+ * - returns the right most value once evaluated ("5 6" would return 6, "5+1" would return 11,
+ *       "5+1 3+4" would return 7)
+ **/
 static int ParseFormula(bool ret)
 {
-	int value=0; // qfox: value is local, no need to set it if ret is set.
-	bool hexmode = false; // qfox: hexmode is boolean now
-	bool negmode = false; // qfox: if a number is prefixed by a -
+	signed int value=0; 					// qfox: value is local, no need to set it if ret is set.
+	bool hexmode = false; 					// qfox: hexmode is boolean now
+	bool negmode = false; 					// qfox: if a number is prefixed by a -
 	while(*GlobalCurrentChar != 0)
 	{
         if (EvaluateError) return value;
@@ -175,7 +252,7 @@ static int ParseFormula(bool ret)
 		{
 		case 0:
 			// qfox: not the value 0 but the ascii value 0, d'oh, stringterminator.
-			return value; // qfox: There is no more input, so return.
+			return value; 					// qfox: There is no more input, so return.
 		case '(':
 			// qfox: recurse one level deeper
 			++GlobalCurrentChar;
@@ -184,6 +261,8 @@ static int ParseFormula(bool ret)
 			break;
 		case ')':
 			// qfox: return from this recursion level
+			negmode = false; 
+			hexmode = false;
 			++GlobalCurrentChar;
 			return value;
 		case ':':
@@ -191,7 +270,7 @@ static int ParseFormula(bool ret)
 			++GlobalCurrentChar;
 			return value;
 		case 'x':
-			hexmode = true; // qfox: hexmode is boolean now
+			hexmode = true;
 			++GlobalCurrentChar;
 			break;
 		case '+':
@@ -275,9 +354,9 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001); // qfox: "!" is not a valid command, but perhaps we could 
-          						  // 	   use it as a prefix, checking if the next is 1000
-		          				  // 	   (or 0) or not and inverting it. For now error it.
+				BotSyntaxError(1001); 	// qfox: "!" is not a valid command, but perhaps we could 
+          						  		//		use it as a prefix, checking if the next is 1000
+		          				  		//		(or 0) or not and inverting it. For now error it.
 				return value;
 			}
 		case '?':
@@ -325,9 +404,9 @@ static int ParseFormula(bool ret)
 			}
 			if (ret) return value;
 			break;
-        case 10:                   // qfox: whitespace is whitespace.
-        case 13:
-        case 9:                    // qfox: or was char 8 tab? i always mix up
+        case 10:                   // qfox: whitespace is whitespace, I count spaces,
+        case 13:                   //       returns and tabs as whitespace.
+        case 9:
 		case ' ':
             ++GlobalCurrentChar;
             hexmode = false;       // qfox: well, since hexmode is local, and there more
@@ -340,7 +419,6 @@ static int ParseFormula(bool ret)
             negmode = false;
 			break;                 // qfox: Never return here, always break.
 		case 'a':
-            // button A
 			if(*(GlobalCurrentChar+1) == 't'
 				&&*(GlobalCurrentChar+2) == 't'
 				&&*(GlobalCurrentChar+3) == 'e'
@@ -348,10 +426,11 @@ static int ParseFormula(bool ret)
 				&&*(GlobalCurrentChar+5) == 'p'
 				&&*(GlobalCurrentChar+6) == 't')
 			{
+				// attempt
                 GlobalCurrentChar += 7;
 				if (ProcessCode) value = BotAttempts;
 			}
-			else if(*(GlobalCurrentChar+1) == 'd'
+			else if((*(GlobalCurrentChar+1) == 'd'
 				&&*(GlobalCurrentChar+2) == 'd'
 				&&*(GlobalCurrentChar+3) == 'c'
 				&&*(GlobalCurrentChar+4) == 'o'
@@ -360,10 +439,12 @@ static int ParseFormula(bool ret)
 				&&*(GlobalCurrentChar+7) == 't'
 				&&*(GlobalCurrentChar+8) == 'e'
 				&&*(GlobalCurrentChar+9) == 'r'
-				&&*(GlobalCurrentChar+10)== '(')
+				&&*(GlobalCurrentChar+10)== '(') ||
+				(*(GlobalCurrentChar+1) == 'c'
+				&&*(GlobalCurrentChar+2) == '('))
 			{
-                // addcounter()
-				GlobalCurrentChar += 11;
+                // addcounter() ac()
+				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'd') ? 11 : 3;
 				// qfox: next literal needs to be parsed regardless of ProcessCode's value
 				int nextlit = ParseFormula(false);
 				if(ProcessCode)
@@ -383,18 +464,6 @@ static int ParseFormula(bool ret)
 				if (ProcessCode) 
 				{
 					value = nextlit < 0 ? -value : value;
-				}
-			}
-			else if(*(GlobalCurrentChar+1) == 'c'
-				&&*(GlobalCurrentChar+2) == '(')
-			{
-				GlobalCurrentChar += 3;
-				// qfox: next literal needs to be parsed regardless of ProcessCode's value
-				int nextlit = ParseFormula(false);
-				if(ProcessCode)
-				{
-					// todo: Throw an error for arguments >256?
-					value = (BotCounter[(nextlit & 0x7FFFFFFF) % 256] += value);
 				}
 			}
 			else
@@ -419,6 +488,7 @@ static int ParseFormula(bool ret)
                      // qfox: Requesting button for 0 means all buttons
                      //       pressed will be returned. Makes it easy to check
                      //       whether some button was the only button pressed.
+                     //		  BotInput[1] is the last input given (?)
                      if (value == 0) value = BotInput[1];
                      else value &= BotInput[1];
                 }
@@ -453,7 +523,7 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(2001);
 				return value;
 			}
 			if (ret) return value;
@@ -469,7 +539,7 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(3001);
 				return value;
 			}
 			if (ret) return value;
@@ -490,7 +560,7 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(4001);
 				return value;
 			}
 		case 'f':
@@ -505,18 +575,44 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(5001);
 				return value;
 			}
 			if (ret) return value;
 			break;
 		case 'i':
 			++GlobalCurrentChar;
-			if (ProcessCode) value = BotLoopVar;
+			if (ProcessCode) value = BotLoopVari;
+			if (ret) return value;
+			break;
+		case 'j':
+			++GlobalCurrentChar;
+			if (ProcessCode) value = BotLoopVarj;
+			if (ret) return value;
+			break;
+		case 'k':
+			++GlobalCurrentChar;
+			if (ProcessCode) value = BotLoopVark;
 			if (ret) return value;
 			break;
 		case 'l':
-			if(*(GlobalCurrentChar+1) == 'e'
+			if((*(GlobalCurrentChar+1) == 'b') ||
+				 (*(GlobalCurrentChar+1) == 'a'
+				&&*(GlobalCurrentChar+2) == 's'
+				&&*(GlobalCurrentChar+3) == 't'
+				&&*(GlobalCurrentChar+4) == 'b'
+				&&*(GlobalCurrentChar+5) == 'u'
+				&&*(GlobalCurrentChar+6) == 't'
+				&&*(GlobalCurrentChar+7) == 't'
+				&&*(GlobalCurrentChar+8) == 'o'
+				&&*(GlobalCurrentChar+9) == 'n'))
+			{
+				// lastbutton lb
+				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'b') ? 2 : 10;
+				if (ProcessCode) 
+					value = LastButtonPressed;
+			}
+			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'f'
 				&&*(GlobalCurrentChar+3) == 't')
 			{
@@ -535,7 +631,8 @@ static int ParseFormula(bool ret)
 				//	 returns the number of loops (doesn't change value)
 				if(value > 0 && ProcessCode)
 				{
-					if(BotLoopVar == 0)
+					// qfox: if the third counter is 0, we can nest another loop()
+					if(BotLoopVark == 0)
 					{
 						// qfox: Why was there a limit to 64k iterations?
 						//       Changed starting counter to 0, makes more
@@ -546,23 +643,53 @@ static int ParseFormula(bool ret)
 						//       this to be moved on after this loop, so the
 						//       last time won't be reset.
 						//       Value must be >0 so the last one is safe.
-						if (value>1) 
+                        int which = 0; // qfox: which loopcounter to reset afterwards?
+                        if (value>1) 
                         {
+                        	// qfox: I've just copied the code for each loopvar, seems easier
+                        	//		 and probably faster then throwing nested ?: in the for
                             char * pos;
-    						for(BotLoopVar = 0; BotLoopVar < value-1; BotLoopVar++)
-    						{
-                                pos = GlobalCurrentChar; // backup position (um, is it safe to copy pointers to chars like this?)
-    							ParseFormula(false);
-    							GlobalCurrentChar = pos;     // restore position
-    						}
+                            if (BotLoopVari == 0)
+                            {
+                            	which = 1;
+	    						for(; BotLoopVari < value-1; BotLoopVari++)
+	    						{
+	                                pos = GlobalCurrentChar; // qfox: backup position (um, is it safe to copy pointers to chars like this?)
+	    							ParseFormula(false);
+	    							GlobalCurrentChar = pos; // qfox: restore position
+	    						}
+	    					}
+                            else if (BotLoopVarj == 0)
+                            {
+                            	which = 2;
+	    						for(; BotLoopVarj < value-1; BotLoopVarj++)
+	    						{
+	                                pos = GlobalCurrentChar; // qfox: backup position (um, is it safe to copy pointers to chars like this?)
+	    							ParseFormula(false);
+	    							GlobalCurrentChar = pos; // qfox: restore position
+	    						}
+	    					}
+                            else
+                            {
+                            	which = 3;
+	    						for(; BotLoopVark < value-1; BotLoopVark++)
+	    						{
+	                                pos = GlobalCurrentChar; // qfox: backup position (um, is it safe to copy pointers to chars like this?)
+	    							ParseFormula(false);
+	    							GlobalCurrentChar = pos; // qfox: restore position
+	    						}
+	    					}
                         }
-						ParseFormula(false); // the last time, but this time the char pointer remains moved
-						BotLoopVar = 0;
+						ParseFormula(false); 			 	 // qfox: the last time, but this time the char pointer remains moved
+						// qfox: reset (the proper) counter
+						if (which == 1) BotLoopVari = 0;
+						else if (which == 2) BotLoopVarj = 0;
+						else BotLoopVark = 0;
 						
 					}
 					else
 					{
-						// qfox: Can't nest loops (but if this is desired, perhaps we can fix that...)
+						// qfox: For each nesting, we need an additional counter, I think nesting loop() three deep max will suffice here.
 						BotSyntaxError(1002);
 						return value;
 					}
@@ -580,7 +707,7 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(7001);
 				return value;
 			}
 			if (ret) return value;
@@ -591,7 +718,6 @@ static int ParseFormula(bool ret)
 				&&*(GlobalCurrentChar+3) == '(')
 			{
                 // mem()
-                // todo: allow fetching of one byte or one int somehow
                 GlobalCurrentChar += 4;
 				int nextlit = ParseFormula(false);
 				if (ProcessCode) {
@@ -600,9 +726,63 @@ static int ParseFormula(bool ret)
 					value = ARead[nextlit](nextlit);
 				}
 			}
+			else if(*(GlobalCurrentChar+1) == 'e'
+				&&*(GlobalCurrentChar+2) == 'm'
+				&&*(GlobalCurrentChar+3) == 'h'
+				&&*(GlobalCurrentChar+4) == '(')
+			{
+                // memh()
+                GlobalCurrentChar += 5;
+                
+				int nextlit = ParseFormula(false);
+				if (ProcessCode) {
+                    // qfox: Throw error if beyond boundry?
+                    // qfox: memh() will return the high nibble of a byte, the value
+                    //		 mem(arg) & 0xF0
+                    nextlit = (nextlit & 0x7FFFFFFF) % 65536;
+					value = (ARead[nextlit](nextlit) & 0xF0) >> 8;
+				}
+			}
+			else if(*(GlobalCurrentChar+1) == 'e'
+				&&*(GlobalCurrentChar+2) == 'm'
+				&&*(GlobalCurrentChar+3) == 'l'
+				&&*(GlobalCurrentChar+4) == '(')
+			{
+                // meml()
+                GlobalCurrentChar += 5;
+                
+				int nextlit = ParseFormula(false);
+				if (ProcessCode) {
+                    // qfox: Throw error if beyond boundry?
+                    // qfox: meml() will return the low nibble of a byte, the value
+                    //		 mem(arg) & 0x0F
+                    nextlit = (nextlit & 0x7FFFFFFF) % 65536;
+					value = ARead[nextlit](nextlit) & 0x0F;
+				}
+			}
+			else if(*(GlobalCurrentChar+1) == 'e'
+				&&*(GlobalCurrentChar+2) == 'm'
+				&&*(GlobalCurrentChar+3) == 'w'
+				&&*(GlobalCurrentChar+4) == '(')
+			{
+                // memw()
+                GlobalCurrentChar += 5;
+                
+				int nextlit = ParseFormula(false);
+				if (ProcessCode) {
+                    // qfox: Throw error if beyond boundry?
+                    // qfox: memw() will return 2bytes (a word), the value
+                    //		 (mem(arg) << 8) + (mem(arg+1)).
+                    int v1 = (nextlit & 0x7FFFFFFF) % 65536;
+                    int v2 = ((nextlit+1) & 0x7FFFFFFF) % 65536;
+                    v1 = ARead[v1](v1);
+					v2 = ARead[v2](v2);
+					value = (v1<<8)+v2;
+				}
+			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(8001);
 				return value;
 			}
 			if (ret) return value;
@@ -613,18 +793,7 @@ static int ParseFormula(bool ret)
 			++GlobalCurrentChar;
 			break;
 		case 'r':
-			if(*(GlobalCurrentChar+1) == 'a'
-				&&*(GlobalCurrentChar+2) == 'm'
-				&&*(GlobalCurrentChar+3) == '(')
-			{
-                // ram()
-				// qfox: absoleted by mem(), perhaps it should be removed? 
-                GlobalCurrentChar += 4;
-                // qfox: next literal needs to be parsed regardless of ProcessCode's value
-                int nextlit = ParseFormula(false);
-				if (ProcessCode) value = RAM[(nextlit & 0x7FFFFFFF) % 2048];
-			}
-			else if(*(GlobalCurrentChar+1) == 'i'
+			if(*(GlobalCurrentChar+1) == 'i'
 				&&*(GlobalCurrentChar+2) == 'g'
 				&&*(GlobalCurrentChar+3) == 'h'
 				&&*(GlobalCurrentChar+4) == 't')
@@ -657,7 +826,7 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(9001);
 				return value;
 			}
 			if (ret) return value;
@@ -716,7 +885,7 @@ static int ParseFormula(bool ret)
             }
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(10001);
 				return value;
 			}
 			if (ret) return value;
@@ -730,7 +899,26 @@ static int ParseFormula(bool ret)
 			}
 			else
 			{
-				BotSyntaxError(1001);
+				BotSyntaxError(11001);
+				return value;
+			}
+			if (ret) return value;
+			break;
+		case 'v':
+			if(*(GlobalCurrentChar+1) == 'a'
+				&&*(GlobalCurrentChar+2) == 'l'
+				&&*(GlobalCurrentChar+3) == 'u'
+				&&*(GlobalCurrentChar+4) == 'e')
+			{
+				// value
+				// qfox: value is completely transparent, more like a nop (or no-operation).
+				//		 could be used in a iif where there is no else, or to make it more
+				//		 clear how value is used internally...
+				GlobalCurrentChar += 5;
+			}
+			else
+			{
+				BotSyntaxError(12001);
 				return value;
 			}
 			if (ret) return value;
@@ -756,7 +944,6 @@ static int ParseFormula(bool ret)
 				// qfox: keep on reading input until no more numbers are encountered (0-9)
 				int ahead = 0;
 				value = 0;
-				// todo: border check (we dont want to check beyond our stringlength)
 				while (*(GlobalCurrentChar+ahead) >= '0' && *(GlobalCurrentChar+ahead) <= '9') {
 					if (negmode) value = (value*10)-(*(GlobalCurrentChar+ahead) - '0');
 					else value = (value*10)+(*(GlobalCurrentChar+ahead) - '0');
@@ -782,8 +969,7 @@ static int ParseFormula(bool ret)
 				// qfox: Keep on reading input until no more numbers are encountered (0-9)
 				int ahead = 0;
 				value = 0;
-				// todo: number-size check (int is max)
-				// todo: boundry-check (we dont want to check beyond our stringlength)
+				// todo: number-size check (int is max) -> do it when converting to bytecode
 				while ((*(GlobalCurrentChar+ahead) >= '0' && *(GlobalCurrentChar+ahead) <= '9')
 					|| (*(GlobalCurrentChar+ahead) >= 'A' && *(GlobalCurrentChar+ahead) <= 'F')) {
                     // qfox: next code is a little redundant, but it's either redundant or even harder to read.
@@ -807,60 +993,128 @@ static int ParseFormula(bool ret)
 			break;
 		default:
 			// qfox: Unknown characters should error out from now on. You can use spaces.
-			BotSyntaxError(1001);
+			BotSyntaxError(12001);
 			return value;
 		}
 	}
 	return value;
 }
 
-// qfox: abuse the "frames" for debugging. as long as i cant edit the dialog i'm forced to do this
-void debug(int n)
+
+/**
+ * qfox: print a number
+ **/
+static void debug(int n)
 {
-     SetDlgItemInt(hwndBasicBot,1017,n,FALSE);
+     SetDlgItemInt(hwndBasicBot,GUI_BOT_DEBUG,n,TRUE);
+}
+/**
+ * Print a string
+ **/
+static void debugS(LPCSTR s)
+{
+	SetDlgItemTextA(hwndBasicBot,GUI_BOT_DEBUG,s);
 }
 
-//Update BasicBot input
+/**
+ * qfox: when an error occurs, call this method to print the errorcode
+ **/
+static void error(int n)
+{
+     SetDlgItemInt(hwndBasicBot,GUI_BOT_ERROR,n,TRUE);
+}
+
+
+/**
+ * Update BasicBot input
+ **/
 void UpdateBasicBot()
 {
 	if(hwndBasicBot && BotRunning)
 	{
 		int i,j,k;
-		char *dummy = "dum";
-		
+
+		// qfox: If there is any input on the buffer, dont update yet.
+		//		 [0] means the number of inputs left on the BotInput buffer
 		if(BotInput[0])
 			return;
 		
-		//Create the bot output...
+		// luke: Create the bot output...
+		// qfox: 1; just computing 1 frame of input.
 		BotInput[0] = 1;
+		
+		// qfox: when the bot starts, or the "end when" is reached, NewAttempt is set.
+		//		this boolean tells you to reset/init stuff.
 		if(NewAttempt)
 		{
-			BotInput[1] = 65536;
-			NewAttempt = 0;
-			AttemptPointer = 0;
-			BotFrame = 0;
-			memset(BotCounter, 0, 1024);
+			if (UpdateFromGUI)
+				FromGUI();
+			LastButtonPressed = 0;
+			BotInput[1] = 65536; 		 // qfox: 17th flag, interpreted below as start of a new frame.
+										 //		  it loads the savestate when encountered in input.cpp.
+										 //		  should handle this more gracefully some day.
+			NewAttempt = false;	 		 // qfox: running an attempt now
+			AttemptPointer = 0;  		 // qfox: offset, frame counter?
+			BotFrame = 0;        		 // qfox: frame counter...
+			memset(BotCounter, 0, BOT_MAXCOUNTERS*4); // qfox: sets all the counters to 0. *4 because
+													  //	   memset writes bytes and the counters are
+													  //	   ints (4 bytes! :)
 		}
 		else
 		{
-			//Check if goal is met
-			if(BotFrame > 1020 || (int) (NextRandom() % 1000) < EvaluateFormula(Formula[20], &dummy, false))
+			// luke: Check if goal is met
+			// qfox: Goal is met if the frame count goes above 1020, or if the 
+			//		 result was higher then a random number between 0 and 1000.
+			//		 I think the random part needs to be removed as it has no
+			//		 added value. You either get your goal or you dont. leave
+			//		 the original, in case we want to revert it.
+			
+			//if(BotFrame > (BOT_MAXFRAMES-4) || (int) (NextRandom() % 1000) < EvaluateFormula(Formula[20]))
+			if(BotFrame > (BOT_MAXFRAMES-5) || EvaluateFormula(Formula[CODE_STOP]) == 1000)
 			{
+
 				int currentscore[4];
-				int better = 0;
+				bool better = false;
 
-				NewAttempt = 1;
+				// qfox: this was the last frame of this attempt
+				NewAttempt = true;
 
-				//Check if better score
+				// luke: Check if better score
+				// qfox: this evaluates each of the four strings (over and over again)
+				//		 which can become rather sluggish.
+				//		 maximize, tie1, tie2, tie3
 				for(i=0; i < 4; i++)
 				{
-					currentscore[i] = EvaluateFormula(Formula[16+i], &dummy, false);
+					currentscore[i] = EvaluateFormula(Formula[CODE_MAX+i]);
 				}
+
+				// qfox: update last score
+				//		 300 should be enough..?
+				char lastscore[300];
+				sprintf(lastscore, "%d %d %d %d (%dth)", currentscore[0], currentscore[1], currentscore[2], currentscore[3], BotAttempts);
+				SetDlgItemText(hwndBasicBot,GUI_BOT_LAST,lastscore);
+				// qfox: update avg score
+				memset(lastscore, 0, 300); // clear the array
+
+				// qfox: update the averages
+				for (i=0; i<4; ++i)
+					AverageScore[i] = ((AverageScore[i]*BotAttempts)+currentscore[i])/(BotAttempts+1);
+				// qfox: show them
+				//sprintf(lastscore, "%d.1 %d.1 %d.1 %d.1", AverageScore[0], AverageScore[1], AverageScore[2], AverageScore[3]);
+				//SetDlgItemText(hwndBasicBot,GUI_BOT_AVG,lastscore);
+				SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGMAX,AverageScore[0], TRUE);
+				SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE1,AverageScore[1], TRUE);
+				SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE2,AverageScore[2], TRUE);
+				SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE3,AverageScore[3], TRUE);
+
+				// qfox: compare all scores. if scores are not equal, a break _will_
+				//		 occur. else the next will be checked. if all is equal, the
+				//		 old best is kept.
 				for(i=0; i < 4; i++)
 				{
 					if(currentscore[i] > BotBestScore[i])
 					{
-						better = 1;
+						better = true;
 						break;
 					}
 					else if(currentscore[i] < BotBestScore[i])
@@ -868,31 +1122,45 @@ void UpdateBasicBot()
 						break;
 					}
 				}
-				//Update best
+				
+				// luke: Update best
 				if(better)
 				{
-					char tempstring[4096];
-					char symbols[] = "ABET^v<>ABET^v<>"; //mbg merge 7/18/06 changed dim to unspecified to leave room for the null
-					int seenplayer2=0;
+
+					#define BOT_RESULTBUFSIZE (BOT_MAXFRAMES*4)
+					char tempstring[BOT_RESULTBUFSIZE];				// qfox: used for the "result" part. last time i checked 1024*12 is > 4k, but ok.
+					char symbols[] = "ABET^v<>ABET^v<>"; 			//mbg merge 7/18/06 changed dim to unspecified to leave room for the null
+					bool seenplayer2 = false;						// qfox: bool keeps track of player two inputs
+					// qfox: update the scores
 					for(i = 0; i < 4; i++)
 					{
 						BotBestScore[i] = currentscore[i];
 					}
+					// qfox: copy the new best run
 					for(i = 0; i < AttemptPointer; i++)
 					{
 						BestAttempt[i] = CurrentAttempt[i];
 					}
-					for(; i < 1024; i++)
+					// qfox: set the remainder of the array to -1, indicating a "end of run"
+					for(; i < BOT_MAXFRAMES; i++)
 					{
 						BestAttempt[i] = -1;
 					}
-					sprintf(tempstring, "%d %d %d %d (%d attempt)", BotBestScore[0], BotBestScore[1], BotBestScore[2], BotBestScore[3], BotAttempts);
-					SetDlgItemText(hwndBasicBot,1018,tempstring);
-					memset(tempstring, 0, 4096);
-					k = 0;
 
-					//Make output as text
-					for(i = 0; i < 1024 && BestAttempt[i] != -1 && k < 4095; i++)
+					// qfox: update best score
+					sprintf(tempstring, "%d %d %d %d (%dth)", BotBestScore[0], BotBestScore[1], BotBestScore[2], BotBestScore[3], BotAttempts);
+					SetDlgItemText(hwndBasicBot,GUI_BOT_BESTRESULT,tempstring);
+					memset(tempstring, 0, BOT_RESULTBUFSIZE); // clear the array
+					
+					// qfox: create the run in ascii
+					k = 0; // keep track of len, needs to be below bufsize
+					// luke: Make output as text
+					// qfox: while you're not exceeding the max of frames, a
+					//		 frame had input, and you're not exceeding the bufsize...
+					//		 Warning: the second condition prevents a bufferoverrun,
+					//		          -21 is because between checks a max of 21 chars
+					//				  could be added.
+					for(i = 0; i < BOT_MAXFRAMES && BestAttempt[i] != -1 && k < BOT_RESULTBUFSIZE-21; i++)
 					{
 						tempstring[k] = '0' + ((i/10) % 10);
 						k++;
@@ -918,36 +1186,62 @@ void UpdateBasicBot()
 						tempstring[k] = ' ';
 						k++;
 					}
-					SetDlgItemText(hwndBasicBot,1019,tempstring);
+
+					// qfox: update best score keys
+					SetDlgItemText(hwndBasicBot,GUI_BOT_KEYS,tempstring);
 				}
 			}
-			else //Goal not met
+			else // luke: Goal not met
 			{
-				//Generate 1 frame of output
+				// luke: Generate 1 frame of output
+				// qfox: reset input
 				BotInput[1] = 0;
 				
+				// qfox: for two players, respectfully compute the probability
+				//		 for A B select start up down left and right buttons. In
+				//		 that order. If the number is higher then the generated
+				//		 random number, the button is pressed :)
 				for(i=0;i<16;i++)
 				{
-					if((int) (NextRandom() % 1000) < EvaluateFormula(Formula[i], &dummy, false))
+					if((int) (NextRandom() % 1000) < EvaluateFormula(Formula[i]))
 					{
+						// qfox: button flags:
+						// 		button - player 1 - player 2
+						//		A		 	1			 9
+						//		B		 	2			10
+						//		select	 	3			11
+						//		start	 	4			12
+						// 		up		 	5			13
+						// 		down	 	6			14
+						//		left	 	7			15
+						//		right	 	8			16
+						//		The input code will read the value of BotInput[1]
+						//		If flag 17 is set, it will load a savestate, else
+						//		it takes this input and puts the lower byte in 1
+						//		and the upper byte in 2.
 						BotInput[1] |= 1 << i;
 					}
 				}
 
-				//Save what we've done
-				if(AttemptPointer < 1024)
+				// luke: Save what we've done
+				// qfox: only if we're not already at the max, should we 
+				//		 perhaps not check sooner if we are going to
+				//		 anyways?
+				if(AttemptPointer < BOT_MAXFRAMES)
 				{
 					CurrentAttempt[AttemptPointer] = BotInput[1];
 					AttemptPointer++;
 				}
 				
-				//Run extra commands
-				EvaluateFormula(Formula[21],&dummy, false);
-				EvaluateFormula(Formula[22],&dummy, false);
+				// luke: Run extra commands
+				EvaluateFormula(ExtraCode);
+				// qfox: remember the buttons pressed in this frame
+				LastButtonPressed = BotInput[1];
 			}
 		}
 
-		//Update statistics
+		// luke: Update statistics
+		// qfox: flag 17 for input means the code will load a savestate next. looks kinda silly. to be changed.
 		if(BotInput[1] == 65536)
 		{
 			BotAttempts++;
@@ -955,18 +1249,72 @@ void UpdateBasicBot()
 		else
 		{
 			BotFrames++;
+			// qfox: BotFrame is redundant? always equal to AttemptPointer
 			BotFrame++;
 		}
-		if(BotFrames % 100 == 0)
+		// qfox: increase the statistics
+		if((BotFrames % 500) == 0)
 		{
-			SetDlgItemInt(hwndBasicBot,1037,BotAttempts,FALSE);
-			// SetDlgItemInt(hwndBasicBot,1017,BotFrames,FALSE); // qfox: using this to debug...
+			SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPTS,BotAttempts,TRUE);
+			SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES,BotFrames,TRUE);
 		}
 	}
-    if(EvaluateError) StopBasicBot(); // qfox: When the evaluate function errors out, this
-                                      //       var is set. In that case stop running.
 }
 
+
+/**
+ * Check the current settings for syntax validity
+ **/
+void CheckCode()
+{
+	EvaluateError = false;
+	for(int i=0;i<8;i++)
+	{
+		if (EvaluateError)
+			break;
+		switch (i)
+		{
+		case 0:
+			debugS("Error at A");
+			break;
+		case 1:
+			debugS("Error at B");
+			break;
+		case 2:
+			debugS("Error at Start");
+			break;
+		case 3:
+			debugS("Error at Select");
+			break;
+		case 4:
+			debugS("Error at up");
+			break;
+		case 5:
+			debugS("Error at down");
+			break;
+		case 6:
+			debugS("Error at left");
+			break;
+		case 7:
+			debugS("Error at right");
+			break;
+		default:
+			break;
+		}
+		EvaluateFormula(Formula[i]);
+	}
+	debugS("Error at extra code");
+	EvaluateFormula(ExtraCode);
+	if (!EvaluateError)
+	{
+		debugS("Code syntax ok!");
+		error(0);
+	}
+}
+
+/**
+ * qfox: save code seems to be good.
+ **/
 static void SaveBasicBot()
 {
 	const char filter[]="Basic Bot(*.bot)\0*.bot\0";
@@ -1019,44 +1367,27 @@ static void SaveBasicBot()
 		fputc('o',fp);
 		fputc('t',fp);
 		fputc(0,fp);
-		for(i=0;i<23;i++)
+		for(i=0;i<BOT_FORMULAS;i++)
 		{
-			for(j=0;j<1024;j++)
+			for(j=0;j<BOT_MAXCODE;j++)
 			{
 				fputc(Formula[i][j],fp);
 			}
+		}
+		for(j=0;j<BOT_MAXCODE;j++)
+		{
+			fputc(ExtraCode[j],fp);
 		}
 		fclose(fp);
 	}
 }
 
-static void StopBasicBot() 
-{
-    BotRunning = 0;
-    BotAttempts = BotFrames = 0;
-    BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
-    NewAttempt = 1;
-}
-static void StartBasicBot() {
-    if (hwndBasicBot)
-    {
-        int i;
-        BotRunning = 1;
-        for(i = 0; i < 8; i++)
-        {
-        	GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)],1024);
-        }
-        for(i = 0; i < 4; i++)
-        {
-        	GetDlgItemText(hwndBasicBot,1010+i,Formula[16+i],1024);
-        }
-        GetDlgItemText(hwndBasicBot, 1009, Formula[20],1024);
-        GetDlgItemText(hwndBasicBot, 1020, Formula[21],1024);
-        GetDlgItemText(hwndBasicBot, 1022, Formula[22],1024);
-    }
-}
-
-//Loads a previously saved file
+/**
+ * luke: Loads a previously saved file
+ * qfox: code seems good
+ *		 do need to add ensurance that saved file has the same BOT_MAXCODE value 
+ *		 as currently set, or offer some kind of support for this "problem"
+ **/
 static void LoadBasicBot()
 {
 	const char filter[]="Basic Bot (*.bot)\0*.bot\0";
@@ -1077,7 +1408,7 @@ static void LoadBasicBot()
 	{
 		int i,j;
 		
-		//Save the directory
+		// luke: Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
 			free(BasicBotDir);
@@ -1096,9 +1427,9 @@ static void LoadBasicBot()
 			return;
 		}
 		
-		for(i=0;i<23;i++)
+		for(i=0;i<BOT_FORMULAS;i++)
 		{
-			for(j=0;j<1024;j++)
+			for(j=0;j<BOT_MAXCODE;j++)
 			{
 				Formula[i][j] = fgetc(fp);
 				if(Formula[i][j] & 128)
@@ -1107,32 +1438,138 @@ static void LoadBasicBot()
 				}
 			}
 		}
+		for(j=0;j<BOT_MAXCODE;j++)
+		{
+			ExtraCode[j] = fgetc(fp);
+			if(ExtraCode[j] & 128)
+			{
+				ExtraCode[j] = 0;
+			}
+		}
 		fclose(fp);
 	}
 }
 
 
-static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/**
+ * qfox: moved code to start function to be called from other places.
+ *		 the code puts all the code from gui to variables and starts bot.
+ **/
+static void StartBasicBot() {
+	// todo: make sure you are or get into botmode here
+	BotRunning = true;
+	FromGUI();
+	for (int i=0; i<4; ++i)
+		AverageScore[4] = 0.0;
+	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,(LPTSTR)"Stop!");
+}
+
+/**
+ * qfox: moved code to stop function to be called from other places
+ **/
+static void StopBasicBot() 
 {
-	int i;
-	DSMFix(uMsg);
-	switch(uMsg)
+    BotRunning = false;
+    BotAttempts = 0;
+    BotFrames = 0;
+    BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
+    NewAttempt = true;
+	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,"Run!");
+}
+
+
+/**
+ * qfox: put all the editable values from the gui to the variables
+ *		 usable for a future "update" button :)
+ **/
+static void FromGUI()
+{
+	if (hwndBasicBot)
 	{
-	case WM_INITDIALOG:
-		break;
-	case WM_CLOSE:
-	case WM_QUIT:
+        int i;
+        for(i = 0; i < 8; i++)
+        {
+        	// qfox: id 1000-1008 are for the buttons
+        	GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)], BOT_MAXCODE);
+        }
+        for(i = 0; i < 4; i++)
+        {
+        	// qfox: id 1010-1014 are for goals
+			GetDlgItemText(hwndBasicBot,1010+i,Formula[CODE_MAX+i], BOT_MAXCODE);
+        }
+        // qfox: id 1009 is for "end when"
+		GetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP], BOT_MAXCODE);
+        
+        GetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode, BOT_MAXCODE);
+	}
+	UpdateFromGUI = false;
+}
+
+/**
+ * qfox: put all the editable values from the variables to the gui
+ **/
+static void ToGUI()
+{
+	if (hwndBasicBot && Formula && ExtraCode)
+	{
+		int i;
 		for(i = 0; i < 8; i++)
 		{
-			GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)],1024);
+			SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)]);
 		}
 		for(i = 0; i < 4; i++)
 		{
-			GetDlgItemText(hwndBasicBot,1010+i,Formula[16+i],1024);
+			SetDlgItemText(hwndBasicBot,1010+i,Formula[CODE_MAX+i]);
 		}
-		GetDlgItemText(hwndBasicBot, 1009, Formula[20],1024);
-		GetDlgItemText(hwndBasicBot, 1020, Formula[21],1024);
-		GetDlgItemText(hwndBasicBot, 1022, Formula[22],1024);
+		// qfox: end when field
+		SetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP]);
+
+		SetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode);
+	}
+}
+
+
+/**
+ * qfox: initializes the variables to 0 (and frame=1)
+ **/
+static void InitVars()
+{
+	memset(Formula, 0, BOT_FORMULAS*BOT_MAXCODE);
+	memset(ExtraCode, 0, BOT_MAXCODE);
+	int i;
+	for(i = 0; i < BOT_FORMULAS; i++)
+	{
+		Formula[i][0] = '0';
+	}
+	ExtraCode[0] = '0';
+	Formula[CODE_STOP][0] = 'f';
+	Formula[CODE_STOP][1] = 'r';
+	Formula[CODE_STOP][2] = 'a';
+	Formula[CODE_STOP][3] = 'm';
+	Formula[CODE_STOP][4] = 'e';
+	Formula[CODE_STOP][5] = '=';
+	Formula[CODE_STOP][6] = '1';
+}
+
+/**
+ * qfox: called from windows. main gui (=dialog) control.
+ **/
+static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int i;
+	DSMFix(uMsg); // qfox: stops sound on 5 of the messages...
+	switch(uMsg)
+	{
+	case WM_INITDIALOG:
+		// todo: load last used settings -> will have to figure out the load/save part first.
+		// todo: why the hell is this event not firing?
+		CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 0); // select the player1 radiobutton
+		break;
+	case WM_CLOSE:
+	case WM_QUIT:
+		// todo: save last used settings
+		// qfox: before closing, it quickly copies the contents to the variables... for some reason.
+		FromGUI();
 		DestroyWindow(hwndBasicBot);
 		hwndBasicBot=0;
 		break;
@@ -1140,192 +1577,137 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		switch(HIWORD(wParam))
 		{
 		case BN_CLICKED:
+			bool p1 = false; // qfox: if a player radiobutton is pressed, this tells me which one
 			switch(LOWORD(wParam))
 			{
-			case 1008: //change player button clicked
-				EditPlayer ^= 1;
-				SetDlgItemText(hwndBasicBot,1008,(LPTSTR)(EditPlayer?"Edit Player 2":"Edit Player 1"));
-				SetDlgItemText(hwndBasicBot,2000,(LPTSTR)(EditPlayer?"Player 1":"Player 2"));
+			case GUI_BOT_P1:
+				if (EditPlayerOne) break;
+				p1 = true;
+			case GUI_BOT_P2: 
+				if (!p1 && !EditPlayerOne) break;
+
+				// qfox: if the player, that was clicked on, is already being edited, dont bother
+				//		 otherwise...
+				EditPlayerOne = (p1 == true);
+				// qfox: swap player code info
 				for(i = 0; i < 8; i++)
 				{
-					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?8:0)],1024);
-					SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)]);
+					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?8:0)],BOT_MAXCODE);
+					SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)]);
 				}
 				break;
-			case 1014: //Save button clicked
-				for(i = 0; i < 8; i++)
-				{
-					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)],1024);
-				}
-				for(i = 0; i < 4; i++)
-				{
-					GetDlgItemText(hwndBasicBot,1010+i,Formula[16+i],1024);
-				}
-				GetDlgItemText(hwndBasicBot, 1009, Formula[20],1024);
-				GetDlgItemText(hwndBasicBot, 1020, Formula[21],1024);
-				GetDlgItemText(hwndBasicBot, 1022, Formula[22],1024);
-				StopSound();
+			case GUI_BOT_SAVE:
+				StopSound(); // qfox: required?
+				FromGUI();
 				SaveBasicBot();
 				break;			
-			case 1015: //Load button clicked
-				StopSound();
+			case GUI_BOT_LOAD:
+				StopSound(); // qfox: required?
 				LoadBasicBot();
-				for(i = 0; i < 8; i++)
-				{
-					SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)]);
-				}
-				for(i = 0; i < 4; i++)
-				{
-					SetDlgItemText(hwndBasicBot,1010+i,Formula[16+i]);
-				}
-				SetDlgItemText(hwndBasicBot, 1009, Formula[20]);
-				SetDlgItemText(hwndBasicBot, 1020, Formula[21]);
-				SetDlgItemText(hwndBasicBot, 1022, Formula[22]);
+				ToGUI();
 				break;
-			case 1021: //Play best button clicked
+			case GUI_BOT_BEST:
+				// qfox: if bot is running and no frames left on the botinput buffer
     			if(BotRunning == 0 && BotInput[0] == 0)
 				{
-					for(i = 0; i < 1022 && BestAttempt[i] != -1; i++)
+					// qfox: feed BotInput the inputs until -1 is reached
+					for(i = 0; i < (BOT_MAXFRAMES-2) && BestAttempt[i] != -1; i++)
 					{
 						BotInput[i+2] = BestAttempt[i];
 					}
-					BotInput[0] = i+1;
-					BotInput[1] = 65536;
+					BotInput[0] = i+1; 		// qfox: the number of botframes currently in the variable
+					BotInput[1] = 65536; 	// qfox: flag 17, when processed by input.h this causes the
+											//		 code to load the savestate. should really change
+											//		 this construction, its ugly (but i guess it works)
 				}
 				break;
-			case 1016: //Run button clicked
+			case GUI_BOT_RUN:
 				if(BotRunning)
-				{
                     StopBasicBot();
-					//BotAttempts = BotFrames = 0;
-					//BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
-					//NewAttempt = 1;
-				}
-				else // qfox: The else code does not need to be run (again) if stopping
-                {
-                     StartBasicBot();
-                     /*
-                    BotRunning = 1;
-    				for(i = 0; i < 8; i++)
-    				{
-    					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)],1024);
-    				}
-    				for(i = 0; i < 4; i++)
-    				{
-    					GetDlgItemText(hwndBasicBot,1010+i,Formula[16+i],1024);
-    				}
-    				GetDlgItemText(hwndBasicBot, 1009, Formula[20],1024);
-    				GetDlgItemText(hwndBasicBot, 1020, Formula[21],1024);
-    				GetDlgItemText(hwndBasicBot, 1022, Formula[22],1024);
-                    */
-                }
-				SetDlgItemText(hwndBasicBot,1016,(LPTSTR)(BotRunning?"Stop":"Run!"));
+				else
+                    StartBasicBot();
 				break;
-			case 1036: //Clear button clicked
+			case GUI_BOT_CLEAR:
 				StopSound();
 				if(MessageBox(hwndBasicBot, "Clear all text?", "Confirm clear", MB_YESNO)==IDYES)
 				{
-					memset(Formula,0, 24*1024);
-					for(i = 0; i < 24; i++)
-					{
-						Formula[i][0] = '0';
-					}
-					Formula[20][0] = 'f';
-					Formula[20][1] = 'r';
-					Formula[20][2] = 'a';
-					Formula[20][3] = 'm';
-					Formula[20][4] = 'e';
-					Formula[20][5] = '=';
-					Formula[20][6] = '1';
-					for(i = 0; i < 8; i++)
-					{
-						SetDlgItemText(hwndBasicBot,1000+i,Formula[i+(EditPlayer?0:8)]);
-					}
-					for(i = 0; i < 4; i++)
-					{
-						SetDlgItemText(hwndBasicBot,1010+i,Formula[16+i]);
-					}
-					SetDlgItemText(hwndBasicBot, 1009, Formula[20]);
-					SetDlgItemText(hwndBasicBot, 1020, Formula[21]);
-					SetDlgItemText(hwndBasicBot, 1022, Formula[22]);
+					InitVars();
+					ToGUI();
 				}
 				break;
-
+			case GUI_BOT_CLOSE:
+				FromGUI(); // qfox: might tear this out later. seems a little pointless.
+				DestroyWindow(hwndBasicBot);
+				hwndBasicBot=0;
+				break;
+			case GUI_BOT_BOTMODE:
+				// qfox: toggle external input mode
+				FCEU_SetBotMode(FCEU_BotMode()?0:1);
+				//SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,FCEU_BotMode()?"Disable external input":"Enable external input");
+				// qfox: no need for the previous line, will be done when UpdateExternalButton() gets called by FCEU_BotMode()
+				break;
+			case GUI_BOT_CHECK:
+				// qfox: check the current code for errors, without starting attempts
+				CheckCode();
+				break;
+			case GUI_BOT_UPDATE:
+				// qfox: put a flag up, when the current attempt stops, let the code 
+				//		 refresh the variables with the data from gui, without stopping.
+				UpdateFromGUI = true;
+				break;
 			default:
 				break;
 			}
 		}
-
-		if(!(wParam>>16)) //Close button clicked
+/*
+		if(!(wParam>>16)) // luke: Close button clicked // qfox: why is this not one of the cases above. it'll take me ages to find it's id now :(
 		{
-			switch(wParam&0xFFFF)
+			// qfox: there used to be a switch here with just one label, but I have no idea why...
+			if ((wParam&0xFFFF) == 1)
 			{
-			case 1:
-				for(i = 0; i < 8; i++)
-				{
-					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayer?0:8)],1024);
-				}
-				for(i = 0; i < 4; i++)
-				{
-					GetDlgItemText(hwndBasicBot,1010+i,Formula[16+i],1024);
-				}
-				GetDlgItemText(hwndBasicBot, 1009, Formula[20],1024);
-				GetDlgItemText(hwndBasicBot, 1020, Formula[21],1024);
-				GetDlgItemText(hwndBasicBot, 1022, Formula[22],1024);
+				FromGUI();
 				DestroyWindow(hwndBasicBot);
 				hwndBasicBot=0;
-				break;
 			}
 		}
 		break;
+*/
 	default:
 		break;
 	}
 	return 0;
 }
 
+/**
+ * qfox: creates dialog
+ **/
 void CreateBasicBot()
 {
-	static int BotNeedsInit = 1;
-	int i;
-	if(BotNeedsInit) 
-	{
-		BotNeedsInit = 0;
-		SeedRandom(rand());
-		memset(Formula,0, 24*1024);
-		for(i = 0; i < 24; i++)
-		{
-			Formula[i][0] = '0';
-		}
-		Formula[20][0] = 'f';
-		Formula[20][1] = 'r';
-		Formula[20][2] = 'a';
-		Formula[20][3] = 'm';
-		Formula[20][4] = 'e';
-		Formula[20][5] = '=';
-		Formula[20][6] = '1';
-	}
+	SeedRandom(rand());
+	InitVars();
 
 	if(hwndBasicBot) //If already open, give focus
 	{
 		SetFocus(hwndBasicBot);
-		return;
 	}
-	
-	//Create
-	hwndBasicBot=CreateDialog(fceu_hInstance,"BASICBOT",NULL,BasicBotCallB);
-	EditPlayer = 1;
-	BotRunning = 0;
-	for(i = 0; i < 8; i++)
+	else
 	{
-		SetDlgItemText(hwndBasicBot,1000+i,Formula[i]);
+		//Create
+		hwndBasicBot=CreateDialog(fceu_hInstance,"BASICBOT",NULL,BasicBotCallB);
+		EditPlayerOne = true;
+		BotRunning = false;
+		ToGUI();
 	}
-	for(i = 0; i < 4; i++)
-	{
-		SetDlgItemText(hwndBasicBot,1010+i,Formula[16+i]);
-	}
-	SetDlgItemText(hwndBasicBot, 1009, Formula[20]);
-	SetDlgItemText(hwndBasicBot, 1020, Formula[21]);
-	SetDlgItemText(hwndBasicBot, 1022, Formula[22]);
 }
 
+
+/**
+ * Update the text on this button. Called from input, when this state changes.
+ **/
+void UpdateExternalButton()
+{
+	if (hwndBasicBot)
+	{
+		SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,FCEU_BotMode()?"Disable external input":"Enable external input");
+	}
+}
