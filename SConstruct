@@ -30,7 +30,7 @@ print "platform: ", env['PLATFORM']
 if env['PLATFORM'] == 'cygwin':
   env.Append(CCFLAGS = " -mno-cygwin")
   env.Append(LINKFLAGS = " -mno-cygwin")
-  env['LIBS'] = ['ddraw','dinput','dsound','gdi32','dxguid','winmm','shell32','wsock32','comdlg32','ole32'];
+  env['LIBS'] = ['wsock32'];
 
 conf = Configure(env)
 if not conf.CheckLib('SDL'):
@@ -60,6 +60,8 @@ if env['FRAMESKIP']:
 # parse SDL cflags/libs
 env.ParseConfig('sdl-config --cflags --libs')
 
+print "LIBS:",env['CCFLAGS']
+#env['IBS'] = ['wsock32', 'SDL', 'z', 'mingw32', 'SDL']
 Export('env')
 
 SConscript(['src/SConscript'])

@@ -53,6 +53,7 @@ typedef signed int int32;
 #define fstat _fstat
 #define mkdir _mkdir
 #define alloca _alloca
+#define snprintf _snprintf
 #define W_OK 2
 #define R_OK 2
 #define X_OK 1

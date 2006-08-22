@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+//http://www.geisswerks.com/ryan/FAQS/timing.html
+
 static uint64 tmethod,tfreq;
 static uint64 desiredfps;
 
@@ -27,8 +29,11 @@ int32 fps_scale = 256;
 
 static void RefreshThrottleFPS(void)
 {
+	printf("WTF\n");
+	fflush(stdout);
  desiredfps=FCEUI_GetDesiredFPS()>>8;
  desiredfps=(desiredfps*fps_scale)>>8;
+ 
 }
 
 static uint64 GetCurTime(void)
@@ -47,56 +52,102 @@ static uint64 GetCurTime(void)
 
 }
 
+static uint64 ttime,ltime;
+
 static void InitSpeedThrottle(void)
 {
- tmethod=0;
- if(QueryPerformanceFrequency((LARGE_INTEGER*)&tfreq))
- {
-  tmethod=1;
- }
- else
-  tfreq=1000;
- tfreq<<=16;    /* Adjustment for fps returned from FCEUI_GetDesiredFPS(). */
+	timeBeginPeriod(1);
+	SetThreadAffinityMask(GetCurrentThread(),1);
+	
+
+	tmethod=0;
+	if(QueryPerformanceFrequency((LARGE_INTEGER*)&tfreq)) {
+		tmethod=1;
+	}
+	else tfreq=1000;
+
+	tfreq<<=16;    /* Adjustment for fps returned from FCEUI_GetDesiredFPS(). */
+	ltime = 0; //mbg
+}
+
+///Resets the throttle timing. use this when the player releases the turbo
+void ResetSpeedThrottle() {
+	ltime = 0;
 }
 
 
 static int SpeedThrottle(void)
 {
- static uint64 ttime,ltime;
+	//the desired running time for this frame
+	uint64 desiredRunningTime = tfreq/desiredfps;
 
- waiter:
+	ttime = GetCurTime();
 
- ttime=GetCurTime();
+	//if this is our first time, save ltime and bail out
+	if(ltime == 0) {
+		ltime = ttime;
+		return 0;
+	}
 
- if( (ttime-ltime) < (tfreq/desiredfps) )
- {
-  uint64 sleepy;
-  sleepy=(tfreq/desiredfps)-(ttime-ltime);  
-  sleepy*=1000;
-  if(tfreq>=65536)
-	  sleepy/=tfreq>>16;
-  else
-      sleepy=0;
-  if(sleepy>100)
-  {
-   // block for a max of 100ms to
-   // keep the gui responsive
-   Sleep(100);
-   return 1;
-  }
-  Sleep(sleepy);
-  goto waiter;
- }
- if( (ttime-ltime) >= (tfreq*4/desiredfps))
-  ltime=ttime;
- else
- {
-  ltime+=tfreq/desiredfps;
+	//otherwise calculate our delta
+	uint64 delta = ttime-ltime;
+	
+	/*printf("%20I64d %20I64d\n",delta,desiredRunningTime);
+	fflush(stdout);*/
+	if( delta < desiredRunningTime ) {
+		//if the elapsed time is less than the desired running time
 
-  if( (ttime-ltime) >= (tfreq/desiredfps) ) // Oops, we're behind!
-  return(1);
- }
- return(0);
+		//sleepy gets the time that needs to be slept.
+		//it is then converted to ms<<16
+		uint64 sleepy = desiredRunningTime-delta; 
+		//sleepy *= 1000;
+		//if we have more than 1 ms to sleep, sleep 1 ms and return
+		if(sleepy>=65536) {
+			Sleep(1);
+			return 1;
+		} else {
+			//otherwise, we can't throttle for less than 1ms. assume we're close enough and return
+			ltime += desiredRunningTime;
+			return 0;
+		}
+
+		//sleepy*=1000;
+		//if(tfreq>=65536)
+		//	sleepy/=tfreq>>16;
+		//else
+		//	sleepy=0;
+		//if(sleepy>100)
+		//{
+		//	// block for a max of 100ms to
+		//	// keep the gui responsive
+		//	Sleep(100);
+		//	return 1;
+		//}
+		//Sleep(sleepy);
+		//goto waiter;
+	} else {
+		//we're behind...
+		if(delta > 2*desiredRunningTime) {
+			//if we're behind by 2 frames, then reset the throttling
+			ResetSpeedThrottle();
+		} else {
+			//we're only behind by part of a frame
+			//just don't throttle!
+			ltime += desiredRunningTime;
+		}
+		return 0;
+	}
+	//}
+	//if( (ttime-ltime) >= (tfreq*4/desiredfps))
+	//	ltime=ttime;
+	//else
+	//{
+	//	ltime+=tfreq/desiredfps;
+
+	//	if( (ttime-ltime) >= (tfreq/desiredfps) ) // Oops, we're behind!
+	//		return(1);
+	//}
+	//return(0);
 }
 
 // Quick code for internal FPS display.

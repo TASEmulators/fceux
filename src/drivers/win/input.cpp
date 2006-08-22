@@ -125,6 +125,7 @@ static void UpdateTopRider(void);
 
 static uint32 JSreturn=0;
 int NoWaiting=0;
+bool turbo = false;
 
 #include "keyscan.h"
 static unsigned char *keys=0;
@@ -1226,8 +1227,8 @@ static struct
 	{ EMUCMD_FRAME_ADVANCE, 			SCAN_TAB, },
 	{ EMUCMD_SCREENSHOT,				SCAN_F9 },
 	{ EMUCMD_HIDE_MENU_TOGGLE,			SCAN_ESCAPE },
-	//{ EMUCMD_SPEED_SLOWER, 				SCAN_MINUS, }, // think about these
-	//{ EMUCMD_SPEED_FASTER, 				SCAN_EQUAL, }, // think about these
+	{ EMUCMD_SPEED_SLOWER, 				SCAN_MINUS, }, // think about these
+	{ EMUCMD_SPEED_FASTER, 				SCAN_EQUAL, }, // think about these
 	{ EMUCMD_SPEED_TURBO, 				SCAN_GRAVE, }, //tilde
 	{ EMUCMD_SAVE_SLOT_0, 				SCAN_0, },
 	{ EMUCMD_SAVE_SLOT_1, 				SCAN_1, },
@@ -1826,11 +1827,13 @@ void MapInput(void)
 
 void FCEUD_TurboOn(void)
 {
-	NoWaiting|=1;
+	//NoWaiting|=1;
+	turbo = 1;
 }
 
 void FCEUD_TurboOff(void)
 {
-	NoWaiting&=~1;
+	//NoWaiting&=~1;
+	turbo = false;
 }
 

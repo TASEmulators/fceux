@@ -2,6 +2,8 @@ Items to be completed before 2.0 release
 
 FASTAPASS / FP_FASTAPASS / Are these archaic? They suck - ??
 
+Separate frameskip/pause from EmulationPaused - zeromus
+
 Make ALL Debugging code conditional - zeromus
 
 Doxygen integration - DONE

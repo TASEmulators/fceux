@@ -490,18 +490,17 @@ doloopy:
 	{
 		while(GameInfo)
 		{
-	        uint8 *gfx=0;
-			int32 *sound=0;
-			int32 ssize=0;
+	        uint8 *gfx=0; ///contains framebuffer
+			int32 *sound=0; ///contains sound data buffer
+			int32 ssize=0; ///contains sound samples count
 
 			#ifdef _USE_SHARED_MEMORY_
 			UpdateBasicBot();
 			#endif
 			FCEU_UpdateBot();
 
-			FCEUI_Emulate(&gfx, &sound, &ssize, 0);
-			xbsave = gfx;
-			FCEUD_Update(gfx, sound, ssize);
+			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
+			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
 			 //mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
 			 if(closeGame)
@@ -510,7 +509,21 @@ doloopy:
 				GameInfo = 0;
 			 }
 
-			
+		}
+		//xbsave = NULL;
+		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
+		StopSound();
+	}
+	Sleep(50);
+	if(!exiting)
+		goto doloopy;
+
+	doexito:
+	DriverKill();
+	timeEndPeriod(1);
+	FCEUI_Kill();
+	return(0);
+}
 
 			//mbg merge 7/19/06 
 			//--------this code was added by tasbuild
@@ -549,21 +562,8 @@ doloopy:
 				stopCount=0;
 			}*/
 			//-----------------------------------
-		}
-		xbsave = NULL;
-		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
-		StopSound();
-	}
-	Sleep(50);
-	if(!exiting)
-		goto doloopy;
 
-	doexito:
-	DriverKill();
-	timeEndPeriod(1);
-	FCEUI_Kill();
-	return(0);
-}
+
 
 //mbg merge 7/19/06 - the function that contains the code that used to just be UpdateFCEUWindow() and FCEUD_UpdateInput()
 void _updateWindow() {
@@ -780,15 +780,10 @@ void _updateWindow() {
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
-	static int skipcount = 0;
-	int temp_fps_scale=(NoWaiting&1)?(256*16):fps_scale;
-	int maxskip = (temp_fps_scale<=256) ? 0 : temp_fps_scale>>8;
-
-	int ocount = Count;
+	//mbg merge 7/19/06 - leaving this untouched but untested
+	/*int ocount = Count;
 	// apply frame scaling to Count
 	Count = (Count<<8)/temp_fps_scale;
-
-	//mbg merge 7/19/06 - leaving this untouched but untested
 	//Disable sound and throttling for BotMode--we want max speed!
 	if(FCEU_BotMode())
 	{
@@ -804,18 +799,40 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		UpdateFCEUWindow();
 		FCEUD_UpdateInput();
 		return;
-	}
+	}*/
 
-	//mbg naive code
+	extern bool turbo; //hack
+
+	//write all the sound we generated.
 	if(soundo && Buffer && Count) {
-		int32 writeSize = GetWriteSound();
-		int32 writeCount = Count;
-		FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
+		void FCEUD_WriteSoundData_new(int32 *Buffer, int scale, int Count, bool turbo);
+		FCEUD_WriteSoundData_new(Buffer,fps_scale,Count,turbo);
+		//FCEUD_WriteSoundData(Buffer,fps_scale,Count);
 	}
 
+	//blit the framebuffer
 	if(XBuf)
 		FCEUD_BlitScreen(XBuf);
+
+	//update debugging displays
 	_updateWindow();
+
+
+	//throttle
+	bool skip = false;
+	for(;;) {
+		if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
+			if(!turbo) //and turbo is disabled..
+				if(!FCEUI_EmulationPaused()) //and we're not paused..
+					//if(SpeedThrottle()) {//...then check whether we need to throttle
+					//	//idle..
+					//	Sleep(0);
+					//	continue;
+					//}
+				{}
+		break;
+	}
+
 
 	//delay until we unpause. we will only stick here if we're paused by a breakpoint or debug command
 	while(FCEUI_EmulationPaused() && inDebugger)

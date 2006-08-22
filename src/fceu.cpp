@@ -426,6 +426,9 @@ void AutoFire(void)
 
 void UpdateRewind(void);
 
+///Emulates a single frame.
+
+///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
  int r,ssize;
@@ -452,7 +455,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
  FCEU_UpdateInput();
  if(geniestage!=1) FCEU_ApplyPeriodicCheats();
  r=FCEUPPU_Loop(skip);
-
+ 
  ssize=FlushEmulateSound();
 
 //#ifdef WIN32

@@ -595,6 +595,9 @@
 					RelativePath="..\src\drivers\win\ntview.h">
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\OutputDS.cpp">
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\ppuview.cpp">
 				</File>
 				<File

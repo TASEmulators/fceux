@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <list>
 
 LPDIRECTSOUND ppDS=0;           /* DirectSound object. */
 LPDIRECTSOUNDBUFFER ppbuf=0;    /* Primary buffer object. */
@@ -131,6 +132,10 @@ int32 GetMaxSound(void)
  return( BufHowMuch >> bittage);
 }
 
+///enqueues the given samples for playback
+static void EnqueueSamples(void *data, uint32 len) {
+}
+
 static int RawWrite(void *data, uint32 len)
 {
  //uint32 cw; //mbg merge 7/17/06 removed
@@ -156,11 +161,12 @@ static int RawWrite(void *data, uint32 len)
 
 
   // THIS LIMITS THE EMULATION SPEED
-  if((!NoWaiting) || (soundoptions&SO_OLDUP))
-  while(!(curlen=RawCanWrite()))
-  {   
-   Sleep(1);
-  }
+  //if((!NoWaiting) || (soundoptions&SO_OLDUP))
+  //printf("RawCanWrite(): %d\n",RawCanWrite());
+  //while(!(curlen=RawCanWrite()))
+  //{  
+  // Sleep(1);
+  //}
 
   if(curlen>len) curlen=len;
 
@@ -211,8 +217,8 @@ static int RawWrite(void *data, uint32 len)
   len-=curlen;
   data=(uint8 *)data+curlen; //mbg merge 7/17/06 reworked to be type proper
 
-  if(len && !NoWaiting && (fps_scale <= 256 || (soundoptions&SO_OLDUP)))
-   Sleep(1); // do some extra sleeping if we think there's time and we're not scaling up the FPS or in turbo mode
+  //if(len && !NoWaiting && (fps_scale <= 256 || (soundoptions&SO_OLDUP)))
+  // Sleep(1); // do some extra sleeping if we think there's time and we're not scaling up the FPS or in turbo mode
 
  } // end while(len) loop
 
@@ -222,6 +228,212 @@ static int RawWrite(void *data, uint32 len)
 
 int silencer=0;
 
+#undef min
+#undef max
+#include "oakra.h"
+
+OAKRA_Module_OutputDS *dsout;
+
+class BufferSet {
+public:
+
+	static const int BufferSize = 1024;
+	static const int BufferSizeBits = 10;
+	static const int BufferSizeBitmask = 1023;
+	
+	class Buffer {
+	public:
+		int decay, size, length;
+		Buffer(int size) { length = 0; this->size = size; data = OAKRA_Module::malloc(size); }
+		int getRemaining() { return size-length; }
+		void *data;
+		~Buffer() { delete data; }
+	};
+
+	std::vector<Buffer*> liveBuffers;
+	std::vector<Buffer*> freeBuffers;
+	int length;
+	int offset; //offset of beginning of addressing into current buffer
+	int bufferCount;
+
+	BufferSet() {
+		offset = length = bufferCount = 0;
+	}
+
+	//causes the oldest free buffer to decay one unit. kills it if it gets too old
+	void decay(int threshold) {
+		if(freeBuffers.empty()) return;
+		if(freeBuffers[0]->decay++>=threshold) {
+			delete freeBuffers[0];
+			freeBuffers.erase(freeBuffers.begin());
+		}
+	}
+
+	Buffer *getBuffer() {
+		//try to get a buffer from the free pool first
+		//if theres nothing in the free pool, get a new buffer
+		if(!freeBuffers.size()) return getNewBuffer();
+		//otherwise, return the last thing in the free pool (most recently freed)
+		Buffer *ret = *--freeBuffers.end();
+		freeBuffers.erase(--freeBuffers.end());
+		return ret;
+	}
+
+	//adds the buffer to the free list
+	void freeBuffer(Buffer *buf) {
+		freeBuffers.push_back(buf);
+		buf->decay = 0;
+		buf->length = 0;
+	}
+
+	Buffer *getNewBuffer() {
+		bufferCount++;
+		return new Buffer(BufferSize);
+	}
+
+	short getShortAtIndex(int addr) {
+		addr <<= 1; //shorts are 2bytes
+		int buffer = (addr+offset)>>BufferSizeBits;
+		int ofs = (addr+offset) & BufferSizeBitmask;
+		return *(short*)((char*)liveBuffers[buffer]->data+ofs);
+	}
+
+	//dequeues the specified number of bytes
+	void dequeue(int length) {
+		offset += length;
+		while(offset >= BufferSize) {
+			Buffer *front = liveBuffers[0];
+			freeBuffer(front);
+			liveBuffers.erase(liveBuffers.begin());
+			offset -= BufferSize;
+		}
+		this->length -= length;
+	}
+
+
+	void enqueue(int length, void *data) {
+		int todo = length;
+		int done = 0;
+
+		//if there are no buffers in the queue, then we definitely need one before we start
+		if(liveBuffers.empty()) liveBuffers.push_back(getBuffer());
+		
+		while(todo) {
+			//check the frontmost buffer
+			Buffer *end = *--liveBuffers.end();
+			int available = std::min(todo,end->getRemaining());
+			memcpy((char*)end->data + end->length,(char*)data + done,available);
+			end->length += available;
+			todo -= available;
+			done += available;
+			
+			//we're going to need another buffer
+			if(todo != 0)
+				liveBuffers.push_back(getBuffer());
+		}
+
+		this->length += length;
+	}
+};
+
+
+class Player : public OAKRA_Module {
+public:
+
+	BufferSet buffers;
+	int cursor;
+	
+	bool turbo;
+	int scale;
+
+	//not interpolating! someday it will! 
+	int generate(int samples, void *buf) {
+
+		int incr = 256;
+		int bufferSamples = buffers.length>>1;
+
+		//if we're we're too far behind, playback faster
+		if(bufferSamples > 44100*3/60) {
+			int behind = bufferSamples - 44100/60;
+			incr = behind*256*60/44100/2;
+			//we multiply our playback rate by 1/2 the number of frames we're behind
+		}
+		if(incr<256) printf("OHNO -- %d -- shouldnt be less than 256!\n",incr); //sanity check: should never be less than 256
+
+		incr = (incr*scale)>>8; //apply scaling factor
+
+		//figure out how many dest samples we can generate at this rate without running out of source samples
+		int destSamplesCanGenerate = (bufferSamples<<8) / incr;
+
+		int todo = std::min(destSamplesCanGenerate,samples);
+		short *sbuf = (short*)buf;
+		for(int i=0;i<todo;i++) {
+			sbuf[i] = buffers.getShortAtIndex(cursor>>8);
+			cursor += incr;
+		}
+		buffers.dequeue((cursor>>8)<<1);
+		cursor &= 255;
+		memset(sbuf+todo,0,(samples-todo)<<1);
+		return samples;
+	}
+
+	Player() {
+		scale = 256;
+		cursor = 0;
+		turbo = false;
+	}
+
+	///receives and enqueues s16 stereo samples
+	void receive(int samples, short *buf, bool turbo, int scale) {
+
+		dsout->lock();
+		buffers.enqueue(samples*2,buf);
+		buffers.decay(60);
+		this->scale = scale;
+		dsout->unlock();
+
+		//throttle
+//		//wait for the buffer to be satisfactorily low before continuing
+		if(!turbo) {
+			for(;;) {
+				dsout->lock();
+				int remain = buffers.length>>1;
+				dsout->unlock();
+				if(remain<44100/60) break;
+				Sleep(1);
+			}
+		}
+	}
+
+};
+Player *player;
+
+
+void sound_init_new() {
+	dsout = new OAKRA_Module_OutputDS();
+	dsout->start(0);
+	dsout->beginThread();
+	OAKRA_Format fmt;
+	fmt.format = OAKRA_S16;
+	fmt.channels = 1;
+	fmt.rate = 44100;
+	fmt.size = 2;
+	OAKRA_Voice *voice = dsout->getVoice(fmt);
+	player = new Player();
+	dsout->lock();
+	voice->setSource(player);
+	dsout->unlock();
+}
+
+void FCEUD_WriteSoundData_new(int32 *Buffer, int scale, int Count, bool turbo) {
+	#define WSD_BUFSIZE (2 * 96000 / 50)
+	static int16 MBuffer[WSD_BUFSIZE*2];
+
+	for(int i=0;i<Count;i++)
+		MBuffer[i] = Buffer[i];
+	player->receive(Count,MBuffer,turbo,scale);
+}
+
 int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
 {
 #define WSD_BUFSIZE (2 * 96000 / 50)
@@ -230,21 +442,25 @@ int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
 	int iCount=0;
 	static int16 MBuffer[WSD_BUFSIZE*2];
 
-	if(!(soundoptions&SO_OLDUP))
-	{
-		if(FCEUI_EmulationPaused())
-			memset(MBuffer, 0, WSD_BUFSIZE); // slow and/or unnecessary
+	//if(!(soundoptions&SO_OLDUP))
+	//{
+	//	if(FCEUI_EmulationPaused())
+	//		memset(MBuffer, 0, WSD_BUFSIZE); // slow and/or unnecessary
 
-		if(FCEUI_EmulationPaused()) scale >>= 1;
+	//	if(FCEUI_EmulationPaused()) scale >>= 1;
 
-		// limit frequency change to between 50% and 200%
-		if(scale > 512) scale = 512;
-		if(scale < 128) scale = 128;
-	}
+	//	// limit frequency change to between 50% and 200%
+	//	if(scale > 512) scale = 512;
+	//	if(scale < 128) scale = 128;
+	//}
 
 //	for(;Count>0;Count-=WSD_BUFSIZE)
 	{
-		int amt = (soundoptions&SO_OLDUP) ? Count : (Count > WSD_BUFSIZE ? WSD_BUFSIZE : Count);
+		//int amt = (soundoptions&SO_OLDUP) ? Count : (Count > WSD_BUFSIZE ? WSD_BUFSIZE : Count);
+		int amt = Count;
+
+		int cando = RawCanWrite();
+		printf("Count/cando %d/%d\n",amt,cando);
 
 		if(!bittage)
 		{
@@ -258,7 +474,7 @@ int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
 				for(P=0;P<amt;P++)
 					*(((uint8*)MBuffer)+P)=((int8)(Buffer[P*scale/256]>>8))^128;
 
-			RawWrite(MBuffer,amt);
+			RawWrite(MBuffer,cando);
 		}
 		else // force 8-bit sound is off:
 		{
@@ -272,7 +488,7 @@ int FCEUD_WriteSoundData(int32 *Buffer, int scale, int Count)
 				for(P=0;P<amt;P++)
 					MBuffer[P]=Buffer[P*scale/256];
 
-			RawWrite(MBuffer,amt * 2);
+			RawWrite(MBuffer,cando * 2);
 		}
 
 		iCount+=amt;
@@ -363,6 +579,8 @@ int InitSound()
 {
  DSCAPS dscaps;
  DSBCAPS dsbcaps;
+
+ sound_init_new();
 
  memset(&wf,0x00,sizeof(wf));
  wf.wFormatTag = WAVE_FORMAT_PCM;
@@ -743,5 +961,8 @@ void FCEUD_SoundVolumeAdjust(int n)
 	FCEUI_SetSoundVolume(soundvolume);
 	FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
+
+//-----------
+
 
 #include "wave.cpp"

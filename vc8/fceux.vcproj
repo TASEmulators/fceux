@@ -70,7 +70,7 @@
 				AdditionalDependencies="comctl32.lib vfw32.lib dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				EntryPointSymbol="mainCRTStartup"
 				TargetMachine="1"
 			/>
@@ -211,12 +211,12 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../zlib"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -635,6 +635,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\common\configSys.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\common\configSys.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\common\hq2x.cpp"
 					>
 				</File>
@@ -687,15 +695,15 @@
 				Name="win"
 				>
 				<File
-					RelativePath="..\src\asm.h"
-					>
-				</File>
-				<File
 					RelativePath="..\src\drivers\win\aviout.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\basicbot.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\basicbot.h"
 					>
 				</File>
 				<File
@@ -912,6 +920,14 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\ntview.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\oakra.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\OutputDS.cpp"
 					>
 				</File>
 				<File
