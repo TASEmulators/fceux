@@ -1,6 +1,5 @@
 #ifndef _BASICBOT_H_
 	#define _BASICBOT_H_
-	#include "stdbool.h"
 	#define BOT_MAXFRAMES 2048 // qfox: max number of frames to be computed per attempt...
 	void UpdateBasicBot();
 	void CreateBasicBot();
