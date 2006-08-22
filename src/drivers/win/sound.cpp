@@ -400,6 +400,7 @@ public:
 				int remain = buffers.length>>1;
 				dsout->unlock();
 				if(remain<44100/60) break;
+				//if(remain<44100*scale/256/60) break; ??
 				Sleep(1);
 			}
 		}

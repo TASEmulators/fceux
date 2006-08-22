@@ -56,18 +56,18 @@ static uint64 ttime,ltime;
 
 static void InitSpeedThrottle(void)
 {
-	timeBeginPeriod(1);
-	SetThreadAffinityMask(GetCurrentThread(),1);
-	
+	//timeBeginPeriod(1);
+	//SetThreadAffinityMask(GetCurrentThread(),1);
+	//
 
-	tmethod=0;
-	if(QueryPerformanceFrequency((LARGE_INTEGER*)&tfreq)) {
-		tmethod=1;
-	}
-	else tfreq=1000;
+	//tmethod=0;
+	//if(QueryPerformanceFrequency((LARGE_INTEGER*)&tfreq)) {
+	//	tmethod=1;
+	//}
+	//else tfreq=1000;
 
-	tfreq<<=16;    /* Adjustment for fps returned from FCEUI_GetDesiredFPS(). */
-	ltime = 0; //mbg
+	//tfreq<<=16;    /* Adjustment for fps returned from FCEUI_GetDesiredFPS(). */
+	//ltime = 0; //mbg
 }
 
 ///Resets the throttle timing. use this when the player releases the turbo

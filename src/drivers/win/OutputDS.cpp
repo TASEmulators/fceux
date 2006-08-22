@@ -3,7 +3,7 @@
 #include "dsound.h"
 #include <vector>
 
-#define LATENCY_MS (50)
+#define LATENCY_MS (100)
 
 
 int voltbl[] = {
