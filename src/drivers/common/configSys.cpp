@@ -2,6 +2,7 @@
 #include <fstream>
 #include <stdio.h>
 
+#include "../../types.h"
 #include "configSys.h"
 
 /**
