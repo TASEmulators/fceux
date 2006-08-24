@@ -1828,7 +1828,7 @@ void MapInput(void)
 void FCEUD_TurboOn(void)
 {
 	//NoWaiting|=1;
-	turbo = 1;
+	turbo = true;
 }
 
 void FCEUD_TurboOff(void)

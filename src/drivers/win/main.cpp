@@ -476,7 +476,6 @@ int main(int argc,char *argv[])
 	if(!DriverInitialize())
 		goto doexito;
  
-	InitSpeedThrottle();
 	UpdateMenu();
 
 	if(t)
@@ -781,35 +780,27 @@ void _updateWindow() {
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	//mbg merge 7/19/06 - leaving this untouched but untested
-	/*int ocount = Count;
-	// apply frame scaling to Count
-	Count = (Count<<8)/temp_fps_scale;
-	//Disable sound and throttling for BotMode--we want max speed!
-	if(FCEU_BotMode())
-	{
-		if(XBuf && (skipcount >= 64))
+	//its probably not optimal
+	if(FCEU_BotMode()) {
+		//this counts the number of frames we've skipped blitting
+		static int skipcount = 0;
+		if(XBuf && (skipcount++ >= 64))
 		{
 			skipcount = 0;
 			FCEUD_BlitScreen(XBuf);
 		}
-		else
-		{
-			skipcount++;
-		}
 		UpdateFCEUWindow();
 		FCEUD_UpdateInput();
 		return;
-	}*/
+	}
 
-	extern bool turbo; //hack
+	win_SoundSetScale(fps_scale);
 
 	//write all the sound we generated.
 	if(soundo && Buffer && Count) {
-		void FCEUD_WriteSoundData_new(int32 *Buffer, int scale, int Count, bool turbo);
-		FCEUD_WriteSoundData_new(Buffer,fps_scale,Count,turbo);
-		//FCEUD_WriteSoundData(Buffer,fps_scale,Count);
+		win_SoundWriteData(Buffer,Count);
 	}
-
+	
 	//blit the framebuffer
 	if(XBuf)
 		FCEUD_BlitScreen(XBuf);
@@ -817,28 +808,20 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//update debugging displays
 	_updateWindow();
 
-
 	//throttle
-	bool skip = false;
-	for(;;) {
-		if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
-			if(!turbo) //and turbo is disabled..
-				if(!FCEUI_EmulationPaused()) //and we're not paused..
-					//if(SpeedThrottle()) {//...then check whether we need to throttle
-					//	//idle..
-					//	Sleep(0);
-					//	continue;
-					//}
-				{}
-		break;
-	}
-
+	extern bool turbo; //needs to be declared better
+	if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
+		if(!turbo) //and turbo is disabled..
+			if(!FCEUI_EmulationPaused())
+				//then throttle
+				win_Throttle();
 
 	//delay until we unpause. we will only stick here if we're paused by a breakpoint or debug command
 	while(FCEUI_EmulationPaused() && inDebugger)
 	{
 		Sleep(50);
 		BlockingCheck();
+		FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
 	}
 
 	//something of a hack, but straightforward:

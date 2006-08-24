@@ -473,6 +473,7 @@ int SaveSnapshot(void)
   fclose(pp);
  return(0);
 }
+//TODO mbg - this needs to be implemented in a better way
 #ifdef SHOWFPS
 uint64 FCEUD_GetTime(void);
 uint64 FCEUD_GetTimeFreq(void);
