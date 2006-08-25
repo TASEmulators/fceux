@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel
+ *  Copyright (C) 2002 Xodnizel and zeromus
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@
 
 #include <list>
 
-static int mute=0;				/* TODO:  add to config? add to GUI. */
-
-
-int silencer=0;
+/// controls whether playback is muted
+static bool mute = false;
+/// indicates whether we've been coerced into outputting 8bit audio
+static int bits;
 
 #undef min
 #undef max
@@ -31,6 +31,8 @@ int silencer=0;
 
 OAKRA_Module_OutputDS *dsout;
 
+//manages a set of small buffers which together work as one large buffer capable of resizing itsself and 
+//shrinking when a larger buffer is no longer necessary
 class BufferSet {
 public:
 
@@ -95,14 +97,6 @@ public:
 		return *(short*)((char*)liveBuffers[buffer]->data+ofs);
 	}
 
-	template <class ST>
-	ST getElementAtIndex(int addr) {
-		addr *= sizeof(ST); //shorts are 2bytes
-		int buffer = (addr+offset)>>BufferSizeBits;
-		int ofs = (addr+offset) & BufferSizeBitmask;
-		return *(ST*)((char*)liveBuffers[buffer]->data+ofs);
-	}
-
 	//dequeues the specified number of bytes
 	void dequeue(int length) {
 		offset += length;
@@ -121,14 +115,14 @@ public:
 	//not all the bytes you asked for will be locked (no more than one buffer-full)
 	//try again if you didnt get enough.
 	//returns the number of bytes locked.
-	int lock(int length, void **ptr) {
-		int remain = BufferSize-offset;
-		*ptr = (char*)liveBuffers[0]->data + offset;
-		if(length<remain)
-			return length;
-		else
-			return remain;
-	}
+	//int lock(int length, void **ptr) {
+	//	int remain = BufferSize-offset;
+	//	*ptr = (char*)liveBuffers[0]->data + offset;
+	//	if(length<remain)
+	//		return length;
+	//	else
+	//		return remain;
+	//}
 
 	void enqueue(int length, void *data) {
 		int todo = length;
@@ -155,58 +149,18 @@ public:
 	}
 };
 
-
-class PlayerBase : public OAKRA_Module {
-public:
-
-	BufferSet buffers;
-	int scale;
-
-	PlayerBase() {
-		scale = 256;
-	}
-
-	void receive(int bytes, void *buf) {
-		dsout->lock();
-		buffers.enqueue(bytes,buf);
-		buffers.decay(60);
-		dsout->unlock();
-	}
-
-	virtual int getSamplesInBuffer() = 0;
-
-	void throttle() {
-		//wait for the buffer to be satisfactorily low before continuing
-		for(;;) {
-			dsout->lock();
-			int remain = getSamplesInBuffer();
-			dsout->unlock();
-			if(remain<44100/60) break;
-			//if(remain<44100*scale/256/60) break; ??
-			Sleep(1);
-		}
-	}
-
-	void setScale(int scale) {
-		dsout->lock();
-		this->scale = scale;
-		dsout->unlock();
-	}
-};
-
-template <class ST,int SHIFT,int ZERO>
-class Player : public PlayerBase {
+class Player : public OAKRA_Module {
 public:
 
 	int cursor;
-
-	int getSamplesInBuffer() { return buffers.length>>SHIFT; }
+	BufferSet buffers;
+	int scale;
 
 	//not interpolating! someday it will! 
 	int generate(int samples, void *buf) {
 
 		int incr = 256;
-		int bufferSamples = buffers.length>>SHIFT;
+		int bufferSamples = buffers.length>>1;
 
 		//if we're we're too far behind, playback faster
 		if(bufferSamples > 44100*3/60) {
@@ -222,28 +176,80 @@ public:
 		int destSamplesCanGenerate = (bufferSamples<<8) / incr;
 
 		int todo = std::min(destSamplesCanGenerate,samples);
-		ST *sbuf = (ST*)buf;
+		short *sbuf = (short*)buf;
 		for(int i=0;i<todo;i++) {
-			sbuf[i] = buffers.getElementAtIndex<ST>(cursor>>8);
+			sbuf[i] = buffers.getShortAtIndex(cursor>>8);
 			cursor += incr;
 		}
-		buffers.dequeue((cursor>>8)<<SHIFT);
+		buffers.dequeue((cursor>>8)<<1);
 		cursor &= 255;
-		memset(sbuf+todo,ZERO,(samples-todo)<<SHIFT);
+		
+		//perhaps mute
+		if(mute) memset(sbuf,0,samples<<1);
+		else memset(sbuf+todo,0,(samples-todo)<<1);
+
 		return samples;
 	}
 
-	Player() {
-		cursor = 0;
+	void receive(int bytes, void *buf) {
+		dsout->lock();
+		buffers.enqueue(bytes,buf);
+		buffers.decay(60);
+		dsout->unlock();
 	}
 
+	void throttle() {
+		//wait for the buffer to be satisfactorily low before continuing
+		for(;;) {
+			dsout->lock();
+			int remain = buffers.length>>1;
+			dsout->unlock();
+			if(remain<44100/60) break;
+			//if(remain<44100*scale/256/60) break; ??
+			Sleep(1);
+		}
+	}
+
+	void setScale(int scale) {
+		dsout->lock();
+		this->scale = scale;
+		dsout->unlock();
+	}
+
+	Player() {
+		scale = 256;
+		cursor = 0;
+	}
 };
 
-class ShortPlayer : public Player<short,1,0> {};
-class BytePlayer : public Player<unsigned char,0,0x80> {};
-static ShortPlayer *shortPlayer;
-static BytePlayer *bytePlayer;
-static PlayerBase *player;
+//this class just converts the primary 16bit audio stream to 8bit
+class Player8 : public OAKRA_Module {
+public:
+	Player *player;
+	Player8(Player *player) { this->player = player; }
+	int generate(int samples, void *buf) {
+		int half = samples>>1;
+		//retrieve first half of 16bit samples
+		player->generate(half,buf);
+		//and convert to 8bit
+		unsigned char *dbuf = (unsigned char*)buf;
+		short *sbuf = (short*)buf;
+		for(int i=0;i<half;i++)
+			dbuf[i] = (sbuf[i]>>8)^0x80;
+		//now retrieve second half
+		int remain = samples-half;
+		short *halfbuf = (short*)alloca(remain<<1);
+		player->generate(remain,halfbuf);
+		dbuf += half;
+		for(int i=0;i<remain;i++)
+			dbuf[i] = (halfbuf[i]>>8)^0x80;
+		return samples;
+	}
+};
+
+
+static Player *player;
+static Player8 *player8;
 
 void win_Throttle() {
 	player->throttle();
@@ -265,25 +271,22 @@ void win_SoundInit(int bits) {
 	fmt.size = OAKRA_Module::calcSize(fmt);
 	OAKRA_Voice *voice = dsout->getVoice(fmt);
 	
-	if(bits == 8)
-		player = bytePlayer = new BytePlayer();
-	else player = shortPlayer = new ShortPlayer();
+	player = new Player();
+	player8 = new Player8(player);
 
 	dsout->lock();
-	voice->setSource(player);
+	if(bits == 8) voice->setSource(player8);
+	else voice->setSource(player);
 	dsout->unlock();
 }
 
 void TrashSound() {
-	delete dsout;
+	if(dsout) delete dsout;
 	if(player) delete player;
+	dsout = 0;
 	player = 0;
 }
 
-//HACK - aviout is expecting this
-WAVEFORMATEX wf;
-int bittage; //1 -> 8bit
-static int bits;
 
 
 int InitSound() {
@@ -297,6 +300,7 @@ int InitSound() {
 		FCEUD_PrintError("DirectSound: 16-bit sound is not supported.  Forcing 8-bit sound.");*/
 		bits = 16;
 	}
+	bits = 8;
 
 	win_SoundInit(bits);
 
@@ -315,27 +319,16 @@ void win_SoundWriteData(int32 *buffer, int count) {
 	//todo..
 		// FCEUI_AviSoundUpdate((void*)MBuffer, Count);
 
-	switch(bits) {
-	case 16: {
-		void *tempbuf = alloca(2*count);
-		short *sbuf = (short *)tempbuf;
-		for(int i=0;i<count;i++)
-			sbuf[i] = buffer[i];
-		player->receive(count*2,tempbuf);
-		break;
-		}
-	case 8: {
-		void *tempbuf = alloca(count);
-		unsigned char *bbuf = (unsigned char *)tempbuf;
-		for(int i=0;i<count;i++)
-			bbuf[i] = (buffer[i]>>8)^128;
-		player->receive(count,tempbuf);
-		}
-	}
+	void *tempbuf = alloca(2*count);
+	short *sbuf = (short *)tempbuf;
+	for(int i=0;i<count;i++)
+		sbuf[i] = buffer[i];
+	player->receive(count*2,tempbuf);
 }
 
 
-
+//--------
+//GUI and control APIs
 
 static HWND uug=0;
 
@@ -524,14 +517,13 @@ void FCEUD_SoundToggle(void)
 {
 	if(mute)
 	{
-		mute=0;
-		FCEU_DispMessage("Sound mute off.");
+		mute = false;
+		FCEU_DispMessage("Sound unmuted");
 	}
 	else
 	{
-		mute=1;
-		StopSound();
-		FCEU_DispMessage("Sound mute on.");
+		mute = true;
+		FCEU_DispMessage("Sound muted");
 	}
 }
 
@@ -543,12 +535,65 @@ void FCEUD_SoundVolumeAdjust(int n)
 	case 0:		soundvolume=100; break;
 	case 1:		soundvolume+=10; if(soundvolume>150) soundvolume=150; break;
 	}
-	mute=0;
+	mute = false;
 	FCEUI_SetSoundVolume(soundvolume);
 	FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
 
 //-----------
+//throttle stuff
+//-----------
+
+static uint64 desiredfps;
+
+static int32 fps_scale_table[]=
+{ 3, 3, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192, 16384, 16384};
+int32 fps_scale = 256;
+
+static void RefreshThrottleFPS(void)
+{
+	printf("WTF\n");
+	fflush(stdout);
+ desiredfps=FCEUI_GetDesiredFPS()>>8;
+ desiredfps=(desiredfps*fps_scale)>>8;
+ 
+}
+
+static void IncreaseEmulationSpeed(void)
+{
+ int i;
+ for(i=1; fps_scale_table[i]<fps_scale; i++)
+  ;
+ fps_scale = fps_scale_table[i+1];
+}
+
+static void DecreaseEmulationSpeed(void)
+{
+ int i;
+ for(i=1; fps_scale_table[i]<fps_scale; i++)
+  ;
+ fps_scale = fps_scale_table[i-1];
+}
+
+#define fps_table_size		(sizeof(fps_scale_table)/sizeof(fps_scale_table[0]))
+
+void FCEUD_SetEmulationSpeed(int cmd)
+{
+	switch(cmd)
+	{
+	case EMUSPEED_SLOWEST:	fps_scale=fps_scale_table[0];  break;
+	case EMUSPEED_SLOWER:	DecreaseEmulationSpeed(); break;
+	case EMUSPEED_NORMAL:	fps_scale=256; break;
+	case EMUSPEED_FASTER:	IncreaseEmulationSpeed(); break;
+	case EMUSPEED_FASTEST:	fps_scale=fps_scale_table[fps_table_size-1]; break;
+	default:
+		return;
+	}
+
+	RefreshThrottleFPS();
+
+	FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
+}
 
 
 #include "wave.cpp"

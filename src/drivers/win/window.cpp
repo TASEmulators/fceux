@@ -646,7 +646,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 322:ConfigTiming();break;
                   case 323:StopSound();ShowNetplayConsole();break;
                   case 324:StopSound();ConfigPalette();break;
-                  case 325:StopSound();ConfigSound();break;
+				  case 325:StopSound();ConfigSound();break;
                   case 326:ConfigVideo();break;
 				  case 328:MapInput();break;
 

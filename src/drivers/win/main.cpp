@@ -305,8 +305,6 @@ void DoPriority(void)
 
 static int changerecursive=0;
 
-#include "throttle.cpp"
-
 #include "sound.cpp"
 #include "video.cpp"
 #include "window.cpp"

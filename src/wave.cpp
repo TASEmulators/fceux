@@ -45,24 +45,12 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
  if(soundlog)
 	 wsize+=fwrite(temp,1,Count*sizeof(int16),soundlog);
 
-#ifdef MSVC
- if(FCEUI_AviIsRecording())
- {
-	 extern int bittage;
-	 if(!bittage)
-	 {
-		 //mbg merge 7/17/06 changed to alloca
-		 //int8 temp2[Count];
-		 int8 *temp2 = (int8*)alloca(Count);
-		 int P;
-		 for(P=0;P<Count;P++)
-			 *(((uint8*)temp2)+P)=((int8)(temp[P]>>8))^128;
-		 FCEUI_AviSoundUpdate((void*)temp2, Count);
-	 }
-	 else
-		 FCEUI_AviSoundUpdate((void*)temp, Count);
- }
-#endif
+	#ifdef MSVC
+	if(FCEUI_AviIsRecording())
+	{
+		FCEUI_AviSoundUpdate((void*)temp, Count);
+	}
+	#endif
 }
 
 int FCEUI_EndWaveRecord(void)

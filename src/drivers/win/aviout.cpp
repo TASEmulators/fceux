@@ -5,8 +5,8 @@
 #include "common.h"
 
 extern PALETTEENTRY color_palette[256];
-extern WAVEFORMATEX wf;
-extern int soundo;
+//extern WAVEFORMATEX wf;
+//extern int soundo;
 
 #define VIDEO_STREAM	0
 #define AUDIO_STREAM	1
@@ -306,7 +306,6 @@ int FCEUI_AviBegin(const char* fname)
 
 	struct VideoSystemInfo vsi;
 	BITMAPINFOHEADER bi;
-	const WAVEFORMATEX* wfex = NULL;
 	int is_pal;
 
 	is_pal=FCEUI_GetCurrentVidSystem(&vsi.start_scanline, &vsi.end_scanline);
@@ -321,12 +320,20 @@ int FCEUI_AviBegin(const char* fname)
 	bi.biHeight = vsi.end_scanline-vsi.start_scanline;
 	bi.biSizeImage = 3 * bi.biWidth * bi.biHeight;
 
-	if(soundo)
-		wfex = &wf;
+	//mbg 8/25/06 -- hardcoded stuff for now
+	WAVEFORMATEX wf;
+	wf.cbSize = sizeof(WAVEFORMATEX);
+	wf.nAvgBytesPerSec = 44100 * 2;
+	wf.nBlockAlign = 2;
+	wf.nChannels = 1;
+	wf.nSamplesPerSec = 44100;
+	wf.wBitsPerSample = 16;
+	wf.wFormatTag = WAVE_FORMAT_PCM;
+	
 
 	saved_avi_ext[0]='\0';
 
-	if(!avi_open(fname, &bi, wfex, &vsi))
+	if(!avi_open(fname, &bi, &wf, &vsi))
 	{
 		saved_avi_fname[0]='\0';
 		return 0;
