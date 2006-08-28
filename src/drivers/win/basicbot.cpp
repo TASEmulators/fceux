@@ -37,7 +37,7 @@
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well.
-static char BBversion[] = "0.2.1";
+static char BBversion[] = "0.2.2";
 
 static HWND hwndBasicBot = 0;			// qfox: GUI handle
 static bool BotRunning = false;			// qfox: Is the bot computing or not? I think...
@@ -131,6 +131,19 @@ float AverageScore[4];					// qfox: keep the average scores in here. to prevent 
 										//		 this is not a total, but the average is computed after
 										//		 every attempt and put back in here. this shouldn't
 										//		 affect accuracy.
+int X,Y,Z,P,Prand,Q,Qrand;              // qfox: static variables (is this a contradiction?) and
+                                        //       probabilities. XYZ remain the same, PQ return randomly a
+                                        //       number in the range of 0-P or 0-Q. They can be used in
+                                        //       the code like any other command ("5+X echo"). The button
+                                        //       above their input fields will update these values only (!)
+                                        //       The rand values are updated after each frame. This results
+                                        //       in all the P and Q values being equal in every usage, but
+                                        //       random for each frame.
+                                        //       The values are only evaluated when reading them from the
+                                        //       GUI (so when starting a new run or when refreshing). This
+                                        //       means you can use any code here, but the static won't be
+                                        //       updated every frame. This is the intention of the variable.
+
 
 static void SeedRandom(uint32 seed)
 {
@@ -152,7 +165,14 @@ static unsigned int NextRandom(void)
 	rand3 = (((rand3 & 4294967280U) << 17) ^ b);
 	return (rand1 ^ rand2 ^ rand3);
 }
-
+/**
+ * qfox: this is the way we use it anyways
+ */
+static int GetRandom(int n)
+{
+	if (n == 0) return n; // qfox: zero devision exception catch :)
+	return (int) (NextRandom() % n);
+}
 
 /**
  * qfox: All syntax-errors lead here. Some gui notification should be 
@@ -233,6 +253,15 @@ static int EvaluateFormula(char * formula)
     return ParseFormula(false);
 }
 
+/**
+ * qfox: fetch the contents of a textfield, evaluated it, return the result
+ */
+static int EvaluateTextfield(int fieldID)
+{
+	char TempCode[BOT_MAXCODE];
+	GetDlgItemText(hwndBasicBot, fieldID, TempCode, BOT_MAXCODE);
+	return EvaluateFormula(TempCode);
+}
 /**
  * Parse one level of a string, return the value of the right most number
  * - ret indicates whether the function should return as soon as it determines a number,
@@ -991,6 +1020,25 @@ static int ParseFormula(bool ret)
 			}
 			if (ret) return value;
 			break;
+		case 'P':
+		case 'Q':
+			// qfox:these values will not change for each usage
+			//      but be changed to a random number in 0-P and
+            //      0-Q after each frame. This way you can vary
+			//      the value of some number while using this
+			//      number more then once.
+			value = (*GlobalCurrentChar == 'P') ? Prand : Qrand;
+			++GlobalCurrentChar;
+			if (ret) return value;
+			break;
+		case 'X':
+		case 'Y':
+		case 'Z':
+			// qfox: the XYZ makes using statics easier.
+			value = (*GlobalCurrentChar == 'X') ? X : ((*GlobalCurrentChar == 'Y') ? Y : Z);
+			++GlobalCurrentChar;
+			if (ret) return value;
+			break;
 		default:
 			// qfox: Unknown characters should error out from now on. You can use spaces.
 			BotSyntaxError(12001);
@@ -1059,6 +1107,9 @@ void UpdateBasicBot()
 			memset(BotCounter, 0, BOT_MAXCOUNTERS*4); // qfox: sets all the counters to 0. *4 because
 													  //	   memset writes bytes and the counters are
 													  //	   ints (4 bytes! :)
+			// qfox: update the P and Q values to something new
+			Prand = GetRandom(P);
+			Qrand = GetRandom(Q);
 		}
 		else
 		{
@@ -1203,7 +1254,7 @@ void UpdateBasicBot()
 				//		 random number, the button is pressed :)
 				for(i=0;i<16;i++)
 				{
-					if((int) (NextRandom() % 1000) < EvaluateFormula(Formula[i]))
+					if(GetRandom(1000) < EvaluateFormula(Formula[i]))
 					{
 						// qfox: button flags:
 						// 		button - player 1 - player 2
@@ -1501,6 +1552,8 @@ static void FromGUI()
 		GetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP], BOT_MAXCODE);
         
         GetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode, BOT_MAXCODE);
+		
+		UpdateStatics();
 	}
 	UpdateFromGUI = false;
 }
@@ -1525,6 +1578,13 @@ static void ToGUI()
 		SetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP]);
 
 		SetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode);
+
+		SetDlgItemInt(hwndBasicBot, GUI_BOT_X, X, TRUE);
+		SetDlgItemInt(hwndBasicBot, GUI_BOT_Y, Y, TRUE);
+		SetDlgItemInt(hwndBasicBot, GUI_BOT_Z, Z, TRUE);
+		SetDlgItemInt(hwndBasicBot, GUI_BOT_P, P, TRUE);
+		SetDlgItemInt(hwndBasicBot, GUI_BOT_Q, Q, TRUE);
+
 	}
 }
 
@@ -1549,6 +1609,21 @@ static void InitVars()
 	Formula[CODE_STOP][4] = 'e';
 	Formula[CODE_STOP][5] = '=';
 	Formula[CODE_STOP][6] = '1';
+	X = Y = Z = P = Prand = Q = Qrand = 0;
+}
+
+/**
+ * qfox: behaves like FromGUI(), except only for XYZPQ
+ */
+static void UpdateStatics()
+{
+		// qfox: these "statics" are only evaluated once
+		//       (this also saves me looking up stringtoint functions ;)
+		X = EvaluateTextfield(GUI_BOT_X);
+		Y = EvaluateTextfield(GUI_BOT_Y);
+		Z = EvaluateTextfield(GUI_BOT_Z);
+		P = EvaluateTextfield(GUI_BOT_P);
+		Q = EvaluateTextfield(GUI_BOT_Q);
 }
 
 /**
@@ -1623,9 +1698,15 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				break;
 			case GUI_BOT_RUN:
 				if(BotRunning)
+				{
                     StopBasicBot();
+					FCEU_SetBotMode(0);
+				}
 				else
+				{
+					FCEU_SetBotMode(1);
                     StartBasicBot();
+				}
 				break;
 			case GUI_BOT_CLEAR:
 				StopSound();
@@ -1655,6 +1736,10 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				//		 refresh the variables with the data from gui, without stopping.
 				UpdateFromGUI = true;
 				break;
+			case GUI_BOT_U:
+				// qfox: the small update button above the static variables ("U"),
+				//       only update the statics.
+				UpdateStatics();
 			default:
 				break;
 			}
