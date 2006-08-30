@@ -4,14 +4,14 @@
 #include "sdl.h"
 #include "throttle.h"
 
-static uint64 tfreq;
-static uint64 desiredfps;
+static uint64 s_tfreq;
+static uint64 s_desiredfps;
 
-static int32 fps_scale_table[]=
+static int32 s_fpsScaleTable[]=
 { 3, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048 };
-int32 fps_scale = 256;
+int32 g_fpsScale = 256;
 
-#define fps_table_size (sizeof(fps_scale_table) / sizeof(fps_scale_table[0]))
+#define FPS_TABLE_SIZE (sizeof(s_fpsScaleTable) / sizeof(s_fpsScaleTable[0]))
 
 /**
  * Refreshes the FPS throttling variables.
@@ -19,10 +19,10 @@ int32 fps_scale = 256;
 void
 RefreshThrottleFPS()
 {
-    desiredfps = FCEUI_GetDesiredFPS() >> 8;
-    desiredfps = (desiredfps * fps_scale) >> 8;
-    tfreq = 10000000;
-    tfreq <<= 16; /* Adjustment for fps returned from FCEUI_GetDesiredFPS(). */
+    s_desiredfps = FCEUI_GetDesiredFPS() >> 8;
+    s_desiredfps = (s_desiredfps * g_fpsScale) >> 8;
+    s_tfreq = 10000000;
+    s_tfreq <<= 16; /* Adjust for fps returned from FCEUI_GetDesiredFPS(). */
 }
 
 /**
@@ -44,8 +44,8 @@ SpeedThrottle()
         ttime = SDL_GetTicks();
         ttime *= 10000;
 
-        if((ttime - ltime) < (tfreq / desiredfps)) {
-            int64 delay = (tfreq / desiredfps) - (ttime - ltime);
+        if((ttime - ltime) < (s_tfreq / s_desiredfps)) {
+            int64 delay = (s_tfreq / s_desiredfps) - (ttime - ltime);
             if(delay > 0) {
                 SDL_Delay(delay / 10000);
             }
@@ -55,10 +55,10 @@ SpeedThrottle()
     } while(doDelay);
 
     // update the "last time" to match when we want the next tick
-    if((ttime - ltime) >= ((tfreq * 4) / desiredfps)) {
+    if((ttime - ltime) >= ((s_tfreq * 4) / s_desiredfps)) {
         ltime = ttime;
     } else {
-        ltime += tfreq / desiredfps;
+        ltime += s_tfreq / s_desiredfps;
     }
 }
 
@@ -71,15 +71,15 @@ IncreaseEmulationSpeed()
     int i = 0;
 
     // find the next entry in the FPS rate table
-    while(i < (fps_table_size - 1) && fps_scale_table[i] < fps_scale) {
+    while(i < (FPS_TABLE_SIZE - 1) && s_fpsScaleTable[i] < g_fpsScale) {
         i++;
     }
-    fps_scale = fps_scale_table[i+1];
+    g_fpsScale = s_fpsScaleTable[i+1];
 
     // refresh the FPS throttling variables
     RefreshThrottleFPS();
 
-    FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
+    FCEU_DispMessage("emulation speed %d%%",(g_fpsScale*100)>>8);
 }
 
 /**
@@ -91,15 +91,15 @@ DecreaseEmulationSpeed()
     int i = 1;
 
     // find the previous entry in the FPS rate table
-    while(i < fps_table_size && fps_scale_table[i] < fps_scale) {
+    while(i < FPS_TABLE_SIZE && s_fpsScaleTable[i] < g_fpsScale) {
         i++;
     } 
-    fps_scale = fps_scale_table[i - 1];
+    g_fpsScale = s_fpsScaleTable[i - 1];
 
     // refresh the FPS throttling variables
     RefreshThrottleFPS();
 
-    FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
+    FCEU_DispMessage("emulation speed %d%%",(g_fpsScale*100)>>8);
 }
 
 /**
@@ -110,19 +110,19 @@ FCEUD_SetEmulationSpeed(int cmd)
 {
     switch(cmd) {
     case EMUSPEED_SLOWEST:
-        fps_scale = fps_scale_table[0];
+        g_fpsScale = s_fpsScaleTable[0];
         break;
     case EMUSPEED_SLOWER:
         DecreaseEmulationSpeed();
         break;
     case EMUSPEED_NORMAL:
-        fps_scale = 256;
+        g_fpsScale = 256;
         break;
     case EMUSPEED_FASTER:
         IncreaseEmulationSpeed();
         break;
     case EMUSPEED_FASTEST:
-        fps_scale = fps_scale_table[fps_table_size - 1];
+        g_fpsScale = s_fpsScaleTable[FPS_TABLE_SIZE - 1];
         break;
     default:
         return;
@@ -130,5 +130,5 @@ FCEUD_SetEmulationSpeed(int cmd)
 
     RefreshThrottleFPS();
 
-    FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
+    FCEU_DispMessage("emulation speed %d%%",(g_fpsScale*100)>>8);
 }

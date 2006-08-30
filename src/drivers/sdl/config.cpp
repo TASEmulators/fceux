@@ -26,218 +26,19 @@
 #include <windows.h>
 #endif
 
-int   frameskip;
-char *cpalette;
-char *soundrecfn;
-int   ntsccol, ntschue, ntsctint;
-char *DrBaseDirectory;
-
-static int srendlinev[2]={8,0};
-static int erendlinev[2]={231,239};
-
-static int soundvol=100;
-static long soundq=0;
-
-int _sound=1;
-long soundrate=48000;
-#ifdef WIN32
-long soundbufsize=52;
-#else
-long soundbufsize=24;
-#endif
-
-
-DSETTINGS Settings;
-CFGSTRUCT DriverConfig[]={
-	#ifdef OPENGL
-	AC(_stretchx),
-	AC(_stretchy),
-	AC(_opengl),
-	AC(_openglip),
-	#endif
-	AC(Settings.special),
-	AC(Settings.specialfs),
-	AC(_doublebuf),
-	AC(_xscale),
-	AC(_yscale),
-	AC(_xscalefs),
-	AC(_yscalefs),
-	AC(_bpp),
-	AC(_efx),
-	AC(_efxfs),
-	AC(_fullscreen),
-        AC(_xres),
-	AC(_yres),
-        ACS(netplaynick),
-	AC(netlocalplayers),
-	AC(tport),
-	ACS(netpassword),
-	ACS(netgamekey),
-        ENDCFGSTRUCT
-};
-
-//-fshack x       Set the environment variable SDL_VIDEODRIVER to \"x\" when
-//                entering full screen mode and x is not \"0\".
-
-char *DriverUsage=
-"-xres   x	Set horizontal resolution to x for full screen mode.\n\
--yres   x       Set vertical resolution to x for full screen mode.\n\
--xscale(fs) x	Multiply width by x(Real numbers >0 with OpenGL, otherwise integers >0).\n\
--yscale(fs) x	Multiply height by x(Real numbers >0 with OpenGL, otherwise integers >0).\n\
--bpp(fs) x	Bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
--opengl x	Enable OpenGL support if x is 1.\n\
--openglip x	Enable OpenGL linear interpolation if x is 1.\n\
--doublebuf x	\n\
--special(fs) x	Specify special scaling filter.\n\
--stretch(x/y) x	Stretch to fill surface on x or y axis(fullscreen, only with OpenGL).\n\
--efx(fs) x	Enable special effects.  Logically OR the following together:\n\
-		 1 = scanlines(for yscale>=2).\n\
-		 2 = TV blur(for bpp of 16 or 32).\n\
--fs	 x      Select full screen mode if x is non zero.\n\
--connect s      Connect to server 's' for TCP/IP network play.\n\
--netnick s	Set the nickname to use in network play.\n\
--netgamekey s 	Use key 's' to create a unique session for the game loaded.\n\
--netpassword s	Password to use for connecting to the server.\n\
--netlocalplayers x	Set the number of local players.\n\
--netport x      Use TCP/IP port x for network play.";
-
-ARGPSTRUCT DriverArgs[]={
-	#ifdef OPENGL
-	 {"-opengl",0,&_opengl,0},
-	 {"-openglip",0,&_openglip,0},
-	 {"-stretchx",0,&_stretchx,0},
-	 {"-stretchy",0,&_stretchy,0},
-	#endif
-	 {"-special",0,&Settings.special,0},
-	 {"-specialfs",0,&Settings.specialfs,0},
-	 {"-doublebuf",0,&_doublebuf,0},
-	 {"-bpp",0,&_bpp,0},
-	 {"-xscale",0,&_xscale,2},
-	 {"-yscale",0,&_yscale,2},
-	 {"-efx",0,&_efx,0},
-         {"-xscalefs",0,&_xscalefs,2},
-         {"-yscalefs",0,&_yscalefs,2},
-         {"-efxfs",0,&_efxfs,0},
-	 {"-xres",0,&_xres,0},
-         {"-yres",0,&_yres,0},
-         {"-fs",0,&_fullscreen,0},
-         //{"-fshack",0,&_fshack,0x4001},
-         {"-connect",0,&netplayhost,0x4001},
-         {"-netport",0,&tport,0},
-	 {"-netlocalplayers",0,&netlocalplayers,0},
-	 {"-netnick",0,&netplaynick,0x4001},
-	 {"-netpassword",0,&netpassword,0x4001},
-         {0,0,0,0}
-};
-
-#include "usage.h"
-
-void
-SetDefaults(void)
-{
-    Settings.special=Settings.specialfs=0;
-    _bpp=8;
-    _xres=640;
-    _yres=480;
-    _fullscreen=0;
-    _xscale=2;
-    _yscale=2;
-    _xscalefs=_yscalefs=2;
-    _efx=_efxfs=0;
-    //_fshack=_fshacksave=0;
-#ifdef OPENGL
-    _opengl=1;
-    _stretchx=1; 
-    _stretchy=0;
-    _openglip=1;
-#endif
-}
-
-
-/**
- * Unimplemented.
- */
-void DoDriverArgs(void)
-{
-
-}
-
-/**
- * Handles arguments passed to FCEU.  Hopefully obsolete with new
- * configuration system.
- */
-static void
-DoArgs(int argc,
-       char *argv[])
-{
-    int x;
-
-    static ARGPSTRUCT FCEUArgs[]={
-        {"-soundbufsize",0,&soundbufsize,0},
-        {"-soundrate",0,&soundrate,0},
-        {"-soundq",0,&soundq,0},
-#ifdef FRAMESKIP
-        {"-frameskip",0,&frameskip,0},
-#endif
-        {"-sound",0,&_sound,0},
-        {"-soundvol",0,&soundvol,0},
-        {"-cpalette",0,&cpalette,0x4001},
-        {"-soundrecord",0,&soundrecfn,0x4001},
-
-        {"-ntsccol",0,&ntsccol,0},
-        {"-pal",0,&eoptions,0x8000|EO_PAL},
-
-        {"-lowpass",0,&eoptions,0x8000|EO_LOWPASS},
-        {"-gg",0,&eoptions,0x8000|EO_GAMEGENIE},
-        {"-no8lim",0,&eoptions,0x8001},
-        {"-snapname",0,&eoptions,0x8000|EO_SNAPNAME},
-        {"-nofs",0,&eoptions,0x8000|EO_NOFOURSCORE},
-        {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},
-        {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
-        {"-slstart",0,&srendlinev[0],0},{"-slend",0,&erendlinev[0],0},
-        {"-slstartp",0,&srendlinev[1],0},{"-slendp",0,&erendlinev[1],0},
-        {0,(int *)InputArgs,0,0},
-        {0,(int *)DriverArgs,0,0},
-        {0,0,0,0}
-    };
-
-    ParseArguments(argc, argv, FCEUArgs);
-    if(cpalette) {
-        if(cpalette[0] == '0') {
-            if(cpalette[1] == 0) {
-                free(cpalette);
-                cpalette=0;
-            }
-        }
-    }
-
-    FCEUI_SetVidSystem((eoptions&EO_PAL)?1:0);
-    FCEUI_SetGameGenie((eoptions&EO_GAMEGENIE)?1:0);
-    FCEUI_SetLowPass((eoptions&EO_LOWPASS)?1:0);
-
-    FCEUI_DisableSpriteLimitation(eoptions&1);
-    FCEUI_SetSnapName(eoptions&EO_SNAPNAME);
-
-    for(x = 0; x < 2; x++) {
-        if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
-        if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
-    }
-
-    FCEUI_SetRenderedLines(srendlinev[0],erendlinev[0],srendlinev[1],erendlinev[1]);
-    DoDriverArgs();
-}
+//#include "usage.h"
 
 /**
  * Read a custom pallete from a file and load it into the core.
  */
 static void
-LoadCPalette()
+LoadCPalette(const std::string &file)
 {
     uint8 tmpp[192];
     FILE *fp;
 
-    if(!(fp = FCEUD_UTF8fopen(cpalette, "rb"))) {
-        printf(" Error loading custom palette from file: %s\n", cpalette);
+    if(!(fp = FCEUD_UTF8fopen(file.c_str(), "rb"))) {
+        printf(" Error loading custom palette from file: %s\n", file.c_str());
         return;
     }
     fread(tmpp, 1, 192, fp);
@@ -245,76 +46,28 @@ LoadCPalette()
     fclose(fp);
 }
 
-
-static CFGSTRUCT fceuconfig[]= {
-	AC(soundrate),
-	AC(soundq),
-	AC(_sound),
-	AC(soundvol),
-	AC(soundbufsize),
-	ACS(cpalette),
-	AC(ntsctint),
-	AC(ntschue),
-	AC(ntsccol),
-	AC(eoptions),
-	ACA(srendlinev),
-	ACA(erendlinev),
-	ADDCFGSTRUCT(InputConfig),
-	ADDCFGSTRUCT(DriverConfig),
-	ENDCFGSTRUCT
-};
-
-/**
- * Wrapper for SaveFCEUConfig() that sets the path.  Hopefully
- * obsolete with new configuration system.
- */
-void
-SaveConfig()
-{	
-    char tdir[2048];
-    sprintf(tdir,"%s"PSS"fceu98.cfg", DrBaseDirectory);
-    FCEUI_GetNTSCTH(&ntsctint, &ntschue);
-    SaveFCEUConfig(tdir, fceuconfig);
-}
-
-/**
- * Wrapper for LoadFCEUConfig() that sets the path.  Hopefully
- * obsolete with the new configuration system.
- */
-static void
-LoadConfig()
-{
-    char tdir[2048];
-    sprintf(tdir,"%s"PSS"fceu98.cfg",DrBaseDirectory);
-
-    /* Get default settings for if no config file exists. */
-    FCEUI_GetNTSCTH(&ntsctint, &ntschue);	
-    LoadFCEUConfig(tdir,fceuconfig);
-    InputUserActiveFix();
-}
-
 /**
  * Creates the subdirectories used for saving snapshots, movies, game
  * saves, etc.  Hopefully obsolete with new configuration system.
  */
 static void
-CreateDirs(void)
+CreateDirs(const std::string &dir)
 {
     char *subs[7]={"fcs","fcm","snaps","gameinfo","sav","cheats","movie"};
-    char tdir[2048];
+    std::string subdir;
     int x;
 
 #ifdef WIN32
-    mkdir((char *)DrBaseDirectory);
+    mkdir(dir.c_str());
     for(x = 0; x < 6; x++) {
-        sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
-        mkdir(tdir);
+        subdir = dir + PSS + subs[x];
+        mkdir(subdir.c_str());
     }
 #else
-    mkdir((char *)DrBaseDirectory,S_IRWXU);
+    mkdir(dir.c_str(), S_IRWXU);
     for(x = 0; x < 6; x++) {
-        sprintf(tdir,"%s"PSS"%s",DrBaseDirectory,subs[x]);
-        mkdir(tdir,S_IRWXU);
+        subdir = dir + PSS + subs[x];
+        mkdir(subdir.c_str(), S_IRWXU);
     }
 #endif
 }
@@ -324,58 +77,242 @@ CreateDirs(void)
  * hopefully become obsolete once the new configuration system is in
  * place.
  */
-static uint8 *
-GetBaseDirectory()
+static void
+GetBaseDirectory(std::string &dir)
 {
-    uint8 *ol;
-    uint8 *ret; 
+    char *home, *lastBS;
 
-    ol=(uint8 *)getenv("HOME");
-
-    if(ol) {
-        ret=(uint8 *)malloc(strlen((char *)ol)+1+strlen("./fceultra"));
-        strcpy((char *)ret,(char *)ol);
-        strcat((char *)ret,"/.fceultra");
+    home = getenv("HOME");
+    if(home) {
+        dir = std::string(home) + "/.fceultra";
     } else {
 #ifdef WIN32
-        char *sa;
+        home = new char[MAX_PATH + 1];
+        GetModuleFileName(NULL, home, MAX_PATH + 1);
 
-        ret=(uint8*)malloc(MAX_PATH+1);
-        GetModuleFileName(NULL,(char*)ret,MAX_PATH+1);
+        lastBS = strrchr(home,'\\');
+        if(lastBS) {
+            *lastBS = 0;
+        }
 
-        sa=strrchr((char*)ret,'\\');
-        if(sa)
-            *sa = 0; 
+        dir = std::string(home);
+        delete[] home;
 #else
-        ret=(uint8 *)malloc(sizeof(uint8));
-        ret[0]=0;
+        dir = "";
 #endif
-        printf("%s\n",ret);
     }
-    return(ret);
 }
 
 
-int
-InitConfig(int argc,
-           char **argv)
+Config *
+InitConfig()
 {
-    DrBaseDirectory = (char *)GetBaseDirectory();
-    FCEUI_SetBaseDirectory(DrBaseDirectory);
+    std::string dir, prefix;
+    Config *config;
 
-    CreateDirs();
+    GetBaseDirectory(dir);
 
-    if(argc<=1)  {
-        ShowUsage(argv[0]);
-        return -1;
+    FCEUI_SetBaseDirectory(dir.c_str());
+    CreateDirs(dir);
+
+    config = new Config(dir);
+
+    // sound options
+    config->addOption('s', "sound", "SDL.Sound", 1);
+    config->addOption("volume", "SDL.SoundVolume", 100);
+    config->addOption("SDL.SoundRate", 48000);
+    config->addOption("SDL.SoundQuality", 0);
+    config->addOption("soundrecord", "SDL.SoundRecordFile", "");
+#ifdef WIN32
+    config->addOption("SDL.SoundBufSize", 52);
+#else
+    config->addOption("SDL.SoundBufSize", 24);
+#endif
+
+    // old EOptions
+    config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
+    config->addOption("lowpass", "SDL.LowPass", 0);
+    config->addOption("pal", "SDL.PAL", 0);
+    config->addOption("frameskip", "SDL.Frameskip", 0);
+    config->addOption("SDL.SnapName", 0);
+    config->addOption("SDL.ClipSides", 0);
+    config->addOption("SDL.NoThrottle", 0);
+    config->addOption("SDL.DisableSpriteLimit", 0);
+
+    // color control
+    config->addOption('p', "palette", "SDL.Palette", "");
+    config->addOption("tint", "SDL.Tint", 56);
+    config->addOption("hue", "SDL.Hue", 72);
+    config->addOption("color", "SDL.Color", 0);
+
+    // scanline settings
+    config->addOption("SDL.ScanLineStart", 0);
+    config->addOption("SDL.ScanLineEnd", 239);
+
+    // video controls
+    config->addOption('x', "xres", "SDL.XResolution", 512);
+    config->addOption('y', "yres", "SDL.YResolution", 448);
+    config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
+    config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
+    config->addOption("doublebuf", "SDL.DoubleBuffering", 0);
+    config->addOption("xscale", "SDL.XScale", 1.0);
+    config->addOption("yscale", "SDL.YScale", 1.0);
+    config->addOption("xstretch", "SDL.XStretch", 0);
+    config->addOption("ystretch", "SDL.YStretch", 0);
+
+    // OpenGL options
+    config->addOption("opengl", "SDL.OpenGL", 0);
+    config->addOption("SDL.OpenGLip", 0);
+    config->addOption("SDL.SpecialFilter", 0);
+    config->addOption("SDL.SpecialFX", 0);
+
+    // network play options
+    config->addOption('n', "net", "SDL.NetworkServer", "");
+    config->addOption('u', "user", "SDL.NetworkUsername", "");
+    config->addOption('w', "pass", "SDL.NetworkPassword", "");
+    config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
+    config->addOption('p', "port", "SDL.NetworkPort", 0xFCE);
+    config->addOption('l', "players", "SDL.NetworkNumPlayers", 1);
+
+    // input configuration options
+    config->addOption("SDL.Input.0", "GamePad.0");
+    config->addOption("SDL.Input.1", "GamePad.1");
+    config->addOption("SDL.Input.2", "None");
+
+    // Allow for input configuration
+    config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
+
+    // GamePad 0 - 3
+    for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
+        char buf[64];
+        snprintf(buf, 20, "SDL.Input.GamePad.%d.", i);
+        prefix = buf;
+
+        config->addOption(prefix + "DeviceType", DefaultGamePadDevice[i]);
+        config->addOption(prefix + "DeviceNum",  0);
+        for(unsigned int j = 0; j < GAMEPAD_NUM_BUTTONS; j++) {
+            config->addOption(prefix + GamePadNames[j], DefaultGamePad[i][j]);
+        }
     }
-    LoadConfig();
-    DoArgs(argc - 2, &argv[1]);
 
+    // PowerPad 0 - 1
+    for(unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++) {
+        char buf[64];
+        snprintf(buf, 20, "SDL.Input.PowerPad.%d.", i);
+        prefix = buf;
+
+        config->addOption(prefix + "DeviceType", DefaultPowerPadDevice[i]);
+        config->addOption(prefix + "DeviceNum",  0);
+        for(unsigned int j = 0; j < POWERPAD_NUM_BUTTONS; j++) {
+            config->addOption(prefix +PowerPadNames[j], DefaultPowerPad[i][j]);
+        }
+    }
+
+    // QuizKing
+    prefix = "SDL.Input.QuizKing.";
+    config->addOption(prefix + "DeviceType", DefaultQuizKingDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < QUIZKING_NUM_BUTTONS; j++) {
+        config->addOption(prefix + QuizKingNames[j], DefaultQuizKing[j]);
+    }
+
+    // HyperShot
+    prefix = "SDL.Input.HyperShot.";
+    config->addOption(prefix + "DeviceType", DefaultHyperShotDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < HYPERSHOT_NUM_BUTTONS; j++) {
+        config->addOption(prefix + HyperShotNames[j], DefaultHyperShot[j]);
+    }
+
+    // Mahjong
+    prefix = "SDL.Input.Mahjong.";
+    config->addOption(prefix + "DeviceType", DefaultMahjongDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < MAHJONG_NUM_BUTTONS; j++) {
+        config->addOption(prefix + MahjongNames[j], DefaultMahjong[j]);
+    }
+
+    // TopRider
+    prefix = "SDL.Input.TopRider.";
+    config->addOption(prefix + "DeviceType", DefaultTopRiderDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < TOPRIDER_NUM_BUTTONS; j++) {
+        config->addOption(prefix + TopRiderNames[j], DefaultTopRider[j]);
+    }
+
+    // FTrainer
+    prefix = "SDL.Input.FTrainer.";
+    config->addOption(prefix + "DeviceType", DefaultFTrainerDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < FTRAINER_NUM_BUTTONS; j++) {
+        config->addOption(prefix + FTrainerNames[j], DefaultFTrainer[j]);
+    }
+
+    // FamilyKeyBoard
+    prefix = "SDL.Input.FamilyKeyBoard.";
+    config->addOption(prefix + "DeviceType", DefaultFamilyKeyBoardDevice);
+    config->addOption(prefix + "DeviceNum", 0);
+    for(unsigned int j = 0; j < FAMILYKEYBOARD_NUM_BUTTONS; j++) {
+        config->addOption(prefix + FamilyKeyBoardNames[j],
+                          DefaultFamilyKeyBoard[j]);
+    }
+
+    // All mouse devices
+    config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");
+    config->addOption("SDL.OekaKids.0.DeviceNum", 0);
+
+    config->addOption("SDL.Arkanoid.0.DeviceType", "Mouse");
+    config->addOption("SDL.Arkanoid.0.DeviceNum", 0);
+
+    config->addOption("SDL.Shadow.0.DeviceType", "Mouse");
+    config->addOption("SDL.Shadow.0.DeviceNum", 0);
+
+    config->addOption("SDL.Zapper.0.DeviceType", "Mouse");
+    config->addOption("SDL.Zapper.0.DeviceNum", 0);
+
+    return config;
+}
+
+void
+UpdateEMUCore(Config *config)
+{
+    int ntsccol, ntsctint, ntschue, flag, start, end;
+    std::string cpalette;
+
+    config->getOption("SDL.Color", &ntsccol);
+    config->getOption("SDL.Tint", &ntsctint);
+    config->getOption("SDL.Hue", &ntschue);
     FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
-    if(cpalette) {
-        LoadCPalette();
+
+    config->getOption("SDL.Palette", &cpalette);
+    if(cpalette.size()) {
+        LoadCPalette(cpalette);
     }
 
-    return 0;
+    config->getOption("SDL.PAL", &flag);
+    FCEUI_SetVidSystem(flag ? 1 : 0);
+
+    config->getOption("SDL.GameGenie", &flag);
+    FCEUI_SetGameGenie(flag ? 1 : 0);
+
+    config->getOption("SDL.LowPass", &flag);
+    FCEUI_SetLowPass(flag ? 1 : 0);
+
+    config->getOption("SDL.DisableSpriteLimit", &flag);
+    FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
+
+    config->getOption("SDL.DisableSpriteLimit", &flag);
+    FCEUI_SetSnapName(flag ? 1 : 0);
+
+    config->getOption("SDL.ScanLineStart", &start);
+    config->getOption("SDL.ScanLineEnd", &end);
+
+#if DOING_SCANLINE_CHECKS     
+    for(int i = 0; i < 2; x++) {
+        if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
+        if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;
+    }
+#endif
+
+    FCEUI_SetRenderedLines(start + 8, end - 8, start, end);
 }

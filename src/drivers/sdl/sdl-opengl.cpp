@@ -74,93 +74,107 @@ glClear_Func p_glClear;
 glMatrixMode_Func p_glMatrixMode;
 glDisable_Func p_glDisable;
 
-void SetOpenGLPalette(uint8 *data)
+void
+SetOpenGLPalette(uint8 *data)
 {
- if(!HiBuffer)
- {
-  p_glBindTexture(GL_TEXTURE_2D, textures[0]);
-  p_glColorTableEXT(GL_TEXTURE_2D,GL_RGB,256,GL_RGBA,GL_UNSIGNED_BYTE,data);
- }
- else
-  SetPaletteBlitToHigh((uint8*)data); 
+    if(!HiBuffer) {
+        p_glBindTexture(GL_TEXTURE_2D, textures[0]);
+        p_glColorTableEXT(GL_TEXTURE_2D, GL_RGB, 256,
+                          GL_RGBA, GL_UNSIGNED_BYTE, data);
+    } else {
+        SetPaletteBlitToHigh((uint8*)data);
+    }
 }
 
-void BlitOpenGL(uint8 *buf)
+void
+BlitOpenGL(uint8 *buf)
 {
- p_glBindTexture(GL_TEXTURE_2D, textures[0]);
- if(HiBuffer)
- {
-  static int xo=0;
-  xo=(xo+1)&3;
-  Blit8ToHigh(buf,(uint8*)HiBuffer,256,240,256*4,1,1);
-  if(!xo)
-  p_glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,256,256, 0, GL_RGBA,GL_UNSIGNED_BYTE,
-			HiBuffer);
- }
- else
- {
-  //glPixelStorei(GL_UNPACK_ROW_LENGTH, 256);
-  p_glTexImage2D(GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT, 256, 256, 0,
-		GL_COLOR_INDEX,GL_UNSIGNED_BYTE,buf);
- }
+    p_glBindTexture(GL_TEXTURE_2D, textures[0]);
+    if(HiBuffer) {
+        static int xo = 0;
+        xo = (xo + 1) & 3;
+        Blit8ToHigh(buf, (uint8*)HiBuffer, 256, 240, 256*4, 1, 1);
+        if(!xo) {
+            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
+                           GL_RGBA, GL_UNSIGNED_BYTE, HiBuffer);
+        }
+    } else {
+        //glPixelStorei(GL_UNPACK_ROW_LENGTH, 256);
+        p_glTexImage2D(GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT, 256, 256, 0,
+                       GL_COLOR_INDEX,GL_UNSIGNED_BYTE,buf);
+    }
 
- p_glBegin(GL_QUADS);
- p_glTexCoord2f(1.0f*left/256, 1.0f*bottom/256);	// Bottom left of our picture.
- p_glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
+    p_glBegin(GL_QUADS);
+    p_glTexCoord2f(1.0f*left/256, 1.0f*bottom/256); // Bottom left of picture.
+    p_glVertex2f(-1.0f, -1.0f);	// Bottom left of target.
 
- p_glTexCoord2f(1.0f*right/256, 1.0f*bottom/256);	// Bottom right of our picture.
- p_glVertex2f( 1.0f, -1.0f);	// Bottom right of target.
+    p_glTexCoord2f(1.0f*right/256, 1.0f*bottom/256);// Bottom right of picture.
+    p_glVertex2f( 1.0f, -1.0f);	// Bottom right of target.
 
- p_glTexCoord2f(1.0f*right/256, 1.0f*top/256);	// Top right of our picture.
- p_glVertex2f( 1.0f,  1.0f);	// Top right of target.
+    p_glTexCoord2f(1.0f*right/256, 1.0f*top/256); // Top right of our picture.
+    p_glVertex2f( 1.0f,  1.0f);	// Top right of target.
 
- p_glTexCoord2f(1.0f*left/256, 1.0f*top/256);	// Top left of our picture.
- p_glVertex2f(-1.0f,  1.0f);	// Top left of target.
- p_glEnd();
+    p_glTexCoord2f(1.0f*left/256, 1.0f*top/256);  // Top left of our picture.
+    p_glVertex2f(-1.0f,  1.0f);	// Top left of target.
+    p_glEnd();
 
- //glDisable(GL_BLEND);
- if(scanlines)
- {
-  p_glEnable(GL_BLEND);
+    //glDisable(GL_BLEND);
+    if(scanlines) {
+        p_glEnable(GL_BLEND);
 
-  p_glBindTexture(GL_TEXTURE_2D, textures[1]);
-  p_glBlendFunc(GL_DST_COLOR, GL_SRC_ALPHA);
+        p_glBindTexture(GL_TEXTURE_2D, textures[1]);
+        p_glBlendFunc(GL_DST_COLOR, GL_SRC_ALPHA);
 
-  p_glBegin(GL_QUADS);
+        p_glBegin(GL_QUADS);
 
-  p_glTexCoord2f(1.0f*left/256, 1.0f*bottom/256);  // Bottom left of our picture.
-  p_glVertex2f(-1.0f, -1.0f);      // Bottom left of target.
+        p_glTexCoord2f(1.0f*left/256,
+                       1.0f*bottom/256); // Bottom left of our picture.
+        p_glVertex2f(-1.0f, -1.0f);      // Bottom left of target.
  
-  p_glTexCoord2f(1.0f*right/256, 1.0f*bottom/256); // Bottom right of our picture.
-  p_glVertex2f( 1.0f, -1.0f);      // Bottom right of target.
+        p_glTexCoord2f(1.0f*right/256,
+                       1.0f*bottom/256); // Bottom right of our picture.
+        p_glVertex2f( 1.0f, -1.0f);      // Bottom right of target.
  
-  p_glTexCoord2f(1.0f*right/256, 1.0f*top/256);    // Top right of our picture.
-  p_glVertex2f( 1.0f,  1.0f);      // Top right of target.
+        p_glTexCoord2f(1.0f*right/256,
+                       1.0f*top/256);    // Top right of our picture.
+        p_glVertex2f( 1.0f,  1.0f);      // Top right of target.
  
-  p_glTexCoord2f(1.0f*left/256, 1.0f*top/256);     // Top left of our picture.
-  p_glVertex2f(-1.0f,  1.0f);      // Top left of target.
+        p_glTexCoord2f(1.0f*left/256,
+                       1.0f*top/256);     // Top left of our picture.
+        p_glVertex2f(-1.0f,  1.0f);      // Top left of target.
 
-  p_glEnd();
-  p_glDisable(GL_BLEND);
- }
-  SDL_GL_SwapBuffers();
+        p_glEnd();
+        p_glDisable(GL_BLEND);
+    }
+    SDL_GL_SwapBuffers();
 }
 
-void KillOpenGL(void)
+void
+KillOpenGL(void)
 {
- if(textures[0])
-  p_glDeleteTextures(2, &textures[0]);
- textures[0]=0;
- if(HiBuffer)
- {
-  free(HiBuffer);
-  HiBuffer=0;
- }
+    if(textures[0]) {
+        p_glDeleteTextures(2, &textures[0]);
+    }
+    textures[0]=0;
+    if(HiBuffer) {
+        free(HiBuffer);
+        HiBuffer=0;
+    }
 }
 /* Rectangle, left, right(not inclusive), top, bottom(not inclusive). */
 
-int InitOpenGL(int l, int r, int t, int b, double xscale,double yscale, int efx, int ipolate,
-		int stretchx, int stretchy, SDL_Surface *screen)
+int
+InitOpenGL(int l,
+           int r,
+           int t,
+           int b,
+           double xscale,
+           double yscale,
+           int efx,
+           int ipolate,
+           int stretchx,
+           int stretchy,
+           SDL_Surface *screen)
 {
  const char *extensions;
 
@@ -211,8 +225,8 @@ int InitOpenGL(int l, int r, int t, int b, double xscale,double yscale, int efx,
  }
 
  {
-  int rw=(r-l)*xscale;
-  int rh=(b-t)*yscale;
+  int rw=(int)((r-l)*xscale);
+  int rh=(int)((b-t)*yscale);
   int sx=(screen->w-rw)/2;     // Start x
   int sy=(screen->h-rh)/2;      // Start y
 

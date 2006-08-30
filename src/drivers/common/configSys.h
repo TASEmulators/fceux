@@ -10,20 +10,23 @@ private:
 
     std::map<std::string, std::string>    _strOptMap;
     std::map<std::string, int>            _intOptMap;
-    std::map<std::string, void (*)(void)> _fnOptMap;
+    std::map<std::string, double>         _dblOptMap;
+    std::map<std::string, void (*)(const std::string &)> _fnOptMap;
 
     std::map<char, std::string>        _shortArgMap;
     std::map<std::string, std::string> _longArgMap;
 
 private:
     int _addOption(char, const std::string &, const std::string &, int);
+    int _addOption(const std::string &, const std::string &, int);
     int _load(void);
     int _parseArgs(int, char **);
 
 public:
     const static int STRING   = 1;
     const static int INTEGER  = 2;
-    const static int FUNCTION = 3;
+    const static int DOUBLE   = 3;
+    const static int FUNCTION = 4;
 
 public:
     Config(std::string d) : _dir(d) { }
@@ -34,24 +37,38 @@ public:
      * parse().
      */
     int addOption(char, const std::string &,
-                  const std::string &, int);
-    int addOption(char, const std::string &,
                   const std::string &, const std::string &);
     int addOption(char, const std::string &,
-                  const std::string &, void (*)(void));
+                  const std::string &, int);
+    int addOption(char, const std::string &,
+                  const std::string &, double);
+    int addOption(char, const std::string &,
+                  const std::string &, void (*)(const std::string &));
+
+    int addOption(const std::string &,
+                  const std::string &, const std::string &);
+    int addOption(const std::string &, const std::string &, int);
+    int addOption(const std::string &, const std::string &, double);
+    //int addOption(const std::string &,
+    //              const std::string &, void (*)(const std::string &));
+
     int addOption(const std::string &, const std::string &);
     int addOption(const std::string &, int);
+    int addOption(const std::string &, double);
+    //int addOption(const std::string &, void (*)(const std::string &));
 
     /**
      * Sets a configuration option.  Can be called at any time.
      */
-    int setOption(const std::string &, int);
     int setOption(const std::string &, const std::string &);
-    int setOption(const std::string &, void (*)(void));
+    int setOption(const std::string &, int);
+    int setOption(const std::string &, double);
+    int setOption(const std::string &, void (*)(const std::string &));
 
     int getOption(const std::string &, std::string *);
     int getOption(const std::string &, const char **);
     int getOption(const std::string &, int *);
+    int getOption(const std::string &, double *);
 
     /**
      * Parse the arguments.  Also read in the configuration file and

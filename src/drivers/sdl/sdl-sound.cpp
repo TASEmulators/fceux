@@ -27,11 +27,17 @@
 
 #include "sdl.h"
 
-static volatile int *Buffer = 0;
-static unsigned int BufferSize;
-static unsigned int BufferRead;
-static unsigned int BufferWrite;
-static volatile unsigned int BufferIn;
+#include "../common/configSys.h"
+extern Config *g_config;
+
+static volatile int *s_Buffer = 0;
+static unsigned int s_BufferSize;
+static unsigned int s_BufferRead;
+static unsigned int s_BufferWrite;
+static volatile unsigned int s_BufferIn;
+
+static int s_mute = 0;
+
 
 /**
  * Callback from the SDL to get and play audio data.
@@ -46,10 +52,10 @@ fillaudio(void *udata,
 
     while(len) {
         int16 sample = 0;
-        if(BufferIn) {
-            sample = Buffer[BufferRead];
-            BufferRead = (BufferRead + 1) % BufferSize;
-            BufferIn--;
+        if(s_BufferIn) {
+            sample = s_Buffer[s_BufferRead];
+            s_BufferRead = (s_BufferRead + 1) % s_BufferSize;
+            s_BufferIn--;
         } else {
             sample = 0;
         }
@@ -66,8 +72,13 @@ fillaudio(void *udata,
 int
 InitSound(FCEUGI *gi)
 {
+    int sound, soundrate, soundbufsize, soundvolume, soundq;
     SDL_AudioSpec spec;
-    if(!_sound) return(0);
+
+    g_config->getOption("SDL.Sound", &sound);
+    if(!sound) {
+        return 0;
+    }
 
     memset(&spec, 0, sizeof(spec));
     if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
@@ -76,6 +87,12 @@ InitSound(FCEUGI *gi)
         return(0);
     }
 
+    // load configuration variables
+    g_config->getOption("SDL.SoundRate", &soundrate);
+    g_config->getOption("SDL.SoundBufSize", &soundbufsize);
+    g_config->getOption("SDL.SoundVolume", &soundvolume);
+    g_config->getOption("SDL.SoundQuality", &soundq);
+
     spec.freq = soundrate;
     spec.format = AUDIO_S16SYS;
     spec.channels = 1;
@@ -83,18 +100,18 @@ InitSound(FCEUGI *gi)
     spec.callback = fillaudio;
     spec.userdata = 0;
 
-    BufferSize = soundbufsize * soundrate / 1000;
+    s_BufferSize = soundbufsize * soundrate / 1000;
 
     // XXX soules - what is this??
     /* SDL uses at least double-buffering, so multiply by 2. */
-    BufferSize -= spec.samples * 2;
+    s_BufferSize -= spec.samples * 2;
 
-    if(BufferSize < spec.samples) BufferSize = spec.samples;
+    if(s_BufferSize < spec.samples) s_BufferSize = spec.samples;
 
-    Buffer = (int *)malloc(sizeof(int) * BufferSize);
-    BufferRead = BufferWrite = BufferIn = 0;
+    s_Buffer = (int *)malloc(sizeof(int) * s_BufferSize);
+    s_BufferRead = s_BufferWrite = s_BufferIn = 0;
 
-    //printf("SDL Size: %d, Internal size: %d\n",spec.samples,BufferSize);
+    //printf("SDL Size: %d, Internal size: %d\n",spec.samples,s_BufferSize);
 
     if(SDL_OpenAudio(&spec, 0) < 0) {
         puts(SDL_GetError());
@@ -102,6 +119,9 @@ InitSound(FCEUGI *gi)
         return(0);
     }
     SDL_PauseAudio(0);
+
+    FCEUI_SetSoundVolume(soundvolume);
+    FCEUI_SetSoundQuality(soundq);
     FCEUI_Sound(soundrate);
     return(1);
 }
@@ -113,7 +133,7 @@ InitSound(FCEUGI *gi)
 uint32
 GetMaxSound(void)
 {
-    return(BufferSize);
+    return(s_BufferSize);
 }
 
 /**
@@ -122,7 +142,7 @@ GetMaxSound(void)
 uint32
 GetWriteSound(void)
 {
-    return(BufferSize - BufferIn);
+    return(s_BufferSize - s_BufferIn);
 }
 
 /**
@@ -133,14 +153,14 @@ WriteSound(int32 *buf,
            int Count)
 {
     while(Count) {
-        while(BufferIn == BufferSize) {
+        while(s_BufferIn == s_BufferSize) {
             SDL_Delay(1);
         }
 
-        Buffer[BufferWrite] = *buf;
+        s_Buffer[s_BufferWrite] = *buf;
         Count--;
-        BufferWrite = (BufferWrite + 1) % BufferSize;
-        BufferIn++;
+        s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+        s_BufferIn++;
         buf++;
     }
 }
@@ -163,16 +183,13 @@ KillSound(void)
     FCEUI_Sound(0);
     SDL_CloseAudio();
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
-    if(Buffer) {
-        free((void *)Buffer);
-        Buffer = 0;
+    if(s_Buffer) {
+        free((void *)s_Buffer);
+        s_Buffer = 0;
     }
     return(0);
 }
 
-
-static int mute=0;
-static int soundvolume=100;
 
 /**
  * Adjust the volume either down (-1), up (1), or to the default (0).
@@ -181,6 +198,9 @@ static int soundvolume=100;
 void
 FCEUD_SoundVolumeAdjust(int n)
 {
+    int soundvolume;
+    g_config->getOption("SDL.SoundVolume", &soundvolume);
+
     switch(n) {
     case -1:
         soundvolume -= 10;
@@ -199,8 +219,10 @@ FCEUD_SoundVolumeAdjust(int n)
         break;
     }
 
-    mute = 0;
+    s_mute = 0;
     FCEUI_SetSoundVolume(soundvolume);
+    g_config->setOption("SDL.SoundVolume", soundvolume);
+
     FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
 
@@ -210,12 +232,15 @@ FCEUD_SoundVolumeAdjust(int n)
 void
 FCEUD_SoundToggle(void)
 {
-    if(mute) {
-        mute = 0;
+    if(s_mute) {
+        int soundvolume;
+        g_config->getOption("SDL.SoundVolume", &soundvolume);
+
+        s_mute = 0;
         FCEUI_SetSoundVolume(soundvolume);
         FCEU_DispMessage("Sound mute off.");
     } else {
-        mute = 1;
+        s_mute = 1;
         FCEUI_SetSoundVolume(0);
         FCEU_DispMessage("Sound mute on.");
     }

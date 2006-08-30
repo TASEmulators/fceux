@@ -24,6 +24,8 @@
 #include "sdl-video.h"
 #include "unix-netplay.h"
 
+#include "../common/configSys.h"
+
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -34,7 +36,7 @@ int sdlhaveogl;
 #endif
 
 
-extern int32 fps_scale;
+extern int32 g_fpsScale;
 
 int CloseGame(void);
 
@@ -46,6 +48,10 @@ int eoptions=0;
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
+
+
+// global configuration object
+Config *g_config;
 
 /**
  * Prints an error string to STDOUT.
@@ -119,6 +125,8 @@ CloseStuff(int signum)
  */
 int LoadGame(const char *path)
 {
+    std::string filename;
+
     CloseGame();
     if(!FCEUI_LoadGame(path, 1)) {
         return 0;
@@ -129,10 +137,11 @@ int LoadGame(const char *path)
     if(!DriverInitialize(GameInfo)) {
         return(0);
     }
-    if(soundrecfn) {
-        if(!FCEUI_BeginWaveRecord(soundrecfn)) {
-            free(soundrecfn);
-            soundrecfn=0;
+
+    g_config->getOption("SDL.SoundRecordFile", &filename);
+    if(filename.size()) {
+        if(!FCEUI_BeginWaveRecord(filename.c_str())) {
+            g_config->setOption("SDL.SoundRecordFile", "");
         }
     }
     isloaded = 1;
@@ -147,6 +156,8 @@ int LoadGame(const char *path)
 int
 CloseGame()
 {
+    std::string filename;
+
     if(!isloaded) {
         return(0);
     }
@@ -155,7 +166,8 @@ CloseGame()
     isloaded = 0;
     GameInfo = 0;
 
-    if(soundrecfn) {
+    g_config->getOption("SDL.SoundRecordFile", &filename);
+    if(filename.size()) {
         FCEUI_EndWaveRecord();
     }
 
@@ -165,7 +177,7 @@ CloseGame()
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
-void DoFun(void)
+static void DoFun(int frameskip)
 {
     uint8 *gfx;  
     int32 *sound;
@@ -224,7 +236,7 @@ DriverInitialize(FCEUGI *gi)
 static void
 DriverKill()
 {
-    SaveConfig();
+    //SaveConfig();
 
 #ifndef WIN32
     // XXX soules - capturing all these signals seems pointless
@@ -253,14 +265,14 @@ FCEUD_Update(uint8 *XBuf,
 
     int ocount = Count;
     // apply frame scaling to Count
-    Count = (Count<<8)/fps_scale;
+    Count = (Count<<8) / g_fpsScale;
     if(Count) {
         int32 can=GetWriteSound();
         static int uflow=0;
         int32 tmpcan;
 
         // don't underflow when scaling fps
-        if(can >= GetMaxSound() && fps_scale<=256) uflow=1;	/* Go into massive underflow mode. */
+        if(can >= GetMaxSound() && g_fpsScale<=256) uflow=1;	/* Go into massive underflow mode. */
 
         if(can > Count) can=Count;
         else uflow=0;
@@ -270,7 +282,7 @@ FCEUD_Update(uint8 *XBuf,
         //if(uflow) puts("Underflow");
         tmpcan = GetWriteSound();
         // don't underflow when scaling fps
-        if(fps_scale>256 || ((tmpcan < Count*0.90) && !uflow)) {
+        if(g_fpsScale>256 || ((tmpcan < Count*0.90) && !uflow)) {
             if(XBuf && (inited&4) && !(NoWaiting & 2))
                 BlitScreen(XBuf);
             Buffer+=can;
@@ -356,6 +368,8 @@ int
 main(int argc,
      char *argv[])
 {
+    int error, frameskip;
+
     FCEUD_Message("\nStarting "FCEU_NAME_AND_VERSION"...\n");
 
 #ifdef WIN32
@@ -378,9 +392,12 @@ main(int argc,
 #endif
 #endif
 
-    SetDefaults();
-
-    int error;
+    // Initialize the configuration system
+    g_config = InitConfig();
+    if(!g_config) {
+        SDL_Quit();
+        return -1;
+    }
 
     // initialize the infrastructure
     error = FCEUI_Initialize();
@@ -389,15 +406,22 @@ main(int argc,
         return -1;
     }
 
-    // XXX configuration initialization
-    error = InitConfig(argc, argv);
-    if(error) {
+    int romIndex = g_config->parse(argc, argv);
+    if(romIndex <= 0) {
+        FCEUD_Message("\nError parsing command line arguments\n");
         SDL_Quit();
         return -1;
     }
 
+    // update the input devices
+    UpdateInput(g_config);
+
+    // update the emu core
+    UpdateEMUCore(g_config);
+    g_config->getOption("SDL.Frameskip", &frameskip);
+
     // load the specified game
-    error = LoadGame(argv[argc - 1]);
+    error = LoadGame(argv[romIndex]);
     if(error != 1) {
         DriverKill();
         SDL_Quit();
@@ -406,12 +430,12 @@ main(int argc,
 
     // loop playing the game
     while(GameInfo) {
-        DoFun();
+        DoFun(frameskip);
     }
     CloseGame();
 
-    // save the configuration information
-    SaveConfig();
+    // save the configuration information?
+    //SaveConfig();
 
     // exit the infrastructure
     FCEUI_Kill();

@@ -78,7 +78,7 @@ int FCEUI_EndWaveRecord(void)
 }
 
 
-int FCEUI_BeginWaveRecord(char *fn)
+int FCEUI_BeginWaveRecord(const char *fn)
 {
  int r;
 

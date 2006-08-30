@@ -588,7 +588,7 @@ static char FileExt[2048];	/* Includes the . character, as in ".nes" */
 
 static char FileBaseDirectory[2048];
 
-void FCEUI_SetBaseDirectory(char *dir)
+void FCEUI_SetBaseDirectory(const char *dir)
 {
  strncpy(BaseDirectory,dir,2047);
  BaseDirectory[2047]=0;

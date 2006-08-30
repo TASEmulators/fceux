@@ -1,9 +1,4 @@
-extern int   frameskip;
-extern char *cpalette;
-extern char *soundrecfn;
-extern int   ntsccol, ntschue, ntsctint;
-extern char *DrBaseDirectory;
+#include "../common/configSys.h"
 
-int  InitConfig(int, char **);
-void SaveConfig(void);
-void SetDefaults(void);
+Config *InitConfig(void);
+void UpdateEMUCore(Config *);

@@ -17,7 +17,8 @@ Config::_addOption(char shortArg,
                    int type)
 {
     // make sure we have a valid type
-    if(type != INTEGER && type != STRING) {
+    if(type != INTEGER && type != STRING &&
+       type != DOUBLE && type != FUNCTION) {
         return -1;
     }
 
@@ -25,17 +26,21 @@ Config::_addOption(char shortArg,
     if(_shortArgMap.find(shortArg) != _shortArgMap.end() ||
        _longArgMap.find(longArg) != _longArgMap.end() ||
        (type == INTEGER && _intOptMap.find(name) != _intOptMap.end()) ||
-       (type == STRING  && _strOptMap.find(name) != _strOptMap.end())) {
+       (type == STRING  && _strOptMap.find(name) != _strOptMap.end()) ||
+       (type == DOUBLE  && _dblOptMap.find(name) != _dblOptMap.end())) {
         return -1;
     }
 
     // add the option
     switch(type) {
+    case(STRING):
+        _strOptMap[name] = "";
+        break;
     case(INTEGER):
         _intOptMap[name] = 0;
         break;
-    case(STRING):
-        _strOptMap[name] = "";
+    case(DOUBLE):
+        _dblOptMap[name] = 0.0;
         break;
     case(FUNCTION):
         _fnOptMap[name] = NULL;
@@ -48,6 +53,44 @@ Config::_addOption(char shortArg,
 
     return 0;
 }
+
+int
+Config::_addOption(const std::string &longArg,
+                   const std::string &name,
+                   int type)
+{
+    // make sure we have a valid type
+    if(type != STRING && type != INTEGER && type != DOUBLE) {
+        return -1;
+    }
+
+    // check if the option already exists
+    if(_longArgMap.find(longArg) != _longArgMap.end() ||
+       (type == STRING  && _strOptMap.find(name) != _strOptMap.end()) ||
+       (type == INTEGER && _intOptMap.find(name) != _intOptMap.end()) ||
+       (type == DOUBLE  && _dblOptMap.find(name) != _dblOptMap.end())) {
+        return -1;
+    }
+
+    // add the option
+    switch(type) {
+    case(STRING):
+        _strOptMap[name] = "";
+        break;
+    case(INTEGER):
+        _intOptMap[name] = 0;
+        break;
+    case(DOUBLE):
+        _dblOptMap[name] = 0.0;
+        break;
+    default:
+        break;
+    } 
+    _longArgMap[longArg] = name;
+
+    return 0;
+}
+
 
 /**
  * Add a given option and sets its default value.  The option is
@@ -88,6 +131,36 @@ int
 Config::addOption(char shortArg,
                   const std::string &longArg,
                   const std::string &name,
+                  double defaultValue)
+{
+    int error;
+
+    // add the option to the config system
+    error = _addOption(shortArg, longArg, name, DOUBLE);
+    if(error) {
+        return error;
+    }
+
+    // set the option to the default value
+    error = setOption(name, defaultValue);
+    if(error) {
+        return error;
+    }
+
+    return 0;
+}
+
+
+/**
+ * Add a given option and sets its default value.  The option is
+ * specified as a short command line (-f), long command line (--foo),
+ * option name (Foo), its type (integer or string), and its default
+ * value.
+ */
+int
+Config::addOption(char shortArg,
+                  const std::string &longArg,
+                  const std::string &name,
                   const std::string &defaultValue)
 {
     int error;
@@ -111,7 +184,7 @@ int
 Config::addOption(char shortArg,
                   const std::string &longArg,
                   const std::string &name,
-                  void (*defaultFn)(void))
+                  void (*defaultFn)(const std::string &))
 {
     int error;
 
@@ -123,6 +196,72 @@ Config::addOption(char shortArg,
 
     // set the option to the default value
     error = setOption(name, defaultFn);
+    if(error) {
+        return error;
+    }
+
+    return 0;
+}
+
+int
+Config::addOption(const std::string &longArg,
+                  const std::string &name,
+                  const std::string &defaultValue)
+{
+    int error;
+
+    // add the option to the config system
+    error = _addOption(longArg, name, STRING);
+    if(error) {
+        return error;
+    }
+
+    // set the option to the default value
+    error = setOption(name, defaultValue);
+    if(error) {
+        return error;
+    }
+
+    return 0;
+}
+
+int
+Config::addOption(const std::string &longArg,
+                  const std::string &name,
+                  int defaultValue)
+{
+    int error;
+
+    // add the option to the config system
+    error = _addOption(longArg, name, INTEGER);
+    if(error) {
+        return error;
+    }
+
+    // set the option to the default value
+    error = setOption(name, defaultValue);
+    if(error) {
+        return error;
+    }
+
+    return 0;
+}
+
+int
+Config::addOption(const std::string &longArg,
+                  const std::string &name,
+                  double defaultValue)
+{
+    int error;
+
+    // add the option to the config system
+    error = _addOption(longArg, name, DOUBLE);
+    if(error) {
+        return error;
+    }
+
+    // set the option to the default value
+    error = setOption(name, defaultValue);
     if(error) {
         return error;
     }
@@ -156,6 +295,19 @@ Config::addOption(const std::string &name,
     return 0;
 }
 
+int
+Config::addOption(const std::string &name,
+                  double defaultValue)
+{
+    if(_dblOptMap.find(name) != _dblOptMap.end()) {
+        return -1;
+    }
+
+    // add the option
+    _dblOptMap[name] = defaultValue;
+    return 0;
+}
+
 /**
  * Sets the specified option to the given integer value.
  */
@@ -168,6 +320,26 @@ Config::setOption(const std::string &name,
     // confirm that the option exists
     opt_i = _intOptMap.find(name);
     if(opt_i == _intOptMap.end()) {
+        return -1;
+    }
+
+    // set the option
+    opt_i->second = value;
+    return 0;
+}
+
+/**
+ * Sets the specified option to the given integer value.
+ */
+int
+Config::setOption(const std::string &name,
+                  double value)
+{
+    std::map<std::string, double>::iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _dblOptMap.find(name);
+    if(opt_i == _dblOptMap.end()) {
         return -1;
     }
 
@@ -201,9 +373,9 @@ Config::setOption(const std::string &name,
  */
 int
 Config::setOption(const std::string &name,
-                  void (*value)(void))
+                  void (*value)(const std::string &))
 {
-    std::map<std::string, void (*)(void)>::iterator opt_i;
+    std::map<std::string, void (*)(const std::string &)>::iterator opt_i;
 
     // confirm that the option exists
     opt_i = _fnOptMap.find(name);
@@ -268,6 +440,23 @@ Config::getOption(const std::string &name,
     return 0;
 }
 
+int
+Config::getOption(const std::string &name,
+                  double *value)
+{
+    std::map<std::string, double>::iterator opt_i;
+
+    // confirm that the option exists
+    opt_i = _dblOptMap.find(name);
+    if(opt_i == _dblOptMap.end()) {
+        return -1;
+    }
+
+    // get the option
+    (*value) = opt_i->second;
+    return 0;
+}
+
 /**
  * Parses the command line arguments.  Short args are of the form -f
  * <opt>, long args are of the form --foo <opt>.  Returns < 0 on error,
@@ -281,7 +470,8 @@ Config::_parseArgs(int argc,
     std::map<std::string, std::string>::iterator long_i, str_i;
     std::map<char, std::string>::iterator short_i;
     std::map<std::string, int>::iterator int_i;
-    std::map<std::string, void (*)(void)>::iterator fn_i;
+    std::map<std::string, double>::iterator dbl_i;
+    std::map<std::string, void (*)(const std::string &)>::iterator fn_i;
     std::string arg, opt, value;
 
     for(int i = 1; i < argc; i++) {
@@ -318,13 +508,6 @@ Config::_parseArgs(int argc,
             opt = short_i->second;
         }
 
-        // check if its a function, and if so, call the function
-        fn_i  = _fnOptMap.find(opt);
-        if(fn_i != _fnOptMap.end()) {
-            (*(fn_i->second))();
-            continue;
-        }
-
         // make sure we've got a value
         if(i + 1 >= argc) {
             // XXX missing value
@@ -335,10 +518,16 @@ Config::_parseArgs(int argc,
         // now, find the appropriate option entry, and update it
         str_i = _strOptMap.find(opt);
         int_i = _intOptMap.find(opt);
+        dbl_i = _dblOptMap.find(opt);
+        fn_i  = _fnOptMap.find(opt);
         if(str_i != _strOptMap.end()) {
             str_i->second = argv[i];
         } else if(int_i != _intOptMap.end()) {
             int_i->second = atol(argv[i]);
+        } else if(dbl_i != _dblOptMap.end()) {
+            dbl_i->second = atof(argv[i]);
+        } else if(fn_i != _fnOptMap.end()) {
+            (*(fn_i->second))(argv[i]);
         } else {
             // XXX invalid option?  shouldn't happen
             return -1;
@@ -386,6 +575,7 @@ Config::_load()
     unsigned int pos, eqPos;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
+    std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
     std::string configFile = _dir + "/fceu.cfg";
     std::string line, name, value;
@@ -399,7 +589,7 @@ Config::_load()
         config.open(configFile.c_str(), std::ios::in | std::ios::out);
         if(!config.is_open()) {
             // XXX file couldn't be opened?
-            return -1;
+            return 0;
         }
 
         while(!config.eof()) {
@@ -422,11 +612,14 @@ Config::_load()
 
             // check if the option exists, and if so, set it appropriately
             str_i = _strOptMap.find(name);
+            dbl_i = _dblOptMap.find(name);
             int_i = _intOptMap.find(name);
             if(str_i != _strOptMap.end()) {
                 str_i->second = value;
             } else if(int_i != _intOptMap.end()) {
                 int_i->second = atol(value.c_str());
+            } else if(dbl_i != _dblOptMap.end()) {
+                dbl_i->second = atof(value.c_str());
             }
         }
 
@@ -449,6 +642,7 @@ Config::save()
     int error;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
+    std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
     std::string configFile = _dir + "/fceu.cfg";
     char buf[1024];
@@ -468,6 +662,11 @@ Config::save()
         for(int_i = _intOptMap.begin(); int_i != _intOptMap.end(); int_i++) {
             snprintf(buf, 1024, "%s = %d\n",
                      int_i->first.c_str(), int_i->second);
+            config.write(buf, strlen(buf));
+        }
+        for(dbl_i = _dblOptMap.begin(); dbl_i != _dblOptMap.end(); int_i++) {
+            snprintf(buf, 1024, "%s = %f\n",
+                     dbl_i->first.c_str(), dbl_i->second);
             config.write(buf, strlen(buf));
         }
         for(str_i = _strOptMap.begin(); str_i != _strOptMap.end(); str_i++) {
