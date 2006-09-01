@@ -13,4 +13,8 @@
 	static void FromGUI();
 	static void UpdateStatics();
 	void UpdateExternalButton();
+	static void LoadBasicBotFile(char fn[]);
+	static void LoadBasicBot();
+	static void SaveBasicBotFile(char fn[]);
+	static void SaveBasicBot();
 #endif // _BASICBOT_H_

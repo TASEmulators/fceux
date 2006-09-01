@@ -37,7 +37,7 @@
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well.
-static char BBversion[] = "0.2.2";
+static char BBversion[] = "0.2.2b";
 
 static HWND hwndBasicBot = 0;			// qfox: GUI handle
 static bool BotRunning = false;			// qfox: Is the bot computing or not? I think...
@@ -45,8 +45,8 @@ static bool BotRunning = false;			// qfox: Is the bot computing or not? I think.
 static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
 
 #define BOT_MAXCODE 1024				// qfox: max length of code, 1kb may be too little...
-#define BOT_FORMULAS 21
-static char Formula[BOT_FORMULAS][BOT_MAXCODE];	// qfox: These hold the 21 formula's entered in the GUI:
+#define BOT_FORMULAS 27					// qfox: number of code fields in the array
+static char Formula[BOT_FORMULAS][BOT_MAXCODE];	// qfox: These hold the BOT_FORMULAS formula's entered in the GUI:
 static int  CODE_1_A        = 0,
 			CODE_1_B        = 1,
 			CODE_1_SELECT   = 2,
@@ -67,9 +67,13 @@ static int  CODE_1_A        = 0,
 			CODE_MAX        = 17,
 			CODE_TIE1       = 18,
 			CODE_TIE2       = 19,
-			CODE_TIE3       = 20;
-static char ExtraCode[BOT_MAXCODE];		// qfox: Contains the extra code, executed after dealing
-										//		 with input.
+			CODE_TIE3       = 20,
+			CODE_X			= 21,
+			CODE_Y			= 22,
+			CODE_Z			= 23,
+			CODE_P			= 24,
+			CODE_Q			= 25,
+			CODE_EXTRA		= 26;
 
 #define BOT_MAXCOUNTERS 256
 static int BotCounter[BOT_MAXCOUNTERS]; // qfox: The counters. All ints, maybe change this to
@@ -1285,7 +1289,7 @@ void UpdateBasicBot()
 				}
 				
 				// luke: Run extra commands
-				EvaluateFormula(ExtraCode);
+				EvaluateFormula(Formula[CODE_EXTRA]);
 				// qfox: remember the buttons pressed in this frame
 				LastButtonPressed = BotInput[1];
 			}
@@ -1355,7 +1359,7 @@ void CheckCode()
 		EvaluateFormula(Formula[i]);
 	}
 	debugS("Error at extra code");
-	EvaluateFormula(ExtraCode);
+	EvaluateFormula(Formula[CODE_EXTRA]);
 	if (!EvaluateError)
 	{
 		debugS("Code syntax ok!");
@@ -1383,8 +1387,6 @@ static void SaveBasicBot()
 	ofn.lpstrInitialDir=BasicBotDir;
 	if(GetSaveFileName(&ofn))
 	{
-		int i,j;
-
 		//Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
@@ -1394,7 +1396,8 @@ static void SaveBasicBot()
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
 
-		//quick get length of nameo
+		int i;
+		//luke: quick get length of nameo
 		for(i=0;i<2048;i++)
 		{
 			if(nameo[i] == 0)
@@ -1403,7 +1406,7 @@ static void SaveBasicBot()
 			}
 		}
 
-		//add .bot if nameo doesn't have it
+		//luke: add .bot if fn doesn't have it
 		if((i < 4 || nameo[i-4] != '.') && i < 2040)
 		{
 			nameo[i] = '.';
@@ -1412,8 +1415,18 @@ static void SaveBasicBot()
 			nameo[i+3] = 't';
 			nameo[i+4] = 0;
 		}
-
-		FILE *fp=FCEUD_UTF8fopen(nameo,"wb");
+		SaveBasicBotFile(nameo);
+	}
+}
+/**
+ * qfox: save to supplied filename
+ */
+static void SaveBasicBotFile(char fn[])
+{
+	FILE *fp=FCEUD_UTF8fopen(fn,"wb");
+	if (fp != NULL)
+	{
+		int i,j;
 		fputc('b',fp);
 		fputc('o',fp);
 		fputc('t',fp);
@@ -1425,14 +1438,9 @@ static void SaveBasicBot()
 				fputc(Formula[i][j],fp);
 			}
 		}
-		for(j=0;j<BOT_MAXCODE;j++)
-		{
-			fputc(ExtraCode[j],fp);
-		}
 		fclose(fp);
 	}
 }
-
 /**
  * luke: Loads a previously saved file
  * qfox: code seems good
@@ -1457,8 +1465,6 @@ static void LoadBasicBot()
 
 	if(GetOpenFileName(&ofn))
 	{
-		int i,j;
-		
 		// luke: Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
@@ -1468,7 +1474,27 @@ static void LoadBasicBot()
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
 
-		FILE *fp=FCEUD_UTF8fopen(nameo,"rb");
+		// qfox: now actually load the file
+		LoadBasicBotFile(nameo);
+	}
+}
+
+
+/**
+ * qfox: load a file by supplying the filename
+ */
+static void LoadBasicBotFile(char fn[])
+{
+	int i,j;
+
+	// qfox: open the file
+	FILE *fp=FCEUD_UTF8fopen(fn,"rb");
+	if (fp != NULL) 
+	{
+
+		// qfox: if the first four chars of the file are not
+		//       "bot0", it's not a valid botfile. only check
+		//       done at the moment.
 		if(fgetc(fp) != 'b'
 			|| fgetc(fp) != 'o'
 			|| fgetc(fp) != 't'
@@ -1478,25 +1504,23 @@ static void LoadBasicBot()
 			return;
 		}
 		
+		// qfox: read the codes for the buttons for player one and
+		//       two, and the end/result/ties.
 		for(i=0;i<BOT_FORMULAS;i++)
 		{
+			// qfox: read BOT_MAXCODE bytes per codefield
 			for(j=0;j<BOT_MAXCODE;j++)
 			{
 				Formula[i][j] = fgetc(fp);
+				// qfox: if the char is 128, its 0 (?)
 				if(Formula[i][j] & 128)
 				{
+					// qfox: figure out wtf this is
 					Formula[i][j] = 0;
 				}
 			}
 		}
-		for(j=0;j<BOT_MAXCODE;j++)
-		{
-			ExtraCode[j] = fgetc(fp);
-			if(ExtraCode[j] & 128)
-			{
-				ExtraCode[j] = 0;
-			}
-		}
+		// qfox: release lock and resources
 		fclose(fp);
 	}
 }
@@ -1538,21 +1562,25 @@ static void FromGUI()
 	if (hwndBasicBot)
 	{
         int i;
+		// qfox: buttons
         for(i = 0; i < 8; i++)
         {
         	// qfox: id 1000-1008 are for the buttons
         	GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)], BOT_MAXCODE);
         }
-        for(i = 0; i < 4; i++)
-        {
-        	// qfox: id 1010-1014 are for goals
-			GetDlgItemText(hwndBasicBot,1010+i,Formula[CODE_MAX+i], BOT_MAXCODE);
-        }
-        // qfox: id 1009 is for "end when"
-		GetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP], BOT_MAXCODE);
-        
-        GetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode, BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_END, Formula[CODE_STOP], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_MAX, Formula[CODE_MAX], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE1, Formula[CODE_TIE1], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE2, Formula[CODE_TIE2], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE3, Formula[CODE_TIE3], BOT_MAXCODE);
+        GetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, Formula[CODE_EXTRA], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_X, Formula[CODE_X], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_Y, Formula[CODE_Y], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_Z, Formula[CODE_Z], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_P, Formula[CODE_P], BOT_MAXCODE);
+		GetDlgItemText(hwndBasicBot, GUI_BOT_Q, Formula[CODE_Q], BOT_MAXCODE);
 		
+		// qfox: function, because we call this from a different button as well
 		UpdateStatics();
 	}
 	UpdateFromGUI = false;
@@ -1563,27 +1591,27 @@ static void FromGUI()
  **/
 static void ToGUI()
 {
-	if (hwndBasicBot && Formula && ExtraCode)
+	if (hwndBasicBot && Formula && Formula[CODE_EXTRA])
 	{
 		int i;
+		// qfox: buttons
 		for(i = 0; i < 8; i++)
 		{
 			SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)]);
 		}
-		for(i = 0; i < 4; i++)
-		{
-			SetDlgItemText(hwndBasicBot,1010+i,Formula[CODE_MAX+i]);
-		}
-		// qfox: end when field
-		SetDlgItemText(hwndBasicBot, 1009, Formula[CODE_STOP]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_END, Formula[CODE_STOP]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_MAX, Formula[CODE_MAX]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE1, Formula[CODE_TIE1]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE2, Formula[CODE_TIE2]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE3, Formula[CODE_TIE3]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, Formula[CODE_EXTRA]);
 
-		SetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, ExtraCode);
-
-		SetDlgItemInt(hwndBasicBot, GUI_BOT_X, X, TRUE);
-		SetDlgItemInt(hwndBasicBot, GUI_BOT_Y, Y, TRUE);
-		SetDlgItemInt(hwndBasicBot, GUI_BOT_Z, Z, TRUE);
-		SetDlgItemInt(hwndBasicBot, GUI_BOT_P, P, TRUE);
-		SetDlgItemInt(hwndBasicBot, GUI_BOT_Q, Q, TRUE);
+		// qfox: static variables
+		SetDlgItemText(hwndBasicBot, GUI_BOT_X, Formula[CODE_X]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_Y, Formula[CODE_Y]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_Z, Formula[CODE_Z]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_P, Formula[CODE_P]);
+		SetDlgItemText(hwndBasicBot, GUI_BOT_Q, Formula[CODE_Q]);
 
 	}
 }
@@ -1595,13 +1623,11 @@ static void ToGUI()
 static void InitVars()
 {
 	memset(Formula, 0, BOT_FORMULAS*BOT_MAXCODE);
-	memset(ExtraCode, 0, BOT_MAXCODE);
 	int i;
 	for(i = 0; i < BOT_FORMULAS; i++)
 	{
 		Formula[i][0] = '0';
 	}
-	ExtraCode[0] = '0';
 	Formula[CODE_STOP][0] = 'f';
 	Formula[CODE_STOP][1] = 'r';
 	Formula[CODE_STOP][2] = 'a';
@@ -1639,12 +1665,15 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		// todo: load last used settings -> will have to figure out the load/save part first.
 		// todo: why the hell is this event not firing?
 		CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 0); // select the player1 radiobutton
+		LoadBasicBotFile("default.bot");
+		ToGUI();
+		// test echo, to botmode toggle button, doesnt work
+		SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,"hello");
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
-		// todo: save last used settings
-		// qfox: before closing, it quickly copies the contents to the variables... for some reason.
 		FromGUI();
+		SaveBasicBotFile("default.bot");
 		DestroyWindow(hwndBasicBot);
 		hwndBasicBot=0;
 		break;
@@ -1717,9 +1746,6 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				}
 				break;
 			case GUI_BOT_CLOSE:
-				FromGUI(); // qfox: might tear this out later. seems a little pointless.
-				DestroyWindow(hwndBasicBot);
-				hwndBasicBot=0;
 				break;
 			case GUI_BOT_BOTMODE:
 				// qfox: toggle external input mode
@@ -1740,6 +1766,11 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				// qfox: the small update button above the static variables ("U"),
 				//       only update the statics.
 				UpdateStatics();
+				break;
+			case GUI_BOT_TEST:
+				MessageBox(hwndBasicBot, "Showing", "Hrm", MB_OK);
+				SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,"hello");
+				break;
 			default:
 				break;
 			}
@@ -1781,7 +1812,6 @@ void CreateBasicBot()
 		hwndBasicBot=CreateDialog(fceu_hInstance,"BASICBOT",NULL,BasicBotCallB);
 		EditPlayerOne = true;
 		BotRunning = false;
-		ToGUI();
 	}
 }
 

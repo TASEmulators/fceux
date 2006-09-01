@@ -5,10 +5,15 @@
 #define GUI_BOT_CLOSE                   1
 #define IDI_ICON1                       101
 #define IDI_ICON2                       102
+#define GUI_BOT_END                     1009
 #define GUI_BOT_X                       1010
+#define GUI_BOT_TIE1                    1011
+#define GUI_BOT_TIE2                    1012
+#define GUI_BOT_TIE3                    1013
 #define GUI_BOT_SAVE                    1014
 #define GUI_BOT_LOAD                    1015
 #define GUI_BOT_RUN                     1016
+#define GUI_BOT_MAX                     1017
 #define GUI_BOT_Y                       1018
 #define GUI_BOT_KEYS                    1019
 #define GUI_BOT_EXTRA                   1020
@@ -19,6 +24,7 @@
 #define GUI_BOT_BOTMODE                 1025
 #define GUI_BOT_P                       1026
 #define GUI_BOT_Q                       1027
+#define GUI_BOT_TEST                    1028
 #define GUI_BOT_P1                      1035
 #define GUI_BOT_CLEAR                   1036
 #define GUI_BOT_ATTEMPTS                1037
