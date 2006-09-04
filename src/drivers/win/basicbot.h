@@ -4,8 +4,7 @@
 	void UpdateBasicBot();
 	void CreateBasicBot();
 	extern char *BasicBotDir;
-	static int EvaluateFormula(char * formula);
-	static int ParseFormula(bool ret);
+	static void BotSyntaxError(int errorcode);
 	static void StopBasicBot();
 	static void StartBasicBot();
 	static void debug(int n);
@@ -13,8 +12,17 @@
 	static void FromGUI();
 	static void UpdateStatics();
 	void UpdateExternalButton();
-	static void LoadBasicBotFile(char fn[]);
-	static void LoadBasicBot();
-	static void SaveBasicBotFile(char fn[]);
-	static void SaveBasicBot();
+	static bool LoadBasicBotFile(char fn[]);
+	static bool LoadBasicBot();
+	static bool SaveBasicBotFile(char fn[]);
+	static bool SaveBasicBot();
+	void CrashWindow();
+	void InitCode();
+	void ResetStats();
+	void UpdateBestGUI();
+	void UpdateLastGUI(int last[]);
+	void UpdateAvgGUI();
+	void UpdateFullGUI();
+	void UpdateCountersGUI();
+	void SetNewAttempt();
 #endif // _BASICBOT_H_

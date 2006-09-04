@@ -3,6 +3,7 @@
 // Used by res.rc
 //
 #define GUI_BOT_CLOSE                   1
+#define GUI_BOT_VALUES                  2
 #define IDI_ICON1                       101
 #define IDI_ICON2                       102
 #define GUI_BOT_END                     1009
@@ -20,11 +21,13 @@
 #define GUI_BOT_BEST                    1021
 #define GUI_BOT_Z                       1022
 #define GUI_BOT_CHECK                   1023
+#define GUI_BOT_COMMENTS                1023
 #define GUI_BOT_UPDATE                  1024
 #define GUI_BOT_BOTMODE                 1025
 #define GUI_BOT_P                       1026
 #define GUI_BOT_Q                       1027
 #define GUI_BOT_TEST                    1028
+#define GUI_BOT_RESET                   1029
 #define GUI_BOT_P1                      1035
 #define GUI_BOT_CLEAR                   1036
 #define GUI_BOT_ATTEMPTS                1037
@@ -53,7 +56,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40013
-#define _APS_NEXT_CONTROL_VALUE         1053
+#define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
