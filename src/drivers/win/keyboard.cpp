@@ -19,7 +19,7 @@
  */
 
 #include "common.h"
-#include <dinput.h>
+#include "dinput.h"
 
 #include "input.h"
 #include "keyboard.h"

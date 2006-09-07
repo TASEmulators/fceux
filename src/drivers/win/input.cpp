@@ -22,7 +22,7 @@
 #define _WIN32_IE	0x0300
 
 #include "common.h"
-#include <dinput.h>
+#include "dinput.h"
 #include <windows.h>
 #include <commctrl.h>
 

@@ -67,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib vfw32.lib dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				AdditionalDependencies="comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../vc_libs/x86/ddraw.lib ../vc_libs/x86/dsound.lib ../vc_libs/x86/dinput.lib ../vc_libs/x86/dxguid.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -230,7 +230,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib vfw32.lib dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				AdditionalDependencies="comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../vc_libs/x86/ddraw.lib ../vc_libs/x86/dsound.lib ../vc_libs/x86/dinput.lib ../vc_libs/x86/dxguid.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"

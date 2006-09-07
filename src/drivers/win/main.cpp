@@ -24,10 +24,10 @@
 // I like hacks.
 #define uint8 __UNO492032
 #include <winsock.h>
-#include <ddraw.h>
+#include "ddraw.h"
 #undef LPCWAVEFORMATEX
-#include <dsound.h>
-#include <dinput.h>
+#include "dsound.h"
+#include "dinput.h"
 //#include <dir.h> //mbg merge 7/17/06 removed
 #include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
