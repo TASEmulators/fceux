@@ -1,4 +1,3 @@
-int res;
 /**
  * qfox:
  * todo: boundrycheck every case in the switch! the string checks might override the boundries and read data its not supposed to. i'm not quite sure if this is an issue in C though.
@@ -34,26 +33,26 @@ int res;
 #include "basicbot.h"
 #include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode()
 
-// qfox: v0.1.0 will be the last release by Luke, mine will start at v0.2.0 and
+// v0.1.0 will be the last release by Luke, mine will start at v0.2.0 and
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
-//	 put in the project as well.
-static char BBversion[] = "0.3.0";
+//	 put in the project as well. A changelog will be kept.
+static char BBversion[] = "0.3.1";
 // title
-static char BBcaption[] = "Basic Bot v0.3.0 by qFox";
+static char BBcaption[] = "Basic Bot v0.3.1 by qFox";
+// save/load version
+static int BBsaveload = 1;
 
-static HWND hwndBasicBot = 0;			// GUI handle
-static bool BotRunning = false;			// Is the bot computing or not?
+static HWND hwndBasicBot = 0;					// GUI handle
+static bool BotRunning = false;					// Is the bot computing or not?
 
 static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
 
-#define BOT_MAXCODE 1024						// Max length of code-fields in bytes
-#define BOT_FORMULAS 28							// Number of code fields in the array
-static char Formula[BOT_FORMULAS][BOT_MAXCODE];	// These hold BOT_FORMULAS formula's entered in the GUI:
-static int Bytecode[BOT_FORMULAS][BOT_MAXCODE]; // Byte code converted formulas
-static int ByteCodePointer;						// Points to position of next value
+#define BOT_FORMULAS 35							// Number of code fields in the array
+char * Formula[BOT_FORMULAS];					// These hold BOT_FORMULAS formula's entered in the GUI:
+int * Bytecode[BOT_FORMULAS];					// Byte code converted formulas
 static int ByteCodeField;						// Working field
-static int  CODE_1_A        = 0,				// code fields
+static int  CODE_1_A        = 0,				// Code fields
 			CODE_1_B        = 1,
 			CODE_1_SELECT   = 2,
 			CODE_1_START    = 3,
@@ -69,20 +68,69 @@ static int  CODE_1_A        = 0,				// code fields
 			CODE_2_DOWN     = 13,
 			CODE_2_LEFT     = 14,
 			CODE_2_RIGHT    = 15,
-			CODE_STOP       = 16,
-			CODE_MAX        = 17,
-			CODE_TIE1       = 18,
-			CODE_TIE2       = 19,
-			CODE_TIE3       = 20,
-			CODE_X			= 21,
-			CODE_Y			= 22,
-			CODE_Z			= 23,
-			CODE_P			= 24,
-			CODE_Q			= 25,
-			CODE_EXTRA		= 26,
-			CODE_COMMENTS   = 27;
+			CODE_OK         = 16,
+			CODE_INVALID    = 17,
+			CODE_ROLLBACK   = 18,
+			CODE_MAXFRAMES  = 19,
+			CODE_MAXATTEMPTS= 20,
+			CODE_MAXPARTS   = 21,
+			CODE_SCORE      = 22,
+			CODE_TIE1       = 23,
+			CODE_TIE2       = 24,
+			CODE_TIE3       = 25,
+			CODE_TIE4       = 26,
+			CODE_TIE5       = 27,
+			CODE_X			= 28,
+			CODE_Y			= 29,
+			CODE_Z			= 30,
+			CODE_P			= 31,
+			CODE_Q			= 32,
+			CODE_EXTRA		= 33,
+			CODE_COMMENTS   = 34;
+// array contains GUI id's for certain pieces of code
+// these are in sync with the CODE_ ints above
+int Labels[] = { 
+			GUI_BOT_A_1,
+			GUI_BOT_B_1,
+			GUI_BOT_SELECT_1,
+			GUI_BOT_START_1,
+			GUI_BOT_UP_1,
+			GUI_BOT_DOWN_1,
+			GUI_BOT_LEFT_1,
+			GUI_BOT_RIGHT_1,
+			GUI_BOT_A_2,
+			GUI_BOT_B_2,
+			GUI_BOT_SELECT_2,
+			GUI_BOT_START_2,
+			GUI_BOT_UP_2,
+			GUI_BOT_DOWN_2,
+			GUI_BOT_LEFT_2,
+			GUI_BOT_RIGHT_2,
+			GUI_BOT_OK,
+			GUI_BOT_INVALID,
+			GUI_BOT_ROLLBACK,
+			GUI_BOT_MAXFRAMES,
+			GUI_BOT_MAXATTEMPTS,
+			GUI_BOT_MAXPARTS,
+			GUI_BOT_SCORE,
+			GUI_BOT_TIE1,
+			GUI_BOT_TIE2,
+			GUI_BOT_TIE3,
+			GUI_BOT_TIE4,
+			GUI_BOT_TIE5,
+			GUI_BOT_X,
+			GUI_BOT_Y,
+			GUI_BOT_Z,
+			GUI_BOT_P,
+			GUI_BOT_Q,
+			GUI_BOT_EXTRA,
+			GUI_BOT_COMMENTS
+			};
 
-const int	BOT_BYTE_LB		= 48,				// commands
+// these are the commands
+// they are actually the "bytecode" commands,
+// used by the encoder and interpreter
+const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_RB		= 1,
 			BOT_BYTE_LIT	= 2,
 			BOT_BYTE_COLON	= 3,
@@ -149,7 +197,9 @@ static int BotFrame,					// Which frame is currently or last computed?
 
 static int BotAttempts, 				// Number of attempts tried so far
 	   BotFrames, 						// Number of frames computed so far
-	   BotBestScore[4]; 				// Maximize, tie1, tie2, tie3
+	   Oks,								// Number of successfull attempts
+	   Invalids,						// Number of invalidated attempts
+	   BotBestScore[6]; 				// Maximize, tie1, tie2, tie3
 static bool NewAttempt;					// Tells code to reset certain run-specific info
 
 static int LastButtonPressed;			// Used for lastbutton command (note that this 
@@ -191,11 +241,6 @@ bool UpdateFromGUI = false;				// When this flag is set, the next new attempt wi
 										//	the settings from gui to mem. note that this cannot set
 										//	the settings for both players at once... maybe later.
 
-float AverageScore[4];					// Keep the average scores in here. to prevent overflow
-										//	this is not a total, but the average is computed after
-										//	every attempt and put back in here. this shouldn't
-										//	affect accuracy.
-
 int X,Y,Z,P,Prand,Q,Qrand;              // Static variables (is this a contradiction?) and
                                         //	probabilities. XYZ remain the same, PQ return randomly a
                                         //	number in the range of 0-P or 0-Q. They can be used in
@@ -222,6 +267,56 @@ static void SeedRandom(uint32 seed)
 }
 
 /**
+ * Get the length of a textfield ("edit control") or textarea
+ * It's more of a macro really.
+ * Returns 0 when an error occurs, the length of current 
+ * contents in any other case (check LastError in case of 0)
+ */
+unsigned int FieldLength(HWND winhandle,int controlid)
+{
+	HWND hwndItem = GetDlgItem(winhandle,controlid);
+	return SendMessage(hwndItem,WM_GETTEXTLENGTH,0,0);
+}
+/**
+ * Get the text from a freaking textfield/textarea
+ * Will reserve new memory space. These strings need
+ * to be "free"d when done with them!!
+ **/
+char * GetText(HWND winhandle, int controlid)
+{
+	unsigned int count = FieldLength(hwndBasicBot,controlid);
+	char *t = new char[count+1];
+	GetDlgItemTextA(hwndBasicBot,controlid,t,count+1);
+	return t;
+}
+
+/**
+ * copies "len" chars or until a '\0' from the
+ * old string to a new buffer and terminates 
+ * this buffer with a '\0'
+ **/
+char * ToString(char * old, int len)
+{
+	char * temp = new char[len+1];
+	for (int i=0; i<len; ++i) 
+	{
+		if (old[i] == 0) break;
+		temp[i] = old[i];
+	}
+	temp[len] = '\0';
+	return temp;
+}
+/**
+ * Get the len of a string, which is the position
+ * of the first '\0' from the start
+ **/
+unsigned int GetLength(char * str)
+{
+	char * was = str;
+	while (*str != 0) ++str;
+	return str-was;
+}
+/**
  * luke: Simulation-quality random numbers: taus88 algorithm
  **/
 static unsigned int NextRandom(void)
@@ -247,24 +342,27 @@ static int GetRandom(int n)
 /**
  * Print a string
  **/
-static void debugS(LPCSTR s)
+static char * debugS(char * s)
 {
 	SetDlgItemTextA(hwndBasicBot,GUI_BOT_DEBUG,s);
+	return s;
 }
 
 /**
  * Print a number
  **/
-static void debug(int n)
+static int debug(int n)
 {
      SetDlgItemInt(hwndBasicBot,GUI_BOT_DEBUG,n,TRUE);
+	 return n;
 }
 /**
  * When an error occurs, call this method to print the errorcode
  **/
-static void error(int n)
+static int error(int n)
 {
      SetDlgItemInt(hwndBasicBot,GUI_BOT_ERROR,n,TRUE);
+	 return n;
 }
 
 
@@ -285,16 +383,24 @@ static void BotSyntaxError(int errorcode)
  * - formula is the string to parse
  * - codefield is the field for which this code is meant
  **/
-static void ToByteCode(char * formula, int codefield)
+static int * ToByteCode(char * formula)
 {
-	// clear array
-	memset(Bytecode[codefield],0,BOT_MAXCODE*sizeof(int));
+	// get the len of the formula
+	int len = GetLength(formula);
+	// create some new space with the len of the formula
+	// its very unlikely that the bytecode will be any
+	// longer then the formula, the only exception is a
+	// formula with a single digit. for this reason
+	// we'll add a 10 byte padding
+	#define EXTRABYTES 30
+	int * bytes = new int[len+EXTRABYTES];
+	memset(bytes,0,sizeof(int)*(len+EXTRABYTES));
+	int pointer = 0;
+
 	// reset values
     EvaluateError = false;
     // set the global pointer to the string at the start of the string
     GlobalCurrentChar = formula;
-    // set the global field to the field passed on
-	ByteCodeField = codefield;
 
     // first we want to quickly check whether the brackets are matching or not
     // same for ? and :, both are pairs and should not exist alone, also they
@@ -332,14 +438,14 @@ static void ToByteCode(char * formula, int codefield)
 	{
     	BotSyntaxError(1004);
 		debugS("?:;() dont match!");
-		return;
+		free(bytes);
+		return NULL;
 	}
     
-	ByteCodePointer = 0;
 	bool hexmode = false;
 	bool negmode = false;
 
-	// three stacks, used to branch properly
+	// two stacks, used to branch properly
 	// code adds current pos to the stack if one of the commands
 	// is encountered. once a proper jump point is reached, put
 	// the location back at the position that's on the top of the
@@ -364,11 +470,11 @@ static void ToByteCode(char * formula, int codefield)
 			break; 
 		case '(':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LB;
+			bytes[pointer++] = BOT_BYTE_LB;
 			break;
 		case ')':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_RB;
+			bytes[pointer++] = BOT_BYTE_RB;
 			break;
 		case 'x':
 			++GlobalCurrentChar;
@@ -376,79 +482,79 @@ static void ToByteCode(char * formula, int codefield)
 			break;
 		case '+':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_ADD;
+			bytes[pointer++] = BOT_BYTE_ADD;
 			break;
 		case '-':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_SUB;
+			bytes[pointer++] = BOT_BYTE_SUB;
 			break;
 		case '*':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MUL;
+			bytes[pointer++] = BOT_BYTE_MUL;
 			break;
 		case '/':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_DIV;
+			bytes[pointer++] = BOT_BYTE_DIV;
 			break;
 		case '%':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MOD;
+			bytes[pointer++] = BOT_BYTE_MOD;
 			break;
 		case '&':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_AND;
+			bytes[pointer++] = BOT_BYTE_AND;
 			break;
 		case '|':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_OR;
+			bytes[pointer++] = BOT_BYTE_OR;
 			break;
 		case '^':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_XOR;
+			bytes[pointer++] = BOT_BYTE_XOR;
 			break;
 		case '=':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_EQ;
+			bytes[pointer++] = BOT_BYTE_EQ;
 			break;
 		case '>':
 			if(*(GlobalCurrentChar + 1) == '=')
 			{
                 GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_GTEQ;
+				bytes[pointer++] = BOT_BYTE_GTEQ;
             }
 			else if(*(GlobalCurrentChar + 1) == '>')
 			{
 				GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_RSHIFT;
+				bytes[pointer++] = BOT_BYTE_RSHIFT;
 			}
 			else
 			{
 			    ++GlobalCurrentChar;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_GT;
+				bytes[pointer++] = BOT_BYTE_GT;
             }
 			break;
 		case '<':
 			if(*(GlobalCurrentChar + 1) == '=') 
             {
                 GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LTEQ;
+				bytes[pointer++] = BOT_BYTE_LTEQ;
             }
 			else if(*(GlobalCurrentChar + 1) == '<')
 			{
 				GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LSHIFT;
+				bytes[pointer++] = BOT_BYTE_LSHIFT;
 			}
 			else
 			{
 			    ++GlobalCurrentChar;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LT;
+				bytes[pointer++] = BOT_BYTE_LT;
             }
 			break;
 		case '!':
 			if(*(GlobalCurrentChar + 1) == '=')
 			{
                 GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_UEQ;
+				bytes[pointer++] = BOT_BYTE_UEQ;
 			}
 			else
 			{
@@ -456,7 +562,8 @@ static void ToByteCode(char * formula, int codefield)
           						  		//	use it as a prefix, checking if the next is 1000
 		          				  		//	(or 0) or not and inverting it. For now error it.
 				debugS("Unknown command (!...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case '?':
@@ -467,30 +574,30 @@ static void ToByteCode(char * formula, int codefield)
 			// if true, it skips over 1, jumping to 3 when reaching :
 			// else it just jumps to 2
 			// this is basic branching using a stack :)
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_IIF;
-			qmarkstack[++qpoint] = ByteCodePointer++;
+			bytes[pointer++] = BOT_BYTE_IIF;
+			qmarkstack[++qpoint] = pointer++;
 			break;
 		case ':':
 			{
 			++GlobalCurrentChar;
 			// colon encountered
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_COLON;
+			bytes[pointer++] = BOT_BYTE_COLON;
 			// next position will contain jump to end of second statement
-			colonstack[++cpoint] = ByteCodePointer++;
+			colonstack[++cpoint] = pointer++;
 			// put the number of positions after this target as jump target after the ?
 			int qmarkpos = qmarkstack[qpoint--];
-			Bytecode[ByteCodeField][qmarkpos] = ByteCodePointer - qmarkpos;
+			bytes[qmarkpos] = pointer - qmarkpos;
 			break;
 			}
 		case ';':
 			{
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_SCOLON;
+			bytes[pointer++] = BOT_BYTE_SCOLON;
 			// semicolon encountered
 			// had to use the semicolon to simplify determining end of second arg...
 			// next position is the target of the colon
 			int colonpos = colonstack[cpoint--];
-			Bytecode[ByteCodeField][colonpos] = ByteCodePointer - colonpos;
+			bytes[colonpos] = pointer - colonpos;
 			break;
 			}
         case 10:
@@ -509,7 +616,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
 				// attempt
                 GlobalCurrentChar += 7;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_ATTEMPT;
+				bytes[pointer++] = BOT_BYTE_ATTEMPT;
 			}
 			else if((*(GlobalCurrentChar+1) == 'd'
 				&&*(GlobalCurrentChar+2) == 'd'
@@ -526,7 +633,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // addcounter() ac()
 				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'd') ? 11 : 3;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_AC;
+				bytes[pointer++] = BOT_BYTE_AC;
 			}
 			else if(*(GlobalCurrentChar+1) == 'b'
 				&&*(GlobalCurrentChar+2) == 's'
@@ -534,14 +641,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // abs()
 				GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_ABS;
+				bytes[pointer++] = BOT_BYTE_ABS;
 			}
 			else
 			{
                 // a()
 				++GlobalCurrentChar;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LIT;
-				Bytecode[ByteCodeField][ByteCodePointer++] = 1;
+				bytes[pointer++] = BOT_BYTE_LIT;
+				bytes[pointer++] = 1;
 			}
 			break;
 		case 'b':
@@ -553,14 +660,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // button
 				GlobalCurrentChar += 6;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_BUTTON;
+				bytes[pointer++] = BOT_BYTE_BUTTON;
 			}
 			else
 			{
                 // button B
 				++GlobalCurrentChar;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LIT;
-				Bytecode[ByteCodeField][ByteCodePointer++] = 2;
+				bytes[pointer++] = BOT_BYTE_LIT;
+				bytes[pointer++] = 2;
 			}
 			break;
 		case 'c':
@@ -575,13 +682,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // counter()
                 GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'o') ? 8 : 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_C;
+				bytes[pointer++] = BOT_BYTE_C;
 			}
 			else
 			{
 				BotSyntaxError(2001);
 				debugS("Unknown Command (c...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'd':
@@ -591,13 +699,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // down
 				GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_DOWN;
+				bytes[pointer++] = BOT_BYTE_DOWN;
 			}
 			else
 			{
 				BotSyntaxError(3001);
 				debugS("Unknown Command (d...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'e':
@@ -606,14 +715,15 @@ static void ToByteCode(char * formula, int codefield)
 				&&*(GlobalCurrentChar+3) == 'o')
 			{
 				GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_ECHO;
+				bytes[pointer++] = BOT_BYTE_ECHO;
     			break;
 			}
 			else
 			{
 				BotSyntaxError(4001);
 				debugS("Unknown Command (e...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 		case 'f':
 			if(*(GlobalCurrentChar+1) == 'r'
@@ -623,26 +733,27 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // frame
 				GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_FRAME;
+				bytes[pointer++] = BOT_BYTE_FRAME;
 			}
 			else
 			{
 				BotSyntaxError(5001);
 				debugS("Unknown Command (f...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'i':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_I;
+			bytes[pointer++] = BOT_BYTE_I;
 			break;
 		case 'j':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_J;
+			bytes[pointer++] = BOT_BYTE_J;
 			break;
 		case 'k':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_K;
+			bytes[pointer++] = BOT_BYTE_K;
 			break;
 		case 'l':
 			if((*(GlobalCurrentChar+1) == 'b') ||
@@ -658,7 +769,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
 				// lastbutton lb
 				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'b') ? 2 : 10;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LAST;
+				bytes[pointer++] = BOT_BYTE_LAST;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'f'
@@ -666,7 +777,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // left
 				GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LEFT;
+				bytes[pointer++] = BOT_BYTE_LEFT;
 			}
 			else if(*(GlobalCurrentChar+1) == 'o'
 				&&*(GlobalCurrentChar+2) == 'o'
@@ -680,14 +791,15 @@ static void ToByteCode(char * formula, int codefield)
 				// statement, it needs to be closed before leaving this
 				// block anyways. (make sure the code checks for this!)
 				GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LOOP;
-				colonstack[++cpoint] = ByteCodePointer++;
+				bytes[pointer++] = BOT_BYTE_LOOP;
+				colonstack[++cpoint] = pointer++;
 			}
 			else
 			{
 				BotSyntaxError(7001);
 				debugS("Unknown Command (l...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'm':
@@ -697,7 +809,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // mem()
                 GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MEM;
+				bytes[pointer++] = BOT_BYTE_MEM;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'm'
@@ -706,7 +818,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // memh()
                 GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MEMH;
+				bytes[pointer++] = BOT_BYTE_MEMH;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'm'
@@ -715,7 +827,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // meml()
                 GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MEML;
+				bytes[pointer++] = BOT_BYTE_MEML;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'm'
@@ -724,13 +836,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // memw()
                 GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_MEMW;
+				bytes[pointer++] = BOT_BYTE_MEMW;
 			}
 			else
 			{
 				BotSyntaxError(8001);
 				debugS("Unknown Command (m...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'n':
@@ -746,7 +859,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // right
                 GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_RIGHT;
+				bytes[pointer++] = BOT_BYTE_RIGHT;
 			}
 			else if((*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 's'
@@ -766,13 +879,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // resetcounter() rc()
                 GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'e') ? 13 : 3;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_RC;
+				bytes[pointer++] = BOT_BYTE_RC;
 			}
 			else
 			{
 				BotSyntaxError(9001);
 				debugS("Unknown Command (r...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 's':
@@ -783,7 +897,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // start
                 GlobalCurrentChar += 5;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_START;
+				bytes[pointer++] = BOT_BYTE_START;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'l'
@@ -793,7 +907,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // select
                 GlobalCurrentChar += 6;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_SELECT;
+				bytes[pointer++] = BOT_BYTE_SELECT;
 			}
 			// why was there no short version for setcounter()? There is now... :)
 			else if ((*(GlobalCurrentChar+1) == 'c') ||
@@ -810,7 +924,7 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // setcounter() sc()
 				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'c') ? 3 : 11;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_SC;
+				bytes[pointer++] = BOT_BYTE_SC;
 			}
 			// qfox: Added stop command. Should do exactly the same as pressing the "stop" button.\
 			//	 But probably won't yet :)
@@ -820,13 +934,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // stop
                 GlobalCurrentChar += 4;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_STOP;
+				bytes[pointer++] = BOT_BYTE_STOP;
             }
 			else
 			{
 				BotSyntaxError(10001);
 				debugS("Unknown Command (s...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'u':
@@ -834,13 +949,14 @@ static void ToByteCode(char * formula, int codefield)
 			{
                 // up
                 GlobalCurrentChar += 2;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_UP;
+				bytes[pointer++] = BOT_BYTE_UP;
 			}
 			else
 			{
 				BotSyntaxError(11001);
 				debugS("Unknown Command (p...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'v':
@@ -859,7 +975,8 @@ static void ToByteCode(char * formula, int codefield)
 			{
 				BotSyntaxError(12001);
 				debugS("Unknown Command (v...)");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case '0':
@@ -892,8 +1009,8 @@ static void ToByteCode(char * formula, int codefield)
 				// I don't think ahead needs to be incremented before adding it to
 				//	 currentchar, because the while increments it for _every_ character.
 				GlobalCurrentChar += ahead;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LIT;
-				Bytecode[ByteCodeField][ByteCodePointer++] = value;
+				bytes[pointer++] = BOT_BYTE_LIT;
+				bytes[pointer++] = value;
 				negmode = false;
 				break;
 			}
@@ -924,8 +1041,8 @@ static void ToByteCode(char * formula, int codefield)
 					++ahead;
 				}
 				GlobalCurrentChar += ahead;
-				Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_LIT;
-				Bytecode[ByteCodeField][ByteCodePointer++] = value;
+				bytes[pointer++] = BOT_BYTE_LIT;
+				bytes[pointer++] = value;
 				negmode = false;
 				hexmode = false;
 			}
@@ -934,37 +1051,39 @@ static void ToByteCode(char * formula, int codefield)
 				// If not in hexmode, we cant use these characters.
 				BotSyntaxError(1003);
 				debugS("Not in hexmode!");
-				return;
+				free(bytes);
+				return NULL;
 			}
 			break;
 		case 'P':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_P;
+			bytes[pointer++] = BOT_BYTE_P;
 			break;
 		case 'Q':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_Q;
+			bytes[pointer++] = BOT_BYTE_Q;
 			break;
 		case 'X':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_X;
+			bytes[pointer++] = BOT_BYTE_X;
 			break;
 		case 'Y':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_Y;
+			bytes[pointer++] = BOT_BYTE_Y;
 			break;
 		case 'Z':
 			++GlobalCurrentChar;
-			Bytecode[ByteCodeField][ByteCodePointer++] = BOT_BYTE_Z;
+			bytes[pointer++] = BOT_BYTE_Z;
 			break;
 		default:
 			// Unknown characters should error out. You can use spaces.
 			BotSyntaxError(12001);
 			debugS("Unknown character...");
-			return;
+			free(bytes);
+			return NULL;
 		}
 	}
-	return;
+	return bytes;
 }
 
 
@@ -1328,11 +1447,17 @@ void UpdateBasicBot()
 			
 			//if(BotFrame > (BOT_MAXFRAMES-4) || (int) (NextRandom() % BOT_MAXPROB) < EvaluateFormula(Formula[20]))
 			int i; // loopcounter
-			if(BotFrame > (BOT_MAXFRAMES-5) || Interpret(CODE_STOP) == BOT_MAXPROB)
+			bool improvement = true;
+			if(BotFrame > (BOT_MAXFRAMES-5) || (improvement = (Interpret(CODE_INVALID) == BOT_MAXPROB)) || Interpret(CODE_OK) == BOT_MAXPROB)
 			{
+				// a little misleading, but if the improvement 
+				// bool is set here, the attempt is invalid
+				if (improvement)
+					++Invalids;
+				else
+					++Oks;
 
-				int currentscore[4];
-				bool better = false;
+				int currentscore[6];
 
 				// This was the last frame of this attempt
 				NewAttempt = true;
@@ -1340,42 +1465,44 @@ void UpdateBasicBot()
 				// This evaluates each of the four strings (over and over again)
 				//	which can become rather sluggish.
 				//	maximize, tie1, tie2, tie3
-				for(i=0; i < 4; i++)
+				for(i=0; i < 6; i++)
 				{
-					currentscore[i] = Interpret(CODE_MAX+i);
+					currentscore[i] = Interpret(CODE_SCORE+i);
 				}
 
 				// Update last score
 				UpdateLastGUI(currentscore);
 
-				// Update avg score
-				for (i=0; i<4; ++i)
-					AverageScore[i] = ((AverageScore[i]*BotAttempts)+currentscore[i])/(BotAttempts+1);
-				// show them
-				UpdateAvgGUI();
-
-
-				// compare all scores. if scores are not equal, a break _will_
-				//	occur. else the next will be checked. if all is equal, the
-				//	old best is kept.
-				for(i=0; i < 4; i++)
+				// dont improve if this attempt was invalid
+				if (!improvement)
 				{
-					if(currentscore[i] > BotBestScore[i])
+					improvement = false;
+					// compare all scores. if scores are not equal, a break _will_
+					//	occur. else the next will be checked. if all is equal, the
+					//	old best is kept.
+					for(i=0; i < 6; i++)
 					{
-						better = true;
-						break;
+						if(currentscore[i] > BotBestScore[i])
+						{
+							improvement = true;
+							break;
+						}
+						else if(currentscore[i] < BotBestScore[i])
+						{
+							break;
+						}
 					}
-					else if(currentscore[i] < BotBestScore[i])
-					{
-						break;
-					}
+				}
+				else
+				{
+					improvement = false;
 				}
 				
 				// Update best
-				if(better)
+				if(improvement)
 				{
 					// Update the scores
-					for(i = 0; i < 4; i++)
+					for(i = 0; i < 6; i++)
 					{
 						BotBestScore[i] = currentscore[i];
 					}
@@ -1403,7 +1530,7 @@ void UpdateBasicBot()
 				//	random number, the button is pressed :)
 				for(i=0;i<16;i++)
 				{
-					res = Interpret(i);
+					int res = Interpret(i);
 					if(GetRandom(BOT_MAXPROB) < res)
 					{
 						// Button flags:
@@ -1465,7 +1592,7 @@ void UpdateBasicBot()
 /**
  * Check the current settings for syntax validity
  **/
-static void CheckCode()
+/*static void CheckCode()
 {
 	EvaluateError = false;
 	for(int i=0;i<8;i++)
@@ -1511,7 +1638,7 @@ static void CheckCode()
 		error(0);
 	}
 }
-
+*/
 /**
  * save code seems to be good.
  **/
@@ -1577,9 +1704,22 @@ static bool SaveBasicBotFile(char fn[])
 		fputc('o',fp);
 		fputc('t',fp);
 		fputc(0,fp);
+		fputc(BBsaveload&0xFF,fp);
+		// for every line...
 		for(i=0;i<BOT_FORMULAS;i++)
 		{
-			for(j=0;j<BOT_MAXCODE;j++)
+			// first put down the length
+			// this is an int, so 4 bytes
+			// big/little endian doesnt matter
+			// as long as we read it back the 
+			// same order :)
+			int len = GetLength(Formula[i]);
+			fputc( len>>24,fp);
+			fputc((len&0x00FF0000)>>16,fp);
+			fputc((len&0x0000FF00)>>8,fp);
+			fputc( len&0x000000FF,fp);
+			// now put in the data
+			for (j=0; j<len; ++j)
 			{
 				fputc(Formula[i][j],fp);
 			}
@@ -1588,7 +1728,8 @@ static bool SaveBasicBotFile(char fn[])
 		debugS("Saved settings!");
 		return true;
 	}
-	debugS("Error saving settings!");
+	debugS("Error saving settings! Unable to open file!");
+	error(1005);
 	return false;
 }
 /**
@@ -1651,31 +1792,60 @@ static bool LoadBasicBotFile(char fn[])
 			|| fgetc(fp) != 0)
 		{
 			fclose(fp);
+			debugS("Error loading file! Target not a botfile!");
+			error(1005);
 			return false;
 		}
-		
-		// read the codes for the buttons for player one and
-		//       two, and the end/result/ties.
+		// the next thing is the saveload version
+		// if this differs, the current code has
+		// a different layout for the botfile and
+		// can not read the current botfile
+		// this is just a byte, but i dont think
+		// there will be more then 256 versions :p
+		if (fgetc(fp) != BBsaveload)
+		{
+			fclose(fp);
+			debugS("Error loading file! Incorrect version!");
+			error(1005);
+			return false;
+		}
+		// next come all the codefields
 		for(i=0;i<BOT_FORMULAS;i++)
 		{
-			// read BOT_MAXCODE bytes per codefield
-			for(j=0;j<BOT_MAXCODE;j++)
+			// first read the size. this is an int
+			// so read the four bytes, in the same 
+			// order as they were saved. +1 for \0
+			int len = (fgetc(fp)<<24) + (fgetc(fp)<<16) + (fgetc(fp)<<8) + fgetc(fp);
+			// now create some space for this thing
+			char * code = new char[len+1];
+			// add the \0
+			code[len] = '\0';
+			// now read this many bytes...
+			for(j=0;j<len;j++)
 			{
-				Formula[i][j] = fgetc(fp);
+				code[j] = fgetc(fp);
 				// if the char is 128, its 0 (?)
-				if(Formula[i][j] & 128)
-				{
-					// todo: figure out wtf this is
-					Formula[i][j] = 0;
-				}
+				// still have to figure out wtf
+				// but i dont think this applies
+				// anymore for the current code
+				// i think it was to eliminate
+				// chars >128, or something.
+				if(code[j] & 128)
+					code[j] = 0;
 			}
+			// we want no memleaks, no sir!
+			if (Formula[i] != NULL)
+				free(Formula[i]);
+			// hook them up!
+			Formula[i] = code;
 		}
 		// release lock and resources
 		fclose(fp);
 		debugS("Loaded file!");
 		return true;
 	}
-	debugS("Error loading file!");
+	debugS("Error loading file! Unable to open it!");
+	error(1005);
 	return false;
 }
 
@@ -1684,13 +1854,12 @@ static bool LoadBasicBotFile(char fn[])
  * Moved code to start function to be called from other places.
  * The code puts all the code from gui to variables and starts bot.
  **/
-static void StartBasicBot() {
+static void StartBasicBot()
+{
 	// todo: make sure you are or get into botmode here
 	FCEU_SetBotMode(1);
 	BotRunning = true;
 	FromGUI();
-	for (int i=0; i<4; ++i)
-		AverageScore[4] = 0.0;
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,(LPTSTR)"Stop!");
 }
 
@@ -1717,37 +1886,17 @@ static void FromGUI()
 {
 	if (hwndBasicBot)
 	{
-        int i;
 		// buttons
-        for(i = 0; i < 8; i++)
+		for (int i = 0; i < BOT_FORMULAS; i++)
         {
-        	// id 1000-1008 are for the buttons
-			memset(Formula[i + (EditPlayerOne?0:8)],0,BOT_MAXCODE);
-        	GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)], BOT_MAXCODE);
-			ToByteCode(Formula[i+(EditPlayerOne?0:8)],i+(EditPlayerOne?0:8));
+			// since we malloc the strings, we need to free them before replacing them...
+			if (Formula[i] != NULL) 
+				free(Formula[i]);
+			Formula[i] = GetText(hwndBasicBot,Labels[i]);
+			// um yeah, eval-ing the comments is a bad idea :p
+			if (i != CODE_COMMENTS) 
+				Bytecode[i] = ToByteCode(Formula[i]);
         }
-		memset(Formula[CODE_STOP],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_END, Formula[CODE_STOP], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_STOP],CODE_STOP);
-		memset(Formula[CODE_MAX],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_MAX, Formula[CODE_MAX], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_MAX],CODE_MAX);
-		memset(Formula[CODE_TIE1],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE1, Formula[CODE_TIE1], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_TIE1],CODE_TIE1);
-		memset(Formula[CODE_TIE2],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE2, Formula[CODE_TIE2], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_TIE2],CODE_TIE2);
-		memset(Formula[CODE_TIE3],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_TIE3, Formula[CODE_TIE3], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_TIE3],CODE_TIE3);
-		memset(Formula[CODE_EXTRA],0,BOT_MAXCODE);
-        GetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, Formula[CODE_EXTRA], BOT_MAXCODE);
-		ToByteCode(Formula[CODE_EXTRA],CODE_EXTRA);
-		memset(Formula[CODE_COMMENTS],0,BOT_MAXCODE);
-		GetDlgItemText(hwndBasicBot, GUI_BOT_COMMENTS, Formula[CODE_COMMENTS], BOT_MAXCODE);
-		// DONT EVAL THE COMMENTS! gah
-		
 		// function, because we call this from a different button as well
 		UpdateStatics();
 	}
@@ -1759,26 +1908,12 @@ static void FromGUI()
  **/
 static void ToGUI()
 {
-	if (hwndBasicBot && Formula && Formula[CODE_EXTRA])
+	if (hwndBasicBot && Formula)
 	{
-		int i;
-		// buttons
-		for(i = 0; i < 8; i++)
+		for (int i=0; i<BOT_FORMULAS; ++i)
 		{
-			SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)]);
+			SetDlgItemText(hwndBasicBot,Labels[i],Formula[i]);
 		}
-		SetDlgItemText(hwndBasicBot, GUI_BOT_END, Formula[CODE_STOP]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_MAX, Formula[CODE_MAX]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE1, Formula[CODE_TIE1]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE2, Formula[CODE_TIE2]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_TIE3, Formula[CODE_TIE3]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_EXTRA, Formula[CODE_EXTRA]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_COMMENTS, Formula[CODE_COMMENTS]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_P, Formula[CODE_P]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_Q, Formula[CODE_Q]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_X, Formula[CODE_X]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_Y, Formula[CODE_Y]);
-		SetDlgItemText(hwndBasicBot, GUI_BOT_Z, Formula[CODE_Z]);
 	}
 }
 
@@ -1788,25 +1923,34 @@ static void ToGUI()
  **/
 static void InitVars()
 {
-	memset(Formula, 0, BOT_FORMULAS*BOT_MAXCODE);
-	memset(Bytecode, 0, BOT_FORMULAS*BOT_MAXCODE*sizeof(int));
-	int i;
-	for(i = 0; i < BOT_FORMULAS; i++)
+	for(int i = 0; i < BOT_FORMULAS; i++)
 	{
-		Formula[i][0] = '0';
+		if (i != CODE_OK && i != CODE_COMMENTS)
+		{
+			char * n = new char[2];
+			n[0] = '0';
+			n[1] = 0;
+			Formula[i] = n;
+		}
 	}
-	Formula[CODE_STOP][0] = 'f';
-	Formula[CODE_STOP][1] = 'r';
-	Formula[CODE_STOP][2] = 'a';
-	Formula[CODE_STOP][3] = 'm';
-	Formula[CODE_STOP][4] = 'e';
-	Formula[CODE_STOP][5] = '=';
-	Formula[CODE_STOP][6] = '1';
+	char * s = new char[8];
+	s[0] = 'f';
+	s[1] = 'r';
+	s[2] = 'a';
+	s[3] = 'm';
+	s[4] = 'e';
+	s[5] = '=';
+	s[6] = '5';
+	s[7] = 0;
+	Formula[CODE_OK] = s;
+	char * t = new char[5];
+	t[0] = 'N';
+	t[1] = 'o';
+	t[2] = 'n';
+	t[3] = 'e';
+	t[4] = 0;
+	Formula[CODE_COMMENTS] = t;
 	X = Y = Z = P = Prand = Q = Qrand = 0;
-	Formula[CODE_COMMENTS][0] = 'N';
-	Formula[CODE_COMMENTS][1] = 'o';
-	Formula[CODE_COMMENTS][2] = 'n';
-	Formula[CODE_COMMENTS][3] = 'e';
 }
 
 /**
@@ -1817,26 +1961,24 @@ static void UpdateStatics()
 	// These "statics" are only evaluated once
 	//	(this also saves me looking up stringtoint functions ;)
 	// todo: improve efficiency, crap atm due to conversion
-	memset(Formula[CODE_X],0,BOT_MAXCODE);
-	GetDlgItemTextA(hwndBasicBot, GUI_BOT_X, Formula[CODE_X], BOT_MAXCODE);
-	memset(Formula[CODE_Y],0,BOT_MAXCODE);
-	GetDlgItemTextA(hwndBasicBot, GUI_BOT_Y, Formula[CODE_Y], BOT_MAXCODE);
-	memset(Formula[CODE_Z],0,BOT_MAXCODE);
-	GetDlgItemTextA(hwndBasicBot, GUI_BOT_Z, Formula[CODE_Z], BOT_MAXCODE);
-	memset(Formula[CODE_P],0,BOT_MAXCODE);
-	GetDlgItemTextA(hwndBasicBot, GUI_BOT_P, Formula[CODE_P], BOT_MAXCODE);
-	memset(Formula[CODE_Q],0,BOT_MAXCODE);
-	GetDlgItemTextA(hwndBasicBot, GUI_BOT_Q, Formula[CODE_Q], BOT_MAXCODE);
-	ToByteCode(Formula[CODE_X],CODE_X);
-	ToByteCode(Formula[CODE_Y],CODE_Y);
-	ToByteCode(Formula[CODE_Z],CODE_Z);
-	ToByteCode(Formula[CODE_P],CODE_P);
-	ToByteCode(Formula[CODE_Q],CODE_Q);
-	X = Interpret(CODE_X);
-	Y = Interpret(CODE_Y);
-	Z = Interpret(CODE_Z);
-	P = Interpret(CODE_P);
-	Q = Interpret(CODE_Q);
+	if (hwndBasicBot)
+	{
+		for (int i = GUI_BOT_X; i < 5; ++i)
+        {
+			// since we malloc the strings, we need to free them before replacing them...
+			if (Formula[i] != NULL) 
+				free(Formula[i]);
+			Formula[i] = GetText(hwndBasicBot,Labels[i]);
+			// um yeah, eval-ing the comments is a bad idea :p
+			if (i != CODE_COMMENTS) 
+				Bytecode[i] = ToByteCode(Formula[i]);
+        }
+		X = Interpret(CODE_X);
+		Y = Interpret(CODE_Y);
+		Z = Interpret(CODE_Z);
+		P = Interpret(CODE_P);
+		Q = Interpret(CODE_Q);
+	}
 }
 
 /**
@@ -1845,12 +1987,13 @@ static void UpdateStatics()
 static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i;
-	char valuesboxmsg[2048];
 	DSMFix(uMsg); // stops sound on 5 of the messages...
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
-		// todo: why cant i change gui controls in this event?
+		// cant change gui controls in this event
+		// seems to be a inherited "feature", for backwards
+		// compatibility.
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
@@ -1860,24 +2003,14 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		switch(HIWORD(wParam))
 		{
 		case BN_CLICKED:
-			bool p1 = false; // if a player radiobutton is pressed, this tells me which one
+			bool p1 = false; // if a input radiobutton is pressed, this tells me which one
 			switch(LOWORD(wParam))
 			{
 			case GUI_BOT_P1:
-				if (EditPlayerOne) break;
 				p1 = true;
-			case GUI_BOT_P2: 
-				if (!p1 && !EditPlayerOne) break;
-
-				// if the player, that was clicked on, is already being edited, dont bother
-				//	otherwise...
-				EditPlayerOne = (p1 == true);
-				// swap player code info
-				for(i = 0; i < 8; i++)
-				{
-					GetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?8:0)],BOT_MAXCODE);
-					SetDlgItemText(hwndBasicBot,1000+i,Formula[i + (EditPlayerOne?0:8)]);
-				}
+			case GUI_BOT_P2:
+				// set the botmode
+				FCEU_SetBotMode(p1?0:1);
 				break;
 			case GUI_BOT_SAVE:
 				StopSound(); // required?
@@ -1925,16 +2058,6 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			case GUI_BOT_CLOSE:
 				CrashWindow();
 				break;
-			case GUI_BOT_BOTMODE:
-				// toggle external input mode
-				FCEU_SetBotMode(FCEU_BotMode()?0:1);
-				//SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,FCEU_BotMode()?"Disable external input":"Enable external input");
-				// no need for the previous line, will be done when UpdateExternalButton() gets called by FCEU_BotMode()
-				break;
-			case GUI_BOT_CHECK:
-				// check the current code for errors, without starting attempts
-				CheckCode();
-				break;
 			case GUI_BOT_UPDATE:
 				// put a flag up, when the current attempt stops, let the code 
 				//	refresh the variables with the data from gui, without stopping.
@@ -1946,28 +2069,33 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				UpdateStatics();
 				break;
 			case GUI_BOT_TEST:
+				{
 				//MessageBox(hwndBasicBot, "Showing", "Hrm", MB_OK);
 				//SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,"hello");
 				FromGUI();
-				ToByteCode(Formula[CODE_EXTRA],CODE_EXTRA);
 				DebugByteCode(Bytecode[CODE_EXTRA]);
-				GlobalCurrentCode = 0;
-				ByteCodeField = CODE_EXTRA;
-				error(Interpreter(false));
+				error(Interpret(CODE_EXTRA));
+				//char * t = GetText(hwndBasicBot,GUI_BOT_MAXPARTS);
+				//debugS(t);
+				//free(t);
+				}
 				break;
 			case GUI_BOT_VALUES:
+				{
 				// display all the #DEFINEs and static values
+				char valuesboxmsg[2048];
 				sprintf(valuesboxmsg, 
 					"%s\n%s\n\n%s%s\n%s%d\n%s%d\n%s%d\n%s%d",
 					"These are the values that were",
 					"hardcoded at compilation time:",
 					"Basic Bot:		v", BBversion,
+					"Botfile:		v", BBsaveload,
 					"Max Frames:	", BOT_MAXFRAMES,
-					"Max Codelength:	", BOT_MAXCODE,
 					"Counters:		", BOT_MAXCOUNTERS,
 					"Probability Range:	0 - ", BOT_MAXPROB);
 				
 				MessageBox(hwndBasicBot, valuesboxmsg, "Harcoded values", MB_OK);
+				}
 				break;
 			case GUI_BOT_RESET:
 				ResetStats();
@@ -1976,6 +2104,7 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				break;
 			}
 		}
+		break; // WM_COMMAND
 	default:
 		break;
 	}
@@ -2009,8 +2138,9 @@ void CreateBasicBot()
  */
 void InitCode()
 {
-	CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 1); // select the player1 radiobutton
-	if (LoadBasicBotFile("default.bot"))
+	CheckDlgButton(hwndBasicBot, FCEU_BotMode() ? GUI_BOT_P2 : GUI_BOT_P1, 1); // select the player1 radiobutton
+	//if (LoadBasicBotFile("default.bot"))
+	if (false)
 	{
 		ToGUI();
 		debugS("Loaded default.bot");
@@ -2030,6 +2160,11 @@ void CrashWindow()
 {
 	FromGUI();
 	SaveBasicBotFile("default.bot");
+	for (int i=0; i<BOT_FORMULAS; ++i)
+	{
+		free(Formula[i]);
+		free(Bytecode[i]);
+	}
 	DestroyWindow(hwndBasicBot);
 	hwndBasicBot=0;
 }
@@ -2040,7 +2175,16 @@ void UpdateExternalButton()
 {
 	if (hwndBasicBot)
 	{
-		SetDlgItemText(hwndBasicBot,GUI_BOT_BOTMODE,FCEU_BotMode()?"Disable external input":"Enable external input");
+		if (FCEU_BotMode())
+		{
+			CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 0);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_P2, 1);
+		}
+		else
+		{
+			CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 1);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_P2, 0);
+		}
 	}
 }
 
@@ -2051,9 +2195,10 @@ void ResetStats()
 {
 	BotAttempts = 0;
 	BotFrames = 0;
-	memset(BotBestScore,0,sizeof(int)*4);
+	Oks = 0;
+	Invalids = 0;
+	memset(BotBestScore,0,sizeof(int)*6);
 	memset(BestAttempt,-1,BOT_MAXFRAMES*sizeof(int));
-	AverageScore[0]=AverageScore[1]=AverageScore[2]=AverageScore[3]=0;
 	UpdateFullGUI();
 }
 /**
@@ -2063,9 +2208,7 @@ void UpdateFullGUI()
 {
 	ToGUI();
 	UpdateBestGUI();
-	UpdateAvgGUI();
-	int empty[4];
-	empty[0]=empty[1]=empty[2]=empty[3]=0;
+	int empty[4] = {0,0,0,0};
 	UpdateLastGUI(empty);
 	UpdateCountersGUI();
 }
@@ -2076,24 +2219,29 @@ void UpdateBestGUI()
 {
 	#define BOT_RESULTBUFSIZE (BOT_MAXFRAMES*sizeof(int))
 	char tempstring[BOT_RESULTBUFSIZE];				// Used for the "result" part. last time i checked 1024*12 is > 4k, but ok.
+	memset(tempstring, 0, BOT_RESULTBUFSIZE);		// clear the array
 	char symbols[] = "ABET^v<>ABET^v<>";
 	bool seenplayer2 = false;						// Bool keeps track of player two inputs
 
-	// Update best score
-	sprintf(tempstring, "%d %d %d %d (%dth)", BotBestScore[0], BotBestScore[1], BotBestScore[2], BotBestScore[3], BotAttempts);
-	SetDlgItemText(hwndBasicBot,GUI_BOT_BESTRESULT,tempstring);
-	memset(tempstring, 0, BOT_RESULTBUFSIZE); // clear the array
+	// Update best scores
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_BEST,BotAttempts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_BEST,BotFrame,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_BEST,BotBestScore[0],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE1_BEST,BotBestScore[1],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE2_BEST,BotBestScore[2],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_BEST,BotBestScore[3],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_BEST,BotBestScore[4],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_BEST,BotBestScore[5],TRUE);
 
 	// Create the run in ascii
-	int i,j,k;
-	k = 0; // keep track of len, needs to be below bufsize
+	int k = 0;     // keep track of len, needs to be below bufsize
 	// Make output as text
 	// While you're not exceeding the max of frames, a
 	//	frame had input, and you're not exceeding the bufsize...
 	//	Warning: the second condition prevents a bufferoverrun,
 	//		-21 is because between checks a max of 21 chars
 	//		could be added.
-	for(i = 0; i < BOT_MAXFRAMES && BestAttempt[i] != -1 && k < BOT_RESULTBUFSIZE-21; i++)
+	for(int i = 0; i < BOT_MAXFRAMES && BestAttempt[i] != -1 && k < BOT_RESULTBUFSIZE-21; i++)
 	{
 		tempstring[k] = '0' + ((i/10) % 10);
 		k++;
@@ -2102,7 +2250,7 @@ void UpdateBestGUI()
 		tempstring[k] = '.';
 		k++;
 		seenplayer2=0;
-		for(j = 0; j < 16; j++)
+		for(int j = 0; j < 16; j++)
 		{
 			if(BestAttempt[i] & (1 << j))
 			{
@@ -2124,24 +2272,19 @@ void UpdateBestGUI()
 	SetDlgItemText(hwndBasicBot,GUI_BOT_KEYS,tempstring);
 }
 /**
- * Update the averages
- */
-void UpdateAvgGUI()
-{
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGMAX,AverageScore[0], TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE1,AverageScore[1], TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE2,AverageScore[2], TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_AVGTIE3,AverageScore[3], TRUE);
-}
-/**
  * Update the Last Scores
  */
 void UpdateLastGUI(int last[])
 {
-	//	300 should be enough..?
-	char lastscore[300];
-	sprintf(lastscore, "%d %d %d %d (%dth)", last[0], last[1], last[2], last[3], BotAttempts);
-	SetDlgItemText(hwndBasicBot,GUI_BOT_LAST,lastscore);
+	// Update best scores
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,BotAttempts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_LAST,BotFrame,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_LAST,last[0],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE1_LAST,last[1],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE2_LAST,last[2],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_LAST,last[3],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_LAST,last[4],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_LAST,last[5],TRUE);
 }
 
 /**
@@ -2151,6 +2294,8 @@ void UpdateCountersGUI()
 {
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPTS,BotAttempts,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES,BotFrames,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_OKS,Oks,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_INVALIDS,Invalids,TRUE);
 }
 /**
  * Set up the vars to start a new attempt
@@ -2171,3 +2316,4 @@ void SetNewAttempt()
 	Prand = GetRandom(P);
 	Qrand = GetRandom(Q);
 }
+

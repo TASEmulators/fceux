@@ -7,8 +7,9 @@
 	static void BotSyntaxError(int errorcode);
 	static void StopBasicBot();
 	static void StartBasicBot();
-	static void debug(int n);
-	static void error(int n);
+	static int debug(int n);
+	static char * debugS(char * s);
+	static int error(int n);
 	static void FromGUI();
 	static void UpdateStatics();
 	void UpdateExternalButton();
