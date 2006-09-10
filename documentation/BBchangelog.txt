@@ -1,0 +1,144 @@
+This changelog only concerns the Basic Bot code.
+Changelog 0.3.1:
+10 september 2006
+- Change - Code    - Removed the code length limit. You can now enter as much characters as you desire (and the GUI allows). This entails no overhead in variables and save files. As a result older botfiles can no longer be loaded. This change has a high impact on BB.
+- Change - Botfile - Because of the new way of handling codefields, the saved botfiles are saved slightly differently as well. It will now save a version number, to prohibit you from loading a botfile you cant load with the current version. Furthermore the saved fields now save their length, and no longer saves bytes that are unused (the '\0' bytes).
+- Change - GUI     - Did a little overhaul on the GUI. Adjusted it to be able to view player one and two inputs at the same time. There is now a OK and Invalid field. The OK field tells the bot when a attempt has finished and is to be counted (like: frame=500). The invalid field tells the bot when a attempt is not to be counted (like when you die). The result part has changed to give a better view. Added two additional Tie's.
+- Change - GUI     - External button is gone, instead there's now two radiobuttons that do the same thing. Pressing run still puts you in botmode, pressing stop keeps you in botmode (because it pops up the debugger for now).
+- Remove - Stats   - Removed the averages. They were a nice idea, but they didnt feel very helpfull in practice.
+- Added  - Stats   - Now showing a counter of how many attempts were successfull and how many failed. This should (/may) give an indication as to how good/bad your code is.
+
+Known issues:
+- Rollback, Max frames, Max attempts, Max parts, do nothing. They are for a future feature :)
+- The autoload/save thing is still broke. I think fceu somehow remembers the last used directory after loading/saving and uses it as the "working directory".
+- The debugger still pops up for exiting botmode, just press run and close it.
+- Test does the same as before.
+- There should be no memory leaks. They can appear now because the code uses new/free to remove the code length limit. This entails the coder to "manually" free allocated memory when done with it, which is the number one source of memory leaks. If you find a memory leak, report it please.
+- There's no manual yet :p Will try to make one soon.
+- May create some kind of "expert" button to hide half the current GUI, so new people wont be overwhelmed by the number of controls.
+
+Changelog 0.3.0:
+5 september 2006
+- Change - Source  - Basic Bot is now running on a byte interpreter. This is a big change, worth of a 0.1.0 increment ;) BB will now first parse the code and convert it to bytecode. Then, when computing, it feeds these bytecodes to a interpreter. This will speed up things (or should). It also allows for easier error checking.
+- Change - Command - Due to the bytecode and branching, iif and loop had to change. They both require a semi-colon (;) as terminator. Loop no longer requires brackets (but you may use them anyways). Examples: "5?3:2;" and "loop 5 ac(3) ;". For the user, the ; behaves like ), internally it copies its position to the location of the ':' or loop symbol, so the code knows where to jump to.
+- Added  - Command - Shifts! I needed them for some SMB tests and they werent there. x >> y and x << y will shift x y bits to the left/right. This is not a rotation!
+
+Known issues:
+- Error checking is not completely waterproof yet, bare with me.
+- Test now parses the code in the Extra field, turns it to bytecode, and shows the evaluated result (if any) in the error box. If no rom is loaded, dont use mem() or you _will_ crash. The best attempt window will show you the first 30 symbols of the byte code.
+- I broke the autosave/load thing. It still saves and loads, but somehow along the way it changes paths. Not quite sure whats up with that...
+- The crash mentioned earlier, when disabling external input after running the bot, is more of an annoying pause. Press the run button of the debugger and close it, to continue.
+
+Changelog 0.2.3:
+2 september 2006
+- Fixed  - GUI    - Now fixes GUI texts properly when it fires up.
+- Added  - GUI    - Comments. You can now enter some comments (same length as codefields), like author or game info.
+- Added  - GUI    - BasicBot now auto saves/loads "default.bot" when opening/closing the basicbot window. It will save this to the working directory (usually same as the exe). A message is displayed whether the load was succesfull or not, if not it will load default values (like pushing clear).
+- Change - Source - Removed all the nicknames, it's my source now and the whole thing has been redone. I'm the only one working on this anyways.
+- Added  - GUI    - There's a button "Values" now. This will show the hardcoded values the program uses. These were hardcoded at compile time and cannot be changed, unless you recompile the exe. Shows stuff like BB version, max frames it can compute and max length of code fields.
+- Change - GUI    - Changed the titlebartext.
+- Change - GUI    - Check button has been replaced by the Test button. It's generally not adviced to use it since it's used by me to debug, so unpredictable things may happen :)
+
+Known issues:
+
+- Load behaves like update: when the code is running and you hit load, it will put these values to the memory and the GUI. This is a designflaw, but you'll have to live with it.
+- Old botfiles, for whoever has them anyways, will probably not load properly.
+- All fields still max out at about 1k, will be enlarged in a future release.
+- Code does not check for the presence of an argument for functions. If no argument is present, it will take the value 0.
+- Program crashes when stopping (to be more precise, the program crashes when switching botmode to off), this is a bug unrelated to my source but one that does need to be fixed... fast.
+- I think it's stable, but due to the rather drastic changes going on and my not so great knowledge about pointers and stuff I'm not quite convinced it really is. However, no problems rose in any of my tests...
+
+Changelog 0.2.2b:
+1 september 2006
+- Change - GUI    - Test button, should be ignored...
+- Fixed  - GUI    - The new static variables werent saved/loaded when done so. They are now.
+- Change - Source - Improved load/save functions.
+
+Changelog 0.2.2:
+29 august 2006
+- Change - GUI		 - Run now sets FCEU in "external mode" if not already so. It also exits this mode when done/stopping. This kind of absoletes the whole botmode button for bot-purpose, but it's currently the only way to enable botmode so I'll leave it in for now :)
+- Added  - Commands  - Also affects GUI. New are the XYZ and PQ "static variables", no this is not a contradiction :) The strings are evaluated once, when loading them from the GUI (so also when presseing the refresh button). The XYZ values then remain the same while running. The PQ values only at the start of each attempt, to a value between 0 and P (or Q), but remain the same in every usage.
+- Added  - GUI       - The small "U" button above the new variables only updates those variables, none of the other code.
+- Change - Errors    - The syntax errors now have 1-12 prefix instead of just 1 for me to determine where things go bad when a new syntax error was introduced (so you'll get the error 1001 through 12001 for syntax errors.
+
+These changes were done pretty quickly and did not undergo much testing I'm afraid. Bugs may exist.
+
+Changelog 0.2.1:
+Built binary is the work in progress at fceultra.sourceforge.net
+No guarantuees are made that any of the other stuff actually works. In fact, I'm quite certain most of it doesn't.
+This is not an official release! It's a test-release intended to test the Basic Bot part of the program, and only that.
+You have been warned.
+
+- Change - Commands  - ')' now also resets hexmode and negmode.
+- Change - Source    - Updated the source to no longer supply arguments that I threw out the previous time.
+- Change - Source    - Cleaned up comments, commented entire document.
+- Change - Source    - Removed several redundant pieces of code.
+- Change - Commands  - Removed ram().
+- Change - Behaviour - Previously, the goal would be reached if the result of the "end when" line would be greater then a random number between 0 and 1000 (there was actually a chance for it to be impossible to reach its goal: when that random number was 1000). I don't see the added value of the random part, you either reach your goal or you dont. If I hear any protest this can be put back in easily.
+- Fixed  - Commands  - "stop" now works.
+- Fixed  - Errors    - All errors now stop future attempts (until the run button is pressed again).
+- Change - Source    - Used defines for max frames, codelength and resultwindowsize. Now we can easily change these limits.
+- Change - Source    - Changed several ints to bools, when they were used as such anyways.
+- Change - Behaviour - Clears debug when starting.
+- Change - Behaviour - Upped the number of frames the bot can compute to 4k (used to be 1k), this is now a (hardcoded) variable.
+- Change - Source    - The code lengths are currently set to 1k each. I've changed this 1k to one variable (hardcoded), however this would mean paying attention to loading older files. Especially if we're to decreasing this size. Size will be increased in the future.
+- Added  - Errors    - New error introduced: 1004. Thrown when the occurences of '(' != ')' or '?' != ':'. The characters () and :? always need to be pairs. The code does not explicitly check proper nesting (yet...), but I think that's done implicitly by parsing.
+- Fixed  - Behaviour - Negative numbers work, prefix 'n' does too. Something like "n5+6 echo" shows 1, "n5 -1" shows -6. I forgot that C has signed numbers :D
+- Added  - Commands  - Added memw(n), which reads two bytes from the memory: ((mem(n)<<8)+(mem(n+1))), memh(n) and meml(n) read half a byte (a nibble) (they (value&0xF0)>>8 and value&0x0F the values before returning). Note that the memh() will also return values 0-15. Is there anyone who thinks memi() for 32bit numbers is really usefull?
+- Added  - Commands  - Added j and k. j returns the loopcounter of a nested loop, k returns teh loopcounter of a nested loop inside a nested loop.
+- Change - Commands  - You can now nest loop() twice, so you can do: "5 loop(i loop(j loop(k echo)))". Any more loops will still result in 1002. To check: "rc(10) 5 loop(5 loop(5 loop(5 ac(10)))) c(10) echo" should be 625 (5x5x5x5).
+- Change - Errors    - Error 1002 is now thrown when nesting loops 3+ deep.
+- Added  - Commands  - Added value. Completely transparent, like a nop/noop (no-operation). Can be used to use in iif's (1?500:value). Note that "value echo" is the same as "echo", value doesn't change anything, just improves readability. It is accepted as number though (unlike echo).
+- Change - GUI		 - Redesigned it a little bit. Still not quite the way I want it though.
+- Added  - GUI		 - Refresh button. When the bot is running and you want to change parameters to see whether it improves, you can change the code in the GUI and press refresh. The bot will then refresh its internal code with the GUI.
+- Added  - GUI		 - Botmode button. Toggles "external mode" on/off.
+- Added  - GUI		 - Added some more information. It shows the score of the last attempt. There is a debug section and an error section. The averages for score and tie1-3 are shown next to them.
+- Change - Source    - Had to change to vc8, because I know no other way to change the GUI. As a result I can no longer compile Luke's old code, but am stuck with the SF project files. They work, but may be even more buggy.
+- Added  - Commands  - Added "lastbutton", or "lb" short, which returns the button pressed in the previous frame. This will not work for the last frame pressed before the save-state, so at the first frame, this value is always 0.
+- Change - Behaviour - BB can now compute up to 2k frames (was 1k). I intend to enlarge this number greatly, but need to check out possible memory issues before I do.
+
+Known issues:
+
+- Player radiobutton is not selected on load. Has no effect on the code, player 1 is set by default.
+- External input button starts with "toggle" instead of its state.
+- External input button text will not be updated if the external input is toggled anywhere else (currently impossible, but hey).
+- Check button is disabled because it's too much code now, and will be much easier to do later.
+- Load behaves like update: when the code is running and you hit load, it will put these values to the memory and the GUI. This is a designflaw, but you'll have to live with it.
+- Hexmode/Negmode issue remains the same, except for ')', as mentioned.
+- Old botfiles, for whoever has them anyways, will load except for the extra2 field. You'll need to paste this into the one field.
+- All fields still max out at about 1k, will be enlarged in a future release.
+- Code does not check for the presence of an argument for functions. If no argument is present, it will take the value 0.
+
+
+Changelog 0.2.0:
+FCEU has not been changed, except for the about, in any way! No bugs fixed, no additional features, go back to sleep.
+
+- Changed parsing method to be more robust.
+- Added "echo" command. Will print the last value to the "Frames" area on the right side. As a result, this update is disabled. Until I can figure out how to change the dialog (GUI), this is my only option.
+- Added "stop" command, but does not work yet. Stop throws an error with code 5000. The bot should stop (but doesn't right now).
+- Added "sc(x)" command. I don't know why ac() and c() were there, but sc() was not... Anyways, sc() does the same as setcounter().
+- Added some errorchecking. You will now see errors when your code is faulthy. The codes are printed in the Frames box on the left. When an error is thrown, the code stops his attempts the moment it starts them. You have to hit stop/run manually for now to try again.
+	1001 = invalid character encountered (only whitespace is allows and ignored, space CRLF (return) and tab).
+	1002 = nesting of loops not allowed (currently, you can not do "2 loop(3 loop())" ).
+	1003 = not in hexmode (when encountering ABCDEF).
+	5000 = stopped by code (user).
+- Updated the about box to make clear this is a new version.
+- Fixed dozens of bugs concerning iif (condition?true:false). You can now safely nest these and use all the available commands inside them. The previous code would execute both commands regardless of the result of the condition.
+- Changed loop(), i now starts at 0 instead of 1. If the original way is preferred this can easily be reversed.
+- Changed button, if value is 0, button will return all the buttons pressed.
+- Note, ram() is still in, but will be removed next version since it is entirely absoleted by mem().
+- Added n, works as a prefix for numbers to negate them. Technically works, but it doesn't quite show yet.
+
+Known issues:
+
+- "stop" does not work properly yet (eg. it fails to do what he's supposed to do: stop the bot).
+- Negative numbers are not handled properly.
+- Loop can not be nested. If there's a demand for this, this can be changed.
+- When using x or n, if you dont put whitespace behind the number, you will remain in hexmode or negmode (meaning, if another number is encountered between whitespace, that number will also be treated as if it was prefixed by x or n). I don't plan to fix this right now, for your own sanity use some whitespace.
+- Not really worth mentioning at this point, but the frame count updater has been disabled to allow minor debugging.
+
+qFox, 19 august 2006
+qfox.nl
+
+BB 0.1.0:
+Last code by Luke, used this as basis.

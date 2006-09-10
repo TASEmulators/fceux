@@ -1,0 +1,117 @@
+Manual for BasicBot
+Written for v0.3.1
+10 september 2006
+Peter "qFox" van der Zee
+
+This is a bot. It uses a combination of probability and scripting to play games. It comes with a rather powerfull scripting language.
+To operate it you need to enter some values for the buttons. The bot will evaluate these values. The result is the chance of that button pressed, in a range from 0 to 1000 (you can check this range by pressing the value button).
+If you enter 500 for a button, there will be a chance of 50% for every frame that this button will be pressed. 
+Note that you can use the scripting language to change the number. For example, you can make a button is not pressed if another button is pressed (you usually dont want left and right to be pressed at once). Or to jump if you're at the edge of a gap (read the memory and jump if it's value is x).
+
+When processing a frame, the inputs are checked first (from A1 to Right2). Then the OK and invalid are processed, and if they are not 0 the score is computed. If they are 0 the extra field is executed.
+Note that the button command is reset at the start of each frame, and can only contain the buttons that have been processed so far (so for A1, button will always return 0, and the A for player 2 can only see the buttons player 1 is pressing this frame). Only the fields not for input can see all the buttons pressed this frame.
+
+Note that the value of the OK and invalid fields need to be >= the max probability (1000) to stop the current attempt. Also note that the attempt will end, successfully, when the maxframes frames has been reached (currently about 2040, see values).
+
+The GUI consists of a lot of fields and buttons. I'll start with the buttons.
+
+Close: Closes the GUI.
+Save...: Save the current contents of the fields to a file.
+Load...: Load a file with settings of the fields.
+Clear: Reset all the fields to the default "empty" values.
+Test: A test button for me to test stuff me. At the moment of writing it will test and evaluate the code in the extra field.
+Update: While running, this allows you to adjust the settings in memory with what's in the GUI without stopping/starting the bot. It will update at the start of the next attempt.
+Play best: This will load the savestate and play the keyfile that proved to be the best so far. You can then save the resulting state and move on manually, if it's good for you :)
+Reset: Resets all the stats (last, best and the counters).
+Values: Shows you a list of hardcoded values. These are the values that can not be changed by the user.
+Run!/Stop: Will toggle the bot. It will put itself into botmode (when pressing run) if not alreay so. It will not put itself out of botmode yet, because this causes the debugger to pop up.
+
+The radiobuttons "Normal" and "External" will toggle the botmode, and show you what the current state is.
+
+For as far as not explained yet, here are the fields:
+Inputs: The buttons should contain the probability of being pressed each frame. They are seperated for player one and two. For now, three and four players is not supported, maybe in the future (who'll use it anyways?)
+
+Comments: Just a string to describe what the current settings are meant for, not used otherwise.
+
+OK when: If this would return true, the current attempt stops and is matched against the best attempt so far. If this attempt is better, the best attempt is replaced by this one. You can put a frame limit, a score goal or the distance to move here.
+Invalid when: When should te bot quit the current run and try again? Like when you die, or loose an item, or stuff like that.
+Rollback: Unused for now, but when used, it should indicate how many frames should be rolled back when the end of this attempt is reached. Not sure yet whether this is practible.
+Max frames: For a future feature, this indicates how many frames each part can be.
+Max attempts: For a future feature, this indicates how many attempts per part should be computed.
+Max parts: For a future feature, this tells the bot how many parts should be computed.
+
+Score: The bot uses this value to see how good an attempt was. You can put stuff like your ingame score here, the number of coins gotten, number of kills or distance walked. This value almost always uses some kind of mem(), to get ingame information.
+Tie1-5: Behaves the same as the score field, but breaks ties when deciding which is the best. Can also be used to check out certain information each run (like how many coins you got, when score is more important, or how many times you pressed B this attempt, etc).
+
+X,Y,Z: These are static variables. They are only evaluated when updating and remain the same once evaluated.
+P,Q: Almost the same as XYZ, except these will return a value between 0 and P or Q when used. This is usefull when wanting to test a certain range of probability (500+P, or whatever).
+
+Extra code: This is executed once all the inputs have been evaluated, and only if the current attempt is not ended. You can enter general processing stuff here. Increase counters, or whatever.
+
+
+Commands:
+
+The bot uses a simple but powerfull scripting language, not really based on anything. It was started by Luke, and extended by me (qFox). The language is evaluated fully and encoded to a bytecode, when updating. This bytecode is fed to an interpreter when running.
+There is no limit to bracketdepth (except perhaps a stack-depth limit, but you there's really no valid reason to reach it, ever). You can nest loops to a max of 3, because this entails annoying stuff to get i,j,k working. Any higher depth will result in a syntactical error. You can nest iif's (?:;) as much as you can nest brackets.
+The evaluator works from left to right, and has no other priority. This means that "5+3-2*8/7%3" is evaluated as "5+(3-(2*(8/(7%3))))". While most functions require brackets for their parameter, loop and iif dont, since they are terminated by the semi-colon (;). You are of course allowed to use brackets anyways.
+For whitespace you can use spaces, tabs and returns. Unix/mac/windows style returns don't matter, but since this bot is windows only (for now, programming technically) this shouldn't even matter. Any other, unknown, character will error out saying so.
+There is no real limit to the length of your code. There used to be, but I changed it.
+
+Commands are case-sensitive. As a rule of thumb, all commands are lowercase, except for XYZPQ. For hex numbers, ABCDEF must be uppercase.
+
+For the descriptions below, "<value>" means the last value that wasnt processed (eg: 5 loop(x), 5 would be <value>, same for return values: c(0) loop(x)).
+
+Arithmatic: BasicBot supports the following operators, who will always accept parameters like "<value1> operator <value2>":
++  Addition
+-  Subtraction
+*  Multiplication
+/  Devision
+%  Modulation
+&  Bitwise AND
+|  Bitwise OR
+^  Bitwise XOR
+>> Bitwise shift right (with zero padding on the left)
+<< Bitwise shift left (with zero padding on the right)
+
+There are several standard comparison operators. These operators will return 0 when false, or the max probability (at this moment 1000) when true: = != >= > <= <
+
+There is one way of branching, the iif: "<value> ? x : y ;". If <value> is not 0, execute part x, else execute part y. x and y can be multiple statements, x is bound by the colon (:) and y is bound by the semi-colon (;). The ? : and ; are paired. Effectively they make the "if then else". "mem(x3FD) ? 3 ac(3) : rc(3) 2 ac(5) ;" means "if memory location 0x3FD is not 0, execute "3 ac(3)", else execute "rc(3) 2 ac(5)". These can be nested as much as desired. I may add a while branch later.
+
+attempt = Returns the current attempt number.
+a = Returns the flag for button A. See also button.
+abs(x) = Returns the positive value of x.
+<value> ac(x) = Same as addcounter(x).
+<value> addcounter(x) = Add <value> to counter x
+<value> button = Returns the buttons pressed (so far) for this frame. If <value> is 0, all buttons are returned, else only those buttons supplied (<value> is ANDed with the buttons first).
+counter(x) = Returns value of counter x.
+c(x) = Same as counter(x)
+down = Returns flag for button down. See also button.
+<value> echo = Echoos <value> to the debug area, then returns <value>.
+frame = Returns the frame the bot is currently working on.
+i = When in a loop, returns the current cycle of the most inner loop.
+j = When in a loop, returns the current cycle of the second inner loop.
+k = When in a loop, returns the current cycle of the third inner loop.
+lastbutton = Returns the buttons pressed in the previous frame, always returns 0 the first frame.
+lb = Same as lastbutton.
+left = Returns flag for button left. See also button.
+<value> loop x ; = Execute "x" <value> times. The x may be more then one statement, the ; is mandatory and defines x. You may nest a max of three loops at once. Example: "3 loop 2 + i ac(5) ;"
+mem(x) = Returns the value of address x. This can only be done when a rom is loaded (in fact, the program will crash if somehow not so). It will read the memory of the running game and returns it's value. For the bot, this is probably the most used command since it's the only way to get direct info from the game. Stuff like score, but also environment. Basically anything! To know what value is stored where, you need to check out the game by other tools in FCEU first...
+memh(x) = Same as mem(x), except it returns the high nibble of a byte (so it ANDs the value with 0xF0 first).
+meml(x) = Same as mem(x), except it returns the low nibble of a byte (so it ANDs the value with 0x0F first).
+memw(x) = Same as mem(x), except it returns a word (two bytes), x and x+1 to be precies, as one value. Would be same as "(mem(x)<<8)+mem(x+1)"
+n = Puts you in negmode, the next number encountered will be interpretered as being negative. This was much much easier opposed to using the prefix '-', since that's also the operator for subtraction.
+rc(x) = Same as resetcounter(x).
+right = Returns flag for button right. See also button.
+resetcounter(x) = Resets counter x to 0. Sort of the same as "0 sc(x)".
+select = Returns flag for button select. See also button.
+start = Returns flag for button start. See also button.
+stop = Stops the bot with error code 5000.
+<value> setcounter(x) = Sets counter x to <value>.
+up = Returns flag for button up. See also button.
+x = Puts you in hexmode. The next number encountered will be interpretered as a hex number. You may use "0123456789ABCDEF" for a number in this mode. "ABCDEF" will error out when not in hexmode, and is case-sensitive!
+X,Y,Z = Returns the value entered in the static variables. Note that these values are evaluated only once, at updating time, so something like "frame" for this value is useless.
+P,Q = Almost the same as X Y and Z, except these return a random value between 0 and P or Q. The returned value remains equal for every attempt, but changes to a new value between 0 and P or Q after each attempt.
+
+When an erorr is thrown, which should never be while the bot is running, a guiding message is shown in the debug part to explain what went wrong. The bot will stop running when an error is thrown.
+
+That's about it for now :)
