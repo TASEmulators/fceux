@@ -1,6 +1,6 @@
 Manual for BasicBot
-Written for v0.3.1
-10 september 2006
+Written for v0.3.2
+16 september 2006
 Peter "qFox" van der Zee
 
 This is a bot. It uses a combination of probability and scripting to play games. It comes with a rather powerfull scripting language.
@@ -82,6 +82,7 @@ a = Returns the flag for button A. See also button.
 abs(x) = Returns the positive value of x.
 <value> ac(x) = Same as addcounter(x).
 <value> addcounter(x) = Add <value> to counter x
+always = Returns the max probability, can make code more legible, exactly same as "max".
 <value> button = Returns the buttons pressed (so far) for this frame. If <value> is 0, all buttons are returned, else only those buttons supplied (<value> is ANDed with the buttons first).
 counter(x) = Returns value of counter x.
 c(x) = Same as counter(x)
@@ -95,11 +96,14 @@ lastbutton = Returns the buttons pressed in the previous frame, always returns 0
 lb = Same as lastbutton.
 left = Returns flag for button left. See also button.
 <value> loop x ; = Execute "x" <value> times. The x may be more then one statement, the ; is mandatory and defines x. You may nest a max of three loops at once. Example: "3 loop 2 + i ac(5) ;"
+max = Returns the max probability, can make code more legible, exactly same as "always".
 mem(x) = Returns the value of address x. This can only be done when a rom is loaded (in fact, the program will crash if somehow not so). It will read the memory of the running game and returns it's value. For the bot, this is probably the most used command since it's the only way to get direct info from the game. Stuff like score, but also environment. Basically anything! To know what value is stored where, you need to check out the game by other tools in FCEU first...
 memh(x) = Same as mem(x), except it returns the high nibble of a byte (so it ANDs the value with 0xF0 first).
 meml(x) = Same as mem(x), except it returns the low nibble of a byte (so it ANDs the value with 0x0F first).
 memw(x) = Same as mem(x), except it returns a word (two bytes), x and x+1 to be precies, as one value. Would be same as "(mem(x)<<8)+mem(x+1)"
 n = Puts you in negmode, the next number encountered will be interpretered as being negative. This was much much easier opposed to using the prefix '-', since that's also the operator for subtraction.
+no = Same as never.
+never = returns 0, can make code more legible.
 rc(x) = Same as resetcounter(x).
 right = Returns flag for button right. See also button.
 resetcounter(x) = Resets counter x to 0. Sort of the same as "0 sc(x)".
@@ -111,6 +115,7 @@ up = Returns flag for button up. See also button.
 x = Puts you in hexmode. The next number encountered will be interpretered as a hex number. You may use "0123456789ABCDEF" for a number in this mode. "ABCDEF" will error out when not in hexmode, and is case-sensitive!
 X,Y,Z = Returns the value entered in the static variables. Note that these values are evaluated only once, at updating time, so something like "frame" for this value is useless.
 P,Q = Almost the same as X Y and Z, except these return a random value between 0 and P or Q. The returned value remains equal for every attempt, but changes to a new value between 0 and P or Q after each attempt.
+yes = Same as always and max.
 
 When an erorr is thrown, which should never be while the bot is running, a guiding message is shown in the debug part to explain what went wrong. The bot will stop running when an error is thrown.
 

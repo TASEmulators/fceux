@@ -1,11 +1,8 @@
 /**
  * qfox:
- * todo: boundrycheck every case in the switch! the string checks might override the boundries and read data its not supposed to. i'm not quite sure if this is an issue in C though.
  * todo: memi() to fetch a 32bit number? is this desired?
  * todo: check for existence of argument (low priority)
- * todo: let the code with errorchecking run through the code first so subsequent evals are faster. -> done when changing to bytecode/interpreter
  * todo: cleanup "static"s here and there and read up on what they mean in C, i think i've got them confused
- * todo: fix some button so you can test code without having to run it (so setting external input and opening a rom won't be required to test scriptcode). Code is there but you can't do certain commands when no rom is loaded and nothing is init'ed, so i'll put this on hold.
  **/
 
 /* FCE Ultra - NES/Famicom Emulator
@@ -37,9 +34,9 @@
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well. A changelog will be kept.
-static char BBversion[] = "0.3.1";
+static char BBversion[] = "0.3.2";
 // title
-static char BBcaption[] = "Basic Bot v0.3.1 by qFox";
+static char BBcaption[] = "Basic Bot v0.3.2 by qFox";
 // save/load version
 static int BBsaveload = 1;
 
@@ -157,6 +154,7 @@ const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_C		= 23,
 			BOT_BYTE_DOWN	= 24,
 			BOT_BYTE_ECHO	= 25,
+			BOT_BYTE_ERROR	= 53,
 			BOT_BYTE_FRAME	= 26,
 			BOT_BYTE_I		= 27,
 			BOT_BYTE_J		= 28,
@@ -165,10 +163,12 @@ const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_LEFT	= 30,
 			BOT_BYTE_LOOP	= 31,
 			BOT_BYTE_LSHIFT = 51,
+			BOT_BYTE_MAX	= 54,
 			BOT_BYTE_MEM	= 32,
 			BOT_BYTE_MEMH	= 33,
 			BOT_BYTE_MEML	= 34,
 			BOT_BYTE_MEMW	= 35,
+			BOT_BYTE_NEVER  = 55,
 			BOT_BYTE_RC		= 37,
 			BOT_BYTE_RIGHT	= 36,
 			BOT_BYTE_RSHIFT = 52,
@@ -643,6 +643,16 @@ static int * ToByteCode(char * formula)
 				GlobalCurrentChar += 4;
 				bytes[pointer++] = BOT_BYTE_ABS;
 			}
+			else if(*(GlobalCurrentChar+1) == 'l'
+				&&*(GlobalCurrentChar+2) == 'w'
+				&&*(GlobalCurrentChar+3) == 'a'
+				&&*(GlobalCurrentChar+4) == 'y'
+				&&*(GlobalCurrentChar+5) == 's')
+			{
+                // always (=max)
+				GlobalCurrentChar += 6;
+				bytes[pointer++] = BOT_BYTE_MAX;
+			}
 			else
 			{
                 // a()
@@ -686,7 +696,7 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(2001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (c...)");
 				free(bytes);
 				return NULL;
@@ -703,7 +713,7 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(3001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (d...)");
 				free(bytes);
 				return NULL;
@@ -718,9 +728,18 @@ static int * ToByteCode(char * formula)
 				bytes[pointer++] = BOT_BYTE_ECHO;
     			break;
 			}
+			if(*(GlobalCurrentChar+1) == 'r'
+				&&*(GlobalCurrentChar+2) == 'r'
+				&&*(GlobalCurrentChar+3) == 'o'
+				&&*(GlobalCurrentChar+4) == 'r')
+			{
+				GlobalCurrentChar += 5;
+				bytes[pointer++] = BOT_BYTE_ERROR;
+    			break;
+			}
 			else
 			{
-				BotSyntaxError(4001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (e...)");
 				free(bytes);
 				return NULL;
@@ -737,7 +756,7 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(5001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (f...)");
 				free(bytes);
 				return NULL;
@@ -796,14 +815,21 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(7001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (l...)");
 				free(bytes);
 				return NULL;
 			}
 			break;
 		case 'm':
-			if(*(GlobalCurrentChar+1) == 'e'
+			if(*(GlobalCurrentChar+1) == 'a'
+				&&*(GlobalCurrentChar+2) == 'x')
+			{
+				// max
+				GlobalCurrentChar += 3;
+				bytes[pointer++] = BOT_BYTE_MAX;
+			}
+			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'm'
 				&&*(GlobalCurrentChar+3) == '(')
 			{
@@ -840,16 +866,29 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(8001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (m...)");
 				free(bytes);
 				return NULL;
 			}
 			break;
 		case 'n':
-            // this is a little sketchy, but the principle works.
-			++GlobalCurrentChar;
-			negmode = true;
+			if(*(GlobalCurrentChar+1) == 'e'
+				&&*(GlobalCurrentChar+2) == 'v'
+				&&*(GlobalCurrentChar+3) == 'e'
+				&&*(GlobalCurrentChar+4) == 'r'||
+				*(GlobalCurrentChar+1) == 'o')
+			{
+                // never no
+                GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'e') ? 5 : 2;
+				bytes[pointer++] = BOT_BYTE_NEVER;
+			}
+			else
+			{
+				// this is a little sketchy, but the principle works.
+				++GlobalCurrentChar;
+				negmode = true;
+			}
 			break;
 		case 'r':
 			if(*(GlobalCurrentChar+1) == 'i'
@@ -883,7 +922,7 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(9001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (r...)");
 				free(bytes);
 				return NULL;
@@ -973,8 +1012,24 @@ static int * ToByteCode(char * formula)
 			}
 			else
 			{
-				BotSyntaxError(12001);
+				BotSyntaxError(1001);
 				debugS("Unknown Command (v...)");
+				free(bytes);
+				return NULL;
+			}
+			break;
+		case 'y':
+			if(*(GlobalCurrentChar+1) == 'e'
+				&&*(GlobalCurrentChar+2) == 's')
+			{
+				// yes
+				GlobalCurrentChar += 3;
+				bytes[pointer++] = BOT_BYTE_MAX;
+			}
+			else
+			{
+				BotSyntaxError(1001);
+				debugS("Unknown Command (y...)");
 				free(bytes);
 				return NULL;
 			}
@@ -1222,6 +1277,9 @@ static int Interpreter(bool single)
 		case BOT_BYTE_ECHO:
 			debug(value);
 			break;
+		case BOT_BYTE_ERROR:
+			error(value);
+			break;
 		case BOT_BYTE_FRAME:
 			value = BotFrame;
 			if (single) return value;
@@ -1301,6 +1359,10 @@ static int Interpreter(bool single)
 			value <<= Interpreter(true);
 			if (single) return value;
 			break;
+		case BOT_BYTE_MAX:
+			value = BOT_MAXPROB;
+			if (single) return value;
+			break;
 		case BOT_BYTE_MEM:
 			nextlit = (Interpreter(false) & 0x7FFFFFFF) % 65536;
 			value = ARead[nextlit](nextlit);
@@ -1327,6 +1389,10 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 			}
+		case BOT_BYTE_NEVER:
+			value = 0;
+			if (single) return value;
+			break;
 		case BOT_BYTE_RC:
 			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256] = 0);
 			if (single) return 0;
@@ -1352,10 +1418,10 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 		case BOT_BYTE_STOP:
-            // stops the code with an error...
-            BotSyntaxError(5000);
+            // stops the code
             EvaluateError = true;
-			debugS("Stopped by code");
+			MessageBox(hwndBasicBot, "Stopped by code!", "Stop signal", MB_OK);
+			StopBasicBot();
 			return 0;
 		case BOT_BYTE_UP:
 			value = 16;
@@ -1421,7 +1487,7 @@ static void DebugByteCode(int code[])
  **/
 void UpdateBasicBot()
 {
-	if(hwndBasicBot && BotRunning)
+	if(hwndBasicBot && BotRunning && !EvaluateError)
 	{
 		// If there is any input on the buffer, dont update yet.
 		// [0] means the number of inputs left on the BotInput buffer
@@ -1859,6 +1925,7 @@ static void StartBasicBot()
 	// todo: make sure you are or get into botmode here
 	FCEU_SetBotMode(1);
 	BotRunning = true;
+	EvaluateError = false;
 	FromGUI();
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,(LPTSTR)"Stop!");
 }
@@ -2027,7 +2094,7 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
     			if(!BotRunning && BotInput[0] == 0)
 				{
 					// feed BotInput the inputs until -1 is reached
-					for(i = 0; i < (BOT_MAXFRAMES-2) && BestAttempt[i] != -1; i++)
+					for(i = 0; i < (BOT_MAXFRAMES-3) && BestAttempt[i] != -1; i++)
 					{
 						BotInput[i+2] = BestAttempt[i];
 					}

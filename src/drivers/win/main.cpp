@@ -377,7 +377,7 @@ void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM) {
 	//Bot input
 	// qfox: replaced 4096 by BOT_MAXFRAMES to make it possible to increase the number of frames
 	//       the bot can compute in one single attempt.
-	mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES, "fceu.BotInput");
+	mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES*sizeof(int), "fceu.BotInput");
 	BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
 	BotInput[0] = 0;
 }

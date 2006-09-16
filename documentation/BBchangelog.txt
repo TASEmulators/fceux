@@ -1,4 +1,22 @@
 This changelog only concerns the Basic Bot code.
+Changelog 0.3.2:
+16 september 2006
+
+- Added  - Command - "<value> error" will show the <value> in the error part (can be used in conjunction to echo). Does not actually throw an error...
+- Change - Command - "stop" does not set the error 5000 any more and notifies the user by dialog box (so not to trash the debug)
+- Fixed  - Bug     - If you would replay best with >1000 frames before, the program would crash. Fixed now.
+- Added  - Command - "max", "always" and "yes", return the maximum probability and behave the same (but sometimes max makes more sense, and other times always does and the next yes does).
+- Added  - Command - "never" and "no", both return 0.
+- Added  - Manual  - yay! Look in documentation of this project, BBmanual.txt is what you want.
+
+Known issues:
+- I've seen the bot desyncing once when playing best...
+- Rollback, Max frames, Max attempts, Max parts, do nothing. They are for a future feature :)
+- The autoload/save thing is still broke. I think fceu somehow remembers the last used directory after loading/saving and uses it as the "working directory".
+- The debugger still pops up for exiting botmode, just press run and close it.
+- Test crashes (so just dont press it :)
+- May create some kind of "expert" button to hide half the current GUI, so new people wont be overwhelmed by the number of controls.
+
 Changelog 0.3.1:
 10 september 2006
 - Change - Code    - Removed the code length limit. You can now enter as much characters as you desire (and the GUI allows). This entails no overhead in variables and save files. As a result older botfiles can no longer be loaded. This change has a high impact on BB.
