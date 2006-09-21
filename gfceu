@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.5.1"
-# gfceu version 0.5.1
+version = "0.5.1svn"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
@@ -481,7 +480,7 @@ def no_network_radio_clicked(arg1):
 # Globals
 xml = None
 options = None
-optionsfile = os.getenv('HOME')+'/.gfceu'
+optionsfile = os.getenv('HOME')+'/.gfceu_options'
 fceu_binary = None
 fceu_server_binary = None
 #version is defined earlier in the code
