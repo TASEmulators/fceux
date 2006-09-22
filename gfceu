@@ -278,7 +278,7 @@ def launch(passed, local=False):
   # FIXME
   # This seems like a bit of a dirty hack.  
   # Does anyone know of a more elegant solution?
-  for x in range(1,20):
+  for x in range(0,2):
     gtk.main_iteration_do()
   
   os.system(command)
