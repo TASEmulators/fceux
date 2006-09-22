@@ -1156,7 +1156,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.<
   <property name="website">http://gfceu.thepiratecove.org/</property>
   <property name="website_label" translatable="yes"></property>
   <property name="authors">Lukas Sabota
-&lt;punkrockguy318@comcast.net&gt;</property>
+&lt;punkrockguy318@comcast.net&gt;
+
+Patch Writers:
+Scott Brown</property>
   <property name="artists">Sketching:
   J. Sammer
 Digital Manipulation:

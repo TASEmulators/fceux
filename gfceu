@@ -367,21 +367,17 @@ def browse_button_clicked(widget):
 
   chooser.set_default_response(gtk.RESPONSE_OK)
   
-  filter = gtk.FileFilter()
-  filter.set_name("All files")
-  filter.add_pattern("*")
-  chooser.add_filter(filter)
-  
   filter=gtk.FileFilter()
   filter.set_name("NES Roms")
   filter.add_mime_type("application/x-nes-rom")
+  filter.add_mime_type("application/zip")
   filter.add_pattern("*.nes")
+  filter.add_pattern("*.zip")
   chooser.add_filter(filter)
   
-  filter=gtk.FileFilter()
-  filter.set_name("Zip Files")
-  filter.add_mime_type("application/zip")
-  filter.add_pattern("*.zip")
+  filter = gtk.FileFilter()
+  filter.set_name("All files")
+  filter.add_pattern("*")
   chooser.add_filter(filter)
   
 
