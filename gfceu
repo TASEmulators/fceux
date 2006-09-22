@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.5.1svn"
+version = "0.5.1"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
