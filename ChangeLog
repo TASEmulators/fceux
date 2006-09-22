@@ -1,6 +1,6 @@
-========================== version x.x.x ========================
+========================== version 0.5.1 ========================
 Bug Fixes:
-* Chooser uses All Files by defualt
+* Updated chooser filters
 * Allow support for loading zipped ROMs
 * Network ROM loading works
 * Code cleanup
