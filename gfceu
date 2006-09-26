@@ -274,11 +274,7 @@ def launch(passed, local=False):
   
   # os.system() is a blocker, so we must force
   # gtk to process our events.
-  # 20 iterations seems enough to me
-  # FIXME
-  # This seems like a bit of a dirty hack.  
-  # Does anyone know of a more elegant solution?
-  for x in range(0,2):
+  while gtk.events_pending():
     gtk.main_iteration_do()
   
   os.system(command)

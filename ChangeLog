@@ -1,3 +1,6 @@
+========================== version 0.5.2 ========================
+Cleanup:
+* Fixed silly hack when forcing GTK event processing.
 ========================== version 0.5.1 ========================
 Bug Fixes:
 * Updated chooser filters
