@@ -321,7 +321,7 @@ def find_binary(this_binary):
   # # # # # # # #
 # GTK Signal Handlers
 class GladeHandlers:
-  def launchbutton_clicked(arg1):
+  def launch_button_clicked(arg1):
     global xml
     global options
     options.romfile = widgets['rom_entry'].get_text()
