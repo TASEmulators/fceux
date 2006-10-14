@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.5.1"
+version = "0.5.2"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 import sys
 import os
 import pickle
+import shutil
 from optparse import OptionParser
 from subprocess import Popen
 
@@ -135,7 +136,7 @@ def load_options():
   ifile.close()
 
 def save_options():
-  global options, optionsfile
+  global options, optionsfile, appconfigdir
   ofile = file(optionsfile, 'w')
   pickle.dump(options, ofile)
   ofile.close()
@@ -176,6 +177,30 @@ def give_widgets():
     options = game_options()
     give_widgets() 
   
+def setup_environment ():
+  """
+    Configures the environment if this is the first time the application
+    has been run.  For instance, it checks for the options file and creates 
+    it if it doesn't exist.  It also converts between the old version and 
+    the new version of this application, which stores the options file in 
+    a separate directory.
+  """
+       
+  global appconfigdir, old_optionsfile, optionsfile
+       
+    
+  if not os.path.exists(appconfigdir):
+    # this is the first time the application is run.
+    # create the directory
+    gfceu_message("Creating application settings directory")
+    os.mkdir(appconfigdir)
+   
+  if os.path.exists(old_optionsfile):
+    # for full backwards compatibility, this file is processed, but moved 
+    # to the new directory and filename for future compatibility
+    gfceu_message("Old version of options file found, converting to new version")
+    shutil.move(old_optionsfile,optionsfile)
+
 def set_options():
   """ 
   set_options()
@@ -472,7 +497,9 @@ def no_network_radio_clicked(arg1):
 # Globals
 xml = None
 options = None
-optionsfile = os.getenv('HOME')+'/.gfceu_options'
+appconfigdir = os.getenv('HOME') + '/.gfceu'
+old_optionsfile = os.getenv('HOME')+'/.gfceu_options'
+optionsfile = appconfigdir + 'gfceu_options.dat'
 fceu_binary = None
 fceu_server_binary = None
 #version is defined earlier in the code
@@ -530,7 +557,7 @@ if __name__ == '__main__':
     }
       
   xml.signal_autoconnect (dic)
-
+  setup_environment()
   # Set the global options
   options = game_options()
 
