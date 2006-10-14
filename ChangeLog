@@ -2,6 +2,7 @@
 Cleanup:
 * Fixed silly hack when forcing GTK event processing.
 * Accepted patch from Scott Brown on improved options file system
+* Completely reworked glade handling
 ========================== version 0.5.1 ========================
 Bug Fixes:
 * Updated chooser filters
