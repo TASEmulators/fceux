@@ -81,12 +81,26 @@
 #define GUI_BOT_TIE3_LAST               1073
 #define GUI_BOT_TIE4_LAST               1074
 #define GUI_BOT_TIE5_LAST               1075
-#define GUI_BOT_ATTEMPT_LAST2           1076
-#define GUI_BOT_ATTEMPT_LAST3           1077
+#define GUI_BOT_SKIPS                   1077
 #define GUI_BOT_FRAMES_LAST             1078
 #define GUI_BOT_FRAMES_BEST             1079
 #define GUI_BOT_OKS                     1080
+#define GUI_BOT_ATTEMPT_PREV            1081
 #define GUI_BOT_INVALIDS                1082
+#define GUI_BOT_SCORE_PREV              1083
+#define GUI_BOT_TIE1_PREV               1084
+#define GUI_BOT_TIE2_PREV               1085
+#define GUI_BOT_TIE3_PREV               1086
+#define GUI_BOT_TIE4_PREV               1087
+#define GUI_BOT_TIE5_PREV               1088
+#define GUI_BOT_FRAMES_PREV             1089
+#define GUI_BOT_PART_LAST               1090
+#define GUI_BOT_PART_BEST               1091
+#define GUI_BOT_PART_PREV               1092
+#define GUI_BOT_LB_PREV                 1093
+#define GUI_BOT_TIE5_PREV3              1094
+#define GUI_BOT_SLOW                    1095
+#define GUI_BOT_FRAMESKIP               1096
 #define ID_DEBUG_DEBUGGER               40053
 #define ID_DEBUG_PPUVIEWER              40054
 #define ID_DEBUG_NAMETABLEVIEWER        40055
@@ -103,7 +117,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40013
-#define _APS_NEXT_CONTROL_VALUE         1077
+#define _APS_NEXT_CONTROL_VALUE         1097
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

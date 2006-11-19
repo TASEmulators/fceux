@@ -3,6 +3,9 @@
  * todo: memi() to fetch a 32bit number? is this desired?
  * todo: check for existence of argument (low priority)
  * todo: cleanup "static"s here and there and read up on what they mean in C, i think i've got them confused
+ delete new
+ main.cpp contains blit-skipping: FCEUD_Update
+ sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory); (main)
  **/
 
 /* FCE Ultra - NES/Famicom Emulator
@@ -34,14 +37,20 @@
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well. A changelog will be kept.
-static char BBversion[] = "0.3.2";
+static char BBversion[] = "0.3.3";
 // title
-static char BBcaption[] = "Basic Bot v0.3.2 by qFox";
+static char BBcaption[] = "Basic Bot v0.3.3 by qFox";
 // save/load version
 static int BBsaveload = 1;
 
 static HWND hwndBasicBot = 0;					// GUI handle
 static bool BotRunning = false;					// Is the bot computing or not?
+static bool MovingOn = false;					// If movingon bool is set, the bot is feeding the app
+												// with the best result of the current part. it will
+												// not compute anything, just read input.
+												// when it fed all available input, it will save to
+												// current state and continue with the next part from there
+static int MovingPointer = 0;					// Points to the next input to be sent
 
 static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
 
@@ -147,7 +156,7 @@ const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_LT		= 16,
 			BOT_BYTE_UEQ	= 17,
 			BOT_BYTE_IIF	= 18,
-			BOT_BYTE_ATTEMPT = 19,
+			BOT_BYTE_ATTEMPT= 19,
 			BOT_BYTE_AC		= 20,
 			BOT_BYTE_ABS	= 21,
 			BOT_BYTE_BUTTON = 22,
@@ -157,6 +166,7 @@ const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_ERROR	= 53,
 			BOT_BYTE_FRAME	= 26,
 			BOT_BYTE_I		= 27,
+			BOT_BYTE_INVALIDS=57,
 			BOT_BYTE_J		= 28,
 			BOT_BYTE_K		= 29,
 			BOT_BYTE_LAST   = 50,
@@ -169,13 +179,20 @@ const int 	BOT_BYTE_LB		= 48,
 			BOT_BYTE_MEML	= 34,
 			BOT_BYTE_MEMW	= 35,
 			BOT_BYTE_NEVER  = 55,
+			BOT_BYTE_OKS    = 56,
 			BOT_BYTE_RC		= 37,
 			BOT_BYTE_RIGHT	= 36,
 			BOT_BYTE_RSHIFT = 52,
-			BOT_BYTE_START	= 38,
+			BOT_BYTE_SCORE  = 58,
 			BOT_BYTE_SELECT = 39,
+			BOT_BYTE_START	= 38,
 			BOT_BYTE_SC		= 40,
 			BOT_BYTE_STOP	= 41,
+			BOT_BYTE_TIE1   = 59,
+			BOT_BYTE_TIE2   = 60,
+			BOT_BYTE_TIE3   = 61,
+			BOT_BYTE_TIE4   = 62,
+			BOT_BYTE_TIE5   = 63,
 			BOT_BYTE_UP		= 42,
 			BOT_BYTE_P		= 43,
 			BOT_BYTE_Q		= 44,
@@ -197,18 +214,20 @@ static int BotFrame,					// Which frame is currently or last computed?
 
 static int BotAttempts, 				// Number of attempts tried so far
 	   BotFrames, 						// Number of frames computed so far
+	   TotalFrames,						// Total frames computed
+	   TotalAttempts,					// Total attempts computed
 	   Oks,								// Number of successfull attempts
 	   Invalids,						// Number of invalidated attempts
-	   BotBestScore[6]; 				// Maximize, tie1, tie2, tie3
+	   Parts,							// Number of parts computed so far
+	   BotBestScore[6]; 				// score, tie1, tie2, tie3, tie4, tie5
 static bool NewAttempt;					// Tells code to reset certain run-specific info
 
 static int LastButtonPressed;			// Used for lastbutton command (note that this 
 										//	doesnt work for the very first frame of each attempt...)
 
-static int 
-	CurrentAttempt[BOT_MAXFRAMES],		// Contains all the frames of the current attempt.
-	   BestAttempt[BOT_MAXFRAMES], 		// Contains all the frames of the best attempt so far.
-	   AttemptPointer;					// Points to the last frame of the current attempt.
+static uint32 CurrentAttempt[BOT_MAXFRAMES];		// Contains all the frames of the current attempt.
+static uint32 BestAttempt[BOT_MAXFRAMES]; 			// Contains all the frames of the best attempt so far.
+static uint32 AttemptPointer;			// Points to the last frame of the current attempt.
 
 static bool ProcessCode = true;			// This boolean tells the code whether or not to process
 										//	some code. This is mainly used in branching (iif's)
@@ -259,7 +278,46 @@ int X,Y,Z,P,Prand,Q,Qrand;              // Static variables (is this a contradic
 										//	BOT_MAXPROB (for always/certain). This is also the value
 										//	comparisons return when "true", because then it's "certain"
 										//	This used to be (if it changed) 1000.
+struct lastPart {
+	int part;
+	int attempt;
+	int frames;
+	int Tattempts;
+	int Tframes;
+	int counters[256];
+	int score;
+	int tie1;
+	int tie2;
+	int tie3;
+	int tie4;
+	int tie5;
+	int lastbutton;
+};
+lastPart * LastPart;
+lastPart * NewPart(int part, int attempt, 
+			   int frames, int score, int tie1, 
+			   int tie2, int tie3, int tie4, 
+			   int tie5, int lastbutton)
+{
+	lastPart * l = new lastPart();
+	(*l).attempt = attempt;
+	(*l).frames = frames;
+	(*l).score = score;
+	(*l).tie1 = tie1;
+	(*l).tie2 = tie2;
+	(*l).tie3 = tie3;
+	(*l).tie4 = tie4;
+	(*l).tie5 = tie5;
+	(*l).lastbutton = lastbutton;
+	for (int i=0; i<256; ++i)
+		(*l).counters[i] = BotCounter[i];
 
+	return l;
+}
+static void mbox(char * txt)
+{
+	MessageBox(hwndBasicBot, txt, "Debug", MB_OK);
+}
 static void SeedRandom(uint32 seed)
 {
 	rand1 = seed;
@@ -280,7 +338,7 @@ unsigned int FieldLength(HWND winhandle,int controlid)
 /**
  * Get the text from a freaking textfield/textarea
  * Will reserve new memory space. These strings need
- * to be "free"d when done with them!!
+ * to be "delete"d when done with them!!
  **/
 char * GetText(HWND winhandle, int controlid)
 {
@@ -438,7 +496,7 @@ static int * ToByteCode(char * formula)
 	{
     	BotSyntaxError(1004);
 		debugS("?:;() dont match!");
-		free(bytes);
+		delete bytes;
 		return NULL;
 	}
     
@@ -562,7 +620,7 @@ static int * ToByteCode(char * formula)
           						  		//	use it as a prefix, checking if the next is 1000
 		          				  		//	(or 0) or not and inverting it. For now error it.
 				debugS("Unknown command (!...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -698,7 +756,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (c...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -715,7 +773,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (d...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -741,7 +799,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (e...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 		case 'f':
@@ -758,13 +816,28 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (f...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
 		case 'i':
-			++GlobalCurrentChar;
-			bytes[pointer++] = BOT_BYTE_I;
+			if(*(GlobalCurrentChar+1) == 'n'
+				&&*(GlobalCurrentChar+2) == 'v'
+				&&*(GlobalCurrentChar+3) == 'a'
+				&&*(GlobalCurrentChar+4) == 'l'
+				&&*(GlobalCurrentChar+5) == 'i'
+				&&*(GlobalCurrentChar+6) == 'd'
+				&&*(GlobalCurrentChar+7) == 's')
+			{
+				// invalids
+				GlobalCurrentChar += 8;
+				bytes[pointer++] = BOT_BYTE_INVALIDS;
+			}
+			else
+			{
+				++GlobalCurrentChar;
+				bytes[pointer++] = BOT_BYTE_I;
+			}
 			break;
 		case 'j':
 			++GlobalCurrentChar;
@@ -817,7 +890,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (l...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -868,7 +941,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (m...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -888,6 +961,22 @@ static int * ToByteCode(char * formula)
 				// this is a little sketchy, but the principle works.
 				++GlobalCurrentChar;
 				negmode = true;
+			}
+			break;
+		case 'o':
+			if(*(GlobalCurrentChar+1) == 'k'
+				&&*(GlobalCurrentChar+2) == 's')
+			{
+                // oks
+                GlobalCurrentChar += 3;
+				bytes[pointer++] = BOT_BYTE_OKS;
+			}
+			else
+			{
+				BotSyntaxError(11001);
+				debugS("Unknown Command (o...)");
+				delete bytes;
+				return NULL;
 			}
 			break;
 		case 'r':
@@ -924,7 +1013,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (r...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -937,6 +1026,15 @@ static int * ToByteCode(char * formula)
                 // start
                 GlobalCurrentChar += 5;
 				bytes[pointer++] = BOT_BYTE_START;
+			}
+			else if(*(GlobalCurrentChar+1) == 'c'
+				&&*(GlobalCurrentChar+2) == 'o'
+				&&*(GlobalCurrentChar+3) == 'r'
+				&&*(GlobalCurrentChar+4) == 'e')
+			{
+                // score
+                GlobalCurrentChar += 5;
+				bytes[pointer++] = BOT_BYTE_SCORE;
 			}
 			else if(*(GlobalCurrentChar+1) == 'e'
 				&&*(GlobalCurrentChar+2) == 'l'
@@ -979,7 +1077,37 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(10001);
 				debugS("Unknown Command (s...)");
-				free(bytes);
+				delete bytes;
+				return NULL;
+			}
+			break;
+		case 't':
+			if(*(GlobalCurrentChar+1) == 'i'
+				&&*(GlobalCurrentChar+2) == 'e'
+				&&(*(GlobalCurrentChar+3) == '1' || 
+				   *(GlobalCurrentChar+3) == '2' || 
+				   *(GlobalCurrentChar+3) == '3' || 
+				   *(GlobalCurrentChar+3) == '4' || 
+				   *(GlobalCurrentChar+3) == '5'))
+			{
+                // tie 1-5
+				// returns the current max tie 1-5
+				switch ((int)*(GlobalCurrentChar+3)) {
+					case '1': bytes[pointer++] = BOT_BYTE_TIE1; break;
+					case '2': bytes[pointer++] = BOT_BYTE_TIE2; break;
+					case '3': bytes[pointer++] = BOT_BYTE_TIE3; break;
+					case '4': bytes[pointer++] = BOT_BYTE_TIE4; break;
+					case '5': bytes[pointer++] = BOT_BYTE_TIE5; break;
+					default: debugS("Serious error here");
+				}
+				GlobalCurrentChar += 4;
+				
+            }
+			else
+			{
+				BotSyntaxError(11001);
+				debugS("Unknown Command (u...)");
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -993,8 +1121,8 @@ static int * ToByteCode(char * formula)
 			else
 			{
 				BotSyntaxError(11001);
-				debugS("Unknown Command (p...)");
-				free(bytes);
+				debugS("Unknown Command (u...)");
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -1014,7 +1142,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (v...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -1030,7 +1158,7 @@ static int * ToByteCode(char * formula)
 			{
 				BotSyntaxError(1001);
 				debugS("Unknown Command (y...)");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -1106,7 +1234,7 @@ static int * ToByteCode(char * formula)
 				// If not in hexmode, we cant use these characters.
 				BotSyntaxError(1003);
 				debugS("Not in hexmode!");
-				free(bytes);
+				delete bytes;
 				return NULL;
 			}
 			break;
@@ -1134,7 +1262,7 @@ static int * ToByteCode(char * formula)
 			// Unknown characters should error out. You can use spaces.
 			BotSyntaxError(12001);
 			debugS("Unknown character...");
-			free(bytes);
+			delete bytes;
 			return NULL;
 		}
 	}
@@ -1288,6 +1416,10 @@ static int Interpreter(bool single)
 			value = BotLoopVarI;
 			if (single) return value;
 			break;
+		case BOT_BYTE_INVALIDS:
+			value = Invalids;
+			if (single) return value;
+			break;
 		case BOT_BYTE_J:
 			value = BotLoopVarJ;
 			if (single) return value;
@@ -1393,6 +1525,10 @@ static int Interpreter(bool single)
 			value = 0;
 			if (single) return value;
 			break;
+		case BOT_BYTE_OKS:
+			value = Oks;
+			if (single) return value;
+			break;
 		case BOT_BYTE_RC:
 			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256] = 0);
 			if (single) return 0;
@@ -1409,6 +1545,10 @@ static int Interpreter(bool single)
 			value = 8;
 			if (single) return value;
 			break;
+		case BOT_BYTE_SCORE:
+			value = BotBestScore[0];
+			if (single) return value;
+			break;
 		case BOT_BYTE_SELECT:
 			value = 4;
 			if (single) return value;
@@ -1423,6 +1563,26 @@ static int Interpreter(bool single)
 			MessageBox(hwndBasicBot, "Stopped by code!", "Stop signal", MB_OK);
 			StopBasicBot();
 			return 0;
+		case BOT_BYTE_TIE1:
+			value = BotBestScore[1];
+			if (single) return value;
+			break;
+		case BOT_BYTE_TIE2:
+			value = BotBestScore[2];
+			if (single) return value;
+			break;
+		case BOT_BYTE_TIE3:
+			value = BotBestScore[3];
+			if (single) return value;
+			break;
+		case BOT_BYTE_TIE4:
+			value = BotBestScore[4];
+			if (single) return value;
+			break;
+		case BOT_BYTE_TIE5:
+			value = BotBestScore[5];
+			if (single) return value;
+			break;
 		case BOT_BYTE_UP:
 			value = 16;
 			if (single) return value;
@@ -1484,172 +1644,217 @@ static void DebugByteCode(int code[])
 }
 /**
  * Update BasicBot input
+ * Called from the main game loop, every cycle
  **/
 void UpdateBasicBot()
 {
+	// If there is any input on the buffer, dont update yet.
+	// [0] means the number of inputs left on the BotInput buffer
+	if(BotInput[0])
+		return;
 	if(hwndBasicBot && BotRunning && !EvaluateError)
 	{
-		// If there is any input on the buffer, dont update yet.
-		// [0] means the number of inputs left on the BotInput buffer
-		if(BotInput[0])
-			return;
-		
-		// 1; just computing 1 frame of input.
-		BotInput[0] = 1;
-		
-		// When the bot starts, or the "end when" is reached, NewAttempt is set.
-		//	this boolean tells you to reset/init stuff.
-		if(NewAttempt)
+		if (MovingOn) // feed it the best result of the last part
 		{
-			SetNewAttempt();
-		}
-		else
-		{
-			// Goal is met if the frame count goes above 1020, or if the 
-			//	result was higher then a random number between 0 and 1000.
-			//	I think the random part needs to be removed as it has no
-			//	added value. You either get your goal or you dont. Leave
-			//	the original, in case we want to revert it.
-			
-			//if(BotFrame > (BOT_MAXFRAMES-4) || (int) (NextRandom() % BOT_MAXPROB) < EvaluateFormula(Formula[20]))
-			int i; // loopcounter
-			bool improvement = true;
-			if(BotFrame > (BOT_MAXFRAMES-5) || (improvement = (Interpret(CODE_INVALID) == BOT_MAXPROB)) || Interpret(CODE_OK) == BOT_MAXPROB)
+			if (BestAttempt[MovingPointer] != -1)
 			{
-				// a little misleading, but if the improvement 
-				// bool is set here, the attempt is invalid
-				if (improvement)
-					++Invalids;
-				else
-					++Oks;
+				BotInput[0] = 1;
+				BotInput[1] = BestAttempt[MovingPointer++];
+			}
+			else
+			{
+				// save the current state to the default state (i hope this works)
+				FCEUI_SaveState(BOT_STATEFILE);
+//				StopBasicBot();
+//				debugS("Test");
+				// show stats
+				UpdatePrevGUI(BotBestScore);
+				// and continue...
+				MovingOn = false;
+				BotAttempts = 0;
+				++Parts;
+				SetNewAttempt();
+			}
+		}
+		else // do normal bot stuff
+		{
 
-				int currentscore[6];
-
-				// This was the last frame of this attempt
-				NewAttempt = true;
-
-				// This evaluates each of the four strings (over and over again)
-				//	which can become rather sluggish.
-				//	maximize, tie1, tie2, tie3
-				for(i=0; i < 6; i++)
+			// 1; just computing 1 frame of input.
+			BotInput[0] = 1;
+			
+			// When the bot starts, or the "end when" is reached, NewAttempt is set.
+			//	this boolean tells you to reset/init stuff.
+			if(NewAttempt)
+			{
+				SetNewAttempt();
+			}
+			else
+			{
+				// Goal is met if the frame count goes above 1020, or if the 
+				//	result was higher then a random number between 0 and 1000.
+				//	I think the random part needs to be removed as it has no
+				//	added value. You either get your goal or you dont. Leave
+				//	the original, in case we want to revert it.
+				
+				//if(BotFrame > (BOT_MAXFRAMES-4) || (int) (NextRandom() % BOT_MAXPROB) < EvaluateFormula(Formula[20]))
+				int i; // loopcounter
+				bool improvement = true;
+				if((BotFrame > (BOT_MAXFRAMES-5)) | (improvement = (Interpret(CODE_INVALID) >= BOT_MAXPROB)) | (Interpret(CODE_OK) >= BOT_MAXPROB))
 				{
-					currentscore[i] = Interpret(CODE_SCORE+i);
-				}
+					// a little misleading, but if the improvement 
+					// bool is set here, the attempt is invalid
+					if (improvement)
+						++Invalids;
+					else
+						++Oks;
 
-				// Update last score
-				UpdateLastGUI(currentscore);
+					int currentscore[6];
 
-				// dont improve if this attempt was invalid
-				if (!improvement)
-				{
-					improvement = false;
-					// compare all scores. if scores are not equal, a break _will_
-					//	occur. else the next will be checked. if all is equal, the
-					//	old best is kept.
+					// This was the last frame of this attempt
+					NewAttempt = true;
+
+					// This evaluates each of the four strings (over and over again)
+					//	which can become rather sluggish.
+					//	maximize, tie1, tie2, tie3
 					for(i=0; i < 6; i++)
 					{
-						if(currentscore[i] > BotBestScore[i])
+						currentscore[i] = Interpret(CODE_SCORE+i);
+					}
+
+					// Update last score
+					UpdateLastGUI(currentscore);
+
+					// dont improve if this attempt was invalid
+					if (!improvement)
+					{
+						improvement = false;
+						// compare all scores. if scores are not equal, a break _will_
+						//	occur. else the next will be checked. if all is equal, the
+						//	old best is kept.
+						for(i=0; i < 6; i++)
 						{
-							improvement = true;
-							break;
+							if(currentscore[i] > BotBestScore[i])
+							{
+								improvement = true;
+								break;
+							}
+							else if(currentscore[i] < BotBestScore[i])
+							{
+								break;
+							}
 						}
-						else if(currentscore[i] < BotBestScore[i])
+					}
+					else
+					{
+						improvement = false;
+					}
+					
+					// Update best
+					if(improvement)
+					{
+						// Update the scores
+						for(i = 0; i < 6; i++)
 						{
-							break;
+							BotBestScore[i] = currentscore[i];
+						}
+						// Copy the new best run
+						uint32 j;
+						for(j = 0; j < AttemptPointer; j++)
+						{
+							BestAttempt[j] = CurrentAttempt[j];
+						}
+						// terminate
+						BestAttempt[j] = -1;
+						// duh
+						UpdateBestGUI();
+					}
+					// if the attempt has finished, check whether this is the end of this part
+					// just eval the part like the other stuff
+					// todo: fix it so that the counters are kept and stuff like that
+					if (Interpret(CODE_MAXATTEMPTS) == BOT_MAXPROB)
+					{
+						LastPart = NewPart(Parts,BotAttempts,BotFrame,currentscore[0],currentscore[1],
+							currentscore[2],currentscore[3],currentscore[4],currentscore[5], LastButtonPressed);
+						LastPart->Tattempts = TotalAttempts;
+						LastPart->Tframes = TotalFrames;
+						// feed the best input to the app
+						// we accomplish this by setting the bool
+						MovingPointer = 0;
+						MovingOn = true;
+						// we're not actually going to do a new attempt because movingon is set
+						SetNewAttempt();
+						// next time the bot update is called, it will fetch input from the best buffer
+						// once this is complete, the code will save the state and continue a new attempt
+					}
+
+				}
+				else // Goal not met
+				{
+					// Generate 1 frame of output
+					BotInput[1] = 0;
+					
+					// For two players, respectfully compute the probability
+					//	for A B select start up down left and right buttons. In
+					//	that order. If the number is higher then the generated
+					//	random number, the button is pressed :)
+					for(i=0;i<16;i++)
+					{
+						int res = Interpret(i);
+						if(GetRandom(BOT_MAXPROB) < res)
+						{
+							// Button flags:
+							//	button - player 1 - player 2
+							//	A		 	1			 9
+							//	B		 	2			10
+							//	select	 	3			11
+							//	start	 	4			12
+							//	up		 	5			13
+							//	down	 	6			14
+							//	left	 	7			15
+							//	right	 	8			16
+							//	The input code will read the value of BotInput[1]
+							//	If flag 17 is set, it will load a savestate, else
+							//	it takes this input and puts the lower byte in 1
+							//	and the upper byte in 2.
+							BotInput[1] |= 1 << i;
 						}
 					}
-				}
-				else
-				{
-					improvement = false;
-				}
-				
-				// Update best
-				if(improvement)
-				{
-					// Update the scores
-					for(i = 0; i < 6; i++)
+
+					// Save what we've done
+					// Only if we're not already at the max, should we 
+					//	perhaps not check sooner if we are going to
+					//	anyways?
+					if(AttemptPointer < BOT_MAXFRAMES)
 					{
-						BotBestScore[i] = currentscore[i];
+						CurrentAttempt[AttemptPointer] = BotInput[1];
+						AttemptPointer++;
 					}
-					// Copy the new best run
-					for(i = 0; i < AttemptPointer; i++)
-					{
-						BestAttempt[i] = CurrentAttempt[i];
-					}
-					// Set the remainder of the array to -1, indicating a "end of run"
-					for(; i < BOT_MAXFRAMES; i++)
-					{
-						BestAttempt[i] = -1;
-					}
-					UpdateBestGUI();
+					
+					// Run extra commands
+					Interpret(CODE_EXTRA);
+					// Remember the buttons pressed in this frame
+					LastButtonPressed = BotInput[1];
 				}
 			}
-			else // Goal not met
+
+			// Update statistics
+			// Flag 17 for input means the code will load a savestate next. looks kinda silly. to be changed.
+			if(BotInput[1] == 65536)
 			{
-				// Generate 1 frame of output
-				BotInput[1] = 0;
-				
-				// For two players, respectfully compute the probability
-				//	for A B select start up down left and right buttons. In
-				//	that order. If the number is higher then the generated
-				//	random number, the button is pressed :)
-				for(i=0;i<16;i++)
-				{
-					int res = Interpret(i);
-					if(GetRandom(BOT_MAXPROB) < res)
-					{
-						// Button flags:
-						//	button - player 1 - player 2
-						//	A		 	1			 9
-						//	B		 	2			10
-						//	select	 	3			11
-						//	start	 	4			12
-						//	up		 	5			13
-						//	down	 	6			14
-						//	left	 	7			15
-						//	right	 	8			16
-						//	The input code will read the value of BotInput[1]
-						//	If flag 17 is set, it will load a savestate, else
-						//	it takes this input and puts the lower byte in 1
-						//	and the upper byte in 2.
-						BotInput[1] |= 1 << i;
-					}
-				}
-
-				// Save what we've done
-				// Only if we're not already at the max, should we 
-				//	perhaps not check sooner if we are going to
-				//	anyways?
-				if(AttemptPointer < BOT_MAXFRAMES)
-				{
-					CurrentAttempt[AttemptPointer] = BotInput[1];
-					AttemptPointer++;
-				}
-				
-				// Run extra commands
-				Interpret(CODE_EXTRA);
-				// Remember the buttons pressed in this frame
-				LastButtonPressed = BotInput[1];
+				++BotAttempts;
+				++TotalAttempts;
 			}
-		}
-
-		// Update statistics
-		// Flag 17 for input means the code will load a savestate next. looks kinda silly. to be changed.
-		if(BotInput[1] == 65536)
-		{
-			BotAttempts++;
-		}
-		else
-		{
-			BotFrames++;
-			// BotFrame is redundant? always equal to AttemptPointer
-			BotFrame++;
-		}
-		// Increase the statistics
-		if((BotFrames % 500) == 0)
-		{
-			UpdateCountersGUI();
+			else
+			{
+				++BotFrames; // global
+				++BotFrame;  // this attempt
+				++TotalFrames; // global
+			}
+			// Increase the statistics
+			if((BotFrames % 500) == 0)
+			{
+				UpdateCountersGUI();
+			}
 		}
 	}
 }
@@ -1725,14 +1930,16 @@ static bool SaveBasicBot()
 	ofn.lpstrInitialDir=BasicBotDir;
 	if(GetSaveFileName(&ofn))
 	{
+		/*
 		// Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
-			free(BasicBotDir);
-			BasicBotDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
+			delete BasicBotDir;
+			BasicBotDir=new char[strlen(ofn.lpstrFile)+1];
 			strcpy(BasicBotDir,ofn.lpstrFile);
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
+		*/
 
 		int i;
 		// quick get length of nameo
@@ -1821,14 +2028,16 @@ static bool LoadBasicBot()
 
 	if(GetOpenFileName(&ofn))
 	{
+		/*
 		// Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
-			free(BasicBotDir);
-			BasicBotDir=(char*)malloc(strlen(ofn.lpstrFile)+1); //mbg merge 7/18/06 added cast
+			delete BasicBotDir;
+			BasicBotDir=new[GetLength(ofn.lpstrFile)+1];
 			strcpy(BasicBotDir,ofn.lpstrFile);
 			BasicBotDir[ofn.nFileOffset]=0;
 		}
+		*/
 
 		// now actually load the file
 		return LoadBasicBotFile(nameo);
@@ -1901,7 +2110,7 @@ static bool LoadBasicBotFile(char fn[])
 			}
 			// we want no memleaks, no sir!
 			if (Formula[i] != NULL)
-				free(Formula[i]);
+				delete Formula[i];
 			// hook them up!
 			Formula[i] = code;
 		}
@@ -1928,6 +2137,11 @@ static void StartBasicBot()
 	EvaluateError = false;
 	FromGUI();
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,(LPTSTR)"Stop!");
+	NewAttempt = true;
+	Parts = 1;
+	// set up saved state, load default, save to botstate
+	FCEUI_LoadState(0);
+	FCEUI_SaveState(BOT_STATEFILE);
 }
 
 /**
@@ -1939,6 +2153,8 @@ static void StopBasicBot()
 	BotRunning = false;
     BotAttempts = 0;
     BotFrames = 0;
+	TotalFrames = 0;
+	TotalAttempts = 0;
     BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
     NewAttempt = true;
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,"Run!");
@@ -1956,9 +2172,9 @@ static void FromGUI()
 		// buttons
 		for (int i = 0; i < BOT_FORMULAS; i++)
         {
-			// since we malloc the strings, we need to free them before replacing them...
+			// since we alloc the strings, we need to delete them before replacing them...
 			if (Formula[i] != NULL) 
-				free(Formula[i]);
+				delete Formula[i];
 			Formula[i] = GetText(hwndBasicBot,Labels[i]);
 			// um yeah, eval-ing the comments is a bad idea :p
 			if (i != CODE_COMMENTS) 
@@ -2016,6 +2232,19 @@ static void InitVars()
 	t[2] = 'n';
 	t[3] = 'e';
 	t[4] = 0;
+	char * r = new char[10];
+	r[0] = 'a';
+	r[1] = 't';
+	r[2] = 't';
+	r[3] = 'e';
+	r[4] = 'm';
+	r[5] = 'p';
+	r[6] = 't';
+	r[7] = '=';
+	r[8] = '1';
+	r[9] = '0';
+	r[10] = '0';
+	r[11] = 0;
 	Formula[CODE_COMMENTS] = t;
 	X = Y = Z = P = Prand = Q = Qrand = 0;
 }
@@ -2032,9 +2261,9 @@ static void UpdateStatics()
 	{
 		for (int i = GUI_BOT_X; i < 5; ++i)
         {
-			// since we malloc the strings, we need to free them before replacing them...
+			// since we malloc the strings, we need to delete them before replacing them...
 			if (Formula[i] != NULL) 
-				free(Formula[i]);
+				delete Formula[i];
 			Formula[i] = GetText(hwndBasicBot,Labels[i]);
 			// um yeah, eval-ing the comments is a bad idea :p
 			if (i != CODE_COMMENTS) 
@@ -2049,11 +2278,30 @@ static void UpdateStatics()
 }
 
 /**
+ * play the best found run
+ **/
+static void PlayBest()
+{
+	// feed BotInput the inputs until -1 is reached
+	int i;
+	for(i = 0; i < (BOT_MAXFRAMES-3) && BestAttempt[i] != -1; i++)
+	{
+		BotInput[i+2] = BestAttempt[i];
+	}
+	BotInput[0] = i+1; 		// the number of botframes currently in the variable
+	BotInput[1] = 65536; 	// flag 17, when processed by input.cpp this causes the
+							//	code to load the savestate. should really change
+							//	this construction, its ugly (but i guess it works)
+							//  i dont see the problem in calling a load from here
+}
+
+int skip = 1;
+int pause = 0;
+/**
  * Called from windows. main gui (=dialog) control.
  **/
 static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int i;
 	DSMFix(uMsg); // stops sound on 5 of the messages...
 	switch(uMsg)
 	{
@@ -2093,15 +2341,7 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				// if bot is running and no frames left on the botinput buffer
     			if(!BotRunning && BotInput[0] == 0)
 				{
-					// feed BotInput the inputs until -1 is reached
-					for(i = 0; i < (BOT_MAXFRAMES-3) && BestAttempt[i] != -1; i++)
-					{
-						BotInput[i+2] = BestAttempt[i];
-					}
-					BotInput[0] = i+1; 		// the number of botframes currently in the variable
-					BotInput[1] = 65536; 	// flag 17, when processed by input.h this causes the
-											//	code to load the savestate. should really change
-											//	this construction, its ugly (but i guess it works)
+					PlayBest();
 				}
 				break;
 			case GUI_BOT_RUN:
@@ -2167,6 +2407,10 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			case GUI_BOT_RESET:
 				ResetStats();
 				break;
+			case GUI_BOT_FRAMESKIP:
+				skip = GetDlgItemInt(hwndBasicBot,GUI_BOT_SKIPS,0,false);
+				pause = GetDlgItemInt(hwndBasicBot,GUI_BOT_SLOW,0,false);
+				break;
 			default:
 				break;
 			}
@@ -2229,8 +2473,8 @@ void CrashWindow()
 	SaveBasicBotFile("default.bot");
 	for (int i=0; i<BOT_FORMULAS; ++i)
 	{
-		free(Formula[i]);
-		free(Bytecode[i]);
+		delete Formula[i];
+		delete Bytecode[i];
 	}
 	DestroyWindow(hwndBasicBot);
 	hwndBasicBot=0;
@@ -2261,11 +2505,13 @@ void UpdateExternalButton()
 void ResetStats()
 {
 	BotAttempts = 0;
+	Parts = 1;
 	BotFrames = 0;
 	Oks = 0;
 	Invalids = 0;
 	memset(BotBestScore,0,sizeof(int)*6);
-	memset(BestAttempt,-1,BOT_MAXFRAMES*sizeof(int));
+	delete LastPart;
+	LastPart = NULL;
 	UpdateFullGUI();
 }
 /**
@@ -2299,6 +2545,7 @@ void UpdateBestGUI()
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_BEST,BotBestScore[3],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_BEST,BotBestScore[4],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_BEST,BotBestScore[5],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_BEST,Parts,TRUE);
 
 	// Create the run in ascii
 	int k = 0;     // keep track of len, needs to be below bufsize
@@ -2344,6 +2591,7 @@ void UpdateBestGUI()
 void UpdateLastGUI(int last[])
 {
 	// Update best scores
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,Parts,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,BotAttempts,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_LAST,BotFrame,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_LAST,last[0],TRUE);
@@ -2352,6 +2600,39 @@ void UpdateLastGUI(int last[])
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_LAST,last[3],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_LAST,last[4],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_LAST,last[5],TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_LAST,Parts,TRUE);
+}
+/**
+ * update info for previous part
+ **/
+void UpdatePrevGUI(int best[])
+{
+	// Update previous part scores
+	if (LastPart != NULL)
+	{
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_PREV,LastPart->part,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_PREV,LastPart->attempt,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_PREV,LastPart->frames,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_PREV,best[0],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE1_PREV,best[1],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE2_PREV,best[2],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_PREV,best[3],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_PREV,best[4],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_PREV,best[5],TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_LB_PREV,LastPart->lastbutton,TRUE);
+	}
+	else
+	{
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE1_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE2_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_PREV,0,TRUE);
+	}
 }
 
 /**
@@ -2359,8 +2640,8 @@ void UpdateLastGUI(int last[])
  */
 void UpdateCountersGUI()
 {
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPTS,BotAttempts,TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES,BotFrames,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPTS,TotalAttempts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES,TotalFrames,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_OKS,Oks,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_INVALIDS,Invalids,TRUE);
 }
@@ -2378,9 +2659,43 @@ void SetNewAttempt()
 	NewAttempt = false;	 		 // Running an attempt now
 	AttemptPointer = 0;  		 // Offset, frame counter?
 	BotFrame = 0;        		 // Frame counter...
-	memset(BotCounter, 0, BOT_MAXCOUNTERS*sizeof(int)); // Sets all the counters to 0.
 	// Update the P and Q values to something new
 	Prand = GetRandom(P);
 	Qrand = GetRandom(Q);
+
+	// set the values from the previous parts correct
+	if (LastPart != NULL)
+	{
+		LastButtonPressed = LastPart->lastbutton;
+		for (int i=0; i<256; ++i)
+			BotCounter[i] = LastPart->counters[i];
+	}
+	else
+	{
+		memset(BotCounter, 0, BOT_MAXCOUNTERS*sizeof(int)); // Sets all the counters to 0.
+		LastButtonPressed = 0;
+	}
 }
 
+
+
+
+
+/**
+ * Returns the number of frames to skip
+ * while computing in botmode
+ * (called from main.cpp)
+ */
+int BotFrameSkip()
+{
+	return skip;
+}
+/**
+ * Returns the ms to pause after each blit
+ * This can be used to evaluate your bot
+ * (called from main.cpp)
+ */
+int BotFramePause()
+{
+	return pause;
+}

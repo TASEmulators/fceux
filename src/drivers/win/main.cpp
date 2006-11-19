@@ -346,7 +346,6 @@ void _updateMemWatch() {
 #ifdef _USE_SHARED_MEMORY_
 HANDLE mapGameMemBlock;
 HANDLE mapRAM;
-HANDLE mapBotInput;
 uint32 *BotInput;
 void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM) {
 
@@ -375,10 +374,11 @@ void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM) {
 	SFCPU[6].v = *RAM;
 
 	//Bot input
-	// qfox: replaced 4096 by BOT_MAXFRAMES to make it possible to increase the number of frames
-	//       the bot can compute in one single attempt.
-	mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES*sizeof(int), "fceu.BotInput");
-	BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
+	// qfox: tossed mapping alltogether
+	//mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES*sizeof(int), "fceu.BotInput");
+	//BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
+	// qfox: not working with a map anymore
+	BotInput = new uint32[BOT_MAXFRAMES];
 	BotInput[0] = 0;
 }
 
@@ -407,9 +407,8 @@ void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM) {
 		GameMemBlock = NULL;
 	}
 
-	UnmapViewOfFile(mapBotInput);
-	CloseHandle(mapBotInput);
-	BotInput = NULL;
+	// qfox: not working with map anymore
+	delete BotInput;
 }
 #endif
 
@@ -775,17 +774,32 @@ void _updateWindow() {
 //	} // end of !(old sound code) block
 //}
 
+// qfox 09/17/06: moved the skipcount outside because it was completely pointless
+//                in there.
+/**
+ * Counts the number of frames that have not been displayed
+ * Used for the bot, to skip frames (and save time).
+ **/
+int skipcount = 0;
+/**
+ * Update the game and gamewindow with a new frame
+ **/
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	//mbg merge 7/19/06 - leaving this untouched but untested
 	//its probably not optimal
 	if(FCEU_BotMode()) {
 		//this counts the number of frames we've skipped blitting
-		static int skipcount = 0;
-		if(XBuf && (skipcount++ >= 64))
+		// qfox 09/17/06: for bot evaluation purposes, the number
+		//                of frames to be skipped is set from the
+		//                bot gui.
+		if(XBuf && (skipcount++ >= BotFrameSkip()))
 		{
 			skipcount = 0;
 			FCEUD_BlitScreen(XBuf);
+			// qfox 17/09/06: it can be wishfull for a coder to evaluate his bot.
+			//                slowing it down can help here :) defaults at 0
+			if (BotFramePause() > 0) Sleep(BotFramePause());
 		}
 		UpdateFCEUWindow();
 		FCEUD_UpdateInput();

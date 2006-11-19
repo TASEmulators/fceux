@@ -1,4 +1,27 @@
 This changelog only concerns the Basic Bot code.
+Changelog 0.3.3:
+19 november 2006
+
+- Added  - Command - "invalids" and "oks" return their values. Usefull for determining whether to move on, or perhaps to change a value depending on the number of invalids.
+- Added  - GUI     - You can now set the number of frames to skip, as well as the number of ms to wait after a frame-update. This can help you to evaluate your bot more closely.
+- Added  - Code    - Major update here... The bot can now process a game part by part. Parts are from their start up to where they are deemed Ok (or Invalid, but invalids are never saved as "best"). When they are Ok (or Invalid) the code checks if the Max Attempts condition is true. If so, it will load and play the best attempt and save at the end, then continue where it was with the next part. This way you can cover a game in parts.
+- Change - Save    - The code used to just load the default savestate no-matter-what. Now, when you press run, it loads the default save state. Immediately after he saves it to a "botstate" state. From there-on he loads from this state. When a part is done, he saves to this state as well. Will add a button later to load this specific state.
+- Added  - GUI     - Another column to show the stats of the last part
+- Change - Code    - Upped the recording limit to 10.000 frames (needed it myself :)
+- Added  - Command - A variable (for bot) that holds the current scores: score tie1 tie2 tie3 tie4 tie5. Can be used to discard a current run if the score is already lower then the highest current score. Can be a serious time-saver when the number of frames is a condition
+
+Known issues:
+- There still seems to be a desync sometimes... only happens when you use the part-system. it doesnt desync a single run attempt.
+- There is a nasty bug occuring between parts. Sort of like a desync, even though I'm not sure whether that's even possible. But it sometimes tends to save a run that should have been marked invalid.
+- If the start of a new part makes the "invalid" return true immediately, the bot goes bananaz. You might as well stop it because it will only keep on doing the same thing.
+- When pressing update, the GUI sometimes reverts some changes you made. Not sure why the behavious is like that when it happens, but I should investigate and change it.
+
+Todo:
+- Fix that nasty desync!
+- Add a button that in/validates a current run immediately. This should prohibit runs that are obviously ok but don't meet all the requirements set by you yet.
+- Add logging stuff
+- Add code to run at the start of an attempt, to initialize variables.
+
 Changelog 0.3.2:
 16 september 2006
 

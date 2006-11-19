@@ -224,14 +224,14 @@ void FCEU_UpdateBot()
 			FCEUI_FrameAdvance();
 			break;
 		case 1:
-			FCEUI_LoadState(0);
+			FCEUI_LoadState(BOT_STATEFILE);
 			break;
 		default:
 			break;
 		}
 
 		//Bot input ends; let the world know we're done
-		if(BotPointer >= BotInput[0] || BotPointer >= 1023)
+		if(BotPointer >= BotInput[0] || BotPointer >= BOT_MAXFRAMES-1)
 		{
 			BotInput[0] = 0;
 			BotPointer = 0;
