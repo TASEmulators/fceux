@@ -1,4 +1,37 @@
 This changelog only concerns the Basic Bot code.
+
+Changelog 0.3.4a:
+27 november 2006
+
+- Fixed  - Command - abs() did not function, fixed now.
+- Fixed  - Code    - Hopefully, the segmented-comutationcode. Found a major thinkingerror anyways.
+- Change - GUI     - Score/Tie is now just Score 1 - 6. They are still an order of tie-breakers, but it just looks better. The title is also used for loggin.
+- Added  - GUI     - Titles for scores/ties. You can write what certain scores/ties mean in the bottom-right part. Press the small button above it to show it in the result window and the log.
+- Change - Command - Changed 'score' and 'tie1' (through 5) to just 'score1' (trough 6).
+- Added  - Logging - The code will now do some (automatic) rudimentary logging. After each attempt it will write the part, attempt, frames, and six scores and their titles to a file called 'bb-log.txt'. It will not write scores that have '-' as title. Logging will be extended in the future, more options, all that.
+- Added  - GUI     - Rom description to identify what rom this bot is designed for.
+- Fixed  - GUI     - Well, not fixed, but I disabled the rollback and maxframes inputs since they are useless atm and confusing (even for me).
+- Change - Code    - The extra code will now be ran BEFORE a frame, instead of afterwards. This makes more sense anyways, but in practice it merely means that the extra code is ran before the first frame, instead of after the last.
+- Added  - GUI     - Like the extra code works for each frame, likewise are there now inputs for before an attempt and a part.
+- Added  - GUI     - Listbox to contain the counter values. Autoupdated at the start of each attempt. Press 'test' button (for now) to update it manually.
+
+Known issues:
+- Previously saved bots don't work with this version.
+- I have yet to determine whether there actually is a problem with the code or whether it was my testcode that was to blame for the strange occurences, but...
+- There seems to be a strange behaviour bug when going to the next part
+- When pressing reset, the right-top values don't reset
+- When pressing reset, some of the values don't zero out
+- There might still be a desync when using segments
+- Segments are called parts, but I want to change this to segments for clarity
+- Delay/Frameskips are saved and loaded, but not active on load (you still need to press the button).
+- I'm afraid this release hasn't been tested very well so there may be more (subtle) bugs... That's why it's labeled a.
+
+Todo:
+- Add a button that in/validates a current run immediately. This should prohibit runs that are obviously ok but don't meet all the requirements set by you yet.
+- Expand logging
+- Add a menu to allow more options and less cluttering in main BB window.
+
+
 Changelog 0.3.3:
 19 november 2006
 

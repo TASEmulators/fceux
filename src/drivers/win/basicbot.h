@@ -27,8 +27,13 @@
 	void UpdateAvgGUI();
 	void UpdateFullGUI();
 	void UpdateCountersGUI();
+	void UpdateTitles();
 	void SetNewAttempt();
+	void SetNewPart();
 	void UpdatePrevGUI(int best[]);
 	int BotFrameSkip();
 	int BotFramePause();
+	bool LoggingEnabled();
+	void LogAttempt(int *scores, bool better);
+	void ShowCounters();
 #endif // _BASICBOT_H_

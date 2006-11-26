@@ -19,13 +19,16 @@
 #define GUI_BOT_INVALID                 1009
 #define GUI_BOT_X                       1010
 #define GUI_BOT_TIE1                    1011
+#define GUI_BOT_SCORE2                  1011
 #define GUI_BOT_TIE2                    1012
+#define GUI_BOT_SCORE3                  1012
 #define GUI_BOT_TIE3                    1013
+#define GUI_BOT_SCORE4                  1013
 #define GUI_BOT_SAVE                    1014
 #define GUI_BOT_LOAD                    1015
 #define GUI_BOT_RUN                     1016
 #define GUI_BOT_MAX                     1017
-#define GUI_BOT_SCORE                   1017
+#define GUI_BOT_SCORE1                  1017
 #define GUI_BOT_Y                       1018
 #define GUI_BOT_KEYS                    1019
 #define GUI_BOT_EXTRA                   1020
@@ -35,6 +38,7 @@
 #define GUI_BOT_COMMENTS                1023
 #define GUI_BOT_UPDATE                  1024
 #define GUI_BOT_BOTMODE                 1025
+#define GUI_BOT_ROMNAME                 1025
 #define GUI_BOT_P                       1026
 #define GUI_BOT_Q                       1027
 #define GUI_BOT_TEST                    1028
@@ -56,8 +60,10 @@
 #define GUI_BOT_DOWN_2                  1042
 #define GUI_BOT_LEFT_2                  1043
 #define GUI_BOT_RIGHT_2                 1044
-#define GUI_BOT_TIE4                    1045
-#define GUI_BOT_TIE5                    1046
+#define GUI_BOT_SCORE5                  1045
+#define GUI_BOT_SCORE6                  1046
+#define GUI_BOT_INIT_PART               1047
+#define GUI_BOT_INIT_ATTEMPT            1048
 #define GUI_BOT_FRAMES                  1049
 #define GUI_BOT_BESTRESULT              1050
 #define GUI_BOT_LAST                    1051
@@ -81,6 +87,7 @@
 #define GUI_BOT_TIE3_LAST               1073
 #define GUI_BOT_TIE4_LAST               1074
 #define GUI_BOT_TIE5_LAST               1075
+#define GUI_BOT_ATTEMPT_LAST2           1076
 #define GUI_BOT_SKIPS                   1077
 #define GUI_BOT_FRAMES_LAST             1078
 #define GUI_BOT_FRAMES_BEST             1079
@@ -101,6 +108,24 @@
 #define GUI_BOT_TIE5_PREV3              1094
 #define GUI_BOT_SLOW                    1095
 #define GUI_BOT_FRAMESKIP               1096
+#define GUI_BOT_PART_LAST2              1097
+#define GUI_BOT_TITLE1                  1098
+#define GUI_BOT_TITLE2                  1099
+#define GUI_BOT_TITLE3                  1100
+#define GUI_BOT_TITLE4                  1101
+#define GUI_BOT_TITLE5                  1102
+#define GUI_BOT_TITLE6                  1103
+#define GUI_BOT_PART_LAST3              1104
+#define GUI_BOT_INIT_PART2              1105
+#define GUI_BOT_TITLEL1                 1106
+#define GUI_BOT_TITLES                  1107
+#define GUI_BOT_TITLEL2                 1108
+#define GUI_BOT_LOG                     1109
+#define GUI_BOT_TITLEL3                 1110
+#define GUI_BOT_TITLEL4                 1111
+#define GUI_BOT_TITLEL5                 1112
+#define GUI_BOT_TITLEL6                 1113
+#define GUI_BOT_COUNTERS                1114
 #define ID_DEBUG_DEBUGGER               40053
 #define ID_DEBUG_PPUVIEWER              40054
 #define ID_DEBUG_NAMETABLEVIEWER        40055
@@ -117,7 +142,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40013
-#define _APS_NEXT_CONTROL_VALUE         1097
+#define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
