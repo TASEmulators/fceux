@@ -244,7 +244,7 @@ def launch(passed, local=False):
     else:
       netpass = '-netpassword ' + '"' + options.join_pass + '" '
     network = '-connect "' + options.join_add + '"'\
-    ' -netport '+ options.join_port + ' ' + netpass
+    ' -netport '+ str(options.join_port) + ' ' + netpass
   else:
     network = ''
   
@@ -254,7 +254,7 @@ def launch(passed, local=False):
     else:
       netpass = ' -netpassword ' + '"' + options.host_pass + '" '
     network = '-connect localhost -netport '+\
-    options.host_port + netpass + ' '
+    str(options.host_port) + netpass + ' '
       
     
   if local:
@@ -279,7 +279,7 @@ def launch(passed, local=False):
     else:
       args = [xterm_binary, "-e", fceu_server_binary]
     args.append('--port')
-    args.append(options.host_port)
+    args.append(str(options.host_port))
     if options.host_pass:
       args.append("--password")
       args.append(options.host_pass)
