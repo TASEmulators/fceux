@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.5.2"
+version = "0.6.0"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
@@ -225,7 +225,7 @@ def set_options():
 
   
 def launch(passed, local=False):
-  global xml, options, fceu_server_binary, fceu_binary
+  global xml, options, fceu_server_binary, fceu_binary, aoss_binary
   set_options()
   
   if options.sound_check:
@@ -265,7 +265,7 @@ def launch(passed, local=False):
   else:
     opengl = '-opengl 0 '
   
-  command = fceu_binary +' '+ sound + fullscreen +\
+  command =  aoss_binary + ' ' + fceu_binary +' '+ sound + fullscreen +\
   network + opengl + options.extra_entry + ' '+ passed
   gfceu_message('Command: ' + command)
 
@@ -487,6 +487,7 @@ appconfigdir = os.getenv('HOME') + '/.gfceu'
 old_optionsfile = os.getenv('HOME')+'/.gfceu_options'
 optionsfile = appconfigdir + 'gfceu_options.dat'
 fceu_binary = None
+aoss_binary = None
 fceu_server_binary = None
 #version is defined earlier in the code
 #have_vfs is defined earlier in the code
@@ -528,6 +529,12 @@ if __name__ == '__main__':
     sudo apt-get install fceu', 4, True)
   else:
     gfceu_message('Using: '+fceu_binary)
+  aoss_binary = find_binary('aoss')
+  if aoss_binary == None:
+    gfceu_error('Could not find the the ALSA OSS wrapper.\n\
+    GFCEU will not be able to share the sound device with other applications.\n\
+    On Debian based systems (like Ubuntu), try the following command:\n\
+    sudo apt-get install alsa-oss', 76, True, False)
 
   widgets = WidgetsWrapper()
   widgets['main_window'].show_all()

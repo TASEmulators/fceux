@@ -1,4 +1,6 @@
-========================== version 0.5.3 ========================
+========================== version 0.6.0 ========================
+* Fixed evil no ROM problem.
+* Added ALSA support (sort of)
 * Fixed join/host problem.
 ========================== version 0.5.2 ========================
 Cleanup:
