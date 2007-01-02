@@ -8,4 +8,4 @@ PyGTK, GTK, and PyGlade (tested with 2.8) (Ubuntu package name: (python-gtk2 lib
 FCE Ultra (Ubuntu package name: fceu)
 
 Optional:
-GnomeVFS 2 (tested with 2.14.1) (Ubuntu package name libgnomevfs2-0 python-gtk2) 
+GnomeVFS 2 (tested with 2.14.1) (Ubuntu package name libgnomevfs2-0 python-gtk2)alsa-oss (tested with 1.0.11
