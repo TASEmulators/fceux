@@ -416,9 +416,9 @@ int main(int argc,char *argv[])
 {
 	char *t;
 
-	if(timeBeginPeriod(1)!=TIMERR_NOERROR)
+	if(timeBeginPeriod(1) != TIMERR_NOERROR)
 	{
-	AddLogText("Error setting timer granularity to 1ms.",1);
+		AddLogText("Error setting timer granularity to 1ms.", DO_ADD_NEWLINE);
 	}
 
 	InitCommonControls();
