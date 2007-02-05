@@ -176,14 +176,20 @@ uint8 *RAM;
 //---------
 //windows might need to allocate these differently, so we have some special code
 
-static void AllocBuffers() {
-	#ifdef _USE_SHARED_MEMORY_
+static void AllocBuffers()
+{
+	
+#ifdef _USE_SHARED_MEMORY_
+
 	void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM);
 	win_AllocBuffers(&GameMemBlock, &RAM);
-	#else 
+	
+#else 
+
 	GameMemBlock = (uint8*)FCEU_gmalloc(131072);
 	RAM = (uint8*)FCEU_gmalloc(0x800);
-	#endif
+	
+#endif
 }
 
 static void FreeBuffers() {
@@ -347,21 +353,30 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 }
 
 
+/**
+* Return: Flag that indicates whether the function was succesful or not.
+**/
 int FCEUI_Initialize(void)
 {
 	if(!FCEU_InitVirtualVideo())
+	{
 		return 0;
+	}
 
 	AllocBuffers();
 
+	// Initialize some parts of the settings structure
 	memset(&FSettings,0,sizeof(FSettings));
 	FSettings.UsrFirstSLine[0]=8;
 	FSettings.UsrFirstSLine[1]=0;
 	FSettings.UsrLastSLine[0]=231;
 	FSettings.UsrLastSLine[1]=239;
 	FSettings.SoundVolume=100;
+	
 	FCEUPPU_Init();
+	
 	X6502_Init();
+	
 	return 1;
 }
 

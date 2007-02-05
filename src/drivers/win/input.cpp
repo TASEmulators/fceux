@@ -1291,8 +1291,11 @@ void ApplyDefaultCommandMapping(void)
 	int i;
 
 	memset(FCEUD_CommandMapping, 0, sizeof(FCEUD_CommandMapping));
+
 	for(i=0; i<NUM_DEFAULT_MAPPINGS; ++i)
+	{
 		FCEUD_CommandMapping[DefaultCommandMapping[i].cmd] = DefaultCommandMapping[i].key;
+	}
 }
 
 int FCEUD_TestCommandState(int c)

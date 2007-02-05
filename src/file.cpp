@@ -588,27 +588,38 @@ static char FileExt[2048];	/* Includes the . character, as in ".nes" */
 
 static char FileBaseDirectory[2048];
 
+/**
+* Updates the base directory
+**/
 void FCEUI_SetBaseDirectory(const char *dir)
 {
- strncpy(BaseDirectory,dir,2047);
- BaseDirectory[2047]=0;
+	strncpy(BaseDirectory, dir, sizeof(BaseDirectory));
+
+	// TODO: Necessary?
+	BaseDirectory[2047] = 0;
 }
 
 static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0};     // odirs, odors. ^_^
 
 void FCEUI_SetDirOverride(int which, char *n)
 {
-//	FCEU_PrintError("odirs[%d]=%s->%s", which, odirs[which], n);
-if(which < FCEUIOD__COUNT)
- odirs[which]=n;
+	//	FCEU_PrintError("odirs[%d]=%s->%s", which, odirs[which], n);
+	if (which < FCEUIOD__COUNT)
+	{
+		odirs[which] = n;
+	}
 
- if(GameInfo)  /* Rebuild cache of present states/movies. */
- {
-  if(which==FCEUIOD_STATE)
-   FCEUSS_CheckStates();
-  else if(which == FCEUIOD_MISC)
-   FCEUMOV_CheckMovies();
- }
+	if(GameInfo)  /* Rebuild cache of present states/movies. */
+	{
+		if(which==FCEUIOD_STATE)
+		{
+			FCEUSS_CheckStates();
+		}
+		else if(which == FCEUIOD_MISC)
+		{
+			FCEUMOV_CheckMovies();
+		}
+	}
 }
 
  #ifndef HAVE_ASPRINTF

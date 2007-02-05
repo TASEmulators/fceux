@@ -26,7 +26,10 @@
 /*								*/
 /****************************************************************/
 
-static CFGSTRUCT fceuconfig[]={
+/**
+* Structure that contains configuration information
+**/
+static CFGSTRUCT fceuconfig[] = {
 
         ACS(rfiles[0]),
         ACS(rfiles[1]),
@@ -125,13 +128,15 @@ static CFGSTRUCT fceuconfig[]={
 
 static void SaveConfig(char *filename)
 {
-        SaveFCEUConfig(filename,fceuconfig);
+	SaveFCEUConfig(filename,fceuconfig);
 }
 
-static void LoadConfig(char *filename)
+void LoadConfig(const char *filename)
 {
-	FCEUI_GetNTSCTH(&ntsctint,&ntschue);
-        LoadFCEUConfig(filename,fceuconfig);
-	FCEUI_SetNTSCTH(ntsccol,ntsctint,ntschue);
+	FCEUI_GetNTSCTH(&ntsctint, &ntschue);
+
+	LoadFCEUConfig(filename, fceuconfig);
+
+	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 }
 

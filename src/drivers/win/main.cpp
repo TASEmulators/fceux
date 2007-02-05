@@ -75,27 +75,42 @@ HRESULT  ddrval;
 
 // cheats, misc, nonvol, states, snaps, ..., base
 static char *DOvers[6]={0,0,0,0,0,0};
-static char *defaultds[5]={"cheats","sav","fcs","snaps","movie"};
+static const char *defaultds[5]={"cheats","sav","fcs","snaps","movie"};
 
 static char TempArray[2048];
+
+/**
+* Contains the base directory of FCE
+**/
 static char BaseDirectory[2048];
 
 void SetDirs(void)
 {
- int x;
- static int jlist[6]=
-  {FCEUIOD_CHEATS,FCEUIOD_MISC,FCEUIOD_NV,FCEUIOD_STATE,FCEUIOD_SNAPS, FCEUIOD__COUNT};
+	int x;
 
- FCEUI_SetSnapName(eoptions&EO_SNAPNAME);
+	static int jlist[6]= {
+		FCEUIOD_CHEATS,
+		FCEUIOD_MISC,
+		FCEUIOD_NV,
+		FCEUIOD_STATE,
+		FCEUIOD_SNAPS, 
+		FCEUIOD__COUNT};
 
- for(x=0;x<6;x++)
- {
-  FCEUI_SetDirOverride(jlist[x], DOvers[x]);  
- }
- if(DOvers[5])
-  FCEUI_SetBaseDirectory(DOvers[5]);
- else
-  FCEUI_SetBaseDirectory(BaseDirectory);
+	FCEUI_SetSnapName(eoptions & EO_SNAPNAME);
+
+	for(x=0; x < sizeof(jlist) / sizeof(*jlist); x++)
+	{
+		FCEUI_SetDirOverride(jlist[x], DOvers[x]);  
+	}
+
+	if(DOvers[5])
+	{
+		FCEUI_SetBaseDirectory(DOvers[5]);
+	}
+	else
+	{
+		FCEUI_SetBaseDirectory(BaseDirectory);
+	}
 }
 /* Remove empty, unused directories. */
 void RemoveDirs(void)
@@ -110,30 +125,44 @@ void RemoveDirs(void)
   }
 }
 
+/**
+* Creates the default directories.
+**/
 void CreateDirs(void)
 {
- int x;
+	int x;
 
- for(x=0;x<5;x++)
-  if(!DOvers[x])
-  {
-   sprintf(TempArray,"%s\\%s",DOvers[5]?DOvers[5]:BaseDirectory,defaultds[x]);
-   CreateDirectory(TempArray,0);
-  }
+	for(x = 0; x < sizeof(defaultds) / sizeof(*defaultds); x++)
+	{
+		if(!DOvers[x])
+		{
+			sprintf(TempArray, "%s\\%s", DOvers[5] ? DOvers[5] : BaseDirectory, defaultds[x]);
+			CreateDirectory(TempArray,0);
+		}
+	}
 }
 
 static char *gfsdir=0;
+
+/**
+* Fills the BaseDirectory string
+*
+* TODO: Potential buffer overflow caused by limited size of BaseDirectory?
+**/
 void GetBaseDirectory(void)
 {
- int x;
- BaseDirectory[0]=0;
- GetModuleFileName(0,(LPTSTR)BaseDirectory,2047);
+	unsigned int i;
+	GetModuleFileName(0, (LPTSTR)BaseDirectory, sizeof(BaseDirectory) - 1);
 
- for(x=strlen(BaseDirectory);x>=0;x--)
- {
-  if(BaseDirectory[x]=='\\' || BaseDirectory[x]=='/')
-   {BaseDirectory[x]=0;break;}
- }
+	// Search for the last / or \ in the directory and terminate the string  there
+	for(i = strlen(BaseDirectory); i >= 0 ; i--)
+	{
+		if(BaseDirectory[i]=='\\' || BaseDirectory[i]=='/')
+		{
+			BaseDirectory[i] = 0;
+			return;
+		}
+	}
 }
 
 static int exiting=0;
@@ -333,7 +362,6 @@ static void DriverKill(void)
 }
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
-
 void ApplyDefaultCommandMapping(void);
 
 
@@ -347,25 +375,28 @@ void _updateMemWatch() {
 HANDLE mapGameMemBlock;
 HANDLE mapRAM;
 uint32 *BotInput;
-void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM) {
 
+void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
+{
 	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
+	
 	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
-		//mbg 7/38/06 - is this the proper error handling?
+		//mbg 7/28/06 - is this the proper error handling?
 		//do we need to indicate to user somehow that this failed in this emu instance?
 		CloseHandle(mapGameMemBlock);
+		
 		mapGameMemBlock = NULL;
 		*GameMemBlock = (uint8 *) malloc(131072);
 		*RAM = (uint8 *) malloc(2048);
 	}
 	else
 	{
-		*GameMemBlock    = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0);
+		*GameMemBlock = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0);
 
 		// set up shared memory mappings
-		mapRAM          = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
-		*RAM             = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
+		mapRAM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
+		*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
 	}
 
 	// Give RAM pointer to state structure
@@ -412,6 +443,13 @@ void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM) {
 }
 #endif
 
+void do_exit()
+{
+	DriverKill();
+	timeEndPeriod(1);
+	FCEUI_Kill();
+}
+
 int main(int argc,char *argv[])
 {
 	char *t;
@@ -424,61 +462,89 @@ int main(int argc,char *argv[])
 	InitCommonControls();
 
 	if(!FCEUI_Initialize())
-		goto doexito;
+	{
+		do_exit();
+		return 1;
+	}
 
 	ApplyDefaultCommandMapping();
 
 	srand(GetTickCount());        // rand() is used for some GUI sillyness.
 
-	fceu_hInstance=GetModuleHandle(0);
+	fceu_hInstance = GetModuleHandle(0);
 
+	// Get the base directory
 	GetBaseDirectory();
 
+	// Load the config information
 	sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory);
 	LoadConfig(TempArray);
 
-	t=ParseArgies(argc,argv);
+	// Parse the commandline arguments
+	t = ParseArgies(argc, argv);
+
 	/* Bleh, need to find a better place for this. */
 	{
-        palyo&=1;
+        palyo &= 1;
         FCEUI_SetVidSystem(palyo);
-        genie&=1;
+
+        genie &= 1;
         FCEUI_SetGameGenie(genie);
-        fullscreen&=1;
-        soundo&=1;
+
+        fullscreen &= 1;
+        soundo &= 1;
+
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
 	}
+
 	ParseGIInput(NULL);      /* Since a game doesn't have to be
                      loaded before the GUI can be used, make
                      sure the temporary input type variables
                      are set.
                   */
+
+	// Initialize default directories
 	CreateDirs();
 	SetDirs();
 
 	DoVideoConfigFix();
 	DoTimingConfigFix();
 
-	if(eoptions&EO_CPALETTE)
+	if(eoptions & EO_CPALETTE)
+	{
 		FCEUI_SetPaletteArray(cpalette);
+	}
 
-	if(!t) fullscreen=0;
+	if(!t)
+	{
+		fullscreen=0;
+	}
 
 	CreateMainWindow();
 
 	if(!InitDInput())
-		goto doexito;
+	{
+		do_exit();
+		return 1;
+	}
 
 	if(!DriverInitialize())
-		goto doexito;
+	{
+		do_exit();
+		return 1;
+	}
  
 	UpdateMenu();
 
 	if(t)
+	{
 		ALoad(t);
-	else if(eoptions&EO_FOAFTERSTART)
+	}
+	else if(eoptions & EO_FOAFTERSTART)
+	{
 		LoadNewGamey(hAppWnd, 0);
+	}
 
 doloopy:
 	UpdateFCEUWindow();  
@@ -514,7 +580,6 @@ doloopy:
 	if(!exiting)
 		goto doloopy;
 
-	doexito:
 	DriverKill();
 	timeEndPeriod(1);
 	FCEUI_Kill();

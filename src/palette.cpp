@@ -267,8 +267,8 @@ void WritePalette(void)
 
 void FCEUI_GetNTSCTH(int *tint, int *hue)
 {
- *tint=ntsctint;
- *hue=ntschue;
+	*tint = ntsctint;
+	*hue = ntschue;
 } 
 
 static int controlselect=0;

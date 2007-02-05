@@ -5,8 +5,8 @@ typedef struct {
         int len;
 } CFGSTRUCT;
 
-void SaveFCEUConfig(char *filename, CFGSTRUCT *cfgst);
-void LoadFCEUConfig(char *filename, CFGSTRUCT *cfgst);
+void SaveFCEUConfig(const char *filename, const CFGSTRUCT *cfgst);
+void LoadFCEUConfig(const char *filename, CFGSTRUCT *cfgst);
 
 /* Macros for building CFGSTRUCT structures. */
 

@@ -74,46 +74,62 @@ void FCEU_KillVirtualVideo(void)
  //}
 }
 
+/**
+* Return: Flag that indicates whether the function was succesful or not.
+*
+* TODO: This function is Windows-only. It should probably be moved.
+**/
 int FCEU_InitVirtualVideo(void)
 {
- if(!XBuf)		/* Some driver code may allocate XBuf externally. */
-			/* 256 bytes per scanline, * 240 scanline maximum, +8 for alignment,
-			*/
+	if(!XBuf)		/* Some driver code may allocate XBuf externally. */
+					/* 256 bytes per scanline, * 240 scanline maximum, +8 for alignment,
+					*/
+
 #ifdef _USE_SHARED_MEMORY_
-	mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 8,"fceu.XBuf");
+
+	mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 8, "fceu.XBuf");
+	
 	if(mapXBuf == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(mapXBuf);
 		mapXBuf = NULL;
-		XBuf= (uint8*) (FCEU_malloc(256 * 256 + 8));
-		XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 8));
+		XBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
+		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
 	}
 	else
 	{
-		XBuf     = (uint8 *)MapViewOfFile(mapXBuf, FILE_MAP_WRITE, 0, 0, 0);
-
+		XBuf = (uint8 *)MapViewOfFile(mapXBuf, FILE_MAP_WRITE, 0, 0, 0);
 		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
 	}
 
 	if (!XBuf || !XBackBuf)
+	{
 		return 0;
+	}
+	
 #else
- if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))) ||
-    !(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))))
-  return 0;
-#endif //_USE_SHARED_MEMORY_
- xbsave=XBuf;
 
- if(sizeof(uint8*)==4)
- {
-  uint32 m;
-  m=(uint32)XBuf;
-  m=(4-m)&3;
-  XBuf+=m;
- } 
- memset(XBuf,128,256*256); //*240);
- memset(XBackBuf,128,256*256);
- return 1;
+	if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))) ||
+		!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))))
+	{
+		return 0;
+	}
+	
+#endif //_USE_SHARED_MEMORY_
+
+	xbsave = XBuf;
+
+	if( sizeof(uint8*) == 4 )
+	{
+		uint32 m = (uint32)XBuf;
+		m = ( 4 - m) & 3;
+		XBuf+=m;
+	}
+	
+	memset(XBuf,128,256*256); //*240);
+	memset(XBackBuf,128,256*256);
+	
+	return 1;
 }
 
 int howlong;

@@ -363,16 +363,31 @@ void X6502_Reset(void)
 {
  _IRQlow=FCEU_IQRESET;
 }
-  
+/**
+* Initializes the 6502 CPU
+**/
 void X6502_Init(void)
 {
-	int x;
+	unsigned int i;
 
+	// Initialize the CPU structure
 	memset((void *)&X,0,sizeof(X));
-	for(x=0;x<256;x++)
-	 if(!x) ZNTable[x]=Z_FLAG;
-   else if(x&0x80) ZNTable[x]=N_FLAG;
-	 else ZNTable[x]=0;
+
+	for(i = 0; i < sizeof(ZNTable); i++)
+	{
+		if(!i)
+		{
+			ZNTable[i] = Z_FLAG;
+		}
+		else if ( i & 0x80 )
+		{
+			ZNTable[i] = N_FLAG;
+		}
+		else
+		{
+			ZNTable[i] = 0;
+		}
+	}
 }
 
 void X6502_Power(void)

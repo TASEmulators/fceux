@@ -20,6 +20,9 @@
 
 #include "../common/args.h"
 
+/**
+* Parses commandline arguments
+**/
 char *ParseArgies(int argc, char *argv[])
 {         
         //int x;  //mbg merge 7/17/06 removed
@@ -33,8 +36,12 @@ char *ParseArgies(int argc, char *argv[])
          {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
 	};
 
-       if(argc<=1) return(0);
+       if(argc <= 1)
+	   {
+		   return(0);
+	   }
 
        ParseArguments(argc-2, &argv[1], FCEUArgs);
+
        return(argv[argc-1]);
 }

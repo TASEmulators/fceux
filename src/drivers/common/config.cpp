@@ -50,103 +50,149 @@ static int FReadString(FILE *fp, char *str, int n)
 
 static void GetValueR(FILE *fp, char *str, void *v, int c)
 {
- char buf[256];
- int s;
+	char buf[256];
+	int s;
 
- while(FReadString(fp,buf,256))
- {
-  fread(&s,1,4,fp);
-  if(!strcmp(str, buf))
-  {
-   if(!c)	// String, allocate some memory.
-   {
-    if(!(*(char **)v=(char*)malloc(s)))
-     goto gogl;
-    fread(*(char **)v,1,s,fp);
-    continue;
-   }
-   else if(s>c || s<c)
-   {
-     gogl:
-     fseek(fp,s,SEEK_CUR);
-     continue;
-   }
-   fread((uint8*)v,1,c,fp);
-  }
-  else
-   fseek(fp,s,SEEK_CUR);
- }
- fseek(fp,4,SEEK_SET);
+	while(FReadString(fp,buf,256))
+	{
+		fread(&s,1,4,fp);
+
+		if(!strcmp(str, buf))
+		{
+			if(!c)	// String, allocate some memory.
+			{
+				if(!(*(char **)v=(char*)malloc(s)))
+					goto gogl;
+				
+				fread(*(char **)v,1,s,fp);
+				continue;
+			}
+			else if(s>c || s<c)
+			{
+				gogl:
+				fseek(fp,s,SEEK_CUR);
+				continue;
+			}
+		
+			fread((uint8*)v,1,c,fp);
+		}
+		else
+		{
+			fseek(fp,s,SEEK_CUR);
+		}
+	}
+
+	fseek(fp,4,SEEK_SET);
 }
 
-static void SetValueR(FILE *fp, char *str, void *v, int c)
+void SetValueR(FILE *fp, const char *str, void *v, int c)
 {
- fwrite(str,1,strlen(str)+1,fp);
- fwrite((uint8*)&c,1,4,fp);
- fwrite((uint8*)v,1,c,fp);
+	fwrite(str,1,strlen(str)+1,fp);
+	fwrite((uint8*)&c,1,4,fp);
+	fwrite((uint8*)v,1,c,fp);
 }
 
-static void SaveParse(CFGSTRUCT *cfgst, FILE *fp)
-{
-        int x=0;
-
-	while(cfgst[x].ptr)
-        {
-         if(!cfgst[x].name)     // Link to new config structure
-	 {
-	  SaveParse((CFGSTRUCT*)cfgst[x].ptr,fp);	// Recursion is sexy.  I could
-					// save a little stack space if I made
-					// the file pointer a non-local
-					// variable...
-	  x++;
-	  continue;
-	 }
-
-         if(cfgst[x].len)               // Plain data
-          SetValueR(fp,cfgst[x].name,cfgst[x].ptr,cfgst[x].len);
-         else                           // String
-          if(*(char **)cfgst[x].ptr)    // Only save it if there IS a string.
-           SetValueR(fp,cfgst[x].name,*(char **)cfgst[x].ptr,
-                        strlen(*(char **)cfgst[x].ptr)+1);
-         x++;
-        }
-}
-
-void SaveFCEUConfig(char *filename, CFGSTRUCT *cfgst)
-{
-	FILE *fp;
-
-        fp=fopen(filename,"wb");
-        if(fp==NULL) return;
-
-	SaveParse(cfgst,fp);
-
-	fclose(fp);
-}
-
-static void LoadParse(CFGSTRUCT *cfgst, FILE *fp)
+/**
+* Parses a configuration structure and saves information from the structure into a file.
+*
+* @param cfgst The configuration structure.
+* @param fp File handle.
+**/
+void SaveParse(const CFGSTRUCT *cfgst, FILE *fp)
 {
 	int x=0;
 
 	while(cfgst[x].ptr)
-        {
-         if(!cfgst[x].name)     // Link to new config structure
-         {
-	  LoadParse((CFGSTRUCT*)cfgst[x].ptr,fp);
-	  x++;
-	  continue;
-         }
-         GetValueR(fp,cfgst[x].name,cfgst[x].ptr,cfgst[x].len);
-         x++;
-        } 
+	{
+
+		if(!cfgst[x].name)     // Link to new config structure
+		{
+			SaveParse((CFGSTRUCT*)cfgst[x].ptr, fp);	// Recursion is sexy.  I could
+													// save a little stack space if I made
+													// the file pointer a non-local
+													// variable...
+			x++;
+			continue;
+		}
+
+		if(cfgst[x].len)
+		{
+			// Plain data
+			SetValueR(fp,cfgst[x].name,cfgst[x].ptr,cfgst[x].len);
+		}
+		else
+		{
+			// String
+			if(*(char **)cfgst[x].ptr)
+			{
+				// Only save it if there IS a string.
+				SetValueR(fp,cfgst[x].name,*(char **)cfgst[x].ptr, strlen(*(char **)cfgst[x].ptr)+1);
+			}
+		}
+
+		x++;
+	}
 }
 
-void LoadFCEUConfig(char *filename, CFGSTRUCT *cfgst)
+/**
+* Stores information from a configuration struct into a configuration file.
+*
+* @param filename Name of the configuration file
+* @param cfgst The configuration struct
+**/
+void SaveFCEUConfig(const char *filename, const CFGSTRUCT *cfgst)
 {
-        FILE *fp;
+	FILE *fp = fopen(filename,"wb");
 
-        fp=fopen(filename,"rb");
-        if(fp==NULL) return;
-	LoadParse(cfgst,fp);
-        fclose(fp);
+	if(fp==NULL)
+	{
+		return;
+	}
+
+	SaveParse(cfgst, fp);
+
+	fclose(fp);
+}
+
+/**
+* Parses information from a file into a configuration structure.
+*
+* @param cfgst The configuration structure.
+* @param fp File handle.
+**/
+void LoadParse(CFGSTRUCT *cfgst, FILE *fp)
+{
+	int x = 0;
+
+	while(cfgst[x].ptr)
+	{
+		if(!cfgst[x].name)     // Link to new config structure
+		{
+			LoadParse((CFGSTRUCT*)cfgst[x].ptr, fp);
+			x++;
+			continue;
+		}
+
+		GetValueR(fp, cfgst[x].name, cfgst[x].ptr, cfgst[x].len);
+		x++;
+	} 
+}
+
+/**
+* Loads config information from the config file.
+*
+* @param filename Name of the config file.
+**/
+void LoadFCEUConfig(const char *filename, CFGSTRUCT *cfgst)
+{
+	FILE *fp = fopen(filename,"rb");
+
+	if(fp==NULL)
+	{
+		return;
+	}
+
+	LoadParse(cfgst, fp);
+
+	fclose(fp);
 }
