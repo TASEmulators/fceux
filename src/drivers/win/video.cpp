@@ -240,7 +240,6 @@ int SetVideoMode(int fs)
         PaletteChanged=1;
 
         ResetVideo();
-        StopSound();
 
         if(!InitializeDDraw(fs)) return(1);     // DirectDraw not initialized
 

@@ -403,8 +403,6 @@ void KillNTView() {
 	NTViewSkip=0;
 }
 
-extern void StopSound(void);
-
 BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
 	char str[50];
@@ -471,7 +469,6 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			KillNTView();
 			break;
 		case WM_MOVING:
-			StopSound();
 			break;
 		case WM_MOVE:
 			GetWindowRect(hwndDlg,&wrect);

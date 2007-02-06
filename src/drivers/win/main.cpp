@@ -282,9 +282,12 @@ char *FCEUD_GetCompilerString() {
 	return 	__COMPILER__STRING__;
 }
 
+/**
+* Displays the about box
+**/
 void ShowAboutBox(void)
 {
- MessageBox(hAppWnd,FCEUI_GetAboutString(),FCEU_NAME,MB_OK);
+	MessageBox(hAppWnd,FCEUI_GetAboutString(),FCEU_NAME,MB_OK);
 }
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
@@ -304,7 +307,6 @@ void DoFCEUExit(void)
  if(exiting)    /* Eh, oops.  I'll need to try to fix this later. */
   return;
 
- StopSound();
  if(goptions & GOO_CONFIRMEXIT)
   if(IDYES != MessageBox(hAppWnd,emsg[rand()&3],"Exit FCE Ultra?",MB_ICONQUESTION|MB_YESNO))
    return;
@@ -336,7 +338,27 @@ static int changerecursive=0;
 
 #include "sound.cpp"
 #include "video.cpp"
+//extern int winspecial;
+//extern vmdef vmodes[11];
+//extern int disvaccel;
+//extern int fssync;
+//extern int winsync;
+//int SetVideoMode(int fs);
+//void DoVideoConfigFix(void);
+//void FCEUD_BlitScreen(uint8 *XBuf);
+
 #include "window.cpp"
+//extern char *rfiles[10];
+//extern char *rdirs[10];
+//extern int EnableBackgroundInput;
+//void ByebyeWindow(void);
+//void DoTimingConfigFix();
+//void CreateMainWindow();
+//void UpdateMenu();
+//void ALoad(char *nameo);
+//void LoadNewGamey(HWND hParent, char *initialdir);
+//void UpdateMenu();
+
 #include "config.cpp"
 #include "args.cpp"
 
@@ -574,7 +596,6 @@ doloopy:
 		}
 		//xbsave = NULL;
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
-		StopSound();
 	}
 	Sleep(50);
 	if(!exiting)

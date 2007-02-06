@@ -32,7 +32,7 @@ void DSMFix(UINT msg)
     case WM_NCRBUTTONDOWN:
     case WM_NCMBUTTONDOWN:
     case WM_NCLBUTTONDOWN:
-    case WM_ENTERMENULOOP:StopSound();break;
+    case WM_ENTERMENULOOP:break;
  }
 }
 static void ConfigGUI(void);
@@ -316,8 +316,7 @@ static void ALoad(char *nameo)
    if(eoptions&EO_FSAFTERLOAD)
     SetFSVideoMode();
   }
-  else
-   StopSound();
+   
   ParseGIInput(GameInfo);
   RedoMenuGI(GameInfo);
 }
@@ -640,13 +639,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					          UpdateMenu(); break;
 				  case 40002: CreateBasicBot();break;
 				  // case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
-                  case 320:StopSound();ConfigDirectories();break;
-                  case 327:StopSound();ConfigGUI();break;
-                  case 321:StopSound();ConfigInput(hWnd);break;
+                  case 320:ConfigDirectories();break;
+                  case 327:ConfigGUI();break;
+                  case 321:ConfigInput(hWnd);break;
                   case 322:ConfigTiming();break;
-                  case 323:StopSound();ShowNetplayConsole();break;
-                  case 324:StopSound();ConfigPalette();break;
-				  case 325:StopSound();ConfigSound();break;
+                  case 323:ShowNetplayConsole();break;
+                  case 324:ConfigPalette();break;
+				  case 325:ConfigSound();break;
                   case 326:ConfigVideo();break;
 				  case 328:MapInput();break;
 
@@ -664,7 +663,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   //case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
 					  //mbg merge TODO 7/17/06 - had to remove this
                   //case 205:CreateMemWatch(hWnd);break;
-                  case 100:StopSound();
+                  case 100:
                            LoadNewGamey(hWnd, 0);
                            break;
                   case 101:if(GameInfo)
@@ -685,7 +684,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                             MENUITEMINFO mi;
                             char *str;
              
-                            StopSound();
+                            
                             if(CreateSoundSave())
                              str="Stop Sound Logging";
                             else
@@ -710,7 +709,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				  case 151:FCEUD_AviRecordTo();break;
 				  case 152:FCEUD_AviStop();break;
 
-                  case 400:StopSound();ShowAboutBox();break;
+                  case 400:ShowAboutBox();break;
                   case 401:MakeLogWindow();break;
                  }
                 }
@@ -892,7 +891,7 @@ void UpdateFCEUWindow(void)
   if(!(eoptions&EO_BGRUN))
    while(nofocus)
    {
-    StopSound();
+    
     Sleep(75);
     BlockingCheck();
    }
@@ -900,7 +899,7 @@ void UpdateFCEUWindow(void)
    //mbg merge 7/19/06 removing this since I think its not used
  //if(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
  //{
- // StopSound();
+ // 
  // while(_userpause)   //mbg merge 7/18/06 this changed. even though theres nothing setting this..
  // {
  //  Sleep(50);
@@ -1085,7 +1084,7 @@ static BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
                 {
                  case 100:ntsccol^=1;FCEUI_SetNTSCTH(ntsccol,ntsctint,ntschue);break;
                  case 200:
-                          StopSound();
+                          
                           if(LoadPaletteFile())
                            EnableWindow(GetDlgItem(hwndDlg,201),1);
                           break;
@@ -1929,7 +1928,7 @@ void FCEUD_MovieReplayFrom(void)
 {
   char* fn;
 	
-  StopSound();
+  
 
   fn=(char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
   if(fn)
@@ -2150,7 +2149,7 @@ void FCEUD_MovieRecordTo(void)
 	struct CreateMovieParameters p;
 	p.szFilename=FCEUI_MovieGetCurrentName(0);
 	
-	StopSound();
+	
 
 	if(DialogBoxParam(fceu_hInstance,"IDD_RECORDINP",hAppWnd,RecordDialogProc,(LPARAM)&p))
 	{
@@ -2200,7 +2199,7 @@ void FCEUD_AviRecordTo(void)
 		sprintf(szChoice, "%s.avi", FileBase);
 	}
 
-	StopSound();
+	
 
 	// avi record file browser
 	memset(&ofn, 0, sizeof(ofn));
@@ -2226,7 +2225,7 @@ void FCEUD_AviStop(void)
 
 void FCEUD_CmdOpen(void)
 {
-	StopSound();
+	
 	LoadNewGamey(hAppWnd, 0);
 }
 

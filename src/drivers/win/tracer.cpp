@@ -166,7 +166,6 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case WM_MOVING:
-			StopSound();
 			break;
 	}
 
@@ -181,7 +180,6 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 					if(!FCEUI_EmulationPaused() && !log_update_window) break; //mbg merge 7/19/06 changd to use EmulationPaused()
 
-					StopSound();
 					GetScrollInfo((HWND)lParam,SB_CTL,&tracesi);
 					switch(LOWORD(wParam)) {
 						case SB_ENDSCROLL:
@@ -530,7 +528,6 @@ void EnableTracerMenuItems(void){
 //this returns 1 if the CD logger is activated when needed, or 0 if the user selected no, not to activate it
 int PromptForCDLogger(void){
 	if((logging_options & (LOG_NEW_INSTRUCTIONS|LOG_NEW_DATA)) && (!FCEUI_GetLoggingCD())){
-		StopSound();
 		if(MessageBox(hTracer,"In order for some of the features you have selected to take effect,\
  the Code/Data Logger must also be running.\
  Would you like to Start the Code/Data Logger Now?","Start Code/Data Logger?",
@@ -550,7 +547,6 @@ void ShowLogDirDialog(void){
  const char filter[]="6502 Trace Log File(*.log,*.txt)\0*.log;*.txt\0";
  char nameo[2048];
  OPENFILENAME ofn;
- StopSound();
  memset(&ofn,0,sizeof(ofn));
  ofn.lStructSize=sizeof(ofn);
  ofn.hInstance=fceu_hInstance;

@@ -135,8 +135,6 @@ void EnableCheatButtons(HWND hwndDlg, int enable) {
 	EnableWindow(GetDlgItem(hwndDlg,309),enable);
 }
 
-extern void StopSound(void);
-
 BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	LOGFONT lf;
 	RECT wrect;
@@ -150,7 +148,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
-			StopSound();
 			SetWindowPos(hwndDlg,0,ChtPosX,ChtPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			//setup font
@@ -223,7 +220,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 		case WM_VSCROLL:
 			if (scrollnum > 16) {
-				StopSound();
  				switch (LOWORD(wParam)) {
 					case SB_TOP:
 						scrollindex=-32768;

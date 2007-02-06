@@ -2434,12 +2434,10 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				FCEU_SetBotMode(p1?0:1);
 				break;
 			case GUI_BOT_SAVE:
-				StopSound(); // required?
 				FromGUI();
 				SaveBasicBot();
 				break;			
 			case GUI_BOT_LOAD:
-				StopSound(); // required?
 				LoadBasicBot();
 				ToGUI();
 				break;
@@ -2461,7 +2459,6 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				}
 				break;
 			case GUI_BOT_CLEAR:
-				StopSound();
 				if(MessageBox(hwndBasicBot, "Clear all text?", "Confirm clear", MB_YESNO)==IDYES)
 				{
 					InitVars();

@@ -59,7 +59,6 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 		case WM_QUIT:
 								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
-									StopSound();
 									MessageBox(hCDLogger,
 "The Trace logger is currently using this for some of its features.\
  Please turn the trace logger off and try again.","Unable to Pause Code/Data Logger",
@@ -118,7 +117,6 @@ MB_OK);
 			}
 			break;
 		case WM_MOVING:
-			StopSound();
 			break;
 	}
 	return FALSE;
@@ -130,7 +128,6 @@ void LoadCDLogFile(){
 	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	StopSound();
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
@@ -178,7 +175,6 @@ void SaveCDLogFileAs(){
 	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	StopSound();
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
@@ -266,7 +262,6 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 		MessageBox(NULL, "Unable to Generate Stripped Rom. Get Something Logged and try again.", "Error", MB_OK);
 		return;
 	}
-	StopSound();
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;

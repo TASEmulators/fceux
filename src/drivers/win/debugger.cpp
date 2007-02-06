@@ -859,7 +859,6 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 	return FALSE;
 }
 
-extern void StopSound();
 extern char *iNesShortFName();
 
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -963,7 +962,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			DestroyWindow(hwndDlg);
 			break;
 		case WM_MOVING:
-			StopSound();
 			break;
 		case WM_MOVE:
 			GetWindowRect(hwndDlg,&wrect);
@@ -982,7 +980,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused()) UpdateRegs(hwndDlg);
 				if (lParam) {
-					StopSound();
 					GetScrollInfo((HWND)lParam,SB_CTL,&si);
 					switch(LOWORD(wParam)) {
 						case SB_ENDSCROLL:
@@ -1106,7 +1103,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						tmp--;
 					}
 					ChangeMemViewFocus(2,GetNesFileAddress(i),-1);
-				}  else {StopSound();}
+				}
 				break;
 			case WM_MBUTTONDOWN:
 				mouse_x = GET_X_LPARAM(lParam);
@@ -1125,18 +1122,16 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						tmp--;
 					}
 					SetGGConvFocus(i,GetMem(i));
-				}  else {StopSound();}
+				}
 				break;
 			case WM_INITMENUPOPUP:
 			case WM_INITMENU:
-				StopSound();
 				break;
 			case WM_COMMAND:
 				switch(HIWORD(wParam)) {
 					case BN_CLICKED:
 						switch(LOWORD(wParam)) {
 							case 101: //Add
-								StopSound();
 								childwnd = 1;
 								if (DialogBox(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB)) AddBreakList();
 								childwnd = 0;
@@ -1146,7 +1141,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								DeleteBreak(SendDlgItemMessage(hwndDlg,302,LB_GETCURSEL,0,0));
 								break;
 							case 103: //Edit
-								StopSound();
 								WP_edit = SendDlgItemMessage(hwndDlg,302,LB_GETCURSEL,0,0);
 								if (DialogBox(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB)) EditBreakList();
 								WP_edit = -1;
@@ -1311,7 +1305,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 extern void iNESGI(int h);
 
 void DoPatcher(int address,HWND hParent){
-	StopSound();
 	iapoffset=address;
 	if(GameInterface==iNESGI)DialogBox(fceu_hInstance,"ROMPATCHER",hParent,PatcherCallB);
 	else MessageBox(hDebug, "Sorry, The Patcher only works on INES rom images", "Error", MB_OK);

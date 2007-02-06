@@ -223,7 +223,6 @@ int LoadTableFile(){
 	const char filter[]="Table Files (*.TBL)\0*.tbl\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	StopSound();
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
@@ -814,7 +813,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 // ################################## End of SP CODE ###########################
 
 	switch (message) {
-		case WM_ENTERMENULOOP:StopSound();return 0;
+		case WM_ENTERMENULOOP:return 0;
 		case WM_INITMENUPOPUP:
 			if(undo_list != 0)EnableMenuItem(GetMenu(hMemView),200,MF_BYCOMMAND | MF_ENABLED);
 			else EnableMenuItem(GetMenu(hMemView),200,MF_BYCOMMAND | MF_GRAYED);
@@ -864,7 +863,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 		case WM_VSCROLL:
 			
-				StopSound();
 				ZeroMemory(&si, sizeof(SCROLLINFO));
 				si.fMask = SIF_ALL;
 				si.cbSize = sizeof(SCROLLINFO);
@@ -1264,7 +1262,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		case WM_SIZE:
-			StopSound();
 			ClientHeight = HIWORD (lParam) ;
 			if(DataAmount != ((ClientHeight/MemFontHeight)*16)){
 				DataAmount = ((ClientHeight/MemFontHeight)*16);
@@ -1287,7 +1284,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0 ;
 
 		case WM_COMMAND:
-			StopSound();
 			
 // ################################## Start of SP CODE ###########################
 			if (wParam >= 30 && wParam <= 39)
@@ -1449,7 +1445,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 
 		case WM_MOVE:
-			StopSound();
 			return 0;
 
 		case WM_DESTROY :

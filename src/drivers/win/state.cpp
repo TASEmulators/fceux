@@ -4,7 +4,6 @@ void FCEUD_SaveStateAs(void)
  char nameo[2048];
  OPENFILENAME ofn;
 
- StopSound();
  memset(&ofn,0,sizeof(ofn));
  ofn.lStructSize=sizeof(ofn);
  ofn.hInstance=fceu_hInstance;
@@ -24,7 +23,6 @@ void FCEUD_LoadStateFrom(void)
  char nameo[2048];
  OPENFILENAME ofn;
 
- StopSound();
  memset(&ofn,0,sizeof(ofn));
  ofn.lStructSize=sizeof(ofn);
  ofn.hInstance=fceu_hInstance;

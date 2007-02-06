@@ -255,11 +255,6 @@ void win_Throttle() {
 	player->throttle();
 }
 
-void StopSound() {
-	//dont think this needs to do anything anymore
-}
-
-
 void win_SoundInit(int bits) {
 	dsout = new OAKRA_Module_OutputDS();
 	dsout->start(hAppWnd);
@@ -357,7 +352,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
   switch(uMsg) {
    case WM_NCRBUTTONDOWN:
    case WM_NCMBUTTONDOWN:
-   case WM_NCLBUTTONDOWN:StopSound();break;
+   case WM_NCLBUTTONDOWN:break;
 
    case WM_INITDIALOG:
                 /* Volume Trackbar */

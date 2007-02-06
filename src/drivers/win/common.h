@@ -27,7 +27,6 @@ extern HINSTANCE fceu_hInstance;
 
 extern int NoWaiting;
 void DSMFix(UINT msg);
-void StopSound(void);
 
 extern int eoptions;
 

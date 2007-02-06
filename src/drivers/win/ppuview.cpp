@@ -191,8 +191,6 @@ void KillPPUView() {
         PPUViewSkip=0;
 }
 
-extern void StopSound(void);
-
 BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         RECT wrect;
         char str[20];
@@ -257,7 +255,6 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         KillPPUView();
                         break;
                 case WM_MOVING:
-                        StopSound();
                         break;
                 case WM_MOVE:
                         GetWindowRect(hwndDlg,&wrect);
