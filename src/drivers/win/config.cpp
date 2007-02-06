@@ -31,16 +31,16 @@
 **/
 static CFGSTRUCT fceuconfig[] = {
 
-        ACS(rfiles[0]),
-        ACS(rfiles[1]),
-        ACS(rfiles[2]),
-        ACS(rfiles[3]),
-        ACS(rfiles[4]),
-        ACS(rfiles[5]),
-        ACS(rfiles[6]),
-        ACS(rfiles[7]),
-        ACS(rfiles[8]),
-        ACS(rfiles[9]),
+        ACS(recent_files[0]),
+        ACS(recent_files[1]),
+        ACS(recent_files[2]),
+        ACS(recent_files[3]),
+        ACS(recent_files[4]),
+        ACS(recent_files[5]),
+        ACS(recent_files[6]),
+        ACS(recent_files[7]),
+        ACS(recent_files[8]),
+        ACS(recent_files[9]),
 
         ACS(rdirs[0]),
         ACS(rdirs[1]),

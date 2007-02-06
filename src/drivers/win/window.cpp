@@ -24,6 +24,13 @@ extern char *md5_asciistr(uint8 digest[16]);
 extern FCEUGI *GameInfo;
 extern int EnableRewind;
 
+// Contains recent file strings
+char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
+char *rdirs[10]={0,0,0,0,0,0,0,0,0,0};
+
+const unsigned int MENU_FIRST_RECENT_FILE = 600;
+const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
+
 void DSMFix(UINT msg)
 {
  switch(msg)
@@ -49,55 +56,67 @@ static int EnableBackgroundInput=0;
 
 void ShowCursorAbs(int w)
 {
- static int stat=0;
- if(w)
- {
-  if(stat==-1) {stat++; ShowCursor(1);}
- }
- else
- {
-  if(stat==0) {stat--; ShowCursor(0);}
- }
+	static int stat = 0;
+
+	if(w)
+	{
+		if(stat == -1)
+		{
+			stat++;
+			ShowCursor(1);
+		}
+	}
+	else
+	{
+		if(stat==0)
+		{
+			stat--;
+			ShowCursor(0);
+		}
+	}
 }
 
 
 void CalcWindowSize(RECT *al)
 {
- al->left=0;
- al->right=VNSWID*winsizemulx;
- al->top=0;
- al->bottom=totallines*winsizemuly;
+	al->left=0;
+	al->right=VNSWID*winsizemulx;
+	al->top=0;
+	al->bottom=totallines*winsizemuly;
 
- AdjustWindowRectEx(al,GetWindowLong(hAppWnd,GWL_STYLE),GetMenu(hAppWnd)!=NULL,GetWindowLong(hAppWnd,GWL_EXSTYLE));
+	AdjustWindowRectEx(al,
+		GetWindowLong(hAppWnd,GWL_STYLE),
+		GetMenu(hAppWnd) != NULL,
+		GetWindowLong(hAppWnd,GWL_EXSTYLE)
+	);
 
- al->right-=al->left;
- al->left=0;
- al->bottom-=al->top;
- al->top=0;
+	al->right-=al->left;
+	al->left=0;
+	al->bottom-=al->top;
+	al->top=0;
 }
-
 
 void RedoMenuGI(FCEUGI *gi)
 {
- int simpled[]={101,111,110,200,201,204,203,141,142,143,151,152,300,40003,40028, 0};
- int x;
+	int simpled[]={101,111,110,200,201,204,203,141,142,143,151,152,40120,300,40003,40028, 0};
+	int x;
 
- x = 0;
- while(simpled[x])
- {
-  #ifndef FCEUDEF_DEBUGGER
-  if(simpled[x] == 203)
-   EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND | MF_GRAYED);
-  else
-  #endif
-  #ifndef _USE_SHARED_MEMORY_
-  if(simpled[x] == 40002 || simpled[x] == 40003)
-	  EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND| MF_GRAYED);
-  else
-  #endif
-  EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND | (gi?MF_ENABLED:MF_GRAYED));
-  x++;
- }
+	x = 0;
+	while(simpled[x])
+	{
+#ifndef FCEUDEF_DEBUGGER
+		if(simpled[x] == 203)
+			EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND | MF_GRAYED);
+		else
+#endif
+#ifndef _USE_SHARED_MEMORY_
+			if(simpled[x] == 40002 || simpled[x] == 40003)
+				EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND| MF_GRAYED);
+			else
+#endif
+				EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND | (gi?MF_ENABLED:MF_GRAYED));
+		x++;
+	}
 }
 
 void UpdateMenu(void)
@@ -148,74 +167,135 @@ void UpdateMenu(void)
 }
 
 static HMENU recentmenu, recentdmenu;
-char *rfiles[10]={0,0,0,0,0,0,0,0,0,0};
-char *rdirs[10]={0,0,0,0,0,0,0,0,0,0};
 
-void UpdateRMenu(HMENU menu, char **strs, int mitem, int baseid)
+/**
+* Updates recent files / recent directories menu
+*
+* @param menu Menu handle of the main window's menu
+* @param strs Strings to add to the menu
+* @param mitem Menu ID of the recent files / directory menu
+* @param baseid Menu ID of the first subitem
+**/
+void UpdateRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
- MENUITEMINFO moo;
- int x;
+	// UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 
- moo.cbSize=sizeof(moo);
- moo.fMask=MIIM_SUBMENU|MIIM_STATE;
+	MENUITEMINFO moo;
+	int x;
 
- GetMenuItemInfo(GetSubMenu(fceumenu,0),mitem,FALSE,&moo);
- moo.hSubMenu=menu;
- moo.fState=strs[0]?MFS_ENABLED:MFS_GRAYED;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
 
- SetMenuItemInfo(GetSubMenu(fceumenu,0),mitem,FALSE,&moo);
+	GetMenuItemInfo(GetSubMenu(fceumenu, 0), mitem, FALSE, &moo);
+	moo.hSubMenu = menu;
+	moo.fState = strs[0] ? MFS_ENABLED : MFS_GRAYED;
 
- for(x=0;x<10;x++)
-  RemoveMenu(menu,baseid+x,MF_BYCOMMAND);
- for(x=9;x>=0;x--)
- {  
-  char tmp[128+5];
-  if(!strs[x]) continue;
+	SetMenuItemInfo(GetSubMenu(fceumenu, 0), mitem, FALSE, &moo);
 
-  moo.cbSize=sizeof(moo);
-  moo.fMask=MIIM_DATA|MIIM_ID|MIIM_TYPE;
+	// Remove all recent files submenus
+	for(x = 0; x < MAX_NUMBER_OF_RECENT_FILES; x++)
+	{
+		RemoveMenu(menu, baseid + x, MF_BYCOMMAND);
+	}
 
-  if(strlen(strs[x])<128)
-  {
-   sprintf(tmp,"&%d. %s",(x+1)%10,strs[x]);
-  }
-  else
-   sprintf(tmp,"&%d. %s",(x+1)%10,strs[x]+strlen(strs[x])-127);
+	// Recreate the menus
+	for(x = MAX_NUMBER_OF_RECENT_FILES - 1; x >= 0; x--)
+	{  
+		char tmp[128 + 5];
 
-  moo.cch=strlen(tmp);
-  moo.fType=0;
-  moo.wID=baseid+x;
-  moo.dwTypeData=tmp;
-  InsertMenuItem(menu,0,1,&moo);
- }
- DrawMenuBar(hAppWnd);
+		// Skip empty strings
+		if(!strs[x])
+		{
+			continue;
+		}
+
+		moo.cbSize = sizeof(moo);
+		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
+
+		// Fill in the menu text.
+		if(strlen(strs[x]) < 128)
+		{
+			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x]);
+		}
+		else
+		{
+			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x] + strlen( strs[x] ) - 127);
+		}
+
+		// Insert the menu item
+		moo.cch = strlen(tmp);
+		moo.fType = 0;
+		moo.wID = baseid + x;
+		moo.dwTypeData = tmp;
+		InsertMenuItem(menu, 0, 1, &moo);
+	}
+
+	DrawMenuBar(hAppWnd);
 }
 
-void AddRecent(char *fn)
+/**
+* Add a filename to the recent files list.
+*
+* @param filename Name of the file to add.
+**/
+void AddRecent(const char *filename)
 {
- int x;
+	int x;
 
- for(x=0;x<10;x++)
-  if(rfiles[x])
-   if(!strcmp(rfiles[x],fn))    // Item is already in list.
-   {
-    int y;
-    char *tmp;
+	// Try to find out if the filename is already in the recent files list.
+	for( x = 0; x < MAX_NUMBER_OF_RECENT_FILES; x++)
+	{
+		if(recent_files[x])
+		{
+			if(!strcmp(recent_files[x], filename))    // Item is already in list.
+			{
+				// If the filename is in the file list don't add it again.
+				// Move it up in the list instead.
 
-    tmp=rfiles[x];              // Save pointer.
-    for(y=x;y;y--)
-     rfiles[y]=rfiles[y-1];     // Move items down.
+				int y;
+				char *tmp;
 
-    rfiles[0]=tmp;              // Put item on top.
-    UpdateRMenu(recentmenu, rfiles, 102, 600);
-    return;
-   }
+				// Save pointer.
+				tmp = recent_files[x];
+				
+				for(y = x; y; y--)
+				{
+					// Move items down.
+					recent_files[y] = recent_files[y - 1];
+				}
 
- if(rfiles[9]) free(rfiles[9]);
- for(x=9;x;x--) rfiles[x]=rfiles[x-1];
- rfiles[0]=(char*)malloc(strlen(fn)+1); //mbg merge 7/17/06 added cast
- strcpy(rfiles[0],fn);
- UpdateRMenu(recentmenu, rfiles, 102, 600);
+				// Put item on top.
+				recent_files[0] = tmp;
+
+				// Update the recent files menu
+				UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+
+				return;
+			}
+		}
+	}
+
+	// The filename wasn't found in the list. That means we need to add it.
+
+	// If there's no space left in the recent files list, get rid of the last
+	// item in the list.
+	if(recent_files[MAX_NUMBER_OF_RECENT_FILES - 1])
+	{
+		free(recent_files[MAX_NUMBER_OF_RECENT_FILES - 1]);
+	}
+
+	// Move the other items down.
+	for(x = MAX_NUMBER_OF_RECENT_FILES - 1; x; x--)
+	{
+		recent_files[x] = recent_files[x - 1];
+	}
+
+	// Add the new item.
+	recent_files[0] = (char*)malloc(strlen(filename) + 1); //mbg merge 7/17/06 added cast
+	strcpy(recent_files[0], filename);
+
+	// Update the recent files menu
+	UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 }
 
 void AddRecentDir(char *fn)
@@ -321,44 +401,65 @@ static void ALoad(char *nameo)
   RedoMenuGI(GameInfo);
 }
 
-void LoadNewGamey(HWND hParent, char *initialdir)
+/**
+* Shows an Open File dialog and opens the ROM if the user selects a ROM file.
+*
+* @param hParent Handle of the main window
+* @param initialdir Directory that's pre-selected in the Open File dialog.
+**/
+void LoadNewGamey(HWND hParent, const char *initialdir)
 {
- const char filter[]="All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
- char nameo[2048];
- OPENFILENAME ofn;
- memset(&ofn,0,sizeof(ofn));
- ofn.lStructSize=sizeof(ofn);
- ofn.hInstance=fceu_hInstance;
- ofn.lpstrTitle="FCE Ultra Open File...";
- ofn.lpstrFilter=filter;
- nameo[0]=0;
- ofn.hwndOwner=hParent;
- ofn.lpstrFile=nameo;
- ofn.nMaxFile=256;
- ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY; //OFN_EXPLORER|OFN_ENABLETEMPLATE|OFN_ENABLEHOOK;
- ofn.lpstrInitialDir=initialdir?initialdir:gfsdir;
- if(GetOpenFileName(&ofn))
- {
-  char *tmpdir;
+	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
+	char nameo[2048];
 
-  if((tmpdir=(char *)malloc(ofn.nFileOffset+1))) //mbg merge 7/17/06 added cast
-  {
-   strncpy(tmpdir,ofn.lpstrFile,ofn.nFileOffset);
-   tmpdir[ofn.nFileOffset]=0;
-   AddRecentDir(tmpdir);
+	// Create the Open File dialog
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
 
-   if(!initialdir)              // Prevent setting the File->Open default
-                                // directory when a "Recent Directory" is selected.
-   {
-    if(gfsdir)
-     free(gfsdir);
-    gfsdir = tmpdir;
-   }
-   else
-    free(tmpdir);
-  }
-  ALoad(nameo);
- }
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="FCE Ultra Open File...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.hwndOwner=hParent;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY; //OFN_EXPLORER|OFN_ENABLETEMPLATE|OFN_ENABLEHOOK;
+	ofn.lpstrInitialDir = initialdir ? initialdir : gfsdir;
+
+	// Show the Open File dialog
+	if(GetOpenFileName(&ofn))
+	{
+		char *tmpdir = (char *)malloc( ofn.nFileOffset + 1 ); //mbg merge 7/17/06 added cast
+
+		if(tmpdir)
+		{
+			// Get the directory from the filename
+			strncpy(tmpdir, ofn.lpstrFile, ofn.nFileOffset);
+			tmpdir[ofn.nFileOffset]=0;
+
+			// Add the directory to the list of recent directories
+			AddRecentDir(tmpdir);
+
+			// Prevent setting the File->Open default
+			// directory when a "Recent Directory" is selected.
+			if(!initialdir)             
+			{
+				if(gfsdir)
+				{
+					free(gfsdir);
+				}
+
+				gfsdir = tmpdir;
+			}
+			else
+			{
+				free(tmpdir);
+			}
+		}
+
+		ALoad(nameo);
+	}
 }
 
 static uint32 mousex,mousey,mouseb;
@@ -403,35 +504,46 @@ void DoPPUView();//mbg merge 7/19/06 yech had to add
 
 void MapInput(void);
 
+/**
+* Message loop of the main window
+**/
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
   DSMFix(msg);
-  switch(msg) {
-    case WM_LBUTTONDOWN:
-    case WM_LBUTTONUP:
-    case WM_RBUTTONDOWN:
-    case WM_RBUTTONUP:
-                  mouseb=wParam;
-                  goto proco;
-    case WM_MOUSEMOVE:
-                  {
-                   mousex=LOWORD(lParam);
-                   mousey=HIWORD(lParam);
-                  }
-                  goto proco;
-    case WM_ERASEBKGND:
-                  if(xbsave)
-                   return(0);
-                  else goto proco;
-    case WM_PAINT:if(xbsave)
-                  {
-                   PAINTSTRUCT ps;
-                   BeginPaint(hWnd,&ps);
-                   FCEUD_BlitScreen(xbsave);
-                   EndPaint(hWnd,&ps);
-                   return(0);
-                  }
-                  goto proco;
+
+  switch(msg)
+  {
+	  case WM_LBUTTONDOWN:
+	  case WM_LBUTTONUP:
+	  case WM_RBUTTONDOWN:
+	  case WM_RBUTTONUP:
+		  mouseb=wParam;
+		  goto proco;
+
+	  case WM_MOUSEMOVE:
+		  {
+			  mousex=LOWORD(lParam);
+			  mousey=HIWORD(lParam);
+		  }
+		  goto proco;
+
+	  case WM_ERASEBKGND:
+		  if(xbsave)
+			  return(0);
+		  else
+			  goto proco;
+
+	  case WM_PAINT:
+		  if(xbsave)
+		  {
+			  PAINTSTRUCT ps;
+			  BeginPaint(hWnd,&ps);
+			  FCEUD_BlitScreen(xbsave);
+			  EndPaint(hWnd,&ps);
+			  return(0);
+		  }
+		  goto proco;
+
     case WM_SIZE:
                 if(!fullscreen && !changerecursive)
                  switch(wParam)
@@ -490,230 +602,266 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  }                 
                 }
                 break;
+
     case WM_COMMAND:
-                if(!(wParam>>16))
-                {
-                 wParam&=0xFFFF;
-                 if(wParam>=600 && wParam<=609) // Recent files
-                 {
-                  if(rfiles[wParam-600]) ALoad(rfiles[wParam-600]);
-                 }
-                 else if(wParam >= 700 && wParam <= 709) // Recent dirs
-                 {
-                  if(rdirs[wParam-700])
-                   LoadNewGamey(hWnd, rdirs[wParam - 700]);
-                 }
-                 switch(wParam)
-                 {
-					 //-------
-					//mbg merge 7/18/06 added XD tools
-				 case ID_DEBUG_DEBUGGER: DoDebug(0); break;
-				 case ID_DEBUG_PPUVIEWER: DoPPUView(); break;
-				 case ID_DEBUG_NAMETABLEVIEWER: DoNTView(); break;
-				 case ID_DEBUG_HEXEDITOR: DoMemView(); break;
-				 case ID_DEBUG_TRACELOGGER: DoTracer(); break;
-				 case ID_DEBUG_GAMEGENIEDECODER: DoGGConv(); break;
-				 case ID_DEBUG_CDLOGGER: DoCDLogger(); break;
-				 
-				 case 40004:
-					 SetAutoFirePattern(1,1);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40005:
-					 SetAutoFirePattern(1,2);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40006:
-					 SetAutoFirePattern(1,3);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40007:
-					 SetAutoFirePattern(1,4);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40008:
-					 SetAutoFirePattern(1,5);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40009:
-					 SetAutoFirePattern(2,1);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40010:
-					 SetAutoFirePattern(2,2);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40011:
-					 SetAutoFirePattern(2,3);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40012:
-					 SetAutoFirePattern(2,4);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40013:
-					 SetAutoFirePattern(3,1);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40014:
-					 SetAutoFirePattern(3,2);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40015:
-					 SetAutoFirePattern(3,3);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40022:
-					 SetAutoFirePattern(4,1);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40023:
-					 SetAutoFirePattern(4,2);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40024:
-					 SetAutoFirePattern(5,1);
-					 CheckedAutoFirePattern = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40016:
-				 case 40017:
-				 case 40018:
-				 case 40019:
-				 case 40020:
-				 case 40021:
-					 SetAutoFireOffset(wParam - 40016);
-					 CheckedAutoFireOffset = wParam;
-					 UpdateMenu();
-					 break;
-				 case 40025:
-					 SetAutoFireDesynch(GetAutoFireDesynch()^1);
-					 UpdateMenu();
-					 break;
-                  case 300:ToggleHideMenu();break;
-                  case 301:
-					  eoptions^=EO_BGRUN;
-					  if((eoptions & EO_BGRUN) == 0)
-					  {
-						  EnableBackgroundInput = 0;
-						  KeyboardSetBackgroundAccess(EnableBackgroundInput);
-						  SetJoystickBackgroundAccess(EnableBackgroundInput);
-					  }
-					  UpdateMenu();
-					  break;
-				  case 302:EnableBackgroundInput ^= 1;
-					  eoptions |= EO_BGRUN*EnableBackgroundInput;
-					  KeyboardSetBackgroundAccess(EnableBackgroundInput);
-					  SetJoystickBackgroundAccess(EnableBackgroundInput);
-					  UpdateMenu();
-					  break;
-				  case 40029:
-					  EnableRewind^= 1;
-					  UpdateMenu();
-					  break;
-				  case 303:status_icon=!status_icon;UpdateMenu();break;
-                  case 310:genie^=1;FCEUI_SetGameGenie(genie);UpdateMenu();break;
-                  case 311:palyo^=1;
-                           FCEUI_SetVidSystem(palyo);
-                           RefreshThrottleFPS();
-                           UpdateMenu();
-                           FixFL();
-//						   DoVideoConfigFix();
-                           SetMainWindowStuff();
-                           break;
-				  case 40003: FCEU_SetBotMode(1^FCEU_BotMode());
-					          UpdateMenu(); break;
-				  case 40002: CreateBasicBot();break;
-				  // case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
-                  case 320:ConfigDirectories();break;
-                  case 327:ConfigGUI();break;
-                  case 321:ConfigInput(hWnd);break;
-                  case 322:ConfigTiming();break;
-                  case 323:ShowNetplayConsole();break;
-                  case 324:ConfigPalette();break;
-				  case 325:ConfigSound();break;
-                  case 326:ConfigVideo();break;
-				  case 328:MapInput();break;
 
-                  case 200:RestartMovieOrReset(0);break;
-                  case 201:RestartMovieOrReset(1);break;
-				  case 40026: FCEUI_FDSSelect();break;
-				  case 40001: FCEUI_FDSInsert();break;
-				  case 40027: FCEUI_VSUniCoin();break;
-			
+		if(!(wParam>>16))
+		{
+			wParam &= 0xFFFF;
 
-		  #ifdef FCEUDEF_DEBUGGER
-		  //case 203:BeginDSeq(hWnd);break; //mbg merge 7/18/06 removed as part of old debugger
-		  #endif
+			// A menu item from the recent files menu was clicked.
+			if(wParam >= MENU_FIRST_RECENT_FILE && wParam <= MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES - 1)
+			{
+				if(recent_files[wParam - MENU_FIRST_RECENT_FILE])
+				{
+					ALoad(recent_files[wParam - MENU_FIRST_RECENT_FILE]);
+				}
+			}
+			else if(wParam >= 700 && wParam <= 709) // Recent dirs
+			{
+				// TODO: Do menu items 700 - 709 even exist?
+				if(rdirs[wParam-700])
+					LoadNewGamey(hWnd, rdirs[wParam - 700]);
+			}
+			switch(wParam)
+			{
+				//-------
+				//mbg merge 7/18/06 added XD tools
+			case ID_DEBUG_DEBUGGER: DoDebug(0); break;
+			case ID_DEBUG_PPUVIEWER: DoPPUView(); break;
+			case ID_DEBUG_NAMETABLEVIEWER: DoNTView(); break;
+			case ID_DEBUG_HEXEDITOR: DoMemView(); break;
+			case ID_DEBUG_TRACELOGGER: DoTracer(); break;
+			case ID_DEBUG_GAMEGENIEDECODER: DoGGConv(); break;
+			case ID_DEBUG_CDLOGGER: DoCDLogger(); break;
 
-                  //case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
-					  //mbg merge TODO 7/17/06 - had to remove this
-                  //case 205:CreateMemWatch(hWnd);break;
-                  case 100:
-                           LoadNewGamey(hWnd, 0);
-                           break;
-                  case 101:if(GameInfo)
-                           {
-			    #ifdef FCEUDEF_DEBUGGER
-			    //KillDebugger(); //mbg merge 7/18/06 removed as part of old debugger
-			    #endif
-                            FCEUI_CloseGame();                            
-                            GameInfo=0;
-                            RedoMenuGI(GameInfo);
-                           }
-                           break;
-                  case 110:FCEUD_SaveStateAs();break;
-                  case 111:FCEUD_LoadStateFrom();break;
+			case 40004:
+				SetAutoFirePattern(1,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40005:
+				SetAutoFirePattern(1,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40006:
+				SetAutoFirePattern(1,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40007:
+				SetAutoFirePattern(1,4);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40008:
+				SetAutoFirePattern(1,5);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40009:
+				SetAutoFirePattern(2,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40010:
+				SetAutoFirePattern(2,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40011:
+				SetAutoFirePattern(2,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40012:
+				SetAutoFirePattern(2,4);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40013:
+				SetAutoFirePattern(3,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40014:
+				SetAutoFirePattern(3,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40015:
+				SetAutoFirePattern(3,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40022:
+				SetAutoFirePattern(4,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40023:
+				SetAutoFirePattern(4,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40024:
+				SetAutoFirePattern(5,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateMenu();
+				break;
+			case 40016:
+			case 40017:
+			case 40018:
+			case 40019:
+			case 40020:
+			case 40021:
+				SetAutoFireOffset(wParam - 40016);
+				CheckedAutoFireOffset = wParam;
+				UpdateMenu();
+				break;
+			case 40025:
+				SetAutoFireDesynch(GetAutoFireDesynch()^1);
+				UpdateMenu();
+				break;
+			case 300:ToggleHideMenu();break;
+			case 301:
+				eoptions^=EO_BGRUN;
+				if((eoptions & EO_BGRUN) == 0)
+				{
+					EnableBackgroundInput = 0;
+					KeyboardSetBackgroundAccess(EnableBackgroundInput);
+					SetJoystickBackgroundAccess(EnableBackgroundInput);
+				}
+				UpdateMenu();
+				break;
+			case 302:EnableBackgroundInput ^= 1;
+				eoptions |= EO_BGRUN*EnableBackgroundInput;
+				KeyboardSetBackgroundAccess(EnableBackgroundInput);
+				SetJoystickBackgroundAccess(EnableBackgroundInput);
+				UpdateMenu();
+				break;
+			case 40029:
+				EnableRewind^= 1;
+				UpdateMenu();
+				break;
+			case 303:status_icon=!status_icon;UpdateMenu();break;
+			case 310:genie^=1;FCEUI_SetGameGenie(genie);UpdateMenu();break;
+			case 311:palyo^=1;
+				FCEUI_SetVidSystem(palyo);
+				RefreshThrottleFPS();
+				UpdateMenu();
+				FixFL();
+				//						   DoVideoConfigFix();
+				SetMainWindowStuff();
+				break;
+			case 40003: FCEU_SetBotMode(1^FCEU_BotMode());
+				UpdateMenu(); break;
+			case 40002: CreateBasicBot();break;
+				// case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
+			case 320:ConfigDirectories();break;
+			case 327:ConfigGUI();break;
+			case 321:ConfigInput(hWnd);break;
+			case 322:ConfigTiming();break;
+			case 323:ShowNetplayConsole();break;
+			case 324:ConfigPalette();break;
+			case 325:ConfigSound();break;
+			case 326:ConfigVideo();break;
+			case 328:MapInput();break;
 
-                  case 40120: //mbg merge 7/18/06 changed ID from 120
-                           {
-                            MENUITEMINFO mi;
-                            char *str;
-             
-                            
-                            if(CreateSoundSave())
-                             str="Stop Sound Logging";
-                            else
-                             str="Log Sound As...";
-                            memset(&mi,0,sizeof(mi));
-                            mi.fMask=MIIM_DATA|MIIM_TYPE;
-                            mi.cbSize=sizeof(mi);
-                            GetMenuItemInfo(fceumenu,120,0,&mi);                           
-                            mi.fMask=MIIM_DATA|MIIM_TYPE;
-                            mi.cbSize=sizeof(mi);
-                            mi.dwTypeData=str;
-                            mi.cch=strlen(str);
-                            SetMenuItemInfo(fceumenu,120,0,&mi);
-                           }
-                           break;
-                  case 130:DoFCEUExit();break;
+			case 200:RestartMovieOrReset(0);break;
+			case 201:RestartMovieOrReset(1);break;
+			case 40026: FCEUI_FDSSelect();break;
+			case 40001: FCEUI_FDSInsert();break;
+			case 40027: FCEUI_VSUniCoin();break;
 
-                  case 141:FCEUD_MovieRecordTo();break;
-                  case 142:FCEUD_MovieReplayFrom();break;
-                  case 143:FCEUI_StopMovie();break;
 
-				  case 151:FCEUD_AviRecordTo();break;
-				  case 152:FCEUD_AviStop();break;
+#ifdef FCEUDEF_DEBUGGER
+				//case 203:BeginDSeq(hWnd);break; //mbg merge 7/18/06 removed as part of old debugger
+#endif
 
-                  case 400:ShowAboutBox();break;
-                  case 401:MakeLogWindow();break;
-                 }
-                }
-                break;
+				//case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
+				//mbg merge TODO 7/17/06 - had to remove this
+				//case 205:CreateMemWatch(hWnd);break;
+
+			case MENU_OPEN_FILE:
+				// User selected the Open File menu => Show the file selection dialog
+				LoadNewGamey(hWnd, 0);
+				break;
+
+			case MENU_CLOSE_FILE:
+				// User selected the Close File menu => Close the game if necessary
+				if(GameInfo)
+				{
+					FCEUI_CloseGame();                            
+					GameInfo=0;
+					RedoMenuGI(GameInfo);
+				}
+				break;
+
+			case MENU_SAVE_STATE:
+				// Save state as menu was selected
+				FCEUD_SaveStateAs();
+				break;
+
+			case MENU_LOAD_STATE:
+				// Load state from menu was selected
+				FCEUD_LoadStateFrom();
+				break;
+
+			case 40120: //mbg merge 7/18/06 changed ID from 120
+				{
+					MENUITEMINFO mi;
+					char *str;
+
+
+					if(CreateSoundSave())
+						str="Stop Sound Logging";
+					else
+						str="Log Sound As...";
+					memset(&mi,0,sizeof(mi));
+					mi.fMask=MIIM_DATA|MIIM_TYPE;
+					mi.cbSize=sizeof(mi);
+					GetMenuItemInfo(fceumenu,120,0,&mi);                           
+					mi.fMask=MIIM_DATA|MIIM_TYPE;
+					mi.cbSize=sizeof(mi);
+					mi.dwTypeData=str;
+					mi.cch=strlen(str);
+					SetMenuItemInfo(fceumenu,120,0,&mi);
+				}
+				break;
+			case 130:DoFCEUExit();break;
+
+			case MENU_RECORD_MOVIE:
+				// Record movie menu was selected
+				FCEUD_MovieRecordTo();
+				break;
+
+			case MENU_REPLAY_MOVIE:
+				// Replay movie menu was selected
+				FCEUD_MovieReplayFrom();
+				break;
+
+			case MENU_STOP_MOVIE:
+				// Stop movie menu was selected
+				FCEUI_StopMovie();
+				break;
+
+			case MENU_RECORD_AVI:
+				// Record AVI menu was selected
+				FCEUD_AviRecordTo();
+				break;
+
+			case MENU_STOP_AVI:
+				// Stop AVI menu was selected
+				FCEUD_AviStop();
+				break;
+
+			case 400:ShowAboutBox();break;
+			case 401:MakeLogWindow();break;
+			}
+		}
+		break;
 
 
     case WM_SYSCOMMAND:
@@ -917,87 +1065,96 @@ void ByebyeWindow(void)
 
 int CreateMainWindow(void)
 {
-  WNDCLASSEX winclass;
-  RECT tmp;
+	WNDCLASSEX winclass;
+	RECT tmp;
 
-  memset(&winclass,0,sizeof(winclass));
-  winclass.cbSize=sizeof(WNDCLASSEX);
-  winclass.style=CS_OWNDC|CS_HREDRAW|CS_VREDRAW|CS_SAVEBITS;
-  winclass.lpfnWndProc=AppWndProc;
-  winclass.cbClsExtra=0;
-  winclass.cbWndExtra=0;
-  winclass.hInstance=fceu_hInstance;
-  winclass.hIcon=LoadIcon(fceu_hInstance, "ICON_1");
-  winclass.hIconSm=LoadIcon(fceu_hInstance, "ICON_1");
-  winclass.hCursor=LoadCursor(NULL, IDC_ARROW);
-  winclass.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
-  //winclass.lpszMenuName="FCEUMENU";
-  winclass.lpszClassName="FCEULTRA";
+	memset(&winclass,0,sizeof(winclass));
+	winclass.cbSize=sizeof(WNDCLASSEX);
+	winclass.style=CS_OWNDC|CS_HREDRAW|CS_VREDRAW|CS_SAVEBITS;
+	winclass.lpfnWndProc=AppWndProc;
+	winclass.cbClsExtra=0;
+	winclass.cbWndExtra=0;
+	winclass.hInstance=fceu_hInstance;
+	winclass.hIcon=LoadIcon(fceu_hInstance, "ICON_1");
+	winclass.hIconSm=LoadIcon(fceu_hInstance, "ICON_1");
+	winclass.hCursor=LoadCursor(NULL, IDC_ARROW);
+	winclass.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
+	winclass.lpszClassName="FCEULTRA";
 
-  if(!RegisterClassEx(&winclass))
-    return FALSE;
+	if(!RegisterClassEx(&winclass))
+	{
+		return FALSE;
+	}
 
-  AdjustWindowRectEx(&tmp,WS_OVERLAPPEDWINDOW,1,0);
+	AdjustWindowRectEx(&tmp,WS_OVERLAPPEDWINDOW,1,0);
 
-  fceumenu=LoadMenu(fceu_hInstance,"FCEUMENU");
+	fceumenu=LoadMenu(fceu_hInstance,"FCEUMENU");
 
-  recentmenu=CreateMenu();
-  recentdmenu = CreateMenu();
+	recentmenu=CreateMenu();
+	recentdmenu = CreateMenu();
 
-  UpdateRMenu(recentmenu, rfiles, 102, 600);
-  UpdateRMenu(recentdmenu, rdirs, 103, 700);
+	// Update recent files menu
+	UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+	UpdateRMenu(recentdmenu, rdirs, 103, 700);
 
-  RedoMenuGI(NULL);
+	RedoMenuGI(NULL);
 
-  hAppWnd = CreateWindowEx(0,"FCEULTRA","FCE Ultra",
-                        WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */
-                        CW_USEDEFAULT,CW_USEDEFAULT,256,240,  /* X,Y ; Width, Height */
-                        NULL,fceumenu,fceu_hInstance,NULL );  
-  DragAcceptFiles(hAppWnd, 1);
-  SetMainWindowStuff();
-  return 1;
+	hAppWnd = CreateWindowEx(0,"FCEULTRA","FCE Ultra",
+		WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */
+		CW_USEDEFAULT,CW_USEDEFAULT,256,240,  /* X,Y ; Width, Height */
+		NULL,fceumenu,fceu_hInstance,NULL );  
+
+	DragAcceptFiles(hAppWnd, 1);
+
+	SetMainWindowStuff();
+
+	return 1;
 }
 
 
 int SetMainWindowStuff(void)
 {
-  RECT tmp;
+	RECT tmp;
 
-  GetWindowRect(hAppWnd,&tmp);
+	GetWindowRect(hAppWnd,&tmp);
 
-  if(ismaximized)
-  {
-   winwidth=tmp.right - tmp.left;
-   winheight=tmp.bottom - tmp.top;
+	if(ismaximized)
+	{
+		winwidth=tmp.right - tmp.left;
+		winheight=tmp.bottom - tmp.top;
 
-   ShowWindow(hAppWnd, SW_SHOWMAXIMIZED);
-  }
-  else
-  {
-   RECT srect;
-   if(WindowXC!=(1<<30))
-   {
-    /* Subtracting and adding for if(eoptions&EO_USERFORCE) below. */
-    tmp.bottom-=tmp.top;
-    tmp.bottom+=WindowYC;
+		ShowWindow(hAppWnd, SW_SHOWMAXIMIZED);
+	}
+	else
+	{
+		RECT srect;
 
-    tmp.right-=tmp.left;
-    tmp.right+=WindowXC;
-   
+		if(WindowXC!=(1<<30))
+		{
+			/* Subtracting and adding for if(eoptions&EO_USERFORCE) below. */
+			tmp.bottom-=tmp.top;
+			tmp.bottom+=WindowYC;
 
-    tmp.left=WindowXC;
-    tmp.top=WindowYC;
-    WindowXC=1<<30;
-   }
+			tmp.right-=tmp.left;
+			tmp.right+=WindowXC;
 
-   CalcWindowSize(&srect);
-   SetWindowPos(hAppWnd,HWND_TOP,tmp.left,tmp.top,srect.right,srect.bottom,SWP_SHOWWINDOW);
-   winwidth=srect.right;
-   winheight=srect.bottom;
 
-   ShowWindow(hAppWnd, SW_SHOWNORMAL);
-  }
-  return 1;
+			tmp.left=WindowXC;
+			tmp.top=WindowYC;
+			WindowXC=1<<30;
+		}
+
+		CalcWindowSize(&srect);
+
+		SetWindowPos(hAppWnd,HWND_TOP,tmp.left,tmp.top,srect.right,srect.bottom,SWP_SHOWWINDOW);
+
+		winwidth=srect.right;
+		winheight=srect.bottom;
+
+		ShowWindow(hAppWnd, SW_SHOWNORMAL);
+	}
+
+	return 1;
 }
 
 int GetClientAbsRect(LPRECT lpRect)
@@ -1924,26 +2081,30 @@ static BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	return FALSE;
 };
 
+/**
+* Show movie replay dialog and replay the movie if necessary.
+**/
 void FCEUD_MovieReplayFrom(void)
 {
-  char* fn;
-	
-  
+	char* fn;
 
-  fn=(char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
-  if(fn)
-  {
-	  FCEUI_LoadMovie(fn, ReplayDialogReadOnlyStatus, ReplayDialogStopFrame);
-	  free(fn);
-      palyo=FCEUI_GetCurrentVidSystem(0,0);
-      UpdateMenu();
-      FixFL();
-      SetMainWindowStuff();
-      RefreshThrottleFPS();
-   
-	  extern int movie_readonly;
-	  moviereadonly = movie_readonly; // for prefs
-  }
+	fn = (char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
+
+	if(fn)
+	{
+		FCEUI_LoadMovie(fn, ReplayDialogReadOnlyStatus, ReplayDialogStopFrame);
+
+		free(fn);
+
+		palyo = FCEUI_GetCurrentVidSystem(0,0);
+		UpdateMenu();
+		FixFL();
+		SetMainWindowStuff();
+		RefreshThrottleFPS();
+
+		extern int movie_readonly;
+		moviereadonly = movie_readonly; // for prefs
+	}
 }
 
 static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
@@ -2144,17 +2305,18 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	return FALSE;
 }
 
-void FCEUD_MovieRecordTo(void)
+/**
+* Show the record movie dialog and record a movie.
+**/
+void FCEUD_MovieRecordTo()
 {
 	struct CreateMovieParameters p;
-	p.szFilename=FCEUI_MovieGetCurrentName(0);
-	
-	
+	p.szFilename = FCEUI_MovieGetCurrentName(0);
 
-	if(DialogBoxParam(fceu_hInstance,"IDD_RECORDINP",hAppWnd,RecordDialogProc,(LPARAM)&p))
+	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{
 		// turn WCHAR into UTF8
-		char meta[MOVIE_MAX_METADATA<<2];
+		char meta[MOVIE_MAX_METADATA << 2];
 		WideCharToMultiByte(CP_UTF8, 0, p.metadata, -1, meta, sizeof(meta), NULL, NULL);
 
 		if(p.recordFrom >= 3)
@@ -2164,6 +2326,7 @@ void FCEUD_MovieRecordTo(void)
 			FCEUI_LoadState(p.szSavestateFilename);
 			{
 				extern int loadStateFailed;
+
 				if(loadStateFailed)
 				{
 					char str [1024];
@@ -2171,15 +2334,24 @@ void FCEUD_MovieRecordTo(void)
 					FCEUD_PrintError(str);
 				}
 			}
+
 			free(p.szSavestateFilename);
 		}
 
-		FCEUI_SaveMovie(p.szFilename, (p.recordFrom==0) ? MOVIE_FLAG_FROM_POWERON : ((p.recordFrom==1) ? MOVIE_FLAG_FROM_RESET : 0), meta);
+		FCEUI_SaveMovie(
+			p.szFilename,
+			(p.recordFrom == 0) ? MOVIE_FLAG_FROM_POWERON : ((p.recordFrom == 1) ? MOVIE_FLAG_FROM_RESET : 0),
+			meta);
 	}
 
 	free(p.szFilename);
 }
 
+/**
+* Shows an Open File menu and starts recording an AVI
+* 
+* TODO: Does this even work?
+**/
 void FCEUD_AviRecordTo(void)
 {
 	OPENFILENAME ofn;
@@ -2189,17 +2361,20 @@ void FCEUD_AviRecordTo(void)
 	{
 		extern char curMovieFilename[];
 		strcpy(szChoice, curMovieFilename);
-		char* dot=strrchr(szChoice,'.');
-		if(dot) *dot='\0';
-		strcat(szChoice,".avi");
+		char* dot = strrchr(szChoice,'.');
+		
+		if (dot)
+		{
+			*dot='\0';
+		}
+
+		strcat(szChoice, ".avi");
 	}
 	else
 	{
 		extern char FileBase[];
 		sprintf(szChoice, "%s.avi", FileBase);
 	}
-
-	
 
 	// avi record file browser
 	memset(&ofn, 0, sizeof(ofn));
@@ -2212,12 +2387,16 @@ void FCEUD_AviRecordTo(void)
 
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+
 	if(GetSaveFileName(&ofn))
 	{
 		FCEUI_AviBegin(szChoice);
 	}
 }
 
+/**
+* Stop AVI recording
+**/
 void FCEUD_AviStop(void)
 {
 	FCEUI_AviEnd();

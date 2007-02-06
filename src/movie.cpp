@@ -127,14 +127,18 @@ int FCEUMOV_ShouldPause(void)
 int suppressMovieStop=0;
 int movieConvertOffset1=0, movieConvertOffset2=0,movieConvertOK=0,movieSyncHackOn=0;
 
+/**
+* Stop movie playback.
+**/
 static void StopPlayback(void)
 {
-  if(suppressMovieStop)
-   return;
-  resetDMCacc=movieSyncHackOn=0;
-  fclose(slots[-1 - current]);
-  current=0;
-  FCEU_DispMessage("Movie playback stopped.");
+	if(suppressMovieStop)
+		return;
+
+	resetDMCacc = movieSyncHackOn = 0;
+	fclose(slots[-1 - current]);
+	current = 0;
+	FCEU_DispMessage("Movie playback stopped.");
 }
 
 void MovieFlushHeader(void)
@@ -211,28 +215,47 @@ void MovieFlushHeader(void)
 	fseek(fp, loc, SEEK_SET);
 }
 
-static void StopRecording(void)
+/**
+* Stop movie recording
+**/
+void StopRecording(void)
 {
-  if(suppressMovieStop)
-   return;
-  resetDMCacc=movieSyncHackOn=0;
- DoEncode(0,0,1);   /* Write a dummy timestamp value so that the movie will keep
-                       "playing" after user input has stopped. */
- // finish header
- MovieFlushHeader();
+	if(suppressMovieStop)
+	{
+		return;
+	}
 
- // FIXME:  truncate movie to length
- // ftruncate();
- fclose(slots[current - 1]);
- MovieStatus[current - 1] = 1;
- current=0;
- FCEU_DispMessage("Movie recording stopped.");
+	resetDMCacc = movieSyncHackOn = 0;
+
+	DoEncode(0,0,1);   /* Write a dummy timestamp value so that the movie will keep
+					   "playing" after user input has stopped. */
+
+	// finish header
+	MovieFlushHeader();
+
+	// FIXME:  truncate movie to length
+	// ftruncate();
+	fclose(slots[current - 1]);
+	MovieStatus[current - 1] = 1;
+	current = 0;
+
+	FCEU_DispMessage("Movie recording stopped.");
 }
 
-void FCEUI_StopMovie(void)
+/**
+* Stop movie recording or movie playback.
+**/
+void FCEUI_StopMovie()
 {
- if(current < 0) StopPlayback();
- if(current > 0) StopRecording();
+	if(current < 0)
+	{
+		StopPlayback();
+	}
+
+	if(current > 0)
+	{
+		StopRecording();
+	}
 }
 
 #ifdef MSVC

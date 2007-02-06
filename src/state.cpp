@@ -639,36 +639,44 @@ int loadStateFailed = 0; // hack, this function should return a value instead
 
 void FCEUI_LoadState(char *fname)
 {
- StateShow=0;
- loadStateFailed=0;
+	StateShow = 0;
+	loadStateFailed = 0;
 
- /* For network play, be load the state locally, and then save the state to a temporary file,
-    and send that.  This insures that if an older state is loaded that is missing some
-    information expected in newer save states, desynchronization won't occur(at least not
-    from this ;)).
- */
- if(FCEUSS_Load(fname))
- {
-  if(FCEUnetplay)
-  {
-   char *fn=FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
-   FILE *fp;
+	/* For network play, be load the state locally, and then save the state to a temporary file,
+	and send that.  This insures that if an older state is loaded that is missing some
+	information expected in newer save states, desynchronization won't occur(at least not
+	from this ;)).
+	*/
 
-   if((fp=fopen(fn,"wb")))
-   {
-    if(FCEUSS_SaveFP(fp))
-    {
-     fclose(fp);
-     FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);    
-    }
-    else fclose(fp);
-    unlink(fn);
-   }
-   free(fn);
-  }
- }
- else loadStateFailed=1;
+	if(FCEUSS_Load(fname))
+	{
+		if(FCEUnetplay)
+		{
+			char *fn = FCEU_MakeFName(FCEUMKF_NPTEMP, 0, 0);
+			FILE *fp;
 
+			if((fp = fopen(fn," wb")))
+			{
+				if(FCEUSS_SaveFP(fp))
+				{
+					fclose(fp);
+					FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);    
+				}
+				else
+				{
+					fclose(fp);
+				}
+
+				unlink(fn);
+			}
+
+			free(fn);
+		}
+	}
+	else
+	{
+		loadStateFailed = 1;
+	}
 }
 
 void FCEU_DrawSaveStates(uint8 *XBuf)

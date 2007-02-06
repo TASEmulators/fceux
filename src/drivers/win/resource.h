@@ -4,8 +4,18 @@
 //
 #define GUI_BOT_CLOSE                   1
 #define GUI_BOT_VALUES                  2
+#define MENU_OPEN_FILE                  100
+#define MENU_CLOSE_FILE                 101
 #define IDI_ICON1                       101
 #define IDI_ICON2                       102
+#define MENU_RECENT_FILES               102
+#define MENU_SAVE_STATE                 110
+#define MENU_LOAD_STATE                 111
+#define MENU_RECORD_MOVIE               141
+#define MENU_REPLAY_MOVIE               142
+#define MENU_STOP_MOVIE                 143
+#define MENU_RECORD_AVI                 151
+#define MENU_STOP_AVI                   152
 #define GUI_BOT_A_1                     1000
 #define GUI_BOT_B_1                     1001
 #define GUI_BOT_SELECT_1                1002
@@ -141,7 +151,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40013
+#define _APS_NEXT_COMMAND_VALUE         40023
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
