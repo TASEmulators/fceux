@@ -16,6 +16,7 @@
 #define MENU_STOP_MOVIE                 143
 #define MENU_RECORD_AVI                 151
 #define MENU_STOP_AVI                   152
+#define MENU_EXIT                       153
 #define GUI_BOT_A_1                     1000
 #define GUI_BOT_B_1                     1001
 #define GUI_BOT_SELECT_1                1002
@@ -143,6 +144,7 @@
 #define ID_DEBUG_TRACELOGGER            40057
 #define ID_DEBUG_GAMEGENIEDECODER       40059
 #define ID_DEBUG_CDLOGGER               40060
+#define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
 
@@ -151,7 +153,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40023
+#define _APS_NEXT_COMMAND_VALUE         40025
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

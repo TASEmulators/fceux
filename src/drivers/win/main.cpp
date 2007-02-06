@@ -293,29 +293,36 @@ void ShowAboutBox(void)
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
 int closeGame = 0;
 
-void DoFCEUExit(void)
+/**
+* Exits FCE Ultra
+**/
+void DoFCEUExit()
 {
- /* Wolfenstein 3D had cute exit messages. */
- char *emsg[4]={"Are you sure you want to leave?  I'll become lonely!",
-                "If you exit, I'll... EAT YOUR MOUSE.",
-                "You can never really exit, you know.",
-                "E-x-i-t?"
-               };
+	/* Wolfenstein 3D had cute exit messages. */
+	char *emsg[4]={"Are you sure you want to leave?  I'll become lonely!",
+		"If you exit, I'll... EAT YOUR MOUSE.",
+		"You can never really exit, you know.",
+		"E-x-i-t?"
+	};
 
- KillDebugger(); //mbg merge 7/19/06 added
+	KillDebugger(); //mbg merge 7/19/06 added
 
- if(exiting)    /* Eh, oops.  I'll need to try to fix this later. */
-  return;
+	if(exiting)    /* Eh, oops.  I'll need to try to fix this later. */
+		return;
 
- if(goptions & GOO_CONFIRMEXIT)
-  if(IDYES != MessageBox(hAppWnd,emsg[rand()&3],"Exit FCE Ultra?",MB_ICONQUESTION|MB_YESNO))
-   return;
+	if(goptions & GOO_CONFIRMEXIT)
+	{
+		if(IDYES != MessageBox(hAppWnd, emsg[rand() & 3], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
+		{
+			return;
+		}
+	}
 
- FCEUI_StopMovie();
- FCEUD_AviStop();
+	FCEUI_StopMovie();
+	FCEUD_AviStop();
 
- exiting=1;
- closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
+	exiting = 1;
+	closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 }
 
 void DoPriority(void)

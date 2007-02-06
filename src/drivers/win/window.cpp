@@ -809,16 +809,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_LoadStateFrom();
 				break;
 
-			case 40120: //mbg merge 7/18/06 changed ID from 120
+			case MENU_LOG_SOUND: //mbg merge 7/18/06 changed ID from 120
+				// Record sound menu was selected
+				// TODO: Proper stop logging
 				{
 					MENUITEMINFO mi;
-					char *str;
+					char *str = CreateSoundSave() ? "Stop Sound Logging" : "Log Sound As...";
 
-
-					if(CreateSoundSave())
-						str="Stop Sound Logging";
-					else
-						str="Log Sound As...";
 					memset(&mi,0,sizeof(mi));
 					mi.fMask=MIIM_DATA|MIIM_TYPE;
 					mi.cbSize=sizeof(mi);
@@ -830,7 +827,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					SetMenuItemInfo(fceumenu,120,0,&mi);
 				}
 				break;
-			case 130:DoFCEUExit();break;
+
+			case MENU_EXIT:
+				// Exit menu was selected
+				DoFCEUExit();
+				break;
 
 			case MENU_RECORD_MOVIE:
 				// Record movie menu was selected

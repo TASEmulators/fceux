@@ -24,24 +24,33 @@ int CloseWave(void)
  return(FCEUI_EndWaveRecord());
 }
 
+/**
+* Shows a Open File dialog and starts logging sound.
+* 
+* @return Flag that indicates failure (0) or success (1).
+**/
 int CreateSoundSave(void)
 {
- const char filter[]="MS WAVE(*.wav)\0*.wav\0";
- char nameo[2048];
- OPENFILENAME ofn;
+	const char filter[]="MS WAVE(*.wav)\0*.wav\0";
+	char nameo[2048];
+	OPENFILENAME ofn;
 
- FCEUI_EndWaveRecord();
+	FCEUI_EndWaveRecord();
 
- memset(&ofn,0,sizeof(ofn));
- ofn.lStructSize=sizeof(ofn);
- ofn.hInstance=fceu_hInstance;
- ofn.lpstrTitle="Log Sound As...";
- ofn.lpstrFilter=filter;
- nameo[0]=0;
- ofn.lpstrFile=nameo;
- ofn.nMaxFile=256;
- ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
- if(GetSaveFileName(&ofn))
-  return FCEUI_BeginWaveRecord(nameo);
- return 0;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Log Sound As...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+
+	if(GetSaveFileName(&ofn))
+	{
+		return FCEUI_BeginWaveRecord(nameo);
+	}
+
+	return 0;
 }
