@@ -68,7 +68,14 @@ int SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
 
-HWND hAppWnd=0;
+/**
+* Handle of the main window.
+**/
+HWND hAppWnd = 0;
+
+/**
+* FCE Ultra Instance 
+**/
 HINSTANCE fceu_hInstance;
 
 HRESULT  ddrval;
