@@ -73,9 +73,18 @@ HINSTANCE fceu_hInstance;
 
 HRESULT  ddrval;
 
-// cheats, misc, nonvol, states, snaps, ..., base
-static char *DOvers[6]={0,0,0,0,0,0};
-static const char *defaultds[5]={"cheats","sav","fcs","snaps","movie"};
+/** 
+* Contains the names of the overridden standard directories
+* in the order cheats, misc, nonvol, states, snaps, ..., base
+**/
+static char *directory_names[6] = {0, 0, 0, 0, 0, 0};
+
+/**
+* Contains the names of the default directories.
+**/
+static const char *default_directory_names[5] = {"cheats", "sav", "fcs", "snaps", "movie"};
+
+#define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
 
 static char TempArray[2048];
 
@@ -100,12 +109,12 @@ void SetDirs(void)
 
 	for(x=0; x < sizeof(jlist) / sizeof(*jlist); x++)
 	{
-		FCEUI_SetDirOverride(jlist[x], DOvers[x]);  
+		FCEUI_SetDirOverride(jlist[x], directory_names[x]);  
 	}
 
-	if(DOvers[5])
+	if(directory_names[5])
 	{
-		FCEUI_SetBaseDirectory(DOvers[5]);
+		FCEUI_SetBaseDirectory(directory_names[5]);
 	}
 	else
 	{
@@ -118,9 +127,9 @@ void RemoveDirs(void)
  int x;
 
  for(x=0;x<5;x++)
-  if(!DOvers[x])
+  if(!directory_names[x])
   {
-   sprintf(TempArray,"%s\\%s",DOvers[5]?DOvers[5]:BaseDirectory,defaultds[x]);
+   sprintf(TempArray,"%s\\%s",directory_names[5]?directory_names[5]:BaseDirectory,default_directory_names[x]);
    RemoveDirectory(TempArray);
   }
 }
@@ -132,11 +141,11 @@ void CreateDirs(void)
 {
 	int x;
 
-	for(x = 0; x < sizeof(defaultds) / sizeof(*defaultds); x++)
+	for(x = 0; x < sizeof(default_directory_names) / sizeof(*default_directory_names); x++)
 	{
-		if(!DOvers[x])
+		if(!directory_names[x])
 		{
-			sprintf(TempArray, "%s\\%s", DOvers[5] ? DOvers[5] : BaseDirectory, defaultds[x]);
+			sprintf(TempArray, "%s\\%s", directory_names[5] ? directory_names[5] : BaseDirectory, default_directory_names[x]);
 			CreateDirectory(TempArray,0);
 		}
 	}

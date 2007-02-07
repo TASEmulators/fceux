@@ -64,13 +64,13 @@ static CFGSTRUCT fceuconfig[] = {
 
         ACS(gfsdir),
 
-        NACS("odcheats",DOvers[0]),
-        NACS("odmisc",DOvers[1]),
-        NACS("odnonvol",DOvers[2]),
-        NACS("odstates",DOvers[3]),
-        NACS("odsnaps",DOvers[4]),
-        NACS("odbase",DOvers[5]),
-        NACS("odbase",DOvers[6]),
+        NACS("odcheats",directory_names[0]),
+        NACS("odmisc",directory_names[1]),
+        NACS("odnonvol",directory_names[2]),
+        NACS("odstates",directory_names[3]),
+        NACS("odsnaps",directory_names[4]),
+        NACS("odbase",directory_names[5]),
+        NACS("odbase",directory_names[6]),
 
         AC(winspecial),
         AC(winsizemulx),

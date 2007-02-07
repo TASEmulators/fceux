@@ -845,7 +845,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems(); break;
 			case 40002: CreateBasicBot();break;
 				// case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
-			case 320:ConfigDirectories();break;
+			
+			case MENU_DIRECTORIES:
+				// Directories menu was selected
+				ConfigDirectories();
+				break;
+
 			case 327:ConfigGUI();break;
 			case 321:ConfigInput(hWnd);break;
 			case 322:ConfigTiming();break;
@@ -1519,79 +1524,142 @@ static int BrowseForFolder(HWND hParent, char *htext, char *buf)
  return(ret);
 }
 
-static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/**
+* Processes information from the Directories selection dialog after
+* the dialog was closed.
+*
+* @param hwndDlg Handle of the dialog window.
+**/
+void CloseDirectoriesDialog(HWND hwndDlg)
 {
-  int x;
+	int x;
 
-  switch(uMsg){
-   case WM_INITDIALOG:                
-	   SetDlgItemText(hwndDlg,65508,"The settings in the \"Individual Directory Overrides\" group will override the settings in the \"Base Directory Override\" group.  To delete an override, delete the text from the text edit control.  Note that the directory the configuration file is in cannot be overridden");
-                for(x=0;x<6;x++)
-                 SetDlgItemText(hwndDlg,100+x,DOvers[x]);
-                if(eoptions&EO_SNAPNAME)
-                 CheckDlgButton(hwndDlg,300,BST_CHECKED);
-                break;
-   case WM_CLOSE:
-   case WM_QUIT: goto gornk;
-   case WM_COMMAND:
-                if(!(wParam>>16))
-                {
-                 if((wParam&0xFFFF)>=200 && (wParam&0xFFFF)<=205)
-                 {
-                  static char *helpert[6]={"Cheats","Miscellaneous","Nonvolatile Game Data","Save States","Screen Snapshots","Base Directory"};
-                  char name[MAX_PATH];
+	// Update the information from the screenshot naming checkbox
+	if(IsDlgButtonChecked(hwndDlg, CHECK_SCREENSHOT_NAMES) == BST_CHECKED)
+	{
+		eoptions |= EO_SNAPNAME;
+	}
+	else
+	{
+		eoptions &= ~EO_SNAPNAME;
+	}
 
-                  if(BrowseForFolder(hwndDlg,helpert[((wParam&0xFFFF)-200)],name))
-                   SetDlgItemText(hwndDlg,100+((wParam&0xFFFF)-200),name);
-                 }
-                 else switch(wParam&0xFFFF)
-                 {
-                  case 1:
-                        gornk:
+	RemoveDirs();   // Remove empty directories.
 
-                        if(IsDlgButtonChecked(hwndDlg,300)==BST_CHECKED)
-                         eoptions|=EO_SNAPNAME;
-                        else
-                         eoptions&=~EO_SNAPNAME;
+	// Read the information from the edit fields and update the
+	// necessary variables.
+	for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
+	{
+		LONG len;
+		len = SendDlgItemMessage(hwndDlg, EDIT_CHEATS + x, WM_GETTEXTLENGTH, 0, 0);
 
-                        RemoveDirs();   // Remove empty directories.
+		if(len <= 0)
+		{
+			if(directory_names[x])
+			{
+				free(directory_names[x]);
+			}
 
-                        for(x=0;x<6;x++)
-                        {
-                         LONG len;
-                         len=SendDlgItemMessage(hwndDlg,100+x,WM_GETTEXTLENGTH,0,0);
-                         if(len<=0)
-                         {
-                          if(DOvers[x]) free(DOvers[x]);
-                          DOvers[x]=0;
-                          continue;
-                         }
-                         len++; // Add 1 for null character.
-                         if(!(DOvers[x]=(char*)malloc(len))) //mbg merge 7/17/06 added cast
-                          continue;
-                         if(!GetDlgItemText(hwndDlg,100+x,DOvers[x],len))
-                         {
-                          free(DOvers[x]);
-                          DOvers[x]=0;
-                          continue;
-                         }
+			directory_names[x] = 0;
+			continue;
+		}
 
-                        }
+		len++; // Add 1 for null character.
 
-                        CreateDirs();   // Create needed directories.
-                        SetDirs();      // Set the directories in the core.
-                        EndDialog(hwndDlg,0);
-                        break;
-                 }
-                }
-              }
-  return 0;
+		if( !(directory_names[x] = (char*)malloc(len))) //mbg merge 7/17/06 added cast
+		{
+			continue;
+		}
+
+		if(!GetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x], len))
+		{
+			free(directory_names[x]);
+			directory_names[x]=0;
+			continue;
+		}
+
+	}
+
+	CreateDirs();   // Create needed directories.
+	SetDirs();      // Set the directories in the core.
+
+	EndDialog(hwndDlg, 0);
 }
 
-
-static void ConfigDirectories(void)
+/**
+* Callback function for the directories configuration dialog.
+**/
+static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  DialogBox(fceu_hInstance,"DIRCONFIG",hAppWnd,DirConCallB);
+	int x;
+
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+
+			SetDlgItemText(hwndDlg,65508,"The settings in the \"Individual Directory Overrides\" group will override the settings in the \"Base Directory Override\" group.  To delete an override, delete the text from the text edit control.  Note that the directory the configuration file is in cannot be overridden");
+
+			// Initialize the directories textboxes
+			for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
+			{
+				SetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x]);
+			}
+
+			// Check the screenshot naming checkbox if necessary
+			if(eoptions & EO_SNAPNAME)
+			{
+				CheckDlgButton(hwndDlg, CHECK_SCREENSHOT_NAMES, BST_CHECKED);
+			}
+			break;
+
+		case WM_CLOSE:
+		case WM_QUIT:
+			CloseDirectoriesDialog(hwndDlg);
+			break;
+
+		case WM_COMMAND:
+			if( !(wParam >> 16) )
+			{
+				if( (wParam & 0xFFFF) >= BUTTON_CHEATS && (wParam & 0xFFFF) <= BUTTON_CHEATS + NUMBER_OF_DIRECTORIES)
+				{
+					// If a directory selection button was pressed, ask the
+					// user for a directory.
+
+					static char *helpert[6] = {
+						"Cheats",
+						"Miscellaneous",
+						"Nonvolatile Game Data",
+						"Save States",
+						"Screen Snapshots",
+						"Base Directory"
+					};
+
+					char name[MAX_PATH];
+
+					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_CHEATS)], name))
+					{
+						SetDlgItemText(hwndDlg, EDIT_CHEATS + ((wParam & 0xFFFF) - BUTTON_CHEATS), name);
+					}
+				}
+				else switch(wParam & 0xFFFF)
+				{
+					case CLOSE_BUTTON:
+						CloseDirectoriesDialog(hwndDlg);
+						break;
+				}
+			}
+
+	}
+
+	return 0;
+}
+
+/**
+* Shows the dialog for configuring the standard directories.
+**/
+void ConfigDirectories(void)
+{
+	DialogBox(fceu_hInstance, "DIRCONFIG", hAppWnd, DirConCallB);
 }
 
 static int ReplayDialogReadOnlyStatus = 0;
