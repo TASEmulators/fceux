@@ -69,7 +69,9 @@ static int EmulationPaused=0;
 
 static int RewindStatus[4] = {0, 0, 0, 0}; //is it safe to load rewind state
 static int RewindIndex = 0; //which rewind state we're on
-int EnableRewind = 0; //is rewind enabled
+
+// Flag that indicates whether the rewind option is enabled or not
+int EnableRewind = 0;
 
 ///a wrapper for unzip.c
 extern "C" FILE *FCEUI_UTF8fopen_C(const char *n, const char *m) { return ::FCEUD_UTF8fopen(n,m); }
@@ -503,21 +505,32 @@ void FCEUI_CloseGame(void)
 	CloseGame();
 }
 
-void RestartMovieOrReset(int pow)
+/**
+* @param do_power_off Power off (1) or reset (0)
+**/
+void RestartMovieOrReset(unsigned int do_power_off)
 {
 	extern int movie_readonly;
+	extern char curMovieFilename[512];
+
 	if(FCEUMOV_IsPlaying() || FCEUMOV_IsRecording() && movie_readonly)
 	{
-		extern char curMovieFilename[512];
 		FCEUI_LoadMovie(curMovieFilename, movie_readonly, 0);
+
 		if(FCEUI_IsMovieActive())
+		{
 			return;
+		}
 	}
 
-	if(pow)
+	if(do_power_off)
+	{
 		FCEUI_PowerNES();
+	}
 	else
+	{
 		FCEUI_ResetNES();
+	}
 }
 
 void ResetNES(void)
@@ -676,9 +689,12 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend)
  return(PAL);
 }
 
+/**
+* Enable or disable Game Genie option.
+**/
 void FCEUI_SetGameGenie(int a)
 {
- FSettings.GameGenie=a?1:0;
+	FSettings.GameGenie = a ? 1 : 0;
 }
 
 void FCEUI_SetSnapName(int a)

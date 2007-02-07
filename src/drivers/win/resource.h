@@ -17,6 +17,18 @@
 #define MENU_RECORD_AVI                 151
 #define MENU_STOP_AVI                   152
 #define MENU_EXIT                       153
+#define MENU_RESET                      200
+#define MENU_POWER                      201
+#define MENU_EJECT_DISK                 202
+#define MENU_SWITCH_DISK                203
+#define MENU_INSERT_COIN                204
+#define MENU_HIDE_MENU                  300
+#define MENU_RUN_IN_BACKGROUND          301
+#define MENU_BACKGROUND_INPUT           302
+#define MENU_SHOW_STATUS_ICON           303
+#define MENU_ENABLE_REWIND              304
+#define MENU_GAME_GENIE                 310
+#define MENU_PAL                        311
 #define GUI_BOT_A_1                     1000
 #define GUI_BOT_B_1                     1001
 #define GUI_BOT_SELECT_1                1002
@@ -153,7 +165,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40025
+#define _APS_NEXT_COMMAND_VALUE         40037
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

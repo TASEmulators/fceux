@@ -191,8 +191,11 @@ static int moviereadonly=1;
 
 static int fullscreen=0;
 static int soundflush=0;
-static int genie=0;
-static int palyo=0;
+// Flag that indicates whether Game Genie is enabled or not.
+static int genie = 0;
+
+// Flag that indicates whether PAL Emulation is enabled or not.
+static int pal_emulation = 0;
 static int status_icon=1;
 static int windowedfailed;
 static double saspectw=1, saspecth=1;
@@ -514,8 +517,8 @@ int main(int argc,char *argv[])
 
 	/* Bleh, need to find a better place for this. */
 	{
-        palyo &= 1;
-        FCEUI_SetVidSystem(palyo);
+        pal_emulation &= 1;
+        FCEUI_SetVidSystem(pal_emulation);
 
         genie &= 1;
         FCEUI_SetGameGenie(genie);
@@ -564,7 +567,7 @@ int main(int argc,char *argv[])
 		return 1;
 	}
  
-	UpdateMenu();
+	UpdateCheckedMenuItems();
 
 	if(t)
 	{
@@ -1078,5 +1081,5 @@ int FCEUD_ShowStatusIcon(void)
 void FCEUD_ToggleStatusIcon(void)
 {
 	status_icon=!status_icon;
-	UpdateMenu();
+	UpdateCheckedMenuItems();
 }

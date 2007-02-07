@@ -47,6 +47,9 @@ static void ConfigTiming(void);
 static void ConfigPalette(void);
 static void ConfigDirectories(void);
 
+/**
+* Menu handle of the main menu.
+**/
 static HMENU fceumenu=0;
 
 static int tog=0;
@@ -98,7 +101,24 @@ void CalcWindowSize(RECT *al)
 
 void RedoMenuGI(FCEUGI *gi)
 {
-	int simpled[]={101,111,110,200,201,204,203,141,142,143,151,152,40120,300,40003,40028, 0};
+	int simpled[]= { 101,
+		111,
+		110,
+		MENU_RESET,
+		MENU_POWER,
+		204,
+		203,
+		141,
+		142,
+		143,
+		151,
+		152,
+		40120,
+		MENU_HIDE_MENU,
+		40003,
+		40028,
+		0};
+
 	int x;
 
 	x = 0;
@@ -119,49 +139,72 @@ void RedoMenuGI(FCEUGI *gi)
 	}
 }
 
-void UpdateMenu(void)
+/**
+* Updates menu items which need to be checked or unchecked.
+**/
+void UpdateCheckedMenuItems(void)
 {
-	static int *polo[3]={&genie,&palyo,&status_icon};
-	static int polo2[3]={310,311,303};
+	static int *polo[] = { &genie, &pal_emulation, &status_icon };
+	static int polo2[]={ MENU_GAME_GENIE, MENU_PAL, MENU_SHOW_STATUS_ICON };
 	int x;
 
-	for(x=0;x<3;x++)
-		CheckMenuItem(fceumenu,polo2[x],*polo[x]?MF_CHECKED:MF_UNCHECKED);
+	// Check or uncheck the necessary menu items
+	for(x = 0; x < sizeof(polo) / sizeof(*polo); x++)
+	{
+		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
+	}
 
-	if(eoptions&EO_BGRUN)
-		CheckMenuItem(fceumenu,301,MF_CHECKED);
-	else
-		CheckMenuItem(fceumenu,301,MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
 
-	if(FCEU_BotMode())
-		CheckMenuItem(fceumenu,40003, MF_CHECKED);
-	else
-		CheckMenuItem(fceumenu,40003, MF_UNCHECKED);
+	CheckMenuItem(fceumenu, 40003, FCEU_BotMode() ? MF_CHECKED : MF_UNCHECKED);
 
-	if(GetAutoFireDesynch())
-		CheckMenuItem(fceumenu,40025, MF_CHECKED);
-	else
-		CheckMenuItem(fceumenu,40025, MF_UNCHECKED);
+	CheckMenuItem(fceumenu, 40025, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
 
-	CheckMenuItem(fceumenu,302, EnableBackgroundInput?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu,40029, EnableRewind?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_ENABLE_REWIND, EnableRewind ? MF_CHECKED : MF_UNCHECKED);
 
-	int AutoFirePatternIDs[]={40004,40005,40006,40007,40008,40009,40010,40011,40012,40013,40014,40015,40022,40023,40024,0};
-	int AutoFireOffsetIDs[]={40016,40017,40018,40019,40020,40021,0};
+	int AutoFirePatternIDs[] = {
+		40004,
+		40005,
+		40006,
+		40007,
+		40008,
+		40009,
+		40010,
+		40011,
+		40012,
+		40013,
+		40014,
+		40015,
+		40022,
+		40023,
+		40024,
+		0};
+
+	int AutoFireOffsetIDs[] = {
+		40016,
+		40017,
+		40018,
+		40019,
+		40020,
+		40021,
+	0};
 
 	x = 0;
+
 	while(AutoFirePatternIDs[x])
 	{
-		CheckMenuItem(fceumenu,AutoFirePatternIDs[x],
-			AutoFirePatternIDs[x]==CheckedAutoFirePattern?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
+			AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
 		x++;
 	}
 
 	x = 0;
+
 	while(AutoFireOffsetIDs[x])
 	{
-		CheckMenuItem(fceumenu,AutoFireOffsetIDs[x],
-			AutoFireOffsetIDs[x]==CheckedAutoFireOffset?MF_CHECKED:MF_UNCHECKED);
+		CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
+			AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
 		x++;
 	}
 }
@@ -325,18 +368,21 @@ void AddRecentDir(char *fn)
  UpdateRMenu(recentdmenu, rdirs, 103, 700);
 }
 
-
-
-void HideMenu(int h)
+/**
+* Hides the main menu.
+* 
+* @param hide_menu Flag to turn the main menu on (0) or off (1) 
+**/
+void HideMenu(unsigned int hide_menu)
 {
-  if(h)
-  {
-   SetMenu(hAppWnd,0);   
-  }
-  else
-  {
-   SetMenu(hAppWnd,fceumenu);
-  }
+	if(hide_menu)
+	{
+		SetMenu(hAppWnd, 0);
+	}
+	else
+	{
+		SetMenu(hAppWnd, fceumenu);
+	}
 }
 
 static LONG WindowXC=1<<30,WindowYC;
@@ -366,16 +412,24 @@ void HideFWindow(int h)
  SetWindowPos(hAppWnd,0,0,0,0,0,SWP_FRAMECHANGED|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOMOVE|SWP_NOREPOSITION|SWP_NOSIZE|SWP_NOZORDER);
 }
 
+/**
+* Toggles the display status of the main menu.
+**/
 void ToggleHideMenu(void)
 { 
- if(!fullscreen && (GameInfo || tog))
- {
-  tog^=1;
-  HideMenu(tog);
-  SetMainWindowStuff();
- }
+	if(!fullscreen && (GameInfo || tog))
+	{
+		tog ^= 1;
+		HideMenu(tog);
+		SetMainWindowStuff();
+	}
 }
 
+/**
+* Toggles the display status of the main menu.
+*
+* TODO: We could get rid of this one.
+**/
 void FCEUD_HideMenuToggle(void)
 {
 	ToggleHideMenu();
@@ -385,8 +439,8 @@ static void ALoad(char *nameo)
 {
   if(FCEUI_LoadGame(nameo,1))
   {
-   palyo=FCEUI_GetCurrentVidSystem(0,0);
-   UpdateMenu();
+   pal_emulation = FCEUI_GetCurrentVidSystem(0,0);
+   UpdateCheckedMenuItems();
    FixFL();
    SetMainWindowStuff();
    AddRecent(nameo);
@@ -494,7 +548,7 @@ void GetMouseData(uint32 *md)
 //static int sizchange=0;
 static int vchanged=0;
 
-extern void RestartMovieOrReset(int pow);
+extern void RestartMovieOrReset(unsigned int pow);
 
 int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
 void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
@@ -638,77 +692,77 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case 40004:
 				SetAutoFirePattern(1,1);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40005:
 				SetAutoFirePattern(1,2);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40006:
 				SetAutoFirePattern(1,3);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40007:
 				SetAutoFirePattern(1,4);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40008:
 				SetAutoFirePattern(1,5);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40009:
 				SetAutoFirePattern(2,1);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40010:
 				SetAutoFirePattern(2,2);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40011:
 				SetAutoFirePattern(2,3);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40012:
 				SetAutoFirePattern(2,4);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40013:
 				SetAutoFirePattern(3,1);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40014:
 				SetAutoFirePattern(3,2);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40015:
 				SetAutoFirePattern(3,3);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40022:
 				SetAutoFirePattern(4,1);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40023:
 				SetAutoFirePattern(4,2);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40024:
 				SetAutoFirePattern(5,1);
 				CheckedAutoFirePattern = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40016:
 			case 40017:
@@ -718,45 +772,77 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case 40021:
 				SetAutoFireOffset(wParam - 40016);
 				CheckedAutoFireOffset = wParam;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
 			case 40025:
 				SetAutoFireDesynch(GetAutoFireDesynch()^1);
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
-			case 300:ToggleHideMenu();break;
-			case 301:
-				eoptions^=EO_BGRUN;
+
+			case MENU_HIDE_MENU:
+				// Hide menu menu was selected
+				ToggleHideMenu();
+				break;
+
+			case MENU_RUN_IN_BACKGROUND:
+				// Run in Background menu was selected
+				// TODO: Does this even work?
+
+				eoptions ^= EO_BGRUN;
+
 				if((eoptions & EO_BGRUN) == 0)
 				{
 					EnableBackgroundInput = 0;
 					KeyboardSetBackgroundAccess(EnableBackgroundInput);
 					SetJoystickBackgroundAccess(EnableBackgroundInput);
 				}
-				UpdateMenu();
+
+				UpdateCheckedMenuItems();
 				break;
-			case 302:EnableBackgroundInput ^= 1;
-				eoptions |= EO_BGRUN*EnableBackgroundInput;
+
+			case MENU_BACKGROUND_INPUT:
+				// Enable background input menu was selected
+				// TODO: Does this even work?
+				EnableBackgroundInput ^= 1;
+				eoptions |= EO_BGRUN * EnableBackgroundInput;
 				KeyboardSetBackgroundAccess(EnableBackgroundInput);
 				SetJoystickBackgroundAccess(EnableBackgroundInput);
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
-			case 40029:
+
+			case MENU_ENABLE_REWIND:
 				EnableRewind^= 1;
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				break;
-			case 303:status_icon=!status_icon;UpdateMenu();break;
-			case 310:genie^=1;FCEUI_SetGameGenie(genie);UpdateMenu();break;
-			case 311:palyo^=1;
-				FCEUI_SetVidSystem(palyo);
+
+			case MENU_SHOW_STATUS_ICON:
+				// Show status icon menu was selected
+				// TODO: This does not work.
+				status_icon = !status_icon;
+				UpdateCheckedMenuItems();
+				break;
+
+			case MENU_GAME_GENIE:
+				// Game Genie menu was selected
+
+				genie ^= 1;
+				FCEUI_SetGameGenie(genie);
+				UpdateCheckedMenuItems();
+				break;
+
+			case MENU_PAL:
+				// PAL Emulation menu was selected
+				pal_emulation ^= 1;
+				FCEUI_SetVidSystem(pal_emulation);
 				RefreshThrottleFPS();
-				UpdateMenu();
+				UpdateCheckedMenuItems();
 				FixFL();
 				//						   DoVideoConfigFix();
 				SetMainWindowStuff();
 				break;
+
 			case 40003: FCEU_SetBotMode(1^FCEU_BotMode());
-				UpdateMenu(); break;
+				UpdateCheckedMenuItems(); break;
 			case 40002: CreateBasicBot();break;
 				// case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
 			case 320:ConfigDirectories();break;
@@ -769,11 +855,30 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case 326:ConfigVideo();break;
 			case 328:MapInput();break;
 
-			case 200:RestartMovieOrReset(0);break;
-			case 201:RestartMovieOrReset(1);break;
-			case 40026: FCEUI_FDSSelect();break;
-			case 40001: FCEUI_FDSInsert();break;
-			case 40027: FCEUI_VSUniCoin();break;
+			case MENU_RESET:
+				// The reset menu was selected
+				RestartMovieOrReset(0);
+				break;
+
+			case MENU_POWER:
+				// The power menu was selected
+				RestartMovieOrReset(1);
+				break;
+
+			case MENU_SWITCH_DISK:
+				// Switch disk menu was selected
+				FCEUI_FDSSelect();
+				break;
+
+			case MENU_EJECT_DISK:
+				// Eject disk menu was selected
+				FCEUI_FDSInsert();
+				break;
+
+			case MENU_INSERT_COIN:
+				// Insert coin menu was selected
+				FCEUI_VSUniCoin();
+				break;
 
 
 #ifdef FCEUDEF_DEBUGGER
@@ -900,7 +1005,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
                  if(!(lParam&(1<<30)))
                  {
-                  UpdateMenu();
+                  UpdateCheckedMenuItems();
                   changerecursive=1;
                   if(!SetVideoMode(fullscreen^1))
                    SetVideoMode(fullscreen);
@@ -2097,8 +2202,8 @@ void FCEUD_MovieReplayFrom(void)
 
 		free(fn);
 
-		palyo = FCEUI_GetCurrentVidSystem(0,0);
-		UpdateMenu();
+		pal_emulation = FCEUI_GetCurrentVidSystem(0,0);
+		UpdateCheckedMenuItems();
 		FixFL();
 		SetMainWindowStuff();
 		RefreshThrottleFPS();

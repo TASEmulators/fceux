@@ -507,11 +507,17 @@ void FCEUI_VSUniCoin(void)
  FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN);
 }
 
+/**
+* Resets the NES
+**/
 void FCEUI_ResetNES(void)
 {
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
 }
-  
+
+/**
+* Powers off the NES
+**/
 void FCEUI_PowerNES(void)
 {
         FCEU_QSimpleCommand(FCEUNPCMD_POWER);

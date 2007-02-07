@@ -55,7 +55,7 @@ static CFGSTRUCT fceuconfig[] = {
 
         AC(ntsccol),AC(ntsctint),AC(ntschue),
 
-        NAC("palyo",palyo),
+        NAC("palyo",pal_emulation),
 	NAC("genie",genie),
 	NAC("fs",fullscreen),
 	NAC("vgamode",vmod),
