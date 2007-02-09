@@ -499,13 +499,19 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
   return 0;
 }
 
-
+/**
+* Shows the sounds configuration dialog.
+**/
 void ConfigSound(void)
 {
- if(!uug)
-  uug=CreateDialog(fceu_hInstance,"SOUNDCONFIG",0,SoundConCallB);
- else
-  SetFocus(uug);
+	if(!uug)
+	{
+		uug = CreateDialog(fceu_hInstance, "SOUNDCONFIG", 0, SoundConCallB);
+	}
+	else
+	{
+		SetFocus(uug);
+	}
 }
 
 void FCEUD_SoundToggle(void)

@@ -486,9 +486,13 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
  return 0;
 }
 
-
+/**
+* Shows Netplay dialog.
+**/
 void ShowNetplayConsole(void)
 {
- if(!netwin)
-  netwin=CreateDialog(fceu_hInstance,"NETMOO",0,NetCon);
+	if(!netwin)
+	{
+		netwin = CreateDialog(fceu_hInstance, "NETMOO", 0, NetCon);
+	}
 }

@@ -1115,18 +1115,24 @@ void DoVideoConfigFix(void)
         UpdateRendBounds();
 }
 
+/**
+* Shows the Video configuration dialog.
+**/
 void ConfigVideo(void)
 {
-        DialogBox(fceu_hInstance,"VIDEOCONFIG",hAppWnd,VideoConCallB); 
-        DoVideoConfigFix();
-        if(fullscreen)
-         SetFSVideoMode();
-        else
-        {
-         changerecursive=1;
-         SetVideoMode(0);
-         changerecursive=0;
-        }
-         //SetMainWindowStuff();
+	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 
+	DoVideoConfigFix();
+
+	if(fullscreen)
+	{
+		SetFSVideoMode();
+	}
+	else
+	{
+		changerecursive = 1;
+		SetVideoMode(0);
+		changerecursive = 0;
+	}
+	//SetMainWindowStuff();
 }
 

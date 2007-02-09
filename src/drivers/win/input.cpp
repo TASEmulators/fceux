@@ -1003,187 +1003,281 @@ static void DoTBConfig(HWND hParent, const char *text, char *_template, ButtConf
   DialogBox(fceu_hInstance,_template,hParent,DoTBCallB);
 }
 
-static BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/**
+* Callback function of the input configuration dialog.
+**/
+BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  static const char *strn[6]={"<none>","Gamepad","Zapper","Power Pad A","Power Pad B","Arkanoid Paddle"};
-  static const char *strf[14]=
-  {"<none>","Arkanoid Paddle","Hyper Shot gun","4-Player Adapter",
-  "Family Keyboard","Subor Keyboard","HyperShot Pads", "Mahjong", "Quiz King Buzzers",
-  "Family Trainer A","Family Trainer B", "Oeka Kids Tablet", "Barcode World",
-  "Top Rider"};
-  static const int haven[6]={0,1,0,1,1,0};
-  static const int havef[14]={0,0,0,0, 1,1,0,0, 1,1,1,0, 0,0};
-  int x;
-  
-  switch(uMsg) {
-   case WM_INITDIALOG:                
-	   SetDlgItemText(hwndDlg,65488,"Select the device you want to be enabled on input ports 1 and 2, and the Famicom expansion port.  You may configure the device listed above each drop-down list by pressing \"Configure\", if applicable.  The device currently being emulated on the each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.  If you select a device to be on the emulated Famicom Expansion Port, you should probably have emulated gamepads on the emulated NES-style input ports.");
-                for(x=0;x<2;x++)        
-                {
-                 int y;
+	const char * const nes_description[6] = {
+		"<none>",
+		"Gamepad",
+		"Zapper",
+		"Power Pad A",
+		"Power Pad B",
+		"Arkanoid Paddle"
+	};
 
-                 for(y=0;y<6;y++)
-                  SendDlgItemMessage(hwndDlg,104+x,CB_ADDSTRING,0,(LPARAM)(LPSTR)strn[y]);
+	const unsigned int NUMBER_OF_PORTS = 2;
+	const unsigned int NUMBER_OF_NES_DEVICES = sizeof(nes_description) / sizeof(*nes_description);
 
-                 SendDlgItemMessage(hwndDlg,104+x,CB_SETCURSEL,UsrInputType[x],(LPARAM)(LPSTR)0);
-                 EnableWindow(GetDlgItem(hwndDlg,106+x),haven[InputType[x]]);
-                 SetDlgItemText(hwndDlg,200+x,(LPTSTR)strn[InputType[x]]);
-                }
+	const char * const famicom_description[14] =
+	{
+		"<none>",
+		"Arkanoid Paddle",
+		"Hyper Shot gun",
+		"4-Player Adapter",
+		"Family Keyboard",
+		"Subor Keyboard",
+		"HyperShot Pads",
+		"Mahjong",
+		"Quiz King Buzzers",
+		"Family Trainer A",
+		"Family Trainer B",
+		"Oeka Kids Tablet",
+		"Barcode World",
+		"Top Rider"};
 
+		const static unsigned int NUMBER_OF_FAMICOM_DEVICES = sizeof(famicom_description) / sizeof(*famicom_description);
 
-                {
-                 int y;
-                 for(y=0;y<13;y++)
-                  SendDlgItemMessage(hwndDlg,110,CB_ADDSTRING,0,(LPARAM)(LPSTR)strf[y]);
-                 SendDlgItemMessage(hwndDlg,110,CB_SETCURSEL,UsrInputType[2],(LPARAM)(LPSTR)0);                
-                 EnableWindow(GetDlgItem(hwndDlg,111),havef[InputType[2]]);
-                 SetDlgItemText(hwndDlg,202,(LPTSTR)strf[InputType[2]]);
-                }
-                
-				extern int autoHoldKey, autoHoldClearKey;
-				char btext[128];
-				if(autoHoldKey)
+		static const int haven[6]= { 0, 1, 0, 1, 1, 0 };
+
+		static const int havef[14]= { 0,0,0,0, 1,1,0,0, 1,1,1,0, 0,0 };
+
+		int port;
+
+		switch(uMsg)
+		{
+			case WM_INITDIALOG:     
+
+				SetDlgItemText(hwndDlg, LBL_INPUT_HELP, "Select the device you want to be enabled on input ports 1 and 2, and the Famicom expansion port.  You may configure the device listed above each drop-down list by pressing \"Configure\", if applicable.  The device currently being emulated on the each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.  If you select a device to be on the emulated Famicom Expansion Port, you should probably have emulated gamepads on the emulated NES-style input ports.");
+
+				int current_device;
+
+				for(port = 0; port < NUMBER_OF_PORTS; port++)        
 				{
-					if(!GetKeyNameText(autoHoldKey<<16,btext,128))
-						sprintf(btext, "KB: %d", autoHoldKey);
-				}
-				else
-					sprintf(btext, "not assigned");
-				SetDlgItemText(hwndDlg, 115, btext);
+					for(current_device = 0; current_device < NUMBER_OF_NES_DEVICES; current_device++)
+					{
+						SendDlgItemMessage(hwndDlg, COMBO_PAD1 + port, CB_ADDSTRING, 0, (LPARAM)(LPSTR)nes_description[current_device]);
+					}
 
-				if(autoHoldClearKey)
+					SendDlgItemMessage(hwndDlg, COMBO_PAD1 + port, CB_SETCURSEL, UsrInputType[port],(LPARAM)(LPSTR)0);
+					EnableWindow(GetDlgItem(hwndDlg,BTN_PORT1 + port) ,haven[InputType[port]]);
+					SetDlgItemText(hwndDlg, TXT_PAD1 + port, (LPTSTR)nes_description[InputType[port]]);
+				}
+
+				for(current_device = 0; current_device < NUMBER_OF_FAMICOM_DEVICES; current_device++)
 				{
-					if(!GetKeyNameText(autoHoldClearKey<<16,btext,128))
-						sprintf(btext, "KB: %d", autoHoldClearKey);
+					SendDlgItemMessage(hwndDlg, COMBO_FAM, CB_ADDSTRING, 0, (LPARAM)(LPSTR)famicom_description[current_device]);
 				}
-				else
-					sprintf(btext, "not assigned");
-				SetDlgItemText(hwndDlg, 116, btext);
 
-                break;
-   case WM_CLOSE:
-   case WM_QUIT: goto gornk;
-   case WM_COMMAND:
-                if(HIWORD(wParam)==CBN_SELENDOK)
-                {
-                 switch(LOWORD(wParam))
-                 {
-                  case 104:
-                  case 105:UsrInputType[LOWORD(wParam)-104]=InputType[LOWORD(wParam)-104]=SendDlgItemMessage(hwndDlg,LOWORD(wParam),CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                           EnableWindow( GetDlgItem(hwndDlg,LOWORD(wParam)+2),haven[InputType[LOWORD(wParam)-104]]);
-                           SetDlgItemText(hwndDlg,200+LOWORD(wParam)-104,(LPTSTR)strn[InputType[LOWORD(wParam)-104]]);
-                           break;
-                  case 110:UsrInputType[2]=InputType[2]=SendDlgItemMessage(hwndDlg,110,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                           EnableWindow(GetDlgItem(hwndDlg,111),havef[InputType[2]]);
-                           SetDlgItemText(hwndDlg,202,(LPTSTR)strf[InputType[2]]);
-                           break;
-                           
-                 }
+				SendDlgItemMessage(hwndDlg, COMBO_FAM, CB_SETCURSEL, UsrInputType[2], (LPARAM)(LPSTR)0);
+				EnableWindow(GetDlgItem(hwndDlg, BTN_FAM), havef[InputType[2]]);
+				SetDlgItemText(hwndDlg, TXT_FAM, (LPTSTR)famicom_description[InputType[2]]);
 
-                }
-                if(!(wParam>>16))
-                switch(wParam&0xFFFF)
-                {                 
-                 case 111:
-                 {
-                  const char *text = strf[InputType[2]];
-                  DoTBType=DoTBPort=0;
+			extern int autoHoldKey, autoHoldClearKey;
+			char btext[128];
 
-                  switch(InputType[2])
-                  {
-                   case SIFC_FTRAINERA:
-                   case SIFC_FTRAINERB:DoTBConfig(hwndDlg, text, "POWERPADDIALOG", FTrainerButtons, 12); break;
-                   case SIFC_FKB:DoTBConfig(hwndDlg, text, "FKBDIALOG",fkbmap,0x48);break;
-                   case SIFC_SUBORKB:DoTBConfig(hwndDlg, text, "SUBORKBDIALOG",suborkbmap,0x60);break;
-                   case SIFC_QUIZKING:DoTBConfig(hwndDlg, text, "QUIZKINGDIALOG",QuizKingButtons,6);break;
-                  }
-                 }
-                 break;
+			if(autoHoldKey)
+			{
+				if(!GetKeyNameText(autoHoldKey << 16, btext, 128))
+				{
+					sprintf(btext, "KB: %d", autoHoldKey);
+				}
+			}
+			else
+			{
+				sprintf(btext, "not assigned");
+			}
 
-                 case 107:
-                 case 106:
-                  {
-                   int which=(wParam&0xFFFF)-106;
-                   const char *text = strn[InputType[which]];
+			SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
 
-                   DoTBType=DoTBPort=0;
-                   switch(InputType[which])
-                   {
-                    case SI_GAMEPAD:
-                    {
-                     ButtConfig tmp[10 + 10];
+			if(autoHoldClearKey)
+			{
+				if(!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
+				{
+					sprintf(btext, "KB: %d", autoHoldClearKey);
+				}
+			}
+			else
+			{
+				sprintf(btext, "not assigned");
+			}
 
-                     memcpy(tmp, GamePadConfig[which], 10 * sizeof(ButtConfig));
-                     memcpy(&tmp[10], GamePadConfig[which+2], 10 * sizeof(ButtConfig));
+			SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
 
-                     DoTBType=SI_GAMEPAD;
-                     DoTBPort=which;
-                     DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 10 + 10);
+			break;
 
-                     memcpy(GamePadConfig[which], tmp, 10 * sizeof(ButtConfig));
-                     memcpy(GamePadConfig[which+2], &tmp[10], 10 * sizeof(ButtConfig));
-                    }
-                    break;
+		case WM_CLOSE:
+		case WM_QUIT:
+			EndDialog(hwndDlg, 0);
 
-                    case SI_POWERPADA:
-                    case SI_POWERPADB:
-                     DoTBConfig(hwndDlg, text, "POWERPADDIALOG",powerpadsc[which],12);
-                     break;
-                   }
-                  }
-                  break;
+		case WM_COMMAND:
 
-                 case 112: // auto-hold button
-					 {
-						char btext[128];
-						btext[0]=0;
-						GetDlgItemText(hwndDlg, 112, btext, 128);
+			if(HIWORD(wParam)==CBN_SELENDOK)
+			{
+				switch(LOWORD(wParam))
+				{
+					case COMBO_PAD1:
+					case COMBO_PAD2:
+						{
+							unsigned int sel_input = LOWORD(wParam) - COMBO_PAD1;
+							UsrInputType[sel_input] = InputType[sel_input] = SendDlgItemMessage(hwndDlg, LOWORD(wParam), CB_GETCURSEL, 0, (LPARAM)(LPSTR)0);
+							EnableWindow( GetDlgItem(hwndDlg, LOWORD(wParam) + 2), haven[InputType[sel_input]]);
+							SetDlgItemText(hwndDlg, TXT_PAD1 + sel_input, (LPTSTR)nes_description[InputType[sel_input]]);
+						}
+
+						break;
+
+					case COMBO_FAM:
+						UsrInputType[2] =
+							InputType[2] =
+							SendDlgItemMessage(hwndDlg, COMBO_FAM, CB_GETCURSEL, 0, (LPARAM)(LPSTR)0);
+
+						EnableWindow(GetDlgItem(hwndDlg, BTN_FAM), havef[InputType[2]]);
+						SetDlgItemText(hwndDlg, TXT_FAM, (LPTSTR)famicom_description[InputType[2]]);
+						break;
+
+				}
+
+			}
+
+			if( !(wParam >> 16) )
+			{
+				switch(wParam & 0xFFFF)
+				{                 
+					case BTN_FAM:
+					{
+						const char *text = famicom_description[InputType[2]];
+						DoTBType = DoTBPort = 0;
+
+						switch(InputType[2])
+						{
+							case SIFC_FTRAINERA:
+							case SIFC_FTRAINERB:
+								DoTBConfig(hwndDlg, text, "POWERPADDIALOG", FTrainerButtons, 12);
+								break;
+							case SIFC_FKB:
+								DoTBConfig(hwndDlg, text, "FKBDIALOG", fkbmap, 0x48);
+								break;
+							case SIFC_SUBORKB:
+								DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, 0x60);
+								break;
+							case SIFC_QUIZKING:
+								DoTBConfig(hwndDlg, text, "QUIZKINGDIALOG", QuizKingButtons, 6);
+								break;
+						}
+					}
+					break;
+
+					case BTN_PORT2:
+					case BTN_PORT1:
+					{
+						int which = (wParam & 0xFFFF) - BTN_PORT1;
+						const char *text = nes_description[InputType[which]];
+
+						DoTBType = DoTBPort = 0;
+
+						switch(InputType[which])
+						{
+							case SI_GAMEPAD:
+							{
+								ButtConfig tmp[10 + 10];
+
+								memcpy(tmp, GamePadConfig[which], 10 * sizeof(ButtConfig));
+								memcpy(&tmp[10], GamePadConfig[which + 2], 10 * sizeof(ButtConfig));
+
+								DoTBType = SI_GAMEPAD;
+								DoTBPort = which;
+								DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 10 + 10);
+
+								memcpy(GamePadConfig[which], tmp, 10 * sizeof(ButtConfig));
+								memcpy(GamePadConfig[which + 2], &tmp[10], 10 * sizeof(ButtConfig));
+							}
+							break;
+
+							case SI_POWERPADA:
+							case SI_POWERPADB:
+								DoTBConfig(hwndDlg, text, "POWERPADDIALOG", powerpadsc[which], 12);
+								break;
+							}
+						}
+						break;
+
+					case BTN_AUTO_HOLD: // auto-hold button
+					{
+						char btext[128] = { 0 };
+
+						GetDlgItemText(hwndDlg, BTN_AUTO_HOLD, btext, sizeof(btext) );
+
 						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 
+
 						if(button)
 						{
-						    if(!GetKeyNameText(button<<16,btext,128))
+							if(!GetKeyNameText(button << 16, btext, 128))
+							{
 								sprintf(btext, "KB: %d", button);
+							}
 						}
 						else
+						{
 							sprintf(btext, "not assigned");
+						}
+
 						extern int autoHoldKey;
 						autoHoldKey = button;
-						SetDlgItemText(hwndDlg, 115, btext);
-					 }
-					 break;
-                 case 114: // auto-hold clear button
-					 {
-						char btext[128];
-						btext[0]=0;
-						GetDlgItemText(hwndDlg, 114, btext, 128);
+						SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
+					}
+					break;
+					case BTN_CLEAR_AH: // auto-hold clear button
+					{
+						char btext[128] = { 0 };
+
+						GetDlgItemText(hwndDlg, BTN_CLEAR_AH, btext, 128);
+
 						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 added cast
+
 						if(button)
 						{
-						    if(!GetKeyNameText(button<<16,btext,128))
+							if( !GetKeyNameText(button << 16, btext, sizeof(btext)))
+							{
 								sprintf(btext, "KB: %d", button);
+							}
 						}
 						else
+						{
 							sprintf(btext, "not assigned");
+						}
+
 						extern int autoHoldClearKey;
 						autoHoldClearKey = button;
-						SetDlgItemText(hwndDlg, 116, btext);
-					 }
-					 break;
 
-                 case 1:
-                        gornk:
-                        EndDialog(hwndDlg,0);
-                        break;
-               }
-              }
-  return 0;
+						SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
+					}
+					break;
+
+					case BTN_CLOSE:
+						EndDialog(hwndDlg, 0);
+						break;
+				}
+			}
+		}
+
+	return 0;
 }
 
+/**
+* Shows the input configuration dialog.
+*
+* @param hParent Handle of the parent window.
+**/
 void ConfigInput(HWND hParent)
 {
-  DialogBox(fceu_hInstance,"INPUTCONFIG",hParent,InputConCallB);
-  if(GameInfo)
-   InitOtherInput();
+	DialogBox(fceu_hInstance, "INPUTCONFIG", hParent, InputConCallB);
+
+	if(GameInfo)
+	{
+		InitOtherInput();
+	}
 }
 
 
@@ -1816,16 +1910,21 @@ static BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, 
 	return FALSE;
 }
 
+/**
+* Show input mapping configuration dialog.
+**/
 void MapInput(void)
 {
-  // Make a backup of the current mappings, in case the user changes their mind.
-  int* backupmapping = (int*)malloc(sizeof(FCEUD_CommandMapping));
-  memcpy(backupmapping, FCEUD_CommandMapping, sizeof(FCEUD_CommandMapping));
+	// Make a backup of the current mappings, in case the user changes their mind.
+	int* backupmapping = (int*)malloc(sizeof(FCEUD_CommandMapping));
+	memcpy(backupmapping, FCEUD_CommandMapping, sizeof(FCEUD_CommandMapping));
 
-  if(!DialogBox(fceu_hInstance,"MAPINPUT",hAppWnd,MapInputDialogProc))
-	memcpy(FCEUD_CommandMapping, backupmapping, sizeof(FCEUD_CommandMapping));
+	if(!DialogBox(fceu_hInstance, "MAPINPUT", hAppWnd, MapInputDialogProc))
+	{
+		memcpy(FCEUD_CommandMapping, backupmapping, sizeof(FCEUD_CommandMapping));
+	}
 
-  free(backupmapping);
+	free(backupmapping);
 }
 
 void FCEUD_TurboOn(void)

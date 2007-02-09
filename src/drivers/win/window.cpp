@@ -856,13 +856,40 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ConfigGUI();
 				break;
 
-			case 321:ConfigInput(hWnd);break;
-			case 322:ConfigTiming();break;
-			case 323:ShowNetplayConsole();break;
-			case 324:ConfigPalette();break;
-			case 325:ConfigSound();break;
-			case 326:ConfigVideo();break;
-			case 328:MapInput();break;
+			case MENU_INPUT:
+				// Input menu was selected
+				ConfigInput(hWnd);
+				break;
+
+			case MENU_TIMING:
+				// Timing menu was selected
+				ConfigTiming();
+				break;
+
+			case MENU_NETWORK:
+				// Network Play menu was selected
+				ShowNetplayConsole();
+				break;
+
+			case MENU_PALETTE:
+				// Palette menu was selected
+				ConfigPalette();
+				break;
+
+			case MENU_SOUND:
+				// Sound menu was selected
+				ConfigSound();
+				break;
+
+			case MENU_VIDEO:
+				// Video menu was selected
+				ConfigVideo();
+				break;
+
+			case MENU_HOTKEYS:
+				// Hotkeys menu was selected
+				MapInput();
+				break;
 
 			case MENU_RESET:
 				// The reset menu was selected
@@ -972,8 +999,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_AviStop();
 				break;
 
-			case 400:ShowAboutBox();break;
-			case 401:MakeLogWindow();break;
+			case MENU_ABOUT:
+				// About menu was selected
+				ShowAboutBox();
+				break;
+
+			case MENU_MSGLOG:
+				// Message Log menu was selected
+				MakeLogWindow();
+				break;
 			}
 		}
 		break;
@@ -1329,61 +1363,99 @@ int LoadPaletteFile(void)
  return(0);
 }
 static HWND pwindow;
-static BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+
+/**
+* Callback function for the palette configuration dialog.
+**/
+BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  DSMFix(uMsg);
-  switch(uMsg) {
-   case WM_INITDIALOG:                
-                if(ntsccol)
-                 CheckDlgButton(hwndDlg,100,BST_CHECKED);
-                SendDlgItemMessage(hwndDlg,500,TBM_SETRANGE,1,MAKELONG(0,128));
-                SendDlgItemMessage(hwndDlg,501,TBM_SETRANGE,1,MAKELONG(0,128));
-		FCEUI_GetNTSCTH(&ntsctint,&ntschue);
-                SendDlgItemMessage(hwndDlg,500,TBM_SETPOS,1,ntsctint);
-                SendDlgItemMessage(hwndDlg,501,TBM_SETPOS,1,ntschue);
-                EnableWindow(GetDlgItem(hwndDlg,201),(eoptions&EO_CPALETTE)?1:0);
-                break;
-   case WM_HSCROLL:
-                ntsctint=SendDlgItemMessage(hwndDlg,500,TBM_GETPOS,0,(LPARAM)(LPSTR)0);
-                ntschue=SendDlgItemMessage(hwndDlg,501,TBM_GETPOS,0,(LPARAM)(LPSTR)0);
-		FCEUI_SetNTSCTH(ntsccol,ntsctint,ntschue);
-                break;
-   case WM_CLOSE:
-   case WM_QUIT: goto gornk;
-   case WM_COMMAND:
-                if(!(wParam>>16))
-                switch(wParam&0xFFFF)
-                {
-                 case 100:ntsccol^=1;FCEUI_SetNTSCTH(ntsccol,ntsctint,ntschue);break;
-                 case 200:
-                          
-                          if(LoadPaletteFile())
-                           EnableWindow(GetDlgItem(hwndDlg,201),1);
-                          break;
-                 case 201:FCEUI_SetPaletteArray(0);
-                          eoptions&=~EO_CPALETTE;
-                          EnableWindow(GetDlgItem(hwndDlg,201),0);
-                          break;
-                 case 1:
-                        gornk:
-                        DestroyWindow(hwndDlg);
-                        pwindow=0; // Yay for user race conditions.
-                        break;
-               }
-              }
-  return 0;
+	DSMFix(uMsg);
+
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+
+			if(ntsccol)
+			{
+				CheckDlgButton(hwndDlg, 100, BST_CHECKED);
+			}
+
+			SendDlgItemMessage(hwndDlg, 500, TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, 501, TBM_SETRANGE, 1, MAKELONG(0, 128));
+
+			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
+
+			SendDlgItemMessage(hwndDlg, 500, TBM_SETPOS, 1, ntsctint);
+			SendDlgItemMessage(hwndDlg, 501, TBM_SETPOS, 1, ntschue);
+
+			EnableWindow(GetDlgItem(hwndDlg, 201), (eoptions & EO_CPALETTE) ? 1 : 0);
+
+			break;
+
+		case WM_HSCROLL:
+			ntsctint = SendDlgItemMessage(hwndDlg, 500, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntschue = SendDlgItemMessage(hwndDlg, 501, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+			break;
+
+		case WM_CLOSE:
+		case WM_QUIT:
+			goto gornk;
+
+		case WM_COMMAND:
+			if(!(wParam>>16))
+			{
+				switch(wParam&0xFFFF)
+				{
+					case 100:
+						ntsccol ^= 1;
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						break;
+
+					case 200:
+						if(LoadPaletteFile())
+						{
+							EnableWindow(GetDlgItem(hwndDlg, 201), 1);
+						}
+						break;
+
+					case 201:
+						FCEUI_SetPaletteArray(0);
+						eoptions &= ~EO_CPALETTE;
+						EnableWindow(GetDlgItem(hwndDlg, 201), 0);
+						break;
+
+					case 1:
+gornk:
+						DestroyWindow(hwndDlg);
+						pwindow = 0; // Yay for user race conditions.
+						break;
+				}
+			}
+	}
+
+	return 0;
 }
 
-static void ConfigPalette(void)
+/**
+* Shows palette configuration dialog.
+**/
+void ConfigPalette(void)
 {
- if(!pwindow)
-  pwindow=CreateDialog(fceu_hInstance,"PALCONFIG",0,PaletteConCallB);
- else
-  SetFocus(pwindow);
+	if(!pwindow)
+	{
+		pwindow=CreateDialog(fceu_hInstance, "PALCONFIG" ,0 , PaletteConCallB);
+	}
+	else
+	{
+		SetFocus(pwindow);
+	}
 }
 
-
-static BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+/**
+* Callback function of the Timing configuration dialog.
+**/
+BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
  int x;
 
@@ -1435,10 +1507,13 @@ void DoTimingConfigFix(void)
   DoPriority();
 }
 
-static void ConfigTiming(void)
+/**
+* Shows the Timing configuration dialog.
+**/
+void ConfigTiming(void)
 {
-  DialogBox(fceu_hInstance,"TIMINGCONFIG",hAppWnd,TimingConCallB);  
-  DoTimingConfigFix();
+	DialogBox(fceu_hInstance, "TIMINGCONFIG", hAppWnd, TimingConCallB);  
+	DoTimingConfigFix();
 }
 
 /**

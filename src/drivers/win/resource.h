@@ -5,6 +5,7 @@
 #define GUI_BOT_CLOSE                   1
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
+#define BTN_CLOSE                       1
 #define GUI_BOT_VALUES                  2
 #define MENU_OPEN_FILE                  100
 #define EDIT_CHEATS                     100
@@ -14,10 +15,20 @@
 #define MENU_RECENT_FILES               102
 #define CB_LOAD_FILE_OPEN               102
 #define CB_AUTO_HIDE_MENU               104
+#define COMBO_PAD1                      104
+#define COMBO_PAD2                      105
+#define BTN_PORT1                       106
+#define BTN_PORT2                       107
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
+#define COMBO_FAM                       110
 #define MENU_LOAD_STATE                 111
 #define CB_DISABLE_SCREEN_SAVER         111
+#define BTN_FAM                         111
+#define BTN_AUTO_HOLD                   112
+#define BTN_CLEAR_AH                    114
+#define LBL_AUTO_HOLD                   115
+#define LBL_CLEAR_AH                    116
 #define MENU_RECORD_MOVIE               141
 #define MENU_REPLAY_MOVIE               142
 #define MENU_STOP_MOVIE                 143
@@ -26,8 +37,11 @@
 #define MENU_EXIT                       153
 #define MENU_RESET                      200
 #define BUTTON_CHEATS                   200
+#define TXT_PAD1                        200
 #define MENU_POWER                      201
+#define TXT_PAD2                        201
 #define MENU_EJECT_DISK                 202
+#define TXT_FAM                         202
 #define MENU_SWITCH_DISK                203
 #define MENU_INSERT_COIN                204
 #define MENU_HIDE_MENU                  300
@@ -39,6 +53,7 @@
 #define MENU_GAME_GENIE                 310
 #define MENU_PAL                        311
 #define MENU_DIRECTORIES                320
+#define MENU_INPUT                      321
 #define MENU_GUI_OPTIONS                327
 #define GUI_BOT_A_1                     1000
 #define GUI_BOT_B_1                     1001
@@ -160,6 +175,14 @@
 #define GUI_BOT_TITLEL5                 1112
 #define GUI_BOT_TITLEL6                 1113
 #define GUI_BOT_COUNTERS                1114
+#define MENU_NETWORK                    40040
+#define MENU_PALETTE                    40041
+#define MENU_SOUND                      40042
+#define MENU_TIMING                     40043
+#define MENU_VIDEO                      40044
+#define MENU_HOTKEYS                    40045
+#define MENU_ABOUT                      40046
+#define MENU_MSGLOG                     40047
 #define ID_DEBUG_DEBUGGER               40053
 #define ID_DEBUG_PPUVIEWER              40054
 #define ID_DEBUG_NAMETABLEVIEWER        40055
@@ -170,13 +193,14 @@
 #define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
+#define LBL_INPUT_HELP                  65488
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40039
+#define _APS_NEXT_COMMAND_VALUE         40048
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

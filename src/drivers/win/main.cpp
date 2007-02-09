@@ -306,7 +306,7 @@ char *FCEUD_GetCompilerString() {
 **/
 void ShowAboutBox(void)
 {
-	MessageBox(hAppWnd,FCEUI_GetAboutString(),FCEU_NAME,MB_OK);
+	MessageBox(hAppWnd, FCEUI_GetAboutString(), FCEU_NAME, MB_OK);
 }
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
