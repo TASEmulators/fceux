@@ -183,6 +183,8 @@
 #define MENU_HOTKEYS                    40045
 #define MENU_ABOUT                      40046
 #define MENU_MSGLOG                     40047
+#define MENU_CHEATS                     40048
+#define MENU_BASIC_BOT                  40049
 #define ID_DEBUG_DEBUGGER               40053
 #define ID_DEBUG_PPUVIEWER              40054
 #define ID_DEBUG_NAMETABLEVIEWER        40055
@@ -199,8 +201,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        103
-#define _APS_NEXT_COMMAND_VALUE         40048
+#define _APS_NEXT_RESOURCE_VALUE        105
+#define _APS_NEXT_COMMAND_VALUE         40050
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

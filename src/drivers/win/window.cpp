@@ -130,7 +130,7 @@ void RedoMenuGI(FCEUGI *gi)
 		else
 #endif
 #ifndef _USE_SHARED_MEMORY_
-			if(simpled[x] == 40002 || simpled[x] == 40003)
+			if(simpled[x] == MENU_BASIC_BOT || simpled[x] == 40003)
 				EnableMenuItem(fceumenu,simpled[x],MF_BYCOMMAND| MF_GRAYED);
 			else
 #endif
@@ -841,10 +841,18 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				SetMainWindowStuff();
 				break;
 
-			case 40003: FCEU_SetBotMode(1^FCEU_BotMode());
-				UpdateCheckedMenuItems(); break;
-			case 40002: CreateBasicBot();break;
-				// case 40028: DoMemmo(0); break; //mbg merge 7/18/06 removed as part of old debugger
+			case MENU_CHEATS:
+				ConfigCheats(hWnd);
+				break;
+
+			case 40003:
+				FCEU_SetBotMode(1^FCEU_BotMode());
+				UpdateCheckedMenuItems();
+				break;
+
+			case MENU_BASIC_BOT:
+				CreateBasicBot();
+				break;
 			
 			case MENU_DIRECTORIES:
 				// Directories menu was selected
