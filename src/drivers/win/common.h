@@ -26,7 +26,6 @@ extern HWND hAppWnd;
 extern HINSTANCE fceu_hInstance;
 
 extern int NoWaiting;
-void DSMFix(UINT msg);
 
 extern int eoptions;
 

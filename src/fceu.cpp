@@ -229,24 +229,35 @@ static DECLFR(ARAMH)
 
 static void CloseGame(void)
 {
- if(GameInfo)
- {
-  if(FCEUnetplay)
-   FCEUD_NetworkClose();
-  FCEUI_StopMovie();
-  if(GameInfo->name)
-  {
-   free(GameInfo->name);
-   GameInfo->name=0;
-  }
-  if(GameInfo->type!=GIT_NSF)
-   FCEU_FlushGameCheats(0,0);
-  GameInterface(GI_CLOSE);
-  ResetExState(0,0);
-  CloseGenie();
-  free(GameInfo);
-  GameInfo = 0;
- }
+	if(GameInfo)
+	{
+		if(FCEUnetplay)
+		{
+			FCEUD_NetworkClose();
+		}
+
+		FCEUI_StopMovie();
+
+		if(GameInfo->name)
+		{
+			free(GameInfo->name);
+			GameInfo->name=0;
+		}
+
+		if(GameInfo->type!=GIT_NSF)
+		{
+			FCEU_FlushGameCheats(0,0);
+		}
+
+		GameInterface(GI_CLOSE);
+
+		ResetExState(0,0);
+
+		CloseGenie();
+
+		free(GameInfo);
+		GameInfo = 0;
+	}
 }
 
 void ResetGameLoaded(void)

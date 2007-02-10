@@ -185,13 +185,44 @@
 #define MENU_MSGLOG                     40047
 #define MENU_CHEATS                     40048
 #define MENU_BASIC_BOT                  40049
+#define MENU_AUTOFIRE_PATTERN_1         40050
+#define MENU_AUTOFIRE_PATTERN_2         40051
+#define MENU_AUTOFIRE_PATTERN_3         40052
 #define ID_DEBUG_DEBUGGER               40053
+#define MENU_AUTOFIRE_PATTERN_4         40053
 #define ID_DEBUG_PPUVIEWER              40054
+#define MENU_AUTOFIRE_PATTERN_5         40054
 #define ID_DEBUG_NAMETABLEVIEWER        40055
+#define MENU_AUTOFIRE_PATTERN_6         40055
 #define ID_DEBUG_HEXEDITOR              40056
+#define MENU_AUTOFIRE_PATTERN_7         40056
 #define ID_DEBUG_TRACELOGGER            40057
+#define MENU_AUTOFIRE_PATTERN_8         40057
+#define MENU_AUTOFIRE_PATTERN_9         40058
 #define ID_DEBUG_GAMEGENIEDECODER       40059
+#define MENU_AUTOFIRE_PATTERN_10        40059
 #define ID_DEBUG_CDLOGGER               40060
+#define MENU_AUTOFIRE_PATTERN_11        40060
+#define MENU_AUTOFIRE_PATTERN_12        40061
+#define MENU_AUTOFIRE_PATTERN_13        40062
+#define MENU_AUTOFIRE_PATTERN_14        40063
+#define MENU_AUTOFIRE_PATTERN_15        40064
+#define MENU_AUTOFIRE_OFFSET_1          40065
+#define MENU_AUTOFIRE_OFFSET_2          40066
+#define MENU_AUTOFIRE_OFFSET_3          40067
+#define MENU_AUTOFIRE_OFFSET_4          40068
+#define MENU_AUTOFIRE_OFFSET_5          40069
+#define MENU_AUTOFIRE_OFFSET_6          40070
+#define MENU_ALTERNATE_AB               40071
+#define MENU_EXTERNAL_INPUT             40072
+#define MENU_DEBUG                      40073
+#define MENU_PPUVIEWER                  40074
+#define MENU_NAMETABLEVIEWER            40075
+#define MENU_HEXEDITOR                  40076
+#define MENU_TRACELOGGER                40077
+#define MENU_CDLOGGER                   40078
+#define MENU_GAMEGENIEDECODER           40079
+#define MENU_DEBUGGER                   40080
 #define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
@@ -202,7 +233,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40050
+#define _APS_NEXT_COMMAND_VALUE         40081
 #define _APS_NEXT_CONTROL_VALUE         1117
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

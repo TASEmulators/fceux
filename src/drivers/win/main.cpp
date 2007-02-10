@@ -64,7 +64,7 @@ void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
 void FixWXY(int pref);
-int SetMainWindowStuff(void);
+void SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
 
@@ -400,13 +400,13 @@ int DriverInitialize(void)
 
 static void DriverKill(void)
 { 
- sprintf(TempArray,"%s/fceu98.cfg",BaseDirectory);
- SaveConfig(TempArray);
- DestroyInput();
- ResetVideo();
- if(soundo) TrashSound();
- CloseWave();
- ByebyeWindow();
+	sprintf(TempArray,"%s/fceu98.cfg",BaseDirectory);
+	SaveConfig(TempArray);
+	DestroyInput();
+	ResetVideo();
+	if(soundo) TrashSound();
+	CloseWave();
+	ByebyeWindow();
 }
 
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);

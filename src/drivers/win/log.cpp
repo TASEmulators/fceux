@@ -56,8 +56,6 @@ void RedoText(void)
 **/
 BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DSMFix(uMsg);
-
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:

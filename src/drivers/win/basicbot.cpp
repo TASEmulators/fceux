@@ -2408,7 +2408,6 @@ int pause = 0;
  **/
 static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DSMFix(uMsg); // stops sound on 5 of the messages...
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
