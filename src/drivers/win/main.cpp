@@ -55,6 +55,7 @@
 #include "config.h"
 #include "sound.h"
 #include "wave.h"
+#include "video.h"
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -104,7 +105,7 @@ HWND hAppWnd = 0;
 **/
 HINSTANCE fceu_hInstance;
 
-HRESULT  ddrval;
+HRESULT ddrval;
 
 static char TempArray[2048];
 
@@ -113,7 +114,7 @@ int totallines = 0;
 static int exiting = 0;
 static volatile int moocow = 0;
 
-static int windowedfailed;
+int windowedfailed;
 
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
@@ -270,7 +271,7 @@ void FixFL()
 	totallines = erendline - srendline + 1;
 }
 
-static void UpdateRendBounds(void)
+void UpdateRendBounds()
 { 
 	FCEUI_SetRenderedLines(srendlinen, erendlinen, srendlinep, erendlinep);
 	FixFL(); 
@@ -368,10 +369,6 @@ void DoPriority()
 		}
 	}
 }
-
-// TODO: HORRIBLE
-
-#include "video.cpp"
 
 int DriverInitialize()
 {

@@ -21,6 +21,8 @@
 #include "video.h"
 
 static int RecalcCustom(void);
+void InputScreenChanged(int fs);
+void UpdateRendBounds();
 
 static DDCAPS caps;
 static int mustrestore=0;
@@ -240,6 +242,7 @@ int SetVideoMode(int fs)
          ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsd, &lpDDSPrimary,(IUnknown FAR*)NULL);
          if (ddrval != DD_OK)
          {
+			 void FCEU_PrintError(char *format, ...);
           FCEU_PrintError("%08x, %d\n",ddrval,lpDD7);
           ShowDDErr("Error creating primary surface.");
           return 1;

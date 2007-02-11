@@ -1,7 +1,7 @@
 #ifndef WIN_MAIN_H
 #define WIN_MAIN_H
 
-#include "../../types.h"
+#include "common.h"
 
 // #defines
 
@@ -87,6 +87,8 @@ extern int soundo;
 extern int eoptions;
 extern int soundoptions;
 extern uint8 *xbsave;
+extern HRESULT ddrval;
+extern int windowedfailed;
 
 void FixFL();
 void DoFCEUExit();
