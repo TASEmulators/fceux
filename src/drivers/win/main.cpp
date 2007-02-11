@@ -128,7 +128,6 @@ static int srendline, erendline;
 static int totallines;
 
 int soundo = 1;
-static int ntsccol = 0, ntsctint, ntschue;
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
 int closeGame = 0;

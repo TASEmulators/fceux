@@ -84,7 +84,7 @@ static HMENU fceumenu = 0;
 static int tog = 0;
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
 static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
-static int EnableBackgroundInput = 0;
+//static int EnableBackgroundInput = 0;
 
 static HMENU recentmenu, recentdmenu;
 

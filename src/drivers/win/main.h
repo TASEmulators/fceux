@@ -67,6 +67,8 @@ static int erendlinen = 231;
 static int srendlinep = 0;
 static int erendlinep = 239;
 
+static int ntsccol = 0, ntsctint, ntschue;
+
 extern int soundo;
 extern int eoptions;
 extern int soundoptions;
