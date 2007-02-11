@@ -1,3 +1,5 @@
+#include "common.h"
+
 /**
 * Show an Save File dialog and save a savegame state to the selected file.
 **/

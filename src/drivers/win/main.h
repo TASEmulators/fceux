@@ -69,8 +69,32 @@ static int erendlinep = 239;
 
 static int ntsccol = 0, ntsctint, ntschue;
 
+extern int totallines;
+
+//mbg merge 7/17/06 did these have to be unsigned?
+static int srendline, erendline;
+
+static int changerecursive=0;
+
+static volatile int nofocus = 0;
+
+/**
+* Contains the base directory of FCE
+**/
+static char BaseDirectory[2048];
+
 extern int soundo;
 extern int eoptions;
 extern int soundoptions;
+extern uint8 *xbsave;
+
+void FixFL();
+void DoFCEUExit();
+void ShowAboutBox();
+int BlockingCheck();
+void DoPriority();
+void RemoveDirs();
+void CreateDirs();
+void SetDirs();
 
 #endif

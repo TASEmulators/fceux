@@ -1,3 +1,8 @@
+#ifndef WIN_INPUT_H
+#define WIN_INPU_H
+
+#include "dinput.h"
+
 void ConfigInput(HWND hParent);
 int InitDInput(void);
 void CreateInputStuff(void);
@@ -51,3 +56,4 @@ extern const char* ScanNames[];
 extern CFGSTRUCT HotkeyConfig[];
 #endif
 
+#endif

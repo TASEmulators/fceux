@@ -18,10 +18,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "window.h"
+#include "main.h"
 #include "state.cpp"      /* Save/Load state AS */
 
 #include "sound.h"
 #include "wave.h"
+#include "input.h"
+#include "video.h"
+#include "../../input.h"
+
+#include "ppuview.h"
+#include "debugger.h"
+#include "cheat.h"
+#include "debug.h"
+#include "ntview.h"
+#include "memview.h"
+#include "tracer.h"
+#include "cdlogger.h"
+#include "basicbot.h"
 
 // #defines
 
@@ -52,6 +67,8 @@ void ConfigGUI();
 void ConfigTiming();
 void ConfigPalette();
 void ConfigDirectories();
+void SetAutoFirePattern(int onframes, int offframes);
+void SetAutoFireOffset(int offset);
 
 void RestartMovieOrReset(unsigned int pow);
 int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
@@ -485,7 +502,7 @@ void FCEUD_HideMenuToggle(void)
 	ToggleHideMenu();
 }
 
-static void ALoad(char *nameo)
+void ALoad(char *nameo)
 {
 	if(FCEUI_LoadGame(nameo, 1))
 	{
@@ -1289,7 +1306,7 @@ void UpdateFCEUWindow(void)
 /**
 * Destroys the main window
 **/
-void ByebyeWindow(void)
+void ByebyeWindow()
 {
 	SetMenu(hAppWnd, 0);
 	DestroyMenu(fceumenu);
@@ -1301,7 +1318,7 @@ void ByebyeWindow(void)
 * 
 * @return Flag that indicates failure (0) or success (1)
 **/
-int CreateMainWindow(void)
+int CreateMainWindow()
 {
 	WNDCLASSEX winclass;
 	RECT tmp;
@@ -1624,7 +1641,7 @@ BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
   return 0;
 }
 
-void DoTimingConfigFix(void)
+void DoTimingConfigFix()
 {
 	DoPriority();
 }

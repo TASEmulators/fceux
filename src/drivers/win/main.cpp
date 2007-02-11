@@ -36,15 +36,14 @@
 #include "../../fceu.h"
 #include "../../state.h"
 #include "../../debug.h"
-#include "ppuview.h"
-#include "debugger.h"
 #include "input.h"
 #include "netplay.h"
 #include "joystick.h"
 #include "keyboard.h"
+#include "ppuview.h"
+#include "debugger.h"
 #include "cheat.h"
 #include "debug.h"
-#include "ppuview.h"
 #include "ntview.h"
 #include "memview.h"
 #include "tracer.h"
@@ -54,6 +53,8 @@
 #include "basicbot.h"
 #include "args.h"
 #include "config.h"
+#include "sound.h"
+#include "wave.h"
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -107,32 +108,22 @@ HRESULT  ddrval;
 
 static char TempArray[2048];
 
-/**
-* Contains the base directory of FCE
-**/
-static char BaseDirectory[2048];
+int totallines = 0;
 
 static int exiting = 0;
 static volatile int moocow = 0;
 
 static int windowedfailed;
 
-static volatile int nofocus = 0;
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
 extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display, input_display;
 
-//mbg merge 7/17/06 did these have to be unsigned?
-static int srendline, erendline;
-static int totallines;
-
 int soundo = 1;
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
 int closeGame = 0;
-
-static int changerecursive=0;
 
 // qfox 09/17/06: moved the skipcount outside because it was completely pointless
 //                in there.
@@ -227,7 +218,7 @@ void RemoveDirs()
 /**
 * Creates the default directories.
 **/
-void CreateDirs(void)
+void CreateDirs()
 {
 	DefaultDirectoryWalker(DirectoryCreator);
 }
@@ -254,7 +245,7 @@ void GetBaseDirectory(void)
 	}
 }
 
-int BlockingCheck(void)
+int BlockingCheck()
 {
 	MSG msg;
 	moocow = 1;
@@ -273,7 +264,7 @@ int BlockingCheck(void)
 	return exiting ? 0 : 1;
 }
 
-static void FixFL(void)
+void FixFL()
 {
 	FCEUI_GetCurrentVidSystem(&srendline, &erendline);
 	totallines = erendline - srendline + 1;
@@ -320,7 +311,7 @@ const char *FCEUD_GetCompilerString()
 /**
 * Displays the about box
 **/
-void ShowAboutBox(void)
+void ShowAboutBox()
 {
 	MessageBox(hAppWnd, FCEUI_GetAboutString(), FCEU_NAME, MB_OK);
 }
@@ -360,7 +351,7 @@ void DoFCEUExit()
 /**
 * Changes the thread priority of the main thread.
 **/
-void DoPriority(void)
+void DoPriority()
 {
 	if(eoptions & EO_HIGHPRIO)
 	{
@@ -380,9 +371,7 @@ void DoPriority(void)
 
 // TODO: HORRIBLE
 
-//#include "sound.cpp"
 #include "video.cpp"
-#include "window.cpp"
 
 int DriverInitialize()
 {

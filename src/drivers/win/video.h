@@ -65,5 +65,6 @@ int SetVideoMode(int fs);
 void DoVideoConfigFix();
 void FCEUD_BlitScreen(uint8 *XBuf);
 void ResetVideo();
+void SetFSVideoMode();
 
 #endif

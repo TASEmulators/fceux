@@ -1067,7 +1067,7 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
   return 0;
 }
 
-static void SetFSVideoMode(void)
+void SetFSVideoMode()
 {
  changerecursive=1;
  if(!SetVideoMode(1))
