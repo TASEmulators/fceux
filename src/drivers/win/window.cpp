@@ -1328,6 +1328,8 @@ int CreateMainWindow()
 		fceu_hInstance,
 		NULL );  
 
+	CenterWindowOnScreen(hAppWnd);
+
 	DragAcceptFiles(hAppWnd, 1);
 
 	SetMainWindowStuff();
