@@ -51,6 +51,7 @@
 #include "cdlogger.h"
 
 #include "basicbot.h"
+#include "args.h"
 
 // #defines
 
@@ -102,7 +103,7 @@ void ApplyDefaultCommandMapping(void);
 // Internal variables
 
 uint8 *xbsave = NULL;
-int eoptions=EO_BGRUN | EO_FORCEISCALE;
+int eoptions = EO_BGRUN | EO_FORCEISCALE;
 
 /**
 * Handle of the main window.
@@ -442,7 +443,6 @@ void DoPriority(void)
 #include "video.cpp"
 #include "window.cpp"
 #include "config.cpp"
-#include "args.cpp"
 
 int DriverInitialize()
 {
