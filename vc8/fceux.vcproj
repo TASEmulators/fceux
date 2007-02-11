@@ -831,6 +831,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\directories.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\directories.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\guiconfig.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\guiconfig.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\input.cpp"
 					>
 					<FileConfiguration
@@ -987,6 +1003,32 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\palette.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\palette.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\ppuview.cpp"
 					>
 				</File>
@@ -1060,6 +1102,14 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\state.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\timing.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\timing.h"
 					>
 				</File>
 				<File

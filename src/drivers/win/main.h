@@ -19,9 +19,8 @@
 #define GOO_CONFIRMEXIT 2       /* Confirmation before exiting. */
 #define GOO_POWERRESET  4       /* Confirm on power/reset. */
 
-/* Some timing-related variables (now ignored). */
-static int maxconbskip = 32;             /* Maximum consecutive blit skips. */
-static int ffbskip = 32;              /* Blit skips per blit when FF-ing */
+extern int maxconbskip;
+extern int ffbskip;
 
 static int moviereadonly = 1;
 
@@ -55,7 +54,6 @@ static double saspectw = 1, saspecth = 1;
 static double winsizemulx = 1, winsizemuly = 1;
 static int winwidth, winheight;
 static int ismaximized = 0;
-static uint32 goptions = GOO_DISABLESS;
 
 static int soundrate = 44100;
 static int soundbuftime = 50;
@@ -89,6 +87,7 @@ extern int soundoptions;
 extern uint8 *xbsave;
 extern HRESULT ddrval;
 extern int windowedfailed;
+extern uint32 goptions;
 
 void FixFL();
 void DoFCEUExit();

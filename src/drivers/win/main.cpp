@@ -100,6 +100,12 @@ int soundoptions = SO_SECONDARY | SO_GFOCUS;
 **/
 HWND hAppWnd = 0;
 
+uint32 goptions = GOO_DISABLESS;
+
+/* Some timing-related variables (now ignored). */
+int maxconbskip = 32;             /* Maximum consecutive blit skips. */
+int ffbskip = 32;              /* Blit skips per blit when FF-ing */
+
 /**
 * FCE Ultra Instance 
 **/

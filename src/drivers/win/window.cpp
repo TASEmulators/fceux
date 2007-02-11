@@ -18,6 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/**
+* File description: Everything relevant for the main window should go here. This
+*                   does not include functions relevant for dialog windows.
+**/
+
 #include "window.h"
 #include "main.h"
 #include "state.h"      /* Save/Load state AS */
@@ -38,20 +43,10 @@
 #include "cdlogger.h"
 #include "basicbot.h"
 
-// #defines
-
-#define MAX(x,y) ((x)<(y)?(y):(x))
-#define MIN(x,y) ((x)>(y)?(y):(x))
-
-// Type definitions
-
-struct CreateMovieParameters
-{
-	char* szFilename;				// on Dialog creation, this is the default filename to display.  On return, this is the filename that the user chose.
-	int recordFrom;				// 0 = "Power-On", 1 = "Reset", 2 = "Now", 3+ = savestate file in szSavestateFilename
-	char* szSavestateFilename;
-	WCHAR metadata[MOVIE_MAX_METADATA];
-};
+#include "guiconfig.h"
+#include "timing.h"
+#include "palette.h"
+#include "directories.h"
 
 // Extern variables
 
@@ -63,10 +58,6 @@ extern int movieConvertOffset1, movieConvertOffset2, movieConvertOK;
 
 char *md5_asciistr(uint8 digest[16]);
 
-void ConfigGUI();
-void ConfigTiming();
-void ConfigPalette();
-void ConfigDirectories();
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 
@@ -91,7 +82,7 @@ const unsigned int MAX_NUMBER_OF_RECENT_DIRS = sizeof(recent_directories)/sizeof
 
 static int movieHackType = 3;
 
-static HWND pwindow;
+HWND pwindow;
 
 /**
 * Menu handle of the main menu.
@@ -142,7 +133,6 @@ void ShowCursorAbs(int set_visible)
 		}
 	}
 }
-
 
 void CalcWindowSize(RECT *al)
 {
@@ -1460,300 +1450,6 @@ int GetClientAbsRect(LPRECT lpRect)
 }
 
 /**
-* Prompts the user for a palette file and opens that file.
-*
-* @return Flag that indicates failure (0) or success (1)
-**/
-int LoadPaletteFile()
-{
-	const char filter[]="All usable files(*.pal)\0*.pal\0All files (*.*)\0*.*\0";
-
-	FILE *fp;
-	char nameo[2048];
-
-	// Display open file dialog
-	OPENFILENAME ofn;
-	memset(&ofn, 0, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hInstance = fceu_hInstance;
-	ofn.lpstrTitle = "FCE Ultra Open Palette File...";
-	ofn.lpstrFilter = filter;
-	nameo[0] = 0;
-	ofn.lpstrFile = nameo;
-	ofn.nMaxFile = 256;
-	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-	ofn.lpstrInitialDir = 0;
-
-	if(GetOpenFileName(&ofn))
-	{
-		if((fp = FCEUD_UTF8fopen(nameo, "rb")))
-		{
-			fread(cpalette, 1, 192, fp);
-			fclose(fp);
-
-			FCEUI_SetPaletteArray(cpalette);
-			
-			eoptions |= EO_CPALETTE;
-			return 1;
-		}
-		else
-		{
-			FCEUD_PrintError("Error opening palette file!");
-		}
-	}
-
-	return 0;
-}
-
-/**
-* Callback function for the palette configuration dialog.
-**/
-BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch(uMsg)
-	{
-		case WM_INITDIALOG:
-
-			if(ntsccol)
-			{
-				CheckDlgButton(hwndDlg, 100, BST_CHECKED);
-			}
-
-			SendDlgItemMessage(hwndDlg, 500, TBM_SETRANGE, 1, MAKELONG(0, 128));
-			SendDlgItemMessage(hwndDlg, 501, TBM_SETRANGE, 1, MAKELONG(0, 128));
-
-			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
-
-			SendDlgItemMessage(hwndDlg, 500, TBM_SETPOS, 1, ntsctint);
-			SendDlgItemMessage(hwndDlg, 501, TBM_SETPOS, 1, ntschue);
-
-			EnableWindow(GetDlgItem(hwndDlg, 201), (eoptions & EO_CPALETTE) ? 1 : 0);
-
-			break;
-
-		case WM_HSCROLL:
-			ntsctint = SendDlgItemMessage(hwndDlg, 500, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			ntschue = SendDlgItemMessage(hwndDlg, 501, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
-			break;
-
-		case WM_CLOSE:
-		case WM_QUIT:
-			goto gornk;
-
-		case WM_COMMAND:
-			if(!(wParam>>16))
-			{
-				switch(wParam&0xFFFF)
-				{
-					case 100:
-						ntsccol ^= 1;
-						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
-						break;
-
-					case 200:
-						if(LoadPaletteFile())
-						{
-							EnableWindow(GetDlgItem(hwndDlg, 201), 1);
-						}
-						break;
-
-					case 201:
-						FCEUI_SetPaletteArray(0);
-						eoptions &= ~EO_CPALETTE;
-						EnableWindow(GetDlgItem(hwndDlg, 201), 0);
-						break;
-
-					case 1:
-gornk:
-						DestroyWindow(hwndDlg);
-						pwindow = 0; // Yay for user race conditions.
-						break;
-				}
-			}
-	}
-
-	return 0;
-}
-
-/**
-* Shows palette configuration dialog.
-**/
-void ConfigPalette(void)
-{
-	if(!pwindow)
-	{
-		pwindow=CreateDialog(fceu_hInstance, "PALCONFIG" ,0 , PaletteConCallB);
-	}
-	else
-	{
-		SetFocus(pwindow);
-	}
-}
-
-/**
-* Callback function of the Timing configuration dialog.
-**/
-BOOL CALLBACK TimingConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
- int x;
-
-  switch(uMsg) {
-   case WM_INITDIALOG:                
-                if(eoptions&EO_HIGHPRIO)
-                 CheckDlgButton(hwndDlg,105,BST_CHECKED);
-                if(eoptions&EO_NOTHROTTLE)
-                 CheckDlgButton(hwndDlg,101,BST_CHECKED);
-                for(x=0;x<10;x++)
-                {
-                 char buf[8];
-                 sprintf(buf,"%d",x);
-                 SendDlgItemMessage(hwndDlg,110,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
-                 SendDlgItemMessage(hwndDlg,111,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
-                }
-                SendDlgItemMessage(hwndDlg,110,CB_SETCURSEL,maxconbskip,(LPARAM)(LPSTR)0);
-                SendDlgItemMessage(hwndDlg,111,CB_SETCURSEL,ffbskip,(LPARAM)(LPSTR)0);
-                break;
-   case WM_CLOSE:
-   case WM_QUIT: goto gornk;
-   case WM_COMMAND:
-                if(!(wParam>>16))
-                switch(wParam&0xFFFF)
-                {
-                 case 1:
-                        gornk:
-                        if(IsDlgButtonChecked(hwndDlg,105)==BST_CHECKED)
-                         eoptions|=EO_HIGHPRIO;
-                        else
-                         eoptions&=~EO_HIGHPRIO;
-
-                        if(IsDlgButtonChecked(hwndDlg,101)==BST_CHECKED)
-                         eoptions|=EO_NOTHROTTLE;
-                        else
-                         eoptions&=~EO_NOTHROTTLE;
-
-                        maxconbskip=SendDlgItemMessage(hwndDlg,110,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                        ffbskip=SendDlgItemMessage(hwndDlg,111,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                        EndDialog(hwndDlg,0);
-                        break;
-               }
-              }
-  return 0;
-}
-
-void DoTimingConfigFix()
-{
-	DoPriority();
-}
-
-/**
-* Shows the Timing configuration dialog.
-**/
-void ConfigTiming(void)
-{
-	DialogBox(fceu_hInstance, "TIMINGCONFIG", hAppWnd, TimingConCallB);  
-	DoTimingConfigFix();
-}
-
-/**
-* Processes information from the GUI options dialog after
-* the dialog was closed.
-*
-* @param hwndDlg Handle of the dialog window.
-**/
-void CloseGuiDialog(HWND hwndDlg)
-{
-	if(IsDlgButtonChecked(hwndDlg, CB_LOAD_FILE_OPEN) == BST_CHECKED)
-	{
-		eoptions |= EO_FOAFTERSTART;
-	}
-	else
-	{
-		eoptions &= ~EO_FOAFTERSTART;
-	}
-
-	if(IsDlgButtonChecked(hwndDlg, CB_AUTO_HIDE_MENU) == BST_CHECKED)
-	{
-		eoptions |= EO_HIDEMENU;
-	}
-	else
-	{
-		eoptions &= ~EO_HIDEMENU;
-	}
-
-	goptions &= ~(GOO_CONFIRMEXIT | GOO_DISABLESS);
-
-	if(IsDlgButtonChecked(hwndDlg, CB_ASK_EXIT)==BST_CHECKED)
-	{
-		goptions |= GOO_CONFIRMEXIT;
-	}
-
-	if(IsDlgButtonChecked(hwndDlg, CB_DISABLE_SCREEN_SAVER)==BST_CHECKED)
-	{
-		goptions |= GOO_DISABLESS;
-	}
-
-	EndDialog(hwndDlg,0);
-}
-
-/**
-* Message loop of the GUI configuration dialog.
-**/
-BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch(uMsg)
-	{
-		case WM_INITDIALOG:
-
-			if(eoptions & EO_FOAFTERSTART)
-			{
-				CheckDlgButton(hwndDlg, CB_LOAD_FILE_OPEN, BST_CHECKED);
-			}
-
-			if(eoptions&EO_HIDEMENU)
-			{
-				CheckDlgButton(hwndDlg, CB_AUTO_HIDE_MENU, BST_CHECKED);
-			}
-
-			if(goptions & GOO_CONFIRMEXIT)
-			{
-				CheckDlgButton(hwndDlg, CB_ASK_EXIT, BST_CHECKED);
-			}
-
-			if(goptions & GOO_DISABLESS)
-			{
-				CheckDlgButton(hwndDlg, CB_DISABLE_SCREEN_SAVER, BST_CHECKED);
-			}
-
-			break;
-
-		case WM_CLOSE:
-		case WM_QUIT:
-			CloseGuiDialog(hwndDlg);
-
-		case WM_COMMAND:
-			if(!(wParam>>16))
-			{
-				switch(wParam&0xFFFF)
-				{
-					case BUTTON_CLOSE:
-						CloseGuiDialog(hwndDlg);
-				}
-			}
-	}
-
-	return 0;
-}
-
-/**
-* Shows the GUI configuration dialog.
-**/
-void ConfigGUI(void)
-{
-	DialogBox(fceu_hInstance, "GUICONFIG", hAppWnd, GUIConCallB);  
-}
-
-/**
 * Displays a folder selection dialog.
 * 
 * @param hParent Handle of the parent window.
@@ -1799,144 +1495,6 @@ int BrowseForFolder(HWND hParent, const char *htext, char *buf)
 	CoUninitialize();
 
 	return 1;
-}
-
-/**
-* Processes information from the Directories selection dialog after
-* the dialog was closed.
-*
-* @param hwndDlg Handle of the dialog window.
-**/
-void CloseDirectoriesDialog(HWND hwndDlg)
-{
-	int x;
-
-	// Update the information from the screenshot naming checkbox
-	if(IsDlgButtonChecked(hwndDlg, CHECK_SCREENSHOT_NAMES) == BST_CHECKED)
-	{
-		eoptions |= EO_SNAPNAME;
-	}
-	else
-	{
-		eoptions &= ~EO_SNAPNAME;
-	}
-
-	RemoveDirs();   // Remove empty directories.
-
-	// Read the information from the edit fields and update the
-	// necessary variables.
-	for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
-	{
-		LONG len;
-		len = SendDlgItemMessage(hwndDlg, EDIT_CHEATS + x, WM_GETTEXTLENGTH, 0, 0);
-
-		if(len <= 0)
-		{
-			if(directory_names[x])
-			{
-				free(directory_names[x]);
-			}
-
-			directory_names[x] = 0;
-			continue;
-		}
-
-		len++; // Add 1 for null character.
-
-		if( !(directory_names[x] = (char*)malloc(len))) //mbg merge 7/17/06 added cast
-		{
-			continue;
-		}
-
-		if(!GetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x], len))
-		{
-			free(directory_names[x]);
-			directory_names[x]=0;
-			continue;
-		}
-
-	}
-
-	CreateDirs();   // Create needed directories.
-	SetDirs();      // Set the directories in the core.
-
-	EndDialog(hwndDlg, 0);
-}
-
-/**
-* Callback function for the directories configuration dialog.
-**/
-static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	int x;
-
-	switch(uMsg)
-	{
-		case WM_INITDIALOG:
-
-			SetDlgItemText(hwndDlg,65508,"The settings in the \"Individual Directory Overrides\" group will override the settings in the \"Base Directory Override\" group.  To delete an override, delete the text from the text edit control.  Note that the directory the configuration file is in cannot be overridden");
-
-			// Initialize the directories textboxes
-			for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
-			{
-				SetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x]);
-			}
-
-			// Check the screenshot naming checkbox if necessary
-			if(eoptions & EO_SNAPNAME)
-			{
-				CheckDlgButton(hwndDlg, CHECK_SCREENSHOT_NAMES, BST_CHECKED);
-			}
-			break;
-
-		case WM_CLOSE:
-		case WM_QUIT:
-			CloseDirectoriesDialog(hwndDlg);
-			break;
-
-		case WM_COMMAND:
-			if( !(wParam >> 16) )
-			{
-				if( (wParam & 0xFFFF) >= BUTTON_CHEATS && (wParam & 0xFFFF) <= BUTTON_CHEATS + NUMBER_OF_DIRECTORIES)
-				{
-					// If a directory selection button was pressed, ask the
-					// user for a directory.
-
-					static char *helpert[6] = {
-						"Cheats",
-						"Miscellaneous",
-						"Nonvolatile Game Data",
-						"Save States",
-						"Screen Snapshots",
-						"Base Directory"
-					};
-
-					char name[MAX_PATH];
-
-					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_CHEATS)], name))
-					{
-						SetDlgItemText(hwndDlg, EDIT_CHEATS + ((wParam & 0xFFFF) - BUTTON_CHEATS), name);
-					}
-				}
-				else switch(wParam & 0xFFFF)
-				{
-					case CLOSE_BUTTON:
-						CloseDirectoriesDialog(hwndDlg);
-						break;
-				}
-			}
-
-	}
-
-	return 0;
-}
-
-/**
-* Shows the dialog for configuring the standard directories.
-**/
-void ConfigDirectories(void)
-{
-	DialogBox(fceu_hInstance, "DIRCONFIG", hAppWnd, DirConCallB);
 }
 
 static char* GetReplayPath(HWND hwndDlg)
