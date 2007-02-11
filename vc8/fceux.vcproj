@@ -939,6 +939,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\mapinput.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\mapinput.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\memview.cpp"
 					>
 				</File>

@@ -3,6 +3,17 @@
 
 #include "dinput.h"
 
+#define CMD_KEY_MASK			0xff
+#define CMD_KEY_LSHIFT			(1<<16)
+#define CMD_KEY_RSHIFT			(1<<17)
+#define CMD_KEY_SHIFT			(CMD_KEY_LSHIFT|CMD_KEY_RSHIFT)
+#define CMD_KEY_LCTRL			(1<<18)
+#define CMD_KEY_RCTRL			(1<<19)
+#define CMD_KEY_CTRL			(CMD_KEY_LCTRL|CMD_KEY_RCTRL)
+#define CMD_KEY_LALT			(1<<20)
+#define CMD_KEY_RALT			(1<<21)
+#define CMD_KEY_ALT				(CMD_KEY_LALT|CMD_KEY_RALT)
+
 void ConfigInput(HWND hParent);
 int InitDInput(void);
 void CreateInputStuff(void);
@@ -54,6 +65,9 @@ void FCEUD_UpdateInput();
 
 extern const char* ScanNames[];
 extern CFGSTRUCT HotkeyConfig[];
+
+extern int FCEUD_CommandMapping[EMUCMD_MAX];
+
 #endif
 
 #endif
