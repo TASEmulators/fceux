@@ -41,6 +41,8 @@
 #define MENU_RESET                      200
 #define BUTTON_CHEATS                   200
 #define TXT_PAD1                        200
+#define BTN_RESTORE_DEFAULTS            200
+#define BTN_CLEAR                       200
 #define MENU_POWER                      201
 #define TXT_PAD2                        201
 #define MENU_EJECT_DISK                 202
@@ -49,6 +51,7 @@
 #define MENU_INSERT_COIN                204
 #define MENU_HIDE_MENU                  300
 #define CHECK_SCREENSHOT_NAMES          300
+#define COMBO_FILTER                    300
 #define MENU_RUN_IN_BACKGROUND          301
 #define MENU_BACKGROUND_INPUT           302
 #define MENU_SHOW_STATUS_ICON           303
@@ -62,6 +65,7 @@
 #define GUI_BOT_B_1                     1001
 #define GUI_BOT_SELECT_1                1002
 #define GUI_BOT_START_1                 1003
+#define LV_MAPPING                      1003
 #define GUI_BOT_UP_1                    1004
 #define GUI_BOT_DOWN_1                  1005
 #define GUI_BOT_LEFT_1                  1006
