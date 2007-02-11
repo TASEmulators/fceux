@@ -28,7 +28,7 @@ FCEUX\n\
 \n\
 "__TIME__" "__DATE__"\n";
 
-	char *compilerString = FCEUD_GetCompilerString();
+	const char *compilerString = FCEUD_GetCompilerString();
 
 	//allocate the string and concatenate the template with the compiler string
 	if(aboutString) free(aboutString);

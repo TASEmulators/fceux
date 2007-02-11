@@ -10,7 +10,7 @@ FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
 
 
 //mbg 7/23/06
-char *FCEUD_GetCompilerString();
+const char *FCEUD_GetCompilerString();
 
 /* This makes me feel dirty for some reason. */
 void FCEU_printf(char *format, ...);
@@ -21,7 +21,7 @@ void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b);
 void FCEUD_GetPalette(uint8 i,uint8 *r, uint8 *g, uint8 *b);
 
 /* Displays an error.  Can block or not. */
-void FCEUD_PrintError(char *s);
+void FCEUD_PrintError(const char *s);
 void FCEUD_Message(const char *s);
 
 /* Network interface */

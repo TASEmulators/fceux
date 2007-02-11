@@ -28,7 +28,6 @@
 #undef LPCWAVEFORMATEX
 #include "dsound.h"
 #include "dinput.h"
-//#include <dir.h> //mbg merge 7/17/06 removed
 #include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
@@ -51,14 +50,44 @@
 #include "tracer.h"
 #include "cdlogger.h"
 
-//#include "memwatch.h" //mbg merge 7/19/06 removed-memwatch is gone
 #include "basicbot.h"
+
+// #defines
 
 #define VNSCLIP  ((eoptions&EO_CLIPSIDES)?8:0)
 #define VNSWID   ((eoptions&EO_CLIPSIDES)?240:256)
 
-uint8 *xbsave=NULL;
-int eoptions=EO_BGRUN | EO_FORCEISCALE;
+#define SO_FORCE8BIT  1
+#define SO_SECONDARY  2
+#define SO_GFOCUS     4
+#define SO_D16VOL     8
+#define SO_MUTEFA     16
+#define SO_OLDUP      32
+
+#define GOO_DISABLESS   1       /* Disable screen saver when game is loaded. */
+#define GOO_CONFIRMEXIT 2       /* Confirmation before exiting. */
+#define GOO_POWERRESET  4       /* Confirm on power/reset. */
+
+//---------------------------
+//mbg merge 6/29/06 - new aboutbox
+
+#ifdef _M_X64
+  #define _MSVC_ARCH "x64"
+#else
+  #define _MSVC_ARCH "x86"
+#endif
+#ifdef _DEBUG
+ #define _MSVC_BUILD "debug"
+#else 
+ #define _MSVC_BUILD "release"
+#endif
+#define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
+#define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
+#define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
+#define _Py_STRINGIZE2(X) #X
+//re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
+
+// External functions
 
 void ResetVideo(void);
 void ShowCursorAbs(int w);
@@ -67,6 +96,13 @@ void FixWXY(int pref);
 void SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
+void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
+void ApplyDefaultCommandMapping(void);
+
+// Internal variables
+
+uint8 *xbsave = NULL;
+int eoptions=EO_BGRUN | EO_FORCEISCALE;
 
 /**
 * Handle of the main window.
@@ -92,6 +128,7 @@ static char *directory_names[6] = {0, 0, 0, 0, 0, 0};
 static const char *default_directory_names[5] = {"cheats", "sav", "fcs", "snaps", "movie"};
 
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
+#define NUMBER_OF_DEFAULT_DIRECTORIES sizeof(default_directory_names) / sizeof(*default_directory_names)
 
 static char TempArray[2048];
 
@@ -100,7 +137,71 @@ static char TempArray[2048];
 **/
 static char BaseDirectory[2048];
 
-void SetDirs(void)
+static int exiting = 0;
+static volatile int moocow = 0;
+
+/* Some timing-related variables (now ignored). */
+static int maxconbskip = 32;             /* Maximum consecutive blit skips. */
+static int ffbskip = 32;              /* Blit skips per blit when FF-ing */
+
+static int moviereadonly = 1;
+
+static int fullscreen = 0;
+static int soundflush = 0;
+// Flag that indicates whether Game Genie is enabled or not.
+static int genie = 0;
+
+// Flag that indicates whether PAL Emulation is enabled or not.
+static int pal_emulation = 0;
+static int status_icon = 1;
+static int windowedfailed;
+static double saspectw = 1, saspecth = 1;
+static double winsizemulx = 1, winsizemuly = 1;
+static int winwidth, winheight;
+static int ismaximized = 0;
+
+static volatile int nofocus = 0;
+static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
+
+static uint32 goptions = GOO_DISABLESS;
+
+static int soundrate = 44100;
+static int soundbuftime = 50;
+/*static*/ int soundoptions = SO_SECONDARY | SO_GFOCUS;
+static int soundvolume = 100;
+static int soundquality = 0;
+extern int autoHoldKey, autoHoldClearKey;
+extern int frame_display, input_display;
+
+//mbg merge 7/17/06 did these have to be unsigned?
+static int srendline, erendline;
+static int srendlinen = 8;
+static int erendlinen = 231;
+static int srendlinep = 0;
+static int erendlinep = 239;
+static int totallines;
+
+static uint8 cpalette[192];
+static int vmod = 0;
+int soundo = 1;
+static int ntsccol = 0, ntsctint, ntschue;
+
+//mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
+int closeGame = 0;
+
+static int changerecursive=0;
+
+// qfox 09/17/06: moved the skipcount outside because it was completely pointless
+//                in there.
+/**
+ * Counts the number of frames that have not been displayed
+ * Used for the bot, to skip frames (and save time).
+ **/
+int skipcount = 0;
+
+// Internal functions
+
+void SetDirs()
 {
 	int x;
 
@@ -128,17 +229,56 @@ void SetDirs(void)
 		FCEUI_SetBaseDirectory(BaseDirectory);
 	}
 }
-/* Remove empty, unused directories. */
-void RemoveDirs(void)
-{
- int x;
 
- for(x=0;x<5;x++)
-  if(!directory_names[x])
-  {
-   sprintf(TempArray,"%s\\%s",directory_names[5]?directory_names[5]:BaseDirectory,default_directory_names[x]);
-   RemoveDirectory(TempArray);
-  }
+/**
+* Creates a directory.
+*
+* @param dirname Name of the directory to create.
+**/
+void DirectoryCreator(const char* dirname)
+{
+	CreateDirectory(dirname, 0);
+}
+
+/**
+* Removes a directory.
+*
+* @param dirname Name of the directory to remove.
+**/
+void DirectoryRemover(const char* dirname)
+{
+	RemoveDirectory(dirname);
+}
+
+/**
+* Used to walk over the default directories array.
+*
+* @param callback Callback function that's called for every default directory name.
+**/
+void DefaultDirectoryWalker(void (*callback)(const char*))
+{
+	unsigned int curr_dir;
+
+	for(curr_dir = 0; curr_dir < NUMBER_OF_DEFAULT_DIRECTORIES; curr_dir++)
+	{
+		if(!directory_names[curr_dir])
+		{
+			sprintf(
+				TempArray,
+				"%s\\%s",
+				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory,
+				default_directory_names[curr_dir]
+			);
+
+			callback(TempArray);
+		}
+	}
+}
+
+/* Remove empty, unused directories. */
+void RemoveDirs()
+{
+	DefaultDirectoryWalker(DirectoryRemover);
 }
 
 /**
@@ -146,16 +286,7 @@ void RemoveDirs(void)
 **/
 void CreateDirs(void)
 {
-	int x;
-
-	for(x = 0; x < sizeof(default_directory_names) / sizeof(*default_directory_names); x++)
-	{
-		if(!directory_names[x])
-		{
-			sprintf(TempArray, "%s\\%s", directory_names[5] ? directory_names[5] : BaseDirectory, default_directory_names[x]);
-			CreateDirectory(TempArray,0);
-		}
-	}
+	DefaultDirectoryWalker(DirectoryCreator);
 }
 
 static char *gfsdir=0;
@@ -181,123 +312,66 @@ void GetBaseDirectory(void)
 	}
 }
 
-static int exiting=0;
-static volatile int moocow = 0;
 int BlockingCheck(void)
 {
-  MSG msg;
-  moocow = 1;
-  while( PeekMessage( &msg, 0, 0, 0, PM_NOREMOVE ) ) {
-     if( GetMessage( &msg, 0,  0, 0)>0 )
-     {
-     TranslateMessage(&msg);
-     DispatchMessage(&msg);
-     }
-   }
- moocow = 0;
- if(exiting) return(0);
- return(1);
+	MSG msg;
+	moocow = 1;
+
+	while( PeekMessage( &msg, 0, 0, 0, PM_NOREMOVE ) )
+	{
+		if( GetMessage( &msg, 0,  0, 0)>0 )
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	moocow = 0;
+
+	return exiting ? 0 : 1;
 }
-
-/* Some timing-related variables (now ignored). */
-static int maxconbskip = 32;             /* Maximum consecutive blit skips. */
-static int ffbskip = 32;              /* Blit skips per blit when FF-ing */
-
-static int moviereadonly=1;
-
-static int fullscreen=0;
-static int soundflush=0;
-// Flag that indicates whether Game Genie is enabled or not.
-static int genie = 0;
-
-// Flag that indicates whether PAL Emulation is enabled or not.
-static int pal_emulation = 0;
-static int status_icon=1;
-static int windowedfailed;
-static double saspectw=1, saspecth=1;
-static double winsizemulx=1, winsizemuly=1;
-static int winwidth,winheight;
-static int ismaximized = 0;
-
-static volatile int nofocus=0;
-//static volatile int userpause=0; //mbg merge 7/18/06 removed. this has been replaced with FCEU_EmulationPaused stuff
-static volatile int _userpause=0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
-
-#define SO_FORCE8BIT  1
-#define SO_SECONDARY  2
-#define SO_GFOCUS     4
-#define SO_D16VOL     8
-#define SO_MUTEFA     16
-#define SO_OLDUP      32
-
-#define GOO_DISABLESS   1       /* Disable screen saver when game is loaded. */
-#define GOO_CONFIRMEXIT 2       /* Confirmation before exiting. */
-#define GOO_POWERRESET  4       /* Confirm on power/reset. */
-
-static uint32 goptions = GOO_DISABLESS;
-
-static int soundrate=44100;
-static int soundbuftime=50;
-/*static*/ int soundoptions=SO_SECONDARY|SO_GFOCUS;
-static int soundvolume=100;
-static int soundquality=0;
-extern int autoHoldKey, autoHoldClearKey;
-extern int frame_display, input_display;
-
-//mbg merge 7/17/06 did these have to be unsigned?
-static int srendline,erendline;
-static int srendlinen=8;
-static int erendlinen=231;
-static int srendlinep=0;
-static int erendlinep=239;
-static int totallines;
 
 static void FixFL(void)
 {
- FCEUI_GetCurrentVidSystem(&srendline,&erendline);
- totallines=erendline-srendline+1;
+	FCEUI_GetCurrentVidSystem(&srendline, &erendline);
+	totallines = erendline - srendline + 1;
 }
 
 static void UpdateRendBounds(void)
 { 
- FCEUI_SetRenderedLines(srendlinen,erendlinen,srendlinep,erendlinep);
- FixFL(); 
+	FCEUI_SetRenderedLines(srendlinen, erendlinen, srendlinep, erendlinep);
+	FixFL(); 
 }
 
-static uint8 cpalette[192];
-static int vmod = 0;
-int soundo=1;
-static int ntsccol=0,ntsctint,ntschue;
-
-void FCEUD_PrintError(char *s)
+/**
+* Shows an error message in a message box.
+*
+* @param errormsg Text of the error message.
+**/
+void FCEUD_PrintError(const char *errormsg)
 {
- AddLogText(s,1);
- if(fullscreen) ShowCursorAbs(1);
- MessageBox(0,s,"FCE Ultra Error",MB_ICONERROR|MB_OK|MB_SETFOREGROUND|MB_TOPMOST);
- if(fullscreen)ShowCursorAbs(0);
+	AddLogText(errormsg, 1);
+	
+	if(fullscreen)
+	{
+		ShowCursorAbs(1);
+	}
+
+	MessageBox(0, errormsg, "FCE Ultra Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+	
+	if(fullscreen)
+	{
+		ShowCursorAbs(0);
+	}
 }
 
-
-//---------------------------
-//mbg merge 6/29/06 - new aboutbox
-
-#ifdef _M_X64
-  #define _MSVC_ARCH "x64"
-#else
-  #define _MSVC_ARCH "x86"
-#endif
-#ifdef _DEBUG
- #define _MSVC_BUILD "debug"
-#else 
- #define _MSVC_BUILD "release"
-#endif
-#define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
-#define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
-#define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
-#define _Py_STRINGIZE2(X) #X
-//re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
-
-char *FCEUD_GetCompilerString() {
+/**
+* Generates a compiler identification string.
+*
+* @return Compiler identification string
+**/
+const char *FCEUD_GetCompilerString()
+{
 	return 	__COMPILER__STRING__;
 }
 
@@ -308,9 +382,6 @@ void ShowAboutBox(void)
 {
 	MessageBox(hAppWnd, FCEUI_GetAboutString(), FCEU_NAME, MB_OK);
 }
-
-//mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
-int closeGame = 0;
 
 /**
 * Exits FCE Ultra
@@ -344,74 +415,67 @@ void DoFCEUExit()
 	closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 }
 
+/**
+* Changes the thread priority of the main thread.
+**/
 void DoPriority(void)
 {
- if(eoptions&EO_HIGHPRIO)
- {
-  if(!SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_HIGHEST))
-  {
-   AddLogText("Error setting thread priority to THREAD_PRIORITY_HIGHEST.",1);
-  }
- }
- else
-  if(!SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_NORMAL))
-  {
-   AddLogText("Error setting thread priority to THREAD_PRIORITY_NORMAL.",1);
-  }
+	if(eoptions & EO_HIGHPRIO)
+	{
+		if(!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST))
+		{
+			AddLogText("Error setting thread priority to THREAD_PRIORITY_HIGHEST.", 1);
+		}
+	}
+	else
+	{
+		if(!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL))
+		{
+			AddLogText("Error setting thread priority to THREAD_PRIORITY_NORMAL.", 1);
+		}
+	}
 }
 
-static int changerecursive=0;
+// TODO: HORRIBLE
 
 #include "sound.cpp"
 #include "video.cpp"
-//extern int winspecial;
-//extern vmdef vmodes[11];
-//extern int disvaccel;
-//extern int fssync;
-//extern int winsync;
-//int SetVideoMode(int fs);
-//void DoVideoConfigFix(void);
-//void FCEUD_BlitScreen(uint8 *XBuf);
-
 #include "window.cpp"
-//extern char *rfiles[10];
-//extern char *rdirs[10];
-//extern int EnableBackgroundInput;
-//void ByebyeWindow(void);
-//void DoTimingConfigFix();
-//void CreateMainWindow();
-//void UpdateMenu();
-//void ALoad(char *nameo);
-//void LoadNewGamey(HWND hParent, char *initialdir);
-//void UpdateMenu();
-
 #include "config.cpp"
 #include "args.cpp"
 
-int DriverInitialize(void)
+int DriverInitialize()
 {
-  if(soundo)
-   soundo=InitSound();
+	if(soundo)
+	{
+		soundo = InitSound();
+	}
 
-  SetVideoMode(fullscreen);
-  InitInputStuff();             /* Initialize DInput interfaces. */
-  return 1;
+	SetVideoMode(fullscreen);
+	InitInputStuff();             /* Initialize DInput interfaces. */
+
+	return 1;
 }
 
 static void DriverKill(void)
 { 
-	sprintf(TempArray,"%s/fceu98.cfg",BaseDirectory);
+	// Save config file
+	sprintf(TempArray, "%s/fceu98.cfg", BaseDirectory);
 	SaveConfig(TempArray);
+
 	DestroyInput();
+
 	ResetVideo();
-	if(soundo) TrashSound();
+
+	if(soundo)
+	{
+		TrashSound();
+	}
+
 	CloseWave();
+
 	ByebyeWindow();
 }
-
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
-void ApplyDefaultCommandMapping(void);
-
 
 //mbg merge 7/18/06 - the function that contains the code that used to just be UpdateMemWatch()
 void _updateMemWatch() {
@@ -427,13 +491,13 @@ uint32 *BotInput;
 void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 {
 	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
-	
+
 	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		//mbg 7/28/06 - is this the proper error handling?
 		//do we need to indicate to user somehow that this failed in this emu instance?
 		CloseHandle(mapGameMemBlock);
-		
+
 		mapGameMemBlock = NULL;
 		*GameMemBlock = (uint8 *) malloc(131072);
 		*RAM = (uint8 *) malloc(2048);
@@ -461,7 +525,8 @@ void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 	BotInput[0] = 0;
 }
 
-void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM) {
+void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
+{
 	//clean up shared memory 
 	if(mapRAM)
 	{
@@ -674,7 +739,8 @@ doloopy:
 
 
 //mbg merge 7/19/06 - the function that contains the code that used to just be UpdateFCEUWindow() and FCEUD_UpdateInput()
-void _updateWindow() {
+void _updateWindow()
+{
 	UpdateFCEUWindow();
 	FCEUD_UpdateInput();
 	PPUViewDoBlit();
@@ -886,13 +952,6 @@ void _updateWindow() {
 //	} // end of !(old sound code) block
 //}
 
-// qfox 09/17/06: moved the skipcount outside because it was completely pointless
-//                in there.
-/**
- * Counts the number of frames that have not been displayed
- * Used for the bot, to skip frames (and save time).
- **/
-int skipcount = 0;
 /**
  * Update the game and gamewindow with a new frame
  **/
@@ -1067,26 +1126,45 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 static void FCEUD_MakePathDirs(const char *fname)
 {
 	char path[MAX_PATH];
-	const char* div=fname;
-	do {
-		const char* fptr=strchr(div,'\\');
-		if(!fptr) fptr=strchr(div,'/');
-		if(!fptr) break;
-		int off=fptr-fname;
-		strncpy(path,fname,off);
-		path[off]='\0';
+	const char* div = fname;
+
+	do
+	{
+		const char* fptr = strchr(div, '\\');
+
+		if(!fptr)
+		{
+			fptr = strchr(div, '/');
+		}
+
+		if(!fptr)
+		{
+			break;
+		}
+
+		int off = fptr - fname;
+		strncpy(path, fname, off);
+		path[off] = '\0';
 		mkdir(path);
-		div=fptr+1;
-		while(div[0]=='\\'||div[0]=='/') div++;
+
+		div = fptr + 1;
+		
+		while(div[0] == '\\' || div[0] == '/')
+		{
+			div++;
+		}
+
 	} while(1);
 }
 
 FILE *FCEUD_UTF8fopen(const char *n, const char *m)
 {
-  if(strchr(m,'w')||strchr(m,'+'))
-	  FCEUD_MakePathDirs(n);
+	if(strchr(m, 'w') || strchr(m, '+'))
+	{
+		FCEUD_MakePathDirs(n);
+	}
 
-  return(fopen(n,m));
+	return(fopen(n, m));
 }
 
 int FCEUD_ShowStatusIcon(void)
@@ -1096,6 +1174,6 @@ int FCEUD_ShowStatusIcon(void)
 
 void FCEUD_ToggleStatusIcon(void)
 {
-	status_icon=!status_icon;
+	status_icon = !status_icon;
 	UpdateCheckedMenuItems();
 }
