@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "window.h"
+#include "gui.h"
 
 /**
 * Processes information from the Directories selection dialog after
@@ -10,8 +11,6 @@
 **/
 void CloseDirectoriesDialog(HWND hwndDlg)
 {
-	int x;
-
 	// Update the information from the screenshot naming checkbox
 	if(IsDlgButtonChecked(hwndDlg, CHECK_SCREENSHOT_NAMES) == BST_CHECKED)
 	{
@@ -26,38 +25,60 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 
 	// Read the information from the edit fields and update the
 	// necessary variables.
-	for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
+	for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 	{
 		LONG len;
-		len = SendDlgItemMessage(hwndDlg, EDIT_CHEATS + x, WM_GETTEXTLENGTH, 0, 0);
+		len = SendDlgItemMessage(hwndDlg, EDIT_CHEATS + curr_dir, WM_GETTEXTLENGTH, 0, 0);
 
 		if(len <= 0)
 		{
-			if(directory_names[x])
+			if(directory_names[curr_dir])
 			{
-				free(directory_names[x]);
+				free(directory_names[curr_dir]);
 			}
 
-			directory_names[x] = 0;
+			directory_names[curr_dir] = 0;
 			continue;
 		}
 
 		len++; // Add 1 for null character.
 
-		if( !(directory_names[x] = (char*)malloc(len))) //mbg merge 7/17/06 added cast
+		if( !(directory_names[curr_dir] = (char*)malloc(len))) //mbg merge 7/17/06 added cast
 		{
 			continue;
 		}
 
-		if(!GetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x], len))
+		if(!GetDlgItemText(hwndDlg, EDIT_CHEATS + curr_dir, directory_names[curr_dir], len))
 		{
-			free(directory_names[x]);
-			directory_names[x]=0;
+			free(directory_names[curr_dir]);
+			directory_names[curr_dir] = 0;
 			continue;
+		}
+
+		if (!directoryExists(directory_names[curr_dir]))
+		{
+			const char* mask = "Error: Directory %s does not exist. Create this directory?";
+
+			char* buffer = (char*)malloc(strlen(mask) + strlen(directory_names[curr_dir]) + 1);
+
+			sprintf(buffer, mask, directory_names[curr_dir]);
+
+			if ( MessageBox(hwndDlg, buffer, "FCE Ultra", MB_ICONERROR | MB_YESNO) == IDYES )
+			{
+				if (!CreateDirectory(directory_names[curr_dir], 0))
+				{
+					MessageBox(hwndDlg, "Error: Couldn't create directory. Please choose a different directory.", "FCE Ultra", MB_ICONERROR | MB_OK);
+					free(buffer);
+					return;
+				}
+			}
+
+			free(buffer);
 		}
 
 	}
 
+	initDirectories();
 	CreateDirs();   // Create needed directories.
 	SetDirs();      // Set the directories in the core.
 
@@ -69,18 +90,14 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 **/
 static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	int x;
-
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
 
-			SetDlgItemText(hwndDlg,65508,"The settings in the \"Individual Directory Overrides\" group will override the settings in the \"Base Directory Override\" group.  To delete an override, delete the text from the text edit control.  Note that the directory the configuration file is in cannot be overridden");
-
 			// Initialize the directories textboxes
-			for(x = 0; x < NUMBER_OF_DIRECTORIES; x++)
+			for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 			{
-				SetDlgItemText(hwndDlg, EDIT_CHEATS + x, directory_names[x]);
+				SetDlgItemText(hwndDlg, EDIT_CHEATS + curr_dir, directory_names[curr_dir]);
 			}
 
 			// Check the screenshot naming checkbox if necessary
@@ -88,6 +105,9 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			{
 				CheckDlgButton(hwndDlg, CHECK_SCREENSHOT_NAMES, BST_CHECKED);
 			}
+
+			CenterWindowOnScreen(hwndDlg);
+
 			break;
 
 		case WM_CLOSE:
@@ -123,6 +143,9 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 				{
 					case CLOSE_BUTTON:
 						CloseDirectoriesDialog(hwndDlg);
+						break;
+					case BTN_CANCEL:
+						EndDialog(hwndDlg, 0);
 						break;
 				}
 			}

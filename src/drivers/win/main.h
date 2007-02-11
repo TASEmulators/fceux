@@ -96,5 +96,6 @@ void DoPriority();
 void RemoveDirs();
 void CreateDirs();
 void SetDirs();
+void initDirectories();
 
 #endif

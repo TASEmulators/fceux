@@ -4,6 +4,63 @@
 #include <shlobj.h>     // For directories configuration dialog.
 
 /**
+* Centers a window relative to its parent window.
+*
+* @param hwndDlg Handle of the window to center.
+**/
+void CenterWindow(HWND hwndDlg)
+{
+	//TODO: This function should probably moved into the generic Win32 window file
+    //move the window relative to its parent
+    HWND hwndParent = GetParent(hwndDlg);
+	RECT rect;
+	RECT rectP;
+
+    GetWindowRect(hwndDlg, &rect);
+    GetWindowRect(hwndParent, &rectP);
+
+    unsigned int width  = rect.right  - rect.left;
+    unsigned height = rect.bottom - rect.top;
+
+    unsigned x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
+    unsigned y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
+
+    unsigned int screenwidth  = GetSystemMetrics(SM_CXSCREEN);
+    unsigned int screenheight = GetSystemMetrics(SM_CYSCREEN);
+
+    //make sure that the dialog box never moves outside of the screen
+    if(x < 0) x = 0;
+    if(y < 0) y = 0;
+    if(x + width  > screenwidth)  x = screenwidth  - width;
+    if(y + height > screenheight) y = screenheight - height;
+
+    MoveWindow(hwndDlg, x, y, width, height, FALSE);
+}
+
+/**
+* Centers a window on the screen.
+*
+* @param hwnd The window handle.
+**/
+void CenterWindowOnScreen(HWND hwnd)
+{
+	RECT rect;
+
+    GetWindowRect(hwnd, &rect);
+
+    unsigned int screenwidth  = GetSystemMetrics(SM_CXSCREEN);
+    unsigned int screenheight = GetSystemMetrics(SM_CYSCREEN);
+
+    unsigned int width  = rect.right  - rect.left;
+    unsigned height = rect.bottom - rect.top;
+
+    unsigned x = (screenwidth -  width) / 2;
+    unsigned y = (screenheight - height) / 2;
+
+    MoveWindow(hwnd, x, y, width, height, FALSE);
+}
+
+/**
 * Changes the state of the mouse cursor.
 * 
 * @param set_visible Determines the visibility of the cursor ( 1 or 0 )

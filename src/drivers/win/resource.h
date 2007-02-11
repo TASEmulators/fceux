@@ -7,6 +7,7 @@
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
 #define GUI_BOT_VALUES                  2
+#define BTN_CANCEL                      2
 #define MENU_OPEN_FILE                  100
 #define EDIT_CHEATS                     100
 #define MENU_CLOSE_FILE                 101
