@@ -19,6 +19,7 @@
  */
 
 #include "video.h"
+#include "gui.h"
 
 static int RecalcCustom(void);
 void InputScreenChanged(int fs);

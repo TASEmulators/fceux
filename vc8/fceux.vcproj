@@ -839,6 +839,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\gui.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\gui.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\guiconfig.cpp"
 					>
 				</File>
@@ -1042,6 +1050,14 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\pref.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\replay.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\replay.h"
 					>
 				</File>
 				<File

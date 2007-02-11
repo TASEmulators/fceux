@@ -5,6 +5,9 @@
 
 // #defines
 
+#define MAX(x,y) ((x)<(y)?(y):(x))
+#define MIN(x,y) ((x)>(y)?(y):(x))
+
 #define VNSCLIP  ((eoptions&EO_CLIPSIDES)?8:0)
 #define VNSWID   ((eoptions&EO_CLIPSIDES)?240:256)
 

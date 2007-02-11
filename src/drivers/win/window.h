@@ -3,11 +3,6 @@
 
 #include "common.h"
 
-// #defines
-
-#define MAX(x,y) ((x)<(y)?(y):(x))
-#define MIN(x,y) ((x)>(y)?(y):(x))
-
 // Type definitions
 
 struct CreateMovieParameters
@@ -24,7 +19,6 @@ extern char *recent_files[];
 extern char *recent_directories[10];
 extern HWND pwindow;
 
-void ShowCursorAbs(int set_visible);
 void HideFWindow(int h);
 void SetMainWindowStuff();
 int GetClientAbsRect(LPRECT lpRect);
@@ -36,5 +30,7 @@ void UpdateCheckedMenuItems();
 void ALoad(char *nameo);
 void LoadNewGamey(HWND hParent, const char *initialdir);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
+void UpdateCheckedMenuItems();
+void SetMainWindowStuff();
 
 #endif
