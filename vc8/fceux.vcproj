@@ -789,6 +789,32 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\config.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)2.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\config.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\debugger.cpp"
 					>
 				</File>
@@ -990,6 +1016,14 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\tracer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\video.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\window.h"
 					>
 				</File>
 				<Filter

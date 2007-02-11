@@ -26,6 +26,20 @@
 /*								*/
 /****************************************************************/
 
+#include "config.h"
+#include "common.h"
+#include "main.h"
+#include "window.h"
+#include "video.h"
+
+extern CFGSTRUCT NetplayConfig[];
+extern CFGSTRUCT InputConfig[];
+extern CFGSTRUCT HotkeyConfig[];
+extern int autoHoldKey, autoHoldClearKey;
+extern int frame_display;
+extern int input_display;
+extern char *BasicBotDir;
+
 /**
 * Structure that contains configuration information
 **/
@@ -125,7 +139,7 @@ static CFGSTRUCT fceuconfig[] = {
 		ENDCFGSTRUCT
 };
 
-static void SaveConfig(char *filename)
+void SaveConfig(const char *filename)
 {
 	SaveFCEUConfig(filename,fceuconfig);
 }

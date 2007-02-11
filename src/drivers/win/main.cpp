@@ -52,6 +52,7 @@
 
 #include "basicbot.h"
 #include "args.h"
+#include "config.h"
 
 // #defines
 
@@ -442,7 +443,6 @@ void DoPriority(void)
 #include "sound.cpp"
 #include "video.cpp"
 #include "window.cpp"
-#include "config.cpp"
 
 int DriverInitialize()
 {
