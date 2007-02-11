@@ -373,7 +373,7 @@ static void ResetSearch(void)
 
 static int srescallb(uint32 a, uint8 last, uint8 current, void *data)
 {
- char tmp[13];
+ char tmp[14];
  sprintf(tmp, "$%04x:%03d:%03d",(unsigned int)a,(unsigned int)last,(unsigned int)current);
  return(AddToList(tmp,a));
 }
