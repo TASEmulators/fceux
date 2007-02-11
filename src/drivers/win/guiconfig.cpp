@@ -1,5 +1,6 @@
 #include "common.h"
 #include "main.h"
+#include "gui.h"
 
 /**
 * Processes information from the GUI options dialog after
@@ -71,6 +72,8 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				CheckDlgButton(hwndDlg, CB_DISABLE_SCREEN_SAVER, BST_CHECKED);
 			}
 
+			CenterWindowOnScreen(hwndDlg);
+
 			break;
 
 		case WM_CLOSE:
@@ -78,9 +81,9 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CloseGuiDialog(hwndDlg);
 
 		case WM_COMMAND:
-			if(!(wParam>>16))
+			if(!(wParam >> 16))
 			{
-				switch(wParam&0xFFFF)
+				switch(wParam & 0xFFFF)
 				{
 					case BUTTON_CLOSE:
 						CloseGuiDialog(hwndDlg);
