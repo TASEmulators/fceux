@@ -20,7 +20,7 @@
 
 #include "window.h"
 #include "main.h"
-#include "state.cpp"      /* Save/Load state AS */
+#include "state.h"      /* Save/Load state AS */
 
 #include "sound.h"
 #include "wave.h"

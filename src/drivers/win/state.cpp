@@ -3,7 +3,7 @@
 /**
 * Show an Save File dialog and save a savegame state to the selected file.
 **/
-void FCEUD_SaveStateAs(void)
+void FCEUD_SaveStateAs()
 {
 	const char filter[] = "FCE Ultra Save State(*.fc?)\0*.fc?\0";
 	char nameo[2048];
@@ -28,7 +28,7 @@ void FCEUD_SaveStateAs(void)
 /**
 * Show an Open File dialog and load a savegame state from the selected file.
 **/
-void FCEUD_LoadStateFrom(void)
+void FCEUD_LoadStateFrom()
 {
 	const char filter[]="FCE Ultra Save State(*.fc?)\0*.fc?\0";
 	char nameo[2048];
