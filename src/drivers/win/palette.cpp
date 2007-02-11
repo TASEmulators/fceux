@@ -1,6 +1,7 @@
 #include "common.h"
 #include "main.h"
 #include "window.h"
+#include "gui.h"
 
 /**
 * Prompts the user for a palette file and opens that file.
@@ -71,6 +72,8 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			SendDlgItemMessage(hwndDlg, 501, TBM_SETPOS, 1, ntschue);
 
 			EnableWindow(GetDlgItem(hwndDlg, 201), (eoptions & EO_CPALETTE) ? 1 : 0);
+
+			CenterWindowOnScreen(hwndDlg);
 
 			break;
 
