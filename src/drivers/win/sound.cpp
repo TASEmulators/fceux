@@ -19,6 +19,8 @@
  */
 
 #include <list>
+#include "common.h"
+#include "main.h"
 
 /// controls whether playback is muted
 static bool mute = false;
@@ -502,7 +504,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 /**
 * Shows the sounds configuration dialog.
 **/
-void ConfigSound(void)
+void ConfigSound()
 {
 	if(!uug)
 	{
@@ -551,7 +553,7 @@ static int32 fps_scale_table[]=
 { 3, 3, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192, 16384, 16384};
 int32 fps_scale = 256;
 
-static void RefreshThrottleFPS(void)
+void RefreshThrottleFPS()
 {
 	printf("WTF\n");
 	fflush(stdout);
@@ -597,4 +599,4 @@ void FCEUD_SetEmulationSpeed(int cmd)
 }
 
 
-#include "wave.cpp"
+//#include "wave.cpp"

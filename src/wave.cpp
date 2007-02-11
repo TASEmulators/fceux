@@ -53,7 +53,7 @@ void FCEU_WriteWaveData(int32 *Buffer, int Count)
 	#endif
 }
 
-int FCEUI_EndWaveRecord(void)
+int FCEUI_EndWaveRecord()
 {
  long s;
 

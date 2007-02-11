@@ -20,6 +20,9 @@
 
 #include "state.cpp"      /* Save/Load state AS */
 
+#include "sound.h"
+#include "wave.h"
+
 // #defines
 
 #define MAX(x,y) ((x)<(y)?(y):(x))
@@ -382,7 +385,7 @@ void UpdateRecentArray(const char* addString, char** bufferArray, unsigned int a
 	}
 
 	// Move the other items down.
-	for(x = arrayLen - 1; x; x--)
+	for(unsigned int x = arrayLen - 1; x; x--)
 	{
 		bufferArray[x] = bufferArray[x - 1];
 	}

@@ -18,7 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-int CloseWave(void)
+
+#include "common.h"
+#include "../../wave.h"
+
+int CloseWave()
 {
 
  return(FCEUI_EndWaveRecord());
@@ -29,7 +33,7 @@ int CloseWave(void)
 * 
 * @return Flag that indicates failure (0) or success (1).
 **/
-int CreateSoundSave(void)
+int CreateSoundSave()
 {
 	const char filter[]="MS WAVE(*.wav)\0*.wav\0";
 	char nameo[2048];
