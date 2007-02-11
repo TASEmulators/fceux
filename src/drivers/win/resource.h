@@ -12,12 +12,14 @@
 #define EDIT_CHEATS                     100
 #define MENU_CLOSE_FILE                 101
 #define IDI_ICON1                       101
+#define CB_DISABLE_SPEED_THROTTLING     101
 #define IDI_ICON2                       102
 #define MENU_RECENT_FILES               102
 #define CB_LOAD_FILE_OPEN               102
 #define CB_AUTO_HIDE_MENU               104
 #define COMBO_PAD1                      104
 #define COMBO_PAD2                      105
+#define CB_SET_HIGH_PRIORITY            105
 #define BTN_PORT1                       106
 #define BTN_PORT2                       107
 #define MENU_SAVE_STATE                 110
