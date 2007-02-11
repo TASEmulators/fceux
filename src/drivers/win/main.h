@@ -39,11 +39,7 @@ static int status_icon = 1;
 static int vmod = 0;
 static char *gfsdir=0;
 
-/** 
-* Contains the names of the overridden standard directories
-* in the order cheats, misc, nonvol, states, snaps, ..., base
-**/
-static char *directory_names[6] = {0, 0, 0, 0, 0, 0};
+extern char* directory_names[6];
 
 /**
 * Contains the names of the default directories.

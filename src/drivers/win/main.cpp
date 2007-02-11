@@ -95,6 +95,12 @@ int eoptions = EO_BGRUN | EO_FORCEISCALE;
 
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
 
+/** 
+* Contains the names of the overridden standard directories
+* in the order cheats, misc, nonvol, states, snaps, ..., base
+**/
+char *directory_names[6] = {0, 0, 0, 0, 0, 0};
+
 /**
 * Handle of the main window.
 **/
@@ -158,7 +164,7 @@ void SetDirs()
 
 	for(x=0; x < sizeof(jlist) / sizeof(*jlist); x++)
 	{
-		FCEUI_SetDirOverride(jlist[x], directory_names[x]);  
+		FCEUI_SetDirOverride(jlist[x], directory_names[x]);
 	}
 
 	if(directory_names[5])
@@ -495,6 +501,35 @@ void do_exit()
 	FCEUI_Kill();
 }
 
+/**
+* Puts the default directory names into the elements of the directory_names array
+* that aren't already defined.
+**/
+void initDirectories()
+{
+	for (unsigned int i = 0; i < NUMBER_OF_DEFAULT_DIRECTORIES; i++)
+	{
+		if (directory_names[i] == 0)
+		{
+			sprintf(
+				TempArray,
+				"%s\\%s",
+				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory,
+				default_directory_names[i]
+			);
+
+			directory_names[i] = (char*)malloc(strlen(TempArray) + 1);
+			strcpy(directory_names[i], TempArray);
+		}
+	}
+
+	if (directory_names[NUMBER_OF_DIRECTORIES - 1] == 0)
+	{
+		directory_names[NUMBER_OF_DIRECTORIES - 1] = (char*)malloc(strlen(BaseDirectory) + 1);
+		strcpy(directory_names[NUMBER_OF_DIRECTORIES - 1], BaseDirectory);
+	}
+}
+
 int main(int argc,char *argv[])
 {
 	char *t;
@@ -524,6 +559,8 @@ int main(int argc,char *argv[])
 	// Load the config information
 	sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory);
 	LoadConfig(TempArray);
+
+	initDirectories();
 
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
