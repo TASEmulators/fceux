@@ -72,6 +72,11 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 					return;
 				}
 			}
+			else
+			{
+				free(buffer);
+				return;
+			}
 
 			free(buffer);
 		}
