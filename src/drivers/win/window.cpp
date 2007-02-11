@@ -165,7 +165,15 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_STOP_AVI,
 		MENU_LOG_SOUND,
 		MENU_HIDE_MENU,
-		40003
+		40003,
+		MENU_DEBUGGER,
+		MENU_PPUVIEWER,
+		MENU_NAMETABLEVIEWER,
+		MENU_HEXEDITOR,
+		MENU_TRACELOGGER,
+		MENU_CDLOGGER,
+		MENU_GAMEGENIEDECODER,
+		MENU_CHEATS
 	};
 
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
@@ -181,7 +189,6 @@ void updateGameDependentMenus(unsigned int enable)
 			else
 #endif
 				EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED));
-		i++;
 	}
 }
 
