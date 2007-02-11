@@ -598,7 +598,9 @@ void InitFilterComboBox(HWND hwndDlg)
 	// Populate the filter combobox.
 	SendDlgItemMessage(hwndDlg, COMBO_FILTER, CB_INSERTSTRING, 0, (LPARAM)"None");
 
-	for(unsigned i = 0; i < EMUCMDTYPE_MAX; ++i)
+	unsigned i;
+
+	for(i = 0; i < EMUCMDTYPE_MAX; ++i)
 	{
 		SendDlgItemMessage(hwndDlg, COMBO_FILTER, CB_INSERTSTRING, i+1, (LPARAM)FCEUI_CommandTypeNames[i]);
 	}
