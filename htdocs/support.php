@@ -28,7 +28,7 @@ It currently provides an elegant interface for:<br>
 <li>Input configuration</li>
 <li>Easy network play</li>
 </ul>
-For more information about gfceu and for download links, click <a href="http://gfceu.thepiratecove.org">here</a>.
+For more information about gfceu and for download links, click <a href="http://dietschnitzel.com/gfceu/">here</a>.
 </p>
 
 </div>
