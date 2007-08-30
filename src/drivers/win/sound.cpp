@@ -249,12 +249,40 @@ public:
 	}
 };
 
+//todo - a properly synchronized method ShouldntTouchSound() which is totally safe (use mutexes) and use that to guard all sound code
+//also add an alternate timer-based throttler for when sound is disabled
+
 
 static Player *player;
 static Player8 *player8;
 
+static bool trashPending = false;
+
+void TrashSound() {
+	trashPending = true;
+}
+
+void DoTrashSound() {
+	if(dsout) delete dsout;
+	if(player) delete player;
+	dsout = 0;
+	player = 0;
+	trashPending = false;
+}
+
+bool CheckTrashSound() {
+	if(trashPending)
+	{
+		DoTrashSound();
+		return true;
+	}
+	else return false;
+}
+
 void win_Throttle() {
-	player->throttle();
+	if(CheckTrashSound()) return;
+	if(player)
+		player->throttle();
 }
 
 void win_SoundInit(int bits) {
@@ -276,14 +304,6 @@ void win_SoundInit(int bits) {
 	else voice->setSource(player);
 	dsout->unlock();
 }
-
-void TrashSound() {
-	if(dsout) delete dsout;
-	if(player) delete player;
-	dsout = 0;
-	player = 0;
-}
-
 
 
 int InitSound() {
@@ -308,14 +328,15 @@ int InitSound() {
 
 
 void win_SoundSetScale(int scale) {
-	player->scale = scale;
+	if(CheckTrashSound()) return;
+	if(player)
+		player->scale = scale;
 }
 
 void win_SoundWriteData(int32 *buffer, int count) {
-	
-	//todo..
-		// FCEUI_AviSoundUpdate((void*)MBuffer, Count);
-
+	//mbg 8/30/07 - this used to be done here, but now its gtting called from somewhere else...
+	//FCEUI_AviSoundUpdate((void*)MBuffer, Count);
+	if(CheckTrashSound()) return;
 	void *tempbuf = alloca(2*count);
 	short *sbuf = (short *)tempbuf;
 	for(int i=0;i<count;i++)
