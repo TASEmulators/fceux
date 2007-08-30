@@ -685,6 +685,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 		p = (struct CreateMovieParameters*)lParam;
 		UpdateRecordDialogPath(hwndDlg, p->szFilename);
 		free(p->szFilename);
+		p->szFilename = 0;
 		
 		/* Populate the "record from..." dialog */
 		{
@@ -851,6 +852,7 @@ void FCEUD_MovieRecordTo()
 			meta);
 	}
 
-	free(p.szFilename);
+	if(p.szFilename)
+		free(p.szFilename);
 }
 
