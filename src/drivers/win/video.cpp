@@ -38,11 +38,11 @@ int disvaccel = 0;      /* Disable video hardware acceleration. */
 int fssync=0;
 int winsync=0;
 
+
+PALETTEENTRY *color_palette;
+
 #ifdef _USE_SHARED_MEMORY_
-PALETTEENTRY *color_palette;  // shared memory changes
 HANDLE mapColorPalette;
-#else
-PALETTEENTRY color_palette[256];
 #endif //_USE_SHARED_MEMORY_
 
 static int PaletteChanged=0;
@@ -100,7 +100,7 @@ void FCEUD_GetPalette(unsigned char i, unsigned char *r, unsigned char *g, unsig
 static int InitializeDDraw(int fs)
 {
 #ifdef _USE_SHARED_MEMORY_
-	mapColorPalette = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * sizeof(PALETTEENTRY),"fceu.ColorPalette");
+	mapColorPalette = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE, 0, 256 * sizeof(PALETTEENTRY),"fceu.ColorPalette");
 	if(mapColorPalette == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(mapColorPalette);
@@ -110,7 +110,7 @@ static int InitializeDDraw(int fs)
 	else
 		color_palette   = (PALETTEENTRY *)MapViewOfFile(mapColorPalette, FILE_MAP_WRITE, 0, 0, 0);
 #endif
-	
+
 	//(disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:
         ddrval = DirectDrawCreate((disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:NULL, &lpDD, NULL);
         if (ddrval != DD_OK)

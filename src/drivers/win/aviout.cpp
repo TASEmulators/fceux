@@ -4,7 +4,7 @@
 
 #include "common.h"
 
-extern PALETTEENTRY color_palette[256];
+extern PALETTEENTRY *color_palette;
 //extern WAVEFORMATEX wf;
 //extern int soundo;
 
@@ -250,23 +250,21 @@ static int avi_open(const char* filename, const BITMAPINFOHEADER* pbmih, const W
 	return result;
 }
 
+//converts to 24bpp
 static void do_video_conversion(const unsigned char* buffer)
 {
-#define BPP (3) // 24-bit
-//	memset(avi_file->convert_buffer, 0, VIDEO_WIDTH*(avi_file->end_scanline-avi_file->start_scanline)*BPP);
+//	memset(avi_file->convert_buffer, 0, VIDEO_WIDTH*(avi_file->end_scanline-avi_file->start_scanline)*3);
 
 	buffer += avi_file->start_scanline * VIDEO_WIDTH;
 
-	int y;
-	for(y=avi_file->start_scanline; y<avi_file->end_scanline; ++y)
+	for(int y=avi_file->start_scanline; y<avi_file->end_scanline; ++y)
 	{
-		uint8* pix = avi_file->convert_buffer + (avi_file->end_scanline-1-y)*VIDEO_WIDTH*BPP;
+		uint8* pix = avi_file->convert_buffer + (avi_file->end_scanline-1-y)*VIDEO_WIDTH*3;
 		const uint8* prevbuf = buffer;
 
-		register int x;
-		for(x=0; x<VIDEO_WIDTH; ++x)
+		for(int x=0; x<VIDEO_WIDTH; ++x)
 		{
-			register const char* cp = (const char*)(color_palette + *buffer++)+2;
+			uint8 *cp = (uint8*)(color_palette + *buffer++)+2;
 			*pix++ = *cp--;
 			*pix++ = *cp--;
 			*pix++ = *cp;
