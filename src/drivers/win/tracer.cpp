@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <algorithm>
+
 #include "common.h"
 #include "debugger.h"
 #include "..\..\x6502.h"
@@ -453,7 +455,7 @@ void UpdateLogText(void){
 	}
 	*/
 
-	for(i = tracesi.nPos;i < min(tracesi.nMax,tracesi.nPos+21);i++){
+	for(i = tracesi.nPos;i < std::min(tracesi.nMax,tracesi.nPos+21);i++){
 		j = i;
 		if(tracelogbufusedsize == tracelogbufsize){
 			j = (tracelogbufpos+i)%tracelogbufsize;

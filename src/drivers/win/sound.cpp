@@ -555,11 +555,9 @@ int32 fps_scale = 256;
 
 void RefreshThrottleFPS()
 {
-	printf("WTF\n");
 	fflush(stdout);
- desiredfps=FCEUI_GetDesiredFPS()>>8;
- desiredfps=(desiredfps*fps_scale)>>8;
- 
+	desiredfps=FCEUI_GetDesiredFPS()>>8;
+	desiredfps=(desiredfps*fps_scale)>>8;
 }
 
 static void IncreaseEmulationSpeed(void)

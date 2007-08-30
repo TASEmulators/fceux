@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../src/drivers/win/zlib"
-				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx"
+				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -67,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../vc_libs/x86/ddraw.lib ../vc_libs/x86/dsound.lib ../vc_libs/x86/dinput.lib ../vc_libs/x86/dxguid.lib"
+				AdditionalDependencies="Rpcrt4.lib  comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -1390,6 +1390,240 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+					</File>
+				</Filter>
+				<Filter
+					Name="audiere"
+					>
+					<File
+						RelativePath="..\src\drivers\win\audiere\audiere.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\basic_source.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\basic_source.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\debug.cpp"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)1.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)1.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\debug.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\default_file.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds_buffer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds_buffer.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds_stream.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_ds_stream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_mixer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_mixer.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_mm.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_mm.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_null.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\device_null.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\dumb_resample.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\dumb_resample.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\file_ansi.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\input.cpp"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)2.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)2.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\internal.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\loop_point_source.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\mci_device.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\memory_file.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\memory_file.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\resampler.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\resampler.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\resource.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\sample_buffer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\sound.cpp"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)2.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)\$(InputName)2.obj"
+								XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\sound_effect.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\threads.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\threads_win32.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\timer.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\timer_win32.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\tone.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\types.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\utility.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\utility.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\audiere\version.cpp"
+						>
 					</File>
 				</Filter>
 			</Filter>
