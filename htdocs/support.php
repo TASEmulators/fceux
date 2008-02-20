@@ -22,8 +22,8 @@
 <h2 class="boxhead"><a id="fceupal">FCEU-PAL</a></h2>
 <div class="boxbody">
 <p>
-A program which analyzes the NES ROM and launches FCE Ultra with the
-correct "-pal" parameter.
+A program written by Mateusz Viste which analyzes the NES ROM
+and launches FCE Ultra with the correct "-pal" parameter.
 The archive contains executables for DOS and Linux, as well as the
 source-code (under the GNU/GPL licence). The program is written in
 FreeBASIC.  It would be great if someone could port this to C and
@@ -100,7 +100,8 @@ Legacy Releases:<br>
 <h2 class="boxhead"><a id="setpal">SETPAL</a></h2>
 <div class="boxbody">
 <p>
-A command-line utility which changes the "NTSC/PAL" bit of
+A command-line utility written by Mateusz Viste which changes the
+"NTSC/PAL" bit of
 an iNES header (that is the weakest bit of the 10th byte).  Many old
 PAL NES ROMs have an incorrect bit, which causes FCE Ultra to
 think the ROMs are NTSC even though they are not.  The archive
