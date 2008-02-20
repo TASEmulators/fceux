@@ -10,9 +10,9 @@
 <ul>
 <li><a href="#fceupal">FCEU-PAL</a></li>
 <li><a href="#gfceu">GNOME FCE Ultra</a></li>
+<li><a href="#mines">MiNES</a></li>
 <li><a href="#chtconv">NESten&lt;--&gt;FCE Ultra Cheat Converter</a></li>
 <li><a href="#netplay">Network Play Server</a></li>
-<li><a href="#setpal">SETPAL</a></li>
 </ul>
 </div>
 </div>
@@ -49,6 +49,18 @@ It currently provides an elegant interface for:<br>
 For more information about gfceu and for download links, click <a href="http://dietschnitzel.com/gfceu/">here</a>.
 </p>
 
+</div>
+</div>
+
+
+<div class="mainbox">
+<h2 class="boxhead"><a id="mines">MiNES</a></h2>
+<div class="boxbody">
+<p>
+An editor for NES ROMs in the iNES format, written by Mateusz Viste.
+It allows you to change the PAL/NTSC bit of the iNES header.
+<a href="http://mateusz.viste.free.fr/dos/en/download.php?plik=mines">Download</a>
+</p>
 </div>
 </div>
 
@@ -91,24 +103,6 @@ Current Release:<br>
 Legacy Releases:<br>
 <a href="http://prdownloads.sourceforge.net/fceultra/fceu-server-0.0.4.tar.gz?download">0.0.4 Source Code</a><br>
 <a href="http://prdownloads.sourceforge.net/fceultra/fceunetserver-0.0.3.tar.bz2">0.0.3 Source Code</a>
-</p>
-</div>
-</div>
-
-
-<div class="mainbox">
-<h2 class="boxhead"><a id="setpal">SETPAL</a></h2>
-<div class="boxbody">
-<p>
-A command-line utility written by Mateusz Viste which changes the
-"NTSC/PAL" bit of
-an iNES header (that is the weakest bit of the 10th byte).  Many old
-PAL NES ROMs have an incorrect bit, which causes FCE Ultra to
-think the ROMs are NTSC even though they are not.  The archive
-contains executables for DOS and Linux, as well as the source-code
-(under the GNU/GPL licence).  The program is written in
-FreeBASIC.
-<a href="http://mateusz.viste.free.fr/fceu/setpal.zip">Download</a>
 </p>
 </div>
 </div>
