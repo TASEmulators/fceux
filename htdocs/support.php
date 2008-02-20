@@ -57,8 +57,8 @@ For more information about gfceu and for download links, click <a href="http://d
 <h2 class="boxhead"><a id="mines">MiNES</a></h2>
 <div class="boxbody">
 <p>
-An editor for NES ROMs in the iNES format, written by Mateusz Viste.
-It allows you to change the PAL/NTSC bit of the iNES header.
+An editor for NES ROMs in the iNES format.  It allows you to
+change the PAL/NTSC bit of the iNES header.  Written by Mateusz Viste.
 <a href="http://mateusz.viste.free.fr/dos/en/download.php?plik=mines">Download</a>
 </p>
 </div>
