@@ -51,9 +51,9 @@
 uint64 timestampbase;
 
 
-FCEUGI *GameInfo = NULL;
-void (*GameInterface)(int h);
+FCEUGI *GameInfo = 0;
 
+void (*GameInterface)(int h);
 void (*GameStateRestore)(int version);
 
 readfunc ARead[0x10000];
@@ -255,7 +255,7 @@ static void CloseGame(void)
 
 		CloseGenie();
 
-		free(GameInfo);
+		delete GameInfo;
 		GameInfo = 0;
 	}
 }
@@ -289,40 +289,45 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 //	StopSound();
 //#endif
 
-        FCEUFILE *fp;
+	//----------
+	//attempt to open the files
+	FCEUFILE *fp;
 	char *ipsfn;
-	
-	ResetGameLoaded();
-	
-	RewindStatus[0] = RewindStatus[1] = 0;
-	RewindStatus[2] = RewindStatus[3] = 0;
-
-	GameInfo = (FCEUGI*)malloc(sizeof(FCEUGI));
-	memset(GameInfo, 0, sizeof(FCEUGI));
-
-	GameInfo->soundchan = 0;
-	GameInfo->soundrate = 0;
-        GameInfo->name=0;
-        GameInfo->type=GIT_CART;
-        GameInfo->vidsys=GIV_USER;
-        GameInfo->input[0]=GameInfo->input[1]=-1;
-        GameInfo->inputfc=-1;
-        GameInfo->cspecial=0;
 
 	FCEU_printf("Loading %s...\n\n",name);
-
-        GetFileBase(name);
+	GetFileBase(name);
 
 	ipsfn=FCEU_MakeFName(FCEUMKF_IPS,0,0);
 	fp=FCEU_fopen(name,ipsfn,"rb",0);
 	free(ipsfn);
 
-	if(!fp)
-        {
- 	 FCEU_PrintError("Error opening \"%s\"!",name);
-	 return 0;
+	if(!fp) {
+ 		FCEU_PrintError("Error opening \"%s\"!",name);
+		return 0;
 	}
+	//---------
 
+	//file opened ok. start loading.
+
+	ResetGameLoaded();
+	
+	RewindStatus[0] = RewindStatus[1] = 0;
+	RewindStatus[2] = RewindStatus[3] = 0;
+
+	CloseGame();
+	GameInfo = new FCEUGI;
+	memset(GameInfo, 0, sizeof(FCEUGI));
+		
+	GameInfo->soundchan = 0;
+	GameInfo->soundrate = 0;
+    GameInfo->name=0;
+    GameInfo->type=GIT_CART;
+    GameInfo->vidsys=GIV_USER;
+    GameInfo->input[0]=GameInfo->input[1]=-1;
+    GameInfo->inputfc=-1;
+    GameInfo->cspecial=0;
+
+		//try to load each different format
         if(iNESLoad(name,fp,OverwriteVidMode))
          goto endlseq;
         if(NSFLoad(fp))
@@ -335,6 +340,9 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
         FCEU_PrintError("An error occurred while loading the file.");
 		FCEUD_PrintError("An error occurred while loading the file.");
         FCEU_fclose(fp);
+
+		delete GameInfo;
+
         return 0;
 
         endlseq:

@@ -1011,7 +1011,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				if(GameInfo)
 				{
 					FCEUI_CloseGame();                            
-					GameInfo = 0;
 					updateGameDependentMenus(GameInfo != 0);
 				}
 				break;
