@@ -214,7 +214,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
  FCEUFILE *fceufp;
  void *t;
 
- if(strchr(mode,'r'))
+ if(ipsfn && strchr(mode,'r'))
   ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
 
  fceufp=(FCEUFILE *)malloc(sizeof(FCEUFILE));
