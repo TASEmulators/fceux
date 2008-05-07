@@ -379,10 +379,14 @@ int FCEUI_Initialize(void)
 	AllocBuffers();
 
 	// Initialize some parts of the settings structure
+	//mbg 5/7/08 - I changed the ntsc settings to match pal.
+	//this is more for precision emulation, instead of entertainment, which is what fceux is all about nowadays
 	memset(&FSettings,0,sizeof(FSettings));
-	FSettings.UsrFirstSLine[0]=8;
+	//FSettings.UsrFirstSLine[0]=8;
+	FSettings.UsrFirstSLine[0]=0;
 	FSettings.UsrFirstSLine[1]=0;
-	FSettings.UsrLastSLine[0]=231;
+	//FSettings.UsrLastSLine[0]=231;
+	FSettings.UsrLastSLine[0]=239;
 	FSettings.UsrLastSLine[1]=239;
 	FSettings.SoundVolume=100;
 	

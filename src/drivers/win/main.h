@@ -59,8 +59,12 @@ static int soundbuftime = 50;
 static int soundvolume = 100;
 static int soundquality = 0;
 static uint8 cpalette[192];
-static int srendlinen = 8;
-static int erendlinen = 231;
+//mbg 5/7/08 - I changed the ntsc settings to match pal.
+//this is more for precision emulation, instead of entertainment, which is what fceux is all about nowadays
+//static int srendlinen = 8;
+//static int erendlinen = 231;
+static int srendlinen = 0;
+static int erendlinen = 239;
 static int srendlinep = 0;
 static int erendlinep = 239;
 

@@ -457,7 +457,6 @@ static void BlitScreenWindow(unsigned char *XBuf)
   specialmul = 3;
  else specialmul = 1;
 
-
  srect.top=srect.left=0;
  srect.right=VNSWID * specialmul;
  srect.bottom=totallines * specialmul;
