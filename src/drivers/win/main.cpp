@@ -38,6 +38,7 @@
 #include "../../debug.h"
 #include "input.h"
 #include "netplay.h"
+#include "memwatch.h"
 #include "joystick.h"
 #include "keyboard.h"
 #include "ppuview.h"
@@ -415,12 +416,6 @@ static void DriverKill(void)
 	ByebyeWindow();
 }
 
-//mbg merge 7/18/06 - the function that contains the code that used to just be UpdateMemWatch()
-void _updateMemWatch() {
-	//UpdateMemWatch()
-	//but soon we will do more!
-}
-
 #ifdef _USE_SHARED_MEMORY_
 HANDLE mapGameMemBlock;
 HANDLE mapRAM;
@@ -716,6 +711,7 @@ void _updateWindow()
 	UpdateMemoryView(0);
 	UpdateCDLogger();
 	UpdateLogWindow();
+	UpdateMemWatch();
 	NTViewDoBlit(0);
 }
 

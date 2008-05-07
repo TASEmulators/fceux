@@ -230,6 +230,7 @@
 #define MENU_CDLOGGER                   40078
 #define MENU_GAMEGENIEDECODER           40079
 #define MENU_DEBUGGER                   40080
+#define MENU_MEMORY_WATCH				40081
 #define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438

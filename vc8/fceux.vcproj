@@ -963,6 +963,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\memwatch.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\memwatch.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\netplay.cpp"
 					>
 					<FileConfiguration

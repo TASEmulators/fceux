@@ -33,6 +33,7 @@
 #include "video.h"
 #include "../../input.h"
 
+#include "memwatch.h"
 #include "ppuview.h"
 #include "debugger.h"
 #include "cheat.h"
@@ -995,8 +996,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 #endif
 
 				//case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
-				//mbg merge TODO 7/17/06 - had to remove this
-				//case 205:CreateMemWatch(hWnd);break;
+				
+			case MENU_MEMORY_WATCH:
+				CreateMemWatch(hWnd);
+				break;
 
 			case MENU_OPEN_FILE:
 				// User selected the Open File menu => Show the file selection dialog
