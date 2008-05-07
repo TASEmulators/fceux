@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../vc_libs/x86/ddraw.lib ../vc_libs/x86/dsound.lib ../vc_libs/x86/dinput.lib ../vc_libs/x86/dxguid.lib"
+				AdditionalDependencies="Rpcrt4.lib  comctl32.lib vfw32.lib winmm.lib ws2_32.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
