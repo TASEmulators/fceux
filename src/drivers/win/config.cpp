@@ -83,7 +83,11 @@ static CFGSTRUCT fceuconfig[] = {
         NACS("odnonvol",directory_names[2]),
         NACS("odstates",directory_names[3]),
         NACS("odsnaps",directory_names[4]),
-        NACS("odbase",directory_names[5]),
+		NACS("odmemwatch",directory_names[5]),
+		NACS("odbasicbot",directory_names[6]),
+		NACS("odmacro",directory_names[7]),
+		NACS("odfdsrom",directory_names[8]),
+        NACS("odbase",directory_names[9]),
 
         AC(winspecial),
         AC(winsizemulx),

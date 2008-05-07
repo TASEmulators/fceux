@@ -238,8 +238,12 @@ void FCEUI_CheatSearchSetCurrentAsOriginal(void);
 #define FCEUIOD_NV      2
 #define FCEUIOD_CHEATS  3
 #define FCEUIOD_MISC    4
+#define FCEUIOD_MEMW	5
+#define FCEUIOD_BBOT	6
+#define FCEUIOD_MACRO	7
+#define FCEUIOD_FDS		8
 
-#define FCEUIOD__COUNT  5
+#define FCEUIOD__COUNT  9
 
 void FCEUI_SetDirOverride(int which, char *n);
 

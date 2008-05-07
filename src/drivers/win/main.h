@@ -39,12 +39,12 @@ static int status_icon = 1;
 static int vmod = 0;
 static char *gfsdir=0;
 
-extern char* directory_names[6];
+extern char* directory_names[10];
 
 /**
 * Contains the names of the default directories.
 **/
-static const char *default_directory_names[5] = {"cheats", "sav", "fcs", "snaps", "movie"};
+static const char *default_directory_names[9] = {"cheats", "movie", "sav", "fcs", "snaps", "memwatch", "basicbot", "macro", ""};
 
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
 #define NUMBER_OF_DEFAULT_DIRECTORIES sizeof(default_directory_names) / sizeof(*default_directory_names)
