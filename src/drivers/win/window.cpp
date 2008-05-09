@@ -43,6 +43,7 @@
 #include "tracer.h"
 #include "cdlogger.h"
 #include "basicbot.h"
+#include "throttle.h"
 
 #include "guiconfig.h"
 #include "timing.h"

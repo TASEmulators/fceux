@@ -66,6 +66,11 @@ static int RWWrap=0;
 //bit0 indicates whether emulation is paused
 //bit1 indicates whether emulation is in frame step mode
 static int EmulationPaused=0;
+bool frameAdvanceRequested=false;
+int frameAdvanceDelay;
+
+//indicates that the emulation core just frame advanced (consumed the frame advance state and paused)
+bool JustFrameAdvanced=false;
 
 static int RewindStatus[4] = {0, 0, 0, 0}; //is it safe to load rewind state
 static int RewindIndex = 0; //which rewind state we're on
@@ -252,6 +257,12 @@ static void CloseGame(void)
 		GameInterface(GI_CLOSE);
 
 		ResetExState(0,0);
+
+		//mbg 5/9/08 - clear screen when game is closed
+		//http://sourceforge.net/tracker/index.php?func=detail&aid=1787298&group_id=13536&atid=113536
+		extern uint8 *XBuf;
+		if(XBuf)
+			memset(XBuf,0,256*256);
 
 		CloseGenie();
 
@@ -473,6 +484,20 @@ void UpdateRewind(void);
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
  int r,ssize;
+  
+ JustFrameAdvanced = false;
+
+ if(frameAdvanceRequested) {
+	 if(frameAdvanceDelay==0) {
+		EmulationPaused = 3;
+		frameAdvanceDelay++;
+	 } else {
+		 if(frameAdvanceDelay>=10) {
+			 EmulationPaused = 3;
+		 } else frameAdvanceDelay++;
+	 }
+ }
+
 
  if(EmulationPaused&2)
   EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
@@ -523,6 +548,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 //  if(soundoptions&SO_MUTEFA)
 //#endif
 	*SoundBufSize=0;              // keep sound muted
+	JustFrameAdvanced = true;
  }
 }
 
@@ -762,9 +788,15 @@ void FCEUI_ToggleEmulationPause(void)
 	EmulationPaused = (EmulationPaused&1)^1;
 }
 
+void FCEUI_FrameAdvanceEnd(void)
+{
+	frameAdvanceRequested = false;
+}
+
 void FCEUI_FrameAdvance(void)
 {
-	EmulationPaused |= 1|2;
+	frameAdvanceRequested = true;
+	frameAdvanceDelay = 0;
 }
 
 static int RewindCounter = 0;

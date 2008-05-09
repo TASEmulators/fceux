@@ -31,6 +31,7 @@
 #include "main.h"
 #include "window.h"
 #include "video.h"
+#include "memwatch.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -137,7 +138,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(autoHoldClearKey),
 	AC(frame_display),
 	AC(input_display),
-	//ACS(MemWatchDir), //mbg merge 7/18/06 removed
+	ACS(MemWatchDir), //mbg merge 7/18/06 removed
 	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
 		ENDCFGSTRUCT

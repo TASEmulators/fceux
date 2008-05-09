@@ -824,6 +824,14 @@ BOOL CALLBACK PatcherCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 extern char *iNesShortFName();
 
+void DebuggerExit()
+{
+	FCEUI_Debugger().badopbreak = 0;
+	debugger_open = 0;
+	DeleteObject(hNewFont);
+	DestroyWindow(hDebug);
+}
+
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	LOGFONT lf;
 	RECT wrect;
@@ -919,10 +927,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 		case WM_QUIT:
 			exitdebug:
-			FCEUI_Debugger().badopbreak = 0;
-			debugger_open = 0;
-			DeleteObject(hNewFont);
-			DestroyWindow(hwndDlg);
+			DebuggerExit();
 			break;
 		case WM_MOVING:
 			break;

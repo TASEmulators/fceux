@@ -270,6 +270,14 @@ void DoTrashSound() {
 	trashPending = false;
 }
 
+
+void TrashSoundNow() {
+	DoTrashSound();
+	//is this safe?
+}
+
+
+
 bool CheckTrashSound() {
 	if(trashPending)
 	{
@@ -287,7 +295,10 @@ void win_Throttle() {
 
 void win_SoundInit(int bits) {
 	dsout = new OAKRA_Module_OutputDS();
-	dsout->start(hAppWnd);
+	if(soundoptions&SO_GFOCUS)
+		dsout->start(0);
+	else
+		dsout->start(hAppWnd);
 	dsout->beginThread();
 	OAKRA_Format fmt;
 	fmt.format = bits==8?OAKRA_U8:OAKRA_S16;
@@ -447,7 +458,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                            }
                            if(soundo)
                            {
-                            TrashSound();
+                            TrashSoundNow();
                             soundo=InitSound();
                             UpdateSD(hwndDlg);
                            }
@@ -470,7 +481,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          case 122:soundoptions^=SO_FORCE8BIT;   
                                   if(soundo)
                                   {
-                                   TrashSound();
+                                   TrashSoundNow();
                                    soundo=InitSound();
                                    UpdateSD(hwndDlg);                                   
                                   }
@@ -478,7 +489,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          case 123:soundoptions^=SO_SECONDARY;
                                   if(soundo)
                                   {
-                                   TrashSound();
+                                   TrashSoundNow();
                                    soundo=InitSound();
                                    UpdateSD(hwndDlg);
                                   }
@@ -486,7 +497,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          case 124:soundoptions^=SO_GFOCUS;
                                   if(soundo)
                                   {
-                                   TrashSound();
+                                   TrashSoundNow();
                                    soundo=InitSound();
                                    UpdateSD(hwndDlg);
                                   }
@@ -496,7 +507,7 @@ BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          case 131:soundoptions^=SO_OLDUP;
                                   if(soundo)
                                   {
-                                   TrashSound();
+                                   TrashSoundNow();
                                    soundo=InitSound();
                                    UpdateSD(hwndDlg);
                                   }
@@ -563,59 +574,5 @@ void FCEUD_SoundVolumeAdjust(int n)
 	FCEUI_SetSoundVolume(soundvolume);
 	FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
-
-//-----------
-//throttle stuff
-//-----------
-
-static uint64 desiredfps;
-
-static int32 fps_scale_table[]=
-{ 3, 3, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512, 768, 1024, 2048, 4096, 8192, 16384, 16384};
-int32 fps_scale = 256;
-
-void RefreshThrottleFPS()
-{
-	fflush(stdout);
-	desiredfps=FCEUI_GetDesiredFPS()>>8;
-	desiredfps=(desiredfps*fps_scale)>>8;
-}
-
-static void IncreaseEmulationSpeed(void)
-{
- int i;
- for(i=1; fps_scale_table[i]<fps_scale; i++)
-  ;
- fps_scale = fps_scale_table[i+1];
-}
-
-static void DecreaseEmulationSpeed(void)
-{
- int i;
- for(i=1; fps_scale_table[i]<fps_scale; i++)
-  ;
- fps_scale = fps_scale_table[i-1];
-}
-
-#define fps_table_size		(sizeof(fps_scale_table)/sizeof(fps_scale_table[0]))
-
-void FCEUD_SetEmulationSpeed(int cmd)
-{
-	switch(cmd)
-	{
-	case EMUSPEED_SLOWEST:	fps_scale=fps_scale_table[0];  break;
-	case EMUSPEED_SLOWER:	DecreaseEmulationSpeed(); break;
-	case EMUSPEED_NORMAL:	fps_scale=256; break;
-	case EMUSPEED_FASTER:	IncreaseEmulationSpeed(); break;
-	case EMUSPEED_FASTEST:	fps_scale=fps_scale_table[fps_table_size-1]; break;
-	default:
-		return;
-	}
-
-	RefreshThrottleFPS();
-
-	FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
-}
-
 
 //#include "wave.cpp"

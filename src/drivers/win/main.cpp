@@ -49,6 +49,7 @@
 #include "memview.h"
 #include "tracer.h"
 #include "cdlogger.h"
+#include "throttle.h"
 
 #include "main.h"
 #include "basicbot.h"
@@ -366,9 +367,11 @@ void DoFCEUExit()
 	closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 }
 
-/**
-* Changes the thread priority of the main thread.
-**/
+void FCEUD_OnCloseGame()
+{
+}
+
+//Changes the thread priority of the main thread.
 void DoPriority()
 {
 	if(eoptions & EO_HIGHPRIO)
@@ -616,6 +619,8 @@ int main(int argc,char *argv[])
 		return 1;
 	}
  
+	InitSpeedThrottle();
+
 	UpdateCheckedMenuItems();
 
 	if(t)
@@ -970,17 +975,25 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//update debugging displays
 	_updateWindow();
 
+	extern bool JustFrameAdvanced;
+
 	//MBG TODO - think about this logic
 	//throttle
 	extern bool turbo; //needs to be declared better
 	if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
 		if(!turbo) //and turbo is disabled..
-			if(!FCEUI_EmulationPaused())
+			if(!FCEUI_EmulationPaused() 
+				||JustFrameAdvanced
+				)
 				//then throttle
-				win_Throttle();
+				while(SpeedThrottle()) {
+					FCEUD_UpdateInput();
+					_updateWindow();
+				}
+
 
 	//sleep just to be polite
-	if(FCEUI_EmulationPaused()) {
+	if(!JustFrameAdvanced && FCEUI_EmulationPaused()) {
 		Sleep(50);
 	}
 

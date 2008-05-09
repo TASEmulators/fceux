@@ -1141,6 +1141,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\throttle.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\throttle.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\timing.cpp"
 					>
 				</File>

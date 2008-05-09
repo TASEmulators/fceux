@@ -1392,7 +1392,7 @@ int FCEUD_TestCommandState(int c)
 	|| c == EMUCMD_SPEED_SLOWER
 	|| c == EMUCMD_SPEED_FASTER*/)
 	{
-		keys=GetKeyboard(); 
+		keys=GetKeyboard_nr(); 
 /*		if((cmdmask & CMD_KEY_LALT) == CMD_KEY_LALT
 		|| (cmdmask & CMD_KEY_RALT) == CMD_KEY_RALT
 		|| (cmdmask & CMD_KEY_LALT) == CMD_KEY_LALT
@@ -1400,12 +1400,11 @@ int FCEUD_TestCommandState(int c)
 		|| (cmdmask & CMD_KEY_RCTRL) == CMD_KEY_RCTRL
 		|| (cmdmask & CMD_KEY_LSHIFT) == CMD_KEY_LSHIFT
 		|| (cmdmask & CMD_KEY_RSHIFT) == CMD_KEY_RSHIFT)*/
-			keys_nr=GetKeyboard();
+			keys_nr=GetKeyboard_nr();
 //		else
 //			keys_nr=GetKeyboard_nr();
 	}
-	else 
-		if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function, but right now Turbo is the only command that has it
+	else if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function, but right now Turbo is the only command that has it
 	{
 		keys=GetKeyboard_jd();
 		keys_nr=GetKeyboard_nr(); 

@@ -1,6 +1,5 @@
 extern int32 fps_scale;
 
-void RefreshThrottleFPS();
 void ConfigSound();
 int InitSound();
 void TrashSound();

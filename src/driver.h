@@ -206,6 +206,7 @@ void FCEUI_MovieToggleReadOnly(void);
 void FCEUI_MovieToggleFrameDisplay(void);
 void FCEUI_ToggleInputDisplay(void);
 
+
 void FCEUD_MovieRecordTo(void);
 void FCEUD_MovieReplayFrom(void);
 
@@ -287,7 +288,11 @@ void FCEUI_SetEmulationPaused(int val);
 ///toggles the paused bit (bit0) for EmulationPaused. caused FCEUD_DebugUpdate() to fire if the emulation pauses
 void FCEUI_ToggleEmulationPause(void);
 
+///called when the emulator closes a game
+void FCEUD_OnCloseGame(void);
+
 void FCEUI_FrameAdvance(void);
+void FCEUI_FrameAdvanceEnd(void);
 
 /* AVI Output */
 int FCEUI_AviBegin(const char* fname);

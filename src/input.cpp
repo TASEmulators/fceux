@@ -552,7 +552,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_POWER,							EMUCMDTYPE_MISC,	FCEUI_PowerNES, 0, 0, "Power", },
 	{ EMUCMD_RESET,							EMUCMDTYPE_MISC,	FCEUI_ResetNES, 0, 0, "Reset", },
 	{ EMUCMD_PAUSE,							EMUCMDTYPE_MISC,	FCEUI_ToggleEmulationPause, 0, 0, "Pause", },
-	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, 0, 0, "Frame Advance", },
+	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot, 0, 0, "Screenshot", },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", },
 
