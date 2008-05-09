@@ -263,6 +263,7 @@ static void CloseGame(void)
 void ResetGameLoaded(void)
 {
         if(GameInfo) CloseGame();
+		EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
         GameStateRestore=0;
         PPU_hook=0;
         GameHBIRQHook=0;
@@ -510,6 +511,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
  *SoundBuf=WaveFinal;
  *SoundBufSize=ssize;
 
+ //if we were asked to frame advance, then since we have just finished
+ //a frame, we should switch to regular pause
  if(EmulationPaused&2)
  {
   EmulationPaused = 1;          // restore paused flag
@@ -735,7 +738,17 @@ int32 FCEUI_GetDesiredFPS(void)
 
 int FCEUI_EmulationPaused(void)
 {
- return (EmulationPaused&1);
+	return (EmulationPaused&1);
+}
+
+int FCEUI_EmulationFrameStepped()
+{
+	return (EmulationPaused&2);
+}
+
+void FCEUI_ClearEmulationFrameStepped()
+{
+	EmulationPaused &=~2;
 }
 
 //mbg merge 7/18/06 added

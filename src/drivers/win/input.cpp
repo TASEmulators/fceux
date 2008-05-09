@@ -129,8 +129,8 @@ int NoWaiting=0;
 bool turbo = false;
 
 #include "keyscan.h"
-static unsigned char *keys=0;
-static unsigned char *keys_nr=0;
+static unsigned int *keys=0;
+static unsigned int *keys_nr=0;
 static int DIPS=0;
 
 //#define KEY(__a) keys_nr[MKK(__a)]
@@ -1404,7 +1404,8 @@ int FCEUD_TestCommandState(int c)
 //		else
 //			keys_nr=GetKeyboard_nr();
 	}
-	else if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function, but right now Turbo is the only command that has it
+	else 
+		if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function, but right now Turbo is the only command that has it
 	{
 		keys=GetKeyboard_jd();
 		keys_nr=GetKeyboard_nr(); 

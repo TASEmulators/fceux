@@ -476,20 +476,19 @@ void UpdateRegs(HWND hwndDlg) {
 ///indicates whether we're under the control of the debugger
 bool inDebugger = false;
 
-void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count); //HACK
+//this code enters the debugger.
 void FCEUD_DebugBreakpoint() {
-	inDebugger = true;
-	DoDebug(1);
-	UpdateLogWindow();
-	if(hMemView)UpdateMemoryView(0);
-	//mbg merge 6/30/06 - this architecture has changed
-	FCEUD_Update(0,0,0);
-	//FCEUD_BlitScreen(XBuf+8); //this looks odd, I know. but the pause routine is in here!!
-	//if(logging)LogInstruction(); //logging might have been started while we were paused
-	inDebugger = false;
+	UpdateDebugger();
+	void win_debuggerLoop(); //HACK
+	win_debuggerLoop();
 }
 
-void UpdateDebugger() {
+void UpdateDebugger()
+{
+	//dont do anything if the debugger is not visible
+	if(!hDebug)
+		return;
+
 	char str[256]={0},chr[8];
 	int tmp,ret,i;
 

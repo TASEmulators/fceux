@@ -710,7 +710,6 @@ doloopy:
 void _updateWindow()
 {
 	UpdateFCEUWindow();
-	FCEUD_UpdateInput();
 	PPUViewDoBlit();
 	UpdateMemoryView(0);
 	UpdateCDLogger();
@@ -921,9 +920,20 @@ void _updateWindow()
 //	} // end of !(old sound code) block
 //}
 
-/**
- * Update the game and gamewindow with a new frame
- **/
+void win_debuggerLoop()
+{
+	//delay until something causes us to unpause. 
+	//either a hotkey or a debugger command
+	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
+	{
+		Sleep(50);
+		FCEUD_UpdateInput();
+		_updateWindow();
+	}
+	int zzz=9;
+}
+
+// Update the game and gamewindow with a new frame
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	//mbg merge 7/19/06 - leaving this untouched but untested
@@ -960,6 +970,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//update debugging displays
 	_updateWindow();
 
+	//MBG TODO - think about this logic
 	//throttle
 	extern bool turbo; //needs to be declared better
 	if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
@@ -968,23 +979,33 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 				//then throttle
 				win_Throttle();
 
-	//delay until we unpause. we will only stick here if we're paused by a breakpoint or debug command
-	while(FCEUI_EmulationPaused() && inDebugger)
-	{
+	//sleep just to be polite
+	if(FCEUI_EmulationPaused()) {
 		Sleep(50);
-		BlockingCheck();
-		FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
 	}
 
-	//something of a hack, but straightforward:
-	//if we were paused, but not in the debugger, then unpause ourselves and step.
-	//this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
-	//cut off execution as soon as it makes it into the main cpu cycle loop
-	if(FCEUI_EmulationPaused() && !inDebugger) {
-		FCEUI_ToggleEmulationPause();
-		FCEUI_Debugger().step = 1;
-	}
+	//while(EmulationPaused==1 && inDebugger)
+	//{
+	//	Sleep(50);
+	//	BlockingCheck();
+	//	FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
+	//}
+
+	////so, we're not paused anymore.
+
+	////something of a hack, but straightforward:
+	////if we were paused, but not in the debugger, then unpause ourselves and step.
+	////this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
+	////cut off execution as soon as it makes it into the main cpu cycle loop
+	//if(FCEUI_EmulationPaused() && !inDebugger) {
+	//	FCEUI_ToggleEmulationPause();
+	//	FCEUI_Debugger().step = 1;
+	//	FCEUD_DebugBreakpoint();
+	//}
 	
+	//make sure to update the input once per frame
+	FCEUD_UpdateInput();
+
 
 //	if(soundo) //&& temp_fps_scale >= 64
 //	{

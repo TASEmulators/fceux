@@ -1,7 +1,7 @@
 void KeyboardClose(void);
 int KeyboardInitialize(void);
 void KeyboardUpdate(void);
-unsigned char *GetKeyboard(void);
-unsigned char *GetKeyboard_nr(void);
-unsigned char *GetKeyboard_jd(void);
+unsigned int *GetKeyboard(void);
+unsigned int *GetKeyboard_nr(void);
+unsigned int *GetKeyboard_jd(void);
 int KeyboardSetBackgroundAccess(int on);

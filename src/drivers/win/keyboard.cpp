@@ -34,20 +34,24 @@ void KeyboardClose(void)
  lpdid=0;
 }
 
-static unsigned char keys[256] = {0,}; // with repeat
-static unsigned char keys_nr[256] = {0,}; // non-repeating
-static unsigned char keys_jd[256] = {0,}; // just-down
-static unsigned char keys_jd_lock[256] = {0,}; // just-down released lock
+static unsigned int keys[256] = {0,}; // with repeat
+static unsigned int keys_nr[256] = {0,}; // non-repeating
+static unsigned int keys_jd[256] = {0,}; // just-down
+static unsigned int keys_jd_lock[256] = {0,}; // just-down released lock
 int autoHoldKey = 0, autoHoldClearKey = 0;
+int ctr=0;
 void KeyboardUpdateState(void)
 {
  unsigned char tk[256];
+ printf("%d!!\n",ctr++);
 
  ddrval=IDirectInputDevice7_GetDeviceState(lpdid,256,tk);
 
  // HACK because DirectInput is totally wacky about recognizing the PAUSE/BREAK key
  if(GetAsyncKeyState(VK_PAUSE)) // normally this should have & 0x8000, but apparently this key is too special for that to work
 	 tk[0xC5] = 0x80;
+
+ DWORD time = timeGetTime();
 
  switch(ddrval)
  {
@@ -64,16 +68,16 @@ void KeyboardUpdateState(void)
 		#define KEY_JUST_DOWN_DURATION (4) // must be >= 1 and <= 255
 
 		int i;
+		
 		for(i = 0 ; i < 256 ; i++)
-			if(tk[i])
-				if(keys_nr[i] < 255)
-					keys_nr[i]++; // activate key, and count up for repeat
-				else
-					keys_nr[i] = 255 - KEY_REPEAT_REPEATING_DELAY; // oscillate for repeat
+			if(tk[i]) {
+				if(keys_nr[i] == 0)
+					keys_nr[i] = time;
+			}
 			else
-				keys_nr[i] = 0; // deactivate key
+				keys_nr[i] = 0;
 
-		memcpy(keys,keys_nr,256);
+		memcpy(keys,keys_nr,256*4);
 
 		// key-down detection
 		for(i = 0 ; i < 256 ; i++)
@@ -87,18 +91,18 @@ void KeyboardUpdateState(void)
 			else if(keys_jd[i]
 			/*&& (i != 0x2A && i != 0x36 && i != 0x1D && i != 0x38)*/)
 			{
-				if(++keys_jd[i] > KEY_JUST_DOWN_DURATION)
+				if(time - keys_jd[i] > KEY_JUST_DOWN_DURATION)
 				{
 					keys_jd[i] = 0;
 					keys_jd_lock[i] = 1;
 				}
 			}
 			else
-				keys_jd[i] = 1;
+				keys_jd[i] = time;
 
 		// key repeat
 		for(i = 0 ; i < 256 ; i++)
-			if(keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
+			if(time - keys[i] >= KEY_REPEAT_INITIAL_DELAY && !((time-keys[i])%KEY_REPEAT_REPEATING_DELAY))
 				keys[i] = 0;
 	}	   
 	break;
@@ -106,7 +110,7 @@ void KeyboardUpdateState(void)
 
    case DIERR_INPUTLOST:
    case DIERR_NOTACQUIRED:
-                         memset(keys,0,256);
+                         memset(keys,0,256*4);
                          IDirectInputDevice7_Acquire(lpdid);
                          break;
   }
@@ -116,15 +120,15 @@ void KeyboardUpdateState(void)
   autoHoldReset = autoHoldClearKey && keys[autoHoldClearKey] != 0;
 }
 
-unsigned char *GetKeyboard(void)
+unsigned int *GetKeyboard(void)
 {
  return(keys);
 }
-unsigned char *GetKeyboard_nr(void)
+unsigned int *GetKeyboard_nr(void)
 {
  return(keys_nr);
 }
-unsigned char *GetKeyboard_jd(void)
+unsigned int *GetKeyboard_jd(void)
 {
  return(keys_jd);
 }

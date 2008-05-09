@@ -85,7 +85,7 @@ static struct
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))
 
 static uint8 keyonce[MKK_COUNT];
-static unsigned char *keys_nr = 0;
+static unsigned int *keys_nr = 0;
 
 static const char* ScanNames[256]=
 {
