@@ -43,7 +43,6 @@ int ctr=0;
 void KeyboardUpdateState(void)
 {
  unsigned char tk[256];
- printf("%d!!\n",ctr++);
 
  ddrval=IDirectInputDevice7_GetDeviceState(lpdid,256,tk);
 
