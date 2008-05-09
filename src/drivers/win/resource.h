@@ -8,6 +8,7 @@
 #define BTN_CLOSE                       1
 #define GUI_BOT_VALUES                  2
 #define BTN_CANCEL                      2
+#define BTN_CLOSE2                      2
 #define MENU_OPEN_FILE                  100
 #define EDIT_CHEATS                     100
 #define MENU_CLOSE_FILE                 101
@@ -32,6 +33,9 @@
 #define BTN_CLEAR_AH                    114
 #define LBL_AUTO_HOLD                   115
 #define LBL_CLEAR_AH                    116
+#define LBL_AUTO_HOLD2                  118
+#define LBL_AUTO_HOLD3                  120
+#define LBL_AUTO_HOLD4                  122
 #define MENU_RECORD_MOVIE               141
 #define MENU_REPLAY_MOVIE               142
 #define MENU_STOP_MOVIE                 143
@@ -182,6 +186,16 @@
 #define GUI_BOT_TITLEL5                 1112
 #define GUI_BOT_TITLEL6                 1113
 #define GUI_BOT_COUNTERS                1114
+#define IDC_CHECK1                      1117
+#define IDC_BUTTON2                     1119
+#define IDC_BUTTON3                     1120
+#define IDC_BUTTON4                     1121
+#define IDC_BUTTON5                     1122
+#define IDC_BUTTON6                     1123
+#define IDC_BUTTON7                     1124
+#define IDC_BUTTON8                     1125
+#define IDC_BUTTON9                     1126
+#define IDC_BUTTON10                    1127
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -230,7 +244,7 @@
 #define MENU_CDLOGGER                   40078
 #define MENU_GAMEGENIEDECODER           40079
 #define MENU_DEBUGGER                   40080
-#define MENU_MEMORY_WATCH				40081
+#define MENU_MEMORY_WATCH               40081
 #define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
@@ -242,7 +256,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
 #define _APS_NEXT_COMMAND_VALUE         40081
-#define _APS_NEXT_CONTROL_VALUE         1117
+#define _APS_NEXT_CONTROL_VALUE         1128
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
