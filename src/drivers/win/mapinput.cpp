@@ -484,12 +484,6 @@ void PopulateMappingDisplay(HWND hwndDlg)
 	// Get the selected filter.
 	int filter = (int)SendDlgItemMessage(hwndDlg, COMBO_FILTER, CB_GETCURSEL, 0, 0);
 
-	// Delete everything in the current display.
-	for(unsigned i = num; i>0; --i)
-	{
-		SendMessage(hwndListView, LVM_DELETEITEM, (WPARAM)i-1, 0);
-	}
-
 	int* conflictTable = 0;
 
 	// Get the filter type.
@@ -503,6 +497,9 @@ void PopulateMappingDisplay(HWND hwndDlg)
 	}
 
 	LVITEM lvi;
+
+
+	int newItemCount = 0;
 
 	// Populate display.
 	for(int i = 0, idx = 0; i < EMUCMD_MAX; ++i)
@@ -518,7 +515,12 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.pszText = (char*)FCEUI_CommandTypeNames[FCEUI_CommandTable[i].type];
 			lvi.lParam = (LPARAM)i;
 
-			SendMessage(hwndListView, LVM_INSERTITEM, (WPARAM)0, (LPARAM)&lvi);
+			if(newItemCount<num)
+				SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
+			else
+				SendMessage(hwndListView, LVM_INSERTITEM, (WPARAM)0, (LPARAM)&lvi);
+
+			newItemCount++;
 
 			memset(&lvi, 0, sizeof(lvi));
 			lvi.mask = LVIF_TEXT;
@@ -538,6 +540,12 @@ void PopulateMappingDisplay(HWND hwndDlg)
 
 			idx++;
 		}
+	}
+
+	//delete unneeded items
+	for(int i=newItemCount;i<num;i++)
+	{
+		SendMessage(hwndListView, LVM_DELETEITEM, (WPARAM)(newItemCount), 0);
 	}
 
 	if(conflictTable)
