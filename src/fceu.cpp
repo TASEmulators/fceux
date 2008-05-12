@@ -47,6 +47,11 @@
 #include	"file.h"
 #include	"vsuni.h"
 
+//TODO - we really need some kind of global platform-specific options api
+#ifdef WIN32
+#include "drivers/win/main.h"
+#endif
+
 
 uint64 timestampbase;
 
@@ -483,73 +488,73 @@ void UpdateRewind(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
- int r,ssize;
-  
- JustFrameAdvanced = false;
+	int r,ssize;
 
- if(frameAdvanceRequested) {
-	 if(frameAdvanceDelay==0) {
-		EmulationPaused = 3;
-		frameAdvanceDelay++;
-	 } else {
-		 if(frameAdvanceDelay>=10) {
-			 EmulationPaused = 3;
-		 } else frameAdvanceDelay++;
-	 }
- }
+	JustFrameAdvanced = false;
 
-
- if(EmulationPaused&2)
-  EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
- else if(EmulationPaused&1 || FCEU_BotMode())
- {
-  memcpy(XBuf, XBackBuf, 256*256);
-  FCEU_PutImage();
-  *pXBuf=XBuf;
-  *SoundBuf=WaveFinal;
-  *SoundBufSize=0;
-
-  return;
- }
-
- if(!FCEU_BotMode())
- {
-	AutoFire();
-	UpdateRewind();
- }
- 
- FCEU_UpdateInput();
- if(geniestage!=1) FCEU_ApplyPeriodicCheats();
- r=FCEUPPU_Loop(skip);
- 
- ssize=FlushEmulateSound();
-
-//#ifdef WIN32
-//   FCEUI_AviVideoUpdate(XBuf);
-//#endif
-
- timestampbase += timestamp;
- timestamp = 0;
+	if(frameAdvanceRequested) {
+		if(frameAdvanceDelay==0) {
+			EmulationPaused = 3;
+			frameAdvanceDelay++;
+		} else {
+			if(frameAdvanceDelay>=10) {
+				EmulationPaused = 3;
+			} else frameAdvanceDelay++;
+		}
+	}
 
 
- *pXBuf=skip?0:XBuf;
- *SoundBuf=WaveFinal;
- *SoundBufSize=ssize;
+	if(EmulationPaused&2)
+		EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
+	else if(EmulationPaused&1 || FCEU_BotMode())
+	{
+		memcpy(XBuf, XBackBuf, 256*256);
+		FCEU_PutImage();
+		*pXBuf=XBuf;
+		*SoundBuf=WaveFinal;
+		*SoundBufSize=0;
 
- //if we were asked to frame advance, then since we have just finished
- //a frame, we should switch to regular pause
- if(EmulationPaused&2)
- {
-  EmulationPaused = 1;          // restore paused flag
-  //mbg merge 7/28/06 don't like the looks of this...
-//#ifdef WIN32
-//  #define SO_MUTEFA     16
-//  extern int soundoptions;
-//  if(soundoptions&SO_MUTEFA)
-//#endif
-	*SoundBufSize=0;              // keep sound muted
-	JustFrameAdvanced = true;
- }
+		return;
+	}
+
+	if(!FCEU_BotMode())
+	{
+		AutoFire();
+		UpdateRewind();
+	}
+
+	FCEU_UpdateInput();
+	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
+	r=FCEUPPU_Loop(skip);
+
+	ssize=FlushEmulateSound();
+
+	//#ifdef WIN32
+	//   FCEUI_AviVideoUpdate(XBuf);
+	//#endif
+
+	timestampbase += timestamp;
+	timestamp = 0;
+
+
+	*pXBuf=skip?0:XBuf;
+	*SoundBuf=WaveFinal;
+	*SoundBufSize=ssize;
+
+	//if we were asked to frame advance, then since we have just finished
+	//a frame, we should switch to regular pause
+	if(EmulationPaused&2)
+	{
+		EmulationPaused = 1;          // restore paused flag
+
+		//mute the frame advance if the user requested it
+		#ifdef WIN32
+		if(soundoptions&SO_MUTEFA)
+			*SoundBufSize=0;              // keep sound muted
+		#endif
+
+		JustFrameAdvanced = true;
+	}
 }
 
 void FCEUI_CloseGame(void)
