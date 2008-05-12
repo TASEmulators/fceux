@@ -244,6 +244,7 @@
 #define MENU_GAMEGENIEDECODER           40079
 #define MENU_DEBUGGER                   40080
 #define MENU_MEMORY_WATCH               40081
+#define MENU_RAMFILTER                  40082
 #define MENU_LOG_SOUND                  40120
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
@@ -253,8 +254,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        105
-#define _APS_NEXT_COMMAND_VALUE         40081
+#define _APS_NEXT_RESOURCE_VALUE        106
+#define _APS_NEXT_COMMAND_VALUE         40083
 #define _APS_NEXT_CONTROL_VALUE         1128
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

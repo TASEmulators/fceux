@@ -44,6 +44,7 @@
 #include "cdlogger.h"
 #include "basicbot.h"
 #include "throttle.h"
+#include "monitor.h"
 
 #include "guiconfig.h"
 #include "timing.h"
@@ -714,6 +715,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_PPUVIEWER:
 				DoPPUView();
+				break;
+
+			case MENU_RAMFILTER:
+				DoByteMonitor(); 
 				break;
 
 			case MENU_NAMETABLEVIEWER:

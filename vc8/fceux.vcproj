@@ -971,6 +971,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\monitor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\monitor.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\netplay.cpp"
 					>
 					<FileConfiguration
