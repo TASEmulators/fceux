@@ -1,3 +1,6 @@
+//this code is sloppily ripped from an unfinished sound system written for internal use by m.gambrell
+//it is released into the public domain and its stability is not warranted
+
 #include "oakra.h"
 
 #include "dsound.h"
@@ -64,7 +67,6 @@ public:
 		cPlay = 0;
 
 		hr = ds_buf->Play(0,0,DSBPLAY_LOOPING);
-		int xxx=9;
 	}
 	
 	//not supported

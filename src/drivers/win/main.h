@@ -54,10 +54,12 @@ static double winsizemulx = 1, winsizemuly = 1;
 static int winwidth, winheight;
 static int ismaximized = 0;
 
-static int soundrate = 44100;
-static int soundbuftime = 50;
-static int soundvolume = 100;
-static int soundquality = 0;
+extern int soundoptions;
+extern int soundrate;
+extern int soundbuftime;
+extern int soundvolume;
+extern int soundquality;
+
 static uint8 cpalette[192];
 //mbg 5/7/08 - I changed the ntsc settings to match pal.
 //this is more for precision emulation, instead of entertainment, which is what fceux is all about nowadays

@@ -95,7 +95,12 @@ void ApplyDefaultCommandMapping(void);
 uint8 *xbsave = NULL;
 int eoptions = EO_BGRUN | EO_FORCEISCALE;
 
+//global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
+int soundrate = 44100;
+int soundbuftime = 50;
+int soundvolume = 100;
+int soundquality = 0;
 
 /** 
 * Contains the names of the overridden standard directories

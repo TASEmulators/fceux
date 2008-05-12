@@ -1,22 +1,26 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel and zeromus
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 2002 Xodnizel and zeromus
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+//todo - config synchronization guards
+//todo - use correct framerate instead of 60
+//todo - find out why fast forwarding at 96khz causes buffering to glitch?
 
 #include <list>
 #include "common.h"
@@ -41,7 +45,7 @@ public:
 	static const int BufferSize = 1024;
 	static const int BufferSizeBits = 10;
 	static const int BufferSizeBitmask = 1023;
-	
+
 	class Buffer {
 	public:
 		int decay, size, length;
@@ -132,7 +136,7 @@ public:
 
 		//if there are no buffers in the queue, then we definitely need one before we start
 		if(liveBuffers.empty()) liveBuffers.push_back(getBuffer());
-		
+
 		while(todo) {
 			//check the frontmost buffer
 			Buffer *end = *--liveBuffers.end();
@@ -141,7 +145,7 @@ public:
 			end->length += available;
 			todo -= available;
 			done += available;
-			
+
 			//we're going to need another buffer
 			if(todo != 0)
 				liveBuffers.push_back(getBuffer());
@@ -165,9 +169,9 @@ public:
 		int bufferSamples = buffers.length>>1;
 
 		//if we're we're too far behind, playback faster
-		if(bufferSamples > 44100*3/60) {
-			int behind = bufferSamples - 44100/60;
-			incr = behind*256*60/44100/2;
+		if(bufferSamples > soundrate*3/60) {
+			int behind = bufferSamples - soundrate/60;
+			incr = behind*256*60/soundrate/2;
 			//we multiply our playback rate by 1/2 the number of frames we're behind
 		}
 		if(incr<256) printf("OHNO -- %d -- shouldnt be less than 256!\n",incr); //sanity check: should never be less than 256
@@ -185,7 +189,7 @@ public:
 		}
 		buffers.dequeue((cursor>>8)<<1);
 		cursor &= 255;
-		
+
 		//perhaps mute
 		if(mute) memset(sbuf,0,samples<<1);
 		else memset(sbuf+todo,0,(samples-todo)<<1);
@@ -206,8 +210,8 @@ public:
 			dsout->lock();
 			int remain = buffers.length>>1;
 			dsout->unlock();
-			if(remain<44100/60) break;
-			//if(remain<44100*scale/256/60) break; ??
+			if(remain<soundrate/60) break;
+			//if(remain<soundrate*scale/256/60) break; ??
 			Sleep(1);
 		}
 	}
@@ -248,10 +252,6 @@ public:
 		return samples;
 	}
 };
-
-//todo - a properly synchronized method ShouldntTouchSound() which is totally safe (use mutexes) and use that to guard all sound code
-//also add an alternate timer-based throttler for when sound is disabled
-
 
 static Player *player;
 static Player8 *player8;
@@ -303,10 +303,10 @@ void win_SoundInit(int bits) {
 	OAKRA_Format fmt;
 	fmt.format = bits==8?OAKRA_U8:OAKRA_S16;
 	fmt.channels = 1;
-	fmt.rate = 44100;
+	fmt.rate = soundrate;
 	fmt.size = OAKRA_Module::calcSize(fmt);
 	OAKRA_Voice *voice = dsout->getVoice(fmt);
-	
+
 	player = new Player();
 	player8 = new Player8(player);
 
@@ -318,23 +318,25 @@ void win_SoundInit(int bits) {
 
 
 int InitSound() {
-	if(soundoptions&SO_FORCE8BIT)
-		bits = 8;
-	else {
+	bits = 8;
+
+	if(!(soundoptions&SO_FORCE8BIT))
+	{
 		//no modern system should have this problem, and we dont use primary buffer
 		/*if( (!(dscaps.dwFlags&DSCAPS_PRIMARY16BIT) && !(soundoptions&SO_SECONDARY)) ||
 		(!(dscaps.dwFlags&DSCAPS_SECONDARY16BIT) && (soundoptions&SO_SECONDARY)))
-		{
 		FCEUD_PrintError("DirectSound: 16-bit sound is not supported.  Forcing 8-bit sound.");*/
-		bits = 16;
+
+		//if(dscaps.dwFlags&DSCAPS_SECONDARY16BIT)
+			bits = 16;
+		//else 
+		//	FCEUD_PrintError("DirectSound: 16-bit sound is not supported.  Forcing 8-bit sound.")
 	}
-	bits = 8;
 
 	win_SoundInit(bits);
 
 	FCEUI_Sound(soundrate);
 	return 1;
-	//  FCEUD_PrintError("DirectSound: Sound device is being emulated through waveform-audio functions.  Sound quality will most likely be awful.  Try to update your sound device's sound drivers.");
 }
 
 
@@ -363,179 +365,177 @@ static HWND uug=0;
 
 static void UpdateSD(HWND hwndDlg)
 {
- int t;
+	int t;
 
- CheckDlgButton(hwndDlg,126,soundo?BST_CHECKED:BST_UNCHECKED);
- CheckDlgButton(hwndDlg,122,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
- CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
- CheckDlgButton(hwndDlg,124,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
- CheckDlgButton(hwndDlg,130,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
- CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
- SendDlgItemMessage(hwndDlg,129,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
- t=0;
- if(soundrate==22050) t=1;
- else if(soundrate==44100) t=2;
- else if(soundrate==48000) t=3;
- else if(soundrate==96000) t=4;
- SendDlgItemMessage(hwndDlg,200,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
+	CheckDlgButton(hwndDlg,126,soundo?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,122,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,124,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,130,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
+	SendDlgItemMessage(hwndDlg,129,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
+	t=0;
+	if(soundrate==22050) t=1;
+	else if(soundrate==44100) t=2;
+	else if(soundrate==48000) t=3;
+	else if(soundrate==96000) t=4;
+	SendDlgItemMessage(hwndDlg,200,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
 }
 
 BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
-  switch(uMsg) {
-   case WM_NCRBUTTONDOWN:
-   case WM_NCMBUTTONDOWN:
-   case WM_NCLBUTTONDOWN:break;
+	switch(uMsg) {
+case WM_NCRBUTTONDOWN:
+case WM_NCMBUTTONDOWN:
+case WM_NCLBUTTONDOWN:break;
 
-   case WM_INITDIALOG:
-                /* Volume Trackbar */
-                SendDlgItemMessage(hwndDlg,500,TBM_SETRANGE,1,MAKELONG(0,150));
-                SendDlgItemMessage(hwndDlg,500,TBM_SETTICFREQ,25,0);
-                SendDlgItemMessage(hwndDlg,500,TBM_SETPOS,1,150-soundvolume);
+case WM_INITDIALOG:
+	/* Volume Trackbar */
+	SendDlgItemMessage(hwndDlg,500,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,500,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,500,TBM_SETPOS,1,150-soundvolume);
 
-                /* buffer size time trackbar */
-                SendDlgItemMessage(hwndDlg,128,TBM_SETRANGE,1,MAKELONG(15,200));
-                SendDlgItemMessage(hwndDlg,128,TBM_SETTICFREQ,1,0);
-                SendDlgItemMessage(hwndDlg,128,TBM_SETPOS,1,soundbuftime);
+	/* buffer size time trackbar */
+	SendDlgItemMessage(hwndDlg,128,TBM_SETRANGE,1,MAKELONG(15,200));
+	SendDlgItemMessage(hwndDlg,128,TBM_SETTICFREQ,1,0);
+	SendDlgItemMessage(hwndDlg,128,TBM_SETPOS,1,soundbuftime);
 
-                {
-                 char tbuf[8];
-                 sprintf(tbuf,"%d",soundbuftime);
-                 SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
-                }
+	{
+		char tbuf[8];
+		sprintf(tbuf,"%d",soundbuftime);
+		SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
+	}
 
-                SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Low");
-                SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"High");
-                SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Highest");
+	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Low");
+	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"High");
+	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Highest");
 
-                SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"11025");
-                SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"22050");
-                SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"44100");
-                SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"48000");
-                SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"96000");
+	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"11025");
+	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"22050");
+	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"44100");
+	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"48000");
+	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"96000");
 
-                UpdateSD(hwndDlg);
-                break;
-   case WM_VSCROLL:
-                soundvolume=150-SendDlgItemMessage(hwndDlg,500,TBM_GETPOS,0,0);
-                FCEUI_SetSoundVolume(soundvolume);
-                break;
-   case WM_HSCROLL:
-                {
-                 char tbuf[8];
-                 soundbuftime=SendDlgItemMessage(hwndDlg,128,TBM_GETPOS,0,0);
-                 sprintf(tbuf,"%d",soundbuftime);
-                 SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
-                 //soundbufsize=(soundbuftime*soundrate/1000);
-                }
-                break;
-   case WM_CLOSE:
-   case WM_QUIT: goto gornk;
-   case WM_COMMAND:
-                switch(HIWORD(wParam))
-                {
-                 case CBN_SELENDOK:
-			switch(LOWORD(wParam))
-                        {
-			 case 200:
-                         {
-                          int tmp;
-                          tmp=SendDlgItemMessage(hwndDlg,200,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                          if(tmp==0) tmp=11025;
-                          else if(tmp==1) tmp=22050;
-                          else if(tmp==2) tmp=44100;
-                          else if(tmp==3) tmp=48000;
-                          else tmp=96000;
-                          if(tmp!=soundrate)
-                          {
-                           soundrate=tmp;
-                           if(soundrate<44100)
-                           {
-			    soundquality=0;
-                            FCEUI_SetSoundQuality(0);
-                            UpdateSD(hwndDlg);
-                           }
-                           if(soundo)
-                           {
-                            TrashSoundNow();
-                            soundo=InitSound();
-                            UpdateSD(hwndDlg);
-                           }
-                          }
-                         }
-			 break;
-
-			case 129:
-			 soundquality=SendDlgItemMessage(hwndDlg,129,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                         if(soundrate<44100) soundquality=0;
-                         FCEUI_SetSoundQuality(soundquality);
-                         UpdateSD(hwndDlg);
-			 break;
+	UpdateSD(hwndDlg);
+	break;
+case WM_VSCROLL:
+	soundvolume=150-SendDlgItemMessage(hwndDlg,500,TBM_GETPOS,0,0);
+	FCEUI_SetSoundVolume(soundvolume);
+	break;
+case WM_HSCROLL:
+	{
+		char tbuf[8];
+		soundbuftime=SendDlgItemMessage(hwndDlg,128,TBM_GETPOS,0,0);
+		sprintf(tbuf,"%d",soundbuftime);
+		SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
+		//soundbufsize=(soundbuftime*soundrate/1000);
+	}
+	break;
+case WM_CLOSE:
+case WM_QUIT: goto gornk;
+case WM_COMMAND:
+	switch(HIWORD(wParam))
+	{
+	case CBN_SELENDOK:
+		switch(LOWORD(wParam))
+		{
+		case 200:
+			{
+				int tmp;
+				tmp=SendDlgItemMessage(hwndDlg,200,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+				if(tmp==0) tmp=11025;
+				else if(tmp==1) tmp=22050;
+				else if(tmp==2) tmp=44100;
+				else if(tmp==3) tmp=48000;
+				else tmp=96000;
+				if(tmp!=soundrate)
+				{
+					soundrate=tmp;
+					if(soundrate<44100)
+					{
+						soundquality=0;
+						FCEUI_SetSoundQuality(0);
+						UpdateSD(hwndDlg);
+					}
+					if(soundo)
+					{
+						TrashSoundNow();
+						soundo=InitSound();
+						UpdateSD(hwndDlg);
+					}
+				}
 			}
-                        break;
+			break;
 
-                 case BN_CLICKED:
-                        switch(LOWORD(wParam))
-                        {
-                         case 122:soundoptions^=SO_FORCE8BIT;   
-                                  if(soundo)
-                                  {
-                                   TrashSoundNow();
-                                   soundo=InitSound();
-                                   UpdateSD(hwndDlg);                                   
-                                  }
-                                  break;
-                         case 123:soundoptions^=SO_SECONDARY;
-                                  if(soundo)
-                                  {
-                                   TrashSoundNow();
-                                   soundo=InitSound();
-                                   UpdateSD(hwndDlg);
-                                  }
-                                  break;
-                         case 124:soundoptions^=SO_GFOCUS;
-                                  if(soundo)
-                                  {
-                                   TrashSoundNow();
-                                   soundo=InitSound();
-                                   UpdateSD(hwndDlg);
-                                  }
-                                  break;
-                         case 130:soundoptions^=SO_MUTEFA;
-                                  break;
-                         case 131:soundoptions^=SO_OLDUP;
-                                  if(soundo)
-                                  {
-                                   TrashSoundNow();
-                                   soundo=InitSound();
-                                   UpdateSD(hwndDlg);
-                                  }
-                                  break;
-                         case 126:soundo=!soundo;
-                                  if(!soundo) TrashSound();
-                                  else soundo=InitSound();
-                                  UpdateSD(hwndDlg);
-                                  break;
-                        }
-                }
+		case 129:
+			soundquality=SendDlgItemMessage(hwndDlg,129,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+			if(soundrate<44100) soundquality=0;
+			FCEUI_SetSoundQuality(soundquality);
+			UpdateSD(hwndDlg);
+			break;
+		}
+		break;
 
-                if(!(wParam>>16))
-                switch(wParam&0xFFFF)
-                {
-                 case 1:
-                        gornk:                         
-                        DestroyWindow(hwndDlg);
-                        uug=0;
-                        break;
-               }
-              }
-  return 0;
+	case BN_CLICKED:
+		switch(LOWORD(wParam))
+		{
+		case 122:soundoptions^=SO_FORCE8BIT;   
+			if(soundo)
+			{
+				TrashSoundNow();
+				soundo=InitSound();
+				UpdateSD(hwndDlg);                                   
+			}
+			break;
+		case 123:soundoptions^=SO_SECONDARY;
+			if(soundo)
+			{
+				TrashSoundNow();
+				soundo=InitSound();
+				UpdateSD(hwndDlg);
+			}
+			break;
+		case 124:soundoptions^=SO_GFOCUS;
+			if(soundo)
+			{
+				TrashSoundNow();
+				soundo=InitSound();
+				UpdateSD(hwndDlg);
+			}
+			break;
+		case 130:soundoptions^=SO_MUTEFA;
+			break;
+		case 131:soundoptions^=SO_OLDUP;
+			if(soundo)
+			{
+				TrashSoundNow();
+				soundo=InitSound();
+				UpdateSD(hwndDlg);
+			}
+			break;
+		case 126:soundo=!soundo;
+			if(!soundo) TrashSound();
+			else soundo=InitSound();
+			UpdateSD(hwndDlg);
+			break;
+		}
+	}
+
+	if(!(wParam>>16))
+		switch(wParam&0xFFFF)
+	{
+		case 1:
+gornk:                         
+			DestroyWindow(hwndDlg);
+			uug=0;
+			break;
+	}
+	}
+	return 0;
 }
 
-/**
-* Shows the sounds configuration dialog.
-**/
+/// Shows the sounds configuration dialog.
 void ConfigSound()
 {
 	if(!uug)
