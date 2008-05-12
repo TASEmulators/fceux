@@ -1,26 +1,27 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2006 Luke Gustafson
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 2006 Luke Gustafson
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include "common.h"
 #include "..\..\fceu.h"
 #include "memwatch.h"
+#include "..\..\debug.h"
 
 static HWND hwndMemWatch=0;
 static char addresses[24][16];
@@ -28,19 +29,23 @@ static char labels[24][24];
 static int NeedsInit = 1;
 char *MemWatchDir = 0;
 
+//mbg 5/12/08
+//for the curious, I tested U16ToHexStr and it was 10x faster than printf.
+//so the author of these dedicated functions is not insane, and I will leave them.
+
 static char *U8ToStr(uint8 a)
 {
- static char TempArray[8];
- TempArray[0] = '0' + a/100;
- TempArray[1] = '0' + (a%100)/10;
- TempArray[2] = '0' + (a%10);
- TempArray[3] = 0;
- return TempArray;
+	static char TempArray[8];
+	TempArray[0] = '0' + a/100;
+	TempArray[1] = '0' + (a%100)/10;
+	TempArray[2] = '0' + (a%10);
+	TempArray[3] = 0;
+	return TempArray;
 }
 
 
 //I don't trust scanf for speed
-static uint16 FastStrToU16(char* s)
+static uint16 FastStrToU16(char* s, bool& valid)
 {
 	int i;
 	uint16 v=0;
@@ -62,102 +67,139 @@ static uint16 FastStrToU16(char* s)
 		}
 		else
 		{
+			valid = false;
 			return 0xFFFF;
 		}
 	}
+	valid = true;
 	return v;
 }
 
 static char *U16ToDecStr(uint16 a)
 {
- static char TempArray[8];
- TempArray[0] = '0' + a/10000;
- TempArray[1] = '0' + (a%10000)/1000;
- TempArray[2] = '0' + (a%1000)/100;
- TempArray[3] = '0' + (a%100)/10;
- TempArray[4] = '0' + (a%10);
- TempArray[5] = 0;
- return TempArray;
+	static char TempArray[8];
+	TempArray[0] = '0' + a/10000;
+	TempArray[1] = '0' + (a%10000)/1000;
+	TempArray[2] = '0' + (a%1000)/100;
+	TempArray[3] = '0' + (a%100)/10;
+	TempArray[4] = '0' + (a%10);
+	TempArray[5] = 0;
+	return TempArray;
 }
 
-//sorry this is hard to read... but I don't trust printf for speed!
+
 static char *U16ToHexStr(uint16 a)
 {
- static char TempArray[8];
- TempArray[0] = a/4096 > 9?'A'+a/4096-10:'0' + a/4096;
- TempArray[1] = (a%4096)/256 > 9?'A'+(a%4096)/256 - 10:'0' + (a%4096)/256;
- TempArray[2] = (a%256)/16 > 9?'A'+(a%256)/16 - 10:'0' + (a%256)/16;
- TempArray[3] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
- TempArray[4] = 0;
- return TempArray;
+	static char TempArray[8];
+	TempArray[0] = a/4096 > 9?'A'+a/4096-10:'0' + a/4096;
+	TempArray[1] = (a%4096)/256 > 9?'A'+(a%4096)/256 - 10:'0' + (a%4096)/256;
+	TempArray[2] = (a%256)/16 > 9?'A'+(a%256)/16 - 10:'0' + (a%256)/16;
+	TempArray[3] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
+	TempArray[4] = 0;
+	return TempArray;
 }
 
 static char *U8ToHexStr(uint8 a)
 {
- static char TempArray[8];
- TempArray[0] = a/16 > 9?'A'+a/16 - 10:'0' + a/16;
- TempArray[1] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
- TempArray[2] = 0;
- return TempArray;
+	static char TempArray[8];
+	TempArray[0] = a/16 > 9?'A'+a/16 - 10:'0' + a/16;
+	TempArray[1] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
+	TempArray[2] = 0;
+	return TempArray;
 }
+
+
+static const int MW_ADDR_Lookup[] = {
+	MW_ADDR00,MW_ADDR01,MW_ADDR02,MW_ADDR03,
+	MW_ADDR04,MW_ADDR05,MW_ADDR06,MW_ADDR07,
+	MW_ADDR08,MW_ADDR09,MW_ADDR10,MW_ADDR11,
+	MW_ADDR12,MW_ADDR13,MW_ADDR14,MW_ADDR15,
+	MW_ADDR16,MW_ADDR17,MW_ADDR18,MW_ADDR19,
+	MW_ADDR20,MW_ADDR21,MW_ADDR22,MW_ADDR23
+};
+
+static const int MWNUM = ARRAY_SIZE(MW_ADDR_Lookup);
+
+static struct MWRec
+{
+	static int findIndex(WORD ctl)
+	{
+		for(int i=0;i<MWNUM;i++)
+			if(MW_ADDR_Lookup[i] == ctl)
+				return i;
+		return -1;
+	}
+
+	void parse(WORD ctl)
+	{
+		char TempArray[16];
+		GetDlgItemText(hwndMemWatch,ctl,TempArray,16);
+		TempArray[15]=0;
+
+		valid = hex = twobytes = false;
+		switch(TempArray[0])
+		{
+			case 0:
+				break;
+			case '!':
+				twobytes=true;
+				addr=FastStrToU16(TempArray+1,valid);
+				break;
+			case 'x':
+				hex = true;
+				valid = true;
+				addr=FastStrToU16(TempArray+1,valid);
+				break;
+			case 'X':
+				hex = twobytes = true;
+				valid = true;
+				addr = FastStrToU16(TempArray+1,valid);
+				break;
+			default:
+				valid = true;
+				addr=FastStrToU16(TempArray,valid);
+				break;
+			}
+	}
+	bool valid, twobytes, hex;
+	uint16 addr;
+} mwrecs[MWNUM];
 
 //Update the values in the Memory Watch window
 void UpdateMemWatch()
 {
 	if(hwndMemWatch)
 	{
-		char TempArray[16];
-		int i, twobytes, hex;
-		uint16 a;
-		for(i = 0; i < 24; i++)
+		for(int i = 0; i < MWNUM; i++)
 		{
-			GetDlgItemText(hwndMemWatch,1001+i*3,TempArray,16);
-			twobytes=0;
-			hex = 0;
-			TempArray[15]=0;
-			switch(TempArray[0])
+			MWRec& mwrec = mwrecs[i];
+			uint16& a = mwrec.addr;
+			bool& hex = mwrec.hex;
+			bool& twobytes = mwrec.twobytes;
+			bool& valid = mwrec.valid;
+
+			if(mwrec.valid)
 			{
-			case 0:
-				SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)"---");
-				continue;
-			case '!':
-				twobytes=1;
-				a=FastStrToU16(TempArray+1);
-				break;
-			case 'x':
-				hex = 1;
-				a=FastStrToU16(TempArray+1);
-				break;
-			case 'X':
-				hex = twobytes = 1;
-				a = FastStrToU16(TempArray+1);
-				break;
-			default:
-				a=FastStrToU16(TempArray);
-				break;
-			}
-			if(a != 0xFFFF)
-			{
-				if(hex == 0)
+				if(mwrec.hex)
 				{
-					if(twobytes == 0)
+					if(mwrec.twobytes)
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToStr(ARead[a](a)));
+						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToStr(GetMem(mwrec.addr)));
 					}
 					else
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToDecStr(ARead[a](a)+256*ARead[a+1](a+1)));
+						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToDecStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8)));
 					}
 				}
 				else
 				{
-					if(twobytes == 0)
+					if(mwrec.twobytes)
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToHexStr(ARead[a](a)));
+						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToHexStr(GetMem(mwrec.addr)));
 					}
 					else
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToHexStr(ARead[a](a)+256*ARead[a+1](a+1)));
+						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToHexStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8)));
 					}
 				}
 			}
@@ -299,11 +341,11 @@ static void LoadMemWatch()
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.lpstrInitialDir=MemWatchDir;
-	
+
 	if(GetOpenFileName(&ofn))
 	{
 		int i,j;
-		
+
 		//Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
@@ -312,7 +354,7 @@ static void LoadMemWatch()
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
-		
+
 		FILE *fp=FCEUD_UTF8fopen(nameo,"r");
 		for(i=0;i<24;i++)
 		{
@@ -322,7 +364,7 @@ static void LoadMemWatch()
 			fscanf(fp, "%s\n", nameo);
 			for(j = 0; j < 24; j++)
 				labels[i][j] = nameo[j];
-			
+
 			//Replace dummy strings with empty strings
 			if(addresses[i][0] == '|')
 			{
@@ -333,7 +375,7 @@ static void LoadMemWatch()
 				labels[i][0] = 0;
 			}
 			PutInSpaces(i);
-			
+
 			addresses[i][15] = 0;
 			labels[i][23] = 0; //just in case
 
@@ -344,6 +386,7 @@ static void LoadMemWatch()
 		fclose(fp);
 	}
 }
+
 
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -362,6 +405,17 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		switch(HIWORD(wParam))
 		{
+		
+		case EN_CHANGE:
+			{
+				//the contents of an address box changed. re-parse it.
+				//first, find which address changed
+				int changed = MWRec::findIndex(LOWORD(wParam));
+				if(changed==-1) break;
+				mwrecs[changed].parse(LOWORD(wParam));
+				break;
+			}
+
 		case BN_CLICKED:
 			switch(LOWORD(wParam))
 			{
@@ -432,11 +486,11 @@ void CreateMemWatch(HWND parent)
 		SetFocus(hwndMemWatch);
 		return;
 	}
-	
+
 	//Create
 	//hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",parent,MemWatchCallB);
 	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
-	
+
 	//Initialize values to previous entered addresses/labels
 	{
 		int i;

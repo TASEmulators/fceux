@@ -113,3 +113,5 @@ extern uint8 vsdip;
 #define JOY_LEFT        0x40
 #define JOY_RIGHT       0x80
 #endif
+
+#define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
