@@ -210,6 +210,7 @@
 #define GUI_BOT_TITLEL6                 1113
 #define GUI_BOT_COUNTERS                1114
 #define IDC_CHECK1                      1117
+#define BTN_DISABLE_LRUD                1117
 #define IDC_BUTTON2                     1119
 #define IDC_BUTTON3                     1120
 #define IDC_BUTTON4                     1121
