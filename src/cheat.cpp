@@ -204,6 +204,7 @@ void FCEU_LoadGameCheats(FILE *override)
   if(!fp) return;
  }
 
+ FCEU_printf("Cheats file loaded.\n");
  while(fgets(linebuf,2048,fp)>0)
  { 
   char *tbuf=linebuf;
