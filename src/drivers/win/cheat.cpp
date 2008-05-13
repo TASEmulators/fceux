@@ -26,7 +26,8 @@
 #include "..\..\cart.h"
 
 HWND hCheat; //mbg merge 7/19/06 had to add 
-int CheatWindow,CheatStyle; //mbg merge 7/19/06 had to add
+int CheatWindow;
+int CheatStyle=1;
 
 #define GGLISTSIZE 128 //hopefully this is enough for all cases
 
@@ -499,6 +500,8 @@ void ConfigCheats(HWND hParent) {
 		if (CheatStyle) hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
 		else DialogBox(fceu_hInstance,"CHEATCONSOLE",hParent,CheatConsoleCallB);
 	}
+	else
+	 SetFocus(hCheat);
 }
 
 BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
