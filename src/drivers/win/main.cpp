@@ -547,6 +547,7 @@ int main(int argc,char *argv[])
 	}
 
 	InitCommonControls();
+	debugSystem = new DebugSystem();
 
 	if(!FCEUI_Initialize())
 	{
@@ -673,6 +674,9 @@ doloopy:
 	DriverKill();
 	timeEndPeriod(1);
 	FCEUI_Kill();
+
+	delete debugSystem;
+
 	return(0);
 }
 

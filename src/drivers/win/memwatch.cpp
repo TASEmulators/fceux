@@ -22,7 +22,9 @@
 #include "..\..\fceu.h"
 #include "memwatch.h"
 #include "..\..\debug.h"
+#include "debugger.h"
 
+static HDC hdc;
 static HWND hwndMemWatch=0;
 static char addresses[24][16];
 static char labels[24][24];
@@ -120,6 +122,9 @@ static const int MW_ADDR_Lookup[] = {
 
 static const int MWNUM = ARRAY_SIZE(MW_ADDR_Lookup);
 
+static int yPositions[MWNUM];
+static int xPositions[MWNUM];
+
 static struct MWRec
 {
 	static int findIndex(WORD ctl)
@@ -170,43 +175,46 @@ void UpdateMemWatch()
 {
 	if(hwndMemWatch)
 	{
+		SetTextColor(hdc,RGB(0,0,0));
+		SetBkColor(hdc,GetSysColor(COLOR_3DFACE));
+
 		for(int i = 0; i < MWNUM; i++)
 		{
 			MWRec& mwrec = mwrecs[i];
-			uint16& a = mwrec.addr;
-			bool& hex = mwrec.hex;
-			bool& twobytes = mwrec.twobytes;
-			bool& valid = mwrec.valid;
 
-			if(mwrec.valid)
+			char* text;
+			if(mwrec.valid && GameInfo)
 			{
 				if(mwrec.hex)
 				{
 					if(mwrec.twobytes)
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToStr(GetMem(mwrec.addr)));
+						text = U16ToHexStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8));
 					}
 					else
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToDecStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8)));
+						text = U8ToHexStr(GetMem(mwrec.addr));
 					}
 				}
 				else
 				{
 					if(mwrec.twobytes)
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U8ToHexStr(GetMem(mwrec.addr)));
+						text = U16ToDecStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8));
 					}
 					else
 					{
-						SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)U16ToHexStr(GetMem(mwrec.addr)+(GetMem(mwrec.addr+1)<<8)));
+						text = U8ToStr(GetMem(mwrec.addr));
 					}
 				}
 			}
 			else
 			{
-				SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR)"---");
+				text = "-";
 			}
+
+			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
+			TextOut(hdc,0,0,text,strlen(text));
 		}
 	}
 }
@@ -387,18 +395,45 @@ static void LoadMemWatch()
 	}
 }
 
-
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	//mbg 5/7/08 - wtf?
-	//DSMFix(uMsg);
+	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
+
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
+		hdc = GetDC(hwndDlg);
+		SelectObject (hdc, debugSystem->hFixedFont);
+		SetTextAlign(hdc,TA_UPDATECP | TA_TOP | TA_LEFT);
+
+		//find the positions where we should draw string values
+		for(int i=0;i<MWNUM;i++) {
+			int col=0;
+			if(i>=MWNUM/2)
+				col=1;
+			RECT r;
+			GetWindowRect(GetDlgItem(hwndDlg,MW_ADDR_Lookup[i]),&r);
+			ScreenToClient(hwndDlg,(LPPOINT)&r);
+			ScreenToClient(hwndDlg,(LPPOINT)&r.right);
+			yPositions[i] = r.top;
+			yPositions[i] += ((r.bottom-r.top)-debugSystem->fixedFontHeight)/2; //vertically center
+			GetWindowRect(GetDlgItem(hwndDlg,kLabelControls[col]),&r);
+			ScreenToClient(hwndDlg,(LPPOINT)&r);
+			xPositions[i] = r.left;
+		}
 		break;
+
+	case WM_PAINT: {
+		PAINTSTRUCT ps;
+		BeginPaint(hwndDlg, &ps);
+		EndPaint(hwndDlg, &ps);
+		UpdateMemWatch();
+		break;
+	}
 	case WM_CLOSE:
 	case WM_QUIT:
 		SaveStrings();
+		DeleteObject(hdc);
 		DestroyWindow(hwndMemWatch);
 		hwndMemWatch=0;
 		break;
@@ -490,6 +525,7 @@ void CreateMemWatch(HWND parent)
 	//Create
 	//hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",parent,MemWatchCallB);
 	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
+	UpdateMemWatch();
 
 	//Initialize values to previous entered addresses/labels
 	{

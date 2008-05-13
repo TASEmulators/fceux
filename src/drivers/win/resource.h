@@ -270,6 +270,8 @@
 #define MENU_MEMORY_WATCH               40081
 #define MENU_RAMFILTER                  40082
 #define MENU_LOG_SOUND                  40120
+#define MW_ValueLabel2                  65423
+#define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
 #define GUI_BOT_ERROR                   65438
 #define LBL_INPUT_HELP                  65488

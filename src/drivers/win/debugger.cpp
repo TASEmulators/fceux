@@ -1320,3 +1320,22 @@ void DoDebug(uint8 halt) {
 		if (GameInfo) UpdateDebugger();
 	}
 }
+
+//-----------------------------------------
+DebugSystem* debugSystem;
+
+DebugSystem::DebugSystem()
+{
+	hFixedFont = CreateFont(13,8, /*Height,Width*/
+		0,0, /*escapement,orientation*/
+		400,FALSE,FALSE,FALSE, /*weight, italic,, underline, strikeout*/
+		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
+		"Courier"); /*font name*/
+}
+
+DebugSystem::~DebugSystem()
+{
+	DeleteObject(hFixedFont);
+}
+

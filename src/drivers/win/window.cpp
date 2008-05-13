@@ -1158,7 +1158,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                 goto proco;
     case WM_CLOSE:
     case WM_DESTROY:
-    case WM_QUIT:DoFCEUExit();break;
+    case WM_QUIT:
+		DoFCEUExit();
+		break;
     case WM_ACTIVATEAPP:       
        if((BOOL)wParam)
        {

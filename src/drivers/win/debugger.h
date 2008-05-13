@@ -31,6 +31,15 @@ void DoDebug(uint8 halt);
 
 extern bool inDebugger;
 
+extern class DebugSystem {
+public:
+	DebugSystem();
+	~DebugSystem();
+	
+	HFONT hFixedFont;
+	static const int fixedFontWidth = 8;
+	static const int fixedFontHeight = 13;
+} *debugSystem;
 
 
 #endif

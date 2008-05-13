@@ -91,10 +91,7 @@ HWND hMemView, hMemFind;
 HDC mDC;
 //int tempdummy;
 //char dummystr[100];
-HFONT hMemFont;
 int CurOffset;
-int MemFontHeight;
-int MemFontWidth;
 int ClientHeight;
 int NoColors;
 int EditingMode;
@@ -299,7 +296,11 @@ void UnloadTableFile(){
 	TableFileLoaded = 0;
 	return;
 }
-void UpdateMemoryView(int draw_all){
+void UpdateMemoryView(int draw_all)
+{
+	int MemFontWidth = debugSystem->fixedFontWidth;
+	int MemFontHeight = debugSystem->fixedFontHeight;
+
 	int i, j;
 	//LPVOID lpMsgBuf;
 	//int curlength;
@@ -728,18 +729,22 @@ void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset){
 
 
 int GetHexScreenCoordx(int offset){
-	return (8*MemFontWidth)+((offset%16)*3*MemFontWidth); //todo: add Curoffset to this and to below function
+	return (8*debugSystem->fixedFontWidth)+((offset%16)*3*debugSystem->fixedFontWidth); //todo: add Curoffset to this and to below function
 }
 
 int GetHexScreenCoordy(int offset){
-	return (offset/16)*MemFontHeight;
+	return (offset/16)*debugSystem->fixedFontHeight;
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
 
 //if the mouse is in the text field, this function will set AddyWasText to 1 otherwise it is 0
 //if the mouse wasn't in any range, this function returns -1
-int GetAddyFromCoord(int x,int y){
+int GetAddyFromCoord(int x,int y)
+{
+	int MemFontWidth = debugSystem->fixedFontWidth;
+	int MemFontHeight = debugSystem->fixedFontHeight;
+
 	if(y < 0)y = 0;
 	if(x < 8*MemFontWidth)x = 8*MemFontWidth+1;
 
@@ -758,7 +763,8 @@ int GetAddyFromCoord(int x,int y){
 	return -1;
 }
 
-void AutoScrollFromCoord(int x,int y){
+void AutoScrollFromCoord(int x,int y)
+{
 	SCROLLINFO si;
 	if(y < 0){
 		ZeroMemory(&si, sizeof(SCROLLINFO));
@@ -787,8 +793,8 @@ void AutoScrollFromCoord(int x,int y){
 	}
 }
 
-void KillMemView(){
-	DeleteObject(hMemFont);
+void KillMemView()
+{
 	ReleaseDC(hMemView,mDC);
 	DestroyWindow(hMemView);
 	UnregisterClass("MEMVIEW",fceu_hInstance);
@@ -796,7 +802,8 @@ void KillMemView(){
 	return;
 }
 
-LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam){
+LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
 	HDC          hdc;
 	HGLOBAL      hGlobal ;
 	PTSTR        pGlobal ;
@@ -807,6 +814,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	TEXTMETRIC tm;
 	SCROLLINFO si;
 	int x, y, i, j;
+
+	const int MemFontWidth = debugSystem->fixedFontWidth;
+	const int MemFontHeight = debugSystem->fixedFontHeight;
 
 	char c[2];
 	char str[100];
@@ -831,18 +841,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 // ################################## End of SP CODE ###########################
 			mDC = GetDC(hwnd);
 			HDataDC = mDC;//deleteme
-			hMemFont = CreateFont(13,8, /*Height,Width*/
-				0,0, /*escapement,orientation*/
-				400,FALSE,FALSE,FALSE, /*weight, italic,, underline, strikeout*/
-				ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
-				DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
-				"Courier"); /*font name*/
-			SelectObject (HDataDC, hMemFont);
+			SelectObject (HDataDC, debugSystem->hFixedFont);
 			SetTextAlign(HDataDC,TA_UPDATECP | TA_TOP | TA_LEFT);
 
-			GetTextMetrics (HDataDC, &tm) ;
-			MemFontWidth = 8;
-			MemFontHeight = 13;
+			GetTextMetrics (HDataDC, &tm);
 
 			MaxSize = 0x10000;
 			//Allocate Memory for color lists
@@ -1264,7 +1266,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		case WM_SIZE:
-			ClientHeight = HIWORD (lParam) ;
+			ClientHeight = HIWORD (lParam);
 			if(DataAmount != ((ClientHeight/MemFontHeight)*16)){
 				DataAmount = ((ClientHeight/MemFontHeight)*16);
 				if(DataAmount+CurOffset > MaxSize)CurOffset = MaxSize-DataAmount;
