@@ -1012,6 +1012,12 @@ int FCEUMOV_ReadState(FILE* st, uint32 size)
  }
 
  load_successful=1;
+
+ // Maximus: Show the last input combination entered from the
+ // movie within the state
+ if(current!=0) // <- mz: only if playing or recording a movie
+  memcpy(&cur_input_display, joop, 4);
+
  return 1;
 }
 
