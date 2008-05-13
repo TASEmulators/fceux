@@ -490,8 +490,11 @@ int FCEUSS_Load(char *fname)
 	FILE *st;
 	char *fn;
 
-	//Hopefully this fixes read-only toggle problems?
-	if(FCEUMOV_IsRecording()) MovieFlushHeader();
+	//this fixes read-only toggle problems
+	if(FCEUMOV_IsRecording()) {
+		FCEUMOV_AddCommand(0);
+		MovieFlushHeader();
+	}
 
 	if(geniestage==1)
 	{
