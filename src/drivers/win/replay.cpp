@@ -89,7 +89,7 @@ static char* GetSavePath(HWND hwndDlg)
 	_splitpath(fn, szDrive, szDirectory, szFilename, szExt);
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
 	{
-		char* newfn=FCEU_MakePath(FCEUMKF_MOVIE, fn);		// need to make a full path
+		char* newfn=FCEU_MakePath(FCEUMKF_STATE, fn);		// need to make a full path
 		free(fn);
 		fn=newfn;
 	}

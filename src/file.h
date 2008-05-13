@@ -41,5 +41,7 @@ char *FCEU_MakeFName(int type, int id1, char *cd1);
 #define FCEUMKF_STATEGLOB	13
 #define FCEUMKF_MOVIEGLOB2	14
 #define FCEUMKF_REWINDSTATE 15
+#define FCEUMKF_MEMW 16
+#define FCEUMKF_BBOT 17
 
 #endif

@@ -645,12 +645,22 @@ char* FCEU_GetPath(int type)
   case FCEUMKF_STATE:if(odirs[FCEUIOD_STATE])
                       ret=strdup(odirs[FCEUIOD_STATE]);
                      else
-                      asprintf(&ret,"%s"PSS"movie",BaseDirectory);
+                      asprintf(&ret,"%s"PSS"fcs",BaseDirectory);
 		     break;
   case FCEUMKF_MOVIE:if(odirs[FCEUIOD_MISC])
                       ret=strdup(odirs[FCEUIOD_MISC]);
                      else
                       asprintf(&ret,"%s"PSS"movie",BaseDirectory);
+		     break;
+  case FCEUMKF_MEMW:if(odirs[FCEUIOD_MEMW])
+                      ret=strdup(odirs[FCEUIOD_MEMW]);
+                    else
+                      asprintf(&ret,"%s"PSS"memwatch",BaseDirectory);
+		     break;
+  case FCEUMKF_BBOT:if(odirs[FCEUIOD_BBOT])
+                      ret=strdup(odirs[FCEUIOD_BBOT]);
+                    else
+                      asprintf(&ret,"%s"PSS"basicbot",BaseDirectory);
 		     break;
  }
  return(ret);
@@ -666,6 +676,11 @@ char *FCEU_MakePath(int type, const char* filebase)
                       asprintf(&ret,"%s"PSS"%s",odirs[FCEUIOD_MISC],filebase);
                      else
                       asprintf(&ret,"%s"PSS"movie"PSS"%s",BaseDirectory,filebase);
+		     break;
+  case FCEUMKF_STATE:if(odirs[FCEUIOD_STATE])
+                      asprintf(&ret,"%s"PSS"%s",odirs[FCEUIOD_STATE],filebase);
+                     else
+                      asprintf(&ret,"%s"PSS"fcs"PSS"%s",BaseDirectory,filebase);
 		     break;
  }
  return(ret);
@@ -785,13 +800,18 @@ char *FCEU_MakeFName(int type, int id1, char *cd1)
   case FCEUMKF_IPS:  asprintf(&ret,"%s"PSS"%s%s.ips",FileBaseDirectory,FileBase,FileExt);
                      break;
   case FCEUMKF_GGROM:asprintf(&ret,"%s"PSS"gg.rom",BaseDirectory);break;
-  case FCEUMKF_FDSROM:asprintf(&ret,"%s"PSS"disksys.rom",BaseDirectory);break;
+  case FCEUMKF_FDSROM:
+                     if(odirs[FCEUIOD_FDSROM])
+                      asprintf(&ret,"%s"PSS"disksys.rom",odirs[FCEUIOD_FDSROM],FileBase);
+                     else
+                      asprintf(&ret,"%s"PSS"disksys.rom",BaseDirectory,FileBase);
+                     break;
   case FCEUMKF_PALETTE:
-                       if(odirs[FCEUIOD_MISC])
-                        asprintf(&ret,"%s"PSS"%s.pal",odirs[FCEUIOD_MISC],FileBase);
-                       else
-                        asprintf(&ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);
-                       break;
+                     if(odirs[FCEUIOD_MISC])
+                      asprintf(&ret,"%s"PSS"%s.pal",odirs[FCEUIOD_MISC],FileBase);
+                     else
+                      asprintf(&ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);
+                     break;
   case FCEUMKF_MOVIEGLOB:
                      if(odirs[FCEUIOD_MISC])
 //                      asprintf(&ret,"%s"PSS"%s*.fcm",odirs[FCEUIOD_MISC],FileBase);
