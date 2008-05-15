@@ -3,6 +3,9 @@
 #include "main.h"
 #include "window.h"
 
+bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 1003 is given a
+					      //value by the program rather than the user.  This will be used when deciding to automatically make the stop movie checkbox checked.
+
 extern int movieConvertOffset1, movieConvertOffset2, movieConvertOK;
 extern FCEUGI *GameInfo;
 
@@ -195,7 +198,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 			sprintf(tmp, "%lu", info.num_frames);
 			SetWindowTextA(GetDlgItem(hwndDlg,301), tmp);                   // frames
 			SetDlgItemText(hwndDlg,1003,tmp);
-			
+			autoInfo1003 = true;
+
 			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
 			info.num_frames += (div>>1);                                    // round up
 			sprintf(tmp, "%02d:%02d:%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, (info.num_frames/div) % 60);
@@ -474,6 +478,20 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		return FALSE;
 
 	case WM_COMMAND:
+		if(HIWORD(wParam) == EN_CHANGE)
+		 {
+			if (LOWORD(wParam) == 1003) // Check if Stop movie at value has changed
+			{
+				if (autoInfo1003 == false)
+				{
+				HWND hwnd1 = GetDlgItem(hwndDlg,1002);
+				Button_SetCheck(hwnd1,BST_CHECKED);
+				}
+				else
+					autoInfo1003 = false;
+			}
+		 }
+		
 		if(HIWORD(wParam) == CBN_SELCHANGE)
 		{
 			UpdateReplayDialog(hwndDlg);
