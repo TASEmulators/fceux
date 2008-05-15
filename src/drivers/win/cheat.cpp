@@ -417,7 +417,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								GetDlgItemText(hwndDlg,110,str,3);
 								FCEUI_CheatSearchEnd(8,0,StrToU8(str));
 							}
-							else FCEUI_CheatSearchEnd(6,0,0);
+							else FCEUI_CheatSearchEnd(6,0,0); 
 							ShowResults(hwndDlg);
 							break;
 					}

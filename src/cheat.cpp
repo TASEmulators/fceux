@@ -781,7 +781,7 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
  }
 
 
- if(!type)      // Change to a specific value.
+if(!type)      // Change to a specific value.
  {
   for(x=0;x<0x10000;x++)
    if(!(CheatComp[x]&CHEATC_NOSHOW))
@@ -822,7 +822,7 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
  }
  else if(type==3)                          // Any change.
  {
-  for(x=0;x<0x10000;x++)
+  for(x=0x000;x<0x10000;x++)
    if(!(CheatComp[x]&CHEATC_NOSHOW))
    {
     if(CheatComp[x]!=CheatRPtrs[x>>10][x])
@@ -832,25 +832,77 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
     else
      CheatComp[x]|=CHEATC_EXCLUDED;
    }
+
  }
- else if(type==4)                         // Value decreased.
+ else if(type==4)                          // new value = known
  {
-  for(x=0;x<0x10000;x++)
+  for(x=0x000;x<0x10000;x++)
    if(!(CheatComp[x]&CHEATC_NOSHOW))
    {
-    if(!(CheatRPtrs[x>>10][x]<CheatComp[x]))
+    if(CheatRPtrs[x>>10][x]==v1)
+    {
+
+    }
+    else
      CheatComp[x]|=CHEATC_EXCLUDED;
    }
+
  }
- else if(type==5)                         // Value increased.
+ else if(type==5)                          // new value greater than
  {
-  for(x=0;x<0x10000;x++)
+  for(x=0x000;x<0x10000;x++)
    if(!(CheatComp[x]&CHEATC_NOSHOW))
    {
-    if(!(CheatRPtrs[x>>10][x]>CheatComp[x]))
+    if(CheatComp[x]<CheatRPtrs[x>>10][x])
+    {
+
+    }
+    else
      CheatComp[x]|=CHEATC_EXCLUDED;
    }
+
  }
- if(type>4)
-  FCEUI_CheatSearchSetCurrentAsOriginal();
+ else if(type==6)                          // new value less than
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if(CheatComp[x]>CheatRPtrs[x>>10][x])
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==7)                          // new value greater than by known value
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if((CheatRPtrs[x>>10][x]-CheatComp[x])==v2)
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==8)                          // new value less than by known value
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if((CheatComp[x]-CheatRPtrs[x>>10][x])==v2)
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
 }
+
