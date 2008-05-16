@@ -101,11 +101,12 @@ int soundrate = 44100;
 int soundbuftime = 50;
 int soundvolume = 100;
 int soundquality = 0;
+double saspectw = 1, saspecth = 1;
+double winsizemulx = 1, winsizemuly = 1;
 
-/** 
-* Contains the names of the overridden standard directories
-* in the order cheats, misc, nonvol, states, snaps, memwatch, basicbot, macro, fds,..., base
-**/
+
+// Contains the names of the overridden standard directories
+// in the order cheats, misc, nonvol, states, snaps, memwatch, basicbot, macro, fds,..., base
 char *directory_names[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /**

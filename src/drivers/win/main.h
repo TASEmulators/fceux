@@ -49,8 +49,8 @@ static const char *default_directory_names[9] = {"cheats", "movie", "sav", "fcs"
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
 #define NUMBER_OF_DEFAULT_DIRECTORIES sizeof(default_directory_names) / sizeof(*default_directory_names)
 
-static double saspectw = 1, saspecth = 1;
-static double winsizemulx = 1, winsizemuly = 1;
+extern double saspectw, saspecth;
+extern double winsizemulx, winsizemuly;
 static int winwidth, winheight;
 static int ismaximized = 0;
 
