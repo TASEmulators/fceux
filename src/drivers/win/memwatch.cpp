@@ -500,7 +500,9 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 }
 
 //Open the Memory Watch dialog
-void CreateMemWatch(HWND parent)
+void CreateMemWatch()
+//void CreateMemWatch(HWND parent) - adelikat: old code made use of this but parent was only used in a line commented out.  Taking out for my own needs :P
+
 {
 	if(NeedsInit) //Clear the strings
 	{
@@ -538,4 +540,18 @@ void CreateMemWatch(HWND parent)
 		}
 	}
 }
-
+void AddMemWatch(char memaddress[32])
+{
+ char TempArray[32];
+	int i;
+ CreateMemWatch();
+	for(i = 0; i < 24; i++)
+	{
+	 GetDlgItemText(hwndMemWatch,1001+i*3,TempArray,32);
+	 if (TempArray[0] == 0)
+	 {
+		 SetDlgItemText(hwndMemWatch,1001+i*3,memaddress);
+		 break;
+		}
+	}
+}

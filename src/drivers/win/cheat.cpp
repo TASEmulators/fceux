@@ -21,6 +21,7 @@
 #include "common.h"
 #include "cheat.h"
 #include "memview.h"
+#include "memwatch.h"
 #include "debugger.h"
 #include "..\..\fceu.h"
 #include "..\..\cart.h"
@@ -424,6 +425,13 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 					break;
 				case LBN_DBLCLK:
 					switch (LOWORD(wParam)) { //disable/enable cheat
+						case 106:
+							lbfocus=1;
+							SendDlgItemMessage(hwndDlg,106,LB_GETTEXT,SendDlgItemMessage(hwndDlg,106,LB_GETCURSEL,0,0),(LPARAM)(LPCTSTR)str);
+							strcpy(str2,str+1);
+							str2[4] = 0;
+							AddMemWatch(str2);
+							break;
 						case 101:
 //							FCEUI_GetCheat(selcheat,&name,&a,&v,&s); //bbit edited: replaced this with the line below
 							FCEUI_GetCheat(selcheat,&name,&a,&v,NULL,&s,NULL);

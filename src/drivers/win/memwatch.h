@@ -1,3 +1,4 @@
 void UpdateMemWatch();
-void CreateMemWatch(HWND parent);
+void CreateMemWatch();
+void AddMemWatch(char memaddress[32]);
 extern char * MemWatchDir;

@@ -1004,7 +1004,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
 				
 			case MENU_MEMORY_WATCH:
-				CreateMemWatch(hWnd);
+				CreateMemWatch();
 				break;
 
 			case MENU_OPEN_FILE:
