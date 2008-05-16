@@ -438,6 +438,41 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		hwndMemWatch=0;
 		break;
 	case WM_COMMAND:
+		
+		//Menu Items
+		/*switch(wParam)
+		{	
+		case MEMW_FILE_CLOSED:  // Close memwatch window.  TODO: check if current watch has been saved and ask if save changes
+			SaveStrings();
+			DestroyWindow(hwndMemWatch);
+			hwndMemWatch=0;
+			break;
+					 
+		case MEMW_FILE_OPEN:
+			LoadMemWatch();
+			break;
+		
+		case MEMW_FILE_SAVEAS:
+			SaveMemWatch();
+			break;
+		
+		case MEMW_FILE_NEW:
+			//TODO: Replace confirm clear with a check if file is saved followed by a "do you wish to save?" message
+			if(MessageBox(hwndMemWatch, "Clear all text?", "Confirm clear", MB_YESNO)==IDYES)
+				{
+					int i;
+					for(i=0;i<24;i++)
+					{
+						addresses[i][0] = 0;
+						labels[i][0] = 0;
+						SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
+						SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+					}
+				}
+		default:
+		break;
+		}*/
+
 		switch(HIWORD(wParam))
 		{
 		

@@ -34,6 +34,8 @@ int nextBookmark = 0;
 * @param address The address to find.
 * @return The index of the bookmark at that address or -1 if there's no bookmark at that address.
 **/
+
+
 int findBookmark(unsigned int address)
 {
 	int i;

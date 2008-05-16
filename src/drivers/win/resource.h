@@ -270,6 +270,37 @@
 #define MENU_DEBUGGER                   40080
 #define MENU_MEMORY_WATCH               40081
 #define MENU_RAMFILTER                  40082
+#define MENU_OPEN                       40083
+#define MENU_CLOSE                      40084
+#define MENU_SAVEAS                     40085
+#define MENU_SAVE                       40086
+#define MENU_RECENT                     40087
+#define MENU_CLEARTEXT                  40088
+#define MENU_LOADSTART                  40089
+#define ID_OPTIONS_LOADLASTFILEONSTARTUP 40090
+#define ID_OPTIONS_LOADLASTFILE         40091
+#define OPTIONS_LOADSTART               40092
+#define FILE_OPEN                       40093
+#define FILE_CLOSE                      40094
+#define FILE_SAVE                       40095
+#define FILE_SAVEAS                     40096
+#define FILE_RECENT                     40097
+#define FILE_CLEARTEXT                  40098
+#define ID_HELP_COMMANDS                40099
+#define About                           40100
+#define ID_HELP_ABOUT                   40101
+#define FILE_NEW                        40102
+#define MEMW_FILE_NEW                   40103
+#define MEMW_FILE_OPEN                  40104
+#define MEMW_FILE_SAVE                  40105
+#define MEMW_FILE_SAVEAS                40106
+#define MEMW_FILE_RECENT                40107
+#define MEMW_FILE_CLOSE                 40108
+#define MEMW_OPTIONS_LOADSTART          40109
+#define MEMW_ID_OPTIONS_LOADLASTFILE    40110
+#define MEMW_WCOMMANDS                  40111
+#define MEMW_HELP_ABOUT                 40112
+#define MEMW_HELP_WCOMMANDS             40113
 #define MENU_LOG_SOUND                  40120
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -281,9 +312,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        106
-#define _APS_NEXT_COMMAND_VALUE         40083
-#define _APS_NEXT_CONTROL_VALUE         1128
+#define _APS_NEXT_RESOURCE_VALUE        107
+#define _APS_NEXT_COMMAND_VALUE         40114
+#define _APS_NEXT_CONTROL_VALUE         1129
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
