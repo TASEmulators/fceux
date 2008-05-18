@@ -41,6 +41,12 @@ extern int frame_display;
 extern int input_display;
 extern char *BasicBotDir;
 
+//window positions:
+extern int ChtPosX,ChtPosY;
+extern int DbgPosX,DbgPosY;
+extern int MemView_wndx, MemView_wndy;
+extern int MemFind_wndx, MemFind_wndy;
+
 /**
 * Structure that contains configuration information
 **/
@@ -143,6 +149,16 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(EnableBackgroundInput),
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
+
+	//window positions
+	AC(ChtPosX),
+	AC(ChtPosY),
+	AC(DbgPosX),
+	AC(DbgPosY),
+	AC(MemView_wndx),
+	AC(MemView_wndy),
+	AC(MemFind_wndx), 
+	AC(MemFind_wndy),
 
 	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT
