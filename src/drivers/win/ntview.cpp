@@ -32,6 +32,7 @@
 HWND hNTView;
 
 int NTViewPosX,NTViewPosY;
+
 static uint8 palcache[32]; //palette cache //mbg merge 7/19/06 needed to be static
 //uint8 ntcache0[0x400],ntcache1[0x400],ntcache2[0x400],ntcache3[0x400]; //cache CHR, fixes a refresh problem when right-clicking
 uint8 *ntable0, *ntable1, *ntable2, *ntable3; //name table bitmap array
@@ -410,7 +411,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch(uMsg) {
 		case WM_INITDIALOG:
-			//SetWindowPos(hwndDlg,0,PPUViewPosX,PPUViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+			SetWindowPos(hwndDlg,0,NTViewPosX,NTViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			//prepare the bitmap attributes
 			//pattern tables
@@ -472,8 +473,8 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_MOVE:
 			GetWindowRect(hwndDlg,&wrect);
-			//NTViewPosX = wrect.left; //todo: is this needed?
-			//NTViewPosY = wrect.top;
+			NTViewPosX = wrect.left;
+			NTViewPosY = wrect.top;
 			break;
 		case WM_RBUTTONDBLCLK:
 		case WM_RBUTTONDOWN:

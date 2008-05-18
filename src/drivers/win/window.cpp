@@ -98,6 +98,7 @@ static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
 static HMENU recentmenu, recentdmenu;
 
 static LONG WindowXC=1<<30,WindowYC;
+int MainWindow_wndx, MainWindow_wndy;
 
 static uint32 mousex,mousey,mouseb;
 
@@ -601,6 +602,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	  case WM_RBUTTONUP:
 		  mouseb=wParam;
 		  goto proco;
+
+	  case WM_MOVE: {
+		RECT wrect;
+		GetWindowRect(hWnd,&wrect);
+		MainWindow_wndx = wrect.left;
+		MainWindow_wndy = wrect.top;
+	}
 
 	  case WM_MOUSEMOVE:
 		  {
@@ -1329,8 +1337,8 @@ int CreateMainWindow()
 		"FCEULTRA",
 		"FCE Ultra",
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
+		MainWindow_wndx,
+		MainWindow_wndy,
 		256,
 		240,  /* X,Y ; Width, Height */
 		NULL,
@@ -1338,7 +1346,7 @@ int CreateMainWindow()
 		fceu_hInstance,
 		NULL );  
 
-	CenterWindowOnScreen(hAppWnd);
+	//CenterWindowOnScreen(hAppWnd);
 
 	DragAcceptFiles(hAppWnd, 1);
 

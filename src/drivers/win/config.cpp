@@ -46,6 +46,9 @@ extern int ChtPosX,ChtPosY;
 extern int DbgPosX,DbgPosY;
 extern int MemView_wndx, MemView_wndy;
 extern int MemFind_wndx, MemFind_wndy;
+extern int NTViewPosX,NTViewPosY;
+extern int PPUViewPosX,PPUViewPosY;
+extern int MainWindow_wndx, MainWindow_wndy;
 
 /**
 * Structure that contains configuration information
@@ -159,6 +162,12 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemView_wndy),
 	AC(MemFind_wndx), 
 	AC(MemFind_wndy),
+	AC(NTViewPosX),
+	AC(NTViewPosY),
+	AC(PPUViewPosX),
+	AC(PPUViewPosY),
+	AC(MainWindow_wndx),
+	AC(MainWindow_wndy),
 
 	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT
