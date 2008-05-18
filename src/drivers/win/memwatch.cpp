@@ -537,14 +537,15 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		}
 		break;
 
-	case WM_PAINT: {
+	case WM_PAINT:
 		PAINTSTRUCT ps;
 		BeginPaint(hwndDlg, &ps);
 		EndPaint(hwndDlg, &ps);
 		UpdateMemWatch();
+		break;
+	case WM_INITMENU:
 		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 		break;
-	}
 	case WM_CLOSE:
 	case WM_QUIT:
 		CloseMemoryWatch();
