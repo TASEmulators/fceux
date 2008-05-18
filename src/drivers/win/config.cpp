@@ -142,6 +142,7 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
 	AC(MemWatchLoadOnStart),
+	AC(MemWatchLoadFileOnStart),
 
 	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT

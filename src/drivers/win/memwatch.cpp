@@ -32,8 +32,8 @@ static int NeedsInit = 1;
 char *MemWatchDir = 0;
 char memwLastFilename[2048];
 bool fileChanged = false;
-bool MemWatchLoadOnStart = false;  //If load memw on fceu start TODO: receive it from config file, if not in config, set to false
-bool loadFileonStart = false;  //If load last file on memw start TODO: receive from config file, if not in config, set to false
+bool MemWatchLoadOnStart = false;
+bool MemWatchLoadFileOnStart = false;
 static HMENU memwmenu = 0;
 //char RecentMemwDirs[5][48];  //Recent directories
 
@@ -545,6 +545,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		break;
 	case WM_INITMENU:
 		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
@@ -585,18 +586,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		case MEMW_OPTIONS_LOADLASTFILE: //Load last file when opening memwatch
-			
-			if (loadFileonStart==false)
-				{
-				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADLASTFILE,MF_CHECKED);
-				loadFileonStart=true;
-				}
-			else
-				{
-				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADLASTFILE,MF_UNCHECKED);
-				loadFileonStart=false;
-				}
-				
+				MemWatchLoadFileOnStart ^= 1;
+				CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
 			break;
 
 		case MEMW_HELP_WCOMMANDS:
