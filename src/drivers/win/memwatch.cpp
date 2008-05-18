@@ -32,7 +32,7 @@ static int NeedsInit = 1;
 char *MemWatchDir = 0;
 char memwLastFilename[2048];
 bool fileChanged = false;
-bool loadonStart = false;  //If load memw on fceu start TODO: receive it from config file, if not in config, set to false
+bool MemWatchLoadOnStart = false;  //If load memw on fceu start TODO: receive it from config file, if not in config, set to false
 bool loadFileonStart = false;  //If load last file on memw start TODO: receive from config file, if not in config, set to false
 static HMENU memwmenu = 0;
 //char RecentMemwDirs[5][48];  //Recent directories
@@ -473,7 +473,7 @@ void CloseMemoryWatch()
 						SaveMemWatch();
 					}
 			}
-	//Save MemwLastFile, window x,y, LoadonStart, LoadFileonStart, RecentMemwDirs		
+	//Save MemwLastFile, window x,y, MemWatchLoadOnStart, LoadFileonStart, RecentMemwDirs		
 	DestroyWindow(hwndMemWatch);
 	hwndMemWatch=0;
 
@@ -542,6 +542,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		BeginPaint(hwndDlg, &ps);
 		EndPaint(hwndDlg, &ps);
 		UpdateMemWatch();
+		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 		break;
 	}
 	case WM_CLOSE:
@@ -578,18 +579,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		case MEMW_OPTIONS_LOADSTART: //Load on Start up
-			
-			if (loadonStart==false)
-			{
-				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADSTART,MF_CHECKED);
-				loadonStart=true;
-			}
-			else
-			{
-				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADSTART,MF_UNCHECKED);
-				loadonStart=false;
-			}
-				
+				MemWatchLoadOnStart ^= 1;
+				CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 			break;
 
 		case MEMW_OPTIONS_LOADLASTFILE: //Load last file when opening memwatch

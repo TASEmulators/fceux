@@ -639,6 +639,8 @@ int main(int argc,char *argv[])
 		LoadNewGamey(hAppWnd, 0);
 	}
 
+
+	if (MemWatchLoadOnStart) CreateMemWatch();
 doloopy:
 	UpdateFCEUWindow();  
 	if(GameInfo)
