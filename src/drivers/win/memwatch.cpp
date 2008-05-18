@@ -30,6 +30,12 @@ static char addresses[24][16];
 static char labels[24][24];
 static int NeedsInit = 1;
 char *MemWatchDir = 0;
+char memwLastFilename[2048];
+bool fileChanged = false;
+bool loadonStart = false;  //If load memw on fceu start TODO: receive it from config file, if not in config, set to false
+bool loadFileonStart = false;  //If load last file on memw start TODO: receive from config file, if not in config, set to false
+static HMENU memwmenu = 0;
+//char RecentMemwDirs[5][48];  //Recent directories
 
 //mbg 5/12/08
 //for the curious, I tested U16ToHexStr and it was 10x faster than printf.
@@ -261,19 +267,35 @@ static void PutInSpaces(int i)
 	}
 }
 
+
+bool iftextchanged()
+{
+//Decides if any edit box has anything	
+	int i,j;
+	for(i=0;i<24;i++)
+	{
+		for(j=0;j<16;j++)
+		{
+			if(addresses[i][j] != NULL || labels [i][j] != NULL)
+				return true;
+		}
+	}
+return false;
+}
+
 //Saves all the addresses and labels to disk
 static void SaveMemWatch()
 {
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
-	char nameo[2048];
+	 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Memory Watch As...";
 	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
+	memwLastFilename[0]=0;
+	ofn.lpstrFile=memwLastFilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MEMW);
@@ -290,27 +312,27 @@ static void SaveMemWatch()
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 
-		//quick get length of nameo
+		//quick get length of memwLastFilename
 		for(i=0;i<2048;i++)
 		{
-			if(nameo[i] == 0)
+			if(memwLastFilename[i] == 0)
 			{
 				break;
 			}
 		}
 
-		//add .txt if nameo doesn't have it
-		if((i < 4 || nameo[i-4] != '.') && i < 2040)
+		//add .txt if memwLastFilename doesn't have it
+		if((i < 4 || memwLastFilename[i-4] != '.') && i < 2040)
 		{
-			nameo[i] = '.';
-			nameo[i+1] = 't';
-			nameo[i+2] = 'x';
-			nameo[i+3] = 't';
-			nameo[i+4] = 0;
+			memwLastFilename[i] = '.';
+			memwLastFilename[i+1] = 't';
+			memwLastFilename[i+2] = 'x';
+			memwLastFilename[i+3] = 't';
+			memwLastFilename[i+4] = 0;
 		}
-
+		
 		SaveStrings();
-		FILE *fp=FCEUD_UTF8fopen(nameo,"w");
+		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
 		for(i=0;i<24;i++)
 		{
 			//Use dummy strings to fill empty slots
@@ -329,23 +351,66 @@ static void SaveMemWatch()
 			fprintf(fp, "%s %s\n", addresses[i], labels[i]);
 			PutInSpaces(i);
 		}
+		fileChanged=false;
 		fclose(fp);
 	}
+}
+
+static void QuickSaveMemWatch() //Save rather than Save as
+{
+	if (fileChanged==false) //Checks if current watch has been changed, if so quick save has no effect.
+		return;	
+	if (memwLastFilename[0]!=NULL) // Check if there is there something to save else default to save as
+	{
+		SaveStrings();
+		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
+		for(int i=0;i<24;i++)
+		{
+			//Use dummy strings to fill empty slots
+			if(labels[i][0] == 0)
+			{
+				labels[i][0] = '|';
+				labels[i][1] = 0;
+			}
+			if(addresses[i][0] == 0)
+			{
+				addresses[i][0] = '|';
+				addresses[i][1] = 0;
+			}
+			//spaces can be a problem for scanf so get rid of them
+			TakeOutSpaces(i);
+			fprintf(fp, "%s %s\n", addresses[i], labels[i]);
+			PutInSpaces(i);
+			
+		}
+		fileChanged = false;
+		fclose (fp);
+	}
+	else
+		SaveMemWatch();
 }
 
 //Loads a previously saved file
 static void LoadMemWatch()
 {
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
-	char nameo[2048];
+	char watchfcontents[2048]; 
+	
+	//Now clear last file used variable (memwLastFilename)
+	//This might be unecessary
+		for (int i=0;i<2048;i++)
+		{
+			memwLastFilename[i] = NULL;
+		}
+	
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Load Memory Watch...";
 	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
+	memwLastFilename[0]=0;
+	ofn.lpstrFile=memwLastFilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MEMW);
@@ -363,15 +428,15 @@ static void LoadMemWatch()
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 
-		FILE *fp=FCEUD_UTF8fopen(nameo,"r");
+		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
 		for(i=0;i<24;i++)
 		{
-			fscanf(fp, "%s ", nameo); //re-using nameo--bady style :P
+			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
 			for(j = 0; j < 16; j++)
-				addresses[i][j] = nameo[j];
-			fscanf(fp, "%s\n", nameo);
+				addresses[i][j] = watchfcontents[j];
+			fscanf(fp, "%s\n", watchfcontents);
 			for(j = 0; j < 24; j++)
-				labels[i][j] = nameo[j];
+				labels[i][j] = watchfcontents[j];
 
 			//Replace dummy strings with empty strings
 			if(addresses[i][0] == '|')
@@ -393,10 +458,59 @@ static void LoadMemWatch()
 		}
 		fclose(fp);
 	}
+fileChanged = false;
+}
+
+void CloseMemoryWatch()
+{
+			SaveStrings();
+			
+			//TODO: save window x,y and last file opened to some variables then save them to config when fceu closes
+			if (fileChanged==true)
+			{
+				if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
+					{
+						SaveMemWatch();
+					}
+			}
+	//Save MemwLastFile, window x,y, LoadonStart, LoadFileonStart, RecentMemwDirs		
+	DestroyWindow(hwndMemWatch);
+	hwndMemWatch=0;
+
+}
+
+
+void ClearAllText()
+{
+	if (fileChanged==true) //If contents have changed
+		{
+			if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
+			{
+				SaveMemWatch();
+
+			}
+		}
+					
+					int i;
+					for(i=0;i<24;i++)
+					{
+						addresses[i][0] = 0;
+						labels[i][0] = 0;
+						SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
+						SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+					}
+					//Now clear last file used variable (memwLastFilename)
+					for (int i=0;i<2048;i++)
+					{
+						memwLastFilename[i] = NULL;
+					}
+fileChanged = false;
+				
 }
 
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	
 	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
 
 	switch(uMsg)
@@ -432,52 +546,83 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	}
 	case WM_CLOSE:
 	case WM_QUIT:
-		SaveStrings();
-		DeleteObject(hdc);
-		DestroyWindow(hwndMemWatch);
-		hwndMemWatch=0;
+		CloseMemoryWatch();
+		//DeleteObject(hdc);
 		break;
 	case WM_COMMAND:
 		
 		//Menu Items
-		/*switch(wParam)
+		switch(wParam)
 		{	
-		case MEMW_FILE_CLOSED:  // Close memwatch window.  TODO: check if current watch has been saved and ask if save changes
-			SaveStrings();
-			DestroyWindow(hwndMemWatch);
-			hwndMemWatch=0;
+		case MEMW_FILE_CLOSE:  
+			CloseMemoryWatch();
 			break;
-					 
+								 
 		case MEMW_FILE_OPEN:
 			LoadMemWatch();
 			break;
 		
+		case MEMW_FILE_SAVE:
+			QuickSaveMemWatch();
+			break;
+
 		case MEMW_FILE_SAVEAS:
 			SaveMemWatch();
 			break;
 		
 		case MEMW_FILE_NEW:
-			//TODO: Replace confirm clear with a check if file is saved followed by a "do you wish to save?" message
-			if(MessageBox(hwndMemWatch, "Clear all text?", "Confirm clear", MB_YESNO)==IDYES)
+			ClearAllText();
+			break;
+		
+		case MEMW_FILE_RECENT:
+			break;
+
+		case MEMW_OPTIONS_LOADSTART: //Load on Start up
+			
+			if (loadonStart==false)
+			{
+				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADSTART,MF_CHECKED);
+				loadonStart=true;
+			}
+			else
+			{
+				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADSTART,MF_UNCHECKED);
+				loadonStart=false;
+			}
+				
+			break;
+
+		case MEMW_OPTIONS_LOADLASTFILE: //Load last file when opening memwatch
+			
+			if (loadFileonStart==false)
 				{
-					int i;
-					for(i=0;i<24;i++)
-					{
-						addresses[i][0] = 0;
-						labels[i][0] = 0;
-						SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-						SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
-					}
+				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADLASTFILE,MF_CHECKED);
+				loadFileonStart=true;
 				}
+			else
+				{
+				CheckMenuItem(memwmenu,MEMW_OPTIONS_LOADLASTFILE,MF_UNCHECKED);
+				loadFileonStart=false;
+				}
+				
+			break;
+
+		case MEMW_HELP_WCOMMANDS:
+			break;
+
+		case MEMW_HELP_ABOUT:
+			break;
+
 		default:
 		break;
-		}*/
+		}
 
 		switch(HIWORD(wParam))
 		{
 		
 		case EN_CHANGE:
 			{
+				fileChanged = iftextchanged();			
 				//the contents of an address box changed. re-parse it.
 				//first, find which address changed
 				int changed = MWRec::findIndex(LOWORD(wParam));
@@ -485,51 +630,41 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				mwrecs[changed].parse(LOWORD(wParam));
 				break;
 			}
-
+		
 		case BN_CLICKED:
+			
 			switch(LOWORD(wParam))
 			{
 			case 101: //Save button clicked
 				//StopSound(); //mbg 5/7/08
-				SaveMemWatch();
+				//SaveMemWatch();  //5/13/08 Buttons removed (I didn't remove the code so it would be easy to add them back one day)
 				break;			
 			case 102: //Load button clicked
 				//StopSound(); //mbg 5/7/08
-				LoadMemWatch();
+				//LoadMemWatch();  //5/13/08 Buttons removed
 				break;
 			case 103: //Clear button clicked
-				//StopSound(); //mbg 5/7/08
-				if(MessageBox(hwndMemWatch, "Clear all text?", "Confirm clear", MB_YESNO)==IDYES)
-				{
-					int i;
-					for(i=0;i<24;i++)
-					{
-						addresses[i][0] = 0;
-						labels[i][0] = 0;
-						SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-						SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
-					}
-				}
+				//ClearAllText();  //5/13/08 Buttons removed
 				break;
 			default:
 				break;
-			}
+			} 
 		}
-
+		
 		if(!(wParam>>16)) //Close button clicked
 		{
 			switch(wParam&0xFFFF)
 			{
 			case 1:
-				SaveStrings();
-				DestroyWindow(hwndMemWatch);
-				hwndMemWatch=0;
+				//CloseMemoryWatch();  //5/13/08 Buttons removed
 				break;
 			}
 		}
+		
 		break;
 	default:
 		break;
+		
 	}
 	return 0;
 }
@@ -562,9 +697,11 @@ void CreateMemWatch()
 	//Create
 	//hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",parent,MemWatchCallB);
 	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
+	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
 
 	//Initialize values to previous entered addresses/labels
+	
 	{
 		int i;
 		for(i = 0; i < 24; i++)
@@ -590,3 +727,4 @@ void AddMemWatch(char memaddress[32])
 		}
 	}
 }
+

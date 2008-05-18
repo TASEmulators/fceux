@@ -141,6 +141,8 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(MemWatchDir), //mbg merge 7/18/06 removed
 	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
+
+	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT
 };
 
