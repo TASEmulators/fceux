@@ -35,11 +35,156 @@ bool fileChanged = false;
 bool MemWatchLoadOnStart = false;
 bool MemWatchLoadFileOnStart = false;
 static HMENU memwmenu = 0;
-//char RecentMemwDirs[5][48];  //Recent directories
+
+char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
+char *memw_recent_directories[10] = { 0, 0, 0, 0, 0 };
+
+const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
+const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
+const unsigned int MEMW_MAX_NUMBER_OF_RECENT_DIRS = sizeof(memw_recent_directories)/sizeof(*memw_recent_directories);
+
+static HMENU memwrecentmenu, memwrecentdmenu;
 
 //mbg 5/12/08
 //for the curious, I tested U16ToHexStr and it was 10x faster than printf.
 //so the author of these dedicated functions is not insane, and I will leave them.
+
+
+void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
+{
+	MENUITEMINFO moo;
+	int x;
+
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
+
+	GetMenuItemInfo(GetSubMenu(memwmenu, 0), mitem, FALSE, &moo);
+	moo.hSubMenu = menu;
+	moo.fState = strs[0] ? MFS_ENABLED : MFS_GRAYED;
+
+	SetMenuItemInfo(GetSubMenu(memwmenu, 0), mitem, FALSE, &moo);
+
+	// Remove all recent files submenus
+	for(x = 0; x < MEMW_MAX_NUMBER_OF_RECENT_FILES; x++)
+	{
+		RemoveMenu(menu, baseid + x, MF_BYCOMMAND);
+	}
+
+	// Recreate the menus
+	for(x = MEMW_MAX_NUMBER_OF_RECENT_FILES - 1; x >= 0; x--)
+	{  
+		char tmp[128 + 5];
+
+		// Skip empty strings
+		if(!strs[x])
+		{
+			continue;
+		}
+
+		moo.cbSize = sizeof(moo);
+		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
+
+		// Fill in the menu text.
+		if(strlen(strs[x]) < 128)
+		{
+			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x]);
+		}
+		else
+		{
+			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x] + strlen( strs[x] ) - 127);
+		}
+
+		// Insert the menu item
+		moo.cch = strlen(tmp);
+		moo.fType = 0;
+		moo.wID = baseid + x;
+		moo.dwTypeData = tmp;
+		InsertMenuItem(menu, 0, 1, &moo);
+	}
+
+	DrawMenuBar(hAppWnd);
+}
+
+
+
+void UpdateMemwRecentArray(const char* addString, char** bufferArray, unsigned int arrayLen, HMENU menu, unsigned int menuItem, unsigned int baseId)
+{
+	// Try to find out if the filename is already in the recent files list.
+	for(unsigned int x = 0; x < arrayLen; x++)
+	{
+		if(bufferArray[x])
+		{
+			if(!strcmp(bufferArray[x], addString))    // Item is already in list.
+			{
+				// If the filename is in the file list don't add it again.
+				// Move it up in the list instead.
+
+				int y;
+				char *tmp;
+
+				// Save pointer.
+				tmp = bufferArray[x];
+				
+				for(y = x; y; y--)
+				{
+					// Move items down.
+					bufferArray[y] = bufferArray[y - 1];
+				}
+
+				// Put item on top.
+				bufferArray[0] = tmp;
+
+				// Update the recent files menu
+				UpdateMemw_RMenu(menu, bufferArray, menuItem, baseId);
+
+				return;
+			}
+		}
+	}
+
+	// The filename wasn't found in the list. That means we need to add it.
+
+	// If there's no space left in the recent files list, get rid of the last
+	// item in the list.
+	if(bufferArray[arrayLen - 1])
+	{
+		free(bufferArray[arrayLen - 1]);
+	}
+
+	// Move the other items down.
+	for(unsigned int x = arrayLen - 1; x; x--)
+	{
+		bufferArray[x] = bufferArray[x - 1];
+	}
+
+	// Add the new item.
+	bufferArray[0] = (char*)malloc(strlen(addString) + 1); //mbg merge 7/17/06 added cast
+	strcpy(bufferArray[0], addString);
+
+	// Update the recent files menu
+	UpdateMemw_RMenu(menu, bufferArray, menuItem, baseId);
+}
+
+/**
+* Add a filename to the recent files list.
+*
+* @param filename Name of the file to add.
+**/
+void MemwAddRecentFile(const char *filename)
+{
+	UpdateMemwRecentArray(filename, memw_recent_files, MEMW_MAX_NUMBER_OF_RECENT_FILES, memwrecentmenu, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
+}
+
+/**
+* Add a directory to the recent directories list.
+*
+* @param dirname Name of the directory to add.
+**/
+void MemwAddRecentDirectory(const char *dirname)
+{
+	UpdateMemwRecentArray(dirname, memw_recent_directories, MEMW_MAX_NUMBER_OF_RECENT_DIRS, memwrecentdmenu, 103, 700);
+}
+
 
 static char *U8ToStr(uint8 a)
 {
@@ -50,7 +195,6 @@ static char *U8ToStr(uint8 a)
 	TempArray[3] = 0;
 	return TempArray;
 }
-
 
 //I don't trust scanf for speed
 static uint16 FastStrToU16(char* s, bool& valid)
@@ -427,6 +571,13 @@ static void LoadMemWatch()
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
+			// Get the directory from the filename
+			char *tmpdir = MemWatchDir;
+			strncpy(tmpdir, ofn.lpstrFile, ofn.nFileOffset);
+			tmpdir[ofn.nFileOffset]=0;
+
+			// Add the directory to the list of recent directories
+			MemwAddRecentDirectory(tmpdir);
 
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
 		for(i=0;i<24;i++)
@@ -552,6 +703,11 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		CloseMemoryWatch();
 		//DeleteObject(hdc);
 		break;
+	/*
+	case WM_KEYDOWN:
+		if (wParam == VK_HOME)
+			ClearAllText();
+	*/
 	case WM_COMMAND:
 		
 		//Menu Items
@@ -591,9 +747,6 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		case MEMW_HELP_WCOMMANDS:
-			break;
-
-		case MEMW_HELP_ABOUT:
 			break;
 
 		default:
@@ -682,7 +835,13 @@ void CreateMemWatch()
 	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
 	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
+	memwrecentmenu = CreateMenu();
+	memwrecentdmenu = CreateMenu();
 
+	// Update recent files menu
+	UpdateMemw_RMenu(memwrecentmenu, memw_recent_files, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
+	UpdateMemw_RMenu(memwrecentdmenu, memw_recent_directories, 103, 700);
+	
 	//Initialize values to previous entered addresses/labels
 	
 	{
