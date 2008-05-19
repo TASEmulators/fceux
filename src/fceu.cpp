@@ -355,10 +355,10 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
          goto endlseq;
 
         FCEU_PrintError("An error occurred while loading the file.");
-		FCEUD_PrintError("An error occurred while loading the file.");
         FCEU_fclose(fp);
 
 		delete GameInfo;
+		GameInfo = 0;
 
         return 0;
 
