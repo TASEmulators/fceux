@@ -46,6 +46,8 @@ static char BBcaption[] = "Basic Bot v0.3.4a by qFox";
 // save/load version
 static int BBsaveload = 2;
 
+int BasicBot_wndx=0, BasicBot_wndy=0;
+
 static HWND hwndBasicBot = 0;					// GUI handle
 static bool BotRunning = false;					// Is the bot computing or not?
 static bool ResetStatsASAP = false;					// Do we need to reset the stats asap? (when pressing reset in gui)
@@ -2414,7 +2416,16 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		// cant change gui controls in this event
 		// seems to be a inherited "feature", for backwards
 		// compatibility.
+		SetWindowPos(hwndDlg,0,BasicBot_wndx,BasicBot_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 		break;
+	case WM_MOVE: {
+		RECT wrect;
+		GetWindowRect(hwndDlg,&wrect);
+		BasicBot_wndx = wrect.left;
+		BasicBot_wndy = wrect.top;
+		break;
+	};
+
 	case WM_CLOSE:
 	case WM_QUIT:
 		CrashWindow();

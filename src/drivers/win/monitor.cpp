@@ -34,6 +34,7 @@ const char* rule_strings[] = { "Any", "Exact value", "All but value", "Less than
 
 unsigned char snapshots[NUMBER_OF_RULES][SIZE_OF_RAM];// = { first_snapshot, second_snapshot, third_snapshot, fourth_snapshot, fifth_snapshot };
 
+int Monitor_wndx=0, Monitor_wndy=0;
 unsigned int last_button = 0;
 
 BOOL verify_rule(unsigned int rule_number, unsigned int chosen_rule, unsigned int offset, unsigned int value)
@@ -220,7 +221,16 @@ unsigned int ruleBox_to_ruleInput(unsigned int ruleBox)
 BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg) {
+		case WM_MOVE: {
+			RECT wrect;
+			GetWindowRect(hwndDlg,&wrect);
+			Monitor_wndx = wrect.left;
+			Monitor_wndy = wrect.top;
+			break;
+		};
+
 		case WM_INITDIALOG:
+			SetWindowPos(hwndDlg,0,Monitor_wndx,Monitor_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			monitor_open = 1;
 //			CenterWindow(hwndDlg);
 

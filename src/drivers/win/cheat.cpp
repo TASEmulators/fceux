@@ -34,6 +34,7 @@ int CheatStyle=1;
 
 int selcheat;
 int ChtPosX,ChtPosY;
+int GGConv_wndx=0, GGConv_wndy=0;
 static HFONT hFont,hNewFont;
 
 static int scrollindex;
@@ -517,8 +518,16 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	int i;
 
 	switch(uMsg) {
+		case WM_MOVE: {
+			RECT wrect;
+			GetWindowRect(hwndDlg,&wrect);
+			GGConv_wndx = wrect.left;
+			GGConv_wndy = wrect.top;
+			break;
+		};
 		case WM_INITDIALOG:
 			//todo: set text limits
+			SetWindowPos(hwndDlg,0,GGConv_wndx,GGConv_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			break;
 		case WM_CREATE:
 

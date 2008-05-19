@@ -54,6 +54,8 @@ int tracelogbufusedsize;
 
 FILE *LOG_FP;
 
+int Tracer_wndx=0, Tracer_wndy=0;
+
 void ShowLogDirDialog(void);
 void BeginLoggingSequence(void);
 void LogInstruction(void);
@@ -69,8 +71,15 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	int i;
 	LOGFONT lf;
 	switch(uMsg) {
+		case WM_MOVE: {
+			RECT wrect;
+			GetWindowRect(hwndDlg,&wrect);
+			Tracer_wndx = wrect.left;
+			Tracer_wndy = wrect.top;
+			break;
+		};
 		case WM_INITDIALOG:
-			//CenterWindow(hwndDlg);
+			SetWindowPos(hwndDlg,0,Tracer_wndx,Tracer_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hTracer = hwndDlg;
 
 			//setup font

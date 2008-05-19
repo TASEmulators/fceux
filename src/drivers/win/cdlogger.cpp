@@ -37,6 +37,9 @@ void SaveStrippedRom();
 
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;
+
+int CDLogger_wndx=0, CDLogger_wndy=0;
+
 //extern uint8 *ROM;
 //extern uint8 *VROM;
 
@@ -49,7 +52,15 @@ char loadedcdfile[1024];
 
 BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
+		case WM_MOVE: {
+			RECT wrect;
+			GetWindowRect(hwndDlg,&wrect);
+			CDLogger_wndx = wrect.left;
+			CDLogger_wndy = wrect.top;
+			break;
+		};
 		case WM_INITDIALOG:
+			SetWindowPos(hwndDlg,0,CDLogger_wndx,CDLogger_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hCDLogger = hwndDlg;
 			codecount = datacount = 0;
 			undefinedcount = PRGsize[0];

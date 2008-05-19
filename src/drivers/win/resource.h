@@ -304,6 +304,7 @@
 #define MEMW_OPTIONS_LOADLASTFILE       40114
 #define ID_RECENT_                      40115
 #define ID_RECENT_1                     40116
+#define ID_FILE_RECENT                  40117
 #define MENU_LOG_SOUND                  40120
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -316,7 +317,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        108
-#define _APS_NEXT_COMMAND_VALUE         40117
+#define _APS_NEXT_COMMAND_VALUE         40118
 #define _APS_NEXT_CONTROL_VALUE         1129
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

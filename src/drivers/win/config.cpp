@@ -40,6 +40,7 @@ extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display;
 extern int input_display;
 extern char *BasicBotDir;
+extern int disableUDLR;
 
 //window positions:
 extern int ChtPosX,ChtPosY;
@@ -49,6 +50,12 @@ extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
 extern int PPUViewPosX,PPUViewPosY;
 extern int MainWindow_wndx, MainWindow_wndy;
+extern int BasicBot_wndx, BasicBot_wndy;
+extern int MemWatch_wndx, MemWatch_wndy;
+extern int Monitor_wndx, Monitor_wndy;
+extern int Tracer_wndx, Tracer_wndy;
+extern int CDLogger_wndx, CDLogger_wndy;
+extern int GGConv_wndx, GGConv_wndy;
 
 /**
 * Structure that contains configuration information
@@ -160,11 +167,13 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(autoHoldClearKey),
 	AC(frame_display),
 	AC(input_display),
-	ACS(MemWatchDir), //mbg merge 7/18/06 removed
+	ACS(MemWatchDir),
 	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
+
+	AC(disableUDLR),
 
 	//window positions
 	AC(ChtPosX),
@@ -181,6 +190,18 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(PPUViewPosY),
 	AC(MainWindow_wndx),
 	AC(MainWindow_wndy),
+	AC(BasicBot_wndx),
+	AC(BasicBot_wndy),
+	AC(MemWatch_wndx),
+	AC(MemWatch_wndy),
+	AC(Monitor_wndx),
+	AC(Monitor_wndy),
+	AC(Tracer_wndx),
+	AC(Tracer_wndy),
+	AC(CDLogger_wndx),
+	AC(CDLogger_wndy),
+	AC(GGConv_wndx),
+	AC(GGConv_wndy),
 
 	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT

@@ -24,6 +24,7 @@
 #include "..\..\debug.h"
 #include "debugger.h"
 
+int MemWatch_wndx=0, MemWatch_wndy=0;
 static HDC hdc;
 static HWND hwndMemWatch=0;
 static char addresses[24][16];
@@ -666,7 +667,16 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 
 	switch(uMsg)
 	{
+	case WM_MOVE: {
+		RECT wrect;
+		GetWindowRect(hwndDlg,&wrect);
+		MemWatch_wndx = wrect.left;
+		MemWatch_wndy = wrect.top;
+		break;
+	};
+
 	case WM_INITDIALOG:
+		SetWindowPos(hwndDlg,0,MemWatch_wndx,MemWatch_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 		hdc = GetDC(hwndDlg);
 		SelectObject (hdc, debugSystem->hFixedFont);
 		SetTextAlign(hdc,TA_UPDATECP | TA_TOP | TA_LEFT);

@@ -136,7 +136,7 @@ static int DIPS=0;
 //#define KEY(__a) keys_nr[MKK(__a)]
 
 int cidisabled=0;
-static int disableUDLR=0;
+int disableUDLR=0;
 
 #define MK(x)   {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
 #define MC(x)   {{BUTTC_KEYBOARD},{0},{x},1}

@@ -7,7 +7,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ *fs
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "../../types.h"
+#include "../../driver.h"
 #include "config.h"
 
 static int FReadString(FILE *fp, char *str, int n)
@@ -47,6 +48,87 @@ static int FReadString(FILE *fp, char *str, int n)
  if(z<0) return 0;
  return 1;
 }
+
+#include <map>
+#include <string>
+typedef std::map<std::string,std::string> CFGMAP;
+static CFGMAP cfgmap;
+
+static void cfg_Parse(FILE *fp)
+{
+	//yes... it is a homebrewed key-value-pair parser
+	std::string key,value;
+	enum {
+		NEWLINE, KEY, SEPARATOR, VALUE, COMMENT
+	} state = NEWLINE;
+	bool bail = false;
+	for(;;)
+	{
+		int c = fgetc(fp);
+		if(c == -1)
+			goto bail;
+		bool iswhitespace = (c==' '||c=='\t');
+		bool iscommentchar = (c=='#');
+		bool isnewline = (c==10||c==13);
+		switch(state)
+		{
+		case NEWLINE:
+			if(iswhitespace) goto done;
+			if(iscommentchar) goto docomment;
+			if(isnewline) goto done;
+			key = "";
+			value = "";
+			goto dokey; 
+			break;
+		case COMMENT:
+			docomment:
+			state = COMMENT;
+			if(isnewline) state = NEWLINE;
+			break;
+		case KEY:
+			dokey: //dookie
+			state = KEY;
+			if(iswhitespace) goto doseparator;
+			if(isnewline) goto commit;
+			key += c;
+			break;
+		case SEPARATOR:
+			doseparator:
+			state = SEPARATOR;
+			if(isnewline) goto commit;
+			if(!iswhitespace) goto dovalue;
+			break;
+		case VALUE:
+			dovalue:
+			state = VALUE;
+			if(isnewline) goto commit;
+			value += c;
+		}
+		goto done;
+
+		bail:
+		bail = true;
+		if(state == VALUE) goto commit;
+		commit:
+		cfgmap[key] = value;
+		state = NEWLINE;
+		if(bail) break;
+		done: ;
+	}
+}
+
+static void cfg_Save(FILE *fp)
+{
+	for(CFGMAP::iterator it(cfgmap.begin()); it != cfgmap.end(); it++)
+	{
+		if(it->first.size()>30 || it->second.size()>30)
+		{
+			int zzz=9;
+		}
+		fprintf(fp,"%s %s\n",it->first.c_str(),it->second.c_str());
+	}
+}
+
 
 static void GetValueR(FILE *fp, char *str, void *v, int c)
 {
@@ -93,7 +175,7 @@ void SetValueR(FILE *fp, const char *str, void *v, int c)
 }
 
 /**
-* Parses a configuration structure and saves information from the structure into a file.
+* Parses a c onfiguration structure and saves information from the structure into a file.
 *
 * @param cfgst The configuration structure.
 * @param fp File handle.
@@ -105,12 +187,10 @@ void SaveParse(const CFGSTRUCT *cfgst, FILE *fp)
 	while(cfgst[x].ptr)
 	{
 
-		if(!cfgst[x].name)     // Link to new config structure
-		{
-			SaveParse((CFGSTRUCT*)cfgst[x].ptr, fp);	// Recursion is sexy.  I could
-													// save a little stack space if I made
-													// the file pointer a non-local
-													// variable...
+		//structure contains another embedded structure.
+		//recurse.
+		if(!cfgst[x].name) {
+			SaveParse((CFGSTRUCT*)cfgst[x].ptr, fp);
 			x++;
 			continue;
 		}
@@ -133,26 +213,6 @@ void SaveParse(const CFGSTRUCT *cfgst, FILE *fp)
 
 		x++;
 	}
-}
-
-/**
-* Stores information from a configuration struct into a configuration file.
-*
-* @param filename Name of the configuration file
-* @param cfgst The configuration struct
-**/
-void SaveFCEUConfig(const char *filename, const CFGSTRUCT *cfgst)
-{
-	FILE *fp = fopen(filename,"wb");
-
-	if(fp==NULL)
-	{
-		return;
-	}
-
-	SaveParse(cfgst, fp);
-
-	fclose(fp);
 }
 
 /**
@@ -179,21 +239,204 @@ void LoadParse(CFGSTRUCT *cfgst, FILE *fp)
 	} 
 }
 
-/**
-* Loads config information from the config file.
-*
-* @param filename Name of the config file.
-**/
-void LoadFCEUConfig(const char *filename, CFGSTRUCT *cfgst)
+
+static void StringToBytes(std::string& str, void* data, int len)
 {
-	FILE *fp = fopen(filename,"rb");
+	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
+		goto hex;
+	
+	if(len==1) {
+		int x = atoi(str.c_str());
+		*(unsigned char*)data = x;
+		return;
+	} else if(len==2) {
+		int x = atoi(str.c_str());
+		*(unsigned short*)data = x;
+		return;
+	} else if(len==4) {
+		int x = atoi(str.c_str());
+		*(unsigned int*)data = x;
+		return;
+	}
+	//else it had better be hex
+	FCEUD_PrintError("Config error: no hex data found somewhere it is required");
+hex:
+	int amt = len;
+	int bytesAvailable = str.size()/2;
+	if(bytesAvailable < amt)
+		amt = bytesAvailable;
+	const char* cstr = str.c_str()+2;
+	for(int i=0;i<amt;i++) {
+		char a = toupper(cstr[i*2]);
+		char b = toupper(cstr[i*2+1]);
+		if(a>='A') a=a-'A'+10;
+		else a-='0';
+		if(b>='A') b=b-'A'+10;
+		else b-='0';
+		unsigned char val = ((unsigned char)a<<4)|(unsigned char)b; 
+		((unsigned char*)data)[i] = val;
+	}
+}
+
+static std::string BytesToString(void* data, int len)
+{
+	char temp[16];
+	if(len==1) {
+		sprintf(temp,"%d",*(unsigned char*)data);
+		return temp;
+	} else if(len==2) {
+		sprintf(temp,"%d",*(unsigned short*)data);
+		return temp;
+	} else if(len==4) {
+		sprintf(temp,"%d",*(unsigned int*)data);
+		return temp;		
+	}
+	std::string ret;
+	ret.resize(len*2+2);
+	char* str= (char*)ret.c_str();
+	str[0] = '0';
+	str[1] = 'x';
+	str += 2;
+	for(int i=0;i<len;i++)
+	{
+		int a = (((unsigned char*)data)[i]>>4);
+		int b = (((unsigned char*)data)[i])&15;
+		if(a>9) a += 'A'-10;
+		else a += '0';
+		if(b>9) b += 'A'-10;
+		else b += '0';
+		str[i*2] = a;
+		str[i*2+1] = b;
+	}
+	return ret;
+}
+
+static void cfg_OldToNew(const CFGSTRUCT *cfgst)
+{
+	int x=0;
+
+	while(cfgst[x].ptr)
+	{
+		//structure contains another embedded structure. recurse.
+		if(!cfgst[x].name) {
+			cfg_OldToNew((CFGSTRUCT*)cfgst[x].ptr);
+			x++;
+			continue;
+		}
+
+		if(cfgst[x].len)
+		{
+			//binary data
+			cfgmap[cfgst[x].name] = BytesToString(cfgst[x].ptr,cfgst[x].len);
+		}
+		else
+		{
+			//string data
+			if(*(char*)cfgst[x].ptr)
+				cfgmap[cfgst[x].name] = *(char**)cfgst[x].ptr;
+			else cfgmap[cfgst[x].name] = "";
+		}
+
+		x++;
+	}
+}
+
+void cfg_NewToOld(CFGSTRUCT *cfgst)
+{
+	int x=0;
+
+	while(cfgst[x].ptr)
+	{
+		//structure contains another embedded structure. recurse.
+		if(!cfgst[x].name) {
+			cfg_NewToOld((CFGSTRUCT*)cfgst[x].ptr);
+			x++;
+			continue;
+		}
+
+		//if the key was not found, skip it
+		if(cfgmap.find(std::string(cfgst[x].name)) == cfgmap.end())
+		{
+			x++;
+			continue;
+		}
+
+		if(cfgst[x].len)
+		{
+			//binary data
+			StringToBytes(cfgmap[cfgst[x].name],cfgst[x].ptr,cfgst[x].len);
+		}
+		else
+		{
+			//string data
+			if(*(char*)cfgst[x].ptr)
+				free(cfgst[x].ptr);
+			std::string& str = cfgmap[cfgst[x].name];
+			if(str == "")
+				*(char**)cfgst[x].ptr = 0;
+			else
+				*(char**)cfgst[x].ptr = strdup(cfgmap[cfgst[x].name].c_str());
+		}
+
+		x++;
+	}
+}
+
+//saves the old fceu98 format
+void SaveFCEUConfig_old(const char *filename, const CFGSTRUCT *cfgst)
+{
+	FILE *fp = fopen(filename,"wb");
 
 	if(fp==NULL)
 	{
 		return;
 	}
 
-	LoadParse(cfgst, fp);
+	SaveParse(cfgst, fp);
+
+	fclose(fp);
+}
+
+void SaveFCEUConfig(const char *filename, const CFGSTRUCT *cfgst)
+{
+	FILE *fp = fopen(filename,"wb");
+
+	if(fp==NULL)
+		return;
+
+	fp = fopen(filename,"wb");
+	cfg_OldToNew(cfgst);
+	cfg_Save(fp);
+	fclose(fp);
+}
+
+//loads the old fceu98 format
+void LoadFCEUConfig_old(const char *filename, CFGSTRUCT *cfgst)
+{
+	FILE *fp = fopen(filename,"rb");
+
+	if(fp==NULL)
+		return;
+
+	LoadParse(cfgst,fp);
+
+	fclose(fp);
+}
+
+void LoadFCEUConfig(const char *filename, CFGSTRUCT *cfgst)
+{
+	FILE *fp = fopen(filename,"rb");
+
+	cfgmap.clear();
+
+	//make sure there is a version key set
+	cfgmap["!version"] = "1";
+
+	if(fp==NULL)
+		return;
+
+	cfg_Parse(fp);
+	cfg_NewToOld(cfgst);
 
 	fclose(fp);
 }
