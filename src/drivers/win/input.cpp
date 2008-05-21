@@ -136,7 +136,7 @@ static int DIPS=0;
 //#define KEY(__a) keys_nr[MKK(__a)]
 
 int cidisabled=0;
-int disableUDLR=0;
+int allowUDLR=1;
 
 #define MK(x)   {{BUTTC_KEYBOARD},{0},{MKK(x)},1}
 #define MC(x)   {{BUTTC_KEYBOARD},{0},{x},1}
@@ -222,7 +222,7 @@ void UpdateGamepad()
     JS|=(1<<x)<<(wg<<3);
 
   // Check if U+D/L+R is disabled
-  if(disableUDLR)
+  if(!allowUDLR)
   {
 	  for(x=0;x<32;x+=8)
 	  {
@@ -1046,10 +1046,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		{
 			case WM_INITDIALOG:     
 				// Update the disable UDLR checkbox based on the current value
-				CheckDlgButton(hwndDlg,BTN_DISABLE_LRUD,disableUDLR?BST_CHECKED:BST_UNCHECKED);
-
-				// Add the help text
-				SetDlgItemText(hwndDlg, LBL_INPUT_HELP, "Select the device you want to be enabled on input ports 1 and 2, and the Famicom expansion port.  You may configure the device listed above each drop-down list by pressing \"Configure\", if applicable.  The device currently being emulated on the each port is listed above the drop down list; loading certain games will override your settings, but only temporarily.  If you select a device to be on the emulated Famicom Expansion Port, you should probably have emulated gamepads on the emulated NES-style input ports.");
+				CheckDlgButton(hwndDlg,BTN_ALLOW_LRUD,allowUDLR?BST_CHECKED:BST_UNCHECKED);
 
 				// Initialize the controls for the input ports
 				for(unsigned int port = 0; port < NUMBER_OF_PORTS; port++)        
@@ -1165,10 +1162,10 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			case WM_COMMAND:
 				// Handle disable UD/LR option
-				if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == BTN_DISABLE_LRUD)
+				if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == BTN_ALLOW_LRUD)
 				{
-					FCEU_printf("Disable UDLR toggled\n");
-					disableUDLR = !disableUDLR;
+					FCEU_printf("Allow UDLR toggled.\n");
+					allowUDLR = !allowUDLR;
 				}
 
 				if(HIWORD(wParam) == CBN_SELENDOK)

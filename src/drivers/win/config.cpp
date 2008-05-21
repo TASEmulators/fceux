@@ -40,7 +40,7 @@ extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display;
 extern int input_display;
 extern char *BasicBotDir;
-extern int disableUDLR;
+extern int allowUDLR;
 
 //window positions:
 extern int ChtPosX,ChtPosY;
@@ -173,7 +173,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
 
-	AC(disableUDLR),
+	AC(allowUDLR),
 
 	//window positions
 	AC(ChtPosX),
