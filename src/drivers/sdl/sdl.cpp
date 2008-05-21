@@ -481,4 +481,5 @@ DUMMY(FCEUD_AviStop)
 void FCEUI_AviVideoUpdate(const unsigned char* buffer) { } 
 int FCEUD_ShowStatusIcon(void) {return 0;} 
 int FCEUI_AviIsRecording(void) {return 0;}
+void FCEUI_UseInputPreset(int preset) { } 
 

@@ -68,6 +68,7 @@ void FCEUI_SetNTSCTH(int n, int tint, int hue);
 void FCEUI_SetInput(int port, int type, void *ptr, int attrib);
 void FCEUI_SetInputFC(int type, void *ptr, int attrib);
 void FCEUI_DisableFourScore(int s);
+void FCEUI_UseInputPreset(int preset);
 
 #define SI_NONE      0
 #define SI_GAMEPAD   1

@@ -545,6 +545,7 @@ static void CommandMovieSelectSlot(void);
 static void CommandMovieRecord(void);
 static void CommandMovieReplay(void);
 static void CommandSoundAdjust(void);
+static void CommandUsePreset(void);
 static void ViewSlots(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
@@ -666,7 +667,10 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_VSUNI_TOGGLE_DIP_8,			EMUCMDTYPE_VSUNI,	CommandToggleDip, 0, 0, "Toggle Dipswitch 8", },
 	{ EMUCMD_VSUNI_TOGGLE_DIP_9,			EMUCMDTYPE_VSUNI,	CommandToggleDip, 0, 0, "Toggle Dipswitch 9", },
 	{ EMUCMD_MISC_REWIND,					EMUCMDTYPE_MISC,	FCEUI_Rewind, 0, 0, "Rewind", },
-	{ EMUCMD_MISC_SHOWSTATES,				EMUCMDTYPE_MISC,    ViewSlots,	0,0, "View save slots", },
+	{ EMUCMD_MISC_SHOWSTATES,				EMUCMDTYPE_MISC,	ViewSlots, 0,0, "View save slots", },
+	{ EMUCMD_MISC_USE_INPUT_PRESET_1,		EMUCMDTYPE_MISC,	CommandUsePreset, 0,0, "Use Input Preset 1", },
+	{ EMUCMD_MISC_USE_INPUT_PRESET_2,		EMUCMDTYPE_MISC,	CommandUsePreset, 0,0, "Use Input Preset 2", },
+	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset, 0,0, "Use Input Preset 3", },
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -794,3 +798,8 @@ static void CommandSoundAdjust(void)
 	FCEUD_SoundVolumeAdjust(n);
 }
 
+
+static void CommandUsePreset(void)
+{
+	FCEUI_UseInputPreset(execcmd-EMUCMD_MISC_USE_INPUT_PRESET_1);
+}

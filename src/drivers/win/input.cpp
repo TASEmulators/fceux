@@ -60,6 +60,8 @@ int InitDInput(void)
  }
  return 1;
 }
+static void PresetExport(int preset);
+static void PresetImport(int preset);
 
 static uint32 MouseData[3];
 static int screenmode=0;
@@ -148,7 +150,7 @@ int allowUDLR=1;
 
 ButtConfig GamePadConfig[4][10]={
         /* Gamepad 1 */
-        { 
+        {
          MK(LEFTALT), MK(LEFTCONTROL), MK(TAB), MK(ENTER), MK(BL_CURSORUP),
           MK(BL_CURSORDOWN),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT)
 	},
@@ -162,6 +164,11 @@ ButtConfig GamePadConfig[4][10]={
         /* Gamepad 4 */
         GPZ()
 };
+
+ButtConfig GamePadPreset1[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
+ButtConfig GamePadPreset2[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
+ButtConfig GamePadPreset3[4][10]={GPZ(),GPZ(),GPZ(),GPZ()};
+char *InputPresetDir = 0;
 
 extern int rapidAlternator; // for auto-fire / autofire
 int DesynchAutoFire=0; // A and B not at same time
@@ -583,6 +590,9 @@ CFGSTRUCT InputConfig[]={
         AC(HyperShotButtons),
         AC(MahjongButtons),
         AC(GamePadConfig),
+        AC(GamePadPreset1),
+        AC(GamePadPreset2),
+        AC(GamePadPreset3),
         AC(fkbmap),
         AC(suborkbmap),
         ENDCFGSTRUCT
@@ -1301,6 +1311,27 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 							break;
 
+						case BTN_PRESET_SET1:
+							MessageBox(0, "Current input configuration has been set as Preset 1.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+							memcpy(GamePadPreset1, GamePadConfig, sizeof(GamePadConfig));
+							break;
+						case BTN_PRESET_SET2:
+							MessageBox(0, "Current input configuration has been set as Preset 2.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+							memcpy(GamePadPreset2, GamePadConfig, sizeof(GamePadConfig));
+							break;
+						case BTN_PRESET_SET3:
+							MessageBox(0, "Current input configuration has been set as Preset 3.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+							memcpy(GamePadPreset3, GamePadConfig, sizeof(GamePadConfig));
+							break;
+
+						case BTN_PRESET_EXPORT1: PresetExport(1); break;
+						case BTN_PRESET_EXPORT2: PresetExport(2); break;
+						case BTN_PRESET_EXPORT3: PresetExport(3); break;
+						 
+						case BTN_PRESET_IMPORT1: PresetImport(1); break;
+						case BTN_PRESET_IMPORT2: PresetImport(2); break;
+						case BTN_PRESET_IMPORT3: PresetImport(3); break;
+
 						case BTN_AUTO_HOLD: // auto-hold button
 							{
 								char btext[128] = { 0 };
@@ -1477,3 +1508,109 @@ void FCEUD_TurboOff(void)
 	turbo = false;
 }
 
+void FCEUI_UseInputPreset(int preset)
+{
+	switch(preset)
+	{
+		case 0: memcpy(GamePadConfig, GamePadPreset1, sizeof(GamePadPreset1)); break;
+		case 1: memcpy(GamePadConfig, GamePadPreset2, sizeof(GamePadPreset2)); break;
+		case 2: memcpy(GamePadConfig, GamePadPreset3, sizeof(GamePadPreset3)); break;
+	}
+	FCEU_DispMessage("Using input preset %d.",preset+1);
+}
+
+static void PresetExport(int preset)
+{
+	const char filter[]="Input Preset File(*.pre)\0*.pre\0";
+	char nameo[2048];
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Export Input Preset To...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+	ofn.lpstrInitialDir=InputPresetDir;
+	if(GetSaveFileName(&ofn))
+	{
+		int i;
+		//Save the directory
+		if(ofn.nFileOffset < 1024)
+		{
+			free(InputPresetDir);
+			InputPresetDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
+			strcpy(InputPresetDir,ofn.lpstrFile);
+			InputPresetDir[ofn.nFileOffset]=0;
+		}
+
+		//quick get length of nameo
+		for(i=0;i<2048;i++)
+		{
+			if(nameo[i] == 0)
+			{
+				break;
+			}
+		}
+
+		//add .pre if nameo doesn't have it
+		if((i < 4 || nameo[i-4] != '.') && i < 2040)
+		{
+			nameo[i] = '.';
+			nameo[i+1] = 'p';
+			nameo[i+2] = 'r';
+			nameo[i+3] = 'e';
+			nameo[i+4] = 0;
+		}
+
+		FILE *fp=FCEUD_UTF8fopen(nameo,"w");
+		switch(preset)
+		{
+			case 1: fwrite(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;
+			case 2: fwrite(GamePadPreset2,1,sizeof(GamePadPreset2),fp); break;
+			case 3: fwrite(GamePadPreset3,1,sizeof(GamePadPreset3),fp); break;
+		}
+		fclose(fp);
+	}
+}
+
+static void PresetImport(int preset)
+{
+	const char filter[]="Input Preset File(*.pre)\0*.pre\0";
+	char nameo[2048];
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Import Input Preset......";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.lpstrInitialDir=InputPresetDir;
+
+	if(GetOpenFileName(&ofn))
+	{
+		//Save the directory
+		if(ofn.nFileOffset < 1024)
+		if(ofn.nFileOffset < 1024)
+		{
+			free(InputPresetDir);
+			InputPresetDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
+			strcpy(InputPresetDir,ofn.lpstrFile);
+			InputPresetDir[ofn.nFileOffset]=0;
+		}
+
+		FILE *fp=FCEUD_UTF8fopen(nameo,"r");
+		switch(preset)
+		{
+			case 1: fread(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;
+			case 2: fread(GamePadPreset2,1,sizeof(GamePadPreset2),fp); break;
+			case 3: fread(GamePadPreset3,1,sizeof(GamePadPreset3),fp); break;
+		}
+		fclose(fp);
+	}
+}
