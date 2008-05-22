@@ -22,13 +22,13 @@ static char* GetReplayPath(HWND hwndDlg)
 	char* fn=0;
 	char szChoice[MAX_PATH];
 
-	LONG lIndex = SendDlgItemMessage(hwndDlg, 200, CB_GETCURSEL, 0, 0);
-	LONG lCount = SendDlgItemMessage(hwndDlg, 200, CB_GETCOUNT, 0, 0);
+	LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCURSEL, 0, 0);
+	LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCOUNT, 0, 0);
 
 	// NOTE: lCount-1 is the "Browse..." list item
 	if(lIndex != CB_ERR && lIndex != lCount-1)
 	{
-		LONG lStringLength = SendDlgItemMessage(hwndDlg, 200, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
+		LONG lStringLength = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
 		if(lStringLength < MAX_PATH)
 		{
 			char szDrive[MAX_PATH]={0};
@@ -37,7 +37,7 @@ static char* GetReplayPath(HWND hwndDlg)
 			char szExt[MAX_PATH]={0};
 			char szTemp[MAX_PATH]={0};
 
-			SendDlgItemMessage(hwndDlg, 200, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)szTemp);
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)szTemp);
 			if(szTemp[0] && szTemp[1]!=':')
 				sprintf(szChoice, ".\\%s", szTemp);
 			else
@@ -65,7 +65,7 @@ static char* GetRecordPath(HWND hwndDlg)
 	char szFilename[MAX_PATH]={0};
 	char szExt[MAX_PATH]={0};
 
-	GetDlgItemText(hwndDlg, 200, szChoice, sizeof(szChoice));
+	GetDlgItemText(hwndDlg, IDC_EDIT_FILENAME, szChoice, sizeof(szChoice));
 
 	_splitpath(szChoice, szDrive, szDirectory, szFilename, szExt);
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
@@ -83,11 +83,11 @@ static char* GetSavePath(HWND hwndDlg)
 	char szDirectory[MAX_PATH]={0};
 	char szFilename[MAX_PATH]={0};
 	char szExt[MAX_PATH]={0};
-	LONG lIndex = SendDlgItemMessage(hwndDlg, 301, CB_GETCURSEL, 0, 0);
-	LONG lStringLength = SendDlgItemMessage(hwndDlg, 301, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
+	LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
+	LONG lStringLength = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
 
 	fn = (char*)malloc(lStringLength);
-	SendDlgItemMessage(hwndDlg, 301, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)fn);
+	SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)fn);
 
 	_splitpath(fn, szDrive, szDirectory, szFilename, szExt);
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
@@ -108,8 +108,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 	char *fn=GetReplayPath(hwndDlg);
 
 	// remember the previous setting for the read-only checkbox
-	if(IsWindowEnabled(GetDlgItem(hwndDlg, 201)))
-		ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, 201, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+	if(IsWindowEnabled(GetDlgItem(hwndDlg, IDC_CHECK_READONLY)))
+		ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 
 	if(fn)
 	{
@@ -129,16 +129,16 @@ void UpdateReplayDialog(HWND hwndDlg)
 			extern int resetDMCacc;
 			extern int justAutoConverted;
 			int noNoSyncHack=!(info.flags&MOVIE_FLAG_NOSYNCHACK) && resetDMCacc;
-			EnableWindow(GetDlgItem(hwndDlg,1000),justAutoConverted || noNoSyncHack);
-			EnableWindow(GetDlgItem(hwndDlg,1001),justAutoConverted || noNoSyncHack);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_OFFSET),justAutoConverted || noNoSyncHack);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_FROM),justAutoConverted || noNoSyncHack);
 			if(justAutoConverted)
 			{
 				// use values as nesmock offsets
 				if(movieHackType != 0)
 				{
 					movieHackType=0;
-					SendDlgItemMessage(hwndDlg, 1000, WM_SETTEXT, 0,(LPARAM)"2");
-					SendDlgItemMessage(hwndDlg, 1001, WM_SETTEXT, 0,(LPARAM)"0");
+					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"2");
+					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"0");
 					SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"Offset:");
 					SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"from");
 				}
@@ -153,11 +153,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 //					extern int8 DMCBitCount;
 //					char str[256];
 //					sprintf(str, "%d", DMCacc);
-//					SendDlgItemMessage(hwndDlg, 1000, WM_SETTEXT, 0,(LPARAM)str);
+//					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)str);
 //					sprintf(str, "%d", DMCBitCount);
-//					SendDlgItemMessage(hwndDlg, 1001, WM_SETTEXT, 0,(LPARAM)str);
-					SendDlgItemMessage(hwndDlg, 1000, WM_SETTEXT, 0,(LPARAM)"8");
-					SendDlgItemMessage(hwndDlg, 1001, WM_SETTEXT, 0,(LPARAM)"0");
+//					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)str);
+					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"8");
+					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"0");
 					SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"Missing data: acc=");
 					SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"bc=");
 				}
@@ -165,8 +165,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 			else if(movieHackType != 2)
 			{
 				movieHackType=2;
-				SendDlgItemMessage(hwndDlg, 1000, WM_SETTEXT, 0,(LPARAM)"");
-				SendDlgItemMessage(hwndDlg, 1001, WM_SETTEXT, 0,(LPARAM)"");
+				SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"");
+				SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"");
 				SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"");
 				SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"");
 			}
@@ -196,17 +196,17 @@ void UpdateReplayDialog(HWND hwndDlg)
 			uint32 div;
 			
 			sprintf(tmp, "%lu", info.num_frames);
-			SetWindowTextA(GetDlgItem(hwndDlg,301), tmp);                   // frames
-			SetDlgItemText(hwndDlg,1003,tmp);
+			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES), tmp);                   // frames
+			SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,tmp);
 			autoInfo1003 = true;
 
 			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
 			info.num_frames += (div>>1);                                    // round up
 			sprintf(tmp, "%02d:%02d:%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, (info.num_frames/div) % 60);
-			SetWindowTextA(GetDlgItem(hwndDlg,300), tmp);                   // length
+			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
 			
 			sprintf(tmp, "%lu", info.rerecord_count);
-			SetWindowTextA(GetDlgItem(hwndDlg,302), tmp);                   // rerecord
+			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 			
 			{
 				// convert utf8 metadata to windows widechar
@@ -214,21 +214,21 @@ void UpdateReplayDialog(HWND hwndDlg)
 				if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, metadata, -1, wszMeta, MOVIE_MAX_METADATA))
 				{
 					if(wszMeta[0])
-						SetWindowTextW(GetDlgItem(hwndDlg,303), wszMeta);              // metadata
+						SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), wszMeta);              // metadata
 					else
-						SetWindowTextW(GetDlgItem(hwndDlg,303), L"(this movie has no author info)");				   // metadata
+						SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), L"(this movie has no author info)");				   // metadata
 				}
 			}
 			
-			EnableWindow(GetDlgItem(hwndDlg,201),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
-			SendDlgItemMessage(hwndDlg,201,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
+			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
 			
-			SetWindowText(GetDlgItem(hwndDlg,306),(info.flags & MOVIE_FLAG_FROM_RESET) ? "Reset or Power-On" : "Savestate");
+			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),(info.flags & MOVIE_FLAG_FROM_RESET) ? "Reset or Power-On" : "Savestate");
 			if(info.movie_version > 1)
 			{
 				char emuStr[128];
-				SetWindowText(GetDlgItem(hwndDlg,304),info.name_of_rom_used);
-				SetWindowText(GetDlgItem(hwndDlg,305),md5_asciistr(info.md5_of_rom_used));
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used);
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),md5_asciistr(info.md5_of_rom_used));
 				if(info.emu_version_used > 64)
 					sprintf(emuStr, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
 				else
@@ -256,16 +256,16 @@ void UpdateReplayDialog(HWND hwndDlg)
 						}
 					}
 				}
-				SetWindowText(GetDlgItem(hwndDlg,307),emuStr);
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),emuStr);
 			}
 			else
 			{
-				SetWindowText(GetDlgItem(hwndDlg,304),"unknown");
-				SetWindowText(GetDlgItem(hwndDlg,305),"unknown");
-				SetWindowText(GetDlgItem(hwndDlg,307),"FCEU 0.98.10 (blip)");
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"unknown");
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"unknown");
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"FCEU 0.98.10 (blip)");
 			}
 
-			SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(GameInfo->MD5));
+			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
 			EnableWindow(GetDlgItem(hwndDlg,1),TRUE);                     // enable OK
 			
 			doClear = 0;
@@ -275,24 +275,24 @@ void UpdateReplayDialog(HWND hwndDlg)
 	}
 	else
 	{
-		EnableWindow(GetDlgItem(hwndDlg,1000),FALSE);
-		EnableWindow(GetDlgItem(hwndDlg,1001),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_OFFSET),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_FROM),FALSE);
 	}
 
 	if(doClear)
 	{
-		SetWindowText(GetDlgItem(hwndDlg,300),"");
-		SetWindowText(GetDlgItem(hwndDlg,301),"");
-		SetWindowText(GetDlgItem(hwndDlg,302),"");
-		SetWindowText(GetDlgItem(hwndDlg,303),"");
-		SetWindowText(GetDlgItem(hwndDlg,304),"");
-		SetWindowText(GetDlgItem(hwndDlg,305),"");
-		SetWindowText(GetDlgItem(hwndDlg,306),"Nothing (invalid movie)");
-		SetWindowText(GetDlgItem(hwndDlg,307),"");
-		SetWindowText(GetDlgItem(hwndDlg,308),md5_asciistr(GameInfo->MD5));
-		SetDlgItemText(hwndDlg,1003,"");
-		EnableWindow(GetDlgItem(hwndDlg,201),FALSE);
-		SendDlgItemMessage(hwndDlg,201,BM_SETCHECK,BST_UNCHECKED,0);
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"Nothing (invalid movie)");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
+		SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,"");
+		EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),FALSE);
+		SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,BST_UNCHECKED,0);
 		EnableWindow(GetDlgItem(hwndDlg,1),FALSE);
 	}
 }
@@ -338,8 +338,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	case WM_INITDIALOG:
 		{
 			movieHackType=3;
-			SendDlgItemMessage(hwndDlg, 201, BM_SETCHECK, moviereadonly?BST_CHECKED:BST_UNCHECKED, 0);
-			SendDlgItemMessage(hwndDlg, 1002,BM_SETCHECK, BST_UNCHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, moviereadonly?BST_CHECKED:BST_UNCHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
 			char* findGlob[2] = {FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0),
 								 FCEU_MakeFName(FCEUMKF_MOVIEGLOB2, 0, 0)};
@@ -456,7 +456,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 						char relative[MAX_PATH];
 						AbsoluteToRelative(relative, filename, BaseDirectory);
-						SendDlgItemMessage(hwndDlg, 200, CB_INSERTSTRING, i++, (LPARAM)relative);
+						SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
 					} while(FindNextFile(hFind, &wfd));
 					FindClose(hFind);
 				}
@@ -468,23 +468,23 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			free(findGlob[1]);
 
 			if(i>0)
-				SendDlgItemMessage(hwndDlg, 200, CB_SETCURSEL, i-1, 0);
-			SendDlgItemMessage(hwndDlg, 200, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
+				SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, i-1, 0);
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
 
 			UpdateReplayDialog(hwndDlg);
 		}
 
-		SetFocus(GetDlgItem(hwndDlg, 200));
+		SetFocus(GetDlgItem(hwndDlg, IDC_COMBO_FILENAME));
 		return FALSE;
 
 	case WM_COMMAND:
 		if(HIWORD(wParam) == EN_CHANGE)
 		 {
-			if (LOWORD(wParam) == 1003) // Check if Stop movie at value has changed
+			if (LOWORD(wParam) == IDC_EDIT_STOPFRAME) // Check if Stop movie at value has changed
 			{
 				if (autoInfo1003 == false)
 				{
-				HWND hwnd1 = GetDlgItem(hwndDlg,1002);
+				HWND hwnd1 = GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE);
 				Button_SetCheck(hwnd1,BST_CHECKED);
 				}
 				else
@@ -498,8 +498,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		}
 		else if(HIWORD(wParam) == CBN_CLOSEUP)
 		{
-			LONG lCount = SendDlgItemMessage(hwndDlg, 200, CB_GETCOUNT, 0, 0);
-			LONG lIndex = SendDlgItemMessage(hwndDlg, 200, CB_GETCURSEL, 0, 0);
+			LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCOUNT, 0, 0);
+			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCURSEL, 0, 0);
 			if (lIndex != CB_ERR && lIndex == lCount-1)
 				SendMessage(hwndDlg, WM_COMMAND, (WPARAM)IDOK, 0);		// send an OK notification to open the file browser
 		}
@@ -510,8 +510,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 			case IDOK:
 				{
-					LONG lCount = SendDlgItemMessage(hwndDlg, 200, CB_GETCOUNT, 0, 0);
-					LONG lIndex = SendDlgItemMessage(hwndDlg, 200, CB_GETCURSEL, 0, 0);
+					LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCOUNT, 0, 0);
+					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCURSEL, 0, 0);
 					if(lIndex != CB_ERR)
 					{
 						if(lIndex == lCount-1)
@@ -538,23 +538,23 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								char relative[MAX_PATH];
 								AbsoluteToRelative(relative, szFile, BaseDirectory);
 
-								LONG lOtherIndex = SendDlgItemMessage(hwndDlg, 200, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
+								LONG lOtherIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
 								if(lOtherIndex != CB_ERR)
 								{
 									// select already existing string
-									SendDlgItemMessage(hwndDlg, 200, CB_SETCURSEL, lOtherIndex, 0);
+									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, lOtherIndex, 0);
 								} else {
-									SendDlgItemMessage(hwndDlg, 200, CB_INSERTSTRING, lIndex, (LPARAM)relative);
-									SendDlgItemMessage(hwndDlg, 200, CB_SETCURSEL, lIndex, 0);
+									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, lIndex, (LPARAM)relative);
+									SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, lIndex, 0);
 								}
 
 								// restore focus to the dialog
-								SetFocus(GetDlgItem(hwndDlg, 200));
+								SetFocus(GetDlgItem(hwndDlg, IDC_COMBO_FILENAME));
 								UpdateReplayDialog(hwndDlg);
 //								if (ofn.Flags & OFN_READONLY)
-//									SendDlgItemMessage(hwndDlg, 201, BM_SETCHECK, BST_CHECKED, 0);
+//									SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, BST_CHECKED, 0);
 //								else
-//									SendDlgItemMessage(hwndDlg, 201, BM_SETCHECK, BST_UNCHECKED, 0);
+//									SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, BST_UNCHECKED, 0);
 							}
 
 							free(pn);
@@ -565,16 +565,16 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							// TODO: warn the user when they open a movie made with a different ROM
 							char* fn=GetReplayPath(hwndDlg);
 							//char TempArray[16]; //mbg merge 7/17/06 removed
-							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, 201, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 							
 							char offset1Str[32]={0};
 							char offset2Str[32]={0};
 							
-							SendDlgItemMessage(hwndDlg, 1003, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
-							ReplayDialogStopFrame = (SendDlgItemMessage(hwndDlg, 1002, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
+							SendDlgItemMessage(hwndDlg, IDC_EDIT_STOPFRAME, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
+							ReplayDialogStopFrame = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
 
-							SendDlgItemMessage(hwndDlg, 1000, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
-							SendDlgItemMessage(hwndDlg, 1001, WM_GETTEXT, (WPARAM)32, (LPARAM)offset2Str);
+							SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
+							SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_GETTEXT, (WPARAM)32, (LPARAM)offset2Str);
 
 							movieConvertOffset1=strtol(offset1Str,0,10);
 							movieConvertOffset2=strtol(offset2Str,0,10);
@@ -593,13 +593,13 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		}
 
 	case WM_CTLCOLORSTATIC:
-		if((HWND)lParam == GetDlgItem(hwndDlg, 308))
+		if((HWND)lParam == GetDlgItem(hwndDlg, IDC_LABEL_CURRCHECKSUM))
 		{
 			// draw the md5 sum in red if it's different from the md5 of the rom used in the replay
 			HDC hdcStatic = (HDC)wParam;
 			char szMd5Text[35];
 
-			GetDlgItemText(hwndDlg, 305, szMd5Text, 35);
+			GetDlgItemText(hwndDlg, IDC_LABEL_ROMCHECKSUM, szMd5Text, 35);
 			if(!strlen(szMd5Text) || !strcmp(szMd5Text, "unknown") || !strcmp(szMd5Text, "00000000000000000000000000000000") || !strcmp(szMd5Text, md5_asciistr(GameInfo->MD5)))
 				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match (or no comparison)
 			else
@@ -652,8 +652,8 @@ static void UpdateRecordDialog(HWND hwndDlg)
 		if(access(fn, F_OK) ||
 			!access(fn, W_OK))
 		{
-			LONG lCount = SendDlgItemMessage(hwndDlg, 301, CB_GETCOUNT, 0, 0);
-			LONG lIndex = SendDlgItemMessage(hwndDlg, 301, CB_GETCURSEL, 0, 0);
+			LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCOUNT, 0, 0);
+			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 			if(lIndex != lCount-1)
 			{
 				enable=1;
@@ -688,7 +688,7 @@ static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
 
 	if(fn)
 	{
-		SetWindowText(GetDlgItem(hwndDlg,200),fn);				// FIXME:  make utf-8?
+		SetWindowText(GetDlgItem(hwndDlg,IDC_EDIT_FILENAME),fn);				// FIXME:  make utf-8?
 		free(fn);
 	}
 }
@@ -712,9 +712,8 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			HANDLE hFind;
 			int i=0;
 			
-			SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, i++, (LPARAM)"Start");
-			SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, i++, (LPARAM)"Reset");
-			SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, i++, (LPARAM)"Now");
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Start");
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Now");
 			
 			memset(&wfd, 0, sizeof(wfd));
 			hFind = FindFirstFile(findGlob, &wfd);
@@ -730,14 +729,14 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 						!strcmp(wfd.cFileName + (strlen(wfd.cFileName) - 4), ".fcm"))
 						continue;
 
-					SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, i++, (LPARAM)wfd.cFileName);
+					SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)wfd.cFileName);
 				} while(FindNextFile(hFind, &wfd));
 				FindClose(hFind);
 			}
 			free(findGlob);
 			
-			SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
-			SendDlgItemMessage(hwndDlg, 301, CB_SETCURSEL, 0, 0);				// choose "from reset" as a default
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, 0, 0);				// choose "from reset" as a default
 		}
 		UpdateRecordDialog(hwndDlg);
 		
@@ -746,19 +745,19 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	case WM_COMMAND:
 		if(HIWORD(wParam) == CBN_SELCHANGE)
 		{
-			LONG lIndex = SendDlgItemMessage(hwndDlg, 301, CB_GETCURSEL, 0, 0);
+			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 			if(lIndex == CB_ERR)
 			{
 				// fix listbox selection
-				SendDlgItemMessage(hwndDlg, 301, CB_SETCURSEL, (WPARAM)0, 0);
+				SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, (WPARAM)0, 0);
 			}
 			UpdateRecordDialog(hwndDlg);
 			return TRUE;
 		}
 		else if(HIWORD(wParam) == CBN_CLOSEUP)
 		{
-			LONG lCount = SendDlgItemMessage(hwndDlg, 301, CB_GETCOUNT, 0, 0);
-			LONG lIndex = SendDlgItemMessage(hwndDlg, 301, CB_GETCURSEL, 0, 0);
+			LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCOUNT, 0, 0);
+			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 			if (lIndex != CB_ERR && lIndex == lCount-1)
 			{
 				OPENFILENAME ofn;
@@ -774,15 +773,15 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				ofn.nMaxFile = MAX_PATH;
 				if(GetOpenFileName(&ofn))
 				{
-					SendDlgItemMessage(hwndDlg, 301, CB_INSERTSTRING, lIndex, (LPARAM)szChoice);
-					SendDlgItemMessage(hwndDlg, 301, CB_SETCURSEL, (WPARAM)lIndex, 0);
+					SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, lIndex, (LPARAM)szChoice);
+					SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, (WPARAM)lIndex, 0);
 				}
 				else
 					UpdateRecordDialog(hwndDlg);
 			}
 			return TRUE;
 		}
-		else if(HIWORD(wParam) == EN_CHANGE && LOWORD(wParam) == 200)
+		else if(HIWORD(wParam) == EN_CHANGE && LOWORD(wParam) == IDC_EDIT_FILENAME)
 		{
 			UpdateRecordDialog(hwndDlg);
 		}
@@ -792,9 +791,9 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			{
 			case IDOK:
 				{
-					LONG lIndex = SendDlgItemMessage(hwndDlg, 301, CB_GETCURSEL, 0, 0);
+					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 					p->szFilename = GetRecordPath(hwndDlg);
-					GetDlgItemTextW(hwndDlg,300,p->metadata,MOVIE_MAX_METADATA);
+					GetDlgItemTextW(hwndDlg,IDC_EDIT_AUTHORINFO,p->metadata,MOVIE_MAX_METADATA);
 					p->recordFrom = (int)lIndex;
 					if(lIndex>=3)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
@@ -806,7 +805,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				EndDialog(hwndDlg, 0);
 				return TRUE;
 				
-			case 201:
+			case IDC_BUTTON_BROWSEFILE:
 				{
 					OPENFILENAME ofn;
 					char szChoice[MAX_PATH]={0};

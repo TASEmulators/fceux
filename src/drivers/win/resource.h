@@ -46,8 +46,12 @@
 #define TXT_PAD1                        200
 #define BTN_RESTORE_DEFAULTS            200
 #define BTN_CLEAR                       200
+#define IDC_EDIT_FILENAME               200
+#define IDC_COMBO_FILENAME              200
 #define MENU_POWER                      201
 #define TXT_PAD2                        201
+#define IDC_BUTTON_BROWSEFILE           201
+#define IDC_CHECK_READONLY              201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
 #define MENU_SWITCH_DISK                203
@@ -55,21 +59,36 @@
 #define MENU_HIDE_MENU                  300
 #define CHECK_SCREENSHOT_NAMES          300
 #define COMBO_FILTER                    300
+#define IDC_EDIT_AUTHORINFO             300
+#define IDC_LABEL_LENGTH                300
 #define MENU_RUN_IN_BACKGROUND          301
+#define IDC_COMBO_RECORDFROM            301
+#define IDC_LABEL_FRAMES                301
 #define MENU_BACKGROUND_INPUT           302
+#define IDC_LABEL_UNDOCOUNT             302
 #define MENU_SHOW_STATUS_ICON           303
+#define IDC_LABEL_AUTHORINFO            303
 #define MENU_ENABLE_REWIND              304
+#define IDC_LABEL_ROMUSED               304
+#define IDC_LABEL_ROMCHECKSUM           305
+#define IDC_LABEL_RECORDEDFROM          306
+#define IDC_LABEL_EMULATORUSED          307
+#define IDC_LABEL_CURRCHECKSUM          308
 #define MENU_GAME_GENIE                 310
 #define MENU_PAL                        311
 #define MENU_DIRECTORIES                320
 #define MENU_INPUT                      321
 #define MENU_GUI_OPTIONS                327
 #define GUI_BOT_A_1                     1000
+#define IDC_EDIT_OFFSET                 1000
 #define GUI_BOT_B_1                     1001
 #define MW_ADDR00                       1001
+#define IDC_EDIT_FROM                   1001
 #define GUI_BOT_SELECT_1                1002
+#define IDC_CHECK_STOPMOVIE             1002
 #define GUI_BOT_START_1                 1003
 #define LV_MAPPING                      1003
+#define IDC_EDIT_STOPFRAME              1003
 #define GUI_BOT_UP_1                    1004
 #define MW_ADDR01                       1004
 #define GUI_BOT_DOWN_1                  1005
@@ -317,7 +336,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        108
 #define _APS_NEXT_COMMAND_VALUE         40118
-#define _APS_NEXT_CONTROL_VALUE         1129
+#define _APS_NEXT_CONTROL_VALUE         1130
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
