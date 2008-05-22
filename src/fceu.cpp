@@ -506,7 +506,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	if(EmulationPaused&2)
 		EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
-	else if(EmulationPaused&1 || FCEU_BotMode())
+	else if((EmulationPaused&1) || FCEU_BotMode())
 	{
 		memcpy(XBuf, XBackBuf, 256*256);
 		FCEU_PutImage();

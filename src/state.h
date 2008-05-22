@@ -20,10 +20,17 @@
 
 #include <stdio.h>
 
+enum ENUM_SSLOADPARAMS
+{
+	SSLOADPARAM_NOBACKUP,
+	SSLOADPARAM_BACKUP,
+	SSLOADPARAM_DUMMY
+};
+
 void FCEUSS_Save(char *);
 int FCEUSS_Load(char *);
 int FCEUSS_SaveFP(FILE *);
-int FCEUSS_LoadFP(FILE *, int);
+int FCEUSS_LoadFP(FILE *, ENUM_SSLOADPARAMS);
 
 extern int CurrentState;
 void FCEUSS_CheckStates(void);
@@ -33,6 +40,8 @@ typedef struct {
            uint32 s;
 	   char *desc;
 } SFORMAT;
+
+
 
 void ResetExState(void (*PreSave)(void),void (*PostSave)(void));
 void AddExState(void *v, uint32 s, int type, char *desc);

@@ -223,7 +223,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
 			
-			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),(info.flags & MOVIE_FLAG_FROM_RESET) ? "Reset or Power-On" : "Savestate");
+			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),(info.flags & MOVIE_FLAG_FROM_POWERON) ? "Power-On" : "Savestate");
 			if(info.movie_version > 1)
 			{
 				char emuStr[128];
@@ -863,10 +863,9 @@ void FCEUD_MovieRecordTo()
 			free(p.szSavestateFilename);
 		}
 
-		FCEUI_SaveMovie(
-			p.szFilename,
-			(p.recordFrom == 0) ? MOVIE_FLAG_FROM_POWERON : ((p.recordFrom == 1) ? MOVIE_FLAG_FROM_RESET : 0),
-			meta);
+		uint8 flags = 0;
+		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
+		FCEUI_SaveMovie(p.szFilename, flags, meta);
 	}
 
 	if(p.szFilename)

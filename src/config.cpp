@@ -23,15 +23,17 @@ FCEU MM - CaH4e3\n\
 FCEU TAS - blip & nitsuja\n\
 FCEU TAS+ - Luke Gustafson\n\
 FCEUX\n\
- - CaH4e3, Luke Gustafson\n\
- - Matthew Gambrell, Sebastian Porst\n\
+ - rheiny, zeromus\n\
+ - CaH4e3, Luke Gustafson, Sebastian Porst\n\
+ - adelikat, _mz\n\
 \n\
 "__TIME__" "__DATE__"\n";
+
+	if(aboutString) return aboutString;
 
 	const char *compilerString = FCEUD_GetCompilerString();
 
 	//allocate the string and concatenate the template with the compiler string
-	if(aboutString) free(aboutString);
 	aboutString = (char*)malloc(strlen(aboutTemplate) + strlen(compilerString) + 1);
 	sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
 	return aboutString;

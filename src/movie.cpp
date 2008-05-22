@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h> //mbgm erge 7/17/06 removed
+#include <assert.h>
+
 #ifdef MSVC
 #include <windows.h>
 #endif
@@ -32,28 +33,28 @@ extern char FileBase[];
 /*
 struct MovieHeader
 {
- uint32 magic;						// +0
- uint32 version=2;					// +4
- uint8 flags[4];					// +8
- uint32 length_frames;				// +12
- uint32 rerecord_count;				// +16
- uint32 movie_data_size;			// +20
- uint32 offset_to_savestate;		// +24, should be 4-byte-aligned
- uint32 offset_to_movie_data;		// +28, should be 4-byte-aligned
- uint8 md5_of_rom_used[16];			// +32
- uint32 version_of_emu_used			// +48
- char name_of_rom_used[]			// +52, utf-8, null-terminated
- char metadata[];					//      utf-8, null-terminated
- uint8 padding[];
- uint8 savestate[];					//      always present, even in a "from reset" recording
- uint8 padding[];					//      used for byte-alignment
- uint8 movie_data[];
+uint32 magic;						// +0
+uint32 version=2;					// +4
+uint8 flags[4];					// +8
+uint32 length_frames;				// +12
+uint32 rerecord_count;				// +16
+uint32 movie_data_size;			// +20
+uint32 offset_to_savestate;		// +24, should be 4-byte-aligned
+uint32 offset_to_movie_data;		// +28, should be 4-byte-aligned
+uint8 md5_of_rom_used[16];			// +32
+uint32 version_of_emu_used			// +48
+char name_of_rom_used[]			// +52, utf-8, null-terminated
+char metadata[];					//      utf-8, null-terminated
+uint8 padding[];
+uint8 savestate[];					//      always present, even in a "from reset" recording
+uint8 padding[];					//      used for byte-alignment
+uint8 movie_data[];
 }
 */
 
 static int current = 0;     // > 0 for recording, < 0 for playback
 static FILE *slots[10]={0};
-static uint8 joop[4];
+static uint8 joop[4]; //mbg 5/22/08 - seems to be a snapshot of the joystates for delta compression
 static uint32 framets = 0;
 static uint32 frameptr = 0;
 static uint8* moviedata = NULL;
@@ -77,14 +78,14 @@ static uint32 nextts = 0;
 static int32 nextd = 0;
 
 SFORMAT FCEUMOV_STATEINFO[]={
- { joop, 4,"JOOP"},
- { &framets, 4|FCEUSTATE_RLSB, "FTS "},
- { &nextts, 4|FCEUSTATE_RLSB, "NXTS"},
- { &nextd, 4|FCEUSTATE_RLSB, "NXTD"},
- { &frameptr, 4|FCEUSTATE_RLSB, "FPTR"},
- { &framecount, 4|FCEUSTATE_RLSB, "FCNT"},
+	{ joop, 4,"JOOP"},
+	{ &framets, 4|FCEUSTATE_RLSB, "FTS "},
+	{ &nextts, 4|FCEUSTATE_RLSB, "NXTS"},
+	{ &nextd, 4|FCEUSTATE_RLSB, "NXTD"},
+	{ &frameptr, 4|FCEUSTATE_RLSB, "FPTR"},
+	{ &framecount, 4|FCEUSTATE_RLSB, "FCNT"},
 
- { 0 }
+	{ 0 }
 };
 
 static int CurrentMovie = 1;
@@ -101,14 +102,14 @@ int FCEUMOV_GetFrame(void)
 
 int FCEUMOV_IsPlaying(void)
 {
- if(current < 0) return(1);
- else return(0);
+	if(current < 0) return(1);
+	else return(0);
 }
 
 int FCEUMOV_IsRecording(void)
 {
- if(current > 0) return(1);
- else return(0);
+	if(current > 0) return(1);
+	else return(0);
 }
 
 int FCEUMOV_ShouldPause(void)
@@ -311,7 +312,7 @@ static const char* convertToFCM(const char *fname, char *buffer)
 			if(movieConvertOffset2) sprintf(offset, "-o %d:%d", movieConvertOffset2,movieConvertOffset1);
 			else sprintf(offset, "-o %d", movieConvertOffset1);
 			sprintf(cmd, ".\\util\\nesmock\\nesmock.exe %s %s -spal=%c -sfceuver=%d \"%s\" \"%s\" ", offset, romInfo, FCEUI_GetCurrentVidSystem(0,0)?'1':'0', fceuver, fname, buffer);
-//				FCEU_PrintError(cmd);
+			//				FCEU_PrintError(cmd);
 			executeCommand(cmd);
 
 			FILE* file = FCEUD_UTF8fopen(buffer,"rb");
@@ -374,17 +375,17 @@ void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
 static void ResetInputTypes()
 {
 #ifdef MSVC
- extern int UsrInputType[3];
- UsrInputType[0] = SI_GAMEPAD;
- UsrInputType[1] = SI_GAMEPAD;
- UsrInputType[2] = SIFC_NONE;
+	extern int UsrInputType[3];
+	UsrInputType[0] = SI_GAMEPAD;
+	UsrInputType[1] = SI_GAMEPAD;
+	UsrInputType[2] = SIFC_NONE;
 
- ParseGIInput(NULL/*GameInfo*/);
- extern int cspec, gametype;
- cspec=GameInfo->cspecial;
- gametype=GameInfo->type;
+	ParseGIInput(NULL/*GameInfo*/);
+	extern int cspec, gametype;
+	cspec=GameInfo->cspecial;
+	gametype=GameInfo->type;
 
- InitOtherInput();
+	InitOtherInput();
 #endif
 }
 
@@ -394,220 +395,226 @@ char curMovieFilename[512];
 // PlayMovie / MoviePlay function
 void FCEUI_LoadMovie(char *fname, int _read_only, int _stopframe)
 {
- char buffer [512];
- fname = (char*)convertToFCM(fname,buffer);
+	char buffer [512];
+	fname = (char*)convertToFCM(fname,buffer);
 
- FILE *fp;
- char *fn = NULL;
+	FILE *fp;
+	char *fn = NULL;
 
- FCEUI_StopMovie();
+	FCEUI_StopMovie();
 
- if(!fname)
-  fname = fn = FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0);
+	if(!fname)
+		fname = fn = FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0);
 
-char origname[512];
-strcpy(origname,fname);
+	char origname[512];
+	strcpy(origname,fname);
 
- stopframe = _stopframe;
+	stopframe = _stopframe;
 
- // check movie_readonly
- movie_readonly = _read_only;
- if(access(fname, W_OK))
-  movie_readonly = 2;
+	// check movie_readonly
+	movie_readonly = _read_only;
+	if(access(fname, W_OK))
+		movie_readonly = 2;
 
- fp = FCEUD_UTF8fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
+	fp = FCEUD_UTF8fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
 
- if(fn)
- {
-  free(fn);
-  fname = NULL;
- }
-
- if(!fp) return;
-
- // read header
- 
-  uint32 magic;
-  uint32 version;
-  uint8 flags[4];
-
-  read32le(&magic, fp);
-  if(magic != MOVIE_MAGIC)
-  {
-   fclose(fp);
-   return;
-  }
-//DEBUG_COMPARE_RAM(__LINE__);
-
-  read32le(&version, fp);
-  if(version == 1)
-  {
-	  // attempt to load previous version's format
-	  fclose(fp);
-	  FCEUI_LoadMovie_v1(fname, _read_only);
-	  return;
-  }
-  else if(version == MOVIE_VERSION)
-  {}
-  else
-  {
-	  // unsupported version
-	  fclose(fp);
-	  return;
-  }
-
-  fread(flags, 1, 4, fp);
-  read32le(&framecount, fp);
-  read32le(&rerecord_count, fp);
-  read32le(&moviedatasize, fp);
-  read32le(&savestate_offset, fp);
-  read32le(&firstframeoffset, fp);
-  if(fseek(fp, savestate_offset, SEEK_SET))
-  {
-   fclose(fp);
-   return;
-  }
-
-//  FCEU_PrintError("flags[0] & MOVIE_FLAG_NOSYNCHACK=%d",flags[0] & MOVIE_FLAG_NOSYNCHACK);
-  if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
-	  movieSyncHackOn=0;
-  else
-	  movieSyncHackOn=1;
-
-  if(flags[0] & MOVIE_FLAG_PAL)
-  {
-	FCEUI_SetVidSystem(1);
-  }
-  else
-  {
-	FCEUI_SetVidSystem(0);
-  }
- 
-
- // fully reload the game to reinitialize everything before playing any movie
- // to try fixing nondeterministic playback of some games
- {
-	extern char lastLoadedGameName [2048];
-	extern int disableBatteryLoading, suppressAddPowerCommand;
-	suppressAddPowerCommand=1;
-	suppressMovieStop=1;
+	if(fn)
 	{
-		FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
-		if(!gi)
-			PowerNES();
+		free(fn);
+		fname = NULL;
 	}
-	suppressMovieStop=0;
-	suppressAddPowerCommand=0;
- }
 
- if(!FCEUSS_LoadFP(fp,1)) return;
-  if(flags[0] & MOVIE_FLAG_PAL)
-  {
-	FCEUI_SetVidSystem(1);
-  }
-  else
-  {
-	FCEUI_SetVidSystem(0);
-  }
- ResetInputTypes();
+	if(!fp) return;
 
- fseek(fp, firstframeoffset, SEEK_SET);
- moviedata = (uint8*)realloc(moviedata, moviedatasize);
- fread(moviedata, 1, moviedatasize, fp);
+	// read header
 
- framecount = 0;		// movies start at frame 0!
- frameptr = 0;
- current = CurrentMovie;
- slots[current] = fp;
+	uint32 magic;
+	uint32 version;
+	uint8 flags[4];
 
- memset(joop,0,sizeof(joop));
- current = -1 - current;
- framets=0;
- nextts=0;
- nextd = -1;
+	read32le(&magic, fp);
+	if(magic != MOVIE_MAGIC)
+	{
+		fclose(fp);
+		return;
+	}
+	//DEBUG_COMPARE_RAM(__LINE__);
 
- MovieStatus[CurrentMovie] = 1;
- if(!fname)
-  FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
- else
-  FCEU_DispMessage("Movie playback started.");
+	read32le(&version, fp);
+	if(version == 1)
+	{
+		// attempt to load previous version's format
+		fclose(fp);
+		FCEUI_LoadMovie_v1(fname, _read_only);
+		return;
+	}
+	else if(version == MOVIE_VERSION)
+	{}
+	else
+	{
+		// unsupported version
+		fclose(fp);
+		return;
+	}
 
- strcpy(curMovieFilename, origname);
+	fread(flags, 1, 4, fp);
+	read32le(&framecount, fp);
+	read32le(&rerecord_count, fp);
+	read32le(&moviedatasize, fp);
+	read32le(&savestate_offset, fp);
+	read32le(&firstframeoffset, fp);
+
+	//  FCEU_PrintError("flags[0] & MOVIE_FLAG_NOSYNCHACK=%d",flags[0] & MOVIE_FLAG_NOSYNCHACK);
+	if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
+		movieSyncHackOn=0;
+	else
+		movieSyncHackOn=1;
+
+	if(flags[0] & MOVIE_FLAG_PAL)
+	{
+		FCEUI_SetVidSystem(1);
+	}
+	else
+	{
+		FCEUI_SetVidSystem(0);
+	}
+
+
+	// fully reload the game to reinitialize everything before playing any movie
+	// to try fixing nondeterministic playback of some games
+	{
+		extern char lastLoadedGameName [2048];
+		extern int disableBatteryLoading, suppressAddPowerCommand;
+		suppressAddPowerCommand=1;
+		suppressMovieStop=1;
+		{
+			FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
+			if(!gi)
+				PowerNES();
+		}
+		suppressMovieStop=0;
+		suppressAddPowerCommand=0;
+	}
+
+	if(flags[0] & MOVIE_FLAG_FROM_POWERON)
+	{
+		//don't need to load a savestate
+		//there shouldn't be a savestate!
+		if(savestate_offset != 0xFFFFFFFF)
+			FCEU_PrintError("Savestate found in a start-from-poweron movie!");
+	}
+	else
+	{
+		if(savestate_offset == 0xFFFFFFFF)
+			FCEU_PrintError("No savestate found in a start-from-savestate movie!");
+
+		if(fseek(fp, savestate_offset, SEEK_SET))
+		{
+			fclose(fp);
+			return;
+		}
+
+		if(!FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP)) 
+			return;
+	}
+
+	if(flags[0] & MOVIE_FLAG_PAL)
+	{
+		FCEUI_SetVidSystem(1);
+	}
+	else
+	{
+		FCEUI_SetVidSystem(0);
+	}
+	ResetInputTypes();
+
+	fseek(fp, firstframeoffset, SEEK_SET);
+	moviedata = (uint8*)realloc(moviedata, moviedatasize);
+	fread(moviedata, 1, moviedatasize, fp);
+
+	framecount = 0;		// movies start at frame 0!
+	frameptr = 0;
+	current = CurrentMovie;
+	slots[current] = fp;
+
+	memset(joop,0,sizeof(joop));
+	current = -1 - current;
+	framets=0;
+	nextts=0;
+	nextd = -1;
+
+	MovieStatus[CurrentMovie] = 1;
+	if(!fname)
+		FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
+	else
+		FCEU_DispMessage("Movie playback started.");
+
+	strcpy(curMovieFilename, origname);
 }
 
 void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 {
- FILE *fp;
- char *fn;
- int poweron=0;
- uint8 padding[4] = {0,0,0,0};
- int n_padding;
+	FILE *fp;
+	char *fn;
+	uint8 padding[4] = {0,0,0,0};
+	int n_padding;
 
- FCEUI_StopMovie();
+	FCEUI_StopMovie();
 
- char origname[512];
- if(fname)
- {
-  fp = FCEUD_UTF8fopen(fname, "wb");
-  strcpy(origname,fname);
- }
- else
- {
-  fp=FCEUD_UTF8fopen(fn=FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0),"wb");
-  strcpy(origname,fn);
-  free(fn);
- }
+	char origname[512];
+	if(fname)
+	{
+		fp = FCEUD_UTF8fopen(fname, "wb");
+		strcpy(origname,fname);
+	}
+	else
+	{
+		fp=FCEUD_UTF8fopen(fn=FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0),"wb");
+		strcpy(origname,fn);
+		free(fn);
+	}
 
- if(!fp) return;
+	if(!fp) return;
 
- // don't need the movieSyncHackOn sync hack for newly recorded movies
- flags |= MOVIE_FLAG_NOSYNCHACK;
- resetDMCacc=movieSyncHackOn=0;
+	// don't need the movieSyncHackOn sync hack for newly recorded movies
+	flags |= MOVIE_FLAG_NOSYNCHACK;
+	resetDMCacc=movieSyncHackOn=0;
 
- // add PAL flag
- if(FCEUI_GetCurrentVidSystem(0,0))
-  flags |= MOVIE_FLAG_PAL;
+	// add PAL flag
+	if(FCEUI_GetCurrentVidSystem(0,0))
+		flags |= MOVIE_FLAG_PAL;
 
- if(flags & MOVIE_FLAG_FROM_POWERON)
- {
-	 poweron=1;
-	 flags &= ~MOVIE_FLAG_FROM_POWERON;
-	 flags |= MOVIE_FLAG_FROM_RESET;
- }
+	// write header
+	write32le(MOVIE_MAGIC, fp);
+	write32le(MOVIE_VERSION, fp);
+	fputc(flags, fp);
+	fputc(0, fp);                      // reserved
+	fputc(0, fp);                      // reserved
+	fputc(0, fp);                      // reserved
+	write32le(0, fp);                  // leave room for length frames
+	write32le(0, fp);                  // leave room for rerecord count
+	write32le(0, fp);                  // leave room for movie data size
+	write32le(0, fp);                  // leave room for savestate_offset
+	write32le(0, fp);                  // leave room for offset_to_controller_data
+	fwrite(GameInfo->MD5, 1, 16, fp);	// write ROM checksum
+	write32le(FCEU_VERSION_NUMERIC, fp);	// write emu version used
+	fputs(FileBase, fp);					// write ROM name used
+	fputc(0, fp);
+	if(metadata)
+	{
+		if(strlen(metadata) < MOVIE_MAX_METADATA)
+			fputs(metadata, fp);
+		else
+			fwrite(metadata, 1, MOVIE_MAX_METADATA-1, fp);
+	}
+	fputc(0, fp);
 
- // write header
- write32le(MOVIE_MAGIC, fp);
- write32le(MOVIE_VERSION, fp);
- fputc(flags, fp);
- fputc(0, fp);                      // reserved
- fputc(0, fp);                      // reserved
- fputc(0, fp);                      // reserved
- write32le(0, fp);                  // leave room for length frames
- write32le(0, fp);                  // leave room for rerecord count
- write32le(0, fp);                  // leave room for movie data size
- write32le(0, fp);                  // leave room for savestate_offset
- write32le(0, fp);                  // leave room for offset_to_controller_data
- fwrite(GameInfo->MD5, 1, 16, fp);	// write ROM checksum
- write32le(FCEU_VERSION_NUMERIC, fp);	// write emu version used
- fputs(FileBase, fp);					// write ROM name used
- fputc(0, fp);
- if(metadata)
- {
-  if(strlen(metadata) < MOVIE_MAX_METADATA)
-   fputs(metadata, fp);
-  else
-   fwrite(metadata, 1, MOVIE_MAX_METADATA-1, fp);
- }
- fputc(0, fp);
+	// add padding
+	n_padding = (4 - (ftell(fp) & 0x3)) & 0x3;
+	fwrite(padding, 1, n_padding, fp);
 
- // add padding
- n_padding = (4 - (ftell(fp) & 0x3)) & 0x3;
- fwrite(padding, 1, n_padding, fp);
-
- if(flags & MOVIE_FLAG_FROM_RESET)
- {
-	 if(poweron)
-	 {
+	if(flags & MOVIE_FLAG_FROM_POWERON)
+	{
 		// make a for-movie-recording power-on clear the game's save data, too
 		// (note: FCEU makes a save state immediately after this and that loads that on movie playback)
 		extern char lastLoadedGameName [2048];
@@ -624,231 +631,292 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 		suppressMovieStop=0;
 		disableBatteryLoading=0;
 		suppressAddPowerCommand=0;
-	 }
- }
 
- savestate_offset = ftell(fp);
- FCEUSS_SaveFP(fp);
- fseek(fp, 0, SEEK_END);
+		//no savestate
+		savestate_offset = 0xFFFFFFFF;
+	}
+	else
+	{
+		savestate_offset = ftell(fp);
+		FCEUSS_SaveFP(fp);
+	}
 
- ResetInputTypes();
+	fseek(fp, 0, SEEK_END);
 
- // add padding
- n_padding = (4 - (ftell(fp) & 0x3)) & 0x3;
- fwrite(padding, 1, n_padding, fp);
+	ResetInputTypes();
 
- firstframeoffset = ftell(fp);
+	// add padding
+	n_padding = (4 - (ftell(fp) & 0x3)) & 0x3;
+	fwrite(padding, 1, n_padding, fp);
 
- // finish header
- fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
- write32le(savestate_offset, fp);
- write32le(firstframeoffset, fp);
+	firstframeoffset = ftell(fp);
 
- fseek(fp, firstframeoffset, SEEK_SET);
+	// finish header
+	fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
+	write32le(savestate_offset, fp);
+	write32le(firstframeoffset, fp);
 
- // set recording flag
- current=CurrentMovie;
+	fseek(fp, firstframeoffset, SEEK_SET);
 
- movie_readonly = 0;
- frameptr = 0;
- framecount = 0;
- rerecord_count = 0;
- slots[current] = fp;
- memset(joop,0,sizeof(joop));
- current++;
- framets=0;
- nextd = -1;
+	// set recording flag
+	current=CurrentMovie;
 
- // trigger a reset
- if(flags & MOVIE_FLAG_FROM_RESET)
- {
-	 if(poweron)
-	 {
-		PowerNES();							// NOTE:  this will write an FCEUNPCMD_POWER into the movie file
-	 }
-	 else
-		ResetNES();							// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
- }
- if(!fname)
-  FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
- else
-  FCEU_DispMessage("Movie recording started.");
+	movie_readonly = 0;
+	frameptr = 0;
+	framecount = 0;
+	rerecord_count = 0;
+	slots[current] = fp;
+	memset(joop,0,sizeof(joop));
+	current++;
+	framets=0;
+	nextd = -1;
 
- strcpy(curMovieFilename, origname);
+	//mbg 5/22/08 - I didnt delete this because I thought it was interesting
+	//// trigger a reset
+	//if(flags & MOVIE_FLAG_FROM_RESET)
+	//{
+	//	if(poweron)
+	//	{
+	//		PowerNES();							// NOTE:  this will write an FCEUNPCMD_POWER into the movie file
+	//	}
+	//	else
+	//		ResetNES();							// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
+	//}
+
+	if(!fname)
+		FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
+	else
+		FCEU_DispMessage("Movie recording started.");
+
+	strcpy(curMovieFilename, origname);
 }
 
 static void movie_writechar(int c)
 {
- if(frameptr == moviedatasize)
- {
-  moviedatasize += 4096;
-  moviedata = (uint8*)realloc(moviedata, moviedatasize);
- }
- moviedata[frameptr++] = (uint8)(c & 0xff);
- fputc(c, slots[current - 1]);
+	if(frameptr == moviedatasize)
+	{
+		moviedatasize += 4096;
+		moviedata = (uint8*)realloc(moviedata, moviedatasize);
+	}
+	moviedata[frameptr++] = (uint8)(c & 0xff);
+	fputc(c, slots[current - 1]);
 }
 
 static int movie_readchar()
 {
- if(frameptr >= moviedatasize)
- {
-  return -1;
- }
- return (int)(moviedata[frameptr++]);
+	if(frameptr >= moviedatasize)
+	{
+		return -1;
+	}
+	return (int)(moviedata[frameptr++]);
 }
 
 static void DoEncode(int joy, int button, int dummy)
 {
- uint8 d;
+	uint8 d;
 
- d = 0;
+	d = 0;
 
- if(framets >= 65536)
-  d = 3 << 5;
- else if(framets >= 256)
-  d = 2 << 5;
- else if(framets > 0)
-  d = 1 << 5;
+	if(framets >= 65536)
+		d = 3 << 5;
+	else if(framets >= 256)
+		d = 2 << 5;
+	else if(framets > 0)
+		d = 1 << 5;
 
- if(dummy) d|=0x80;
+	if(dummy) d|=0x80;
 
- d |= joy << 3;
- d |= button;
+	d |= joy << 3;
+	d |= button;
 
- movie_writechar(d);
- //printf("Wr: %02x, %d\n",d,slots[current-1]);
- while(framets)
- {
-  movie_writechar(framets & 0xff);
-  //printf("Wrts: %02x\n",framets & 0xff);
-  framets >>= 8;
- }
+	movie_writechar(d);
+	//printf("Wr: %02x, %d\n",d,slots[current-1]);
+	while(framets)
+	{
+		movie_writechar(framets & 0xff);
+		//printf("Wrts: %02x\n",framets & 0xff);
+		framets >>= 8;
+	}
 }
 
-// TODO: make this function legible! (what are all these magic numbers and weirdly named variables and crazy unexplained loops?)
+//the main interaction point between the emulator and the movie system.
+//either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 {
- int x,y;
+	int x,y;
 
-// if(!current) return;   // Not playback nor recording.
+	// if(!current) return;   // Not playback nor recording.
 
- if(current < 0)    // Playback
- {
-  while(nextts == framets || nextd == -1)
-  {
-   int tmp,ti;
-   uint8 d;
-
-   if(nextd != -1)
-   {
-    if(nextd&0x80)
-    {
-    //puts("Egads");
-     FCEU_DoSimpleCommand(nextd&0x1F);
-    }
-    else
-     joop[(nextd >> 3)&0x3] ^= 1 << (nextd&0x7);
-   }
-
-
-   tmp = movie_readchar();
-   d = tmp;
-
-   if(tmp < 0)
-   {
-    StopPlayback();
-    memcpy(&cur_input_display,js,4);
-    return;
-   }
-
-   nextts = 0;
-   tmp >>= 5;
-   tmp &= 0x3;
-   ti=0;
-
-   int tmpfix = tmp;
-   while(tmp--) { nextts |= movie_readchar() << (ti * 8); ti++; }
-
-   // This fixes a bug in movies recorded before version 0.98.11
-   // It's probably not necessary, but it may keep away CRAZY PEOPLE who recorded
-   // movies on <= 0.98.10 and don't work on playback.
-   if(tmpfix == 1 && !nextts) 
-   {nextts |= movie_readchar()<<8; }
-   else if(tmpfix == 2 && !nextts) {nextts |= movie_readchar()<<16; }
-
-   if(nextd != -1)
-    framets = 0;
-   nextd = d;
-  }
-
-  memcpy(js,joop,4);
- }
- else if(current > 0)			// Recording 
- {
-    // flush header info every 300 frames in case of crash
-	//Don't if in bot mode--we don't need extra overhead
-	if(!SkipFlush)
+	if(current < 0)    // Playback
 	{
-		static int fcounter=0;
-		fcounter++;
-		if(!(fcounter%300))
-			MovieFlushHeader();
+		//while(nextts == framets || nextd == -1)
+		//{
+		//	int tmp,ti;
+		//	uint8 d;
+
+		//	if(nextd != -1)
+		//	{
+		//		if(nextd&0x80)
+		//		{
+		//			//puts("Egads");
+		//			FCEU_DoSimpleCommand(nextd&0x1F);
+		//		}
+		//		else
+		//			joop[(nextd >> 3)&0x3] ^= 1 << (nextd&0x7);
+		//	}
+
+
+		//	tmp = movie_readchar();
+		//	d = tmp;
+
+		//	if(tmp < 0)
+		//	{
+		//		StopPlayback();
+		//		memcpy(&cur_input_display,js,4);
+		//		return;
+		//	}
+
+		//	nextts = 0;
+		//	tmp >>= 5;
+		//	tmp &= 0x3;
+		//	ti=0;
+
+		//	int tmpfix = tmp;
+		//	while(tmp--) { nextts |= movie_readchar() << (ti * 8); ti++; }
+
+		//	// This fixes a bug in movies recorded before version 0.98.11
+		//	// It's probably not necessary, but it may keep away CRAZY PEOPLE who recorded
+		//	// movies on <= 0.98.10 and don't work on playback.
+		//	if(tmpfix == 1 && !nextts) 
+		//	{nextts |= movie_readchar()<<8; }
+		//	else if(tmpfix == 2 && !nextts) {nextts |= movie_readchar()<<16; }
+
+		//	if(nextd != -1)
+		//		framets = 0;
+		//	nextd = d;
+		//}
+
+		//memcpy(js,joop,4);
+
+		//TODO - rock solid stability and error detection
+
+		//for each joystick
+		for(int i=0;i<4;i++)
+		{
+			uint8 &joystate = js[i];
+			joystate = 0;
+			for(int bit=7;bit>=0;bit--)
+			{
+				int c = movie_readchar();
+				if(c == -1)
+				{
+					StopPlayback();
+					goto bail;
+				}
+				if(c != ' ')
+					joystate |= (1<<bit);
+			}
+			//eat the separator (a pipe or a newline)
+			movie_readchar();
+		}
+		bail: ;
+		
+	}
+	else if(current > 0)			// Recording 
+	{
+		//mbg 5/22/08 - keep dumping the header for now
+		MovieFlushHeader();
+		//// flush header info every 300 frames in case of crash
+		////Don't if in bot mode--we don't need extra overhead
+		//if(!SkipFlush)
+		//{
+		//	static int fcounter=0;
+		//	fcounter++;
+		//	if(!(fcounter%300))
+		//		MovieFlushHeader();
+		//}
+
+		//for(x=0;x<4;x++)
+		//{
+		//	if(js[x] != joop[x])
+		//	{
+		//		for(y=0;y<8;y++)
+		//			if((js[x] ^ joop[x]) & (1 << y))
+		//				DoEncode(x, y, 0);
+		//		joop[x] = js[x];
+		//	}
+		//	else if(framets == ((1<<24)-1)) DoEncode(0,0,1); // Overflow will happen, so do dummy update. 
+		//}
+
+		//for each joystick
+		for(int i=0;i<4;i++)
+		{
+			//these are mnemonics for each joystick bit.
+			//since we usually use the regular joypad, these will be more helpful.
+			//but any character other than ' ' should count as a set bit
+			//maybe other input types will need to be encoded another way..
+			const char mnemonics[] = {'A','B','S','T','U','D','L','R'};
+			for(int bit=7;bit>=0;bit--)
+			{
+				uint8 &joystate = js[i];
+				int bitmask = (1<<bit);
+				char mnemonic = mnemonics[bit];
+				//if the bit is set write the mnemonic
+				if(joystate & bitmask)
+					movie_writechar(mnemonic);
+				else //otherwise write a space
+					movie_writechar(' ');
+			}
+
+			//separate the joysticks
+			if(i != 3) movie_writechar('|');
+		}
+
+		//each frame is on a new line
+		movie_writechar('\n');
 	}
 
-  for(x=0;x<4;x++)
-  {
-   if(js[x] != joop[x])
-   {
-    for(y=0;y<8;y++)
-     if((js[x] ^ joop[x]) & (1 << y))
-      DoEncode(x, y, 0);
-    joop[x] = js[x];
-   }
-   else if(framets == ((1<<24)-1)) DoEncode(0,0,1); // Overflow will happen, so do dummy update. 
-  }
- }
+	if(current)
+	{
+		framets++;
+		framecount++;
+	}
 
- if(current)
- {
-  framets++;
-  framecount++;
- }
+	memcpy(&cur_input_display,js,4);
 
- memcpy(&cur_input_display,js,4);
-
- //Stop the movie at a specified frame 
- if(current < 0 && FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
- {
-	 FCEUI_ToggleEmulationPause();
- }
+	//Stop the movie at a specified frame 
+	if(current < 0 && FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
+	{
+		FCEUI_ToggleEmulationPause();
+	}
 
 }
 
 void FCEUMOV_AddCommand(int cmd)
 {
- if(current <= 0) return;   // Return if not recording a movie
- //printf("%d\n",cmd);
- DoEncode((cmd>>3)&0x3,cmd&0x7,1);
+	if(current <= 0) return;   // Return if not recording a movie
+	//printf("%d\n",cmd);
+	DoEncode((cmd>>3)&0x3,cmd&0x7,1);
 }
 
 void FCEUMOV_CheckMovies(void)
 {
-        FILE *st=NULL;
-        char *fn;
-        int ssel;
-        
-        for(ssel=0;ssel<10;ssel++)
-        {
-         st=FCEUD_UTF8fopen(fn=FCEU_MakeFName(FCEUMKF_MOVIE,ssel,0),"rb");
-         free(fn);
-         if(st)
-         {
-          MovieStatus[ssel]=1;
-          fclose(st);
-         }   
-         else
-          MovieStatus[ssel]=0;
-        }
+	FILE *st=NULL;
+	char *fn;
+	int ssel;
+
+	for(ssel=0;ssel<10;ssel++)
+	{
+		st=FCEUD_UTF8fopen(fn=FCEU_MakeFName(FCEUMKF_MOVIE,ssel,0),"rb");
+		free(fn);
+		if(st)
+		{
+			MovieStatus[ssel]=1;
+			fclose(st);
+		}   
+		else
+			MovieStatus[ssel]=0;
+	}
 
 }
 
@@ -864,24 +932,24 @@ void FCEUI_SelectMovieNext(int n)
 
 int FCEUI_SelectMovie(int w, int show)
 {
- int oldslot=CurrentMovie;
- if(w == -1) { MovieShow = 0; return 0; } //mbg merge 7/17/06 had to add return value
- FCEUI_SelectState(-1,0);
+	int oldslot=CurrentMovie;
+	if(w == -1) { MovieShow = 0; return 0; } //mbg merge 7/17/06 had to add return value
+	FCEUI_SelectState(-1,0);
 
- CurrentMovie=w;
- MovieShow=180;
+	CurrentMovie=w;
+	MovieShow=180;
 
- if(show)
- {
-  MovieShow=180;
-  if(current > 0)
-   FCEU_DispMessage("-recording movie %d-",current-1);
-  else if (current < 0)
-   FCEU_DispMessage("-playing movie %d-",-1 - current);
-  else
-   FCEU_DispMessage("-select movie-");
- }
- return 0; //mbg merge 7/17/06 had to add return value
+	if(show)
+	{
+		MovieShow=180;
+		if(current > 0)
+			FCEU_DispMessage("-recording movie %d-",current-1);
+		else if (current < 0)
+			FCEU_DispMessage("-playing movie %d-",-1 - current);
+		else
+			FCEU_DispMessage("-select movie-");
+	}
+	return 0; //mbg merge 7/17/06 had to add return value
 }
 
 int movcounter=0;
@@ -899,30 +967,30 @@ void FCEU_DrawMovies(uint8 *XBuf)
 	if(howl>176) howl=180;
 	if(howl<1) howl=1;
 	if((howlong<howl || movcounter)
-	&& (frameDisplayOn && 
-	(!movcounter || last_frame_display!=framecount)))
-	//|| input_display && (!movcounter || last_input_display!=cur_input_display)))
+		&& (frameDisplayOn && 
+		(!movcounter || last_frame_display!=framecount)))
+		//|| input_display && (!movcounter || last_input_display!=cur_input_display)))
 	{
 		//Old input display code
 		/*
 		char inputstr [32];
 		if(input_display)
 		{
-			uint32 c = cur_input_display;
-			sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
-				(c&0x40)?'<':' ', (c&0x10)?'^':' ', (c&0x80)?'>':' ', (c&0x20)?'v':' ',
-				(c&0x01)?'A':' ', (c&0x02)?'B':' ', (c&0x08)?'S':' ', (c&0x04)?'s':' ',
-				(c&0x4000)?'<':' ', (c&0x1000)?'^':' ', (c&0x8000)?'>':' ', (c&0x2000)?'v':' ',
-				(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ');
-			if(!(c&0xff00))
-				inputstr[8] = '\0';
+		uint32 c = cur_input_display;
+		sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
+		(c&0x40)?'<':' ', (c&0x10)?'^':' ', (c&0x80)?'>':' ', (c&0x20)?'v':' ',
+		(c&0x01)?'A':' ', (c&0x02)?'B':' ', (c&0x08)?'S':' ', (c&0x04)?'s':' ',
+		(c&0x4000)?'<':' ', (c&0x1000)?'^':' ', (c&0x8000)?'>':' ', (c&0x2000)?'v':' ',
+		(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ');
+		if(!(c&0xff00))
+		inputstr[8] = '\0';
 		}
 		if(frameDisplayOn && !input_display)
-			FCEU_DispMessage("%s frame %u",current >= 0?"Recording":"Playing",framecount);
+		FCEU_DispMessage("%s frame %u",current >= 0?"Recording":"Playing",framecount);
 		else if(input_display && !frameDisplayOn)
-			FCEU_DispMessage("Input: %s",inputstr);
+		FCEU_DispMessage("Input: %s",inputstr);
 		else //if(input_display && frame_display)
-			FCEU_DispMessage("%s %u %s",current >= 0?"Recording":"Playing",framecount,inputstr);
+		FCEU_DispMessage("%s %u %s",current >= 0?"Recording":"Playing",framecount,inputstr);
 		*/
 		if(frameDisplayOn)
 		{
@@ -944,81 +1012,81 @@ void FCEU_DrawMovies(uint8 *XBuf)
 
 int FCEUMOV_WriteState(FILE* st)
 {
- uint32 to_write = 0;
- if(current < 0)
-  to_write = moviedatasize;
- else if(current > 0)
-  to_write = frameptr;
+	uint32 to_write = 0;
+	if(current < 0)
+		to_write = moviedatasize;
+	else if(current > 0)
+		to_write = frameptr;
 
- if(!st)
-  return to_write;
+	if(!st)
+		return to_write;
 
- if(to_write)
-  fwrite(moviedata, 1, to_write, st);
- return to_write;
+	if(to_write)
+		fwrite(moviedata, 1, to_write, st);
+	return to_write;
 }
 
 static int load_successful;
 
 int FCEUMOV_ReadState(FILE* st, uint32 size)
 {
- // if this savestate was made while replaying,
- // we need to "undo" nextd and nextts
- if(nextd != -1)
- {
-  int d = 1;
-  if(nextts > 65536)
-   d = 4;
-  else if(nextts > 256)
-   d = 3;
-  else if(nextts > 0)
-   d = 2;
-  frameptr -= d;
-  nextd = -1;
- }
+	// if this savestate was made while replaying,
+	// we need to "undo" nextd and nextts
+	if(nextd != -1)
+	{
+		int d = 1;
+		if(nextts > 65536)
+			d = 4;
+		else if(nextts > 256)
+			d = 3;
+		else if(nextts > 0)
+			d = 2;
+		frameptr -= d;
+		nextd = -1;
+	}
 
-// if(current > 0 || (!movie_readonly && current < 0))            /* Recording or Playback (!read-only) */
- if(current!=0 && !movie_readonly)
- {
-  // copy movie data from savestate
-  moviedata = (uint8*)realloc(moviedata, size);
-  moviedatasize = size;
-  if(size && fread(moviedata, 1, size, st)<size)
-   return 0;
-  if(current < 0)                   // switch to recording
-   current = -current;
-  fseek(slots[current - 1], firstframeoffset, SEEK_SET);
-  fwrite(moviedata, 1, frameptr, slots[current - 1]);
-  if(!FCEU_BotMode())
-  {
-	  rerecord_count++;
-  }
- }
-// else if(current < 0)       /* Playback (read-only) */
- else if(current!=0 && movie_readonly)
- {
-  if(current > 0)                   // switch to playback
-   current = -current;
-  // allow frameptr to be updated but keep movie data
-  fseek(st, size, SEEK_CUR);
-  // prevent seeking beyond the end of the movie
-  if(frameptr > moviedatasize)
-   frameptr = moviedatasize;
- }
- else						/* Neither recording or replaying */
- {
-  // skip movie data
-  fseek(st, size, SEEK_CUR);
- }
+	// if(current > 0 || (!movie_readonly && current < 0))            /* Recording or Playback (!read-only) */
+	if(current!=0 && !movie_readonly)
+	{
+		// copy movie data from savestate
+		moviedata = (uint8*)realloc(moviedata, size);
+		moviedatasize = size;
+		if(size && fread(moviedata, 1, size, st)<size)
+			return 0;
+		if(current < 0)                   // switch to recording
+			current = -current;
+		fseek(slots[current - 1], firstframeoffset, SEEK_SET);
+		fwrite(moviedata, 1, frameptr, slots[current - 1]);
+		if(!FCEU_BotMode())
+		{
+			rerecord_count++;
+		}
+	}
+	// else if(current < 0)       /* Playback (read-only) */
+	else if(current!=0 && movie_readonly)
+	{
+		if(current > 0)                   // switch to playback
+			current = -current;
+		// allow frameptr to be updated but keep movie data
+		fseek(st, size, SEEK_CUR);
+		// prevent seeking beyond the end of the movie
+		if(frameptr > moviedatasize)
+			frameptr = moviedatasize;
+	}
+	else						/* Neither recording or replaying */
+	{
+		// skip movie data
+		fseek(st, size, SEEK_CUR);
+	}
 
- load_successful=1;
+	load_successful=1;
 
- // Maximus: Show the last input combination entered from the
- // movie within the state
- if(current!=0) // <- mz: only if playing or recording a movie
-  memcpy(&cur_input_display, joop, 4);
+	// Maximus: Show the last input combination entered from the
+	// movie within the state
+	if(current!=0) // <- mz: only if playing or recording a movie
+		memcpy(&cur_input_display, joop, 4);
 
- return 1;
+	return 1;
 }
 
 void FCEUMOV_PreLoad(void)
@@ -1036,24 +1104,24 @@ int FCEUMOV_PostLoad(void)
 
 char* FCEUI_MovieGetCurrentName(int addSlotNumber)
 {
- return FCEU_MakeFName(FCEUMKF_MOVIE,(addSlotNumber ? CurrentMovie : -1),0);
+	return FCEU_MakeFName(FCEUMKF_MOVIE,(addSlotNumber ? CurrentMovie : -1),0);
 }
 
 int FCEUI_IsMovieActive(void)
 {
-  return current;
+	return current;
 }
 
 void FCEUI_MovieToggleFrameDisplay(void)
 {
- frame_display=!frame_display;
- if(!(current != 0 && frame_display))// && !input_display)
-  FCEU_ResetMessages();
- else
- {
-  last_frame_display = ~framecount;
-  last_input_display = ~cur_input_display;
- }
+	frame_display=!frame_display;
+	if(!(current != 0 && frame_display))// && !input_display)
+		FCEU_ResetMessages();
+	else
+	{
+		last_frame_display = ~framecount;
+		last_input_display = ~cur_input_display;
+	}
 }
 
 void FCEUI_ToggleInputDisplay(void)
@@ -1073,15 +1141,15 @@ void FCEUI_ToggleInputDisplay(void)
 		input_display = 0;
 		break;
 	}
- 
- //if(!input_display && !(current != 0 && frame_display))
-  //FCEU_ResetMessages();
- //else
+
+	//if(!input_display && !(current != 0 && frame_display))
+	//FCEU_ResetMessages();
+	//else
 	if(input_display)
- {
-  last_frame_display = ~framecount;
-  last_input_display = ~cur_input_display;
- }
+	{
+		last_frame_display = ~framecount;
+		last_input_display = ~cur_input_display;
+	}
 }
 
 void FCEUI_MovieToggleReadOnly(void)
@@ -1109,147 +1177,152 @@ int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 	fname = (const char*)convertToFCM(fname,buffer);
 	strncpy(lastMovieInfoFilename, fname, 512);
 
-// main get info part of function
-{
- uint32 magic;
- uint32 version;
- uint8 _flags[4];
+	// main get info part of function
+	{
+		uint32 magic;
+		uint32 version;
+		uint8 _flags[4];
 
- FILE* fp = FCEUD_UTF8fopen(fname, "rb");
- if(!fp)
-  return 0;
+		FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+		if(!fp)
+			return 0;
 
- read32le(&magic, fp);
- if(magic != MOVIE_MAGIC)
- {
-  fclose(fp);
-  return 0;
- }
+		read32le(&magic, fp);
+		if(magic != MOVIE_MAGIC)
+		{
+			fclose(fp);
+			return 0;
+		}
 
- read32le(&version, fp);
- if(version != MOVIE_VERSION)
- {
-  fclose(fp);
-  if(version == 1)
-   return FCEUI_MovieGetInfo_v1(fname, info);
-  else
-   return 0;
- }
+		read32le(&version, fp);
+		if(version != MOVIE_VERSION)
+		{
+			fclose(fp);
+			if(version == 1)
+				return FCEUI_MovieGetInfo_v1(fname, info);
+			else
+				return 0;
+		}
 
- info->movie_version = MOVIE_VERSION;
+		info->movie_version = MOVIE_VERSION;
 
- fread(_flags, 1, 4, fp);
+		fread(_flags, 1, 4, fp);
 
- info->flags = _flags[0];
- read32le(&info->num_frames, fp);
- read32le(&info->rerecord_count, fp);
+		info->flags = _flags[0];
+		read32le(&info->num_frames, fp);
+		read32le(&info->rerecord_count, fp);
 
- if(access(fname, W_OK))
-  info->read_only = 1;
- else
-  info->read_only = 0;
+		if(access(fname, W_OK))
+			info->read_only = 1;
+		else
+			info->read_only = 0;
 
- fseek(fp, 12, SEEK_CUR);			// skip movie_data_size, offset_to_savestate, and offset_to_movie_data
+		fseek(fp, 12, SEEK_CUR);			// skip movie_data_size, offset_to_savestate, and offset_to_movie_data
 
- fread(info->md5_of_rom_used, 1, 16, fp);
- info->md5_of_rom_used_present = 1;
+		fread(info->md5_of_rom_used, 1, 16, fp);
+		info->md5_of_rom_used_present = 1;
 
- read32le(&info->emu_version_used, fp);
+		read32le(&info->emu_version_used, fp);
 
- // I probably could have planned this better...
- {
-  char str[256];
-  size_t r;
-  uint32 p; //mbg merge 7/17/06 change to uint32
-  int p2=0;
-  char last_c=32;
+		// I probably could have planned this better...
+		{
+			char str[256];
+			size_t r;
+			uint32 p; //mbg merge 7/17/06 change to uint32
+			int p2=0;
+			char last_c=32;
 
-  if(info->name_of_rom_used && info->name_of_rom_used_size)
-   info->name_of_rom_used[0]='\0';
+			if(info->name_of_rom_used && info->name_of_rom_used_size)
+				info->name_of_rom_used[0]='\0';
 
-  r=fread(str, 1, 256, fp);
-  while(r > 0)
-  {
-   for(p=0; p<r && last_c != '\0'; ++p)
-   {
-    if(info->name_of_rom_used && info->name_of_rom_used_size && (p2 < info->name_of_rom_used_size-1))
-    {
-     info->name_of_rom_used[p2]=str[p];
-     p2++;
-	 last_c=str[p];
-    }
-   }
-   if(p<r)
-   {
-    memmove(str, str+p, r-p);
-    r -= p;
-    break;
-   }
-   r=fread(str, 1, 256, fp);
-  }
+			r=fread(str, 1, 256, fp);
+			while(r > 0)
+			{
+				for(p=0; p<r && last_c != '\0'; ++p)
+				{
+					if(info->name_of_rom_used && info->name_of_rom_used_size && (p2 < info->name_of_rom_used_size-1))
+					{
+						info->name_of_rom_used[p2]=str[p];
+						p2++;
+						last_c=str[p];
+					}
+				}
+				if(p<r)
+				{
+					memmove(str, str+p, r-p);
+					r -= p;
+					break;
+				}
+				r=fread(str, 1, 256, fp);
+			}
 
-  p2=0;
-  last_c=32;
+			p2=0;
+			last_c=32;
 
-  if(info->metadata && info->metadata_size)
-   info->metadata[0]='\0';
+			if(info->metadata && info->metadata_size)
+				info->metadata[0]='\0';
 
-  while(r > 0)
-  {
-   for(p=0; p<r && last_c != '\0'; ++p)
-   {
-    if(info->metadata && info->metadata_size && (p2 < info->metadata_size-1))
-    {
-     info->metadata[p2]=str[p];
-     p2++;
-	 last_c=str[p];
-    }
-   }
-   if(p != r)
-    break;
-   r=fread(str, 1, 256, fp);
-  }
+			while(r > 0)
+			{
+				for(p=0; p<r && last_c != '\0'; ++p)
+				{
+					if(info->metadata && info->metadata_size && (p2 < info->metadata_size-1))
+					{
+						info->metadata[p2]=str[p];
+						p2++;
+						last_c=str[p];
+					}
+				}
+				if(p != r)
+					break;
+				r=fread(str, 1, 256, fp);
+			}
 
-  if(r<=0)
-  {
-   // somehow failed to read romname and metadata
-   fclose(fp);
-   return 0;
-  }
- }
+			if(r<=0)
+			{
+				// somehow failed to read romname and metadata
+				fclose(fp);
+				return 0;
+			}
+		}
 
- // check what hacks are necessary
-  fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
-  uint32 temp_savestate_offset;
-  read32le(&temp_savestate_offset, fp);
-  if(fseek(fp, temp_savestate_offset, SEEK_SET))
-  {
-   fclose(fp);
-   return 0;
-  }
-  if(!FCEUSS_LoadFP(fp,2)) return 0; // 2 -> don't really load, just load to find what's there then load backup
+		// check what hacks are necessary
+		fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
+		uint32 temp_savestate_offset;
+		read32le(&temp_savestate_offset, fp);
+		if(temp_savestate_offset != 0xFFFFFFFF)
+		{
+			if(fseek(fp, temp_savestate_offset, SEEK_SET))
+			{
+				fclose(fp);
+				return 0;
+			}
 
- fclose(fp);
- return 1;
-}
+			//don't really load, just load to find what's there then load backup
+			if(!FCEUSS_LoadFP(fp,SSLOADPARAM_DUMMY)) return 0; 
+		}
+
+		fclose(fp);
+		return 1;
+	}
 }
 /*
-  Backwards compat
+Backwards compat
 */
 
 
 /*
 struct MovieHeader_v1
 {
- uint32 magic;
- uint32 version=1;
- uint8 flags[4];
- uint32 length_frames;
- uint32 rerecord_count;
- uint32 movie_data_size;
- uint32 offset_to_savestate;
- uint32 offset_to_movie_data;
- uint16 metadata_ucs2[];     // ucs-2, ick!  sizeof(metadata) = offset_to_savestate - MOVIE_HEADER_SIZE
+uint32 magic;
+uint32 version=1;
+uint8 flags[4];
+uint32 length_frames;
+uint32 rerecord_count;
+uint32 movie_data_size;
+uint32 offset_to_savestate;
+uint32 offset_to_movie_data;
+uint16 metadata_ucs2[];     // ucs-2, ick!  sizeof(metadata) = offset_to_savestate - MOVIE_HEADER_SIZE
 }
 */
 
@@ -1257,220 +1330,220 @@ struct MovieHeader_v1
 
 static void FCEUI_LoadMovie_v1(char *fname, int _read_only)
 {
- FILE *fp;
- char *fn = NULL;
+	FILE *fp;
+	char *fn = NULL;
 
- FCEUI_StopMovie();
+	FCEUI_StopMovie();
 
- if(!fname)
-  fname = fn = FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0);
+	if(!fname)
+		fname = fn = FCEU_MakeFName(FCEUMKF_MOVIE,CurrentMovie,0);
 
- // check movie_readonly
- movie_readonly = _read_only;
- if(access(fname, W_OK))
-  movie_readonly = 2;
+	// check movie_readonly
+	movie_readonly = _read_only;
+	if(access(fname, W_OK))
+		movie_readonly = 2;
 
- fp = FCEUD_UTF8fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
+	fp = FCEUD_UTF8fopen(fname, (movie_readonly>=2) ? "rb" : "r+b");
 
- if(fn)
- {
-  free(fn);
-  fname = NULL;
- }
-
- if(!fp) return;
-
- // read header
- {
-  uint32 magic;
-  uint32 version;
-  uint8 flags[4];
-  uint32 fc;
-
-  read32le(&magic, fp);
-  if(magic != MOVIE_MAGIC)
-  {
-   fclose(fp);
-   return;
-  }
-
-  read32le(&version, fp);
-  if(version != 1)
-  {
-   fclose(fp);
-   return;
-  }
-
-  fread(flags, 1, 4, fp);
-  read32le(&fc, fp);
-  read32le(&rerecord_count, fp);
-  read32le(&moviedatasize, fp);
-  read32le(&savestate_offset, fp);
-  read32le(&firstframeoffset, fp);
-  if(fseek(fp, savestate_offset, SEEK_SET))
-  {
-   fclose(fp);
-   return;
-  }
-
-  if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
-	  movieSyncHackOn=0;
-  else
-	  movieSyncHackOn=1;
- }
-
- // fully reload the game to reinitialize everything before playing any movie
- // to try fixing nondeterministic playback of some games
- {
-	extern char lastLoadedGameName [2048];
-	extern int disableBatteryLoading, suppressAddPowerCommand;
-	suppressAddPowerCommand=1;
-	suppressMovieStop=1;
+	if(fn)
 	{
-		FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
-		if(!gi)
-			PowerNES();
+		free(fn);
+		fname = NULL;
 	}
-	suppressMovieStop=0;
-	suppressAddPowerCommand=0;
- }
 
- if(!FCEUSS_LoadFP(fp,1)) return;
+	if(!fp) return;
 
- ResetInputTypes();
+	// read header
+	{
+		uint32 magic;
+		uint32 version;
+		uint8 flags[4];
+		uint32 fc;
 
- fseek(fp, firstframeoffset, SEEK_SET);
- moviedata = (uint8*)realloc(moviedata, moviedatasize);
- fread(moviedata, 1, moviedatasize, fp);
+		read32le(&magic, fp);
+		if(magic != MOVIE_MAGIC)
+		{
+			fclose(fp);
+			return;
+		}
 
- framecount = 0;		// movies start at frame 0!
- frameptr = 0;
- current = CurrentMovie;
- slots[current] = fp;
+		read32le(&version, fp);
+		if(version != 1)
+		{
+			fclose(fp);
+			return;
+		}
 
- memset(joop,0,sizeof(joop));
- current = -1 - current;
- framets=0;
- nextts=0;
- nextd = -1;
- MovieStatus[CurrentMovie] = 1;
- if(!fname)
-  FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
- else
-  FCEU_DispMessage("Movie playback started.");
+		fread(flags, 1, 4, fp);
+		read32le(&fc, fp);
+		read32le(&rerecord_count, fp);
+		read32le(&moviedatasize, fp);
+		read32le(&savestate_offset, fp);
+		read32le(&firstframeoffset, fp);
+		if(fseek(fp, savestate_offset, SEEK_SET))
+		{
+			fclose(fp);
+			return;
+		}
+
+		if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
+			movieSyncHackOn=0;
+		else
+			movieSyncHackOn=1;
+	}
+
+	// fully reload the game to reinitialize everything before playing any movie
+	// to try fixing nondeterministic playback of some games
+	{
+		extern char lastLoadedGameName [2048];
+		extern int disableBatteryLoading, suppressAddPowerCommand;
+		suppressAddPowerCommand=1;
+		suppressMovieStop=1;
+		{
+			FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
+			if(!gi)
+				PowerNES();
+		}
+		suppressMovieStop=0;
+		suppressAddPowerCommand=0;
+	}
+
+	if(!FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP)) return;
+
+	ResetInputTypes();
+
+	fseek(fp, firstframeoffset, SEEK_SET);
+	moviedata = (uint8*)realloc(moviedata, moviedatasize);
+	fread(moviedata, 1, moviedatasize, fp);
+
+	framecount = 0;		// movies start at frame 0!
+	frameptr = 0;
+	current = CurrentMovie;
+	slots[current] = fp;
+
+	memset(joop,0,sizeof(joop));
+	current = -1 - current;
+	framets=0;
+	nextts=0;
+	nextd = -1;
+	MovieStatus[CurrentMovie] = 1;
+	if(!fname)
+		FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
+	else
+		FCEU_DispMessage("Movie playback started.");
 }
 
 static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)
 {
- uint32 magic;
- uint32 version;
- uint8 _flags[4];
- uint32 savestateoffset;
- uint8 tmp[MOVIE_MAX_METADATA<<1];
- int metadata_length;
+	uint32 magic;
+	uint32 version;
+	uint8 _flags[4];
+	uint32 savestateoffset;
+	uint8 tmp[MOVIE_MAX_METADATA<<1];
+	int metadata_length;
 
- FILE* fp = FCEUD_UTF8fopen(fname, "rb");
- if(!fp)
-  return 0;
+	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+	if(!fp)
+		return 0;
 
- read32le(&magic, fp);
- if(magic != MOVIE_MAGIC)
- {
-  fclose(fp);
-  return 0;
- }
+	read32le(&magic, fp);
+	if(magic != MOVIE_MAGIC)
+	{
+		fclose(fp);
+		return 0;
+	}
 
- read32le(&version, fp);
- if(version != 1)
- {
-  fclose(fp);
-  return 0;
- }
+	read32le(&version, fp);
+	if(version != 1)
+	{
+		fclose(fp);
+		return 0;
+	}
 
- info->movie_version = 1;
- info->emu_version_used = 0;			// unknown
+	info->movie_version = 1;
+	info->emu_version_used = 0;			// unknown
 
- fread(_flags, 1, 4, fp);
+	fread(_flags, 1, 4, fp);
 
- info->flags = _flags[0];
- read32le(&info->num_frames, fp);
- read32le(&info->rerecord_count, fp);
+	info->flags = _flags[0];
+	read32le(&info->num_frames, fp);
+	read32le(&info->rerecord_count, fp);
 
- if(access(fname, W_OK))
-  info->read_only = 1;
- else
-  info->read_only = 0;
+	if(access(fname, W_OK))
+		info->read_only = 1;
+	else
+		info->read_only = 0;
 
- fseek(fp, 4, SEEK_CUR);
- read32le(&savestateoffset, fp);
+	fseek(fp, 4, SEEK_CUR);
+	read32le(&savestateoffset, fp);
 
- metadata_length = (int)savestateoffset - MOVIE_V1_HEADER_SIZE;
- if(metadata_length > 0)
- {
-  //int i; //mbg merge 7/17/06 removed
+	metadata_length = (int)savestateoffset - MOVIE_V1_HEADER_SIZE;
+	if(metadata_length > 0)
+	{
+		//int i; //mbg merge 7/17/06 removed
 
-  metadata_length >>= 1;
-  if(metadata_length >= MOVIE_MAX_METADATA)
-   metadata_length = MOVIE_MAX_METADATA-1;
+		metadata_length >>= 1;
+		if(metadata_length >= MOVIE_MAX_METADATA)
+			metadata_length = MOVIE_MAX_METADATA-1;
 
-  fseek(fp, MOVIE_V1_HEADER_SIZE, SEEK_SET);
-  fread(tmp, 1, metadata_length<<1, fp);
- }
+		fseek(fp, MOVIE_V1_HEADER_SIZE, SEEK_SET);
+		fread(tmp, 1, metadata_length<<1, fp);
+	}
 
- // turn old ucs2 metadata into utf8
- if(info->metadata && info->metadata_size)
- {
-	 char* ptr=info->metadata;
-	 char* ptr_end=info->metadata+info->metadata_size-1;
-	 int c_ptr=0;
-	 while(ptr<ptr_end && c_ptr<metadata_length)
-	 {
-		 uint16 c=(tmp[c_ptr<<1] | (tmp[(c_ptr<<1)+1] << 8));
-		 //mbg merge 7/17/06 changed to if..elseif
-		 if(c<=0x7f)
-			 *ptr++ = (char)(c&0x7f);
-		 else if(c<=0x7FF)
-			 if(ptr+1>=ptr_end)
-				 ptr_end=ptr;
-			 else
+	// turn old ucs2 metadata into utf8
+	if(info->metadata && info->metadata_size)
+	{
+		char* ptr=info->metadata;
+		char* ptr_end=info->metadata+info->metadata_size-1;
+		int c_ptr=0;
+		while(ptr<ptr_end && c_ptr<metadata_length)
+		{
+			uint16 c=(tmp[c_ptr<<1] | (tmp[(c_ptr<<1)+1] << 8));
+			//mbg merge 7/17/06 changed to if..elseif
+			if(c<=0x7f)
+				*ptr++ = (char)(c&0x7f);
+			else if(c<=0x7FF)
+				if(ptr+1>=ptr_end)
+					ptr_end=ptr;
+				else
 			 {
 				 *ptr++=(0xc0 | (c>>6));
 				 *ptr++=(0x80 | (c & 0x3f));
 			 }
-		 else
-			 if(ptr+2>=ptr_end)
-				 ptr_end=ptr;
-			 else
+			else
+				if(ptr+2>=ptr_end)
+					ptr_end=ptr;
+				else
 			 {
 				 *ptr++=(0xe0 | (c>>12));
 				 *ptr++=(0x80 | ((c>>6) & 0x3f));
 				 *ptr++=(0x80 | (c & 0x3f));
 			 }
 
-		 c_ptr++;
-	 }
-	 *ptr='\0';
- }
+				c_ptr++;
+		}
+		*ptr='\0';
+	}
 
- // md5 info not available from v1
- info->md5_of_rom_used_present = 0;
- // rom name used for the movie not available from v1
- if(info->name_of_rom_used && info->name_of_rom_used_size)
-  info->name_of_rom_used[0] = '\0';
+	// md5 info not available from v1
+	info->md5_of_rom_used_present = 0;
+	// rom name used for the movie not available from v1
+	if(info->name_of_rom_used && info->name_of_rom_used_size)
+		info->name_of_rom_used[0] = '\0';
 
- // check what hacks are necessary
-  fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
-  uint32 temp_savestate_offset;
-  read32le(&temp_savestate_offset, fp);
-  if(fseek(fp, temp_savestate_offset, SEEK_SET))
-  {
-   fclose(fp);
-   return 0;
-  }
-  if(!FCEUSS_LoadFP(fp,2)) return 0; // 2 -> don't really load, just load to find what's there then load backup
+	// check what hacks are necessary
+	fseek(fp, 24, SEEK_SET);			// offset_to_savestate offset
+	uint32 temp_savestate_offset;
+	read32le(&temp_savestate_offset, fp);
+	if(fseek(fp, temp_savestate_offset, SEEK_SET))
+	{
+		fclose(fp);
+		return 0;
+	}
+	if(!FCEUSS_LoadFP(fp,SSLOADPARAM_DUMMY)) return 0; // 2 -> don't really load, just load to find what's there then load backup
 
 
- fclose(fp);
- return 1;
+	fclose(fp);
+	return 1;
 }
 

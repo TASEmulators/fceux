@@ -311,7 +311,7 @@ void NetplayUpdate(uint8 *joyp)
 				{
 				 FILE *fp = FetchFile(FCEU_de32lsb(buf));
 				 if(!fp) return;
-				 if(FCEUSS_LoadFP(fp,1))
+				 if(FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP))
 				 {
 				  fclose(fp);				
 			          FCEU_DispMessage("Remote state loaded.");

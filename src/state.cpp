@@ -391,9 +391,9 @@ void FCEUSS_Save(char *fname)
 	}
 }
 
-int FCEUSS_LoadFP(FILE *st, int make_backup)
+int FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 {
-	if(make_backup==2 && suppress_scan_chunks)
+	if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
 		return 1;
 
 	int x;
@@ -401,8 +401,8 @@ int FCEUSS_LoadFP(FILE *st, int make_backup)
 	int stateversion;
 	char* fn=0;
 
-	/* Make temporary savestate in case something screws up during the load */
-	if(make_backup==1)
+	//Make temporary savestate in case something screws up during the load
+	if(params == SSLOADPARAM_BACKUP)
 	{
 		fn=FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
 		FILE *fp;
@@ -423,7 +423,7 @@ int FCEUSS_LoadFP(FILE *st, int make_backup)
 		}
 	}
 
-	if(make_backup!=2)
+	if(params!=SSLOADPARAM_DUMMY)
 	{
 		FCEUMOV_PreLoad();
 	}
@@ -440,12 +440,12 @@ int FCEUSS_LoadFP(FILE *st, int make_backup)
 	{
 		stateversion=header[3] * 100;
 	}
-	if(make_backup==2)
+	if(params == SSLOADPARAM_DUMMY)
 	{
 		scan_chunks=1;
 	}
 	x=ReadStateChunks(st,*(uint32*)(header+4));
-	if(make_backup==2)
+	if(params == SSLOADPARAM_DUMMY)
 	{
 		scan_chunks=0;
 		return 1;
@@ -467,14 +467,14 @@ int FCEUSS_LoadFP(FILE *st, int make_backup)
 
 	if(fn)
 	{
-		if(!x || make_backup==2)  //is make_backup==2 possible??  oh well.
+		if(!x || params == SSLOADPARAM_DUMMY)  //is make_backup==2 possible??  oh well.
 		{
 			/* Oops!  Load the temporary savestate */
 			FILE *fp;
 				
 			if((fp=fopen(fn,"rb")))
 			{
-				FCEUSS_LoadFP(fp,0);
+				FCEUSS_LoadFP(fp,SSLOADPARAM_NOBACKUP);
 				fclose(fp);
 			}
 			unlink(fn);
@@ -521,7 +521,7 @@ int FCEUSS_Load(char *fname)
 	//If in bot mode, don't do a backup when loading.
 	//Otherwise you eat at the hard disk, since so many
 	//states are being loaded.
-	if(FCEUSS_LoadFP(st,FCEU_BotMode()?0:1))
+	if(FCEUSS_LoadFP(st,FCEU_BotMode()?SSLOADPARAM_NOBACKUP:SSLOADPARAM_BACKUP))
 	{
 		if(!fname)
 		{

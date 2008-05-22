@@ -175,9 +175,11 @@ void FCEUI_LoadState(char *fname);
 void FCEUD_SaveStateAs(void);
 void FCEUD_LoadStateFrom(void);
 
-#define MOVIE_FLAG_FROM_RESET   (1<<1)
+//movie was recorded from poweron. the alternative is from a savestate
+#define MOVIE_FLAG_FROM_POWERON (1<<3)
+
 #define MOVIE_FLAG_PAL          (1<<2)
-#define MOVIE_FLAG_FROM_POWERON (1<<3) // value is temporary onle, gets converted to reset
+
 #define MOVIE_MAX_METADATA      512
 
 typedef struct
