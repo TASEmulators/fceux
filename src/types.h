@@ -22,6 +22,7 @@
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
 
+#include <string>
 #include <stdlib.h>
 
 #define FCEU_VERSION_NUMERIC 19901

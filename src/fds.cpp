@@ -723,7 +723,7 @@ static int SubLoad(FCEUFILE *fp)
   FCEU_fread(diskdata[x],1,65500,fp);
   md5_update(&md5,diskdata[x],65500);
  }
- md5_finish(&md5,GameInfo->MD5);
+ md5_finish(&md5,GameInfo->MD5.data);
  return(1);
 }
 

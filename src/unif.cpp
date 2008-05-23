@@ -555,7 +555,7 @@ int UNIFLoad(const char *name, FCEUFILE *fp)
           for(x=0;x<16;x++)
            FCEU_printf("%02x",UNIFCart.MD5[x]);
           FCEU_printf("\n");
-	  memcpy(GameInfo->MD5,UNIFCart.MD5,sizeof(UNIFCart.MD5));
+	  memcpy(&GameInfo->MD5,&UNIFCart.MD5,sizeof(UNIFCart.MD5));
 	}
 
         if(!InitializeBoard())

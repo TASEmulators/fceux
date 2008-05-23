@@ -2136,16 +2136,8 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\utils\unzip.c"
+				RelativePath="..\src\utils\unzip.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						CompileAs="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\utils\unzip.h"
