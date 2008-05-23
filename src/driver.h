@@ -175,8 +175,12 @@ void FCEUI_LoadState(char *fname);
 void FCEUD_SaveStateAs(void);
 void FCEUD_LoadStateFrom(void);
 
-//movie was recorded from poweron. the alternative is from a savestate
+//movie was recorded from poweron. the alternative is from a savestate (or from reset)
 #define MOVIE_FLAG_FROM_POWERON (1<<3)
+
+//an ARCHAIC flag which means the movie was recorded from a soft reset.
+//WHY would you do this?? do not create any new movies with this flag
+#define MOVIE_FLAG_FROM_RESET   (1<<1)
 
 #define MOVIE_FLAG_PAL          (1<<2)
 

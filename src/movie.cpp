@@ -671,17 +671,11 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 	framets=0;
 	nextd = -1;
 
-	//mbg 5/22/08 - I didnt delete this because I thought it was interesting
-	//// trigger a reset
-	//if(flags & MOVIE_FLAG_FROM_RESET)
-	//{
-	//	if(poweron)
-	//	{
-	//		PowerNES();							// NOTE:  this will write an FCEUNPCMD_POWER into the movie file
-	//	}
-	//	else
-	//		ResetNES();							// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
-	//}
+	// trigger a reset
+	if(flags & MOVIE_FLAG_FROM_RESET)
+	{
+		ResetNES();	// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
+	}
 
 	if(!fname)
 		FCEUI_SelectMovie(CurrentMovie,1);       /* Quick hack to display status. */
