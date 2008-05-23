@@ -615,10 +615,6 @@ void FCEUI_SetDirOverride(int which, char *n)
 		{
 			FCEUSS_CheckStates();
 		}
-		else if(which == FCEUIOD_MISC)
-		{
-			FCEUMOV_CheckMovies();
-		}
 	}
 }
 

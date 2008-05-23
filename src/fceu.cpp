@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <string>
 #include  <string.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -374,7 +375,6 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	  PowerNES();
 		
 	FCEUSS_CheckStates();
-	FCEUMOV_CheckMovies();
 
         if(GameInfo->type!=GIT_NSF)
         {

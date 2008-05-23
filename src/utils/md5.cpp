@@ -228,8 +228,9 @@ void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 
 
 /* Uses a static buffer, so beware of how it's used. */
-char *md5_asciistr(uint8 digest[16])
+char *md5_asciistr(MD5DATA& md5)
 {
+ uint8* digest = md5.data;
  static char str[33];
  static char trans[16]={'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
  int x;

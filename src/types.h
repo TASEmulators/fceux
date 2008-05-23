@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#define FCEU_VERSION_NUMERIC 9816
+#define FCEU_VERSION_NUMERIC 19901
 #define FCEU_NAME "FCE Ultra"
 #define FCEU_VERSION_STRING "1.9.9"
 #define FCEU_NAME_AND_VERSION FCEU_NAME " " FCEU_VERSION_STRING
@@ -54,6 +54,7 @@ typedef signed int int32;
 #define mkdir _mkdir
 #define alloca _alloca
 #define snprintf _snprintf
+#define vsnprintf _vsnprintf
 #define W_OK 2
 #define R_OK 2
 #define X_OK 1

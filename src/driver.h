@@ -2,6 +2,7 @@
 #define __DRIVER_H_
 
 #include <stdio.h>
+#include <string>
 
 #include "types.h"
 #include "git.h"
@@ -191,18 +192,16 @@ typedef struct
  int    movie_version;					// version of the movie format in the file
  uint32 num_frames;
  uint32 rerecord_count;
- uint8  flags;
+ bool poweron, reset, pal, nosynchack;
  int    read_only;
  uint32 emu_version_used;				// 9813 = 0.98.13
  char*  metadata;						// caller-supplied buffer to store metadata.  can be NULL.
  int    metadata_size;					// size of the buffer pointed to by metadata
- uint8  md5_of_rom_used[16];
- int    md5_of_rom_used_present;		// v1 movies don't have md5 info available
- char*  name_of_rom_used;				// caller-supplied buffer to store metadata.  can be NULL.
- int    name_of_rom_used_size;			// size of the buffer pointer to by name_of_rom_used
+ MD5DATA md5_of_rom_used;
+ bool md5_of_rom_used_present;		// v1 movies don't have md5 info available
+ std::string name_of_rom_used;				
 } MOVIE_INFO;
 
-int FCEUI_SelectMovie(int, int);
 void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata);
 void FCEUI_LoadMovie(char *fname, int read_only, int _stopframe);
 void FCEUI_StopMovie(void);

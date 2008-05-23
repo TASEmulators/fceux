@@ -18,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+#include <string>
 #include <string.h>
 
 #include "types.h"
@@ -749,42 +751,16 @@ static void CommandStateLoad(void)
 		FCEUI_LoadState(0);
 }
 
-void FCEUI_SelectMovieNext(int);
-/*
-static void CommandMovieSelectSlot(void)
-{
-	if(execcmd <= EMUCMD_MOVIE_SLOT_9)
-		FCEUI_SelectMovie(execcmd-EMUCMD_MOVIE_SLOT_0, 1);
-	else if(execcmd == EMUCMD_MOVIE_SLOT_NEXT)
-		FCEUI_SelectMovieNext(1);
-	else if(execcmd == EMUCMD_MOVIE_SLOT_PREV)
-		FCEUI_SelectMovieNext(-1);
-}
-
 static void CommandMovieRecord(void)
 {
-	if(execcmd >= EMUCMD_MOVIE_RECORD_SLOT_0 && execcmd <= EMUCMD_MOVIE_RECORD_SLOT_9)
-	{
-		int oldslot=FCEUI_SelectMovie(execcmd-EMUCMD_MOVIE_RECORD_SLOT_0, 0);
-		FCEUI_SaveMovie(0, 0, 0);
-		FCEUI_SelectMovie(oldslot, 0);
-	}
-	else
-		FCEUI_SaveMovie(0, 0, 0);
+	FCEUI_SaveMovie(0, 0, 0);
 }
 
 static void CommandMovieReplay(void)
 {
-	if(execcmd >= EMUCMD_MOVIE_REPLAY_SLOT_0 && execcmd <= EMUCMD_MOVIE_REPLAY_SLOT_9)
-	{
-		int oldslot=FCEUI_SelectMovie(execcmd-EMUCMD_MOVIE_REPLAY_SLOT_0, 0);
-		FCEUI_LoadMovie(0, 0);
-		FCEUI_SelectMovie(oldslot, 0);
-	}
-	else
-		FCEUI_LoadMovie(0, 0);
+	FCEUI_LoadMovie(0, 0, 0);
 }
-*/
+
 static void CommandSoundAdjust(void)
 {
 	int n;

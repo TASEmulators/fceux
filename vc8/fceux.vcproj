@@ -748,6 +748,7 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
+							GeneratePreprocessedFile="0"
 							ObjectFile="$(IntDir)\$(InputName)2.obj"
 							XMLDocumentationFileName="$(IntDir)\$(InputName)2.xdc"
 						/>
@@ -2170,6 +2171,14 @@
 		<File
 			RelativePath="..\src\cheat.cpp"
 			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					GeneratePreprocessedFile="0"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\src\conddebug.cpp"

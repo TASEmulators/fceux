@@ -21,6 +21,7 @@
 /*  TODO: Add (better) file io error checking */
 /*  TODO: Change save state file format. */
 
+#include <string>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -490,11 +491,12 @@ int FCEUSS_Load(char *fname)
 	FILE *st;
 	char *fn;
 
-	//this fixes read-only toggle problems
-	if(FCEUMOV_IsRecording()) {
-		FCEUMOV_AddCommand(0);
-		MovieFlushHeader();
-	}
+	//mbg movie - this needs to be overhauled
+	////this fixes read-only toggle problems
+	//if(FCEUMOV_IsRecording()) {
+	//	FCEUMOV_AddCommand(0);
+	//	MovieFlushHeader();
+	//}
 
 	if(geniestage==1)
 	{
@@ -621,8 +623,7 @@ int FCEUI_SelectState(int w, int show)
 {
  int oldstate=CurrentState;
  if(w == -1) { StateShow = 0; return 0; } //mbg merge 7/17/06 had to make return a value
- FCEUI_SelectMovie(-1,0);
-
+ 
  CurrentState=w;
  if(show)
  {

@@ -22,6 +22,7 @@
 /// \brief various string manipulation utilities
 
 #include "xstring.h"
+#include <string>
 
 ///Upper case routine. Returns number of characters modified
 int str_ucase(char *str) {
@@ -188,4 +189,123 @@ int str_replace(char *str, char *search, char *replace) {
 	strcpy(str,astr);
 	free(astr);
 	return j;
+}
+
+///Converts the provided data to a string in a standard, user-friendly, round-trippable format
+std::string BytesToString(void* data, int len)
+{
+	char temp[16];
+	if(len==1) {
+		sprintf(temp,"%d",*(unsigned char*)data);
+		return temp;
+	} else if(len==2) {
+		sprintf(temp,"%d",*(unsigned short*)data);
+		return temp;
+	} else if(len==4) {
+		sprintf(temp,"%d",*(unsigned int*)data);
+		return temp;		
+	}
+	std::string ret;
+	ret.resize(len*2+2);
+	char* str= (char*)ret.c_str();
+	str[0] = '0';
+	str[1] = 'x';
+	str += 2;
+	for(int i=0;i<len;i++)
+	{
+		int a = (((unsigned char*)data)[i]>>4);
+		int b = (((unsigned char*)data)[i])&15;
+		if(a>9) a += 'A'-10;
+		else a += '0';
+		if(b>9) b += 'A'-10;
+		else b += '0';
+		str[i*2] = a;
+		str[i*2+1] = b;
+	}
+	return ret;
+}
+
+///returns -1 if this is not a hex string
+int HexStringToBytesLength(std::string& str)
+{
+	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
+		return str.size()/2-1;
+	else return -1;
+}
+
+///parses a string in the same format as BytesToString
+///returns true if success.
+bool StringToBytes(std::string& str, void* data, int len)
+{
+	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
+		goto hex;
+	
+	if(len==1) {
+		int x = atoi(str.c_str());
+		*(unsigned char*)data = x;
+		return true;
+	} else if(len==2) {
+		int x = atoi(str.c_str());
+		*(unsigned short*)data = x;
+		return true;
+	} else if(len==4) {
+		int x = atoi(str.c_str());
+		*(unsigned int*)data = x;
+		return true;
+	}
+	//we can't handle it
+	return false;
+hex:
+	int amt = len;
+	int bytesAvailable = str.size()/2;
+	if(bytesAvailable < amt)
+		amt = bytesAvailable;
+	const char* cstr = str.c_str()+2;
+	for(int i=0;i<amt;i++) {
+		char a = toupper(cstr[i*2]);
+		char b = toupper(cstr[i*2+1]);
+		if(a>='A') a=a-'A'+10;
+		else a-='0';
+		if(b>='A') b=b-'A'+10;
+		else b-='0';
+		unsigned char val = ((unsigned char)a<<4)|(unsigned char)b; 
+		((unsigned char*)data)[i] = val;
+	}
+
+	return true;
+}
+
+#include <string>
+#include <vector>
+/// \brief convert input string into vector of string tokens
+///
+/// \note consecutive delimiters will be treated as single delimiter
+/// \note delimiters are _not_ included in return data
+///
+/// \param input string to be parsed
+/// \param delims list of delimiters.
+
+std::vector<std::string> tokenize_str(const std::string & str,
+                                      const std::string & delims=", \t")
+{
+  using namespace std;
+  // Skip delims at beginning, find start of first token
+  string::size_type lastPos = str.find_first_not_of(delims, 0);
+  // Find next delimiter @ end of token
+  string::size_type pos     = str.find_first_of(delims, lastPos);
+
+  // output vector
+  vector<string> tokens;
+
+  while (string::npos != pos || string::npos != lastPos)
+    {
+      // Found a token, add it to the vector.
+      tokens.push_back(str.substr(lastPos, pos - lastPos));
+      // Skip delims.  Note the "not_of". this is beginning of token
+      lastPos = str.find_first_not_of(delims, pos);
+      // Find next delimiter at end of token.
+      pos     = str.find_first_of(delims, lastPos);
+    }
+
+  return tokens;
 }

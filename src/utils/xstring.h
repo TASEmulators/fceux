@@ -17,9 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
+#include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <vector>
+
 
 //definitions for str_strip() flags
 #define STRIP_SP	0x01 /* space */
@@ -35,3 +37,9 @@ int str_rtrim(char *str, int flags);
 int str_strip(char *str, int flags);
 int chr_replace(char *str, char search, char replace);
 int str_replace(char *str, char *search, char *replace);
+
+int HexStringToBytesLength(std::string& str);
+std::string BytesToString(void* data, int len);
+bool StringToBytes(std::string& str, void* data, int len);
+
+std::vector<std::string> tokenize_str(const std::string & str,const std::string & delims);

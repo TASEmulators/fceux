@@ -32,6 +32,7 @@
 
 #include "../../types.h"
 #include "../../driver.h"
+#include "../../utils/xstring.h"
 #include "config.h"
 
 static int FReadString(FILE *fp, char *str, int n)
@@ -240,77 +241,6 @@ void LoadParse(CFGSTRUCT *cfgst, FILE *fp)
 }
 
 
-static void StringToBytes(std::string& str, void* data, int len)
-{
-	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
-		goto hex;
-	
-	if(len==1) {
-		int x = atoi(str.c_str());
-		*(unsigned char*)data = x;
-		return;
-	} else if(len==2) {
-		int x = atoi(str.c_str());
-		*(unsigned short*)data = x;
-		return;
-	} else if(len==4) {
-		int x = atoi(str.c_str());
-		*(unsigned int*)data = x;
-		return;
-	}
-	//else it had better be hex
-	FCEUD_PrintError("Config error: no hex data found somewhere it is required");
-hex:
-	int amt = len;
-	int bytesAvailable = str.size()/2;
-	if(bytesAvailable < amt)
-		amt = bytesAvailable;
-	const char* cstr = str.c_str()+2;
-	for(int i=0;i<amt;i++) {
-		char a = toupper(cstr[i*2]);
-		char b = toupper(cstr[i*2+1]);
-		if(a>='A') a=a-'A'+10;
-		else a-='0';
-		if(b>='A') b=b-'A'+10;
-		else b-='0';
-		unsigned char val = ((unsigned char)a<<4)|(unsigned char)b; 
-		((unsigned char*)data)[i] = val;
-	}
-}
-
-static std::string BytesToString(void* data, int len)
-{
-	char temp[16];
-	if(len==1) {
-		sprintf(temp,"%d",*(unsigned char*)data);
-		return temp;
-	} else if(len==2) {
-		sprintf(temp,"%d",*(unsigned short*)data);
-		return temp;
-	} else if(len==4) {
-		sprintf(temp,"%d",*(unsigned int*)data);
-		return temp;		
-	}
-	std::string ret;
-	ret.resize(len*2+2);
-	char* str= (char*)ret.c_str();
-	str[0] = '0';
-	str[1] = 'x';
-	str += 2;
-	for(int i=0;i<len;i++)
-	{
-		int a = (((unsigned char*)data)[i]>>4);
-		int b = (((unsigned char*)data)[i])&15;
-		if(a>9) a += 'A'-10;
-		else a += '0';
-		if(b>9) b += 'A'-10;
-		else b += '0';
-		str[i*2] = a;
-		str[i*2+1] = b;
-	}
-	return ret;
-}
-
 static void cfg_OldToNew(const CFGSTRUCT *cfgst)
 {
 	int x=0;
@@ -364,7 +294,8 @@ void cfg_NewToOld(CFGSTRUCT *cfgst)
 		if(cfgst[x].len)
 		{
 			//binary data
-			StringToBytes(cfgmap[cfgst[x].name],cfgst[x].ptr,cfgst[x].len);
+			if(!StringToBytes(cfgmap[cfgst[x].name],cfgst[x].ptr,cfgst[x].len))
+				FCEUD_PrintError("Config error: error parsing parameter");
 		}
 		else
 		{

@@ -9,7 +9,9 @@
 #define GIV_NTSC  0  /* NTSC emulation. */
 #define GIV_PAL    1  /* PAL emulation. */
 #define GIV_USER  2  /* What was set by FCEUI_SetVidSys(). */
-	
+
+#include "utils/md5.h"
+
 typedef struct {
   uint8 *name;  /* Game name, UTF8 encoding */
 
@@ -22,7 +24,7 @@ typedef struct {
   int cspecial;  /* Special cart expansion: DIP switches, barcode
 			   reader, etc.
 			*/
-	uint8 MD5[16];
+	MD5DATA MD5;
   int soundrate;  /* For Ogg Vorbis expansion sound wacky support.  0 for default. */
   int soundchan;  /* Number of sound channels. */
 } FCEUGI;

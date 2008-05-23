@@ -342,8 +342,9 @@ void FCEU_DispMessage(char *format, ...)
 
  howlong=180;
 
- extern int movcounter;
- movcounter=0;
+ //mbg movie 5/23/08
+ //extern int movcounter;
+ //movcounter=0;
 }
 
 void FCEU_ResetMessages(void)

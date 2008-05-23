@@ -14,7 +14,6 @@ static int ReplayDialogStopFrame = 0;
 
 static int movieHackType = 3;
 
-char *md5_asciistr(uint8 digest[16]);
 void RefreshThrottleFPS();
 
 static char* GetReplayPath(HWND hwndDlg)
@@ -114,21 +113,15 @@ void UpdateReplayDialog(HWND hwndDlg)
 	if(fn)
 	{
 		MOVIE_INFO info;
-		char metadata[MOVIE_MAX_METADATA];
-		char rom_name[MAX_PATH];
 
 		memset(&info, 0, sizeof(info));
-		info.metadata = metadata;
-		info.metadata_size = sizeof(metadata);
-		info.name_of_rom_used = rom_name;
-		info.name_of_rom_used_size = sizeof(rom_name);
 
 		if(FCEUI_MovieGetInfo(fn, &info))
 		{
 #define MOVIE_FLAG_NOSYNCHACK          (1<<4) // set in newer version, used for old movie compatibility
 			extern int resetDMCacc;
 			extern int justAutoConverted;
-			int noNoSyncHack=!(info.flags&MOVIE_FLAG_NOSYNCHACK) && resetDMCacc;
+			int noNoSyncHack=!(info.nosynchack) && resetDMCacc;
 			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_OFFSET),justAutoConverted || noNoSyncHack);
 			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_FROM),justAutoConverted || noNoSyncHack);
 			if(justAutoConverted)
@@ -206,28 +199,30 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
 			
 			sprintf(tmp, "%lu", info.rerecord_count);
-			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
+			//SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 			
 			{
-				// convert utf8 metadata to windows widechar
-				WCHAR wszMeta[MOVIE_MAX_METADATA];
-				if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, metadata, -1, wszMeta, MOVIE_MAX_METADATA))
-				{
-					if(wszMeta[0])
-						SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), wszMeta);              // metadata
-					else
-						SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), L"(this movie has no author info)");				   // metadata
-				}
+				//// convert utf8 metadata to windows widechar
+				//WCHAR wszMeta[MOVIE_MAX_METADATA];
+				//if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, metadata, -1, wszMeta, MOVIE_MAX_METADATA))
+				//{
+				//	if(wszMeta[0])
+				//		SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), wszMeta);              // metadata
+				//	else
+				//		SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), L"(this movie has no author info)");				   // metadata
+				//}
+
+				SetDlgItemTextW(hwndDlg,IDC_LABEL_AUTHORINFO,L"Temporarily non-functional");
 			}
 			
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
 			
-			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),(info.flags & MOVIE_FLAG_FROM_POWERON) ? "Power-On" : "Savestate");
+			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
 			if(info.movie_version > 1)
 			{
 				char emuStr[128];
-				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used);
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used.c_str());
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),md5_asciistr(info.md5_of_rom_used));
 				if(info.emu_version_used > 64)
 					sprintf(emuStr, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
@@ -283,7 +278,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 	{
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES),"");
-		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
+		//SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"");
@@ -410,10 +405,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						char rom_name[MAX_PATH];
 
 						memset(&info, 0, sizeof(info));
-						info.metadata = metadata;
-						info.metadata_size = sizeof(metadata);
-						info.name_of_rom_used = rom_name;
-						info.name_of_rom_used_size = sizeof(rom_name);
 
 						char filename [512];
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
@@ -836,7 +827,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 void FCEUD_MovieRecordTo()
 {
 	struct CreateMovieParameters p;
-	p.szFilename = FCEUI_MovieGetCurrentName(0);
+	p.szFilename = FCEU_MakeFName(FCEUMKF_MOVIE,0,0);
 
 	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{
