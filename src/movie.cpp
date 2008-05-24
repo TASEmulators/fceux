@@ -89,18 +89,6 @@ int justAutoConverted = 0; //PLEASE REMOVE ME
 /* Cache variables used for playback. */
 static uint32 nextts = 0;
 static int32 nextd = 0;
-
-SFORMAT FCEUMOV_STATEINFO[]={
-	{ joop, 4,"JOOP"},
-	{ &framets, 4|FCEUSTATE_RLSB, "FTS "},
-	{ &nextts, 4|FCEUSTATE_RLSB, "NXTS"},
-	{ &nextd, 4|FCEUSTATE_RLSB, "NXTD"},
-	{ &frameptr, 4|FCEUSTATE_RLSB, "FPTR"},
-	{ &framecount, 4|FCEUSTATE_RLSB, "FCNT"},
-
-	{ 0 }
-};
-
 static int MovieShow = 0;  
 
 
@@ -122,11 +110,15 @@ static enum EMOVIEMODE
 FILE* fpRecordingMovie = 0;
 int currFrameCounter;
 
+SFORMAT FCEUMOV_STATEINFO[]={
+	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
+	{ 0 }
+};
+
 int FCEUMOV_GetFrame(void)
 {
 	return currFrameCounter;
 }
-
 
 bool FCEUMOV_ShouldPause(void)
 {
@@ -184,6 +176,9 @@ public:
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
 
+	//the entire contents of the disk file that was loaded
+	std::vector<char> serializedFile;
+
 	class TDictionary : public std::map<std::string,std::string>
 	{
 	public:
@@ -236,22 +231,33 @@ public:
 
 } currMovieData;
 
+
 void DumpCurrentHeader(FILE* fp)
 {
-	fprintf(fp,":version %d\n", currMovieData.version);
-	fprintf(fp,":emuVersion %d\n", currMovieData.emuVersion);
-	fprintf(fp,":palFlag %d\n", currMovieData.palFlag?1:0);
-	fprintf(fp,":poweronFlag %d\n", currMovieData.poweronFlag?1:0);
-	fprintf(fp,":resetFlag %d\n", currMovieData.resetFlag?1:0);
-	fprintf(fp,":romFilename %s\n", currMovieData.romFilename.c_str());
-	fprintf(fp,":romChecksum %s\n", BytesToString(currMovieData.romChecksum.data,MD5DATA::size).c_str());
+	fprintf(fp,"version %d\n", currMovieData.version);
+	fprintf(fp,"emuVersion %d\n", currMovieData.emuVersion);
+	fprintf(fp,"palFlag %d\n", currMovieData.palFlag?1:0);
+	fprintf(fp,"poweronFlag %d\n", currMovieData.poweronFlag?1:0);
+	fprintf(fp,"resetFlag %d\n", currMovieData.resetFlag?1:0);
+	fprintf(fp,"romFilename %s\n", currMovieData.romFilename.c_str());
+	fprintf(fp,"romChecksum %s\n", BytesToString(currMovieData.romChecksum.data,MD5DATA::size).c_str());
 	if(currMovieData.savestate.size() != 0)
-		fprintf(fp,":savestate %s\n", BytesToString(&currMovieData.savestate[0],currMovieData.savestate.size()).c_str());
+		fprintf(fp,"savestate %s\n", BytesToString(&currMovieData.savestate[0],currMovieData.savestate.size()).c_str());
 }
 
 //yuck... another custom text parser.
 void LoadFM2(MovieData& movieData, FILE *fp)
 {
+	//read the entire file so we can keep it handy.
+	//we could parse from that instead of the disk again...
+
+	fseek(fp,0,SEEK_END);
+	int len = ftell(fp);
+	fseek(fp,0,SEEK_SET);
+	movieData.serializedFile.resize(len);
+	fread(&movieData.serializedFile[0],1,len,fp);
+	fseek(fp,0,SEEK_SET);
+
 	MovieData::TDictionary dictionary;
 
 	std::string key,value;
@@ -265,25 +271,23 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 		if(c == -1)
 			goto bail;
 		bool iswhitespace = (c==' '||c=='\t');
-		bool iskeychar = (c==':');
+		bool isrecchar = (c=='|');
 		bool isnewline = (c==10||c==13);
 		switch(state)
 		{
 		case NEWLINE:
 			if(isnewline) goto done;
-			if(iskeychar) 
-			{
-				key = "";
-				value = "";
-				state = KEY;
-				goto done;
-			}
-			goto dorecord;
+			if(iswhitespace) goto done;
+			if(isrecchar) 
+				goto dorecord;
+			//must be a key
+			key = "";
+			value = "";
+			goto dokey;
 			break;
 		case RECORD: {
 				dorecord:
 				MovieRecord record;
-				ungetc(c,fp);
 				//for each joystick
 				for(int i=0;i<4;i++)
 				{
@@ -550,8 +554,6 @@ static void movie_writechar(int c)
 	fputc(c,fpRecordingMovie);
 }
 
-
-
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
@@ -585,6 +587,8 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 	}
 	else if(movieMode == MOVIEMODE_RECORD)
 	{
+		movie_writechar('|');
+
 		//for each joystick
 		for(int i=0;i<4;i++)
 		{
@@ -619,9 +623,13 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 
 }
 
+//TODO 
 void FCEUMOV_AddCommand(int cmd)
 {
-	if(current <= 0) return;   // Return if not recording a movie
+	// do nothing if not recording a movie
+	if(movieMode != MOVIEMODE_RECORD)
+		return;
+	
 	//printf("%d\n",cmd);
 
 	//MBG TODO BIG TODO TODO TODO
@@ -688,24 +696,53 @@ void FCEU_DrawMovies(uint8 *XBuf)
 
 int FCEUMOV_WriteState(FILE* st)
 {
-	uint32 to_write = 0;
-	if(current < 0)
-		to_write = moviedatasize;
-	else if(current > 0)
-		to_write = frameptr;
+	//we are supposed to dump the movie data into the savestate
 
-	if(!st)
-		return to_write;
+	if(movieMode == MOVIEMODE_RECORD)
+	{
+		int todo = ftell(fpRecordingMovie);
+		if(st)
+		{
+			fseek(fpRecordingMovie,0,SEEK_SET);
+			std::vector<uint8> tempbuf(todo);
+			fread(&tempbuf[0],1,todo,fpRecordingMovie);
+			fwrite(&tempbuf[0],1,todo,st);
+		}
+		return todo;
+	}
+	else
+	{
+		int todo = currMovieData.serializedFile.size();
+		if(st)
+		{
+			fwrite(&currMovieData.serializedFile[0],1,currMovieData.serializedFile.size(),st);
+		}
+		return todo;
+	}
 
-	if(to_write)
-		fwrite(moviedata, 1, to_write, st);
-	return to_write;
 }
 
-static int load_successful;
+static bool load_successful;
 
 int FCEUMOV_ReadState(FILE* st, uint32 size)
 {
+	load_successful = false;
+
+	//write the state to disk so we can reload
+	std::vector<uint8> buf(size);
+	fread(&buf[0],1,size,st);
+	FILE* tmp = tmpfile();
+	fwrite(&buf[0],1,size,tmp);
+	fseek(tmp,0,SEEK_SET);
+	currMovieData = MovieData();
+	LoadFM2(currMovieData, tmp);
+	fclose(tmp);
+
+	//todo - switch to recording
+	
+	movieMode = MOVIEMODE_PLAY;
+	load_successful = true;
+
 	//// if this savestate was made while replaying,
 	//// we need to "undo" nextd and nextts
 	//if(nextd != -1)
