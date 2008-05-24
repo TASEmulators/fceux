@@ -561,8 +561,6 @@ int main(int argc,char *argv[])
 
 	ApplyDefaultCommandMapping();
 
-	srand(GetTickCount());        // rand() is used for some GUI sillyness.
-
 	fceu_hInstance = GetModuleHandle(0);
 
 	// Get the base directory

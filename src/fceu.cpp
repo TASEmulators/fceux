@@ -19,34 +19,35 @@
  */
 
 #include <string>
-#include  <string.h>
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<stdarg.h>
-#include	"types.h"
-#include	"x6502.h"
-#include	"fceu.h"
-#include	"ppu.h"
-#include	"sound.h"
-#include	"netplay.h"
-#include	"file.h"
-#include	"utils/endian.h"
-#include    "utils/memory.h"
-#include	"utils/crc32.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include "types.h"
+#include "x6502.h"
+#include "fceu.h"
+#include "ppu.h"
+#include "sound.h"
+#include "netplay.h"
+#include "file.h"
+#include "utils/endian.h"
+#include "utils/memory.h"
+#include "utils/crc32.h"
 
-#include	"cart.h"
-#include	"nsf.h"
-#include	"fds.h"
-#include	"ines.h"
-#include	"unif.h"
-#include    "cheat.h"
-#include	"palette.h"
-#include	"state.h"
-#include	"movie.h"
-#include    "video.h"
-#include	"input.h"
-#include	"file.h"
-#include	"vsuni.h"
+#include "cart.h"
+#include "nsf.h"
+#include "fds.h"
+#include "ines.h"
+#include "unif.h"
+#include "cheat.h"
+#include "palette.h"
+#include "state.h"
+#include "movie.h"
+#include "video.h"
+#include "input.h"
+#include "file.h"
+#include "vsuni.h"
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
@@ -396,6 +397,8 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 **/
 int FCEUI_Initialize(void)
 {
+	srand(time(0));
+
 	if(!FCEU_InitVirtualVideo())
 	{
 		return 0;

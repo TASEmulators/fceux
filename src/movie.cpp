@@ -738,9 +738,15 @@ int FCEUMOV_ReadState(FILE* st, uint32 size)
 	LoadFM2(currMovieData, tmp);
 	fclose(tmp);
 
-	//todo - switch to recording
-	
-	movieMode = MOVIEMODE_PLAY;
+	//complex TAS logic for when a savestate is loaded:
+	//if we are playing:
+	// then, the movie we are playing must match the one stored in the savestate.
+	//if we are recording:
+	// then, the movie we are playing must match the one stored in the savestate.
+	//if we are doing neither:
+	//  then, we must discard this movie
+
+	//movieMode = MOVIEMODE_PLAY;
 	load_successful = true;
 
 	//// if this savestate was made while replaying,
