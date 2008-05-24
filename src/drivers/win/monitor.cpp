@@ -2,6 +2,7 @@
 #include "monitor.h"
 #include "debugger.h"
 #include "debuggersp.h"
+#include "memwatch.h"
 #include "..\..\fceu.h"
 #include "..\..\debug.h"
 #include "..\..\conddebug.h"
@@ -255,6 +256,17 @@ BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					EnableWindow(GetDlgItem(hwndDlg, ruleBox_to_ruleInput(LOWORD(wParam))), sl == RULE_EXACT || sl == RULE_EXACT_NOT);
 
 					break;
+				}
+				case LBN_DBLCLK:
+				{
+					if (LOWORD(wParam) == RESULTS_BOX)
+					{
+						char str[259] = { 0 },str2[259] = { 0 };
+						SendDlgItemMessage(hwndDlg,RESULTS_BOX,LB_GETTEXT,SendDlgItemMessage(hwndDlg,RESULTS_BOX,LB_GETCURSEL,0,0),(LPARAM)(LPCTSTR)str);
+						strcpy(str2,str);
+						str2[4] = 0;
+						AddMemWatch(str2);
+					}
 				}
 			}
 			break;
