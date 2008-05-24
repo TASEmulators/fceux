@@ -520,7 +520,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY; //OFN_EXPLORER|OFN_ENABLETEMPLATE|OFN_ENABLEHOOK;
-	ofn.lpstrInitialDir = initialdir ? initialdir : gfsdir;
+	ofn.lpstrInitialDir = initialdir ? initialdir : FCEU_GetPath(FCEUMKF_ROMS);
 
 	// Show the Open File dialog
 	if(GetOpenFileName(&ofn))

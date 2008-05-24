@@ -240,17 +240,20 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 void FCEUI_CheatSearchShowExcluded(void);
 void FCEUI_CheatSearchSetCurrentAsOriginal(void);
 
-#define FCEUIOD_STATE   0
-#define FCEUIOD_SNAPS   1
-#define FCEUIOD_NV      2
-#define FCEUIOD_CHEATS  3
-#define FCEUIOD_MISC    4
-#define FCEUIOD_MEMW    5
-#define FCEUIOD_BBOT    6
-#define FCEUIOD_MACRO   7
-#define FCEUIOD_FDSROM  8
+#define FCEUIOD_ROMS    0
+#define FCEUIOD_NV      1
+#define FCEUIOD_STATES  2
+#define FCEUIOD_FDSROM  3
+#define FCEUIOD_SNAPS   4
+#define FCEUIOD_CHEATS  5
+#define FCEUIOD_MOVIES  6
+#define FCEUIOD_MEMW    7
+#define FCEUIOD_BBOT    8
+#define FCEUIOD_MACRO   9
+#define FCEUIOD_INPUT   10
+#define FCEUIOD_LUA     11
 
-#define FCEUIOD__COUNT  9
+#define FCEUIOD__COUNT  12
 
 void FCEUI_SetDirOverride(int which, char *n);
 

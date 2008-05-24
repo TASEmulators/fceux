@@ -28,7 +28,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 	for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 	{
 		LONG len;
-		len = SendDlgItemMessage(hwndDlg, EDIT_CHEATS + curr_dir, WM_GETTEXTLENGTH, 0, 0);
+		len = SendDlgItemMessage(hwndDlg, EDIT_ROMS + curr_dir, WM_GETTEXTLENGTH, 0, 0);
 
 		if(len <= 0)
 		{
@@ -48,7 +48,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 			continue;
 		}
 
-		if(!GetDlgItemText(hwndDlg, EDIT_CHEATS + curr_dir, directory_names[curr_dir], len))
+		if(!GetDlgItemText(hwndDlg, EDIT_ROMS + curr_dir, directory_names[curr_dir], len))
 		{
 			free(directory_names[curr_dir]);
 			directory_names[curr_dir] = 0;
@@ -102,7 +102,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			// Initialize the directories textboxes
 			for(unsigned int curr_dir = 0; curr_dir < NUMBER_OF_DIRECTORIES; curr_dir++)
 			{
-				SetDlgItemText(hwndDlg, EDIT_CHEATS + curr_dir, directory_names[curr_dir]);
+				SetDlgItemText(hwndDlg, EDIT_ROMS + curr_dir, directory_names[curr_dir]);
 			}
 
 			// Check the screenshot naming checkbox if necessary
@@ -123,25 +123,32 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		case WM_COMMAND:
 			if( !(wParam >> 16) )
 			{
-				if( (wParam & 0xFFFF) >= BUTTON_CHEATS && (wParam & 0xFFFF) <= BUTTON_CHEATS + NUMBER_OF_DIRECTORIES)
+				if( (wParam & 0xFFFF) >= BUTTON_ROMS && (wParam & 0xFFFF) <= BUTTON_ROMS + NUMBER_OF_DIRECTORIES)
 				{
 					// If a directory selection button was pressed, ask the
 					// user for a directory.
 
-					static char *helpert[6] = {
-						"Cheats",
-						"Miscellaneous",
-						"Nonvolatile Game Data",
+					static char *helpert[13] = {
+						"Roms",
+						"Battery Saves",
 						"Save States",
-						"Screen Snapshots",
+						"FDS Bios Rom",
+						"Screenshots",
+						"Cheats",
+						"Movies",
+						"Memory Watch",
+						"Basic Bot",
+						"Macro files",
+						"Input Presets",
+						"Lua Scripts",
 						"Base Directory"
 					};
 
 					char name[MAX_PATH];
 
-					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_CHEATS)], name))
+					if(BrowseForFolder(hwndDlg, helpert[ ( (wParam & 0xFFFF) - BUTTON_ROMS)], name))
 					{
-						SetDlgItemText(hwndDlg, EDIT_CHEATS + ((wParam & 0xFFFF) - BUTTON_CHEATS), name);
+						SetDlgItemText(hwndDlg, EDIT_ROMS + ((wParam & 0xFFFF) - BUTTON_ROMS), name);
 					}
 				}
 				else switch(wParam & 0xFFFF)

@@ -9,7 +9,7 @@
 #define GUI_BOT_VALUES                  2
 #define BTN_CANCEL                      2
 #define MENU_OPEN_FILE                  100
-#define EDIT_CHEATS                     100
+#define EDIT_ROMS                       100
 #define MENU_CLOSE_FILE                 101
 #define IDI_ICON1                       101
 #define CB_DISABLE_SPEED_THROTTLING     101
@@ -42,7 +42,7 @@
 #define MENU_STOP_AVI                   152
 #define MENU_EXIT                       153
 #define MENU_RESET                      200
-#define BUTTON_CHEATS                   200
+#define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
 #define BTN_RESTORE_DEFAULTS            200
 #define BTN_CLEAR                       200

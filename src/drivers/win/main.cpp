@@ -106,8 +106,8 @@ double winsizemulx = 1, winsizemuly = 1;
 
 
 // Contains the names of the overridden standard directories
-// in the order cheats, misc, nonvol, states, snaps, memwatch, basicbot, macro, fds,..., base
-char *directory_names[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+// in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, basicbot, macro, input presets, lua scripts, base
+char *directory_names[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /**
 * Handle of the main window.
@@ -160,16 +160,19 @@ void SetDirs()
 {
 	int x;
 
-	static int jlist[10]= {
-		FCEUIOD_CHEATS,
-		FCEUIOD_MISC,
+	static int jlist[13]= {
+		FCEUIOD_ROMS,
 		FCEUIOD_NV,
-		FCEUIOD_STATE,
+		FCEUIOD_STATES,
+		FCEUIOD_FDSROM,
 		FCEUIOD_SNAPS,
+		FCEUIOD_CHEATS,
+		FCEUIOD_MOVIES,
 		FCEUIOD_MEMW,
 		FCEUIOD_BBOT,
 		FCEUIOD_MACRO,
-		FCEUIOD_FDSROM,
+		FCEUIOD_INPUT,
+		FCEUIOD_LUA,
 		FCEUIOD__COUNT};
 
 	FCEUI_SetSnapName(eoptions & EO_SNAPNAME);
@@ -179,9 +182,9 @@ void SetDirs()
 		FCEUI_SetDirOverride(jlist[x], directory_names[x]);
 	}
 
-	if(directory_names[10])
+	if(directory_names[12])
 	{
-		FCEUI_SetBaseDirectory(directory_names[10]);
+		FCEUI_SetBaseDirectory(directory_names[12]);
 	}
 	else
 	{
