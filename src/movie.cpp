@@ -22,7 +22,6 @@
 #include "movie.h"
 #include "utils/memory.h"
 #include "utils/xstring.h"
-#include "zlib.h"
 
 
 #define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
@@ -438,22 +437,15 @@ void FCEUI_LoadMovie(char *fname, int _read_only, int _pauseframe)
 	//WE NEED TO LOAD A SAVESTATE
 	if(!currMovieData.poweronFlag)
 	{
-		//uncompress the savestate
-		int bufsize = ntohl(*(int*)&currMovieData.savestate[0]);
-		uint8* buf = new uint8[bufsize];
-		uLongf uncomprlen = bufsize;
-		uncompress(buf,&uncomprlen,(uint8*)&currMovieData.savestate[4],currMovieData.savestate.size()-4);
-
-		//dump it to disk
+		//dump the savestate to disk
 		FILE* fp = tmpfile();
-		fwrite(buf,1,bufsize,fp);
+		fwrite(&currMovieData.savestate[0],1,currMovieData.savestate.size(),fp);
 		fseek(fp,0,SEEK_SET);
 
 		//and load the state
 		bool success = FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP);
 
 		fclose(fp);
-		delete[] buf;
 
 		if(!success) return;
 	}
@@ -525,27 +517,14 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 		//dump a savestate to a tempfile..
 		FILE* tmp = tmpfile();
 		FCEUSS_SaveFP(tmp); 
+
+		//reloading the savestate into the data structure
 		fseek(tmp,0,SEEK_END);
 		int len = (int)ftell(tmp);
 		fseek(tmp,0,SEEK_SET);
-		//reloading the savestate from the tempfile..
-		uint8* buf = new uint8[len];
-		fread(buf,1,len,tmp);
+		currMovieData.savestate.resize(len);
+		fread(&currMovieData.savestate[0],1,len,tmp);
 		fclose(tmp);
-
-		//compress it
-		uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
-		uLongf destlen;
-		int error = compress2(cbuf,&destlen,buf,len,Z_BEST_COMPRESSION);
-
-		//poke it in the data structure
-		currMovieData.savestate.resize(destlen+4);
-		memcpy(&currMovieData.savestate[4],cbuf,destlen);
-		*(int*)&currMovieData.savestate[0] = htonl(len);
-
-		//cleanup
-		delete[] buf;
-		delete[] cbuf;
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames

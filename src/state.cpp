@@ -27,6 +27,8 @@
 #include <string.h>
 //#include <unistd.h> //mbg merge 7/17/06 removed
 
+#include <vector>
+
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -41,6 +43,7 @@
 #include "netplay.h"
 #include "video.h"
 #include "input.h"
+#include "zlib.h"
 
 static void (*SPreSave)(void);
 static void (*SPostSave)(void);
@@ -305,55 +308,72 @@ static int ReadStateChunks(FILE *st, int32 totalsize)
  return ret;
 }
 
-
 int CurrentState=1;
 extern int geniestage;
 
-int FCEUSS_SaveFP(FILE *st)
+bool FCEUSS_SaveFP(FILE *st)
 {
-        static uint32 totalsize;
-        static uint8 header[16]="FCS";
-        uint32 writeoffset;
-        
-        writeoffset = ftell(st);
-        memset(header+4,0,13);
-        header[3]=0xFF;
-	FCEU_en32lsb(header + 8, FCEU_VERSION_NUMERIC);
-        fwrite(header,1,16,st);       
-        FCEUPPU_SaveState();
-        FCEUSND_SaveState();
-        totalsize=WriteStateChunk(st,1,SFCPU);
-        totalsize+=WriteStateChunk(st,2,SFCPUC);
-        totalsize+=WriteStateChunk(st,3,FCEUPPU_STATEINFO);
-        totalsize+=WriteStateChunk(st,4,FCEUCTRL_STATEINFO);
-        totalsize+=WriteStateChunk(st,5,FCEUSND_STATEINFO);
-		if(FCEUI_IsMovieActive())
-        {
-         totalsize+=WriteStateChunk(st,6,FCEUMOV_STATEINFO);
-         uint32 size = FCEUMOV_WriteState(0);
-         fputc(7,st);
-         write32le(size, st);
-         FCEUMOV_WriteState(st);
-         totalsize += 5 + size;
-        }
-		// save back buffer
-		{
-			extern uint8 *XBackBuf;
-			uint32 size = 256 * 256 + 8;
-			fputc(8,st);
-			write32le(size, st);
-	        fwrite(XBackBuf,1,size,st);
-			totalsize += 5 + size;
-		}
+	FILE* tmp = tmpfile();
+
+	uint32 totalsize = 0;
+
+	FCEUPPU_SaveState();
+	FCEUSND_SaveState();
+	totalsize=WriteStateChunk(tmp,1,SFCPU);
+	totalsize+=WriteStateChunk(tmp,2,SFCPUC);
+	totalsize+=WriteStateChunk(tmp,3,FCEUPPU_STATEINFO);
+	totalsize+=WriteStateChunk(tmp,4,FCEUCTRL_STATEINFO);
+	totalsize+=WriteStateChunk(tmp,5,FCEUSND_STATEINFO);
+	if(FCEUI_IsMovieActive())
+	{
+		totalsize+=WriteStateChunk(tmp,6,FCEUMOV_STATEINFO);
+		uint32 size = FCEUMOV_WriteState(0);
+		fputc(7,tmp);
+		write32le(size, tmp);
+		FCEUMOV_WriteState(tmp);
+		totalsize += 5 + size;
+	}
+	// save back buffer
+	{
+		extern uint8 *XBackBuf;
+		uint32 size = 256 * 256 + 8;
+		fputc(8,tmp);
+		write32le(size, tmp);
+		fwrite(XBackBuf,1,size,tmp);
+		totalsize += 5 + size;
+	}
 
 	if(SPreSave) SPreSave();
-        totalsize+=WriteStateChunk(st,0x10,SFMDATA);
+	totalsize+=WriteStateChunk(tmp,0x10,SFMDATA);
 	if(SPreSave) SPostSave();
 
-        fseek(st,writeoffset+4,SEEK_SET);
-        write32le(totalsize,st);
-	return(1);
+	//save the length of the file
+	int len = (int)ftell(tmp);
+
+	//reload the savestate from the tempfile 
+	fseek(tmp,0,SEEK_SET);
+	std::vector<uint8> buf(len);
+	fread(&buf[0],1,len,tmp);
+	fclose(tmp);
+
+	//compress it
+	uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
+	uLongf comprlen;
+	int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_COMPRESSION);
+
+	//dump the header
+	uint8 header[16]="FCSX";
+	FCEU_en32lsb(header+4, totalsize);
+	FCEU_en32lsb(header+8, FCEU_VERSION_NUMERIC);
+	FCEU_en32lsb(header+12, comprlen);
+
+	//dump it to the destination file
+	fwrite(header,1,16,st);
+	fwrite(cbuf,1,comprlen,st);
+
+	return error == Z_OK;
 }
+
 
 void FCEUSS_Save(char *fname)
 {
@@ -392,14 +412,38 @@ void FCEUSS_Save(char *fname)
 	}
 }
 
-int FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
+bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 {
 	if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
 		return 1;
 
-	int x;
+	////--------------
+	////read and decompress the savestate
+	//uint32 comprlen, datalen;
+	//if(!read32le(&datalen,st))
+	//	return false;
+	//if(!read32le(&comprlen,st))
+	//	return false;
+	//
+	//std::vector<uint8> cbuf(comprlen);
+	//std::vector<uint8> buf(datalen);
+	//if(fread(&cbuf[0],1,comprlen,st) != comprlen)
+	//	return false;
+
+	//uLongf uncomprlen = datalen;
+	//int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
+	//if(error != Z_OK || uncomprlen != datalen)
+	//	return false;
+
+	////dump savestate to a tempfile
+	//FILE* tmp = tmpfile();
+	//fwrite(&buf[0],0,datalen,tmp);
+	//fseek(tmp,0,SEEK_SET);
+	////-----------------
+
+
+	bool x;
 	uint8 header[16];
-	int stateversion;
 	char* fn=0;
 
 	//Make temporary savestate in case something screws up during the load
@@ -425,36 +469,50 @@ int FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 	}
 
 	if(params!=SSLOADPARAM_DUMMY)
-	{
 		FCEUMOV_PreLoad();
-	}
+	
+	//read and analyze the header
 	fread(&header,1,16,st);
-	if(memcmp(header,"FCS",3))
-	{
-		return(0);
-	}
-	if(header[3] == 0xFF)
-	{
-		stateversion = FCEU_de32lsb(header + 8);
-	}
-	else
-	{
-		stateversion=header[3] * 100;
-	}
+	if(memcmp(header,"FCSX",4))
+		return false;
+	int totalsize = FCEU_de32lsb(header + 4);
+	int stateversion = FCEU_de32lsb(header + 8);
+	int comprlen = FCEU_de32lsb(header + 12);
+
+	//load the compressed chunk and decompress
+	std::vector<uint8> cbuf(comprlen);
+	std::vector<uint8> buf(totalsize);
+	if(fread(&cbuf[0],1,comprlen,st) != comprlen)
+		return false;
+
+	uLongf uncomprlen = totalsize;
+	int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
+	if(error != Z_OK || uncomprlen != totalsize)
+		return false;
+
+	//dump it back to a tempfile
+	FILE* tmp = tmpfile();
+	fwrite(&buf[0],1,totalsize,tmp);
+	fseek(tmp,0,SEEK_SET);
+
 	if(params == SSLOADPARAM_DUMMY)
 	{
 		scan_chunks=1;
 	}
-	x=ReadStateChunks(st,*(uint32*)(header+4));
+	
+	x = ReadStateChunks(tmp,totalsize)!=0;
+	
 	if(params == SSLOADPARAM_DUMMY)
 	{
 		scan_chunks=0;
-		return 1;
+		fclose(tmp);
+		return true;
 	}
-	if(read_sfcpuc && stateversion<9500)
-	{
-		X.IRQlow=0;
-	}
+
+	//mbg 5/24/08 - we don't support old states, so this shouldnt matter.
+	//if(read_sfcpuc && stateversion<9500)
+	//	X.IRQlow=0;
+
 	if(GameStateRestore)
 	{
 		GameStateRestore(stateversion);
@@ -463,7 +521,7 @@ int FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 	{
 		FCEUPPU_LoadState(stateversion);
 		FCEUSND_LoadState(stateversion);  
-		x=FCEUMOV_PostLoad();
+		x=FCEUMOV_PostLoad()!=0;
 	}
 
 	if(fn)
@@ -483,7 +541,8 @@ int FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 		free(fn);
 	}
 
-	return(x);
+	fclose(tmp);
+	return x;
 }
 
 int FCEUSS_Load(char *fname)

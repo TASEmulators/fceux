@@ -29,8 +29,8 @@ enum ENUM_SSLOADPARAMS
 
 void FCEUSS_Save(char *);
 int FCEUSS_Load(char *);
-int FCEUSS_SaveFP(FILE *);
-int FCEUSS_LoadFP(FILE *, ENUM_SSLOADPARAMS);
+bool FCEUSS_SaveFP(FILE *);
+bool FCEUSS_LoadFP(FILE *, ENUM_SSLOADPARAMS);
 
 extern int CurrentState;
 void FCEUSS_CheckStates(void);
