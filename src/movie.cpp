@@ -22,6 +22,8 @@
 #include "movie.h"
 #include "utils/memory.h"
 #include "utils/xstring.h"
+#include "zlib.h"
+
 
 #define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
 #define MOVIE_VERSION           3 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
@@ -37,6 +39,8 @@ extern char FileBase[];
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
 //also cleanup the whole emulator version bullshit in replay. we dont support that old stuff anymore
+
+//todo - better error handling for the compressed savestate (handle compression)
 
 /*
 struct MovieHeader
@@ -434,11 +438,23 @@ void FCEUI_LoadMovie(char *fname, int _read_only, int _pauseframe)
 	//WE NEED TO LOAD A SAVESTATE
 	if(!currMovieData.poweronFlag)
 	{
+		//uncompress the savestate
+		int bufsize = ntohl(*(int*)&currMovieData.savestate[0]);
+		uint8* buf = new uint8[bufsize];
+		uLongf uncomprlen = bufsize;
+		uncompress(buf,&uncomprlen,(uint8*)&currMovieData.savestate[4],currMovieData.savestate.size()-4);
+
+		//dump it to disk
 		FILE* fp = tmpfile();
-		fwrite(&currMovieData.savestate[0],1,currMovieData.savestate.size(),fp);
+		fwrite(buf,1,bufsize,fp);
 		fseek(fp,0,SEEK_SET);
+
+		//and load the state
 		bool success = FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP);
+
 		fclose(fp);
+		delete[] buf;
+
 		if(!success) return;
 	}
 
@@ -506,15 +522,30 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 	}
 	else
 	{
-		//dump a savestate
+		//dump a savestate to a tempfile..
 		FILE* tmp = tmpfile();
 		FCEUSS_SaveFP(tmp); 
 		fseek(tmp,0,SEEK_END);
 		int len = (int)ftell(tmp);
 		fseek(tmp,0,SEEK_SET);
-		currMovieData.savestate.resize(len);
-		fread(&currMovieData.savestate[0],1,len,tmp);
+		//reloading the savestate from the tempfile..
+		uint8* buf = new uint8[len];
+		fread(buf,1,len,tmp);
 		fclose(tmp);
+
+		//compress it
+		uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
+		uLongf destlen;
+		int error = compress2(cbuf,&destlen,buf,len,Z_BEST_COMPRESSION);
+
+		//poke it in the data structure
+		currMovieData.savestate.resize(destlen+4);
+		memcpy(&currMovieData.savestate[4],cbuf,destlen);
+		*(int*)&currMovieData.savestate[0] = htonl(len);
+
+		//cleanup
+		delete[] buf;
+		delete[] cbuf;
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
