@@ -89,13 +89,7 @@ static CFGSTRUCT fceuconfig[] = {
         ACS(memw_recent_files[2]),
         ACS(memw_recent_files[3]),
         ACS(memw_recent_files[4]),
-        
-        ACS(memw_recent_directories[0]),
-        ACS(memw_recent_directories[1]),
-        ACS(memw_recent_directories[2]),
-        ACS(memw_recent_directories[3]),
-        ACS(memw_recent_directories[4]),
-        
+              
 
         AC(ntsccol),AC(ntsctint),AC(ntschue),
 

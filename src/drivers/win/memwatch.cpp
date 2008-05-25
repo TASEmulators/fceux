@@ -38,11 +38,9 @@ bool MemWatchLoadFileOnStart = false;
 static HMENU memwmenu = 0;
 
 char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
-char *memw_recent_directories[10] = { 0, 0, 0, 0, 0 };
 
 const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
-const unsigned int MEMW_MAX_NUMBER_OF_RECENT_DIRS = sizeof(memw_recent_directories)/sizeof(*memw_recent_directories);
 
 static HMENU memwrecentmenu, memwrecentdmenu;
 
@@ -181,11 +179,6 @@ void MemwAddRecentFile(const char *filename)
 *
 * @param dirname Name of the directory to add.
 **/
-void MemwAddRecentDirectory(const char *dirname)
-{
-	UpdateMemwRecentArray(dirname, memw_recent_directories, MEMW_MAX_NUMBER_OF_RECENT_DIRS, memwrecentdmenu, 103, 700);
-}
-
 
 static char *U8ToStr(uint8 a)
 {
@@ -572,14 +565,7 @@ static void LoadMemWatch()
 			strcpy(MemWatchDir,ofn.lpstrFile);
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
-			// Get the directory from the filename
-			char *tmpdir = MemWatchDir;
-			strncpy(tmpdir, ofn.lpstrFile, ofn.nFileOffset);
-			tmpdir[ofn.nFileOffset]=0;
-
-			// Add the directory to the list of recent directories
-			MemwAddRecentDirectory(tmpdir);
-
+			
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
 			MemwAddRecentFile(memwLastFilename);
 
@@ -906,8 +892,7 @@ void CreateMemWatch()
 	}
 
 	//Create
-	//hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",parent,MemWatchCallB);
-	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
+		hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
 	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
 	memwrecentmenu = CreateMenu();
@@ -915,10 +900,8 @@ void CreateMemWatch()
 
 	// Update recent files menu
 	UpdateMemw_RMenu(memwrecentmenu, memw_recent_files, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
-	UpdateMemw_RMenu(memwrecentdmenu, memw_recent_directories, 103, 700);
-	
+		
 	//Initialize values to previous entered addresses/labels
-	
 	{
 		int i;
 		for(i = 0; i < 24; i++)
