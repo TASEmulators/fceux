@@ -581,6 +581,8 @@ static void LoadMemWatch()
 			MemwAddRecentDirectory(tmpdir);
 
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
+			MemwAddRecentFile(memwLastFilename);
+
 		for(i=0;i<24;i++)
 		{
 			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
@@ -613,6 +615,53 @@ static void LoadMemWatch()
 fileChanged = false;
 }
 
+// Loads a recent file given the recent files array number(0-4) 
+void OpenMemwatchRecentFile(int memwRFileNumber)
+{
+	int rnum=memwRFileNumber;
+		if (rnum > MEMW_MAX_NUMBER_OF_RECENT_FILES) return; //just in case
+	
+	char* x = memw_recent_files[rnum];
+	char watchfcontents[2048];
+
+	FILE *fp=FCEUD_UTF8fopen(x,"r");
+	
+	if (rnum != 0) //Change order of recent files if not most recent
+		MemwAddRecentFile(x);
+
+	int i,j;
+	for(i=0;i<24;i++)
+		{
+			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
+			for(j = 0; j < 16; j++)
+				addresses[i][j] = watchfcontents[j];
+			fscanf(fp, "%s\n", watchfcontents);
+			for(j = 0; j < 24; j++)
+				labels[i][j] = watchfcontents[j];
+
+			//Replace dummy strings with empty strings
+			if(addresses[i][0] == '|')
+			{
+				addresses[i][0] = 0;
+			}
+			if(labels[i][0] == '|')
+			{
+				labels[i][0] = 0;
+			}
+			PutInSpaces(i);
+
+			addresses[i][15] = 0;
+			labels[i][23] = 0; //just in case
+
+			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
+			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
+			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+	}
+		fclose(fp);
+
+fileChanged = false;
+}
+
 void CloseMemoryWatch()
 {
 			SaveStrings();
@@ -625,7 +674,7 @@ void CloseMemoryWatch()
 						SaveMemWatch();
 					}
 			}
-	//Save MemwLastFile, window x,y, MemWatchLoadOnStart, LoadFileonStart, RecentMemwDirs		
+		
 	DestroyWindow(hwndMemWatch);
 	hwndMemWatch=0;
 
@@ -723,6 +772,22 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		//Menu Items
 		switch(wParam)
 		{	
+		case 600: //First item in recent menu
+			OpenMemwatchRecentFile(0);
+			break;
+		case 601: //2nd item in recent menu
+			OpenMemwatchRecentFile(1);
+			break;
+		case 602: //3rd item in recent menu
+			OpenMemwatchRecentFile(2);
+			break;
+		case 603: //4th item in recent menu
+			OpenMemwatchRecentFile(3);
+			break;
+		case 604: //5th item in recent menu
+			OpenMemwatchRecentFile(4);
+			break;
+		
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
 			break;
@@ -863,6 +928,7 @@ void CreateMemWatch()
 			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
 		}
 	}
+if (MemWatchLoadFileOnStart) OpenMemwatchRecentFile(0);
 }
 void AddMemWatch(char memaddress[32])
 {
