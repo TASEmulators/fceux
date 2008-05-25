@@ -24,11 +24,15 @@
 #include "..\..\debug.h"
 #include "debugger.h"
 
+const int NUMWATCHES = 24;
+const int LABELLENGTH = 64;
+const int ADDRESSLENGTH = 16;
+
 int MemWatch_wndx=0, MemWatch_wndy=0;
 static HDC hdc;
 static HWND hwndMemWatch=0;
-static char addresses[24][16];
-static char labels[24][24];
+static char addresses[NUMWATCHES][ADDRESSLENGTH];
+static char labels[NUMWATCHES][LABELLENGTH];
 static int NeedsInit = 1;
 char *MemWatchDir = 0;
 char memwLastFilename[2048];
@@ -368,10 +372,10 @@ void UpdateMemWatch()
 static void SaveStrings()
 {
 	int i;
-	for(i=0;i<24;i++)
+	for(i=0;i<NUMWATCHES;i++)
 	{
-		GetDlgItemText(hwndMemWatch,1001+i*3,addresses[i],16);
-		GetDlgItemText(hwndMemWatch,1000+i*3,labels[i],24);
+		GetDlgItemText(hwndMemWatch,1001+i*3,addresses[i],ADDRESSLENGTH);
+		GetDlgItemText(hwndMemWatch,1000+i*3,labels[i],LABELLENGTH);
 	}
 }
 
@@ -379,12 +383,12 @@ static void SaveStrings()
 static void TakeOutSpaces(int i)
 {
 	int j;
-	for(j=0;j<16;j++)
+	for(j=0;j<ADDRESSLENGTH;j++)
 	{
 		if(addresses[i][j] == ' ') addresses[i][j] = '|';
 		if(labels[i][j] == ' ') labels[i][j] = '|';
 	}
-	for(;j<24;j++)
+	for(;j<LABELLENGTH;j++)
 	{
 		if(labels[i][j] == ' ') labels[i][j] = '|';
 	}
@@ -394,12 +398,12 @@ static void TakeOutSpaces(int i)
 static void PutInSpaces(int i)
 {
 	int j;
-	for(j=0;j<16;j++)
+	for(j=0;j<ADDRESSLENGTH;j++)
 	{
 		if(addresses[i][j] == '|') addresses[i][j] = ' ';
 		if(labels[i][j] == '|') labels[i][j] = ' ';
 	}
-	for(;j<24;j++)
+	for(;j<LABELLENGTH;j++)
 	{
 		if(labels[i][j] == '|') labels[i][j] = ' ';
 	}
@@ -410,12 +414,17 @@ bool iftextchanged()
 {
 //Decides if any edit box has anything	
 	int i,j;
-	for(i=0;i<24;i++)
+	for(i=0;i<NUMWATCHES;i++)
 	{
-		for(j=0;j<16;j++)
+		for(j=0;j<LABELLENGTH;j++)
 		{
 			if(addresses[i][j] != NULL || labels [i][j] != NULL)
 				return true;
+		}
+		for(;j<LABELLENGTH;j++)
+		{
+		if(labels[i][j] != NULL)
+			return true;
 		}
 	}
 return false;
@@ -471,7 +480,7 @@ static void SaveMemWatch()
 		
 		SaveStrings();
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
-		for(i=0;i<24;i++)
+		for(i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
 			if(labels[i][0] == 0)
@@ -502,7 +511,7 @@ static void QuickSaveMemWatch() //Save rather than Save as
 	{
 		SaveStrings();
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
-		for(int i=0;i<24;i++)
+		for(int i=0;i<NUMWATCHES;i++)
 		{
 			//Use dummy strings to fill empty slots
 			if(labels[i][0] == 0)
@@ -569,13 +578,13 @@ static void LoadMemWatch()
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"r");
 			MemwAddRecentFile(memwLastFilename);
 
-		for(i=0;i<24;i++)
+		for(i=0;i<NUMWATCHES;i++)
 		{
 			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
-			for(j = 0; j < 16; j++)
+			for(j = 0; j < ADDRESSLENGTH; j++)
 				addresses[i][j] = watchfcontents[j];
 			fscanf(fp, "%s\n", watchfcontents);
-			for(j = 0; j < 24; j++)
+			for(j = 0; j < LABELLENGTH; j++)
 				labels[i][j] = watchfcontents[j];
 
 			//Replace dummy strings with empty strings
@@ -589,8 +598,10 @@ static void LoadMemWatch()
 			}
 			PutInSpaces(i);
 
-			addresses[i][15] = 0;
-			labels[i][23] = 0; //just in case
+			int templl = LABELLENGTH - 1;
+			int tempal = ADDRESSLENGTH - 1;
+			addresses[i][tempal] = 0;
+			labels[i][templl] = 0; //just in case
 
 			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
 			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
@@ -616,13 +627,13 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 		MemwAddRecentFile(x);
 
 	int i,j;
-	for(i=0;i<24;i++)
+	for(i=0;i<NUMWATCHES;i++)
 		{
 			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
-			for(j = 0; j < 16; j++)
+			for(j = 0; j < ADDRESSLENGTH; j++)
 				addresses[i][j] = watchfcontents[j];
 			fscanf(fp, "%s\n", watchfcontents);
-			for(j = 0; j < 24; j++)
+			for(j = 0; j < LABELLENGTH; j++)
 				labels[i][j] = watchfcontents[j];
 
 			//Replace dummy strings with empty strings
@@ -636,8 +647,10 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 			}
 			PutInSpaces(i);
 
-			addresses[i][15] = 0;
-			labels[i][23] = 0; //just in case
+			int templl = LABELLENGTH - 1;
+			int tempal = ADDRESSLENGTH - 1;
+			addresses[i][tempal] = 0;
+			labels[i][templl] = 0; //just in case
 
 			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
 			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
@@ -679,7 +692,7 @@ void ClearAllText()
 		}
 					
 					int i;
-					for(i=0;i<24;i++)
+					for(i=0;i<NUMWATCHES;i++)
 					{
 						addresses[i][0] = 0;
 						labels[i][0] = 0;
@@ -875,9 +888,9 @@ void CreateMemWatch()
 	{
 		NeedsInit = 0;
 		int i,j;
-		for(i=0;i<24;i++)
+		for(i=0;i<NUMWATCHES;i++)
 		{
-			for(j=0;j<24;j++)
+			for(j=0;j<LABELLENGTH;j++)
 			{
 				addresses[i][j] = 0;
 				labels[i][j] = 0;
@@ -904,7 +917,7 @@ void CreateMemWatch()
 	//Initialize values to previous entered addresses/labels
 	{
 		int i;
-		for(i = 0; i < 24; i++)
+		for(i = 0; i < NUMWATCHES; i++)
 		{
 			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
 			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
@@ -918,7 +931,7 @@ void AddMemWatch(char memaddress[32])
  char TempArray[32];
 	int i;
  CreateMemWatch();
-	for(i = 0; i < 24; i++)
+	for(i = 0; i < NUMWATCHES; i++)
 	{
 	 GetDlgItemText(hwndMemWatch,1001+i*3,TempArray,32);
 	 if (TempArray[0] == 0)
