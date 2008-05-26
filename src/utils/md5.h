@@ -1,6 +1,8 @@
 #ifndef _MD5_H
 #define _MD5_H
 
+#include "../types.h"
+
 struct md5_context
 {
     uint32 total[2];
@@ -8,16 +10,7 @@ struct md5_context
     uint8 buffer[64];
 };
 
-template<typename T, int N>
-struct ValueArray
-{
-	T data[N];
-	T &operator[](int index) { return data[index]; }
-	static const int size = N;
-};
-
 typedef ValueArray<uint8,16> MD5DATA;
-	
 
 void md5_starts( struct md5_context *ctx );
 void md5_update( struct md5_context *ctx, uint8 *input, uint32 length );

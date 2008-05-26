@@ -159,7 +159,6 @@ static CFGSTRUCT fceuconfig[] = {
         ADDCFGSTRUCT(InputConfig),
         ADDCFGSTRUCT(HotkeyConfig),
 
-        AC(moviereadonly),
 	AC(autoHoldKey),
 	AC(autoHoldClearKey),
 	AC(frame_display),

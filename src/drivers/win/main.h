@@ -25,8 +25,6 @@
 extern int maxconbskip;
 extern int ffbskip;
 
-static int moviereadonly = 1;
-
 static int fullscreen = 0;
 static int soundflush = 0;
 // Flag that indicates whether Game Genie is enabled or not.

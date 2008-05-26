@@ -10,7 +10,7 @@ bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
 int FCEUMOV_WriteState(FILE* st);
-int FCEUMOV_ReadState(FILE* st, uint32 size);
+bool FCEUMOV_ReadState(FILE* st, uint32 size);
 void FCEUMOV_PreLoad(void);
 int FCEUMOV_PostLoad(void);
 void MovieFlushHeader(void);

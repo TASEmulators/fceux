@@ -140,6 +140,9 @@ static void (*DoSQ2)(void)=Dummyfunc;
 
 static uint32 ChannelBC[5];
 
+//savestate sync hack stuff
+int movieSyncHackOn=0,resetDMCacc=0,movieConvertOffset1,movieConvertOffset2;
+
 static void LoadDMCPeriod(uint8 V)
 {
  if(PAL)
@@ -1081,21 +1084,21 @@ void FCEUSND_Reset(void)
 	// MAJOR BUG WAS HERE: DMCacc and DMCBitCount never got reset...
 	// so, do some ridiculous hackery if a movie's about to play to keep it in sync...
 
-	extern int movieSyncHackOn,resetDMCacc,movieConvertOffset1,movieConvertOffset2;
+	
 	if(movieSyncHackOn)
 	{
 		if(resetDMCacc)
 		{
 			// no value in movie save state
-#ifdef WIN32
+		#ifdef WIN32
 			// use editbox fields
 			DMCacc=movieConvertOffset1;
 			DMCBitCount=movieConvertOffset2;
-#else
+		#else
 			// no editbox fields, so leave the values alone
 			// and print out a warning that says what they are
 			FCEU_PrintError("Warning: These variables were not found in the save state and will keep their current value: DMCacc=%d, DMCBitCount=%d\n", DMCacc, DMCBitCount);
-#endif
+		#endif
 		}
 		else
 		{

@@ -121,16 +121,15 @@ void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor)
        for(; *textmsg; ++textmsg)
        {
            int ch, wid;
-           unsigned ny, nx;
            
            if(*textmsg == '\n') { x=beginx; y+=6; continue; }
            ch  = FixJoedChar(*textmsg);
            wid = JoedCharWidth(*textmsg);
            
-           for(ny=0; ny<5; ++ny)
+           for(int ny=0; ny<5; ++ny)
            {
                uint8 d = Font6x5[ch*6 + 1+ny];
-               for(nx=0; nx<wid; ++nx)
+               for(int nx=0; nx<wid; ++nx)
                {
                    int c = (d >> (7-nx)) & 1;
                    if(c)

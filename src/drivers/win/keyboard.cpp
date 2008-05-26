@@ -64,8 +64,7 @@ void KeyboardUpdateState(void)
 		#define KEY_REPEAT_REPEATING_DELAY (6) // must be >= 1 and <= 255
 		#define KEY_JUST_DOWN_DURATION (4) // must be >= 1 and <= 255
 
-		int i;
-		for(i = 0 ; i < 256 ; i++)
+		for(int i = 0 ; i < 256 ; i++)
 			if(tk[i])
 				if(keys_nr[i] < 255)
 					keys_nr[i]++; // activate key, and count up for repeat
@@ -77,7 +76,7 @@ void KeyboardUpdateState(void)
 		memcpy(keys,keys_nr,256);
 
 		// key-down detection
-		for(i = 0 ; i < 256 ; i++)
+		for(int i = 0 ; i < 256 ; i++)
 			if(!keys_nr[i])
 			{
 				keys_jd[i] = 0;
@@ -98,8 +97,8 @@ void KeyboardUpdateState(void)
 				keys_jd[i] = 1;
 
 		// key repeat
-		for(i = 0 ; i < 256 ; i++)
-			if(keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
+		for(int i = 0 ; i < 256 ; i++)
+			if((int)keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
 				keys[i] = 0;
 	}	   
 	break;

@@ -185,6 +185,11 @@ void FCEUD_LoadStateFrom(void);
 
 #define MOVIE_FLAG_PAL          (1<<2)
 
+// set in newer version, used for old movie compatibility
+//TODO - only use this flag to print a warning that the sync might be bad
+//so that we can get rid of the sync hack code
+#define MOVIE_FLAG_NOSYNCHACK          (1<<4) 
+
 #define MOVIE_MAX_METADATA      512
 
 typedef struct
@@ -203,13 +208,14 @@ typedef struct
 } MOVIE_INFO;
 
 void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata);
-void FCEUI_LoadMovie(char *fname, int read_only, int _stopframe);
+void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_StopMovie(void);
 int FCEUI_IsMovieActive(void);
 int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
-void FCEUI_MovieToggleFrameDisplay(void);
+bool FCEUI_GetMovieToggleReadOnly();
+void FCEUI_MovieToggleFrameDisplay();
 void FCEUI_ToggleInputDisplay(void);
 
 

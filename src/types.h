@@ -148,4 +148,57 @@ typedef uint32_t uint32;
 
 typedef void (FP_FASTAPASS(2) *writefunc)(uint32 A, uint8 V);
 typedef uint8 (FP_FASTAPASS(1) *readfunc)(uint32 A);
+
+
+template<typename T, int N>
+struct ValueArray
+{
+	T data[N];
+	T &operator[](int index) { return data[index]; }
+	static const int size = N;
+	bool operator!=(ValueArray<T,N> &other) { return !operator==(other); }
+	bool operator==(ValueArray<T,N> &other)
+	{
+		for(int i=0;i<size;i++)
+			if(data[i] != other[i])
+				return false;
+		return true;
+	}
+};
+
+#include "utils/endian.h"
+
+
+struct FCEU_Guid : public ValueArray<uint8,16>
+{
+	void newGuid()
+	{
+		for(int i=0;i<size;i++)
+			data[i] = rand();
+	}
+
+	std::string toString()
+	{
+		char buf[37];
+		sprintf(buf,"%08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X",
+			FCEU_de32lsb(data),FCEU_de16lsb(data+4),FCEU_de16lsb(data+6),FCEU_de16lsb(data+8),data[10],data[11],data[12],data[13],data[14],data[15]);
+		return std::string(buf);
+	}
+
+	static FCEU_Guid fromString(std::string str)
+	{
+		FCEU_Guid ret;
+		ret.scan(str);
+		return ret;
+	}
+
+	void scan(std::string str)
+	{
+		//scanf sucks and tramples bytes. so we read to an oversize tempbuf and copy
+		char buf[20];
+		sscanf(str.c_str(),"%08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X",buf,buf+4,buf+6,buf+8,buf+10,buf+11,buf+12,buf+13,buf+14,buf+15);
+		*this = *(FCEU_Guid*)buf;
+	}
+};
+
 #endif

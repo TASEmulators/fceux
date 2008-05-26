@@ -6,13 +6,12 @@
 bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 1003 is given a
 					      //value by the program rather than the user.  This will be used when deciding to automatically make the stop movie checkbox checked.
 
-extern int movieConvertOffset1, movieConvertOffset2, movieConvertOK;
 extern FCEUGI *GameInfo;
 
-static int ReplayDialogReadOnlyStatus = 0;
+//retains the state of the readonly checkbox
+static bool ReplayDialogReadOnlyStatus;
+//retains the state of the stopframe value
 static int ReplayDialogStopFrame = 0;
-
-static int movieHackType = 3;
 
 void RefreshThrottleFPS();
 
@@ -101,8 +100,6 @@ static char* GetSavePath(HWND hwndDlg)
 
 void UpdateReplayDialog(HWND hwndDlg)
 {
-	movieConvertOffset1=0, movieConvertOffset2=0,movieConvertOK=0;
-
 	int doClear=1;
 	char *fn=GetReplayPath(hwndDlg);
 
@@ -118,73 +115,6 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 		if(FCEUI_MovieGetInfo(fn, &info))
 		{
-#define MOVIE_FLAG_NOSYNCHACK          (1<<4) // set in newer version, used for old movie compatibility
-			extern int resetDMCacc;
-			extern int justAutoConverted;
-			int noNoSyncHack=!(info.nosynchack) && resetDMCacc;
-			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_OFFSET),justAutoConverted || noNoSyncHack);
-			EnableWindow(GetDlgItem(hwndDlg,IDC_EDIT_FROM),justAutoConverted || noNoSyncHack);
-			if(justAutoConverted)
-			{
-				// use values as nesmock offsets
-				if(movieHackType != 0)
-				{
-					movieHackType=0;
-					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"2");
-					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"0");
-					SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"Offset:");
-					SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"from");
-				}
-			}
-			else if(noNoSyncHack)
-			{
-				// use values as sound reset hack values
-				if(movieHackType != 1)
-				{
-					movieHackType=1;
-//					extern int32 DMCacc;
-//					extern int8 DMCBitCount;
-//					char str[256];
-//					sprintf(str, "%d", DMCacc);
-//					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)str);
-//					sprintf(str, "%d", DMCBitCount);
-//					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)str);
-					SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"8");
-					SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"0");
-					SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"Missing data: acc=");
-					SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"bc=");
-				}
-			}
-			else if(movieHackType != 2)
-			{
-				movieHackType=2;
-				SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_SETTEXT, 0,(LPARAM)"");
-				SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_SETTEXT, 0,(LPARAM)"");
-				SendDlgItemMessage(hwndDlg, 2000, WM_SETTEXT, 0,(LPARAM)"");
-				SendDlgItemMessage(hwndDlg, 2001, WM_SETTEXT, 0,(LPARAM)"");
-			}
-
-/*			{	// select away to autoconverted movie... but actually we don't want to do that now that there's an offset setting in the dialog
-				extern char lastMovieInfoFilename [512];
-				char relative[MAX_PATH];
-				AbsoluteToRelative(relative, lastMovieInfoFilename, BaseDirectory);
-
-				LONG lOtherIndex = SendDlgItemMessage(hwndDlg, 200, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
-				if(lOtherIndex != CB_ERR)
-				{
-					// select already existing string
-					SendDlgItemMessage(hwndDlg, 200, CB_SETCURSEL, lOtherIndex, 0);
-				} else {
-					LONG lIndex = SendDlgItemMessage(hwndDlg, 200, CB_GETCURSEL, 0, 0);
-					SendDlgItemMessage(hwndDlg, 200, CB_INSERTSTRING, lIndex, (LPARAM)relative);
-					SendDlgItemMessage(hwndDlg, 200, CB_SETCURSEL, lIndex, 0);
-				}
-
-				// restore focus to the dialog
-//				SetFocus(GetDlgItem(hwndDlg, 200));
-			}*/
-
-
 			char tmp[256];
 			uint32 div;
 			
@@ -332,8 +262,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 	case WM_INITDIALOG:
 		{
-			movieHackType=3;
-			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, moviereadonly?BST_CHECKED:BST_UNCHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, ReplayDialogReadOnlyStatus?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
 			char* findGlob[2] = {FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0),
@@ -558,19 +487,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							//char TempArray[16]; //mbg merge 7/17/06 removed
 							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 							
-							char offset1Str[32]={0};
-							char offset2Str[32]={0};
-							
-							SendDlgItemMessage(hwndDlg, IDC_EDIT_STOPFRAME, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
-							ReplayDialogStopFrame = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
-
-							SendDlgItemMessage(hwndDlg, IDC_EDIT_OFFSET, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
-							SendDlgItemMessage(hwndDlg, IDC_EDIT_FROM, WM_GETTEXT, (WPARAM)32, (LPARAM)offset2Str);
-
-							movieConvertOffset1=strtol(offset1Str,0,10);
-							movieConvertOffset2=strtol(offset2Str,0,10);
-							movieConvertOK=1;
-
 							EndDialog(hwndDlg, (INT_PTR)fn);
 						}
 					}
@@ -605,14 +521,12 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	return FALSE;
 };
 
-/**
-* Show movie replay dialog and replay the movie if necessary.
-**/
+/// Show movie replay dialog and replay the movie if necessary.
 void FCEUD_MovieReplayFrom(void)
 {
-	char* fn;
+	ReplayDialogReadOnlyStatus = FCEUI_GetMovieToggleReadOnly();
 
-	fn = (char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
+	char* fn = (char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
 
 	if(fn)
 	{
@@ -625,9 +539,6 @@ void FCEUD_MovieReplayFrom(void)
 		FixFL();
 		SetMainWindowStuff();
 		RefreshThrottleFPS();
-
-		extern int movie_readonly;
-		moviereadonly = movie_readonly; // for prefs
 	}
 }
 

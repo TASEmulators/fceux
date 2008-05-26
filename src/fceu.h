@@ -65,24 +65,22 @@ extern uint8 PAL;
 #include "driver.h"
 
 typedef struct {
-           int PAL;
-           int NetworkPlay;
-	   int SoundVolume;
-           int GameGenie;
+	int PAL;
+	int NetworkPlay;
+	int SoundVolume;
+	int GameGenie;
 
-	   /* Current first and last rendered scanlines. */
-	   int FirstSLine;
-	   int LastSLine;
-
-	   /* Driver code(user)-specified first and last rendered scanlines. 
-	      Usr*SLine[0] is for NTSC, Usr*SLine[1] is for PAL.
-           */
-	   int UsrFirstSLine[2];
-	   int UsrLastSLine[2];
-	   int SnapName;
-	   uint32 SndRate;
-	   int soundq;
-	   int lowpass;
+	//Current first and last rendered scanlines.
+	int FirstSLine;
+	int LastSLine;
+	//Driver code(user)-specified first and last rendered scanlines. 
+	//Usr*SLine[0] is for NTSC, Usr*SLine[1] is for PAL.
+	int UsrFirstSLine[2];
+	int UsrLastSLine[2];
+	int SnapName;
+	uint32 SndRate;
+	int soundq;
+	int lowpass;
 } FCEUS;
 
 extern FCEUS FSettings;
@@ -115,3 +113,4 @@ extern uint8 vsdip;
 #endif
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(a[0]))
+

@@ -24,14 +24,7 @@
 #include "utils/xstring.h"
 
 
-#define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
 #define MOVIE_VERSION           3 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
-
-#define MOVIE_FLAG_NOSYNCHACK          (1<<4) // set in newer version, used for old movie compatibility
-
-// backwards compat
-static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
-static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info);
 
 extern char FileBase[];
 
@@ -39,67 +32,17 @@ extern char FileBase[];
 //which the user would have already converted from fcm
 //also cleanup the whole emulator version bullshit in replay. we dont support that old stuff anymore
 
-//todo - better error handling for the compressed savestate (handle compression)
+//todo - better error handling for the compressed savestate
 
-/*
-struct MovieHeader
-{
-uint32 magic;						// +0
-uint32 version=2;					// +4
-uint8 flags[4];					// +8
-uint32 length_frames;				// +12
-uint32 rerecord_count;				// +16
-uint32 movie_data_size;			// +20
-uint32 offset_to_savestate;		// +24, should be 4-byte-aligned
-uint32 offset_to_movie_data;		// +28, should be 4-byte-aligned
-uint8 md5_of_rom_used[16];			// +32
-uint32 version_of_emu_used			// +48
-char name_of_rom_used[]			// +52, utf-8, null-terminated
-char metadata[];					//      utf-8, null-terminated
-uint8 padding[];
-uint8 savestate[];					//      always present, even in a "from reset" recording
-uint8 padding[];					//      used for byte-alignment
-uint8 movie_data[];
-}
-*/
+//todo - consider a MemoryBackedFile class..
+//..a lot of work.. instead lets just read back from the current fcm
 
-FILE* slots;
-static int current = 0;     // > 0 for recording, < 0 for playback
-static uint8 joop[4]; //mbg 5/22/08 - seems to be a snapshot of the joystates for delta compression
-static uint32 framets = 0;
-static uint32 frameptr = 0;
-static uint8* moviedata = NULL;
-static uint32 moviedatasize = 0;
-static uint32 firstframeoffset = 0;
-static uint32 savestate_offset = 0;
-static uint32 framecount = 0;
-static uint32 rerecord_count = 0;
-/*static*/ int movie_readonly = 1;
-static uint32 pauseframe = 0;
-int frame_display = 0;
-static uint32 last_frame_display = ~0;
-int input_display = 0;
-uint32 cur_input_display = 0;
-static uint32 last_input_display = ~0;
-
-int resetDMCacc=0;
-
-int justAutoConverted = 0; //PLEASE REMOVE ME
-
-/* Cache variables used for playback. */
-static uint32 nextts = 0;
-static int32 nextd = 0;
-static int MovieShow = 0;  
-
-
+//todo - handle case where read+write is requested, but the file is actually readonly (could be confusing)
 
 //sometimes we accidentally produce movie stop signals while we're trying to do other things with movies..
 bool suppressMovieStop=false;
 
-int movieConvertOffset1=0, movieConvertOffset2=0,movieConvertOK=0,movieSyncHackOn=0;
-
-//todo - consider a MemoryBackedFile class..
-//..a lot of work.. instead lets just read back from the current fcm
+//----movie engine main state
 
 static enum EMOVIEMODE
 {
@@ -108,41 +51,18 @@ static enum EMOVIEMODE
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
 FILE* fpRecordingMovie = 0;
+
 int currFrameCounter;
+uint32 cur_input_display = 0;
+int pauseframe;
+bool movie_readonly = true;
+int input_display = 0;
+int frame_display = 0;
 
 SFORMAT FCEUMOV_STATEINFO[]={
 	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
 	{ 0 }
 };
-
-int FCEUMOV_GetFrame(void)
-{
-	return currFrameCounter;
-}
-
-bool FCEUMOV_ShouldPause(void)
-{
-	if(pauseframe && currFrameCounter == pauseframe)
-	{
-		pauseframe = 0; //only pause once!
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-int FCEUMOV_IsPlaying(void)
-{
-	return movieMode == MOVIEMODE_PLAY;
-}
-
-int FCEUMOV_IsRecording(void)
-{
-	return movieMode == MOVIEMODE_RECORD;
-}
-
 
 char curMovieFilename[512];
 
@@ -150,6 +70,38 @@ class MovieRecord
 {
 public:
 	ValueArray<uint8,4> joysticks;
+
+	void dump(FILE* fp)
+	{
+		fputc('|',fp);
+
+		//for each joystick
+		for(int i=0;i<4;i++)
+		{
+			//these are mnemonics for each joystick bit.
+			//since we usually use the regular joypad, these will be more helpful.
+			//but any character other than ' ' should count as a set bit
+			//maybe other input types will need to be encoded another way..
+			const char mnemonics[] = {'A','B','S','T','U','D','L','R'};
+			for(int bit=7;bit>=0;bit--)
+			{
+				uint8 &joystate = joysticks[i];
+				int bitmask = (1<<bit);
+				char mnemonic = mnemonics[bit];
+				//if the bit is set write the mnemonic
+				if(joystate & bitmask)
+					fputc(mnemonic,fp);
+				else //otherwise write a space
+					fputc(' ',fp);
+			}
+
+			//separate the joysticks
+			if(i != 3) fputc('|',fp);
+		}
+
+		//each frame is on a new line
+		fputc('\n',fp);
+	}
 };
 
 class MovieData
@@ -176,8 +128,15 @@ public:
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
 
+	FCEU_Guid guid;
+
 	//the entire contents of the disk file that was loaded
 	std::vector<char> serializedFile;
+
+	void truncateAt(int frame)
+	{
+		records.resize(frame);
+	}
 
 	class TDictionary : public std::map<std::string,std::string>
 	{
@@ -217,6 +176,8 @@ public:
 		dictionary.tryInstallString("romFilename",romFilename);
 		if(dictionary.containsKey("romChecksum"))
 			StringToBytes(dictionary["romChecksum"],&romChecksum,MD5DATA::size);
+		if(dictionary.containsKey("guid"))
+			guid = FCEU_Guid::fromString(dictionary["guid"]);
 		if(dictionary.containsKey("savestate"))
 		{
 			std::string& str = dictionary["savestate"];
@@ -229,20 +190,60 @@ public:
 		}
 	}
 
+	int dumpLen()
+	{
+		FILE* tmp = tmpfile();
+		dump(tmp);
+		int len = ftell(tmp);
+		fclose(tmp);
+		return len;
+	}
+
+	void dump(FILE *fp)
+	{
+		fprintf(fp,"version %d\n", version);
+		fprintf(fp,"emuVersion %d\n", emuVersion);
+		fprintf(fp,"palFlag %d\n", palFlag?1:0);
+		fprintf(fp,"poweronFlag %d\n", poweronFlag?1:0);
+		fprintf(fp,"resetFlag %d\n", resetFlag?1:0);
+		fprintf(fp,"romFilename %s\n", romFilename.c_str());
+		fprintf(fp,"romChecksum %s\n", BytesToString(romChecksum.data,MD5DATA::size).c_str());
+		fprintf(fp,"guid %s\n", guid.toString().c_str());
+		if(savestate.size() != 0)
+			fprintf(fp,"savestate %s\n", BytesToString(&savestate[0],savestate.size()).c_str());
+		for(unsigned int i=0;i<records.size();i++)
+			records[i].dump(fp);
+	}
+
 } currMovieData;
+//---------
 
-
-void DumpCurrentHeader(FILE* fp)
+int FCEUMOV_GetFrame(void)
 {
-	fprintf(fp,"version %d\n", currMovieData.version);
-	fprintf(fp,"emuVersion %d\n", currMovieData.emuVersion);
-	fprintf(fp,"palFlag %d\n", currMovieData.palFlag?1:0);
-	fprintf(fp,"poweronFlag %d\n", currMovieData.poweronFlag?1:0);
-	fprintf(fp,"resetFlag %d\n", currMovieData.resetFlag?1:0);
-	fprintf(fp,"romFilename %s\n", currMovieData.romFilename.c_str());
-	fprintf(fp,"romChecksum %s\n", BytesToString(currMovieData.romChecksum.data,MD5DATA::size).c_str());
-	if(currMovieData.savestate.size() != 0)
-		fprintf(fp,"savestate %s\n", BytesToString(&currMovieData.savestate[0],currMovieData.savestate.size()).c_str());
+	return currFrameCounter;
+}
+
+bool FCEUMOV_ShouldPause(void)
+{
+	if(pauseframe && currFrameCounter == pauseframe)
+	{
+		pauseframe = 0; //only pause once!
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+int FCEUMOV_IsPlaying(void)
+{
+	return movieMode == MOVIEMODE_PLAY;
+}
+
+int FCEUMOV_IsRecording(void)
+{
+	return movieMode == MOVIEMODE_RECORD;
 }
 
 //yuck... another custom text parser.
@@ -354,20 +355,8 @@ void StopPlayback()
 void StopRecording()
 {
 	FCEU_DispMessage("Movie recording stopped.");
+
 	movieMode = MOVIEMODE_INACTIVE;
-
-	//mbg todo - think about this
-	resetDMCacc = movieSyncHackOn = 0;
-
-	//mbg todo - think about this
-	//DoEncode(0,0,1);   // Write a dummy timestamp value so that the movie will keep "playing" after user input has stopped.
-	
-	//mbg todo - add the equivalent
-	// finish header
-	//MovieFlushHeader();
-	// FIXME:  truncate movie to length
-	// ftruncate();
-
 	fclose(fpRecordingMovie);
 	fpRecordingMovie = 0;
 }
@@ -406,16 +395,15 @@ static void ResetInputTypes()
 
 
 //begin playing an existing movie
-void FCEUI_LoadMovie(char *fname, int _read_only, int _pauseframe)
+void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 {
 	assert(fname);
-
-	pauseframe = _pauseframe;
 
 	FCEUI_StopMovie();
 
 	currMovieData = MovieData();
 	
+	strcpy(curMovieFilename, fname);
 	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
 	LoadFM2(currMovieData, fp);
 	fclose(fp);
@@ -465,10 +453,31 @@ void FCEUI_LoadMovie(char *fname, int _read_only, int _pauseframe)
 	//we really need to research this...
 	ResetInputTypes();
 
+	//stuff that should only happen when we're ready to positively commit to the replay
 	currFrameCounter = 0;
+	pauseframe = _pauseframe;
+	movie_readonly = _read_only;
 	movieMode = MOVIEMODE_PLAY;
+
+	if(movie_readonly)
+		FCEU_DispMessage("Replay started Read-Only.");
+	else
+		FCEU_DispMessage("Replay started Read+Write.");
 }
 
+static void closeRecordingMovie()
+{
+	if(fpRecordingMovie)
+		fclose(fpRecordingMovie);
+}
+
+static void openRecordingMovie(const char* fname)
+{
+	fpRecordingMovie = FCEUD_UTF8fopen(fname, "wb");
+	if(!fpRecordingMovie)
+		FCEU_PrintError("Error opening movie output file: %s",fname);
+	strcpy(curMovieFilename, fname);
+}
 
 
 //begin recording a new movie
@@ -478,20 +487,12 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 
 	FCEUI_StopMovie();
 
-	fpRecordingMovie = FCEUD_UTF8fopen(fname, "wb");
-	if(!fpRecordingMovie)
-	{
-		FCEU_PrintError("Error opening movie output file: %s",fname);
-	}
+	openRecordingMovie(fname);
 
-	movieMode = MOVIEMODE_RECORD;
 	currMovieData = MovieData();
+	currMovieData.guid.newGuid();
 
-	//old sync management code:
-	//flags |= MOVIE_FLAG_NOSYNCHACK;
-	resetDMCacc=movieSyncHackOn=0;
-
-	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0);
+	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.poweronFlag = (flags & MOVIE_FLAG_FROM_POWERON)!=0;
 	currMovieData.resetFlag = (flags & MOVIE_FLAG_FROM_RESET)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
@@ -532,7 +533,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
-	DumpCurrentHeader(fpRecordingMovie);
+	currMovieData.dump(fpRecordingMovie);
 
 	//todo - think about this
 	ResetInputTypes();
@@ -544,22 +545,15 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 		ResetNES();	// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
 	}
 
+	movieMode = MOVIEMODE_RECORD;
+	
 	FCEU_DispMessage("Movie recording started.");
-
-	strcpy(curMovieFilename, fname);
-}
-
-static void movie_writechar(int c)
-{
-	fputc(c,fpRecordingMovie);
 }
 
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 {
-	int x,y;
-
 	if(movieMode == MOVIEMODE_PLAY)
 	{
 		//TODO - rock solid stability and error detection
@@ -587,40 +581,18 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 	}
 	else if(movieMode == MOVIEMODE_RECORD)
 	{
-		movie_writechar('|');
+		MovieRecord mr;
 
 		//for each joystick
 		for(int i=0;i<4;i++)
-		{
-			//these are mnemonics for each joystick bit.
-			//since we usually use the regular joypad, these will be more helpful.
-			//but any character other than ' ' should count as a set bit
-			//maybe other input types will need to be encoded another way..
-			const char mnemonics[] = {'A','B','S','T','U','D','L','R'};
-			for(int bit=7;bit>=0;bit--)
-			{
-				uint8 &joystate = js[i];
-				int bitmask = (1<<bit);
-				char mnemonic = mnemonics[bit];
-				//if the bit is set write the mnemonic
-				if(joystate & bitmask)
-					movie_writechar(mnemonic);
-				else //otherwise write a space
-					movie_writechar(' ');
-			}
+			mr.joysticks[i] = js[i];
 
-			//separate the joysticks
-			if(i != 3) movie_writechar('|');
-		}
+		currMovieData.records.push_back(mr);
+		mr.dump(fpRecordingMovie);
 
-		//each frame is on a new line
-		movie_writechar('\n');
 	}
 
 	memcpy(&cur_input_display,js,4);
-
-
-
 }
 
 //TODO 
@@ -698,33 +670,21 @@ int FCEUMOV_WriteState(FILE* st)
 {
 	//we are supposed to dump the movie data into the savestate
 
-	if(movieMode == MOVIEMODE_RECORD)
+	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
 	{
-		int todo = ftell(fpRecordingMovie);
+		int todo = currMovieData.dumpLen();
+		
 		if(st)
-		{
-			fseek(fpRecordingMovie,0,SEEK_SET);
-			std::vector<uint8> tempbuf(todo);
-			fread(&tempbuf[0],1,todo,fpRecordingMovie);
-			fwrite(&tempbuf[0],1,todo,st);
-		}
+			currMovieData.dump(st);
+		
 		return todo;
 	}
-	else
-	{
-		int todo = currMovieData.serializedFile.size();
-		if(st)
-		{
-			fwrite(&currMovieData.serializedFile[0],1,currMovieData.serializedFile.size(),st);
-		}
-		return todo;
-	}
-
+	else return 0;
 }
 
 static bool load_successful;
 
-int FCEUMOV_ReadState(FILE* st, uint32 size)
+bool FCEUMOV_ReadState(FILE* st, uint32 size)
 {
 	load_successful = false;
 
@@ -733,79 +693,73 @@ int FCEUMOV_ReadState(FILE* st, uint32 size)
 	fread(&buf[0],1,size,st);
 	FILE* tmp = tmpfile();
 	fwrite(&buf[0],1,size,tmp);
+	FILE* wtf = fopen("d:\\wtf.txt","wb");
+	fwrite(&buf[0],1,size,wtf);
+	fclose(wtf);
 	fseek(tmp,0,SEEK_SET);
-	currMovieData = MovieData();
-	LoadFM2(currMovieData, tmp);
+	MovieData tempMovieData = MovieData();
+	LoadFM2(tempMovieData, tmp);
 	fclose(tmp);
 
 	//complex TAS logic for when a savestate is loaded:
-	//if we are playing:
-	// then, the movie we are playing must match the one stored in the savestate.
-	//if we are recording:
-	// then, the movie we are playing must match the one stored in the savestate.
+	//----------------
+	//if we are playing or recording and toggled read-only:
+	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error.
+	//  the savestate is assumed to be in the same timeline as the current movie.
+	//  if the current movie is not long enough to get to the savestate's frame#, then it is an error. 
+	//  the movie contained in the savestate will be discarded.
+	//  the emulator will be put into play mode.
+	//if we are playing or recording and toggled read+write
+	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error.
+	//  the movie contained in the savestate will be loaded into memory
+	//  the frames in the movie after the savestate frame will be discarded
+	//  the in-memory movie will be dumped to disk as fcm.
+	//  the emulator will be put into record mode.
 	//if we are doing neither:
-	//  then, we must discard this movie
+	//  then, we must discard this movie and just load the savestate
 
-	//movieMode = MOVIEMODE_PLAY;
+
+	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD)
+	{
+		//handle moviefile mismatch
+		if(tempMovieData.guid != currMovieData.guid)
+		{
+			FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
+			return false;
+		}
+
+		closeRecordingMovie();
+
+		if(movie_readonly)
+		{
+			//if the frame counter is longer than our current movie, then error
+			if(currFrameCounter >= (int)currMovieData.records.size())
+			{
+				FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
+				return false;
+			}
+			movieMode = MOVIEMODE_PLAY;
+		}
+		else
+		{
+			//truncate before we copy, just to save some time
+			tempMovieData.truncateAt(currFrameCounter);
+			currMovieData = tempMovieData;
+
+			openRecordingMovie(curMovieFilename);
+			currMovieData.dump(fpRecordingMovie);
+			movieMode = MOVIEMODE_RECORD;
+		}
+	}
+	
 	load_successful = true;
-
-	//// if this savestate was made while replaying,
-	//// we need to "undo" nextd and nextts
-	//if(nextd != -1)
-	//{
-	//	int d = 1;
-	//	if(nextts > 65536)
-	//		d = 4;
-	//	else if(nextts > 256)
-	//		d = 3;
-	//	else if(nextts > 0)
-	//		d = 2;
-	//	frameptr -= d;
-	//	nextd = -1;
-	//}
-
-	//// if(current > 0 || (!movie_readonly && current < 0))            /* Recording or Playback (!read-only) */
-	//if(current!=0 && !movie_readonly)
-	//{
-	//	// copy movie data from savestate
-	//	moviedata = (uint8*)realloc(moviedata, size);
-	//	moviedatasize = size;
-	//	if(size && fread(moviedata, 1, size, st)<size)
-	//		return 0;
-	//	if(current < 0)                   // switch to recording
-	//		current = -current;
-	//	fseek(slots[current - 1], firstframeoffset, SEEK_SET);
-	//	fwrite(moviedata, 1, frameptr, slots[current - 1]);
-	//	if(!FCEU_BotMode())
-	//	{
-	//		rerecord_count++;
-	//	}
-	//}
-	//// else if(current < 0)       /* Playback (read-only) */
-	//else if(current!=0 && movie_readonly)
-	//{
-	//	if(current > 0)                   // switch to playback
-	//		current = -current;
-	//	// allow frameptr to be updated but keep movie data
-	//	fseek(st, size, SEEK_CUR);
-	//	// prevent seeking beyond the end of the movie
-	//	if(frameptr > moviedatasize)
-	//		frameptr = moviedatasize;
-	//}
-	//else						/* Neither recording or replaying */
-	//{
-	//	// skip movie data
-	//	fseek(st, size, SEEK_CUR);
-	//}
-
-	//load_successful=1;
 
 	//// Maximus: Show the last input combination entered from the
 	//// movie within the state
 	//if(current!=0) // <- mz: only if playing or recording a movie
 	//	memcpy(&cur_input_display, joop, 4);
 
-	return 1;
+	return true;
 }
 
 void FCEUMOV_PreLoad(void)
@@ -833,58 +787,61 @@ int FCEUI_IsMovieActive(void)
 
 void FCEUI_MovieToggleFrameDisplay(void)
 {
-	frame_display=!frame_display;
-	if(!(current != 0 && frame_display))// && !input_display)
-		FCEU_ResetMessages();
-	else
-	{
-		last_frame_display = ~framecount;
-		last_input_display = ~cur_input_display;
-	}
+	//todo
+
+	//frame_display=!frame_display;
+	//if(!(current != 0 && frame_display))// && !input_display)
+	//	FCEU_ResetMessages();
+	//else
+	//{
+	//	last_frame_display = ~framecount;
+	//	last_input_display = ~cur_input_display;
+	//}
 }
 
 void FCEUI_ToggleInputDisplay(void)
 {
-	switch(input_display)
-	{
-	case 0:
-		input_display = 1;
-		break;
-	case 1:
-		input_display = 2;
-		break;
-	case 2:
-		input_display = 4;
-		break;
-	default:
-		input_display = 0;
-		break;
-	}
+	//todo
 
-	//if(!input_display && !(current != 0 && frame_display))
-	//FCEU_ResetMessages();
-	//else
-	if(input_display)
-	{
-		last_frame_display = ~framecount;
-		last_input_display = ~cur_input_display;
-	}
+	//switch(input_display)
+	//{
+	//case 0:
+	//	input_display = 1;
+	//	break;
+	//case 1:
+	//	input_display = 2;
+	//	break;
+	//case 2:
+	//	input_display = 4;
+	//	break;
+	//default:
+	//	input_display = 0;
+	//	break;
+	//}
+
+	////if(!input_display && !(current != 0 && frame_display))
+	////FCEU_ResetMessages();
+	////else
+	//if(input_display)
+	//{
+	//	last_frame_display = ~framecount;
+	//	last_input_display = ~cur_input_display;
+	//}
 }
 
-void FCEUI_MovieToggleReadOnly(void)
+bool FCEUI_GetMovieToggleReadOnly()
 {
-	if(movie_readonly < 2)
-	{
-		movie_readonly = !movie_readonly;
-		if(movie_readonly)
-			FCEU_DispMessage("Movie is now Read-Only.");
-		else
-			FCEU_DispMessage("Movie is now Read+Write.");
-	}
+	return movie_readonly;
+}
+
+void FCEUI_MovieToggleReadOnly()
+{
+	if(movie_readonly)
+		FCEU_DispMessage("Movie is now Read+Write.");
 	else
-	{
-		FCEU_DispMessage("Movie file is Read-Only.");
-	}
+		FCEU_DispMessage("Movie is now Read-Only.");
+	
+	movie_readonly = !movie_readonly;
 }
 
 int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
@@ -912,6 +869,32 @@ int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 }
 
 
+//struct MovieHeader
+//{
+//uint32 magic;						// +0
+//uint32 version=2;					// +4
+//uint8 flags[4];					// +8
+//uint32 length_frames;				// +12
+//uint32 rerecord_count;				// +16
+//uint32 movie_data_size;			// +20
+//uint32 offset_to_savestate;		// +24, should be 4-byte-aligned
+//uint32 offset_to_movie_data;		// +28, should be 4-byte-aligned
+//uint8 md5_of_rom_used[16];			// +32
+//uint32 version_of_emu_used			// +48
+//char name_of_rom_used[]			// +52, utf-8, null-terminated
+//char metadata[];					//      utf-8, null-terminated
+//uint8 padding[];
+//uint8 savestate[];					//      always present, even in a "from reset" recording
+//uint8 padding[];					//      used for byte-alignment
+//uint8 movie_data[];
+//}
+
+
+// backwards compat
+//static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
+//static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info);
+//
+//#define MOVIE_MAGIC             0x1a4d4346      // FCM\x1a
 //
 //int _old_FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 //{

@@ -570,7 +570,7 @@ void FCEUI_CloseGame(void)
 **/
 void RestartMovieOrReset(unsigned int do_power_off)
 {
-	extern int movie_readonly;
+	extern bool movie_readonly;
 	extern char curMovieFilename[512];
 
 	if(FCEUMOV_IsPlaying() || FCEUMOV_IsRecording() && movie_readonly)
