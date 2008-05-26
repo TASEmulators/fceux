@@ -161,23 +161,7 @@ void FCEUI_SaveSnapshot(void)
  dosnapsave=1;
 }
 
-/// this draws the recording icon (play/pause/record)
-static void FCEU_DrawRecordingStatus(uint8* XBuf)
-{
-	int n=0;
-	if(FCEUD_ShowStatusIcon())
-	{
-		if(FCEUI_EmulationPaused())
-			n=3;
-		else if(FCEUI_IsMovieActive()>0)
-			n=2;
-		else if(FCEUI_IsMovieActive()<0)
-			n=1;
-	}
 
-	if(n)
-		FCEU_DrawRecordingStatusN(XBuf, n);
-}
 
 static void ReallySnap(void)
 {

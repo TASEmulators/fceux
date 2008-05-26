@@ -221,12 +221,13 @@ static uint8* sline_icons[4]=
 	pause_slines
 };
 
-void FCEU_DrawRecordingStatusN(uint8* XBuf, int n)
+static void drawstatus(uint8* XBuf, int n, int y, int xofs)
 {
 	uint8* slines=sline_icons[n];
 	int i;
 
-	XBuf += (FSettings.LastSLine-28)*256 + 240 + 255;
+	
+	XBuf += FCEU_TextScanlineOffsetFromBottom(y) + 240 + 255 + xofs;
 	for(i=0; slines[i]!=99; i+=3)
 	{
 		int y=slines[i];
@@ -244,6 +245,28 @@ void FCEU_DrawRecordingStatusN(uint8* XBuf, int n)
 		int x;
 		for(x=slines[i+1]; x!=slines[i+2]; ++x)
 			dest[x]=4;
+	}
+}
+
+/// this draws the recording icon (play/pause/record)
+void FCEU_DrawRecordingStatus(uint8* XBuf)
+{
+	if(FCEUD_ShowStatusIcon())
+	{
+		bool hasPlayRecIcon = false;	
+		if(FCEUI_IsMovieActive()>0)
+		{
+			drawstatus(XBuf,2,28,0);
+			hasPlayRecIcon = true;
+		}
+		else if(FCEUI_IsMovieActive()<0)
+		{
+			drawstatus(XBuf,1,28,0);
+			hasPlayRecIcon = true;
+		}
+
+		if(FCEUI_EmulationPaused())
+			drawstatus(XBuf,3,28,hasPlayRecIcon?-16:0);
 	}
 }
 
