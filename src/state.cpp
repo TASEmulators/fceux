@@ -143,7 +143,7 @@ static int WriteStateChunk(FILE *st, int type, SFORMAT *sf)
 
  if(!SubWrite(st,sf))
  {
-	 return(0);
+	 return 5;
  }
  return (bsize+5);
 }
@@ -358,7 +358,7 @@ bool FCEUSS_SaveFP(FILE *st)
 
 	//compress it
 	uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
-	uLongf comprlen;
+	uLongf comprlen = len*2;
 	int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_COMPRESSION);
 
 	//dump the header
