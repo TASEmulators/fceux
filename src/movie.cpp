@@ -588,12 +588,15 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 		//stop when we run out of frames
 		if(currFrameCounter == currMovieData.records.size())
 		{
-			StopPlayback();
+			
 			if(FCEUD_PauseAfterPlayback())
 			{
 				FCEUI_ToggleEmulationPause();
 				FCEU_DispMessage("Paused after playback");
-			}
+			} 
+			else
+				StopPlayback();
+		}
 		}
 		else
 		{
