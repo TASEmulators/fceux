@@ -588,21 +588,22 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 		//stop when we run out of frames
 		if(currFrameCounter == currMovieData.records.size())
 		{
-			
-			if(FCEUD_PauseAfterPlayback())
-			{
-				FCEUI_ToggleEmulationPause();
-				FCEU_DispMessage("Paused after playback");
-			} 
-			else
-				StopPlayback();
-		}
+			StopPlayback();
 		}
 		else
 		{
 			MovieRecord& mr = currMovieData.records[currFrameCounter];
 			for(int i=0;i<4;i++)
 				js[i] = mr.joysticks[i];
+		}
+
+		//if we are on the last frame, then pause the emulator if the player requested it
+		if(currFrameCounter == currMovieData.records.size()-1)
+		{
+			if(FCEUD_PauseAfterPlayback())
+			{
+				FCEUI_ToggleEmulationPause();
+			}
 		}
 
 		//pause the movie at a specified frame 
