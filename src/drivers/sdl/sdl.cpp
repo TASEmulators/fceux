@@ -517,7 +517,7 @@ void FCEUD_PrintError(const char *errormsg)
 
 // dummy functions
 
-#define DUMMY(__f) void __f(void) {printf("%s\n", __f); FCEU_DispMessage("Not implemented.");}
+#define DUMMY(__f) void __f(void) {printf("%s\n", #__f); FCEU_DispMessage("Not implemented.");}
 DUMMY(FCEUD_HideMenuToggle)
 DUMMY(FCEUD_TurboOn)
 DUMMY(FCEUD_TurboOff)
