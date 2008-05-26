@@ -83,6 +83,9 @@ typedef struct {
 	int lowpass;
 } FCEUS;
 
+int FCEU_TextScanlineOffset(int y);
+int FCEU_TextScanlineOffsetFromBottom(int y);
+
 extern FCEUS FSettings;
 
 void FCEU_PrintError(char *format, ...);

@@ -22,6 +22,7 @@
 #define CB_SET_HIGH_PRIORITY            105
 #define BTN_PORT1                       106
 #define BTN_PORT2                       107
+#define IDR_ACCELERATOR1                108
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
 #define COMBO_FAM                       110
@@ -324,6 +325,7 @@
 #define ID_RECENT_1                     40116
 #define ID_FILE_RECENT                  40117
 #define ID_FILE_RECENT40118             40118
+#define ID_ACCELERATOR_CTRL_O           40119
 #define MENU_LOG_SOUND                  40120
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -335,8 +337,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        108
-#define _APS_NEXT_COMMAND_VALUE         40119
+#define _APS_NEXT_RESOURCE_VALUE        109
+#define _APS_NEXT_COMMAND_VALUE         40121
 #define _APS_NEXT_CONTROL_VALUE         1130
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

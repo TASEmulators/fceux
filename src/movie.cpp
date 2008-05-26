@@ -23,7 +23,6 @@
 #include "utils/memory.h"
 #include "utils/xstring.h"
 
-
 #define MOVIE_VERSION           3 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
 
 extern char FileBase[];
@@ -73,8 +72,13 @@ class MovieRecord
 public:
 	ValueArray<uint8,4> joysticks;
 
-	void dump(FILE* fp)
+	void dump(FILE* fp, int index)
 	{
+		//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
+		//but someone would need to change the parser to ignore it
+		//fputc('|',fp);
+		//fprintf(fp,"%08d",index);
+
 		fputc('|',fp);
 
 		//for each joystick
@@ -213,8 +217,8 @@ public:
 		fprintf(fp,"guid %s\n", guid.toString().c_str());
 		if(savestate.size() != 0)
 			fprintf(fp,"savestate %s\n", BytesToString(&savestate[0],savestate.size()).c_str());
-		for(unsigned int i=0;i<records.size();i++)
-			records[i].dump(fp);
+		for(int i=0;i<(int)records.size();i++)
+			records[i].dump(fp,i);
 	}
 
 } currMovieData;
@@ -600,8 +604,8 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 		for(int i=0;i<4;i++)
 			mr.joysticks[i] = js[i];
 
+		mr.dump(fpRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
-		mr.dump(fpRecordingMovie);
 
 	}
 
@@ -677,6 +681,18 @@ void FCEU_DrawMovies(uint8 *XBuf)
 //
 //	FCEU_DrawNumberRow(XBuf,MovieStatus, CurrentMovie);
 //	MovieShow--;
+
+	if(frame_display)
+	{
+		char counterbuf[32] = {0};
+		if(movieMode == MOVIEMODE_PLAY)
+			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
+		else if(movieMode == MOVIEMODE_RECORD)
+			sprintf(counterbuf,"%d",currMovieData.records.size());
+
+		if(counterbuf[0])
+			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
+	}
 }
 
 int FCEUMOV_WriteState(FILE* st)
@@ -800,16 +816,7 @@ int FCEUI_IsMovieActive(void)
 
 void FCEUI_MovieToggleFrameDisplay(void)
 {
-	//todo
-
-	//frame_display=!frame_display;
-	//if(!(current != 0 && frame_display))// && !input_display)
-	//	FCEU_ResetMessages();
-	//else
-	//{
-	//	last_frame_display = ~framecount;
-	//	last_input_display = ~cur_input_display;
-	//}
+	frame_display=!frame_display;
 }
 
 void FCEUI_ToggleInputDisplay(void)

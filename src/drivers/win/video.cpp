@@ -19,6 +19,7 @@
  */
 
 #include "video.h"
+#include "../../drawing.h"
 #include "gui.h"
 
 static int RecalcCustom(void);

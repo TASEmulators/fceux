@@ -849,3 +849,11 @@ void FCEUI_Rewind(void)
 	}
 }
 
+int FCEU_TextScanlineOffset(int y)
+{
+	return FSettings.FirstSLine*256;
+}
+int FCEU_TextScanlineOffsetFromBottom(int y)
+{
+	return (FSettings.LastSLine-y)*256;
+}

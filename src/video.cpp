@@ -40,6 +40,7 @@
 #include "nsf.h"
 #include "input.h"
 #include "vsuni.h"
+#include "drawing.h"
 
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
@@ -133,9 +134,8 @@ int FCEU_InitVirtualVideo(void)
 }
 
 int howlong;
-static char errmsg[65];
+char errmsg[65];
 
-#include "drawing.h"
 #ifdef FRAMESKIP
 
 //#define SHOWFPS
@@ -160,7 +160,8 @@ void FCEUI_SaveSnapshot(void)
 {
  dosnapsave=1;
 }
- 
+
+/// this draws the recording icon (play/pause/record)
 static void FCEU_DrawRecordingStatus(uint8* XBuf)
 {
 	int n=0;

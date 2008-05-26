@@ -487,6 +487,11 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							//char TempArray[16]; //mbg merge 7/17/06 removed
 							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 							
+							char offset1Str[32]={0};
+
+							SendDlgItemMessage(hwndDlg, IDC_EDIT_STOPFRAME, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
+							ReplayDialogStopFrame = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
+							
 							EndDialog(hwndDlg, (INT_PTR)fn);
 						}
 					}

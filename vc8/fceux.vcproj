@@ -2221,6 +2221,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\src\drawing.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\src\fceu.cpp"
 			>
 		</File>

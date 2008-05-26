@@ -120,10 +120,8 @@ uint32 goptions = GOO_DISABLESS;
 int maxconbskip = 32;             /* Maximum consecutive blit skips. */
 int ffbskip = 32;              /* Blit skips per blit when FF-ing */
 
-/**
-* FCE Ultra Instance 
-**/
 HINSTANCE fceu_hInstance;
+HACCEL fceu_hAccel;
 
 HRESULT ddrval;
 
@@ -282,8 +280,15 @@ int BlockingCheck()
 	{
 		if( GetMessage( &msg, 0,  0, 0)>0 )
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			extern HWND hwndMemWatch;
+			int accelerated = 0;
+			/*if(hwndMemWatch)
+				accelerated = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);*/
+			if(!accelerated)
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
 	}
 
@@ -562,6 +567,7 @@ int main(int argc,char *argv[])
 	ApplyDefaultCommandMapping();
 
 	fceu_hInstance = GetModuleHandle(0);
+	LoadAccelerators(fceu_hInstance,"IDR_ACCELERATOR1");
 
 	// Get the base directory
 	GetBaseDirectory();

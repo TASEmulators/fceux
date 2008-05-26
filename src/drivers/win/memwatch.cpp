@@ -30,7 +30,7 @@ const int ADDRESSLENGTH = 16;
 
 int MemWatch_wndx=0, MemWatch_wndy=0;
 static HDC hdc;
-static HWND hwndMemWatch=0;
+HWND hwndMemWatch=0;
 static char addresses[NUMWATCHES][ADDRESSLENGTH];
 static char labels[NUMWATCHES][LABELLENGTH];
 static int NeedsInit = 1;
@@ -767,10 +767,13 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			ClearAllText();
 	*/
 	case WM_COMMAND:
-		
+
 		//Menu Items
-		switch(wParam)
+		switch(LOWORD(wParam))
 		{	
+		case ID_ACCELERATOR_CTRL_O:
+			MessageBox(hwndDlg,"Someone hit ctrl+o","test",0);
+			break;
 		case 600: //First item in recent menu
 			OpenMemwatchRecentFile(0);
 			break;
