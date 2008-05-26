@@ -727,7 +727,7 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 		if(movie_readonly)
 		{
 			//if the frame counter is longer than our current movie, then error
-			if(currFrameCounter >= (int)currMovieData.records.size())
+			if(currFrameCounter > (int)currMovieData.records.size())
 			{
 				FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
 				return false;
