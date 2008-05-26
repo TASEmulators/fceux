@@ -627,61 +627,6 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
-	//mbg todo
-
-//	int frameDisplayOn = current != 0 && frame_display;
-//	extern int howlong;
-//#if MSVC	
-//	extern int32 fps_scale;
-//#else
-//	int32 fps_scale=256;
-//#endif
-//	int howl=(180-(FCEUI_EmulationPaused()?(60):(20*fps_scale/256)));
-//	if(howl>176) howl=180;
-//	if(howl<1) howl=1;
-//	if((howlong<howl || movcounter)
-//		&& (frameDisplayOn && 
-//		(!movcounter || last_frame_display!=framecount)))
-//		//|| input_display && (!movcounter || last_input_display!=cur_input_display)))
-//	{
-//		//Old input display code
-//		/*
-//		char inputstr [32];
-//		if(input_display)
-//		{
-//		uint32 c = cur_input_display;
-//		sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
-//		(c&0x40)?'<':' ', (c&0x10)?'^':' ', (c&0x80)?'>':' ', (c&0x20)?'v':' ',
-//		(c&0x01)?'A':' ', (c&0x02)?'B':' ', (c&0x08)?'S':' ', (c&0x04)?'s':' ',
-//		(c&0x4000)?'<':' ', (c&0x1000)?'^':' ', (c&0x8000)?'>':' ', (c&0x2000)?'v':' ',
-//		(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ');
-//		if(!(c&0xff00))
-//		inputstr[8] = '\0';
-//		}
-//		if(frameDisplayOn && !input_display)
-//		FCEU_DispMessage("%s frame %u",current >= 0?"Recording":"Playing",framecount);
-//		else if(input_display && !frameDisplayOn)
-//		FCEU_DispMessage("Input: %s",inputstr);
-//		else //if(input_display && frame_display)
-//		FCEU_DispMessage("%s %u %s",current >= 0?"Recording":"Playing",framecount,inputstr);
-//		*/
-//		if(frameDisplayOn)
-//		{
-//			FCEU_DispMessage("%s frame %u",current >= 0?"Recording":"Playing",framecount);
-//		}
-//		last_frame_display = framecount;
-//		last_input_display = cur_input_display;
-//		movcounter=180-1;
-//		return;
-//	}
-//
-//	if(movcounter) movcounter--;
-//
-//	if(!MovieShow) return;
-//
-//	FCEU_DrawNumberRow(XBuf,MovieStatus, CurrentMovie);
-//	MovieShow--;
-
 	if(frame_display)
 	{
 		char counterbuf[32] = {0};
@@ -821,32 +766,21 @@ void FCEUI_MovieToggleFrameDisplay(void)
 
 void FCEUI_ToggleInputDisplay(void)
 {
-	//todo
-
-	//switch(input_display)
-	//{
-	//case 0:
-	//	input_display = 1;
-	//	break;
-	//case 1:
-	//	input_display = 2;
-	//	break;
-	//case 2:
-	//	input_display = 4;
-	//	break;
-	//default:
-	//	input_display = 0;
-	//	break;
-	//}
-
-	////if(!input_display && !(current != 0 && frame_display))
-	////FCEU_ResetMessages();
-	////else
-	//if(input_display)
-	//{
-	//	last_frame_display = ~framecount;
-	//	last_input_display = ~cur_input_display;
-	//}
+	switch(input_display)
+	{
+	case 0:
+		input_display = 1;
+		break;
+	case 1:
+		input_display = 2;
+		break;
+	case 2:
+		input_display = 4;
+		break;
+	default:
+		input_display = 0;
+		break;
+	}
 }
 
 bool FCEUI_GetMovieToggleReadOnly()
