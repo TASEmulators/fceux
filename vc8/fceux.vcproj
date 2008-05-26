@@ -1150,6 +1150,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\tasedit.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\tasedit.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\throttle.cpp"
 					>
 				</File>

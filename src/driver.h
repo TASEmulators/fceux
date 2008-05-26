@@ -359,6 +359,9 @@ void FCEUD_UpdateNTView(int scanline, int drawall);
 ///the driver might should update its PPUView (only used if debugging support is compiled in)
 void FCEUD_UpdatePPUView(int scanline, int drawall);
 
+///I am dissatisfied with this method of getting an option from the driver to the core. but that is what we're using for now
+bool FCEUD_PauseAfterPlayback();
+
 #ifdef __cplusplus
 extern "C" 
 #endif 

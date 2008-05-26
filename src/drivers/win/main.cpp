@@ -1201,3 +1201,4 @@ void FCEUD_ToggleStatusIcon(void)
 	status_icon = !status_icon;
 	UpdateCheckedMenuItems();
 }
+

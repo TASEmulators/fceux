@@ -589,6 +589,11 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 		if(currFrameCounter == currMovieData.records.size())
 		{
 			StopPlayback();
+			if(FCEUD_PauseAfterPlayback())
+			{
+				FCEUI_ToggleEmulationPause();
+				FCEU_DispMessage("Paused after playback");
+			}
 		}
 		else
 		{
@@ -830,6 +835,7 @@ int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 	info->md5_of_rom_used_present = 1;
 	info->emu_version_used = md.emuVersion;
 	info->name_of_rom_used = md.romFilename;
+	info->rerecord_count = md.recordCount;
 
 	return 1;
 }

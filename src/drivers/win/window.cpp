@@ -45,6 +45,7 @@
 #include "basicbot.h"
 #include "throttle.h"
 #include "monitor.h"
+#include "tasedit.h"
 
 #include "guiconfig.h"
 #include "timing.h"
@@ -74,6 +75,7 @@ void DoPPUView();//mbg merge 7/19/06 yech had to add
 void MapInput(void);
 
 // Internal variables
+int pauseAfterPlayback = 0;
 
 // Contains recent file strings
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -189,6 +191,7 @@ void UpdateCheckedMenuItems()
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
 
+	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, 40003, FCEU_BotMode() ? MF_CHECKED : MF_UNCHECKED);
@@ -855,6 +858,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 
+			case MENU_TASEDIT:
+				DoTasEdit();
+				break;
+
 			case MENU_EXTERNAL_INPUT:
 				// TODO: ???
 				break;
@@ -862,6 +869,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_HIDE_MENU:
 				// Hide menu menu was selected
 				ToggleHideMenu();
+				break;
+
+			case MENU_PAUSEAFTERPLAYBACK:
+				pauseAfterPlayback = pauseAfterPlayback?0:1;
+				UpdateCheckedMenuItems();
 				break;
 
 			case MENU_RUN_IN_BACKGROUND:
@@ -1498,3 +1510,7 @@ void FCEUD_CmdOpen(void)
 	LoadNewGamey(hAppWnd, 0);
 }
 
+bool FCEUD_PauseAfterPlayback()
+{
+	return pauseAfterPlayback!=0;
+}

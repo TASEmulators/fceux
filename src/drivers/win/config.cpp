@@ -41,6 +41,7 @@ extern int frame_display;
 extern int input_display;
 extern char *BasicBotDir;
 extern int allowUDLR;
+extern int pauseAfterPlayback;
 
 //window positions:
 extern int ChtPosX,ChtPosY;
@@ -198,6 +199,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(CDLogger_wndy),
 	AC(GGConv_wndx),
 	AC(GGConv_wndy),
+
+	AC(pauseAfterPlayback),
 
 	//ACS(memwLastfile[2048]),
 		ENDCFGSTRUCT
