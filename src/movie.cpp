@@ -119,6 +119,7 @@ public:
 		, palFlag(false)
 		, poweronFlag(false)
 		, resetFlag(false)
+		, recordCount(1)
 	{
 		memset(&romChecksum,0,sizeof(MD5DATA));
 	}
@@ -133,6 +134,7 @@ public:
 	std::string romFilename;
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
+	int recordCount;
 
 	FCEU_Guid guid;
 
@@ -176,6 +178,7 @@ public:
 	{
 		dictionary.tryInstallInt("version",version);
 		dictionary.tryInstallInt("emuVersion",emuVersion);
+		dictionary.tryInstallInt("recordCount",recordCount);
 		dictionary.tryInstallBool("palFlag",palFlag);
 		dictionary.tryInstallBool("poweronFlag",poweronFlag);
 		dictionary.tryInstallBool("resetFlag",resetFlag);
@@ -209,6 +212,7 @@ public:
 	{
 		fprintf(fp,"version %d\n", version);
 		fprintf(fp,"emuVersion %d\n", emuVersion);
+		fprintf(fp,"recordCount %d\n", recordCount);
 		fprintf(fp,"palFlag %d\n", palFlag?1:0);
 		fprintf(fp,"poweronFlag %d\n", poweronFlag?1:0);
 		fprintf(fp,"resetFlag %d\n", resetFlag?1:0);
@@ -690,6 +694,7 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error.
 	//  the movie contained in the savestate will be loaded into memory
 	//  the frames in the movie after the savestate frame will be discarded
+	//  the in-memory movie will have its rerecord count incremented
 	//  the in-memory movie will be dumped to disk as fcm.
 	//  the emulator will be put into record mode.
 	//if we are doing neither:
@@ -722,6 +727,7 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 			//truncate before we copy, just to save some time
 			tempMovieData.truncateAt(currFrameCounter);
 			currMovieData = tempMovieData;
+			currMovieData.recordCount++;
 
 			openRecordingMovie(curMovieFilename);
 			currMovieData.dump(fpRecordingMovie);
