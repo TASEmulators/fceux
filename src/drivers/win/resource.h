@@ -239,6 +239,7 @@
 #define BTN_PRESET_EXPORT1              1125
 #define BTN_PRESET_EXPORT2              1126
 #define BTN_PRESET_EXPORT3              1127
+#define IDC_LIST1                       1130
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -327,6 +328,8 @@
 #define ID_FILE_RECENT40118             40118
 #define ID_ACCELERATOR_CTRL_O           40119
 #define MENU_LOG_SOUND                  40120
+#define ID_TOOLS_TASEDIT                40123
+#define MENU_TASEDIT                    40124
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -337,9 +340,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        109
-#define _APS_NEXT_COMMAND_VALUE         40123
-#define _APS_NEXT_CONTROL_VALUE         1130
+#define _APS_NEXT_RESOURCE_VALUE        110
+#define _APS_NEXT_COMMAND_VALUE         40125
+#define _APS_NEXT_CONTROL_VALUE         1131
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

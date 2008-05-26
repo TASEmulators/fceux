@@ -129,7 +129,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
 			
 			sprintf(tmp, "%lu", info.rerecord_count);
-			//SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
+			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 			
 			{
 				//// convert utf8 metadata to windows widechar
