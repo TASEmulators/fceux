@@ -268,12 +268,13 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 	bool bail = false;
 	for(;;)
 	{
+		bool iswhitespace, isrecchar, isnewline;
 		int c = fgetc(fp);
 		if(c == -1)
 			goto bail;
-		bool iswhitespace = (c==' '||c=='\t');
-		bool isrecchar = (c=='|');
-		bool isnewline = (c==10||c==13);
+		iswhitespace = (c==' '||c=='\t');
+		isrecchar = (c=='|');
+		isnewline = (c==10||c==13);
 		switch(state)
 		{
 		case NEWLINE:

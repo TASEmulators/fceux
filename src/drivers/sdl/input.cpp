@@ -321,9 +321,9 @@ do {                                              \
         }                                         \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
     } else {                                      \
-        if(is_shift) {                            \
+      /*if(is_shift) {                            \
             FCEUI_SelectMovie(x,1);               \
-        } else {                                  \
+        } else */{                                \
             FCEUI_SelectState(x,1);               \
 	}                                         \
     }                                             \

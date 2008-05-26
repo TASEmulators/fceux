@@ -49,6 +49,33 @@ static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
 
+char *DriverUsage=
+"--pal x	Use PAL timing.\n\
+--gamegenie x, -g x	Enable emulated Game Genie if x is nonzero.\n\
+--frameskip x	Set # of frames to skip per emulated frame.\n\
+--(x/y)res x, -(x/y) x	Set horizontal/vertical resolution to x for full screen mode.\n\
+--(x/y)scale x	Multiply width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
+--(x/y)stretch x	Stretch to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
+--bpp x, -b x	Bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
+--opengl x	Enable OpenGL support if x is nonzero.\n\
+--doublebuf x	Enable SDL double-buffering if x is nonzero.\n\
+--fullscreen x, -f x	Select full screen mode if x is nonzero.\n\
+--color x	?\n\
+--hue x	?\n\
+--tint x	?\n\
+--palette p, -p p	?\n\
+--sound x, -s x	Enable sound if x is nonzero.\n\
+--volume x	Set volume to x%.\n\
+--lowpass x	Enable low-pass filter if x is nonzero.\n\
+--soundrecord s	Record sound to file s.\n\
+--inputcfg, -i	Configure input device(s) on startup.\n\
+--net s, -n s	Connect to server 's' for TCP/IP network play.\n\
+--port x, -p x	Use TCP/IP port x for network play.\
+--user s, -u s	Set the nickname to use in network play.\n\
+--pass s, -w s	Password to use for connecting to the server.\n\
+--netkey s, -k s	Use key 's' to create a unique session for the game loaded.\n\
+--players x, -l x	Set the number of local players.\n";
+
 
 // global configuration object
 Config *g_config;
@@ -342,8 +369,8 @@ static char *s_linuxCompilerString = "g++ " __VERSION__;
 /**
  * Returns the compiler string.
  */
-char *FCEUD_GetCompilerString() {
-    return (char *)s_linuxCompilerString;
+const char *FCEUD_GetCompilerString() {
+    return (const char *)s_linuxCompilerString;
 }
 
 /**
@@ -462,6 +489,29 @@ FCEUD_GetTimeFreq(void)
 {
     // SDL_GetTicks() is in milliseconds
     return 1000;
+}
+
+/**
+* Prints a textual message without adding a newline at the end.
+*
+* @param text The text of the message.
+* 
+* TODO: This function should have a better name.
+**/
+void FCEUD_Message(const char *text)
+{
+	fputs(text, stdout);
+}
+
+/**
+* Shows an error message in a message box.
+* (For now: prints to stderr.)
+*
+* @param errormsg Text of the error message.
+**/
+void FCEUD_PrintError(const char *errormsg)
+{
+	fprintf(stderr, "%s\n", errormsg);
 }
 
 

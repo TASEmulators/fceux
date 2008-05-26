@@ -4,7 +4,7 @@ endian.cpp
 general.cpp
 md5.cpp
 memory.cpp
-unzip.c
+unzip.cpp
 xstring.cpp
 """)
 

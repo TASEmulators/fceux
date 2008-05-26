@@ -66,11 +66,12 @@ static void cfg_Parse(FILE *fp)
 	for(;;)
 	{
 		int c = fgetc(fp);
+		bool iswhitespace, iscommentchar, isnewline;
 		if(c == -1)
 			goto bail;
-		bool iswhitespace = (c==' '||c=='\t');
-		bool iscommentchar = (c=='#');
-		bool isnewline = (c==10||c==13);
+		iswhitespace = (c==' '||c=='\t');
+		iscommentchar = (c=='#');
+		isnewline = (c==10||c==13);
 		switch(state)
 		{
 		case NEWLINE:
