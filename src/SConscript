@@ -5,6 +5,7 @@ cheat.cpp
 conddebug.cpp
 config.cpp
 debug.cpp
+drawing.cpp
 fceu.cpp
 fds.cpp
 file.cpp 
