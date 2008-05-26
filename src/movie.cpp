@@ -501,6 +501,8 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 
 	openRecordingMovie(fname);
 
+	currFrameCounter = 0;
+
 	currMovieData = MovieData();
 	currMovieData.guid.newGuid();
 
@@ -585,7 +587,6 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 			MovieRecord& mr = currMovieData.records[currFrameCounter];
 			for(int i=0;i<4;i++)
 				js[i] = mr.joysticks[i];
-			currFrameCounter++;
 		}
 
 		//pause the movie at a specified frame 
@@ -606,8 +607,9 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 
 		mr.dump(fpRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
-
 	}
+
+	currFrameCounter++;
 
 	memcpy(&cur_input_display,js,4);
 }
