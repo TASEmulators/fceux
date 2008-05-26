@@ -72,7 +72,7 @@ static int RWWrap=0;
 //mbg merge 7/18/06 docs
 //bit0 indicates whether emulation is paused
 //bit1 indicates whether emulation is in frame step mode
-static int EmulationPaused=0;
+int EmulationPaused=0;
 bool frameAdvanceRequested=false;
 int frameAdvanceDelay;
 

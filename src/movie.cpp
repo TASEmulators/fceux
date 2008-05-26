@@ -27,6 +27,8 @@
 #define MOVIE_VERSION           3 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
 
 extern char FileBase[];
+extern int EmulationPaused;
+
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
@@ -417,10 +419,15 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 		suppressAddPowerCommand=1;
 		suppressMovieStop=true;
 		{
+			//we need to save the pause state through this process
+			int oldPaused = EmulationPaused;
+
 			FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
 			//mbg 5/23/08 - wtf? why would this return null?
 			//if(!gi) PowerNES();
 			assert(gi);
+
+			EmulationPaused = oldPaused;
 		}
 		suppressMovieStop=false;
 		suppressAddPowerCommand=0;
@@ -508,11 +515,16 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 		disableBatteryLoading=1;
 		suppressMovieStop=true;
 		{
+			//we need to save the pause state through this process
+			int oldPaused = EmulationPaused;
+
 			// NOTE:  this will NOT write an FCEUNPCMD_POWER into the movie file
 			FCEUGI* gi = FCEUI_LoadGame(lastLoadedGameName, 0);
 			//mbg 5/23/08 - wtf? why would this return null?
 			//if(!gi) PowerNES();
 			assert(gi);
+
+			EmulationPaused = oldPaused;
 		}
 		suppressMovieStop=false;
 		disableBatteryLoading=0;
