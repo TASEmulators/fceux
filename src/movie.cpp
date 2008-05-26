@@ -565,6 +565,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
 	}
 
 	movieMode = MOVIEMODE_RECORD;
+	movie_readonly = false;
 	
 	FCEU_DispMessage("Movie recording started.");
 }
