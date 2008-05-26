@@ -43,3 +43,4 @@ std::string BytesToString(void* data, int len);
 bool StringToBytes(std::string& str, void* data, int len);
 
 std::vector<std::string> tokenize_str(const std::string & str,const std::string & delims);
+void splitpath(const char* path, char* drv, char* dir, char* name, char* ext);

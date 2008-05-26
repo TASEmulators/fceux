@@ -280,10 +280,12 @@ int BlockingCheck()
 	{
 		if( GetMessage( &msg, 0,  0, 0)>0 )
 		{
+			//other accelerator capable dialogs could be added here
 			extern HWND hwndMemWatch;
 			int accelerated = 0;
-			/*if(hwndMemWatch)
-				accelerated = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);*/
+			if(IsChild(hwndMemWatch,msg.hwnd))
+				accelerated = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
+
 			if(!accelerated)
 			{
 				TranslateMessage(&msg);
@@ -567,7 +569,7 @@ int main(int argc,char *argv[])
 	ApplyDefaultCommandMapping();
 
 	fceu_hInstance = GetModuleHandle(0);
-	LoadAccelerators(fceu_hInstance,"IDR_ACCELERATOR1");
+	fceu_hAccel = LoadAccelerators(fceu_hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 	// Get the base directory
 	GetBaseDirectory();

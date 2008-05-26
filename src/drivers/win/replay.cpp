@@ -149,46 +149,52 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
 			
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
-			if(info.movie_version > 1)
-			{
+
+			//-----------
+			//mbg 5/26/08 - getting rid of old movie formats
+
+			//if(info.movie_version > 1)
+			//{
 				char emuStr[128];
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used.c_str());
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),md5_asciistr(info.md5_of_rom_used));
-				if(info.emu_version_used > 64)
+
+				//if(info.emu_version_used > 64)
 					sprintf(emuStr, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
-				else
-				{
-					if(info.emu_version_used == 1)
-						strcpy(emuStr, "Famtasia");
-					else if(info.emu_version_used == 2)
-						strcpy(emuStr, "Nintendulator");
-					else if(info.emu_version_used == 3)
-						strcpy(emuStr, "VirtuaNES");
-					else
-					{
-						strcpy(emuStr, "(unknown)");
-						char* dot = strrchr(fn,'.');
-						if(dot)
-						{
-							if(!stricmp(dot,".fmv"))
-								strcpy(emuStr, "Famtasia? (unknown version)");
-							else if(!stricmp(dot,".nmv"))
-								strcpy(emuStr, "Nintendulator? (unknown version)");
-							else if(!stricmp(dot,".vmv"))
-								strcpy(emuStr, "VirtuaNES? (unknown version)");
-							else if(!stricmp(dot,".fcm"))
-								strcpy(emuStr, "FCEU? (unknown version)");
-						}
-					}
-				}
+				//else
+				//{
+				//	if(info.emu_version_used == 1)
+				//		strcpy(emuStr, "Famtasia");
+				//	else if(info.emu_version_used == 2)
+				//		strcpy(emuStr, "Nintendulator");
+				//	else if(info.emu_version_used == 3)
+				//		strcpy(emuStr, "VirtuaNES");
+				//	else
+				//	{
+				//		strcpy(emuStr, "(unknown)");
+				//		char* dot = strrchr(fn,'.');
+				//		if(dot)
+				//		{
+				//			if(!stricmp(dot,".fmv"))
+				//				strcpy(emuStr, "Famtasia? (unknown version)");
+				//			else if(!stricmp(dot,".nmv"))
+				//				strcpy(emuStr, "Nintendulator? (unknown version)");
+				//			else if(!stricmp(dot,".vmv"))
+				//				strcpy(emuStr, "VirtuaNES? (unknown version)");
+				//			else if(!stricmp(dot,".fcm"))
+				//				strcpy(emuStr, "FCEU? (unknown version)");
+				//		}
+				//	}
+				//}
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),emuStr);
-			}
-			else
-			{
-				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"unknown");
-				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"unknown");
-				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"FCEU 0.98.10 (blip)");
-			}
+			//}
+			//else
+			//{
+			//	SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"unknown");
+			//	SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"unknown");
+			//	SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"FCEU 0.98.10 (blip)");
+			//}
+			//--------------------
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
 			EnableWindow(GetDlgItem(hwndDlg,1),TRUE);                     // enable OK
@@ -314,7 +320,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 							continue;
 
-						// filter out everything that's not *.fcm, *.fmv, *.vmv, or *.nmv
+						// filter out everything that's not *.fcm, *.fm2
 						// (because FindFirstFile is too dumb to do that)
 						{
 							char* dot=strrchr(wfd.cFileName,'.');
@@ -325,7 +331,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							int k, extlen=strlen(ext);
 							for(k=0;k<extlen;k++)
 								ext[k]=tolower(ext[k]);
-							if(strcmp(ext,"fcm") && strcmp(ext,"fmv") && strcmp(ext,"vmv") && strcmp(ext,"nmv"))
+							if(strcmp(ext,"fcm") && strcmp(ext,"fm2"))
 								continue;
 						}
 
@@ -339,25 +345,25 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
 
 						char* dot = strrchr(filename, '.');
-						int fcm = (dot && tolower(dot[1]) == 'f' && tolower(dot[2]) == 'c' && tolower(dot[3]) == 'm');
 
-						if(fcm && !FCEUI_MovieGetInfo(filename, &info))
+						if(!FCEUI_MovieGetInfo(filename, &info))
 							continue;
 
+						//------------
+						//attempt to match the movie with the rom
+						//first, try matching md5
+						//then try matching base name
 						char md51 [256];
 						char md52 [256];
-						if(fcm) strcpy(md51, md5_asciistr(GameInfo->MD5));
-						if(fcm) strcpy(md52, md5_asciistr(info.md5_of_rom_used));
-						if(!fcm || strcmp(md51, md52))
+						strcpy(md51, md5_asciistr(GameInfo->MD5));
+						strcpy(md52, md5_asciistr(info.md5_of_rom_used));
+						if(strcmp(md51, md52))
 						{
-							if(fcm)
-							{
-								unsigned int k, count1=0, count2=0; //mbg merge 7/17/06 changed to uint
-								for(k=0;k<strlen(md51);k++) count1 += md51[k]-'0';
-								for(k=0;k<strlen(md52);k++) count2 += md52[k]-'0';
-								if(count1 && count2)
-									continue;
-							}
+							unsigned int k, count1=0, count2=0; //mbg merge 7/17/06 changed to uint
+							for(k=0;k<strlen(md51);k++) count1 += md51[k]-'0';
+							for(k=0;k<strlen(md52);k++) count2 += md52[k]-'0';
+							if(count1 && count2)
+								continue;
 
 							char* tlen1=strstr(wfd.cFileName, " (");
 							char* tlen2=strstr(FileBase, " (");
@@ -373,6 +379,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									continue;
 							}
 						}
+						//-------------
+						//if we get here, then we had a match
 
 						char relative[MAX_PATH];
 						AbsoluteToRelative(relative, filename, BaseDirectory);
@@ -445,12 +453,12 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "Supported Movie Files (*.fcm|*.fmv|*.nmv|*.vmv)\0*.fcm;*.fmv;*.nmv;*.vmv\0FCEU Movie Files (*.fcm)\0*.fcm\0Famtasia Movie Files (*.fmv)\0*.fmv\0Nintendulator Movie Files (*.nmv)\0*.nmv\0VirtuaNES Movie Files (*.vmv)\0*.vmv\0All files(*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "Supported Movie Files (*.fcm|*.fm2)\0*.fcm;*.fm2\0FCEUX Movie Files (*.fm2)\0*.fm2\0FCEU Movie Files (*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;
 							ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
-							ofn.lpstrDefExt = "fcm";
+							ofn.lpstrDefExt = "fm2";
 							ofn.lpstrTitle = "Replay Movie from File";
 
 							if(GetOpenFileName(&ofn))
@@ -612,7 +620,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 		free(p->szFilename);
 		p->szFilename = 0;
 		
-		/* Populate the "record from..." dialog */
+		// Populate the "record from..." dialog
 		{
 			char* findGlob=FCEU_MakeFName(FCEUMKF_STATEGLOB, 0, 0);
 			WIN32_FIND_DATA wfd;
@@ -633,7 +641,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 						continue;
 					
 					if (strlen(wfd.cFileName) < 4 ||
-						!strcmp(wfd.cFileName + (strlen(wfd.cFileName) - 4), ".fcm"))
+						!strcmp(wfd.cFileName + (strlen(wfd.cFileName) - 4), ".fm2"))
 						continue;
 
 					SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)wfd.cFileName);
@@ -674,7 +682,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				memset(&ofn, 0, sizeof(ofn));
 				ofn.lStructSize = sizeof(ofn);
 				ofn.hwndOwner = hwndDlg;
-				ofn.lpstrFilter = "FCE Ultra Save State(*.fc?)\0*.fc?\0\0";
+				ofn.lpstrFilter = "FCEU Save State(*.fc?)\0*.fc?\0\0";
 				ofn.lpstrFile = szChoice;
 				ofn.lpstrDefExt = "fcs";
 				ofn.nMaxFile = MAX_PATH;
@@ -721,9 +729,9 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					memset(&ofn, 0, sizeof(ofn));
 					ofn.lStructSize = sizeof(ofn);
 					ofn.hwndOwner = hwndDlg;
-					ofn.lpstrFilter = "FCE Ultra Movie File(*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
+					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0FCEU Movie File(*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
 					ofn.lpstrFile = szChoice;
-					ofn.lpstrDefExt = "fcm";
+					ofn.lpstrDefExt = "fm2";
 					ofn.nMaxFile = MAX_PATH;
 					ofn.Flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 					if(GetSaveFileName(&ofn))

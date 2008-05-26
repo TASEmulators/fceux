@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -39,6 +40,7 @@
 #include "state.h"
 #include "movie.h"
 #include "driver.h"
+#include "utils/xstring.h"
 
 typedef struct {
            uint8 *data;
@@ -715,46 +717,41 @@ char *FCEU_MakeFName(int type, int id1, char *cd1)
 	{
 		case FCEUMKF_NPTEMP: asprintf(&ret,"%s"PSS"m590plqd94fo.tmp",BaseDirectory);break;
 		case FCEUMKF_MOVIE:
-			if(id1>=0)
-			{
-				if(odirs[FCEUIOD_MOVIES])
-					asprintf(&ret,"%s"PSS"%s.%d.fcm",odirs[FCEUIOD_MOVIES],FileBase,id1);
-				else
-					asprintf(&ret,"%s"PSS"movies"PSS"%s.%d.fcm",BaseDirectory,FileBase,id1);
-				if(stat(ret,&tmpstat)==-1)
-				{
-					if(odirs[FCEUIOD_MOVIES])
-						asprintf(&ret,"%s"PSS"%s.%d.fcm",odirs[FCEUIOD_MOVIES],FileBase,id1);
-					else
-						asprintf(&ret,"%s"PSS"movies"PSS"%s.%d.fcm",BaseDirectory,FileBase,id1);
-				}
-			}
+			if(odirs[FCEUIOD_MOVIES])
+				asprintf(&ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
 			else
-			{
-				if(odirs[FCEUIOD_MOVIES])
-					asprintf(&ret,"%s"PSS"%s.fcm",odirs[FCEUIOD_MOVIES],FileBase);
-				else
-					asprintf(&ret,"%s"PSS"movies"PSS"%s.fcm",BaseDirectory,FileBase);
-			}
+				asprintf(&ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory,FileBase);
 			break;
 		case FCEUMKF_STATE:
-			if(odirs[FCEUIOD_STATES])
 			{
-				asprintf(&ret,"%s"PSS"%s.fc%d",odirs[FCEUIOD_STATES],FileBase,id1);
-			}
-			else
-			{
-				asprintf(&ret,"%s"PSS"fcs"PSS"%s.fc%d",BaseDirectory,FileBase,id1);
-			}
-			if(stat(ret,&tmpstat)==-1)
-			{
+				std::string movieFilenamePart;
+				extern char curMovieFilename[512];
+				if(*curMovieFilename)
+				{
+					char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
+					splitpath(curMovieFilename,drv,dir,name,ext);
+					movieFilenamePart = std::string(".") + name;
+				}
+				const char* mfn = movieFilenamePart.c_str();
+
 				if(odirs[FCEUIOD_STATES])
 				{
-					asprintf(&ret,"%s"PSS"%s.fc%d",odirs[FCEUIOD_STATES],FileBase,id1);
+					asprintf(&ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
 				}
 				else
 				{
-					asprintf(&ret,"%s"PSS"fcs"PSS"%s.fc%d",BaseDirectory,FileBase,id1);
+					asprintf(&ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+				}
+				if(stat(ret,&tmpstat)==-1)
+				{
+					if(odirs[FCEUIOD_STATES])
+					{
+						asprintf(&ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
+					}
+					else
+					{
+						asprintf(&ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+					}
 				}
 			}
 			break;
@@ -830,11 +827,10 @@ char *FCEU_MakeFName(int type, int id1, char *cd1)
 			break;
 		case FCEUMKF_PALETTE:asprintf(&ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);break;
 		case FCEUMKF_MOVIEGLOB:
+			//these globs use ??? because we can load multiple formats
 			if(odirs[FCEUIOD_MOVIES])
-//				asprintf(&ret,"%s"PSS"%s*.fcm",odirs[FCEUIOD_MOVIES],FileBase);
 				asprintf(&ret,"%s"PSS"*.???",odirs[FCEUIOD_MOVIES]);
 			else
-//				asprintf(&ret,"%s"PSS"fcs"PSS"%s*.fcm",BaseDirectory,FileBase);
 				asprintf(&ret,"%s"PSS"movies"PSS"*.???",BaseDirectory);
 			break;
 		case FCEUMKF_MOVIEGLOB2:asprintf(&ret,"%s"PSS"*.???",BaseDirectory);break;

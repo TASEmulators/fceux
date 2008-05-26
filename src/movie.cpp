@@ -65,7 +65,7 @@ SFORMAT FCEUMOV_STATEINFO[]={
 	{ 0 }
 };
 
-char curMovieFilename[512];
+char curMovieFilename[512] = {0};
 
 class MovieRecord
 {
@@ -382,6 +382,8 @@ void FCEUI_StopMovie()
 		StopPlayback();
 	else if(movieMode == MOVIEMODE_RECORD)
 		StopRecording();
+
+	curMovieFilename[0] = 0;
 }
 
 
@@ -460,7 +462,8 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 
 	//TODO - handle reset flag
 
-	//...why do we have to do this. isnt it setup by the rom?
+	//if there is no savestate, we won't have this crucial piece of information at the start of the movie.
+	//so, we have to include it with the movie
 	if(currMovieData.palFlag)
 		FCEUI_SetVidSystem(1);
 	else

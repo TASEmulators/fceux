@@ -771,9 +771,6 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		//Menu Items
 		switch(LOWORD(wParam))
 		{	
-		case ID_ACCELERATOR_CTRL_O:
-			MessageBox(hwndDlg,"Someone hit ctrl+o","test",0);
-			break;
 		case 600: //First item in recent menu
 			OpenMemwatchRecentFile(0);
 			break;
@@ -793,7 +790,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
 			break;
-								 
+
 		case MEMW_FILE_OPEN:
 			LoadMemWatch();
 			break;

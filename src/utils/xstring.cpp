@@ -309,3 +309,58 @@ std::vector<std::string> tokenize_str(const std::string & str,
 
   return tokens;
 }
+
+//this code was taken from WINE (LGPL)
+//http://google.com/codesearch?hl=en&q=+lang:c+splitpath+show:CPvw9Z-euls:_RSotQzmLeU:KGzljMEYFbY&sa=N&cd=9&ct=rc&cs_p=http://gentoo.osuosl.org/distfiles/Wine-20050524.tar.gz&cs_f=wine-20050524/programs/winefile/splitpath.c
+void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
+{
+    const char* end; /* end of processed string */
+	const char* p;	 /* search pointer */
+	const char* s;	 /* copy pointer */
+
+	/* extract drive name */
+	if (path[0] && path[1]==':') {
+		if (drv) {
+			*drv++ = *path++;
+			*drv++ = *path++;
+			*drv = '\0';
+		}
+	} else if (drv)
+		*drv = '\0';
+
+	/* search for end of string or stream separator */
+	for(end=path; *end && *end!=':'; )
+		end++;
+
+	/* search for begin of file extension */
+	for(p=end; p>path && *--p!='\\' && *p!='/'; )
+		if (*p == '.') {
+			end = p;
+			break;
+		}
+
+	if (ext)
+		for(s=end; (*ext=*s++); )
+			ext++;
+
+	/* search for end of directory name */
+	for(p=end; p>path; )
+		if (*--p=='\\' || *p=='/') {
+			p++;
+			break;
+		}
+
+	if (name) {
+		for(s=p; s<end; )
+			*name++ = *s++;
+
+		*name = '\0';
+	}
+
+	if (dir) {
+		for(s=path; s<p; )
+			*dir++ = *s++;
+
+		*dir = '\0';
+	}
+}

@@ -60,6 +60,7 @@ typedef signed int int32;
 #define R_OK 2
 #define X_OK 1
 #define F_OK 0
+#define PATH_MAX 260
 #else
 
 //mingw32 doesnt prototype this for some reason
