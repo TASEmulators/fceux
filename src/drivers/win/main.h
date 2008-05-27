@@ -72,21 +72,15 @@ extern int soundvolume;
 extern int soundquality;
 
 static uint8 cpalette[192];
-//mbg 5/7/08 - I changed the ntsc settings to match pal.
-//this is more for precision emulation, instead of entertainment, which is what fceux is all about nowadays
-//static int srendlinen = 8;
-//static int erendlinen = 231;
-static int srendlinen = 0;
-static int erendlinen = 239;
-static int srendlinep = 0;
-static int erendlinep = 239;
+extern int srendlinen;
+extern int erendlinen;
+extern int srendlinep;
+extern int erendlinep;
 
 static int ntsccol = 0, ntsctint, ntschue;
 
-extern int totallines;
-
 //mbg merge 7/17/06 did these have to be unsigned?
-static int srendline, erendline;
+//static int srendline, erendline;
 
 static int changerecursive=0;
 
@@ -105,7 +99,6 @@ extern HRESULT ddrval;
 extern int windowedfailed;
 extern uint32 goptions;
 
-void FixFL();
 void DoFCEUExit();
 void ShowAboutBox();
 int BlockingCheck();

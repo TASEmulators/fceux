@@ -32,6 +32,7 @@
 #include "input.h"
 #include "video.h"
 #include "../../input.h"
+#include "../../fceu.h"
 
 #include "memwatch.h"
 #include "ppuview.h"
@@ -113,7 +114,7 @@ void CalcWindowSize(RECT *al)
 	al->left = 0;
 	al->right = VNSWID * winsizemulx;
 	al->top = 0;
-	al->bottom = totallines * winsizemuly;
+	al->bottom = FSettings.TotalScanlines() * winsizemuly;
 
 	AdjustWindowRectEx(al,
 		GetWindowLong(hAppWnd, GWL_STYLE),
@@ -475,8 +476,6 @@ void ALoad(char *nameo)
 
 		UpdateCheckedMenuItems();
 
-		FixFL();
-
 		SetMainWindowStuff();
 
 		AddRecentFile(nameo);
@@ -577,7 +576,7 @@ void GetMouseData(uint32 *md)
 			RECT t;
 			GetClientRect(hAppWnd, &t);
 			md[0] = md[0] * VNSWID / (t.right ? t.right : 1);
-			md[1] = md[1] * totallines / (t.bottom ? t.bottom : 1);
+			md[1] = md[1] * FSettings.TotalScanlines() / (t.bottom ? t.bottom : 1);
 		}
 		else
 		{
@@ -588,7 +587,7 @@ void GetMouseData(uint32 *md)
 		md[0] += VNSCLIP;
 	}
 
-	md[1] += srendline;
+	md[1] += FSettings.FirstSLine;
 	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
 }
 
@@ -928,7 +927,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_SetVidSystem(pal_emulation);
 				RefreshThrottleFPS();
 				UpdateCheckedMenuItems();
-				FixFL();
 				//						   DoVideoConfigFix();
 				SetMainWindowStuff();
 				break;
@@ -1218,11 +1216,11 @@ void FixWXY(int pref)
 
 		if(!pref)
 		{
-			winsizemuly = winsizemulx * 256 / 240 * 3 / 4 * saspectw / saspecth;
+			winsizemuly = winsizemulx * 256 / FSettings.TotalScanlines() * 3 / 4 * saspectw / saspecth;
 		}
 		else
 		{
-			winsizemulx = winsizemuly * 240 / 256 * 4 / 3 * saspecth / saspectw;
+			winsizemulx = winsizemuly * FSettings.TotalScanlines() / 256 * 4 / 3 * saspecth / saspectw;
 		}
 	}
 	if(winspecial)
@@ -1352,7 +1350,7 @@ int CreateMainWindow()
 		MainWindow_wndx,
 		MainWindow_wndy,
 		256,
-		240,  /* X,Y ; Width, Height */
+		FSettings.TotalScanlines(),  /* X,Y ; Width, Height */
 		NULL,
 		fceumenu,
 		fceu_hInstance,
@@ -1444,7 +1442,7 @@ int GetClientAbsRect(LPRECT lpRect)
 	else
 	{
 		lpRect->right = point.x + VNSWID * winsizemulx;
-		lpRect->bottom = point.y + totallines * winsizemuly;
+		lpRect->bottom = point.y + FSettings.TotalScanlines() * winsizemuly;
 	}
 	return 1;
 }

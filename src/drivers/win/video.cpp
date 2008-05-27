@@ -21,6 +21,7 @@
 #include "video.h"
 #include "../../drawing.h"
 #include "gui.h"
+#include "../../fceu.h"
 
 static int RecalcCustom(void);
 void InputScreenChanged(int fs);
@@ -261,7 +262,7 @@ int SetVideoMode(int fs)
          ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
          ddsdback.dwWidth=256 * specmul;
-         ddsdback.dwHeight=240 * specmul;
+         ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
          
          /* 
            If the blit hardware can't stretch, assume it's cheap(and slow)
@@ -346,7 +347,7 @@ int SetVideoMode(int fs)
           ddsdback.ddsCaps.dwCaps= DDSCAPS_OFFSCREENPLAIN;
 
           ddsdback.dwWidth=256 * specmul; //vmodes[vmod].srect.right;
-          ddsdback.dwHeight=240 * specmul; //vmodes[vmod].srect.bottom;
+          ddsdback.dwHeight=FSettings.TotalScanlines() * specmul; //vmodes[vmod].srect.bottom;
 
 	  if(!(caps.dwCaps&DDCAPS_BLTSTRETCH))
            ddsdback.ddsCaps.dwCaps|=DDSCAPS_SYSTEMMEMORY; 
@@ -465,7 +466,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 
  srect.top=srect.left=0;
  srect.right=VNSWID * specialmul;
- srect.bottom=totallines * specialmul;
+ srect.bottom=FSettings.TotalScanlines() * specialmul;
 
  if(PaletteChanged==1)
  {
@@ -487,10 +488,10 @@ static void BlitScreenWindow(unsigned char *XBuf)
  ScreenLoc=(unsigned char*)ddsdback.lpSurface; //mbg merge 7/17/06 added cst
  if(veflags&1)
  {
-  memset(ScreenLoc,0,pitch*240);
+  memset(ScreenLoc,0,pitch*ddsdback.dwHeight);
   veflags&=~1;
  }
- Blit8ToHigh(XBuf+srendline*256+VNSCLIP,ScreenLoc, VNSWID, totallines, pitch,specialmul,specialmul);
+ Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,specialmul,specialmul);
 
  IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
 
@@ -557,7 +558,7 @@ static void BlitScreenFull(uint8 *XBuf)
   srect.top=0;
   srect.left=0;
   srect.right=VNSWID * specmul;
-  srect.bottom=totallines * specmul;
+  srect.bottom=FSettings.TotalScanlines() * specmul;
 
   if(vmodes[vmod].flags&VMDF_STRFS)
   {
@@ -568,8 +569,8 @@ static void BlitScreenFull(uint8 *XBuf)
   }
   else
   {
-   drect.top=(vmodes[vmod].y-(totallines*vmodes[vmod].yscale))>>1;
-   drect.bottom=drect.top+(totallines*vmodes[vmod].yscale);
+   drect.top=(vmodes[vmod].y-(FSettings.TotalScanlines()*vmodes[vmod].yscale))>>1;
+   drect.bottom=drect.top+(FSettings.TotalScanlines()*vmodes[vmod].yscale);
    drect.left=(vmodes[vmod].x-VNSWID*vmodes[vmod].xscale)>>1;
    drect.right=drect.left+VNSWID*vmodes[vmod].xscale;
   }
@@ -711,20 +712,20 @@ static void BlitScreenFull(uint8 *XBuf)
    if(vmodes[vmod].special)
     ScreenLoc += (vmodes[vmod].drect.left*(bpp>>3)) + ((vmodes[vmod].drect.top)*pitch);   
    else
-    ScreenLoc+=((vmodes[vmod].x-VNSWID)>>1)*(bpp>>3)+(((vmodes[vmod].y-totallines)>>1))*pitch;
+    ScreenLoc+=((vmodes[vmod].x-VNSWID)>>1)*(bpp>>3)+(((vmodes[vmod].y-FSettings.TotalScanlines())>>1))*pitch;
   }
 
   if(bpp>=16)
   {
-   Blit8ToHigh(XBuf+srendline*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID, totallines, pitch,specmul,specmul); //mbg merge 7/17/06 added cast
+   Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,specmul,specmul); //mbg merge 7/17/06 added cast
   }
   else
   {
-   XBuf+=srendline*256+VNSCLIP;
+   XBuf+=FSettings.FirstSLine*256+VNSCLIP;
    if(vmodes[vmod].special)
-    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, totallines, pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
+    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
    else
-    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, totallines, pitch,1,1,0,0); //mbg merge 7/17/06 added cast
+    Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,1,1,0,0); //mbg merge 7/17/06 added cast
   }
  }
 
@@ -826,7 +827,7 @@ static int RecalcCustom(void)
     cmode->xscale=1;
    }
   }
-  if(totallines*cmode->yscale>cmode->y)
+  if(FSettings.TotalScanlines()*cmode->yscale>cmode->y)
   {
    if(cmode->special)
    {
@@ -841,12 +842,12 @@ static int RecalcCustom(void)
   }
 
   cmode->srect.left=VNSCLIP;
-  cmode->srect.top=srendline;
+  cmode->srect.top=FSettings.FirstSLine;
   cmode->srect.right=256-VNSCLIP;
-  cmode->srect.bottom=erendline+1;
+  cmode->srect.bottom=FSettings.LastSLine+1;
 
-  cmode->drect.top=(cmode->y-(totallines*cmode->yscale))>>1;
-  cmode->drect.bottom=cmode->drect.top+totallines*cmode->yscale;
+  cmode->drect.top=(cmode->y-(FSettings.TotalScanlines()*cmode->yscale))>>1;
+  cmode->drect.bottom=cmode->drect.top+FSettings.TotalScanlines()*cmode->yscale;
   
   cmode->drect.left=(cmode->x-(VNSWID*cmode->xscale))>>1;
   cmode->drect.right=cmode->drect.left+VNSWID*cmode->xscale;
@@ -864,7 +865,7 @@ static int RecalcCustom(void)
   FCEUD_PrintError("Horizontal resolution is too low.");
   return(0);
  }
- if(cmode->y<totallines && !(cmode->flags&VMDF_STRFS))
+ if(cmode->y<FSettings.TotalScanlines() && !(cmode->flags&VMDF_STRFS))
  {
   FCEUD_PrintError("Vertical resolution must not be less than the total number of drawn scanlines.");
   return(0);

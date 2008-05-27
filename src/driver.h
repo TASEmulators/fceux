@@ -207,7 +207,7 @@ typedef struct
  std::string name_of_rom_used;				
 } MOVIE_INFO;
 
-void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata);
+void FCEUI_SaveMovie(char *fname, uint8 flags);
 void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_StopMovie(void);
 int FCEUI_IsMovieActive(void);

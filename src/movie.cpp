@@ -500,7 +500,7 @@ static void openRecordingMovie(const char* fname)
 
 
 //begin recording a new movie
-void FCEUI_SaveMovie(char *fname, uint8 flags, const char* metadata)
+void FCEUI_SaveMovie(char *fname, uint8 flags)
 {
 	assert(fname);
 

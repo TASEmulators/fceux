@@ -70,13 +70,18 @@ typedef struct {
 	int SoundVolume;
 	int GameGenie;
 
-	//Current first and last rendered scanlines.
+	//the currently selected first and last rendered scanlines.
 	int FirstSLine;
 	int LastSLine;
-	//Driver code(user)-specified first and last rendered scanlines. 
+
+	//the number of scanlines in the currently selected configuration
+	int TotalScanlines() { return LastSLine - FirstSLine + 1; }
+
+	//Driver-supplied user-selected first and last rendered scanlines. 
 	//Usr*SLine[0] is for NTSC, Usr*SLine[1] is for PAL.
 	int UsrFirstSLine[2];
 	int UsrLastSLine[2];
+
 	int SnapName;
 	uint32 SndRate;
 	int soundq;

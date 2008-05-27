@@ -131,20 +131,6 @@ void UpdateReplayDialog(HWND hwndDlg)
 			sprintf(tmp, "%lu", info.rerecord_count);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 			
-			{
-				//// convert utf8 metadata to windows widechar
-				//WCHAR wszMeta[MOVIE_MAX_METADATA];
-				//if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, metadata, -1, wszMeta, MOVIE_MAX_METADATA))
-				//{
-				//	if(wszMeta[0])
-				//		SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), wszMeta);              // metadata
-				//	else
-				//		SetWindowTextW(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO), L"(this movie has no author info)");				   // metadata
-				//}
-
-				SetDlgItemTextW(hwndDlg,IDC_LABEL_AUTHORINFO,L"Temporarily non-functional");
-			}
-			
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
 			
@@ -214,8 +200,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 	{
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES),"");
-		//SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
-		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_AUTHORINFO),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"Nothing (invalid movie)");
@@ -336,8 +321,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						}
 
 						MOVIE_INFO info;
-						char metadata[MOVIE_MAX_METADATA];
-						char rom_name[MAX_PATH];
 
 						memset(&info, 0, sizeof(info));
 
@@ -549,7 +532,6 @@ void FCEUD_MovieReplayFrom(void)
 
 		pal_emulation = FCEUI_GetCurrentVidSystem(0,0);
 		UpdateCheckedMenuItems();
-		FixFL();
 		SetMainWindowStuff();
 		RefreshThrottleFPS();
 	}
@@ -708,7 +690,6 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				{
 					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 					p->szFilename = GetRecordPath(hwndDlg);
-					GetDlgItemTextW(hwndDlg,IDC_EDIT_AUTHORINFO,p->metadata,MOVIE_MAX_METADATA);
 					p->recordFrom = (int)lIndex;
 					if(lIndex>=3)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
@@ -755,10 +736,6 @@ void FCEUD_MovieRecordTo()
 
 	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{
-		// turn WCHAR into UTF8
-		char meta[MOVIE_MAX_METADATA << 2];
-		WideCharToMultiByte(CP_UTF8, 0, p.metadata, -1, meta, sizeof(meta), NULL, NULL);
-
 		if(p.recordFrom >= 3)
 		{
 			// attempt to load the savestate
@@ -780,7 +757,7 @@ void FCEUD_MovieRecordTo()
 
 		uint8 flags = 0;
 		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
-		FCEUI_SaveMovie(p.szFilename, flags, meta);
+		FCEUI_SaveMovie(p.szFilename, flags);
 	}
 
 	if(p.szFilename)

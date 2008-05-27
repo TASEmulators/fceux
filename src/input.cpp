@@ -753,7 +753,7 @@ static void CommandStateLoad(void)
 
 static void CommandMovieRecord(void)
 {
-	FCEUI_SaveMovie(0, 0, 0);
+	FCEUI_SaveMovie(0, 0);
 }
 
 static void CommandMovieReplay(void)

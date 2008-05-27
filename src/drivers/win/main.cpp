@@ -127,7 +127,6 @@ HRESULT ddrval;
 
 static char TempArray[2048];
 
-int totallines = 0;
 
 static int exiting = 0;
 static volatile int moocow = 0;
@@ -140,6 +139,11 @@ extern int autoHoldKey, autoHoldClearKey;
 extern int frame_display, input_display;
 
 int soundo = 1;
+
+int srendlinen = 8;
+int erendlinen = 231;
+int srendlinep = 0;
+int erendlinep = 239;
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
 int closeGame = 0;
@@ -299,16 +303,9 @@ int BlockingCheck()
 	return exiting ? 0 : 1;
 }
 
-void FixFL()
-{
-	FCEUI_GetCurrentVidSystem(&srendline, &erendline);
-	totallines = erendline - srendline + 1;
-}
-
 void UpdateRendBounds()
 { 
 	FCEUI_SetRenderedLines(srendlinen, erendlinen, srendlinep, erendlinep);
-	FixFL(); 
 }
 
 /**
