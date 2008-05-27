@@ -307,7 +307,7 @@ bool UpdateFromGUI = false;				// When this flag is set, the next new attempt wi
 										//	the settings from gui to mem. note that this cannot set
 										//	the settings for both players at once... maybe later.
 
-int X,Y,Z,P,Prand,Q,Qrand;              // Static variables (is this a contradiction?) and
+static int X,Y,Z,P,Prand,Q,Qrand;       // Static variables (is this a contradiction?) and
                                         //	probabilities. XYZ remain the same, PQ return randomly a
                                         //	number in the range of 0-P or 0-Q. They can be used in
                                         //	the code like any other command ("5+X echo"). The button
