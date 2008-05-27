@@ -286,11 +286,20 @@ int BlockingCheck()
 		{
 			//other accelerator capable dialogs could be added here
 			extern HWND hwndMemWatch;
-			int accelerated = 0;
-			if(IsChild(hwndMemWatch,msg.hwnd))
-				accelerated = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
+			int handled = 0;
+			if(hwndMemWatch)
+			{
+				if(IsChild(hwndMemWatch,msg.hwnd))
+					handled = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
+				if(!handled)
+				{
+					int resylt = IsDialogMessage(hwndMemWatch,&msg);
+					handled = resylt;
+				}
+			}
 
-			if(!accelerated)
+
+			if(!handled)
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
