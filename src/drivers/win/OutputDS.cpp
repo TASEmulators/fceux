@@ -67,14 +67,14 @@ public:
 		HRESULT hr = ds_dev->CreateSoundBuffer(&dsbd,&ds_buf,0);
 		cPlay = 0;
 
-		if(hr)
+		if(!hr)
 		{
 			hr = ds_buf->Play(0,0,DSBPLAY_LOOPING);
 		}
 
 		//if we couldnt create the voice, then a sound card is missing.
 		//we'll use this in getVoice to catch the condition
-		if(!hr)
+		if(hr)
 			dead = true;
 	}
 	
