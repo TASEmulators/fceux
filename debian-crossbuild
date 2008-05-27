@@ -1,0 +1,1 @@
+PLATFORM=win32 CC=i586-mingw32msvc-gcc CXX=i586-mingw32msvc-g++ WRC=i586-mingw32msvc-windres WINDRES=i586-mingw32msvc-windres CFLAGS=-Wno-write-strings scons
