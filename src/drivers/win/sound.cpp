@@ -265,8 +265,10 @@ void TrashSound() {
 void DoTrashSound() {
 	if(dsout) delete dsout;
 	if(player) delete player;
+	if(player8) delete player8;
 	dsout = 0;
 	player = 0;
+	player8 = 0;
 	trashPending = false;
 }
 
@@ -293,12 +295,15 @@ void win_Throttle() {
 		player->throttle();
 }
 
+static bool killsound;
 void win_SoundInit(int bits) {
-	dsout = new OAKRA_Module_OutputDS();
+	killsound = false;
+	dsout = new OAKRA_Module_OutputDS(); 
 	if(soundoptions&SO_GFOCUS)
 		dsout->start(0);
 	else
 		dsout->start(hAppWnd);
+	
 	dsout->beginThread();
 	OAKRA_Format fmt;
 	fmt.format = bits==8?OAKRA_U8:OAKRA_S16;
@@ -306,14 +311,22 @@ void win_SoundInit(int bits) {
 	fmt.rate = soundrate;
 	fmt.size = OAKRA_Module::calcSize(fmt);
 	OAKRA_Voice *voice = dsout->getVoice(fmt);
+	if(!voice)
+	{
+		killsound = true;
+		FCEUD_PrintError("Couldn't initialize sound buffers. Sound disabled");
+	}
 
 	player = new Player();
 	player8 = new Player8(player);
 
-	dsout->lock();
-	if(bits == 8) voice->setSource(player8);
-	else voice->setSource(player);
-	dsout->unlock();
+	if(voice)
+	{
+		dsout->lock();
+		if(bits == 8) voice->setSource(player8);
+		else voice->setSource(player);
+		dsout->unlock();
+	}
 }
 
 
@@ -334,6 +347,8 @@ int InitSound() {
 	}
 
 	win_SoundInit(bits);
+	if(killsound)
+		TrashSound();
 
 	FCEUI_Sound(soundrate);
 	return 1;
@@ -354,7 +369,8 @@ void win_SoundWriteData(int32 *buffer, int count) {
 	short *sbuf = (short *)tempbuf;
 	for(int i=0;i<count;i++)
 		sbuf[i] = buffer[i];
-	player->receive(count*2,tempbuf);
+	if(player)
+		player->receive(count*2,tempbuf);
 }
 
 

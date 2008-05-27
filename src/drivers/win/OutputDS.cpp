@@ -33,7 +33,8 @@ public:
 	}
 	virtual ~DSVoice() {
 		driver->freeVoiceInternal(this,true);
-		ds_buf->Release();
+		if(ds_buf)
+			ds_buf->Release();
 	}
 	DSVoice(OAKRA_Module_OutputDS *driver, OAKRA_Format &format, IDirectSound *ds_dev, bool global) { 
 		this->driver = driver;
@@ -66,7 +67,15 @@ public:
 		HRESULT hr = ds_dev->CreateSoundBuffer(&dsbd,&ds_buf,0);
 		cPlay = 0;
 
-		hr = ds_buf->Play(0,0,DSBPLAY_LOOPING);
+		if(hr)
+		{
+			hr = ds_buf->Play(0,0,DSBPLAY_LOOPING);
+		}
+
+		//if we couldnt create the voice, then a sound card is missing.
+		//we'll use this in getVoice to catch the condition
+		if(!hr)
+			dead = true;
 	}
 	
 	//not supported
@@ -165,13 +174,27 @@ OAKRA_Module_OutputDS::~OAKRA_Module_OutputDS() {
 
 OAKRA_Voice *OAKRA_Module_OutputDS::getVoice(OAKRA_Format &format, OAKRA_Module *source) {
 	DSVoice *dsv = (DSVoice *)getVoice(format);
-	dsv->setSource(source);
+	if(dsv->dead)
+	{
+		delete dsv;
+	}
+	else
+	{
+		dsv->setSource(source);
+	}
 	return dsv;
 }
 
 OAKRA_Voice *OAKRA_Module_OutputDS::getVoice(OAKRA_Format &format) {
 	DSVoice *voice = new DSVoice(this,format,((Data *)data)->ds_dev,((Data *)data)->global);
-	((Data *)data)->voices.push_back(voice);
+	if(voice->dead)
+	{
+		delete voice;
+	}
+	else
+	{
+		((Data *)data)->voices.push_back(voice);
+	}
 	return voice;
 }
 void OAKRA_Module_OutputDS::freeVoice(OAKRA_Voice *voice) {
