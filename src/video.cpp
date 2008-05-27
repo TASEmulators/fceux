@@ -46,6 +46,8 @@ uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
 static uint8 *xbsave=NULL;
 
+GUIMESSAGE guiMessage;
+
 //for input display
 extern int input_display;
 extern uint32 cur_input_display;
@@ -133,8 +135,6 @@ int FCEU_InitVirtualVideo(void)
 	return 1;
 }
 
-int howlong;
-char errmsg[65];
 
 #ifdef FRAMESKIP
 
@@ -165,176 +165,183 @@ void FCEUI_SaveSnapshot(void)
 
 static void ReallySnap(void)
 {
- int x=SaveSnapshot();
- if(!x)
-  FCEU_DispMessage("Error saving screen snapshot.");
- else
-  FCEU_DispMessage("Screen snapshot %d saved.",x-1);
+	int x=SaveSnapshot();
+	if(!x)
+		FCEU_DispMessage("Error saving screen snapshot.");
+	else
+		FCEU_DispMessage("Screen snapshot %d saved.",x-1);
 }
 
 void FCEU_PutImage(void)
 {
-	#ifdef SHOWFPS
+#ifdef SHOWFPS
 	ShowFPS();
-	#endif
-/*
-		 // HACK to record input and/or frame counter into AVI
-		 extern int frame_display, input_display, movcounter;
-		 int movieDrawInAVI = FCEUI_AviIsRecording() && (frame_display || input_display) && movcounter;
-		 if(movieDrawInAVI)
-		 {
-			FCEU_DrawMovies(XBuf);
-			DrawMessage();
-		 }
-*/
-        if(GameInfo->type==GIT_NSF)
-        {
-         DrawNSF(XBuf);
-         /* Save snapshot after NSF screen is drawn.  Why would we want to
-            do it before?
-         */
-         if(dosnapsave)
-         {
-          ReallySnap();
-          dosnapsave=0;
-         }
-        } 
-        else
-        {
-         /* Update AVI before overlay stuff is written */
-         if(!FCEUI_EmulationPaused())
-          FCEUI_AviVideoUpdate(XBuf);
-         /* Save backbuffer before overlay stuff is written. */
-         if(!FCEUI_EmulationPaused())
-          memcpy(XBackBuf, XBuf, 256*256);
-         /* Save snapshot before overlay stuff is written. */
-         if(dosnapsave)
-         {
-          ReallySnap();
-          dosnapsave=0;
-         }
-         if(GameInfo->type==GIT_VSUNI)
-          FCEU_VSUniDraw(XBuf);
-		 FCEU_DrawSaveStates(XBuf);
-		 FCEU_DrawMovies(XBuf);
-         FCEU_DrawNTSCControlBars(XBuf);
-		 FCEU_DrawRecordingStatus(XBuf);
-        }
-//		if(!movieDrawInAVI)
-	        DrawMessage();
-        FCEU_DrawInput(XBuf);
-
-		//Fancy input display code
-		if(input_display)
+#endif
+	
+	if(GameInfo->type==GIT_NSF)
+	{
+		DrawNSF(XBuf);
+		
+		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
+		if(dosnapsave)
 		{
-			int controller, c, color;
-			int i, j;
-			uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
-			if(input_display > 4) input_display = 4;
-			for(controller = 0; controller < input_display; controller++, t += 56)
+			ReallySnap();
+			dosnapsave=0;
+		}
+	} 
+	else
+	{
+
+		//Some messages need to be displayed before the avi is dumped
+		DrawMessage(true);
+
+		//Update AVI before overlay stuff is written
+		if(!FCEUI_EmulationPaused())
+			FCEUI_AviVideoUpdate(XBuf);
+		
+		//Save backbuffer before overlay stuff is written.
+		if(!FCEUI_EmulationPaused())
+			memcpy(XBackBuf, XBuf, 256*256);
+
+		//Save snapshot before overlay stuff is written.
+		if(dosnapsave)
+		{
+			ReallySnap();
+			dosnapsave=0;
+		}
+		if(GameInfo->type==GIT_VSUNI)
+			FCEU_VSUniDraw(XBuf);
+
+		FCEU_DrawSaveStates(XBuf);
+		FCEU_DrawMovies(XBuf);
+		FCEU_DrawNTSCControlBars(XBuf);
+		FCEU_DrawRecordingStatus(XBuf);
+	}
+	
+	DrawMessage(false);
+	FCEU_DrawInput(XBuf);
+
+	//Fancy input display code
+	if(input_display)
+	{
+		int controller, c, color;
+		int i, j;
+		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
+		if(input_display > 4) input_display = 4;
+		for(controller = 0; controller < input_display; controller++, t += 56)
+		{
+			for(i = 0; i < 34;i++)
+				for(j = 0; j <9 ; j++)
+					t[i+j*256] = (t[i+j*256] & 15) | 0xC0;
+			for(i = 3; i < 6; i++)
+				for(j = 3; j< 6; j++)
+					t[i+j*256] = 3;
+			c = cur_input_display >> (controller * 8);
+			c &= 255;
+			//A
+			color = c&1?4:3;
+			for(i=0; i < 4; i++)
 			{
-				for(i = 0; i < 34;i++)
-					for(j = 0; j <9 ; j++)
-						t[i+j*256] = (t[i+j*256] & 15) | 0xC0;
-				for(i = 3; i < 6; i++)
-					for(j = 3; j< 6; j++)
-						t[i+j*256] = 3;
-				c = cur_input_display >> (controller * 8);
-				c &= 255;
-				//A
-				color = c&1?4:3;
-				for(i=0; i < 4; i++)
+				for(j = 0; j < 4; j++)
 				{
-					for(j = 0; j < 4; j++)
-					{
-						if(i%3==0 && j %3 == 0)
-							continue;
-						t[30+4*256+i+j*256] = color;
-					}
+					if(i%3==0 && j %3 == 0)
+						continue;
+					t[30+4*256+i+j*256] = color;
 				}
-				//B
-				color = c&2?4:3;
-				for(i=0; i < 4; i++)
+			}
+			//B
+			color = c&2?4:3;
+			for(i=0; i < 4; i++)
+			{
+				for(j = 0; j < 4; j++)
 				{
-					for(j = 0; j < 4; j++)
-					{
-						if(i%3==0 && j %3 == 0)
-							continue;
-						t[24+4*256+i+j*256] = color;
-					}
+					if(i%3==0 && j %3 == 0)
+						continue;
+					t[24+4*256+i+j*256] = color;
 				}
-				//Select
-				color = c&4?4:3;
-				for(i = 0; i < 4; i++)
+			}
+			//Select
+			color = c&4?4:3;
+			for(i = 0; i < 4; i++)
+			{
+				t[11+5*256+i] = color;
+				t[11+6*256+i] = color;
+			}
+			//Start
+			color = c&8?4:3;
+			for(i = 0; i < 4; i++)
+			{
+				t[17+5*256+i] = color;
+				t[17+6*256+i] = color;
+			}
+			//Up
+			color = c&16?4:3;
+			for(i = 0; i < 3; i++)
+			{
+				for(j = 0; j < 3; j++)
 				{
-					t[11+5*256+i] = color;
-					t[11+6*256+i] = color;
+					t[3+i+256*j] = color;
 				}
-				//Start
-				color = c&8?4:3;
-				for(i = 0; i < 4; i++)
+			}
+			//Down
+			color = c&32?4:3;
+			for(i = 0; i < 3; i++)
+			{
+				for(j = 0; j < 3; j++)
 				{
-					t[17+5*256+i] = color;
-					t[17+6*256+i] = color;
+					t[3+i+256*j+6*256] = color;
 				}
-				//Up
-				color = c&16?4:3;
-				for(i = 0; i < 3; i++)
+			}
+			//Left
+			color = c&64?4:3;
+			for(i = 0; i < 3; i++)
+			{
+				for(j = 0; j < 3; j++)
 				{
-					for(j = 0; j < 3; j++)
-					{
-						t[3+i+256*j] = color;
-					}
+					t[3*256+i+256*j] = color;
 				}
-				//Down
-				color = c&32?4:3;
-				for(i = 0; i < 3; i++)
+			}
+			//Right
+			color = c&128?4:3;
+			for(i = 0; i < 3; i++)
+			{
+				for(j = 0; j < 3; j++)
 				{
-					for(j = 0; j < 3; j++)
-					{
-						t[3+i+256*j+6*256] = color;
-					}
-				}
-				//Left
-				color = c&64?4:3;
-				for(i = 0; i < 3; i++)
-				{
-					for(j = 0; j < 3; j++)
-					{
-						t[3*256+i+256*j] = color;
-					}
-				}
-				//Right
-				color = c&128?4:3;
-				for(i = 0; i < 3; i++)
-				{
-					for(j = 0; j < 3; j++)
-					{
-						t[6+3*256+i+256*j] = color;
-					}
+					t[6+3*256+i+256*j] = color;
 				}
 			}
 		}
+	}
+}
+
+void FCEU_DispMessageOnMovie(char *format, ...)
+{
+	va_list ap;
+
+	va_start(ap,format);
+	vsprintf(guiMessage.errmsg,format,ap);
+	va_end(ap);
+
+	guiMessage.howlong = 180;
+	guiMessage.isMovieMessage = true;
 }
 
 void FCEU_DispMessage(char *format, ...)
 {
- va_list ap;
+	va_list ap;
 
- va_start(ap,format);
- vsprintf(errmsg,format,ap);
- va_end(ap);
+	va_start(ap,format);
+	vsprintf(guiMessage.errmsg,format,ap);
+	va_end(ap);
 
- howlong=180;
-
- //mbg movie 5/23/08
- //extern int movcounter;
- //movcounter=0;
+	guiMessage.howlong = 180;
+	guiMessage.isMovieMessage = false;
 }
 
-void FCEU_ResetMessages(void)
+void FCEU_ResetMessages()
 {
- howlong=0;
+	guiMessage.howlong = 0;
+	guiMessage.isMovieMessage = false;
 }
 
 

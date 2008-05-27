@@ -125,13 +125,16 @@ void DrawTextLineBG(uint8 *dest)
 }
 
 
-
-void DrawMessage(void)
+void DrawMessage(bool beforeMovie)
 {
-	if(howlong)
+	if(guiMessage.howlong)
 	{
+		//don't display movie messages if we're not before the movie
+		if(beforeMovie && !guiMessage.isMovieMessage)
+			return;
+
 		uint8 *t;
-		howlong--;
+		guiMessage.howlong--;
 		t=XBuf+FCEU_TextScanlineOffsetFromBottom(16);
 
 		/*
@@ -148,12 +151,12 @@ void DrawMessage(void)
 		if(t>=XBuf)
 		{
 			int color = 0x20;
-			if(howlong == 39) color = 0x38;
-			if(howlong <= 30) color = 0x2C;
-			if(howlong <= 20) color = 0x1C;
-			if(howlong <= 10) color = 0x11;
-			if(howlong <= 5) color = 0x1;
-			DrawTextTrans(t, 256, (uint8 *)errmsg, color+0x80);
+			if(guiMessage.howlong == 39) color = 0x38;
+			if(guiMessage.howlong <= 30) color = 0x2C;
+			if(guiMessage.howlong <= 20) color = 0x1C;
+			if(guiMessage.howlong <= 10) color = 0x11;
+			if(guiMessage.howlong <= 5) color = 0x1;
+			DrawTextTrans(t, 256, (uint8 *)guiMessage.errmsg, color+0x80);
 		}
 	}
 }

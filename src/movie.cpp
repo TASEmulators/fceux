@@ -358,7 +358,7 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 /// Stop movie playback.
 void StopPlayback()
 {
-	FCEU_DispMessage("Movie playback stopped.");
+	FCEU_DispMessageOnMovie("Movie playback stopped.");
 	movieMode = MOVIEMODE_INACTIVE;
 }
 
