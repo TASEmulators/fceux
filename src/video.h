@@ -10,7 +10,7 @@ extern struct GUIMESSAGE
 	int howlong;
 
 	//the current gui message
-	char errmsg[65];
+	char errmsg[86];
 
 	//indicates that the movie should be drawn even on top of movies
 	bool isMovieMessage;
