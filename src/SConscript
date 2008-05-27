@@ -49,4 +49,7 @@ file_list.append(platform_files)
 
 print env['LINKFLAGS']
 
-env.Program('fceu', file_list)
+if env['PLATFORM'] == 'win32':
+  env.Program('fceux.exe', file_list)
+else:
+  env.Program('fceux', file_list)
