@@ -627,7 +627,7 @@ static void BlitScreenFull(uint8 *XBuf)
       "decb %%bl\n\t"
       "jne akoop1\n\t"
       :
-      : "S" (XBuf+srendline*256+VNSCLIP), "D" (ScreenLoc+((240-totallines)/2)*pitch+(640-(VNSWID<<1))/2),"b" (totallines), "c" ((pitch-VNSWID)<<1)
+      : "S" (XBuf+FSettings.FirstSLine*256+VNSCLIP), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-(VNSWID<<1))/2),"b" (FSettings.TotalScanlines()), "c" ((pitch-VNSWID)<<1)
       : "%al", "%edx", "%cc" );
   }
   else
@@ -649,7 +649,7 @@ static void BlitScreenFull(uint8 *XBuf)
      "decb %%bl\n\t"
      "jne koop1\n\t"
       :
-      : "S" (XBuf+srendline*256), "D" (ScreenLoc+((240-totallines)/2)*pitch+(640-512)/2),"b" (totallines), "c" (pitch-512+pitch)
+      : "S" (XBuf+FSettings.FirstSLine*256), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-512)/2),"b" (FSettings.TotalScanlines()), "c" (pitch-512+pitch)
       : "%al", "%edx", "%cc" );
   }
  }
@@ -676,7 +676,7 @@ static void BlitScreenFull(uint8 *XBuf)
       "decb %%bl\n\t"
       "jne ayoop1\n\t"
       :
-      : "S" (XBuf+srendline*256+VNSCLIP), "D" (ScreenLoc+((240-totallines)/2)*pitch+(640-(VNSWID<<1))/2),"b" (totallines), "c" ((pitch-VNSWID)<<1)
+      : "S" (XBuf+FSettings.FirstSLine*256+VNSCLIP), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-(VNSWID<<1))/2),"b" (FSettings.TotalScanlines()), "c" ((pitch-VNSWID)<<1)
       : "%al", "%edx", "%cc" );
   }
   else
@@ -699,7 +699,7 @@ static void BlitScreenFull(uint8 *XBuf)
       "decb %%bl\n\t"
       "jne yoop1\n\t"
       :
-      : "S" (XBuf+srendline*256), "D" (ScreenLoc+((240-totallines)/2)*pitch+(640-512)/2),"b" (totallines), "c" (pitch-512+pitch)
+      : "S" (XBuf+FSettings.FirstSLine*256), "D" (ScreenLoc+((240-FSettings.TotalScanlines())/2)*pitch+(640-512)/2),"b" (FSettings.TotalScanlines()), "c" (pitch-512+pitch)
       : "%al", "%edx", "%cc" );
   }
  }

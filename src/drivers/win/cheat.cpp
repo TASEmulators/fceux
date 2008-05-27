@@ -23,8 +23,8 @@
 #include "memview.h"
 #include "memwatch.h"
 #include "debugger.h"
-#include "..\..\fceu.h"
-#include "..\..\cart.h"
+#include "../../fceu.h"
+#include "../../cart.h"
 
 HWND hCheat; //mbg merge 7/19/06 had to add 
 int CheatWindow;

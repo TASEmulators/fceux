@@ -5,6 +5,7 @@
 #include "keyboard.h"
 #include "gui.h"
 #include "../../input.h"
+#include <commctrl.h>
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 

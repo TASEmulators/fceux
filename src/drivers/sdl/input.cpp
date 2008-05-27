@@ -208,7 +208,7 @@ KeyboardCommands()
         // f5 to save state, Shift-f5 to save movie
         if(keyonly(F5)) {
             if(is_shift) {
-                FCEUI_SaveMovie(NULL,0,NULL);
+                FCEUI_SaveMovie(NULL,0);
             } else {
                 FCEUI_SaveState(NULL);
             }

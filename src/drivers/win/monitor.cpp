@@ -3,9 +3,9 @@
 #include "debugger.h"
 #include "debuggersp.h"
 #include "memwatch.h"
-#include "..\..\fceu.h"
-#include "..\..\debug.h"
-#include "..\..\conddebug.h"
+#include "../../fceu.h"
+#include "../../debug.h"
+#include "../../conddebug.h"
 #include <assert.h>
 
 HWND hMonitor = 0;

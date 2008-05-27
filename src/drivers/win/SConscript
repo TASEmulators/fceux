@@ -1,0 +1,59 @@
+Import('env')
+
+my_list =  Split("""
+args.cpp
+aviout.cpp
+basicbot.cpp
+cdlogger.cpp
+cheat.cpp
+common.cpp
+config.cpp
+debugger.cpp
+debuggersp.cpp
+directories.cpp
+gui.cpp
+guiconfig.cpp
+input.cpp
+joystick.cpp
+keyboard.cpp
+log.cpp
+main.cpp
+mapinput.cpp
+memview.cpp
+memviewsp.cpp
+memwatch.cpp
+monitor.cpp
+netplay.cpp
+ntview.cpp
+OutputDS.cpp
+palette.cpp
+ppuview.cpp
+pref.cpp
+replay.cpp
+sound.cpp
+state.cpp
+tasedit.cpp
+throttle.cpp
+timing.cpp
+tracer.cpp
+video.cpp
+wave.cpp
+window.cpp 
+""")
+
+# TODO this is probably .obj if built on a Windows system...
+my_list.append('res.o')
+env.Command('res.o', 'res.rc', env['WINDRES'] + ' -o $TARGET $SOURCE')
+
+subdirs = Split("""
+directx
+zlib""")
+
+for x in range(len(my_list)):
+  my_list[x] = 'drivers/win/' + my_list[x]
+
+for dir in subdirs:
+  subdir_files = SConscript('%s/SConscript' % dir)
+  my_list.append(subdir_files)
+
+Return('my_list')

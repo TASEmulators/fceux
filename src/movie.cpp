@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-#ifdef MSVC
+#ifdef WIN32
 #include <windows.h>
 #endif
 
@@ -391,7 +391,7 @@ void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
 void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
 static void ResetInputTypes()
 {
-#ifdef MSVC
+#ifdef WIN32
 	extern int UsrInputType[3];
 	UsrInputType[0] = SI_GAMEPAD;
 	UsrInputType[1] = SI_GAMEPAD;

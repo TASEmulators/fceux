@@ -151,7 +151,7 @@ void FCEU_PutImageDummy(void)
   FCEU_DrawSaveStates(XBuf);
   FCEU_DrawMovies(XBuf);
  }
- if(howlong) howlong--; /* DrawMessage() */
+ if(guiMessage.howlong) guiMessage.howlong--; /* DrawMessage() */
 }
 #endif
 

@@ -1054,7 +1054,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// TODO: Proper stop logging
 				{
 					MENUITEMINFO mi;
-					char *str = CreateSoundSave() ? "Stop Sound Logging" : "Log Sound As...";
+					// Evil:
+                                        char *strT = "Stop Sound Logging";
+                                        char *strF = "Log Sound As...";
+					char *str = CreateSoundSave() ? strT : strF;
 
 					memset(&mi,0,sizeof(mi));
 					mi.fMask=MIIM_DATA|MIIM_TYPE;

@@ -21,12 +21,12 @@
 #include <algorithm>
 
 #include "common.h"
-#include "..\..\types.h"
-#include "..\..\debug.h"
-#include "..\..\fceu.h"
-#include "..\..\cheat.h"
-#include "..\..\cart.h"
-#include "..\..\ines.h"
+#include "../../types.h"
+#include "../../debug.h"
+#include "../../fceu.h"
+#include "../../cheat.h"
+#include "../../cart.h"
+#include "../../ines.h"
 #include "memview.h"
 #include "debugger.h"
 #include "cdlogger.h"

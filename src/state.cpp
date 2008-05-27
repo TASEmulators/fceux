@@ -263,7 +263,7 @@ static int ReadStateChunks(FILE *st, int32 totalsize)
 			extern uint8 *XBackBuf;
 	        if(size != fread(XBackBuf,1,size,st))
 				ret = 0;
-#ifdef MSVC
+#ifdef WIN32
 			else
 			{
 				FCEUD_BlitScreen(XBuf);

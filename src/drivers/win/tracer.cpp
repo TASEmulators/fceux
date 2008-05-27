@@ -22,12 +22,12 @@
 
 #include "common.h"
 #include "debugger.h"
-#include "..\..\x6502.h"
-#include "..\..\fceu.h"
-#include "..\..\cart.h" //mbg merge 7/19/06 moved after fceu.h
-#include "..\..\file.h"
-#include "..\..\debug.h"
-#include "..\..\asm.h"
+#include "../../x6502.h"
+#include "../../fceu.h"
+#include "../../cart.h" //mbg merge 7/19/06 moved after fceu.h
+#include "../../file.h"
+#include "../../debug.h"
+#include "../../asm.h"
 #include "cdlogger.h"
 #include "tracer.h"
 #include "memview.h"

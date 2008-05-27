@@ -63,7 +63,6 @@ void SetEmulationSpeed(int type);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();
 
-extern const char* ScanNames[];
 extern CFGSTRUCT HotkeyConfig[];
 
 extern int FCEUD_CommandMapping[EMUCMD_MAX];

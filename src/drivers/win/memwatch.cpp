@@ -19,9 +19,9 @@
 */
 
 #include "common.h"
-#include "..\..\fceu.h"
+#include "../../fceu.h"
 #include "memwatch.h"
-#include "..\..\debug.h"
+#include "../../debug.h"
 #include "debugger.h"
 
 const int NUMWATCHES = 24;
