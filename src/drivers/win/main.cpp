@@ -303,13 +303,19 @@ int BlockingCheck()
 				if(IsChild(hwndMemWatch,msg.hwnd))
 					handled = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
 				if(!handled)
-				{
-					int resylt = IsDialogMessage(hwndMemWatch,&msg);
-					handled = resylt;
-				}
+					handled = IsDialogMessage(hwndMemWatch,&msg);
 			}
 
-
+			if(!handled)
+				if(msg.hwnd == hAppWnd)
+				{
+					handled = TranslateAccelerator(hAppWnd,fceu_hAccel,&msg);
+					if(handled)
+					{
+						int zzz=9;
+					}
+				}
+	
 			if(!handled)
 			{
 				TranslateMessage(&msg);

@@ -697,7 +697,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
     case WM_COMMAND:
 
-		if(!(wParam>>16))
+		if(HIWORD(wParam) == 0 || HIWORD(wParam) == 1)
 		{
 			wParam &= 0xFFFF;
 
@@ -715,7 +715,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				if(recent_directories[wParam-700])
 					LoadNewGamey(hWnd, recent_directories[wParam - 700]);
 			}
-			switch(wParam)
+			switch(LOWORD(wParam))
 			{
 				//-------
 				//mbg merge 7/18/06 added XD tools
@@ -1025,6 +1025,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				CreateMemWatch();
 				break;
 
+			case ACCEL_CTRL_O:
 			case MENU_OPEN_FILE:
 				// User selected the Open File menu => Show the file selection dialog
 				LoadNewGamey(hWnd, 0);

@@ -791,6 +791,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			CloseMemoryWatch();
 			break;
 
+		case ACCEL_CTRL_O:
 		case MEMW_FILE_OPEN:
 			LoadMemWatch();
 			break;
