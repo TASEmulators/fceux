@@ -36,7 +36,9 @@ public:
 		if(ds_buf)
 			ds_buf->Release();
 	}
-	DSVoice(OAKRA_Module_OutputDS *driver, OAKRA_Format &format, IDirectSound *ds_dev, bool global) { 
+	DSVoice(OAKRA_Module_OutputDS *driver, OAKRA_Format &format, IDirectSound *ds_dev, bool global) 
+		: ds_buf(0)
+	{ 
 		this->driver = driver;
 		vol = 255;
 		pan = 0;
