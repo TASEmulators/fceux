@@ -43,7 +43,7 @@ window.cpp
 
 # TODO this is probably .obj if built on a Windows system...
 my_list.append('res.o')
-env.Command('res.o', 'res.rc', env['WINDRES'] + ' -o $TARGET $SOURCE')
+env.Command('res.o', 'res.rc', env['WINDRES'] + ' -I/src/drivers/win -o $TARGET $SOURCE')
 
 subdirs = Split("""
 directx
