@@ -8,4 +8,5 @@ void RedoCheatsLB(HWND hwndDlg);
 void ConfigCheats(HWND hParent);
 void DoGGConv();
 void SetGGConvFocus(int address,int compare);
+void UpdateCheatList();
 //void ConfigAddCheat(HWND wnd); //bbit edited:commented out this line

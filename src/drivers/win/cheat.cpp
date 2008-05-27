@@ -25,7 +25,7 @@
 #include "debugger.h"
 #include "../../fceu.h"
 #include "../../cart.h"
-
+static HWND pwindow = 0;
 HWND hCheat; //mbg merge 7/19/06 had to add 
 int CheatWindow;
 int CheatStyle=1;
@@ -511,7 +511,21 @@ void ConfigCheats(HWND hParent) {
 	}
 	else
 	 SetFocus(hCheat);
+	 
+	if(!pwindow)
+		pwindow=CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
+	else
+		SetFocus(pwindow); 
 }
+
+void UpdateCheatList()
+{
+	if(!pwindow)
+		return;
+	else
+		ShowResults(pwindow);
+}
+
 
 BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	char str[100];
@@ -720,3 +734,4 @@ void DoGGConv(){
 	hGGConv = CreateDialog(fceu_hInstance,"GGCONV",NULL,GGConvCallB);
 	return;
 }
+

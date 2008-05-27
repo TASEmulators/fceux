@@ -7,13 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
-// Workaround for windres from binutils 1.18:
-#ifndef LVS_OWNERDATA
-#define LVS_OWNERDATA 0x1000
-#endif
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -23,6 +17,7 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1394,6 +1389,7 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1401,9 +1397,9 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Dialog
 //
 
-CHEATCONSOLE DIALOGEX 0, 0, 389, 178
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Dialog"
+CHEATCONSOLE DIALOGEX 0, 0, 384, 178
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Cheat Search"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "Active Cheats",201,3,1,133,168,WS_TABSTOP
@@ -1450,7 +1446,7 @@ BEGIN
     "CHEATCONSOLE", DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 382
+        RIGHTMARGIN, 377
         TOPMARGIN, 7
         BOTTOMMARGIN, 171
     END
@@ -1467,6 +1463,7 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1626,8 +1623,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

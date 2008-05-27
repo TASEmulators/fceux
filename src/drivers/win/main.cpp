@@ -759,6 +759,7 @@ void _updateWindow()
 	UpdateLogWindow();
 	UpdateMemWatch();
 	NTViewDoBlit(0);
+	UpdateCheatList();
 }
 
 //void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
