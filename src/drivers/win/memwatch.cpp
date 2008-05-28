@@ -537,7 +537,8 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 	char watchfcontents[2048];
 
 	FILE *fp=FCEUD_UTF8fopen(x,"r");
-	
+	strcpy(memwLastFilename,x);
+
 	if (rnum != 0) //Change order of recent files if not most recent
 		MemwAddRecentFile(x);
 
