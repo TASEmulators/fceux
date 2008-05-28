@@ -39,7 +39,7 @@ FCEUMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Open...",                    MENU_OPEN_FILE
+        MENUITEM "&Open...  Ctrl+O",            MENU_OPEN_FILE
         MENUITEM "&Close",                      MENU_CLOSE_FILE
         MENUITEM "&Recent",                     MENU_RECENT_FILES
         MENUITEM SEPARATOR
@@ -1514,13 +1514,13 @@ MEMWATCHMENU MENU
 BEGIN
     POPUP "File  "
     BEGIN
-        MENUITEM "New...      Ctrl+N",          MEMW_FILE_NEW
-        MENUITEM "Open...    Ctrl+O",           MEMW_FILE_OPEN
-        MENUITEM "Save         Ctrl+S",         MEMW_FILE_SAVE
-        MENUITEM "Save As...",                  MEMW_FILE_SAVEAS
+        MENUITEM "New...       Ctrl+N",         MEMW_FILE_NEW
+        MENUITEM "Open...     Ctrl+O",          MEMW_FILE_OPEN
+        MENUITEM "Save          Ctrl+S",        MEMW_FILE_SAVE
+        MENUITEM "Save As..  Ctrl+Shift+S",     MEMW_FILE_SAVEAS
         MENUITEM "&Recent",                     ID_FILE_RECENT
         MENUITEM SEPARATOR
-        MENUITEM "Close",                       MEMW_FILE_CLOSE
+        MENUITEM "Close          Ctrl+W",       MEMW_FILE_CLOSE
     END
     POPUP "Options"
     BEGIN
@@ -1615,6 +1615,9 @@ BEGIN
     "E",            ACCEL_CTRL_E,           VIRTKEY, CONTROL, NOINVERT
     "O",            ACCEL_CTRL_O,           VIRTKEY, CONTROL, NOINVERT
     "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ACCEL_CTRL_SHIFT_S,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "N",            ACCEL_CTRL_N,           VIRTKEY, CONTROL, NOINVERT
 END
 
 

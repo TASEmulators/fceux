@@ -702,6 +702,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			OpenMemwatchRecentFile(4);
 			break;
 		
+		case ACCEL_CTRL_W:
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
 			break;
@@ -711,14 +712,17 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			LoadMemWatch();
 			break;
 		
+		case ACCEL_CTRL_S:
 		case MEMW_FILE_SAVE:
 			QuickSaveMemWatch();
 			break;
 
+		case ACCEL_CTRL_SHIFT_S:
 		case MEMW_FILE_SAVEAS:
 			SaveMemWatch();
 			break;
 		
+		case ACCEL_CTRL_N:
 		case MEMW_FILE_NEW:
 			ClearAllText();
 			break;

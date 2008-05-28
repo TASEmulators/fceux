@@ -2285,6 +2285,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\src\drivers\win\res\te_arrow.bmp"
+			>
+		</File>
+		<File
 			RelativePath="..\src\unif.cpp"
 			>
 		</File>
