@@ -359,7 +359,8 @@ bool FCEUSS_SaveFP(FILE *st)
 	//compress it
 	uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
 	uLongf comprlen = len*2;
-	int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_COMPRESSION);
+	//int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_COMPRESSION);
+	int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_SPEED);
 
 	//dump the header
 	uint8 header[16]="FCSX";

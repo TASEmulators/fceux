@@ -26,6 +26,8 @@
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
 #define COMBO_FAM                       110
+#define IDB_BITMAP1                     110
+#define IDB_TE_ARROW                    110
 #define MENU_LOAD_STATE                 111
 #define CB_DISABLE_SCREEN_SAVER         111
 #define BTN_FAM                         111
@@ -240,6 +242,8 @@
 #define BTN_PRESET_EXPORT2              1126
 #define BTN_PRESET_EXPORT3              1127
 #define IDC_LIST1                       1130
+#define IDC_HACKY2                      1131
+#define IDC_HACKY1                      1132
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -333,6 +337,8 @@
 #define ID_CONFIG_PAUSEAFTERPLAYBACK    40125
 #define MENU_PAUSEAFTERPLAYBACK         40126
 #define ACCEL_CTRL_O                    40130
+#define ACCEL_CTRL_E                    40131
+#define ACCEL_CTRL_W                    40132
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -343,9 +349,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        110
-#define _APS_NEXT_COMMAND_VALUE         40131
-#define _APS_NEXT_CONTROL_VALUE         1131
+#define _APS_NEXT_RESOURCE_VALUE        111
+#define _APS_NEXT_COMMAND_VALUE         40134
+#define _APS_NEXT_CONTROL_VALUE         1132
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

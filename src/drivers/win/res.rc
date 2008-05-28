@@ -1264,12 +1264,14 @@ BEGIN
     EDITTEXT        IDC_EDIT_STOPFRAME,119,38,35,12,ES_AUTOHSCROLL | ES_NUMBER
 END
 
-TASEDIT DIALOGEX 0, 0, 374, 348
+TASEDIT DIALOGEX 0, 0, 470, 349
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "TAS Editor"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_LIST1,"SysListView32",LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,7,7,273,296
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,273,296
+    PUSHBUTTON      "Hacky add 1000 frames",IDC_HACKY2,318,73,124,38
+    PUSHBUTTON      "Hacky truncate after current frame",IDC_HACKY1,313,31,124,38
 END
 
 
@@ -1372,9 +1374,9 @@ BEGIN
     "TASEDIT", DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 367
+        RIGHTMARGIN, 463
         TOPMARGIN, 7
-        BOTTOMMARGIN, 341
+        BOTTOMMARGIN, 342
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1610,9 +1612,18 @@ END
 
 IDR_ACCELERATOR1 ACCELERATORS 
 BEGIN
+    "E",            ACCEL_CTRL_E,           VIRTKEY, CONTROL, NOINVERT
     "O",            ACCEL_CTRL_O,           VIRTKEY, CONTROL, NOINVERT
+    "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

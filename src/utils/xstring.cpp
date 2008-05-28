@@ -364,3 +364,97 @@ void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 		*dir = '\0';
 	}
 }
+
+//mbg 5/12/08
+//for the curious, I tested U16ToHexStr and it was 10x faster than printf.
+//so the author of these dedicated functions is not insane, and I will leave them.
+
+static char TempArray[11];
+
+uint16 FastStrToU16(char* s, bool& valid)
+{
+	int i;
+	uint16 v=0;
+	for(i=0; i < 4; i++)
+	{
+		if(s[i] == 0) return v;
+		v<<=4;
+		if(s[i] >= '0' && s[i] <= '9')
+		{
+			v+=s[i]-'0';
+		}
+		else if(s[i] >= 'a' && s[i] <= 'f')
+		{
+			v+=s[i]-'a'+10;
+		}
+		else if(s[i] >= 'A' && s[i] <= 'F')
+		{
+			v+=s[i]-'A'+10;
+		}
+		else
+		{
+			valid = false;
+			return 0xFFFF;
+		}
+	}
+	valid = true;
+	return v;
+}
+
+char *U8ToDecStr(uint8 a)
+{
+	TempArray[0] = '0' + a/100;
+	TempArray[1] = '0' + (a%100)/10;
+	TempArray[2] = '0' + (a%10);
+	TempArray[3] = 0;
+	return TempArray;
+}
+
+char *U16ToDecStr(uint16 a)
+{
+	TempArray[0] = '0' + a/10000;
+	TempArray[1] = '0' + (a%10000)/1000;
+	TempArray[2] = '0' + (a%1000)/100;
+	TempArray[3] = '0' + (a%100)/10;
+	TempArray[4] = '0' + (a%10);
+	TempArray[5] = 0;
+	return TempArray;
+}
+
+char *U32ToDecStr(char* buf, uint32 a)
+{
+	buf[0] = '0' + a/1000000000;
+	buf[1] = '0' + (a%1000000000)/100000000;
+	buf[2] = '0' + (a%100000000)/10000000;
+	buf[3] = '0' + (a%10000000)/1000000;
+	buf[4] = '0' + (a%1000000)/100000;
+	buf[5] = '0' + (a%100000)/10000;
+	buf[6] = '0' + (a%10000)/1000;
+	buf[7] = '0' + (a%1000)/100;
+	buf[8] = '0' + (a%100)/10;
+	buf[9] = '0' + (a%10);
+	buf[10] = 0;
+	return buf;
+}
+char *U32ToDecStr(uint32 a)
+{
+	return U32ToDecStr(TempArray,a);
+}
+
+char *U16ToHexStr(uint16 a)
+{
+	TempArray[0] = a/4096 > 9?'A'+a/4096-10:'0' + a/4096;
+	TempArray[1] = (a%4096)/256 > 9?'A'+(a%4096)/256 - 10:'0' + (a%4096)/256;
+	TempArray[2] = (a%256)/16 > 9?'A'+(a%256)/16 - 10:'0' + (a%256)/16;
+	TempArray[3] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
+	TempArray[4] = 0;
+	return TempArray;
+}
+
+char *U8ToHexStr(uint8 a)
+{
+	TempArray[0] = a/16 > 9?'A'+a/16 - 10:'0' + a/16;
+	TempArray[1] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
+	TempArray[2] = 0;
+	return TempArray;
+}

@@ -22,12 +22,13 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "../types.h"
 
 //definitions for str_strip() flags
-#define STRIP_SP	0x01 /* space */
-#define STRIP_TAB	0x02 /* tab */
-#define STRIP_CR	0x04 /* carriage return */
-#define STRIP_LF	0x08 /* line feed */
+#define STRIP_SP	0x01 // space 
+#define STRIP_TAB	0x02 // tab 
+#define STRIP_CR	0x04 // carriage return 
+#define STRIP_LF	0x08 // line feed 
 
 
 int str_ucase(char *str);
@@ -44,3 +45,11 @@ bool StringToBytes(std::string& str, void* data, int len);
 
 std::vector<std::string> tokenize_str(const std::string & str,const std::string & delims);
 void splitpath(const char* path, char* drv, char* dir, char* name, char* ext);
+
+uint16 FastStrToU16(char* s, bool& valid);
+char *U16ToDecStr(uint16 a);
+char *U32ToDecStr(uint32 a);
+char *U32ToDecStr(char* buf, uint32 a);
+char *U8ToDecStr(uint8 a);
+char *U8ToHexStr(uint8 a);
+char *U16ToHexStr(uint16 a);

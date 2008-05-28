@@ -3,9 +3,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include <vector>
-#include <map>
-
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -27,6 +24,7 @@
 
 extern char FileBase[];
 extern int EmulationPaused;
+extern bool moviePleaseLogSavestates;
 
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
@@ -66,167 +64,135 @@ SFORMAT FCEUMOV_STATEINFO[]={
 };
 
 char curMovieFilename[512] = {0};
+MovieData currMovieData;
 
-class MovieRecord
+void MovieData::clearRecordRange(int start, int len)
 {
-public:
-	ValueArray<uint8,4> joysticks;
+	for(int i=0;i<len;i++)
+		records[i+start].clear();
+}
 
-	void dump(FILE* fp, int index)
-	{
-		//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
-		//but someone would need to change the parser to ignore it
-		//fputc('|',fp);
-		//fprintf(fp,"%08d",index);
-
-		fputc('|',fp);
-
-		//for each joystick
-		for(int i=0;i<4;i++)
-		{
-			//these are mnemonics for each joystick bit.
-			//since we usually use the regular joypad, these will be more helpful.
-			//but any character other than ' ' should count as a set bit
-			//maybe other input types will need to be encoded another way..
-			const char mnemonics[] = {'A','B','S','T','U','D','L','R'};
-			for(int bit=7;bit>=0;bit--)
-			{
-				uint8 &joystate = joysticks[i];
-				int bitmask = (1<<bit);
-				char mnemonic = mnemonics[bit];
-				//if the bit is set write the mnemonic
-				if(joystate & bitmask)
-					fputc(mnemonic,fp);
-				else //otherwise write a space
-					fputc(' ',fp);
-			}
-
-			//separate the joysticks
-			if(i != 3) fputc('|',fp);
-		}
-
-		//each frame is on a new line
-		fputc('\n',fp);
-	}
-};
-
-class MovieData
+void MovieData::TryDumpIncremental()
 {
-public:
-	MovieData()
-		: version(MOVIE_VERSION)
-		, emuVersion(FCEU_VERSION_NUMERIC)
-		, palFlag(false)
-		, poweronFlag(false)
-		, resetFlag(false)
-		, recordCount(1)
+	if(moviePleaseLogSavestates)
 	{
-		memset(&romChecksum,0,sizeof(MD5DATA));
-	}
-
-	int emuVersion;
-	int version;
-	//todo - somehow force mutual exclusion for poweron and reset (with an error in the parser)
-	bool palFlag;
-	bool poweronFlag;
-	bool resetFlag;
-	MD5DATA romChecksum;
-	std::string romFilename;
-	std::vector<char> savestate;
-	std::vector<MovieRecord> records;
-	int recordCount;
-
-	FCEU_Guid guid;
-
-	//the entire contents of the disk file that was loaded
-	std::vector<char> serializedFile;
-
-	void truncateAt(int frame)
-	{
-		records.resize(frame);
-	}
-
-	class TDictionary : public std::map<std::string,std::string>
-	{
-	public:
-		bool containsKey(std::string key)
+		//only log the savestate if we are appending to the green zone
+		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
-			return find(key) != end();
-		}
-
-		void tryInstallBool(std::string key, bool& val)
-		{
-			if(containsKey(key))
-				val = atoi(operator [](key).c_str())!=0;
-		}
-
-		void tryInstallString(std::string key, std::string& val)
-		{
-			if(containsKey(key))
-				val = operator [](key);
-		}
-
-		void tryInstallInt(std::string key, int& val)
-		{
-			if(containsKey(key))
-				val = atoi(operator [](key).c_str());
-		}
-
-	};
-
-	void installDictionary(TDictionary& dictionary)
-	{
-		dictionary.tryInstallInt("version",version);
-		dictionary.tryInstallInt("emuVersion",emuVersion);
-		dictionary.tryInstallInt("recordCount",recordCount);
-		dictionary.tryInstallBool("palFlag",palFlag);
-		dictionary.tryInstallBool("poweronFlag",poweronFlag);
-		dictionary.tryInstallBool("resetFlag",resetFlag);
-		dictionary.tryInstallString("romFilename",romFilename);
-		if(dictionary.containsKey("romChecksum"))
-			StringToBytes(dictionary["romChecksum"],&romChecksum,MD5DATA::size);
-		if(dictionary.containsKey("guid"))
-			guid = FCEU_Guid::fromString(dictionary["guid"]);
-		if(dictionary.containsKey("savestate"))
-		{
-			std::string& str = dictionary["savestate"];
-			int len = HexStringToBytesLength(str);
-			if(len >= 1)
+			if(currFrameCounter < (int)currMovieData.records.size())
 			{
-				savestate.resize(len);
-				StringToBytes(str,&savestate[0],len);
+				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate);
+				currMovieData.greenZoneCount++;
 			}
 		}
 	}
+}
 
-	int dumpLen()
+const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
+void MovieRecord::dump(FILE* fp, int index)
+{
+	//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
+	//but someone would need to change the parser to ignore it
+	//fputc('|',fp);
+	//fprintf(fp,"%08d",index);
+
+	fputc('|',fp);
+
+	//for each joystick
+	for(int i=0;i<4;i++)
 	{
-		FILE* tmp = tmpfile();
-		dump(tmp);
-		int len = ftell(tmp);
-		fclose(tmp);
-		return len;
+		//these are mnemonics for each joystick bit.
+		//since we usually use the regular joypad, these will be more helpful.
+		//but any character other than ' ' should count as a set bit
+		//maybe other input types will need to be encoded another way..
+		for(int bit=7;bit>=0;bit--)
+		{
+			uint8 &joystate = joysticks[i];
+			int bitmask = (1<<bit);
+			char mnemonic = mnemonics[bit];
+			//if the bit is set write the mnemonic
+			if(joystate & bitmask)
+				fputc(mnemonic,fp);
+			else //otherwise write a space
+				fputc(' ',fp);
+		}
+
+		//separate the joysticks
+		if(i != 3) fputc('|',fp);
 	}
 
-	void dump(FILE *fp)
-	{
-		fprintf(fp,"version %d\n", version);
-		fprintf(fp,"emuVersion %d\n", emuVersion);
-		fprintf(fp,"recordCount %d\n", recordCount);
-		fprintf(fp,"palFlag %d\n", palFlag?1:0);
-		fprintf(fp,"poweronFlag %d\n", poweronFlag?1:0);
-		fprintf(fp,"resetFlag %d\n", resetFlag?1:0);
-		fprintf(fp,"romFilename %s\n", romFilename.c_str());
-		fprintf(fp,"romChecksum %s\n", BytesToString(romChecksum.data,MD5DATA::size).c_str());
-		fprintf(fp,"guid %s\n", guid.toString().c_str());
-		if(savestate.size() != 0)
-			fprintf(fp,"savestate %s\n", BytesToString(&savestate[0],savestate.size()).c_str());
-		for(int i=0;i<(int)records.size();i++)
-			records[i].dump(fp,i);
-	}
+	//each frame is on a new line
+	fputc('\n',fp);
+}
 
-} currMovieData;
-//---------
+MovieData::MovieData()
+	: version(MOVIE_VERSION)
+	, emuVersion(FCEU_VERSION_NUMERIC)
+	, palFlag(false)
+	, poweronFlag(false)
+	, resetFlag(false)
+	, recordCount(1)
+	, greenZoneCount(0)
+{
+	memset(&romChecksum,0,sizeof(MD5DATA));
+}
+
+void MovieData::truncateAt(int frame)
+{
+	records.resize(frame);
+}
+
+void MovieData::installDictionary(TDictionary& dictionary)
+{
+	dictionary.tryInstallInt("version",version);
+	dictionary.tryInstallInt("emuVersion",emuVersion);
+	dictionary.tryInstallInt("recordCount",recordCount);
+	dictionary.tryInstallBool("palFlag",palFlag);
+	dictionary.tryInstallBool("poweronFlag",poweronFlag);
+	dictionary.tryInstallBool("resetFlag",resetFlag);
+	dictionary.tryInstallString("romFilename",romFilename);
+	if(dictionary.containsKey("romChecksum"))
+		StringToBytes(dictionary["romChecksum"],&romChecksum,MD5DATA::size);
+	if(dictionary.containsKey("guid"))
+		guid = FCEU_Guid::fromString(dictionary["guid"]);
+	if(dictionary.containsKey("savestate"))
+	{
+		std::string& str = dictionary["savestate"];
+		int len = HexStringToBytesLength(str);
+		if(len >= 1)
+		{
+			savestate.resize(len);
+			StringToBytes(str,&savestate[0],len);
+		}
+	}
+}
+
+void MovieData::dump(FILE *fp)
+{
+	fprintf(fp,"version %d\n", version);
+	fprintf(fp,"emuVersion %d\n", emuVersion);
+	fprintf(fp,"recordCount %d\n", recordCount);
+	fprintf(fp,"palFlag %d\n", palFlag?1:0);
+	fprintf(fp,"poweronFlag %d\n", poweronFlag?1:0);
+	fprintf(fp,"resetFlag %d\n", resetFlag?1:0);
+	fprintf(fp,"romFilename %s\n", romFilename.c_str());
+	fprintf(fp,"romChecksum %s\n", BytesToString(romChecksum.data,MD5DATA::size).c_str());
+	fprintf(fp,"guid %s\n", guid.toString().c_str());
+	if(savestate.size() != 0)
+		fprintf(fp,"savestate %s\n", BytesToString(&savestate[0],savestate.size()).c_str());
+	for(int i=0;i<(int)records.size();i++)
+		records[i].dump(fp,i);
+}
+
+int MovieData::dumpLen()
+{
+	FILE* tmp = tmpfile();
+	dump(tmp);
+	int len = ftell(tmp);
+	fclose(tmp);
+	return len;
+}
+
 
 int FCEUMOV_GetFrame(void)
 {
@@ -259,16 +225,6 @@ int FCEUMOV_IsRecording(void)
 //yuck... another custom text parser.
 void LoadFM2(MovieData& movieData, FILE *fp)
 {
-	//read the entire file so we can keep it handy.
-	//we could parse from that instead of the disk again...
-
-	fseek(fp,0,SEEK_END);
-	int len = ftell(fp);
-	fseek(fp,0,SEEK_SET);
-	movieData.serializedFile.resize(len);
-	fread(&movieData.serializedFile[0],1,len,fp);
-	fseek(fp,0,SEEK_SET);
-
 	MovieData::TDictionary dictionary;
 
 	std::string key,value;
@@ -406,6 +362,33 @@ static void ResetInputTypes()
 #endif
 }
 
+bool MovieData::loadSavestateFrom(std::vector<uint8>* buf)
+{
+	//dump the savestate to disk
+	FILE* fp = tmpfile();
+	fwrite(&(*buf)[0],1,buf->size(),fp);
+	fseek(fp,0,SEEK_SET);
+
+	//and load the state
+	bool success = FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP);
+	fclose(fp);
+	return success;
+}
+
+void MovieData::dumpSavestateTo(std::vector<uint8>* buf)
+{
+	//dump a savestate to a tempfile..
+	FILE* tmp = tmpfile();
+	FCEUSS_SaveFP(tmp); 
+
+	//reloading the savestate into the data structure
+	fseek(tmp,0,SEEK_END);
+	int len = (int)ftell(tmp);
+	fseek(tmp,0,SEEK_SET);
+	buf->resize(len);
+	fread(&(*buf)[0],1,len,tmp);
+	fclose(tmp);
+}
 
 //begin playing an existing movie
 void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
@@ -447,16 +430,8 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	//WE NEED TO LOAD A SAVESTATE
 	if(!currMovieData.poweronFlag)
 	{
-		//dump the savestate to disk
-		FILE* fp = tmpfile();
-		fwrite(&currMovieData.savestate[0],1,currMovieData.savestate.size(),fp);
-		fseek(fp,0,SEEK_SET);
-
 		//and load the state
-		bool success = FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP);
-
-		fclose(fp);
-
+		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
 		if(!success) return;
 	}
 
@@ -478,6 +453,8 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	movie_readonly = _read_only;
 	movieMode = MOVIEMODE_PLAY;
 
+	currMovieData.TryDumpIncremental();
+
 	if(movie_readonly)
 		FCEU_DispMessage("Replay started Read-Only.");
 	else
@@ -497,7 +474,6 @@ static void openRecordingMovie(const char* fname)
 		FCEU_PrintError("Error opening movie output file: %s",fname);
 	strcpy(curMovieFilename, fname);
 }
-
 
 //begin recording a new movie
 void FCEUI_SaveMovie(char *fname, uint8 flags)
@@ -545,17 +521,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	}
 	else
 	{
-		//dump a savestate to a tempfile..
-		FILE* tmp = tmpfile();
-		FCEUSS_SaveFP(tmp); 
-
-		//reloading the savestate into the data structure
-		fseek(tmp,0,SEEK_END);
-		int len = (int)ftell(tmp);
-		fseek(tmp,0,SEEK_SET);
-		currMovieData.savestate.resize(len);
-		fread(&currMovieData.savestate[0],1,len,tmp);
-		fclose(tmp);
+		MovieData::dumpSavestateTo(&currMovieData.savestate);
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
@@ -583,8 +549,6 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 {
 	if(movieMode == MOVIEMODE_PLAY)
 	{
-		//TODO - rock solid stability and error detection
-
 		//stop when we run out of frames
 		if(currFrameCounter == currMovieData.records.size())
 		{

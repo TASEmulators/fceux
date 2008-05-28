@@ -23,6 +23,7 @@
 #include "memwatch.h"
 #include "../../debug.h"
 #include "debugger.h"
+#include "../../utils/xstring.h"
 
 const int NUMWATCHES = 24;
 const int LABELLENGTH = 64;
@@ -47,11 +48,6 @@ const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
 
 static HMENU memwrecentmenu, memwrecentdmenu;
-
-//mbg 5/12/08
-//for the curious, I tested U16ToHexStr and it was 10x faster than printf.
-//so the author of these dedicated functions is not insane, and I will leave them.
-
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
@@ -178,87 +174,6 @@ void MemwAddRecentFile(const char *filename)
 	UpdateMemwRecentArray(filename, memw_recent_files, MEMW_MAX_NUMBER_OF_RECENT_FILES, memwrecentmenu, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
 }
 
-/**
-* Add a directory to the recent directories list.
-*
-* @param dirname Name of the directory to add.
-**/
-
-static char *U8ToStr(uint8 a)
-{
-	static char TempArray[8];
-	TempArray[0] = '0' + a/100;
-	TempArray[1] = '0' + (a%100)/10;
-	TempArray[2] = '0' + (a%10);
-	TempArray[3] = 0;
-	return TempArray;
-}
-
-//I don't trust scanf for speed
-static uint16 FastStrToU16(char* s, bool& valid)
-{
-	int i;
-	uint16 v=0;
-	for(i=0; i < 4; i++)
-	{
-		if(s[i] == 0) return v;
-		v<<=4;
-		if(s[i] >= '0' && s[i] <= '9')
-		{
-			v+=s[i]-'0';
-		}
-		else if(s[i] >= 'a' && s[i] <= 'f')
-		{
-			v+=s[i]-'a'+10;
-		}
-		else if(s[i] >= 'A' && s[i] <= 'F')
-		{
-			v+=s[i]-'A'+10;
-		}
-		else
-		{
-			valid = false;
-			return 0xFFFF;
-		}
-	}
-	valid = true;
-	return v;
-}
-
-static char *U16ToDecStr(uint16 a)
-{
-	static char TempArray[8];
-	TempArray[0] = '0' + a/10000;
-	TempArray[1] = '0' + (a%10000)/1000;
-	TempArray[2] = '0' + (a%1000)/100;
-	TempArray[3] = '0' + (a%100)/10;
-	TempArray[4] = '0' + (a%10);
-	TempArray[5] = 0;
-	return TempArray;
-}
-
-
-static char *U16ToHexStr(uint16 a)
-{
-	static char TempArray[8];
-	TempArray[0] = a/4096 > 9?'A'+a/4096-10:'0' + a/4096;
-	TempArray[1] = (a%4096)/256 > 9?'A'+(a%4096)/256 - 10:'0' + (a%4096)/256;
-	TempArray[2] = (a%256)/16 > 9?'A'+(a%256)/16 - 10:'0' + (a%256)/16;
-	TempArray[3] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
-	TempArray[4] = 0;
-	return TempArray;
-}
-
-static char *U8ToHexStr(uint8 a)
-{
-	static char TempArray[8];
-	TempArray[0] = a/16 > 9?'A'+a/16 - 10:'0' + a/16;
-	TempArray[1] = a%16 > 9?'A'+(a%16) - 10:'0' + (a%16);
-	TempArray[2] = 0;
-	return TempArray;
-}
-
-
 static const int MW_ADDR_Lookup[] = {
 	MW_ADDR00,MW_ADDR01,MW_ADDR02,MW_ADDR03,
 	MW_ADDR04,MW_ADDR05,MW_ADDR06,MW_ADDR07,
@@ -352,7 +267,7 @@ void UpdateMemWatch()
 					}
 					else
 					{
-						text = U8ToStr(GetMem(mwrec.addr));
+						text = U8ToDecStr(GetMem(mwrec.addr));
 					}
 				}
 			}

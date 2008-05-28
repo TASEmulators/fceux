@@ -36,6 +36,7 @@
 #include "../../fceu.h"
 #include "../../state.h"
 #include "../../debug.h"
+#include "../../movie.h"
 #include "input.h"
 #include "netplay.h"
 #include "memwatch.h"
@@ -50,6 +51,7 @@
 #include "tracer.h"
 #include "cdlogger.h"
 #include "throttle.h"
+#include "tasedit.h"
 
 #include "main.h"
 #include "basicbot.h"
@@ -297,6 +299,7 @@ int BlockingCheck()
 		{
 			//other accelerator capable dialogs could be added here
 			extern HWND hwndMemWatch;
+			extern HWND hwndTasEdit;
 			int handled = 0;
 			if(hwndMemWatch)
 			{
@@ -304,6 +307,11 @@ int BlockingCheck()
 					handled = TranslateAccelerator(hwndMemWatch,fceu_hAccel,&msg);
 				if(!handled)
 					handled = IsDialogMessage(hwndMemWatch,&msg);
+			}
+			if(!handled && hwndTasEdit)
+			{
+				if(IsChild(hwndTasEdit,msg.hwnd))
+					handled = TranslateAccelerator(hwndTasEdit,fceu_hAccel,&msg);
 			}
 
 			if(!handled)
@@ -689,6 +697,8 @@ doloopy:
 			FCEU_UpdateBot();
 
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
+			currMovieData.TryDumpIncremental();
+			
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
 			 //mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
@@ -766,6 +776,7 @@ void _updateWindow()
 	UpdateMemWatch();
 	NTViewDoBlit(0);
 	UpdateCheatList();
+	UpdateTasEdit();
 }
 
 //void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)

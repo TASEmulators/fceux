@@ -857,6 +857,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 
+			case ACCEL_CTRL_E:
 			case MENU_TASEDIT:
 				DoTasEdit();
 				break;
