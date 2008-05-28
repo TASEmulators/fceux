@@ -1194,8 +1194,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
        }
        goto proco;
     case WM_ENTERMENULOOP:
-      EnableMenuItem(fceumenu,143,MF_BYCOMMAND | (FCEUI_IsMovieActive()?MF_ENABLED:MF_GRAYED));
-      EnableMenuItem(fceumenu,152,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
+      EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEUI_IsMovieActive()?MF_ENABLED:MF_GRAYED));
+      EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
     default:
       proco:
       return DefWindowProc(hWnd,msg,wParam,lParam);
