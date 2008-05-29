@@ -1626,7 +1626,7 @@ END
 // Bitmap
 //
 
-IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
+IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
