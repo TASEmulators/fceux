@@ -23,6 +23,8 @@
 #include "common.h"
 #include "../common/args.h"
 
+char* MovieToLoad = 0;
+
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
 
 /**
@@ -39,6 +41,7 @@ char *ParseArgies(int argc, char *argv[])
          //{"-nofs",0,&eoptions,0},   
          {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},  
          {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
+         {"-playmovie",0,&MovieToLoad,0x4001},
 	};
 
        if(argc <= 1)

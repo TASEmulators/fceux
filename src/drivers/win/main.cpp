@@ -671,8 +671,6 @@ int main(int argc,char *argv[])
  
 	InitSpeedThrottle();
 
-	UpdateCheckedMenuItems();
-
 	if(t)
 	{
 		ALoad(t);
@@ -683,7 +681,15 @@ int main(int argc,char *argv[])
 	}
 
 
+	if(MovieToLoad)
+	{
+		FCEUI_LoadMovie(MovieToLoad, 1, 0);
+		free(MovieToLoad);
+		MovieToLoad = NULL;
+	}
 	if (MemWatchLoadOnStart) CreateMemWatch();
+
+	UpdateCheckedMenuItems();
 doloopy:
 	UpdateFCEUWindow();  
 	if(GameInfo)
