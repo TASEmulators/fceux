@@ -24,7 +24,6 @@
 #include "fceu.h"
 #include "debug.h"
 #include "sound.h"
-#include "mem-cb.h"
 
 X6502 X;
 uint32 timestamp;
@@ -38,65 +37,39 @@ void FP_FASTAPASS(1) (*MapIRQHook)(int a);
  timestamp+=__x;  \
 }
 
-static INLINE void RdRunCB(unsigned int A)
-{
- if (memCallbacks.read_cb)
- {
-  std::map<uint32, readfunc>::const_iterator i =
-   memCallbacks.read_cb->find(FCEU_AddressCanonicalize(A));
-  if (i != memCallbacks.read_cb->end()) (i->second)(A);
- }
-}
-
-static INLINE void WrRunCB(unsigned int A, uint8 V)
-{
- if (memCallbacks.write_cb)
- {
-  std::map<uint32, writefunc>::const_iterator i =
-   memCallbacks.write_cb->find(FCEU_AddressCanonicalize(A));
-  if (i != memCallbacks.write_cb->end()) (i->second)(A, V);
- }
-}
-
 //normal memory read
 static INLINE uint8 RdMem(unsigned int A)
 {
- RdRunCB(A);
  return(_DB=ARead[A](A));
 }
 
 //normal memory write
 static INLINE void WrMem(unsigned int A, uint8 V)
 {
- WrRunCB(A, V);
  BWrite[A](A,V);
 }
 
 static INLINE uint8 RdRAM(unsigned int A) 
 {
   //bbit edited: this was changed so cheat substituion would work
-  RdRunCB(A);
   return(_DB=ARead[A](A));
   // return(_DB=RAM[A]); 
 }
 
 static INLINE void WrRAM(unsigned int A, uint8 V)
 {
- WrRunCB(A, V);
  RAM[A]=V;
 }
 
 uint8 FASTAPASS(1) X6502_DMR(uint32 A)
 {
  ADDCYC(1);
- RdRunCB(A);
  return(X.DB=ARead[A](A));
 }
 
 void FASTAPASS(2) X6502_DMW(uint32 A, uint8 V)
 {
  ADDCYC(1);
- WrRunCB(A, V);
  BWrite[A](A,V);
 }
 

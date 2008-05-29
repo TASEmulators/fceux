@@ -1527,10 +1527,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\mem-cb.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\memory.h"
 				>
 			</File>
@@ -2258,10 +2254,6 @@
 		</File>
 		<File
 			RelativePath="..\src\input.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\src\mem-cb.cpp"
 			>
 		</File>
 		<File
