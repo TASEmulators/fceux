@@ -77,6 +77,8 @@ void MapInput(void);
 
 // Internal variables
 int pauseAfterPlayback = 0;
+static int winwidth, winheight;
+static volatile int nofocus = 0;
 
 // Contains recent file strings
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -86,7 +88,10 @@ const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
 const unsigned int MAX_NUMBER_OF_RECENT_DIRS = sizeof(recent_directories)/sizeof(*recent_directories);
 
+// Exported variables
 HWND pwindow;
+int EnableBackgroundInput = 0;
+int ismaximized = 0;
 
 /**
 * Menu handle of the main menu.
@@ -96,7 +101,6 @@ static HMENU fceumenu = 0;
 static int tog = 0;
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
 static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
-//static int EnableBackgroundInput = 0;
 
 static HMENU recentmenu, recentdmenu;
 

@@ -26,15 +26,14 @@ extern int maxconbskip;
 extern int ffbskip;
 
 static int fullscreen = 0;
-static int soundflush = 0;
 // Flag that indicates whether Game Genie is enabled or not.
-static int genie = 0;
+extern int genie;
 
 // Flag that indicates whether PAL Emulation is enabled or not.
-static int pal_emulation = 0;
-static int status_icon = 1;
+extern int pal_emulation;
+extern int status_icon;
 
-static int vmod = 0;
+extern int vmod;
 static char *gfsdir=0;
 
 extern char* directory_names[13];
@@ -62,29 +61,26 @@ static const char *default_directory_names[12] = {
 
 extern double saspectw, saspecth;
 extern double winsizemulx, winsizemuly;
-static int winwidth, winheight;
-static int ismaximized = 0;
 
+extern int ismaximized;
 extern int soundoptions;
 extern int soundrate;
 extern int soundbuftime;
 extern int soundvolume;
 extern int soundquality;
 
-static uint8 cpalette[192];
+extern uint8 cpalette[192];
 extern int srendlinen;
 extern int erendlinen;
 extern int srendlinep;
 extern int erendlinep;
 
-static int ntsccol = 0, ntsctint, ntschue;
+extern int ntsccol, ntsctint, ntschue;
 
 //mbg merge 7/17/06 did these have to be unsigned?
 //static int srendline, erendline;
 
 static int changerecursive=0;
-
-static volatile int nofocus = 0;
 
 /**
 * Contains the base directory of FCE

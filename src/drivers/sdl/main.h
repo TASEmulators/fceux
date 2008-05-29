@@ -52,12 +52,12 @@ int CLImain(int argc, char *argv[]);
 // GamePad defaults
 #define GAMEPAD_NUM_DEVICES 4
 #define GAMEPAD_NUM_BUTTONS 10
-static char *GamePadNames[GAMEPAD_NUM_BUTTONS] =
+static const char *GamePadNames[GAMEPAD_NUM_BUTTONS] =
     {"A", "B", "Select", "Start",
      "Up", "Down", "Left", "Right", "TurboA", "TurboB"};
-static char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
+static const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
     {"Keyboard", "None", "None", "None"};
-static int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
+static const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
     { { SDLK_KP2, SDLK_KP3, SDLK_TAB, SDLK_RETURN,
         SDLK_w, SDLK_s, SDLK_a, SDLK_d, 0, 0 },
       { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -67,11 +67,11 @@ static int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
 // PowerPad defaults
 #define POWERPAD_NUM_DEVICES 2
 #define POWERPAD_NUM_BUTTONS 12
-static char *PowerPadNames[POWERPAD_NUM_BUTTONS] =
+static const char *PowerPadNames[POWERPAD_NUM_BUTTONS] =
     {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B"};
-static char *DefaultPowerPadDevice[POWERPAD_NUM_DEVICES] =
+static const char *DefaultPowerPadDevice[POWERPAD_NUM_DEVICES] =
     {"Keyboard", "None"};
-static int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS] =
+static const int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS] =
     { { SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
         SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
         SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH },
@@ -79,53 +79,53 @@ static int DefaultPowerPad[POWERPAD_NUM_DEVICES][POWERPAD_NUM_BUTTONS] =
 
 // QuizKing defaults
 #define QUIZKING_NUM_BUTTONS 6
-static char *QuizKingNames[QUIZKING_NUM_BUTTONS] =
+static const char *QuizKingNames[QUIZKING_NUM_BUTTONS] =
     { "0", "1", "2", "3", "4", "5" };
-static char *DefaultQuizKingDevice = "Keyboard";
-static int DefaultQuizKing[QUIZKING_NUM_BUTTONS] =
+static const char *DefaultQuizKingDevice = "Keyboard";
+static const int DefaultQuizKing[QUIZKING_NUM_BUTTONS] =
     { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y };
 
 // HyperShot defaults
 #define HYPERSHOT_NUM_BUTTONS 4
-static char *HyperShotNames[HYPERSHOT_NUM_BUTTONS] =
+static const char *HyperShotNames[HYPERSHOT_NUM_BUTTONS] =
     { "0", "1", "2", "3" };
-static char *DefaultHyperShotDevice = "Keyboard";
-static int DefaultHyperShot[HYPERSHOT_NUM_BUTTONS] =
+static const char *DefaultHyperShotDevice = "Keyboard";
+static const int DefaultHyperShot[HYPERSHOT_NUM_BUTTONS] =
     { SDLK_q, SDLK_w, SDLK_e, SDLK_r };
 
 // Mahjong defaults
 #define MAHJONG_NUM_BUTTONS 21
-static char *MahjongNames[MAHJONG_NUM_BUTTONS] =
+static const char *MahjongNames[MAHJONG_NUM_BUTTONS] =
     { "00", "01", "02", "03", "04", "05", "06", "07",
       "08", "09", "10", "11", "12", "13", "14", "15",
       "16", "17", "18", "19", "20" };
-static char *DefaultMahjongDevice = "Keyboard";
-static int DefaultMahjong[MAHJONG_NUM_BUTTONS] =
+static const char *DefaultMahjongDevice = "Keyboard";
+static const int DefaultMahjong[MAHJONG_NUM_BUTTONS] =
     { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_a, SDLK_s, SDLK_d,
       SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l, SDLK_z, SDLK_x,
       SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m };
 
 // TopRider defaults
 #define TOPRIDER_NUM_BUTTONS 8
-static char *TopRiderNames[TOPRIDER_NUM_BUTTONS] =
+static const char *TopRiderNames[TOPRIDER_NUM_BUTTONS] =
     { "0", "1", "2", "3", "4", "5", "6", "7" };
-static char *DefaultTopRiderDevice = "Keyboard";
-static int DefaultTopRider[TOPRIDER_NUM_BUTTONS] =
+static const char *DefaultTopRiderDevice = "Keyboard";
+static const int DefaultTopRider[TOPRIDER_NUM_BUTTONS] =
     { SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i };
 
 // FTrainer defaults
 #define FTRAINER_NUM_BUTTONS 12
-static char *FTrainerNames[FTRAINER_NUM_BUTTONS] =
+static const char *FTrainerNames[FTRAINER_NUM_BUTTONS] =
     { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B" };
-static char *DefaultFTrainerDevice = "Keyboard";
-static int DefaultFTrainer[FTRAINER_NUM_BUTTONS] =
+static const char *DefaultFTrainerDevice = "Keyboard";
+static const int DefaultFTrainer[FTRAINER_NUM_BUTTONS] =
     { SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET,
       SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
       SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH };
 
 // FamilyKeyBoard defaults
 #define FAMILYKEYBOARD_NUM_BUTTONS 0x48
-static char *FamilyKeyBoardNames[FAMILYKEYBOARD_NUM_BUTTONS] =
+static const char *FamilyKeyBoardNames[FAMILYKEYBOARD_NUM_BUTTONS] =
     { "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
       "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
       "MINUS", "EQUAL", "BACKSLASH", "BACKSPACE",
@@ -137,8 +137,8 @@ static char *FamilyKeyBoardNames[FAMILYKEYBOARD_NUM_BUTTONS] =
       "PERIOD", "SLASH", "RIGHTALT", "RIGHTSHIFT", "LEFTALT", "SPACE",
       "DELETE", "END", "PAGEDOWN",
       "CURSORUP", "CURSORLEFT", "CURSORRIGHT", "CURSORDOWN" };
-static char *DefaultFamilyKeyBoardDevice = "Keyboard";
-static int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS] =
+static const char *DefaultFamilyKeyBoardDevice = "Keyboard";
+static const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS] =
     { SDLK_F1, SDLK_F2, SDLK_F3, SDLK_F4, SDLK_F5, SDLK_F6, SDLK_F7, SDLK_F8,
       SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
       SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_0,

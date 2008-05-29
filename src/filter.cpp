@@ -12,6 +12,9 @@
 
 #include "fcoeffs.h"
 
+static int32 sq2coeffs[SQ2NCOEFFS];
+static int32 coeffs[NCOEFFS];
+
 static uint32 mrindex;
 static uint32 mrratio;
 
@@ -124,7 +127,7 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
          {
           int32 acc=0,acc2=0;
           unsigned int c;
-          int32 *S,*D;
+          const int32 *S,*D;
  
           for(c=NCOEFFS,S=&in[(x>>16)-NCOEFFS],D=coeffs;c;c--,D++)
  	  {
@@ -162,12 +165,12 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
 
 void MakeFilters(int32 rate)
 {
- int32 *tabs[6]={C44100NTSC,C44100PAL,C48000NTSC,C48000PAL,C96000NTSC,
+ const int32 *tabs[6]={C44100NTSC,C44100PAL,C48000NTSC,C48000PAL,C96000NTSC,
         C96000PAL};
- int32 *sq2tabs[6]={SQ2C44100NTSC,SQ2C44100PAL,SQ2C48000NTSC,SQ2C48000PAL,
+ const int32 *sq2tabs[6]={SQ2C44100NTSC,SQ2C44100PAL,SQ2C48000NTSC,SQ2C48000PAL,
 	SQ2C96000NTSC,SQ2C96000PAL};
 
- int32 *tmp;
+ const int32 *tmp;
  int32 x;
  uint32 nco;
 

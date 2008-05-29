@@ -116,6 +116,9 @@ int soundvolume = 100;
 int soundquality = 0;
 double saspectw = 1, saspecth = 1;
 double winsizemulx = 1, winsizemuly = 1;
+int genie = 0;
+int pal_emulation = 0;
+int ntsccol = 0, ntsctint, ntschue;
 
 
 // Contains the names of the overridden standard directories
@@ -616,14 +619,14 @@ int main(int argc,char *argv[])
 
 	/* Bleh, need to find a better place for this. */
 	{
-        pal_emulation &= 1;
+        pal_emulation = !!pal_emulation;
         FCEUI_SetVidSystem(pal_emulation);
 
-        genie &= 1;
+        genie = !!genie;
         FCEUI_SetGameGenie(genie);
 
-        fullscreen &= 1;
-        soundo &= 1;
+        fullscreen = !!fullscreen;
+        soundo = !!soundo;
 
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
@@ -1225,6 +1228,8 @@ FILE *FCEUD_UTF8fopen(const char *n, const char *m)
 
 	return(fopen(n, m));
 }
+
+int status_icon = 1;
 
 int FCEUD_ShowStatusIcon(void)
 {

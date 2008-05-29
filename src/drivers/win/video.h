@@ -38,21 +38,8 @@ typedef struct {
 } vmdef;
 
 // left, top, right, bottom
-static vmdef vmodes[11]={
-                         {320,240,8,0,1,1,0}, //0
-                         {320,240,8,0,1,1,0}, //1
-                         {512,384,8,0,1,1,0}, //2
-                         {640,480,8,0,1,1,0}, //3
-                         {640,480,8,0,1,1,0}, //4
-                         {640,480,8,0,1,1,0}, //5
-                         {640,480,8,VMDF_DXBLT,2,2,0}, //6
-                         {1024,768,8,VMDF_DXBLT,4,3,0}, //7
-                         {1280,1024,8,VMDF_DXBLT,5,4,0}, //8
-                         {1600,1200,8,VMDF_DXBLT,6,5,0}, //9
-                         {800,600,8,VMDF_DXBLT|VMDF_STRFS,0,0}    //10
-                       };
-
-static int winspecial = 0;
+extern vmdef vmodes[11];
+extern int winspecial;
 
 extern int disvaccel;
 extern int fssync;

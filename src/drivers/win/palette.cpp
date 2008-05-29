@@ -3,6 +3,8 @@
 #include "window.h"
 #include "gui.h"
 
+uint8 cpalette[192];
+
 /**
 * Prompts the user for a palette file and opens that file.
 *

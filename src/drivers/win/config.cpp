@@ -42,6 +42,7 @@ extern int input_display;
 extern char *BasicBotDir;
 extern int allowUDLR;
 extern int pauseAfterPlayback;
+extern int EnableBackgroundInput;
 
 //window positions:
 extern int ChtPosX,ChtPosY;

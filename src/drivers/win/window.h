@@ -12,8 +12,6 @@ struct CreateMovieParameters
 	char* szSavestateFilename;
 };
 
-static int EnableBackgroundInput = 0;
-
 extern char *recent_files[];
 extern char *recent_directories[10];
 extern HWND pwindow;
