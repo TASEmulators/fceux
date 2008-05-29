@@ -12,6 +12,7 @@ file.cpp
 filter.cpp 
 ines.cpp
 input.cpp
+mem-cb.cpp
 netplay.cpp
 nsf.cpp
 palette.cpp
