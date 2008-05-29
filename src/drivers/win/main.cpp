@@ -627,6 +627,11 @@ int main(int argc,char *argv[])
 
         fullscreen = !!fullscreen;
         soundo = !!soundo;
+        frame_display = !!frame_display;
+        input_display = !!input_display;
+        allowUDLR = !!allowUDLR;
+        pauseAfterPlayback = !!pauseAfterPlayback;
+        EnableBackgroundInput = !!EnableBackgroundInput;
 
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
@@ -683,9 +688,15 @@ int main(int argc,char *argv[])
 
 	if(GameInfo && MovieToLoad)
 	{
-		FCEUI_LoadMovie(MovieToLoad, 1, 0);
+		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, replayStopFrameSetting);
 		free(MovieToLoad);
 		MovieToLoad = NULL;
+	}
+	if(GameInfo && StateToLoad)
+	{
+		FCEUI_LoadState(StateToLoad);
+		free(StateToLoad);
+		StateToLoad = NULL;
 	}
 	if (MemWatchLoadOnStart) CreateMemWatch();
 

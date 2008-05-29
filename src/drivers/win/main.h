@@ -32,6 +32,11 @@ extern int genie;
 // Flag that indicates whether PAL Emulation is enabled or not.
 extern int pal_emulation;
 extern int status_icon;
+extern int frame_display;
+extern int input_display;
+extern int allowUDLR;
+extern int pauseAfterPlayback;
+extern int EnableBackgroundInput;
 
 extern int vmod;
 static char *gfsdir=0;

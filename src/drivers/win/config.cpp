@@ -36,13 +36,8 @@
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
-extern int autoHoldKey, autoHoldClearKey;
-extern int frame_display;
-extern int input_display;
 extern char *BasicBotDir;
-extern int allowUDLR;
-extern int pauseAfterPlayback;
-extern int EnableBackgroundInput;
+extern int autoHoldKey, autoHoldClearKey;
 
 //window positions:
 extern int ChtPosX,ChtPosY;

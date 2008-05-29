@@ -24,6 +24,7 @@
 #include "../common/args.h"
 
 char* MovieToLoad = 0;
+char* StateToLoad = 0;
 
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
 
@@ -42,6 +43,14 @@ char *ParseArgies(int argc, char *argv[])
          {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},  
          {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
          {"-playmovie",0,&MovieToLoad,0x4001},
+         {"-loadstate",0,&StateToLoad,0x4001},
+         {"-readonly",0,&replayReadOnlySetting,0},
+         {"-stopframe",0,&replayStopFrameSetting,0},
+         {"-framedisplay",0,&frame_display,0},
+         {"-inputdisplay",0,&input_display,0},
+         {"-allowUDLR",0,&allowUDLR,0},
+         {"-stopmovie",0,&pauseAfterPlayback,0},
+         {"-bginput",0,&EnableBackgroundInput,0},
          {0, 0, 0, 0},
 	};
 

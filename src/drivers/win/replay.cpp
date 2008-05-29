@@ -8,10 +8,9 @@ bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 100
 
 extern FCEUGI *GameInfo;
 
-//retains the state of the readonly checkbox
-static bool ReplayDialogReadOnlyStatus;
-//retains the state of the stopframe value
-static int ReplayDialogStopFrame = 0;
+//retains the state of the readonly checkbox and stopframe value
+bool replayReadOnlySetting;
+int replayStopFrameSetting = 0;
 
 void RefreshThrottleFPS();
 
@@ -105,7 +104,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 	// remember the previous setting for the read-only checkbox
 	if(IsWindowEnabled(GetDlgItem(hwndDlg, IDC_CHECK_READONLY)))
-		ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+		replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 
 	if(fn)
 	{
@@ -132,7 +131,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 			
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
-			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (ReplayDialogReadOnlyStatus ? BST_CHECKED : BST_UNCHECKED), 0);
+			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
 			
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
 
@@ -253,7 +252,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 	case WM_INITDIALOG:
 		{
-			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, ReplayDialogReadOnlyStatus?BST_CHECKED:BST_UNCHECKED, 0);
+			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, replayReadOnlySetting?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
 			char* findGlob[2] = {FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0),
@@ -476,12 +475,12 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							// TODO: warn the user when they open a movie made with a different ROM
 							char* fn=GetReplayPath(hwndDlg);
 							//char TempArray[16]; //mbg merge 7/17/06 removed
-							ReplayDialogReadOnlyStatus = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+							replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
 							
 							char offset1Str[32]={0};
 
 							SendDlgItemMessage(hwndDlg, IDC_EDIT_STOPFRAME, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
-							ReplayDialogStopFrame = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
+							replayStopFrameSetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
 							
 							EndDialog(hwndDlg, (INT_PTR)fn);
 						}
@@ -520,13 +519,13 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 /// Show movie replay dialog and replay the movie if necessary.
 void FCEUD_MovieReplayFrom(void)
 {
-	ReplayDialogReadOnlyStatus = FCEUI_GetMovieToggleReadOnly();
+	replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
 
 	char* fn = (char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
 
 	if(fn)
 	{
-		FCEUI_LoadMovie(fn, ReplayDialogReadOnlyStatus, ReplayDialogStopFrame);
+		FCEUI_LoadMovie(fn, replayReadOnlySetting, replayStopFrameSetting);
 
 		free(fn);
 
