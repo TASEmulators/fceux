@@ -42,6 +42,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-clipsides",0,&eoptions,0x8000|EO_CLIPSIDES},  
          {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
          {"-playmovie",0,&MovieToLoad,0x4001},
+         {0, 0, 0, 0},
 	};
 
        if(argc <= 1)
