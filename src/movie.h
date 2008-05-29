@@ -96,7 +96,7 @@ public:
 	};
 
 	void truncateAt(int frame);
-	void MovieData::installDictionary(TDictionary& dictionary);
+	void installDictionary(TDictionary& dictionary);
 	void dump(FILE *fp);
 	int dumpLen();
 	void clearRecordRange(int start, int len);
