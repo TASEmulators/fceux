@@ -401,6 +401,7 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	
 	strcpy(curMovieFilename, fname);
 	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+	if (!fp) return;
 	LoadFM2(currMovieData, fp);
 	fclose(fp);
 

@@ -681,7 +681,7 @@ int main(int argc,char *argv[])
 	}
 
 
-	if(MovieToLoad)
+	if(GameInfo && MovieToLoad)
 	{
 		FCEUI_LoadMovie(MovieToLoad, 1, 0);
 		free(MovieToLoad);
