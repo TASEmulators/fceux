@@ -717,8 +717,6 @@ doloopy:
 			FCEU_UpdateBot();
 
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
-			currMovieData.TryDumpIncremental();
-			
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
 			 //mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()

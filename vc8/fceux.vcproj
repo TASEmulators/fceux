@@ -1252,6 +1252,10 @@
 						RelativePath="..\src\drivers\win\res\ICON_2.ico"
 						>
 					</File>
+					<File
+						RelativePath="..\src\drivers\win\res\te_arrow.bmp"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="zlib"
@@ -2282,10 +2286,6 @@
 		</File>
 		<File
 			RelativePath="..\src\state.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\src\drivers\win\res\te_arrow.bmp"
 			>
 		</File>
 		<File

@@ -192,6 +192,13 @@ static void ColumnSet(int column)
 		currMovieData.records[*it].setBitValue(0,button,newValue);
 		ListView_Update(hwndList,*it);
 	}
+
+	//reduce the green zone
+	int firstSelection = *selectionFrames.begin();
+	currMovieData.greenZoneCount = std::min(firstSelection,currMovieData.greenZoneCount);
+
+	//redraw everything to show the reduced green zone
+	RedrawList();
 }
 
 //The subclass wndproc for the listview header
@@ -291,6 +298,9 @@ static void Export()
 	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MOVIE);
 	if(GetSaveFileName(&ofn))
 	{
+		FILE* outf = fopen(ofn.lpstrFile,"wb");
+		currMovieData.dump(outf);
+		fclose(outf);
 	}
 }
 
@@ -329,15 +339,10 @@ static void ItemChanged(NMLISTVIEW* info)
 	}
 	else
 	{
-		if(ON) {
-			printf("%d ON\n",item);
+		if(ON)
 			selectionFrames.insert(item);
-		}
 		else if(OFF) 
-		{
-			printf("%d OFF\n",item);
 			selectionFrames.erase(item);
-		}
 	}
 }
 
