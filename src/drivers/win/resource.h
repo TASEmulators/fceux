@@ -244,6 +244,7 @@
 #define IDC_LIST1                       1130
 #define IDC_HACKY2                      1131
 #define IDC_HACKY1                      1132
+#define IDC_HACKYEXPORT                 1133
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042

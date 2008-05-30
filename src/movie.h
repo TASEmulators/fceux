@@ -26,8 +26,28 @@ public:
 
 	void toggleBit(int joy, int bit)
 	{
-		int mask = (1<<bit);
-		joysticks[joy] ^= mask;
+		joysticks[joy] ^= mask(bit);
+	}
+
+	void setBit(int joy, int bit)
+	{
+		joysticks[joy] |= mask(bit);
+	}
+
+	void clearBit(int joy, int bit)
+	{
+		joysticks[joy] &= ~mask(bit);
+	}
+
+	void setBitValue(int joy, int bit, bool val)
+	{
+		if(val) setBit(joy,bit);
+		else clearBit(joy,bit);
+	}
+
+	bool checkBit(int joy, int bit)
+	{
+		return (joysticks[joy] & mask(bit))!=0;
 	}
 
 	void clear() { 
@@ -40,6 +60,9 @@ public:
 	void dump(FILE* fp, int index);
 
 	static const char mnemonics[8];
+
+private:
+	int mask(int bit) { return 1<<bit; }
 };
 
 class MovieData
@@ -58,6 +81,7 @@ public:
 	std::string romFilename;
 	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
+	//this is the RERECORD COUNT. please rename variable.
 	int recordCount;
 	FCEU_Guid guid;
 	

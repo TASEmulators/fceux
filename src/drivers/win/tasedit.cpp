@@ -1,3 +1,5 @@
+#include <set>
+
 #include "common.h"
 #include "tasedit.h"
 #include "../../fceu.h"
@@ -10,7 +12,11 @@
 
 HWND hwndTasEdit = 0;
 static int lastCursor;
-static HWND hwndList;
+static HWND hwndList, hwndHeader;
+static WNDPROC hwndHeader_oldWndproc;
+
+typedef std::set<int> TSelectionFrames;
+static TSelectionFrames selectionFrames;
 
 //hacky.. we need to think about how to convey information from the driver to the movie code.
 //add a new fceud_ function?? blehhh maybe
@@ -96,12 +102,13 @@ void UpdateTasEdit()
 		//scroll to the row
 		ListView_EnsureVisible(hwndList,newCursor,FALSE);
 		//select the row
+		ListView_SetItemState(hwndList,lastCursor,0, LVIS_FOCUSED|LVIS_SELECTED);
 		ListView_SetItemState(hwndList,newCursor,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
 		
 		//update the old and new rows
 		ListView_Update(hwndList,lastCursor);
 		ListView_Update(hwndList,newCursor);
-
+		
 		lastCursor = newCursor;
 	}
 }
@@ -145,19 +152,86 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	}
 }
 
-void InitDialog()
+
+//the column set operation, for setting a button for a span of selected values
+static void ColumnSet(int column)
 {
+	int button = column-2;
+
+	//inspect the selected frames. count the set and unset rows
+	int set=0, unset=0;
+	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+	{
+		if(currMovieData.records[*it].checkBit(0,button))
+			set++;
+		else unset++;
+	}
+
+	//if it is half and half, then set them all
+	//if they are all set, unset them all
+	//if they are all unset, set them all
+	bool setz = (set==0);
+	bool unsetz = (unset==0);
+	bool newValue;
+	
+	//do nothing if we didnt even have any work to do
+	if(setz && unsetz)
+		return;
+	//all unset.. set them
+	else if(setz && !unsetz)
+		newValue = true;
+	//all set.. unset them
+	else if(!setz && unsetz)
+		newValue = false;
+	//a mix. set them.
+	else newValue = true;
+
+	//operate on the data and update the listview
+	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+	{
+		currMovieData.records[*it].setBitValue(0,button,newValue);
+		ListView_Update(hwndList,*it);
+	}
+}
+
+//The subclass wndproc for the listview header
+static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	switch(msg)
+	{
+	case WM_LBUTTONDOWN:
+		{
+			//perform hit test
+			HDHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			SendMessage(hWnd,HDM_HITTEST,0,(LPARAM)&info);
+			if(info.iItem != -1)
+				ColumnSet(info.iItem);
+		}
+	}
+	return CallWindowProc(hwndHeader_oldWndproc,hWnd,msg,wParam,lParam);
+}
+
+//All dialog initialization
+static void InitDialog()
+{
+	//prepare the listview
 	ListView_SetExtendedListViewStyleEx(hwndList,
                              LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES ,
                              LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES );
 
+	//subclass the header
+	hwndHeader = ListView_GetHeader(hwndList);
+	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader,GWL_WNDPROC,(LONG)HeaderWndProc);
 
+
+	//setup all images for the listview
 	HIMAGELIST himglist = ImageList_Create(12,12,ILC_COLOR32 | ILC_MASK,1,1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance,MAKEINTRESOURCE(IDB_TE_ARROW));
 	ImageList_AddMasked(himglist, bmp, RGB(255,0,255));
 	DeleteObject(bmp);
 	ListView_SetImageList(hwndList,himglist,LVSIL_SMALL);
-
 	//doesnt work well??
 	//HIMAGELIST himglist = ImageList_LoadImage(fceu_hInstance,MAKEINTRESOURCE(IDB_TE_ARROW),12,1,RGB(255,0,255),IMAGE_BITMAP,LR_DEFAULTCOLOR);
 
@@ -202,6 +276,70 @@ void KillTasEdit()
 	moviePleaseLogSavestates = false;
 }
 
+static void Export()
+{
+	const char filter[]="FCEUX Movie File(*.fm2)\0*.fm2\0";
+	char fname[2048] = {0};
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Export TAS as...";
+	ofn.lpstrFilter=filter;
+	ofn.lpstrFile=fname;
+	ofn.nMaxFile=256;
+	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MOVIE);
+	if(GetSaveFileName(&ofn))
+	{
+	}
+}
+
+//likewise, handles a changed item range from the listview
+static void ItemRangeChanged(NMLVODSTATECHANGE* info)
+{
+	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
+	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
+
+	if(ON)
+		for(int i=info->iFrom;i<=info->iTo;i++)
+			selectionFrames.insert(i);
+	else
+		for(int i=info->iFrom;i<=info->iTo;i++)
+			selectionFrames.erase(i);
+}
+
+//handles a changed item from the listview
+//used to track selection
+static void ItemChanged(NMLISTVIEW* info)
+{
+	int item = info->iItem;
+	
+	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
+	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
+
+	//if the item is -1, apply the change to all items
+	if(item == -1)
+	{
+		if(OFF)
+		{
+			selectionFrames.clear();
+		}
+		else
+			FCEUD_PrintError("Unexpected condition in TasEdit ItemChanged. Please report.");
+	}
+	else
+	{
+		if(ON) {
+			printf("%d ON\n",item);
+			selectionFrames.insert(item);
+		}
+		else if(OFF) 
+		{
+			printf("%d OFF\n",item);
+			selectionFrames.erase(item);
+		}
+	}
+}
 
 BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -213,6 +351,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			break; 
 
 		case WM_NOTIFY:
+
 			switch(wParam)
 			{
 			case IDC_LIST1:
@@ -224,10 +363,14 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case LVN_GETDISPINFO:
 					GetDispInfo((NMLVDISPINFO*)lParam);
 					break;
-				case NM_CLICK:
-					break;
 				case NM_DBLCLK:
 					DoubleClick((LPNMITEMACTIVATE)lParam);
+					break;
+				case LVN_ITEMCHANGED:
+					ItemChanged((LPNMLISTVIEW) lParam);
+					break;
+				case LVN_ODSTATECHANGED:
+					ItemRangeChanged((LPNMLVODSTATECHANGE) lParam);
 					break;
 					
 				}
@@ -253,6 +396,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				currMovieData.records.resize(currMovieData.records.size()+1000);
 				currMovieData.clearRecordRange(currMovieData.records.size()-1000,1000);
 				UpdateTasEdit();
+				break;
+			
+			case IDC_HACKYEXPORT:
+				//hackyexport: save an fm2
+				Export();
 				break;
 
 			case ACCEL_CTRL_W:
