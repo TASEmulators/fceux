@@ -201,6 +201,11 @@ static void ColumnSet(int column)
 	RedrawList();
 }
 
+//copies the current selection to the clipboard
+static void Copy()
+{
+}
+
 //The subclass wndproc for the listview header
 static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -406,6 +411,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case IDC_HACKYEXPORT:
 				//hackyexport: save an fm2
 				Export();
+				break;
+
+			case ACCEL_CTRL_C:
+				Copy();
 				break;
 
 			case ACCEL_CTRL_W:
