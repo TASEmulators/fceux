@@ -22,7 +22,7 @@ static struct
 } DefaultCommandMapping[]=
 {
 	{ EMUCMD_RESET, 					SCAN_R | CMD_KEY_CTRL },
-	{ EMUCMD_PAUSE, 					SCAN_F2, },
+	{ EMUCMD_PAUSE, 					SCAN_PAUSE, },
 	{ EMUCMD_FRAME_ADVANCE, 			SCAN_BACKSLASH, },
 	{ EMUCMD_SCREENSHOT,				SCAN_F12 },
 	{ EMUCMD_HIDE_MENU_TOGGLE,			SCAN_ESCAPE },
