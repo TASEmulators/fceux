@@ -1614,11 +1614,12 @@ END
 IDR_ACCELERATOR1 ACCELERATORS 
 BEGIN
     "E",            ACCEL_CTRL_E,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ACCEL_CTRL_N,           VIRTKEY, CONTROL, NOINVERT
     "O",            ACCEL_CTRL_O,           VIRTKEY, CONTROL, NOINVERT
-    "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_SHIFT_S,     VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "N",            ACCEL_CTRL_N,           VIRTKEY, CONTROL, NOINVERT
+    "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
+    "C",            ACCEL_CTRL_C,           VIRTKEY, CONTROL, NOINVERT
 END
 
 
