@@ -40,7 +40,7 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Open...  Ctrl+O",            MENU_OPEN_FILE
-        MENUITEM "&Close",                      MENU_CLOSE_FILE
+        MENUITEM "&Close      Ctrl+W",          MENU_CLOSE_FILE
         MENUITEM "&Recent",                     MENU_RECENT_FILES
         MENUITEM SEPARATOR
         MENUITEM "Load State From...",          MENU_LOAD_STATE
@@ -70,7 +70,7 @@ BEGIN
     POPUP "&Config"
     BEGIN
         MENUITEM "Hide Menu",                   MENU_HIDE_MENU
-        MENUITEM "Show Status Icon",            MENU_SHOW_STATUS_ICON
+        MENUITEM "Show Movie Status Icon",      MENU_SHOW_STATUS_ICON
         MENUITEM "Pause After Playback",        MENU_PAUSEAFTERPLAYBACK
         MENUITEM "Enable Run in Background",    MENU_RUN_IN_BACKGROUND
         MENUITEM "Enable Background Input",     MENU_BACKGROUND_INPUT
@@ -390,7 +390,7 @@ CAPTION "GUI Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "Close",BUTTON_CLOSE,64,68,56,14
-    CONTROL         "Load ""File Open"" dialog when FCE Ultra starts.",CB_LOAD_FILE_OPEN,
+    CONTROL         "Load ""File Open"" dialog when FCEUX starts.",CB_LOAD_FILE_OPEN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,164,12
     CONTROL         "Automatically hide menu on game load.",CB_AUTO_HIDE_MENU,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,23,164,12
@@ -679,8 +679,8 @@ FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Full Screen Settings",65453,10,8,364,115,WS_GROUP
     CONTROL         "Full Screen",101,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,23,145,12
-    CONTROL         "Enter full screen mode after file is loaded.",102,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,39,145,12
+    CONTROL         "Enter full screen mode after game is loaded.",102,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,39,151,12
     LTEXT           "Sync Method:",65452,20,82,48,10
     COMBOBOX        105,72,79,93,50,CBS_DROPDOWNLIST | WS_TABSTOP
     LTEXT           "Video Mode:",65451,20,62,42,10

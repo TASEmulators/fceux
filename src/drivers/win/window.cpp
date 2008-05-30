@@ -1035,7 +1035,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// User selected the Open File menu => Show the file selection dialog
 				LoadNewGamey(hWnd, 0);
 				break;
-
+			
+			case ACCEL_CTRL_W:
 			case MENU_CLOSE_FILE:
 				// User selected the Close File menu => Close the game if necessary
 				if(GameInfo)
