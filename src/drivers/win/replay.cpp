@@ -9,7 +9,7 @@ bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 100
 extern FCEUGI *GameInfo;
 
 //retains the state of the readonly checkbox and stopframe value
-bool replayReadOnlySetting;
+int replayReadOnlySetting;
 int replayStopFrameSetting = 0;
 
 void RefreshThrottleFPS();

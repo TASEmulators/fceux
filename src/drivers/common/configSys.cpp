@@ -571,7 +571,6 @@ Config::parse(int argc,
 int
 Config::_load()
 {
-    int error;
     unsigned int pos, eqPos;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
@@ -639,7 +638,6 @@ Config::_load()
 int
 Config::save()
 {
-    int error;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
