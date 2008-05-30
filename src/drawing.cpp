@@ -3,8 +3,6 @@
 #include "drawing.h"
 #include "video.h"
 
-extern char errmsg[65];
-
 static uint8 Font6x5[594] =
 {
 	4,  0,  0,  0,  0,  0,
