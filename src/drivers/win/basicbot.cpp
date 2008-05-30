@@ -334,7 +334,7 @@ struct lastPart {
 	int frames;
 	int Tattempts;
 	int Tframes;
-	int counters[256];
+	int counters[BOT_MAXCOUNTERS];
 	int score;
 	int tie1;
 	int tie2;
@@ -360,7 +360,7 @@ lastPart * NewPart(int part, int attempt,
 	(*l).tie4 = tie4;
 	(*l).tie5 = tie5;
 	(*l).lastbutton = lastbutton;
-	for (int i=0; i<256; ++i)
+	for (int i=0; i<BOT_MAXCOUNTERS; ++i)
 		(*l).counters[i] = BotCounter[i];
 
 	return l;
@@ -1440,7 +1440,7 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 		case BOT_BYTE_AC:
-			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256] += value);
+			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % BOT_MAXCOUNTERS] += value);
 			if (single) return value;
 			break;
 		case BOT_BYTE_ABS:
@@ -1455,7 +1455,7 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 		case BOT_BYTE_C:
-			value = BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256];
+			value = BotCounter[(Interpreter(false) & 0x7FFFFFFF) % BOT_MAXCOUNTERS];
 			if (single) return value;
 			break;
 		case BOT_BYTE_DOWN:
@@ -1590,7 +1590,7 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 		case BOT_BYTE_RC:
-			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256] = 0);
+			value = (BotCounter[(Interpreter(false) & 0x7FFFFFFF) % BOT_MAXCOUNTERS] = 0);
 			if (single) return 0;
 			break;
 		case BOT_BYTE_RIGHT:
@@ -1610,7 +1610,7 @@ static int Interpreter(bool single)
 			if (single) return value;
 			break;
 		case BOT_BYTE_SC:
-			BotCounter[(Interpreter(false) & 0x7FFFFFFF) % 256] = value;
+			BotCounter[(Interpreter(false) & 0x7FFFFFFF) % BOT_MAXCOUNTERS] = value;
 			if (single) return value;
 			break;
 		case BOT_BYTE_SCORE1:
@@ -2815,7 +2815,7 @@ void SetNewAttempt()
 	if (LastPart != NULL)
 	{
 		LastButtonPressed = LastPart->lastbutton;
-		for (int i=0; i<256; ++i)
+		for (int i=0; i<BOT_MAXCOUNTERS; ++i)
 			BotCounter[i] = LastPart->counters[i];
 	}
 	else
