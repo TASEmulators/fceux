@@ -39,12 +39,13 @@ if env['PLATFORM'] == 'cygwin':
 conf = Configure(env)
 if env['PLATFORM'] == 'win32':
   conf.env.Append(CPPPATH = [".", "drivers/win/", "drivers/common/", "drivers/", "drivers/win/zlib", "drivers/win/directx"])
-  conf.env.Append(CPPDEFINES = ["PSS_STYLE=2", "WIN32", "_USE_SHARED_MEMORY_", "NETWORK", "FCEUDEF_DEBUGGER", "NOMINMAX", "_WIN32_IE=0x0300"])
+  conf.env.Append(CPPDEFINES = ["PSS_STYLE=2", "WIN32", "_USE_SHARED_MEMORY_", "NETWORK", "FCEUDEF_DEBUGGER", "NOMINMAX", "NEED_MINGW_HACKS", "_WIN32_IE=0x0600"])
   conf.env.Append(LIBS = ["rpcrt4", "comctl32", "vfw32", "winmm", "ws2_32", "comdlg32", "ole32", "gdi32"])
   if env.has_key('DEBUG'):
     if env['DEBUG']:
       conf.env.Append(CCFLAGS = " -g")
       conf.env.Append(CPPDEFINES = ["_DEBUG"])
+      conf.env.Append(CCFLAGS = " -O3 -Wall")
     else: # Should we do this?
       conf.env.Append(CCFLAGS = " -O3 -fomit-frame-pointer")
 else:

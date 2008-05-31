@@ -1,3 +1,6 @@
+#ifndef WIN_COMMON_H
+#define WIN_COMMON_H
+
 #include <stdio.h>
 #include <windows.h>
 #include <windowsx.h>
@@ -12,6 +15,20 @@
 #define DIRECTSOUND_VERSION  0x0700
 #define DIRECTDRAW_VERSION 0x0700
 #define DIRECTINPUT_VERSION     0x700
+
+#ifdef NEED_MINGW_HACKS
+typedef struct _HD_HITTESTINFO HDHITTESTINFO;
+// Pulled from wine's commctrl.h:
+typedef struct tagNMLVODSTATECHANGE
+{
+    NMHDR hdr;
+    int iFrom;
+    int iTo;
+    UINT uNewState;
+    UINT uOldState;
+} NMLVODSTATECHANGE, *LPNMLVODSTATECHANGE;
+#endif
+
 //#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 removing conditional compiles
 #include "../../types.h"
 #include "../../file.h"
@@ -45,3 +62,4 @@ extern int eoptions;
 #define EO_NOFOURSCORE  32768
 
 bool directoryExists(const char* dirname);
+#endif
