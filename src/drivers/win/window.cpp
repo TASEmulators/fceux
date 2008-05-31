@@ -101,6 +101,7 @@ static HMENU fceumenu = 0;
 static int tog = 0;
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
 static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
+static bool loggingSound = false;
 
 static HMENU recentmenu, recentdmenu;
 
@@ -1057,24 +1058,26 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case MENU_LOG_SOUND: //mbg merge 7/18/06 changed ID from 120
-				// Record sound menu was selected
-				// TODO: Proper stop logging
+				// (new-ish record sound / stop logging code:)
 				{
 					MENUITEMINFO mi;
-					// Evil:
-                                        char *strT = "Stop Sound Logging";
-                                        char *strF = "Log Sound As...";
-					char *str = CreateSoundSave() ? strT : strF;
+					if (loggingSound)
+					{
+						CloseWave();
+						loggingSound = false;
+					}
+					else loggingSound = CreateSoundSave();
 
 					memset(&mi,0,sizeof(mi));
 					mi.fMask=MIIM_DATA|MIIM_TYPE;
 					mi.cbSize=sizeof(mi);
-					GetMenuItemInfo(fceumenu,120,0,&mi);                           
+					GetMenuItemInfo(fceumenu,MENU_LOG_SOUND,0,&mi);                           
 					mi.fMask=MIIM_DATA|MIIM_TYPE;
 					mi.cbSize=sizeof(mi);
-					mi.dwTypeData=str;
-					mi.cch=strlen(str);
-					SetMenuItemInfo(fceumenu,120,0,&mi);
+					if (loggingSound) mi.dwTypeData = "Stop Sound Logging";
+					else mi.dwTypeData = "Log Sound As...";
+					mi.cch=strlen(mi.dwTypeData);
+					SetMenuItemInfo(fceumenu,MENU_LOG_SOUND,0,&mi);
 				}
 				break;
 
