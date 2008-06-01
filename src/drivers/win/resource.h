@@ -344,7 +344,7 @@
 #define ACCEL_CTRL_SHIFT_S              40135
 #define ACCEL_CTRL_N                    40136
 #define ACCEL_CTRL_C                    40138
-#define FCEU_HELP                       40140
+#define MENU_HELP                       40140
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436

@@ -54,6 +54,8 @@
 #include "directories.h"
 #include "gui.h"
 
+#include <htmlhelp.h>
+
 // Extern variables
 
 extern FCEUGI *GameInfo;
@@ -1116,9 +1118,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ShowAboutBox();
 				break;
 
-			case FCEU_HELP:
+			case MENU_HELP:
 				// Help Menu is selected
-
+				//HtmlHelp(GetDesktopWindow(), "drivers/win/fceux.chm::/{7EEBAD0B-2126-4A8A-864F-61D603111A68}.htm", HH_DISPLAY_TOPIC, (DWORD)NULL);
+				HtmlHelp(GetDesktopWindow(), "C:/fceux.chm::/{7EEBAD0B-2126-4A8A-864F-61D603111A68}.htm", HH_DISPLAY_TOPIC, (DWORD)NULL);
 				break;
 
 			case MENU_MSGLOG:
