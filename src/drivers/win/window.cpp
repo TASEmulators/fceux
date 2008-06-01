@@ -1116,6 +1116,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ShowAboutBox();
 				break;
 
+			case FCEU_HELP:
+				// Help Menu is selected
+
+				break;
+
 			case MENU_MSGLOG:
 				// Message Log menu was selected
 				MakeLogWindow();

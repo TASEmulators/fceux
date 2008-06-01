@@ -2241,6 +2241,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\src\drivers\win\help\fceux.chm"
+			>
+		</File>
+		<File
 			RelativePath="..\src\fds.cpp"
 			>
 		</File>

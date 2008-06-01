@@ -140,6 +140,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "Help...",                     40140
         MENUITEM "&Message Log...",             MENU_MSGLOG
         MENUITEM SEPARATOR
         MENUITEM "&About...",                   MENU_ABOUT
