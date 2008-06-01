@@ -78,12 +78,12 @@ int FCEUI_EndWaveRecord()
 }
 
 
-int FCEUI_BeginWaveRecord(const char *fn)
+bool FCEUI_BeginWaveRecord(const char *fn)
 {
  int r;
 
  if(!(soundlog=FCEUD_UTF8fopen(fn,"wb")))
-  return 0;
+  return false;
  wsize=0;
 
 
@@ -121,5 +121,5 @@ int FCEUI_BeginWaveRecord(const char *fn)
  fputs("data",soundlog);
  fseek(soundlog,4,SEEK_CUR);
 
- return(1);
+ return true;
 }

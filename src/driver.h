@@ -53,7 +53,7 @@ void FCEUI_NetplayText(uint8 *text);
 */
 void FCEUD_NetworkClose(void);
 
-int FCEUI_BeginWaveRecord(const char *fn);
+bool FCEUI_BeginWaveRecord(const char *fn);
 int FCEUI_EndWaveRecord(void);
 
 void FCEUI_ResetNES(void);

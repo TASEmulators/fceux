@@ -33,7 +33,7 @@ int CloseWave()
 * 
 * @return Flag that indicates failure (0) or success (1).
 **/
-int CreateSoundSave()
+bool CreateSoundSave()
 {
 	const char filter[]="MS WAVE(*.wav)\0*.wav\0";
 	char nameo[2048];
@@ -56,5 +56,5 @@ int CreateSoundSave()
 		return FCEUI_BeginWaveRecord(nameo);
 	}
 
-	return 0;
+	return false;
 }
