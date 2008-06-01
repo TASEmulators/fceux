@@ -119,6 +119,7 @@ double winsizemulx = 1, winsizemuly = 1;
 int genie = 0;
 int pal_emulation = 0;
 int ntsccol = 0, ntsctint, ntschue;
+char BaseDirectory[2048];
 
 
 // Contains the names of the overridden standard directories

@@ -90,7 +90,7 @@ static int changerecursive=0;
 /**
 * Contains the base directory of FCE
 **/
-static char BaseDirectory[2048];
+extern char BaseDirectory[2048];
 
 extern int soundo;
 extern int eoptions;

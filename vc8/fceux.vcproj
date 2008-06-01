@@ -860,6 +860,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\help.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\help.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\input.cpp"
 					>
 					<FileConfiguration

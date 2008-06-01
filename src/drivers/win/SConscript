@@ -13,6 +13,7 @@ debuggersp.cpp
 directories.cpp
 gui.cpp
 guiconfig.cpp
+help.cpp
 input.cpp
 joystick.cpp
 keyboard.cpp
