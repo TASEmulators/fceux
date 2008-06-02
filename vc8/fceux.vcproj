@@ -2251,6 +2251,15 @@
 		<File
 			RelativePath="..\src\drivers\win\help\fceux.chm"
 			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)"
+					Outputs="$(OutDir)\fceux.chm"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\src\fds.cpp"

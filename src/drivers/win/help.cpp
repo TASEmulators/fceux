@@ -6,7 +6,7 @@ void OpenHelpWindow(const char *subpage)
 {
 	char helpFileName[MAX_PATH];
 	strcpy(helpFileName, BaseDirectory);
-	strcat(helpFileName, "\\help\\fceux.chm");
+	strcat(helpFileName, "\\fceux.chm");
 	if (subpage)
 	{
 		strcat(helpFileName, "::/");
