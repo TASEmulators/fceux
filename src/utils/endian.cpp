@@ -65,6 +65,17 @@ int write32le(uint32 b, FILE *fp)
 	return((fwrite(s,1,4,fp)<4)?0:4);
 }
 
+int write32le(uint32 b, std::ostream* os)
+{
+	uint8 s[4];
+	s[0]=b;
+	s[1]=b>>8;
+	s[2]=b>>16;
+	s[3]=b>>24;
+	os->write((char*)&s,4);
+	return 4;
+}
+
 ///reads a little endian 32bit value from the specified file
 int read32le(uint32 *Bufo, FILE *fp)
 {

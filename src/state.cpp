@@ -28,6 +28,7 @@
 //#include <unistd.h> //mbg merge 7/17/06 removed
 
 #include <vector>
+#include <sstream>
 
 #include "types.h"
 #include "x6502.h"
@@ -89,6 +90,49 @@ SFORMAT SFCPUC[]={
  { 0 }
 };
 
+static int SubWrite(std::ostream* os, SFORMAT *sf)
+{
+ uint32 acc=0;
+
+ while(sf->v)
+ {
+  if(sf->s==~0)		/* Link to another struct.	*/
+  {
+   uint32 tmp;
+
+   if(!(tmp=SubWrite(os,(SFORMAT *)sf->v)))
+    return(0);
+   acc+=tmp;
+   sf++;
+   continue;
+  }
+
+  acc+=8;			/* Description + size */
+  acc+=sf->s&(~RLSB);
+
+  if(os)			/* Are we writing or calculating the size of this block? */
+  {
+	  os->write(sf->desc,4);
+   write32le(sf->s&(~RLSB),os);
+
+   #ifndef LSB_FIRST
+   if(sf->s&RLSB)
+    FlipByteOrder(sf->v,sf->s&(~RLSB));
+   #endif
+ 
+	os->write((char*)sf->v,sf->s&(~RLSB));
+   /* Now restore the original byte order. */
+   #ifndef LSB_FIRST
+   if(sf->s&RLSB)   
+    FlipByteOrder(sf->v,sf->s&(~RLSB));
+   #endif
+  }
+  sf++; 
+ }
+
+ return(acc);
+}
+
 static int SubWrite(FILE *st, SFORMAT *sf)
 {
  uint32 acc=0;
@@ -132,13 +176,26 @@ static int SubWrite(FILE *st, SFORMAT *sf)
  return(acc);
 }
 
+static int WriteStateChunk(std::ostream* os, int type, SFORMAT *sf)
+{
+	os->put(type);
+	int bsize = SubWrite((std::ostream*)0,sf);
+	write32le(bsize,os);
+
+	if(!SubWrite(os,sf))
+	{
+		return 5;
+	}
+	return (bsize+5);
+}
+
 static int WriteStateChunk(FILE *st, int type, SFORMAT *sf)
 {
  int bsize;
 
  fputc(type,st);
  
- bsize=SubWrite(0,sf);
+ bsize=SubWrite((FILE*)0,sf);
  write32le(bsize,st);		
 
  if(!SubWrite(st,sf))
@@ -313,54 +370,48 @@ extern int geniestage;
 
 bool FCEUSS_SaveFP(FILE *st)
 {
-	FILE* tmp = tmpfile();
+	//a temporary buffer. we're goign to put the savestate in here and then compress it
+	memorystream ms;
+	std::ostream* os = (std::ostream*)&ms;
 
 	uint32 totalsize = 0;
 
 	FCEUPPU_SaveState();
 	FCEUSND_SaveState();
-	totalsize=WriteStateChunk(tmp,1,SFCPU);
-	totalsize+=WriteStateChunk(tmp,2,SFCPUC);
-	totalsize+=WriteStateChunk(tmp,3,FCEUPPU_STATEINFO);
-	totalsize+=WriteStateChunk(tmp,4,FCEUCTRL_STATEINFO);
-	totalsize+=WriteStateChunk(tmp,5,FCEUSND_STATEINFO);
+	totalsize=WriteStateChunk(os,1,SFCPU);
+	totalsize+=WriteStateChunk(os,2,SFCPUC);
+	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
+	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
+	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
 	if(FCEUI_IsMovieActive())
 	{
-		totalsize+=WriteStateChunk(tmp,6,FCEUMOV_STATEINFO);
-		uint32 size = FCEUMOV_WriteState(0);
-		fputc(7,tmp);
-		write32le(size, tmp);
-		FCEUMOV_WriteState(tmp);
+		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
+		uint32 size = FCEUMOV_WriteState((std::ostream*)0);
+		os->put(7);
+		write32le(size, os);
+		FCEUMOV_WriteState(os);
 		totalsize += 5 + size;
 	}
 	// save back buffer
 	{
 		extern uint8 *XBackBuf;
 		uint32 size = 256 * 256 + 8;
-		fputc(8,tmp);
-		write32le(size, tmp);
-		fwrite(XBackBuf,1,size,tmp);
+		os->put(8);
+		write32le(size, os);
+		os->write((char*)XBackBuf,size);
 		totalsize += 5 + size;
 	}
 
 	if(SPreSave) SPreSave();
-	totalsize+=WriteStateChunk(tmp,0x10,SFMDATA);
+	totalsize+=WriteStateChunk(os,0x10,SFMDATA);
 	if(SPreSave) SPostSave();
 
 	//save the length of the file
-	int len = (int)ftell(tmp);
+	int len = ms.size();
 
-	//reload the savestate from the tempfile 
-	fseek(tmp,0,SEEK_SET);
-	std::vector<uint8> buf(len);
-	fread(&buf[0],1,len,tmp);
-	fclose(tmp);
-
-	//compress it
 	uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
 	uLongf comprlen = len*2;
-	//int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_COMPRESSION);
-	int error = compress2(cbuf,&comprlen,&buf[0],len,Z_BEST_SPEED);
+	int error = compress2(cbuf,&comprlen,(uint8*)ms.buf(),len,Z_BEST_SPEED);
 
 	//dump the header
 	uint8 header[16]="FCSX";
@@ -369,6 +420,7 @@ bool FCEUSS_SaveFP(FILE *st)
 	FCEU_en32lsb(header+12, comprlen);
 
 	//dump it to the destination file
+	
 	fwrite(header,1,16,st);
 	fwrite(cbuf,1,comprlen,st);
 

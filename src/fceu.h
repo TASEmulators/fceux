@@ -1,6 +1,32 @@
 #ifndef _FCEUH
 #define _FCEUH
 
+#include <iostream>
+#include <sstream>
+
+class sane_stringbuf : public std::stringbuf
+{
+public:
+	friend class memorystream;
+};
+
+class memorystream : public std::basic_iostream<char, std::char_traits<char> >
+{
+public:
+	memorystream()
+		: std::basic_iostream<char, std::char_traits<char> >(&_Stringbuffer)
+		{	// construct empty character buffer
+		}
+	
+	sane_stringbuf _Stringbuffer;
+
+	friend class sane_stringbuf;
+
+	public: 
+		char* buf() { return _Stringbuffer.pbase(); }
+		int size() { return tellp(); }
+};
+
 extern int fceuindbg;
 void ResetGameLoaded(void);
 

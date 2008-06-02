@@ -26,6 +26,7 @@ extern char FileBase[];
 extern int EmulationPaused;
 extern bool moviePleaseLogSavestates;
 
+using namespace std;
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
@@ -165,6 +166,12 @@ void MovieData::installDictionary(TDictionary& dictionary)
 			StringToBytes(str,&savestate[0],len);
 		}
 	}
+}
+
+void MovieData::dump(std::ostream *os)
+{
+	*os << "version " << version;
+	*os << "emuVersion " << emuVersion;
 }
 
 void MovieData::dump(FILE *fp)
@@ -622,6 +629,22 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		if(counterbuf[0])
 			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
 	}
+}
+
+int FCEUMOV_WriteState(std::ostream* os)
+{
+	//we are supposed to dump the movie data into the savestate
+
+	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
+	{
+		int todo = currMovieData.dumpLen();
+		
+		if(os)
+			currMovieData.dump(os);
+		
+		return todo;
+	}
+	else return 0;
 }
 
 int FCEUMOV_WriteState(FILE* st)

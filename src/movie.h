@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <ostream>
 
 void FCEUMOV_AddJoy(uint8 *, int SkipFlush);
 void FCEUMOV_AddCommand(int cmd);
@@ -14,6 +15,7 @@ bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
 int FCEUMOV_WriteState(FILE* st);
+int FCEUMOV_WriteState(std::ostream* os);
 bool FCEUMOV_ReadState(FILE* st, uint32 size);
 void FCEUMOV_PreLoad(void);
 int FCEUMOV_PostLoad(void);
@@ -58,6 +60,7 @@ public:
 	std::vector<uint8> savestate;
 
 	void dump(FILE* fp, int index);
+	void dump(std::ostream* os, int index);
 
 	static const char mnemonics[8];
 
@@ -122,6 +125,7 @@ public:
 	void truncateAt(int frame);
 	void installDictionary(TDictionary& dictionary);
 	void dump(FILE *fp);
+	void dump(std::ostream* os);
 	int dumpLen();
 	void clearRecordRange(int start, int len);
 	
