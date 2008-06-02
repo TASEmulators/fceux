@@ -22,6 +22,7 @@
 /// \brief contains file I/O functions that write/read data LSB first.
 
 #include <stdio.h>
+#include <ostream>
 #include "../types.h"
 #include "endian.h"
 
