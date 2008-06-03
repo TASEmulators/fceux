@@ -389,24 +389,25 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	FCEUPPU_SaveState();
 	FCEUSND_SaveState();
 	totalsize=WriteStateChunk(os,1,SFCPU);
-	ms.sync();
 	totalsize+=WriteStateChunk(os,2,SFCPUC);
-	ms.sync();
 	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
-	ms.sync();
 	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
-	ms.sync();
 	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
-	ms.sync();
 	if(FCEUI_IsMovieActive())
 	{
 		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
-		ms.sync();
-		uint32 size = FCEUMOV_WriteState((std::ostream*)0);
-		os->put(7);
-		write32le(size, os);
-		FCEUMOV_WriteState(os);
-		totalsize += 5 + size;
+
+		//MBG tasedit HACK HACK HACK!
+		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
+		extern bool moviePleaseLogSavestates;
+		if(!moviePleaseLogSavestates)
+		{
+			uint32 size = FCEUMOV_WriteState((std::ostream*)0);
+			os->put(7);
+			write32le(size, os);
+			FCEUMOV_WriteState(os);
+			totalsize += 5 + size;
+		}
 	}
 	// save back buffer
 	{
@@ -416,7 +417,6 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 		write32le(size, os);
 		os->write((char*)XBackBuf,size);
 		totalsize += 5 + size;
-		ms.sync();
 	}
 
 	if(SPreSave) SPreSave();
@@ -453,7 +453,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 
 	//dump it to the destination file
 	outstream->write((char*)header,16);
-	outstream->write((char*)cbuf,comprlen);
+	outstream->write((char*)cbuf,comprlen==-1?totalsize:comprlen);
 
 	if(cbuf != (uint8*)ms.buf()) delete[] cbuf;
 	return error == Z_OK;
@@ -657,16 +657,25 @@ bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 	int stateversion = FCEU_de32lsb(header + 8);
 	int comprlen = FCEU_de32lsb(header + 12);
 
-	//load the compressed chunk and decompress
-	std::vector<uint8> cbuf(comprlen);
+	//load the compressed chunk and decompress if necessary
 	std::vector<uint8> buf(totalsize);
-	if(fread(&cbuf[0],1,comprlen,st) != comprlen)
-		return false;
+	if(comprlen == -1)
+	{
+		int ret = fread(&buf[0],1,totalsize,st);
+		if(ret != totalsize)
+			return false;
+	}
+	else
+	{
+		std::vector<uint8> cbuf(comprlen);
+		if(fread(&cbuf[0],1,comprlen,st) != comprlen)
+			return false;
 
-	uLongf uncomprlen = totalsize;
-	int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
-	if(error != Z_OK || uncomprlen != totalsize)
-		return false;
+		uLongf uncomprlen = totalsize;
+		int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
+		if(error != Z_OK || uncomprlen != totalsize)
+			return false;
+	}
 
 	//dump it back to a tempfile
 	FILE* tmp = tmpfile();

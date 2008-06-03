@@ -30,13 +30,6 @@ private:
 
 public:
 
-	//the logical length of the buffer
-	size_t size()
-	{ 
-		sync();
-		return length;
-	}
-
 	memory_streambuf()
 		: length(0)
 		, myBuf(true)
@@ -73,11 +66,17 @@ public:
 		sync();
 	}
 
-
 	~memory_streambuf()
 	{
 		//only cleanup if we own the seq
 		if(myBuf) delete[] buf;
+	}
+	
+	//the logical length of the buffer
+	size_t size()
+	{ 
+		sync();
+		return length;
 	}
 
 	//to avoid copying, rebuilds the provided vector and copies the streambuf contents into it
@@ -91,6 +90,14 @@ public:
 	std::vector<T> toVector()
 	{
 		return std::vector<T>(buf,buf+length);
+	}
+
+	//if the memorystream wraps a vector, the vector will be trimmed to the correct size,.
+	//you probably need to use this if you are using the vector wrapper
+	void trim()
+	{
+		if(!usevec) return;
+		usevec->resize(size());
 	}
 
 	//tells the current read or write position
@@ -234,13 +241,13 @@ public:
 	{}
 
 	memorystream(char* usebuf, int buflength)
-		: streambuf(usebuf, buflength)
-		, std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+		: std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+		, streambuf(usebuf, buflength)
 	{}
 
 	memorystream(std::vector<char>* usevec)
-		: streambuf(usevec)
-		, std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+		: std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+		, streambuf(usevec)
 	{}
 
 	//the underlying memory_streambuf
@@ -255,4 +262,8 @@ public:
 	void sync() { streambuf.sync(); }
 	//rewinds the cursors to offset 0
 	void rewind() { streambuf.seekpos(0,std::ios::in | std::ios::out); }
+
+	//if the memorystream wraps a vector, the vector will be trimmed to the correct size,.
+	//you probably need to use this if you are using the vector wrapper
+	void trim() { streambuf.trim(); }
 };

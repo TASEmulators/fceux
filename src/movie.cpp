@@ -87,7 +87,7 @@ void MovieData::TryDumpIncremental()
 		{
 			if(currFrameCounter < (int)currMovieData.records.size())
 			{
-				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_NO_COMPRESSION);
+				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 				currMovieData.greenZoneCount++;
 			}
 		}
@@ -437,6 +437,7 @@ void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 {
 	memorystream ms(buf);
 	FCEUSS_SaveMS(&ms,compressionLevel);
+	ms.trim();
 }
 
 //begin playing an existing movie
@@ -716,9 +717,12 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 	fread(&buf[0],1,size,st);
 	FILE* tmp = tmpfile();
 	fwrite(&buf[0],1,size,tmp);
-	FILE* wtf = fopen("d:\\wtf.txt","wb");
-	fwrite(&buf[0],1,size,wtf);
-	fclose(wtf);
+	//---------
+	//(debug)
+	//FILE* wtf = fopen("d:\\wtf.txt","wb");
+	//fwrite(&buf[0],1,size,wtf);
+	//fclose(wtf);
+	//---------
 	fseek(tmp,0,SEEK_SET);
 	MovieData tempMovieData = MovieData();
 	LoadFM2(tempMovieData, tmp);
@@ -797,7 +801,8 @@ int FCEUMOV_PostLoad(void)
 	if(!FCEUI_IsMovieActive())
 		return 1;
 	else
-		return load_successful;
+		//mbg tasedit hack!!!!!!!!!
+		return load_successful || moviePleaseLogSavestates;
 }
 
 int FCEUI_IsMovieActive(void)
