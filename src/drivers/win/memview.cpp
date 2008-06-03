@@ -697,7 +697,7 @@ void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset){
 
 	if(!hMemView)DoMemView();
 	if(EditingMode != newEditingMode)
-		MemViewCallB(hMemView,WM_COMMAND,300+newEditingMode,0); //let the window handler change this for us
+		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_VIEW_RAM+newEditingMode,0); //let the window handler change this for us
 
 	if((EndOffset == StartOffset) || (EndOffset == -1)){
 		CursorEndAddy = -1;
@@ -831,11 +831,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_ENTERMENULOOP:return 0;
 	case WM_INITMENUPOPUP:
-		if(undo_list != 0)EnableMenuItem(GetMenu(hMemView),200,MF_BYCOMMAND | MF_ENABLED);
-		else EnableMenuItem(GetMenu(hMemView),200,MF_BYCOMMAND | MF_GRAYED);
+		if(undo_list != 0)EnableMenuItem(GetMenu(hMemView),MENU_MV_EDIT_UNDO,MF_BYCOMMAND | MF_ENABLED);
+		else EnableMenuItem(GetMenu(hMemView),MENU_MV_EDIT_UNDO,MF_BYCOMMAND | MF_GRAYED);
 
-		if(TableFileLoaded)EnableMenuItem(GetMenu(hMemView),103,MF_BYCOMMAND | MF_ENABLED);
-		else EnableMenuItem(GetMenu(hMemView),103,MF_BYCOMMAND | MF_GRAYED);
+		if(TableFileLoaded)EnableMenuItem(GetMenu(hMemView),MENU_MV_FILE_UNLOAD_TBL,MF_BYCOMMAND | MF_ENABLED);
+		else EnableMenuItem(GetMenu(hMemView),MENU_MV_FILE_UNLOAD_TBL,MF_BYCOMMAND | MF_GRAYED);
 
 		return 0;
 
@@ -939,10 +939,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			switch(wParam){
 	case 0x43: //Ctrl+C
-		MemViewCallB(hMemView,WM_COMMAND,201,0); //recursion at work
+		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_COPY,0); //recursion at work
 		return 0;
 	case 0x56: //Ctrl+V
-		MemViewCallB(hMemView,WM_COMMAND,202,0);
+		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_PASTE,0);
 		return 0;
 	case 0x5a: //Ctrl+Z
 		UndoLastPatch();
@@ -1118,7 +1118,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					InsertMenuItem(hMenu,i+1,1,&MenuInfo);
 			}
 		}
-		//InsertMenu(hMenu, 1, MF_STRING, 892, "Test");
 		if(i != 0)i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, x, y, hMemView, NULL);
 		switch(i){
 	case 1 : //1 = Freeze Ram Address
@@ -1295,42 +1294,18 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_COMMAND:
 
-		// ################################## Start of SP CODE ###########################
-		if (wParam >= 30 && wParam <= 39)
-		{
-			int newValue = handleBookmarkMenu(wParam - 30);
-
-			if (newValue != -1)
-			{
-				CurOffset = newValue;
-				CursorEndAddy = -1;
-				CursorStartAddy = hexBookmarks[wParam - 30].address;
-				UpdateColorTable();
-			}
-		}
-		else if (wParam == 400)
-		{
-			removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
-			UpdateColorTable();
-		}
-		else if (wParam == 600)
-		{
-			MessageBox(0, "", "", 0);
-		}
-		// ################################## End of SP CODE ###########################
-
 		switch(wParam)
 		{
-		case 100:
+		case MENU_MV_FILE_SAVE:
 			FlushUndoBuffer();
 			iNesSave();
 			UpdateColorTable();
 			return 0;
 
-		case 101:
+		case MENU_MV_FILE_SAVE_AS:
 			return 0;
 
-		case 102:
+		case MENU_MV_FILE_LOAD_TBL:
 			if((i = LoadTableFile()) != -1){
 				sprintf(str,"Error Loading Table File At Line %d",i);
 				MessageBox(hMemView,str,"error", MB_OK);
@@ -1338,13 +1313,13 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			UpdateColorTable();
 			return 0;
 
-		case 103:
+		case MENU_MV_FILE_UNLOAD_TBL:
 			UnloadTableFile();
 			UpdateColorTable();
 			return 0;
 
 			// ################################## Start of SP CODE ###########################
-		case 104:
+		case MENU_MV_FILE_DUMP_RAM:
 			{
 				char bar[0x800];
 				unsigned int i;
@@ -1353,7 +1328,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				dumpToFile(bar, sizeof(bar));
 				return 0;
 			}
-		case 105:
+		case MENU_MV_FILE_DUMP_PPU:
 			{
 				char bar[0x4000];
 				unsigned int i;
@@ -1370,11 +1345,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			// ################################## End of SP CODE ###########################
 
-		case 200: //undo
+		case MENU_MV_EDIT_UNDO:
 			UndoLastPatch();
 			return 0;
 
-		case 201: //copy
+		case MENU_MV_EDIT_COPY:
 			if(CursorEndAddy == -1)i = 1;
 			else i = CursorEndAddy-CursorStartAddy+1;
 
@@ -1402,7 +1377,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			CloseClipboard () ;
 			return 0;
 
-		case 202: //paste
+		case MENU_MV_EDIT_PASTE:
 
 			OpenClipboard(hwnd);
 			hGlobal = GetClipboardData(CF_TEXT);
@@ -1417,20 +1392,19 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			GlobalUnlock (hGlobal);
 			CloseClipboard();
 			return 0;
-			return 0;
 
-		case 203: //find
+		case MENU_MV_EDIT_FIND:
 			OpenFindDialog();
 			return 0;
 
 
-		case 300:
-		case 301:
-		case 302:
-			EditingMode = wParam-300;
+		case MENU_MV_VIEW_RAM:
+		case MENU_MV_VIEW_PPU:
+		case MENU_MV_VIEW_ROM:
+			EditingMode = wParam-MENU_MV_VIEW_RAM;
 			for(i = 0;i < 3;i++){
-				if(EditingMode == i)CheckMenuItem(GetMenu(hMemView),300+i,MF_CHECKED);
-				else CheckMenuItem(GetMenu(hMemView),300+i,MF_UNCHECKED);
+				if(EditingMode == i)CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_CHECKED);
+				else CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_UNCHECKED);
 			}
 			if(EditingMode == 0)MaxSize = 0x10000;
 			if(EditingMode == 1)MaxSize = 0x4000;
@@ -1452,6 +1426,28 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			UpdateColorTable();
 			return 0;
+
+			// ################################## Start of SP CODE ###########################
+		case MENU_MV_BOOKMARKS_RM_ALL:
+			removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
+			UpdateColorTable();
+			return 0;
+
+		default:
+			if (wParam >= 30 && wParam <= 39)
+			{
+				int newValue = handleBookmarkMenu(wParam - 30);
+
+				if (newValue != -1)
+				{
+					CurOffset = newValue;
+					CursorEndAddy = -1;
+					CursorStartAddy = hexBookmarks[wParam - 30].address;
+					UpdateColorTable();
+				}
+				return 0;
+			}
+			// ################################## End of SP CODE ###########################
 		}
 
 	case WM_MOVE: {
@@ -1526,15 +1522,15 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_INITDIALOG:
 		SetWindowPos(hwndDlg,0,MemFind_wndx,MemFind_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
-		if(FindDirectionUp) CheckDlgButton(hwndDlg, 1003, BST_CHECKED);
-		else CheckDlgButton(hwndDlg, 1004, BST_CHECKED);
+		if(FindDirectionUp) CheckDlgButton(hwndDlg, IDC_MEMVIEWFIND_DIR_UP, BST_CHECKED);
+		else CheckDlgButton(hwndDlg, IDC_MEMVIEWFIND_DIR_DOWN, BST_CHECKED);
 
-		if(FindAsText) CheckDlgButton(hwndDlg, 1002, BST_CHECKED);
-		else CheckDlgButton(hwndDlg, 1001, BST_CHECKED);
+		if(FindAsText) CheckDlgButton(hwndDlg, IDC_MEMVIEWFIND_TYPE_TEXT, BST_CHECKED);
+		else CheckDlgButton(hwndDlg, IDC_MEMVIEWFIND_TYPE_HEX, BST_CHECKED);
 
-		if(FindTextBox[0])SetDlgItemText(hwndDlg,1000,FindTextBox);
+		if(FindTextBox[0])SetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox);
 
-		SendDlgItemMessage(hwndDlg,1000,EM_SETLIMITTEXT,59,0);
+		SendDlgItemMessage(hwndDlg,IDC_MEMVIEWFIND_WHAT,EM_SETLIMITTEXT,59,0);
 		break;
 	case WM_CREATE:
 
@@ -1543,9 +1539,9 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
-		GetDlgItemText(hMemFind,1000,FindTextBox,59);
-		DestroyWindow(hMemFind);
-		hMemFind = 0;
+		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,59);
+		DestroyWindow(hwndDlg);
+		hwndDlg = 0;
 		break;
 	case WM_MOVING:
 		break;
@@ -1566,20 +1562,20 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		switch(HIWORD(wParam)) {
 	case BN_CLICKED:
 		switch(LOWORD(wParam)) {
-	case 1001 :
+	case IDC_MEMVIEWFIND_TYPE_HEX :
 		FindAsText=0;
 		break;
-	case 1002 :
+	case IDC_MEMVIEWFIND_TYPE_TEXT :
 		FindAsText=1;
 		break;
 
-	case 1003 :
+	case IDC_MEMVIEWFIND_DIR_UP :
 		FindDirectionUp = 1;
 		break;
-	case 1004 :
+	case IDC_MEMVIEWFIND_DIR_DOWN :
 		FindDirectionUp = 0;
 		break;
-	case 1005 :
+	case IDC_MEMVIEWFIND_NEXT :
 		FindNext();
 		break;
 		}
@@ -1596,7 +1592,7 @@ void FindNext(){
 	unsigned char data[60];
 	int datasize = 0, i, j, inputc = -1, found;
 
-	if(hMemFind) GetDlgItemText(hMemFind,1000,str,59);
+	if(hMemFind) GetDlgItemText(hMemFind,IDC_MEMVIEWFIND_WHAT,str,59);
 	else strcpy(str,FindTextBox);
 
 	for(i = 0;str[i] != 0;i++){

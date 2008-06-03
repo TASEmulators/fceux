@@ -383,19 +383,21 @@ static void UpdateSD(HWND hwndDlg)
 {
 	int t;
 
-	CheckDlgButton(hwndDlg,126,soundo?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,122,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,124,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,130,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
-	SendDlgItemMessage(hwndDlg,129,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_ENABLED,soundo?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_8BIT,(soundoptions&SO_FORCE8BIT)?BST_CHECKED:BST_UNCHECKED);
+	// The option formerly flagged by SO_SECONDARY can no longer be disabled.
+	// CheckDlgButton(hwndDlg,123,(soundoptions&SO_SECONDARY)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_GLOBAL_FOCUS,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndDlg,CHECK_SOUND_MUTEFA,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
+	// The option formerly flagged by SO_OLDUP can no longer be enabled.
+	// CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
 	t=0;
 	if(soundrate==22050) t=1;
 	else if(soundrate==44100) t=2;
 	else if(soundrate==48000) t=3;
 	else if(soundrate==96000) t=4;
-	SendDlgItemMessage(hwndDlg,200,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
 }
 
 BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -408,14 +410,14 @@ case WM_NCLBUTTONDOWN:break;
 
 case WM_INITDIALOG:
 	/* Volume Trackbar */
-	SendDlgItemMessage(hwndDlg,500,TBM_SETRANGE,1,MAKELONG(0,150));
-	SendDlgItemMessage(hwndDlg,500,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,500,TBM_SETPOS,1,150-soundvolume);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETPOS,1,150-soundvolume);
 
 	/* buffer size time trackbar */
-	SendDlgItemMessage(hwndDlg,128,TBM_SETRANGE,1,MAKELONG(15,200));
-	SendDlgItemMessage(hwndDlg,128,TBM_SETTICFREQ,1,0);
-	SendDlgItemMessage(hwndDlg,128,TBM_SETPOS,1,soundbuftime);
+	SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_SETRANGE,1,MAKELONG(15,200));
+	SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_SETTICFREQ,1,0);
+	SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_SETPOS,1,soundbuftime);
 
 	{
 		char tbuf[8];
@@ -423,26 +425,26 @@ case WM_INITDIALOG:
 		SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
 	}
 
-	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Low");
-	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"High");
-	SendDlgItemMessage(hwndDlg,129,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Highest");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Low");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_ADDSTRING,0,(LPARAM)(LPSTR)"High");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Highest");
 
-	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"11025");
-	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"22050");
-	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"44100");
-	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"48000");
-	SendDlgItemMessage(hwndDlg,200,CB_ADDSTRING,0,(LPARAM)(LPSTR)"96000");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"11025");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"22050");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"44100");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"48000");
+	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_ADDSTRING,0,(LPARAM)(LPSTR)"96000");
 
 	UpdateSD(hwndDlg);
 	break;
 case WM_VSCROLL:
-	soundvolume=150-SendDlgItemMessage(hwndDlg,500,TBM_GETPOS,0,0);
+	soundvolume=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_GETPOS,0,0);
 	FCEUI_SetSoundVolume(soundvolume);
 	break;
 case WM_HSCROLL:
 	{
 		char tbuf[8];
-		soundbuftime=SendDlgItemMessage(hwndDlg,128,TBM_GETPOS,0,0);
+		soundbuftime=SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_GETPOS,0,0);
 		sprintf(tbuf,"%d",soundbuftime);
 		SetDlgItemText(hwndDlg,666,(LPTSTR)tbuf);
 		//soundbufsize=(soundbuftime*soundrate/1000);
@@ -456,10 +458,10 @@ case WM_COMMAND:
 	case CBN_SELENDOK:
 		switch(LOWORD(wParam))
 		{
-		case 200:
+		case COMBO_SOUND_RATE:
 			{
 				int tmp;
-				tmp=SendDlgItemMessage(hwndDlg,200,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+				tmp=SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 				if(tmp==0) tmp=11025;
 				else if(tmp==1) tmp=22050;
 				else if(tmp==2) tmp=44100;
@@ -484,8 +486,8 @@ case WM_COMMAND:
 			}
 			break;
 
-		case 129:
-			soundquality=SendDlgItemMessage(hwndDlg,129,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+		case COMBO_SOUND_QUALITY:
+			soundquality=SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 			if(soundrate<44100) soundquality=0;
 			FCEUI_SetSoundQuality(soundquality);
 			UpdateSD(hwndDlg);
@@ -496,7 +498,7 @@ case WM_COMMAND:
 	case BN_CLICKED:
 		switch(LOWORD(wParam))
 		{
-		case 122:soundoptions^=SO_FORCE8BIT;   
+		case CHECK_SOUND_8BIT:soundoptions^=SO_FORCE8BIT;   
 			if(soundo)
 			{
 				TrashSoundNow();
@@ -504,6 +506,8 @@ case WM_COMMAND:
 				UpdateSD(hwndDlg);                                   
 			}
 			break;
+		// The option formerly flagged by SO_SECONDARY can no longer be disabled.
+#if 0
 		case 123:soundoptions^=SO_SECONDARY;
 			if(soundo)
 			{
@@ -512,7 +516,8 @@ case WM_COMMAND:
 				UpdateSD(hwndDlg);
 			}
 			break;
-		case 124:soundoptions^=SO_GFOCUS;
+#endif
+		case CHECK_SOUND_GLOBAL_FOCUS:soundoptions^=SO_GFOCUS;
 			if(soundo)
 			{
 				TrashSoundNow();
@@ -520,8 +525,10 @@ case WM_COMMAND:
 				UpdateSD(hwndDlg);
 			}
 			break;
-		case 130:soundoptions^=SO_MUTEFA;
+		case CHECK_SOUND_MUTEFA:soundoptions^=SO_MUTEFA;
 			break;
+		// The option formerly flagged by SO_OLDUP can no longer be enabled.
+#if 0
 		case 131:soundoptions^=SO_OLDUP;
 			if(soundo)
 			{
@@ -530,7 +537,8 @@ case WM_COMMAND:
 				UpdateSD(hwndDlg);
 			}
 			break;
-		case 126:soundo=!soundo;
+#endif
+		case CHECK_SOUND_ENABLED:soundo=!soundo;
 			if(!soundo) TrashSound();
 			else soundo=InitSound();
 			UpdateSD(hwndDlg);
@@ -541,7 +549,7 @@ case WM_COMMAND:
 	if(!(wParam>>16))
 		switch(wParam&0xFFFF)
 	{
-		case 1:
+		case BTN_CLOSE:
 gornk:                         
 			DestroyWindow(hwndDlg);
 			uug=0;
@@ -590,5 +598,3 @@ void FCEUD_SoundVolumeAdjust(int n)
 	FCEUI_SetSoundVolume(soundvolume);
 	FCEU_DispMessage("Sound volume %d.", soundvolume);
 }
-
-//#include "wave.cpp"

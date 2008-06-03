@@ -182,7 +182,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			//--------------------
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
-			EnableWindow(GetDlgItem(hwndDlg,1),TRUE);                     // enable OK
+			EnableWindow(GetDlgItem(hwndDlg,IDOK),TRUE);                     // enable OK
 			
 			doClear = 0;
 		}
@@ -208,7 +208,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,"");
 		EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),FALSE);
 		SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,BST_UNCHECKED,0);
-		EnableWindow(GetDlgItem(hwndDlg,1),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDOK),FALSE);
 	}
 }
 
@@ -559,7 +559,7 @@ static void UpdateRecordDialog(HWND hwndDlg)
 		free(fn);
 	}
 
-	EnableWindow(GetDlgItem(hwndDlg,1),enable ? TRUE : FALSE);
+	EnableWindow(GetDlgItem(hwndDlg,IDOK),enable ? TRUE : FALSE);
 }
 
 static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)

@@ -217,7 +217,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         bmInfo2.bmiHeader.biBitCount = 24;
 
                         //create memory dcs
-                        pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,101));
+                        pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,GRP_PPUVIEW_TABLES));
                         TmpDC0 = CreateCompatibleDC(pDC); //pattern table 0
                         TmpDC1 = CreateCompatibleDC(pDC); //pattern table 1
                         TmpDC2 = CreateCompatibleDC(pDC); //palettes
@@ -231,11 +231,11 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         TmpObj2 = SelectObject(TmpDC2,TmpBmp2);
 
                         //Refresh Trackbar
-                        SendDlgItemMessage(hwndDlg,201,TBM_SETRANGE,0,(LPARAM)MAKELONG(0,25));
-                        SendDlgItemMessage(hwndDlg,201,TBM_SETPOS,1,PPUViewRefresh);
+                        SendDlgItemMessage(hwndDlg,CTL_PPUVIEW_TRACKBAR,TBM_SETRANGE,0,(LPARAM)MAKELONG(0,25));
+                        SendDlgItemMessage(hwndDlg,CTL_PPUVIEW_TRACKBAR,TBM_SETPOS,1,PPUViewRefresh);
 
                         //Set Text Limit
-                        SendDlgItemMessage(hwndDlg,102,EM_SETLIMITTEXT,3,0);
+                        SendDlgItemMessage(hwndDlg,IDC_PPUVIEW_SCANLINE,EM_SETLIMITTEXT,3,0);
 
                         //force redraw the first time the PPU Viewer is opened
                         PPUViewSkip=100;
@@ -283,41 +283,41 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                                 mouse_x = (mouse_x-PATTERNDESTX)/(8*ZOOM);
                                 mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
                                 sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-                                SetDlgItemText(hwndDlg,103,str);
-                                SetDlgItemText(hwndDlg,104,"Tile:");
-                                SetDlgItemText(hwndDlg,105,"Palettes");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,str);
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_PALETTES,"Palettes");
                         }
                         else if(((mouse_x >= PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)*2+1))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
                                 mouse_x = (mouse_x-(PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1))/(8*ZOOM);
                                 mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
                                 sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-                                SetDlgItemText(hwndDlg,104,str);
-                                SetDlgItemText(hwndDlg,103,"Tile:");
-                                SetDlgItemText(hwndDlg,105,"Palettes");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,str);
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_PALETTES,"Palettes");
                         }
                         else if(((mouse_x >= PALETTEDESTX) && (mouse_x < (PALETTEDESTX+PALETTEWIDTH))) && (mouse_y >= PALETTEDESTY) && (mouse_y < (PALETTEDESTY+PALETTEHEIGHT))) {
                                 mouse_x = (mouse_x-PALETTEDESTX)/32;
                                 mouse_y = (mouse_y-PALETTEDESTY)/32;
                                 sprintf(str,"Palette: $%02X",palcache[(mouse_y<<4)|mouse_x]);
-                                SetDlgItemText(hwndDlg,103,"Tile:");
-                                SetDlgItemText(hwndDlg,104,"Tile:");
-                                SetDlgItemText(hwndDlg,105,str);
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_PALETTES,str);
                         }
                         else {
-                                SetDlgItemText(hwndDlg,103,"Tile:");
-                                SetDlgItemText(hwndDlg,104,"Tile:");
-                                SetDlgItemText(hwndDlg,105,"Palettes");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE1,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_TILE2,"Tile:");
+                                SetDlgItemText(hwndDlg,LBL_PPUVIEW_PALETTES,"Palettes");
                         }
 
                         break;
                 case WM_NCACTIVATE:
                         sprintf(str,"%d",PPUViewScanline);
-                        SetDlgItemText(hwndDlg,102,str);
+                        SetDlgItemText(hwndDlg,IDC_PPUVIEW_SCANLINE,str);
                         break;
                 case WM_COMMAND:
                         switch(HIWORD(wParam)) {
                                 case EN_UPDATE:
-                                        GetDlgItemText(hwndDlg,102,str,4);
+                                        GetDlgItemText(hwndDlg,IDC_PPUVIEW_SCANLINE,str,4);
                                         sscanf(str,"%d",&PPUViewScanline);
                                         if(PPUViewScanline > 239) PPUViewScanline = 239;
                                         break;
@@ -325,7 +325,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         break;
                 case WM_HSCROLL:
                         if(lParam) { //refresh trackbar
-                                PPUViewRefresh = SendDlgItemMessage(hwndDlg,201,TBM_GETPOS,0,0);
+                                PPUViewRefresh = SendDlgItemMessage(hwndDlg,CTL_PPUVIEW_TRACKBAR,TBM_GETPOS,0,0);
                         }
                         break;
         }

@@ -777,13 +777,13 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
                    if(bc->NumC >= MAXBUTTCONFIG)
                    goto gornk;
                    nstr = MakeButtString(bc);
-                   SetDlgItemText(hwndDlg, 100, nstr);
+                   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
                    free(nstr);
                  }
                 }
                 break;
    case WM_USER + 666:
-                      //SetFocus(GetDlgItem(hwndDlg,100));
+                      //SetFocus(GetDlgItem(hwndDlg,LBL_DWBDIALOG_TEXT));
                       if(DWBStarted)
                       {
                        char *nstr;
@@ -791,7 +791,7 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
                        bc->NumC = 0;
                        DWBStarted = 0;
                        nstr = MakeButtString(bc);
-                       SetDlgItemText(hwndDlg, 100, nstr);
+                       SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
                        free(nstr);
                       }
 
@@ -815,7 +815,7 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
                         goto gornk;
 
                        nstr = MakeButtString(bc);
-                       SetDlgItemText(hwndDlg, 100, nstr);
+                       SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
                        free(nstr);
                       }
                       break;
@@ -825,7 +825,7 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
                       SetTimer(hwndDlg,666,25,0);     /* Every 25ms.*/
                       {
                        char *nstr = MakeButtString(DWBButtons);
-                       SetDlgItemText(hwndDlg, 100, nstr);
+                       SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
                        free(nstr);
                       }
                       break;
@@ -835,17 +835,17 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
    case WM_COMMAND:
                  switch(wParam&0xFFFF)
                  {
-                  case 200:
+                  case BTN_CLEAR:
                            {
                             ButtConfig *bc = DWBButtons;                
                             char *nstr;
                             bc->NumC = 0;
                             nstr = MakeButtString(bc);
-                            SetDlgItemText(hwndDlg, 100, nstr);
+                            SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
                             free(nstr);
                            }
                            break;
-                  case 201:
+                  case BTN_CLOSE:
                          gornk:
                          KillTimer(hwndDlg,666);
                          EndJoyWait(hAppWnd);
@@ -958,12 +958,12 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
                       {
                        char buf[32];
                        sprintf(buf,"Virtual Gamepad %d",DoTBPort+1);
-                       SetDlgItemText(hwndDlg, 100,buf);
+                       SetDlgItemText(hwndDlg, GRP_GAMEPAD1,buf);
 
                        sprintf(buf,"Virtual Gamepad %d",DoTBPort+3);
-                       SetDlgItemText(hwndDlg, 101, buf);
+                       SetDlgItemText(hwndDlg, GRP_GAMEPAD2, buf);
 
-                       CheckDlgButton(hwndDlg,400,(eoptions & EO_NOFOURSCORE)?BST_CHECKED:BST_UNCHECKED);
+                       CheckDlgButton(hwndDlg,CHECK_DISABLE_FOURSCORE,(eoptions & EO_NOFOURSCORE)?BST_CHECKED:BST_UNCHECKED);
                       }
                       SetWindowText(hwndDlg, DoTBTitle);
                       break;
@@ -983,13 +983,13 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
                  }
                  else switch(wParam&0xFFFF)
                  {
-                  case 1:
+                  case BTN_CLOSE:
                          gornk:
 
                          if(DoTBType == SI_GAMEPAD)
                          {
                           eoptions &= ~EO_NOFOURSCORE;
-                          if(IsDlgButtonChecked(hwndDlg,400)==BST_CHECKED)
+                          if(IsDlgButtonChecked(hwndDlg,CHECK_DISABLE_FOURSCORE)==BST_CHECKED)
                            eoptions|=EO_NOFOURSCORE;
                          }
                          EndDialog(hwndDlg,0);

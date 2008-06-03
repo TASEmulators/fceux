@@ -83,11 +83,9 @@ static volatile int nofocus = 0;
 
 // Contains recent file strings
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
-char *recent_directories[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
-const unsigned int MAX_NUMBER_OF_RECENT_DIRS = sizeof(recent_directories)/sizeof(*recent_directories);
 
 // Exported variables
 HWND pwindow;
@@ -104,7 +102,7 @@ static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
 static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
 static bool loggingSound = false;
 
-static HMENU recentmenu, recentdmenu;
+static HMENU recentmenu;
 
 static LONG WindowXC=1<<30,WindowYC;
 int MainWindow_wndx, MainWindow_wndy;
@@ -156,7 +154,6 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_STOP_AVI,
 		MENU_LOG_SOUND,
 		MENU_HIDE_MENU,
-		40003,
 		MENU_DEBUGGER,
 		MENU_PPUVIEWER,
 		MENU_NAMETABLEVIEWER,
@@ -169,13 +166,8 @@ void updateGameDependentMenus(unsigned int enable)
 
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
 	{
-#ifndef FCEUDEF_DEBUGGER
-		if(simpled[i] == 203)
-			EnableMenuItem(fceumenu,menu_ids[i],MF_BYCOMMAND | MF_GRAYED);
-		else
-#endif
 #ifndef _USE_SHARED_MEMORY_
-			if(simpled[x] == MENU_BASIC_BOT || simpled[i] == 40003)
+			if(simpled[x] == MENU_BASIC_BOT)
 				EnableMenuItem(fceumenu,menu_ids[i],MF_BYCOMMAND| MF_GRAYED);
 			else
 #endif
@@ -201,9 +193,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
 
-	CheckMenuItem(fceumenu, 40003, FCEU_BotMode() ? MF_CHECKED : MF_UNCHECKED);
-
-	CheckMenuItem(fceumenu, 40025, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_REWIND, EnableRewind ? MF_CHECKED : MF_UNCHECKED);
@@ -398,16 +388,6 @@ void AddRecentFile(const char *filename)
 }
 
 /**
-* Add a directory to the recent directories list.
-*
-* @param dirname Name of the directory to add.
-**/
-void AddRecentDirectory(const char *dirname)
-{
-	UpdateRecentArray(dirname, recent_directories, MAX_NUMBER_OF_RECENT_DIRS, recentdmenu, 103, 700);
-}
-
-/**
 * Hides the main menu.
 * 
 * @param hide_menu Flag to turn the main menu on (0) or off (1) 
@@ -540,9 +520,6 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 			// Get the directory from the filename
 			strncpy(tmpdir, ofn.lpstrFile, ofn.nFileOffset);
 			tmpdir[ofn.nFileOffset]=0;
-
-			// Add the directory to the list of recent directories
-			AddRecentDirectory(tmpdir);
 
 			// Prevent setting the File->Open default
 			// directory when a "Recent Directory" is selected.
@@ -711,15 +688,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(wParam >= MENU_FIRST_RECENT_FILE && wParam <= MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES - 1)
 			{
 				if(recent_files[wParam - MENU_FIRST_RECENT_FILE])
-				{
 					ALoad(recent_files[wParam - MENU_FIRST_RECENT_FILE]);
-				}
-			}
-			else if(wParam >= 700 && wParam <= 709) // Recent dirs
-			{
-				// TODO: Do menu items 700 - 709 even exist?
-				if(recent_directories[wParam-700])
-					LoadNewGamey(hWnd, recent_directories[wParam - 700]);
 			}
 			switch(LOWORD(wParam))
 			{
@@ -942,11 +911,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ConfigCheats(hWnd);
 				break;
 
-			case 40003:
-				FCEU_SetBotMode(1^FCEU_BotMode());
-				UpdateCheckedMenuItems();
-				break;
-
 			case MENU_BASIC_BOT:
 				CreateBasicBot();
 				break;
@@ -1022,12 +986,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 
-#ifdef FCEUDEF_DEBUGGER
-				//case 203:BeginDSeq(hWnd);break; //mbg merge 7/18/06 removed as part of old debugger
-#endif
-
-				//case 204:ConfigAddCheat(hWnd);break; //mbg merge TODO 7/17/06 - had to remove this
-				
 			case MENU_MEMORY_WATCH:
 				CreateMemWatch();
 				break;
@@ -1353,11 +1311,9 @@ int CreateMainWindow()
 	fceumenu = LoadMenu(fceu_hInstance,"FCEUMENU");
 
 	recentmenu = CreateMenu();
-	recentdmenu = CreateMenu();
 
 	// Update recent files menu
 	UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
-	UpdateRMenu(recentdmenu, recent_directories, 103, 700);
 
 	updateGameDependentMenus(0);
 

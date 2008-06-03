@@ -67,7 +67,7 @@ void FCEUD_NetworkClose(void)
  NetStatAdd("*** Connection lost.");
  if(netwin)
  {
-  SetDlgItemText(netwin,250,"Connect");
+  SetDlgItemText(netwin,BTN_NETMOO_CONNECT,"Connect");
   FixCDis(netwin,1);
  }
  if(Socket!=INVALID_SOCKET)
@@ -90,14 +90,14 @@ static void FixCDis(HWND hParent, int how)
 {
  int x;
 
- for(x=200;x<=206;x++)
+ for(x=IDC_NETMOO_HOST;x<=IDC_NETMOO_PASS;x++) // XXX iterate over all netplay settings elements
   EnableWindow( GetDlgItem(hParent,x),how);
 }
 static void GetSettings(HWND hwndDlg)
 {
                          char buf[256];
                          char **strs[4]={&netplayhost,&netplaynick,&netgamekey,&netpassword};
-                         int ids[4]={200,203,205,206};
+                         int ids[4]={IDC_NETMOO_HOST,IDC_NETMOO_NICK,IDC_NETMOO_KEY,IDC_NETMOO_PASS};
                          int x;
 
                          for(x=0;x<4;x++)
@@ -114,8 +114,8 @@ static void GetSettings(HWND hwndDlg)
                            strcpy(*strs[x], buf);
                           }
                          }
-                         remotetport = GetDlgItemInt(hwndDlg,201,0,0);                         
-                         netlocalplayers=1 + SendDlgItemMessage(hwndDlg,204,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         remotetport = GetDlgItemInt(hwndDlg,IDC_NETMOO_PORT,0,0);                         
+                         netlocalplayers=1 + SendDlgItemMessage(hwndDlg,COMBO_NETMOO_LOCAL_PLAYERS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 }
 
 static void NetStatAdd(char *text)
@@ -172,9 +172,9 @@ static void NetStatAdd(char *text)
     strcat(textbuf,"\r\n");
   }
  }
- SetDlgItemText(netwin,101,textbuf);
+ SetDlgItemText(netwin,IDC_NETMOO_STATUS,textbuf);
  free(textbuf);
- SendDlgItemMessage(netwin,101,EM_LINESCROLL,0,32767);
+ SendDlgItemMessage(netwin,IDC_NETMOO_STATUS,EM_LINESCROLL,0,32767);
 }
 
 void FCEUD_NetplayText(uint8 *text)
@@ -408,11 +408,11 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                    {
                     switch(LOWORD(wParam))
                     {
-                     case 250:
+                     case BTN_NETMOO_CONNECT:
                         if(FCEUDnetplay)
                         {
                          FCEUD_NetworkClose();
-                         SetDlgItemText(hwndDlg,250,"Connect");
+                         SetDlgItemText(hwndDlg,BTN_NETMOO_CONNECT,"Connect");
                          FixCDis(hwndDlg,1);
                         }
                         else if(GameInfo)
@@ -420,7 +420,7 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          GetSettings(hwndDlg);
                          if(FCEUD_NetworkConnect())
                          {
-                          SetDlgItemText(hwndDlg,250,"Disconnect");
+                          SetDlgItemText(hwndDlg,BTN_NETMOO_CONNECT,"Disconnect");
                           FixCDis(hwndDlg,0);
                          }
                         }
@@ -433,7 +433,7 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                     int t;
 
 
-                    t=GetDlgItemText(hwndDlg,102,buf,1024);
+                    t=GetDlgItemText(hwndDlg,IDC_NETMOO_CMD_INPUT,buf,1024);
                     buf[1023]=0;
 
                     if(strchr(buf,'\r'))
@@ -453,20 +453,20 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                      }
                      *dest = 0;
                      FCEUI_NetplayText((uint8*)buf); //mbg merge 7/17/06 added cast
-                     SetDlgItemText(hwndDlg,102,"");                    
+                     SetDlgItemText(hwndDlg,IDC_NETMOO_CMD_INPUT,"");                    
                     }
                    }
                    break;
    case WM_INITDIALOG:
                    if(netplayhost)
-                    SetDlgItemText(hwndDlg,200,netplayhost);
-                   SetDlgItemInt(hwndDlg,201,remotetport,0);
+                    SetDlgItemText(hwndDlg,IDC_NETMOO_HOST,netplayhost);
+                   SetDlgItemInt(hwndDlg,IDC_NETMOO_PORT,remotetport,0);
                    if(netplaynick)
-                    SetDlgItemText(hwndDlg,203,netplaynick);
+                    SetDlgItemText(hwndDlg,IDC_NETMOO_NICK,netplaynick);
                    if(netgamekey)
-                    SetDlgItemText(hwndDlg,205,netgamekey);
+                    SetDlgItemText(hwndDlg,IDC_NETMOO_KEY,netgamekey);
                    if(netpassword)
-                    SetDlgItemText(hwndDlg,206,netpassword);
+                    SetDlgItemText(hwndDlg,IDC_NETMOO_PASS,netpassword);
 
                    {
                     int x;
@@ -474,9 +474,9 @@ static BOOL CALLBACK NetCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                     for(x=0;x<4;x++)
                     {
                      sprintf(buf,"%d",x+1);
-                     SendDlgItemMessage(hwndDlg,204,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
+                     SendDlgItemMessage(hwndDlg,COMBO_NETMOO_LOCAL_PLAYERS,CB_ADDSTRING,0,(LPARAM)(LPSTR)buf);
                     }
-                    SendDlgItemMessage(hwndDlg,204,CB_SETCURSEL,netlocalplayers-1,(LPARAM)(LPSTR)0);
+                    SendDlgItemMessage(hwndDlg,COMBO_NETMOO_LOCAL_PLAYERS,CB_SETCURSEL,netlocalplayers-1,(LPARAM)(LPSTR)0);
                    }
 
 

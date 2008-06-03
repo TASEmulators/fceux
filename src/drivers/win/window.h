@@ -13,7 +13,6 @@ struct CreateMovieParameters
 };
 
 extern char *recent_files[];
-extern char *recent_directories[10];
 extern HWND pwindow;
 
 void HideFWindow(int h);

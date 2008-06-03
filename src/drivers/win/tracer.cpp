@@ -87,32 +87,32 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetObject(hlogFont, sizeof(LOGFONT), &lf);
 			strcpy(lf.lfFaceName,"Courier");
 			hlogNewFont = CreateFontIndirect(&lf);
-			SendDlgItemMessage(hwndDlg,100,WM_SETFONT,(WPARAM)hlogNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG,WM_SETFONT,(WPARAM)hlogNewFont,FALSE);
 			
 			//check the disabled radio button
-			CheckRadioButton(hwndDlg,103,104,103);
+			CheckRadioButton(hwndDlg,IDC_RADIO_LOG_LAST,IDC_RADIO_LOG_TO_FILE,IDC_RADIO_LOG_LAST);
 
-			//EnableWindow(GetDlgItem(hwndDlg,101),FALSE);
+			//EnableWindow(GetDlgItem(hwndDlg,IDC_SCRL_TRACER_LOG),FALSE);
 			//fill in the options for the log size
 			for(i = 0;i < LOG_OPTION_SIZE;i++){
-				SendDlgItemMessage(hwndDlg,105,CB_INSERTSTRING,-1,(LPARAM)(LPSTR)log_optn_strlst[i]);
+				SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG_SIZE,CB_INSERTSTRING,-1,(LPARAM)(LPSTR)log_optn_strlst[i]);
 			}
-			SendDlgItemMessage(hwndDlg,105,CB_SETCURSEL,0,0);
-			SetDlgItemText(hwndDlg, 100, "Welcome to the Trace Logger.");
+			SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG_SIZE,CB_SETCURSEL,0,0);
+			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
 			logtofile = 0;
 
 			if(logging_options == -1){
 				logging_options = (LOG_REGISTERS | LOG_PROCESSOR_STATUS);
-				CheckDlgButton(hwndDlg, 110, BST_CHECKED);
-				CheckDlgButton(hwndDlg, 111, BST_CHECKED);
+				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
+				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);
 			} else{
-				if(logging_options&LOG_REGISTERS)CheckDlgButton(hwndDlg, 110, BST_CHECKED);
-				if(logging_options&LOG_PROCESSOR_STATUS)CheckDlgButton(hwndDlg, 111, BST_CHECKED);				
+				if(logging_options&LOG_REGISTERS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
+				if(logging_options&LOG_PROCESSOR_STATUS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);				
 			}
-			EnableWindow(GetDlgItem(hwndDlg,105),TRUE);
-			EnableWindow(GetDlgItem(hwndDlg,112),FALSE);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_TRACER_LOG_SIZE),TRUE);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_LOG_BROWSE),FALSE);
 
-			if(log_update_window)CheckDlgButton(hwndDlg, 116, BST_CHECKED);
+			if(log_update_window)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, BST_CHECKED);
 
 			EnableTracerMenuItems();
 			break;
@@ -128,48 +128,48 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch(HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
-						case 102: //start logging
+						case IDC_BTN_START_STOP_LOGGING:
 							if(logging)EndLoggingSequence();
 							else BeginLoggingSequence();
 							EnableTracerMenuItems();
 							break;
-						case 103:
+						case IDC_RADIO_LOG_LAST:
 							logtofile = 0;
 							EnableTracerMenuItems();
 							break;
-						case 104:
+						case IDC_RADIO_LOG_TO_FILE:
 							logtofile = 1;
 							EnableTracerMenuItems();
 							break;
-						case 110:
+						case IDC_CHECK_LOG_REGISTERS:
 							logging_options ^= LOG_REGISTERS;
 							break;
-						case 111:
+						case IDC_CHECK_LOG_PROCESSOR_STATUS:
 							logging_options ^= LOG_PROCESSOR_STATUS;
 							break; 
-						case 114:
+						case IDC_CHECK_LOG_NEW_INSTRUCTIONS:
 							logging_options ^= LOG_NEW_INSTRUCTIONS;
 							if(logging && (!PromptForCDLogger())){
 								logging_options ^= LOG_NEW_INSTRUCTIONS; //turn it back off
-								CheckDlgButton(hTracer, 114, BST_UNCHECKED);
+								CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_INSTRUCTIONS, BST_UNCHECKED);
 							}
 							//EnableTracerMenuItems();
 							break;
-						case 115:
+						case IDC_CHECK_LOG_NEW_DATA:
 							logging_options ^= LOG_NEW_DATA;
 							if(logging && (!PromptForCDLogger())){
 								logging_options ^= LOG_NEW_DATA; //turn it back off
-								CheckDlgButton(hTracer, 115, BST_UNCHECKED);
+								CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
 							}
 							break;
-						case 116:
+						case IDC_CHECK_LOG_UPDATE_WINDOW:
 							//todo: if this gets unchecked then we need to clear out the window
 							log_update_window ^= 1;
 							if(!FCEUI_EmulationPaused() && !log_update_window) //mbg merge 7/19/06 changed to use EmulationPaused()
-								SetDlgItemText(hTracer, 100, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
+								SetDlgItemText(hTracer, IDC_TRACER_LOG, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
 							//PauseLoggingSequence();
 							break;
-						case 112:
+						case IDC_BTN_LOG_BROWSE:
 							ShowLogDirDialog();
 							break;
 					}
@@ -231,8 +231,8 @@ void BeginLoggingSequence(void){
 		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
 	} else {
 		strcpy(str,"Allocating Memory...\r\n");
-		SetDlgItemText(hTracer, 100, str);
-		tracelogbufsize = j = log_optn_intlst[SendDlgItemMessage(hTracer,105,CB_GETCURSEL,0,0)];
+		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
+		tracelogbufsize = j = log_optn_intlst[SendDlgItemMessage(hTracer,IDC_TRACER_LOG_SIZE,CB_GETCURSEL,0,0)];
 		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
 		for(i = 0;i < j;i++){
 			tracelogbuf[i] = (char*)malloc(80); //mbg merge 7/19/06 added cast
@@ -241,7 +241,7 @@ void BeginLoggingSequence(void){
 		sprintf(str2,"%d Bytes Allocated...\r\n",j*80);
 		strcat(str,str2);
 		strcat(str,"Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
-		SetDlgItemText(hTracer, 100, str);
+		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
 		tracelogbufpos = tracelogbufusedsize = 0;
 	}
 	
@@ -249,7 +249,7 @@ void BeginLoggingSequence(void){
 	olddatacount = datacount;
 
 	logging=1;
-	SetDlgItemText(hTracer, 102,"Stop Logging");
+	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Stop Logging");
 	return;
 }
 /*
@@ -409,10 +409,10 @@ void EndLoggingSequence(void){
 			free(tracelogbuf[i]);
 		}
 		free(tracelogbuf);
-		SetDlgItemText(hTracer, 100, "Welcome to the Trace Logger.");
+		SetDlgItemText(hTracer, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
 	}
 	logging=0;
-	SetDlgItemText(hTracer, 102,"Start Logging");
+	SetDlgItemText(hTracer, IDC_BTN_START_STOP_LOGGING,"Start Logging");
 
 }
 
@@ -425,7 +425,7 @@ void UpdateLogWindow(void){
 
 	//todo: fix this up.
 	//if(!log_update_window && !userpause){
-	//	SetDlgItemText(hTracer, 100, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
+	//	SetDlgItemText(hTracer, IDC_TRACER_LOG, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
 	//	return;
 	//}
 	
@@ -446,7 +446,7 @@ void UpdateLogWindow(void){
 	tracesi.nMax = tracelogbufusedsize; //todo: try -2
 	tracesi.nPos = tracesi.nMax-tracesi.nPage;
 	if (tracesi.nPos < tracesi.nMin) tracesi.nPos = tracesi.nMin;
-	SetScrollInfo(GetDlgItem(hTracer,101),SB_CTL,&tracesi,TRUE);
+	SetScrollInfo(GetDlgItem(hTracer,IDC_SCRL_TRACER_LOG),SB_CTL,&tracesi,TRUE);
 	UpdateLogText();
 
 	return;
@@ -471,65 +471,65 @@ void UpdateLogText(void){
 		}
 		strcat(str,tracelogbuf[j]);
 	}
-	SetDlgItemText(hTracer, 100, str);
+	SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
 	sprintf(str,"nPage = %d, nPos = %d, nMax = %d, nMin = %d",tracesi.nPage,tracesi.nPos,tracesi.nMax,tracesi.nMin);
-	SetDlgItemText(hTracer, 1002, str);
+	SetDlgItemText(hTracer, IDC_TRACER_STATS, str);
 	return;
 }
 
 void EnableTracerMenuItems(void){
 
 	//if(logging_options & LOG_NEW_INSTRUCTIONS){
-		//EnableWindow(GetDlgItem(hTracer,115),TRUE);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),TRUE);
 	//} else {
-	//	CheckDlgButton(hTracer, 115, BST_UNCHECKED);
-		//EnableWindow(GetDlgItem(hTracer,115),FALSE);
+	//	CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
 	//}
 
 	if(logging){
-		EnableWindow(GetDlgItem(hTracer,103),FALSE);
-		EnableWindow(GetDlgItem(hTracer,104),FALSE);
-		EnableWindow(GetDlgItem(hTracer,105),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,110),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,111),FALSE);
-		EnableWindow(GetDlgItem(hTracer,112),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,114),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,115),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),FALSE);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_REGISTERS),FALSE);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_PROCESSOR_STATUS),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),FALSE);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),FALSE);
+		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
 		return;
 	}
 
-	EnableWindow(GetDlgItem(hTracer,103),TRUE);
-	EnableWindow(GetDlgItem(hTracer,104),TRUE);
-	EnableWindow(GetDlgItem(hTracer,105),TRUE);
-	//EnableWindow(GetDlgItem(hTracer,110),TRUE);
-	//EnableWindow(GetDlgItem(hTracer,111),TRUE); //uncomment me
-	EnableWindow(GetDlgItem(hTracer,112),TRUE);
-	EnableWindow(GetDlgItem(hTracer,114),TRUE);
+	EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),TRUE);
+	EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),TRUE);
+	EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),TRUE);
+	//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_REGISTERS),TRUE);
+	//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_PROCESSOR_STATUS),TRUE); //uncomment me
+	EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
+	EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),TRUE);
 
 	if(logtofile){
-		EnableWindow(GetDlgItem(hTracer,105),FALSE);
-		EnableWindow(GetDlgItem(hTracer,112),TRUE);
-		CheckDlgButton(hTracer, 116, BST_UNCHECKED);
+		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
+		CheckDlgButton(hTracer, IDC_CHECK_LOG_UPDATE_WINDOW, BST_UNCHECKED);
 		log_update_window = 0;
-		EnableWindow(GetDlgItem(hTracer,116),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),FALSE);
 	} else{
-		EnableWindow(GetDlgItem(hTracer,105),TRUE);
-		EnableWindow(GetDlgItem(hTracer,112),FALSE);
-		EnableWindow(GetDlgItem(hTracer,116),TRUE);
+		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),TRUE);
+		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),FALSE);
+		EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),TRUE);
 	}
 
 /*
 	if(FCEUI_GetLoggingCD()){
-			EnableWindow(GetDlgItem(hTracer,114),TRUE);
+			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),TRUE);
 		if(logging_options & LOG_NEW_INSTRUCTIONS){
-			EnableWindow(GetDlgItem(hTracer,115),TRUE);
-		} else EnableWindow(GetDlgItem(hTracer,115),FALSE);
+			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),TRUE);
+		} else EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
 	}
 	else{
-			EnableWindow(GetDlgItem(hTracer,114),FALSE);
-			EnableWindow(GetDlgItem(hTracer,115),FALSE);
-			CheckDlgButton(hTracer, 114, BST_UNCHECKED);
-			CheckDlgButton(hTracer, 115, BST_UNCHECKED);
+			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),FALSE);
+			EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
+			CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_INSTRUCTIONS, BST_UNCHECKED);
+			CheckDlgButton(hTracer, IDC_CHECK_LOG_NEW_DATA, BST_UNCHECKED);
 			logging_options &= 3;
 	}
 */
@@ -546,7 +546,7 @@ int PromptForCDLogger(void){
 				DoCDLogger();
 				FCEUI_SetLoggingCD(1);
 				//EnableTracerMenuItems();
-				SetDlgItemText(hCDLogger, 105, "Pause");
+				SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
 				return 1;
 			}
 		return 0; //user selected no so 0 is returned

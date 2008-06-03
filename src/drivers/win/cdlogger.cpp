@@ -86,16 +86,16 @@ MB_OK);
 			switch(HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
-						case 103:
+						case BTN_CDLOGGER_RESET:
 							codecount = datacount = 0;
 							undefinedcount = PRGsize[0];
 							ZeroMemory(cdloggerdata,PRGsize[0]);
 							UpdateCDLogger();
 							break;
-						case 104:
+						case BTN_CDLOGGER_LOAD:
 							LoadCDLogFile();
 							break;
-						case 105:
+						case BTN_CDLOGGER_START_PAUSE:
 							if(FCEUI_GetLoggingCD()){
 								if((logging) && (logging_options & LOG_NEW_INSTRUCTIONS)){
 									MessageBox(hCDLogger,
@@ -106,21 +106,21 @@ MB_OK);
 								}
 								FCEUI_SetLoggingCD(0);
 								EnableTracerMenuItems();
-								SetDlgItemText(hCDLogger, 105, "Start");
+								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Start");
 							}
 							else{
 								FCEUI_SetLoggingCD(1);
 								EnableTracerMenuItems();
-								SetDlgItemText(hCDLogger, 105, "Pause");
+								SetDlgItemText(hCDLogger, BTN_CDLOGGER_START_PAUSE, "Pause");
 							}
 							break;
-						case 106:
+						case BTN_CDLOGGER_SAVE_AS:
 							SaveCDLogFileAs();
 							break;
-						case 107:
+						case BTN_CDLOGGER_SAVE:
 							SaveCDLogFile();
 							break;
-						case 108:
+						case BTN_CDLOGGER_SAVE_STRIPPED:
 							SaveStrippedRom();
 							break;
 					}
@@ -240,11 +240,11 @@ void UpdateCDLogger(){
 		fundefinedcount = undefinedcount, fromsize = PRGsize[0];
 	if(!hCDLogger)return;
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
-	SetDlgItemText(hCDLogger,100,str);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
 	sprintf(str,"0x%06x %.2f%%",datacount,fdatacount/fromsize*100);
-	SetDlgItemText(hCDLogger,101,str);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_DATACOUNT,str);
 	sprintf(str,"0x%06x %.2f%%",undefinedcount,fundefinedcount/fromsize*100);
-	SetDlgItemText(hCDLogger,102,str);
+	SetDlgItemText(hCDLogger,LBL_CDLOGGER_UNDEFCOUNT,str);
 	return;
 }
 

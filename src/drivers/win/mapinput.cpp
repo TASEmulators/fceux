@@ -338,7 +338,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			memset(keyonce, 0, sizeof(keyonce));
 			
 			KeyboardSetBackgroundAccess(1);
-			SetFocus(GetDlgItem(hwndDlg, 100));
+			SetFocus(GetDlgItem(hwndDlg, LBL_KEY_COMBO));
 
 			CenterWindowOnScreen(hwndDlg);
 		}
@@ -375,7 +375,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 				{
 					key = newkey | meta;
 					ClearExtraMeta(&key);
-					SetDlgItemText(hwndDlg, 100, GetKeyComboName(key));
+					SetDlgItemText(hwndDlg, LBL_KEY_COMBO, GetKeyComboName(key));
 				}
 				else if(NothingPressed() && key)
 				{

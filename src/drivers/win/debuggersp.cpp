@@ -685,7 +685,7 @@ unsigned int getBookmarkAddress(HWND hwnd, unsigned int index)
 	int n;
 	char buffer[5] = {0};
 	
-	SendDlgItemMessage(hwnd, 701, LB_GETTEXT, index, (LPARAM)buffer);
+	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETTEXT, index, (LPARAM)buffer);
 	
 	sscanf(buffer, "%x", &n);
 	
@@ -707,7 +707,7 @@ void dumpBookmarks(HWND hwnd)
 	if (bookmarkData)
 		free(bookmarkData);
 		
-	bookmarks = SendDlgItemMessage(hwnd, 701, LB_GETCOUNT, 0, 0);
+	bookmarks = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCOUNT, 0, 0);
 	bookmarkData = (unsigned short*)malloc(bookmarks * sizeof(unsigned short));
 	
 	for (i=0;i<bookmarks;i++)
@@ -730,7 +730,7 @@ void AddDebuggerBookmark2(HWND hwnd, char* buffer)
 		return;
 	}
 	
-	SendDlgItemMessage(hwnd, 701, LB_ADDSTRING, 0, (LPARAM)buffer);
+	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_ADDSTRING, 0, (LPARAM)buffer);
 	
 	dumpBookmarks(hwnd);
 }
@@ -747,7 +747,7 @@ void AddDebuggerBookmark(HWND hwnd)
 	unsigned int n;
 	char buffer[5] = {0};
 	
-	GetDlgItemText(hwnd, 312, buffer, 5);
+	GetDlgItemText(hwnd, IDC_DEBUGGER_BOOKMARK, buffer, 5);
 		
 	result = sscanf(buffer, "%x", &n);
 	
@@ -769,7 +769,7 @@ void AddDebuggerBookmark(HWND hwnd)
 void DeleteDebuggerBookmark(HWND hwnd)
 {
 	// Get the selected bookmark
-	int selectedItem = SendDlgItemMessage(hwnd, 701, LB_GETCURSEL, 0, 0);
+	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
 	
 	if (selectedItem == LB_ERR)
 	{
@@ -780,7 +780,7 @@ void DeleteDebuggerBookmark(HWND hwnd)
 	{
 		// Remove the selected bookmark
 		
-		SendDlgItemMessage(hwnd, 701, LB_DELETESTRING, selectedItem, 0);
+		SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_DELETESTRING, selectedItem, 0);
 		dumpBookmarks(hwnd);
 	}
 }
@@ -795,7 +795,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
 void GoToDebuggerBookmark(HWND hwnd)
 {
 	unsigned int n;
-	int selectedItem = SendDlgItemMessage(hwnd, 701, LB_GETCURSEL, 0, 0);
+	int selectedItem = SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_GETCURSEL, 0, 0);
 	
 	// If no bookmark is selected just return
 	if (selectedItem == LB_ERR) return;

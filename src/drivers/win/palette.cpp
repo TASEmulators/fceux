@@ -62,26 +62,26 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			if(ntsccol)
 			{
-				CheckDlgButton(hwndDlg, 100, BST_CHECKED);
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
 			}
 
-			SendDlgItemMessage(hwndDlg, 500, TBM_SETRANGE, 1, MAKELONG(0, 128));
-			SendDlgItemMessage(hwndDlg, 501, TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
 
 			FCEUI_GetNTSCTH(&ntsctint, &ntschue);
 
-			SendDlgItemMessage(hwndDlg, 500, TBM_SETPOS, 1, ntsctint);
-			SendDlgItemMessage(hwndDlg, 501, TBM_SETPOS, 1, ntschue);
+			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETPOS, 1, ntsctint);
+			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETPOS, 1, ntschue);
 
-			EnableWindow(GetDlgItem(hwndDlg, 201), (eoptions & EO_CPALETTE) ? 1 : 0);
+			EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), (eoptions & EO_CPALETTE) ? 1 : 0);
 
 			CenterWindowOnScreen(hwndDlg);
 
 			break;
 
 		case WM_HSCROLL:
-			ntsctint = SendDlgItemMessage(hwndDlg, 500, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
-			ntschue = SendDlgItemMessage(hwndDlg, 501, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntsctint = SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
+			ntschue = SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_GETPOS, 0, (LPARAM)(LPSTR)0);
 			FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 			break;
 
@@ -94,25 +94,25 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			{
 				switch(wParam&0xFFFF)
 				{
-					case 100:
+					case CHECK_PALETTE_ENABLED:
 						ntsccol ^= 1;
 						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 						break;
 
-					case 200:
+					case BTN_PALETTE_LOAD:
 						if(LoadPaletteFile())
 						{
-							EnableWindow(GetDlgItem(hwndDlg, 201), 1);
+							EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), 1);
 						}
 						break;
 
-					case 201:
+					case BTN_PALETTE_RESET:
 						FCEUI_SetPaletteArray(0);
 						eoptions &= ~EO_CPALETTE;
-						EnableWindow(GetDlgItem(hwndDlg, 201), 0);
+						EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), 0);
 						break;
 
-					case 1:
+					case BUTTON_CLOSE:
 gornk:
 						DestroyWindow(hwndDlg);
 						pwindow = 0; // Yay for user race conditions.

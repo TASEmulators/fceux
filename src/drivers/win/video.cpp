@@ -929,81 +929,79 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
          case WM_INITDIALOG:      
 			 SetDlgItemText(hwndDlg,65454,"For the custom video mode settings to be in effect, the \"Custom\" video mode needs to be selected.  If you select a sync method, and sound is disabled, you may want to disable speed throttling(in the \"Timing\" window).  If you use \"wait for vblank\", you should use the \"lazy\" form.\x0AAllowing more than 8 sprites per scanline can cause graphics corruption in some games, including \"Solstice\".");
                 for(x=0;x<11;x++)
-                 SendDlgItemMessage(hwndDlg,100,CB_ADDSTRING,0,(LPARAM)(LPSTR)vmstr[x]);
-                SendDlgItemMessage(hwndDlg,100,CB_SETCURSEL,vmod,(LPARAM)(LPSTR)0);
+                 SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_ADDSTRING,0,(LPARAM)(LPSTR)vmstr[x]);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_SETCURSEL,vmod,(LPARAM)(LPSTR)0);
 
-                SendDlgItemMessage(hwndDlg,202,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8");
-                SendDlgItemMessage(hwndDlg,202,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16");
-                SendDlgItemMessage(hwndDlg,202,CB_ADDSTRING,0,(LPARAM)(LPSTR)"24");
-                SendDlgItemMessage(hwndDlg,202,CB_ADDSTRING,0,(LPARAM)(LPSTR)"32");
-                SendDlgItemMessage(hwndDlg,202,CB_SETCURSEL,(vmodes[0].bpp>>3)-1,(LPARAM)(LPSTR)0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"8");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"16");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"24");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_ADDSTRING,0,(LPARAM)(LPSTR)"32");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_SETCURSEL,(vmodes[0].bpp>>3)-1,(LPARAM)(LPSTR)0);
 
-                SetDlgItemInt(hwndDlg,200,vmodes[0].x,0);
-                SetDlgItemInt(hwndDlg,201,vmodes[0].y,0);
+                SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,vmodes[0].x,0);
+                SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,vmodes[0].y,0);
 
-                SetDlgItemInt(hwndDlg,302,vmodes[0].xscale,0);
-                SetDlgItemInt(hwndDlg,303,vmodes[0].yscale,0);
-                CheckRadioButton(hwndDlg,300,301,(vmodes[0].flags&VMDF_STRFS)?301:300);
+                SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,vmodes[0].xscale,0);
+                SetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,vmodes[0].yscale,0);
+                CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
                 {
                  char *str[]={"<none>","hq2x","Scale2x","hq3x","Scale3x"};
                  int x;
                  for(x=0;x<5;x++)
                  {
-                  SendDlgItemMessage(hwndDlg,304,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+                  SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
                   SendDlgItemMessage(hwndDlg,406,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
                  }
                 }
-                SendDlgItemMessage(hwndDlg,304,CB_SETCURSEL,vmodes[0].special,(LPARAM)(LPSTR)0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_SETCURSEL,vmodes[0].special,(LPARAM)(LPSTR)0);
                 SendDlgItemMessage(hwndDlg,406,CB_SETCURSEL,winspecial,(LPARAM)(LPSTR)0);
 
                 if(eoptions&EO_FSAFTERLOAD)
-                 CheckDlgButton(hwndDlg,102,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
 
                 if(eoptions&EO_CLIPSIDES)
-                 CheckDlgButton(hwndDlg,106,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES,BST_CHECKED);
 
                 if(disvaccel&1)
-                 CheckDlgButton(hwndDlg,130,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN,BST_CHECKED);
 
                 if(disvaccel&2)
-                 CheckDlgButton(hwndDlg,131,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_FS,BST_CHECKED);
 
                 if(eoptions&EO_FORCEISCALE)
-                 CheckDlgButton(hwndDlg,402,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS,BST_CHECKED);
 
                 if(eoptions&EO_FORCEASPECT)
-                 CheckDlgButton(hwndDlg,403,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_FORCE_ASPECT_CORRECTION,BST_CHECKED);
 
-                SetDlgItemInt(hwndDlg,500,srendlinen,0);
-                SetDlgItemInt(hwndDlg,501,erendlinen,0);
+                SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_NTSC,srendlinen,0);
+                SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_NTSC,erendlinen,0);
 
-                SetDlgItemInt(hwndDlg,502,srendlinep,0);
-                SetDlgItemInt(hwndDlg,503,erendlinep,0);
+                SetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_PAL,srendlinep,0);
+                SetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_PAL,erendlinep,0);
 
 
-                SetDlgItemDouble(hwndDlg, 400, winsizemulx);
-                SetDlgItemDouble(hwndDlg, 401, winsizemuly);
-                SetDlgItemDouble(hwndDlg, 404, saspectw);
-                SetDlgItemDouble(hwndDlg, 405, saspecth);
+                SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X, winsizemulx);
+                SetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y, winsizemuly);
+                SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X, saspectw);
+                SetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y, saspecth);
 
-                //SetDlgI               temInt(hwndDlg,103,winsizemul,0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
 
-                SendDlgItemMessage(hwndDlg,104,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
-                SendDlgItemMessage(hwndDlg,105,CB_ADDSTRING,0,(LPARAM)(LPSTR)"<none>");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
 
-                SendDlgItemMessage(hwndDlg,104,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
-                SendDlgItemMessage(hwndDlg,104,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Double Buffering");
 
-                SendDlgItemMessage(hwndDlg,105,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Wait for VBlank");
-                SendDlgItemMessage(hwndDlg,105,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Lazy wait for VBlank");
-                SendDlgItemMessage(hwndDlg,105,CB_ADDSTRING,0,(LPARAM)(LPSTR)"Double Buffering");
-
-                SendDlgItemMessage(hwndDlg,104,CB_SETCURSEL,winsync,(LPARAM)(LPSTR)0);
-                SendDlgItemMessage(hwndDlg,105,CB_SETCURSEL,fssync,(LPARAM)(LPSTR)0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_SETCURSEL,winsync,(LPARAM)(LPSTR)0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_SETCURSEL,fssync,(LPARAM)(LPSTR)0);
 
                 if(eoptions&EO_NOSPRLIM)
-                 CheckDlgButton(hwndDlg,600,BST_CHECKED);
+                 CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_NO8LIM,BST_CHECKED);
 
                 break;
          case WM_CLOSE:
@@ -1012,23 +1010,23 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                         if(!(wParam>>16))
                         switch(wParam&0xFFFF)
                         {
-                         case 1:
+                         case BTN_CLOSE:
                          gornk:
          
-                         if(IsDlgButtonChecked(hwndDlg,106)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES)==BST_CHECKED)
                           eoptions|=EO_CLIPSIDES;
                          else
                           eoptions&=~EO_CLIPSIDES;
 
-                         if(IsDlgButtonChecked(hwndDlg,600)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_NO8LIM)==BST_CHECKED)
                           eoptions|=EO_NOSPRLIM;
                          else
                           eoptions&=~EO_NOSPRLIM;
 
-                         srendlinen=GetDlgItemInt(hwndDlg,500,0,0);
-                         erendlinen=GetDlgItemInt(hwndDlg,501,0,0);
-                         srendlinep=GetDlgItemInt(hwndDlg,502,0,0);
-                         erendlinep=GetDlgItemInt(hwndDlg,503,0,0);
+                         srendlinen=GetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_NTSC,0,0);
+                         erendlinen=GetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_NTSC,0,0);
+                         srendlinep=GetDlgItemInt(hwndDlg,IDC_SCANLINE_FIRST_PAL,0,0);
+                         erendlinep=GetDlgItemInt(hwndDlg,IDC_SCANLINE_LAST_PAL,0,0);
 
 
                          if(erendlinen>239) erendlinen=239;
@@ -1039,53 +1037,53 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
                          UpdateRendBounds();
 
-                         if(IsDlgButtonChecked(hwndDlg,301)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_RADIO_STRETCH)==BST_CHECKED)
                           vmodes[0].flags|=VMDF_STRFS;
                          else
                           vmodes[0].flags&=~VMDF_STRFS;
 
-                         vmod=SendDlgItemMessage(hwndDlg,100,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                         vmodes[0].x=GetDlgItemInt(hwndDlg,200,0,0);
-                         vmodes[0].y=GetDlgItemInt(hwndDlg,201,0,0);
-                         vmodes[0].bpp=(SendDlgItemMessage(hwndDlg,202,CB_GETCURSEL,0,(LPARAM)(LPSTR)0)+1)<<3;
+                         vmod=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         vmodes[0].x=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,0,0);
+                         vmodes[0].y=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YRES,0,0);
+                         vmodes[0].bpp=(SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_BPP,CB_GETCURSEL,0,(LPARAM)(LPSTR)0)+1)<<3;
 
-                         vmodes[0].xscale=GetDlgItemInt(hwndDlg,302,0,0);
-                         vmodes[0].yscale=GetDlgItemInt(hwndDlg,303,0,0);
-                         vmodes[0].special=SendDlgItemMessage(hwndDlg,304,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         vmodes[0].xscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XSCALE,0,0);
+                         vmodes[0].yscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,0,0);
+                         vmodes[0].special=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 
                          winspecial = SendDlgItemMessage(hwndDlg,406,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
                          disvaccel = 0;
 
-                         if(IsDlgButtonChecked(hwndDlg,130)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN)==BST_CHECKED)
                           disvaccel |= 1;
-                         if(IsDlgButtonChecked(hwndDlg,131)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_DISABLE_HW_ACCEL_FS)==BST_CHECKED)
                           disvaccel |= 2;
 
 
-                         if(IsDlgButtonChecked(hwndDlg,101)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_FS)==BST_CHECKED)
                           fullscreen=1;
                          else
                           fullscreen=0;
-                         if(IsDlgButtonChecked(hwndDlg,102)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS)==BST_CHECKED)
                           eoptions|=EO_FSAFTERLOAD;
                          else
                           eoptions&=~EO_FSAFTERLOAD;
 
                          eoptions &= ~(EO_FORCEISCALE | EO_FORCEASPECT);
-                         if(IsDlgButtonChecked(hwndDlg,402)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS)==BST_CHECKED)
                           eoptions|=EO_FORCEISCALE;
-                         if(IsDlgButtonChecked(hwndDlg,403)==BST_CHECKED)
+                         if(IsDlgButtonChecked(hwndDlg,IDC_FORCE_ASPECT_CORRECTION)==BST_CHECKED)
                           eoptions|=EO_FORCEASPECT;
 
 
-                         winsizemulx=GetDlgItemDouble(hwndDlg, 400);
-                         winsizemuly=GetDlgItemDouble(hwndDlg, 401);
-                         saspectw=GetDlgItemDouble(hwndDlg, 404);
-                         saspecth=GetDlgItemDouble(hwndDlg, 405);
+                         winsizemulx=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X);
+                         winsizemuly=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y);
+                         saspectw=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_X);
+                         saspecth=GetDlgItemDouble(hwndDlg, IDC_VIDEOCONFIG_ASPECT_Y);
                          FixWXY(0);
 
-                         winsync=SendDlgItemMessage(hwndDlg,104,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
-                         fssync=SendDlgItemMessage(hwndDlg,105,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         winsync=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_WIN,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         fssync=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SYNC_METHOD_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
                          EndDialog(hwndDlg,0);
                          break;
                }

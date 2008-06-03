@@ -182,6 +182,9 @@ static const int MW_ADDR_Lookup[] = {
 	MW_ADDR16,MW_ADDR17,MW_ADDR18,MW_ADDR19,
 	MW_ADDR20,MW_ADDR21,MW_ADDR22,MW_ADDR23
 };
+inline int MW_ADDR(int i) { return MW_ADDR_Lookup[i]  ; }
+inline int MW_NAME(int i) { return MW_ADDR_Lookup[i]-1; }
+inline int MW_VAL (int i) { return MW_ADDR_Lookup[i]+1; }
 
 static const int MWNUM = ARRAY_SIZE(MW_ADDR_Lookup);
 
@@ -193,7 +196,7 @@ static struct MWRec
 	static int findIndex(WORD ctl)
 	{
 		for(int i=0;i<MWNUM;i++)
-			if(MW_ADDR_Lookup[i] == ctl)
+			if(MW_ADDR(i) == ctl)
 				return i;
 		return -1;
 	}
@@ -287,10 +290,10 @@ void UpdateMemWatch()
 static void SaveStrings()
 {
 	int i;
-	for(i=0;i<NUMWATCHES;i++)
+	for(i=0;i<MWNUM;i++)
 	{
-		GetDlgItemText(hwndMemWatch,1001+i*3,addresses[i],ADDRESSLENGTH);
-		GetDlgItemText(hwndMemWatch,1000+i*3,labels[i],LABELLENGTH);
+		GetDlgItemText(hwndMemWatch,MW_ADDR(i),addresses[i],ADDRESSLENGTH);
+		GetDlgItemText(hwndMemWatch,MW_NAME(i),labels[i],LABELLENGTH);
 	}
 }
 
@@ -518,9 +521,9 @@ static void LoadMemWatch()
 			addresses[i][tempal] = 0;
 			labels[i][templl] = 0; //just in case
 
-			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
-			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+			SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
+			SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 		}
 		fclose(fp);
 	}
@@ -568,9 +571,9 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 			addresses[i][tempal] = 0;
 			labels[i][templl] = 0; //just in case
 
-			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
-			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+			SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
+			SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 	}
 		fclose(fp);
 
@@ -608,12 +611,12 @@ void ClearAllText()
 		}
 					
 					int i;
-					for(i=0;i<NUMWATCHES;i++)
+					for(i=0;i<MWNUM;i++)
 					{
 						addresses[i][0] = 0;
 						labels[i][0] = 0;
-						SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-						SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+						SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+						SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 					}
 					//Now clear last file used variable (memwLastFilename)
 					for (int i=0;i<2048;i++)
@@ -651,7 +654,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			if(i>=MWNUM/2)
 				col=1;
 			RECT r;
-			GetWindowRect(GetDlgItem(hwndDlg,MW_ADDR_Lookup[i]),&r);
+			GetWindowRect(GetDlgItem(hwndDlg,MW_ADDR(i)),&r);
 			ScreenToClient(hwndDlg,(LPPOINT)&r);
 			ScreenToClient(hwndDlg,(LPPOINT)&r.right);
 			yPositions[i] = r.top;
@@ -686,23 +689,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 
 		//Menu Items
 		switch(LOWORD(wParam))
-		{	
-		case 600: //First item in recent menu
-			OpenMemwatchRecentFile(0);
-			break;
-		case 601: //2nd item in recent menu
-			OpenMemwatchRecentFile(1);
-			break;
-		case 602: //3rd item in recent menu
-			OpenMemwatchRecentFile(2);
-			break;
-		case 603: //4th item in recent menu
-			OpenMemwatchRecentFile(3);
-			break;
-		case 604: //5th item in recent menu
-			OpenMemwatchRecentFile(4);
-			break;
-		
+		{
 		case ACCEL_CTRL_W:
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
@@ -745,6 +732,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		default:
+			if (LOWORD(wParam) >= MEMW_MENU_FIRST_RECENT_FILE && LOWORD(wParam) < MEMW_MENU_FIRST_RECENT_FILE+MEMW_MAX_NUMBER_OF_RECENT_FILES)
+				OpenMemwatchRecentFile(LOWORD(wParam) - MEMW_MENU_FIRST_RECENT_FILE);
 		break;
 		}
 
@@ -762,6 +751,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				break;
 			}
 		
+#if 0
 		case BN_CLICKED:
 			
 			switch(LOWORD(wParam))
@@ -780,8 +770,10 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			default:
 				break;
 			} 
+#endif
 		}
 		
+#if 0
 		if(!(wParam>>16)) //Close button clicked
 		{
 			switch(wParam&0xFFFF)
@@ -791,6 +783,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				break;
 			}
 		}
+#endif
 		
 		break;
 	default:
@@ -838,11 +831,11 @@ void CreateMemWatch()
 	//Initialize values to previous entered addresses/labels
 	{
 		int i;
-		for(i = 0; i < NUMWATCHES; i++)
+		for(i = 0; i < MWNUM; i++)
 		{
-			SetDlgItemText(hwndMemWatch,1002+i*3,(LPTSTR) "---");
-			SetDlgItemText(hwndMemWatch,1001+i*3,(LPTSTR) addresses[i]);
-			SetDlgItemText(hwndMemWatch,1000+i*3,(LPTSTR) labels[i]);
+			SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
+			SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 		}
 	}
 if (MemWatchLoadFileOnStart) OpenMemwatchRecentFile(0);
@@ -852,12 +845,12 @@ void AddMemWatch(char memaddress[32])
  char TempArray[32];
 	int i;
  CreateMemWatch();
-	for(i = 0; i < NUMWATCHES; i++)
+	for(i = 0; i < MWNUM; i++)
 	{
-	 GetDlgItemText(hwndMemWatch,1001+i*3,TempArray,32);
+	 GetDlgItemText(hwndMemWatch,MW_ADDR(i),TempArray,32);
 	 if (TempArray[0] == 0)
 	 {
-		 SetDlgItemText(hwndMemWatch,1001+i*3,memaddress);
+		 SetDlgItemText(hwndMemWatch,MW_ADDR(i),memaddress);
 		 break;
 		}
 	}

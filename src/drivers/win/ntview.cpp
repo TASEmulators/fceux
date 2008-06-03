@@ -43,8 +43,17 @@ int NTViewSkip,NTViewRefresh;
 static int mouse_x,mouse_y; //todo: is static needed here? --mbg 7/19/06 - i think so
 int redrawtables = 0;
 int chrchanged = 0;
-int ntmirroring, oldntmirroring = -1; //0 is horizontal, 1 is vertical, 2 is four screen.
-int lockmirroring;
+
+enum NT_MirrorType {
+	NT_NONE = -1,
+	NT_HORIZONTAL, NT_VERTICAL, NT_FOUR_SCREEN,
+	NT_SINGLE_SCREEN_TABLE_0, NT_SINGLE_SCREEN_TABLE_1,
+	NT_SINGLE_SCREEN_TABLE_2, NT_SINGLE_SCREEN_TABLE_3,
+	NT_NUM_MIRROR_TYPES
+};
+#define IDC_NTVIEW_MIRROR_TYPE_0 IDC_NTVIEW_MIRROR_HORIZONTAL
+NT_MirrorType ntmirroring, oldntmirroring = NT_NONE;
+//int lockmirroring;
 //int ntmirroring[4]; //these 4 ints are either 0, 1, 2, or 3 and tell where each of the 4 nametables point to
 //uint8 *ntmirroringpointers[] = {&NTARAM[0x000],&NTARAM[0x400],ExtraNTARAM,ExtraNTARAM+0x400};
 
@@ -94,43 +103,43 @@ void NTViewDoBlit(int autorefresh) {
 	if((redrawtables && !autorefresh) || (autorefresh) || (scrolllines)){
 		//todo: use switch and use bitblt for because its faster
 		switch(ntmirroring){
-			case 0: //horizontal
+			case NT_HORIZONTAL:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 			break;
-			case 1: //vertical
+			case NT_VERTICAL:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				break;
-			case 2: //four screen
+			case NT_FOUR_SCREEN:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
 			break;
-			case 3: //single screen, table 0
+			case NT_SINGLE_SCREEN_TABLE_0:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
 			break;
-			case 4: //single screen, table 1
+			case NT_SINGLE_SCREEN_TABLE_1:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
 			break;
-			case 5: //single screen, table 2
+			case NT_SINGLE_SCREEN_TABLE_2:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
 			break;
-			case 6: //single screen, table 3
+			case NT_SINGLE_SCREEN_TABLE_3:
 				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
 				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
@@ -138,43 +147,43 @@ void NTViewDoBlit(int autorefresh) {
 			break;
 		}
 		/*
-		if(ntmirroring == 0){ //horizontal
+		if(ntmirroring == NT_HORIZONTAL){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 1){ //vertical
+		if(ntmirroring == NT_VERTICAL){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 2){ //four screen
+		if(ntmirroring == NT_FOUR_SCREEN){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 3){ //single screen, table 0
+		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_0){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 4){ //single screen, table 1
+		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_1){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 5){ //single screen, table 2
+		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_2){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 		}
-		if(ntmirroring == 6){ //single screen, table 3
+		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_3){
 			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
 			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
@@ -205,39 +214,39 @@ void NTViewDoBlit(int autorefresh) {
 
 void UpdateMirroringButtons(){
 	int i;
-	for(i = 0; i < 7;i++){
-		if(i != ntmirroring)CheckDlgButton(hNTView, i+1001, BST_UNCHECKED);
-		else CheckDlgButton(hNTView, i+1001, BST_CHECKED);
+	for(i = 0; i < NT_NUM_MIRROR_TYPES;i++){
+		if(i != ntmirroring)CheckDlgButton(hNTView, i+IDC_NTVIEW_MIRROR_TYPE_0, BST_UNCHECKED);
+		else CheckDlgButton(hNTView, i+IDC_NTVIEW_MIRROR_TYPE_0, BST_CHECKED);
 	}
 	return;
 }
 
 void ChangeMirroring(){
 	switch(ntmirroring){
-		case 0:
+		case NT_HORIZONTAL:
 			vnapage[0] = vnapage[1] = &NTARAM[0x000];
 			vnapage[2] = vnapage[3] = &NTARAM[0x400];
 			break;
-		case 1:
+		case NT_VERTICAL:
 			vnapage[0] = vnapage[2] = &NTARAM[0x000];
 			vnapage[1] = vnapage[3] = &NTARAM[0x400];
 			break;
-		case 2:
+		case NT_FOUR_SCREEN:
 			vnapage[0] = &NTARAM[0x000];
 			vnapage[1] = &NTARAM[0x400];
 			vnapage[2] = ExtraNTARAM;
 			vnapage[3] = ExtraNTARAM+0x400;
 			break;
-		case 3:
+		case NT_SINGLE_SCREEN_TABLE_0:
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x000];
 			break;
-		case 4:
+		case NT_SINGLE_SCREEN_TABLE_1:
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = &NTARAM[0x400];
 			break;
-		case 5:
+		case NT_SINGLE_SCREEN_TABLE_2:
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM;
 			break;
-		case 6:
+		case NT_SINGLE_SCREEN_TABLE_3:
 			vnapage[0] = vnapage[1] = vnapage[2] = vnapage[3] = ExtraNTARAM+0x400;
 			break;
 	}
@@ -329,7 +338,7 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 	//char str[50];
 	//sprintf(str,"%d,%d,%d",horzscroll,vertscroll,ntmirroring);
 	//sprintf(str,"%08X  %08X",TempAddr, RefreshAddr);
-	//SetDlgItemText(hNTView, 103, str);
+	//SetDlgItemText(hNTView, IDC_NTVIEW_PROPERTIES_LINE_1, str);
 
 	if (NTViewSkip < NTViewRefresh) return;
 
@@ -342,16 +351,16 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 	}
 	
 
-	ntmirroring = -1;
-	if(vnapage[0] == vnapage[1])ntmirroring = 0;
-	if(vnapage[0] == vnapage[2])ntmirroring = 1;
-	if((vnapage[0] != vnapage[1]) && (vnapage[0] != vnapage[2]))ntmirroring = 2;
+	ntmirroring = NT_NONE;
+	if(vnapage[0] == vnapage[1])ntmirroring = NT_HORIZONTAL;
+	if(vnapage[0] == vnapage[2])ntmirroring = NT_VERTICAL;
+	if((vnapage[0] != vnapage[1]) && (vnapage[0] != vnapage[2]))ntmirroring = NT_FOUR_SCREEN;
 
 	if((vnapage[0] == vnapage[1]) && (vnapage[1] == vnapage[2]) && (vnapage[2] == vnapage[3])){ 
-		if(vnapage[0] == &NTARAM[0x000])ntmirroring = 3;
-		if(vnapage[0] == &NTARAM[0x400])ntmirroring = 4;
-		if(vnapage[0] == ExtraNTARAM)ntmirroring = 5;
-		if(vnapage[0] == ExtraNTARAM+0x400)ntmirroring = 6;
+		if(vnapage[0] == &NTARAM[0x000])ntmirroring = NT_SINGLE_SCREEN_TABLE_0;
+		if(vnapage[0] == &NTARAM[0x400])ntmirroring = NT_SINGLE_SCREEN_TABLE_1;
+		if(vnapage[0] == ExtraNTARAM)ntmirroring = NT_SINGLE_SCREEN_TABLE_2;
+		if(vnapage[0] == ExtraNTARAM+0x400)ntmirroring = NT_SINGLE_SCREEN_TABLE_3;
 	}
 
 	if(oldntmirroring != ntmirroring){
@@ -365,11 +374,11 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 		DrawNameTable(ntable2,ExtraNTARAM,0);
 		DrawNameTable(ntable3,ExtraNTARAM+0x400,0);
 	} else {
-		if((ntmirroring == 0) || (ntmirroring == 1) || (ntmirroring == 3))
-			DrawNameTable(ntable0,&NTARAM[0x000],ntcache[0]);
-		if((ntmirroring == 0) || (ntmirroring == 1) || (ntmirroring == 4))
+		if(ntmirroring == NT_HORIZONTAL || ntmirroring == NT_VERTICAL || ntmirroring == NT_SINGLE_SCREEN_TABLE_0)
+		       DrawNameTable(ntable0,&NTARAM[0x000],ntcache[0]);
+		if(ntmirroring == NT_HORIZONTAL || ntmirroring == NT_VERTICAL || ntmirroring == NT_SINGLE_SCREEN_TABLE_1)
 			DrawNameTable(ntable1,&NTARAM[0x400],ntcache[1]);
-		if(ntmirroring == 2){
+		if(ntmirroring == NT_FOUR_SCREEN){
 			DrawNameTable(ntable2,ExtraNTARAM,ntcache[2]);
 			DrawNameTable(ntable3,ExtraNTARAM+0x400,ntcache[3]);
 		}
@@ -423,7 +432,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			bmInfo.bmiHeader.biBitCount = 24;
 
 			//create memory dcs
-			pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,101));
+			pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,IDC_NTVIEW_TABLE_BOX));
 			TmpDC0 = CreateCompatibleDC(pDC); //name table 0
 			TmpDC1 = CreateCompatibleDC(pDC); //name table 1
 			TmpDC2 = CreateCompatibleDC(pDC); //name table 2
@@ -441,18 +450,18 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			TmpObj3 = SelectObject(TmpDC3,TmpBmp3);
 
 			//Refresh Trackbar
-			SendDlgItemMessage(hwndDlg,201,TBM_SETRANGE,0,(LPARAM)MAKELONG(0,25));
-			SendDlgItemMessage(hwndDlg,201,TBM_SETPOS,1,NTViewRefresh);
+			SendDlgItemMessage(hwndDlg,IDC_NTVIEW_REFRESH_TRACKBAR,TBM_SETRANGE,0,(LPARAM)MAKELONG(0,25));
+			SendDlgItemMessage(hwndDlg,IDC_NTVIEW_REFRESH_TRACKBAR,TBM_SETPOS,1,NTViewRefresh);
 
 			//Set Text Limit
-			SendDlgItemMessage(hwndDlg,102,EM_SETLIMITTEXT,3,0);
+			SendDlgItemMessage(hwndDlg,IDC_NTVIEW_SCANLINE,EM_SETLIMITTEXT,3,0);
 
 			//force redraw the first time the PPU Viewer is opened
 			NTViewSkip=100;
 
 			SelectObject (pDC, CreatePen (PS_SOLID, 2, RGB (255, 255, 255))) ;
 
-			CheckDlgButton(hwndDlg, 1008, BST_CHECKED);
+			CheckDlgButton(hwndDlg, IDC_NTVIEW_SHOW_SCROLL_LINES, BST_CHECKED);
 			//clear cache
 			//memset(palcache,0,32);
 			//memset(ntcache0,0,0x400);
@@ -499,72 +508,72 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				TileX = (mouse_x-NTDESTX)/8;
 				TileY = (mouse_y-NTDESTY)/8;
 				sprintf(str,"X / Y: %0d / %0d",TileX,TileY);
-				SetDlgItemText(hwndDlg,104,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,str);
 				NameTable = (TileX/32)+((TileY/30)*2);
 				PPUAddress = 0x2000+(NameTable*0x400)+((TileY%30)*32)+(TileX%32);
 				sprintf(str,"PPU Address: %04X",PPUAddress);
-				SetDlgItemText(hwndDlg,105,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,str);
 				TileID = vnapage[(PPUAddress>>10)&0x3][PPUAddress&0x3FF];
 				sprintf(str,"Tile ID: %02X",TileID);
-				SetDlgItemText(hwndDlg,103,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,str);
 			}
 
 /*			if (((mouse_x >= PATTERNDESTX) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
 				mouse_x = (mouse_x-PATTERNDESTX)/(8*ZOOM);
 				mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
 				sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-				SetDlgItemText(hwndDlg,103,str);
-				SetDlgItemText(hwndDlg,104,"Tile:");
-				SetDlgItemText(hwndDlg,105,"Palettes");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
 			}
 			else if (((mouse_x >= PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1) && (mouse_x < (PATTERNDESTX+(PATTERNWIDTH*ZOOM)*2+1))) && (mouse_y >= PATTERNDESTY) && (mouse_y < (PATTERNDESTY+(PATTERNHEIGHT*ZOOM)))) {
 				mouse_x = (mouse_x-(PATTERNDESTX+(PATTERNWIDTH*ZOOM)+1))/(8*ZOOM);
 				mouse_y = (mouse_y-PATTERNDESTY)/(8*ZOOM);
 				sprintf(str,"Tile: $%X%X",mouse_y,mouse_x);
-				SetDlgItemText(hwndDlg,104,str);
-				SetDlgItemText(hwndDlg,103,"Tile:");
-				SetDlgItemText(hwndDlg,105,"Palettes");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
 			}
 			else if (((mouse_x >= PALETTEDESTX) && (mouse_x < (PALETTEDESTX+PALETTEWIDTH))) && (mouse_y >= PALETTEDESTY) && (mouse_y < (PALETTEDESTY+PALETTEHEIGHT))) {
 				mouse_x = (mouse_x-PALETTEDESTX)/32;
 				mouse_y = (mouse_y-PALETTEDESTY)/32;
 				sprintf(str,"Palette: $%02X",palcache[(mouse_y<<4)|mouse_x]);
-				SetDlgItemText(hwndDlg,103,"Tile:");
-				SetDlgItemText(hwndDlg,104,"Tile:");
-				SetDlgItemText(hwndDlg,105,str);
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,str);
 			}
 			else {
-				SetDlgItemText(hwndDlg,103,"Tile:");
-				SetDlgItemText(hwndDlg,104,"Tile:");
-				SetDlgItemText(hwndDlg,105,"Palettes");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_1,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_2,"Tile:");
+				SetDlgItemText(hwndDlg,IDC_NTVIEW_PROPERTIES_LINE_3,"Palettes");
 			}
 */
 			break;
 		case WM_NCACTIVATE:
 			sprintf(str,"%d",NTViewScanline);
-			SetDlgItemText(hwndDlg,102,str);
+			SetDlgItemText(hwndDlg,IDC_NTVIEW_SCANLINE,str);
 			break;
 		case WM_COMMAND:
 			switch(HIWORD(wParam)) {
 				case EN_UPDATE:
-					GetDlgItemText(hwndDlg,102,str,4);
+					GetDlgItemText(hwndDlg,IDC_NTVIEW_SCANLINE,str,4);
 					sscanf(str,"%d",&NTViewScanline);
 					if (NTViewScanline > 239) NTViewScanline = 239;
 					chrchanged = 1;
 					break;
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
-						case 1001 :
-						case 1002 :
-						case 1003 :
-						case 1004 :
-						case 1005 :
-						case 1006 :
-						case 1007 :
-							oldntmirroring = ntmirroring = LOWORD(wParam)-1001;
+						case IDC_NTVIEW_MIRROR_HORIZONTAL :
+						case IDC_NTVIEW_MIRROR_VERTICAL :
+						case IDC_NTVIEW_MIRROR_FOUR_SCREEN :
+						case IDC_NTVIEW_MIRROR_SS_TABLE_0 :
+						case IDC_NTVIEW_MIRROR_SS_TABLE_1 :
+						case IDC_NTVIEW_MIRROR_SS_TABLE_2 :
+						case IDC_NTVIEW_MIRROR_SS_TABLE_3 :
+							oldntmirroring = ntmirroring = NT_MirrorType(LOWORD(wParam)-IDC_NTVIEW_MIRROR_TYPE_0);
 							ChangeMirroring();
 							break;
-						case 1008 : 
+						case IDC_NTVIEW_SHOW_SCROLL_LINES : 
 							scrolllines ^= 1;
 							chrchanged = 1;
 							break;
@@ -574,7 +583,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_HSCROLL:
 			if (lParam) { //refresh trackbar
-				NTViewRefresh = SendDlgItemMessage(hwndDlg,201,TBM_GETPOS,0,0);
+				NTViewRefresh = SendDlgItemMessage(hwndDlg,IDC_NTVIEW_REFRESH_TRACKBAR,TBM_GETPOS,0,0);
 			}
 			break;
 	}
