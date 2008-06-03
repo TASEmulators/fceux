@@ -190,7 +190,10 @@ static void ColumnSet(int column)
 	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 	{
 		currMovieData.records[*it].setBitValue(0,button,newValue);
-		ListView_Update(hwndList,*it);
+		//we would do this if we wanted to update the affected record. but that results in big operations
+		//redrawing once per item set, which causes it to flicker and take forever.
+		//so now we rely on the update at the end.
+		//ListView_Update(hwndList,*it);
 	}
 
 	//reduce the green zone
