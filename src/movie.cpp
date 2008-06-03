@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <zlib.h>
 
 #ifdef WIN32
 #include <windows.h>
@@ -86,7 +87,7 @@ void MovieData::TryDumpIncremental()
 		{
 			if(currFrameCounter < (int)currMovieData.records.size())
 			{
-				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate);
+				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_NO_COMPRESSION);
 				currMovieData.greenZoneCount++;
 			}
 		}
@@ -417,7 +418,7 @@ static void ResetInputTypes()
 #endif
 }
 
-bool MovieData::loadSavestateFrom(std::vector<uint8>* buf)
+bool MovieData::loadSavestateFrom(std::vector<char>* buf)
 {
 	//dump the savestate to disk
 	FILE* fp = tmpfile();
@@ -430,19 +431,10 @@ bool MovieData::loadSavestateFrom(std::vector<uint8>* buf)
 	return success;
 }
 
-void MovieData::dumpSavestateTo(std::vector<uint8>* buf)
+void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 {
-	//dump a savestate to a tempfile..
-	FILE* tmp = tmpfile();
-	FCEUSS_SaveFP(tmp,-1); 
-
-	//reloading the savestate into the data structure
-	fseek(tmp,0,SEEK_END);
-	int len = (int)ftell(tmp);
-	fseek(tmp,0,SEEK_SET);
-	buf->resize(len);
-	fread(&(*buf)[0],1,len,tmp);
-	fclose(tmp);
+	memorystream ms(buf);
+	FCEUSS_SaveMS(&ms,compressionLevel);
 }
 
 //begin playing an existing movie
@@ -577,7 +569,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	}
 	else
 	{
-		MovieData::dumpSavestateTo(&currMovieData.savestate);
+		MovieData::dumpSavestateTo(&currMovieData.savestate,Z_BEST_COMPRESSION);
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames

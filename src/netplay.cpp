@@ -276,7 +276,7 @@ void NetplayUpdate(uint8 *joyp)
                                
 			        fn = FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
 			        fp = fopen(fn, "wb");
-			        if(FCEUSS_SaveFP(fp,-1))
+			        if(FCEUSS_SaveFP(fp,Z_BEST_COMPRESSION))
 			        {
 			         fclose(fp);
 			         if(!FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn))

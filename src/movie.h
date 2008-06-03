@@ -57,7 +57,7 @@ public:
 	}
 	
 	//a waste of memory in lots of cases..  maybe make it a pointer later?
-	std::vector<uint8> savestate;
+	std::vector<char> savestate;
 
 	void dump(FILE* fp, int index);
 	void dump(std::ostream* os, int index);
@@ -82,7 +82,7 @@ public:
 	bool resetFlag;
 	MD5DATA romChecksum;
 	std::string romFilename;
-	std::vector<uint8> savestate;
+	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
 	//this is the RERECORD COUNT. please rename variable.
 	int recordCount;
@@ -129,8 +129,8 @@ public:
 	int dumpLen();
 	void clearRecordRange(int start, int len);
 	
-	static bool loadSavestateFrom(std::vector<uint8>* buf);
-	static void dumpSavestateTo(std::vector<uint8>* buf);
+	static bool loadSavestateFrom(std::vector<char>* buf);
+	static void dumpSavestateTo(std::vector<char>* buf, int compressionLevel);
 	void TryDumpIncremental();
 };
 

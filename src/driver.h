@@ -3,11 +3,13 @@
 
 #include <stdio.h>
 #include <string>
+#include <fstream>
 
 #include "types.h"
 #include "git.h"
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
+std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m);
 
 
 //mbg 7/23/06

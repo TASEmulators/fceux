@@ -1235,6 +1235,30 @@ static void FCEUD_MakePathDirs(const char *fname)
 	} while(1);
 }
 
+std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
+{
+	if(strchr(m, 'w') || strchr(m, '+'))
+	{
+		FCEUD_MakePathDirs(n);
+	}
+
+	std::ios_base::open_mode mode = std::ios_base::binary;
+	if(!strcmp(m,"r"))
+		mode |= std::ios_base::in;
+	else if(!strcmp(m,"w"))
+		mode |= std::ios_base::out | std::ios_base::trunc;
+	else if(!strcmp(m,"a"))
+		mode |= std::ios_base::out | std::ios_base::app;
+	else if(!strcmp(m,"r+"))
+		mode |= std::ios_base::in | std::ios_base::out;
+	else if(!strcmp(m,"w+"))
+		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
+	else if(!strcmp(m,"a+"))
+		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
+	
+	return new std::fstream(n,mode);
+}
+
 FILE *FCEUD_UTF8fopen(const char *n, const char *m)
 {
 	if(strchr(m, 'w') || strchr(m, '+'))

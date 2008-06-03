@@ -368,9 +368,19 @@ static int ReadStateChunks(FILE *st, int32 totalsize)
 int CurrentState=1;
 extern int geniestage;
 
-bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
+bool FCEUSS_SaveFP(FILE* fp, int compressionLevel)
 {
-	//a temporary buffer. we're going to put the savestate in here and then compress it
+	memorystream ms;
+	bool ret = FCEUSS_SaveMS(&ms,compressionLevel);
+	fwrite(ms.buf(),1,ms.size(),fp);
+	return ret;
+}
+
+bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
+{
+	//a temp memory stream. we'll dump some data here and then compress
+	//TODO - support dumping directly without compressing to save a buffer copy
+
 	memorystream ms;
 	std::ostream* os = (std::ostream*)&ms;
 
@@ -426,7 +436,7 @@ bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 	int error = Z_OK;
 	uint8* cbuf = (uint8*)ms.buf();
 	uLongf comprlen = -1;
-	//if(compressionLevel != Z_NO_COMPRESSION)
+	if(compressionLevel != Z_NO_COMPRESSION)
 	{
 		//worst case compression.
 		//zlib says "0.1% larger than sourceLen plus 12 bytes"
@@ -442,8 +452,8 @@ bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 	FCEU_en32lsb(header+12, comprlen);
 
 	//dump it to the destination file
-	fwrite(header,1,16,st);
-	fwrite(cbuf,1,comprlen,st);
+	outstream->write((char*)header,16);
+	outstream->write((char*)cbuf,comprlen);
 
 	if(cbuf != (uint8*)ms.buf()) delete[] cbuf;
 	return error == Z_OK;

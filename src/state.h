@@ -29,7 +29,11 @@ enum ENUM_SSLOADPARAMS
 
 void FCEUSS_Save(char *);
 int FCEUSS_Load(char *);
-bool FCEUSS_SaveFP(FILE *, int compressionLevel); //zlib values: 0 (none) through 9 (max) or -1 (default)
+
+ //zlib values: 0 (none) through 9 (max) or -1 (default)
+bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel);
+bool FCEUSS_SaveFP(FILE* fp, int compressionLevel);
+
 bool FCEUSS_LoadFP(FILE *, ENUM_SSLOADPARAMS);
 
 extern int CurrentState;

@@ -2,13 +2,14 @@
 #include <vector>
 #include <sstream>
 
+template<typename T>
 class memory_streambuf: public std::streambuf {
 private:
 
 	friend class memorystream;
 
 	//the current buffer
-	char* buf;
+	T* buf;
 
 	//the current allocated capacity of the buffer
 	size_t capacity;
@@ -21,6 +22,9 @@ private:
 
 	//the current 'write window' starting position within the buffer for writing.
 	size_t ww;
+
+	//a vector that we have been told to use
+	std::vector<T>* usevec;
 	
 
 public:
@@ -36,10 +40,38 @@ public:
 		: length(0)
 		, myBuf(true)
 		, ww(0)
-		, buf(new char[capacity = 8])
+		, buf(new T[capacity = 128])
+		, usevec(0)
 	{
 		sync();
 	}
+
+	//constructs a non-expandable streambuf around the provided buffer
+	memory_streambuf(T* usebuf, int buflength)
+		: length(buflength)
+		, myBuf(false)
+		, buf(usebuf)
+		, ww(0)
+		, usevec(0)
+	{
+		sync();
+	}
+
+	//constructs an expandable streambuf around the provided buffer
+	memory_streambuf(std::vector<T>* _usevec)
+		: usevec(_usevec)
+		, length(_usevec->size())
+		, capacity(_usevec->size())
+		, myBuf(false)
+		, ww(0)
+	{
+		if(length>0)
+			buf = &(*_usevec)[0];
+		else buf = 0;
+
+		sync();
+	}
+
 
 	~memory_streambuf()
 	{
@@ -48,26 +80,16 @@ public:
 	}
 
 	//to avoid copying, rebuilds the provided vector and copies the streambuf contents into it
-	void toVector(std::vector<char>& out)
+	void toVector(std::vector<T>& out)
 	{
-		out.reserve(length);
+		out.resize(length);
 		memcpy(&out[0],buf,length);
 	}
 
 	//maybe the compiler can avoid copying, but maybe not: returns a vector representing the current streambuf
-	std::vector<char> toVector()
+	std::vector<T> toVector()
 	{
-		return std::vector<char>(buf,buf+length);
-	}
-
-	//constructs a non-expandable streambuf around the provided buffer
-	memory_streambuf(char* usebuf, int buflength)
-		: length(buflength)
-		, myBuf(false)
-		, buf(usebuf)
-		, ww(0)
-	{
-		sync();
+		return std::vector<T>(buf,buf+length);
 	}
 
 	//tells the current read or write position
@@ -98,7 +120,7 @@ public:
 		return 0;
 	}
 
-	char* getbuf()
+	T* getbuf()
 	{
 		sync();
 		return buf;
@@ -131,7 +153,7 @@ private:
 
 	void expand(size_t upto)
 	{
-		if(!myBuf)
+		if(!myBuf && !usevec)
 			throw new std::exception("memory_streambuf is not expandable");
 
 		size_t newcapacity;
@@ -139,14 +161,25 @@ private:
 			newcapacity = capacity + capacity/2 + 2;
 		else
 			newcapacity = std::max(upto,capacity);
-		
+
 		if(newcapacity == capacity) return;
 
-		char* newbuf = new char[newcapacity];
-		memcpy(newbuf,buf,capacity);
-		delete[] buf;
-		capacity = newcapacity;
-		buf = newbuf;
+		//if we are supposed to use the vector, then do it now
+		if(usevec)
+		{
+			usevec->resize(newcapacity);
+			capacity = usevec->size();
+			buf = &(*usevec)[0];
+		}
+		else
+		{
+			//otherwise, manage our own buffer
+			T* newbuf = new T[newcapacity];
+			memcpy(newbuf,buf,capacity);
+			delete[] buf;
+			capacity = newcapacity;
+			buf = newbuf;
+		}
 	}
 
 protected:
@@ -197,11 +230,20 @@ class memorystream : public std::basic_iostream<char, std::char_traits<char> >
 public:
 	memorystream()
 		: std::basic_iostream<char, std::char_traits<char> >(&streambuf)
-	{
-	}
+	{}
+
+	memorystream(char* usebuf, int buflength)
+		: streambuf(usebuf, buflength)
+		, std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+	{}
+
+	memorystream(std::vector<char>* usevec)
+		: streambuf(usevec)
+		, std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+	{}
 
 	//the underlying memory_streambuf
-	memory_streambuf streambuf;
+	memory_streambuf<char> streambuf;
 
 
 public: 
