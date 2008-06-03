@@ -28,7 +28,6 @@
 //#include <unistd.h> //mbg merge 7/17/06 removed
 
 #include <vector>
-#include <sstream>
 
 #include "types.h"
 #include "x6502.h"
@@ -36,6 +35,7 @@
 #include "sound.h"
 #include "utils/endian.h"
 #include "utils/memory.h"
+#include "utils/memorystream.h"
 #include "file.h"
 #include "fds.h"
 #include "state.h"
@@ -379,13 +379,19 @@ bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 	FCEUPPU_SaveState();
 	FCEUSND_SaveState();
 	totalsize=WriteStateChunk(os,1,SFCPU);
+	ms.sync();
 	totalsize+=WriteStateChunk(os,2,SFCPUC);
+	ms.sync();
 	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
+	ms.sync();
 	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
+	ms.sync();
 	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
+	ms.sync();
 	if(FCEUI_IsMovieActive())
 	{
 		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
+		ms.sync();
 		uint32 size = FCEUMOV_WriteState((std::ostream*)0);
 		os->put(7);
 		write32le(size, os);
@@ -400,6 +406,7 @@ bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 		write32le(size, os);
 		os->write((char*)XBackBuf,size);
 		totalsize += 5 + size;
+		ms.sync();
 	}
 
 	if(SPreSave) SPreSave();
@@ -408,6 +415,13 @@ bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 
 	//save the length of the file
 	int len = ms.size();
+
+	//sanity check: len and totalsize should be the same
+	if(len != totalsize)
+	{
+		FCEUD_PrintError("sanity violation: len != totalsize");
+		return false;
+	}
 
 	int error = Z_OK;
 	uint8* cbuf = (uint8*)ms.buf();

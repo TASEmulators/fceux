@@ -18,7 +18,11 @@
 #include "video.h"
 #include "movie.h"
 #include "utils/memory.h"
+#include "utils/memorystream.h"
 #include "utils/xstring.h"
+
+using namespace std;
+
 
 #define MOVIE_VERSION           3 // still at 2 since the format itself is still compatible - to detect which version the movie was made with, check the fceu version stored in the movie header (e.g against FCEU_VERSION_NUMERIC)
 
@@ -90,6 +94,42 @@ void MovieData::TryDumpIncremental()
 }
 
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
+void MovieRecord::dump(std::ostream* os, int index)
+{
+	//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
+	//but someone would need to change the parser to ignore it
+	//fputc('|',fp);
+	//fprintf(fp,"%08d",index);
+
+	os->put('|');
+
+	//for each joystick
+	for(int i=0;i<4;i++)
+	{
+		//these are mnemonics for each joystick bit.
+		//since we usually use the regular joypad, these will be more helpful.
+		//but any character other than ' ' should count as a set bit
+		//maybe other input types will need to be encoded another way..
+		for(int bit=7;bit>=0;bit--)
+		{
+			uint8 &joystate = joysticks[i];
+			int bitmask = (1<<bit);
+			char mnemonic = mnemonics[bit];
+			//if the bit is set write the mnemonic
+			if(joystate & bitmask)
+				os->put(mnemonic);
+			else //otherwise write a space
+				os->put(' ');
+		}
+
+		//separate the joysticks
+		if(i != 3) os->put('|');
+	}
+
+	//each frame is on a new line
+	os->put('\n');
+}
+
 void MovieRecord::dump(FILE* fp, int index)
 {
 	//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
@@ -170,8 +210,18 @@ void MovieData::installDictionary(TDictionary& dictionary)
 
 void MovieData::dump(std::ostream *os)
 {
-	*os << "version " << version;
-	*os << "emuVersion " << emuVersion;
+	*os << "version " << version << endl;
+	*os << "emuVersion " << emuVersion << endl;
+	*os << "recordCount " << recordCount << endl;
+	*os << "palFlag " << (palFlag?1:0) << endl;
+	*os << "poweronFlag " << (poweronFlag?1:0) << endl;
+	*os << "resetFlag " << (resetFlag?1:0) << endl;
+	*os << "romFilename " << romFilename << endl;
+	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
+	if(savestate.size() != 0)
+		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
+	for(int i=0;i<(int)records.size();i++)
+		records[i].dump(os,i);
 }
 
 void MovieData::dump(FILE *fp)
@@ -193,11 +243,9 @@ void MovieData::dump(FILE *fp)
 
 int MovieData::dumpLen()
 {
-	FILE* tmp = tmpfile();
-	dump(tmp);
-	int len = ftell(tmp);
-	fclose(tmp);
-	return len;
+	memorystream ms;
+	dump(&ms);
+	return ms.size();
 }
 
 

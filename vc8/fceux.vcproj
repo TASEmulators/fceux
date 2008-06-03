@@ -2156,6 +2156,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\utils\memorystream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\utils\unzip.cpp"
 				>
 			</File>
