@@ -219,6 +219,8 @@ void MovieData::dump(std::ostream *os)
 	*os << "resetFlag " << (resetFlag?1:0) << endl;
 	*os << "romFilename " << romFilename << endl;
 	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
+	*os << "guid " << guid.toString() << endl;
+		
 	if(savestate.size() != 0)
 		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
 	for(int i=0;i<(int)records.size();i++)
