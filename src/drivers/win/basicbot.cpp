@@ -36,6 +36,21 @@
 #include "basicbot.h"
 #include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode()
 
+// Cleanup: static function declarations moved here
+static void BotSyntaxError(int errorcode);
+static void StopBasicBot();
+static void StartBasicBot();
+static int debug(int n);
+static char * debugS(char * s);
+static int error(int n);
+static void FromGUI();
+static void UpdateStatics();
+static bool LoadBasicBotFile(char fn[]);
+static bool LoadBasicBot();
+static bool SaveBasicBotFile(char fn[]);
+static bool SaveBasicBot();
+static void PlayBest();
+
 // v0.1.0 will be the last release by Luke, mine will start at v0.2.0 and
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
@@ -2437,9 +2452,9 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			bool p1 = false; // if a input radiobutton is pressed, this tells me which one
 			switch(LOWORD(wParam))
 			{
-			case GUI_BOT_P1:
+			case GUI_BOT_INTERNAL:
 				p1 = true;
-			case GUI_BOT_P2:
+			case GUI_BOT_EXTERNAL:
 				// set the botmode
 				FCEU_SetBotMode(p1?0:1);
 				break;
@@ -2575,7 +2590,7 @@ void CreateBasicBot()
  */
 void InitCode()
 {
-	CheckDlgButton(hwndBasicBot, FCEU_BotMode() ? GUI_BOT_P2 : GUI_BOT_P1, 1); // select the player1 radiobutton
+	CheckDlgButton(hwndBasicBot, FCEU_BotMode() ? GUI_BOT_EXTERNAL : GUI_BOT_INTERNAL, 1); // select the player1 radiobutton
 	//if (LoadBasicBotFile("default.bot"))
 	if (false)
 	{
@@ -2615,13 +2630,13 @@ void UpdateExternalButton()
 	{
 		if (FCEU_BotMode())
 		{
-			CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 0);
-			CheckDlgButton(hwndBasicBot, GUI_BOT_P2, 1);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_INTERNAL, 0);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_EXTERNAL, 1);
 		}
 		else
 		{
-			CheckDlgButton(hwndBasicBot, GUI_BOT_P1, 1);
-			CheckDlgButton(hwndBasicBot, GUI_BOT_P2, 0);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_INTERNAL, 1);
+			CheckDlgButton(hwndBasicBot, GUI_BOT_EXTERNAL, 0);
 		}
 	}
 }
