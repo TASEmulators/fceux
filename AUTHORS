@@ -35,26 +35,44 @@ Rerecording support
 -----------------------------------------
 >= 2.0 - Incorporates new contributions from:
 
-CaH4e3 - CaH4e3 at mail dot ru
-Mappers
+(phase 1)
 
-Luke Gustafson - document thyself
-Windows TAS and movie recording enhancements
-
-SP - document thyself
+SP - document thyself (sf:rheiny)
 Enhanced Windows debugging tools
 
-zeromus - mgambrell at gmail dot com
-Core architecture refactoring
+zeromus - mgambrell at gmail dot com (sf:zeromus)
+Core architecture refactoring and merging
 Windows driver maintenance
 
-Lukas Sabota - punkrockguy318 at comcast.net 
+CaH4e3 - CaH4e3 at mail dot ru (sf: cah4e3)
+Mappers
+
+Luke Gustafson - document thyself (sf:???)
+Windows TAS and movie recording enhancements
+
+qfox - document thyself (sf:qfox)
+basicbot
+
+adelikat - document thyself (sf:adelikat)
+UI cleanup, project management, documentation
+
+_mz - document thyself (mauzus)
+Windows driver maintenance and cleanup
+
+nitsujrehtona - document thyself (sf:jeblanchard)
+mingw32 build and windows driver maintenance
+
+---------linux devvers---------
+>= 2.0 - These guys concentrated on keeping fceux the premiere 
+         linux-portable nes emu
+
+Lukas Sabota - punkrockguy318 at comcast.net (sf:punkrockguy318)
 Build system
 
-Soules - gimmedonutnow at gmail dot com
+Soules - gimmedonutnow at gmail dot com (sf:gimmedonutnow)
 Linux SDL driver maintenance
 
-radsaq - radsaq at gmail dot com
+radsaq - radsaq at gmail dot com (sf:radsaq)
 Build system, testing, and random cleanups
 
 -----------------------------------------

@@ -23,9 +23,9 @@ FCEU MM - CaH4e3\n\
 FCEU TAS - blip & nitsuja\n\
 FCEU TAS+ - Luke Gustafson\n\
 FCEUX\n\
- - rheiny, zeromus\n\
- - CaH4e3, Luke Gustafson, Sebastian Porst\n\
- - adelikat, _mz\n\
+ - SP, zeromus\n\
+ - CaH4e3, Luke Gustafson, qfox\n\
+ - adelikat, _mz, nitsujrehtona\n\
 \n\
 "__TIME__" "__DATE__"\n";
 
