@@ -1437,6 +1437,23 @@
 						</FileConfiguration>
 					</File>
 				</Filter>
+				<Filter
+					Name="help"
+					>
+					<File
+						RelativePath="..\src\drivers\win\help\fceux.chm"
+						>
+						<FileConfiguration
+							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCustomBuildTool"
+								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)"
+								Outputs="$(OutDir)\fceux.chm"
+							/>
+						</FileConfiguration>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
@@ -2251,19 +2268,6 @@
 		<File
 			RelativePath="..\src\fceu.cpp"
 			>
-		</File>
-		<File
-			RelativePath="..\src\drivers\win\help\fceux.chm"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)"
-					Outputs="$(OutDir)\fceux.chm"
-				/>
-			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\src\fds.cpp"
