@@ -1242,7 +1242,7 @@ std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
 		FCEUD_MakePathDirs(n);
 	}
 
-	std::ios_base::open_mode mode = std::ios_base::binary;
+	std::ios_base::openmode mode = std::ios_base::binary;
 	if(!strcmp(m,"r"))
 		mode |= std::ios_base::in;
 	else if(!strcmp(m,"w"))

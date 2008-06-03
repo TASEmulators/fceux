@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <stdexcept>
 
 template<typename T>
 class memory_streambuf: public std::streambuf {
@@ -154,7 +155,7 @@ private:
 	void expand(size_t upto)
 	{
 		if(!myBuf && !usevec)
-			throw new std::exception("memory_streambuf is not expandable");
+			throw new std::runtime_error("memory_streambuf is not expandable");
 
 		size_t newcapacity;
 		if(upto == -1)
