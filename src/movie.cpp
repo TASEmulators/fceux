@@ -386,7 +386,7 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf)
 {
 	//dump a savestate to a tempfile..
 	FILE* tmp = tmpfile();
-	FCEUSS_SaveFP(tmp); 
+	FCEUSS_SaveFP(tmp,-1); 
 
 	//reloading the savestate into the data structure
 	fseek(tmp,0,SEEK_END);

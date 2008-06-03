@@ -113,6 +113,12 @@ void FCEU_en32lsb(uint8 *buf, uint32 morp)
 	buf[3]=morp>>24;
 } 
 
+void FCEU_en16lsb(uint8* buf, uint16 morp)
+{
+	buf[0]=morp;
+	buf[1]=morp>>8;
+}
+
 ///unpacks a 64bit little endian value from the provided byte array into host byte order
 uint64 FCEU_de64lsb(uint8 *morp)
 {
@@ -130,4 +136,3 @@ uint16 FCEU_de16lsb(uint8 *morp)
 {
 	return morp[0]|(morp[1]<<8);
 }
-

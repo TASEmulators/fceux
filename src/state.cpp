@@ -368,9 +368,9 @@ static int ReadStateChunks(FILE *st, int32 totalsize)
 int CurrentState=1;
 extern int geniestage;
 
-bool FCEUSS_SaveFP(FILE *st)
+bool FCEUSS_SaveFP(FILE *st, int compressionLevel)
 {
-	//a temporary buffer. we're goign to put the savestate in here and then compress it
+	//a temporary buffer. we're going to put the savestate in here and then compress it
 	memorystream ms;
 	std::ostream* os = (std::ostream*)&ms;
 
@@ -409,9 +409,17 @@ bool FCEUSS_SaveFP(FILE *st)
 	//save the length of the file
 	int len = ms.size();
 
-	uint8* cbuf = new uint8[len*2]; //worst case compression, lets say twice the input buffer size
-	uLongf comprlen = len*2;
-	int error = compress2(cbuf,&comprlen,(uint8*)ms.buf(),len,Z_BEST_SPEED);
+	int error = Z_OK;
+	uint8* cbuf = (uint8*)ms.buf();
+	uLongf comprlen = -1;
+	//if(compressionLevel != Z_NO_COMPRESSION)
+	{
+		//worst case compression.
+		//zlib says "0.1% larger than sourceLen plus 12 bytes"
+		comprlen = (len>>9)+12 + len;
+		cbuf = new uint8[comprlen]; 
+		error = compress2(cbuf,&comprlen,(uint8*)ms.buf(),len,compressionLevel);
+	}
 
 	//dump the header
 	uint8 header[16]="FCSX";
@@ -420,10 +428,10 @@ bool FCEUSS_SaveFP(FILE *st)
 	FCEU_en32lsb(header+12, comprlen);
 
 	//dump it to the destination file
-	
 	fwrite(header,1,16,st);
 	fwrite(cbuf,1,comprlen,st);
 
+	if(cbuf != (uint8*)ms.buf()) delete[] cbuf;
 	return error == Z_OK;
 }
 
@@ -454,7 +462,7 @@ void FCEUSS_Save(char *fname)
 	 return;
 	}
 
-	FCEUSS_SaveFP(st);
+	FCEUSS_SaveFP(st,-1);
 
 	fclose(st);
 
@@ -465,35 +473,10 @@ void FCEUSS_Save(char *fname)
 	}
 }
 
-bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
+bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 {
 	if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
-		return 1;
-
-	////--------------
-	////read and decompress the savestate
-	//uint32 comprlen, datalen;
-	//if(!read32le(&datalen,st))
-	//	return false;
-	//if(!read32le(&comprlen,st))
-	//	return false;
-	//
-	//std::vector<uint8> cbuf(comprlen);
-	//std::vector<uint8> buf(datalen);
-	//if(fread(&cbuf[0],1,comprlen,st) != comprlen)
-	//	return false;
-
-	//uLongf uncomprlen = datalen;
-	//int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
-	//if(error != Z_OK || uncomprlen != datalen)
-	//	return false;
-
-	////dump savestate to a tempfile
-	//FILE* tmp = tmpfile();
-	//fwrite(&buf[0],0,datalen,tmp);
-	//fseek(tmp,0,SEEK_SET);
-	////-----------------
-
+		return true;
 
 	bool x;
 	uint8 header[16];
@@ -507,7 +490,125 @@ bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 		
 		if((fp=fopen(fn,"wb")))
 		{
-			if(FCEUSS_SaveFP(fp))
+			if(FCEUSS_SaveFP(fp,-1))
+			{
+				fclose(fp);
+			}
+			else
+			{
+				fclose(fp);
+				unlink(fn);
+				free(fn);
+				fn=0;
+			}
+		}
+	}
+
+	if(params!=SSLOADPARAM_DUMMY)
+		FCEUMOV_PreLoad();
+
+	//read and analyze the header
+	is->read((char*)&header,16);
+	if(memcmp(header,"FCSX",4))
+		return false;
+	int totalsize = FCEU_de32lsb(header + 4);
+	int stateversion = FCEU_de32lsb(header + 8);
+	int comprlen = FCEU_de32lsb(header + 12);
+
+	std::vector<uint8> buf(totalsize);
+
+	//not compressed:
+	if(comprlen != -1)
+	{
+		//load the compressed chunk and decompress
+		std::vector<uint8> cbuf(comprlen);
+		is->read((char*)&cbuf[0],comprlen);
+
+		uLongf uncomprlen = totalsize;
+		int error = uncompress(&buf[0],&uncomprlen,&cbuf[0],comprlen);
+		if(error != Z_OK || uncomprlen != totalsize)
+			return false;
+	}
+	else
+	{
+		is->read((char*)&buf[0],totalsize);
+	}
+
+	//dump it back to a tempfile
+	FILE* tmp = tmpfile();
+	fwrite(&buf[0],1,totalsize,tmp);
+	fseek(tmp,0,SEEK_SET);
+
+	if(params == SSLOADPARAM_DUMMY)
+	{
+		scan_chunks=1;
+	}
+	
+	x = ReadStateChunks(tmp,totalsize)!=0;
+	
+	if(params == SSLOADPARAM_DUMMY)
+	{
+		scan_chunks=0;
+		fclose(tmp);
+		return true;
+	}
+
+	//mbg 5/24/08 - we don't support old states, so this shouldnt matter.
+	//if(read_sfcpuc && stateversion<9500)
+	//	X.IRQlow=0;
+
+	if(GameStateRestore)
+	{
+		GameStateRestore(stateversion);
+	}
+	if(x)
+	{
+		FCEUPPU_LoadState(stateversion);
+		FCEUSND_LoadState(stateversion);  
+		x=FCEUMOV_PostLoad()!=0;
+	}
+
+	if(fn)
+	{
+		if(!x || params == SSLOADPARAM_DUMMY)  //is make_backup==2 possible??  oh well.
+		{
+			/* Oops!  Load the temporary savestate */
+			FILE *fp;
+				
+			if((fp=fopen(fn,"rb")))
+			{
+				FCEUSS_LoadFP(fp,SSLOADPARAM_NOBACKUP);
+				fclose(fp);
+			}
+			unlink(fn);
+		}
+		free(fn);
+	}
+
+	fclose(tmp);
+	return x;
+
+	return false;
+}
+
+bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
+{
+	if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
+		return true;
+
+	bool x;
+	uint8 header[16];
+	char* fn=0;
+
+	//Make temporary savestate in case something screws up during the load
+	if(params == SSLOADPARAM_BACKUP)
+	{
+		fn=FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
+		FILE *fp;
+		
+		if((fp=fopen(fn,"wb")))
+		{
+			if(FCEUSS_SaveFP(fp,-1))
 			{
 				fclose(fp);
 			}
@@ -773,7 +874,7 @@ void FCEUI_LoadState(char *fname)
 
 			if((fp = fopen(fn," wb")))
 			{
-				if(FCEUSS_SaveFP(fp))
+				if(FCEUSS_SaveFP(fp,-1))
 				{
 					fclose(fp);
 					FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);    

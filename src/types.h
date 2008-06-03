@@ -195,10 +195,13 @@ struct FCEU_Guid : public ValueArray<uint8,16>
 
 	void scan(std::string str)
 	{
-		//scanf sucks and tramples bytes. so we read to an oversize tempbuf and copy
-		char buf[20];
-		sscanf(str.c_str(),"%08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X",buf,buf+4,buf+6,buf+8,buf+10,buf+11,buf+12,buf+13,buf+14,buf+15);
-		*this = *(FCEU_Guid*)buf;
+		char* endptr = (char*)str.c_str();
+		FCEU_en32lsb(data,strtoul(endptr,&endptr,16));
+		FCEU_en16lsb(data+4,strtoul(endptr+1,&endptr,16));
+		FCEU_en16lsb(data+6,strtoul(endptr+1,&endptr,16));
+		FCEU_en16lsb(data+8,strtoul(endptr+1,&endptr,16));
+		for(int i=0;i<6;i++)
+			data[10+i] = strtoul(endptr+1,&endptr,16);
 	}
 };
 
