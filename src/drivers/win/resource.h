@@ -494,7 +494,8 @@
 #define MEMW_HELP_WCOMMANDS             40113
 #define MEMW_OPTIONS_LOADLASTFILE       40114
 #define ID_FILE_RECENT                  40117
-#define MENU_LOG_SOUND                  40120
+#define MENU_RECORD_WAV                 40120
+#define MENU_STOP_WAV                   40121
 #define MENU_TASEDIT                    40124
 #define MENU_PAUSEAFTERPLAYBACK         40126
 #define ACCEL_CTRL_O                    40130

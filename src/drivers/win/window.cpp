@@ -152,7 +152,8 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_STOP_MOVIE,
 		MENU_RECORD_AVI,
 		MENU_STOP_AVI,
-		MENU_LOG_SOUND,
+		MENU_RECORD_WAV,
+		MENU_STOP_WAV,
 		MENU_HIDE_MENU,
 		MENU_DEBUGGER,
 		MENU_PPUVIEWER,
@@ -1016,28 +1017,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_LoadStateFrom();
 				break;
 
-			case MENU_LOG_SOUND: //mbg merge 7/18/06 changed ID from 120
-				// (new-ish record sound / stop logging code:)
-				{
-					MENUITEMINFO mi;
-					if (loggingSound)
-					{
-						CloseWave();
-						loggingSound = false;
-					}
-					else loggingSound = CreateSoundSave();
+			//mbg merge 7/18/06 changed ID from 120
+			//jeb rewrite 6/3/08 (for UI consistency)
+			case MENU_RECORD_WAV: 
+				loggingSound = CreateSoundSave();
+				break;
 
-					memset(&mi,0,sizeof(mi));
-					mi.fMask=MIIM_DATA|MIIM_TYPE;
-					mi.cbSize=sizeof(mi);
-					GetMenuItemInfo(fceumenu,MENU_LOG_SOUND,0,&mi);                           
-					mi.fMask=MIIM_DATA|MIIM_TYPE;
-					mi.cbSize=sizeof(mi);
-					if (loggingSound) mi.dwTypeData = "Stop Sound Logging";
-					else mi.dwTypeData = "Log Sound As...";
-					mi.cch=strlen(mi.dwTypeData);
-					SetMenuItemInfo(fceumenu,MENU_LOG_SOUND,0,&mi);
-				}
+			case MENU_STOP_WAV: 
+				CloseWave();
+				loggingSound = false;
 				break;
 
 			case MENU_EXIT:
@@ -1169,6 +1157,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
     case WM_ENTERMENULOOP:
       EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEUI_IsMovieActive()?MF_ENABLED:MF_GRAYED));
       EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
+      EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
     default:
       proco:
       return DefWindowProc(hWnd,msg,wParam,lParam);

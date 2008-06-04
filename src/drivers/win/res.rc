@@ -54,7 +54,8 @@ BEGIN
         MENUITEM "Record AVI...",               MENU_RECORD_AVI
         MENUITEM "Stop AVI",                    MENU_STOP_AVI
         MENUITEM SEPARATOR
-        MENUITEM "Log &Sound As...",            MENU_LOG_SOUND
+        MENUITEM "Record WAV...",               MENU_RECORD_WAV
+        MENUITEM "Stop WAV",                    MENU_STOP_WAV
         MENUITEM SEPARATOR
         MENUITEM "E&xit     Alt+F4",            MENU_EXIT
     END
