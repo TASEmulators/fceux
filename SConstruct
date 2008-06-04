@@ -73,7 +73,9 @@ print "base CCFLAGS:",env['CCFLAGS']
 # Split into release and debug environments:
 #release_env = env.Clone(CCFLAGS = ['-O3', '-fomit-frame-pointer'], CPPDEFINES=["NDEBUG"])
 #debug_env = env.Clone(CCFLAGS = ['-O', '-g'], CPPDEFINES=["_DEBUG"])
-#
+# THAT FAILED! Compromise:
+env.Append(CCFLAGS = ['-O3', '-g'], CPPDEFINES = ["_DEBUG"])
+
 #SConscript('src/SConscript', build_dir='release', exports={'env':release_env})
 #SConscript('src/SConscript', build_dir='release', exports={'env':debug_env})
 Export('env')
