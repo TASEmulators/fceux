@@ -1048,7 +1048,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		static const int configurable_nes[6]= { 0, 1, 0, 1, 1, 0 };
 
-		static const int configurable_fam[14]= { 0,0,0,0, 1,1,0,0, 1,1,1,0, 0,0 };
+		static const int configurable_fam[14]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
 
 		const unsigned int FAMICOM_POSITION = 2;
 
@@ -1267,6 +1267,9 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 										break;
 									case SIFC_SUBORKB:
 										DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, 0x60);
+										break;
+									case SIFC_MAHJONG:
+										DoTBConfig(hwndDlg, text, "MAHJONGDIALOG", MahjongButtons, 21);
 										break;
 									case SIFC_QUIZKING:
 										DoTBConfig(hwndDlg, text, "QUIZKINGDIALOG", QuizKingButtons, 6);
