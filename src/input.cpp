@@ -640,6 +640,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_REPLAY_SLOT_8,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 8", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_9,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 9", },
 */
+	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING,			EMUCMDTYPE_MOVIE,	FCEUI_MoviePlayFromBeginning, 0, 0, "Play Movie From Beginning", },
 	{ EMUCMD_MOVIE_STOP,					EMUCMDTYPE_MOVIE,	FCEUI_StopMovie, 0, 0, "Stop Movie", },
 	{ EMUCMD_MOVIE_READONLY_TOGGLE,			EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleReadOnly, 0, 0, "Toggle Read-Only", },
 	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleFrameDisplay, 0, 0, "Movie Frame Display Toggle", },

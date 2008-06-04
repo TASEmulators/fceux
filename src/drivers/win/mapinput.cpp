@@ -81,6 +81,7 @@ static struct
 	//{ EMUCMD_MOVIE_SLOT_9, 				SCAN_9 | CMD_KEY_ALT, },
 	//{ EMUCMD_MOVIE_RECORD, 				SCAN_F5 | CMD_KEY_ALT, },
 	//{ EMUCMD_MOVIE_REPLAY, 				SCAN_F7 | CMD_KEY_ALT, },
+	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, 			SCAN_R | CMD_KEY_SHIFT },
 };
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))

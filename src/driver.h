@@ -211,6 +211,7 @@ typedef struct
 
 void FCEUI_SaveMovie(char *fname, uint8 flags);
 void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
+void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 int FCEUI_IsMovieActive(void);
 int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);

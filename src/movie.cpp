@@ -854,6 +854,18 @@ void FCEUI_MovieToggleReadOnly()
 	movie_readonly = !movie_readonly;
 }
 
+void FCEUI_MoviePlayFromBeginning(void)
+{
+	if (movieMode != MOVIEMODE_INACTIVE)
+	{
+		char *fname = strdup(curMovieFilename);
+		FCEUI_LoadMovie(fname, true, 0);
+		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.");
+		free(fname);
+	}
+}
+
+
 int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 {
 	memset(info,0,sizeof(MOVIE_INFO));
