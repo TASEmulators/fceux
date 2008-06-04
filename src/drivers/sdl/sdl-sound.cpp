@@ -102,11 +102,8 @@ InitSound(FCEUGI *gi)
 
     s_BufferSize = soundbufsize * soundrate / 1000;
 
-    // XXX soules - what is this??
-    /* SDL uses at least double-buffering, so multiply by 2. */
-    s_BufferSize -= spec.samples * 2;
-
-    if(s_BufferSize < spec.samples) s_BufferSize = spec.samples;
+    // For safety, set a bare minimum:
+    if (s_BufferSize < spec.samples * 2) s_BufferSize = spec.samples * 2;
 
     s_Buffer = (int *)malloc(sizeof(int) * s_BufferSize);
     s_BufferRead = s_BufferWrite = s_BufferIn = 0;

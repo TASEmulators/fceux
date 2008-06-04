@@ -52,6 +52,8 @@ int gametype = 0;
 char *DriverUsage=
 "--pal x	Use PAL timing.\n\
 --gamegenie x, -g x	Enable emulated Game Genie if x is nonzero.\n\
+--no8lim x       Disables the 8 sprites per scanline limitation, if x is nonzero.\n\
+--nothrottle x	Disable artificial speed throttling, if x is nonzero.\n\
 --frameskip x	Set # of frames to skip per emulated frame.\n\
 --(x/y)res x, -(x/y) x	Set horizontal/vertical resolution to x for full screen mode.\n\
 --(x/y)scale x	Multiply width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
@@ -60,17 +62,26 @@ char *DriverUsage=
 --opengl x	Enable OpenGL support if x is nonzero.\n\
 --doublebuf x	Enable SDL double-buffering if x is nonzero.\n\
 --fullscreen x, -f x	Select full screen mode if x is nonzero.\n\
---color x	?\n\
---hue x	?\n\
---tint x	?\n\
---palette p, -p p	?\n\
+--clipsides x	Clip left- and rightmost 8 columns of pixels if x is nonzero.\n\
+--slstart x	Set the first drawn emulated scanline.  Valid values for x are\n\
+	        0 through 239.\n\
+--slend x	Set the last drawn emulated scanline.  Valid values for x are\n\
+		0 through 239.\n\
+--color x	Emulate an NTSC TV's colors, if x is nonzero.\n\
+--hue x		Parameter for NTSC color emulation.\n\
+--tint x	Parameter for NTSC color emulation.\n\
+--palette s, -p s	Load a custom global palette from file s.\n\
 --sound x, -s x	Enable sound if x is nonzero.\n\
+--soundrate x	Set sound playback rate to x Hz.\n\
+--soundq x	Sets sound quality: 0 for low, 1 for high.\n\
+--soundbufsize x	Set sound buffer size to x ms.\n\
 --volume x	Set volume to x%.\n\
 --lowpass x	Enable low-pass filter if x is nonzero.\n\
 --soundrecord s	Record sound to file s.\n\
+--snapname x	Prepend the game's name to (numeric) snapshot filenames, if x is nonzero.\n\
 --inputcfg, -i	Configure input device(s) on startup.\n\
 --net s, -n s	Connect to server 's' for TCP/IP network play.\n\
---port x, -p x	Use TCP/IP port x for network play.\
+--port x, -p x	Use TCP/IP port x for network play.\n\
 --user s, -u s	Set the nickname to use in network play.\n\
 --pass s, -w s	Password to use for connecting to the server.\n\
 --netkey s, -k s	Use key 's' to create a unique session for the game loaded.\n\
@@ -79,6 +90,24 @@ char *DriverUsage=
 
 // global configuration object
 Config *g_config;
+
+static void ShowUsage(char *prog)
+{
+	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
+	puts("Options:");
+	puts(DriverUsage);
+// These options are basically not going to work...
+#if 0
+puts("\
+--inputx str	Select device mapped to virtual input port x(1-2).\n\
+		 str may be: none, gamepad, zapper, powerpada, powerpadb,\n\
+			     arkanoid\n\
+--fcexp str	Select Famicom expansion port device.\n\
+		 str may be: none, shadow, arkanoid, 4player, fkb\n\
+--nofs x		Disables Four-Score emulation if x is 1.\n\
+");
+#endif
+}
 
 /**
  * Prints an error string to STDOUT.
@@ -429,12 +458,14 @@ main(int argc,
     // initialize the infrastructure
     error = FCEUI_Initialize();
     if(error != 1) {
+        ShowUsage(argv[0]);
         SDL_Quit();
         return -1;
     }
 
     int romIndex = g_config->parse(argc, argv);
     if(romIndex <= 0) {
+        ShowUsage(argv[0]);
         FCEUD_Message("\nError parsing command line arguments\n");
         SDL_Quit();
         return -1;

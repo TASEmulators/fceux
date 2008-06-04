@@ -26,8 +26,6 @@
 #include <windows.h>
 #endif
 
-//#include "usage.h"
-
 /**
  * Read a custom pallete from a file and load it into the core.
  */
@@ -120,13 +118,13 @@ InitConfig()
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
     config->addOption("volume", "SDL.SoundVolume", 100);
-    config->addOption("SDL.SoundRate", 48000);
-    config->addOption("SDL.SoundQuality", 0);
+    config->addOption("soundrate", "SDL.SoundRate", 48000);
+    config->addOption("soundq", "SDL.SoundQuality", 0);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
 #ifdef WIN32
-    config->addOption("SDL.SoundBufSize", 52);
+    config->addOption("soundbufsize", "SDL.SoundBufSize", 52);
 #else
-    config->addOption("SDL.SoundBufSize", 24);
+    config->addOption("soundbufsize", "SDL.SoundBufSize", 24);
 #endif
 
     // old EOptions
@@ -134,10 +132,10 @@ InitConfig()
     config->addOption("lowpass", "SDL.LowPass", 0);
     config->addOption("pal", "SDL.PAL", 0);
     config->addOption("frameskip", "SDL.Frameskip", 0);
-    config->addOption("SDL.SnapName", 0);
-    config->addOption("SDL.ClipSides", 0);
-    config->addOption("SDL.NoThrottle", 0);
-    config->addOption("SDL.DisableSpriteLimit", 0);
+    config->addOption("snapname", "SDL.SnapName", 0);
+    config->addOption("clipsides", "SDL.ClipSides", 0);
+    config->addOption("nothrottle", "SDL.NoThrottle", 0);
+    config->addOption("no8lim", "SDL.DisableSpriteLimit", 0);
 
     // color control
     config->addOption('p', "palette", "SDL.Palette", "");
@@ -146,8 +144,8 @@ InitConfig()
     config->addOption("color", "SDL.Color", 0);
 
     // scanline settings
-    config->addOption("SDL.ScanLineStart", 0);
-    config->addOption("SDL.ScanLineEnd", 239);
+    config->addOption("slstart", "SDL.ScanLineStart", 0);
+    config->addOption("slend", "SDL.ScanLineEnd", 239);
 
     // video controls
     config->addOption('x', "xres", "SDL.XResolution", 512);
