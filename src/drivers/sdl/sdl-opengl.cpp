@@ -214,7 +214,7 @@ InitOpenGL(int l,
  if((efx&2) || !extensions || !p_glColorTableEXT || !strstr(extensions,"GL_EXT_paletted_texture"))
  {
   if(!(efx&2)) // Don't want to print out a warning message in this case...
-   FCEU_printf("Paletted texture extension not found.  Using slower texture format...");
+   FCEU_printf("Paletted texture extension not found.  Using slower texture format...\n");
   HiBuffer=malloc(4*256*256);
   memset(HiBuffer,0x00,4*256*256);
   #ifndef LSB_FIRST

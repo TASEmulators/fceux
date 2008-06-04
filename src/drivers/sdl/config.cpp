@@ -160,7 +160,7 @@ InitConfig()
 
     // OpenGL options
     config->addOption("opengl", "SDL.OpenGL", 0);
-    config->addOption("SDL.OpenGLip", 0);
+    config->addOption("openglip", "SDL.OpenGLip", 0);
     config->addOption("SDL.SpecialFilter", 0);
     config->addOption("SDL.SpecialFX", 0);
 
