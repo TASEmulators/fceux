@@ -85,24 +85,24 @@ void FCEU_KillVirtualVideo(void)
 int FCEU_InitVirtualVideo(void)
 {
 	if(!XBuf)		/* Some driver code may allocate XBuf externally. */
-					/* 256 bytes per scanline, * 240 scanline maximum, +8 for alignment,
+					/* 256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
 					*/
 
 #ifdef _USE_SHARED_MEMORY_
 
-	mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 8, "fceu.XBuf");
+	mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 16, "fceu.XBuf");
 	
 	if(mapXBuf == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(mapXBuf);
 		mapXBuf = NULL;
-		XBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
-		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
+		XBuf = (uint8*) (FCEU_malloc(256 * 256 + 16));
+		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 16));
 	}
 	else
 	{
 		XBuf = (uint8 *)MapViewOfFile(mapXBuf, FILE_MAP_WRITE, 0, 0, 0);
-		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 8));
+		XBackBuf = (uint8*) (FCEU_malloc(256 * 256 + 16));
 	}
 
 	if (!XBuf || !XBackBuf)
@@ -112,8 +112,8 @@ int FCEU_InitVirtualVideo(void)
 	
 #else
 
-	if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))) ||
-		!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 8))))
+	if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))) ||
+		!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))))
 	{
 		return 0;
 	}
@@ -124,8 +124,8 @@ int FCEU_InitVirtualVideo(void)
 
 	if( sizeof(uint8*) == 4 )
 	{
-		uint8 m = *XBuf;
-		m = ( 4 - m) & 3;
+		unsigned m = (unsigned)XBuf;
+		m = ( 8 - m) & 7;
 		XBuf+=m;
 	}
 	
