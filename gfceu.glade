@@ -376,6 +376,7 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
             <child>
               <widget class="GtkVBox" id="network_vbox">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="border_width">5</property>
                 <property name="spacing">5</property>
                 <child>
@@ -396,7 +397,6 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                 <child>
                   <widget class="GtkFrame" id="host_frame">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">GTK_SHADOW_NONE</property>
                     <child>
@@ -491,7 +491,6 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                 <child>
                   <widget class="GtkFrame" id="join_frame">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">GTK_SHADOW_NONE</property>
                     <child>
@@ -622,6 +621,7 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
             <child>
               <widget class="GtkLabel" id="label13">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="label" translatable="yes">Network</property>
               </widget>
               <packing>
