@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -325,7 +324,8 @@ BEGIN
     PUSHBUTTON      "A",310,195,138,16,12
     PUSHBUTTON      "Turbo B",319,154,122,32,12
     PUSHBUTTON      "Turbo A",318,195,122,32,12
-    CONTROL         "Disable four-score emulation.",CHECK_DISABLE_FOURSCORE,"Button",BS_AUTOCHECKBOX,9,193,106,12
+    CONTROL         "Disable four-score emulation.",CHECK_DISABLE_FOURSCORE,
+                    "Button",BS_AUTOCHECKBOX,9,193,106,12
 END
 
 GUICONFIG DIALOGEX 16, 123, 184, 90
@@ -598,7 +598,8 @@ BEGIN
     COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_FS,72,79,93,50,CBS_DROPDOWNLIST | WS_TABSTOP
     LTEXT           "Video Mode:",65451,20,62,42,10
     COMBOBOX        IDC_VIDEOCONFIG_MODE,72,59,93,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_FS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,103,145,12
+    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_FS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,103,145,12
     GROUPBOX        "Custom Video Mode",65450,177,18,186,97,WS_GROUP
     LTEXT           "Mode:",13,186,32,25,8
     EDITTEXT        IDC_VIDEOCONFIG_XRES,214,30,27,12,ES_RIGHT
@@ -622,11 +623,14 @@ BEGIN
     CTEXT           "Y:",65438,134,137,42,8
     EDITTEXT        IDC_WINSIZE_MUL_X,83,148,42,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_WINSIZE_MUL_Y,134,148,42,12,ES_AUTOHSCROLL
-    CONTROL         "Force integral scaling factors.",IDC_FORCE_INT_VIDEO_SCALARS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,164,145,12
-    CONTROL         "Force aspect ratio correction.",IDC_FORCE_ASPECT_CORRECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,179,145,12
+    CONTROL         "Force integral scaling factors.",IDC_FORCE_INT_VIDEO_SCALARS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,164,145,12
+    CONTROL         "Force aspect ratio correction.",IDC_FORCE_ASPECT_CORRECTION,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,179,145,12
     LTEXT           "Sync Method:",65437,20,215,51,8
     COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_WIN,83,213,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_WIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,230,145,12
+    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_WIN,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,230,145,12
     GROUPBOX        "Drawing Area",65494,196,127,178,86,WS_GROUP
     LTEXT           "First Line:",65436,218,153,39,8
     LTEXT           "Last Line:",65435,218,173,43,8
@@ -643,7 +647,8 @@ BEGIN
     EDITTEXT        IDC_VIDEOCONFIG_ASPECT_X,109,195,28,12,ES_AUTOHSCROLL
     CTEXT           ":",65431,139,197,8,8
     EDITTEXT        IDC_VIDEOCONFIG_ASPECT_Y,148,195,28,12,ES_AUTOHSCROLL
-    CONTROL         "Allow more than 8 sprites per scanline.",IDC_VIDEOCONFIG_NO8LIM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,230,157,11
+    CONTROL         "Allow more than 8 sprites per scanline.",IDC_VIDEOCONFIG_NO8LIM,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,230,157,11
     GROUPBOX        "Emulation",65430,196,216,178,32,WS_GROUP
     LTEXT           "(can someone please tell us what use this is?)",IDC_STATIC,227,203,144,8
 END
@@ -938,7 +943,8 @@ BEGIN
     LTEXT           "Scanline:",IDC_DEBUGGER_VAL_SLINE,435,183,50,10
     CONTROL         "",55535,"Static",SS_BLACKFRAME,5,6,10,289
     LTEXT           "",IDC_DEBUGGER_ADDR_LINE,5,296,538,10
-    CONTROL         "Break on Bad Opcode",IDC_DEBUGGER_BREAK_ON_BAD_OP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,437,118,90,10
+    CONTROL         "Break on Bad Opcode",IDC_DEBUGGER_BREAK_ON_BAD_OP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,437,118,90,10
     CONTROL         "Symbolic debugging",IDC_DEBUGGER_ENABLE_SYMBOLIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,347,200,79,10
     PUSHBUTTON      "Reload Symbols",IDC_DEBUGGER_RELOAD_SYMS,427,198,55,14
     GROUPBOX        "Bookmarks",45535,348,214,119,80
@@ -962,15 +968,19 @@ BEGIN
     PUSHBUTTON      "Start Logging",IDC_BTN_START_STOP_LOGGING,155,176,67,14,BS_CENTER | BS_VCENTER
     COMBOBOX        IDC_TRACER_LOG_SIZE,44,194,48,127,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Extra Log Options",109,3,234,384,35
-    CONTROL         "Log state of A, X and Y registers",IDC_CHECK_LOG_REGISTERS,"Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,9,246,120,10
-    CONTROL         "Log Processor Status Flags",IDC_CHECK_LOG_PROCESSOR_STATUS,"Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,133,246,103,10
+    CONTROL         "Log state of A, X and Y registers",IDC_CHECK_LOG_REGISTERS,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,9,246,120,10
+    CONTROL         "Log Processor Status Flags",IDC_CHECK_LOG_PROCESSOR_STATUS,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,133,246,103,10
     PUSHBUTTON      "Browse...",IDC_BTN_LOG_BROWSE,55,213,43,14,BS_CENTER | BS_VCENTER
     LTEXT           "",IDC_TRACER_STATS,123,216,153,14
-    CONTROL         "Only log newly mapped code",IDC_CHECK_LOG_NEW_INSTRUCTIONS,"Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,9,284,107,10
+    CONTROL         "Only log newly mapped code",IDC_CHECK_LOG_NEW_INSTRUCTIONS,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,9,284,107,10
     GROUPBOX        "Extra Log Options that work with the Code/Data Logger",113,3,272,383,40
     CONTROL         "Only log code that accesses newly mapped data",IDC_CHECK_LOG_NEW_DATA,
                     "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,9,297,169,10
-    CONTROL         "Automatically update Window While logging",IDC_CHECK_LOG_UPDATE_WINDOW,"Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,181,196,158,10
+    CONTROL         "Automatically update Window While logging",IDC_CHECK_LOG_UPDATE_WINDOW,
+                    "Button",BS_AUTOCHECKBOX | BS_LEFT | WS_TABSTOP,181,196,158,10
 END
 
 ADDBP DIALOGEX 66, 83, 185, 121
@@ -1012,16 +1022,20 @@ BEGIN
     LTEXT           "X / Y:",IDC_NTVIEW_PROPERTIES_LINE_2,238,355,75,8
     CONTROL         "Vertical",IDC_NTVIEW_MIRROR_VERTICAL,"Button",BS_AUTORADIOBUTTON,15,355,39,10
     CONTROL         "Four Screen",IDC_NTVIEW_MIRROR_FOUR_SCREEN,"Button",BS_AUTORADIOBUTTON,15,367,55,10
-    CONTROL         "Single Screen (Table 0)",IDC_NTVIEW_MIRROR_SS_TABLE_0,"Button",BS_AUTORADIOBUTTON,113,345,90,10
-    CONTROL         "Single Screen (Table 1)",IDC_NTVIEW_MIRROR_SS_TABLE_1,"Button",BS_AUTORADIOBUTTON,113,356,90,10
-    CONTROL         "Single Screen (Table 2)",IDC_NTVIEW_MIRROR_SS_TABLE_2,"Button",BS_AUTORADIOBUTTON,113,366,90,10
-    CONTROL         "Single Screen (Table 3)",IDC_NTVIEW_MIRROR_SS_TABLE_3,"Button",BS_AUTORADIOBUTTON,113,377,90,10
+    CONTROL         "Single Screen (Table 0)",IDC_NTVIEW_MIRROR_SS_TABLE_0,
+                    "Button",BS_AUTORADIOBUTTON,113,345,90,10
+    CONTROL         "Single Screen (Table 1)",IDC_NTVIEW_MIRROR_SS_TABLE_1,
+                    "Button",BS_AUTORADIOBUTTON,113,356,90,10
+    CONTROL         "Single Screen (Table 2)",IDC_NTVIEW_MIRROR_SS_TABLE_2,
+                    "Button",BS_AUTORADIOBUTTON,113,366,90,10
+    CONTROL         "Single Screen (Table 3)",IDC_NTVIEW_MIRROR_SS_TABLE_3,
+                    "Button",BS_AUTORADIOBUTTON,113,377,90,10
     GROUPBOX        "Current Mirroring",65532,7,332,214,58
     CONTROL         "Show Scroll Lines",IDC_NTVIEW_SHOW_SCROLL_LINES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,101,319,69,10
     CONTROL         "Horizontal",IDC_NTVIEW_MIRROR_HORIZONTAL,"Button",BS_AUTORADIOBUTTON,15,344,47,10
     GROUPBOX        "Properties",65531,227,336,122,60
     LTEXT           "PPU Address:",IDC_NTVIEW_PROPERTIES_LINE_3,237,363,75,8
-    LTEXT           "Mirror:",IDC_NTVIEW_PROPERTIES_LINE_4,237,372,75,8
+    LTEXT           "Mirror:",IDC_NTVIEW_PROPERTIES_LINE_3,237,372,75,8
 END
 
 ROMPATCHER DIALOGEX 84, 67, 304, 135
@@ -1188,6 +1202,32 @@ BEGIN
     PUSHBUTTON      "Hacky add 1000 frames",IDC_HACKY2,327,82,124,38
 END
 
+ASSEMBLER DIALOGEX 0, 0, 202, 135
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Inline Assembler"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        101,27,9,167,12,ES_READONLY
+    COMBOBOX        100,15,25,180,54,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Apply",201,159,114,36,14
+    LTEXT           "PC:",-1,15,10,12,10
+    LTEXT           "Patch:",-1,15,41,26,9
+    PUSHBUTTON      "Save...",202,117,114,36,14
+    PUSHBUTTON      "Undo",203,15,114,35,14
+    DEFPUSHBUTTON   "Def",300,55,116,16,12,NOT WS_VISIBLE
+    LISTBOX         102,15,50,180,59,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_DISABLENOSCROLL | LBS_NOSEL | WS_VSCROLL | WS_TABSTOP
+END
+
+NAMEBOOKMARKDLG DIALOGEX 0, 0, 186, 73
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Bookmark description..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Bookmark description",-1,58,14,70,8
+    EDITTEXT        1000,7,28,172,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "&OK",1001,67,52,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1283,6 +1323,22 @@ BEGIN
         RIGHTMARGIN, 463
         TOPMARGIN, 7
         BOTTOMMARGIN, 342
+    END
+
+    "ASSEMBLER", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 195
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    "NAMEBOOKMARKDLG", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 66
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -1544,8 +1600,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

@@ -81,13 +81,13 @@
 #define IDC_ADDBP_MEM_CPU               105
 #define IDC_ROMPATCHER_CURRENT_DATA     105
 #define IDC_NTVIEW_PROPERTIES_LINE_3    105
+#define IDC_NTVIEW_PROPERTIES_LINE_4    105
 #define BTN_PORT1                       106
 #define BTN_CDLOGGER_SAVE_AS            106
 #define IDC_CHEAT_LIST_POSSIBILITIES    106
 #define IDC_VIDEOCONFIG_CLIPSIDES       106
 #define IDC_DEBUGGER_STEP_OUT           106
 #define IDC_ADDBP_MEM_PPU               106
-#define IDC_NTVIEW_PROPERTIES_LINE_4    105
 #define BTN_PORT2                       107
 #define BTN_CDLOGGER_SAVE               107
 #define IDC_CHEAT_SCRL_POSSIBILITIES    107
@@ -184,9 +184,9 @@
 #define IDC_NETMOO_KEY                  205
 #define IDC_DEBUGGER_FLAG_I             205
 #define IDC_NETMOO_PASS                 206
-#define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define IDC_DEBUGGER_FLAG_Z             206
 #define IDC_DEBUGGER_FLAG_C             207
+#define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define BTN_NETMOO_CONNECT              250
 #define MENU_HIDE_MENU                  300
 #define CHECK_SCREENSHOT_NAMES          300
@@ -344,7 +344,6 @@
 #define MW_ADDR12                       1037
 #define GUI_BOT_SELECT_2                1038
 #define GUI_BOT_START_2                 1039
-#define GUI_BOT_EXTERNAL                      1040
 #define GUI_BOT_EXTERNAL                1040
 #define MW_ADDR13                       1040
 #define GUI_BOT_UP_2                    1041
@@ -515,7 +514,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        111
+#define _APS_NEXT_RESOURCE_VALUE        113
 #define _APS_NEXT_COMMAND_VALUE         40141
 #define _APS_NEXT_CONTROL_VALUE         1132
 #define _APS_NEXT_SYMED_VALUE           101
