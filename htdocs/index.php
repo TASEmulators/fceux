@@ -12,7 +12,7 @@
   </p>
   <p>
    It has been tested (and runs)
-   under DOS, Linux SVGAlib, Linux X, Mac OS X, and MS Windows.  A native GUI is provided for the MS Windows port, and the other ports use a command-line based interface.  However, GNOME users can optionally use <a href="http://gfceu.thepiratecove.org">the GNOME front-end</a>.  The SDL port
+   under DOS, Linux SVGAlib, Linux X, Mac OS X, and MS Windows.  A native GUI is provided for the MS Windows port, and the other ports use a command-line based interface.  However, GNOME users can optionally use <a href="http://dietschnitzel.com/gfceu/">the GNOME front-end</a>.  The SDL port
    should run on any modern UNIX-like operating system(such as FreeBSD) with
    no code changes.
   </p>
@@ -37,7 +37,7 @@ introduce yourself :-)
 
 <h3 class="boxsubhead">15 June 2006</h3>
 <p>
-I, <a href="mailto:punkrockguy318 _at _ comcast _dot_ net">Lukas Sabota</a> have
+I, <a href="mailto:ltsmooth42 _at _ gmail _dot_ com">Lukas Sabota</a> have
 been asked to join the FCE Ultra team.  I hope to improve this project by maintaining a graphical
 interface for FCE Ultra.  You can check out my existing work <a href="http://thepiratecove.org/gfceu/">here</a>.
 </p>
