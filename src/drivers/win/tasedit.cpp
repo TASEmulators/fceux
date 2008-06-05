@@ -20,7 +20,7 @@ static TSelectionFrames selectionFrames;
 
 //hacky.. we need to think about how to convey information from the driver to the movie code.
 //add a new fceud_ function?? blehhh maybe
-bool moviePleaseLogSavestates = false;
+extern EMOVIEMODE movieMode;
 
 static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -288,7 +288,7 @@ void KillTasEdit()
 {
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
-	moviePleaseLogSavestates = false;
+	FCEUMOV_ExitTasEdit();
 }
 
 static void Export()
@@ -438,7 +438,7 @@ void DoTasEdit()
 
 	if(hwndTasEdit)
 	{
-		moviePleaseLogSavestates = true;
+		FCEUMOV_EnterTasEdit();
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
 }

@@ -30,7 +30,8 @@
 #include "keyboard.h"
 #include "joystick.h"
 #include "gui.h"
-#include "../../fceu.h" //mbg merge 7/17/06 added
+#include "fceu.h"
+#include "movie.h"
 
 #include "keyscan.h"
 
@@ -213,13 +214,13 @@ int DTestButton(ButtConfig *bc)
 
 void UpdateGamepad()
 {
- if(FCEUI_IsMovieActive()<0)
+ if(FCEUMOV_Mode(MOVIEMODE_PLAY))
    return;
 
  uint32 JS=0;
  int x;
  int wg;
- if(FCEUI_IsMovieActive()>0)
+ if(FCEUMOV_Mode(MOVIEMODE_RECORD))
 	 AutoFire();
 
  for(wg=0;wg<4;wg++)

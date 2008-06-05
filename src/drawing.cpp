@@ -2,6 +2,7 @@
 #include "fceu.h"
 #include "drawing.h"
 #include "video.h"
+#include "movie.h"
 
 static uint8 Font6x5[594] =
 {
@@ -307,12 +308,12 @@ void FCEU_DrawRecordingStatus(uint8* XBuf)
 	if(FCEUD_ShowStatusIcon())
 	{
 		bool hasPlayRecIcon = false;	
-		if(FCEUI_IsMovieActive()>0)
+		if(FCEUMOV_Mode(MOVIEMODE_RECORD))
 		{
 			drawstatus(XBuf,2,28,0);
 			hasPlayRecIcon = true;
 		}
-		else if(FCEUI_IsMovieActive()<0)
+		else if(FCEUMOV_Mode(MOVIEMODE_PLAY))
 		{
 			drawstatus(XBuf,1,28,0);
 			hasPlayRecIcon = true;

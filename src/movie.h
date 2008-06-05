@@ -9,16 +9,30 @@
 void FCEUMOV_AddJoy(uint8 *, int SkipFlush);
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
-int FCEUMOV_IsPlaying(void);
-int FCEUMOV_IsRecording(void);
+
+enum EMOVIEMODE
+{
+	MOVIEMODE_INACTIVE = 1,
+	MOVIEMODE_RECORD = 2,
+	MOVIEMODE_PLAY = 4,
+	MOVIEMODE_TASEDIT = 8
+};
+
+EMOVIEMODE FCEUMOV_Mode();
+bool FCEUMOV_Mode(EMOVIEMODE modemask);
+bool FCEUMOV_Mode(int modemask);
+
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
 int FCEUMOV_WriteState(FILE* st);
 int FCEUMOV_WriteState(std::ostream* os);
 bool FCEUMOV_ReadState(FILE* st, uint32 size);
-void FCEUMOV_PreLoad(void);
-int FCEUMOV_PostLoad(void);
+void FCEUMOV_PreLoad();
+bool FCEUMOV_PostLoad();
+
+void FCEUMOV_EnterTasEdit();
+void FCEUMOV_ExitTasEdit();
 
 
 class MovieRecord

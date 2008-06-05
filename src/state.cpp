@@ -305,7 +305,7 @@ static int ReadStateChunks(FILE *st, int32 totalsize)
 		read_snd=1;
 	   break;
    case 6:
-	   if(FCEUI_IsMovieActive())
+	   if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
 	   {
 		   if(!ReadStateChunk(st,FCEUMOV_STATEINFO,size)) ret=0;
 	   }
@@ -393,14 +393,13 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
 	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
 	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
-	if(FCEUI_IsMovieActive())
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
 	{
 		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
 
 		//MBG tasedit HACK HACK HACK!
 		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
-		extern bool moviePleaseLogSavestates;
-		if(!moviePleaseLogSavestates)
+		if(!FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 		{
 			uint32 size = FCEUMOV_WriteState((std::ostream*)0);
 			os->put(7);
@@ -881,14 +880,18 @@ int FCEUI_SelectState(int w, int show)
 
 void FCEUI_SaveState(char *fname)
 {
- StateShow=0;
- FCEUSS_Save(fname);
+	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
+	
+	StateShow=0;
+	FCEUSS_Save(fname);
 }
 
 int loadStateFailed = 0; // hack, this function should return a value instead
 
 void FCEUI_LoadState(char *fname)
 {
+	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
+
 	StateShow = 0;
 	loadStateFailed = 0;
 

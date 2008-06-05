@@ -408,10 +408,10 @@ void FCEUI_AviEnd()
 	avi_destroy(&avi_file);
 }
 
-int FCEUI_AviIsRecording()
+bool FCEUI_AviIsRecording()
 {
 	if(avi_file)
-		return 1;
+		return true;
 
-	return 0;
+	return false;
 }

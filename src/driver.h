@@ -213,7 +213,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags);
 void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
-int FCEUI_IsMovieActive(void);
+//int FCEUI_IsMovieActive(void);
 int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
@@ -312,12 +312,12 @@ void FCEUD_OnCloseGame(void);
 void FCEUI_FrameAdvance(void);
 void FCEUI_FrameAdvanceEnd(void);
 
-/* AVI Output */
+//AVI Output
 int FCEUI_AviBegin(const char* fname);
 void FCEUI_AviEnd(void);
 void FCEUI_AviVideoUpdate(const unsigned char* buffer);
 void FCEUI_AviSoundUpdate(void* soundData, int soundLen);
-int FCEUI_AviIsRecording(void);
+bool FCEUI_AviIsRecording();
 
 void FCEUD_AviRecordTo(void);
 void FCEUD_AviStop(void);
@@ -328,7 +328,7 @@ typedef int TestCommandState(int cmd);
 void FCEUI_HandleEmuCommands(TestCommandState* testfn);
 
 
-/* Emulation speed */
+//Emulation speed
 enum EMUSPEED_SET
 {
 	EMUSPEED_SLOWEST=0,
@@ -364,6 +364,16 @@ void FCEUD_UpdatePPUView(int scanline, int drawall);
 
 ///I am dissatisfied with this method of getting an option from the driver to the core. but that is what we're using for now
 bool FCEUD_PauseAfterPlayback();
+
+enum EFCEUI
+{
+	FCEUI_STOPAVI, FCEUI_SAVESTATE, FCEUI_LOADSTATE,
+	FCEUI_STOPMOVIE, FCEUI_RECORDMOVIE, FCEUI_PLAYMOVIE
+};
+
+//checks whether an EFCEUI is valid right now
+bool FCEU_IsValidUI(EFCEUI ui);
+
 
 #ifdef __cplusplus
 extern "C" 

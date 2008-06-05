@@ -54,6 +54,7 @@
 #include "directories.h"
 #include "gui.h"
 #include "help.h"
+#include "movie.h"
 
 // Extern variables
 
@@ -71,7 +72,6 @@ void RestartMovieOrReset(unsigned int pow);
 int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
 void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
-int FCEUMOV_IsPlaying(void); //mbg merge 7/17/06 YECH had to add
 void DoPPUView();//mbg merge 7/19/06 yech had to add
 
 void MapInput(void);
@@ -141,15 +141,10 @@ void updateGameDependentMenus(unsigned int enable)
 {
 	const int menu_ids[]= {
 		MENU_CLOSE_FILE,
-		MENU_SAVE_STATE,
-		MENU_LOAD_STATE,
 		MENU_RESET,
 		MENU_POWER,
 		MENU_INSERT_COIN,
 		MENU_SWITCH_DISK,
-		MENU_RECORD_MOVIE,
-		MENU_REPLAY_MOVIE,
-		MENU_STOP_MOVIE,
 		MENU_RECORD_AVI,
 		MENU_STOP_AVI,
 		MENU_RECORD_WAV,
@@ -545,7 +540,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 
 void GetMouseData(uint32 *md)
 {
-	if(FCEUI_IsMovieActive() < 0)
+	if(FCEUMOV_Mode() == MOVIEMODE_PLAY)
 	{
 		return;
 	}
@@ -1155,9 +1150,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
        }
        goto proco;
     case WM_ENTERMENULOOP:
-      EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEUI_IsMovieActive()?MF_ENABLED:MF_GRAYED));
-      EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
-      EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_SAVE_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SAVESTATE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
     default:
       proco:
       return DefWindowProc(hWnd,msg,wParam,lParam);
@@ -1421,7 +1420,9 @@ void FCEUD_AviRecordTo(void)
 	OPENFILENAME ofn;
 	char szChoice[MAX_PATH];
 
-	if(FCEUMOV_IsPlaying())
+	//if we are playing a movie, construct the filename from the current movie.
+	//else construct it from the filename.
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
 	{
 		extern char curMovieFilename[];
 		strcpy(szChoice, curMovieFilename);

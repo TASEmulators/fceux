@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src"
 				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

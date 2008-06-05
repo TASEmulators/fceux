@@ -29,7 +29,6 @@ using namespace std;
 
 extern char FileBase[];
 extern int EmulationPaused;
-extern bool moviePleaseLogSavestates;
 
 using namespace std;
 
@@ -49,10 +48,7 @@ bool suppressMovieStop=false;
 
 //----movie engine main state
 
-static enum EMOVIEMODE
-{
-	MOVIEMODE_INACTIVE, MOVIEMODE_RECORD, MOVIEMODE_PLAY
-} movieMode = MOVIEMODE_INACTIVE;
+EMOVIEMODE movieMode = MOVIEMODE_INACTIVE;
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
 FILE* fpRecordingMovie = 0;
@@ -80,7 +76,7 @@ void MovieData::clearRecordRange(int start, int len)
 
 void MovieData::TryDumpIncremental()
 {
-	if(moviePleaseLogSavestates)
+	if(movieMode == MOVIEMODE_TASEDIT)
 	{
 		//only log the savestate if we are appending to the green zone
 		if(currFrameCounter == currMovieData.greenZoneCount)
@@ -270,14 +266,19 @@ bool FCEUMOV_ShouldPause(void)
 	}
 }
 
-int FCEUMOV_IsPlaying(void)
+EMOVIEMODE FCEUMOV_Mode()
 {
-	return movieMode == MOVIEMODE_PLAY;
+	return movieMode;
 }
 
-int FCEUMOV_IsRecording(void)
+bool FCEUMOV_Mode(EMOVIEMODE modemask)
 {
-	return movieMode == MOVIEMODE_RECORD;
+	return (movieMode&modemask)!=0;
+}
+
+bool FCEUMOV_Mode(int modemask)
+{
+	return FCEUMOV_Mode((EMOVIEMODE)modemask);
 }
 
 //yuck... another custom text parser.
@@ -400,9 +401,9 @@ void FCEUI_StopMovie()
 	curMovieFilename[0] = 0;
 }
 
-
 void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
 void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
+
 static void ResetInputTypes()
 {
 #ifdef WIN32
@@ -418,6 +419,69 @@ static void ResetInputTypes()
 
 	InitOtherInput();
 #endif
+}
+
+
+static void poweron(bool shouldDisableBatteryLoading)
+{
+	// make a for-movie-recording power-on clear the game's save data, too
+		extern char lastLoadedGameName [2048];
+		extern int disableBatteryLoading, suppressAddPowerCommand;
+		suppressAddPowerCommand=1;
+		if(shouldDisableBatteryLoading) disableBatteryLoading=1;
+		suppressMovieStop=true;
+		{
+			//we need to save the pause state through this process
+			int oldPaused = EmulationPaused;
+
+			// NOTE:  this will NOT write an FCEUNPCMD_POWER into the movie file
+			FCEUGI* gi = FCEUI_LoadGame(lastLoadedGameName, 0);
+			//mbg 5/23/08 - wtf? why would this return null?
+			//if(!gi) PowerNES();
+			assert(gi);
+
+			EmulationPaused = oldPaused;
+		}
+		suppressMovieStop=false;
+		if(shouldDisableBatteryLoading) disableBatteryLoading=0;
+		suppressAddPowerCommand=0;
+}
+
+
+
+void FCEUMOV_EnterTasEdit()
+{
+	//stop any current movie activity
+	FCEUI_StopMovie();
+
+	//clear the current movie
+	currFrameCounter = 0;
+	currMovieData = MovieData();
+	currMovieData.guid.newGuid();
+	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
+	currMovieData.poweronFlag = true;
+	currMovieData.romChecksum = GameInfo->MD5;
+	currMovieData.romFilename = FileBase;
+
+	//reset the rom
+	poweron(false);
+
+	//todo - think about this
+	ResetInputTypes();
+
+	//pause the emulator
+	FCEUI_SetEmulationPaused(1);
+
+	//and enter tasedit mode
+	movieMode = MOVIEMODE_TASEDIT;
+	FCEU_DispMessage("Tasedit engaged");
+}
+
+void FCEUMOV_ExitTasEdit()
+{
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessage("Tasedit disengaged");
+	currMovieData = MovieData();
 }
 
 bool MovieData::loadSavestateFrom(std::vector<char>* buf)
@@ -443,6 +507,9 @@ void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 //begin playing an existing movie
 void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 {
+	if(!FCEU_IsValidUI(FCEUI_PLAYMOVIE))
+		return;
+
 	assert(fname);
 
 	FCEUI_StopMovie();
@@ -458,23 +525,7 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	// fully reload the game to reinitialize everything before playing any movie
 	// to try fixing nondeterministic playback of some games
 	{
-		extern char lastLoadedGameName [2048];
-		extern int disableBatteryLoading, suppressAddPowerCommand;
-		suppressAddPowerCommand=1;
-		suppressMovieStop=true;
-		{
-			//we need to save the pause state through this process
-			int oldPaused = EmulationPaused;
-
-			FCEUGI * gi = FCEUI_LoadGame(lastLoadedGameName, 0);
-			//mbg 5/23/08 - wtf? why would this return null?
-			//if(!gi) PowerNES();
-			assert(gi);
-
-			EmulationPaused = oldPaused;
-		}
-		suppressMovieStop=false;
-		suppressAddPowerCommand=0;
+		poweron(false);
 	}
 
 	//todo - if reset flag is set, will the poweron flag be set?
@@ -526,9 +577,13 @@ static void openRecordingMovie(const char* fname)
 	strcpy(curMovieFilename, fname);
 }
 
+
 //begin recording a new movie
 void FCEUI_SaveMovie(char *fname, uint8 flags)
 {
+	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
+		return;
+
 	assert(fname);
 
 	FCEUI_StopMovie();
@@ -548,27 +603,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 
 	if(currMovieData.poweronFlag)
 	{
-		// make a for-movie-recording power-on clear the game's save data, too
-		extern char lastLoadedGameName [2048];
-		extern int disableBatteryLoading, suppressAddPowerCommand;
-		suppressAddPowerCommand=1;
-		disableBatteryLoading=1;
-		suppressMovieStop=true;
-		{
-			//we need to save the pause state through this process
-			int oldPaused = EmulationPaused;
-
-			// NOTE:  this will NOT write an FCEUNPCMD_POWER into the movie file
-			FCEUGI* gi = FCEUI_LoadGame(lastLoadedGameName, 0);
-			//mbg 5/23/08 - wtf? why would this return null?
-			//if(!gi) PowerNES();
-			assert(gi);
-
-			EmulationPaused = oldPaused;
-		}
-		suppressMovieStop=false;
-		disableBatteryLoading=0;
-		suppressAddPowerCommand=0;
+		poweron(true);
 	}
 	else
 	{
@@ -598,6 +633,11 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 {
+	//todo - for tasedit, either dump or load depending on whether input recording is enabled
+	//or something like that
+	//(input recording is just like standard read+write movie recording with input taken from gamepad)
+	//otherwise, it will come from the tasedit data.
+
 	if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
@@ -796,24 +836,23 @@ void FCEUMOV_PreLoad(void)
 	load_successful=0;
 }
 
-int FCEUMOV_PostLoad(void)
+bool FCEUMOV_PostLoad(void)
 {
-	if(!FCEUI_IsMovieActive())
-		return 1;
+	if(movieMode == MOVIEMODE_INACTIVE || movieMode == MOVIEMODE_TASEDIT)
+		return true;
 	else
-		//mbg tasedit hack!!!!!!!!!
-		return load_successful || moviePleaseLogSavestates;
+		return load_successful;
 }
 
-int FCEUI_IsMovieActive(void)
-{
-	//this is a lame method. we should change all the fceu code that uses it to call the 
-	//IsRecording or IsPlaying methods
-	//return > 0 for recording, < 0 for playback
-	if(FCEUMOV_IsRecording()) return 1;
-	else if(FCEUMOV_IsPlaying()) return -1;
-	else return 0;
-}
+//int FCEUI_IsMovieActive(void)
+//{
+//	//this is a lame method. we should change all the fceu code that uses it to call the 
+//	//IsRecording or IsPlaying methods
+//	//return > 0 for recording, < 0 for playback
+//	if(FCEUMOV_IsRecording()) return 1;
+//	else if(FCEUMOV_IsPlaying()) return -1;
+//	else return 0;
+//}
 
 void FCEUI_MovieToggleFrameDisplay(void)
 {

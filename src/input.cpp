@@ -249,7 +249,7 @@ void FCEU_UpdateBot()
 
 void FCEU_UpdateInput(void)
 {
-	if(!FCEUMOV_IsPlaying() && !BotMode)
+	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && !BotMode)
 	{
 		int x;
 
@@ -475,7 +475,7 @@ void FCEU_QSimpleCommand(int cmd)
  else
  {
   FCEU_DoSimpleCommand(cmd);
-  if(FCEUMOV_IsRecording())
+  if(FCEUMOV_Mode(MOVIEMODE_RECORD))
    FCEUMOV_AddCommand(cmd);
  }
 }

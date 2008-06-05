@@ -474,7 +474,7 @@ void AutoFire(void)
 	counter = (++counter) % (8*7*5*3);
 	//If recording a movie, use the frame # for the autofire so the offset
 	//doesn't get screwed up when loading.
-	if(FCEUMOV_IsPlaying() || FCEUMOV_IsRecording())
+	if(FCEUMOV_Mode(MOVIEMODE_RECORD | MOVIEMODE_PLAY))
 	{
 		rapidAlternator= AutoFirePattern[(AutoFireOffset + FCEUMOV_GetFrame())%AutoFirePatternLength];
 	}
@@ -567,19 +567,18 @@ void FCEUI_CloseGame(void)
 	CloseGame();
 }
 
-/**
-* @param do_power_off Power off (1) or reset (0)
-**/
+//resets or powers off the system, as specified
+//OR, if a movie is playing or recording, possibly reloads the movie according to funny rules.
 void RestartMovieOrReset(unsigned int do_power_off)
 {
 	extern bool movie_readonly;
 	extern char curMovieFilename[512];
 
-	if(FCEUMOV_IsPlaying() || FCEUMOV_IsRecording() && movie_readonly)
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY) || FCEUMOV_Mode(MOVIEMODE_RECORD) && movie_readonly)
 	{
 		FCEUI_LoadMovie(curMovieFilename, movie_readonly, 0);
 
-		if(FCEUI_IsMovieActive())
+		if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
 		{
 			return;
 		}
@@ -789,7 +788,8 @@ void FCEUI_ClearEmulationFrameStepped()
 
 //mbg merge 7/18/06 added
 //ideally maybe we shouldnt be using this, but i need it for quick merging
-void FCEUI_SetEmulationPaused(int val) {
+void FCEUI_SetEmulationPaused(int val)
+{
 	EmulationPaused = val;
 }
 
@@ -858,4 +858,26 @@ int FCEU_TextScanlineOffset(int y)
 int FCEU_TextScanlineOffsetFromBottom(int y)
 {
 	return (FSettings.LastSLine-y)*256;
+}
+
+bool FCEU_IsValidUI(EFCEUI ui)
+{
+	switch(ui)
+	{
+	case FCEUI_RECORDMOVIE:
+	case FCEUI_PLAYMOVIE:
+		if(!GameInfo) return false;
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
+		break;
+	case FCEUI_STOPMOVIE:
+		return FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD);
+	case FCEUI_STOPAVI:
+		return FCEUI_AviIsRecording();
+	case FCEUI_SAVESTATE:
+	case FCEUI_LOADSTATE:
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
+		if(!GameInfo) return false;
+		break;
+	}
+	return true;
 }
