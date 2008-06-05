@@ -489,7 +489,6 @@ optionsfile = appconfigdir + 'gfceu_options.dat'
 fceu_binary = None
 aoss_binary = None
 fceu_server_binary = None
-glade_file = None
 #version is defined earlier in the code
 #have_vfs is defined earlier in the code
 
@@ -497,16 +496,16 @@ class WidgetsWrapper:
   def __init__(self):
     # Search for the glade file
     # Check first in the directory of this script.
-    if os.path.isfile(os.path.dirname(sys.argv[0])+'gfceu.glade'):
-      glade_file = os.path.dirname(sys.argv[0]) + 'gfceu.glade'
-    # Then check in the share directory (installed)
-    elif os.path.isfile(os.path.dirname(sys.argv[0]) +\
-    '../share/gfceu/gfceu.glade'):
-      glade_file = os.path.dirname(sys.argv[0])+'../share/gfceu/gfceu.glade'
+    if os.path.isfile('gfceu.glade'):
+      glade_file = 'gfceu.glade'
+    # Then check to see if its installed on a *nix system
+    elif os.path.isfile(os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')):
+      glade_file = os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')
     else:
       print 'ERROR.'
       print 'Could not find the glade interface file.'
       print 'Try reinstalling the application.'
+      sys.exit(1)
     
     self.widgets = gtk.glade.XML(glade_file)
     self.widgets.signal_autoconnect(GladeHandlers.__dict__)
