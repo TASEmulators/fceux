@@ -225,26 +225,26 @@ def set_options():
 
   
 def launch(passed, local=False):
-  global xml, options, fceu_server_binary, fceu_binary, aoss_binary
+  global xml, options, fceu_server_binary, fceu_binary
   set_options()
   
   if options.sound_check:
-    sound = '-sound 1 '
+    sound = '--sound 1 '
   else:
-    sound = '-sound 0 '
+    sound = '--sound 0 '
     
   if options.fullscreen_check:
-    fullscreen = '-fs 1 '
+    fullscreen = '--fullscreen 1 '
   else:
-    fullscreen = '-fs 0 '
+    fullscreen = '--fullscreen 0 '
     
   if options.join_radio:
     if options.join_pass == '':
       netpass = ''
     else:
-      netpass = '-netpassword ' + '"' + options.join_pass + '" '
-    network = '-connect "' + options.join_add + '"'\
-    ' -netport '+ str(options.join_port) + ' ' + netpass
+      netpass = '--pass ' + '"' + options.join_pass + '" '
+    network = '-net "' + options.join_add + '"'\
+    ' --port '+ str(options.join_port) + ' ' + netpass
   else:
     network = ''
   
@@ -252,8 +252,8 @@ def launch(passed, local=False):
     if options.host_pass == '':
       netpass = ' '
     else:
-      netpass = ' -netpassword ' + '"' + options.host_pass + '" '
-    network = '-connect localhost -netport '+\
+      netpass = ' --pass ' + '"' + options.host_pass + '" '
+    network = '--net localhost --port '+\
     str(options.host_port) + netpass + ' '
       
     
@@ -261,11 +261,11 @@ def launch(passed, local=False):
     network = ''
   
   if options.opengl_check:
-    opengl = '-opengl 1 '
+    opengl = '--opengl 1 '
   else:
-    opengl = '-opengl 0 '
+    opengl = '--opengl 0 '
   
-  command =  aoss_binary + ' ' + fceu_binary +' '+ sound + fullscreen +\
+  command =  fceu_binary +' '+ sound + fullscreen +\
   network + opengl + options.extra_entry + ' '+ passed
   gfceu_message('Command: ' + command)
 
@@ -297,7 +297,8 @@ def launch(passed, local=False):
     os.kill(pid, 9)
   widgets['main_window'].show()
 
-def find_binary(this_binary):
+def find_binary(file):
+  
   path = os.getenv('PATH')
   directories= []
   directory = ''
@@ -310,12 +311,12 @@ def find_binary(this_binary):
       directory = ''
 
   for x in directories:
-    if os.path.isfile(os.path.join(x, this_binary)):
-      return os.path.join(x,this_binary)
+    if os.path.isfile(os.path.join(x, file)):
+      return os.path.join(x,file)
 
-  if os.path.isfile(os.path.join(os.curdir,this_binary)):
-    return os.path.join(os.curdir, this_binary)
-        
+  if os.path.isfile(os.path.join(os.curdir,file)):
+    return os.path.join(os.curdir, file)
+
   return None
   
   # # # # # # # #
@@ -487,7 +488,6 @@ appconfigdir = os.getenv('HOME') + '/.gfceu'
 old_optionsfile = os.getenv('HOME')+'/.gfceu_options'
 optionsfile = appconfigdir + 'gfceu_options.dat'
 fceu_binary = None
-aoss_binary = None
 fceu_server_binary = None
 #version is defined earlier in the code
 #have_vfs is defined earlier in the code
@@ -521,7 +521,7 @@ if __name__ == '__main__':
   parser = OptionParser(version='%prog '+ version)
   parser.parse_args()
   
-  fceu_binary = find_binary('fceu')
+  fceu_binary = find_binary('fceux')
   if fceu_binary == None:
     gfceu_error('Could not find the fceu binary.\n\
     Ensure that FCE Ultra is installed and in the $PATH.\n\
@@ -529,13 +529,7 @@ if __name__ == '__main__':
     sudo apt-get install fceu', 4, True)
   else:
     gfceu_message('Using: '+fceu_binary)
-  aoss_binary = find_binary('aoss')
-  if aoss_binary == None:
-    gfceu_error('Could not find the the ALSA OSS wrapper.\n\
-    GFCEU will not be able to share the sound device with other applications.\n\
-    On Debian based systems (like Ubuntu), try the following command:\n\
-    sudo apt-get install alsa-oss', 76, True, False)
-
+  
   widgets = WidgetsWrapper()
   widgets['main_window'].show_all()
   setup_environment()
