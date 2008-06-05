@@ -171,8 +171,6 @@ CloseStuff(int signum)
 #endif
 
 
-#include "usage.h"
-
 /**
  * Loads a game, given a full path/filename.  The driver code must be
  * initialized after the game is loaded, because the emulator code
