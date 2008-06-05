@@ -119,7 +119,7 @@ InitConfig()
     config->addOption('s', "sound", "SDL.Sound", 1);
     config->addOption("volume", "SDL.SoundVolume", 100);
     config->addOption("soundrate", "SDL.SoundRate", 48000);
-    config->addOption("soundq", "SDL.SoundQuality", 0);
+    config->addOption("soundq", "SDL.SoundQuality", 1);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
 #ifdef WIN32
     config->addOption("soundbufsize", "SDL.SoundBufSize", 52);
