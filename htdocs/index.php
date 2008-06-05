@@ -39,7 +39,7 @@ introduce yourself :-)
 <p>
 I, <a href="mailto:ltsmooth42 _at _ gmail _dot_ com">Lukas Sabota</a> have
 been asked to join the FCE Ultra team.  I hope to improve this project by maintaining a graphical
-interface for FCE Ultra.  You can check out my existing work <a href="http://thepiratecove.org/gfceu/">here</a>.
+interface for FCE Ultra.  You can check out my existing work <a href="http://dietschnitzel.com/gfceu">here</a>.
 </p>
 
 
