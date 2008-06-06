@@ -538,7 +538,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 	}
 }
 
-void GetMouseData(uint32 *md)
+void GetMouseData(uint32 (&md)[3])
 {
 	if(FCEUMOV_Mode() == MOVIEMODE_PLAY)
 	{

@@ -324,7 +324,7 @@ void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 			*drv++ = *path++;
 			*drv++ = *path++;
 			*drv = '\0';
-		}
+		} else path+=2;
 	} else if (drv)
 		*drv = '\0';
 
@@ -342,6 +342,8 @@ void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 	if (ext)
 		for(s=end; (*ext=*s++); )
 			ext++;
+	else
+		for(s=end; *s++; )
 
 	/* search for end of directory name */
 	for(p=end; p>path; )
@@ -355,7 +357,9 @@ void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 			*name++ = *s++;
 
 		*name = '\0';
-	}
+	} else
+		for(s=p; s<end; )
+			*s++;
 
 	if (dir) {
 		for(s=path; s<p; )

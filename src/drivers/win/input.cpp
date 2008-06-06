@@ -32,6 +32,7 @@
 #include "gui.h"
 #include "fceu.h"
 #include "movie.h"
+#include "window.h"
 
 #include "keyscan.h"
 
@@ -336,7 +337,6 @@ static uint8 fkbkeys[0x48];
 static uint8 suborkbkeys[0x60];
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
-void GetMouseData(uint32 *md); //mbg merge 7/17/06 yech had to add this
 
 void FCEUD_UpdateInput()
 {

@@ -28,5 +28,6 @@ void LoadNewGamey(HWND hParent, const char *initialdir);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void UpdateCheckedMenuItems();
 void SetMainWindowStuff();
+void GetMouseData(uint32 (&md)[3]);
 
 #endif

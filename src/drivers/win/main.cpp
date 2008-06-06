@@ -502,11 +502,6 @@ void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 		*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
 	}
 
-	// Give RAM pointer to state structure
-	//mbg 7/28/06 - wtf?
-	extern SFORMAT SFCPU[];
-	SFCPU[6].v = *RAM;
-
 	//Bot input
 	// qfox: tossed mapping alltogether
 	//mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES*sizeof(int), "fceu.BotInput");

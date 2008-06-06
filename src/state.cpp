@@ -36,6 +36,7 @@
 #include "utils/endian.h"
 #include "utils/memory.h"
 #include "utils/memorystream.h"
+#include "utils/xstring.h"
 #include "file.h"
 #include "fds.h"
 #include "state.h"
@@ -72,11 +73,7 @@ SFORMAT SFCPU[]={
  { &X.X, 1, "X\0\0"},
  { &X.Y, 1, "Y\0\0"},
  { &X.S, 1, "S\0\0"},
-#ifdef _USE_SHARED_MEMORY_
- { NULL, 0x800, "RAM"}, //will be initialized later after getting a pointer to RAM
-#else
- { RAM, 0x800, "RAM"},
-#endif
+ { &RAM, 0x800 | FCEUSTATE_INDIRECT, "RAM", },
  { 0 }
 };
 
@@ -96,7 +93,7 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 
  while(sf->v)
  {
-  if(sf->s==~0)		/* Link to another struct.	*/
+  if(sf->s==~0)		//Link to another struct
   {
    uint32 tmp;
 
@@ -107,24 +104,28 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
    continue;
   }
 
-  acc+=8;			/* Description + size */
-  acc+=sf->s&(~RLSB);
+  acc+=8;			//Description + size
+  acc+=sf->s&(~FCEUSTATE_FLAGS);
 
-  if(os)			/* Are we writing or calculating the size of this block? */
+  if(os)			//Are we writing or calculating the size of this block?
   {
 	  os->write(sf->desc,4);
-   write32le(sf->s&(~RLSB),os);
+   write32le(sf->s&(~FCEUSTATE_FLAGS),os);
 
    #ifndef LSB_FIRST
    if(sf->s&RLSB)
-    FlipByteOrder(sf->v,sf->s&(~RLSB));
+    FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
    #endif
  
-	os->write((char*)sf->v,sf->s&(~RLSB));
-   /* Now restore the original byte order. */
+   if(sf->s&FCEUSTATE_INDIRECT)
+	   os->write(*(char **)sf->v,sf->s&(~FCEUSTATE_FLAGS));
+   else
+	os->write((char*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
+
+   //Now restore the original byte order.
    #ifndef LSB_FIRST
    if(sf->s&RLSB)   
-    FlipByteOrder(sf->v,sf->s&(~RLSB));
+    FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
    #endif
   }
   sf++; 
@@ -139,7 +140,7 @@ static int SubWrite(FILE *st, SFORMAT *sf)
 
  while(sf->v)
  {
-  if(sf->s==~0)		/* Link to another struct.	*/
+  if(sf->s==~0)		//Link to another struct
   {
    uint32 tmp;
 
@@ -150,24 +151,24 @@ static int SubWrite(FILE *st, SFORMAT *sf)
    continue;
   }
 
-  acc+=8;			/* Description + size */
-  acc+=sf->s&(~RLSB);
+  acc+=8;			//Description + size
+  acc+=sf->s&(~FCEUSTATE_FLAGS);
 
-  if(st)			/* Are we writing or calculating the size of this block? */
+  if(st)			// Are we writing or calculating the size of this block?
   {
    fwrite(sf->desc,1,4,st);
-   write32le(sf->s&(~RLSB),st);
+   write32le(sf->s&(~FCEUSTATE_FLAGS),st);
 
    #ifndef LSB_FIRST
    if(sf->s&RLSB)
-    FlipByteOrder(sf->v,sf->s&(~RLSB));
+    FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
    #endif
  
-   fwrite((uint8 *)sf->v,1,sf->s&(~RLSB),st);
-   /* Now restore the original byte order. */
+   fwrite((uint8 *)sf->v,1,sf->s&(~FCEUSTATE_FLAGS),st);
+   //Now restore the original byte order.
    #ifndef LSB_FIRST
    if(sf->s&RLSB)   
-    FlipByteOrder(sf->v,sf->s&(~RLSB));
+    FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
    #endif
   }
   sf++; 
@@ -219,7 +220,7 @@ static SFORMAT *CheckS(SFORMAT *sf, uint32 tsize, char *desc)
   }
   if(!memcmp(desc,sf->desc,4))
   {
-   if(tsize!=(sf->s&(~RLSB)))
+   if(tsize!=(sf->s&(~FCEUSTATE_FLAGS)))
     return(0);
    return(sf);
   }
@@ -251,11 +252,14 @@ static int ReadStateChunk(FILE *st, SFORMAT *sf, int size)
 
   if((tmp=CheckS(sf,tsize,toa)))
   {
-   fread((uint8 *)tmp->v,1,tmp->s&(~RLSB),st);
+	  if(tmp->s&FCEUSTATE_INDIRECT)
+		  fread(*(uint8 **)tmp->v,1,tmp->s&(~FCEUSTATE_FLAGS),st);
+	  else
+		fread((uint8 *)tmp->v,1,tmp->s&(~FCEUSTATE_FLAGS),st);
 
    #ifndef LSB_FIRST
    if(tmp->s&RLSB)
-    FlipByteOrder(tmp->v,tmp->s&(~RLSB));
+    FlipByteOrder(tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
    #endif
   }
   else
@@ -485,7 +489,7 @@ void FCEUSS_Save(char *fname)
 	 return;
 	}
 
-	FCEUSS_SaveFP(st,-1);
+	FCEUSS_SaveFP(st,0);
 
 	fclose(st);
 
@@ -770,7 +774,13 @@ int FCEUSS_Load(char *fname)
 	//states are being loaded.
 	if(FCEUSS_LoadFP(st,FCEU_BotMode()?SSLOADPARAM_NOBACKUP:SSLOADPARAM_BACKUP))
 	{
-		if(!fname)
+		if(fname)
+		{
+			char szFilename[260]={0};
+			splitpath(fname, 0, 0, szFilename, 0);
+			FCEU_DispMessage("State %s loaded.",szFilename);
+		}
+		else
 		{
 			//This looks redudant to me... but why bother deleting it:)
 			SaveStateStatus[CurrentState]=1;
