@@ -489,7 +489,7 @@ void FCEUSS_Save(char *fname)
 	 return;
 	}
 
-	FCEUSS_SaveFP(st,0);
+	FCEUSS_SaveFP(st,-1);
 
 	fclose(st);
 
