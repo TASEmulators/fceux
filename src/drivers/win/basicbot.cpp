@@ -79,7 +79,8 @@ static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
 char * Formula[BOT_FORMULAS];					// These hold BOT_FORMULAS formula's entered in the GUI:
 int * Bytecode[BOT_FORMULAS];					// Byte code converted formulas
 static int ByteCodeField;						// Working field
-static int  CODE_1_A        = 0,				// Code fields
+enum {
+			CODE_1_A        = 0,				// Code fields
 			CODE_1_B        = 1,
 			CODE_1_SELECT   = 2,
 			CODE_1_START    = 3,
@@ -132,8 +133,9 @@ static int  CODE_1_A        = 0,				// Code fields
 			CODE_TITLE6		= 43,
 			CODE_ROMNAME	= 44,
 			CODE_SKIPS		= 45,
-			CODE_SLOW		= 46;
+			CODE_SLOW		= 46
 			// BOT_FORMULAS needs to be CODE_SLOW+1 !
+};
 
 // array contains GUI id's for certain pieces of code
 // these are in sync with the CODE_ ints above
@@ -291,7 +293,7 @@ static uint32 CurrentAttempt[BOT_MAXFRAMES];		// Contains all the frames of the 
 static uint32 BestAttempt[BOT_MAXFRAMES]; 			// Contains all the frames of the best attempt so far.
 static uint32 AttemptPointer;			// Points to the last frame of the current attempt.
 
-static bool ProcessCode = true;			// This boolean tells the code whether or not to process
+//static bool ProcessCode = true;			// This boolean tells the code whether or not to process
 										//	some code. This is mainly used in branching (iif's)
 										//	to skip over the part of the code that is not to be
 										//	executed. It still needs to be parsed because the
@@ -379,10 +381,6 @@ lastPart * NewPart(int part, int attempt,
 		(*l).counters[i] = BotCounter[i];
 
 	return l;
-}
-static void mbox(char * txt)
-{
-	MessageBox(hwndBasicBot, txt, "Debug", MB_OK);
 }
 static void SeedRandom(uint32 seed)
 {
@@ -585,9 +583,9 @@ static int * ToByteCode(char * formula, int codefield)
 	int qmarkstack[100];
 	int colonstack[100];
 	// stack-counters
-	int qpoint=-1,cpoint=-1,lpoint=-1;
+	int qpoint=-1,cpoint=-1;
 
-	int pointerStart = (int)GlobalCurrentChar;
+	char * pointerStart = GlobalCurrentChar;
 
 	while(*GlobalCurrentChar != 0 && !EvaluateError)
 	{
@@ -1160,7 +1158,7 @@ static int * ToByteCode(char * formula, int codefield)
 				GlobalCurrentChar += (*(GlobalCurrentChar+1) == 'c') ? 3 : 11;
 				bytes[pointer++] = BOT_BYTE_SC;
 			}
-			// qfox: Added stop command. Should do exactly the same as pressing the "stop" button.\
+			// qfox: Added stop command. Should do exactly the same as pressing the "stop" button.
 			//	 But probably won't yet :)
 			else if(*(GlobalCurrentChar+1) == 't'
 				&&*(GlobalCurrentChar+2) == 'o'
@@ -1333,7 +1331,7 @@ static int * ToByteCode(char * formula, int codefield)
 		default:
 			// Unknown characters should error out. You can use spaces.
 			BotSyntaxError(12001);
-			sprintf(errormsg,"[%d][%d] Unknown character... '%c'",codefield,GlobalCurrentChar-pointerStart,(*GlobalCurrentChar));
+			sprintf(errormsg,"[%d][%d] Unknown character... '%c'",codefield,int(GlobalCurrentChar-pointerStart),(*GlobalCurrentChar));
 			debugS(errormsg);
 			delete bytes;
 			return NULL;

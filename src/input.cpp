@@ -543,7 +543,7 @@ static void CommandStateLoad(void);
 static void CommandStateSave(void);
 static void CommandSelectSaveSlot(void);
 static void CommandEmulationSpeed(void);
-static void CommandMovieSelectSlot(void);
+// static void CommandMovieSelectSlot(void);
 static void CommandMovieRecord(void);
 static void CommandMovieReplay(void);
 static void CommandSoundAdjust(void);

@@ -88,8 +88,8 @@ public:
 	MovieData();
 	
 
-	int emuVersion;
 	int version;
+	int emuVersion;
 	//todo - somehow force mutual exclusion for poweron and reset (with an error in the parser)
 	bool palFlag;
 	bool poweronFlag;

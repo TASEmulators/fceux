@@ -131,8 +131,6 @@ int checkCondition(const char* condition, int num)
 **/
 unsigned int NewBreak(const char* name, int start, int end, unsigned int type, const char* condition, unsigned int num, bool enable)
 {
-	unsigned int brk=0;
-
 	// Finally add breakpoint to the list
 	watchpoint[num].address = start;
 	watchpoint[num].endaddress = 0;

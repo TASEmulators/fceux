@@ -79,10 +79,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 {
  if(specfilt == 2 || specfilt == 4) // scale2x and scale3x
  {
-  int multi;
-
-  if(specfilt == 2) multi = 2 * 2;
-  else if(specfilt == 4) multi = 3 * 3;
+  int multi = ((specfilt == 2) ? 2 * 2 : 3 * 3);
 
   specbuf8bpp = (uint8*)malloc(256*240*multi); //mbg merge 7/17/06 added cast
 

@@ -630,7 +630,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
                   int h=wrect->bottom-wrect->top;
                   int w=wrect->right-wrect->left;
-                  int how;
+                  int how = 0;
 
                   if(wParam == WMSZ_BOTTOM || wParam == WMSZ_TOP)
                    how = 2;

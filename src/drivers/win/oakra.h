@@ -103,14 +103,12 @@ public:
 	}
 
 	static int generateSilence(int samples, void *buf, int sampleSize) {
-		char *cbuf = (char *)buf;
 		int n = sampleSize*samples;
 		memset(buf,0,n);
 		return samples;
 	}
 
 	static int generateSilence(int samples, void *buf, OAKRA_Format &format) {
-		char *cbuf = (char *)buf;
 		int n = format.size*samples;
 		memset(buf,0,n);
 		return samples;
