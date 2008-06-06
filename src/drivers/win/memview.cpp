@@ -39,6 +39,19 @@
 #define MODE_NES_PPU      1
 #define MODE_NES_FILE     2
 
+#define ID_ADDRESS_FRZ_SUBMENU          1
+#define ID_ADDRESS_ADDBP_R              2
+#define ID_ADDRESS_ADDBP_W              3
+#define ID_ADDRESS_ADDBP_X              4
+#define ID_ADDRESS_SEEK_IN_ROM          5
+#define ID_ADDRESS_CREATE_GG_CODE       6
+#define ID_ADDRESS_BOOKMARK             20
+
+#define ID_ADDRESS_FRZ_TOGGLE_STATE     1
+#define ID_ADDRESS_FRZ_FREEZE           50
+#define ID_ADDRESS_FRZ_UNFREEZE         51
+#define ID_ADDRESS_FRZ_SEP              52
+#define ID_ADDRESS_FRZ_UNFREEZE_ALL     53
 
 // This defines all of our right click popup menus
 struct
@@ -51,18 +64,18 @@ struct
 }
 popupmenu[] =
 {
-	{0,0x2000,0,1,"Freeze/Unfreeze This Address"},
-	{0x6000,0x7FFF,0,1,"Freeze/Unfreeze This Address"},
-	{0,0xFFFF,0,2,"Add Debugger Read Breakpoint"},
-	{0,0x3FFF,1,2,"Add Debugger Read Breakpoint"},
-	{0,0xFFFF,0,3,"Add Debugger Write Breakpoint"},
-	{0,0x3FFF,1,3,"Add Debugger Write Breakpoint"},
-	{0,0xFFFF,0,4,"Add Debugger Execute Breakpoint"},
-	{0x8000,0xFFFF,0,5,"Go Here In Rom File"},
-	{0x8000,0xFFFF,0,6,"Create Game Genie Code At This Address"},
-	//{0,0xFFFFFF,2,7,"Create Game Genie Code At This Address"}
+	{0x0000,0x2000,0,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
+	{0x6000,0x7FFF,0,ID_ADDRESS_FRZ_SUBMENU,"Freeze/Unfreeze This Address"},
+	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
+	{0x0000,0x3FFF,1,ID_ADDRESS_ADDBP_R,"Add Debugger Read Breakpoint"},
+	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
+	{0x0000,0x3FFF,1,ID_ADDRESS_ADDBP_W,"Add Debugger Write Breakpoint"},
+	{0x0000,0xFFFF,0,ID_ADDRESS_ADDBP_X,"Add Debugger Execute Breakpoint"},
+	{0x8000,0xFFFF,0,ID_ADDRESS_SEEK_IN_ROM,"Go Here In Rom File"},
+	{0x8000,0xFFFF,0,ID_ADDRESS_CREATE_GG_CODE,"Create Game Genie Code At This Address"},
+	//{0x0000,0xFFFFFF,2,7,"Create Game Genie Code At This Address"}
 	// ################################## Start of SP CODE ###########################
-	{0, 0xFFFF, 0, 20, "Add / Remove bookmark"},
+	{0x0000, 0xFFFF, 0, ID_ADDRESS_BOOKMARK, "Add / Remove bookmark"},
 	// ################################## End of SP CODE ###########################
 } ;
 
@@ -1073,20 +1086,20 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					memset(&MenuInfo,0,sizeof(MENUITEMINFO));
 					switch(popupmenu[i].id){ //this will set the text for the menu dynamically based on the id
 						// ################################## Start of SP CODE ###########################
-	case 1:
+	case ID_ADDRESS_FRZ_SUBMENU:
 		{
 			HMENU sub = CreatePopupMenu();
 			AppendMenu(hMenu, MF_POPUP | MF_STRING, (UINT)sub, "Freeze / Unfreeze Address");
-			AppendMenu(sub, MF_STRING, 1, "Toggle state");
-			AppendMenu(sub, MF_STRING, 50, "Freeze");
-			AppendMenu(sub, MF_STRING, 51, "Unfreeze");
-			AppendMenu(sub, MF_SEPARATOR, 52, "-");
-			AppendMenu(sub, MF_STRING, 53, "Unfreeze all");
+			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_TOGGLE_STATE, "Toggle state");
+			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_FREEZE, "Freeze");
+			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE, "Unfreeze");
+			AppendMenu(sub, MF_SEPARATOR, ID_ADDRESS_FRZ_SEP, "-");
+			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE_ALL, "Unfreeze all");
 
 			continue;
 		}
 		// ################################## End of SP CODE ###########################
-	case 2 : //We want this to give the address to add the read breakpoint for
+	case ID_ADDRESS_ADDBP_R: //We want this to give the address to add the read breakpoint for
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
 			sprintf(str,"Add Read Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
 		else
@@ -1094,14 +1107,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		popupmenu[i].text = str;
 		break;
 
-	case 3 :
+	case ID_ADDRESS_ADDBP_W:
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
 			sprintf(str,"Add Write Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
 		else
 			sprintf(str,"Add Write Breakpoint For Address 0x%04X",j);
 		popupmenu[i].text = str;
 		break;
-	case 4 :
+	case ID_ADDRESS_ADDBP_X:
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy))
 			sprintf(str,"Add Execute Breakpoint For Address 0x%04X-0x%04X",CursorStartAddy,CursorEndAddy);
 		else
@@ -1120,7 +1133,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 		if(i != 0)i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, x, y, hMemView, NULL);
 		switch(i){
-	case 1 : //1 = Freeze Ram Address
+	case ID_ADDRESS_FRZ_TOGGLE_STATE:
 		// ################################## Start of SP CODE ###########################
 		{
 			int n;
@@ -1130,7 +1143,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			break;
 		}
-	case 50:
+	case ID_ADDRESS_FRZ_FREEZE:
 		{
 			int n;
 			for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
@@ -1139,7 +1152,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			break;
 		}
-	case 51:
+	case ID_ADDRESS_FRZ_UNFREEZE:
 		{
 			int n;
 			for (n=CursorStartAddy;(CursorEndAddy == -1 && n == CursorStartAddy) || n<=CursorEndAddy;n++)
@@ -1148,7 +1161,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			break;
 		}
-	case 53:
+	case ID_ADDRESS_FRZ_UNFREEZE_ALL:
 		{
 			int n;
 			for (n=0;n<0x2000;n++)
@@ -1164,7 +1177,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		// ################################## End of SP CODE ###########################
 		break;
 
-	case 2 : //2 = Add Read Breakpoint
+	case ID_ADDRESS_ADDBP_R:
 		watchpoint[numWPs].flags = WP_E | WP_R;
 		if(EditingMode == 1)watchpoint[numWPs].flags |= BT_P;
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
@@ -1184,7 +1197,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		else DoDebug(0);
 		break;
 
-	case 3 : //3 = Add Write Breakpoint
+	case ID_ADDRESS_ADDBP_W:
 		watchpoint[numWPs].flags = WP_E | WP_W;
 		if(EditingMode == 1)watchpoint[numWPs].flags |= BT_P;
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
@@ -1203,7 +1216,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		if(hDebug)AddBreakList();
 		else DoDebug(0);
 		break;
-	case 4 : //4 = Add Execute Breakpoint
+	case ID_ADDRESS_ADDBP_X:
 		watchpoint[numWPs].flags = WP_E | WP_X;
 		if((j <= CursorEndAddy) && (j >= CursorStartAddy)){
 			watchpoint[numWPs].address = CursorStartAddy;
@@ -1221,14 +1234,14 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		if(hDebug)AddBreakList();
 		else DoDebug(0);
 		break;
-	case 5 : //5 = Go Here In Rom File
+	case ID_ADDRESS_SEEK_IN_ROM:
 		ChangeMemViewFocus(2,GetNesFileAddress(j),-1);
 		break;
-	case 6 : //6 = Create GG Code
+	case ID_ADDRESS_CREATE_GG_CODE:
 		SetGGConvFocus(j,GetMem(j));
 		break;
 		// ################################## Start of SP CODE ###########################
-	case 20:
+	case ID_ADDRESS_BOOKMARK:
 		{
 			if (toggleBookmark(hwnd, CursorStartAddy))
 			{
@@ -1434,15 +1447,15 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		default:
-			if (wParam >= 30 && wParam <= 39)
+			if (wParam >= ID_FIRST_BOOKMARK && wParam <= ID_FIRST_BOOKMARK)
 			{
-				int newValue = handleBookmarkMenu(wParam - 30);
+				int newValue = handleBookmarkMenu(wParam - ID_FIRST_BOOKMARK);
 
 				if (newValue != -1)
 				{
 					CurOffset = newValue;
 					CursorEndAddy = -1;
-					CursorStartAddy = hexBookmarks[wParam - 30].address;
+					CursorStartAddy = hexBookmarks[wParam - ID_FIRST_BOOKMARK].address;
 					UpdateColorTable();
 				}
 				return 0;

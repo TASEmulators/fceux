@@ -20,6 +20,7 @@
 #define MENU_MV_FILE_SAVE               100
 #define IDC_VIDEOCONFIG_MODE            100
 #define IDC_ROMPATCHER_OFFSET_BOX       100
+#define IDC_ASSEMBLER_HISTORY           100
 #define MENU_CLOSE_FILE                 101
 #define IDI_ICON1                       101
 #define CB_DISABLE_SPEED_THROTTLING     101
@@ -34,6 +35,7 @@
 #define IDC_DEBUGGER_BP_ADD             101
 #define IDC_ROMPATCHER_DOTNES_OFFSET    101
 #define IDC_NTVIEW_TABLE_BOX            101
+#define IDC_ASSEMBLER_DISASSEMBLY       101
 #define IDI_ICON2                       102
 #define MENU_RECENT_FILES               102
 #define CB_LOAD_FILE_OPEN               102
@@ -48,6 +50,7 @@
 #define IDC_ADDBP_MODE_R                102
 #define IDC_ROMPATCHER_OFFSET           102
 #define IDC_NTVIEW_SCANLINE             102
+#define IDC_ASSEMBLER_PATCH_DISASM      102
 #define BTN_CDLOGGER_RESET              103
 #define LBL_PPUVIEW_TILE1               103
 #define IDC_CHEAT_VAL                   103
@@ -81,13 +84,13 @@
 #define IDC_ADDBP_MEM_CPU               105
 #define IDC_ROMPATCHER_CURRENT_DATA     105
 #define IDC_NTVIEW_PROPERTIES_LINE_3    105
-#define IDC_NTVIEW_PROPERTIES_LINE_4    105
 #define BTN_PORT1                       106
 #define BTN_CDLOGGER_SAVE_AS            106
 #define IDC_CHEAT_LIST_POSSIBILITIES    106
 #define IDC_VIDEOCONFIG_CLIPSIDES       106
 #define IDC_DEBUGGER_STEP_OUT           106
 #define IDC_ADDBP_MEM_PPU               106
+#define IDC_NTVIEW_PROPERTIES_LINE_4    106
 #define BTN_PORT2                       107
 #define BTN_CDLOGGER_SAVE               107
 #define IDC_CHEAT_SCRL_POSSIBILITIES    107
@@ -165,18 +168,21 @@
 #define IDC_DEBUGGER_FLAG_V             201
 #define IDC_ADDBP_ADDR_END              201
 #define IDC_NTVIEW_REFRESH_TRACKBAR     201
+#define IDC_ASSEMBLER_APPLY             201
 #define MENU_EJECT_DISK                 202
 #define TXT_FAM                         202
 #define MENU_MV_EDIT_PASTE              202
 #define IDC_VIDEOCONFIG_BPP             202
 #define IDC_DEBUGGER_FLAG_U             202
 #define IDC_ADDBP_CONDITION             202
+#define IDC_ASSEMBLER_SAVE              202
 #define MENU_SWITCH_DISK                203
 #define IDC_NETMOO_NICK                 203
 #define IDC_CHEAT_BOX_POSSIBILITIES     203
 #define MENU_MV_EDIT_FIND               203
 #define IDC_DEBUGGER_FLAG_B             203
 #define IDC_ADDBP_NAME                  203
+#define IDC_ASSEMBLER_UNDO              203
 #define MENU_INSERT_COIN                204
 #define COMBO_NETMOO_LOCAL_PLAYERS      204
 #define MENU_MV_EDIT_FIND_NEXT          204
@@ -196,6 +202,7 @@
 #define MENU_MV_VIEW_RAM                300
 #define IDC_RADIO_SCALE                 300
 #define IDC_DEBUGGER_DISASSEMBLY        300
+#define IDC_ASSEMBLER_DEFPUSHBUTTON     300
 #define MENU_RUN_IN_BACKGROUND          301
 #define IDC_COMBO_RECORDFROM            301
 #define IDC_LABEL_FRAMES                301
@@ -252,6 +259,7 @@
 #define IDC_DEBUGGER_VAL_S              403
 #define IDC_VIDEOCONFIG_ASPECT_X        404
 #define IDC_VIDEOCONFIG_ASPECT_Y        405
+#define IDC_VIDEOCONFIG_SCALER_WIN      406
 #define CTL_TINT_TRACKBAR               500
 #define CTL_VOLUME_TRACKBAR             500
 #define IDC_SCANLINE_FIRST_NTSC         500
@@ -268,6 +276,7 @@
 #define IDC_EDIT_OFFSET                 1000
 #define IDC_GAME_GENIE_CODE             1000
 #define IDC_MEMVIEWFIND_WHAT            1000
+#define IDC_BOOKMARK_DESCRIPTION        1000
 #define GUI_BOT_B_1                     1001
 #define MW_ADDR00                       1001
 #define IDC_EDIT_FROM                   1001

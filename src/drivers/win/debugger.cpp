@@ -642,14 +642,14 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CenterWindow(hwndDlg);
 
 			//set font
-			SendDlgItemMessage(hwndDlg,101,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,102,WM_SETFONT,(WPARAM)hNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,WM_SETFONT,(WPARAM)hNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,WM_SETFONT,(WPARAM)hNewFont,FALSE);
 
 			//set limits
-			SendDlgItemMessage(hwndDlg,100,CB_LIMITTEXT,20,0);
+			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_HISTORY,CB_LIMITTEXT,20,0);
 
-			SetDlgItemText(hwndDlg,101,DisassembleLine(iaPC));
-			SetFocus(GetDlgItem(hwndDlg,100));
+			SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(iaPC));
+			SetFocus(GetDlgItem(hwndDlg,IDC_ASSEMBLER_HISTORY));
 
 			patchlen = 0;
 			applied = 0;
@@ -664,7 +664,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch (LOWORD(wParam)) {
-						case 201: //Apply
+						case IDC_ASSEMBLER_APPLY:
 							if (patchlen) {
 								ptr = GetNesPRGPointer(GetNesFileAddress(iaPC)-16);
 								count = 0;
@@ -679,7 +679,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								applied = 1;
 							}
 							break;
-						case 202: //Save...
+						case IDC_ASSEMBLER_SAVE:
 							if (applied) {
 								count = romaddr = GetNesFileAddress(iaPC);
 								for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
@@ -694,9 +694,9 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								}
 							}
 							break;
-						case 203: //Undo
-							if ((count = SendDlgItemMessage(hwndDlg,102,LB_GETCOUNT,0,0))) {
-								SendDlgItemMessage(hwndDlg,102,LB_DELETESTRING,count-1,0);
+						case IDC_ASSEMBLER_UNDO:
+							if ((count = SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_GETCOUNT,0,0))) {
+								SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_DELETESTRING,count-1,0);
 								patchlen--;
 								count = 0;
 								for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
@@ -709,13 +709,13 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 									lastundo -= j;
 									applied = 1;
 								}
-								SetDlgItemText(hwndDlg,101,DisassembleLine(iaPC+count));
+								SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(iaPC+count));
 							}
 							break;
-						case 300: //Hidden default button
+						case IDC_ASSEMBLER_DEFPUSHBUTTON:
 							count = 0;
 							for (i = 0; i < patchlen; i++) count += opsize[patchdata[i][0]];
-							GetDlgItemText(hwndDlg,100,str,21);
+							GetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,str,21);
 							if (!Assemble(patchdata[patchlen],(iaPC+count),str)) {
 								count = iaPC;
 								for (i = 0; i <= patchlen; i++) count += opsize[patchdata[i][0]];
@@ -723,12 +723,12 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 									MessageBox(hwndDlg, "Patch data cannot exceed address 0xFFFF", "Address error", MB_OK);
 									break;
 								}
-								SetDlgItemText(hwndDlg,100,"");
-								if (count < 0x10000) SetDlgItemText(hwndDlg,101,DisassembleLine(count));
-								else SetDlgItemText(hwndDlg,101,"OVERFLOW");
+								SetDlgItemText(hwndDlg,IDC_ASSEMBLER_HISTORY,"");
+								if (count < 0x10000) SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,DisassembleLine(count));
+								else SetDlgItemText(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,"OVERFLOW");
 								dasm = DisassembleData((count-opsize[patchdata[patchlen][0]]),patchdata[patchlen]);
-								SendDlgItemMessage(hwndDlg,102,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)dasm);
-								AddAsmHistory(hwndDlg,100,dasm+16);
+								SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)dasm);
+								AddAsmHistory(hwndDlg,IDC_ASSEMBLER_HISTORY,dasm+16);
 								SetWindowText(hwndDlg, "Inline Assembler");
 								patchlen++;
 							}
@@ -738,7 +738,7 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							}
 							break;
 					}
-					SetFocus(GetDlgItem(hwndDlg,100)); //set focus to combo box after anything is pressed!
+					SetFocus(GetDlgItem(hwndDlg,IDC_ASSEMBLER_HISTORY)); //set focus to combo box after anything is pressed!
 					break;
 			}
 			break;

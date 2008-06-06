@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#define ID_FIRST_BOOKMARK               30
+
 typedef struct
 {
 	char description[51];

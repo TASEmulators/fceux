@@ -68,17 +68,17 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 	{
 		case WM_INITDIALOG:
 			// Limit bookmark descriptions to 50 characters
-			SendDlgItemMessage(hwndDlg,1000,EM_SETLIMITTEXT,50,0);
+			SendDlgItemMessage(hwndDlg,IDC_BOOKMARK_DESCRIPTION,EM_SETLIMITTEXT,50,0);
 			
 			// Put the current bookmark description into the edit field
 			// and set focus to that edit field.
-			SetDlgItemText(hwndDlg, 1000, bookmarkDescription);
-			SetFocus(GetDlgItem(hwndDlg, 1000));
+			SetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription);
+			SetFocus(GetDlgItem(hwndDlg, IDC_BOOKMARK_DESCRIPTION));
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
 			// Update the bookmark description
-			GetDlgItemText(hwndDlg, 1000, bookmarkDescription, 50);
+			GetDlgItemText(hwndDlg, IDC_BOOKMARK_DESCRIPTION, bookmarkDescription, 50);
 			EndDialog(hwndDlg, 0);
 			break;
 		case WM_COMMAND:
@@ -87,7 +87,7 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				case BN_CLICKED:
 					switch(LOWORD(wParam))
 					{
-						case 1001:
+						case IDOK:
 							SendMessage(hwndDlg, WM_QUIT, 0, 0);
 							break;
 					}
@@ -185,7 +185,7 @@ void updateBookmarkMenus(HMENU menu)
 	// Remove all bookmark menus
 	for (i = 0;i<nextBookmark + 1;i++)
 	{
-		RemoveMenu(menu, 30 + i, MF_BYCOMMAND);
+		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	}
 	
 	// Add the menus again
@@ -197,7 +197,7 @@ void updateBookmarkMenus(HMENU menu)
 		
 		mi.dwTypeData = buffer;
 		mi.cch = strlen(buffer);
-		mi.wID = 30 + i;
+		mi.wID = ID_FIRST_BOOKMARK + i;
 		
 		InsertMenuItem(menu, 2 + i , TRUE, &mi);
 	}
@@ -230,7 +230,7 @@ void removeAllBookmarks(HMENU menu)
 	
 	for (i = 0;i<nextBookmark;i++)
 	{
-		RemoveMenu(menu, 30 + i, MF_BYCOMMAND);
+		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	}
 	
 	nextBookmark = 0;

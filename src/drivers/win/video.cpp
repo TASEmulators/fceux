@@ -927,7 +927,6 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
         switch(uMsg)
         {
          case WM_INITDIALOG:      
-			 SetDlgItemText(hwndDlg,65454,"For the custom video mode settings to be in effect, the \"Custom\" video mode needs to be selected.  If you select a sync method, and sound is disabled, you may want to disable speed throttling(in the \"Timing\" window).  If you use \"wait for vblank\", you should use the \"lazy\" form.\x0AAllowing more than 8 sprites per scanline can cause graphics corruption in some games, including \"Solstice\".");
                 for(x=0;x<11;x++)
                  SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_ADDSTRING,0,(LPARAM)(LPSTR)vmstr[x]);
                 SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_SETCURSEL,vmod,(LPARAM)(LPSTR)0);
@@ -951,11 +950,11 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                  for(x=0;x<5;x++)
                  {
                   SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
-                  SendDlgItemMessage(hwndDlg,406,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
+                  SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
                  }
                 }
                 SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_SETCURSEL,vmodes[0].special,(LPARAM)(LPSTR)0);
-                SendDlgItemMessage(hwndDlg,406,CB_SETCURSEL,winspecial,(LPARAM)(LPSTR)0);
+                SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_SETCURSEL,winspecial,(LPARAM)(LPSTR)0);
 
                 if(eoptions&EO_FSAFTERLOAD)
                  CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
@@ -1051,7 +1050,7 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
                          vmodes[0].yscale=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_YSCALE,0,0);
                          vmodes[0].special=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 
-                         winspecial = SendDlgItemMessage(hwndDlg,406,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
+                         winspecial = SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
                          disvaccel = 0;
 
                          if(IsDlgButtonChecked(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN)==BST_CHECKED)
