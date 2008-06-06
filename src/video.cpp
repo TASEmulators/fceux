@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -124,7 +125,7 @@ int FCEU_InitVirtualVideo(void)
 
 	if( sizeof(uint8*) == 4 )
 	{
-		unsigned m = (unsigned)XBuf;
+		uintptr_t m = (uintptr_t)XBuf;
 		m = ( 8 - m) & 7;
 		XBuf+=m;
 	}
