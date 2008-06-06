@@ -1505,8 +1505,8 @@ void DoMemView() {
 		wndclass.cbClsExtra    = 0 ;
 		wndclass.cbWndExtra    = 0 ;
 		wndclass.hInstance     = fceu_hInstance;
-		wndclass.hIcon         = LoadIcon(fceu_hInstance, "FCEUXD_ICON");
-		wndclass.hIconSm       = LoadIcon(fceu_hInstance, "FCEUXD_ICON");
+		wndclass.hIcon         = LoadIcon(fceu_hInstance, "ICON_1");
+		wndclass.hIconSm       = LoadIcon(fceu_hInstance, "ICON_1");
 		wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
 		wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH) ;
 		wndclass.lpszMenuName  = "MEMVIEWMENU" ; //TODO: add a menu
