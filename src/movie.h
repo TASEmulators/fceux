@@ -6,7 +6,9 @@
 #include <string>
 #include <ostream>
 
-void FCEUMOV_AddJoy(uint8 *, int SkipFlush);
+#include "input/zapper.h"
+
+void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush);
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
 
@@ -25,7 +27,7 @@ bool FCEUMOV_Mode(int modemask);
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
-int FCEUMOV_WriteState(FILE* st);
+//int FCEUMOV_WriteState(FILE* st);
 int FCEUMOV_WriteState(std::ostream* os);
 bool FCEUMOV_ReadState(FILE* st, uint32 size);
 void FCEUMOV_PreLoad();
@@ -39,6 +41,10 @@ class MovieRecord
 {
 public:
 	ValueArray<uint8,4> joysticks;
+	
+	struct {
+		uint8 x,y,b;
+	} zappers[2];
 
 	void toggleBit(int joy, int bit)
 	{
@@ -73,7 +79,6 @@ public:
 	//a waste of memory in lots of cases..  maybe make it a pointer later?
 	std::vector<char> savestate;
 
-	void dump(FILE* fp, int index);
 	void dump(std::ostream* os, int index);
 
 	static const char mnemonics[8];
@@ -138,7 +143,6 @@ public:
 
 	void truncateAt(int frame);
 	void installDictionary(TDictionary& dictionary);
-	void dump(FILE *fp);
 	void dump(std::ostream* os);
 	int dumpLen();
 	void clearRecordRange(int start, int len);

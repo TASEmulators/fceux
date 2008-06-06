@@ -18,20 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include        <string.h>
-#include        <stdlib.h>
+#include <string.h>
+#include <stdlib.h>
 
-#include        "share.h"
+#include "share.h"
+#include "zapper.h"
 
-typedef struct {
-        uint32 mzx,mzy,mzb;
-        int zap_readbit;
-        int bogo;
-	int zappo;
-	uint64 zaphit;
-} ZAPPER;
-
-static ZAPPER ZD[2];
+ZAPPER ZD[2];
 
 static void ZapperFrapper(int w, uint8 *bg, uint8 *spr, uint32 linets, int final)
 {

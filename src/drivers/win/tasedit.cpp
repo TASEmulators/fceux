@@ -7,6 +7,8 @@
 #include "../../movie.h"
 #include "../../utils/xstring.h"
 
+using namespace std;
+
 //to change header font
 //http://forums.devx.com/archive/index.php/t-37234.html
 
@@ -306,9 +308,10 @@ static void Export()
 	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MOVIE);
 	if(GetSaveFileName(&ofn))
 	{
-		FILE* outf = fopen(ofn.lpstrFile,"wb");
-		currMovieData.dump(outf);
-		fclose(outf);
+		fstream* osRecordingMovie = FCEUD_UTF8_fstream(ofn.lpstrFile, "wb");
+		currMovieData.dump(osRecordingMovie);
+		osRecordingMovie->close();
+		delete osRecordingMovie;
 	}
 }
 

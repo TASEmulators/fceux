@@ -30,6 +30,7 @@
 #include "netplay.h"
 #include "movie.h"
 #include "state.h"
+#include "input/zapper.h"
 
 #include "input.h"
 #include "vsuni.h"
@@ -286,7 +287,7 @@ void FCEU_UpdateInput(void)
 	if(FCEUnetplay)
 		NetplayUpdate(joy);
 
-	FCEUMOV_AddJoy(joy, BotMode);
+	FCEUMOV_AddInputState(ZD, joy, BotMode);
 
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniSwap(&joy[0],&joy[1]);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <zlib.h>
+#include <iomanip>
 
 #ifdef WIN32
 #include <windows.h>
@@ -51,7 +52,8 @@ bool suppressMovieStop=false;
 EMOVIEMODE movieMode = MOVIEMODE_INACTIVE;
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
-FILE* fpRecordingMovie = 0;
+//FILE* fpRecordingMovie = 0;
+fstream* osRecordingMovie = 0;
 
 int currFrameCounter;
 uint32 cur_input_display = 0;
@@ -120,47 +122,15 @@ void MovieRecord::dump(std::ostream* os, int index)
 		}
 
 		//separate the joysticks
-		if(i != 3) os->put('|');
+		os->put('|');
 	}
+
+	//write the zapper state
+	*os << setw(3) << setfill('0') << (int)zappers[0].x << ' ' << setw(3) << setfill('0') << (int)zappers[0].y << setw(1) << ' ' << (int)zappers[0].b << '|';
+	*os << setw(3) << setfill('0') << (int)zappers[1].x << ' ' << setw(3) << setfill('0') << (int)zappers[1].y << setw(1) << ' ' << (int)zappers[1].b;
 
 	//each frame is on a new line
 	os->put('\n');
-}
-
-void MovieRecord::dump(FILE* fp, int index)
-{
-	//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
-	//but someone would need to change the parser to ignore it
-	//fputc('|',fp);
-	//fprintf(fp,"%08d",index);
-
-	fputc('|',fp);
-
-	//for each joystick
-	for(int i=0;i<4;i++)
-	{
-		//these are mnemonics for each joystick bit.
-		//since we usually use the regular joypad, these will be more helpful.
-		//but any character other than ' ' should count as a set bit
-		//maybe other input types will need to be encoded another way..
-		for(int bit=7;bit>=0;bit--)
-		{
-			uint8 &joystate = joysticks[i];
-			int bitmask = (1<<bit);
-			char mnemonic = mnemonics[bit];
-			//if the bit is set write the mnemonic
-			if(joystate & bitmask)
-				fputc(mnemonic,fp);
-			else //otherwise write a space
-				fputc(' ',fp);
-		}
-
-		//separate the joysticks
-		if(i != 3) fputc('|',fp);
-	}
-
-	//each frame is on a new line
-	fputc('\n',fp);
 }
 
 MovieData::MovieData()
@@ -223,23 +193,6 @@ void MovieData::dump(std::ostream *os)
 		records[i].dump(os,i);
 }
 
-void MovieData::dump(FILE *fp)
-{
-	fprintf(fp,"version %d\n", version);
-	fprintf(fp,"emuVersion %d\n", emuVersion);
-	fprintf(fp,"recordCount %d\n", recordCount);
-	fprintf(fp,"palFlag %d\n", palFlag?1:0);
-	fprintf(fp,"poweronFlag %d\n", poweronFlag?1:0);
-	fprintf(fp,"resetFlag %d\n", resetFlag?1:0);
-	fprintf(fp,"romFilename %s\n", romFilename.c_str());
-	fprintf(fp,"romChecksum %s\n", BytesToString(romChecksum.data,MD5DATA::size).c_str());
-	fprintf(fp,"guid %s\n", guid.toString().c_str());
-	if(savestate.size() != 0)
-		fprintf(fp,"savestate %s\n", BytesToString(&savestate[0],savestate.size()).c_str());
-	for(int i=0;i<(int)records.size();i++)
-		records[i].dump(fp,i);
-}
-
 int MovieData::dumpLen()
 {
 	memorystream ms;
@@ -288,7 +241,7 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 
 	std::string key,value;
 	enum {
-		NEWLINE, KEY, SEPARATOR, VALUE, RECORD
+		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT
 	} state = NEWLINE;
 	bool bail = false;
 	for(;;)
@@ -312,7 +265,8 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 			value = "";
 			goto dokey;
 			break;
-		case RECORD: {
+		case RECORD:
+			{
 				dorecord:
 				MovieRecord record;
 				//for each joystick
@@ -331,10 +285,22 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 					//eat the separator (a pipe or a newline)
 					fgetc(fp);
 				}
+				//crappy parser
+				char tmp[4] = {0,0,0,0};
+				fread(tmp,1,3,fp); record.zappers[0].x = atoi(tmp); fgetc(fp);
+				fread(tmp,1,3,fp); record.zappers[0].y = atoi(tmp); fgetc(fp);
+				tmp[1] = 0;
+				fread(tmp,1,1,fp); record.zappers[0].b = atoi(tmp); fgetc(fp);
+				fread(tmp,1,3,fp); record.zappers[1].x = atoi(tmp); fgetc(fp);
+				fread(tmp,1,3,fp); record.zappers[1].y = atoi(tmp); fgetc(fp);
+				tmp[1] = 0;
+				fread(tmp,1,1,fp); record.zappers[1].b = atoi(tmp); fgetc(fp);
+
 				movieData.records.push_back(record);
 				state = NEWLINE;
 				break;
 			}
+
 		case KEY:
 			dokey: //dookie
 			state = KEY;
@@ -383,8 +349,9 @@ void StopRecording()
 	FCEU_DispMessage("Movie recording stopped.");
 
 	movieMode = MOVIEMODE_INACTIVE;
-	fclose(fpRecordingMovie);
-	fpRecordingMovie = 0;
+	//fclose(fpRecordingMovie);
+	//fpRecordingMovie = 0;
+	osRecordingMovie = 0;
 }
 
 
@@ -404,21 +371,22 @@ void FCEUI_StopMovie()
 void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
 void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
 
+//TODO - i dont think some of this like gametype and cspec are necessary
 static void ResetInputTypes()
 {
-#ifdef WIN32
-	extern int UsrInputType[3];
-	UsrInputType[0] = SI_GAMEPAD;
-	UsrInputType[1] = SI_GAMEPAD;
-	UsrInputType[2] = SIFC_NONE;
-
-	ParseGIInput(NULL/*GameInfo*/);
-	extern int cspec, gametype;
-	cspec=GameInfo->cspecial;
-	gametype=GameInfo->type;
-
-	InitOtherInput();
-#endif
+//#ifdef WIN32
+//	extern int UsrInputType[3];
+//	UsrInputType[0] = SI_GAMEPAD;
+//	UsrInputType[1] = SI_GAMEPAD;
+//	UsrInputType[2] = SIFC_NONE;
+//
+//	ParseGIInput(NULL/*GameInfo*/);
+//	extern int cspec, gametype;
+//	cspec=GameInfo->cspecial;
+//	gametype=GameInfo->type;
+//
+//	InitOtherInput();
+//#endif
 }
 
 
@@ -565,14 +533,23 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 
 static void closeRecordingMovie()
 {
-	if(fpRecordingMovie)
-		fclose(fpRecordingMovie);
+	//if(fpRecordingMovie)
+	//	fclose(fpRecordingMovie);
+	if(osRecordingMovie)
+	{
+		osRecordingMovie->close();
+		delete osRecordingMovie;
+	}
 }
 
 static void openRecordingMovie(const char* fname)
 {
-	fpRecordingMovie = FCEUD_UTF8fopen(fname, "wb");
-	if(!fpRecordingMovie)
+	//fpRecordingMovie = FCEUD_UTF8fopen(fname, "wb");
+	//if(!fpRecordingMovie)
+	//	FCEU_PrintError("Error opening movie output file: %s",fname);
+	
+	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+	if(!osRecordingMovie)
 		FCEU_PrintError("Error opening movie output file: %s",fname);
 	strcpy(curMovieFilename, fname);
 }
@@ -611,7 +588,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
-	currMovieData.dump(fpRecordingMovie);
+	currMovieData.dump(osRecordingMovie);
 
 	//todo - think about this
 	ResetInputTypes();
@@ -631,7 +608,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
-void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
+void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush)
 {
 	//todo - for tasedit, either dump or load depending on whether input recording is enabled
 	//or something like that
@@ -650,6 +627,13 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 			MovieRecord& mr = currMovieData.records[currFrameCounter];
 			for(int i=0;i<4;i++)
 				js[i] = mr.joysticks[i];
+
+			for(int i=0;i<2;i++)
+			{
+				zappers[i].mzx = mr.zappers[i].x;
+				zappers[i].mzy = mr.zappers[i].y;
+				zappers[i].mzb = mr.zappers[i].b;
+			}
 		}
 
 		//if we are on the last frame, then pause the emulator if the player requested it
@@ -677,7 +661,16 @@ void FCEUMOV_AddJoy(uint8 *js, int SkipFlush)
 		for(int i=0;i<4;i++)
 			mr.joysticks[i] = js[i];
 
-		mr.dump(fpRecordingMovie,currMovieData.records.size());
+		//printf("%d %d %d\n",zappers[1].mzx,zappers[1].mzy,zappers[1].mzb);
+
+		for(int i=0;i<2;i++)
+		{
+			mr.zappers[i].x = zappers[i].mzx;
+			mr.zappers[i].y = zappers[i].mzy;
+			mr.zappers[i].b = zappers[i].mzb;
+		}
+		
+		mr.dump(osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
 	}
 
@@ -724,22 +717,6 @@ int FCEUMOV_WriteState(std::ostream* os)
 		
 		if(os)
 			currMovieData.dump(os);
-		
-		return todo;
-	}
-	else return 0;
-}
-
-int FCEUMOV_WriteState(FILE* st)
-{
-	//we are supposed to dump the movie data into the savestate
-
-	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
-	{
-		int todo = currMovieData.dumpLen();
-		
-		if(st)
-			currMovieData.dump(st);
 		
 		return todo;
 	}
@@ -816,7 +793,7 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 			currMovieData.recordCount++;
 
 			openRecordingMovie(curMovieFilename);
-			currMovieData.dump(fpRecordingMovie);
+			currMovieData.dump(osRecordingMovie);
 			movieMode = MOVIEMODE_RECORD;
 		}
 	}
