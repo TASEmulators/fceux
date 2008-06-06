@@ -72,7 +72,7 @@ static DECLFW(Mapper25_write)
  }
 }
 
-static void FP_FASTAPASS(1) KonamiIRQHook(int a)
+static void KonamiIRQHook(int a)
 {
 //  #define LCYCS ((227*2))
   #define LCYCS 341

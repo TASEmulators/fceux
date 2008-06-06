@@ -79,7 +79,7 @@ static DECLFW(Mapper95_write)
   }
 }
 
-static void FP_FASTAPASS(1) dragonbust_ppu(uint32 A)
+static void dragonbust_ppu(uint32 A)
 {
   static int last=-1;
   static uint8 z;

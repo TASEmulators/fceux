@@ -213,7 +213,7 @@ static uint32 NWCIRQCount;
 static uint8 NWCRec;
 #define NWCDIP 0xE
 
-static void FP_FASTAPASS(1) NWCIRQHook(int a)
+static void NWCIRQHook(int a)
 {
   if(!(NWCRec&0x10))
   {

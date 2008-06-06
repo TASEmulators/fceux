@@ -24,7 +24,7 @@
 static uint32 FTVal,FTValR;
 static char side;
 
-static uint8 FP_FASTAPASS(2) FT_Read(int w, uint8 ret)
+static uint8 FT_Read(int w, uint8 ret)
 {
  if(w) 
  {
@@ -33,7 +33,7 @@ static uint8 FP_FASTAPASS(2) FT_Read(int w, uint8 ret)
  return(ret);
 }
 
-static void FP_FASTAPASS(1) FT_Write(uint8 V)
+static void FT_Write(uint8 V)
 {
  FTValR=0;
 
@@ -51,7 +51,7 @@ static void FP_FASTAPASS(1) FT_Write(uint8 V)
  FTValR<<=1;
 }
 
-static void FP_FASTAPASS(2) FT_Update(void *data, int arg)
+static void FT_Update(void *data, int arg)
 {
  FTVal=*(uint32 *)data;
 }

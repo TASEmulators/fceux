@@ -25,7 +25,7 @@
 #define latcha2 mapbyte2[1]
 
 
-static void FP_FASTAPASS(1) latchcheck(uint32 VAddr)
+static void latchcheck(uint32 VAddr)
 {
      uint8 l,h;
 

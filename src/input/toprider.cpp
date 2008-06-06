@@ -24,7 +24,7 @@
 static uint32 bs,bss;
 static uint32 boop;
 
-static uint8 FP_FASTAPASS(2) Read(int w, uint8 ret)
+static uint8 Read(int w, uint8 ret)
 {
  if(w) 
  {
@@ -37,7 +37,7 @@ static uint8 FP_FASTAPASS(2) Read(int w, uint8 ret)
  return(ret);
 }
 
-static void FP_FASTAPASS(1) Write(uint8 V)
+static void Write(uint8 V)
 {
  // if(V&0x2) 
  bs=bss;
@@ -45,7 +45,7 @@ static void FP_FASTAPASS(1) Write(uint8 V)
 // boop=0xC0;
 }
 
-static void FP_FASTAPASS(2) Update(void *data, int arg)
+static void Update(void *data, int arg)
 {
  bss=*(uint8*)data;
  bss|=bss<<8;

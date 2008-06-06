@@ -26,7 +26,7 @@
  
 } 
 */
-static void FP_FASTAPASS(1) m83IRQHook(int a)
+static void m83IRQHook(int a)
 {
   if(IRQa)
   {

@@ -312,7 +312,7 @@ static void GenMMC3Close(void)
 }
 
 //static uint16 _a12;
-//static void FP_FASTAPASS(1) MMC3_PPU(uint32 A)
+//static void MMC3_PPU(uint32 A)
 //{
 //  if(A&0x2000)return;
 //  if((!_a12)&&(A&0x1000))
@@ -915,7 +915,7 @@ void Mapper116_Init(CartInfo *info)
 static uint8 PPUCHRBus;
 static uint8 TKSMIR[8];
 
-static void FP_FASTAPASS(1) TKSPPU(uint32 A)
+static void TKSPPU(uint32 A)
 {
  A&=0x1FFF;
  A>>=10;
@@ -992,7 +992,7 @@ static void M165CWM(uint32 A, uint8 V)
    M165PPUFE();
 }
 
-static void FP_FASTAPASS(1) M165PPU(uint32 A)
+static void M165PPU(uint32 A)
 {
  if((A&0x1FF0)==0x1FD0)
  {

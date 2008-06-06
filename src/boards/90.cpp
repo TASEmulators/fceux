@@ -366,7 +366,7 @@ static void ClockCounter(void)
   }
 }
 
-void FP_FASTAPASS(1) CPUWrap(int a)
+void CPUWrap(int a)
 {
   int x;
   if((IRQMode&3)==0) for(x=0;x<a;x++) ClockCounter();
@@ -379,7 +379,7 @@ static void SLWrap(void)
 }
 
 static uint32 lastread;
-static void FP_FASTAPASS(1) M90PPU(uint32 A)
+static void M90PPU(uint32 A)
 {
   if((IRQMode&3)==2)
   {

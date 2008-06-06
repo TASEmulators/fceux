@@ -24,7 +24,7 @@
 static uint8 QZVal,QZValR;
 static uint8 FunkyMode;
 
-static uint8 FP_FASTAPASS(2) QZ_Read(int w, uint8 ret)
+static uint8 QZ_Read(int w, uint8 ret)
 {
  if(w) 
  {
@@ -55,13 +55,13 @@ static void QZ_Strobe(void)
  //puts("Strobe");
 }
 
-static void FP_FASTAPASS(1) QZ_Write(uint8 V)
+static void QZ_Write(uint8 V)
 {
  //printf("Wr: %02x\n",V);
  FunkyMode=V&4;
 }
 
-static void FP_FASTAPASS(2) QZ_Update(void *data, int arg)
+static void QZ_Update(void *data, int arg)
 {
  QZVal=*(uint8 *)data;
 }

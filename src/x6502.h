@@ -118,7 +118,7 @@ extern uint32 timestamp;
 #define Z_FLAG  0x02
 #define C_FLAG  0x01
 
-extern void FP_FASTAPASS(1) (*MapIRQHook)(int a);
+extern void (*MapIRQHook)(int a);
 
 #define NTSC_CPU 1789772.7272727272727272
 #define PAL_CPU  1662607.125
@@ -140,11 +140,11 @@ void X6502_Power(void);
 void TriggerNMI(void);
 void TriggerNMI2(void);
 
-uint8 FASTAPASS(1) X6502_DMR(uint32 A);
-void FASTAPASS(2) X6502_DMW(uint32 A, uint8 V);
+uint8 X6502_DMR(uint32 A);
+void X6502_DMW(uint32 A, uint8 V);
 
-void FASTAPASS(1) X6502_IRQBegin(int w);
-void FASTAPASS(1) X6502_IRQEnd(int w);
+void X6502_IRQBegin(int w);
+void X6502_IRQEnd(int w);
 
 #define _X6502H
 #endif

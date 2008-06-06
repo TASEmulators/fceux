@@ -21,7 +21,7 @@
 #include "mapinc.h"
 
 
-void FP_FASTAPASS(1) IREMIRQHook(int a)
+void IREMIRQHook(int a)
 {
   if(IRQa)
   {

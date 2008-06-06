@@ -127,7 +127,7 @@ void FlushGenieRW(void)
  }
 }
 
-readfunc FASTAPASS(1) GetReadHandler(int32 a)
+readfunc GetReadHandler(int32 a)
 {
   if(a>=0x8000 && RWWrap)
    return AReadG[a-0x8000];
@@ -135,7 +135,7 @@ readfunc FASTAPASS(1) GetReadHandler(int32 a)
    return ARead[a];
 }
 
-void FASTAPASS(3) SetReadHandler(int32 start, int32 end, readfunc func)
+void SetReadHandler(int32 start, int32 end, readfunc func)
 {
   int32 x;
 
@@ -156,7 +156,7 @@ void FASTAPASS(3) SetReadHandler(int32 start, int32 end, readfunc func)
     ARead[x]=func;
 }
 
-writefunc FASTAPASS(1) GetWriteHandler(int32 a)
+writefunc GetWriteHandler(int32 a)
 {
   if(RWWrap && a>=0x8000)
    return BWriteG[a-0x8000];
@@ -164,7 +164,7 @@ writefunc FASTAPASS(1) GetWriteHandler(int32 a)
    return BWrite[a];
 }
 
-void FASTAPASS(3) SetWriteHandler(int32 start, int32 end, writefunc func)
+void SetWriteHandler(int32 start, int32 end, writefunc func)
 {
   int32 x;
 

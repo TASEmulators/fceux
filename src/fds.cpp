@@ -57,7 +57,7 @@ static DECLFR(FDSBIOSRead);
 static DECLFR(FDSRAMRead);
 static DECLFW(FDSRAMWrite);
 static void FDSInit(void);
-static void FP_FASTAPASS(1) FDSFix(int a);
+static void FDSFix(int a);
 
 #define FDSRAM GameMemBlock
 #define CHRRAM (GameMemBlock+32768)
@@ -184,7 +184,7 @@ void FCEU_FDSSelect(void)
 	    FCEU_DispMessage("Disk %d Side %c Selected",SelectDisk>>1,(SelectDisk&1)?'B':'A');
 }
 
-static void FP_FASTAPASS(1) FDSFix(int a)
+static void FDSFix(int a)
 {
  if((IRQa&2) && IRQCount)
  {

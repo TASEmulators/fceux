@@ -21,60 +21,7 @@
 	 pixdata|=ppulut3[XOffset|(atlatch<<3)];
 	 //printf("%02x ",ppulut3[XOffset|(atlatch<<3)]);
 
-	 #ifdef C80x86
-	 asm volatile(
-	 "movl %%ebx,%%eax\n\t"
-	 "andl $15,%%eax\n\t"
-	 "movb (%%esi,%%eax),%%cl\n\t"
-	 "shrl $4, %%ebx\n\t"
-	 "movb %%cl, (%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 1(%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 2(%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 3(%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 4(%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 5(%%edi)\n\t"
-
-         "movl %%ebx,%%eax\n\t"
-         "andl $15,%%eax\n\t"
-         "movb (%%esi,%%eax),%%cl\n\t"
-         "shrl $4, %%ebx\n\t"
-         "movb %%cl, 6(%%edi)\n\t"
-
-         //"movl %%ebx,%%eax\n\t"
-         //"andl $15,%%eax\n\t"
-         //"movb (%%esi,%%eax),%%cl\n\t"
-         //"movb %%cl, 7(%%edi)\n\t"
-	 "movb (%%esi, %%ebx),%%cl\n\t"
-	 "movb %%cl, 7(%%edi)\n\t"
-	 :
-	 : "S" (S), "D" (P), "b" (pixdata)
-	 : "eax", "cl" );
-	 #else
+	
 	 P[0]=S[pixdata&0xF];
 	 pixdata>>=4;
 	 P[1]=S[pixdata&0xF];
@@ -90,7 +37,6 @@
          P[6]=S[pixdata&0xF];
          pixdata>>=4;
          P[7]=S[pixdata&0xF];
-	 #endif
 	 P+=8;
         }
 

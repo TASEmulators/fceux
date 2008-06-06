@@ -82,16 +82,16 @@ struct iNES_HEADER {
     uint8 reserve[8];
 };
 
-void FASTAPASS(2) VRAM_BANK1(uint32 A, uint8 V);
-void FASTAPASS(2) VRAM_BANK4(uint32 A,uint32 V);
+void VRAM_BANK1(uint32 A, uint8 V);
+void VRAM_BANK4(uint32 A,uint32 V);
 
-void FASTAPASS(2) VROM_BANK1(uint32 A,uint32 V);
-void FASTAPASS(2) VROM_BANK2(uint32 A,uint32 V);
-void FASTAPASS(2) VROM_BANK4(uint32 A, uint32 V);
-void FASTAPASS(1) VROM_BANK8(uint32 V);
-void FASTAPASS(2) ROM_BANK8(uint32 A, uint32 V);
-void FASTAPASS(2) ROM_BANK16(uint32 A, uint32 V);
-void FASTAPASS(1) ROM_BANK32(uint32 V);
+void VROM_BANK1(uint32 A,uint32 V);
+void VROM_BANK2(uint32 A,uint32 V);
+void VROM_BANK4(uint32 A, uint32 V);
+void VROM_BANK8(uint32 V);
+void ROM_BANK8(uint32 A, uint32 V);
+void ROM_BANK16(uint32 A, uint32 V);
+void ROM_BANK32(uint32 V);
 
 extern uint8 vmask;
 extern uint32 vmask1;
@@ -101,9 +101,9 @@ extern uint32 pmask8;
 extern uint8 pmask16;
 extern uint8 pmask32;
 
-void FASTAPASS(1) onemir(uint8 V);
-void FASTAPASS(1) MIRROR_SET2(uint8 V);
-void FASTAPASS(1) MIRROR_SET(uint8 V);
+void onemir(uint8 V);
+void MIRROR_SET2(uint8 V);
+void MIRROR_SET(uint8 V);
 
 void Mapper0_init(void);
 void Mapper1_init(void);

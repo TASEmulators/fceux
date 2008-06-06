@@ -200,7 +200,7 @@ static void MMC5CHRB(void)
   }
 }
 
-static void FASTAPASS(2) MMC5WRAM(uint32 A, uint32 V)
+static void MMC5WRAM(uint32 A, uint32 V)
 {
   //printf("%02x\n",V);
   V=MMC5WRAMIndex[V&7];

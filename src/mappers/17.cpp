@@ -22,7 +22,7 @@
 
 
 
-static void FP_FASTAPASS(1) FFEIRQHook(int a)
+static void FFEIRQHook(int a)
 {
   if(IRQa)
   {

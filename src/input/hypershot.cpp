@@ -24,7 +24,7 @@
 static uint8 HSVal,HSValR;
 
 
-static uint8 FP_FASTAPASS(2) HS_Read(int w, uint8 ret)
+static uint8 HS_Read(int w, uint8 ret)
 {
  if(w) ret|=HSValR;
 
@@ -36,7 +36,7 @@ static void HS_Strobe(void)
  HSValR=HSVal<<1;
 }
 
-static void FP_FASTAPASS(2) HS_Update(void *data, int arg)
+static void HS_Update(void *data, int arg)
 {
  HSVal=*(uint8*)data;
 }

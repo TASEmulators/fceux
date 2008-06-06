@@ -80,7 +80,7 @@ static DECLFW(Mapper23_write)
  }
 }
 
-void FP_FASTAPASS(1) KonamiIRQHook2(int a)
+void KonamiIRQHook2(int a)
 {
   #define LCYCS 341
   if(IRQa)

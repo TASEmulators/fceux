@@ -25,7 +25,7 @@ static int seq,ptr,bit,cnt,have;
 static uint8 bdata[20];
 
 
-static uint8 FP_FASTAPASS(2) Read(int w, uint8 ret)
+static uint8 Read(int w, uint8 ret)
 {
  if(w && have) 
  {
@@ -48,12 +48,12 @@ static uint8 FP_FASTAPASS(2) Read(int w, uint8 ret)
  return(ret);
 }
 
-static void FP_FASTAPASS(1) Write(uint8 V)
+static void Write(uint8 V)
 {
  //printf("%02x\n",V);
 }
 
-static void FP_FASTAPASS(2) Update(void *data, int arg)
+static void Update(void *data, int arg)
 {
  if(*(uint8 *)data)
  {

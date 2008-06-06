@@ -58,7 +58,7 @@ static DECLFW(Mapper67_write)
   case 0xf800:ROM_BANK16(0x8000,V);break;
  }
 }
-static void FP_FASTAPASS(1) SunIRQHook(int a)
+static void SunIRQHook(int a)
 {
   if(IRQa)
   {

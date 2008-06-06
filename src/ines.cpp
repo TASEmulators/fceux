@@ -760,7 +760,7 @@ char *iNesShortFName() {
 	return ret+1;
 }
 
-void FASTAPASS(2) VRAM_BANK1(uint32 A, uint8 V)
+void VRAM_BANK1(uint32 A, uint8 V)
 {
  V&=7;
  PPUCHRRAM|=(1<<(A>>10));
@@ -768,7 +768,7 @@ void FASTAPASS(2) VRAM_BANK1(uint32 A, uint8 V)
  VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
 }
  
-void FASTAPASS(2) VRAM_BANK4(uint32 A, uint32 V)
+void VRAM_BANK4(uint32 A, uint32 V)
 {
  V&=1;
  PPUCHRRAM|=(0xF<<(A>>10));
@@ -778,20 +778,20 @@ void FASTAPASS(2) VRAM_BANK4(uint32 A, uint32 V)
  CHRBankList[((A)>>10)+3]=(V<<2)+3;
  VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
 }
-void FASTAPASS(2) VROM_BANK1(uint32 A,uint32 V)
+void VROM_BANK1(uint32 A,uint32 V)
 {
  setchr1(A,V);
  CHRBankList[(A)>>10]=V;
 }
  
-void FASTAPASS(2) VROM_BANK2(uint32 A,uint32 V)
+void VROM_BANK2(uint32 A,uint32 V)
 {
  setchr2(A,V);
  CHRBankList[(A)>>10]=(V<<1);
  CHRBankList[((A)>>10)+1]=(V<<1)+1;
 }
 
-void FASTAPASS(2) VROM_BANK4(uint32 A, uint32 V)
+void VROM_BANK4(uint32 A, uint32 V)
 {
  setchr4(A,V);
  CHRBankList[(A)>>10]=(V<<2);
@@ -800,7 +800,7 @@ void FASTAPASS(2) VROM_BANK4(uint32 A, uint32 V)
  CHRBankList[((A)>>10)+3]=(V<<2)+3;
 }
 
-void FASTAPASS(1) VROM_BANK8(uint32 V)
+void VROM_BANK8(uint32 V)
 {
  setchr8(V);
  CHRBankList[0]=(V<<3);
@@ -813,14 +813,14 @@ void FASTAPASS(1) VROM_BANK8(uint32 V)
  CHRBankList[7]=(V<<3)+7;
 }
 
-void FASTAPASS(2) ROM_BANK8(uint32 A, uint32 V)
+void ROM_BANK8(uint32 A, uint32 V)
 {
  setprg8(A,V);
  if(A>=0x8000)
   PRGBankList[((A-0x8000)>>13)]=V;
 }
  
-void FASTAPASS(2) ROM_BANK16(uint32 A, uint32 V)
+void ROM_BANK16(uint32 A, uint32 V)
 {
  setprg16(A,V);
  if(A>=0x8000) 
@@ -830,7 +830,7 @@ void FASTAPASS(2) ROM_BANK16(uint32 A, uint32 V)
  }
 } 
 
-void FASTAPASS(1) ROM_BANK32(uint32 V)
+void ROM_BANK32(uint32 V)
 {
  setprg32(0x8000,V);
  PRGBankList[0]=V<<2;
@@ -839,7 +839,7 @@ void FASTAPASS(1) ROM_BANK32(uint32 V)
  PRGBankList[3]=(V<<2)+3;
 }
 
-void FASTAPASS(1) onemir(uint8 V)
+void onemir(uint8 V)
 {
 	if(Mirroring==2) return;
         if(V>1)
@@ -848,14 +848,14 @@ void FASTAPASS(1) onemir(uint8 V)
 	setmirror(MI_0+V);
 }
 
-void FASTAPASS(1) MIRROR_SET2(uint8 V)
+void MIRROR_SET2(uint8 V)
 {
 	if(Mirroring==2) return;
 	Mirroring=V;
 	setmirror(V);
 }
 
-void FASTAPASS(1) MIRROR_SET(uint8 V)
+void MIRROR_SET(uint8 V)
 {
 	if(Mirroring==2) return;
 	V^=1;

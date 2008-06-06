@@ -28,4 +28,4 @@ void *FCEU_malloc(uint32 size);
 void *FCEU_gmalloc(uint32 size);
 void FCEU_gfree(void *ptr);
 void FCEU_free(void *ptr);
-void FASTAPASS(3) FCEU_memmove(void *d, void *s, uint32 l);
+void FCEU_memmove(void *d, void *s, uint32 l);

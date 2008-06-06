@@ -131,24 +131,8 @@ typedef uint32_t uint32;
 #endif
 
 
-#ifdef __GNUC__
- #ifdef C80x86
-  #define FASTAPASS(x) __attribute__((regparm(x)))
-  #define FP_FASTAPASS FASTAPASS
- #else
-  #define FASTAPASS(x)
-  #define FP_FASTAPASS(x)
- #endif
-#elif MSVC
- #define FP_FASTAPASS(x)
- #define FASTAPASS(x)
-#else
- #define FP_FASTAPASS(x)
- #define FASTAPASS(x)
-#endif
-
-typedef void (FP_FASTAPASS(2) *writefunc)(uint32 A, uint8 V);
-typedef uint8 (FP_FASTAPASS(1) *readfunc)(uint32 A);
+typedef void (*writefunc)(uint32 A, uint8 V);
+typedef uint8 (*readfunc)(uint32 A);
 
 
 template<typename T, int N>

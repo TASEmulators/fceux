@@ -44,7 +44,7 @@ static DECLFW(M43Low)
  //printf("$%04x:$%02x\n",A,V);
 }
 
-static void FP_FASTAPASS(1) M43Ho(int a)
+static void M43Ho(int a)
 {
  IRQCount+=a;
  if(IRQa)

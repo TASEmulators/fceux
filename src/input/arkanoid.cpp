@@ -36,7 +36,7 @@ static void StrobeARKFC(void)
 }
 
 
-static uint8 FP_FASTAPASS(2) ReadARKFC(int w,uint8 ret)
+static uint8 ReadARKFC(int w,uint8 ret)
 {
  ret&=~2;
 
@@ -64,7 +64,7 @@ static uint32 FixX(uint32 x)
  return(x);
 }
 
-static void FP_FASTAPASS(2) UpdateARKFC(void *data, int arg)
+static void UpdateARKFC(void *data, int arg)
 {
  uint32 *ptr=(uint32 *)data;
  FCArk.mzx=FixX(ptr[0]);
@@ -80,7 +80,7 @@ INPUTCFC *FCEU_InitArkanoidFC(void)
  return(&ARKCFC);
 }
 
-static uint8 FP_FASTAPASS(1) ReadARK(int w)
+static uint8 ReadARK(int w)
 {
  uint8 ret=0;
 
@@ -97,12 +97,12 @@ static uint8 FP_FASTAPASS(1) ReadARK(int w)
 }
 
 
-static void FP_FASTAPASS(1) StrobeARK(int w)
+static void StrobeARK(int w)
 {
 	NESArk[w].readbit=0;
 }
 
-static void FP_FASTAPASS(3) UpdateARK(int w, void *data, int arg)
+static void UpdateARK(int w, void *data, int arg)
 {
  uint32 *ptr=(uint32*)data;
  NESArk[w].mzx=FixX(ptr[0]);

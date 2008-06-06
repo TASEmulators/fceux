@@ -55,7 +55,7 @@ static DECLFW(Mapper96_write)
  setchr4r(0x10,0x1000,(latche&4)|3);
 }
 
-static void FP_FASTAPASS(1) M96Hook(uint32 A)
+static void M96Hook(uint32 A)
 {
  if((A&0x3000)!=0x2000) return;
  //if((A&0x3ff)>=0x3c0) return;

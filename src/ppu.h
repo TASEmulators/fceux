@@ -6,7 +6,7 @@ int FCEUPPU_Loop(int skip);
 void FCEUPPU_LineUpdate();
 void FCEUPPU_SetVideoSystem(int w);
 
-extern void FP_FASTAPASS(1) (*PPU_hook)(uint32 A);
+extern void (*PPU_hook)(uint32 A);
 extern void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
 
 /* For cart.c and banksw.h, mostly */

@@ -23,7 +23,7 @@
 #define K4buf mapbyte2
 #define K4buf2 mapbyte3
 
-void FP_FASTAPASS(1) JalecoIRQHook(int a)
+void JalecoIRQHook(int a)
 {
   if(IRQa && IRQCount)
   {

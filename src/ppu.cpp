@@ -53,7 +53,7 @@
 #define Pal     (PALRAM)   
 
 static void FetchSpriteData(void);
-static void FASTAPASS(1) RefreshLine(int lastpixel);
+static void RefreshLine(int lastpixel);
 static void RefreshSprites(void);
 static void CopySprites(uint8 *target);
 
@@ -123,7 +123,7 @@ static uint8 deemp=0;
 static int deempcnt[8];
 
 void (*GameHBIRQHook)(void), (*GameHBIRQHook2)(void);
-void FP_FASTAPASS(1) (*PPU_hook)(uint32 A);
+void (*PPU_hook)(uint32 A);
 
 uint8 vtoggle=0;
 uint8 XOffset=0;
@@ -496,7 +496,7 @@ static int spork=0;     /* spork the world.  Any sprites on this line?
                         */
                           
 // lasttile is really "second to last tile."
-static void FASTAPASS(1) RefreshLine(int lastpixel)
+static void RefreshLine(int lastpixel)
 {
         static uint32 pshift[2];
         static uint32 atlatch;
@@ -1003,13 +1003,8 @@ static void RefreshSprites(void)
 
        for(n=numsprites;n>=0;n--,spr--)
        {
-	 //#ifdef C80x86
-	 //register uint32 pixdata asm ("eax");
-	 //register uint8 J, atr;
-	 //#else
-        register uint32 pixdata;
-        register uint8 J,atr;
-	 //#endif
+        uint32 pixdata;
+        uint8 J,atr;
 
         int x=spr->x;
         uint8 *C;

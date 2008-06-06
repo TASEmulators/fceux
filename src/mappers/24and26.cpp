@@ -34,7 +34,7 @@ static int swaparoo;
 
 static int acount=0;
 
-static void FP_FASTAPASS(1) KonamiIRQHook(int a)
+static void KonamiIRQHook(int a)
 {
   #define LCYCS 341
 //  #define LCYCS ((227*2)+1)

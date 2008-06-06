@@ -21,7 +21,7 @@
 
 #include "mapinc.h"
 
-static void FP_FASTAPASS(1) BandaiIRQHook(int a)
+static void BandaiIRQHook(int a)
 {
   if(IRQa)
   {
@@ -260,7 +260,7 @@ int FCEUI_DatachSet(const uint8 *rcode)
         return(1);
 }
 
-static void FP_FASTAPASS(1) BarcodeIRQHook(int a)
+static void BarcodeIRQHook(int a)
 {
  BandaiIRQHook(a);
 

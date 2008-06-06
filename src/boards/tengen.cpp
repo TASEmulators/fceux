@@ -36,10 +36,10 @@ static SFORMAT Rambo_StateRegs[]={
   {0}
 };
 
-static void FP_FASTAPASS(2) (*setchr1wrap)(unsigned int A, unsigned int V);
+static void (*setchr1wrap)(unsigned int A, unsigned int V);
 //static int nomirror;
 
-static void FP_FASTAPASS(1) RAMBO1_IRQHook(int a)
+static void RAMBO1_IRQHook(int a)
 {
   static int smallcount;
   if(!IRQmode) return;
@@ -158,7 +158,7 @@ static void RAMBO1_init(void)
   AddExState(Rambo_StateRegs, ~0, 0, 0);
 }
 
-static void FP_FASTAPASS(2) CHRWrap(unsigned int A, unsigned int V)
+static void CHRWrap(unsigned int A, unsigned int V)
 {
   setchr1(A,V);
 }
@@ -173,7 +173,7 @@ void Mapper64_init(void)
 static int MirCache[8];
 static unsigned int PPUCHRBus;
 
-static void FP_FASTAPASS(2) MirWrap(unsigned int A, unsigned int V)
+static void MirWrap(unsigned int A, unsigned int V)
 {
   MirCache[A>>10]=(V>>7)&1;
   if(PPUCHRBus==(A>>10))
@@ -181,7 +181,7 @@ static void FP_FASTAPASS(2) MirWrap(unsigned int A, unsigned int V)
   setchr1(A,V);
 }
 
-static void FP_FASTAPASS(1) MirrorFear(uint32 A)
+static void MirrorFear(uint32 A)
 {
   A&=0x1FFF;
   A>>=10;
