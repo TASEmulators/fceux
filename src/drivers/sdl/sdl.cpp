@@ -559,7 +559,7 @@ DUMMY(FCEUD_AviRecordTo)
 DUMMY(FCEUD_AviStop)
 void FCEUI_AviVideoUpdate(const unsigned char* buffer) { } 
 int FCEUD_ShowStatusIcon(void) {return 0;} 
-int FCEUI_AviIsRecording(void) {return 0;}
+bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { } 
 bool FCEUD_PauseAfterPlayback() { return false; }
 bool moviePleaseLogSavestates = false;

@@ -27,6 +27,7 @@
 #include "sdl-video.h"
 
 #include "../common/cheat.h"
+#include "../../movie.h"
 #include "../../fceu.h"
 
 
@@ -356,7 +357,7 @@ GetMouseData(uint32 *d)
     uint32 t;
 
     // Don't get input when a movie is playing back
-    if(FCEUI_IsMovieActive() < 0)
+    if(FCEUMOV_Mode(MOVIEMODE_PLAY))
         return;
 
     // retrieve the state of the mouse from SDL
@@ -513,7 +514,7 @@ static void
 UpdateGamepad(void)
 {
     // don't update during movie playback
-    if(FCEUI_IsMovieActive() < 0) {
+    if(FCEUMOV_Mode(MOVIEMODE_PLAY)) {
         return;
     }
 
@@ -577,7 +578,7 @@ static uint32
 UpdatePPadData(int w)
 {
     // don't update if a movie is playing
-    if(FCEUI_IsMovieActive() < 0) {
+    if(FCEUMOV_Mode(MOVIEMODE_PLAY)) {
         return 0;
     }
 
