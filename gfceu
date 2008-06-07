@@ -109,8 +109,16 @@ except ImportError:
 # GFCEU Functions
 
 class game_options:
+  # sound
   sound_check = True
+  soundq_check = True
+  soundrate_entry = 11000
+  
+  # video
   fullscreen_check = False
+  xscale_spin = 2
+  yscale_spin = 2
+  bpp_combo = 32
   extra_entry = ''
   romfile = ''
   opengl_check = False
@@ -208,8 +216,13 @@ def set_options():
   """
   global xml
   options.romfile = widgets['rom_entry'].get_text()
-  options.sound_check = widgets['sound_check'].get_active()
   
+  # sound
+  options.sound_check = widgets['sound_check'].get_active()
+  options.soundq_check = widgets['soundq_check'].get_active()
+  options.soundrate_entry = widgets['soundrate_entry'].get_text()
+  
+  # video
   options.fullscreen_check = widgets['fullscreen_check'].get_active()
   options.opengl_check = widgets['opengl_check'].get_active()
   
@@ -223,6 +236,7 @@ def set_options():
   options.join_pass = widgets['join_pass'].get_text()
   options.host_port = widgets['host_port'].get_value()
   options.host_pass = widgets['host_pass'].get_text()
+  
 
   
 def launch(passed, local=False):
@@ -233,6 +247,16 @@ def launch(passed, local=False):
     sound = '--sound 1 '
   else:
     sound = '--sound 0 '
+
+  if options.soundq_check:
+    soundq = '--soundq 1 '
+  else:
+    soundq = '--soundq 0 '
+    
+  if options.soundrate_entry:
+    soundrate = '--soundrate ' + options.soundrate_entry + ' '
+  else:
+    soundrate = ' '
     
   if options.fullscreen_check:
     fullscreen = '--fullscreen 1 '
@@ -266,7 +290,7 @@ def launch(passed, local=False):
   else:
     opengl = '--opengl 0 '
   
-  command =  fceux_binary +' '+ sound + fullscreen +\
+  command =  fceux_binary +' '+ sound + soundq + soundrate + fullscreen +\
   network + opengl + options.extra_entry + ' '+ passed
   gfceu_message('Command: ' + command)
 
