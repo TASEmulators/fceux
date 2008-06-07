@@ -159,7 +159,11 @@ def give_widgets():
   global xml, options
   try:
     widgets['rom_entry'].set_text(options.romfile)
+    
+    # sound
     widgets['sound_check'].set_active(options.sound_check)
+    widgets['soundq_check'].set_active(options.soundq_check)
+    widgets['soundrate_entry'].set_text(options.soundrate_entry)
     
     widgets['fullscreen_check'].set_active(options.fullscreen_check)
     widgets['opengl_check'].set_active(options.opengl_check)
