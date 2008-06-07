@@ -21,7 +21,8 @@
 
 #include "mapinc.h"
 
-static uint8 IRQCount, IRQPre;
+static uint8 IRQCount;
+//static uint8 IRQPre;
 static uint8 IRQa;
 static uint8 prg_reg[2];
 static uint8 chr_reg[8];
@@ -56,8 +57,8 @@ static void Sync(void)
   setprg8(0xA000,prg_reg[1]);
   int i;
   for(i=0; i<8; i++)
-     setchr1(i<<10,chr_reg[i]);     
-  setmirror(mirr^1);   
+     setchr1(i<<10,chr_reg[i]);
+  setmirror(mirr^1);
 }
 
 static DECLFW(M222Write)

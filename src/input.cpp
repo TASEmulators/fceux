@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 1998 BERO 
+ *  Copyright (C) 1998 BERO
  *  Copyright (C) 2002 Xodnizel
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,10 +36,10 @@
 #include "vsuni.h"
 #include "fds.h"
 
-// qfox: For UpdateExternalButton(), called when the 
+// qfox: For UpdateExternalButton(), called when the
 //       botmode state changes, to update a label in gui.
 #ifdef WIN32
-	#include "drivers/win/basicbot.h" 
+	#include "drivers/win/basicbot.h"
 #endif // WIN32
 
 extern INPUTC *FCEU_InitZapper(int w);
@@ -97,7 +97,7 @@ static INPUTCFC *FCExp=0;
 static uint8 ReadGPVS(int w)
 {
                 uint8 ret=0;
-  
+
                 if(joy_readbit[w]>=8)
                  ret=1;
                 else
@@ -137,7 +137,7 @@ static DECLFR(JPRead)
 
 	if(JPorts[A&1]->Read)
 	 ret|=JPorts[A&1]->Read(A&1);
-	
+
 	if(FCExp)
 	 if(FCExp->Read)
 	  ret=FCExp->Read(A&1,ret);
@@ -294,27 +294,27 @@ void FCEU_UpdateInput(void)
 }
 
 static DECLFR(VSUNIRead0)
-{ 
-        uint8 ret=0; 
-  
-        if(JPorts[0]->Read)   
+{
+        uint8 ret=0;
+
+        if(JPorts[0]->Read)
          ret|=(JPorts[0]->Read(0))&1;
- 
+
         ret|=(vsdip&3)<<3;
         if(coinon)
          ret|=0x4;
         return ret;
 }
- 
+
 static DECLFR(VSUNIRead1)
 {
         uint8 ret=0;
- 
+
         if(JPorts[1]->Read)
          ret|=(JPorts[1]->Read(1))&1;
-        ret|=vsdip&0xFC;   
+        ret|=vsdip&0xFC;
         return ret;
-} 
+}
 
 static void SLHLHook(uint8 *bg, uint8 *spr, uint32 linets, int final)
 {
@@ -323,7 +323,7 @@ static void SLHLHook(uint8 *bg, uint8 *spr, uint32 linets, int final)
  for(x=0;x<2;x++)
   if(JPorts[x]->SLHook)
    JPorts[x]->SLHook(x,bg,spr,linets,final);
- if(FCExp) 
+ if(FCExp)
   if(FCExp->SLHook)
    FCExp->SLHook(bg,spr,linets,final);
 }
@@ -399,7 +399,7 @@ static void SetInputStuffFC(void)
 }
 
 void InitializeInput(void)
-{ 
+{
 	memset(joy_readbit,0,sizeof(joy_readbit));
         memset(joy,0,sizeof(joy));
 	LastStrobe = 0;
@@ -408,7 +408,7 @@ void InitializeInput(void)
         {
          SetReadHandler(0x4016,0x4016,VSUNIRead0);
          SetReadHandler(0x4017,0x4017,VSUNIRead1);
-        } 
+        }
         else
          SetReadHandler(0x4016,0x4017,JPRead);
 
@@ -482,13 +482,13 @@ void FCEU_QSimpleCommand(int cmd)
 }
 
 void FCEUI_FDSSelect(void)
-{ 
+{
  FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
-} 
+}
 
 //mbg merge 7/17/06 changed to void fn(void) to make it an EMUCMDFN
 void FCEUI_FDSInsert(void)
-{ 
+{
  FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
  //return(1);
 }
@@ -545,8 +545,8 @@ static void CommandStateSave(void);
 static void CommandSelectSaveSlot(void);
 static void CommandEmulationSpeed(void);
 // static void CommandMovieSelectSlot(void);
-static void CommandMovieRecord(void);
-static void CommandMovieReplay(void);
+//static void CommandMovieRecord(void);
+//static void CommandMovieReplay(void);
 static void CommandSoundAdjust(void);
 static void CommandUsePreset(void);
 static void ViewSlots(void);
@@ -753,7 +753,7 @@ static void CommandStateLoad(void)
 		FCEUI_LoadState(0);
 }
 
-static void CommandMovieRecord(void)
+/*static void CommandMovieRecord(void)
 {
 	FCEUI_SaveMovie(0, 0);
 }
@@ -761,7 +761,7 @@ static void CommandMovieRecord(void)
 static void CommandMovieReplay(void)
 {
 	FCEUI_LoadMovie(0, 0, 0);
-}
+}*/
 
 static void CommandSoundAdjust(void)
 {

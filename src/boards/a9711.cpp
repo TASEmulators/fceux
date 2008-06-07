@@ -21,7 +21,7 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 m_perm[8] = {0, 1, 0, 3, 0, 5, 6, 7};
+//static uint8 m_perm[8] = {0, 1, 0, 3, 0, 5, 6, 7};
 
 static void UNLA9711PW(uint32 A, uint8 V)
 {

@@ -78,9 +78,7 @@ CreateDirs(const std::string &dir)
 static void
 GetBaseDirectory(std::string &dir)
 {
-    char *home, *lastBS;
-
-    home = getenv("HOME");
+    char *home = getenv("HOME");
     if(home) {
         dir = std::string(home) + "/.fceultra";
     } else {
@@ -88,7 +86,7 @@ GetBaseDirectory(std::string &dir)
         home = new char[MAX_PATH + 1];
         GetModuleFileName(NULL, home, MAX_PATH + 1);
 
-        lastBS = strrchr(home,'\\');
+        char *lastBS = strrchr(home,'\\');
         if(lastBS) {
             *lastBS = 0;
         }
@@ -305,7 +303,7 @@ UpdateEMUCore(Config *config)
     config->getOption("SDL.ScanLineStart", &start);
     config->getOption("SDL.ScanLineEnd", &end);
 
-#if DOING_SCANLINE_CHECKS     
+#if DOING_SCANLINE_CHECKS
     for(int i = 0; i < 2; x++) {
         if(srendlinev[x]<0 || srendlinev[x]>239) srendlinev[x]=0;
         if(erendlinev[x]<srendlinev[x] || erendlinev[x]>239) erendlinev[x]=239;

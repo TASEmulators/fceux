@@ -61,7 +61,7 @@ extern Config *g_config;
 #define SOL_TCP IPPROTO_TCP
 #endif
 
-int FCEUDnetplay=0; 
+int FCEUDnetplay=0;
 
 static int s_Socket = -1;
 
@@ -77,7 +77,7 @@ en32(uint8 *buf,
 
 /*
 static uint32 de32(uint8 *morp)
-{ 
+{
  return(morp[0]|(morp[1]<<8)|(morp[2]<<16)|(morp[3]<<24));
 }
 */
@@ -90,7 +90,7 @@ FCEUD_NetworkConnect(void)
     unsigned long hadr;
     int TSocket, tcpopt, error;
     int netdivisor;
-  
+
     // get any required configuration variables
     int port, localPlayers;
     std::string server, username, password, key;
@@ -121,7 +121,7 @@ FCEUD_NetworkConnect(void)
 #elif WIN32
     error = setsockopt(TSocket, SOL_TCP, TCP_NODELAY,
                        (char*)&tcpopt, sizeof(int));
-#else 
+#else
     error = setsockopt(TSocket, SOL_TCP, TCP_NODELAY, &tcpopt, sizeof(int));
 #endif
     if(error) {
@@ -144,7 +144,7 @@ FCEUD_NetworkConnect(void)
         }
         memcpy(&sockin.sin_addr, phostentb->h_addr, phostentb->h_length);
     }
- 
+
     sockin.sin_port = htons(port);
     puts("*** Connecting to remote host...");
     error = connect(TSocket, (struct sockaddr *)&sockin, sizeof(sockin));
@@ -160,17 +160,17 @@ FCEUD_NetworkConnect(void)
     puts("*** Sending initialization data to server...");
     uint8 *sendbuf;
     uint8 buf[5];
-    uint32 sblen, data;
+    uint32 sblen;
 
     sblen = 4 + 16 + 16 + 64 + 1 + username.size();
     sendbuf = (uint8 *)malloc(sblen);
     memset(sendbuf, 0, sblen);
-                           
+
     // XXX soules - should use htons instead of en32() from above!
-    //data = htons(sblen - 4);
+    //uint32 data = htons(sblen - 4);
     //memcpy(sendbuf, &data, sizeof(data));
     en32(sendbuf, sblen - 4);
-                           
+
     if(key.size()) {
         struct md5_context md5;
         uint8 md5out[16];
@@ -187,13 +187,13 @@ FCEUD_NetworkConnect(void)
     if(password.size()) {
         struct md5_context md5;
         uint8 md5out[16];
-   
+
         md5_starts(&md5);
         md5_update(&md5, (uint8 *)password.c_str(), password.size());
         md5_finish(&md5, md5out);
         memcpy(sendbuf + 4 + 16, md5out, 16);
     }
-                        
+
     memset(sendbuf + 4 + 16 + 16, 0, 64);
 
     sendbuf[4 + 16 + 16 + 64] = (uint8)localPlayers;
@@ -258,14 +258,14 @@ FCEUD_RecvData(void *data,
 {
     int size;
     NoWaiting &= ~2;
-   
+
     for(;;) {
         fd_set funfun;
         struct timeval popeye;
-    
+
         popeye.tv_sec=0;
         popeye.tv_usec=100000;
-  
+
         FD_ZERO(&funfun);
         FD_SET(s_Socket, &funfun);
 
@@ -277,7 +277,7 @@ FCEUD_RecvData(void *data,
         if(FD_ISSET(s_Socket,&funfun)) {
 #ifdef WIN32
             size = recv(s_Socket, (char*)data, len, 0);
-#else 
+#else
             size = recv(s_Socket, data, len, MSG_WAITALL);
 #endif
 

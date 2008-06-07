@@ -26,15 +26,15 @@ private:
 
 	//a vector that we have been told to use
 	std::vector<T>* usevec;
-	
+
 
 public:
 
 	memory_streambuf()
-		: length(0)
+		: buf(new T[capacity = 128])
 		, myBuf(true)
+		, length(0)
 		, ww(0)
-		, buf(new T[capacity = 128])
 		, usevec(0)
 	{
 		sync();
@@ -42,9 +42,9 @@ public:
 
 	//constructs a non-expandable streambuf around the provided buffer
 	memory_streambuf(T* usebuf, int buflength)
-		: length(buflength)
+		: buf(usebuf)
 		, myBuf(false)
-		, buf(usebuf)
+		, length(buflength)
 		, ww(0)
 		, usevec(0)
 	{
@@ -53,11 +53,11 @@ public:
 
 	//constructs an expandable streambuf around the provided buffer
 	memory_streambuf(std::vector<T>* _usevec)
-		: usevec(_usevec)
-		, length(_usevec->size())
-		, capacity(_usevec->size())
+		: capacity(_usevec->size())
 		, myBuf(false)
+		, length(_usevec->size())
 		, ww(0)
+		, usevec(_usevec)
 	{
 		if(length>0)
 			buf = &(*_usevec)[0];
@@ -71,10 +71,10 @@ public:
 		//only cleanup if we own the seq
 		if(myBuf) delete[] buf;
 	}
-	
+
 	//the logical length of the buffer
 	size_t size()
-	{ 
+	{
 		sync();
 		return length;
 	}
@@ -254,7 +254,7 @@ public:
 	memory_streambuf<char> streambuf;
 
 
-public: 
+public:
 
 	size_t size() { return streambuf.size(); }
 	char* buf() { return streambuf.getbuf(); }
