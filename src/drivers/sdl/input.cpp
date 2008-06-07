@@ -705,7 +705,7 @@ InitInputInterface()
             attrib = 1;
             break;
         }
-        FCEUI_SetInput(x, InputType[x], InputDPtr, attrib);
+        FCEUI_SetInput(x, (ESI)InputType[x], InputDPtr, attrib);
     }
 
     attrib    = 0;
@@ -749,7 +749,7 @@ InitInputInterface()
         break;
     }
 
-    FCEUI_SetInputFC(InputType[2], InputDPtr, attrib);
+    FCEUI_SetInputFC((ESIFC)InputType[2], InputDPtr, attrib);
     FCEUI_DisableFourScore(eoptions & EO_NOFOURSCORE);
 }
 
