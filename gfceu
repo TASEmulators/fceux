@@ -519,10 +519,12 @@ class WidgetsWrapper:
 # main
 if __name__ == '__main__':
   # Parse options
+  fceux_binary = find_binary('fceux')
   parser = OptionParser(version='%prog '+ version)
+  parser.add_option('-b', '--binary', action="store", type="string", dest="fceux_binary")
   parser.parse_args()
   
-  fceux_binary = find_binary('fceux')
+  
   if fceux_binary == None:
     gfceu_error('Could not find the fceu binary.\n\
     Ensure that FCE Ultra is installed and in the $PATH.\n\
