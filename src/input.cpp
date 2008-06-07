@@ -1,23 +1,23 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 1998 BERO
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 1998 BERO
+*  Copyright (C) 2002 Xodnizel
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include <string>
 #include <string.h>
@@ -31,6 +31,7 @@
 #include "movie.h"
 #include "state.h"
 #include "input/zapper.h"
+//#include "input/basic.h"
 
 #include "input.h"
 #include "vsuni.h"
@@ -39,9 +40,11 @@
 // qfox: For UpdateExternalButton(), called when the
 //       botmode state changes, to update a label in gui.
 #ifdef WIN32
-	#include "drivers/win/basicbot.h"
+#include "drivers/win/basicbot.h"
 #endif // WIN32
 
+//it is easier to declare these input drivers extern here than include a bunch of files
+//-------------
 extern INPUTC *FCEU_InitZapper(int w);
 extern INPUTC *FCEU_InitPowerpadA(int w);
 extern INPUTC *FCEU_InitPowerpadB(int w);
@@ -59,6 +62,7 @@ extern INPUTCFC *FCEU_InitFamilyTrainerB(void);
 extern INPUTCFC *FCEU_InitOekaKids(void);
 extern INPUTCFC *FCEU_InitTopRider(void);
 extern INPUTCFC *FCEU_InitBarcodeWorld(void);
+//---------------
 
 static uint8 joy_readbit[2];
 static uint8 joy[4]={0,0,0,0};
@@ -69,78 +73,42 @@ static int BotMode = 0;
 static uint32 BotPointer = 0; //mbg merge 7/18/06 changed to uint32
 #endif
 
-/* This function is a quick hack to get the NSF player to use emulated gamepad
-   input.
-*/
+//This function is a quick hack to get the NSF player to use emulated gamepad input.
 uint8 FCEU_GetJoyJoy(void)
 {
- return(joy[0]|joy[1]|joy[2]|joy[3]);
+	return(joy[0]|joy[1]|joy[2]|joy[3]);
 }
+
 extern uint8 coinon;
 
-static int FSDisable=0;  /* Set to 1 if NES-style four-player adapter is disabled. */
-static int JPAttrib[2]={0,0};
-static int JPType[2]={0,0};
-static void *InputDataPtr[2];
+static bool FSDisable=false;  // Set to true if NES-style four-player adapter is disabled.
 
-static int JPAttribFC=0;
-static int JPTypeFC=0;
-static void *InputDataPtrFC;
-
-void (*InputScanlineHook)(uint8 *bg, uint8 *spr, uint32 linets, int final);
-
-
-static INPUTC DummyJPort={0,0,0,0,0};
-static INPUTC *JPorts[2]={&DummyJPort,&DummyJPort};
-static INPUTCFC *FCExp=0;
-
-static uint8 ReadGPVS(int w)
+static struct JOYPORT
 {
-                uint8 ret=0;
+	int attrib;
+	ESI type;
+	void* ptr;
+	INPUTC* driver;
+} joyports[2];
 
-                if(joy_readbit[w]>=8)
-                 ret=1;
-                else
-                {
-                 ret = ((joy[w]>>(joy_readbit[w]))&1);
-                 if(!fceuindbg)
-                  joy_readbit[w]++;
-                }
-                return ret;
-}
-
-static uint8 ReadGP(int w)
+static struct FCPORT
 {
-                uint8 ret;
+	int attrib;
+	ESIFC type;
+	void* ptr;
+	INPUTCFC* driver;
+} portFC;
 
-                if(joy_readbit[w]>=8)
-                 ret = ((joy[2+w]>>(joy_readbit[w]&7))&1);
-                else
-                 ret = ((joy[w]>>(joy_readbit[w]))&1);
-                if(joy_readbit[w]>=16) ret=0;
-                if(FSDisable)
-		{
-	  	 if(joy_readbit[w]>=8) ret|=1;
-		}
-		else
-		{
-                 if(joy_readbit[w]==19-w) ret|=1;
-		}
-		if(!fceuindbg)
-		 joy_readbit[w]++;
-                return ret;
-}
+
 
 static DECLFR(JPRead)
 {
 	uint8 ret=0;
 
-	if(JPorts[A&1]->Read)
-	 ret|=JPorts[A&1]->Read(A&1);
+	ret|=joyports[A&1].driver->Read(A&1);
 
-	if(FCExp)
-	 if(FCExp->Read)
-	  ret=FCExp->Read(A&1,ret);
+	if(portFC.driver)
+		ret = portFC.driver->Read(A&1,ret);
 
 	ret|=X.DB&0xC0;
 	return(ret);
@@ -148,37 +116,106 @@ static DECLFR(JPRead)
 
 static DECLFW(B4016)
 {
-	if(FCExp)
-	 if(FCExp->Write)
-	  FCExp->Write(V&7);
+	if(portFC.driver)
+		portFC.driver->Write(V&7);
 
-	if(JPorts[0]->Write)
-	 JPorts[0]->Write(V&1);
-        if(JPorts[1]->Write)
-         JPorts[1]->Write(V&1);
+	for(int i=0;i<2;i++)
+		joyports[i].driver->Write(V&1);
 
-        if((LastStrobe&1) && (!(V&1)))
-        {
-	 /* This strobe code is just for convenience.  If it were
-	    with the code in input / *.c, it would more accurately represent
-	    what's really going on.  But who wants accuracy? ;)
-	    Seriously, though, this shouldn't be a problem.
-	 */
-	 if(JPorts[0]->Strobe)
-	  JPorts[0]->Strobe(0);
-         if(JPorts[1]->Strobe)
-          JPorts[1]->Strobe(1);
-	 if(FCExp)
-	  if(FCExp->Strobe)
-	   FCExp->Strobe();
-	 }
-         LastStrobe=V&0x1;
+	if((LastStrobe&1) && (!(V&1)))
+	{
+		//old comment:
+		//This strobe code is just for convenience.  If it were
+		//with the code in input / *.c, it would more accurately represent
+		//what's really going on.  But who wants accuracy? ;)
+		//Seriously, though, this shouldn't be a problem.
+		//new comment:
+		
+		//mbg 6/7/08 - I guess he means that the input drivers could track the strobing themselves
+		//I dont see why it is unreasonable here.
+		for(int i=0;i<2;i++)
+			joyports[i].driver->Strobe(0);
+		if(portFC.driver)
+			portFC.driver->Strobe();
+	}
+	LastStrobe=V&0x1;
 }
 
 static void StrobeGP(int w)
 {
 	joy_readbit[w]=0;
 }
+
+//a main joystick port driver representing the case where nothing is plugged in
+static INPUTC DummyJPort={0,0,0,0,0};
+//and an expansion port driver for the same ting
+static INPUTCFC DummyPortFC={0,0,0,0,0};
+
+
+//--------4 player driver for expansion port--------
+static uint8 F4ReadBit[2];
+static void StrobeFami4(void)
+{
+	F4ReadBit[0]=F4ReadBit[1]=0;
+}
+
+static uint8 ReadFami4(int w, uint8 ret)
+{
+	ret&=1;
+
+	ret |= ((joy[2+w]>>(F4ReadBit[w]))&1)<<1;
+	if(F4ReadBit[w]>=8) ret|=2;
+	else F4ReadBit[w]++;
+
+	return(ret);
+}
+
+static INPUTCFC FAMI4C={ReadFami4,0,StrobeFami4,0,0,0};
+//------------------
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+static uint8 ReadGPVS(int w)
+{
+	uint8 ret=0;
+
+	if(joy_readbit[w]>=8)
+		ret=1;
+	else
+	{
+		ret = ((joy[w]>>(joy_readbit[w]))&1);
+		if(!fceuindbg)
+			joy_readbit[w]++;
+	}
+	return ret;
+}
+
+//basic joystick port driver
+static uint8 ReadGP(int w)
+{
+	uint8 ret;
+
+	if(joy_readbit[w]>=8)
+		ret = ((joy[2+w]>>(joy_readbit[w]&7))&1);
+	else
+		ret = ((joy[w]>>(joy_readbit[w]))&1);
+	if(joy_readbit[w]>=16) ret=0;
+	if(FSDisable)
+	{
+		if(joy_readbit[w]>=8) ret|=1;
+	}
+	else
+	{
+		if(joy_readbit[w]==19-w) ret|=1;
+	}
+	if(!fceuindbg)
+		joy_readbit[w]++;
+	return ret;
+}
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
+
 
 static INPUTC GPC={ReadGP,0,StrobeGP,0,0,0};
 static INPUTC GPCVS={ReadGPVS,0,StrobeGP,0,0,0};
@@ -191,22 +228,18 @@ int FCEU_BotMode()
 void FCEU_SetBotMode(int x)
 {
 	BotMode = x;
-	#ifdef WIN32
-		// qfox: update gui in basicbot
-		UpdateExternalButton();
-	#endif // WIN32
+#ifdef WIN32
+	// qfox: update gui in basicbot
+	UpdateExternalButton();
+#endif // WIN32
 }
 
 void FCEU_DrawInput(uint8 *buf)
 {
- int x;
-
- for(x=0;x<2;x++)
-  if(JPorts[x]->Draw)
-   JPorts[x]->Draw(x,buf,JPAttrib[x]);
- if(FCExp)
-  if(FCExp->Draw)
-   FCExp->Draw(buf,JPAttribFC);
+	for(int pad=0;pad<2;pad++)
+		joyports[pad].driver->Draw(pad,buf,joyports[pad].attrib);
+	if(portFC.driver)
+		portFC.driver->Draw(buf,portFC.attrib);
 }
 
 void FCEU_UpdateBot()
@@ -252,33 +285,28 @@ void FCEU_UpdateInput(void)
 {
 	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && !BotMode)
 	{
-		int x;
-
-		for(x=0;x<2;x++)
+		for(int port=0;port<2;port++)
 		{
-			switch(JPType[x])
+			switch(joyports[port].type)
 			{
 			case SI_GAMEPAD:
-				if(!x)
+				if(port==0)
 				{
-					joy[0]=*(uint32 *)InputDataPtr[0];
-					joy[2]=*(uint32 *)InputDataPtr[0] >> 16;
+					joy[0]=*(uint32 *)joyports[0].ptr;
+					joy[2]=*(uint32 *)joyports[0].ptr >> 16;
 				}
 				else
 				{
-					joy[1]=*(uint32 *)InputDataPtr[1] >>8;
-					joy[3]=*(uint32 *)InputDataPtr[1] >>24;
+					joy[1]=*(uint32 *)joyports[1].ptr >>8;
+					joy[3]=*(uint32 *)joyports[1].ptr >>24;
 				}
 				break;
 			default:
-				if(JPorts[x]->Update)
-					JPorts[x]->Update(x,InputDataPtr[x],JPAttrib[x]);
+				joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
 				break;
 			}
 		}
-		if(FCExp)
-			if(FCExp->Update)
-				FCExp->Update(InputDataPtrFC,JPAttribFC);
+		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
 	if(GameInfo->type==GIT_VSUNI)
@@ -295,157 +323,168 @@ void FCEU_UpdateInput(void)
 
 static DECLFR(VSUNIRead0)
 {
-        uint8 ret=0;
+	uint8 ret=0;
 
-        if(JPorts[0]->Read)
-         ret|=(JPorts[0]->Read(0))&1;
+	ret|=(joyports[0].driver->Read(0))&1;
 
-        ret|=(vsdip&3)<<3;
-        if(coinon)
-         ret|=0x4;
-        return ret;
+	ret|=(vsdip&3)<<3;
+	if(coinon)
+		ret|=0x4;
+	return ret;
 }
 
 static DECLFR(VSUNIRead1)
 {
-        uint8 ret=0;
+	uint8 ret=0;
 
-        if(JPorts[1]->Read)
-         ret|=(JPorts[1]->Read(1))&1;
-        ret|=vsdip&0xFC;
-        return ret;
+	ret|=(joyports[1].driver->Read(1))&1;
+	ret|=vsdip&0xFC;
+	return ret;
 }
 
-static void SLHLHook(uint8 *bg, uint8 *spr, uint32 linets, int final)
-{
- int x;
 
- for(x=0;x<2;x++)
-  if(JPorts[x]->SLHook)
-   JPorts[x]->SLHook(x,bg,spr,linets,final);
- if(FCExp)
-  if(FCExp->SLHook)
-   FCExp->SLHook(bg,spr,linets,final);
+
+//calls from the ppu;
+//calls the SLHook for any driver that needs it
+void InputScanlineHook(uint8 *bg, uint8 *spr, uint32 linets, int final)
+{
+	for(int port=0;port<2;port++)
+		joyports[port].driver->SLHook(port,bg,spr,linets,final);
+	portFC.driver->SLHook(bg,spr,linets,final);
 }
 
-static void CheckSLHook(void)
+//binds JPorts[pad] to the driver specified in JPType[pad]
+static void SetInputStuff(int port)
 {
-        InputScanlineHook=0;
-        if(JPorts[0]->SLHook || JPorts[1]->SLHook)
-         InputScanlineHook=SLHLHook;
-        if(FCExp)
-         if(FCExp->SLHook)
-          InputScanlineHook=SLHLHook;
+	switch(joyports[port].type)
+	{
+	case SI_GAMEPAD:
+		if(GameInfo->type==GIT_VSUNI)
+			joyports[port].driver = &GPCVS;
+		else
+			joyports[port].driver= &GPC;
+		break;
+	case SI_ARKANOID:
+		joyports[port].driver=FCEU_InitArkanoid(port);
+		break;
+	case SI_ZAPPER:
+		joyports[port].driver=FCEU_InitZapper(port);
+		break;
+	case SI_POWERPADA:
+		joyports[port].driver=FCEU_InitPowerpadA(port);
+		break;
+	case SI_POWERPADB:
+		joyports[port].driver=FCEU_InitPowerpadB(port);
+		break;
+	case SI_NONE:
+		joyports[port].driver=&DummyJPort;
+		break;
+	}
 }
 
-static void SetInputStuff(int x)
+static void SetInputStuffFC()
 {
- 	 switch(JPType[x])
-	 {
-	  case SI_GAMEPAD:
-           if(GameInfo->type==GIT_VSUNI)
-	    JPorts[x] = &GPCVS;
-	   else
-	    JPorts[x]=&GPC;
-	  break;
-	  case SI_ARKANOID:JPorts[x]=FCEU_InitArkanoid(x);break;
-	  case SI_ZAPPER:JPorts[x]=FCEU_InitZapper(x);break;
-          case SI_POWERPADA:JPorts[x]=FCEU_InitPowerpadA(x);break;
-	  case SI_POWERPADB:JPorts[x]=FCEU_InitPowerpadB(x);break;
-	  case SI_NONE:JPorts[x]=&DummyJPort;break;
-         }
-
-	CheckSLHook();
+	switch(portFC.type)
+	{
+	case SIFC_NONE: 
+		portFC.driver=&DummyPortFC;
+		break;
+	case SIFC_ARKANOID:
+		portFC.driver=FCEU_InitArkanoidFC();
+		break;
+	case SIFC_SHADOW:
+		portFC.driver=FCEU_InitSpaceShadow();
+		break;
+	case SIFC_OEKAKIDS:
+		portFC.driver=FCEU_InitOekaKids();
+		break;
+	case SIFC_4PLAYER:
+		portFC.driver=&FAMI4C;
+		memset(&F4ReadBit,0,sizeof(F4ReadBit));
+		break;
+	case SIFC_FKB:
+		portFC.driver=FCEU_InitFKB();
+		break;
+	case SIFC_SUBORKB:
+		portFC.driver=FCEU_InitSuborKB();
+		break;
+	case SIFC_HYPERSHOT:
+		portFC.driver=FCEU_InitHS();
+		break;
+	case SIFC_MAHJONG:
+		portFC.driver=FCEU_InitMahjong();
+		break;
+	case SIFC_QUIZKING:
+		portFC.driver=FCEU_InitQuizKing();
+		break;
+	case SIFC_FTRAINERA:
+		portFC.driver=FCEU_InitFamilyTrainerA();
+		break;
+	case SIFC_FTRAINERB:
+		portFC.driver=FCEU_InitFamilyTrainerB();
+		break;
+	case SIFC_BWORLD:
+		portFC.driver=FCEU_InitBarcodeWorld();
+		break;
+	case SIFC_TOPRIDER:
+		portFC.driver=FCEU_InitTopRider();
+		break;
+	}
 }
 
-static uint8 F4ReadBit[2];
-static void StrobeFami4(void)
+void FCEUI_SetInput(int port, ESI type, void *ptr, int attrib)
 {
- F4ReadBit[0]=F4ReadBit[1]=0;
+	joyports[port].attrib = attrib;
+	joyports[port].type = type;
+	joyports[port].ptr = ptr;
+	SetInputStuff(port);
 }
 
-static uint8 ReadFami4(int w, uint8 ret)
+void FCEUI_SetInputFC(ESIFC type, void *ptr, int attrib)
 {
- ret&=1;
-
- ret |= ((joy[2+w]>>(F4ReadBit[w]))&1)<<1;
- if(F4ReadBit[w]>=8) ret|=2;
- else F4ReadBit[w]++;
-
- return(ret);
-}
-
-static INPUTCFC FAMI4C={ReadFami4,0,StrobeFami4,0,0,0};
-static void SetInputStuffFC(void)
-{
-        switch(JPTypeFC)
-        {
-         case SIFC_NONE:FCExp=0;break;
-         case SIFC_ARKANOID:FCExp=FCEU_InitArkanoidFC();break;
-	 case SIFC_SHADOW:FCExp=FCEU_InitSpaceShadow();break;
-	 case SIFC_OEKAKIDS:FCExp=FCEU_InitOekaKids();break;
-         case SIFC_4PLAYER:FCExp=&FAMI4C;memset(&F4ReadBit,0,sizeof(F4ReadBit));break;
-	 case SIFC_FKB:FCExp=FCEU_InitFKB();break;
-   case SIFC_SUBORKB:FCExp=FCEU_InitSuborKB();break;
-	 case SIFC_HYPERSHOT:FCExp=FCEU_InitHS();break;
-	 case SIFC_MAHJONG:FCExp=FCEU_InitMahjong();break;
-	 case SIFC_QUIZKING:FCExp=FCEU_InitQuizKing();break;
-	 case SIFC_FTRAINERA:FCExp=FCEU_InitFamilyTrainerA();break;
-	 case SIFC_FTRAINERB:FCExp=FCEU_InitFamilyTrainerB();break;
-	 case SIFC_BWORLD:FCExp=FCEU_InitBarcodeWorld();break;
-	 case SIFC_TOPRIDER:FCExp=FCEU_InitTopRider();break;
-        }
-	CheckSLHook();
-}
-
-void InitializeInput(void)
-{
-	memset(joy_readbit,0,sizeof(joy_readbit));
-        memset(joy,0,sizeof(joy));
-	LastStrobe = 0;
-
-        if(GameInfo->type==GIT_VSUNI)
-        {
-         SetReadHandler(0x4016,0x4016,VSUNIRead0);
-         SetReadHandler(0x4017,0x4017,VSUNIRead1);
-        }
-        else
-         SetReadHandler(0x4016,0x4017,JPRead);
-
-        SetWriteHandler(0x4016,0x4016,B4016);
-
-        SetInputStuff(0);
-        SetInputStuff(1);
+	portFC.attrib = attrib;
+	portFC.type = type;
+	portFC.ptr = ptr;
 	SetInputStuffFC();
 }
 
-void FCEUI_SetInput(int port, int type, void *ptr, int attrib)
+
+//initializes the input system to power-on state
+void InitializeInput(void)
 {
- JPAttrib[port]=attrib;
- JPType[port]=type;
- InputDataPtr[port]=ptr;
- SetInputStuff(port);
+	memset(joy_readbit,0,sizeof(joy_readbit));
+	memset(joy,0,sizeof(joy));
+	LastStrobe = 0;
+
+	if(GameInfo->type==GIT_VSUNI)
+	{
+		SetReadHandler(0x4016,0x4016,VSUNIRead0);
+		SetReadHandler(0x4017,0x4017,VSUNIRead1);
+	}
+	else
+		SetReadHandler(0x4016,0x4017,JPRead);
+
+	SetWriteHandler(0x4016,0x4016,B4016);
+
+	//force the port drivers to be setup
+	SetInputStuff(0);
+	SetInputStuff(1);
+	SetInputStuffFC();
 }
 
-void FCEUI_DisableFourScore(int s)
-{
- FSDisable=s;
-}
 
-void FCEUI_SetInputFC(int type, void *ptr, int attrib)
+
+void FCEUI_DisableFourScore(bool disabled)
 {
- JPAttribFC=attrib;
- JPTypeFC=type;
- InputDataPtrFC=ptr;
- SetInputStuffFC();
+	FSDisable = disabled;
 }
 
 SFORMAT FCEUCTRL_STATEINFO[]={
-  { joy_readbit, 2, "JYRB"},
-  { joy, 4, "JOYS"},
-  { &LastStrobe, 1, "LSTS"},
-  { 0 }
- };
+	{ joy_readbit, 2, "JYRB"},
+	{ joy, 4, "JOYS"},
+	{ &LastStrobe, 1, "LSTS"},
+	{ 0 }
+};
 
 void FCEU_DoSimpleCommand(int cmd)
 {
@@ -471,59 +510,55 @@ void FCEU_DoSimpleCommand(int cmd)
 
 void FCEU_QSimpleCommand(int cmd)
 {
- if(FCEUnetplay)
-  FCEUNET_SendCommand(cmd, 0);
- else
- {
-  FCEU_DoSimpleCommand(cmd);
-  if(FCEUMOV_Mode(MOVIEMODE_RECORD))
-   FCEUMOV_AddCommand(cmd);
- }
+	if(FCEUnetplay)
+		FCEUNET_SendCommand(cmd, 0);
+	else
+	{
+		FCEU_DoSimpleCommand(cmd);
+		if(FCEUMOV_Mode(MOVIEMODE_RECORD))
+			FCEUMOV_AddCommand(cmd);
+	}
 }
 
 void FCEUI_FDSSelect(void)
 {
- FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
+	FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
 }
 
 //mbg merge 7/17/06 changed to void fn(void) to make it an EMUCMDFN
 void FCEUI_FDSInsert(void)
 {
- FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
- //return(1);
+	FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
+	//return(1);
 }
 
 /*
 int FCEUI_FDSEject(void)
 {
-    FCEU_QSimpleCommand(FCEUNPCMD_FDSEJECT);
-    return(1);
+FCEU_QSimpleCommand(FCEUNPCMD_FDSEJECT);
+return(1);
 }
 */
 void FCEUI_VSUniToggleDIP(int w)
 {
- FCEU_QSimpleCommand(FCEUNPCMD_VSUNIDIP0 + w);
+	FCEU_QSimpleCommand(FCEUNPCMD_VSUNIDIP0 + w);
 }
 
 void FCEUI_VSUniCoin(void)
 {
- FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN);
+	FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN);
 }
 
-/**
-* Resets the NES
-**/
+//Resets the NES
 void FCEUI_ResetNES(void)
 {
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
 }
 
-/**
-* Powers off the NES
-**/
+//Powers off the NES
 void FCEUI_PowerNES(void)
 {
-        FCEU_QSimpleCommand(FCEUNPCMD_POWER);
+	FCEU_QSimpleCommand(FCEUNPCMD_POWER);
 }
 
 const char* FCEUI_CommandTypeNames[]=
@@ -604,7 +639,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_LOAD_STATE_SLOT_8,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 8", },
 	{ EMUCMD_LOAD_STATE_SLOT_9,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 9", },
 
-/*	{ EMUCMD_MOVIE_SLOT_0,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 0", },
+	/*	{ EMUCMD_MOVIE_SLOT_0,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 0", },
 	{ EMUCMD_MOVIE_SLOT_1,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 1", },
 	{ EMUCMD_MOVIE_SLOT_2,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 2", },
 	{ EMUCMD_MOVIE_SLOT_3,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 3", },
@@ -618,7 +653,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_SLOT_PREV,				EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Previous Movie Slot", },
 	{ EMUCMD_MOVIE_RECORD,					EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie", },*/
 	{ EMUCMD_MOVIE_RECORD_TO,				EMUCMDTYPE_MOVIE,	FCEUD_MovieRecordTo, 0, 0, "Record Movie To...", },
-/*	{ EMUCMD_MOVIE_RECORD_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 0", },
+	/*	{ EMUCMD_MOVIE_RECORD_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 0", },
 	{ EMUCMD_MOVIE_RECORD_SLOT_1,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 1", },
 	{ EMUCMD_MOVIE_RECORD_SLOT_2,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 2", },
 	{ EMUCMD_MOVIE_RECORD_SLOT_3,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 3", },
@@ -630,7 +665,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_RECORD_SLOT_9,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 9", },
 	{ EMUCMD_MOVIE_REPLAY,					EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie", },*/
 	{ EMUCMD_MOVIE_REPLAY_FROM,				EMUCMDTYPE_MOVIE,	FCEUD_MovieReplayFrom, 0, 0, "Replay Movie From...", },
-/*	{ EMUCMD_MOVIE_REPLAY_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 0", },
+	/*	{ EMUCMD_MOVIE_REPLAY_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 0", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_1,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 1", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_2,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 2", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_3,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 3", },
@@ -640,7 +675,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_REPLAY_SLOT_7,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 7", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_8,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 8", },
 	{ EMUCMD_MOVIE_REPLAY_SLOT_9,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 9", },
-*/
+	*/
 	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING,			EMUCMDTYPE_MOVIE,	FCEUI_MoviePlayFromBeginning, 0, 0, "Play Movie From Beginning", },
 	{ EMUCMD_MOVIE_STOP,					EMUCMDTYPE_MOVIE,	FCEUI_StopMovie, 0, 0, "Stop Movie", },
 	{ EMUCMD_MOVIE_READONLY_TOGGLE,			EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleReadOnly, 0, 0, "Toggle Read-Only", },
@@ -730,7 +765,7 @@ static void CommandSelectSaveSlot(void)
 
 static void CommandStateSave(void)
 {
-//	FCEU_PrintError("execcmd=%d, EMUCMD_SAVE_STATE_SLOT_0=%d, EMUCMD_SAVE_STATE_SLOT_9=%d", execcmd,EMUCMD_SAVE_STATE_SLOT_0,EMUCMD_SAVE_STATE_SLOT_9);
+	//	FCEU_PrintError("execcmd=%d, EMUCMD_SAVE_STATE_SLOT_0=%d, EMUCMD_SAVE_STATE_SLOT_9=%d", execcmd,EMUCMD_SAVE_STATE_SLOT_0,EMUCMD_SAVE_STATE_SLOT_9);
 	if(execcmd >= EMUCMD_SAVE_STATE_SLOT_0 && execcmd <= EMUCMD_SAVE_STATE_SLOT_9)
 	{
 		int oldslot=FCEUI_SelectState(execcmd-EMUCMD_SAVE_STATE_SLOT_0, 0);
@@ -755,12 +790,12 @@ static void CommandStateLoad(void)
 
 /*static void CommandMovieRecord(void)
 {
-	FCEUI_SaveMovie(0, 0);
+FCEUI_SaveMovie(0, 0);
 }
 
 static void CommandMovieReplay(void)
 {
-	FCEUI_LoadMovie(0, 0, 0);
+FCEUI_LoadMovie(0, 0, 0);
 }*/
 
 static void CommandSoundAdjust(void)

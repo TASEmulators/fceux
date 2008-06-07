@@ -9,7 +9,7 @@ bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 100
 extern FCEUGI *GameInfo;
 
 //retains the state of the readonly checkbox and stopframe value
-int replayReadOnlySetting;
+bool replayReadOnlySetting;
 int replayStopFrameSetting = 0;
 
 void RefreshThrottleFPS();
@@ -104,7 +104,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 	// remember the previous setting for the read-only checkbox
 	if(IsWindowEnabled(GetDlgItem(hwndDlg, IDC_CHECK_READONLY)))
-		replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+		replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
 	if(fn)
 	{
@@ -475,7 +475,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							// TODO: warn the user when they open a movie made with a different ROM
 							char* fn=GetReplayPath(hwndDlg);
 							//char TempArray[16]; //mbg merge 7/17/06 removed
-							replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED) ? 1 : 0;
+							replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 							
 							char offset1Str[32]={0};
 

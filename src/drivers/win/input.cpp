@@ -38,9 +38,8 @@
 
 LPDIRECTINPUT7 lpDI=0;
 
-/* UsrInputType[] is user-specified.  InputType[] is current
-        (game loading can override user settings)
-*/
+//UsrInputType[] is user-specified.  InputType[] is current
+//        (game/savestate/movie loading can override user settings)
 
 int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
 int InputType[3]={0,0,0};
@@ -50,17 +49,15 @@ int gametype=0;
 
 int InitDInput(void)
 {
- HRESULT ddrval;
+	HRESULT ddrval;
 
- //mbg merge 7/17/06 changed:
- //ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,&IID_IDirectInput7,(LPVOID *)&lpDI,0);
- ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,IID_IDirectInput7,(LPVOID *)&lpDI,0);
- if(ddrval!=DI_OK)
- {
-  FCEUD_PrintError("DirectInput: Error creating DirectInput object.");
-  return 0;
- }
- return 1;
+	ddrval=DirectInputCreateEx(fceu_hInstance,DIRECTINPUT_VERSION,IID_IDirectInput7,(LPVOID *)&lpDI,0);
+	if(ddrval!=DI_OK)
+	{
+		FCEUD_PrintError("DirectInput: Error creating DirectInput object.");
+		return 0;
+	}
+	return 1;
 }
 static void PresetExport(int preset);
 static void PresetImport(int preset);
@@ -69,45 +66,45 @@ static uint32 MouseData[3];
 static int screenmode=0;
 void InputScreenChanged(int fs)
 {
- int x;
- if(GameInfo)
- {
-  for(x=0;x<2;x++)
-   if(InputType[x]==SI_ZAPPER)
-    FCEUI_SetInput(x,SI_ZAPPER,MouseData,fs);
-  if(InputType[2]==SIFC_SHADOW)
-   FCEUI_SetInputFC(SIFC_SHADOW,MouseData,fs);
- }
- screenmode=fs;
+	int x;
+	if(GameInfo)
+	{
+		for(x=0;x<2;x++)
+			if(InputType[x]==SI_ZAPPER)
+				FCEUI_SetInput(x,SI_ZAPPER,MouseData,fs);
+		if(InputType[2]==SIFC_SHADOW)
+			FCEUI_SetInputFC(SIFC_SHADOW,MouseData,fs);
+	}
+	screenmode=fs;
 }
 
-/* Necessary for proper GUI functioning(configuring when a game isn't loaded). */
+//Necessary for proper GUI functioning(configuring when a game isn't loaded).
 void InputUserActiveFix(void)
 {
- int x;
- for(x=0;x<3;x++) InputType[x]=UsrInputType[x];
+	int x;
+	for(x=0;x<3;x++) InputType[x]=UsrInputType[x];
 }
 
 void ParseGIInput(FCEUGI *gi)
 { 
- InputType[0]=UsrInputType[0];
- InputType[1]=UsrInputType[1];
- InputType[2]=UsrInputType[2];
- 
- if(gi)
- {
-  if(gi->input[0]>=0)
-   InputType[0]=gi->input[0];
-  if(gi->input[1]>=0)
-   InputType[1]=gi->input[1];
-  if(gi->inputfc>=0)
-   InputType[2]=gi->inputfc;
-  cspec = gi->cspecial;
-  gametype=gi->type;
+	InputType[0]=UsrInputType[0];
+	InputType[1]=UsrInputType[1];
+	InputType[2]=UsrInputType[2];
 
-  InitOtherInput();
- }
- else cspec=gametype=0;
+	if(gi)
+	{
+		if(gi->input[0]>=0)
+			InputType[0]=gi->input[0];
+		if(gi->input[1]>=0)
+			InputType[1]=gi->input[1];
+		if(gi->inputfc>=0)
+			InputType[2]=gi->inputfc;
+		cspec = gi->cspecial;
+		gametype=gi->type;
+
+		InitOtherInput();
+	}
+	else cspec=gametype=0;
 }
 
 
@@ -407,7 +404,7 @@ void InitOtherInput(void)
                                 attrib=screenmode;
                                 break;
     }
-    FCEUI_SetInput(x,InputType[x],InputDPtr,attrib);
+    FCEUI_SetInput(x,(ESI)InputType[x],InputDPtr,attrib);
    }
 
    attrib=0;
@@ -428,8 +425,8 @@ void InitOtherInput(void)
     case SIFC_FTRAINERB:InputDPtr=&FTrainerData;break;
    }
 
-   FCEUI_SetInputFC(InputType[2],InputDPtr,attrib);
-   FCEUI_DisableFourScore(eoptions&EO_NOFOURSCORE);
+   FCEUI_SetInputFC((ESIFC)InputType[2],InputDPtr,attrib);
+   FCEUI_DisableFourScore((eoptions&EO_NOFOURSCORE)!=0);
 }
 
 ButtConfig fkbmap[0x48]=

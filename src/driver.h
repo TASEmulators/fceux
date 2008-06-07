@@ -68,33 +68,42 @@ void FCEUI_NTSCINC(void);
 void FCEUI_GetNTSCTH(int *tint, int *hue);
 void FCEUI_SetNTSCTH(int n, int tint, int hue);
 
-void FCEUI_SetInput(int port, int type, void *ptr, int attrib);
-void FCEUI_SetInputFC(int type, void *ptr, int attrib);
-void FCEUI_DisableFourScore(int s);
+//input device types for the standard joystick port
+enum ESI
+{
+	SI_NONE			= 0,
+	SI_GAMEPAD		= 1,
+	SI_ZAPPER		= 2,
+	SI_POWERPADA	= 3,
+	SI_POWERPADB	= 4,
+	SI_ARKANOID		= 5,
+	SI_MOUSE		= 6 //mbg merge 7/17/06 added
+};
+
+//input device types for the expansion port
+enum ESIFC
+{
+	SIFC_NONE		= 0,
+	SIFC_ARKANOID	= 1,
+	SIFC_SHADOW		= 2,
+	SIFC_4PLAYER	= 3,
+	SIFC_FKB		= 4,
+	SIFC_SUBORKB	= 5,
+	SIFC_HYPERSHOT	= 6,
+	SIFC_MAHJONG	= 7,
+	SIFC_QUIZKING	= 8,
+	SIFC_FTRAINERA	= 9,
+	SIFC_FTRAINERB	= 10,
+	SIFC_OEKAKIDS	= 11,
+	SIFC_BWORLD		= 12,
+	SIFC_TOPRIDER	= 13,
+};
+
+void FCEUI_SetInput(int port, ESI type, void *ptr, int attrib);
+void FCEUI_SetInputFC(ESIFC type, void *ptr, int attrib);
+void FCEUI_DisableFourScore(bool disabled);
 void FCEUI_UseInputPreset(int preset);
 
-#define SI_NONE      0
-#define SI_GAMEPAD   1
-#define SI_ZAPPER    2
-#define SI_POWERPADA  3
-#define SI_POWERPADB  4
-#define SI_ARKANOID   5
-#define SI_MOUSE   6 //mbg merge 7/17/06 added
-
-#define SIFC_NONE      0
-#define SIFC_ARKANOID  1
-#define SIFC_SHADOW      2
-#define SIFC_4PLAYER    3
-#define SIFC_FKB      4
-#define SIFC_SUBORKB    5
-#define SIFC_HYPERSHOT  6
-#define SIFC_MAHJONG  7
-#define SIFC_QUIZKING  8
-#define SIFC_FTRAINERA  9
-#define SIFC_FTRAINERB  10
-#define SIFC_OEKAKIDS  11
-#define SIFC_BWORLD      12
-#define SIFC_TOPRIDER  13
 
 #define SIS_NONE  0
 #define SIS_DATACH  1

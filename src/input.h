@@ -1,22 +1,42 @@
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
-typedef struct {
-        uint8 (*Read)(int w);
-	void (*Write)(uint8 v);
-        void (*Strobe)(int w);
-	void (*Update)(int w, void *data, int arg);
-	void (*SLHook)(int w, uint8 *bg, uint8 *spr, uint32 linets, int final);
-	void (*Draw)(int w, uint8 *buf, int arg);
+//The interface for standard joystick port device drivers
+typedef struct
+{
+	//these methods call the function pointers (or not, if they are null)
+	uint8 Read(int w) { if(_Read) return _Read(w); else return 0; }
+	void Write(uint8 w) { if(_Write) _Write(w); }
+	void Strobe(int w) { if(_Strobe) _Strobe(w); }
+	void Update(int w, void *data, int arg) { if(_Update) _Update(w,data,arg); }
+	void SLHook(int w, uint8 *bg, uint8 *spr, uint32 linets, int final) { if(_SLHook) _SLHook(w,bg,spr,linets,final); }
+	void Draw(int w, uint8 *buf, int arg) { if(_Draw) _Draw(w,buf,arg); }
+
+	uint8 (*_Read)(int w);
+	void (*_Write)(uint8 v);
+	void (*_Strobe)(int w);
+	void (*_Update)(int w, void *data, int arg);
+	void (*_SLHook)(int w, uint8 *bg, uint8 *spr, uint32 linets, int final);
+	void (*_Draw)(int w, uint8 *buf, int arg);
 } INPUTC;
 
-typedef struct {
-	uint8 (*Read)(int w, uint8 ret);
-	void (*Write)(uint8 v);
-	void (*Strobe)(void);
-        void (*Update)(void *data, int arg);
-        void (*SLHook)(uint8 *bg, uint8 *spr, uint32 linets, int final);
-        void (*Draw)(uint8 *buf, int arg);
+//The interface for the expansion port device drivers
+typedef struct
+{
+	//these methods call the function pointers (or not, if they are null)
+	uint8 Read(int w, uint8 ret) { if(_Read) return _Read(w,ret); else return ret; }
+	void Write(uint8 v) { if(_Write) _Write(v); }
+	void Strobe() { if(_Strobe) _Strobe(); }
+	void Update(void *data, int arg) { if(_Update) _Update(data,arg); }
+	void SLHook(uint8 *bg, uint8 *spr, uint32 linets, int final) { if(_SLHook) _SLHook(bg,spr,linets,final); }
+	void Draw(uint8 *buf, int arg) { if(_Draw) _Draw(buf,arg); }
+
+	uint8 (*_Read)(int w, uint8 ret);
+	void (*_Write)(uint8 v);
+	void (*_Strobe)();
+	void (*_Update)(void *data, int arg);
+	void (*_SLHook)(uint8 *bg, uint8 *spr, uint32 linets, int final);
+	void (*_Draw)(uint8 *buf, int arg);
 } INPUTCFC;
 
 void FCEU_DrawInput(uint8 *buf);
@@ -26,7 +46,9 @@ void FCEU_SetBotMode(int x);
 void InitializeInput(void);
 void FCEU_UpdateBot(void);
 extern void (*PStrobe[2])(void);
-extern void (*InputScanlineHook)(uint8 *bg, uint8 *spr, uint32 linets, int final);
+
+//called from PPU on scanline events.
+extern void InputScanlineHook(uint8 *bg, uint8 *spr, uint32 linets, int final);
 
 void FCEU_DoSimpleCommand(int cmd);
 

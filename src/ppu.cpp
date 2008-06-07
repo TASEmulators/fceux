@@ -383,17 +383,17 @@ static int tofix=0;
 
 static void ResetRL(uint8 *target)
 {
- memset(target,0xFF,256);
- if(InputScanlineHook)
-  InputScanlineHook(0,0,0,0);
- Plinef=target;
- Pline=target; 
- firsttile=0;
- linestartts=timestamp*48+X.count;
- tofix=0;
- FCEUPPU_LineUpdate();
- tofix=1;  
+	memset(target,0xFF,256);
+	InputScanlineHook(0,0,0,0);
+	Plinef=target;
+	Pline=target; 
+	firsttile=0;
+	linestartts=timestamp*48+X.count;
+	tofix=0;
+	FCEUPPU_LineUpdate();
+	tofix=1;  
 }
+
 static uint8 sprlinebuf[256+8];
 
 void FCEUPPU_LineUpdate(void)
@@ -555,7 +555,7 @@ static void RefreshLine(int lastpixel)
           tofix=0;
          }
 
-         if(InputScanlineHook && (lastpixel-16)>=0) 
+         if((lastpixel-16)>=0) 
          {
           InputScanlineHook(Plinef,spork?sprlinebuf:0,linestartts,lasttile*8-16);
          }
@@ -694,7 +694,7 @@ static void RefreshLine(int lastpixel)
   CheckSpriteHit(lastpixel);  /* This only works right because
 					   of a hack earlier in this function.
 					*/
-        if(InputScanlineHook && (lastpixel-16)>=0)
+        if((lastpixel-16)>=0)
         {
          InputScanlineHook(Plinef,spork?sprlinebuf:0,linestartts,lasttile*8-16);
         }
