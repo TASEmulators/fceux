@@ -247,20 +247,24 @@ def launch(passed, local=False):
   global xml, options, fceu_server_binary, fceux_binary
   set_options()
   
+  sound_options = ''
+  
   if options.sound_check:
-    sound = '--sound 1 '
+    sound_options += '--sound 1 '
   else:
-    sound = '--sound 0 '
+    sound_options += '--sound 0 '
 
   if options.soundq_check:
-    soundq = '--soundq 1 '
+    sound_options += '--soundq 1 '
   else:
-    soundq = '--soundq 0 '
+    sound_options += '--soundq 0 '
     
   if options.soundrate_entry:
-    soundrate = '--soundrate ' + options.soundrate_entry + ' '
+    sound_options += '--soundrate ' + options.soundrate_entry + ' '
   else:
     soundrate = ' '
+  
+  
     
   if options.fullscreen_check:
     fullscreen = '--fullscreen 1 '
@@ -294,7 +298,7 @@ def launch(passed, local=False):
   else:
     opengl = '--opengl 0 '
   
-  command =  fceux_binary +' '+ sound + soundq + soundrate + fullscreen +\
+  command =  fceux_binary + ' ' + sound_options + fullscreen +\
   network + opengl + options.extra_entry + ' '+ passed
   gfceu_message('Command: ' + command)
 

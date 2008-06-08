@@ -275,7 +275,8 @@
                       <widget class="GtkSpinButton" id="xscale_spin">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">1 1 10 0.5 2 2</property>
+                        <property name="adjustment">2 1 10 0.5 1 10</property>
+                        <property name="digits">1</property>
                         <property name="numeric">True</property>
                       </widget>
                       <packing>
@@ -307,6 +308,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="adjustment">2 1 10 0.5 1 10</property>
+                        <property name="digits">1</property>
                         <property name="numeric">True</property>
                         <property name="update_policy">GTK_UPDATE_IF_VALID</property>
                       </widget>
