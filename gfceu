@@ -167,6 +167,8 @@ def give_widgets():
     
     widgets['fullscreen_check'].set_active(options.fullscreen_check)
     widgets['opengl_check'].set_active(options.opengl_check)
+    widgets['xscale_spin'].set_value(options.xscale_spin)
+    widgets['yscale_spin'].set_value(options.yscale_spin)
     
     widgets['extra_entry'].set_text(options.extra_entry)
         
@@ -229,6 +231,8 @@ def set_options():
   # video
   options.fullscreen_check = widgets['fullscreen_check'].get_active()
   options.opengl_check = widgets['opengl_check'].get_active()
+  options.xscale_spin = widgets['xscale_spin'].get_value()
+  options.yscale_spin = widgets['yscale_spin'].get_value()
   
   options.extra_entry = widgets['extra_entry'].get_text()
   
@@ -243,7 +247,7 @@ def set_options():
   
 
   
-def launch(passed, local=False):
+def launch(rom_name, local=False):
   global xml, options, fceu_server_binary, fceux_binary
   set_options()
   
@@ -264,13 +268,22 @@ def launch(passed, local=False):
   else:
     soundrate = ' '
   
-  
-    
+  # video
+  video_options = ''
   if options.fullscreen_check:
-    fullscreen = '--fullscreen 1 '
+    video_options += '--fullscreen 1 '
   else:
-    fullscreen = '--fullscreen 0 '
+    video_options += '--fullscreen 0 '
     
+  if options.opengl_check:
+    video_options += '--opengl 1 '
+  else:
+    video_options += '--opengl 0 '
+
+  video_options += ' --xscale ' + str(options.xscale_spin)
+  video_options += ' --yscale ' + str(options.yscale_spin)
+    
+  
   if options.join_radio:
     if options.join_pass == '':
       netpass = ''
@@ -293,13 +306,10 @@ def launch(passed, local=False):
   if local:
     network = ''
   
-  if options.opengl_check:
-    opengl = '--opengl 1 '
-  else:
-    opengl = '--opengl 0 '
   
-  command =  fceux_binary + ' ' + sound_options + fullscreen +\
-  network + opengl + options.extra_entry + ' '+ passed
+  
+  command =  fceux_binary + ' ' + sound_options + video_options +\
+  network + options.extra_entry + ' '+ rom_name
   gfceu_message('Command: ' + command)
 
   
