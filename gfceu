@@ -282,6 +282,7 @@ def launch(rom_name, local=False):
 
   video_options += ' --xscale ' + str(options.xscale_spin)
   video_options += ' --yscale ' + str(options.yscale_spin)
+  video_options += ' '
     
   
   if options.join_radio:
