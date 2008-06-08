@@ -45,6 +45,7 @@
 #include "input.h"
 #include "vsuni.h"
 #include "drawing.h"
+#include "driver.h"
 
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
