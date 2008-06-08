@@ -26,7 +26,7 @@ int GetAutoFireDesynch();
 extern LPDIRECTINPUT7 lpDI;
 
 extern int InputType[3];
-extern int UsrInputType[3];
+//extern int UsrInputType[3];
 extern int cidisabled;
 #ifndef _aosdfjk02fmasf
 #define _aosdfjk02fmasf
@@ -58,7 +58,7 @@ void ParseGIInput(FCEUGI *GameInfo);
 #define FCFGD_HYPERSHOT 3
 #define FCFGD_QUIZKING  4
 
-void InitOtherInput(void);
+void InitInputPorts(void);
 void SetEmulationSpeed(int type);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();

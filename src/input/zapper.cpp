@@ -23,8 +23,9 @@
 
 #include "share.h"
 #include "zapper.h"
+#include "movie.h"
 
-ZAPPER ZD[2];
+static ZAPPER ZD[2];
 
 static void ZapperFrapper(int w, uint8 *bg, uint8 *spr, uint32 linets, int final)
 {
@@ -125,8 +126,7 @@ static uint8 ReadZapper(int w)
 
 static void DrawZapper(int w, uint8 *buf, int arg)
 {
- if(arg)
-  FCEU_DrawGunSight(buf, ZD[w].mzx,ZD[w].mzy);
+ FCEU_DrawGunSight(buf, ZD[w].mzx,ZD[w].mzy);
 }
 
 static void UpdateZapper(int w, void *data, int arg)
@@ -144,8 +144,28 @@ static void UpdateZapper(int w, void *data, int arg)
   ZD[w].mzb=ptr[2];
 }
 
-static INPUTC ZAPC={ReadZapper,0,0,UpdateZapper,ZapperFrapper,DrawZapper};
-static INPUTC ZAPVSC={ReadZapperVS,0,StrobeZapperVS,UpdateZapper,ZapperFrapper,DrawZapper};
+static void LogZapper(int w, MovieRecord* mr)
+{
+	mr->zappers[w].x = ZD[w].mzx;
+	mr->zappers[w].y = ZD[w].mzy;
+	mr->zappers[w].b = ZD[w].mzb;
+}
+
+static void LoadZapper(int w, MovieRecord* mr)
+{
+	if(ZD[w].bogo)
+		ZD[w].bogo--;
+	if(mr->zappers[w].b&3 && (!(ZD[w].mzb&3)))
+		ZD[w].bogo=5;
+
+	ZD[w].mzx = mr->zappers[w].x;
+	ZD[w].mzy = mr->zappers[w].y;
+	ZD[w].mzb = mr->zappers[w].b;
+}
+
+
+static INPUTC ZAPC={ReadZapper,0,0,UpdateZapper,ZapperFrapper,DrawZapper,LogZapper,LoadZapper};
+static INPUTC ZAPVSC={ReadZapperVS,0,StrobeZapperVS,UpdateZapper,ZapperFrapper,DrawZapper,LogZapper,LoadZapper};
 
 INPUTC *FCEU_InitZapper(int w)
 {

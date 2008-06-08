@@ -118,7 +118,7 @@ static CFGSTRUCT fceuconfig[] = {
 	NAC("eoptions",eoptions),
         NACA("cpalette",cpalette),
 
-        NACA("InputType",UsrInputType),
+        NACA("InputType",InputType),
 
 	NAC("vmcx",vmodes[0].x),
 	NAC("vmcy",vmodes[0].y),

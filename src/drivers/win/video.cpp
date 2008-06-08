@@ -35,7 +35,7 @@ static int bpp;
 static int vflags;
 static int veflags;
 
-int disvaccel = 0;      /* Disable video hardware acceleration. */
+int disvaccel = 0;      //Disable video hardware acceleration.
 
 int fssync=0;
 int winsync=0;
@@ -257,7 +257,7 @@ int SetVideoMode(int fs)
           return 1;
          }
 
-         /* Beginning */
+         //Beginning
          memset(&ddsd,0,sizeof(ddsd));
          ddsd.dwSize = sizeof(ddsd);
          ddsd.dwFlags = DDSD_CAPS;
@@ -280,10 +280,9 @@ int SetVideoMode(int fs)
          ddsdback.dwWidth=256 * specmul;
          ddsdback.dwHeight=FSettings.TotalScanlines() * specmul;
          
-         /* 
-           If the blit hardware can't stretch, assume it's cheap(and slow)
-           and create the buffer in system memory.
-         */
+         //If the blit hardware can't stretch, assume it's cheap(and slow)
+         //and create the buffer in system memory.
+         
          if(!(caps.dwCaps&DDCAPS_BLTSTRETCH))
           ddsdback.ddsCaps.dwCaps|=DDSCAPS_SYSTEMMEMORY;
        
@@ -329,7 +328,7 @@ int SetVideoMode(int fs)
          windowedfailed=0;
          SetMainWindowStuff();
         }
-        else    /* Following is full-screen */
+        else    //Following is full-screen
         {
          if(vmod == 0)
          {         
@@ -421,9 +420,14 @@ int SetVideoMode(int fs)
          ShowCursorAbs(0);
         }
 
-        InputScreenChanged(fs);
         fullscreen=fs;
         return 1;
+}
+
+//draw input aids if we are fullscreen
+bool FCEUD_ShouldDrawInputAids()
+{
+	return fullscreen!=0;
 }
 
 static void BlitScreenWindow(uint8 *XBuf);
@@ -1105,9 +1109,7 @@ void DoVideoConfigFix(void)
 	UpdateRendBounds();
 }
 
-/**
-* Shows the Video configuration dialog.
-**/
+//Shows the Video configuration dialog.
 void ConfigVideo(void)
 {
 	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 

@@ -26,6 +26,7 @@ extern int maxconbskip;
 extern int ffbskip;
 
 static int fullscreen = 0;
+
 // Flag that indicates whether Game Genie is enabled or not.
 extern int genie;
 

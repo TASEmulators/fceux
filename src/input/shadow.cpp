@@ -117,7 +117,6 @@ static uint8 ReadZapper(int w, uint8 ret)
 
 static void DrawZapper(uint8 *buf, int arg)
 {
- if(arg)
   FCEU_DrawCursor(buf, ZD.mzx, ZD.mzy);
 }
 

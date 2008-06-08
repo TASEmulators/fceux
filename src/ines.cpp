@@ -169,104 +169,103 @@ struct CRCMATCH  {
 
 struct INPSEL {
 	uint32 crc32;
-	int input1;
-	int input2;
-	int inputfc;
+	ESI input1;
+	ESI input2;
+	ESIFC inputfc;
 };
 
-/* This is mostly for my personal use.  So HA. */
 static void SetInput(void)
 {
- static struct INPSEL moo[]=
+	static struct INPSEL moo[]=
 	{
-         {0x3a1694f9,SI_GAMEPAD,SI_GAMEPAD,SIFC_4PLAYER},       /* Nekketsu Kakutou Densetsu */
+		{0x3a1694f9,SI_GAMEPAD,SI_GAMEPAD,SIFC_4PLAYER},       // Nekketsu Kakutou Densetsu 
 
-   {0xc3c0811d,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  /* The two "Oeka Kids" games */
-   {0x9d048ea4,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  /*           */
+		{0xc3c0811d,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  // The two "Oeka Kids" games 
+		{0x9d048ea4,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  //           
 
-   {0xaf4010ea,SI_GAMEPAD,SI_POWERPADB,-1},  /* World Class Track Meet */
-   {0xd74b2719,SI_GAMEPAD,SI_POWERPADB,-1},  /* Super Team Games */
-   {0x61d86167,SI_GAMEPAD,SI_POWERPADB,-1},  /* Street Cop */
-   {0x6435c095,SI_GAMEPAD,SI_POWERPADB,-1},      /* Short Order/Eggsplode */
+		{0xaf4010ea,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // World Class Track Meet 
+		{0xd74b2719,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Super Team Games 
+		{0x61d86167,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Street Cop 
+		{0x6435c095,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Short Order/Eggsplode 
 
 
-   {0x47232739,SI_GAMEPAD,SI_GAMEPAD,SIFC_TOPRIDER},  /* Top Rider */
+		{0x47232739,SI_GAMEPAD,SI_GAMEPAD,SIFC_TOPRIDER},  // Top Rider 
 
-	 {0x48ca0ee1,SI_GAMEPAD,SI_GAMEPAD,SIFC_BWORLD},    /* Barcode World */
-	 {0x9f8f200a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, /* Super Mogura Tataki!! - Pokkun Moguraa */
-	 {0x9044550e,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, /* Rairai Kyonshizu */
-	 {0x2f128512,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, /* Jogging Race */
-	 {0x60ad090a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, /* Athletic World */
+		{0x48ca0ee1,SI_GAMEPAD,SI_GAMEPAD,SIFC_BWORLD},    // Barcode World 
+		{0x9f8f200a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Super Mogura Tataki!! - Pokkun Moguraa 
+		{0x9044550e,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Rairai Kyonshizu 
+		{0x2f128512,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Jogging Race 
+		{0x60ad090a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Athletic World 
 
-	 {0x8a12a7d9,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, /* Totsugeki Fuuun Takeshi Jou */
-	 {0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, /* Running Stadium */
-	 {0x370ceb65,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, /* Meiro Dai Sakusen */
-	 // Bad dump? {0x69ffb014,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, /* Fuun Takeshi Jou 2 */
-	 {0x6cca1c1f,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, /* Dai Undoukai */
-	 {0x29de87af,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  /* Aerobics Studio */
-         {0xbba58be5,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  /* Family Trainer: Manhattan Police */
-	 {0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  /* Family Trainer:  Running Stadium */
+		{0x8a12a7d9,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Totsugeki Fuuun Takeshi Jou 
+		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Running Stadium 
+		{0x370ceb65,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Meiro Dai Sakusen 
+		// Bad dump? {0x69ffb014,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Fuun Takeshi Jou 2 
+		{0x6cca1c1f,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Dai Undoukai 
+		{0x29de87af,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Aerobics Studio 
+		{0xbba58be5,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer: Manhattan Police 
+		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer:  Running Stadium 
 
-	 {0xd9f45be9,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  /* Gimme a Break ... */
-	 {0x1545bd13,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  /* Gimme a Break ... 2 */
+		{0xd9f45be9,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 
+		{0x1545bd13,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 2 
 
-	 {0x7b44fb2a,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  /* Ide Yousuke Meijin no Jissen Mahjong 2 */
-	 {0x9fae4d46,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  /* Ide Yousuke Meijin no Jissen Mahjong */
+		{0x7b44fb2a,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 2 
+		{0x9fae4d46,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 
 
-	 {0x980be936,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, /* Hyper Olympic */
-	 {0x21f85681,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, /* Hyper Olympic (Gentei Ban) */
-	 {0x915a53a7,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, /* Hyper Sports */
-   {0xad9c63e2,SI_GAMEPAD,-1,SIFC_SHADOW},  /* Space Shadow */
+		{0x980be936,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic 
+		{0x21f85681,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic (Gentei Ban) 
+		{0x915a53a7,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Sports 
+		{0xad9c63e2,SI_GAMEPAD,SI_UNSET,SIFC_SHADOW},  // Space Shadow 
 
-   {0x24598791,-1,SI_ZAPPER,0},  /* Duck Hunt */
-	 {0xff24d794,-1,SI_ZAPPER,0},   /* Hogan's Alley */
-   {0xbeb8ab01,-1,SI_ZAPPER,0},  /* Gumshoe */
-   {0xde8fd935,-1,SI_ZAPPER,0},  /* To the Earth */
-   {0xedc3662b,-1,SI_ZAPPER,0},  /* Operation Wolf */
-   {0x2a6559a1,-1,SI_ZAPPER,0},  /* Operation Wolf (J) */
+		{0x24598791,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Duck Hunt 
+		{0xff24d794,SI_UNSET,SI_ZAPPER,SIFC_NONE},   // Hogan's Alley 
+		{0xbeb8ab01,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gumshoe 
+		{0xde8fd935,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // To the Earth 
+		{0xedc3662b,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf 
+		{0x2a6559a1,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf (J) 
 
-   {0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,0},  /* The Lone Ranger */
-	 {0xb8b9aca3,-1,SI_ZAPPER,0},  /* Wild Gunman */
-	 {0x5112dc21,-1,SI_ZAPPER,0},  /* Wild Gunman */
-	 {0x4318a2f8,-1,SI_ZAPPER,0},  /* Barker Bill's Trick Shooting */
-	 {0x5ee6008e,-1,SI_ZAPPER,0},  /* Mechanized Attack */
-	 {0x3e58a87e,-1,SI_ZAPPER,0},  /* Freedom Force */
-    {0xe9a7fe9e,-1,SI_MOUSE,0}, /* Educational Computer 2000 */ //mbg merge 7/17/06 added -- appears to be from newer MM build
-   {0x851eb9be,SI_GAMEPAD,SI_ZAPPER,0},  /* Shooting Range */
-   {0x74bea652,SI_GAMEPAD,SI_ZAPPER,0},  /* Supergun 3-in-1 */
-	 {0x32fb0583,-1,SI_ARKANOID,0}, /* Arkanoid(NES) */
-	 {0xd89e5a67,-1,-1,SIFC_ARKANOID}, /* Arkanoid (J) */
-	 {0x0f141525,-1,-1,SIFC_ARKANOID}, /* Arkanoid 2(J) */
+		{0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // The Lone Ranger 
+		{0xb8b9aca3,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman 
+		{0x5112dc21,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman 
+		{0x4318a2f8,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Barker Bill's Trick Shooting 
+		{0x5ee6008e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Mechanized Attack 
+		{0x3e58a87e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Freedom Force 
+		{0xe9a7fe9e,SI_UNSET,SI_MOUSE,SIFC_NONE}, // Educational Computer 2000  //mbg merge 7/17/06 added -- appears to be from newer MM build
+		{0x851eb9be,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Shooting Range 
+		{0x74bea652,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Supergun 3-in-1 
+		{0x32fb0583,SI_UNSET,SI_ARKANOID,SIFC_NONE}, // Arkanoid(NES) 
+		{0xd89e5a67,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid (J) 
+		{0x0f141525,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid 2(J) 
 
-   {0x912989dc,-1,-1,SIFC_FKB},  /* Playbox BASIC */
-   {0xf7606810,-1,-1,SIFC_FKB},  /* Family BASIC 2.0A */
-   {0x895037bc,-1,-1,SIFC_FKB},  /* Family BASIC 2.1a */
-   {0xb2530afc,-1,-1,SIFC_FKB},  /* Family BASIC 3.0 */
-   {0x82f1fb96,-1,-1,SIFC_SUBORKB},  /* Subor 1.0 Russian */
-   {0xabb2f974,-1,-1,SIFC_SUBORKB},  /* Study and Game 32-in-1 */
-   {0xd5d6eac4,-1,-1,SIFC_SUBORKB},  /* Edu (As) */
-   {0x589b6b0d,-1,-1,SIFC_SUBORKB},  /* SuporV20 */
-     {0x5e073a1b,-1,-1,SIFC_SUBORKB},  /* Supor English (Chinese) */
-    {0x8b265862,-1,-1,SIFC_SUBORKB},
-   {0x41401c6d,-1,-1,SIFC_SUBORKB},  /* SuporV40 */
-     {0x41ef9ac4,-1,-1,SIFC_SUBORKB},
-     {0x368c19a8,-1,-1,SIFC_SUBORKB},   /* LIKO Study Cartridge */
-   {0x543ab532,-1,-1,SIFC_SUBORKB},   /* LIKO Color Lines */
-	 {0,-1,-1,-1}
+		{0x912989dc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Playbox BASIC 
+		{0xf7606810,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.0A 
+		{0x895037bc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.1a 
+		{0xb2530afc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 3.0 
+		{0x82f1fb96,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Subor 1.0 Russian 
+		{0xabb2f974,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Study and Game 32-in-1 
+		{0xd5d6eac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Edu (As) 
+		{0x589b6b0d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV20 
+		{0x5e073a1b,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Supor English (Chinese) 
+		{0x8b265862,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
+		{0x41401c6d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV40 
+		{0x41ef9ac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
+		{0x368c19a8,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Study Cartridge 
+		{0x543ab532,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Color Lines 
+		{0,SI_UNSET,SI_UNSET,SIFC_UNSET}
 	};
- int x=0;
+	int x=0;
 
- while(moo[x].input1>=0 || moo[x].input2>=0 || moo[x].inputfc>=0)
- {
-  if(moo[x].crc32==iNESGameCRC32)
-  {
-   GameInfo->input[0]=moo[x].input1;
-   GameInfo->input[1]=moo[x].input2;
-   GameInfo->inputfc=moo[x].inputfc;
-   break;
-  }
-  x++;
- }
+	while(moo[x].input1>=0 || moo[x].input2>=0 || moo[x].inputfc>=0)
+	{
+		if(moo[x].crc32==iNESGameCRC32)
+		{
+			GameInfo->input[0]=moo[x].input1;
+			GameInfo->input[1]=moo[x].input2;
+			GameInfo->inputfc=moo[x].inputfc;
+			break;
+		}
+		x++;
+	}
 }
 
 #define INESB_INCOMPLETE  1

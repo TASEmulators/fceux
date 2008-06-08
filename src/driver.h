@@ -15,44 +15,41 @@ std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m);
 //mbg 7/23/06
 const char *FCEUD_GetCompilerString();
 
-/* This makes me feel dirty for some reason. */
+//This makes me feel dirty for some reason.
 void FCEU_printf(char *format, ...);
 #define FCEUI_printf FCEU_printf
 
-/* Video interface */
+//Video interface
 void FCEUD_SetPalette(uint8 index, uint8 r, uint8 g, uint8 b);
 void FCEUD_GetPalette(uint8 i,uint8 *r, uint8 *g, uint8 *b);
 
-/* Displays an error.  Can block or not. */
+//Displays an error.  Can block or not.
 void FCEUD_PrintError(const char *s);
 void FCEUD_Message(const char *s);
 
-/* Network interface */
+//Network interface
 
-/* Call only when a game is loaded. */
+//Call only when a game is loaded.
 int FCEUI_NetplayStart(int nlocal, int divisor);
 
-/* Call when network play needs to stop. */
+// Call when network play needs to stop.
 void FCEUI_NetplayStop(void);
 
-/* Note:  YOU MUST NOT CALL ANY FCEUI_* FUNCTIONS WHILE IN FCEUD_SendData() or
-   FCEUD_RecvData().
-*/
+//Note:  YOU MUST NOT CALL ANY FCEUI_* FUNCTIONS WHILE IN FCEUD_SendData() or FCEUD_RecvData().
 
-/* Return 0 on failure, 1 on success. */
+//Return 0 on failure, 1 on success.
 int FCEUD_SendData(void *data, uint32 len);
 int FCEUD_RecvData(void *data, uint32 len);
 
-/* Display text received over the network. */
+//Display text received over the network.
 void FCEUD_NetplayText(uint8 *text);
 
-/* Encode and send text over the network. */
+//Encode and send text over the network.
 void FCEUI_NetplayText(uint8 *text);
 
-/* Called when a fatal error occurred and network play can't continue.  This function
-   should call FCEUI_NetplayStop() after it has deinitialized the network on the driver
-   side.
-*/
+//Called when a fatal error occurred and network play can't continue.  This function
+//should call FCEUI_NetplayStop() after it has deinitialized the network on the driver
+//side.
 void FCEUD_NetworkClose(void);
 
 bool FCEUI_BeginWaveRecord(const char *fn);
@@ -68,82 +65,45 @@ void FCEUI_NTSCINC(void);
 void FCEUI_GetNTSCTH(int *tint, int *hue);
 void FCEUI_SetNTSCTH(int n, int tint, int hue);
 
-//input device types for the standard joystick port
-enum ESI
-{
-	SI_NONE			= 0,
-	SI_GAMEPAD		= 1,
-	SI_ZAPPER		= 2,
-	SI_POWERPADA	= 3,
-	SI_POWERPADB	= 4,
-	SI_ARKANOID		= 5,
-	SI_MOUSE		= 6 //mbg merge 7/17/06 added
-};
-
-//input device types for the expansion port
-enum ESIFC
-{
-	SIFC_NONE		= 0,
-	SIFC_ARKANOID	= 1,
-	SIFC_SHADOW		= 2,
-	SIFC_4PLAYER	= 3,
-	SIFC_FKB		= 4,
-	SIFC_SUBORKB	= 5,
-	SIFC_HYPERSHOT	= 6,
-	SIFC_MAHJONG	= 7,
-	SIFC_QUIZKING	= 8,
-	SIFC_FTRAINERA	= 9,
-	SIFC_FTRAINERB	= 10,
-	SIFC_OEKAKIDS	= 11,
-	SIFC_BWORLD		= 12,
-	SIFC_TOPRIDER	= 13,
-};
-
 void FCEUI_SetInput(int port, ESI type, void *ptr, int attrib);
 void FCEUI_SetInputFC(ESIFC type, void *ptr, int attrib);
 void FCEUI_DisableFourScore(bool disabled);
 void FCEUI_UseInputPreset(int preset);
 
 
-#define SIS_NONE  0
-#define SIS_DATACH  1
-#define SIS_NWC    2
-#define SIS_VSUNISYSTEM  3
-#define SIS_NSF    4
+//New interface functions
 
-/* New interface functions */
-
-/* 0 to order screen snapshots numerically(0.png), 1 to order them file base-numerically(smb3-0.png). */
+//0 to order screen snapshots numerically(0.png), 1 to order them file base-numerically(smb3-0.png).
 void FCEUI_SetSnapName(int a);
 
-/* 0 to keep 8-sprites limitation, 1 to remove it */
+//0 to keep 8-sprites limitation, 1 to remove it
 void FCEUI_DisableSpriteLimitation(int a);
 
-/* -1 = no change, 0 = show, 1 = hide, 2 = internal toggle */
+//-1 = no change, 0 = show, 1 = hide, 2 = internal toggle
 void FCEUI_SetRenderDisable(int sprites, int bg);
 
-/* name=path and file to load.  returns 0 on failure, 1 on success */
+//name=path and file to load.  returns 0 on failure, 1 on success
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
 
-/* allocates memory.  0 on failure, 1 on success. */
-int FCEUI_Initialize(void);
+//general purpose emulator initialization. returns true if successful
+bool FCEUI_Initialize();
 
-/* Emulates a frame. */
+//Emulates a frame.
 void FCEUI_Emulate(uint8 **, int32 **, int32 *, int);
 
-/* Closes currently loaded game */
+//Closes currently loaded game
 void FCEUI_CloseGame(void);
 
-/* Deallocates all allocated memory.  Call after FCEUI_Emulate() returns. */
+//Deallocates all allocated memory.  Call after FCEUI_Emulate() returns.
 void FCEUI_Kill(void);
 
-/* Enable/Disable game genie. a=0 disable, a=1 enable */
-void FCEUI_SetGameGenie(int a);
+//Enable/Disable game genie. a=true->enabled 
+void FCEUI_SetGameGenie(bool a);
 
-/* Set video system a=0 NTSC, a=1 PAL */
+//Set video system a=0 NTSC, a=1 PAL
 void FCEUI_SetVidSystem(int a);
 
-/* Convenience function; returns currently emulated video system(0=NTSC, 1=PAL).  */
+//Convenience function; returns currently emulated video system(0=NTSC, 1=PAL).
 int FCEUI_GetCurrentVidSystem(int *slstart, int *slend);
 
 #ifdef FRAMESKIP
@@ -154,23 +114,19 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend);
 void FCEUI_FrameSkip(int x);
 #endif
 
-/* First and last scanlines to render, for ntsc and pal emulation. */
+//First and last scanlines to render, for ntsc and pal emulation.
 void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall);
 
-/* Sets the base directory(save states, snapshots, etc. are saved in directories
-   below this directory. */
+//Sets the base directory(save states, snapshots, etc. are saved in directories below this directory.
 void FCEUI_SetBaseDirectory(const char *dir);
 
-/* Tells FCE Ultra to copy the palette data pointed to by pal and use it.
-   Data pointed to by pal needs to be 64*3 bytes in length.
-*/
+//Tells FCE Ultra to copy the palette data pointed to by pal and use it.
+//Data pointed to by pal needs to be 64*3 bytes in length.
 void FCEUI_SetPaletteArray(uint8 *pal);
 
-/* Sets up sound code to render sound at the specified rate, in samples
-   per second.  Only sample rates of 44100, 48000, and 96000 are currently
-   supported.
-   If "Rate" equals 0, sound is disabled.
-*/
+//Sets up sound code to render sound at the specified rate, in samples
+//per second.  Only sample rates of 44100, 48000, and 96000 are currently supported.
+//If "Rate" equals 0, sound is disabled.
 void FCEUI_Sound(int Rate);
 void FCEUI_SetSoundVolume(uint32 volume);
 void FCEUI_SetSoundQuality(int quality);
@@ -180,7 +136,7 @@ void FCEUD_SoundVolumeAdjust(int);
 
 int FCEUI_SelectState(int, int);
 
-/* "fname" overrides the default save state filename code if non-NULL. */
+//"fname" overrides the default save state filename code if non-NULL.
 void FCEUI_SaveState(char *fname);
 void FCEUI_LoadState(char *fname);
 
@@ -305,7 +261,7 @@ void FCEUI_FDSSelect(void);
 int FCEUI_DatachSet(const uint8 *rcode);
 
 ///returns a flag indicating whether emulation is paused
-int FCEUI_EmulationPaused(void);
+int FCEUI_EmulationPaused();
 ///returns a flag indicating whether a one frame step has been requested
 int FCEUI_EmulationFrameStepped();
 ///clears the framestepped flag. use it after youve stepped your one frame
@@ -313,7 +269,10 @@ void FCEUI_ClearEmulationFrameStepped();
 ///sets the EmulationPaused flags
 void FCEUI_SetEmulationPaused(int val);
 ///toggles the paused bit (bit0) for EmulationPaused. caused FCEUD_DebugUpdate() to fire if the emulation pauses
-void FCEUI_ToggleEmulationPause(void);
+void FCEUI_ToggleEmulationPause();
+
+//indicates whether input aids should be drawn (such as crosshairs, etc; usually in fullscreen mode)
+bool FCEUD_ShouldDrawInputAids();
 
 ///called when the emulator closes a game
 void FCEUD_OnCloseGame(void);
@@ -389,4 +348,4 @@ extern "C"
 #endif 
 FILE *FCEUI_UTF8fopen_C(const char *n, const char *m);
 
-#endif /* __DRIVER_H_ */
+#endif //__DRIVER_H_

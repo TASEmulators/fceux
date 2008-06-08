@@ -334,7 +334,6 @@ void FCEU_VSUniCheck(uint64 md5partial, int *MapperNo, uint8 *Mirroring)
   {
 
    if(vs->ppu < RCP2C03B) pale = vs->ppu;
-   //puts(vs->name);
    *MapperNo = vs->mapper;
    *Mirroring = vs->mirroring;
    GameInfo->type = GIT_VSUNI;

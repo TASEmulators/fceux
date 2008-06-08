@@ -8,7 +8,7 @@
 
 #include "input/zapper.h"
 
-void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush);
+void FCEUMOV_AddInputState();
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
 

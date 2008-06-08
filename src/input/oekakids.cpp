@@ -82,7 +82,7 @@ static void OK_Update(void *data, int arg)
 
 static void DrawOeka(uint8 *buf, int arg)
 {
- if(arg && OKY<44)
+ if(OKY<44)
   FCEU_DrawCursor(buf, OKX, OKY);
 }  
 

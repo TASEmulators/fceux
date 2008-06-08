@@ -342,9 +342,9 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
     GameInfo->name=0;
     GameInfo->type=GIT_CART;
     GameInfo->vidsys=GIV_USER;
-    GameInfo->input[0]=GameInfo->input[1]=-1;
-    GameInfo->inputfc=-1;
-    GameInfo->cspecial=0;
+    GameInfo->input[0]=GameInfo->input[1]=SI_UNSET;
+    GameInfo->inputfc=SIFC_UNSET;
+    GameInfo->cspecial=SIS_NONE;
 
 		//try to load each different format
         if(iNESLoad(name,fp,OverwriteVidMode))
@@ -392,16 +392,14 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 }
 
 
-/**
-* Return: Flag that indicates whether the function was succesful or not.
-**/
-int FCEUI_Initialize(void)
+//Return: Flag that indicates whether the function was succesful or not.
+bool FCEUI_Initialize()
 {
 	srand(time(0));
 
 	if(!FCEU_InitVirtualVideo())
 	{
-		return 0;
+		return false;
 	}
 
 	AllocBuffers();
@@ -422,7 +420,7 @@ int FCEUI_Initialize(void)
 	
 	X6502_Init();
 	
-	return 1;
+	return true;
 }
 
 void FCEUI_Kill(void)
@@ -750,12 +748,10 @@ int FCEUI_GetCurrentVidSystem(int *slstart, int *slend)
  return(PAL);
 }
 
-/**
-* Enable or disable Game Genie option.
-**/
-void FCEUI_SetGameGenie(int a)
+//Enable or disable Game Genie option.
+void FCEUI_SetGameGenie(bool a)
 {
-	FSettings.GameGenie = a ? 1 : 0;
+	FSettings.GameGenie = a;
 }
 
 void FCEUI_SetSnapName(int a)

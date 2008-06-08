@@ -613,13 +613,12 @@ int main(int argc,char *argv[])
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
 
-	/* Bleh, need to find a better place for this. */
+	//Bleh, need to find a better place for this.
 	{
         pal_emulation = !!pal_emulation;
         FCEUI_SetVidSystem(pal_emulation);
 
-        genie = !!genie;
-        FCEUI_SetGameGenie(genie);
+        FCEUI_SetGameGenie(genie!=0);
 
         fullscreen = !!fullscreen;
         soundo = !!soundo;

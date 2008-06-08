@@ -20,6 +20,7 @@
 */
 
 #include <string>
+#include <ostream>
 #include <string.h>
 
 #include "types.h"
@@ -65,7 +66,7 @@ extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //---------------
 
 static uint8 joy_readbit[2];
-static uint8 joy[4]={0,0,0,0};
+uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
 
 static int BotMode = 0;
@@ -83,23 +84,8 @@ extern uint8 coinon;
 
 static bool FSDisable=false;  // Set to true if NES-style four-player adapter is disabled.
 
-static struct JOYPORT
-{
-	int attrib;
-	ESI type;
-	void* ptr;
-	INPUTC* driver;
-} joyports[2];
-
-static struct FCPORT
-{
-	int attrib;
-	ESIFC type;
-	void* ptr;
-	INPUTCFC* driver;
-} portFC;
-
-
+JOYPORT joyports[2] = { JOYPORT(0), JOYPORT(1) };
+FCPORT portFC;
 
 static DECLFR(JPRead)
 {
@@ -142,9 +128,9 @@ static DECLFW(B4016)
 }
 
 //a main joystick port driver representing the case where nothing is plugged in
-static INPUTC DummyJPort={0,0,0,0,0};
+static INPUTC DummyJPort={0,0,0,0,0,0};
 //and an expansion port driver for the same ting
-static INPUTCFC DummyPortFC={0,0,0,0,0};
+static INPUTCFC DummyPortFC={0,0,0,0,0,0};
 
 
 //--------4 player driver for expansion port--------
@@ -200,6 +186,35 @@ static void UpdateGP(int w, void *data, int arg)
 	}
 }
 
+static void LogGP(int w, MovieRecord* mr)
+{
+	if(w==0)
+	{
+		mr->joysticks[0] = joy[0];
+		mr->joysticks[2] = joy[2];
+	}
+	else
+	{
+		mr->joysticks[1] = joy[1];
+		mr->joysticks[3] = joy[3];
+	}
+}
+
+static void LoadGP(int w, MovieRecord* mr)
+{
+	if(w==0)
+	{
+		joy[0] = mr->joysticks[0];
+		joy[2] = mr->joysticks[2];
+	}
+	else
+	{
+		joy[1] = mr->joysticks[1];
+		joy[3] = mr->joysticks[3];
+	}
+}
+
+
 //basic joystick port driver
 static uint8 ReadGP(int w)
 {
@@ -231,8 +246,8 @@ static void StrobeGP(int w)
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
 
 
-static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0};
-static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0};
+static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
+static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 
 int FCEU_BotMode()
 {
@@ -295,14 +310,16 @@ void FCEU_UpdateBot()
 #endif //_USE_SHARED_MEMORY_
 }
 
+
 void FCEU_UpdateInput(void)
 {
+	//tell all drivers to poll input and set up their logical states
 	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && !BotMode)
 	{
 		for(int port=0;port<2;port++)
 			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
-	}
+	} 
 
 	if(GameInfo->type==GIT_VSUNI)
 		if(coinon) coinon--;
@@ -310,8 +327,9 @@ void FCEU_UpdateInput(void)
 	if(FCEUnetplay)
 		NetplayUpdate(joy);
 
-	FCEUMOV_AddInputState(ZD, joy, BotMode);
-
+	FCEUMOV_AddInputState();
+	
+	//TODO - should this apply to the movie data? should this be displayed in the input hud?
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniSwap(&joy[0],&joy[1]);
 }

@@ -223,7 +223,9 @@ void FCEU_PutImage(void)
 	}
 	
 	DrawMessage(false);
-	FCEU_DrawInput(XBuf);
+
+	if(FCEUD_ShouldDrawInputAids())
+		FCEU_DrawInput(XBuf);
 
 	//Fancy input display code
 	if(input_display)

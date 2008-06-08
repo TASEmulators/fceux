@@ -71,7 +71,7 @@ typedef struct {
 	int PAL;
 	int NetworkPlay;
 	int SoundVolume;
-	int GameGenie;
+	bool GameGenie;
 
 	//the currently selected first and last rendered scanlines.
 	int FirstSLine;

@@ -608,7 +608,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
-void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush)
+void FCEUMOV_AddInputState()
 {
 	//todo - for tasedit, either dump or load depending on whether input recording is enabled
 	//or something like that
@@ -624,16 +624,9 @@ void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush)
 		}
 		else
 		{
-			MovieRecord& mr = currMovieData.records[currFrameCounter];
-			for(int i=0;i<4;i++)
-				js[i] = mr.joysticks[i];
-
-			for(int i=0;i<2;i++)
-			{
-				zappers[i].mzx = mr.zappers[i].x;
-				zappers[i].mzy = mr.zappers[i].y;
-				zappers[i].mzb = mr.zappers[i].b;
-			}
+			MovieRecord* mr = &currMovieData.records[currFrameCounter];
+			joyports[0].load(mr);
+			joyports[1].load(mr);
 		}
 
 		//if we are on the last frame, then pause the emulator if the player requested it
@@ -657,27 +650,19 @@ void FCEUMOV_AddInputState(ZAPPER (&zappers)[2], uint8 (&js)[4], int SkipFlush)
 	{
 		MovieRecord mr;
 
-		//for each joystick
-		for(int i=0;i<4;i++)
-			mr.joysticks[i] = js[i];
+		joyports[0].log(&mr);
+		joyports[1].log(&mr);
 
-		//printf("%d %d %d\n",zappers[1].mzx,zappers[1].mzy,zappers[1].mzb);
-
-		for(int i=0;i<2;i++)
-		{
-			mr.zappers[i].x = zappers[i].mzx;
-			mr.zappers[i].y = zappers[i].mzy;
-			mr.zappers[i].b = zappers[i].mzb;
-		}
-		
 		mr.dump(osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
 	}
 
 	currFrameCounter++;
 
-	memcpy(&cur_input_display,js,4);
+	extern uint8 joy[4];
+	memcpy(&cur_input_display,joy,4);
 }
+
 
 //TODO 
 void FCEUMOV_AddCommand(int cmd)

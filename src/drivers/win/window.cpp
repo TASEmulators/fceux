@@ -889,7 +889,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// Game Genie menu was selected
 
 				genie ^= 1;
-				FCEUI_SetGameGenie(genie);
+				FCEUI_SetGameGenie(genie!=0);
 				UpdateCheckedMenuItems();
 				break;
 
