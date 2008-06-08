@@ -34,6 +34,7 @@
 #include "dface.h"
 
 #include "../common/configSys.h"
+#include "sdl-video.h"
 
 // GLOBALS
 extern Config *g_config;
@@ -66,6 +67,13 @@ static int s_paletterefresh;
  * Attempts to destroy the graphical video display.  Returns 0 on
  * success, -1 on failure.
  */
+
+//draw input aids if we are fullscreen
+bool FCEUD_ShouldDrawInputAids()
+{
+	return s_fullscreen!=0;
+}
+ 
 int
 KillVideo()
 {
