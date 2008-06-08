@@ -141,11 +141,6 @@ static DECLFW(B4016)
 	LastStrobe=V&0x1;
 }
 
-static void StrobeGP(int w)
-{
-	joy_readbit[w]=0;
-}
-
 //a main joystick port driver representing the case where nothing is plugged in
 static INPUTC DummyJPort={0,0,0,0,0};
 //and an expansion port driver for the same ting
@@ -191,6 +186,20 @@ static uint8 ReadGPVS(int w)
 	return ret;
 }
 
+static void UpdateGP(int w, void *data, int arg)
+{
+	if(w==0)
+	{
+		joy[0]=*(uint32 *)joyports[0].ptr;
+		joy[2]=*(uint32 *)joyports[0].ptr >> 16;
+	}
+	else
+	{
+		joy[1]=*(uint32 *)joyports[1].ptr >> 8;
+		joy[3]=*(uint32 *)joyports[1].ptr >> 24;
+	}
+}
+
 //basic joystick port driver
 static uint8 ReadGP(int w)
 {
@@ -214,11 +223,16 @@ static uint8 ReadGP(int w)
 	return ret;
 }
 
+static void StrobeGP(int w)
+{
+	joy_readbit[w]=0;
+}
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
 
 
-static INPUTC GPC={ReadGP,0,StrobeGP,0,0,0};
-static INPUTC GPCVS={ReadGPVS,0,StrobeGP,0,0,0};
+static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0};
+static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0};
 
 int FCEU_BotMode()
 {
@@ -286,26 +300,7 @@ void FCEU_UpdateInput(void)
 	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && !BotMode)
 	{
 		for(int port=0;port<2;port++)
-		{
-			switch(joyports[port].type)
-			{
-			case SI_GAMEPAD:
-				if(port==0)
-				{
-					joy[0]=*(uint32 *)joyports[0].ptr;
-					joy[2]=*(uint32 *)joyports[0].ptr >> 16;
-				}
-				else
-				{
-					joy[1]=*(uint32 *)joyports[1].ptr >>8;
-					joy[3]=*(uint32 *)joyports[1].ptr >>24;
-				}
-				break;
-			default:
-				joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
-				break;
-			}
-		}
+			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);
 		portFC.driver->Update(portFC.ptr,portFC.attrib);
 	}
 
