@@ -671,6 +671,17 @@ FCEUD_UpdateInput()
     }
 }
 
+void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
+{
+	eoptions &= ~EO_FOURSCORE;
+	if(fourscore) eoptions |= EO_FOURSCORE;
+
+	InputType[0]=port0;
+	InputType[1]=port1;
+	InputType[2]=fcexp;
+	InitInputInterface();
+}
+
 /**
  * Initialize the input device interface between the emulation and the driver.
  */
@@ -750,7 +761,7 @@ InitInputInterface()
     }
 
     FCEUI_SetInputFC((ESIFC)InputType[2], InputDPtr, attrib);
-    FCEUI_DisableFourScore(eoptions & EO_NOFOURSCORE);
+    FCEUI_SetInputFourscore((eoptions & EO_FOURSCORE)!=0);
 }
 
 

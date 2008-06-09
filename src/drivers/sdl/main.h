@@ -31,7 +31,7 @@ extern int eoptions;
 #define EO_SUBASE      2
 #define EO_CLIPSIDES   8
 #define EO_SNAPNAME    16
-#define EO_NOFOURSCORE	32
+#define EO_FOURSCORE	32
 #define EO_NOTHROTTLE	64
 #define EO_GAMEGENIE	128
 #define EO_PAL		256
