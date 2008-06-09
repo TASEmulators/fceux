@@ -27,3 +27,24 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 include(${CMAKE_SOURCE_DIR}/cmake/fceux.cmake)
+# I cannot fucking believe that I need to do this:
+#don't: ENABLE_LANGUAGE(RC) # above
+#do: (for cmake-2.6.0 at least)
+set(OUTPUT_RES_RC_O CMakeFiles/${FCEUX_EXE_NAME}.dir/__/__/__/src/drivers/win/res.rc.o)
+add_custom_command(
+  OUTPUT ${OUTPUT_RES_RC_O}
+  COMMAND ${HOST}-windres -Isrc/drivers/win -DLVS_OWNERDATA=0x1000 -o ${OUTPUT_RES_RC_O} ${CMAKE_SOURCE_DIR}/src/drivers/win/res.rc
+  DEPENDS ${CMAKE_SOURCE_DIR}/src/drivers/win/res.rc
+  VERBATIM
+)
+add_custom_target(
+  BuildResourceFileFor${FCEUX_EXE_NAME}
+  DEPENDS ${OUTPUT_RES_RC_O}
+)
+set(DEFINED_BUILD_RESOURCE_FILE TRUE CACHE GLOBAL "This is a hack to get CMake to build the .rc file")
+
+add_dependencies( ${FCEUX_EXE_NAME} BuildResourceFileFor${FCEUX_EXE_NAME} )
+set_property(
+  TARGET ${FCEUX_EXE_NAME}
+  PROPERTY LINK_FLAGS ${OUTPUT_RES_RC_O}
+)
