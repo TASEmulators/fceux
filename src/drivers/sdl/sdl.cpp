@@ -233,12 +233,12 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 
 static void DoFun(int frameskip)
 {
-    uint8 *gfx;  
+    uint8 *gfx;
     int32 *sound;
     int32 ssize;
     static int fskipc = 0;
     static int opause = 0;
-         
+
 #ifdef FRAMESKIP
     fskipc = (fskipc + 1) % (frameskip + 1);
 #endif
@@ -290,7 +290,7 @@ DriverInitialize(FCEUGI *gi)
 static void
 DriverKill()
 {
-    //SaveConfig();
+    //g_config->save();
 
 #ifndef WIN32
     // XXX soules - capturing all these signals seems pointless
@@ -343,7 +343,7 @@ FCEUD_Update(uint8 *XBuf,
             Count-=can;
             if(Count) {
                 if(NoWaiting) {
-                    can=GetWriteSound(); 
+                    can=GetWriteSound();
                     if(Count>can) Count=can;
                     WriteSound(Buffer,Count);
                 } else {
@@ -402,7 +402,7 @@ std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
 	else if(!strcmp(m,"a+") || !strcmp(m,"a+b"))
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
-	
+
 	return new std::fstream(n,mode);
 }
 
@@ -546,7 +546,7 @@ FCEUD_GetTimeFreq(void)
 * Prints a textual message without adding a newline at the end.
 *
 * @param text The text of the message.
-* 
+*
 * TODO: This function should have a better name.
 **/
 void FCEUD_Message(const char *text)
@@ -579,10 +579,10 @@ DUMMY(FCEUD_MovieReplayFrom)
 DUMMY(FCEUD_ToggleStatusIcon)
 DUMMY(FCEUD_AviRecordTo)
 DUMMY(FCEUD_AviStop)
-void FCEUI_AviVideoUpdate(const unsigned char* buffer) { } 
-int FCEUD_ShowStatusIcon(void) {return 0;} 
+void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
+int FCEUD_ShowStatusIcon(void) {return 0;}
 bool FCEUI_AviIsRecording(void) {return false;}
-void FCEUI_UseInputPreset(int preset) { } 
+void FCEUI_UseInputPreset(int preset) { }
 bool FCEUD_PauseAfterPlayback() { return false; }
 bool moviePleaseLogSavestates = false;
 

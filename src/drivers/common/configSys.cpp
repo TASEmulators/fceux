@@ -47,7 +47,7 @@ Config::_addOption(char shortArg,
         break;
     default:
         break;
-    } 
+    }
     _shortArgMap[shortArg] = name;
     _longArgMap[longArg] = name;
 
@@ -85,7 +85,7 @@ Config::_addOption(const std::string &longArg,
         break;
     default:
         break;
-    } 
+    }
     _longArgMap[longArg] = name;
 
     return 0;
@@ -662,7 +662,7 @@ Config::save()
                      int_i->first.c_str(), int_i->second);
             config.write(buf, strlen(buf));
         }
-        for(dbl_i = _dblOptMap.begin(); dbl_i != _dblOptMap.end(); int_i++) {
+        for(dbl_i = _dblOptMap.begin(); dbl_i != _dblOptMap.end(); dbl_i++) {
             snprintf(buf, 1024, "%s = %f\n",
                      dbl_i->first.c_str(), dbl_i->second);
             config.write(buf, strlen(buf));
