@@ -27,7 +27,6 @@ bool FCEUMOV_Mode(int modemask);
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
-//int FCEUMOV_WriteState(FILE* st);
 int FCEUMOV_WriteState(std::ostream* os);
 bool FCEUMOV_ReadState(FILE* st, uint32 size);
 void FCEUMOV_PreLoad();
@@ -36,9 +35,10 @@ bool FCEUMOV_PostLoad();
 void FCEUMOV_EnterTasEdit();
 void FCEUMOV_ExitTasEdit();
 
-
+class MovieData;
 class MovieRecord
 {
+
 public:
 	ValueArray<uint8,4> joysticks;
 	
@@ -79,8 +79,11 @@ public:
 	//a waste of memory in lots of cases..  maybe make it a pointer later?
 	std::vector<char> savestate;
 
-	void dump(std::ostream* os, int index);
-
+	void parse(MovieData* md, std::istream* is);
+	void dump(MovieData* md, std::ostream* os, int index);
+	void parseJoy(std::istream* is, uint8& joystate);
+	void dumpJoy(std::ostream* os, uint8 joystate);
+	
 	static const char mnemonics[8];
 
 private:
@@ -106,6 +109,11 @@ public:
 	//this is the RERECORD COUNT. please rename variable.
 	int recordCount;
 	FCEU_Guid guid;
+
+	//which ports are defined for the movie
+	int ports[3];
+	//whether fourscore is enabled
+	bool fourscore;
 	
 	//----TasEdit stuff---
 	int greenZoneCount;
@@ -142,7 +150,7 @@ public:
 	};
 
 	void truncateAt(int frame);
-	void installDictionary(TDictionary& dictionary);
+	void installValue(std::string& key, std::string& val);
 	void dump(std::ostream* os);
 	int dumpLen();
 	void clearRecordRange(int start, int len);
@@ -150,6 +158,17 @@ public:
 	static bool loadSavestateFrom(std::vector<char>* buf);
 	static void dumpSavestateTo(std::vector<char>* buf, int compressionLevel);
 	void TryDumpIncremental();
+
+private:
+	void installInt(std::string& val, int& var)
+	{
+		var = atoi(val.c_str());
+	}
+
+	void installBool(std::string& val, bool& var)
+	{
+		var = atoi(val.c_str())!=0;
+	}
 };
 
 extern MovieData currMovieData;

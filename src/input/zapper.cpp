@@ -25,7 +25,7 @@
 #include "zapper.h"
 #include "../movie.h"
 
-extern ZAPPER ZD[2];
+static ZAPPER ZD[2];
 
 static void ZapperFrapper(int w, uint8 *bg, uint8 *spr, uint32 linets, int final)
 {

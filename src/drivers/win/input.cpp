@@ -351,8 +351,19 @@ void FCEUD_UpdateInput()
 	}
 }
 
+void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
+{
+	eoptions &= ~EO_FOURSCORE;
+	if(fourscore) eoptions |= EO_FOURSCORE;
+
+	InputType[0]=port0;
+	InputType[1]=port1;
+	InputType[2]=fcexp;
+	InitInputPorts();
+}
+
 //Initializes the emulator with the current input port configuration
-void InitInputPorts(void)
+void InitInputPorts()
 {
 	void *InputDPtr;
 
@@ -396,7 +407,7 @@ void InitInputPorts(void)
 	}
 
 	FCEUI_SetInputFC((ESIFC)InputType[2],InputDPtr,attrib);
-	FCEUI_DisableFourScore((eoptions&EO_NOFOURSCORE)!=0);
+	FCEUI_SetInputFourscore((eoptions&EO_FOURSCORE)!=0);
 }
 
 ButtConfig fkbmap[0x48]=
@@ -725,13 +736,13 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 		   bc->DeviceNum[wc]=0;
 		   bc->ButtonNum[wc]=lParam&255;
 
-		   /* Stop config if the user pushes the same button twice in a row. */
+		   //Stop config if the user pushes the same button twice in a row.
 		   if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
 			   bc->ButtonNum[wc]==bc->ButtonNum[wc-1])   
 			   goto gornk;
 
 		   bc->NumC++;
-		   /* Stop config if we reached our maximum button limit. */
+		   //Stop config if we reached our maximum button limit.
 		   if(bc->NumC >= MAXBUTTCONFIG)
 			   goto gornk;
 
@@ -743,12 +754,15 @@ static BOOL CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
    case WM_INITDIALOG:
 	   SetWindowText(hwndDlg, (char*)DWBText); //mbg merge 7/17/06 added cast
 	   BeginJoyWait(hwndDlg);
-	   SetTimer(hwndDlg,666,25,0);     /* Every 25ms.*/
+	   SetTimer(hwndDlg,666,25,0);     //Every 25ms.
 	   {
 		   char *nstr = MakeButtString(DWBButtons);
 		   SetDlgItemText(hwndDlg, LBL_DWBDIALOG_TEXT, nstr);
 		   free(nstr);
 	   }
+   
+	   
+
 	   break;
    case WM_CLOSE:
    case WM_QUIT: goto gornk;
@@ -883,8 +897,6 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 		   sprintf(buf,"Virtual Gamepad %d",DoTBPort+3);
 		   SetDlgItemText(hwndDlg, GRP_GAMEPAD2, buf);
-
-		   CheckDlgButton(hwndDlg,CHECK_DISABLE_FOURSCORE,(eoptions & EO_NOFOURSCORE)?BST_CHECKED:BST_UNCHECKED);
 	   }
 	   SetWindowText(hwndDlg, DoTBTitle);
 	   break;
@@ -907,19 +919,12 @@ static BOOL CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
    case BTN_CLOSE:
 gornk:
 
-	   if(DoTBType == SI_GAMEPAD)
-	   {
-		   eoptions &= ~EO_NOFOURSCORE;
-		   if(IsDlgButtonChecked(hwndDlg,CHECK_DISABLE_FOURSCORE)==BST_CHECKED)
-			   eoptions|=EO_NOFOURSCORE;
-	   }
 	   EndDialog(hwndDlg,0);
 	   break;
 		   }
 	   }
 	}
 	return 0;
-
 }
 
 static void DoTBConfig(HWND hParent, const char *text, char *_template, ButtConfig *buttons, int max)
@@ -930,391 +935,402 @@ static void DoTBConfig(HWND hParent, const char *text, char *_template, ButtConf
 	DialogBox(fceu_hInstance,_template,hParent,DoTBCallB);
 }
 
-/**
-* Callback function of the input configuration dialog.
-**/
+
+const unsigned int NUMBER_OF_PORTS = 2;
+const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT;
+const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT;
+//these are unfortunate lists. they match the ESI and ESIFC enums
+static const int configurable_nes[6]= { 0, 1, 0, 1, 1, 0 };
+static const int configurable_fam[14]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
+const unsigned int FAMICOM_POSITION = 2;
+
+static void UpdateComboPad(HWND hwndDlg, WORD id)
+{
+	unsigned int sel_input = id - COMBO_PAD1;
+
+	// Update the user input type
+	InputType[sel_input] =
+		SendDlgItemMessage(
+		hwndDlg,
+		id,
+		CB_GETCURSEL,
+		0,
+		(LPARAM)(LPSTR)0
+		);
+
+	// Enable or disable the configuration button
+	EnableWindow(
+		GetDlgItem(hwndDlg, id + 2),
+		configurable_nes[InputType[sel_input]]
+	);
+
+	// Update the text field
+	SetDlgItemText(
+		hwndDlg,
+		TXT_PAD1 + sel_input,
+		(LPTSTR)ESI_Name((ESI)InputType[sel_input])
+	);
+}
+
+static void UpdateComboFam(HWND hwndDlg)
+{
+// Update the user input type of the famicom
+	InputType[FAMICOM_POSITION] =
+		SendDlgItemMessage(
+		hwndDlg,
+		COMBO_FAM,
+		CB_GETCURSEL,
+		0,
+		(LPARAM)(LPSTR)0
+		);
+
+	// Enable or disable the configuration button
+	EnableWindow(
+		GetDlgItem(hwndDlg, BTN_FAM),
+		configurable_fam[InputType[FAMICOM_POSITION]]
+	);
+
+	// Update the text field
+	SetDlgItemText(
+		hwndDlg,
+		TXT_FAM,
+		(LPTSTR)ESIFC_Name((ESIFC)InputType[FAMICOM_POSITION])
+	);
+}
+
+
+static void UpdateFourscoreState(HWND dlg)
+{
+	//(inverse logic:)
+	BOOL enable = (eoptions & EO_FOURSCORE)?FALSE:TRUE;
+
+	EnableWindow(GetDlgItem(dlg,BTN_PORT1),enable);
+	EnableWindow(GetDlgItem(dlg,BTN_PORT2),enable);
+	EnableWindow(GetDlgItem(dlg,COMBO_PAD1),enable);
+	EnableWindow(GetDlgItem(dlg,COMBO_PAD2),enable);
+	EnableWindow(GetDlgItem(dlg,TXT_PAD1),enable);
+	EnableWindow(GetDlgItem(dlg,TXT_PAD2),enable);
+	
+	//change the inputs to gamepad
+	if(!enable)
+	{
+		SendMessage(GetDlgItem(dlg,COMBO_PAD1),CB_SETCURSEL,SI_GAMEPAD,0);
+		SendMessage(GetDlgItem(dlg,COMBO_PAD2),CB_SETCURSEL,SI_GAMEPAD,0);
+		UpdateComboPad(dlg,COMBO_PAD1);
+		UpdateComboPad(dlg,COMBO_PAD2);
+		SetDlgItemText(dlg,TXT_PAD1,ESI_Name(SI_GAMEPAD));
+		SetDlgItemText(dlg,TXT_PAD2,ESI_Name(SI_GAMEPAD));
+	}
+}
+
+//Callback function of the input configuration dialog.
 BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	const unsigned int NUMBER_OF_PORTS = 2;
-
-	const char * const nes_description[6] = {
-		"<none>",
-		"Gamepad",
-		"Zapper",
-		"Power Pad A",
-		"Power Pad B",
-		"Arkanoid Paddle"
-	};
-
-	const unsigned int NUMBER_OF_NES_DEVICES = sizeof(nes_description) / sizeof(*nes_description);
-
-	const char * const famicom_description[14] =
+	switch(uMsg)
 	{
-		"<none>",
-		"Arkanoid Paddle",
-		"Hyper Shot gun",
-		"4-Player Adapter",
-		"Family Keyboard",
-		"Subor Keyboard",
-		"HyperShot Pads",
-		"Mahjong",
-		"Quiz King Buzzers",
-		"Family Trainer A",
-		"Family Trainer B",
-		"Oeka Kids Tablet",
-		"Barcode World",
-		"Top Rider"};
+	case WM_INITDIALOG:     
+		// Update the disable UDLR checkbox based on the current value
+		CheckDlgButton(hwndDlg,BTN_ALLOW_LRUD,allowUDLR?BST_CHECKED:BST_UNCHECKED);
 
-		const static unsigned int NUMBER_OF_FAMICOM_DEVICES = sizeof(famicom_description) / sizeof(*famicom_description);
+		//update the fourscore checkbox
+		CheckDlgButton(hwndDlg,CHECK_ENABLE_FOURSCORE,(eoptions & EO_FOURSCORE)?BST_CHECKED:BST_UNCHECKED);
 
-		static const int configurable_nes[6]= { 0, 1, 0, 1, 1, 0 };
-
-		static const int configurable_fam[14]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
-
-		const unsigned int FAMICOM_POSITION = 2;
-
-		switch(uMsg)
+		// Initialize the controls for the input ports
+		for(unsigned int port = 0; port < NUMBER_OF_PORTS; port++)        
 		{
-		case WM_INITDIALOG:     
-			// Update the disable UDLR checkbox based on the current value
-			CheckDlgButton(hwndDlg,BTN_ALLOW_LRUD,allowUDLR?BST_CHECKED:BST_UNCHECKED);
-
-			// Initialize the controls for the input ports
-			for(unsigned int port = 0; port < NUMBER_OF_PORTS; port++)        
+			// Initialize the combobox
+			for(unsigned int current_device = 0; current_device < NUMBER_OF_NES_DEVICES; current_device++)
 			{
-				// Initialize the combobox
-				for(unsigned int current_device = 0; current_device < NUMBER_OF_NES_DEVICES; current_device++)
-				{
-					SendDlgItemMessage(hwndDlg,
-						COMBO_PAD1 + port,
-						CB_ADDSTRING, 0,
-						(LPARAM)(LPSTR)nes_description[current_device]
-					);
-				}
-
-				// Update the combobox selection according to the
-				// currently selected input mode.
 				SendDlgItemMessage(hwndDlg,
 					COMBO_PAD1 + port,
-					CB_SETCURSEL,
-					InputType[port],
-					(LPARAM)(LPSTR)0
-					);
-
-				// Enable the configuration button if necessary.
-				EnableWindow(
-					GetDlgItem(hwndDlg, BTN_PORT1 + port),
-					configurable_nes[InputType[port]]
-				);
-
-				// Update the label that displays the input device.
-				SetDlgItemText(
-					hwndDlg,
-					TXT_PAD1 + port,
-					(LPTSTR)nes_description[InputType[port]]
-				);
-			}
-
-			// Initialize the Famicom combobox
-			for(unsigned current_device = 0; current_device < NUMBER_OF_FAMICOM_DEVICES; current_device++)
-			{
-				SendDlgItemMessage(
-					hwndDlg,
-					COMBO_FAM,
-					CB_ADDSTRING,
-					0,
-					(LPARAM)(LPSTR)famicom_description[current_device]
+					CB_ADDSTRING, 0,
+					(LPARAM)(LPSTR)ESI_Name((ESI)current_device)
 				);
 			}
 
 			// Update the combobox selection according to the
 			// currently selected input mode.
-			SendDlgItemMessage(
-				hwndDlg,
-				COMBO_FAM,
+			SendDlgItemMessage(hwndDlg,
+				COMBO_PAD1 + port,
 				CB_SETCURSEL,
-				InputType[FAMICOM_POSITION],
+				InputType[port],
 				(LPARAM)(LPSTR)0
 				);
 
 			// Enable the configuration button if necessary.
 			EnableWindow(
-				GetDlgItem(hwndDlg, BTN_FAM),
-				configurable_fam[InputType[FAMICOM_POSITION]]
+				GetDlgItem(hwndDlg, BTN_PORT1 + port),
+				configurable_nes[InputType[port]]
 			);
 
 			// Update the label that displays the input device.
 			SetDlgItemText(
 				hwndDlg,
-				TXT_FAM,
-				(LPTSTR)famicom_description[InputType[FAMICOM_POSITION]]
+				TXT_PAD1 + port,
+				(LPTSTR)ESI_Name((ESI)InputType[port])
 			);
-
-			// Initialize the auto key controls
-
-			extern int autoHoldKey, autoHoldClearKey;
-			char btext[128];
-
-			if(autoHoldKey)
-			{
-				if(!GetKeyNameText(autoHoldKey << 16, btext, 128))
-				{
-					sprintf(btext, "KB: %d", autoHoldKey);
-				}
-			}
-			else
-			{
-				sprintf(btext, "not assigned");
-			}
-
-			SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
-
-			if(autoHoldClearKey)
-			{
-				if(!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
-				{
-					sprintf(btext, "KB: %d", autoHoldClearKey);
-				}
-			}
-			else
-			{
-				sprintf(btext, "not assigned");
-			}
-
-			SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
-
-			CenterWindowOnScreen(hwndDlg);
-
-			break;
-
-		case WM_CLOSE:
-		case WM_QUIT:
-			EndDialog(hwndDlg, 0);
-
-		case WM_COMMAND:
-			// Handle disable UD/LR option
-			if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == BTN_ALLOW_LRUD)
-			{
-				FCEU_printf("Allow UDLR toggled.\n");
-				allowUDLR = !allowUDLR;
-			}
-
-			if(HIWORD(wParam) == CBN_SELENDOK)
-			{
-				switch(LOWORD(wParam))
-				{
-				case COMBO_PAD1:
-				case COMBO_PAD2:
-					{
-						unsigned int sel_input = LOWORD(wParam) - COMBO_PAD1;
-
-						// Update the user input type
-						InputType[sel_input] =
-							SendDlgItemMessage(
-							hwndDlg,
-							LOWORD(wParam),
-							CB_GETCURSEL,
-							0,
-							(LPARAM)(LPSTR)0
-							);
-
-						// Enable or disable the configuration button
-						EnableWindow(
-							GetDlgItem(hwndDlg, LOWORD(wParam) + 2),
-							configurable_nes[InputType[sel_input]]
-						);
-
-						// Update the text field
-						SetDlgItemText(
-							hwndDlg,
-							TXT_PAD1 + sel_input,
-							(LPTSTR)nes_description[InputType[sel_input]]
-						);
-					}
-
-					break;
-
-				case COMBO_FAM:
-
-					// Update the user input type of the famicom
-					InputType[FAMICOM_POSITION] =
-						SendDlgItemMessage(
-						hwndDlg,
-						COMBO_FAM,
-						CB_GETCURSEL,
-						0,
-						(LPARAM)(LPSTR)0
-						);
-
-					// Enable or disable the configuration button
-					EnableWindow(
-						GetDlgItem(hwndDlg, BTN_FAM),
-						configurable_fam[InputType[FAMICOM_POSITION]]
-					);
-
-					// Update the text field
-					SetDlgItemText(
-						hwndDlg,
-						TXT_FAM,
-						(LPTSTR)famicom_description[InputType[FAMICOM_POSITION]]
-					);
-
-					break;
-
-				}
-
-			}
-
-			if( !(wParam >> 16) )
-			{
-				switch(wParam & 0xFFFF)
-				{
-				case BTN_FAM:
-					{
-						const char *text = famicom_description[InputType[FAMICOM_POSITION]];
-
-						DoTBType = DoTBPort = 0;
-
-						switch(InputType[FAMICOM_POSITION])
-						{
-						case SIFC_FTRAINERA:
-						case SIFC_FTRAINERB:
-							DoTBConfig(hwndDlg, text, "POWERPADDIALOG", FTrainerButtons, 12);
-							break;
-						case SIFC_FKB:
-							DoTBConfig(hwndDlg, text, "FKBDIALOG", fkbmap, 0x48);
-							break;
-						case SIFC_SUBORKB:
-							DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, 0x60);
-							break;
-						case SIFC_MAHJONG:
-							DoTBConfig(hwndDlg, text, "MAHJONGDIALOG", MahjongButtons, 21);
-							break;
-						case SIFC_QUIZKING:
-							DoTBConfig(hwndDlg, text, "QUIZKINGDIALOG", QuizKingButtons, 6);
-							break;
-						}
-					}
-
-					break;
-
-				case BTN_PORT2:
-				case BTN_PORT1:
-					{
-						int which = (wParam & 0xFFFF) - BTN_PORT1;
-						const char *text = nes_description[InputType[which]];
-
-						DoTBType = DoTBPort = 0;
-
-						switch(InputType[which])
-						{
-						case SI_GAMEPAD:
-							{
-								ButtConfig tmp[10 + 10];
-
-								memcpy(tmp, GamePadConfig[which], 10 * sizeof(ButtConfig));
-								memcpy(&tmp[10], GamePadConfig[which + 2], 10 * sizeof(ButtConfig));
-
-								DoTBType = SI_GAMEPAD;
-								DoTBPort = which;
-								DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 10 + 10);
-
-								memcpy(GamePadConfig[which], tmp, 10 * sizeof(ButtConfig));
-								memcpy(GamePadConfig[which + 2], &tmp[10], 10 * sizeof(ButtConfig));
-							}
-							break;
-
-						case SI_POWERPADA:
-						case SI_POWERPADB:
-							DoTBConfig(hwndDlg, text, "POWERPADDIALOG", powerpadsc[which], 12);
-							break;
-						}
-					}
-
-					break;
-
-				case BTN_PRESET_SET1:
-					MessageBox(0, "Current input configuration has been set as Preset 1.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
-					memcpy(GamePadPreset1, GamePadConfig, sizeof(GamePadConfig));
-					break;
-				case BTN_PRESET_SET2:
-					MessageBox(0, "Current input configuration has been set as Preset 2.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
-					memcpy(GamePadPreset2, GamePadConfig, sizeof(GamePadConfig));
-					break;
-				case BTN_PRESET_SET3:
-					MessageBox(0, "Current input configuration has been set as Preset 3.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
-					memcpy(GamePadPreset3, GamePadConfig, sizeof(GamePadConfig));
-					break;
-
-				case BTN_PRESET_EXPORT1: PresetExport(1); break;
-				case BTN_PRESET_EXPORT2: PresetExport(2); break;
-				case BTN_PRESET_EXPORT3: PresetExport(3); break;
-
-				case BTN_PRESET_IMPORT1: PresetImport(1); break;
-				case BTN_PRESET_IMPORT2: PresetImport(2); break;
-				case BTN_PRESET_IMPORT3: PresetImport(3); break;
-
-				case BTN_AUTO_HOLD: // auto-hold button
-					{
-						char btext[128] = { 0 };
-
-						GetDlgItemText(hwndDlg, BTN_AUTO_HOLD, btext, sizeof(btext) );
-
-						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 
-
-						if(button)
-						{
-							if(!GetKeyNameText(button << 16, btext, 128))
-							{
-								sprintf(btext, "KB: %d", button);
-							}
-						}
-						else
-						{
-							sprintf(btext, "not assigned");
-						}
-
-						extern int autoHoldKey;
-						autoHoldKey = button;
-						SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
-					}
-					break;
-
-				case BTN_CLEAR_AH: // auto-hold clear button
-					{
-						char btext[128] = { 0 };
-
-						GetDlgItemText(hwndDlg, BTN_CLEAR_AH, btext, 128);
-
-						int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 added cast
-
-						if(button)
-						{
-							if( !GetKeyNameText(button << 16, btext, sizeof(btext)))
-							{
-								sprintf(btext, "KB: %d", button);
-							}
-						}
-						else
-						{
-							sprintf(btext, "not assigned");
-						}
-
-						extern int autoHoldClearKey;
-						autoHoldClearKey = button;
-
-						SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
-					}
-					break;
-
-				case BTN_CLOSE:
-					EndDialog(hwndDlg, 0);
-					break;
-				}
-			}
 		}
 
-		return 0;
+		// Initialize the Famicom combobox
+		for(unsigned current_device = 0; current_device < NUMBER_OF_FAMICOM_DEVICES; current_device++)
+		{
+			SendDlgItemMessage(
+				hwndDlg,
+				COMBO_FAM,
+				CB_ADDSTRING,
+				0,
+				(LPARAM)(LPSTR)ESIFC_Name((ESIFC)current_device)
+			);
+		}
+
+		// Update the combobox selection according to the
+		// currently selected input mode.
+		SendDlgItemMessage(
+			hwndDlg,
+			COMBO_FAM,
+			CB_SETCURSEL,
+			InputType[FAMICOM_POSITION],
+			(LPARAM)(LPSTR)0
+			);
+
+		// Enable the configuration button if necessary.
+		EnableWindow(
+			GetDlgItem(hwndDlg, BTN_FAM),
+			configurable_fam[InputType[FAMICOM_POSITION]]
+		);
+
+		// Update the label that displays the input device.
+		SetDlgItemText(
+			hwndDlg,
+			TXT_FAM,
+			(LPTSTR)ESIFC_Name((ESIFC)InputType[FAMICOM_POSITION])
+		);
+
+		// Initialize the auto key controls
+
+		extern int autoHoldKey, autoHoldClearKey;
+		char btext[128];
+
+		if(autoHoldKey)
+		{
+			if(!GetKeyNameText(autoHoldKey << 16, btext, 128))
+			{
+				sprintf(btext, "KB: %d", autoHoldKey);
+			}
+		}
+		else
+		{
+			sprintf(btext, "not assigned");
+		}
+
+		SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
+
+		if(autoHoldClearKey)
+		{
+			if(!GetKeyNameText(autoHoldClearKey << 16, btext, 128))
+			{
+				sprintf(btext, "KB: %d", autoHoldClearKey);
+			}
+		}
+		else
+		{
+			sprintf(btext, "not assigned");
+		}
+
+		SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
+
+		CenterWindowOnScreen(hwndDlg);
+
+		UpdateFourscoreState(hwndDlg);
+
+		break;
+
+	case WM_CLOSE:
+	case WM_QUIT:
+		EndDialog(hwndDlg, 0);
+
+	case WM_COMMAND:
+		// Handle disable UD/LR option
+		if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == BTN_ALLOW_LRUD)
+		{
+			FCEU_printf("Allow UDLR toggled.\n");
+			allowUDLR = !allowUDLR;
+		}
+
+		//Handle the fourscore button
+		if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == CHECK_ENABLE_FOURSCORE)
+		{
+			eoptions ^= EO_FOURSCORE;
+			FCEU_printf("Fourscore toggled to \n",(eoptions & EO_FOURSCORE)?"ON":"OFF");
+			UpdateFourscoreState(hwndDlg);
+		}
+
+		if(HIWORD(wParam) == CBN_SELENDOK)
+		{
+			switch(LOWORD(wParam))
+			{
+			case COMBO_PAD1:
+			case COMBO_PAD2:
+				UpdateComboPad(hwndDlg, LOWORD(wParam));
+				break;
+
+			case COMBO_FAM:
+				UpdateComboFam(hwndDlg);
+				break;
+			}
+
+		}
+
+		if( !(wParam >> 16) )
+		{
+			switch(wParam & 0xFFFF)
+			{
+			case BTN_FAM:
+				{
+					const char *text = ESI_Name((ESI)InputType[FAMICOM_POSITION]);
+
+					DoTBType = DoTBPort = 0;
+
+					switch(InputType[FAMICOM_POSITION])
+					{
+					case SIFC_FTRAINERA:
+					case SIFC_FTRAINERB:
+						DoTBConfig(hwndDlg, text, "POWERPADDIALOG", FTrainerButtons, 12);
+						break;
+					case SIFC_FKB:
+						DoTBConfig(hwndDlg, text, "FKBDIALOG", fkbmap, 0x48);
+						break;
+					case SIFC_SUBORKB:
+						DoTBConfig(hwndDlg, text, "SUBORKBDIALOG", suborkbmap, 0x60);
+						break;
+					case SIFC_MAHJONG:
+						DoTBConfig(hwndDlg, text, "MAHJONGDIALOG", MahjongButtons, 21);
+						break;
+					case SIFC_QUIZKING:
+						DoTBConfig(hwndDlg, text, "QUIZKINGDIALOG", QuizKingButtons, 6);
+						break;
+					}
+				}
+
+				break;
+
+			case BTN_PORT2:
+			case BTN_PORT1:
+				{
+					int which = (wParam & 0xFFFF) - BTN_PORT1;
+					const char *text = ESI_Name((ESI)InputType[which]);
+
+					DoTBType = DoTBPort = 0;
+
+					switch(InputType[which])
+					{
+					case SI_GAMEPAD:
+						{
+							ButtConfig tmp[10 + 10];
+
+							memcpy(tmp, GamePadConfig[which], 10 * sizeof(ButtConfig));
+							memcpy(&tmp[10], GamePadConfig[which + 2], 10 * sizeof(ButtConfig));
+
+							DoTBType = SI_GAMEPAD;
+							DoTBPort = which;
+							DoTBConfig(hwndDlg, text, "GAMEPADDIALOG", tmp, 10 + 10);
+
+							memcpy(GamePadConfig[which], tmp, 10 * sizeof(ButtConfig));
+							memcpy(GamePadConfig[which + 2], &tmp[10], 10 * sizeof(ButtConfig));
+						}
+						break;
+
+					case SI_POWERPADA:
+					case SI_POWERPADB:
+						DoTBConfig(hwndDlg, text, "POWERPADDIALOG", powerpadsc[which], 12);
+						break;
+					}
+				}
+
+				break;
+
+			case BTN_PRESET_SET1:
+				MessageBox(0, "Current input configuration has been set as Preset 1.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				memcpy(GamePadPreset1, GamePadConfig, sizeof(GamePadConfig));
+				break;
+			case BTN_PRESET_SET2:
+				MessageBox(0, "Current input configuration has been set as Preset 2.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				memcpy(GamePadPreset2, GamePadConfig, sizeof(GamePadConfig));
+				break;
+			case BTN_PRESET_SET3:
+				MessageBox(0, "Current input configuration has been set as Preset 3.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				memcpy(GamePadPreset3, GamePadConfig, sizeof(GamePadConfig));
+				break;
+
+			case BTN_PRESET_EXPORT1: PresetExport(1); break;
+			case BTN_PRESET_EXPORT2: PresetExport(2); break;
+			case BTN_PRESET_EXPORT3: PresetExport(3); break;
+
+			case BTN_PRESET_IMPORT1: PresetImport(1); break;
+			case BTN_PRESET_IMPORT2: PresetImport(2); break;
+			case BTN_PRESET_IMPORT3: PresetImport(3); break;
+
+			case BTN_AUTO_HOLD: // auto-hold button
+				{
+					char btext[128] = { 0 };
+
+					GetDlgItemText(hwndDlg, BTN_AUTO_HOLD, btext, sizeof(btext) );
+
+					int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 
+
+					if(button)
+					{
+						if(!GetKeyNameText(button << 16, btext, 128))
+						{
+							sprintf(btext, "KB: %d", button);
+						}
+					}
+					else
+					{
+						sprintf(btext, "not assigned");
+					}
+
+					extern int autoHoldKey;
+					autoHoldKey = button;
+					SetDlgItemText(hwndDlg, LBL_AUTO_HOLD, btext);
+				}
+				break;
+
+			case BTN_CLEAR_AH: // auto-hold clear button
+				{
+					char btext[128] = { 0 };
+
+					GetDlgItemText(hwndDlg, BTN_CLEAR_AH, btext, 128);
+
+					int button = DWaitSimpleButton(hwndDlg, (uint8*)btext); //mbg merge 7/17/06 added cast
+
+					if(button)
+					{
+						if( !GetKeyNameText(button << 16, btext, sizeof(btext)))
+						{
+							sprintf(btext, "KB: %d", button);
+						}
+					}
+					else
+					{
+						sprintf(btext, "not assigned");
+					}
+
+					extern int autoHoldClearKey;
+					autoHoldClearKey = button;
+
+					SetDlgItemText(hwndDlg, LBL_CLEAR_AH, btext);
+				}
+				break;
+
+			case BTN_CLOSE:
+				EndDialog(hwndDlg, 0);
+				break;
+			}
+		}
+	}
+
+	return 0;
 }
 
 //Shows the input configuration dialog.
@@ -1431,9 +1447,9 @@ void FCEUI_UseInputPreset(int preset)
 {
 	switch(preset)
 	{
-	case 0: memcpy(GamePadConfig, GamePadPreset1, sizeof(GamePadPreset1)); break;
-	case 1: memcpy(GamePadConfig, GamePadPreset2, sizeof(GamePadPreset2)); break;
-	case 2: memcpy(GamePadConfig, GamePadPreset3, sizeof(GamePadPreset3)); break;
+		case 0: memcpy(GamePadConfig, GamePadPreset1, sizeof(GamePadPreset1)); break;
+		case 1: memcpy(GamePadConfig, GamePadPreset2, sizeof(GamePadPreset2)); break;
+		case 2: memcpy(GamePadConfig, GamePadPreset3, sizeof(GamePadPreset3)); break;
 	}
 	FCEU_DispMessage("Using input preset %d.",preset+1);
 }

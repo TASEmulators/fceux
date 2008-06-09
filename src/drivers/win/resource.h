@@ -252,6 +252,7 @@
 #define IDC_WINSIZE_MUL_X               400
 #define IDC_CHEAT_CHECK_NE_BY           401
 #define IDC_WINSIZE_MUL_Y               401
+#define CHECK_ENABLE_FOURSCORE          401
 #define IDC_CHEAT_CHECK_GT_BY           402
 #define IDC_FORCE_INT_VIDEO_SCALARS     402
 #define IDC_CHEAT_CHECK_LT_BY           403

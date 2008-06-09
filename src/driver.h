@@ -67,7 +67,12 @@ void FCEUI_SetNTSCTH(int n, int tint, int hue);
 
 void FCEUI_SetInput(int port, ESI type, void *ptr, int attrib);
 void FCEUI_SetInputFC(ESIFC type, void *ptr, int attrib);
-void FCEUI_DisableFourScore(bool disabled);
+
+//tells the emulator whether a fourscore is attached
+void FCEUI_SetInputFourscore(bool attachFourscore);
+//tells whether a fourscore is attached
+bool FCEUI_GetInputFourscore();
+
 void FCEUI_UseInputPreset(int preset);
 
 
@@ -143,6 +148,10 @@ void FCEUI_LoadState(char *fname);
 void FCEUD_SaveStateAs(void);
 void FCEUD_LoadStateFrom(void);
 
+//at the minimum, you should call FCEUI_SetInput, FCEUI_SetInputFC, and FCEUI_SetInputFourscore
+//you may also need to maintain your own internal state
+void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp);
+
 //movie was recorded from poweron. the alternative is from a savestate (or from reset)
 #define MOVIE_FLAG_FROM_POWERON (1<<3)
 
@@ -179,7 +188,7 @@ void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 //int FCEUI_IsMovieActive(void);
-int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);
+bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();

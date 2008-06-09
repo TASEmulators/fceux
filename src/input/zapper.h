@@ -10,6 +10,4 @@ struct ZAPPER
 	uint64 zaphit;
 };
 
-static ZAPPER ZD[2];
-
 #endif

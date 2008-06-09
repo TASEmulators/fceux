@@ -594,12 +594,12 @@ void RestartMovieOrReset(unsigned int do_power_off)
 
 void ResetNES(void)
 {
-        FCEUMOV_AddCommand(FCEUNPCMD_RESET);
-        if(!GameInfo) return;
-        GameInterface(GI_RESETM2);
-        FCEUSND_Reset();
-        FCEUPPU_Reset();
-        X6502_Reset();
+    FCEUMOV_AddCommand(FCEUNPCMD_RESET);
+    if(!GameInfo) return;
+    GameInterface(GI_RESETM2);
+    FCEUSND_Reset();
+    FCEUPPU_Reset();
+    X6502_Reset();
 
 	// clear back baffer
 	extern uint8 *XBackBuf;

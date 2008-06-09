@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -325,8 +324,6 @@ BEGIN
     PUSHBUTTON      "A",310,195,138,16,12
     PUSHBUTTON      "Turbo B",319,154,122,32,12
     PUSHBUTTON      "Turbo A",318,195,122,32,12
-    CONTROL         "Disable four-score emulation.",CHECK_DISABLE_FOURSCORE,
-                    "Button",BS_AUTOCHECKBOX,9,193,106,12
 END
 
 GUICONFIG DIALOGEX 16, 123, 184, 90
@@ -344,48 +341,50 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,53,164,12
 END
 
-INPUTCONFIG DIALOGEX 122, 105, 349, 187
+INPUTCONFIG DIALOGEX 122, 105, 349, 199
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Input Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Port 1:",102,20,19,152,50
-    COMBOBOX        COMBO_PAD1,27,47,71,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "Configure",BTN_PORT1,109,33,56,14
-    GROUPBOX        "Port 2:",103,176,19,152,50
-    COMBOBOX        COMBO_PAD2,183,47,71,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "Configure",BTN_PORT2,265,33,56,14
-    GROUPBOX        "NES-style Input Ports",108,10,8,328,71
-    GROUPBOX        "Famicom Expansion Port:",109,176,82,162,50
-    COMBOBOX        COMBO_FAM,183,111,84,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "Configure",BTN_FAM,275,98,56,14
-    CONTROL         "",65487,"Static",SS_BLACKFRAME,27,31,71,12
-    CONTROL         "",65486,"Static",SS_BLACKFRAME,183,31,71,12
-    CONTROL         "",65485,"Static",SS_BLACKFRAME,183,95,84,12
-    CTEXT           "",TXT_PAD1,30,32,65,10
-    CTEXT           "",TXT_PAD2,186,32,65,10
-    CTEXT           "",TXT_FAM,186,96,78,10
-    PUSHBUTTON      "Set",BTN_AUTO_HOLD,19,146,45,13
-    LTEXT           "not assigned",LBL_AUTO_HOLD,71,148,87,8
-    PUSHBUTTON      "Clear",BTN_CLEAR_AH,19,161,45,13
-    LTEXT           "not assigned",LBL_CLEAR_AH,71,163,87,8
-    DEFPUSHBUTTON   "Close",BTN_CLOSE,282,166,56,14
-    GROUPBOX        "Input Presets",113,10,82,162,50
-    CONTROL         "Allow Left+Right / Up+Down",BTN_ALLOW_LRUD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,183,146,107,10
-    PUSHBUTTON      "Set",BTN_PRESET_SET1,34,92,37,11
-    PUSHBUTTON      "Set",BTN_PRESET_SET2,34,104,37,11
-    PUSHBUTTON      "Set",BTN_PRESET_SET3,34,116,37,11
-    PUSHBUTTON      "Import",BTN_PRESET_IMPORT1,84,92,37,11
-    PUSHBUTTON      "Import",BTN_PRESET_IMPORT2,84,104,37,11
-    PUSHBUTTON      "Import",BTN_PRESET_IMPORT3,84,116,37,11
-    PUSHBUTTON      "Export",BTN_PRESET_EXPORT1,123,92,37,11
-    PUSHBUTTON      "Export",BTN_PRESET_EXPORT2,123,104,37,11
-    PUSHBUTTON      "Export",BTN_PRESET_EXPORT3,123,116,37,11
-    GROUPBOX        "Auto-Hold",118,10,135,162,44
-    GROUPBOX        "Emulation",119,176,135,162,25
-    CTEXT           "1",IDC_STATIC,18,94,8,8
-    CTEXT           "2",IDC_STATIC,18,105,8,8
-    CTEXT           "3",IDC_STATIC,18,117,8,8
+    GROUPBOX        "Port 1:",102,20,31,152,50
+    COMBOBOX        COMBO_PAD1,27,57,71,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "Configure",BTN_PORT1,109,43,56,14
+    GROUPBOX        "Port 2:",103,176,31,152,50
+    COMBOBOX        COMBO_PAD2,183,57,71,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "Configure",BTN_PORT2,265,41,56,14
+    GROUPBOX        "NES-style Input Ports",108,10,8,328,83
+    GROUPBOX        "Famicom Expansion Port:",109,176,93,162,50
+    COMBOBOX        COMBO_FAM,183,122,84,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "Configure",BTN_FAM,275,105,56,14
+    CONTROL         "",65487,"Static",SS_BLACKFRAME,27,41,71,12
+    CONTROL         "",65486,"Static",SS_BLACKFRAME,183,41,71,12
+    CONTROL         "",65485,"Static",SS_BLACKFRAME,183,106,84,12
+    CTEXT           "",TXT_PAD1,30,42,65,10
+    CTEXT           "",TXT_PAD2,186,42,65,10
+    CTEXT           "",TXT_FAM,186,107,78,10
+    PUSHBUTTON      "Set",BTN_AUTO_HOLD,19,157,45,13
+    LTEXT           "not assigned",LBL_AUTO_HOLD,71,159,87,8
+    PUSHBUTTON      "Clear",BTN_CLEAR_AH,19,172,45,13
+    LTEXT           "not assigned",LBL_CLEAR_AH,71,174,87,8
+    DEFPUSHBUTTON   "Close",BTN_CLOSE,282,177,56,14
+    GROUPBOX        "Input Presets",113,10,93,162,50
+    CONTROL         "Allow Left+Right / Up+Down",BTN_ALLOW_LRUD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,183,157,107,10
+    PUSHBUTTON      "Set",BTN_PRESET_SET1,34,103,37,11
+    PUSHBUTTON      "Set",BTN_PRESET_SET2,34,115,37,11
+    PUSHBUTTON      "Set",BTN_PRESET_SET3,34,127,37,11
+    PUSHBUTTON      "Import",BTN_PRESET_IMPORT1,84,103,37,11
+    PUSHBUTTON      "Import",BTN_PRESET_IMPORT2,84,115,37,11
+    PUSHBUTTON      "Import",BTN_PRESET_IMPORT3,84,127,37,11
+    PUSHBUTTON      "Export",BTN_PRESET_EXPORT1,123,103,37,11
+    PUSHBUTTON      "Export",BTN_PRESET_EXPORT2,123,115,37,11
+    PUSHBUTTON      "Export",BTN_PRESET_EXPORT3,123,127,37,11
+    GROUPBOX        "Auto-Hold",118,10,146,162,44
+    GROUPBOX        "Emulation",119,176,146,162,25
+    CTEXT           "1",IDC_STATIC,18,105,8,8
+    CTEXT           "2",IDC_STATIC,18,116,8,8
+    CTEXT           "3",IDC_STATIC,18,128,8,8
+    CONTROL         "Attach four-score (implies four gamepads)",CHECK_ENABLE_FOURSCORE,
+                    "Button",BS_AUTOCHECKBOX,18,18,142,12
 END
 
 MAHJONGDIALOG DIALOG  65510, 106, 340, 110
@@ -1261,7 +1260,7 @@ BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 338
         TOPMARGIN, 8
-        BOTTOMMARGIN, 179
+        BOTTOMMARGIN, 191
     END
 
     "NETMOO", DIALOG
@@ -1603,8 +1602,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

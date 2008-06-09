@@ -58,7 +58,7 @@ void ParseGIInput(FCEUGI *GameInfo);
 #define FCFGD_HYPERSHOT 3
 #define FCFGD_QUIZKING  4
 
-void InitInputPorts(void);
+void InitInputPorts();
 void SetEmulationSpeed(int type);
 int FCEUD_TestCommandState(int c);
 void FCEUD_UpdateInput();

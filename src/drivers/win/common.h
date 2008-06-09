@@ -59,7 +59,7 @@ extern int eoptions;
 #define EO_HIGHPRIO    4096
 #define EO_FORCEASPECT  8192
 #define EO_FORCEISCALE  16384
-#define EO_NOFOURSCORE  32768
+#define EO_FOURSCORE  32768
 
 bool directoryExists(const char* dirname);
 #endif

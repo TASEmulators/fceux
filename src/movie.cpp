@@ -93,41 +93,105 @@ void MovieData::TryDumpIncremental()
 }
 
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
-void MovieRecord::dump(std::ostream* os, int index)
+void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
+{
+	//these are mnemonics for each joystick bit.
+	//since we usually use the regular joypad, these will be more helpful.
+	//but any character other than ' ' should count as a set bit
+	//maybe other input types will need to be encoded another way..
+	for(int bit=7;bit>=0;bit--)
+	{
+		int bitmask = (1<<bit);
+		char mnemonic = mnemonics[bit];
+		//if the bit is set write the mnemonic
+		if(joystate & bitmask)
+			os->put(mnemonic);
+		else //otherwise write a space
+			os->put(' ');
+	}
+}
+
+void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
+{
+	joystate = 0;
+	for(int bit=7;bit>=0;bit--)
+	{
+		int c = is->get();
+		if(c == -1)
+			return;
+		if(c != ' ')
+			joystate |= (1<<bit);
+	}
+}
+
+void MovieRecord::parse(MovieData* md, std::istream* is)
+{
+	//by the time we get in here, the initial pipe has already been extracted
+
+	//a special case: if fourscore is enabled, parse four gamepads
+	if(md->fourscore)
+	{
+		parseJoy(is,joysticks[0]); is->get(); //eat the pipe
+		parseJoy(is,joysticks[1]); is->get(); //eat the pipe
+		parseJoy(is,joysticks[2]); is->get(); //eat the pipe
+		parseJoy(is,joysticks[3]); is->get(); //eat the pipe
+	}
+	else
+	{
+		for(int port=0;port<2;port++)
+		{
+			if(md->ports[port] == SI_GAMEPAD)
+				parseJoy(is, joysticks[port]);
+			else if(md->ports[port] == SI_ZAPPER)
+			{
+				int x,y,b;
+				*is >> x >> y >> b;
+				zappers[port].x = x;
+				zappers[port].y = y;
+				zappers[port].b = b;
+			}
+			
+			is->get(); //eat the pipe
+		}
+	}
+
+	//(no fcexp data is logged right now)
+	is->get(); //eat the pipe
+
+	//should be left at a newline
+}
+
+void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 {
 	//todo: if we want frame numbers in the output (which we dont since we couldnt cut and paste in movies)
 	//but someone would need to change the parser to ignore it
 	//fputc('|',fp);
 	//fprintf(fp,"%08d",index);
 
-	os->put('|');
-
-	//for each joystick
-	for(int i=0;i<4;i++)
+	//a special case: if fourscore is enabled, dump four gamepads
+	if(md->fourscore)
 	{
-		//these are mnemonics for each joystick bit.
-		//since we usually use the regular joypad, these will be more helpful.
-		//but any character other than ' ' should count as a set bit
-		//maybe other input types will need to be encoded another way..
-		for(int bit=7;bit>=0;bit--)
+		os->put('|');
+		dumpJoy(os,joysticks[0]); os->put('|');
+		dumpJoy(os,joysticks[1]); os->put('|');
+		dumpJoy(os,joysticks[2]); os->put('|');
+		dumpJoy(os,joysticks[3]); os->put('|');
+	}
+	else
+	{
+		for(int port=0;port<2;port++)
 		{
-			uint8 &joystate = joysticks[i];
-			int bitmask = (1<<bit);
-			char mnemonic = mnemonics[bit];
-			//if the bit is set write the mnemonic
-			if(joystate & bitmask)
-				os->put(mnemonic);
-			else //otherwise write a space
-				os->put(' ');
+			os->put('|');
+			if(md->ports[port] == SI_GAMEPAD)
+				dumpJoy(os, joysticks[port]);
+			else if(md->ports[port] == SI_ZAPPER)
+				*os << setw(3) << setfill('0') << (int)zappers[port].x << ' ' << setw(3) << setfill('0') << (int)zappers[port].y << setw(1) << ' ' << (int)zappers[port].b;
 		}
-
-		//separate the joysticks
 		os->put('|');
 	}
-
-	//write the zapper state
-	*os << setw(3) << setfill('0') << (int)zappers[0].x << ' ' << setw(3) << setfill('0') << (int)zappers[0].y << setw(1) << ' ' << (int)zappers[0].b << '|';
-	*os << setw(3) << setfill('0') << (int)zappers[1].x << ' ' << setw(3) << setfill('0') << (int)zappers[1].y << setw(1) << ' ' << (int)zappers[1].b;
+	
+	//(no fcexp data is logged right now)
+	os->put('|');
 
 	//each frame is on a new line
 	os->put('\n');
@@ -150,27 +214,42 @@ void MovieData::truncateAt(int frame)
 	records.resize(frame);
 }
 
-void MovieData::installDictionary(TDictionary& dictionary)
+void MovieData::installValue(std::string& key, std::string& val)
 {
-	dictionary.tryInstallInt("version",version);
-	dictionary.tryInstallInt("emuVersion",emuVersion);
-	dictionary.tryInstallInt("recordCount",recordCount);
-	dictionary.tryInstallBool("palFlag",palFlag);
-	dictionary.tryInstallBool("poweronFlag",poweronFlag);
-	dictionary.tryInstallBool("resetFlag",resetFlag);
-	dictionary.tryInstallString("romFilename",romFilename);
-	if(dictionary.containsKey("romChecksum"))
-		StringToBytes(dictionary["romChecksum"],&romChecksum,MD5DATA::size);
-	if(dictionary.containsKey("guid"))
-		guid = FCEU_Guid::fromString(dictionary["guid"]);
-	if(dictionary.containsKey("savestate"))
+	//todo - use another config system, or drive this from a little data structure. because this is gross
+	if(key == "version")
+		installInt(val,version);
+	else if(key == "emuVersion")
+		installInt(val,emuVersion);
+	else if(key == "recordCount")
+		installInt(val,recordCount);
+	else if(key == "palFlag")
+		installBool(val,palFlag);
+	else if(key == "poweronFlag")
+		installBool(val,poweronFlag);
+	else if(key == "resetFlag")
+		installBool(val,resetFlag);
+	else if(key == "romFilename")
+		romFilename = val;
+	else if(key == "romChecksum")
+		StringToBytes(val,&romChecksum,MD5DATA::size);
+	else if(key == "guid")
+		guid = FCEU_Guid::fromString(val);
+	else if(key == "fourscore")
+		installBool(val,fourscore);
+	else if(key == "port0")
+		installInt(val,ports[0]);
+	else if(key == "port1")
+		installInt(val,ports[1]);
+	else if(key == "port2")
+		installInt(val,ports[2]);
+	else if(key == "savestate")
 	{
-		std::string& str = dictionary["savestate"];
-		int len = HexStringToBytesLength(str);
+		int len = HexStringToBytesLength(val);
 		if(len >= 1)
 		{
 			savestate.resize(len);
-			StringToBytes(str,&savestate[0],len);
+			StringToBytes(val,&savestate[0],len);
 		}
 	}
 }
@@ -186,11 +265,15 @@ void MovieData::dump(std::ostream *os)
 	*os << "romFilename " << romFilename << endl;
 	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
 	*os << "guid " << guid.toString() << endl;
+	*os << "fourscore " << (fourscore?1:0) << endl;
+	*os << "port0 " << ports[0] << endl;
+	*os << "port1 " << ports[1] << endl;
+	*os << "port2 " << ports[2] << endl;
 		
 	if(savestate.size() != 0)
 		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
 	for(int i=0;i<(int)records.size();i++)
-		records[i].dump(os,i);
+		records[i].dump(this,os,i);
 }
 
 int MovieData::dumpLen()
@@ -235,10 +318,8 @@ bool FCEUMOV_Mode(int modemask)
 }
 
 //yuck... another custom text parser.
-void LoadFM2(MovieData& movieData, FILE *fp)
+void LoadFM2(MovieData& movieData, std::istream* fp)
 {
-	MovieData::TDictionary dictionary;
-
 	std::string key,value;
 	enum {
 		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT
@@ -247,7 +328,7 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 	for(;;)
 	{
 		bool iswhitespace, isrecchar, isnewline;
-		int c = fgetc(fp);
+		int c = fp->get();
 		if(c == -1)
 			goto bail;
 		iswhitespace = (c==' '||c=='\t');
@@ -269,33 +350,7 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 			{
 				dorecord:
 				MovieRecord record;
-				//for each joystick
-				for(int i=0;i<4;i++)
-				{
-					uint8& joystate = record.joysticks[i];
-					joystate = 0;
-					for(int bit=7;bit>=0;bit--)
-					{
-						int c = fgetc(fp);
-						if(c == -1)
-							goto bail;
-						if(c != ' ')
-							joystate |= (1<<bit);
-					}
-					//eat the separator (a pipe or a newline)
-					fgetc(fp);
-				}
-				//crappy parser
-				char tmp[4] = {0,0,0,0};
-				fread(tmp,1,3,fp); record.zappers[0].x = atoi(tmp); fgetc(fp);
-				fread(tmp,1,3,fp); record.zappers[0].y = atoi(tmp); fgetc(fp);
-				tmp[1] = 0;
-				fread(tmp,1,1,fp); record.zappers[0].b = atoi(tmp); fgetc(fp);
-				fread(tmp,1,3,fp); record.zappers[1].x = atoi(tmp); fgetc(fp);
-				fread(tmp,1,3,fp); record.zappers[1].y = atoi(tmp); fgetc(fp);
-				tmp[1] = 0;
-				fread(tmp,1,1,fp); record.zappers[1].b = atoi(tmp); fgetc(fp);
-
+				record.parse(&movieData, fp);
 				movieData.records.push_back(record);
 				state = NEWLINE;
 				break;
@@ -326,13 +381,11 @@ void LoadFM2(MovieData& movieData, FILE *fp)
 		bail = true;
 		if(state == VALUE) goto commit;
 		commit:
-		dictionary[key] = value;
+		movieData.installValue(key,value);
 		state = NEWLINE;
 		if(bail) break;
 		done: ;
 	}
-
-	movieData.installDictionary(dictionary);
 }
 
 
@@ -367,28 +420,6 @@ void FCEUI_StopMovie()
 
 	curMovieFilename[0] = 0;
 }
-
-void ParseGIInput(FCEUGI *GI); //mbg merge 7/17/06 - had to add. gross.
-void InitOtherInput(void); //mbg merge 7/17/06 - had to add. gross.
-
-//TODO - i dont think some of this like gametype and cspec are necessary
-static void ResetInputTypes()
-{
-//#ifdef WIN32
-//	extern int UsrInputType[3];
-//	UsrInputType[0] = SI_GAMEPAD;
-//	UsrInputType[1] = SI_GAMEPAD;
-//	UsrInputType[2] = SIFC_NONE;
-//
-//	ParseGIInput(NULL/*GameInfo*/);
-//	extern int cspec, gametype;
-//	cspec=GameInfo->cspecial;
-//	gametype=GameInfo->type;
-//
-//	InitOtherInput();
-//#endif
-}
-
 
 static void poweron(bool shouldDisableBatteryLoading)
 {
@@ -435,7 +466,7 @@ void FCEUMOV_EnterTasEdit()
 	poweron(false);
 
 	//todo - think about this
-	ResetInputTypes();
+	//ResetInputTypes();
 
 	//pause the emulator
 	FCEUI_SetEmulationPaused(1);
@@ -485,10 +516,11 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	currMovieData = MovieData();
 	
 	strcpy(curMovieFilename, fname);
-	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
+	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if (!fp) return;
 	LoadFM2(currMovieData, fp);
-	fclose(fp);
+	fp->close();
+	delete fp;
 
 	// fully reload the game to reinitialize everything before playing any movie
 	// to try fixing nondeterministic playback of some games
@@ -514,8 +546,8 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	else
 		FCEUI_SetVidSystem(0);
 
-	//we really need to research this...
-	ResetInputTypes();
+	//force the input configuration stored in the movie to apply
+	FCEUD_SetInput(currMovieData.fourscore,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
 
 	//stuff that should only happen when we're ready to positively commit to the replay
 	currFrameCounter = 0;
@@ -577,6 +609,10 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	currMovieData.resetFlag = (flags & MOVIE_FLAG_FROM_RESET)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
+	currMovieData.fourscore = FCEUI_GetInputFourscore();
+	currMovieData.ports[0] = joyports[0].type;
+	currMovieData.ports[1] = joyports[1].type;
+	currMovieData.ports[2] = portFC.type;
 
 	if(currMovieData.poweronFlag)
 	{
@@ -591,7 +627,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	currMovieData.dump(osRecordingMovie);
 
 	//todo - think about this
-	ResetInputTypes();
+	//ResetInputTypes();
 
 	//todo - think about this
 	// trigger a reset
@@ -653,7 +689,7 @@ void FCEUMOV_AddInputState()
 		joyports[0].log(&mr);
 		joyports[1].log(&mr);
 
-		mr.dump(osRecordingMovie,currMovieData.records.size());
+		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
 	}
 
@@ -715,20 +751,17 @@ bool FCEUMOV_ReadState(FILE* st, uint32 size)
 	load_successful = false;
 
 	//write the state to disk so we can reload
-	std::vector<uint8> buf(size);
+	std::vector<char> buf(size);
 	fread(&buf[0],1,size,st);
-	FILE* tmp = tmpfile();
-	fwrite(&buf[0],1,size,tmp);
 	//---------
 	//(debug)
 	//FILE* wtf = fopen("d:\\wtf.txt","wb");
 	//fwrite(&buf[0],1,size,wtf);
 	//fclose(wtf);
 	//---------
-	fseek(tmp,0,SEEK_SET);
+	memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	LoadFM2(tempMovieData, tmp);
-	fclose(tmp);
+	LoadFM2(tempMovieData, &mstemp);
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------
@@ -867,15 +900,17 @@ void FCEUI_MoviePlayFromBeginning(void)
 }
 
 
-int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
+bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 {
 	memset(info,0,sizeof(MOVIE_INFO));
 
 	MovieData md;
-	FILE* fp = FCEUD_UTF8fopen(fname, "rb");
-	if(!fp) return 0;
+	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
+	if(!fp) return false;
 	LoadFM2(md, fp);
-	fclose(fp);
+	fp->close();
+	delete fp;
+	
 
 	info->movie_version = md.version;
 	info->poweron = md.poweronFlag;
@@ -889,7 +924,7 @@ int FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 	info->name_of_rom_used = md.romFilename;
 	info->rerecord_count = md.recordCount;
 
-	return 1;
+	return true;
 }
 
 

@@ -35,8 +35,28 @@ enum ESI
 	SI_POWERPADA	= 3,
 	SI_POWERPADB	= 4,
 	SI_ARKANOID		= 5,
-	SI_MOUSE		= 6 //mbg merge 7/17/06 added
+	SI_MOUSE		= 6,
+
+	SI_COUNT = SI_MOUSE
 };
+
+inline const char* ESI_Name(ESI esi)
+{
+	static const char * const names[] =
+	{
+		"<none>",
+		"Gamepad",
+		"Zapper",
+		"Power Pad A",
+		"Power Pad B",
+		"Arkanoid Paddle"
+	};
+
+	if(esi >= SI_NONE && esi < SI_COUNT)
+		return names[esi];
+	else return "<invalid ESI>";
+}
+
 
 //input device types for the expansion port
 enum ESIFC
@@ -56,11 +76,41 @@ enum ESIFC
 	SIFC_OEKAKIDS	= 11,
 	SIFC_BWORLD		= 12,
 	SIFC_TOPRIDER	= 13,
+	
+	SIFC_COUNT = SIFC_TOPRIDER
 };
+
+
+inline const char* ESIFC_Name(ESIFC esifc)
+{
+	static const char * const names[] =
+	{
+		"<none>",
+		"Arkanoid Paddle",
+		"Hyper Shot gun",
+		"4-Player Adapter",
+		"Family Keyboard",
+		"Subor Keyboard",
+		"HyperShot Pads",
+		"Mahjong",
+		"Quiz King Buzzers",
+		"Family Trainer A",
+		"Family Trainer B",
+		"Oeka Kids Tablet",
+		"Barcode World",
+		"Top Rider"
+	};
+
+	if(esifc >= SIFC_NONE && esifc < SIFC_COUNT)
+		return names[esifc];
+	else return "<invalid ESIFC>";
+}
+
 
 #include "utils/md5.h"
 
-typedef struct {
+typedef struct
+{
 	uint8 *name;	//Game name, UTF8 encoding
 
 	EGIT type;      

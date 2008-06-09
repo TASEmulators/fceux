@@ -82,7 +82,8 @@ uint8 FCEU_GetJoyJoy(void)
 
 extern uint8 coinon;
 
-static bool FSDisable=false;  // Set to true if NES-style four-player adapter is disabled.
+//set to true if the fourscore is attached
+static bool FSAttached = false;
 
 JOYPORT joyports[2] = { JOYPORT(0), JOYPORT(1) };
 FCPORT portFC;
@@ -92,6 +93,11 @@ static DECLFR(JPRead)
 	uint8 ret=0;
 
 	ret|=joyports[A&1].driver->Read(A&1);
+
+	if(!(A&1) && ret)
+	{
+		int zzz=9;
+	}
 
 	if(portFC.driver)
 		ret = portFC.driver->Read(A&1,ret);
@@ -120,7 +126,7 @@ static DECLFW(B4016)
 		//mbg 6/7/08 - I guess he means that the input drivers could track the strobing themselves
 		//I dont see why it is unreasonable here.
 		for(int i=0;i<2;i++)
-			joyports[i].driver->Strobe(0);
+			joyports[i].driver->Strobe(i);
 		if(portFC.driver)
 			portFC.driver->Strobe();
 	}
@@ -225,7 +231,7 @@ static uint8 ReadGP(int w)
 	else
 		ret = ((joy[w]>>(joy_readbit[w]))&1);
 	if(joy_readbit[w]>=16) ret=0;
-	if(FSDisable)
+	if(!FSAttached)
 	{
 		if(joy_readbit[w]>=8) ret|=1;
 	}
@@ -486,10 +492,13 @@ void InitializeInput(void)
 }
 
 
-
-void FCEUI_DisableFourScore(bool disabled)
+bool FCEUI_GetInputFourscore()
 {
-	FSDisable = disabled;
+	return FSAttached;
+}
+void FCEUI_SetInputFourscore(bool attachFourscore)
+{
+	FSAttached = attachFourscore;
 }
 
 SFORMAT FCEUCTRL_STATEINFO[]={
