@@ -318,7 +318,7 @@ bool FCEUMOV_Mode(int modemask)
 }
 
 //yuck... another custom text parser.
-void LoadFM2(MovieData& movieData, std::istream* fp)
+void LoadFM2(MovieData& movieData, std::istream* fp, bool stopAfterHeader = false)
 {
 	std::string key,value;
 	enum {
@@ -349,6 +349,7 @@ void LoadFM2(MovieData& movieData, std::istream* fp)
 		case RECORD:
 			{
 				dorecord:
+				if (stopAfterHeader) return;
 				MovieRecord record;
 				record.parse(&movieData, fp);
 				movieData.records.push_back(record);
@@ -907,7 +908,7 @@ bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
 	MovieData md;
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) return false;
-	LoadFM2(md, fp);
+	LoadFM2(md, fp, true);
 	fp->close();
 	delete fp;
 	
