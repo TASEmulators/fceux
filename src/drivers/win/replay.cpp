@@ -3,8 +3,8 @@
 #include "main.h"
 #include "window.h"
 
-bool autoInfo1003 = true; //This is a hacky variable that checks when dialog 1003 is given a
-					      //value by the program rather than the user.  This will be used when deciding to automatically make the stop movie checkbox checked.
+// Used when deciding to automatically make the stop movie checkbox checked
+static bool stopframeWasEditedByUser = false;
 
 extern FCEUGI *GameInfo;
 
@@ -116,23 +116,23 @@ void UpdateReplayDialog(HWND hwndDlg)
 		{
 			char tmp[256];
 			uint32 div;
-			
-			sprintf(tmp, "%lu", info.num_frames);
+
+			sprintf(tmp, "%u", (unsigned)info.num_frames);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES), tmp);                   // frames
 			SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,tmp);
-			autoInfo1003 = true;
+			stopframeWasEditedByUser = false;
 
 			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
 			info.num_frames += (div>>1);                                    // round up
 			sprintf(tmp, "%02d:%02d:%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, (info.num_frames/div) % 60);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
-			
-			sprintf(tmp, "%lu", info.rerecord_count);
+
+			sprintf(tmp, "%u", (unsigned)info.rerecord_count);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
-			
+
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
-			
+
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
 
 			//-----------
@@ -183,7 +183,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
 			EnableWindow(GetDlgItem(hwndDlg,IDOK),TRUE);                     // enable OK
-			
+
 			doClear = 0;
 		}
 
@@ -392,16 +392,16 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		 {
 			if (LOWORD(wParam) == IDC_EDIT_STOPFRAME) // Check if Stop movie at value has changed
 			{
-				if (autoInfo1003 == false)
+				if (stopframeWasEditedByUser)
 				{
 				HWND hwnd1 = GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE);
 				Button_SetCheck(hwnd1,BST_CHECKED);
 				}
 				else
-					autoInfo1003 = false;
+					stopframeWasEditedByUser = true;
 			}
 		 }
-		
+
 		if(HIWORD(wParam) == CBN_SELCHANGE)
 		{
 			UpdateReplayDialog(hwndDlg);
@@ -476,12 +476,12 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							char* fn=GetReplayPath(hwndDlg);
 							//char TempArray[16]; //mbg merge 7/17/06 removed
 							replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-							
+
 							char offset1Str[32]={0};
 
 							SendDlgItemMessage(hwndDlg, IDC_EDIT_STOPFRAME, WM_GETTEXT, (WPARAM)32, (LPARAM)offset1Str);
 							replayStopFrameSetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE, BM_GETCHECK,0,0) == BST_CHECKED)? strtol(offset1Str,0,10):0;
-							
+
 							EndDialog(hwndDlg, (INT_PTR)fn);
 						}
 					}
@@ -574,7 +574,7 @@ static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
 		char szDirectory[MAX_PATH]={0};
 		char szFilename[MAX_PATH]={0};
 		char szExt[MAX_PATH]={0};
-		
+
 		_splitpath(fname, szDrive, szDirectory, szFilename, szExt);
 		fn=(char*)malloc(strlen(szFilename)+strlen(szExt)+1);
 		_makepath(fn, "", "", szFilename, szExt);
@@ -592,7 +592,7 @@ static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
 static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static struct CreateMovieParameters* p = NULL;
-	
+
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
@@ -600,17 +600,17 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 		UpdateRecordDialogPath(hwndDlg, p->szFilename);
 		free(p->szFilename);
 		p->szFilename = 0;
-		
+
 		// Populate the "record from..." dialog
 		{
 			char* findGlob=FCEU_MakeFName(FCEUMKF_STATEGLOB, 0, 0);
 			WIN32_FIND_DATA wfd;
 			HANDLE hFind;
 			int i=0;
-			
+
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Start");
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Now");
-			
+
 			memset(&wfd, 0, sizeof(wfd));
 			hFind = FindFirstFile(findGlob, &wfd);
 			if(hFind != INVALID_HANDLE_VALUE)
@@ -620,7 +620,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					if ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ||
 						(wfd.dwFileAttributes & FILE_ATTRIBUTE_READONLY))
 						continue;
-					
+
 					if (strlen(wfd.cFileName) < 4 ||
 						!strcmp(wfd.cFileName + (strlen(wfd.cFileName) - 4), ".fm2"))
 						continue;
@@ -630,14 +630,14 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				FindClose(hFind);
 			}
 			free(findGlob);
-			
+
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, 0, 0);				// choose "from reset" as a default
 		}
 		UpdateRecordDialog(hwndDlg);
-		
+
 		return TRUE;
-		
+
 	case WM_COMMAND:
 		if(HIWORD(wParam) == CBN_SELCHANGE)
 		{
@@ -658,7 +658,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			{
 				OPENFILENAME ofn;
 				char szChoice[MAX_PATH]={0};
-				
+
 				// pop open a file browser to choose the savestate
 				memset(&ofn, 0, sizeof(ofn));
 				ofn.lStructSize = sizeof(ofn);
@@ -695,16 +695,16 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					EndDialog(hwndDlg, 1);
 				}
 				return TRUE;
-				
+
 			case IDCANCEL:
 				EndDialog(hwndDlg, 0);
 				return TRUE;
-				
+
 			case IDC_BUTTON_BROWSEFILE:
 				{
 					OPENFILENAME ofn;
 					char szChoice[MAX_PATH]={0};
-					
+
 					// browse button
 					memset(&ofn, 0, sizeof(ofn));
 					ofn.lStructSize = sizeof(ofn);
