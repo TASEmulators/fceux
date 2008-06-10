@@ -290,7 +290,7 @@ DriverInitialize(FCEUGI *gi)
 static void
 DriverKill()
 {
-    //g_config->save();
+    g_config->save();
 
 #ifndef WIN32
     // XXX soules - capturing all these signals seems pointless

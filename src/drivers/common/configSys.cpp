@@ -608,7 +608,8 @@ Config::_load()
             pos = line.find(" ");
             name = line.substr(0, (pos > eqPos) ? eqPos : pos);
             pos = line.find_first_not_of(" ", eqPos + 1);
-            value = line.substr(pos);
+	    if (pos == std::string::npos) value = "";
+	    else value = line.substr(pos);
 
             // check if the option exists, and if so, set it appropriately
             str_i = _strOptMap.find(name);
