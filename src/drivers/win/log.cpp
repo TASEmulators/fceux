@@ -59,7 +59,6 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
-            RedoText();
 			break;
 		case WM_COMMAND:
 			if(HIWORD(wParam)==BN_CLICKED)
@@ -83,6 +82,7 @@ void MakeLogWindow(void)
 	if(!logwin)
 	{
 		logwin = CreateDialog(fceu_hInstance, "MESSAGELOG" , 0, LogCon);
+		RedoText(); // XXX jeblanchard Why didn't this work in WM_INITDIALOG?
 	}
 }
 
