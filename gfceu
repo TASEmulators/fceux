@@ -112,7 +112,7 @@ class game_options:
   # sound
   sound_check = True
   soundq_check = True
-  soundrate_entry = 11000
+  soundrate_entry = "11000"
   
   # video
   fullscreen_check = False
