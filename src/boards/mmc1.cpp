@@ -332,6 +332,8 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int battery)
   info->Power=GenMMC1Power;
   GameStateRestore=MMC1_Restore;
   AddExState(&lreset, 8, 1, "LRST");
+  AddExState(&Buffer, 1, 1, "BFFR");
+  AddExState(&BufferShift, 1, 1, "BFRS");
 }
 
 void Mapper1_Init(CartInfo *info)
