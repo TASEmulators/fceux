@@ -599,7 +599,7 @@ Config::_load()
 
             // check line validity
             eqPos = line.find("=");
-            if(line[0] == '#' || eqPos == std::string::npos) {
+            if(line[0] == '#') {
                 // skip this line
                 continue;
             }
