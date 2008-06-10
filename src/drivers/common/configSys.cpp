@@ -572,7 +572,7 @@ Config::parse(int argc,
 int
 Config::_load()
 {
-    unsigned int pos, eqPos;
+    signed int pos, eqPos;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
