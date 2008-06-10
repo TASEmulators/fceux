@@ -94,11 +94,12 @@ static DECLFR(JPRead)
 
 	ret|=joyports[A&1].driver->Read(A&1);
 
+	/* this code effectively does nothing as zzz is never used
 	if(!(A&1) && ret)
 	{
 		int zzz=9;
 	}
-
+	*/ 
 	if(portFC.driver)
 		ret = portFC.driver->Read(A&1,ret);
 
@@ -822,7 +823,7 @@ FCEUI_LoadMovie(0, 0, 0);
 
 static void CommandSoundAdjust(void)
 {
-	int n;
+	int n=0;
 	switch(execcmd)
 	{
 	case EMUCMD_SOUND_VOLUME_UP:		n=1;  break;
