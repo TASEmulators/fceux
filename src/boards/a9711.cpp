@@ -44,15 +44,15 @@ static void UNLA9711PW(uint32 A, uint8 V)
     setprg8(A,V&0x3F);
 }
 
-static DECLFW(UNLA9711Write8000)
-{
+//static DECLFW(UNLA9711Write8000)
+//{
 //  FCEU_printf("bs %04x %02x\n",A,V);
 //  if(V&0x80)
 //    MMC3_CMDWrite(A,V);
 //  else
 //    MMC3_CMDWrite(A,m_perm[V&7]);
 //  if(V!=0x86) MMC3_CMDWrite(A,V);
-}
+//}
 
 static DECLFW(UNLA9711WriteLo)
 {

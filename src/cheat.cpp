@@ -38,7 +38,7 @@ void FCEU_CheatResetRAM(void)
 {
  int x;
 
- for(x=0;x<64;x++) 
+ for(x=0;x<64;x++)
   CheatRPtrs[x]=0;
 }
 
@@ -98,7 +98,7 @@ static DECLFR(SubCheatsRead)
     if(pv==s->compare)
      return(s->val);
     else return(pv);
-   } 
+   }
    else return(s->val);
   }
   s++;
@@ -135,7 +135,7 @@ void RebuildSubCheats(void)
    }
   }
   c=c->next;
- } 
+ }
 }
 
 void FCEU_PowerCheats()
@@ -207,7 +207,7 @@ void FCEU_LoadGameCheats(FILE *override)
 
  FCEU_printf("Cheats file loaded.\n");
  while(fgets(linebuf,2048,fp)>0)
- { 
+ {
   char *tbuf=linebuf;
   int doc=0;
 
@@ -226,7 +226,7 @@ void FCEU_LoadGameCheats(FILE *override)
    doc=1;
   }
 
-  if(tbuf[0]==':')    
+  if(tbuf[0]==':')
   {
    tbuf++;
    status=0;
@@ -241,7 +241,7 @@ void FCEU_LoadGameCheats(FILE *override)
    namebuf=(char *)malloc(strlen(neo)+1);
    strcpy(namebuf,neo);
   }
-  else 
+  else
   {
    char *neo=&tbuf[4+2+1+1];
    if(sscanf(tbuf,"%04x%*[:]%02x",&addr,&val)!=2)
@@ -281,7 +281,7 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
   {
    struct CHEATF *next=cheats;
    for(;;)
-   {  
+   {
     struct CHEATF *last=next;
     next=next->next;
     free(last->name);
@@ -302,7 +302,7 @@ void FCEU_FlushGameCheats(FILE *override, int nosave)
   {
    struct CHEATF *next=cheats;
    FILE *fp;
-   
+
    if(override)
     fp = override;
    else
@@ -398,7 +398,7 @@ int FCEUI_DelCheat(uint32 which)
      cheats=cheatsl=0;  // No (more) cheats.
    }
    free(cur->name);     // Now that all references to this cheat are removed,
-   free(cur);           // free the memory.   
+   free(cur);           // free the memory.
    break;
   }                     // *END REMOVE THIS CHEAT*
 
@@ -457,7 +457,7 @@ int FCEUI_GetCheat(uint32 which, char **name, uint32 *a, uint8 *v, int *compare,
    if(name)
     *name=next->name;
    if(a)
-    *a=next->addr; 
+    *a=next->addr;
    if(v)
     *v=next->val;
    if(s)
@@ -485,7 +485,7 @@ static int GGtobin(char c)
 }
 
 /* Returns 1 on success, 0 on failure. Sets *a,*v,*c. */
-int FCEUI_DecodeGG(const char *str, uint16 *a, uint8 *v, int *c)
+int FCEUI_DecodeGG(const char *str, int *a, int *v, int *c)
 {
  uint16 A;
  uint8 V,C;
@@ -539,7 +539,7 @@ int FCEUI_DecodeGG(const char *str, uint16 *a, uint8 *v, int *c)
   t=GGtobin(*str++);
   C|=(t&0x07);
   C|=(t&0x08)<<4;
-  
+
   t=GGtobin(*str++);
   C|=(t&0x07)<<4;
   V|=(t&0x08);
@@ -551,7 +551,7 @@ int FCEUI_DecodeGG(const char *str, uint16 *a, uint8 *v, int *c)
  return(0);
 }
 
-int FCEUI_DecodePAR(const char *str, uint16 *a, uint8 *v, int *c, int *type)
+int FCEUI_DecodePAR(const char *str, int *a, int *v, int *c, int *type)
 {
  int boo[4];
  if(strlen(str)!=8) return(0);
@@ -629,7 +629,7 @@ int FCEUI_ToggleCheat(uint32 which)
 {
  struct CHEATF *next=cheats;
  uint32 x=0;
-   
+
  while(next)
  {
   if(x==which)
@@ -658,7 +658,7 @@ static int InitCheatComp(void)
  }
  for(x=0;x<65536;x++)
   CheatComp[x]=CHEATC_NONE;
- 
+
  return(1);
 }
 

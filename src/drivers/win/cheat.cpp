@@ -26,7 +26,7 @@
 #include "../../fceu.h"
 #include "../../cart.h"
 static HWND pwindow = 0;
-HWND hCheat; //mbg merge 7/19/06 had to add 
+HWND hCheat; //mbg merge 7/19/06 had to add
 int CheatWindow;
 int CheatStyle=1;
 
@@ -419,7 +419,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								GetDlgItemText(hwndDlg,IDC_CHEAT_VAL_LT_BY,str,3);
 								FCEUI_CheatSearchEnd(8,0,StrToU8(str));
 							}
-							else FCEUI_CheatSearchEnd(6,0,0); 
+							else FCEUI_CheatSearchEnd(6,0,0);
 							ShowResults(hwndDlg);
 							break;
 					}
@@ -523,11 +523,11 @@ void ConfigCheats(HWND hParent) {
 	}
 	else
 	 SetFocus(hCheat);
-	 
+
 	if(!pwindow)
 		pwindow=CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
 	else
-		SetFocus(pwindow); 
+		SetFocus(pwindow);
 }
 
 void UpdateCheatList()
@@ -576,16 +576,16 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 								GetDlgItemText(hGGConv,IDC_GAME_GENIE_CODE,GGcode,9);
 								if((strlen(GGcode) != 8) && (strlen(GGcode) != 6))break;
 
-								FCEUI_DecodeGG(GGcode, (uint16 *)&GGaddr, (uint8 *)&GGval, &GGcomp);
+								FCEUI_DecodeGG(GGcode, &GGaddr, &GGval, &GGcomp);
 
 								sprintf(str,"%04X",GGaddr);
 								SetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str);
-								
+
 								if(GGcomp != -1)
 									sprintf(str,"%02X",GGcomp);
 								else str[0] = 0;
 								SetDlgItemText(hGGConv,IDC_GAME_GENIE_COMP,str);
-									
+
 								sprintf(str,"%02X",GGval);
 								SetDlgItemText(hGGConv,IDC_GAME_GENIE_VAL,str);
 								//ListGGAddresses();
@@ -594,7 +594,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							case IDC_GAME_GENIE_ADDR:
 							case IDC_GAME_GENIE_COMP:
 							case IDC_GAME_GENIE_VAL:
-								
+
 								GetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str,5);
 								if(strlen(str) != 4) break;
 
@@ -629,7 +629,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 									SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_ADDSTRING,0,(LPARAM)(LPSTR)str);
 									selcheat = (SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_GETCOUNT,0,0) - 1);
 									SendDlgItemMessage(hCheat,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
-	
+
 									SetDlgItemText(hCheat,IDC_CHEAT_ADDR,(LPTSTR)U16ToStr(GGaddr));
 									SetDlgItemText(hCheat,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(GGval));
 
@@ -659,31 +659,31 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 //The code in this function is a modified version
 //of Chris Covell's work - I'd just like to point that out
-void EncodeGG(char *str, int a, int v, int c){ 
+void EncodeGG(char *str, int a, int v, int c){
 	uint8 num[8];
 	static char lets[16]={'A','P','Z','L','G','I','T','Y','E','O','X','U','K','S','V','N'};
 	int i;
 	if(a > 0x8000)a-=0x8000;
 
-	num[0]=(v&7)+((v>>4)&8); 
+	num[0]=(v&7)+((v>>4)&8);
 	num[1]=((v>>4)&7)+((a>>4)&8);
 	num[2]=((a>>4)&7);
 	num[3]=(a>>12)+(a&8);
 	num[4]=(a&7)+((a>>8)&8);
 	num[5]=((a>>8)&7);
-  
+
 	if (c == -1){
 		num[5]+=v&8;
-		for(i = 0;i < 6;i++)str[i] = lets[num[i]]; 
+		for(i = 0;i < 6;i++)str[i] = lets[num[i]];
 		str[6] = 0;
 	} else {
 		num[2]+=8;
 		num[5]+=c&8;
 		num[6]=(c&7)+((c>>4)&8);
 		num[7]=((c>>4)&7)+(v&8);
-		for(i = 0;i < 8;i++)str[i] = lets[num[i]]; 
+		for(i = 0;i < 8;i++)str[i] = lets[num[i]];
 		str[8] = 0;
-	} 
+	}
 	return;
 }
 
@@ -707,7 +707,7 @@ void ListGGAddresses(){
 		}
 	}
 
-	
+
 }
 
 //A different model for this could be to have everything
@@ -722,8 +722,8 @@ void SetGGConvFocus(int address,int compare){
 	dontupdateGG = 1; //little hack to fix a nasty bug
 
 	sprintf(str,"%04X",address);
-	SetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str); 
-	
+	SetDlgItemText(hGGConv,IDC_GAME_GENIE_ADDR,str);
+
 	dontupdateGG = 0;
 
 	sprintf(str,"%02X",GGcomp);

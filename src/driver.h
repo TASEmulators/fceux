@@ -102,7 +102,7 @@ void FCEUI_CloseGame(void);
 //Deallocates all allocated memory.  Call after FCEUI_Emulate() returns.
 void FCEUI_Kill(void);
 
-//Enable/Disable game genie. a=true->enabled 
+//Enable/Disable game genie. a=true->enabled
 void FCEUI_SetGameGenie(bool a);
 
 //Set video system a=0 NTSC, a=1 PAL
@@ -164,7 +164,7 @@ void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp);
 // set in newer version, used for old movie compatibility
 //TODO - only use this flag to print a warning that the sync might be bad
 //so that we can get rid of the sync hack code
-#define MOVIE_FLAG_NOSYNCHACK          (1<<4) 
+#define MOVIE_FLAG_NOSYNCHACK          (1<<4)
 
 #define MOVIE_MAX_METADATA      512
 
@@ -180,7 +180,7 @@ typedef struct
  int    metadata_size;					// size of the buffer pointed to by metadata
  MD5DATA md5_of_rom_used;
  bool md5_of_rom_used_present;		// v1 movies don't have md5 info available
- std::string name_of_rom_used;				
+ std::string name_of_rom_used;
 } MOVIE_INFO;
 
 void FCEUI_SaveMovie(char *fname, uint8 flags);
@@ -204,8 +204,8 @@ void FCEUI_SaveSnapshot(void);
 void FCEU_DispMessage(char *format, ...);
 #define FCEUI_DispMessage FCEU_DispMessage
 
-int FCEUI_DecodePAR(const char *code, uint16 *a, uint8 *v, int *c, int *type);
-int FCEUI_DecodeGG(const char *str, uint16 *a, uint8 *v, int *c);
+int FCEUI_DecodePAR(const char *code, int *a, int *v, int *c, int *type);
+int FCEUI_DecodeGG(const char *str, int *a, int *v, int *c);
 int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int type);
 int FCEUI_DelCheat(uint32 which);
 int FCEUI_ToggleCheat(uint32 which);
@@ -299,7 +299,7 @@ bool FCEUI_AviIsRecording();
 void FCEUD_AviRecordTo(void);
 void FCEUD_AviStop(void);
 
-///A callback that the emu core uses to poll the state of a given emulator command key 
+///A callback that the emu core uses to poll the state of a given emulator command key
 typedef int TestCommandState(int cmd);
 ///Signals the emu core to poll for emulator commands and take actions
 void FCEUI_HandleEmuCommands(TestCommandState* testfn);
@@ -353,8 +353,8 @@ bool FCEU_IsValidUI(EFCEUI ui);
 
 
 #ifdef __cplusplus
-extern "C" 
-#endif 
+extern "C"
+#endif
 FILE *FCEUI_UTF8fopen_C(const char *n, const char *m);
 
 #endif //__DRIVER_H_

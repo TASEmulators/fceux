@@ -65,10 +65,10 @@ static uint8 Get8(unsigned int def)
 static int GetI(int def)
 {
  char buf[32];
- 
+
  fgets(buf,32,stdin);
  if(buf[0]=='\n')
-  return(def);  
+  return(def);
  sscanf(buf,"%d",&def);
  return def;
 }
@@ -117,7 +117,7 @@ int ListChoice(int hmm)
    if(buf[0]=='s' || buf[0]=='S') return(-1);
    if(buf[0]=='\n') return(0);
    if(!sscanf(buf,"%d",&num))
-    return(0);  
+    return(0);
    if(num<1) goto tryagain;
    return(num);
   }
@@ -165,12 +165,12 @@ int AddToList(char *text, uint32 id)
  mordoe=1;
  listids[listcount]=id;
  printf("%2d) %s\n",listcount+1,text);
- listcount++; 
+ listcount++;
  return(1);
 }
 
 /*
-**	
+**
 **	End list code.
 **/
 
@@ -214,7 +214,7 @@ static void ModifyCheat(int num)
  GetString(buf,256);
 
  /* This obviously doesn't allow for cheats with no names.  Bah.  Who wants
-    nameless cheats anyway... 
+    nameless cheats anyway...
  */
 
  if(buf[0])
@@ -245,15 +245,13 @@ static void ModifyCheat(int num)
 
 static void AddCheatGGPAR(int which)
 {
- uint16 A;
- uint8 V;
- int C;
+ int A, V, C;
  int type;
  char name[256],code[256];
 
  printf("Name: ");
- GetString(name,256); 
- 
+ GetString(name,256);
+
  printf("Code: ");
  GetString(code,256);
 
@@ -268,7 +266,7 @@ static void AddCheatGGPAR(int which)
     return;
    }
   }
-  else 
+  else
   {
    if(!FCEUI_DecodeGG(code,&A,&V,&C))
    {
@@ -291,8 +289,8 @@ static void AddCheatGG(void)
 }
 
 static void AddCheatPAR(void)
-{  
- AddCheatGGPAR(1); 
+{
+ AddCheatGGPAR(1);
 }
 
 static void AddCheatParam(uint32 A, uint8 V)
@@ -356,7 +354,7 @@ static void ListCheats(void)
 	    break;
    case 'd':if(!FCEUI_DelCheat(which))
  	     puts("Error deleting cheat!");
-	    else 
+	    else
 	     puts("Cheat has been deleted.");
 	    break;
    case 'm':ModifyCheat(which);
