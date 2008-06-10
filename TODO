@@ -1,10 +1,8 @@
 TODO: 
-* Ensure version server >= 0.0.5
-* Resolution?
-* Windows Support
-* --last command line option
-* normal options (quiet)
-* server nick
-* no xterm
-  In progress - status_window.py started, needs to work to be functional
-* Browser?
+* improve button config now that config system is resolved
+* resolution
+* parse normal options (etc quiet)
+* Browser
+
+Deferred:
+* A lot of shit was going to be done with the client/server GUI, but netplay is fucked in svn as it is.
