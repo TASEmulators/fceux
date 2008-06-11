@@ -512,7 +512,12 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 
 	assert(fname);
 
-	FCEUI_StopMovie();
+	//mbg 6/10/08 - we used to call StopMovie here, but that cleared curMovieFilename and gave us crashes...
+	if(movieMode == MOVIEMODE_PLAY)
+		StopPlayback();
+	else if(movieMode == MOVIEMODE_RECORD)
+		StopRecording();
+	//--------------
 
 	currMovieData = MovieData();
 	
@@ -526,7 +531,7 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	// fully reload the game to reinitialize everything before playing any movie
 	// to try fixing nondeterministic playback of some games
 	{
-		poweron(false);
+		poweron(true);
 	}
 
 	//todo - if reset flag is set, will the poweron flag be set?
@@ -539,6 +544,8 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	}
 
 	//TODO - handle reset flag
+	//ResetNES();
+
 
 	//if there is no savestate, we won't have this crucial piece of information at the start of the movie.
 	//so, we have to include it with the movie
