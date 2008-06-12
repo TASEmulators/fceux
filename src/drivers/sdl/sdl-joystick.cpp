@@ -60,11 +60,11 @@ DTestButtonJoy(ButtConfig *bc)
                                   (((bc->ButtonNum[x] >> 8) & 0x1F) & 
                                    (bc->ButtonNum[x]&0xFF)))) {
                 return(1);
-            } else if(SDL_JoystickGetButton(s_Joysticks[bc->DeviceNum[x]],
-                                            bc->ButtonNum[x])) { 
-                return(1);
             }
-        }
+       } else if(SDL_JoystickGetButton(s_Joysticks[bc->DeviceNum[x]],
+                                       bc->ButtonNum[x])) { 
+           return(1);
+       }
     }
     return(0);
 }
