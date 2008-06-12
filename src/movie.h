@@ -20,6 +20,11 @@ enum EMOVIEMODE
 	MOVIEMODE_TASEDIT = 8
 };
 
+enum EMOVIECMD
+{
+	MOVIECMD_RESET = 1,
+};
+
 EMOVIEMODE FCEUMOV_Mode();
 bool FCEUMOV_Mode(EMOVIEMODE modemask);
 bool FCEUMOV_Mode(int modemask);
@@ -45,6 +50,12 @@ public:
 	struct {
 		uint8 x,y,b;
 	} zappers[2];
+
+	//misc commands like reset, etc.
+	//small now to save space; we might need to support more commands later.
+	//the disk format will support up to 64bit if necessary
+	uint8 commands;
+	bool command_reset() { return (commands&MOVIECMD_RESET)!=0; }
 
 	void toggleBit(int joy, int bit)
 	{

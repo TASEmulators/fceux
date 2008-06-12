@@ -128,6 +128,10 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 {
 	//by the time we get in here, the initial pipe has already been extracted
 
+	//extract the commands
+	*is >> commands;
+	is->get(); //eat the pipe
+
 	//a special case: if fourscore is enabled, parse four gamepads
 	if(md->fourscore)
 	{
@@ -167,6 +171,9 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 	//but someone would need to change the parser to ignore it
 	//fputc('|',fp);
 	//fprintf(fp,"%08d",index);
+
+	//dump the misc commands
+	*os << setw(1) << commands << '|';
 
 	//a special case: if fourscore is enabled, dump four gamepads
 	if(md->fourscore)
@@ -669,6 +676,11 @@ void FCEUMOV_AddInputState()
 		else
 		{
 			MovieRecord* mr = &currMovieData.records[currFrameCounter];
+			
+			//reset if necessary
+			if(mr->command_reset())
+				ResetNES();
+
 			joyports[0].load(mr);
 			joyports[1].load(mr);
 		}
