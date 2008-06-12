@@ -317,6 +317,7 @@ enum EMUSPEED_SET
 void FCEUD_SetEmulationSpeed(int cmd);
 void FCEUD_TurboOn(void);
 void FCEUD_TurboOff(void);
+void FCEUD_TurboToggle(void);
 
 int FCEUD_ShowStatusIcon(void);
 void FCEUD_ToggleStatusIcon(void);

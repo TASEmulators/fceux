@@ -1431,17 +1431,9 @@ int FCEUD_TestCommandState(int c)
 	return keys[cmdmask] ? 1 : 0;
 }
 
-void FCEUD_TurboOn(void)
-{
-	//NoWaiting|=1;
-	turbo = true;
-}
-
-void FCEUD_TurboOff(void)
-{
-	//NoWaiting&=~1;
-	turbo = false;
-}
+void FCEUD_TurboOn    (void) { turbo = true; }
+void FCEUD_TurboOff   (void) { turbo = false; }
+void FCEUD_TurboToggle(void) { turbo = !turbo; }
 
 void FCEUI_UseInputPreset(int preset)
 {

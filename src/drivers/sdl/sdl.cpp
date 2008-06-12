@@ -570,8 +570,6 @@ void FCEUD_PrintError(const char *errormsg)
 
 #define DUMMY(__f) void __f(void) {printf("%s\n", #__f); FCEU_DispMessage("Not implemented.");}
 DUMMY(FCEUD_HideMenuToggle)
-DUMMY(FCEUD_TurboOn)
-DUMMY(FCEUD_TurboOff)
 DUMMY(FCEUD_SaveStateAs)
 DUMMY(FCEUD_LoadStateFrom)
 DUMMY(FCEUD_MovieRecordTo)
@@ -584,5 +582,7 @@ int FCEUD_ShowStatusIcon(void) {return 0;}
 bool FCEUI_AviIsRecording(void) {return false;}
 void FCEUI_UseInputPreset(int preset) { }
 bool FCEUD_PauseAfterPlayback() { return false; }
-bool moviePleaseLogSavestates = false;
-
+// These are actually fine, but will be unused and overriden by the current UI code.
+void FCEUD_TurboOn    (void) { NoWaiting|= 1; }
+void FCEUD_TurboOff   (void) { NoWaiting&=~1; }
+void FCEUD_TurboToggle(void) { NoWaiting^= 1; }
