@@ -141,6 +141,7 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 
 	//extract the commands
 	commands = uintDecFromIstream(is);
+	//*is >> commands;
 	is->get(); //eat the pipe
 
 	//a special case: if fourscore is enabled, parse four gamepads
