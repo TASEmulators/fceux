@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <vector>
+#include <iostream>
 
 #include "../types.h"
 
@@ -53,3 +54,6 @@ char *U32ToDecStr(char* buf, uint32 a);
 char *U8ToDecStr(uint8 a);
 char *U8ToHexStr(uint8 a);
 char *U16ToHexStr(uint16 a);
+
+//extracts a decimal uint from an istream
+unsigned int uintDecFromIstream(std::istream* is);

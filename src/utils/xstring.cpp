@@ -462,3 +462,19 @@ char *U8ToHexStr(uint8 a)
 	TempArray[2] = 0;
 	return TempArray;
 }
+
+unsigned int uintDecFromIstream(std::istream* is)
+{
+	unsigned int ret = 0;
+
+	for(;;)
+	{
+		int d = is->get() - '0';
+		if(d<0 || d>9)
+			break;
+		ret *= 10;
+		ret += d;
+	}
+	is->unget();
+	return ret;
+}

@@ -113,15 +113,26 @@ void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
 
 void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
 {
+	char buf[8];
+	is->read(buf,8);
 	joystate = 0;
-	for(int bit=7;bit>=0;bit--)
+	for(int i=0;i<8;i++)
 	{
-		int c = is->get();
-		if(c == -1)
-			return;
-		if(c != ' ')
-			joystate |= (1<<bit);
+		joystate <<= 1;
+		joystate |= ((buf[i]!=' ')?1:0);
 	}
+	
+	//older, slower(?) way:
+
+	//joystate = 0;
+	//for(int bit=7;bit>=0;bit--)
+	//{
+	//	int c = is->get();
+	//	if(c == -1)
+	//		return;
+	//	if(c != ' ')
+	//		joystate |= (1<<bit);
+	//}
 }
 
 void MovieRecord::parse(MovieData* md, std::istream* is)
@@ -129,7 +140,7 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 	//by the time we get in here, the initial pipe has already been extracted
 
 	//extract the commands
-	*is >> commands;
+	commands = uintDecFromIstream(is);
 	is->get(); //eat the pipe
 
 	//a special case: if fourscore is enabled, parse four gamepads
@@ -150,6 +161,7 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 			{
 				int x,y,b;
 				*is >> x >> y >> b;
+				//todo: test uintDecFromIstream
 				zappers[port].x = x;
 				zappers[port].y = y;
 				zappers[port].b = b;
