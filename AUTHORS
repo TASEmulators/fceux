@@ -59,8 +59,9 @@ UI cleanup, project management, documentation
 _mz - document thyself (mauzus)
 Windows driver maintenance and cleanup
 
-nitsujrehtona - document thyself (sf:jeblanchard)
-mingw32 build and windows driver maintenance
+UncombedCoconut - UncombedCoconut at gmail dot com (sf:jeblanchard)
+Build system and cross-compilation support
+Driver maintenance and refactoring
 
 ---------linux devvers---------
 >= 2.0 - These guys concentrated on keeping fceux the premiere 
