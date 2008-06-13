@@ -177,6 +177,19 @@ struct FCEU_Guid : public ValueArray<uint8,16>
 		return ret;
 	}
 
+	static uint8 hexToByte(char** ptrptr)
+	{
+		char a = toupper(**ptrptr);
+		(*ptrptr)++;
+		char b = toupper(**ptrptr);
+		(*ptrptr)++;
+		if(a>='A') a=a-'A'+10;
+		else a-='0';
+		if(b>='A') b=b-'A'+10;
+		else b-='0';
+		return ((unsigned char)a<<4)|(unsigned char)b; 
+	}
+
 	void scan(std::string str)
 	{
 		char* endptr = (char*)str.c_str();
@@ -184,8 +197,9 @@ struct FCEU_Guid : public ValueArray<uint8,16>
 		FCEU_en16lsb(data+4,strtoul(endptr+1,&endptr,16));
 		FCEU_en16lsb(data+6,strtoul(endptr+1,&endptr,16));
 		FCEU_en16lsb(data+8,strtoul(endptr+1,&endptr,16));
+		endptr++;
 		for(int i=0;i<6;i++)
-			data[10+i] = strtoul(endptr+1,&endptr,16);
+			data[10+i] = hexToByte(&endptr);
 	}
 };
 
