@@ -186,7 +186,7 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 	//fprintf(fp,"%08d",index);
 
 	//dump the misc commands
-	*os << setw(1) << commands << '|';
+	*os << '|' << setw(1) << (int)commands;
 
 	//a special case: if fourscore is enabled, dump four gamepads
 	if(md->fourscore)
@@ -721,6 +721,7 @@ void FCEUMOV_AddInputState()
 
 		joyports[0].log(&mr);
 		joyports[1].log(&mr);
+		mr.commands = 0;
 
 		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
