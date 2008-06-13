@@ -188,7 +188,7 @@ void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 //int FCEUI_IsMovieActive(void);
-bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info);
+bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();

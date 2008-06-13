@@ -112,7 +112,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 		memset(&info, 0, sizeof(info));
 
-		if(FCEUI_MovieGetInfo(fn, &info))
+		if(FCEUI_MovieGetInfo(fn, &info, false))
 		{
 			char tmp[256];
 			uint32 div;
@@ -328,7 +328,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 						char* dot = strrchr(filename, '.');
 
-						if(!FCEUI_MovieGetInfo(filename, &info))
+						if(!FCEUI_MovieGetInfo(filename, &info, true))
 							continue;
 
 						//------------

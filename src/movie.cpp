@@ -934,14 +934,14 @@ void FCEUI_MoviePlayFromBeginning(void)
 }
 
 
-bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info)
+bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info, bool skipFrameCount)
 {
 	memset(info,0,sizeof(MOVIE_INFO));
 
 	MovieData md;
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) return false;
-	LoadFM2(md, fp, true);
+	LoadFM2(md, fp, skipFrameCount);
 	fp->close();
 	delete fp;
 	
