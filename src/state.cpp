@@ -465,33 +465,38 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 
 void FCEUSS_Save(char *fname)
 {
-	FILE *st=NULL;
+	std::fstream* st = 0;
 	char *fn;
 
 	if(geniestage==1)
 	{
-	 FCEU_DispMessage("Cannot save FCS in GG screen.");
-	 return;
-        }
+		FCEU_DispMessage("Cannot save FCS in GG screen.");
+		return;
+	}
 
 	if(fname)
-	 st=FCEUD_UTF8fopen(fname, "wb");
+		st =FCEUD_UTF8_fstream(fname, "wb");
 	else
 	{
-//		FCEU_PrintError("daCurrentState=%d",CurrentState);
-         st=FCEUD_UTF8fopen(fn=FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0),"wb");
-	 free(fn);
+		//FCEU_PrintError("daCurrentState=%d",CurrentState);
+		st = FCEUD_UTF8_fstream(fn=FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0),"wb");
+		free(fn);
 	}
 
 	if(st == NULL)
 	{
-         FCEU_DispMessage("State %d save error.",CurrentState);
-	 return;
+		FCEU_DispMessage("State %d save error.",CurrentState);
+		return;
 	}
 
-	FCEUSS_SaveFP(st,-1);
 
-	fclose(st);
+	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+		FCEUSS_SaveMS(st,-1);
+	else
+		FCEUSS_SaveMS(st,0);
+
+	st->close();
+	delete st;
 
 	if(!fname)
 	{
@@ -517,7 +522,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 		
 		if((fp=fopen(fn,"wb")))
 		{
-			if(FCEUSS_SaveFP(fp,-1))
+			if(FCEUSS_SaveFP(fp,0))
 			{
 				fclose(fp);
 			}
@@ -635,7 +640,7 @@ bool FCEUSS_LoadFP(FILE *st, ENUM_SSLOADPARAMS params)
 		
 		if((fp=fopen(fn,"wb")))
 		{
-			if(FCEUSS_SaveFP(fp,-1))
+			if(FCEUSS_SaveFP(fp,0))
 			{
 				fclose(fp);
 			}
@@ -920,7 +925,7 @@ void FCEUI_LoadState(char *fname)
 
 			if((fp = fopen(fn," wb")))
 			{
-				if(FCEUSS_SaveFP(fp,-1))
+				if(FCEUSS_SaveFP(fp,0))
 				{
 					fclose(fp);
 					FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);    
