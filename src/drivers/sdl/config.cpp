@@ -155,6 +155,7 @@ InitConfig()
     config->addOption("yscale", "SDL.YScale", 1.0);
     config->addOption("xstretch", "SDL.XStretch", 0);
     config->addOption("ystretch", "SDL.YStretch", 0);
+    config->addOption("noframe", "SDL.NoFrame", 0);
 
     // OpenGL options
     config->addOption("opengl", "SDL.OpenGL", 0);

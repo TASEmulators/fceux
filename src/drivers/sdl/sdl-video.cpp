@@ -57,6 +57,7 @@ static double s_exs, s_eys;
 static int s_eefx;
 static int s_clipSides;
 static int s_fullscreen;
+static int noframe;
 
 #define NWIDTH	(256 - (s_clipSides ? 16 : 0))
 #define NOFFSET	(s_clipSides ? 8 : 0)
@@ -136,6 +137,7 @@ InitVideo(FCEUGI *gi)
     g_config->getOption("SDL.XResolution", &xres);
     g_config->getOption("SDL.YResolution", &yres);
     g_config->getOption("SDL.ClipSides", &s_clipSides);
+    g_config->getOption("SDL.NoFrame", &noframe);
 
     // check the starting, ending, and total scan lines
     FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
@@ -171,6 +173,10 @@ InitVideo(FCEUGI *gi)
     // check if we are rendering fullscreen
     if(s_fullscreen) {
         flags |= SDL_FULLSCREEN;
+    }
+    
+    if(noframe) {
+        flags |= SDL_NOFRAME;
     }
 
     // gives the SDL exclusive palette control... ensures the requested colors
@@ -280,7 +286,7 @@ InitVideo(FCEUGI *gi)
             return -1;
         }
 #endif
-
+        
         s_screen = SDL_SetVideoMode((int)(NWIDTH * s_exs),
                                   (int)(s_tlines * s_eys),
                                   desbpp, flags);

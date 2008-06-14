@@ -63,6 +63,7 @@ char *DriverUsage=
 --doublebuf x	Enable SDL double-buffering if x is nonzero.\n\
 --fullscreen x, -f x	Select full screen mode if x is nonzero.\n\
 --clipsides x	Clip left- and rightmost 8 columns of pixels if x is nonzero.\n\
+--noframe x     Hides title bar and window decorations.\n\
 --slstart x	Set the first drawn emulated scanline.  Valid values for x are\n\
 	        0 through 239.\n\
 --slend x	Set the last drawn emulated scanline.  Valid values for x are\n\
