@@ -50,43 +50,43 @@ static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
 
 char *DriverUsage=
-"--pal x	Use PAL timing.\n\
---gamegenie x, -g x	Enable emulated Game Genie if x is nonzero.\n\
+"--pal x	Uses PAL timing.\n\
+--gamegenie x, -g x	Enables emulated Game Genie if x is nonzero.\n\
 --no8lim x       Disables the 8 sprites per scanline limitation, if x is nonzero.\n\
---nothrottle x	Disable artificial speed throttling, if x is nonzero.\n\
---frameskip x	Set # of frames to skip per emulated frame.\n\
---(x/y)res x, -(x/y) x	Set horizontal/vertical resolution to x for full screen mode.\n\
---(x/y)scale x	Multiply width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
---(x/y)stretch x	Stretch to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
---bpp x, -b x	Bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
---opengl x	Enable OpenGL support if x is nonzero.\n\
---doublebuf x	Enable SDL double-buffering if x is nonzero.\n\
---fullscreen x, -f x	Select full screen mode if x is nonzero.\n\
---clipsides x	Clip left- and rightmost 8 columns of pixels if x is nonzero.\n\
+--nothrottle x	Disables artificial speed throttling, if x is nonzero.\n\
+--frameskip x	Sets # of frames to skip per emulated frame.\n\
+--(x/y)res x, -(x/y) x	Sets horizontal/vertical resolution to x for full screen mode.\n\
+--(x/y)scale x	Multiplies width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
+--(x/y)stretch x	Stretchess to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
+--bpp x, -b x	Sets bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
+--opengl x	Enables OpenGL support if x is nonzero.\n\
+--doublebuf x	Enables SDL double-buffering if x is nonzero.\n\
+--fullscreen x, -f x	Selects full screen mode if x is nonzero.\n\
+--clipsides x	Clips left- and rightmost 8 columns of pixels if x is nonzero.\n\
 --noframe x     Hides title bar and window decorations.\n\
---slstart x	Set the first drawn emulated scanline.  Valid values for x are\n\
+--slstart x	Sets the first drawn emulated scanline.  Valid values for x are\n\
 	        0 through 239.\n\
---slend x	Set the last drawn emulated scanline.  Valid values for x are\n\
+--slend x	Sets the last drawn emulated scanline.  Valid values for x are\n\
 		0 through 239.\n\
---color x	Emulate an NTSC TV's colors, if x is nonzero.\n\
---hue x		Parameter for NTSC color emulation.\n\
---tint x	Parameter for NTSC color emulation.\n\
---palette s, -p s	Load a custom global palette from file s.\n\
---sound x, -s x	Enable sound if x is nonzero.\n\
---soundrate x	Set sound playback rate to x Hz.\n\
+--color x	Emulates an NTSC TV's colors, if x is nonzero.\n\
+--hue x		Sets parameter for NTSC color emulation.\n\
+--tint x	Sets parameter for NTSC color emulation.\n\
+--palette s, -p s	Loads a custom global palette from file s.\n\
+--sound x, -s x	Enables sound if x is nonzero.\n\
+--soundrate x	Sets sound playback rate to x Hz.\n\
 --soundq x	Sets sound quality: 0 for low, 1 for high.\n\
---soundbufsize x	Set sound buffer size to x ms.\n\
---volume x	Set volume to x%.\n\
---lowpass x	Enable low-pass filter if x is nonzero.\n\
---soundrecord s	Record sound to file s.\n\
---snapname x	Prepend the game's name to (numeric) snapshot filenames, if x is nonzero.\n\
---inputcfg, -i	Configure input device(s) on startup.\n\
---net s, -n s	Connect to server 's' for TCP/IP network play.\n\
---port x, -p x	Use TCP/IP port x for network play.\n\
---user s, -u s	Set the nickname to use in network play.\n\
---pass s, -w s	Password to use for connecting to the server.\n\
---netkey s, -k s	Use key 's' to create a unique session for the game loaded.\n\
---players x, -l x	Set the number of local players.\n";
+--soundbufsize x	Sets sound buffer size to x ms.\n\
+--volume x	Sets volume to x%.\n\
+--lowpass x	Enables low-pass filter if x is nonzero.\n\
+--soundrecord s	Records sound to file s.\n\
+--snapname x	Prepends the game's name to (numeric) snapshot filenames, if x is nonzero.\n\
+--inputcfg, -i	Configures input device(s) on startup.\n\
+--net s, -n s	Connects to server 's' for TCP/IP network play.\n\
+--port x, -p x	Uses TCP/IP port x for network play.\n\
+--user s, -u s	Sets the nickname to use in network play.\n\
+--pass s, -w s	Sets password to use for connecting to the server.\n\
+--netkey s, -k s	Uses key 's' to create a unique session for the game loaded.\n\
+--players x, -l x	Sets the number of local players.\n";
 
 
 // global configuration object
