@@ -543,16 +543,20 @@ class WidgetsWrapper:
     if os.path.isfile('gfceu.glade'):
       glade_file = 'gfceu.glade'
     # Then check to see if its installed on a *nix system
-    elif os.path.isfile(os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')):
-      glade_file = os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')
+    elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.glade')):
+      glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.glade')
     else:
       print 'ERROR.'
       print 'Could not find the glade interface file.'
       print 'Try reinstalling the application.'
       sys.exit(1)
     
-    self.widgets = gtk.glade.XML(glade_file)
-    self.widgets.signal_autoconnect(GladeHandlers.__dict__)
+    try:
+      print "Using: " + glade_file
+      self.widgets = gtk.glade.XML(glade_file)
+      self.widgets.signal_autoconnect(GladeHandlers.__dict__)
+    except:
+      gfceu_error("Couldn't load the glade UI file", 24)
 
   def __getitem__(self, key):
     return self.widgets.get_widget(key)
