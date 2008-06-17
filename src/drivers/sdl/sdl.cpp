@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
+#include <fstream>
 
 
 #include "main.h"
@@ -388,7 +390,7 @@ FCEUD_Update(uint8 *XBuf,
 /**
  * Opens a file to be read a byte at a time.
  */
-std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
+std::fstream* FCEUD_UTF8_fstream(const char *fn, const char *m)
 {
 	std::ios_base::openmode mode = std::ios_base::binary;
 	if(!strcmp(m,"r") || !strcmp(m,"rb"))
@@ -404,7 +406,7 @@ std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
 	else if(!strcmp(m,"a+") || !strcmp(m,"a+b"))
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
 
-	return new std::fstream(n,mode);
+	return new std::fstream(fn,mode);
 }
 
 /**
