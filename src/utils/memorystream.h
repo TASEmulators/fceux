@@ -210,7 +210,10 @@ protected:
 		if(which & std::ios_base::in)
 			setg(buf, buf+pos, buf + length);
 		if(which & std::ios_base::out)
+		{
+			ww = pos;
 			setp(buf+pos, buf + capacity);
+		}
 
 		return pos;
 	}

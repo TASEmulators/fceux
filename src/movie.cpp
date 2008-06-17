@@ -276,8 +276,9 @@ void MovieData::installValue(std::string& key, std::string& val)
 	}
 }
 
-void MovieData::dump(std::ostream *os)
+int MovieData::dump(std::ostream *os)
 {
+	int start = os->tellp();
 	*os << "version " << version << endl;
 	*os << "emuVersion " << emuVersion << endl;
 	*os << "recordCount " << recordCount << endl;
@@ -296,15 +297,9 @@ void MovieData::dump(std::ostream *os)
 		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
 	for(int i=0;i<(int)records.size();i++)
 		records[i].dump(this,os,i);
+	int end = os->tellp();
+	return end-start;
 }
-
-int MovieData::dumpLen()
-{
-	memorystream ms;
-	dump(&ms);
-	return ms.size();
-}
-
 
 int FCEUMOV_GetFrame(void)
 {
@@ -761,16 +756,8 @@ void FCEU_DrawMovies(uint8 *XBuf)
 int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
-
 	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
-	{
-		int todo = currMovieData.dumpLen();
-		
-		if(os)
-			currMovieData.dump(os);
-		
-		return todo;
-	}
+		return currMovieData.dump(os);
 	else return 0;
 }
 

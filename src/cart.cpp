@@ -658,7 +658,7 @@ void FCEU_SaveGameSave(CartInfo *LocalHWInfo)
 	}
 }
 
-// hack, movie.c has to communicate with this function somehow
+// hack, movie.cpp has to communicate with this function somehow
 int disableBatteryLoading=0;
 
 void FCEU_LoadGameSave(CartInfo *LocalHWInfo)

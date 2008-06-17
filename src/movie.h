@@ -163,8 +163,7 @@ public:
 
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
-	void dump(std::ostream* os);
-	int dumpLen();
+	int dump(std::ostream* os);
 	void clearRecordRange(int start, int len);
 	
 	static bool loadSavestateFrom(std::vector<char>* buf);
