@@ -55,5 +55,7 @@ char *U8ToDecStr(uint8 a);
 char *U8ToHexStr(uint8 a);
 char *U16ToHexStr(uint16 a);
 
+std::string stditoa(int n);
+
 //extracts a decimal uint from an istream
 unsigned int uintDecFromIstream(std::istream* is);

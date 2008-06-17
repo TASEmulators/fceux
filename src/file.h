@@ -1,6 +1,8 @@
 #ifndef _FCEU_FILE_H_
 #define _FCEU_FILE_H_
 
+#include <string>
+
 typedef struct {
         void *fp;       // FILE* or ptr to ZIPWRAP
         uint32 type;    // 0=normal file, 1=gzip, 2=zip
@@ -22,9 +24,9 @@ int FCEU_fisarchive(FCEUFILE*);
 
 
 void GetFileBase(const char *f);
-char* FCEU_GetPath(int type);
-char *FCEU_MakePath(int type, const char* filebase);
-char *FCEU_MakeFName(int type, int id1, char *cd1);
+std::string FCEU_GetPath(int type);
+std::string FCEU_MakePath(int type, const char* filebase);
+std::string FCEU_MakeFName(int type, int id1, char *cd1);
 
 #define FCEUMKF_STATE        1
 #define FCEUMKF_SNAP         2

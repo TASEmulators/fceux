@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <ostream>
+#include <fstream>
 #include "../types.h"
 #include "endian.h"
 
@@ -82,6 +83,19 @@ int read32le(uint32 *Bufo, FILE *fp)
 {
 	uint32 buf;
 	if(fread(&buf,1,4,fp)<4)
+		return 0;
+#ifdef LSB_FIRST
+	*(uint32*)Bufo=buf;
+#else
+	*(uint32*)Bufo=((buf&0xFF)<<24)|((buf&0xFF00)<<8)|((buf&0xFF0000)>>8)|((buf&0xFF000000)>>24);
+#endif
+	return 1;
+}
+
+int read32le(uint32 *Bufo, std::istream *is)
+{
+	uint32 buf;
+	if(is->readsome((char*)&buf,4) != 4)
 		return 0;
 #ifdef LSB_FIRST
 	*(uint32*)Bufo=buf;

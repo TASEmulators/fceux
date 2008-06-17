@@ -635,92 +635,93 @@ void FCEUI_SetDirOverride(int which, char *n)
 	}
 	#endif
 
-char* FCEU_GetPath(int type)
+std::string FCEU_GetPath(int type)
 {
-	char *ret=0;
+	char ret[FILENAME_MAX];
 	switch(type)
 	{
 		case FCEUMKF_STATE:
 			if(odirs[FCEUIOD_STATES])
-				ret=strdup(odirs[FCEUIOD_STATES]);
+				return (odirs[FCEUIOD_STATES]);
 			else
-				asprintf(&ret,"%s"PSS"fcs",BaseDirectory);
+				sprintf(ret,"%s"PSS"fcs",BaseDirectory);
 			break;
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
-				ret=strdup(odirs[FCEUIOD_MOVIES]);
+				return (odirs[FCEUIOD_MOVIES]);
 			else
-				asprintf(&ret,"%s"PSS"movies",BaseDirectory);
+				sprintf(ret,"%s"PSS"movies",BaseDirectory);
 			break;
 		case FCEUMKF_MEMW:
 			if(odirs[FCEUIOD_MEMW])
-				ret=strdup(odirs[FCEUIOD_MEMW]);
+				return (odirs[FCEUIOD_MEMW]);
 			else
-				asprintf(&ret,"%s"PSS"tools",BaseDirectory);
+				sprintf(ret,"%s"PSS"tools",BaseDirectory);
 			break;
 		case FCEUMKF_BBOT:
 			if(odirs[FCEUIOD_BBOT])
-				ret=strdup(odirs[FCEUIOD_BBOT]);
+				return (odirs[FCEUIOD_BBOT]);
 			else
-				asprintf(&ret,"%s"PSS"tools",BaseDirectory);
+				sprintf(ret,"%s"PSS"tools",BaseDirectory);
 			break;
 		case FCEUMKF_ROMS:
 			if(odirs[FCEUIOD_ROMS])
-				ret=strdup(odirs[FCEUIOD_ROMS]);
+				return (odirs[FCEUIOD_ROMS]);
 			else
-				asprintf(&ret,"%s",BaseDirectory);
+				sprintf(ret,"%s",BaseDirectory);
 			break;
 		case FCEUMKF_INPUT:
 			if(odirs[FCEUIOD_INPUT])
-				ret=strdup(odirs[FCEUIOD_INPUT]);
+				return (odirs[FCEUIOD_INPUT]);
 			else
-				asprintf(&ret,"%s"PSS"tools",BaseDirectory);
+				sprintf(ret,"%s"PSS"tools",BaseDirectory);
 			break;
 		case FCEUMKF_LUA:
 			if(odirs[FCEUIOD_LUA])
-				ret=strdup(odirs[FCEUIOD_LUA]);
+				return (odirs[FCEUIOD_LUA]);
 			else
-				asprintf(&ret,"%s"PSS"tools",BaseDirectory);
+				sprintf(ret,"%s"PSS"tools",BaseDirectory);
 			break;
 	}
-	return(ret);
+
+	return ret;
 }
 
-char *FCEU_MakePath(int type, const char* filebase)
+std::string FCEU_MakePath(int type, const char* filebase)
 {
-	char *ret=0;
+	char ret[FILENAME_MAX];
 
 	switch(type)
 	{
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
-				asprintf(&ret,"%s"PSS"%s",odirs[FCEUIOD_MOVIES],filebase);
+				sprintf(ret,"%s"PSS"%s",odirs[FCEUIOD_MOVIES],filebase);
 			else
-				asprintf(&ret,"%s"PSS"movies"PSS"%s",BaseDirectory,filebase);
+				sprintf(ret,"%s"PSS"movies"PSS"%s",BaseDirectory,filebase);
 			break;
 		case FCEUMKF_STATE:
 			if(odirs[FCEUIOD_STATES])
-				asprintf(&ret,"%s"PSS"%s",odirs[FCEUIOD_STATES],filebase);
+				sprintf(ret,"%s"PSS"%s",odirs[FCEUIOD_STATES],filebase);
 			else
-				asprintf(&ret,"%s"PSS"fcs"PSS"%s",BaseDirectory,filebase);
+				sprintf(ret,"%s"PSS"fcs"PSS"%s",BaseDirectory,filebase);
 			break;
 	}
-	return(ret);
+	return ret;
 }
 
-char *FCEU_MakeFName(int type, int id1, char *cd1)
+std::string FCEU_MakeFName(int type, int id1, char *cd1)
 {
-	char *ret=0;
+	char ret[FILENAME_MAX];
 	struct stat tmpstat;
 
 	switch(type)
 	{
-		case FCEUMKF_NPTEMP: asprintf(&ret,"%s"PSS"m590plqd94fo.tmp",BaseDirectory);break;
+		case FCEUMKF_NPTEMP: sprintf(ret,"%s"PSS"m590plqd94fo.tmp",BaseDirectory);break;
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
-				asprintf(&ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
+				sprintf(ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
 			else
-				asprintf(&ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory,FileBase);
 			break;
 		case FCEUMKF_STATE:
 			{
@@ -736,21 +737,21 @@ char *FCEU_MakeFName(int type, int id1, char *cd1)
 
 				if(odirs[FCEUIOD_STATES])
 				{
-					asprintf(&ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
+					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
 				}
 				else
 				{
-					asprintf(&ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
 				}
 				if(stat(ret,&tmpstat)==-1)
 				{
 					if(odirs[FCEUIOD_STATES])
 					{
-						asprintf(&ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
+						sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
 					}
 					else
 					{
-						asprintf(&ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+						sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
 					}
 				}
 			}
@@ -759,89 +760,90 @@ char *FCEU_MakeFName(int type, int id1, char *cd1)
 			if(FSettings.SnapName)
 			{
 				if(odirs[FCEUIOD_SNAPS])
-					asprintf(&ret,"%s"PSS"%s-%d.%s",odirs[FCEUIOD_SNAPS],FileBase,id1,cd1);
+					sprintf(ret,"%s"PSS"%s-%d.%s",odirs[FCEUIOD_SNAPS],FileBase,id1,cd1);
 				else
-					asprintf(&ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory,FileBase,id1,cd1);
+					sprintf(ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory,FileBase,id1,cd1);
 			}
 			else
 			{
 				if(odirs[FCEUIOD_SNAPS])
-					asprintf(&ret,"%s"PSS"%d.%s",odirs[FCEUIOD_SNAPS],id1,cd1);
+					sprintf(ret,"%s"PSS"%d.%s",odirs[FCEUIOD_SNAPS],id1,cd1);
 				else
-					asprintf(&ret,"%s"PSS"snaps"PSS"%d.%s",BaseDirectory,id1,cd1);
+					sprintf(ret,"%s"PSS"snaps"PSS"%d.%s",BaseDirectory,id1,cd1);
 			}
 			break;
 		case FCEUMKF_FDS:
 			if(odirs[FCEUIOD_NV])
-				asprintf(&ret,"%s"PSS"%s.fds",odirs[FCEUIOD_NV],FileBase);
+				sprintf(ret,"%s"PSS"%s.fds",odirs[FCEUIOD_NV],FileBase);
 			else
-				asprintf(&ret,"%s"PSS"sav"PSS"%s.fds",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"sav"PSS"%s.fds",BaseDirectory,FileBase);
 			break;
 		case FCEUMKF_SAV:
 			if(odirs[FCEUIOD_NV])
-				asprintf(&ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
+				sprintf(ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 			else
-				asprintf(&ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
+				sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_NV])
-					asprintf(&ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
+					sprintf(ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 				else
-					asprintf(&ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
+					sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
 			}
 			break;
 		case FCEUMKF_REWINDSTATE:
 			if(odirs[FCEUIOD_STATES])
 			{
-				asprintf(&ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
+				sprintf(ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
 			}
 			else
 			{
-				asprintf(&ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
+				sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
 			}
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_STATES])
 				{
-					asprintf(&ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
+					sprintf(ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
 				}
 				else
 				{
-					asprintf(&ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
 				}
 			}
 			break;
 		case FCEUMKF_CHEAT:
 			if(odirs[FCEUIOD_CHEATS])
-				asprintf(&ret,"%s"PSS"%s.cht",odirs[FCEUIOD_CHEATS],FileBase);
+				sprintf(ret,"%s"PSS"%s.cht",odirs[FCEUIOD_CHEATS],FileBase);
 			else
-				asprintf(&ret,"%s"PSS"cheats"PSS"%s.cht",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"cheats"PSS"%s.cht",BaseDirectory,FileBase);
 			break;
-		case FCEUMKF_IPS:asprintf(&ret,"%s"PSS"%s%s.ips",FileBaseDirectory,FileBase,FileExt);break;
-		case FCEUMKF_GGROM:asprintf(&ret,"%s"PSS"gg.rom",BaseDirectory);break;
+		case FCEUMKF_IPS:sprintf(ret,"%s"PSS"%s%s.ips",FileBaseDirectory,FileBase,FileExt);break;
+		case FCEUMKF_GGROM:sprintf(ret,"%s"PSS"gg.rom",BaseDirectory);break;
 		case FCEUMKF_FDSROM:
 			if(odirs[FCEUIOD_FDSROM])
-				asprintf(&ret,"%s"PSS"disksys.rom",odirs[FCEUIOD_FDSROM]);
+				sprintf(ret,"%s"PSS"disksys.rom",odirs[FCEUIOD_FDSROM]);
 			else
-				asprintf(&ret,"%s"PSS"disksys.rom",BaseDirectory);
+				sprintf(ret,"%s"PSS"disksys.rom",BaseDirectory);
 			break;
-		case FCEUMKF_PALETTE:asprintf(&ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);break;
+		case FCEUMKF_PALETTE:sprintf(ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);break;
 		case FCEUMKF_MOVIEGLOB:
 			//these globs use ??? because we can load multiple formats
 			if(odirs[FCEUIOD_MOVIES])
-				asprintf(&ret,"%s"PSS"*.???",odirs[FCEUIOD_MOVIES]);
+				sprintf(ret,"%s"PSS"*.???",odirs[FCEUIOD_MOVIES]);
 			else
-				asprintf(&ret,"%s"PSS"movies"PSS"*.???",BaseDirectory);
+				sprintf(ret,"%s"PSS"movies"PSS"*.???",BaseDirectory);
 			break;
-		case FCEUMKF_MOVIEGLOB2:asprintf(&ret,"%s"PSS"*.???",BaseDirectory);break;
+		case FCEUMKF_MOVIEGLOB2:sprintf(ret,"%s"PSS"*.???",BaseDirectory);break;
 		case FCEUMKF_STATEGLOB:
 			if(odirs[FCEUIOD_STATES])
-				asprintf(&ret,"%s"PSS"%s*.fc?",odirs[FCEUIOD_STATES],FileBase);
+				sprintf(ret,"%s"PSS"%s*.fc?",odirs[FCEUIOD_STATES],FileBase);
 			else
-				asprintf(&ret,"%s"PSS"fcs"PSS"%s*.fc?",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"fcs"PSS"%s*.fc?",BaseDirectory,FileBase);
 			break;
 	}
-	return(ret);
+	
+	return ret;
 }
 
 void GetFileBase(const char *f)

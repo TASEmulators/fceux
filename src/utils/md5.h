@@ -2,6 +2,7 @@
 #define _MD5_H
 
 #include "../types.h"
+#include "valuearray.h"
 
 struct md5_context
 {

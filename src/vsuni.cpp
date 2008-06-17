@@ -28,6 +28,7 @@
 #include "netplay.h"
 #include "vsuni.h"
 #include "state.h"
+#include "driver.h"
 
 #define IOPTION_GUN       0x1
 #define IOPTION_SWAPDIRAB       0x2

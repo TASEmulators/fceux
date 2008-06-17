@@ -363,7 +363,8 @@ static void SaveMemWatch()
 	ofn.lpstrFile=memwLastFilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MEMW);
+	std::string initdir =  FCEU_GetPath(FCEUMKF_MEMW);
+	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
 		int i;
@@ -478,7 +479,8 @@ static void LoadMemWatch()
 	ofn.lpstrFile=memwLastFilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MEMW);
+	std::string initdir = FCEU_GetPath(FCEUMKF_MEMW);
+	ofn.lpstrInitialDir=initdir.c_str();
 
 	if(GetOpenFileName(&ofn))
 	{

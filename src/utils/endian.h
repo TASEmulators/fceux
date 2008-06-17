@@ -1,9 +1,14 @@
 #ifndef __FCEU_ENDIAN
 #define __FCEU_ENDIAN
 
+//#include <iosfwd>
+#include <stdio.h>
+
+
 int write16le(uint16 b, FILE *fp);
 int write32le(uint32 b, FILE *fp);
 int write32le(uint32 b, std::ostream* os);
+int read32le(uint32 *Bufo, std::istream *is);
 int read32le(uint32 *Bufo, FILE *fp);
 void FlipByteOrder(uint8 *src, uint32 count);
 

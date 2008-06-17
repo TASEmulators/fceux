@@ -22,17 +22,17 @@ case 0x00:  /* BRK */
             _PC++;
             PUSH(_PC>>8);
             PUSH(_PC);
-            PUSH(_P|U_FLAG|B_FLAG);
-	    _P|=I_FLAG;
+            PUSH(__P|U_FLAG|B_FLAG);
+	    __P|=I_FLAG;
 	    _PI|=I_FLAG;
             _PC=RdMem(0xFFFE);
             _PC|=RdMem(0xFFFF)<<8;
             break;
 
 case 0x40:  /* RTI */
-            _P=POP();
+            __P=POP();
 	    /* _PI=_P; This is probably incorrect, so it's commented out. */
-	    _PI = _P;
+	    _PI = __P;
             _PC=POP();
             _PC|=POP()<<8;
             break;
@@ -47,14 +47,14 @@ case 0x48: /* PHA */
            PUSH(_A);
            break;
 case 0x08: /* PHP */
-           PUSH(_P|U_FLAG|B_FLAG);
+           PUSH(__P|U_FLAG|B_FLAG);
            break;
 case 0x68: /* PLA */
            _A=POP();
            X_ZN(_A);
            break;
 case 0x28: /* PLP */
-           _P=POP();
+           __P=POP();
            break;
 case 0x4C:
 	  {
@@ -107,11 +107,11 @@ case 0x98: /* TYA */
            break;
 
 case 0xBA: /* TSX */
-           _X=_S;
+           _X=__S;
            X_ZN(_X);
            break;
 case 0x9A: /* TXS */
-           _S=_X;
+           __S=_X;
            break;
 
 case 0xCA: /* DEX */
@@ -133,26 +133,26 @@ case 0xC8: /* INY */
            break;
 
 case 0x18: /* CLC */
-           _P&=~C_FLAG;
+           __P&=~C_FLAG;
            break;
 case 0xD8: /* CLD */
-           _P&=~D_FLAG;
+           __P&=~D_FLAG;
            break;
 case 0x58: /* CLI */
-           _P&=~I_FLAG;
+           __P&=~I_FLAG;
            break;
 case 0xB8: /* CLV */
-           _P&=~V_FLAG;
+           __P&=~V_FLAG;
            break;
 
 case 0x38: /* SEC */
-           _P|=C_FLAG;
+           __P|=C_FLAG;
            break;
 case 0xF8: /* SED */
-           _P|=D_FLAG;
+           __P|=D_FLAG;
            break;
 case 0x78: /* SEI */
-           _P|=I_FLAG;
+           __P|=I_FLAG;
            break;
 
 case 0xEA: /* NOP */
@@ -296,28 +296,28 @@ case 0x94: ST_ZPX(_Y);
 case 0x8C: ST_AB(_Y);
 
 /* BCC */
-case 0x90: JR(!(_P&C_FLAG)); break;
+case 0x90: JR(!(__P&C_FLAG)); break;
 
 /* BCS */
-case 0xB0: JR(_P&C_FLAG); break;
+case 0xB0: JR(__P&C_FLAG); break;
 
 /* BEQ */
-case 0xF0: JR(_P&Z_FLAG); break;
+case 0xF0: JR(__P&Z_FLAG); break;
 
 /* BNE */
-case 0xD0: JR(!(_P&Z_FLAG)); break;
+case 0xD0: JR(!(__P&Z_FLAG)); break;
 
 /* BMI */
-case 0x30: JR(_P&N_FLAG); break;
+case 0x30: JR(__P&N_FLAG); break;
 
 /* BPL */
-case 0x10: JR(!(_P&N_FLAG)); break;
+case 0x10: JR(!(__P&N_FLAG)); break;
 
 /* BVC */
-case 0x50: JR(!(_P&V_FLAG)); break;
+case 0x50: JR(!(__P&V_FLAG)); break;
 
 /* BVS */
-case 0x70: JR(_P&V_FLAG); break;
+case 0x70: JR(__P&V_FLAG); break;
 
 //default: printf("Bad %02x at $%04x\n",b1,X.PC);break;
 //ifdef moo
@@ -327,7 +327,7 @@ case 0x70: JR(_P&V_FLAG); break;
 
 /* AAC */
 case 0x2B:
-case 0x0B: LD_IM(AND;_P&=~C_FLAG;_P|=_A>>7);
+case 0x0B: LD_IM(AND;__P&=~C_FLAG;__P|=_A>>7);
 
 /* AAX */
 case 0x87: ST_ZP(_A&_X);
@@ -338,7 +338,7 @@ case 0x83: ST_IX(_A&_X);
 /* ARR - ARGH, MATEY! */
 case 0x6B: { 
 	     uint8 arrtmp; 
-	     LD_IM(AND;_P&=~V_FLAG;_P|=(_A^(_A>>1))&0x40;arrtmp=_A>>7;_A>>=1;_A|=(_P&C_FLAG)<<7;_P&=~C_FLAG;_P|=arrtmp;X_ZN(_A));
+	     LD_IM(AND;__P&=~V_FLAG;__P|=(_A^(_A>>1))&0x40;arrtmp=_A>>7;_A>>=1;_A|=(__P&C_FLAG)<<7;__P&=~C_FLAG;__P|=arrtmp;X_ZN(_A));
 	   }
 /* ASR */
 case 0x4B: LD_IM(AND;LSRA);
@@ -404,7 +404,7 @@ case 0xF2:ADDCYC(0xFF);
 	  break;
 
 /* LAR */
-case 0xBB: RMW_ABY(_S&=x;_A=_X=_S;X_ZN(_X));
+case 0xBB: RMW_ABY(__S&=x;_A=_X=__S;X_ZN(_X));
 
 /* LAX */
 case 0xA7: LD_ZP(LDA;LDX);
@@ -469,7 +469,7 @@ case 0x9C: ST_ABX(_Y&(((A-_X)>>8)+1));
 case 0x9E: ST_ABY(_X&(((A-_Y)>>8)+1));
 
 /* XAS */
-case 0x9B: _S=_A&_X;ST_ABY(_S& (((A-_Y)>>8)+1) );
+case 0x9B: __S=_A&_X;ST_ABY(__S& (((A-_Y)>>8)+1) );
 
 /* TOP */
 case 0x0C: LD_AB(;);

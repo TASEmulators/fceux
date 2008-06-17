@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <zlib.h>
 #include <iomanip>
+#include <fstream>
 
 #ifdef WIN32
 #include <windows.h>
@@ -19,6 +20,7 @@
 #include "file.h"
 #include "video.h"
 #include "movie.h"
+#include "utils/guid.h"
 #include "utils/memory.h"
 #include "utils/memorystream.h"
 #include "utils/xstring.h"
@@ -338,7 +340,7 @@ bool FCEUMOV_Mode(int modemask)
 }
 
 //yuck... another custom text parser.
-void LoadFM2(MovieData& movieData, std::istream* fp, bool stopAfterHeader = false)
+static void LoadFM2(MovieData& movieData, std::istream* fp, int size=-1, bool stopAfterHeader = false)
 {
 	std::string key,value;
 	enum {
@@ -348,6 +350,7 @@ void LoadFM2(MovieData& movieData, std::istream* fp, bool stopAfterHeader = fals
 	for(;;)
 	{
 		bool iswhitespace, isrecchar, isnewline;
+		if(size--==0) goto bail;
 		int c = fp->get();
 		if(c == -1)
 			goto bail;
@@ -506,15 +509,8 @@ void FCEUMOV_ExitTasEdit()
 
 bool MovieData::loadSavestateFrom(std::vector<char>* buf)
 {
-	//dump the savestate to disk
-	FILE* fp = tmpfile();
-	fwrite(&(*buf)[0],1,buf->size(),fp);
-	fseek(fp,0,SEEK_SET);
-
-	//and load the state
-	bool success = FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP);
-	fclose(fp);
-	return success;
+	memorystream ms(buf);
+	return FCEUSS_LoadFP(&ms,SSLOADPARAM_BACKUP);
 }
 
 void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
@@ -780,22 +776,22 @@ int FCEUMOV_WriteState(std::ostream* os)
 
 static bool load_successful;
 
-bool FCEUMOV_ReadState(FILE* st, uint32 size)
+bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 {
 	load_successful = false;
 
-	//write the state to disk so we can reload
-	std::vector<char> buf(size);
-	fread(&buf[0],1,size,st);
-	//---------
-	//(debug)
-	//FILE* wtf = fopen("d:\\wtf.txt","wb");
-	//fwrite(&buf[0],1,size,wtf);
-	//fclose(wtf);
-	//---------
-	memorystream mstemp(&buf);
+	////write the state to disk so we can reload
+	//std::vector<char> buf(size);
+	//fread(&buf[0],1,size,st);
+	////---------
+	////(debug)
+	////FILE* wtf = fopen("d:\\wtf.txt","wb");
+	////fwrite(&buf[0],1,size,wtf);
+	////fclose(wtf);
+	////---------
+	//memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	LoadFM2(tempMovieData, &mstemp);
+	LoadFM2(tempMovieData, is);
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------
@@ -934,7 +930,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 }
 
 
-bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* info, bool skipFrameCount)
+bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFrameCount)
 {
 	memset(info,0,sizeof(MOVIE_INFO));
 

@@ -1,9 +1,6 @@
 #ifndef _FCEUH
 #define _FCEUH
 
-#include <iostream>
-#include <sstream>
-
 extern int fceuindbg;
 void ResetGameLoaded(void);
 
@@ -65,7 +62,7 @@ extern int GameAttributes;
 
 extern uint8 PAL;
 
-#include "driver.h"
+//#include "driver.h"
 
 typedef struct {
 	int PAL;

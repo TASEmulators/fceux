@@ -1460,7 +1460,8 @@ static void PresetExport(int preset)
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_INPUT);
+	std::string initdir = FCEU_GetPath(FCEUMKF_INPUT).c_str();
+	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
 		int i;
@@ -1517,7 +1518,8 @@ static void PresetImport(int preset)
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_INPUT);
+	std::string initdir = FCEU_GetPath(FCEUMKF_INPUT);
+	ofn.lpstrInitialDir=initdir.c_str();
 
 	if(GetOpenFileName(&ofn))
 	{

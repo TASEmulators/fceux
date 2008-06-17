@@ -358,6 +358,14 @@
 			<File
 				RelativePath="..\src\boards\01-222.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\boards\112.cpp"
@@ -2157,6 +2165,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\utils\guid.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\utils\guid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\utils\md5.cpp"
 				>
 			</File>
@@ -2182,6 +2198,10 @@
 			</File>
 			<File
 				RelativePath="..\src\utils\unzip.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\utils\valuearray.h"
 				>
 			</File>
 			<File

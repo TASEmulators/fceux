@@ -44,6 +44,7 @@
 #include "utils/md5.h"
 #include "cheat.h"
 #include "vsuni.h"
+#include "driver.h"
 
 extern SFORMAT FCEUVSUNI_STATEINFO[];
 

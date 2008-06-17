@@ -24,17 +24,16 @@ enum ENUM_SSLOADPARAMS
 {
 	SSLOADPARAM_NOBACKUP,
 	SSLOADPARAM_BACKUP,
-	SSLOADPARAM_DUMMY
 };
 
 void FCEUSS_Save(char *);
-int FCEUSS_Load(char *);
+bool FCEUSS_Load(char *);
 
  //zlib values: 0 (none) through 9 (max) or -1 (default)
 bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel);
 bool FCEUSS_SaveFP(FILE* fp, int compressionLevel);
 
-bool FCEUSS_LoadFP(FILE *, ENUM_SSLOADPARAMS);
+bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params);
 
 extern int CurrentState;
 void FCEUSS_CheckStates(void);

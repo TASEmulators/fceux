@@ -3,13 +3,15 @@
 
 #include <stdio.h>
 #include <string>
-#include <fstream>
+#include <iosfwd>
 
 #include "types.h"
 #include "git.h"
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
+inline FILE *FCEUD_UTF8fopen(const std::string &n, const char *mode) { return FCEUD_UTF8fopen(n.c_str(),mode); }
 std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m);
+inline std::fstream* FCEUD_UTF8_fstream(const std::string &n, const char *m) { return FCEUD_UTF8_fstream(n.c_str(),m); }
 
 
 //mbg 7/23/06
@@ -188,7 +190,7 @@ void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 //int FCEUI_IsMovieActive(void);
-bool FCEUI_MovieGetInfo(const char* fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
+bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();

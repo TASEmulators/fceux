@@ -7,6 +7,7 @@
 #include <ostream>
 
 #include "input/zapper.h"
+#include "utils/guid.h"
 
 void FCEUMOV_AddInputState();
 void FCEUMOV_AddCommand(int cmd);
@@ -33,7 +34,7 @@ bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 
 int FCEUMOV_WriteState(std::ostream* os);
-bool FCEUMOV_ReadState(FILE* st, uint32 size);
+bool FCEUMOV_ReadState(std::istream* is, uint32 size);
 void FCEUMOV_PreLoad();
 bool FCEUMOV_PostLoad();
 

@@ -21,6 +21,7 @@
 #include "../../types.h"
 #include "../../fceu.h"
 #include "windows.h"
+#include "driver.h"
 
 static uint64 tmethod,tfreq;
 static uint64 desiredfps;

@@ -478,3 +478,9 @@ unsigned int uintDecFromIstream(std::istream* is)
 	is->unget();
 	return ret;
 }
+
+std::string stditoa(int n)
+{
+	char tempbuf[16];
+	return itoa(n,tempbuf,10);
+}

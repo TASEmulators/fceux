@@ -32,6 +32,8 @@
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
 
+#include <fstream>
+
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../state.h"

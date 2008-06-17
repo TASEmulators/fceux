@@ -316,7 +316,7 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	FCEU_printf("Loading %s...\n\n",name);
 	GetFileBase(name);
 
-	ipsfn=FCEU_MakeFName(FCEUMKF_IPS,0,0);
+	ipsfn=strdup(FCEU_MakeFName(FCEUMKF_IPS,0,0).c_str());
 	fp=FCEU_fopen(name,ipsfn,"rb",0);
 	free(ipsfn);
 
@@ -817,7 +817,7 @@ void UpdateRewind(void)
 	if(RewindCounter == 0)
 	{
 		RewindIndex = (RewindIndex + 1) % 4;
-		f = FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0);
+		f = strdup(FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0).c_str());
 		FCEUSS_Save(f);
 		free(f);
 		RewindStatus[RewindIndex] = 1;
@@ -832,7 +832,7 @@ void FCEUI_Rewind(void)
 	if(RewindStatus[RewindIndex] == 1)
 	{
 		char * f;
-		f = FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0);
+		f = strdup(FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0).c_str());
 		FCEUSS_Load(f);
 		free(f);
 		

@@ -2029,7 +2029,8 @@ static bool SaveBasicBot()
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_BBOT);
+	std::string initdir = FCEU_GetPath(FCEUMKF_BBOT);
+	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
 		/*
@@ -2107,11 +2108,11 @@ static bool SaveBasicBotFile(char fn[])
 	error(1005);
 	return false;
 }
-/**
- * Loads a previously saved file
- * todo: need to add ensurance that saved file has the same BOT_MAXCODE value 
- *		 as currently set, or offer some kind of support for this "problem"
- **/
+
+//  Loads a previously saved file
+//  todo: need to add ensurance that saved file has the same BOT_MAXCODE value 
+// 		 as currently set, or offer some kind of support for this "problem"
+// 
 static bool LoadBasicBot()
 {
 	const char filter[]="Basic Bot (*.bot)\0*.bot\0";
@@ -2126,7 +2127,8 @@ static bool LoadBasicBot()
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_BBOT);
+	std::string initdir = FCEU_GetPath(FCEUMKF_BBOT);
+	ofn.lpstrInitialDir=initdir.c_str();
 
 	if(GetOpenFileName(&ofn))
 	{

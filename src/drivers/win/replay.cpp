@@ -44,7 +44,7 @@ static char* GetReplayPath(HWND hwndDlg)
 
 			_splitpath(szChoice, szDrive, szDirectory, szFilename, szExt);
 			if(szDrive[0]=='\0' && szDirectory[0]=='\0')
-				fn=FCEU_MakePath(FCEUMKF_MOVIE, szChoice);		// need to make a full path
+				fn=strdup(FCEU_MakePath(FCEUMKF_MOVIE, szChoice).c_str());		// need to make a full path
 			else
 				fn=strdup(szChoice);							// given a full path
 		}
@@ -66,7 +66,7 @@ static char* GetRecordPath(HWND hwndDlg)
 
 	_splitpath(szChoice, szDrive, szDirectory, szFilename, szExt);
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
-		fn=FCEU_MakePath(FCEUMKF_MOVIE, szChoice);		// need to make a full path
+		fn=strdup(FCEU_MakePath(FCEUMKF_MOVIE, szChoice).c_str());		// need to make a full path
 	else
 		fn=strdup(szChoice);							// given a full path
 
@@ -89,7 +89,7 @@ static char* GetSavePath(HWND hwndDlg)
 	_splitpath(fn, szDrive, szDirectory, szFilename, szExt);
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
 	{
-		char* newfn=FCEU_MakePath(FCEUMKF_STATE, fn);		// need to make a full path
+		char* newfn=strdup(FCEU_MakePath(FCEUMKF_STATE, fn).c_str());		// need to make a full path
 		free(fn);
 		fn=newfn;
 	}
@@ -255,11 +255,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, replayReadOnlySetting?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
-			char* findGlob[2] = {FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0),
-								 FCEU_MakeFName(FCEUMKF_MOVIEGLOB2, 0, 0)};
-
-			extern int suppress_scan_chunks;
-			suppress_scan_chunks=1;
+			char* findGlob[2] = {strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0).c_str()),
+								 strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB2, 0, 0).c_str())};
 
 			int i=0, j=0;
 
@@ -372,8 +369,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 			}
 
-			suppress_scan_chunks=0;
-
 			free(findGlob[0]);
 			free(findGlob[1]);
 
@@ -427,7 +422,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if(lIndex == lCount-1)
 						{
 							// pop open a file browser...
-							char *pn=FCEU_GetPath(FCEUMKF_MOVIE);
+							char *pn=strdup(FCEU_GetPath(FCEUMKF_MOVIE).c_str());
 							char szFile[MAX_PATH]={0};
 							OPENFILENAME ofn;
 							//int nRet; //mbg merge 7/17/06 removed
@@ -564,7 +559,7 @@ static void UpdateRecordDialog(HWND hwndDlg)
 
 static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
 {
-	char* baseMovieDir = FCEU_GetPath(FCEUMKF_MOVIE);
+	char* baseMovieDir = strdup(FCEU_GetPath(FCEUMKF_MOVIE).c_str());
 	char* fn=0;
 
 	// display a shortened filename if the file exists in the base movie directory
@@ -603,7 +598,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 
 		// Populate the "record from..." dialog
 		{
-			char* findGlob=FCEU_MakeFName(FCEUMKF_STATEGLOB, 0, 0);
+			char* findGlob=strdup(FCEU_MakeFName(FCEUMKF_STATEGLOB, 0, 0).c_str());
 			WIN32_FIND_DATA wfd;
 			HANDLE hFind;
 			int i=0;
@@ -731,7 +726,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 void FCEUD_MovieRecordTo()
 {
 	struct CreateMovieParameters p;
-	p.szFilename = FCEU_MakeFName(FCEUMKF_MOVIE,0,0);
+	p.szFilename = strdup(FCEU_MakeFName(FCEUMKF_MOVIE,0,0).c_str());
 
 	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{

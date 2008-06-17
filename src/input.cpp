@@ -37,6 +37,7 @@
 #include "input.h"
 #include "vsuni.h"
 #include "fds.h"
+#include "driver.h"
 
 // qfox: For UpdateExternalButton(), called when the
 //       botmode state changes, to update a label in gui.

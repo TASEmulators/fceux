@@ -1,4 +1,5 @@
 #include <set>
+#include <fstream>
 
 #include "common.h"
 #include "tasedit.h"
@@ -305,7 +306,8 @@ static void Export()
 	ofn.lpstrFilter=filter;
 	ofn.lpstrFile=fname;
 	ofn.nMaxFile=256;
-	ofn.lpstrInitialDir=FCEU_GetPath(FCEUMKF_MOVIE);
+	std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
+	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
 		fstream* osRecordingMovie = FCEUD_UTF8_fstream(ofn.lpstrFile, "wb");

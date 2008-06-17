@@ -1,22 +1,22 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 2002 Xodnizel
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #ifndef WIN32
 #include <stdint.h>
@@ -64,22 +64,22 @@ HANDLE mapXBuf;
 void FCEU_KillVirtualVideo(void)
 {
 	//mbg merge TODO 7/17/06 temporarily removed
- //if(xbsave)
- //{
- // free(xbsave);
- // xbsave=0;
- //}
- //if(XBuf)
- //{
+	//if(xbsave)
+	//{
+	// free(xbsave);
+	// xbsave=0;
+	//}
+	//if(XBuf)
+	//{
 	//UnmapViewOfFile(XBuf);
 	//CloseHandle(mapXBuf);
 	//mapXBuf=NULL;
- //}
- //if(XBackBuf)
- //{
- // free(XBackBuf);
- // XBackBuf=0;
- //}
+	//}
+	//if(XBackBuf)
+	//{
+	// free(XBackBuf);
+	// XBackBuf=0;
+	//}
 }
 
 /**
@@ -90,13 +90,13 @@ void FCEU_KillVirtualVideo(void)
 int FCEU_InitVirtualVideo(void)
 {
 	if(!XBuf)		/* Some driver code may allocate XBuf externally. */
-					/* 256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
-					*/
+		/* 256 bytes per scanline, * 240 scanline maximum, +16 for alignment,
+		*/
 
 #ifdef _USE_SHARED_MEMORY_
 
-	mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 16, "fceu.XBuf");
-	
+		mapXBuf  = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 256 * 256 + 16, "fceu.XBuf");
+
 	if(mapXBuf == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		CloseHandle(mapXBuf);
@@ -114,30 +114,30 @@ int FCEU_InitVirtualVideo(void)
 	{
 		return 0;
 	}
-	
+
 #else
 
-	if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))) ||
-		!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))))
-	{
-		return 0;
-	}
-	
+		if(!(XBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))) ||
+			!(XBackBuf= (uint8*) (FCEU_malloc(256 * 256 + 16))))
+		{
+			return 0;
+		}
+
 #endif //_USE_SHARED_MEMORY_
 
-	xbsave = XBuf;
+		xbsave = XBuf;
 
-	if( sizeof(uint8*) == 4 )
-	{
-		uintptr_t m = (uintptr_t)XBuf;
-		m = ( 8 - m) & 7;
-		XBuf+=m;
-	}
-	
-	memset(XBuf,128,256*256); //*240);
-	memset(XBackBuf,128,256*256);
-	
-	return 1;
+		if( sizeof(uint8*) == 4 )
+		{
+			uintptr_t m = (uintptr_t)XBuf;
+			m = ( 8 - m) & 7;
+			XBuf+=m;
+		}
+
+		memset(XBuf,128,256*256); //*240);
+		memset(XBackBuf,128,256*256);
+
+		return 1;
 }
 
 
@@ -147,23 +147,23 @@ int FCEU_InitVirtualVideo(void)
 void ShowFPS(void);
 void FCEU_PutImageDummy(void)
 {
- #ifdef SHOWFPS
- ShowFPS();
- #endif
- if(GameInfo->type!=GIT_NSF)
- {
-  FCEU_DrawNTSCControlBars(XBuf);
-  FCEU_DrawSaveStates(XBuf);
-  FCEU_DrawMovies(XBuf);
- }
- if(guiMessage.howlong) guiMessage.howlong--; /* DrawMessage() */
+#ifdef SHOWFPS
+	ShowFPS();
+#endif
+	if(GameInfo->type!=GIT_NSF)
+	{
+		FCEU_DrawNTSCControlBars(XBuf);
+		FCEU_DrawSaveStates(XBuf);
+		FCEU_DrawMovies(XBuf);
+	}
+	if(guiMessage.howlong) guiMessage.howlong--; /* DrawMessage() */
 }
 #endif
 
 static int dosnapsave=0;
 void FCEUI_SaveSnapshot(void)
 {
- dosnapsave=1;
+	dosnapsave=1;
 }
 
 
@@ -182,11 +182,11 @@ void FCEU_PutImage(void)
 #ifdef SHOWFPS
 	ShowFPS();
 #endif
-	
+
 	if(GameInfo->type==GIT_NSF)
 	{
 		DrawNSF(XBuf);
-		
+
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
 		if(dosnapsave)
 		{
@@ -203,7 +203,7 @@ void FCEU_PutImage(void)
 		//Update AVI before overlay stuff is written
 		if(!FCEUI_EmulationPaused())
 			FCEUI_AviVideoUpdate(XBuf);
-		
+
 		//Save backbuffer before overlay stuff is written.
 		if(!FCEUI_EmulationPaused())
 			memcpy(XBackBuf, XBuf, 256*256);
@@ -222,7 +222,7 @@ void FCEU_PutImage(void)
 		FCEU_DrawNTSCControlBars(XBuf);
 		FCEU_DrawRecordingStatus(XBuf);
 	}
-	
+
 	DrawMessage(false);
 
 	if(FCEUD_ShouldDrawInputAids())
@@ -354,140 +354,140 @@ void FCEU_ResetMessages()
 
 static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
 {
- uint32 crc;
+	uint32 crc;
 
- uint8 tempo[4];
+	uint8 tempo[4];
 
- tempo[0]=size>>24;
- tempo[1]=size>>16;
- tempo[2]=size>>8;
- tempo[3]=size;
+	tempo[0]=size>>24;
+	tempo[1]=size>>16;
+	tempo[2]=size>>8;
+	tempo[3]=size;
 
- if(fwrite(tempo,4,1,fp)!=1)
-  return 0;
- if(fwrite(type,4,1,fp)!=1)
-  return 0;
+	if(fwrite(tempo,4,1,fp)!=1)
+		return 0;
+	if(fwrite(type,4,1,fp)!=1)
+		return 0;
 
- if(size)
-  if(fwrite(data,1,size,fp)!=size)
-   return 0;
+	if(size)
+		if(fwrite(data,1,size,fp)!=size)
+			return 0;
 
- crc=CalcCRC32(0,(uint8 *)type,4);
- if(size)
-  crc=CalcCRC32(crc,data,size);
+	crc=CalcCRC32(0,(uint8 *)type,4);
+	if(size)
+		crc=CalcCRC32(crc,data,size);
 
- tempo[0]=crc>>24;
- tempo[1]=crc>>16;
- tempo[2]=crc>>8;
- tempo[3]=crc;
+	tempo[0]=crc>>24;
+	tempo[1]=crc>>16;
+	tempo[2]=crc>>8;
+	tempo[3]=crc;
 
- if(fwrite(tempo,4,1,fp)!=1)
-  return 0;
- return 1;
+	if(fwrite(tempo,4,1,fp)!=1)
+		return 0;
+	return 1;
 }
 
 int SaveSnapshot(void)
 {
- static unsigned int lastu=0;
+	static unsigned int lastu=0;
 
- char *fn=0;
- int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
- int x,u,y;
- FILE *pp=NULL;
- uint8 *compmem=NULL;
- uLongf compmemsize=totallines*263+12;
+	char *fn=0;
+	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
+	int x,u,y;
+	FILE *pp=NULL;
+	uint8 *compmem=NULL;
+	uLongf compmemsize=totallines*263+12;
 
- if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
-  return 0;
+	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
+		return 0;
 
- for(u=lastu;u<99999;u++)
- {
-  pp=FCEUD_UTF8fopen((fn=FCEU_MakeFName(FCEUMKF_SNAP,u,"png")),"rb");
-  if(pp==NULL) break;
-  fclose(pp);
- }
+	for(u=lastu;u<99999;u++)
+	{
+		pp=FCEUD_UTF8fopen((fn=strdup(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str())),"rb");
+		if(pp==NULL) break;
+		fclose(pp);
+	}
 
- lastu=u;
+	lastu=u;
 
- if(!(pp=FCEUD_UTF8fopen(fn,"wb")))
- {
-  free(fn);
-  return 0;
- }
- free(fn);
- {
-  static uint8 header[8]={137,80,78,71,13,10,26,10};
-  if(fwrite(header,8,1,pp)!=1)
-   goto PNGerr;
- }
+	if(!(pp=FCEUD_UTF8fopen(fn,"wb")))
+	{
+		free(fn);
+		return 0;
+	}
+	free(fn);
+	{
+		static uint8 header[8]={137,80,78,71,13,10,26,10};
+		if(fwrite(header,8,1,pp)!=1)
+			goto PNGerr;
+	}
 
- {
-  uint8 chunko[13];
+	{
+		uint8 chunko[13];
 
-  chunko[0]=chunko[1]=chunko[3]=0;
-  chunko[2]=0x1;			// Width of 256
+		chunko[0]=chunko[1]=chunko[3]=0;
+		chunko[2]=0x1;			// Width of 256
 
-  chunko[4]=chunko[5]=chunko[6]=0;
-  chunko[7]=totallines;			// Height
+		chunko[4]=chunko[5]=chunko[6]=0;
+		chunko[7]=totallines;			// Height
 
-  chunko[8]=8;				// bit depth
-  chunko[9]=3;				// Color type; indexed 8-bit
-  chunko[10]=0;				// compression: deflate
-  chunko[11]=0;				// Basic adapative filter set(though none are used).
-  chunko[12]=0;				// No interlace.
+		chunko[8]=8;				// bit depth
+		chunko[9]=3;				// Color type; indexed 8-bit
+		chunko[10]=0;				// compression: deflate
+		chunko[11]=0;				// Basic adapative filter set(though none are used).
+		chunko[12]=0;				// No interlace.
 
-  if(!WritePNGChunk(pp,13,"IHDR",chunko))
-   goto PNGerr;
- }
+		if(!WritePNGChunk(pp,13,"IHDR",chunko))
+			goto PNGerr;
+	}
 
- {
-  uint8 pdata[256*3];
-  for(x=0;x<256;x++)
-   FCEUD_GetPalette(x,pdata+x*3,pdata+x*3+1,pdata+x*3+2);
-  if(!WritePNGChunk(pp,256*3,"PLTE",pdata))
-   goto PNGerr;
- }
+	{
+		uint8 pdata[256*3];
+		for(x=0;x<256;x++)
+			FCEUD_GetPalette(x,pdata+x*3,pdata+x*3+1,pdata+x*3+2);
+		if(!WritePNGChunk(pp,256*3,"PLTE",pdata))
+			goto PNGerr;
+	}
 
- {
-  uint8 *tmp=XBuf+FSettings.FirstSLine*256;
-  uint8 *dest,*mal,*mork;
+	{
+		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
+		uint8 *dest,*mal,*mork;
 
-  if(!(mal=mork=dest=(uint8 *)malloc((totallines<<8)+totallines)))
-   goto PNGerr;
- //   mork=dest=XBuf;
+		if(!(mal=mork=dest=(uint8 *)malloc((totallines<<8)+totallines)))
+			goto PNGerr;
+		//   mork=dest=XBuf;
 
-  for(y=0;y<totallines;y++)
-  {
-   *dest=0;			// No filter.
-   dest++;
-   for(x=256;x;x--,tmp++,dest++)
-    *dest=*tmp; 	
-  }
+		for(y=0;y<totallines;y++)
+		{
+			*dest=0;			// No filter.
+			dest++;
+			for(x=256;x;x--,tmp++,dest++)
+				*dest=*tmp; 	
+		}
 
-  if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
-  {
-   if(mal) free(mal);
-   goto PNGerr;
-  }
-  if(mal) free(mal);
-  if(!WritePNGChunk(pp,compmemsize,"IDAT",compmem))
-   goto PNGerr;
- }
- if(!WritePNGChunk(pp,0,"IEND",0))
-  goto PNGerr;
+		if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
+		{
+			if(mal) free(mal);
+			goto PNGerr;
+		}
+		if(mal) free(mal);
+		if(!WritePNGChunk(pp,compmemsize,"IDAT",compmem))
+			goto PNGerr;
+	}
+	if(!WritePNGChunk(pp,0,"IEND",0))
+		goto PNGerr;
 
- free(compmem);
- fclose(pp);
+	free(compmem);
+	fclose(pp);
 
- return u+1;
+	return u+1;
 
 
- PNGerr:
- if(compmem)
-  free(compmem);
- if(pp)
-  fclose(pp);
- return(0);
+PNGerr:
+	if(compmem)
+		free(compmem);
+	if(pp)
+		fclose(pp);
+	return(0);
 }
 //TODO mbg - this needs to be implemented in a better way
 #ifdef SHOWFPS
@@ -499,14 +499,14 @@ static int boopcount = 0;
 
 void ShowFPS(void)
 { 
- uint64 da = FCEUD_GetTime() - boop[boopcount];
- char fpsmsg[16];
- int booplimit = PAL?50:60;
- boop[boopcount] = FCEUD_GetTime();
+	uint64 da = FCEUD_GetTime() - boop[boopcount];
+	char fpsmsg[16];
+	int booplimit = PAL?50:60;
+	boop[boopcount] = FCEUD_GetTime();
 
- sprintf(fpsmsg, "%8.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
- DrawTextTrans(XBuf + (256-8-8*8) + (FSettings.FirstSLine+4)*256,256,fpsmsg,4);
- // It's not averaging FPS over exactly 1 second, but it's close enough.
- boopcount = (boopcount + 1) % booplimit;
+	sprintf(fpsmsg, "%8.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
+	DrawTextTrans(XBuf + (256-8-8*8) + (FSettings.FirstSLine+4)*256,256,fpsmsg,4);
+	// It's not averaging FPS over exactly 1 second, but it's close enough.
+	boopcount = (boopcount + 1) % booplimit;
 }
 #endif

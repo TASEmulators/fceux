@@ -38,6 +38,7 @@
 #include  "state.h"
 #include  "video.h"
 #include  "input.h"
+#include "driver.h"
 
 #define VBlankON  (PPU[0]&0x80)   /* Generate VBlank NMI */
 #define Sprite16  (PPU[0]&0x20)   /* Sprites 8x16/8x8  */
