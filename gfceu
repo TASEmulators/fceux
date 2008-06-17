@@ -2,7 +2,7 @@
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
 version = "0.7svn"
-title = "gfceux"
+title = "gfceu"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
