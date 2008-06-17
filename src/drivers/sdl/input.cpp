@@ -259,7 +259,7 @@ KeyboardCommands()
 
     // F12 or Esc close game
     if(KEY(F12) || KEY(ESCAPE)) {
-        CloseGame();
+        FCEUI_CloseGame();
     }
 
     // VS Unisystem games
@@ -389,7 +389,7 @@ UpdatePhysicalInput()
     while(SDL_PollEvent(&event)) {
         switch(event.type) {
         case SDL_QUIT:
-            CloseGame();
+            FCEUI_CloseGame();
             puts("Quit");
             break;
         default:

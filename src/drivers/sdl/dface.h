@@ -30,7 +30,7 @@ void UnlockConsole(void);
 void ToggleFS();		/* SDL */
 
 int LoadGame(const char *path);
-int CloseGame(void);
+//int CloseGame(void);
 
 void Giggles(int);
 void DoFun(void);

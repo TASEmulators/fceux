@@ -52,7 +52,48 @@
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
+#else
+#include "drivers/sdl/sdl.h"
 #endif
+
+static void CloseGame(void)
+{
+	if(GameInfo)
+	{
+		if(FCEUnetplay)
+		{
+			FCEUD_NetworkClose();
+		}
+
+		FCEUI_StopMovie();
+
+		if(GameInfo->name)
+		{
+			free(GameInfo->name);
+			GameInfo->name=0;
+		}
+
+		if(GameInfo->type!=GIT_NSF)
+		{
+			FCEU_FlushGameCheats(0,0);
+		}
+
+		GameInterface(GI_CLOSE);
+
+		ResetExState(0,0);
+
+		//mbg 5/9/08 - clear screen when game is closed
+		//http://sourceforge.net/tracker/index.php?func=detail&aid=1787298&group_id=13536&atid=113536
+		extern uint8 *XBuf;
+		if(XBuf)
+			memset(XBuf,0,256*256);
+
+		CloseGenie();
+
+		delete GameInfo;
+		GameInfo = 0;
+	}
+}
 
 
 uint64 timestampbase;
@@ -239,44 +280,6 @@ static DECLFR(ARAMH)
         return RAM[A&0x7FF];
 }
 
-static void CloseGame(void)
-{
-	if(GameInfo)
-	{
-		if(FCEUnetplay)
-		{
-			FCEUD_NetworkClose();
-		}
-
-		FCEUI_StopMovie();
-
-		if(GameInfo->name)
-		{
-			free(GameInfo->name);
-			GameInfo->name=0;
-		}
-
-		if(GameInfo->type!=GIT_NSF)
-		{
-			FCEU_FlushGameCheats(0,0);
-		}
-
-		GameInterface(GI_CLOSE);
-
-		ResetExState(0,0);
-
-		//mbg 5/9/08 - clear screen when game is closed
-		//http://sourceforge.net/tracker/index.php?func=detail&aid=1787298&group_id=13536&atid=113536
-		extern uint8 *XBuf;
-		if(XBuf)
-			memset(XBuf,0,256*256);
-
-		CloseGenie();
-
-		delete GameInfo;
-		GameInfo = 0;
-	}
-}
 
 void ResetGameLoaded(void)
 {

@@ -346,8 +346,9 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size=INT_MAX, bo
 	for(;;)
 	{
 		bool iswhitespace, isrecchar, isnewline;
+		int c;
 		if(size--<=0) goto bail;
-		int c = fp->get();
+		c = fp->get();
 		if(c == -1)
 			goto bail;
 		iswhitespace = (c==' '||c=='\t');
