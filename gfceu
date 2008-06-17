@@ -507,7 +507,7 @@ class GfceuApp:
          'gp3_button' : '3',
          'gp4_button' : '4'}
     command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
-    launch(command, True)
+    self.launch(command, True)
 
   def config_help_button_clicked(self, menuitem, data=None):
     msgbox = gtk.MessageDialog(parent=None, flags=0,
