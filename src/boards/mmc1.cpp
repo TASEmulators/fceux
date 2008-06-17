@@ -310,6 +310,8 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int battery)
   if(wram)
   {
     WRAM=(uint8*)FCEU_gmalloc(wram*1024);
+	//mbg 6/17/08 - this shouldve been cleared to re-initialize save ram
+	memset(WRAM,0,wram*1024);
     mmc1opts|=1;
     if(wram>8) mmc1opts|=4;
     SetupCartPRGMapping(0x10,WRAM,wram*1024,1);
