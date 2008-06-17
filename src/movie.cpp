@@ -5,6 +5,7 @@
 #include <zlib.h>
 #include <iomanip>
 #include <fstream>
+#include <limits.h>
 
 #ifdef WIN32
 #include <windows.h>
@@ -335,7 +336,7 @@ bool FCEUMOV_Mode(int modemask)
 }
 
 //yuck... another custom text parser.
-static void LoadFM2(MovieData& movieData, std::istream* fp, int size=-1, bool stopAfterHeader = false)
+static void LoadFM2(MovieData& movieData, std::istream* fp, int size=INT_MAX, bool stopAfterHeader = false)
 {
 	std::string key,value;
 	enum {
@@ -345,7 +346,7 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size=-1, bool st
 	for(;;)
 	{
 		bool iswhitespace, isrecchar, isnewline;
-		if(size--==0) goto bail;
+		if(size--<=0) goto bail;
 		int c = fp->get();
 		if(c == -1)
 			goto bail;
@@ -369,7 +370,10 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size=-1, bool st
 				dorecord:
 				if (stopAfterHeader) return;
 				MovieRecord record;
+				int preparse = fp->tellg();
 				record.parse(&movieData, fp);
+				int postparse = fp->tellg();
+				size -= (postparse-preparse);
 				movieData.records.push_back(record);
 				state = NEWLINE;
 				break;

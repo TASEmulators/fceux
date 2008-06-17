@@ -95,7 +95,7 @@ int read32le(uint32 *Bufo, FILE *fp)
 int read32le(uint32 *Bufo, std::istream *is)
 {
 	uint32 buf;
-	if(is->readsome((char*)&buf,4) != 4)
+	if(is->read((char*)&buf,4).gcount() != 4)
 		return 0;
 #ifdef LSB_FIRST
 	*(uint32*)Bufo=buf;

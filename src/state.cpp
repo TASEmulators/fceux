@@ -135,49 +135,6 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 	return(acc);
 }
 
-static int SubWrite(FILE *st, SFORMAT *sf)
-{
-	uint32 acc=0;
-
-	while(sf->v)
-	{
-		if(sf->s==~0)		//Link to another struct
-		{
-			uint32 tmp;
-
-			if(!(tmp=SubWrite(st,(SFORMAT *)sf->v)))
-				return(0);
-			acc+=tmp;
-			sf++;
-			continue;
-		}
-
-		acc+=8;			//Description + size
-		acc+=sf->s&(~FCEUSTATE_FLAGS);
-
-		if(st)			// Are we writing or calculating the size of this block?
-		{
-			fwrite(sf->desc,1,4,st);
-			write32le(sf->s&(~FCEUSTATE_FLAGS),st);
-
-#ifndef LSB_FIRST
-			if(sf->s&RLSB)
-				FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
-#endif
-
-			fwrite((uint8 *)sf->v,1,sf->s&(~FCEUSTATE_FLAGS),st);
-			//Now restore the original byte order.
-#ifndef LSB_FIRST
-			if(sf->s&RLSB)   
-				FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
-#endif
-		}
-		sf++; 
-	}
-
-	return(acc);
-}
-
 static int WriteStateChunk(std::ostream* os, int type, SFORMAT *sf)
 {
 	os->put(type);
@@ -185,22 +142,6 @@ static int WriteStateChunk(std::ostream* os, int type, SFORMAT *sf)
 	write32le(bsize,os);
 
 	if(!SubWrite(os,sf))
-	{
-		return 5;
-	}
-	return (bsize+5);
-}
-
-static int WriteStateChunk(FILE *st, int type, SFORMAT *sf)
-{
-	int bsize;
-
-	fputc(type,st);
-
-	bsize=SubWrite((FILE*)0,sf);
-	write32le(bsize,st);		
-
-	if(!SubWrite(st,sf))
 	{
 		return 5;
 	}
@@ -239,7 +180,7 @@ static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
 	{
 		uint32 tsize;
 		char toa[4];
-		if(is->readsome(toa,4)<4)
+		if(is->read(toa,4).gcount()<4)
 			return false;
 
 		read32le(&tsize,is);
@@ -247,9 +188,9 @@ static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
 		if((tmp=CheckS(sf,tsize,toa)))
 		{
 			if(tmp->s&FCEUSTATE_INDIRECT)
-				is->readsome(*(char **)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
+				is->read(*(char **)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 			else
-				is->readsome((char *)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
+				is->read((char *)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 
 #ifndef LSB_FIRST
 			if(tmp->s&RLSB)
@@ -317,7 +258,7 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 			// load back buffer
 			{
 				extern uint8 *XBackBuf;
-				if(is->readsome((char*)XBackBuf,size) != size)
+				if(is->read((char*)XBackBuf,size).gcount() != size)
 					ret = false;
 
 				//MBG TODO - can this be moved to a better place?
@@ -406,6 +347,15 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
 		if(!FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 		{
+			//more stable? but we dont think the other one is unstable
+			//memorystream mstemp;
+			//int size = FCEUMOV_WriteState(&mstemp);
+			//mstemp.sync();
+			//os->put(7);
+			//write32le(size, os);
+			//os->write(mstemp.buf(),mstemp.size());
+			//totalsize += 5+size;
+
 			os->seekp(5,std::ios::cur);
 			int size = FCEUMOV_WriteState(os);
 			os->seekp(-(size+5),std::ios::cur);
@@ -634,7 +584,6 @@ bool FCEUSS_Load(char *fname)
 void FCEUSS_CheckStates(void)
 {
 	FILE *st=NULL;
-	char *fn;
 	int ssel;
 
 	for(ssel=0;ssel<10;ssel++)
