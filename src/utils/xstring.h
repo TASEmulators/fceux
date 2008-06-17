@@ -26,10 +26,10 @@
 #include "../types.h"
 
 //definitions for str_strip() flags
-#define STRIP_SP	0x01 // space 
-#define STRIP_TAB	0x02 // tab 
-#define STRIP_CR	0x04 // carriage return 
-#define STRIP_LF	0x08 // line feed 
+#define STRIP_SP	0x01 // space
+#define STRIP_TAB	0x02 // tab
+#define STRIP_CR	0x04 // carriage return
+#define STRIP_LF	0x08 // line feed
 
 
 int str_ucase(char *str);

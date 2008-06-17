@@ -125,11 +125,11 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 
 			//Now restore the original byte order.
 #ifndef LSB_FIRST
-			if(sf->s&RLSB)   
+			if(sf->s&RLSB)
 				FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
 		}
-		sf++; 
+		sf++;
 	}
 
 	return(acc);
@@ -398,7 +398,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 		//worst case compression.
 		//zlib says "0.1% larger than sourceLen plus 12 bytes"
 		comprlen = (len>>9)+12 + len;
-		cbuf = new uint8[comprlen]; 
+		cbuf = new uint8[comprlen];
 		error = compress2(cbuf,&comprlen,(uint8*)ms.buf(),len,compressionLevel);
 	}
 
@@ -462,7 +462,6 @@ void FCEUSS_Save(char *fname)
 bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 {
 	uint8 header[16];
-	char* fn=0;
 
 	FCEUMOV_PreLoad();
 
@@ -507,7 +506,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	if(x)
 	{
 		FCEUPPU_LoadState(stateversion);
-		FCEUSND_LoadState(stateversion);  
+		FCEUSND_LoadState(stateversion);
 		x=FCEUMOV_PostLoad();
 	}
 
@@ -568,7 +567,7 @@ bool FCEUSS_Load(char *fname)
 		}
 		delete st;
 		return true;
-	}   
+	}
 	else
 	{
 		if(!fname)
@@ -662,7 +661,7 @@ int FCEUI_SelectState(int w, int show)
 		FCEU_DispMessage("-select state-");
 	}
 	return oldstate;
-}  
+}
 
 void FCEUI_SaveState(char *fname)
 {
@@ -699,7 +698,7 @@ void FCEUI_LoadState(char *fname)
 				if(FCEUSS_SaveFP(fp,0))
 				{
 					fclose(fp);
-					FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);    
+					FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn);
 				}
 				else
 				{
