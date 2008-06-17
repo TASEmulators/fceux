@@ -479,38 +479,11 @@ unsigned int uintDecFromIstream(std::istream* is)
 	return ret;
 }
 
-//FIXME: itoa isn't ANSI C compliant.  Perhaps sprintf would be better here?   
-#ifdef WIN32
 std::string stditoa(int n)
 {
 	char tempbuf[16];
-	return itoa(n,tempbuf,10);
+	sprintf(tempbuf, "%d", n);
+	return tempbuf;
 }
-#else
-std::string stditoa(int n) {
-	enum { kMaxDigits = 35 };
-	
-	std::string buf;
-	
-	buf.reserve( kMaxDigits ); // Pre-allocate enough space.
-	
-	int quotient = n;
-
-	// Translating number to string with base
-	do {
-		buf += "0123456789abcdef"[ std::abs( quotient % 10 ) ];
-		quotient /= 10;
-	} while ( quotient );
-	
-
-	
-	// Append the negative sign for base 10
-	if ( n < 0) buf += '-';
-	
-	std::reverse( buf.begin(), buf.end() );
-	
-	return buf;
-}
-#endif
 
 
