@@ -33,7 +33,7 @@ from subprocess import Popen
 
   # # # # # # # #
 # Messaging Functions
-def gfceu_message(message, use_gtk=False):
+def gfceu_print(text, use_gtk=False):
   """
   gqfceu_message()
   
@@ -41,11 +41,11 @@ def gfceu_message(message, use_gtk=False):
   messages.  However, it can be used for important messages as well.  If a
   GTK message_box is requried, the use_gtk flag can be enabled
   """
-  print title + ' message:  '+message
+  print text
   if use_gtk:
     msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO,
       buttons=gtk.BUTTONS_CLOSE)
-    msgbox.set_markup(message)
+    msgbox.set_markup(text)
     msgbox.run()
     msgbox.destroy()
 
@@ -74,19 +74,20 @@ def gfceu_error(message, code, use_gtk=True, fatal=True):
 # Import libraries
 try:
   import pytgtk
-  pygtk.require("2.6")
+  pygtk.require("2.12")
 except:
   pass
 try:
   import gtk
 except ImportError:
   gfceu_error('The PyGTK libraries cannot be found.\n\
-  Ensure that PyGTK (>=2.0) is installed on this system.\n\
+  Ensure that PyGTK (>=2.12) is installed on this system.\n\
   On Debian based systems (like Ubuntu), try this command:\n\
   sudo apt-get install python-gtk2 libgtk2.0-0', 1, False)
 
 try:
-  import gtk.glade
+  #import gtk.glade
+  pass
 except ImportError:
   gfceu_error('The glade libraries cannot be found.\n\
   Ensure that libglade is installed on this system.\n\
@@ -158,31 +159,31 @@ def give_widgets():
   """
   global xml, options
   try:
-    widgets['rom_entry'].set_text(options.romfile)
+    widgets.get_object("rom_entry").set_text(options.romfile)
     
     # sound
-    widgets['sound_check'].set_active(options.sound_check)
-    widgets['soundq_check'].set_active(options.soundq_check)
-    widgets['soundrate_entry'].set_text(options.soundrate_entry)
+    widgets.get_object("sound_check").set_active(options.sound_check)
+    widgets.get_object("soundq_check").set_active(options.soundq_check)
+    widgets.get_object("soundrate_entry").set_text(options.soundrate_entry)
     
-    widgets['fullscreen_check'].set_active(options.fullscreen_check)
-    widgets['opengl_check'].set_active(options.opengl_check)
-    widgets['xscale_spin'].set_value(options.xscale_spin)
-    widgets['yscale_spin'].set_value(options.yscale_spin)
+    widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
+    widgets.get_object("opengl_check").set_active(options.opengl_check)
+    widgets.get_object("xscale_spin").set_value(options.xscale_spin)
+    widgets.get_object("yscale_spin").set_value(options.yscale_spin)
     
-    widgets['extra_entry'].set_text(options.extra_entry)
+    widgets.get_object("extra_entry").set_text(options.extra_entry)
         
     # Usability point:
     # Users will probably not want to remember their previous network setting.
     # Users may accidently be connecting to a remote server/hosting a game when
     # they were unaware.
     # No network is being set by default
-    widgets['no_network_radio'].set_active(True)
-    widgets['join_add'].set_text(options.join_add)
-    widgets['join_port'].set_value(float(options.join_port))
-    widgets['join_pass'].set_text(options.join_pass)
-    widgets['host_port'].set_value(float(options.host_port))
-    widgets['host_pass'].set_text(options.host_pass)
+    widgets.get_object("no_network_radio").set_active(True)
+    widgets.get_object("join_add").set_text(options.join_add)
+    widgets.get_object("join_port").set_value(float(options.join_port))
+    widgets.get_object("join_pass").set_text(options.join_pass)
+    widgets.get_object("host_port").set_value(float(options.host_port))
+    widgets.get_object("host_pass").set_text(options.host_pass)
 
   except AttributeError:   
   # When new widgets are added, old pickle files might break.
@@ -204,13 +205,13 @@ def setup_environment ():
   if not os.path.exists(appconfigdir):
     # this is the first time the application is run.
     # create the directory
-    gfceu_message("Creating application settings directory")
+    gfceu_print("Creating application settings directory")
     os.mkdir(appconfigdir)
    
   if os.path.exists(old_optionsfile):
     # for full backwards compatibility, this file is processed, but moved 
     # to the new directory and filename for future compatibility
-    gfceu_message("Old version of options file found, converting to new version")
+    gfceu_print("Old version of options file found, converting to new version")
     shutil.move(old_optionsfile,optionsfile)
 
 def set_options():
@@ -221,29 +222,29 @@ def set_options():
   and stores it in the options object.
   """
   global xml
-  options.romfile = widgets['rom_entry'].get_text()
+  options.romfile = widgets.get_object("rom_entry").get_text()
   
   # sound
-  options.sound_check = widgets['sound_check'].get_active()
-  options.soundq_check = widgets['soundq_check'].get_active()
-  options.soundrate_entry = widgets['soundrate_entry'].get_text()
+  options.sound_check = widgets.get_object("sound_check").get_active()
+  options.soundq_check = widgets.get_object("soundq_check").get_active()
+  options.soundrate_entry = widgets.get_object("soundrate_entry").get_text()
   
   # video
-  options.fullscreen_check = widgets['fullscreen_check'].get_active()
-  options.opengl_check = widgets['opengl_check'].get_active()
-  options.xscale_spin = widgets['xscale_spin'].get_value()
-  options.yscale_spin = widgets['yscale_spin'].get_value()
+  options.fullscreen_check = widgets.get_object("fullscreen_check").get_active()
+  options.opengl_check = widgets.get_object("opengl_check").get_active()
+  options.xscale_spin = widgets.get_object("xscale_spin").get_value()
+  options.yscale_spin = widgets.get_object("yscale_spin").get_value()
   
-  options.extra_entry = widgets['extra_entry'].get_text()
+  options.extra_entry = widgets.get_object("extra_entry").get_text()
   
-  options.join_radio = widgets['join_radio'].get_active()
-  options.host_radio = widgets['host_radio'].get_active()
-  options.no_network_radio = widgets['no_network_radio'].get_active()
-  options.join_add = widgets['join_add'].get_text()
-  options.join_port = widgets['join_port'].get_value()
-  options.join_pass = widgets['join_pass'].get_text()
-  options.host_port = widgets['host_port'].get_value()
-  options.host_pass = widgets['host_pass'].get_text()
+  options.join_radio = widgets.get_object("join_radio").get_active()
+  options.host_radio = widgets.get_object("host_radio").get_active()
+  options.no_network_radio = widgets.get_object("no_network_radio").get_active()
+  options.join_add = widgets.get_object("join_add").get_text()
+  options.join_port = widgets.get_object("join_port").get_value()
+  options.join_pass = widgets.get_object("join_pass").get_text()
+  options.host_port = widgets.get_object("host_port").get_value()
+  options.host_pass = widgets.get_object("host_pass").get_text()
   
 
   
@@ -311,7 +312,7 @@ def launch(rom_name, local=False):
   
   command =  fceux_binary + ' ' + sound_options + video_options +\
   network + options.extra_entry + ' '+ rom_name
-  gfceu_message('Command: ' + command)
+  gfceu_print('Command: ' + command)
 
   
   if options.host_radio:
@@ -329,7 +330,7 @@ def launch(rom_name, local=False):
       args.append(options.host_pass)
     pid = Popen(args).pid
   
-  widgets['main_window'].hide()
+  widgets.get_object("main_window").hide()
   
   # os.system() is a blocker, so we must force
   # gtk to process our events.
@@ -339,7 +340,7 @@ def launch(rom_name, local=False):
   os.system(command)
   if options.host_radio:
     os.kill(pid, 9)
-  widgets['main_window'].show()
+  widgets.get_object("main_window").show()
 
 def find_binary(file):
   
@@ -366,12 +367,48 @@ def find_binary(file):
   # # # # # # # #
 # GTK Signal Handlers
 class GladeHandlers:
-  def launch_button_clicked(arg1):
+  pass
+  
+##############################################################################
+# Globals
+options = None
+appconfigdir = os.getenv('HOME') + '/.'+ title
+old_optionsfile = os.getenv('HOME')+'/.' + title + '_options'
+optionsfile = appconfigdir + 'gfceu_options.dat'
+fceux_binary = None
+fceu_server_binary = None
+#version is defined earlier in the code
+#have_vfs is defined earlier in the code
+
+class WidgetsWrapper:
+  def __init__(self):
+    # Search for the glade file
+    # Check first in the directory of this script.
+    global widgets
+    if os.path.isfile('gfceu.xml'):
+      glade_file = 'gfceu.xml'
+    # Then check to see if its installed on a *nix system
+    elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.xml')):
+      glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.xml')
+    else:
+      print 'ERROR.'
+      print 'Could not find the glade interface file.'
+      print 'Try reinstalling the application.'
+      sys.exit(1)
+    
+    try:
+      print "Using: " + glade_file
+      widgets = gtk.Builder()
+      widgets.add_from_file(glade_file)
+      widgets.connect_signals(self)
+    except:
+      gfceu_error("Couldn't load the glade UI file", 24)
+  def launch_button_clicked(self, arg1):
     global xml
     global options
-    options.romfile = widgets['rom_entry'].get_text()
-    if widgets['rom_entry'].get_text() == '':
-      gfceu_message('Please specify a ROM to open in the main tab.', True)
+    options.romfile = widgets.get_object("rom_entry").get_text()
+    if widgets.get_object("rom_entry").get_text() == '':
+      gfceu_print('Please specify a ROM to open in the main tab.', True)
       return
     if options.network_rom:
       try:
@@ -401,15 +438,14 @@ class GladeHandlers:
       romfile = options.romfile
       
     launch('"'+romfile+'"')
-
-
-  def about_button_clicked(arg1):
+    
+  def about_button_clicked(self, menuitem, data=None):
     global xml
-    widgets['about_dialog'].set_name('GNOME FCE Ultra '+version)
-    widgets['about_dialog'].run()
-    widgets['about_dialog'].hide()
+    widgets.get_object("about_dialog").set_name('GNOME FCE Ultra '+version)
+    widgets.get_object("about_dialog").run()
+    widgets.get_object("about_dialog").hide()
 
-  def browse_button_clicked(widget):
+  def browse_button_clicked(self, menuitem, data=None):
     global xml,options
     set_options()
     chooser = gtk.FileChooserDialog("Open...",  None,
@@ -451,17 +487,17 @@ class GladeHandlers:
     if response == gtk.RESPONSE_OK:
       if chooser.get_filename():
         x = chooser.get_filename()
-        widgets['rom_entry'].set_text(x)
+        widgets.get_object("rom_entry").set_text(x)
         options.romfile = x
         options.network_rom = False
       elif chooser.get_uri():
         x = chooser.get_uri()
-        widgets['rom_entry'].set_text(x)
+        widgets.get_object("rom_entry").set_text(x)
         options.romfile = x
         options.network_rom = True
 
-  def gamepad_clicked(widget):
-    print widget.name
+  def gamepad_clicked(self, widget, data=None):
+
     d = {'gp1_button' : '1',
          'gp2_button' : '2',
          'gp3_button' : '3',
@@ -469,7 +505,7 @@ class GladeHandlers:
     command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
     launch(command, True)
 
-  def config_help_button_clicked(arg1):
+  def config_help_button_clicked(self, menuitem, data=None):
     msgbox = gtk.MessageDialog(parent=None, flags=0,
       type=gtk.MESSAGE_INFO, buttons=gtk.BUTTONS_CLOSE)
     msgbox.set_markup("Once a gamepad is seleceted, a titlebar will be displayed\
@@ -480,17 +516,17 @@ class GladeHandlers:
     msgbox.hide()
 
 
-  def join_radio_clicked(arg1):
+  def join_radio_clicked(self, menuitem, data=None):
     global options
-    widgets['join_frame'].set_sensitive(True)
-    widgets['host_frame'].set_sensitive(False)
+    widgets.get_object("join_frame").set_sensitive(True)
+    widgets.get_object("host_frame").set_sensitive(False)
     options.join_radio = True
     options.host_radio = False
     options.no_network_radio = False
     
-  def host_radio_clicked(arg1):
+  def host_radio_clicked(self, menuitem, data=None):
     global fceu_server_binary
-    if widgets['host_radio'].get_active():
+    if widgets.get_object("host_radio").get_active():
       fceu_server_binary = find_binary('fceu-server')
       if fceu_server_binary == None:
         if os.name == 'nt':
@@ -501,67 +537,31 @@ class GladeHandlers:
           gfceu_error("The fceu server software cannot be found on \n\
           this system.  Ensure that it is installed and in your path.",
           101, True, False)
-        widgets['no_network_radio'].set_active(True)
+        widgets.get_object("no_network_radio").set_active(True)
         options.no_network_radio = True
         return False
 
-      gfceu_message("Using: "+fceu_server_binary)
-      widgets['join_frame'].set_sensitive(False)
-      widgets['host_frame'].set_sensitive(True)
+      gfceu_print("Using: "+fceu_server_binary)
+      widgets.get_object("join_frame").set_sensitive(False)
+      widgets.get_object("host_frame").set_sensitive(True)
       options.join_radio = False
       options.host_radio = True
       options.no_network_radio = False
 
-  def no_network_radio_clicked(arg1):
-    widgets['join_frame'].set_sensitive(False)
-    widgets['host_frame'].set_sensitive(False)
+  def no_network_radio_clicked(self, menuitem, data=None):
+    widgets.get_object("join_frame").set_sensitive(False)
+    widgets.get_object("host_frame").set_sensitive(False)
     options.join_radio = False
     options.host_radio = False
     options.no_network_radio = True
   
-  def end(widget,arg=0):
+  def end(self, menuitem, data=None):
     global xml, options, optionsfile
     set_options()
     save_options()
     gtk.main_quit()
-  
-##############################################################################
-# Globals
-options = None
-appconfigdir = os.getenv('HOME') + '/.'+ title
-old_optionsfile = os.getenv('HOME')+'/.' + title + '_options'
-optionsfile = appconfigdir + 'gfceu_options.dat'
-fceux_binary = None
-fceu_server_binary = None
-#version is defined earlier in the code
-#have_vfs is defined earlier in the code
 
-class WidgetsWrapper:
-  def __init__(self):
-    # Search for the glade file
-    # Check first in the directory of this script.
-    if os.path.isfile('gfceu.glade'):
-      glade_file = 'gfceu.glade'
-    # Then check to see if its installed on a *nix system
-    elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.glade')):
-      glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.glade')
-    else:
-      print 'ERROR.'
-      print 'Could not find the glade interface file.'
-      print 'Try reinstalling the application.'
-      sys.exit(1)
-    
-    try:
-      print "Using: " + glade_file
-      self.widgets = gtk.glade.XML(glade_file)
-      self.widgets.signal_autoconnect(GladeHandlers.__dict__)
-    except:
-      gfceu_error("Couldn't load the glade UI file", 24)
-
-  def __getitem__(self, key):
-    return self.widgets.get_widget(key)
-
-
+widgets = None
   # # # # # # # #
 # main
 if __name__ == '__main__':
@@ -578,10 +578,10 @@ if __name__ == '__main__':
     On Debian based systems (like Ubuntu), try the following command:\n\
     sudo apt-get install fceu', 4, True)
   else:
-    gfceu_message('Using: '+fceux_binary)
+    gfceu_print('Using: '+fceux_binary)
   
-  widgets = WidgetsWrapper()
-  widgets['main_window'].show_all()
+  wrap = WidgetsWrapper()
+  widgets.get_object("main_window").show_all()
   setup_environment()
 
   options = game_options()
