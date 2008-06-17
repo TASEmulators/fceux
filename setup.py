@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 setup(name="gfceu",
-		version="0.6.0",
+		version="0.7svn",
 		scripts = ['gfceu'],
 		data_files=[('share/gfceu/',['gfceu.glade', 'gfceu_big.png', 'gfceu.png']),
                 ('share/pixmaps/', ['gfceu.png']),
