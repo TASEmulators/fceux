@@ -35,11 +35,10 @@ from subprocess import Popen
 # Messaging Functions
 def gfceu_print(text, use_gtk=False):
   """
-  gqfceu_message()
+  gfceu_print()
   
   This function prints messages to the user.  This is generally used for status
-  messages.  However, it can be used for important messages as well.  If a
-  GTK message_box is requried, the use_gtk flag can be enabled
+  messages. If a GTK message_box is requried, the use_gtk flag can be enabled.
   """
   print text
   if use_gtk:
@@ -53,13 +52,9 @@ def gfceu_error(message, code, use_gtk=True, fatal=True):
   """
   gfceu_error()
   
-  TODO:  This can be reworked to use the raise/except methods already defined
-  in the standard python language.  One of these days...
+  Presents the user with an error message and optionally quits the program.
   """
-  print '# # # #'
-  print title + ' ERROR code '+str(code)+':'
-  print message
-  print '# # # #'
+  print title + ' error code '+str(code)+': ' + message
   if use_gtk:
     msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_ERROR,
       buttons=gtk.BUTTONS_CLOSE)
@@ -84,15 +79,6 @@ except ImportError:
   Ensure that PyGTK (>=2.12) is installed on this system.\n\
   On Debian based systems (like Ubuntu), try this command:\n\
   sudo apt-get install python-gtk2 libgtk2.0-0', 1, False)
-
-try:
-  #import gtk.glade
-  pass
-except ImportError:
-  gfceu_error('The glade libraries cannot be found.\n\
-  Ensure that libglade is installed on this system.\n\
-  On Debian based systems (like Ubuntu), try this command:\n\
-  sudo apt-get install libglade2-0 python-gtk2', 2, False)
   
 try:
   import gnomevfs
@@ -123,6 +109,8 @@ class game_options:
   extra_entry = ''
   romfile = ''
   opengl_check = False
+  
+  # network
   join_radio = False
   join_add = ''
   join_port = 4046
@@ -185,7 +173,7 @@ def give_widgets():
     widgets.get_object("host_port").set_value(float(options.host_port))
     widgets.get_object("host_pass").set_text(options.host_pass)
 
-  except AttributeError:   
+  except:   
   # When new widgets are added, old pickle files might break.
     options = game_options()
     give_widgets() 
@@ -199,20 +187,13 @@ def setup_environment ():
   a separate directory.
   """
        
-  global appconfigdir, old_optionsfile, optionsfile
+  global appconfigdir, optionsfile
        
-    
   if not os.path.exists(appconfigdir):
     # this is the first time the application is run.
     # create the directory
     gfceu_print("Creating application settings directory")
     os.mkdir(appconfigdir)
-   
-  if os.path.exists(old_optionsfile):
-    # for full backwards compatibility, this file is processed, but moved 
-    # to the new directory and filename for future compatibility
-    gfceu_print("Old version of options file found, converting to new version")
-    shutil.move(old_optionsfile,optionsfile)
 
 def set_options():
   """ 
@@ -286,6 +267,8 @@ def launch(rom_name, local=False):
   video_options += ' '
     
   
+  # Netplay is fucked right now
+  """
   if options.join_radio:
     if options.join_pass == '':
       netpass = ''
@@ -302,19 +285,19 @@ def launch(rom_name, local=False):
     else:
       netpass = ' --pass ' + '"' + options.host_pass + '" '
     network = '--net localhost --port '+\
-    str(options.host_port) + netpass + ' '
-      
+    str(options.host_port) + netpass + ' '    
     
   if local:
     network = ''
-  
-  
+  """
+  network = ''
   
   command =  fceux_binary + ' ' + sound_options + video_options +\
   network + options.extra_entry + ' '+ rom_name
   gfceu_print('Command: ' + command)
 
-  
+  # more code to disable because netplay is fucked
+  """  
   if options.host_radio:
     xterm_binary = find_binary("xterm")
     if xterm_binary == None:
@@ -329,7 +312,7 @@ def launch(rom_name, local=False):
       args.append("--password")
       args.append(options.host_pass)
     pid = Popen(args).pid
-  
+  """  
   widgets.get_object("main_window").hide()
   
   # os.system() is a blocker, so we must force
@@ -338,9 +321,14 @@ def launch(rom_name, local=False):
     gtk.main_iteration_do()
   
   os.system(command)
+  widgets.get_object("main_window").show()
+  
+  # another part of netplay code
+  """
   if options.host_radio:
     os.kill(pid, 9)
-  widgets.get_object("main_window").show()
+  """
+  
 
 def find_binary(file):
   
@@ -364,21 +352,14 @@ def find_binary(file):
 
   return None
   
-  # # # # # # # #
-# GTK Signal Handlers
-class GladeHandlers:
-  pass
   
 ##############################################################################
 # Globals
 options = None
 appconfigdir = os.getenv('HOME') + '/.'+ title
-old_optionsfile = os.getenv('HOME')+'/.' + title + '_options'
 optionsfile = appconfigdir + 'gfceu_options.dat'
 fceux_binary = None
 fceu_server_binary = None
-#version is defined earlier in the code
-#have_vfs is defined earlier in the code
 
 class WidgetsWrapper:
   def __init__(self):
