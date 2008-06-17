@@ -2,7 +2,7 @@
 #define _guid_h_
 
 #include <string>
-#include "types.h"
+#include "../types.h"
 #include "valuearray.h"
 
 struct FCEU_Guid : public ValueArray<uint8,16>
