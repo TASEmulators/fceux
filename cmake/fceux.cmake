@@ -188,6 +188,7 @@ set(SRC_CORE
   ${CMAKE_SOURCE_DIR}/src/utils/crc32.cpp
   ${CMAKE_SOURCE_DIR}/src/utils/endian.cpp
   ${CMAKE_SOURCE_DIR}/src/utils/general.cpp
+  ${CMAKE_SOURCE_DIR}/src/utils/guid.cpp
   ${CMAKE_SOURCE_DIR}/src/utils/md5.cpp
   ${CMAKE_SOURCE_DIR}/src/utils/memory.cpp
   ${CMAKE_SOURCE_DIR}/src/utils/unzip.cpp
