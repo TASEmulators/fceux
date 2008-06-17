@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(name="gfceu",
 		version="0.7svn",
 		scripts = ['gfceu'],
-		data_files=[('share/gfceu/',['gfceu.glade', 'gfceu_big.png', 'gfceu.png']),
+		data_files=[('share/gfceu/',['gfceu.xml', 'gfceu_big.png', 'gfceu.png']),
                 ('share/pixmaps/', ['gfceu.png']),
                 ('share/man/man1/', ['gfceu.1']),
       			    ('share/applications/', ['gfceu.desktop'])],

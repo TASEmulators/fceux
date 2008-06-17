@@ -293,7 +293,7 @@ class GfceuApp:
       glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceu/gfceu.xml')
     else:
       print 'ERROR.'
-      print 'Could not find the glade interface file.'
+      print 'Could not find the glade.xml file.'
       print 'Try reinstalling the application.'
       sys.exit(1)
     
