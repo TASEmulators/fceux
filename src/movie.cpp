@@ -791,7 +791,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	////---------
 	//memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	LoadFM2(tempMovieData, is);
+	LoadFM2(tempMovieData, is, size);
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------

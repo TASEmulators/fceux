@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "x6502abbrev.h"
+
 int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = 0;
@@ -386,14 +388,14 @@ int getValue(int type)
 		case 'A': return _A;
 		case 'X': return _X;
 		case 'Y': return _Y;
-		case 'N': return __P & N_FLAG ? 1 : 0;
-		case 'V': return __P & V_FLAG ? 1 : 0;
-		case 'U': return __P & U_FLAG ? 1 : 0;
-		case 'B': return __P & B_FLAG ? 1 : 0;
-		case 'D': return __P & D_FLAG ? 1 : 0;
-		case 'I': return __P & I_FLAG ? 1 : 0;
-		case 'Z': return __P & Z_FLAG ? 1 : 0;
-		case 'C': return __P & C_FLAG ? 1 : 0;
+		case 'N': return _P & N_FLAG ? 1 : 0;
+		case 'V': return _P & V_FLAG ? 1 : 0;
+		case 'U': return _P & U_FLAG ? 1 : 0;
+		case 'B': return _P & B_FLAG ? 1 : 0;
+		case 'D': return _P & D_FLAG ? 1 : 0;
+		case 'I': return _P & I_FLAG ? 1 : 0;
+		case 'Z': return _P & Z_FLAG ? 1 : 0;
+		case 'C': return _P & C_FLAG ? 1 : 0;
 		case 'P': return _PC;
 	}
 

@@ -23,18 +23,6 @@
 #include "x6502struct.h"
 
 extern X6502 X;
-#define _PC        X.PC
-#define _A         X.A
-#define _X         X.X
-#define _Y         X.Y
-#define __S         X.S
-#define __P         X.P
-#define _PI        X.mooPI
-#define _DB        X.DB
-#define _count     X.count
-#define _tcount    X.tcount
-#define _IRQlow    X.IRQlow
-#define _jammed    X.jammed
 
 
 //the opsize table is used to quickly grab the instruction sizes (in bytes)

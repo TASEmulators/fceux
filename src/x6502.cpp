@@ -25,6 +25,8 @@
 #include "debug.h"
 #include "sound.h"
 
+#include "x6502abbrev.h"
+
 X6502 X;
 uint32 timestamp;
 void (*MapIRQHook)(int a);
@@ -76,18 +78,18 @@ void X6502_DMW(uint32 A, uint8 V)
 #define PUSH(V) \
 {       \
  uint8 VTMP=V;  \
- WrRAM(0x100+__S,VTMP);  \
- __S--;  \
+ WrRAM(0x100+_S,VTMP);  \
+ _S--;  \
 }       
 
-#define POP() RdRAM(0x100+(++__S))
+#define POP() RdRAM(0x100+(++_S))
 
 static uint8 ZNTable[256];
 /* Some of these operations will only make sense if you know what the flag
    constants are. */
 
-#define X_ZN(zort)      __P&=~(Z_FLAG|N_FLAG);__P|=ZNTable[zort]
-#define X_ZNT(zort)  __P|=ZNTable[zort]
+#define X_ZN(zort)      _P&=~(Z_FLAG|N_FLAG);_P|=ZNTable[zort]
+#define X_ZNT(zort)  _P|=ZNTable[zort]
 
 #define JR(cond);  \
 {    \
@@ -113,24 +115,24 @@ static uint8 ZNTable[256];
 
 /*  All of the freaky arithmetic operations. */
 #define AND  _A&=x;X_ZN(_A)
-#define BIT  __P&=~(Z_FLAG|V_FLAG|N_FLAG);__P|=ZNTable[x&_A]&Z_FLAG;__P|=x&(V_FLAG|N_FLAG)
+#define BIT  _P&=~(Z_FLAG|V_FLAG|N_FLAG);_P|=ZNTable[x&_A]&Z_FLAG;_P|=x&(V_FLAG|N_FLAG)
 #define EOR  _A^=x;X_ZN(_A)
 #define ORA  _A|=x;X_ZN(_A)
 
 #define ADC  {  \
-        uint32 l=_A+x+(__P&1);  \
-        __P&=~(Z_FLAG|C_FLAG|N_FLAG|V_FLAG);  \
-        __P|=((((_A^x)&0x80)^0x80) & ((_A^l)&0x80))>>1;  \
-        __P|=(l>>8)&C_FLAG;  \
+        uint32 l=_A+x+(_P&1);  \
+        _P&=~(Z_FLAG|C_FLAG|N_FLAG|V_FLAG);  \
+        _P|=((((_A^x)&0x80)^0x80) & ((_A^l)&0x80))>>1;  \
+        _P|=(l>>8)&C_FLAG;  \
         _A=l;  \
         X_ZNT(_A);  \
        }
 
 #define SBC  {  \
-        uint32 l=_A-x-((__P&1)^1);  \
-        __P&=~(Z_FLAG|C_FLAG|N_FLAG|V_FLAG);  \
-        __P|=((_A^l)&(_A^x)&0x80)>>1;  \
-        __P|=((l>>8)&C_FLAG)^C_FLAG;  \
+        uint32 l=_A-x-((_P&1)^1);  \
+        _P&=~(Z_FLAG|C_FLAG|N_FLAG|V_FLAG);  \
+        _P|=((_A^l)&(_A^x)&0x80)>>1;  \
+        _P|=((l>>8)&C_FLAG)^C_FLAG;  \
         _A=l;  \
         X_ZNT(_A);  \
        }
@@ -138,16 +140,16 @@ static uint8 ZNTable[256];
 #define CMPL(a1,a2) {  \
          uint32 t=a1-a2;  \
          X_ZN(t&0xFF);  \
-         __P&=~C_FLAG;  \
-         __P|=((t>>8)&C_FLAG)^C_FLAG;  \
+         _P&=~C_FLAG;  \
+         _P|=((t>>8)&C_FLAG)^C_FLAG;  \
 		    }
 
 /* Special undocumented operation.  Very similar to CMP. */
 #define AXS      {  \
                      uint32 t=(_A&_X)-x;    \
                      X_ZN(t&0xFF);      \
-                     __P&=~C_FLAG;       \
-         __P|=((t>>8)&C_FLAG)^C_FLAG;  \
+                     _P&=~C_FLAG;       \
+         _P|=((t>>8)&C_FLAG)^C_FLAG;  \
          _X=t;  \
         }
 
@@ -159,26 +161,26 @@ static uint8 ZNTable[256];
 #define DEC         x--;X_ZN(x)
 #define INC    x++;X_ZN(x)
 
-#define ASL  __P&=~C_FLAG;__P|=x>>7;x<<=1;X_ZN(x)
-#define LSR  __P&=~(C_FLAG|N_FLAG|Z_FLAG);__P|=x&1;x>>=1;X_ZNT(x)
+#define ASL  _P&=~C_FLAG;_P|=x>>7;x<<=1;X_ZN(x)
+#define LSR  _P&=~(C_FLAG|N_FLAG|Z_FLAG);_P|=x&1;x>>=1;X_ZNT(x)
 
 /* For undocumented instructions, maybe for other things later... */
-#define LSRA  __P&=~(C_FLAG|N_FLAG|Z_FLAG);__P|=_A&1;_A>>=1;X_ZNT(_A)
+#define LSRA  _P&=~(C_FLAG|N_FLAG|Z_FLAG);_P|=_A&1;_A>>=1;X_ZNT(_A)
 
 #define ROL  {  \
      uint8 l=x>>7;  \
      x<<=1;  \
-     x|=__P&C_FLAG;  \
-     __P&=~(Z_FLAG|N_FLAG|C_FLAG);  \
-     __P|=l;  \
+     x|=_P&C_FLAG;  \
+     _P&=~(Z_FLAG|N_FLAG|C_FLAG);  \
+     _P|=l;  \
      X_ZNT(x);  \
     }
 #define ROR  {  \
      uint8 l=x&1;  \
      x>>=1;  \
-     x|=(__P&C_FLAG)<<7;  \
-     __P&=~(Z_FLAG|N_FLAG|C_FLAG);  \
-     __P|=l;  \
+     x|=(_P&C_FLAG)<<7;  \
+     _P&=~(Z_FLAG|N_FLAG|C_FLAG);  \
+     _P|=l;  \
      X_ZNT(x);  \
 		}
 		 
@@ -392,7 +394,7 @@ void X6502_Init(void)
 
 void X6502_Power(void)
 {
- _count=_tcount=_IRQlow=_PC=_A=_X=_Y=__S=__P=_PI=_DB=_jammed=0;
+ _count=_tcount=_IRQlow=_PC=_A=_X=_Y=_S=_P=_PI=_DB=_jammed=0;
  timestamp=0;
  X6502_Reset();
 }
@@ -419,7 +421,7 @@ void X6502_Run(int32 cycles)
      _PC=RdMem(0xFFFC);
      _PC|=RdMem(0xFFFD)<<8;
      _jammed=0;
-     _PI=__P=I_FLAG;
+     _PI=_P=I_FLAG;
      _IRQlow&=~FCEU_IQRESET;
     }
     else if(_IRQlow&FCEU_IQNMI2)
@@ -434,8 +436,8 @@ void X6502_Run(int32 cycles)
       ADDCYC(7);
       PUSH(_PC>>8);
       PUSH(_PC);
-      PUSH((__P&~B_FLAG)|(U_FLAG));
-      __P|=I_FLAG;
+      PUSH((_P&~B_FLAG)|(U_FLAG));
+      _P|=I_FLAG;
 	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
       _PC=RdMem(0xFFFA);
       _PC|=RdMem(0xFFFB)<<8;
@@ -449,8 +451,8 @@ void X6502_Run(int32 cycles)
       ADDCYC(7);
       PUSH(_PC>>8);
       PUSH(_PC);
-      PUSH((__P&~B_FLAG)|(U_FLAG));
-      __P|=I_FLAG;
+      PUSH((_P&~B_FLAG)|(U_FLAG));
+      _P|=I_FLAG;
 	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
       _PC=RdMem(0xFFFE);
       _PC|=RdMem(0xFFFF)<<8;
@@ -459,7 +461,7 @@ void X6502_Run(int32 cycles)
     _IRQlow&=~(FCEU_IQTEMP);
     if(_count<=0)
     {
-     _PI=__P;
+     _PI=_P;
      return;
      } //Should increase accuracy without a
               //major speed hit.
@@ -468,7 +470,7 @@ void X6502_Run(int32 cycles)
 	//will probably cause a major speed decrease on low-end systems
 	DEBUG( DebugCycle() );
 
-   _PI=__P;
+   _PI=_P;
    b1=RdMem(_PC);
 
    ADDCYC(CycTable[b1]);
