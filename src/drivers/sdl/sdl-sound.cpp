@@ -96,7 +96,7 @@ InitSound(FCEUGI *gi)
     spec.freq = soundrate;
     spec.format = AUDIO_S16SYS;
     spec.channels = 1;
-    spec.samples = 256;
+    spec.samples = 512;
     spec.callback = fillaudio;
     spec.userdata = 0;
 
