@@ -63,6 +63,7 @@ class game_options:
   sound_check = True
   soundq_check = True
   soundrate_entry = "11000"
+  soundbufsize_entry = "48"
   
   # video
   fullscreen_check = False
@@ -116,7 +117,9 @@ def give_widgets():
     widgets.get_object("sound_check").set_active(options.sound_check)
     widgets.get_object("soundq_check").set_active(options.soundq_check)
     widgets.get_object("soundrate_entry").set_text(options.soundrate_entry)
+    widgets.get_object("soundbufsize_entry").set_text(options.soundbufsize_entry)
     
+    # video
     widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
     widgets.get_object("opengl_check").set_active(options.opengl_check)
     widgets.get_object("xscale_spin").set_value(options.xscale_spin)
@@ -137,10 +140,11 @@ def give_widgets():
     widgets.get_object("host_pass").set_text(options.host_pass)
 
   except AttributeError:   
-  # When new widgets are added, old pickle files might break.
+    # When new widgets are added, old pickle files might break.
     options = game_options()
     give_widgets() 
-  
+  except RuntimeError:
+    print "shit"  
 
 def set_options():
   """ 
@@ -155,6 +159,7 @@ def set_options():
   options.sound_check = widgets.get_object("sound_check").get_active()
   options.soundq_check = widgets.get_object("soundq_check").get_active()
   options.soundrate_entry = widgets.get_object("soundrate_entry").get_text()
+  options.soundbufsize_entry = widgets.get_object("soundbufsize_entry").get_text()
   
   # video
   options.fullscreen_check = widgets.get_object("fullscreen_check").get_active()
@@ -168,7 +173,7 @@ def set_options():
   options.host_radio = widgets.get_object("host_radio").get_active()
   options.no_network_radio = widgets.get_object("no_network_radio").get_active()
   options.join_add = widgets.get_object("join_add").get_text()
-  options.join_port = widgets.get_object("join_port").get_value()
+  options.join_port = int(widgets.get_object("join_port").get_value())
   options.join_pass = widgets.get_object("join_pass").get_text()
   options.host_port = widgets.get_object("host_port").get_value()
   options.host_pass = widgets.get_object("host_pass").get_text()
@@ -297,13 +302,13 @@ class GfceuApp:
       print 'Try reinstalling the application.'
       sys.exit(1)
     
-    try:
-      print "Using: " + glade_file
-      widgets = gtk.Builder()
-      widgets.add_from_file(glade_file)
-      widgets.connect_signals(self)
-    except:
-      self.print_error("Couldn't load the glade UI file", 24)
+    #try:
+    print "Using: " + glade_file
+    widgets = gtk.Builder()
+    widgets.add_from_file(glade_file)
+    widgets.connect_signals(self)
+    #except:
+    #  self.print_error("Couldn't load the glade UI file", 24)
     
     widgets.get_object("main_window").show_all()
       
@@ -325,8 +330,9 @@ class GfceuApp:
       
     if options.soundrate_entry:
       sound_options += '--soundrate ' + options.soundrate_entry + ' '
-    else:
-      soundrate = ' '
+    
+    if options.soundbufsize_entry:
+      sound_options += '--soundbufsize ' + options.soundbufsize_entry + ' '
     
     # video
     video_options = ''
@@ -346,36 +352,39 @@ class GfceuApp:
       
     
     # Netplay is fucked right now
-    """
+   
     if options.join_radio:
       if options.join_pass == '':
         netpass = ''
       else:
-        netpass = '--pass ' + '"' + options.join_pass + '" '
-      network = '-net "' + options.join_add + '"'\
+        netpass = '--pass ' + options.join_pass
+      network = '--net ' + options.join_add +\
       ' --port '+ str(options.join_port) + ' ' + netpass
     else:
       network = ''
-    
+   
     if options.host_radio:
+      """
       if options.host_pass == '':
         netpass = ' '
       else:
-        netpass = ' --pass ' + '"' + options.host_pass + '" '
+#        netpass = ' --pass ' + '"' + options.host_pass + '" '
+        netpass = ' --pass ' + options.host_pass 
       network = '--net localhost --port '+\
       str(options.host_port) + netpass + ' '    
+      """
+      network = ''
       
     if local:
       network = ''
-    """
-    network = ''
+   
     
     command =  self.fceux_binary + ' ' + sound_options + video_options +\
     network + options.extra_entry + ' '+ rom_name
     self.msg('Command: ' + command)
 
     # more code to disable because netplay is fucked
-    """  
+    """
     if options.host_radio:
       xterm_binary = find_binary("xterm")
       if xterm_binary == None:
@@ -406,7 +415,7 @@ class GfceuApp:
     if options.host_radio:
       os.kill(pid, 9)
     """
-  
+    
   ### Callbacks
   def launch_button_clicked(self, arg1):
 
