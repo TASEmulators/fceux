@@ -312,8 +312,8 @@ static void Export()
 	{
 		fstream* osRecordingMovie = FCEUD_UTF8_fstream(ofn.lpstrFile, "wb");
 		currMovieData.dump(osRecordingMovie);
-		osRecordingMovie->close();
 		delete osRecordingMovie;
+		osRecordingMovie = 0;
 	}
 }
 

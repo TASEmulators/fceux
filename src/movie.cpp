@@ -589,12 +589,10 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 
 static void closeRecordingMovie()
 {
-	//if(fpRecordingMovie)
-	//	fclose(fpRecordingMovie);
 	if(osRecordingMovie)
 	{
-		osRecordingMovie->close();
 		delete osRecordingMovie;
+		osRecordingMovie = 0;
 	}
 }
 
@@ -930,7 +928,6 @@ bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFra
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) return false;
 	LoadFM2(md, fp, skipFrameCount);
-	fp->close();
 	delete fp;
 	
 
