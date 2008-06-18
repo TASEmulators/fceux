@@ -168,7 +168,7 @@ InitConfig()
     config->addOption('u', "user", "SDL.NetworkUsername", "");
     config->addOption('w', "pass", "SDL.NetworkPassword", "");
     config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
-    config->addOption('p', "port", "SDL.NetworkPort", 0xFCE);
+    config->addOption( 0, "port", "SDL.NetworkPort", 4046);
     config->addOption('l', "players", "SDL.NetworkNumPlayers", 1);
 
     // input configuration options
