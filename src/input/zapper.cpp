@@ -145,7 +145,6 @@ static void UpdateZapper(int w, void *data, int arg)
 
 static void LogZapper(int w, MovieRecord* mr)
 {
-	uint32 *ptr=(uint32 *)data;
 	mr->zappers[w].x = ZD[w].mzx;
 	mr->zappers[w].y = ZD[w].mzy;
 	mr->zappers[w].b = ZD[w].mzb;
