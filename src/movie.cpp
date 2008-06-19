@@ -405,11 +405,12 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size=INT_MAX, bo
 		bail:
 		bail = true;
 		if(state == VALUE) goto commit;
+		goto done;
 		commit:
 		movieData.installValue(key,value);
 		state = NEWLINE;
-		if(bail) break;
 		done: ;
+		if(bail) break;
 	}
 }
 
