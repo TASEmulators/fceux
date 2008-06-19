@@ -43,8 +43,6 @@ void FCEU_DrawGunSight(uint8 *buf, int xc, int yc)
  int x,y;
  int c,d;
 
- buf += FSettings.FirstSLine * 256;
-
   for(y=0;y<13;y++)
    for(x=0;x<13;x++)
    {
