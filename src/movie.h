@@ -49,7 +49,7 @@ public:
 	ValueArray<uint8,4> joysticks;
 	
 	struct {
-		uint8 x,y,b;
+		uint8 x,y,b,bogo;
 	} zappers[2];
 
 	//misc commands like reset, etc.

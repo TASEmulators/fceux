@@ -503,10 +503,14 @@ void FCEUI_SetInputFourscore(bool attachFourscore)
 	FSAttached = attachFourscore;
 }
 
+//mbg 6/18/08 HACK
+extern ZAPPER ZD[2];
 SFORMAT FCEUCTRL_STATEINFO[]={
 	{ joy_readbit, 2, "JYRB"},
 	{ joy, 4, "JOYS"},
 	{ &LastStrobe, 1, "LSTS"},
+	{ &ZD[0].bogo, 1, "ZBG0"},
+	{ &ZD[1].bogo, 1, "ZBG1"},
 	{ 0 }
 };
 

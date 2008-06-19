@@ -5,7 +5,7 @@ struct ZAPPER
 {
 	uint32 mzx,mzy,mzb;
 	int zap_readbit;
-	int bogo;
+	uint8 bogo;
 	int zappo;
 	uint64 zaphit;
 };
