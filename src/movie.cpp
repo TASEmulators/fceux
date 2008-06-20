@@ -47,6 +47,9 @@ using namespace std;
 
 //todo - handle case where read+write is requested, but the file is actually readonly (could be confusing)
 
+//todo - could we, given a field size, over-read from an inputstream and then parse out an integer?
+//that would be faster than several reads, perhaps.
+
 //sometimes we accidentally produce movie stop signals while we're trying to do other things with movies..
 bool suppressMovieStop=false;
 
@@ -143,7 +146,7 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 	//by the time we get in here, the initial pipe has already been extracted
 
 	//extract the commands
-	commands = uintDecFromIstream(is);
+	commands = uint32DecFromIstream(is);
 	//*is >> commands;
 	is->get(); //eat the pipe
 
@@ -165,13 +168,12 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 			{
 				int x,y,b,bogo;
 				uint64 zaphit;
-				*is >> x >> y >> b >> bogo >> zaphit;
-				//todo: test uintDecFromIstream
-				zappers[port].x = x;
-				zappers[port].y = y;
-				zappers[port].b = b;
-				zappers[port].bogo = bogo;
-				zappers[port].zaphit = zaphit;
+				//*is >> x >> y >> b >> bogo >> zaphit;
+				zappers[port].x = uint32DecFromIstream(is);
+				zappers[port].y = uint32DecFromIstream(is);
+				zappers[port].b = uint32DecFromIstream(is);
+				zappers[port].bogo = uint32DecFromIstream(is);
+				zappers[port].zaphit = uint64DecFromIstream(is);
 			}
 			
 			is->get(); //eat the pipe
@@ -192,7 +194,9 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 	//fprintf(fp,"%08d",index);
 
 	//dump the misc commands
-	*os << '|' << setw(1) << (int)commands;
+	//*os << '|' << setw(1) << (int)commands;
+	os->put('|');
+	putdec<uint8,1,true>(os,commands);
 
 	//a special case: if fourscore is enabled, dump four gamepads
 	if(md->fourscore)
@@ -211,7 +215,13 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 			if(md->ports[port] == SI_GAMEPAD)
 				dumpJoy(os, joysticks[port]);
 			else if(md->ports[port] == SI_ZAPPER)
-				*os << setw(3) << setfill('0') << (int)zappers[port].x << ' ' << setw(3) << setfill('0') << (int)zappers[port].y << setw(1) << ' ' << (int)zappers[port].b << ' ' << (int)zappers[port].bogo << ' ' << zappers[port].zaphit;
+			{
+				putdec<uint8,3,true>(os,zappers[port].x); os->put(' ');
+				putdec<uint8,3,true>(os,zappers[port].y); os->put(' ');
+				putdec<uint8,1,true>(os,zappers[port].b); os->put(' ');
+				putdec<uint8,1,true>(os,zappers[port].bogo); os->put(' ');
+				putdec<uint64,20,false>(os,zappers[port].zaphit);
+			}
 		}
 		os->put('|');
 	}

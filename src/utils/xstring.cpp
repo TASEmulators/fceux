@@ -463,27 +463,10 @@ char *U8ToHexStr(uint8 a)
 	return TempArray;
 }
 
-unsigned int uintDecFromIstream(std::istream* is)
-{
-	unsigned int ret = 0;
-
-	for(;;)
-	{
-		int d = is->get() - '0';
-		if(d<0 || d>9)
-			break;
-		ret *= 10;
-		ret += d;
-	}
-	is->unget();
-	return ret;
-}
-
 std::string stditoa(int n)
 {
 	char tempbuf[16];
 	sprintf(tempbuf, "%d", n);
 	return tempbuf;
 }
-
 
