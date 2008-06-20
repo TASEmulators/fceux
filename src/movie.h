@@ -50,6 +50,7 @@ public:
 	
 	struct {
 		uint8 x,y,b,bogo;
+		uint64 zaphit;
 	} zappers[2];
 
 	//misc commands like reset, etc.

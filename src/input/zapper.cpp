@@ -134,7 +134,7 @@ static void UpdateZapper(int w, void *data, int arg)
 	uint32 *ptr=(uint32 *)data;
 
 	if(ZD[w].bogo)
-		ZD[w].bogo--;
+		ZD[w].bogo--;	
 	if(ptr[2]&3 && (!(ZD[w].mzb&3)))
 		ZD[w].bogo=5;
 
@@ -149,6 +149,7 @@ static void LogZapper(int w, MovieRecord* mr)
 	mr->zappers[w].y = ZD[w].mzy;
 	mr->zappers[w].b = ZD[w].mzb;
 	mr->zappers[w].bogo = ZD[w].bogo;
+	mr->zappers[w].zaphit = ZD[w].zaphit;
 }
 
 static void LoadZapper(int w, MovieRecord* mr)
@@ -157,6 +158,7 @@ static void LoadZapper(int w, MovieRecord* mr)
 	ZD[w].mzy = mr->zappers[w].y;
 	ZD[w].mzb = mr->zappers[w].b;
 	ZD[w].bogo = mr->zappers[w].bogo;
+	ZD[w].zaphit = mr->zappers[w].zaphit;
 }
 
 

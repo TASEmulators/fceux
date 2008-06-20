@@ -164,12 +164,14 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 			else if(md->ports[port] == SI_ZAPPER)
 			{
 				int x,y,b,bogo;
-				*is >> x >> y >> b >> bogo;
+				uint64 zaphit;
+				*is >> x >> y >> b >> bogo >> zaphit;
 				//todo: test uintDecFromIstream
 				zappers[port].x = x;
 				zappers[port].y = y;
 				zappers[port].b = b;
 				zappers[port].bogo = bogo;
+				zappers[port].zaphit = zaphit;
 			}
 			
 			is->get(); //eat the pipe
@@ -209,7 +211,7 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 			if(md->ports[port] == SI_GAMEPAD)
 				dumpJoy(os, joysticks[port]);
 			else if(md->ports[port] == SI_ZAPPER)
-				*os << setw(3) << setfill('0') << (int)zappers[port].x << ' ' << setw(3) << setfill('0') << (int)zappers[port].y << setw(1) << ' ' << (int)zappers[port].b << ' ' << (int)zappers[port].bogo;
+				*os << setw(3) << setfill('0') << (int)zappers[port].x << ' ' << setw(3) << setfill('0') << (int)zappers[port].y << setw(1) << ' ' << (int)zappers[port].b << ' ' << (int)zappers[port].bogo << ' ' << zappers[port].zaphit;
 		}
 		os->put('|');
 	}
