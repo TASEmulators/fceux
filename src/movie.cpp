@@ -339,7 +339,7 @@ bool FCEUMOV_Mode(int modemask)
 }
 
 //yuck... another custom text parser.
-static void LoadFM2(MovieData& movieData, std::istream* fp, int size=INT_MAX, bool stopAfterHeader = false)
+static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
 	std::string key,value;
 	enum {
@@ -544,7 +544,7 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	strcpy(curMovieFilename, fname);
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if (!fp) return;
-	LoadFM2(currMovieData, fp);
+	LoadFM2(currMovieData, fp, INT_MAX, false);
 	fp->close();
 	delete fp;
 
@@ -785,7 +785,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	////---------
 	//memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	LoadFM2(tempMovieData, is, size);
+	LoadFM2(tempMovieData, is, size, false);
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------
@@ -931,7 +931,7 @@ bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFra
 	MovieData md;
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) return false;
-	LoadFM2(md, fp, skipFrameCount);
+	LoadFM2(md, fp, INT_MAX, skipFrameCount);
 	delete fp;
 	
 
