@@ -40,7 +40,7 @@
 //	and the when it can be successfully read/written to.  This should
 //	prevent writes to wrong places OR add code to prevent disk ejects
 //	when the virtual motor is on(mmm...virtual motor).
-
+extern int disableBatteryLoading; 
 
 static DECLFR(FDSRead4030);
 static DECLFR(FDSRead4031);
@@ -790,7 +790,7 @@ int FDSLoad(const char *name, FCEUFILE *fp)
 
 	fclose(zp);
 
-
+if (!disableBatteryLoading)
 	{
 		FCEUFILE *tp;
 		char *fn=strdup(FCEU_MakeFName(FCEUMKF_FDS,0,0).c_str());
