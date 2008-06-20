@@ -78,6 +78,22 @@ int write32le(uint32 b, std::ostream* os)
 	return 4;
 }
 
+int write64le(uint64 b, std::ostream* os)
+{
+	uint8 s[8];
+	s[0]=b;
+	s[1]=b>>8;
+	s[2]=b>>16;
+	s[3]=b>>24;
+	s[4]=b>>32;
+	s[5]=b>>40;
+	s[6]=b>>48;
+	s[7]=b>>56;
+	os->write((char*)&s,8);
+	return 4;
+}
+
+
 ///reads a little endian 32bit value from the specified file
 int read32le(uint32 *Bufo, FILE *fp)
 {
@@ -91,6 +107,21 @@ int read32le(uint32 *Bufo, FILE *fp)
 #endif
 	return 1;
 }
+
+///reads a little endian 64bit value from the specified file
+int read64le(uint64 *Bufo, std::istream *is)
+{
+	uint64 buf;
+	if(is->read((char*)&buf,8).gcount() != 8)
+		return 0;
+#ifdef LSB_FIRST
+	*Bufo=buf;
+#else
+	*Bufo = FCEU_de64lsb(&buf)
+#endif
+	return 1;
+}
+
 
 int read32le(uint32 *Bufo, std::istream *is)
 {

@@ -31,7 +31,6 @@ bool FCEUSS_Load(char *);
 
  //zlib values: 0 (none) through 9 (max) or -1 (default)
 bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel);
-bool FCEUSS_SaveFP(FILE* fp, int compressionLevel);
 
 bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params);
 

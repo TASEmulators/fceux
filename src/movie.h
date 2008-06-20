@@ -93,7 +93,9 @@ public:
 	std::vector<char> savestate;
 
 	void parse(MovieData* md, std::istream* is);
+	bool parseBinary(MovieData* md, std::istream* is);
 	void dump(MovieData* md, std::ostream* os, int index);
+	void dumpBinary(MovieData* md, std::ostream* os, int index);
 	void parseJoy(std::istream* is, uint8& joystate);
 	void dumpJoy(std::ostream* os, uint8 joystate);
 	
@@ -122,6 +124,9 @@ public:
 	//this is the RERECORD COUNT. please rename variable.
 	int recordCount;
 	FCEU_Guid guid;
+
+	//was the frame data stored in binary?
+	bool binaryFlag;
 
 	//which ports are defined for the movie
 	int ports[3];
@@ -164,7 +169,7 @@ public:
 
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
-	int dump(std::ostream* os);
+	int dump(std::ostream* os, bool binary);
 	void clearRecordRange(int start, int len);
 	
 	static bool loadSavestateFrom(std::vector<char>* buf);

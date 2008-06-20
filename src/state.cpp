@@ -314,13 +314,6 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 int CurrentState=1;
 extern int geniestage;
 
-bool FCEUSS_SaveFP(FILE* fp, int compressionLevel)
-{
-	memorystream ms;
-	bool ret = FCEUSS_SaveMS(&ms,compressionLevel);
-	fwrite(ms.buf(),1,ms.size(),fp);
-	return ret;
-}
 
 bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 {
@@ -688,7 +681,8 @@ void FCEUI_LoadState(char *fname)
 
 	if(FCEUSS_Load(fname))
 	{
-		if(FCEUnetplay)
+		//mbg todo netplay
+		/*if(FCEUnetplay)
 		{
 			char *fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP, 0, 0).c_str());
 			FILE *fp;
@@ -709,7 +703,7 @@ void FCEUI_LoadState(char *fname)
 			}
 
 			free(fn);
-		}
+		}*/
 	}
 	else
 	{

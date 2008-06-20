@@ -256,46 +256,49 @@ void NetplayUpdate(uint8 *joyp)
 				break;
 			case FCEUNPCMD_SAVESTATE:	
 				{
-					char *fn;
-					FILE *fp;
+					//mbg todo netplay
+					//char *fn;
+					//FILE *fp;
 
-					/* Send the cheats first, then the save state, since
-					there might be a frame or two in between the two sendfile
-					commands on the server side.
-					*/
-					fn = strdup(FCEU_MakeFName(FCEUMKF_CHEAT,0,0).c_str());
-					//if(!
-					FCEUNET_SendFile(FCEUNPCMD_LOADCHEATS,fn);
+					////Send the cheats first, then the save state, since
+					////there might be a frame or two in between the two sendfile
+					////commands on the server side.
 
-					// {
-					//  free(fn);
-					//  return;
-					// }
-					free(fn);
-					if(!FCEUnetplay) return;
+					//fn = strdup(FCEU_MakeFName(FCEUMKF_CHEAT,0,0).c_str());
 
-					fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP,0,0).c_str());
-					fp = fopen(fn, "wb");
-					if(FCEUSS_SaveFP(fp,Z_BEST_COMPRESSION))
-					{
-						fclose(fp);
-						if(!FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn))
-						{
-							unlink(fn);
-							free(fn);
-							return;
-						}
-						unlink(fn);
-						free(fn);
-					}
-					else
-					{
-						fclose(fp);
-						FCEUD_PrintError("File error.  (K)ill, (M)aim, (D)estroy?  Now!");
-						unlink(fn);
-						free(fn);
-						return;
-					}
+					////why??????
+					////if(!
+					//	FCEUNET_SendFile(FCEUNPCMD_LOADCHEATS,fn);
+					//// {
+					////  free(fn);
+					////  return;
+					//// }
+
+					//free(fn);
+					//if(!FCEUnetplay) return;
+
+					//fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP,0,0).c_str());
+					//fp = fopen(fn, "wb");
+					//if(FCEUSS_SaveFP(fp,Z_BEST_COMPRESSION))
+					//{
+					//	fclose(fp);
+					//	if(!FCEUNET_SendFile(FCEUNPCMD_LOADSTATE, fn))
+					//	{
+					//		unlink(fn);
+					//		free(fn);
+					//		return;
+					//	}
+					//	unlink(fn);
+					//	free(fn);
+					//}
+					//else
+					//{
+					//	fclose(fp);
+					//	FCEUD_PrintError("File error.  (K)ill, (M)aim, (D)estroy?  Now!");
+					//	unlink(fn);
+					//	free(fn);
+					//	return;
+					//}
 
 				}
 				break;

@@ -127,18 +127,6 @@ void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
 		joystate <<= 1;
 		joystate |= ((buf[i]!=' ')?1:0);
 	}
-	
-	//older, slower(?) way:
-
-	//joystate = 0;
-	//for(int bit=7;bit>=0;bit--)
-	//{
-	//	int c = is->get();
-	//	if(c == -1)
-	//		return;
-	//	if(c != ' ')
-	//		joystate |= (1<<bit);
-	//}
 }
 
 void MovieRecord::parse(MovieData* md, std::istream* is)
@@ -166,9 +154,6 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 				parseJoy(is, joysticks[port]);
 			else if(md->ports[port] == SI_ZAPPER)
 			{
-				int x,y,b,bogo;
-				uint64 zaphit;
-				//*is >> x >> y >> b >> bogo >> zaphit;
 				zappers[port].x = uint32DecFromIstream(is);
 				zappers[port].y = uint32DecFromIstream(is);
 				zappers[port].b = uint32DecFromIstream(is);
@@ -184,6 +169,67 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 	is->get(); //eat the pipe
 
 	//should be left at a newline
+}
+
+
+bool MovieRecord::parseBinary(MovieData* md, std::istream* is)
+{
+	commands = (uint8)is->get();
+
+	//check for eof
+	if(is->gcount() != 1) return false;
+
+	if(md->fourscore)
+	{
+		is->read((char*)&joysticks,4);
+	}
+	else
+	{
+		for(int port=0;port<2;port++)
+		{
+			if(md->ports[port] == SI_GAMEPAD)
+				joysticks[port] = (uint8)is->get();
+			else if(md->ports[port] == SI_ZAPPER)
+			{
+				zappers[port].x = (uint8)is->get();
+				zappers[port].y = (uint8)is->get();
+				zappers[port].b = (uint8)is->get();
+				zappers[port].bogo = (uint8)is->get();
+				zappers[port].zaphit = uint64DecFromIstream(is);
+			}
+		}
+	}
+
+	return true;
+}
+
+
+void MovieRecord::dumpBinary(MovieData* md, std::ostream* os, int index)
+{
+	os->put(commands);
+	if(md->fourscore)
+	{
+		os->put(joysticks[0]);
+		os->put(joysticks[1]);
+		os->put(joysticks[2]);
+		os->put(joysticks[3]);
+	}
+	else
+	{
+		for(int port=0;port<2;port++)
+		{
+			if(md->ports[port] == SI_GAMEPAD)
+				os->put(joysticks[port]);
+			else if(md->ports[port] == SI_ZAPPER)
+			{
+				os->put(zappers[port].x);
+				os->put(zappers[port].y);
+				os->put(zappers[port].b);
+				os->put(zappers[port].bogo);
+				write64le(zappers[port].zaphit, os);
+			}
+		}
+	}
 }
 
 void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
@@ -239,6 +285,7 @@ MovieData::MovieData()
 	, palFlag(false)
 	, poweronFlag(false)
 	, resetFlag(false)
+	, binaryFlag(false)
 	, recordCount(1)
 	, greenZoneCount(0)
 {
@@ -279,6 +326,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,ports[1]);
 	else if(key == "port2")
 		installInt(val,ports[2]);
+	else if(key == "binary")
+		installBool(val,binaryFlag);
 	else if(key == "savestate")
 	{
 		int len = HexStringToBytesLength(val);
@@ -290,7 +339,7 @@ void MovieData::installValue(std::string& key, std::string& val)
 	}
 }
 
-int MovieData::dump(std::ostream *os)
+int MovieData::dump(std::ostream *os, bool binary)
 {
 	int start = os->tellp();
 	*os << "version " << version << endl;
@@ -306,11 +355,23 @@ int MovieData::dump(std::ostream *os)
 	*os << "port0 " << ports[0] << endl;
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
+	
+	if(binary)
+		*os << "binary 1" << endl;
 		
 	if(savestate.size() != 0)
 		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
-	for(int i=0;i<(int)records.size();i++)
-		records[i].dump(this,os,i);
+	if(binary)
+	{
+		//put one | to start the binary dump
+		os->put('|');
+		for(int i=0;i<(int)records.size();i++)
+			records[i].dumpBinary(this,os,i);
+	}
+	else
+		for(int i=0;i<(int)records.size();i++)
+			records[i].dump(this,os,i);
+
 	int end = os->tellp();
 	return end-start;
 }
@@ -348,6 +409,43 @@ bool FCEUMOV_Mode(int modemask)
 	return FCEUMOV_Mode((EMOVIEMODE)modemask);
 }
 
+static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size)
+{
+	int recordsize = 1; //1 for the command
+	if(movieData.fourscore)
+		recordsize += 4; //4 joysticks
+	else
+	{
+		for(int i=0;i<2;i++)
+		{
+			switch(movieData.ports[i])
+			{
+			case SI_GAMEPAD: recordsize++; break;
+			case SI_ZAPPER: recordsize+=10; break;
+			}
+		}
+	}
+
+	//find out how much remains in the file
+	int curr = fp->tellg();
+	fp->seekg(0,std::ios::end);
+	int end = fp->tellg();
+	int flen = end-curr;
+	fp->seekg(curr,std::ios::beg);
+
+	//the amount todo is the min of the limiting size we received and the remaining contents of the file
+	int todo = std::min(size, flen);
+
+	int numRecords = todo/recordsize;
+	movieData.records.resize(numRecords);
+	for(int i=0;i<numRecords;i++)
+	{
+		movieData.records[i].parseBinary(&movieData,fp);
+	}
+
+	
+}
+
 //yuck... another custom text parser.
 static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
@@ -367,6 +465,11 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 		iswhitespace = (c==' '||c=='\t');
 		isrecchar = (c=='|');
 		isnewline = (c==10||c==13);
+		if(isrecchar && movieData.binaryFlag && !stopAfterHeader)
+		{
+			LoadFM2_binarychunk(movieData, fp, size);
+			return;
+		}
 		switch(state)
 		{
 		case NEWLINE:
@@ -383,12 +486,12 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 			{
 				dorecord:
 				if (stopAfterHeader) return;
-				MovieRecord record;
+				int currcount = movieData.records.size();
+				movieData.records.resize(currcount+1);
 				int preparse = fp->tellg();
-				record.parse(&movieData, fp);
+				movieData.records[currcount].parse(&movieData, fp);
 				int postparse = fp->tellg();
 				size -= (postparse-preparse);
-				movieData.records.push_back(record);
 				state = NEWLINE;
 				break;
 			}
@@ -660,7 +763,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	}
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
-	currMovieData.dump(osRecordingMovie);
+	currMovieData.dump(osRecordingMovie, false);
 
 	//todo - think about this
 	//ResetInputTypes();
@@ -762,7 +865,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		char counterbuf[32] = {0};
 		if(movieMode == MOVIEMODE_PLAY)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
-		else if(movieMode == MOVIEMODE_RECORD)
+		else if(movieMode == MOVIEMODE_RECORD) 
 			sprintf(counterbuf,"%d",currMovieData.records.size());
 
 		if(counterbuf[0])
@@ -774,7 +877,7 @@ int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
 	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
-		return currMovieData.dump(os);
+		return currMovieData.dump(os, true);
 	else return 0;
 }
 
@@ -845,7 +948,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			currMovieData.recordCount++;
 
 			openRecordingMovie(curMovieFilename);
-			currMovieData.dump(osRecordingMovie);
+			currMovieData.dump(osRecordingMovie, false);
 			movieMode = MOVIEMODE_RECORD;
 		}
 	}
