@@ -3,10 +3,12 @@
 
 #include "common.h"
 #include "tasedit.h"
-#include "../../fceu.h"
+#include "fceu.h"
 #include "debugger.h"
-#include "../../movie.h"
-#include "../../utils/xstring.h"
+#include "replay.h"
+#include "movie.h"
+#include "utils/xstring.h"
+
 
 using namespace std;
 
@@ -14,6 +16,8 @@ using namespace std;
 //http://forums.devx.com/archive/index.php/t-37234.html
 
 HWND hwndTasEdit = 0;
+
+static HMENU hmenu;
 static int lastCursor;
 static HWND hwndList, hwndHeader;
 static WNDPROC hwndHeader_oldWndproc;
@@ -366,6 +370,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_INITDIALOG:
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
 			InitDialog();
+			SetMenu(hwndDlg,hmenu);
 			break; 
 
 		case WM_NOTIFY:
@@ -410,14 +415,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				UpdateTasEdit();
 				break;
 			case IDC_HACKY2:
-				//hacky1: delete all items after the current selection
+				//hacky1: delete all items after the cur rent selection
 				currMovieData.records.resize(currMovieData.records.size()+1000);
 				currMovieData.clearRecordRange(currMovieData.records.size()-1000,1000);
 				UpdateTasEdit();
 				break;
+
+			case ID_FILE_OPENFM2:
+				Replay_LoadMovie(true);
+				break;
 			
-			case IDC_HACKYEXPORT:
-				//hackyexport: save an fm2
+			case ID_FILE_SAVEFM2:
 				Export();
 				break;
 
@@ -437,6 +445,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 void DoTasEdit()
 {
+	if(!hmenu)
+		hmenu = LoadMenu(fceu_hInstance,"TASEDITMENU");
+
 	lastCursor = -1;
 	if(!hwndTasEdit) 
 		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",NULL,WndprocTasEdit);

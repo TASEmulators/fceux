@@ -916,7 +916,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		}
 		case WM_CLOSE:
 		case WM_QUIT:
-			exitdebug:
+			//exitdebug:
 			DebuggerExit();
 			break;
 		case WM_MOVING:

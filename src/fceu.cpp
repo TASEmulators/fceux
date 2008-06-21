@@ -565,34 +565,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 void FCEUI_CloseGame(void)
 {	
+	if(!FCEU_IsValidUI(FCEUI_CLOSEGAME)) 
+		return;
 	CloseGame();
-}
-
-//resets or powers off the system, as specified
-//OR, if a movie is playing or recording, possibly reloads the movie according to funny rules.
-void RestartMovieOrReset(unsigned int do_power_off)
-{
-	extern bool movie_readonly;
-	extern char curMovieFilename[512];
-
-	if(FCEUMOV_Mode(MOVIEMODE_PLAY) || FCEUMOV_Mode(MOVIEMODE_RECORD) && movie_readonly)
-	{
-		FCEUI_LoadMovie(curMovieFilename, movie_readonly, 0);
-
-		if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
-		{
-			return;
-		}
-	}
-
-	if(do_power_off)
-	{
-		FCEUI_PowerNES();
-	}
-	else
-	{
-		FCEUI_ResetNES();
-	}
 }
 
 void ResetNES(void)
@@ -863,20 +838,39 @@ bool FCEU_IsValidUI(EFCEUI ui)
 {
 	switch(ui)
 	{
+	case FCEUI_OPENGAME:
+	case FCEUI_CLOSEGAME:
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
+		break;
+
 	case FCEUI_RECORDMOVIE:
 	case FCEUI_PLAYMOVIE:
-		if(!GameInfo) return false;
-		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
-		break;
-	case FCEUI_STOPMOVIE:
-		return FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD);
-	case FCEUI_STOPAVI:
-		return FCEUI_AviIsRecording();
 	case FCEUI_SAVESTATE:
 	case FCEUI_LOADSTATE:
+		if(!GameInfo) return false;
 		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
+		break;
+
+	case FCEUI_STOPMOVIE:
+		return FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD);
+
+	case FCEUI_STOPAVI:
+		return FCEUI_AviIsRecording();
+
+	case FCEUI_TASEDIT:
 		if(!GameInfo) return false;
 		break;
+
+	case FCEUI_RESET:
+		if(!GameInfo) return false;
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT|MOVIEMODE_PLAY)) return false;
+		break;
+		
+	case FCEUI_POWER:
+		if(!GameInfo) return false;
+		if(!FCEUMOV_Mode(MOVIEMODE_INACTIVE)) return false;
+		break;
+
 	}
 	return true;
 }

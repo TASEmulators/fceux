@@ -28,11 +28,8 @@ int CloseWave()
  return(FCEUI_EndWaveRecord());
 }
 
-/**
-* Shows a Open File dialog and starts logging sound.
-* 
-* @return Flag that indicates failure (0) or success (1).
-**/
+/// Shows a Open File dialog and starts logging sound.
+/// @return Flag that indicates failure (0) or success (1).
 bool CreateSoundSave()
 {
 	const char filter[]="MS WAVE(*.wav)\0*.wav\0";

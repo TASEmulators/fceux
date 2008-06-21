@@ -63,7 +63,7 @@ fstream* osRecordingMovie = 0;
 
 int currFrameCounter;
 uint32 cur_input_display = 0;
-int pauseframe;
+int pauseframe = -1;
 bool movie_readonly = true;
 int input_display = 0;
 int frame_display = 0;
@@ -283,8 +283,6 @@ MovieData::MovieData()
 	: version(MOVIE_VERSION)
 	, emuVersion(FCEU_VERSION_NUMERIC)
 	, palFlag(false)
-	, poweronFlag(false)
-	, resetFlag(false)
 	, binaryFlag(false)
 	, recordCount(1)
 	, greenZoneCount(0)
@@ -308,10 +306,6 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,recordCount);
 	else if(key == "palFlag")
 		installBool(val,palFlag);
-	else if(key == "poweronFlag")
-		installBool(val,poweronFlag);
-	else if(key == "resetFlag")
-		installBool(val,resetFlag);
 	else if(key == "romFilename")
 		romFilename = val;
 	else if(key == "romChecksum")
@@ -346,8 +340,6 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "emuVersion " << emuVersion << endl;
 	*os << "recordCount " << recordCount << endl;
 	*os << "palFlag " << (palFlag?1:0) << endl;
-	*os << "poweronFlag " << (poweronFlag?1:0) << endl;
-	*os << "resetFlag " << (resetFlag?1:0) << endl;
 	*os << "romFilename " << romFilename << endl;
 	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
 	*os << "guid " << guid.toString() << endl;
@@ -599,7 +591,6 @@ void FCEUMOV_EnterTasEdit()
 	currMovieData = MovieData();
 	currMovieData.guid.newGuid();
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
-	currMovieData.poweronFlag = true;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
 
@@ -608,6 +599,8 @@ void FCEUMOV_EnterTasEdit()
 
 	//todo - think about this
 	//ResetInputTypes();
+	//todo - maybe this instead
+	//FCEUD_SetInput(currMovieData.fourscore,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
 
 	//pause the emulator
 	FCEUI_SetEmulationPaused(1);
@@ -638,9 +631,9 @@ void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 }
 
 //begin playing an existing movie
-void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
+void FCEUI_LoadMovie(char *fname, bool _read_only, bool tasedit, int _pauseframe)
 {
-	if(!FCEU_IsValidUI(FCEUI_PLAYMOVIE))
+	if(!tasedit && !FCEU_IsValidUI(FCEUI_PLAYMOVIE))
 		return;
 
 	assert(fname);
@@ -667,18 +660,12 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 		poweron(true);
 	}
 
-	//todo - if reset flag is set, will the poweron flag be set?
 	//WE NEED TO LOAD A SAVESTATE
-	if(!currMovieData.poweronFlag)
+	if(currMovieData.savestate.size() != 0)
 	{
-		//and load the state
 		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
 		if(!success) return;
 	}
-
-	//TODO - handle reset flag
-	//ResetNES();
-
 
 	//if there is no savestate, we won't have this crucial piece of information at the start of the movie.
 	//so, we have to include it with the movie
@@ -691,17 +678,25 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, int _pauseframe)
 	FCEUD_SetInput(currMovieData.fourscore,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
 
 	//stuff that should only happen when we're ready to positively commit to the replay
-	currFrameCounter = 0;
-	pauseframe = _pauseframe;
-	movie_readonly = _read_only;
-	movieMode = MOVIEMODE_PLAY;
+	if(tasedit)
+	{
+		currFrameCounter = 0;
+		pauseframe = _pauseframe;
 
-	currMovieData.TryDumpIncremental();
-
-	if(movie_readonly)
-		FCEU_DispMessage("Replay started Read-Only.");
+		currMovieData.TryDumpIncremental();
+	}
 	else
-		FCEU_DispMessage("Replay started Read+Write.");
+	{
+		currFrameCounter = 0;
+		pauseframe = _pauseframe;
+		movie_readonly = _read_only;
+		movieMode = MOVIEMODE_PLAY;
+
+		if(movie_readonly)
+			FCEU_DispMessage("Replay started Read-Only.");
+		else
+			FCEU_DispMessage("Replay started Read+Write.");
+	}
 }
 
 static void closeRecordingMovie()
@@ -715,10 +710,6 @@ static void closeRecordingMovie()
 
 static void openRecordingMovie(const char* fname)
 {
-	//fpRecordingMovie = FCEUD_UTF8fopen(fname, "wb");
-	//if(!fpRecordingMovie)
-	//	FCEU_PrintError("Error opening movie output file: %s",fname);
-	
 	osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
 	if(!osRecordingMovie)
 		FCEU_PrintError("Error opening movie output file: %s",fname);
@@ -727,7 +718,8 @@ static void openRecordingMovie(const char* fname)
 
 
 //begin recording a new movie
-void FCEUI_SaveMovie(char *fname, uint8 flags)
+//TODO - BUG - the record-from-another-savestate doesnt work.
+void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags)
 {
 	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
 		return;
@@ -744,8 +736,6 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	currMovieData.guid.newGuid();
 
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
-	currMovieData.poweronFlag = (flags & MOVIE_FLAG_FROM_POWERON)!=0;
-	currMovieData.resetFlag = (flags & MOVIE_FLAG_FROM_RESET)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
 	currMovieData.fourscore = FCEUI_GetInputFourscore();
@@ -753,7 +743,7 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 	currMovieData.ports[1] = joyports[1].type;
 	currMovieData.ports[2] = portFC.type;
 
-	if(currMovieData.poweronFlag)
+	if(flags & MOVIE_FLAG_FROM_POWERON)
 	{
 		poweron(true);
 	}
@@ -764,16 +754,6 @@ void FCEUI_SaveMovie(char *fname, uint8 flags)
 
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
 	currMovieData.dump(osRecordingMovie, false);
-
-	//todo - think about this
-	//ResetInputTypes();
-
-	//todo - think about this
-	// trigger a reset
-	if(flags & MOVIE_FLAG_FROM_RESET)
-	{
-		ResetNES();	// NOTE:  this will write an FCEUNPCMD_RESET into the movie file
-	}
 
 	movieMode = MOVIEMODE_RECORD;
 	movie_readonly = false;
@@ -790,7 +770,7 @@ void FCEUMOV_AddInputState()
 	//(input recording is just like standard read+write movie recording with input taken from gamepad)
 	//otherwise, it will come from the tasedit data.
 
-	if(movieMode == MOVIEMODE_PLAY)
+	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_TASEDIT)
 	{
 		//stop when we run out of frames
 		if(currFrameCounter == currMovieData.records.size())
@@ -976,16 +956,6 @@ bool FCEUMOV_PostLoad(void)
 		return load_successful;
 }
 
-//int FCEUI_IsMovieActive(void)
-//{
-//	//this is a lame method. we should change all the fceu code that uses it to call the 
-//	//IsRecording or IsPlaying methods
-//	//return > 0 for recording, < 0 for playback
-//	if(FCEUMOV_IsRecording()) return 1;
-//	else if(FCEUMOV_IsPlaying()) return -1;
-//	else return 0;
-//}
-
 void FCEUI_MovieToggleFrameDisplay(void)
 {
 	frame_display=!frame_display;
@@ -1030,7 +1000,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 	if (movieMode != MOVIEMODE_INACTIVE)
 	{
 		char *fname = strdup(curMovieFilename);
-		FCEUI_LoadMovie(fname, true, 0);
+		FCEUI_LoadMovie(fname, true, false, 0);
 		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.");
 		free(fname);
 	}
@@ -1047,10 +1017,8 @@ bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFra
 	LoadFM2(md, fp, INT_MAX, skipFrameCount);
 	delete fp;
 	
-
 	info->movie_version = md.version;
-	info->poweron = md.poweronFlag;
-	info->reset = md.resetFlag;
+	info->poweron = md.savestate.size()==0;
 	info->pal = md.palFlag;
 	info->nosynchack = true;
 	info->num_frames = md.records.size();
@@ -1062,6 +1030,18 @@ bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFra
 
 	return true;
 }
+
+
+
+//int FCEUI_IsMovieActive(void)
+//{
+//	//this is a lame method. we should change all the fceu code that uses it to call the 
+//	//IsRecording or IsPlaying methods
+//	//return > 0 for recording, < 0 for playback
+//	if(FCEUMOV_IsRecording()) return 1;
+//	else if(FCEUMOV_IsPlaying()) return -1;
+//	else return 0;
+//}
 
 
 //struct MovieHeader

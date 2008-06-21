@@ -340,15 +340,6 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
 		if(!FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 		{
-			//more stable? but we dont think the other one is unstable
-			//memorystream mstemp;
-			//int size = FCEUMOV_WriteState(&mstemp);
-			//mstemp.sync();
-			//os->put(7);
-			//write32le(size, os);
-			//os->write(mstemp.buf(),mstemp.size());
-			//totalsize += 5+size;
-
 			os->seekp(5,std::ios::cur);
 			int size = FCEUMOV_WriteState(os);
 			os->seekp(-(size+5),std::ios::cur);

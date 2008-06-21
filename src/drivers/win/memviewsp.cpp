@@ -28,14 +28,9 @@
 HexBookmark hexBookmarks[64];
 int nextBookmark = 0;
 
-/**
-* Finds the bookmark for a given address
-*
-* @param address The address to find.
-* @return The index of the bookmark at that address or -1 if there's no bookmark at that address.
-**/
-
-
+/// Finds the bookmark for a given address
+/// @param address The address to find.
+/// @return The index of the bookmark at that address or -1 if there's no bookmark at that address.
 int findBookmark(unsigned int address)
 {
 	int i;
@@ -59,9 +54,7 @@ char bookmarkDescription[51] = {0};
 
 BOOL CenterWindow(HWND hwndDlg);
 
-/**
-* Callback function for the name bookmark dialog
-**/
+/// Callback function for the name bookmark dialog
 BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -97,13 +90,10 @@ BOOL CALLBACK nameBookmarkCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 	return FALSE;
 }
 
-/**
-* Attempts to add a new bookmark to the bookmark list.
-*
-* @param hwnd HWND of the FCEU window
-* @param address Address of the new bookmark
-* @return Returns 0 if everything's OK and an error flag otherwise.
-**/
+/// Attempts to add a new bookmark to the bookmark list.
+/// @param hwnd HWND of the FCEU window
+/// @param address Address of the new bookmark
+/// @return Returns 0 if everything's OK and an error flag otherwise.
 int addBookmark(HWND hwnd, unsigned int address)
 {
 	// Enforce a maximum of 64 bookmarks
@@ -128,18 +118,14 @@ int addBookmark(HWND hwnd, unsigned int address)
 	}
 }
 
-/**
-* Removes a bookmark from the bookmark list
-*
-* @param index Index of the bookmark to remove
-**/
+/// Removes a bookmark from the bookmark list
+/// @param index Index of the bookmark to remove
 void removeBookmark(unsigned int index)
 {
 	// TODO: Range checking
 	
 	// At this point it's necessary to move the content of the bookmark list
-	unsigned int i;
-	for (i=index;i<nextBookmark - 1;i++)
+	for (int i=index;i<nextBookmark - 1;i++)
 	{
 		hexBookmarks[i] = hexBookmarks[i+1];
 	}
@@ -147,13 +133,10 @@ void removeBookmark(unsigned int index)
 	--nextBookmark;
 }
 
-/**
-* Adds or removes a bookmark from a given address
-*
-* @param hwnd HWND of the emu window
-* @param address Address of the bookmark
-**/
-int toggleBookmark(HWND hwnd, unsigned int address)
+/// Adds or removes a bookmark from a given address
+/// @param hwnd HWND of the emu window
+/// @param address Address of the bookmark
+int toggleBookmark(HWND hwnd, uint32 address)
 {
 	int val = findBookmark(address);
 	
@@ -169,11 +152,8 @@ int toggleBookmark(HWND hwnd, unsigned int address)
 	}
 }
 
-/**
-* Updates the bookmark menu in the hex window
-*
-* @param menu Handle of the bookmark menu
-**/
+/// Updates the bookmark menu in the hex window
+/// @param menu Handle of the bookmark menu
 void updateBookmarkMenus(HMENU menu)
 {
 	int i;
@@ -203,13 +183,10 @@ void updateBookmarkMenus(HMENU menu)
 	}
 }
 
-/**
-* Returns the address to scroll to if a given bookmark was activated
-*
-* @param bookmark Index of the bookmark
-* @return The address to scroll to or -1 if the bookmark index is invalid.
-**/
-int handleBookmarkMenu(unsigned int bookmark)
+/// Returns the address to scroll to if a given bookmark was activated
+/// @param bookmark Index of the bookmark
+/// @return The address to scroll to or -1 if the bookmark index is invalid.
+int handleBookmarkMenu(int bookmark)
 {
 	if (bookmark < nextBookmark)
 	{
@@ -219,16 +196,11 @@ int handleBookmarkMenu(unsigned int bookmark)
 	return -1;
 }
 
-/**
-* Removes all bookmarks
-*
-* @param menu Handle of the bookmark menu
-**/
+/// Removes all bookmarks
+/// @param menu Handle of the bookmark menu
 void removeAllBookmarks(HMENU menu)
 {
-	unsigned int i;
-	
-	for (i = 0;i<nextBookmark;i++)
+	for (int i = 0;i<nextBookmark;i++)
 	{
 		RemoveMenu(menu, ID_FIRST_BOOKMARK + i, MF_BYCOMMAND);
 	}

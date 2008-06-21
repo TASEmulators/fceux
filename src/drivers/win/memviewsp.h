@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "types.h"
+
 #define ID_FIRST_BOOKMARK               30
 
 typedef struct
@@ -29,8 +31,8 @@ typedef struct
 extern HexBookmark hexBookmarks[64];
 extern int nextBookmark;
 
-int toggleBookmark(HWND hwnd, unsigned int address);
+int toggleBookmark(HWND hwnd, uint32 address);
 void updateBookmarkMenus(HMENU menu);
-int handleBookmarkMenu(unsigned int bookmark);
+int handleBookmarkMenu(int bookmark);
 void removeAllBookmarks(HMENU menu);
 

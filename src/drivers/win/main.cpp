@@ -685,7 +685,7 @@ int main(int argc,char *argv[])
 
 	if(GameInfo && MovieToLoad)
 	{
-		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting!=0, replayStopFrameSetting!=0);
+		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting!=0, false, replayStopFrameSetting!=0);
 		free(MovieToLoad);
 		MovieToLoad = NULL;
 	}

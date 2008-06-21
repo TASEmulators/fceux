@@ -580,12 +580,16 @@ void FCEUI_VSUniCoin(void)
 //Resets the NES
 void FCEUI_ResetNES(void)
 {
+	if(!FCEU_IsValidUI(FCEUI_RESET))
+		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
 }
 
 //Powers off the NES
 void FCEUI_PowerNES(void)
 {
+	if(!FCEU_IsValidUI(FCEUI_POWER))
+		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_POWER);
 }
 

@@ -5,8 +5,8 @@ void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset);
 
 void ApplyPatch(int addr,int size, uint8* data);
 void UndoLastPatch();
-int GetFileData(int offset);
-int WriteFileData(int offset,int data);
+int GetFileData(uint32 offset);
+int WriteFileData(uint32 offset,int data);
 int GetRomFileSize();
 void FlushUndoBuffer();
 

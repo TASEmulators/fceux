@@ -252,6 +252,18 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 	case WM_INITDIALOG:
 		{
+			bool tasedit = lParam?true:false;
+
+			//some of the controls are illogical with tasedit
+			//remove them, and rename the window
+			if(tasedit)
+			{
+				SetWindowText(hwndDlg,"Load TasEdit Movie");
+				ShowWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),SW_HIDE);
+				ShowWindow(GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE),SW_HIDE);
+				ShowWindow(GetDlgItem(hwndDlg,IDC_EDIT_STOPFRAME),SW_HIDE);
+			}
+			
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, replayReadOnlySetting?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
@@ -511,26 +523,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	return FALSE;
 };
 
-/// Show movie replay dialog and replay the movie if necessary.
-void FCEUD_MovieReplayFrom(void)
-{
-	replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
-
-	char* fn = (char*)DialogBox(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc);
-
-	if(fn)
-	{
-		FCEUI_LoadMovie(fn, replayReadOnlySetting, replayStopFrameSetting);
-
-		free(fn);
-
-		pal_emulation = FCEUI_GetCurrentVidSystem(0,0);
-		UpdateCheckedMenuItems();
-		SetMainWindowStuff();
-		RefreshThrottleFPS();
-	}
-}
-
 static void UpdateRecordDialog(HWND hwndDlg)
 {
 	int enable=0;
@@ -720,9 +712,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	return FALSE;
 }
 
-/**
-* Show the record movie dialog and record a movie.
-**/
+//Show the record movie dialog and record a movie.
 void FCEUD_MovieRecordTo()
 {
 	struct CreateMovieParameters p;
@@ -749,7 +739,7 @@ void FCEUD_MovieRecordTo()
 			free(p.szSavestateFilename);
 		}
 
-		uint8 flags = 0;
+		EMOVIE_FLAG flags = MOVIE_FLAG_NONE;
 		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
 		FCEUI_SaveMovie(p.szFilename, flags);
 	}
@@ -758,3 +748,29 @@ void FCEUD_MovieRecordTo()
 		free(p.szFilename);
 }
 
+
+void Replay_LoadMovie(bool tasedit)
+{
+	replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
+
+	char* fn = (char*)DialogBoxParam(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc, (LPARAM)(tasedit?1:0));
+
+	if(fn)
+	{
+		FCEUI_LoadMovie(fn, replayReadOnlySetting, tasedit, replayStopFrameSetting);
+
+		free(fn);
+
+		//mbg 6/21/08 - i think this stuff has to get updated in case the movie changed the pal emulation flag
+		pal_emulation = FCEUI_GetCurrentVidSystem(0,0);
+		UpdateCheckedMenuItems();
+		SetMainWindowStuff();
+		RefreshThrottleFPS();
+	}
+}
+
+/// Show movie replay dialog and replay the movie if necessary.
+void FCEUD_MovieReplayFrom()
+{
+	Replay_LoadMovie(false);
+}

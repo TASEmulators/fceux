@@ -1,31 +1,29 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 2002 Xodnizel
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
-/**
-* File description: Everything relevant for the main window should go here. This
-*                   does not include functions relevant for dialog windows.
-**/
+// File description: Everything relevant for the main window should go here. This
+//                   does not include functions relevant for dialog windows.
 
 #include "window.h"
 #include "main.h"
-#include "state.h"      /* Save/Load state AS */
+#include "state.h"
 
 #include "sound.h"
 #include "wave.h"
@@ -68,7 +66,6 @@ char *md5_asciistr(uint8 digest[16]);
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 
-void RestartMovieOrReset(unsigned int pow);
 int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
 void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
@@ -92,9 +89,7 @@ HWND pwindow;
 int EnableBackgroundInput = 0;
 int ismaximized = 0;
 
-/**
-* Menu handle of the main menu.
-**/
+//Menu handle of the main menu.
 static HMENU fceumenu = 0;
 
 static int tog = 0;
@@ -124,7 +119,7 @@ void CalcWindowSize(RECT *al)
 		GetWindowLong(hAppWnd, GWL_STYLE),
 		GetMenu(hAppWnd) != NULL,
 		GetWindowLong(hAppWnd, GWL_EXSTYLE)
-	);
+		);
 
 	al->right -= al->left;
 	al->left = 0;
@@ -132,11 +127,8 @@ void CalcWindowSize(RECT *al)
 	al->top=0;
 }
 
-/**
-* Updates the menu items that should only be enabled if a game is loaded.
-*
-* @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
-**/
+/// Updates the menu items that should only be enabled if a game is loaded.
+/// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
 void updateGameDependentMenus(unsigned int enable)
 {
 	const int menu_ids[]= {
@@ -163,17 +155,15 @@ void updateGameDependentMenus(unsigned int enable)
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
 	{
 #ifndef _USE_SHARED_MEMORY_
-			if(simpled[x] == MENU_BASIC_BOT)
-				EnableMenuItem(fceumenu,menu_ids[i],MF_BYCOMMAND| MF_GRAYED);
-			else
+		if(simpled[x] == MENU_BASIC_BOT)
+			EnableMenuItem(fceumenu,menu_ids[i],MF_BYCOMMAND| MF_GRAYED);
+		else
 #endif
-				EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED));
+			EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED));
 	}
 }
 
-/**
-* Updates menu items which need to be checked or unchecked.
-**/
+//Updates menu items which need to be checked or unchecked.
 void UpdateCheckedMenuItems()
 {
 	static int *polo[] = { &genie, &pal_emulation, &status_icon };
@@ -212,42 +202,39 @@ void UpdateCheckedMenuItems()
 		MENU_AUTOFIRE_PATTERN_15,
 		0};
 
-	int AutoFireOffsetIDs[] = {
-		MENU_AUTOFIRE_OFFSET_1,
-		MENU_AUTOFIRE_OFFSET_2,
-		MENU_AUTOFIRE_OFFSET_3,
-		MENU_AUTOFIRE_OFFSET_4,
-		MENU_AUTOFIRE_OFFSET_5,
-		MENU_AUTOFIRE_OFFSET_6,
-	0};
+		int AutoFireOffsetIDs[] = {
+			MENU_AUTOFIRE_OFFSET_1,
+			MENU_AUTOFIRE_OFFSET_2,
+			MENU_AUTOFIRE_OFFSET_3,
+			MENU_AUTOFIRE_OFFSET_4,
+			MENU_AUTOFIRE_OFFSET_5,
+			MENU_AUTOFIRE_OFFSET_6,
+			0};
 
-	x = 0;
+			x = 0;
 
-	while(AutoFirePatternIDs[x])
-	{
-		CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
-			AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
-		x++;
-	}
+			while(AutoFirePatternIDs[x])
+			{
+				CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
+					AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
+				x++;
+			}
 
-	x = 0;
+			x = 0;
 
-	while(AutoFireOffsetIDs[x])
-	{
-		CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
-			AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
-		x++;
-	}
+			while(AutoFireOffsetIDs[x])
+			{
+				CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
+					AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
+				x++;
+			}
 }
 
-/**
-* Updates recent files / recent directories menu
-*
-* @param menu Menu handle of the main window's menu
-* @param strs Strings to add to the menu
-* @param mitem Menu ID of the recent files / directory menu
-* @param baseid Menu ID of the first subitem
-**/
+/// Updates recent files / recent directories menu
+/// @param menu Menu handle of the main window's menu
+/// @param strs Strings to add to the menu
+/// @param mitem Menu ID of the recent files / directory menu
+/// @param baseid Menu ID of the first subitem
 void UpdateRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
 	// UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
@@ -305,16 +292,13 @@ void UpdateRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int basei
 	DrawMenuBar(hAppWnd);
 }
 
-/**
-* Helper function to populate the recent directories and recent files arrays.
-*
-* @param addString String to add to the array.
-* @param bufferArray Array where the string will be added.
-* @param arrayLen Length of the bufferArray.
-* @param menu Menu handle of the main menu.
-* @param menuItem
-* @param baseID
-**/
+/// Helper function to populate the recent directories and recent files arrays.
+/// @param addString String to add to the array.
+/// @param bufferArray Array where the string will be added.
+/// @param arrayLen Length of the bufferArray.
+/// @param menu Menu handle of the main menu.
+/// @param menuItem
+/// @param baseID
 void UpdateRecentArray(const char* addString, char** bufferArray, unsigned int arrayLen, HMENU menu, unsigned int menuItem, unsigned int baseId)
 {
 	// Try to find out if the filename is already in the recent files list.
@@ -332,7 +316,7 @@ void UpdateRecentArray(const char* addString, char** bufferArray, unsigned int a
 
 				// Save pointer.
 				tmp = bufferArray[x];
-				
+
 				for(y = x; y; y--)
 				{
 					// Move items down.
@@ -373,21 +357,15 @@ void UpdateRecentArray(const char* addString, char** bufferArray, unsigned int a
 	UpdateRMenu(menu, bufferArray, menuItem, baseId);
 }
 
-/**
-* Add a filename to the recent files list.
-*
-* @param filename Name of the file to add.
-**/
+/// Add a filename to the recent files list.
+/// @param filename Name of the file to add.
 void AddRecentFile(const char *filename)
 {
 	UpdateRecentArray(filename, recent_files, MAX_NUMBER_OF_RECENT_FILES, recentmenu, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 }
 
-/**
-* Hides the main menu.
-* 
-* @param hide_menu Flag to turn the main menu on (0) or off (1) 
-**/
+/// Hides the main menu.
+///@param hide_menu Flag to turn the main menu on (0) or off (1) 
 void HideMenu(unsigned int hide_menu)
 {
 	if(hide_menu)
@@ -427,9 +405,7 @@ void HideFWindow(int h)
 	SetWindowPos(hAppWnd, 0 ,0 ,0 ,0 ,0 ,SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOREPOSITION | SWP_NOSIZE | SWP_NOZORDER);
 }
 
-/**
-* Toggles the display status of the main menu.
-**/
+//Toggles the display status of the main menu.
 void ToggleHideMenu(void)
 { 
 	if(!fullscreen && (GameInfo || tog))
@@ -440,11 +416,8 @@ void ToggleHideMenu(void)
 	}
 }
 
-/**
-* Toggles the display status of the main menu.
-*
-* TODO: We could get rid of this one.
-**/
+//Toggles the display status of the main menu.
+//TODO: We could get rid of this one.
 void FCEUD_HideMenuToggle(void)
 {
 	ToggleHideMenu();
@@ -480,12 +453,9 @@ void ALoad(char *nameo)
 	updateGameDependentMenus(GameInfo != 0);
 }
 
-/**
-* Shows an Open File dialog and opens the ROM if the user selects a ROM file.
-*
-* @param hParent Handle of the main window
-* @param initialdir Directory that's pre-selected in the Open File dialog.
-**/
+/// Shows an Open File dialog and opens the ROM if the user selects a ROM file.
+/// @param hParent Handle of the main window
+/// @param initialdir Directory that's pre-selected in the Open File dialog.
 void LoadNewGamey(HWND hParent, const char *initialdir)
 {
 	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
@@ -571,111 +541,109 @@ void GetMouseData(uint32 (&md)[3])
 	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
 }
 
-/**
-* Message loop of the main window
-**/
+//Message loop of the main window
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-  switch(msg)
-  {
-	  case WM_LBUTTONDOWN:
-	  case WM_LBUTTONUP:
-	  case WM_RBUTTONDOWN:
-	  case WM_RBUTTONUP:
-		  mouseb=wParam;
-		  goto proco;
+	switch(msg)
+	{
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+		mouseb=wParam;
+		goto proco;
 
-	  case WM_MOVE: {
+	case WM_MOVE: {
 		RECT wrect;
 		GetWindowRect(hWnd,&wrect);
 		MainWindow_wndx = wrect.left;
 		MainWindow_wndy = wrect.top;
-	}
+				  }
 
-	  case WM_MOUSEMOVE:
-		  {
-			  mousex=LOWORD(lParam);
-			  mousey=HIWORD(lParam);
-		  }
-		  goto proco;
+	case WM_MOUSEMOVE:
+		{
+			mousex=LOWORD(lParam);
+			mousey=HIWORD(lParam);
+		}
+		goto proco;
 
-	  case WM_ERASEBKGND:
-		  if(xbsave)
-			  return(0);
-		  else
-			  goto proco;
+	case WM_ERASEBKGND:
+		if(xbsave)
+			return(0);
+		else
+			goto proco;
 
-	  case WM_PAINT:
-		  if(xbsave)
-		  {
-			  PAINTSTRUCT ps;
-			  BeginPaint(hWnd,&ps);
-			  FCEUD_BlitScreen(xbsave);
-			  EndPaint(hWnd,&ps);
-			  return(0);
-		  }
-		  goto proco;
+	case WM_PAINT:
+		if(xbsave)
+		{
+			PAINTSTRUCT ps;
+			BeginPaint(hWnd,&ps);
+			FCEUD_BlitScreen(xbsave);
+			EndPaint(hWnd,&ps);
+			return(0);
+		}
+		goto proco;
 
-    case WM_SIZE:
-                if(!fullscreen && !changerecursive)
-                 switch(wParam)
-                 {
-                  case SIZE_MAXIMIZED: ismaximized = 1;SetMainWindowStuff();break;
-                  case SIZE_RESTORED: ismaximized = 0;SetMainWindowStuff();break;
-                 }
-                 break;
-    case WM_SIZING:
-                 {
-                  RECT *wrect=(RECT *)lParam;
-                  RECT srect;
+	case WM_SIZE:
+		if(!fullscreen && !changerecursive)
+			switch(wParam)
+		{
+			case SIZE_MAXIMIZED: ismaximized = 1;SetMainWindowStuff();break;
+			case SIZE_RESTORED: ismaximized = 0;SetMainWindowStuff();break;
+		}
+		break;
+	case WM_SIZING:
+		{
+			RECT *wrect=(RECT *)lParam;
+			RECT srect;
 
-                  int h=wrect->bottom-wrect->top;
-                  int w=wrect->right-wrect->left;
-                  int how = 0;
+			int h=wrect->bottom-wrect->top;
+			int w=wrect->right-wrect->left;
+			int how = 0;
 
-                  if(wParam == WMSZ_BOTTOM || wParam == WMSZ_TOP)
-                   how = 2;
-                  else if(wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT)
-                   how = 1;
-                  else if(wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT
-                        || wParam == WMSZ_TOPRIGHT || wParam == WMSZ_TOPLEFT)
-                   how = 3;
-                  if(how & 1)
-                   winsizemulx*= (double)w/winwidth;
-                  if(how & 2)
-                   winsizemuly*= (double)h/winheight;
-                  if(how & 1) FixWXY(0);
-                  else FixWXY(1);
+			if(wParam == WMSZ_BOTTOM || wParam == WMSZ_TOP)
+				how = 2;
+			else if(wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT)
+				how = 1;
+			else if(wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT
+				|| wParam == WMSZ_TOPRIGHT || wParam == WMSZ_TOPLEFT)
+				how = 3;
+			if(how & 1)
+				winsizemulx*= (double)w/winwidth;
+			if(how & 2)
+				winsizemuly*= (double)h/winheight;
+			if(how & 1) FixWXY(0);
+			else FixWXY(1);
 
-                  CalcWindowSize(&srect);
-                  winwidth=srect.right;
-                  winheight=srect.bottom;
-                  wrect->right = wrect->left + srect.right;
-                  wrect->bottom = wrect->top + srect.bottom;
-                 }
-                 //sizchange=1;
-                 //break;
-                 goto proco;
-    case WM_DISPLAYCHANGE:
-                if(!fullscreen && !changerecursive)
-                 vchanged=1;
-                goto proco;
-    case WM_DROPFILES:
-                {
-                 UINT len;
-                 char *ftmp;
+			CalcWindowSize(&srect);
+			winwidth=srect.right;
+			winheight=srect.bottom;
+			wrect->right = wrect->left + srect.right;
+			wrect->bottom = wrect->top + srect.bottom;
+		}
+		//sizchange=1;
+		//break;
+		goto proco;
+	case WM_DISPLAYCHANGE:
+		if(!fullscreen && !changerecursive)
+			vchanged=1;
+		goto proco;
+	case WM_DROPFILES:
+		{
+			UINT len;
+			char *ftmp;
 
-                 len=DragQueryFile((HDROP)wParam,0,0,0)+1; //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
-                 if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
-                 {
-                  DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
-                  ALoad(ftmp);
-                  free(ftmp);
-                 }                 
-                }
-                break;
+			len=DragQueryFile((HDROP)wParam,0,0,0)+1; //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
+			if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
+			{
+				DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
+				ALoad(ftmp);
+				free(ftmp);
+			}                 
+		}
+		break;
 
-    case WM_COMMAND:
+	case WM_COMMAND:
 
 		if(HIWORD(wParam) == 0 || HIWORD(wParam) == 1)
 		{
@@ -911,7 +879,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_BASIC_BOT:
 				CreateBasicBot();
 				break;
-			
+
 			case MENU_DIRECTORIES:
 				// Directories menu was selected
 				ConfigDirectories();
@@ -959,12 +927,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_RESET:
 				// The reset menu was selected
-				RestartMovieOrReset(0);
+				FCEUI_ResetNES();
 				break;
 
 			case MENU_POWER:
 				// The power menu was selected
-				RestartMovieOrReset(1);
+				FCEUI_PowerNES();
 				break;
 
 			case MENU_SWITCH_DISK:
@@ -992,7 +960,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// User selected the Open File menu => Show the file selection dialog
 				LoadNewGamey(hWnd, 0);
 				break;
-			
+
 			case ACCEL_CTRL_W:
 			case MENU_CLOSE_FILE:
 				// User selected the Close File menu => Close the game if necessary
@@ -1013,8 +981,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_LoadStateFrom();
 				break;
 
-			//mbg merge 7/18/06 changed ID from 120
-			//jeb rewrite 6/3/08 (for UI consistency)
+				//mbg merge 7/18/06 changed ID from 120
+				//jeb rewrite 6/3/08 (for UI consistency)
 			case MENU_RECORD_WAV: 
 				loggingSound = CreateSoundSave();
 				break;
@@ -1073,84 +1041,79 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		break;
 
 
-    case WM_SYSCOMMAND:
-               if(GameInfo && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
-                return(0);
+	case WM_SYSCOMMAND:
+		if(GameInfo && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
+			return(0);
 
-               if(wParam==SC_KEYMENU)
-               {
-                if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
-                 break;
-                if(lParam == VK_RETURN || fullscreen || tog) break;
-               }
-               goto proco;
-    case WM_SYSKEYDOWN:
-               if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
-                break; /* Hopefully this won't break DInput... */
-
-                if(fullscreen || tog)
-                {
-                 if(wParam==VK_MENU)
-                  break;
-                }
-                if(wParam==VK_F10)
-                {
-					return 0;
-				/*
-                 if(!moocow) FCEUD_PrintError("Iyee");
-                 if(!(lParam&0x40000000))
-                  FCEUI_ResetNES();
-                 break;
-				*/
-                }
-
-                if(wParam == VK_RETURN)
+		if(wParam==SC_KEYMENU)
 		{
-                 if(!(lParam&(1<<30)))
-                 {
-                  UpdateCheckedMenuItems();
-                  changerecursive=1;
-                  if(!SetVideoMode(fullscreen^1))
-                   SetVideoMode(fullscreen);
-                  changerecursive=0;
-                 }
-                 break;
+			if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
+				break;
+			if(lParam == VK_RETURN || fullscreen || tog) break;
 		}
-                goto proco;
+		goto proco;
+	case WM_SYSKEYDOWN:
+		if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
+			break; // Hopefully this won't break DInput...
 
-    case WM_KEYDOWN:
-              if(GameInfo)
-	      {
-	       /* Only disable command keys if a game is loaded(and the other
-		  conditions are right, of course). */
-               if(InputType[2]==SIFC_FKB)
-	       {
-		if(wParam==VK_SCROLL)
+		if(fullscreen || tog)
 		{
- 		 cidisabled^=1;
-		 FCEUI_DispMessage("Family Keyboard %sabled.",cidisabled?"en":"dis");
+			if(wParam==VK_MENU)
+				break;
 		}
-		if(cidisabled)
-                 break; /* Hopefully this won't break DInput... */
-	       }
-	      }
-                goto proco;
-    case WM_CLOSE:
-    case WM_DESTROY:
-    case WM_QUIT:
+
+		if(wParam == VK_RETURN)
+		{
+			if(!(lParam&(1<<30)))
+			{
+				UpdateCheckedMenuItems();
+				changerecursive=1;
+				if(!SetVideoMode(fullscreen^1))
+					SetVideoMode(fullscreen);
+				changerecursive=0;
+			}
+			break;
+		}
+		goto proco;
+
+	case WM_KEYDOWN:
+		if(GameInfo)
+		{
+			//Only disable command keys if a game is loaded(and the other conditions are right, of course).
+			if(InputType[2]==SIFC_FKB)
+			{
+				if(wParam==VK_SCROLL)
+				{
+					cidisabled^=1;
+					FCEUI_DispMessage("Family Keyboard %sabled.",cidisabled?"en":"dis");
+				}
+				if(cidisabled)
+					break; // Hopefully this won't break DInput...
+			}
+		}
+		goto proco;
+	case WM_CLOSE:
+	case WM_DESTROY:
+	case WM_QUIT:
 		DoFCEUExit();
 		break;
-    case WM_ACTIVATEAPP:       
-       if((BOOL)wParam)
-       {
-        nofocus=0;
-       }
-       else
-       {
-        nofocus=1;
-       }
-       goto proco;
-    case WM_ENTERMENULOOP:
+	case WM_ACTIVATEAPP:       
+		if((BOOL)wParam)
+		{
+			nofocus=0;
+		}
+		else
+		{
+			nofocus=1;
+		}
+		goto proco;
+	case WM_ENTERMENULOOP:
+		EnableMenuItem(fceumenu,MENU_RESET,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RESET)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_OPEN_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
@@ -1158,11 +1121,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
-    default:
-      proco:
-      return DefWindowProc(hWnd,msg,wParam,lParam);
-   }
-  return 0;
+	default:
+proco:
+		return DefWindowProc(hWnd,msg,wParam,lParam);
+	}
+	return 0;
 }
 
 void FixWXY(int pref)
@@ -1255,9 +1218,8 @@ void UpdateFCEUWindow(void)
 	}
 }
 
-/**
-* Destroys the main window
-**/
+
+//Destroys the main window
 void ByebyeWindow()
 {
 	SetMenu(hAppWnd, 0);
@@ -1265,11 +1227,8 @@ void ByebyeWindow()
 	DestroyWindow(hAppWnd);
 }
 
-/**
-* Creates the main window.
-* 
-* @return Flag that indicates failure (0) or success (1)
-**/
+/// reates the main window.
+/// @return Flag that indicates failure (0) or success (1)
 int CreateMainWindow()
 {
 	WNDCLASSEX winclass;
@@ -1371,7 +1330,7 @@ void SetMainWindowStuff()
 			srect.right,
 			srect.bottom,
 			SWP_SHOWWINDOW
-		);
+			);
 
 		winwidth = srect.right;
 		winheight = srect.bottom;
@@ -1380,9 +1339,7 @@ void SetMainWindowStuff()
 	}
 }
 
-/**
-* @return Flag that indicates failure (0) or success (1).
-**/
+/// @return Flag that indicates failure (0) or success (1).
 int GetClientAbsRect(LPRECT lpRect)
 {
 	POINT point;
@@ -1411,11 +1368,7 @@ int GetClientAbsRect(LPRECT lpRect)
 	return 1;
 }
 
-/**
-* Shows an Open File menu and starts recording an AVI
-* 
-* TODO: Does this even work?
-**/
+//Shows an Open File menu and starts recording an AVI
 void FCEUD_AviRecordTo(void)
 {
 	OPENFILENAME ofn;
@@ -1428,7 +1381,7 @@ void FCEUD_AviRecordTo(void)
 		extern char curMovieFilename[];
 		strcpy(szChoice, curMovieFilename);
 		char* dot = strrchr(szChoice,'.');
-		
+
 		if (dot)
 		{
 			*dot='\0';
@@ -1460,9 +1413,7 @@ void FCEUD_AviRecordTo(void)
 	}
 }
 
-/**
-* Stop AVI recording
-**/
+//Stop AVI recording
 void FCEUD_AviStop(void)
 {
 	FCEUI_AviEnd();
@@ -1470,7 +1421,6 @@ void FCEUD_AviStop(void)
 
 void FCEUD_CmdOpen(void)
 {
-	
 	LoadNewGamey(hAppWnd, 0);
 }
 

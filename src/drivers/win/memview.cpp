@@ -84,7 +84,7 @@ popupmenu[] =
 int LoadTableFile();
 void UnloadTableFile();
 void InputData(char *input);
-int GetMemViewData(int i);
+int GetMemViewData(uint32 i);
 void UpdateCaption();
 int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data); //mbg merge 6/29/06 - added arg
 int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type); //mbg merge 6/29/06 - added arg
@@ -168,8 +168,8 @@ void ApplyPatch(int addr,int size, uint8* data){
 	tmp->last=undo_list;
 
 	for(i = 0;i < size;i++){
-		tmp->data[i] = GetFileData(addr+i);
-		WriteFileData(addr+i,data[i]);
+		tmp->data[i] = GetFileData((uint32)addr+i);
+		WriteFileData((uint32)addr+i,data[i]);
 	}
 
 	undo_list=tmp;
@@ -185,7 +185,7 @@ void UndoLastPatch(){
 	//while(tmp->next != 0){tmp=tmp->next;}; //traverse to the one before the last one
 
 	for(i = 0;i < tmp->size;i++){
-		WriteFileData(tmp->addr+i,tmp->data[i]);
+		WriteFileData((uint32)tmp->addr+i,tmp->data[i]);
 	}
 
 	undo_list=undo_list->last;
@@ -197,7 +197,7 @@ void UndoLastPatch(){
 	return;
 }
 
-void FlushUndoBuffer(){
+static void FlushUndoBuffer(){
 	struct UNDOSTRUCT *tmp;
 	while(undo_list!= 0){
 		tmp=undo_list;
@@ -210,14 +210,14 @@ void FlushUndoBuffer(){
 }
 
 
-int GetFileData(int offset){
+static int GetFileData(uint32 offset){
 	if(offset < 16) return *((unsigned char *)&head+offset);
 	if(offset < 16+PRGsize[0])return PRGptr[0][offset-16];
 	if(offset < 16+PRGsize[0]+CHRsize[0])return CHRptr[0][offset-16-PRGsize[0]];
 	return -1;
 }
 
-int WriteFileData(int addr,int data){
+static int WriteFileData(uint32 addr,int data){
 	if (addr < 16)MessageBox(hMemView,"Sorry", "Go bug bbit if you really want to edit the header.", MB_OK);
 	if((addr >= 16) && (addr < PRGsize[0]+16)) *(uint8 *)(GetNesPRGPointer(addr-16)) = data;
 	if((addr >= PRGsize[0]+16) && (addr < CHRsize[0]+PRGsize[0]+16)) *(uint8 *)(GetNesCHRPointer(addr-16-PRGsize[0])) = data;
@@ -225,7 +225,7 @@ int WriteFileData(int addr,int data){
 	return 0;
 }
 
-int GetRomFileSize(){ //todo: fix or remove this?
+static int GetRomFileSize(){ //todo: fix or remove this?
 	return 0;
 }
 
@@ -446,7 +446,7 @@ void UpdateCaption(){
 	return;
 }
 
-int GetMemViewData(int i){
+int GetMemViewData(uint32 i){
 	if(EditingMode == 0)return GetMem(i);
 	if(EditingMode == 1){
 		i &= 0x3FFF;
@@ -484,7 +484,7 @@ void UpdateColorTable(){
 
 	for (j=0;j<nextBookmark;j++)
 	{
-		if((hexBookmarks[j].address >= CurOffset) && (hexBookmarks[j].address < CurOffset+DataAmount))
+		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
 			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0);
 	}
 
@@ -493,7 +493,7 @@ void UpdateColorTable(){
 	if(EditingMode == 2){
 		if(cdloggerdata) {
 			for(i = 0;i < DataAmount;i++){
-				if((CurOffset+i >= 16) && (CurOffset+i < 16+PRGsize[0])) {
+				if(((uint32)CurOffset+i >= 16) && ((uint32)CurOffset+i < 16+PRGsize[0])) {
 					if((cdloggerdata[i+CurOffset-16]&3) == 3)TextColorList[i]=RGB(0,192,0);
 					if((cdloggerdata[i+CurOffset-16]&3) == 1)TextColorList[i]=RGB(192,192,0);
 					if((cdloggerdata[i+CurOffset-16]&3) == 2)TextColorList[i]=RGB(0,0,192);
@@ -518,7 +518,7 @@ void UpdateColorTable(){
 //mbg merge 6/29/06 - added argument
 int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data) {
 
-	if((a >= CurOffset) && (a < CurOffset+DataAmount)){
+	if((a >= (uint32)CurOffset) && (a < (uint32)CurOffset+DataAmount)){
 		if(s)TextColorList[a-CurOffset] = RGB(0,0,255);
 	}
 	return 1;
@@ -789,7 +789,7 @@ void AutoScrollFromCoord(int x,int y)
 		GetScrollInfo(hMemView,SB_VERT,&si);
 		si.nPos += y / 16;
 		if (si.nPos < si.nMin) si.nPos = si.nMin;
-		if ((si.nPos+si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage;
+		if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage;
 		CurOffset = si.nPos*16;
 		SetScrollInfo(hMemView,SB_VERT,&si,TRUE);
 		return;
@@ -802,7 +802,7 @@ void AutoScrollFromCoord(int x,int y)
 		GetScrollInfo(hMemView,SB_VERT,&si);
 		si.nPos -= (ClientHeight-y) / 16;
 		if (si.nPos < si.nMin) si.nPos = si.nMin;
-		if ((si.nPos+si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage;
+		if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage;
 		CurOffset = si.nPos*16;
 		SetScrollInfo(hMemView,SB_VERT,&si,TRUE);
 		return;
@@ -1373,7 +1373,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			if(!EditingText){
 				for(j = 0;j < i;j++){
 					str[0] = 0;
-					sprintf(str,"%02X",GetMemViewData(j+CursorStartAddy));
+					sprintf(str,"%02X",GetMemViewData((uint32)j+CursorStartAddy));
 					strcat(pGlobal,str);
 				}
 			} else {

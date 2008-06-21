@@ -154,42 +154,47 @@ void FCEUD_LoadStateFrom(void);
 //you may also need to maintain your own internal state
 void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp);
 
-//movie was recorded from poweron. the alternative is from a savestate (or from reset)
-#define MOVIE_FLAG_FROM_POWERON (1<<3)
+enum EMOVIE_FLAG
+{
+	MOVIE_FLAG_NONE = 0,
 
-//an ARCHAIC flag which means the movie was recorded from a soft reset.
-//WHY would you do this?? do not create any new movies with this flag
-#define MOVIE_FLAG_FROM_RESET   (1<<1)
+	//an ARCHAIC flag which means the movie was recorded from a soft reset.
+	//WHY would you do this?? do not create any new movies with this flag
+	MOVIE_FLAG_FROM_RESET = (1<<1),
+	
+	MOVIE_FLAG_PAL = (1<<2),
 
-#define MOVIE_FLAG_PAL          (1<<2)
+	//movie was recorded from poweron. the alternative is from a savestate (or from reset)
+	MOVIE_FLAG_FROM_POWERON = (1<<3),
 
-// set in newer version, used for old movie compatibility
-//TODO - only use this flag to print a warning that the sync might be bad
-//so that we can get rid of the sync hack code
-#define MOVIE_FLAG_NOSYNCHACK          (1<<4)
+	// set in newer version, used for old movie compatibility
+	//TODO - only use this flag to print a warning that the sync might be bad
+	//so that we can get rid of the sync hack code
+	MOVIE_FLAG_NOSYNCHACK = (1<<4)
+};
 
 #define MOVIE_MAX_METADATA      512
 
 typedef struct
 {
- int    movie_version;					// version of the movie format in the file
- uint32 num_frames;
- uint32 rerecord_count;
- bool poweron, reset, pal, nosynchack;
- int    read_only;
- uint32 emu_version_used;				// 9813 = 0.98.13
- char*  metadata;						// caller-supplied buffer to store metadata.  can be NULL.
- int    metadata_size;					// size of the buffer pointed to by metadata
- MD5DATA md5_of_rom_used;
- bool md5_of_rom_used_present;		// v1 movies don't have md5 info available
- std::string name_of_rom_used;
+	int movie_version;					// version of the movie format in the file
+	uint32 num_frames;
+	uint32 rerecord_count;
+	bool poweron, pal, nosynchack;
+	bool reset; //mbg 6/21/08 - this flag isnt used anymore.. but maybe one day we can scan it out of the first record in the movie file
+	int read_only;
+	uint32 emu_version_used;				// 9813 = 0.98.13
+	char* metadata;						// caller-supplied buffer to store metadata.  can be NULL.
+	int metadata_size;					// size of the buffer pointed to by metadata
+	MD5DATA md5_of_rom_used;
+	bool md5_of_rom_used_present;		// v1 movies don't have md5 info available
+	std::string name_of_rom_used;
 } MOVIE_INFO;
 
-void FCEUI_SaveMovie(char *fname, uint8 flags);
-void FCEUI_LoadMovie(char *fname, bool read_only, int _stopframe);
+void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags);
+void FCEUI_LoadMovie(char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
-//int FCEUI_IsMovieActive(void);
 bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
@@ -348,7 +353,10 @@ bool FCEUD_PauseAfterPlayback();
 enum EFCEUI
 {
 	FCEUI_STOPAVI, FCEUI_SAVESTATE, FCEUI_LOADSTATE,
-	FCEUI_STOPMOVIE, FCEUI_RECORDMOVIE, FCEUI_PLAYMOVIE
+	FCEUI_STOPMOVIE, FCEUI_RECORDMOVIE, FCEUI_PLAYMOVIE,
+	FCEUI_OPENGAME, FCEUI_CLOSEGAME,
+	FCEUI_TASEDIT,
+	FCEUI_RESET, FCEUI_POWER,
 };
 
 //checks whether an EFCEUI is valid right now

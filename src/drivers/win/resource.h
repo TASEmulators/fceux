@@ -515,6 +515,9 @@
 #define ACCEL_CTRL_N                    40136
 #define ACCEL_CTRL_C                    40138
 #define MENU_HELP                       40140
+#define ID_FILE_OOADFM2                 40141
+#define ID_FILE_OPENFM2                 40142
+#define ID_FILE_SAVEFM2                 40143
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -524,8 +527,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        113
-#define _APS_NEXT_COMMAND_VALUE         40141
+#define _APS_NEXT_RESOURCE_VALUE        114
+#define _APS_NEXT_COMMAND_VALUE         40144
 #define _APS_NEXT_CONTROL_VALUE         1132
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
