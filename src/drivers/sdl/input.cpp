@@ -29,6 +29,7 @@
 #include "../common/cheat.h"
 #include "../../movie.h"
 #include "../../fceu.h"
+#include "../../driver.h"
 
 
 /** GLOBALS **/
@@ -167,9 +168,9 @@ KeyboardCommands()
     // f4 controls rendering
     if(keyonly(F4)) {
         if(is_shift) {
-            FCEUI_SetRenderDisable(-1, 2);
+            FCEUI_SetRenderPlanes(true, false);
         } else {
-            FCEUI_SetRenderDisable(2, -1);
+            FCEUI_SetRenderPlanes(false, true);
         }
     }
 
@@ -209,7 +210,7 @@ KeyboardCommands()
         // f5 to save state, Shift-f5 to save movie
         if(keyonly(F5)) {
             if(is_shift) {
-                FCEUI_SaveMovie(NULL,0);
+                FCEUI_SaveMovie(NULL,MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -219,7 +220,7 @@ KeyboardCommands()
         if(keyonly(F7)) {
             if(is_shift) {
                 //mbg merge 7/23/06 loadmovie takes another arg now
-                FCEUI_LoadMovie(NULL,0,0);
+                FCEUI_LoadMovie(NULL, false, false, false);
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -227,9 +228,11 @@ KeyboardCommands()
     }
 
     // f1 to toggle tile view
+    /*
     if(keyonly(F1)) {
         FCEUI_ToggleTileView();
     }
+    */
 
     // - to decrease speed, = to increase speed
     if(keyonly(MINUS)) {
@@ -1126,6 +1129,7 @@ InputCfg(const std::string &text)
     }
 }
 
+
 /**
  * Specify a FamiCom Expansion device as the 3rd input device.  Takes
  * a text string describing the device.
@@ -1183,6 +1187,7 @@ Input2(char *text)
         }
     }
 }
+
 
 /** GLOBALS **/
 #if 0
