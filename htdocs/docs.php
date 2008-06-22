@@ -5,7 +5,8 @@
 
 <h1 class="center">FCE Ultra General Documentation</h1>
 <p>
-<i>Last updated September 15, 2004</i><br/>
+  <i> History updated Juney 22, 2008</i>
+  <i>Content last updated September 15, 2004</i><br/>
 <i>Valid as of FCE Ultra 0.98.13</i>
 </p>
 
@@ -13,6 +14,7 @@
  <b>Table of Contents:</b>
 </p>
 <ul>
+  
     <li><a href="#intro">Introduction</a>
         <ul>
             <li><a href="#intro-history">History of FCE Ultra</a></li>
@@ -72,14 +74,16 @@
 
  <hr />
 <h2><a id="intro">Introduction</a></h2>
- <p>
-        FCE Ultra is an NTSC and PAL Famicom/NES emulator for various
-        platforms. It is based upon Bero's original FCE source code.  Current   
-        features include good PPU, CPU, pAPU, expansion chip, and joystick 
-        emulation.  Also a feature unique to this emulator(at the current
-        time) is authentic Game Genie emulation.  Save states and snapshot
-        features also have been implemented.  
- </p>
+<p>
+  FCEUX was started in 2006 by zeromus and rheiny (sp) as an attempt to merge various branches
+  of FCE Ultra into a unified emulator.  Additional authors joined the project, including
+  mz, adelikat, nitsujrehtona, maximus, CaH4e3, Sebastian Porst.
+</p>
+<p>
+  FCEUX contains all features and enhancements from FCE, FCE Ultra, FCEU rerecording,
+  FCEUXD, and FCEUXDSP as well as many new mappers from FCEU-mm
+</p>
+
  <p>
  This document has been arranged to keep user interface details and emulation
  details as separate as possible, though this has not been accomplished entirely.
@@ -91,37 +95,106 @@
  "your home directory plus .fceultra".  For all other ports(including DOS and
 MS Windows), the base directory is the directory that the executable is in.
  </p>
- <h3><a id="intro-history">History of FCE Ultra</a></h3>
- <p>
- <i>This section is a work-in-progress.  Some details may be incorrect.</i><br/>
- Bero originally wrote a NES emulator that was referred to as <a href="http://www.geocities.co.jp/Playtown/2004/fce.htm">FCE</a>.
- This name was apparently meant only to serve as a temporary name, but its usage remained.  Xodnizel originally ported it to
- Linux SVGAlib, and made a few improvements.  This code base was abandoned,
- and work began anew, under DOS, with the original FCE source code.  
- At the end of November, 1998, FCE Ultra Beta 1 was released.
- </p>
- <p>
- FCE Ultra remained DOS-only until version 0.18, when it was ported to Linux
- SVGAlib, and released as a staticly-linked executable.  The first MS Windows
- port was released as version 0.25.
- </p>
- <p>
- The source code of 0.40 was released on November 12, 2000.  It retained
- the simple license of FCE for a long time, which stated that " This software is freeware.you can use it non-commercially."
- Almost two years later, in June 2002, 0.80 was released, and FCE Ultra was relicensed under the GNU GPL.
- </p>
- <hr />
- <h2><a id="features">Core Features</a></h2>
- <h3><a id="features-cpu">CPU</a></h3>
- <p>
- All official instructions of the NES' CPU, the 2A03, which is compatible(mostly)
- with the 6502, are emulated.  "Unofficial" instructions are also emulated,
- though probably not as accurately as the more well-defined official instructions.
- </p>
- <hr />
- <h3><a id="features-ppu">PPU</a></h3>
- <p>
-  <ul>
+<hr />
+
+<h2> <a id="intro-history">History of FCE Ultra</a></h2>
+
+<p>
+  Bero originally wrote a NES emulator that was referred to as FCE. 
+  This name was apparently meant only to serve as a temporary name, 
+  but its usage remained. Xodnizel originally ported it to Linux SVGAlib, 
+  and made a few improvements. This code base was abandoned, and work began anew, 
+  under DOS, with the original FCE source code. At the end of November, 1998, 
+  FCE Ultra Beta 1 was released.
+</p>
+<p>
+  FCE Ultra remained DOS-only until version 0.18, when it was ported to Linux SVGAlib, 
+  and released as a statically-linked executable. The first MS Windows port was released as version 0.25.
+</p>
+<p>
+  The source code of 0.40 was released on November 12, 2000. It retained the simple license 
+  of FCE for a long time, which stated that " This software is freeware.  You can use it non-commercially." 
+  Almost two years later, in June 2002, 0.80 was released, and FCE Ultra was re-licensed under the GNU GPL.
+</p>
+<p>
+  It has been tested (and runs) under DOS, Linux SVGAlib, Linux X, Mac OS X, and Windows. A native GUI 
+  is provided for the Windows port, and the other ports use a command-line interface. The SDL port should 
+  run on any modern UNIX-like operating system (such as FreeBSD, Solaris or IRIX) with no code changes. 
+  It has also been ported to the GP2X, PlayStation Portable as PSPFceUltra, the Nintendo GameCube and Pepper Pad.
+</p>
+<p>
+  FCE Ultra was created by Xodnizel. Development appeared to stop and the homepage and forums for the emulator were taken down. 
+  The last version before this was v0.98.13-pre, released in September 2004 as source-only. The last binary release was v0.98.12 in August 2004.
+</p>
+<p>
+  However, it was resurrected again in March of 2006 by Anthony Giorgio and Mark Doliner.
+</p>
+<p>
+  There is also a graphical frontend for FCE Ultra. GFCE Ultra is written in Python and uses the GTK2 user interface library. 
+  Because is it written in Python and with portability in mind, it can be run on any UNIX-like platform and any processor architecture 
+  that is supported by Python.
+</p>
+<h3> FCEU Rerecording</h3>
+  <p>
+    The "rerecording" version of FCE Ultra was implemented to FCE Ultra 0.98.10 with movie
+    recording support.  This was done by blip, and was implemented for the purpose of creating
+    Tool-Assisted Speedruns.
+  </p>
+  <P>
+    The rerecording branch continued with 0.98.12, adding movie support features, such as "bullet proof"
+    recording.  In 2006, FCEU 0.98.16 was implemented by nitsuja and luke.  Various tools such as read-only toggling,
+    increased hotkey mapping, and memory watch were added.
+  </P>
+  <p>
+    In 2008, FCEU rerecording was picked up again by mz, maximus, adelikat, and nitsujrehtona with various updates
+    named FCEU.0.98.17 - 0.98.28
+  </p>
+<h3>FCEUD/FCEUXD/FCEUXDSP</h3>
+  <p>
+    FCEUD
+  </p>
+  <p>
+    In 2002, Parasyte modified the then-current version (0.81.3) of FCE Ultra and added a Nesten-style
+    debugger, along with several other features, and named it "FCEUD" (FCE Ultra Debugger).
+  </p>
+  <p>
+    FCEUXD
+  </p>
+  <p>
+    In January 2004, bbitmaster began working on more features and called it "FCEUXD" (FCE Ultra Extended Debugger).
+    It is a branch of FCE Ultra that contains many extended debugging features compared to the original FCE Ultra code such as a trace logger, a built-in hex editor, a name table viewer, code/data logger, inline assembler, and Game Genie decoder/encoder in addition to the debugger and PPU viewer from FCEUD.
+    The last version made was FCEUXD 1.0a
+  </p>
+  <p>
+    <h3> FCEUXDSP stands for FCEUXD "SP" version and is a branch of FCEUXD 1.0a </h3>
+  </p>
+  <p>
+    It was created in 2006 by sp.  The project extends the debugging tools even further compared to
+    FCEUXD by adding new tools, functions, and usability of debugging tools.
+  </p>
+  <p>
+    The last version of FCEUXDSP was 1.07 which adds a feature known as the RAM Filter.
+  </p>
+
+  
+  <hr />
+  <h2>
+    <a id="features">Core Features</a>
+  </h2>
+  <h3>
+    <a id="features-cpu">CPU</a>
+  </h3>
+  <p>
+    All official instructions of the NES' CPU, the 2A03, which is compatible(mostly)
+    with the 6502, are emulated.  "Unofficial" instructions are also emulated,
+    though probably not as accurately as the more well-defined official instructions.
+  </p>
+  <hr />
+  <h3>
+    <a id="features-ppu">PPU</a>
+  </h3>
+  <p>
+    <ul>
    <li>8x8 and 8x16 sprites.</li>
    <li>Sprite hit emulation(including checking the bg color).</li>
    <li>8 sprite limit(and flag emulation).</li>

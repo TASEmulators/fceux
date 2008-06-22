@@ -25,4 +25,6 @@
 <span class="naventry">[<a href="/support.php">Support Files</a>]</span>
 <span class="naventry">[<a href="/links.php">Links</a>]</span>
 <span class="naventry">[<a href="http://sourceforge.net/projects/fceultra/">Development</a>]</span>
+<span class="naventry">[<a href="/links.php">Links</a>]</span>
+<span class="naventry">[<a href="/archive.php">Links</a>]</span>
 </div>

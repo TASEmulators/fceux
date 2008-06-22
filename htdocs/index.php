@@ -6,16 +6,15 @@
  <h2 class="boxhead">Introduction </h2>
  <div class="boxbody">
    <p>
-   FCE Ultra is a NES (Nintendo Entertainment System) and Famicom (Family Computer)
-   emulator for a variety of different platforms, based on Bero's <a href="http://www.geocities.co.jp/Playtown/2004/fce.htm">FCE</a>.  Game compatibility is very
-   high, provided you provide non-corrupt ROM/disk images.  
-  </p>
-  <p>
-   It has been tested (and runs)
-   under DOS, Linux SVGAlib, Linux X, Mac OS X, and MS Windows.  A native GUI is provided for the MS Windows port, and the other ports use a command-line based interface.  However, GNOME users can optionally use <a href="http://dietschnitzel.com/gfceu/">the GNOME front-end</a>.  The SDL port
-   should run on any modern UNIX-like operating system(such as FreeBSD) with
-   no code changes.
-  </p>
+     FCEUX is a cross platform, NTSC and PAL Famicom/NES emulator that is an evolution of the original FCE Ultra emulator.  
+     Over time FCE Ultra had separated into many separate branches.
+   </p>
+   <p>
+     The concept behind FCEUX  is to merge elements from FCE Ultra, FCEU rerecording, FCEUXD, FCEUXDSP, and FCEU-umm into a single branch of FCEU.  
+     As the  X implies , it is a all encompassing FCEU emulator that gives the best of all worlds for the general player, 
+     the ROM-hacking community, and the Tool-Assisted Speedrun Community.
+
+   </p>
  </div>
 </div>
 
@@ -23,9 +22,14 @@
 <h2 class="boxhead">News</h2>   <!-- News section -->
 <div class="boxbody">
 
+<h3 class="boxsubhead">22 June 2008</h3>
+<p>
+    Round 1 of the attempt to update the content of this site.  Downloads are still outdated versions of FCEU Ultra.
+</p>  
+  
 <h3 class="boxsubhead">5 June 2008</h3>
 <p>
-No, this project is not dead.  There are a few of us developers working in subversion.  However, we could always use more help.  We are in particular need of some more people who would be willing to help out with the SDL port.  If interested, just come chat with us in #fceu on irc.freenode.net<br>
+No, this project is not dead.  There are a few of us developers working in subversion.  However, we could always use more help.  We need both SDL and Windows developers.  If interested, just come chat with us in #fceu on irc.freenode.net<br>
 <a href="mailto:ltsmooth42 _at_ gmail _dot _com">Lukas Sabota</a>
 </p>
 
@@ -108,117 +112,6 @@ to preserve the state of the project as it was left by the author,
 Xodnizel.  But we'd love to get development going again, too.  We'll
 post more information soon.
 </p>
-
-
-
-<h3 class="boxsubhead">29 October 2004</h3>
-<p>
-No new *official* releases of FCE Ultra will be made. I mean it this time. :b
-</p>
-
-<p>
-The forum has been closed, as I will not be available to moderate it any longer, but the old posts will be viewable indefinitely.
-</p>
-
-<p>
-Crazy people may download http://fceultra.sourceforge.net/fceu-0.98.13-pre.src.tar.bz2 which was intended to be 0.98.13.  It should be stable, and fixed several major bugs present in 0.98.12, but I have neither the time nor desire to do thorough tests for regressions, and thus it will not be an official release.
-</p>
-
-
-
-<h3 class="boxsubhead">12 September 2004</h3>
-<p>
-All future binary release(s) of FCE Ultra will be compiled without the emulation
-debugger.  The emulator can still be built with the debugger from source, however.
-</p>
-<p>
-This is being done to greatly speed up compilation times, decrease executable
-size, and speed up emulation slightly.  Also, the presence of a debugger
-in the official build(at least for MS Windows) will probably become meaningless
-once a certain third-party branch of FCE Ultra is released.
-</p>
-
-
-
-<h3 class="boxsubhead">XX Something 2004</h3>
-<p>
-FCE Ultra 0.98.12 is out.  The MS Windows binary release should run using
-fewer CPU cycles("faster") than previous 0.98.x MS Windows binary releases.
-</p>
-
-
-
-<h3 class="boxsubhead">17 May 2004</h3>
-<p>FCE Ultra 0.98.10 is out.</p>
-<pre>
-0.98.10:
-
-        Reimplemented network play.  It now requires a standalone network play server, which
-        will be released as a later time.  For fun, "starmen.net" is running this server,
-        which is publicly accessible.
-        I also made various code fixes/improvements to allow for network play, particularly
-        with the command handling code.
-
-        Reworked much of the VS Unisystem emulation code, partially based on information from
-        MAME.  The following games are now supported(in iNES format):
-
-         Battle City
-         Castlevania  
-         Clu Clu Land 
-         Dr. Mario
-         Duck Hunt 
-         Excitebike
-         Excitebike (Japanese)
-         Freedom Force
-         Goonies, The
-         Gradius
-         Gumshoe
-         Hogan's Alley
-         Ice Climber
-         Ladies Golf
-         Mach Rider
-         Mach Rider (Japanese)
-         Mighty Bomb Jack (Japanese)
-         Ninja Jajamaru Kun (Japanese)
-         Pinball
-         Pinball (Japanese)
-         Platoon
-         RBI Baseball
-         Slalom
-         Soccer
-         Star Luster
-         Stroke and Match Golf
-         Stroke and Match Golf - Ladies
-         Stroke and Match Golf (Japanese)
-         Super Mario Bros.
-         Super Sky Kid
-         Super Xevious
-         Tetris   
-         TKO Boxing
-         Top Gun   
-
-        Win32-native:  Fixed a bug in the debugger's breakpoint list that appeared when
-        one tried to delete a breakpoint(the control accidentally had auto-sort enabled,
-        causing a discrepancy between what was displayed and what was contained in internal
-        data structures).
-
-        The current disk image XOR original disk image is now stored in save states.  This
-        should greatly increase compressability(important for network play), and make
-        it a little more legal to distribute such save states now.
-
-        Modified the save state format to allow for more precise and larger version numbers.
-
-        Various minor code changes.
-
-        Fixed initialization of the FCEUGameInfo structure, which previously led
-        to problems with sound output on the SexyAL-using ports(Linux).
-
-        Apparently I added support for mapper 255 a while back.  Documentation updated.
-
-        Added iNES header correction information for Armored Scrum Object and Alpha Mission.
-
-        Merged banksw.h into ines.c, fixed some of its prototypes in ines.h.
-</pre>
 
 </div> <!-- End News div -->
 
