@@ -2,9 +2,13 @@
 #include "common.h"
 #include "main.h"
 #include "window.h"
+#include "movie.h"
 
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
+
+//the comments contained in the currently-displayed movie
+static std::vector<std::string> currComments;
 
 extern FCEUGI *GameInfo;
 
@@ -106,11 +110,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 	if(IsWindowEnabled(GetDlgItem(hwndDlg, IDC_CHECK_READONLY)))
 		replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
+	EnableWindow(GetDlgItem(hwndDlg,IDC_BUTTON_METADATA),FALSE);
+
 	if(fn)
 	{
 		MOVIE_INFO info;
-
-		memset(&info, 0, sizeof(info));
 
 		if(FCEUI_MovieGetInfo(fn, &info, false))
 		{
@@ -144,8 +148,10 @@ void UpdateReplayDialog(HWND hwndDlg)
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used.c_str());
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),md5_asciistr(info.md5_of_rom_used));
 
-				//if(info.emu_version_used > 64)
+				if(info.emu_version_used < 20000 )
 					sprintf(emuStr, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");
+				else 
+					sprintf(emuStr, "FCEUX %d.%02d.%02d", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100);
 				//else
 				//{
 				//	if(info.emu_version_used == 1)
@@ -182,7 +188,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 			//--------------------
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
-			EnableWindow(GetDlgItem(hwndDlg,IDOK),TRUE);                     // enable OK
+
+			// enable OK and metadata
+			EnableWindow(GetDlgItem(hwndDlg,IDOK),TRUE);  
+			EnableWindow(GetDlgItem(hwndDlg,IDC_BUTTON_METADATA),TRUE);
+			currComments = info.comments;
 
 			doClear = 0;
 		}
@@ -244,6 +254,71 @@ void AbsoluteToRelative(char *const dst, const char *const dir, const char *cons
 //		sprintf(dst, ".\\%s", dir + igood);
 //	else
 		strcpy(dst, dir + igood);
+}
+
+BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+	case WM_INITDIALOG:
+		{
+			//setup columns
+			HWND hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
+			
+			ListView_SetExtendedListViewStyleEx(hwndList,
+                             LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES ,
+                             LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES );
+
+			RECT listRect;
+			GetClientRect(hwndList,&listRect);
+			LVCOLUMN lvc;
+			int colidx=0;
+			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+			lvc.pszText = "Key";
+			lvc.cx = 100;
+			ListView_InsertColumn(hwndList, colidx++, &lvc);
+			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+			lvc.pszText = "Value";
+			lvc.cx = listRect.right - 100;
+			ListView_InsertColumn(hwndList, colidx++, &lvc);
+
+			for(uint32 i=0;i<currComments.size();i++)
+			{
+				std::string& comment = currComments[i];
+				size_t splitat = comment.find_first_of(' ');
+				std::string key, value;
+				//if we can't split it then call it an unnamed key
+				if(splitat == std::string::npos)
+				{
+					value = comment;
+				} else
+				{
+					key = comment.substr(0,splitat);
+					value = comment.substr(splitat+1);
+				}
+
+				LVITEM lvi;
+				lvi.iItem = i;
+				lvi.mask = LVIF_TEXT;
+				lvi.iSubItem = 0;
+				lvi.pszText = (LPSTR)key.c_str();
+				ListView_InsertItem(hwndList,&lvi);
+				ListView_SetItemText( hwndList, i, 1, (LPSTR)value.c_str());
+			}
+			
+		}
+		break;
+
+	case WM_COMMAND:
+		switch(LOWORD(wParam))
+		{
+			case IDCANCEL:
+				EndDialog(hwndDlg, 0);
+				return TRUE;
+		}
+		break;
+	}
+	return FALSE;
 }
 
 BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -329,8 +404,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						}
 
 						MOVIE_INFO info;
-
-						memset(&info, 0, sizeof(info));
 
 						char filename [512];
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
@@ -425,6 +498,10 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			int wID = LOWORD(wParam);
 			switch(wID)
 			{
+			case IDC_BUTTON_METADATA:
+				DialogBoxParam(fceu_hInstance, "IDD_REPLAY_METADATA", hwndDlg, ReplayMetadataDialogProc, (LPARAM)0);
+				break;
+
 			case IDOK:
 				{
 					LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_GETCOUNT, 0, 0);

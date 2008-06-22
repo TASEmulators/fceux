@@ -124,6 +124,7 @@
 #define IDC_DEBUGGER_BOOKMARK_DEL       113
 #define BTN_CLEAR_AH                    114
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
+#define IDD_DIALOG1                     114
 #define LBL_AUTO_HOLD                   115
 #define IDC_CHECK_LOG_NEW_DATA          115
 #define LBL_CLEAR_AH                    116
@@ -443,6 +444,7 @@
 #define IDC_LIST1                       1130
 #define IDC_HACKY2                      1131
 #define IDC_HACKY1                      1132
+#define IDC_BUTTON_METADATA             1132
 #define IDC_HACKYEXPORT                 1133
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
@@ -534,9 +536,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        114
+#define _APS_NEXT_RESOURCE_VALUE        115
 #define _APS_NEXT_COMMAND_VALUE         40151
-#define _APS_NEXT_CONTROL_VALUE         1132
+#define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

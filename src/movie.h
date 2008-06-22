@@ -9,6 +9,41 @@
 #include "input/zapper.h"
 #include "utils/guid.h"
 
+enum EMOVIE_FLAG
+{
+	MOVIE_FLAG_NONE = 0,
+
+	//an ARCHAIC flag which means the movie was recorded from a soft reset.
+	//WHY would you do this?? do not create any new movies with this flag
+	MOVIE_FLAG_FROM_RESET = (1<<1),
+	
+	MOVIE_FLAG_PAL = (1<<2),
+
+	//movie was recorded from poweron. the alternative is from a savestate (or from reset)
+	MOVIE_FLAG_FROM_POWERON = (1<<3),
+
+	// set in newer version, used for old movie compatibility
+	//TODO - only use this flag to print a warning that the sync might be bad
+	//so that we can get rid of the sync hack code
+	MOVIE_FLAG_NOSYNCHACK = (1<<4)
+};
+
+typedef struct
+{
+	int movie_version;					// version of the movie format in the file
+	uint32 num_frames;
+	uint32 rerecord_count;
+	bool poweron, pal, nosynchack;
+	bool reset; //mbg 6/21/08 - this flag isnt used anymore.. but maybe one day we can scan it out of the first record in the movie file
+	int read_only;
+	uint32 emu_version_used;				// 9813 = 0.98.13
+	MD5DATA md5_of_rom_used;
+	std::string name_of_rom_used;
+
+	std::vector<std::string> comments;
+} MOVIE_INFO;
+
+
 void FCEUMOV_AddInputState();
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
@@ -190,5 +225,16 @@ private:
 extern MovieData currMovieData;
 extern int currFrameCounter;
 //---------
+
+void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags);
+void FCEUI_LoadMovie(char *fname, bool read_only, bool tasedit, int _stopframe);
+void FCEUI_MoviePlayFromBeginning(void);
+void FCEUI_StopMovie(void);
+bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
+char* FCEUI_MovieGetCurrentName(int addSlotNumber);
+void FCEUI_MovieToggleReadOnly(void);
+bool FCEUI_GetMovieToggleReadOnly();
+void FCEUI_MovieToggleFrameDisplay();
+void FCEUI_ToggleInputDisplay(void);
 
 #endif //__MOVIE_H_

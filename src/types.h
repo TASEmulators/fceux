@@ -25,9 +25,9 @@
 #include <stdlib.h>
 #include <iosfwd>
 
-#define FCEU_VERSION_NUMERIC 19901
+#define FCEU_VERSION_NUMERIC 20000
 #define FCEU_NAME "FCE Ultra"
-#define FCEU_VERSION_STRING "1.9.9"
+#define FCEU_VERSION_STRING "2.0.0"
 #define FCEU_NAME_AND_VERSION FCEU_NAME " " FCEU_VERSION_STRING
 
 ///causes the code fragment argument to be compiled in if the build includes debugging

@@ -313,6 +313,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,ports[2]);
 	else if(key == "binary")
 		installBool(val,binaryFlag);
+	else if(key == "comment")
+		comments.push_back(val);
 	else if(key == "savestate")
 	{
 		int len = HexStringToBytesLength(val);
@@ -339,7 +341,7 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
 
-	for(int i=0;i<comments.size();i++)
+	for(uint32 i=0;i<comments.size();i++)
 		*os << "comment " << comments[i] << endl;
 	
 	if(binary)
@@ -998,8 +1000,6 @@ void FCEUI_MoviePlayFromBeginning(void)
 
 bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFrameCount)
 {
-	memset(info,0,sizeof(MOVIE_INFO));
-
 	MovieData md;
 	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) return false;
@@ -1012,10 +1012,10 @@ bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFra
 	info->nosynchack = true;
 	info->num_frames = md.records.size();
 	info->md5_of_rom_used = md.romChecksum;
-	info->md5_of_rom_used_present = 1;
 	info->emu_version_used = md.emuVersion;
 	info->name_of_rom_used = md.romFilename;
 	info->rerecord_count = md.rerecordCount;
+	info->comments = md.comments;
 
 	return true;
 }

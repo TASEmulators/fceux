@@ -159,7 +159,15 @@ static void ConvertFCM(HWND hwndOwner)
 		for(uint32 i=0;i<todo.size();i++)
 		{
 			std::string infname = todo[i];
-			std::string outname = infname + ".fm2";
+			
+			//produce output filename
+			std::string outname;
+			size_t dot = infname.find_last_of(".");
+			if(dot == std::string::npos)
+				outname = infname + ".fm2";
+			else
+				outname = infname.substr(0,dot) + ".fm2";
+
 			MovieData md;
 			EFCM_CONVERTRESULT result = convert_fcm(md, infname);
 			if(result==FCM_CONVERTRESULT_SUCCESS)
@@ -172,10 +180,10 @@ static void ConvertFCM(HWND hwndOwner)
 				std::string msg = "Failure converting " + infname + "\r\n\r\n" + EFCM_CONVERTRESULT_message(result);
 				MessageBox(hwndOwner,msg.c_str(),"Failure converting fcm", 0);
 			}
-
-			std::string okmsg = "Converted " + stditoa(okcount) + " movie(s). There were " + stditoa(todo.size()-okcount) + " failure(s).";
-			MessageBox(hwndOwner,okmsg.c_str(),"FCM Conversion results", 0);
 		}
+
+		std::string okmsg = "Converted " + stditoa(okcount) + " movie(s). There were " + stditoa(todo.size()-okcount) + " failure(s).";
+		MessageBox(hwndOwner,okmsg.c_str(),"FCM Conversion results", 0);
 	}
 
 	delete[] ofn.lpstrFile;
