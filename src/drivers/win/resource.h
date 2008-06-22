@@ -523,6 +523,8 @@
 #define ID_                             40146
 #define MENU_DISPLAY_BG                 40147
 #define MENU_DISPLAY_OBJ                40148
+#define ID_FILE_CONVERTMOVIE            40149
+#define MENU_CONVERT_MOVIE              40150
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -533,7 +535,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        114
-#define _APS_NEXT_COMMAND_VALUE         40149
+#define _APS_NEXT_COMMAND_VALUE         40151
 #define _APS_NEXT_CONTROL_VALUE         1132
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

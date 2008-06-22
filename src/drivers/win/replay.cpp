@@ -202,7 +202,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"");
-		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"Nothing (invalid movie)");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
 		SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,"");
@@ -313,7 +313,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 							continue;
 
-						// filter out everything that's not *.fcm, *.fm2
+						// filter out everything that's not *.fm2
 						// (because FindFirstFile is too dumb to do that)
 						{
 							char* dot=strrchr(wfd.cFileName,'.');
@@ -324,7 +324,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							int k, extlen=strlen(ext);
 							for(k=0;k<extlen;k++)
 								ext[k]=tolower(ext[k]);
-							if(strcmp(ext,"fcm") && strcmp(ext,"fm2"))
+							if(strcmp(ext,"fm2"))
 								continue;
 						}
 
@@ -442,7 +442,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "Supported Movie Files (*.fcm|*.fm2)\0*.fcm;*.fm2\0FCEUX Movie Files (*.fm2)\0*.fm2\0FCEU Movie Files (*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0All files(*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;
@@ -696,7 +696,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					memset(&ofn, 0, sizeof(ofn));
 					ofn.lStructSize = sizeof(ofn);
 					ofn.hwndOwner = hwndDlg;
-					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0FCEU Movie File(*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
+					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0All files(*.*)\0*.*\0\0";
 					ofn.lpstrFile = szChoice;
 					ofn.lpstrDefExt = "fm2";
 					ofn.nMaxFile = MAX_PATH;

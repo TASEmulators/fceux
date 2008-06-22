@@ -45,6 +45,8 @@
 #include "throttle.h"
 #include "monitor.h"
 #include "tasedit.h"
+#include "oldmovie.h"
+#include "movie.h"
 
 #include "guiconfig.h"
 #include "timing.h"
@@ -53,6 +55,8 @@
 #include "gui.h"
 #include "help.h"
 #include "movie.h"
+
+#include <fstream>
 
 // Extern variables
 
@@ -107,6 +111,61 @@ static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 
 // Internal functions
+
+static void ConvertFCM(HWND hwndOwner)
+{
+	std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
+
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwndOwner;
+	ofn.lpstrFilter = "FCEU <2.0 Movie Files (*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
+	ofn.lpstrFile = new char[640*1024]; //640K should be enough for anyone
+	ofn.lpstrFile[0] = 0;
+	ofn.nMaxFile = 640*1024;
+	ofn.lpstrInitialDir = initdir.c_str();
+	ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+	ofn.lpstrDefExt = "fcm";
+	ofn.lpstrTitle = "Select old movie(s) for conversion";
+
+	if(GetOpenFileName(&ofn))
+	{
+		std::vector<std::string> todo;
+
+		if(ofn.nFileExtension==0)
+		{
+			//multiselect
+			std::string dir = ofn.lpstrFile;
+			char* cp = ofn.lpstrFile + dir.size() + 1;
+			while(*cp) 
+			{
+				std::string fname = cp;
+				todo.push_back(dir + "/" + fname);
+				cp += fname.size() + 1;
+			}
+		}
+		else
+		{
+			todo.push_back(ofn.lpstrFile);
+		}
+
+		for(uint32 i=0;i<todo.size();i++)
+		{
+			std::string infname = todo[i];
+			std::string outname = infname + ".fm2";
+			MovieData md;
+			if(convert_fcm(md, infname)==FCM_CONVERTRESULT_SUCCESS)
+			{
+				std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
+				md.dump(outf,false);
+				delete outf;
+			}
+		}
+	}
+
+	delete[] ofn.lpstrFile;
+}
 
 void CalcWindowSize(RECT *al)
 {
@@ -992,6 +1051,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					updateGameDependentMenus(GameInfo != 0);
 				}
 				break;
+
+			case MENU_CONVERT_MOVIE:
+				ConvertFCM(hWnd);
+				break;
+
 
 			case MENU_SAVE_STATE:
 				// Save state as menu was selected

@@ -1580,6 +1580,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\oldmovie.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\palette.h"
 				>
 			</File>
@@ -2319,6 +2323,10 @@
 		</File>
 		<File
 			RelativePath="..\src\nsf.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\src\oldmovie.cpp"
 			>
 		</File>
 		<File

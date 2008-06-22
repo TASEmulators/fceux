@@ -49,6 +49,7 @@ BEGIN
         MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
         MENUITEM "Replay Movie...",             MENU_REPLAY_MOVIE
         MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
+        MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
         MENUITEM "Record AVI...",               MENU_RECORD_AVI
         MENUITEM "Stop AVI",                    MENU_STOP_AVI

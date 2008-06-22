@@ -120,7 +120,7 @@ public:
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
 	//this is the RERECORD COUNT. please rename variable.
-	int recordCount;
+	int rerecordCount;
 	FCEU_Guid guid;
 
 	//was the frame data stored in binary?
