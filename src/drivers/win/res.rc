@@ -100,6 +100,7 @@ BEGIN
         MENUITEM "&RAM Filter...",              MENU_RAMFILTER
         MENUITEM "&Basic Bot...",               MENU_BASIC_BOT
         MENUITEM "TAS Edit",                    MENU_TASEDIT
+        MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
         POPUP "Autofire &Pattern"
         BEGIN
@@ -131,8 +132,6 @@ BEGIN
         MENUITEM "&Alternate A and B",          MENU_ALTERNATE_AB
         MENUITEM SEPARATOR
         MENUITEM "Use &External Input",         MENU_EXTERNAL_INPUT
-        MENUITEM SEPARATOR
-        MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
     END
     POPUP "&Debug"
     BEGIN
