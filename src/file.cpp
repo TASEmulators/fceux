@@ -42,6 +42,8 @@
 #include "driver.h"
 #include "utils/xstring.h"
 
+using namespace std;
+
 typedef struct {
            uint8 *data;
            uint32 size;
@@ -50,397 +52,397 @@ typedef struct {
 
 void ApplyIPS(FILE *ips, MEMWRAP *dest)
 {
- uint8 header[5];
- uint32 count=0;
+	uint8 header[5];
+	uint32 count=0;
 
- FCEU_printf(" Applying IPS...\n");
- if(fread(header,1,5,ips)!=5)
- {
-  fclose(ips);
-  return;
- }
- if(memcmp(header,"PATCH",5))
- {
-  fclose(ips);
-  return;
- }
+	FCEU_printf(" Applying IPS...\n");
+	if(fread(header,1,5,ips)!=5)
+	{
+		fclose(ips);
+		return;
+	}
+	if(memcmp(header,"PATCH",5))
+	{
+		fclose(ips);
+		return;
+	}
 
- while(fread(header,1,3,ips)==3)
- {
-  uint32 offset=(header[0]<<16)|(header[1]<<8)|header[2];
-  uint16 size;
+	while(fread(header,1,3,ips)==3)
+	{
+		uint32 offset=(header[0]<<16)|(header[1]<<8)|header[2];
+		uint16 size;
 
-  if(!memcmp(header,"EOF",3))
-  {
-   FCEU_printf(" IPS EOF:  Did %d patches\n\n",count);
-   fclose(ips);
-   return;
-  }
+		if(!memcmp(header,"EOF",3))
+		{
+			FCEU_printf(" IPS EOF:  Did %d patches\n\n",count);
+			fclose(ips);
+			return;
+		}
 
-  size=fgetc(ips)<<8;
-  size|=fgetc(ips);
-  if(!size)	/* RLE */
-  {
-   uint8 *start;
-   uint8 b;
-   size=fgetc(ips)<<8;
-   size|=fgetc(ips);
+		size=fgetc(ips)<<8;
+		size|=fgetc(ips);
+		if(!size)	/* RLE */
+		{
+			uint8 *start;
+			uint8 b;
+			size=fgetc(ips)<<8;
+			size|=fgetc(ips);
 
-   //FCEU_printf("  Offset: %8d  Size: %5d RLE\n",offset,size);
+			//FCEU_printf("  Offset: %8d  Size: %5d RLE\n",offset,size);
 
-   if((offset+size)>dest->size)
-   {
-    uint8 *tmp;
+			if((offset+size)>dest->size)
+			{
+				uint8 *tmp;
 
-    // Probably a little slow.
-    tmp=(uint8 *)realloc(dest->data,offset+size);
-    if(!tmp)
-    {
-     FCEU_printf("  Oops.  IPS patch %d(type RLE) goes beyond end of file.  Could not allocate memory.\n",count);
-     fclose(ips);
-     return;
-    }
-    dest->size=offset+size;
-    dest->data=tmp;
-    memset(dest->data+dest->size,0,offset+size-dest->size);
-   }
-   b=fgetc(ips);
-   start=dest->data+offset;
-   do
-   {
-    *start=b;
-    start++;
-   } while(--size);
-  }
-  else		/* Normal patch */
-  {
-   //FCEU_printf("  Offset: %8d  Size: %5d\n",offset,size);
-   if((offset+size)>dest->size)
-   {
-    uint8 *tmp;
+				// Probably a little slow.
+				tmp=(uint8 *)realloc(dest->data,offset+size);
+				if(!tmp)
+				{
+					FCEU_printf("  Oops.  IPS patch %d(type RLE) goes beyond end of file.  Could not allocate memory.\n",count);
+					fclose(ips);
+					return;
+				}
+				dest->size=offset+size;
+				dest->data=tmp;
+				memset(dest->data+dest->size,0,offset+size-dest->size);
+			}
+			b=fgetc(ips);
+			start=dest->data+offset;
+			do
+			{
+				*start=b;
+				start++;
+			} while(--size);
+		}
+		else		/* Normal patch */
+		{
+			//FCEU_printf("  Offset: %8d  Size: %5d\n",offset,size);
+			if((offset+size)>dest->size)
+			{
+				uint8 *tmp;
 
-    // Probably a little slow.
-    tmp=(uint8 *)realloc(dest->data,offset+size);
-    if(!tmp)
-    {
-     FCEU_printf("  Oops.  IPS patch %d(type normal) goes beyond end of file.  Could not allocate memory.\n",count);
-     fclose(ips);
-     return;
-    }
-    dest->data=tmp;
-    memset(dest->data+dest->size,0,offset+size-dest->size);
-   }
-   fread(dest->data+offset,1,size,ips);
-  }
-  count++;
- }
- fclose(ips);
- FCEU_printf(" Hard IPS end!\n");
+				// Probably a little slow.
+				tmp=(uint8 *)realloc(dest->data,offset+size);
+				if(!tmp)
+				{
+					FCEU_printf("  Oops.  IPS patch %d(type normal) goes beyond end of file.  Could not allocate memory.\n",count);
+					fclose(ips);
+					return;
+				}
+				dest->data=tmp;
+				memset(dest->data+dest->size,0,offset+size-dest->size);
+			}
+			fread(dest->data+offset,1,size,ips);
+		}
+		count++;
+	}
+	fclose(ips);
+	FCEU_printf(" Hard IPS end!\n");
 }
 
 static MEMWRAP *MakeMemWrap(void *tz, int type)
 {
- MEMWRAP *tmp;
+	MEMWRAP *tmp;
 
- if(!(tmp=(MEMWRAP *)FCEU_malloc(sizeof(MEMWRAP))))
-  goto doret;
- tmp->location=0;
+	if(!(tmp=(MEMWRAP *)FCEU_malloc(sizeof(MEMWRAP))))
+		goto doret;
+	tmp->location=0;
 
- if(type==0)
- {
-  fseek((FILE *)tz,0,SEEK_END);
-  tmp->size=ftell((FILE *)tz);
-  fseek((FILE *)tz,0,SEEK_SET);
-  if(!(tmp->data=(uint8*)FCEU_malloc(tmp->size)))
-  {
-   free(tmp);
-   tmp=0;
-   goto doret;
-  }
-  fread(tmp->data,1,tmp->size,(FILE *)tz);
- }
- else if(type==1)
- {
-  /* Bleck.  The gzip file format has the size of the uncompressed data,
-     but I can't get to the info with the zlib interface(?). */
-  for(tmp->size=0; gzgetc(tz) != EOF; tmp->size++);
-  gzseek(tz,0,SEEK_SET);
-  if(!(tmp->data=(uint8 *)FCEU_malloc(tmp->size)))
-  {
-   free(tmp);
-   tmp=0;
-   goto doret;
-  }
-  gzread(tz,tmp->data,tmp->size);
- }
- else if(type==2)
- {
-  unz_file_info ufo;
-  unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
+	if(type==0)
+	{
+		fseek((FILE *)tz,0,SEEK_END);
+		tmp->size=ftell((FILE *)tz);
+		fseek((FILE *)tz,0,SEEK_SET);
+		if(!(tmp->data=(uint8*)FCEU_malloc(tmp->size)))
+		{
+			free(tmp);
+			tmp=0;
+			goto doret;
+		}
+		fread(tmp->data,1,tmp->size,(FILE *)tz);
+	}
+	else if(type==1)
+	{
+		/* Bleck.  The gzip file format has the size of the uncompressed data,
+		but I can't get to the info with the zlib interface(?). */
+		for(tmp->size=0; gzgetc(tz) != EOF; tmp->size++);
+		gzseek(tz,0,SEEK_SET);
+		if(!(tmp->data=(uint8 *)FCEU_malloc(tmp->size)))
+		{
+			free(tmp);
+			tmp=0;
+			goto doret;
+		}
+		gzread(tz,tmp->data,tmp->size);
+	}
+	else if(type==2)
+	{
+		unz_file_info ufo;
+		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
 
-  tmp->size=ufo.uncompressed_size;
-  if(!(tmp->data=(uint8 *)FCEU_malloc(ufo.uncompressed_size)))
-  {
-   free(tmp);
-   tmp=0;
-   goto doret;
-  }
-  unzReadCurrentFile(tz,tmp->data,ufo.uncompressed_size);
- }
+		tmp->size=ufo.uncompressed_size;
+		if(!(tmp->data=(uint8 *)FCEU_malloc(ufo.uncompressed_size)))
+		{
+			free(tmp);
+			tmp=0;
+			goto doret;
+		}
+		unzReadCurrentFile(tz,tmp->data,ufo.uncompressed_size);
+	}
 
- doret:
- if(type==0)
- {
-  fclose((FILE *)tz);
- }
- else if(type==1)
- {
-  gzclose(tz);
- }
- else if(type==2)
- {
-  unzCloseCurrentFile(tz);
-  unzClose(tz);
- }
- return tmp;
+doret:
+	if(type==0)
+	{
+		fclose((FILE *)tz);
+	}
+	else if(type==1)
+	{
+		gzclose(tz);
+	}
+	else if(type==2)
+	{
+		unzCloseCurrentFile(tz);
+		unzClose(tz);
+	}
+	return tmp;
 }
 
 #ifndef __GNUC__
- #define strcasecmp strcmp
+#define strcasecmp strcmp
 #endif
 
 
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext)
 {
- FILE *ipsfile=0;
- FCEUFILE *fceufp;
- void *t;
+	FILE *ipsfile=0;
+	FCEUFILE *fceufp;
+	void *t;
 
- if(ipsfn && strchr(mode,'r'))
-  ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
+	if(ipsfn && strchr(mode,'r'))
+		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
 
- fceufp=(FCEUFILE *)malloc(sizeof(FCEUFILE));
+	fceufp=(FCEUFILE *)malloc(sizeof(FCEUFILE));
 
- {
-  unzFile tz;
-  if((tz=unzOpen(path)))  // If it's not a zip file, use regular file handlers.
-			  // Assuming file type by extension usually works,
-			  // but I don't like it. :)
-  {
-   if(unzGoToFirstFile(tz)==UNZ_OK)
-   {
-    for(;;)
-    {
-     char tempu[512];	// Longer filenames might be possible, but I don't
-		 	// think people would name files that long in zip files...
-     unzGetCurrentFileInfo(tz,0,tempu,512,0,0,0,0);
-     tempu[511]=0;
-     if(strlen(tempu)>=4)
-     {
-      char *za=tempu+strlen(tempu)-4;
+	{
+		unzFile tz;
+		if((tz=unzOpen(path)))  // If it's not a zip file, use regular file handlers.
+			// Assuming file type by extension usually works,
+			// but I don't like it. :)
+		{
+			if(unzGoToFirstFile(tz)==UNZ_OK)
+			{
+				for(;;)
+				{
+					char tempu[512];	// Longer filenames might be possible, but I don't
+					// think people would name files that long in zip files...
+					unzGetCurrentFileInfo(tz,0,tempu,512,0,0,0,0);
+					tempu[511]=0;
+					if(strlen(tempu)>=4)
+					{
+						char *za=tempu+strlen(tempu)-4;
 
-      if(!ext)
-      {
-       if(!strcasecmp(za,".nes") || !strcasecmp(za,".fds") ||
-          !strcasecmp(za,".nsf") || !strcasecmp(za,".unf") ||
-          !strcasecmp(za,".nez"))
-        break;
-      }
-      else if(!strcasecmp(za,ext))
-       break;
-     }
-     if(strlen(tempu)>=5)
-     {
-      if(!strcasecmp(tempu+strlen(tempu)-5,".unif"))
-       break;
-     }
-     if(unzGoToNextFile(tz)!=UNZ_OK)
-     {
-      if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
-      break;
-     }
-    }
-    if(unzOpenCurrentFile(tz)!=UNZ_OK)
-     goto zpfail;
-   }
-   else
-   {
-    zpfail:
-    free(fceufp);
-    unzClose(tz);
-    return 0;
-   }
-   if(!(fceufp->fp=MakeMemWrap(tz,2)))
-   {
-    free(fceufp);
-    return(0);
-   }
-   fceufp->type=2;
-   if(ipsfile)
-    ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-   return(fceufp);
-  }
- }
+						if(!ext)
+						{
+							if(!strcasecmp(za,".nes") || !strcasecmp(za,".fds") ||
+								!strcasecmp(za,".nsf") || !strcasecmp(za,".unf") ||
+								!strcasecmp(za,".nez"))
+								break;
+						}
+						else if(!strcasecmp(za,ext))
+							break;
+					}
+					if(strlen(tempu)>=5)
+					{
+						if(!strcasecmp(tempu+strlen(tempu)-5,".unif"))
+							break;
+					}
+					if(unzGoToNextFile(tz)!=UNZ_OK)
+					{
+						if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
+						break;
+					}
+				}
+				if(unzOpenCurrentFile(tz)!=UNZ_OK)
+					goto zpfail;
+			}
+			else
+			{
+zpfail:
+				free(fceufp);
+				unzClose(tz);
+				return 0;
+			}
+			if(!(fceufp->fp=MakeMemWrap(tz,2)))
+			{
+				free(fceufp);
+				return(0);
+			}
+			fceufp->type=2;
+			if(ipsfile)
+				ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
+			return(fceufp);
+		}
+	}
 
- if((t=FCEUD_UTF8fopen(path,"rb")))
- {
-  uint32 magic;
+	if((t=FCEUD_UTF8fopen(path,"rb")))
+	{
+		uint32 magic;
 
-  magic=fgetc((FILE *)t);
-  magic|=fgetc((FILE *)t)<<8;
-  magic|=fgetc((FILE *)t)<<16;
+		magic=fgetc((FILE *)t);
+		magic|=fgetc((FILE *)t)<<8;
+		magic|=fgetc((FILE *)t)<<16;
 
-  if(magic!=0x088b1f)   /* Not gzip... */
-   fclose((FILE *)t);
-  else                  /* Probably gzip */
-  {
-   int fd;
+		if(magic!=0x088b1f)   /* Not gzip... */
+			fclose((FILE *)t);
+		else                  /* Probably gzip */
+		{
+			int fd;
 
-   fd = dup(fileno( (FILE *)t));
+			fd = dup(fileno( (FILE *)t));
 
-   fclose((FILE*)t); //mbg merge 7/17/06 - cast to FILE*
+			fclose((FILE*)t); //mbg merge 7/17/06 - cast to FILE*
 
-   lseek(fd, 0, SEEK_SET);
+			lseek(fd, 0, SEEK_SET);
 
-   if((t=gzdopen(fd,mode)))
-   {
-    fceufp->type=1;
-    fceufp->fp=t;
-    if(ipsfile)
-    {
-     fceufp->fp=MakeMemWrap(t,1);
-     gzclose(t);
+			if((t=gzdopen(fd,mode)))
+			{
+				fceufp->type=1;
+				fceufp->fp=t;
+				if(ipsfile)
+				{
+					fceufp->fp=MakeMemWrap(t,1);
+					gzclose(t);
 
-     if(fceufp->fp)
-     {
-      free(fceufp);
-      return(0);
-     }
+					if(fceufp->fp)
+					{
+						free(fceufp);
+						return(0);
+					}
 
-     fceufp->type=3;
-     ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-    }
-    return(fceufp);
-   }
-   close(fd);
-  }
+					fceufp->type=3;
+					ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
+				}
+				return(fceufp);
+			}
+			close(fd);
+		}
 
- }
+	}
 
-  if((t=FCEUD_UTF8fopen(path,mode)))
-  {
-   fseek((FILE *)t,0,SEEK_SET);
-   fceufp->type=0;
-   fceufp->fp=t;
-   if(ipsfile)
-   {
-    if(!(fceufp->fp=MakeMemWrap(t,0)))
-    {
-     free(fceufp);
-     return(0);
-    }
-    fceufp->type=3;
-    ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-   }
-   return(fceufp);
-  }
+	if((t=FCEUD_UTF8fopen(path,mode)))
+	{
+		fseek((FILE *)t,0,SEEK_SET);
+		fceufp->type=0;
+		fceufp->fp=t;
+		if(ipsfile)
+		{
+			if(!(fceufp->fp=MakeMemWrap(t,0)))
+			{
+				free(fceufp);
+				return(0);
+			}
+			fceufp->type=3;
+			ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
+		}
+		return(fceufp);
+	}
 
- free(fceufp);
- return 0;
+	free(fceufp);
+	return 0;
 }
 
 int FCEU_fclose(FCEUFILE *fp)
 {
- if(fp->type==1)
- {
-  gzclose(fp->fp);
- }
- else if(fp->type>=2)
- {
-  free(((MEMWRAP*)(fp->fp))->data);
-  free(fp->fp);
- }
- else
- {
-  fclose((FILE *)fp->fp);
- }
- free(fp);
- return 1;
+	if(fp->type==1)
+	{
+		gzclose(fp->fp);
+	}
+	else if(fp->type>=2)
+	{
+		free(((MEMWRAP*)(fp->fp))->data);
+		free(fp->fp);
+	}
+	else
+	{
+		fclose((FILE *)fp->fp);
+	}
+	free(fp);
+	return 1;
 }
 
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
- if(fp->type==1)
- {
-  return gzread(fp->fp,ptr,size*nmemb);
- }
- else if(fp->type>=2)
- {
-  MEMWRAP *wz;
-  uint32 total=size*nmemb;
+	if(fp->type==1)
+	{
+		return gzread(fp->fp,ptr,size*nmemb);
+	}
+	else if(fp->type>=2)
+	{
+		MEMWRAP *wz;
+		uint32 total=size*nmemb;
 
-  wz=(MEMWRAP*)fp->fp;
-  if(wz->location>=wz->size) return 0;
+		wz=(MEMWRAP*)fp->fp;
+		if(wz->location>=wz->size) return 0;
 
-  if((wz->location+total)>wz->size)
-  {
-   int ak=wz->size-wz->location;
-   memcpy((uint8*)ptr,wz->data+wz->location,ak);
-   wz->location=wz->size;
-   return(ak/size);
-  }
-  else
-  {
-   memcpy((uint8*)ptr,wz->data+wz->location,total);
-   wz->location+=total;
-   return nmemb;
-  }
- }
- else
- {
- return fread(ptr,size,nmemb,(FILE *)fp->fp);
- }
+		if((wz->location+total)>wz->size)
+		{
+			int ak=wz->size-wz->location;
+			memcpy((uint8*)ptr,wz->data+wz->location,ak);
+			wz->location=wz->size;
+			return(ak/size);
+		}
+		else
+		{
+			memcpy((uint8*)ptr,wz->data+wz->location,total);
+			wz->location+=total;
+			return nmemb;
+		}
+	}
+	else
+	{
+		return fread(ptr,size,nmemb,(FILE *)fp->fp);
+	}
 }
 
 uint64 FCEU_fwrite(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
- if(fp->type==1)
- {
-  return gzwrite(fp->fp,ptr,size*nmemb);
- }
- else if(fp->type>=2)
- {
-  return 0;
- }
- else
-  return fwrite(ptr,size,nmemb,(FILE *)fp->fp);
+	if(fp->type==1)
+	{
+		return gzwrite(fp->fp,ptr,size*nmemb);
+	}
+	else if(fp->type>=2)
+	{
+		return 0;
+	}
+	else
+		return fwrite(ptr,size,nmemb,(FILE *)fp->fp);
 }
 
 int FCEU_fseek(FCEUFILE *fp, long offset, int whence)
 {
- if(fp->type==1)
- {
-  return( (gzseek(fp->fp,offset,whence)>0)?0:-1);
- }
- else if(fp->type>=2)
- {
-  MEMWRAP *wz;
-  wz=(MEMWRAP*)fp->fp;
+	if(fp->type==1)
+	{
+		return( (gzseek(fp->fp,offset,whence)>0)?0:-1);
+	}
+	else if(fp->type>=2)
+	{
+		MEMWRAP *wz;
+		wz=(MEMWRAP*)fp->fp;
 
-  switch(whence)
-  {
-   case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
-                  return(-1);
-                 wz->location=offset;break;
-   case SEEK_CUR:if(offset+wz->location>wz->size)
-                  return (-1);
-                 wz->location+=offset;
-                 break;
-  }
-  return 0;
- }
- else
-  return fseek((FILE *)fp->fp,offset,whence);
+		switch(whence)
+		{
+		case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
+						  return(-1);
+			wz->location=offset;break;
+		case SEEK_CUR:if(offset+wz->location>wz->size)
+						  return (-1);
+			wz->location+=offset;
+			break;
+		}
+		return 0;
+	}
+	else
+		return fseek((FILE *)fp->fp,offset,whence);
 }
 
 uint64 FCEU_ftell(FCEUFILE *fp)
@@ -584,21 +586,16 @@ int FCEU_fisarchive(FCEUFILE *fp)
 
 
 
-static char BaseDirectory[2048];
+static std::string BaseDirectory;
 char FileBase[2048];
-static char FileExt[2048];	/* Includes the . character, as in ".nes" */
+static char FileExt[2048];	//Includes the . character, as in ".nes"
 
 static char FileBaseDirectory[2048];
 
-/**
-* Updates the base directory
-**/
-void FCEUI_SetBaseDirectory(const char *dir)
+/// Updates the base directory
+void FCEUI_SetBaseDirectory(std::string const & dir)
 {
-	strncpy(BaseDirectory, dir, sizeof(BaseDirectory));
-
-	// TODO: Necessary?
-	BaseDirectory[2047] = 0;
+	BaseDirectory = dir;
 }
 
 static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0,0,0,0,0,0,0,0};     // odirs, odors. ^_^
@@ -644,43 +641,43 @@ std::string FCEU_GetPath(int type)
 			if(odirs[FCEUIOD_STATES])
 				return (odirs[FCEUIOD_STATES]);
 			else
-				sprintf(ret,"%s"PSS"fcs",BaseDirectory);
+				return BaseDirectory + PSS + "fcs";
 			break;
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
 				return (odirs[FCEUIOD_MOVIES]);
 			else
-				sprintf(ret,"%s"PSS"movies",BaseDirectory);
+				return BaseDirectory + PSS + "movies";
 			break;
 		case FCEUMKF_MEMW:
 			if(odirs[FCEUIOD_MEMW])
 				return (odirs[FCEUIOD_MEMW]);
 			else
-				sprintf(ret,"%s"PSS"tools",BaseDirectory);
+				return BaseDirectory + PSS + "tools";
 			break;
 		case FCEUMKF_BBOT:
 			if(odirs[FCEUIOD_BBOT])
 				return (odirs[FCEUIOD_BBOT]);
 			else
-				sprintf(ret,"%s"PSS"tools",BaseDirectory);
+				return BaseDirectory + PSS + "tools";
 			break;
 		case FCEUMKF_ROMS:
 			if(odirs[FCEUIOD_ROMS])
 				return (odirs[FCEUIOD_ROMS]);
 			else
-				sprintf(ret,"%s",BaseDirectory);
+				return BaseDirectory;
 			break;
 		case FCEUMKF_INPUT:
 			if(odirs[FCEUIOD_INPUT])
 				return (odirs[FCEUIOD_INPUT]);
 			else
-				sprintf(ret,"%s"PSS"tools",BaseDirectory);
+				return BaseDirectory + PSS + "tools";
 			break;
 		case FCEUMKF_LUA:
 			if(odirs[FCEUIOD_LUA])
 				return (odirs[FCEUIOD_LUA]);
 			else
-				sprintf(ret,"%s"PSS"tools",BaseDirectory);
+				return BaseDirectory + PSS + "tools";
 			break;
 	}
 
@@ -695,15 +692,15 @@ std::string FCEU_MakePath(int type, const char* filebase)
 	{
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
-				sprintf(ret,"%s"PSS"%s",odirs[FCEUIOD_MOVIES],filebase);
+				return (string)odirs[FCEUIOD_MOVIES] + PSS + filebase;
 			else
-				sprintf(ret,"%s"PSS"movies"PSS"%s",BaseDirectory,filebase);
+				return BaseDirectory + PSS + "movies" + PSS + filebase;
 			break;
 		case FCEUMKF_STATE:
 			if(odirs[FCEUIOD_STATES])
-				sprintf(ret,"%s"PSS"%s",odirs[FCEUIOD_STATES],filebase);
+				return (string)odirs[FCEUIOD_STATES] + PSS + filebase;
 			else
-				sprintf(ret,"%s"PSS"fcs"PSS"%s",BaseDirectory,filebase);
+				return BaseDirectory + PSS + "fcs" + PSS + filebase;
 			break;
 	}
 	return ret;
@@ -716,12 +713,11 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 
 	switch(type)
 	{
-		case FCEUMKF_NPTEMP: sprintf(ret,"%s"PSS"m590plqd94fo.tmp",BaseDirectory);break;
 		case FCEUMKF_MOVIE:
 			if(odirs[FCEUIOD_MOVIES])
 				sprintf(ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
 			else
-				sprintf(ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory.c_str(),FileBase);
 			break;
 		case FCEUMKF_STATE:
 			{
@@ -741,7 +737,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 				}
 				else
 				{
-					sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory.c_str(),FileBase,mfn,id1);
 				}
 				if(stat(ret,&tmpstat)==-1)
 				{
@@ -751,7 +747,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 					}
 					else
 					{
-						sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory,FileBase,mfn,id1);
+						sprintf(ret,"%s"PSS"fcs"PSS"%s%s.fc%d",BaseDirectory.c_str(),FileBase,mfn,id1);
 					}
 				}
 			}
@@ -762,33 +758,33 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 				if(odirs[FCEUIOD_SNAPS])
 					sprintf(ret,"%s"PSS"%s-%d.%s",odirs[FCEUIOD_SNAPS],FileBase,id1,cd1);
 				else
-					sprintf(ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory,FileBase,id1,cd1);
+					sprintf(ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory.c_str(),FileBase,id1,cd1);
 			}
 			else
 			{
 				if(odirs[FCEUIOD_SNAPS])
 					sprintf(ret,"%s"PSS"%d.%s",odirs[FCEUIOD_SNAPS],id1,cd1);
 				else
-					sprintf(ret,"%s"PSS"snaps"PSS"%d.%s",BaseDirectory,id1,cd1);
+					sprintf(ret,"%s"PSS"snaps"PSS"%d.%s",BaseDirectory.c_str(),id1,cd1);
 			}
 			break;
 		case FCEUMKF_FDS:
 			if(odirs[FCEUIOD_NV])
 				sprintf(ret,"%s"PSS"%s.fds",odirs[FCEUIOD_NV],FileBase);
 			else
-				sprintf(ret,"%s"PSS"sav"PSS"%s.fds",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"sav"PSS"%s.fds",BaseDirectory.c_str(),FileBase);
 			break;
 		case FCEUMKF_SAV:
 			if(odirs[FCEUIOD_NV])
 				sprintf(ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 			else
-				sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
+				sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory.c_str(),FileBase,cd1);
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_NV])
 					sprintf(ret,"%s"PSS"%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 				else
-					sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory,FileBase,cd1);
+					sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory.c_str(),FileBase,cd1);
 			}
 			break;
 		case FCEUMKF_REWINDSTATE:
@@ -798,7 +794,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			}
 			else
 			{
-				sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
+				sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory.c_str(),id1);
 			}
 			if(stat(ret,&tmpstat)==-1)
 			{
@@ -808,7 +804,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 				}
 				else
 				{
-					sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory,id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory.c_str(),id1);
 				}
 			}
 			break;
@@ -816,30 +812,30 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			if(odirs[FCEUIOD_CHEATS])
 				sprintf(ret,"%s"PSS"%s.cht",odirs[FCEUIOD_CHEATS],FileBase);
 			else
-				sprintf(ret,"%s"PSS"cheats"PSS"%s.cht",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"cheats"PSS"%s.cht",BaseDirectory.c_str(),FileBase);
 			break;
 		case FCEUMKF_IPS:sprintf(ret,"%s"PSS"%s%s.ips",FileBaseDirectory,FileBase,FileExt);break;
-		case FCEUMKF_GGROM:sprintf(ret,"%s"PSS"gg.rom",BaseDirectory);break;
+		case FCEUMKF_GGROM:sprintf(ret,"%s"PSS"gg.rom",BaseDirectory.c_str());break;
 		case FCEUMKF_FDSROM:
 			if(odirs[FCEUIOD_FDSROM])
 				sprintf(ret,"%s"PSS"disksys.rom",odirs[FCEUIOD_FDSROM]);
 			else
-				sprintf(ret,"%s"PSS"disksys.rom",BaseDirectory);
+				sprintf(ret,"%s"PSS"disksys.rom",BaseDirectory.c_str());
 			break;
-		case FCEUMKF_PALETTE:sprintf(ret,"%s"PSS"%s.pal",BaseDirectory,FileBase);break;
+		case FCEUMKF_PALETTE:sprintf(ret,"%s"PSS"%s.pal",BaseDirectory.c_str(),FileBase);break;
 		case FCEUMKF_MOVIEGLOB:
 			//these globs use ??? because we can load multiple formats
 			if(odirs[FCEUIOD_MOVIES])
 				sprintf(ret,"%s"PSS"*.???",odirs[FCEUIOD_MOVIES]);
 			else
-				sprintf(ret,"%s"PSS"movies"PSS"*.???",BaseDirectory);
+				sprintf(ret,"%s"PSS"movies"PSS"*.???",BaseDirectory.c_str());
 			break;
-		case FCEUMKF_MOVIEGLOB2:sprintf(ret,"%s"PSS"*.???",BaseDirectory);break;
+		case FCEUMKF_MOVIEGLOB2:sprintf(ret,"%s"PSS"*.???",BaseDirectory.c_str());break;
 		case FCEUMKF_STATEGLOB:
 			if(odirs[FCEUIOD_STATES])
 				sprintf(ret,"%s"PSS"%s*.fc?",odirs[FCEUIOD_STATES],FileBase);
 			else
-				sprintf(ret,"%s"PSS"fcs"PSS"%s*.fc?",BaseDirectory,FileBase);
+				sprintf(ret,"%s"PSS"fcs"PSS"%s*.fc?",BaseDirectory.c_str(),FileBase);
 			break;
 	}
 	

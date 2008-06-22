@@ -166,15 +166,23 @@ void updateGameDependentMenus(unsigned int enable)
 //Updates menu items which need to be checked or unchecked.
 void UpdateCheckedMenuItems()
 {
-	static int *polo[] = { &genie, &pal_emulation, &status_icon };
+	bool spr, bg;
+	FCEUI_GetRenderPlanes(spr,bg);
+
+	static int *polo[] = { &genie, &pal_emulation, &status_icon};
 	static int polo2[]={ MENU_GAME_GENIE, MENU_PAL, MENU_SHOW_STATUS_ICON };
 	int x;
+
+	
 
 	// Check or uncheck the necessary menu items
 	for(x = 0; x < sizeof(polo) / sizeof(*polo); x++)
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
+
+	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
@@ -871,6 +879,20 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//						   DoVideoConfigFix();
 				SetMainWindowStuff();
 				break;
+			
+			case MENU_DISPLAY_BG:
+			case MENU_DISPLAY_OBJ:
+				{
+					bool spr, bg;
+					FCEUI_GetRenderPlanes(spr,bg);
+					if(LOWORD(wParam)==MENU_DISPLAY_BG)
+						bg = !bg;
+					else
+						spr = !spr;
+					FCEUI_SetRenderPlanes(spr,bg);
+				}
+				break;
+
 
 			case MENU_CHEATS:
 				ConfigCheats(hWnd);
@@ -1108,6 +1130,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		goto proco;
 	case WM_ENTERMENULOOP:
+		UpdateCheckedMenuItems();
+
 		EnableMenuItem(fceumenu,MENU_RESET,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RESET)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));

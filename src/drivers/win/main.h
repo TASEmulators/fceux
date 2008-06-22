@@ -2,6 +2,7 @@
 #define WIN_MAIN_H
 
 #include "common.h"
+#include <string>
 
 // #defines
 
@@ -44,9 +45,7 @@ static char *gfsdir=0;
 
 extern char* directory_names[13];
 
-/**
-* Contains the names of the default directories.
-**/
+///Contains the names of the default directories.
 static const char *default_directory_names[12] = {
 	"",         // roms
 	"sav",      // nonvol
@@ -88,10 +87,8 @@ extern int ntsccol, ntsctint, ntschue;
 
 static int changerecursive=0;
 
-/**
-* Contains the base directory of FCE
-**/
-extern char BaseDirectory[2048];
+/// Contains the base directory of FCE
+extern std::string BaseDirectory;
 
 extern int soundo;
 extern int eoptions;

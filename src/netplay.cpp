@@ -155,7 +155,6 @@ static FILE *FetchFile(uint32 remlen)
 	uLongf len;
 	char *buf;  
 	FILE *fp;
-	char *fn;   
 
 	if(clen > 500000)  // Sanity check
 	{
@@ -164,17 +163,14 @@ static FILE *FetchFile(uint32 remlen)
 	}
 
 	//printf("Receiving file: %d...\n",clen);
-	fn = strdup(FCEU_MakeFName(FCEUMKF_NPTEMP,0,0).c_str());
-	if((fp = fopen(fn,"w+b")))
+	if(fp = tmpfile())
 	{
 		cbuf = (char *)malloc(clen); //mbg merge 7/17/06 added cast
 		if(!FCEUD_RecvData(cbuf, clen))
 		{
 			NetError();
-			unlink(fn);
 			fclose(fp);
 			free(cbuf);
-			free(fn);
 			return(0);
 		}
 
@@ -182,10 +178,8 @@ static FILE *FetchFile(uint32 remlen)
 		if(len > 500000)    // Another sanity check
 		{
 			NetError();
-			unlink(fn);
 			fclose(fp);
 			free(cbuf);
-			free(fn);
 			return(0);
 		}
 		buf = (char *)malloc(len); //mbg merge 7/17/06 added cast
@@ -194,11 +188,8 @@ static FILE *FetchFile(uint32 remlen)
 		fwrite(buf, 1, len, fp);
 		free(buf);
 		fseek(fp, 0, SEEK_SET);
-		unlink(fn);
-		free(fn);
 		return(fp);
 	}
-	free(fn);
 	return(0);
 }
 

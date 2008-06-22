@@ -121,23 +121,21 @@ double winsizemulx = 1, winsizemuly = 1;
 int genie = 0;
 int pal_emulation = 0;
 int ntsccol = 0, ntsctint, ntschue;
-char BaseDirectory[2048];
+std::string BaseDirectory;
 
 
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, basicbot, macro, input presets, lua scripts, base
 char *directory_names[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-/**
-* Handle of the main window.
-**/
+//Handle of the main window.
 HWND hAppWnd = 0;
 
 uint32 goptions = GOO_DISABLESS;
 
-/* Some timing-related variables (now ignored). */
-int maxconbskip = 32;             /* Maximum consecutive blit skips. */
-int ffbskip = 32;              /* Blit skips per blit when FF-ing */
+// Some timing-related variables (now ignored).
+int maxconbskip = 32;             //Maximum consecutive blit skips.
+int ffbskip = 32;              //Blit skips per blit when FF-ing
 
 HINSTANCE fceu_hInstance;
 HACCEL fceu_hAccel;
@@ -165,18 +163,16 @@ int srendlinep = 0;
 int erendlinep = 239;
 
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
-int closeGame = 0;
+bool closeGame = false;
+
 
 // qfox 09/17/06: moved the skipcount outside because it was completely pointless
 //                in there.
-/**
- * Counts the number of frames that have not been displayed
- * Used for the bot, to skip frames (and save time).
- **/
+//Counts the number of frames that have not been displayed
+//Used for the bot, to skip frames (and save time).
 int skipcount = 0;
 
 // Internal functions
-
 void SetDirs()
 {
 	int x;
@@ -213,31 +209,22 @@ void SetDirs()
 	}
 }
 
-/**
-* Creates a directory.
-*
-* @param dirname Name of the directory to create.
-**/
+/// Creates a directory.
+/// @param dirname Name of the directory to create.
 void DirectoryCreator(const char* dirname)
 {
 	CreateDirectory(dirname, 0);
 }
 
-/**
-* Removes a directory.
-*
-* @param dirname Name of the directory to remove.
-**/
+/// Removes a directory.
+/// @param dirname Name of the directory to remove.
 void DirectoryRemover(const char* dirname)
 {
 	RemoveDirectory(dirname);
 }
 
-/**
-* Used to walk over the default directories array.
-*
-* @param callback Callback function that's called for every default directory name.
-**/
+/// Used to walk over the default directories array.
+/// @param callback Callback function that's called for every default directory name.
 void DefaultDirectoryWalker(void (*callback)(const char*))
 {
 	unsigned int curr_dir;
@@ -249,7 +236,7 @@ void DefaultDirectoryWalker(void (*callback)(const char*))
 			sprintf(
 				TempArray,
 				"%s\\%s",
-				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory,
+				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory.c_str(),
 				default_directory_names[curr_dir]
 			);
 
@@ -258,40 +245,31 @@ void DefaultDirectoryWalker(void (*callback)(const char*))
 	}
 }
 
-/* Remove empty, unused directories. */
+/// Remove empty, unused directories.
 void RemoveDirs()
 {
 	DefaultDirectoryWalker(DirectoryRemover);
 }
 
-/**
-* Creates the default directories.
-**/
+///Creates the default directories.
 void CreateDirs()
 {
 	DefaultDirectoryWalker(DirectoryCreator);
 }
 
 
-/**
-* Fills the BaseDirectory string
-*
-* TODO: Potential buffer overflow caused by limited size of BaseDirectory?
-**/
+
+//Fills the BaseDirectory string
+//TODO: Potential buffer overflow caused by limited size of BaseDirectory?
 void GetBaseDirectory(void)
 {
-	unsigned int i;
-	GetModuleFileName(0, (LPTSTR)BaseDirectory, sizeof(BaseDirectory) - 1);
+	char temp[2048];
+	GetModuleFileName(0, temp, 2048);
+	BaseDirectory = temp;
 
-	// Search for the last / or \ in the directory and terminate the string  there
-	for(i = strlen(BaseDirectory); i >= 0 ; i--)
-	{
-		if(BaseDirectory[i]=='\\' || BaseDirectory[i]=='/')
-		{
-			BaseDirectory[i] = 0;
-			return;
-		}
-	}
+	size_t truncate_at = BaseDirectory.find_last_of("\\/");
+	if(truncate_at != std::string::npos)
+		BaseDirectory = BaseDirectory.substr(0,truncate_at);
 }
 
 int BlockingCheck()
@@ -348,11 +326,8 @@ void UpdateRendBounds()
 	FCEUI_SetRenderedLines(srendlinen, erendlinen, srendlinep, erendlinep);
 }
 
-/**
-* Shows an error message in a message box.
-*
-* @param errormsg Text of the error message.
-**/
+/// Shows an error message in a message box.
+///@param errormsg Text of the error message.
 void FCEUD_PrintError(const char *errormsg)
 {
 	AddLogText(errormsg, 1);
@@ -370,54 +345,49 @@ void FCEUD_PrintError(const char *errormsg)
 	}
 }
 
-/**
-* Generates a compiler identification string.
-*
-* @return Compiler identification string
-**/
+///Generates a compiler identification string.
+/// @return Compiler identification string
 const char *FCEUD_GetCompilerString()
 {
 	return 	__COMPILER__STRING__;
 }
 
-/**
-* Displays the about box
-**/
+//Displays the about box
 void ShowAboutBox()
 {
 	MessageBox(hAppWnd, FCEUI_GetAboutString(), FCEU_NAME, MB_OK);
 }
 
-/**
-* Exits FCE Ultra
-**/
+//Exits FCE Ultra
 void DoFCEUExit()
 {
-	/* Wolfenstein 3D had cute exit messages. */
-	char *emsg[4]={"Are you sure you want to leave?  I'll become lonely!",
-		"If you exit, I'll... EAT YOUR MOUSE.",
-		"You can never really exit, you know.",
-		"E-x-i-t?"
-	};
-
-	KillDebugger(); //mbg merge 7/19/06 added
-
-	if(exiting)    /* Eh, oops.  I'll need to try to fix this later. */
+	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
 
 	if(goptions & GOO_CONFIRMEXIT)
 	{
+		//Wolfenstein 3D had cute exit messages.
+		const char * const emsg[4]={"Are you sure you want to leave?  I'll become lonely!",
+			"If you exit, I'll... EAT YOUR MOUSE.",
+			"You can never really exit, you know.",
+			"E-x-i-t?"
+		};
+
 		if(IDYES != MessageBox(hAppWnd, emsg[rand() & 3], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
 		{
 			return;
 		}
 	}
 
+	CloseMemoryWatch();	
+
+	KillDebugger(); //mbg merge 7/19/06 added
+
 	FCEUI_StopMovie();
 	FCEUD_AviStop();
 
 	exiting = 1;
-	closeGame = 1;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
+	closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
 }
 
 void FCEUD_OnCloseGame()
@@ -459,7 +429,7 @@ int DriverInitialize()
 static void DriverKill(void)
 { 
 	// Save config file
-	sprintf(TempArray, "%s/fceu98.cfg", BaseDirectory);
+	sprintf(TempArray, "%s/fceu98.cfg", BaseDirectory.c_str());
 	SaveConfig(TempArray);
 
 	DestroyInput();
@@ -551,10 +521,7 @@ void do_exit()
 	FCEUI_Kill();
 }
 
-/**
-* Puts the default directory names into the elements of the directory_names array
-* that aren't already defined.
-**/
+//Puts the default directory names into the elements of the directory_names array that aren't already defined.
 void initDirectories()
 {
 	for (unsigned int i = 0; i < NUMBER_OF_DEFAULT_DIRECTORIES; i++)
@@ -564,7 +531,7 @@ void initDirectories()
 			sprintf(
 				TempArray,
 				"%s\\%s",
-				directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] ? directory_names[NUMBER_OF_DEFAULT_DIRECTORIES] : BaseDirectory,
+				directory_names[i] ? directory_names[i] : BaseDirectory.c_str(),
 				default_directory_names[i]
 			);
 
@@ -575,8 +542,8 @@ void initDirectories()
 
 	if (directory_names[NUMBER_OF_DIRECTORIES - 1] == 0)
 	{
-		directory_names[NUMBER_OF_DIRECTORIES - 1] = (char*)malloc(strlen(BaseDirectory) + 1);
-		strcpy(directory_names[NUMBER_OF_DIRECTORIES - 1], BaseDirectory);
+		directory_names[NUMBER_OF_DIRECTORIES - 1] = (char*)malloc(BaseDirectory.size() + 1);
+		strcpy(directory_names[NUMBER_OF_DIRECTORIES - 1], BaseDirectory.c_str());
 	}
 }
 
@@ -607,7 +574,7 @@ int main(int argc,char *argv[])
 	GetBaseDirectory();
 
 	// Load the config information
-	sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory);
+	sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory.c_str());
 	LoadConfig(TempArray);
 
 	initDirectories();

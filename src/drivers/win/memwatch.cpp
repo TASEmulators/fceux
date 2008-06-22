@@ -584,19 +584,22 @@ fileChanged = false;
 
 void CloseMemoryWatch()
 {
-			SaveStrings();
-			
-			//TODO: save window x,y and last file opened to some variables then save them to config when fceu closes
-			if (fileChanged==true)
+	if(hwndMemWatch)
+	{
+		SaveStrings();
+
+		//TODO: save window x,y and last file opened to some variables then save them to config when fceu closes
+		if (fileChanged==true)
+		{
+			if(MessageBox(hwndMemWatch, "Save Changes?", "Memory Watch Settings", MB_YESNO)==IDYES)
 			{
-				if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
-					{
-						SaveMemWatch();
-					}
+				SaveMemWatch();
 			}
-		
-	DestroyWindow(hwndMemWatch);
-	hwndMemWatch=0;
+		}
+
+		DestroyWindow(hwndMemWatch);
+		hwndMemWatch=0;
+	}
 
 }
 

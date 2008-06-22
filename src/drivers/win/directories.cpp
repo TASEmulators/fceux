@@ -3,12 +3,8 @@
 #include "window.h"
 #include "gui.h"
 
-/**
-* Processes information from the Directories selection dialog after
-* the dialog was closed.
-*
-* @param hwndDlg Handle of the dialog window.
-**/
+///Processes information from the Directories selection dialog after the dialog was closed.
+///@param hwndDlg Handle of the dialog window.
 void CloseDirectoriesDialog(HWND hwndDlg)
 {
 	// Update the information from the screenshot naming checkbox
@@ -90,9 +86,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 	EndDialog(hwndDlg, 0);
 }
 
-/**
-* Callback function for the directories configuration dialog.
-**/
+///Callback function for the directories configuration dialog.
 static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -167,9 +161,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 	return 0;
 }
 
-/**
-* Shows the dialog for configuring the standard directories.
-**/
+//Shows the dialog for configuring the standard directories.
 void ConfigDirectories()
 {
 	DialogBox(fceu_hInstance, "DIRCONFIG", hAppWnd, DirConCallB);

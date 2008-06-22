@@ -646,9 +646,12 @@ void InputData(char *input){
 		if(EditingMode == 0)BWrite[addr](addr,data[i]);
 		if(EditingMode == 1){
 			addr &= 0x3FFF;
-			if(addr < 0x2000)VPage[addr>>10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
-			if((addr > 0x2000) && (addr < 0x3F00))vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
-			if((addr > 0x3F00) && (addr < 0x3FFF))PALRAM[addr&0x1F] = data[i];
+			if(addr < 0x2000)
+				VPage[addr>>10][addr] = data[i]; //todo: detect if this is vrom and turn it red if so
+			if((addr >= 0x2000) && (addr < 0x3F00))
+				vnapage[(addr>>10)&0x3][addr&0x3FF] = data[i]; //todo: this causes 0x3000-0x3f00 to mirror 0x2000-0x2f00, is this correct?
+			if((addr >= 0x3F00) && (addr < 0x3FFF))
+				PALRAM[addr&0x1F] = data[i];
 		}
 		if(EditingMode == 2){
 			ApplyPatch(addr,datasize,data);

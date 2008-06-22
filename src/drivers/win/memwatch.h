@@ -1,5 +1,6 @@
 void UpdateMemWatch();
 void CreateMemWatch();
+void CloseMemoryWatch();
 void AddMemWatch(char memaddress[32]);
 extern char * MemWatchDir;
 extern bool MemWatchLoadOnStart;

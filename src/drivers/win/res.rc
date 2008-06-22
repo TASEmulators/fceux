@@ -67,6 +67,9 @@ BEGIN
         MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
         MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
+        MENUITEM SEPARATOR
+        MENUITEM "Display BG",                  MENU_DISPLAY_BG
+        MENUITEM "Display OBJ",                 MENU_DISPLAY_OBJ
     END
     POPUP "&Config"
     BEGIN

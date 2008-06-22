@@ -86,8 +86,8 @@ void FCEUI_SetSnapName(int a);
 //0 to keep 8-sprites limitation, 1 to remove it
 void FCEUI_DisableSpriteLimitation(int a);
 
-//-1 = no change, 0 = show, 1 = hide, 2 = internal toggle
-void FCEUI_SetRenderDisable(int sprites, int bg);
+void FCEUI_SetRenderPlanes(bool sprites, bool bg);
+void FCEUI_GetRenderPlanes(bool& sprites, bool& bg);
 
 //name=path and file to load.  returns 0 on failure, 1 on success
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
@@ -125,7 +125,7 @@ void FCEUI_FrameSkip(int x);
 void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall);
 
 //Sets the base directory(save states, snapshots, etc. are saved in directories below this directory.
-void FCEUI_SetBaseDirectory(const char *dir);
+void FCEUI_SetBaseDirectory(std::string const & dir);
 
 //Tells FCE Ultra to copy the palette data pointed to by pal and use it.
 //Data pointed to by pal needs to be 64*3 bytes in length.

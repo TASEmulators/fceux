@@ -38,7 +38,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1);
 #define FCEUMKF_IPS          8
 #define FCEUMKF_FDS          9
 #define FCEUMKF_MOVIE        10
-#define FCEUMKF_NPTEMP       11
+//#define FCEUMKF_NPTEMP       11 //mbg 6/21/08 - who needs this..?
 #define FCEUMKF_MOVIEGLOB    12
 #define FCEUMKF_STATEGLOB    13
 #define FCEUMKF_MOVIEGLOB2   14

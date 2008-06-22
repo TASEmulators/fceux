@@ -54,71 +54,70 @@ extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
 
-/**
-* Structure that contains configuration information
-**/
+
+//Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
 
-        ACS(recent_files[0]),
-        ACS(recent_files[1]),
-        ACS(recent_files[2]),
-        ACS(recent_files[3]),
-        ACS(recent_files[4]),
-        ACS(recent_files[5]),
-        ACS(recent_files[6]),
-        ACS(recent_files[7]),
-        ACS(recent_files[8]),
-        ACS(recent_files[9]),
+	ACS(recent_files[0]),
+	ACS(recent_files[1]),
+	ACS(recent_files[2]),
+	ACS(recent_files[3]),
+	ACS(recent_files[4]),
+	ACS(recent_files[5]),
+	ACS(recent_files[6]),
+	ACS(recent_files[7]),
+	ACS(recent_files[8]),
+	ACS(recent_files[9]),
 
-		ACS(memw_recent_files[0]),
-        ACS(memw_recent_files[1]),
-        ACS(memw_recent_files[2]),
-        ACS(memw_recent_files[3]),
-        ACS(memw_recent_files[4]),
-              
+	ACS(memw_recent_files[0]),
+	ACS(memw_recent_files[1]),
+	ACS(memw_recent_files[2]),
+	ACS(memw_recent_files[3]),
+	ACS(memw_recent_files[4]),
 
-        AC(ntsccol),AC(ntsctint),AC(ntschue),
 
-        NAC("palyo",pal_emulation),
+	AC(ntsccol),AC(ntsctint),AC(ntschue),
+
+	NAC("palyo",pal_emulation),
 	NAC("genie",genie),
 	NAC("fs",fullscreen),
 	NAC("vgamode",vmod),
 	NAC("sound",soundo),
-        NAC("sicon",status_icon),
+	NAC("sicon",status_icon),
 
-        ACS(gfsdir),
+	ACS(gfsdir),
 
-        NACS("odroms",directory_names[0]),
-        NACS("odnonvol",directory_names[1]),
-        NACS("odstates",directory_names[2]),
-        NACS("odfdsrom",directory_names[3]),
-        NACS("odsnaps",directory_names[4]),
-        NACS("odcheats",directory_names[5]),
-        NACS("odmovies",directory_names[6]),
-        NACS("odmemwatch",directory_names[7]),
-        NACS("odbasicbot",directory_names[8]),
-        NACS("odmacro",directory_names[9]),
-        NACS("odinput",directory_names[10]),
-        NACS("odlua",directory_names[11]),
-        NACS("odbase",directory_names[12]),
+	NACS("odroms",directory_names[0]),
+	NACS("odnonvol",directory_names[1]),
+	NACS("odstates",directory_names[2]),
+	NACS("odfdsrom",directory_names[3]),
+	NACS("odsnaps",directory_names[4]),
+	NACS("odcheats",directory_names[5]),
+	NACS("odmovies",directory_names[6]),
+	NACS("odmemwatch",directory_names[7]),
+	NACS("odbasicbot",directory_names[8]),
+	NACS("odmacro",directory_names[9]),
+	NACS("odinput",directory_names[10]),
+	NACS("odlua",directory_names[11]),
+	NACS("odbase",directory_names[12]),
 
-        AC(winspecial),
-        AC(winsizemulx),
-        AC(winsizemuly),
-        NAC("saspectw987",saspectw),
-        NAC("saspecth987",saspecth),
+	AC(winspecial),
+	AC(winsizemulx),
+	AC(winsizemuly),
+	NAC("saspectw987",saspectw),
+	NAC("saspecth987",saspecth),
 
 	AC(soundrate),
-        AC(soundbuftime),
+	AC(soundbuftime),
 	AC(soundoptions),
 	AC(soundquality),
-        AC(soundvolume),
+	AC(soundvolume),
 
-        AC(goptions),
+	AC(goptions),
 	NAC("eoptions",eoptions),
-        NACA("cpalette",cpalette),
+	NACA("cpalette",cpalette),
 
-        NACA("InputType",InputType),
+	NACA("InputType",InputType),
 
 	NAC("vmcx",vmodes[0].x),
 	NAC("vmcy",vmodes[0].y),
@@ -126,24 +125,24 @@ static CFGSTRUCT fceuconfig[] = {
 	NAC("vmcf",vmodes[0].flags),
 	NAC("vmcxs",vmodes[0].xscale),
 	NAC("vmcys",vmodes[0].yscale),
-        NAC("vmspecial",vmodes[0].special),
+	NAC("vmspecial",vmodes[0].special),
 
-        NAC("srendline",srendlinen),
-        NAC("erendline",erendlinen),
-        NAC("srendlinep",srendlinep),
-        NAC("erendlinep",erendlinep),
+	NAC("srendline",srendlinen),
+	NAC("erendline",erendlinen),
+	NAC("srendlinep",srendlinep),
+	NAC("erendlinep",erendlinep),
 
-        AC(disvaccel),
+	AC(disvaccel),
 	AC(winsync),
-        NAC("988fssync",fssync),
+	NAC("988fssync",fssync),
 
-        AC(ismaximized),
-        AC(maxconbskip),
-        AC(ffbskip),
+	AC(ismaximized),
+	AC(maxconbskip),
+	AC(ffbskip),
 
-        ADDCFGSTRUCT(NetplayConfig),
-        ADDCFGSTRUCT(InputConfig),
-        ADDCFGSTRUCT(HotkeyConfig),
+	ADDCFGSTRUCT(NetplayConfig),
+	ADDCFGSTRUCT(InputConfig),
+	ADDCFGSTRUCT(HotkeyConfig),
 
 	AC(autoHoldKey),
 	AC(autoHoldClearKey),
@@ -188,7 +187,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(pauseAfterPlayback),
 
 	//ACS(memwLastfile[2048]),
-		ENDCFGSTRUCT
+	ENDCFGSTRUCT
 };
 
 void SaveConfig(const char *filename)

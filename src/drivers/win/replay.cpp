@@ -40,7 +40,7 @@ static char* GetReplayPath(HWND hwndDlg)
 			else
 				strcpy(szChoice, szTemp);
 
-			SetCurrentDirectory(BaseDirectory);
+			SetCurrentDirectory(BaseDirectory.c_str());
 
 			_splitpath(szChoice, szDrive, szDirectory, szFilename, szExt);
 			if(szDrive[0]=='\0' && szDirectory[0]=='\0')
@@ -374,7 +374,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						//if we get here, then we had a match
 
 						char relative[MAX_PATH];
-						AbsoluteToRelative(relative, filename, BaseDirectory);
+						AbsoluteToRelative(relative, filename, BaseDirectory.c_str());
 						SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
 					} while(FindNextFile(hFind, &wfd));
 					FindClose(hFind);
@@ -453,7 +453,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							if(GetOpenFileName(&ofn))
 							{
 								char relative[MAX_PATH];
-								AbsoluteToRelative(relative, szFile, BaseDirectory);
+								AbsoluteToRelative(relative, szFile, BaseDirectory.c_str());
 
 								LONG lOtherIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
 								if(lOtherIndex != CB_ERR)
