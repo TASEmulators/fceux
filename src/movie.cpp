@@ -338,6 +338,9 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "port0 " << ports[0] << endl;
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
+
+	for(int i=0;i<comments.size();i++)
+		*os << "comment " << comments[i] << endl;
 	
 	if(binary)
 		*os << "binary 1" << endl;

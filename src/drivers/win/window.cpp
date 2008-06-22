@@ -29,8 +29,8 @@
 #include "wave.h"
 #include "input.h"
 #include "video.h"
-#include "../../input.h"
-#include "../../fceu.h"
+#include "input.h"
+#include "fceu.h"
 
 #include "memwatch.h"
 #include "ppuview.h"
@@ -55,6 +55,7 @@
 #include "gui.h"
 #include "help.h"
 #include "movie.h"
+#include "utils/xstring.h"
 
 #include <fstream>
 
@@ -133,6 +134,7 @@ static void ConvertFCM(HWND hwndOwner)
 	{
 		std::vector<std::string> todo;
 
+		//build a list of movies to convert. this might be one, or it might be many, depending on what the user selected
 		if(ofn.nFileExtension==0)
 		{
 			//multiselect
@@ -150,17 +152,29 @@ static void ConvertFCM(HWND hwndOwner)
 			todo.push_back(ofn.lpstrFile);
 		}
 
+		SetCursor(LoadCursor(0,IDC_WAIT));
+
+		//convert each movie
+		int okcount = 0;
 		for(uint32 i=0;i<todo.size();i++)
 		{
 			std::string infname = todo[i];
 			std::string outname = infname + ".fm2";
 			MovieData md;
-			if(convert_fcm(md, infname)==FCM_CONVERTRESULT_SUCCESS)
+			EFCM_CONVERTRESULT result = convert_fcm(md, infname);
+			if(result==FCM_CONVERTRESULT_SUCCESS)
 			{
+				okcount++;
 				std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
 				md.dump(outf,false);
 				delete outf;
+			} else {
+				std::string msg = "Failure converting " + infname + "\r\n\r\n" + EFCM_CONVERTRESULT_message(result);
+				MessageBox(hwndOwner,msg.c_str(),"Failure converting fcm", 0);
 			}
+
+			std::string okmsg = "Converted " + stditoa(okcount) + " movie(s). There were " + stditoa(todo.size()-okcount) + " failure(s).";
+			MessageBox(hwndOwner,okmsg.c_str(),"FCM Conversion results", 0);
 		}
 	}
 

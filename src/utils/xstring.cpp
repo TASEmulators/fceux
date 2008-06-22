@@ -470,3 +470,16 @@ std::string stditoa(int n)
 	return tempbuf;
 }
 
+
+std::string readNullTerminatedAscii(std::istream* is)
+{
+	std::string ret;
+	ret.reserve(50);
+	for(;;) 
+	{
+		int c = is->get();
+		if(c == 0) break;
+		else ret += (char)c;
+	}
+	return ret;
+}

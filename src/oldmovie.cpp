@@ -1,9 +1,11 @@
 #include "types.h"
 #include "fceu.h"
 #include "driver.h"
+#include "netplay.h"
 
 #include "oldmovie.h"
 #include "movie.h"
+#include "utils/xstring.h"
 
 #include <fstream>
 
@@ -42,6 +44,7 @@ using namespace std;
 //-------
 
 static uint8 joop[4];
+static uint8 joopcmd;
 static uint32 framets = 0;
 static uint32 frameptr = 0;
 static uint8* moviedata = NULL;
@@ -53,8 +56,6 @@ static uint32 savestate_offset = 0;
 static uint32 nextts = 0;
 static int32 nextd = 0;
 
-
-static int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 
 
 //backwards compat
@@ -442,7 +443,7 @@ static int movie_readchar()
 }
 
 
-static void FCEUMOV_AddJoy()
+static void _addjoy()
 {
 	while(nextts == framets || nextd == -1)
 	{
@@ -453,8 +454,10 @@ static void FCEUMOV_AddJoy()
 		{
 			if(nextd&0x80)
 			{
-				//puts("Egads");
 				//FCEU_DoSimpleCommand(nextd&0x1F);
+				int command = nextd&0x1F;
+				if(command = FCEUNPCMD_RESET)
+					joopcmd = MOVIECMD_RESET;
 			}
 			else
 				joop[(nextd >> 3)&0x3] ^= 1 << (nextd&0x7);
@@ -500,6 +503,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 
 	uint32 framecount;
 	uint32 rerecord_count;
+	int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 
 
 	ifstream* fp = (ifstream*)FCEUD_UTF8_fstream(fname, "rb");
@@ -543,35 +547,35 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	read32le(&savestate_offset, fp);
 	read32le(&firstframeoffset, fp);
 
+	//read header values
+	fp->read((char*)&md.romChecksum,16);
+	read32le((uint32*)&md.emuVersion,fp);
+
+	md.romFilename = readNullTerminatedAscii(fp);
+	md.comments.push_back("author " + readNullTerminatedAscii(fp));
+
 	//  FCEU_PrintError("flags[0] & MOVIE_FLAG_NOSYNCHACK=%d",flags[0] & MOVIE_FLAG_NOSYNCHACK);
 	if(flags[0] & MOVIE_FLAG_NOSYNCHACK)
 		movieSyncHackOn=0;
 	else
 		movieSyncHackOn=1;
 
-	//if(flags[0] & MOVIE_FLAG_PAL)
-	//if(flags[0] & MOVIE_FLAG_FROM_POWERON)
-	//{
-	//	//don't need to load a savestate
-	//	//there shouldn't be a savestate!
-	//	if(savestate_offset != 0xFFFFFFFF)
-	//		FCEU_PrintError("Savestate found in a start-from-poweron movie!");
-	//}
-	//else
-	//{
-	//	if(savestate_offset == 0xFFFFFFFF)
-	//		FCEU_PrintError("No savestate found in a start-from-savestate movie!");
+	if(flags[0] & MOVIE_FLAG_PAL)
+		md.palFlag = true;
 
-	//	if(fseek(fp, savestate_offset, SEEK_SET))
-	//	{
-	//		fclose(fp);
-	//		return;
-	//	}
-
-	//	if(!FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP)) 
-	//		return;
-	//}
-
+	bool initreset = false;
+	if(flags[0] & MOVIE_FLAG_FROM_POWERON)
+	{
+		//don't need to load a savestate
+	}
+	else if(flags[0] & MOVIE_FLAG_FROM_RESET)
+	{
+		initreset = true;
+	}
+	else
+	{
+		return FCM_CONVERTRESULT_STARTFROMSAVESTATENOTSUPPORTED;
+	}
 
 	//analyze input types?
 	//ResetInputTypes();
@@ -589,6 +593,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	//prepare output structure
 	md.rerecordCount = rerecord_count;
 	md.records.resize(framecount);
+	md.guid.newGuid();
 
 	//begin decoding.
 	//joymask is used to look for any joystick that has input.
@@ -596,8 +601,11 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	uint8 joymask[4] = {0,0,0,0};
 	for(uint32 i=0;i<framecount;i++)
 	{
-		FCEUMOV_AddJoy();
-		md.records[i].commands = 0;
+		joopcmd = 0;
+		if(i==0 && initreset)
+			joopcmd = MOVIECMD_RESET;
+		_addjoy();
+		md.records[i].commands = joopcmd;
 		for(int j=0;j<4;j++) {
 			joymask[j] |= joop[j];
 			md.records[i].joysticks[j] = joop[j];
@@ -613,7 +621,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	else
 	{
 		md.fourscore = false;
-		md.ports[0] = md.ports[1] = SI_GAMEPAD ;
+		md.ports[0] = md.ports[1] = SI_GAMEPAD;
 	}
 
 	free(moviedata);

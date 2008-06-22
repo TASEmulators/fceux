@@ -57,6 +57,8 @@ char *U16ToHexStr(uint16 a);
 
 std::string stditoa(int n);
 
+std::string readNullTerminatedAscii(std::istream* is);
+
 //extracts a decimal uint from an istream
 template<typename T> T templateIntegerDecFromIstream(std::istream* is)
 {

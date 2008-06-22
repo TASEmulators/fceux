@@ -119,6 +119,7 @@ public:
 	std::string romFilename;
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
+	std::vector<std::string> comments;
 	//this is the RERECORD COUNT. please rename variable.
 	int rerecordCount;
 	FCEU_Guid guid;
