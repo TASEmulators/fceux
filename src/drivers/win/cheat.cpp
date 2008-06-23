@@ -518,16 +518,11 @@ void ConfigCheats(HWND hParent) {
 	if (!CheatWindow) {
 		selcheat=-1;
 		CheatWindow=1;
-		if (CheatStyle) hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
+		if (CheatStyle) pwindow = hCheat = CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
 		else DialogBox(fceu_hInstance,"CHEATCONSOLE",hParent,CheatConsoleCallB);
 	}
 	else
 	 SetFocus(hCheat);
-
-	if(!pwindow)
-		pwindow=CreateDialog(fceu_hInstance,"CHEATCONSOLE",NULL,CheatConsoleCallB);
-	else
-		SetFocus(pwindow);
 }
 
 void UpdateCheatList()
