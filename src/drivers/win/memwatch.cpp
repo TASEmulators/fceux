@@ -537,9 +537,9 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 {
 	int rnum=memwRFileNumber;
 		if (rnum > MEMW_MAX_NUMBER_OF_RECENT_FILES) return; //just in case
-		if (rnum == NULL) return; //If no recent files exist just return.  Useful for Load last file on startup (or if something goes screwy)
-	
+		
 	char* x = memw_recent_files[rnum];
+	if (x == NULL) return; //If no recent files exist just return.  Useful for Load last file on startup (or if something goes screwy)
 	char watchfcontents[2048];
 
 	FILE *fp=FCEUD_UTF8fopen(x,"r");
