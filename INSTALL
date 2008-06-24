@@ -9,5 +9,3 @@ Python (tested with 2.5); (Ubuntu package name:  python)
 PyGTK, and GTK;  (Ubuntu package name: (python-gtk2 libgtk2.0-0)
 FCE UltraX - You're going to need the latest fceux for gfceu .7 to work
 
-Optional:
-GnomeVFS 2 (tested with 2.14.1) (Ubuntu package name libgnomevfs2-0 )

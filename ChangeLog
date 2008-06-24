@@ -1,3 +1,4 @@
+* No longer requires GnomeVFS
 * Major code cleanup
 * Now requires pygtk >= 2.12
 * Transitioned from gtk.glade to gtk.Builder.

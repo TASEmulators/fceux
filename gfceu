@@ -41,17 +41,6 @@ except ImportError:
   On Debian based systems (like Ubuntu), try this command:\n\
   sudo apt-get install python-gtk2 libgtk2.0-0"
   
-try:
-  import gnomevfs
-  have_gnomevfs = True
-except ImportError:
-  print "The gnomevfs libraries cannot be found.\n\
-  To enable ROM loading over the network, ensure that gnomevfs is installed on\
-  this system.\n\
-  On Debian based systems (like Ubuntu), try this command:\n\
-  sudo apt-get install python-gtk2 libgnomevfs2-0"
-  have_gnomevfs = False
-  
 
 
 
@@ -424,34 +413,8 @@ class GfceuApp:
     if widgets.get_object("rom_entry").get_text() == '':
       self.msg('Please specify a ROM to open in the main tab.', True)
       return
-    if options.network_rom:
-      try:
-        myvfs = gnomevfs.Handle(options.romfile)
-        # FIXME
-        # Smarter way of handling this?  Copying direct error information?
-      except gnomevfs.HostNotFoundError:
-        gfceu_error("Remote ROM host not found.", 7, True, False)
-        return
-      except:
-        gfceu_error("Failed to open the network ROM.", 6, True, False)
-        return
-      myfile = file('/tmp/gfceu.nes', 'wb')
-      while 1:
-        try:
-    	    myfile.write(myvfs.read(1024))
-        except gnomevfs.EOFError:
-  	      break
-        except:
-  	      gfceu_error("Failed to open the network ROM.", 10, True, False)
-  	      return
       
-      myvfs.close()
-      myfile.close()
-      romfile = '/tmp/gfceu.nes'
-    else:
-      romfile = options.romfile
-      
-    self.launch('"'+romfile+'"')
+    self.launch('"'+ options.romfile +'"')
     
   def about_button_clicked(self, menuitem, data=None):
     widgets.get_object("about_dialog").set_name('GNOME FCE Ultra '+version)
@@ -465,11 +428,7 @@ class GfceuApp:
             gtk.FILE_CHOOSER_ACTION_OPEN,
   			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
   			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-    if have_gnomevfs:
-      chooser.set_property("local-only", False)
-    else:
-      chooser.set_property("local-only", True)
-
+    chooser.set_property("local-only", False)
     chooser.set_default_response(gtk.RESPONSE_OK)
     
     filter=gtk.FileFilter()
