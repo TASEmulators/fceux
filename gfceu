@@ -72,7 +72,6 @@ class game_options:
   host_port = 4046
   host_pass = ''
   no_network_radio = True
-  network_rom = False
   
 
 def load_options():
