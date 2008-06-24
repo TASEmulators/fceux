@@ -29,7 +29,7 @@ import os
 import pickle
 import shutil
 from optparse import OptionParser
-from subprocess import Popen
+#from subprocess import Popen
 
 try:
   import pygtk
@@ -43,9 +43,6 @@ except ImportError:
   
 
 
-
-  # # # # # # # #
-# GFCEU Functions
 
 class game_options:
   # sound
@@ -194,7 +191,7 @@ def find_binary(file):
   return None
   
   
-##############################################################################
+# # # # # # # # # # # # # # # # #
 # Globals
 options = None
 appconfigdir = os.getenv('HOME') + '/.'+ title
@@ -290,13 +287,13 @@ class GfceuApp:
       print 'Try reinstalling the application.'
       sys.exit(1)
     
-    #try:
-    print "Using: " + glade_file
-    widgets = gtk.Builder()
-    widgets.add_from_file(glade_file)
-    widgets.connect_signals(self)
-    #except:
-    #  self.print_error("Couldn't load the glade UI file", 24)
+    try:
+      print "Using: " + glade_file
+      widgets = gtk.Builder()
+      widgets.add_from_file(glade_file)
+      widgets.connect_signals(self)
+    except:
+      self.print_error("Couldn't load the UI data.", 24)
     
     widgets.get_object("main_window").show_all()
       
@@ -534,13 +531,8 @@ class GfceuApp:
 
 
 if __name__ == '__main__':
-
-
   parser = OptionParser(version='%prog '+ version)
   parser.parse_args()
-  
-  
 
-  
   app = GfceuApp()
   
