@@ -62,7 +62,7 @@
 // Extern variables
 
 extern FCEUGI *GameInfo;
-extern int EnableRewind;
+extern int EnableAutosave;
 
 // Extern functions
 
@@ -271,7 +271,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_ENABLE_REWIND, EnableRewind ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
 
 	int AutoFirePatternIDs[] = {
 		MENU_AUTOFIRE_PATTERN_1,
@@ -931,8 +931,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 
-			case MENU_ENABLE_REWIND:
-				EnableRewind ^= 1;
+			case MENU_ENABLE_AUTOSAVE:
+				EnableAutosave ^= 1;
 				UpdateCheckedMenuItems();
 				break;
 

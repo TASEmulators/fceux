@@ -120,11 +120,11 @@ int frameAdvanceDelay;
 //indicates that the emulation core just frame advanced (consumed the frame advance state and paused)
 bool JustFrameAdvanced=false;
 
-static int RewindStatus[4] = {0, 0, 0, 0}; //is it safe to load rewind state
-static int RewindIndex = 0; //which rewind state we're on
+static int AutosaveStatus[4] = {0, 0, 0, 0}; //is it safe to load Auto-savestate
+static int AutosaveIndex = 0; //which Auto-savestate we're on
 
-// Flag that indicates whether the rewind option is enabled or not
-int EnableRewind = 0;
+// Flag that indicates whether the Auto-save option is enabled or not
+int EnableAutosave = 0;
 
 ///a wrapper for unzip.c
 extern "C" FILE *FCEUI_UTF8fopen_C(const char *n, const char *m) { return ::FCEUD_UTF8fopen(n,m); }
@@ -333,8 +333,8 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 
 	ResetGameLoaded();
 	
-	RewindStatus[0] = RewindStatus[1] = 0;
-	RewindStatus[2] = RewindStatus[3] = 0;
+	AutosaveStatus[0] = AutosaveStatus[1] = 0;
+	AutosaveStatus[2] = AutosaveStatus[3] = 0;
 
 	CloseGame();
 	GameInfo = new FCEUGI;
@@ -485,7 +485,7 @@ void AutoFire(void)
 	}
 }
 
-void UpdateRewind(void);
+void UpdateAutosave(void);
 
 ///Emulates a single frame.
 
@@ -524,7 +524,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	if(!FCEU_BotMode())
 	{
 		AutoFire();
-		UpdateRewind();
+		UpdateAutosave();
 	}
 
 	FCEU_UpdateInput();
@@ -783,45 +783,45 @@ void FCEUI_FrameAdvance(void)
 	frameAdvanceDelay = 0;
 }
 
-static int RewindCounter = 0;
+static int AutosaveCounter = 0;
 
-void UpdateRewind(void)
+void UpdateAutosave(void)
 {
-	if(!EnableRewind)
+	if(!EnableAutosave)
 		return;
 	
 	char * f;
-	RewindCounter = (RewindCounter + 1) % 256;
-	if(RewindCounter == 0)
+	AutosaveCounter = (AutosaveCounter + 1) % 256;
+	if(AutosaveCounter == 0)
 	{
-		RewindIndex = (RewindIndex + 1) % 4;
-		f = strdup(FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0).c_str());
+		AutosaveIndex = (AutosaveIndex + 1) % 4;
+		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE,AutosaveIndex,0).c_str());
 		FCEUSS_Save(f);
 		free(f);
-		RewindStatus[RewindIndex] = 1;
+		AutosaveStatus[AutosaveIndex] = 1;
 	}
 }
 
-void FCEUI_Rewind(void)
+void FCEUI_Autosave(void)
 {
-	if(!EnableRewind)
+	if(!EnableAutosave)
 		return;
 
-	if(RewindStatus[RewindIndex] == 1)
+	if(AutosaveStatus[AutosaveIndex] == 1)
 	{
 		char * f;
-		f = strdup(FCEU_MakeFName(FCEUMKF_REWINDSTATE,RewindIndex,0).c_str());
+		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE,AutosaveIndex,0).c_str());
 		FCEUSS_Load(f);
 		free(f);
 		
 		//Set pointer to previous available slot
-		if(RewindStatus[(RewindIndex + 3)%4] == 1)
+		if(AutosaveStatus[(AutosaveIndex + 3)%4] == 1)
 		{
-			RewindIndex = (RewindIndex + 3)%4;
+			AutosaveIndex = (AutosaveIndex + 3)%4;
 		}
 
-		//Reset time to next rewind save
-		RewindCounter = 0;
+		//Reset time to next Auto-save
+		AutosaveCounter = 0;
 	}
 }
 

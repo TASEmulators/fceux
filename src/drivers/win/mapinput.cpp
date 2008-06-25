@@ -47,7 +47,7 @@ static struct
 	//{ EMUCMD_FDS_SIDE_SELECT, 			SCAN_F6, },
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE, 	SCAN_COMMA, },
 	//{ EMUCMD_MOVIE_READONLY_TOGGLE, 	SCAN_8 | CMD_KEY_SHIFT, },*/
-	//{ EMUCMD_MISC_REWIND, SCAN_R, },  Removed until rewind is fixed?
+	//{ EMUCMD_MISC_AUTOSAVE, SCAN_R, },  adelikat - Since Auto-save is disabled by default, so should the hotkey mapping
 	//mbg 7/31/06 - these have been removed as defaults until we decide whether hotkey philosophy permits them
 	{ EMUCMD_SAVE_STATE_SLOT_0, 		SCAN_F10 | CMD_KEY_SHIFT, },
 	{ EMUCMD_SAVE_STATE_SLOT_1, 		SCAN_F1 | CMD_KEY_SHIFT, },

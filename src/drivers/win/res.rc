@@ -78,7 +78,7 @@ BEGIN
         MENUITEM "Pause After Playback",        MENU_PAUSEAFTERPLAYBACK
         MENUITEM "Enable Run in Background",    MENU_RUN_IN_BACKGROUND
         MENUITEM "Enable Background Input",     MENU_BACKGROUND_INPUT
-        MENUITEM "Enable Rewind",               MENU_ENABLE_REWIND
+        MENUITEM "Enable Auto-save",            MENU_ENABLE_AUTOSAVE
         MENUITEM SEPARATOR
         MENUITEM "Game Genie",                  MENU_GAME_GENIE
         MENUITEM "PAL Emulation",               MENU_PAL

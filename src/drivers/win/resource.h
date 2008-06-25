@@ -221,7 +221,7 @@
 #define IDC_LABEL_AUTHORINFO            303
 #define IDC_BTN_CHEAT_UPD               303
 #define IDC_VIDEOCONFIG_YSCALE          303
-#define MENU_ENABLE_REWIND              304
+#define MENU_ENABLE_AUTOSAVE            304
 #define IDC_LABEL_ROMUSED               304
 #define IDC_BTN_CHEAT_RESET             304
 #define IDC_VIDEOCONFIG_SCALER_FS       304

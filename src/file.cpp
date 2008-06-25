@@ -459,7 +459,7 @@ uint64 FCEU_ftell(FCEUFILE *fp)
 		return ftell((FILE *)fp->fp);
 }
 
-void FCEU_rewind(FCEUFILE *fp)
+void FCEU_autosave(FCEUFILE *fp)
 {
 	if(fp->type==1)
 	{
@@ -470,7 +470,7 @@ void FCEU_rewind(FCEUFILE *fp)
 		((MEMWRAP *)(fp->fp))->location=0;
 	}
 	else
-		/* Rewind */
+		//Autosave load
 		fseek((FILE*)fp->fp,0,SEEK_SET); //mbg merge 7/17/06 - added cast to FILE*
 }
 
@@ -787,24 +787,24 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 					sprintf(ret,"%s"PSS"sav"PSS"%s.%s",BaseDirectory.c_str(),FileBase,cd1);
 			}
 			break;
-		case FCEUMKF_REWINDSTATE:
+		case FCEUMKF_AUTOSTATE:
 			if(odirs[FCEUIOD_STATES])
 			{
-				sprintf(ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
+				sprintf(ret,"%s"PSS"autosave%d.fcs",odirs[FCEUIOD_STATES],id1);
 			}
 			else
 			{
-				sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory.c_str(),id1);
+				sprintf(ret,"%s"PSS"fcs"PSS"autosave%d.fcs",BaseDirectory.c_str(),id1);
 			}
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_STATES])
 				{
-					sprintf(ret,"%s"PSS"rewind%d.fcs",odirs[FCEUIOD_STATES],id1);
+					sprintf(ret,"%s"PSS"autosave%d.fcs",odirs[FCEUIOD_STATES],id1);
 				}
 				else
 				{
-					sprintf(ret,"%s"PSS"fcs"PSS"rewind%d.fcs",BaseDirectory.c_str(),id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"autosave%d.fcs",BaseDirectory.c_str(),id1);
 				}
 			}
 			break;

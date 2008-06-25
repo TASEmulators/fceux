@@ -845,6 +845,7 @@ void CreateMemWatch()
 		}
 	}
 if (MemWatchLoadFileOnStart) OpenMemwatchRecentFile(0);
+else fileChanged = false;
 }
 void AddMemWatch(char memaddress[32])
 {

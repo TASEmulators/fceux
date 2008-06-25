@@ -25,7 +25,7 @@ void PowerNES(void);
 void SetAutoFireOffset(int offset);
 void SetAutoFirePattern(int onframes, int offframes);
 void AutoFire(void);
-void FCEUI_Rewind(void);
+void FCEUI_Autosave(void);
 
 //mbg 7/23/06
 char *FCEUI_GetAboutString();

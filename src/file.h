@@ -14,7 +14,7 @@ uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE*);
 uint64 FCEU_fwrite(void *ptr, size_t size, size_t nmemb, FCEUFILE*);
 int FCEU_fseek(FCEUFILE*, long offset, int whence);
 uint64 FCEU_ftell(FCEUFILE*);
-void FCEU_rewind(FCEUFILE*);
+void FCEU_autosave(FCEUFILE*);
 int FCEU_read32le(uint32 *Bufo, FCEUFILE*);
 int FCEU_read16le(uint16 *Bufo, FCEUFILE*);
 int FCEU_fgetc(FCEUFILE*);
@@ -42,7 +42,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1);
 #define FCEUMKF_MOVIEGLOB    12
 #define FCEUMKF_STATEGLOB    13
 #define FCEUMKF_MOVIEGLOB2   14
-#define FCEUMKF_REWINDSTATE  15
+#define FCEUMKF_AUTOSTATE	 15
 #define FCEUMKF_MEMW         16
 #define FCEUMKF_BBOT         17
 #define FCEUMKF_ROMS         18
