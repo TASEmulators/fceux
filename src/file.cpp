@@ -722,7 +722,8 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 {
 	char ret[FILENAME_MAX];
 	struct stat tmpstat;
-	const char* mfn; //= GetMfn();
+	std::string mfnString;
+	const char* mfn;
 
 	switch(type)
 	{
@@ -744,7 +745,8 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 				}
 				const char* mfn = movieFilenamePart.c_str(); */
 				//mfn = GetMfn();
-				mfn = GetMfn().c_str();
+				mfnString = GetMfn();
+				mfn = mfnString.c_str();
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
