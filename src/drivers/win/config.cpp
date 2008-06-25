@@ -53,7 +53,7 @@ extern int Monitor_wndx, Monitor_wndy;
 extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
-
+extern int EnableAutosave;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -153,6 +153,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(EnableBackgroundInput),
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
+	AC(EnableAutosave),
 
 	AC(allowUDLR),
 
