@@ -89,8 +89,12 @@ void FCEUI_DisableSpriteLimitation(int a);
 void FCEUI_SetRenderPlanes(bool sprites, bool bg);
 void FCEUI_GetRenderPlanes(bool& sprites, bool& bg);
 
-//name=path and file to load.  returns 0 on failure, 1 on success
+//name=path and file to load.  returns null if it failed
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
+
+//same as FCEUI_LoadGame, except that it can load from a tempfile. 
+//name is the actual path to open; logicalname is what the emulator should think it is
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int OverwriteVidMode);
 
 //general purpose emulator initialization. returns true if successful
 bool FCEUI_Initialize();

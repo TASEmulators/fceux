@@ -41,7 +41,6 @@ extern int pauseAfterPlayback;
 extern int EnableBackgroundInput;
 
 extern int vmod;
-static char *gfsdir=0;
 
 extern char* directory_names[13];
 

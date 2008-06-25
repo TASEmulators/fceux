@@ -127,6 +127,7 @@
 #define IDD_DIALOG1                     114
 #define LBL_AUTO_HOLD                   115
 #define IDC_CHECK_LOG_NEW_DATA          115
+#define IDD_DIALOG2                     115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
 #define CHECK_SOUND_8BIT                122
@@ -536,7 +537,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        115
+#define _APS_NEXT_RESOURCE_VALUE        116
 #define _APS_NEXT_COMMAND_VALUE         40151
 #define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           101

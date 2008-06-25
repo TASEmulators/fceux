@@ -512,9 +512,11 @@ void FCEUD_HideMenuToggle(void)
 	ToggleHideMenu();
 }
 
-void ALoad(char *nameo)
+void ALoad(char *nameo,char* actualfile)
 {
-	if(FCEUI_LoadGame(nameo, 1))
+	bool isvirtual = (actualfile==0);
+	if(isvirtual) actualfile = nameo;
+	if(FCEUI_LoadGameVirtual(actualfile, nameo, 1))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
 
@@ -522,7 +524,9 @@ void ALoad(char *nameo)
 
 		SetMainWindowStuff();
 
-		AddRecentFile(nameo);
+		//todo-add recent files from archives somehow
+		if(!isvirtual)
+			AddRecentFile(nameo);
 
 		RefreshThrottleFPS();
 
@@ -569,32 +573,18 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 	// Show the Open File dialog
 	if(GetOpenFileName(&ofn))
 	{
-		char *tmpdir = (char *)malloc( ofn.nFileOffset + 1 ); //mbg merge 7/17/06 added cast
-
-		if(tmpdir)
+		//if the user selected a 7zip file, then we have some work to do..
+		//todo - scan file instead of checking extension
+		std::string fname = nameo;
+		extern void do7zip(HWND hwnd, std::string fname);
+		if(fname.substr(fname.size()-3,3) == ".7z")
 		{
-			// Get the directory from the filename
-			strncpy(tmpdir, ofn.lpstrFile, ofn.nFileOffset);
-			tmpdir[ofn.nFileOffset]=0;
-
-			// Prevent setting the File->Open default
-			// directory when a "Recent Directory" is selected.
-			if(!initialdir)             
-			{
-				if(gfsdir)
-				{
-					free(gfsdir);
-				}
-
-				gfsdir = tmpdir;
-			}
-			else
-			{
-				free(tmpdir);
-			}
+			do7zip(hParent, fname);
 		}
-
-		ALoad(nameo);
+		else
+		{
+			ALoad(nameo,0);
+		}
 	}
 }
 
@@ -726,7 +716,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
 			{
 				DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
-				ALoad(ftmp);
+				ALoad(ftmp,0);
 				free(ftmp);
 			}                 
 		}
@@ -742,7 +732,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(wParam >= MENU_FIRST_RECENT_FILE && wParam <= MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES - 1)
 			{
 				if(recent_files[wParam - MENU_FIRST_RECENT_FILE])
-					ALoad(recent_files[wParam - MENU_FIRST_RECENT_FILE]);
+					ALoad(recent_files[wParam - MENU_FIRST_RECENT_FILE],0);
 			}
 			switch(LOWORD(wParam))
 			{

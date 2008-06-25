@@ -97,6 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -702,6 +703,10 @@
 			<Filter
 				Name="win"
 				>
+				<File
+					RelativePath="..\src\drivers\win\7zip.cpp"
+					>
+				</File>
 				<File
 					RelativePath="..\src\drivers\win\args.cpp"
 					>

@@ -104,6 +104,11 @@ static int ppudead=1;
 static int kook=0;
 int fceuindbg=0;
 
+//mbg 6/23/08
+//make the no-bg fill color configurable
+//0xFF shall indicate to use palette[0]
+uint8 gNoBGFillColor = 0xFF;
+
 int MMC5Hack=0;
 uint32 MMC5HackVROMMask=0;
 uint8 *MMC5HackExNTARAMPtr=0;
@@ -755,7 +760,11 @@ static void DoLine(void)
 	if(!renderbg)  // User asked to not display background data.
 	{
 		uint32 tem;
-		tem=Pal[0]|(Pal[0]<<8)|(Pal[0]<<16)|(Pal[0]<<24);
+		uint8 col;
+		if(gNoBGFillColor == 0xFF)
+			col = Pal[0];
+		else col = gNoBGFillColor;
+		tem=col|(col<<8)|(col<<16)|(col<<24);
 		tem|=0x40404040;
 		FCEU_dwmemset(target,tem,256);
 	}

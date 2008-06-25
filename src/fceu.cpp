@@ -283,17 +283,17 @@ static DECLFR(ARAMH)
 
 void ResetGameLoaded(void)
 {
-        if(GameInfo) CloseGame();
-		EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
-        GameStateRestore=0;
-        PPU_hook=0;
-        GameHBIRQHook=0;
-        if(GameExpSound.Kill)
-         GameExpSound.Kill();
-        memset(&GameExpSound,0,sizeof(GameExpSound));
-        MapIRQHook=0;
-        MMC5Hack=0;
-        PAL&=1;
+	if(GameInfo) CloseGame();
+	EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
+	GameStateRestore=0;
+	PPU_hook=0;
+	GameHBIRQHook=0;
+	if(GameExpSound.Kill)
+		GameExpSound.Kill();
+	memset(&GameExpSound,0,sizeof(GameExpSound));
+	MapIRQHook=0;
+	MMC5Hack=0;
+	PAL&=1;
 	pale=0;
 }
 
@@ -302,14 +302,16 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode);
 int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(FCEUFILE *fp);
 
-char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
+//mbg 6/25/08 - remove this one day
+//char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
-FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
+
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int OverwriteVidMode)
 {
 	//mbg merge 7/17/07 - why is this here
-//#ifdef WIN32
-//	StopSound();
-//#endif
+	//#ifdef WIN32
+	//	StopSound();
+	//#endif
 
 	//----------
 	//attempt to open the files
@@ -317,14 +319,14 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	char *ipsfn;
 
 	FCEU_printf("Loading %s...\n\n",name);
-	GetFileBase(name);
+	GetFileBase(logicalname);
 
 	ipsfn=strdup(FCEU_MakeFName(FCEUMKF_IPS,0,0).c_str());
 	fp=FCEU_fopen(name,ipsfn,"rb",0);
 	free(ipsfn);
 
 	if(!fp) {
- 		FCEU_PrintError("Error opening \"%s\"!",name);
+		FCEU_PrintError("Error opening \"%s\"!",name);
 		return 0;
 	}
 	//---------
@@ -332,66 +334,69 @@ FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 	//file opened ok. start loading.
 
 	ResetGameLoaded();
-	
+
 	AutosaveStatus[0] = AutosaveStatus[1] = 0;
 	AutosaveStatus[2] = AutosaveStatus[3] = 0;
 
 	CloseGame();
 	GameInfo = new FCEUGI;
 	memset(GameInfo, 0, sizeof(FCEUGI));
-		
+
 	GameInfo->soundchan = 0;
 	GameInfo->soundrate = 0;
-    GameInfo->name=0;
-    GameInfo->type=GIT_CART;
-    GameInfo->vidsys=GIV_USER;
-    GameInfo->input[0]=GameInfo->input[1]=SI_UNSET;
-    GameInfo->inputfc=SIFC_UNSET;
-    GameInfo->cspecial=SIS_NONE;
+	GameInfo->name=0;
+	GameInfo->type=GIT_CART;
+	GameInfo->vidsys=GIV_USER;
+	GameInfo->input[0]=GameInfo->input[1]=SI_UNSET;
+	GameInfo->inputfc=SIFC_UNSET;
+	GameInfo->cspecial=SIS_NONE;
 
-		//try to load each different format
-        if(iNESLoad(name,fp,OverwriteVidMode))
-         goto endlseq;
-        if(NSFLoad(fp))
-         goto endlseq;
-        if(UNIFLoad(name,fp))
-         goto endlseq;
-        if(FDSLoad(name,fp))
-         goto endlseq;
+	//try to load each different format
+	if(iNESLoad(name,fp,OverwriteVidMode))
+		goto endlseq;
+	if(NSFLoad(fp))
+		goto endlseq;
+	if(UNIFLoad(name,fp))
+		goto endlseq;
+	if(FDSLoad(name,fp))
+		goto endlseq;
 
-        FCEU_PrintError("An error occurred while loading the file.");
-        FCEU_fclose(fp);
+	FCEU_PrintError("An error occurred while loading the file.");
+	FCEU_fclose(fp);
 
-		delete GameInfo;
-		GameInfo = 0;
+	delete GameInfo;
+	GameInfo = 0;
 
-        return 0;
+	return 0;
 
-        endlseq:
-		
-        FCEU_fclose(fp);
+endlseq:
 
-        FCEU_ResetVidSys();
-		
-        if(GameInfo->type!=GIT_NSF)
-         if(FSettings.GameGenie)
-	  OpenGenie();
-	  PowerNES();
-		
+	FCEU_fclose(fp);
+
+	FCEU_ResetVidSys();
+
+	if(GameInfo->type!=GIT_NSF)
+		if(FSettings.GameGenie)
+			OpenGenie();
+	PowerNES();
+
 	FCEUSS_CheckStates();
 
-        if(GameInfo->type!=GIT_NSF)
-        {
-         FCEU_LoadGamePalette();
-         FCEU_LoadGameCheats(0);
-        }
-        
+	if(GameInfo->type!=GIT_NSF)
+	{
+		FCEU_LoadGamePalette();
+		FCEU_LoadGameCheats(0);
+	}
+
 	FCEU_ResetPalette();
 	FCEU_ResetMessages();	// Save state, status messages, etc.
 
-	strcpy(lastLoadedGameName, name);
+	return GameInfo;
+}
 
-        return GameInfo;
+FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
+{
+	return FCEUI_LoadGameVirtual(name,name,OverwriteVidMode);
 }
 
 
@@ -605,36 +610,34 @@ int suppressAddPowerCommand=0; // hack... yeah, I know...
 void PowerNES(void) 
 {
 	if(!suppressAddPowerCommand)
-        FCEUMOV_AddCommand(FCEUNPCMD_POWER);
-    if(!GameInfo) return;
+		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
+	if(!GameInfo) return;
 
 	FCEU_CheatResetRAM();
 	FCEU_CheatAddRAM(2,0,RAM);
 
-        GeniePower();
+	GeniePower();
 
 	FCEU_MemoryRand(RAM,0x800);
 	//memset(RAM,0xFF,0x800);
-	
-        SetReadHandler(0x0000,0xFFFF,ANull);
-        SetWriteHandler(0x0000,0xFFFF,BNull);
-        
-		SetReadHandler(0,0x7FF,ARAML);
-        SetWriteHandler(0,0x7FF,BRAML);
-        
-		SetReadHandler(0x800,0x1FFF,ARAMH);  /* Part of a little */
-        SetWriteHandler(0x800,0x1FFF,BRAMH); /* hack for a small speed boost. */
- 
-		InitializeInput();
-		FCEUSND_Power();
-        FCEUPPU_Power();
 
-	/* Have the external game hardware "powered" after the internal NES stuff.  
-	   Needed for the NSF code and VS System code.
-	*/
+	SetReadHandler(0x0000,0xFFFF,ANull);
+	SetWriteHandler(0x0000,0xFFFF,BNull);
+
+	SetReadHandler(0,0x7FF,ARAML);
+	SetWriteHandler(0,0x7FF,BRAML);
+
+	SetReadHandler(0x800,0x1FFF,ARAMH); // Part of a little
+	SetWriteHandler(0x800,0x1FFF,BRAMH); //hack for a small speed boost.
+
+	InitializeInput();
+	FCEUSND_Power();
+	FCEUPPU_Power();
+
+	//Have the external game hardware "powered" after the internal NES stuff.  Needed for the NSF code and VS System code.
 	GameInterface(GI_POWER);
 	if(GameInfo->type==GIT_VSUNI)
-	FCEU_VSUniPower();
+		FCEU_VSUniPower();
 
 	timestampbase=0;
 	X6502_Power();

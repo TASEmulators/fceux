@@ -39,6 +39,8 @@ extern CFGSTRUCT HotkeyConfig[];
 extern char *BasicBotDir;
 extern int autoHoldKey, autoHoldClearKey;
 
+extern uint8 gNoBGFillColor;
+
 //window positions:
 extern int ChtPosX,ChtPosY;
 extern int DbgPosX,DbgPosY;
@@ -75,7 +77,7 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(memw_recent_files[3]),
 	ACS(memw_recent_files[4]),
 
-
+	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
 
 	NAC("palyo",pal_emulation),
@@ -84,8 +86,6 @@ static CFGSTRUCT fceuconfig[] = {
 	NAC("vgamode",vmod),
 	NAC("sound",soundo),
 	NAC("sicon",status_icon),
-
-	ACS(gfsdir),
 
 	NACS("odroms",directory_names[0]),
 	NACS("odnonvol",directory_names[1]),
