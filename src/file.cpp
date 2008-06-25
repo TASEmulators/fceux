@@ -584,7 +584,19 @@ int FCEU_fisarchive(FCEUFILE *fp)
 	return 0;
 }
 
-
+std::string GetMfn() //Retrieves the movie filename from curMovieFilename (for adding to savestate and auto-save files)
+{
+	std::string movieFilenamePart;
+	extern char curMovieFilename[512];
+	if(*curMovieFilename)
+		{
+		char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
+		splitpath(curMovieFilename,drv,dir,name,ext);
+		movieFilenamePart = std::string(".") + name;
+		}
+	//const char* mfn = movieFilenamePart.c_str();
+	return movieFilenamePart;
+}
 
 static std::string BaseDirectory;
 char FileBase[2048];
@@ -710,6 +722,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 {
 	char ret[FILENAME_MAX];
 	struct stat tmpstat;
+	const char* mfn; //= GetMfn();
 
 	switch(type)
 	{
@@ -721,7 +734,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			break;
 		case FCEUMKF_STATE:
 			{
-				std::string movieFilenamePart;
+				/* std::string movieFilenamePart;
 				extern char curMovieFilename[512];
 				if(*curMovieFilename)
 				{
@@ -729,8 +742,9 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 					splitpath(curMovieFilename,drv,dir,name,ext);
 					movieFilenamePart = std::string(".") + name;
 				}
-				const char* mfn = movieFilenamePart.c_str();
-
+				const char* mfn = movieFilenamePart.c_str(); */
+				//mfn = GetMfn();
+				mfn = GetMfn().c_str();
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
@@ -788,23 +802,26 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			}
 			break;
 		case FCEUMKF_AUTOSTATE:
+			extern char curMovieFilename[512];
+			mfn = GetMfn().c_str();
 			if(odirs[FCEUIOD_STATES])
 			{
-				sprintf(ret,"%s"PSS"autosave%d.fcs",odirs[FCEUIOD_STATES],id1);
+				sprintf(ret,"%s"PSS"%s%s-autosave%d.fcs",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
 			}
 			else
 			{
-				sprintf(ret,"%s"PSS"fcs"PSS"autosave%d.fcs",BaseDirectory.c_str(),id1);
+				//sprintf(ret,"%s"PSS"fcs"PSS"%s.%s-autosave.fcs",BaseDirectory.c_str(), FileBase, mfn);
+				sprintf(ret,"%s"PSS"fcs"PSS"%s%s-autosave%d.fcs",BaseDirectory.c_str(),FileBase,mfn,id1);
 			}
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_STATES])
 				{
-					sprintf(ret,"%s"PSS"autosave%d.fcs",odirs[FCEUIOD_STATES],id1);
+					sprintf(ret,"%s"PSS"%s%s-autosave%d.fcs",odirs[FCEUIOD_STATES],FileBase,mfn,id1);
 				}
 				else
 				{
-					sprintf(ret,"%s"PSS"fcs"PSS"autosave%d.fcs",BaseDirectory.c_str(),id1);
+					sprintf(ret,"%s"PSS"fcs"PSS"%s%s-autosave%d.fcs",BaseDirectory.c_str(),FileBase,mfn,id1);
 				}
 			}
 			break;
