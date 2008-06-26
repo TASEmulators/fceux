@@ -47,6 +47,7 @@
 #include "tasedit.h"
 #include "oldmovie.h"
 #include "movie.h"
+#include "7zip.h"
 
 #include "guiconfig.h"
 #include "timing.h"
@@ -112,6 +113,14 @@ static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 
 // Internal functions
+
+void SplitRecentArchiveFilename(std::string src, std::string& archive, std::string& file)
+{
+	src = src.substr(1);
+	size_t pipe = src.find_first_of('|');
+	archive = src.substr(0,pipe);
+	file = src.substr(pipe+1);
+}
 
 static void ConvertFCM(HWND hwndOwner)
 {
@@ -349,32 +358,40 @@ void UpdateRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int basei
 	// Recreate the menus
 	for(x = MAX_NUMBER_OF_RECENT_FILES - 1; x >= 0; x--)
 	{  
-		char tmp[128 + 5];
-
 		// Skip empty strings
 		if(!strs[x])
-		{
 			continue;
+
+		std::string tmp = strs[x];
+		if(tmp[0] == '|')
+		{
+			std::string archiveName, fileName;
+			SplitRecentArchiveFilename(tmp,archiveName,fileName);
+			tmp = archiveName + " <" + fileName + ">";
 		}
+
+		//clamp this string to 128 chars
+		if(tmp.size()>128)
+			tmp = tmp.substr(0,128);
 
 		moo.cbSize = sizeof(moo);
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
 
-		// Fill in the menu text.
-		if(strlen(strs[x]) < 128)
-		{
-			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x]);
-		}
-		else
-		{
-			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x] + strlen( strs[x] ) - 127);
-		}
+		//// Fill in the menu text.
+		//if(strlen(strs[x]) < 128)
+		//{
+		//	sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x]);
+		//}
+		//else
+		//{
+		//	sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, strs[x] + strlen( strs[x] ) - 127);
+		//}
 
 		// Insert the menu item
-		moo.cch = strlen(tmp);
+		moo.cch = tmp.size();
 		moo.fType = 0;
 		moo.wID = baseid + x;
-		moo.dwTypeData = tmp;
+		moo.dwTypeData = (LPSTR)tmp.c_str();
 		InsertMenuItem(menu, 0, 1, &moo);
 	}
 
@@ -512,10 +529,10 @@ void FCEUD_HideMenuToggle(void)
 	ToggleHideMenu();
 }
 
-void ALoad(char *nameo,char* actualfile)
+void ALoad(char *nameo,char* actualfile,char* archiveFile)
 {
-	bool isvirtual = (actualfile==0);
-	if(isvirtual) actualfile = nameo;
+	bool isvirtual = (actualfile!=0);
+	if(!isvirtual) actualfile = nameo;
 	if(FCEUI_LoadGameVirtual(actualfile, nameo, 1))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
@@ -525,8 +542,13 @@ void ALoad(char *nameo,char* actualfile)
 		SetMainWindowStuff();
 
 		//todo-add recent files from archives somehow
-		if(!isvirtual)
-			AddRecentFile(nameo);
+		std::string recentFileName = nameo;
+		if(archiveFile)
+			recentFileName = (std::string)"|" + archiveFile + "|" + nameo;
+		else
+			recentFileName = nameo;
+		
+		AddRecentFile(recentFileName.c_str());
 
 		RefreshThrottleFPS();
 
@@ -576,7 +598,6 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 		//if the user selected a 7zip file, then we have some work to do..
 		//todo - scan file instead of checking extension
 		std::string fname = nameo;
-		extern void do7zip(HWND hwnd, std::string fname);
 		if(fname.substr(fname.size()-3,3) == ".7z")
 		{
 			do7zip(hParent, fname);
@@ -731,8 +752,18 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			// A menu item from the recent files menu was clicked.
 			if(wParam >= MENU_FIRST_RECENT_FILE && wParam <= MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES - 1)
 			{
-				if(recent_files[wParam - MENU_FIRST_RECENT_FILE])
-					ALoad(recent_files[wParam - MENU_FIRST_RECENT_FILE],0);
+				char*& fname = recent_files[wParam - MENU_FIRST_RECENT_FILE];
+				if(fname)
+				{
+					if(fname[0] == '|')
+					{
+						std::string fnamestr = fname, archiveName, fileName;
+						SplitRecentArchiveFilename(fnamestr,archiveName,fileName);
+						do7zip(hWnd,archiveName,&fileName);
+					}
+					else 
+						ALoad(fname,0);
+				}
 			}
 			switch(LOWORD(wParam))
 			{

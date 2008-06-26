@@ -327,7 +327,7 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 	return FALSE;
 }
 
-void do7zip(HWND hParent, std::string fname)
+void do7zip(HWND hParent, std::string fname, std::string* innerFilename)
 {
 	LibRef libref("7zxa.dll");
 	if(!libref.hmod) {
@@ -389,7 +389,21 @@ void do7zip(HWND hParent, std::string fname)
 					fileSelectorContext.items.push_back(item);
 				}
 
-				int ret = DialogBoxParam(fceu_hInstance, "7ZIPARCHIVEDIALOG", hParent, ArchiveFileSelectorCallback, (LPARAM)0);
+				//try to load the file directly if we're in autopilot
+				int ret = LB_ERR;
+				if(innerFilename)
+				{
+					for(uint32 i=0;i<fileSelectorContext.items.size();i++)
+						if(fileSelectorContext.items[i].name == *innerFilename)
+						{
+							ret = i;
+							break;
+						}
+				}
+				else
+					//or use the UI if we're not
+					ret = DialogBoxParam(fceu_hInstance, "7ZIPARCHIVEDIALOG", hParent, ArchiveFileSelectorCallback, (LPARAM)0);
+
 				if(ret != LB_ERR)
 				{
 					FileSelectorContext::Item& item = fileSelectorContext.items[ret];
@@ -402,8 +416,8 @@ void do7zip(HWND hParent, std::string fname)
 						FILE* outf = fopen(tempname,"wb");
 						fwrite(&data[0],1,item.size,outf);
 						fclose(outf);
-						void ALoad(char *nameo,char* actualfile);
-						ALoad((char*)item.name.c_str(),tempname);
+						void ALoad(char *nameo,char* actualfile,char* archiveFile);
+						ALoad((char*)item.name.c_str(),tempname,(char*)fname.c_str());
 
 					} //if we extracted the file correctly
 
