@@ -8,6 +8,7 @@
 #include "replay.h"
 #include "movie.h"
 #include "utils/xstring.h"
+#include "Win32InputBox.h"
 
 
 using namespace std;
@@ -17,7 +18,7 @@ using namespace std;
 
 HWND hwndTasEdit = 0;
 
-static HMENU hmenu;
+static HMENU hmenu, hrmenu;
 static int lastCursor;
 static HWND hwndList, hwndHeader;
 static WNDPROC hwndHeader_oldWndproc;
@@ -125,6 +126,59 @@ void RedrawList()
 	InvalidateRect(hwndList,0,FALSE);
 }
 
+enum ECONTEXTMENU
+{
+	CONTEXTMENU_STRAY = 0,
+	CONTEXTMENU_SELECTED = 1,
+};
+
+void ShowMenu(ECONTEXTMENU which, POINT& pt)
+{
+	HMENU sub = GetSubMenu(hrmenu,(int)which);
+	TrackPopupMenu(sub,0,pt.x,pt.y,TPM_RIGHTBUTTON,hwndTasEdit,0);
+}
+
+void StrayClickMenu(LPNMITEMACTIVATE info)
+{
+	POINT pt = info->ptAction;
+	ClientToScreen(hwndList,&pt);
+	ShowMenu(CONTEXTMENU_STRAY,pt);
+}
+
+void RightClickMenu(LPNMITEMACTIVATE info)
+{
+	POINT pt = info->ptAction;
+	ClientToScreen(hwndList,&pt);
+	ShowMenu(CONTEXTMENU_SELECTED,pt);
+}
+
+void RightClick(LPNMITEMACTIVATE info)
+{
+	int index = info->iItem;
+	int column = info->iSubItem;
+
+	//stray clicks give a context menu:
+	if(index == -1)
+	{
+		StrayClickMenu(info);
+		return;
+	}
+
+	//make sure that the click is in our currently selected set.
+	//if it is not, then we don't know what to do yet
+	if(selectionFrames.find(index) == selectionFrames.end())
+	{
+		return;
+	}
+	
+	RightClickMenu(info);
+}
+
+void InvalidateGreenZone(int after)
+{
+	currMovieData.greenZoneCount = std::min(after+1,currMovieData.greenZoneCount);
+}
+
 void DoubleClick(LPNMITEMACTIVATE info)
 {
 	int index = info->iItem;
@@ -140,6 +194,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		if(index < currMovieData.greenZoneCount)
 		{
 			MovieData::loadSavestateFrom(&currMovieData.records[index].savestate);
+			currFrameCounter = index;	
 		}
 	}
 	else //if an input column was clicked:
@@ -151,14 +206,35 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		//update the row
 		ListView_Update(hwndList,index);
 
-		//reduce the green zone
-		currMovieData.greenZoneCount = std::min(index+1,currMovieData.greenZoneCount);
+		InvalidateGreenZone(index);
 
 		//redraw everything to show the reduced green zone
 		RedrawList();
 	}
 }
 
+//insert frames at the currently selected positions.
+static void InsertFrames()
+{
+	int frames = selectionFrames.size();
+
+	//this is going to be slow.
+
+	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
+	currMovieData.records.reserve(currMovieData.records.size()+frames);
+
+	//insert frames before each selection
+	int ctr=0;
+	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+	{
+		currMovieData.insertEmpty(*it+ctr,1);
+		ctr++;
+	}
+
+	InvalidateGreenZone(*selectionFrames.begin());
+
+	RedrawList();
+}
 
 //the column set operation, for setting a button for a span of selected values
 static void ColumnSet(int column)
@@ -204,8 +280,7 @@ static void ColumnSet(int column)
 	}
 
 	//reduce the green zone
-	int firstSelection = *selectionFrames.begin();
-	currMovieData.greenZoneCount = std::min(firstSelection,currMovieData.greenZoneCount);
+	InvalidateGreenZone(*selectionFrames.begin());
 
 	//redraw everything to show the reduced green zone
 	RedrawList();
@@ -370,7 +445,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_INITDIALOG:
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
 			InitDialog();
-			SetMenu(hwndDlg,hmenu);
 			break; 
 
 		case WM_NOTIFY:
@@ -388,6 +462,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					break;
 				case NM_DBLCLK:
 					DoubleClick((LPNMITEMACTIVATE)lParam);
+					break;
+				case NM_RCLICK:
+					RightClick((LPNMITEMACTIVATE)lParam);
 					break;
 				case LVN_ITEMCHANGED:
 					ItemChanged((LPNMLISTVIEW) lParam);
@@ -409,15 +486,22 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
+			case MENU_INSERTFRAMES:
+				InsertFrames();
+				break;
+			case MENU_STRAY_INSERTFRAMES:
+				{
+					int frames;
+					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
+					{
+						currMovieData.insertEmpty(-1,frames);
+						RedrawList();
+					}
+				}
+				break;
 			case IDC_HACKY1:
 				//hacky1: delete all items after the current selection
 				currMovieData.records.resize(currFrameCounter+1);
-				UpdateTasEdit();
-				break;
-			case IDC_HACKY2:
-				//hacky1: delete all items after the cur rent selection
-				currMovieData.records.resize(currMovieData.records.size()+1000);
-				currMovieData.clearRecordRange(currMovieData.records.size()-1000,1000);
 				UpdateTasEdit();
 				break;
 
@@ -446,7 +530,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 void DoTasEdit()
 {
 	if(!hmenu)
+	{
 		hmenu = LoadMenu(fceu_hInstance,"TASEDITMENU");
+		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
+	}
+
 
 	lastCursor = -1;
 	if(!hwndTasEdit) 

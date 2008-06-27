@@ -1260,6 +1260,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\Win32InputBox.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\Win32InputBox.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\window.cpp"
 					>
 				</File>

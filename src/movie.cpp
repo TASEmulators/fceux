@@ -79,6 +79,21 @@ void MovieData::clearRecordRange(int start, int len)
 		records[i+start].clear();
 }
 
+void MovieData::insertEmpty(int at, int frames)
+{
+	if(at == -1) 
+	{
+		int currcount = records.size();
+		records.resize(records.size()+frames);
+		clearRecordRange(currcount,frames);
+	}
+	else
+	{
+		records.insert(records.begin()+at,frames,MovieRecord());
+		clearRecordRange(at,frames);
+	}
+}
+
 void MovieData::TryDumpIncremental()
 {
 	if(movieMode == MOVIEMODE_TASEDIT)
@@ -93,6 +108,12 @@ void MovieData::TryDumpIncremental()
 			}
 		}
 	}
+}
+
+void MovieRecord::clear()
+{ 
+	*(uint32*)&joysticks = 0;
+	memset(zappers,0,sizeof(zappers));
 }
 
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
@@ -605,6 +626,7 @@ void FCEUMOV_EnterTasEdit()
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
+	currMovieData.insertEmpty(0,1);
 
 	//reset the rom
 	poweron(false);
@@ -619,6 +641,9 @@ void FCEUMOV_EnterTasEdit()
 
 	//and enter tasedit mode
 	movieMode = MOVIEMODE_TASEDIT;
+	
+	currMovieData.TryDumpIncremental();
+
 	FCEU_DispMessage("Tasedit engaged");
 }
 

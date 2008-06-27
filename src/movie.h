@@ -120,9 +120,7 @@ public:
 		return (joysticks[joy] & mask(bit))!=0;
 	}
 
-	void clear() { 
-		*(uint32*)&joysticks = 0;
-	}
+	void clear();
 	
 	//a waste of memory in lots of cases..  maybe make it a pointer later?
 	std::vector<char> savestate;
@@ -205,6 +203,7 @@ public:
 	void installValue(std::string& key, std::string& val);
 	int dump(std::ostream* os, bool binary);
 	void clearRecordRange(int start, int len);
+	void insertEmpty(int at, int frames);
 	
 	static bool loadSavestateFrom(std::vector<char>* buf);
 	static void dumpSavestateTo(std::vector<char>* buf, int compressionLevel);

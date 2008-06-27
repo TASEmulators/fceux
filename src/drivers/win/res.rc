@@ -159,6 +159,80 @@ BEGIN
         MENUITEM "Save FM2",                    ID_FILE_SAVEFM2
         MENUITEM "&Open FM2",                   ID_FILE_OPENFM2
     END
+    MENUITEM "Edit",                        0
+END
+
+MEMVIEWMENU MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Save Rom",                   MENU_MV_FILE_SAVE
+        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS
+        MENUITEM "&Load *.TBL File",            MENU_MV_FILE_LOAD_TBL
+        MENUITEM "Unload *.TBL file",           MENU_MV_FILE_UNLOAD_TBL
+        POPUP "&Dump to file"
+        BEGIN
+            MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
+            MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
+        END
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Undo      Ctrl+Z",            MENU_MV_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Copy",                        MENU_MV_EDIT_COPY
+        MENUITEM "Paste",                       MENU_MV_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Find...",                     MENU_MV_EDIT_FIND
+        MENUITEM "Find Next",                   MENU_MV_EDIT_FIND_NEXT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "NES Memory",                  MENU_MV_VIEW_RAM, CHECKED
+        MENUITEM "PPU Memory",                  MENU_MV_VIEW_PPU
+        MENUITEM "Rom File",                    MENU_MV_VIEW_ROM
+    END
+    POPUP "&Bookmarks"
+    BEGIN
+        MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
+        MENUITEM SEPARATOR
+    END
+END
+
+MEMWATCHMENU MENU 
+BEGIN
+    POPUP "File  "
+    BEGIN
+        MENUITEM "New...       Ctrl+N",         MEMW_FILE_NEW
+        MENUITEM "Open...     Ctrl+O",          MEMW_FILE_OPEN
+        MENUITEM "Save          Ctrl+S",        MEMW_FILE_SAVE
+        MENUITEM "Save As..  Ctrl+Shift+S",     MEMW_FILE_SAVEAS
+        MENUITEM "&Recent",                     ID_FILE_RECENT
+        MENUITEM SEPARATOR
+        MENUITEM "Close          Ctrl+W",       MEMW_FILE_CLOSE
+    END
+    POPUP "Options"
+    BEGIN
+        MENUITEM "Load on Startup",             MEMW_OPTIONS_LOADSTART
+        MENUITEM "Load Last File on Startup",   MEMW_OPTIONS_LOADLASTFILE
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "MemWatch Commands",           MEMW_HELP_WCOMMANDS
+    END
+END
+
+TASEDITCONTEXTMENUS MENU 
+BEGIN
+    POPUP "Stray"
+    BEGIN
+        MENUITEM "&Insert Frames",              MENU_STRAY_INSERTFRAMES
+    END
+    POPUP "Selected"
+    BEGIN
+        MENUITEM "Insert Frame(s)",             MENU_INSERTFRAMES
+        MENUITEM "Delete Frame(s)",             MENU_DELETEFRAMES
+    END
 END
 
 
@@ -441,29 +515,6 @@ BEGIN
     PUSHBUTTON      "Restore Defaults",BTN_RESTORE_DEFAULTS,7,274,75,14
     COMBOBOX        COMBO_FILTER,32,255,283,193,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Filter:",65484,6,255,21,12,SS_CENTERIMAGE | NOT WS_GROUP
-END
-
-MEMVIEW DIALOG  48, 71, 263, 237
-STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Memory Viewer"
-FONT 8, "Fixedsys"
-BEGIN
-    DEFPUSHBUTTON   "Close",1,200,218,56,14
-    EDITTEXT        100,6,4,237,132,ES_CENTER | ES_MULTILINE | ES_READONLY
-    EDITTEXT        200,14,167,19,12
-    EDITTEXT        201,42,167,14,12
-    DEFPUSHBUTTON   "Poke Me!",202,68,156,42,14
-    GROUPBOX        "Memory Poke",102,6,146,111,48,WS_TABSTOP
-    SCROLLBAR       103,244,4,9,132,SBS_VERT
-    GROUPBOX        "Memory File Dump",104,118,146,143,33,WS_TABSTOP
-    EDITTEXT        210,133,160,19,12
-    EDITTEXT        211,189,160,19,12
-    LTEXT           "through",65483,156,162,29,8
-    PUSHBUTTON      "Dump Me!",212,213,159,42,14
-    GROUPBOX        "Memory File Load",65482,6,200,102,33,WS_TABSTOP
-    EDITTEXT        220,21,213,19,12
-    PUSHBUTTON      "Load!",222,56,211,42,14
-    DEFPUSHBUTTON   "HL Store",203,68,176,42,14
 END
 
 MESSAGELOG DIALOG  33, 38, 370, 184
@@ -1211,11 +1262,11 @@ END
 TASEDIT DIALOGEX 0, 0, 470, 349
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "TAS Editor"
+MENU TASEDITMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,7,273,296
     PUSHBUTTON      "Hacky truncate after current frame",IDC_HACKY1,313,31,124,38
-    PUSHBUTTON      "Hacky add 1000 frames",IDC_HACKY2,313,73,124,38
 END
 
 ASSEMBLER DIALOGEX 0, 0, 202, 135
@@ -1509,72 +1560,6 @@ END
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 #endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-MEMVIEWMENU MENU 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Save Rom",                   MENU_MV_FILE_SAVE
-        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS
-        MENUITEM "&Load *.TBL File",            MENU_MV_FILE_LOAD_TBL
-        MENUITEM "Unload *.TBL file",           MENU_MV_FILE_UNLOAD_TBL
-        POPUP "&Dump to file"
-        BEGIN
-            MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
-            MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
-        END
-    END
-    POPUP "&Edit"
-    BEGIN
-        MENUITEM "Undo      Ctrl+Z",            MENU_MV_EDIT_UNDO
-        MENUITEM SEPARATOR
-        MENUITEM "Copy",                        MENU_MV_EDIT_COPY
-        MENUITEM "Paste",                       MENU_MV_EDIT_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "Find...",                     MENU_MV_EDIT_FIND
-        MENUITEM "Find Next",                   MENU_MV_EDIT_FIND_NEXT
-    END
-    POPUP "&View"
-    BEGIN
-        MENUITEM "NES Memory",                  MENU_MV_VIEW_RAM, CHECKED
-        MENUITEM "PPU Memory",                  MENU_MV_VIEW_PPU
-        MENUITEM "Rom File",                    MENU_MV_VIEW_ROM
-    END
-    POPUP "&Bookmarks"
-    BEGIN
-        MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
-        MENUITEM SEPARATOR
-    END
-END
-
-MEMWATCHMENU MENU 
-BEGIN
-    POPUP "File  "
-    BEGIN
-        MENUITEM "New...       Ctrl+N",         MEMW_FILE_NEW
-        MENUITEM "Open...     Ctrl+O",          MEMW_FILE_OPEN
-        MENUITEM "Save          Ctrl+S",        MEMW_FILE_SAVE
-        MENUITEM "Save As..  Ctrl+Shift+S",     MEMW_FILE_SAVEAS
-        MENUITEM "&Recent",                     ID_FILE_RECENT
-        MENUITEM SEPARATOR
-        MENUITEM "Close          Ctrl+W",       MEMW_FILE_CLOSE
-    END
-    POPUP "Options"
-    BEGIN
-        MENUITEM "Load on Startup",             MEMW_OPTIONS_LOADSTART
-        MENUITEM "Load Last File on Startup",   MEMW_OPTIONS_LOADLASTFILE
-    END
-    POPUP "Help"
-    BEGIN
-        MENUITEM "MemWatch Commands",           MEMW_HELP_WCOMMANDS
-    END
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //

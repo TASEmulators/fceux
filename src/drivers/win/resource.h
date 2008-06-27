@@ -528,6 +528,13 @@
 #define MENU_DISPLAY_OBJ                40148
 #define ID_FILE_CONVERTMOVIE            40149
 #define MENU_CONVERT_MOVIE              40150
+#define ID_STRAY_INSERTFRAMES           40151
+#define MENU_INSERTFRAMES               40152
+#define ID_SELECTED_INSERTFRAME         40153
+#define ID_SELECTED_DELETEFRAME         40154
+#define MENU_DELETEFRAME                40155
+#define MENU_DELETEFRAMES               40156
+#define MENU_STRAY_INSERTFRAMES         40157
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -537,8 +544,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        116
-#define _APS_NEXT_COMMAND_VALUE         40151
+#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_COMMAND_VALUE         40158
 #define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
