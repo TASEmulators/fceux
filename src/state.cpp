@@ -546,7 +546,7 @@ bool FCEUSS_Load(char *fname)
 			//This looks redudant to me... but why bother deleting it:)
 			SaveStateStatus[CurrentState]=1;
 
-			//FCEU_DispMessage("State %d loaded.",CurrentState);
+			FCEU_DispMessage("State %d loaded.",CurrentState);
 			SaveStateStatus[CurrentState]=1;
 		}
 		delete st;

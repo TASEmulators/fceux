@@ -925,7 +925,6 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			tempMovieData.truncateAt(currFrameCounter);
 			currMovieData = tempMovieData;
 			currMovieData.rerecordCount++;
-			FCEU_DispMessage("State loaded. Rerecord count: %d\n",currMovieData.rerecordCount);
 
 			openRecordingMovie(curMovieFilename);
 			currMovieData.dump(osRecordingMovie, false);
