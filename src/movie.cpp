@@ -71,6 +71,7 @@ SFORMAT FCEUMOV_STATEINFO[]={
 
 char curMovieFilename[512] = {0};
 MovieData currMovieData;
+int currRerecordCount;
 
 void MovieData::clearRecordRange(int start, int len)
 {
@@ -699,6 +700,7 @@ void FCEUI_LoadMovie(char *fname, bool _read_only, bool tasedit, int _pauseframe
 		pauseframe = _pauseframe;
 		movie_readonly = _read_only;
 		movieMode = MOVIEMODE_PLAY;
+		currRerecordCount = currMovieData.rerecordCount;
 
 		if(movie_readonly)
 			FCEU_DispMessage("Replay started Read-Only.");
@@ -756,6 +758,7 @@ void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags)
 
 	movieMode = MOVIEMODE_RECORD;
 	movie_readonly = false;
+	currRerecordCount = 0;
 	
 	FCEU_DispMessage("Movie recording started.");
 }
@@ -924,7 +927,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			//truncate before we copy, just to save some time
 			tempMovieData.truncateAt(currFrameCounter);
 			currMovieData = tempMovieData;
-			currMovieData.rerecordCount++;
+			currMovieData.rerecordCount = ++currRerecordCount;
 
 			openRecordingMovie(curMovieFilename);
 			currMovieData.dump(osRecordingMovie, false);
