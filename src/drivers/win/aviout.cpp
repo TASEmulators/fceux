@@ -318,13 +318,14 @@ int FCEUI_AviBegin(const char* fname)
 	bi.biHeight = vsi.end_scanline-vsi.start_scanline;
 	bi.biSizeImage = 3 * bi.biWidth * bi.biHeight;
 
-	//mbg 8/25/06 -- hardcoded stuff for now
+	//mbg 6/27/08 -- this was originally labeled as hacky..
+	extern int soundrate;
 	WAVEFORMATEX wf;
 	wf.cbSize = sizeof(WAVEFORMATEX);
-	wf.nAvgBytesPerSec = 44100 * 2;
+	wf.nAvgBytesPerSec = soundrate * 2;
 	wf.nBlockAlign = 2;
 	wf.nChannels = 1;
-	wf.nSamplesPerSec = 44100;
+	wf.nSamplesPerSec = soundrate;
 	wf.wBitsPerSample = 16;
 	wf.wFormatTag = WAVE_FORMAT_PCM;
 	
