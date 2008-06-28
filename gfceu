@@ -457,12 +457,6 @@ class GfceuApp:
         x = chooser.get_filename()
         widgets.get_object("rom_entry").set_text(x)
         options.romfile = x
-        options.network_rom = False
-      elif chooser.get_uri():
-        x = chooser.get_uri()
-        widgets.get_object("rom_entry").set_text(x)
-        options.romfile = x
-        options.network_rom = True
 
   def gamepad_clicked(self, widget, data=None):
 
