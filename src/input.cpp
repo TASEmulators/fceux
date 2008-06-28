@@ -632,8 +632,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_SPEED_NORMAL,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Normal Speed", 0 },
 	{ EMUCMD_SPEED_FASTER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Up", 0 },
 	{ EMUCMD_SPEED_FASTEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Fastest Speed", 0 },
-	{ EMUCMD_SPEED_TURBO,					EMUCMDTYPE_SPEED,	FCEUD_TurboOn, FCEUD_TurboOff, 0, "Turbo", 0 },
-	{ EMUCMD_SPEED_TURBO_TOGGLE,				EMUCMDTYPE_SPEED,	FCEUD_TurboToggle, 0, 0, "Turbo Toggle", 0 },
+	{ EMUCMD_SPEED_TURBO,					EMUCMDTYPE_SPEED,	FCEUD_TurboOn, FCEUD_TurboOff, 0, "Turbo", EMUCMDFLAG_TASEDIT },
+	{ EMUCMD_SPEED_TURBO_TOGGLE,				EMUCMDTYPE_SPEED,	FCEUD_TurboToggle, 0, 0, "Turbo Toggle", EMUCMDFLAG_TASEDIT },
 
 	{ EMUCMD_SAVE_SLOT_0,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 0", 0 },
 	{ EMUCMD_SAVE_SLOT_1,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 1", 0 },

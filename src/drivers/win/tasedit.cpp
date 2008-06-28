@@ -310,13 +310,14 @@ static void DeleteFrames()
 //the column set operation, for setting a button for a span of selected values
 static void ColumnSet(int column)
 {
-	int button = column-2;
+	int joy = (column-2)/8;
+	int button = (column-2)%8;
 
 	//inspect the selected frames. count the set and unset rows
 	int set=0, unset=0;
 	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 	{
-		if(currMovieData.records[*it].checkBit(0,button))
+		if(currMovieData.records[*it].checkBit(joy,button))
 			set++;
 		else unset++;
 	}
@@ -343,7 +344,7 @@ static void ColumnSet(int column)
 	//operate on the data and update the listview
 	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 	{
-		currMovieData.records[*it].setBitValue(0,button,newValue);
+		currMovieData.records[*it].setBitValue(joy,button,newValue);
 		//we would do this if we wanted to update the affected record. but that results in big operations
 		//redrawing once per item set, which causes it to flicker and take forever.
 		//so now we rely on the update at the end.
@@ -633,6 +634,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 void DoTasEdit()
 {
+	if(!FCEU_IsValidUI(FCEUI_TASEDIT))
+		return;
+
 	if(!hmenu)
 	{
 		hmenu = LoadMenu(fceu_hInstance,"TASEDITMENU");
