@@ -302,7 +302,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode);
 int FDSLoad(const char *name, FCEUFILE *fp);
 int NSFLoad(FCEUFILE *fp);
 
-//mbg 6/25/08 - remove this one day
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
 
@@ -607,8 +606,11 @@ void hand(X6502 *X, int type, unsigned int A)
 }
 
 int suppressAddPowerCommand=0; // hack... yeah, I know...
+void MapperInit();
 void PowerNES(void) 
 {
+	MapperInit();
+
 	if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if(!GameInfo) return;
@@ -638,6 +640,8 @@ void PowerNES(void)
 	GameInterface(GI_POWER);
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniPower();
+
+	
 
 	timestampbase=0;
 	X6502_Power();

@@ -1,23 +1,23 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 1998 BERO 
- *  Copyright (C) 2002 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 1998 BERO 
+*  Copyright (C) 2002 Xodnizel
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,50 +79,50 @@ void (*MapperReset)(void);
 static int MapperNo=0;
 
 /*  MapperReset() is called when the NES is reset(with the reset button).  
-    Mapperxxx_init is called when the NES has been powered on.
+Mapperxxx_init is called when the NES has been powered on.
 */
 
 
 static DECLFR(TrainerRead)
 {
- return(trainerpoo[A&0x1FF]);
+	return(trainerpoo[A&0x1FF]);
 }
 
 
 void iNESGI(int h) //bbit edited: removed static keyword
 {
- switch(h)
- {
-  case GI_RESETM2:
+	switch(h)
+	{
+	case GI_RESETM2:
 		if(MapperReset)
-		 MapperReset();
+			MapperReset();
 		if(iNESCart.Reset)
-		 iNESCart.Reset();
+			iNESCart.Reset();
 		break;
-  case GI_POWER:
-                if(iNESCart.Power)
-                 iNESCart.Power();
+	case GI_POWER:
+		if(iNESCart.Power)
+			iNESCart.Power();
 		if(trainerpoo)
 		{
-		 int x;
-		 for(x=0;x<512;x++)
+			int x;
+			for(x=0;x<512;x++)
 		 {
-		  X6502_DMW(0x7000+x,trainerpoo[x]);
-		  if(X6502_DMR(0x7000+x)!=trainerpoo[x])
-		  {
-                    SetReadHandler(0x7000,0x71FF,TrainerRead);
-		    break;
-		  }
+			 X6502_DMW(0x7000+x,trainerpoo[x]);
+			 if(X6502_DMR(0x7000+x)!=trainerpoo[x])
+			 {
+				 SetReadHandler(0x7000,0x71FF,TrainerRead);
+				 break;
+			 }
 		 }
 		}
 		break;
-  case GI_CLOSE:
+	case GI_CLOSE:
 		{
-                 FCEU_SaveGameSave(&iNESCart);
+			FCEU_SaveGameSave(&iNESCart);
 
-		 if(iNESCart.Close) iNESCart.Close();
+			if(iNESCart.Close) iNESCart.Close();
 #ifdef _USE_SHARED_MEMORY_
-		 if(ROM)
+			if(ROM)
 		 {
 			 if(mapROM)
 			 {
@@ -136,7 +136,7 @@ void iNESGI(int h) //bbit edited: removed static keyword
 				 ROM = NULL;
 			 }
 		 }
-		 if(VROM)
+			if(VROM)
 		 {
 			 if(mapVROM)
 			 {
@@ -151,14 +151,14 @@ void iNESGI(int h) //bbit edited: removed static keyword
 			 }
 		 }
 #else
-	 	 if(ROM) {free(ROM);ROM=0;}
-		 if(VROM) {free(VROM);VROM=0;}
+			if(ROM) {free(ROM);ROM=0;}
+			if(VROM) {free(VROM);VROM=0;}
 #endif
-	         if(MapClose) MapClose();
-		 if(trainerpoo) {FCEU_gfree(trainerpoo);trainerpoo=0;}
-	        }
-        	break;
-     }
+			if(MapClose) MapClose();
+			if(trainerpoo) {FCEU_gfree(trainerpoo);trainerpoo=0;}
+		}
+		break;
+	}
 }
 
 uint32 iNESGameCRC32=0;
@@ -282,24 +282,24 @@ struct BADINF {
 
 static struct BADINF BadROMImages[]=
 {
- #include "ines-bad.h"
+#include "ines-bad.h"
 };
 
 void CheckBad(uint64 md5partial)
 {
- int x;
+	int x;
 
- x=0;
- //printf("0x%llx\n",md5partial);
- while(BadROMImages[x].name)
- {
-  if(BadROMImages[x].md5partial == md5partial)
-  {
-   FCEU_PrintError("The copy game you have loaded, \"%s\", is bad, and will not work properly on FCE Ultra.", BadROMImages[x].name);
-   return;
-  }
-  x++;
- }
+	x=0;
+	//printf("0x%llx\n",md5partial);
+	while(BadROMImages[x].name)
+	{
+		if(BadROMImages[x].md5partial == md5partial)
+		{
+			FCEU_PrintError("The copy game you have loaded, \"%s\", is bad, and will not work properly on FCE Ultra.", BadROMImages[x].name);
+			return;
+		}
+		x++;
+	}
 
 }
 
@@ -310,185 +310,203 @@ struct CHINF {
 	int32 mirror;
 };
 
+void MapperInit()
+{
+	if(NewiNES_Init(MapperNo))
+	{
+
+	}
+	else
+	{
+		iNESCart.Power=iNESPower;
+		if(head.ROM_type&2)
+		{
+			iNESCart.SaveGame[0]=WRAM;
+			iNESCart.SaveGameLen[0]=8192;
+		}
+	}
+}
+
+
 static void CheckHInfo(void)
 {
- /* ROM images that have the battery-backed bit set in the header that really
-    don't have battery-backed RAM is not that big of a problem, so I'll
-    treat this differently by only listing games that should have battery-backed RAM.
+	/* ROM images that have the battery-backed bit set in the header that really
+	don't have battery-backed RAM is not that big of a problem, so I'll
+	treat this differently by only listing games that should have battery-backed RAM.
 
-    Lower 64 bits of the MD5 hash.
- */
+	Lower 64 bits of the MD5 hash.
+	*/
 
- static uint64 savie[]=
+	static uint64 savie[]=
 	{
-   0x498c10dc463cfe95LL,  /* Battle Fleet */
-   0x6917ffcaca2d8466LL,  /* Famista '90 */
-         
-         0xd63dcc68c2b20adcLL,    /* Final Fantasy J */
-         0x012df596e2b31174LL,    /* Final Fantasy 1+2 */
-         0xf6b359a720549ecdLL,    /* Final Fantasy 2 */
-         0x5a30da1d9b4af35dLL,    /* Final Fantasy 3 */
+		0x498c10dc463cfe95LL,  /* Battle Fleet */
+		0x6917ffcaca2d8466LL,  /* Famista '90 */
 
-   0x2ee3417ba8b69706LL,  /* Hydlide 3*/
+		0xd63dcc68c2b20adcLL,    /* Final Fantasy J */
+		0x012df596e2b31174LL,    /* Final Fantasy 1+2 */
+		0xf6b359a720549ecdLL,    /* Final Fantasy 2 */
+		0x5a30da1d9b4af35dLL,    /* Final Fantasy 3 */
 
-   0xebbce5a54cf3ecc0LL,  /* Justbreed */
+		0x2ee3417ba8b69706LL,  /* Hydlide 3*/
 
-   0x6a858da551ba239eLL,  /* Kaijuu Monogatari */
-   0xa40666740b7d22feLL,  /* Mindseeker */
+		0xebbce5a54cf3ecc0LL,  /* Justbreed */
 
-         0x77b811b2760104b9LL,    /* Mouryou Senki Madara */
+		0x6a858da551ba239eLL,  /* Kaijuu Monogatari */
+		0xa40666740b7d22feLL,  /* Mindseeker */
 
-   0x11b69122efe86e8cLL,  /* RPG Jinsei Game */
+		0x77b811b2760104b9LL,    /* Mouryou Senki Madara */
 
-   0xa70b495314f4d075LL,  /* Ys 3 */
+		0x11b69122efe86e8cLL,  /* RPG Jinsei Game */
+
+		0xa70b495314f4d075LL,  /* Ys 3 */
 
 
-   0xc04361e499748382LL,  /* AD&D Heroes of the Lance */
-   0xb72ee2337ced5792LL,  /* AD&D Hillsfar */
-   0x2b7103b7a27bd72fLL,  /* AD&D Pool of Radiance */
+		0xc04361e499748382LL,  /* AD&D Heroes of the Lance */
+		0xb72ee2337ced5792LL,  /* AD&D Hillsfar */
+		0x2b7103b7a27bd72fLL,  /* AD&D Pool of Radiance */
 
- 	 0x854d7947a3177f57LL,    /* Crystalis */
+		0x854d7947a3177f57LL,    /* Crystalis */
 
-   0xb0bcc02c843c1b79LL,  /* DW */
-   0x4a1f5336b86851b6LL,  /* DW */
+		0xb0bcc02c843c1b79LL,  /* DW */
+		0x4a1f5336b86851b6LL,  /* DW */
 
-   0x2dcf3a98c7937c22LL,  /* DW 2 */
-   0x733026b6b72f2470LL,  /* Dw 3 */
-   0x98e55e09dfcc7533LL,  /* DW 4*/
-   0x8da46db592a1fcf4LL,  /* Faria */
-   0x91a6846d3202e3d6LL,  /* Final Fantasy */
-   0xedba17a2c4608d20LL,  /* ""    */
+		0x2dcf3a98c7937c22LL,  /* DW 2 */
+		0x733026b6b72f2470LL,  /* Dw 3 */
+		0x98e55e09dfcc7533LL,  /* DW 4*/
+		0x8da46db592a1fcf4LL,  /* Faria */
+		0x91a6846d3202e3d6LL,  /* Final Fantasy */
+		0xedba17a2c4608d20LL,  /* ""    */
 
-         0x94b9484862a26cbaLL,    /* Legend of Zelda */
-         0x04a31647de80fdabLL,    /*      ""      */
-         
-         0x9aa1dc16c05e7de5LL,    /* Startropics */
-         0x1b084107d0878bd0LL,    /* Startropics 2*/
+		0x94b9484862a26cbaLL,    /* Legend of Zelda */
+		0x04a31647de80fdabLL,    /*      ""      */
 
-         0x836c0ff4f3e06e45LL,    /* Zelda 2 */
+		0x9aa1dc16c05e7de5LL,    /* Startropics */
+		0x1b084107d0878bd0LL,    /* Startropics 2*/
 
-   0      /* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
+		0x836c0ff4f3e06e45LL,    /* Zelda 2 */
+
+		0      /* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
 	};
 
- static struct CHINF moo[]=
+	static struct CHINF moo[]=
 	{
-  #include "ines-correct.h"
+#include "ines-correct.h"
 	};
- int tofix=0;
- int x;
- uint64 partialmd5=0;
+	int tofix=0;
+	int x;
+	uint64 partialmd5=0;
 
- for(x=0;x<8;x++)
- {
-  partialmd5 |= (uint64)iNESCart.MD5[15-x] << (x*8);
-  //printf("%16llx\n",partialmd5);
- }
- CheckBad(partialmd5);
+	for(x=0;x<8;x++)
+	{
+		partialmd5 |= (uint64)iNESCart.MD5[15-x] << (x*8);
+		//printf("%16llx\n",partialmd5);
+	}
+	CheckBad(partialmd5);
 
- x=0;
+	x=0;
 
- do
- {
-  if(moo[x].crc32==iNESGameCRC32)
-  {
-   if(moo[x].mapper>=0)
-   {
-    if(moo[x].mapper&0x800 && VROM_size)
-    {
-     VROM_size=0;
+	do
+	{
+		if(moo[x].crc32==iNESGameCRC32)
+		{
+			if(moo[x].mapper>=0)
+			{
+				if(moo[x].mapper&0x800 && VROM_size)
+				{
+					VROM_size=0;
 #ifdef _USE_SHARED_MEMORY_
-	 if(mapVROM)
-	 {
-		UnmapViewOfFile(mapVROM);
-		CloseHandle(mapVROM);
-	 }
-	 else
-	 {
-		 free(VROM);
-	 }
+					if(mapVROM)
+					{
+						UnmapViewOfFile(mapVROM);
+						CloseHandle(mapVROM);
+					}
+					else
+					{
+						free(VROM);
+					}
 #else
-	 free(VROM);
+					free(VROM);
 #endif
-     VROM=0;
-     tofix|=8;
-    }
-    if(MapperNo!=(moo[x].mapper&0xFF))
-    {
-     tofix|=1;
-     MapperNo=moo[x].mapper&0xFF;
-    }
-   }
-   if(moo[x].mirror>=0)
-   {
-    if(moo[x].mirror==8)
-    {
-     if(Mirroring==2)  /* Anything but hard-wired(four screen). */
-     {
-      tofix|=2;
-      Mirroring=0;
-     }
-    }
-    else if(Mirroring!=moo[x].mirror)
-    {
-     if(Mirroring!=(moo[x].mirror&~4))
-      if((moo[x].mirror&~4)<=2)  /* Don't complain if one-screen mirroring
-				   needs to be set(the iNES header can't
-				   hold this information).
-				*/
-       tofix|=2;
-     Mirroring=moo[x].mirror;
-    }
-   }
-   break;
-  }
-  x++;
- } while(moo[x].mirror>=0 || moo[x].mapper>=0);
+					VROM=0;
+					tofix|=8;
+				}
+				if(MapperNo!=(moo[x].mapper&0xFF))
+				{
+					tofix|=1;
+					MapperNo=moo[x].mapper&0xFF;
+				}
+			}
+			if(moo[x].mirror>=0)
+			{
+				if(moo[x].mirror==8)
+				{
+					if(Mirroring==2)  /* Anything but hard-wired(four screen). */
+					{
+						tofix|=2;
+						Mirroring=0;
+					}
+				}
+				else if(Mirroring!=moo[x].mirror)
+				{
+					if(Mirroring!=(moo[x].mirror&~4))
+						if((moo[x].mirror&~4)<=2)  /* Don't complain if one-screen mirroring
+												   needs to be set(the iNES header can't
+												   hold this information).
+												   */
+												   tofix|=2;
+					Mirroring=moo[x].mirror;
+				}
+			}
+			break;
+		}
+		x++;
+	} while(moo[x].mirror>=0 || moo[x].mapper>=0);
 
- x=0;
- while(savie[x] != 0)
- {
-  if(savie[x] == partialmd5)
-  {
-   if(!(head.ROM_type&2))
-   {
-    tofix|=4;
-    head.ROM_type|=2;
-   }
-  }
-  x++;
- }
+	x=0;
+	while(savie[x] != 0)
+	{
+		if(savie[x] == partialmd5)
+		{
+			if(!(head.ROM_type&2))
+			{
+				tofix|=4;
+				head.ROM_type|=2;
+			}
+		}
+		x++;
+	}
 
- /* Games that use these iNES mappers tend to have the four-screen bit set
-    when it should not be.
- */
- if((MapperNo==118 || MapperNo==24 || MapperNo==26) && (Mirroring==2))
- {
-  Mirroring=0;
-  tofix|=2;
- }
+	/* Games that use these iNES mappers tend to have the four-screen bit set
+	when it should not be.
+	*/
+	if((MapperNo==118 || MapperNo==24 || MapperNo==26) && (Mirroring==2))
+	{
+		Mirroring=0;
+		tofix|=2;
+	}
 
- /* Four-screen mirroring implicitly set. */
- if(MapperNo==99)
-  Mirroring=2;   
+	/* Four-screen mirroring implicitly set. */
+	if(MapperNo==99)
+		Mirroring=2;   
 
- if(tofix)
- {
-  char gigastr[768];
-  strcpy(gigastr,"The iNES header contains incorrect information.  For now, the information will be corrected in RAM.  ");
-  if(tofix&1)
-   sprintf(gigastr+strlen(gigastr),"The mapper number should be set to %d.  ",MapperNo);
-  if(tofix&2)
-  {
-   char *mstr[3]={"Horizontal","Vertical","Four-screen"};
-   sprintf(gigastr+strlen(gigastr),"Mirroring should be set to \"%s\".  ",mstr[Mirroring&3]);
-  }
-  if(tofix&4)
-   strcat(gigastr,"The battery-backed bit should be set.  ");  
-  if(tofix&8)
-   strcat(gigastr,"This game should not have any CHR ROM.  ");
-  strcat(gigastr,"\n");
-  FCEU_printf("%s",gigastr);
- }
+	if(tofix)
+	{
+		char gigastr[768];
+		strcpy(gigastr,"The iNES header contains incorrect information.  For now, the information will be corrected in RAM.  ");
+		if(tofix&1)
+			sprintf(gigastr+strlen(gigastr),"The mapper number should be set to %d.  ",MapperNo);
+		if(tofix&2)
+		{
+			char *mstr[3]={"Horizontal","Vertical","Four-screen"};
+			sprintf(gigastr+strlen(gigastr),"Mirroring should be set to \"%s\".  ",mstr[Mirroring&3]);
+		}
+		if(tofix&4)
+			strcat(gigastr,"The battery-backed bit should be set.  ");  
+		if(tofix&8)
+			strcat(gigastr,"This game should not have any CHR ROM.  ");
+		strcat(gigastr,"\n");
+		FCEU_printf("%s",gigastr);
+	}
 }
 
 typedef struct {
@@ -498,55 +516,55 @@ typedef struct {
 
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 {
-        struct md5_context md5;
+	struct md5_context md5;
 
 	if(FCEU_fread(&head,1,16,fp)!=16)
- 	 return 0;
+		return 0;
 
-        if(memcmp(&head,"NES\x1a",4))
-         return 0;
+	if(memcmp(&head,"NES\x1a",4))
+		return 0;
 
 	memset(&iNESCart,0,sizeof(iNESCart));
 
-        if(!memcmp((char *)(&head)+0x7,"DiskDude",8))
-        {
-         memset((char *)(&head)+0x7,0,0x9);
-        }
-
-        if(!memcmp((char *)(&head)+0x7,"demiforce",9))
-        {
-         memset((char *)(&head)+0x7,0,0x9);
-        }
-
-        if(!memcmp((char *)(&head)+0xA,"Ni03",4))
-        {
-         if(!memcmp((char *)(&head)+0x7,"Dis",3))
-          memset((char *)(&head)+0x7,0,0x9);
-         else
-          memset((char *)(&head)+0xA,0,0x6);
-        }
-
-//  int ROM_size=0;
-        if(!head.ROM_size)
+	if(!memcmp((char *)(&head)+0x7,"DiskDude",8))
 	{
-//   FCEU_PrintError("No PRG ROM!");
-//   return(0);
-   ROM_size=256;
-         //head.ROM_size++;
+		memset((char *)(&head)+0x7,0,0x9);
 	}
-  else
-   ROM_size=head.ROM_size;
 
-//    ROM_size = head.ROM_size;
-        VROM_size = head.VROM_size;
+	if(!memcmp((char *)(&head)+0x7,"demiforce",9))
+	{
+		memset((char *)(&head)+0x7,0,0x9);
+	}
+
+	if(!memcmp((char *)(&head)+0xA,"Ni03",4))
+	{
+		if(!memcmp((char *)(&head)+0x7,"Dis",3))
+			memset((char *)(&head)+0x7,0,0x9);
+		else
+			memset((char *)(&head)+0xA,0,0x6);
+	}
+
+	//  int ROM_size=0;
+	if(!head.ROM_size)
+	{
+		//   FCEU_PrintError("No PRG ROM!");
+		//   return(0);
+		ROM_size=256;
+		//head.ROM_size++;
+	}
+	else
+		ROM_size=head.ROM_size;
+
+	//    ROM_size = head.ROM_size;
+	VROM_size = head.VROM_size;
 	ROM_size=uppow2(ROM_size);
 
-        if(VROM_size)
-	 VROM_size=uppow2(VROM_size);
+	if(VROM_size)
+		VROM_size=uppow2(VROM_size);
 
-        MapperNo = (head.ROM_type>>4);
-        MapperNo|=(head.ROM_type2&0xF0);
-        Mirroring = (head.ROM_type&1);
+	MapperNo = (head.ROM_type>>4);
+	MapperNo|=(head.ROM_type2&0xF0);
+	Mirroring = (head.ROM_type&1);
 
 	if(head.ROM_type&8) Mirroring=2;
 
@@ -590,11 +608,11 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 #else
 	if(!(ROM=(uint8 *)FCEU_malloc(ROM_size<<14)))
 		return 0;
-		
+
 	if(VROM_size)
 	{
 		if(!(VROM=(uint8 *)FCEU_malloc(VROM_size<<13)))
-			{
+		{
 			free(ROM);
 			return 0;
 		}
@@ -604,99 +622,89 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	if(VROM_size) memset(VROM,0xFF,VROM_size<<13);
 	if(head.ROM_type&4)   /* Trainer */
 	{
-	 trainerpoo=(uint8 *)FCEU_gmalloc(512);
- 	 FCEU_fread(trainerpoo,512,1,fp);
+		trainerpoo=(uint8 *)FCEU_gmalloc(512);
+		FCEU_fread(trainerpoo,512,1,fp);
 	}
 
 	ResetCartMapping();
 	ResetExState(0,0);
 
 	SetupCartPRGMapping(0,ROM,ROM_size*0x4000,0);
-        SetupCartPRGMapping(1,WRAM,8192,1);
+	SetupCartPRGMapping(1,WRAM,8192,1);
 
-        FCEU_fread(ROM,0x4000,head.ROM_size,fp);
+	FCEU_fread(ROM,0x4000,head.ROM_size,fp);
 
 	if(VROM_size)
-	 FCEU_fread(VROM,0x2000,head.VROM_size,fp);
+		FCEU_fread(VROM,0x2000,head.VROM_size,fp);
 
-        md5_starts(&md5);  
-        md5_update(&md5,ROM,ROM_size<<14);
+	md5_starts(&md5);  
+	md5_update(&md5,ROM,ROM_size<<14);
 
 	iNESGameCRC32=CalcCRC32(0,ROM,ROM_size<<14);
 
 	if(VROM_size)
 	{
-	 iNESGameCRC32=CalcCRC32(iNESGameCRC32,VROM,VROM_size<<13);
-         md5_update(&md5,VROM,VROM_size<<13);
+		iNESGameCRC32=CalcCRC32(iNESGameCRC32,VROM,VROM_size<<13);
+		md5_update(&md5,VROM,VROM_size<<13);
 	}
 	md5_finish(&md5,iNESCart.MD5);
 	memcpy(&GameInfo->MD5,&iNESCart.MD5,sizeof(iNESCart.MD5));
 
 	iNESCart.CRC32=iNESGameCRC32;
 
-        FCEU_printf(" PRG ROM:  %3d x 16KiB\n CHR ROM:  %3d x  8KiB\n ROM CRC32:  0x%08lx\n",
+	FCEU_printf(" PRG ROM:  %3d x 16KiB\n CHR ROM:  %3d x  8KiB\n ROM CRC32:  0x%08lx\n",
 		head.ROM_size,head.VROM_size,iNESGameCRC32);
 
-        {
-         int x;
-         FCEU_printf(" ROM MD5:  0x");
-         for(x=0;x<16;x++) 
-          FCEU_printf("%02x",iNESCart.MD5[x]);
-         FCEU_printf("\n");
-        }
+	{
+		int x;
+		FCEU_printf(" ROM MD5:  0x");
+		for(x=0;x<16;x++) 
+			FCEU_printf("%02x",iNESCart.MD5[x]);
+		FCEU_printf("\n");
+	}
 	FCEU_printf(" Mapper:  %d\n Mirroring: %s\n", MapperNo,Mirroring==2?"None(Four-screen)":Mirroring?"Vertical":"Horizontal");
-        if(head.ROM_type&2) FCEU_printf(" Battery-backed.\n");
-        if(head.ROM_type&4) FCEU_printf(" Trained.\n");
+	if(head.ROM_type&2) FCEU_printf(" Battery-backed.\n");
+	if(head.ROM_type&4) FCEU_printf(" Trained.\n");
 
 	SetInput();
 	CheckHInfo();
 	{
-	 int x;
-	 uint64 partialmd5=0;
+		int x;
+		uint64 partialmd5=0;
 
-	 for(x=0;x<8;x++)
-	 {
-	  partialmd5 |= (uint64)iNESCart.MD5[7-x] << (x*8);
-	 } 
+		for(x=0;x<8;x++)
+		{
+			partialmd5 |= (uint64)iNESCart.MD5[7-x] << (x*8);
+		} 
 
-	 FCEU_VSUniCheck(partialmd5, &MapperNo, &Mirroring);
+		FCEU_VSUniCheck(partialmd5, &MapperNo, &Mirroring);
 	}
 	/* Must remain here because above functions might change value of
-	   VROM_size and free(VROM).
+	VROM_size and free(VROM).
 	*/
 	if(VROM_size)
-         SetupCartCHRMapping(0,VROM,VROM_size*0x2000,0);
+		SetupCartCHRMapping(0,VROM,VROM_size*0x2000,0);
 
-        if(Mirroring==2)
-         SetupCartMirroring(4,1,ExtraNTARAM);
-        else if(Mirroring>=0x10)
-	 SetupCartMirroring(2+(Mirroring&1),1,0);
+	if(Mirroring==2)
+		SetupCartMirroring(4,1,ExtraNTARAM);
+	else if(Mirroring>=0x10)
+		SetupCartMirroring(2+(Mirroring&1),1,0);
 	else
-         SetupCartMirroring(Mirroring&1,(Mirroring&4)>>2,0);
-	
+		SetupCartMirroring(Mirroring&1,(Mirroring&4)>>2,0);
+
 	iNESCart.battery=(head.ROM_type&2)?1:0;
 	iNESCart.mirror=Mirroring;
 
 	//if(MapperNo != 18) {
-  //  if(ROM) free(ROM);
-  //  if(VROM) free(VROM);
-  //  ROM=VROM=0;
-  //  return(0);
+	//  if(ROM) free(ROM);
+	//  if(VROM) free(VROM);
+	//  ROM=VROM=0;
+	//  return(0);
 	// }
 
-	if(NewiNES_Init(MapperNo))
-	{
 
-	}
-	else
-	{
-	 iNESCart.Power=iNESPower;
-         if(head.ROM_type&2)
-	 {
-	  iNESCart.SaveGame[0]=WRAM;
-	  iNESCart.SaveGameLen[0]=8192;
-	 }
-	}
+	GameInfo->mappernum = MapperNo;
+	MapperInit();
 	FCEU_LoadGameSave(&iNESCart);
 
 	strcpy(LoadedRomFName,name); //bbit edited: line added
@@ -709,9 +717,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	if(OverwriteVidMode)
 	{
 		if(strstr(name,"(E)") || strstr(name,"(e)")
-		|| strstr(name,"(F)") || strstr(name,"(f)")
-		|| strstr(name,"(G)") || strstr(name,"(g)")
-		|| strstr(name,"(I)") || strstr(name,"(i)"))
+			|| strstr(name,"(F)") || strstr(name,"(f)")
+			|| strstr(name,"(G)") || strstr(name,"(g)")
+			|| strstr(name,"(I)") || strstr(name,"(i)"))
 			FCEUI_SetVidSystem(1);
 		else
 			FCEUI_SetVidSystem(0);
@@ -739,7 +747,7 @@ int iNesSave(){
 
 	if(head.ROM_type&4) 	/* Trainer */
 	{
- 	 fwrite(trainerpoo,512,1,fp);
+		fwrite(trainerpoo,512,1,fp);
 	}
 
 	fwrite(ROM,0x4000,head.ROM_size,fp);
@@ -762,88 +770,88 @@ char *iNesShortFName() {
 
 void VRAM_BANK1(uint32 A, uint8 V)
 {
- V&=7;
- PPUCHRRAM|=(1<<(A>>10));
- CHRBankList[(A)>>10]=V;
- VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
+	V&=7;
+	PPUCHRRAM|=(1<<(A>>10));
+	CHRBankList[(A)>>10]=V;
+	VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
 }
- 
+
 void VRAM_BANK4(uint32 A, uint32 V)
 {
- V&=1;
- PPUCHRRAM|=(0xF<<(A>>10));
- CHRBankList[(A)>>10]=(V<<2);
- CHRBankList[((A)>>10)+1]=(V<<2)+1;
- CHRBankList[((A)>>10)+2]=(V<<2)+2;
- CHRBankList[((A)>>10)+3]=(V<<2)+3;
- VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
+	V&=1;
+	PPUCHRRAM|=(0xF<<(A>>10));
+	CHRBankList[(A)>>10]=(V<<2);
+	CHRBankList[((A)>>10)+1]=(V<<2)+1;
+	CHRBankList[((A)>>10)+2]=(V<<2)+2;
+	CHRBankList[((A)>>10)+3]=(V<<2)+3;
+	VPage[(A)>>10]=&CHRRAM[V<<10]-(A);
 }
 void VROM_BANK1(uint32 A,uint32 V)
 {
- setchr1(A,V);
- CHRBankList[(A)>>10]=V;
+	setchr1(A,V);
+	CHRBankList[(A)>>10]=V;
 }
- 
+
 void VROM_BANK2(uint32 A,uint32 V)
 {
- setchr2(A,V);
- CHRBankList[(A)>>10]=(V<<1);
- CHRBankList[((A)>>10)+1]=(V<<1)+1;
+	setchr2(A,V);
+	CHRBankList[(A)>>10]=(V<<1);
+	CHRBankList[((A)>>10)+1]=(V<<1)+1;
 }
 
 void VROM_BANK4(uint32 A, uint32 V)
 {
- setchr4(A,V);
- CHRBankList[(A)>>10]=(V<<2);
- CHRBankList[((A)>>10)+1]=(V<<2)+1;
- CHRBankList[((A)>>10)+2]=(V<<2)+2;
- CHRBankList[((A)>>10)+3]=(V<<2)+3;
+	setchr4(A,V);
+	CHRBankList[(A)>>10]=(V<<2);
+	CHRBankList[((A)>>10)+1]=(V<<2)+1;
+	CHRBankList[((A)>>10)+2]=(V<<2)+2;
+	CHRBankList[((A)>>10)+3]=(V<<2)+3;
 }
 
 void VROM_BANK8(uint32 V)
 {
- setchr8(V);
- CHRBankList[0]=(V<<3);
- CHRBankList[1]=(V<<3)+1;
- CHRBankList[2]=(V<<3)+2;
- CHRBankList[3]=(V<<3)+3;
- CHRBankList[4]=(V<<3)+4;
- CHRBankList[5]=(V<<3)+5;
- CHRBankList[6]=(V<<3)+6;
- CHRBankList[7]=(V<<3)+7;
+	setchr8(V);
+	CHRBankList[0]=(V<<3);
+	CHRBankList[1]=(V<<3)+1;
+	CHRBankList[2]=(V<<3)+2;
+	CHRBankList[3]=(V<<3)+3;
+	CHRBankList[4]=(V<<3)+4;
+	CHRBankList[5]=(V<<3)+5;
+	CHRBankList[6]=(V<<3)+6;
+	CHRBankList[7]=(V<<3)+7;
 }
 
 void ROM_BANK8(uint32 A, uint32 V)
 {
- setprg8(A,V);
- if(A>=0x8000)
-  PRGBankList[((A-0x8000)>>13)]=V;
+	setprg8(A,V);
+	if(A>=0x8000)
+		PRGBankList[((A-0x8000)>>13)]=V;
 }
- 
+
 void ROM_BANK16(uint32 A, uint32 V)
 {
- setprg16(A,V);
- if(A>=0x8000) 
- {
-  PRGBankList[((A-0x8000)>>13)]=V<<1;
-  PRGBankList[((A-0x8000)>>13)+1]=(V<<1)+1;
- }
+	setprg16(A,V);
+	if(A>=0x8000) 
+	{
+		PRGBankList[((A-0x8000)>>13)]=V<<1;
+		PRGBankList[((A-0x8000)>>13)+1]=(V<<1)+1;
+	}
 } 
 
 void ROM_BANK32(uint32 V)
 {
- setprg32(0x8000,V);
- PRGBankList[0]=V<<2;
- PRGBankList[1]=(V<<2)+1;
- PRGBankList[2]=(V<<2)+2;
- PRGBankList[3]=(V<<2)+3;
+	setprg32(0x8000,V);
+	PRGBankList[0]=V<<2;
+	PRGBankList[1]=(V<<2)+1;
+	PRGBankList[2]=(V<<2)+2;
+	PRGBankList[3]=(V<<2)+3;
 }
 
 void onemir(uint8 V)
 {
 	if(Mirroring==2) return;
-        if(V>1)
-         V=1;
+	if(V>1)
+		V=1;
 	Mirroring=0x10|V;
 	setmirror(MI_0+V);
 }
@@ -865,272 +873,272 @@ void MIRROR_SET(uint8 V)
 
 static void NONE_init(void)
 {
-        ROM_BANK16(0x8000,0);
-        ROM_BANK16(0xC000,~0);
+	ROM_BANK16(0x8000,0);
+	ROM_BANK16(0xC000,~0);
 
-        if(VROM_size) 
-	 VROM_BANK8(0);
-        else
-	 setvram8(CHRRAM);
+	if(VROM_size) 
+		VROM_BANK8(0);
+	else
+		setvram8(CHRRAM);
 }
 void (*MapInitTab[256])(void)=
 {
-    0,
-    0,
-    0, //Mapper2_init,
-    0, //Mapper3_init,
-    0,
-    0,
-    Mapper6_init,
-    0,//Mapper7_init,
-    Mapper8_init,
-    Mapper9_init,
-    Mapper10_init,
-    0, //Mapper11_init,
-    0, 
-    0, //Mapper13_init,
-    0,
-    Mapper15_init,
-    Mapper16_init,
-    Mapper17_init,
-    Mapper18_init,
-    0,
-    0,
-    Mapper21_init,
-    Mapper22_init,
-    Mapper23_init,
-    Mapper24_init,
-    Mapper25_init,
-    Mapper26_init,
-    Mapper27_init,
-    0,
-    0,
-    0,
-    0,
-    Mapper32_init,
-    Mapper33_init,
-    Mapper34_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    Mapper40_init,
-    Mapper41_init,
-    Mapper42_init,
-    0, //Mapper43_init,
-    0,
-    0,
-    Mapper46_init,
-    0,
-    Mapper48_init,
-    0,
-    Mapper50_init,
-    Mapper51_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,//    Mapper57_init,
-    0,//    Mapper58_init,
-    Mapper59_init,
-    0,// Mapper60_init,
-    Mapper61_init,
-    Mapper62_init,
-    0,
-    Mapper64_init,
-    Mapper65_init,
-    0,//Mapper66_init,
-    Mapper67_init,
-    Mapper68_init,
-    Mapper69_init,
-    0,//Mapper70_init,
-    Mapper71_init,
-    Mapper72_init,
-    Mapper73_init,
-    0,
-    Mapper75_init,
-    Mapper76_init,
-    Mapper77_init,
-    0, //Mapper78_init,
-    Mapper79_init,
-    Mapper80_init,
-    0,
-    Mapper82_init,
-    Mapper83_init,
-    0,
-    Mapper85_init,
-    Mapper86_init,
-    0, //Mapper87_init,
-    0, //Mapper88_init,
-    Mapper89_init,
-    0,
-    Mapper91_init,
-    Mapper92_init,
-    0, //Mapper93_init,
-    0, //Mapper94_init,
-    0,
-    Mapper96_init,
-    Mapper97_init,
-    0,
-    Mapper99_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, //Mapper107_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // Mapper113_init,
-    0,
-    0,
-    0, //Mapper116_init,
-    0, //Mapper117_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, //Mapper140_init,
-    0,
-    0,
-    0,
-    0, //Mapper144_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    Mapper151_init,
-    0, //Mapper152_init,
-    Mapper153_init,
-    0, //Mapper154_init,
-    0,
-    Mapper156_init,
-    Mapper157_init,
-    0, //Mapper158_init, removed
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    Mapper166_init,
-    Mapper167_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, //Mapper180_init,
-    0,
-    0,
-    0,
-    0, //Mapper184_init,
-    0, //Mapper185_init,
-    0,
-    0,
-    0,
-    0, //Mapper189_init,
-    0,
-    0, //Mapper191_init,
-    0,
-    Mapper193_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, //Mapper200_init,
-    Mapper201_init,
-    Mapper202_init,
-    Mapper203_init,
-    Mapper204_init,
-    0,
-    0,
-    Mapper207_init,
-    0,
-    0,
-    0,
-    0, //Mapper211_init,
-    Mapper212_init,
-    Mapper213_init,
-    Mapper214_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    Mapper225_init,
-    0, //Mapper226_init,
-    Mapper227_init,
-    Mapper228_init,
-    Mapper229_init,
-    Mapper230_init,
-    Mapper231_init,
-    Mapper232_init,
-    0,
-    Mapper234_init,
-    0, //Mapper235_init,
-    0,
-    0,
-    0,
-    0,
-    0, //Mapper240_init,
-    Mapper241_init,
-    Mapper242_init,
-    0,
-    Mapper244_init,
-    0,
-    Mapper246_init,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    Mapper255_init
+	0,
+	0,
+	0, //Mapper2_init,
+	0, //Mapper3_init,
+	0,
+	0,
+	Mapper6_init,
+	0,//Mapper7_init,
+	Mapper8_init,
+	Mapper9_init,
+	Mapper10_init,
+	0, //Mapper11_init,
+	0, 
+	0, //Mapper13_init,
+	0,
+	Mapper15_init,
+	Mapper16_init,
+	Mapper17_init,
+	Mapper18_init,
+	0,
+	0,
+	Mapper21_init,
+	Mapper22_init,
+	Mapper23_init,
+	Mapper24_init,
+	Mapper25_init,
+	Mapper26_init,
+	Mapper27_init,
+	0,
+	0,
+	0,
+	0,
+	Mapper32_init,
+	Mapper33_init,
+	Mapper34_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	Mapper40_init,
+	Mapper41_init,
+	Mapper42_init,
+	0, //Mapper43_init,
+	0,
+	0,
+	Mapper46_init,
+	0,
+	Mapper48_init,
+	0,
+	Mapper50_init,
+	Mapper51_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,//    Mapper57_init,
+	0,//    Mapper58_init,
+	Mapper59_init,
+	0,// Mapper60_init,
+	Mapper61_init,
+	Mapper62_init,
+	0,
+	Mapper64_init,
+	Mapper65_init,
+	0,//Mapper66_init,
+	Mapper67_init,
+	Mapper68_init,
+	Mapper69_init,
+	0,//Mapper70_init,
+	Mapper71_init,
+	Mapper72_init,
+	Mapper73_init,
+	0,
+	Mapper75_init,
+	Mapper76_init,
+	Mapper77_init,
+	0, //Mapper78_init,
+	Mapper79_init,
+	Mapper80_init,
+	0,
+	Mapper82_init,
+	Mapper83_init,
+	0,
+	Mapper85_init,
+	Mapper86_init,
+	0, //Mapper87_init,
+	0, //Mapper88_init,
+	Mapper89_init,
+	0,
+	Mapper91_init,
+	Mapper92_init,
+	0, //Mapper93_init,
+	0, //Mapper94_init,
+	0,
+	Mapper96_init,
+	Mapper97_init,
+	0,
+	Mapper99_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0, //Mapper107_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0, // Mapper113_init,
+	0,
+	0,
+	0, //Mapper116_init,
+	0, //Mapper117_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0, //Mapper140_init,
+	0,
+	0,
+	0,
+	0, //Mapper144_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	Mapper151_init,
+	0, //Mapper152_init,
+	Mapper153_init,
+	0, //Mapper154_init,
+	0,
+	Mapper156_init,
+	Mapper157_init,
+	0, //Mapper158_init, removed
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	Mapper166_init,
+	Mapper167_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0, //Mapper180_init,
+	0,
+	0,
+	0,
+	0, //Mapper184_init,
+	0, //Mapper185_init,
+	0,
+	0,
+	0,
+	0, //Mapper189_init,
+	0,
+	0, //Mapper191_init,
+	0,
+	Mapper193_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0, //Mapper200_init,
+	Mapper201_init,
+	Mapper202_init,
+	Mapper203_init,
+	Mapper204_init,
+	0,
+	0,
+	Mapper207_init,
+	0,
+	0,
+	0,
+	0, //Mapper211_init,
+	Mapper212_init,
+	Mapper213_init,
+	Mapper214_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	Mapper225_init,
+	0, //Mapper226_init,
+	Mapper227_init,
+	Mapper228_init,
+	Mapper229_init,
+	Mapper230_init,
+	Mapper231_init,
+	Mapper232_init,
+	0,
+	Mapper234_init,
+	0, //Mapper235_init,
+	0,
+	0,
+	0,
+	0,
+	0, //Mapper240_init,
+	Mapper241_init,
+	Mapper242_init,
+	0,
+	Mapper244_init,
+	0,
+	Mapper246_init,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	Mapper255_init
 };
 
 static DECLFW(BWRAM)
@@ -1146,41 +1154,41 @@ static DECLFR(AWRAM)
 #ifdef DEBUG_MAPPER
 static DECLFW(WriteHandler)
 {
- FCEU_printf("$%04x:$%02x\n",A,V);
+	FCEU_printf("$%04x:$%02x\n",A,V);
 }
 #endif
 
 void (*MapStateRestore)(int version);
 void iNESStateRestore(int version)
 {
- int x;
- 
- if(!MapperNo) return;
+	int x;
 
- for(x=0;x<4;x++)
-  setprg8(0x8000+x*8192,PRGBankList[x]);
+	if(!MapperNo) return;
 
- if(VROM_size)
-  for(x=0;x<8;x++) 
-    setchr1(0x400*x,CHRBankList[x]);
+	for(x=0;x<4;x++)
+		setprg8(0x8000+x*8192,PRGBankList[x]);
 
-if(0) switch(Mirroring)
- {
-   case 0:setmirror(MI_H);break;
-   case 1:setmirror(MI_V);break;
-   case 0x12:
-   case 0x10:setmirror(MI_0);break;
-   case 0x13:
-   case 0x11:setmirror(MI_1);break;
- }
- if(MapStateRestore) MapStateRestore(version);
+	if(VROM_size)
+		for(x=0;x<8;x++) 
+			setchr1(0x400*x,CHRBankList[x]);
+
+	if(0) switch(Mirroring)
+	{
+case 0:setmirror(MI_H);break;
+case 1:setmirror(MI_V);break;
+case 0x12:
+case 0x10:setmirror(MI_0);break;
+case 0x13:
+case 0x11:setmirror(MI_1);break;
+	}
+	if(MapStateRestore) MapStateRestore(version);
 }
 
 static void iNESPower(void)
 {
 	int x;
 	int type=MapperNo;
-	
+
 	SetReadHandler(0x8000,0xFFFF,CartBR);
 	GameStateRestore=iNESStateRestore;
 	MapClose=0;
@@ -1191,19 +1199,19 @@ static void iNESPower(void)
 	SetReadHandler(0x6000,0x7FFF,AWRAM);
 	SetWriteHandler(0x6000,0x7FFF,BWRAM);
 	FCEU_CheatAddRAM(8,0x6000,WRAM);
-/*
-    #ifdef DEBUG_MAPPER
-    if(type==0) SetWriteHandler(0x4020,0xFFFF,WriteHandler);
-    #endif
-*/
+	/*
+	#ifdef DEBUG_MAPPER
+	if(type==0) SetWriteHandler(0x4020,0xFFFF,WriteHandler);
+	#endif
+	*/
 	/* This statement represents atrocious code.  I need to rewrite
-	   all of the iNES mapper code... */
+	all of the iNES mapper code... */
 	IRQCount=IRQLatch=IRQa=0;
 	if(head.ROM_type&2)
 		memset(GameMemBlock+8192,0,131072-8192);
 	else
 		memset(GameMemBlock,0,131072);
-	
+
 	NONE_init();
 	ResetExState(0,0);
 
@@ -1211,264 +1219,264 @@ static void iNESPower(void)
 		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
 	AddExState(WRAM, 8192, 0, "WRAM");
-	
+
 	if(type==19 || type==6 || type==69 || type==85 || type==96)
-         AddExState(MapperExRAM, 32768, 0, "MEXR");
-    if((!VROM_size || type==6 || type==19) && (type!=13 && type!=96))
-         AddExState(CHRRAM, 8192, 0, "CHRR");
-        if(head.ROM_type&8)
-         AddExState(ExtraNTARAM, 2048, 0, "EXNR");
+		AddExState(MapperExRAM, 32768, 0, "MEXR");
+	if((!VROM_size || type==6 || type==19) && (type!=13 && type!=96))
+		AddExState(CHRRAM, 8192, 0, "CHRR");
+	if(head.ROM_type&8)
+		AddExState(ExtraNTARAM, 2048, 0, "EXNR");
 
 	/* Exclude some mappers whose emulation code handle save state stuff 
-	   themselves. */
+	themselves. */
 	if(type && type!=13 && type!=96)
 	{
-         AddExState(mapbyte1, 32, 0, "MPBY");
-         AddExState(&Mirroring, 1, 0, "MIRR");
-         AddExState(&IRQCount, 4, 1, "IRQC");
-         AddExState(&IRQLatch, 4, 1, "IQL1");
-         AddExState(&IRQa, 1, 0, "IRQA");
-         AddExState(PRGBankList, 4, 0, "PBL");
-         for(x=0;x<8;x++)
-         {
-          char tak[8];
-          sprintf(tak,"CBL%d",x);         
-          AddExState(&CHRBankList[x], 2, 1,tak);
-         }
+		AddExState(mapbyte1, 32, 0, "MPBY");
+		AddExState(&Mirroring, 1, 0, "MIRR");
+		AddExState(&IRQCount, 4, 1, "IRQC");
+		AddExState(&IRQLatch, 4, 1, "IQL1");
+		AddExState(&IRQa, 1, 0, "IRQA");
+		AddExState(PRGBankList, 4, 0, "PBL");
+		for(x=0;x<8;x++)
+		{
+			char tak[8];
+			sprintf(tak,"CBL%d",x);         
+			AddExState(&CHRBankList[x], 2, 1,tak);
+		}
 	}
 
-        if(MapInitTab[type]) MapInitTab[type]();
-        else if(type)
-        {
-         FCEU_PrintError("iNES mapper #%d is not supported at all.",type);
-        }
+	if(MapInitTab[type]) MapInitTab[type]();
+	else if(type)
+	{
+		FCEU_PrintError("iNES mapper #%d is not supported at all.",type);
+	}
 }
 
 
 typedef struct {
-           int number;   
-           void (*init)(CartInfo *);
+	int number;   
+	void (*init)(CartInfo *);
 } BMAPPING;
 /*
 static BMAPPING bmap[] = {
-    {1,   Mapper1_Init},
-    {2,   UNROM_Init},
-    {3,   CNROM_Init},
-    {4,   Mapper4_Init},
-    {5,   Mapper5_Init},
-    {12,  Mapper12_Init},
-    {13,  CPROM_Init},
-    {19,  Mapper19_Init},
-    {44,  Mapper44_Init},
-    {45,  Mapper45_Init},
-    {47,  Mapper47_Init},
-    {49,  Mapper49_Init},
-    {52,  Mapper52_Init},
-    {74,  Mapper74_Init},
-    {90,  Mapper90_Init},
-    {95,  Mapper95_Init},
-    {105, Mapper105_Init},
-    {112, Mapper112_Init},
-    {114, Mapper114_Init},
-        {115, Mapper115_Init},
-        {116, Mapper116_Init},
-	{118, Mapper118_Init},
-    {119, Mapper119_Init},
-    {133, SA72008_Init},
-    {137, S8259D_Init},
-    {138, S8259B_Init},
-    {139, S8259C_Init},
-    {141, S8259A_Init},
-    {143, TCA01_Init},
-    {145, SA72007_Init},
-    {146, SA0161M_Init},
-    {147, TCU01_Init},
-    {148, SA0037_Init},
-    {149, SA0036_Init},
-    {150, S74LS374N_Init},
-	{155, Mapper155_Init},
-    {160, Mapper90_Init},
-    {163, Mapper163_Init},
-	{164, Mapper164_Init},
-    {165, Mapper165_Init},
-    {182, Mapper182_Init},
-    {183, Mapper183_Init},
-    {186, Mapper186_Init},
-        {187, Mapper187_Init},
-	{188, Mapper188_Init},
-    {191, Mapper191_Init},
-    {205, Mapper205_Init},
-    {206, DEIROM_Init},
-        {208, Mapper208_Init},
-    {209, Mapper209_Init},
-	{210, Mapper210_Init},
-    {215, Mapper215_Init},
-    {216, Mapper216_Init},
-    {217, Mapper217_Init},
-    {243, S74LS374NA_Init},
-        {245, Mapper245_Init},
-        {249, Mapper249_Init},
-        {250, Mapper250_Init},
-    {254, Mapper254_Init},
-    {  0,        0}
+{1,   Mapper1_Init},
+{2,   UNROM_Init},
+{3,   CNROM_Init},
+{4,   Mapper4_Init},
+{5,   Mapper5_Init},
+{12,  Mapper12_Init},
+{13,  CPROM_Init},
+{19,  Mapper19_Init},
+{44,  Mapper44_Init},
+{45,  Mapper45_Init},
+{47,  Mapper47_Init},
+{49,  Mapper49_Init},
+{52,  Mapper52_Init},
+{74,  Mapper74_Init},
+{90,  Mapper90_Init},
+{95,  Mapper95_Init},
+{105, Mapper105_Init},
+{112, Mapper112_Init},
+{114, Mapper114_Init},
+{115, Mapper115_Init},
+{116, Mapper116_Init},
+{118, Mapper118_Init},
+{119, Mapper119_Init},
+{133, SA72008_Init},
+{137, S8259D_Init},
+{138, S8259B_Init},
+{139, S8259C_Init},
+{141, S8259A_Init},
+{143, TCA01_Init},
+{145, SA72007_Init},
+{146, SA0161M_Init},
+{147, TCU01_Init},
+{148, SA0037_Init},
+{149, SA0036_Init},
+{150, S74LS374N_Init},
+{155, Mapper155_Init},
+{160, Mapper90_Init},
+{163, Mapper163_Init},
+{164, Mapper164_Init},
+{165, Mapper165_Init},
+{182, Mapper182_Init},
+{183, Mapper183_Init},
+{186, Mapper186_Init},
+{187, Mapper187_Init},
+{188, Mapper188_Init},
+{191, Mapper191_Init},
+{205, Mapper205_Init},
+{206, DEIROM_Init},
+{208, Mapper208_Init},
+{209, Mapper209_Init},
+{210, Mapper210_Init},
+{215, Mapper215_Init},
+{216, Mapper216_Init},
+{217, Mapper217_Init},
+{243, S74LS374NA_Init},
+{245, Mapper245_Init},
+{249, Mapper249_Init},
+{250, Mapper250_Init},
+{254, Mapper254_Init},
+{  0,        0}
 };
 */
 static BMAPPING bmap[] = {
-    {0,   NROM_Init},
-    {1,   Mapper1_Init},
-    {2,   UNROM_Init},
-    {3,   CNROM_Init},
-    {4,   Mapper4_Init},
-    {5,   Mapper5_Init},
-    {7,   ANROM_Init},
-    {11,  Mapper11_Init},
-    {12,  Mapper12_Init},
-    {13,  CPROM_Init},
-    {19,  Mapper19_Init},
-    {37,  Mapper37_Init},
-    {43,  Mapper43_Init},
-    {44,  Mapper44_Init},
-    {45,  Mapper45_Init},
-    {47,  Mapper47_Init},
-    {49,  Mapper49_Init},
-    {52,  Mapper52_Init},
-    {57,  Mapper57_Init},
-    {58,  BMCGK192_Init},
-    {60,  BMCD1038_Init},
-    {66,  MHROM_Init},
-    {70,  Mapper70_Init},
-    {74,  Mapper74_Init},
-    {78,  Mapper78_Init},
-    {87,  Mapper87_Init},
-    {88,  Mapper88_Init},
-    {90,  Mapper90_Init},
-    {93,  SUNSOFT_UNROM_Init},
-    {94,  Mapper94_Init},
-    {95,  Mapper95_Init},
-    {105, Mapper105_Init},
-    {107, Mapper107_Init},
-    {112, Mapper112_Init},
-    {113, Mapper113_Init},
-    {114, Mapper114_Init},
-    {115, Mapper115_Init},
-    {116, Mapper116_Init},
-    {117, Mapper117_Init},
-    {118, TKSROM_Init},
-    {119, Mapper119_Init},
-    {132, UNL22211_Init},
-    {133, SA72008_Init},
-    {137, S8259D_Init},
-    {138, S8259B_Init},
-    {139, S8259C_Init},
-    {140, Mapper140_Init},
-    {141, S8259A_Init},
-    {143, TCA01_Init},
-    {144, Mapper144_Init},
-    {145, SA72007_Init},
-    {146, SA0161M_Init},
-    {147, TCU01_Init},
-    {148, SA0037_Init},
-    {149, SA0036_Init},
-    {150, S74LS374N_Init},
-    {152, Mapper152_Init},
-    {154, Mapper154_Init},
-    {155, Mapper155_Init},
-    {160, Mapper90_Init},
-    {163, Mapper163_Init},
-    {164, Mapper164_Init},
-    {165, Mapper165_Init},
-    {180, Mapper180_Init},
-    {181, Mapper181_Init},
-    {182, Mapper182_Init},
-    {183, Mapper183_Init},
-    {184, Mapper184_Init},
-    {185, Mapper185_Init},
-    {186, Mapper186_Init},
-    {187, Mapper187_Init},
-    {188, Mapper188_Init},
-    {189, Mapper189_Init},
-    {191, Mapper191_Init},
-    {192, Mapper192_Init},
-    {194, Mapper194_Init},
-    {195, Mapper195_Init},
-    {198, Mapper198_Init},
-    {199, Mapper199_Init},
-    {200, Mapper200_Init},
-    {205, Mapper205_Init},
-    {206, DEIROM_Init},
-    {208, Mapper208_Init},
-    {209, Mapper209_Init},
-    {210, Mapper210_Init},
-    {211, Mapper211_Init},
-    {215, Mapper215_Init},
-    {216, Mapper216_Init},
-    {217, Mapper217_Init},
+	{0,   NROM_Init},
+	{1,   Mapper1_Init},
+	{2,   UNROM_Init},
+	{3,   CNROM_Init},
+	{4,   Mapper4_Init},
+	{5,   Mapper5_Init},
+	{7,   ANROM_Init},
+	{11,  Mapper11_Init},
+	{12,  Mapper12_Init},
+	{13,  CPROM_Init},
+	{19,  Mapper19_Init},
+	{37,  Mapper37_Init},
+	{43,  Mapper43_Init},
+	{44,  Mapper44_Init},
+	{45,  Mapper45_Init},
+	{47,  Mapper47_Init},
+	{49,  Mapper49_Init},
+	{52,  Mapper52_Init},
+	{57,  Mapper57_Init},
+	{58,  BMCGK192_Init},
+	{60,  BMCD1038_Init},
+	{66,  MHROM_Init},
+	{70,  Mapper70_Init},
+	{74,  Mapper74_Init},
+	{78,  Mapper78_Init},
+	{87,  Mapper87_Init},
+	{88,  Mapper88_Init},
+	{90,  Mapper90_Init},
+	{93,  SUNSOFT_UNROM_Init},
+	{94,  Mapper94_Init},
+	{95,  Mapper95_Init},
+	{105, Mapper105_Init},
+	{107, Mapper107_Init},
+	{112, Mapper112_Init},
+	{113, Mapper113_Init},
+	{114, Mapper114_Init},
+	{115, Mapper115_Init},
+	{116, Mapper116_Init},
+	{117, Mapper117_Init},
+	{118, TKSROM_Init},
+	{119, Mapper119_Init},
+	{132, UNL22211_Init},
+	{133, SA72008_Init},
+	{137, S8259D_Init},
+	{138, S8259B_Init},
+	{139, S8259C_Init},
+	{140, Mapper140_Init},
+	{141, S8259A_Init},
+	{143, TCA01_Init},
+	{144, Mapper144_Init},
+	{145, SA72007_Init},
+	{146, SA0161M_Init},
+	{147, TCU01_Init},
+	{148, SA0037_Init},
+	{149, SA0036_Init},
+	{150, S74LS374N_Init},
+	{152, Mapper152_Init},
+	{154, Mapper154_Init},
+	{155, Mapper155_Init},
+	{160, Mapper90_Init},
+	{163, Mapper163_Init},
+	{164, Mapper164_Init},
+	{165, Mapper165_Init},
+	{180, Mapper180_Init},
+	{181, Mapper181_Init},
+	{182, Mapper182_Init},
+	{183, Mapper183_Init},
+	{184, Mapper184_Init},
+	{185, Mapper185_Init},
+	{186, Mapper186_Init},
+	{187, Mapper187_Init},
+	{188, Mapper188_Init},
+	{189, Mapper189_Init},
+	{191, Mapper191_Init},
+	{192, Mapper192_Init},
+	{194, Mapper194_Init},
+	{195, Mapper195_Init},
+	{198, Mapper198_Init},
+	{199, Mapper199_Init},
+	{200, Mapper200_Init},
+	{205, Mapper205_Init},
+	{206, DEIROM_Init},
+	{208, Mapper208_Init},
+	{209, Mapper209_Init},
+	{210, Mapper210_Init},
+	{211, Mapper211_Init},
+	{215, Mapper215_Init},
+	{216, Mapper216_Init},
+	{217, Mapper217_Init},
 
-    {218, UNLA9711_Init},
-    {219, UNLSL1632_Init},
-    {220, UNLCN22M_Init},
-    {221, BMCFK23C_Init},
+	{218, UNLA9711_Init},
+	{219, UNLSL1632_Init},
+	{220, UNLCN22M_Init},
+	{221, BMCFK23C_Init},
 
-    {222, Mapper222_Init},
-    {226, Mapper226_Init},
-    {235, Mapper235_Init},
-    {240, Mapper240_Init},
-    {243, S74LS374NA_Init},
-    {245, Mapper245_Init},
-    {249, Mapper249_Init},
-    {250, Mapper250_Init},
-    {254, Mapper254_Init},
-    {  0,        0}
+	{222, Mapper222_Init},
+	{226, Mapper226_Init},
+	{235, Mapper235_Init},
+	{240, Mapper240_Init},
+	{243, S74LS374NA_Init},
+	{245, Mapper245_Init},
+	{249, Mapper249_Init},
+	{250, Mapper250_Init},
+	{254, Mapper254_Init},
+	{  0,        0}
 };
 
 static int NewiNES_Init(int num)
 {
- BMAPPING *tmp=bmap;
+	BMAPPING *tmp=bmap;
 
- if(GameInfo->type == GIT_VSUNI)
-  AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
+	if(GameInfo->type == GIT_VSUNI)
+		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
- while(tmp->init)
- {
-  if(num==tmp->number)
-  {
-   UNIFchrrama=0; // need here for compatibility with UNIF mapper code
-   if(!VROM_size)
-   {
-    int CHRRAMSize;
-    if(num==13)
+	while(tmp->init)
 	{
-		CHRRAMSize=16384;
-	}
-    else
-	{
-		CHRRAMSize=8192;
-	}
+		if(num==tmp->number)
+		{
+			UNIFchrrama=0; // need here for compatibility with UNIF mapper code
+			if(!VROM_size)
+			{
+				int CHRRAMSize;
+				if(num==13)
+				{
+					CHRRAMSize=16384;
+				}
+				else
+				{
+					CHRRAMSize=8192;
+				}
 #ifdef _USE_SHARED_MEMORY_
-	mapVROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, CHRRAMSize,"fceu.VROM");
-	if(mapVROM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		CloseHandle(mapVROM);
-		mapVROM = NULL;
-		VROM=(uint8 *)malloc(CHRRAMSize);
-	}
-	else
-	{
-		VROM   = (uint8 *)MapViewOfFile(mapVROM, FILE_MAP_WRITE, 0, 0, 0);
-	}
+				mapVROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, CHRRAMSize,"fceu.VROM");
+				if(mapVROM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
+				{
+					CloseHandle(mapVROM);
+					mapVROM = NULL;
+					VROM=(uint8 *)malloc(CHRRAMSize);
+				}
+				else
+				{
+					VROM   = (uint8 *)MapViewOfFile(mapVROM, FILE_MAP_WRITE, 0, 0, 0);
+				}
 #else
-	VROM=(uint8 *)malloc(CHRRAMSize);
+				VROM=(uint8 *)malloc(CHRRAMSize);
 #endif
-    UNIFchrrama=VROM;
-    SetupCartCHRMapping(0,VROM,CHRRAMSize,1);
-    AddExState(VROM,CHRRAMSize, 0, "CHRR");
-   }
-   if(head.ROM_type&8)
-    AddExState(ExtraNTARAM, 2048, 0, "EXNR");
-   tmp->init(&iNESCart);
-   return(1);
-  }
-  tmp++;
- }
- return(0);
+				UNIFchrrama=VROM;
+				SetupCartCHRMapping(0,VROM,CHRRAMSize,1);
+				AddExState(VROM,CHRRAMSize, 0, "CHRR");
+			}
+			if(head.ROM_type&8)
+				AddExState(ExtraNTARAM, 2048, 0, "EXNR");
+			tmp->init(&iNESCart);
+			return(1);
+		}
+		tmp++;
+	}
+	return(0);
 }

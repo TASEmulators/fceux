@@ -112,6 +112,7 @@ inline const char* ESIFC_Name(ESIFC esifc)
 typedef struct
 {
 	uint8 *name;	//Game name, UTF8 encoding
+	int mappernum;
 
 	EGIT type;      
 	EGIV vidsys;     //Current emulated video system;

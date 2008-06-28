@@ -611,7 +611,10 @@ static void poweron(bool shouldDisableBatteryLoading)
 	//"hack for movie WRAM clearing on record from poweron"
 	//but W-T-F. are you telling me that there is some problem with the poweron sequence?
 	//screw that. we're using the main poweron sequence, even if that breaks old movie compatibility (unlikely)
+	extern int disableBatteryLoading;
+	if(shouldDisableBatteryLoading) disableBatteryLoading=1;
 	PowerNES();
+	if(shouldDisableBatteryLoading) disableBatteryLoading=0;
 }
 
 

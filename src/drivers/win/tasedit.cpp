@@ -54,9 +54,19 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 		case 6:
 		case 7:
 		case 8:
-		case 9: {
-				int bit = (item.iSubItem - 2);
-				uint8 data = currMovieData.records[item.iItem].joysticks[0];
+		case 9: 
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14:
+		case 15:
+		case 16:
+		case 17: 
+			{
+				int joy = (item.iSubItem - 2)/8;
+				int bit = (item.iSubItem - 2)%8;
+				uint8 data = currMovieData.records[item.iItem].joysticks[joy];
 				if(data & (1<<bit))
 				{
 					item.pszText[0] = MovieRecord::mnemonics[bit];
@@ -88,8 +98,13 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		return CDRF_NOTIFYSUBITEMDRAW;
 	case CDDS_SUBITEMPREPAINT:
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
-		if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount)
-			msg->clrTextBk = RGB(192,255,192);
+		if((msg->iSubItem-2)/8==0)
+			if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount)
+				msg->clrTextBk = RGB(192,255,192);
+			else {}
+		else if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount)
+				msg->clrTextBk = RGB(144,192,144);
+			else msg->clrTextBk = RGB(192,192,192);
 		return CDRF_DODEFAULT;
 	default:
 		return CDRF_DODEFAULT;
@@ -211,8 +226,9 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	else //if an input column was clicked:
 	{
 		//toggle the bit
-		int bit = (info->iSubItem-2);
-		currMovieData.records[index].toggleBit(0,bit);
+		int joy = (info->iSubItem - 2)/8;
+		int bit = (info->iSubItem - 2)%8;
+		currMovieData.records[index].toggleBit(joy,bit);
 		
 		//update the row
 		ListView_Update(hwndList,index);
@@ -222,6 +238,23 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		//redraw everything to show the reduced green zone
 		RedrawList();
 	}
+}
+
+//removes all selections
+static void ClearSelection()
+{
+	int frameCount = ListView_GetItemCount(hwndList);
+	LVITEM lvi;
+	lvi.mask = LVIF_STATE;
+	lvi.state = 0;
+	lvi.stateMask = LVIS_SELECTED;
+	for(int i=0;i<frameCount;i++)
+	{
+		lvi.iItem = i;
+		ListView_SetItem(hwndList,&lvi);
+	}
+
+	selectionFrames.clear();
 }
 
 //insert frames at the currently selected positions.
@@ -241,7 +274,6 @@ static void InsertFrames()
 	}
 
 	InvalidateGreenZone(*selectionFrames.begin());
-
 	UpdateTasEdit();
 	RedrawList();
 }
@@ -249,6 +281,13 @@ static void InsertFrames()
 //delete frames at the currently selected positions.
 static void DeleteFrames()
 {
+	int frames = selectionFrames.size();
+
+	if(frames == currMovieData.records.size())
+	{
+		MessageBox(hwndTasEdit,"Please don't delete all of the frames in the movie. This violates an internal invariant we need to keep.","Error deleting",0);
+		return;
+	}
 	//this is going to be _really_ slow.
 
 	//insert frames before each selection
@@ -263,7 +302,7 @@ static void DeleteFrames()
 	//in the particular case of deletion, we need to make sure we reset currFrameCounter to something reasonable
 	//why not the current green zone max?
 	currFrameCounter = currMovieData.greenZoneCount-1;
-
+	ClearSelection();
 	UpdateTasEdit();
 	RedrawList();
 }
@@ -388,6 +427,22 @@ static void InitDialog()
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	lvc.cx = 20;
+	lvc.pszText = "A";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "B";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "S";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "T";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "U";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "D";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "L";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	lvc.pszText = "R";
+	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	lvc.pszText = "A";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	lvc.pszText = "B";
