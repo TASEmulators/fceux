@@ -253,6 +253,23 @@ InitConfig()
         config->addOption(prefix + FamilyKeyBoardNames[j],
                           DefaultFamilyKeyBoard[j]);
     }
+    
+    // Hotkeys
+    prefix = "SDL.Hotkeys.";
+    config->addOption(prefix + "CheatMenu", SDLK_F2);
+    config->addOption(prefix + "RenderBG", SDLK_F4);
+    config->addOption(prefix + "SaveState", SDLK_F5);
+    config->addOption(prefix + "LoadState", SDLK_F7);
+    config->addOption(prefix + "Screenshot", SDLK_F9);
+    config->addOption(prefix + "Reset", SDLK_F10);
+    config->addOption(prefix + "Power", SDLK_F11);
+    config->addOption(prefix + "Quit", SDLK_ESCAPE);
+    config->addOption(prefix + "Pause", SDLK_BACKSLASH);
+    config->addOption(prefix + "DecraseSpeed", SDLK_MINUS);
+    config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
+    config->addOption(prefix + "FrameAdvance", SDLK_RCTRL);
+    
+    
 
     // All mouse devices
     config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");

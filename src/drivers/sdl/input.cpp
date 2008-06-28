@@ -23,6 +23,8 @@
 #include "main.h"
 #include "dface.h"
 #include "input.h"
+#include "config.h"
+
 
 #include "sdl-video.h"
 
@@ -34,6 +36,8 @@
 
 /** GLOBALS **/
 int NoWaiting=1;
+extern Config *g_config;
+
 
 /* UsrInputType[] is user-specified.  InputType[] is current
         (game loading can override user settings)
@@ -144,7 +148,7 @@ static int g_fkbEnabled = 0;
 static void
 KeyboardCommands()
 {
-    int is_shift, is_alt;
+    int is_shift, is_alt, key;
 
     // get the keyboard input
     g_keyState = SDL_GetKeyState(NULL);
@@ -164,13 +168,13 @@ KeyboardCommands()
 
     is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
     is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
-
-    // f4 controls rendering
-    if(keyonly(F4)) {
+    
+    g_config->getOption("SDL.Hotkeys.RenderBG", &key);
+    if(g_keyState[key]) {
         if(is_shift) {
             FCEUI_SetRenderPlanes(true, false);
         } else {
-            FCEUI_SetRenderPlanes(false, true);
+            FCEUI_SetRenderPlanes(true, true);
         }
     }
 
@@ -195,29 +199,33 @@ KeyboardCommands()
         }
     }
 
-    // f9 is save snapshot key
-    if(keyonly(F9)) {
+    
+    
+    g_config->getOption("SDL.Hotkeys.Screenshot", &key);
+    if(g_keyState[key]) {
         FCEUI_SaveSnapshot();
     }
 
     // if not NES Sound Format
     if(gametype != GIT_NSF) {
-        // f2 to enable cheats
-        if(keyonly(F2)) {
+        
+        g_config->getOption("SDL.Hotkeys.CheatMenu", &key);
+        if(g_keyState[key]) {
             DoCheatSeq();
         }
 
-        // f5 to save state, Shift-f5 to save movie
-        if(keyonly(F5)) {
+        g_config->getOption("SDL.Hotkeys.SaveState", &key);
+        if(g_keyState[key]) {
             if(is_shift) {
                 FCEUI_SaveMovie(NULL,MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
         }
-
+        
+        g_config->getOption("SDL.Hotkeys.LoadState", &key);
         // f7 to load state, Shift-f7 to load movie
-        if(keyonly(F7)) {
+        if(g_keyState[key]) {
             if(is_shift) {
                 //mbg merge 7/23/06 loadmovie takes another arg now
                 FCEUI_LoadMovie(NULL, false, false, false);
@@ -227,41 +235,42 @@ KeyboardCommands()
         }
     }
 
-    // f1 to toggle tile view
-    /*
-    if(keyonly(F1)) {
-        FCEUI_ToggleTileView();
-    }
-    */
-
-    // - to decrease speed, = to increase speed
-    if(keyonly(MINUS)) {
+    
+    g_config->getOption("SDL.Hotkeys.DecreaseSpeed", &key);
+    if(g_keyState[key]) {
+        // this doesn't seem to work right now
         DecreaseEmulationSpeed();
     }
-    if(keyonly(EQUAL)) {
+    g_config->getOption("SDL.Hotkeys.IncreaseSpeed", &key);
+    if(g_keyState[key]) {
+        // this seems quite sporadic
         IncreaseEmulationSpeed();
     }
 
     if(keyonly(BACKSPACE)) {
         FCEUI_MovieToggleFrameDisplay();
     }
-    if(keyonly(BACKSLASH)) {
+    g_config->getOption("SDL.Hotkeys.Pause", &key);
+    if(g_keyState[key]) {
         FCEUI_ToggleEmulationPause();
     }
-    if(keyonly(RIGHTCONTROL)) {
-        FCEUI_FrameAdvance();
+    g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
+    if(g_keyState[key]) {
+        // this currently crashes fceu for me, is this broken?
+        //FCEUI_FrameAdvance();
     }
 
-    // f10 reset, f11 power
-    if(keyonly(F10)) {
+    
+    g_config->getOption("SDL.Hotkeys.Reset", &key);
+    if(g_keyState[key]) {
         FCEUI_ResetNES();
     }
-    if(keyonly(F11)) {
+    g_config->getOption("SDL.Hotkeys.Power", &key);
+    if(g_keyState[key]) {
         FCEUI_PowerNES();
     }
-
-    // F12 or Esc close game
-    if(KEY(F12) || KEY(ESCAPE)) {
+    g_config->getOption("SDL.Hotkeys.Quit", &key);
+    if(g_keyState[key]) {
         FCEUI_CloseGame();
     }
 
