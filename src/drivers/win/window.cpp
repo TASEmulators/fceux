@@ -45,6 +45,8 @@
 #include "throttle.h"
 #include "monitor.h"
 #include "tasedit.h"
+#include "keyboard.h"
+#include "joystick.h"
 #include "oldmovie.h"
 #include "movie.h"
 #include "7zip.h"
@@ -72,8 +74,6 @@ char *md5_asciistr(uint8 digest[16]);
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 
-int KeyboardSetBackgroundAccess(int on); //mbg merge 7/17/06 YECH had to add
-void SetJoystickBackgroundAccess(int background); //mbg merge 7/17/06 YECH had to add
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void DoPPUView();//mbg merge 7/19/06 yech had to add
 
@@ -935,8 +935,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				if((eoptions & EO_BGRUN) == 0)
 				{
 					EnableBackgroundInput = 0;
-					KeyboardSetBackgroundAccess(EnableBackgroundInput);
-					SetJoystickBackgroundAccess(EnableBackgroundInput);
+					KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
+					JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
 				}
 
 				UpdateCheckedMenuItems();
@@ -947,8 +947,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// TODO: Does this even work?
 				EnableBackgroundInput ^= 1;
 				eoptions |= EO_BGRUN * EnableBackgroundInput;
-				KeyboardSetBackgroundAccess(EnableBackgroundInput);
-				SetJoystickBackgroundAccess(EnableBackgroundInput);
+				KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
+				JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
 				UpdateCheckedMenuItems();
 				break;
 

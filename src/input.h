@@ -248,6 +248,12 @@ extern const char* FCEUI_CommandTypeNames[];
 
 typedef void EMUCMDFN(void);
 
+enum EMUCMDFLAG
+{
+	EMUCMDFLAG_NONE = 0,
+	EMUCMDFLAG_TASEDIT = 1,
+};
+
 struct EMUCMDTABLE
 {
 	int cmd;
@@ -256,6 +262,7 @@ struct EMUCMDTABLE
 	EMUCMDFN* fn_off;
 	int state;
 	char* name;
+	int flags; //EMUCMDFLAG
 };
 
 extern struct EMUCMDTABLE FCEUI_CommandTable[];

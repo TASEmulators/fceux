@@ -316,9 +316,7 @@ char* GetKeyComboName(int c)
 	return text;
 }
 
-/**
-* Callback function for the dialog where the user can change hotkeys.
-**/
+//Callback function for the dialog where the user can change hotkeys.
 BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	static HANDLE hThread = NULL;
@@ -338,7 +336,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 			key = 0;
 			memset(keyonce, 0, sizeof(keyonce));
 			
-			KeyboardSetBackgroundAccess(1);
+			KeyboardSetBackgroundAccess(true);
 			SetFocus(GetDlgItem(hwndDlg, LBL_KEY_COMBO));
 
 			CenterWindowOnScreen(hwndDlg);
@@ -388,7 +386,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		case WM_USER+1:
 			{
 				// Done with keyboard.
-				KeyboardSetBackgroundAccess(0);
+				KeyboardSetBackgroundAccess(false);
 
 				// Kill the thread.
 				SetEvent(threadargs.hThreadExit);

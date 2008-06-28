@@ -305,48 +305,58 @@ static uint8 suborkbkeys[0x60];
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
+void HandleHotkeys()
+{
+	FCEUI_HandleEmuCommands(FCEUD_TestCommandState);
+}
+
 void FCEUD_UpdateInput()
 {
-	int x;
-	int t=0;
+	bool joy=false,mouse=false;
 
 	KeyboardUpdateState();
 	UpdateJoysticks();
 
-	//UpdatePhysicalInput();
-	//KeyboardCommands();
-	FCEUI_HandleEmuCommands(FCEUD_TestCommandState);
+	HandleHotkeys();
 
 	{
-		for(x=0;x<2;x++)
+		for(int x=0;x<2;x++)
 			switch(InputType[x])
 		{
-			case SI_GAMEPAD:t|=1;break;
-			case SI_ARKANOID:t|=2;break;
-			case SI_ZAPPER:t|=2;break;
+			case SI_GAMEPAD: joy=true; break;
+			case SI_ARKANOID: mouse=true; break;
+			case SI_ZAPPER: mouse=true; break;
 			case SI_POWERPADA:
-			case SI_POWERPADB:powerpadbuf[x]=UpdatePPadData(x);break;
+			case SI_POWERPADB:
+				powerpadbuf[x]=UpdatePPadData(x);
+				break;
 		}
 
 		switch(InputType[2])
 		{
-		case SIFC_ARKANOID:t|=2;break;
-		case SIFC_SHADOW:t|=2;break;
-		case SIFC_FKB:if(cidisabled) UpdateFKB();break;
-		case SIFC_SUBORKB:if(cidisabled) UpdateSuborKB();break;
+		case SIFC_ARKANOID: mouse=true; break;
+		case SIFC_SHADOW:  mouse=true; break;
+		case SIFC_FKB:
+			if(cidisabled) 
+				UpdateFKB();
+			break;
+		case SIFC_SUBORKB:
+			if(cidisabled) 
+				UpdateSuborKB();
+			break;
 		case SIFC_HYPERSHOT: UpdateHyperShot();break;
 		case SIFC_MAHJONG: UpdateMahjong();break;
 		case SIFC_QUIZKING: UpdateQuizKing();break;
 		case SIFC_FTRAINERB:
 		case SIFC_FTRAINERA: UpdateFTrainer();break;
 		case SIFC_TOPRIDER: UpdateTopRider();break;
-		case SIFC_OEKAKIDS:t|=2;break;
+		case SIFC_OEKAKIDS: mouse=true; break;
 		}
 
-		if(t&1)
+		if(joy)
 			UpdateGamepad();
 
-		if(t&2)
+		if(mouse)
 			GetMouseData(MouseData);
 	}
 }

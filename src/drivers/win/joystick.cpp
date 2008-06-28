@@ -414,8 +414,24 @@ int InitJoysticks(HWND hwnd)
 
 void SetJoystickBackgroundAccess(int background)
 {
-	int n;
-	for(n=0; n<numjoysticks; n++)
+
+}
+
+
+
+
+
+static int background = 0;
+static bool curr = false;
+
+
+static void UpdateBackgroundAccess(bool on)
+{
+	if(curr == on) return;
+
+	curr = on;
+
+	for(int n=0; n<numjoysticks; n++)
 	{
 		IDirectInputDevice7_Unacquire(Joysticks[n]);
 		if(background)
@@ -426,4 +442,21 @@ void SetJoystickBackgroundAccess(int background)
 	}
 }
 
+void JoystickSetBackgroundAccessBit(int bit)
+{
+	background |= (1<<bit);
+	UpdateBackgroundAccess(background != 0);
+}
+void JoystickClearBackgroundAccessBit(int bit)
+{
+	background &= ~(1<<bit);
+	UpdateBackgroundAccess(background != 0);
+}
 
+void JoystickSetBackgroundAccess(bool on)
+{
+	if(on)
+		JoystickSetBackgroundAccessBit(JOYBACKACCESS_OLDSTYLE);
+	else
+		JoystickClearBackgroundAccessBit(JOYBACKACCESS_OLDSTYLE);
+}

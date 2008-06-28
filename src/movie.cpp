@@ -101,11 +101,13 @@ void MovieData::TryDumpIncremental()
 		//only log the savestate if we are appending to the green zone
 		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
-			if(currFrameCounter < (int)currMovieData.records.size())
+			if(currFrameCounter == (int)currMovieData.records.size() || currMovieData.records.size()==0)
 			{
-				MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
-				currMovieData.greenZoneCount++;
+				currMovieData.insertEmpty(-1,1);
 			}
+			
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.greenZoneCount++;
 		}
 	}
 }
@@ -626,7 +628,6 @@ void FCEUMOV_EnterTasEdit()
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
-	currMovieData.insertEmpty(0,1);
 
 	//reset the rom
 	poweron(false);
@@ -797,7 +798,26 @@ void FCEUMOV_AddInputState()
 	//(input recording is just like standard read+write movie recording with input taken from gamepad)
 	//otherwise, it will come from the tasedit data.
 
-	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_TASEDIT)
+	if(movieMode == MOVIEMODE_TASEDIT)
+	{
+		MovieRecord* mr = &currMovieData.records[currFrameCounter];
+		if(movie_readonly)
+		{
+			//reset if necessary
+			if(mr->command_reset())
+				ResetNES();
+
+			joyports[0].load(mr);
+			joyports[1].load(mr);
+		}
+		else
+		{
+			joyports[0].log(mr);
+			joyports[1].log(mr);
+			mr->commands = 0;
+		}
+	}
+	else if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
 		if(currFrameCounter == currMovieData.records.size())

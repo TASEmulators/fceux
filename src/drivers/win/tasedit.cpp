@@ -9,7 +9,8 @@
 #include "movie.h"
 #include "utils/xstring.h"
 #include "Win32InputBox.h"
-
+#include "keyboard.h"
+#include "joystick.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ HWND hwndTasEdit = 0;
 static HMENU hmenu, hrmenu;
 static int lastCursor;
 static HWND hwndList, hwndHeader;
-static WNDPROC hwndHeader_oldWndproc;
+static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
 
 typedef std::set<int> TSelectionFrames;
 static TSelectionFrames selectionFrames;
@@ -101,21 +102,31 @@ void UpdateTasEdit()
 	if(!hwndTasEdit) return;
 
 	//update the number of items
-	ListView_SetItemCountEx(hwndList,currMovieData.getNumRecords(),LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
+	int currLVItemCount = ListView_GetItemCount(hwndList);
+	if(currMovieData.getNumRecords() != currLVItemCount)
+	{
+		ListView_SetItemCountEx(hwndList,currMovieData.getNumRecords(),LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
+	}
 
 	//update the cursor
 	int newCursor = currFrameCounter;
 	if(newCursor != lastCursor)
 	{
+		//unselect all prior rows
+		TSelectionFrames oldSelected = selectionFrames;
+		for(TSelectionFrames::iterator it(oldSelected.begin()); it != oldSelected.end(); it++)
+			ListView_SetItemState(hwndList,*it,0, LVIS_FOCUSED|LVIS_SELECTED);
+
 		//scroll to the row
 		ListView_EnsureVisible(hwndList,newCursor,FALSE);
 		//select the row
-		ListView_SetItemState(hwndList,lastCursor,0, LVIS_FOCUSED|LVIS_SELECTED);
 		ListView_SetItemState(hwndList,newCursor,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
 		
 		//update the old and new rows
-		ListView_Update(hwndList,lastCursor);
 		ListView_Update(hwndList,newCursor);
+		ListView_Update(hwndList,lastCursor);
+		for(TSelectionFrames::iterator it(oldSelected.begin()); it != oldSelected.end(); it++)
+			ListView_Update(hwndList,*it);
 		
 		lastCursor = newCursor;
 	}
@@ -310,6 +321,17 @@ static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lP
 	return CallWindowProc(hwndHeader_oldWndproc,hWnd,msg,wParam,lParam);
 }
 
+//The subclass wndproc for the listview
+static LRESULT APIENTRY ListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	switch(msg)
+	{
+	case WM_CHAR:
+		return 0;
+	}
+	return CallWindowProc(hwndList_oldWndProc,hWnd,msg,wParam,lParam);
+}
+
 //All dialog initialization
 static void InitDialog()
 {
@@ -322,6 +344,8 @@ static void InitDialog()
 	hwndHeader = ListView_GetHeader(hwndList);
 	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader,GWL_WNDPROC,(LONG)HeaderWndProc);
 
+	//subclass the whole listview, so we can block some keystrokes
+	hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList,GWL_WNDPROC,(LONG)ListWndProc);
 
 	//setup all images for the listview
 	HIMAGELIST himglist = ImageList_Create(12,12,ILC_COLOR32 | ILC_MASK,1,1);
@@ -502,6 +526,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case IDC_HACKY1:
 				//hacky1: delete all items after the current selection
 				currMovieData.records.resize(currFrameCounter+1);
+				InvalidateGreenZone(currFrameCounter);
 				UpdateTasEdit();
 				break;
 
@@ -542,6 +567,8 @@ void DoTasEdit()
 
 	if(hwndTasEdit)
 	{
+		KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
+		JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
 		FCEUMOV_EnterTasEdit();
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
