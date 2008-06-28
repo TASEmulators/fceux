@@ -213,7 +213,7 @@ bool MovieRecord::parseBinary(MovieData* md, std::istream* is)
 				zappers[port].y = (uint8)is->get();
 				zappers[port].b = (uint8)is->get();
 				zappers[port].bogo = (uint8)is->get();
-				zappers[port].zaphit = uint64DecFromIstream(is);
+				read64le(&zappers[port].zaphit,is);
 			}
 		}
 	}
@@ -431,7 +431,7 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 			switch(movieData.ports[i])
 			{
 			case SI_GAMEPAD: recordsize++; break;
-			case SI_ZAPPER: recordsize+=10; break;
+			case SI_ZAPPER: recordsize+=12; break;
 			}
 		}
 	}

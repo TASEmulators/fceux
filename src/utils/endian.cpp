@@ -90,7 +90,7 @@ int write64le(uint64 b, std::ostream* os)
 	s[6]=b>>48;
 	s[7]=b>>56;
 	os->write((char*)&s,8);
-	return 4;
+	return 8;
 }
 
 
