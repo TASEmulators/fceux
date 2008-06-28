@@ -235,15 +235,36 @@ static void InsertFrames()
 	currMovieData.records.reserve(currMovieData.records.size()+frames);
 
 	//insert frames before each selection
-	int ctr=0;
-	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+	for(TSelectionFrames::reverse_iterator it(selectionFrames.rbegin()); it != selectionFrames.rend(); it++)
 	{
-		currMovieData.insertEmpty(*it+ctr,1);
-		ctr++;
+		currMovieData.insertEmpty(*it,1);
 	}
 
 	InvalidateGreenZone(*selectionFrames.begin());
 
+	UpdateTasEdit();
+	RedrawList();
+}
+
+//delete frames at the currently selected positions.
+static void DeleteFrames()
+{
+	//this is going to be _really_ slow.
+
+	//insert frames before each selection
+	int ctr=0;
+	for(TSelectionFrames::reverse_iterator it(selectionFrames.rbegin()); it != selectionFrames.rend(); it++)
+	{
+		currMovieData.records.erase(currMovieData.records.begin()+*it);
+	}
+
+	InvalidateGreenZone(*selectionFrames.begin());
+
+	//in the particular case of deletion, we need to make sure we reset currFrameCounter to something reasonable
+	//why not the current green zone max?
+	currFrameCounter = currMovieData.greenZoneCount-1;
+
+	UpdateTasEdit();
 	RedrawList();
 }
 
@@ -510,6 +531,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
+			case MENU_DELETEFRAMES:
+				DeleteFrames();
+				break;
 			case MENU_INSERTFRAMES:
 				InsertFrames();
 				break;
