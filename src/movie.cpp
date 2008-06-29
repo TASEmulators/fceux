@@ -114,6 +114,7 @@ void MovieData::TryDumpIncremental()
 
 void MovieRecord::clear()
 { 
+	commands = 0;
 	*(uint32*)&joysticks = 0;
 	memset(zappers,0,sizeof(zappers));
 }
