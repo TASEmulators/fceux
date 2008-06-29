@@ -82,7 +82,7 @@ def load_options():
   ifile.close()
 
 def save_options():
-  global options, optionsfile, appconfigdir
+  global options, optionsfile
   ofile = file(optionsfile, 'w')
   pickle.dump(options, ofile)
   ofile.close()
@@ -194,15 +194,13 @@ def find_binary(file):
 # # # # # # # # # # # # # # # # #
 # Globals
 options = None
-appconfigdir = os.getenv('HOME') + '/.'+ title
-optionsfile = appconfigdir + 'gfceu_options.dat'
+optionsfile = os.getenv('HOME') + '/gfceu_options.dat'
 widgets = None
 
 class GfceuApp:
   def __init__(self):
     self.fceux_binary = self.find_fceu()
     self.load_ui()
-    self.setup_environment()
 
     options = game_options()
     load_options()
@@ -242,24 +240,7 @@ class GfceuApp:
       msgbox.destroy()
     if fatal:
       sys.exit(code)
-      
-  def setup_environment (self):
-    """
-    Configures the environment if this is the first time the application
-    has been run.  For instance, it checks for the options file and creates 
-    it if it doesn't exist.  It also converts between the old version and 
-    the new version of this application, which stores the options file in 
-    a separate directory.
-    """
-       
-    global appconfigdir, optionsfile
-       
-    if not os.path.exists(appconfigdir):
-      # this is the first time the application is run.
-      # create the directory
-      self.msg("Creating application settings directory")
-      os.mkdir(appconfigdir)
- 
+   
   def find_fceu(self):
     bin = find_binary('fceux')
     if bin == None:
@@ -287,13 +268,13 @@ class GfceuApp:
       print 'Try reinstalling the application.'
       sys.exit(1)
     
-    try:
-      print "Using: " + glade_file
-      widgets = gtk.Builder()
-      widgets.add_from_file(glade_file)
-      widgets.connect_signals(self)
-    except:
-      self.print_error("Couldn't load the UI data.", 24)
+    #try:
+    print "Using: " + glade_file
+    widgets = gtk.Builder()
+    widgets.add_from_file(glade_file)
+    widgets.connect_signals(self)
+    #except:
+    #  self.print_error("Couldn't load the UI data.", 24)
     
     widgets.get_object("main_window").show_all()
       
@@ -517,7 +498,6 @@ class GfceuApp:
     options.no_network_radio = True
   
   def end(self, menuitem, data=None):
-    global options, optionsfile
     set_options()
     save_options()
     gtk.main_quit()
