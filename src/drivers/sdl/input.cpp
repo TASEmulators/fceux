@@ -170,7 +170,7 @@ KeyboardCommands()
     is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
     
     g_config->getOption("SDL.Hotkeys.RenderBG", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         if(is_shift) {
             FCEUI_SetRenderPlanes(true, false);
         } else {
@@ -202,7 +202,7 @@ KeyboardCommands()
     
     
     g_config->getOption("SDL.Hotkeys.Screenshot", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         FCEUI_SaveSnapshot();
     }
 
@@ -210,12 +210,12 @@ KeyboardCommands()
     if(gametype != GIT_NSF) {
         
         g_config->getOption("SDL.Hotkeys.CheatMenu", &key);
-        if(g_keyState[key]) {
+        if(_keyonly(key)) {
             DoCheatSeq();
         }
 
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
-        if(g_keyState[key]) {
+        if(_keyonly(key)) {
             if(is_shift) {
                 FCEUI_SaveMovie(NULL,MOVIE_FLAG_NONE);
             } else {
@@ -225,7 +225,7 @@ KeyboardCommands()
         
         g_config->getOption("SDL.Hotkeys.LoadState", &key);
         // f7 to load state, Shift-f7 to load movie
-        if(g_keyState[key]) {
+        if(_keyonly(key)) {
             if(is_shift) {
                 //mbg merge 7/23/06 loadmovie takes another arg now
                 FCEUI_LoadMovie(NULL, false, false, false);
@@ -237,13 +237,11 @@ KeyboardCommands()
 
     
     g_config->getOption("SDL.Hotkeys.DecreaseSpeed", &key);
-    if(g_keyState[key]) {
-        // this doesn't seem to work right now
+    if(_keyonly(key)) {
         DecreaseEmulationSpeed();
     }
     g_config->getOption("SDL.Hotkeys.IncreaseSpeed", &key);
-    if(g_keyState[key]) {
-        // this seems quite sporadic
+    if(_keyonly(key)) {
         IncreaseEmulationSpeed();
     }
 
@@ -251,26 +249,26 @@ KeyboardCommands()
         FCEUI_MovieToggleFrameDisplay();
     }
     g_config->getOption("SDL.Hotkeys.Pause", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         FCEUI_ToggleEmulationPause();
     }
     g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         // this currently crashes fceu for me, is this broken?
         //FCEUI_FrameAdvance();
     }
 
     
     g_config->getOption("SDL.Hotkeys.Reset", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         FCEUI_ResetNES();
     }
     g_config->getOption("SDL.Hotkeys.Power", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         FCEUI_PowerNES();
     }
     g_config->getOption("SDL.Hotkeys.Quit", &key);
-    if(g_keyState[key]) {
+    if(_keyonly(key)) {
         FCEUI_CloseGame();
     }
 
