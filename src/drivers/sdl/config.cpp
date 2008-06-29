@@ -265,7 +265,7 @@ InitConfig()
     config->addOption(prefix + "Power", SDLK_F11);
     config->addOption(prefix + "Quit", SDLK_ESCAPE);
     config->addOption(prefix + "Pause", SDLK_BACKSLASH);
-    config->addOption(prefix + "DecraseSpeed", SDLK_MINUS);
+    config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_RCTRL);
     
