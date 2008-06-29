@@ -268,13 +268,13 @@ class GfceuApp:
       print 'Try reinstalling the application.'
       sys.exit(1)
     
-    #try:
-    print "Using: " + glade_file
-    widgets = gtk.Builder()
-    widgets.add_from_file(glade_file)
-    widgets.connect_signals(self)
-    #except:
-    #  self.print_error("Couldn't load the UI data.", 24)
+    try:
+      print "Using: " + glade_file
+      widgets = gtk.Builder()
+      widgets.add_from_file(glade_file)
+      widgets.connect_signals(self)
+    except:
+      self.print_error("Couldn't load the UI data.", 24)
     
     widgets.get_object("main_window").show_all()
       
