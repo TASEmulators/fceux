@@ -35,7 +35,6 @@ typedef struct
 	uint32 rerecord_count;
 	bool poweron, pal, nosynchack;
 	bool reset; //mbg 6/21/08 - this flag isnt used anymore.. but maybe one day we can scan it out of the first record in the movie file
-	int read_only;
 	uint32 emu_version_used;				// 9813 = 0.98.13
 	MD5DATA md5_of_rom_used;
 	std::string name_of_rom_used;

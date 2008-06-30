@@ -107,8 +107,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 	char *fn=GetReplayPath(hwndDlg);
 
 	// remember the previous setting for the read-only checkbox
-	if(IsWindowEnabled(GetDlgItem(hwndDlg, IDC_CHECK_READONLY)))
-		replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	replayReadOnlySetting = (SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_GETCHECK, 0, 0) == BST_CHECKED);
 
 	EnableWindow(GetDlgItem(hwndDlg,IDC_BUTTON_METADATA),FALSE);
 
@@ -126,6 +125,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,tmp);
 			stopframeWasEditedByUser = false;
 
+			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),TRUE);
+
 			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
 			info.num_frames += (div>>1);                                    // round up
 			sprintf(tmp, "%02d:%02d:%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, (info.num_frames/div) % 60);
@@ -134,8 +135,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			sprintf(tmp, "%u", (unsigned)info.rerecord_count);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
 
-			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),(info.read_only)? FALSE : TRUE); // disable read-only checkbox if the file access is read-only
-			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,info.read_only ? BST_CHECKED : (replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
+			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,(replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
 
@@ -545,10 +545,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// restore focus to the dialog
 								SetFocus(GetDlgItem(hwndDlg, IDC_COMBO_FILENAME));
 								UpdateReplayDialog(hwndDlg);
-//								if (ofn.Flags & OFN_READONLY)
-//									SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, BST_CHECKED, 0);
-//								else
-//									SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, BST_UNCHECKED, 0);
 							}
 
 							free(pn);
