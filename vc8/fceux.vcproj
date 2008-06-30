@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)&#x0D;&#x0A;upx.exe --force $(TargetPath)"
+				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)&#x0D;&#x0A;upx.exe --force $(TargetPath)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -1184,6 +1184,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\texthook.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\texthook.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\throttle.cpp"
 					>
 				</File>
@@ -1474,7 +1482,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)"
+								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)&#x0D;&#x0A;"
 								Outputs="$(OutDir)\fceux.chm"
 							/>
 						</FileConfiguration>
@@ -1483,7 +1491,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)"
+								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)&#x0D;&#x0A;"
 								Outputs="$(OutDir)\fceux.chm"
 							/>
 						</FileConfiguration>

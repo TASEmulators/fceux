@@ -130,6 +130,8 @@
 #define IDD_DIALOG2                     115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
+#define IDD_DIALOG3                     120
+#define TEXTHOOKER                      120
 #define CHECK_SOUND_8BIT                122
 #define CHECK_SOUND_GLOBAL_FOCUS        124
 #define CHECK_SOUND_ENABLED             126
@@ -535,6 +537,7 @@
 #define MENU_DELETEFRAME                40155
 #define MENU_DELETEFRAMES               40156
 #define MENU_STRAY_INSERTFRAMES         40157
+#define ID_TOOLS_TEXTHOOKER             40158
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -544,8 +547,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
-#define _APS_NEXT_COMMAND_VALUE         40158
+#define _APS_NEXT_RESOURCE_VALUE        121
+#define _APS_NEXT_COMMAND_VALUE         40159
 #define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

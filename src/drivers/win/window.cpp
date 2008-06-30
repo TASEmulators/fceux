@@ -50,7 +50,7 @@
 #include "oldmovie.h"
 #include "movie.h"
 #include "7zip.h"
-
+#include "texthook.h"
 #include "guiconfig.h"
 #include "timing.h"
 #include "palette.h"
@@ -1149,6 +1149,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_STOP_AVI:
 				// Stop AVI menu was selected
 				FCEUD_AviStop();
+				break;
+
+			case ID_TOOLS_TEXTHOOKER:
+				DoTextHooker();
 				break;
 
 			case MENU_ABOUT:
