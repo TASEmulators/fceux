@@ -589,7 +589,6 @@ void CloseMemoryWatch()
 	{
 		SaveStrings();
 
-		//TODO: save window x,y and last file opened to some variables then save them to config when fceu closes
 		if (fileChanged==true)
 		{
 			if(MessageBox(hwndMemWatch, "Save Changes?", "Memory Watch Settings", MB_YESNO)==IDYES)
@@ -825,7 +824,7 @@ void CreateMemWatch()
 	}
 
 	//Create
-		hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
+	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
 	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
 	memwrecentmenu = CreateMenu();

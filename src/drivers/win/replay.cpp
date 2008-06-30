@@ -215,7 +215,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_EMULATORUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_CURRCHECKSUM),md5_asciistr(GameInfo->MD5));
-		SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,"");
+		SetDlgItemText(hwndDlg,IDC_EDIT_STOPFRAME,""); stopframeWasEditedByUser=false;
 		EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),FALSE);
 		SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,BST_UNCHECKED,0);
 		EnableWindow(GetDlgItem(hwndDlg,IDOK),FALSE);
@@ -476,6 +476,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				{
 				HWND hwnd1 = GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE);
 				Button_SetCheck(hwnd1,BST_CHECKED);
+				stopframeWasEditedByUser = true;
 				}
 				else
 					stopframeWasEditedByUser = true;
