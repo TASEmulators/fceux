@@ -73,7 +73,7 @@ uint8 pausedTileToggles[32][30]; //same as above, but is used during the emulato
 int lmousedown = 0; //keeps track of the the left mousebuttons down state (for click/drag selection)
 int drawingorerasing = 1; //keeps track of whether the user is selecting or deselecting on the selection window
 char chartable[256][4]; //used for table mappings
-int TableFileLoaded = 0; //boolean for whether a table file is loaded or not
+static int TableFileLoaded = 0; //boolean for whether a table file is loaded or not
 uint16 tile = 0x0000; //used to store the value of a tile at a given x,y location
 int tileattr = 0; //used to store the corresponding attribute location for tile (see getTextHookerTile)
 uint16 maru = 0x1000; //used to store the lookup value for the handakuten mark
@@ -98,7 +98,7 @@ HGDIOBJ thTmpObj0;//,thTmpObj1;
 
 
 //this struct is used to store ja/en words for word replacement
-typedef struct notllword {
+struct llword {
 	//holds the japanese word
 	char ja[40];
 
@@ -106,8 +106,8 @@ typedef struct notllword {
 	char en[40];
 
 	//holds the next item in the sequence
-	void* next;
-} llword;
+	llword* next;
+};
 
 llword *words; //initial word
 
@@ -397,7 +397,7 @@ void KillTextHooker() {
 
 //this is defined elsewhere and is called by TextHookerLoadTableFile
 //i don't think it's ever actually used, though...
-extern void StopSound(void);
+//extern void StopSound(void);
 
 
 /*
@@ -417,7 +417,7 @@ int TextHookerLoadTableFile(){
 	const char filter[]="Table Files (*.THT)\0*.tht\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	StopSound();
+	//StopSound(); //mbg merge 6/30/08
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
@@ -610,12 +610,12 @@ int TextHookerLoadTableFile(){
 
 			//init words if we need to
 			if ( words == NULL ) {
-				words = malloc( sizeof( llword ) );
+				words = (llword*)malloc( sizeof( llword ) );
 				words->next = NULL;
 			}
 
 			//create the word item
-			llword *newitem = malloc( sizeof( llword ) );
+			llword *newitem = (llword*)malloc( sizeof( llword ) );
 			strcpy( newitem->en, en );
 			strcpy( newitem->ja, ja );
 			newitem->next = NULL;
@@ -680,7 +680,7 @@ int TextHookerSaveTableFile(){
 	const char filter[]="Table Files (*.THT)\0*.tht\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	StopSound();
+	//StopSound(); //mbg merge 6/30/08
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
@@ -839,7 +839,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			KillTextHooker();
 			break;
 		case WM_MOVING:
-			StopSound();
+			//StopSound(); //mbg merge 6/30/08
 			break;
 		case WM_MOVE:
 			GetWindowRect(hwndDlg,&wrect);
@@ -1048,7 +1048,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 											} else { //not in the table...
 												//place a space
 												memset( tempchar, 0, sizeof( char ) * 4 );
-												tempchar[0] = 0x81;
+												tempchar[0] = (char)0x81;
 												tempchar[1] = 0x40;
 												strcat( str, tempchar );
 											}
@@ -1069,7 +1069,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 									memset( bufferstrtemp, 0, sizeof( str ) ); //init the temp buffer
 									if ( found ) { //if we found it, replace it
 										//add a null byte after the first half
-										strcpy( found, "\0" ); 
+										strcpy( (char*)found, "\0" ); 
 
 										//copy the first half of the haystack
 										strcpy( bufferstrtemp, str ); 
@@ -1078,7 +1078,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 										strcat( bufferstrtemp, current->en ); 
 
 										//tack on the rest of the haystack
-										strcat( bufferstrtemp, found + ( sizeof( char ) * strlen( current->ja ) ) ); 
+										strcat( bufferstrtemp, (char*)found + ( strlen( current->ja ) ) ); 
 
 										//copy the temp back to the haystack
 										strcpy( str, bufferstrtemp );
@@ -1105,8 +1105,8 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							
 						case 117: //excite.co.jp
 							//init the buffers
-							textToTrans = malloc( sizeof( char ) * 1024 );
-							transText = malloc( sizeof( char ) * 2048 );
+							textToTrans = (char*)malloc( sizeof( char ) * 1024 );
+							transText = (char*)malloc( sizeof( char ) * 2048 );
 							memset( textToTrans, 0, sizeof( char ) * 1024 );
 
 							//get the buffer into textToTrans
@@ -1141,7 +1141,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 								memset( bufferstrtemp, 0, sizeof( str ) ); //init the temp buffer
 								if ( found ) { //found something to replace!
 									//add a null byte after the first half
-									strcpy( found, "\0" ); 
+									strcpy( (char*)found, "\0" ); 
 
 									//copy the first half of the haystack
 									strcpy( bufferstrtemp, str ); 
@@ -1150,7 +1150,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 									strcat( bufferstrtemp, " " ); 
 
 									//tack on the rest of the haystack
-									strcat( bufferstrtemp, found + ( sizeof( char ) * 2 ) ); 
+									strcat( bufferstrtemp, (char*)found + 2 ); 
 
 									//copy the temp back to the haystack
 									strcpy( str, bufferstrtemp );
@@ -1199,7 +1199,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							for ( i = 0; i < 32; i++ ) {
 								for ( j = 0; j < 30; j++ ) {
 									//add to x
-									x += (int)pow( 2, y ) * tileToggles[i][j];
+									x += (1<<y) * tileToggles[i][j];
 									
 									y++;
 									if ( y >= 6 ) { //we have a full byte now
@@ -1268,7 +1268,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							for ( i = 0; i < sizeof( byteline ); i++ ) {
 								x = byteline[i];
 								for ( y = 0; y < 6; y++ ) {
-									if ( ( x & (int)pow( 2, y ) ) != 0 ) {
+									if ( ( x & (1<<y)) != 0 ) {
 										strcat( binstring, "1" );
 									} else {
 										strcat( binstring, "0" );
@@ -1307,7 +1307,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 						case 133: //save word
 							//add the word to the words list
 							//create the word item
-							newitem = malloc( sizeof( llword ) );
+							newitem = (llword*)malloc( sizeof( llword ) );
 
 							//get the english and japanese values
 							GetDlgItemText(hwndDlg,131,newitem->ja,40);
@@ -1325,7 +1325,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 							//init words if we need to
 							if ( words == NULL ) {
-								words = malloc( sizeof( llword ) );
+								words = (llword*)malloc( sizeof( llword ) );
 								words->next = NULL;
 							}
 
@@ -1433,10 +1433,10 @@ int excitecojp() {
 	// Successfully connected!
 
 	char *buffer; // buffer to hold our http request
-	buffer = malloc( sizeof( char ) * 2048 );
+	buffer = (char*)malloc( sizeof( char ) * 2048 );
 	memset( buffer, 0, 2048 );
 	char *urlEscapedText; // holds the url escaped textToTrans
-	urlEscapedText = malloc( sizeof( char ) * 2048 );
+	urlEscapedText = (char*)malloc( sizeof( char ) * 2048 );
 	memset( urlEscapedText, 0, 2048 );
 	memset( buffer, 0, 2048 );
 	
@@ -1467,9 +1467,9 @@ int excitecojp() {
 	}
 
 	char *recvbuffer; //server response is read one char at a time
-	recvbuffer = malloc( sizeof( char ) * 4 );
+	recvbuffer = (char*)malloc( sizeof( char ) * 4 );
 	char *theLine; //holds the current line being read from the server response
-	theLine = malloc( sizeof( char ) * 2048 );
+	theLine = (char*)malloc( sizeof( char ) * 2048 );
 	memset( buffer, 0, 2048 );
 	memset( theLine, 0, 2048 );
 	memset( transText, 0, 2048 );
@@ -1560,6 +1560,7 @@ void DoTextHooker() {
 	}
 	*/ //adelikat - Who needs error messages? (in fceuxdspce, GI = FCEUGI typedef and no longer exists, but it shouldn't be hard to find another way to determine these conditions.
 	if (!hTextHooker) hTextHooker = CreateDialog(fceu_hInstance,"TEXTHOOKER",NULL,TextHookerCallB);
+	DWORD ret = GetLastError();
 
 	CheckDlgButton( hTextHooker, 341, BST_CHECKED );
 	CheckDlgButton( hTextHooker, 342, BST_CHECKED );

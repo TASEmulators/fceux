@@ -130,8 +130,6 @@
 #define IDD_DIALOG2                     115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
-#define IDD_DIALOG3                     120
-#define TEXTHOOKER                      120
 #define CHECK_SOUND_8BIT                122
 #define CHECK_SOUND_GLOBAL_FOCUS        124
 #define CHECK_SOUND_ENABLED             126
