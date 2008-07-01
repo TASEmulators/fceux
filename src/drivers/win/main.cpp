@@ -122,7 +122,7 @@ int genie = 0;
 int pal_emulation = 0;
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
-
+int PauseAfterLoad;
 
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, basicbot, macro, input presets, lua scripts, base
@@ -601,11 +601,11 @@ int main(int argc,char *argv[])
 		FCEUI_SetSoundQuality(soundquality);
 	}
 
-	ParseGIInput(NULL);      /* Since a game doesn't have to be
-                     loaded before the GUI can be used, make
-                     sure the temporary input type variables
-                     are set.
-                  */
+	ParseGIInput(NULL);		/* Since a game doesn't have to be
+							loaded before the GUI can be used, make
+							sure the temporary input type variables
+							are set.
+							*/
 
 	// Initialize default directories
 	CreateDirs();
@@ -663,6 +663,7 @@ int main(int argc,char *argv[])
 		StateToLoad = NULL;
 	}
 	if (MemWatchLoadOnStart) CreateMemWatch();
+	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
 
 	UpdateCheckedMenuItems();
 doloopy:

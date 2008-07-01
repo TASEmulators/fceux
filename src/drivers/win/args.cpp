@@ -53,6 +53,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-stopmovie",0,&pauseAfterPlayback,0},
          {"-bginput",0,&EnableBackgroundInput,0},
          {"-turbo",0,&turbo,0},
+		 {"-pause",0,&PauseAfterLoad,0},
          {0, 0, 0, 0},
 	};
 
