@@ -570,6 +570,43 @@
 #define ID_Menu40175                    40175
 #define ID_Menu40176                    40176
 #define ID_EDIT_TRUNCATE                40177
+#define ID_FILE_IMPORTFM2               40178
+#define ID_FILE_NEWPROJECT              40179
+#define ID_FILE_OPEN_PROJECT            40180
+#define ID_FILE_OPENPROJECT             40181
+#define ID_FILE_SAVEPROJECTAS           40182
+#define ID_FILE_EXPORTFM2               40183
+#define ACCEL_CTRL_X                    40184
+#define ID_EDIT_ADDMARKER               40186
+#define ID_EDIT_REMOVE_MARKER           40187
+#define ID_TASEDIT_CUT                  40188
+#define ID_TASEDIT_COPY                 40189
+#define ID_TASEDIT_COPYTONEW            40190
+#define ID_TASEDIT_PASTE                40191
+#define ID_TASEDIT_DELETE               40192
+#define ID_TASEDIT_FILE_CLOSE           40193
+#define ID_TASEDIT_PASTETONEW           40194
+#define ACCEL_CTRL_V                    40195
+#define ACCEL_CTRL_SHIFT_V              40196
+#define ACCEL_CTRL_DELETE               40197
+#define ID_ACCEL_CTRL_T                 40198
+#define ACCEL_CTRL_T                    40198
+#define ACCEL_CTRL_B                    40199
+#define ID_CONTEXT_SELECTED_TRUNCATE    40200
+#define ID_CONTEXT_STRAY_TRUNCATE       40201
+#define ID_VIEW                         40202
+#define MENU_CONTEXT_STRAY_INSERTFRAMES 40203
+#define ID_CONTEXT_SELECTED_INSERTFRAMES 40204
+#define ID_CONTEXT_SELECTED_DELETEFRAMES 40205
+#define ID_SELECTED_REMOVEMARKER        40206
+#define ID_CONTEXT_SELECTED_PASTETONEW  40207
+#define ID_CONTEXT_SELECTED_ADDMARKER   40208
+#define ID_CONTEXT_SELECTED_REMOVEMARKER 40209
+#define ID_CONTEXT_SELECTED_BRANCH      40210
+#define ID_EDIT_BRANCHCTRL              40211
+#define ID_EDIT_BRANCH                  40212
+#define ID_EDIT_SELECTALL               40214
+#define ID_EDIT_REMOVEMARKER            40215
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -580,7 +617,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40178
+#define _APS_NEXT_COMMAND_VALUE         40216
 #define _APS_NEXT_CONTROL_VALUE         1150
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

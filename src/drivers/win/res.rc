@@ -158,28 +158,33 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New Project          Ctrl+N", ID_FILE_NEWPROJECTCTRL
-        MENUITEM "&Open Project...     Ctrl+O", ID_FILE_OPENFM2
-        MENUITEM "&Save Project          Ctrl+S", ID_FILE_SAVEPROJECT
-        MENUITEM "Save Project As...  Ctrl+Shift+S", ID_FILE_SAVEAS
+        MENUITEM "&New Project           Ctrl+N", ID_FILE_NEWPROJECT
+        MENUITEM "&Open Project...      Ctrl+O", ID_FILE_OPENPROJECT
+        MENUITEM "&Save Project           Ctrl+S", ID_FILE_SAVEPROJECT
+        MENUITEM "Save Project As...  Ctrl+Shift+S", ID_FILE_SAVEPROJECTAS
         MENUITEM SEPARATOR
-        MENUITEM "Export to FM2",               ID_FILE_SAVEFM2
+        MENUITEM "Import FM2",                  ID_FILE_IMPORTFM2
+        MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2
         MENUITEM SEPARATOR
-        MENUITEM "Close                 Ctrl+W", ID_FILE_CLOSECTRL
+        MENUITEM "Close                      Ctrl+W", ID_TASEDIT_FILE_CLOSE
     END
     POPUP "Edit"
     BEGIN
-        MENUITEM "Copy     Ctrl+V",             ID_EDIT_COPY40165
-        MENUITEM "Copy to New Ctrl+Shift+V",    ID_EDIT_COPYTONEW
-        MENUITEM "Cut   Ctrl+X",                ID_EDIT_CUT40167
-        MENUITEM "Paste Ctrl+V",                ID_EDIT_PASTE40166
-        MENUITEM "Delete",                      ID_EDIT_DELETE
-        MENUITEM "Truncate",                    ID_EDIT_TRUNCATE
+        MENUITEM "Select All",                  ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
-        MENUITEM "Add Marker",                  ID_Menu40175
-        MENUITEM "Remove Marker",               ID_Menu40176
+        MENUITEM "Cut                   Ctrl+X", ID_TASEDIT_CUT
+        MENUITEM "Copy                Ctrl+C",  ID_TASEDIT_COPY
+        MENUITEM "Paste               Ctrl+V",  ID_TASEDIT_PASTE
+        MENUITEM "Paste to New   Ctrl+Shift+V", ID_TASEDIT_PASTETONEW
+        MENUITEM "Delete              Ctrl+Delete", ID_TASEDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Add Marker",                  ID_EDIT_ADDMARKER
+        MENUITEM "Remove Marker",               ID_EDIT_REMOVEMARKER
+        MENUITEM SEPARATOR
+        MENUITEM "Truncate         Ctrl+T",     ID_EDIT_TRUNCATE
+        MENUITEM "Branch            Ctrl+B",    ID_EDIT_BRANCH
     END
-    MENUITEM "View",                        0
+    MENUITEM "View",                        ID_VIEW
     POPUP "Help"
     BEGIN
         MENUITEM "TASEdit Help",                ID_HELP_TASEDITHELP
@@ -250,19 +255,22 @@ TASEDITCONTEXTMENUS MENU
 BEGIN
     POPUP "Stray"
     BEGIN
-        MENUITEM "&Insert Frames",              MENU_STRAY_INSERTFRAMES
+        MENUITEM "&Insert Frames",              MENU_CONTEXT_STRAY_INSERTFRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Truncate",                    ID_STRAY_TRUNCATE
+        MENUITEM "Truncate",                    ID_CONTEXT_STRAY_TRUNCATE
     END
     POPUP "Selected"
     BEGIN
-        MENUITEM "Insert Frame(s)",             MENU_INSERTFRAMES
-        MENUITEM "Delete Frame(s)",             MENU_DELETEFRAMES
+        MENUITEM "Insert Frame(s)",             ID_CONTEXT_SELECTED_INSERTFRAMES
+        MENUITEM "Delete Frame(s)",             ID_CONTEXT_SELECTED_DELETEFRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Copy to new inputlog",        ID_SELECTED_CREATEMACRO
-        MENUITEM "Insert Marker",               ID_SELECTED_INSERTMARKER
-        MENUITEM "Branch",                      ID_SELECTED_BRANCH
-        MENUITEM "Truncate",                    ID_Menu
+        MENUITEM "Paste to New",                ID_CONTEXT_SELECTED_PASTETONEW
+        MENUITEM SEPARATOR
+        MENUITEM "Add Marker",                  ID_CONTEXT_SELECTED_ADDMARKER
+        MENUITEM "Remove Marker",               ID_CONTEXT_SELECTED_REMOVEMARKER
+        MENUITEM SEPARATOR
+        MENUITEM "Truncate",                    ID_CONTEXT_SELECTED_TRUNCATE
+        MENUITEM "Branch",                      ID_CONTEXT_SELECTED_BRANCH
     END
 END
 
@@ -1690,13 +1698,19 @@ END
 
 IDR_ACCELERATOR1 ACCELERATORS 
 BEGIN
+    "C",            ACCEL_CTRL_C,           VIRTKEY, CONTROL, NOINVERT
     "E",            ACCEL_CTRL_E,           VIRTKEY, CONTROL, NOINVERT
     "N",            ACCEL_CTRL_N,           VIRTKEY, CONTROL, NOINVERT
     "O",            ACCEL_CTRL_O,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_SHIFT_S,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
-    "C",            ACCEL_CTRL_C,           VIRTKEY, CONTROL, NOINVERT
+    "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ACCEL_CTRL_SHIFT_V,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_DELETE,      ACCEL_CTRL_DELETE,      VIRTKEY, CONTROL, NOINVERT
+    "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
+    "B",            ACCEL_CTRL_B,           VIRTKEY, CONTROL, NOINVERT
 END
 
 

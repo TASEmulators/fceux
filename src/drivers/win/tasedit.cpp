@@ -360,10 +360,51 @@ static void ColumnSet(int column)
 	RedrawList();
 }
 
+//Highlights all frames in current input log
+static void SelectAll()
+{
+}
+
+//cuts the current selection and copies to the clipboard
+static void Cut()
+{
+}
+
 //copies the current selection to the clipboard
 static void Copy()
 {
 }
+
+//pastes the current clipboard selection into current inputlog
+static void Paste()
+{
+}
+
+//pastes the current clipboard selection into a new inputlog
+static void PastetoNew()
+{
+}
+
+//removes the current selection (does not put in clipboard)
+static void Delete()
+{
+}
+
+//Adds a marker to left column at selected frame (if multiple frames selected, it is placed at end of selection)
+void AddMarker()
+{
+}
+
+//Removes marker from selected frame (if multiple frames selected, all markers in selection removed?
+void RemoveMarker()
+{
+}
+
+//Makes new branch (timeline), takes current frame and creates new input log of all frames before it, new input log will be in focus
+void Branch()
+{
+}
+
 
 //The subclass wndproc for the listview header
 static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
@@ -471,11 +512,49 @@ static void InitDialog()
 
 void KillTasEdit()
 {
+	//TODO: determine if project has changed, and ask to save changes
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
 	FCEUMOV_ExitTasEdit();
 }
 
+//Creates a new TASEdit Project
+static void NewProject()
+{
+//determine if current project changed
+//if so, ask to save changes
+//close current project
+//create new project
+}
+
+//Opens a new Project file
+static void OpenProject()
+{
+//determine if current project changed
+//if so, ask to save changes
+//close current project
+//open dialog for new project file
+}
+
+//Saves current project
+static void SaveProject()
+{
+//determine if file exists, if not, do SaveProjectAs()
+//Save work, flag project as not changed
+}
+
+static void SaveProjectAs()
+{
+//Save project as new user selected filename
+//flag project as not changed
+}
+
+//Takes a selected .fm2 file and adds it to the Project inputlog
+static void Import()
+{
+}
+
+//Takes current inputlog and saves it as a .fm2 file
 static void Export()
 {
 	const char filter[]="FCEUX Movie File(*.fm2)\0*.fm2\0";
@@ -590,7 +669,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 			}
 			break;
-
+		
 		case WM_CLOSE:
 		case WM_QUIT:
 			KillTasEdit();
@@ -599,13 +678,101 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
-			case MENU_DELETEFRAMES:
-				DeleteFrames();
+			case ACCEL_CTRL_N:
+			case ID_FILE_NEWPROJECT:
+				NewProject();  
 				break;
-			case MENU_INSERTFRAMES:
-				InsertFrames();
+
+			case ACCEL_CTRL_O:
+			case ID_FILE_OPENPROJECT:
+				Replay_LoadMovie(true); //TODO: change function name to LoadProject(true)?
 				break;
-			case MENU_STRAY_INSERTFRAMES:
+			
+			case ACCEL_CTRL_S:
+			case ID_FILE_SAVEPROJECT:
+				SaveProject();
+				break;
+
+			case ACCEL_CTRL_SHIFT_S:
+			case ID_FILE_SAVEPROJECTAS:
+				SaveProjectAs();
+				break;
+
+			case ID_FILE_IMPORTFM2:
+				Import();
+				break;
+
+			case ID_FILE_EXPORTFM2:
+				Export();
+				break;
+
+			case ACCEL_CTRL_W:
+			case ID_TASEDIT_FILE_CLOSE:
+				KillTasEdit();
+				break;
+		
+			case ID_EDIT_SELECTALL:
+				SelectAll();
+				break;
+			
+			case ACCEL_CTRL_X:
+			case ID_TASEDIT_CUT:
+				Cut();
+				break;
+
+			case ACCEL_CTRL_C:
+			case ID_TASEDIT_COPY:
+				Copy();
+				break;
+
+			case ACCEL_CTRL_V:
+			case ID_TASEDIT_PASTE:
+				Paste();
+				break;
+
+			case ACCEL_CTRL_SHIFT_V:  //Takes selected frames and creates new inputlog files
+			case ID_TASEDIT_PASTETONEW:
+			case ID_CONTEXT_SELECTED_PASTETONEW:
+				PastetoNew();
+				break;
+
+			case ACCEL_CTRL_DELETE:
+			case ID_TASEDIT_DELETE:
+				Delete();
+				break;
+
+			case ID_EDIT_ADDMARKER:
+			case ID_CONTEXT_SELECTED_ADDMARKER:
+				AddMarker();
+				break;
+
+			case ID_EDIT_REMOVEMARKER:
+			case ID_CONTEXT_SELECTED_REMOVEMARKER:
+				RemoveMarker();
+				break;
+
+			case ACCEL_CTRL_T:
+			case ID_EDIT_TRUNCATE:
+			case ID_CONTEXT_SELECTED_TRUNCATE:
+			case ID_CONTEXT_STRAY_TRUNCATE:
+			case IDC_HACKY1:
+				//hacky1: delete all items after the current selection
+				currMovieData.records.resize(currFrameCounter+1);
+				InvalidateGreenZone(currFrameCounter);
+				UpdateTasEdit();
+				break;
+
+			case ACCEL_CTRL_B:
+			case ID_EDIT_BRANCH:
+			case ID_CONTEXT_SELECTED_BRANCH:
+				Branch();
+				break;
+
+			case ID_HELP_TASEDITHELP:
+				//link to TASEdit in help menu
+				break;
+
+			case MENU_CONTEXT_STRAY_INSERTFRAMES:
 				{
 					int frames;
 					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
@@ -615,28 +782,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					}
 				}
 				break;
-			case IDC_HACKY1:
-				//hacky1: delete all items after the current selection
-				currMovieData.records.resize(currFrameCounter+1);
-				InvalidateGreenZone(currFrameCounter);
-				UpdateTasEdit();
+
+			case ID_CONTEXT_SELECTED_INSERTFRAMES:
+				InsertFrames();
 				break;
 
-			case ID_FILE_OPENFM2:
-				Replay_LoadMovie(true);
+			case ID_CONTEXT_SELECTED_DELETEFRAMES:
+				DeleteFrames();
 				break;
 			
-			case ID_FILE_SAVEFM2:
-				Export();
-				break;
+			
 
-			case ACCEL_CTRL_C:
-				Copy();
-				break;
-
-			case ACCEL_CTRL_W:
-				KillTasEdit();
-				break;
 			}
 			break;
 	}
