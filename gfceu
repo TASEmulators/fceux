@@ -166,12 +166,12 @@ def set_options():
   options.host_pass = widgets.get_object("host_pass").get_text()
   
 
-  
-
-  
-
 def find_binary(file):
+  # first check the script directory
+  if os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]),file)):
+    return os.path.join(os.path.dirname(sys.argv[0]), file)
   
+  # if not in the script directory, check the $PATH 
   path = os.getenv('PATH')
   directories= []
   directory = ''
@@ -187,8 +187,7 @@ def find_binary(file):
     if os.path.isfile(os.path.join(x, file)):
       return os.path.join(x,file)
 
-  if os.path.isfile(os.path.join(os.curdir,file)):
-    return os.path.join(os.curdir, file)
+
 
   return None
   

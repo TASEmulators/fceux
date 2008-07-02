@@ -1,5 +1,7 @@
+* Supports autoscale
 * No longer requires GnomeVFS
 * Major code cleanup
+* Supports fceux command line options (different syntax from fceu)
 * Now requires pygtk >= 2.12
 * Transitioned from gtk.glade to gtk.Builder.
 * Changed some strings to reflect new email and website
