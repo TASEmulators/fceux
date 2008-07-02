@@ -563,6 +563,13 @@
 #define ID_EDIT_COPYTONEW               40168
 #define ID_EDIT_DELETE                  40169
 #define ID_HELP_TASEDITHELP             40170
+#define ID_FILE_NEWPROJECTCTRL          40171
+#define ID_FILE_SAVEPROJECT             40172
+#define ID_FILE_SAVEAS                  40173
+#define ID_FILE_CLOSECTRL               40174
+#define ID_Menu40175                    40175
+#define ID_Menu40176                    40176
+#define ID_EDIT_TRUNCATE                40177
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -573,7 +580,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40171
+#define _APS_NEXT_COMMAND_VALUE         40178
 #define _APS_NEXT_CONTROL_VALUE         1150
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

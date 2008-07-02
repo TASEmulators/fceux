@@ -158,16 +158,26 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "Save FM2",                    ID_FILE_SAVEFM2
-        MENUITEM "&Open FM2",                   ID_FILE_OPENFM2
+        MENUITEM "&New Project          Ctrl+N", ID_FILE_NEWPROJECTCTRL
+        MENUITEM "&Open Project...     Ctrl+O", ID_FILE_OPENFM2
+        MENUITEM "&Save Project          Ctrl+S", ID_FILE_SAVEPROJECT
+        MENUITEM "Save Project As...  Ctrl+Shift+S", ID_FILE_SAVEAS
+        MENUITEM SEPARATOR
+        MENUITEM "Export to FM2",               ID_FILE_SAVEFM2
+        MENUITEM SEPARATOR
+        MENUITEM "Close                 Ctrl+W", ID_FILE_CLOSECTRL
     END
     POPUP "Edit"
     BEGIN
-        MENUITEM "Copy",                        ID_EDIT_COPY40165
-        MENUITEM "Cut",                         ID_EDIT_CUT40167
-        MENUITEM "Paste",                       ID_EDIT_PASTE40166
-        MENUITEM "Copy to New",                 ID_EDIT_COPYTONEW
+        MENUITEM "Copy     Ctrl+V",             ID_EDIT_COPY40165
+        MENUITEM "Copy to New Ctrl+Shift+V",    ID_EDIT_COPYTONEW
+        MENUITEM "Cut   Ctrl+X",                ID_EDIT_CUT40167
+        MENUITEM "Paste Ctrl+V",                ID_EDIT_PASTE40166
         MENUITEM "Delete",                      ID_EDIT_DELETE
+        MENUITEM "Truncate",                    ID_EDIT_TRUNCATE
+        MENUITEM SEPARATOR
+        MENUITEM "Add Marker",                  ID_Menu40175
+        MENUITEM "Remove Marker",               ID_Menu40176
     END
     MENUITEM "View",                        0
     POPUP "Help"
