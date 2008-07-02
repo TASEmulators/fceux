@@ -58,13 +58,13 @@ char *DriverUsage=
 --nothrottle x	Disables artificial speed throttling, if x is nonzero.\n\
 --frameskip x	Sets # of frames to skip per emulated frame.\n\
 --(x/y)res x, -(x/y) x	Sets horizontal/vertical resolution to x for full screen mode.\n\
---autoscale x Enables autoscaling if x is nonzero \n\
---keepratio x Keeps native NES ratio when autoscaling if x is nonzero \n\
+--autoscale x   Enables autoscaling if x is nonzero. \n\
+--keepratio x   Keeps native NES ratio when autoscaling if x is nonzero. \n\
 --(x/y)scale x	Multiplies width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
 --(x/y)stretch x	Stretchess to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
 --bpp x, -b x	Sets bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
---opengl x	Enables OpenGL support if x is nonzero.\n\
---doublebuf x	Enables SDL double-buffering if x is nonzero.\n\
+--opengl x	  Enables OpenGL support if x is nonzero.\n\
+--doublebuf xEnables SDL double-buffering if x is nonzero.\n\
 --fullscreen x, -f x	Selects full screen mode if x is nonzero.\n\
 --clipsides x	Clips left- and rightmost 8 columns of pixels if x is nonzero.\n\
 --noframe x     Hides title bar and window decorations.\n\
