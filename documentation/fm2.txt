@@ -56,6 +56,8 @@ SI_ZAPPER:
  B: %1d, 1 if the mouse button is pressed; 0 if not
  Q: %1d, an internal value used by the emulator's zapper code (this is most unfortunate..)
  Z: %d, a variable-length decimal integer; an internal value used by the emulator's zapper code (this is even more unfortunate..)
+SIFC_NONE:
+ this field must always be empty.
 
 * Notes *
 A. There is no key-value pair that indicates the length of the movie. This must be read by scanning the inputlog and counting the number of lines.
