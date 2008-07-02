@@ -1,0 +1,8 @@
+TODO: 
+* improve button config now that config system is resolved
+* resolution
+* parse normal options (etc quiet)
+* Browser
+
+Deferred:
+* A lot of shit was going to be done with the client/server GUI, but netplay is fucked in svn as it is.
