@@ -457,6 +457,9 @@
 #define IDC_LIST2                       1141
 #define IDC_COMBO1                      1142
 #define IDC_BUTTON6                     1143
+#define IDC_BUTTON5                     1144
+#define IDC_BUTTON7                     1145
+#define IDC_BUTTON8                     1146
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -557,7 +560,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
 #define _APS_NEXT_COMMAND_VALUE         40159
-#define _APS_NEXT_CONTROL_VALUE         1144
+#define _APS_NEXT_CONTROL_VALUE         1147
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
