@@ -151,6 +151,8 @@ InitConfig()
     config->addOption('f', "fullscreen", "SDL.Fullscreen", 0);
     config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
     config->addOption("doublebuf", "SDL.DoubleBuffering", 0);
+    config->addOption("autoscale", "SDL.AutoScale", 1);
+    config->addOption("keepaspect", "SDL.KeepAspect", 1);
     config->addOption("xscale", "SDL.XScale", 1.0);
     config->addOption("yscale", "SDL.YScale", 1.0);
     config->addOption("xstretch", "SDL.XStretch", 0);

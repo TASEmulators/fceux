@@ -110,6 +110,18 @@ KillVideo()
 
 static int s_sponge;
 
+inline double GetXScale(int xres)
+{
+    return ((double)xres) / NWIDTH;
+}
+inline double GetYScale(int yres)
+{
+    return ((double)yres) / s_tlines;
+    //if(_integerscalefs)
+    //    scale = (int)scale;
+}
+    
+
 /**
  * Attempts to initialize the graphical video display.  Returns 0 on
  * success, -1 on failure.
@@ -121,6 +133,7 @@ InitVideo(FCEUGI *gi)
     const SDL_VideoInfo *vinf;
     int error, flags = 0;
     int doublebuf, xstretch, ystretch, xres, yres;
+    
 
     FCEUI_printf("Initializing video...");
 
@@ -142,6 +155,7 @@ InitVideo(FCEUGI *gi)
     // check the starting, ending, and total scan lines
     FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
     s_tlines = s_erendline - s_srendline + 1;
+    
 
 
     // check for OpenGL and set the global flags
@@ -169,10 +183,38 @@ InitVideo(FCEUGI *gi)
     if(vinf->hw_available) {
         flags |= SDL_HWSURFACE;
     }
-
+    
+    double auto_xscale = 0;
+    double auto_yscale = 0;
+    int autoscale;
     // check if we are rendering fullscreen
     if(s_fullscreen) {
         flags |= SDL_FULLSCREEN;
+        g_config->getOption("SDL.AutoScale", &autoscale);
+        if(autoscale)
+        {
+            auto_xscale = GetXScale(xres);
+            auto_yscale = GetYScale(yres);
+            double native_ratio = ((double)NWIDTH) / s_tlines;
+            double screen_ratio = ((double)xres) / yres;
+            int keep_aspect;
+            g_config->getOption("SDL.KeepAspect", &keep_aspect);
+            // Try to choose resolution
+        
+            if (screen_ratio < native_ratio)
+            {
+                // The screen is narrower than the original. Maximizing width will not clip
+                auto_xscale = auto_yscale = GetXScale(xres);
+                if (keep_aspect) 
+                    auto_yscale = GetYScale(yres);
+            }
+            else
+            {
+                auto_yscale = auto_xscale = GetYScale(yres);
+                if (keep_aspect) 
+                    auto_xscale = GetXScale(xres);
+            }
+        }
     }
     
     if(noframe) {
@@ -199,9 +241,18 @@ InitVideo(FCEUGI *gi)
     if(s_fullscreen) {
         int desbpp;
         g_config->getOption("SDL.BitsPerPixel", &desbpp);
-
-        g_config->getOption("SDL.XScale", &s_exs);
-        g_config->getOption("SDL.YScale", &s_eys);
+        
+        if (autoscale)
+        {
+            s_exs = auto_xscale;
+            s_eys = auto_yscale;
+        }
+        else
+        {
+            g_config->getOption("SDL.XScale", &s_exs);
+            g_config->getOption("SDL.YScale", &s_eys);
+        }
+        
         g_config->getOption("SDL.SpecialFX", &s_eefx);
 
 #ifdef OPENGL
