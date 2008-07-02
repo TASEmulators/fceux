@@ -454,12 +454,14 @@
 #define IDC_RADIO1                      1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140
-#define IDC_LIST2                       1141
 #define IDC_COMBO1                      1142
 #define IDC_BUTTON6                     1143
 #define IDC_BUTTON5                     1144
 #define IDC_BUTTON7                     1145
 #define IDC_BUTTON8                     1146
+#define IDC_EDIT1                       1147
+#define IDC_BUTTON9                     1148
+#define IDC_LIST2                       1149
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -549,6 +551,18 @@
 #define MENU_DELETEFRAMES               40156
 #define MENU_STRAY_INSERTFRAMES         40157
 #define ID_TOOLS_TEXTHOOKER             40158
+#define ID_Menu                         40159
+#define ID_STRAY_TRUNCATE               40160
+#define ID_SELECTED_BRANCH              40161
+#define ID_SELECTED_INSERTMARKER        40162
+#define ID_SELECTED_CREATEMACRO         40163
+#define ID_EDIT                         40164
+#define ID_EDIT_COPY40165               40165
+#define ID_EDIT_PASTE40166              40166
+#define ID_EDIT_CUT40167                40167
+#define ID_EDIT_COPYTONEW               40168
+#define ID_EDIT_DELETE                  40169
+#define ID_HELP_TASEDITHELP             40170
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -559,8 +573,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40159
-#define _APS_NEXT_CONTROL_VALUE         1147
+#define _APS_NEXT_COMMAND_VALUE         40171
+#define _APS_NEXT_CONTROL_VALUE         1150
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
