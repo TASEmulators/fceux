@@ -1,6 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<!--Generated with glade3 3.4.5 on Wed Jul  2 01:50:28 2008 -->
 <glade-interface>
-  <requires-version lib="gtk+" version="2.12"/>
   <widget class="GtkWindow" id="gamepad_config_window">
     <child>
       <widget class="GtkHBox" id="hbox3">
@@ -35,16 +36,27 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button4">
+                      <widget class="GtkButton" id="button1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Right</property>
+                        <property name="label" translatable="yes">Up</property>
                         <property name="response_id">0</property>
                       </widget>
                       <packing>
-                        <property name="left_attach">2</property>
-                        <property name="right_attach">3</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="button2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="label" translatable="yes">Left</property>
+                        <property name="response_id">0</property>
+                      </widget>
+                      <packing>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                       </packing>
@@ -65,29 +77,18 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button2">
+                      <widget class="GtkButton" id="button4">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Left</property>
+                        <property name="label" translatable="yes">Right</property>
                         <property name="response_id">0</property>
                       </widget>
                       <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="button1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Up</property>
-                        <property name="response_id">0</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                       </packing>
                     </child>
                   </widget>
@@ -337,8 +338,8 @@ Artwork for old versions (&lt; 0.2.7):
                 <property name="label" translatable="yes">Main</property>
               </widget>
               <packing>
-                <property name="tab_fill">False</property>
                 <property name="type">tab</property>
+                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
@@ -386,30 +387,17 @@ Artwork for old versions (&lt; 0.2.7):
                     <property name="column_spacing">5</property>
                     <property name="row_spacing">5</property>
                     <child>
-                      <widget class="GtkButton" id="gp1_button">
+                      <widget class="GtkButton" id="gp3_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _1</property>
+                        <property name="label" translatable="yes">Gamepad _3</property>
                         <property name="use_underline">True</property>
                         <property name="response_id">0</property>
                         <signal name="clicked" handler="gamepad_clicked" after="yes"/>
                       </widget>
                       <packing>
-                        <property name="y_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkButton" id="gp2_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _2</property>
-                        <property name="use_underline">True</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="gamepad_clicked" after="yes"/>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options"></property>
                       </packing>
                     </child>
@@ -431,17 +419,30 @@ Artwork for old versions (&lt; 0.2.7):
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="gp3_button">
+                      <widget class="GtkButton" id="gp2_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _3</property>
+                        <property name="label" translatable="yes">Gamepad _2</property>
                         <property name="use_underline">True</property>
                         <property name="response_id">0</property>
                         <signal name="clicked" handler="gamepad_clicked" after="yes"/>
                       </widget>
                       <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="y_options"></property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="gp1_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Gamepad _1</property>
+                        <property name="use_underline">True</property>
+                        <property name="response_id">0</property>
+                        <signal name="clicked" handler="gamepad_clicked" after="yes"/>
+                      </widget>
+                      <packing>
                         <property name="y_options"></property>
                       </packing>
                     </child>
@@ -480,9 +481,9 @@ Artwork for old versions (&lt; 0.2.7):
                 <property name="label" translatable="yes">Input</property>
               </widget>
               <packing>
+                <property name="type">tab</property>
                 <property name="position">1</property>
                 <property name="tab_fill">False</property>
-                <property name="type">tab</property>
               </packing>
             </child>
             <child>
@@ -520,6 +521,20 @@ Artwork for old versions (&lt; 0.2.7):
                   </packing>
                 </child>
                 <child>
+                  <widget class="GtkCheckButton" id="autoscale_check">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">_Autoscale Fullscreen</property>
+                    <property name="use_underline">True</property>
+                    <property name="response_id">0</property>
+                    <property name="draw_indicator">True</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <widget class="GtkHBox" id="xscale_box">
                     <property name="visible">True</property>
                     <child>
@@ -548,7 +563,7 @@ Artwork for old versions (&lt; 0.2.7):
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -581,7 +596,7 @@ Artwork for old versions (&lt; 0.2.7):
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -609,7 +624,7 @@ Artwork for old versions (&lt; 0.2.7):
                   </widget>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -622,7 +637,7 @@ Artwork for old versions (&lt; 0.2.7):
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
               </widget>
@@ -636,9 +651,9 @@ Artwork for old versions (&lt; 0.2.7):
                 <property name="label" translatable="yes">Video</property>
               </widget>
               <packing>
+                <property name="type">tab</property>
                 <property name="position">2</property>
                 <property name="tab_fill">False</property>
-                <property name="type">tab</property>
               </packing>
             </child>
             <child>
@@ -722,9 +737,9 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                 <property name="label" translatable="yes">Advanced</property>
               </widget>
               <packing>
+                <property name="type">tab</property>
                 <property name="position">3</property>
                 <property name="tab_fill">False</property>
-                <property name="type">tab</property>
               </packing>
             </child>
             <child>
@@ -839,9 +854,9 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                 <property name="label" translatable="yes">Sound</property>
               </widget>
               <packing>
+                <property name="type">tab</property>
                 <property name="position">4</property>
                 <property name="tab_fill">False</property>
-                <property name="type">tab</property>
               </packing>
             </child>
             <child>
@@ -882,26 +897,15 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                             <property name="column_spacing">5</property>
                             <property name="row_spacing">5</property>
                             <child>
-                              <widget class="GtkLabel" id="label19">
+                              <widget class="GtkEntry" id="host_pass">
                                 <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Port:</property>
+                                <property name="can_focus">True</property>
                               </widget>
                               <packing>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label20">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Password:</property>
-                              </widget>
-                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
-                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -919,15 +923,26 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkEntry" id="host_pass">
+                              <widget class="GtkLabel" id="label20">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Password:</property>
                               </widget>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label19">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Port:</property>
+                              </widget>
+                              <packing>
+                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -978,13 +993,54 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                             <property name="column_spacing">3</property>
                             <property name="row_spacing">5</property>
                             <child>
-                              <widget class="GtkEntry" id="join_add">
+                              <widget class="GtkSpinButton" id="join_port">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="adjustment">4046 1 65536 1 10 10</property>
+                                <property name="climb_rate">1</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label17">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Password:</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label16">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Server Port:</property>
+                              </widget>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="label15">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Server Address:</property>
+                              </widget>
+                              <packing>
+                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -1004,54 +1060,13 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label15">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Server Address:</property>
-                              </widget>
-                              <packing>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label16">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Server Port:</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="label17">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Password:</property>
-                              </widget>
-                              <packing>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"></property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkSpinButton" id="join_port">
+                              <widget class="GtkEntry" id="join_add">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="adjustment">4046 1 65536 1 10 10</property>
-                                <property name="climb_rate">1</property>
                               </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
                                 <property name="y_options"></property>
                               </packing>
                             </child>
@@ -1096,9 +1111,9 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                 <property name="label" translatable="yes">Network</property>
               </widget>
               <packing>
+                <property name="type">tab</property>
                 <property name="position">5</property>
                 <property name="tab_fill">False</property>
-                <property name="type">tab</property>
               </packing>
             </child>
           </widget>

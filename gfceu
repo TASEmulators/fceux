@@ -44,7 +44,7 @@ except ImportError:
 
 
 
-class game_options:
+class GameOptions:
   # sound
   sound_check = True
   soundq_check = True
@@ -59,6 +59,7 @@ class game_options:
   extra_entry = ''
   romfile = ''
   opengl_check = False
+  autoscale_check = True
   
   # network
   join_radio = False
@@ -107,6 +108,7 @@ def give_widgets():
     # video
     widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
     widgets.get_object("opengl_check").set_active(options.opengl_check)
+    widgets.get_object("autoscale_check").set_active(options.autoscale_check)
     widgets.get_object("xscale_spin").set_value(options.xscale_spin)
     widgets.get_object("yscale_spin").set_value(options.yscale_spin)
     
@@ -126,10 +128,8 @@ def give_widgets():
 
   except AttributeError:   
     # When new widgets are added, old pickle files might break.
-    options = game_options()
-    give_widgets() 
-  except RuntimeError:
-    print "shit"  
+    options = GameOptions()
+    give_widgets()   
 
 def set_options():
   """ 
@@ -149,6 +149,8 @@ def set_options():
   # video
   options.fullscreen_check = widgets.get_object("fullscreen_check").get_active()
   options.opengl_check = widgets.get_object("opengl_check").get_active()
+  options.autoscale_check = widgets.get_object("autoscale_check").get_active()
+  
   options.xscale_spin = widgets.get_object("xscale_spin").get_value()
   options.yscale_spin = widgets.get_object("yscale_spin").get_value()
   
@@ -194,7 +196,7 @@ def find_binary(file):
 # # # # # # # # # # # # # # # # #
 # Globals
 options = None
-optionsfile = os.getenv('HOME') + '/gfceu_options.dat'
+optionsfile = os.getenv('HOME') + '/.gfceu_options.dat'
 widgets = None
 
 class GfceuApp:
@@ -202,7 +204,7 @@ class GfceuApp:
     self.fceux_binary = self.find_fceu()
     self.load_ui()
 
-    options = game_options()
+    options = GameOptions()
     load_options()
     give_widgets()
     try:
@@ -311,6 +313,11 @@ class GfceuApp:
       video_options += '--opengl 1 '
     else:
       video_options += '--opengl 0 '
+    
+    if options.autoscale_check:
+      video_options += '--autoscale 1 '
+    else:
+      video_options += '--autoscale 0 '
 
     video_options += ' --xscale ' + str(options.xscale_spin)
     video_options += ' --yscale ' + str(options.yscale_spin)
