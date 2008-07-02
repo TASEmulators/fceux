@@ -17,6 +17,8 @@ using namespace std;
 //to change header font
 //http://forums.devx.com/archive/index.php/t-37234.html
 
+int TasEdit_wndx, TasEdit_wndy;
+
 HWND hwndTasEdit = 0;
 
 static HMENU hmenu, hrmenu;
@@ -544,9 +546,19 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
+			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
 			InitDialog();
 			break; 
+
+		case WM_MOVE: {
+				RECT wrect;
+				GetWindowRect(hwndDlg,&wrect);
+				TasEdit_wndx = wrect.left;
+				TasEdit_wndy = wrect.top;
+				break;
+				  }
 
 		case WM_NOTIFY:
 

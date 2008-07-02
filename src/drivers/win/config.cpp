@@ -55,6 +55,7 @@ extern int Monitor_wndx, Monitor_wndy;
 extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
+extern int TasEdit_wndx, TasEdit_wndy;
 extern int EnableAutosave;
 
 //Structure that contains configuration information
@@ -184,6 +185,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(CDLogger_wndy),
 	AC(GGConv_wndx),
 	AC(GGConv_wndy),
+	AC(TasEdit_wndx),
+	AC(TasEdit_wndy),
 
 	AC(pauseAfterPlayback),
 
