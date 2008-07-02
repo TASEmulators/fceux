@@ -68,7 +68,7 @@ C.
 If a fourscore is used, then port0 and port1 are irrelevant and ignored. 
 The input types must all be gamepads, and the inputlog will be in the following format:
   {player1  player2  player3  player4}
-|c|ABSTUDLR|abstudlr|ABSTUDLR|abstudlr|port2|
+|c|ABSTUDLR|ABSTUDLR|ABSTUDLR|ABSTUDLR|port2|
 If a fourscore is not used, then port0 and port1 are required.
 
 D. The author of this format is curious about what people think of it. Please let him know!
