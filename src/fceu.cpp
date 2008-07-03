@@ -57,7 +57,7 @@
 #include "drivers/sdl/sdl.h"
 #endif
 
-int AFon, AFoff;
+int AFon, AFoff, AutoFireOffset = 0;
 
 static void CloseGame(void)
 {
@@ -443,7 +443,6 @@ void FCEUI_Kill(void)
 int rapidAlternator = 0;
 int AutoFirePattern[8] = {1,0,0,0,0,0,0,0};
 int AutoFirePatternLength = 2;
-int AutoFireOffset = 0;
 
 void SetAutoFirePattern(int onframes, int offframes)
 {

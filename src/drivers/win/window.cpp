@@ -113,6 +113,7 @@ static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 
 int GetCheckedAutoFirePattern();
+int GetCheckedAutoFireOffset();
 
 int GetCheckedAutoFirePattern()
 {
@@ -134,6 +135,16 @@ int GetCheckedAutoFirePattern()
 	if (AFon == 5 && AFoff == 1) return MENU_AUTOFIRE_PATTERN_15;
 
 return MENU_AUTOFIRE_PATTERN_1;
+}
+
+int GetCheckedAutoFireOffset()
+{
+	if (AutoFireOffset == 1) return MENU_AUTOFIRE_OFFSET_2;
+	if (AutoFireOffset == 2) return MENU_AUTOFIRE_OFFSET_3;
+	if (AutoFireOffset == 3) return MENU_AUTOFIRE_OFFSET_4;
+	if (AutoFireOffset == 4) return MENU_AUTOFIRE_OFFSET_5;
+	if (AutoFireOffset == 5) return MENU_AUTOFIRE_OFFSET_6;
+	return MENU_AUTOFIRE_OFFSET_1;
 }
 
 // Internal functions
@@ -336,6 +347,7 @@ void UpdateCheckedMenuItems()
 
 			x = 0;
 			CheckedAutoFirePattern = GetCheckedAutoFirePattern();
+			CheckedAutoFireOffset =  GetCheckedAutoFireOffset();
 			while(AutoFirePatternIDs[x])
 			{
 				CheckMenuItem(fceumenu, AutoFirePatternIDs[x],

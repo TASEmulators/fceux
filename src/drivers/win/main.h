@@ -41,6 +41,7 @@ extern int pauseAfterPlayback;
 extern int EnableBackgroundInput;
 extern int AFon;
 extern int AFoff;
+extern int AutoFireOffset;
 
 extern int vmod;
 

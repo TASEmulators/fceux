@@ -57,7 +57,8 @@ extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
 extern int TasEdit_wndx, TasEdit_wndy;
 extern int EnableAutosave;
-extern int AFon, AFoff;
+extern int AFon, AFoff, AutoFireOffset;
+extern int DesynchAutoFire;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -192,6 +193,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(pauseAfterPlayback),
 	AC(AFon),
 	AC(AFoff),
+	AC(AutoFireOffset),
+	AC(DesynchAutoFire),
 
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
