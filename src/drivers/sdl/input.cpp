@@ -92,6 +92,9 @@ static uint32 FTrainerData  = 0;
 static uint8  TopRiderData  = 0;
 static uint8  BWorldData[1+13+1];
 
+int movie_slot = 1;
+
+
 static void UpdateFKB(void);
 static void UpdateGamepad(void);
 static void UpdateQuizKing(void);
@@ -141,6 +144,8 @@ _keyonly(int a)
 #define keyonly(__a) _keyonly(MKK(__a))
 
 static int g_fkbEnabled = 0;
+
+
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -217,7 +222,15 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
-                FCEUI_SaveMovie(NULL,MOVIE_FLAG_NONE);
+            	char* fname = g_config->getConfigDirectory();
+            	char fnum[2];
+				strcat(fname, "/fcm/");
+				sprintf(fnum, "%d", movie_slot);
+				strcat(fname, fnum);
+				strcat(fname, ".fcm");
+				
+				FCEUI_printf("Recording movie to %s\n", fname);
+                FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -227,8 +240,15 @@ KeyboardCommands()
         // f7 to load state, Shift-f7 to load movie
         if(_keyonly(key)) {
             if(is_shift) {
-                //mbg merge 7/23/06 loadmovie takes another arg now
-                FCEUI_LoadMovie(NULL, false, false, false);
+               	char* fname = g_config->getConfigDirectory();
+            	char fnum[2];
+				strcat(fname, "/fcm/");
+				sprintf(fnum, "%d", movie_slot);
+				strcat(fname, fnum);
+				strcat(fname, ".fcm");
+				
+				FCEUI_printf("Playing back movie located at %s\n", fname);
+                FCEUI_LoadMovie(fname , false, false, false);
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -332,11 +352,11 @@ do {                                              \
         }                                         \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
     } else {                                      \
-      /*if(is_shift) {                            \
-            FCEUI_SelectMovie(x,1);               \
-        } else */{                                \
+      if(is_shift) {							  \
+            movie_slot = x;                       \
+        } else {                                  \
             FCEUI_SelectState(x,1);               \
-	}                                         \
+	}                                             \
     }                                             \
 } while(0)
 

@@ -569,6 +569,11 @@ Config::parse(int argc,
  *
  * Lines beginning with # are ignored.
  */
+char* Config::getConfigDirectory()
+{
+	return strdup(_dir.c_str());
+}
+
 int
 Config::_load()
 {

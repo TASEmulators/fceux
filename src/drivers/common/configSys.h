@@ -75,6 +75,13 @@ public:
      * set the variables accordingly.
      */
     int parse(int, char **);
+    
+    /**
+     * Returns the directory of the configuration files.
+     *
+     */
+    
+    char* getConfigDirectory();
 
     /**
      * Save all of the current configuration options to the
