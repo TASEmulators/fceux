@@ -102,7 +102,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\output"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)&#x0D;&#x0A;upx.exe --force $(TargetPath)&#x0D;&#x0A;"
+				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -1184,14 +1184,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\win\texthook.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\drivers\win\texthook.h"
-					>
-				</File>
-				<File
 					RelativePath="..\src\drivers\win\throttle.cpp"
 					>
 				</File>
@@ -1479,15 +1471,6 @@
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
-							>
-							<Tool
-								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)&#x0D;&#x0A;"
-								Outputs="$(OutDir)\fceux.chm"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCustomBuildTool"
@@ -2249,30 +2232,6 @@
 			</File>
 			<File
 				RelativePath="..\src\utils\xstring.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="palettes"
-			>
-			<File
-				RelativePath="..\src\palettes\palettes.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\palettes\rp2c04001.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\palettes\rp2c04002.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\palettes\rp2c04003.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\palettes\rp2c05004.h"
 				>
 			</File>
 		</Filter>
