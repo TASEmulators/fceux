@@ -664,7 +664,7 @@ int main(int argc,char *argv[])
 	}
 	if (MemWatchLoadOnStart) CreateMemWatch();
 	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
-
+	SetAutoFirePattern(AFon, AFoff);
 	UpdateCheckedMenuItems();
 doloopy:
 	UpdateFCEUWindow();  

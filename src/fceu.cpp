@@ -52,9 +52,12 @@
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
+
 #else
 #include "drivers/sdl/sdl.h"
 #endif
+
+int AFon, AFoff;
 
 static void CloseGame(void)
 {
@@ -465,6 +468,7 @@ void SetAutoFirePattern(int onframes, int offframes)
 	{
 		AutoFirePatternLength = onframes + offframes;
 	}
+	AFon = onframes; AFoff = offframes;
 }
 
 void SetAutoFireOffset(int offset)

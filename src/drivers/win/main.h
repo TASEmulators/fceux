@@ -39,6 +39,8 @@ extern int input_display;
 extern int allowUDLR;
 extern int pauseAfterPlayback;
 extern int EnableBackgroundInput;
+extern int AFon;
+extern int AFoff;
 
 extern int vmod;
 

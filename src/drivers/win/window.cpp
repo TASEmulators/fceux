@@ -112,6 +112,30 @@ static uint32 mousex,mousey,mouseb;
 
 static int vchanged = 0;
 
+int GetCheckedAutoFirePattern();
+
+int GetCheckedAutoFirePattern()
+{
+//adelikat: sorry, I'm sure there is an easier way to accomplish this.
+//This function allows the proper check to be displayed on the auto-fire pattern offset at start up when another autofire pattern is saved in config
+	if (AFon == 1 && AFoff == 2) return MENU_AUTOFIRE_PATTERN_2;
+	if (AFon == 1 && AFoff == 3) return MENU_AUTOFIRE_PATTERN_3;
+	if (AFon == 1 && AFoff == 4) return MENU_AUTOFIRE_PATTERN_4;
+	if (AFon == 1 && AFoff == 5) return MENU_AUTOFIRE_PATTERN_5;
+	if (AFon == 2 && AFoff == 1) return MENU_AUTOFIRE_PATTERN_6;
+	if (AFon == 2 && AFoff == 2) return MENU_AUTOFIRE_PATTERN_7;
+	if (AFon == 2 && AFoff == 3) return MENU_AUTOFIRE_PATTERN_8;
+	if (AFon == 2 && AFoff == 4) return MENU_AUTOFIRE_PATTERN_9;
+	if (AFon == 3 && AFoff == 1) return MENU_AUTOFIRE_PATTERN_10;
+	if (AFon == 3 && AFoff == 2) return MENU_AUTOFIRE_PATTERN_11;
+	if (AFon == 3 && AFoff == 3) return MENU_AUTOFIRE_PATTERN_12;
+	if (AFon == 4 && AFoff == 1) return MENU_AUTOFIRE_PATTERN_13;
+	if (AFon == 4 && AFoff == 2) return MENU_AUTOFIRE_PATTERN_14;
+	if (AFon == 5 && AFoff == 1) return MENU_AUTOFIRE_PATTERN_15;
+
+return MENU_AUTOFIRE_PATTERN_1;
+}
+
 // Internal functions
 
 void SplitRecentArchiveFilename(std::string src, std::string& archive, std::string& file)
@@ -311,7 +335,7 @@ void UpdateCheckedMenuItems()
 			0};
 
 			x = 0;
-
+			CheckedAutoFirePattern = GetCheckedAutoFirePattern();
 			while(AutoFirePatternIDs[x])
 			{
 				CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
