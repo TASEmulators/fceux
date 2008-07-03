@@ -92,9 +92,6 @@ static uint32 FTrainerData  = 0;
 static uint8  TopRiderData  = 0;
 static uint8  BWorldData[1+13+1];
 
-int movie_slot = 1;
-
-
 static void UpdateFKB(void);
 static void UpdateGamepad(void);
 static void UpdateQuizKing(void);
@@ -145,7 +142,27 @@ _keyonly(int a)
 
 static int g_fkbEnabled = 0;
 
+int movie_slot = 0;
 
+/* 
+ * This function creates a filename to save/load a movie
+ * depending on the selected movie_slot (shift + x) where x is a
+ * number from 0 to 9
+ */
+
+char* GetMovieFilename(void)
+{
+    
+    char* fname = g_config->getConfigDirectory();
+    char fnum[2];
+    //TODO: The rom name should be prepended to the begining of the filename
+	strcat(fname, "/movie/");
+	sprintf(fnum, "%d", movie_slot);
+	strcat(fname, fnum);
+	strcat(fname, ".fm2");
+				
+    return fname;
+}
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -222,13 +239,7 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
-            	char* fname = g_config->getConfigDirectory();
-            	char fnum[2];
-				strcat(fname, "/movie/");
-				sprintf(fnum, "%d", movie_slot);
-				strcat(fname, fnum);
-				strcat(fname, ".fc2");
-				
+                char* fname = GetMovieFilename();
 				FCEUI_printf("Recording movie to %s\n", fname);
                 FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
             } else {
@@ -240,13 +251,7 @@ KeyboardCommands()
         // f7 to load state, Shift-f7 to load movie
         if(_keyonly(key)) {
             if(is_shift) {
-               	char* fname = g_config->getConfigDirectory();
-            	char fnum[2];
-				strcat(fname, "/movie/");
-				sprintf(fnum, "%d", movie_slot);
-				strcat(fname, fnum);
-				strcat(fname, ".fc2");
-				
+               	char* fname = GetMovieFilename();
 				FCEUI_printf("Playing back movie located at %s\n", fname);
                 FCEUI_LoadMovie(fname , false, false, false);
             } else {
