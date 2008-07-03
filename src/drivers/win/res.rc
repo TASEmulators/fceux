@@ -204,6 +204,8 @@ BEGIN
             MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
         END
+        MENUITEM SEPARATOR
+        MENUITEM "Close",                       ID_MEMWVIEW_FILE_CLOSE
     END
     POPUP "&Edit"
     BEGIN

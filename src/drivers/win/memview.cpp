@@ -1361,6 +1361,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			// ################################## End of SP CODE ###########################
 
+		case ID_MEMWVIEW_FILE_CLOSE:
+			KillMemView();
+			return 0;
+		
 		case MENU_MV_EDIT_UNDO:
 			UndoLastPatch();
 			return 0;

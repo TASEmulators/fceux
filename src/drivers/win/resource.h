@@ -607,6 +607,8 @@
 #define ID_EDIT_BRANCH                  40212
 #define ID_EDIT_SELECTALL               40214
 #define ID_EDIT_REMOVEMARKER            40215
+#define ID_FILE_CLOSECTRL40216          40216
+#define ID_MEMWVIEW_FILE_CLOSE          40217
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -617,7 +619,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40216
+#define _APS_NEXT_COMMAND_VALUE         40218
 #define _APS_NEXT_CONTROL_VALUE         1150
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

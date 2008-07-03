@@ -1,4 +1,5 @@
 void DoMemView();
+void KillMemView();
 void UpdateMemoryView(int draw_all);
 void UpdateColorTable();
 void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset);

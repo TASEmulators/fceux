@@ -1184,6 +1184,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\texthook.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\texthook.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\throttle.cpp"
 					>
 				</File>

@@ -239,7 +239,8 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_TRACELOGGER,
 		MENU_CDLOGGER,
 		MENU_GAMEGENIEDECODER,
-		MENU_CHEATS
+		MENU_CHEATS,
+		ID_TOOLS_TEXTHOOKER
 	};
 
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
@@ -1090,7 +1091,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// User selected the Close File menu => Close the game if necessary
 				if(GameInfo)
 				{
-					FCEUI_CloseGame();                            
+					FCEUI_CloseGame();
+					KillMemView();
 					updateGameDependentMenus(GameInfo != 0);
 				}
 				break;
