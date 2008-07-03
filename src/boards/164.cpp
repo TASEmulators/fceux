@@ -19,7 +19,8 @@
  */
 
 #include "mapinc.h"
-
+#include <stdio.h>
+#include <string.h>
 static uint8 cmd;
 static uint8 DRegs[8];
 static SFORMAT StateRegs[]=
