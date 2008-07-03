@@ -616,6 +616,8 @@ static void CommandEmulationSpeed(void);
 //static void CommandMovieReplay(void);
 static void CommandSoundAdjust(void);
 static void CommandUsePreset(void);
+static void BackgroundDisplayToggle(void);
+static void ObjectDisplayToggle(void);
 static void ViewSlots(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
@@ -743,6 +745,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_USE_INPUT_PRESET_1,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 1", 0 },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_2,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 2", 0 },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 3", 0 },
+	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE, EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
+	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE, EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -857,4 +861,20 @@ static void CommandSoundAdjust(void)
 static void CommandUsePreset(void)
 {
 	FCEUI_UseInputPreset(execcmd-EMUCMD_MISC_USE_INPUT_PRESET_1);
+}
+
+static void BackgroundDisplayToggle(void)
+{
+	bool spr, bg;
+	FCEUI_GetRenderPlanes(spr,bg);
+	bg = !bg;
+	FCEUI_SetRenderPlanes(spr,bg);
+}
+
+static void ObjectDisplayToggle(void)
+{
+	bool spr, bg;
+	FCEUI_GetRenderPlanes(spr,bg);
+	spr = !spr;
+	FCEUI_SetRenderPlanes(spr,bg);
 }

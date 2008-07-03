@@ -41,14 +41,12 @@ static struct
 	{ EMUCMD_SAVE_SLOT_9, 				SCAN_9, },
 	{ EMUCMD_SAVE_STATE, 				SCAN_I, }, //adelikat, set to my defaults for lack of something better
 	{ EMUCMD_LOAD_STATE, 				SCAN_P, }, //most people use the loadslotx / savestlotx style system which requires hogging all th F Keys.  So I set it up in FCEUX that way.
-	//get feedback from TAS people about these
 	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE, 	SCAN_PERIOD, },
 	//{ EMUCMD_FDS_EJECT_INSERT, 			SCAN_F8, },  //These two can be removed, as they can cause nasty errors and the F keys are needed
 	//{ EMUCMD_FDS_SIDE_SELECT, 			SCAN_F6, },
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE, 	SCAN_COMMA, },
 	//{ EMUCMD_MOVIE_READONLY_TOGGLE, 	SCAN_8 | CMD_KEY_SHIFT, },*/
 	//{ EMUCMD_MISC_AUTOSAVE, SCAN_R, },  adelikat - Since Auto-save is disabled by default, so should the hotkey mapping
-	//mbg 7/31/06 - these have been removed as defaults until we decide whether hotkey philosophy permits them
 	{ EMUCMD_SAVE_STATE_SLOT_0, 		SCAN_F10 | CMD_KEY_SHIFT, },
 	{ EMUCMD_SAVE_STATE_SLOT_1, 		SCAN_F1 | CMD_KEY_SHIFT, },
 	{ EMUCMD_SAVE_STATE_SLOT_2, 		SCAN_F2 | CMD_KEY_SHIFT, },
