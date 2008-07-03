@@ -224,10 +224,10 @@ KeyboardCommands()
             if(is_shift) {
             	char* fname = g_config->getConfigDirectory();
             	char fnum[2];
-				strcat(fname, "/fcm/");
+				strcat(fname, "/movie/");
 				sprintf(fnum, "%d", movie_slot);
 				strcat(fname, fnum);
-				strcat(fname, ".fcm");
+				strcat(fname, ".fc2");
 				
 				FCEUI_printf("Recording movie to %s\n", fname);
                 FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
@@ -242,10 +242,10 @@ KeyboardCommands()
             if(is_shift) {
                	char* fname = g_config->getConfigDirectory();
             	char fnum[2];
-				strcat(fname, "/fcm/");
+				strcat(fname, "/movie/");
 				sprintf(fnum, "%d", movie_slot);
 				strcat(fname, fnum);
-				strcat(fname, ".fcm");
+				strcat(fname, ".fc2");
 				
 				FCEUI_printf("Playing back movie located at %s\n", fname);
                 FCEUI_LoadMovie(fname , false, false, false);
