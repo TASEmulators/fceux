@@ -124,7 +124,7 @@ void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
 {
 	//these are mnemonics for each joystick bit.
 	//since we usually use the regular joypad, these will be more helpful.
-	//but any character other than ' ' should count as a set bit
+	//but any character other than ' ' or '.' should count as a set bit
 	//maybe other input types will need to be encoded another way..
 	for(int bit=7;bit>=0;bit--)
 	{
@@ -133,8 +133,8 @@ void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
 		//if the bit is set write the mnemonic
 		if(joystate & bitmask)
 			os->put(mnemonic);
-		else //otherwise write a space
-			os->put(' ');
+		else //otherwise write an unset bit
+			os->put('.');
 	}
 }
 
@@ -146,7 +146,7 @@ void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
 	for(int i=0;i<8;i++)
 	{
 		joystate <<= 1;
-		joystate |= ((buf[i]!=' ')?1:0);
+		joystate |= ((buf[i]=='.'||buf[i]==' ')?0:1);
 	}
 }
 

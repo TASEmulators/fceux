@@ -46,7 +46,7 @@ MOVIECMD_RESET = 1
 the format of port0, port1, port2 depends on which types of devices were attached.
 SI_GAMEPAD:
  the field consists of eight characters which constitute a bitfield.
- any non-space character means that the button was pressed.
+ any character other than ' ' or '.' means that the button was pressed.
  by convention, the following mnemonics will be used in a column to remind us of which button corresponds to which column:
    ABSTUDLR (A,B,Select,sTart,Up,Down,Left,Right)
 SI_ZAPPER:
@@ -71,4 +71,8 @@ The input types must all be gamepads, and the inputlog will be in the following 
 |c|ABSTUDLR|ABSTUDLR|ABSTUDLR|ABSTUDLR|port2|
 If a fourscore is not used, then port0 and port1 are required.
 
-D. The author of this format is curious about what people think of it. Please let him know!
+D. The emulator uses these framerate constants
+  - NTSC: 1008307711 /256/65536 = 60.099822938442230224609375
+  - PAL : 838977920  /256/65536 = 50.00698089599609375
+
+E. The author of this format is curious about what people think of it. Please let him know!
