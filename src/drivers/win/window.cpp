@@ -93,6 +93,7 @@ const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*rec
 // Exported variables
 HWND pwindow;
 int EnableBackgroundInput = 0;
+int EnableExternalInput = 0;
 int ismaximized = 0;
 
 //Menu handle of the main menu.
@@ -317,6 +318,7 @@ void UpdateCheckedMenuItems()
 
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_EXTERNAL_INPUT, EnableExternalInput ? MF_CHECKED : MF_UNCHECKED);
 
 	int AutoFirePatternIDs[] = {
 		MENU_AUTOFIRE_PATTERN_1,
@@ -950,7 +952,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case MENU_EXTERNAL_INPUT:
-				// TODO: ???
+				FCEU_SetBotMode(1^FCEU_BotMode());
+				EnableExternalInput = EnableExternalInput?0:1;
+				UpdateCheckedMenuItems(); break;
 				break;
 
 			case MENU_HIDE_MENU:
@@ -965,8 +969,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_RUN_IN_BACKGROUND:
 				// Run in Background menu was selected
-				// TODO: Does this even work?
-
+				
 				eoptions ^= EO_BGRUN;
 
 				if((eoptions & EO_BGRUN) == 0)
@@ -981,7 +984,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_BACKGROUND_INPUT:
 				// Enable background input menu was selected
-				// TODO: Does this even work?
+				
 				EnableBackgroundInput ^= 1;
 				eoptions |= EO_BGRUN * EnableBackgroundInput;
 				KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
