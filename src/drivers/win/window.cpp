@@ -999,7 +999,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_SHOW_STATUS_ICON:
 				// Show status icon menu was selected
-				// TODO: This does not work.
 				status_icon = !status_icon;
 				UpdateCheckedMenuItems();
 				break;
@@ -1013,12 +1012,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case MENU_PAL:
-				// PAL Emulation menu was selected
+				//	PAL Emulation menu was selected
 				pal_emulation ^= 1;
 				FCEUI_SetVidSystem(pal_emulation);
 				RefreshThrottleFPS();
 				UpdateCheckedMenuItems();
-				//						   DoVideoConfigFix();
+				//	DoVideoConfigFix();
 				SetMainWindowStuff();
 				break;
 			

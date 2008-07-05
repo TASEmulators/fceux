@@ -2271,6 +2271,7 @@ static void StopBasicBot()
     BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
     NewAttempt = true;
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,"Run!");
+	FCEU_SetBotMode(0);
 }
 
 
