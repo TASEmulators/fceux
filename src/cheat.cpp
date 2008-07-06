@@ -206,7 +206,8 @@ void FCEU_LoadGameCheats(FILE *override)
 		if(!fp) return;
 	}
 
-	FCEU_printf("Cheats file loaded.\n");
+	FCEU_DispMessage("Cheats file loaded."); //Tells user a cheats file was loaded.
+	FCEU_printf("Cheats file loaded.\n");	 //Sends message to message log.
 	while(fgets(linebuf,2048,fp)>0)
 	{
 		char *tbuf=linebuf;

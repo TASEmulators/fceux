@@ -383,16 +383,15 @@ endlseq:
 	PowerNES();
 
 	FCEUSS_CheckStates();
-
 	if(GameInfo->type!=GIT_NSF)
-	{
 		FCEU_LoadGamePalette();
-		FCEU_LoadGameCheats(0);
-	}
 
 	FCEU_ResetPalette();
 	FCEU_ResetMessages();	// Save state, status messages, etc.
-
+	
+	if(GameInfo->type!=GIT_NSF)
+		FCEU_LoadGameCheats(0);
+	
 	return GameInfo;
 }
 
