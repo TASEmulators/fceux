@@ -2272,6 +2272,7 @@ static void StopBasicBot()
     NewAttempt = true;
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,"Run!");
 	FCEU_SetBotMode(0);
+	FCEUI_FrameAdvanceEnd();
 }
 
 

@@ -367,13 +367,17 @@ void DoFCEUExit()
 	if(goptions & GOO_CONFIRMEXIT)
 	{
 		//Wolfenstein 3D had cute exit messages.
-		const char * const emsg[4]={"Are you sure you want to leave?  I'll become lonely!",
+		const char * const emsg[7]={"Are you sure you want to leave?  I'll become lonely!",
+			"A strange game. The only winning move is not to play. How about a nice game of chess?",
 			"If you exit, I'll... EAT YOUR MOUSE.",
 			"You can never really exit, you know.",
-			"E-x-i-t?"
+			"E.X.I.T?",
+			"I'm sorry, you missed your exit. There is another one in 19 miles",
+			"Silly Exit Message goes here"
+
 		};
 
-		if(IDYES != MessageBox(hAppWnd, emsg[rand() & 3], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
+		if(IDYES != MessageBox(hAppWnd, emsg[rand() & 6], "Exit FCE Ultra?", MB_ICONQUESTION | MB_YESNO) )
 		{
 			return;
 		}
