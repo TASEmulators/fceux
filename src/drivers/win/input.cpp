@@ -120,7 +120,7 @@ int allowUDLR=1;
 ButtConfig GamePadConfig[4][10]={
 	//Gamepad 1
 	{
-		MK(A), MK(LEFTCONTROL), MK(TAB), MK(ENTER), MK(BL_CURSORUP),
+		MK(F), MK(D), MK(S), MK(ENTER), MK(BL_CURSORUP),
 			MK(BL_CURSORDOWN),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT)
 	},
 
