@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)"
+				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)&#x0D;&#x0A;upx ..\output\fceux.exe"
 			/>
 		</Configuration>
 		<Configuration
