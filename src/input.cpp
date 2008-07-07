@@ -66,6 +66,9 @@ extern INPUTCFC *FCEU_InitTopRider(void);
 extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //---------------
 
+extern unsigned int LagCounter;
+extern bool lagCounterDisplay;
+extern bool lagFlag;
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
@@ -91,6 +94,7 @@ FCPORT portFC;
 
 static DECLFR(JPRead)
 {
+	lagFlag = false;
 	uint8 ret=0;
 
 	ret|=joyports[A&1].driver->Read(A&1);
@@ -344,6 +348,7 @@ void FCEU_UpdateInput(void)
 
 static DECLFR(VSUNIRead0)
 {
+	lagFlag = false;
 	uint8 ret=0;
 
 	ret|=(joyports[0].driver->Read(0))&1;
@@ -356,6 +361,7 @@ static DECLFR(VSUNIRead0)
 
 static DECLFR(VSUNIRead1)
 {
+	lagFlag = false;
 	uint8 ret=0;
 
 	ret|=(joyports[1].driver->Read(1))&1;
@@ -618,6 +624,8 @@ static void CommandSoundAdjust(void);
 static void CommandUsePreset(void);
 static void BackgroundDisplayToggle(void);
 static void ObjectDisplayToggle(void);
+static void LagCounterReset(void);
+static void LagCounterToggle(void);
 static void ViewSlots(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
@@ -747,6 +755,9 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 3", 0 },
 	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE, EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE, EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
+	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE, EMUCMDTYPE_MISC, LagCounterToggle, 0, 0, "Lag Counter Toggle", 0 },
+	{ EMUCMD_MISC_LAGCOUNTER_RESET, EMUCMDTYPE_MISC, LagCounterReset, 0, 0, "Lag Counter Reset", 0}
+	//memory watch, cheat search, debugger, ppu, hex editor, trace logger, code/data logger, 
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -877,4 +888,14 @@ static void ObjectDisplayToggle(void)
 	FCEUI_GetRenderPlanes(spr,bg);
 	spr = !spr;
 	FCEUI_SetRenderPlanes(spr,bg);
+}
+
+static void LagCounterReset(void)
+{
+	LagCounter = 0;
+}
+
+static void LagCounterToggle(void)
+{
+lagCounterDisplay ^= 1;
 }

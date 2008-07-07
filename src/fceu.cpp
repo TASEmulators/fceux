@@ -57,7 +57,11 @@
 #include "drivers/sdl/sdl.h"
 #endif
 
-int AFon, AFoff, AutoFireOffset = 0;
+int AFon, AFoff, AutoFireOffset = 0; //For keeping track of autofire settings
+
+unsigned int LagCounter = 0;  //This will increment everytime input is not polled by the game
+bool lagCounterDisplay = true;
+bool lagFlag = true;
 
 static void CloseGame(void)
 {
@@ -498,6 +502,7 @@ void UpdateAutosave(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
+	lagFlag = true;
 	int r,ssize;
 
 	JustFrameAdvanced = false;
@@ -567,6 +572,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 
 	currMovieData.TryDumpIncremental();
+		if (lagFlag) LagCounter++;
+		if (lagCounterDisplay)FCEU_DispMessage("%d",LagCounter) ;
 }
 
 void FCEUI_CloseGame(void)
@@ -633,7 +640,7 @@ void PowerNES(void)
 
 	SetReadHandler(0x800,0x1FFF,ARAMH); // Part of a little
 	SetWriteHandler(0x800,0x1FFF,BRAMH); //hack for a small speed boost.
-
+	
 	InitializeInput();
 	FCEUSND_Power();
 	FCEUPPU_Power();
