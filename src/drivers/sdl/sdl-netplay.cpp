@@ -1,8 +1,9 @@
 #include "sdl.h"
-#include <SDL/SDL_net.h>
+#include <SDL_net.h>
 #include "sdl-netplay.h"
 
 char *ServerHost;
+int magic;
 
 static int LocalPortTCP=0xFCE;
 static int LocalPortUDP=0xFCE;
@@ -35,7 +36,7 @@ int FCEUD_NetworkConnect(void)
  IPaddress rip;
 
  SDLNet_Init();
-
+ int netplay =1;
  if(netplay==1)	/* Be a server. */
  {
   TCPsocket tmp;
@@ -43,15 +44,14 @@ int FCEUD_NetworkConnect(void)
 
   SDLNet_ResolveHost(&rip,NULL,LocalPortTCP);
 
-  UDPSocket=SDLNet_UDP_Open(&p);
+  UDPSocket=SDLNet_UDP_Open(p);
 
   tmp=SDLNet_TCP_Open(&rip);
-  Socket=SDLNet_TCP_Accept(&tmp);
+  Socket=SDLNet_TCP_Accept(tmp);
 
   memcpy(&rip,SDLNet_TCP_GetPeerAddress(Socket),sizeof(IPaddress));
-
   {
-   uint8 buf[12];
+   Uint32 buf[12];
    uint32 player=1;
 
    magic=SDL_GetTicks();
@@ -76,7 +76,7 @@ int FCEUD_NetworkConnect(void)
    Uint16 p=LocalPortUDP;
    uint8 buf[12];
   
-   UDPSocket=SDLNet_UDP_Open(&p);
+   UDPSocket=SDLNet_UDP_Open(p);
 
    /* Now, tell the server what local UDP port it should send to. */
    en32(buf,p);
@@ -88,7 +88,7 @@ int FCEUD_NetworkConnect(void)
    magic=de32(buf+8);
   }
   set=SDLNet_AllocSocketSet(1);
-  SDLNet_TCP_AddSocket(set,TCPSocket);
+  SDLNet_TCP_AddSocket(set,Socket);
   SDLNet_UDP_AddSocket(set,UDPSocket);
  }	// End client connect code.
 
@@ -201,7 +201,6 @@ int FCEUD_GetDataFromServer(uint8 *data)
   }
   if(SDLNet_SocketReady(Socket))
   {
-   SDLNet_TCP_Recv
      if(de32(buf)==incounter) /* New packet, keep. */
      {
       unsigned long beefie; 
