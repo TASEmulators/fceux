@@ -75,7 +75,6 @@ void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
-void DoPPUView();//mbg merge 7/19/06 yech had to add
 
 void MapInput(void);
 

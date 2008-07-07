@@ -59,6 +59,7 @@ extern int TasEdit_wndx, TasEdit_wndy;
 extern int EnableAutosave;
 extern int AFon, AFoff, AutoFireOffset;
 extern int DesynchAutoFire;
+extern bool lagCounterDisplay;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -195,6 +196,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AFoff),
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
+	AC(lagCounterDisplay),
 
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT

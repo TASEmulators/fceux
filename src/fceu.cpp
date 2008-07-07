@@ -60,7 +60,7 @@
 int AFon, AFoff, AutoFireOffset = 0; //For keeping track of autofire settings
 
 unsigned int LagCounter = 0;  //This will increment everytime input is not polled by the game
-bool lagCounterDisplay = true;
+bool lagCounterDisplay = false;
 bool lagFlag = true;
 
 static void CloseGame(void)

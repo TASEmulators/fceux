@@ -42,7 +42,16 @@
 // qfox: For UpdateExternalButton(), called when the
 //       botmode state changes, to update a label in gui.
 #ifdef WIN32
+#include "drivers/win/main.h"
 #include "drivers/win/basicbot.h"
+#include "drivers/win/memwatch.h"
+#include "drivers/win/cheat.h"
+#include "drivers/win/debugger.h"
+#include "drivers/win/ppuview.h"
+#include "drivers/win/cdlogger.h"
+#include "drivers/win/tracer.h"
+#include "drivers/win/memview.h"
+
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -609,6 +618,7 @@ const char* FCEUI_CommandTypeNames[]=
 	"AVI",
 	"FDS",
 	"VS Sys",
+	"Tools",
 };
 
 static void CommandUnImpl(void);
@@ -627,6 +637,12 @@ static void ObjectDisplayToggle(void);
 static void LagCounterReset(void);
 static void LagCounterToggle(void);
 static void ViewSlots(void);
+static void LaunchMemoryWatch(void);
+static void LaunchDebugger(void);
+static void LaunchPPU(void);
+static void LaunchHex(void);
+static void LaunchTraceLogger(void);
+static void LaunchCodeDataLogger(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -756,8 +772,13 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE, EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE, EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE, EMUCMDTYPE_MISC, LagCounterToggle, 0, 0, "Lag Counter Toggle", 0 },
-	{ EMUCMD_MISC_LAGCOUNTER_RESET, EMUCMDTYPE_MISC, LagCounterReset, 0, 0, "Lag Counter Reset", 0}
-	//memory watch, cheat search, debugger, ppu, hex editor, trace logger, code/data logger, 
+	{ EMUCMD_MISC_LAGCOUNTER_RESET, EMUCMDTYPE_MISC, LagCounterReset, 0, 0, "Lag Counter Reset", 0},
+	{ EMUCMD_TOOL_OPENMEMORYWATCH,	EMUCMDTYPE_TOOL, LaunchMemoryWatch, 0, 0, "Open Memory Watch", 0},
+	{ EMUCMD_TOOL_OPENDEBUGGER,		EMUCMDTYPE_TOOL, LaunchDebugger, 0, 0, "Open Debugger", 0},
+	{ EMUCMD_TOOL_OPENHEX,			EMUCMDTYPE_TOOL, LaunchHex, 0, 0, "Open Hex Editor", 0},
+	{ EMUCMD_TOOL_OPENPPU,			EMUCMDTYPE_TOOL, LaunchPPU, 0, 0, "Open PPU Viewer", 0},
+	{ EMUCMD_TOOL_OPENTRACELOGGER,	EMUCMDTYPE_TOOL, LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
+	{ EMUCMD_TOOL_OPENCDLOGGER,		EMUCMDTYPE_TOOL, LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -898,4 +919,46 @@ static void LagCounterReset(void)
 static void LagCounterToggle(void)
 {
 lagCounterDisplay ^= 1;
+}
+
+static void LaunchMemoryWatch(void)
+{
+#ifdef WIN32
+	CreateMemWatch();
+#endif
+}
+
+static void LaunchDebugger(void)
+{
+#ifdef WIN32
+	DoDebug(0);
+#endif
+}
+
+static void LaunchPPU(void)
+{
+#ifdef WIN32
+	DoPPUView();
+#endif
+}
+
+static void LaunchHex(void)
+{
+#ifdef WIN32
+	DoMemView();
+#endif
+}
+
+static void LaunchTraceLogger(void)
+{
+#ifdef WIN32
+	DoTracer();
+#endif
+}
+
+static void LaunchCodeDataLogger(void)
+{
+#ifdef WIN32
+	DoCDLogger();
+#endif
 }
