@@ -599,7 +599,7 @@ void ALoad(char *nameo, char* innerFilename)
 /// @param initialdir Directory that's pre-selected in the Open File dialog.
 void LoadNewGamey(HWND hParent, const char *initialdir)
 {
-	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.gz,*.7z)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.gz;*.7z\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
+	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.gz,*.rar,*.7z)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.gz;*.rar;*.7z\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
 	char nameo[2048];
 
 	// Create the Open File dialog
