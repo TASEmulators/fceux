@@ -75,9 +75,9 @@ extern INPUTCFC *FCEU_InitTopRider(void);
 extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //---------------
 
-extern unsigned int LagCounter;
-extern bool lagCounterDisplay;
-extern bool lagFlag;
+unsigned int LagCounter;
+bool lagCounterDisplay;
+bool lagFlag;
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;

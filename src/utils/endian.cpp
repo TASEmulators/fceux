@@ -108,6 +108,19 @@ int read32le(uint32 *Bufo, FILE *fp)
 	return 1;
 }
 
+int read16le(uint16 *Bufo, std::istream *is)
+{
+	uint16 buf;
+	if(is->read((char*)&buf,2).gcount() != 2)
+		return 0;
+#ifdef LSB_FIRST
+	*Bufo=buf;
+#else
+	*Bufo = FCEU_de16lsb(&buf)
+#endif
+	return 1;
+}
+
 ///reads a little endian 64bit value from the specified file
 int read64le(uint64 *Bufo, std::istream *is)
 {

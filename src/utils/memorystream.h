@@ -30,6 +30,17 @@ private:
 
 public:
 
+	memory_streambuf(int _capacity)
+		: buf(new T[capacity=_capacity])
+		, myBuf(true)
+		, length(_capacity)
+		, ww(0)
+		, usevec(0)
+	{
+		sync();
+	}
+
+
 	memory_streambuf()
 		: buf(new T[capacity = 128])
 		, myBuf(true)
@@ -241,6 +252,11 @@ class memorystream : public std::basic_iostream<char, std::char_traits<char> >
 public:
 	memorystream()
 		: std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+	{}
+
+	memorystream(int size)
+		: std::basic_iostream<char, std::char_traits<char> >(&streambuf)
+		, streambuf(size)
 	{}
 
 	memorystream(char* usebuf, int buflength)

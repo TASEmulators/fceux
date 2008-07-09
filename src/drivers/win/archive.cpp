@@ -8,11 +8,14 @@
 #include <OleAuto.h>
 
 #include "7zip/IArchive.h"
+#include "file.h"
+#include "utils/memorystream.h"
+#include "utils/guid.h"
 
 #include "driver.h"
 #include "main.h"
 
-DEFINE_GUID(CLSID_CFormat7z,0x23170F69,0x40C1,0x278A,0x10,0x00,0x00,0x01,0x10,0x07,0x00,0x00);
+DEFINE_GUID(CLSID_CFormat_07,0x23170F69,0x40C1,0x278A,0x10,0x00,0x00,0x01,0x10,0x07,0x00,0x00);
 
 class OutStream : public IArchiveExtractCallback
 {
@@ -269,7 +272,7 @@ class LibRef
 public:
 	HMODULE hmod;
 	LibRef(const char* fname) {
-		hmod = LoadLibrary("7zxa.dll");
+		hmod = LoadLibrary(fname);
 	}
 	~LibRef() {
 		if(hmod)
@@ -327,24 +330,135 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 	return FALSE;
 }
 
-void do7zip(HWND hParent, std::string fname, std::string* innerFilename)
+typedef UINT32 (WINAPI *CreateObjectFunc)(const GUID*,const GUID*,void**);
+
+struct FormatRecord
 {
-	LibRef libref("7zxa.dll");
+	std::vector<char> signature;
+	GUID guid;
+};
+
+typedef std::vector<FormatRecord> TFormatRecords;
+TFormatRecords formatRecords;
+
+void initArchiveSystem()
+{
+	LibRef libref("7z.dll");
+	if(!libref.hmod)
+	{
+		//couldnt initialize archive system
+	}
+
+	typedef HRESULT (WINAPI *GetNumberOfFormatsFunc)(UINT32 *numFormats);
+	typedef HRESULT (WINAPI *GetHandlerProperty2Func)(UInt32 formatIndex, PROPID propID, PROPVARIANT *value);
+
+	GetNumberOfFormatsFunc GetNumberOfFormats = (GetNumberOfFormatsFunc)GetProcAddress(libref.hmod,"GetNumberOfFormats");
+	GetHandlerProperty2Func GetHandlerProperty2 = (GetHandlerProperty2Func)GetProcAddress(libref.hmod,"GetHandlerProperty2");
+
+
+	UINT32 numFormats;
+	GetNumberOfFormats(&numFormats);
+
+	for(uint32 i=0;i<numFormats;i++)
+	{
+		PROPVARIANT prop;
+		prop.vt = VT_EMPTY;
+
+		GetHandlerProperty2(i,NArchive::kStartSignature,&prop);
+		
+		FormatRecord fr;
+		int len = SysStringLen(prop.bstrVal);
+		fr.signature.reserve(len);
+		for(int j=0;j<len;j++)
+			fr.signature.push_back(((char*)prop.bstrVal)[j]);
+
+		GetHandlerProperty2(i,NArchive::kClassID,&prop);
+		memcpy((char*)&fr.guid,(char*)prop.bstrVal,16);
+
+		formatRecords.push_back(fr);
+
+		::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
+	}
+
+}
+
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
+{
+	LibRef libref("7z.dll");
+	if(!libref.hmod)
+		return ArchiveScanRecord();
+
+	//check the file against the signatures
+	std::fstream* inf = FCEUD_UTF8_fstream(fname,"rb");
+	int matchingFormat = -1;
+	for(uint32 i=0;i<(int)formatRecords.size();i++)
+	{
+		inf->seekg(0);
+		int size = formatRecords[i].signature.size();
+		if(size==0)
+			continue; //WHY??
+		char* temp = new char[size];
+		inf->read((char*)temp,size);
+		if(!memcmp(&formatRecords[i].signature[0],temp,size))
+		{
+			delete[] temp;
+			matchingFormat = i;
+			break;
+		}
+		delete[] temp;
+	}
+	delete inf;
+
+	if(matchingFormat == -1)
+		return ArchiveScanRecord();
+
+	CreateObjectFunc CreateObject = (CreateObjectFunc)GetProcAddress(libref.hmod,"CreateObject");
+	if(!CreateObject)
+		return ArchiveScanRecord();
+	IInArchive* object;
+	if (!FAILED(CreateObject( &formatRecords[matchingFormat].guid, &IID_IInArchive, (void**)&object )))
+	{
+		//fetch the start signature
+		InFileStream ifs(fname);
+		if (SUCCEEDED(object->Open(&ifs,0,0)))
+		{
+			uint32 numFiles;
+			if (SUCCEEDED(object->GetNumberOfItems(&numFiles)))
+			{
+				object->Release();
+				return ArchiveScanRecord(matchingFormat,(int)numFiles);
+			}
+		}
+	}
+
+	object->Release();
+
+	return ArchiveScanRecord();
+}
+
+extern HWND hAppWnd;
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename)
+{
+	FCEUFILE* fp = 0;
+	
+	LibRef libref("7z.dll");
 	if(!libref.hmod) {
-		MessageBox(hParent,"Could not locate 7zxa.dll","Failure launching 7z archive browser",0);
-		return;
+		MessageBox(hAppWnd,"Could not locate 7z.dll","Failure launching archive browser",0);
+		return 0;
 	}
 
 	typedef UINT32 (WINAPI *CreateObjectFunc)(const GUID*,const GUID*,void**);
 	CreateObjectFunc CreateObject = (CreateObjectFunc)GetProcAddress(libref.hmod,"CreateObject");
 	if(!CreateObject)
 	{
-		MessageBox(hParent,"7zxa.dll was invalid","Failure launching 7z archive browser",0);
-		return;
+		MessageBox(hAppWnd,"7z.dll was invalid","Failure launching archive browser",0);
+		return 0;
 	}
 
+
 	IInArchive* object;
-	if (!FAILED(CreateObject( &CLSID_CFormat7z, &IID_IInArchive, (void**)&object )))
+	if (!FAILED(CreateObject( &formatRecords[asr.type].guid, &IID_IInArchive, (void**)&object )))
 	{
 		InFileStream ifs(fname);
 		if (SUCCEEDED(object->Open(&ifs,0,0)))
@@ -402,24 +516,29 @@ void do7zip(HWND hParent, std::string fname, std::string* innerFilename)
 				}
 				else
 					//or use the UI if we're not
-					ret = DialogBoxParam(fceu_hInstance, "7ZIPARCHIVEDIALOG", hParent, ArchiveFileSelectorCallback, (LPARAM)0);
+					ret = DialogBoxParam(fceu_hInstance, "ARCHIVECHOOSERDIALOG", hAppWnd, ArchiveFileSelectorCallback, (LPARAM)0);
 
 				if(ret != LB_ERR)
 				{
 					FileSelectorContext::Item& item = fileSelectorContext.items[ret];
-					std::vector<char> data(item.size);
-					OutStream outStream( item.index, &data[0], item.size);
+					memorystream* ms = new memorystream(item.size);
+					OutStream outStream( item.index, ms->buf(), item.size);
 					const uint32 indices[1] = {item.index};
 					if (SUCCEEDED(object->Extract(indices,1,0,&outStream)))
 					{
-						char* tempname = tmpnam(0);
-						FILE* outf = fopen(tempname,"wb");
-						fwrite(&data[0],1,item.size,outf);
-						fclose(outf);
-						void ALoad(char *nameo,char* actualfile,char* archiveFile);
-						ALoad((char*)item.name.c_str(),tempname,(char*)fname.c_str());
-
-					} //if we extracted the file correctly
+						//if we extracted the file correctly
+						fp = new FCEUFILE();
+						fp->archiveFilename = fname;
+						fp->filename = fileSelectorContext.items[ret].name;
+						fp->archiveIndex = ret;
+						fp->mode = FCEUFILE::READ;
+						fp->size = fileSelectorContext.items[ret].size;
+						fp->stream = ms;
+					} 
+					else
+					{
+						delete ms;
+					}
 
 				} //if returned a file from the fileselector
 				
@@ -427,4 +546,6 @@ void do7zip(HWND hParent, std::string fname, std::string* innerFilename)
 		} //if we opened the 7z correctly
 		object->Release();
 	}
+
+	return fp;
 }

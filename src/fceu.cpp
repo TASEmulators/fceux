@@ -59,9 +59,16 @@
 
 int AFon, AFoff, AutoFireOffset = 0; //For keeping track of autofire settings
 
-unsigned int LagCounter = 0;  //This will increment everytime input is not polled by the game
-bool lagCounterDisplay = false;
-bool lagFlag = true;
+FCEUGI::FCEUGI()
+	: filename(0)
+	, archiveFilename(0)
+{}
+
+FCEUGI::~FCEUGI()
+{
+	if(filename) delete filename;
+	if(archiveFilename) delete archiveFilename;
+}
 
 static void CloseGame(void)
 {
@@ -312,7 +319,7 @@ int NSFLoad(FCEUFILE *fp);
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
 
-FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int OverwriteVidMode)
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 {
 	//mbg merge 7/17/07 - why is this here
 	//#ifdef WIN32
@@ -325,10 +332,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int Ove
 	char *ipsfn;
 
 	FCEU_printf("Loading %s...\n\n",name);
-	GetFileBase(logicalname);
 
 	ipsfn=strdup(FCEU_MakeFName(FCEUMKF_IPS,0,0).c_str());
 	fp=FCEU_fopen(name,ipsfn,"rb",0);
+	GetFileBase(fp->filename.c_str());
+
 	free(ipsfn);
 
 	if(!fp) {
@@ -345,8 +353,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int Ove
 	AutosaveStatus[2] = AutosaveStatus[3] = 0;
 
 	CloseGame();
-	GameInfo = new FCEUGI;
+	GameInfo = new FCEUGI();
 	memset(GameInfo, 0, sizeof(FCEUGI));
+
+	GameInfo->filename = strdup(fp->filename.c_str());
+	if(fp->archiveFilename != "") GameInfo->archiveFilename = strdup(fp->archiveFilename.c_str());
 
 	GameInfo->soundchan = 0;
 	GameInfo->soundrate = 0;
@@ -401,7 +412,7 @@ endlseq:
 
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode)
 {
-	return FCEUI_LoadGameVirtual(name,name,OverwriteVidMode);
+	return FCEUI_LoadGameVirtual(name,OverwriteVidMode);
 }
 
 
@@ -502,6 +513,9 @@ void UpdateAutosave(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
+	extern unsigned int LagCounter;
+	extern bool lagCounterDisplay;
+	extern bool lagFlag;
 	lagFlag = true;
 	int r,ssize;
 

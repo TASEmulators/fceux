@@ -7,6 +7,7 @@
 
 #include "types.h"
 #include "git.h"
+#include "file.h"
 
 FILE *FCEUD_UTF8fopen(const char *fn, const char *mode);
 inline FILE *FCEUD_UTF8fopen(const std::string &n, const char *mode) { return FCEUD_UTF8fopen(n.c_str(),mode); }
@@ -93,8 +94,8 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg);
 FCEUGI *FCEUI_LoadGame(const char *name, int OverwriteVidMode);
 
 //same as FCEUI_LoadGame, except that it can load from a tempfile. 
-//name is the actual path to open; logicalname is what the emulator should think it is
-FCEUGI *FCEUI_LoadGameVirtual(const char *name, const char *logicalname, int OverwriteVidMode);
+//name is the logical path to open; archiveFilename is the archive which contains name
+FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode);
 
 //general purpose emulator initialization. returns true if successful
 bool FCEUI_Initialize();
@@ -318,6 +319,11 @@ enum EFCEUI
 //checks whether an EFCEUI is valid right now
 bool FCEU_IsValidUI(EFCEUI ui);
 
+//if you want to autopilot this, pass in an innerfilename to try and automatically load
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename);
+
+//scans a file to see if it is an archive you can handle
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname);
 
 #ifdef __cplusplus
 extern "C"

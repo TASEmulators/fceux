@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /y /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)"
+				CommandLine="xcopy /y /d $(ProjectDir)\..\src\drivers\win\7z.dll $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -181,7 +181,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7zxa.dll $(OutDir)&#x0D;&#x0A;upx ..\output\fceux.exe"
+				CommandLine="xcopy /d $(ProjectDir)\..\src\drivers\win\7z.dll $(OutDir)&#x0D;&#x0A;upx ..\output\fceux.exe&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -705,11 +705,11 @@
 				Name="win"
 				>
 				<File
-					RelativePath="..\src\drivers\win\7zip.cpp"
+					RelativePath="..\src\drivers\win\archive.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\win\7zip.h"
+					RelativePath="..\src\drivers\win\archive.h"
 					>
 				</File>
 				<File

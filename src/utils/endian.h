@@ -12,6 +12,8 @@ int write64le(uint64 b, std::ostream* os);
 int read64le(uint64 *Bufo, std::istream *is);
 int read32le(uint32 *Bufo, std::istream *is);
 int read32le(uint32 *Bufo, FILE *fp);
+int read16le(uint16 *Bufo, std::istream *is);
+
 void FlipByteOrder(uint8 *src, uint32 count);
 
 void FCEU_en32lsb(uint8 *, uint32);

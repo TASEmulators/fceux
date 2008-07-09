@@ -109,8 +109,11 @@ inline const char* ESIFC_Name(ESIFC esifc)
 
 #include "utils/md5.h"
 
-typedef struct
+struct FCEUGI
 {
+	FCEUGI();
+	~FCEUGI();
+
 	uint8 *name;	//Game name, UTF8 encoding
 	int mappernum;
 
@@ -125,5 +128,9 @@ typedef struct
 	//mbg 6/8/08 - ???
 	int soundrate;  //For Ogg Vorbis expansion sound wacky support.  0 for default.
 	int soundchan;  //Number of sound channels.
-} FCEUGI;
+
+	char* filename;
+	char* archiveFilename;
+};
+
 #endif

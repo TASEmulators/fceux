@@ -49,7 +49,6 @@
 #include "joystick.h"
 #include "oldmovie.h"
 #include "movie.h"
-#include "7zip.h"
 #include "texthook.h"
 #include "guiconfig.h"
 #include "timing.h"
@@ -149,13 +148,7 @@ int GetCheckedAutoFireOffset()
 
 // Internal functions
 
-void SplitRecentArchiveFilename(std::string src, std::string& archive, std::string& file)
-{
-	src = src.substr(1);
-	size_t pipe = src.find_first_of('|');
-	archive = src.substr(0,pipe);
-	file = src.substr(pipe+1);
-}
+
 
 static void ConvertFCM(HWND hwndOwner)
 {
@@ -401,12 +394,10 @@ void UpdateRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int basei
 			continue;
 
 		std::string tmp = strs[x];
-		if(tmp[0] == '|')
-		{
-			std::string archiveName, fileName;
-			SplitRecentArchiveFilename(tmp,archiveName,fileName);
+		std::string archiveName, fileName, fileToOpen;
+		FCEU_SplitArchiveFilename(tmp,archiveName,fileName,fileToOpen);
+		if(archiveName != "")
 			tmp = archiveName + " <" + fileName + ">";
-		}
 
 		//clamp this string to 128 chars
 		if(tmp.size()>128)
@@ -567,11 +558,9 @@ void FCEUD_HideMenuToggle(void)
 	ToggleHideMenu();
 }
 
-void ALoad(char *nameo,char* actualfile,char* archiveFile)
+void ALoad(char *nameo, char* innerFilename)
 {
-	bool isvirtual = (actualfile!=0);
-	if(!isvirtual) actualfile = nameo;
-	if(FCEUI_LoadGameVirtual(actualfile, nameo, 1))
+	if(FCEUI_LoadGameVirtual(nameo, 1))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
 
@@ -579,10 +568,9 @@ void ALoad(char *nameo,char* actualfile,char* archiveFile)
 
 		SetMainWindowStuff();
 
-		//todo-add recent files from archives somehow
 		std::string recentFileName = nameo;
-		if(archiveFile)
-			recentFileName = (std::string)"|" + archiveFile + "|" + nameo;
+		if(GameInfo->archiveFilename)
+			recentFileName = (std::string)GameInfo->archiveFilename + "|" + GameInfo->filename;
 		else
 			recentFileName = nameo;
 		
@@ -633,17 +621,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 	// Show the Open File dialog
 	if(GetOpenFileName(&ofn))
 	{
-		//if the user selected a 7zip file, then we have some work to do..
-		//todo - scan file instead of checking extension
-		std::string fname = nameo;
-		if(fname.substr(fname.size()-3,3) == ".7z")
-		{
-			do7zip(hParent, fname);
-		}
-		else
-		{
-			ALoad(nameo,0);
-		}
+		ALoad(nameo);
 	}
 }
 
@@ -775,7 +753,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
 			{
 				DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
-				ALoad(ftmp,0);
+				ALoad(ftmp);
 				free(ftmp);
 			}                 
 		}
@@ -793,14 +771,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				char*& fname = recent_files[wParam - MENU_FIRST_RECENT_FILE];
 				if(fname)
 				{
-					if(fname[0] == '|')
-					{
-						std::string fnamestr = fname, archiveName, fileName;
-						SplitRecentArchiveFilename(fnamestr,archiveName,fileName);
-						do7zip(hWnd,archiveName,&fileName);
-					}
-					else 
-						ALoad(fname,0);
+					ALoad(fname);
 				}
 			}
 			switch(LOWORD(wParam))

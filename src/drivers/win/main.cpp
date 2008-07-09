@@ -39,6 +39,7 @@
 #include "../../state.h"
 #include "../../debug.h"
 #include "../../movie.h"
+#include "archive.h"
 #include "input.h"
 #include "netplay.h"
 #include "memwatch.h"
@@ -554,6 +555,8 @@ void initDirectories()
 int main(int argc,char *argv[])
 {
 	char *t;
+
+	initArchiveSystem();
 
 	if(timeBeginPeriod(1) != TIMERR_NOERROR)
 	{

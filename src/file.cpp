@@ -26,7 +26,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#ifndef WIN32
 #include <zlib.h>
+#endif
 
 #include "types.h"
 #include "file.h"
@@ -211,377 +213,162 @@ doret:
 #define strcasecmp strcmp
 #endif
 
+void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::string& file, std::string& fileToOpen)
+{
+	size_t pipe = src.find_first_of('|');
+	if(pipe == std::string::npos)
+	{
+		archive = "";
+		file = src;
+		fileToOpen = src;
+	}
+	else
+	{
+		archive = src.substr(0,pipe);
+		file = src.substr(pipe+1);
+		fileToOpen = archive;
+	}
+}
 
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext)
 {
 	FILE *ipsfile=0;
-	FCEUFILE *fceufp;
-	void *t;
+	FCEUFILE *fceufp=0;
 
-	if(ipsfn && strchr(mode,'r'))
+	bool read = (std::string)mode == "rb";
+	bool write = (std::string)mode == "wb";
+	if(read&&write || (!read&&!write))
+	{
+		FCEU_PrintError("invalid file open mode specified (only wb and rb are supported)");
+		return 0;
+	}
+
+	std::string archive,fname,fileToOpen;
+	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
+	
+
+	//try to setup the ips file
+	if(ipsfn && read)
 		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
 
-	fceufp=(FCEUFILE *)malloc(sizeof(FCEUFILE));
-
+	if(read)
 	{
-		unzFile tz;
-		if((tz=unzOpen(path)))  // If it's not a zip file, use regular file handlers.
-			// Assuming file type by extension usually works,
-			// but I don't like it. :)
+		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
+		if(asr.numFiles == 0)
 		{
-			if(unzGoToFirstFile(tz)==UNZ_OK)
+			//if the archive contained no files, try to open it the old fashioned way
+			std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
+			if(!fp)
 			{
-				for(;;)
-				{
-					char tempu[512];	// Longer filenames might be possible, but I don't
-					// think people would name files that long in zip files...
-					unzGetCurrentFileInfo(tz,0,tempu,512,0,0,0,0);
-					tempu[511]=0;
-					if(strlen(tempu)>=4)
-					{
-						char *za=tempu+strlen(tempu)-4;
-
-						if(!ext)
-						{
-							if(!strcasecmp(za,".nes") || !strcasecmp(za,".fds") ||
-								!strcasecmp(za,".nsf") || !strcasecmp(za,".unf") ||
-								!strcasecmp(za,".nez"))
-								break;
-						}
-						else if(!strcasecmp(za,ext))
-							break;
-					}
-					if(strlen(tempu)>=5)
-					{
-						if(!strcasecmp(tempu+strlen(tempu)-5,".unif"))
-							break;
-					}
-					if(unzGoToNextFile(tz)!=UNZ_OK)
-					{
-						if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
-						break;
-					}
-				}
-				if(unzOpenCurrentFile(tz)!=UNZ_OK)
-					goto zpfail;
-			}
-			else
-			{
-zpfail:
-				free(fceufp);
-				unzClose(tz);
 				return 0;
 			}
-			if(!(fceufp->fp=MakeMemWrap(tz,2)))
-			{
-				free(fceufp);
-				return(0);
-			}
-			fceufp->type=2;
-			if(ipsfile)
-				ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-			return(fceufp);
+			fceufp = new FCEUFILE();
+			fceufp->filename = fileToOpen;
+			fceufp->archiveIndex = -1;
+			fceufp->stream = (std::iostream*)fp;
+			FCEU_fseek(fceufp,0,SEEK_END);
+			fceufp->size = FCEU_ftell(fceufp);
+			FCEU_fseek(fceufp,0,SEEK_SET);
+			return fceufp;
 		}
-	}
-
-	if((t=FCEUD_UTF8fopen(path,"rb")))
-	{
-		uint32 magic;
-
-		magic=fgetc((FILE *)t);
-		magic|=fgetc((FILE *)t)<<8;
-		magic|=fgetc((FILE *)t)<<16;
-
-		if(magic!=0x088b1f)   /* Not gzip... */
-			fclose((FILE *)t);
-		else                  /* Probably gzip */
+		else
 		{
-			int fd;
-
-			fd = dup(fileno( (FILE *)t));
-
-			fclose((FILE*)t); //mbg merge 7/17/06 - cast to FILE*
-
-			lseek(fd, 0, SEEK_SET);
-
-			if((t=gzdopen(fd,mode)))
-			{
-				fceufp->type=1;
-				fceufp->fp=t;
-				if(ipsfile)
-				{
-					fceufp->fp=MakeMemWrap(t,1);
-					gzclose(t);
-
-					if(fceufp->fp)
-					{
-						free(fceufp);
-						return(0);
-					}
-
-					fceufp->type=3;
-					ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-				}
-				return(fceufp);
-			}
-			close(fd);
+			//open an archive file
+			if(archive == "")
+				fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
+			else
+				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
+			return fceufp;
 		}
-
 	}
 
-	if((t=FCEUD_UTF8fopen(path,mode)))
-	{
-		fseek((FILE *)t,0,SEEK_SET);
-		fceufp->type=0;
-		fceufp->fp=t;
-		if(ipsfile)
-		{
-			if(!(fceufp->fp=MakeMemWrap(t,0)))
-			{
-				free(fceufp);
-				return(0);
-			}
-			fceufp->type=3;
-			ApplyIPS(ipsfile,(MEMWRAP *)fceufp->fp);
-		}
-		return(fceufp);
-	}
-
-	free(fceufp);
 	return 0;
 }
 
 int FCEU_fclose(FCEUFILE *fp)
 {
-	if(fp->type==1)
-	{
-		gzclose(fp->fp);
-	}
-	else if(fp->type>=2)
-	{
-		free(((MEMWRAP*)(fp->fp))->data);
-		free(fp->fp);
-	}
-	else
-	{
-		fclose((FILE *)fp->fp);
-	}
-	free(fp);
+	delete fp;
 	return 1;
 }
 
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
-	if(fp->type==1)
-	{
-		return gzread(fp->fp,ptr,size*nmemb);
-	}
-	else if(fp->type>=2)
-	{
-		MEMWRAP *wz;
-		uint32 total=size*nmemb;
-
-		wz=(MEMWRAP*)fp->fp;
-		if(wz->location>=wz->size) return 0;
-
-		if((wz->location+total)>wz->size)
-		{
-			int ak=wz->size-wz->location;
-			memcpy((uint8*)ptr,wz->data+wz->location,ak);
-			wz->location=wz->size;
-			return(ak/size);
-		}
-		else
-		{
-			memcpy((uint8*)ptr,wz->data+wz->location,total);
-			wz->location+=total;
-			return nmemb;
-		}
-	}
-	else
-	{
-		return fread(ptr,size,nmemb,(FILE *)fp->fp);
-	}
+	fp->stream->read((char*)ptr,size*nmemb);
+	uint32 read = fp->stream->gcount();
+	return read/size;
 }
 
 uint64 FCEU_fwrite(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
-	if(fp->type==1)
-	{
-		return gzwrite(fp->fp,ptr,size*nmemb);
-	}
-	else if(fp->type>=2)
-	{
-		return 0;
-	}
-	else
-		return fwrite(ptr,size,nmemb,(FILE *)fp->fp);
+	fp->stream->write((char*)ptr,size*nmemb);
+	//todo - how do we tell how many bytes we wrote?
+	return nmemb;
 }
 
 int FCEU_fseek(FCEUFILE *fp, long offset, int whence)
 {
-	if(fp->type==1)
-	{
-		return( (gzseek(fp->fp,offset,whence)>0)?0:-1);
-	}
-	else if(fp->type>=2)
-	{
-		MEMWRAP *wz;
-		wz=(MEMWRAP*)fp->fp;
+	//if(fp->type==1)
+	//{
+	//	return( (gzseek(fp->fp,offset,whence)>0)?0:-1);
+	//}
+	//else if(fp->type>=2)
+	//{
+	//	MEMWRAP *wz;
+	//	wz=(MEMWRAP*)fp->fp;
 
-		switch(whence)
-		{
-		case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
-						  return(-1);
-			wz->location=offset;break;
-		case SEEK_CUR:if(offset+wz->location>wz->size)
-						  return (-1);
-			wz->location+=offset;
-			break;
-		}
-		return 0;
-	}
-	else
-		return fseek((FILE *)fp->fp,offset,whence);
+	//	switch(whence)
+	//	{
+	//	case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
+	//					  return(-1);
+	//		wz->location=offset;break;
+	//	case SEEK_CUR:if(offset+wz->location>wz->size)
+	//					  return (-1);
+	//		wz->location+=offset;
+	//		break;
+	//	}
+	//	return 0;
+	//}
+	//else
+	//	return fseek((FILE *)fp->fp,offset,whence);
+
+	fp->stream->seekg(offset,(std::ios_base::seekdir)whence);
+	fp->stream->seekp(offset,(std::ios_base::seekdir)whence);
+
+	return FCEU_ftell(fp);
 }
 
 uint64 FCEU_ftell(FCEUFILE *fp)
 {
-	if(fp->type==1)
-	{
-		return gztell(fp->fp);
-	}
-	else if(fp->type>=2)
-	{
-		return (((MEMWRAP *)(fp->fp))->location);
-	}
+	if(fp->mode == FCEUFILE::READ)
+		return fp->stream->tellg();
 	else
-		return ftell((FILE *)fp->fp);
-}
-
-void FCEU_autosave(FCEUFILE *fp)
-{
-	if(fp->type==1)
-	{
-		gzrewind(fp->fp);
-	}
-	else if(fp->type>=2)
-	{
-		((MEMWRAP *)(fp->fp))->location=0;
-	}
-	else
-		//Autosave load
-		fseek((FILE*)fp->fp,0,SEEK_SET); //mbg merge 7/17/06 - added cast to FILE*
+		return fp->stream->tellp();
 }
 
 int FCEU_read16le(uint16 *val, FCEUFILE *fp)
 {
-	uint8 t[4]; //mbg merge 7/17/06 - changed size from 2 to 4 to avoid dangerous problem with uint32* poking
-
-	if(fp->type>=1)
-	{
-		if(fp->type>=2)
-		{
-			MEMWRAP *wz;
-			wz=(MEMWRAP *)fp->fp;
-			if(wz->location+2>wz->size)
-				{return 0;}
-			*(uint32 *)t=*(uint32 *)(wz->data+wz->location);
-			wz->location+=2;
-		}
-		else if(fp->type==1)
-			if(gzread(fp->fp,&t,2)!=2) return(0);
-		return(1);
-	}
-	else
-	{
-		if(fread(t,1,2,(FILE *)fp->fp)!=2) return(0);
-	}
-	*val=t[0]|(t[1]<<8);
-	return(1);
+	return read16le(val,fp->stream);
 }
 
 int FCEU_read32le(uint32 *Bufo, FCEUFILE *fp)
 {
-	if(fp->type>=1)
-	{
-		uint8 t[4];
-		#ifndef LSB_FIRST
-		uint8 x[4];
-		#endif
-		if(fp->type>=2)
-		{
-			MEMWRAP *wz;
-			wz=(MEMWRAP *)fp->fp;
-			if(wz->location+4>wz->size)
-				{return 0;}
-			*(uint32 *)t=*(uint32 *)(wz->data+wz->location);
-			wz->location+=4;
-		}
-		else if(fp->type==1)
-			gzread(fp->fp,&t,4);
-		#ifndef LSB_FIRST
-		x[0]=t[3];
-		x[1]=t[2];
-		x[2]=t[1];
-		x[3]=t[0];
-		*(uint32*)Bufo=*(uint32*)x;
-		#else
-		*(uint32*)Bufo=*(uint32*)t;
-		#endif
-		return 1;
-	}
-	else
-	{
-		return read32le(Bufo,(FILE *)fp->fp);
-	}
+	return read32le(Bufo, fp->stream);
 }
 
 int FCEU_fgetc(FCEUFILE *fp)
 {
-	if(fp->type==1)
-		return gzgetc(fp->fp);
-	else if(fp->type>=2)
-	{
-		MEMWRAP *wz;
-		wz=(MEMWRAP *)fp->fp;
-		if(wz->location<wz->size)
-			return wz->data[wz->location++];
-		return EOF;
-	}
-	else
-		return fgetc((FILE *)fp->fp);
+	return fp->stream->get();
 }
 
 uint64 FCEU_fgetsize(FCEUFILE *fp)
 {
-	if(fp->type==1)
-	{
-		int x,t;
-		t=gztell(fp->fp);
-		gzrewind(fp->fp);
-		for(x=0; gzgetc(fp->fp) != EOF; x++);
-		gzseek(fp->fp,t,SEEK_SET);
-		return(x);
-	}
-	else if(fp->type>=2)
-		return ((MEMWRAP*)(fp->fp))->size;
-	else
-	{
-		long t,r;
-		t=ftell((FILE *)fp->fp);
-		fseek((FILE *)fp->fp,0,SEEK_END);
-		r=ftell((FILE *)fp->fp);
-		fseek((FILE *)fp->fp,t,SEEK_SET);
-		return r;
-	}
+	return fp->size;
 }
 
 int FCEU_fisarchive(FCEUFILE *fp)
 {
-	if(fp->type==2)
-		return 1;
-	return 0;
+	if(fp->archiveIndex==0) return 0;
+	else return 1;
 }
 
 std::string GetMfn() //Retrieves the movie filename from curMovieFilename (for adding to savestate and auto-save files)
@@ -619,7 +406,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 		odirs[which] = n;
 	}
 
-	if(GameInfo)  /* Rebuild cache of present states/movies. */
+	if(GameInfo)  //Rebuild cache of present states/movies. 
 	{
 		if(which==FCEUIOD_STATES)
 		{
