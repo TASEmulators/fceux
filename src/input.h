@@ -278,5 +278,9 @@ struct EMUCMDTABLE
 
 extern struct EMUCMDTABLE FCEUI_CommandTable[];
 
+extern unsigned int lagCounter;
+extern bool lagCounterDisplay;
+extern bool lagFlag;
+
 #endif //_INPUT_H_
 

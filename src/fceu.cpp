@@ -513,9 +513,6 @@ void UpdateAutosave(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
-	extern unsigned int LagCounter;
-	extern bool lagCounterDisplay;
-	extern bool lagFlag;
 	//lagFlag = true;
 	int r,ssize;
 
@@ -587,7 +584,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 
 	currMovieData.TryDumpIncremental();
-		if (lagFlag) LagCounter++;
+		if (lagFlag) lagCounter++;
 				
 }
 

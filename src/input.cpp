@@ -75,9 +75,12 @@ extern INPUTCFC *FCEU_InitTopRider(void);
 extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //---------------
 
-unsigned int LagCounter;
+//global lag variables
+unsigned int lagCounter;
 bool lagCounterDisplay;
 bool lagFlag;
+//-------------
+
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
@@ -108,12 +111,6 @@ static DECLFR(JPRead)
 
 	ret|=joyports[A&1].driver->Read(A&1);
 
-	/* this code effectively does nothing as zzz is never used
-	if(!(A&1) && ret)
-	{
-		int zzz=9;
-	}
-	*/ 
 	if(portFC.driver)
 		ret = portFC.driver->Read(A&1,ret);
 
@@ -913,12 +910,12 @@ static void ObjectDisplayToggle(void)
 
 static void LagCounterReset(void)
 {
-	LagCounter = 0;
+	lagCounter = 0;
 }
 
 static void LagCounterToggle(void)
 {
-lagCounterDisplay ^= 1;
+	lagCounterDisplay ^= 1;
 }
 
 static void LaunchMemoryWatch(void)

@@ -906,10 +906,6 @@ void FCEU_DrawMovies(uint8 *XBuf)
 
 void FCEU_DrawLagCounter(uint8 *XBuf)
 {
-	unsigned int lastLagCounter;
-	extern bool lagCounterDisplay;
-	extern unsigned int LagCounter;
-	extern bool lagFlag;
 	uint8 color;
 	
 	if (lagFlag) color = 0x16+0x80; //If currently lagging display red
@@ -918,7 +914,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 	if(lagCounterDisplay)
 	{
 		char counterbuf[32] = {0};	
-		sprintf(counterbuf,"%d",LagCounter);
+		sprintf(counterbuf,"%d",lagCounter);
 		
 		if(counterbuf[0])
 			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(32), 256, (uint8*)counterbuf, color); //0x20+0x80
