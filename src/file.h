@@ -9,13 +9,25 @@ struct FCEUFILE {
 	//void *fp;       // FILE* or ptr to ZIPWRAP
 	//uint32 type;    // 0=normal file, 1=gzip, 2=zip
 	std::iostream *stream;
+
+	//the name of the file, or the logical name of the file within the archive
 	std::string filename;
+	
+	//the filename of the archive (maybe "" if it is not in an archive)
 	std::string archiveFilename;
+
+	//the number of files that were in the archive
+	int archiveCount;
+
+	//the index of the file within the archive
 	int archiveIndex;
+
+	//the size of the file
 	int size;
 
 	FCEUFILE()
 		: stream(0)
+		, archiveCount(-1)
 	{}
 	
 	~FCEUFILE()

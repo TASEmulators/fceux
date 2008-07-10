@@ -131,6 +131,7 @@ struct FCEUGI
 
 	char* filename;
 	char* archiveFilename;
+	int archiveCount;
 };
 
 #endif

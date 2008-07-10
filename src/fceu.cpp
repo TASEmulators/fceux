@@ -358,6 +358,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	GameInfo->filename = strdup(fp->filename.c_str());
 	if(fp->archiveFilename != "") GameInfo->archiveFilename = strdup(fp->archiveFilename.c_str());
+	GameInfo->archiveCount = fp->archiveCount;
 
 	GameInfo->soundchan = 0;
 	GameInfo->soundrate = 0;

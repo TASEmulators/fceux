@@ -340,13 +340,15 @@ struct FormatRecord
 
 typedef std::vector<FormatRecord> TFormatRecords;
 TFormatRecords formatRecords;
+static bool archiveSystemInitialized=false;
+static LibRef libref("7z.dll");
 
 void initArchiveSystem()
 {
-	LibRef libref("7z.dll");
 	if(!libref.hmod)
 	{
 		//couldnt initialize archive system
+		return;
 	}
 
 	typedef HRESULT (WINAPI *GetNumberOfFormatsFunc)(UINT32 *numFormats);
@@ -355,6 +357,14 @@ void initArchiveSystem()
 	GetNumberOfFormatsFunc GetNumberOfFormats = (GetNumberOfFormatsFunc)GetProcAddress(libref.hmod,"GetNumberOfFormats");
 	GetHandlerProperty2Func GetHandlerProperty2 = (GetHandlerProperty2Func)GetProcAddress(libref.hmod,"GetHandlerProperty2");
 
+	if(!GetNumberOfFormats || !GetHandlerProperty2)
+	{
+		//not the right dll.
+		return;
+	}
+
+	//looks like it is gonna be OK
+	archiveSystemInitialized = true;
 
 	UINT32 numFormats;
 	GetNumberOfFormats(&numFormats);
@@ -384,9 +394,10 @@ void initArchiveSystem()
 
 ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 {
-	LibRef libref("7z.dll");
-	if(!libref.hmod)
+	if(!archiveSystemInitialized)
+	{
 		return ArchiveScanRecord();
+	}
 
 	//check the file against the signatures
 	std::fstream* inf = FCEUD_UTF8_fstream(fname,"rb");
@@ -442,8 +453,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 {
 	FCEUFILE* fp = 0;
 	
-	LibRef libref("7z.dll");
-	if(!libref.hmod) {
+	if(!archiveSystemInitialized) {
 		MessageBox(hAppWnd,"Could not locate 7z.dll","Failure launching archive browser",0);
 		return 0;
 	}
@@ -457,6 +467,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 	}
 
 
+	bool unnamedFileFound = false;
 	IInArchive* object;
 	if (!FAILED(CreateObject( &formatRecords[asr.type].guid, &IID_IInArchive, (void**)&object )))
 	{
@@ -478,28 +489,40 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 					prop.vt = VT_EMPTY;
 
 					if (FAILED(object->GetProperty( i, kpidSize, &prop )) || prop.vt != VT_UI8 || !prop.uhVal.LowPart || prop.uhVal.HighPart)
-						continue;
+					{
+						goto bomb;
+					}
 
 					item.size = prop.uhVal.LowPart;
 
 					if (FAILED(object->GetProperty( i, kpidPath, &prop )) || prop.vt != VT_BSTR || prop.bstrVal == NULL)
-						continue;
-
-
-					std::wstring tempfname = prop.bstrVal;
-					int buflen = tempfname.size()*2;
-					char* buf = new char[buflen];
-					int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
-					if(ret == 0) {
-						delete[] buf;
-						continue;
+					{
+						//mbg 7/10/08 - this was attempting to handle gz files, but it fails later in the extraction
+						if(!unnamedFileFound)
+						{
+							unnamedFileFound = true;
+							item.name = "<unnamed>";
+						}
+						else goto bomb;
 					}
-					buf[ret] = 0;
-					item.name = buf;
-					delete[] buf;
-
+					else
+					{
+						std::wstring tempfname = prop.bstrVal;
+						int buflen = tempfname.size()*2;
+						char* buf = new char[buflen];
+						int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
+						if(ret == 0) {
+							delete[] buf;
+							::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
+							continue;
+						}
+						buf[ret] = 0;
+						item.name = buf;
+						
+						delete[] buf;
+					}
+					
 					::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
-
 					fileSelectorContext.items.push_back(item);
 				}
 
@@ -514,8 +537,11 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 							break;
 						}
 				}
+				else if(numFiles==1)
+					//or automatically choose the first file if there was only one file in the archive
+					ret = 0;
 				else
-					//or use the UI if we're not
+					//otherwise use the UI
 					ret = DialogBoxParam(fceu_hInstance, "ARCHIVECHOOSERDIALOG", hAppWnd, ArchiveFileSelectorCallback, (LPARAM)0);
 
 				if(ret != LB_ERR)
@@ -524,7 +550,8 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 					memorystream* ms = new memorystream(item.size);
 					OutStream outStream( item.index, ms->buf(), item.size);
 					const uint32 indices[1] = {item.index};
-					if (SUCCEEDED(object->Extract(indices,1,0,&outStream)))
+					HRESULT hr = object->Extract(indices,1,0,&outStream);
+					if (SUCCEEDED(hr))
 					{
 						//if we extracted the file correctly
 						fp = new FCEUFILE();
@@ -534,6 +561,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 						fp->mode = FCEUFILE::READ;
 						fp->size = fileSelectorContext.items[ret].size;
 						fp->stream = ms;
+						fp->archiveCount = (int)numFiles;
 					} 
 					else
 					{
@@ -544,6 +572,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 				
 			} //if we scanned the 7z correctly
 		} //if we opened the 7z correctly
+		bomb:
 		object->Release();
 	}
 

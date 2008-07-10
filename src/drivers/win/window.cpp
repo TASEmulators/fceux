@@ -569,7 +569,7 @@ void ALoad(char *nameo, char* innerFilename)
 		SetMainWindowStuff();
 
 		std::string recentFileName = nameo;
-		if(GameInfo->archiveFilename)
+		if(GameInfo->archiveFilename && GameInfo->archiveCount>1)
 			recentFileName = (std::string)GameInfo->archiveFilename + "|" + GameInfo->filename;
 		else
 			recentFileName = nameo;
