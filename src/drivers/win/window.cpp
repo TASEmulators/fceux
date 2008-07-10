@@ -566,7 +566,7 @@ void ALoad(char *nameo, char* innerFilename)
 
 		UpdateCheckedMenuItems();
 
-		SetMainWindowStuff();
+		PushCurrentVideoSettings();
 
 		std::string recentFileName = nameo;
 		if(GameInfo->archiveFilename && GameInfo->archiveCount>1)
@@ -987,8 +987,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_SetVidSystem(pal_emulation);
 				RefreshThrottleFPS();
 				UpdateCheckedMenuItems();
-				//	DoVideoConfigFix();
-				SetMainWindowStuff();
+				PushCurrentVideoSettings();
 				break;
 			
 			case MENU_DISPLAY_BG:

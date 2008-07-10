@@ -520,7 +520,11 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		ddrval=IDirectDrawSurface7_Blt(lpDDSPrimary, &drect,lpDDSBack,&srect,DDBLT_WAIT,0);
 		if(ddrval!=DD_OK)
 		{
-			if(ddrval==DDERR_SURFACELOST) {RestoreDD(1);RestoreDD(0);}
+			if(ddrval==DDERR_SURFACELOST)
+			{
+				RestoreDD(1);
+				RestoreDD(0);
+			}
 			return;
 		}
 	}
@@ -1113,12 +1117,8 @@ void DoVideoConfigFix(void)
 	UpdateRendBounds();
 }
 
-//Shows the Video configuration dialog.
-void ConfigVideo(void)
+void PushCurrentVideoSettings()
 {
-	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 
-	DoVideoConfigFix();
-
 	if(fullscreen)
 	{
 		SetFSVideoMode();
@@ -1129,6 +1129,17 @@ void ConfigVideo(void)
 		SetVideoMode(0);
 		changerecursive = 0;
 	}
+
 	SetMainWindowStuff();
+}
+
+
+//Shows the Video configuration dialog.
+void ConfigVideo(void)
+{
+	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 
+	DoVideoConfigFix();
+
+	PushCurrentVideoSettings();
 }
 
