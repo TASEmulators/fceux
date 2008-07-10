@@ -906,15 +906,22 @@ void FCEU_DrawMovies(uint8 *XBuf)
 
 void FCEU_DrawLagCounter(uint8 *XBuf)
 {
+	unsigned int lastLagCounter;
 	extern bool lagCounterDisplay;
 	extern unsigned int LagCounter;
+	extern bool lagFlag;
+	uint8 color;
+	
+	if (lagFlag) color = 0x16+0x80; //If currently lagging display red
+	else color = 0x19+0x80;         //else display green
+
 	if(lagCounterDisplay)
 	{
 		char counterbuf[32] = {0};	
 		sprintf(counterbuf,"%d",LagCounter);
 		
 		if(counterbuf[0])
-			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(32), 256, (uint8*)counterbuf, 0x20+0x80);
+			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(32), 256, (uint8*)counterbuf, color); //0x20+0x80
 	}
 }
 
