@@ -219,6 +219,7 @@ void FCEU_PutImage(void)
 
 		FCEU_DrawSaveStates(XBuf);
 		FCEU_DrawMovies(XBuf);
+		FCEU_DrawLagCounter(XBuf);
 		FCEU_DrawNTSCControlBars(XBuf);
 		FCEU_DrawRecordingStatus(XBuf);
 	}

@@ -46,6 +46,7 @@ typedef struct
 void FCEUMOV_AddInputState();
 void FCEUMOV_AddCommand(int cmd);
 void FCEU_DrawMovies(uint8 *);
+void FCEU_DrawLagCounter(uint8 *);
 
 enum EMOVIEMODE
 {

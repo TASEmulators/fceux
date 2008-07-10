@@ -587,7 +587,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	currMovieData.TryDumpIncremental();
 		if (lagFlag) LagCounter++;
-		if (lagCounterDisplay)FCEU_DispMessage("%d",LagCounter) ;
 }
 
 void FCEUI_CloseGame(void)

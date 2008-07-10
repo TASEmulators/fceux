@@ -904,6 +904,20 @@ void FCEU_DrawMovies(uint8 *XBuf)
 	}
 }
 
+void FCEU_DrawLagCounter(uint8 *XBuf)
+{
+	extern bool lagCounterDisplay;
+	extern unsigned int LagCounter;
+	if(lagCounterDisplay)
+	{
+		char counterbuf[32] = {0};	
+		sprintf(counterbuf,"%d",LagCounter);
+		
+		if(counterbuf[0])
+			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(32), 256, (uint8*)counterbuf, 0x20+0x80);
+	}
+}
+
 int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
