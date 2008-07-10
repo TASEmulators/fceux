@@ -516,7 +516,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	extern unsigned int LagCounter;
 	extern bool lagCounterDisplay;
 	extern bool lagFlag;
-	lagFlag = true;
+	//lagFlag = true;
 	int r,ssize;
 
 	JustFrameAdvanced = false;
@@ -553,6 +553,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 
 	FCEU_UpdateInput();
+	lagFlag = true;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
 	r=FCEUPPU_Loop(skip);
 
