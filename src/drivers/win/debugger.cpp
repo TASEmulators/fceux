@@ -1109,14 +1109,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								break;
 							case IDC_DEBUGGER_STEP_IN:
-								//mbg merge 7/19/06 also put the whole block inside the if (previously only updateregs was... was it a bug?)
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									FCEUI_Debugger().step = true;
-									FCEUI_SetEmulationPaused(0);
-									UpdateDebugger();
 								}
+								FCEUI_Debugger().step = true;
+								FCEUI_SetEmulationPaused(0);
+								UpdateDebugger();
 								break;
 							case IDC_DEBUGGER_STEP_OUT:
 								//mbg merge 7/18/06 changed pausing check and set
@@ -1213,21 +1212,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						break;
 				}
 				break;
-
-					/*
-				if(skipdebug)break;
-				if(
-				(uMsg == 32) ||
-				(uMsg == 127))break;
-				fp = fopen("debug.txt","a");
-				u++;
-				sprintf(str,"%d = %06d",u,uMsg);
-				skipdebug=1;
-				SetWindowText(hDebug,str);
-				skipdebug=0;
-				fprintf(fp,"%s\n",str);
-				fclose(fp);
-				break;*/
 		}
 	}
 
