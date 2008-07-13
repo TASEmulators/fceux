@@ -628,10 +628,8 @@ void hand(X6502 *X, int type, unsigned int A)
 }
 
 int suppressAddPowerCommand=0; // hack... yeah, I know...
-void MapperInit();
 void PowerNES(void) 
 {
-	MapperInit();
 
 	if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
