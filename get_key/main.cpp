@@ -1,17 +1,29 @@
+// main.cpp
+// get_fceu_key
+//   this program opens an SDL window and gets an input event from the user.
+//   it than prints the values that are needed in the fceux config
+//   this was written to be used with gfceux, the GTK frontend for gfceu
+
+// Lukas Sabota
+// Licensed under the GPL v2
+// July 16, 2008
+
 #include<iostream>
 #include<SDL.h>
 
-const int WIDTH = 640;	
-const int HEIGHT = 480;
+const int WIDTH = 300;	
+const int HEIGHT = 300;
 const int BPP = 4;
 const int DEPTH = 32;
-
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-	SDL_WM_SetCaption("Press any key. . .", NULL);
+    // the caption doesn't set on intrepid
+    // TODO: test on ubuntu 8.04
+	SDL_WM_SetCaption("Press any key. . .", 0);
+	
 	SDL_Surface *screen;
 	SDL_Event event;
 	
@@ -33,6 +45,8 @@ int main(int argc, char* argv[])
               {
                     case SDL_QUIT:
                         return 0;
+                    // this code was modified from drivers/sdl/input.cpp in fceu so 
+                    //   that the same values will be written in the config as fceux --inputcfg
 	                case SDL_KEYDOWN:
                         cout << "BUTTC_KEYBOARD" << endl;
                         cout << 0 << endl;
@@ -52,37 +66,9 @@ int main(int argc, char* argv[])
                             return 1;
                         }
                         break;
-/*                    case SDL_JOYAXISMOTION: 
-                        if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
-                            if(abs(event.jaxis.value) < 1000) {
-                                LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
-                            }
-                        } else {
-                            if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
-                                bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                                bc->DeviceNum[wb] = event.jaxis.which;
-                                bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
-                                                     ((event.jaxis.value < 0)
-                                                      ? 0x4000 : 0));
-                                return(1);
-                            }
-                        }
-                        break;
-                                case SDL_KEYDOWN:
-                        keypress = 1;
-                        cout << (int)event.key.keysym.sym;
-                        break;
-                    case SDL_JOYAXISMOTION:
-                        if ( (event.jaxis.value < -3200 ) | | (event.jaxis.value > 3200) )
-                        {
-                            if (event.jaxis == 0)
-                            {
-*/                                    
-                  
-                      
-             }
-        }
-    }   
+                }
+            }
+        }   
     return 0;
 }
 
