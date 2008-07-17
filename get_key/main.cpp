@@ -22,53 +22,54 @@ int main(int argc, char* argv[])
 {
     // the caption doesn't set on intrepid
     // TODO: test on ubuntu 8.04
-	SDL_WM_SetCaption("Press any key. . .", 0);
+    SDL_WM_SetCaption("Press any key. . .", 0);
 	
-	SDL_Surface *screen;
-	SDL_Event event;
+	  SDL_Surface *screen;
+  	SDL_Event event;
 	
-	// open any joysticks
-	for(int i = 0; i < SDL_NumJoysticks(); i++)
-		SDL_JoystickOpen(i);
+  	// open any joysticks
+  	for(int i = 0; i < SDL_NumJoysticks(); i++)
+  		SDL_JoystickOpen(i);
 
-	if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_SWSURFACE)))
+    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_SWSURFACE)))
     {
         SDL_Quit();
         return 1;
     }
 
-	 while(1) 
-     {
-         while(SDL_PollEvent(&event)) 
-         {      
-              switch (event.type) 
-              {
-                    case SDL_QUIT:
-                        return 0;
+    while(1) 
+    {
+        while(SDL_PollEvent(&event)) 
+        {      
+            switch (event.type) 
+            {
+                case SDL_QUIT:
+                    return 0;
                     // this code was modified from drivers/sdl/input.cpp in fceu so 
                     //   that the same values will be written in the config as fceux --inputcfg
-	                case SDL_KEYDOWN:
-                        cout << "BUTTC_KEYBOARD" << endl;
-                        cout << 0 << endl;
-                        cout << event.key.keysym.sym << endl;
-                        return 1;
-                    case SDL_JOYBUTTONDOWN:
+	              case SDL_KEYDOWN:
+                    cout << "BUTTC_KEYBOARD" << endl;
+                    cout << 0 << endl;
+                    cout << event.key.keysym.sym << endl;
+                    return 1;
+                case SDL_JOYBUTTONDOWN:
+                    cout << "BUTTC_JOYSTICK" << endl;
+                    cout << event.jbutton.which << endl;
+                    cout << event.jbutton.button << endl; 
+                    return 1;
+                case SDL_JOYHATMOTION:
+                    if(event.jhat.value != SDL_HAT_CENTERED)
+                    {
                         cout << "BUTTC_JOYSTICK" << endl;
-                        cout << event.jbutton.which << endl;
-                        cout << event.jbutton.button << endl; 
+                        cout << event.jhat.which << endl;
+                        cout <<  (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
+                                             event.jhat.value) << endl;
                         return 1;
-                    case SDL_JOYHATMOTION:
-                        if(event.jhat.value != SDL_HAT_CENTERED) {
-                            cout << "BUTTC_JOYSTICK" << endl;
-                            cout << event.jhat.which << endl;
-                            cout <<  (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
-                                                 event.jhat.value) << endl;
-                            return 1;
-                        }
+                    }
                         break;
-                }
             }
-        }   
+        }
+    }   
     return 0;
 }
 
