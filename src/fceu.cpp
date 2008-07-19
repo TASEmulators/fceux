@@ -52,6 +52,7 @@
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
+#include "drivers/win/cheat.h"
 
 #else
 #include "drivers/sdl/sdl.h"
@@ -557,9 +558,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	ssize=FlushEmulateSound();
 
-	//#ifdef WIN32
+	#ifdef WIN32
+	UpdateCheatList();
 	//   FCEUI_AviVideoUpdate(XBuf);
-	//#endif
+	#endif
 
 	timestampbase += timestamp;
 	timestamp = 0;

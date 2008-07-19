@@ -427,7 +427,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				case LBN_DBLCLK:
 					switch (LOWORD(wParam)) { //disable/enable cheat
 						case IDC_CHEAT_LIST_POSSIBILITIES:
-							lbfocus=1;
+							extern int EmulationPaused;
+							if (EmulationPaused == 1)	//We only want to send info to memwatch if paused
+							{							//otherwise we will be sending info while it is updating causing unpredictable behavior
+								lbfocus=1;				   
 							SendDlgItemMessage(hwndDlg,
 							                   IDC_CHEAT_LIST_POSSIBILITIES,
 							                   LB_GETTEXT,
@@ -438,6 +441,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							strcpy(str2,str+1);
 							str2[4] = 0;
 							AddMemWatch(str2);
+							}
 							break;
 						case IDC_LIST_CHEATS:
 //							FCEUI_GetCheat(selcheat,&name,&a,&v,&s); //bbit edited: replaced this with the line below

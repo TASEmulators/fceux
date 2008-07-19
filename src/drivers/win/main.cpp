@@ -765,7 +765,7 @@ void _updateWindow()
 	UpdateLogWindow();
 	UpdateMemWatch();
 	NTViewDoBlit(0);
-	UpdateCheatList();
+	//UpdateCheatList(); Moved to FCEUI_Emulate
 	UpdateTasEdit();
 }
 
