@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -748,6 +748,32 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\basicbot.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\basicbot2.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\basicbot2.h"
 					>
 				</File>
 				<File

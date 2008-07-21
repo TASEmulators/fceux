@@ -58,6 +58,7 @@
 
 #include "main.h"
 #include "basicbot.h"
+#include "basicbot2.h" // qfox: new bot
 #include "args.h"
 #include "config.h"
 #include "sound.h"

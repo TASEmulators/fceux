@@ -44,6 +44,7 @@
 #ifdef WIN32
 #include "drivers/win/main.h"
 #include "drivers/win/basicbot.h"
+#include "drivers/win/basicbot2.h" // qfox: new bot
 #include "drivers/win/memwatch.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/debugger.h"

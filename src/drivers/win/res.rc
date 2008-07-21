@@ -99,6 +99,7 @@ BEGIN
         MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
         MENUITEM "&RAM Filter...",              MENU_RAMFILTER
         MENUITEM "&Basic Bot...",               MENU_BASIC_BOT
+        MENUITEM "New Basic Bot...",            MENU_BASIC_BOT2
         MENUITEM "TAS Edit",                    MENU_TASEDIT
         MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
@@ -1478,6 +1479,55 @@ BEGIN
     LTEXT           "(Hex)",IDC_STATIC,226,34,19,8
 END
 
+BASICBOT2 DIALOGEX 0, 0, 335, 222
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT1,44,5,281,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,44,19,281,12,ES_AUTOHSCROLL
+    LTEXT           "Rom",IDC_STATIC,5,5,39,14,SS_CENTERIMAGE
+    LTEXT           "Comment",IDC_STATIC,5,19,39,13,SS_CENTERIMAGE
+    LTEXT           "A",IDC_STATIC,5,44,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT3,45,44,136,13,ES_AUTOHSCROLL
+    LTEXT           "B",IDC_STATIC,5,57,40,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT4,45,57,136,12,ES_AUTOHSCROLL
+    LTEXT           "Start",IDC_STATIC,5,69,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT5,45,69,136,13,ES_AUTOHSCROLL
+    LTEXT           "Select",IDC_STATIC,5,82,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT6,45,82,136,13,ES_AUTOHSCROLL
+    LTEXT           "Up",IDC_STATIC,5,95,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT7,45,95,136,13,ES_AUTOHSCROLL
+    LTEXT           "Down",IDC_STATIC,5,108,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT8,45,108,136,13,ES_AUTOHSCROLL
+    LTEXT           "Left",IDC_STATIC,5,121,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT9,45,121,136,13,ES_AUTOHSCROLL
+    LTEXT           "Right",IDC_STATIC,5,134,40,13,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT10,45,134,136,13,ES_AUTOHSCROLL
+    CTEXT           "Player 1",IDC_STATIC,45,33,136,11,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    EDITTEXT        IDC_EDIT11,189,44,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT12,189,57,136,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT13,189,69,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT14,189,82,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT15,189,95,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT16,189,108,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT17,189,121,136,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT18,189,134,136,13,ES_AUTOHSCROLL
+    CTEXT           "Player 2",IDC_STATIC,189,32,136,12,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    PUSHBUTTON      "Run",IDC_BUTTON2,275,186,50,14
+    LTEXT           "Score 1",IDC_STATIC,5,158,39,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT20,44,158,50,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT19,94,158,136,14,ES_AUTOHSCROLL
+    LTEXT           "Score 2",IDC_STATIC,5,172,39,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT21,44,172,50,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT22,94,172,136,14,ES_AUTOHSCROLL
+    LTEXT           "Score 3",IDC_STATIC,5,186,39,14,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT23,44,186,50,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT24,94,186,136,14,ES_AUTOHSCROLL
+    CTEXT           "Description",IDC_STATIC,44,147,50,11,SS_CENTERIMAGE
+    CTEXT           "Condition",IDC_STATIC,94,147,135,11,SS_CENTERIMAGE
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1619,6 +1669,36 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 171
     END
+
+    "BASICBOT2", DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 325
+        VERTGUIDE, 44
+        VERTGUIDE, 94
+        VERTGUIDE, 181
+        VERTGUIDE, 189
+        VERTGUIDE, 229
+        VERTGUIDE, 325
+        VERTGUIDE, 331
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 212
+        HORZGUIDE, 19
+        HORZGUIDE, 31
+        HORZGUIDE, 44
+        HORZGUIDE, 57
+        HORZGUIDE, 69
+        HORZGUIDE, 82
+        HORZGUIDE, 95
+        HORZGUIDE, 108
+        HORZGUIDE, 121
+        HORZGUIDE, 134
+        HORZGUIDE, 147
+        HORZGUIDE, 158
+        HORZGUIDE, 172
+        HORZGUIDE, 186
+        HORZGUIDE, 197
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1723,6 +1803,37 @@ END
 
 IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 #endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Dutch (Netherlands) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NLD)
+#ifdef _WIN32
+LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+BASICBOTMENU MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "Clear",                       ID_FILE_CLEAR
+        MENUITEM "Load",                        ID_FILE_LOAD
+        MENUITEM "Save",                        ID_FILE_SAVE40223
+        MENUITEM "Close",                       ID_FILE_CLOSE40218
+    END
+    MENUITEM "Play Best",                   0
+    MENUITEM "Reset",                       0
+END
+
+#endif    // Dutch (Netherlands) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

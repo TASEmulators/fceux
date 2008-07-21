@@ -42,6 +42,7 @@
 #include "tracer.h"
 #include "cdlogger.h"
 #include "basicbot.h"
+#include "basicbot2.h" // qfox: new bot
 #include "throttle.h"
 #include "monitor.h"
 #include "tasedit.h"
@@ -1010,6 +1011,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_BASIC_BOT:
 				CreateBasicBot();
+				break;
+
+			case MENU_BASIC_BOT2:
+				BotCreateBasicBot();
 				break;
 
 			case MENU_DIRECTORIES:
