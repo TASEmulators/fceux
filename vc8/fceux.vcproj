@@ -1482,7 +1482,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)&#x0D;&#x0A;"
+								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 								Outputs="$(OutDir)\fceux.chm"
 							/>
 						</FileConfiguration>
@@ -1491,7 +1491,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm $(OutDir)&#x0D;&#x0A;"
+								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 								Outputs="$(OutDir)\fceux.chm"
 							/>
 						</FileConfiguration>
