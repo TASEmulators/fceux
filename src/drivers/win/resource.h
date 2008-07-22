@@ -488,7 +488,6 @@
 #define BOT_TF_SCORE2_DESC              1181
 #define BOT_TF_SCORE2_VALUE             1182
 #define BOT_TF_SCORE3_DESC              1183
-#define IDC_EDIT24                      1184
 #define BOT_TF_SCORE3_VALUE             1184
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
@@ -645,6 +644,9 @@
 #define ID_FILE_SAVE40223               40223
 #define ID_MODE_SIMPLE                  40224
 #define ID_MODE_ADVANCED                40225
+#define ID_PLAYBEST                     40226
+#define ID_RESET                        40227
+#define BOT_MENU_CLOSE                  40228
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -655,7 +657,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        123
-#define _APS_NEXT_COMMAND_VALUE         40226
+#define _APS_NEXT_COMMAND_VALUE         40229
 #define _APS_NEXT_CONTROL_VALUE         1175
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

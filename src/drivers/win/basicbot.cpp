@@ -2620,8 +2620,10 @@ void CrashWindow()
 		delete Formula[i];
 		delete Bytecode[i];
 	}
-	DestroyWindow(hwndBasicBot);
-	hwndBasicBot=0;
+	if (hwndBasicBot) {
+		DestroyWindow(hwndBasicBot);
+		hwndBasicBot=0;
+	}
 }
 /**
  * Update the text on this button. Called from input, when this state changes.

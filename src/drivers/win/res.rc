@@ -1479,7 +1479,7 @@ BEGIN
     LTEXT           "(Hex)",IDC_STATIC,226,34,19,8
 END
 
-BASICBOT2 DIALOGEX 0, 0, 335, 222
+BASICBOT2 DIALOGEX 0, 0, 335, 316
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Dialog"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -1686,7 +1686,7 @@ BEGIN
         VERTGUIDE, 325
         VERTGUIDE, 331
         TOPMARGIN, 5
-        BOTTOMMARGIN, 212
+        BOTTOMMARGIN, 306
         HORZGUIDE, 19
         HORZGUIDE, 31
         HORZGUIDE, 44
@@ -1828,13 +1828,13 @@ BASICBOTMENU MENU
 BEGIN
     POPUP "File"
     BEGIN
-        MENUITEM "Clear",                       ID_FILE_CLEAR
-        MENUITEM "Load",                        ID_FILE_LOAD
-        MENUITEM "Save",                        ID_FILE_SAVE40223
-        MENUITEM "Close",                       ID_FILE_CLOSE40218
+        MENUITEM "Clear",                       ID_FILE_CLEAR, INACTIVE
+        MENUITEM "Load",                        ID_FILE_LOAD, INACTIVE
+        MENUITEM "Save",                        ID_FILE_SAVE40223, INACTIVE
+        MENUITEM "Close",                       BOT_MENU_CLOSE
     END
-    MENUITEM "Play Best",                   0
-    MENUITEM "Reset",                       0
+    MENUITEM "Play Best",                   ID_PLAYBEST, INACTIVE
+    MENUITEM "Reset",                       ID_RESET, INACTIVE
     POPUP "Mode"
     BEGIN
         MENUITEM "Simple",                      ID_MODE_SIMPLE, CHECKED

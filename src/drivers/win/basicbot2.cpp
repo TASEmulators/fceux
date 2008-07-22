@@ -6,13 +6,15 @@
 
 // Static variables and functions are only used in this file
 static HWND hwndBasicBot = 0; // GUI handle
+// GUI values
 static char * inputStrings[16]; // from gui
 static int inputNumbers[16]; // temp: the values
 static char * romString;
 static char * commentString;
 static char * scoreString[3][2]; // score[n][title/value]
 
-// put all the inputs into an array for easy iterative access (indices are synced with inputStrings)
+// put all the inputs into an array for easy iterative access
+// (indices are synced with the order of BotInput[1] inputs)
 static int inputs[] = {
 	BOT_TF_A_1,
 	BOT_TF_B_1,
@@ -48,10 +50,12 @@ void BotCreateBasicBot() {
 		SetMenu(hwndBasicBot, hmenu);
 		// initialize the random generator
 		srand( (unsigned)time( NULL ) );
+		// set all inputs to 0
+		GetAllInputs();
 	}
 	FCEU_SetBotMode(BOTMODE_NEWBOT);
 }
-static void BotCloseWindow() {
+static void BotCloseBasicBot() {
 	if (hwndBasicBot) {
 		DestroyWindow(hwndBasicBot);
 		hwndBasicBot = 0;
@@ -83,7 +87,7 @@ static BOOL CALLBACK WindowCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		case WM_CLOSE:
 		case WM_QUIT:
 		{
-			BotCloseWindow();
+			BotCloseBasicBot();
 			break;
 		}
 		case WM_COMMAND:
@@ -107,6 +111,11 @@ static BOOL CALLBACK WindowCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 						{
 							break;
 						}
+						case BOT_MENU_CLOSE:
+						{
+							BotCloseBasicBot();
+							break;
+						}
 					}
 					break;
 				}
@@ -123,9 +132,7 @@ static BOOL CALLBACK WindowCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 
 // Called from main emulator loop
 void BasicBotGetInput() {
-	printf("yes?");
 	if (FCEU_BotMode() != BOTMODE_NEWBOT) {
-		printf(" no...\n");
 		return;
 	}
 	BotInput[0] = 1; // number of frames on the buffer (starts at BotInput[1])
@@ -149,7 +156,6 @@ void BasicBotGetInput() {
 			BotInput[1] |= 1 << i;
 		}
 	}
-	printf(" yes! %d\n", BotInput[1]);
 }
 
 
