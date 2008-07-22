@@ -34,7 +34,7 @@
 #include "common.h"
 #include "../../fceu.h" //mbg merge 7/18/06 added
 #include "basicbot.h"
-#include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode()
+#include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode() BOTMODES
 
 // Cleanup: static function declarations moved here
 static void BotSyntaxError(int errorcode);
@@ -1727,6 +1727,7 @@ static void DebugByteCode(int code[])
  **/
 void UpdateBasicBot()
 {
+	if (FCEU_BotMode() != BOTMODE_OLDBOT) return;
 	// If there is any input on the buffer, dont update yet.
 	// [0] means the number of inputs left on the BotInput buffer
 	if(BotInput[0])
@@ -2238,7 +2239,7 @@ static void StartBasicBot()
 {
 	// show message
 	debugS("Running!");
-	FCEU_SetBotMode(1);
+	FCEU_SetBotMode(BOTMODE_OLDBOT);
 	BotRunning = true;
 	EvaluateError = false;
 	FromGUI();
@@ -2262,7 +2263,6 @@ static void StartBasicBot()
  **/
 static void StopBasicBot() 
 {
-    //FCEU_SetBotMode(0);
 	BotRunning = false;
     BotAttempts = 0;
     BotFrames = 0;
@@ -2271,7 +2271,7 @@ static void StopBasicBot()
     BotBestScore[0] = BotBestScore[1] = BotBestScore[2] = BotBestScore[3] = -999999999;
     NewAttempt = true;
 	SetDlgItemText(hwndBasicBot,GUI_BOT_RUN,"Run!");
-	FCEU_SetBotMode(0);
+	FCEU_SetBotMode(BOTMODE_OFF);
 	FCEUI_FrameAdvanceEnd();
 }
 
@@ -2458,7 +2458,7 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				p1 = true;
 			case GUI_BOT_EXTERNAL:
 				// set the botmode
-				FCEU_SetBotMode(p1?0:1);
+				FCEU_SetBotMode(p1?BOTMODE_OFF:BOTMODE_OLDBOT);
 				break;
 			case GUI_BOT_SAVE:
 				FromGUI();
@@ -2592,7 +2592,7 @@ void CreateBasicBot()
  */
 void InitCode()
 {
-	CheckDlgButton(hwndBasicBot, FCEU_BotMode() ? GUI_BOT_EXTERNAL : GUI_BOT_INTERNAL, 1); // select the player1 radiobutton
+	CheckDlgButton(hwndBasicBot, FCEU_BotMode() == BOTMODE_OLDBOT ? GUI_BOT_EXTERNAL : GUI_BOT_INTERNAL, 1); // select the player1 radiobutton
 	//if (LoadBasicBotFile("default.bot"))
 	if (false)
 	{
@@ -2630,7 +2630,7 @@ void UpdateExternalButton()
 {
 	if (hwndBasicBot)
 	{
-		if (FCEU_BotMode())
+		if (FCEU_BotMode() == BOTMODE_OLDBOT)
 		{
 			CheckDlgButton(hwndBasicBot, GUI_BOT_INTERNAL, 0);
 			CheckDlgButton(hwndBasicBot, GUI_BOT_EXTERNAL, 1);

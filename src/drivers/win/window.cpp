@@ -923,7 +923,16 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case MENU_EXTERNAL_INPUT:
-				FCEU_SetBotMode(1^FCEU_BotMode());
+				// qfox: TODO: this should be looked into. treat true external input as special versus the bot input
+				//       right now it is compatible with the old mode, but pressing this menuoption will turn off
+				//       the new bot if on...
+				FCEU_SetBotMode(
+					(
+						(1^(FCEU_BotMode() == BOTMODE_OFF?0:1))==1?
+							BOTMODE_OLDBOT:
+							BOTMODE_OFF
+					)
+				);
 				EnableExternalInput = EnableExternalInput?0:1;
 				UpdateCheckedMenuItems(); break;
 				break;

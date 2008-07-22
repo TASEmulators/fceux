@@ -39,10 +39,10 @@
 #include "fds.h"
 #include "driver.h"
 
-// qfox: For UpdateExternalButton(), called when the
-//       botmode state changes, to update a label in gui.
 #ifdef WIN32
 #include "drivers/win/main.h"
+// qfox: For UpdateExternalButton(), called when the
+//       botmode state changes, to update a label in gui.
 #include "drivers/win/basicbot.h"
 #include "drivers/win/basicbot2.h" // qfox: new bot
 #include "drivers/win/memwatch.h"
@@ -86,7 +86,8 @@ static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
 
-static int BotMode = 0;
+BOTMODES BotMode = BOTMODE_OFF;
+
 #ifdef _USE_SHARED_MEMORY_
 static uint32 BotPointer = 0; //mbg merge 7/18/06 changed to uint32
 #endif
@@ -268,12 +269,12 @@ static void StrobeGP(int w)
 static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 
-int FCEU_BotMode()
+BOTMODES FCEU_BotMode()
 {
 	return BotMode;
 }
 
-void FCEU_SetBotMode(int x)
+void FCEU_SetBotMode(BOTMODES x)
 {
 	BotMode = x;
 #ifdef WIN32
@@ -294,7 +295,7 @@ void FCEU_UpdateBot()
 {
 #ifdef _USE_SHARED_MEMORY_
 	//This is the external input (aka bot) code
-	if(!BotMode)
+	if(BotMode == BOTMODE_OFF)
 		return;
 	if(BotInput[0])
 	{
@@ -333,7 +334,7 @@ void FCEU_UpdateBot()
 void FCEU_UpdateInput(void)
 {
 	//tell all drivers to poll input and set up their logical states
-	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && !BotMode)
+	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && BotMode == BOTMODE_OFF)
 	{
 		for(int port=0;port<2;port++)
 			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);

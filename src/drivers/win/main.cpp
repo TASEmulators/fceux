@@ -455,6 +455,19 @@ static void DriverKill(void)
 #ifdef _USE_SHARED_MEMORY_
 HANDLE mapGameMemBlock;
 HANDLE mapRAM;
+
+// qfox: about BotInput
+// If in botmode, BasicBot will put the input in this variable.
+// FCEU_UpdateBot() in input.cpp will then fill the controller
+// inputs according to this variable. The layout is as follows:
+//   bit  0-7 =  player 1 controller
+//   bits 8-15 = player 2 controller
+//   bit  17 = load savestate 1 if set
+// Order of these buttons bitwise:
+//   A B SELECT START UP DOWN LEFT RIGHT
+// TODO: fix a new variable to tell the function to load a save
+//       state to allow the bot to compute four players (since
+//       there's not enough space to do so now)
 uint32 *BotInput;
 
 void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
@@ -685,19 +698,22 @@ doloopy:
 			int32 ssize=0; ///contains sound samples count
 
 			#ifdef _USE_SHARED_MEMORY_
-			UpdateBasicBot();
+			// press input like BasicBot tells you to
+			UpdateBasicBot(); // qfox: old bot
+			// same as above, for the new bot
+			BasicBotGetInput();  // qfox: new bot (uses same input variables and mechanism as old bot, for now)
+			FCEU_UpdateBot(); // qfox: shouldnt this be inside the sharedmemory ifdef?? (it is now, was below the endif)
 			#endif
-			FCEU_UpdateBot();
 
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
-			 //mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
-			 if(closeGame)
-			 {
+			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
+			if(closeGame)
+			{
 				FCEUI_CloseGame();
 				GameInfo = 0;
-			 }
+			}
 
 		}
 		//xbsave = NULL;
@@ -734,7 +750,7 @@ doloopy:
 
 				//if in bot mode, don't idle.  eat the CPU up :)
 				//mbg - why should we do this? does bot mode set the paused flag? that doesnt seem right...
-				if(!FCEU_BotMode())
+				if(FCEU_BotMode() == BOTMODE_OFF)
 				{
 					int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
 					if(notAlternateThrottle)
@@ -781,7 +797,7 @@ void _updateWindow()
 //	Count = (Count<<8)/temp_fps_scale;
 //
 //	//Disable sound and throttling for BotMode--we want max speed!
-//	if(FCEU_BotMode())
+//	if(FCEU_BotMode() != BOTMODE_OFF)
 //	{
 //		if(XBuf && (skipcount >= 64))
 //		{
@@ -990,7 +1006,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	//mbg merge 7/19/06 - leaving this untouched but untested
 	//its probably not optimal
-	if(FCEU_BotMode()) {
+	if(FCEU_BotMode() != BOTMODE_OFF) {
 		//this counts the number of frames we've skipped blitting
 		// qfox 09/17/06: for bot evaluation purposes, the number
 		//                of frames to be skipped is set from the

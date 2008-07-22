@@ -89,10 +89,15 @@ extern struct FCPORT
 } portFC;
 
 
+enum BOTMODES {
+	BOTMODE_OFF = 0,
+	BOTMODE_OLDBOT = 1,
+	BOTMODE_NEWBOT = 2
+};
+BOTMODES FCEU_BotMode(void);
+void FCEU_SetBotMode(BOTMODES x);
 void FCEU_DrawInput(uint8 *buf);
 void FCEU_UpdateInput(void);
-int FCEU_BotMode(void);
-void FCEU_SetBotMode(int x);
 void InitializeInput(void);
 void FCEU_UpdateBot(void);
 extern void (*PStrobe[2])(void);

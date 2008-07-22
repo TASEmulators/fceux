@@ -461,30 +461,35 @@
 #define IDC_BUTTON8                     1146
 #define IDC_EDIT1                       1147
 #define IDC_BUTTON9                     1148
-#define IDC_EDIT2                       1148
+#define BOT_TF_COMMENT                  1148
 #define IDC_LIST2                       1149
-#define IDC_EDIT3                       1149
-#define IDC_EDIT4                       1150
-#define IDC_EDIT5                       1152
-#define IDC_EDIT6                       1153
-#define IDC_EDIT7                       1154
-#define IDC_EDIT8                       1156
-#define IDC_EDIT9                       1157
-#define IDC_EDIT10                      1158
-#define IDC_EDIT11                      1160
-#define IDC_EDIT12                      1161
-#define IDC_EDIT13                      1162
-#define IDC_EDIT14                      1163
-#define IDC_EDIT15                      1164
-#define IDC_EDIT16                      1165
-#define IDC_EDIT17                      1166
-#define IDC_EDIT18                      1167
-#define IDC_EDIT20                      1169
-#define IDC_EDIT19                      1176
-#define IDC_EDIT21                      1181
-#define IDC_EDIT22                      1182
-#define IDC_EDIT23                      1183
+#define BOT_TF_A_1                      1149
+#define BOT_TF_B_1                      1150
+#define BOT_TF_SELECT_1                 1152
+#define BOT_TF_START_1                  1153
+#define BOT_TF_UP_1                     1154
+#define BOT_TF_DOWN_1                   1156
+#define BOT_TF_LEFT_1                   1157
+#define BOT_TF_RIGHT_1                  1158
+#define BOT_TF_A_2                      1160
+#define BOT_TF_B_2                      1161
+#define BOT_TF_SELECT_2                 1162
+#define BOT_TF_START_2                  1163
+#define BOT_TF_UP_2                     1164
+#define BOT_TF_DOWN_2                   1165
+#define BOT_TF_LEFT_2                   1166
+#define BOT_TF_RIGHT_2                  1167
+#define BOT_TF_SCORE1_DESC              1169
+#define BOT_BUTTON_UPDATE               1171
+#define BOT_BUTTON_RUN                  1172
+#define BOT_BUTTON_TEST                 1173
+#define BOT_TF_ROM                      1174
+#define BOT_TF_SCORE1_VALUE             1176
+#define BOT_TF_SCORE2_DESC              1181
+#define BOT_TF_SCORE2_VALUE             1182
+#define BOT_TF_SCORE3_DESC              1183
 #define IDC_EDIT24                      1184
+#define BOT_TF_SCORE3_VALUE             1184
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -638,6 +643,8 @@
 #define ID_FILE_CLEAR                   40221
 #define ID_FILE_LOAD                    40222
 #define ID_FILE_SAVE40223               40223
+#define ID_MODE_SIMPLE                  40224
+#define ID_MODE_ADVANCED                40225
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -648,8 +655,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        123
-#define _APS_NEXT_COMMAND_VALUE         40224
-#define _APS_NEXT_CONTROL_VALUE         1156
+#define _APS_NEXT_COMMAND_VALUE         40226
+#define _APS_NEXT_CONTROL_VALUE         1175
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
