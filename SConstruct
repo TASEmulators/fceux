@@ -53,14 +53,14 @@ else:
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
     conf.env.Append(CCFLAGS = " -DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
-  env = conf.Finish()
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
+  env = conf.Finish()
 
 # Build for this system's endianness, if not overriden
-if env.has_key('LSB_FIRST'):
-  if env['LSB_FIRST']:
-    env.Append(CPPDEFINES = ['LSB_FIRST'])
+#if env.has_key('LSB_FIRST'):
+#  if env['LSB_FIRST']:
+#    env.Append(CPPDEFINES = ['LSB_FIRST'])
 elif sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
   env.Append(CPPDEFINES = ['LSB_FIRST'])
 
@@ -74,7 +74,7 @@ print "base CCFLAGS:",env['CCFLAGS']
 #release_env = env.Clone(CCFLAGS = ['-O3', '-fomit-frame-pointer'], CPPDEFINES=["NDEBUG"])
 #debug_env = env.Clone(CCFLAGS = ['-O', '-g'], CPPDEFINES=["_DEBUG"])
 # THAT FAILED! Compromise:
-env.Append(CCFLAGS = ['-O3', '-g'], CPPDEFINES = ["_DEBUG"])
+#env.Append(CCFLAGS = ['-O3', '-g'], CPPDEFINES = ["_DEBUG"])
 
 #SConscript('src/SConscript', build_dir='release', exports={'env':release_env})
 #SConscript('src/SConscript', build_dir='release', exports={'env':debug_env})
