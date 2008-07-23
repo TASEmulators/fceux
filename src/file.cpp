@@ -213,10 +213,6 @@ doret:
 	return tmp;
 }
 
-#ifndef __GNUC__
-#define strcasecmp strcmp
-#endif
-
 void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::string& file, std::string& fileToOpen)
 {
 	size_t pipe = src.find_first_of('|');

@@ -29,6 +29,7 @@
 #include "fceu.h"
 #include "driver.h"
 #include "boards/mapinc.h"
+#include "fceulua.h"
 
 #include "palette.h"
 #include "palettes/palettes.h"
@@ -109,6 +110,8 @@ void SetNESDeemph(uint8 d, int force)
 	}
 	else   /* Only set this when palette has changed. */
 	{
+		FCEU_LuaUpdatePalette();
+
 		r=rtmul[6];
 		g=rtmul[6];
 		b=rtmul[6];
@@ -152,9 +155,10 @@ void SetNESDeemph(uint8 d, int force)
 	}
 
 	lastd=d;
+	FCEU_LuaUpdatePalette();
 }
 
-/* Converted from Kevin Horton's qbasic palette generator. */
+// Converted from Kevin Horton's qbasic palette generator. 
 static void CalculatePalette(void)
 {
 	int x,z;
@@ -259,6 +263,7 @@ void WritePalette(void)
 		FCEUD_SetPalette(x,unvpalette[x].r,unvpalette[x].g,unvpalette[x].b);
 	if(GameInfo->type==GIT_NSF)
 	{
+		FCEU_LuaUpdatePalette();
 		//for(x=0;x<128;x++)
 		// FCEUD_SetPalette(x,x,0,x);
 	}

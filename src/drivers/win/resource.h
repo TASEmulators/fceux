@@ -131,6 +131,7 @@
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
 #define CHECK_SOUND_8BIT                122
+#define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
 #define CHECK_SOUND_ENABLED             126
 #define CTL_LATENCY_TRACKBAR            128
@@ -647,6 +648,8 @@
 #define ID_PLAYBEST                     40226
 #define ID_RESET                        40227
 #define BOT_MENU_CLOSE                  40228
+#define ID_FILE_RUNLUASCRIPT            40229
+#define ID_FILE_STOPLUASCRIPT           40230
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 #define GUI_BOT_DEBUG                   65436
@@ -656,8 +659,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        123
-#define _APS_NEXT_COMMAND_VALUE         40229
+#define _APS_NEXT_RESOURCE_VALUE        124
+#define _APS_NEXT_COMMAND_VALUE         40231
 #define _APS_NEXT_CONTROL_VALUE         1175
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

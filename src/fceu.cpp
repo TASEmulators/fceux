@@ -1,22 +1,22 @@
 /* FCE Ultra - NES/Famicom Emulator
- *
- * Copyright notice for this file:
- *  Copyright (C) 2003 Xodnizel
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+*
+* Copyright notice for this file:
+*  Copyright (C) 2003 Xodnizel
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include <string>
 #include <string.h>
@@ -48,6 +48,7 @@
 #include "input.h"
 #include "file.h"
 #include "vsuni.h"
+#include "fceulua.h"
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
@@ -61,8 +62,8 @@
 int AFon, AFoff, AutoFireOffset = 0; //For keeping track of autofire settings
 
 FCEUGI::FCEUGI()
-	: filename(0)
-	, archiveFilename(0)
+: filename(0)
+, archiveFilename(0)
 {}
 
 FCEUGI::~FCEUGI()
@@ -151,93 +152,93 @@ static DECLFW(BNull)
 
 static DECLFR(ANull)
 {
- return(X.DB);
+	return(X.DB);
 }
 
 int AllocGenieRW(void)
 {
- if(!(AReadG=(readfunc *)FCEU_malloc(0x8000*sizeof(readfunc))))
-  return 0;
- if(!(BWriteG=(writefunc *)FCEU_malloc(0x8000*sizeof(writefunc))))
-  return 0;
- RWWrap=1;
- return 1;
+	if(!(AReadG=(readfunc *)FCEU_malloc(0x8000*sizeof(readfunc))))
+		return 0;
+	if(!(BWriteG=(writefunc *)FCEU_malloc(0x8000*sizeof(writefunc))))
+		return 0;
+	RWWrap=1;
+	return 1;
 }
 
 void FlushGenieRW(void)
 {
- int32 x;
+	int32 x;
 
- if(RWWrap)
- {
-  for(x=0;x<0x8000;x++)
-  {
-   ARead[x+0x8000]=AReadG[x];
-   BWrite[x+0x8000]=BWriteG[x];
-  }
-  free(AReadG);
-  free(BWriteG);
-  AReadG=0;
-  BWriteG=0;
-  RWWrap=0;
- }
+	if(RWWrap)
+	{
+		for(x=0;x<0x8000;x++)
+		{
+			ARead[x+0x8000]=AReadG[x];
+			BWrite[x+0x8000]=BWriteG[x];
+		}
+		free(AReadG);
+		free(BWriteG);
+		AReadG=0;
+		BWriteG=0;
+		RWWrap=0;
+	}
 }
 
 readfunc GetReadHandler(int32 a)
 {
-  if(a>=0x8000 && RWWrap)
-   return AReadG[a-0x8000];
-  else
-   return ARead[a];
+	if(a>=0x8000 && RWWrap)
+		return AReadG[a-0x8000];
+	else
+		return ARead[a];
 }
 
 void SetReadHandler(int32 start, int32 end, readfunc func)
 {
-  int32 x;
+	int32 x;
 
-  if(!func)
-   func=ANull;
+	if(!func)
+		func=ANull;
 
-  if(RWWrap)
-   for(x=end;x>=start;x--)
-   {
-    if(x>=0x8000)
-     AReadG[x-0x8000]=func;
-    else
-     ARead[x]=func;
-   }
-  else
+	if(RWWrap)
+		for(x=end;x>=start;x--)
+		{
+			if(x>=0x8000)
+				AReadG[x-0x8000]=func;
+			else
+				ARead[x]=func;
+		}
+	else
 
-   for(x=end;x>=start;x--)
-    ARead[x]=func;
+		for(x=end;x>=start;x--)
+			ARead[x]=func;
 }
 
 writefunc GetWriteHandler(int32 a)
 {
-  if(RWWrap && a>=0x8000)
-   return BWriteG[a-0x8000];
-  else
-   return BWrite[a];
+	if(RWWrap && a>=0x8000)
+		return BWriteG[a-0x8000];
+	else
+		return BWrite[a];
 }
 
 void SetWriteHandler(int32 start, int32 end, writefunc func)
 {
-  int32 x;
+	int32 x;
 
-  if(!func)
-   func=BNull;
+	if(!func)
+		func=BNull;
 
-  if(RWWrap)
-   for(x=end;x>=start;x--)
-   {
-    if(x>=0x8000)
-     BWriteG[x-0x8000]=func;
-    else
-     BWrite[x]=func;
-   }
-  else
-   for(x=end;x>=start;x--)
-    BWrite[x]=func;
+	if(RWWrap)
+		for(x=end;x>=start;x--)
+		{
+			if(x>=0x8000)
+				BWriteG[x-0x8000]=func;
+			else
+				BWrite[x]=func;
+		}
+	else
+		for(x=end;x>=start;x--)
+			BWrite[x]=func;
 }
 
 uint8 *GameMemBlock;
@@ -248,28 +249,28 @@ uint8 *RAM;
 
 static void AllocBuffers()
 {
-	
+
 #ifdef _USE_SHARED_MEMORY_
 
 	void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM);
 	win_AllocBuffers(&GameMemBlock, &RAM);
-	
+
 #else 
 
 	GameMemBlock = (uint8*)FCEU_gmalloc(131072);
 	RAM = (uint8*)FCEU_gmalloc(0x800);
-	
+
 #endif
 }
 
 static void FreeBuffers() {
-	#ifdef _USE_SHARED_MEMORY_
+#ifdef _USE_SHARED_MEMORY_
 	void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM);
 	win_FreeBuffers(GameMemBlock, RAM);
-	#else 
+#else 
 	FCEU_free(GameMemBlock);
 	FCEU_free(RAM);
-	#endif
+#endif
 }
 //------
 
@@ -277,22 +278,24 @@ uint8 PAL=0;
 
 static DECLFW(BRAML)
 {  
-        RAM[A]=V;
+	RAM[A]=V;
+	FCEU_LuaWriteInform();
 }
 
 static DECLFW(BRAMH)
 {
-        RAM[A&0x7FF]=V;
+	RAM[A&0x7FF]=V;
+	FCEU_LuaWriteInform();
 }
 
 static DECLFR(ARAML)
 {
-        return RAM[A];
+	return RAM[A];
 }
 
 static DECLFR(ARAMH)
 {
-        return RAM[A&0x7FF];
+	return RAM[A&0x7FF];
 }
 
 
@@ -405,10 +408,10 @@ endlseq:
 
 	FCEU_ResetPalette();
 	FCEU_ResetMessages();	// Save state, status messages, etc.
-	
+
 	if(GameInfo->type!=GIT_NSF)
 		FCEU_LoadGameCheats(0);
-	
+
 	return GameInfo;
 }
 
@@ -441,16 +444,17 @@ bool FCEUI_Initialize()
 	FSettings.UsrLastSLine[0]=239;
 	FSettings.UsrLastSLine[1]=239;
 	FSettings.SoundVolume=100;
-	
+
 	FCEUPPU_Init();
-	
+
 	X6502_Init();
-	
+
 	return true;
 }
 
 void FCEUI_Kill(void)
 {
+	FCEU_LuaStop();
 	FCEU_KillVirtualVideo();
 	FCEU_KillGenie();
 	FreeBuffers();
@@ -551,6 +555,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		UpdateAutosave();
 	}
 
+	FCEU_LuaFrameBoundary();
 	FCEU_UpdateInput();
 	lagFlag = true;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
@@ -558,10 +563,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	ssize=FlushEmulateSound();
 
-	#ifdef WIN32
+#ifdef WIN32
 	UpdateCheatList();
 	//   FCEUI_AviVideoUpdate(XBuf);
-	#endif
+#endif
 
 	timestampbase += timestamp;
 	timestamp = 0;
@@ -578,17 +583,17 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		EmulationPaused = 1;          // restore paused flag
 
 		//mute the frame advance if the user requested it
-		#ifdef WIN32
+#ifdef WIN32
 		if(soundoptions&SO_MUTEFA)
 			*SoundBufSize=0;              // keep sound muted
-		#endif
+#endif
 
 		JustFrameAdvanced = true;
 	}
 
 	currMovieData.TryDumpIncremental();
-		if (lagFlag) lagCounter++;
-				
+	if (lagFlag) lagCounter++;
+
 }
 
 void FCEUI_CloseGame(void)
@@ -600,12 +605,12 @@ void FCEUI_CloseGame(void)
 
 void ResetNES(void)
 {
-    FCEUMOV_AddCommand(FCEUNPCMD_RESET);
-    if(!GameInfo) return;
-    GameInterface(GI_RESETM2);
-    FCEUSND_Reset();
-    FCEUPPU_Reset();
-    X6502_Reset();
+	FCEUMOV_AddCommand(FCEUNPCMD_RESET);
+	if(!GameInfo) return;
+	GameInterface(GI_RESETM2);
+	FCEUSND_Reset();
+	FCEUPPU_Reset();
+	X6502_Reset();
 
 	// clear back baffer
 	extern uint8 *XBackBuf;
@@ -614,14 +619,14 @@ void ResetNES(void)
 
 void FCEU_MemoryRand(uint8 *ptr, uint32 size)
 {
- int x=0;
- while(size)
- {
-  *ptr=(x&4)?0xFF:0x00;
-  x++;
-  size--;
-  ptr++;
- }
+	int x=0;
+	while(size)
+	{
+		*ptr=(x&4)?0xFF:0x00;
+		x++;
+		size--;
+		ptr++;
+	}
 }
 
 void hand(X6502 *X, int type, unsigned int A)
@@ -653,7 +658,7 @@ void PowerNES(void)
 
 	SetReadHandler(0x800,0x1FFF,ARAMH); // Part of a little
 	SetWriteHandler(0x800,0x1FFF,BRAMH); //hack for a small speed boost.
-	
+
 	InitializeInput();
 	FCEUSND_Power();
 	FCEUPPU_Power();
@@ -663,7 +668,7 @@ void PowerNES(void)
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniPower();
 
-	
+
 
 	timestampbase=0;
 	X6502_Power();
@@ -675,84 +680,84 @@ void PowerNES(void)
 
 void FCEU_ResetVidSys(void)
 {
- int w;
-  
- if(GameInfo->vidsys==GIV_NTSC)
-  w=0; 
- else if(GameInfo->vidsys==GIV_PAL)
-  w=1;  
- else
-  w=FSettings.PAL;
-  
- PAL=w?1:0;
- FCEUPPU_SetVideoSystem(w);
- SetSoundVariables();
+	int w;
+
+	if(GameInfo->vidsys==GIV_NTSC)
+		w=0; 
+	else if(GameInfo->vidsys==GIV_PAL)
+		w=1;  
+	else
+		w=FSettings.PAL;
+
+	PAL=w?1:0;
+	FCEUPPU_SetVideoSystem(w);
+	SetSoundVariables();
 }
 
 FCEUS FSettings;
 
 void FCEU_printf(char *format, ...)
 {
- char temp[2048];
+	char temp[2048];
 
- va_list ap;
+	va_list ap;
 
- va_start(ap,format);
- vsprintf(temp,format,ap);
- FCEUD_Message(temp);
+	va_start(ap,format);
+	vsprintf(temp,format,ap);
+	FCEUD_Message(temp);
 
- va_end(ap);
+	va_end(ap);
 }
 
 void FCEU_PrintError(char *format, ...)
 {
- char temp[2048];
+	char temp[2048];
 
- va_list ap;
+	va_list ap;
 
- va_start(ap,format);
- vsprintf(temp,format,ap);
- FCEUD_PrintError(temp);
+	va_start(ap,format);
+	vsprintf(temp,format,ap);
+	FCEUD_PrintError(temp);
 
- va_end(ap);
+	va_end(ap);
 }
 
 void FCEUI_SetRenderedLines(int ntscf, int ntscl, int palf, int pall)
 {
- FSettings.UsrFirstSLine[0]=ntscf;
- FSettings.UsrLastSLine[0]=ntscl;
- FSettings.UsrFirstSLine[1]=palf;
- FSettings.UsrLastSLine[1]=pall;
- if(PAL)
- {
-  FSettings.FirstSLine=FSettings.UsrFirstSLine[1];
-  FSettings.LastSLine=FSettings.UsrLastSLine[1];
- }
- else
- {
-  FSettings.FirstSLine=FSettings.UsrFirstSLine[0];
-  FSettings.LastSLine=FSettings.UsrLastSLine[0];
- }
+	FSettings.UsrFirstSLine[0]=ntscf;
+	FSettings.UsrLastSLine[0]=ntscl;
+	FSettings.UsrFirstSLine[1]=palf;
+	FSettings.UsrLastSLine[1]=pall;
+	if(PAL)
+	{
+		FSettings.FirstSLine=FSettings.UsrFirstSLine[1];
+		FSettings.LastSLine=FSettings.UsrLastSLine[1];
+	}
+	else
+	{
+		FSettings.FirstSLine=FSettings.UsrFirstSLine[0];
+		FSettings.LastSLine=FSettings.UsrLastSLine[0];
+	}
 
 }
 
 void FCEUI_SetVidSystem(int a)
 {
- FSettings.PAL=a?1:0;
- if(GameInfo)
- {
-  FCEU_ResetVidSys();
-  FCEU_ResetPalette();
- }
+	FSettings.PAL=a?1:0;
+	if(GameInfo)
+	{
+		FCEU_ResetVidSys();
+		FCEU_ResetPalette();
+	}
 }
 
 int FCEUI_GetCurrentVidSystem(int *slstart, int *slend)
 {
- if(slstart)
-  *slstart=FSettings.FirstSLine;
- if(slend)
-  *slend=FSettings.LastSLine;
- return(PAL);
+	if(slstart)
+		*slstart=FSettings.FirstSLine;
+	if(slend)
+		*slend=FSettings.LastSLine;
+	return(PAL);
 }
 
 //Enable or disable Game Genie option.
@@ -763,15 +768,15 @@ void FCEUI_SetGameGenie(bool a)
 
 void FCEUI_SetSnapName(int a)
 {
- FSettings.SnapName=a;
+	FSettings.SnapName=a;
 }
 
 int32 FCEUI_GetDesiredFPS(void)
 {
-  if(PAL)
-   return(838977920); // ~50.007
-  else
-   return(1008307711);	// ~60.1
+	if(PAL)
+		return(838977920); // ~50.007
+	else
+		return(1008307711);	// ~60.1
 }
 
 int FCEUI_EmulationPaused(void)
@@ -818,7 +823,7 @@ void UpdateAutosave(void)
 {
 	if(!EnableAutosave)
 		return;
-	
+
 	char * f;
 	AutosaveCounter = (AutosaveCounter + 1) % 256;
 	if(AutosaveCounter == 0)
@@ -842,7 +847,7 @@ void FCEUI_Autosave(void)
 		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE,AutosaveIndex,0).c_str());
 		FCEUSS_Load(f);
 		free(f);
-		
+
 		//Set pointer to previous available slot
 		if(AutosaveStatus[(AutosaveIndex + 3)%4] == 1)
 		{
@@ -894,7 +899,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 		if(!GameInfo) return false;
 		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT|MOVIEMODE_PLAY)) return false;
 		break;
-		
+
 	case FCEUI_POWER:
 		if(!GameInfo) return false;
 		if(!FCEUMOV_Mode(MOVIEMODE_INACTIVE)) return false;

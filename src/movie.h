@@ -64,6 +64,8 @@ enum EMOVIECMD
 EMOVIEMODE FCEUMOV_Mode();
 bool FCEUMOV_Mode(EMOVIEMODE modemask);
 bool FCEUMOV_Mode(int modemask);
+inline bool FCEUMOV_IsPlaying() { return FCEUMOV_Mode(MOVIEMODE_PLAY); }
+inline bool FCEUMOV_IsRecording() { return FCEUMOV_Mode(MOVIEMODE_RECORD); }
 
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);

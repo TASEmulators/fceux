@@ -909,3 +909,20 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
 	}
 }
 
+int FCEU_CheatGetByte(uint32 A)
+{
+   if(CheatRPtrs[A>>10])
+    return CheatRPtrs[A>>10][A];
+   else if(A < 0x10000)
+    return ARead[A](A);
+   else
+    return 0;
+}
+
+void FCEU_CheatSetByte(uint32 A, uint8 V)
+{
+   if(CheatRPtrs[A>>10])
+    CheatRPtrs[A>>10][A]=V;
+   else if(A < 0x10000)
+    BWrite[A](A, V);
+}

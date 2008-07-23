@@ -17,6 +17,7 @@
 #include "file.h"
 #include "video.h"
 #include "movie.h"
+#include "fceulua.h"
 #include "utils/guid.h"
 #include "utils/memory.h"
 #include "utils/memorystream.h"
@@ -993,7 +994,11 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			//truncate before we copy, just to save some time
 			tempMovieData.truncateAt(currFrameCounter);
 			currMovieData = tempMovieData;
-			currMovieData.rerecordCount = ++currRerecordCount;
+			
+			if(!FCEU_LuaRerecordCountSkip())
+				currRerecordCount++;
+			
+			currMovieData.rerecordCount = currRerecordCount;
 
 			openRecordingMovie(curMovieFilename);
 			currMovieData.dump(osRecordingMovie, false);

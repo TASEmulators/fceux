@@ -58,6 +58,7 @@
 #include "gui.h"
 #include "help.h"
 #include "movie.h"
+#include "fceulua.h"
 #include "utils/xstring.h"
 
 #include <fstream>
@@ -1192,6 +1193,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// Message Log menu was selected
 				MakeLogWindow();
 				break;
+
+			case ID_FILE_RUNLUASCRIPT:
+				FCEUD_LuaRunFrom(); 
+				break;
+			
+			case ID_FILE_STOPLUASCRIPT:
+				FCEU_LuaStop();
+				break;
 			}
 		}
 		break;
@@ -1585,4 +1594,94 @@ void FCEUD_CmdOpen(void)
 bool FCEUD_PauseAfterPlayback()
 {
 	return pauseAfterPlayback!=0;
+}
+
+INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+
+	static int *success;
+
+	switch (msg) {
+	case WM_INITDIALOG:
+		{
+
+		// Nothing very useful to do
+		success = (int*)lParam;
+		return TRUE;
+		}
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+			case IDOK:
+			{
+				char filename[MAX_PATH];
+				GetDlgItemText(hDlg, 1096, filename, MAX_PATH);
+				if (FCEU_LoadLuaCode(filename)) {
+					*success = 1;
+					// For user's convenience, don't close dialog unless we're done.
+					// Users who make syntax errors and fix/reload will thank us.
+					EndDialog(hDlg, 1);
+				} else {
+					//MessageBox(hDlg, "Couldn't load script.", "Oops", MB_OK); // XXX better if errors are displayed by the Lua code.
+					*success = 0;
+				}
+				return TRUE;
+			}
+			case IDCANCEL:
+			{
+				EndDialog(hDlg, 0);
+				return TRUE;
+			}
+			case 1359:
+			{
+				OPENFILENAME  ofn;
+				char  szFileName[MAX_PATH];
+				szFileName[0] = '\0';
+				ZeroMemory( (LPVOID)&ofn, sizeof(OPENFILENAME) );
+				ofn.lStructSize = sizeof(OPENFILENAME);
+				ofn.hwndOwner = hDlg;
+				ofn.lpstrFilter = "Lua scripts\0*.lua\0All files\0*.*\0\0";
+				ofn.lpstrFile = szFileName;
+				ofn.lpstrDefExt = "lua";
+				ofn.nMaxFile = MAX_PATH;
+				ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
+				if(GetOpenFileName( &ofn ))
+				{
+					SetWindowText(GetDlgItem(hDlg, 1096), szFileName);
+				}
+				//SetCurrentDirectory(movieDirectory);
+				return TRUE;
+			}
+		}
+
+
+	}
+	//char message[1024];
+//	sprintf(message, "Unkonwn command %d,%d",msg,wParam);
+	//MessageBox(hDlg, message, TEXT("Range Error"), MB_OK);
+
+//	printf("Unknown entry %d,%d,%d\n",msg,wParam,lParam);
+	// All else, fall off
+	return FALSE;
+
+}
+
+void FCEUD_LuaRunFrom(void)
+{
+  int success = 0;
+
+  //StopSound();
+
+  DialogBoxParam(fceu_hInstance, "IDD_LUA_ADD", hAppWnd, DlgLuaScriptDialog,(LPARAM) &success);
+}
+
+void FCEUD_UpdateLuaMenus()
+{
+	MENUITEMINFO mii;
+	ZeroMemory( &mii, sizeof( mii));
+	mii.cbSize = sizeof( mii);
+	mii.fMask = MIIM_STATE;
+	mii.fState = MFS_UNCHECKED;
+	SetMenuItemInfo (fceumenu, ID_FILE_RUNLUASCRIPT, FALSE, &mii);
+	if (!FCEU_LuaRunning()) mii.fState |= MFS_DISABLED;
+	SetMenuItemInfo (fceumenu, ID_FILE_STOPLUASCRIPT, FALSE, &mii);
 }

@@ -46,6 +46,7 @@
 #include "vsuni.h"
 #include "drawing.h"
 #include "driver.h"
+#include "fceulua.h"
 
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
@@ -228,6 +229,8 @@ void FCEU_PutImage(void)
 
 	if(FCEUD_ShouldDrawInputAids())
 		FCEU_DrawInput(XBuf);
+
+	FCEU_LuaGui(XBuf);
 
 	//Fancy input display code
 	if(input_display)

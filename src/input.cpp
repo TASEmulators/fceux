@@ -32,8 +32,7 @@
 #include "movie.h"
 #include "state.h"
 #include "input/zapper.h"
-//#include "input/basic.h"
-
+#include "fceulua.h"
 #include "input.h"
 #include "vsuni.h"
 #include "fds.h"
@@ -196,13 +195,13 @@ static void UpdateGP(int w, void *data, int arg)
 {
 	if(w==0)
 	{
-		joy[0]=*(uint32 *)joyports[0].ptr;
-		joy[2]=*(uint32 *)joyports[0].ptr >> 16;
+		joy[0]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr;
+		joy[2]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr >> 16;
 	}
 	else
 	{
-		joy[1]=*(uint32 *)joyports[1].ptr >> 8;
-		joy[3]=*(uint32 *)joyports[1].ptr >> 24;
+		joy[1]= FCEU_LuaUsingJoypad(1) ? FCEU_LuaReadJoypad(1) : *(uint32 *)joyports[1].ptr >> 8;
+		joy[3]= FCEU_LuaUsingJoypad(3) ? FCEU_LuaReadJoypad(3) : *(uint32 *)joyports[1].ptr >> 24;
 	}
 }
 
@@ -740,6 +739,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleFrameDisplay, 0, 0, "Movie Frame Display Toggle", 0 },
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE,	EMUCMDTYPE_MISC,	FCEUI_ToggleInputDisplay, 0, 0, "Toggle Input Display", 0 },
 	{ EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUD_ToggleStatusIcon, 0, 0, "Toggle Status Icon", 0 },
+
+	{ EMUCMD_SCRIPT_RELOAD,					EMUCMDTYPE_MISC,	FCEU_ReloadLuaCode, 0, 0, "Reload current Lua script", },
 
 	{ EMUCMD_SOUND_TOGGLE,					EMUCMDTYPE_SOUND,	FCEUD_SoundToggle, 0, 0, "Sound Mute Toggle", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SOUND_VOLUME_UP,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Up", EMUCMDFLAG_TASEDIT },

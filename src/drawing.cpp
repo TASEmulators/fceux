@@ -374,7 +374,7 @@ static int JoedCharWidth(uint8 ch)
 	return Font6x5[FixJoedChar(ch)*6];
 }
 
-void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor)
+void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, int max_w, int max_h)
 {
 	unsigned beginx=5, x=beginx;
 	unsigned y=2;
@@ -382,6 +382,8 @@ void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor)
 	char target[64][256] = {{0}};
 
 	assert(width==256);
+	if (max_w > 256) max_w = 256;
+	if (max_h >  64) max_h =  64;
 
 	for(; *textmsg; ++textmsg)
 	{
@@ -451,3 +453,7 @@ textoverflow:
 		}
 }
 
+void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor)
+{
+	DrawTextTransWH(dest, width, textmsg, fgcolor, 256, 16);
+}

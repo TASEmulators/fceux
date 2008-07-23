@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua"
 				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -54,7 +54,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
-				CompileAs="2"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -130,13 +130,14 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src"
+				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua"
 				PreprocessorDefinitions="WIN32;NDEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1339,12 +1340,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\compress.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1363,12 +1380,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\deflate.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1387,12 +1420,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\infblock.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1411,12 +1460,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\inffast.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1435,12 +1500,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\inftrees.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1459,12 +1540,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\trees.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1483,12 +1580,28 @@
 								CompileAs="1"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\zlib\zutil.c"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								CompileAs="1"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -1521,6 +1634,222 @@
 								Outputs="$(OutDir)\fceux.chm"
 							/>
 						</FileConfiguration>
+					</File>
+				</Filter>
+				<Filter
+					Name="lua"
+					>
+					<File
+						RelativePath="..\src\drivers\win\lua\lapi.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lapi.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lauxlib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lauxlib.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lbaselib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lcode.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lcode.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldblib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldebug.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldebug.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldo.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldo.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ldump.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lfunc.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lfunc.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lgc.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lgc.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\linit.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\liolib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\llex.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\llex.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\llimits.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lmathlib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lmem.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lmem.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\loadlib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lobject.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lobject.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lopcodes.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lopcodes.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\loslib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lparser.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lparser.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lstate.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lstate.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lstring.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lstring.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lstrlib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ltable.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ltable.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ltablib.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ltm.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\ltm.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lua.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\luaconf.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lualib.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lundump.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lundump.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lvm.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lvm.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lzio.c"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\lzio.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\lua\print.c"
+						>
 					</File>
 				</Filter>
 			</Filter>
@@ -1589,6 +1918,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\fceulua.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\fcoeffs.h"
 				>
 			</File>
@@ -1622,10 +1955,6 @@
 			</File>
 			<File
 				RelativePath="..\src\input.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\memory.h"
 				>
 			</File>
 			<File
@@ -2120,6 +2449,7 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						CompileAs="1"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -2396,6 +2726,10 @@
 		</File>
 		<File
 			RelativePath="..\src\input.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\src\lua-engine.cpp"
 			>
 		</File>
 		<File

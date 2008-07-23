@@ -56,6 +56,9 @@ BEGIN
         MENUITEM "Record WAV...",               MENU_RECORD_WAV
         MENUITEM "Stop WAV",                    MENU_STOP_WAV
         MENUITEM SEPARATOR
+        MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
+        MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
+        MENUITEM SEPARATOR
         MENUITEM "E&xit     Alt+F4",            MENU_EXIT
     END
     POPUP "&NES"
@@ -1531,6 +1534,17 @@ BEGIN
     CTEXT           "Use only numbers for now, chance 0-1000",IDC_STATIC,89,19,185,12,SS_CENTERIMAGE
 END
 
+IDD_LUA_ADD DIALOGEX 0, 0, 186, 66
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Load Lua Script..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Load && Run",1,70,44,50,14
+    PUSHBUTTON      "Cancel",2,129,44,50,14
+    EDITTEXT        1096,7,7,116,14,ES_AUTOHSCROLL | ES_READONLY,WS_EX_NOPARENTNOTIFY
+    PUSHBUTTON      "Browse...",1359,129,7,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1702,6 +1716,14 @@ BEGIN
         HORZGUIDE, 172
         HORZGUIDE, 186
         HORZGUIDE, 200
+    END
+
+    "IDD_LUA_ADD", DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
     END
 END
 #endif    // APSTUDIO_INVOKED

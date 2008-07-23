@@ -25,6 +25,10 @@
 
 #include "../types.h"
 
+#ifndef __GNUC__
+#define strcasecmp strcmp
+#endif
+
 //definitions for str_strip() flags
 #define STRIP_SP	0x01 // space
 #define STRIP_TAB	0x02 // tab

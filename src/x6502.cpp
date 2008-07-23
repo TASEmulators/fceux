@@ -24,6 +24,7 @@
 #include "fceu.h"
 #include "debug.h"
 #include "sound.h"
+#include "fceulua.h"
 
 #include "x6502abbrev.h"
 
@@ -48,7 +49,8 @@ static INLINE uint8 RdMem(unsigned int A)
 //normal memory write
 static INLINE void WrMem(unsigned int A, uint8 V)
 {
- BWrite[A](A,V);
+	BWrite[A](A,V);
+	FCEU_LuaWriteInform();
 }
 
 static INLINE uint8 RdRAM(unsigned int A) 
@@ -60,7 +62,8 @@ static INLINE uint8 RdRAM(unsigned int A)
 
 static INLINE void WrRAM(unsigned int A, uint8 V)
 {
- RAM[A]=V;
+	RAM[A]=V;
+	FCEU_LuaWriteInform();
 }
 
 uint8 X6502_DMR(uint32 A)
@@ -73,6 +76,7 @@ void X6502_DMW(uint32 A, uint8 V)
 {
  ADDCYC(1);
  BWrite[A](A,V);
+ FCEU_LuaWriteInform();
 }
 
 #define PUSH(V) \
