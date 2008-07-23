@@ -319,12 +319,6 @@ enum EFCEUI
 //checks whether an EFCEUI is valid right now
 bool FCEU_IsValidUI(EFCEUI ui);
 
-//if you want to autopilot this, pass in an innerfilename to try and automatically load
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename);
-
-//scans a file to see if it is an archive you can handle
-ArchiveScanRecord FCEUD_ScanArchive(std::string fname);
-
 #ifdef __cplusplus
 extern "C"
 #endif

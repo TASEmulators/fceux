@@ -5,7 +5,7 @@ import sys
 opts = Options()
 opts.AddOptions(
   #BoolOption('PSS_STYLE', 'Path separator style', 1),
-  BoolOption('LSB_FIRST', 'Least significant byte first?', None),
+  #BoolOption('LSB_FIRST', 'Least significant byte first?', None),
   BoolOption('FRAMESKIP', 'Enable frameskipping', 0),
   BoolOption('OPENGL',    'Enable OpenGL support (SDL only)', 1)
 )
