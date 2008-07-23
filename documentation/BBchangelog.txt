@@ -1,4 +1,23 @@
-This changelog only concerns the Basic Bot code.
+This changelog only concerns the BasicBot code. Changelog by qFox.
+
+Changelog 0.3.5:
+23 july 2008 (yes, it's been a while :)
+
+- Added  - GUI  - Checkbox for counter display, turn it off to disable this update (it's quite expensive)
+- Added  - GUI  - Button to get current values of the counters
+- Fixed  - GUI  - Checkbox for logging. It was there, but seemed to be a checkbox for error somehow. It also wasn't doing anything anyways. I moved it and when you press it, there will be a file in the workingdir called BBlog.txt, which logs every attempt. Can be nice and helpfull. Off by default.
+- Change - GUI  - Renamed parts to segments, which was something I wanted to do for a long time. Also internally.
+- Fixed  - Code - XYZPQ were broken due to silly looping. They work again.
+- Fixed  - Code - Delay and Frameskip now correspond internally with what is shown in the GUI when you load a file
+- Fixed  - GUI  - Some bug where a new start would not reset the statistics properly
+- Added  - GUI  - Minimize button
+- Fixed  - Code - Pressing reset now resets everything from last to 0, instead of weird numbers for the 5th and 6th score.
+- Change - Code - Internal. Moved some functions and declarations around
+
+Known issues:
+- Segmented runs still desync. I have a feeling it has to do with the lastbutton variable, which does not seem to be remembered properly accross segments (so the first frame of a new segment has bogus lastbutton... I think).
+- When pressing reset, the right-top values don't reset because they indicate the stats for current run. If you want to reset those, simply restart... (not adding this issue again)
+- Segments that go bad from the start (like when it starts right in front of an enemy and it's impossible to avoid collision) will screw up segmented runs. I want to change this by saving the savestate of each segment individually. When there is no best attempt for the current segment, the bot should rollback to the previous segment and try again. This prevents the bot from getting stuck (well, as much as possible). At least it won't stop the bot in such a case.
 
 Changelog 0.3.4a:
 27 november 2006

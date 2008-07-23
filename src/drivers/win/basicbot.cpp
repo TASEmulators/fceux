@@ -32,7 +32,7 @@
  */
 
 #include "common.h"
-#include "../../fceu.h" //mbg merge 7/18/06 added
+#include "../../fceu.h" // BotInput
 #include "basicbot.h"
 #include "../../input.h" // qfox: fceu_botmode() fceu_setbotmode() BOTMODES
 
@@ -50,14 +50,30 @@ static bool LoadBasicBot();
 static bool SaveBasicBotFile(char fn[]);
 static bool SaveBasicBot();
 static void PlayBest();
+static void LogAttempt(int *scores, bool better);
+static void ShowCounters(bool ignoreflag);
+static void UpdateFrameskip();
+static void CrashWindow();
+static void InitCode();
+static void ResetStats();
+static void UpdateBestGUI();
+static void UpdateLastGUI(int last[]);
+static void UpdateFullGUI();
+static void UpdateCountersGUI();
+static void UpdateTitles();
+static void SetNewAttempt();
+static void SetNewSegment();
+static void UpdatePrevGUI(int best[]);
+static bool LoggingEnabled();
+
 
 // v0.1.0 will be the last release by Luke, mine will start at v0.2.0 and
 //	 go up each time something is released to the public, so you'll
 //	 know your version is the latest or whatever. Version will be
 //	 put in the project as well. A changelog will be kept.
-static char BBversion[] = "0.3.4a";
+static char BBversion[] = "0.3.5";
 // title
-static char BBcaption[] = "Basic Bot v0.3.4a by qFox";
+static char BBcaption[] = "Basic Bot v0.3.5 by qFox";
 // save/load version
 static int BBsaveload = 2;
 
@@ -65,13 +81,21 @@ int BasicBot_wndx=0, BasicBot_wndy=0;
 
 static HWND hwndBasicBot = 0;					// GUI handle
 static bool BotRunning = false;					// Is the bot computing or not?
-static bool ResetStatsASAP = false;					// Do we need to reset the stats asap? (when pressing reset in gui)
+static bool ResetStatsASAP = false;				// Do we need to reset the stats asap? (when pressing reset in gui)
 static bool MovingOn = false;					// If movingon bool is set, the bot is feeding the app
-												// with the best result of the current part. it will
+												// with the best result of the current segment. it will
 												// not compute anything, just read input.
 												// when it fed all available input, it will save to
-												// current state and continue with the next part from there
+												// current state and continue with the next segment from there
 static int MovingPointer = 0;					// Points to the next input to be sent
+static bool UpdateVariables = false;			// Update the right column with variables? Is expensive...
+static bool CreateLog = false;					// Ouput everything to a file?
+
+// Next two values are used in main loop, 
+// gotten by functions BotFrameSkip() and BotFramePause()
+static int skip = 1;							// Number of frames to skip while bot is playing
+static int pause = 0;							// Number of ms to wait after each frame while bot is playing (allows 
+												// the programmer to visually check the bot...)
 
 static uint32 rand1=1, rand2=0x1337EA75, rand3=0x0BADF00D;
 
@@ -102,7 +126,7 @@ enum {
 			CODE_ROLLBACK   = 18,
 			CODE_MAXFRAMES  = 19,
 			CODE_MAXATTEMPTS= 20,
-			CODE_MAXPARTS   = 21,
+			CODE_MAXSEGMENTS= 21,
 
 			CODE_SCORE1     = 22,
 			CODE_SCORE2     = 23,
@@ -111,15 +135,15 @@ enum {
 			CODE_SCORE5     = 26,
 			CODE_SCORE6     = 27,
 
-			CODE_X			= 28,
+			CODE_X			= 28, // keep XYZPQ sequential, code relies on it
 			CODE_Y			= 29,
 			CODE_Z			= 30,
 			CODE_P			= 31,
-			CODE_Q			= 32,
+			CODE_Q			= 32, // Q should be the last in that sequence, if that changes look for it elsewhere too
 
 			CODE_EXTRA		= 33,
 			CODE_INIT_ATTEMPT = 34,
-			CODE_INIT_PART	= 35,
+			CODE_INIT_SEGMENT = 35,
 
 			// from here on down put inputs that
 			// are not to be parsed, but visual only
@@ -162,7 +186,7 @@ int Labels[] = {
 			GUI_BOT_ROLLBACK,
 			GUI_BOT_MAXFRAMES,
 			GUI_BOT_MAXATTEMPTS,
-			GUI_BOT_MAXPARTS,
+			GUI_BOT_MAXSEGMENTS,
 
 			GUI_BOT_SCORE1,
 			GUI_BOT_SCORE2,
@@ -179,7 +203,7 @@ int Labels[] = {
 
 			GUI_BOT_EXTRA,
 			GUI_BOT_INIT_ATTEMPT,
-			GUI_BOT_INIT_PART,
+			GUI_BOT_INIT_SEGMENT,
 
 			// from here on down put inputs that
 			// are not to be parsed, but visual only
@@ -282,7 +306,7 @@ static int BotAttempts, 				// Number of attempts tried so far
 	   TotalAttempts,					// Total attempts computed
 	   Oks,								// Number of successfull attempts
 	   Invalids,						// Number of invalidated attempts
-	   Parts,							// Number of parts computed so far
+	   Segments,						// Number of segments computed so far
 	   BotBestScore[BOT_MAXSCORES]; 				// score, tie1, tie2, tie3, tie4, tie5
 static bool NewAttempt;					// Tells code to reset certain run-specific info
 
@@ -295,7 +319,7 @@ static uint32 AttemptPointer;			// Points to the last frame of the current attem
 
 //static bool ProcessCode = true;			// This boolean tells the code whether or not to process
 										//	some code. This is mainly used in branching (iif's)
-										//	to skip over the part of the code that is not to be
+										//	to skip over the segment of the code that is not to be
 										//	executed. It still needs to be parsed because the
 										//	pointer needs to be moved ahead.
 
@@ -345,8 +369,8 @@ static int X,Y,Z,P,Prand,Q,Qrand;       // Static variables (is this a contradic
 
 FILE * LogFile;							// The handle to the logfile
 
-struct lastPart {
-	int part;
+struct lastSegment {
+	int segment;
 	int attempt;
 	int frames;
 	int Tattempts;
@@ -360,14 +384,14 @@ struct lastPart {
 	int tie5;
 	int lastbutton;
 };
-lastPart * LastPart;
-lastPart * BestPart; // temporarily save stuff here until current part is done. then replace lastpart by bestpart.
-lastPart * NewPart(int part, int attempt, 
+lastSegment * LastSegment;
+lastSegment * BestSegment; // temporarily save stuff here until current segment is done. then replace lastsegment by bestsegment.
+lastSegment * NewSegment(int segment, int attempt, 
 			   int frames, int score, int tie1, 
 			   int tie2, int tie3, int tie4, 
 			   int tie5, int lastbutton)
 {
-	lastPart * l = new lastPart();
+	lastSegment * l = new lastSegment();
 	(*l).attempt = attempt;
 	(*l).frames = frames;
 	(*l).score = score;
@@ -1343,12 +1367,14 @@ static int * ToByteCode(char * formula, int codefield)
 
 /**
  * The bytecode interpreter
+ * Interprets the field where ByteCodeField currently points to
+ * To interpret one field use Interpret(field_index)
  */
 static int Interpreter(bool single)
 {
 	int value = 0;
 	int nextlit;
-	while (Bytecode[ByteCodeField][GlobalCurrentCode] != 0)
+	while (Bytecode[ByteCodeField] && Bytecode[ByteCodeField][GlobalCurrentCode] != 0)
 	{
 		switch (Bytecode[ByteCodeField][GlobalCurrentCode++])
 		{
@@ -1691,9 +1717,9 @@ static int Interpreter(bool single)
  */
 static int Interpret(int codefield)
 {
-	GlobalCurrentCode = 0;
+	GlobalCurrentCode = 0; // pointer to bytecode
 	ByteCodeField = codefield;
-	return Interpreter(false);
+	return Interpreter(false); // interpreter uses the global ByteCodeField
 }
 
 
@@ -1734,7 +1760,7 @@ void UpdateBasicBot()
 		return;
 	if(hwndBasicBot && BotRunning && !EvaluateError)
 	{
-		if (MovingOn) // feed it the best result of the last part
+		if (MovingOn) // feed it the best result of the last segment
 		{
 			if (BestAttempt[MovingPointer] != -1)
 			{
@@ -1743,7 +1769,7 @@ void UpdateBasicBot()
 			}
 			else
 			{
-				SetNewPart();
+				SetNewSegment();
 			}
 		}
 		else // do normal bot stuff
@@ -1805,8 +1831,8 @@ void UpdateBasicBot()
 					// dont improve if this attempt was invalid
 					if (!invalid)
 					{
-						// if this is the first attempt for this part, it's always better
-						if (BestPart == NULL)
+						// if this is the first attempt for this segment, it's always better
+						if (BestSegment == NULL)
 						{
 							improvement = true;
 						}
@@ -1850,9 +1876,9 @@ void UpdateBasicBot()
 						}
 
 						// this may be the attempt that we want to continue on...
-//						if (BestPart != NULL) // will be NULL when this is first 'best'
-//							delete BestPart;
-						BestPart = NewPart(Parts,BotAttempts,BotFrame,currentscore[0],currentscore[1],
+//						if (BestSegment != NULL) // will be NULL when this is first 'best'
+//							delete BestSegment;
+						BestSegment = NewSegment(Segments,BotAttempts,BotFrame,currentscore[0],currentscore[1],
 							currentscore[2],currentscore[3],currentscore[4],currentscore[5], LastButtonPressed);
 
 						// terminate
@@ -1862,21 +1888,19 @@ void UpdateBasicBot()
 					}
 
 					// this is the "post-frame goal-met" event part
-					//if (LoggingEnabled())
-					LogAttempt(currentscore, improvement);
+					if (LoggingEnabled()) LogAttempt(currentscore, improvement);
 
-
-					// if the attempt has finished, check whether this is the end of this part
-					// just eval the part like the other stuff
+					// if the attempt has finished, check whether this is the end of this segment
+					// just eval the attempt like the other stuff
 					if (Interpret(CODE_MAXATTEMPTS) >= BOT_MAXPROB)
 					{
-//						if (LastPart != NULL) // only NULL after first part
-//							delete LastPart;
-						LastPart = BestPart;
-//						BestPart = NULL; // dont delete it, we need the instance! it's inside LastPart now
+//						if (LastSegment != NULL) // only NULL after first segment
+//							delete LastSegment;
+						LastSegment = BestSegment;
+//						BestSegment = NULL; // dont delete it, we need the instance! it's inside LastSegment now
 						// update the frames and attempts in this computation
-						LastPart->Tattempts = TotalAttempts;
-						LastPart->Tframes = TotalFrames;
+						LastSegment->Tattempts = TotalAttempts;
+						LastSegment->Tframes = TotalFrames;
 						// feed the best input to the app
 						// we accomplish this by setting the bool
 						MovingPointer = 0;
@@ -2157,7 +2181,6 @@ static bool LoadBasicBot()
 static bool LoadBasicBotFile(char fn[])
 {
 	int i,j;
-
 	// open the file
 	FILE *fp=FCEUD_UTF8fopen(fn,"rb");
 	if (fp != NULL) 
@@ -2248,9 +2271,9 @@ static void StartBasicBot()
 	else
 		return;
 	NewAttempt = true;
-	if (LastPart != NULL) delete LastPart;
-	LastPart = NULL;
-	Parts = 1;
+	if (LastSegment != NULL) delete LastSegment;
+	LastSegment = NULL;
+	Segments = 1;
 	memset(BotCounter, 0, BOT_MAXCOUNTERS*sizeof(int)); // Sets all the counters to 0.
 	LastButtonPressed = 0;
 	// set up saved state, load default, save to botstate
@@ -2383,7 +2406,7 @@ static void UpdateStatics()
 	// todo: improve efficiency, crap atm due to conversion
 	if (hwndBasicBot)
 	{
-		for (int i = CODE_X; i < 5; ++i)
+		for (int i = CODE_X; i <= CODE_Q; ++i)
         {
 			// since we malloc the strings, we need to delete them before replacing them...
 			if (Formula[i] != NULL) 
@@ -2392,11 +2415,11 @@ static void UpdateStatics()
 			// um yeah, eval-ing the comments is a bad idea :p
 			Bytecode[i] = ToByteCode(Formula[i],i);
 
-			if (i == CODE_X) X = Interpret(i);
-			else if (i == CODE_Y) Y = Interpret(i);
-			else if (i == CODE_Z) Z = Interpret(i);
-			else if (i == CODE_P) P = Interpret(i);
-			else if (i == CODE_Q) Q = Interpret(i);
+			if (i == CODE_X) { X = Interpret(i); }
+			else if (i == CODE_Y) { Y = Interpret(i); }
+			else if (i == CODE_Z) { Z = Interpret(i); }
+			else if (i == CODE_P) { P = Interpret(i); }
+			else if (i == CODE_Q) { Q = Interpret(i); }
 			else debugS("Grave error!");
         }
 	}
@@ -2420,8 +2443,6 @@ static void PlayBest()
 							//  i dont see the problem in calling a load from here
 }
 
-int skip = 1;
-int pause = 0;
 /**
  * Called from windows. main gui (=dialog) control.
  **/
@@ -2467,6 +2488,7 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			case GUI_BOT_LOAD:
 				LoadBasicBot();
 				ToGUI();
+				UpdateFrameskip(); // according to what the gui says
 				break;
 			case GUI_BOT_BEST:
 				// if bot is running and no frames left on the botinput buffer
@@ -2519,41 +2541,66 @@ static BOOL CALLBACK BasicBotCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 				fprintf(f,"hello %d earthlings!",5);
 				fclose(f);
 				*/
-					ShowCounters();
+				ShowCounters(false);
 
 
-				//char * t = GetText(hwndBasicBot,GUI_BOT_MAXPARTS);
+				//char * t = GetText(hwndBasicBot,GUI_BOT_MAXSEGMENTS);
 				//debugS(t);
 				//free(t);
 				}
 				break;
 			case GUI_BOT_VALUES:
 				{
-				// display all the #DEFINEs and static values
-				char valuesboxmsg[2048];
+				// display all the #DEFINEs, static values and evaluate current values for player 1
+				FromGUI();
+				char valuesboxmsg[4096];
 				sprintf(valuesboxmsg, 
-					"%s\n%s\n\n%s%s\n%s%d\n%s%d\n%s%d\n%s%d",
+					"%s\n%s\n\n%s%s\n%s%d\n%s%d\n%s%d\n%s%d\n\n%s\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d\n%s%d",
 					"These are the values that were",
 					"hardcoded at compilation time:",
 					"Basic Bot:		v", BBversion,
 					"Botfile:		v", BBsaveload,
 					"Max Frames:	", BOT_MAXFRAMES,
 					"Counters:		", BOT_MAXCOUNTERS,
-					"Probability Range:	0 - ", BOT_MAXPROB);
+					"Probability Range:	0 - ", BOT_MAXPROB,
+					
+					"These are current values for player 1:",
+					"A: ",       Interpret(CODE_1_A),
+					"B: ",       Interpret(CODE_1_B),
+					"Select: ",  Interpret(CODE_1_SELECT),
+					"Start: ",   Interpret(CODE_1_START),
+					"Up: ",      Interpret(CODE_1_UP),
+					"Down: ",    Interpret(CODE_1_DOWN),
+					"Left: ",    Interpret(CODE_1_LEFT),
+					"Right: ",   Interpret(CODE_1_RIGHT));
 				
 				MessageBox(hwndBasicBot, valuesboxmsg, "Harcoded values", MB_OK);
-				}
 				break;
+				}
 			case GUI_BOT_RESET:
 				ResetStatsASAP = true;
 				break;
 			case GUI_BOT_FRAMESKIP:
-				skip = GetDlgItemInt(hwndBasicBot,GUI_BOT_SKIPS,0,false);
-				pause = GetDlgItemInt(hwndBasicBot,GUI_BOT_SLOW,0,false);
+				UpdateFrameskip();
 				break;
 			case GUI_BOT_TITLES:
 				UpdateTitles();
 				break;
+			case GUI_BOT_VARS:
+			{
+				UpdateVariables = (IsDlgButtonChecked(hwndBasicBot, GUI_BOT_VARS) == 1);
+				break;
+			}
+			case GUI_BOT_LOG:
+			{
+				CreateLog = (IsDlgButtonChecked(hwndBasicBot, GUI_BOT_LOG) == 1);
+				break;
+			}
+			case GUI_BOT_UPDATEVARS:
+				{
+					ShowCounters(true);
+					break;
+				}
 			default:
 				break;
 			}
@@ -2590,10 +2637,13 @@ void CreateBasicBot()
 /**
  * This function should be called whenever the dialog is created
  */
-void InitCode()
+static void InitCode()
 {
 	CheckDlgButton(hwndBasicBot, FCEU_BotMode() == BOTMODE_OLDBOT ? GUI_BOT_EXTERNAL : GUI_BOT_INTERNAL, 1); // select the player1 radiobutton
+	CheckDlgButton(hwndBasicBot, GUI_BOT_VARS, (UpdateVariables?1:0)); // check the show variable checkbox
+	CheckDlgButton(hwndBasicBot, GUI_BOT_LOG, (CreateLog?1:0)); // check create log checkbox
 	//if (LoadBasicBotFile("default.bot"))
+	// strdup(FCEU_MakePath("default.bot", odirs[FCEUIOD_BBOT]).c_str())) (src/file.cpp)
 	if (false)
 	{
 		// false until i figure out why the directory changes
@@ -2611,7 +2661,7 @@ void InitCode()
 /**
  * This function should be called whenever the window is closing
  */
-void CrashWindow()
+static void CrashWindow()
 {
 	FromGUI();
 	//SaveBasicBotFile("default.bot");
@@ -2649,41 +2699,41 @@ void UpdateExternalButton()
  * Reset the stats, and the gui as well...
  * Should be called after a attempt is done
  */
-void ResetStats()
+static void ResetStats()
 {
 	BotAttempts = 0;
-	Parts = 1;
+	Segments = 1;
 	BotFrames = 0;
 	Oks = 0;
 	Invalids = 0;
 	for (int i=0; i<BOT_MAXSCORES; ++i)
 		BotBestScore[i] = 0;
-	if (LastPart != NULL)
+	if (LastSegment != NULL)
 	{
-		delete LastPart;
-		LastPart = NULL;
+		delete LastSegment;
+		LastSegment = NULL;
 	}
 	UpdateFullGUI();
 }
 /**
  * Update all the values in the GUI
  */
-void UpdateFullGUI()
+static void UpdateFullGUI()
 {
 	ToGUI();
 	UpdateBestGUI();
-	int empty[4] = {0,0,0,0};
+	int empty[6] = {0,0,0,0,0,0};
 	UpdateLastGUI(empty);
 	UpdateCountersGUI();
-	ShowCounters();
+	ShowCounters(false);
 }
 /**
- * Update the "best" parts of GUI
+ * Update the "best" segments of GUI
  */
-void UpdateBestGUI()
+static void UpdateBestGUI()
 {
 	#define BOT_RESULTBUFSIZE (BOT_MAXFRAMES*sizeof(int))
-	char tempstring[BOT_RESULTBUFSIZE];				// Used for the "result" part. last time i checked 1024*12 is > 4k, but ok.
+	char tempstring[BOT_RESULTBUFSIZE];				// Used for the "result" segment. last time i checked 1024*12 is > 4k, but ok.
 	memset(tempstring, 0, BOT_RESULTBUFSIZE);		// clear the array
 	char symbols[] = "ABET^v<>ABET^v<>";
 	bool seenplayer2 = false;						// Bool keeps track of player two inputs
@@ -2697,7 +2747,7 @@ void UpdateBestGUI()
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_BEST,BotBestScore[3],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_BEST,BotBestScore[4],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_BEST,BotBestScore[5],TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_BEST,Parts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_SEGMENT_BEST,Segments,TRUE);
 
 	// Create the run in ascii
 	int k = 0;     // keep track of len, needs to be below bufsize
@@ -2740,10 +2790,10 @@ void UpdateBestGUI()
 /**
  * Update the Last Scores
  */
-void UpdateLastGUI(int last[])
+static void UpdateLastGUI(int last[])
 {
 	// Update best scores
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,Parts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,Segments,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_LAST,BotAttempts,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_LAST,BotFrame,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_LAST,last[0],TRUE);
@@ -2752,26 +2802,26 @@ void UpdateLastGUI(int last[])
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_LAST,last[3],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_LAST,last[4],TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_LAST,last[5],TRUE);
-	SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_LAST,Parts,TRUE);
+	SetDlgItemInt(hwndBasicBot,GUI_BOT_SEGMENT_LAST,Segments,TRUE);
 }
 /**
- * update info for previous part
+ * update info for previous segment
  **/
-void UpdatePrevGUI(int best[])
+static void UpdatePrevGUI(int best[])
 {
-	// Update previous part scores
-	if (LastPart != NULL)
+	// Update previous segment scores
+	if (LastSegment != NULL)
 	{
-		SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_PREV,LastPart->part,TRUE);
-		SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_PREV,LastPart->attempt,TRUE);
-		SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_PREV,LastPart->frames,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_SEGMENT_PREV,LastSegment->segment,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPT_PREV,LastSegment->attempt,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES_PREV,LastSegment->frames,TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_SCORE_PREV,best[0],TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE1_PREV,best[1],TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE2_PREV,best[2],TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_PREV,best[3],TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_PREV,best[4],TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_PREV,best[5],TRUE);
-		SetDlgItemInt(hwndBasicBot,GUI_BOT_LB_PREV,LastPart->lastbutton,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_LB_PREV,LastSegment->lastbutton,TRUE);
 	}
 	else
 	{
@@ -2783,14 +2833,14 @@ void UpdatePrevGUI(int best[])
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE3_PREV,0,TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE4_PREV,0,TRUE);
 		SetDlgItemInt(hwndBasicBot,GUI_BOT_TIE5_PREV,0,TRUE);
-		SetDlgItemInt(hwndBasicBot,GUI_BOT_PART_PREV,0,TRUE);
+		SetDlgItemInt(hwndBasicBot,GUI_BOT_SEGMENT_PREV,0,TRUE);
 	}
 }
 
 /**
  * Update the counters in the GUI
  */
-void UpdateCountersGUI()
+static void UpdateCountersGUI()
 {
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_ATTEMPTS,TotalAttempts,TRUE);
 	SetDlgItemInt(hwndBasicBot,GUI_BOT_FRAMES,TotalFrames,TRUE);
@@ -2800,7 +2850,7 @@ void UpdateCountersGUI()
 /**
  * put the texts in the title controls to the result window, and in mem
  */
-void UpdateTitles() {
+static void UpdateTitles() {
 	for (int i=0; i<BOT_MAXSCORES; ++i) {
 		Formula[i+CODE_TITLE1] = GetText(hwndBasicBot,Labels[i+CODE_TITLE1]);
 	}
@@ -2815,7 +2865,7 @@ void UpdateTitles() {
 /**
  * Set up the vars to start a new attempt
  */
-void SetNewAttempt()
+static void SetNewAttempt()
 {
 	if (UpdateFromGUI)
 		FromGUI();
@@ -2830,32 +2880,28 @@ void SetNewAttempt()
 	Prand = GetRandom(P);
 	Qrand = GetRandom(Q);
 
-	// set the values from the previous parts correct
-	if (LastPart != NULL)
+	// set the values from the previous segments correct
+	if (LastSegment != NULL)
 	{
-		LastButtonPressed = LastPart->lastbutton;
+		LastButtonPressed = LastSegment->lastbutton;
 		for (int i=0; i<BOT_MAXCOUNTERS; ++i)
-			BotCounter[i] = LastPart->counters[i];
+			BotCounter[i] = LastSegment->counters[i];
 	}
 	else
 	{
 		memset(BotCounter, 0, BOT_MAXCOUNTERS*sizeof(int)); // Sets all the counters to 0.
 		LastButtonPressed = 0;
 	}
-	ShowCounters();
+	ShowCounters(false);
 	// Run init attempt code
 	Interpret(CODE_INIT_ATTEMPT);
 
 }
 
-
-
-
-
 /**
- * code to run when a new part is created
+ * code to run when a new segment is created
  */
-void SetNewPart()
+static void SetNewSegment()
 {
 				// save the current state to the default state
 				FCEUI_SaveState(BOT_STATEFILE);
@@ -2864,12 +2910,12 @@ void SetNewPart()
 				// and continue...
 				MovingOn = false;
 				BotAttempts = 0;
-				++Parts;
+				++Segments;
 				SetNewAttempt();
 
-				// init part event
+				// init segment event
 				// Run code
-				Interpret(CODE_INIT_PART);
+				Interpret(CODE_INIT_SEGMENT);
 }
 /**
  * Returns the number of frames to skip
@@ -2892,39 +2938,63 @@ int BotFramePause()
 /**
  * write one line of logging to a default logfile
  */
-void LogAttempt(int * scores, bool better)
+static void LogAttempt(int * scores, bool better)
 {
-	LogFile = fopen("bb-log.txt","at");
-	//fprintf(LogFile, "hello world!");
-	
-	fprintf(LogFile,"%sPart %d: Attempt %d: frames: %d",
-		better?"*":"",Parts,BotAttempts,BotFrame);
-	
-	// dont print scores that have - as title
-	if (!(Formula[CODE_TITLE1][0] == '-' && Formula[CODE_TITLE1][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE1],scores[0]);
-	if (!(Formula[CODE_TITLE2][0] == '-' && Formula[CODE_TITLE2][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE2],scores[1]);
-	if (!(Formula[CODE_TITLE3][0] == '-' && Formula[CODE_TITLE3][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE3],scores[2]);
-	if (!(Formula[CODE_TITLE4][0] == '-' && Formula[CODE_TITLE4][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE4],scores[3]);
-	if (!(Formula[CODE_TITLE5][0] == '-' && Formula[CODE_TITLE5][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE5],scores[4]);
-	if (!(Formula[CODE_TITLE6][0] == '-' && Formula[CODE_TITLE6][1] == 0))
-		fprintf(LogFile,", %s: %d",Formula[CODE_TITLE6],scores[5]);
-	fprintf(LogFile,"\n");
-	fclose(LogFile);	
+	if (CreateLog) {
+		LogFile = fopen("bb-log.txt","at");
+		//fprintf(LogFile, "hello world!");
+		
+		fprintf(LogFile,"%sSegment %d: Attempt %d: frames: %d",
+			better?"*":"",Segments,BotAttempts,BotFrame);
+		
+		// dont print scores that have - as title
+		if (!(Formula[CODE_TITLE1][0] == '-' && Formula[CODE_TITLE1][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE1],scores[0]);
+		if (!(Formula[CODE_TITLE2][0] == '-' && Formula[CODE_TITLE2][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE2],scores[1]);
+		if (!(Formula[CODE_TITLE3][0] == '-' && Formula[CODE_TITLE3][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE3],scores[2]);
+		if (!(Formula[CODE_TITLE4][0] == '-' && Formula[CODE_TITLE4][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE4],scores[3]);
+		if (!(Formula[CODE_TITLE5][0] == '-' && Formula[CODE_TITLE5][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE5],scores[4]);
+		if (!(Formula[CODE_TITLE6][0] == '-' && Formula[CODE_TITLE6][1] == 0))
+			fprintf(LogFile,", %s: %d",Formula[CODE_TITLE6],scores[5]);
+		fprintf(LogFile,"\n");
+		fclose(LogFile);
+	}
 }
 
-void ShowCounters()
+/*
+ * Update the right column with the counters of the bot
+ * If the ignoreflag argument is true, it will print no
+ * matter what the UpdateVariables setting is, otherwise
+ * only when that variable is true.
+ */
+static void ShowCounters(bool ignoreflag)
 {
-	HWND list = GetDlgItem(hwndBasicBot, GUI_BOT_COUNTERS);
-	SendMessage(list,LB_RESETCONTENT,NULL,NULL);
-	for (int i=0; i<BOT_MAXCOUNTERS; ++i)
-	{
-		char str[50];
-		sprintf(str,"[%03d]: %02X",i,BotCounter[i]);
-		SendMessage(list, LB_ADDSTRING, NULL, (LPARAM) str);
+	if (ignoreflag || UpdateVariables) {
+		HWND list = GetDlgItem(hwndBasicBot, GUI_BOT_COUNTERS);
+		SendMessage(list,LB_RESETCONTENT,NULL,NULL);
+		for (int i=0; i<BOT_MAXCOUNTERS; ++i)
+		{
+			char str[50];
+			sprintf(str,"[%03d]: %02X",i,BotCounter[i]);
+			SendMessage(list, LB_ADDSTRING, NULL, (LPARAM) str);
+		}
 	}
+}
+
+/*
+ * Updates the values for skipping frames and delaying the throttle
+ * These values are gotten from main.cpp and increase or decrease
+ * the bot running speed to allow quicker or slower computation.
+ */
+static void UpdateFrameskip() {
+	skip = GetDlgItemInt(hwndBasicBot,GUI_BOT_SKIPS,0,false);
+	pause = GetDlgItemInt(hwndBasicBot,GUI_BOT_SLOW,0,false);
+}
+
+static bool LoggingEnabled() {
+	return CreateLog;
 }

@@ -168,11 +168,9 @@ int erendlinep = 239;
 bool closeGame = false;
 
 
-// qfox 09/17/06: moved the skipcount outside because it was completely pointless
-//                in there.
-//Counts the number of frames that have not been displayed
-//Used for the bot, to skip frames (and save time).
-int skipcount = 0;
+// Counts the number of frames that have not been displayed.
+// Used for the bot, to skip frames (makes things faster).
+int BotFramesSkipped = 0;
 
 // Internal functions
 void SetDirs()
@@ -1011,9 +1009,9 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 		// qfox 09/17/06: for bot evaluation purposes, the number
 		//                of frames to be skipped is set from the
 		//                bot gui.
-		if(XBuf && (skipcount++ >= BotFrameSkip()))
+		if(XBuf && (BotFramesSkipped++ >= BotFrameSkip()))
 		{
-			skipcount = 0;
+			BotFramesSkipped = 0;
 			FCEUD_BlitScreen(XBuf);
 			// qfox 17/09/06: it can be wishfull for a coder to evaluate his bot.
 			//                slowing it down can help here :) defaults at 0
@@ -1098,14 +1096,14 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 //		if(Buffer && (writeCount))
 //			FCEUD_WriteSoundData(Buffer,temp_fps_scale,MAX(writeSize,writeCount));
 //
-//		if(XBuf && (skipcount >= maxskip))
+//		if(XBuf && (BotFramesSkipped >= maxskip))
 //		{
-//			skipcount = 0;
+//			BotFramesSkipped = 0;
 //			FCEUD_BlitScreen(XBuf);
 //			_updateMemWatch();
 //		}
 //		else
-//			skipcount++;
+//			BotFramesSkipped++;
 //
 //		_updateWindow();
 //	}
@@ -1147,15 +1145,15 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//		if(XBuf)
 	//		{
-	//			if((!skipthis && !NoWaiting) || (skipcount >= maxskip))
+	//			if((!skipthis && !NoWaiting) || (BotFramesSkipped >= maxskip))
 	//			{
 	//				FCEUD_BlitScreen(XBuf);
 	//				_updateMemWatch();
-	//				skipcount = 0;
+	//				BotFramesSkipped = 0;
 	//			}
 	//			else
 	//			{
-	//				skipcount++;
+	//				BotFramesSkipped++;
 	//			}
 	//		}
 
