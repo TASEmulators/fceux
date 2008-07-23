@@ -348,7 +348,7 @@
 #define GUI_BOT_MAXFRAMES               1031
 #define MW_ADDR10                       1031
 #define GUI_BOT_MAXATTEMPTS             1032
-#define GUI_BOT_MAXPARTS                1033
+#define GUI_BOT_MAXSEGMENTS             1033
 #define GUI_BOT_B_2                     1034
 #define MW_ADDR11                       1034
 #define GUI_BOT_INTERNAL                1035
@@ -367,7 +367,7 @@
 #define GUI_BOT_SCORE5                  1045
 #define GUI_BOT_SCORE6                  1046
 #define MW_ADDR15                       1046
-#define GUI_BOT_INIT_PART               1047
+#define GUI_BOT_INIT_SEGMENT            1047
 #define GUI_BOT_INIT_ATTEMPT            1048
 #define GUI_BOT_FRAMES                  1049
 #define MW_ADDR16                       1049
@@ -409,8 +409,9 @@
 #define GUI_BOT_TIE5_PREV               1088
 #define GUI_BOT_FRAMES_PREV             1089
 #define GUI_BOT_PART_LAST               1090
-#define GUI_BOT_PART_BEST               1091
-#define GUI_BOT_PART_PREV               1092
+#define GUI_BOT_SEGMENT_BEST            1091
+#define GUI_BOT_SEGMENT_LAST            1090
+#define GUI_BOT_SEGMENT_PREV            1092
 #define GUI_BOT_LB_PREV                 1093
 #define GUI_BOT_TIE5_PREV3              1094
 #define GUI_BOT_SLOW                    1095
@@ -433,6 +434,7 @@
 #define GUI_BOT_TITLEL5                 1112
 #define GUI_BOT_TITLEL6                 1113
 #define GUI_BOT_COUNTERS                1114
+#define GUI_BOT_UPDATEVARS              1115
 #define BTN_ALLOW_LRUD                  1117
 #define BTN_PRESET_SET1                 1119
 #define BTN_PRESET_SET2                 1120
@@ -485,6 +487,7 @@
 #define BOT_BUTTON_RUN                  1172
 #define BOT_BUTTON_TEST                 1173
 #define BOT_TF_ROM                      1174
+#define GUI_BOT_VARS                    1175
 #define BOT_TF_SCORE1_VALUE             1176
 #define BOT_TF_SCORE2_DESC              1181
 #define BOT_TF_SCORE2_VALUE             1182
@@ -661,7 +664,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
 #define _APS_NEXT_COMMAND_VALUE         40231
-#define _APS_NEXT_CONTROL_VALUE         1175
+#define _APS_NEXT_CONTROL_VALUE         1179
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
