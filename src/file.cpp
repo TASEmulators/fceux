@@ -30,6 +30,10 @@
 #include <zlib.h>
 #endif
 
+#ifdef WIN32
+#include <drivers/win/archive.h>
+#endif
+
 #include "types.h"
 #include "file.h"
 #include "utils/endian.h"
