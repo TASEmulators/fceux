@@ -18,6 +18,7 @@ extern "C"
 #include <lualib.h>
 }
 
+
 #include "types.h"
 #include "fceu.h"
 #include "video.h"
@@ -1706,3 +1707,10 @@ void FCEU_LuaGui(uint8 *XBuf) {
 
 	return;
 }
+
+#ifndef WIN32
+// stub for now
+void FCEUD_UpdateLuaMenus()
+{
+}
+#endif
