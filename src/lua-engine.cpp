@@ -158,6 +158,7 @@ int FCEU_LuaFrameSkip() {
 	case SPEED_MAXIMUM:
 		return 1;
 	}
+	return 0;
 }
 
 /**
