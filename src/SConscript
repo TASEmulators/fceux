@@ -12,6 +12,7 @@ file.cpp
 filter.cpp 
 ines.cpp
 input.cpp
+lua-engine.cpp
 netplay.cpp
 nsf.cpp
 palette.cpp

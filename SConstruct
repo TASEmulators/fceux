@@ -48,6 +48,9 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
+  if not conf.CheckLib('lua5.1', autoadd=1):
+    print 'Did not find liblua5.1 or lua5.1.lib, exiting!'
+    Exit(1)
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = " -DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
@@ -55,13 +58,14 @@ else:
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
+  env.ParseConfig('echo "-I/usr/include/lua5.1/ -llua5.1"')
   env = conf.Finish()
 
 # Build for this system's endianness, if not overriden
 #if env.has_key('LSB_FIRST'):
 #  if env['LSB_FIRST']:
 #    env.Append(CPPDEFINES = ['LSB_FIRST'])
-elif sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
+if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
   env.Append(CPPDEFINES = ['LSB_FIRST'])
 
 if env['FRAMESKIP']:

@@ -343,11 +343,12 @@ void MovieData::installValue(std::string& key, std::string& val)
 		comments.push_back(val);
 	else if(key == "savestate")
 	{
-		int len = HexStringToBytesLength(val);
+		int len = Base64StringToBytesLength(val);
+		if(len == -1) len = HexStringToBytesLength(val); // wasn't base64, try hex
 		if(len >= 1)
 		{
 			savestate.resize(len);
-			StringToBytes(val,&savestate[0],len);
+			StringToBytes(val,&savestate[0],len); // decodes either base64 or hex
 		}
 	}
 }
