@@ -280,7 +280,7 @@ int Base64StringToBytesLength(const std::string& str)
 {
 	if(str.size() < 7 || (str.size()-7) % 4 || str.substr(0,7) != "base64:") return -1;
 	
-	size_t c = (str.size() - 7) / 4;
+	size_t c = ((str.size() - 7) / 4) * 3;
 	if(str[str.size()-1] == '=') { --c;
 	if(str[str.size()-2] == '=') --c; }
 	return c;
@@ -294,13 +294,12 @@ bool StringToBytes(const std::string& str, void* data, int len)
 	{
 		// base64
 		unsigned char* tgt = (unsigned char*)data;
-		int pos = 7, remain = str.size() - pos;
-		while(remain > 0 && len > 0)
+		for(size_t pos = 7; pos < str.size() && len > 0; )
 		{
 			unsigned char input[4], converted[4];
 			for(int i=0; i<4; ++i)
 			{
-				if(pos >= remain && i > 0) return false; // invalid data
+				if(pos >= str.size() && i > 0) return false; // invalid data
 				input[i]	 = str[pos++];
 				if(input[i] & 0x80) return false;	  // illegal character
 				converted[i] = Base64Table[input[i]^0x80];
@@ -316,7 +315,9 @@ bool StringToBytes(const std::string& str, void* data, int len)
 			if(outlen > len) outlen = len;
 			memcpy(tgt, outpacket, outlen);
 			tgt += outlen;
+			len -= outlen;
 		}
+		return true;
 	}
 	if(str.size()>2 && str[0] == '0' && toupper(str[1]) == 'X')
 	{
