@@ -339,6 +339,11 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	ipsfn=strdup(FCEU_MakeFName(FCEUMKF_IPS,0,0).c_str());
 	fp=FCEU_fopen(name,ipsfn,"rb",0);
+	if(!fp)
+	{
+		return 0;
+	}
+
 	GetFileBase(fp->filename.c_str());
 
 	free(ipsfn);
