@@ -197,9 +197,11 @@ void FCEU_PutImage(void)
 	} 
 	else
 	{
-
 		//Some messages need to be displayed before the avi is dumped
 		DrawMessage(true);
+
+		//Lua gui should draw before the avi is dumped.
+		FCEU_LuaGui(XBuf);
 
 		//Update AVI before overlay stuff is written
 		if(!FCEUI_EmulationPaused())
@@ -229,8 +231,6 @@ void FCEU_PutImage(void)
 
 	if(FCEUD_ShouldDrawInputAids())
 		FCEU_DrawInput(XBuf);
-
-	FCEU_LuaGui(XBuf);
 
 	//Fancy input display code
 	if(input_display)
