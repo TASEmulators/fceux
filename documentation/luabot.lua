@@ -1,6 +1,6 @@
 -- LuaBot, concept bot for FCEU and ZSnes and any other emu that has compatible Lua engine
 -- qFox, 24 July 2008
--- version 1.01
+-- version 1.03
 
 local function realcount(t) -- accurately count the number of elements of a table, even if they contain nil values. not fast, but accurate.
 	local n = 0;
@@ -357,7 +357,7 @@ while (rand_if(isRunEnd())) do
 		-- press keys from bot
 		gui.text(10,10,"Attempt: "..attempt.." / "..maxattempts.."\nFrame: "..frame.." / "..maxframes);
 		if (segments[segment] and segments[segment].best and segments[segment].prev) then 
-			gui.text(10,30,"Last score: "..segments[segment].prev.score.." ok="..okattempts..", fails="..failattempts.."\nBest score: "..segments[segment].best.score);
+			gui.text(10,30,"Last score: "..segments[segment].prev.score.." ok="..okattempts..", fail="..failattempts.."\nBest score: "..segments[segment].best.score);
 		elseif (segments[segment] and segments[segment].prev) then
 			gui.text(10,30,"Last score: "..segments[segment].prev.score.."\nBest score: none, fails="..failattempts); 
 		end;
@@ -388,8 +388,6 @@ while (rand_if(isRunEnd())) do
 		if (rand_if(pressKeySelect2())) then key2.select = 1; end;
 		if (rand_if(pressKeyStart2()))  then key2.start = 1; end;
 
-		gui.text(50,70,"key1: "..realcount(key1)..", key2: "..realcount(key2).."\nlast1: "..realcount(lastkey1)..", last2: "..realcount(lastkey2));
-
 		onInputEnd();
 
 		lastkey1 = key1;
@@ -401,7 +399,7 @@ while (rand_if(isRunEnd())) do
 
 	-- actually set the keys here.
 	joypad.set(1, key1);
-	joypad.set(1, key2);
+	joypad.set(2, key2);
 
 	-- next frame
 	FCEU.frameadvance();
