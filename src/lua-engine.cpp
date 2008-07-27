@@ -1058,7 +1058,7 @@ int gui_popup(lua_State *L) {
 	const char *message = luaL_checkstring(L, 1);
 	const char *type = luaL_optstring(L, 2, "ok");
 	
-#ifdef __WIN32__
+#ifdef WIN32
 	int t;
 	if (strcmp(type, "ok") == 0)
 		t = MB_OK;
@@ -1069,7 +1069,7 @@ int gui_popup(lua_State *L) {
 	else
 		return luaL_error(L, "invalid popup type \"%s\"", type);
 
-        StopSound();
+    //StopSound(); //mbg merge 7/27/08
 	int result = MessageBox(hAppWnd, message, "Lua Script Pop-up", t);
 	
 	lua_settop(L,1);
