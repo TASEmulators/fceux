@@ -683,7 +683,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	case WM_CLOSE:
 	case WM_QUIT:
 		CloseMemoryWatch();
-		//DeleteObject(hdc);
+		//DeleteObject(hdc); //removed
 		break;
 	/*
 	case WM_KEYDOWN:
