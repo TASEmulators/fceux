@@ -1497,6 +1497,17 @@ int FCEU_LoadLuaCode(const char *filename) {
 	}
 
 	if (!LUA) {
+		
+		#ifdef WIN32
+			HMODULE test = LoadLibrary("lua5.1.dll");
+			if(!test)
+			{
+				FCEUD_PrintError("Couldn't initialize lua system due to failure loading lua5.1.dll");
+				return 0;
+			}
+			FreeLibrary(test);
+		#endif
+
 		LUA = lua_open();
 		luaL_openlibs(LUA);
 
