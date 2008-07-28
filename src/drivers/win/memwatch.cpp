@@ -47,7 +47,7 @@ char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
 const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
 
-static HMENU memwrecentmenu, memwrecentdmenu;
+static HMENU memwrecentmenu;
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
@@ -828,7 +828,6 @@ void CreateMemWatch()
 	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
 	memwrecentmenu = CreateMenu();
-	memwrecentdmenu = CreateMenu();
 
 	// Update recent files menu
 	UpdateMemw_RMenu(memwrecentmenu, memw_recent_files, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
