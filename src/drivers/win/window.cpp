@@ -1674,14 +1674,3 @@ void FCEUD_LuaRunFrom(void)
   DialogBoxParam(fceu_hInstance, "IDD_LUA_ADD", hAppWnd, DlgLuaScriptDialog,(LPARAM) &success);
 }
 
-void FCEUD_UpdateLuaMenus()
-{
-	MENUITEMINFO mii;
-	ZeroMemory( &mii, sizeof( mii));
-	mii.cbSize = sizeof( mii);
-	mii.fMask = MIIM_STATE;
-	mii.fState = MFS_UNCHECKED;
-	SetMenuItemInfo (fceumenu, ID_FILE_RUNLUASCRIPT, FALSE, &mii);
-	if (!FCEU_LuaRunning()) mii.fState |= MFS_DISABLED;
-	SetMenuItemInfo (fceumenu, ID_FILE_STOPLUASCRIPT, FALSE, &mii);
-}

@@ -163,7 +163,6 @@ void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp);
 void FCEUD_MovieRecordTo(void);
 void FCEUD_MovieReplayFrom(void);
 void FCEUD_LuaRunFrom(void);
-void FCEUD_UpdateLuaMenus(void);
 
 int32 FCEUI_GetDesiredFPS(void);
 void FCEUI_SaveSnapshot(void);

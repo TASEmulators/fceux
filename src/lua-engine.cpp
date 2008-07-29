@@ -115,7 +115,6 @@ static void FCEU_LuaOnStop() {
 	if (wasPaused && !FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
 	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
-	FCEUD_UpdateLuaMenus();
 }
 
 
@@ -1463,7 +1462,7 @@ void FCEU_LuaFrameBoundary() {
 #endif
 
 	} else {
-		FCEU_LuaOnStop();
+		FCEU_LuaStop();
 		FCEU_DispMessage("Script died of natural causes.\n");
 	}
 
@@ -1490,6 +1489,9 @@ int FCEU_LoadLuaCode(const char *filename) {
 		if (luaScriptName) free(luaScriptName);
 		luaScriptName = strdup(filename);
 	}
+
+	//stop any lua we might already have had running
+	FCEU_LuaStop();
 
 	if (!L) {
 		
@@ -1601,7 +1603,7 @@ void FCEU_ReloadLuaCode()
  */
 void FCEU_LuaStop() {
 
-	// Kill it.
+	//already killed
 	if (!L) return;
 
 	//execute the user's shutdown callbacks
@@ -1735,9 +1737,3 @@ void FCEU_LuaGui(uint8 *XBuf) {
 	return;
 }
 
-#ifndef WIN32
-// stub for now
-void FCEUD_UpdateLuaMenus()
-{
-}
-#endif

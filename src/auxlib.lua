@@ -3,7 +3,6 @@ iuplua_open()
 local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open")
 iupcontrolslua_open() 
 
-
 function emu.OnClose.iuplua()
 	if(emu.OnCloseIup ~= nil) then
 		emu.OnCloseIup();
