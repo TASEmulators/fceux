@@ -2453,6 +2453,28 @@
 			>
 		</File>
 		<File
+			RelativePath="..\src\auxlib.lua"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;"
+					Outputs="$(OutDir)\auxlib.lua"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;"
+					Outputs="$(OutDir)\auxlib.lua"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
 			RelativePath="..\src\cart.cpp"
 			>
 		</File>

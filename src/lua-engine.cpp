@@ -40,7 +40,7 @@ extern "C"
 #define FALSE 0
 #endif
 
-static lua_State *LUA;
+static lua_State *L;
 
 // Are we running any code right now?
 static char *luaScriptName = NULL;
@@ -62,6 +62,7 @@ static int skipRerecords = FALSE;
 static const char *frameAdvanceThread = "FCEU.FrameAdvance";
 static const char *memoryWatchTable = "FCEU.Memory";
 static const char *memoryValueTable = "FCEU.MemValues";
+static const char *onCloseCallback = "emu.OnClose";
 static const char *guiCallbackTable = "FCEU.GUI";
 
 // True if there's a thread waiting to run after a run of frame-advance.
@@ -124,7 +125,7 @@ static void FCEU_LuaOnStop() {
  * consult FCEU_LuaFrameSkip().
  */
 int FCEU_LuaSpeed() {
-	if (!LUA || !luaRunning)
+	if (!L || !luaRunning)
 		return 0;
 
 	//printf("%d\n", speedmode);
@@ -145,7 +146,7 @@ int FCEU_LuaSpeed() {
  * Returns 0 if no, 1 if frame should be skipped, -1 if it should not be.
  */
 int FCEU_LuaFrameSkip() {
-	if (!LUA || !luaRunning)
+	if (!L || !luaRunning)
 		return 0;
 
 	switch (speedmode) {
@@ -167,32 +168,32 @@ int FCEU_LuaFrameSkip() {
  *
  */
 void FCEU_LuaWriteInform() {
-	if (!LUA || !luaRunning) return;
+	if (!L || !luaRunning) return;
 	// Nuke the stack, just in case.
-	lua_settop(LUA,0);
+	lua_settop(L,0);
 
-	lua_getfield(LUA, LUA_REGISTRYINDEX, memoryWatchTable);
-	lua_pushnil(LUA);
-	while (lua_next(LUA, 1) != 0)
+	lua_getfield(L, LUA_REGISTRYINDEX, memoryWatchTable);
+	lua_pushnil(L);
+	while (lua_next(L, 1) != 0)
 	{
-		unsigned int addr = luaL_checkinteger(LUA, 2);
+		unsigned int addr = luaL_checkinteger(L, 2);
 		lua_Integer value;
-		lua_getfield(LUA, LUA_REGISTRYINDEX, memoryValueTable);
-		lua_pushvalue(LUA, 2);
-		lua_gettable(LUA, 4);
-		value = luaL_checkinteger(LUA, 5);
+		lua_getfield(L, LUA_REGISTRYINDEX, memoryValueTable);
+		lua_pushvalue(L, 2);
+		lua_gettable(L, 4);
+		value = luaL_checkinteger(L, 5);
 		if (FCEU_CheatGetByte(addr) != value)
 		{
 			// Value changed; update & invoke the Lua callback
-			lua_pushinteger(LUA, addr);
-			lua_pushinteger(LUA, FCEU_CheatGetByte(addr));
-			lua_settable(LUA, 4);
-			lua_pop(LUA, 2);
+			lua_pushinteger(L, addr);
+			lua_pushinteger(L, FCEU_CheatGetByte(addr));
+			lua_settable(L, 4);
+			lua_pop(L, 2);
 
 			numTries = 1000;
-			int res = lua_pcall(LUA, 0, 0, 0);
+			int res = lua_pcall(L, 0, 0, 0);
 			if (res) {
-				const char *err = lua_tostring(LUA, -1);
+				const char *err = lua_tostring(L, -1);
 				
 #ifdef WIN32
 				//StopSound(); //mbg merge 7/23/08
@@ -202,9 +203,9 @@ void FCEU_LuaWriteInform() {
 #endif
 			}
 		}
-		lua_settop(LUA, 2);
+		lua_settop(L, 2);
 	}
-	lua_settop(LUA, 0);
+	lua_settop(L, 0);
 }
 
 ///////////////////////////
@@ -704,11 +705,10 @@ static int gui_drawpixel(lua_State *L) {
 
 	int x = luaL_checkinteger(L, 1);
 	int y = luaL_checkinteger(L,2);
-	y += FSettings.FirstSLine;
 
 	uint8 colour = gui_getcolour(L,3);
 
-	if (x < 0 || x >= 256 || y < FSettings.FirstSLine || y > FSettings.LastSLine)
+	if (x < 0 || x >= 256 || y < 0 || y >= 256)
 		luaL_error(L,"bad coordinates");
 
 	gui_prepare();
@@ -727,14 +727,12 @@ static int gui_drawline(lua_State *L) {
 	y1 = luaL_checkinteger(L,2);
 	x2 = luaL_checkinteger(L,3);
 	y2 = luaL_checkinteger(L,4);
-	y1 += FSettings.FirstSLine;
-	y2 += FSettings.FirstSLine;
 	colour = gui_getcolour(L,5);
 
-	if (x1 < 0 || x1 >= 256 || y1 < FSettings.FirstSLine || y1 > FSettings.LastSLine)
+	if (x1 < 0 || x1 >= 256 || y1 < 0 || y1 >= 256)
 		luaL_error(L,"bad coordinates");
 
-	if (x2 < 0 || x2 >= 256 || y2 < FSettings.FirstSLine || y2 > FSettings.LastSLine)
+	if (x2 < 0 || x2 >= 256 || y2 < 0 || y2 >= 256)
 		luaL_error(L,"bad coordinates");
 
 	gui_prepare();
@@ -800,14 +798,12 @@ static int gui_drawbox(lua_State *L) {
 	y1 = luaL_checkinteger(L,2);
 	x2 = luaL_checkinteger(L,3);
 	y2 = luaL_checkinteger(L,4);
-	y1 += FSettings.FirstSLine;
-	y2 += FSettings.FirstSLine;
 	colour = gui_getcolour(L,5);
 
-	if (x1 < 0 || x1 >= 256 || y1 < FSettings.FirstSLine || y1 > FSettings.LastSLine)
+	if (x1 < 0 || x1 >= 256 || y1 < 0 || y1 >= 256)
 		luaL_error(L,"bad coordinates");
 
-	if (x2 < 0 || x2 >= 256 || y2 < FSettings.FirstSLine || y2 > FSettings.LastSLine)
+	if (x2 < 0 || x2 >= 256 || y2 < 0 || y2 >= 256)
 		luaL_error(L,"bad coordinates");
 
 
@@ -856,7 +852,7 @@ static int gui_gdscreenshot(lua_State *L) {
 	
 	// This is QUITE nasty...
 	
-	const int width=256, height=1+FSettings.LastSLine-FSettings.FirstSLine;
+	const int width=256, height=256;
 	
 	// Stack allocation
 	unsigned char *buffer = (unsigned char*)alloca(2+2+2+1+4 + (width*height*4));
@@ -883,7 +879,7 @@ static int gui_gdscreenshot(lua_State *L) {
 	// Now we can actually save the image data
 	int i = 0;
 	int x,y;
-	for (y=FSettings.FirstSLine; y <= FSettings.LastSLine; y++) {
+	for (y=0; y < height; y++) {
 		for (x=0; x < width; x++) {
 			uint8 index = XBuf[y*256 + x];
 
@@ -929,14 +925,13 @@ static int gui_text(lua_State *L) {
 	x = luaL_checkinteger(L,1);
 	y = luaL_checkinteger(L,2);
 	msg = luaL_checkstring(L,3);
-	y += FSettings.FirstSLine;
 
-	if (x < 0 || x >= 256 || y < FSettings.FirstSLine || y > FSettings.LastSLine)
+	if (x < 0 || x >= 256 || y < 0 || y >= 256)
 		luaL_error(L,"bad coordinates");
 
 	gui_prepare();
 
-	DrawTextTransWH(gui_data+y*256+x, 256, (uint8 *)msg, 0x20+0x80, 256 - x, 1 + FSettings.LastSLine - y);
+	DrawTextTransWH(gui_data+y*256+x, 256, (uint8 *)msg, 0x20+0x80, 256 - x, 256 - y);
 
 	return 0;
 
@@ -994,7 +989,7 @@ static int gui_gdoverlay(lua_State *L) {
 		y = 0; 
 	}	
 	
-	for (sy += FSettings.FirstSLine; y < height && sy <= FSettings.LastSLine; y++, sy++) {
+	for (; y < height && sy < 256; y++, sy++) {
 	
 		if (baseX < 0) {
 			x = -baseX;
@@ -1436,13 +1431,13 @@ void FCEU_LuaFrameBoundary() {
 //	printf("Lua Frame\n");
 
 	// HA!
-	if (!LUA || !luaRunning)
+	if (!L || !luaRunning)
 		return;
 
 	// Our function needs calling
-	lua_settop(LUA,0);
-	lua_getfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
-	lua_State *thread = lua_tothread(LUA,1);	
+	lua_settop(L,0);
+	lua_getfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
+	lua_State *thread = lua_tothread(L,1);	
 
 	// Lua calling C must know that we're busy inside a frame boundary
 	frameBoundary = TRUE;
@@ -1456,8 +1451,8 @@ void FCEU_LuaFrameBoundary() {
 	} else if (result != 0) {
 		// Done execution by bad causes
 		FCEU_LuaOnStop();
-		lua_pushnil(LUA);
-		lua_setfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
+		lua_pushnil(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
 		
 		// Error?
 #ifdef WIN32
@@ -1496,7 +1491,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 		luaScriptName = strdup(filename);
 	}
 
-	if (!LUA) {
+	if (!L) {
 		
 		#ifdef WIN32
 			HMODULE test = LoadLibrary("lua5.1.dll");
@@ -1508,59 +1503,65 @@ int FCEU_LoadLuaCode(const char *filename) {
 			FreeLibrary(test);
 		#endif
 
-		LUA = lua_open();
-		luaL_openlibs(LUA);
+		L = lua_open();
+		luaL_openlibs(L);
 
-		luaL_register(LUA, "FCEU", fceulib);
-		luaL_register(LUA, "memory", memorylib);
-		luaL_register(LUA, "joypad", joypadlib);
-		luaL_register(LUA, "savestate", savestatelib);
-		luaL_register(LUA, "movie", movielib);
-		luaL_register(LUA, "gui", guilib);
+		luaL_register(L, "FCEU", fceulib);
+		luaL_register(L, "memory", memorylib);
+		luaL_register(L, "joypad", joypadlib);
+		luaL_register(L, "savestate", savestatelib);
+		luaL_register(L, "movie", movielib);
+		luaL_register(L, "gui", guilib);
 
-		lua_pushcfunction(LUA, base_AND);
-		lua_setfield(LUA, LUA_GLOBALSINDEX, "AND");
-		lua_pushcfunction(LUA, base_OR);
-		lua_setfield(LUA, LUA_GLOBALSINDEX, "OR");
-		lua_pushcfunction(LUA, base_XOR);
-		lua_setfield(LUA, LUA_GLOBALSINDEX, "XOR");
-		lua_pushcfunction(LUA, base_BIT);
-		lua_setfield(LUA, LUA_GLOBALSINDEX, "BIT");
+		lua_pushcfunction(L, base_AND);
+		lua_setfield(L, LUA_GLOBALSINDEX, "AND");
+		lua_pushcfunction(L, base_OR);
+		lua_setfield(L, LUA_GLOBALSINDEX, "OR");
+		lua_pushcfunction(L, base_XOR);
+		lua_setfield(L, LUA_GLOBALSINDEX, "XOR");
+		lua_pushcfunction(L, base_BIT);
+		lua_setfield(L, LUA_GLOBALSINDEX, "BIT");
+
+		lua_newtable(L);
+		lua_setglobal(L,"emu");
+		lua_getglobal(L,"emu");
+		lua_newtable(L);
+		lua_setfield(L,-2,"OnClose");
 
 		
-		lua_newtable(LUA);
-		lua_setfield(LUA, LUA_REGISTRYINDEX, memoryWatchTable);
-		lua_newtable(LUA);
-		lua_setfield(LUA, LUA_REGISTRYINDEX, memoryValueTable);
+		lua_newtable(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, memoryWatchTable);
+		lua_newtable(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, memoryValueTable);
 	}
 
 	// We make our thread NOW because we want it at the bottom of the stack.
 	// If all goes wrong, we let the garbage collector remove it.
-	lua_State *thread = lua_newthread(LUA);
+	lua_State *thread = lua_newthread(L);
 	
 	// Load the data	
-	int result = luaL_loadfile(LUA,filename);
+	int result = luaL_loadfile(L,filename);
 
 	if (result) {
 #ifdef WIN32
 		// Doing this here caused nasty problems; reverting to MessageBox-from-dialog behavior.
                 //StopSound();//StopSound(); //mbg merge 7/23/08
-		MessageBox(NULL, lua_tostring(LUA,-1), "Lua load error", MB_OK | MB_ICONSTOP);
+		MessageBox(NULL, lua_tostring(L,-1), "Lua load error", MB_OK | MB_ICONSTOP);
 #else
-		fprintf(stderr, "Failed to compile file: %s\n", lua_tostring(LUA,-1));
+		fprintf(stderr, "Failed to compile file: %s\n", lua_tostring(L,-1));
 #endif
 
 		// Wipe the stack. Our thread
-		lua_settop(LUA,0);
+		lua_settop(L,0);
 		return 0; // Oh shit.
 	}
 
 	
 	// Get our function into it
-	lua_xmove(LUA, thread, 1);
+	lua_xmove(L, thread, 1);
 	
 	// Save the thread to the registry. This is why I make the thread FIRST.
-	lua_setfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
+	lua_setfield(L, LUA_REGISTRYINDEX, frameAdvanceThread);
 	
 
 	// Initialize settings
@@ -1601,12 +1602,26 @@ void FCEU_ReloadLuaCode()
 void FCEU_LuaStop() {
 
 	// Kill it.
-	if (LUA) {
-		lua_close(LUA); // this invokes our garbage collectors for us
-		LUA = NULL;
-		FCEU_LuaOnStop();
+	if (!L) return;
+
+	//execute the user's shutdown callbacks
+	//onCloseCallback
+	lua_getglobal(L, "emu");
+	lua_getfield(L, -1, "OnClose");
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0)
+	{
+		lua_call(L,0,0);
 	}
 
+	//sometimes iup uninitializes com
+	CoInitialize(0);
+	//lua_gc(L,LUA_GCCOLLECT,0);
+
+
+	lua_close(L); // this invokes our garbage collectors for us
+	L = NULL;
+	FCEU_LuaOnStop();
 }
 
 /**
@@ -1614,7 +1629,7 @@ void FCEU_LuaStop() {
  *
  */
 int FCEU_LuaRunning() {
-	return LUA && luaRunning;
+	return L && luaRunning;
 }
 
 
@@ -1644,7 +1659,7 @@ uint8 FCEU_LuaReadJoypad(int which) {
  * This function will not return true if a script is not running.
  */
 int FCEU_LuaRerecordCountSkip() {
-	return LUA && luaRunning && skipRerecords;
+	return L && luaRunning && skipRerecords;
 }
 
 
@@ -1656,32 +1671,32 @@ int FCEU_LuaRerecordCountSkip() {
  */
 void FCEU_LuaGui(uint8 *XBuf) {
 
-	if (!LUA || !luaRunning)
+	if (!L || !luaRunning)
 		return;
 
 	// First, check if we're being called by anybody
-	lua_getfield(LUA, LUA_REGISTRYINDEX, guiCallbackTable);
+	lua_getfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
 	
-	if (lua_isfunction(LUA, -1)) {
+	if (lua_isfunction(L, -1)) {
 		// We call it now
 		numTries = 1000;
-		int ret = lua_pcall(LUA, 0, 0, 0);
+		int ret = lua_pcall(L, 0, 0, 0);
 		if (ret != 0) {
 #ifdef WIN32
 			//StopSound();//StopSound(); //mbg merge 7/23/08
-			MessageBox(hAppWnd, lua_tostring(LUA, -1), "Lua Error in GUI function", MB_OK);
+			MessageBox(hAppWnd, lua_tostring(L, -1), "Lua Error in GUI function", MB_OK);
 #else
-			fprintf(stderr, "Lua error in gui.register function: %s\n", lua_tostring(LUA, -1));
+			fprintf(stderr, "Lua error in gui.register function: %s\n", lua_tostring(L, -1));
 #endif
 			// This is grounds for trashing the function
-			lua_pushnil(LUA);
-			lua_setfield(LUA, LUA_REGISTRYINDEX, guiCallbackTable);
+			lua_pushnil(L);
+			lua_setfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
 		
 		}
 	}
 
 	// And wreak the stack
-	lua_settop(LUA, 0);
+	lua_settop(L, 0);
 
 	if (gui_used == GUI_CLEAR)
 		return;
@@ -1695,14 +1710,14 @@ void FCEU_LuaGui(uint8 *XBuf) {
 	
 	// direct copy
 	if (transparency == 0) {
-		for (y = FSettings.FirstSLine; y <= FSettings.LastSLine && y < 256; y++) {
+		for (y = 0; y < 256; y++) {
 			for (x=0; x < 256; x++) {
 				if (gui_data[y*256+x] != GUI_COLOUR_CLEAR)
 					XBuf[y*256 + x] =  gui_data[y*256+x];
 			}
 		}
 	} else {
-		for (y = FSettings.FirstSLine; y <= FSettings.LastSLine && y < 256; y++) {
+		for (y = 0; y < 256; y++) {
 			for (x=0; x < 256; x++) {
 				if (gui_data[y*256+x] != GUI_COLOUR_CLEAR) {
 					uint8 rg, gg, bg,  rx, gx, bx,  r, g, b;
