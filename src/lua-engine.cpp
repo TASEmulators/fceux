@@ -62,7 +62,6 @@ static int skipRerecords = FALSE;
 static const char *frameAdvanceThread = "FCEU.FrameAdvance";
 static const char *memoryWatchTable = "FCEU.Memory";
 static const char *memoryValueTable = "FCEU.MemValues";
-static const char *onCloseCallback = "emu.OnClose";
 static const char *guiCallbackTable = "FCEU.GUI";
 
 // True if there's a thread waiting to run after a run of frame-advance.
@@ -1617,7 +1616,11 @@ void FCEU_LuaStop() {
 	}
 
 	//sometimes iup uninitializes com
+	//MBG TODO - test whether this is really necessary. i dont think it is
+	#ifdef WIN32
 	CoInitialize(0);
+	#endif
+
 	//lua_gc(L,LUA_GCCOLLECT,0);
 
 
