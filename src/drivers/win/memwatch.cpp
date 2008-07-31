@@ -24,7 +24,8 @@
 #include "../../debug.h"
 #include "debugger.h"
 #include "../../utils/xstring.h"
-
+#include "help.h"
+#include <string>
 const int NUMWATCHES = 24;
 const int LABELLENGTH = 64;
 const int ADDRESSLENGTH = 16;
@@ -41,6 +42,7 @@ bool fileChanged = false;
 bool MemWatchLoadOnStart = false;
 bool MemWatchLoadFileOnStart = false;
 static HMENU memwmenu = 0;
+std::string memwhelp = "{01ABA5FD-D54A-44EF-961A-42C7AA586D95}"; //Name of memory watch chapter in .chm (sure would be nice to get better names for these!"
 
 char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
 
@@ -739,6 +741,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		case MEMW_HELP_WCOMMANDS:
+			OpenHelpWindow(memwhelp);
 			break;
 
 		default:
