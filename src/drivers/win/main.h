@@ -57,7 +57,6 @@ static const char *default_directory_names[12] = {
 	"cheats",   // cheats
 	"movies",   // movies
 	"tools",    // memwatch
-	"tools",    // basicbot
 	"tools",    // macro
 	"tools",    // input presets
 	"tools"     // lua scripts

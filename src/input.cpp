@@ -40,10 +40,6 @@
 
 #ifdef WIN32
 #include "drivers/win/main.h"
-// qfox: For UpdateExternalButton(), called when the
-//       botmode state changes, to update a label in gui.
-#include "drivers/win/basicbot.h"
-#include "drivers/win/basicbot2.h" // qfox: new bot
 #include "drivers/win/memwatch.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/debugger.h"
@@ -84,8 +80,6 @@ bool lagFlag;
 static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
-
-BOTMODES BotMode = BOTMODE_OFF;
 
 #ifdef _USE_SHARED_MEMORY_
 static uint32 BotPointer = 0; //mbg merge 7/18/06 changed to uint32
@@ -268,20 +262,6 @@ static void StrobeGP(int w)
 static INPUTC GPC={ReadGP,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 static INPUTC GPCVS={ReadGPVS,0,StrobeGP,UpdateGP,0,0,LogGP,LoadGP};
 
-BOTMODES FCEU_BotMode()
-{
-	return BotMode;
-}
-
-void FCEU_SetBotMode(BOTMODES x)
-{
-	BotMode = x;
-#ifdef WIN32
-	// qfox: update gui in basicbot
-	UpdateExternalButton();
-#endif // WIN32
-}
-
 void FCEU_DrawInput(uint8 *buf)
 {
 	for(int pad=0;pad<2;pad++)
@@ -290,50 +270,11 @@ void FCEU_DrawInput(uint8 *buf)
 		portFC.driver->Draw(buf,portFC.attrib);
 }
 
-void FCEU_UpdateBot()
-{
-#ifdef _USE_SHARED_MEMORY_
-	//This is the external input (aka bot) code
-	if(BotMode == BOTMODE_OFF)
-		return;
-	if(BotInput[0])
-	{
-		BotPointer++;
-		switch(BotInput[BotPointer] >> 16)
-		{
-		case 0:
-			joy[0] = BotInput[BotPointer] & 255;
-			joy[1] = BotInput[BotPointer] >> 8;
-			joy[2] = joy[3] = 0;
-			FCEUI_FrameAdvance();
-			break;
-		case 1:
-			FCEUI_LoadState(BOT_STATEFILE);
-			break;
-		default:
-			break;
-		}
-
-		//Bot input ends; let the world know we're done
-		if(BotPointer >= BotInput[0] || BotPointer >= BOT_MAXFRAMES-1)
-		{
-			BotInput[0] = 0;
-			BotPointer = 0;
-		}
-	}
-	else
-	{
-		BotPointer = 0;
-		joy[0] = joy[1] = joy[2] = joy[3] = 0;
-	}
-#endif //_USE_SHARED_MEMORY_
-}
-
 
 void FCEU_UpdateInput(void)
 {
 	//tell all drivers to poll input and set up their logical states
-	if(!FCEUMOV_Mode(MOVIEMODE_PLAY) && BotMode == BOTMODE_OFF)
+	if(!FCEUMOV_Mode(MOVIEMODE_PLAY))
 	{
 		for(int port=0;port<2;port++)
 			joyports[port].driver->Update(port,joyports[port].ptr,joyports[port].attrib);

@@ -57,8 +57,6 @@
 #include "tasedit.h"
 
 #include "main.h"
-#include "basicbot.h"
-#include "basicbot2.h" // qfox: new bot
 #include "args.h"
 #include "config.h"
 #include "sound.h"
@@ -127,8 +125,8 @@ std::string BaseDirectory;
 int PauseAfterLoad;
 
 // Contains the names of the overridden standard directories
-// in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, basicbot, macro, input presets, lua scripts, base
-char *directory_names[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+// in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, macro, input presets, lua scripts, base
+char *directory_names[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 //Handle of the main window.
 HWND hAppWnd = 0;
@@ -454,20 +452,6 @@ static void DriverKill(void)
 HANDLE mapGameMemBlock;
 HANDLE mapRAM;
 
-// qfox: about BotInput
-// If in botmode, BasicBot will put the input in this variable.
-// FCEU_UpdateBot() in input.cpp will then fill the controller
-// inputs according to this variable. The layout is as follows:
-//   bit  0-7 =  player 1 controller
-//   bits 8-15 = player 2 controller
-//   bit  17 = load savestate 1 if set
-// Order of these buttons bitwise:
-//   A B SELECT START UP DOWN LEFT RIGHT
-// TODO: fix a new variable to tell the function to load a save
-//       state to allow the bot to compute four players (since
-//       there's not enough space to do so now)
-uint32 *BotInput;
-
 void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 {
 	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
@@ -491,13 +475,6 @@ void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 		*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
 	}
 
-	//Bot input
-	// qfox: tossed mapping alltogether
-	//mapBotInput = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE,0, BOT_MAXFRAMES*sizeof(int), "fceu.BotInput");
-	//BotInput = (uint32 *) MapViewOfFile(mapBotInput, FILE_MAP_WRITE, 0, 0, 0);
-	// qfox: not working with a map anymore
-	BotInput = new uint32[BOT_MAXFRAMES];
-	BotInput[0] = 0;
 }
 
 void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
@@ -525,9 +502,6 @@ void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
 		free(GameMemBlock);
 		GameMemBlock = NULL;
 	}
-
-	// qfox: not working with map anymore
-	delete BotInput;
 }
 #endif
 
@@ -694,14 +668,6 @@ doloopy:
 	        uint8 *gfx=0; ///contains framebuffer
 			int32 *sound=0; ///contains sound data buffer
 			int32 ssize=0; ///contains sound samples count
-
-			#ifdef _USE_SHARED_MEMORY_
-			// press input like BasicBot tells you to
-			UpdateBasicBot(); // qfox: old bot
-			// same as above, for the new bot
-			BasicBotGetInput();  // qfox: new bot (uses same input variables and mechanism as old bot, for now)
-			FCEU_UpdateBot(); // qfox: shouldnt this be inside the sharedmemory ifdef?? (it is now, was below the endif)
-			#endif
 
 			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
@@ -1002,26 +968,6 @@ void win_debuggerLoop()
 // Update the game and gamewindow with a new frame
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
-	//mbg merge 7/19/06 - leaving this untouched but untested
-	//its probably not optimal
-	if(FCEU_BotMode() != BOTMODE_OFF) {
-		//this counts the number of frames we've skipped blitting
-		// qfox 09/17/06: for bot evaluation purposes, the number
-		//                of frames to be skipped is set from the
-		//                bot gui.
-		if(XBuf && (BotFramesSkipped++ >= BotFrameSkip()))
-		{
-			BotFramesSkipped = 0;
-			FCEUD_BlitScreen(XBuf);
-			// qfox 17/09/06: it can be wishfull for a coder to evaluate his bot.
-			//                slowing it down can help here :) defaults at 0
-			if (BotFramePause() > 0) Sleep(BotFramePause());
-		}
-		UpdateFCEUWindow();
-		FCEUD_UpdateInput();
-		return;
-	}
-
 	win_SoundSetScale(fps_scale);
 
 	//write all the sound we generated.

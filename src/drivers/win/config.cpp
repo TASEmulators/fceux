@@ -36,7 +36,6 @@
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
-extern char *BasicBotDir;
 extern int autoHoldKey, autoHoldClearKey;
 
 extern uint8 gNoBGFillColor;
@@ -49,7 +48,6 @@ extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
 extern int PPUViewPosX,PPUViewPosY;
 extern int MainWindow_wndx, MainWindow_wndy;
-extern int BasicBot_wndx, BasicBot_wndy;
 extern int MemWatch_wndx, MemWatch_wndy;
 extern int Monitor_wndx, Monitor_wndy;
 extern int Tracer_wndx, Tracer_wndy;
@@ -99,7 +97,6 @@ static CFGSTRUCT fceuconfig[] = {
 	NACS("odcheats",directory_names[5]),
 	NACS("odmovies",directory_names[6]),
 	NACS("odmemwatch",directory_names[7]),
-	NACS("odbasicbot",directory_names[8]),
 	NACS("odmacro",directory_names[9]),
 	NACS("odinput",directory_names[10]),
 	NACS("odlua",directory_names[11]),
@@ -153,7 +150,6 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(frame_display),
 	AC(input_display),
 	ACS(MemWatchDir),
-	ACS(BasicBotDir),
 	AC(EnableBackgroundInput),
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
@@ -176,8 +172,6 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(PPUViewPosY),
 	AC(MainWindow_wndx),
 	AC(MainWindow_wndy),
-	AC(BasicBot_wndx),
-	AC(BasicBot_wndy),
 	AC(MemWatch_wndx),
 	AC(MemWatch_wndy),
 	AC(Monitor_wndx),

@@ -533,7 +533,7 @@ bool FCEUSS_Load(char *fname)
 	//If in bot mode, don't do a backup when loading.
 	//Otherwise you eat at the hard disk, since so many
 	//states are being loaded.
-	if(FCEUSS_LoadFP(st,FCEU_BotMode() != BOTMODE_OFF?SSLOADPARAM_NOBACKUP:SSLOADPARAM_BACKUP))
+	if(FCEUSS_LoadFP(st,SSLOADPARAM_BACKUP))
 	{
 		if(fname)
 		{

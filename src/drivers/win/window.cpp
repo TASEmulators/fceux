@@ -41,8 +41,6 @@
 #include "memview.h"
 #include "tracer.h"
 #include "cdlogger.h"
-#include "basicbot.h"
-#include "basicbot2.h" // qfox: new bot
 #include "throttle.h"
 #include "monitor.h"
 #include "tasedit.h"
@@ -93,7 +91,6 @@ const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*rec
 // Exported variables
 HWND pwindow;
 int EnableBackgroundInput = 0;
-int EnableExternalInput = 0;
 int ismaximized = 0;
 
 //Menu handle of the main menu.
@@ -312,7 +309,6 @@ void UpdateCheckedMenuItems()
 
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_EXTERNAL_INPUT, EnableExternalInput ? MF_CHECKED : MF_UNCHECKED);
 
 	int AutoFirePatternIDs[] = {
 		MENU_AUTOFIRE_PATTERN_1,
@@ -923,21 +919,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				DoTasEdit();
 				break;
 
-			case MENU_EXTERNAL_INPUT:
-				// qfox: TODO: this should be looked into. treat true external input as special versus the bot input
-				//       right now it is compatible with the old mode, but pressing this menuoption will turn off
-				//       the new bot if on...
-				FCEU_SetBotMode(
-					(
-						(1^(FCEU_BotMode() == BOTMODE_OFF?0:1))==1?
-							BOTMODE_OLDBOT:
-							BOTMODE_OFF
-					)
-				);
-				EnableExternalInput = EnableExternalInput?0:1;
-				UpdateCheckedMenuItems(); break;
-				break;
-
 			case MENU_HIDE_MENU:
 				// Hide menu menu was selected
 				ToggleHideMenu();
@@ -1017,14 +998,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_CHEATS:
 				ConfigCheats(hWnd);
-				break;
-
-			case MENU_BASIC_BOT:
-				CreateBasicBot();
-				break;
-
-			case MENU_BASIC_BOT2:
-				BotCreateBasicBot();
 				break;
 
 			case MENU_DIRECTORIES:

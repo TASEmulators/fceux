@@ -748,40 +748,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\win\basicbot.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\drivers\win\basicbot.h"
-					>
-				</File>
-				<File
-					RelativePath="..\src\drivers\win\basicbot2.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\src\drivers\win\basicbot2.h"
-					>
-				</File>
-				<File
 					RelativePath="..\src\drivers\win\cdlogger.cpp"
 					>
 				</File>
@@ -2460,7 +2426,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;"
+					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 					Outputs="$(OutDir)\auxlib.lua"
 				/>
 			</FileConfiguration>
@@ -2469,7 +2435,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;"
+					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 					Outputs="$(OutDir)\auxlib.lua"
 				/>
 			</FileConfiguration>
