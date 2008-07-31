@@ -276,7 +276,7 @@ void UpdateMemWatch()
 			}
 			else
 			{
-				text = "-";
+				text = "-    ";
 			}
 
 			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
