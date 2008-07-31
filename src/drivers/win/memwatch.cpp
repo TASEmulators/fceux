@@ -273,6 +273,11 @@ void UpdateMemWatch()
 						text = U8ToDecStr(GetMem(mwrec.addr));
 					}
 				}
+
+				int len = strlen(text);
+				for(int i=len;i<5;i++)
+					text[i] = ' ';
+				text[5] = 0;
 			}
 			else
 			{
