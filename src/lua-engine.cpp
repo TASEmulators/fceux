@@ -1576,7 +1576,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 	//FCEU_LuaFrameBoundary();
 
 	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
-	lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
+	//lua_sethook(thread, FCEU_LuaHookFunction, LUA_MASKCOUNT, 10000);
 
 	// We're done.
 	return 1;
