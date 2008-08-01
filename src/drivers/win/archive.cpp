@@ -401,6 +401,8 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 
 	//check the file against the signatures
 	std::fstream* inf = FCEUD_UTF8_fstream(fname,"rb");
+	if(!inf) return ArchiveScanRecord();
+
 	int matchingFormat = -1;
 	for(uint32 i=0;i<(int)formatRecords.size();i++)
 	{

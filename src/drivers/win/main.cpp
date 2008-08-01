@@ -1188,7 +1188,11 @@ std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
 	else if(!strcmp(m,"a+") || !strcmp(m,"a+b"))
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
 	
-	return new std::fstream(n,mode);
+	std::fstream *fs = new std::fstream(n,mode);
+	if(!fs->is_open()) {
+		delete fs;
+		return 0;
+	} else return fs;
 }
 
 FILE *FCEUD_UTF8fopen(const char *n, const char *m)

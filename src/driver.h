@@ -188,9 +188,13 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 void FCEUI_CheatSearchShowExcluded(void);
 void FCEUI_CheatSearchSetCurrentAsOriginal(void);
 
+//.rom
 #define FCEUIOD_ROMS    0
+//NV = nonvolatile. save data.
 #define FCEUIOD_NV      1
+//savestates
 #define FCEUIOD_STATES  2
+//.fds ?
 #define FCEUIOD_FDSROM  3
 #define FCEUIOD_SNAPS   4
 #define FCEUIOD_CHEATS  5
