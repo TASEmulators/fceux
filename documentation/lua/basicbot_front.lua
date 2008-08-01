@@ -1,7 +1,4 @@
--- BasicBot, a LuaBot frontend
--- qFox, 30 July 2008
--- version 1.04 (unstable load button!)
-
+-- BeeBee, BasicBot Frontend v1.06
 -- we need iup, so include it here
 local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
 iuplua_open();
@@ -37,12 +34,12 @@ function emu.OnCloseIup()
 end;
 
 function createTextareaTab(reftable, tmptable, token, tab, fun, val) -- specific one, at that :)
-	reftable[token] = iup.multiline{title="Contents",expand="YES", border="YES",value=val};
+	reftable[token] = iup.multiline{title="Contents",expand="YES", border="YES" }; -- ,value=val};
 	tmptable[token] = iup.vbox{iup.label{title="function "..fun.."()\n  local result = no;"},reftable[token],iup.label{title="  return result;\nend;"}};
 	tmptable[token].tabtitle = tab;
 end;
 function createTextareaTab2(reftable, tmptable, token, fun, arg) -- specific one, at that :) this one generates no return values
-	reftable[token] = iup.multiline{title="Contents",expand="YES", border="YES",value=fun};
+	reftable[token] = iup.multiline{title="Contents",expand="YES", border="YES" }; --,value=fun};
 	if (arg) then
 		tmptable[token] = iup.vbox{iup.label{title="function "..fun.."(wasOk) -- wasOk (boolean) is true when the attempt was ok\n"},reftable[token],iup.label{title="end;"}};
 	else
@@ -148,7 +145,7 @@ function createGUI(n)
 	tabs7.tabtitle = "Selection";
 	
 	playertabs = iup.tabs{general,tabs1,tabs2,tabs3,tabs4,tabs5,tabs6,tabs7,title};
-	handles[n] = iup.dialog{playertabs, title="Basic Bot Frontend", size="450x200"}
+	handles[n] = iup.dialog{playertabs, title="BeeBee; BasicBot Frontend", size="450x200"}
 	handles[n]:showxy(iup.CENTER, iup.CENTER)
 
 	-- now set the callback function for the save button. this will use all the references above.
@@ -242,22 +239,33 @@ function createGUI(n)
 				local file = iup.filedlg{allownew="NO",dialogtype="OPEN",directory="./lua",showhidden="YES",title="Save botfile",extfilter="BasicBot (*.bot)|*.bot|All files (*.*)|*.*|"};
 				file:popup(iup.ANYWHERE,iup.ANYWHERE);
 				if (file.status == 1) then -- cancel
+					iup.Message ("Success", "Canceled by you...");
 					return;
 				end;
 				local nellen = string.len("\n"); -- platform independent
 				fh = assert(io.open(file.value,"r"));
-				print("seek: "..fh:seek());
-				print("version: "..fh:read("*l"));
-				print("seek: "..fh:seek());
-				if (true) then return; end;
+
+				fh:read("*n"); -- version
+				fh:read("*l"); -- return
+				
+				local len;
+				local data;
 				for token,crap in pairs(reftable) do
-					local len = fh:read("*n"); -- read line (length)
-					if (not len) then break; end;
-					fh:seek("set",fh:seek("cur", nellen)); -- remove the aesthetic return
-					print(len);
-					reftable[token].value = fh:read(len);
-					fh:seek("set",fh:seek("cur", nellen)); -- remove the aesthetic return
+					len = fh:read("*n"); -- read line (length)
+					if (not len) then 
+						iup.Message ("Warning", "End of file reached too soon!");
+						break; 
+					end; -- no more data... (should we erase the rest?)
+					fh:read("*l"); -- return
+					data = fh:read(len);
+					if (not data) then 
+						iup.Message ("Warning", "End of file reached too soon!");
+						break; 
+					end; -- no more data... (should we erase the rest?)
+					reftable[token].value = data;
+					fh:read("*l"); -- return
 				end;
+				iup.Message ("Success", "Settings loaded!");
 			end;
 end;
 

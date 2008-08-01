@@ -1,11 +1,11 @@
--- LuaBot, concept bot for FCEU and ZSnes and any other emu that has compatible Lua engine
+-- LuaBot, concept bot for FCEU and snes9x and any other emu that has compatible Lua engine
 -- qFox, 30 July 2008
--- version 1.04
+-- version 1.06
 
--- Botscript data following
--- Rom: ROMNAME
--- Comment: COMMENT
--- Version: VERSION
+-- Botscript data following:
+-- Rom: -- ROMNAME
+-- Comment: -- COMMENT
+-- Version: -- VERSION
 
 local function realcount(t) -- accurately count the number of elements of a table, even if they contain nil values. not fast, but accurate.
 	local n = 0;
@@ -34,8 +34,12 @@ end;
 local loopcounter = 0;   -- counts the main loop
 local key1 = {};         -- holds the to be pressed keys this frame for player 1
 local key2 = {};         -- holds the to be pressed keys this frame for player 2
+local key3 = {};         -- holds the to be pressed keys this frame for player 3
+local key4 = {};         -- holds the to be pressed keys this frame for player 4
 local lastkey1 = {};     -- keys pressed in previous frame for player 1
 local lastkey2 = {};     -- keys pressed in previous frame for player 2
+local lastkey3 = {};     -- keys pressed in previous frame for player 1
+local lastkey4 = {};     -- keys pressed in previous frame for player 2
 local frame = 0;         -- number of frames (current value is current frame count, incremented at the start of a new frame)
 local attempt = 1;       -- number of attempts (current value is current attempt, incremented after the end of an attempt)
 local segment = 1;       -- number of segments (current value is current segment, incremented after the end of a segment)
@@ -53,6 +57,8 @@ local maxsegments = 100;
 local playingbest = false;    -- when going to the next segment, we need to play the best segment to record, this indicates when we're doing so
 local keyrecording1 = {};     -- every key pressed for player 1 is put in here
 local keyrecording2 = {};     -- every key pressed for player 2 is put in here
+local keyrecording3 = {};     -- every key pressed for player 3 is put in here
+local keyrecording4 = {};     -- every key pressed for player 4 is put in here
 
 -- some constants/macro's/whatever to make source easier to read
 local press = maxvalue;
@@ -365,17 +371,21 @@ local function onInputEnd() -- code ran after getting input (lastkey are still v
 	-- ONINPUTEND
 end;
 
--- the bot starts here..
+-- the bot starts here.. (nothing is added from the user from this point onwards)
 
-onStart();                                       -- run this code first
+onStart();                                              -- run this code first
 
 segments[segment].savestate = savestate.create();       -- create anonymous savestate obj for start of first segment
 savestate.save(segments[segment].savestate);            -- save current state to it, it will be reloaded at the start of each frame
 local startkey1 = key1;                                 -- save the last key pressed in the onStart. serves as an anchor for the first segment
 local startkey2 = key2;
+local startkey3 = key3;                                 -- save the last key pressed in the onStart. serves as an anchor for the first segment
+local startkey4 = key4;
 local startvars = vars;                                 -- save the vars array (it might have been used by the onStart)
 lastkey1 = key1;                                        -- to enter the loop...
 lastkey2 = key2;
+lastkey3 = key3;
+lastkey4 = key4;
 --FCEU.speedmode("maximum");                            -- uncomment this line to make the bot run faster ("normal","turbo","maximum")
 
 onSegmentStart();
@@ -429,8 +439,12 @@ while (rand_if(isRunEnd())) do
 			segments[segment].best.tie4 = segments[segment].prev.tie4;
 			segments[segment].best.keys1 = keyrecording1; -- backup the recorded keys
 			segments[segment].best.keys2 = keyrecording2; -- backup the recorded keys player 2
+			segments[segment].best.keys3 = keyrecording3; -- backup the recorded keys
+			segments[segment].best.keys4 = keyrecording4; -- backup the recorded keys player 2
 			segments[segment].best.lastkey1 = lastkey1; -- backup the lastkey
 			segments[segment].best.lastkey2 = lastkey2; -- backup the lastkey
+			segments[segment].best.lastkey3 = lastkey3; -- backup the lastkey
+			segments[segment].best.lastkey4 = lastkey4; -- backup the lastkey
 			segments[segment].best.vars = vars; -- backup the vars table
 		end
 		
@@ -454,6 +468,8 @@ while (rand_if(isRunEnd())) do
 		frame = 0;
 		keyrecording1 = {}; -- reset the recordings :)
 		keyrecording2 = {};
+		keyrecording3 = {};
+		keyrecording4 = {};
 		-- set lastkey to lastkey of previous segment (or start, if first segment)
 		-- also set the vars table to the table of the previous segment
 		if (segment == 1) then 
@@ -463,6 +479,8 @@ while (rand_if(isRunEnd())) do
 		else 
 			lastkey1 = segments[segment-1].best.lastkey1;
 			lastkey2 = segments[segment-1].best.lastkey2;
+			lastkey3 = segments[segment-1].best.lastkey3;
+			lastkey4 = segments[segment-1].best.lastkey4;
 			vars = segments[segment-1].best.vars;
 		end;
 		-- load the segment savestate to go back to the start of this segment
@@ -486,6 +504,8 @@ while (rand_if(isRunEnd())) do
 			playingbest = false;
 			lastkey1 = segments[segment].best.lastkey1;
 			lastkey2 = segments[segment].best.lastkey2;
+			lastkey3 = segments[segment].best.lastkey3;
+			lastkey4 = segments[segment].best.lastkey4;
 			vars = segments[segment].best.vars;
 			segment = segment + 1;
 			segments[segment] = {};
@@ -495,10 +515,11 @@ while (rand_if(isRunEnd())) do
 			-- reset vars
 			frame = 0; -- onSegmentStart and onAttemptStart expect this to be one fewer...
 			attempt = 1;
-			--key1 = {}; -- i dont think this has to be done just for the two events below. they get reset anyways before input.
-			--key2 = {};
+
 			keyrecording1 = {}; -- reset recordings :)
 			keyrecording2 = {};
+			keyrecording3 = {};
+			keyrecording4 = {};
 			-- after this, the next segment starts because playingbest is no longer true
 			onSegmentStart();
 			onAttemptStart();
@@ -506,6 +527,8 @@ while (rand_if(isRunEnd())) do
 		else
 			key1 = segments[segment].best.keys1[frame]; -- fill keys with that of the best attempt
 			key2 = segments[segment].best.keys2[frame];
+			key3 = segments[segment].best.keys3[frame];
+			key4 = segments[segment].best.keys4[frame];
 			gui.text(10,10,"Playback best of segment "..segment.."\nFrame: "..frame);
 		end;
 	end;
@@ -526,6 +549,8 @@ while (rand_if(isRunEnd())) do
 		
 		key1 = {};
 		key2 = {};
+		key3 = {};
+		key4 = {};
 
 		onInputStart();
 
@@ -549,18 +574,44 @@ while (rand_if(isRunEnd())) do
 		if (rand_if(pressKeySelect2())) then key2.select = 1; end;
 		if (rand_if(pressKeyStart2()))  then key2.start = 1; end;
 
+		-- player 3
+		if (rand_if(pressKeyUp3()) )    then key3.up = 1; end;
+		if (rand_if(pressKeyDown3()))   then key3.down = 1; end;
+		if (rand_if(pressKeyLeft3()))   then key3.left = 1; end;
+		if (rand_if(pressKeyRight3()))  then key3.right = 1; end;
+		if (rand_if(pressKeyA3()))      then key3.A = 1; end;
+		if (rand_if(pressKeyB3()))      then key3.B = 1; end;
+		if (rand_if(pressKeySelect3())) then key3.select = 1; end;
+		if (rand_if(pressKeyStart3()))  then key3.start = 1; end;
+
+		-- player 2
+		if (rand_if(pressKeyUp4()) )    then key4.up = 1; end;
+		if (rand_if(pressKeyDown4()))   then key4.down = 1; end;
+		if (rand_if(pressKeyLeft4()))   then key4.left = 1; end;
+		if (rand_if(pressKeyRight4()))  then key4.right = 1; end;
+		if (rand_if(pressKeyA4()))      then key4.A = 1; end;
+		if (rand_if(pressKeyB4()))      then key4.B = 1; end;
+		if (rand_if(pressKeySelect4())) then key4.select = 1; end;
+		if (rand_if(pressKeyStart4()))  then key4.start = 1; end;
+
 		onInputEnd();
 
 		lastkey1 = key1;
 		lastkey2 = key2;
+		lastkey3 = key3;
+		lastkey4 = key4;
 	
 		keyrecording1[frame] = key1; -- record these keys
 		keyrecording2[frame] = key2; -- record these keys
+		keyrecording3[frame] = key3; -- record these keys
+		keyrecording4[frame] = key4; -- record these keys
 	end;
 
 	-- actually set the keys here.
 	joypad.set(1, key1);
 	joypad.set(2, key2);
+	joypad.set(3, key3);
+	joypad.set(4, key4);
 
 	-- next frame
 	FCEU.frameadvance();
