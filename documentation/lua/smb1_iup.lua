@@ -8,7 +8,7 @@
 -- Includes a toggle to automatically kill all enemies within 50px range of mario :p
 
 -- Include our help script to load iup and take care of exit
-require("auxlib.lua");
+require("auxlib");
 
 local running = true;
 local restrainingorder = false;
