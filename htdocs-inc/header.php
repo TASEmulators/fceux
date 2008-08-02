@@ -19,12 +19,12 @@
 <h1 class="center">FCE Ultra</h1>
 
 <div class="navbox">
-<span class="naventry">[<a href="/">Home</a>]</span>
-<span class="naventry">[<a href="/download.php">Download</a>]</span>
+<span class="naventry">[<a href="index.php">Home</a>]</span>
+<span class="naventry">[<a href="download.php">Download</a>]</span>
 <span class="naventry">[<a href="docs.php">Documentation</a>]</span>
-<span class="naventry">[<a href="/support.php">Support Files</a>]</span>
-<span class="naventry">[<a href="/links.php">Links</a>]</span>
+<span class="naventry">[<a href="support.php">Support Files</a>]</span>
+<span class="naventry">[<a href="links.php">Links</a>]</span>
 <span class="naventry">[<a href="http://sourceforge.net/projects/fceultra/">Development</a>]</span>
-<span class="naventry">[<a href="/links.php">Links</a>]</span>
-<span class="naventry">[<a href="/archive.php">Links</a>]</span>
+<span class="naventry">[<a href="links.php">Links</a>]</span>
+<span class="naventry">[<a href="archive.php">Archive</a>]</span>
 </div>

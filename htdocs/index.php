@@ -22,11 +22,6 @@
 <h2 class="boxhead">News</h2>   <!-- News section -->
 <div class="boxbody">
 
-<h3 class="boxsubhead">22 June 2008</h3>
-<p>
-    Round 1 of the attempt to update the content of this site.  Downloads are still outdated versions of FCEU Ultra.
-</p>  
-  
 <h3 class="boxsubhead">5 June 2008</h3>
 <p>
 No, this project is not dead.  There are a few of us developers working in subversion.  However, we could always use more help.  We need both SDL and Windows developers.  If interested, just come chat with us in #fceu on irc.freenode.net<br>
