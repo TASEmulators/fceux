@@ -2,7 +2,7 @@
 -- this shows a test window with all kinds of idle dialogs
 
 -- include our generic script (TAKES CARE OF CLOSING DIALOGS and includes the two iup systems)
-require("auxlib.lua");
+require("auxlib");
 
 -- Note that in the following example, parentheses are optional if you
 -- are specifying tables with curly braces! Might look a little confusing.

@@ -1,7 +1,7 @@
 -- This script shows a simple button and click event
 
 -- Include our help script to load iup and take care of exit
-require("auxlib.lua");
+require("auxlib");
 
 function testiup()
 	-- Our callback function
@@ -22,6 +22,8 @@ function testiup()
 	handles[dialogs]:show();
 
 end
+
+testiup();
 
 while (true) do -- prevent script from exiting
 	FCEU.frameadvance();

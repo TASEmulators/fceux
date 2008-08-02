@@ -19,8 +19,8 @@ end
 
 -- this system allows you to open a number of dialogs without
 -- having to bother about cleanup when the script exits
-local handles = {}; -- this table should hold the handle to all dialogs created in lua
-local dialogs = 0; -- should be incremented PRIOR to creating a new dialog
+handles = {}; -- this table should hold the handle to all dialogs created in lua
+dialogs = 0; -- should be incremented PRIOR to creating a new dialog
 
 -- called by the onclose event (above)
 function emu.OnCloseIup()
