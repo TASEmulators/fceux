@@ -675,7 +675,7 @@ void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 }
 
 //begin playing an existing movie
-void FCEUI_LoadMovie(char *fname, bool _read_only, bool tasedit, int _pauseframe)
+void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
 {
 	if(!tasedit && !FCEU_IsValidUI(FCEUI_PLAYMOVIE))
 		return;
@@ -752,7 +752,7 @@ static void openRecordingMovie(const char* fname)
 
 //begin recording a new movie
 //TODO - BUG - the record-from-another-savestate doesnt work.
-void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags)
+void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags)
 {
 	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
 		return;

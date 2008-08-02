@@ -218,8 +218,9 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
-				FCEUI_printf("Recording movie to %s\n", curMovieFilename);
-                FCEUI_SaveMovie(curMovieFilename, MOVIE_FLAG_NONE);
+                const char* fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
+				FCEUI_printf("Recording movie to %s\n", fname);
+                FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -229,8 +230,10 @@ KeyboardCommands()
         // f7 to load state, Shift-f7 to load movie
         if(_keyonly(key)) {
             if(is_shift) {
-				FCEUI_printf("Playing back movie located at %s\n", curMovieFilename);
-                FCEUI_LoadMovie(curMovieFilename , false, false, false);
+                const char* fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
+                std::cout << fname;
+				FCEUI_printf("Playing back movie located at %s\n", fname);
+                FCEUI_LoadMovie(fname , false, false, false);
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -335,7 +338,7 @@ do {                                              \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
     } else {                                      \
         FCEUI_SelectState(x,1);                   \
-	}                                             \                                                                                                                                     
+	}                                             \                                                                                                                                   
 } while(0)
 
     DIPSless:
