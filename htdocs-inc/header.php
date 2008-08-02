@@ -8,7 +8,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<meta name="keywords" content="FCE Ultra FCEUltra Nintendo NES Famicom emulator"/>
 	<meta name="description" content="FCE Ultra is a Nintendo/Famicom emulator for Linux and Windows."/>
-	<link rel="stylesheet" type="text/css" href="/StyleSheets/main.css"/>
+	<link rel="stylesheet" type="text/css" href="StyleSheets/main.css"/>
 	<title>FCE Ultra<?php if (isset($title)) { print(": $title"); } ?></title>
 </head>
 
