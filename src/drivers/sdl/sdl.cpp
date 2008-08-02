@@ -19,6 +19,7 @@
 #include "../common/cheat.h"
 #include "../../fceu.h"
 #include "../../movie.h"
+#include "../../fceulua.h"
 
 #include "input.h"
 #include "dface.h"
@@ -93,7 +94,8 @@ char *DriverUsage=
 --pass s, -w s	Sets password to use for connecting to the server.\n\
 --netkey s, -k s	Uses key 's' to create a unique session for the game loaded.\n\
 --players x, -l x	Sets the number of local players.\n\
---playmov f    Plays back a recorded movie from filename f.\n";
+--playmov f    Plays back a recorded movie from filename f.\n\
+--loadlua f    Loads lua script from filename f\n";
 
 
 // global configuration object
@@ -521,6 +523,14 @@ main(int argc,
     {
         FCEUI_LoadMovie((char*)fname.c_str(), false, false, false);
         g_config->setOption("SDL.Movie", "");
+    }
+    
+    // load lua script if option passed
+    g_config->getOption("SDL.LuaScript", &fname);
+    if (fname != "")
+    {
+        FCEU_LoadLuaCode(fname.c_str());
+        g_config->setOption("SDL.LoadLua", "");
     }
 
     // loop playing the game

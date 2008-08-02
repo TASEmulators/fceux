@@ -182,7 +182,10 @@ InitConfig()
     config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     
     // video playback
-    config->addOption('z', "playmov", "SDL.Movie", "");
+    config->addOption("playmov", "SDL.Movie", "");
+    
+    // lua
+    config->addOption("loadlua", "SDL.LuaScript", "");
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
