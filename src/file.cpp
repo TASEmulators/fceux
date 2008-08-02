@@ -533,7 +533,7 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			if(odirs[FCEUIOD_MOVIES])
 				sprintf(ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
 			else
-				sprintf(ret,"%s"PSS"movies"PSS"%s.fm2",BaseDirectory.c_str(),FileBase);
+				sprintf(ret,"%s"PSS"movie"PSS"%s.fm2",BaseDirectory.c_str(),FileBase);
 			break;
 		case FCEUMKF_STATE:
 			{
