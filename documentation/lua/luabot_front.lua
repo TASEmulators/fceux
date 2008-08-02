@@ -2,7 +2,7 @@
 -- qFox, 2 August 2008
 
 -- we need iup, so include it here (also takes care of cleaning up dialog when script exits)
-require 'auxlib.lua';
+require 'auxlib';
 
 local botVersion = 1; -- check this version when saving/loading. this will change whenever the botsave-file changes.
 

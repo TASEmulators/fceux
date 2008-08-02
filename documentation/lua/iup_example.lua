@@ -1,5 +1,6 @@
 -- iup example
 -- this shows a test window with all kinds of idle dialogs
+-- docs: http://www.tecgraf.puc-rio.br/iup/
 
 -- include our generic script (TAKES CARE OF CLOSING DIALOGS and includes the two iup systems)
 require("auxlib");
