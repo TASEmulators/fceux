@@ -93,7 +93,7 @@ char *DriverUsage=
 --pass s, -w s	Sets password to use for connecting to the server.\n\
 --netkey s, -k s	Uses key 's' to create a unique session for the game loaded.\n\
 --players x, -l x	Sets the number of local players.\n\
---play f    Plays back a recorded movie from filename f.\n";
+--playmov f    Plays back a recorded movie from filename f.\n";
 
 
 // global configuration object

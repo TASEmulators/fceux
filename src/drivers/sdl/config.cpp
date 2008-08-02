@@ -182,7 +182,7 @@ InitConfig()
     config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     
     // video playback
-    config->addOption('z', "play", "SDL.Movie", "");
+    config->addOption('z', "playmov", "SDL.Movie", "");
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
