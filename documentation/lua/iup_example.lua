@@ -1,47 +1,13 @@
--- super mario bros 1 hitbox script
 -- iup example
 -- this shows a test window with all kinds of idle dialogs
 
--- we need iup, so include it here
-local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
-iuplua_open();
--- we also need the "special controls" of iup (dont change the order though)
-local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
-iupcontrolslua_open();
-
--- callback function to clean up our mess
--- this is called when the script exits (forced or natural)
--- you need to close all the open dialogs here or FCEUX crashes
-function emu.OnClose.iuplua()
-	-- gui.popup("OnClose!");
-	if(emu and emu.OnCloseIup ~= nil) then
-		emu.OnCloseIup();
-	end
-	iup.Close(); -- close the iup system
-end
-
--- this system allows you to open a number of dialogs without
--- having to bother about cleanup when the script exits
-local handles = {}; -- this table should hold the handle to all dialogs created in lua
-local dialogs = 0; -- should be incremented PRIOR to creating a new dialog
--- called by the onclose event (above)
-function emu.OnCloseIup()
-	if (handles) then -- just in case the user was "smart" enough to clear this
-		local i = 1;
-		while (handles[i] ~= nil) do -- cycle through all handles, false handles are skipped, nil denotes the end
-			if (handles[i] and handles[i].destroy) then -- check for the existence of what we need
-				handles[i]:destroy(); -- close this dialog (close() just hides it)
-				handles[i] = nil;
-			end;
-			i = i + 1;
-		end;
-	end;
-end;
-
+-- include our generic script (TAKES CARE OF CLOSING DIALOGS and includes the two iup systems)
+require("auxlib.lua");
 
 -- Note that in the following example, parentheses are optional if you
 -- are specifying tables with curly braces! Might look a little confusing.
 function testiup()
+
 	local img1 = 
 		iup.image{
 		  {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
@@ -82,7 +48,7 @@ function testiup()
 				"255 0 0", -- 2
 				"0 0 0"    -- 3  (changed because of Lua index starts at 1)
 		  }
-		};
+		}
 
 	local img2 = 
 		iup.image{
@@ -125,7 +91,7 @@ function testiup()
 				"255 0 0", -- 3
 				"0 0 0"    -- 4
 		  }
-		};
+		}
 
 	mnu = iup.menu{
 	  iup.submenu{
@@ -138,7 +104,7 @@ function testiup()
 	  },
 	  iup.item{title="IupItem 3"},
 	  iup.item{title="IupItem 4"}
-	};
+	}
 
 	btn = iup.button{title="Press me!"};
 	-- set the callback function, action
@@ -147,7 +113,7 @@ function testiup()
 	btn.action = 
 		function (self) 
 			iup.Message("Why","Why oh why did you press me?"); 
-		end;
+		end
 	
 	dialogs = dialogs + 1; -- there is no ++ in Lua
 	handles[dialogs] = 
@@ -214,11 +180,12 @@ function testiup()
 		};
 
 	handles[dialogs]:show(); -- this actually shows you the dialog. Note that this is equivalent to calling handles[dialogs].show(handles[dialogs]); just shorter.
-end;
 
-testiup(); -- note that this is NOT called from WITHIN the loop!
+end
 
--- once the loop quits, the script exits and all dialogs are automatically destroyed by the onclose event
+testiup(); -- note that this is not called from within the loop!
+
+-- once the loop quits, the script exits and all dialogs are automatically destroyed
 while (true) do
 	FCEU.frameadvance();
 end;
