@@ -335,7 +335,7 @@ void FCEUD_PrintError(const char *errormsg)
 		ShowCursorAbs(1);
 	}
 
-	MessageBox(0, errormsg, "FCE Ultra Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+	MessageBox(0, errormsg, FCEU_NAME" Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 	
 	if(fullscreen)
 	{

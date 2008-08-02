@@ -22,7 +22,7 @@ int LoadPaletteFile()
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hInstance = fceu_hInstance;
-	ofn.lpstrTitle = "FCE Ultra Open Palette File...";
+	ofn.lpstrTitle = FCEU_NAME" Open Palette File...";
 	ofn.lpstrFilter = filter;
 	nameo[0] = 0;
 	ofn.lpstrFile = nameo;

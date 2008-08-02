@@ -606,7 +606,7 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="FCE Ultra Open File...";
+	ofn.lpstrTitle=FCEU_NAME" Open File...";
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.hwndOwner=hParent;
@@ -1408,7 +1408,7 @@ int CreateMainWindow()
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEULTRA",
-		"FCE Ultra",
+		FCEU_NAME,
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
 		MainWindow_wndx,
 		MainWindow_wndy,

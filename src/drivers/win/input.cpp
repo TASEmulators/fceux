@@ -1260,15 +1260,15 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				break;
 
 			case BTN_PRESET_SET1:
-				MessageBox(0, "Current input configuration has been set as Preset 1.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				MessageBox(0, "Current input configuration has been set as Preset 1.", FCEU_NAME, MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 				memcpy(GamePadPreset1, GamePadConfig, sizeof(GamePadConfig));
 				break;
 			case BTN_PRESET_SET2:
-				MessageBox(0, "Current input configuration has been set as Preset 2.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				MessageBox(0, "Current input configuration has been set as Preset 2.", FCEU_NAME, MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 				memcpy(GamePadPreset2, GamePadConfig, sizeof(GamePadConfig));
 				break;
 			case BTN_PRESET_SET3:
-				MessageBox(0, "Current input configuration has been set as Preset 3.", "FCE Ultra Message", MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				MessageBox(0, "Current input configuration has been set as Preset 3.", FCEU_NAME, MB_ICONINFORMATION | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 				memcpy(GamePadPreset3, GamePadConfig, sizeof(GamePadConfig));
 				break;
 

@@ -59,11 +59,11 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 
 			sprintf(buffer, mask, directory_names[curr_dir]);
 
-			if ( MessageBox(hwndDlg, buffer, "FCE Ultra", MB_ICONERROR | MB_YESNO) == IDYES )
+			if ( MessageBox(hwndDlg, buffer, FCEU_NAME, MB_ICONERROR | MB_YESNO) == IDYES )
 			{
 				if (!CreateDirectory(directory_names[curr_dir], 0))
 				{
-					MessageBox(hwndDlg, "Error: Couldn't create directory. Please choose a different directory.", "FCE Ultra", MB_ICONERROR | MB_OK);
+					MessageBox(hwndDlg, "Error: Couldn't create directory. Please choose a different directory.", FCEU_NAME, MB_ICONERROR | MB_OK);
 					free(buffer);
 					return;
 				}
