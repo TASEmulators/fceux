@@ -1,19 +1,11 @@
 -- LuaBot, concept bot for FCEU and snes9x and any other emu that has compatible Lua engine
--- qFox, 30 July 2008
--- version 1.06
+-- qFox, 2 August 2008
+-- version 1.07
 
 -- Botscript data following:
 -- Rom: -- ROMNAME
 -- Comment: -- COMMENT
 -- Version: -- VERSION
-
-local function realcount(t) -- accurately count the number of elements of a table, even if they contain nil values. not fast, but accurate.
-	local n = 0;
-	for i,_ in pairs(t) do
-		n = n + 1;
-	end;
-	return n;
-end;
 
 local maxvalue = 100;    -- always "true", yes, pressed
 local minvalue = 0;      -- always "false", no, released
@@ -75,9 +67,6 @@ local P = 0;
 local Q = 0;
 
 local vars = {};              -- variable table. each cell holds a variable. variables are remembered accross segments
-
-local outputcounter = 0;
-local updateevery = 1000;
 
 -- user defined functions
 
@@ -474,7 +463,9 @@ while (rand_if(isRunEnd())) do
 		-- also set the vars table to the table of the previous segment
 		if (segment == 1) then 
 			lastkey1 = startkey1;
-			lastkey1 = startkey1;
+			lastkey2 = startkey2;
+			lastkey3 = startkey3;
+			lastkey4 = startkey4;
 			vars = startvars;
 		else 
 			lastkey1 = segments[segment-1].best.lastkey1;

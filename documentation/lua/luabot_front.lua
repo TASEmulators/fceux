@@ -1,4 +1,6 @@
--- BeeBee, BasicBot Frontend v1.06
+-- BeeBee, LuaBot Frontend v1.07
+-- qFox, 2 August 2008
+
 -- we need iup, so include it here
 local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
 iuplua_open();
