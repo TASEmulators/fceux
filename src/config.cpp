@@ -27,6 +27,7 @@ FCEUX\n\
  - SP, zeromus\n\
  - CaH4e3, Luke Gustafson, qfox\n\
  - adelikat, _mz, nitsujrehtona\n\
+ - Lukas Sabota \n\
 \n\
 "__TIME__" "__DATE__"\n";
 

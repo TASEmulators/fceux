@@ -1640,10 +1640,25 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 void FCEUD_LuaRunFrom(void)
 {
-  int success = 0;
+	int success = 0;
 
-  //StopSound();
+	//mbg 8/2/08 - i decided i didnt like this dialog box. so for now we are just going to run the script directly
+	//DialogBoxParam(fceu_hInstance, "IDD_LUA_ADD", hAppWnd, DlgLuaScriptDialog,(LPARAM) &success);
 
-  DialogBoxParam(fceu_hInstance, "IDD_LUA_ADD", hAppWnd, DlgLuaScriptDialog,(LPARAM) &success);
+	OPENFILENAME  ofn;
+	char  szFileName[MAX_PATH];
+	szFileName[0] = '\0';
+	ZeroMemory( (LPVOID)&ofn, sizeof(OPENFILENAME) );
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hAppWnd;
+	ofn.lpstrFilter = "Lua scripts\0*.lua\0All files\0*.*\0\0";
+	ofn.lpstrFile = szFileName;
+	ofn.lpstrDefExt = "lua";
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
+	if(GetOpenFileName( &ofn ))
+	{
+		FCEU_LoadLuaCode(szFileName);
+	}
 }
 
