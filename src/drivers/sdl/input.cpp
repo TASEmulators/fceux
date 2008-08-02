@@ -150,6 +150,8 @@ static void
 KeyboardCommands()
 {
     int is_shift, is_alt, key;
+    
+    const char* movie_fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
 
     // get the keyboard input
     g_keyState = SDL_GetKeyState(NULL);
@@ -218,9 +220,8 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
-                const char* fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
-				FCEUI_printf("Recording movie to %s\n", fname);
-                FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
+				FCEUI_printf("Recording movie to %s\n", movie_fname);
+                FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -230,9 +231,9 @@ KeyboardCommands()
         // f7 to load state, Shift-f7 to load movie
         if(_keyonly(key)) {
             if(is_shift) {
-                const char* fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
-				FCEUI_printf("Playing back movie located at %s\n", fname);
-                FCEUI_LoadMovie(fname , false, false, false);
+                FCEUI_StopMovie();
+				FCEUI_printf("Playing back movie located at %s\n", movie_fname);
+                FCEUI_LoadMovie(movie_fname , false, false, false);
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -337,7 +338,7 @@ do {                                              \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
     } else {                                      \
         FCEUI_SelectState(x,1);                   \
-	}                                             \                                                                                                                                   
+	}                                             \
 } while(0)
 
     DIPSless:
@@ -1141,6 +1142,8 @@ InputCfg(const std::string &text)
  * Specify a FamiCom Expansion device as the 3rd input device.  Takes
  * a text string describing the device.
  */
+
+/*
 static void
 FCExp(char *text)
 {
@@ -1162,11 +1165,12 @@ FCExp(char *text)
 static char *cortab[6]={"none","gamepad","zapper","powerpada","powerpadb","arkanoid"};
 static int cortabi[6]={SI_NONE,SI_GAMEPAD,
                                SI_ZAPPER,SI_POWERPADA,SI_POWERPADB,SI_ARKANOID};
-
+*/
 /**
  * Set the 1st user-specified input device.  Specified as a text
  * string.
  */
+/*
 static void
 Input1(char *text)
 {
@@ -1178,11 +1182,12 @@ Input1(char *text)
         }
     }
 }
-
+*/
 /**
  * Set the 2nd user-specified input device.  Specified as a text
  * string.
  */
+/*
 static void
 Input2(char *text)
 {
@@ -1194,7 +1199,7 @@ Input2(char *text)
         }
     }
 }
-
+*/
 
 /** GLOBALS **/
 #if 0
