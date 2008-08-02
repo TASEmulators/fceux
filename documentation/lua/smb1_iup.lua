@@ -7,38 +7,8 @@
 -- It also displays the found hitboxes in a output window with iup
 -- Includes a toggle to automatically kill all enemies within 50px range of mario :p
 
--- we need iup, so include it here
-local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
-iuplua_open();
-local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
-iupcontrolslua_open();
-
--- callback function to clean up our mess
-function emu.OnClose.iuplua()
-	gui.popup("OnClose!");
-	if(emu and emu.OnCloseIup ~= nil) then
-		emu.OnCloseIup();
-	end
-	iup.Close(); 
-end
-
-local handles = {}; -- this table should hold the handle to all dialogs created in lua
-local dialogs = 0; -- should be incremented PRIOR to creating a new dialog
--- called by the onclose event
-function emu.OnCloseIup()
-	if (handles) then -- just in case the user was "smart" enough to clear this
-		local i = 1;
-		while (handles[i] ~= nil) do -- cycle through all handles, false handles are skipped, nil denotes the end
-			if (handles[i] and handles[i].destroy) then -- check for the existence of what we need
-				-- close this dialog
-				handles[i]:destroy();
-				handles[i] = nil;
-			end;
-			i = i + 1;
-		end;
-	end;
-end;
-
+-- Include our help script to load iup and take care of exit
+require("auxlib.lua");
 
 local running = true;
 local restrainingorder = false;

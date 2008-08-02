@@ -1,39 +1,10 @@
 -- BeeBee, LuaBot Frontend v1.07
 -- qFox, 2 August 2008
 
--- we need iup, so include it here
-local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
-iuplua_open();
-local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
-iupcontrolslua_open();
+-- we need iup, so include it here (also takes care of cleaning up dialog when script exits)
+require 'auxlib.lua';
 
 local botVersion = 1; -- check this version when saving/loading. this will change whenever the botsave-file changes.
-
--- callback function to clean up our mess
-function emu.OnClose.iuplua()
-	--iup.Message ("IupMessage", "OnClose!");
-	if(emu and emu.OnCloseIup ~= nil) then
-		emu.OnCloseIup();
-	end
-	iup.Close(); 
-end
-
-local handles = {}; -- this table should hold the handle to all dialogs created in lua
-local dialogs = 0; -- should be incremented PRIOR to creating a new dialog
--- called by the onclose event
-function emu.OnCloseIup()
-	if (handles) then -- just in case the user was "smart" enough to clear this
-		local i = 1;
-		while (handles[i] ~= nil) do -- cycle through all handles, false handles are skipped, nil denotes the end
-			if (handles[i] and handles[i].destroy) then -- check for the existence of what we need
-				-- close this dialog
-				handles[i]:destroy();
-				handles[i] = nil;
-			end;
-			i = i + 1;
-		end;
-	end;
-end;
 
 function createTextareaTab(reftable, tmptable, token, tab, fun, val) -- specific one, at that :)
 	reftable[token] = iup.multiline{title="Contents",expand="YES", border="YES" }; -- ,value=val};

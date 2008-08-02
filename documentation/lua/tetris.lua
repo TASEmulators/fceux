@@ -2,14 +2,6 @@
 -- Tetris (U) [!].rom
 -- qFox
 
-local function realcount(t) -- accurately count the number of elements of a table, even if they contain nil values. not fast, but accurate.
-	local n = 0;
-	for i,_ in pairs(t) do
-		n = n + 1;
-	end;
-	return n;
-end;
-
 local function getPiece(n) -- returns table with information about this piece
 	-- every piece consists of 4 blocks
 	-- so piece will contain the information about these blocks
