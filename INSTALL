@@ -1,3 +1,4 @@
 To compile and install FCE Ultra, follow these steps:
   1.  Ensure that SCons, SDL, and liblua5.1 are installed on your system.
-  2.  Run "scons"
+  2.  Run "scons" to build fceux.
+  3.  To install on Linux/BSD run "scons install" as root.

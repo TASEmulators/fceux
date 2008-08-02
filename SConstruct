@@ -11,8 +11,12 @@ opts.AddOptions(
 )
 
 env = Environment(options = opts)
+env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source="bin/fceux"))
+
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
+
+
 
 if os.environ.has_key('PLATFORM'):
   env.Replace(PLATFORM = os.environ['PLATFORM'])
