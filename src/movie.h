@@ -225,6 +225,7 @@ private:
 
 extern MovieData currMovieData;
 extern int currFrameCounter;
+extern char curMovieFilename[512];
 //---------
 
 void FCEUI_SaveMovie(char *fname, EMOVIE_FLAG flags);

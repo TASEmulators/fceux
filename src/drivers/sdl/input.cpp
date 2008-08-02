@@ -142,27 +142,6 @@ _keyonly(int a)
 
 static int g_fkbEnabled = 0;
 
-int movie_slot = 0;
-
-/* 
- * This function creates a filename to save/load a movie
- * depending on the selected movie_slot (shift + x) where x is a
- * number from 0 to 9
- */
-
-char* GetMovieFilename(void)
-{
-    
-    char* fname = g_config->getConfigDirectory();
-    char fnum[2];
-    //TODO: The rom name should be prepended to the begining of the filename
-	strcat(fname, "/movie/");
-	sprintf(fnum, "%d", movie_slot);
-	strcat(fname, fnum);
-	strcat(fname, ".fm2");
-				
-    return fname;
-}
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -239,9 +218,8 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
-                char* fname = GetMovieFilename();
-				FCEUI_printf("Recording movie to %s\n", fname);
-                FCEUI_SaveMovie(fname, MOVIE_FLAG_NONE);
+				FCEUI_printf("Recording movie to %s\n", curMovieFilename);
+                FCEUI_SaveMovie(curMovieFilename, MOVIE_FLAG_NONE);
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -251,9 +229,8 @@ KeyboardCommands()
         // f7 to load state, Shift-f7 to load movie
         if(_keyonly(key)) {
             if(is_shift) {
-               	char* fname = GetMovieFilename();
-				FCEUI_printf("Playing back movie located at %s\n", fname);
-                FCEUI_LoadMovie(fname , false, false, false);
+				FCEUI_printf("Playing back movie located at %s\n", curMovieFilename);
+                FCEUI_LoadMovie(curMovieFilename , false, false, false);
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -357,12 +334,8 @@ do {                                              \
         }                                         \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
     } else {                                      \
-      if(is_shift) {							  \
-            movie_slot = x;                       \
-        } else {                                  \
-            FCEUI_SelectState(x,1);               \
-	}                                             \
-    }                                             \
+        FCEUI_SelectState(x,1);                   \
+	}                                             \                                                                                                                                     
 } while(0)
 
     DIPSless:
