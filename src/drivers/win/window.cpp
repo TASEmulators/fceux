@@ -1656,6 +1656,8 @@ void FCEUD_LuaRunFrom(void)
 	ofn.lpstrDefExt = "lua";
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
+	std::string initdir = FCEU_GetPath(FCEUMKF_LUA);
+	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetOpenFileName( &ofn ))
 	{
 		FCEU_LoadLuaCode(szFileName);
