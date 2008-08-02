@@ -1,9 +1,11 @@
 -- this includes the iup system
-local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
+require("libiuplua51")
+-- local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
 iuplua_open();
 
 -- this includes the "special controls" of iup (dont change the order though)
-local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
+require("libiupluacontrols51")
+-- local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
 iupcontrolslua_open();
 
 -- callback function to clean up our mess
