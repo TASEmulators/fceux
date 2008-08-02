@@ -231,7 +231,6 @@ KeyboardCommands()
         if(_keyonly(key)) {
             if(is_shift) {
                 const char* fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
-                std::cout << fname;
 				FCEUI_printf("Playing back movie located at %s\n", fname);
                 FCEUI_LoadMovie(fname , false, false, false);
             } else {
