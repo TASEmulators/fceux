@@ -1,11 +1,11 @@
 -- this includes the iup system
 local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
-if(iuplua_open == nil) then iuplua_open = package.loadlib("libiuplua51.so", "iuplua_open"); end
+if(iuplua_open == nil) then require("libiuplua51"); end
 iuplua_open();
 
 -- this includes the "special controls" of iup (dont change the order though)
  local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
-if(iupcontrolslua_open == nil) then iuplua_open = package.loadlib("iupluacontrols51.so", "iupcontrolslua_open"); end
+if(iupcontrolslua_open == nil) then require("libiupluacontrols51"); end
 iupcontrolslua_open();
 
 -- callback function to clean up our mess
