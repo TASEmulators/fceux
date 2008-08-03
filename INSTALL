@@ -1,6 +1,6 @@
 You can install gfceux with setup.py:
 
-$ sudo ./setup.py install --prefix=/usr/local
+$ sudo python setup.py install --prefix=/usr/local
 
 You can change the prefix to whatever you like.
 
