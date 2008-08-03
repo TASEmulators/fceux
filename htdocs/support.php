@@ -33,26 +33,6 @@ implement the functionality directly in FCE Ultra.
 </div>
 </div>
 
-
-<div class="mainbox">
-<h2 class="boxhead"><a id="gfceu">GNOME FCE Ultra</a></h2>
-<div class="boxbody">
-<p>
-GFCEU is a GTK2 front-end designed to provide a simple, yet powerful interface for FCE Ultra.
-It currently provides an elegant interface for:<br>
-<ul>
-<li>Sound configuration</li>
-<li>Video configuration</li>
-<li>Input configuration</li>
-<li>Easy network play</li>
-</ul>
-For more information about gfceu and for download links, click <a href="http://dietschnitzel.com/gfceu/">here</a>.
-</p>
-
-</div>
-</div>
-
-
 <div class="mainbox">
 <h2 class="boxhead"><a id="mines">MiNES</a></h2>
 <div class="boxbody">
@@ -83,9 +63,8 @@ for writing the simple documentation included.  DOS executable, with sources inc
 
 <div class="boxbody">
 <p>
-This is the network play server to be used with FCE Ultra 0.98.10 and later.  It is
-beta quality, but it should work well, though it probably doesn't scale to
-a large number of users as well as it could.
+This is the network play server to be used with FCE Ultra 0.98.10 and later.  It is imcompatible with with 
+FCEUX 2.x, but still works with the older fceu versions.
 </p>
 
 <p>
