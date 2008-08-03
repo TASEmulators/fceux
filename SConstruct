@@ -106,11 +106,8 @@ auxlib_dst = 'bin/auxlib.lua'
 fceux_h_src = 'src/drivers/win/help/fceux.chm'
 fceux_h_dst = 'bin/fceux.chm'
 
-#env.Command(fceux_r_dst, fceux_r_src, [Copy(fceux_r_dst, fceux_r_src)])
-#env.Command(fceux_d_dst, fceux_d_src, [Copy(fceux_d_dst, fceux_d_src)])
 env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
-#env.Alias("install", [fceux_r_dst, fceux_d_dst, fceux_h_dst])
 env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
-env.Alias("install", [fceux_dst, fceux_h_dst])
+
 env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source=("bin/fceux", "bin/auxlib.lua")))
