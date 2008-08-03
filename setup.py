@@ -2,7 +2,7 @@
 from distutils.core import setup
 setup(name="gfceux",
 		version="2.0.0",
-		scripts = ['gfceu'],
+		scripts = ['gfceux'],
 		data_files=[('share/gfceux/',['gfceux.xml', 'gfceux_big.png', 'gfceux.png']),
                 ('share/pixmaps/', ['gfceux.png']),
                 ('share/man/man1/', ['gfceux.1']),
