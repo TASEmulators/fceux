@@ -529,8 +529,8 @@ main(int argc,
     g_config->getOption("SDL.LuaScript", &fname);
     if (fname != "")
     {
+        g_config->setOption("SDL.LuaScript", "");
         FCEU_LoadLuaCode(fname.c_str());
-        g_config->setOption("SDL.LoadLua", "");
     }
 
     // loop playing the game
