@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 from distutils.core import setup
-setup(name="gfceu",
+setup(name="gfceux",
 		version="2.0.0",
 		scripts = ['gfceu'],
-		data_files=[('share/gfceu/',['gfceu.xml', 'gfceu_big.png', 'gfceu.png']),
-                ('share/pixmaps/', ['gfceu.png']),
-                ('share/man/man1/', ['gfceu.1']),
-      			    ('share/applications/', ['gfceu.desktop'])],
+		data_files=[('share/gfceux/',['gfceux.xml', 'gfceux_big.png', 'gfceux.png']),
+                ('share/pixmaps/', ['gfceux.png']),
+                ('share/man/man1/', ['gfceux.1']),
+      			    ('share/applications/', ['gfceux.desktop'])],
 		author = "Lukas Sabota",
-		author_email = "punkrockguy318@comcast.net",
-		url = "http://punkrockguy318.no-ip.org"
-
+		author_email = "ltsmooth42 _at_ gmail.com",
+		url = "http://dietschnitzel.com/gfceu"
 		)
 

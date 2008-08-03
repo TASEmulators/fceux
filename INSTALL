@@ -1,4 +1,4 @@
-You can install gfceu with setup.py:
+You can install gfceux with setup.py:
 
 $ sudo ./setup.py install --prefix=/usr/local
 
