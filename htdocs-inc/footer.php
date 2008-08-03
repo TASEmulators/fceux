@@ -6,6 +6,7 @@ America Inc.
 
 <p class="center">
 
+<!--
 <a href="http://validator.w3.org/check/referer">
 <img src="http://www.w3.org/Icons/valid-xhtml11" class="image"
      alt="Valid XHTML 1.1 Strict" title="Valid XHTML 1.1 Strict" />
@@ -20,6 +21,7 @@ America Inc.
 <img class="image" alt="Get Firefox!" title="Get Firefox!"
      src="http://sfx-images.mozilla.org/affiliates/Buttons/88x31/get.gif"/>
 </a>
+-->
 
 <a href="http://sourceforge.net/">
 <img alt="SourceForge Logo" title="SourceForge Logo" class="image" 

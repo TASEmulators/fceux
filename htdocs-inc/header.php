@@ -9,21 +9,20 @@
 	<meta name="keywords" content="FCE Ultra FCEUltra Nintendo NES Famicom emulator"/>
 	<meta name="description" content="FCE Ultra is a Nintendo/Famicom emulator for Linux and Windows."/>
 	<link rel="stylesheet" type="text/css" href="StyleSheets/main.css"/>
-	<title>FCE Ultra<?php if (isset($title)) { print(": $title"); } ?></title>
+	<title>FCEUX<?php if (isset($title)) { print(": $title"); } ?></title>
 </head>
 
 <body>
 
 <!-- <img class="logo" alt="FCE Ultra" width="750" height="150" src="/logo2.jpg" /> -->
 
-<h1 class="center">FCE Ultra</h1>
+<h1 class="center">FCEUX</h1>
 
 <div class="navbox">
 <span class="naventry">[<a href="index.php">Home</a>]</span>
 <span class="naventry">[<a href="download.php">Download</a>]</span>
 <span class="naventry">[<a href="docs.php">Documentation</a>]</span>
 <span class="naventry">[<a href="support.php">Support Files</a>]</span>
-<span class="naventry">[<a href="links.php">Links</a>]</span>
 <span class="naventry">[<a href="http://sourceforge.net/projects/fceultra/">Development</a>]</span>
 <span class="naventry">[<a href="links.php">Links</a>]</span>
 <span class="naventry">[<a href="archive.php">Archive</a>]</span>
