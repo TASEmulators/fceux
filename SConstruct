@@ -11,7 +11,7 @@ opts.AddOptions(
 )
 
 env = Environment(options = opts)
-env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source="bin/fceux"))
+
 
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
@@ -100,6 +100,9 @@ if env['PLATFORM'] == 'win32':
 fceux_src = 'src/fceux' + exe_suffix
 fceux_dst = 'bin/fceux' + exe_suffix
 
+auxlib_src = 'src/auxlib.lua'
+auxlib_dst = 'bin/auxlib.lua'
+
 fceux_h_src = 'src/drivers/win/help/fceux.chm'
 fceux_h_dst = 'bin/fceux.chm'
 
@@ -108,4 +111,6 @@ fceux_h_dst = 'bin/fceux.chm'
 env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
 #env.Alias("install", [fceux_r_dst, fceux_d_dst, fceux_h_dst])
 env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
+env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
 env.Alias("install", [fceux_dst, fceux_h_dst])
+env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source=("bin/fceux", "bin/auxlib.lua")))
