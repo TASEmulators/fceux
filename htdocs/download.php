@@ -7,13 +7,23 @@
 <tr><th class="boxhead" colspan="3">Download</th></tr>
 <tr><td colspan="3">
 <ul>
-    <li>There are two ports: SDL and Win32. The ports are significantly different. Win32 has an extensive set of native gui amenities and tools.</li>
+    <li>There are two ports: SDL and Win32. The ports are significantly 
+different. Win32 has an extensive set of native gui amenities and 
+tools.  The SDL port supports many of the features of the Win32 build 
+(Lua scripting, movie recording), however some of the Win32 features are 
+Win32 only.  A GTK2 GUI has been also developed for the SDL port.  The 
+SDL port should run any UNIX-type OS (Linux/Solaris/BSD).</li>
     <li>Network play is not presently functional. Fixing it is a high priority.</li>
     <li>SDL:</li>
     <ul>
      <li>This build is working, but may have a few problems. Swing by and help out if you want to help shape it up!
-     <li>Uses scons
-     <li>Requires SDL, libz, and liblua5.1. OpenGL is optional, and recommended.
+     <li><a href=http://scons.org>Scons</a> is required to build from 
+source.</li>
+     <li>Requires SDL, libz, and liblua5.1. OpenGL is optional, and 
+recommended.</li>
+     <li><a href="http://dietschnitzel.com/gfceu">GFceuX</a>, a GTK2 GUI 
+for fceux, is included in the source release.  It is recommened for all non-windows 
+users of the SDL port, unless you particullarly prefer the command-line.</li>
     </ul>
     <li>Win32:
     <ul>
