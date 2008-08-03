@@ -9,7 +9,6 @@
 
 <ul>
 <li><a href="#fceupal">FCEU-PAL</a></li>
-<li><a href="#gfceu">GNOME FCE Ultra</a></li>
 <li><a href="#mines">MiNES</a></li>
 <li><a href="#chtconv">NESten&lt;--&gt;FCE Ultra Cheat Converter</a></li>
 <li><a href="#netplay">Network Play Server</a></li>
