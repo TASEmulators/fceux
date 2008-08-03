@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.7svn"
+version = "2.0.0"
 title = "gfceu"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
@@ -56,10 +56,16 @@ class GameOptions:
   xscale_spin = 2
   yscale_spin = 2
   bpp_combo = 32
-  extra_entry = ''
-  romfile = ''
+  
   opengl_check = False
   autoscale_check = True
+  
+  # main
+  extra_entry = ''
+  romfile = ''
+  moviefile = ''
+  luafile = ''
+  
   
   # network
   join_radio = False
@@ -98,6 +104,8 @@ def give_widgets():
   global options, widgets
   try:
     widgets.get_object("rom_entry").set_text(options.romfile)
+    widgets.get_object("movie_entry").set_text(options.moviefile)
+    widgets.get_object("lua_entry").set_text(options.luafile)
     
     # sound
     widgets.get_object("sound_check").set_active(options.sound_check)
@@ -139,6 +147,8 @@ def set_options():
   and stores it in the options object.
   """
   options.romfile = widgets.get_object("rom_entry").get_text()
+  options.moviefile = widgets.get_object("movie_entry").get_text()
+  options.luafile = widgets.get_object("lua_entry").get_text()
   
   # sound
   options.sound_check = widgets.get_object("sound_check").get_active()
@@ -321,7 +331,14 @@ class GfceuApp:
     video_options += ' --xscale ' + str(options.xscale_spin)
     video_options += ' --yscale ' + str(options.yscale_spin)
     video_options += ' '
-      
+    
+    # lua/movie
+    other_options = ''
+    if options.luafile:
+        other_options += '--loadlua ' + options.luafile + ' '
+    if options.moviefile:
+        other_options += '--playmov ' + options.moviefile + ' '
+          
     
     # Netplay is fucked right now
    
@@ -352,7 +369,7 @@ class GfceuApp:
    
     
     command =  self.fceux_binary + ' ' + sound_options + video_options +\
-    network + options.extra_entry + ' '+ rom_name
+    network + other_options + options.extra_entry + ' '+ rom_name
     self.msg('Command: ' + command)
 
     # more code to disable because netplay is fucked
@@ -403,8 +420,80 @@ class GfceuApp:
     widgets.get_object("about_dialog").set_name('GNOME FCE Ultra '+version)
     widgets.get_object("about_dialog").run()
     widgets.get_object("about_dialog").hide()
-
-  def browse_button_clicked(self, menuitem, data=None):
+  
+  def lua_browse_button_clicked(self, menuitem, data=None):
+    global options
+    set_options()
+    chooser = gtk.FileChooserDialog("Open...",  None,
+            gtk.FILE_CHOOSER_ACTION_OPEN,
+  			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+  			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+    chooser.set_property("local-only", False)
+    chooser.set_default_response(gtk.RESPONSE_OK)
+    
+    filter=gtk.FileFilter()
+    filter.set_name("Lua scripts")
+    filter.add_pattern("*.lua")
+    chooser.add_filter(filter)
+    
+    filter = gtk.FileFilter()
+    filter.set_name("All files")
+    filter.add_pattern("*")
+    chooser.add_filter(filter)
+    
+    if options.luafile == '':
+      folder = os.getenv('HOME')
+    else:
+      folder = os.path.split(options.luafile)[0]
+      
+    chooser.set_current_folder (folder)
+    
+    response = chooser.run()
+    chooser.hide()
+    
+    if response == gtk.RESPONSE_OK:
+      if chooser.get_filename():
+        x = chooser.get_filename()
+        widgets.get_object("lua_entry").set_text(x)
+        options.luafile = x
+  
+  def movie_browse_button_clicked(self, menuitem, data=None):
+    global options
+    set_options()
+    chooser = gtk.FileChooserDialog("Open...",  None,
+            gtk.FILE_CHOOSER_ACTION_OPEN,
+  			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+  			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+    chooser.set_property("local-only", False)
+    chooser.set_default_response(gtk.RESPONSE_OK)
+    
+    filter=gtk.FileFilter()
+    filter.set_name("FM2 movies")
+    filter.add_pattern("*.fm2")
+    chooser.add_filter(filter)
+    
+    filter = gtk.FileFilter()
+    filter.set_name("All files")
+    filter.add_pattern("*")
+    chooser.add_filter(filter)
+    
+    if options.moviefile == '':
+      folder = os.getenv('HOME')
+    else:
+      folder = os.path.split(options.moviefile)[0]
+      
+    chooser.set_current_folder (folder)
+    
+    response = chooser.run()
+    chooser.hide()
+    
+    if response == gtk.RESPONSE_OK:
+      if chooser.get_filename():
+        x = chooser.get_filename()
+        widgets.get_object("movie_entry").set_text(x)
+        options.moviefile = x
+    
+  def rom_browse_button_clicked(self, menuitem, data=None):
     global options
     set_options()
     chooser = gtk.FileChooserDialog("Open...",  None,
@@ -427,8 +516,6 @@ class GfceuApp:
     filter.add_pattern("*")
     chooser.add_filter(filter)
     
-
-    
     if options.romfile == '':
       folder = os.getenv('HOME')
     else:
@@ -443,6 +530,9 @@ class GfceuApp:
       if chooser.get_filename():
         x = chooser.get_filename()
         widgets.get_object("rom_entry").set_text(x)
+        # reset lua and movie entries on rom change
+        widgets.get_object("movie_entry").set_text("")
+        widgets.get_object("lua_entry").set_text("")
         options.romfile = x
 
   def gamepad_clicked(self, widget, data=None):

@@ -7,5 +7,7 @@ You can change the prefix to whatever you like.
 Requirements:
 Python (tested with 2.5); (Ubuntu package name:  python)
 PyGTK, and GTK;  (Ubuntu package name: (python-gtk2 libgtk2.0-0)
-FCE UltraX - You're going to need the latest fceux for gfceu .7 to work
+FceuX 2.0 
+
+NOTE: fceu 1.x is no longer supported in the gfceu 2.x series.  if you still want/need a front-end for gfceu use gfceu .7
 

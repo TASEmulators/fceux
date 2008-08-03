@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Tue Jul 22 22:11:04 2008 -->
+<!--Generated with glade3 3.4.5 on Sat Aug  2 20:20:52 2008 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">10</property>
@@ -67,15 +67,25 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button4">
+                      <object class="GtkButton" id="button1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Right</property>
+                        <property name="label" translatable="yes">Up</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
-                        <property name="right_attach">3</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="label" translatable="yes">Left</property>
+                      </object>
+                      <packing>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                       </packing>
@@ -95,27 +105,17 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button2">
+                      <object class="GtkButton" id="button4">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Left</property>
+                        <property name="label" translatable="yes">Right</property>
                       </object>
                       <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Up</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                       </packing>
                     </child>
                   </object>
@@ -343,6 +343,96 @@ Artwork for old versions (&lt; 0.2.7):
                     <property name="fill">False</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkHBox" id="hbox8">
+                    <property name="visible">True</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="label18">
+                        <property name="visible">True</property>
+                        <property name="xpad">5</property>
+                        <property name="label" translatable="yes">Movie Filename:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="movie_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="movie_browse_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">_Browse...</property>
+                        <property name="use_underline">True</property>
+                        <signal handler="movie_browse_button_clicked" name="clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox13">
+                    <property name="visible">True</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="label23">
+                        <property name="visible">True</property>
+                        <property name="xpad">5</property>
+                        <property name="label" translatable="yes">Lua Script:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="lua_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="lua_browse_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">_Browse...</property>
+                        <property name="use_underline">True</property>
+                        <signal handler="lua_browse_button_clicked" name="clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
             </child>
             <child type="tab">
@@ -399,28 +489,16 @@ Artwork for old versions (&lt; 0.2.7):
                     <property name="column_spacing">5</property>
                     <property name="row_spacing">5</property>
                     <child>
-                      <object class="GtkButton" id="gp1_button">
+                      <object class="GtkButton" id="gp3_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _1</property>
+                        <property name="label" translatable="yes">Gamepad _3</property>
                         <property name="use_underline">True</property>
                         <signal after="yes" handler="gamepad_clicked" name="clicked"/>
                       </object>
                       <packing>
-                        <property name="y_options"/>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="gp2_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _2</property>
-                        <property name="use_underline">True</property>
-                        <signal after="yes" handler="gamepad_clicked" name="clicked"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                         <property name="y_options"/>
                       </packing>
                     </child>
@@ -441,16 +519,28 @@ Artwork for old versions (&lt; 0.2.7):
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="gp3_button">
+                      <object class="GtkButton" id="gp2_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Gamepad _3</property>
+                        <property name="label" translatable="yes">Gamepad _2</property>
                         <property name="use_underline">True</property>
                         <signal after="yes" handler="gamepad_clicked" name="clicked"/>
                       </object>
                       <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="y_options"/>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="gp1_button">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Gamepad _1</property>
+                        <property name="use_underline">True</property>
+                        <signal after="yes" handler="gamepad_clicked" name="clicked"/>
+                      </object>
+                      <packing>
                         <property name="y_options"/>
                       </packing>
                     </child>
@@ -886,26 +976,15 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                             <property name="column_spacing">5</property>
                             <property name="row_spacing">5</property>
                             <child>
-                              <object class="GtkLabel" id="label19">
+                              <object class="GtkEntry" id="host_pass">
                                 <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Port:</property>
+                                <property name="can_focus">True</property>
                               </object>
                               <packing>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"/>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label20">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Password:</property>
-                              </object>
-                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
-                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
@@ -923,15 +1002,26 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="host_pass">
+                              <object class="GtkLabel" id="label20">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Password:</property>
                               </object>
                               <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label19">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Port:</property>
+                              </object>
+                              <packing>
+                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
@@ -981,13 +1071,54 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                             <property name="column_spacing">3</property>
                             <property name="row_spacing">5</property>
                             <child>
-                              <object class="GtkEntry" id="join_add">
+                              <object class="GtkSpinButton" id="join_port">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="adjustment">adjustment4</property>
+                                <property name="climb_rate">1</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label17">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Password:</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label16">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Server Port:</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label15">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Server Address:</property>
+                              </object>
+                              <packing>
+                                <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
@@ -1007,54 +1138,13 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="label15">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Server Address:</property>
-                              </object>
-                              <packing>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"/>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label16">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Server Port:</property>
-                              </object>
-                              <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"/>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label17">
-                                <property name="visible">True</property>
-                                <property name="xalign">0</property>
-                                <property name="label" translatable="yes">Password:</property>
-                              </object>
-                              <packing>
-                                <property name="top_attach">2</property>
-                                <property name="bottom_attach">3</property>
-                                <property name="x_options">GTK_FILL</property>
-                                <property name="y_options"/>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="join_port">
+                              <object class="GtkEntry" id="join_add">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="adjustment">adjustment4</property>
-                                <property name="climb_rate">1</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
