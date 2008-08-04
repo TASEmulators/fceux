@@ -299,7 +299,7 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
-	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounter?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 
