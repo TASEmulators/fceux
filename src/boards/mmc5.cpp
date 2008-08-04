@@ -113,14 +113,17 @@ cartdata MMC5CartList[MMC5_NOCARTS]=
 
 int DetectMMC5WRAMSize(uint32 crc32)
 {
-  int x;
-  for(x=0;x<MMC5_NOCARTS;x++)
-     if(crc32==MMC5CartList[x].crc32)
-     {
-       FCEU_printf(" >8KB external WRAM present.  Use UNIF if you hack the ROM image.\n");
-       return(MMC5CartList[x].size*8);
-     }
-  return(8);
+	int x;
+	for(x=0;x<MMC5_NOCARTS;x++) {
+		if(crc32==MMC5CartList[x].crc32) {
+			FCEU_printf(" >8KB external WRAM present.  Use UNIF if you hack the ROM image.\n");
+			return(MMC5CartList[x].size*8);
+		}
+	}
+
+	//mbg 8/4/08 - previously, this was returning 8KB
+	//but I changed it to return 64 because unlisted carts are probably homebrews, and they should probably use 64 (why not use it all?)
+	return 64;
 }
 
 static void BuildWRAMSizeTable(void)
@@ -374,7 +377,8 @@ static DECLFW(MMC5_WriteROMRAM)
   if(A>=0x8000)
     if(MMC5ROMWrProtect[(A-0x8000)>>13]) return;
   if(MMC5MemIn[(A-0x6000)>>13])
-    if(((WRAMMaskEnable[0]&3)|((WRAMMaskEnable[1]&3)<<2)) == 6) Page[A>>11][A]=V;
+    if(((WRAMMaskEnable[0]&3)|((WRAMMaskEnable[1]&3)<<2)) == 6) 
+		Page[A>>11][A]=V;
 }
 
 static DECLFW(MMC5_ExRAMWr)
