@@ -71,8 +71,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
         MENUITEM SEPARATOR
-        MENUITEM "Display BG",                  MENU_DISPLAY_BG
-        MENUITEM "Display OBJ",                 MENU_DISPLAY_OBJ
     END
     POPUP "&Config"
     BEGIN
@@ -84,8 +82,9 @@ BEGIN
         POPUP "Display"
         BEGIN
             MENUITEM "Movie Status Icon",           MENU_SHOW_STATUS_ICON
-            MENUITEM "Input Display",               MENU_DISPLAY_INPUTDISPLAY
             MENUITEM "Lag Counter",                 MENU_DISPLAY_LAGCOUNTER
+            MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
+            MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ
         END
         MENUITEM SEPARATOR
         MENUITEM "Game Genie",                  MENU_GAME_GENIE
