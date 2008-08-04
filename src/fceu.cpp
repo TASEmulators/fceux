@@ -59,7 +59,7 @@
 #include "drivers/sdl/sdl.h"
 #endif
 
-int AFon, AFoff, AutoFireOffset = 0; //For keeping track of autofire settings
+int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
 FCEUGI::FCEUGI()
 : filename(0)
