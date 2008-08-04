@@ -38,6 +38,14 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/documentation/lua
 <h2 class="boxhead">News</h2>   <!-- News section -->
 <div class="boxbody">
 
+  <h3 class="boxsubhead">04 August 2008</h3>
+  <p>
+  <strong>FCEUX 2.0.1 maintenance release</strong>
+  </p>
+  <p>Jump to the <a href="download.php">download</a> page.
+  </p>
+   -- zeromus
+  </p>
   <h3 class="boxsubhead">02 August 2008</h3>
   <p>
   FCE Ultra is BACK! Today, version 2.0.0 has been released as the new software FCEUX.
