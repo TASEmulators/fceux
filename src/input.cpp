@@ -190,7 +190,7 @@ static void UpdateGP(int w, void *data, int arg)
 	if(w==0)
 	{
 		joy[0]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr;
-		joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr >> 16;
+		joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(2) : *(uint32 *)joyports[0].ptr >> 16;
 	}
 	else
 	{
