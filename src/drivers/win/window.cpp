@@ -1413,7 +1413,7 @@ int CreateMainWindow()
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEULTRA",
-		FCEU_NAME,
+		FCEU_NAME_AND_VERSION,
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
 		MainWindow_wndx,
 		MainWindow_wndy,
