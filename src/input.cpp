@@ -190,13 +190,14 @@ static void UpdateGP(int w, void *data, int arg)
 	if(w==0)
 	{
 		joy[0]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr;
-		joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(2) : *(uint32 *)joyports[2].ptr >> 16;
+		joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr >> 16;
 	}
 	else
 	{
 		joy[1]= FCEU_LuaUsingJoypad(1) ? FCEU_LuaReadJoypad(1) : *(uint32 *)joyports[1].ptr >> 8;
-		joy[3]= FCEU_LuaUsingJoypad(3) ? FCEU_LuaReadJoypad(3) : *(uint32 *)joyports[3].ptr >> 24;
+		joy[3]= FCEU_LuaUsingJoypad(3) ? FCEU_LuaReadJoypad(3) : *(uint32 *)joyports[1].ptr >> 24;
 	}
+
 }
 
 static void LogGP(int w, MovieRecord* mr)
