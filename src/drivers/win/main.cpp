@@ -39,6 +39,7 @@
 #include "../../state.h"
 #include "../../debug.h"
 #include "../../movie.h"
+
 #include "archive.h"
 #include "input.h"
 #include "netplay.h"

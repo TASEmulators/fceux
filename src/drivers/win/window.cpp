@@ -21,6 +21,7 @@
 // File description: Everything relevant for the main window should go here. This
 //                   does not include functions relevant for dialog windows.
 
+#include "../../input.h"
 #include "window.h"
 #include "main.h"
 #include "state.h"
@@ -298,7 +299,7 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
-
+	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounter?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 
@@ -1174,6 +1175,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_STOPLUASCRIPT:
 				FCEU_LuaStop();
 				break;
+			case MENU_DISPLAY_LAGCOUNTER:
+				lagCounterDisplay ^= 1;
+				UpdateCheckedMenuItems();
+
 			}
 		}
 		break;

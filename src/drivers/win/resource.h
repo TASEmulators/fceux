@@ -508,6 +508,13 @@
 #define MENU_BASIC_BOT2                 40220
 #define ID_FILE_RUNLUASCRIPT            40229
 #define ID_FILE_STOPLUASCRIPT           40230
+#define ID_CONFIG_DISPLAY               40231
+#define ID_DISPLAY_INPUTDISPLAY         40232
+#define ID_DISPLAY_LAGCOUNTER           40233
+#define FCUE_DISPLAY_INPUTDISPLAY       40234
+#define FCEU_DISPLAY_LAGCOUNTER         40235
+#define MENU_DISPLAY_INPUTDISPLAY       40236
+#define MENU_DISPLAY_LAGCOUNTER         40237
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 
@@ -516,7 +523,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40231
+#define _APS_NEXT_COMMAND_VALUE         40238
 #define _APS_NEXT_CONTROL_VALUE         1179
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
