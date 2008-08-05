@@ -755,7 +755,6 @@ BEGIN
     CONTROL         "Allow more than 8 sprites per scanline.",IDC_VIDEOCONFIG_NO8LIM,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,250,157,11
     GROUPBOX        "Emulation",65430,196,236,178,32,WS_GROUP
-    LTEXT           "(can someone please tell us what use this is?)",IDC_STATIC,227,203,144,8
 END
 
 DWBDIALOGSIMPLE DIALOGEX 33, 99, 250, 39
