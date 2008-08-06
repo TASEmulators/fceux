@@ -515,6 +515,7 @@
 #define FCEU_DISPLAY_LAGCOUNTER         40235
 #define MENU_DISPLAY_INPUTDISPLAY       40236
 #define MENU_DISPLAY_LAGCOUNTER         40237
+#define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
 

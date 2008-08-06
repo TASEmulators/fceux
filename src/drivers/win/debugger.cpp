@@ -55,7 +55,7 @@ int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
 HWND hDebug;
-static HFONT hFont,hNewFont;
+static HFONT hFont;
 static SCROLLINFO si;
 
 #define INVALID_START_OFFSET 1
@@ -271,7 +271,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 // ################################## End of SP CODE ###########################
 
 	char str[35000]={0},chr[34]={0};
-	int size,i,j;
+	int size;
 	uint8 opcode[3];
 	
 // ################################## Start of SP CODE ###########################
@@ -283,7 +283,13 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 	si.nPos = addr;
 	SetScrollInfo(GetDlgItem(hWnd,scrollid),SB_CTL,&si,TRUE);
 
-	for (i = 0; i < 34; i++) {
+	//figure out how many lines we can draw
+	RECT rect;
+	GetWindowRect(hWnd,&rect);
+	int lines = (rect.bottom-rect.top)/13;
+
+
+	for (int i = 0; i < lines; i++) {
 		if (addr > 0xFFFF) break;
 		if(addr >= 0x8000)
 			sprintf(chr, "%02X:%04X", getBank(addr), addr);
@@ -310,7 +316,7 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 				}
 				break;
 			}
-			for (j = 0; j < size; j++) {
+			for (int j = 0; j < size; j++) {
 				sprintf(chr, "%02X ", opcode[j] = GetMem(addr++));
 				strcat(str,chr);
 			}
@@ -642,8 +648,8 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CenterWindow(hwndDlg);
 
 			//set font
-			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,WM_SETFONT,(WPARAM)hNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_PATCH_DISASM,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 
 			//set limits
 			SendDlgItemMessage(hwndDlg,IDC_ASSEMBLER_HISTORY,CB_LIMITTEXT,20,0);
@@ -818,12 +824,53 @@ void DebuggerExit()
 {
 	FCEUI_Debugger().badopbreak = 0;
 	debugger_open = 0;
-	DeleteObject(hNewFont);
 	DestroyWindow(hDebug);
 }
 
+static RECT currDebuggerRect;
+static RECT newDebuggerRect;
+
+//used to move all child items in the dialog when you resize (except for the dock fill controls which are resized)
+BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	int dx = (newDebuggerRect.right-newDebuggerRect.left)-(currDebuggerRect.right-currDebuggerRect.left);
+	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);
+
+	HWND editbox = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY);
+	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);
+	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);
+	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);
+
+	RECT crect;
+	GetWindowRect(hwnd,&crect);
+	ScreenToClient(hDebug,(LPPOINT)&crect);
+	ScreenToClient(hDebug,((LPPOINT)&crect)+1);
+
+	if(hwnd == editbox) {
+		crect.right += dx;
+		crect.bottom += dy;
+		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
+		GetScrollInfo(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si);
+		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+	} else if(hwnd == icontray) {
+		crect.bottom += dy;
+		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
+	} else if(hwnd == addrline) {
+		crect.top += dy;
+		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+	} else if(hwnd == vscr) {
+		 crect.bottom += dy;
+		 crect.left += dx;
+		 crect.right += dx;
+		 SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
+	} else {
+		crect.left += dx;
+		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+	}
+	return TRUE;
+}
+
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	LOGFONT lf;
 	RECT wrect;
 	char str[256]={0},*ptr,dotdot[4];
 	int tmp,tmp2;
@@ -837,6 +884,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			extern int loadDebugDataFailed;
 
 			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+			GetWindowRect(hwndDlg,&currDebuggerRect);
 
 			si.cbSize = sizeof(SCROLLINFO);
 			si.fMask = SIF_ALL;
@@ -847,20 +895,15 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SetScrollInfo(GetDlgItem(hwndDlg,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si,TRUE);
 
 			//setup font
-			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
-			GetObject(hFont, sizeof(LOGFONT), &lf);
-			strcpy(lf.lfFaceName,"Courier");
-			hNewFont = CreateFontIndirect(&lf);
-
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,WM_SETFONT,(WPARAM)hNewFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,WM_SETFONT,(WPARAM)hNewFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_DISASSEMBLY,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 
 			//text limits
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,EM_SETLIMITTEXT,2,0);
@@ -914,6 +957,17 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			FillBreakList(hwndDlg);
 			break;
 		}
+
+		case WM_SIZE: {
+			GetWindowRect(hwndDlg,&newDebuggerRect);
+			EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);
+			currDebuggerRect = newDebuggerRect;
+			InvalidateRect(hwndDlg,0,TRUE);
+			UpdateWindow(hwndDlg);
+			break;
+		}
+
+
 		case WM_CLOSE:
 		case WM_QUIT:
 			//exitdebug:

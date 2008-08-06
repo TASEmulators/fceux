@@ -1,3 +1,10 @@
+---version 2.0.2 released---
+
+06-aug-2008 - zeromus - auto-fill .fcs extension in save state as dialog
+06-aug-2008 - zeromus - mmc5 - 64KB games now work correctly
+06-aug-2008 - zeromus - mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed
+06-aug-2008 - zeromus - debugger - debugger window is now resizeable
+
 ---version 2.0.1 released---
 
 04-aug-2008 - reorganize display toggle options in the menu
