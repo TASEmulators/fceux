@@ -147,10 +147,23 @@ uint8 PPUSPL;
 uint8 NTARAM[0x800],PALRAM[0x20],SPRAM[0x100],SPRBUF[0x100];
 
 
+
+
 #define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
-#define MMC5BGVRAMADR(V)      &MMC5BGVPage[(V)>>10][(V)]  
 #define VRAMADR(V)      &VPage[(V)>>10][(V)]
 
+//mbg 8/6/08 - fix a bug relating to
+//"When in 8x8 sprite mode, only one set is used for both BG and sprites."
+//in mmc5 docs
+uint8 * MMC5BGVRAMADR(uint32 V) {
+	if(!Sprite16) {
+		extern uint8 mmc5ABMode;                /* A=0, B=1 */
+		if(mmc5ABMode==0)
+			return MMC5SPRVRAMADR(V);
+		else 
+			return &MMC5BGVPage[(V)>>10][(V)];
+	} else return &MMC5BGVPage[(V)>>10][(V)];
+}
 
 static DECLFR(A2002)
 {

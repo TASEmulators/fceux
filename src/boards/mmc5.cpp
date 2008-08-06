@@ -52,7 +52,7 @@ static uint8 PRGBanks[4];
 static uint8 WRAMPage;
 static uint8 CHRBanksA[8], CHRBanksB[4];
 static uint8 WRAMMaskEnable[2];
-static uint8 ABMode;                /* A=0, B=1 */
+uint8 mmc5ABMode;                /* A=0, B=1 */
 
 static uint8 IRQScanline,IRQEnable;
 static uint8 CHRMode, NTAMirroring, NTFill, ATFill;
@@ -128,17 +128,24 @@ int DetectMMC5WRAMSize(uint32 crc32)
 
 static void BuildWRAMSizeTable(void)
 {
-  int x;
-  for(x=0;x<8;x++)
-  {
-    switch(MMC5WRAMsize)
-    {
-      case 0: MMC5WRAMIndex[x]=255; break;
-      case 1: MMC5WRAMIndex[x]=(x>3)?255:0; break;
-      case 2: MMC5WRAMIndex[x]=(x&4)>>2; break;
-      case 4: MMC5WRAMIndex[x]=(x>3)?255:(x&3); break;
-    }
-  }
+	int x;
+	for(x=0;x<8;x++)
+	{
+		switch(MMC5WRAMsize)
+		{
+		case 0: MMC5WRAMIndex[x]=255; break; //X,X,X,X,X,X,X,X
+		case 1: MMC5WRAMIndex[x]=(x>3)?255:0; break; //0,0,0,0,X,X,X,X
+		case 2: MMC5WRAMIndex[x]=(x&4)>>2; break; //0,0,0,0,1,1,1,1
+		case 4: MMC5WRAMIndex[x]=(x>3)?255:(x&3); break; //0,1,2,3,X,X,X,X
+		case 8: MMC5WRAMIndex[x]=x; break; //0,1,2,3,4,5,6,7,8  
+			//mbg 8/6/08 - i added this to support 64KB of wram
+			//now, I have at least one example (laser invasion) which actually uses size 1 but isnt in the crc list
+			//so, whereas before my change on 8/4/08 we would have selected size 1, now we select size 8
+			//this means that we could have just introduced an emulation bug, in case those games happened to 
+			//address, say, page 3. with size 1 that would resolve to [0] but in size 8 it resolves to [3].
+			//so, you know what to do if there are problems.
+		}
+	}
 }
 
 static void MMC5CHRA(void)
@@ -293,7 +300,7 @@ static DECLFW(Mapper5_write)
 {
   if(A>=0x5120&&A<=0x5127)
   {
-    ABMode = 0;
+    mmc5ABMode = 0;
     CHRBanksA[A&7]=V;
     MMC5CHRA();
   }
@@ -305,10 +312,14 @@ static DECLFW(Mapper5_write)
                    {
                      switch((V>>(x<<1))&3)
                      {
-                       case 0:PPUNTARAM|=1<<x;vnapage[x]=NTARAM;break;
-                       case 1:PPUNTARAM|=1<<x;vnapage[x]=NTARAM+0x400;break;
-                       case 2:PPUNTARAM|=1<<x;vnapage[x]=ExRAM;break;
-                       case 3:PPUNTARAM&=~(1<<x);vnapage[x]=MMC5fill;break;
+                       case 0:
+						   PPUNTARAM|=1<<x;vnapage[x]=NTARAM;break;
+                       case 1:
+						   PPUNTARAM|=1<<x;vnapage[x]=NTARAM+0x400;break;
+                       case 2:
+						   PPUNTARAM|=1<<x;vnapage[x]=ExRAM;break;
+                       case 3:
+						   PPUNTARAM&=~(1<<x);vnapage[x]=MMC5fill;break;
                      }
                    }
                  }
@@ -317,7 +328,7 @@ static DECLFW(Mapper5_write)
     case 0x5113: WRAMPage=V;MMC5WRAM(0x6000,V&7);break;
     case 0x5100: mmc5psize=V;MMC5PRG();break;
     case 0x5101: mmc5vsize=V;
-                 if(!ABMode)
+                 if(!mmc5ABMode)
                  { MMC5CHRB();MMC5CHRA();}
                  else
                  { MMC5CHRA();MMC5CHRB();}
@@ -329,13 +340,16 @@ static DECLFW(Mapper5_write)
     case 0x5128:
     case 0x5129:
     case 0x512a:
-    case 0x512b: ABMode=1;
+    case 0x512b: mmc5ABMode=1;
                  CHRBanksB[A&3]=V;
                  MMC5CHRB();
                  break;
     case 0x5102: WRAMMaskEnable[0]=V;break;
     case 0x5103: WRAMMaskEnable[1]=V;break;
-    case 0x5104: CHRMode=V;MMC5HackCHRMode=V&3;break;
+    case 0x5104: 
+		CHRMode=V;
+		MMC5HackCHRMode=V&3;
+		break;
     case 0x5106: if(V!=NTFill)
                  {
                    uint32 t;
@@ -430,7 +444,7 @@ void MMC5Synco(void)
     }
   }
   MMC5WRAM(0x6000,WRAMPage&7);
-  if(!ABMode)
+  if(!mmc5ABMode)
   {
     MMC5CHRB();
     MMC5CHRA();
@@ -746,7 +760,7 @@ static SFORMAT MMC5_StateRegs[]={
         { CHRBanksB, 4, "CHRB"},
         { &WRAMPage, 1, "WRMP"},
         { WRAMMaskEnable, 2, "WRME"},
-        { &ABMode, 1, "ABMD"},
+        { &mmc5ABMode, 1, "ABMD"},
         { &IRQScanline, 1, "IRQS"},
         { &IRQEnable, 1, "IRQE"},
         { &CHRMode, 1, "CHRM"},
