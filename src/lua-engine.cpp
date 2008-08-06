@@ -300,6 +300,22 @@ static int fceu_message(lua_State *L) {
 
 static int memory_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1))); return 1; }
 static int memory_writebyte(lua_State *L) {   FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2)); return 0; }
+static int memory_readbyterange(lua_State *L) {
+
+	int range_start = luaL_checkinteger(L,1);
+	int range_size = luaL_checkinteger(L,2);
+	if(range_size < 0)
+		return 0;
+
+	char* buf = (char*)alloca(range_size);
+	for(int i=0;i<range_size;i++) {
+		buf[i] = FCEU_CheatGetByte(range_start+i);
+	}
+
+	lua_pushlstring(L,buf,range_size);
+	
+	return 1;
+}
 
 
 // Not for the signed versions though
@@ -1368,6 +1384,7 @@ static const struct luaL_reg fceulib [] = {
 static const struct luaL_reg memorylib [] = {
 
 	{"readbyte", memory_readbyte},
+	{"readbyterange", memory_readbyterange},
 	{"readbytesigned", memory_readbytesigned},
 	{"writebyte", memory_writebyte},
 
