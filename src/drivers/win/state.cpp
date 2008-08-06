@@ -5,7 +5,7 @@
 **/
 void FCEUD_SaveStateAs()
 {
-	const char filter[] = FCEU_NAME" Save State(*.fc?)\0*.fc?\0";
+	const char filter[] = FCEU_NAME" Save State (*.fc?)\0*.fc?\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 
@@ -14,6 +14,7 @@ void FCEUD_SaveStateAs()
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Save State As...";
 	ofn.lpstrFilter = filter;
+	ofn.lpstrDefExt = "fcs";
 	nameo[0] = 0;
 	ofn.lpstrFile = nameo;
 	ofn.nMaxFile = 256;
@@ -30,7 +31,7 @@ void FCEUD_SaveStateAs()
 **/
 void FCEUD_LoadStateFrom()
 {
-	const char filter[]= FCEU_NAME" Save State(*.fc?)\0*.fc?\0";
+	const char filter[]= FCEU_NAME" Save State (*.fc?)\0*.fc?\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 
