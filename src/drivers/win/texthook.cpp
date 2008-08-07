@@ -39,6 +39,8 @@
 #include "..\..\palette.h" //bbit edited: this line changed to include this instead of svga.h
 #include "..\..\video.h" //needed for XBuf
 #include "cdlogger.h" //needed for TextHookerLoadTable
+#include "fceu.h"
+
 
 char *textToTrans; // buffer to hold the text that needs translating
 char *transText; //holds the translated text
@@ -47,8 +49,6 @@ extern void FCEUD_BlitScreen(uint8 *XBuf); //needed for pause, not sure where th
 
 //adelikat merge 7/1/08 - had to add these extern variables 
 //------------------------------
-extern int EmulationPaused; // may need _userpause - main.cpp 153 but I am unsure if that is used with standard pause routine
-int userpause = EmulationPaused; //didn't feel like changing all instances of userpause :P
 extern uint8 PALRAM[0x20];
 extern uint8 PPU[4];
 extern uint8 *vnapage[4];
@@ -163,7 +163,7 @@ inline void DrawTextHookerChr(uint8 *pbitmap,uint8 *chr,int pal,int makeitred){
 			p = PALRAM[p+(pal*4)];
 			tmp--;
 
-			if ( userpause == 1 ) {
+			if ( EmulationPaused == 1 ) {
 				//when we're paused, makeitred determines whether to invert
 				//the current colors or not
 				if ( makeitred == 1 ) {
@@ -300,7 +300,7 @@ void UpdateTextHooker() {
 			chr = tile*16;
 
 			//if we're paused
-			if ( userpause == 1 ) {
+			if ( EmulationPaused == 1 ) {
 				//if the selection has changed since we paused
 				if ( tileToggles[x][y] != pausedTileToggles[x][y] ) {
 					DrawTextHookerChr(pbitmap,&VPage[(ptable+chr)>>10][ptable+chr],tileattr,1);
@@ -975,15 +975,16 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							TextHookerDoBlit();
 
 							break;
-						case 106: //pause button (F2)
-							if ( userpause == 1 ) {
-								userpause = 0;
-							} else {
-								userpause = 1;
-								memcpy( pausedTileToggles, tileToggles, sizeof( tileToggles ) );
-							}
-							FCEUD_BlitScreen(XBuf+8);
-							break;
+							//mbg 8/6/08 - this looks weird
+						//case 106: //pause button (F2)
+						//	if ( userpause == 1 ) {
+						//		userpause = 0;
+						//	} else {
+						//		userpause = 1;
+						//		memcpy( pausedTileToggles, tileToggles, sizeof( tileToggles ) );
+						//	}
+						//	FCEUD_BlitScreen(XBuf+8);
+						//	break;
 						case 107: //the SNAP button (oh snap!)
 							if ( TableFileLoaded == 1 ) { //make sure there's a table loaded
 								//go through each tile

@@ -29,7 +29,6 @@ using namespace std;
 #define MOVIE_VERSION           3 
 
 extern char FileBase[];
-extern int EmulationPaused;
 
 using namespace std;
 

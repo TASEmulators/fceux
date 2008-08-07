@@ -427,7 +427,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				case LBN_DBLCLK:
 					switch (LOWORD(wParam)) { //disable/enable cheat
 						case IDC_CHEAT_LIST_POSSIBILITIES:
-							extern int EmulationPaused;
 							if (EmulationPaused == 1)	//We only want to send info to memwatch if paused
 							{							//otherwise we will be sending info while it is updating causing unpredictable behavior
 								lbfocus=1;				   

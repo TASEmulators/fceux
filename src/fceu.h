@@ -42,6 +42,7 @@ extern uint8 MMC5HackSPPage;
 
 extern  uint8  *RAM;            //shared memory modifications
 extern  uint8  *GameMemBlock;   //shared memory modifications
+extern int EmulationPaused;
 
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
