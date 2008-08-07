@@ -74,7 +74,7 @@ extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 //global lag variables
 unsigned int lagCounter;
 bool lagCounterDisplay;
-bool lagFlag;
+char lagFlag;
 //-------------
 
 static uint8 joy_readbit[2];
@@ -101,7 +101,7 @@ FCPORT portFC;
 
 static DECLFR(JPRead)
 {
-	lagFlag = false;
+	lagFlag = 0;
 	uint8 ret=0;
 
 	ret|=joyports[A&1].driver->Read(A&1);
@@ -297,7 +297,7 @@ void FCEU_UpdateInput(void)
 
 static DECLFR(VSUNIRead0)
 {
-	lagFlag = false;
+	lagFlag = 0;
 	uint8 ret=0;
 
 	ret|=(joyports[0].driver->Read(0))&1;
@@ -310,7 +310,7 @@ static DECLFR(VSUNIRead0)
 
 static DECLFR(VSUNIRead1)
 {
-	lagFlag = false;
+	lagFlag = 0;
 	uint8 ret=0;
 
 	ret|=(joyports[1].driver->Read(1))&1;
@@ -466,6 +466,8 @@ SFORMAT FCEUCTRL_STATEINFO[]={
 	{ &LastStrobe, 1, "LSTS"},
 	{ &ZD[0].bogo, 1, "ZBG0"},
 	{ &ZD[1].bogo, 1, "ZBG1"},
+	{ &lagFlag, 1, "LAGF"},
+	{ &lagCounter, 4, "LAGC"},
 	{ 0 }
 };
 
@@ -574,7 +576,6 @@ static void CommandSoundAdjust(void);
 static void CommandUsePreset(void);
 static void BackgroundDisplayToggle(void);
 static void ObjectDisplayToggle(void);
-static void LagCounterReset(void);
 static void LagCounterToggle(void);
 static void ViewSlots(void);
 static void LaunchMemoryWatch(void);
@@ -853,7 +854,7 @@ static void ObjectDisplayToggle(void)
 	FCEUI_SetRenderPlanes(spr,bg);
 }
 
-static void LagCounterReset(void)
+void LagCounterReset()
 {
 	lagCounter = 0;
 }

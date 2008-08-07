@@ -763,6 +763,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags)
 	openRecordingMovie(fname);
 
 	currFrameCounter = 0;
+	LagCounterReset();
 
 	currMovieData = MovieData();
 	currMovieData.guid.newGuid();

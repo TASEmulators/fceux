@@ -523,7 +523,6 @@ void UpdateAutosave(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
-	//lagFlag = true;
 	int r,ssize;
 
 	JustFrameAdvanced = false;
@@ -558,7 +557,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	FCEU_LuaFrameBoundary();
 	FCEU_UpdateInput();
-	lagFlag = true;
+	lagFlag = 1;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
 	r=FCEUPPU_Loop(skip);
 
@@ -643,7 +642,6 @@ void hand(X6502 *X, int type, unsigned int A)
 int suppressAddPowerCommand=0; // hack... yeah, I know...
 void PowerNES(void) 
 {
-
 	if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if(!GameInfo) return;
@@ -674,9 +672,9 @@ void PowerNES(void)
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniPower();
 
-
-
 	timestampbase=0;
+	LagCounterReset();
+
 	X6502_Power();
 	FCEU_PowerCheats();
 	// clear back baffer
