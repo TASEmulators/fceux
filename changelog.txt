@@ -1,5 +1,7 @@
 ---version 2.0.2 released---
 
+06-aug-2008 - zeromus - SF case 2040448  (View Slots bug - does not include new savestate naming)
+06-aug-2008 - zeromus - restore the debugger snap functionality
 06-aug-2008 - zeromus - add memory.readbyterange to emulua
 06-aug-2008 - zeromus - auto-fill .fcs extension in save state as dialog
 06-aug-2008 - zeromus - mmc5 - 64KB games now work correctly

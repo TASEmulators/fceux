@@ -407,7 +407,6 @@ endlseq:
 			OpenGenie();
 	PowerNES();
 
-	FCEUSS_CheckStates();
 	if(GameInfo->type!=GIT_NSF)
 		FCEU_LoadGamePalette();
 

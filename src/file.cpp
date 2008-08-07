@@ -421,14 +421,6 @@ void FCEUI_SetDirOverride(int which, char *n)
 	{
 		odirs[which] = n;
 	}
-
-	if(GameInfo)  //Rebuild cache of present states/movies. 
-	{
-		if(which==FCEUIOD_STATES)
-		{
-			FCEUSS_CheckStates();
-		}
-	}
 }
 
 	#ifndef HAVE_ASPRINTF

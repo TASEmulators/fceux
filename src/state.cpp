@@ -635,6 +635,7 @@ void FCEUI_SelectStateNext(int n)
 
 int FCEUI_SelectState(int w, int show)
 {
+	FCEUSS_CheckStates();
 	int oldstate=CurrentState;
 	if(w == -1) { StateShow = 0; return 0; } //mbg merge 7/17/06 had to make return a value
 
