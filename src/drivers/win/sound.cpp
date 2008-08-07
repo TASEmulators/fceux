@@ -36,7 +36,7 @@ static int bits;
 #include "oakra.h"
 
 OAKRA_Module_OutputDS *dsout;
-
+bool muteTurbo=false;
 //manages a set of small buffers which together work as one large buffer capable of resizing itsself and 
 //shrinking when a larger buffer is no longer necessary
 class BufferSet {
@@ -538,6 +538,9 @@ case WM_COMMAND:
 			}
 			break;
 #endif
+		case CHECK_SOUND_MUTETURBO:
+			muteTurbo ^= 1;
+			break;	
 		case CHECK_SOUND_ENABLED:soundo=!soundo;
 			if(!soundo) TrashSound();
 			else soundo=InitSound();

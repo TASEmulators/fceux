@@ -33,10 +33,11 @@
 #include "fceu.h"
 #include "movie.h"
 #include "window.h"
-
+#include "sound.h"
 #include "keyscan.h"
 
 LPDIRECTINPUT7 lpDI=0;
+
 
 //UsrInputType[] is user-specified.  InputType[] is current
 //        (game/savestate/movie loading can override user settings)
@@ -1441,8 +1442,16 @@ int FCEUD_TestCommandState(int c)
 	return keys[cmdmask] ? 1 : 0;
 }
 
-void FCEUD_TurboOn    (void) { turbo = true; }
-void FCEUD_TurboOff   (void) { turbo = false; }
+void FCEUD_TurboOn    (void) 
+	{ 
+		turbo = true; 
+		if (muteTurbo) TrashSound();
+	}
+void FCEUD_TurboOff   (void) 
+	{
+		turbo = false; 
+		if (muteTurbo) InitSound();
+	}
 void FCEUD_TurboToggle(void) { turbo = !turbo; }
 
 void FCEUI_UseInputPreset(int preset)

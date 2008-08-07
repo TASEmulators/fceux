@@ -74,6 +74,7 @@ extern int soundrate;
 extern int soundbuftime;
 extern int soundvolume;
 extern int soundquality;
+extern bool muteTurbo;
 
 extern uint8 cpalette[192];
 extern int srendlinen;
