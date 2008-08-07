@@ -1452,7 +1452,15 @@ void FCEUD_TurboOff   (void)
 		turbo = false; 
 		if (muteTurbo) InitSound();
 	}
-void FCEUD_TurboToggle(void) { turbo = !turbo; }
+void FCEUD_TurboToggle(void) 
+{ 
+	turbo = !turbo; 
+	if (muteTurbo)
+	{
+		if (turbo) TrashSound();
+		if (!turbo) InitSound();
+	}
+}
 
 void FCEUI_UseInputPreset(int preset)
 {
