@@ -40,9 +40,10 @@ extern int autoHoldKey, autoHoldClearKey;
 
 extern uint8 gNoBGFillColor;
 
-//window positions:
+//window positions and sizes:
 extern int ChtPosX,ChtPosY;
 extern int DbgPosX,DbgPosY;
+extern int DbgSizeX,DbgSizeY;
 extern int MemView_wndx, MemView_wndy;
 extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
@@ -162,6 +163,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(ChtPosY),
 	AC(DbgPosX),
 	AC(DbgPosY),
+	AC(DbgSizeX),
+	AC(DbgSizeY),
 	AC(MemView_wndx),
 	AC(MemView_wndy),
 	AC(MemFind_wndx), 

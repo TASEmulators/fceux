@@ -51,6 +51,7 @@ int childwnd;
 
 extern readfunc ARead[0x10000];
 int DbgPosX,DbgPosY;
+int DbgSizeX=-1,DbgSizeY=-1;
 int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
@@ -857,7 +858,8 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
 	} else if(hwnd == addrline) {
 		crect.top += dy;
-		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+		crect.right += dx;
+		SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
 	} else if(hwnd == vscr) {
 		 crect.bottom += dy;
 		 crect.left += dx;
@@ -884,6 +886,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			extern int loadDebugDataFailed;
 
 			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+
 			GetWindowRect(hwndDlg,&currDebuggerRect);
 
 			si.cbSize = sizeof(SCROLLINFO);
@@ -960,6 +963,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		case WM_SIZE: {
 			GetWindowRect(hwndDlg,&newDebuggerRect);
+			DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;
+			DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
 			EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);
 			currDebuggerRect = newDebuggerRect;
 			InvalidateRect(hwndDlg,0,TRUE);
@@ -1317,7 +1322,11 @@ void UpdatePatcher(HWND hwndDlg){
 }
 
 void DoDebug(uint8 halt) {
-	if (!debugger_open) hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
+	if (!debugger_open) {
+		hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
+		if(DbgSizeX != -1 && DbgSizeY != -1)
+			SetWindowPos(hDebug,0,0,0,DbgSizeX,DbgSizeY,SWP_NOMOVE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+	}
 	if (hDebug) {
 		SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		if (GameInfo) UpdateDebugger();
