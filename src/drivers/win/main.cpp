@@ -432,7 +432,7 @@ int DriverInitialize()
 static void DriverKill(void)
 { 
 	// Save config file
-	sprintf(TempArray, "%s/fceu98.cfg", BaseDirectory.c_str());
+	sprintf(TempArray, "%s/fceux.cfg", BaseDirectory.c_str());
 	SaveConfig(TempArray);
 
 	DestroyInput();
@@ -568,7 +568,7 @@ int main(int argc,char *argv[])
 	GetBaseDirectory();
 
 	// Load the config information
-	sprintf(TempArray,"%s\\fceu98.cfg",BaseDirectory.c_str());
+	sprintf(TempArray,"%s\\fceux.cfg",BaseDirectory.c_str());
 	LoadConfig(TempArray);
 
 	initDirectories();
