@@ -79,6 +79,8 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		};
 		case WM_INITDIALOG:
+			if (Tracer_wndx==-32000) Tracer_wndx=0; //Just in case
+			if (Tracer_wndy==-32000) Tracer_wndy=0;
 			SetWindowPos(hwndDlg,0,Tracer_wndx,Tracer_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hTracer = hwndDlg;
 

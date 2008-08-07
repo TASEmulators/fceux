@@ -655,6 +655,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	};
 
 	case WM_INITDIALOG:
+		if (MemWatch_wndx==-32000) MemWatch_wndx=0; //Just in case
+		if (MemWatch_wndy==-32000) MemWatch_wndx=0; //-32000 bugs can happen as it is a special windows value
 		SetWindowPos(hwndDlg,0,MemWatch_wndx,MemWatch_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 		hdc = GetDC(hwndDlg);
 		SelectObject (hdc, debugSystem->hFixedFont);

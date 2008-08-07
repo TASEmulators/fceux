@@ -60,6 +60,8 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			break;
 		};
 		case WM_INITDIALOG:
+			if (CDLogger_wndx==-32000) CDLogger_wndx=0; //Just in case
+			if (CDLogger_wndy==-32000) CDLogger_wndy=0;
 			SetWindowPos(hwndDlg,0,CDLogger_wndx,CDLogger_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			hCDLogger = hwndDlg;
 			codecount = datacount = 0;

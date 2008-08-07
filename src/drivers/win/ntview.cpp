@@ -420,6 +420,8 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch(uMsg) {
 		case WM_INITDIALOG:
+			if (NTViewPosX==-32000) NTViewPosX=0; //Just in case
+			if (NTViewPosY==-32000) NTViewPosY=0;
 			SetWindowPos(hwndDlg,0,NTViewPosX,NTViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			//prepare the bitmap attributes

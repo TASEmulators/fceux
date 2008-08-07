@@ -231,6 +231,8 @@ BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		};
 
 		case WM_INITDIALOG:
+			if (Monitor_wndx==-32000) Monitor_wndx=0; //Just in case
+			if (Monitor_wndy==-32000) Monitor_wndy=0;
 			SetWindowPos(hwndDlg,0,Monitor_wndx,Monitor_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			monitor_open = 1;
 //			CenterWindow(hwndDlg);

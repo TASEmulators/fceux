@@ -197,6 +197,8 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
         switch(uMsg) {
                 case WM_INITDIALOG:
+					if (PPUViewPosX==-32000) PPUViewPosX=0; //Just in case
+					if (PPUViewPosY==-32000) PPUViewPosY=0;
                         SetWindowPos(hwndDlg,0,PPUViewPosX,PPUViewPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
                         //prepare the bitmap attributes

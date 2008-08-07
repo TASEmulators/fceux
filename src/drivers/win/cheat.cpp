@@ -151,6 +151,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
+			if (ChtPosX==-32000) ChtPosX=0; //Just in case
+			if (ChtPosY==-32000) ChtPosY=0;
 			SetWindowPos(hwndDlg,0,ChtPosX,ChtPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			//setup font
@@ -551,6 +553,8 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		};
 		case WM_INITDIALOG:
 			//todo: set text limits
+			if (GGConv_wndx==-32000) GGConv_wndx=0; //Just in case
+			if (GGConv_wndy==-32000) GGConv_wndy=0;
 			SetWindowPos(hwndDlg,0,GGConv_wndx,GGConv_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			break;
 		case WM_CREATE:

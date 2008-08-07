@@ -37,6 +37,10 @@ extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
 extern int autoHoldKey, autoHoldClearKey;
+extern int EnableAutosave;
+extern int AFon, AFoff, AutoFireOffset;
+extern int DesynchAutoFire;
+extern bool lagCounterDisplay;
 
 extern uint8 gNoBGFillColor;
 
@@ -55,10 +59,7 @@ extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
 extern int TasEdit_wndx, TasEdit_wndy;
-extern int EnableAutosave;
-extern int AFon, AFoff, AutoFireOffset;
-extern int DesynchAutoFire;
-extern bool lagCounterDisplay;
+
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {

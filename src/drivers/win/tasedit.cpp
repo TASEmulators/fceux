@@ -625,6 +625,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
+			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
+			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
 			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);

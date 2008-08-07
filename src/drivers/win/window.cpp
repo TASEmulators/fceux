@@ -1409,7 +1409,8 @@ int CreateMainWindow()
 	UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 
 	updateGameDependentMenus(0);
-
+	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
+	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
 	hAppWnd = CreateWindowEx(
 		0,
 		"FCEULTRA",
