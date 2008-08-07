@@ -515,6 +515,8 @@
 #define FCEU_DISPLAY_LAGCOUNTER         40235
 #define MENU_DISPLAY_INPUTDISPLAY       40236
 #define MENU_DISPLAY_LAGCOUNTER         40237
+#define ID_DISPLAY_FRAMEADV             40238
+#define MENU_DISPLAY_FA_LAGSKIP         40239
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -524,7 +526,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40238
+#define _APS_NEXT_COMMAND_VALUE         40240
 #define _APS_NEXT_CONTROL_VALUE         1179
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

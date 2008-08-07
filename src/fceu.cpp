@@ -61,6 +61,8 @@
 
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
+bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
+								  //TODO: SDL version - hotkey item only, but no default mapping
 FCEUGI::FCEUGI()
 : filename(0)
 , archiveFilename(0)
@@ -576,21 +578,34 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	*SoundBuf=WaveFinal;
 	*SoundBufSize=ssize;
 
-	//if we were asked to frame advance, then since we have just finished
-	//a frame, we should switch to regular pause
-	if(EmulationPaused&2)
-	{
-		EmulationPaused = 1;          // restore paused flag
-
-		//mute the frame advance if the user requested it
-#ifdef WIN32
-		if(soundoptions&SO_MUTEFA)
-			*SoundBufSize=0;              // keep sound muted
-#endif
-
-		JustFrameAdvanced = true;
+	//if we were asked to frame advance, then since we have just finished a frame, we should switch to regular pause
+	if (frameAdvanceLagSkip)
+	{  //Holy nested loops Batman!
+		if (!lagFlag) 
+		{
+			if(EmulationPaused&2)
+			{
+				EmulationPaused = 1;   // restore paused flag
+				#ifdef WIN32
+					if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
+						*SoundBufSize=0;       // keep sound muted
+				#endif
+				JustFrameAdvanced = true;
+			}
+		}
 	}
-
+	else
+	{
+	if(EmulationPaused&2)
+			{
+			EmulationPaused = 1;   // restore paused flag
+			#ifdef WIN32
+				if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
+					*SoundBufSize=0;       // keep sound muted
+				#endif
+				JustFrameAdvanced = true;
+			}
+	} //I apologize to anyone who comes in and tries to fgiure this if branching out
 	currMovieData.TryDumpIncremental();
 	if (lagFlag) 
 	{

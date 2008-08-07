@@ -41,6 +41,7 @@ extern int EnableAutosave;
 extern int AFon, AFoff, AutoFireOffset;
 extern int DesynchAutoFire;
 extern bool lagCounterDisplay;
+extern bool frameAdvanceLagSkip;
 
 extern uint8 gNoBGFillColor;
 
@@ -156,6 +157,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
 	AC(EnableAutosave),
+	AC(frameAdvanceLagSkip),
 
 	AC(allowUDLR),
 

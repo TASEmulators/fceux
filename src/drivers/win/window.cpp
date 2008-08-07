@@ -66,6 +66,7 @@
 
 extern FCEUGI *GameInfo;
 extern int EnableAutosave;
+extern bool frameAdvanceLagSkip;
 
 // Extern functions
 
@@ -299,6 +300,7 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
+	CheckMenuItem(fceumenu, MENU_DISPLAY_FA_LAGSKIP, frameAdvanceLagSkip?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
@@ -1177,6 +1179,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case MENU_DISPLAY_LAGCOUNTER:
 				lagCounterDisplay ^= 1;
+				UpdateCheckedMenuItems();
+			case MENU_DISPLAY_FA_LAGSKIP:
+				frameAdvanceLagSkip ^= 1;
 				UpdateCheckedMenuItems();
 
 			}

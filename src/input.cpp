@@ -75,6 +75,7 @@ extern INPUTCFC *FCEU_InitBarcodeWorld(void);
 unsigned int lagCounter;
 bool lagCounterDisplay;
 char lagFlag;
+extern bool frameAdvanceLagSkip;
 //-------------
 
 static uint8 joy_readbit[2];
@@ -584,6 +585,7 @@ static void LaunchPPU(void);
 static void LaunchHex(void);
 static void LaunchTraceLogger(void);
 static void LaunchCodeDataLogger(void);
+static void FA_SkipLag(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -721,7 +723,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_OPENHEX,			EMUCMDTYPE_TOOL, LaunchHex, 0, 0, "Open Hex Editor", 0},
 	{ EMUCMD_TOOL_OPENPPU,			EMUCMDTYPE_TOOL, LaunchPPU, 0, 0, "Open PPU Viewer", 0},
 	{ EMUCMD_TOOL_OPENTRACELOGGER,	EMUCMDTYPE_TOOL, LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
-	{ EMUCMD_TOOL_OPENCDLOGGER,		EMUCMDTYPE_TOOL, LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0}
+	{ EMUCMD_TOOL_OPENCDLOGGER,		EMUCMDTYPE_TOOL, LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
+	{ EMUCMD_FRAMEADV_SKIPLAG,		EMUCMDTYPE_MISC, FA_SkipLag, 0, 0, "Frame Adv.-Skip Lag", 0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -906,3 +909,7 @@ static void LaunchCodeDataLogger(void)
 #endif
 }
 
+static void FA_SkipLag(void)
+{
+	frameAdvanceLagSkip ^= 1;
+}

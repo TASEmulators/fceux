@@ -1,5 +1,7 @@
 ---version 2.0.2 released---
 
+07-aug-2008 - adelikat - new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config)
+07-aug-2008 - adelikat - put in -32000 protection on all dialogs that remember x,y
 06-aug-2008 - adelikat - change config filename from fceu98.cfg to fceux.cfg
 06-aug-2008 - zeromus - add lagcounter and lagflag to savestate
 06-aug-2008 - zeromus - SF case 2040448  (View Slots bug - does not include new savestate naming)
