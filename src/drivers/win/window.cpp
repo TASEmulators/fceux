@@ -1675,3 +1675,4 @@ void FCEUD_LuaRunFrom(void)
 	}
 }
 
+
