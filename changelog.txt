@@ -1,5 +1,5 @@
 ---version 2.0.2 released---
-
+08-aug-2008 - adelikat - added input display to the FCEUX main menu
 08-aug-2008 - adelikat - fixed the (null) in the default lua directory listing
 08-aug-2008 - adelikat - added shift+L as default hotkey for reload lua script
 08-aug-2008 - adelikat - removed accel ctrl+x (prevented cut from working in accel dialogs)

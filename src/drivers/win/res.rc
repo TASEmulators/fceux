@@ -83,7 +83,15 @@ BEGIN
         POPUP "Display"
         BEGIN
             MENUITEM "Movie Status Icon",           MENU_SHOW_STATUS_ICON
-            MENUITEM "Lag Counter",                 MENU_DISPLAY_LAGCOUNTER
+            POPUP "Input Display"
+            BEGIN
+                MENUITEM "Off",                         MENU_INPUTDISPLAY_0
+                MENUITEM "1 player",                    MENU_INPUTDISPLAY_1
+                MENUITEM "2 player",                    MENU_INPUTDISPLAY_2
+                MENUITEM "4 player",                    MENU_INPUTDISPLAY_4
+            END
+            MENUITEM "Lag Counter",                 ID_DISPLAY_LAGCOUNTER40245
+            MENUITEM SEPARATOR
             MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
             MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ
         END

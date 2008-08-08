@@ -357,7 +357,6 @@
 #define IDC_EDIT1                       1147
 #define IDC_BUTTON9                     1148
 #define IDC_LIST2                       1149
-#define SOUND_MUTETURBO                 1179
 #define CHECK_SOUND_MUTETURBO           1179
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
@@ -519,6 +518,20 @@
 #define MENU_DISPLAY_LAGCOUNTER         40237
 #define ID_DISPLAY_FRAMEADV             40238
 #define MENU_DISPLAY_FA_LAGSKIP         40239
+#define ID_DISPLAY_INPUTDISPLAY40240    40240
+#define ID_LAGCOUNTER_OFF               40241
+#define ID_LAGCOUNTER_1PLAYER           40242
+#define ID_LAGCOUNTER_2PLAYER           40243
+#define ID_LAGCOUNTER_4PLAYER           40244
+#define ID_DISPLAY_LAGCOUNTER40245      40245
+#define MENU_INPUTDISPLAY_OFF           40246
+#define MENU_INPUTDISPLAY_1P            40247
+#define MENU_INPUTDISPLAY_2P            40248
+#define MENU_INPUTDISPLAY_4P            40249
+#define MENU_INPUTDISPLAY_0             40250
+#define MENU_INPUTDISPLAY_1             40251
+#define MENU_INPUTDISPLAY_2             40252
+#define MENU_INPUTDISPLAY_4             40253
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -528,7 +541,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40240
+#define _APS_NEXT_COMMAND_VALUE         40254
 #define _APS_NEXT_CONTROL_VALUE         1180
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -358,6 +358,30 @@ void UpdateCheckedMenuItems()
 					AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
 				x++;
 			}
+
+			//Check input display
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_UNCHECKED);
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_UNCHECKED);
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_UNCHECKED);
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_UNCHECKED);
+			switch (input_display)
+			{
+				case 0: //Off
+					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_CHECKED);
+					break;
+				case 1: //1 player
+					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_CHECKED);
+					break;
+				case 2: //2 player
+					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_CHECKED);
+					break;
+				//note: input display can actually have a 3 player display option but is skipped in the hotkey toggle so it is skipped here as well
+				case 4: //4 player
+					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_CHECKED);
+					break;
+				default:
+					break;
+			}
 }
 
 /// Updates recent files / recent directories menu
@@ -1180,9 +1204,27 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_DISPLAY_LAGCOUNTER:
 				lagCounterDisplay ^= 1;
 				UpdateCheckedMenuItems();
+				break;
 			case MENU_DISPLAY_FA_LAGSKIP:
 				frameAdvanceLagSkip ^= 1;
 				UpdateCheckedMenuItems();
+				break;
+			case MENU_INPUTDISPLAY_0: //Input display off
+				input_display = 0;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_INPUTDISPLAY_1: //Input display - 1 player
+				input_display = 1;
+				UpdateCheckedMenuItems();
+				break;
+				case MENU_INPUTDISPLAY_2: //Input display - 2 player
+				input_display = 2;
+				UpdateCheckedMenuItems();
+				break;
+				case MENU_INPUTDISPLAY_4: //Input display - 4 player
+				input_display = 4;
+				UpdateCheckedMenuItems();
+				break;
 
 			}
 		}
