@@ -1,5 +1,6 @@
 ---version 2.0.2 released---
 
+08-aug-2008 - adelikat - fixed the (null) in the default lua directory listing
 08-aug-2008 - adelikat - added shift+L as default hotkey for reload lua script
 08-aug-2008 - adelikat - removed accel ctrl+x (prevented cut from working in accel dialogs)
 08-aug-2008 - zeromus - fiddle with nametable viewer to display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).

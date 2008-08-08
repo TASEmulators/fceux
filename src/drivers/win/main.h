@@ -59,7 +59,8 @@ static const char *default_directory_names[12] = {
 	"tools",    // memwatch
 	"tools",    // macro
 	"tools",    // input presets
-	"tools"     // lua scripts
+	"tools",     // lua scripts
+	""			// adelikat - adding a dummy one here ( [12] but only 11 entries)
 };
 
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)
