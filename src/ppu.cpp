@@ -165,6 +165,34 @@ uint8 * MMC5BGVRAMADR(uint32 V) {
 	} else return &MMC5BGVPage[(V)>>10][(V)];
 }
 
+//this duplicates logic which is embedded in the ppu rendering code
+//which figures out where to get CHR data from depending on various hack modes
+//mostly involving mmc5.
+//this might be incomplete.
+uint8* FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr) {
+	if(MMC5Hack) {
+		if(MMC5HackCHRMode==1) {
+			uint8 *C = MMC5HackVROMPTR;
+			C += (((MMC5HackExNTARAMPtr[refreshaddr & 0x3ff]) & 0x3f & MMC5HackVROMMask) << 12) + (vadr & 0xfff);
+			return C;
+		} else {
+			return MMC5BGVRAMADR(vadr);
+		}
+	}
+	else return VRAMADR(vadr);
+}
+
+//likewise for ATTR
+int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
+	int attraddr = 0x3C0+((yt>>2)<<3)+(xt>>2);
+	int temp = (((yt&2)<<1)+(xt&2));
+	int refreshaddr = xt+yt*32;
+	if(MMC5Hack && MMC5HackCHRMode==1)
+		return (MMC5HackExNTARAMPtr[refreshaddr & 0x3ff] & 0xC0)>>6;
+	else
+		return (vnapage[ntnum][attraddr] & (3<<temp)) >> temp;
+}
+
 static DECLFR(A2002)
 {
 	uint8 ret;
@@ -469,7 +497,7 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg)
 //				//if((vadr+turt*8192)>=524288)
 //				//printf("%d ",vadr+turt*8192);
 //				cc=0;
-//				//#include "pputile.h"
+//				//#include "pputile.inc"
 //			}
 //} 
 
@@ -601,12 +629,12 @@ static void RefreshLine(int lastpixel)
 				if((tochange<=0 && MMC5HackSPMode&0x40) || (tochange>0 && !(MMC5HackSPMode&0x40)))
 				{
 #define PPUT_MMC5SP
-#include "pputile.h"
+#include "pputile.inc"
 #undef PPUT_MMC5SP
 				}
 				else
 				{
-#include "pputile.h"	    
+#include "pputile.inc"	    
 				}
 				tochange--;
 			}
@@ -620,7 +648,7 @@ static void RefreshLine(int lastpixel)
 #define PPUT_MMC5CHR1
 			for(X1=firsttile;X1<lasttile;X1++)
 			{
-#include "pputile.h"
+#include "pputile.inc"
 			}
 #undef PPUT_MMC5CHR1
 #undef PPUT_MMC5SP
@@ -630,7 +658,7 @@ static void RefreshLine(int lastpixel)
 #define PPUT_MMC5CHR1
 			for(X1=firsttile;X1<lasttile;X1++)
 			{
-#include "pputile.h"
+#include "pputile.inc"
 			}
 #undef PPUT_MMC5CHR1
 		}
@@ -638,7 +666,7 @@ static void RefreshLine(int lastpixel)
 		{
 			for(X1=firsttile;X1<lasttile;X1++)
 			{
-#include "pputile.h"
+#include "pputile.inc"
 			}
 		}
 	}
@@ -649,7 +677,7 @@ static void RefreshLine(int lastpixel)
 #define PPUT_HOOK
 		for(X1=firsttile;X1<lasttile;X1++)
 		{
-#include "pputile.h"
+#include "pputile.inc"
 		}
 #undef PPUT_HOOK
 		norecurse=0;
@@ -658,7 +686,7 @@ static void RefreshLine(int lastpixel)
 	{
 		for(X1=firsttile;X1<lasttile;X1++)
 		{
-#include "pputile.h"
+#include "pputile.inc"
 		}
 	}
 

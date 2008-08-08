@@ -1,5 +1,8 @@
 ---version 2.0.2 released---
 
+08-aug-2008 - zeromus - fiddle with nametable viewer to display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).
+08-aug-2008 - zeromus - fix a new bug in windows build which caused fourscore emulation to fail in some cases
+07-aug-2008 - zeromus - add an option to pick a constant color to draw in place of BG when BG rendering is disabled (look for gNoBGFillColor in config; 255 means to use palette[0])
 07-aug-2008 - adelikat - added a mute turbo option in sound config
 07-aug-2008 - adelikat - new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config)
 07-aug-2008 - adelikat - put in -32000 protection on all dialogs that remember x,y

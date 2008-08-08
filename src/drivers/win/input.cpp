@@ -38,6 +38,8 @@
 
 LPDIRECTINPUT7 lpDI=0;
 
+void InitInputPorts(bool fourscore);
+
 
 //UsrInputType[] is user-specified.  InputType[] is current
 //        (game/savestate/movie loading can override user settings)
@@ -74,7 +76,7 @@ void ParseGIInput(FCEUGI *gi)
 		if(gi->inputfc!=SIFC_UNSET)
 			InputType[2]=gi->inputfc;
 
-		InitInputPorts();
+		InitInputPorts((eoptions & EO_FOURSCORE)!=0);
 	}
 }
 
@@ -370,55 +372,85 @@ void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
 	InputType[0]=port0;
 	InputType[1]=port1;
 	InputType[2]=fcexp;
-	InitInputPorts();
+	InitInputPorts(fourscore);
 }
 
 //Initializes the emulator with the current input port configuration
-void InitInputPorts()
+void InitInputPorts(bool fourscore)
 {
 	void *InputDPtr;
 
-	int t;
-	int x;
 	int attrib;
 
-	for(t=0,x=0;x<2;x++)
-	{
-		attrib=0;
-		InputDPtr=0;
-		switch(InputType[x])
+	if(fourscore) {
+		FCEUI_SetInput(0,SI_GAMEPAD,&JSreturn,0);
+		FCEUI_SetInput(1,SI_GAMEPAD,&JSreturn,0);
+	} else {
+		for(int i=0;i<2;i++)
 		{
-		case SI_POWERPADA:
-		case SI_POWERPADB:InputDPtr=&powerpadbuf[x];break;
-		case SI_GAMEPAD:InputDPtr=&JSreturn;break;     
-		case SI_ARKANOID:InputDPtr=MouseData;t|=1;break;
-		case SI_ZAPPER:InputDPtr=MouseData;
-			t|=1;
-			break;
+			attrib=0;
+			InputDPtr=0;
+			switch(InputType[i])
+			{
+			case SI_POWERPADA:
+			case SI_POWERPADB:
+				InputDPtr=&powerpadbuf[i];
+				break;
+			case SI_GAMEPAD:
+				InputDPtr=&JSreturn;
+				break;
+			case SI_ARKANOID:
+				InputDPtr=MouseData;
+				break;
+			case SI_ZAPPER:
+				InputDPtr=MouseData;
+				break;
+			}
+			FCEUI_SetInput(i,(ESI)InputType[i],InputDPtr,attrib);
 		}
-		FCEUI_SetInput(x,(ESI)InputType[x],InputDPtr,attrib);
 	}
 
 	attrib=0;
 	InputDPtr=0;
 	switch(InputType[2])
 	{
-	case SIFC_SHADOW:InputDPtr=MouseData;t|=1;break;
-	case SIFC_OEKAKIDS:InputDPtr=MouseData;t|=1;break;
-	case SIFC_ARKANOID:InputDPtr=MouseData;t|=1;break;
-	case SIFC_FKB:InputDPtr=fkbkeys;break;
-	case SIFC_SUBORKB:InputDPtr=suborkbkeys;break;
-	case SIFC_HYPERSHOT:InputDPtr=&HyperShotData;break;
-	case SIFC_MAHJONG:InputDPtr=&MahjongData;break;
-	case SIFC_QUIZKING:InputDPtr=&QuizKingData;break;
-	case SIFC_TOPRIDER:InputDPtr=&TopRiderData;break;
-	case SIFC_BWORLD:InputDPtr=BWorldData;break;
+	case SIFC_SHADOW:
+		InputDPtr=MouseData;
+		break;
+	case SIFC_OEKAKIDS:
+		InputDPtr=MouseData;
+		break;
+	case SIFC_ARKANOID:
+		InputDPtr=MouseData;
+		break;
+	case SIFC_FKB:
+		InputDPtr=fkbkeys;
+		break;
+	case SIFC_SUBORKB:
+		InputDPtr=suborkbkeys;
+		break;
+	case SIFC_HYPERSHOT:
+		InputDPtr=&HyperShotData;
+		break;
+	case SIFC_MAHJONG:
+		InputDPtr=&MahjongData;
+		break;
+	case SIFC_QUIZKING:
+		InputDPtr=&QuizKingData;
+		break;
+	case SIFC_TOPRIDER:
+		InputDPtr=&TopRiderData;
+		break;
+	case SIFC_BWORLD:
+		InputDPtr=BWorldData;
+		break;
 	case SIFC_FTRAINERA:
-	case SIFC_FTRAINERB:InputDPtr=&FTrainerData;break;
+	case SIFC_FTRAINERB:
+		InputDPtr=&FTrainerData;
+		break;
 	}
 
 	FCEUI_SetInputFC((ESIFC)InputType[2],InputDPtr,attrib);
-	FCEUI_SetInputFourscore((eoptions&EO_FOURSCORE)!=0);
 }
 
 ButtConfig fkbmap[0x48]=
@@ -1352,7 +1384,7 @@ void ConfigInput(HWND hParent)
 	//in case the input config changes while a game is running, reconfigure the input ports
 	if(GameInfo)
 	{
-		InitInputPorts();
+		InitInputPorts((eoptions & EO_FOURSCORE)!=0);
 	}
 }
 

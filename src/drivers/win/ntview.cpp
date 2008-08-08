@@ -18,6 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/*
+zeromus's ruminations on the ntview:
+nothing in the emu internals really tracks mirroring.
+all we really know at any point is what is pointed to by each vnapage[4]
+So if the ntview is to let a person change the mapping, it needs to infer the mapping mode
+by looking at vnapages and adjust them as the user sees fit.
+This was all working before I got here.
+However, the rendering system was relying on a notion of mirroring modes, which was a mistake.
+It should, instead, rely strictly on the vnapages.
+Since it has a caching mechanism, the cache needs to track what vnapage it thinks it is caching,
+and invalidate it when the vnapage changes.
+*/
+
 #include "common.h"
 #include "ntview.h"
 #include "debugger.h"
@@ -34,15 +47,25 @@ HWND hNTView;
 int NTViewPosX,NTViewPosY;
 
 static uint8 palcache[32]; //palette cache //mbg merge 7/19/06 needed to be static
-//uint8 ntcache0[0x400],ntcache1[0x400],ntcache2[0x400],ntcache3[0x400]; //cache CHR, fixes a refresh problem when right-clicking
-uint8 *ntable0, *ntable1, *ntable2, *ntable3; //name table bitmap array
-uint8 *ntablemirr[4];
-uint8 ntcache[4][0x400]; //todo: use an array for the above variables too
 int NTViewScanline=0,NTViewer=0;
 int NTViewSkip,NTViewRefresh;
 static int mouse_x,mouse_y; //todo: is static needed here? --mbg 7/19/06 - i think so
-int redrawtables = 0;
+bool redrawtables = false;
 int chrchanged = 0;
+
+static class NTCache {
+public:
+	NTCache() 
+		: curr_vnapage(0)
+	{}
+
+	uint8* curr_vnapage;
+	uint8* bitmap;
+	uint8 cache[0x400];
+	HDC hdc;
+	HBITMAP hbmp;
+	HGDIOBJ tmpobj;
+} cache[4];
 
 enum NT_MirrorType {
 	NT_NONE = -1,
@@ -76,13 +99,7 @@ void UpdateMirroringButtons();
 void ChangeMirroring();
 
 static BITMAPINFO bmInfo; //todo is static needed here so it won't interefere with the pattern table viewer?
-static HDC pDC,TmpDC0,TmpDC1;
-static HBITMAP TmpBmp0,TmpBmp1;
-static HGDIOBJ TmpObj0,TmpObj1;
-
-static HDC TmpDC2,TmpDC3;
-static HBITMAP TmpBmp2,TmpBmp3;
-static HGDIOBJ TmpObj2,TmpObj3;
+static HDC pDC;
 
 extern uint32 TempAddr, RefreshAddr;
 extern uint8 XOffset;
@@ -91,7 +108,7 @@ int xpos, ypos;
 int scrolllines = 1;
 
 //if you pass this 1 then it will draw no matter what. If you pass it 0
-//then it will draw if redrawtables is 1
+//then it will draw if redrawtables is true
 void NTViewDoBlit(int autorefresh) {
 	if (!hNTView) return;
 	if (NTViewSkip < NTViewRefresh) {
@@ -101,96 +118,13 @@ void NTViewDoBlit(int autorefresh) {
 	NTViewSkip=0;
 
 	if((redrawtables && !autorefresh) || (autorefresh) || (scrolllines)){
-		//todo: use switch and use bitblt for because its faster
-		switch(ntmirroring){
-			case NT_HORIZONTAL:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-			break;
-			case NT_VERTICAL:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				break;
-			case NT_FOUR_SCREEN:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
-			break;
-			case NT_SINGLE_SCREEN_TABLE_0:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC0,0,0,SRCCOPY);
-			break;
-			case NT_SINGLE_SCREEN_TABLE_1:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC1,0,0,SRCCOPY);
-			break;
-			case NT_SINGLE_SCREEN_TABLE_2:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC2,0,0,SRCCOPY);
-			break;
-			case NT_SINGLE_SCREEN_TABLE_3:
-				BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
-				BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,TmpDC3,0,0,SRCCOPY);
-			break;
-		}
-		/*
-		if(ntmirroring == NT_HORIZONTAL){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_VERTICAL){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_FOUR_SCREEN){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_0){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC0,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_1){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC1,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_2){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC2,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		if(ntmirroring == NT_SINGLE_SCREEN_TABLE_3){
-			StretchBlt(pDC,NTDESTX,NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY,NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX,NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-			StretchBlt(pDC,NTDESTX+(NTWIDTH*ZOOM),NTDESTY+(NTHEIGHT*ZOOM),NTWIDTH*ZOOM,NTHEIGHT*ZOOM,TmpDC3,0,NTHEIGHT-1,NTWIDTH,-NTHEIGHT,SRCCOPY);
-		}
-		*/
-	redrawtables = 0;
+
+	BitBlt(pDC,NTDESTX,NTDESTY,NTWIDTH,NTHEIGHT,cache[0].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY,NTWIDTH,NTHEIGHT,cache[1].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,NTDESTX,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[2].hdc,0,0,SRCCOPY);
+	BitBlt(pDC,NTDESTX+NTWIDTH,NTDESTY+NTHEIGHT,NTWIDTH,NTHEIGHT,cache[3].hdc,0,0,SRCCOPY);
+
+	redrawtables = false;
 	}
 
 	if(scrolllines){
@@ -280,24 +214,40 @@ INLINE void DrawChr(uint8 *pbitmap,uint8 *chr,int pal){
 	//pbitmap -= (((PALETTEBITWIDTH>>2)<<3)-24);
 }
 
-void DrawNameTable(uint8 *bitmap, uint8 *table, uint8 *tablecache) {
-	int x,y,a, chr, ptable=0, cacheaddr0, cacheaddr1;//index=0;
+void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
+
+	NTCache &c = cache[ntnum];
+	uint8 *bitmap = c.bitmap, *table = vnapage[ntnum], *tablecache = c.cache;
+
+	int a, ptable=0;
 	uint8 *pbitmap = bitmap;
 	
 	if(PPU[0]&0x10){ //use the correct pattern table based on this bit
 		ptable=0x1000;
 	}
 
+	bool invalid = invalidateCache;
+	//if we werent asked to invalidate the cache, maybe we need to invalidate it anyway due to vnapage changing
+	if(!invalid)
+		invalid = (c.curr_vnapage != vnapage[ntnum]);
+	c.curr_vnapage = vnapage[ntnum];
+	
+	//HACK: never cache anything
+	//invalid = true;
+
 	pbitmap = bitmap;
-	for(y = 0;y < 30;y++){
-		for(x = 0;x < 32;x++){
-			cacheaddr0 = (y*32)+x;
-			cacheaddr1 = 0x3C0+((y>>2)<<3)+(x>>2);
-			if((tablecache == 0) || (table[cacheaddr0] != tablecache[cacheaddr0]) || 
-				(table[cacheaddr1] != tablecache[cacheaddr1])){
-				redrawtables = 1;
-				a = (table[0x3C0+((y>>2)<<3)+(x>>2)] & (3<<(((y&2)<<1)+(x&2)))) >> (((y&2)<<1)+(x&2));
-				//the commented out code below is all equilivent to the single line above.
+	for(int y=0;y<30;y++){
+		for(int x=0;x<32;x++){
+			int ntaddr = (y*32)+x;
+			int attraddr = 0x3C0+((y>>2)<<3)+(x>>2);
+			if(invalid
+				|| (table[ntaddr] != tablecache[ntaddr]) 
+				|| (table[attraddr] != tablecache[attraddr])) {
+				redrawtables = true;
+				int temp = (((y&2)<<1)+(x&2));
+				a = (table[attraddr] & (3<<temp)) >> temp;
+				
+				//the commented out code below is all allegedly equivalent to the single line above:
 				//tmpx = x>>2;
 				//tmpy = y>>2;
 				//a = 0x3C0+(tmpy*8)+tmpx;
@@ -306,24 +256,42 @@ void DrawNameTable(uint8 *bitmap, uint8 *table, uint8 *tablecache) {
 				//if((((x>>1)&1) == 0) && (((y>>1)&1) == 1)) a = (table[a]&0x30)>>4;
 				//if((((x>>1)&1) == 1) && (((y>>1)&1) == 1)) a = (table[a]&0xC0)>>6;
 
-				chr = table[y*32+x]*16;
-				DrawChr(pbitmap,&VPage[(ptable+chr)>>10][ptable+chr],a);
-				if(tablecache != 0){
-					tablecache[cacheaddr0] = table[cacheaddr0];
-					//tablecache[cacheaddr1] = table[cacheaddr1];
-				}
+				int chr = table[ntaddr]*16;
+
+				extern int FCEUPPU_GetAttr(int ntnum, int xt, int yt);
+
+				//test.. instead of pretending that the nametable is a screen at 0,0 we pretend that it is at the current xscroll and yscroll
+				//int xpos = ((RefreshAddr & 0x400) >> 2) | ((RefreshAddr & 0x1F) << 3) | XOffset;
+				//int ypos = ((RefreshAddr & 0x3E0) >> 2) | ((RefreshAddr & 0x7000) >> 12); 
+				//if(RefreshAddr & 0x800) ypos += 240;
+				//int refreshaddr = (xpos/8+x)+(ypos/8+y)*32;
+
+				int refreshaddr = (x)+(y)*32;
+
+				a = FCEUPPU_GetAttr(ntnum,x,y);
+
+				//a good way to do it:
+				DrawChr(pbitmap,FCEUPPU_GetCHR(ptable+chr,refreshaddr),a);
+
+				tablecache[ntaddr] = table[ntaddr];
+				tablecache[attraddr] = table[attraddr];
+				//one could comment out the line above...
+				//since there are so many fewer attribute values than NT values, it might be best just to refresh the whole attr table below with the memcpy
+
+				//obviously this whole scheme of nt cache doesnt work if an mmc5 game is playing tricks with the attribute table
 			}
 			pbitmap += (8*3);
 		}
 		pbitmap += 7*((NTWIDTH*3));
 	}
 
-	if((tablecache != 0) && (redrawtables)){ //this copies the attribute tables to the cache if needed
-		memcpy(tablecache+0x3c0,table+0x3c0,0x40);
-	}
+	 //this copies the attribute tables to the cache if needed. but we arent using it now because 
+	//if(redrawtables){
+	//	memcpy(tablecache+0x3c0,table+0x3c0,0x40);
+	//}
 }
 
-void FCEUD_UpdateNTView(int scanline, int drawall) {
+void FCEUD_UpdateNTView(int scanline, bool drawall) {
 	if(!NTViewer) return;
 	if(scanline != -1 && scanline != NTViewScanline) return;
 
@@ -349,8 +317,7 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 		memcpy(palcache,PALRAM,32);
 		drawall = 1; //palette has changed, so redraw all
 	}
-	
-
+	 
 	ntmirroring = NT_NONE;
 	if(vnapage[0] == vnapage[1])ntmirroring = NT_HORIZONTAL;
 	if(vnapage[0] == vnapage[2])ntmirroring = NT_VERTICAL;
@@ -368,21 +335,8 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 		oldntmirroring = ntmirroring;
 	}
 
-	if(drawall){
-		DrawNameTable(ntable0,&NTARAM[0x000],0);
-		DrawNameTable(ntable1,&NTARAM[0x400],0);
-		DrawNameTable(ntable2,ExtraNTARAM,0);
-		DrawNameTable(ntable3,ExtraNTARAM+0x400,0);
-	} else {
-		if(ntmirroring == NT_HORIZONTAL || ntmirroring == NT_VERTICAL || ntmirroring == NT_SINGLE_SCREEN_TABLE_0)
-		       DrawNameTable(ntable0,&NTARAM[0x000],ntcache[0]);
-		if(ntmirroring == NT_HORIZONTAL || ntmirroring == NT_VERTICAL || ntmirroring == NT_SINGLE_SCREEN_TABLE_1)
-			DrawNameTable(ntable1,&NTARAM[0x400],ntcache[1]);
-		if(ntmirroring == NT_FOUR_SCREEN){
-			DrawNameTable(ntable2,ExtraNTARAM,ntcache[2]);
-			DrawNameTable(ntable3,ExtraNTARAM+0x400,ntcache[3]);
-		}
-	}
+	for(int i=0;i<4;i++)
+		DrawNameTable(scanline,i,drawall);
 
 	chrchanged = 0;
 
@@ -391,18 +345,12 @@ void FCEUD_UpdateNTView(int scanline, int drawall) {
 
 void KillNTView() {
 	//GDI cleanup
-	DeleteObject(TmpBmp0);
-	SelectObject(TmpDC0,TmpObj0);
-	DeleteDC(TmpDC0);
-	DeleteObject(TmpBmp1);
-	SelectObject(TmpDC1,TmpObj1);
-	DeleteDC(TmpDC1);
-	DeleteObject(TmpBmp2);
-	SelectObject(TmpDC2,TmpObj2);
-	DeleteDC(TmpDC2);
-	DeleteObject(TmpBmp3);
-	SelectObject(TmpDC3,TmpObj3);
-	DeleteDC(TmpDC3);
+	for(int i=0;i<4;i++) {
+		DeleteObject(cache[i].hbmp);
+		SelectObject(cache[i].hdc,cache[i].tmpobj);
+		DeleteDC(cache[i].hdc);
+	}
+
 	ReleaseDC(hNTView,pDC);
 	
 	DeleteObject (SelectObject (pDC, GetStockObject (BLACK_PEN))) ;
@@ -435,21 +383,12 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			//create memory dcs
 			pDC = GetDC(hwndDlg); // GetDC(GetDlgItem(hwndDlg,IDC_NTVIEW_TABLE_BOX));
-			TmpDC0 = CreateCompatibleDC(pDC); //name table 0
-			TmpDC1 = CreateCompatibleDC(pDC); //name table 1
-			TmpDC2 = CreateCompatibleDC(pDC); //name table 2
-			TmpDC3 = CreateCompatibleDC(pDC); //name table 3
-			//TmpDC2 = CreateCompatibleDC(pDC); //palettes
-
-			//create bitmaps and select them into the memory dc's
-			TmpBmp0 = CreateDIBSection(pDC,&bmInfo,DIB_RGB_COLORS,(void**)&ntable0,0,0);
-			TmpObj0 = SelectObject(TmpDC0,TmpBmp0);
-			TmpBmp1 = CreateDIBSection(pDC,&bmInfo,DIB_RGB_COLORS,(void**)&ntable1,0,0);
-			TmpObj1 = SelectObject(TmpDC1,TmpBmp1);
-			TmpBmp2 = CreateDIBSection(pDC,&bmInfo,DIB_RGB_COLORS,(void**)&ntable2,0,0);
-			TmpObj2 = SelectObject(TmpDC2,TmpBmp2);
-			TmpBmp3 = CreateDIBSection(pDC,&bmInfo,DIB_RGB_COLORS,(void**)&ntable3,0,0);
-			TmpObj3 = SelectObject(TmpDC3,TmpBmp3);
+			for(int i=0;i<4;i++) {
+				NTCache &c = cache[i];
+				c.hdc = CreateCompatibleDC(pDC);
+				c.hbmp = CreateDIBSection(pDC,&bmInfo,DIB_RGB_COLORS,(void**)&c.bitmap,0,0);
+				c.tmpobj = SelectObject(c.hdc,c.hbmp);
+			}
 
 			//Refresh Trackbar
 			SendDlgItemMessage(hwndDlg,IDC_NTVIEW_REFRESH_TRACKBAR,TBM_SETRANGE,0,(LPARAM)MAKELONG(0,25));
@@ -602,10 +541,13 @@ void DoNTView() {
 		return;
 	}
 
-	if (!hNTView) hNTView = CreateDialog(fceu_hInstance,"NTVIEW",NULL,NTViewCallB);
+	if (!hNTView) {
+		hNTView = CreateDialog(fceu_hInstance,"NTVIEW",NULL,NTViewCallB);
+		new(cache) NTCache[4]; //reinitialize NTCache
+	}
 	if (hNTView) {
 		SetWindowPos(hNTView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-		FCEUD_UpdateNTView(-1,1);
+		FCEUD_UpdateNTView(-1,true);
 		NTViewDoBlit(1);
 	}
 }

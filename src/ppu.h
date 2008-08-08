@@ -16,5 +16,6 @@ extern uint8 PPUCHRRAM;
 
 void FCEUPPU_SaveState(void);
 void FCEUPPU_LoadState(int version);
+uint8* FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr);
 
 extern int scanline;

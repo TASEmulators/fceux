@@ -304,7 +304,7 @@ void FCEUD_DebugBreakpoint();
 void FCEUD_TraceInstruction();
 
 ///the driver might should update its NTView (only used if debugging support is compiled in)
-void FCEUD_UpdateNTView(int scanline, int drawall);
+void FCEUD_UpdateNTView(int scanline, bool drawall);
 
 ///the driver might should update its PPUView (only used if debugging support is compiled in)
 void FCEUD_UpdatePPUView(int scanline, int drawall);
