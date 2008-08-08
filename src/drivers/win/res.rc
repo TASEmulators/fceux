@@ -1560,7 +1560,6 @@ BEGIN
     "V",            ACCEL_CTRL_SHIFT_V,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
     "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
-    "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
 END
 
 
