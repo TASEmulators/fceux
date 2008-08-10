@@ -1,5 +1,5 @@
 ---version 2.0.2 released---
-10-aug-2008 - punkrockguy318 - SDL: fixed bug where fceux would close when file dialogs were closeds
+10-aug-2008 - punkrockguy318 - SDL: fixed bug where fceux would close when file dialogs were closed
 10-aug-2008 - punkrockguy318 - SDL: File open dialog is now used to movie playback
 10-aug-2008 - punkrockguy318 - SDL: File open wrapper now takes a titlebar argument
 10-aug-2008 - punkrockguy318 - SDL: Cleanup of usage
