@@ -2,6 +2,7 @@
 #define WIN_WINDOW_H
 
 #include "common.h"
+#include <string>
 
 // Type definitions
 
@@ -10,6 +11,7 @@ struct CreateMovieParameters
 	char* szFilename;				// on Dialog creation, this is the default filename to display.  On return, this is the filename that the user chose.
 	int recordFrom;				// 0 = "Power-On", 1 = "Reset", 2 = "Now", 3+ = savestate file in szSavestateFilename
 	char* szSavestateFilename;
+	std::string author;
 };
 
 extern char *recent_files[];
@@ -29,5 +31,12 @@ int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void UpdateCheckedMenuItems();
 void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
+
+template<int BUFSIZE>
+inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {
+	char buf[BUFSIZE];
+	GetDlgItemText(hDlg, nIDDlgItem, buf, BUFSIZE);
+	return buf;
+}
 
 #endif

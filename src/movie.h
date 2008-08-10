@@ -230,7 +230,7 @@ extern int currFrameCounter;
 extern char curMovieFilename[512];
 //---------
 
-void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags);
+void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::string author);
 void FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);

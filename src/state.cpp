@@ -54,6 +54,9 @@ static void (*SPostSave)(void);
 static int SaveStateStatus[10];
 static int StateShow;
 
+//tells the save system innards that we're loading the old format
+bool FCEU_state_loading_old_format;
+
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
 static int SFEXINDEX;
@@ -234,7 +237,13 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 		case 1:if(!ReadStateChunk(is,SFCPU,size)) ret=false;break;
 		case 3:if(!ReadStateChunk(is,FCEUPPU_STATEINFO,size)) ret=false;break;
 		case 4:if(!ReadStateChunk(is,FCEUCTRL_STATEINFO,size)) ret=false;break;
-		case 7:if(!FCEUMOV_ReadState(is,size))                ret=false;break;
+		case 7:
+			if(!FCEUMOV_ReadState(is,size)) {
+				//allow this to fail in old-format savestates.
+				if(!FCEU_state_loading_old_format)
+					ret=false;
+			}
+			break;
 		case 0x10:if(!ReadStateChunk(is,SFMDATA,size)) ret=false; break;
 
 			// now it gets hackier:
@@ -546,7 +555,10 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	if(memcmp(header,"FCSX",4)) {
 		//its not an fceux save file.. perhaps it is an fceu savefile
 		is->seekg(0);
-		return FCEUSS_LoadFP_old(is,params)!=0;
+		FCEU_state_loading_old_format = true;
+		bool ret = FCEUSS_LoadFP_old(is,params)!=0;
+		FCEU_state_loading_old_format = false;
+		return ret;
 	}
 		
 	int totalsize = FCEU_de32lsb(header + 4);

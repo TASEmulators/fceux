@@ -798,6 +798,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 					p->szFilename = GetRecordPath(hwndDlg);
 					p->recordFrom = (int)lIndex;
+					p->author = GetDlgItemText<500>(hwndDlg,IDC_EDIT_AUTHOR);
 					if(lIndex>=3)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
 					EndDialog(hwndDlg, 1);
@@ -862,7 +863,7 @@ void FCEUD_MovieRecordTo()
 
 		EMOVIE_FLAG flags = MOVIE_FLAG_NONE;
 		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
-		FCEUI_SaveMovie(p.szFilename, flags);
+		FCEUI_SaveMovie(p.szFilename, flags, p.author);
 	}
 
 	if(p.szFilename)

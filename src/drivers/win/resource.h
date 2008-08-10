@@ -358,6 +358,7 @@
 #define IDC_BUTTON9                     1148
 #define IDC_LIST2                       1149
 #define CHECK_SOUND_MUTETURBO           1179
+#define IDC_EDIT_AUTHOR                 1180
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -542,7 +543,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
 #define _APS_NEXT_COMMAND_VALUE         40254
-#define _APS_NEXT_CONTROL_VALUE         1180
+#define _APS_NEXT_CONTROL_VALUE         1181
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

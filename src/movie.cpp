@@ -465,10 +465,10 @@ static bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 	char buf[9];
 	std::ios::pos_type curr = fp->tellg();
 	fp->read(buf,9);
+	fp->seekg(curr);
 	if(fp->fail()) return false;
 	if(memcmp(buf,"version 3",9)) 
 		return false;
-	fp->seekg(curr);
 
 	std::string key,value;
 	enum {
@@ -764,7 +764,7 @@ static void openRecordingMovie(const char* fname)
 
 //begin recording a new movie
 //TODO - BUG - the record-from-another-savestate doesnt work.
-void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags)
+void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::string author)
 {
 	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
 		return;
@@ -781,6 +781,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags)
 	currMovieData = MovieData();
 	currMovieData.guid.newGuid();
 
+	currMovieData.comments.push_back("author " + author);
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
@@ -957,19 +958,19 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		movie_readonly = true;
 	}
 
-	////write the state to disk so we can reload
-	//std::vector<char> buf(size);
-	//fread(&buf[0],1,size,st);
-	////---------
-	////(debug)
-	////FILE* wtf = fopen("d:\\wtf.txt","wb");
-	////fwrite(&buf[0],1,size,wtf);
-	////fclose(wtf);
-	////---------
-	//memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	if(!LoadFM2(tempMovieData, is, size, false))
+	std::ios::pos_type curr = is->tellg();
+	if(!LoadFM2(tempMovieData, is, size, false)) {
+		is->seekg((uint32)curr+size);
+		extern bool FCEU_state_loading_old_format;
+		if(FCEU_state_loading_old_format) {
+			if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD) {
+				FCEUI_StopMovie();			
+				FCEU_PrintError("You have tried to use an old savestate while playing a movie. This is unsupported (since the old savestate has old-format movie data in it which can't be converted on the fly)");
+			}
+		}
 		return false;
+	}
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------

@@ -1,5 +1,6 @@
 ---version 2.0.2 released---
 
+09-aug-2008 - zeromus - SF [ 2040463 ] Add an "author" text field in the record movie dialog
 09-aug-2008 - zeromus - re-enable support for old-format savestates.
 09-aug-2008 - zeromus - SF [ 2041944 ] Savestates remember Lua painting
 09-aug-2008 - zeromus - support loading movies from archives
@@ -15,7 +16,7 @@
 07-aug-2008 - adelikat - put in -32000 protection on all dialogs that remember x,y
 06-aug-2008 - adelikat - change config filename from fceu98.cfg to fceux.cfg
 06-aug-2008 - zeromus - add lagcounter and lagflag to savestate
-06-aug-2008 - zeromus - SF case 2040448  (View Slots bug - does not include new savestate naming)
+06-aug-2008 - zeromus - SF [ 2040448 ] View Slots bug - does not include new savestate naming
 06-aug-2008 - zeromus - restore the debugger snap functionality
 06-aug-2008 - zeromus - add memory.readbyterange to emulua
 06-aug-2008 - zeromus - auto-fill .fcs extension in save state as dialog
