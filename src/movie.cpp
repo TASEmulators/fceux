@@ -956,7 +956,6 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		FCEU_PrintError("Cannot loadstate in Read+Write with movie from archive. Movie is now Read-Only.");
 		movie_readonly = true;
 	}
-	
 
 	////write the state to disk so we can reload
 	//std::vector<char> buf(size);
@@ -969,7 +968,8 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	////---------
 	//memorystream mstemp(&buf);
 	MovieData tempMovieData = MovieData();
-	LoadFM2(tempMovieData, is, size, false);
+	if(!LoadFM2(tempMovieData, is, size, false))
+		return false;
 
 	//complex TAS logic for when a savestate is loaded:
 	//----------------
