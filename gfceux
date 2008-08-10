@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceux - Graphical launcher for fceux.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "2.0.0"
+version = "2.0.2"
 title = "gfceux"
 # Copyright (C) 2008  Lukas Sabota <ltsmooth42 _at_ gmail.com>
 ##
@@ -205,7 +205,7 @@ def find_binary(file):
 # # # # # # # # # # # # # # # # #
 # Globals
 options = None
-optionsfile = os.getenv('HOME') + '/.gfceux_options.dat'
+optionsfile = os.getenv('HOME') + '/.fceultra/gfceux_options.dat'
 widgets = None
 
 class GfceuApp:
