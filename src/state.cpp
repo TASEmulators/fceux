@@ -443,16 +443,112 @@ void FCEUSS_Save(char *fname)
 	}
 }
 
+int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
+{
+	//if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
+	//	return 1;
+
+	int x;
+	uint8 header[16];
+	int stateversion;
+	char* fn=0;
+
+	////Make temporary savestate in case something screws up during the load
+	//if(params == SSLOADPARAM_BACKUP)
+	//{
+	//	fn=FCEU_MakeFName(FCEUMKF_NPTEMP,0,0);
+	//	FILE *fp;
+	//	
+	//	if((fp=fopen(fn,"wb")))
+	//	{
+	//		if(FCEUSS_SaveFP(fp))
+	//		{
+	//			fclose(fp);
+	//		}
+	//		else
+	//		{
+	//			fclose(fp);
+	//			unlink(fn);
+	//			free(fn);
+	//			fn=0;
+	//		}
+	//	}
+	//}
+
+	//if(params!=SSLOADPARAM_DUMMY)
+	{
+		FCEUMOV_PreLoad();
+	}
+	is->read((char*)&header,16);
+	if(memcmp(header,"FCS",3))
+	{
+		return(0);
+	}
+	if(header[3] == 0xFF)
+	{
+		stateversion = FCEU_de32lsb(header + 8);
+	}
+	else
+	{
+		stateversion=header[3] * 100;
+	}
+	//if(params == SSLOADPARAM_DUMMY)
+	//{
+	//	scan_chunks=1;
+	//}
+	x=ReadStateChunks(is,*(uint32*)(header+4));
+	//if(params == SSLOADPARAM_DUMMY)
+	//{
+	//	scan_chunks=0;
+	//	return 1;
+	//}
+	if(read_sfcpuc && stateversion<9500)
+	{
+		X.IRQlow=0;
+	}
+	if(GameStateRestore)
+	{
+		GameStateRestore(stateversion);
+	}
+	if(x)
+	{
+		FCEUPPU_LoadState(stateversion);
+		FCEUSND_LoadState(stateversion);  
+		x=FCEUMOV_PostLoad();
+	}
+	if(fn)
+	{
+		//if(!x || params == SSLOADPARAM_DUMMY)  //is make_backup==2 possible??  oh well.
+		//{
+		//	* Oops!  Load the temporary savestate */
+		//	FILE *fp;
+		//		
+		//	if((fp=fopen(fn,"rb")))
+		//	{
+		//		FCEUSS_LoadFP(fp,SSLOADPARAM_NOBACKUP);
+		//		fclose(fp);
+		//	}
+		//	unlink(fn);
+		//}
+		free(fn);
+	}
+
+	return(x);
+}
+
+
 bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 {
 	uint8 header[16];
 
-	FCEUMOV_PreLoad();
-
 	//read and analyze the header
 	is->read((char*)&header,16);
-	if(memcmp(header,"FCSX",4))
-		return false;
+	if(memcmp(header,"FCSX",4)) {
+		//its not an fceux save file.. perhaps it is an fceu savefile
+		is->seekg(0);
+		return FCEUSS_LoadFP_old(is,params)!=0;
+	}
+		
 	int totalsize = FCEU_de32lsb(header + 4);
 	int stateversion = FCEU_de32lsb(header + 8);
 	int comprlen = FCEU_de32lsb(header + 12);
@@ -475,6 +571,8 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	{
 		is->read((char*)&buf[0],totalsize);
 	}
+
+	FCEUMOV_PreLoad();
 
 	memorystream mstemp(&buf);
 	bool x = ReadStateChunks(&mstemp,totalsize)!=0;
