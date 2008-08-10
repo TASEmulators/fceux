@@ -35,12 +35,6 @@
 #include <windows.h>
 #endif
 
-
-#ifdef OPENGL
-int sdlhaveogl;
-#endif
-
-
 extern int32 g_fpsScale;
 
 int CloseGame(void);
@@ -54,48 +48,48 @@ static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
 
-char *DriverUsage=
-"--pal x	Uses PAL timing.\n\
---gamegenie x, -g x	Enables emulated Game Genie if x is nonzero.\n\
---no8lim x       Disables the 8 sprites per scanline limitation, if x is nonzero.\n\
---nothrottle x	Disables artificial speed throttling, if x is nonzero.\n\
---frameskip x	Sets # of frames to skip per emulated frame.\n\
---(x/y)res x, -(x/y) x	Sets horizontal/vertical resolution to x for full screen mode.\n\
---autoscale x   Enables autoscaling in fullscreen if x in nonzero. \n\
---keepratio x   Keeps native NES ratio when autoscaling if x is nonzero. \n\
---(x/y)scale x	Multiplies width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
---(x/y)stretch x	Stretchess to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
---bpp x, -b x	Sets bits per pixel for SDL surface(and video mode in fs). 8, 16, 32.\n\
---opengl x	  Enables OpenGL support if x is nonzero.\n\
---doublebuf xEnables SDL double-buffering if x is nonzero.\n\
---fullscreen x, -f x	Selects full screen mode if x is nonzero.\n\
---clipsides x	Clips left- and rightmost 8 columns of pixels if x is nonzero.\n\
---noframe x     Hides title bar and window decorations.\n\
---slstart x	Sets the first drawn emulated scanline.  Valid values for x are\n\
-	        0 through 239.\n\
---slend x	Sets the last drawn emulated scanline.  Valid values for x are\n\
-		0 through 239.\n\
---color x	Emulates an NTSC TV's colors, if x is nonzero.\n\
---hue x		Sets parameter for NTSC color emulation.\n\
---tint x	Sets parameter for NTSC color emulation.\n\
---palette s, -p s	Loads a custom global palette from file s.\n\
---sound x, -s x	Enables sound if x is nonzero.\n\
---soundrate x	Sets sound playback rate to x Hz.\n\
---soundq x	Sets sound quality: 0 for low, 1 for high.\n\
---soundbufsize x	Sets sound buffer size to x ms.\n\
---volume x	Sets volume to x%.\n\
---lowpass x	Enables low-pass filter if x is nonzero.\n\
---soundrecord s	Records sound to file s.\n\
---snapname x	Prepends the game's name to (numeric) snapshot filenames, if x is nonzero.\n\
---inputcfg, -i	Configures input device(s) on startup.\n\
+char *DriverUsage="\
+--pal          {0|1}   Uses PAL timing.\n\
+--gamegenie    {0|1}   Enables emulated Game Genie.\n\
+--nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n\
+--frameskip     x      Sets # of frames to skip per emulated frame.\n\
+--xres          x      Sets horizontal resolution to x for full screen mode.\n\
+--yres          x      Sets vertical resolution to x for full screen mode.\n\
+--autoscale    {0|1}   Enables autoscaling in fullscreen if x in nonzero. \n\
+--keepratio    {0|1}   Keeps native NES ratio when autoscaling. \n\
+--(x/y)scale    x      Multiplies width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
+--(x/y)stretch {0|1}   Stretches to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
+--bpp        {8|16|32} Sets bits per pixel.\n\
+--opengl       {0|1}   Enables OpenGL support.\n\
+--doublebuf    {0|1}   Enables SDL double-buffering if x is nonzero.\n\
+--fullscreen   {0|1}   Enables full screen mode.\n\
+--clipsides    {0|1}   Clips left and rightmost 8 columns of pixels.\n\
+--noframe      {0|1}   Hides title bar and window decorations.\n\
+--slstart    {0 - 239} Sets the first drawn emulated scanline.\n\
+--slend      {0 - 239} Sets the last drawn emulated scanline.\n\
+--ntsccolor    {0|1}   Emulates an NTSC TV's colors.\n\
+--hue           x      Sets hue for NTSC color emulation.\n\
+--tint          x      Sets tint for NTSC color emulation.\n\
+--palette       f      Loads a custom global palette from file f.\n\
+--sound        {0|1}   Enables sound.\n\
+--soundrate     x      Sets sound playback rate to x Hz.\n\
+--soundq       {0|1}   Enables high sound quality.\n\
+--soundbufsize  x      Sets sound buffer size to x ms.\n\
+--volume     {0 - 100} Sets volume.\n\
+--lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
+--soundrecord   f      Records sound to file f.\n\
+--inputcfg      d      Configures input device d on startup (gamepad1, gamepad2).\n\
+--playmov       f      Plays back a recorded movie from filename f.\n\
+--loadlua       f      Loads lua script from filename f.\n";
+
+/* Moved network options out while netplay is broken.
 --net s, -n s	Connects to server 's' for TCP/IP network play.\n\
 --port x, -p x	Uses TCP/IP port x for network play.\n\
 --user s, -u s	Sets the nickname to use in network play.\n\
 --pass s, -w s	Sets password to use for connecting to the server.\n\
 --netkey s, -k s	Uses key 's' to create a unique session for the game loaded.\n\
 --players x, -l x	Sets the number of local players.\n\
---playmov f    Plays back a recorded movie from filename f.\n\
---loadlua f    Loads lua script from filename f\n";
+*/
 
 
 // global configuration object
@@ -106,17 +100,6 @@ static void ShowUsage(char *prog)
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts("Options:");
 	puts(DriverUsage);
-// These options are basically not going to work...
-#if 0
-puts("\
---inputx str	Select device mapped to virtual input port x(1-2).\n\
-		 str may be: none, gamepad, zapper, powerpada, powerpadb,\n\
-			     arkanoid\n\
---fcexp str	Select Famicom expansion port device.\n\
-		 str may be: none, shadow, arkanoid, 4player, fkb\n\
---nofs x		Disables Four-Score emulation if x is 1.\n\
-");
-#endif
 }
 
 /**
@@ -135,51 +118,6 @@ void FCEUD_Message(char *s)
 {
     fputs(s, stdout);
 }
-
-
-#ifndef WIN32
-/**
- * Capture and handle signals sent to FCEU.
- */
-static void
-SetSignals(void (*t)(int))
-{
-    // XXX soules - why do we capture these?  Seems unnecessary.
-    int sigs[11]={SIGINT,SIGTERM,SIGHUP,SIGPIPE,SIGSEGV,SIGFPE,SIGKILL,SIGALRM,SIGABRT,SIGUSR1,SIGUSR2};
-    int x;
-    for(x = 0; x < 11; x++) {
-        signal(sigs[x], t);
-    }
-}
-
-static void
-CloseStuff(int signum)
-{
-    // XXX soules - again, not clear why this is necessary
-    DriverKill();
-    printf("\nSignal %d has been caught and dealt with...\n",signum);
-    switch(signum) {
-    case SIGINT:printf("How DARE you interrupt me!\n");break;
-    case SIGTERM:printf("MUST TERMINATE ALL HUMANS\n");break;
-    case SIGHUP:printf("Reach out and hang-up on someone.\n");break;
-    case SIGPIPE:printf("The pipe has broken!  Better watch out for floods...\n");break;
-    case SIGSEGV:printf("Iyeeeeeeeee!!!  A segmentation fault has occurred.  Have a fluffy day.\n");break;
-        /* So much SIGBUS evil. */
-#ifdef SIGBUS
-#if(SIGBUS!=SIGSEGV)
-    case SIGBUS:printf("I told you to be nice to the driver.\n");break;
-#endif
-#endif
-    case SIGFPE:printf("Those darn floating points.  Ne'er know when they'll bite!\n");break;
-    case SIGALRM:printf("Don't throw your clock at the meowing cats!\n");break;
-    case SIGABRT:printf("Abort, Retry, Ignore, Fail?\n");break;
-    case SIGUSR1:
-    case SIGUSR2:printf("Killing your processes is not nice.\n");break;
-    }
-    exit(1);
-}
-#endif
-
 
 /**
  * Loads a game, given a full path/filename.  The driver code must be
@@ -470,12 +408,7 @@ main(int argc,
     }
 
 #ifdef OPENGL
-#ifdef APPLEOPENGL
-    sdlhaveogl = 1;	/* Stupid something...  Hack. */
-#else
-    if(!SDL_GL_LoadLibrary(0)) sdlhaveogl=1;
-    else sdlhaveogl=0;
-#endif
+SDL_GL_LoadLibrary(0);
 #endif
 
     // Initialize the configuration system

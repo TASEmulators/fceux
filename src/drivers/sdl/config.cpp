@@ -130,16 +130,14 @@ InitConfig()
     config->addOption("lowpass", "SDL.LowPass", 0);
     config->addOption("pal", "SDL.PAL", 0);
     config->addOption("frameskip", "SDL.Frameskip", 0);
-    config->addOption("snapname", "SDL.SnapName", 0);
     config->addOption("clipsides", "SDL.ClipSides", 0);
-    config->addOption("nothrottle", "SDL.NoThrottle", 0);
-    config->addOption("no8lim", "SDL.DisableSpriteLimit", 0);
+    config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
 
     // color control
     config->addOption('p', "palette", "SDL.Palette", "");
     config->addOption("tint", "SDL.Tint", 56);
     config->addOption("hue", "SDL.Hue", 72);
-    config->addOption("color", "SDL.Color", 0);
+    config->addOption("ntsccolor", "SDL.Color", 0);
 
     // scanline settings
     config->addOption("slstart", "SDL.ScanLineStart", 0);
@@ -152,7 +150,7 @@ InitConfig()
     config->addOption('b', "bpp", "SDL.BitsPerPixel", 32);
     config->addOption("doublebuf", "SDL.DoubleBuffering", 0);
     config->addOption("autoscale", "SDL.AutoScale", 1);
-    config->addOption("keepaspect", "SDL.KeepAspect", 1);
+    config->addOption("keepratio", "SDL.KeepRatio", 1);
     config->addOption("xscale", "SDL.XScale", 1.0);
     config->addOption("yscale", "SDL.YScale", 1.0);
     config->addOption("xstretch", "SDL.XStretch", 0);
@@ -165,26 +163,27 @@ InitConfig()
     config->addOption("SDL.SpecialFilter", 0);
     config->addOption("SDL.SpecialFX", 0);
 
-    // network play options
+    // network play options - netplay is broken
+    /*
     config->addOption('n', "net", "SDL.NetworkServer", "");
     config->addOption('u', "user", "SDL.NetworkUsername", "");
     config->addOption('w', "pass", "SDL.NetworkPassword", "");
     config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
     config->addOption( 0, "port", "SDL.NetworkPort", 4046);
     config->addOption('l', "players", "SDL.NetworkNumPlayers", 1);
-
+    */ 
     // input configuration options
     config->addOption("SDL.Input.0", "GamePad.0");
     config->addOption("SDL.Input.1", "GamePad.1");
     config->addOption("SDL.Input.2", "None");
 
-    // Allow for input configuration
+    // allow for input configuration
     config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     
     // video playback
     config->addOption("playmov", "SDL.Movie", "");
     
-    // lua
+    // load lua script
     config->addOption("loadlua", "SDL.LuaScript", "");
 
     // GamePad 0 - 3
@@ -324,8 +323,8 @@ UpdateEMUCore(Config *config)
     config->getOption("SDL.DisableSpriteLimit", &flag);
     FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
 
-    config->getOption("SDL.DisableSpriteLimit", &flag);
-    FCEUI_SetSnapName(flag ? 1 : 0);
+//    config->getOption("SDL.SnapName", &flag);
+//    FCEUI_SetSnapName(flag ? true : false);
 
     config->getOption("SDL.ScanLineStart", &start);
     config->getOption("SDL.ScanLineEnd", &end);

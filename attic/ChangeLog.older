@@ -1,3 +1,512 @@
+0.98.12:
+
+	Win32:  Fixed the behavior of the sound logging function.
+
+	Fixed a bug that was causing 2xscale/3xscale to be broken
+	when clipping the leftmost and rightmost 8 columns.
+
+	Added an iNES header correction entry for JustBreed.
+
+	Modified the MMC5 "ELROM" board emulation to not emulate WRAM.
+
+	Corrected various pieces of code that were causing compiler warnings.
+
+	Win32:  Scaling settings(x, y, stretch to fill screen) are now respected while
+	using a special scaler in full screen mode, though if x or y scale is
+	less than what is needed for a particular scaler, it will be
+	adjusted.
+
+	Win32:  The window will be reblitted when it becomes invalidated while
+	a game is loaded(such as when you're resizing the window).
+
+	When the PPU is in a "dead" state after starting up, the graphics
+	buffer is now cleared.  Previously, particularly in the Windows port, when
+	a game was closed, and a new game was loaded, the last image from
+	the previous game would be displayed for a short time.
+
+	Win32:  Blit skipping will now occur when sound is disabled and FCE Ultra is
+	running behind the desired frame rate.
+
+	Win32:  Blit-skipping behavior can now be configured to some extent in the "Timing" configuration 
+	window.
+
+	Win32: Added a "Recent Directories" submenu to the "File" menu.
+
+	Removed some debugging code that shouldn't have been enabled in 0.98.11.
+
+0.98.11:
+
+	Win32:  Special scalers are now also supported in windowed mode.  For Scale2x/Scale3x,
+	the fastest "desktop" bit depth is 16bpp.  For hq2x/hq3x, it is 32bpp.
+
+	The shared video blitting code(drivers/common/vidblit.c) can now blit using Scale2x
+	and Scale3x to any target bit depth(8bpp, 16bpp, 24bpp, and 32bpp) instead of just
+	8bpp, as it was before.
+	HQ2x  and HQ3x can now blit to 16bpp, 24bpp(untested), and 32bpp.  The 16bpp and
+	24bpp targets are done doing post-processing conversion, after HQ2x/HQ3x, which
+	really does hurt speed.
+
+	Changed a few names in the credits section of the documentation to their
+	aliases.  Names you didn't get to pick to have are so troublesome. :b
+	I also made various fixes/updates to the documentation.
+
+	Updated the FAQ with some information regard video mode bit depths and speed.
+
+	SDL:  Disabled the fast-forward-key speed-limiting code.  I thought I had
+	done this before...
+
+	Fixed a major bug in the movie recording code, and added some code to automatically detect
+	and fix playback of broken movies from earlier versions.
+
+	Did a little swapping thing with mapper 90 and 209.  I moved back Mortal Kombat 3
+	to mapper 90, and moved Shin Samurai Spirits 2 to mapper 209.  Sorry for any confusion.
+	Mapper 90 should be considered as having the fancy nametable select mode disabled, with
+	mapper 209 having it enabled.
+
+	Added support for mapper 160, which turns out to be the same hardware as mapper
+	90.  Joy.
+
+	Improved mapper 90 emulation.  This mapper really needs low-level
+	emulation for IRQs to work right, though. :/  
+
+	Win32:  Fixed the "hide left/right 8 video columns" feature.
+
+	Since FCE Ultra is ending(or has already exceeded? :b) its actively-updated life, 
+	I've gone ahead and added per-game hacks for "Kick Master" and the PAL version
+	of "Star Wars".  See the documentation for more details.
+
+	Minor optimizations to the high-quality sound emulation code.  The FIR filter
+	code is the bottleneck, though, so these changes won't have much of an effect
+	on overall speed.
+
+	Altered MMC3 IRQ emulation(and the hooks in ppu.c for it).
+
+        Fixed a rather major typo in the VRC7-emulation code.
+
+0.98.10:
+
+	Reimplemented network play.  It now requires a standalone network play server, which
+	will be released as a later time.  For fun, "starmen.net" is running this server,
+	which is publicly accessible.
+	I also made various code fixes/improvements to allow for network play, particularly
+	with the command handling code.
+
+	Reworked much of the VS Unisystem emulation code, partially based on information from
+	MAME.  The following games are now supported:
+
+         Battle City
+         Castlevania
+         Clu Clu Land
+         Dr. Mario
+         Duck Hunt
+         Excitebike
+         Excitebike (Japanese)
+         Freedom Force
+         Goonies, The
+         Gradius
+         Gumshoe
+         Hogan's Alley
+         Ice Climber
+         Ladies Golf
+         Mach Rider
+         Mach Rider (Japanese)
+         Mighty Bomb Jack (Japanese)
+         Ninja Jajamaru Kun (Japanese)
+         Pinball
+         Pinball (Japanese)
+         Platoon
+         RBI Baseball
+         Slalom
+         Soccer
+         Star Luster
+         Stroke and Match Golf
+         Stroke and Match Golf - Ladies
+         Stroke and Match Golf (Japanese)
+         Super Mario Bros.
+         Super Sky Kid
+         Super Xevious
+         Tetris   
+         TKO Boxing
+         Top Gun   
+
+	Win32-native:  Fixed a bug in the debugger's breakpoint list that appeared when
+	one tried to delete a breakpoint(the control accidentally had auto-sort enabled, 
+	causing a discrepancy between what was displayed and what was contained in internal 
+	data structures).
+
+	The current disk image XOR original disk image is now stored in save states.  This
+	should greatly increase compressability(important for network play), and make
+	it a little more legal to distribute such save states now.
+
+	Modified the save state format to allow for more precise and larger version numbers.
+
+	Various minor code changes.
+
+	Fixed initialization of the FCEUGameInfo structure, which previously led
+	to problems with sound output on the SexyAL-using ports(Linux).
+
+	Apparently I added support for mapper 255 a while back.  Documentation updated.
+
+	Added iNES header correction information for Armored Scrum Object and Alpha Mission.
+
+	Merged banksw.h into ines.c, fixed some of its prototypes in ines.h.
+
+0.98.9:
+
+	Win32-native:  Fixed the speed throttling used when sound is disabled.  In previous
+	0.98.x Win32-native releases, emulation was running at 1/2 the speed it should
+	have been when sound was disabled.
+
+	Win32-native:  Moved settings in the "Miscellaneous" configuration window
+	to where they should have been in the first place, and added "GUI" and "Timing"
+	configuration windows to accommodate some.
+
+	Win32-native:  Fixed the handling of the "Scroll Lock" key used to disable and
+	enable Family BASIC Keyboard input.
+
+	Updated documentation to handle some slight differences in the Win32-native
+	port("Win32-native" is what the Win32 port using native APIs, as opposed to something
+	like GTK+ and SDL, will be referred to in documentation now).  I also made
+	some other minor wording adjustments to the documentation.
+
+	Added an iNES header correction for Dragonball.
+
+0.98.8:
+
+	Fixed a typo in sound.c that caused only part of the sound registers
+	to be saved in save states.
+
+	Win32: Switched over to the DirectDraw7 interface, from DirectDraw4's.
+	The surface Flip() method will now block, which results in somewhat
+	smoother animation/scrolling, especially when combined with the
+	auto blit-skip implemented in 0.98.6 when sound is enabled.
+
+	Win32: Undid a change made in the last release that limited the
+	speed of fast-forwarding when using the tilde key.  I really do
+	need to implement some sort of unified timing/blit skip system...
+
+	Win32: Added an option, disabled by default, to ask for confirmation
+	before exiting FCE Ultra.
+
+	Win32:  Added an option, enabled by default, to disable the system 
+	screen saver while a game is loaded.
+
+	Win32:  Added a new video synchronization mode, a "lazy" wait for
+	vblank/vertical retrace.  It calls Sleep(0) in its wait loop.  This
+	still uses all available cpu cycles, but it is much more friendly
+	to other processes than the old-style wait for vblank.
+
+	Win32:  Added support for joystick POV hats.
+
+0.98.7:
+
+	Fixed a bug in the debugger's disassembler when disassembling
+	opcode 0xBC.
+
+	Fixed the behavior of the right mouse button with zapper emulation, to 
+	correspond with what it is documented as doing.
+
+	Win32:  Added proper support for maximizing the window.
+
+	Win32:  Rewrote most of the input and input configuration code.
+
+	Win32:  Changed the configurable aspect ratio to something sensical, the current
+	display's pixel aspect ratio, default of 1:1(square pixels).
+
+	Win32:  Made the default full-screen video mode the custom video mode.  I should have 
+	done this a long time ago to make custom video mode configuration more straighforward
+	for users...
+
+	Added some JACK audio code to be used by the SDL build.  I'll test it and complete
+	it later.
+
+0.98.6:	Made several code modifications to work with older versions of gcc.
+
+	Fixed more header file network play #ifdef-age.
+
+	Fixed a typo in cart.h.
+
+	Fixed some funky code in FCEU_memmove().
+	
+	Fixed some source code causing compiler warnings.
+
+	Fixed SexyAL's format conversion code to not rely on deprecated casting semantics.
+
+	Readded the native Win32 code, and made many improvements.  The major thing
+	that needs to be done now with it is to rewrite the input handling code and input 
+	configuration code.
+
+0.98.5:
+	Added LL to the 64-bit integer constants in ines.c
+
+	Fixed OpenGL support under Mac OS X.
+
+	Added the ability to hide background and/or sprites with the F4 key.
+
+0.98.4:
+	Moved NETWORK #ifdef's to netplay.c to simplify things.
+
+	Fixed gzip file loading code(I think).  I'm still a bit unsure about the semantics
+	of dup() and close(), though.
+
+	Corrected FDS code to try loading the FDS image before loading the BIOS.
+
+	Readded "native" SDL sound code, used for Mac OS X(and maybe BeOS).
+
+0.98.3:
+	Removed the wxWindows GUI code.  GTK+ 2 code will take its place,
+	once it is ready.
+
+	Added reset and power commands to the movie format.  More commands(such as insert
+	disk, eject disk, flip dip switch, etc.) will be added simultaneously as work
+	on network play continues.
+
+        Modified SexyAL OSS code to not adjust the number of fragments to a power of 2.
+        It works fine on my card, allowing finer-grained buffer size control,
+        but I'm not sure it will work with all chips.
+
+	Fixed parsing of the "-specialfs" command-line argument.
+
+	Added the hq3x scaler.
+
+	Updated to the latest Scale2x code.  I also added the Scale3x scaler.
+
+	Changed the keyboard assignments for toggling full screen to "Alt" + "Enter".
+
+	FCEUI_SaveState() and FCEUI_LoadState() changed.  Porters should read
+	driver.h.
+
+	Miscellaneous changes to accommodate new network play plan.  It's not close
+	to being finished.
+
+	Altered RTI emulation.  In Paris Dakar Rally's NMI handler, it does "CLI ; RTI".  
+	Previously, FCE Ultra would generate an interrupt right after RTI occured, due to the 
+	presumed latency that RTI had with the I flag.  I changed it so there is no latency, so
+	no interrupt will occur in this case(interrupts kill this game).  The interrupt source
+	is the "frame IRQ", which it never disables, if anyone cares.
+	This change does break the "Stars SE" demo, though.  Hmm.
+
+	"FCEUGameInfo" is now a pointer, rather than just a statically-allocated structure.
+	This may cause some null-dereferencing-related crashes, but it should help keep
+	code a little cleaner(maybe?).
+
+	Played around with the FDS FM code some more.  It's still not right.  Bah.
+
+	Hacked in support for entering Datach/Barcode World barcodes without a GUI, using the 
+	F8 key and the numeric keys.
+
+	Added code to save/load movies.  Movie support will only record/play back the
+	states of the four emulated gamepads.
+
+	Modified the sound code to use timestamp/timestampbase differently.  In addition,
+	timestampbase is now saved in save states("timestamp" doesn't need to be saved, since
+	it's reset to 0 at the end of each emulated frame).
+
+0.98.2:
+	Fixed a few problems with the SDL command-line build code
+	for Win32.  Also, SDL 1.2.7 seems to have a bug that breaks FCE Ultra's
+	full-screen/windowed switching capabilities(at least under Win32).
+	Stupid everything.
+
+	Minor SexyAL changes.
+
+	Updated documentation.
+
+0.98.1:
+
+	Increased the volume of the FME07 sound channels.
+
+	Fixed a bug in the SexyAL endian conversion code.
+
+	Made the SexyAL chunk conversion loop work.
+
+	Replaced the old OPL2 emulator with a modified version of
+	Mitsutaka Okazaki's YM2413 emulator for the VRC7 sound emulation.
+
+	Decreased the pitch of the FME 07 expansion sound channels by one octave.
+
+	Decreased volume of output of $5011 in MMC5 emulation code.
+
+
+0.98.0:	Some changes I made aren't listed below.  Ah well.  The magnitude
+	of the changes was too great...
+
+
+	Default sound volume is 100(%), which makes a lot more sense than 75%, but not much.
+	It's multiplied by 3/4 internally now.
+
+	Added support for the Datach barcode reader(GUI interface only).  The emulation code
+	was adapted from the VirtuaNES source code.
+
+	Reassigned the Datach games to mapper 157, from 16, with CRC32 checks.
+
+	Increased the maximum number of screen snapshots in the snapshots directory
+	to 99999(from 999).
+
+	Reassigned the following games to mapper 210, using CRC32 checks:
+		Chibi Maruko Chan
+		Dream Master
+		Family Circuit '91
+		Famista '92
+		Famista '93
+		Famista '94
+		Heisei Tensai Bakabon
+		Top Striker
+		Wagyan Land 2
+		Wagyan Land 3
+	If you use a hack/translation of one or more of these games, you will of course
+	need to manually change the mapper number in the header for it to work properly in
+	FCE Ultra.  Family Circuit '91 still may not fit in with the rest of these games,
+	but it's definitely not a "stock" mapper 19 setup.
+
+	Fixed an OpenGL palette bug when using scanlines(previously, I think it was
+	setting the palette of the scanlines overlay texture instead of the actual image
+	texture in some instances).  The bug showed up on games that make use of the color
+	deemphasis bits.
+
+	Rewrote a lot of the PPU background rendering code to be more accurate(and
+	obfuscated!).  This eliminates the X-offset hack I made earlier.
+
+	Removed some of the NSF visualization code, and altered the look of the NSF
+	display slightly.  The NSF waveform visualization code will now take into
+	account the current volume setting.
+
+	Changed the default key bindings for the standard emulated gamepad
+	to something more compatible with window managers.  I may change it back, but probably
+	not, since it is easily configurable now.
+
+	Updated the MMC5, VRC6, and FME07 low-quality sound emulation code
+	with the compatible parts of the high-quality sound emulation code for those chips.
+
+	Adjusted timing of horizontal scroll update(near the beginning of hblank.  I made
+	it occur sooner).  I also added a hack to allow X-offset(fine X scroll) changes mid
+	scanline, however, it is extremely ugly, and may not work correctly for everything
+	(doing it correctly would probably kill speed).
+	I mainly did it to fix games like F-1 Race and Mach Rider, and other racing
+	games that are extremely sensitive to horizontal scrolling timing.
+
+	Some FDS IRQ emulation changes to fix some screen corruption problems
+	in "Kaettekita Mario Bros".
+
+	Removed zlib(the code, not support).
+	I also removed support for compiling without zlib(it's small, simple, provides 
+	very useful functions, and may provide critical features for fceu in the future).
+
+	*undone, breaks debugger, FIXME.* Replaced some inline functions with macros in x6502.c.
+
+	Increased the speed of Namco 106 sound emulation in HQ sound mode.
+
+	Many many sound emulation changes and adjustments based on blargg's tests.
+	The default sound volume is about 150% what it was before, because the sound range
+	has changed(now -soundvol 100 is like -soundvol 200 on older builds), and the
+	default "soundvol" setting is 75.  100 clips on some Namco games, and 200 clips
+	on many games, so I'll probably have the configurable volume range as [0:125].
+	What exactly is "%" supposed to mean in this case....  100% of what?!
+
+	When using low-quality sound emulation mode, total emulation speed is about 10%
+	less than previous builds.  The change in speed for high-quality sound emulation 
+	mode is significantly less.
+
+	Added beginnings of SexyAL to source code tree, removed SDL sound support, and
+	old OSS code.
+
+	Copied over some autoconf/automake stuff from phamicom.  It stills needs a bit
+	of work...
+
+	Fixed DMC IRQ emulation.  Fixes many CodeMasters games.  Finally. ^_^
+
+	Restructured a lot of files, changed the interface between driver and
+	emulator code slightly.
+
+	* Insert stuff here *
+
+November 28, 2003	-	Snapshot
+
+	Removed the DOS, Linux SVGAlib, and Win32 targets.  *GASP*
+	Win32 support will return(eventually), using SDL + wxWindows.
+	SDL can use svgalib or GGI anyway, so it shouldn't be a huge loss.
+	DOS support will only return if someone ports SDL to DOS. ^_^
+	It would be nice if SDL could accept modelines.  Maybe in SDL 2.0...
+	
+	Merged fce.c and svga.c into fceu.c, and fce.h and svga.h into fceu.h.
+
+	Reassigned "Mortal Kombat 3 - Special 56 Peoples" to mapper 209.
+
+	Added emulation of the "Oeka Kids" tablet.
+
+	Added emulation of the Family Trainer.
+
+	Added emulation of the "Ultimate Quiz King" buzzers.
+
+	Added emulation of the Mahjong controller.
+
+	Added emulation of HyperShot controllers.
+
+	Fixed loading of NSFs with load addresses below $8000.
+
+	Cleaned and simplified some of the NES APU code.
+
+	Altered mapper 65 emulation.  Fixes Kaiketsu Yanchamaru 3.  Does it break anything?
+
+	Wrote a small FAQ file.
+
+	Fixed displaying of garbage and other unpleasantness on the first scanline.  I need
+	to clean up that code, though.
+
+	Fixed color deemphasis emulation when all bits are set.  For some
+	reason, I had commented out the code.  Bleh.
+
+	NSF player now writes $C0 to $4017 if the FDS is being used(the FDS
+	BIOS writes $C0 to $4017).  $40 for all other NSFs.
+
+	Added support for iNES mapper 58(nnnesterj).
+
+	Added support for iNES mapper 208.
+
+	Reassigned "Fudou Myouou Den" to mapper 207(CRC32 checks).
+
+	Reassigned "Karnov" to mapper 206(CRC32 checks).
+
+	Fixed the mapper 95 code, which was horribly broken.
+
+	Differentiated between mappers 33 and 48.  Added CRC checks to assign
+	some games to mapper 48.  "Flintstones 2" and "Don Doko Don 2" are
+	the games that need to be assigned to 48.  Are there others?
+
+	Replaced usage of TriggerIRQ to X6502_IRQBegin/X6502_IRQEnd combos in
+	various mapper emulation files.  67, 33/48, 40, 73, 42, 65, 6, 182
+	Removed function TriggerIRQ() from x6502.c
+
+	Fixed the sound volume of the VRC7 emulation in high-quality sound mode.  
+	Decreased(slightly) the volume of VRC7 emulation in both high-quality sound modes.
+
+	Decreased the volume of the MMC5 expansion sound channels.
+
+	Decreased the volume of the FME-7/mapper 69 expansion sound channels.
+
+	Added FCEU_gmalloc(), which will call exit() if memory allocation fails,
+	otherwise it is guaranteed to return a memory block.
+	This will be used in the mapper code mainly.  It should only
+	be used for small memory chunks.  The reasoning is that if 64 some like KB of
+	RAM or less can't be allocated, for example, it'd probably be best to 
+	exit the emulator ASAP.  It also helps to simplify code logic, and 
+	help (me) with modularization.
+	The behavior of this may change in the future.  I still need to think about it.
+	I should probably save the configuration file regularly(or much better,
+	use the registry) on the Windows port, though.
+
+	Cleaned up the save-state saving/loading code a bit, and added
+	support for linked save state structures for better modularity and
+	less code duplication.
+
+	Merged the iNES and UNIF MMC1, MMC3, and MMC5 code more completely.
+	I may need to sanify CHR RAM and WRAM allocation for pedanticness, 
+	though.  Also worked on Tengen RAMBO-1 emulation, and mapper 90 emulation.
+	***THIS MAKES SAVE STATES FOR GAMES THAT USE THESE EXPANSION CHIPS INCOMPATIBLE
+	WITH PREVIOUS VERSIONS***
+	I plan on doing the same thing with other mappers/boards in the future, though.
+	Always on the quest for 1.0...
+
 November 12, 2003	-	0.97.5 Release
 
 	Windows:  Added limited support for arguments that change configuration

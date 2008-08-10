@@ -1,10 +1,14 @@
 ---version 2.0.2 released---
-10-aug-2008 - punkrockguy318 - SDL: Changed default A/B from numpad 2/3 to j/k.
+10-aug-2008 - punkrockguy318 - SDL: Cleanup of usage
+10-aug-2008 - punkrockguy318 - SDL: --no8lim option renamed to --nospritelim
+10-aug-2008 - punkrockguy318 - SDL: --color option renamed to --ntsccolor
+10-aug-2008 - punkrockguy318 - SDL: Screenshots now always prepend the game name.
+10-aug-2008 - punkrockguy318 - SDL: Changed default A/B from numpad 2 and 3 to j and k.
 10-aug-2008 - punkrockguy318 - SDL: Enable frameskip by default
 10-aug-2008 - punkrockguy318 - SDL: Fixed a bug that would crash fceux if the emulation speed was overincreased
 10-aug-2008 - punkrockguy318 - SDL: New default hotkeys to more closely match win32 defaults
 10-aug-2008 - punkrockguy318 - SDL: Added lua script loading hotkey (f3).  Non win32 SDL requires zenity for this to function.
-10-aug-2008 - punkrockguy318 - SDL: Build script cleanup
+10-aug-2008 - punkrockguy318 - SDL: Build script cleanup; also added option for DEBUG builds.
 10-aug-2008 - zeromus - SF [ 2030405 ] Avi recording: no sound b0rks format
 10-aug-2008 - zeromus - SF [ 2037878 ] Convert .fcm doesn't do special characters
 09-aug-2008 - zeromus - SF [ 2040463 ] Add an "author" text field in the record movie dialog

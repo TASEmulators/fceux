@@ -220,22 +220,22 @@ InitVideo(FCEUGI *gi)
             double auto_yscale = GetYScale(yres);
             double native_ratio = ((double)NWIDTH) / s_tlines;
             double screen_ratio = ((double)xres) / yres;
-            int keep_aspect;
+            int keep_ratio;
             
-            g_config->getOption("SDL.KeepAspect", &keep_aspect);
+            g_config->getOption("SDL.KeepRatio", &keep_ratio);
             
             // Try to choose resolution
             if (screen_ratio < native_ratio)
             {
                 // The screen is narrower than the original. Maximizing width will not clip
                 auto_xscale = auto_yscale = GetXScale(xres);
-                if (keep_aspect) 
+                if (keep_ratio) 
                     auto_yscale = GetYScale(yres);
             }
             else
             {
                 auto_yscale = auto_xscale = GetYScale(yres);
-                if (keep_aspect) 
+                if (keep_ratio) 
                     auto_xscale = GetXScale(xres);
             }
             s_exs = auto_xscale;

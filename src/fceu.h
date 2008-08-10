@@ -79,8 +79,8 @@ typedef struct {
 	//Usr*SLine[0] is for NTSC, Usr*SLine[1] is for PAL.
 	int UsrFirstSLine[2];
 	int UsrLastSLine[2];
-
-	int SnapName;
+	
+	bool SnapName;
 	uint32 SndRate;
 	int soundq;
 	int lowpass;
