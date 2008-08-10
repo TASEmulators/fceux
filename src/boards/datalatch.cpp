@@ -89,9 +89,11 @@ void Mapper184_Init(CartInfo *info)
 
 static void CNROMSync(void)
 {
-  setchr8(latche&3);
-  setprg16(0x8000,0);
-  setprg16(0xC000,1);
+	//mbg 8/10/08 - fixed this so that large homebrew roms would work.
+	//setchr8(latche&3);
+	setchr8(latche);
+	setprg16(0x8000,0);
+	setprg16(0xC000,1);
 }
 
 void CNROM_Init(CartInfo *info)
