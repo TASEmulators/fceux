@@ -1,4 +1,7 @@
 ---version 2.0.2 released---
+
+09-aug-2008 - zeromus - SF [ 2041944 ] Savestates remember Lua painting
+09-aug-2008 - zeromus - support loading movies from archives
 08-aug-2008 - adelikat - added input display to the FCEUX main menu
 08-aug-2008 - adelikat - fixed the (null) in the default lua directory listing
 08-aug-2008 - adelikat - added shift+L as default hotkey for reload lua script

@@ -197,6 +197,10 @@ void FCEU_PutImage(void)
 	} 
 	else
 	{
+		//Save backbuffer before overlay stuff is written.
+		if(!FCEUI_EmulationPaused())
+			memcpy(XBackBuf, XBuf, 256*256);
+
 		//Some messages need to be displayed before the avi is dumped
 		DrawMessage(true);
 
@@ -206,10 +210,6 @@ void FCEU_PutImage(void)
 		//Update AVI before overlay stuff is written
 		if(!FCEUI_EmulationPaused())
 			FCEUI_AviVideoUpdate(XBuf);
-
-		//Save backbuffer before overlay stuff is written.
-		if(!FCEUI_EmulationPaused())
-			memcpy(XBackBuf, XBuf, 256*256);
 
 		//Save snapshot before overlay stuff is written.
 		if(dosnapsave)
