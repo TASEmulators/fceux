@@ -72,7 +72,9 @@ template<typename T> T templateIntegerDecFromIstream(std::istream* is)
 
 	for(;;)
 	{
-		int d = is->get() - '0';
+		int c = is->get();
+		if(c == -1) return ret;
+		int d = c - '0';
 		if((d<0 || d>9))
 		{
 			if(!pre)
