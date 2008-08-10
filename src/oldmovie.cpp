@@ -56,7 +56,40 @@ static uint32 savestate_offset = 0;
 static uint32 nextts = 0;
 static int32 nextd = 0;
 
+ // turn old ucs2 metadata into utf8
+void convert_metadata(char* metadata, int metadata_size, uint8* tmp, int metadata_length)
+{
+	 char* ptr=metadata;
+	 char* ptr_end=metadata+metadata_size-1;
+	 int c_ptr=0;
+	 while(ptr<ptr_end && c_ptr<metadata_length)
+	 {
+		 uint16 c=(tmp[c_ptr<<1] | (tmp[(c_ptr<<1)+1] << 8));
+		 //mbg merge 7/17/06 changed to if..elseif
+		 if(c<=0x7f)
+			 *ptr++ = (char)(c&0x7f);
+		 else if(c<=0x7FF)
+			 if(ptr+1>=ptr_end)
+				 ptr_end=ptr;
+			 else
+			 {
+				 *ptr++=(0xc0 | (c>>6));
+				 *ptr++=(0x80 | (c & 0x3f));
+			 }
+		 else
+			 if(ptr+2>=ptr_end)
+				 ptr_end=ptr;
+			 else
+			 {
+				 *ptr++=(0xe0 | (c>>12));
+				 *ptr++=(0x80 | ((c>>6) & 0x3f));
+				 *ptr++=(0x80 | (c & 0x3f));
+			 }
 
+		 c_ptr++;
+	 }
+	 *ptr='\0';
+}
 
 //backwards compat
 static void FCEUI_LoadMovie_v1(char *fname, int _read_only);
@@ -552,7 +585,15 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	read32le((uint32*)&md.emuVersion,fp);
 
 	md.romFilename = readNullTerminatedAscii(fp);
-	md.comments.push_back("author " + readNullTerminatedAscii(fp));
+
+	md.comments.push_back(L"author " + mbstowcs(readNullTerminatedAscii(fp)));
+
+		//int metadata_length = savestate_offset - MOVIE_V1_HEADER_SIZE;
+	//uint8* metadata = new uint8[metadata_length];
+	//char* wcmetadata = new char[metadata_length*4]; //seems to me like we support the worst case
+	//fp->read((char*)metadata,metadata_length);
+	//convert_metadata(wcmetadata,metadata_length*4,metadata,metadata_length);
+	//md.comments.push_back(L"author " + (std::wstring)(wchar_t*)wcmetadata);
 
 	//  FCEU_PrintError("flags[0] & MOVIE_FLAG_NOSYNCHACK=%d",flags[0] & MOVIE_FLAG_NOSYNCHACK);
 	if(flags[0] & MOVIE_FLAG_NOSYNCHACK)

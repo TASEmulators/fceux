@@ -41,7 +41,7 @@ typedef struct
 	MD5DATA md5_of_rom_used;
 	std::string name_of_rom_used;
 
-	std::vector<std::string> comments;
+	std::vector<std::wstring> comments;
 } MOVIE_INFO;
 
 
@@ -156,7 +156,7 @@ public:
 	std::string romFilename;
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
-	std::vector<std::string> comments;
+	std::vector<std::wstring> comments;
 	//this is the RERECORD COUNT. please rename variable.
 	int rerecordCount;
 	FCEU_Guid guid;
@@ -230,7 +230,7 @@ extern int currFrameCounter;
 extern char curMovieFilename[512];
 //---------
 
-void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::string author);
+void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
 void FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);

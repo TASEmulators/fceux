@@ -2278,6 +2278,14 @@
 			Name="utils"
 			>
 			<File
+				RelativePath="..\src\utils\ConvertUTF.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\utils\ConvertUTF.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\utils\crc32.cpp"
 				>
 				<FileConfiguration

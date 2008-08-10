@@ -4,12 +4,13 @@
 #include "window.h"
 #include "movie.h"
 #include "archive.h"
+#include "utils/xstring.h"
 
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
 
 //the comments contained in the currently-displayed movie
-static std::vector<std::string> currComments;
+static std::vector<std::wstring> currComments;
 
 extern FCEUGI *GameInfo;
 
@@ -267,6 +268,7 @@ void AbsoluteToRelative(char *const dst, const char *const dir, const char *cons
 		strcpy(dst, dir + igood);
 }
 
+
 BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -279,6 +281,8 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 			ListView_SetExtendedListViewStyleEx(hwndList,
                              LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES ,
                              LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES );
+
+			ListView_SetUnicodeFormat(hwndList,TRUE);
 
 			RECT listRect;
 			GetClientRect(hwndList,&listRect);
@@ -295,9 +299,9 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 
 			for(uint32 i=0;i<currComments.size();i++)
 			{
-				std::string& comment = currComments[i];
+				std::wstring& comment = currComments[i];
 				size_t splitat = comment.find_first_of(' ');
-				std::string key, value;
+				std::wstring key, value;
 				//if we can't split it then call it an unnamed key
 				if(splitat == std::string::npos)
 				{
@@ -313,8 +317,11 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 				lvi.mask = LVIF_TEXT;
 				lvi.iSubItem = 0;
 				lvi.pszText = (LPSTR)key.c_str();
-				ListView_InsertItem(hwndList,&lvi);
-				ListView_SetItemText( hwndList, i, 1, (LPSTR)value.c_str());
+				SendMessageW(hwndList, LVM_INSERTITEMW, 0, (LPARAM)&lvi);
+				
+				lvi.iSubItem = 1;
+				lvi.pszText = (LPSTR)value.c_str();
+				SendMessageW(hwndList, LVM_SETITEMTEXTW, i, (LPARAM)&lvi);
 			}
 			
 		}
@@ -709,6 +716,8 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 		free(p->szFilename);
 		p->szFilename = 0;
 
+		SendMessage(GetDlgItem(hwndDlg,IDC_EDIT_AUTHOR), CCM_SETUNICODEFORMAT, TRUE, 0);
+
 		// Populate the "record from..." dialog
 		{
 			char* findGlob=strdup(FCEU_MakeFName(FCEUMKF_STATEGLOB, 0, 0).c_str());
@@ -798,7 +807,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 					p->szFilename = GetRecordPath(hwndDlg);
 					p->recordFrom = (int)lIndex;
-					p->author = GetDlgItemText<500>(hwndDlg,IDC_EDIT_AUTHOR);
+					p->author = GetDlgItemTextW<500>(hwndDlg,IDC_EDIT_AUTHOR);
 					if(lIndex>=3)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
 					EndDialog(hwndDlg, 1);

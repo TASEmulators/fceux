@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "fceu.h"
 
 extern PALETTEENTRY *color_palette;
 //extern WAVEFORMATEX wf;
@@ -59,6 +60,7 @@ static int avi_segnum=0;
 //static FILE* avi_check_file=0;
 static struct AVIFile saved_avi_info;
 static int use_prev_options=0;
+static bool use_sound=false;
 
 
 
@@ -91,7 +93,7 @@ static void avi_destroy(struct AVIFile** avi_out)
 	{
 		if((*avi_out)->compressed_streams[AUDIO_STREAM])
 		{
-			AVIStreamClose((*avi_out)->compressed_streams[AUDIO_STREAM]);
+			LONG test = AVIStreamClose((*avi_out)->compressed_streams[AUDIO_STREAM]);
 			(*avi_out)->compressed_streams[AUDIO_STREAM] = NULL;
 			(*avi_out)->streams[AUDIO_STREAM] = NULL;				// compressed_streams[AUDIO_STREAM] is just a copy of streams[AUDIO_STREAM]
 		}
@@ -332,7 +334,21 @@ int FCEUI_AviBegin(const char* fname)
 
 	saved_avi_ext[0]='\0';
 
-	if(!avi_open(fname, &bi, &wf, &vsi))
+	//mbg 8/10/08 - decide whether there will be sound in this movie
+	//if this is a new movie..
+	if(!avi_file) {
+		if(FSettings.SndRate)
+			use_sound = true;
+		else use_sound = false;
+	}
+
+	//mbg 8/10/08 - if there is no sound in this movie, then dont open the audio stream
+	WAVEFORMATEX* pwf = &wf;
+	if(!use_sound)
+		pwf = 0;
+
+
+	if(!avi_open(fname, &bi, pwf, &vsi))
 	{
 		saved_avi_fname[0]='\0';
 		return 0;

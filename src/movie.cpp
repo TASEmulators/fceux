@@ -339,7 +339,7 @@ void MovieData::installValue(std::string& key, std::string& val)
 	else if(key == "binary")
 		installBool(val,binaryFlag);
 	else if(key == "comment")
-		comments.push_back(val);
+		comments.push_back(mbstowcs(val));
 	else if(key == "savestate")
 	{
 		int len = Base64StringToBytesLength(val);
@@ -368,7 +368,7 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "port2 " << ports[2] << endl;
 
 	for(uint32 i=0;i<comments.size();i++)
-		*os << "comment " << comments[i] << endl;
+		*os << "comment " << wcstombs(comments[i]) << endl;
 	
 	if(binary)
 		*os << "binary 1" << endl;
@@ -764,7 +764,7 @@ static void openRecordingMovie(const char* fname)
 
 //begin recording a new movie
 //TODO - BUG - the record-from-another-savestate doesnt work.
-void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::string author)
+void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 {
 	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
 		return;
@@ -781,7 +781,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::string author)
 	currMovieData = MovieData();
 	currMovieData.guid.newGuid();
 
-	currMovieData.comments.push_back("author " + author);
+	if(author != L"") currMovieData.comments.push_back(L"author " + author);
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;

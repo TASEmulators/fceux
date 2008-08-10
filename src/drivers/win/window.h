@@ -11,7 +11,7 @@ struct CreateMovieParameters
 	char* szFilename;				// on Dialog creation, this is the default filename to display.  On return, this is the filename that the user chose.
 	int recordFrom;				// 0 = "Power-On", 1 = "Reset", 2 = "Now", 3+ = savestate file in szSavestateFilename
 	char* szSavestateFilename;
-	std::string author;
+	std::wstring author;
 };
 
 extern char *recent_files[];
@@ -36,6 +36,13 @@ template<int BUFSIZE>
 inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {
 	char buf[BUFSIZE];
 	GetDlgItemText(hDlg, nIDDlgItem, buf, BUFSIZE);
+	return buf;
+}
+
+template<int BUFSIZE>
+inline std::wstring GetDlgItemTextW(HWND hDlg, int nIDDlgItem) {
+	wchar_t buf[BUFSIZE];
+	GetDlgItemTextW(hDlg, nIDDlgItem, buf, BUFSIZE);
 	return buf;
 }
 
