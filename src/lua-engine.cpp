@@ -489,7 +489,7 @@ static int savestate_create(lua_State *L) {
 		filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
 	}
 	else {
-		filename = mkstemp("snlua");
+		filename = mktemp("snlua");
 	}
 	
 	// Our "object". We don't care about the type, we just need the memory and GC services.
