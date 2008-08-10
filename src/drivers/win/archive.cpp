@@ -451,7 +451,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 
 extern HWND hAppWnd;
 
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename)
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
 {
 	FCEUFILE* fp = 0;
 	
@@ -530,10 +530,10 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 
 				//try to load the file directly if we're in autopilot
 				int ret = LB_ERR;
-				if(innerFilename)
+				if(innerFilename || innerIndex != -1)
 				{
 					for(uint32 i=0;i<fileSelectorContext.items.size();i++)
-						if(fileSelectorContext.items[i].name == *innerFilename)
+						if(i == (uint32)innerIndex || (innerFilename && fileSelectorContext.items[i].name == *innerFilename))
 						{
 							ret = i;
 							break;
@@ -559,6 +559,7 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 						fp = new FCEUFILE();
 						fp->archiveFilename = fname;
 						fp->filename = fileSelectorContext.items[ret].name;
+						fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
 						fp->archiveIndex = ret;
 						fp->mode = FCEUFILE::READ;
 						fp->size = fileSelectorContext.items[ret].size;
@@ -579,4 +580,14 @@ FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::str
 	}
 
 	return fp;
+}
+
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string& fname, int innerIndex)
+{
+	return FCEUD_OpenArchive(asr, fname, 0, innerIndex);
+}
+
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename)
+{
+	return FCEUD_OpenArchive(asr, fname, innerFilename, -1);
 }

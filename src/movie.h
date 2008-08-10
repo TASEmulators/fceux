@@ -9,6 +9,8 @@
 #include "input/zapper.h"
 #include "utils/guid.h"
 
+struct FCEUFILE;
+
 enum EMOVIE_FLAG
 {
 	MOVIE_FLAG_NONE = 0,
@@ -232,7 +234,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags);
 void FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
-bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
+bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();

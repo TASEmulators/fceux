@@ -456,13 +456,20 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 	{
 		movieData.records[i].parseBinary(&movieData,fp);
 	}
-
-	
 }
 
 //yuck... another custom text parser.
-static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
+static bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
+	//movie must start with "version 3"
+	char buf[9];
+	std::ios::pos_type curr = fp->tellg();
+	fp->read(buf,9);
+	if(fp->fail()) return false;
+	if(memcmp(buf,"version 3",9)) 
+		return false;
+	fp->seekg(curr);
+
 	std::string key,value;
 	enum {
 		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT
@@ -482,7 +489,7 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 		if(isrecchar && movieData.binaryFlag && !stopAfterHeader)
 		{
 			LoadFM2_binarychunk(movieData, fp, size);
-			return;
+			return true;
 		}
 		switch(state)
 		{
@@ -499,7 +506,7 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 		case RECORD:
 			{
 				dorecord:
-				if (stopAfterHeader) return;
+				if (stopAfterHeader) return true;
 				int currcount = movieData.records.size();
 				movieData.records.resize(currcount+1);
 				int preparse = fp->tellg();
@@ -541,6 +548,8 @@ static void LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 		done: ;
 		if(bail) break;
 	}
+
+	return true;
 }
 
 static void closeRecordingMovie()
@@ -691,10 +700,14 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	currMovieData = MovieData();
 	
 	strcpy(curMovieFilename, fname);
-	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
+	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
 	if (!fp) return;
-	LoadFM2(currMovieData, fp, INT_MAX, false);
-	fp->close();
+	if(fp->isArchive() && !_read_only) {
+		FCEU_PrintError("Cannot open a movie in read+write from an archive.");
+		return;
+	}
+
+	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
 	delete fp;
 
 	//fully reload the game to reinitialize everything before playing any movie
@@ -937,6 +950,14 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 {
 	load_successful = false;
 
+	//a little rule: cant load states in read+write mode with a movie from an archive.
+	//so we are going to switch it to readonly mode in that case
+	if(!movie_readonly && FCEU_isFileInArchive(curMovieFilename)) {
+		FCEU_PrintError("Cannot loadstate in Read+Write with movie from archive. Movie is now Read-Only.");
+		movie_readonly = true;
+	}
+	
+
 	////write the state to disk so we can reload
 	//std::vector<char> buf(size);
 	//fread(&buf[0],1,size,st);
@@ -1081,13 +1102,11 @@ void FCEUI_MoviePlayFromBeginning(void)
 }
 
 
-bool FCEUI_MovieGetInfo(const std::string& fname, MOVIE_INFO* info, bool skipFrameCount)
+bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount)
 {
 	MovieData md;
-	std::fstream* fp = FCEUD_UTF8_fstream(fname, "rb");
-	if(!fp) return false;
-	LoadFM2(md, fp, INT_MAX, skipFrameCount);
-	delete fp;
+	if(!LoadFM2(md, fp->stream, INT_MAX, skipFrameCount))
+		return false;
 	
 	info->movie_version = md.version;
 	info->poweron = md.savestate.size()==0;

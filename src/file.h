@@ -6,8 +6,7 @@
 #include "types.h"
 
 struct FCEUFILE {
-	//void *fp;       // FILE* or ptr to ZIPWRAP
-	//uint32 type;    // 0=normal file, 1=gzip, 2=zip
+	//the stream you can use to access the data
 	std::iostream *stream;
 
 	//the name of the file, or the logical name of the file within the archive
@@ -15,6 +14,9 @@ struct FCEUFILE {
 	
 	//the filename of the archive (maybe "" if it is not in an archive)
 	std::string archiveFilename;
+
+	//a the path to the filename, possibly using | to get into the archive
+	std::string fullFilename;
 
 	//the number of files that were in the archive
 	int archiveCount;
@@ -24,6 +26,9 @@ struct FCEUFILE {
 
 	//the size of the file
 	int size;
+
+	//whether the file is contained in an archive
+	bool isArchive() { return archiveCount > 0; }
 
 	FCEUFILE()
 		: stream(0)
@@ -53,10 +58,13 @@ struct ArchiveScanRecord
 	}
 	int type;
 	int numFiles;
+
+	bool isArchive() { return type != -1; }
 };
 
 
-FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext);
+FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index=-1);
+bool FCEU_isFileInArchive(const char *path);
 int FCEU_fclose(FCEUFILE*);
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE*);
 uint64 FCEU_fwrite(void *ptr, size_t size, size_t nmemb, FCEUFILE*);

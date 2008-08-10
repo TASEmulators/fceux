@@ -644,7 +644,11 @@ int main(int argc,char *argv[])
 
 	if(GameInfo && MovieToLoad)
 	{
-		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting!=0, false, replayStopFrameSetting!=0);
+		//switch to readonly mode if the file is an archive
+		if(FCEU_isFileInArchive(MovieToLoad))
+				replayReadOnlySetting = true;
+
+		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, false, replayStopFrameSetting!=0);
 		free(MovieToLoad);
 		MovieToLoad = NULL;
 	}

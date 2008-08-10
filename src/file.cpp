@@ -230,7 +230,7 @@ void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::strin
 	}
 }
 
-FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext)
+FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index)
 {
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;
@@ -264,6 +264,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			}
 			fceufp = new FCEUFILE();
 			fceufp->filename = fileToOpen;
+			fceufp->fullFilename = fileToOpen;
 			fceufp->archiveIndex = -1;
 			fceufp->stream = (std::iostream*)fp;
 			FCEU_fseek(fceufp,0,SEEK_END);
@@ -275,7 +276,10 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		{
 			//open an archive file
 			if(archive == "")
-				fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
+				if(index != -1)
+					fceufp = FCEUD_OpenArchiveIndex(asr, fileToOpen, index);
+				else 
+					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
 			return fceufp;
@@ -288,6 +292,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		return 0;
 	}
 	fceufp = new FCEUFILE();
+	fceufp->filename = fileToOpen;
 	fceufp->filename = fileToOpen;
 	fceufp->archiveIndex = -1;
 	fceufp->stream = (std::iostream*)fp;
@@ -642,7 +647,8 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			break;
 	}
 	
-	return ret;
+	//convert | to . for archive filenames.
+	return mass_replace(ret,"|",".");
 }
 
 void GetFileBase(const char *f)
@@ -683,4 +689,15 @@ void GetFileBase(const char *f)
 		strcpy(FileBase,tp1);
 		FileExt[0]=0;
 	}
+}
+
+bool FCEU_isFileInArchive(const char *path)
+{
+	bool isarchive = false;
+	FCEUFILE* fp = FCEU_fopen(path,0,"rb",0,0);
+	if(fp) {
+		isarchive = fp->isArchive();
+		delete fp;
+	}
+	return isarchive;
 }

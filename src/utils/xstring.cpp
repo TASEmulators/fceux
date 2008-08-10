@@ -565,3 +565,13 @@ std::string readNullTerminatedAscii(std::istream* is)
 	}
 	return ret;
 }
+
+// replace all instances of victim with replacement
+std::string mass_replace(const std::string &source, const std::string &victim, const std::string &replacement)
+{
+	std::string answer = source;
+	std::string::size_type j = 0;
+	while ((j = answer.find(victim, j)) != std::string::npos )
+	answer.replace(j, victim.length(), replacement);
+	return answer;
+}

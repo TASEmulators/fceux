@@ -3,6 +3,7 @@
 #include "main.h"
 #include "window.h"
 #include "movie.h"
+#include "archive.h"
 
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
@@ -115,7 +116,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 	{
 		MOVIE_INFO info;
 
-		if(FCEUI_MovieGetInfo(fn, &info, false))
+		FCEUFILE* fp = FCEU_fopen(fn,0,"rb",0);
+		bool isarchive = FCEU_isFileInArchive(fn);
+		bool ismovie = FCEUI_MovieGetInfo(fp, &info, false);
+		delete fp;
+		if(ismovie)
 		{
 			char tmp[256];
 			uint32 div;
@@ -138,6 +143,12 @@ void UpdateReplayDialog(HWND hwndDlg)
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,(replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
 
 			SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),info.poweron ? "Power-On" : (info.reset?"Soft-Reset":"Savestate"));
+
+			if(isarchive) {
+				EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),FALSE);
+				Button_SetCheck(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),BST_CHECKED);
+			} else 
+				EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),TRUE);
 
 			//-----------
 			//mbg 5/26/08 - getting rid of old movie formats
@@ -321,6 +332,54 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 	return FALSE;
 }
 
+extern char FileBase[];
+
+void HandleScan(HWND hwndDlg, FCEUFILE* file, int& i)
+{
+	MOVIE_INFO info;
+
+	bool scanok = FCEUI_MovieGetInfo(file, &info, true);
+	if(!scanok)
+		return;
+
+	//------------
+	//attempt to match the movie with the rom
+	//first, try matching md5
+	//then try matching base name
+	char md51 [256];
+	char md52 [256];
+	strcpy(md51, md5_asciistr(GameInfo->MD5));
+	strcpy(md52, md5_asciistr(info.md5_of_rom_used));
+	if(strcmp(md51, md52))
+	{
+		unsigned int k, count1=0, count2=0; //mbg merge 7/17/06 changed to uint
+		for(k=0;k<strlen(md51);k++) count1 += md51[k]-'0';
+		for(k=0;k<strlen(md52);k++) count2 += md52[k]-'0';
+		if(count1 && count2)
+			return;
+
+		const char* tlen1=strstr(file->filename.c_str(), " (");
+		const char* tlen2=strstr(FileBase, " (");
+		int tlen3=tlen1?(int)(tlen1-file->filename.c_str()):file->filename.size();
+		int tlen4=tlen2?(int)(tlen2-FileBase):strlen(FileBase);
+		int len=MAX(0,MIN(tlen3,tlen4));
+		if(strnicmp(file->filename.c_str(), FileBase, len))
+		{
+			char temp[512];
+			strcpy(temp,FileBase);
+			temp[len]='\0';
+			if(!strstr(file->filename.c_str(), temp))
+				return;
+		}
+	}
+	//-------------
+	//if we get here, then we had a match
+
+	char relative[MAX_PATH];
+	AbsoluteToRelative(relative, file->fullFilename.c_str(), BaseDirectory.c_str());
+	SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
+}
+
 BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -345,9 +404,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			char* findGlob[2] = {strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0).c_str()),
 								 strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB2, 0, 0).c_str())};
 
-			int i=0, j=0;
+			int items=0;
 
-			for(j=0;j<2;j++)
+			for(int j=0;j<2;j++)
 			{
 				char* temp=0;
 				do {
@@ -364,7 +423,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 //			FCEU_PrintError(findGlob[0]);
 //			FCEU_PrintError(findGlob[1]);
 
-			for(j=0;j<2;j++)
+			for(int j=0;j<2;j++)
 			{
 				// if the two directories are the same, only look through one of them to avoid adding everything twice
 				if(j==1 && !strnicmp(findGlob[0],findGlob[1],MAX(strlen(findGlob[0]),strlen(findGlob[1]))-6))
@@ -374,7 +433,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				strcpy(globBase,findGlob[j]);
 				globBase[strlen(globBase)-5]='\0';
 
-				extern char FileBase[];
 				//char szFindPath[512]; //mbg merge 7/17/06 removed
 				WIN32_FIND_DATA wfd;
 				HANDLE hFind;
@@ -388,7 +446,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 							continue;
 
-						// filter out everything that's not *.fm2
+						// filter out everything that's not an extension we like *.fm2
 						// (because FindFirstFile is too dumb to do that)
 						{
 							char* dot=strrchr(wfd.cFileName,'.');
@@ -399,56 +457,36 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							int k, extlen=strlen(ext);
 							for(k=0;k<extlen;k++)
 								ext[k]=tolower(ext[k]);
-							if(strcmp(ext,"fm2"))
-								continue;
+							if(stricmp(ext,"fm2"))
+								if(stricmp(ext,"zip"))
+									if(stricmp(ext,"rar"))
+										if(stricmp(ext,"7z"))
+											continue;
 						}
-
-						MOVIE_INFO info;
 
 						char filename [512];
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
 
 						char* dot = strrchr(filename, '.');
 
-						if(!FCEUI_MovieGetInfo(filename, &info, true))
-							continue;
-
-						//------------
-						//attempt to match the movie with the rom
-						//first, try matching md5
-						//then try matching base name
-						char md51 [256];
-						char md52 [256];
-						strcpy(md51, md5_asciistr(GameInfo->MD5));
-						strcpy(md52, md5_asciistr(info.md5_of_rom_used));
-						if(strcmp(md51, md52))
+						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
+						if(asr.numFiles>1) {
+							for(int i=0;i<asr.numFiles;i++) {
+								FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0,i);
+								if(fp) {
+									HandleScan(hwndDlg,fp, items);
+									delete fp;
+								}
+							}
+						} else 
 						{
-							unsigned int k, count1=0, count2=0; //mbg merge 7/17/06 changed to uint
-							for(k=0;k<strlen(md51);k++) count1 += md51[k]-'0';
-							for(k=0;k<strlen(md52);k++) count2 += md52[k]-'0';
-							if(count1 && count2)
-								continue;
-
-							char* tlen1=strstr(wfd.cFileName, " (");
-							char* tlen2=strstr(FileBase, " (");
-							int tlen3=tlen1?(int)(tlen1-wfd.cFileName):strlen(wfd.cFileName);
-							int tlen4=tlen2?(int)(tlen2-FileBase):strlen(FileBase);
-							int len=MAX(0,MIN(tlen3,tlen4));
-							if(strnicmp(wfd.cFileName, FileBase, len))
-							{
-								char temp[512];
-								strcpy(temp,FileBase);
-								temp[len]='\0';
-								if(!strstr(wfd.cFileName, temp))
-									continue;
+							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
+							if(fp) {
+								HandleScan(hwndDlg,fp ,items);
+								delete fp;
 							}
 						}
-						//-------------
-						//if we get here, then we had a match
 
-						char relative[MAX_PATH];
-						AbsoluteToRelative(relative, filename, BaseDirectory.c_str());
-						SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
 					} while(FindNextFile(hFind, &wfd));
 					FindClose(hFind);
 				}
@@ -457,9 +495,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			free(findGlob[0]);
 			free(findGlob[1]);
 
-			if(i>0)
-				SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, i-1, 0);
-			SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
+			if(items>0)
+				SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, items-1, 0);
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, items++, (LPARAM)"Browse...");
 
 			UpdateReplayDialog(hwndDlg);
 		}
@@ -520,7 +558,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0All files(*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0Archive files(*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All files(*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;
@@ -530,8 +568,16 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 							if(GetOpenFileName(&ofn))
 							{
-								char relative[MAX_PATH];
+								char relative[MAX_PATH*2];
 								AbsoluteToRelative(relative, szFile, BaseDirectory.c_str());
+
+								ArchiveScanRecord asr = FCEUD_ScanArchive(relative);
+								FCEUFILE* fp = FCEU_fopen(relative,0,"rb",0);
+								if(!fp) {
+									delete fp;
+									goto abort;
+								}
+								strcpy(relative,fp->fullFilename.c_str());
 
 								LONG lOtherIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
 								if(lOtherIndex != CB_ERR)
@@ -547,6 +593,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								SetFocus(GetDlgItem(hwndDlg, IDC_COMBO_FILENAME));
 								UpdateReplayDialog(hwndDlg);
 							}
+						abort:
 
 							free(pn);
 						}
