@@ -472,12 +472,9 @@ SDL_GL_LoadLibrary(0);
     }
     CloseGame();
 
-    // save the configuration information?
-    //SaveConfig();
 
     // exit the infrastructure
     FCEUI_Kill();
-
     SDL_Quit();
     return 0;
 }

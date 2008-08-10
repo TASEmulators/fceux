@@ -270,7 +270,6 @@ InitConfig()
     config->addOption(prefix + "LoadState", SDLK_F7);
     config->addOption(prefix + "Reset", SDLK_F9);
     config->addOption(prefix + "Screenshot", SDLK_F12);
-    config->addOption(prefix + "Quit", SDLK_ESCAPE);
     config->addOption(prefix + "Pause", SDLK_PAUSE);
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);

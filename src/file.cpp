@@ -519,7 +519,7 @@ std::string FCEU_MakePath(int type, const char* filebase)
 
 std::string FCEU_MakeFName(int type, int id1, char *cd1)
 {
-	char ret[FILENAME_MAX];
+	char ret[FILENAME_MAX] = "";
 	struct stat tmpstat;
 	std::string mfnString;
 	const char* mfn;
@@ -527,10 +527,14 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 	switch(type)
 	{
 		case FCEUMKF_MOVIE:
-			if(odirs[FCEUIOD_MOVIES])
-				sprintf(ret,"%s"PSS"%s.fm2",odirs[FCEUIOD_MOVIES],FileBase);
-			else
-				sprintf(ret,"%s"PSS"movie"PSS"%s.fm2",BaseDirectory.c_str(),FileBase);
+			struct stat fileInfo; 
+			do {
+				if(odirs[FCEUIOD_MOVIES])
+					sprintf(ret,"%s"PSS"%s-%d.fm2",odirs[FCEUIOD_MOVIES],FileBase, id1);
+				else
+					sprintf(ret,"%s"PSS"movie"PSS"%s-%d.fm2",BaseDirectory.c_str(),FileBase, id1);
+				id1++;
+			} while (stat(ret, &fileInfo) == 0);
 			break;
 		case FCEUMKF_STATE:
 			{
@@ -558,20 +562,10 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			}
 			break;
 		case FCEUMKF_SNAP:
-			if(FSettings.SnapName)
-			{
-				if(odirs[FCEUIOD_SNAPS])
-					sprintf(ret,"%s"PSS"%s-%d.%s",odirs[FCEUIOD_SNAPS],FileBase,id1,cd1);
-				else
-					sprintf(ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory.c_str(),FileBase,id1,cd1);
-			}
+			if(odirs[FCEUIOD_SNAPS])
+				sprintf(ret,"%s"PSS"%s-%d.%s",odirs[FCEUIOD_SNAPS],FileBase,id1,cd1);
 			else
-			{
-				if(odirs[FCEUIOD_SNAPS])
-					sprintf(ret,"%s"PSS"%d.%s",odirs[FCEUIOD_SNAPS],id1,cd1);
-				else
-					sprintf(ret,"%s"PSS"snaps"PSS"%d.%s",BaseDirectory.c_str(),id1,cd1);
-			}
+				sprintf(ret,"%s"PSS"snaps"PSS"%s-%d.%s",BaseDirectory.c_str(),FileBase,id1,cd1);
 			break;
 		case FCEUMKF_FDS:
 			if(odirs[FCEUIOD_NV])
@@ -593,7 +587,6 @@ std::string FCEU_MakeFName(int type, int id1, char *cd1)
 			}
 			break;
 		case FCEUMKF_AUTOSTATE:
-			extern char curMovieFilename[512];
 			mfnString = GetMfn();
 			mfn = mfnString.c_str();
 			if(odirs[FCEUIOD_STATES])

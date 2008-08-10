@@ -147,11 +147,13 @@ static int g_fkbEnabled = 0;
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
  * */
-std::string GetFilename()
+std::string GetFilename(const char* title)
 {
+    if (FCEUI_EmulationPaused() == 0)
+        FCEUI_ToggleEmulationPause();
     std::string fname = "";
+    
     #ifdef WIN32
-    // TODO: WIN32 file chooser code goes here
     OPENFILENAME ofn;       // common dialog box structure
     char szFile[260];       // buffer for file name
     HWND hwnd;              // owner window
@@ -178,18 +180,26 @@ std::string GetFilename()
 
     #else
     FILE *fpipe;
-     
-    if ( !(fpipe = (FILE*)popen("zenity --file-selection","r")) )
+    std::string command = "zenity --file-selection --title=\"";
+    command.append(title);
+    command.append("\"");
+    if ( !(fpipe = (FILE*)popen(command.c_str(),"r")) )
     {  // If fpipe is NULL
         FCEUD_PrintError("Pipe error on opening zenity");
     }
       
     int c; 
-    while((c = fgetc (fpipe ))!= '\n')
+    while( (c = fgetc(fpipe)) )
+    {
+        if (c == EOF)
+            break;
+        if (c == '\n')
+            break;
         fname += c;
+    }
     pclose(fpipe);
     #endif
-    
+    FCEUI_ToggleEmulationPause();
     return fname;
 }
 
@@ -200,9 +210,7 @@ static void
 KeyboardCommands()
 {
     int is_shift, is_alt, key;
-    
-    const char* movie_fname = FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str();
-
+    char* movie_fname = "";
     // get the keyboard input
     g_keyState = SDL_GetKeyState(NULL);
 
@@ -270,6 +278,7 @@ KeyboardCommands()
         g_config->getOption("SDL.Hotkeys.SaveState", &key);
         if(_keyonly(key)) {
             if(is_shift) {
+                movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
 				FCEUI_printf("Recording movie to %s\n", movie_fname);
                 FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
             } else {
@@ -282,8 +291,13 @@ KeyboardCommands()
         if(_keyonly(key)) {
             if(is_shift) {
                 FCEUI_StopMovie();
-				FCEUI_printf("Playing back movie located at %s\n", movie_fname);
-                FCEUI_LoadMovie(movie_fname , false, false, false);
+                std::string fname;
+                fname = GetFilename("Open movie for playback...");
+                if(fname != "")
+                {
+				    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
+                    FCEUI_LoadMovie(fname.c_str(), false, false, false);
+                }
             } else {
                 FCEUI_LoadState(NULL);
             }
@@ -331,8 +345,9 @@ KeyboardCommands()
     g_config->getOption("SDL.Hotkeys.LoadLua", &key);
     if(_keyonly(key)) {
         std::string fname;
-        fname = GetFilename();
-        FCEU_LoadLuaCode(fname.c_str());
+        fname = GetFilename("Open LUA script...");
+        if(fname != "")
+            FCEU_LoadLuaCode(fname.c_str());
     }
 
     // VS Unisystem games
