@@ -32,6 +32,7 @@
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
+#include "../../fceulua.h"
 
 
 /** GLOBALS **/
@@ -142,6 +143,31 @@ _keyonly(int a)
 
 static int g_fkbEnabled = 0;
 
+/*** 
+ * This function opens a file chooser dialog and returns the filename the 
+ * user selected.
+ * */
+std::string GetFilename()
+{
+    std::string fname = "";
+    #ifdef WIN32
+    // TODO: WIN32 file chooser code goes here
+    #else
+    FILE *fpipe;
+     
+    if ( !(fpipe = (FILE*)popen("zenity --file-selection","r")) )
+    {  // If fpipe is NULL
+        FCEUD_PrintError("Pipe error on opening zenity");
+    }
+      
+    int c; 
+    while((c = fgetc (fpipe ))!= '\n')
+        fname += c;
+    pclose(fpipe);
+    #endif
+    
+    return fname;
+}
 
 /**
  * Parse keyboard commands and execute accordingly.
@@ -221,7 +247,7 @@ KeyboardCommands()
         if(_keyonly(key)) {
             if(is_shift) {
 				FCEUI_printf("Recording movie to %s\n", movie_fname);
-                FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE);
+                FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, "");
             } else {
                 FCEUI_SaveState(NULL);
             }
@@ -260,7 +286,7 @@ KeyboardCommands()
     g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
     if(_keyonly(key)) {
         // this currently crashes fceu for me, is this broken?
-        //FCEUI_FrameAdvance();
+        FCEUI_FrameAdvance();
     }
 
     
@@ -275,6 +301,12 @@ KeyboardCommands()
     g_config->getOption("SDL.Hotkeys.Quit", &key);
     if(_keyonly(key)) {
         FCEUI_CloseGame();
+    }
+    g_config->getOption("SDL.Hotkeys.LoadLua", &key);
+    if(_keyonly(key)) {
+        std::string fname;
+        fname = GetFilename();
+        FCEU_LoadLuaCode(fname.c_str());
     }
 
     // VS Unisystem games
@@ -355,7 +387,6 @@ do {                                              \
 #undef SSM
     }
 }
-
 
 /**
  * Return the state of the mouse buttons.  Input 'd' is an array of 3

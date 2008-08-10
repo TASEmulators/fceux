@@ -265,6 +265,7 @@ InitConfig()
     // Hotkeys
     prefix = "SDL.Hotkeys.";
     config->addOption(prefix + "CheatMenu", SDLK_F2);
+    config->addOption(prefix + "LoadLua", SDLK_F3);
     config->addOption(prefix + "RenderBG", SDLK_F4);
     config->addOption(prefix + "SaveState", SDLK_F5);
     config->addOption(prefix + "LoadState", SDLK_F7);
