@@ -166,7 +166,7 @@ std::string GetFilename()
     // use the contents of szFile to initialize itself.
     ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile);
-    ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0Lua Scripts\0*.LUA\0";
+    ofn.lpstrFilter = "All\0*.*\0";
     ofn.nFilterIndex = 1;
     ofn.lpstrFileTitle = NULL;
     ofn.nMaxFileTitle = 0;
@@ -271,7 +271,7 @@ KeyboardCommands()
         if(_keyonly(key)) {
             if(is_shift) {
 				FCEUI_printf("Recording movie to %s\n", movie_fname);
-                FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, "");
+                FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
             } else {
                 FCEUI_SaveState(NULL);
             }
