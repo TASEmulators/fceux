@@ -594,7 +594,7 @@ namespace UtfConverter
             if (res != conversionOK)
             {
                 delete [] widestringnative;
-                throw std::exception("La falla!");
+                throw std::exception();
             }
             *targetstart = 0;
             std::wstring resultstring(widestringnative);
@@ -612,7 +612,7 @@ namespace UtfConverter
             if (res != conversionOK)
             {
                 delete [] widestringnative;
-                throw std::exception("La falla!");
+                throw std::exception();
             }
             *targetstart = 0;
             std::wstring resultstring(widestringnative);
@@ -621,7 +621,7 @@ namespace UtfConverter
         }
         else
         {
-            throw std::exception("La falla!");
+            throw std::exception();
         }
         return L"";
     }
@@ -642,7 +642,7 @@ namespace UtfConverter
             if (res != conversionOK)
             {
                 delete [] utf8stringnative;
-                throw std::exception("La falla!");
+                throw std::exception();
             }
             *targetstart = 0;
             std::string resultstring(utf8stringnative);
@@ -661,7 +661,7 @@ namespace UtfConverter
             if (res != conversionOK)
             {
                 delete [] utf8stringnative;
-                throw std::exception("La falla!");
+                throw std::exception();
             }
             *targetstart = 0;
             std::string resultstring(utf8stringnative);
@@ -670,7 +670,7 @@ namespace UtfConverter
         }
         else
         {
-            throw std::exception("La falla!");
+            throw std::exception();
         }
         return "";
     }
@@ -686,3 +686,4 @@ std::string wcstombs(std::wstring str)
 {
 	return UtfConverter::ToUtf8(str);
 }
+

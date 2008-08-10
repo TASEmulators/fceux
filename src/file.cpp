@@ -701,3 +701,4 @@ bool FCEU_isFileInArchive(const char *path)
 	}
 	return isarchive;
 }
+

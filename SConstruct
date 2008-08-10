@@ -4,19 +4,14 @@ import sys
 # XXX path separator fixed right now
 opts = Options()
 opts.AddOptions(
-  #BoolOption('PSS_STYLE', 'Path separator style', 1),
-  #BoolOption('LSB_FIRST', 'Least significant byte first?', None),
   BoolOption('FRAMESKIP', 'Enable frameskipping', 0),
   BoolOption('OPENGL',    'Enable OpenGL support (SDL only)', 1)
 )
 
 env = Environment(options = opts)
 
-
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare'])
-
-
 
 if os.environ.has_key('PLATFORM'):
   env.Replace(PLATFORM = os.environ['PLATFORM'])
@@ -55,6 +50,29 @@ else:
   if not conf.CheckLib('lua5.1', autoadd=1):
     print 'Did not find liblua5.1 or lua5.1.lib, exiting!'
     Exit(1)
+    
+  ### Search for zenity.
+  path = os.getenv('PATH')
+  directories = []
+  dir = ''
+  # check for '$' so last entry is processed
+  for x in path + '$':
+    if x != ':' and x != '$':
+      dir += x
+    else:
+      directories.append(dir)
+      dir = ''
+  
+  zenity = 0
+  print "Checking for zenity..."
+  for x in directories:
+    if os.path.isfile(os.path.join(x, "zenity")):
+      zenity = 1
+  if zenity != 1:
+    print "*** WARNING ***"
+    print "Zenity could not be found in the PATH.  File dialogs will not work without zenity installed."
+    raw_input('Press any key to continue. . .')
+        
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = " -DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
@@ -62,7 +80,9 @@ else:
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
-  env.ParseConfig('echo "-I/usr/include/lua5.1/ -llua5.1"')
+  # parse liblua cflags/libs
+  env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
+  env.Append(LINKFLAGS = "-llua5.1")
   env = conf.Finish()
 
 # Build for this system's endianness, if not overriden
@@ -93,6 +113,7 @@ SConscript('src/SConscript')
 exe_suffix = ''
 if env['PLATFORM'] == 'win32':
   exe_suffix = '.exe'
+
 #fceux_r_src = 'src/release/fceux' + exe_suffix
 #fceux_r_dst = 'bin/fceuxREL' + exe_suffix
 #fceux_d_src = 'src/debug/fceux' + exe_suffix
