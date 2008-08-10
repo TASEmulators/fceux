@@ -1,6 +1,10 @@
 ---version 2.0.2 released---
-10-aug-2008 - punkrockguy318 - Added lua script loading hotkey in sdl build (f3).  Non win32 SDL requires zenity for this to function.
-10-aug-2008 - punkrockguy318 - Build script cleanup
+10-aug-2008 - punkrockguy318 - SDL: Changed default A/B from numpad 2/3 to j/k.
+10-aug-2008 - punkrockguy318 - SDL: Enable frameskip by default
+10-aug-2008 - punkrockguy318 - SDL: Fixed a bug that would crash fceux if the emulation speed was overincreased
+10-aug-2008 - punkrockguy318 - SDL: New default hotkeys to more closely match win32 defaults
+10-aug-2008 - punkrockguy318 - SDL: Added lua script loading hotkey (f3).  Non win32 SDL requires zenity for this to function.
+10-aug-2008 - punkrockguy318 - SDL: Build script cleanup
 10-aug-2008 - zeromus - SF [ 2030405 ] Avi recording: no sound b0rks format
 10-aug-2008 - zeromus - SF [ 2037878 ] Convert .fcm doesn't do special characters
 09-aug-2008 - zeromus - SF [ 2040463 ] Add an "author" text field in the record movie dialog

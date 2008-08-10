@@ -4,7 +4,7 @@ import sys
 # XXX path separator fixed right now
 opts = Options()
 opts.AddOptions(
-  BoolOption('FRAMESKIP', 'Enable frameskipping', 0),
+  BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
   BoolOption('OPENGL',    'Enable OpenGL support (SDL only)', 1)
 )
 

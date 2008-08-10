@@ -307,11 +307,13 @@ KeyboardCommands()
     if(_keyonly(key)) {
         FCEUI_ToggleEmulationPause();
     }
+    
     g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
     if(_keyonly(key)) {
-        // this currently crashes fceu for me, is this broken?
+        // 8-10-08 - this freezes fceux for me - punkrockguy318
         FCEUI_FrameAdvance();
     }
+    
 
     
     g_config->getOption("SDL.Hotkeys.Reset", &key);
@@ -1521,7 +1523,7 @@ const char *GamePadNames[GAMEPAD_NUM_BUTTONS] =
 const char *DefaultGamePadDevice[GAMEPAD_NUM_DEVICES] =
     {"Keyboard", "None", "None", "None"};
 const int DefaultGamePad[GAMEPAD_NUM_DEVICES][GAMEPAD_NUM_BUTTONS] =
-    { { SDLK_KP2, SDLK_KP3, SDLK_TAB, SDLK_RETURN,
+    { { SDLK_j, SDLK_k, SDLK_TAB, SDLK_RETURN,
         SDLK_w, SDLK_s, SDLK_a, SDLK_d, 0, 0 },
       { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
       { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },

@@ -71,7 +71,7 @@ IncreaseEmulationSpeed()
     int i = 0;
 
     // find the next entry in the FPS rate table
-    while(i < (FPS_TABLE_SIZE - 1) && s_fpsScaleTable[i] < g_fpsScale) {
+    while(i < (FPS_TABLE_SIZE - 2) && s_fpsScaleTable[i] < g_fpsScale) {
         i++;
     }
     g_fpsScale = s_fpsScaleTable[i+1];
