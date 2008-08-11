@@ -39,17 +39,11 @@ class ConfigParser:
             if re.search(keyname, line):
                 cursor = self.f.tell()
                 break
-            
-            self.f.seek(cursor)
-            while 1:
-                c = self.f.read(1)
-#                self.f.seek(5, 1)
-                print c,
-
-                if c == '=':
-                    self.f.seek(1, os.SEEK_CUR)
-                    #self.f.write(value)
-                    self.f.flush()
+				
+        newline =  line.split('=')[0] + '=' + str(value)
+        self.f.seek(os.SEEK_CUR, -line.split('=')[0].__len__)		
+        
+		
                 
         
         

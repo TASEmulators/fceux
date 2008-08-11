@@ -162,7 +162,6 @@ def set_options():
   options.autoscale_check = widgets.get_object("autoscale_check").get_active()
   
   options.xscale_spin = widgets.get_object("xscale_spin").get_value()
-  print options.xscale_spin
   options.yscale_spin = widgets.get_object("yscale_spin").get_value()
   
   options.extra_entry = widgets.get_object("extra_entry").get_text()
@@ -256,10 +255,8 @@ class GfceuApp:
   def find_fceu(self):
     bin = find_binary('fceux')
     if bin == None:
-      gfceu_error('Could not find the fceu binary.\n\
-      Ensure that FCE Ultra is installed and in the $PATH.\n\
-      On Debian based systems (like Ubuntu), try the following command:\n\
-      sudo apt-get install fceu', 4, True)
+      gfceu_error('Could not find the fceux binary.\n\
+      Ensure that fceux is installed and in the $PATH.\n', 4, True)
     else:
       self.msg('Using: ' + bin)
     
@@ -276,7 +273,7 @@ class GfceuApp:
       glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')
     else:
       print 'ERROR.'
-      print 'Could not find the glade.xml file.'
+      print 'Could not find the ' + glade_file + ' file.'
       print 'Try reinstalling the application.'
       sys.exit(1)
     
