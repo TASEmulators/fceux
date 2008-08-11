@@ -179,6 +179,10 @@ std::string GetFilename(const char* title)
     fname = GetOpenFileName(&ofn);
 
     #else
+	int fullscreen = 0;
+	g_config->getOption("SDL.Fullscreen", &fullscreen);
+	if(fullscreen)
+		ToggleFS();
     FILE *fpipe;
     std::string command = "zenity --file-selection --title=\"";
     command.append(title);
