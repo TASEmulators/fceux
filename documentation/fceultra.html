@@ -3,6 +3,7 @@
   <title>FCE Ultra General Documentation</title>
  </head>
  <body>
+ 	<font color="red">This is a <b>very outdated version</b> of the documentation. Please be aware.<br />Windows users should advice fceux.chm that comes with FCEUX!</font>
   <center><h1>FCE Ultra General Documentation</h1></center>
   <center><i>Last updated November 12, 2003<br />Valid as of FCE Ultra 0.97</i></center>
  <p>
@@ -17,7 +18,7 @@
    <li /><a href="#features-cpu">CPU</a>
    <li /><a href="#features-ppu">PPU</a>
    <ul>
-    <li /><a href="#features-ppu-palettes">Palettes</a>
+    <li /><a href="#features-ppuaettes">Palettes</a>
    </ul>
    <li /><a href="#features-sound">Sound</a>
    <li /><a href="#features-input">Input</a>
@@ -617,7 +618,8 @@ necessarily 100% accurate or complete):
  <p>
   FCE Ultra supports arguments passed on the command line.  <b>The MS Windows
   port only allows for a file name to be specified, however.</b>  Arguments
-  are taken in the form of "-parameter value".  Some arguments are valueless.
+  are taken in the form of "--parameter value". <b>Windows users use only one dash: 
+"-parameter value".</b> Some arguments are valueless.
   Arguments that have both a parameter and a value will be saved in the
   configuration file, with the exception being the network-play arguments.
   All ports other than the MS Windows one recognize the following parameters:
@@ -625,37 +627,33 @@ necessarily 100% accurate or complete):
   <p>
   <table border>
    <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
-   <tr><td>-cpalette x</td><td>string</td><td>0</td><td>Load a custom global palette from file "x".  Specifying "0" will cause FCE Ultra to stop using the custom global palette.</td></tr>
-   <tr><td>-ntsccol x</td><td>boolean</td><td>0</td><td>If value is true, enable automatic generation and use of an NTSC NES' colors.</td></tr>
-   <tr><td>-pal x</td><td>boolean</td><td>0</td><td>If value is true, emulate a PAL NES.  Otherwise emulate an NTSC NES.</td></tr>
-   <tr><td>-sound x</td><td>integer</td><td>48000(44100 for DOS)</td><td>Sets the playback rate.  If it is zero, sound emulation(and output) is disabled.</td></tr>
-   <tr><td>-soundvol x</td><td>integer</td><td>100</td><td>Sound volume.</td></tr>
-   <tr><td>-soundq x</td><td>boolean</td><td>0</td><td>If value is true, enable high-quality sound emulation.</td></tr>
-   <tr><td>-input1 x <br /><i>and</i><br />-input2 x</td><td>string</td><td>gamepad</td><td>Select input device for input port 1 or 2.  Valid strings are "none", "gamepad", "zapper", "powerpada", and "powerpadb".</td></tr>
-   <tr><td>-fcexp x</td><td>string</td><td>none</td><td>Select Famicom expansion port device.  Valid strings are "none", "shadow", "arkanoid", "4player", and "fkb".</td></tr>
-   <tr><td>-nofs x</td><td>boolean</td><td>0</td><td>If value is true, disable four-score emulation.</td></tr>
-   <tr><td>-gg</td><td>boolean</td><td>0</td><td>Enable Game Genie emulation.</td></tr>
-   <tr><td>-subase x</td><td>boolean</td><td>0</td><td>If value is true, Save extra game data files under the base directory.</td></tr>
-   <tr><td nowrap>-snapname x</td><td>boolean</td><td>0</td><td>If value is true, use an alternate naming scheme(file base and numeric) for screen snapshots.</td></tr>
-   <tr><td nowrap>-nothrottle x</td><td>boolean</td><td>0</td><td>If value is true, disable the speed throttling that is used when sound emulation is disabled.</td></tr>
-   <tr><td>-clipsides x</td><td>boolean</td><td>0</td><td>If value is true, clip leftmost and rightmost 8 columns of pixels of the video output.</td></tr>
-   <tr><td>-slstart x</td><td>integer</td><td>8</td>
-	<td>First scanline to be rendered in NTSC emulation mode(when PAL emulation is disabled).</td></tr>
-   <tr><td>-slend x</td><td>integer</td><td>231</td>
-	<td>Last scanline to be rendered in NTSC emulation mode.</td></tr>
-     <tr><td nowrap>-slstartp x</td><td>integer</td><td>0</td>
-        <td>First scanline to be rendered in PAL emulation mode.</td></tr>
-   <tr><td>-slendp x</td><td>integer</td><td>239</td>
-        <td>Last scanline to be rendered in PAL emulation mode.</td></tr>
+   <tr><td>--cpalette x</td><td>string</td><td>0</td><td>Load a custom global palette from file "x".  Specifying "0" will cause FCE Ultra to stop using the custom global palette.</td></tr>
+   <tr><td>--ntsccol x</td><td>boolean</td><td>0</td><td>If value is true, enable automatic generation and use of an NTSC NES' colors.</td></tr>
+   <tr><td>--pal x</td><td>boolean</td><td>0</td><td>If value is true, emulate a PAL NES.  Otherwise emulate an NTSC NES.</td></tr>
+   <tr><td>--sound x</td><td>integer</td><td>48000(44100 for DOS)</td><td>Sets the playback rate.  If it is zero, sound emulation(and output) is disabled.</td></tr>
+   <tr><td>--soundvol x</td><td>integer</td><td>100</td><td>Sound volume.</td></tr>
+   <tr><td>--soundq x</td><td>boolean</td><td>0</td><td>If value is true, enable high-quality sound emulation.</td></tr>
+   <tr><td>--input1 x <br /><i>and</i><br />-input2 x</td><td>string</td><td>gamepad</td><td>Select input device for input port 1 or 2.  Valid strings are "none", "gamepad", "zapper", "powerpada", and "powerpadb".</td></tr>
+   <tr><td>--fcexp x</td><td>string</td><td>none</td><td>Select Famicom expansion port device.  Valid strings are "none", "shadow", "arkanoid", "4player", and "fkb".</td></tr>
+   <tr><td>--nofs x</td><td>boolean</td><td>0</td><td>If value is true, disable four-score emulation.</td></tr>
+   <tr><td>--gg</td><td>boolean</td><td>0</td><td>Enable Game Genie emulation.</td></tr>
+   <tr><td>--subase x</td><td>boolean</td><td>0</td><td>If value is true, Save extra game data files under the base directory.</td></tr>
+   <tr><td nowrap>--snapname x</td><td>boolean</td><td>0</td><td>If value is true, use an alternate naming scheme(file base and numeric) for screen snapshots.</td></tr>
+   <tr><td nowrap>--nothrottle x</td><td>boolean</td><td>0</td><td>If value is true, disable the speed throttling that is used when sound emulation is disabled.</td></tr>
+   <tr><td>--clipsides x</td><td>boolean</td><td>0</td><td>If value is true, clip leftmost and rightmost 8 columns of pixels of the video output.</td></tr>
+   <tr><td>--slstart x</td><td>integer</td><td>8</td><td>First scanline to be rendered in NTSC emulation mode(when PAL emulation is disabled).</td></tr>
+   <tr><td>--slend x</td><td>integer</td><td>231</td><td>Last scanline to be rendered in NTSC emulation mode.</td></tr>
+   <tr><td nowrap>--slstartp x</td><td>integer</td><td>0</td><td>First scanline to be rendered in PAL emulation mode.</td></tr>
+   <tr><td>--slendp x</td><td>integer</td><td>239</td><td>Last scanline to be rendered in PAL emulation mode.</td></tr>
   </table>
  </p>
  <a name="using-cli-sdl"><h4>SDL</h4></a>
  <p>   
  <table border>
   <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
-  <tr><td>-joyx y</td><td>integer,integer</td><td>0</td><td>Enable joystick #y for virtual joystick #x(both starting at "1").</td></tr>
-  <tr><td>-stretchx/-stretchy x</td><td>boolean</td><td>0/0</td><td>Stretch to fill surface on x or y axis(fullscreen, only with OpenGL).</td></tr>
-  <tr><td>-fs</td><td>boolean</td><td>0</td><td>Full screen mode.</td></tr>
+  <tr><td>--joyx y</td><td>integer,integer</td><td>0</td><td>Enable joystick #y for virtual joystick #x(both starting at "1").</td></tr>
+  <tr><td>--stretchx/-stretchy x</td><td>boolean</td><td>0/0</td><td>Stretch to fill surface on x or y axis(fullscreen, only with OpenGL).</td></tr>
+  <tr><td>--fs</td><td>boolean</td><td>0</td><td>Full screen mode.</td></tr>
  </table>
  </p>
  <a name="using-cli-dos"><h4>DOS</h4></a>
