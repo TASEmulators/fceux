@@ -42,8 +42,6 @@ except ImportError:
   sudo apt-get install python-gtk2 libgtk2.0-0"
   
 
-
-
 class GameOptions:
   # sound
   sound_check = True
@@ -90,7 +88,9 @@ def load_options():
 
 def save_options():
   global options, optionsfile
-  ofile = file(optionsfile, 'w')
+  if os.path.exists(os.path.dirname(optionsfile)) == 0:
+	  os.mkdir(os.path.dirname(optionsfile))
+  ofile = open(optionsfile, 'w')
   pickle.dump(options, ofile)
   ofile.close()
     
@@ -162,6 +162,7 @@ def set_options():
   options.autoscale_check = widgets.get_object("autoscale_check").get_active()
   
   options.xscale_spin = widgets.get_object("xscale_spin").get_value()
+  print options.xscale_spin
   options.yscale_spin = widgets.get_object("yscale_spin").get_value()
   
   options.extra_entry = widgets.get_object("extra_entry").get_text()

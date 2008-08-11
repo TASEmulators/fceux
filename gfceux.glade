@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Aug  2 20:20:52 2008 -->
+<!--Generated with glade3 3.4.5 on Sun Aug 10 22:47:18 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="gamepad_config_window">
     <child>
@@ -619,6 +619,7 @@ Artwork for old versions (&lt; 0.2.7):
                     <property name="label" translatable="yes">_Autoscale Fullscreen</property>
                     <property name="use_underline">True</property>
                     <property name="response_id">0</property>
+                    <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -643,7 +644,7 @@ Artwork for old versions (&lt; 0.2.7):
                       <widget class="GtkSpinButton" id="xscale_spin">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">2 1 10 0.5 1 10</property>
+                        <property name="adjustment">-5 1 5 0.5 1 10</property>
                         <property name="digits">1</property>
                         <property name="numeric">True</property>
                       </widget>
@@ -675,7 +676,7 @@ Artwork for old versions (&lt; 0.2.7):
                       <widget class="GtkSpinButton" id="yscale_spin">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">2 1 10 0.5 1 10</property>
+                        <property name="adjustment">0 1 10 0.5 1 10</property>
                         <property name="digits">1</property>
                         <property name="numeric">True</property>
                         <property name="update_policy">GTK_UPDATE_IF_VALID</property>

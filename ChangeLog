@@ -1,5 +1,7 @@
 ================== version 2.0.2 ================================
 * Now stores config file in .fceultra
+* If the .fceultra config directory doesn't exist yet, gfceux will
+     now create it.
 ================== version 2.0.0 ================================
 * Supports movie playback
 * Support lua script loading
