@@ -460,7 +460,11 @@ SDL_GL_LoadLibrary(0);
     g_config->getOption("SDL.Movie", &fname);
     if (fname != "")
     {
-        FCEUI_LoadMovie((char*)fname.c_str(), false, false, false);
+        if(fname.find(".fm2") != std::string::npos)
+        {
+		    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
+            FCEUI_LoadMovie(fname.c_str(), false, false, false);
+        }
         g_config->setOption("SDL.Movie", "");
     }
     
