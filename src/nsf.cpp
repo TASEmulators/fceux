@@ -121,7 +121,7 @@ NSF_HEADER NSFHeader; //mbg merge 6/29/06 - needs to be global
 void NSFMMC5_Close(void);
 static uint8 *ExWRAM=0;
 
-void NSFGI(int h)
+void NSFGI(GI h)
 {
 	switch(h)
 	{

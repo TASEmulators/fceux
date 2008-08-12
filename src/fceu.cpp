@@ -84,8 +84,6 @@ static void CloseGame(void)
 			FCEUD_NetworkClose();
 		}
 
-		FCEUI_StopMovie();
-
 		if(GameInfo->name)
 		{
 			free(GameInfo->name);
@@ -98,6 +96,8 @@ static void CloseGame(void)
 		}
 
 		GameInterface(GI_CLOSE);
+
+		FCEUI_StopMovie();
 
 		ResetExState(0,0);
 
@@ -120,7 +120,7 @@ uint64 timestampbase;
 
 FCEUGI *GameInfo = 0;
 
-void (*GameInterface)(int h);
+void (*GameInterface)(GI h);
 void (*GameStateRestore)(int version);
 
 readfunc ARead[0x10000];
@@ -656,8 +656,8 @@ void hand(X6502 *X, int type, unsigned int A)
 int suppressAddPowerCommand=0; // hack... yeah, I know...
 void PowerNES(void) 
 {
-	/*void MapperInit();
-	MapperInit();*/
+	//void MapperInit();
+	//MapperInit();
 
 	if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
@@ -688,6 +688,12 @@ void PowerNES(void)
 	GameInterface(GI_POWER);
 	if(GameInfo->type==GIT_VSUNI)
 		FCEU_VSUniPower();
+
+	//if we are in a movie, then reset the saveram
+	extern int disableBatteryLoading;
+	if(disableBatteryLoading)
+		GameInterface(GI_RESETSAVE);
+		
 
 	timestampbase=0;
 	LagCounterReset();

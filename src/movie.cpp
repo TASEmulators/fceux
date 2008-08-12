@@ -595,37 +595,30 @@ void FCEUI_StopMovie()
 static void poweron(bool shouldDisableBatteryLoading)
 {
 	//// make a for-movie-recording power-on clear the game's save data, too
-	//	extern char lastLoadedGameName [2048];
-	//	extern int disableBatteryLoading, suppressAddPowerCommand;
-	//	suppressAddPowerCommand=1;
-	//	if(shouldDisableBatteryLoading) disableBatteryLoading=1;
-	//	suppressMovieStop=true;
-	//	{
-	//		//we need to save the pause state through this process
-	//		int oldPaused = EmulationPaused;
+	//extern char lastLoadedGameName [2048];
+	//extern int disableBatteryLoading, suppressAddPowerCommand;
+	//suppressAddPowerCommand=1;
+	//if(shouldDisableBatteryLoading) disableBatteryLoading=1;
+	//suppressMovieStop=true;
+	//{
+	//	//we need to save the pause state through this process
+	//	int oldPaused = EmulationPaused;
 
-	//		// NOTE:  this will NOT write an FCEUNPCMD_POWER into the movie file
-	//		FCEUGI* gi = FCEUI_LoadGame(lastLoadedGameName, 0);
-	//		//mbg 5/23/08 - wtf? why would this return null?
-	//		//if(!gi) PowerNES();
-	//		assert(gi);
+	//	// NOTE:  this will NOT write an FCEUNPCMD_POWER into the movie file
+	//	FCEUGI* gi = FCEUI_LoadGame(lastLoadedGameName, 0);
+	//	assert(gi);
+	//	PowerNES();
 
-	//		EmulationPaused = oldPaused;
-	//	}
-	//	suppressMovieStop=false;
-	//	if(shouldDisableBatteryLoading) disableBatteryLoading=0;
-	//	suppressAddPowerCommand=0;
+	//	EmulationPaused = oldPaused;
+	//}
+	//suppressMovieStop=false;
+	//if(shouldDisableBatteryLoading) disableBatteryLoading=0;
+	//suppressAddPowerCommand=0;
 
-	//mbg 6/25/08
-	//ok this pissed me off
-	//the only reason for lastLoadedGameName and all these hacks was for this fix:
-	//"hack for movie WRAM clearing on record from poweron"
-	//but W-T-F. are you telling me that there is some problem with the poweron sequence?
-	//screw that. we're using the main poweron sequence, even if that breaks old movie compatibility (unlikely)
 	extern int disableBatteryLoading;
-	if(shouldDisableBatteryLoading) disableBatteryLoading=1;
+	disableBatteryLoading = 1;
 	PowerNES();
-	if(shouldDisableBatteryLoading) disableBatteryLoading=0;
+	disableBatteryLoading = 0;
 }
 
 

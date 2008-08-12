@@ -501,10 +501,14 @@ static int InitializeBoard(void)
 	return(0);
 }
 
-static void UNIFGI(int h)
+static void UNIFGI(GI h)
 {
 	switch(h)
 	{
+	case GI_RESETSAVE:
+		FCEU_ClearGameSave(&UNIFCart);
+		break;
+
 	case GI_RESETM2:
 		if(UNIFCart.Reset)
 			UNIFCart.Reset();

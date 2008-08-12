@@ -84,7 +84,7 @@ static uint8 SelectDisk,InDisk;
 
 #define DC_INC    1
 
-void FDSGI(int h)
+void FDSGI(GI h)
 {
 	switch(h)
 	{

@@ -636,25 +636,21 @@ void FCEU_SaveGameSave(CartInfo *LocalHWInfo)
 	if(LocalHWInfo->battery && LocalHWInfo->SaveGame[0])
 	{
 		FILE *sp;
-		char *soot;
 
-		soot=strdup(FCEU_MakeFName(FCEUMKF_SAV,0,"sav").c_str());
+		std::string soot = FCEU_MakeFName(FCEUMKF_SAV,0,"sav");
 		if((sp=FCEUD_UTF8fopen(soot,"wb"))==NULL)
 		{
 			FCEU_PrintError("WRAM file \"%s\" cannot be written to.\n",soot);
 		}
 		else
 		{
-			int x;
-
-			for(x=0;x<4;x++)
+			for(int x=0;x<4;x++)
 				if(LocalHWInfo->SaveGame[x])
 				{
 					fwrite(LocalHWInfo->SaveGame[x],1,
 						LocalHWInfo->SaveGameLen[x],sp);
 				}
 		}
-		free(soot);
 	}
 }
 
@@ -666,19 +662,26 @@ void FCEU_LoadGameSave(CartInfo *LocalHWInfo)
 	if(LocalHWInfo->battery && LocalHWInfo->SaveGame[0] && !disableBatteryLoading)
 	{
 		FILE *sp;
-		char *soot;
 
-		soot=strdup(FCEU_MakeFName(FCEUMKF_SAV,0,"sav").c_str());
+		std::string soot = FCEU_MakeFName(FCEUMKF_SAV,0,"sav");
 		sp=FCEUD_UTF8fopen(soot,"rb");
 		if(sp!=NULL)
 		{
-			int x;
-			for(x=0;x<4;x++)
+			for(int x=0;x<4;x++)
 				if(LocalHWInfo->SaveGame[x])
 					fread(LocalHWInfo->SaveGame[x],1,LocalHWInfo->SaveGameLen[x],sp);
 		}
-		free(soot);
 	}
 }
 
-
+//clears all save memory. call this if you want to pretend the saveram has been reset (it doesnt touch what is on disk though)
+void FCEU_ClearGameSave(CartInfo *LocalHWInfo)
+{
+	if(LocalHWInfo->battery && LocalHWInfo->SaveGame[0])
+	{
+		FILE *sp;
+		for(int x=0;x<4;x++)
+			if(LocalHWInfo->SaveGame[x])
+				memset(LocalHWInfo->SaveGame[x],0,LocalHWInfo->SaveGameLen[x]);
+	}
+}

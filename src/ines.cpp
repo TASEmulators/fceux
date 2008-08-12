@@ -89,10 +89,14 @@ static DECLFR(TrainerRead)
 }
 
 
-void iNESGI(int h) //bbit edited: removed static keyword
+void iNESGI(GI h) //bbit edited: removed static keyword
 {
 	switch(h)
 	{
+	case GI_RESETSAVE:
+		FCEU_ClearGameSave(&iNESCart);
+		break;
+
 	case GI_RESETM2:
 		if(MapperReset)
 			MapperReset();

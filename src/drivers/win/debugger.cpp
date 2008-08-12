@@ -1282,7 +1282,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	return FALSE; //TRUE;
 }
 
-extern void iNESGI(int h);
+extern void iNESGI(GI h);
 
 void DoPatcher(int address,HWND hParent){
 	iapoffset=address;

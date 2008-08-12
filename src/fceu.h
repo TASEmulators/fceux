@@ -47,12 +47,17 @@ extern int EmulationPaused;
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
 
-extern void (*GameInterface)(int h);
+
+enum GI {
+	GI_RESETM2	=1,
+	GI_POWER =2,
+	GI_CLOSE =3,
+	GI_RESETSAVE = 4
+};
+
+extern void (*GameInterface)(GI h);
 extern void (*GameStateRestore)(int version);
 
-#define GI_RESETM2	1
-#define GI_POWER	2
-#define GI_CLOSE	3
 
 #include "git.h"
 extern FCEUGI *GameInfo;
