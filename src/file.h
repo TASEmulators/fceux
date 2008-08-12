@@ -72,13 +72,15 @@ struct FCEUFILE {
 };
 
 struct FileBaseInfo {
-	FileBaseInfo() {}
-	FileBaseInfo(std::string fbd, std::string fb, std::string ext)
-		: filebasedirectory(fbd)
-		, filebase(fb)
-		, ext(ext)
-	{}
 	std::string filebase, filebasedirectory, ext;
+	FileBaseInfo() {}
+	FileBaseInfo(std::string fbd, std::string fb, std::string ex)
+	{
+		filebasedirectory = fbd;
+		filebase = fb;
+		ext = ex;
+	}
+	
 };
 
 struct ArchiveScanRecord
