@@ -517,7 +517,7 @@ std::string FCEU_MakePath(int type, const char* filebase)
 	return ret;
 }
 
-std::string FCEU_MakeFName(int type, int id1, char *cd1)
+std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 {
 	char ret[FILENAME_MAX] = "";
 	struct stat tmpstat;

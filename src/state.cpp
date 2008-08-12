@@ -410,7 +410,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 }
 
 
-void FCEUSS_Save(char *fname)
+void FCEUSS_Save(const char *fname)
 {
 	std::fstream* st = 0;
 	char *fn;
@@ -608,7 +608,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 }
 
 
-bool FCEUSS_Load(char *fname)
+bool FCEUSS_Load(const char *fname)
 {
 	std::fstream* st;
 
@@ -758,7 +758,7 @@ int FCEUI_SelectState(int w, int show)
 	return oldstate;
 }
 
-void FCEUI_SaveState(char *fname)
+void FCEUI_SaveState(const char *fname)
 {
 	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
 
@@ -768,7 +768,7 @@ void FCEUI_SaveState(char *fname)
 
 int loadStateFailed = 0; // hack, this function should return a value instead
 
-void FCEUI_LoadState(char *fname)
+void FCEUI_LoadState(const char *fname)
 {
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
 

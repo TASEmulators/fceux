@@ -149,8 +149,8 @@ void FCEUD_SoundVolumeAdjust(int);
 int FCEUI_SelectState(int, int);
 
 //"fname" overrides the default save state filename code if non-NULL.
-void FCEUI_SaveState(char *fname);
-void FCEUI_LoadState(char *fname);
+void FCEUI_SaveState(const char *fname);
+void FCEUI_LoadState(const char *fname);
 
 void FCEUD_SaveStateAs(void);
 void FCEUD_LoadStateFrom(void);

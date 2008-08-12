@@ -8,9 +8,9 @@
 
 struct CreateMovieParameters
 {
-	char* szFilename;				// on Dialog creation, this is the default filename to display.  On return, this is the filename that the user chose.
+	std::string szFilename;				// on Dialog creation, this is the default filename to display.  On return, this is the filename that the user chose.
 	int recordFrom;				// 0 = "Power-On", 1 = "Reset", 2 = "Now", 3+ = savestate file in szSavestateFilename
-	char* szSavestateFilename;
+	std::string szSavestateFilename;
 	std::wstring author;
 };
 

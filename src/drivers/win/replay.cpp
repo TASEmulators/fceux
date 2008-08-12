@@ -59,9 +59,9 @@ static char* GetReplayPath(HWND hwndDlg)
 	return fn;
 }
 
-static char* GetRecordPath(HWND hwndDlg)
+static std::string GetRecordPath(HWND hwndDlg)
 {
-	char* fn=0;
+	std::string fn;
 	char szChoice[MAX_PATH];
 	char szDrive[MAX_PATH]={0};
 	char szDirectory[MAX_PATH]={0};
@@ -71,10 +71,17 @@ static char* GetRecordPath(HWND hwndDlg)
 	GetDlgItemText(hwndDlg, IDC_EDIT_FILENAME, szChoice, sizeof(szChoice));
 
 	_splitpath(szChoice, szDrive, szDirectory, szFilename, szExt);
+
+	//make sure that there is an extension of fm2
+	if(stricmp(szExt,".fm2")) {
+		strcpy(szExt,".fm2");
+		_makepath(szChoice,szDrive,szDirectory,szFilename,szExt);
+	}
+
 	if(szDrive[0]=='\0' && szDirectory[0]=='\0')
-		fn=strdup(FCEU_MakePath(FCEUMKF_MOVIE, szChoice).c_str());		// need to make a full path
+		fn=FCEU_MakePath(FCEUMKF_MOVIE, szChoice);		// need to make a full path
 	else
-		fn=strdup(szChoice);							// given a full path
+		fn= szChoice;							// given a full path
 
 	return fn;
 }
@@ -654,14 +661,13 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 static void UpdateRecordDialog(HWND hwndDlg)
 {
 	int enable=0;
-	char* fn=0;
 
-	fn=GetRecordPath(hwndDlg);
+	std::string fn=GetRecordPath(hwndDlg);
 
-	if(fn)
+	if(fn!="")
 	{
-		if(access(fn, F_OK) ||
-			!access(fn, W_OK))
+		if(access(fn.c_str(), F_OK) ||
+			!access(fn.c_str(), W_OK))
 		{
 			LONG lCount = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCOUNT, 0, 0);
 			LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
@@ -671,31 +677,30 @@ static void UpdateRecordDialog(HWND hwndDlg)
 			}
 		}
 
-		free(fn);
 	}
 
 	EnableWindow(GetDlgItem(hwndDlg,IDOK),enable ? TRUE : FALSE);
 }
 
-static void UpdateRecordDialogPath(HWND hwndDlg, const char* fname)
+static void UpdateRecordDialogPath(HWND hwndDlg, const std::string &fname)
 {
 	char* baseMovieDir = strdup(FCEU_GetPath(FCEUMKF_MOVIE).c_str());
 	char* fn=0;
 
 	// display a shortened filename if the file exists in the base movie directory
-	if(!strncmp(fname, baseMovieDir, strlen(baseMovieDir)))
+	if(!strncmp(fname.c_str(), baseMovieDir, strlen(baseMovieDir)))
 	{
 		char szDrive[MAX_PATH]={0};
 		char szDirectory[MAX_PATH]={0};
 		char szFilename[MAX_PATH]={0};
 		char szExt[MAX_PATH]={0};
 
-		_splitpath(fname, szDrive, szDirectory, szFilename, szExt);
+		_splitpath(fname.c_str(), szDrive, szDirectory, szFilename, szExt);
 		fn=(char*)malloc(strlen(szFilename)+strlen(szExt)+1);
 		_makepath(fn, "", "", szFilename, szExt);
 	}
 	else
-		fn=strdup(fname);
+		fn=strdup(fname.c_str());
 
 	if(fn)
 	{
@@ -713,8 +718,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 	case WM_INITDIALOG:
 		p = (struct CreateMovieParameters*)lParam;
 		UpdateRecordDialogPath(hwndDlg, p->szFilename);
-		free(p->szFilename);
-		p->szFilename = 0;
+		p->szFilename = "";
 
 		SendMessage(GetDlgItem(hwndDlg,IDC_EDIT_AUTHOR), CCM_SETUNICODEFORMAT, TRUE, 0);
 
@@ -855,7 +859,7 @@ void FCEUD_MovieRecordTo()
 		{
 			// attempt to load the savestate
 			// FIXME:  pop open a messagebox if this fails
-			FCEUI_LoadState(p.szSavestateFilename);
+			FCEUI_LoadState(p.szSavestateFilename.c_str());
 			{
 				extern int loadStateFailed;
 
@@ -866,17 +870,12 @@ void FCEUD_MovieRecordTo()
 					FCEUD_PrintError(str);
 				}
 			}
-
-			free(p.szSavestateFilename);
 		}
 
 		EMOVIE_FLAG flags = MOVIE_FLAG_NONE;
 		if(p.recordFrom == 0) flags = MOVIE_FLAG_FROM_POWERON;
-		FCEUI_SaveMovie(p.szFilename, flags, p.author);
+		FCEUI_SaveMovie(p.szFilename.c_str(), flags, p.author);
 	}
-
-	if(p.szFilename)
-		free(p.szFilename);
 }
 
 

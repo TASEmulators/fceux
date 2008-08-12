@@ -26,8 +26,8 @@ enum ENUM_SSLOADPARAMS
 	SSLOADPARAM_BACKUP,
 };
 
-void FCEUSS_Save(char *);
-bool FCEUSS_Load(char *);
+void FCEUSS_Save(const char *);
+bool FCEUSS_Load(const char *);
 
  //zlib values: 0 (none) through 9 (max) or -1 (default)
 bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel);
