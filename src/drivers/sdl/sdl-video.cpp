@@ -84,30 +84,31 @@ KillVideo()
         s_IconSurface=0;
     }
 
+
+    // return failure if the video system was not initialized
+    if(s_inited == 0)
+        return -1;
+    
     // if the rest of the system has been initialized, shut it down
-    if(s_inited) {
 #ifdef OPENGL
-        // check for OpenGL and shut it down
-        if(s_useOpenGL)
-            KillOpenGL();
-        else
+    // check for OpenGL and shut it down
+    if(s_useOpenGL)
+        KillOpenGL();
+    else
 #endif
-            // shut down the system that converts from 8 to 16/32 bpp
-            if(s_curbpp > 8)
-                KillBlitToHigh();
+        // shut down the system that converts from 8 to 16/32 bpp
+        if(s_curbpp > 8)
+            KillBlitToHigh();
 
-        // shut down the SDL video sub-system
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    // shut down the SDL video sub-system
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
-        s_inited = 0;
-        return 0;
-    }
-
-    // return failure, since the system was not initialized
-    // XXX soules - this seems odd to me... why is it doing this?
-    return -1;
+    s_inited = 0;
+    return 0;
 }
 
+
+// this variable contains information about the special scaling filters
 static int s_sponge;
 
 /**
@@ -143,7 +144,6 @@ InitVideo(FCEUGI *gi)
 #ifdef OPENGL
     g_config->getOption("SDL.OpenGL", &s_useOpenGL);
 #endif
-    // XXX soules - what is the sponge variable?
     g_config->getOption("SDL.SpecialFilter", &s_sponge);
     g_config->getOption("SDL.XStretch", &xstretch);
     g_config->getOption("SDL.YStretch", &ystretch);

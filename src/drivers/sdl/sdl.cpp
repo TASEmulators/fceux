@@ -66,6 +66,8 @@ char *DriverUsage="\
 --clipsides    {0|1}   Clips left and rightmost 8 columns of pixels.\n\
 --noframe      {0|1}   Hides title bar and window decorations.\n\
 --slstart    {0 - 239} Sets the first drawn emulated scanline.\n\
+--special     {1 - 4}  Use special video scaling filters\n\
+                          (1 = hq2x 2 = Scale2x 3 = hq3x 4 = Scale3x)\n\
 --slend      {0 - 239} Sets the last drawn emulated scanline.\n\
 --ntsccolor    {0|1}   Emulates an NTSC TV's colors.\n\
 --hue           x      Sets hue for NTSC color emulation.\n\
