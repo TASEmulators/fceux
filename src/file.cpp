@@ -175,50 +175,55 @@ FileBaseInfo CurrentFileBase() {
 }
 
 FileBaseInfo DetermineFileBase(const char *f) {
-	const char *tp1,*tp3;
+	//const char *tp1,*tp3;
 
-	char FileBase[2048];
-	char FileBaseDirectory[2048];
-	char FileExt[2048];
+	//char FileBase[2048];
+	//char FileBaseDirectory[2048];
+	//char FileExt[2048];
 
-	#if PSS_STYLE==4
-		tp1=((char *)strrchr(f,':'));
-	#elif PSS_STYLE==1
-		tp1=((char *)strrchr(f,'/'));
-	#else
-		tp1=((char *)strrchr(f,'\\'));
-	#if PSS_STYLE!=3
-		tp3=((char *)strrchr(f,'/'));
-		if(tp1<tp3) tp1=tp3;
-	#endif
-	#endif
-	if(!tp1)
-	{
-		tp1=f;
-		strcpy(FileBaseDirectory,".");
-	}
-	else
-	{
-		memcpy(FileBaseDirectory,f,tp1-f);
-		FileBaseDirectory[tp1-f]=0;
-		tp1++;
-	}
+	//#if PSS_STYLE==4
+	//	tp1=((char *)strrchr(f,':'));
+	//#elif PSS_STYLE==1
+	//	tp1=((char *)strrchr(f,'/'));
+	//#else
+	//	tp1=((char *)strrchr(f,'\\'));
+	//#if PSS_STYLE!=3
+	//	tp3=((char *)strrchr(f,'/'));
+	//	if(tp1<tp3) tp1=tp3;
+	//#endif
+	//#endif
+	//if(!tp1)
+	//{
+	//	tp1=f;
+	//	strcpy(FileBaseDirectory,".");
+	//}
+	//else
+	//{
+	//	memcpy(FileBaseDirectory,f,tp1-f);
+	//	FileBaseDirectory[tp1-f]=0;
+	//	tp1++;
+	//}
 
-	if(((tp3=strrchr(f,'.'))!=NULL) && (tp3>tp1))
-	{
-		memcpy(FileBase,tp1,tp3-tp1);
-		FileBase[tp3-tp1]=0;
-		strcpy(FileExt,tp3);
-	}
-	else
-	{
-		strcpy(FileBase,tp1);
-		FileExt[0]=0;
-	}
+	//if(((tp3=strrchr(f,'.'))!=NULL) && (tp3>tp1))
+	//{
+	//	memcpy(FileBase,tp1,tp3-tp1);
+	//	FileBase[tp3-tp1]=0;
+	//	strcpy(FileExt,tp3);
+	//}
+	//else
+	//{
+	//	strcpy(FileBase,tp1);
+	//	FileExt[0]=0;
+	//}
 
-	return FileBaseInfo(FileBaseDirectory,FileBase,FileExt);
-	
+	char drv[1000], dir[1000], name[1000], ext[1000];
+	splitpath(f,drv,dir,name,ext);
+
+	return FileBaseInfo((std::string)drv + dir,name,ext);	
 }
+
+inline FileBaseInfo DetermineFileBase(const std::string& str) { return DetermineFileBase(str.c_str()); }
+
 
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index)
 {
@@ -236,8 +241,6 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	std::string archive,fname,fileToOpen;
 	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
 	
-	if(!ipsfn) {
-	}
 
 	//try to setup the ips file
 	if(ipsfn && read)
@@ -256,6 +259,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			}
 			fceufp = new FCEUFILE();
 			fceufp->filename = fileToOpen;
+			fceufp->logicalPath = fileToOpen;
 			fceufp->fullFilename = fileToOpen;
 			fceufp->archiveIndex = -1;
 			fceufp->stream = (std::iostream*)fp;
@@ -274,13 +278,16 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
+
+			FileBaseInfo fbi = DetermineFileBase(fileToOpen);
+			fceufp->logicalPath = fbi.filebasedirectory + fceufp->filename;
 			goto applyips;
 		}
 
 	applyips:
 		//try to open the ips file
 		if(!ipsfile && !ipsfn)
-			ipsfile=FCEUD_UTF8fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->filename.c_str())),"rb");
+			ipsfile=FCEUD_UTF8fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->logicalPath.c_str())),"rb");
 		ApplyIPS(ipsfile,fceufp);
 		return fceufp;
 	}

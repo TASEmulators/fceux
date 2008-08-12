@@ -336,7 +336,6 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	//----------
 	//attempt to open the files
 	FCEUFILE *fp;
-	char *ipsfn;
 
 	FCEU_printf("Loading %s...\n\n",name);
 
