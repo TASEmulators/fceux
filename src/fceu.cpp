@@ -722,7 +722,7 @@ void FCEU_printf(char *format, ...)
 	va_list ap;
 
 	va_start(ap,format);
-	vsprintf(temp,format,ap);
+	vsnprintf(temp,sizeof(temp),format,ap);
 	FCEUD_Message(temp);
 
 	va_end(ap);
@@ -735,7 +735,7 @@ void FCEU_PrintError(char *format, ...)
 	va_list ap;
 
 	va_start(ap,format);
-	vsprintf(temp,format,ap);
+	vsnprintf(temp,sizeof(temp),format,ap);
 	FCEUD_PrintError(temp);
 
 	va_end(ap);

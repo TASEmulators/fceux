@@ -330,7 +330,7 @@ void FCEU_DispMessageOnMovie(char *format, ...)
 	va_list ap;
 
 	va_start(ap,format);
-	vsprintf(guiMessage.errmsg,format,ap);
+	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
 	va_end(ap);
 
 	guiMessage.howlong = 180;
@@ -342,7 +342,7 @@ void FCEU_DispMessage(char *format, ...)
 	va_list ap;
 
 	va_start(ap,format);
-	vsprintf(guiMessage.errmsg,format,ap);
+	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
 	va_end(ap);
 
 	guiMessage.howlong = 180;
