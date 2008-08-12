@@ -461,9 +461,19 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 //yuck... another custom text parser.
 static bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
+	//first, look for an fcm signature
+	char fcmbuf[3];
+	std::ios::pos_type curr = fp->tellg();
+	fp->read(fcmbuf,3);
+	fp->seekg(curr);
+	if(!strncmp(fcmbuf,"FCM",3)) {
+		FCEU_PrintError("FCM File format is no longer supported. Please use Tools > Convert FCM");
+		return false;
+	}
+
 	//movie must start with "version 3"
 	char buf[9];
-	std::ios::pos_type curr = fp->tellg();
+	curr = fp->tellg();
 	fp->read(buf,9);
 	fp->seekg(curr);
 	if(fp->fail()) return false;

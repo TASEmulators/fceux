@@ -1,6 +1,7 @@
 ---version 2.0.2 released---
 
-11-aug-2008 - zeromus - SF [ 2046985 ] SRAM not wiped on power cycle (during movies)
+12-aug-2008 - zeromus - print a special message when trying to open an FCM reminding user to convert. (finishes SF [ 2011832 ] Opening non movie file crashes FCEUX)
+12-aug-2008 - zeromus - SF [ 2046985 ] SRAM not wiped on power cycle (during movies)
 11-aug-2008 - zeromus - restore IPS patching capability which was lost when archive support was added
 11-aug-2008 - zeromus - SF [ 2011550 ] Buffer overflow (change vsprintf to vsnprintf)
 11-aug-2008 - zeromus - SF [ 2047004 ] Moviefilenames without extension don't automatically get fm2
