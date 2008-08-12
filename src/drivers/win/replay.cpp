@@ -5,6 +5,7 @@
 #include "movie.h"
 #include "archive.h"
 #include "utils/xstring.h"
+#include <math.h>
 
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
@@ -141,8 +142,12 @@ void UpdateReplayDialog(HWND hwndDlg)
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),TRUE);
 
 			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
+			float tempCount = (info.num_frames % 60); //Get fraction of a second
+			float getTime = ((tempCount / div) * 100); //Convert to 2 digit number
+			int fraction = getTime; //Convert to 2 digit int
+			int seconds = (info.num_frames / div) % 60;
 			info.num_frames += (div>>1);                                    // round up
-			sprintf(tmp, "%02d:%02d:%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, (info.num_frames/div) % 60);
+			sprintf(tmp, "%02d:%02d:%02d.%02d", (info.num_frames/(div*60*60)), (info.num_frames/(div*60))%60, seconds, fraction);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
 
 			sprintf(tmp, "%u", (unsigned)info.rerecord_count);
