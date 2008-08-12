@@ -1,5 +1,6 @@
 ---version 2.0.2 released---
-12-aug-2008 - punkrockguy318 - SF [ 2047050 ] SDL "--special" option fixed for special video scaling filters
+12-aug-2008 - punkrockguy318 - SDL: Saner sound defaults for less choppy sound
+12-aug-2008 - punkrockguy318 - SF [ 2047050 ] SDL: "--special" option fixed for special video scaling filters
 12-aug-2008 - zeromus - print a special message when trying to open an FCM reminding user to convert. (finishes SF [ 2011832 ] Opening non movie file crashes FCEUX)
 12-aug-2008 - zeromus - SF [ 2046985 ] SRAM not wiped on power cycle (during movies)
 11-aug-2008 - zeromus - restore IPS patching capability which was lost when archive support was added

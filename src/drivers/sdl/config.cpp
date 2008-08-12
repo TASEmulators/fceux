@@ -116,14 +116,10 @@ InitConfig()
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
     config->addOption("volume", "SDL.SoundVolume", 100);
-    config->addOption("soundrate", "SDL.SoundRate", 48000);
+    config->addOption("soundrate", "SDL.SoundRate", 11000);
     config->addOption("soundq", "SDL.SoundQuality", 1);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
-#ifdef WIN32
-    config->addOption("soundbufsize", "SDL.SoundBufSize", 52);
-#else
-    config->addOption("soundbufsize", "SDL.SoundBufSize", 24);
-#endif
+    config->addOption("soundbufsize", "SDL.SoundBufSize", 48);
 
     // old EOptions
     config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
