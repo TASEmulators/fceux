@@ -2,6 +2,7 @@
 #define _memorystream_h_
 
 #include <iostream>
+#include <string.h>
 #include <vector>
 #include <sstream>
 #include <stdexcept>
