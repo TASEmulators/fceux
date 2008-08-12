@@ -389,30 +389,30 @@ InitVideo(FCEUGI *gi)
 
     // XXX soules - can't SDL do this for us?
     // if using more than 8bpp, initialize the conversion routines
-    if(s_curbpp > 8)
-#ifdef OPENGL
-        if(!s_useOpenGL)
-#endif
-            InitBlitToHigh(s_curbpp >> 3,
+    if(s_curbpp > 8) {
+        InitBlitToHigh(s_curbpp >> 3,
                            s_screen->format->Rmask,
                            s_screen->format->Gmask,
                            s_screen->format->Bmask,
                            s_eefx, s_sponge);
 #ifdef OPENGL
-    if(s_useOpenGL) {
-        int openGLip;
-        g_config->getOption("SDL.OpenGLip", &openGLip);
+        if(s_useOpenGL) 
+        {
+            int openGLip;
+            g_config->getOption("SDL.OpenGLip", &openGLip);
 
-        if(!InitOpenGL(NOFFSET, 256 - (s_clipSides ? 8 : 0),
-                       s_srendline, s_erendline + 1,
-                       s_exs, s_eys, s_eefx,
-                       openGLip, xstretch, ystretch, s_screen)) {
-            FCEUD_PrintError("Error initializing OpenGL.");
-            KillVideo();
-            return -1;
+            if(!InitOpenGL(NOFFSET, 256 - (s_clipSides ? 8 : 0),
+                           s_srendline, s_erendline + 1,
+                        s_exs, s_eys, s_eefx,
+                        openGLip, xstretch, ystretch, s_screen)) 
+            {
+                FCEUD_PrintError("Error initializing OpenGL.");
+                KillVideo();
+                return -1;
+            }
         }
-    }
 #endif
+    }
     return 0;
 }
 
