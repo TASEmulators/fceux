@@ -1,11 +1,11 @@
 ---version 2.0.2 released---
-10-aug-2008 - punkrockguy318 - SDL: cleaned up the SConsruct
 
-
+11-aug-2008 - zeromus - restore IPS patching capability which was lost when archive support was added
 11-aug-2008 - zeromus - SF [ 2011550 ] Buffer overflow (change vsprintf to vsnprintf)
 11-aug-2008 - zeromus - SF [ 2047004 ] Moviefilenames without extension don't automatically get fm2
 10-aug-2008 - zeromus - upgrade to cah4e3's latest mapper 163&164 code to fix a crash in a game
 10-aug-2008 - zeromus - remove cnrom chr rom size limit for homebrew roms
+10-aug-2008 - punkrockguy318 - SDL: cleaned up the SConsruct
 10-aug-2008 - punkrockguy318 - SDL: fixed issue where fceu would lock up when file dialogs were opened during fullscreen
 10-aug-2008 - punkrockguy318 - SDL: fixed bug where fceux would close when file dialogs were closed
 10-aug-2008 - punkrockguy318 - SDL: File open dialog is now used to movie playback

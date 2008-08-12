@@ -47,30 +47,36 @@
 #include "movie.h"
 #include "driver.h"
 #include "utils/xstring.h"
+#include "utils/memorystream.h"
 
 using namespace std;
 
-typedef struct {
-           uint8 *data;
-           uint32 size;
-           uint32 location;
-} MEMWRAP;
 
-void ApplyIPS(FILE *ips, MEMWRAP *dest)
+static std::string BaseDirectory;
+static char FileExt[2048];	//Includes the . character, as in ".nes"
+char FileBase[2048];
+static char FileBaseDirectory[2048];
+
+
+void ApplyIPS(FILE *ips, FCEUFILE* fp)
 {
 	uint8 header[5];
 	uint32 count=0;
 
+	if(!ips) return;
+
+	char* buf = (char*)malloc(fp->size);
+	memcpy(buf,fp->EnsureMemorystream()->buf(),fp->size);
+
+
 	FCEU_printf(" Applying IPS...\n");
 	if(fread(header,1,5,ips)!=5)
 	{
-		fclose(ips);
-		return;
+		goto end;
 	}
 	if(memcmp(header,"PATCH",5))
 	{
-		fclose(ips);
-		return;
+		goto end;
 	}
 
 	while(fread(header,1,3,ips)==3)
@@ -81,39 +87,34 @@ void ApplyIPS(FILE *ips, MEMWRAP *dest)
 		if(!memcmp(header,"EOF",3))
 		{
 			FCEU_printf(" IPS EOF:  Did %d patches\n\n",count);
-			fclose(ips);
-			return;
+			goto end;
 		}
 
 		size=fgetc(ips)<<8;
 		size|=fgetc(ips);
 		if(!size)	/* RLE */
 		{
-			uint8 *start;
-			uint8 b;
+			char *start;
+			char b;
 			size=fgetc(ips)<<8;
 			size|=fgetc(ips);
 
 			//FCEU_printf("  Offset: %8d  Size: %5d RLE\n",offset,size);
 
-			if((offset+size)>dest->size)
+			if((offset+size)>(uint32)fp->size)
 			{
-				uint8 *tmp;
-
 				// Probably a little slow.
-				tmp=(uint8 *)realloc(dest->data,offset+size);
-				if(!tmp)
+				buf=(char *)realloc(buf,offset+size);
+				if(!buf)
 				{
 					FCEU_printf("  Oops.  IPS patch %d(type RLE) goes beyond end of file.  Could not allocate memory.\n",count);
-					fclose(ips);
-					return;
+					goto end;
 				}
-				dest->size=offset+size;
-				dest->data=tmp;
-				memset(dest->data+dest->size,0,offset+size-dest->size);
+				memset(buf+fp->size,0,offset+size-fp->size);
+				fp->size=offset+size;
 			}
 			b=fgetc(ips);
-			start=dest->data+offset;
+			start=buf+offset;
 			do
 			{
 				*start=b;
@@ -123,94 +124,33 @@ void ApplyIPS(FILE *ips, MEMWRAP *dest)
 		else		/* Normal patch */
 		{
 			//FCEU_printf("  Offset: %8d  Size: %5d\n",offset,size);
-			if((offset+size)>dest->size)
+			if((offset+size)>(uint32)fp->size)
 			{
-				uint8 *tmp;
-
 				// Probably a little slow.
-				tmp=(uint8 *)realloc(dest->data,offset+size);
-				if(!tmp)
+				buf=(char *)realloc(buf,offset+size);
+				if(!buf)
 				{
 					FCEU_printf("  Oops.  IPS patch %d(type normal) goes beyond end of file.  Could not allocate memory.\n",count);
-					fclose(ips);
-					return;
+					goto end;
 				}
-				dest->data=tmp;
-				memset(dest->data+dest->size,0,offset+size-dest->size);
+				memset(buf+fp->size,0,offset+size-fp->size);
 			}
-			fread(dest->data+offset,1,size,ips);
+			fread(buf+offset,1,size,ips);
 		}
 		count++;
 	}
-	fclose(ips);
 	FCEU_printf(" Hard IPS end!\n");
+end:
+	fclose(ips);
+	memorystream* ms = new memorystream(buf,fp->size);
+	ms->giveBuf();
+	fp->SetStream(ms);
 }
 
-static MEMWRAP *MakeMemWrap(void *tz, int type)
-{
-	MEMWRAP *tmp;
-
-	if(!(tmp=(MEMWRAP *)FCEU_malloc(sizeof(MEMWRAP))))
-		goto doret;
-	tmp->location=0;
-
-	if(type==0)
-	{
-		fseek((FILE *)tz,0,SEEK_END);
-		tmp->size=ftell((FILE *)tz);
-		fseek((FILE *)tz,0,SEEK_SET);
-		if(!(tmp->data=(uint8*)FCEU_malloc(tmp->size)))
-		{
-			free(tmp);
-			tmp=0;
-			goto doret;
-		}
-		fread(tmp->data,1,tmp->size,(FILE *)tz);
-	}
-	else if(type==1)
-	{
-		/* Bleck.  The gzip file format has the size of the uncompressed data,
-		but I can't get to the info with the zlib interface(?). */
-		for(tmp->size=0; gzgetc(tz) != EOF; tmp->size++);
-		gzseek(tz,0,SEEK_SET);
-		if(!(tmp->data=(uint8 *)FCEU_malloc(tmp->size)))
-		{
-			free(tmp);
-			tmp=0;
-			goto doret;
-		}
-		gzread(tz,tmp->data,tmp->size);
-	}
-	else if(type==2)
-	{
-		unz_file_info ufo;
-		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
-
-		tmp->size=ufo.uncompressed_size;
-		if(!(tmp->data=(uint8 *)FCEU_malloc(ufo.uncompressed_size)))
-		{
-			free(tmp);
-			tmp=0;
-			goto doret;
-		}
-		unzReadCurrentFile(tz,tmp->data,ufo.uncompressed_size);
-	}
-
-doret:
-	if(type==0)
-	{
-		fclose((FILE *)tz);
-	}
-	else if(type==1)
-	{
-		gzclose(tz);
-	}
-	else if(type==2)
-	{
-		unzCloseCurrentFile(tz);
-		unzClose(tz);
-	}
-	return tmp;
+std::string FCEU_MakeIpsFilename(FileBaseInfo fbi) {
+	char ret[FILENAME_MAX] = "";
+	sprintf(ret,"%s"PSS"%s%s.ips",fbi.filebasedirectory.c_str(),fbi.filebase.c_str(),fbi.ext.c_str());
+	return ret;
 }
 
 void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::string& file, std::string& fileToOpen)
@@ -230,6 +170,56 @@ void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::strin
 	}
 }
 
+FileBaseInfo CurrentFileBase() {
+	return FileBaseInfo(FileBaseDirectory,FileBase,FileExt);
+}
+
+FileBaseInfo DetermineFileBase(const char *f) {
+	const char *tp1,*tp3;
+
+	char FileBase[2048];
+	char FileBaseDirectory[2048];
+	char FileExt[2048];
+
+	#if PSS_STYLE==4
+		tp1=((char *)strrchr(f,':'));
+	#elif PSS_STYLE==1
+		tp1=((char *)strrchr(f,'/'));
+	#else
+		tp1=((char *)strrchr(f,'\\'));
+	#if PSS_STYLE!=3
+		tp3=((char *)strrchr(f,'/'));
+		if(tp1<tp3) tp1=tp3;
+	#endif
+	#endif
+	if(!tp1)
+	{
+		tp1=f;
+		strcpy(FileBaseDirectory,".");
+	}
+	else
+	{
+		memcpy(FileBaseDirectory,f,tp1-f);
+		FileBaseDirectory[tp1-f]=0;
+		tp1++;
+	}
+
+	if(((tp3=strrchr(f,'.'))!=NULL) && (tp3>tp1))
+	{
+		memcpy(FileBase,tp1,tp3-tp1);
+		FileBase[tp3-tp1]=0;
+		strcpy(FileExt,tp3);
+	}
+	else
+	{
+		strcpy(FileBase,tp1);
+		FileExt[0]=0;
+	}
+
+	return FileBaseInfo(FileBaseDirectory,FileBase,FileExt);
+	
+}
+
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index)
 {
 	FILE *ipsfile=0;
@@ -246,6 +236,8 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	std::string archive,fname,fileToOpen;
 	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
 	
+	if(!ipsfn) {
+	}
 
 	//try to setup the ips file
 	if(ipsfn && read)
@@ -270,7 +262,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			FCEU_fseek(fceufp,0,SEEK_END);
 			fceufp->size = FCEU_ftell(fceufp);
 			FCEU_fseek(fceufp,0,SEEK_SET);
-			return fceufp;
+			goto applyips;
 		}
 		else
 		{
@@ -282,8 +274,15 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
-			return fceufp;
+			goto applyips;
 		}
+
+	applyips:
+		//try to open the ips file
+		if(!ipsfile && !ipsfn)
+			ipsfile=FCEUD_UTF8fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->filename.c_str())),"rb");
+		ApplyIPS(ipsfile,fceufp);
+		return fceufp;
 	}
 	#else
 	std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
@@ -404,12 +403,6 @@ std::string GetMfn() //Retrieves the movie filename from curMovieFilename (for a
 		}
 	return movieFilenamePart;
 }
-
-static std::string BaseDirectory;
-char FileBase[2048];
-static char FileExt[2048];	//Includes the . character, as in ".nes"
-
-static char FileBaseDirectory[2048];
 
 /// Updates the base directory
 void FCEUI_SetBaseDirectory(std::string const & dir)
@@ -615,7 +608,9 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 			else
 				sprintf(ret,"%s"PSS"cheats"PSS"%s.cht",BaseDirectory.c_str(),FileBase);
 			break;
-		case FCEUMKF_IPS:sprintf(ret,"%s"PSS"%s%s.ips",FileBaseDirectory,FileBase,FileExt);break;
+		case FCEUMKF_IPS:
+			strcpy(ret,FCEU_MakeIpsFilename(CurrentFileBase()).c_str());
+			break;
 		case FCEUMKF_GGROM:sprintf(ret,"%s"PSS"gg.rom",BaseDirectory.c_str());break;
 		case FCEUMKF_FDSROM:
 			if(odirs[FCEUIOD_FDSROM])
@@ -646,42 +641,9 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 
 void GetFileBase(const char *f)
 {
-	const char *tp1,*tp3;
-
-	#if PSS_STYLE==4
-		tp1=((char *)strrchr(f,':'));
-	#elif PSS_STYLE==1
-		tp1=((char *)strrchr(f,'/'));
-	#else
-		tp1=((char *)strrchr(f,'\\'));
-	#if PSS_STYLE!=3
-		tp3=((char *)strrchr(f,'/'));
-		if(tp1<tp3) tp1=tp3;
-	#endif
-	#endif
-	if(!tp1)
-	{
-		tp1=f;
-		strcpy(FileBaseDirectory,".");
-	}
-	else
-	{
-		memcpy(FileBaseDirectory,f,tp1-f);
-		FileBaseDirectory[tp1-f]=0;
-		tp1++;
-	}
-
-	if(((tp3=strrchr(f,'.'))!=NULL) && (tp3>tp1))
-	{
-		memcpy(FileBase,tp1,tp3-tp1);
-		FileBase[tp3-tp1]=0;
-		strcpy(FileExt,tp3);
-	}
-	else
-	{
-		strcpy(FileBase,tp1);
-		FileExt[0]=0;
-	}
+	FileBaseInfo fbi = DetermineFileBase(f);
+	strcpy(FileBase,fbi.filebase.c_str());
+	strcpy(FileBaseDirectory,fbi.filebasedirectory.c_str());
 }
 
 bool FCEU_isFileInArchive(const char *path)

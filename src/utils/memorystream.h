@@ -1,3 +1,6 @@
+#ifndef _memorystream_h_
+#define _memorystream_h_
+
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -145,6 +148,11 @@ public:
 		return buf;
 	}
 
+	//if we were provided a buffer, then calling this gives us ownership of it
+	void giveBuf() {
+		myBuf = true;
+	}
+
 private:
 
 	void dosync(int c)
@@ -285,4 +293,9 @@ public:
 	//if the memorystream wraps a vector, the vector will be trimmed to the correct size,.
 	//you probably need to use this if you are using the vector wrapper
 	void trim() { streambuf.trim(); }
+
+	void giveBuf() { streambuf.giveBuf(); }
 };
+
+
+#endif

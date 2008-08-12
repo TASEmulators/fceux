@@ -59,6 +59,7 @@
 #include "drivers/sdl/sdl.h"
 #endif
 
+
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
 bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
@@ -339,8 +340,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	FCEU_printf("Loading %s...\n\n",name);
 
-	ipsfn=strdup(FCEU_MakeFName(FCEUMKF_IPS,0,0).c_str());
-	fp=FCEU_fopen(name,ipsfn,"rb",0);
+	fp=FCEU_fopen(name,0,"rb",0);
 	if(!fp)
 	{
 		return 0;
@@ -348,7 +348,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	GetFileBase(fp->filename.c_str());
 
-	free(ipsfn);
+	//free(ipsfn);
 
 	if(!fp) {
 		FCEU_PrintError("Error opening \"%s\"!",name);
@@ -657,6 +657,9 @@ void hand(X6502 *X, int type, unsigned int A)
 int suppressAddPowerCommand=0; // hack... yeah, I know...
 void PowerNES(void) 
 {
+	/*void MapperInit();
+	MapperInit();*/
+
 	if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
 	if(!GameInfo) return;
