@@ -50,29 +50,29 @@ else:
   if not conf.CheckLib('lua5.1', autoadd=1):
     print 'Did not find liblua5.1 or lua5.1.lib, exiting!'
     Exit(1)
-    
-  ### Search for zenity.
-  path = os.getenv('PATH')
-  directories = []
-  dir = ''
-  # check for '$' so last entry is processed
-  for x in path + '$':
-    if x != ':' and x != '$':
-      dir += x
-    else:
-      directories.append(dir)
-      dir = ''
+  ### Search for zenity if we're not in windows
+  if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin':
+    path = os.getenv('PATH')
+    directories = []
+    dir = ''
+    # check for '$' so last entry is processed
+    for x in path + '$':
+      if x != ':' and x != '$':
+        dir += x
+      else:
+        directories.append(dir)
+        dir = ''
   
-  zenity = 0
-  print "Checking for zenity..."
-  for x in directories:
-    if os.path.isfile(os.path.join(x, "zenity")):
-      zenity = 1
-  if zenity != 1:
-    print "*** WARNING ***"
-    print "Zenity could not be found in the PATH.  File dialogs will not work without zenity installed."
-    raw_input('Press any key to continue. . .')
-        
+    zenity = 0
+    print "Checking for zenity..."
+    for x in directories:
+      if os.path.isfile(os.path.join(x, "zenity")):
+        zenity = 1
+    if zenity != 1:
+      print "*** WARNING ***"
+      print "Zenity could not be found in the PATH.  File dialogs will not work without zenity installed."
+      raw_input('Press any key to continue. . .')
+    
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = " -DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
@@ -80,9 +80,8 @@ else:
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
-  # parse liblua cflags/libs
+  # parse liblua cflags
   env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
-  env.Append(LINKFLAGS = "-llua5.1")
   env = conf.Finish()
 
 if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
