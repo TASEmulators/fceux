@@ -1,5 +1,5 @@
 ---version 2.0.2 released---
-
+12-aug-2008 - punkrockguy318 - SDL: fixed segfault when opening .fcm files
 12-aug-2008 - punkrockguy318 - SDL: Saner sound defaults for less choppy sound
 12-aug-2008 - punkrockguy318 - SF [ 2047050 ] SDL: "--special" option fixed for special video scaling filters
 12-aug-2008 - zeromus - SF [ 2046984 ] Player 3 inputs when not used

@@ -296,11 +296,18 @@ KeyboardCommands()
             if(is_shift) {
                 FCEUI_StopMovie();
                 std::string fname;
-                fname = GetFilename("Open movie for playback...");
+                fname = GetFilename("Open FM2 movie for playback...");
                 if(fname != "")
                 {
-				    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
-                    FCEUI_LoadMovie(fname.c_str(), false, false, false);
+                    if(fname.find(".fm2") != std::string::npos)
+                    {
+				        FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
+                        FCEUI_LoadMovie(fname.c_str(), false, false, false);
+                    }
+                    else
+                    {
+                        FCEUI_printf("Only FM2 movies are supported.\n");
+                    }
                 }
             } else {
                 FCEUI_LoadState(NULL);
