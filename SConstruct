@@ -64,11 +64,13 @@ else:
         dir = ''
   
     zenity = 0
-    print "Checking for zenity..."
+    print "Checking for zenity...",
     for x in directories:
       if os.path.isfile(os.path.join(x, "zenity")):
         zenity = 1
-    if zenity != 1:
+    if zenity:
+      print 'yes'
+    else:
       print "*** WARNING ***"
       print "Zenity could not be found in the PATH.  File dialogs will not work without zenity installed."
       raw_input('Press any key to continue. . .')

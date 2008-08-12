@@ -319,8 +319,8 @@ UpdateEMUCore(Config *config)
     config->getOption("SDL.DisableSpriteLimit", &flag);
     FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
 
-//    config->getOption("SDL.SnapName", &flag);
-//    FCEUI_SetSnapName(flag ? true : false);
+    config->getOption("SDL.SnapName", &flag);
+    FCEUI_SetSnapName(flag ? true : false);
 
     config->getOption("SDL.ScanLineStart", &start);
     config->getOption("SDL.ScanLineEnd", &end);
