@@ -220,12 +220,12 @@ static void LoadGP(int w, MovieRecord* mr)
 	if(w==0)
 	{
 		joy[0] = mr->joysticks[0];
-		joy[2] = mr->joysticks[2];
+		if(FSAttached) joy[2] = mr->joysticks[2];
 	}
 	else
 	{
 		joy[1] = mr->joysticks[1];
-		joy[3] = mr->joysticks[3];
+		if(FSAttached) joy[3] = mr->joysticks[3];
 	}
 }
 
