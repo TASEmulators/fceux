@@ -146,6 +146,7 @@ end:
 std::string FCEU_MakeIpsFilename(FileBaseInfo fbi) {
 	char ret[FILENAME_MAX] = "";
 	sprintf(ret,"%s"PSS"%s%s.ips",fbi.filebasedirectory.c_str(),fbi.filebase.c_str(),fbi.ext.c_str());
+        printf("IPS: %s\n",ret);
 	return ret;
 }
 
@@ -174,6 +175,8 @@ FileBaseInfo DetermineFileBase(const char *f) {
 
 	char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
 	splitpath(f,drv,dir,name,ext);
+ 
+        if(dir[0] == 0) strcpy(dir,".");
 
 	return FileBaseInfo((std::string)drv + dir,name,ext);	
 	
