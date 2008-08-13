@@ -561,3 +561,7 @@ bool FCEUD_PauseAfterPlayback() { return false; }
 void FCEUD_TurboOn    (void) { NoWaiting|= 1; }
 void FCEUD_TurboOff   (void) { NoWaiting&=~1; }
 void FCEUD_TurboToggle(void) { NoWaiting^= 1; }
+FCEUFILE* FCEUD_OpenArchiveIndex(ArchiveScanRecord& asr, std::string &fname, int innerIndex) { return 0; }
+FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename) { return 0; }
+ArchiveScanRecord FCEUD_ScanArchive(std::string fname) { return ArchiveScanRecord(); }
+

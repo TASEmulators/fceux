@@ -202,7 +202,6 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	//try to setup the ips file
 	if(ipsfn && read)
 		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
-	#ifdef WIN32
 	if(read)
 	{
 		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
@@ -248,24 +247,6 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		ApplyIPS(ipsfile,fceufp);
 		return fceufp;
 	}
-	#else
-	std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
-	if(!fp)
-	{
-		return 0;
-	}
-	fceufp = new FCEUFILE();
-	fceufp->filename = fileToOpen;
-	fceufp->filename = fileToOpen;
-	fceufp->archiveIndex = -1;
-	fceufp->stream = (std::iostream*)fp;
-	FCEU_fseek(fceufp,0,SEEK_END);
-	fceufp->size = FCEU_ftell(fceufp);
-	FCEU_fseek(fceufp,0,SEEK_SET);
-	return fceufp;
-	#endif
-	
-
 	return 0;
 }
 
