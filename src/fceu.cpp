@@ -775,6 +775,7 @@ void FCEUI_SetVidSystem(int a)
 	{
 		FCEU_ResetVidSys();
 		FCEU_ResetPalette();
+		FCEUD_VideoChanged();
 	}
 }
 

@@ -1143,3 +1143,7 @@ void ConfigVideo(void)
 	PushCurrentVideoSettings();
 }
 
+
+void FCEUD_VideoChanged() {
+	PushCurrentVideoSettings();
+}

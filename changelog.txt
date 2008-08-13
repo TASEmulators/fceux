@@ -1,4 +1,6 @@
 ---version 2.0.2 released---
+
+12-aug-2008 - zeromus - SF [ 2047986 ] palflag 1 in .fm2 files crashes fceux
 12-aug-2008 - adelikat - movie replay dialog displays fractions of a second
 12-aug-2008 - punkrockguy318 - SDL: fixed segfault when opening .fcm files
 12-aug-2008 - punkrockguy318 - SDL: Saner sound defaults for less choppy sound

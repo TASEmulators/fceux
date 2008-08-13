@@ -312,6 +312,9 @@ void FCEUD_UpdatePPUView(int scanline, int drawall);
 ///I am dissatisfied with this method of getting an option from the driver to the core. but that is what we're using for now
 bool FCEUD_PauseAfterPlayback();
 
+///called when fceu changes something in the video system you might be interested in
+void FCEUD_VideoChanged();
+
 enum EFCEUI
 {
 	FCEUI_STOPAVI, FCEUI_SAVESTATE, FCEUI_LOADSTATE,
