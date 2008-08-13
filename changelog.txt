@@ -1,5 +1,5 @@
 ---version 2.0.2 released---
-
+13-aug-2008 - punkrockguy318 - SDL: fixed --input(1-4) options.  input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs
 12-aug-2008 - zeromus - fix SDL configfile woes. configfile now goes to ~/.fceux/fceux.cfg
 12-aug-2008 - zeromus - SF [ 2047986 ] palflag 1 in .fm2 files crashes fceux
 12-aug-2008 - adelikat - movie replay dialog displays fractions of a second

@@ -216,10 +216,11 @@ FileBaseInfo DetermineFileBase(const char *f) {
 	//	FileExt[0]=0;
 	//}
 
-	char drv[1000], dir[1000], name[1000], ext[1000];
+	char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
 	splitpath(f,drv,dir,name,ext);
 
 	return FileBaseInfo((std::string)drv + dir,name,ext);	
+	
 }
 
 inline FileBaseInfo DetermineFileBase(const std::string& str) { return DetermineFileBase(str.c_str()); }

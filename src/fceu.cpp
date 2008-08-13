@@ -347,8 +347,6 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	GetFileBase(fp->filename.c_str());
 
-	//free(ipsfn);
-
 	if(!fp) {
 		FCEU_PrintError("Error opening \"%s\"!",name);
 		return 0;
