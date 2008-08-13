@@ -305,6 +305,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 				magic = fp->get();
 				magic|=fp->get()<<8;
 				magic|=fp->get()<<16;
+				fp->seekg(0,std::ios::beg);
 
 				if(magic==0x088b1f) {
 					 // maybe gzip... 
