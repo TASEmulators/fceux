@@ -184,6 +184,73 @@ FileBaseInfo DetermineFileBase(const char *f) {
 
 inline FileBaseInfo DetermineFileBase(const std::string& str) { return DetermineFileBase(str.c_str()); }
 
+static FCEUFILE * TryUnzip(const std::string& path) {
+	unzFile tz;
+	if((tz=unzOpen(path.c_str())))  // If it's not a zip file, use regular file handlers.
+		// Assuming file type by extension usually works,
+		// but I don't like it. :)
+	{
+		if(unzGoToFirstFile(tz)==UNZ_OK)
+		{
+			for(;;)
+			{
+				char tempu[512];	// Longer filenames might be possible, but I don't
+				// think people would name files that long in zip files...
+				unzGetCurrentFileInfo(tz,0,tempu,512,0,0,0,0);
+				tempu[511]=0;
+				if(strlen(tempu)>=4)
+				{
+					char *za=tempu+strlen(tempu)-4;
+
+					//if(!ext)
+					{
+						if(!strcasecmp(za,".nes") || !strcasecmp(za,".fds") ||
+							!strcasecmp(za,".nsf") || !strcasecmp(za,".unf") ||
+							!strcasecmp(za,".nez"))
+							break;
+					}
+					//else if(!strcasecmp(za,ext))
+					//	break;
+				}
+				if(strlen(tempu)>=5)
+				{
+					if(!strcasecmp(tempu+strlen(tempu)-5,".unif"))
+						break;
+				}
+				if(unzGoToNextFile(tz)!=UNZ_OK)
+				{
+					if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
+					break;
+				}
+			}
+			if(unzOpenCurrentFile(tz)!=UNZ_OK)
+				goto zpfail;
+		}
+		else
+		{
+zpfail:
+			unzClose(tz);
+			return 0;
+		}
+
+		unz_file_info ufo;
+		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
+		
+		int size = ufo.uncompressed_size;
+		memorystream* ms = new memorystream(size);
+		unzReadCurrentFile(tz,ms->buf(),ufo.uncompressed_size);
+		unzCloseCurrentFile(tz);
+		unzClose(tz);
+
+		FCEUFILE *fceufp=fceufp = new FCEUFILE();
+		fceufp->stream = ms;
+		fceufp->size = size;
+		return fceufp;
+		
+	}
+
+	return 0;
+}
 
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index)
 {
@@ -216,6 +283,19 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			if(!fp)
 			{
 				return 0;
+			}
+
+			//try to read a zip file
+			{
+				fceufp = TryUnzip(fileToOpen);
+				if(fceufp) {
+					delete fp;
+					fceufp->filename = fileToOpen;
+					fceufp->logicalPath = fileToOpen;
+					fceufp->fullFilename = fileToOpen;
+					fceufp->archiveIndex = -1;
+					goto applyips;
+				}
 			}
 
 			//try to read a gzipped file
