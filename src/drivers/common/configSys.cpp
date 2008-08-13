@@ -582,7 +582,7 @@ Config::_load()
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
-    std::string configFile = _dir + "/fceu.cfg";
+    std::string configFile = _dir + "/fceux.cfg";
     std::string line, name, value;
     char buf[1024];
 
@@ -649,7 +649,7 @@ Config::save()
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
-    std::string configFile = _dir + "/fceu.cfg";
+    std::string configFile = _dir + "/fceux.cfg";
     char buf[1024];
 
     // set the exception handling to catch i/o errors

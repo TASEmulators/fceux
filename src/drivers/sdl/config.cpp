@@ -80,7 +80,7 @@ GetBaseDirectory(std::string &dir)
 {
     char *home = getenv("HOME");
     if(home) {
-        dir = std::string(home) + "/.fceultra";
+        dir = std::string(home) + "/.fceux";
     } else {
 #ifdef WIN32
         home = new char[MAX_PATH + 1];
