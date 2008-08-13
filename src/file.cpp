@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fstream>
 
 #ifndef WIN32
 #include <zlib.h>
@@ -209,12 +210,50 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
 		if(asr.numFiles == 0)
 		{
+		trygzip:
 			//if the archive contained no files, try to open it the old fashioned way
 			std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
 			if(!fp)
 			{
 				return 0;
 			}
+
+			//try to read a gzipped file
+			{
+				uint32 magic;
+				
+				magic = fp->get();
+				magic|=fp->get()<<8;
+				magic|=fp->get()<<16;
+
+				if(magic==0x088b1f) {
+					 // maybe gzip... 
+
+					void* gzfile = gzopen(fileToOpen.c_str(),"rb");
+					if(gzfile) {
+						delete fp;
+
+						int size;
+						for(size=0; gzgetc(gzfile) != EOF; size++) {}
+						memorystream* ms = new memorystream(size);
+						gzseek(gzfile,0,SEEK_SET);
+						gzread(gzfile,ms->buf(),size);
+						gzclose(gzfile);
+
+						fceufp = new FCEUFILE();
+						fceufp->filename = fileToOpen;
+						fceufp->logicalPath = fileToOpen;
+						fceufp->fullFilename = fileToOpen;
+						fceufp->archiveIndex = -1;
+						fceufp->stream = ms;
+						fceufp->size = size;
+						goto applyips;
+					}
+				}
+			}
+
+		
+
 			fceufp = new FCEUFILE();
 			fceufp->filename = fileToOpen;
 			fceufp->logicalPath = fileToOpen;
@@ -236,6 +275,8 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0);
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
+
+			if(!fceufp) goto trygzip;
 
 			FileBaseInfo fbi = DetermineFileBase(fileToOpen);
 			fceufp->logicalPath = fbi.filebasedirectory + fceufp->filename;
