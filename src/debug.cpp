@@ -24,15 +24,15 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 		return -1;
 	}
 
-	if (type & PPU_BREAKPOINT)
+	if (type & BT_P)
 	{
 		return offset & 0x3FFF;
 	}
-	else if (type & SPRITE_BREAKPOINT)
+	else if (type & BT_S)
 	{
 		return offset & 0x00FF;
 	}
-	else // CPU_BREAKPOINTS
+	else // BT_C
 	{
 		if (GameInfo->type == GIT_NSF) { //NSF Breakpoint keywords
 			if (strcmp(offsetBuffer,"LOAD") == 0) return (NSFHeader.LoadAddressLow | (NSFHeader.LoadAddressHigh<<8));
@@ -55,6 +55,30 @@ int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 
 	return offset;
 }
+
+// Returns the value of a given type or register
+
+int getValue(int type)
+{
+	switch (type)
+	{
+		case 'A': return _A;
+		case 'X': return _X;
+		case 'Y': return _Y;
+		case 'N': return _P & N_FLAG ? 1 : 0;
+		case 'V': return _P & V_FLAG ? 1 : 0;
+		case 'U': return _P & U_FLAG ? 1 : 0;
+		case 'B': return _P & B_FLAG ? 1 : 0;
+		case 'D': return _P & D_FLAG ? 1 : 0;
+		case 'I': return _P & I_FLAG ? 1 : 0;
+		case 'Z': return _P & Z_FLAG ? 1 : 0;
+		case 'C': return _P & C_FLAG ? 1 : 0;
+		case 'P': return _PC;
+	}
+
+	return 0;
+}
+
 
 /**
 * Checks whether a breakpoint condition is syntactically valid
@@ -146,14 +170,15 @@ unsigned int NewBreak(const char* name, int start, int end, unsigned int type, c
 	// Get the breakpoint flags
 	watchpoint[num].flags = 0;
 	if (enable) watchpoint[num].flags|=WP_E;
-	if (type & READ_BREAKPOINT) watchpoint[num].flags|=WP_R;
-	if (type & WRITE_BREAKPOINT) watchpoint[num].flags|=WP_W;
-	if (type & EXECUTE_BREAKPOINT) watchpoint[num].flags|=WP_X;
-	if (type & PPU_BREAKPOINT) {
+	if (type & WP_R) watchpoint[num].flags|=WP_R;
+	if (type & WP_F) watchpoint[num].flags|=WP_F;
+	if (type & WP_W) watchpoint[num].flags|=WP_W;
+	if (type & WP_X) watchpoint[num].flags|=WP_X;
+	if (type & BT_P) {
 		watchpoint[num].flags|=BT_P;
 		watchpoint[num].flags&=~WP_X; //disable execute flag!
 	}
-	if (type & SPRITE_BREAKPOINT) {
+	if (type & BT_S) {
 		watchpoint[num].flags|=BT_S;
 		watchpoint[num].flags&=~WP_X; //disable execute flag!
 	}
@@ -225,6 +250,82 @@ uint8 GetPPUMem(uint8 A) {
 	if (tmp<0x2000) return VPage[tmp>>10][tmp];
 	if (tmp>=0x3F00) return PALRAM[tmp&0x1F];
 	return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+}
+
+//---------------------
+
+// Evaluates a condition
+int evaluate(Condition* c)
+{
+	int f = 0;
+
+	int value1, value2;
+
+	if (c->lhs)
+	{
+		value1 = evaluate(c->lhs);
+	}
+	else
+	{
+		switch(c->type1)
+		{
+			case TYPE_ADDR:
+			case TYPE_NUM: value1 = c->value1; break;
+			default: value1 = getValue(c->value1);
+		}
+	}
+
+	if (c->type1 == TYPE_ADDR)
+	{
+		value1 = GetMem(value1);
+	}
+
+	f = value1;
+
+	if (c->op)
+	{
+		if (c->rhs)
+		{
+			value2 = evaluate(c->rhs);
+		}
+		else
+		{
+			switch(c->type2)
+			{
+				case TYPE_ADDR:
+				case TYPE_NUM: value2 = c->value2; break;
+				default: value2 = getValue(c->type2);
+			}
+		}
+
+		if (c->type2 == TYPE_ADDR)
+		{
+			value2 = GetMem(value2);
+		}
+
+		switch (c->op)
+		{
+			case OP_EQ: f = value1 == value2; break;
+			case OP_NE: f = value1 != value2; break;
+			case OP_GE: f = value1 >= value2; break;
+			case OP_LE: f = value1 <= value2; break;
+			case OP_G: f = value1 > value2; break;
+			case OP_L: f = value1 < value2; break;
+			case OP_MULT: f = value1 * value2; break;
+			case OP_DIV: f = value1 / value2; break;
+			case OP_PLUS: f = value1 + value2; break;
+			case OP_MINUS: f = value1 - value2; break;
+			case OP_OR: f = value1 || value2; break;
+			case OP_AND: f = value1 && value2; break;
+		}
+	}
+
+	return f;
+}
+
+int condition(watchpointinfo* wp)
+{
+	return wp->cond == 0 || evaluate(wp->cond);
 }
 
 
@@ -333,7 +434,29 @@ static DebuggerState dbgstate;
 
 DebuggerState &FCEUI_Debugger() { return dbgstate; }
 
-void BreakHit() {
+void BreakHit(bool force = false) {
+
+	if(!force) {
+		
+		//check to see whether we fall in any forbid zone
+		for (int i = 0; i < numWPs; i++) {
+			watchpointinfo& wp = watchpoint[i];
+			if(!(wp.flags & WP_F))
+				continue;
+
+			if (condition(&wp))
+			{
+				if (wp.endaddress) {
+					if( (wp.address <= _PC) && (wp.endaddress >= _PC) )
+						return;	//forbid
+				} else {
+					if(wp.address == _PC)
+						return; //forbid
+				}
+			}
+		}
+	}
+
 	FCEUI_SetEmulationPaused(1); //mbg merge 7/19/06 changed to use EmulationPaused()
 	
 	//MBG TODO - was this commented out before the gnu refactoring?
@@ -377,108 +500,6 @@ void BreakHit() {
 }
 */
 
-// ################################## Start of SP CODE ###########################
-
-// Returns the value of a given type or register
-
-int getValue(int type)
-{
-	switch (type)
-	{
-		case 'A': return _A;
-		case 'X': return _X;
-		case 'Y': return _Y;
-		case 'N': return _P & N_FLAG ? 1 : 0;
-		case 'V': return _P & V_FLAG ? 1 : 0;
-		case 'U': return _P & U_FLAG ? 1 : 0;
-		case 'B': return _P & B_FLAG ? 1 : 0;
-		case 'D': return _P & D_FLAG ? 1 : 0;
-		case 'I': return _P & I_FLAG ? 1 : 0;
-		case 'Z': return _P & Z_FLAG ? 1 : 0;
-		case 'C': return _P & C_FLAG ? 1 : 0;
-		case 'P': return _PC;
-	}
-
-	return 0;
-}
-
-// Evaluates a condition
-int evaluate(Condition* c)
-{
-	int f = 0;
-
-	int value1, value2;
-
-	if (c->lhs)
-	{
-		value1 = evaluate(c->lhs);
-	}
-	else
-	{
-		switch(c->type1)
-		{
-			case TYPE_ADDR:
-			case TYPE_NUM: value1 = c->value1; break;
-			default: value1 = getValue(c->value1);
-		}
-	}
-
-	if (c->type1 == TYPE_ADDR)
-	{
-		value1 = GetMem(value1);
-	}
-
-	f = value1;
-
-	if (c->op)
-	{
-		if (c->rhs)
-		{
-			value2 = evaluate(c->rhs);
-		}
-		else
-		{
-			switch(c->type2)
-			{
-				case TYPE_ADDR:
-				case TYPE_NUM: value2 = c->value2; break;
-				default: value2 = getValue(c->type2);
-			}
-		}
-
-		if (c->type2 == TYPE_ADDR)
-		{
-			value2 = GetMem(value2);
-		}
-
-		switch (c->op)
-		{
-			case OP_EQ: f = value1 == value2; break;
-			case OP_NE: f = value1 != value2; break;
-			case OP_GE: f = value1 >= value2; break;
-			case OP_LE: f = value1 <= value2; break;
-			case OP_G: f = value1 > value2; break;
-			case OP_L: f = value1 < value2; break;
-			case OP_MULT: f = value1 * value2; break;
-			case OP_DIV: f = value1 / value2; break;
-			case OP_PLUS: f = value1 + value2; break;
-			case OP_MINUS: f = value1 - value2; break;
-			case OP_OR: f = value1 || value2; break;
-			case OP_AND: f = value1 && value2; break;
-		}
-	}
-
-	return f;
-}
-
-int condition(watchpointinfo* wp)
-{
-	return wp->cond == 0 || evaluate(wp->cond);
-}
-
-// ################################## End of SP CODE ###########################
-
-
 ///fires a breakpoint
 void breakpoint() {
 	int i;
@@ -489,7 +510,7 @@ void breakpoint() {
 	opcode[0] = GetMem(_PC);
 	
 	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
-	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit();
+	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit(true);
 
 	//if we're stepping out, track the nest level
 	if (dbgstate.stepout) {
@@ -507,7 +528,7 @@ void breakpoint() {
 	//if we're stepping, then we'll always want to break
 	if (dbgstate.step) {
 		dbgstate.step = false;
-		BreakHit();
+		BreakHit(true);
 		return;
 	}
 
@@ -515,7 +536,7 @@ void breakpoint() {
 	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
 		watchpoint[64].address = 0;
 		watchpoint[64].flags = 0;
-		BreakHit();
+		BreakHit(true);
 		return;
 	}
 

@@ -75,32 +75,24 @@ unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
 	GetDlgItemText(hwndDlg, IDC_ADDBP_ADDR_END, endOffsetBuffer, sizeof(endOffsetBuffer));
 
 	if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MEM_CPU))
-	{
-		type |= CPU_BREAKPOINT;
-	}
+		type |= BT_C;
 	else if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MEM_PPU))
-	{
-		type |= PPU_BREAKPOINT;
-	}
+		type |= BT_P;
 	else
-	{
-		type |= SPRITE_BREAKPOINT;
-	}
+		type |= BT_S;
 
 	if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MODE_R))
-	{
-		type |= READ_BREAKPOINT;
-	}
+		type |= WP_R;
 
 	if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MODE_W))
-	{
-		type |= WRITE_BREAKPOINT;
-	}
+		type |= WP_W;
 
 	if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MODE_X))
-	{
-		type |= EXECUTE_BREAKPOINT;
-	}
+		type |= WP_X;
+
+	//this overrides all
+	if (IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MODE_F))
+		type = WP_F;
 
 	int start = offsetStringToInt(type, startOffsetBuffer);
 
@@ -155,6 +147,24 @@ unsigned int AddBreak(HWND hwndDlg)
 	return 0;
 }
 
+static void UpdateDialog(HWND hwndDlg) {
+	BOOL forbid = IsDlgButtonChecked(hwndDlg, IDC_ADDBP_MODE_F);
+	BOOL enable = !forbid;
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MODE_R),enable);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MODE_W),enable);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MODE_X),enable);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_CPU),enable);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_PPU),enable);
+	EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MEM_SPR),enable);	
+	//nah.. lets leave these checked
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_R,BST_UNCHECKED);
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_W,BST_UNCHECKED);
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MODE_X,BST_UNCHECKED);
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_CPU,BST_UNCHECKED);
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_PPU,BST_UNCHECKED);
+	//CheckDlgButton(hwndDlg,IDC_ADDBP_MEM_SPR,BST_UNCHECKED);
+}
+
 BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char str[8]={0};
@@ -175,6 +185,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				if (watchpoint[WP_edit].flags&WP_R) CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_R, BST_CHECKED);
 				if (watchpoint[WP_edit].flags&WP_W) CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_W, BST_CHECKED);
 				if (watchpoint[WP_edit].flags&WP_X) CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_X, BST_CHECKED);
+				if (watchpoint[WP_edit].flags&WP_F) CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_F, BST_CHECKED);
 
 				if (watchpoint[WP_edit].flags&BT_P) {
 					CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_PPU, BST_CHECKED);
@@ -185,6 +196,8 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					EnableWindow(GetDlgItem(hwndDlg,IDC_ADDBP_MODE_X),FALSE);
 				}
 				else CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_CPU, BST_CHECKED);
+
+				UpdateDialog(hwndDlg);
 				
 // ################################## Start of SP CODE ###########################
 
@@ -220,6 +233,11 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch(HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch(LOWORD(wParam)) {
+						case IDC_ADDBP_MODE_F: {
+							UpdateDialog(hwndDlg);
+							break;
+						}
+
 						case IDOK:
 							if (WP_edit >= 0) {
 								int tmp = NewBreakWindows(hwndDlg,WP_edit,(BOOL)(watchpoint[WP_edit].flags&WP_E));
@@ -562,11 +580,12 @@ char *BreakToText(unsigned int num) {
 	if (watchpoint[num].flags&WP_R) strcat(str,"R"); else strcat(str,"-");
 	if (watchpoint[num].flags&WP_W) strcat(str,"W"); else strcat(str,"-");
 	if (watchpoint[num].flags&WP_X) strcat(str,"X"); else strcat(str,"-");
+	if (watchpoint[num].flags&WP_F) strcat(str,"F"); else strcat(str,"-");
 	
 // ################################## Start of SP CODE ###########################
 	if (watchpoint[num].desc)
 	{
-		strcat(str, " - ");
+		strcat(str, " : ");
 		strcat(str, watchpoint[num].desc);
 	}
 // ################################## End of SP CODE ###########################

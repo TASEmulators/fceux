@@ -10,10 +10,11 @@
 #define WP_W       0x02  //watchpoint, write
 #define WP_R       0x04  //watchpoint, read
 #define WP_X       0x08  //watchpoint, execute
+#define WP_F       0x10  //watchpoint, forbid
 
 #define BT_C       0x00  //break type, cpu mem
-#define BT_P       0x10  //break type, ppu mem
-#define BT_S       0x20  //break type, sprite mem
+#define BT_P       0x20  //break type, ppu mem
+#define BT_S       0x40  //break type, sprite mem
 
 //opbrktype is used to grab the breakpoint type that each instruction will cause.
 //WP_X is not used because ALL opcodes will have the execute bit set.
@@ -46,7 +47,7 @@ typedef struct {
 	Condition* cond;
 	char* condText;
 	char* desc;
-	
+
 // ################################## End of SP CODE ###########################
 } watchpointinfo;
 
@@ -121,12 +122,12 @@ extern NSF_HEADER NSFHeader;
 ///retrieves the core's DebuggerState
 DebuggerState &FCEUI_Debugger();
 
-#define CPU_BREAKPOINT 1
-#define PPU_BREAKPOINT 2
-#define SPRITE_BREAKPOINT 4
-#define READ_BREAKPOINT 8
-#define WRITE_BREAKPOINT 16
-#define EXECUTE_BREAKPOINT 32
+//#define CPU_BREAKPOINT 1
+//#define PPU_BREAKPOINT 2
+//#define SPRITE_BREAKPOINT 4
+//#define READ_BREAKPOINT 8
+//#define WRITE_BREAKPOINT 16
+//#define EXECUTE_BREAKPOINT 32
 
 int offsetStringToInt(unsigned int type, const char* offsetBuffer);
 unsigned int NewBreak(const char* name, int start, int end, unsigned int type, const char* condition, unsigned int num, bool enable);

@@ -102,6 +102,8 @@
 #define IDC_CHEAT_VAL_GT_BY             109
 #define IDC_DEBUGGER_SEEK_TO            109
 #define IDC_ROMPATCHER_PATCH_DATA       109
+#define IDC_ADDBP_MODE_X2               109
+#define IDC_ADDBP_MODE_F                109
 #define IDC_CHEAT_VAL_LT_BY             110
 #define MENU_SAVE_STATE                 110
 #define CB_ASK_EXIT                     110
