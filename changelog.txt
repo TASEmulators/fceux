@@ -53,7 +53,7 @@
 06-aug-2008 - zeromus - restore the debugger snap functionality
 06-aug-2008 - zeromus - add memory.readbyterange to emulua
 06-aug-2008 - zeromus - auto-fill .fcs extension in save state as dialog
-06-aug-2008 - zeromus - mmc5 - 64KB games now work correctly
+06-aug-2008 - zeromus - mmc5 - 64KB WRAM games now work correctly
 06-aug-2008 - zeromus - mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed
 06-aug-2008 - zeromus - debugger - debugger window is now resizeable
 

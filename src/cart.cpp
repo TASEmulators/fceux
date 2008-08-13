@@ -679,7 +679,6 @@ void FCEU_ClearGameSave(CartInfo *LocalHWInfo)
 {
 	if(LocalHWInfo->battery && LocalHWInfo->SaveGame[0])
 	{
-		FILE *sp;
 		for(int x=0;x<4;x++)
 			if(LocalHWInfo->SaveGame[x])
 				memset(LocalHWInfo->SaveGame[x],0,LocalHWInfo->SaveGameLen[x]);
