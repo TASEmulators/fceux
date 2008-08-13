@@ -489,8 +489,12 @@ static int savestate_create(lua_State *L) {
 		filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
 	}
 	else {
-		char tempbuf[100] = "snluaXXXXXX";
-		filename = mktemp(tempbuf);
+		//char tempbuf[100] = "snluaXXXXXX";
+		//filename = mktemp(tempbuf);
+		//doesnt work -^
+		
+		//mbg 8/13/08 - this needs to be this way. we'll make a better system later:
+		filename = tempnam(NULL, "snlua");
 	}
 	
 	// Our "object". We don't care about the type, we just need the memory and GC services.
