@@ -30,10 +30,6 @@
 #include <zlib.h>
 #endif
 
-#ifdef WIN32
-#include <drivers/win/archive.h>
-#endif
-
 #include "types.h"
 #include "file.h"
 #include "utils/endian.h"
@@ -175,46 +171,6 @@ FileBaseInfo CurrentFileBase() {
 }
 
 FileBaseInfo DetermineFileBase(const char *f) {
-	//const char *tp1,*tp3;
-
-	//char FileBase[2048];
-	//char FileBaseDirectory[2048];
-	//char FileExt[2048];
-
-	//#if PSS_STYLE==4
-	//	tp1=((char *)strrchr(f,':'));
-	//#elif PSS_STYLE==1
-	//	tp1=((char *)strrchr(f,'/'));
-	//#else
-	//	tp1=((char *)strrchr(f,'\\'));
-	//#if PSS_STYLE!=3
-	//	tp3=((char *)strrchr(f,'/'));
-	//	if(tp1<tp3) tp1=tp3;
-	//#endif
-	//#endif
-	//if(!tp1)
-	//{
-	//	tp1=f;
-	//	strcpy(FileBaseDirectory,".");
-	//}
-	//else
-	//{
-	//	memcpy(FileBaseDirectory,f,tp1-f);
-	//	FileBaseDirectory[tp1-f]=0;
-	//	tp1++;
-	//}
-
-	//if(((tp3=strrchr(f,'.'))!=NULL) && (tp3>tp1))
-	//{
-	//	memcpy(FileBase,tp1,tp3-tp1);
-	//	FileBase[tp3-tp1]=0;
-	//	strcpy(FileExt,tp3);
-	//}
-	//else
-	//{
-	//	strcpy(FileBase,tp1);
-	//	FileExt[0]=0;
-	//}
 
 	char drv[PATH_MAX], dir[PATH_MAX], name[PATH_MAX], ext[PATH_MAX];
 	splitpath(f,drv,dir,name,ext);

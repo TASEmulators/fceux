@@ -451,7 +451,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 
 extern HWND hAppWnd;
 
-FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
+static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
 {
 	FCEUFILE* fp = 0;
 	
