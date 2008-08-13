@@ -415,7 +415,7 @@ class GfceuApp:
     self.launch('"'+ options.romfile +'"')
     
   def about_button_clicked(self, menuitem, data=None):
-    widgets.get_object("about_dialog").set_name('GNOME FCE Ultra '+version)
+    widgets.get_object("about_dialog").set_name('GFCE UltraX '+version)
     widgets.get_object("about_dialog").run()
     widgets.get_object("about_dialog").hide()
   
