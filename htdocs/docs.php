@@ -3,9 +3,6 @@
 	include("header.php");
 ?>
 
-Docs are currently being overhauled. Due to sourceforge.net being sucky 
-right now, I am editing straight on my web server.
-
 <table class="mainbox" cellpadding="5" cellspacing="0" border="1">
 <tr><th class="boxhead" colspan="3">Documentation</th></tr>
 <tr><td colspan="3">
