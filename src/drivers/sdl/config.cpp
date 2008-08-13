@@ -170,9 +170,10 @@ InitConfig()
     config->addOption('l', "players", "SDL.NetworkNumPlayers", 1);
     */ 
     // input configuration options
-    config->addOption("SDL.Input.0", "GamePad.0");
-    config->addOption("SDL.Input.1", "GamePad.1");
-    config->addOption("SDL.Input.2", "None");
+    config->addOption("input1", "SDL.Input.0", "GamePad.0");
+    config->addOption("input2", "SDL.Input.1", "GamePad.1");
+    config->addOption("input3", "SDL.Input.2", "Gamepad.2");
+    config->addOption("input4", "SDL.Input.3", "Gamepad.3");
 
     // allow for input configuration
     config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);

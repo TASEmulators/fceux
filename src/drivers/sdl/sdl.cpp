@@ -80,6 +80,9 @@ char *DriverUsage="\
 --volume     {0 - 100} Sets volume.\n\
 --lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
 --soundrecord   f      Records sound to file f.\n\
+--input1        d      Set the input device for controller input1\n\
+--input(2,3,4)  d      Set the input device for controller input(2, 3, 4)\n\
+                    Devices:  none, gamepad, zapper, powerpada, powerpadb\n\
 --inputcfg      d      Configures input device d on startup (gamepad1, gamepad2).\n\
 --playmov       f      Plays back a recorded movie from filename f.\n\
 --loadlua       f      Loads lua script from filename f.\n";
