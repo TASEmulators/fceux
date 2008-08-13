@@ -421,15 +421,6 @@ SDL_GL_LoadLibrary(0);
         return -1;
     }
 
-	if(g_config->parse(argc,argv)==-1) {
-		printf("Error parsing config file\n");
-		SDL_Quit();
-        return -1;
-	}
-	
-	// This is here so that a default fceux.cfg will be created on first
-	// run, even without a valid ROM to play.
-	g_config->save();
     // initialize the infrastructure
     error = FCEUI_Initialize();
     if(error != 1) {
@@ -445,6 +436,11 @@ SDL_GL_LoadLibrary(0);
         SDL_Quit();
         return -1;
     }
+
+	// This is here so that a default fceux.cfg will be created on first
+	// run, even without a valid ROM to play.
+	g_config->save();
+
 
     // update the input devices
     UpdateInput(g_config);
