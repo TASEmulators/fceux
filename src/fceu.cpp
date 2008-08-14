@@ -538,7 +538,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 			if(frameAdvanceDelay>=10)
 				EmulationPaused = 3;
 			//else
-			//	frameAdvanceDelay++;
+				frameAdvanceDelay++;
 		}
 	}
 
