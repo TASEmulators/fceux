@@ -548,6 +548,12 @@ int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
 
 bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 {
+	//maybe make a backup savestate
+	memorystream msBackupSavestate;
+	bool backup = (params == SSLOADPARAM_BACKUP);
+	if(backup)
+		FCEUSS_SaveMS(&msBackupSavestate,Z_NO_COMPRESSION);
+
 	uint8 header[16];
 
 	//read and analyze the header
@@ -558,6 +564,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 		FCEU_state_loading_old_format = true;
 		bool ret = FCEUSS_LoadFP_old(is,params)!=0;
 		FCEU_state_loading_old_format = false;
+		if(!ret && backup) FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
 		return ret;
 	}
 		
@@ -578,6 +585,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 		int error = uncompress((uint8*)&buf[0],&uncomprlen,(uint8*)&cbuf[0],comprlen);
 		if(error != Z_OK || uncomprlen != totalsize)
 			return false;
+		//we dont need to restore the backup here because we havent messed with the emulator state yet
 	}
 	else
 	{
@@ -603,6 +611,8 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 		FCEUSND_LoadState(stateversion);
 		x=FCEUMOV_PostLoad();
 	}
+
+	if(!x && backup) FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
 
 	return x;
 }
