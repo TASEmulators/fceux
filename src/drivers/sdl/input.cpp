@@ -345,11 +345,11 @@ KeyboardCommands()
     }
     else
     {
-        if(frameAdvancing)
-        {
+        //if(frameAdvancing)
+        //{
             FCEUI_FrameAdvanceEnd();
             frameAdvancing = false;
-        }
+        //}
     }
     
     g_config->getOption("SDL.Hotkeys.Reset", &key);
