@@ -165,16 +165,20 @@ public:
 	//not interpolating! someday it will! 
 	int generate(int samples, void *buf) {
 
-		int incr = 256;
-		int bufferSamples = buffers.length>>1;
+		int64 incr = 256;
+		int64 bufferSamples = buffers.length>>1;
 
 		//if we're we're too far behind, playback faster
 		if(bufferSamples > soundrate*3/60) {
-			int behind = bufferSamples - soundrate/60;
+			int64 behind = bufferSamples - soundrate/60;
 			incr = behind*256*60/soundrate/2;
 			//we multiply our playback rate by 1/2 the number of frames we're behind
 		}
-		if(incr<256) printf("OHNO -- %d -- shouldnt be less than 256!\n",incr); //sanity check: should never be less than 256
+		if(incr<256) 
+		{
+			 //sanity check: should never be less than 256
+			printf("OHNO -- %d -- shouldnt be less than 256!\n",incr);
+		}
 
 		incr = (incr*scale)>>8; //apply scaling factor
 
