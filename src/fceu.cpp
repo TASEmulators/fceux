@@ -526,14 +526,19 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	JustFrameAdvanced = false;
 
-	if(frameAdvanceRequested) {
-		if(frameAdvanceDelay==0) {
+	if(frameAdvanceRequested)
+	{
+		if(frameAdvanceDelay==0)
+		{
 			EmulationPaused = 3;
 			frameAdvanceDelay++;
-		} else {
-			if(frameAdvanceDelay>=10) {
+		}
+		else
+		{
+			if(frameAdvanceDelay>=10)
 				EmulationPaused = 3;
-			} else frameAdvanceDelay++;
+			//else
+			//	frameAdvanceDelay++;
 		}
 	}
 
@@ -588,21 +593,25 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 						*SoundBufSize=0;       // keep sound muted
 				#endif
 				JustFrameAdvanced = true;
+				frameAdvanceRequested = false;
 			}
 		}
 	}
 	else
 	{
-	if(EmulationPaused&2)
-			{
+		if(EmulationPaused&2)
+		{
 			EmulationPaused = 1;   // restore paused flag
 			#ifdef WIN32
 				if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
 					*SoundBufSize=0;       // keep sound muted
-				#endif
-				JustFrameAdvanced = true;
-			}
+			#endif
+			JustFrameAdvanced = true;
+			frameAdvanceRequested = false;
+		}
 	} //I apologize to anyone who comes in and tries to fgiure this if branching out
+	if (JustFrameAdvanced)
+		frameAdvanceRequested = false;
 	currMovieData.TryDumpIncremental();
 	if (lagFlag) 
 	{
@@ -610,6 +619,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		justLagged = true;
 	}
 	else justLagged = false;
+	
 
 }
 
