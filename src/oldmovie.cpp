@@ -615,6 +615,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	}
 	else
 	{
+		delete fp;
 		return FCM_CONVERTRESULT_STARTFROMSAVESTATENOTSUPPORTED;
 	}
 
@@ -668,5 +669,6 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	free(moviedata);
 	moviedata = 0;
 
+	delete fp;
 	return FCM_CONVERTRESULT_SUCCESS;
 }

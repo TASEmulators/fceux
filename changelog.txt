@@ -1,5 +1,6 @@
 ---version 2.0.2 released---
 
+14-aug-2008 - zeromus - SF [ 2050371 ] FCM>FM2 converter should release file handle
 13-aug-2008 - zeromus - restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added
 13-aug-2008 - zeromus - add FORBID breakpoints - regions which block breakpoints from happening if they contain the PC
 13-aug-2008 - punkrockguy318 - SDL: fixed --input(1-4) options.  input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs
