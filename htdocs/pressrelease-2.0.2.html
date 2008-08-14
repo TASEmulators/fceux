@@ -7,6 +7,7 @@ This release focuses on top-rated user bug and enhancement issues; stabilizing t
 
 emulator:
 bug: restore support for old-format savestates.
+bug: restore savestate load error-recovery system
 bug: restore IPS patching capability which was lost when archive support was added
 bug: restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added
 bug: SF [ 2046985 ] SRAM not wiped on power cycle (during movies)
@@ -29,6 +30,8 @@ bug: removed broken hotkey ctrl+x (prevented cut from working in accel dialogs)
 bug: fixed the (null) in the default lua directory listing
 bug: SF [ 2037878 ] Convert .fcm doesn't do special characters
 bug: SF [ 2046984 ] Player 3/4 input events recorded even when not used
+bug: SF [ 2047001 ] Low speeds crash FCEUX
+bug: SF [ 2050371 ] FCM>FM2 converter should release file handle
 enh: added input display to the FCEUX main menu
 enh: auto-fill .fcs extension in save state as dialog
 enh: change config filename from fceu98.cfg to fceux.cfg
