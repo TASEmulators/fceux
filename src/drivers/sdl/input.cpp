@@ -334,12 +334,23 @@ KeyboardCommands()
     }
     
     g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
-    if(_keyonly(key)) {
-        // 8-10-08 - this freezes fceux for me - punkrockguy318
-        FCEUI_FrameAdvance();
+    static bool frameAdvancing = false;
+    if(g_keyState[key])
+    {
+        if(frameAdvancing == false)
+        {
+            FCEUI_FrameAdvance();
+            frameAdvancing = true;
+        }
     }
-    
-
+    else
+    {
+        if(frameAdvancing)
+        {
+            FCEUI_FrameAdvanceEnd();
+            frameAdvancing = false;
+        }
+    }
     
     g_config->getOption("SDL.Hotkeys.Reset", &key);
     if(_keyonly(key)) {

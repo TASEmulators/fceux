@@ -149,17 +149,19 @@ void
 WriteSound(int32 *buf,
            int Count)
 {
-    while(Count) {
-        while(s_BufferIn == s_BufferSize) {
-            SDL_Delay(1);
-        }
+    extern int EmulationPaused;
+    if (EmulationPaused == 0)
+        while(Count) {
+            while(s_BufferIn == s_BufferSize) {
+                SDL_Delay(1);
+            }
 
-        s_Buffer[s_BufferWrite] = *buf;
-        Count--;
-        s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
-        s_BufferIn++;
-        buf++;
-    }
+            s_Buffer[s_BufferWrite] = *buf;
+            Count--;
+            s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+            s_BufferIn++;
+            buf++;
+        }
 }
 
 /**
