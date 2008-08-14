@@ -47,9 +47,12 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
-  if not conf.CheckLib('lua5.1', autoadd=1):
-    print 'Did not find liblua5.1 or lua5.1.lib, exiting!'
+  lua51 = conf.CheckLib('lua5.1', autoadd=1)
+  lua = conf.CheckLib('lua', autoadd=1)
+  if lua == 0 and lua51 == 0:
+    print 'Did not find liblua5.1, liblua, lua.lib or lua5.1.lib, exiting!'
     Exit(1)
+    
   ### Search for zenity if we're not in windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin':
     path = os.getenv('PATH')
@@ -83,7 +86,10 @@ else:
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
   # parse liblua cflags
-  env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
+  if lua51:
+    env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
+  if lua:
+    env.Append(CPPPATH = ['/usr/local/include/lua', '/usr/include/lua'])
   env = conf.Finish()
 
 if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
