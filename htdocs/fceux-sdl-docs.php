@@ -10,7 +10,8 @@
  </head>
  <body>
   <center><h1>FCEUX SDL Documentation</h1></center>
-  <center><i>Last updated August 13, 2008<br />Valid as of FCEUX 2.0.2</i></center>
+  <center><i>Last updated August 13, 2008<br />Valid as of FCEUX 2.0.2</i><br>
+  <b>Please note that this document is INCOMPLETE</b></center>
  <p>
  <b>Table of Contents:</b>
  <ul>
