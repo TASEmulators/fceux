@@ -37,13 +37,13 @@ users of the SDL port, unless you particullarly prefer the command-line.</li>
 </td></tr>
 <tr><th class="boxhead">Version</th><th class="boxhead">Date</th><th class="boxhead">Description</th></tr>
 <tr>
-    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.1.win32.zip?download">2.0.1 win32 binary</a></td>
-    <td>04 August 2008</td>
+    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.1.win32.zip?download">2.0.2 win32 binary</a></td>
+    <td>14 August 2008</td>
     <td>This is the latest official release</td>
 </tr>
 <tr>
-    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.1.src.tar.bz2?download">2.0.1 source</a></td>
-    <td>04 August 2008</td>
+    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.1.src.tar.bz2?download">2.0.2 source</a></td>
+    <td>14 August 2008</td>
     <td>This is the latest official release</td>
 </tr>
 </table>
