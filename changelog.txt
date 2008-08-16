@@ -1,5 +1,5 @@
 ---version 2.0.3 released---
-
+15-aug-2008 - adelikat - fixed an oversight on my part.  Sound config dialog will now look to see if Mute Turbo should be checked
 
 ---version 2.0.2 released---
 
