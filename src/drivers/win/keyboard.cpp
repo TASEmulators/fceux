@@ -53,63 +53,62 @@ void KeyboardUpdateState(void)
 	switch(ddrval)
 	{
 	case DI_OK: //memcpy(keys,tk,256);break;
-		{
-			extern int soundoptions;
+		break;
+
+	case DIERR_INPUTLOST:
+	case DIERR_NOTACQUIRED:
+		memset(tk,0,256);
+		IDirectInputDevice7_Acquire(lpdid);
+		break;
+	}
+
+	//process keys
+	extern int soundoptions;
 #define SO_OLDUP      32
 
-			extern int soundo;
-			extern int32 fps_scale;
-			int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
+	extern int soundo;
+	extern int32 fps_scale;
+	int notAlternateThrottle = !(soundoptions&SO_OLDUP) && soundo && ((NoWaiting&1)?(256*16):fps_scale) >= 64;
 #define KEY_REPEAT_INITIAL_DELAY ((!notAlternateThrottle) ? (16) : (64)) // must be >= 0 and <= 255
 #define KEY_REPEAT_REPEATING_DELAY (6) // must be >= 1 and <= 255
 #define KEY_JUST_DOWN_DURATION (4) // must be >= 1 and <= 255
 
-			for(int i = 0 ; i < 256 ; i++)
-				if(tk[i])
-					if(keys_nr[i] < 255)
-						keys_nr[i]++; // activate key, and count up for repeat
-					else
-						keys_nr[i] = 255 - KEY_REPEAT_REPEATING_DELAY; // oscillate for repeat
-				else
-					keys_nr[i] = 0; // deactivate key
+	for(int i = 0 ; i < 256 ; i++)
+		if(tk[i])
+			if(keys_nr[i] < 255)
+				keys_nr[i]++; // activate key, and count up for repeat
+			else
+				keys_nr[i] = 255 - KEY_REPEAT_REPEATING_DELAY; // oscillate for repeat
+		else
+			keys_nr[i] = 0; // deactivate key
 
-			memcpy(keys,keys_nr,256);
+	memcpy(keys,keys_nr,256);
 
-			// key-down detection
-			for(int i = 0 ; i < 256 ; i++)
-				if(!keys_nr[i])
-				{
-					keys_jd[i] = 0;
-					keys_jd_lock[i] = 0;
-				}
-				else if(keys_jd_lock[i])
-				{}
-				else if(keys_jd[i]
-				/*&& (i != 0x2A && i != 0x36 && i != 0x1D && i != 0x38)*/)
-				{
-					if(++keys_jd[i] > KEY_JUST_DOWN_DURATION)
-					{
-						keys_jd[i] = 0;
-						keys_jd_lock[i] = 1;
-					}
-				}
-				else
-					keys_jd[i] = 1;
+	// key-down detection
+	for(int i = 0 ; i < 256 ; i++)
+		if(!keys_nr[i])
+		{
+			keys_jd[i] = 0;
+			keys_jd_lock[i] = 0;
+		}
+		else if(keys_jd_lock[i])
+		{}
+		else if(keys_jd[i]
+		/*&& (i != 0x2A && i != 0x36 && i != 0x1D && i != 0x38)*/)
+		{
+			if(++keys_jd[i] > KEY_JUST_DOWN_DURATION)
+			{
+				keys_jd[i] = 0;
+				keys_jd_lock[i] = 1;
+			}
+		}
+		else
+			keys_jd[i] = 1;
 
-				// key repeat
-				for(int i = 0 ; i < 256 ; i++)
-					if((int)keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
-						keys[i] = 0;
-		}	   
-		break;
-
-
-	case DIERR_INPUTLOST:
-	case DIERR_NOTACQUIRED:
-		memset(keys,0,256);
-		IDirectInputDevice7_Acquire(lpdid);
-		break;
-	}
+		// key repeat
+		for(int i = 0 ; i < 256 ; i++)
+			if((int)keys[i] >= KEY_REPEAT_INITIAL_DELAY && !(keys[i]%KEY_REPEAT_REPEATING_DELAY))
+				keys[i] = 0;
 
 	extern uint8 autoHoldOn, autoHoldReset;
 	autoHoldOn = autoHoldKey && keys[autoHoldKey] != 0;
