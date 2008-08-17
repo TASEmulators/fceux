@@ -679,7 +679,11 @@ namespace UtfConverter
 //convert a std::string to std::wstring
 std::wstring mbstowcs(std::string str)
 {
-	return UtfConverter::FromUtf8(str);
+	try {
+		return UtfConverter::FromUtf8(str);
+	} catch(std::exception) {
+		return L"(failed UTF-8 conversion)";
+	}
 }
 
 std::string wcstombs(std::wstring str)
