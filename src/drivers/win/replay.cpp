@@ -399,6 +399,21 @@ void HandleScan(HWND hwndDlg, FCEUFILE* file, int& i)
 	SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
 }
 
+//TODO - dont we already have another  function that can do this
+std::string getExtension(const char* input) {
+	char buf[1024];
+	strcpy(buf,input);
+	char* dot=strrchr(buf,'.');
+	if(!dot)
+		return "";
+	char ext [512];
+	strcpy(ext, dot+1);
+	int k, extlen=strlen(ext);
+	for(k=0;k<extlen;k++)
+		ext[k]=tolower(ext[k]);
+	return ext;
+}
+
 BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -465,21 +480,16 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 							continue;
 
+						//TODO - a big copy/pasted block below. factor out extension extractor or use another one
+
 						// filter out everything that's not an extension we like *.fm2
 						// (because FindFirstFile is too dumb to do that)
 						{
-							char* dot=strrchr(wfd.cFileName,'.');
-							if(!dot)
-								continue;
-							char ext [512];
-							strcpy(ext, dot+1);
-							int k, extlen=strlen(ext);
-							for(k=0;k<extlen;k++)
-								ext[k]=tolower(ext[k]);
-							if(stricmp(ext,"fm2"))
-								if(stricmp(ext,"zip"))
-									if(stricmp(ext,"rar"))
-										if(stricmp(ext,"7z"))
+							std::string ext = getExtension(wfd.cFileName);
+							if(ext != "fm2")
+								if(ext != "zip")
+									if(ext != "rar")
+										if(ext != "7z")
 											continue;
 						}
 
@@ -491,6 +501,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
 						if(asr.numFiles>1) {
 							for(int i=0;i<asr.numFiles;i++) {
+								std::string ext = getExtension(asr.files.items[i].name.c_str());
+								if(ext != "fm2")
+									continue;
 								FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0,i);
 								if(fp) {
 									HandleScan(hwndDlg,fp, items);
@@ -499,6 +512,11 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							}
 						} else 
 						{
+							if(asr.numFiles == 1) {
+								std::string ext = getExtension(asr.files.items[0].name.c_str());
+								if(ext != "fm2")
+									continue;
+							}
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
 							if(fp) {
 								HandleScan(hwndDlg,fp ,items);

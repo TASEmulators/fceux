@@ -71,6 +71,16 @@ struct FCEUFILE {
 	}
 };
 
+struct FCEUARCHIVEFILEINFO
+{
+	struct Item
+	{
+		std::string name;
+		uint32 size, index;
+	};
+	std::vector<Item> items;
+};
+
 struct FileBaseInfo {
 	std::string filebase, filebasedirectory, ext;
 	FileBaseInfo() {}
@@ -96,6 +106,8 @@ struct ArchiveScanRecord
 	}
 	int type;
 	int numFiles;
+
+	FCEUARCHIVEFILEINFO files;
 
 	bool isArchive() { return type != -1; }
 };

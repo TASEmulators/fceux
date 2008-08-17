@@ -15,6 +15,8 @@
 #include "driver.h"
 #include "main.h"
 
+static FCEUARCHIVEFILEINFO *currFileSelectorContext;
+
 DEFINE_GUID(CLSID_CFormat_07,0x23170F69,0x40C1,0x278A,0x10,0x00,0x00,0x01,0x10,0x07,0x00,0x00);
 
 class OutStream : public IArchiveExtractCallback
@@ -280,17 +282,6 @@ public:
 	}
 };
 
-struct FileSelectorContext
-{
-	struct Item
-	{
-		std::string name;
-		uint32 size, index;
-	};
-	std::vector<Item> items;
-} *currFileSelectorContext;
-
-
 
 static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -436,20 +427,61 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 		if (SUCCEEDED(object->Open(&ifs,0,0)))
 		{
 			uint32 numFiles;
+
 			if (SUCCEEDED(object->GetNumberOfItems(&numFiles)))
 			{
+				ArchiveScanRecord asr(matchingFormat,(int)numFiles);
+
+				//scan the filename of each item
+				for(uint32 i=0;i<numFiles;i++)
+				{
+					FCEUARCHIVEFILEINFO::Item item;
+					item.index = i;
+
+					PROPVARIANT prop;
+					prop.vt = VT_EMPTY;
+
+					if (FAILED(object->GetProperty( i, kpidSize, &prop )) || prop.vt != VT_UI8 || !prop.uhVal.LowPart || prop.uhVal.HighPart)
+						goto bomb;
+
+					item.size = prop.uhVal.LowPart;
+
+					if (FAILED(object->GetProperty( i, kpidPath, &prop )) || prop.vt != VT_BSTR || prop.bstrVal == NULL)
+						goto bomb;
+
+					std::wstring tempfname = prop.bstrVal;
+					int buflen = tempfname.size()*2;
+					char* buf = new char[buflen];
+					int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
+					if(ret == 0) {
+						delete[] buf;
+						::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
+						continue;
+					}
+					buf[ret] = 0;
+					item.name = buf;
+					
+					delete[] buf;
+
+					::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
+					asr.files.items.push_back(item);
+				}
+				
 				object->Release();
-				return ArchiveScanRecord(matchingFormat,(int)numFiles);
+				return asr;
 			}
 		}
 	}
 
+bomb:
 	object->Release();
 
 	return ArchiveScanRecord();
 }
 
 extern HWND hAppWnd;
+
+//TODO - factor out the filesize and name extraction code from below (it is already done once above)
 
 static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, std::string* innerFilename, int innerIndex)
 {
@@ -479,12 +511,12 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 			uint32 numFiles;
 			if (SUCCEEDED(object->GetNumberOfItems(&numFiles)))
 			{
-				FileSelectorContext fileSelectorContext;
+				FCEUARCHIVEFILEINFO fileSelectorContext;
 				currFileSelectorContext = &fileSelectorContext;
 
 				for(uint32 i=0;i<numFiles;i++)
 				{
-					FileSelectorContext::Item item;
+					FCEUARCHIVEFILEINFO::Item item;
 					item.index = i;
 
 					PROPVARIANT prop;
@@ -509,19 +541,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 					}
 					else
 					{
-						std::wstring tempfname = prop.bstrVal;
-						int buflen = tempfname.size()*2;
-						char* buf = new char[buflen];
-						int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
-						if(ret == 0) {
-							delete[] buf;
-							::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
-							continue;
-						}
-						buf[ret] = 0;
-						item.name = buf;
 						
-						delete[] buf;
 					}
 					
 					::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
@@ -548,7 +568,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 
 				if(ret != LB_ERR)
 				{
-					FileSelectorContext::Item& item = fileSelectorContext.items[ret];
+					FCEUARCHIVEFILEINFO::Item& item = fileSelectorContext.items[ret];
 					memorystream* ms = new memorystream(item.size);
 					OutStream outStream( item.index, ms->buf(), item.size);
 					const uint32 indices[1] = {item.index};
