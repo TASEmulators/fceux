@@ -1820,12 +1820,13 @@ int FCEUX_PPU_Loop(int skip) {
 	PPU_status &= ~0x40;
 	PPU_status &= ~0x20;
 
-	//todo - this early out might cause a problem.
-	//we might need to check it over and over in the main rendering loop (fceu does this)
-	if(!ScreenON && !SpriteON) {
-		runppu(kLineTime*242);
-		goto finish;
-	}
+	//----------
+	//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
+	//if(!PPUON) {
+	//	runppu(kLineTime*242);
+	//	goto finish;
+	//}
+	//----------
 
 	//There are 2 conditions that update all 5 PPU scroll counters with the 
 	//contents of the latches adjacent to them. The first is after a write to 
