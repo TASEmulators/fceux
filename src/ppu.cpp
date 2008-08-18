@@ -1761,7 +1761,7 @@ struct BGData {
 		struct Record {
 			uint8 nt, at, pt[2];
 
-			void Read(bool incr) {
+			void Read() {
 				RefreshAddr = ppur.get_ntread();
 				nt = FFCEUX_PPURead(RefreshAddr);
 				runppu(kFetchTime);
@@ -1784,7 +1784,7 @@ struct BGData {
 				pt[1] = FFCEUX_PPURead(RefreshAddr);
 				runppu(kFetchTime);
 
-				if(PPUON && incr)
+				if(PPUON)
 					ppur.increment_hsc();
 			}
 		};
@@ -1851,8 +1851,8 @@ int FCEUX_PPU_Loop(int skip) {
 			int yp = sl-1;
 
 			if(sl != 0) {
-				FCEUD_UpdatePPUView(scanline=yp,1);
-				FCEUD_UpdateNTView(scanline=yp,1);
+				DEBUG(FCEUD_UpdatePPUView(scanline=yp,1));
+				DEBUG(FCEUD_UpdateNTView(scanline=yp,1));
 			}
 
 			//twiddle the oam buffers
@@ -1866,7 +1866,7 @@ int FCEUX_PPU_Loop(int skip) {
 			//32 times, we will fetch a tile and then render 8 pixels.
 			//two of those tiles were read in the last scanline.
 			for(int xt=0;xt<32;xt++) {
-				bgdata.main[xt+2].Read(true);
+				bgdata.main[xt+2].Read();
 
 				//ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
@@ -2052,7 +2052,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 			//fetch BG: two tiles for next line
 			for(int xt=0;xt<2;xt++)
-				bgdata.main[xt].Read(true);
+				bgdata.main[xt].Read();
 
 			//I'm unclear of the reason why this particular access to memory is made. 
 			//The nametable address that is accessed 2 times in a row here, is also the 
