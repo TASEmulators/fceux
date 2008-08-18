@@ -313,6 +313,9 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
 
+	CheckMenuItem(fceumenu, ID_DISPLAY_FRAMECOUNTER, frame_display ? MF_CHECKED : MF_UNCHECKED);
+
+
 	int AutoFirePatternIDs[] = {
 		MENU_AUTOFIRE_PATTERN_1,
 		MENU_AUTOFIRE_PATTERN_2,
@@ -983,6 +986,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_ENABLE_AUTOSAVE:
 				EnableAutosave ^= 1;
+				UpdateCheckedMenuItems();
+				break;
+
+			case ID_DISPLAY_FRAMECOUNTER:
+				FCEUI_MovieToggleFrameDisplay();
 				UpdateCheckedMenuItems();
 				break;
 

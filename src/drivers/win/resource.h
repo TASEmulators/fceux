@@ -535,6 +535,7 @@
 #define MENU_INPUTDISPLAY_1             40251
 #define MENU_INPUTDISPLAY_2             40252
 #define MENU_INPUTDISPLAY_4             40253
+#define ID_DISPLAY_FRAMECOUNTER         40254
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -544,7 +545,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40254
+#define _APS_NEXT_COMMAND_VALUE         40255
 #define _APS_NEXT_CONTROL_VALUE         1181
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

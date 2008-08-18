@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -90,6 +91,7 @@ BEGIN
                 MENUITEM "4 player",                    MENU_INPUTDISPLAY_4
             END
             MENUITEM "Lag Counter",                 ID_DISPLAY_LAGCOUNTER40245
+            MENUITEM "Frame Counter",               ID_DISPLAY_FRAMECOUNTER
             MENUITEM SEPARATOR
             MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
             MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ
@@ -1601,7 +1603,8 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
