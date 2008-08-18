@@ -340,6 +340,7 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 //new ppu-----
 void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
+
 	if(tmp>=0x3F00)
 		{
 			// hmmm....
@@ -361,6 +362,7 @@ void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 
 uint8 FFCEUX_PPURead_Default(uint32 A) {
 	uint32 tmp = A;
+
 	if(tmp<0x2000)
 	{
 		return VPage[tmp>>10][tmp];
@@ -1977,22 +1979,16 @@ int FCEUX_PPU_Loop(int skip) {
 			}
 			oamcounts[scanslot] = oamcount;
 
+			//FV is clocked by the PPU's horizontal blanking impulse, and therefore will increment every scanline.
+			//well, according to (which?) tests, maybe at the end of hblank. 
+			//but, according to what it took to get crystalis working, it is at the beginning of hblank.
+			if(PPUON && sl != 0)
+				ppur.increment_vs();
+
 			//todo - think about clearing oams to a predefined value to force deterministic behavior
 
 			//fetch sprite patterns
 			for(int s=0;s<8;s++) {
-
-				if(s==1 && sl != 0) {
-					//begin hblank! 
-					//the screen is always behind the ppu operation so we need to wait a little longer before triggering it
-					//NOTE: SMB3 is very sensitive about this timing, for the statusbar
-					if(PPUON) {
-					if(GameHBIRQHook) 
-						GameHBIRQHook();
-					} else {
-						int zzz=9;
-					}
-				}
 
 				uint8* oam = oams[scanslot][s];
 				uint32 line = yp - oam[0];
@@ -2019,6 +2015,18 @@ int FCEUX_PPU_Loop(int skip) {
 
 				//garbage nametable fetches
 				runppu(kFetchTime);
+
+				if(((PPU[0]&0x38)!=0x18) && s == 2 && SpriteON ) {
+					//(The MMC3 scanline counter is based entirely on PPU A12, triggered on rising edges (after the line remains low for a sufficiently long period of time))
+					//http://nesdevwiki.org/wiki/index.php/Nintendo_MMC3
+					//test cases for timing: SMB3, Crystalis
+					//crystalis requires deferring this til somewhere in sprite [1,3]
+					//kirby requires deferring this til somewhere in sprite [2,5..
+					if(PPUON && GameHBIRQHook) {
+						GameHBIRQHook();
+					}
+				}
+
 				runppu(kFetchTime);
 
 				//pattern table fetches
@@ -2029,6 +2037,7 @@ int FCEUX_PPU_Loop(int skip) {
 				oam[5] = FFCEUX_PPURead(RefreshAddr);
 				runppu(kFetchTime);
 
+
 				//hflip
 				if(!(oam[2]&0x40)) {
 					oam[4] = bitrevlut[oam[4]];
@@ -2036,12 +2045,7 @@ int FCEUX_PPU_Loop(int skip) {
 				}
 			}
 
-			// FV is clocked by the PPU's horizontal blanking impulse, and therefore will increment every scanline.
-			//well, according to my tests, maybe at the end of hblank. 
-			//but where is the end of hblank?
-			//well, i imagine it needs to be before the BG fetches for the next line.
-			if(PPUON && sl != 0)
-				ppur.increment_vs();
+
 
 			//so.. this is the end of hblank. latch horizontal scroll values
 			if(PPUON && sl != 0)
