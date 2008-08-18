@@ -483,6 +483,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						char filename [512];
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
 
+						//replay system requires this to stay put.
+						SetCurrentDirectory(BaseDirectory.c_str());
+
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
 						if(!asr.isArchive()) {
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
@@ -584,6 +587,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							{
 								char relative[MAX_PATH*2];
 								AbsoluteToRelative(relative, szFile, BaseDirectory.c_str());
+								
+								//replay system requires this to stay put.
+								SetCurrentDirectory(BaseDirectory.c_str());
 
 								ArchiveScanRecord asr = FCEUD_ScanArchive(relative);
 								FCEUFILE* fp = FCEU_fopen(relative,0,"rb",0,-1,fm2ext);
