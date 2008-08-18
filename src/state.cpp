@@ -612,7 +612,10 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 		x=FCEUMOV_PostLoad();
 	}
 
-	if(!x && backup) FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
+	if(!x && backup) {
+		msBackupSavestate.sync();
+		FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
+	}
 
 	return x;
 }
