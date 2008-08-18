@@ -32,6 +32,7 @@
 #include "window.h"
 #include "video.h"
 #include "memwatch.h"
+#include "fceu.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -91,6 +92,7 @@ static CFGSTRUCT fceuconfig[] = {
 	NAC("vgamode",vmod),
 	NAC("sound",soundo),
 	NAC("sicon",status_icon),
+	AC(newppu),
 
 	NACS("odroms",directory_names[0]),
 	NACS("odnonvol",directory_names[1]),

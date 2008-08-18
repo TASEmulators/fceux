@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
+#include <zlib.h>
 
 #ifdef __linux
 #include <unistd.h>
@@ -39,6 +40,37 @@ extern "C"
 #define TRUE 1
 #define FALSE 0
 #endif
+
+struct LuaSaveState {
+	std::string filename;
+	memorystream *data;
+	bool anonymous, persisted;
+	LuaSaveState()
+		: data(0) 
+		, anonymous(false)
+		, persisted(false)
+	{}
+	~LuaSaveState() {
+		if(data) delete data;
+	}
+	void persist() {
+		persisted = true;
+		FILE* outf = fopen(filename.c_str(),"wb");
+		fwrite(data->buf(),1,data->size(),outf);
+		fclose(outf);
+	}
+	void ensureLoad() {
+		if(data) return;
+		persisted = true;
+		FILE* inf = fopen(filename.c_str(),"rb");
+		fseek(inf,0,SEEK_END);
+		int len = ftell(inf);
+		fseek(inf,0,SEEK_SET);
+		data = new memorystream(len);
+		fread(data->buf(),1,len,inf);
+		fclose(inf);
+	}
+};
 
 static lua_State *L;
 
@@ -425,42 +457,49 @@ static int joypad_set(lua_State *L) {
 
 
 
-
-// Helper function to convert a savestate object to the filename it represents.
-static char *savestateobj2filename(lua_State *L, int offset) {
-	
-	// First we get the metatable of the indicated object
-	int result = lua_getmetatable(L, offset);
-
-	if (!result)
-		luaL_error(L, "object not a savestate object");
-	
-	// Also check that the type entry is set
-	lua_getfield(L, -1, "__metatable");
-	if (strcmp(lua_tostring(L,-1), "FCEU Savestate") != 0)
-		luaL_error(L, "object not a savestate object");
-	lua_pop(L,1);
-	
-	// Now, get the field we want
-	lua_getfield(L, -1, "filename");
-	
-	// Return it
-	return (char *) lua_tostring(L, -1);
-}
-
+//
+//// Helper function to convert a savestate object to the filename it represents.
+//static char *savestateobj2filename(lua_State *L, int offset) {
+//	
+//	// First we get the metatable of the indicated object
+//	int result = lua_getmetatable(L, offset);
+//
+//	if (!result)
+//		luaL_error(L, "object not a savestate object");
+//	
+//	// Also check that the type entry is set
+//	lua_getfield(L, -1, "__metatable");
+//	if (strcmp(lua_tostring(L,-1), "FCEU Savestate") != 0)
+//		luaL_error(L, "object not a savestate object");
+//	lua_pop(L,1);
+//	
+//	// Now, get the field we want
+//	lua_getfield(L, -1, "filename");
+//	
+//	// Return it
+//	return (char *) lua_tostring(L, -1);
+//}
+//
 
 // Helper function for garbage collection.
 static int savestate_gc(lua_State *L) {
-	// The object we're collecting is on top of the stack
-	lua_getmetatable(L,1);
-	
-	// Get the filename
-	const char *filename;
-	lua_getfield(L, -1, "filename");
-	filename = lua_tostring(L,-1);
 
-	// Delete the file
-	remove(filename);
+	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
+	if(ss->persisted && ss->anonymous)
+		remove(ss->filename.c_str());
+	ss->~LuaSaveState();
+
+	//// The object we're collecting is on top of the stack
+	//lua_getmetatable(L,1);
+	//
+	//// Get the filename
+	//const char *filename;
+	//lua_getfield(L, -1, "filename");
+	//filename = lua_tostring(L,-1);
+
+	//// Delete the file
+	//remove(filename);
+	//
 	
 	// We exit, and the garbage collector takes care of the rest.
 	return 0;
@@ -480,13 +519,14 @@ static int savestate_create(lua_State *L) {
 		}
 	}
 
-	std::string filename;
+	//lets use lua to allocate the memory, since it is effectively a memory pool.
+	LuaSaveState *ss = new(lua_newuserdata(L,sizeof(LuaSaveState))) LuaSaveState();
 
 	if (which > 0) {
 		// Find an appropriate filename. This is OS specific, unfortunately.
 		// So I turned the filename selection code into my bitch. :)
 		// Numbers are 0 through 9 though.
-		filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
+		ss->filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
 	}
 	else {
 		//char tempbuf[100] = "snluaXXXXXX";
@@ -494,36 +534,34 @@ static int savestate_create(lua_State *L) {
 		//doesnt work -^
 		
 		//mbg 8/13/08 - this needs to be this way. we'll make a better system later:
-		filename = tempnam(NULL, "snlua");
+		ss->filename = tempnam(NULL, "snlua");
+		ss->anonymous = true;
 	}
 	
-	// Our "object". We don't care about the type, we just need the memory and GC services.
-	lua_newuserdata(L,1);
-	
+
 	// The metatable we use, protected from Lua and contains garbage collection info and stuff.
 	lua_newtable(L);
 	
-	// First, we must protect it
+	//// First, we must protect it
 	lua_pushstring(L, "FCEU Savestate");
 	lua_setfield(L, -2, "__metatable");
-	
-	
-	// Now we need to save the file itself.
-	lua_pushstring(L, filename.c_str());
-	lua_setfield(L, -2, "filename");
+	//
+	//
+	//// Now we need to save the file itself.
+	//lua_pushstring(L, filename.c_str());
+	//lua_setfield(L, -2, "filename");
 	
 	// If it's an anonymous savestate, we must delete the file from disk should it be gargage collected
-	if (which < 0) {
+	//if (which < 0) {
 		lua_pushcfunction(L, savestate_gc);
 		lua_setfield(L, -2, "__gc");
-	}
+	//}
 	
 	// Set the metatable
 	lua_setmetatable(L, -2);
 
 	// Awesome. Return the object
 	return 1;
-	
 }
 
 
@@ -532,16 +570,27 @@ static int savestate_create(lua_State *L) {
 //   Saves a state to the given object.
 static int savestate_save(lua_State *L) {
 
-	char *filename = savestateobj2filename(L,1);
+	//char *filename = savestateobj2filename(L,1);
+
+	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
+	if(ss->data) delete ss->data;
+	ss->data = new memorystream();
 
 //	printf("saving %s\n", filename);
 
 	// Save states are very expensive. They take time.
 	numTries--;
 
-	FCEUI_SaveState(filename);
+	FCEUSS_SaveMS(ss->data,Z_NO_COMPRESSION);
+	ss->data->sync();
 	return 0;
+}
 
+static int savestate_persist(lua_State *L) {
+
+	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
+	ss->persist();
+	return 0;
 }
 
 // savestate.load(object state)
@@ -549,12 +598,13 @@ static int savestate_save(lua_State *L) {
 //   Loads the given state
 static int savestate_load(lua_State *L) {
 
-	char *filename = savestateobj2filename(L,1);
+	//char *filename = savestateobj2filename(L,1);
+
+	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
 
 	numTries--;
 
-//	printf("loading %s\n", filename);
-	FCEUI_LoadState(filename);
+	FCEUSS_LoadFP(ss->data,SSLOADPARAM_NOBACKUP);
 	return 0;
 
 }
@@ -1408,6 +1458,7 @@ static const struct luaL_reg joypadlib[] = {
 static const struct luaL_reg savestatelib[] = {
 	{"create", savestate_create},
 	{"save", savestate_save},
+	{"persist", savestate_persist},
 	{"load", savestate_load},
 
 	{NULL,NULL}

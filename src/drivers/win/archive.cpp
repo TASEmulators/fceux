@@ -15,6 +15,9 @@
 #include "driver.h"
 #include "main.h"
 
+//todo - we need a way to get a non-readable filepointer, just for probing the archive
+//it would be nonreadable because we wouldnt actually decompress the contents
+
 static FCEUARCHIVEFILEINFO *currFileSelectorContext;
 
 DEFINE_GUID(CLSID_CFormat_07,0x23170F69,0x40C1,0x278A,0x10,0x00,0x00,0x01,0x10,0x07,0x00,0x00);
@@ -290,9 +293,9 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 	case WM_INITDIALOG:
 		{
 			HWND hwndListbox = GetDlgItem(hwndDlg,IDC_LIST1);
-			for(uint32 i=0;i<currFileSelectorContext->items.size();i++)
+			for(uint32 i=0;i<currFileSelectorContext->size();i++)
 			{
-				std::string& name = currFileSelectorContext->items[i].name;
+				std::string& name = (*currFileSelectorContext)[i].name;
 				SendMessage(hwndListbox,LB_ADDSTRING,0,(LPARAM)name.c_str());
 			}
 		}
@@ -380,7 +383,22 @@ void initArchiveSystem()
 
 		::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
 	}
+}
 
+static std::string wstringFromPROPVARIANT(BSTR bstr, bool& success) {
+	std::wstring tempfname = bstr;
+	int buflen = tempfname.size()*2;
+	char* buf = new char[buflen];
+	int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
+	if(ret == 0) {
+		delete[] buf;
+		success = false;
+	}
+	buf[ret] = 0;
+	std::string strret = buf;
+	delete[] buf;
+	success = true;
+	return strret;
 }
 
 ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
@@ -435,7 +453,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 				//scan the filename of each item
 				for(uint32 i=0;i<numFiles;i++)
 				{
-					FCEUARCHIVEFILEINFO::Item item;
+					FCEUARCHIVEFILEINFO_ITEM item;
 					item.index = i;
 
 					PROPVARIANT prop;
@@ -449,22 +467,14 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 					if (FAILED(object->GetProperty( i, kpidPath, &prop )) || prop.vt != VT_BSTR || prop.bstrVal == NULL)
 						goto bomb;
 
-					std::wstring tempfname = prop.bstrVal;
-					int buflen = tempfname.size()*2;
-					char* buf = new char[buflen];
-					int ret = WideCharToMultiByte(CP_ACP,0,tempfname.c_str(),tempfname.size(),buf,buflen,0,0);
-					if(ret == 0) {
-						delete[] buf;
-						::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
-						continue;
-					}
-					buf[ret] = 0;
-					item.name = buf;
-					
-					delete[] buf;
-
+					bool ok;
+					item.name = wstringFromPROPVARIANT(prop.bstrVal,ok);
 					::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
-					asr.files.items.push_back(item);
+					
+					if(!ok)
+						continue;
+
+					asr.files.push_back(item);
 				}
 				
 				object->Release();
@@ -508,94 +518,55 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 		InFileStream ifs(fname);
 		if (SUCCEEDED(object->Open(&ifs,0,0)))
 		{
-			uint32 numFiles;
-			if (SUCCEEDED(object->GetNumberOfItems(&numFiles)))
+			uint32 numfiles = asr.numFilesInArchive;
+			currFileSelectorContext = &asr.files;
+
+			//try to load the file directly if we're in autopilot
+			int ret = LB_ERR;
+			if(innerFilename || innerIndex != -1)
 			{
-				FCEUARCHIVEFILEINFO fileSelectorContext;
-				currFileSelectorContext = &fileSelectorContext;
+				for(uint32 i=0;i<currFileSelectorContext->size();i++)
+					if(i == (uint32)innerIndex || (innerFilename && (*currFileSelectorContext)[i].name == *innerFilename))
+					{
+						ret = i;
+						break;
+					}
+			}
+			else if(asr.files.size()==1)
+				//or automatically choose the first file if there was only one file in the archive
+				ret = 0;
+			else
+				//otherwise use the UI
+				ret = DialogBoxParam(fceu_hInstance, "ARCHIVECHOOSERDIALOG", hAppWnd, ArchiveFileSelectorCallback, (LPARAM)0);
 
-				for(uint32 i=0;i<numFiles;i++)
+			if(ret != LB_ERR)
+			{
+				FCEUARCHIVEFILEINFO_ITEM& item = (*currFileSelectorContext)[ret];
+				memorystream* ms = new memorystream(item.size);
+				OutStream outStream( item.index, ms->buf(), item.size);
+				const uint32 indices[1] = {item.index};
+				HRESULT hr = object->Extract(indices,1,0,&outStream);
+				if (SUCCEEDED(hr))
 				{
-					FCEUARCHIVEFILEINFO::Item item;
-					item.index = i;
-
-					PROPVARIANT prop;
-					prop.vt = VT_EMPTY;
-
-					if (FAILED(object->GetProperty( i, kpidSize, &prop )) || prop.vt != VT_UI8 || !prop.uhVal.LowPart || prop.uhVal.HighPart)
-					{
-						goto bomb;
-					}
-
-					item.size = prop.uhVal.LowPart;
-
-					if (FAILED(object->GetProperty( i, kpidPath, &prop )) || prop.vt != VT_BSTR || prop.bstrVal == NULL)
-					{
-						//mbg 7/10/08 - this was attempting to handle gz files, but it fails later in the extraction
-						if(!unnamedFileFound)
-						{
-							unnamedFileFound = true;
-							item.name = "<unnamed>";
-						}
-						else goto bomb;
-					}
-					else
-					{
-						
-					}
-					
-					::VariantClear( reinterpret_cast<VARIANTARG*>(&prop) );
-					fileSelectorContext.items.push_back(item);
-				}
-
-				//try to load the file directly if we're in autopilot
-				int ret = LB_ERR;
-				if(innerFilename || innerIndex != -1)
-				{
-					for(uint32 i=0;i<fileSelectorContext.items.size();i++)
-						if(i == (uint32)innerIndex || (innerFilename && fileSelectorContext.items[i].name == *innerFilename))
-						{
-							ret = i;
-							break;
-						}
-				}
-				else if(numFiles==1)
-					//or automatically choose the first file if there was only one file in the archive
-					ret = 0;
+					//if we extracted the file correctly
+					fp = new FCEUFILE();
+					fp->archiveFilename = fname;
+					fp->filename = item.name;
+					fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
+					fp->archiveIndex = ret;
+					fp->mode = FCEUFILE::READ;
+					fp->size = item.size;
+					fp->stream = ms;
+					fp->archiveCount = (int)asr.numFilesInArchive;
+				} 
 				else
-					//otherwise use the UI
-					ret = DialogBoxParam(fceu_hInstance, "ARCHIVECHOOSERDIALOG", hAppWnd, ArchiveFileSelectorCallback, (LPARAM)0);
-
-				if(ret != LB_ERR)
 				{
-					FCEUARCHIVEFILEINFO::Item& item = fileSelectorContext.items[ret];
-					memorystream* ms = new memorystream(item.size);
-					OutStream outStream( item.index, ms->buf(), item.size);
-					const uint32 indices[1] = {item.index};
-					HRESULT hr = object->Extract(indices,1,0,&outStream);
-					if (SUCCEEDED(hr))
-					{
-						//if we extracted the file correctly
-						fp = new FCEUFILE();
-						fp->archiveFilename = fname;
-						fp->filename = fileSelectorContext.items[ret].name;
-						fp->fullFilename = fp->archiveFilename + "|" + fp->filename;
-						fp->archiveIndex = ret;
-						fp->mode = FCEUFILE::READ;
-						fp->size = fileSelectorContext.items[ret].size;
-						fp->stream = ms;
-						fp->archiveCount = (int)numFiles;
-					} 
-					else
-					{
-						delete ms;
-					}
+					delete ms;
+				}
 
-				} //if returned a file from the fileselector
-				
-			} //if we scanned the 7z correctly
+			} //if returned a file from the fileselector
+			
 		} //if we opened the 7z correctly
-		bomb:
 		object->Release();
 	}
 

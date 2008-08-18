@@ -71,14 +71,14 @@ struct FCEUFILE {
 	}
 };
 
-struct FCEUARCHIVEFILEINFO
-{
-	struct Item
-	{
-		std::string name;
-		uint32 size, index;
-	};
-	std::vector<Item> items;
+struct FCEUARCHIVEFILEINFO_ITEM {
+	std::string name;
+	uint32 size, index;
+};
+
+class FCEUARCHIVEFILEINFO : public std::vector<FCEUARCHIVEFILEINFO_ITEM> {
+public:
+	void FilterByExtension(const char** ext);
 };
 
 struct FileBaseInfo {
@@ -97,15 +97,18 @@ struct ArchiveScanRecord
 {	
 	ArchiveScanRecord()
 		: type(-1)
-		, numFiles(0)
+		, numFilesInArchive(0)
 	{}
 	ArchiveScanRecord(int _type, int _numFiles)
 	{
 		type = _type;
-		numFiles = _numFiles;
+		numFilesInArchive = _numFiles;
 	}
 	int type;
-	int numFiles;
+
+	//be careful: this is the number of files in the archive.
+	//the size of the files variable might be different.
+	int numFilesInArchive;
 
 	FCEUARCHIVEFILEINFO files;
 
@@ -113,7 +116,7 @@ struct ArchiveScanRecord
 };
 
 
-FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index=-1);
+FCEUFILE *FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index=-1, const char** extensions = 0);
 bool FCEU_isFileInArchive(const char *path);
 int FCEU_fclose(FCEUFILE*);
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE*);

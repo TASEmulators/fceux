@@ -48,6 +48,7 @@
 
 #define SpriteON  (PPU[1]&0x10)   //Show Sprite
 #define ScreenON  (PPU[1]&0x08)   //Show screen
+#define PPUON    (PPU[1]&0x18)		//PPU should operate
 
 #define PPU_status      (PPU[2])
 
@@ -62,6 +63,146 @@ static void Fixit1(void);
 static uint32 ppulut1[256];
 static uint32 ppulut2[256];
 static uint32 ppulut3[128];
+
+
+template<typename T, int BITS>
+struct BITREVLUT {
+
+	T* lut;
+	BITREVLUT() {
+		int bits = BITS;
+		int n = 1<<BITS;
+		lut = new T[n];
+
+		int m = 1;
+		int a = n>>1;
+		int j = 2;
+
+		lut[0] = 0;
+		lut[1] = a;
+
+		while(--bits) {
+			m <<= 1;
+			a >>= 1;
+			for(int i=0;i<m;i++)
+				lut[j++] = lut[i] + a;
+		}
+	}
+
+	T operator[](int index) { return lut[index]; }
+
+};
+BITREVLUT<uint8,8> bitrevlut;
+
+//uses the internal counters concept at http://nesdev.icequake.net/PPU%20addressing.txt
+struct PPUREGS {
+	uint32 fv;//3
+	uint32 v;//1
+	uint32 h;//1
+	uint32 vt;//5
+	uint32 ht;//5
+	uint32 fh;//3
+	uint32 s;//1
+	uint32 par;//8
+	uint32 ar;//2
+
+	uint32 _fv, _v, _h, _vt, _ht;
+
+	PPUREGS()
+		: fv(0), v(0), h(0), vt(0), ht(0), fh(0), s(0), par(0), ar(0)
+		,  _fv(0), _v(0), _h(0), _vt(0), _ht(0)
+	{}
+
+	void install_latches() {
+		fv = _fv;
+		v = _v;
+		h = _h;
+		vt = _vt;
+		ht = _ht;
+	}
+
+	void install_h_latches() {
+		if(ht!=_ht || h != _h) {
+			int zzz=9;
+		}
+		ht = _ht;
+		h = _h;
+	}
+
+	void clear_latches() {
+		_fv = _v = _h = _vt = _ht = 0;
+		fh = 0;
+	}
+
+	void increment_hsc() {
+		//The first one, the horizontal scroll counter, consists of 6 bits, and is 
+		//made up by daisy-chaining the HT counter to the H counter. The HT counter is 
+		//then clocked every 8 pixel dot clocks (or every 8/3 CPU clock cycles).
+		ht++;
+		h += (ht>>5);
+		ht &= 31;
+		h &= 1;
+	}
+
+	void increment_vs() {
+		fv++;
+		vt += (fv>>3);
+		v += (vt==30)?1:0;
+		fv &= 7;
+		if(vt==30) vt=0;
+		v &= 1;
+	}
+
+	uint32 get_ntread() {
+		return 0x2000 | (v<<0xB) | (h<<0xA) | (vt<<5) | ht;
+	}
+
+	uint32 get_2007access() {
+		return ((fv&3)<<0xC) | (v<<0xB) | (h<<0xA) | (vt<<5) | ht;
+	}
+	
+	//The PPU has an internal 4-position, 2-bit shifter, which it uses for 
+	//obtaining the 2-bit palette select data during an attribute table byte 
+	//fetch. To represent how this data is shifted in the diagram, letters a..c 
+	//are used in the diagram to represent the right-shift position amount to 
+	//apply to the data read from the attribute data (a is always 0). This is why 
+	//you only see bits 0 and 1 used off the read attribute data in the diagram.
+	uint32 get_atread() {
+		return 0x2000 | (v<<0xB) | (h<<0xA) | 0x3C0 | ((vt&0x1C)<<1) | ((ht&0x1C)>>2);
+	}
+
+	//address line 3 relates to the pattern table fetch occuring (the PPU always makes them in pairs).
+	uint32 get_ptread() {
+		return (s<<0xC) | (par<<0x4) | fv;
+	}
+
+	void increment2007(bool by32) {
+	
+		//If the VRAM address increment bit (2000.2) is clear (inc. amt. = 1), all the 
+		//scroll counters are daisy-chained (in the order of HT, VT, H, V, FV) so that 
+		//the carry out of each counter controls the next counter's clock rate. The 
+		//result is that all 5 counters function as a single 15-bit one. Any access to 
+		//2007 clocks the HT counter here.
+		//
+		//If the VRAM address increment bit is set (inc. amt. = 32), the only 
+		//difference is that the HT counter is no longer being clocked, and the VT 
+		//counter is now being clocked by access to 2007.
+		if(by32) {
+			vt++;
+		} else {
+			ht++;
+			vt+=(ht>>5)&1;
+		}
+		h+=(vt>>5);
+		v+=(h>>1);
+		fv+=(v>>1);
+		ht &= 31;
+		vt &= 31;
+		h &= 1;
+		v &= 1;
+		fv &= 7;
+	}
+} ppur;
 
 static void makeppulut(void)
 {
@@ -193,8 +334,56 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 		return (vnapage[ntnum][attraddr] & (3<<temp)) >> temp;
 }
 
+//new ppu-----
+void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
+	uint32 tmp = A;
+	if(tmp>=0x3F00)
+		{
+			// hmmm....
+			if(!(tmp&0xf))
+				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+		}
+		else if(tmp<0x2000)
+		{
+			if(PPUCHRRAM&(1<<(tmp>>10)))
+				VPage[tmp>>10][tmp]=V;
+		}   
+		else
+		{
+			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
+				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+		}
+}
+
+uint8 FFCEUX_PPURead_Default(uint32 A) {
+	uint32 tmp = A;
+	if(tmp<0x2000)
+	{
+		return VPage[tmp>>10][tmp];
+	}
+	else
+	{   
+		return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+	}
+}
+
+
+uint8 (*FFCEUX_PPURead)(uint32 A) = FFCEUX_PPURead_Default;
+void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = FFCEUX_PPUWrite_Default;
+//whether to use the new ppu
+int newppu=0;
+//---------------
+
 static DECLFR(A2002)
 {
+	if(newppu)
+	{
+		//once we thought we clear latches here, but that caused midframe glitches.
+		//i think we should only reset the state machine for 2005/2006
+		//ppur.clear_latches();
+	}
+	
 	uint8 ret;
 
 	FCEUPPU_LineUpdate();
@@ -209,6 +398,7 @@ static DECLFR(A2002)
 		PPU_status&=0x7F;
 		PPUGenLatch=ret;
 	}
+
 	return ret;
 }
 
@@ -248,34 +438,45 @@ static DECLFR(A2007)
 	uint8 ret;
 	uint32 tmp=RefreshAddr&0x3FFF;
 
-	FCEUPPU_LineUpdate();
+	if(newppu) {
+		//mbg
+		ret = VRAMBuffer;
+		RefreshAddr = ppur.get_2007access();
+		VRAMBuffer = FFCEUX_PPURead(RefreshAddr);
+		ppur.increment2007(INC32!=0);
+		RefreshAddr = ppur.get_2007access();
+		return ret;
+	} else {
+		FCEUPPU_LineUpdate();
 
-	ret=VRAMBuffer;
+		ret=VRAMBuffer;
 
-#ifdef FCEUDEF_DEBUGGER
-	if(!fceuindbg)
-#endif
-	{
-		if(PPU_hook) PPU_hook(tmp);
-		PPUGenLatch=VRAMBuffer;
-		if(tmp<0x2000)
+	#ifdef FCEUDEF_DEBUGGER
+		if(!fceuindbg)
+	#endif
 		{
-			VRAMBuffer=VPage[tmp>>10][tmp];
+			if(PPU_hook) PPU_hook(tmp);
+			PPUGenLatch=VRAMBuffer;
+			if(tmp<0x2000)
+			{
+				VRAMBuffer=VPage[tmp>>10][tmp];
+			}
+			else
+			{   
+				VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+			}
 		}
-		else
-		{   
-			VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+	#ifdef FCEUDEF_DEBUGGER
+		if(!fceuindbg)
+	#endif
+		{
+			if(INC32) RefreshAddr+=32;
+			else RefreshAddr++;
+			if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
 		}
+
+		return ret;
 	}
-#ifdef FCEUDEF_DEBUGGER
-	if(!fceuindbg)
-#endif
-	{
-		if(INC32) RefreshAddr+=32;
-		else RefreshAddr++;
-		if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
-	}
-	return ret;
 }
 
 static DECLFW(B2000)
@@ -292,6 +493,10 @@ static DECLFW(B2000)
 	PPU[0]=V;
 	TempAddr&=0xF3FF;
 	TempAddr|=(V&3)<<10;
+
+	ppur._h = V&1;
+	ppur._v = (V>>1)&1;
+	ppur.s = (V>>4)&1;
 }
 
 static DECLFW(B2001)
@@ -347,12 +552,16 @@ static DECLFW(B2005)
 		tmp&=0xFFE0;
 		tmp|=V>>3;  
 		XOffset=V&7;
+		ppur._ht = V>>3;
+		ppur.fh = V&7;
 	}
 	else
 	{   
 		tmp&=0x8C1F;
 		tmp|=((V&~0x7)<<2);
 		tmp|=(V&7)<<12;
+		ppur._vt = V>>3;
+		ppur._fv = V&7;
 	}
 	TempAddr=tmp;
 	vtoggle^=1;  
@@ -361,15 +570,23 @@ static DECLFW(B2005)
 
 static DECLFW(B2006)
 {
-	FCEUPPU_LineUpdate();
+	if(!newppu)
+		FCEUPPU_LineUpdate();
+
 
 	PPUGenLatch=V;
 	if(!vtoggle)  
 	{
 		TempAddr&=0x00FF;
 		TempAddr|=(V&0x3f)<<8;
+		
+		ppur._vt &= 0x07;
+		ppur._vt |= (V&0x3)<<3;
+		ppur._h = (V>>2)&1;
+		ppur._v = (V>>3)&1;
+		ppur._fv = (V>>4)&3;
 	}
-	else
+ 	else
 	{   
 		TempAddr&=0xFF00;
 		TempAddr|=V;
@@ -378,6 +595,20 @@ static DECLFW(B2006)
 		if(PPU_hook)
 			PPU_hook(RefreshAddr);
 		//printf("%d, %04x\n",scanline,RefreshAddr);
+
+		ppur._vt &= 0x18;
+		ppur._vt |= (V>>5);
+		ppur._ht = V&31;
+
+		ppur.install_latches();
+
+		if(RefreshAddr==0x18DE) {
+			int zzz=9;
+		}
+	}
+
+	if(ppur._fv == 1) {
+		int zzz=9;
 	}
 	vtoggle^=1;
 }
@@ -385,28 +616,53 @@ static DECLFW(B2006)
 static DECLFW(B2007)
 {
 	uint32 tmp=RefreshAddr&0x3FFF;
-	PPUGenLatch=V;
-	if(tmp>=0x3F00)
-	{
-		// hmmm....
-		if(!(tmp&0xf))
-			PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-		else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
-	}
-	else if(tmp<0x2000)
-	{
-		if(PPUCHRRAM&(1<<(tmp>>10)))
-			VPage[tmp>>10][tmp]=V;
-	}   
+
+	if(newppu) {
+		RefreshAddr = ppur.get_2007access();
+		FFCEUX_PPUWrite(RefreshAddr,V);
+		if(RefreshAddr == 0x2679) {
+			int zzz=9;
+		}
+		if(RefreshAddr == 0x3f13 ) {
+			int zzz=9;
+		}
+		//printf("%04x ",RefreshAddr);
+		ppur.increment2007(INC32!=0);
+		RefreshAddr = ppur.get_2007access();
+	} 
 	else
 	{
-		if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
-			vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+		//printf("%04x ",tmp);
+		if(tmp==0x2679)
+		{
+			int zzz=9;
+		}
+				if(tmp == 0x3f13 ) {
+			int zzz=9;
+		}
+		PPUGenLatch=V;
+		if(tmp>=0x3F00)
+		{
+			// hmmm....
+			if(!(tmp&0xf))
+				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+		}
+		else if(tmp<0x2000)
+		{
+			if(PPUCHRRAM&(1<<(tmp>>10)))
+				VPage[tmp>>10][tmp]=V;
+		}   
+		else
+		{
+			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
+				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+		}
+		//      FCEU_printf("ppu (%04x) %04x:%04x %d, %d\n",X.PC,RefreshAddr,PPUGenLatch,scanline,timestamp);
+		if(INC32) RefreshAddr+=32;
+		else RefreshAddr++;
+		if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
 	}
-	//      FCEU_printf("ppu (%04x) %04x:%04x %d, %d\n",X.PC,RefreshAddr,PPUGenLatch,scanline,timestamp);
-	if(INC32) RefreshAddr+=32;
-	else RefreshAddr++;
-	if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
 }
 
 static DECLFW(B4014)
@@ -1307,9 +1563,13 @@ void FCEUPPU_Power(void)
 	BWrite[0x4014]=B4014;
 }
 
-
 int FCEUPPU_Loop(int skip)
 {
+	if(newppu) {
+		int FCEUX_PPU_Loop(int skip);
+		return FCEUX_PPU_Loop(skip);
+	}
+
 	//Needed for Knight Rider, possibly others.
 	if(ppudead)
 	{
@@ -1441,6 +1701,8 @@ int FCEUPPU_Loop(int skip)
 	}   
 }
 
+int (*PPU_MASTER)(int skip) = FCEUPPU_Loop;
+
 static uint16 TempAddrT,RefreshAddrT;
 
 void FCEUPPU_LoadState(int version)
@@ -1470,4 +1732,338 @@ void FCEUPPU_SaveState(void)
 {
 	TempAddrT=TempAddr;   
 	RefreshAddrT=RefreshAddr;
+}
+
+
+//---------------------
+int pputime=0;
+int totpputime=0;
+const int kLineTime=1364;
+const int kFetchTime=8;
+int idleSynch = 0;
+void runcpu() {
+	//cpu runs 1/12 as fast as ppu.
+	if(pputime<12) return;
+	int cputodo = pputime/12;
+	X6502_Run(cputodo*3); //why *3 i dunno thats how the cpu core is setup
+	pputime -= cputodo*12;
+}
+void runppu(int x) {
+	pputime+=x;
+	totpputime+=x;
+	runcpu();
+}
+
+struct BGData {
+		struct Record {
+			uint8 nt, at, pt[2];
+
+			void Read(bool incr) {
+				RefreshAddr = ppur.get_ntread();
+				nt = FFCEUX_PPURead(RefreshAddr);
+				runppu(kFetchTime);
+
+				RefreshAddr = ppur.get_atread();
+				at = FFCEUX_PPURead(RefreshAddr);
+				runppu(kFetchTime);
+
+				//modify at to get appropriate palette shift
+				if(ppur.vt&2) at >>= 4;
+				if(ppur.ht&2) at >>= 2;
+				at &= 0x03;
+				at <<= 2;
+
+				ppur.par = nt;
+				RefreshAddr = ppur.get_ptread();
+				pt[0] = FFCEUX_PPURead(RefreshAddr);
+				runppu(kFetchTime);
+				RefreshAddr |= 8;
+				pt[1] = FFCEUX_PPURead(RefreshAddr);
+				runppu(kFetchTime);
+
+				if(PPUON && incr)
+					ppur.increment_hsc();
+			}
+		};
+
+		Record main[34]; //one at the end is junk, it can never be rendered
+	} bgdata;
+
+
+int framectr=0;
+int FCEUX_PPU_Loop(int skip) {
+	//262 scanlines
+
+	if(ppudead)
+	{
+		memset(XBuf, 0x80, 256*240);
+		runppu(262*kLineTime);
+		ppudead--;
+		goto finish;
+	}
+
+	//vblank
+	PPU_status |= 0x80;
+	if(VBlankON) TriggerNMI();
+
+	//TRICKY:
+	//even though the timing doc says that every scanline is 1364 except for the first dummy scanline,
+	//i need these to be 1360 in order to get marble madness and pirates! to work.
+	runppu(20*1360);
+
+	//no longer in vblank
+	PPU_status &= ~0x80;
+	//fceu cleared the spritehit and spriteoverflow flags at the same time.. it is reasonable here. or, it is resaonable at vblank interrupt time
+	PPU_status &= ~0x40;
+	PPU_status &= ~0x20;
+
+	//todo - this early out might cause a problem.
+	//we might need to check it over and over in the main rendering loop (fceu does this)
+	if(!ScreenON && !SpriteON) {
+		runppu(kLineTime*242);
+		goto finish;
+	}
+
+	//There are 2 conditions that update all 5 PPU scroll counters with the 
+	//contents of the latches adjacent to them. The first is after a write to 
+	//2006/2. The second, is at the beginning of scanline 20, when the PPU starts 
+	//rendering data for the first time in a frame (this update won't happen if 
+	//all rendering is disabled via 2001.3 and 2001.4).
+
+	if(PPUON)
+		ppur.install_latches();
+
+	uint8 oams[2][8][7];
+	int oamcounts[2]={0,0};
+	int oamslot=0;
+	int oamcount;
+
+	//capture the initial xscroll
+	int xscroll = ppur.fh;
+
+	//render 241 scanlines (including 1 dummy at beginning)
+	for(int sl=0;sl<241;sl++) {
+		int yp = sl-1;
+
+		if(sl != 0) {
+			FCEUD_UpdatePPUView(scanline=yp,1);
+			FCEUD_UpdateNTView(scanline=yp,1);
+		}
+
+		//twiddle the oam buffers
+		int scanslot = oamslot^1;
+		int renderslot = oamslot;
+		oamslot ^= 1;
+
+		oamcount = oamcounts[renderslot];
+		
+		//the main scanline rendering loop:
+		//32 times, we will fetch a tile and then render 8 pixels.
+		//two of those tiles were read in the last scanline.
+		for(int xt=0;xt<32;xt++) {
+			bgdata.main[xt+2].Read(true);
+
+			//ok, we're also going to draw here.
+			//unless we're on the first dummy scanline
+			if(sl != 0) {
+				int xstart = xt<<3;
+				oamcount = oamcounts[renderslot];
+				uint8 *target=XBuf+(yp<<8)+xstart;
+				uint8 *ptr = target;
+				int rasterpos = xstart;
+				for(int xp=0;xp<8;xp++,rasterpos++) {
+
+					//bg pos is different from raster pos due to its offsetability.
+					//so adjust for that here
+					int bgpos = rasterpos + xscroll;
+					int bgpx = bgpos&7;
+					int bgtile = bgpos>>3;
+					
+					//generate the BG data
+					uint8 pixel=0, pixelcolor;
+
+					if(ScreenON && renderbg)
+					{
+						uint8* pt = bgdata.main[bgtile].pt;
+						pixel = ((pt[0]>>(7-bgpx))&1) | (((pt[1]>>(7-bgpx))&1)<<1) | bgdata.main[bgtile].at;
+					}
+					pixelcolor = PALRAM[pixel];
+
+					//look for a sprite to be drawn
+					if(SpriteON)
+						for(int s=0;s<oamcount;s++) {
+							uint8* oam = oams[renderslot][s];
+							int x = oam[3]; 
+							if(rasterpos>=x && rasterpos<x+8) {
+								//build the pixel.
+								//fetch the LSB of the patterns
+								uint8 spixel = oam[4]&1;
+								spixel |= (oam[5]&1)<<1;
+
+								//shift down the patterns so the next pixel is in the LSB
+								oam[4] >>= 1;
+								oam[5] >>= 1;
+
+								//transparent pixel bailout
+								if(spixel==0) continue;
+
+								//spritehit:
+								//1. is it sprite#0?
+								//2. is the bg pixel nonzero?
+								//then, it is spritehit.
+								if(oam[6] == 0 && pixel != 0)
+									PPU_status |= 0x40;
+
+								//bring in the palette bits and palettize
+								spixel |= (oam[2]&3)<<2;
+								pixelcolor  = PALRAM[0x10+spixel];
+								break;
+							}
+						}
+
+					//fceu rendering system requires that this be set 
+					//(so that it knows there is a valid pixel there?)
+					pixelcolor |= 0x80;
+					*ptr++ = pixelcolor;
+				}
+			}
+		}
+
+		//look for sprites (was supposed to run concurrent with bg rendering)
+		oamcounts[scanslot] = 0;
+		oamcount=0;
+		int spriteHeight = Sprite16?16:8;
+		for(int i=0;i<64;i++) {
+			uint8* spr = SPRAM+i*4;
+			if(yp >= spr[0] && yp < spr[0]+spriteHeight) {
+				//if we already have 8 sprites, then this new one causes an overflow,
+				//set the flag and bail out.
+				if(oamcount == 8) {
+					PPU_status |= 0x20;
+					break;
+				}
+
+				//just copy some bytes into the internal sprite buffer
+				for(int j=0;j<4;j++)
+					oams[scanslot][oamcount][j] = spr[j];
+				
+				//note that we stuff the oam index into [6]. 
+				//i need to turn this into a struct so we can have fewer magic numbers
+				oams[scanslot][oamcount][6] = (uint8)i;
+				oamcount++;
+			}
+		}
+		oamcounts[scanslot] = oamcount;
+
+		//todo - think about clearing oams to a predefined value to force deterministic behavior
+
+		//fetch sprite patterns
+		for(int s=0;s<8;s++) {
+
+			if(s==1 && sl != 0) {
+				//begin hblank! 
+				//the screen is always behind the ppu operation so we need to wait a little longer before triggering it
+				//NOTE: SMB3 is very sensitive about this timing, for the statusbar
+				if(PPUON) {
+				if(GameHBIRQHook) 
+					GameHBIRQHook();
+				} else {
+					int zzz=9;
+				}
+			}
+
+			uint8* oam = oams[scanslot][s];
+			uint32 line = yp - oam[0];
+			if(oam[2]&0x80) //vflip
+				line = spriteHeight-line-1;
+
+			uint32 patternNumber = oam[1];
+			uint32 patternAddress;
+
+			//8x16 sprite handling:
+			if(Sprite16) {
+				uint32 bank = (patternNumber&1)<<12;
+				patternNumber = patternNumber&~1;
+				patternNumber |= (line>>3);
+				patternAddress = (patternNumber<<4) | bank;
+			} else {
+				patternAddress = (patternNumber<<4) | (SpAdrHI<<9);
+			}
+
+			//offset into the pattern for the current line.
+			//tricky: tall sprites have already had lines>8 taken care of by getting a new pattern number above.
+			//so we just need the line offset for the second pattern
+			patternAddress += line&7;
+
+			//garbage nametable fetches
+			runppu(kFetchTime);
+			runppu(kFetchTime);
+
+			//pattern table fetches
+			RefreshAddr = patternAddress;
+			oam[4] = FFCEUX_PPURead(RefreshAddr);
+			runppu(kFetchTime);
+			RefreshAddr += 8;
+			oam[5] = FFCEUX_PPURead(RefreshAddr);
+			runppu(kFetchTime);
+
+			//hflip
+			if(!(oam[2]&0x40)) {
+				oam[4] = bitrevlut[oam[4]];
+				oam[5] = bitrevlut[oam[5]];
+			}
+		}
+
+		// FV is clocked by the PPU's horizontal blanking impulse, and therefore will increment every scanline.
+		//well, according to my tests, maybe at the end of hblank. 
+		//but where is the end of hblank?
+		//well, i imagine it needs to be before the BG fetches for the next line.
+		if(PPUON && sl != 0)
+			ppur.increment_vs();
+
+		//so.. this is the end of hblank. latch horizontal scroll values
+		if(PPUON && sl != 0)
+			ppur.install_h_latches();
+
+		//capture the next xscroll
+		xscroll = ppur.fh;
+
+		//fetch BG: two tiles for next line
+		for(int xt=0;xt<2;xt++)
+			bgdata.main[xt].Read(true);
+
+		//I'm unclear of the reason why this particular access to memory is made. 
+		//The nametable address that is accessed 2 times in a row here, is also the 
+		//same nametable address that points to the 3rd tile to be rendered on the 
+		//screen (or basically, the first nametable address that will be accessed when 
+		//the PPU is fetching background data on the next scanline).
+		//(not implemented yet)
+		runppu(kFetchTime);
+		runppu(kFetchTime);
+
+
+		//After memory access 170, the PPU simply rests for 4 cycles (or the 
+		//equivelant of half a memory access cycle) before repeating the whole 
+		//pixel/scanline rendering process. If the scanline being rendered is the very 
+		//first one on every second frame, then this delay simply doesn't exist.
+		if(sl==0 && idleSynch==0)
+		{}
+		else 
+			runppu(4);
+	}
+	
+	idleSynch ++;
+	if(idleSynch==2) idleSynch = 0;
+
+	//idle for one line
+	//why 1360? see the note up top at vblank
+	runppu(1360);
+
+	framectr++;
+
+
+finish:
+	FCEU_PutImage();
+
+	return 0;
 }

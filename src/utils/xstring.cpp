@@ -691,3 +691,18 @@ std::string wcstombs(std::wstring str)
 	return UtfConverter::ToUtf8(str);
 }
 
+
+//TODO - dont we already have another  function that can do this
+std::string getExtension(const char* input) {
+	char buf[1024];
+	strcpy(buf,input);
+	char* dot=strrchr(buf,'.');
+	if(!dot)
+		return "";
+	char ext [512];
+	strcpy(ext, dot+1);
+	int k, extlen=strlen(ext);
+	for(k=0;k<extlen;k++)
+		ext[k]=tolower(ext[k]);
+	return ext;
+}

@@ -2,6 +2,7 @@
 #define _FCEUH
 
 extern int fceuindbg;
+extern int newppu;
 void ResetGameLoaded(void);
 
 #define DECLFR(x) uint8 x (uint32 A)

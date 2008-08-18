@@ -528,25 +528,11 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	if(memcmp(&head,"NES\x1a",4))
 		return 0;
 
+	head.cleanup();
+
 	memset(&iNESCart,0,sizeof(iNESCart));
 
-	if(!memcmp((char *)(&head)+0x7,"DiskDude",8))
-	{
-		memset((char *)(&head)+0x7,0,0x9);
-	}
 
-	if(!memcmp((char *)(&head)+0x7,"demiforce",9))
-	{
-		memset((char *)(&head)+0x7,0,0x9);
-	}
-
-	if(!memcmp((char *)(&head)+0xA,"Ni03",4))
-	{
-		if(!memcmp((char *)(&head)+0x7,"Dis",3))
-			memset((char *)(&head)+0x7,0,0x9);
-		else
-			memset((char *)(&head)+0xA,0,0x6);
-	}
 
 	//  int ROM_size=0;
 	if(!head.ROM_size)

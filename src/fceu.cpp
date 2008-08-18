@@ -339,7 +339,8 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	FCEU_printf("Loading %s...\n\n",name);
 
-	fp=FCEU_fopen(name,0,"rb",0);
+	const char* romextensions[] = {"nes","fds",0};
+	fp=FCEU_fopen(name,0,"rb",0,-1,romextensions);
 	if(!fp)
 	{
 		return 0;
@@ -378,6 +379,9 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	GameInfo->cspecial=SIS_NONE;
 
 	//try to load each different format
+	bool FCEUXLoad(const char *name, FCEUFILE *fp);
+	/*if(FCEUXLoad(name,fp))
+		goto endlseq;*/
 	if(iNESLoad(name,fp,OverwriteVidMode))
 		goto endlseq;
 	if(NSFLoad(fp))
@@ -558,7 +562,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	FCEU_UpdateInput();
 	lagFlag = 1;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
-	r=FCEUPPU_Loop(skip);
+	r = FCEUPPU_Loop(skip);
 
 	ssize=FlushEmulateSound();
 
@@ -934,3 +938,122 @@ bool FCEU_IsValidUI(EFCEUI ui)
 	}
 	return true;
 }
+
+//---------------------
+//experimental new mapper and ppu system follows
+
+class FCEUXCart {
+public:
+	int mirroring;
+	int chrPages, prgPages;
+	uint32 chrSize, prgSize;
+	char* CHR, *PRG;
+
+	FCEUXCart()
+		: CHR(0)
+		, PRG(0)
+	{}
+
+	~FCEUXCart() {
+		if(CHR) delete[] CHR;
+		if(PRG) delete[] PRG;
+	}
+
+	virtual void Power() {
+	}
+
+protected:
+	//void SetReadHandler(int32 start, int32 end, readfunc func) {
+};
+
+FCEUXCart* cart = 0;
+
+//uint8 Read_ByteFromRom(uint32 A) {
+//	if(A>=cart->prgSize) return 0xFF;
+//	return cart->PRG[A];
+//}
+//
+//uint8 Read_Unmapped(uint32 A) {
+//	return 0xFF;
+//}
+
+
+
+class NROM : FCEUXCart {
+public:
+	virtual void Power() {
+		SetReadHandler(0x8000,0xFFFF,CartBR);
+		setprg16(0x8000,0);
+		setprg16(0xC000,~0);
+		setchr8(0);
+
+		vnapage[0] = NTARAM;
+		vnapage[2] = NTARAM;
+		vnapage[1] = NTARAM+0x400;
+		vnapage[3] = NTARAM+0x400;
+		PPUNTARAM=0xF;
+	}
+};
+
+void FCEUXGameInterface(GI command) {
+	switch(command) {
+		case GI_POWER:
+			cart->Power();
+	}
+}
+
+
+
+bool FCEUXLoad(const char *name, FCEUFILE *fp)
+{
+	//read ines header
+	iNES_HEADER head;
+	if(FCEU_fread(&head,1,16,fp)!=16)
+		return false;
+
+	//validate header
+	if(memcmp(&head,"NES\x1a",4))
+		return 0;
+
+	int mapper = (head.ROM_type>>4);
+	mapper |= (head.ROM_type2&0xF0);
+
+	//choose what kind of cart to use.
+	cart = (FCEUXCart*)new NROM();
+
+	//fceu ines loading code uses 256 here when the romsize is 0.
+	cart->prgPages = head.ROM_size;
+	if(cart->prgPages == 0) {
+		printf("FCEUX: received zero prgpages\n");
+		cart->prgPages = 256;
+	}
+
+	cart->chrPages = head.VROM_size;
+
+	cart->mirroring = (head.ROM_type&1); 
+	if(head.ROM_type&8) cart->mirroring=2;
+
+	//skip trainer
+	bool hasTrainer = (head.ROM_type&4)!=0;
+	if(hasTrainer) {
+		FCEU_fseek(fp,512,SEEK_CUR);
+	}
+
+	//load data
+	cart->prgSize = cart->prgPages*16*1024;
+	cart->chrSize = cart->chrPages*8*1024;
+	cart->PRG = new char[cart->prgSize];
+	cart->CHR = new char[cart->chrSize];
+	FCEU_fread(cart->PRG,1,cart->prgSize,fp);
+	FCEU_fread(cart->CHR,1,cart->chrSize,fp);
+
+	//setup the emulator
+	GameInterface=FCEUXGameInterface;
+	ResetCartMapping();
+	SetupCartPRGMapping(0,(uint8*)cart->PRG,cart->prgSize,0);
+	SetupCartCHRMapping(0,(uint8*)cart->CHR,cart->chrSize,0);
+	
+	return true;
+}
+
+

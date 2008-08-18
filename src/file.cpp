@@ -252,7 +252,7 @@ zpfail:
 	return 0;
 }
 
-FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index)
+FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext, int index, const char** extensions)
 {
 	FILE *ipsfile=0;
 	FCEUFILE *fceufp=0;
@@ -275,9 +275,9 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 	if(read)
 	{
 		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
-		if(asr.numFiles == 0)
+		asr.files.FilterByExtension(extensions);
+		if(!asr.isArchive())
 		{
-		trygzip:
 			//if the archive contained no files, try to open it the old fashioned way
 			std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
 			if(!fp)
@@ -334,7 +334,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			}
 
 		
-
+			//open a plain old file
 			fceufp = new FCEUFILE();
 			fceufp->filename = fileToOpen;
 			fceufp->logicalPath = fileToOpen;
@@ -357,7 +357,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			else
 				fceufp = FCEUD_OpenArchive(asr, archive, &fname);
 
-			if(!fceufp) goto trygzip;
+			if(!fceufp) return 0;
 
 			FileBaseInfo fbi = DetermineFileBase(fileToOpen);
 			fceufp->logicalPath = fbi.filebasedirectory + fceufp->filename;
@@ -726,3 +726,21 @@ bool FCEU_isFileInArchive(const char *path)
 	return isarchive;
 }
 
+
+
+void FCEUARCHIVEFILEINFO::FilterByExtension(const char** ext)
+{
+	if(!ext) return;
+	int count = size();
+	for(int i=count-1;i>=0;i--) {
+		std::string fext = getExtension((*this)[i].name.c_str());
+		const char** currext = ext;
+		while(*currext) {
+			if(fext == *currext)
+				goto ok;
+			currext++;
+		}
+		this->erase(begin()+i);
+	ok: ;
+	}
+}

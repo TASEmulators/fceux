@@ -80,6 +80,27 @@ struct iNES_HEADER {
     uint8 ROM_type;
     uint8 ROM_type2;
     uint8 reserve[8];
+
+	void cleanup()
+	{
+		if(!memcmp((char *)(this)+0x7,"DiskDude",8))
+		{
+			memset((char *)(this)+0x7,0,0x9);
+		}
+
+		if(!memcmp((char *)(this)+0x7,"demiforce",9))
+		{
+			memset((char *)(this)+0x7,0,0x9);
+		}
+
+		if(!memcmp((char *)(this)+0xA,"Ni03",4))
+		{
+			if(!memcmp((char *)(this)+0x7,"Dis",3))
+				memset((char *)(this)+0x7,0,0x9);
+			else
+				memset((char *)(this)+0xA,0,0x6);
+		}
+	}
 };
 
 void VRAM_BANK1(uint32 A, uint8 V);

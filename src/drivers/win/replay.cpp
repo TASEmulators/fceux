@@ -6,6 +6,8 @@
 #include "archive.h"
 #include "utils/xstring.h"
 
+static const char* fm2ext[] = {"fm2",0};
+
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
 
@@ -399,21 +401,6 @@ void HandleScan(HWND hwndDlg, FCEUFILE* file, int& i)
 	SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_INSERTSTRING, i++, (LPARAM)relative);
 }
 
-//TODO - dont we already have another  function that can do this
-std::string getExtension(const char* input) {
-	char buf[1024];
-	strcpy(buf,input);
-	char* dot=strrchr(buf,'.');
-	if(!dot)
-		return "";
-	char ext [512];
-	strcpy(ext, dot+1);
-	int k, extlen=strlen(ext);
-	for(k=0;k<extlen;k++)
-		ext[k]=tolower(ext[k]);
-	return ext;
-}
-
 BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg)
@@ -496,31 +483,21 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						char filename [512];
 						sprintf(filename, "%s%s", globBase, wfd.cFileName);
 
-						char* dot = strrchr(filename, '.');
-
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
-						if(asr.numFiles>1) {
-							for(int i=0;i<asr.numFiles;i++) {
-								std::string ext = getExtension(asr.files.items[i].name.c_str());
-								if(ext != "fm2")
-									continue;
-								FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0,i);
-								if(fp) {
-									HandleScan(hwndDlg,fp, items);
-									delete fp;
-								}
-							}
-						} else 
-						{
-							if(asr.numFiles == 1) {
-								std::string ext = getExtension(asr.files.items[0].name.c_str());
-								if(ext != "fm2")
-									continue;
-							}
+						if(!asr.isArchive()) {
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
 							if(fp) {
 								HandleScan(hwndDlg,fp ,items);
 								delete fp;
+							}
+						} else {
+							asr.files.FilterByExtension(fm2ext);
+							for(uint32 i=0;i<asr.files.size();i++) {
+								FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0,asr.files[i].index);
+								if(fp) {
+									HandleScan(hwndDlg,fp, items);
+									delete fp;
+								}
 							}
 						}
 
@@ -602,19 +579,18 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
 							ofn.lpstrDefExt = "fm2";
 							ofn.lpstrTitle = "Replay Movie from File";
-
+	
 							if(GetOpenFileName(&ofn))
 							{
 								char relative[MAX_PATH*2];
 								AbsoluteToRelative(relative, szFile, BaseDirectory.c_str());
 
 								ArchiveScanRecord asr = FCEUD_ScanArchive(relative);
-								FCEUFILE* fp = FCEU_fopen(relative,0,"rb",0);
-								if(!fp) {
-									delete fp;
+								FCEUFILE* fp = FCEU_fopen(relative,0,"rb",0,-1,fm2ext);
+								if(!fp)
 									goto abort;
-								}
 								strcpy(relative,fp->fullFilename.c_str());
+								delete fp;
 
 								LONG lOtherIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_FINDSTRING, (WPARAM)-1, (LPARAM)relative);
 								if(lOtherIndex != CB_ERR)
