@@ -50,6 +50,9 @@
 #define ScreenON  (PPU[1]&0x08)   //Show screen
 #define PPUON    (PPU[1]&0x18)		//PPU should operate
 
+#define SpriteLeft8 (PPU[1]&0x04)
+#define BGLeft8 (PPU[1]&0x02)
+
 #define PPU_status      (PPU[2])
 
 #define Pal     (PALRAM)   
@@ -1871,6 +1874,11 @@ int FCEUX_PPU_Loop(int skip) {
 				uint8 *target=XBuf+(yp<<8)+xstart;
 				uint8 *ptr = target;
 				int rasterpos = xstart;
+
+				//check all the conditions that can cause things to render in these 8px
+				bool renderspritenow = SpriteON && rendersprites && (xt>0 || SpriteLeft8);
+				bool renderbgnow = ScreenON && renderbg && (xt>0 || BGLeft8);
+
 				for(int xp=0;xp<8;xp++,rasterpos++) {
 
 					//bg pos is different from raster pos due to its offsetability.
@@ -1879,10 +1887,10 @@ int FCEUX_PPU_Loop(int skip) {
 					int bgpx = bgpos&7;
 					int bgtile = bgpos>>3;
 					
-					//generate the BG data
 					uint8 pixel=0, pixelcolor;
 
-					if(ScreenON && renderbg)
+					//generate the BG data
+					if(renderbgnow)
 					{
 						uint8* pt = bgdata.main[bgtile].pt;
 						pixel = ((pt[0]>>(7-bgpx))&1) | (((pt[1]>>(7-bgpx))&1)<<1) | bgdata.main[bgtile].at;
@@ -1890,7 +1898,8 @@ int FCEUX_PPU_Loop(int skip) {
 					pixelcolor = PALRAM[pixel];
 
 					//look for a sprite to be drawn
-					if(SpriteON)
+					if(renderspritenow) {
+						bool havepixel = false;
 						for(int s=0;s<oamcount;s++) {
 							uint8* oam = oams[renderslot][s];
 							int x = oam[3]; 
@@ -1904,6 +1913,9 @@ int FCEUX_PPU_Loop(int skip) {
 								oam[4] >>= 1;
 								oam[5] >>= 1;
 
+								//bail out if we already have a pixel from a higher priority sprite
+								if(havepixel) continue;
+
 								//transparent pixel bailout
 								if(spixel==0) continue;
 
@@ -1914,12 +1926,20 @@ int FCEUX_PPU_Loop(int skip) {
 								if(oam[6] == 0 && pixel != 0)
 									PPU_status |= 0x40;
 
+								havepixel = true;
+
+								//priority handling
+								if(oam[2]&0x20) {
+									//behind background:
+									if((pixel&3)!=0) continue;
+								}
+
 								//bring in the palette bits and palettize
 								spixel |= (oam[2]&3)<<2;
 								pixelcolor  = PALRAM[0x10+spixel];
-								break;
 							}
 						}
+					}
 
 					//fceu rendering system requires that this be set 
 					//(so that it knows there is a valid pixel there?)
