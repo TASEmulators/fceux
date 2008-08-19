@@ -1808,14 +1808,16 @@ int FCEUX_PPU_Loop(int skip) {
 	}
 
 	{
-		//vblank
-		PPU_status |= 0x80;
-		if(VBlankON) TriggerNMI();
 
 		//TRICKY:
 		//even though the timing doc says that every scanline is 1364 except for the first dummy scanline,
 		//i need these to be 1360 in order to get marble madness and pirates! to work.
-		runppu(20*1360);
+		runppu(1*1360);
+		PPU_status |= 0x80;
+		runppu(48);
+		if(VBlankON) TriggerNMI();
+		runppu(19*1360-48);
+
 
 		//no longer in vblank
 		PPU_status &= ~0x80;
@@ -1902,46 +1904,46 @@ int FCEUX_PPU_Loop(int skip) {
 						pixelcolor = PALRAM[pixel];
 
 						//look for a sprite to be drawn
-						if(renderspritenow) {
-							bool havepixel = false;
-							for(int s=0;s<oamcount;s++) {
-								uint8* oam = oams[renderslot][s];
-								int x = oam[3]; 
-								if(rasterpos>=x && rasterpos<x+8) {
-									//build the pixel.
-									//fetch the LSB of the patterns
-									uint8 spixel = oam[4]&1;
-									spixel |= (oam[5]&1)<<1;
+						bool havepixel = false;
+						for(int s=0;s<oamcount;s++) {
+							uint8* oam = oams[renderslot][s];
+							int x = oam[3]; 
+							if(rasterpos>=x && rasterpos<x+8) {
+								//build the pixel.
+								//fetch the LSB of the patterns
+								uint8 spixel = oam[4]&1;
+								spixel |= (oam[5]&1)<<1;
 
-									//shift down the patterns so the next pixel is in the LSB
-									oam[4] >>= 1;
-									oam[5] >>= 1;
+								//shift down the patterns so the next pixel is in the LSB
+								oam[4] >>= 1;
+								oam[5] >>= 1;
 
-									//bail out if we already have a pixel from a higher priority sprite
-									if(havepixel) continue;
+								if(!renderspritenow) continue;
 
-									//transparent pixel bailout
-									if(spixel==0) continue;
+								//bail out if we already have a pixel from a higher priority sprite
+								if(havepixel) continue;
 
-									//spritehit:
-									//1. is it sprite#0?
-									//2. is the bg pixel nonzero?
-									//then, it is spritehit.
-									if(oam[6] == 0 && pixel != 0)
-										PPU_status |= 0x40;
+								//transparent pixel bailout
+								if(spixel==0) continue;
 
-									havepixel = true;
+								//spritehit:
+								//1. is it sprite#0?
+								//2. is the bg pixel nonzero?
+								//then, it is spritehit.
+								if(oam[6] == 0 && pixel != 0)
+									PPU_status |= 0x40;
 
-									//priority handling
-									if(oam[2]&0x20) {
-										//behind background:
-										if((pixel&3)!=0) continue;
-									}
+								havepixel = true;
 
-									//bring in the palette bits and palettize
-									spixel |= (oam[2]&3)<<2;
-									pixelcolor  = PALRAM[0x10+spixel];
+								//priority handling
+								if(oam[2]&0x20) {
+									//behind background:
+									if((pixel&3)!=0) continue;
 								}
+
+								//bring in the palette bits and palettize
+								spixel |= (oam[2]&3)<<2;
+								pixelcolor  = PALRAM[0x10+spixel];
 							}
 						}
 
@@ -2083,7 +2085,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 		//idle for one line
 		//why 1360? see the note up top at vblank
-		runppu(1360);
+		runppu(1364);
 
 		framectr++;
 
