@@ -1,4 +1,5 @@
 <?php
+	$title = "cross-platform NES emulation for professionals";
 	include("header.php");
 ?>
 
