@@ -1,4 +1,4 @@
----version 2.0.3 released---
+---version 2.0.3 yet to be released---
 
 18-aug-2008 - zeromus - windows - SF [ 2058942 ] Load state as... does not use the savestate override dir (fixed; now, it does)
 18-aug-2008 - zeromus - windows - permit user optionally to proceed through the movie savestate mismatch error condition, in case he knows what he is doing.
