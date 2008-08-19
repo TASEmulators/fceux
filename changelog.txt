@@ -1,4 +1,14 @@
 ---version 2.0.3 released---
+
+18-aug-2008 - zeromus - windows - SF [ 2058942 ] Load state as... does not use the savestate override dir (fixed; now, it does)
+18-aug-2008 - zeromus - windows - permit user optionally to proceed through the movie savestate mismatch error condition, in case he knows what he is doing.
+18-aug-2008 - zeromus - fix a bug in the savestate recovery code which prevent aborted savestate loads from recovering emulator state correctly.
+18-aug-2008 - zeromus - windows - bind a menu option for display framecounter
+17-aug-2008 - zeromus - windows - fix problem where replay dialog couldnt work when the process current directory had changed to something other than emulator base directory
+17-aug-2008 - zeromus - windows - autoload the only useful rom or movie from an archive, in cases where there is only one
+17-aug-2008 - zeromus - gracefully handle non-convertible broken utf-8 text without crashing
+17-aug-2008 - zeromus - windows - don't read every archive file when scanning for replay dialog. scan them, and only look for *.fm2
+17-aug-2008 - zeromus - debugger - fix issue where keyboard keys get stuck when switching between debugger window and main window
 15-aug-2008 - adelikat - fixed an oversight on my part.  Sound config dialog will now look to see if Mute Turbo should be checked
 
 ---version 2.0.2 released---

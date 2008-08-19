@@ -1004,16 +1004,16 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		if(tempMovieData.guid != currMovieData.guid)
 		{
 			//mbg 8/18/08 - this code  can be used to turn the error message into an OK/CANCEL
-			//#ifdef WIN32
-			//	std::string msg = "There is a mismatch between savestate's movie and current movie.\ncurrent: " + currMovieData.guid.toString() + "\nsavestate: " + tempMovieData.guid.toString() + "\n\nThis means that you have loaded a savestate belonging to a different movie than the one you are playing now.\n\nContinue loading this savestate anyway?";
-			//	extern HWND pwindow;
-			//	int result = MessageBox(pwindow,msg.c_str(),"Error loading savestate",MB_OKCANCEL);
-			//	if(result == IDCANCEL)
-			//		return false;
-			//#else
+			#ifdef WIN32
+				std::string msg = "There is a mismatch between savestate's movie and current movie.\ncurrent: " + currMovieData.guid.toString() + "\nsavestate: " + tempMovieData.guid.toString() + "\n\nThis means that you have loaded a savestate belonging to a different movie than the one you are playing now.\n\nContinue loading this savestate anyway?";
+				extern HWND pwindow;
+				int result = MessageBox(pwindow,msg.c_str(),"Error loading savestate",MB_OKCANCEL);
+				if(result == IDCANCEL)
+					return false;
+			#else
 				FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
 				return false;
-			//#endif
+			#endif
 		}
 
 		closeRecordingMovie();

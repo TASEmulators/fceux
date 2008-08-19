@@ -17,6 +17,8 @@ void FCEUD_SaveStateAs()
 	ofn.lpstrDefExt = "fcs";
 	nameo[0] = 0;
 	ofn.lpstrFile = nameo;
+	std::string initdir = FCEU_GetPath(FCEUMKF_STATE);
+	ofn.lpstrInitialDir = initdir.c_str();
 	ofn.nMaxFile = 256;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
@@ -43,6 +45,8 @@ void FCEUD_LoadStateFrom()
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.lpstrFile=nameo;
+	std::string initdir = FCEU_GetPath(FCEUMKF_STATE);
+	ofn.lpstrInitialDir = initdir.c_str();
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 
