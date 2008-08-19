@@ -20,8 +20,11 @@ further development.  In order to use Lua in the windows build you will need the
 href="http://fceux.com/luapack">fceux.com/luapack</a>] which should be unzipped alongside your fceux.exe. The large numbers of dlls 
 wasn't our choice; but it will enable the iup user interface library which will permit scripts to create their own guis, as well as 
 rendering the base fceux distribution more compact.  Examples of lua scripts may be found in the subversion repository <a 
-href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/documentation/lua/">here</a>
-
+href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/documentation/examplelua/">here</a>
+  <p>
+    You can find out what we've been up to since the last release by checking the <a href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/changelog.txt">changelog</a> directly.
+</p><p>
+    The latest win32 interim build is generally fresh within a day or two at <a href="http://fceux.com/zip">http://fceux.com/zip</a> -- If you are working with a developer to fix an issue affecting you then this is where you will find your fixed build. 
    <p>
      We have a mailing list for all kinds of discussion about FCEUX.  You can subscribe at the
      <a href="https://lists.sourceforge.net/lists/listinfo/fceultra-discuss">fceultra-discuss</a>
