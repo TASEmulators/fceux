@@ -80,6 +80,43 @@ typedef struct __cartdata {
   uint8 size;
 } cartdata;
 
+static void mmc5_PPUWrite(uint32 A, uint8 V) {
+	uint32 tmp = A;
+	extern uint8 PALRAM[0x20];
+
+	if(tmp>=0x3F00)
+		{
+			// hmmm....
+			if(!(tmp&0xf))
+				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+		}
+		else if(tmp<0x2000)
+		{
+			if(PPUCHRRAM&(1<<(tmp>>10)))
+				VPage[tmp>>10][tmp]=V;
+		}   
+		else
+		{
+			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
+				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+		}
+}
+
+uint8 mmc5_PPURead(uint32 A) {
+	uint32 tmp = A;
+
+	if(tmp<0x2000)
+	{
+		return VPage[tmp>>10][tmp];
+	}
+	else
+	{   
+		return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+	}
+}
+
+
 
 // ETROM seems to have 16KB of WRAM, ELROM seems to have 8KB
 // EWROM seems to have 32KB of WRAM
@@ -818,6 +855,9 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery)
  MMC5HackCHRMode=0;
  MMC5HackSPMode=MMC5HackSPScroll=MMC5HackSPPage=0;
  Mapper5_ESI();
+
+	FFCEUX_PPURead = mmc5_PPURead;
+	FFCEUX_PPUWrite = mmc5_PPUWrite;
 }
 
 void Mapper5_Init(CartInfo *info)

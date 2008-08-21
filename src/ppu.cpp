@@ -338,7 +338,7 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 }
 
 //new ppu-----
-void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
+inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
 
 	if(tmp>=0x3F00)
@@ -374,8 +374,18 @@ uint8 FFCEUX_PPURead_Default(uint32 A) {
 }
 
 
-uint8 (*FFCEUX_PPURead)(uint32 A) = FFCEUX_PPURead_Default;
-void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = FFCEUX_PPUWrite_Default;
+uint8 (*FFCEUX_PPURead)(uint32 A) = 0;
+void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = 0;
+
+#define CALL_PPUREAD(A) (FFCEUX_PPURead?FFCEUX_PPURead(A):(\
+	((A)<0x2000)? \
+		VPage[(A)>>10][(A)] \
+		: vnapage[((A)>>10)&0x3][(A)&0x3FF] \
+		))
+		
+
+#define CALL_PPUWRITE(A,V) (FFCEUX_PPUWrite?FFCEUX_PPUWrite(A,V):FFCEUX_PPUWrite_Default(A,V))
+
 //whether to use the new ppu
 int newppu=0;
 //---------------
@@ -447,7 +457,7 @@ static DECLFR(A2007)
 		//mbg
 		ret = VRAMBuffer;
 		RefreshAddr = ppur.get_2007access();
-		VRAMBuffer = FFCEUX_PPURead(RefreshAddr);
+		VRAMBuffer = CALL_PPUREAD(RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
 		return ret;
@@ -624,7 +634,7 @@ static DECLFW(B2007)
 
 	if(newppu) {
 		RefreshAddr = ppur.get_2007access();
-		FFCEUX_PPUWrite(RefreshAddr,V);
+		CALL_PPUWRITE(RefreshAddr,V);
 		if(RefreshAddr == 0x2679) {
 			int zzz=9;
 		}
@@ -1746,17 +1756,13 @@ int totpputime=0;
 const int kLineTime=1364;
 const int kFetchTime=8;
 int idleSynch = 0;
-void runcpu() {
-	//cpu runs 1/12 as fast as ppu.
-	if(pputime<12) return;
-	int cputodo = pputime/12;
-	X6502_Run(cputodo*3); //why *3 i dunno thats how the cpu core is setup
-	pputime -= cputodo*12;
-}
+
 void runppu(int x) {
 	pputime+=x;
-	totpputime+=x;
-	runcpu();
+	int cputodo = pputime>>2;
+	//if(cputodo<200) return;
+	X6502_Run(cputodo); //why *3 i dunno thats how the cpu core is setup
+	pputime -= cputodo<<2;
 }
 
 struct BGData {
@@ -1765,11 +1771,11 @@ struct BGData {
 
 			void Read() {
 				RefreshAddr = ppur.get_ntread();
-				nt = FFCEUX_PPURead(RefreshAddr);
+				nt = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 
 				RefreshAddr = ppur.get_atread();
-				at = FFCEUX_PPURead(RefreshAddr);
+				at = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 
 				//modify at to get appropriate palette shift
@@ -1780,10 +1786,10 @@ struct BGData {
 
 				ppur.par = nt;
 				RefreshAddr = ppur.get_ptread();
-				pt[0] = FFCEUX_PPURead(RefreshAddr);
+				pt[0] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 				RefreshAddr |= 8;
-				pt[1] = FFCEUX_PPURead(RefreshAddr);
+				pt[1] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 
 				if(PPUON)
@@ -1964,7 +1970,7 @@ int FCEUX_PPU_Loop(int skip) {
 				if(yp >= spr[0] && yp < spr[0]+spriteHeight) {
 					//if we already have 8 sprites, then this new one causes an overflow,
 					//set the flag and bail out.
-					if(oamcount == 8) {
+					if(oamcount == 8) { 
 						PPU_status |= 0x20;
 						break;
 					}
@@ -2033,10 +2039,10 @@ int FCEUX_PPU_Loop(int skip) {
 
 				//pattern table fetches
 				RefreshAddr = patternAddress;
-				oam[4] = FFCEUX_PPURead(RefreshAddr);
+				oam[4] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 				RefreshAddr += 8;
-				oam[5] = FFCEUX_PPURead(RefreshAddr);
+				oam[5] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 
 
