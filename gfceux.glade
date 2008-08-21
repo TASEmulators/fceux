@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Aug 13 20:04:13 2008 -->
+<!--Generated with glade3 3.4.5 on Thu Aug 21 01:05:34 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="gamepad_config_window">
     <child>
@@ -36,12 +36,13 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button1">
+                      <widget class="GtkButton" id="up_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Up</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -49,12 +50,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button2">
+                      <widget class="GtkButton" id="left_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Left</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="top_attach">1</property>
@@ -62,12 +64,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button3">
+                      <widget class="GtkButton" id="down_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Down</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="left_attach">1</property>
@@ -77,12 +80,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button4">
+                      <widget class="GtkButton" id="right_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Right</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="left_attach">2</property>
@@ -120,21 +124,23 @@
                   <widget class="GtkHBox" id="hbox4">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkButton" id="button5">
+                      <widget class="GtkButton" id="select_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Select</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button6">
+                      <widget class="GtkButton" id="start_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Start</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -172,21 +178,23 @@
                   <widget class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkButton" id="button7">
+                      <widget class="GtkButton" id="b_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">B</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="button8">
+                      <widget class="GtkButton" id="a_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">A</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="button_clicked"/>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -434,7 +442,7 @@
                         <property name="label" translatable="yes">Gamepad _3</property>
                         <property name="use_underline">True</property>
                         <property name="response_id">0</property>
-                        <signal name="clicked" handler="gamepad_clicked" after="yes"/>
+                        <signal name="clicked" handler="gamepad_clicked_new" after="yes"/>
                       </widget>
                       <packing>
                         <property name="top_attach">1</property>

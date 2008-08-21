@@ -40,7 +40,7 @@ except ImportError:
   Ensure that PyGTK (>=2.12) is installed on this system.\n\
   On Debian based systems (like Ubuntu), try this command:\n\
   sudo apt-get install python-gtk2 libgtk2.0-0"
-  
+
 
 class GameOptions:
   # sound
@@ -532,7 +532,37 @@ class GfceuApp:
         widgets.get_object("movie_entry").set_text("")
         widgets.get_object("lua_entry").set_text("")
         options.romfile = x
-
+  # fix this global its ugly
+  gamepad_config = "0"
+  
+  def gamepad_clicked_new(self, widget, data=None):
+    widgets.get_object("gamepad_config_window").show_all()
+    d = {'gp1_button' : "0",
+         'gp2_button' : "1",
+         'gp3_button' : "2",
+         'gp4_button' : "3"}
+    self.gamepad_config = d[widget.name]
+    
+  def right_button_clicked(self, widget, data=None):
+    print "right!"
+  def left_button_clicked(self, widget, data=None):
+    print "left!"
+  def down_button_clicked(self, widget, data=None):
+    print "down!"
+  def up_button_clicked(self, widget, data=None):
+    print "up!"
+  def button_clicked(self, widget, data=None):
+    d = {'right_button' : "SDL.Input.GamePad." + self.gamepad_config + "Right",
+         'left_button' : "SDL.Input.GamePad." + self.gamepad_config + "Left",
+         'up_button' : "SDL.Input.GamePad." + self.gamepad_config + "Up",
+         'down_button' : "SDL.Input.GamePad." + self.gamepad_config + "Down",
+         'select_button' : "SDL.Input.GamePad." + self.gamepad_config + "Select",
+         'start_button' : "SDL.Input.GamePad." + self.gamepad_config + "Start",
+         'a_button' : "SDL.Input.GamePad." + self.gamepad_config + "A",
+         'b_button' : "SDL.Input.GamePad." + self.gamepad_config + "B"}
+    print d[widget.name]
+  
+  
   def gamepad_clicked(self, widget, data=None):
 
     d = {'gp1_button' : '1',

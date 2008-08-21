@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Wed Aug 13 20:04:13 2008 -->
+<!--Generated with glade3 3.4.5 on Thu Aug 21 00:55:50 2008 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">5</property>
@@ -67,11 +67,12 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button1">
+                      <object class="GtkButton" id="up_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Up</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -79,11 +80,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button2">
+                      <object class="GtkButton" id="left_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Left</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -91,11 +93,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button3">
+                      <object class="GtkButton" id="down_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Down</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -105,11 +108,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button4">
+                      <object class="GtkButton" id="right_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Right</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -144,19 +148,21 @@
                   <object class="GtkHBox" id="hbox4">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkButton" id="button5">
+                      <object class="GtkButton" id="select_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Select</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button6">
+                      <object class="GtkButton" id="start_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Start</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -191,19 +197,21 @@
                   <object class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkButton" id="button7">
+                      <object class="GtkButton" id="b_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">B</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button8">
+                      <object class="GtkButton" id="a_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">A</property>
+                        <signal handler="button_clicked" name="clicked"/>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -487,7 +495,7 @@
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Gamepad _1</property>
                         <property name="use_underline">True</property>
-                        <signal after="yes" handler="gamepad_clicked" name="clicked"/>
+                        <signal after="yes" handler="gamepad_clicked_new" name="clicked"/>
                       </object>
                       <packing>
                         <property name="y_options"/>

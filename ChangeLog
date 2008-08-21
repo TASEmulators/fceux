@@ -1,3 +1,6 @@
+* Working on new config system for input.  you can try by configuring
+ the third gamepad.  It's not functional yet, but it's a start on more
+ intuitive gamepad configuration for sdl
 ================== version 2.0.2 ================================
 * Now stores config file in .fceultra
 * If the .fceultra config directory doesn't exist yet, gfceux will
