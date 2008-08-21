@@ -159,7 +159,7 @@ InitVideo(FCEUGI *gi)
 
 
     // check for OpenGL and set the global flags
-#ifdef OPENGL
+#if OPENGL
     if(s_useOpenGL && !s_sponge) {
         flags = SDL_OPENGL;
     }
@@ -293,8 +293,8 @@ InitVideo(FCEUGI *gi)
             return -1;
         }
     } else {
-        // not fullscreen
-        int desbpp = 0;
+        int desbpp;
+        g_config->getOption("SDL.BitsPerPixel", &desbpp);
 
         g_config->getOption("SDL.XScale", &s_exs);
         g_config->getOption("SDL.YScale", &s_eys);
@@ -307,12 +307,6 @@ InitVideo(FCEUGI *gi)
                 s_exs = s_eys = 2;
             }
             s_eefx = 0;
-
-            // XXX soules - no clue what below comment is from
-            // SDL's 32bpp->16bpp code is slighty faster than mine, at least :/
-            if(s_sponge == 1 || s_sponge == 3) {
-                desbpp = 32;
-            }
         }
 
 #ifdef OPENGL
@@ -371,7 +365,7 @@ InitVideo(FCEUGI *gi)
     if(gi->name) {
         SDL_WM_SetCaption((const char *)gi->name, (const char *)gi->name);
     } else {
-        SDL_WM_SetCaption("FCE Ultra","FCE Ultra");
+        SDL_WM_SetCaption("FCE UltraX","FCE Ultra");
     }
 
     // create the surface for displaying graphical messages
