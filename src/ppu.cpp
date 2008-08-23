@@ -635,12 +635,6 @@ static DECLFW(B2007)
 	if(newppu) {
 		RefreshAddr = ppur.get_2007access();
 		CALL_PPUWRITE(RefreshAddr,V);
-		if(RefreshAddr == 0x2679) {
-			int zzz=9;
-		}
-		if(RefreshAddr == 0x3f13 ) {
-			int zzz=9;
-		}
 		//printf("%04x ",RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
@@ -1753,18 +1747,18 @@ void FCEUPPU_SaveState(void)
 //---------------------
 int pputime=0;
 int totpputime=0;
-const int kLineTime=1364;
-const int kFetchTime=8;
+const int kLineTime=341;
+const int kFetchTime=2;
 int idleSynch = 0;
 
 void runppu(int x) {
-	pputime+=x;
-	int cputodo = pputime>>2;
+	//pputime+=x;
 	//if(cputodo<200) return;
-	X6502_Run(cputodo); //why *3 i dunno thats how the cpu core is setup
-	pputime -= cputodo<<2;
+	X6502_Run(x);
+	//pputime -= cputodo<<2;
 }
 
+//todo - consider making this a 3 or 4 slot fifo to keep from touching so much memory
 struct BGData {
 		struct Record {
 			uint8 nt, at, pt[2];
@@ -1814,30 +1808,23 @@ int FCEUX_PPU_Loop(int skip) {
 	}
 
 	{
-
-		//TRICKY:
-		//even though the timing doc says that every scanline is 1364 except for the first dummy scanline,
-		//i need these to be 1360 in order to get marble madness and pirates! to work.
-		runppu(1*1360);
 		PPU_status |= 0x80;
-		runppu(48);
+		
+		//Not sure if this is correct.  According to Matt Conte and my own tests, it is.
+		//Timing is probably off, though.  
+		//NOTE:  Not having this here breaks a Super Donkey Kong game. 
+		//PPU[3]=PPUSPL=0;       
+
+		const int delay = 20; //fceu used 12 here but I couldnt get it to work in marble madness and pirates.
+		runppu(delay); //X6502_Run(12);
 		if(VBlankON) TriggerNMI();
-		runppu(19*1360-48);
+		runppu(20*(kLineTime)-delay);
 
+		//this seems to run just before the dummy scanline begins
+		PPU_status&=0x1f;
 
-		//no longer in vblank
-		PPU_status &= ~0x80;
-		//fceu cleared the spritehit and spriteoverflow flags at the same time.. it is reasonable here. or, it is resaonable at vblank interrupt time
-		PPU_status &= ~0x40;
-		PPU_status &= ~0x20;
-
-		//----------
 		//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
-		//if(!PPUON) {
-		//	runppu(kLineTime*242);
-		//	goto finish;
-		//}
-		//----------
+		//if(!PPUON) { runppu(kLineTime*242); goto finish; }
 
 		//There are 2 conditions that update all 5 PPU scroll counters with the 
 		//contents of the latches adjacent to them. The first is after a write to 
@@ -1854,7 +1841,7 @@ int FCEUX_PPU_Loop(int skip) {
 		int oamcount;
 
 		//capture the initial xscroll
-		int xscroll = ppur.fh;
+		//int xscroll = ppur.fh;
 
 		//render 241 scanlines (including 1 dummy at beginning)
 		for(int sl=0;sl<241;sl++) {
@@ -1895,7 +1882,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 						//bg pos is different from raster pos due to its offsetability.
 						//so adjust for that here
-						int bgpos = rasterpos + xscroll;
+						int bgpos = rasterpos + ppur.fh;
 						int bgpx = bgpos&7;
 						int bgtile = bgpos>>3;
 						
@@ -1995,6 +1982,10 @@ int FCEUX_PPU_Loop(int skip) {
 
 			//todo - think about clearing oams to a predefined value to force deterministic behavior
 
+			//so.. this is the end of hblank. latch horizontal scroll values
+			if(PPUON && sl != 0)
+				ppur.install_h_latches();
+
 			//fetch sprite patterns
 			for(int s=0;s<8;s++) {
 
@@ -2053,15 +2044,6 @@ int FCEUX_PPU_Loop(int skip) {
 				}
 			}
 
-
-
-			//so.. this is the end of hblank. latch horizontal scroll values
-			if(PPUON && sl != 0)
-				ppur.install_h_latches();
-
-			//capture the next xscroll
-			xscroll = ppur.fh;
-
 			//fetch BG: two tiles for next line
 			for(int xt=0;xt<2;xt++)
 				bgdata.main[xt].Read();
@@ -2083,15 +2065,14 @@ int FCEUX_PPU_Loop(int skip) {
 			if(sl==0 && idleSynch==0)
 			{}
 			else 
-				runppu(4);
+				runppu(1);
 		}
 		
 		idleSynch ++;
 		if(idleSynch==2) idleSynch = 0;
 
 		//idle for one line
-		//why 1360? see the note up top at vblank
-		runppu(1364);
+		runppu(kLineTime);
 
 		framectr++;
 
