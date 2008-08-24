@@ -435,16 +435,19 @@ SDL_GL_LoadLibrary(0);
     }
 
     int romIndex = g_config->parse(argc, argv);
+
+	//mbg 8/23/2008 - this is also here so that the inputcfg routines can have a chance to dump the new inputcfg to the fceux.cfg
+	//in case you didnt specify a rom filename
+	  // This is here so that a default fceux.cfg will be created on first
+	  // run, even without a valid ROM to play.
+	  g_config->save();
+
     if(romIndex <= 0) {
         ShowUsage(argv[0]);
         FCEUD_Message("\nError parsing command line arguments\n");
         SDL_Quit();
         return -1;
     }
-
-	  // This is here so that a default fceux.cfg will be created on first
-	  // run, even without a valid ROM to play.
-	  g_config->save();
 
 
     // update the input devices
