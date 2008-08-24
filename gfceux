@@ -255,7 +255,7 @@ class GfceuApp:
   def find_fceu(self):
     bin = find_binary('fceux')
     if bin == None:
-      gfceu_error('Could not find the fceux binary.\n\
+      self.print_error('Could not find the fceux binary.\n\
       Ensure that fceux is installed and in the $PATH.\n', 4, True)
     else:
       self.msg('Using: ' + bin)
