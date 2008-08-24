@@ -309,6 +309,8 @@ void ResetGameLoaded(void)
 	GameStateRestore=0;
 	PPU_hook=0;
 	GameHBIRQHook=0;
+	FFCEUX_PPURead = 0;
+	FFCEUX_PPUWrite = 0;
 	if(GameExpSound.Kill)
 		GameExpSound.Kill();
 	memset(&GameExpSound,0,sizeof(GameExpSound));

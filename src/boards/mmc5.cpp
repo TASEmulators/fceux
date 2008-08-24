@@ -80,6 +80,18 @@ typedef struct __cartdata {
   uint8 size;
 } cartdata;
 
+#define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8 
+//#define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
+static inline uint8 *  MMC5BGVRAMADR(uint32 A)
+{
+	if(!Sprite16) {
+		if(mmc5ABMode==0)
+			return &MMC5SPRVPage[(A)>>10][(A)];
+		else 
+			return &MMC5BGVPage[(A)>>10][(A)];
+	} else return &MMC5BGVPage[(A)>>10][(A)];
+}
+
 static void mmc5_PPUWrite(uint32 A, uint8 V) {
 	uint32 tmp = A;
 	extern uint8 PALRAM[0x20];
@@ -104,15 +116,15 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 }
 
 uint8 mmc5_PPURead(uint32 A) {
-	uint32 tmp = A;
-
-	if(tmp<0x2000)
+	if(A<0x2000)
 	{
-		return VPage[tmp>>10][tmp];
+		if(ppuphase == PPUPHASE_BG)
+			return *MMC5BGVRAMADR(A);
+		else return MMC5SPRVPage[(A)>>10][(A)];
 	}
 	else
 	{   
-		return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+		return vnapage[(A>>10)&0x3][A&0x3FF];
 	}
 }
 

@@ -22,3 +22,10 @@ extern uint8 (*FFCEUX_PPURead)(uint32 A);
 extern void (*FFCEUX_PPUWrite)(uint32 A, uint8 V);
 
 extern int scanline;
+extern uint8 PPU[4];
+
+enum PPUPHASE {
+	PPUPHASE_VBL, PPUPHASE_BG, PPUPHASE_OBJ
+};
+
+extern PPUPHASE ppuphase;

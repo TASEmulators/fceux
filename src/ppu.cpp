@@ -67,6 +67,8 @@ static uint32 ppulut1[256];
 static uint32 ppulut2[256];
 static uint32 ppulut3[128];
 
+PPUPHASE ppuphase;
+
 
 template<typename T, int BITS>
 struct BITREVLUT {
@@ -1809,6 +1811,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 	{
 		PPU_status |= 0x80;
+		ppuphase = PPUPHASE_VBL;
 		
 		//Not sure if this is correct.  According to Matt Conte and my own tests, it is.
 		//Timing is probably off, though.  
@@ -1847,10 +1850,15 @@ int FCEUX_PPU_Loop(int skip) {
 		for(int sl=0;sl<241;sl++) {
 			int yp = sl-1;
 
+			ppuphase = PPUPHASE_BG;
+
 			if(sl != 0) {
 				DEBUG(FCEUD_UpdatePPUView(scanline=yp,1));
 				DEBUG(FCEUD_UpdateNTView(scanline=yp,1));
 			}
+
+			if(sl != 0) if(MMC5Hack && PPUON) MMC5_hb(yp);
+			
 
 			//twiddle the oam buffers
 			int scanslot = oamslot^1;
@@ -1986,6 +1994,8 @@ int FCEUX_PPU_Loop(int skip) {
 			if(PPUON && sl != 0)
 				ppur.install_h_latches();
 
+			ppuphase = PPUPHASE_OBJ;
+
 			//fetch sprite patterns
 			for(int s=0;s<8;s++) {
 
@@ -2044,6 +2054,8 @@ int FCEUX_PPU_Loop(int skip) {
 				}
 			}
 
+			ppuphase = PPUPHASE_BG;
+
 			//fetch BG: two tiles for next line
 			for(int xt=0;xt<2;xt++)
 				bgdata.main[xt].Read();
@@ -2070,6 +2082,8 @@ int FCEUX_PPU_Loop(int skip) {
 		
 		idleSynch ++;
 		if(idleSynch==2) idleSynch = 0;
+
+		if(MMC5Hack && PPUON) MMC5_hb(240);
 
 		//idle for one line
 		runppu(kLineTime);
