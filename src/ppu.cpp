@@ -1838,7 +1838,7 @@ int FCEUX_PPU_Loop(int skip) {
 		if(PPUON)
 			ppur.install_latches();
 
-		uint8 oams[2][8][7];
+		uint8 oams[2][64][7];
 		int oamcounts[2]={0,0};
 		int oamslot=0;
 		int oamcount;
@@ -1963,9 +1963,9 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int i=0;i<64;i++) {
 				uint8* spr = SPRAM+i*4;
 				if(yp >= spr[0] && yp < spr[0]+spriteHeight) {
-					//if we already have 8 sprites, then this new one causes an overflow,
+					//if we already have maxsprites, then this new one causes an overflow,
 					//set the flag and bail out.
-					if(oamcount == 8) { 
+					if(oamcount == maxsprites) { 
 						PPU_status |= 0x20;
 						break;
 					}
@@ -1997,7 +1997,17 @@ int FCEUX_PPU_Loop(int skip) {
 			ppuphase = PPUPHASE_OBJ;
 
 			//fetch sprite patterns
-			for(int s=0;s<8;s++) {
+			for(int s=0;s<maxsprites;s++) {
+
+				//if we have hit our eight sprite pattern and we dont have any more sprites, then bail
+				if(s==oamcount && s>=8) 
+					break;
+
+				//if this is a real sprite sprite, then it is not above the 8 sprite limit.
+				//this is how we support the no 8 sprite limit feature.
+				//not that at some point we may need a virtual CALL_PPUREAD which just peeks and doesnt increment any counters
+				//this could be handy for the debugging tools also
+				bool realSprite = (s<8);
 
 				uint8* oam = oams[scanslot][s];
 				uint32 line = yp - oam[0];
@@ -2023,7 +2033,7 @@ int FCEUX_PPU_Loop(int skip) {
 				patternAddress += line&7;
 
 				//garbage nametable fetches
-				runppu(kFetchTime);
+				if(realSprite) runppu(kFetchTime);
 
 				if(((PPU[0]&0x38)!=0x18) && s == 2 && SpriteON ) {
 					//(The MMC3 scanline counter is based entirely on PPU A12, triggered on rising edges (after the line remains low for a sufficiently long period of time))
@@ -2036,15 +2046,15 @@ int FCEUX_PPU_Loop(int skip) {
 					}
 				}
 
-				runppu(kFetchTime);
+				if(realSprite) runppu(kFetchTime);
 
 				//pattern table fetches
 				RefreshAddr = patternAddress;
 				oam[4] = CALL_PPUREAD(RefreshAddr);
-				runppu(kFetchTime);
+				if(realSprite) runppu(kFetchTime);
 				RefreshAddr += 8;
 				oam[5] = CALL_PPUREAD(RefreshAddr);
-				runppu(kFetchTime);
+				if(realSprite) runppu(kFetchTime);
 
 
 				//hflip
