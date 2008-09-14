@@ -238,7 +238,7 @@ class GfceuApp:
 
   def print_error(self, message, code, use_gtk=True, fatal=True):
     """
-    GfceuApp.error()
+    GfceuApp.print_error()
     
     Presents the user with an error message and optionally quits the program.
     """
@@ -597,11 +597,11 @@ class GfceuApp:
       
       if self.server_binary == None:
         if os.name == 'nt':
-          gfceu_error("The fceu server software cannot be found. \n\
+          self.print_error("The fceu server software cannot be found. \n\
           Ensure that it is installed in the same directory as \n\
           GFCE Ultra.", 102, True, False)
         else:
-          gfceu_error("The fceu server software cannot be found on \n\
+          self.print_error("The fceu server software cannot be found on \n\
           this system.  Ensure that it is installed and in your path.",
           101, True, False)
         widgets.get_object("no_network_radio").set_active(True)
