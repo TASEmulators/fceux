@@ -1,3 +1,5 @@
+* Fixed error in which gfceux would display an ugly error message if
+ the fceux binary could not be found.
 * Working on new config system for input.  you can try by configuring
  the third gamepad.  It's not functional yet, but it's a start on more
  intuitive gamepad configuration for sdl
