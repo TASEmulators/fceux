@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceux - Graphical launcher for fceux.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "2.0.2"
+version = "2.0.2svn"
 title = "gfceux"
 # Copyright (C) 2008  Lukas Sabota <ltsmooth42 _at_ gmail.com>
 ##
@@ -117,6 +117,11 @@ def give_widgets():
     widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
     widgets.get_object("opengl_check").set_active(options.opengl_check)
     widgets.get_object("autoscale_check").set_active(options.autoscale_check)
+    # set/unset sensitivity on manual scaling
+    if widgets.get_object("autoscale_check").get_active():
+	  widgets.get_object("scaling_frame").set_sensitive(False)
+    else:
+	  widgets.get_object("scaling_frame").set_sensitive(True)
     widgets.get_object("xscale_spin").set_value(options.xscale_spin)
     widgets.get_object("yscale_spin").set_value(options.yscale_spin)
     
@@ -208,9 +213,9 @@ options = None
 optionsfile = os.getenv('HOME') + '/.fceultra/gfceux_options.dat'
 widgets = None
 
-class GfceuApp:
+class GfceuxApp:
   def __init__(self):
-    self.fceux_binary = self.find_fceu()
+    self.fceux_binary = self.find_fceux()
     self.load_ui()
 
     options = GameOptions()
@@ -252,7 +257,7 @@ class GfceuApp:
     if fatal:
       sys.exit(code)
    
-  def find_fceu(self):
+  def find_fceux(self):
     bin = find_binary('fceux')
     if bin == None:
       self.print_error('Could not find the fceux binary.\n\
@@ -413,6 +418,12 @@ class GfceuApp:
       return
       
     self.launch('"'+ options.romfile +'"')
+  
+  def autoscale_check_toggled(self, menuitem, data=None):
+    if widgets.get_object("autoscale_check").get_active():
+	  widgets.get_object("scaling_frame").set_sensitive(False)
+    else:
+	  widgets.get_object("scaling_frame").set_sensitive(True)
     
   def about_button_clicked(self, menuitem, data=None):
     widgets.get_object("about_dialog").set_name('GFCE UltraX '+version)
@@ -632,5 +643,5 @@ if __name__ == '__main__':
   parser = OptionParser(version='%prog '+ version)
   parser.parse_args()
 
-  app = GfceuApp()
+  app = GfceuxApp()
   

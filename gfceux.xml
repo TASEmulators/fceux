@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Fri Aug 22 13:26:06 2008 -->
+<!--Generated with glade3 3.4.5 on Mon Sep 22 04:14:45 2008 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">5</property>
@@ -7,7 +7,7 @@
     <property name="page_increment">1</property>
     <property name="step_increment">0.5</property>
     <property name="page_size">10</property>
-    <property name="value">1</property>
+    <property name="value">2</property>
   </object>
   <object class="GtkAdjustment" id="adjustment2">
     <property name="upper">10</property>
@@ -15,7 +15,7 @@
     <property name="page_increment">1</property>
     <property name="step_increment">0.5</property>
     <property name="page_size">10</property>
-    <property name="value">1</property>
+    <property name="value">2</property>
   </object>
   <object class="GtkAdjustment" id="adjustment3">
     <property name="upper">65536</property>
@@ -579,6 +579,19 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLabel" id="screentip">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;small&gt;&lt;i&gt;(Press Alt+Enter to toggle fullscreen in-game.)&lt;/i&gt;&lt;/small&gt;</property>
+                    <property name="use_markup">True</property>
+                    <property name="wrap">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkCheckButton" id="autoscale_check">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -586,38 +599,7 @@
                     <property name="use_underline">True</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkHBox" id="xscale_box">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkLabel" id="label2">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">X scale:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="padding">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="xscale_spin">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="adjustment">adjustment1</property>
-                        <property name="digits">1</property>
-                        <property name="numeric">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
+                    <signal handler="autoscale_check_toggled" name="toggled"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -625,35 +607,94 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="yscale_box">
+                  <object class="GtkFrame" id="scaling_frame">
                     <property name="visible">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">GTK_SHADOW_NONE</property>
                     <child>
-                      <object class="GtkLabel" id="label5">
+                      <object class="GtkAlignment" id="alignment4">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Y scale:</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <object class="GtkVBox" id="vbox2">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkHBox" id="xscale_box">
+                                <property name="visible">True</property>
+                                <child>
+                                  <object class="GtkLabel" id="label2">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">X scale:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="padding">5</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="xscale_spin">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="adjustment">adjustment1</property>
+                                    <property name="digits">1</property>
+                                    <property name="numeric">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkHBox" id="yscale_box">
+                                <property name="visible">True</property>
+                                <child>
+                                  <object class="GtkLabel" id="label5">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Y scale:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="padding">5</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="yscale_spin">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="adjustment">adjustment2</property>
+                                    <property name="digits">1</property>
+                                    <property name="numeric">True</property>
+                                    <property name="update_policy">GTK_UPDATE_IF_VALID</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="padding">5</property>
-                      </packing>
                     </child>
-                    <child>
-                      <object class="GtkSpinButton" id="yscale_spin">
+                    <child type="label">
+                      <object class="GtkLabel" id="label25">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="adjustment">adjustment2</property>
-                        <property name="digits">1</property>
-                        <property name="numeric">True</property>
-                        <property name="update_policy">GTK_UPDATE_IF_VALID</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Manual Scaling&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
                       </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
                     <property name="position">4</property>
                   </packing>
                 </child>
@@ -674,32 +715,27 @@
                       <object class="GtkEntry" id="bpp_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="width_chars">2</property>
                         <property name="text" translatable="yes">32</property>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">5</property>
                   </packing>
                 </child>
-                <child>
-                  <object class="GtkLabel" id="screentip">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;small&gt;&lt;i&gt;(Press Alt+Enter to toggle fullscreen in-game.)&lt;/i&gt;&lt;/small&gt;</property>
-                    <property name="use_markup">True</property>
-                    <property name="wrap">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">6</property>
-                  </packing>
-                </child>
               </object>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label21">
@@ -712,89 +748,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="advanced_vbox">
-                <property name="visible">True</property>
-                <property name="border_width">5</property>
-                <property name="spacing">5</property>
-                <child>
-                  <object class="GtkHBox" id="hbox11">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImage" id="image3">
-                        <property name="visible">True</property>
-                        <property name="stock">gtk-dialog-info</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="advanced_info">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">If you would like to specify any command line options to FCE Ultra, specify them below.  For a complete option reference, consult the official FCE Ultra documentation.
-
-Invalid options may cause GFCE Ultra to perform incorrectly.
-</property>
-                        <property name="wrap">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">5</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkHBox" id="hbox12">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkLabel" id="label24">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Extra Parameters: </property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="padding">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="extra_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                      </object>
-                      <packing>
-                        <property name="padding">5</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel" id="label22">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Advanced</property>
-              </object>
-              <packing>
-                <property name="position">3</property>
-                <property name="tab_fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkVBox" id="vbox1">
+              <object class="GtkVBox" id="sound_vbox">
                 <property name="visible">True</property>
                 <property name="spacing">5</property>
                 <child>
@@ -844,6 +798,7 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                       <object class="GtkEntry" id="soundrate_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="width_chars">6</property>
                         <property name="text" translatable="yes">11000</property>
                       </object>
                       <packing>
@@ -877,6 +832,7 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                       <object class="GtkEntry" id="soundbufsize_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="width_chars">3</property>
                         <property name="text" translatable="yes">48</property>
                       </object>
                       <packing>
@@ -892,15 +848,93 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
                   </packing>
                 </child>
               </object>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label22">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Sound</property>
+              </object>
               <packing>
-                <property name="position">4</property>
+                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="advanced_vbox">
+                <property name="visible">True</property>
+                <property name="border_width">5</property>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkHBox" id="hbox11">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImage" id="image3">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-dialog-info</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="advanced_info">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">If you would like to specify any command line options to FCE UltraX, specify them below.  For a complete option reference, visit http://fceux.com .
+
+Invalid options may cause GFCE UltraX to behave incorrectly.
+</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox12">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel" id="label24">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Extra Parameters: </property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="padding">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="extra_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="padding">5</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Sound</property>
+                <property name="label" translatable="yes">Advanced</property>
               </object>
               <packing>
                 <property name="position">4</property>
@@ -1148,7 +1182,6 @@ Invalid options may cause GFCE Ultra to perform incorrectly.
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label13">
-                <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="label" translatable="yes">Network</property>
               </object>
