@@ -468,6 +468,7 @@ SDL_GL_LoadLibrary(0);
     // movie playback
     std::string fname;
     g_config->getOption("SDL.Movie", &fname);
+	
 	g_config->setOption("SDL.Movie", "");
     if (fname != "")
     {
