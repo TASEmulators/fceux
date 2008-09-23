@@ -482,9 +482,9 @@ SDL_GL_LoadLibrary(0);
     g_config->getOption("SDL.LuaScript", &fname);
     if (fname != "")
     {
-        g_config->setOption("SDL.LuaScript", "");
         FCEU_LoadLuaCode(fname.c_str());
     }
+	g_config->setOption("SDL.LuaScript", "");
 
     // loop playing the game
     while(GameInfo) {
