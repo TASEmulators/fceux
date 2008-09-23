@@ -1,4 +1,6 @@
 ---version 2.0.3 yet to be released---
+22-sep-2008 - punkrockguy318 - [ 208437 ] fixed an issue where flawed movie
+would crash fceux on every startup
 21-aug-2008 - punkrockguy318 - sdl - fixed issue where windowed mode would
 always be set to 32 bpp
 18-aug-2008 - zeromus - windows - SF [ 2058942 ] Load state as... does not use the savestate override dir (fixed; now, it does)

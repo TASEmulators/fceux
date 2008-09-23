@@ -475,8 +475,8 @@ SDL_GL_LoadLibrary(0);
 		    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
             FCEUI_LoadMovie(fname.c_str(), false, false, false);
         }
-        g_config->setOption("SDL.Movie", "");
     }
+	g_config->setOption("SDL.Movie", "");
     
     // load lua script if option passed
     g_config->getOption("SDL.LuaScript", &fname);
