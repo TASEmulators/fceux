@@ -468,6 +468,7 @@ SDL_GL_LoadLibrary(0);
     // movie playback
     std::string fname;
     g_config->getOption("SDL.Movie", &fname);
+	g_config->setOption("SDL.Movie", "");
     if (fname != "")
     {
         if(fname.find(".fm2") != std::string::npos)
@@ -476,15 +477,16 @@ SDL_GL_LoadLibrary(0);
             FCEUI_LoadMovie(fname.c_str(), false, false, false);
         }
     }
-	g_config->setOption("SDL.Movie", "");
+	
     
     // load lua script if option passed
     g_config->getOption("SDL.LuaScript", &fname);
+	g_config->setOption("SDL.LuaScript", "");
     if (fname != "")
     {
         FCEU_LoadLuaCode(fname.c_str());
     }
-	g_config->setOption("SDL.LuaScript", "");
+	
 
     // loop playing the game
     while(GameInfo) {
