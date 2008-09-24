@@ -1,6 +1,6 @@
 import os
 import sys
-import platform.system
+import platform 
 
 opts = Options()
 opts.AddOptions(
