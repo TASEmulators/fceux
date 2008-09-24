@@ -1,0 +1,4 @@
+To uninstall gfceux, run this as root:
+$  sudo ./uninstall.py
+If you installed gfceux to an alternate prefix, specify the prefix as an argument
+$  sudo ./uninstall.py [prefix]
