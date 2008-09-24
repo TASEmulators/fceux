@@ -54,6 +54,7 @@ char *DriverUsage="\
 --pal          {0|1}   Uses PAL timing.\n\
 --gamegenie    {0|1}   Enables emulated Game Genie.\n\
 --nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n\
+--newppu       {0|1}   Enables the new PPU core.\n\
 --frameskip     x      Sets # of frames to skip per emulated frame.\n\
 --xres          x      Sets horizontal resolution to x for full screen mode.\n\
 --yres          x      Sets vertical resolution to x for full screen mode.\n\
@@ -495,6 +496,17 @@ SDL_GL_LoadLibrary(0);
         FCEU_LoadLuaCode(fname.c_str());
     }
 	#endif
+	
+	g_config->getOption("SDL.NewPPU", &fname);
+	if (fname == "1")
+		newppu = 1;
+	/*g_config->setOption("SDL.LuaScript", "");
+    if (fname != "")
+    {
+        FCEU_LoadLuaCode(fname.c_str());
+    }*/
+	
+	
 	
     // loop playing the game
     while(GameInfo) {

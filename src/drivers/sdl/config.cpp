@@ -185,6 +185,9 @@ InitConfig()
     // load lua script
     config->addOption("loadlua", "SDL.LuaScript", "");
     #endif
+	
+	// enable new PPU core
+	config->addOption("newppu", "SDL.NewPPU", "0");
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {

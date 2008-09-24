@@ -1,4 +1,6 @@
 ---version 2.0.3 yet to be released---
+24-sep-2008 - punkrockguy318 - [ 2057006 ] --newppu option added to sdl,
+disabled by default
 24-sep-2008 - punkrockguy318 - [ 2057008 ] lua is now optional, thanks
 shinydoofy for a patch.  also fixed some build issues.
 22-sep-2008 - punkrockguy318 - [ 2008437 ] fixed an issue where flawed movie

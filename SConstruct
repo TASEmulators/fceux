@@ -6,7 +6,8 @@ opts.AddOptions(
   BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
   BoolOption('OPENGL',    'Enable OpenGL support', 1),
   BoolOption('DEBUG',     'Build with debugging symbols', 0),
-  BoolOption('LUA',       'Enable Lua support', 1)
+  BoolOption('LUA',       'Enable Lua support', 1),
+  BoolOption('NEWPPU',    'Enable new PPU core', 0)
 )
 
 env = Environment(options = opts)
