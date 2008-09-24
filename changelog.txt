@@ -1,4 +1,5 @@
 ---version 2.0.3 yet to be released---
+24-sep-2008 - punkrockguy318 - [ 2047057 ] added uninstall script for gfceux
 24-sep-2008 - punkrockguy318 - [ 2062823 ] fixed ppc build errors and added
 LSB_FIRST option to build scripts
 24-sep-2008 - punkrockguy318 - [ 2057006 ] --newppu option added to sdl,
