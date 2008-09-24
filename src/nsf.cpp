@@ -39,7 +39,9 @@
 #include "cart.h"
 #include "input.h"
 #include "driver.h"
+#ifdef _S9XLUA_H
 #include "fceulua.h"
+#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -409,7 +411,9 @@ static DECLFR(NSF_read)
 				for(x=0;x<8;x++)
 					BANKSET(0x8000+x*4096,NSFHeader.BankSwitch[x]);
 			}
+			#ifdef _S9XLUA_H
 			FCEU_LuaWriteInform();
+			#endif
 			return (CurrentSong-1);
 		}
 	case 0x3FF3:return PAL;

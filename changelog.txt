@@ -1,5 +1,7 @@
 ---version 2.0.3 yet to be released---
-22-sep-2008 - punkrockguy318 - [ 208437 ] fixed an issue where flawed movie
+24-sep-2008 - punkrockguy318 - [ 2057008 ] lua is now optional, thanks
+shinydoofy for a patch.  also fixed some build issues.
+22-sep-2008 - punkrockguy318 - [ 2008437 ] fixed an issue where flawed movie
 would crash fceux on every startup
 21-aug-2008 - punkrockguy318 - sdl - fixed issue where windowed mode would
 always be set to 32 bpp

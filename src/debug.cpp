@@ -1,6 +1,9 @@
 /// \file 
 /// \brief Implements core debugging facilities
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -10,8 +13,7 @@
 #include "driver.h"
 #include "ppu.h"
 
-#include <stdlib.h>
-#include <string.h>
+
 
 #include "x6502abbrev.h"
 

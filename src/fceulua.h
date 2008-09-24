@@ -1,5 +1,4 @@
-#ifndef _S9XLUA_H
-#define _S9XLUA_H
+#ifdef _S9XLUA_H
 
 
 // Just forward function declarations 

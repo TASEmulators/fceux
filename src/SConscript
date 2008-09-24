@@ -12,7 +12,6 @@ file.cpp
 filter.cpp 
 ines.cpp
 input.cpp
-lua-engine.cpp
 netplay.cpp
 nsf.cpp
 palette.cpp
@@ -38,6 +37,9 @@ mappers""")
 
 Import('env')
 Export('env')
+
+if env['LUA']:
+  file_list.append('lua-engine.cpp')
 
 for dir in subdirs:
   subdir_files = SConscript('%s/SConscript' % dir)

@@ -32,7 +32,9 @@
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
+#ifdef _S9XLUA_H
 #include "../../fceulua.h"
+#endif
 
 
 /** GLOBALS **/
@@ -364,6 +366,7 @@ KeyboardCommands()
     if(_keyonly(key)) {
         FCEUI_CloseGame();
     }
+    #ifdef _S9XLUA_H
     g_config->getOption("SDL.Hotkeys.LoadLua", &key);
     if(_keyonly(key)) {
         std::string fname;
@@ -371,6 +374,7 @@ KeyboardCommands()
         if(fname != "")
             FCEU_LoadLuaCode(fname.c_str());
     }
+    #endif
 
     // VS Unisystem games
     if(gametype == GIT_VSUNI) {

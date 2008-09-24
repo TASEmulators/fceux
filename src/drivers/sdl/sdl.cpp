@@ -19,7 +19,9 @@
 #include "../common/cheat.h"
 #include "../../fceu.h"
 #include "../../movie.h"
+#ifdef _S9XLUA_H
 #include "../../fceulua.h"
+#endif
 
 #include "input.h"
 #include "dface.h"
@@ -86,8 +88,7 @@ char *DriverUsage="\
                           Devices: quizking hypershot mahjong toprider ftrainer\n\
                             familykeyboard oekakids arkanoid shadow bworld 4player\n\
 --inputcfg      d      Configures input device d on startup (gamepad1, gamepad2).\n\
---playmov       f      Plays back a recorded movie from filename f.\n\
---loadlua       f      Loads lua script from filename f.\n";
+--playmov       f      Plays back a recorded movie from filename f.";
 
 /* Moved network options out while netplay is broken.
 --net s, -n s	Connects to server 's' for TCP/IP network play.\n\
@@ -107,6 +108,11 @@ static void ShowUsage(char *prog)
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts("Options:");
 	puts(DriverUsage);
+	#ifdef _S9XLUA_H
+	puts ("--loadlua       f      Loads lua script from filename f.\n");
+	#else
+	puts("");
+	#endif
 }
 
 /**
@@ -480,6 +486,7 @@ SDL_GL_LoadLibrary(0);
     }
 	
     
+    #ifdef _S9XLUA_H
     // load lua script if option passed
     g_config->getOption("SDL.LuaScript", &fname);
 	g_config->setOption("SDL.LuaScript", "");
@@ -487,8 +494,8 @@ SDL_GL_LoadLibrary(0);
     {
         FCEU_LoadLuaCode(fname.c_str());
     }
+	#endif
 	
-
     // loop playing the game
     while(GameInfo) {
         DoFun(frameskip);

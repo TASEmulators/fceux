@@ -17,7 +17,9 @@
 #include "file.h"
 #include "video.h"
 #include "movie.h"
+#ifdef _S9XLUA_H
 #include "fceulua.h"
+#endif
 #include "utils/guid.h"
 #include "utils/memory.h"
 #include "utils/memorystream.h"
@@ -1034,8 +1036,10 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			tempMovieData.truncateAt(currFrameCounter);
 			currMovieData = tempMovieData;
 			
+			#ifdef _S9XLUA_H
 			if(!FCEU_LuaRerecordCountSkip())
 				currRerecordCount++;
+			#endif
 			
 			currMovieData.rerecordCount = currRerecordCount;
 

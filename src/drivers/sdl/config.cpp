@@ -181,8 +181,10 @@ InitConfig()
     // video playback
     config->addOption("playmov", "SDL.Movie", "");
     
+    #ifdef _S9XLUA_H
     // load lua script
     config->addOption("loadlua", "SDL.LuaScript", "");
+    #endif
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
@@ -262,7 +264,9 @@ InitConfig()
     // Hotkeys
     prefix = "SDL.Hotkeys.";
     config->addOption(prefix + "CheatMenu", SDLK_F1);
+    #ifdef _S9XLUA_H
     config->addOption(prefix + "LoadLua", SDLK_F3);
+    #endif
     config->addOption(prefix + "RenderBG", SDLK_F4);
     config->addOption(prefix + "SaveState", SDLK_F5);
     config->addOption(prefix + "LoadState", SDLK_F7);

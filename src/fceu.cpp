@@ -48,7 +48,9 @@
 #include "input.h"
 #include "file.h"
 #include "vsuni.h"
+#ifdef _S9XLUA_H
 #include "fceulua.h"
+#endif
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
@@ -282,13 +284,17 @@ uint8 PAL=0;
 static DECLFW(BRAML)
 {  
 	RAM[A]=V;
+	#ifdef _S9XLUA_H
 	FCEU_LuaWriteInform();
+	#endif
 }
 
 static DECLFW(BRAMH)
 {
 	RAM[A&0x7FF]=V;
+	#ifdef _S9XLUA_H
 	FCEU_LuaWriteInform();
+	#endif
 }
 
 static DECLFR(ARAML)
@@ -463,7 +469,9 @@ bool FCEUI_Initialize()
 
 void FCEUI_Kill(void)
 {
+	#ifdef _S9XLUA_H
 	FCEU_LuaStop();
+	#endif
 	FCEU_KillVirtualVideo();
 	FCEU_KillGenie();
 	FreeBuffers();
@@ -560,7 +568,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	AutoFire();
 	UpdateAutosave();
 
+	#ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
+	#endif
 	FCEU_UpdateInput();
 	lagFlag = 1;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
