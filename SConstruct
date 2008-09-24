@@ -1,16 +1,22 @@
 import os
 import sys
+import platform.system
 
 opts = Options()
 opts.AddOptions(
   BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
   BoolOption('OPENGL',    'Enable OpenGL support', 1),
+  BoolOption('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolOption('DEBUG',     'Build with debugging symbols', 0),
   BoolOption('LUA',       'Enable Lua support', 1),
   BoolOption('NEWPPU',    'Enable new PPU core', 0)
 )
 
 env = Environment(options = opts)
+
+# LSB_FIRST must be off for PPC to compile
+if platform.system == "ppc":
+  env['LSB_FIRST'] = 0
 
 # Default compiler flags:
 env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-O2'])
