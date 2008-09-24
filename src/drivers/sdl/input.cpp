@@ -538,7 +538,7 @@ ButtonConfigBegin()
     }
 
     // set the screen and notify the user of button configuration
-    screen = SDL_SetVideoMode(300, 1, 8, 0); 
+    screen = SDL_SetVideoMode(420, 200, 8, 0); 
     SDL_WM_SetCaption("Button Config",0);
 
     // XXX soules - why did we shut this down?
@@ -1028,8 +1028,9 @@ DWaitButton(const uint8 *text,
     SDL_Event event;
     static int32 LastAx[64][64];
     int x,y;
-
-    SDL_WM_SetCaption((const char *)text,0);
+    std::string title = "Press a key for ";
+	title += (const char*)text;
+    SDL_WM_SetCaption(title.c_str(),0);
     puts((const char *)text);
     for(x = 0; x < 64; x++) {
         for(y = 0; y < 64; y++) {
