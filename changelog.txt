@@ -1,4 +1,5 @@
 ---version 2.0.3 yet to be released---
+24-sep-2008 - punkrockguy318 - --inputcfg can now be used without a filename
 24-sep-2008 - punkrockguy318 - [ 2085437 ] should fix issues with missing
 author field crashing fceux
 24-sep-2008 - punkrockguy318 - [ 2047057 ] added uninstall script for gfceux

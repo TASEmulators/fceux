@@ -448,7 +448,12 @@ SDL_GL_LoadLibrary(0);
 	  // This is here so that a default fceux.cfg will be created on first
 	  // run, even without a valid ROM to play.
 	  g_config->save();
-
+	std::string s;
+	g_config->getOption("SDL.InputCfg", &s);
+	
+	// update the input devices
+    UpdateInput(g_config);
+	
     if(romIndex <= 0) {
         ShowUsage(argv[0]);
         FCEUD_Message("\nError parsing command line arguments\n");
@@ -457,8 +462,7 @@ SDL_GL_LoadLibrary(0);
     }
 
 
-    // update the input devices
-    UpdateInput(g_config);
+    
 
     // update the emu core
     UpdateEMUCore(g_config);
