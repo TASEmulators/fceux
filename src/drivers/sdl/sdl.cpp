@@ -54,14 +54,15 @@ char *DriverUsage="\
 --pal          {0|1}   Uses PAL timing.\n\
 --gamegenie    {0|1}   Enables emulated Game Genie.\n\
 --nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n\
---newppu       {0|1}   Enables the new PPU core. (WARNING: May break savestates!)\n\
+--newppu       {0|1}   Enables the new PPU core. (WARNING: May break savestates)\n\
 --frameskip     x      Sets # of frames to skip per emulated frame.\n\
 --xres          x      Sets horizontal resolution to x for full screen mode.\n\
 --yres          x      Sets vertical resolution to x for full screen mode.\n\
 --autoscale    {0|1}   Enables autoscaling in fullscreen if x in nonzero. \n\
 --keepratio    {0|1}   Keeps native NES ratio when autoscaling. \n\
---(x/y)scale    x      Multiplies width/height by x (Real numbers >0 with OpenGL, otherwise integers >0).\n\
---(x/y)stretch {0|1}   Stretches to fill surface on x/y axis (fullscreen, only with OpenGL).\n\
+--(x/y)scale    x      Multiplies width/height by x. \n\
+                        (Real numbers >0 with OpenGL, otherwise integers >0).\n\
+--(x/y)stretch {0|1}   Stretches to fill surface on x/y axis (OpenGL only).\n\
 --bpp        {8|16|32} Sets bits per pixel.\n\
 --opengl       {0|1}   Enables OpenGL support.\n\
 --doublebuf    {0|1}   Enables SDL double-buffering if x is nonzero.\n\
@@ -83,12 +84,12 @@ char *DriverUsage="\
 --volume     {0 - 100} Sets volume.\n\
 --lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
 --soundrecord   f      Records sound to file f.\n\
---input(1,2)    d      Set the input device for controller input 1 or 2.\n\
-                          Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
---input(3,4)    d      Set the famicom expansion device for controller input(3, 4)\n\
-                          Devices: quizking hypershot mahjong toprider ftrainer\n\
-                            familykeyboard oekakids arkanoid shadow bworld 4player\n\
---inputcfg      d      Configures input device d on startup (gamepad1, gamepad2).\n\
+--input(1,2)    d      Set the input device for input 1 or 2.\n\
+                        Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
+--input(3,4)    d      Set the famicom expansion device for input(3, 4)\n\
+                        Devices: quizking hypershot mahjong toprider ftrainer\n\
+                         familykeyboard oekakids arkanoid shadow bworld 4player\n\
+--inputcfg      d      Configures input device d on startup.\n\
 --playmov       f      Plays back a recorded movie from filename f.";
 
 /* Moved network options out while netplay is broken.
