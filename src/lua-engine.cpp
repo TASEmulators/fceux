@@ -1726,7 +1726,7 @@ int FCEU_LuaUsingJoypad(int which) {
  * per frame (if FCEU_LuaUsingJoypad says it's safe to do so)
  */
 uint8 FCEU_LuaReadJoypad(int which) {
-	lua_joypads_used &= !(1 << which);
+	lua_joypads_used &= ~(1 << which);
 	return lua_joypads[which];
 }
 
