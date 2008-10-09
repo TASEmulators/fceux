@@ -55,8 +55,12 @@ void KeyboardUpdateState(void)
 	case DI_OK: //memcpy(keys,tk,256);break;
 		break;
 
-	case DIERR_INPUTLOST:
-	case DIERR_NOTACQUIRED:
+		//mbg 10/8/2008
+		//previously only these two cases were handled. this made dwedit's laptop volume keys freak out.
+		//we're trying this instead
+	default:
+	//case DIERR_INPUTLOST:
+	//case DIERR_NOTACQUIRED:
 		memset(tk,0,256);
 		IDirectInputDevice7_Acquire(lpdid);
 		break;
