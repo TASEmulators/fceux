@@ -985,13 +985,16 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		}
 
 		case WM_SIZE: {
-			GetWindowRect(hwndDlg,&newDebuggerRect);
-			DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;
-			DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
-			EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);
-			currDebuggerRect = newDebuggerRect;
-			InvalidateRect(hwndDlg,0,TRUE);
-			UpdateWindow(hwndDlg);
+			if(wParam == SIZE_RESTORED)
+			{
+				GetWindowRect(hwndDlg,&newDebuggerRect);
+				DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;
+				DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
+				EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);
+				currDebuggerRect = newDebuggerRect;
+				InvalidateRect(hwndDlg,0,TRUE);
+				UpdateWindow(hwndDlg);
+			}
 			break;
 		}
 
