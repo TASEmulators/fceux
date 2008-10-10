@@ -1425,12 +1425,83 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 }
 
+static void fceu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
+	luaL_error(L, "exec_count timeout");
+}
 
+static int fceu_exec_count(lua_State *L) {
+	int count = (int)luaL_checkinteger(L,1);
+	lua_pushvalue(L, 2);
+	lua_sethook(L, fceu_exec_count_hook, LUA_MASKCOUNT, count);
+	int ret = lua_pcall(L, 0, 0, 0);
+	lua_sethook(L, NULL, 0, 0);
+	lua_settop(L,0);
+	lua_pushinteger(L, ret);
+	return 1;
+}
+
+#ifdef WIN32
+static HANDLE readyEvent, goEvent;
+DWORD WINAPI fceu_exec_time_proc(LPVOID lpParameter)
+{
+	SetEvent(readyEvent);
+	WaitForSingleObject(goEvent,INFINITE);
+	lua_State *L = (lua_State *)lpParameter;
+	lua_pushvalue(L, 2);
+	int ret = lua_pcall(L, 0, 0, 0);
+	lua_settop(L,0);
+	lua_pushinteger(L, ret);
+	SetEvent(readyEvent);
+	return 0;
+}
+
+static void fceu_exec_time_hook(lua_State *L, lua_Debug *dbg) {
+	luaL_error(L, "exec_time timeout");
+}
+
+static int fceu_exec_time(lua_State *L)
+{
+	int count = (int)luaL_checkinteger(L,1);
+
+	readyEvent = CreateEvent(0,true,false,0);
+	goEvent = CreateEvent(0,true,false,0);
+	DWORD threadid;
+	HANDLE thread = CreateThread(0,0,fceu_exec_time_proc,(LPVOID)L,0,&threadid);
+	//wait for the lua thread to start
+	WaitForSingleObject(readyEvent,INFINITE);
+	ResetEvent(readyEvent);
+	//tell the lua thread to proceed
+	SetEvent(goEvent);
+	//wait for the lua thread to finish, but no more than the specified amount of time
+	WaitForSingleObject(readyEvent,count);
+	
+	//kill lua (if it hasnt already been killed)
+	lua_sethook(L, fceu_exec_time_hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
+
+	//keep on waiting for the lua thread to come back
+	WaitForSingleObject(readyEvent,count);
+
+	//clear the lua thread-killer
+	lua_sethook(L, NULL, 0, 0);
+	
+	CloseHandle(readyEvent);
+	CloseHandle(goEvent);
+	CloseHandle(thread);
+
+	return 1;
+}
+
+#else
+static int fceu_exec_time(lua_State *L) { return 0; }
+#endif
+  
 static const struct luaL_reg fceulib [] = {
 
 	{"speedmode", fceu_speedmode},
 	{"frameadvance", fceu_frameadvance},
 	{"pause", fceu_pause},
+	{"exec_count", fceu_exec_count},
+	{"exec_time", fceu_exec_time},
 
 	{"message", fceu_message},
 	{NULL,NULL}
