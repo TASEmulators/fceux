@@ -95,7 +95,7 @@
 #endif
 
 // External functions
-
+extern std::string cfgFile;
 void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
@@ -432,7 +432,8 @@ int DriverInitialize()
 static void DriverKill(void)
 { 
 	// Save config file
-	sprintf(TempArray, "%s/fceux.cfg", BaseDirectory.c_str());
+	//sprintf(TempArray, "%s/fceux.cfg", BaseDirectory.c_str());
+	sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
 	SaveConfig(TempArray);
 
 	DestroyInput();
@@ -568,7 +569,8 @@ int main(int argc,char *argv[])
 	GetBaseDirectory();
 
 	// Load the config information
-	sprintf(TempArray,"%s\\fceux.cfg",BaseDirectory.c_str());
+	//sprintf(TempArray,"%s\\fceux.cfg",BaseDirectory.c_str());
+	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 	LoadConfig(TempArray);
 
 	initDirectories();

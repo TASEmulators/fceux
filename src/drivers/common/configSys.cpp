@@ -6,6 +6,7 @@
 #include "../../types.h"
 #include "configSys.h"
 
+std::string cfgFile = "fceux.cfg";
 /**
  * Add a given option.  The option is specified as a short command
  * line (-f), long command line (--foo), option name (Foo), its type
@@ -582,7 +583,7 @@ Config::_load()
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
-    std::string configFile = _dir + "/fceux.cfg";
+    std::string configFile = _dir + "/" + cfgFile;
     std::string line, name, value;
     char buf[1024];
 
@@ -649,7 +650,7 @@ Config::save()
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
-    std::string configFile = _dir + "/fceux.cfg";
+    std::string configFile = _dir + "/" + cfgFile;
     char buf[1024];
 
     // set the exception handling to catch i/o errors
