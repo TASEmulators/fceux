@@ -25,6 +25,7 @@
 
 char* MovieToLoad = 0;
 char* StateToLoad = 0;
+char* ConfigToLoad = 0;
 extern bool turbo;
 
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
@@ -54,6 +55,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-bginput",0,&EnableBackgroundInput,0},
          {"-turbo",0,&turbo,0},
 		 {"-pause",0,&PauseAfterLoad,0},
+		 {"-cfg",0,&ConfigToLoad,0x4001},
          {0, 0, 0, 0},
 	};
 

@@ -567,16 +567,17 @@ int main(int argc,char *argv[])
 
 	// Get the base directory
 	GetBaseDirectory();
+	
+	// Parse the commandline arguments
+	t = ParseArgies(argc, argv);
+	
+	if (ConfigToLoad) cfgFile.assign(ConfigToLoad);
 
 	// Load the config information
-	//sprintf(TempArray,"%s\\fceux.cfg",BaseDirectory.c_str());
 	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 	LoadConfig(TempArray);
 
 	initDirectories();
-
-	// Parse the commandline arguments
-	t = ParseArgies(argc, argv);
 
 	//Bleh, need to find a better place for this.
 	{
