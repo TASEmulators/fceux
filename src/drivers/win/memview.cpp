@@ -818,6 +818,7 @@ void KillMemView()
 	DestroyWindow(hMemView);
 	UnregisterClass("MEMVIEW",fceu_hInstance);
 	hMemView = 0;
+	hMemFind = 0;
 	return;
 }
 
@@ -1561,6 +1562,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_QUIT:
 		GetDlgItemText(hwndDlg,IDC_MEMVIEWFIND_WHAT,FindTextBox,59);
 		DestroyWindow(hwndDlg);
+		hMemFind = 0;
 		hwndDlg = 0;
 		break;
 	case WM_MOVING:
