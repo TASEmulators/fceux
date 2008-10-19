@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceu - Graphical launcher for FCE Ultra.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "0.6.1"
+version = "0.6.2svn"
 # Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
 ##
 """
@@ -90,7 +90,7 @@ except ImportError:
   gfceu_error('The glade libraries cannot be found.\n\
   Ensure that libglade is installed on this system.\n\
   On Debian based systems (like Ubuntu), try this command:\n\
-  sudo apt-get install libglade2-0 python-gtk2', 2, False)
+  sudo apt-get install libglade2-0 python-gtk2 python-glade2', 2, False)
   
 try:
   import gnomevfs
