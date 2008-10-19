@@ -601,7 +601,17 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 		case FCEUMKF_STATE:
 			{
 				mfnString = GetMfn();
-				mfn = mfnString.c_str();
+				
+				if (mfnString.length() < 60)	//This caps the movie filename length before adding it to the savestate filename.  
+					mfn = mfnString.c_str();	//This helps prevent possible crashes from savestate filenames of excessive length.
+					
+				else {
+					  std::string mfnStringTemp = mfnString.substr(0,60);
+					  mfn = mfnStringTemp.c_str();	//mfn is the movie filename
+					 }
+				
+				
+				
 				if(odirs[FCEUIOD_STATES])
 				{
 					sprintf(ret,"%s"PSS"%s%s.fc%d",odirs[FCEUIOD_STATES],FileBase,mfn,id1);

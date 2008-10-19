@@ -618,7 +618,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 				#endif
 				JustFrameAdvanced = true;
 			}
-	} //I apologize to anyone who comes in and tries to fgiure this if branching out
+	} //I apologize to anyone who comes in and tries to figure out this IF branching
 	currMovieData.TryDumpIncremental();
 	if (lagFlag) 
 	{
