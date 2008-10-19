@@ -40,7 +40,7 @@
 /** GLOBALS **/
 int NoWaiting=1;
 extern Config *g_config;
-extern bool bindSavestate, frameAdvanceLagSkip;
+extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
 
 /* UsrInputType[] is user-specified.  InputType[] is current
@@ -389,6 +389,11 @@ KeyboardCommands()
         frameAdvanceLagSkip ^= 1;
         FCEUI_DispMessage("Skipping lag in Frame Advance %sabled.",
             frameAdvanceLagSkip ? "en" : "dis");
+    }
+    
+    g_config->getOption("SDL.Hotkeys.LagCounterDisplay", &key);
+    if(_keyonly(key)) {
+        lagCounterDisplay ^= 1;
     }
 
     // VS Unisystem games

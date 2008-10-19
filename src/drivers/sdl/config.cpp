@@ -282,6 +282,7 @@ InitConfig()
     config->addOption(prefix + "Power", 0);
     config->addOption(prefix + "BindState", SDLK_F2);
     config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
+    config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
     
     
 

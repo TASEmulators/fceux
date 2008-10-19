@@ -1,5 +1,6 @@
 ---version 2.0.3 yet to be released---
-19-oct-2008 - shinydoofy - toggle skipping of lag frames for SDL build, default hotkey F6
+19-oct-2008 - shinydoofy - toggle lag frame counter for SDL, default hotkey F8
+19-oct-2008 - shinydoofy - toggle skipping of lag frames for SDL, default hotkey F6
 19-oct-2008 - shinydoofy - [ 2179829 ] user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2
 19-oct-2008 - adelikat - winew - added a toggle for binding savestates to movies
 18-oct-2008 - adelikat - Win32 - added -cfg (config file) command line argument

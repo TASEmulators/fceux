@@ -65,7 +65,7 @@
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
 bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
-								  //TODO: SDL version - hotkey item only, but no default mapping
+
 FCEUGI::FCEUGI()
 : filename(0)
 , archiveFilename(0)
