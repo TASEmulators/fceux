@@ -35,6 +35,7 @@
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
+#include "../../file.h"
 
 
 /** GLOBALS **/
@@ -375,6 +376,13 @@ KeyboardCommands()
             FCEU_LoadLuaCode(fname.c_str());
     }
     #endif
+    
+    g_config->getOption("SDL.Hotkeys.BindState", &key);
+    if(_keyonly(key)) {
+        bindSavestate = !bindSavestate;
+        FCEUI_DispMessage("Savestate binding to movie %sabled.",
+          bindSavestate ? "en" : "dis");
+    }
 
     // VS Unisystem games
     if(gametype == GIT_VSUNI) {

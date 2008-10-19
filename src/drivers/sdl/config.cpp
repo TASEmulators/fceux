@@ -280,6 +280,7 @@ InitConfig()
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
     config->addOption(prefix + "Power", 0);
+    config->addOption(prefix + "BindState", SDLK_F2);
     
     
 
