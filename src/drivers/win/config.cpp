@@ -33,6 +33,7 @@
 #include "video.h"
 #include "memwatch.h"
 #include "fceu.h"
+#include "file.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -200,6 +201,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
 	AC(lagCounterDisplay),
+	AC(bindSavestate),
 
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT

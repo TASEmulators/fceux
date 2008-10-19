@@ -6,6 +6,8 @@
 #include "types.h"
 #include "utils/memorystream.h"
 
+extern bool bindSavestate;
+
 struct FCEUFILE {
 	//the stream you can use to access the data
 	std::iostream *stream;

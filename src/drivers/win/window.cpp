@@ -59,6 +59,7 @@
 #include "movie.h"
 #include "fceulua.h"
 #include "utils/xstring.h"
+#include "file.h"
 
 #include <fstream>
 
@@ -300,6 +301,7 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
+	CheckMenuItem(fceumenu, MENU_CONFIG_BINDSAVES, bindSavestate?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_FA_LAGSKIP, frameAdvanceLagSkip?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
@@ -1209,6 +1211,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_STOPLUASCRIPT:
 				FCEU_LuaStop();
 				break;
+			case MENU_CONFIG_BINDSAVES:
+				bindSavestate ^= 1;
+				UpdateCheckedMenuItems();
 			case MENU_DISPLAY_LAGCOUNTER:
 				lagCounterDisplay ^= 1;
 				UpdateCheckedMenuItems();

@@ -48,7 +48,7 @@
 
 using namespace std;
 
-
+bool bindSavestate = true;	//Toggle that determines if a savestate filename will include the movie filename
 static std::string BaseDirectory;
 static char FileExt[2048];	//Includes the . character, as in ".nes"
 char FileBase[2048];
@@ -600,15 +600,17 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 			break;
 		case FCEUMKF_STATE:
 			{
-				mfnString = GetMfn();
+				if (bindSavestate) mfnString = GetMfn();
+				else mfnString = "";
 				
 				if (mfnString.length() < 60)	//This caps the movie filename length before adding it to the savestate filename.  
 					mfn = mfnString.c_str();	//This helps prevent possible crashes from savestate filenames of excessive length.
 					
-				else {
-					  std::string mfnStringTemp = mfnString.substr(0,60);
-					  mfn = mfnStringTemp.c_str();	//mfn is the movie filename
-					 }
+				else 
+					{
+					std::string mfnStringTemp = mfnString.substr(0,60);
+					mfn = mfnStringTemp.c_str();	//mfn is the movie filename
+					}
 				
 				
 				
