@@ -35,12 +35,12 @@
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
-#include "../../file.h"
 
 
 /** GLOBALS **/
 int NoWaiting=1;
 extern Config *g_config;
+extern bool bindSavestate, frameAdvanceLagSkip;
 
 
 /* UsrInputType[] is user-specified.  InputType[] is current
@@ -379,9 +379,16 @@ KeyboardCommands()
     
     g_config->getOption("SDL.Hotkeys.BindState", &key);
     if(_keyonly(key)) {
-        bindSavestate = !bindSavestate;
+        bindSavestate ^= 1;
         FCEUI_DispMessage("Savestate binding to movie %sabled.",
-          bindSavestate ? "en" : "dis");
+            bindSavestate ? "en" : "dis");
+    }
+    
+    g_config->getOption("SDL.Hotkeys.FrameAdvanceLagSkip", &key);
+    if(_keyonly(key)) {
+        frameAdvanceLagSkip ^= 1;
+        FCEUI_DispMessage("Skipping lag in Frame Advance %sabled.",
+            frameAdvanceLagSkip ? "en" : "dis");
     }
 
     // VS Unisystem games
