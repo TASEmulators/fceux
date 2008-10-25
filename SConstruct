@@ -9,7 +9,9 @@ opts.AddOptions(
   BoolOption('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolOption('DEBUG',     'Build with debugging symbols', 0),
   BoolOption('LUA',       'Enable Lua support', 1),
-  BoolOption('NEWPPU',    'Enable new PPU core', 0)
+  BoolOption('NEWPPU',    'Enable new PPU core', 0),
+  BoolOption('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
+  BoolOption('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1')
 )
 
 env = Environment(options = opts)
@@ -86,7 +88,14 @@ else:
       print "*** WARNING ***"
       print "Zenity could not be found in the PATH.  File dialogs will not work without zenity installed."
       raw_input('Press any key to continue. . .')
-    
+  
+  ### Search for gd if we're not in Windows
+  if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI'] and env['LOGO']:
+    gd = conf.CheckLib('gd', autoadd=1)
+    if gd == 0:
+      env['LOGO'] = 0
+      print 'Did not find libgd, you won\'t be able to create a logo screen for your avis.'
+   
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = " -DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
@@ -114,6 +123,11 @@ print "base CCFLAGS:",env['CCFLAGS']
 
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g'])
+
+if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
+  env.Append(CPPDEFINES=["CREATE_AVI"])
+ else
+  env['CREATE_AVI']=0;
 
 Export('env')
 SConscript('src/SConscript')

@@ -32,12 +32,18 @@
 
 #include "../common/configSys.h"
 
+#ifdef CREATE_AVI
+#include "../videolog/nesvideos-piece.h"
+#endif
+
 
 #ifdef WIN32
 #include <windows.h>
 #endif
 
-extern int32 g_fpsScale;
+extern double g_fpsScale;
+
+extern bool MaxSpeed;
 
 int CloseGame(void);
 
@@ -111,10 +117,12 @@ static void ShowUsage(char *prog)
 	puts("Options:");
 	puts(DriverUsage);
 	#ifdef _S9XLUA_H
-	puts ("--loadlua       f      Loads lua script from filename f.\n");
-	#else
-	puts("");
+	puts ("--loadlua       f      Loads lua script from filename f.");
 	#endif
+	#ifdef CREATE_AVI
+	puts ("--videolog      c      Call mencoder to grab the video and audio streams to\n                       encode them. Check the documentation for more on this.");
+	#endif
+	puts("");
 }
 
 /**
@@ -280,16 +288,48 @@ FCEUD_Update(uint8 *XBuf,
 {
     extern int FCEUDnetplay;
 
+    #ifdef CREATE_AVI
+    if(LoggingEnabled == 2 || (eoptions&EO_NOTHROTTLE))
+    {
+      if(LoggingEnabled == 2)
+      {
+        int16* MonoBuf = (int16*)malloc(sizeof(*MonoBuf) * Count);
+        int n;
+        for(n=0; n<Count; ++n)
+            MonoBuf[n] = Buffer[n] & 0xFFFF;
+        NESVideoLoggingAudio
+         (
+          MonoBuf, 
+          FSettings.SndRate, 16, 1,
+          Count
+         );
+        free(MonoBuf);
+      }
+      Count /= 2;
+      if(inited & 1)
+      {
+        if(Count > GetWriteSound()) Count = GetWriteSound();
+        if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
+      }
+      if(inited & 2)
+        FCEUD_UpdateInput();
+      if(XBuf && (inited & 4)) BlitScreen(XBuf);
+      
+      //SpeedThrottle();
+        return;
+     }
+    #endif
+    
     int ocount = Count;
     // apply frame scaling to Count
-    Count = (Count<<8) / g_fpsScale;
+    Count = (int)(Count / g_fpsScale);
     if(Count) {
         int32 can=GetWriteSound();
         static int uflow=0;
         int32 tmpcan;
 
         // don't underflow when scaling fps
-        if(can >= GetMaxSound() && g_fpsScale<=256) uflow=1;	/* Go into massive underflow mode. */
+        if(can >= GetMaxSound() && g_fpsScale==1.0) uflow=1;	/* Go into massive underflow mode. */
 
         if(can > Count) can=Count;
         else uflow=0;
@@ -299,7 +339,7 @@ FCEUD_Update(uint8 *XBuf,
         //if(uflow) puts("Underflow");
         tmpcan = GetWriteSound();
         // don't underflow when scaling fps
-        if(g_fpsScale>256 || ((tmpcan < Count*0.90) && !uflow)) {
+        if(g_fpsScale>1.0 || ((tmpcan < Count*0.90) && !uflow)) {
             if(XBuf && (inited&4) && !(NoWaiting & 2))
                 BlitScreen(XBuf);
             Buffer+=can;
@@ -328,7 +368,10 @@ FCEUD_Update(uint8 *XBuf,
 
     } else {
         if(!NoWaiting && (!(eoptions&EO_NOTHROTTLE) || FCEUI_EmulationPaused()))
-            SpeedThrottle();
+        while (SpeedThrottle())
+        {
+            FCEUD_UpdateInput();
+        }
         if(XBuf && (inited&4)) {
             BlitScreen(XBuf);
         }
@@ -468,6 +511,17 @@ SDL_GL_LoadLibrary(0);
     // update the emu core
     UpdateEMUCore(g_config);
     g_config->getOption("SDL.Frameskip", &frameskip);
+    
+    #ifdef CREATE_AVI
+    {std::string tmp;
+    g_config->getOption("SDL.VideoLog", &tmp);
+    g_config->setOption("SDL.VideoLog", "");
+    if(!tmp.empty())
+    {
+        NESVideoSetVideoCmd(tmp.c_str());
+        LoggingEnabled = 1;
+    }}
+    #endif
 
     // load the specified game
     error = LoadGame(argv[romIndex]);

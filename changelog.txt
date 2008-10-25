@@ -1,4 +1,5 @@
 ---version 2.0.3 yet to be released---
+25-oct-2008 - shinydoofy - added support for AVI creation for SDL, see documention/Videolog.txt for more
 19-oct-2008 - shinydoofy - toggle lag frame counter for SDL, default hotkey F8
 19-oct-2008 - shinydoofy - toggle skipping of lag frames for SDL, default hotkey F6
 19-oct-2008 - shinydoofy - [ 2179829 ] user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2

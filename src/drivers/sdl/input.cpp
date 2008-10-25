@@ -253,7 +253,7 @@ KeyboardCommands()
 
     // Toggle throttling
     NoWaiting &= ~1;
-    if(KEY(GRAVE)) {
+    if(KEY(TAB)) {
         NoWaiting |= 1;
     }
 

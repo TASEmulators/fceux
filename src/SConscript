@@ -32,7 +32,8 @@ drivers/common
 fir
 input
 utils
-mappers""")
+mappers
+""")
 #palettes
 
 Import('env')
@@ -40,6 +41,11 @@ Export('env')
 
 if env['LUA']:
   file_list.append('lua-engine.cpp')
+
+if env['CREATE_AVI']:
+  subdirs.append('drivers/videolog')
+  
+
 
 for dir in subdirs:
   subdir_files = SConscript('%s/SConscript' % dir)

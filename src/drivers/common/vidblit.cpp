@@ -284,7 +284,7 @@ void SetPaletteBlitToHigh(uint8 *src)
  }
 }
 
-static void Blit32to24(uint32 *src, uint8 *dest, int xr, int yr, int dpitch)
+void Blit32to24(uint32 *src, uint8 *dest, int xr, int yr, int dpitch)
 {
  int x,y;
 
@@ -306,7 +306,7 @@ static void Blit32to24(uint32 *src, uint8 *dest, int xr, int yr, int dpitch)
 }
 
 
-static void Blit32to16(uint32 *src, uint16 *dest, int xr, int yr, int dpitch,
+void Blit32to16(uint32 *src, uint16 *dest, int xr, int yr, int dpitch,
         int shiftr[3], int shiftl[3])
 {
  int x,y;

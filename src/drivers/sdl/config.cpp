@@ -185,6 +185,10 @@ InitConfig()
     // load lua script
     config->addOption("loadlua", "SDL.LuaScript", "");
     #endif
+    
+    #ifdef CREATE_AVI
+    config->addOption("videolog",  "SDL.VideoLog",  "");
+    #endif    
 	
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", "0");

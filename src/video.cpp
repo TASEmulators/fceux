@@ -50,6 +50,10 @@
 #include "fceulua.h"
 #endif
 
+#ifdef CREATE_AVI
+#include "drivers/videolog/nesvideos-piece.h"
+#endif
+
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
 static uint8 *xbsave=NULL;
@@ -351,6 +355,17 @@ void FCEU_DispMessage(char *format, ...)
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = false;
+	
+	#ifdef CREATE_AVI
+	if(LoggingEnabled == 2)
+	{
+		/* While in AVI recording mode, only display bare minimum
+		 * of messages
+		 */
+		if(strcmp(guiMessage.errmsg, "Movie playback stopped.") != 0)
+			guiMessage.howlong = 0;
+	}
+	#endif
 }
 
 void FCEU_ResetMessages()

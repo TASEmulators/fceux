@@ -25,6 +25,10 @@
 #include "utils/memorystream.h"
 #include "utils/xstring.h"
 
+#ifdef CREATE_AVI
+#include "drivers/videolog/nesvideos-piece.h"
+#endif
+
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -61,7 +65,7 @@ EMOVIEMODE movieMode = MOVIEMODE_INACTIVE;
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
 //FILE* fpRecordingMovie = 0;
-fstream* osRecordingMovie = 0;
+std::ostream* osRecordingMovie = 0;
 
 int currFrameCounter;
 uint32 cur_input_display = 0;
@@ -69,6 +73,7 @@ int pauseframe = -1;
 bool movie_readonly = true;
 int input_display = 0;
 int frame_display = 0;
+int last_displayed_framenumber = -1;
 
 SFORMAT FCEUMOV_STATEINFO[]={
 	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
@@ -305,8 +310,8 @@ MovieData::MovieData()
 	: version(MOVIE_VERSION)
 	, emuVersion(FCEU_VERSION_NUMERIC)
 	, palFlag(false)
-	, binaryFlag(false)
 	, rerecordCount(1)
+	, binaryFlag(false)
 	, greenZoneCount(0)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
@@ -760,6 +765,14 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 		else
 			FCEU_DispMessage("Replay started Read+Write.");
 	}
+	
+	#ifdef CREATE_AVI
+	if(LoggingEnabled)
+	{
+	    FCEU_DispMessage("Video recording enabled.\n");
+	    LoggingEnabled = 2;
+	}
+	#endif
 }
 
 static void openRecordingMovie(const char* fname)
@@ -916,8 +929,12 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
-	if(frame_display)
+	if(frame_display
+	&& movieMode != MOVIEMODE_INACTIVE
+	&& currFrameCounter != last_displayed_framenumber)
 	{
+		last_displayed_framenumber = currFrameCounter;
+		
 		char counterbuf[32] = {0};
 		if(movieMode == MOVIEMODE_PLAY)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
