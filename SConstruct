@@ -126,7 +126,7 @@ if env['DEBUG']:
 
 if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
   env.Append(CPPDEFINES=["CREATE_AVI"])
- else
+else:
   env['CREATE_AVI']=0;
 
 Export('env')
