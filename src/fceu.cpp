@@ -48,6 +48,8 @@
 #include "input.h"
 #include "file.h"
 #include "vsuni.h"
+#include "ines.h"
+
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
@@ -1070,3 +1072,10 @@ bool FCEUXLoad(const char *name, FCEUFILE *fp)
 }
 
 
+uint8 FCEU_ReadRomByte(uint32 i) {
+	extern iNES_HEADER head;
+	if(i < 16) return *((unsigned char *)&head+i);
+	if(i < 16+PRGsize[0])return PRGptr[0][i-16];
+	if(i < 16+PRGsize[0]+CHRsize[0])return CHRptr[0][i-16-PRGsize[0]];
+	return 0;
+}

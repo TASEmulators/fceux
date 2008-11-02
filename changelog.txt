@@ -1,3 +1,7 @@
+---version 2.0.4 yet to be released---
+
+02-nov-2008 - zeromus - emulua - add rom.readbyte and rom.readbytesigned
+
 ---version 2.0.3 released---
 
 02-nov-2008 - zeromus - fix fcm conversion, recording, and playback of reset and power commands

@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _INES_H_
+#define _INES_H_
+
 #ifdef INESPRIV
 
 void iNESStateRestore(int version);
@@ -425,3 +428,5 @@ void Mapper245_Init(CartInfo *);
 void Mapper249_Init(CartInfo *);
 void Mapper250_Init(CartInfo *);
 void Mapper254_Init(CartInfo *);
+
+#endif

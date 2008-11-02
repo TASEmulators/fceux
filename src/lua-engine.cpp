@@ -330,6 +330,8 @@ static int fceu_message(lua_State *L) {
 }
 
 
+static int rom_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_ReadRomByte(luaL_checkinteger(L,1))); return 1; }
+static int rom_readbytesigned(lua_State *L) {   lua_pushinteger(L, (signed char)FCEU_ReadRomByte(luaL_checkinteger(L,1))); return 1; }
 static int memory_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1))); return 1; }
 static int memory_writebyte(lua_State *L) {   FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2)); return 0; }
 static int memory_readbyterange(lua_State *L) {
@@ -1507,6 +1509,13 @@ static const struct luaL_reg fceulib [] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg romlib [] = {
+	{"readbyte", rom_readbyte},
+	{"readbytesigned", rom_readbytesigned},
+	{NULL,NULL}
+};
+
+
 static const struct luaL_reg memorylib [] = {
 
 	{"readbyte", memory_readbyte},
@@ -1653,6 +1662,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 
 		luaL_register(L, "FCEU", fceulib);
 		luaL_register(L, "memory", memorylib);
+		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "savestate", savestatelib);
 		luaL_register(L, "movie", movielib);
