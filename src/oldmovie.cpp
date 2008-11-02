@@ -489,8 +489,10 @@ static void _addjoy()
 			{
 				//FCEU_DoSimpleCommand(nextd&0x1F);
 				int command = nextd&0x1F;
-				if(command = FCEUNPCMD_RESET)
+				if(command == FCEUNPCMD_RESET)
 					joopcmd = MOVIECMD_RESET;
+				if(command == FCEUNPCMD_POWER)
+					joopcmd = MOVIECMD_POWER;
 			}
 			else
 				joop[(nextd >> 3)&0x3] ^= 1 << (nextd&0x7);
