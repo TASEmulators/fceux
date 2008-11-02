@@ -5,8 +5,8 @@
 19-oct-2008 - shinydoofy - toggle lag frame counter for SDL, default hotkey F8
 19-oct-2008 - shinydoofy - toggle skipping of lag frames for SDL, default hotkey F6
 19-oct-2008 - shinydoofy - [ 2179829 ] user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2
-19-oct-2008 - adelikat - winew - added a toggle for binding savestates to movies
-18-oct-2008 - adelikat - Win32 - added -cfg (config file) command line argument
+19-oct-2008 - adelikat - win32 - added a toggle for binding savestates to movies
+18-oct-2008 - adelikat - win32 - added -cfg (config file) command line argument
 08-oct-2008 - zeromus - SF [ 2073113 ] Child windows inside debugging window get invalid sizes
 08-oct-2008 - zeromus - SF [ 2153843 ] Lua ignores second joypad.set()
 24-sep-2008 - punkrockguy318 - made the input config window more usable
