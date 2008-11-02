@@ -14,6 +14,7 @@ ines.cpp
 input.cpp
 netplay.cpp
 nsf.cpp
+oldmovie.cpp
 palette.cpp
 ppu.cpp
 sound.cpp

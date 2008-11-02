@@ -36,6 +36,8 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
+#include "../../oldmovie.h"
+#include "../../types.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -96,7 +98,8 @@ char *DriverUsage="\
                         Devices: quizking hypershot mahjong toprider ftrainer\n\
                          familykeyboard oekakids arkanoid shadow bworld 4player\n\
 --inputcfg      d      Configures input device d on startup.\n\
---playmov       f      Plays back a recorded movie from filename f.";
+--playmov       f      Plays back a recorded movie from filename f.\n\
+--fcmconvert    f      Converts fcm movie file f to fm2.";
 
 /* Moved network options out while netplay is broken.
 --net s, -n s	Connects to server 's' for TCP/IP network play.\n\
@@ -120,7 +123,7 @@ static void ShowUsage(char *prog)
 	puts ("--loadlua       f      Loads lua script from filename f.");
 	#endif
 	#ifdef CREATE_AVI
-	puts ("--videolog      c      Call mencoder to grab the video and audio streams to\n                       encode them. Check the documentation for more on this.");
+	puts ("--videolog      c      Calls mencoder to grab the video and audio streams to\n                       encode them. Check the documentation for more on this.");
 	#endif
 	puts("");
 }
@@ -497,6 +500,40 @@ SDL_GL_LoadLibrary(0);
 	
 	// update the input devices
     UpdateInput(g_config);
+
+    // check for a .fcm file to convert to .fm2
+    g_config->getOption ("SDL.FCMConvert", &s);
+    g_config->setOption ("SDL.FCMConvert", "");
+    if (!s.empty())
+    {
+      int okcount = 0;
+      std::string infname = s.c_str();
+      // procude output filename
+      std::string outname;
+      size_t dot = infname.find_last_of (".");
+      if (dot == std::string::npos)
+        outname = infname + ".fm2";
+      else
+        outname = infname.substr(0,dot) + ".fm2";
+      
+      MovieData md;
+      EFCM_CONVERTRESULT result = convert_fcm (md, infname);
+      
+      if (result == FCM_CONVERTRESULT_SUCCESS)
+      {
+        okcount++;
+        std::fstream* outf = FCEUD_UTF8_fstream (outname, "wb");
+        md.dump (outf,false);
+        delete outf;
+        FCEUD_Message ("Your file has been converted to FM2.\n");
+      } else {
+        FCEUD_Message ("Something went wrong while converting your file...\n");
+      }
+      DriverKill();
+      SDL_Quit();
+      return 0;
+      
+    }
 	
     if(romIndex <= 0) {
         ShowUsage(argv[0]);
@@ -513,14 +550,13 @@ SDL_GL_LoadLibrary(0);
     g_config->getOption("SDL.Frameskip", &frameskip);
     
     #ifdef CREATE_AVI
-    {std::string tmp;
-    g_config->getOption("SDL.VideoLog", &tmp);
+    g_config->getOption("SDL.VideoLog", &s);
     g_config->setOption("SDL.VideoLog", "");
-    if(!tmp.empty())
+    if(!s.empty())
     {
-        NESVideoSetVideoCmd(tmp.c_str());
+        NESVideoSetVideoCmd(s.c_str());
         LoggingEnabled = 1;
-    }}
+    }
     #endif
 
     // load the specified game

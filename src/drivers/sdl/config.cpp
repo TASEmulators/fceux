@@ -188,7 +188,9 @@ InitConfig()
     
     #ifdef CREATE_AVI
     config->addOption("videolog",  "SDL.VideoLog",  "");
-    #endif    
+    #endif
+    
+    config->addOption("fcmconvert", "SDL.FCMConvert", "");
 	
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", "0");

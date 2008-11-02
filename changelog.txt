@@ -1,11 +1,12 @@
 ---version 2.0.4 yet to be released---
 
+02-nov-2008 - shinydoofy - added --fcmconvert for SDL
 02-nov-2008 - zeromus - emulua - add rom.readbyte and rom.readbytesigned
 
 ---version 2.0.3 released---
 
 02-nov-2008 - zeromus - fix fcm conversion, recording, and playback of reset and power commands
-25-oct-2008 - shinydoofy - added support for AVI creation for SDL, see documention/Videolog.txt for more
+25-oct-2008 - shinydoofy - added support for AVI creation for SDL, see documentation/Videolog.txt for more
 19-oct-2008 - shinydoofy - toggle lag frame counter for SDL, default hotkey F8
 19-oct-2008 - shinydoofy - toggle skipping of lag frames for SDL, default hotkey F6
 19-oct-2008 - shinydoofy - [ 2179829 ] user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2
