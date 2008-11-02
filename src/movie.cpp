@@ -831,6 +831,8 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	FCEU_DispMessage("Movie recording started.");
 }
 
+static int _currCommand = 0;
+
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
@@ -870,7 +872,10 @@ void FCEUMOV_AddInputState()
 		{
 			MovieRecord* mr = &currMovieData.records[currFrameCounter];
 			
-			//reset if necessary
+			//reset and power cycle if necessary
+			if(mr->command_power())
+				PowerNES();
+
 			if(mr->command_reset())
 				ResetNES();
 
@@ -901,7 +906,8 @@ void FCEUMOV_AddInputState()
 
 		joyports[0].log(&mr);
 		joyports[1].log(&mr);
-		mr.commands = 0;
+		mr.commands = _currCommand;
+		_currCommand = 0;
 
 		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
@@ -920,11 +926,11 @@ void FCEUMOV_AddCommand(int cmd)
 	// do nothing if not recording a movie
 	if(movieMode != MOVIEMODE_RECORD)
 		return;
-	
-	//printf("%d\n",cmd);
 
-	//MBG TODO BIG TODO TODO TODO
-	//DoEncode((cmd>>3)&0x3,cmd&0x7,1);
+	//NOTE: EMOVIECMD matches FCEUNPCMD_RESET and FCEUNPCMD_POWER
+	//we are lucky (well, I planned it that way)
+
+	_currCommand |= cmd;
 }
 
 void FCEU_DrawMovies(uint8 *XBuf)

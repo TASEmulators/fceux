@@ -944,6 +944,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_POWER:
 		if(!GameInfo) return false;
+		if(FCEUMOV_Mode(MOVIEMODE_RECORD)) return true;
 		if(!FCEUMOV_Mode(MOVIEMODE_INACTIVE)) return false;
 		break;
 

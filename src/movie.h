@@ -61,6 +61,7 @@ enum EMOVIEMODE
 enum EMOVIECMD
 {
 	MOVIECMD_RESET = 1,
+	MOVIECMD_POWER = 2,
 };
 
 EMOVIEMODE FCEUMOV_Mode();
@@ -97,6 +98,7 @@ public:
 	//the disk format will support up to 64bit if necessary
 	uint8 commands;
 	bool command_reset() { return (commands&MOVIECMD_RESET)!=0; }
+	bool command_power() { return (commands&MOVIECMD_POWER)!=0; }
 
 	void toggleBit(int joy, int bit)
 	{
