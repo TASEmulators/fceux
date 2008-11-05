@@ -73,7 +73,6 @@ int pauseframe = -1;
 bool movie_readonly = true;
 int input_display = 0;
 int frame_display = 0;
-int last_displayed_framenumber = -1;
 
 SFORMAT FCEUMOV_STATEINFO[]={
 	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
@@ -936,11 +935,9 @@ void FCEUMOV_AddCommand(int cmd)
 void FCEU_DrawMovies(uint8 *XBuf)
 {
 	if(frame_display
-	&& movieMode != MOVIEMODE_INACTIVE
-	&& currFrameCounter != last_displayed_framenumber)
+	&& movieMode != MOVIEMODE_INACTIVE)
 	{
-		last_displayed_framenumber = currFrameCounter;
-		
+				
 		char counterbuf[32] = {0};
 		if(movieMode == MOVIEMODE_PLAY)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
