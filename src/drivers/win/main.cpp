@@ -127,7 +127,7 @@ int PauseAfterLoad;
 
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, macro, input presets, lua scripts, base
-char *directory_names[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 //Handle of the main window.
 HWND hAppWnd = 0;
@@ -135,7 +135,7 @@ HWND hAppWnd = 0;
 uint32 goptions = GOO_DISABLESS;
 
 // Some timing-related variables (now ignored).
-int maxconbskip = 32;             //Maximum consecutive blit skips.
+int maxconbskip = 32;          //Maximum consecutive blit skips.
 int ffbskip = 32;              //Blit skips per blit when FF-ing
 
 HINSTANCE fceu_hInstance;
@@ -176,7 +176,7 @@ void SetDirs()
 {
 	int x;
 
-	static int jlist[13]= {
+	static int jlist[14]= {
 		FCEUIOD_ROMS,
 		FCEUIOD_NV,
 		FCEUIOD_STATES,
@@ -189,6 +189,7 @@ void SetDirs()
 		FCEUIOD_MACRO,
 		FCEUIOD_INPUT,
 		FCEUIOD_LUA,
+		FCEUIOD_AVI,
 		FCEUIOD__COUNT};
 
 	FCEUI_SetSnapName(eoptions & EO_SNAPNAME);
@@ -198,9 +199,9 @@ void SetDirs()
 		FCEUI_SetDirOverride(jlist[x], directory_names[x]);
 	}
 
-	if(directory_names[12])
+	if(directory_names[13])
 	{
-		FCEUI_SetBaseDirectory(directory_names[12]);
+		FCEUI_SetBaseDirectory(directory_names[13]);
 	}
 	else
 	{

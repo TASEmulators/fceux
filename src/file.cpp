@@ -479,7 +479,7 @@ void FCEUI_SetBaseDirectory(std::string const & dir)
 	BaseDirectory = dir;
 }
 
-static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0,0,0,0,0,0,0,0};     // odirs, odors. ^_^
+static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0,0,0,0,0,0,0,0,0};     // odirs, odors. ^_^
 
 void FCEUI_SetDirOverride(int which, char *n)
 {
@@ -551,6 +551,12 @@ std::string FCEU_GetPath(int type)
 				return (odirs[FCEUIOD_LUA]);
 			else
 				return BaseDirectory + PSS + "tools";
+			break;
+		case FCEUMKF_AVI:
+			if(odirs[FCEUIOD_AVI])
+				return (odirs[FCEUIOD_LUA]);
+			else
+				return BaseDirectory;
 			break;
 	}
 

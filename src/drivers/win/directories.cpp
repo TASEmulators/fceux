@@ -122,7 +122,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 					// If a directory selection button was pressed, ask the
 					// user for a directory.
 
-					static char *helpert[13] = {
+					static char *helpert[14] = {
 						"Roms",
 						"Battery Saves",
 						"Save States",
@@ -135,7 +135,8 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 						"Macro files",
 						"Input Presets",
 						"Lua Scripts",
-						"Base Directory"
+						"Avi Directory",
+						"Base Directory",
 					};
 
 					char name[MAX_PATH];

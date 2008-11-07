@@ -191,23 +191,20 @@ void FCEUI_CheatSearchShowExcluded(void);
 void FCEUI_CheatSearchSetCurrentAsOriginal(void);
 
 //.rom
-#define FCEUIOD_ROMS    0
-//NV = nonvolatile. save data.
-#define FCEUIOD_NV      1
-//savestates
-#define FCEUIOD_STATES  2
-//.fds ?
-#define FCEUIOD_FDSROM  3
-#define FCEUIOD_SNAPS   4
-#define FCEUIOD_CHEATS  5
-#define FCEUIOD_MOVIES  6
-#define FCEUIOD_MEMW    7
-#define FCEUIOD_BBOT    8
-#define FCEUIOD_MACRO   9
-#define FCEUIOD_INPUT   10
-#define FCEUIOD_LUA     11
-
-#define FCEUIOD__COUNT  12
+#define FCEUIOD_ROMS    0	//Roms
+#define FCEUIOD_NV      1	//NV = nonvolatile. save data.	
+#define FCEUIOD_STATES  2	//savestates	
+#define FCEUIOD_FDSROM  3	//disksys.rom
+#define FCEUIOD_SNAPS   4	//screenshots
+#define FCEUIOD_CHEATS  5	//cheats
+#define FCEUIOD_MOVIES  6	//.fm2 files
+#define FCEUIOD_MEMW    7	//memory watch fiels
+#define FCEUIOD_BBOT    8	//basicbot, obsolete
+#define FCEUIOD_MACRO   9	//macro files - tasedit, currently not implemented
+#define FCEUIOD_INPUT   10	//input presets
+#define FCEUIOD_LUA     11	//lua scripts
+#define FCEUIOD_AVI		12	//default file for avi output
+#define FCEUIOD__COUNT  13	//base directory override?
 
 void FCEUI_SetDirOverride(int which, char *n);
 

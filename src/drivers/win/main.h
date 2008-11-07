@@ -45,10 +45,10 @@ extern int AutoFireOffset;
 
 extern int vmod;
 
-extern char* directory_names[13];
+extern char* directory_names[14];
 
 ///Contains the names of the default directories.
-static const char *default_directory_names[12] = {
+static const char *default_directory_names[13] = {
 	"",         // roms
 	"sav",      // nonvol
 	"fcs",      // states
@@ -59,8 +59,9 @@ static const char *default_directory_names[12] = {
 	"tools",    // memwatch
 	"tools",    // macro
 	"tools",    // input presets
-	"tools",     // lua scripts
-	""			// adelikat - adding a dummy one here ( [12] but only 11 entries)
+	"tools",    // lua scripts
+	"",			// avi output
+	""			// adelikat - adding a dummy one here ( [13] but only 12 entries)
 };
 
 #define NUMBER_OF_DIRECTORIES sizeof(directory_names) / sizeof(*directory_names)

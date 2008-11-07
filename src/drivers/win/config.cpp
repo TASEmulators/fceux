@@ -106,7 +106,8 @@ static CFGSTRUCT fceuconfig[] = {
 	NACS("odmacro",directory_names[9]),
 	NACS("odinput",directory_names[10]),
 	NACS("odlua",directory_names[11]),
-	NACS("odbase",directory_names[12]),
+	NACS("odavi",directory_names[12]),
+	NACS("odbase",directory_names[13]),
 
 	AC(winspecial),
 	AC(winsizemulx),
