@@ -1581,11 +1581,28 @@ void FCEUD_AviRecordTo(void)
 	char szChoice[MAX_PATH];
 
 	//if we are playing a movie, construct the filename from the current movie.
-	//else construct it from the filename.
+	//else construct it from the ROM name.
 	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
 	{
+		std::string aviFilename;
 		extern char curMovieFilename[];
-		strcpy(szChoice, curMovieFilename);
+
+		//adelikat - use avi output directory override if specified
+		std::string aviDirectory = FCEU_GetPath(21);  //21 = FCEUMKF_AVI
+		if (aviDirectory != "")						//If directory specified, use it instead
+		{
+			if (aviDirectory.find_last_of("\\") != (aviDirectory.size()))
+				aviDirectory.append("\\");			//if directory override has no / then add one
+			
+			std::string tempfilename = GetMfn();	//get movie filename
+			tempfilename.erase(0,1);				//remove dot
+			
+			aviFilename = aviDirectory + tempfilename;	//concate avi directory and movie filename
+		}
+		else
+			aviFilename = curMovieFilename;			//If no avidirectory override, simply default to the same directory as the movie
+		
+		strcpy(szChoice, aviFilename.c_str());
 		char* dot = strrchr(szChoice,'.');
 
 		if (dot)

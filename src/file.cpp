@@ -554,9 +554,9 @@ std::string FCEU_GetPath(int type)
 			break;
 		case FCEUMKF_AVI:
 			if(odirs[FCEUIOD_AVI])
-				return (odirs[FCEUIOD_LUA]);
+				return (odirs[FCEUIOD_AVI]);
 			else
-				return BaseDirectory;
+				return "";		//If avi output directory not specified, return nothing so that avi code can handle it its own way
 			break;
 	}
 
