@@ -91,6 +91,8 @@ SFORMAT SFCPUC[]={
 	{ 0 }
 };
 
+void foo(uint8* test) { (void)test; }
+
 static int SubWrite(std::ostream* os, SFORMAT *sf)
 {
 	uint32 acc=0;
@@ -118,7 +120,7 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 
 #ifndef LSB_FIRST
 			if(sf->s&RLSB)
-				FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
+				FlipByteOrder((uint8*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
 
 			if(sf->s&FCEUSTATE_INDIRECT)
@@ -129,7 +131,7 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 			//Now restore the original byte order.
 #ifndef LSB_FIRST
 			if(sf->s&RLSB)
-				FlipByteOrder(sf->v,sf->s&(~FCEUSTATE_FLAGS));
+				FlipByteOrder((uint8*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 #endif
 		}
 		sf++;
@@ -197,7 +199,7 @@ static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
 
 #ifndef LSB_FIRST
 			if(tmp->s&RLSB)
-				FlipByteOrder(tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
+				FlipByteOrder((uint8*)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 #endif
 		}
 		else
