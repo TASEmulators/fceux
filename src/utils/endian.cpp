@@ -116,7 +116,7 @@ int read16le(uint16 *Bufo, std::istream *is)
 #ifdef LSB_FIRST
 	*Bufo=buf;
 #else
-	*Bufo = FCEU_de16lsb(&buf)
+	*Bufo = FCEU_de16lsb((uint8*)&buf);
 #endif
 	return 1;
 }
@@ -130,7 +130,7 @@ int read64le(uint64 *Bufo, std::istream *is)
 #ifdef LSB_FIRST
 	*Bufo=buf;
 #else
-	*Bufo = FCEU_de64lsb(&buf)
+	*Bufo = FCEU_de64lsb((uint8*)&buf);
 #endif
 	return 1;
 }
