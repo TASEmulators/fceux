@@ -248,13 +248,13 @@ MEMWATCHMENU MENU
 BEGIN
     POPUP "File  "
     BEGIN
-        MENUITEM "New...       Ctrl+N",         MEMW_FILE_NEW
-        MENUITEM "Open...     Ctrl+O",          MEMW_FILE_OPEN
-        MENUITEM "Save          Ctrl+S",        MEMW_FILE_SAVE
-        MENUITEM "Save As..  Ctrl+Shift+S",     MEMW_FILE_SAVEAS
+        MENUITEM "&New...\tCtrl+N",             MEMW_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            MEMW_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               MEMW_FILE_SAVE
+        MENUITEM "Sa&ve As..\tCtrl+Shift+S",    MEMW_FILE_SAVEAS
         MENUITEM "&Recent",                     ID_FILE_RECENT
         MENUITEM SEPARATOR
-        MENUITEM "Close          Ctrl+W",       MEMW_FILE_CLOSE
+        MENUITEM "&Close\tAlt+F4",              MEMW_FILE_CLOSE
     END
     POPUP "Options"
     BEGIN

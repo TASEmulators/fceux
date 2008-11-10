@@ -704,7 +704,6 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		//Menu Items
 		switch(LOWORD(wParam))
 		{
-		case ACCEL_CTRL_W:
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
 			break;

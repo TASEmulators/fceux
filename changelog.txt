@@ -1,5 +1,5 @@
 ---version 2.0.4 yet to be released---
-
+09-nov-2008 - adelikat - minor memory watch menu clean up, removed Ctrl+W hotkey for close (and placed Alt+F4 on the menu name)
 08-nov-2008 - zeromus - big endian wasnt compiling. fix issues.
 02-nov-2008 - shinydoofy - added --fcmconvert for SDL
 02-nov-2008 - zeromus - emulua - add rom.readbyte and rom.readbytesigned
