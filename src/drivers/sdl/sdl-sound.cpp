@@ -52,8 +52,11 @@ fillaudio(void *udata,
 	// debug code
 	//printf("s_BufferIn: %i s_BufferWrite = %i s_BufferRead = %i s_BufferSize = %i\n",
 	// s_BufferIn, s_BufferWrite, s_BufferRead, s_BufferSize);
+	
+	// ensure that we're not writing garbage data to the soundcard
 	if(s_BufferWrite > s_BufferRead)
 		s_BufferWrite = s_BufferRead; 
+		
     while(len) {
         int16 sample = 0;
         if(s_BufferIn) {
