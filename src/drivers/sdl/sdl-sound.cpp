@@ -49,7 +49,11 @@ fillaudio(void *udata,
 {
     int16 *tmps = (int16*)stream;
     len >>= 1;
-
+	// debug code
+	//printf("s_BufferIn: %i s_BufferWrite = %i s_BufferRead = %i s_BufferSize = %i\n",
+	// s_BufferIn, s_BufferWrite, s_BufferRead, s_BufferSize);
+	if(s_BufferWrite > s_BufferRead)
+		s_BufferWrite = s_BufferRead; 
     while(len) {
         int16 sample = 0;
         if(s_BufferIn) {
@@ -103,7 +107,8 @@ InitSound(FCEUGI *gi)
     s_BufferSize = soundbufsize * soundrate / 1000;
 
     // For safety, set a bare minimum:
-    if (s_BufferSize < spec.samples * 2) s_BufferSize = spec.samples * 2;
+    if (s_BufferSize < spec.samples * 2)
+	s_BufferSize = spec.samples * 2;
 
     s_Buffer = (int *)malloc(sizeof(int) * s_BufferSize);
     s_BufferRead = s_BufferWrite = s_BufferIn = 0;
@@ -151,8 +156,10 @@ WriteSound(int32 *buf,
 {
     extern int EmulationPaused;
     if (EmulationPaused == 0)
-        while(Count) {
-            while(s_BufferIn == s_BufferSize) {
+        while(Count)
+		{
+            while(s_BufferIn == s_BufferSize) 
+			{
                 SDL_Delay(1);
             }
 
