@@ -32,6 +32,8 @@ source.</li>
      <li><a href="http://dietschnitzel.com/gfceu">GFceuX</a>, a GTK2 GUI 
 for fceux, is included in the source release.  It is recommened for all non-windows 
 users of the SDL port, unless you particullarly prefer the command-line.</li>
+	<li>For instructions on installing on an Ubuntu or Debian system, check the howto at 
+	<a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums</a>.</li>
     </ul>
 </ul>
 </td></tr>
