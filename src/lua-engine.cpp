@@ -607,6 +607,7 @@ static int savestate_load(lua_State *L) {
 	numTries--;
 
 	FCEUSS_LoadFP(ss->data,SSLOADPARAM_NOBACKUP);
+	ss->data->seekg(0);
 	return 0;
 
 }
