@@ -588,6 +588,16 @@ void FCEUD_HideMenuToggle(void)
 	ToggleHideMenu();
 }
 
+void CloseGame()
+{
+	if (GameInfo)
+	{
+		FCEUI_CloseGame();
+		KillMemView();
+		updateGameDependentMenus(GameInfo != 0);
+	}
+}
+
 void ALoad(char *nameo, char* innerFilename)
 {
 	if(FCEUI_LoadGameVirtual(nameo, 1))
@@ -1107,32 +1117,23 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_VSUniCoin();
 				break;
 
-
 			case MENU_MEMORY_WATCH:
 				CreateMemWatch();
 				break;
 
-			case ACCEL_CTRL_O:
 			case MENU_OPEN_FILE:
 				// User selected the Open File menu => Show the file selection dialog
 				LoadNewGamey(hWnd, 0);
 				break;
-
-			case ACCEL_CTRL_W:
+			
 			case MENU_CLOSE_FILE:
 				// User selected the Close File menu => Close the game if necessary
-				if(GameInfo)
-				{
-					FCEUI_CloseGame();
-					KillMemView();
-					updateGameDependentMenus(GameInfo != 0);
-				}
+				CloseGame();
 				break;
 
 			case MENU_CONVERT_MOVIE:
 				ConvertFCM(hWnd);
 				break;
-
 
 			case MENU_SAVE_STATE:
 				// Save state as menu was selected

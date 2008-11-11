@@ -39,8 +39,8 @@ FCEUMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Open...  Ctrl+O",            MENU_OPEN_FILE
-        MENUITEM "&Close      Ctrl+W",          MENU_CLOSE_FILE
+        MENUITEM "&Open...",                    MENU_OPEN_FILE
+        MENUITEM "&Close",                      MENU_CLOSE_FILE
         MENUITEM "&Recent",                     MENU_RECENT_FILES
         MENUITEM SEPARATOR
         MENUITEM "Load State From...",          MENU_LOAD_STATE
@@ -59,7 +59,7 @@ BEGIN
         MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
         MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
         MENUITEM SEPARATOR
-        MENUITEM "E&xit     Alt+F4",            MENU_EXIT
+        MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
     END
     POPUP "&NES"
     BEGIN
@@ -172,31 +172,31 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New Project           Ctrl+N", ID_FILE_NEWPROJECT
-        MENUITEM "&Open Project...      Ctrl+O", ID_FILE_OPENPROJECT
-        MENUITEM "&Save Project           Ctrl+S", ID_FILE_SAVEPROJECT
-        MENUITEM "Save Project As...  Ctrl+Shift+S", ID_FILE_SAVEPROJECTAS
+        MENUITEM "&New Project\tCtrl+N",        ID_FILE_NEWPROJECT
+        MENUITEM "&Open Project...\tCtrl+O",    ID_FILE_OPENPROJECT
+        MENUITEM "&Save ProjectCtrl+S",         ID_FILE_SAVEPROJECT
+        MENUITEM "Save Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS
         MENUITEM SEPARATOR
         MENUITEM "Import FM2",                  ID_FILE_IMPORTFM2
         MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2
         MENUITEM SEPARATOR
-        MENUITEM "Close                      Ctrl+W", ID_TASEDIT_FILE_CLOSE
+        MENUITEM "Close\tCtrl+W",               ID_TASEDIT_FILE_CLOSE
     END
     POPUP "Edit"
     BEGIN
         MENUITEM "Select All",                  ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
-        MENUITEM "Cut                   Ctrl+X", ID_TASEDIT_CUT
-        MENUITEM "Copy                Ctrl+C",  ID_TASEDIT_COPY
-        MENUITEM "Paste               Ctrl+V",  ID_TASEDIT_PASTE
-        MENUITEM "Paste to New   Ctrl+Shift+V", ID_TASEDIT_PASTETONEW
-        MENUITEM "Delete              Ctrl+Delete", ID_TASEDIT_DELETE
+        MENUITEM "Cut\tCtrl+X",                 ID_TASEDIT_CUT
+        MENUITEM "Copy\tCtrl+C",                ID_TASEDIT_COPY
+        MENUITEM "Paste\tCtrl+V",               ID_TASEDIT_PASTE
+        MENUITEM "Paste to New\tCtrl+Shift+V",  ID_TASEDIT_PASTETONEW
+        MENUITEM "Delete\tCtrl+Delete",         ID_TASEDIT_DELETE
         MENUITEM SEPARATOR
         MENUITEM "Add Marker",                  ID_EDIT_ADDMARKER
         MENUITEM "Remove Marker",               ID_EDIT_REMOVEMARKER
         MENUITEM SEPARATOR
-        MENUITEM "Truncate         Ctrl+T",     ID_EDIT_TRUNCATE
-        MENUITEM "Branch            Ctrl+B",    ID_EDIT_BRANCH
+        MENUITEM "Truncate\tCtrl+T",            ID_EDIT_TRUNCATE
+        MENUITEM "Branch\tCtrl+B",              ID_EDIT_BRANCH
     END
     MENUITEM "View",                        ID_VIEW
     POPUP "Help"
@@ -219,11 +219,11 @@ BEGIN
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
         END
         MENUITEM SEPARATOR
-        MENUITEM "Close",                       ID_MEMWVIEW_FILE_CLOSE
+        MENUITEM "Close\tAlt+F4",               ID_MEMWVIEW_FILE_CLOSE
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "Undo      Ctrl+Z",            MENU_MV_EDIT_UNDO
+        MENUITEM "Undo\tCtrl+Z",                MENU_MV_EDIT_UNDO
         MENUITEM SEPARATOR
         MENUITEM "Copy",                        MENU_MV_EDIT_COPY
         MENUITEM "Paste",                       MENU_MV_EDIT_PASTE

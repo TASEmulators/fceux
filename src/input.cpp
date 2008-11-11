@@ -592,6 +592,8 @@ static void LaunchHex(void);
 static void LaunchTraceLogger(void);
 static void LaunchCodeDataLogger(void);
 static void FA_SkipLag(void);
+static void OpenRom(void);
+static void CloseRom(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -722,17 +724,19 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_USE_INPUT_PRESET_1,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 1", 0 },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_2,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 2", 0 },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 3", 0 },
-	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE, EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
-	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE, EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
-	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE, EMUCMDTYPE_MISC, LagCounterToggle, 0, 0, "Lag Counter Toggle", 0 },
-	{ EMUCMD_MISC_LAGCOUNTER_RESET, EMUCMDTYPE_MISC, LagCounterReset, 0, 0, "Lag Counter Reset", 0},
-	{ EMUCMD_TOOL_OPENMEMORYWATCH,	EMUCMDTYPE_TOOL, LaunchMemoryWatch, 0, 0, "Open Memory Watch", 0},
-	{ EMUCMD_TOOL_OPENDEBUGGER,		EMUCMDTYPE_TOOL, LaunchDebugger, 0, 0, "Open Debugger", 0},
-	{ EMUCMD_TOOL_OPENHEX,			EMUCMDTYPE_TOOL, LaunchHex, 0, 0, "Open Hex Editor", 0},
-	{ EMUCMD_TOOL_OPENPPU,			EMUCMDTYPE_TOOL, LaunchPPU, 0, 0, "Open PPU Viewer", 0},
-	{ EMUCMD_TOOL_OPENTRACELOGGER,	EMUCMDTYPE_TOOL, LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
-	{ EMUCMD_TOOL_OPENCDLOGGER,		EMUCMDTYPE_TOOL, LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
-	{ EMUCMD_FRAMEADV_SKIPLAG,		EMUCMDTYPE_MISC, FA_SkipLag, 0, 0, "Frame Adv.-Skip Lag", 0}
+	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
+	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
+	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", 0 },
+	{ EMUCMD_MISC_LAGCOUNTER_RESET,			EMUCMDTYPE_MISC,	LagCounterReset,  0, 0, "Lag Counter Reset", 0},
+	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", 0},
+	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
+	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", 0},
+	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", 0},
+	{ EMUCMD_TOOL_OPENTRACELOGGER,			EMUCMDTYPE_TOOL,	LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
+	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
+	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
+	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
+	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -920,4 +924,19 @@ static void LaunchCodeDataLogger(void)
 static void FA_SkipLag(void)
 {
 	frameAdvanceLagSkip ^= 1;
+}
+
+static void OpenRom(void)
+{
+#ifdef WIN32
+	extern HWND hAppWnd;
+	LoadNewGamey(hAppWnd, 0);
+#endif
+}
+
+static void CloseRom(void)
+{
+#ifdef WIN32
+	CloseGame();
+#endif
 }

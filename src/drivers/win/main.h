@@ -25,7 +25,8 @@
 
 extern int maxconbskip;
 extern int ffbskip;
-
+extern void LoadNewGamey(HWND hParent, const char *initialdir);
+extern void CloseGame();
 static int fullscreen = 0;
 
 // Flag that indicates whether Game Genie is enabled or not.
