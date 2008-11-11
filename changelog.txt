@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+10-nov-2008 - adelikat - win32 - removed accel keys from main window
+10-nov-2008 - adelikat - Win32 - added Open & Close ROM mappable hotkeys, removed accel functions
 10-nov-2008 - punkrockguy - improved the sdl sound code; drasticaly improves quality of sound.
 09-nov-2008 - adelikat - minor memory watch menu clean up, removed Ctrl+W hotkey for close (and placed Alt+F4 on the menu name)
 08-nov-2008 - zeromus - big endian wasnt compiling. fix issues.

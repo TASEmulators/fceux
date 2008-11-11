@@ -1091,7 +1091,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// Hotkeys menu was selected
 				MapInput();
 				break;
-
+			
 			case MENU_RESET:
 				// The reset menu was selected
 				FCEUI_ResetNES();

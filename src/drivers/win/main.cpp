@@ -297,7 +297,7 @@ int BlockingCheck()
 				if(IsChild(hwndTasEdit,msg.hwnd))
 					handled = TranslateAccelerator(hwndTasEdit,fceu_hAccel,&msg);
 			}
-
+			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)
 				if(msg.hwnd == hAppWnd)
 				{
@@ -307,7 +307,7 @@ int BlockingCheck()
 						int zzz=9;
 					}
 				}
-	
+			*/
 			if(!handled)
 			{
 				TranslateMessage(&msg);
