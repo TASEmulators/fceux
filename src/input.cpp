@@ -541,12 +541,21 @@ void FCEUI_VSUniCoin(void)
 	FCEU_QSimpleCommand(FCEUNPCMD_VSUNICOIN);
 }
 
+//Resets the frame counter if movie inactive and rom is reset or power-cycle
+void ResetFrameCounter()
+{
+extern EMOVIEMODE movieMode;
+	if(movieMode == MOVIEMODE_INACTIVE)
+		currFrameCounter = 0;
+}
+
 //Resets the NES
 void FCEUI_ResetNES(void)
 {
 	if(!FCEU_IsValidUI(FCEUI_RESET))
 		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
+	ResetFrameCounter();
 }
 
 //Powers off the NES
@@ -555,6 +564,7 @@ void FCEUI_PowerNES(void)
 	if(!FCEU_IsValidUI(FCEUI_POWER))
 		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_POWER);
+	ResetFrameCounter();
 }
 
 const char* FCEUI_CommandTypeNames[]=

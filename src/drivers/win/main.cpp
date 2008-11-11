@@ -590,7 +590,6 @@ int main(int argc,char *argv[])
         fullscreen = !!fullscreen;
         soundo = !!soundo;
         frame_display = !!frame_display;
-        //input_display = !!input_display; adelikat - input_display has 4 states, not 2, this shouldn't be done
         allowUDLR = !!allowUDLR;
         pauseAfterPlayback = !!pauseAfterPlayback;
         EnableBackgroundInput = !!EnableBackgroundInput;
