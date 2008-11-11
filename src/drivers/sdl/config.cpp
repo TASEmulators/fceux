@@ -289,7 +289,16 @@ InitConfig()
     config->addOption(prefix + "BindState", SDLK_F2);
     config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
     config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
-    
+	config->addOption(prefix + "SelectState0", SDLK_0);
+	config->addOption(prefix + "SelectState1", SDLK_1);
+	config->addOption(prefix + "SelectState2", SDLK_2);
+	config->addOption(prefix + "SelectState3", SDLK_3);
+	config->addOption(prefix + "SelectState4", SDLK_4);
+	config->addOption(prefix + "SelectState5", SDLK_5);
+	config->addOption(prefix + "SelectState6", SDLK_6);
+	config->addOption(prefix + "SelectState7", SDLK_7);
+	config->addOption(prefix + "SelectState8", SDLK_8);
+	config->addOption(prefix + "SelectState9", SDLK_9);
     
 
     // All mouse devices

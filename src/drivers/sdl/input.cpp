@@ -19,6 +19,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 
 #include "main.h"
 #include "dface.h"
@@ -376,7 +377,57 @@ KeyboardCommands()
             FCEU_LoadLuaCode(fname.c_str());
     }
     #endif
-    
+	
+	std::string opt = "SDL.Hotkeys.SelectState0";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(0,1);
+	
+	opt = "SDL.Hotkeys.SelectState1";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(1,1);
+		
+	opt = "SDL.Hotkeys.SelectState2";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(2,1);
+		
+	opt = "SDL.Hotkeys.SelectState3";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(3,1);
+		
+	opt = "SDL.Hotkeys.SelectState4";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(4,1);
+		
+	opt = "SDL.Hotkeys.SelectState5";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(5,1);
+		
+	opt = "SDL.Hotkeys.SelectState6";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(6,1);
+		
+	opt = "SDL.Hotkeys.SelectState7";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(7,1);
+		
+	opt = "SDL.Hotkeys.SelectState8";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(8,1);
+		
+	opt = "SDL.Hotkeys.SelectState9";
+	g_config->getOption(opt, &key);
+	if(_keyonly(key))
+		FCEUI_SelectState(9,1);
+	
     g_config->getOption("SDL.Hotkeys.BindState", &key);
     if(_keyonly(key)) {
         bindSavestate ^= 1;
@@ -455,8 +506,6 @@ do {                                              \
             bbuf[bbuft] = 0;                      \
         }                                         \
         FCEUI_DispMessage("Barcode: %s", bbuf);   \
-    } else {                                      \
-        FCEUI_SelectState(x,1);                   \
 	}                                             \
 } while(0)
 

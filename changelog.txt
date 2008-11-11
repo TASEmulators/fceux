@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+11-nov-2008 - punkrockguy - sdl - savestate slots now mappable [2175167]
 10-nov-2008 - adelikat - win32 - removed accel keys from main window
 10-nov-2008 - adelikat - Win32 - added Open & Close ROM mappable hotkeys, removed accel functions
 10-nov-2008 - punkrockguy - improved the sdl sound code; drasticaly improves quality of sound.
