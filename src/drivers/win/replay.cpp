@@ -128,7 +128,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 		FCEUFILE* fp = FCEU_fopen(fn,0,"rb",0);
 		bool isarchive = FCEU_isFileInArchive(fn);
-		bool ismovie = FCEUI_MovieGetInfo(fp, &info, false);
+		bool ismovie = FCEUI_MovieGetInfo(fp, info, false);
 		delete fp;
 		if(ismovie)
 		{
@@ -359,7 +359,7 @@ void HandleScan(HWND hwndDlg, FCEUFILE* file, int& i)
 {
 	MOVIE_INFO info;
 
-	bool scanok = FCEUI_MovieGetInfo(file, &info, true);
+	bool scanok = FCEUI_MovieGetInfo(file, info, true);
 	if(!scanok)
 		return;
 

@@ -236,7 +236,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
 void FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
-bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO* /* [in, out] */ info, bool skipFrameCount = false);
+bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount = false);
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();
