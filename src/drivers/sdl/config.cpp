@@ -299,6 +299,7 @@ InitConfig()
 	config->addOption(prefix + "SelectState7", SDLK_7);
 	config->addOption(prefix + "SelectState8", SDLK_8);
 	config->addOption(prefix + "SelectState9", SDLK_9);
+	config->addOption(prefix + "MovieToggleFrameDisplay", SDLK_BACKSPACE);
     
 
     // All mouse devices

@@ -167,6 +167,9 @@ int stateKey[10];
 int movieToggleFrameDisplayKey;
 int lagCounterDisplayKey;
 
+// this function loads the sdl hotkeys from the config file into the
+// global scope.  this elimates the need for accessing the config file
+// on every cycle of keyboardinput()
 void setHotKeys()
 {
 	g_config->getOption("SDL.Hotkeys.CheatMenu", &cheatMenuKey);
