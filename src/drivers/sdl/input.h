@@ -15,6 +15,7 @@ typedef struct {
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 void ParseGIInput(FCEUGI *GI);
+void setHotKeys();
 
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01

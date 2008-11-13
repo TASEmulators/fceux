@@ -147,6 +147,76 @@ _keyonly(int a)
 
 static int g_fkbEnabled = 0;
 
+// key definitions
+int cheatMenuKey;
+int loadLuaKey;
+int renderBgKey;
+int saveStateKey;
+int loadStateKey;
+int resetKey;
+int screenshotKey;
+int pauseKey;
+int decreaseSpeedKey;
+int increaseSpeedKey;
+int frameAdvanceKey;
+int powerKey;
+int bindStateKey;
+int frameAdvanceLagSkipKey;
+int quitKey;
+int stateKey[10];
+int movieToggleFrameDisplayKey;
+int lagCounterDisplayKey;
+
+void setHotKeys()
+{
+	g_config->getOption("SDL.Hotkeys.CheatMenu", &cheatMenuKey);
+	#ifdef _S9XLUA_H
+	g_config->getOption("SDL.Hotkeys.LoadLua", &loadLuaKey);
+	#endif
+	g_config->getOption("SDL.Hotkeys.RenderBG", &renderBgKey);
+	g_config->getOption("SDL.Hotkeys.SaveState", &saveStateKey);
+	g_config->getOption("SDL.Hotkeys.LoadState", &loadStateKey);
+	g_config->getOption("SDL.Hotkeys.Reset", &resetKey);
+	g_config->getOption("SDL.Hotkeys.Screenshot", &screenshotKey);
+	g_config->getOption("SDL.Hotkeys.Pause", &pauseKey);
+	g_config->getOption("SDL.Hotkeys.IncreaseSpeed", &increaseSpeedKey);
+	g_config->getOption("SDL.Hotkeys.DecreaseSpeed", &decreaseSpeedKey);
+	g_config->getOption("SDL.Hotkeys.FrameAdvance", &frameAdvanceKey);
+	g_config->getOption("SDL.Hotkeys.Power", &powerKey);
+	g_config->getOption("SDL.Hotkeys.Pause", &bindStateKey);
+	g_config->getOption("SDL.Hotkeys.FrameAdvanceLagSkip", &frameAdvanceLagSkipKey);
+	g_config->getOption("SDL.Hotkeys.Quit", &quitKey);
+	g_config->getOption("SDL.Hotkeys.SelectState0", &stateKey[0]);
+	g_config->getOption("SDL.Hotkeys.SelectState1", &stateKey[1]);
+	g_config->getOption("SDL.Hotkeys.SelectState2", &stateKey[2]);
+	g_config->getOption("SDL.Hotkeys.SelectState3", &stateKey[3]);
+	g_config->getOption("SDL.Hotkeys.SelectState4", &stateKey[4]);
+	g_config->getOption("SDL.Hotkeys.SelectState5", &stateKey[5]);
+	g_config->getOption("SDL.Hotkeys.SelectState6", &stateKey[6]);
+	g_config->getOption("SDL.Hotkeys.SelectState7", &stateKey[7]);
+	g_config->getOption("SDL.Hotkeys.SelectState8", &stateKey[8]);
+	g_config->getOption("SDL.Hotkeys.SelectState9", &stateKey[9]);
+	g_config->getOption("SDL.Hotkeys.LagCounterDisplay", &lagCounterDisplayKey);
+	g_config->getOption("SDL.Hotkeys.MovieToggleFrameDisplay", &movieToggleFrameDisplayKey);
+	/*
+	config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
+	config->addOption(prefix + "Power", 0);
+	config->addOption(prefix + "BindState", SDLK_F2);
+	config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
+	config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
+	config->addOption(prefix + "SelectState0", SDLK_0);
+	config->addOption(prefix + "SelectState1", SDLK_1);
+	config->addOption(prefix + "SelectState2", SDLK_2);
+	config->addOption(prefix + "SelectState3", SDLK_3);
+	config->addOption(prefix + "SelectState4", SDLK_4);
+	config->addOption(prefix + "SelectState5", SDLK_5);
+	config->addOption(prefix + "SelectState6", SDLK_6);
+	config->addOption(prefix + "SelectState7", SDLK_7);
+	config->addOption(prefix + "SelectState8", SDLK_8);
+	config->addOption(prefix + "SelectState9", SDLK_9);*/
+	return;
+}
+
 /*** 
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
@@ -217,7 +287,7 @@ std::string GetFilename(const char* title)
 static void
 KeyboardCommands()
 {
-    int is_shift, is_alt, key;
+    int is_shift, is_alt;
     char* movie_fname = "";
     // get the keyboard input
     g_keyState = SDL_GetKeyState(NULL);
@@ -238,8 +308,7 @@ KeyboardCommands()
     is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
     is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
     
-    g_config->getOption("SDL.Hotkeys.RenderBG", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(renderBgKey)) {
         if(is_shift) {
             FCEUI_SetRenderPlanes(true, false);
         } else {
@@ -259,32 +328,28 @@ KeyboardCommands()
     }
 
     // Famicom disk-system games
-    if(gametype==GIT_FDS) {
+    if(gametype==GIT_FDS) 
+	{
         if(keyonly(F6)) {
             FCEUI_FDSSelect();
         }
         if(keyonly(F8)) {
             FCEUI_FDSInsert();
         }
-    }
-
+	}
     
-    
-    g_config->getOption("SDL.Hotkeys.Screenshot", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(screenshotKey)) {
         FCEUI_SaveSnapshot();
     }
 
     // if not NES Sound Format
     if(gametype != GIT_NSF) {
-        
-        g_config->getOption("SDL.Hotkeys.CheatMenu", &key);
-        if(_keyonly(key)) {
+        if(_keyonly(cheatMenuKey)) {
             DoCheatSeq();
         }
-
-        g_config->getOption("SDL.Hotkeys.SaveState", &key);
-        if(_keyonly(key)) {
+		
+		// f5 (default) save key, hold shift to save movie
+        if(_keyonly(saveStateKey)) {
             if(is_shift) {
                 movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
 				FCEUI_printf("Recording movie to %s\n", movie_fname);
@@ -294,9 +359,8 @@ KeyboardCommands()
             }
         }
         
-        g_config->getOption("SDL.Hotkeys.LoadState", &key);
         // f7 to load state, Shift-f7 to load movie
-        if(_keyonly(key)) {
+        if(_keyonly(loadStateKey)) {
             if(is_shift) {
                 FCEUI_StopMovie();
                 std::string fname;
@@ -320,26 +384,24 @@ KeyboardCommands()
     }
 
     
-    g_config->getOption("SDL.Hotkeys.DecreaseSpeed", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(decreaseSpeedKey)) {
         DecreaseEmulationSpeed();
     }
-    g_config->getOption("SDL.Hotkeys.IncreaseSpeed", &key);
-    if(_keyonly(key)) {
+
+    if(_keyonly(increaseSpeedKey)) {
         IncreaseEmulationSpeed();
     }
 
-    if(keyonly(BACKSPACE)) {
+    if(_keyonly(movieToggleFrameDisplayKey)) {
         FCEUI_MovieToggleFrameDisplay();
     }
-    g_config->getOption("SDL.Hotkeys.Pause", &key);
-    if(_keyonly(key)) {
+
+    if(_keyonly(pauseKey)) {
         FCEUI_ToggleEmulationPause();
     }
     
-    g_config->getOption("SDL.Hotkeys.FrameAdvance", &key);
     static bool frameAdvancing = false;
-    if(g_keyState[key])
+    if(g_keyState[frameAdvanceKey])
     {
         if(frameAdvancing == false)
         {
@@ -356,21 +418,18 @@ KeyboardCommands()
         //}
     }
     
-    g_config->getOption("SDL.Hotkeys.Reset", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(resetKey)) {
         FCEUI_ResetNES();
     }
-    g_config->getOption("SDL.Hotkeys.Power", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(powerKey)) {
         FCEUI_PowerNES();
     }
-    g_config->getOption("SDL.Hotkeys.Quit", &key);
-    if(_keyonly(key)) {
+	
+    if(_keyonly(quitKey)) {
         FCEUI_CloseGame();
     }
     #ifdef _S9XLUA_H
-    g_config->getOption("SDL.Hotkeys.LoadLua", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(loadLuaKey)) {
         std::string fname;
         fname = GetFilename("Open LUA script...");
         if(fname != "")
@@ -378,72 +437,23 @@ KeyboardCommands()
     }
     #endif
 	
-	std::string opt = "SDL.Hotkeys.SelectState0";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(0,1);
+	for(int i=0; i<10; i++)
+		if(_keyonly(stateKey[i]))
+			FCEUI_SelectState(i, 1);
 	
-	opt = "SDL.Hotkeys.SelectState1";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(1,1);
-		
-	opt = "SDL.Hotkeys.SelectState2";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(2,1);
-		
-	opt = "SDL.Hotkeys.SelectState3";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(3,1);
-		
-	opt = "SDL.Hotkeys.SelectState4";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(4,1);
-		
-	opt = "SDL.Hotkeys.SelectState5";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(5,1);
-		
-	opt = "SDL.Hotkeys.SelectState6";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(6,1);
-		
-	opt = "SDL.Hotkeys.SelectState7";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(7,1);
-		
-	opt = "SDL.Hotkeys.SelectState8";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(8,1);
-		
-	opt = "SDL.Hotkeys.SelectState9";
-	g_config->getOption(opt, &key);
-	if(_keyonly(key))
-		FCEUI_SelectState(9,1);
-	
-    g_config->getOption("SDL.Hotkeys.BindState", &key);
-    if(_keyonly(key)) {
+	if(_keyonly(bindStateKey)) {
         bindSavestate ^= 1;
         FCEUI_DispMessage("Savestate binding to movie %sabled.",
             bindSavestate ? "en" : "dis");
     }
     
-    g_config->getOption("SDL.Hotkeys.FrameAdvanceLagSkip", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(frameAdvanceLagSkipKey)) {
         frameAdvanceLagSkip ^= 1;
         FCEUI_DispMessage("Skipping lag in Frame Advance %sabled.",
             frameAdvanceLagSkip ? "en" : "dis");
     }
     
-    g_config->getOption("SDL.Hotkeys.LagCounterDisplay", &key);
-    if(_keyonly(key)) {
+    if(_keyonly(lagCounterDisplayKey)) {
         lagCounterDisplay ^= 1;
     }
 

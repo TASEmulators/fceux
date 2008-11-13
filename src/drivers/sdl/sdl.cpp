@@ -558,7 +558,10 @@ SDL_GL_LoadLibrary(0);
         LoggingEnabled = 1;
     }
     #endif
-
+	
+	// load the hotkeys from the config life
+	setHotKeys();
+	
     // load the specified game
     error = LoadGame(argv[romIndex]);
     if(error != 1) {
