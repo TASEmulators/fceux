@@ -414,11 +414,11 @@ KeyboardCommands()
     }
     else
     {
-        //if(frameAdvancing)
-        //{
+        if(frameAdvancing)
+        {
             FCEUI_FrameAdvanceEnd();
             frameAdvancing = false;
-        //}
+        }
     }
     
     if(_keyonly(resetKey)) {
