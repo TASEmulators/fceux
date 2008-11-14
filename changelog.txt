@@ -1,4 +1,7 @@
 ---version 2.0.4 yet to be released---
+14-nov-2008 - adelikat - fixed but when aspect correction and special scaling 3x are set, video was getting resized incorrectly
+14-nov-2008 - adelikat - fixed a bug introduced in previous commit, frame display toggle now works when no movie is present
+12-nov-2008 - adelikat - allowed frame counter to display even with no movie present
 11-nov-2008 - punkrockguy - sdl - savestate slots now mappable [2175167]
 10-nov-2008 - adelikat - win32 - removed accel keys from main window
 10-nov-2008 - adelikat - Win32 - added Open & Close ROM mappable hotkeys, removed accel functions
