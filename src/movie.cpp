@@ -934,25 +934,27 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
-	if(frame_display
-	&& movieMode != MOVIEMODE_INACTIVE)
+	if(frame_display)
 	{
-				
-		char counterbuf[32] = {0};
-		if(movieMode == MOVIEMODE_PLAY)
-			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
-		else if(movieMode == MOVIEMODE_RECORD) 
-			sprintf(counterbuf,"%d",currMovieData.records.size());
-		
-		if(counterbuf[0])
-			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
-	}
-	else
-	{
-		char counterbuf[32] = {0};
-		sprintf(counterbuf,"%d (no movie)",currFrameCounter);
-		if(counterbuf[0])
-			DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
+		if (movieMode != MOVIEMODE_INACTIVE)
+		{
+					
+			char counterbuf[32] = {0};
+			if(movieMode == MOVIEMODE_PLAY)
+				sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
+			else if(movieMode == MOVIEMODE_RECORD) 
+				sprintf(counterbuf,"%d",currMovieData.records.size());
+			
+			if(counterbuf[0])
+				DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
+		}
+		else
+		{
+			char counterbuf[32] = {0};
+			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
+			if(counterbuf[0])
+				DrawTextTrans(XBuf+FCEU_TextScanlineOffsetFromBottom(24), 256, (uint8*)counterbuf, 0x20+0x80);
+		}
 	}
 }
 
