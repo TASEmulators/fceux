@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+14-nov-2008 - adelikat - win32 Hex Editor - Dump Rom & Dump PPU to file Dialog - uses ROM to build default filename
 14-nov-2008 - adelikat - Win32 Memwatch - Save as dialog - uses ROM name to build default memwatch filename if there is no last used memwatch filename
 14-nov-2008 - adelikat - Win32 Text Hooker fixes - Init error checking reinstated, save .tht file no longer crashes, Dialog updates as ROM plays, Remembers window position, fix bug where canceling save as produces an error message, Save As produces default filename based on loaded ROM
 14-nov-2008 - adelikat - fixed but when aspect correction and special scaling 3x are set, video was getting resized incorrectly

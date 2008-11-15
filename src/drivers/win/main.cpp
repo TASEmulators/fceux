@@ -895,6 +895,8 @@ char *GetRomName()
 		splitpath(LoadedRomFName,drv,dir,name,ext);	//Extract components of the ROM path
 		Rom = name;						//Pull out the Name only
 		}
+	else
+		Rom = "";
 	char*mystring = (char*)malloc(2048*sizeof(char));
 	strcpy(mystring, Rom.c_str());		//Convert string to char*
 

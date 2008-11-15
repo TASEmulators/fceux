@@ -33,6 +33,7 @@
 #include "memviewsp.h"
 #include "cheat.h"
 #include <assert.h>
+#include "main.h"
 //#include "string.h"
 
 #define MODE_NES_MEMORY   0
@@ -541,7 +542,7 @@ int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, 
 
 void dumpToFile(const char* buffer, unsigned int size)
 {
-	char name[257] = {0};
+	char name[513] = {0};
 
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
@@ -549,6 +550,7 @@ void dumpToFile(const char* buffer, unsigned int size)
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save to file ...";
 	ofn.lpstrFilter="All files (*.*)\0*.*\0";
+	strcpy(name,GetRomName());
 	ofn.lpstrFile=name;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY;
