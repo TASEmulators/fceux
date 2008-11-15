@@ -48,6 +48,8 @@ extern int vmod;
 
 extern char* directory_names[14];
 
+char *GetRomName();	//Checks if rom is loaded, if so, outputs the Rom name with no directory path or file extension
+
 ///Contains the names of the default directories.
 static const char *default_directory_names[13] = {
 	"",         // roms

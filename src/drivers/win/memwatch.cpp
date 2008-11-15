@@ -26,6 +26,7 @@
 #include "../../utils/xstring.h"
 #include "help.h"
 #include <string>
+#include "main.h"
 const int NUMWATCHES = 24;
 const int LABELLENGTH = 64;
 const int ADDRESSLENGTH = 16;
@@ -366,8 +367,10 @@ static void SaveMemWatch()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Memory Watch As...";
 	ofn.lpstrFilter=filter;
-	memwLastFilename[0]=0;
-	ofn.lpstrFile=memwLastFilename;
+	char nameo[2048];
+	if (!memwLastFilename[0])
+		strcpy(nameo,GetRomName());
+	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	std::string initdir =  FCEU_GetPath(FCEUMKF_MEMW);
