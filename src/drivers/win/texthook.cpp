@@ -694,7 +694,7 @@ int TextHookerSaveTableFile(){
 	ofn.hwndOwner = hCDLogger;
 
 	//get the file name or quit
-	if(!GetSaveFileName(&ofn))return -1;
+	if(!GetSaveFileName(&ofn))return 0;
 
 	//open the file
 	FP = fopen(nameo,"wb");
@@ -747,7 +747,7 @@ int TextHookerSaveTableFile(){
 	fputs( "\r\n[words]\r\n", FP );
 
 	//get a pointer to the first word
-	llword *current = words->next;
+	llword *current = words;
 
 	//write all the words
 	while( current != NULL ) {
@@ -791,7 +791,8 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 	llword *previous = NULL;
 	int charcounter;
 	int	si;
-
+	int saveFileErrorCheck = 0; //used to display error message that may have arised from saving a file
+	
 	memset( str, 0, sizeof( char ) * 2048 );
 	memset( bufferstr, 0, sizeof( char ) * 10240 );
 
@@ -1298,12 +1299,15 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							break;
 
 						case 113: //save table
-							if ( TextHookerSaveTableFile() == -1 ) {
-								MessageBox( NULL, "File successfully saved!", "HOORAY!", MB_OK );
-							} else {
-								MessageBox( NULL, "There was a problem saving the table file.\r\nI'd tell you more but I'm a lazy coder and don't feel like doing proper error checking.", "OH NO!", MB_OK );
-							}
-							break;
+							saveFileErrorCheck = TextHookerSaveTableFile();
+							switch (saveFileErrorCheck)
+							case -1:
+								MessageBox( NULL, "File successfully saved!", "", MB_OK );
+							case 0:
+								break;
+							default:
+								MessageBox( NULL, "There was a problem saving the table file.", "", MB_OK );
+						break;
 
 						case 133: //save word
 							//add the word to the words list
@@ -1549,17 +1553,18 @@ int excitecojp() {
 /*
  * ALL SYSTEMS GO!
  */
-void DoTextHooker() {
-	/*
-	if (!GI) {
+void DoTextHooker() 
+{
+	if (!GameInfo) 
+	{
 		FCEUD_PrintError("You must have a game loaded before you can use the Text Hooker.");
 		return;
 	}
-	if (GI->type==GIT_NSF) {
+	if (GameInfo->type==GIT_NSF) 
+	{
 		FCEUD_PrintError("Silly chip-tunes enthusiast, you can't use the Text Hooker with NSFs.");
 		return;
 	}
-	*/ //adelikat - Who needs error messages? (in fceuxdspce, GI = FCEUGI typedef and no longer exists, but it shouldn't be hard to find another way to determine these conditions.
 	if (!hTextHooker) hTextHooker = CreateDialog(fceu_hInstance,"TEXTHOOKER",NULL,TextHookerCallB);
 	DWORD ret = GetLastError();
 

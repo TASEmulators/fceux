@@ -34,6 +34,7 @@
 #include "memwatch.h"
 #include "fceu.h"
 #include "file.h"
+#include "texthook.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -195,6 +196,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(GGConv_wndy),
 	AC(TasEdit_wndx),
 	AC(TasEdit_wndy),
+	AC(TextHookerPosX),
+	AC(TextHookerPosY),
 
 	AC(pauseAfterPlayback),
 	AC(AFon),

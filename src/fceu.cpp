@@ -58,6 +58,7 @@
 #ifdef WIN32
 #include "drivers/win/main.h"
 #include "drivers/win/cheat.h"
+#include "drivers/win/texthook.h"
 
 #else
 #include "drivers/sdl/sdl.h"
@@ -582,6 +583,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 #ifdef WIN32
 	UpdateCheatList();
+	UpdateTextHooker();
 	//   FCEUI_AviVideoUpdate(XBuf);
 #endif
 

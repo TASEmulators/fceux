@@ -6,6 +6,8 @@ extern int TextHooker;
 extern uint8 hScroll;
 extern uint8 vScroll;
 extern int callTextHooker;
+extern int TextHookerPosX;
+extern int TextHookerPosY;
 
 void TextHookerDoBlit();
 void UpdateTextHooker();
