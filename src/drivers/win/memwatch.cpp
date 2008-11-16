@@ -54,7 +54,7 @@ static HMENU memwrecentmenu;
 
 //Ram change globals------------------------
 unsigned int ramChange = 0;
-char editbox00current[5];
+char editbox00address[5];
 char editbox00last[5];
 int edit00last = 0;
 int edit00now = 0;
@@ -691,6 +691,9 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			ScreenToClient(hwndDlg,(LPPOINT)&r);
 			xPositions[i] = r.left;
 		}
+
+		//Populate Formula pulldown
+
 		break;
 
 	case WM_PAINT:
@@ -898,10 +901,11 @@ void RamChange()
 	MWRec& mwrec = mwrecs[0];
 	if(mwrec.valid && GameInfo)
 	{
-		GetDlgItemText(hwndMemWatch, MW_ADDR00, editbox00current, 6);
-		edit00last = edit00now;
-		edit00now = GetMem(mwrec.addr);				
-		
+		GetDlgItemText(hwndMemWatch, MW_ADDR00, editbox00address, 6);	//Get Address value of edit00
+		SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS, editbox00address);
+		edit00last = edit00now;											//Update last value
+		edit00now = GetMem(mwrec.addr);									//Update now value
+				
 		if (edit00now > edit00last)					//If current value is > then last value
 			edit00count++;							//Increase counter
 		
