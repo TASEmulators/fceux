@@ -52,15 +52,16 @@ const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/s
 
 static HMENU memwrecentmenu;
 
-//Ram change globals------------------------
-unsigned int ramChange = 0;
-char editbox00address[5];
-char editbox00last[5];
-int edit00last = 0;
-int edit00now = 0;
-unsigned int edit00count = 0;
-char edit00changem[5];
-//------------------------------------------
+//Ram change monitor globals------------------------
+bool RamChangeInitialize = false;		//Set true during memw WM_INIT
+const int MAX_RAMMONITOR = 4;			//Maximum number of Ram values that can be monitored
+char editboxnow[MAX_RAMMONITOR][5];		//current address put into editbox 00
+char editboxlast[MAX_RAMMONITOR][5];	//last address put into editbox (1 frame ago)
+int editlast[MAX_RAMMONITOR];			//last address value (1 frame ago)
+int editnow[MAX_RAMMONITOR];			//current address value
+unsigned int editcount[MAX_RAMMONITOR];	//Current counter value
+char editchangem[MAX_RAMMONITOR][5];	//counter converted to string
+//-------------------------------------------------
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
@@ -695,12 +696,23 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		}
 
 		//Populate Formula pulldown menus
-		
-		for (int x = 0; x < FMAX; x++)
+		for (int x = 0; x < MAX_RAMMONITOR; x++)
 		{
-			SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA,(UINT) CB_ADDSTRING, 0,(LPARAM) formula[x].c_str() );
+			for (int y = 0; y < FMAX; y++)
+			{
+				SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA+x,(UINT) CB_ADDSTRING, 0,(LPARAM) formula[y].c_str() );
+			}
+			SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA+x, CB_SETCURSEL, 0, 0);
 		}
-		SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA, CB_SETCURSEL, 0, 0);
+		
+
+		//Initialize RAM Change monitor globals
+		for (int x; x < MAX_RAMMONITOR; x++)
+		{
+			editnow[x] = 0;
+			editlast[x]= 0;
+		}
+		RamChangeInitialize = true;
 		break;
 
 	case WM_PAINT:
@@ -769,10 +781,25 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			OpenHelpWindow(memwhelp);
 			break;
 		case MEMW_EDIT00RESET:
-			edit00last = 0;
-			edit00now = 0;
-			edit00count = 0;
+			editlast[0]  = 0;
+			editnow[0]   = 0;
+			editcount[0] = 0;
 			break;
+		case MEMW_EDIT01RESET:
+			editlast[1]  = 0;
+			editnow[1]   = 0;
+			editcount[1] = 0;
+		break;
+		case MEMW_EDIT02RESET:
+			editlast[2]  = 0;
+			editnow[2]   = 0;
+			editcount[2] = 0;
+		break;
+		case MEMW_EDIT03RESET:
+			editlast[3]  = 0;
+			editnow[3]   = 0;
+			editcount[3] = 0;
+		break;
 		default:
 			if (LOWORD(wParam) >= MEMW_MENU_FIRST_RECENT_FILE && LOWORD(wParam) < MEMW_MENU_FIRST_RECENT_FILE+MEMW_MAX_NUMBER_OF_RECENT_FILES)
 				OpenMemwatchRecentFile(LOWORD(wParam) - MEMW_MENU_FIRST_RECENT_FILE);
@@ -898,49 +925,54 @@ void AddMemWatch(char memaddress[32])
 
 void RamChange()
 {
-	MWRec& mwrec = mwrecs[0];
-	if(mwrec.valid && GameInfo)
+	if (!RamChangeInitialize) return;
+	for (int x = 0; x < MAX_RAMMONITOR; x++)
 	{
-		GetDlgItemText(hwndMemWatch, MW_ADDR00, editbox00address, 6);	//Get Address value of edit00
-		SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS, editbox00address);
-		edit00last = edit00now;											//Update last value
-		edit00now = GetMem(mwrec.addr);									//Update now value
-				
-		
-		//Calculate Ram Change
-		int x = SendDlgItemMessage(hwndMemWatch, MEMW_EDIT00FORMULA,(UINT) CB_GETTOPINDEX, 0,0);
-		switch (x)
+		MWRec& mwrec = mwrecs[x];
+		if(mwrec.valid && GameInfo)
 		{
-		//Greater than------------------------------------
-		case 0:
-			if (edit00now > edit00last)	edit00count++;
-			break;
-		//Greater by 1------------------------------------
-		case 1:
-			if (edit00now-edit00last == 1) edit00count++;
-			break;
-		//Less than---------------------------------------
-		case 2:
-			if (edit00now<edit00last) edit00count++;
-			break;
-		//Less by 1---------------------------------------
-		case 3:
-			if (edit00last-edit00now == 1) edit00count++;
-			break;
-		//Equal-------------------------------------------
-		case 4:	
-			if (edit00now == edit00last) edit00count++;
-			break;
-		//Not Equal---------------------------------------
-		case 5:
-			if (edit00now != edit00last) edit00count++;
-			break;
-		default:
-			break;
+			GetDlgItemText(hwndMemWatch, MW_ADDR00+(x*3), editboxnow[x], 6);	//Get Address value of edit00
+			SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS+x, editboxnow[x]); //Put Address value
+			editlast[x] = editnow[x];											//Update last value
+			editnow[x] = GetMem(mwrec.addr);									//Update now value
+					
+			
+			//Calculate Ram Change
+			int z = SendDlgItemMessage(hwndMemWatch, MEMW_EDIT00FORMULA+x,(UINT) CB_GETTOPINDEX, 0,0);
+			switch (z)
+			{
+			//Greater than------------------------------------
+			case 0:
+				if (editnow[x] > editlast[x])	editcount[x]++;
+				break;
+			//Greater by 1------------------------------------
+			case 1:
+				if (editnow[x]-editlast[x] == 1) editcount[x]++;
+				else if ((editnow[x] == 0 && editlast[x]==255) || (editnow[x] == 0 && editlast[x]==65535)) editcount[x]++;
+				break;
+			//Less than---------------------------------------
+			case 2:
+				if (editnow[x]<editlast[x]) editcount[x]++;
+				break;
+			//Less by 1---------------------------------------
+			case 3:
+				if (editlast[x]-editnow[x] == 1) editcount[x]++;
+				else if ((editlast[x] == 0 && editnow[x]==255) || (editlast[x] == 0 && editnow[x]==65535)) editcount[x]++;
+				break;
+			//Equal-------------------------------------------
+			case 4:	
+				if (editnow[x] == editlast[x]) editcount[x]++;
+				break;
+			//Not Equal---------------------------------------
+			case 5:
+				if (editnow[x] != editlast[x]) editcount[x]++;
+				break;
+			default:
+				break;
 
+			}
+			sprintf(editchangem[x], "%d", editcount[x]);	//Convert counter to text
+			SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
 		}
-		sprintf(edit00changem, "%d", edit00count);	//Convert counter to text
-		SetDlgItemText(hwndMemWatch, MEMW_RESULTS, edit00changem);	//Display text in results box
-	}
-	
+	} //End of for loop	
 }

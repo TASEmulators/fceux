@@ -8,3 +8,4 @@ extern bool MemWatchLoadOnStart;
 extern bool MemWatchLoadFileOnStart;
 extern char *memw_recent_files[];
 extern HWND memw_pwindow;
+extern bool RamChangeInitialize;
