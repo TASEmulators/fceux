@@ -156,7 +156,7 @@ void DrawMessage(bool beforeMovie)
 			if(guiMessage.howlong <= 20) color = 0x1C;
 			if(guiMessage.howlong <= 10) color = 0x11;
 			if(guiMessage.howlong <= 5) color = 0x1;
-			DrawTextTrans(t, 256, (uint8 *)guiMessage.errmsg, color+0x80);
+			DrawTextTrans(ClipSidesOffset+t, 256, (uint8 *)guiMessage.errmsg, color+0x80);
 		}
 	}
 }
@@ -311,17 +311,17 @@ void FCEU_DrawRecordingStatus(uint8* XBuf)
 		bool hasPlayRecIcon = false;	
 		if(FCEUMOV_Mode(MOVIEMODE_RECORD))
 		{
-			drawstatus(XBuf,2,28,0);
+			drawstatus(XBuf-ClipSidesOffset,2,28,0);
 			hasPlayRecIcon = true;
 		}
 		else if(FCEUMOV_Mode(MOVIEMODE_PLAY))
 		{
-			drawstatus(XBuf,1,28,0);
+			drawstatus(XBuf-ClipSidesOffset,1,28,0);
 			hasPlayRecIcon = true;
 		}
 
 		if(FCEUI_EmulationPaused())
-			drawstatus(XBuf,3,28,hasPlayRecIcon?-16:0);
+			drawstatus(XBuf-ClipSidesOffset,3,28,hasPlayRecIcon?-16:0);
 	}
 }
 

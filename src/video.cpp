@@ -56,6 +56,7 @@
 
 uint8 *XBuf=NULL;
 uint8 *XBackBuf=NULL;
+int ClipSidesOffset=0;	//Used to move displayed messages when Clips left and right sides is checked
 static uint8 *xbsave=NULL;
 
 GUIMESSAGE guiMessage;
@@ -528,7 +529,7 @@ void ShowFPS(void)
 	boop[boopcount] = FCEUD_GetTime();
 
 	sprintf(fpsmsg, "%8.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
-	DrawTextTrans(XBuf + (256-8-8*8) + (FSettings.FirstSLine+4)*256,256,fpsmsg,4);
+	DrawTextTrans(ClipSidesOffset+XBuf + (256-8-8*8) + (FSettings.FirstSLine+4)*256,256,fpsmsg,4);
 	// It's not averaging FPS over exactly 1 second, but it's close enough.
 	boopcount = (boopcount + 1) % booplimit;
 }

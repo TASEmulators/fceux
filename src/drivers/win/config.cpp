@@ -45,6 +45,7 @@ extern int AFon, AFoff, AutoFireOffset;
 extern int DesynchAutoFire;
 extern bool lagCounterDisplay;
 extern bool frameAdvanceLagSkip;
+extern int ClipSidesOffset;
 
 extern uint8 gNoBGFillColor;
 
@@ -206,7 +207,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(DesynchAutoFire),
 	AC(lagCounterDisplay),
 	AC(bindSavestate),
-
+	AC(ClipSidesOffset),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };

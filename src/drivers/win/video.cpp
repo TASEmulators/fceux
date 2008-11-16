@@ -22,6 +22,7 @@
 #include "../../drawing.h"
 #include "gui.h"
 #include "../../fceu.h"
+#include "../../video.h"
 
 static int RecalcCustom(void);
 void InputScreenChanged(int fs);
@@ -1025,9 +1026,15 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 gornk:
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES)==BST_CHECKED)
+				{
 					eoptions|=EO_CLIPSIDES;
+					ClipSidesOffset = 8;
+				}
 				else
+				{
 					eoptions&=~EO_CLIPSIDES;
+					ClipSidesOffset = 0;
+				}
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_NO8LIM)==BST_CHECKED)
 					eoptions|=EO_NOSPRLIM;

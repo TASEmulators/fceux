@@ -518,11 +518,11 @@ void DrawNSF(uint8 *XBuf)
 		}
 	}
 
-	DrawTextTrans(XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), 256, NSFHeader.SongName, 6);
-	DrawTextTrans(XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), 256,NSFHeader.Artist, 6);
-	DrawTextTrans(XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), 256,NSFHeader.Copyright, 6);
+	DrawTextTrans(ClipSidesOffset+XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), 256, NSFHeader.SongName, 6);
+	DrawTextTrans(ClipSidesOffset+XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), 256,NSFHeader.Artist, 6);
+	DrawTextTrans(ClipSidesOffset+XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), 256,NSFHeader.Copyright, 6);
 
-	DrawTextTrans(XBuf+70*256+4+(((31-strlen("Song:"))<<2)), 256, (uint8*)"Song:", 6);
+	DrawTextTrans(ClipSidesOffset+XBuf+70*256+4+(((31-strlen("Song:"))<<2)), 256, (uint8*)"Song:", 6);
 	sprintf(snbuf,"<%d/%d>",CurrentSong,NSFHeader.TotalSongs);
 	DrawTextTrans(XBuf+82*256+4+(((31-strlen(snbuf))<<2)), 256, (uint8*)snbuf, 6);
 

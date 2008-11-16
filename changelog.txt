@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+15-nov-2008 - adelikat - Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag & frame counters, messages, etc)
 15-nov-2008 - adelikat - win32 - Implemented Drap & Drop for movie files
 14-nov-2008 - adelikat - win32 Hex Editor - Dump Rom & Dump PPU to file Dialog - uses ROM to build default filename
 14-nov-2008 - adelikat - Win32 Memwatch - Save as dialog - uses ROM name to build default memwatch filename if there is no last used memwatch filename
