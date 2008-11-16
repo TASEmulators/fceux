@@ -676,18 +676,17 @@ BEGIN
     LTEXT           "Hz",65460,115,81,15,9
     GROUPBOX        "Buffering:",127,150,9,131,93,WS_GROUP
     CONTROL         "Use Global Focus",124,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,157,22,100,12
-    CTEXT           "Sound Latency",65459,162,47,107,8
-    CONTROL         "",CTL_LATENCY_TRACKBAR,"msctls_trackbar32",WS_DISABLED | WS_TABSTOP,162,74,107,13
+    CTEXT           "Sound Latency",65459,162,50,107,8
+    CONTROL         "",CTL_LATENCY_TRACKBAR,"msctls_trackbar32",WS_TABSTOP,162,70,107,13
     GROUPBOX        "Volume",125,290,9,56,93,WS_GROUP
     CONTROL         "",CTL_VOLUME_TRACKBAR,"msctls_trackbar32",TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,305,17,28,83
     LTEXT           "15 ms",65458,160,87,20,8
     LTEXT           "200 ms",65457,250,87,25,8
-    LTEXT           "ms",65456,214,67,19,8
+    LTEXT           "ms",65456,211,60,19,8
     COMBOBOX        COMBO_SOUND_RATE,57,78,53,46,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        COMBO_SOUND_QUALITY,57,54,77,46,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Quality:",65455,17,54,35,10
     CONTROL         "Mute frame advance.",CHECK_SOUND_MUTEFA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,110,87,11
-    CTEXT           "(disabled until config system change)",65462,156,57,120,8
     CONTROL         "Mute Turbo.",CHECK_SOUND_MUTETURBO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,111,55,10
 END
 
