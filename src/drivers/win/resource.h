@@ -351,8 +351,9 @@
 #define IDC_RADIO1                      1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140
-#define IDC_COMBO1                      1142
-#define EDIT00FORMULA                   1142
+//#define IDC_COMBO1                      1142
+//#define EDIT00FORMULA                   1142
+#define MEMW_EDIT00FORMULA              1142
 #define IDC_BUTTON6                     1143
 #define IDC_BUTTON5                     1144
 #define IDC_BUTTON7                     1145

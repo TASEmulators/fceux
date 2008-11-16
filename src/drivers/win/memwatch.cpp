@@ -655,6 +655,8 @@ fileChanged = false;
 
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	const int FMAX = 6;
+	std::string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};
 	
 	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
 
@@ -692,8 +694,13 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			xPositions[i] = r.left;
 		}
 
-		//Populate Formula pulldown
-
+		//Populate Formula pulldown menus
+		
+		for (int x = 0; x < FMAX; x++)
+		{
+			SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA,(UINT) CB_ADDSTRING, 0,(LPARAM) formula[x].c_str() );
+		}
+		SendDlgItemMessage(hwndDlg, MEMW_EDIT00FORMULA, CB_SETCURSEL, 0, 0);
 		break;
 
 	case WM_PAINT:
@@ -891,13 +898,6 @@ void AddMemWatch(char memaddress[32])
 
 void RamChange()
 {
-	//Debug: Show frame counter---------------------------------
-	extern int currFrameCounter;
-	char counterbuf[32] = {0};
-	ramChange++;
-	sprintf(counterbuf,"%d/%d",currFrameCounter,ramChange);
-	SetDlgItemText(hwndMemWatch,MEMW_STATIC,counterbuf);
-	//----------------------------------------------------------
 	MWRec& mwrec = mwrecs[0];
 	if(mwrec.valid && GameInfo)
 	{
@@ -906,9 +906,39 @@ void RamChange()
 		edit00last = edit00now;											//Update last value
 		edit00now = GetMem(mwrec.addr);									//Update now value
 				
-		if (edit00now > edit00last)					//If current value is > then last value
-			edit00count++;							//Increase counter
 		
+		//Calculate Ram Change
+		int x = SendDlgItemMessage(hwndMemWatch, MEMW_EDIT00FORMULA,(UINT) CB_GETTOPINDEX, 0,0);
+		switch (x)
+		{
+		//Greater than------------------------------------
+		case 0:
+			if (edit00now > edit00last)	edit00count++;
+			break;
+		//Greater by 1------------------------------------
+		case 1:
+			if (edit00now-edit00last == 1) edit00count++;
+			break;
+		//Less than---------------------------------------
+		case 2:
+			if (edit00now<edit00last) edit00count++;
+			break;
+		//Less by 1---------------------------------------
+		case 3:
+			if (edit00last-edit00now == 1) edit00count++;
+			break;
+		//Equal-------------------------------------------
+		case 4:	
+			if (edit00now == edit00last) edit00count++;
+			break;
+		//Not Equal---------------------------------------
+		case 5:
+			if (edit00now != edit00last) edit00count++;
+			break;
+		default:
+			break;
+
+		}
 		sprintf(edit00changem, "%d", edit00count);	//Convert counter to text
 		SetDlgItemText(hwndMemWatch, MEMW_RESULTS, edit00changem);	//Display text in results box
 	}
