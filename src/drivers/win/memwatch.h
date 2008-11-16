@@ -2,6 +2,7 @@ void UpdateMemWatch();
 void CreateMemWatch();
 void CloseMemoryWatch();
 void AddMemWatch(char memaddress[32]);
+void RamChange();
 extern char * MemWatchDir;
 extern bool MemWatchLoadOnStart;
 extern bool MemWatchLoadFileOnStart;

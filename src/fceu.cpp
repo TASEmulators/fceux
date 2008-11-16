@@ -59,7 +59,7 @@
 #include "drivers/win/main.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/texthook.h"
-
+#include "drivers/win/memwatch.h"
 #else
 #include "drivers/sdl/sdl.h"
 #endif
@@ -584,6 +584,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 #ifdef WIN32
 	UpdateCheatList();
 	UpdateTextHooker();
+	RamChange();
 	//   FCEUI_AviVideoUpdate(XBuf);
 #endif
 

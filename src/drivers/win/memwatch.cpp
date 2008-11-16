@@ -52,6 +52,16 @@ const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/s
 
 static HMENU memwrecentmenu;
 
+//Ram change globals------------------------
+unsigned int ramChange = 0;
+char editbox00current[5];
+char editbox00last[5];
+int edit00last = 0;
+int edit00now = 0;
+unsigned int edit00count = 0;
+char edit00changem[5];
+//------------------------------------------
+
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
 {
 	MENUITEMINFO moo;
@@ -290,6 +300,7 @@ void UpdateMemWatch()
 			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
 			TextOut(hdc,0,0,text,strlen(text));
 		}
+		
 	}
 }
 
@@ -735,19 +746,23 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			break;
 
 		case MEMW_OPTIONS_LOADSTART: //Load on Start up
-				MemWatchLoadOnStart ^= 1;
-				CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
+			MemWatchLoadOnStart ^= 1;
+			CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 			break;
 
 		case MEMW_OPTIONS_LOADLASTFILE: //Load last file when opening memwatch
-				MemWatchLoadFileOnStart ^= 1;
-				CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
+			MemWatchLoadFileOnStart ^= 1;
+			CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
 			break;
 
 		case MEMW_HELP_WCOMMANDS:
 			OpenHelpWindow(memwhelp);
 			break;
-
+		case MEMW_EDIT00RESET:
+			edit00last = 0;
+			edit00now = 0;
+			edit00count = 0;
+			break;
 		default:
 			if (LOWORD(wParam) >= MEMW_MENU_FIRST_RECENT_FILE && LOWORD(wParam) < MEMW_MENU_FIRST_RECENT_FILE+MEMW_MAX_NUMBER_OF_RECENT_FILES)
 				OpenMemwatchRecentFile(LOWORD(wParam) - MEMW_MENU_FIRST_RECENT_FILE);
@@ -812,8 +827,6 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 
 //Open the Memory Watch dialog
 void CreateMemWatch()
-//void CreateMemWatch(HWND parent) - adelikat: old code made use of this but parent was only used in a line commented out.  Taking out for my own needs :P
-
 {
 	if(NeedsInit) //Clear the strings
 	{
@@ -873,3 +886,27 @@ void AddMemWatch(char memaddress[32])
 	}
 }
 
+void RamChange()
+{
+	//Debug: Show frame counter---------------------------------
+	extern int currFrameCounter;
+	char counterbuf[32] = {0};
+	ramChange++;
+	sprintf(counterbuf,"%d/%d",currFrameCounter,ramChange);
+	SetDlgItemText(hwndMemWatch,MEMW_STATIC,counterbuf);
+	//----------------------------------------------------------
+	MWRec& mwrec = mwrecs[0];
+	if(mwrec.valid && GameInfo)
+	{
+		GetDlgItemText(hwndMemWatch, MW_ADDR00, editbox00current, 6);
+		edit00last = edit00now;
+		edit00now = GetMem(mwrec.addr);				
+		
+		if (edit00now > edit00last)					//If current value is > then last value
+			edit00count++;							//Increase counter
+		
+		sprintf(edit00changem, "%d", edit00count);	//Convert counter to text
+		SetDlgItemText(hwndMemWatch, MEMW_RESULTS, edit00changem);	//Display text in results box
+	}
+	
+}

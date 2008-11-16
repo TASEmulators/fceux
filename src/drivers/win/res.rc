@@ -778,7 +778,7 @@ BEGIN
     LTEXT           "Type a key, or press Escape to disable.",65429,53,14,125,8
 END
 
-MEMWATCH DIALOGEX 0, 0, 260, 203
+MEMWATCH DIALOGEX 0, 0, 260, 269
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Memory Watch"
 MENU MEMWATCHMENU
@@ -840,6 +840,15 @@ BEGIN
     LTEXT           "Name",65425,171,7,20,8
     LTEXT           "Address",65424,135,7,26,8
     LTEXT           "Value",MW_ValueLabel2,231,7,19,8
+    LTEXT           "Frames",MEMW_STATIC,209,249,44,8
+    LTEXT           "results",MEMW_RESULTS,100,228,36,8
+    GROUPBOX        "Memory Change Monitoring",IDC_STATIC,0,202,256,59
+    LTEXT           "Address",IDC_STATIC,6,213,26,8
+    LTEXT           "Value",IDC_STATIC,101,213,19,8
+    LTEXT           "Change formula",IDC_STATIC,44,213,50,8
+    LTEXT           "01",IDC_STATIC,21,228,9,8
+    PUSHBUTTON      " ",MEMW_EDIT00RESET,137,230,11,7
+    LTEXT           "Reset",IDC_STATIC,133,213,20,8
 END
 
 DEBUGGER DIALOGEX 54, 74, 548, 305
@@ -1401,6 +1410,11 @@ BEGIN
         RIGHTMARGIN, 374
         TOPMARGIN, 8
         BOTTOMMARGIN, 268
+    END
+
+    "MEMWATCH", DIALOG
+    BEGIN
+        BOTTOMMARGIN, 261
     END
 
     "DEBUGGER", DIALOG
