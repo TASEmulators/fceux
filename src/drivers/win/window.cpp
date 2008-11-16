@@ -63,6 +63,8 @@
 
 #include <fstream>
 
+using namespace std;
+
 // Extern variables
 
 extern FCEUGI *GameInfo;
@@ -789,13 +791,30 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			UINT len;
 			char *ftmp;
 
-			len=DragQueryFile((HDROP)wParam,0,0,0)+1; //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
-			if((ftmp=(char*)malloc(len))) //mbg merge 7/17/06 added cast
+			len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+			if((ftmp=(char*)malloc(len))) 
 			{
-				DragQueryFile((HDROP)wParam,0,ftmp,len); //mbg merge 7/17/06 changed (HANDLE) to (HDROP)
+				DragQueryFile((HDROP)wParam,0,ftmp,len); 
+				string fileDropped = ftmp;
+				
+				//-------------------------------------------------------
+				//Check if Movie file
+				//-------------------------------------------------------
+				if (!(fileDropped.find(".fm2") == string::npos))	 //ROM is already loaded and .fm2 in filename
+				{
+					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension
+						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
+				}
+				//-------------------------------------------------------
+				//If not a movie, Load it as a ROM file
+				//-------------------------------------------------------
+				else
+				{
 				ALoad(ftmp);
 				free(ftmp);
-			}                 
+				}
+				
+			}            
 		}
 		break;
 
