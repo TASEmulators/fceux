@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+15-nov-2008 - adelikat - Win32 - memwatch - implemented RamChange() - monitors the behavior of ram addresses
 15-nov-2008 - adelikat - Win32 - re-enabled sound buffer time
 15-nov-2008 - adelikat - Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag & frame counters, messages, etc)
 15-nov-2008 - adelikat - win32 - Implemented Drap & Drop for movie files

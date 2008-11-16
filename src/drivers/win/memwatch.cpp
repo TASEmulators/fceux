@@ -742,6 +742,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		{
 		case MEMW_FILE_CLOSE:  
 			CloseMemoryWatch();
+			RamChangeInitialize = false;
 			break;
 
 		case ACCEL_CTRL_O:
@@ -762,6 +763,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case ACCEL_CTRL_N:
 		case MEMW_FILE_NEW:
 			ClearAllText();
+			RamChange();
 			break;
 		
 		case MEMW_FILE_RECENT:
@@ -931,7 +933,20 @@ void RamChange()
 		MWRec& mwrec = mwrecs[x];
 		if(mwrec.valid && GameInfo)
 		{
-			GetDlgItemText(hwndMemWatch, MW_ADDR00+(x*3), editboxnow[x], 6);	//Get Address value of edit00
+			int whichADDR = 0;
+			//Get proper Addr edit box
+			switch (x)
+			{
+			case 0:
+				whichADDR = 0; break;	//Addr 1
+			case 1:
+				whichADDR = 3; break;	//Addr 2
+			case 2:
+				whichADDR = 36; break;	//Addr 12
+			case 3:
+				whichADDR = 39; break;	//Addr 13
+			}
+			GetDlgItemText(hwndMemWatch, MW_ADDR00+(whichADDR), editboxnow[x], 6);	//Get Address value of edit00
 			SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS+x, editboxnow[x]); //Put Address value
 			editlast[x] = editnow[x];											//Update last value
 			editnow[x] = GetMem(mwrec.addr);									//Update now value
@@ -973,6 +988,10 @@ void RamChange()
 			}
 			sprintf(editchangem[x], "%d", editcount[x]);	//Convert counter to text
 			SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
+		}
+		else
+		{
+			SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS+x, "");
 		}
 	} //End of for loop	
 }
