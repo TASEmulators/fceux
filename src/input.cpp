@@ -583,6 +583,7 @@ static void ObjectDisplayToggle(void);
 static void LagCounterToggle(void);
 static void ViewSlots(void);
 static void LaunchMemoryWatch(void);
+static void LaunchCheats(void);
 static void LaunchDebugger(void);
 static void LaunchPPU(void);
 static void LaunchHex(void);
@@ -692,6 +693,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", 0 },
 	{ EMUCMD_MISC_LAGCOUNTER_RESET,			EMUCMDTYPE_MISC,	LagCounterReset,  0, 0, "Lag Counter Reset", 0},
 	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", 0},
+	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", 0},
 	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
 	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", 0},
 	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", 0},
@@ -871,6 +873,14 @@ static void LaunchCodeDataLogger(void)
 {
 #ifdef WIN32
 	DoCDLogger();
+#endif
+}
+
+static void LaunchCheats(void)
+{
+#ifdef WIN32
+	extern HWND pwindow;
+	ConfigCheats(pwindow);
 #endif
 }
 
