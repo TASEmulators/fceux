@@ -468,13 +468,13 @@ void FCEUI_SetInputFourscore(bool attachFourscore)
 //mbg 6/18/08 HACK
 extern ZAPPER ZD[2];
 SFORMAT FCEUCTRL_STATEINFO[]={
-	{ joy_readbit, 2, "JYRB"},
-	{ joy, 4, "JOYS"},
-	{ &LastStrobe, 1, "LSTS"},
-	{ &ZD[0].bogo, 1, "ZBG0"},
-	{ &ZD[1].bogo, 1, "ZBG1"},
-	{ &lagFlag, 1, "LAGF"},
-	{ &lagCounter, 4, "LAGC"},
+	{ joy_readbit,	2, "JYRB"},
+	{ joy,			4, "JOYS"},
+	{ &LastStrobe,	1, "LSTS"},
+	{ &ZD[0].bogo,	1, "ZBG0"},
+	{ &ZD[1].bogo,	1, "ZBG1"},
+	{ &lagFlag,		1, "LAGF"},
+	{ &lagCounter,	4, "LAGC"},
 	{ 0 }
 };
 
@@ -484,17 +484,15 @@ void FCEU_DoSimpleCommand(int cmd)
 	{
 	case FCEUNPCMD_FDSINSERT: FCEU_FDSInsert();break;
 	case FCEUNPCMD_FDSSELECT: FCEU_FDSSelect();break;
-		//   case FCEUNPCMD_FDSEJECT: FCEU_FDSEject();break;
 	case FCEUNPCMD_VSUNICOIN: FCEU_VSUniCoin(); break;
-	case FCEUNPCMD_VSUNIDIP0: //mbg merge 7/17/06 removed case range syntax
+	case FCEUNPCMD_VSUNIDIP0: 
 	case FCEUNPCMD_VSUNIDIP0+1:
 	case FCEUNPCMD_VSUNIDIP0+2:
 	case FCEUNPCMD_VSUNIDIP0+3:
 	case FCEUNPCMD_VSUNIDIP0+4:
 	case FCEUNPCMD_VSUNIDIP0+5:
 	case FCEUNPCMD_VSUNIDIP0+6:
-	case FCEUNPCMD_VSUNIDIP0+7:
-		FCEU_VSUniToggleDIP(cmd - FCEUNPCMD_VSUNIDIP0);break;
+	case FCEUNPCMD_VSUNIDIP0+7:	FCEU_VSUniToggleDIP(cmd - FCEUNPCMD_VSUNIDIP0);break;
 	case FCEUNPCMD_POWER: PowerNES();break;
 	case FCEUNPCMD_RESET: ResetNES();break;
 	}
@@ -517,20 +515,12 @@ void FCEUI_FDSSelect(void)
 	FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
 }
 
-//mbg merge 7/17/06 changed to void fn(void) to make it an EMUCMDFN
 void FCEUI_FDSInsert(void)
 {
 	FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
-	//return(1);
 }
 
-/*
-int FCEUI_FDSEject(void)
-{
-FCEU_QSimpleCommand(FCEUNPCMD_FDSEJECT);
-return(1);
-}
-*/
+
 void FCEUI_VSUniToggleDIP(int w)
 {
 	FCEU_QSimpleCommand(FCEUNPCMD_VSUNIDIP0 + w);
@@ -586,9 +576,6 @@ static void CommandStateLoad(void);
 static void CommandStateSave(void);
 static void CommandSelectSaveSlot(void);
 static void CommandEmulationSpeed(void);
-// static void CommandMovieSelectSlot(void);
-//static void CommandMovieRecord(void);
-//static void CommandMovieReplay(void);
 static void CommandSoundAdjust(void);
 static void CommandUsePreset(void);
 static void BackgroundDisplayToggle(void);
@@ -607,11 +594,11 @@ static void CloseRom(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
-	{ EMUCMD_POWER,							EMUCMDTYPE_MISC,	FCEUI_PowerNES, 0, 0, "Power", 0 },
-	{ EMUCMD_RESET,							EMUCMDTYPE_MISC,	FCEUI_ResetNES, 0, 0, "Reset", 0 },
+	{ EMUCMD_POWER,							EMUCMDTYPE_MISC,	FCEUI_PowerNES,		  0, 0, "Power", 0 },
+	{ EMUCMD_RESET,							EMUCMDTYPE_MISC,	FCEUI_ResetNES,		  0, 0, "Reset", 0 },
 	{ EMUCMD_PAUSE,							EMUCMDTYPE_MISC,	FCEUI_ToggleEmulationPause, 0, 0, "Pause", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot, 0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
+	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
 
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", 0 },
@@ -620,7 +607,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_SPEED_FASTER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Up", 0 },
 	{ EMUCMD_SPEED_FASTEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Fastest Speed", 0 },
 	{ EMUCMD_SPEED_TURBO,					EMUCMDTYPE_SPEED,	FCEUD_TurboOn, FCEUD_TurboOff, 0, "Turbo", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_SPEED_TURBO_TOGGLE,				EMUCMDTYPE_SPEED,	FCEUD_TurboToggle, 0, 0, "Turbo Toggle", EMUCMDFLAG_TASEDIT },
+	{ EMUCMD_SPEED_TURBO_TOGGLE,			EMUCMDTYPE_SPEED,	FCEUD_TurboToggle, 0, 0, "Turbo Toggle", EMUCMDFLAG_TASEDIT },
 
 	{ EMUCMD_SAVE_SLOT_0,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 0", 0 },
 	{ EMUCMD_SAVE_SLOT_1,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 1", 0 },
@@ -658,48 +645,14 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_LOAD_STATE_SLOT_7,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 7", 0 },
 	{ EMUCMD_LOAD_STATE_SLOT_8,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 8", 0 },
 	{ EMUCMD_LOAD_STATE_SLOT_9,				EMUCMDTYPE_STATE,	CommandStateLoad, 0, 0, "Load State from Slot 9", 0 },
-
-	/*	{ EMUCMD_MOVIE_SLOT_0,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 0", 0 },
-	{ EMUCMD_MOVIE_SLOT_1,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 1", 0 },
-	{ EMUCMD_MOVIE_SLOT_2,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 2", 0 },
-	{ EMUCMD_MOVIE_SLOT_3,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 3", 0 },
-	{ EMUCMD_MOVIE_SLOT_4,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 4", 0 },
-	{ EMUCMD_MOVIE_SLOT_5,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 5", 0 },
-	{ EMUCMD_MOVIE_SLOT_6,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 6", 0 },
-	{ EMUCMD_MOVIE_SLOT_7,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 7", 0 },
-	{ EMUCMD_MOVIE_SLOT_8,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 8", 0 },
-	{ EMUCMD_MOVIE_SLOT_9,					EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Movie Slot 9", 0 },
-	{ EMUCMD_MOVIE_SLOT_NEXT,				EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Next Movie Slot", 0 },
-	{ EMUCMD_MOVIE_SLOT_PREV,				EMUCMDTYPE_MOVIE,	CommandMovieSelectSlot, 0, 0, "Previous Movie Slot", 0 },
-	{ EMUCMD_MOVIE_RECORD,					EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie", 0 },*/
+	
 	{ EMUCMD_MOVIE_RECORD_TO,				EMUCMDTYPE_MOVIE,	FCEUD_MovieRecordTo, 0, 0, "Record Movie To...",0  },
-	/*	{ EMUCMD_MOVIE_RECORD_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 0", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_1,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 1",0  },
-	{ EMUCMD_MOVIE_RECORD_SLOT_2,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 2", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_3,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 3", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_4,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 4", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_5,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 5", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_6,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 6", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_7,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 7", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_8,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 8", 0 },
-	{ EMUCMD_MOVIE_RECORD_SLOT_9,			EMUCMDTYPE_MOVIE,	CommandMovieRecord, 0, 0, "Record Movie to Slot 9", 0 },
-	{ EMUCMD_MOVIE_REPLAY,					EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie", },*/
 	{ EMUCMD_MOVIE_REPLAY_FROM,				EMUCMDTYPE_MOVIE,	FCEUD_MovieReplayFrom, 0, 0, "Replay Movie From...", },
-	/*	{ EMUCMD_MOVIE_REPLAY_SLOT_0,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 0", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_1,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 1", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_2,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 2", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_3,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 3", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_4,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 4", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_5,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 5", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_6,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 6", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_7,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 7", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_8,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 8", 0 },
-	{ EMUCMD_MOVIE_REPLAY_SLOT_9,			EMUCMDTYPE_MOVIE,	CommandMovieReplay, 0, 0, "Replay Movie from Slot 9", 0 },
-	*/
-	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING,			EMUCMDTYPE_MOVIE,	FCEUI_MoviePlayFromBeginning, 0, 0, "Play Movie From Beginning", 0 },
+	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING,		EMUCMDTYPE_MOVIE,	FCEUI_MoviePlayFromBeginning, 0, 0, "Play Movie From Beginning", 0 },
 	{ EMUCMD_MOVIE_STOP,					EMUCMDTYPE_MOVIE,	FCEUI_StopMovie, 0, 0, "Stop Movie", 0 },
 	{ EMUCMD_MOVIE_READONLY_TOGGLE,			EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleReadOnly, 0, 0, "Toggle Read-Only", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE,	EMUCMDTYPE_MOVIE,	FCEUI_MovieToggleFrameDisplay, 0, 0, "Movie Frame Display Toggle", 0 },
+
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE,	EMUCMDTYPE_MISC,	FCEUI_ToggleInputDisplay, 0, 0, "Toggle Input Display", 0 },
 	{ EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUD_ToggleStatusIcon, 0, 0, "Toggle Status Icon", 0 },
 
@@ -833,16 +786,6 @@ static void CommandStateLoad(void)
 	else
 		FCEUI_LoadState(0);
 }
-
-/*static void CommandMovieRecord(void)
-{
-FCEUI_SaveMovie(0, 0);
-}
-
-static void CommandMovieReplay(void)
-{
-FCEUI_LoadMovie(0, 0, 0);
-}*/
 
 static void CommandSoundAdjust(void)
 {

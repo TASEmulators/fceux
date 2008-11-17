@@ -27,32 +27,41 @@
 #include "help.h"
 #include <string>
 #include "main.h"
-const int NUMWATCHES = 24;
-const int LABELLENGTH = 64;
-const int ADDRESSLENGTH = 16;
 
-int MemWatch_wndx=0, MemWatch_wndy=0;
-static HDC hdc;
-HWND hwndMemWatch=0;
-static char addresses[NUMWATCHES][ADDRESSLENGTH];
-static char labels[NUMWATCHES][LABELLENGTH];
-static int NeedsInit = 1;
-char *MemWatchDir = 0;
-char memwLastFilename[2048];
-bool fileChanged = false;
-bool MemWatchLoadOnStart = false;
-bool MemWatchLoadFileOnStart = false;
-static HMENU memwmenu = 0;
-std::string memwhelp = "{01ABA5FD-D54A-44EF-961A-42C7AA586D95}"; //Name of memory watch chapter in .chm (sure would be nice to get better names for these!"
+using namespace std;
 
+//Memory Watch GUI Handles & Globals---------------------------
+HWND hwndMemWatch=0;		//Handle to Memwatch Window
+static HDC hdc;				//Handle to to Device Context
+static HMENU memwmenu = 0;	//Handle to Memwatch Menu
+static HMENU memwrecentmenu;//Handle to Recent Files Menu
+
+int MemWatch_wndx=0, MemWatch_wndy=0; //Window Position
+
+//Memory Watch globals-----------------------------------------
+const int NUMWATCHES = 24;			//Maximum Number of Watches
+const int LABELLENGTH = 64;			//Maximum Length of a Watch label
+const int ADDRESSLENGTH = 16;		//Maximum Length of a Ram Address
+
+static char addresses[NUMWATCHES][ADDRESSLENGTH];	//Stores all address labels
+static char labels[NUMWATCHES][LABELLENGTH];		//Stores all label lengths
+static int NeedsInit = 1;							//Determines if Memwatch has been initialized (used so you don't lose data if you close memwatch)
+char *MemWatchDir = 0;								//Last directory used by memwatch
+char memwLastFilename[2048];						//Last watch file used by memwatch
+bool fileChanged = false;							//Determines if Save Changes should appear
+bool MemWatchLoadOnStart = false;					//Load on Start Flag
+bool MemWatchLoadFileOnStart = false;				//Load last file Flag
+
+string memwhelp = "{01ABA5FD-D54A-44EF-961A-42C7AA586D95}"; //Name of memory watch chapter in .chm (sure would be nice to get better names for these!"
+
+//Recent Files Menu globals------------------------------------
 char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
-
 const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
 
-static HMENU memwrecentmenu;
 
-//Ram change monitor globals------------------------
+
+//Ram change monitor globals-----------------------------------
 bool RamChangeInitialize = false;		//Set true during memw WM_INIT
 const int MAX_RAMMONITOR = 4;			//Maximum number of Ram values that can be monitored
 char editboxnow[MAX_RAMMONITOR][5];		//current address put into editbox 00
@@ -118,8 +127,7 @@ void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int 
 	DrawMenuBar(hAppWnd);
 }
 
-
-
+//Updates the Recent Files array
 void UpdateMemwRecentArray(const char* addString, char** bufferArray, unsigned int arrayLen, HMENU menu, unsigned int menuItem, unsigned int baseId)
 {
 	// Try to find out if the filename is already in the recent files list.
@@ -171,18 +179,14 @@ void UpdateMemwRecentArray(const char* addString, char** bufferArray, unsigned i
 	}
 
 	// Add the new item.
-	bufferArray[0] = (char*)malloc(strlen(addString) + 1); //mbg merge 7/17/06 added cast
+	bufferArray[0] = (char*)malloc(strlen(addString) + 1);
 	strcpy(bufferArray[0], addString);
 
 	// Update the recent files menu
 	UpdateMemw_RMenu(menu, bufferArray, menuItem, baseId);
 }
 
-/**
-* Add a filename to the recent files list.
-*
-* @param filename Name of the file to add.
-**/
+//Add a filename to the recent files list.
 void MemwAddRecentFile(const char *filename)
 {
 	UpdateMemwRecentArray(filename, memw_recent_files, MEMW_MAX_NUMBER_OF_RECENT_FILES, memwrecentmenu, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
@@ -347,10 +351,9 @@ static void PutInSpaces(int i)
 	}
 }
 
-
+//Decides if any edit box has anything	
 bool iftextchanged()
 {
-//Decides if any edit box has anything	
 	int i,j;
 	for(i=0;i<NUMWATCHES;i++)
 	{
@@ -365,10 +368,10 @@ bool iftextchanged()
 			return true;
 		}
 	}
-return false;
+	return false;
 }
 
-//Saves all the addresses and labels to disk
+//Save as...
 static void SaveMemWatch()
 {
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
@@ -385,7 +388,7 @@ static void SaveMemWatch()
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	std::string initdir =  FCEU_GetPath(FCEUMKF_MEMW);
+	string initdir =  FCEU_GetPath(FCEUMKF_MEMW);
 	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
@@ -478,7 +481,7 @@ static void QuickSaveMemWatch() //Save rather than Save as
 		SaveMemWatch();
 }
 
-//Loads a previously saved file
+//Open Memwatch File
 static void LoadMemWatch()
 {
 	const char filter[]="Memory address list(*.txt)\0*.txt\0";
@@ -501,7 +504,7 @@ static void LoadMemWatch()
 	ofn.lpstrFile=memwLastFilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	std::string initdir = FCEU_GetPath(FCEUMKF_MEMW);
+	string initdir = FCEU_GetPath(FCEUMKF_MEMW);
 	ofn.lpstrInitialDir=initdir.c_str();
 
 	if(GetOpenFileName(&ofn))
@@ -625,7 +628,7 @@ void CloseMemoryWatch()
 
 }
 
-
+//New File
 void ClearAllText()
 {
 	if (fileChanged==true) //If contents have changed
@@ -657,7 +660,7 @@ fileChanged = false;
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	const int FMAX = 6;
-	std::string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};
+	string formula[FMAX] = {"> than", "> by 1", "< than", "< by 1", "equal", "!equal"};
 	
 	const int kLabelControls[] = {MW_ValueLabel1,MW_ValueLabel2};
 
