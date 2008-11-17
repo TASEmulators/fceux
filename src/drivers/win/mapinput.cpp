@@ -6,6 +6,7 @@
 #include "gui.h"
 #include "../../input.h"
 #include <commctrl.h>
+#include "window.h"
 
 void KeyboardUpdateState(void); //mbg merge 7/17/06 yech had to add this
 
@@ -656,7 +657,6 @@ void AskForHotkey(HWND hwndListView)
 			lvi.iItem = nSel;
 			lvi.iSubItem = 2;
 			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[nCmd]);
-
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
 		}
 	}
@@ -710,6 +710,7 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		switch(LOWORD(wParam))
 		{
 			case IDOK:
+				UpdateMenuHotkeys();
 				EndDialog(hwndDlg, 1);
 				return TRUE;
 

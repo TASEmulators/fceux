@@ -115,7 +115,7 @@ BEGIN
         MENUITEM "&Cheats...",                  MENU_CHEATS
         MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
         MENUITEM "&RAM Filter...",              MENU_RAMFILTER
-        MENUITEM "TAS Edit",                    MENU_TASEDIT, INACTIVE
+        MENUITEM "TAS Edit...",                 MENU_TASEDIT, INACTIVE
         MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
         POPUP "Autofire &Pattern"
@@ -147,17 +147,17 @@ BEGIN
         END
         MENUITEM "&Alternate A and B",          MENU_ALTERNATE_AB
         MENUITEM SEPARATOR
-        MENUITEM "Text Hooker",                 ID_TOOLS_TEXTHOOKER
+        MENUITEM "Text Hooker...",              ID_TOOLS_TEXTHOOKER
     END
     POPUP "&Debug"
     BEGIN
-        MENUITEM "Debugger",                    MENU_DEBUGGER
-        MENUITEM "PPU Viewer",                  MENU_PPUVIEWER
-        MENUITEM "Name Table Viewer",           MENU_NAMETABLEVIEWER
-        MENUITEM "Hex Editor",                  MENU_HEXEDITOR
-        MENUITEM "Trace Logger",                MENU_TRACELOGGER
-        MENUITEM "Code/Data Logger",            MENU_CDLOGGER
-        MENUITEM "Game Genie Decoder/Encoder",  MENU_GAMEGENIEDECODER
+        MENUITEM "Debugger...",                 MENU_DEBUGGER
+        MENUITEM "PPU Viewer...",               MENU_PPUVIEWER
+        MENUITEM "Name Table Viewer...",        MENU_NAMETABLEVIEWER
+        MENUITEM "Hex Editor...",               MENU_HEXEDITOR
+        MENUITEM "Trace Logger...",             MENU_TRACELOGGER
+        MENUITEM "Code/Data Logger...",         MENU_CDLOGGER
+        MENUITEM "Game Genie Decoder/Encoder...", MENU_GAMEGENIEDECODER
     END
     POPUP "&Help"
     BEGIN

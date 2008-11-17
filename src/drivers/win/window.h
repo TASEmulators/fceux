@@ -4,6 +4,8 @@
 #include "common.h"
 #include <string>
 
+using namespace std;
+
 // Type definitions
 
 struct CreateMovieParameters
@@ -31,6 +33,8 @@ int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void UpdateCheckedMenuItems();
 void SetMainWindowStuff();
 void GetMouseData(uint32 (&md)[3]);
+//void ChangeMenuItemText(int menuitem, string text);
+void UpdateMenuHotkeys();
 
 template<int BUFSIZE>
 inline std::string GetDlgItemText(HWND hDlg, int nIDDlgItem) {

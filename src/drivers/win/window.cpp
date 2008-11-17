@@ -60,6 +60,7 @@
 #include "fceulua.h"
 #include "utils/xstring.h"
 #include "file.h"
+#include "mapinput.h"
 
 #include <fstream>
 
@@ -1332,7 +1333,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		goto proco;
 	case WM_ENTERMENULOOP:
 		UpdateCheckedMenuItems();
-
+		UpdateMenuHotkeys();
 		EnableMenuItem(fceumenu,MENU_RESET,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RESET)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));
@@ -1771,4 +1772,159 @@ void FCEUD_LuaRunFrom(void)
 	}
 }
 
+void ChangeMenuItemText(int menuitem, string text)
+{
+	MENUITEMINFO moo;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(fceumenu, menuitem, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)text.c_str();
+	SetMenuItemInfo(fceumenu, menuitem, FALSE, &moo);
+}
 
+void UpdateMenuHotkeys()
+{
+	//Update all menu items that can be called rom a hotkey
+	string combo, combined;
+
+	//-------------------------------FILE---------------------------------------
+	//Open ROM
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_OPENROM]);
+	combined = "&Open ROM...\t" + combo;
+	ChangeMenuItemText(MENU_OPEN_FILE, combined);
+
+	//Close ROM
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_CLOSEROM]);
+	combined = "&Close\t" + combo;
+	ChangeMenuItemText(MENU_CLOSE_FILE, combined);
+
+	//Loadstate from
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE_FROM]);
+	combined = "Load State From...\t" + combo;
+	ChangeMenuItemText(MENU_LOAD_STATE, combined);
+
+	//Savestate as
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE_AS]);
+	combined = "Save State As...\t" + combo;
+	ChangeMenuItemText(MENU_SAVE_STATE, combined);
+
+	//Record Movie
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_TO]);
+	combined = "Record Movie...\t" + combo;
+	ChangeMenuItemText(MENU_RECORD_MOVIE, combined);
+
+	//Replay movie
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_REPLAY_FROM]);
+	combined = "Replay Movie...\t" + combo;
+	ChangeMenuItemText(MENU_REPLAY_MOVIE, combined); 
+
+	//Stop movie
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_STOP]);
+	combined = "Stop Movie\t" + combo;
+	ChangeMenuItemText(MENU_STOP_MOVIE, combined); 
+
+	//Record AVI
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_RECORD_AS]);
+	combined = "Record AVI...\t" + combo;
+	ChangeMenuItemText(MENU_RECORD_AVI, combined); 
+
+	//Stop AVI
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_STOP]);
+	combined = "Stop AVI\t" + combo;
+	ChangeMenuItemText(MENU_STOP_AVI, combined); 
+
+	//-------------------------------NES----------------------------------------
+	//Reset
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_RESET]);
+	combined = "&Reset\t" + combo;
+	ChangeMenuItemText(MENU_RESET, combined); 
+
+	//Power
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_POWER]);
+	combined = "&Power\t" + combo;
+	ChangeMenuItemText(MENU_POWER, combined);
+
+	//Eject/Insert Disk
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FDS_EJECT_INSERT]);
+	combined = "&Eject/Insert Disk\t" + combo;
+	ChangeMenuItemText(MENU_EJECT_DISK, combined);
+
+	//Switch Disk Side
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FDS_SIDE_SELECT]);
+	combined = "&Switch Disk Side\t" + combo;
+	ChangeMenuItemText(MENU_SWITCH_DISK, combined);
+	
+	//Insert Coin
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_VSUNI_COIN]);
+	combined = "&Insert Coin\t" + combo;
+	ChangeMenuItemText(MENU_INSERT_COIN, combined);
+
+	//-------------------------------Config-------------------------------------
+	//Hide Menu
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_HIDE_MENU_TOGGLE]);
+	combined = "Hide Menu\t" + combo;
+	ChangeMenuItemText(MENU_HIDE_MENU, combined);
+
+	//Frame Adv. skip lag
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FRAMEADV_SKIPLAG]);
+	combined = "Frame Adv. - Skip Lag\t" + combo;
+	ChangeMenuItemText(MENU_DISPLAY_FA_LAGSKIP, combined);
+
+	//Movie Status Icon
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE]);
+	combined = "Movie Status Icon\t" + combo;
+	ChangeMenuItemText(MENU_SHOW_STATUS_ICON, combined);
+
+	//Lag Counter
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE]);
+	combined = "Lag Counter\t" + combo;
+	ChangeMenuItemText(MENU_DISPLAY_LAGCOUNTER, combined);
+
+	//Frame Counter
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE]);
+	combined = "Frame Counter\t" + combo;
+	ChangeMenuItemText(ID_DISPLAY_FRAMECOUNTER, combined);
+
+	//Graphics: BG
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);
+	combined = "Graphics: BG\t" + combo;
+	ChangeMenuItemText(MENU_DISPLAY_BG, combined);
+
+	//Graphics: OBJ
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_OBJ_TOGGLE]);
+	combined = "Graphics: OBJ\t" + combo;
+	ChangeMenuItemText(MENU_DISPLAY_OBJ, combined);
+
+	//-------------------------------Tools--------------------------------------
+	//Open Memory Watch
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENMEMORYWATCH]);
+	combined = "&Memory Watch...\t" + combo;
+	ChangeMenuItemText(MENU_MEMORY_WATCH, combined);
+
+	//-------------------------------Debug--------------------------------------
+	//Open Debugger
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENDEBUGGER]);
+	combined = "Debugger...\t" + combo;
+	ChangeMenuItemText(MENU_DEBUGGER, combined);
+
+	//Open PPU Viewer
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENPPU]);
+	combined = "PPU Viewer...\t" + combo;
+	ChangeMenuItemText(MENU_PPUVIEWER, combined);
+
+	//Open Hex editor
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENHEX]);
+	combined = "Hex Editor...\t" + combo;
+	ChangeMenuItemText(MENU_HEXEDITOR, combined);
+
+	//Open Trace Logger
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENTRACELOGGER]);
+	combined = "Trace Logger...\t" + combo;
+	ChangeMenuItemText(MENU_TRACELOGGER, combined);
+	
+	//Open Code/Data Logger
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
+	combined = "Code/Data Logger...\t" + combo;
+	ChangeMenuItemText(MENU_CDLOGGER, combined);
+}
