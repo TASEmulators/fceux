@@ -124,6 +124,7 @@ enum
 	GUI_COLOUR_BLUE
 };
 
+
 // Protects Lua calls from going nuts.
 // We set this to a big number like 1000 and decrement it
 // over time. The script gets knifed once this reaches zero.
@@ -134,7 +135,6 @@ static int numTries;
 static const char *button_mappings[] = {
 	"A", "B", "select", "start", "up", "down", "left", "right"
 };
-
 
 /**
  * Resets emulator speed / pause states after script exit.
@@ -236,6 +236,19 @@ void FCEU_LuaWriteInform() {
 		lua_settop(L, 2);
 	}
 	lua_settop(L, 0);
+}
+
+
+/**
+ * Toggle certain rendering planes
+ * FCEU.setrenderingplanes(sprites, background)
+ * Accepts two (lua) boolean values and acts accordingly
+*/
+static int fceu_setrenderplanes(lua_State *L) {
+	bool sprites = (lua_toboolean( L, 1 ) == 1);
+	bool background = (lua_toboolean( L, 2 ) == 1);
+	FCEUI_SetRenderPlanes(sprites, background);
+	return 0;
 }
 
 ///////////////////////////
@@ -617,10 +630,12 @@ static int savestate_load(lua_State *L) {
 //
 //   Gets the frame counter for the movie, or nil if no movie running.
 int movie_framecount(lua_State *L) {
+	/* // qfox, 08-11-21; fceu now counts the number of frames since the last reset if no movie is playing
 	if (!FCEUMOV_IsPlaying() && !FCEUMOV_IsRecording()) {
 		lua_pushnil(L);
 		return 1;
 	}
+	*/
 	
 	lua_pushinteger(L, FCEUMOV_GetFrame());
 	return 1;
@@ -1505,7 +1520,7 @@ static const struct luaL_reg fceulib [] = {
 	{"pause", fceu_pause},
 	{"exec_count", fceu_exec_count},
 	{"exec_time", fceu_exec_time},
-
+	{"setrenderplanes", fceu_setrenderplanes},
 	{"message", fceu_message},
 	{NULL,NULL}
 };
@@ -1531,6 +1546,8 @@ static const struct luaL_reg memorylib [] = {
 
 static const struct luaL_reg joypadlib[] = {
 	{"read", joypad_read},
+	{"get", joypad_read},
+	{"write", joypad_set},
 	{"set", joypad_set},
 
 	{NULL,NULL}
