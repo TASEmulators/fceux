@@ -630,7 +630,8 @@ static int savestate_load(lua_State *L) {
 //
 //   Gets the frame counter for the movie, or nil if no movie running.
 int movie_framecount(lua_State *L) {
-	/* // qfox, 08-11-21; fceu now counts the number of frames since the last reset if no movie is playing
+	/* // qfox, 08-11-21; fceu now counts the number of frames 
+	   //since the last reset if no movie is playing
 	if (!FCEUMOV_IsPlaying() && !FCEUMOV_IsRecording()) {
 		lua_pushnil(L);
 		return 1;
