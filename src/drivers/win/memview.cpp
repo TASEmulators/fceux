@@ -34,7 +34,10 @@
 #include "cheat.h"
 #include <assert.h>
 #include "main.h"
-//#include "string.h"
+#include "string.h"
+#include "help.h"
+
+using namespace std;
 
 #define MODE_NES_MEMORY   0
 #define MODE_NES_PPU      1
@@ -53,6 +56,8 @@
 #define ID_ADDRESS_FRZ_UNFREEZE         51
 #define ID_ADDRESS_FRZ_SEP              52
 #define ID_ADDRESS_FRZ_UNFREEZE_ALL     53
+
+string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help Page
 
 // This defines all of our right click popup menus
 struct
@@ -1454,6 +1459,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		case MENU_MV_BOOKMARKS_RM_ALL:
 			removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
 			UpdateColorTable();
+			return 0;
+
+		case MENU_MV_HELP:
+			OpenHelpWindow(memviewhelp);
 			return 0;
 
 		default:

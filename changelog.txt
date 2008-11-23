@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-nov-2008 - adelikat - win32 - added help menu item to TASEdit and Hex Editor, Minor TASEdit clean up
 22-nov-2008 - adelikat - win32 - fixed so that turbo works with VBlank sync settings
 21-nov-2008 - qfox - Lua - added joypad.write and joypad.get for naming consistency. Added plane display toggle for lua: FCEU.fceu_setrenderplanes(sprites, background) which accepts two boolean args and toggles the drawing of those planes from Lua. Changed movie.framecount() to always return a number, even when no movie is playing. Should return the same number as in view; the number of frames since last reset, if no movie is playing.
 17-nov-2008 - adelikat - added Open Cheats hotkey (currently a windows only function)

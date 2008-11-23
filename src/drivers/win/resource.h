@@ -345,9 +345,13 @@
 #define IDC_BUTTON_METADATA             1132
 #define IDC_HACKYEXPORT                 1133
 #define IDC_BUTTON1                     1133
+#define TASEDIT_REWIND                  1133
 #define IDC_BUTTON2                     1134
+#define TASEDIT_FOWARD                  1134
 #define IDC_BUTTON3                     1135
+#define TASEDIT_REWIND_FULL             1135
 #define IDC_BUTTON4                     1136
+#define TASEDIT_FOWARD_FULL             1136
 #define IDC_RADIO1                      1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140
@@ -555,6 +559,8 @@
 #define ID_DISPLAY_FRAMECOUNTER         40254
 #define ID_CONFIG_BINDSAVESTATESTOMOVIE 40255
 #define MENU_CONFIG_BINDSAVES           40256
+#define MEMVIEW_HELP                    40257
+#define MENU_MV_HELP                    40258
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -564,7 +570,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40257
+#define _APS_NEXT_COMMAND_VALUE         40259
 #define _APS_NEXT_CONTROL_VALUE         1187
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -174,13 +174,13 @@ BEGIN
     BEGIN
         MENUITEM "&New Project\tCtrl+N",        ID_FILE_NEWPROJECT
         MENUITEM "&Open Project...\tCtrl+O",    ID_FILE_OPENPROJECT
-        MENUITEM "&Save ProjectCtrl+S",         ID_FILE_SAVEPROJECT
+        MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT
         MENUITEM "Save Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS
         MENUITEM SEPARATOR
         MENUITEM "Import FM2",                  ID_FILE_IMPORTFM2
         MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2
         MENUITEM SEPARATOR
-        MENUITEM "Close\tCtrl+W",               ID_TASEDIT_FILE_CLOSE
+        MENUITEM "Close\tAlt+F4",               ID_TASEDIT_FILE_CLOSE
     END
     POPUP "Edit"
     BEGIN
@@ -241,6 +241,10 @@ BEGIN
     BEGIN
         MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
         MENUITEM SEPARATOR
+    END
+    POPUP "Help"
+    BEGIN
+        MENUITEM "Help...",                     MENU_MV_HELP
     END
 END
 
@@ -1176,10 +1180,10 @@ BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,11,324,364
     PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16
     LTEXT           "Any number of these icon buttons are pressed",IDC_STATIC,395,84,47,34
-    PUSHBUTTON      "<",IDC_BUTTON1,367,25,26,14
-    PUSHBUTTON      ">",IDC_BUTTON2,391,25,26,14
-    PUSHBUTTON      "<<",IDC_BUTTON3,341,25,26,14
-    PUSHBUTTON      ">>",IDC_BUTTON4,417,25,26,14
+    PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14
+    PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14
+    PUSHBUTTON      "<<",TASEDIT_REWIND_FULL,341,25,26,14
+    PUSHBUTTON      ">>",TASEDIT_FOWARD_FULL,417,25,26,14
     GROUPBOX        "Static",IDC_STATIC,335,11,120,176
     GROUPBOX        "Project Input Logs",IDC_STATIC,335,200,120,175
     PUSHBUTTON      "Record P1",IDC_BUTTON5,340,95,50,14

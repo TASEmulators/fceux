@@ -11,6 +11,7 @@
 #include "Win32InputBox.h"
 #include "keyboard.h"
 #include "joystick.h"
+#include "help.h"
 
 using namespace std;
 
@@ -18,6 +19,8 @@ using namespace std;
 //http://forums.devx.com/archive/index.php/t-37234.html
 
 int TasEdit_wndx, TasEdit_wndy;
+
+string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 
 HWND hwndTasEdit = 0;
 
@@ -708,7 +711,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				Export();
 				break;
 
-			case ACCEL_CTRL_W:
 			case ID_TASEDIT_FILE_CLOSE:
 				KillTasEdit();
 				break;
@@ -717,17 +719,14 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				SelectAll();
 				break;
 			
-			case ACCEL_CTRL_X:
 			case ID_TASEDIT_CUT:
 				Cut();
 				break;
 
-			case ACCEL_CTRL_C:
 			case ID_TASEDIT_COPY:
 				Copy();
 				break;
 
-			case ACCEL_CTRL_V:
 			case ID_TASEDIT_PASTE:
 				Paste();
 				break;
@@ -771,6 +770,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 
 			case ID_HELP_TASEDITHELP:
+				OpenHelpWindow(tasedithelp);
 				//link to TASEdit in help menu
 				break;
 
@@ -793,7 +793,20 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				DeleteFrames();
 				break;
 			
-			
+			case TASEDIT_FOWARD:
+				//advance 1 frame
+				break;
+
+			case TASEDIT_REWIND:
+				//rewinds 1 frame
+				break;
+
+			case TASEDIT_REWIND_FULL:
+				//rewinds to beginning of movie
+				break;
+			case TASEDIT_FOWARD_FULL:
+				//moves to the end of the move (or green zone?)
+				break;
 
 			}
 			break;
