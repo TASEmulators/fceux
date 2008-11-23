@@ -310,7 +310,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_DISPLAY_MOVESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
@@ -1028,8 +1028,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 
-			case ID_DISPLAY_MOVESUBTITLES:
+			case ID_DISPLAY_MOVIESUBTITLES:
 				movieSubtitles ^= 1;
+				if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
+				else FCEU_DispMessage("Movie subtitles off");
 				UpdateCheckedMenuItems();
 				break;
 
@@ -1041,7 +1043,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case MENU_GAME_GENIE:
 				// Game Genie menu was selected
-
 				genie ^= 1;
 				FCEUI_SetGameGenie(genie!=0);
 				UpdateCheckedMenuItems();
@@ -1892,6 +1893,11 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE]);
 	combined = "Frame Counter\t" + combo;
 	ChangeMenuItemText(ID_DISPLAY_FRAMECOUNTER, combined);
+
+	//Movie Subtitles
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_MOVIESUBTITLES]);
+	combined = "Movie Subtitles\t" + combo;
+	ChangeMenuItemText(ID_DISPLAY_MOVIESUBTITLES, combined);
 
 	//Graphics: BG
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);

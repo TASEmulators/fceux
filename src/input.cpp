@@ -78,6 +78,7 @@ unsigned int lagCounter;
 bool lagCounterDisplay;
 char lagFlag;
 extern bool frameAdvanceLagSkip;
+extern bool movieSubtitles;
 //-------------
 
 static uint8 joy_readbit[2];
@@ -592,6 +593,7 @@ static void LaunchCodeDataLogger(void);
 static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
+static void MovieSubtitleToggle(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -701,7 +703,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
-	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0}
+	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
+	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -902,4 +905,11 @@ static void CloseRom(void)
 #ifdef WIN32
 	CloseGame();
 #endif
+}
+
+static void MovieSubtitleToggle(void)
+{
+	movieSubtitles ^= 1;
+	if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
+	else FCEU_DispMessage("Movie subtitles off");
 }

@@ -92,7 +92,7 @@ BEGIN
             END
             MENUITEM "Lag Counter",                 MENU_DISPLAY_LAGCOUNTER
             MENUITEM "Frame Counter",               ID_DISPLAY_FRAMECOUNTER
-            MENUITEM "Move Subtitles",              ID_DISPLAY_MOVESUBTITLES
+            MENUITEM "Movie Subtitles",             ID_DISPLAY_MOVIESUBTITLES
             MENUITEM SEPARATOR
             MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
             MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ
