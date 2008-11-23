@@ -10,12 +10,13 @@ extern struct GUIMESSAGE
 	int howlong;
 
 	//the current gui message
-	char errmsg[86];
+	char errmsg[110];
 
 	//indicates that the movie should be drawn even on top of movies
 	bool isMovieMessage;
 
 } guiMessage;
 
+extern GUIMESSAGE subtitleMessage;
 
 void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);

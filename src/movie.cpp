@@ -1216,6 +1216,31 @@ void ProcessSubtitles(void)
 	for(uint32 i=0;i<currMovieData.subtitles.size();i++)
 	{
 		if (currFrameCounter == subtitleFrames[i])
-			FCEUI_DispMessage("%s",subtitleMessages[i].c_str());
+			FCEU_DisplaySubtitles("%s",subtitleMessages[i].c_str());
+			//FCEUI_DispMessage("%s",subtitleMessages[i].c_str());
 	}
+}
+
+void FCEU_DisplaySubtitles(char *format, ...)
+{
+	/*
+	uint8 color;
+	
+	//color = 0x19+0x80;         //else display green
+	color = 0x20+0x80;
+
+	char counterbuf[512] = {0};	
+	sprintf(counterbuf,"%d",format);
+		
+	if(counterbuf[0])
+		DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(128), 256, (uint8*)counterbuf, color); //0x20+0x80
+		*/
+	va_list ap;
+
+	va_start(ap,format);
+	vsnprintf(subtitleMessage.errmsg,sizeof(subtitleMessage.errmsg),format,ap);
+	va_end(ap);
+
+	subtitleMessage.howlong = 300;
+	subtitleMessage.isMovieMessage = false;
 }

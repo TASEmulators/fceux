@@ -159,6 +159,24 @@ void DrawMessage(bool beforeMovie)
 			DrawTextTrans(ClipSidesOffset+t, 256, (uint8 *)guiMessage.errmsg, color+0x80);
 		}
 	}
+
+	if(subtitleMessage.howlong)
+	{
+		uint8 *tt;
+		subtitleMessage.howlong--;
+		tt=XBuf+FCEU_TextScanlineOffsetFromBottom(216);
+
+		if(tt>=XBuf)
+		{
+			int color = 0x20;
+			if(subtitleMessage.howlong == 39) color = 0x38;
+			if(subtitleMessage.howlong <= 30) color = 0x2C;
+			if(subtitleMessage.howlong <= 20) color = 0x1C;
+			if(subtitleMessage.howlong <= 10) color = 0x11;
+			if(subtitleMessage.howlong <= 5) color = 0x1;
+			DrawTextTrans(ClipSidesOffset+tt, 256, (uint8 *)subtitleMessage.errmsg, color+0x80);
+		}
+	}
 }
 
 

@@ -247,6 +247,7 @@ void FCEUI_ToggleInputDisplay(void);
 
 void LoadSubtitles(void);
 void ProcessSubtitles(void);
+void FCEU_DisplaySubtitles(char *format, ...);
 
 
 

@@ -60,6 +60,7 @@ int ClipSidesOffset=0;	//Used to move displayed messages when Clips left and rig
 static uint8 *xbsave=NULL;
 
 GUIMESSAGE guiMessage;
+GUIMESSAGE subtitleMessage;
 
 //for input display
 extern int input_display;
