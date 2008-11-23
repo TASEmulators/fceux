@@ -289,6 +289,7 @@ InitConfig()
     config->addOption(prefix + "BindState", SDLK_F2);
     config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
     config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
+    config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
 	config->addOption(prefix + "SelectState0", SDLK_0);
 	config->addOption(prefix + "SelectState1", SDLK_1);
 	config->addOption(prefix + "SelectState2", SDLK_2);

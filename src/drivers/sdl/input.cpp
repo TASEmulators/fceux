@@ -166,6 +166,7 @@ int quitKey;
 int stateKey[10];
 int movieToggleFrameDisplayKey;
 int lagCounterDisplayKey;
+int SubtitleDisplayKey;
 
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
@@ -201,6 +202,7 @@ void setHotKeys()
 	g_config->getOption("SDL.Hotkeys.SelectState9", &stateKey[9]);
 	g_config->getOption("SDL.Hotkeys.LagCounterDisplay", &lagCounterDisplayKey);
 	g_config->getOption("SDL.Hotkeys.MovieToggleFrameDisplay", &movieToggleFrameDisplayKey);
+	g_config->getOption("SDL.Hotkeys.SubtitleDisplay", &SubtitleDisplayKey);
 	/*
 	config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
 	config->addOption(prefix + "Power", 0);
@@ -458,6 +460,13 @@ KeyboardCommands()
     
     if(_keyonly(lagCounterDisplayKey)) {
         lagCounterDisplay ^= 1;
+    }
+    
+    if (_keyonly(SubtitleDisplayKey)) {
+        extern int movieSubtitles;
+        movieSubtitles ^= 1;
+        FCEUI_DispMessage("Movie subtitles o%s.",
+            movieSubtitles ? "n" : "ff");
     }
 
     // VS Unisystem games
