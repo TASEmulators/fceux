@@ -14,6 +14,9 @@ static bool stopframeWasEditedByUser = false;
 //the comments contained in the currently-displayed movie
 static std::vector<std::wstring> currComments;
 
+//the subtitles contained in the currently-displayed movie
+static std::vector<std::string> currSubtitles;
+
 extern FCEUGI *GameInfo;
 
 //retains the state of the readonly checkbox and stopframe value
@@ -219,6 +222,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 			EnableWindow(GetDlgItem(hwndDlg,IDOK),TRUE);  
 			EnableWindow(GetDlgItem(hwndDlg,IDC_BUTTON_METADATA),TRUE);
 			currComments = info.comments;
+			currSubtitles = info.subtitles;
 
 			doClear = 0;
 		}
@@ -311,6 +315,50 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 			lvc.cx = listRect.right - 100;
 			ListView_InsertColumn(hwndList, colidx++, &lvc);
 
+						
+			//Display the Subtitles into the Metadata as well
+			for(uint32 i=0;i<currSubtitles.size();i++)
+			{
+				std::string& subtitle = currSubtitles[i];
+				size_t splitat = subtitle.find_first_of(' ');
+				std::wstring key, value;
+				//if we can't split it then call it an unnamed key
+				if(splitat == std::string::npos)
+				{
+					value = mbstowcs(subtitle);
+				} else
+				{
+					key = mbstowcs(subtitle.substr(0,splitat));
+					value = mbstowcs(subtitle.substr(splitat+1));
+				}
+
+				LVITEM lvi;
+				lvi.iItem = i;
+				lvi.mask = LVIF_TEXT;
+				lvi.iSubItem = 0;
+				lvi.pszText = (LPSTR)key.c_str();
+				SendMessageW(hwndList, LVM_INSERTITEMW, 0, (LPARAM)&lvi);
+				
+				lvi.iSubItem = 1;
+				lvi.pszText = (LPSTR)value.c_str();
+				SendMessageW(hwndList, LVM_SETITEMTEXTW, i, (LPARAM)&lvi);
+			}
+			
+			//Display Subtitle Heading
+			if (currSubtitles.size() > 0)	//If no subtitles, don't bother with this heading
+			{
+			string Heading = "SUBTITLES";
+			std::wstring& rHeading = mbstowcs(Heading);
+						
+			LVITEM lvSubtitle;
+				lvSubtitle.iItem = 0;
+				lvSubtitle.mask = LVIF_TEXT;
+				lvSubtitle.iSubItem = 0;
+				lvSubtitle.pszText = (LPSTR)rHeading.c_str();
+				SendMessageW(hwndList, LVM_INSERTITEMW, 0, (LPARAM)&lvSubtitle);
+			}
+				
+			//Display the comments in the movie data
 			for(uint32 i=0;i<currComments.size();i++)
 			{
 				std::wstring& comment = currComments[i];
@@ -337,6 +385,8 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 				lvi.pszText = (LPSTR)value.c_str();
 				SendMessageW(hwndList, LVM_SETITEMTEXTW, i, (LPARAM)&lvi);
 			}
+			
+			
 			
 		}
 		break;

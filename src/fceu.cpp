@@ -632,6 +632,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 	else justLagged = false;
 
+	ProcessSubtitles();
 }
 
 void FCEUI_CloseGame(void)

@@ -24,6 +24,7 @@
 #include "utils/memory.h"
 #include "utils/memorystream.h"
 #include "utils/xstring.h"
+#include <sstream>
 
 #ifdef CREATE_AVI
 #include "drivers/videolog/nesvideos-piece.h"
@@ -35,12 +36,12 @@
 
 using namespace std;
 
-
 #define MOVIE_VERSION           3 
 
 extern char FileBase[];
 
-using namespace std;
+std::vector<int> subtitleFrames;
+std::vector<string> subtitleMessages;
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
@@ -350,6 +351,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installBool(val,binaryFlag);
 	else if(key == "comment")
 		comments.push_back(mbstowcs(val));
+	else if (key == "subtitle")
+		subtitles.push_back(val); //mbstowcs(val));
 	else if(key == "savestate")
 	{
 		int len = Base64StringToBytesLength(val);
@@ -379,6 +382,9 @@ int MovieData::dump(std::ostream *os, bool binary)
 
 	for(uint32 i=0;i<comments.size();i++)
 		*os << "comment " << wcstombs(comments[i]) << endl;
+
+	for(uint32 i=0;i<subtitles.size();i++)
+		*os << "subtitle " << subtitles[i] << endl;
 	
 	if(binary)
 		*os << "binary 1" << endl;
@@ -492,7 +498,7 @@ static bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 
 	std::string key,value;
 	enum {
-		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT
+		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT, SUBTITLE
 	} state = NEWLINE;
 	bool bail = false;
 	for(;;)
@@ -721,6 +727,7 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	}
 
 	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
+	LoadSubtitles();
 	delete fp;
 
 	//fully reload the game to reinitialize everything before playing any movie
@@ -1168,6 +1175,47 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.name_of_rom_used = md.romFilename;
 	info.rerecord_count = md.rerecordCount;
 	info.comments = md.comments;
+	info.subtitles = md.subtitles;
 
 	return true;
+}
+
+//This function creates an array of frame numbers and corresponding strings for displaying subtitles
+void LoadSubtitles(void)
+{
+	
+	extern std::vector<string> subtitles;
+	for(uint32 i=0;i<currMovieData.subtitles.size();i++)
+	{
+		std::string& subtitle = currMovieData.subtitles[i];
+		size_t splitat = subtitle.find_first_of(' ');
+		std::string key, value;
+		
+		//If we can't split them, then don't process this one
+		if(splitat == std::string::npos)
+			{
+			}
+		//Else split the subtitle into the int and string arrays
+		else
+			{
+				key = subtitle.substr(0,splitat);
+				value = subtitle.substr(splitat+1);
+
+				subtitleFrames.push_back(atoi(key.c_str()));
+				subtitleMessages.push_back(value);
+			}
+	}
+
+}
+
+//Every frame, this will be called to determine if a subtitle should be displayed, which one, and then to display it
+void ProcessSubtitles(void)
+{
+	if (movieMode == MOVIEMODE_INACTIVE) return;
+
+	for(uint32 i=0;i<currMovieData.subtitles.size();i++)
+	{
+		if (currFrameCounter == subtitleFrames[i])
+			FCEUI_DispMessage("%s",subtitleMessages[i].c_str());
+	}
 }

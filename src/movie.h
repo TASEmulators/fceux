@@ -42,6 +42,7 @@ typedef struct
 	std::string name_of_rom_used;
 
 	std::vector<std::wstring> comments;
+	std::vector<std::string> subtitles;
 } MOVIE_INFO;
 
 
@@ -159,6 +160,7 @@ public:
 	std::vector<char> savestate;
 	std::vector<MovieRecord> records;
 	std::vector<std::wstring> comments;
+	std::vector<std::string> subtitles;
 	//this is the RERECORD COUNT. please rename variable.
 	int rerecordCount;
 	FCEU_Guid guid;
@@ -242,5 +244,10 @@ void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();
 void FCEUI_MovieToggleFrameDisplay();
 void FCEUI_ToggleInputDisplay(void);
+
+void LoadSubtitles(void);
+void ProcessSubtitles(void);
+
+
 
 #endif //__MOVIE_H_
