@@ -561,6 +561,7 @@
 #define MENU_CONFIG_BINDSAVES           40256
 #define MEMVIEW_HELP                    40257
 #define MENU_MV_HELP                    40258
+#define ID_DISPLAY_MOVESUBTITLES        40259
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -570,7 +571,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40259
+#define _APS_NEXT_COMMAND_VALUE         40260
 #define _APS_NEXT_CONTROL_VALUE         1187
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -71,6 +71,7 @@ using namespace std;
 extern FCEUGI *GameInfo;
 extern int EnableAutosave;
 extern bool frameAdvanceLagSkip;
+extern bool movieSubtitles;
 
 // Extern functions
 
@@ -309,6 +310,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_MOVESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
 
 	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
@@ -1023,6 +1025,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case ID_DISPLAY_FRAMECOUNTER:
 				FCEUI_MovieToggleFrameDisplay();
+				UpdateCheckedMenuItems();
+				break;
+
+			case ID_DISPLAY_MOVESUBTITLES:
+				movieSubtitles ^= 1;
 				UpdateCheckedMenuItems();
 				break;
 

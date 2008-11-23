@@ -50,7 +50,6 @@ uint8 FCEU_ReadRomByte(uint32 i);
 extern readfunc ARead[0x10000];
 extern writefunc BWrite[0x10000];
 
-
 enum GI {
 	GI_RESETM2	=1,
 	GI_POWER =2,
