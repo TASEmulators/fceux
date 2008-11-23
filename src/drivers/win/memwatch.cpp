@@ -710,7 +710,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		
 
 		//Initialize RAM Change monitor globals
-		for (int x; x < MAX_RAMMONITOR; x++)
+		for (int x = 0; x < MAX_RAMMONITOR; x++)
 		{
 			editnow[x] = 0;
 			editlast[x]= 0;

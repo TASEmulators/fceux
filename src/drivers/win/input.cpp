@@ -40,6 +40,8 @@ LPDIRECTINPUT7 lpDI=0;
 
 void InitInputPorts(bool fourscore);
 
+int tempwinsync = 0;
+extern int winsync;
 
 //UsrInputType[] is user-specified.  InputType[] is current
 //        (game/savestate/movie loading can override user settings)
@@ -1476,16 +1478,27 @@ int FCEUD_TestCommandState(int c)
 
 void FCEUD_TurboOn    (void) 
 	{ 
+		tempwinsync = winsync;	//Store winsync setting
+		winsync = 0;			//turn off winsync for turbo (so that turbo can function even with VBlank sync methods
+
 		turbo = true; 
 		if (muteTurbo) TrashSound();
 	}
 void FCEUD_TurboOff   (void) 
 	{
+		winsync = tempwinsync;			//Restore winsync setting
 		turbo = false; 
 		if (muteTurbo) InitSound();
 	}
 void FCEUD_TurboToggle(void) 
 { 
+	if (turbo) winsync = tempwinsync;	//If turbo was on, restore winsync
+	else
+	{
+		tempwinsync = winsync; 
+		winsync = 0;	//If turbo was off, turn off winsync (so that turbo can function even with VBlank sync methods
+	}
+
 	turbo = !turbo; 
 	if (muteTurbo)
 	{

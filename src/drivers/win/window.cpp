@@ -1897,6 +1897,11 @@ void UpdateMenuHotkeys()
 	ChangeMenuItemText(MENU_DISPLAY_OBJ, combined);
 
 	//-------------------------------Tools--------------------------------------
+	//Open Cheats
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCHEATS]);
+	combined = "&Cheats...\t" + combo;
+	ChangeMenuItemText(MENU_CHEATS, combined);
+
 	//Open Memory Watch
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENMEMORYWATCH]);
 	combined = "&Memory Watch...\t" + combo;
