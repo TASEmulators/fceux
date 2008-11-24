@@ -556,7 +556,7 @@ std::string FCEU_GetPath(int type)
 			if(odirs[FCEUIOD_AVI])
 				return (odirs[FCEUIOD_AVI]);
 			else
-				return "";		//If avi output directory not specified, return nothing so that avi code can handle it its own way
+				return BaseDirectory + PSS + "tools";
 			break;
 	}
 
