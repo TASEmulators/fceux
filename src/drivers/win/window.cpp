@@ -65,8 +65,18 @@
 #include <fstream>
 
 using namespace std;
+//********************************************************************************
+//Globals
+//********************************************************************************
 
-// Extern variables
+//Handles---------------------------------------------
+static HMENU fceumenu = 0;	//Main menu.
+HWND pwindow;				//Client Area
+static HMENU recentmenu;	//Recent Menu
+HMENU hfceuxcontext;		//Handle to context menu
+HMENU hfceuxcontextsub;		//Handle to context sub menu
+
+//Extern variables------------------------------------
 
 extern FCEUGI *GameInfo;
 extern int EnableAutosave;
@@ -77,49 +87,48 @@ extern bool turbo;
 // Extern functions
 
 char *md5_asciistr(uint8 digest[16]);
-
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
-
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
-
 void MapInput(void);
 
-// Internal variables
-int pauseAfterPlayback = 0;
+//AutoFire-----------------------------------------------
+
+static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
+static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
+int GetCheckedAutoFirePattern();
+int GetCheckedAutoFireOffset();
+
+//Internal variables-------------------------------------
+int pauseAfterPlayback = 0;			//Flag for pausing emulator when movie is finished
 static int winwidth, winheight;
 static volatile int nofocus = 0;
+static int tog = 0;					//Toggle for Hide Menu
+static bool loggingSound = false;
+static LONG WindowXC=1<<30,WindowYC;
+int MainWindow_wndx, MainWindow_wndy;
+static uint32 mousex,mousey,mouseb;
+static int vchanged = 0;
 
-// Contains recent file strings
+//Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
-
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
 
-// Exported variables
-HWND pwindow;
+//Exported variables ------------------------------------
+
 int EnableBackgroundInput = 0;
 int ismaximized = 0;
 
-//Menu handle of the main menu.
-static HMENU fceumenu = 0;
+//Subtitles/Comments
+void InsertSubtitle(HWND main);
+void InsertComment(HWND main);
 
-static int tog = 0;
-static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
-static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
-static bool loggingSound = false;
+//Help Menu subtopics
+string moviehelp = "{695C964E-B83F-4A6E-9BA2-1A975387DB55}";		 //Movie Recording
+string gettingstartedhelp = "{C76AEBD9-1E27-4045-8A37-69E5A52D0F9A}";//Getting Started
 
-static HMENU recentmenu;
-
-static LONG WindowXC=1<<30,WindowYC;
-int MainWindow_wndx, MainWindow_wndy;
-
-static uint32 mousex,mousey,mouseb;
-
-static int vchanged = 0;
-
-int GetCheckedAutoFirePattern();
-int GetCheckedAutoFireOffset();
+//********************************************************************************
 
 int GetCheckedAutoFirePattern()
 {
@@ -717,24 +726,44 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
-	case WM_RBUTTONUP:
 		mouseb=wParam;
 		goto proco;
 
-	case WM_MOVE: {
+	case WM_RBUTTONUP:
+	{
+		hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
+
+		//If There is a movie loaded
+		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))		
+			hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
+		
+		//If there is a ROM loaded but no movie
+		else if (GameInfo)
+			hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
+		
+		//Else no ROM
+		else
+			hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
+
+		TrackPopupMenu(hfceuxcontextsub,0,mousex,mousey,TPM_RIGHTBUTTON,hWnd,0);
+	}
+
+	case WM_MOVE: 
+	{
 		RECT wrect;
 		GetWindowRect(hWnd,&wrect);
 		MainWindow_wndx = wrect.left;
 		MainWindow_wndy = wrect.top;
-				  }
+	}
 
 	case WM_MOUSEMOVE:
-		{
-			mousex=LOWORD(lParam);
-			mousey=HIWORD(lParam);
-		}
+	{
+		mousex=LOWORD(lParam);
+		mousey=HIWORD(lParam);
+	}
 		goto proco;
 
+	
 	case WM_ERASEBKGND:
 		if(xbsave)
 			return(0);
@@ -1160,7 +1189,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_MEMORY_WATCH:
 				CreateMemWatch();
 				break;
-
+			
+			case FCEU_CONTEXT_OPENROM:
 			case MENU_OPEN_FILE:
 				// User selected the Open File menu => Show the file selection dialog
 				LoadNewGamey(hWnd, 0);
@@ -1206,6 +1236,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUD_MovieRecordTo();
 				break;
 
+			case FCEUX_CONTEXT_REPLAYMOVIE:
 			case MENU_REPLAY_MOVIE:
 				// Replay movie menu was selected
 				FCEUD_MovieReplayFrom();
@@ -1313,6 +1344,24 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_NES_TURBO:
 				FCEUD_TurboToggle();
 				break;
+			
+			//Context Menus------------------------------------------------------
+			//Game+Movie
+			case FCEU_CONTEXT_INSERTSUBTITLE:
+				InsertSubtitle(hWnd);				
+				break;
+			case FCEU_CONTEXT_INSERTCOMMENT:
+				InsertComment(hWnd);
+				break;
+			case FCEU_CONTEXT_MOVIEHELP:
+				OpenHelpWindow(moviehelp);
+				break;
+			
+			//No Game
+			case FCEU_CONTEXT_FCEUHELP:
+				OpenHelpWindow(gettingstartedhelp);
+				break;
+			
 
 
 			}
@@ -1371,6 +1420,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 		}
 		goto proco;
+
 	case WM_CLOSE:
 	case WM_DESTROY:
 	case WM_QUIT:
@@ -2029,4 +2079,68 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
 	combined = "Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
+}
+
+LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	static int *success;
+	//string message;
+	char message[128];
+	stringstream frame;
+	frame << currFrameCounter;
+	string Subtitle;
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+		{
+
+		// Nothing very useful to do
+		success = (int*)lParam;
+		return true;
+		}
+		break;
+	case WM_CLOSE:
+	case WM_DESTROY:
+	case WM_QUIT:
+		{
+			EndDialog(hDlg, 0);
+			return true;
+		}
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) 
+		{
+			case INSERTCS_IDOK:
+			{
+				GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);
+				Subtitle = frame.str() + " " + message;
+				FCEU_printf("%s",Subtitle.c_str());
+				currMovieData.subtitles.push_back(Subtitle);
+				EndDialog(hDlg, 0);
+				return true;
+				break;
+			}
+			
+			case INSERTCS_IDCANCEL:
+			{
+				EndDialog(hDlg, 0);
+				return true;
+				break;
+			}
+			
+		}
+	}
+	return 0;
+}
+void InsertSubtitle(HWND main)
+{
+	//DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
+	string Subtitle = "1000 Poop";
+	currMovieData.subtitles.push_back(Subtitle);				
+}
+
+void InsertComment(HWND main)
+{
+	wstring adelikat = mbstowcs("adelikat");
+	currMovieData.comments.push_back(L"author " + adelikat);
 }

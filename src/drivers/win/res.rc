@@ -312,6 +312,27 @@ BEGIN
     END
 END
 
+FCEUCONTEXTMENUS MENU 
+BEGIN
+    POPUP "Game+Movie"
+    BEGIN
+        MENUITEM "Insert Subtitle",             FCEU_CONTEXT_INSERTSUBTITLE, GRAYED
+        MENUITEM "Insert Comment",              FCEU_CONTEXT_INSERTCOMMENT, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Help....",                   FCEU_CONTEXT_MOVIEHELP
+    END
+    POPUP "Game+NoMovie"
+    BEGIN
+        MENUITEM "&Replay Movie",               FCEUX_CONTEXT_REPLAYMOVIE
+    END
+    POPUP "NoGame"
+    BEGIN
+        MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
+        MENUITEM SEPARATOR
+        MENUITEM "&Help....",                   FCEU_CONTEXT_FCEUHELP
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1578,6 +1599,17 @@ BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,311,214
 END
 
+INSERTCOMMENTSUBTITLE DIALOGEX 0, 0, 147, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Insert Comment"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",INSERTCS_IDOK,7,55,50,14
+    PUSHBUTTON      "Cancel",INSERTCS_IDCANCEL,84,55,50,14
+    EDITTEXT        INSERTCS_MESSAGE,15,30,125,14,ES_AUTOHSCROLL
+    LTEXT           "Insert:",IDC_STATIC,7,11,23,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1593,6 +1625,14 @@ BEGIN
         RIGHTMARGIN, 318
         TOPMARGIN, 7
         BOTTOMMARGIN, 243
+    END
+
+    INSERTCOMMENTSUBTITLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 140
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
     END
 END
 #endif    // APSTUDIO_INVOKED

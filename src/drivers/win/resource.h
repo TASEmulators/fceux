@@ -133,6 +133,8 @@
 #define CHECK_SOUND_8BIT                122
 #define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
+#define IDD_DIALOG4                     124
+#define INSERTCOMMENTSUBTITLE           124
 #define CHECK_SOUND_ENABLED             126
 #define CTL_LATENCY_TRACKBAR            128
 #define COMBO_SOUND_QUALITY             129
@@ -373,8 +375,11 @@
 #define MEMW_EDIT01RESET                1185
 #define MEMW_EDIT02RESET                1186
 #define MEMW_EDIT03RESET                1187
+#define INSERTCS_MESSAGE                1187
 #define MEMW_EDIT00RMADDRESS            1188
+#define INSERTCS_IDOK                   1188
 #define MEMW_EDIT01RMADDRESS            1189
+#define INSERTCS_IDCANCEL               1189
 #define MEMW_EDIT02RMADDRESS            1190
 #define MEMW_EDIT03RMADDRESS            1191
 #define MEMW_EDIT04RMADDRESS            1192
@@ -577,6 +582,20 @@
 #define ID_FILE_SCREENSHOT              40272
 #define ID_FILE_RESTARTMOVIE            40273
 #define ID_FILE_PLAYMOVIEFROMBEGINNING  40274
+#define ID_GAME_INSERTSUBTITLE          40275
+#define ID_GAME_INSERTCOMMENT           40276
+#define ID_GAME_HELP                    40277
+#define ID_GAME_REPLAYMOVIE             40278
+#define ID_GAME_HELP40279               40279
+#define FCEU_CONTEXT_INSERTSUBTITLE     40280
+#define FCEU_CONTEXT_MOVIEHELP          40281
+#define FCEUX_CONTEXT_REPLAYMOVIE       40282
+#define FCEU_CONTEXT_ROMHELP            40283
+#define ID_NOGAME_OPENROM               40284
+#define ID_NOGAME_HELP                  40285
+#define FCEU_CONTEXT_OPENROM            40286
+#define FCEU_CONTEXT_FCEUHELP           40287
+#define FCEU_CONTEXT_INSERTCOMMENT      40288
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -585,9 +604,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40275
-#define _APS_NEXT_CONTROL_VALUE         1187
+#define _APS_NEXT_RESOURCE_VALUE        125
+#define _APS_NEXT_COMMAND_VALUE         40289
+#define _APS_NEXT_CONTROL_VALUE         1190
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
