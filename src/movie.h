@@ -232,6 +232,7 @@ private:
 extern MovieData currMovieData;
 extern int currFrameCounter;
 extern char curMovieFilename[512];
+extern bool subtitlesOnAVI;
 //---------
 
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);

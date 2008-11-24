@@ -162,6 +162,10 @@ void DrawMessage(bool beforeMovie)
 
 	if(subtitleMessage.howlong)
 	{
+		//don't display movie messages if we're not before the movie
+		if(beforeMovie && !subtitleMessage.isMovieMessage)
+			return;
+		
 		uint8 *tt;
 		subtitleMessage.howlong--;
 		tt=XBuf+FCEU_TextScanlineOffsetFromBottom(216);

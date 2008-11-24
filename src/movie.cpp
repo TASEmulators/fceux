@@ -40,8 +40,10 @@ using namespace std;
 
 extern char FileBase[];
 
-std::vector<int> subtitleFrames;
-std::vector<string> subtitleMessages;
+std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
+std::vector<string> subtitleMessages;	//Messages of subtitles
+
+bool subtitlesOnAVI = false;
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
@@ -1217,24 +1219,11 @@ void ProcessSubtitles(void)
 	{
 		if (currFrameCounter == subtitleFrames[i])
 			FCEU_DisplaySubtitles("%s",subtitleMessages[i].c_str());
-			//FCEUI_DispMessage("%s",subtitleMessages[i].c_str());
 	}
 }
 
 void FCEU_DisplaySubtitles(char *format, ...)
 {
-	/*
-	uint8 color;
-	
-	//color = 0x19+0x80;         //else display green
-	color = 0x20+0x80;
-
-	char counterbuf[512] = {0};	
-	sprintf(counterbuf,"%d",format);
-		
-	if(counterbuf[0])
-		DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(128), 256, (uint8*)counterbuf, color); //0x20+0x80
-		*/
 	va_list ap;
 
 	va_start(ap,format);
@@ -1242,5 +1231,5 @@ void FCEU_DisplaySubtitles(char *format, ...)
 	va_end(ap);
 
 	subtitleMessage.howlong = 300;
-	subtitleMessage.isMovieMessage = false;
+	subtitleMessage.isMovieMessage = subtitlesOnAVI;
 }
