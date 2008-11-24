@@ -72,6 +72,7 @@ extern FCEUGI *GameInfo;
 extern int EnableAutosave;
 extern bool frameAdvanceLagSkip;
 extern bool movieSubtitles;
+extern bool turbo;
 
 // Extern functions
 
@@ -305,25 +306,30 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
-	CheckMenuItem(fceumenu, MENU_CONFIG_BINDSAVES, bindSavestate?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_DISPLAY_FA_LAGSKIP, frameAdvanceLagSkip?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES_AVI, subtitlesOnAVI?MF_CHECKED:MF_UNCHECKED);
+	//NES Menu
+	CheckMenuItem(fceumenu, ID_NES_PAUSE, EmulationPaused ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_NES_TURBO, turbo ? MF_CHECKED : MF_UNCHECKED);
 
+	//Config Menu
 	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
-
-	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
-
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_DISPLAY_FA_LAGSKIP, frameAdvanceLagSkip?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_CONFIG_BINDSAVES, bindSavestate?MF_CHECKED : MF_UNCHECKED);
 
+	//Config - Display SubMenu
+	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_DISPLAY_FRAMECOUNTER, frame_display ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES_AVI, subtitlesOnAVI?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
+	
+	//Tools Menu
+	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
 
-
+	//AutoFire Patterns
 	int AutoFirePatternIDs[] = {
 		MENU_AUTOFIRE_PATTERN_1,
 		MENU_AUTOFIRE_PATTERN_2,
@@ -342,57 +348,57 @@ void UpdateCheckedMenuItems()
 		MENU_AUTOFIRE_PATTERN_15,
 		0};
 
-		int AutoFireOffsetIDs[] = {
-			MENU_AUTOFIRE_OFFSET_1,
-			MENU_AUTOFIRE_OFFSET_2,
-			MENU_AUTOFIRE_OFFSET_3,
-			MENU_AUTOFIRE_OFFSET_4,
-			MENU_AUTOFIRE_OFFSET_5,
-			MENU_AUTOFIRE_OFFSET_6,
-			0};
+	int AutoFireOffsetIDs[] = {
+		MENU_AUTOFIRE_OFFSET_1,
+		MENU_AUTOFIRE_OFFSET_2,
+		MENU_AUTOFIRE_OFFSET_3,
+		MENU_AUTOFIRE_OFFSET_4,
+		MENU_AUTOFIRE_OFFSET_5,
+		MENU_AUTOFIRE_OFFSET_6,
+		0};
 
-			x = 0;
-			CheckedAutoFirePattern = GetCheckedAutoFirePattern();
-			CheckedAutoFireOffset =  GetCheckedAutoFireOffset();
-			while(AutoFirePatternIDs[x])
-			{
-				CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
-					AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
-				x++;
-			}
+	x = 0;
+	CheckedAutoFirePattern = GetCheckedAutoFirePattern();
+	CheckedAutoFireOffset =  GetCheckedAutoFireOffset();
+	while(AutoFirePatternIDs[x])
+	{
+		CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
+			AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
+		x++;
+	}
 
-			x = 0;
+	x = 0;
 
-			while(AutoFireOffsetIDs[x])
-			{
-				CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
-					AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
-				x++;
-			}
+	while(AutoFireOffsetIDs[x])
+	{
+		CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
+			AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
+		x++;
+	}
 
-			//Check input display
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_UNCHECKED);
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_UNCHECKED);
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_UNCHECKED);
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_UNCHECKED);
-			switch (input_display)
-			{
-				case 0: //Off
-					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_CHECKED);
-					break;
-				case 1: //1 player
-					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_CHECKED);
-					break;
-				case 2: //2 player
-					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_CHECKED);
-					break;
-				//note: input display can actually have a 3 player display option but is skipped in the hotkey toggle so it is skipped here as well
-				case 4: //4 player
-					CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_CHECKED);
-					break;
-				default:
-					break;
-			}
+	//Check input display
+	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_UNCHECKED);
+	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_UNCHECKED);
+	switch (input_display)
+	{
+		case 0: //Off
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_CHECKED);
+			break;
+		case 1: //1 player
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_CHECKED);
+			break;
+		case 2: //2 player
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_CHECKED);
+			break;
+		//note: input display can actually have a 3 player display option but is skipped in the hotkey toggle so it is skipped here as well
+		case 4: //4 player
+			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_CHECKED);
+			break;
+		default:
+			break;
+	}
 }
 
 /// Updates recent files / recent directories menu
@@ -1210,6 +1216,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_StopMovie();
 				break;
 
+			case ID_FILE_PLAYMOVIEFROMBEGINNING:
+				FCEUI_MoviePlayFromBeginning();
+				break;
+
 			case MENU_RECORD_AVI:
 				// Record AVI menu was selected
 				FCEUD_AviRecordTo();
@@ -1265,14 +1275,45 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				input_display = 1;
 				UpdateCheckedMenuItems();
 				break;
-				case MENU_INPUTDISPLAY_2: //Input display - 2 player
+			case MENU_INPUTDISPLAY_2: //Input display - 2 player
 				input_display = 2;
 				UpdateCheckedMenuItems();
 				break;
-				case MENU_INPUTDISPLAY_4: //Input display - 4 player
+			case MENU_INPUTDISPLAY_4: //Input display - 4 player
 				input_display = 4;
 				UpdateCheckedMenuItems();
 				break;
+
+			case ID_FILE_SCREENSHOT:
+				FCEUI_SaveSnapshot();
+				break;
+
+			case ID_NES_PAUSE:
+				EmulationPaused ^= 1;
+				UpdateCheckedMenuItems();
+				break;
+			case ID_NES_FRAMEADVANCE:
+				FCEUI_FrameAdvance();
+				break;
+			case ID_NES_SPEEDUP:
+				FCEUD_SetEmulationSpeed(3);
+				break;
+			case ID_NES_SLOWDOWN:
+				FCEUD_SetEmulationSpeed(1);
+				break;
+			case ID_NES_SLOWESTSPEED:
+				FCEUD_SetEmulationSpeed(0);
+				break;
+			case ID_NES_NORMALSPEED:
+				FCEUD_SetEmulationSpeed(2);
+				break;
+			case ID_NES_FASTESTSPEED:
+				FCEUD_SetEmulationSpeed(4);
+				break;
+			case ID_NES_TURBO:
+				FCEUD_TurboToggle();
+				break;
+
 
 			}
 		}
@@ -1357,6 +1398,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,ID_FILE_PLAYMOVIEFROMBEGINNING,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYFROMBEGINNING)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVE_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SAVESTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
@@ -1824,6 +1866,16 @@ void UpdateMenuHotkeys()
 	combined = "Stop Movie\t" + combo;
 	ChangeMenuItemText(MENU_STOP_MOVIE, combined); 
 
+	//Play Movie from Beginning
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PLAY_FROM_BEGINNING]);
+	combined = "Play from beginning\t" + combo;
+	ChangeMenuItemText(ID_FILE_PLAYMOVIEFROMBEGINNING, combined); 
+
+	//Screenshot
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCREENSHOT]);
+	combined = "Screenshot\t" + combo;
+	ChangeMenuItemText(ID_FILE_SCREENSHOT, combined); 
+
 	//Record AVI
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_RECORD_AS]);
 	combined = "Record AVI...\t" + combo;
@@ -1859,6 +1911,46 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_VSUNI_COIN]);
 	combined = "&Insert Coin\t" + combo;
 	ChangeMenuItemText(MENU_INSERT_COIN, combined);
+
+	//Pause
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+	combined = "Pause\t" + combo;
+	ChangeMenuItemText(ID_NES_PAUSE, combined);
+
+	//Frame Advance
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FRAME_ADVANCE]);
+	combined = "Frame Advance\t" + combo;
+	ChangeMenuItemText(ID_NES_FRAMEADVANCE, combined);
+
+	//Turbo
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_TURBO_TOGGLE]);
+	combined = "Turbo\t" + combo;
+	ChangeMenuItemText(ID_NES_TURBO, combined);
+
+	//Speed Up
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_FASTER]);
+	combined = "Speed Up\t" + combo;
+	ChangeMenuItemText(ID_NES_SPEEDUP, combined);
+
+	//Slow Down
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWER]);
+	combined = "Slow Down\t" + combo;
+	ChangeMenuItemText(ID_NES_SLOWDOWN, combined);
+
+	//Slowest Speed
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWEST]);
+	combined = "Slowest Speeed\t" + combo;
+	ChangeMenuItemText(ID_NES_SLOWESTSPEED, combined);
+
+	//Normal Speed
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_NORMAL]);
+	combined = "Normal Speed\t" + combo;
+	ChangeMenuItemText(ID_NES_NORMALSPEED, combined);
+
+	//Fastest Speed
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_FASTEST]);
+	combined = "Fastest Speed\t" + combo;
+	ChangeMenuItemText(ID_NES_FASTESTSPEED, combined);
 
 	//-------------------------------Config-------------------------------------
 	//Hide Menu

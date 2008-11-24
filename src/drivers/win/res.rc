@@ -49,6 +49,9 @@ BEGIN
         MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
         MENUITEM "Replay Movie...",             MENU_REPLAY_MOVIE
         MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
+        MENUITEM "Play from beginning",         ID_FILE_PLAYMOVIEFROMBEGINNING
+        MENUITEM SEPARATOR
+        MENUITEM "Screenshot",                  ID_FILE_SCREENSHOT
         MENUITEM SEPARATOR
         MENUITEM "Record AVI...",               MENU_RECORD_AVI
         MENUITEM "Stop AVI",                    MENU_STOP_AVI
@@ -70,6 +73,19 @@ BEGIN
         MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
         MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
+        MENUITEM SEPARATOR
+        MENUITEM "Pause",                       ID_NES_PAUSE
+        MENUITEM "Frame Advance",               ID_NES_FRAMEADVANCE
+        MENUITEM "Turbo",                       ID_NES_TURBO
+        POPUP "Emulation Speed"
+        BEGIN
+            MENUITEM "Speed Up",                    ID_NES_SPEEDUP
+            MENUITEM "Slow Down",                   ID_NES_SLOWDOWN
+            MENUITEM SEPARATOR
+            MENUITEM "Slowest Speed",               ID_NES_SLOWESTSPEED
+            MENUITEM "Normal Speed",                ID_NES_NORMALSPEED
+            MENUITEM "Fastest Speed",               ID_NES_FASTESTSPEED
+        END
     END
     POPUP "&Config"
     BEGIN

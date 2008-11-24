@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+24-nov-2008 - adelikat - win32 - added lots of mappable hotkey items as Menu items
 23-nov-2008 - adelikat - Win32 - fixed some errors in my AVI directory override code
 23-nov-2008 - shinydoofy - movie subs now have a toggle button in the SDL build (F10 by default)
 23-nov-2008 - adelikat - movie subtitle system installed

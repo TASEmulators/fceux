@@ -565,6 +565,18 @@
 #define ID_DISPLAY_MOVIESUBTITLES       40260
 #define ID_DISPLAY_MOVIESUBTITLESINAVI  40261
 #define ID_DISPLAY_MOVIESUBTITLES_AVI   40262
+#define ID_NES_PAUSE                    40263
+#define ID_NES_FRAMEADVANCE             40264
+#define ID_NES_SPEEDUP                  40265
+#define ID_NES_SLOWDOWN                 40266
+#define ID_NES_FASTESTSPEED             40267
+#define ID_NES_NORMALSPEED              40268
+#define ID_NES_TURBO                    40269
+#define ID_NES_SLOWESTSPEED             40270
+#define ID_NES_EMULATIONSPEED           40271
+#define ID_FILE_SCREENSHOT              40272
+#define ID_FILE_RESTARTMOVIE            40273
+#define ID_FILE_PLAYMOVIEFROMBEGINNING  40274
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -574,7 +586,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        124
-#define _APS_NEXT_COMMAND_VALUE         40263
+#define _APS_NEXT_COMMAND_VALUE         40275
 #define _APS_NEXT_CONTROL_VALUE         1187
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
