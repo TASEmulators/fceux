@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+24-nov-2008 - qfox - win32 - fixed two position checks for memwatch and debugger that could cause these windows to "disappear" (moved far out of reach).
 24-nov-2008 - adelikat - win32 - right click context menus installed
 24-nov-2008 - adelikat - win32 - added lots of mappable hotkey items as Menu items
 23-nov-2008 - adelikat - Win32 - fixed some errors in my AVI directory override code

@@ -907,7 +907,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_INITDIALOG: {
 			extern int loadDebugDataFailed;
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
-			if (DbgPosX==-32000) DbgPosX=0;
+			if (DbgPosY==-32000) DbgPosY=0;
 			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			GetWindowRect(hwndDlg,&currDebuggerRect);
