@@ -10,8 +10,9 @@
  </head>
  <body>
   <center><h1>FCEUX SDL Documentation</h1></center>
-  <center><i>Last updated August 13, 2008<br />Valid as of FCEUX 2.0.2</i><br>
-  <b>Please note that this document is INCOMPLETE</b></center>
+  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.3</i><br>
+  <b>Please note that this document is INCOMPLETE and may be INACCURATE.
+  Contributions welcome.</b></center>
  <p>
  <b>Table of Contents:</b>
  <ul>
@@ -26,7 +27,7 @@
   </ul>
   <li /><a href="#using">Using FCEUX</a>
   <ul>
-   <li /><a href="#using-keys">Key Assignments</a>
+   <li /><a href="#using-hotkeys">Hotkey Assignments</a>
    <ul />
     <li /><a href="#using-keys-vs">VS Unisystem</a>
     <li /><a href="#using-keys-fds">Famicom Disk System</a>
@@ -168,12 +169,17 @@ necessarily 100% accurate or complete):
  <p>
  
  </p>
- <a name="using-keys"><h3>Key Assignments</h3></a>
+ <a name="using-hotkeys"><h3>Hotkey Assignments</h3></a>
+ <p>
+ <b>NOTE:</b>There is not a GUI available to remap these hotkeys for SDL.  If you really
+ want to remap the hotkeys, you can edit the config file manually and replace the values
+ with SDL keysyms.  However, hotkey remapping is planned for gfceux in the near future.
  <p>
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
- <tr><td>F2</td><td>Cheat menu (command-line only)</td></tr>
- <tr><td>F3</td><td>Load lua script</td></tr>
+ <tr><td>F1</td><td>Quit FCEUX.</td></tr>
+ <tr><td>F2</td><td>Cheat menu (command-line only).</td></tr>
+ <tr><td>F3</td><td>Load lua scrip.t</td></tr>
  <tr><td>F5</td><td>Save state.</td></tr>
  <tr><td>Shift + F5</td><td>Record FM2 movie.</td></tr>
  <tr><td>Shift + F7</td><td>Playback FM2 movie.</td></tr>
@@ -181,6 +187,8 @@ necessarily 100% accurate or complete):
  <tr><td>0-9</td><td>Select save state slot.</td></tr>
  <tr><td>F12</td><td>Save screen snapshot.</td></tr>
  <tr><td>F11</td><td>Reset.</td></tr>
+ <tr><td>-</td>Decrease emulation speed.</td></tr>
+ <tr><td>=</td>Increase emulation speed.</td></tr>
  </table>
  </p>
  <a name="using-keys-vs"><h4>VS Unisystem</h4></a>

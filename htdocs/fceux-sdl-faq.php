@@ -10,21 +10,19 @@
  </head>
  <body>
   <center><h1>FCEUX SDL FAQ</h1></center>
-  <center><i>Last updated August 23, 2008<br />Valid as of FCEUX 2.0.2</i> by punkrockguy318<br>
+  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.3</i> by punkrockguy318<br>
   </center>
  <p>
  <b>Table of Contents:</b>
  <ul>
-  <li /><a href="#win-vs-sdl">What are the differences between the windows and sdl versions?</a>
+  <li /><a href="#win-vs-sdl">What's the difference between the windows and sdl ports?</a>
   <li /><a href="#config">How do I configure a gamepad?</a>
   <li /><a href="#lua">Why do I need lua5.1 to compile/run FCEUX?</a>
-  <li /><a href="#features-expansion-genie">Game Genie</a>
-  <li /><a href="#features-expansion-vs">VS Unisystem</a>
  </ul>
  
  </p>
  <hr width="100%">
- <a name="intro"><h2>What are the differences between the windows and sdl versions?</h2></a>
+ <a name="intro"><h2>What's the difference between the windows and sdl ports?</h2></a>
  <p>A lot of work that has been done on the FCE code base was been windows only, so 
  some features have not been implemented into the more portable SDL version. </p>
  <p>Here is a list of planned features that are currently in the Win32 build 
@@ -49,22 +47,16 @@
  </ul>
  <a name="config"><h3>How do I configure a gamepad?</h3></a>
  <p>
-  You can configure the first gamepad by running <b>fceux --inputcfg gamepad1 
-  /any/rom/name/here/it/doesnt/matter/</b> </p>
-  <p>When you do this, you'll be presented with a small titlebar with a title 
-  indicating what button to map.  The input configurator will look for two
-  of the same keypress/joystick event.  If it doesn't find two of the same 
+  You can configure the first gamepad by running <b>fceux --inputcfg gamepad1</b> </p>
+  <p>When you do this, you'll be presented with a black window with a titlebar
+  indicating what button to map.  FCEUX will look for two
+  of the same keypress/joystick event in a row.  If it doesn't find two of the same 
   keypresses in a row, it will allow you to map the button to four seperate keys.</p>
-  <p>FCEUX doesn't keep seperate input configurations for serperate games, it
-  simply needs a rom to process on the command line.  You can even use /dev/null as 
-  your filename in the command.</p>
-  <p>I'd like to also note that I've started work on a GUI for setting gamepads, but
-  it is current a WIP, but hopefully it will become functional when I get a chance.</p>
+  <p>Input configuration is planned for gfceux.</p>
  </p>
  <a name="lua"><h4>Why do I need lua5.1 to compile/run fceux?</h4></a>
- <p>More and more of FCEUX is going to work around its lua scripting system.
- FCEUX's lua scripting system leaves endless possibilities for scripts.  An option
- to compile without lua may be added to a future release.</p>
+ <p>You don't! As of version 2.0.3, lua is optional.  However, the lua scritping 
+ engine in fceux is very powerful, and will be used more and more by fceux in the future.</p>
         
  <a name="credits"><h2>Credits</h2></a>
  <p>
