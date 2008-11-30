@@ -277,7 +277,7 @@ necessarily 100% accurate or complete):
    <tr><td>--soundvol x</td><td>integer</td><td>100</td><td>Set sound volume.</td></tr>
    <tr><td>--soundq x</td><td>0|1</td><td>1</td><td>Enable high-quality sound emulation.</td></tr>
    <tr><td>--clipsides</td><td>0|1</td><td>0</td><td>Clip leftmost and rightmost 8 columns of pixels of the video output.</td></tr>
-   <tr><td>--slend /td><td>integer</td><td>231</td><td>Last scanline to be rendered.</td></tr>
+   <tr><td>--slend </td><td>integer</td><td>231</td><td>Last scanline to be rendered.</td></tr>
    <tr><td>--slstart</td><td>integer</td><td>0</td><td>First scanline to be rendered</td></tr>
   </table>
  </p>
