@@ -10,7 +10,7 @@
  </head>
  <body>
   <center><h1>FCEUX SDL Documentation</h1></center>
-  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.3</i><br>
+  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.4</i><br>
   <b>Please note that this document is INCOMPLETE and may be INACCURATE.
   Contributions welcome.</b></center>
  <p>
@@ -177,18 +177,26 @@ necessarily 100% accurate or complete):
  <p>
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
- <tr><td>F1</td><td>Quit FCEUX.</td></tr>
- <tr><td>F2</td><td>Cheat menu (command-line only).</td></tr>
- <tr><td>F3</td><td>Load lua scrip.t</td></tr>
+ <tr><td>F1</td><td>Cheat menu (command-line only).</td></tr>
+ <tr><td>F2</td><td>Toggles savestate binding to movies.</td></tr>
+ <tr><td>F3</td><td>Load lua script.</td></tr>
+ <tr><td>F4</td><td>Toggle background rendering.</td></tr>
  <tr><td>F5</td><td>Save state.</td></tr>
- <tr><td>Shift + F5</td><td>Record FM2 movie.</td></tr>
- <tr><td>Shift + F7</td><td>Playback FM2 movie.</td></tr>
+ <tr><td>F6</td><td>Toggle skipping lag in frame advance.</td></tr>
  <tr><td>F7</td><td>Load state.</td></tr>
- <tr><td>0-9</td><td>Select save state slot.</td></tr>
+ <tr><td>F8</td><td>Toggle lag counter display.</td></tr>
+ <tr><td>F9</td><td>Toggle movie frame counter.</td></tr>
+ <tr><td>F10</td><td>Toggle movie subtitles.</td></tr>
+ <tr><td>F11</td><td>Reset emulation.</td></tr>
  <tr><td>F12</td><td>Save screen snapshot.</td></tr>
- <tr><td>F11</td><td>Reset.</td></tr>
+ <tr><td>Shift + F5</td><td>Begin movie recording.</td></tr>
+ <tr><td>Shift + F7</td><td>Open a movie for playback.</td></tr>
+ <tr><td>0-9</td><td>Select save state slot.</td></tr>
  <tr><td>-</td>Decrease emulation speed.</td></tr>
  <tr><td>=</td>Increase emulation speed.</td></tr>
+ <tr><td>Pause</td>Pause emulation.</td></tr>
+ <tr><td>\</td>Advance a single frame.</td></tr>
+ <tr><td>
  </table>
  </p>
  <a name="using-keys-vs"><h4>VS Unisystem</h4></a>
