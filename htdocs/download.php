@@ -7,12 +7,12 @@
 <tr><th class="boxhead" colspan="3">Download</th></tr>
 <tr><td colspan="3">
 <ul>
-    <li>There are two ports: SDL and Win32. The ports are significantly 
-different. Win32 has an extensive set of native gui amenities and 
-tools.  The SDL port supports many of the features of the Win32 build 
+    <li>FCEUX is written for two platforms: SDL and Win32. The two ports have
+	some significant differences.  The Win32 port has an extensive set of native gui 
+	amenities and tools.  The SDL port supports many of the features of the Win32 build 
 (Lua scripting, movie recording), however some of the Win32 features are 
-Win32 only.  A GTK2 GUI has been also developed for the SDL port.  The 
-SDL port should run any UNIX-type OS (Linux/Solaris/BSD).</li>
+Win32 only.  The Win32 port has a built-in GUI, whereas the SDL port has a 
+GTK launcher GUI.  The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).</li>
     <li>Network play is not presently functional. Fixing it is a high priority.</li>
     <li>Win32:
     <ul>
@@ -25,13 +25,13 @@ where you will find your fixed build.
     </ul>
     <li>SDL:</li>
     <ul>
-     <li>This build is working, but may have a few problems. Swing by and help out if you want to help shape it up!
      <li><a href=http://scons.org>Scons</a> is required to build from 
 source.</li>
-     <li>Requires SDL, libz, zenity, and liblua5.1. OpenGL is optional, and recommended.</li>
-     <li><a href="http://dietschnitzel.com/gfceu">GFceuX</a>, a GTK2 GUI 
-for fceux, is included in the source release.  It is recommened for all non-windows 
-users of the SDL port, unless you particullarly prefer the command-line.</li>
+     <li>Requires SDL, libz, and zenity.  Liblua5.1 and OpenGL 
+	 are optional, but recommended.</li>
+     <li><a href="http://dietschnitzel.com/gfceu">GFCEUX</a>, a GTK2 GUI 
+for fceux, is included in the source release.  All non-windows users of the SDL
+port are reccommended to install and use this, unless you particullarly prefer the command-line.</li>
 	<li>For instructions on installing on an Ubuntu or Debian system, check the howto at 
 	<a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums</a>.</li>
     </ul>

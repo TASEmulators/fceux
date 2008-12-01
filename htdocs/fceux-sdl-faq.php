@@ -29,7 +29,6 @@
  but are missing from the SDL build:</p>
  <ul>
    <li />Autosaving
-   <li />Netplay
    <li />Hotkey mapping
    <li />More graphical ways of configuring FCEUX
  </ul>
