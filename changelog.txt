@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+30-nov-2008 - punkrockguy - commit 1000
 30-nov-2008 - punkrockguy - fixed gcc compile error
 30-nov-2008 - punkrockguy - moved around some hotkeys to be consistent with docs
 30-nov-2008 - punkrockguy - major update to sdl documentation
