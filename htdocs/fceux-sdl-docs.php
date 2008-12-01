@@ -187,11 +187,10 @@ necessarily 100% accurate or complete):
  <tr><td>Shift + F5</td><td>Begin movie recording.</td></tr>
  <tr><td>Shift + F7</td><td>Open a movie for playback.</td></tr>
  <tr><td>0-9</td><td>Select save state slot.</td></tr>
- <tr><td>-</td><td></td>Decrease emulation speed.</td></tr>
+ <tr><td>-</td><td>Decrease emulation speed.</td></tr>
  <tr><td>=</td><td>Increase emulation speed.</td></tr>
  <tr><td>Pause</td><td>Pause emulation.</td></tr>
  <tr><td>\</td><td>Advance a single frame.</td></tr>
- <tr><td>
  </table>
  </p>
  <a name="using-keys-vs"><h4>VS Unisystem</h4></a>
