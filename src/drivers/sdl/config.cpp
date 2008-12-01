@@ -273,23 +273,28 @@ InitConfig()
     // Hotkeys
     prefix = "SDL.Hotkeys.";
     config->addOption(prefix + "CheatMenu", SDLK_F1);
+	config->addOption(prefix + "BindState", SDLK_F2);
     #ifdef _S9XLUA_H
     config->addOption(prefix + "LoadLua", SDLK_F3);
     #endif
     config->addOption(prefix + "RenderBG", SDLK_F4);
     config->addOption(prefix + "SaveState", SDLK_F5);
+	config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
     config->addOption(prefix + "LoadState", SDLK_F7);
-    config->addOption(prefix + "Reset", SDLK_F9);
+	config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
+    config->addOption(prefix + "MovieToggleFrameDisplay", SDLK_F9);
+	config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
+	config->addOption(prefix + "Reset", SDLK_F11);
     config->addOption(prefix + "Screenshot", SDLK_F12);
     config->addOption(prefix + "Pause", SDLK_PAUSE);
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
-    config->addOption(prefix + "Power", 0);
-    config->addOption(prefix + "BindState", SDLK_F2);
-    config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
-    config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
-    config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
+    //config->addOption(prefix + "Power", 0);
+    
+    
+    
+    
 	config->addOption(prefix + "SelectState0", SDLK_0);
 	config->addOption(prefix + "SelectState1", SDLK_1);
 	config->addOption(prefix + "SelectState2", SDLK_2);
@@ -300,7 +305,7 @@ InitConfig()
 	config->addOption(prefix + "SelectState7", SDLK_7);
 	config->addOption(prefix + "SelectState8", SDLK_8);
 	config->addOption(prefix + "SelectState9", SDLK_9);
-	config->addOption(prefix + "MovieToggleFrameDisplay", SDLK_BACKSPACE);
+	
     
 
     // All mouse devices

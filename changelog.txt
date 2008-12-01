@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+30-nov-2008 - punkrockguy - fixed gcc compile error
+30-nov-2008 - punkrockguy - moved around some hotkeys to be consistent with docs
 30-nov-2008 - punkrockguy - major update to sdl documentation
 24-nov-2008 - qfox - win32 - fixed two position checks for memwatch and debugger that could cause these windows to "disappear" (moved far out of reach).
 24-nov-2008 - adelikat - win32 - right click context menus installed

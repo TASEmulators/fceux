@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <fstream>
 #include <limits.h>
+#include <stdarg.h>
+
 
 #include "types.h"
 #include "utils/endian.h"
