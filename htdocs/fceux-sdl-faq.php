@@ -63,7 +63,8 @@
  <p>
  <table border width="100%">
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
-  <tr><td>punkrockguy318</td><td>Author of this document</td></tr>
+  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">punkrockguy318</a></td>
+  <td>Author of this document</td></tr>
  </table>
  </p>
  </body>

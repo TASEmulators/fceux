@@ -212,8 +212,9 @@ necessarily 100% accurate or complete):
  <tr><td>F8</td><td>Eject or Insert disk.</td></tr>
  </table>
  </p>
- <a name="using-keys-gamepad"><h4>Game Pad</h4></a>
- <p>  
+ <a name="using-keys-gamepad"><h4>Gamepad</h4></a>
+ <p> These are the default keys for the first player gamepad.  These can
+ be remapped using the --inputcfg command line parameter or using gfceux.
  <table border>
  <tr><th>Key:</th><th nowrap>Button on Emulated Gamepad:</th></tr>
  <tr><td>K</td><td>B</td></tr>
@@ -228,7 +229,7 @@ necessarily 100% accurate or complete):
  </p> 
  <a name="using-keys-powerpad"><h4>Power Pad</h4></a>
  <p>  
- Does this work?
+ Could someone test this please?
  <table border>
   <tr><th colspan="4">Side B</th></tr>
   <tr><td width="25%">O</td><td width="25%">P</td>
@@ -264,7 +265,8 @@ necessarily 100% accurate or complete):
   are taken in the form of "--parameter value". Most arguments that have
   both a parameter and a value will be saved in the configuration file.
   </p>
-  TODO: Many more options.
+  <b>NOTE: </b>This list is incomplete!  For a full list of options, run
+  fceux without any arguments.
   <p>
   <table border>
    <tr><th>Argument:</th><th>Value Type:</th><th>Default value:</th><th>Description:</th></tr>
@@ -289,7 +291,8 @@ necessarily 100% accurate or complete):
  <p>
  <table border width="100%">
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
-  <tr><td>punkrockguy318</td><td>FCEUX SDL Documentation rewrite.</td></tr>
+  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">punkrockguy318</a></td>
+  <td>FCEUX SDL Documentation rewrite.</td></tr>
  </table>
  </p>
  </body>
