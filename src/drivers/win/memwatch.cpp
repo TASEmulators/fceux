@@ -39,9 +39,9 @@ static HMENU memwrecentmenu;//Handle to Recent Files Menu
 int MemWatch_wndx=0, MemWatch_wndy=0; //Window Position
 
 //Memory Watch globals-----------------------------------------
-const int NUMWATCHES = 24;			//Maximum Number of Watches
-const int LABELLENGTH = 64;			//Maximum Length of a Watch label
-const int ADDRESSLENGTH = 16;		//Maximum Length of a Ram Address
+const int NUMWATCHES = 24;		//Maximum Number of Watches
+const int LABELLENGTH = 64;		//Maximum Length of a Watch label
+const int ADDRESSLENGTH = 16;	//Maximum Length of a Ram Address
 
 static char addresses[NUMWATCHES][ADDRESSLENGTH];	//Stores all address labels
 static char labels[NUMWATCHES][LABELLENGTH];		//Stores all label lengths
@@ -70,6 +70,8 @@ int editlast[MAX_RAMMONITOR];			//last address value (1 frame ago)
 int editnow[MAX_RAMMONITOR];			//current address value
 unsigned int editcount[MAX_RAMMONITOR];	//Current counter value
 char editchangem[MAX_RAMMONITOR][5];	//counter converted to string
+
+void RamChangeReset(int x);
 //-------------------------------------------------
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
@@ -385,6 +387,8 @@ static void SaveMemWatch()
 	char nameo[2048];
 	if (!memwLastFilename[0])
 		strcpy(nameo,GetRomName());
+	else
+		strcpy(nameo,memwLastFilename);
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
@@ -731,13 +735,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	case WM_CLOSE:
 	case WM_QUIT:
 		CloseMemoryWatch();
-		//DeleteObject(hdc); //removed
 		break;
-	/*
-	case WM_KEYDOWN:
-		if (wParam == VK_HOME)
-			ClearAllText();
-	*/
 	case WM_COMMAND:
 
 		//Menu Items
@@ -772,7 +770,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case MEMW_FILE_RECENT:
 			break;
 
-		case MEMW_OPTIONS_LOADSTART: //Load on Start up
+		case MEMW_OPTIONS_LOADSTART:	//Load on Start up
 			MemWatchLoadOnStart ^= 1;
 			CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 			break;
@@ -786,25 +784,17 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			OpenHelpWindow(memwhelp);
 			break;
 		case MEMW_EDIT00RESET:
-			editlast[0]  = 0;
-			editnow[0]   = 0;
-			editcount[0] = 0;
+			RamChangeReset(0);	
 			break;
 		case MEMW_EDIT01RESET:
-			editlast[1]  = 0;
-			editnow[1]   = 0;
-			editcount[1] = 0;
-		break;
+			RamChangeReset(1);
+			break;
 		case MEMW_EDIT02RESET:
-			editlast[2]  = 0;
-			editnow[2]   = 0;
-			editcount[2] = 0;
-		break;
+			RamChangeReset(2);
+			break;
 		case MEMW_EDIT03RESET:
-			editlast[3]  = 0;
-			editnow[3]   = 0;
-			editcount[3] = 0;
-		break;
+			RamChangeReset(3);
+			break;
 		default:
 			if (LOWORD(wParam) >= MEMW_MENU_FIRST_RECENT_FILE && LOWORD(wParam) < MEMW_MENU_FIRST_RECENT_FILE+MEMW_MAX_NUMBER_OF_RECENT_FILES)
 				OpenMemwatchRecentFile(LOWORD(wParam) - MEMW_MENU_FIRST_RECENT_FILE);
@@ -997,4 +987,11 @@ void RamChange()
 			SetDlgItemText(hwndMemWatch, MEMW_EDIT00RMADDRESS+x, "");
 		}
 	} //End of for loop	
+}
+
+void RamChangeReset(int x)
+{
+	editcount[x] = 0;
+	sprintf(editchangem[x], "%d", editcount[x]);					//Convert counter to text
+	SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
 }
