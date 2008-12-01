@@ -11,7 +11,7 @@
 	some significant differences.  The Win32 port has an extensive set of native gui 
 	amenities and tools.  The SDL port supports many of the features of the Win32 build 
 (Lua scripting, movie recording), however some of the Win32 features are 
-Win32 only.  The Win32 port has a built-in GUI, whereas the SDL port has a 
+exclusive to the platform.  The Win32 port has a built-in GUI, whereas the SDL port has a 
 GTK launcher GUI.  The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).</li>
     <li>Network play is not presently functional. Fixing it is a high priority.</li>
     <li>Win32:
