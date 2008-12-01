@@ -2083,6 +2083,9 @@ void UpdateMenuHotkeys()
 
 LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	
+	
+
 	static int *success;
 	//string message;
 	char message[128];
@@ -2093,7 +2096,10 @@ LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, 
 	{
 	case WM_INITDIALOG:
 		{
-
+			if (lParam)
+				SetDlgItemText(hDlg,INSERTCS_STATIC, "Insert Comment:");
+			else
+				SetDlgItemText(hDlg, INSERTCS_STATIC, "Insert Subtitle:");
 		// Nothing very useful to do
 		success = (int*)lParam;
 		return true;
@@ -2134,13 +2140,14 @@ LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, 
 }
 void InsertSubtitle(HWND main)
 {
-	//DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
-	string Subtitle = "1000 Poop";
-	currMovieData.subtitles.push_back(Subtitle);				
+	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
+	//string Subtitle = "1000 Poop";
+	//currMovieData.subtitles.push_back(Subtitle);				
 }
 
 void InsertComment(HWND main)
 {
-	wstring adelikat = mbstowcs("adelikat");
-	currMovieData.comments.push_back(L"author " + adelikat);
+	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 1);
+	//wstring adelikat = mbstowcs("adelikat");
+	//currMovieData.comments.push_back(L"author " + adelikat);
 }

@@ -133,7 +133,6 @@
 #define CHECK_SOUND_8BIT                122
 #define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
-#define IDD_DIALOG4                     124
 #define INSERTCOMMENTSUBTITLE           124
 #define CHECK_SOUND_ENABLED             126
 #define CTL_LATENCY_TRACKBAR            128
@@ -381,6 +380,7 @@
 #define MEMW_EDIT01RMADDRESS            1189
 #define INSERTCS_IDCANCEL               1189
 #define MEMW_EDIT02RMADDRESS            1190
+#define INSERTCS_STATIC                 1190
 #define MEMW_EDIT03RMADDRESS            1191
 #define MEMW_EDIT04RMADDRESS            1192
 #define EDIT00_RESULTS                  1193
@@ -596,6 +596,10 @@
 #define FCEU_CONTEXT_OPENROM            40286
 #define FCEU_CONTEXT_FCEUHELP           40287
 #define FCEU_CONTEXT_INSERTCOMMENT      40288
+#define ID_FILE_MOVIE                   40289
+#define ID_FILE_RECORDAVI               40290
+#define ID_FILE_LUA                     40291
+#define ID_NES_EMULATION                40292
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -605,8 +609,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40289
-#define _APS_NEXT_CONTROL_VALUE         1190
+#define _APS_NEXT_COMMAND_VALUE         40293
+#define _APS_NEXT_CONTROL_VALUE         1191
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -46,21 +46,28 @@ BEGIN
         MENUITEM "Load State From...",          MENU_LOAD_STATE
         MENUITEM "Save State As...",            MENU_SAVE_STATE
         MENUITEM SEPARATOR
-        MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
-        MENUITEM "Replay Movie...",             MENU_REPLAY_MOVIE
-        MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
-        MENUITEM "Play from beginning",         ID_FILE_PLAYMOVIEFROMBEGINNING
+        POPUP "Movie"
+        BEGIN
+            MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
+            MENUITEM "Replay Movie...",             MENU_REPLAY_MOVIE
+            MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
+            MENUITEM "Play from beginning",         ID_FILE_PLAYMOVIEFROMBEGINNING
+        END
+        POPUP "Record AVI/Wav"
+        BEGIN
+            MENUITEM "Record AVI...",               MENU_RECORD_AVI
+            MENUITEM "Stop AVI",                    MENU_STOP_AVI
+            MENUITEM "Record WAV...",               MENU_RECORD_WAV
+            MENUITEM "Stop WAV",                    MENU_STOP_WAV
+        END
         MENUITEM SEPARATOR
         MENUITEM "Screenshot",                  ID_FILE_SCREENSHOT
         MENUITEM SEPARATOR
-        MENUITEM "Record AVI...",               MENU_RECORD_AVI
-        MENUITEM "Stop AVI",                    MENU_STOP_AVI
-        MENUITEM SEPARATOR
-        MENUITEM "Record WAV...",               MENU_RECORD_WAV
-        MENUITEM "Stop WAV",                    MENU_STOP_WAV
-        MENUITEM SEPARATOR
-        MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
-        MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
+        POPUP "Lua"
+        BEGIN
+            MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
+            MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
+        END
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
     END
@@ -74,9 +81,12 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
         MENUITEM SEPARATOR
-        MENUITEM "Pause",                       ID_NES_PAUSE
-        MENUITEM "Frame Advance",               ID_NES_FRAMEADVANCE
-        MENUITEM "Turbo",                       ID_NES_TURBO
+        POPUP "Emulation"
+        BEGIN
+            MENUITEM "Pause",                       ID_NES_PAUSE
+            MENUITEM "Frame Advance",               ID_NES_FRAMEADVANCE
+            MENUITEM "Turbo",                       ID_NES_TURBO
+        END
         POPUP "Emulation Speed"
         BEGIN
             MENUITEM "Speed Up",                    ID_NES_SPEEDUP
@@ -316,8 +326,8 @@ FCEUCONTEXTMENUS MENU
 BEGIN
     POPUP "Game+Movie"
     BEGIN
-        MENUITEM "Insert Subtitle",             FCEU_CONTEXT_INSERTSUBTITLE, GRAYED
-        MENUITEM "Insert Comment",              FCEU_CONTEXT_INSERTCOMMENT, GRAYED
+        MENUITEM "Insert Subtitle",             FCEU_CONTEXT_INSERTSUBTITLE
+        MENUITEM "Insert Comment",              FCEU_CONTEXT_INSERTCOMMENT
         MENUITEM SEPARATOR
         MENUITEM "&Help....",                   FCEU_CONTEXT_MOVIEHELP
     END
@@ -1601,13 +1611,13 @@ END
 
 INSERTCOMMENTSUBTITLE DIALOGEX 0, 0, 147, 82
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Insert Comment"
+CAPTION "Insert Comment / Subtitle"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",INSERTCS_IDOK,7,55,50,14
-    PUSHBUTTON      "Cancel",INSERTCS_IDCANCEL,84,55,50,14
-    EDITTEXT        INSERTCS_MESSAGE,15,30,125,14,ES_AUTOHSCROLL
-    LTEXT           "Insert:",IDC_STATIC,7,11,23,8
+    PUSHBUTTON      "Cancel",INSERTCS_IDCANCEL,89,55,50,14
+    EDITTEXT        INSERTCS_MESSAGE,7,30,133,14,ES_AUTOHSCROLL
+    LTEXT           "Insert Message:",INSERTCS_STATIC,39,14,53,8
 END
 
 
