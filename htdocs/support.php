@@ -9,7 +9,6 @@
 
 <ul>
 <li><a href="#mines">MiNES</a></li>
-<li><a href="#chtconv">NESten&lt;--&gt;FCE Ultra Cheat Converter</a></li>
 <li><a href="#netplay">Legacy Network Play Server</a></li>
 </ul>
 </div>
@@ -29,19 +28,6 @@ change the PAL/NTSC bit of the iNES header.  Written by Mateusz Viste.
 </div>
 </div>
 
-
-<div class="mainbox">
-<h2 class="boxhead"><a id="chtconv">NESten&lt;--&gt;FCE Ultra Cheat Converter</a></h2>
-<div class="boxbody">
-<p>
-This is a simple cheat converter for converting between NESten and FCE Ultra cheat files.
-Only RAM-style (as opposed to Game-Genie) cheats are converted.  Thanks go to Death Adder
-for writing the simple documentation included.  DOS executable, with sources included.
-</p>
-
-<p class="center"><a href="chtconv.zip">Download</a></p>
-</div>
-</div>
 
 <div class="mainbox">
 <h2 class="boxhead"><a id="netplay">Legacy Network Play Server</a></h2>
