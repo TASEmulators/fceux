@@ -22,6 +22,8 @@
 <p>
 A multiplatform editor for NES ROMs in the iNES format.  It allows you to
 change the PAL/NTSC bit of the iNES header.  Written by Mateusz Viste.
+</p>
+<p class="center">
 <a href="http://mateusz.viste.free.fr/dos/en/download.php?plik=mines">Download</a>
 </p>
 </div>
