@@ -18,25 +18,22 @@
  <ul>
   <li /><a href="#intro">Introduction</a>
    <li /><a href="#features-input">Input</a>
-   <li /><a href="#features-input-zapper">Zapper</a>
    <li /><a href="#features-expansion-fds">Famicom Disk System</a>
    <li /><a href="#features-expansion-genie">Game Genie</a>
    <li /><a href="#features-expansion-vs">VS Unisystem</a>
-   </ul>
    <li /><a href="#features-ips">Automatic IPS Patching</a>
-  </ul>
   <li /><a href="#using">Using FCEUX</a>
   <ul>
    <li /><a href="#using-hotkeys">Hotkey Assignments</a>
-   <ul />
+   <ul>
     <li /><a href="#using-keys-vs">VS Unisystem</a>
     <li /><a href="#using-keys-fds">Famicom Disk System</a>
     <li /><a href="#using-keys-gamepad">Game Pad</a>
     <li /><a href="#using-keys-powerpad">Power Pad</a>
     <li /><a href="#using-keys-fkb">Family Keyboard</a>
+    <li /><a href="#using-cli">Command-line options</a>
    </ul>
-   <li /><a href="#using-cli">Command-line options</a>
-   </ul>
+  </ul>
   <li /><a href="#credits">Credits</a>
  </ul>
  </p>
@@ -54,20 +51,18 @@
    </p>
  </p>
  <p>
- In several places references are made to the "base directory".  If you
- are running a port on a UN*X-like system(Linux/*BSD/Mac OSX/SunOS/etc.), the
- base directory is "~/.fceux", or in other words, 
-"your home directory plus .fceux". 
+ FCEUX stores configuration, savestates, movies, screenshots, amount other things
+ in "~/.fceux".  This is referred to as the "base directory".
  </p>
  <hr width="90%">
- <a name="features-input"><h3>Input</h3></a>
+ <a name="features-input"><h2>Input</h2></a>
  <p>
-  FCE Ultra emulates the standard NES gamepad, the Four-Score multiplayer
+  FCEUX emulates the standard NES gamepad, the Four-Score multiplayer
   adapter, the Zapper, the Power Pad,  and the Arkanoid controller.  The 
   Famicom version of the Arkanoid controller, the "Space Shadow" gun, the 
   Famicom 4-player adapter, and the Family Keyboard are also emulated.
  </p>
- <a name="features-input-zapper"><h4>Zapper</h4></a>
+ <h4>Zapper</h4></a>
  <p>
         Most Zapper NES games expect the Zapper to be plugged into port 2.
         and most VS Unisystem games expect the Zapper to be plugged
