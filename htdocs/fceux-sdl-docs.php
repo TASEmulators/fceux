@@ -195,7 +195,7 @@ necessarily 100% accurate or complete):
  </p>
  <a name="using-keys-vs"><h4>VS Unisystem</h4></a>
  <p> 
- Does this work?
+ Could someone test this please?
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
  <tr><td>F8</td><td>Insert coin.</td></tr>
@@ -205,7 +205,7 @@ necessarily 100% accurate or complete):
  </p> 
  <a name="using-keys-fds"><h4>Famicom Disk System</h4></a>
  <p>
- Does this work?
+ Could someone test this please?
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
  <tr><td>F6</td><td>Select disk and disk side.</td></tr>
