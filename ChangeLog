@@ -1,3 +1,4 @@
+* Added initial support for a graphical UI for configuring gamepads
 * Moved gfceu options data file into .fceux instead of .fceultra
 ================= version 2.0.3 =================================
 * Updated UI slightly.  Moved sound and advanced tabs; made autoscaling

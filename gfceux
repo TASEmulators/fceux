@@ -29,6 +29,8 @@ import os
 import pickle
 import shutil
 from optparse import OptionParser
+from config_parse import FceuxConfigParser
+from get_key import KeyGrabber
 #from subprocess import Popen
 
 try:
@@ -210,6 +212,7 @@ def find_binary(file):
 # # # # # # # # # # # # # # # # #
 # Globals
 options = None
+configfile = os.getenv('HOME') + '/.fceux/fceux.cfg'
 optionsfile = os.getenv('HOME') + '/.fceux/gfceux_options.dat'
 widgets = None
 
@@ -291,6 +294,7 @@ class GfceuxApp:
       self.print_error("Couldn't load the UI data.", 24)
     
     widgets.get_object("main_window").show_all()
+    
       
   def launch(self, rom_name, local=False):
     global options
@@ -546,22 +550,16 @@ class GfceuxApp:
   # fix this global its ugly
   gamepad_config = "0"
   
-  def gamepad_clicked_new(self, widget, data=None):
+  def gamepad_clicked(self, widget, data=None):
     widgets.get_object("gamepad_config_window").show_all()
+
     d = {'gp1_button' : "0",
          'gp2_button' : "1",
          'gp3_button' : "2",
          'gp4_button' : "3"}
     self.gamepad_config = d[widget.name]
     
-  def right_button_clicked(self, widget, data=None):
-    print "right!"
-  def left_button_clicked(self, widget, data=None):
-    print "left!"
-  def down_button_clicked(self, widget, data=None):
-    print "down!"
-  def up_button_clicked(self, widget, data=None):
-    print "up!"
+
   def button_clicked(self, widget, data=None):
     d = {'right_button' : "SDL.Input.GamePad." + self.gamepad_config + "Right",
          'left_button' : "SDL.Input.GamePad." + self.gamepad_config + "Left",
@@ -571,10 +569,14 @@ class GfceuxApp:
          'start_button' : "SDL.Input.GamePad." + self.gamepad_config + "Start",
          'a_button' : "SDL.Input.GamePad." + self.gamepad_config + "A",
          'b_button' : "SDL.Input.GamePad." + self.gamepad_config + "B"}
+    kg = KeyGrabber()
+    key = kg.get_key()
+    cp = FceuxConfigParser(configfile)
+    cp.writeKey(d[widget.name], key)
     print d[widget.name]
   
   
-  def gamepad_clicked(self, widget, data=None):
+  def gamepad_clicked_old(self, widget, data=None):
 
     d = {'gp1_button' : '1',
          'gp2_button' : '2',
@@ -582,6 +584,10 @@ class GfceuxApp:
          'gp4_button' : '4'}
     command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
     self.launch(command, True)
+    
+  def gamepad_window_close(self, widget, data=None):
+    widgets.get_object("gamepad_config_window").hide()
+    return True
 
   def config_help_button_clicked(self, menuitem, data=None):
     msgbox = gtk.MessageDialog(parent=None, flags=0,
