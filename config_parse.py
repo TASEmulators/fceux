@@ -1,29 +1,22 @@
 #!/usr/bin/env python
 
 #TODO: fix writing
+#TODO
 
 import re
 import os
 
 class FceuxConfigParser:
     def __init__(self, filename):
-        try:
-            f = open(filename, "r+")
-        except:
-            print "Can't open config."
-        
         self.fn = filename
     
     def _open(self):
         try:
-            self.f = open(self.fn, "r+")
+            self.f = open(self.fn, "r")
             return 1
         except:
             print "Can't open config."
             return 0
-			
-    def _close(self):
-        self.f.close()
 		
         
 	
@@ -39,41 +32,51 @@ class FceuxConfigParser:
                 return line
 
         # key not found
-        self._close()
+        self.f.close()
         return 0
     
     def writeKey(self, keyname, value):
         self._open()
         
+        buf = ""
+
         cursor = 0
         # find the key
         while 1:
-            key = self.f.read(keyname.__len__())
-            if key == "":
+            data = self.f.read(keyname.__len__())
+            buf += data
+            if data == "":
                 return 0
-            if key == keyname:
-                print key
+            if data == keyname:
                 break
             else:
-                 self.f.readline()				
-        # move back until we find a =
-		#while self.f.read(1) != '=':
-		#	self.f.seek(1, -2)		
+                 buf += self.f.readline()
         
+        print value		
+
+        buf += self.f.read(3)
 		
-        print self.f.read(3)
+        buf += str(value)
+        buf += '\n'
+        
+        # ignore the rest of the old line
+        self.f.readline()
+
+        # read the rest of the file
+        while 1:
+            data = self.f.readline()
+            if data == "":
+                break
+            buf += data
 		
-        self.f.write(value)
-		
-        self._close()
+        self.f.close()
+
+        # write the buffer to the config file
+        self.f = open(self.fn, 'w')
+        self.f.write(buf)
+        self.f.close()
 		
 
-    def close(self):
-        self.f.close()
-		print "hey"
-        
-cp = FceuxConfigParser("/home/lukas/.fceux/fceux.cfg")
-cp.writeKey("SDL.Fullscreen", "1")
 
 
 
