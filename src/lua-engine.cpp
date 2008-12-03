@@ -1019,7 +1019,7 @@ static int gui_text(lua_State *L) {
 
 	gui_prepare();
 
-	DrawTextTransWH(gui_data+y*256+x, 256, (uint8 *)msg, 0x20+0x80, 256 - x, 256 - y);
+	DrawTextTransWH(gui_data+y*256+x, 256, (uint8 *)msg, 0x20+0x80, 256 - x, 256 - y, 1);
 
 	return 0;
 
@@ -1667,7 +1667,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 	if (!L) {
 		
 		#ifdef WIN32
-			HMODULE test = LoadLibrary("lua5.1.dll");
+			HMODULE test = LoadLibrary("dll\\lua5.1.dll");
 			if(!test)
 			{
 				FCEUD_PrintError("Couldn't initialize lua system due to failure loading lua5.1.dll");

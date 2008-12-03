@@ -1,9 +1,9 @@
 Import('env')
 
 my_list =  Split("""
+archive.cpp
 args.cpp
 aviout.cpp
-basicbot.cpp
 cdlogger.cpp
 cheat.cpp
 common.cpp
@@ -34,11 +34,13 @@ replay.cpp
 sound.cpp
 state.cpp
 tasedit.cpp
+texthook.cpp
 throttle.cpp
 timing.cpp
 tracer.cpp
 video.cpp
 wave.cpp
+Win32InputBox.cpp
 window.cpp 
 """)
 

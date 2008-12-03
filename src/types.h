@@ -65,7 +65,7 @@ typedef signed int int32;
 
 //mingw32 doesnt prototype this for some reason
 #ifdef __MINGW32__
-void *alloca(size_t);
+#define alloca __builtin_alloca
 #endif
 
 #include <sys/types.h>

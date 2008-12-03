@@ -253,14 +253,14 @@ void FCEU_PutImage(void)
 		{
 			for(i = 0; i < 34;i++)
 				for(j = 0; j <9 ; j++)
-					t[i+j*256] = (t[i+j*256] & 15) | 0xC0;
+					t[i+j*256] = (t[i+j*256] & 0x30) | 0xC1;
 			for(i = 3; i < 6; i++)
 				for(j = 3; j< 6; j++)
-					t[i+j*256] = 3;
+					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
 			c &= 255;
 			//A
-			color = c&1?4:3;
+			color = c&1?0xA7:0xCF;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -271,7 +271,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//B
-			color = c&2?4:3;
+			color = c&2?0xA7:0xCF;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -282,21 +282,21 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Select
-			color = c&4?4:3;
+			color = c&4?0xA7:0xCF;
 			for(i = 0; i < 4; i++)
 			{
 				t[11+5*256+i] = color;
 				t[11+6*256+i] = color;
 			}
 			//Start
-			color = c&8?4:3;
+			color = c&8?0xA7:0xCF;
 			for(i = 0; i < 4; i++)
 			{
 				t[17+5*256+i] = color;
 				t[17+6*256+i] = color;
 			}
 			//Up
-			color = c&16?4:3;
+			color = c&16?0xA7:0xCF;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -305,7 +305,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Down
-			color = c&32?4:3;
+			color = c&32?0xA7:0xCF;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -314,7 +314,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Left
-			color = c&64?4:3;
+			color = c&64?0xA7:0xCF;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -323,7 +323,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Right
-			color = c&128?4:3;
+			color = c&128?0xA7:0xCF;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
