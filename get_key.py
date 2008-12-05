@@ -11,8 +11,12 @@ class KeyGrabber:
     """ KeyGrabber is a wrapper that gets an SDL key from the user using pygame """
     def __init__(self, width=300, height=100):
         pygame.init()
+        pygame.joystick.init()
+        if pygame.joystick.get_count() > 0:
+            print "Joystick found!"
         screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Press any key. . .")
+        
 
     def get_key(self):
         while 1:
