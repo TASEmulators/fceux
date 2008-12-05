@@ -220,6 +220,7 @@ class GfceuxApp:
     def __init__(self):
         self.fceux_binary = self.find_fceux()
         self.load_ui()
+        self.create_config()
 
         options = GameOptions()
         load_options()
@@ -228,6 +229,11 @@ class GfceuxApp:
             gtk.main()
         except KeyboardInterrupt:
             sys.exit(0)
+            
+    def create_config(self):
+        if os.path.exists(configfile) == False:
+            # auto generate a default config by running fceux with no options
+            os.system(find_binary("fceux"))
 
     def msg(self, text, use_gtk=False):
         """
