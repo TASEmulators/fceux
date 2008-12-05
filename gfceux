@@ -34,179 +34,179 @@ from get_key import KeyGrabber
 #from subprocess import Popen
 
 try:
-  import pygtk
-  pygtk.require("2.0")
-  import gtk
+    import pygtk
+    pygtk.require("2.0")
+    import gtk
 except ImportError:
-  print "The PyGTK libraries cannot be found.\n\
-  Ensure that PyGTK (>=2.12) is installed on this system.\n\
-  On Debian based systems (like Ubuntu), try this command:\n\
-  sudo apt-get install python-gtk2 libgtk2.0-0"
+    print "The PyGTK libraries cannot be found.\n\
+    Ensure that PyGTK (>=2.12) is installed on this system.\n\
+    On Debian based systems (like Ubuntu), try this command:\n\
+    sudo apt-get install python-gtk2 libgtk2.0-0"
 
 
 class GameOptions:
-  # sound
-  sound_check = True
-  soundq_check = True
-  soundrate_entry = "11000"
-  soundbufsize_entry = "48"
+    # sound
+    sound_check = True
+    soundq_check = True
+    soundrate_entry = "11000"
+    soundbufsize_entry = "48"
   
-  # video
-  fullscreen_check = False
-  xscale_spin = 2
-  yscale_spin = 2
-  bpp_combo = 32
+    # video
+    fullscreen_check = False
+    xscale_spin = 2
+    yscale_spin = 2
+    bpp_combo = 32
   
-  opengl_check = False
-  autoscale_check = True
+    opengl_check = False
+    autoscale_check = True
   
-  # main
-  extra_entry = ''
-  romfile = ''
-  moviefile = ''
-  luafile = ''
+    # main
+    extra_entry = ''
+    romfile = ''
+    moviefile = ''
+    luafile = ''
   
-  
-  # network
-  join_radio = False
-  join_add = ''
-  join_port = 4046
-  join_pass = ''
-  host_radio = False
-  host_port = 4046
-  host_pass = ''
-  no_network_radio = True
-  
+    
+    # network
+    join_radio = False
+    join_add = ''
+    join_port = 4046
+    join_pass = ''
+    host_radio = False
+    host_port = 4046
+    host_pass = ''
+    no_network_radio = True
+    
 
 def load_options():
-  global options, optionsfile
-  try:
-    ifile = file(optionsfile, 'r')
-    options = pickle.load(ifile)
-    pickle.load(ifile)
-  except:
-    return
-  ifile.close()
+    global options, optionsfile
+    try:
+        ifile = file(optionsfile, 'r')
+        options = pickle.load(ifile)
+        pickle.load(ifile)
+    except:
+        return
+    ifile.close()
 
 def save_options():
-  global options, optionsfile
-  if os.path.exists(os.path.dirname(optionsfile)) == 0:
-	  os.mkdir(os.path.dirname(optionsfile))
-  ofile = open(optionsfile, 'w')
-  pickle.dump(options, ofile)
-  ofile.close()
+    global options, optionsfile
+    if os.path.exists(os.path.dirname(optionsfile)) == 0:
+        os.mkdir(os.path.dirname(optionsfile))
+    ofile = open(optionsfile, 'w')
+    pickle.dump(options, ofile)
+    ofile.close()
     
 def give_widgets():
-  """
-  give_widgets()
-  
-  This function takes data from the options struct and relays it to
-  the GTK window
-  """
-  global options, widgets
-  try:
-    widgets.get_object("rom_entry").set_text(options.romfile)
-    widgets.get_object("movie_entry").set_text(options.moviefile)
-    widgets.get_object("lua_entry").set_text(options.luafile)
+    """
+    give_widgets()
     
-    # sound
-    widgets.get_object("sound_check").set_active(options.sound_check)
-    widgets.get_object("soundq_check").set_active(options.soundq_check)
-    widgets.get_object("soundrate_entry").set_text(options.soundrate_entry)
-    widgets.get_object("soundbufsize_entry").set_text(options.soundbufsize_entry)
+    This function takes data from the options struct and relays it to
+    the GTK window
+    """
+    global options, widgets
+    try:
+        widgets.get_object("rom_entry").set_text(options.romfile)
+        widgets.get_object("movie_entry").set_text(options.moviefile)
+        widgets.get_object("lua_entry").set_text(options.luafile)
     
-    # video
-    widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
-    widgets.get_object("opengl_check").set_active(options.opengl_check)
-    widgets.get_object("autoscale_check").set_active(options.autoscale_check)
-    # set/unset sensitivity on manual scaling
-    if widgets.get_object("autoscale_check").get_active():
-	  widgets.get_object("scaling_frame").set_sensitive(False)
-    else:
-	  widgets.get_object("scaling_frame").set_sensitive(True)
-    widgets.get_object("xscale_spin").set_value(options.xscale_spin)
-    widgets.get_object("yscale_spin").set_value(options.yscale_spin)
+        # sound
+        widgets.get_object("sound_check").set_active(options.sound_check)
+        widgets.get_object("soundq_check").set_active(options.soundq_check)
+        widgets.get_object("soundrate_entry").set_text(options.soundrate_entry)
+        widgets.get_object("soundbufsize_entry").set_text(options.soundbufsize_entry)
     
-    widgets.get_object("extra_entry").set_text(options.extra_entry)
+        # video
+        widgets.get_object("fullscreen_check").set_active(options.fullscreen_check)
+        widgets.get_object("opengl_check").set_active(options.opengl_check)
+        widgets.get_object("autoscale_check").set_active(options.autoscale_check)
         
-    # Usability point:
-    # Users will probably not want to remember their previous network setting.
-    # Users may accidently be connecting to a remote server/hosting a game when
-    # they were unaware.
-    # No network is being set by default
-    widgets.get_object("no_network_radio").set_active(True)
-    widgets.get_object("join_add").set_text(options.join_add)
-    widgets.get_object("join_port").set_value(float(options.join_port))
-    widgets.get_object("join_pass").set_text(options.join_pass)
-    widgets.get_object("host_port").set_value(float(options.host_port))
-    widgets.get_object("host_pass").set_text(options.host_pass)
+        # set/unset sensitivity on manual scaling
+        # TODO: idk if i like this really
+        #if widgets.get_object("autoscale_check").get_active():
+        #    widgets.get_object("scaling_frame").set_sensitive(False)
+        #else:
+        #    widgets.get_object("scaling_frame").set_sensitive(True)
+        widgets.get_object("xscale_spin").set_value(options.xscale_spin)
+        widgets.get_object("yscale_spin").set_value(options.yscale_spin)
+    
+        widgets.get_object("extra_entry").set_text(options.extra_entry)
+        
+        # Usability point:
+        # Users will probably not want to remember their previous network setting.
+        # Users may accidently be connecting to a remote server/hosting a game when
+        # they were unaware.
+        # No network is being set by default
+        widgets.get_object("no_network_radio").set_active(True)
+        widgets.get_object("join_add").set_text(options.join_add)
+        widgets.get_object("join_port").set_value(float(options.join_port))
+        widgets.get_object("join_pass").set_text(options.join_pass)
+        widgets.get_object("host_port").set_value(float(options.host_port))
+        widgets.get_object("host_pass").set_text(options.host_pass)
 
-  except AttributeError:   
-    # When new widgets are added, old pickle files might break.
-    options = GameOptions()
-    give_widgets()   
+    except AttributeError:   
+        # When new widgets are added, old pickle files might break.
+        options = GameOptions()
+        give_widgets()   
 
 def set_options():
-  """ 
-  set_options()
+    """ 
+    set_options()
   
-  This function grabs all of the data from the GTK widgets
-  and stores it in the options object.
-  """
-  options.romfile = widgets.get_object("rom_entry").get_text()
-  options.moviefile = widgets.get_object("movie_entry").get_text()
-  options.luafile = widgets.get_object("lua_entry").get_text()
+    This function grabs all of the data from the GTK widgets
+    and stores it in the options object.
+    """
+    options.romfile = widgets.get_object("rom_entry").get_text()
+    options.moviefile = widgets.get_object("movie_entry").get_text()
+    options.luafile = widgets.get_object("lua_entry").get_text()
   
-  # sound
-  options.sound_check = widgets.get_object("sound_check").get_active()
-  options.soundq_check = widgets.get_object("soundq_check").get_active()
-  options.soundrate_entry = widgets.get_object("soundrate_entry").get_text()
-  options.soundbufsize_entry = widgets.get_object("soundbufsize_entry").get_text()
+    # sound
+    options.sound_check = widgets.get_object("sound_check").get_active()
+    options.soundq_check = widgets.get_object("soundq_check").get_active()
+    options.soundrate_entry = widgets.get_object("soundrate_entry").get_text()
+    options.soundbufsize_entry = widgets.get_object("soundbufsize_entry").get_text()
   
-  # video
-  options.fullscreen_check = widgets.get_object("fullscreen_check").get_active()
-  options.opengl_check = widgets.get_object("opengl_check").get_active()
-  options.autoscale_check = widgets.get_object("autoscale_check").get_active()
+    # video
+    options.fullscreen_check = widgets.get_object("fullscreen_check").get_active()
+    options.opengl_check = widgets.get_object("opengl_check").get_active()
+    options.autoscale_check = widgets.get_object("autoscale_check").get_active()
   
-  options.xscale_spin = widgets.get_object("xscale_spin").get_value()
-  options.yscale_spin = widgets.get_object("yscale_spin").get_value()
+    options.xscale_spin = widgets.get_object("xscale_spin").get_value()
+    options.yscale_spin = widgets.get_object("yscale_spin").get_value()
   
-  options.extra_entry = widgets.get_object("extra_entry").get_text()
+    options.extra_entry = widgets.get_object("extra_entry").get_text()
   
-  options.join_radio = widgets.get_object("join_radio").get_active()
-  options.host_radio = widgets.get_object("host_radio").get_active()
-  options.no_network_radio = widgets.get_object("no_network_radio").get_active()
-  options.join_add = widgets.get_object("join_add").get_text()
-  options.join_port = int(widgets.get_object("join_port").get_value())
-  options.join_pass = widgets.get_object("join_pass").get_text()
-  options.host_port = widgets.get_object("host_port").get_value()
-  options.host_pass = widgets.get_object("host_pass").get_text()
+    options.join_radio = widgets.get_object("join_radio").get_active()
+    options.host_radio = widgets.get_object("host_radio").get_active()
+    options.no_network_radio = widgets.get_object("no_network_radio").get_active()
+    options.join_add = widgets.get_object("join_add").get_text()
+    options.join_port = int(widgets.get_object("join_port").get_value())
+    options.join_pass = widgets.get_object("join_pass").get_text()
+    options.host_port = widgets.get_object("host_port").get_value()
+    options.host_pass = widgets.get_object("host_pass").get_text()
   
 
 def find_binary(file):
-  # first check the script directory
-  if os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]),file)):
-    return os.path.join(os.path.dirname(sys.argv[0]), file)
+    # first check the script directory
+    if os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]),file)):
+        return os.path.join(os.path.dirname(sys.argv[0]), file)
   
-  # if not in the script directory, check the $PATH 
-  path = os.getenv('PATH')
-  directories= []
-  directory = ''
-  # check for '$' so last entry is processed
-  for x in path + '$':
-    if x != ':' and x != '$':
-      directory = directory + x
-    else:
-      directories.append(directory)
-      directory = ''
+    # if not in the script directory, check the $PATH 
+    path = os.getenv('PATH')
+    directories= []
+    directory = ''
+    # check for '$' so last entry is processed
+    for x in path + '$':
+        if x != ':' and x != '$':
+            directory = directory + x
+        else:
+            directories.append(directory)
+            directory = ''
 
-  for x in directories:
-    if os.path.isfile(os.path.join(x, file)):
-      return os.path.join(x,file)
+    for x in directories:
+        if os.path.isfile(os.path.join(x, file)):
+            return os.path.join(x,file)
 
-
-
-  return None
+    return None
   
   
 # # # # # # # # # # # # # # # # #
@@ -217,170 +217,167 @@ optionsfile = os.getenv('HOME') + '/.fceux/gfceux_options.dat'
 widgets = None
 
 class GfceuxApp:
-  def __init__(self):
-    self.fceux_binary = self.find_fceux()
-    self.load_ui()
+    def __init__(self):
+        self.fceux_binary = self.find_fceux()
+        self.load_ui()
 
-    options = GameOptions()
-    load_options()
-    give_widgets()
-    try:
-      gtk.main()
-    except KeyboardInterrupt:
-      sys.exit(0)
+        options = GameOptions()
+        load_options()
+        give_widgets()
+        try:
+            gtk.main()
+        except KeyboardInterrupt:
+            sys.exit(0)
 
-  def msg(self, text, use_gtk=False):
-    """
-    GfceuApp.msg()
+    def msg(self, text, use_gtk=False):
+        """
+        GfceuApp.msg()
     
-    This function prints messages to the user.  This is generally used for status
-    messages. If a GTK message_box is requried, the use_gtk flag can be enabled.
-    """
-    print text
-    if use_gtk:
-      msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO,
-        buttons=gtk.BUTTONS_CLOSE)
-      msgbox.set_markup(text)
-      msgbox.run()
-      msgbox.destroy()
+        This function prints messages to the user.  This is generally used for status
+        messages. If a GTK message_box is requried, the use_gtk flag can be enabled.
+        """
+        print text
+        if use_gtk:
+            msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO,
+                buttons=gtk.BUTTONS_CLOSE)
+            msgbox.set_markup(text)
+            msgbox.run()
+            msgbox.destroy()
 
-  def print_error(self, message, code, use_gtk=True, fatal=True):
-    """
-    GfceuApp.print_error()
+    def print_error(self, message, code, use_gtk=True, fatal=True):
+        """
+        GfceuApp.print_error()
     
-    Presents the user with an error message and optionally quits the program.
-    """
-    print title + ' error code '+str(code)+': ' + message
-    if use_gtk:
-      msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_ERROR,
-        buttons=gtk.BUTTONS_CLOSE)
-      msgbox.set_markup(title + ' ERROR Code '+str(code)+':\n'+message)
-      msgbox.run()
-      msgbox.destroy()
-    if fatal:
-      sys.exit(code)
+        Presents the user with an error message and optionally quits the program.
+        """
+        print title + ' error code '+str(code)+': ' + message
+        if use_gtk:
+            msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_ERROR,
+                buttons=gtk.BUTTONS_CLOSE)
+            msgbox.set_markup(title + ' ERROR Code '+str(code)+':\n'+message)
+            msgbox.run()
+            msgbox.destroy()
+        if fatal:
+            sys.exit(code)
    
-  def find_fceux(self):
-    bin = find_binary('fceux')
-    if bin == None:
-      self.print_error('Could not find the fceux binary.\n\
-      Ensure that fceux is installed and in the $PATH.\n', 4, True)
-    else:
-      self.msg('Using: ' + bin)
+    def find_fceux(self):
+        bin = find_binary('fceux')
+        if bin == None:
+            self.print_error('Could not find the fceux binary.\n\
+                Ensure that fceux is installed and in the $PATH.\n', 4, True)
+        else:
+            self.msg('Using: ' + bin)
     
-    return bin
+        return bin
   
-  def load_ui(self):
-    global widgets
-    """ Search for the glade XML file and load it """
-    # Check first in the directory of this script.
-    if os.path.isfile('gfceux.xml'):
-      glade_file = 'gfceux.xml'
-    # Then check to see if its installed on a *nix system
-    elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')):
-      glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')
-    else:
-      print 'ERROR.'
-      print 'Could not find the ' + glade_file + ' file.'
-      print 'Try reinstalling the application.'
-      sys.exit(1)
+    def load_ui(self):
+        global widgets
+        """ Search for the glade XML file and load it """
+        # Check first in the directory of this script.
+        if os.path.isfile('gfceux.xml'):
+            glade_file = 'gfceux.xml'
+        # Then check to see if its installed on a *nix system
+        elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')):
+            glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')
+        else:
+            print 'ERROR.'
+            print 'Could not find the ' + glade_file + ' file.'
+            print 'Try reinstalling the application.'
+            sys.exit(1)
     
-    try:
-      print "Using: " + glade_file
-      widgets = gtk.Builder()
-      widgets.add_from_file(glade_file)
-      widgets.connect_signals(self)
-    except:
-      self.print_error("Couldn't load the UI data.", 24)
+        try:
+            print "Using: " + glade_file
+            widgets = gtk.Builder()
+            widgets.add_from_file(glade_file)
+            widgets.connect_signals(self)
+        except:
+            self.print_error("Couldn't load the UI data.", 24)
     
-    widgets.get_object("main_window").show_all()
+        widgets.get_object("main_window").show_all()
     
       
-  def launch(self, rom_name, local=False):
-    global options
-    set_options()
+    def launch(self, rom_name, local=False):
+        global options
+        set_options()
     
-    sound_options = ''
+        sound_options = ''
     
-    if options.sound_check:
-      sound_options += '--sound 1 '
-    else:
-      sound_options += '--sound 0 '
+        if options.sound_check:
+            sound_options += '--sound 1 '
+        else:
+            sound_options += '--sound 0 '
 
-    if options.soundq_check:
-      sound_options += '--soundq 1 '
-    else:
-      sound_options += '--soundq 0 '
+        if options.soundq_check:
+            sound_options += '--soundq 1 '
+        else:
+            sound_options += '--soundq 0 '
       
-    if options.soundrate_entry:
-      sound_options += '--soundrate ' + options.soundrate_entry + ' '
+        if options.soundrate_entry:
+            sound_options += '--soundrate ' + options.soundrate_entry + ' '
     
-    if options.soundbufsize_entry:
-      sound_options += '--soundbufsize ' + options.soundbufsize_entry + ' '
+        if options.soundbufsize_entry:
+            sound_options += '--soundbufsize ' + options.soundbufsize_entry + ' '
     
-    # video
-    video_options = ''
-    if options.fullscreen_check:
-      video_options += '--fullscreen 1 '
-    else:
-      video_options += '--fullscreen 0 '
+        # video
+        video_options = ''
+        if options.fullscreen_check:
+            video_options += '--fullscreen 1 '
+        else:
+            video_options += '--fullscreen 0 '
       
-    if options.opengl_check:
-      video_options += '--opengl 1 '
-    else:
-      video_options += '--opengl 0 '
+        if options.opengl_check:
+            video_options += '--opengl 1 '
+        else:
+            video_options += '--opengl 0 '
     
-    if options.autoscale_check:
-      video_options += '--autoscale 1 '
-    else:
-      video_options += '--autoscale 0 '
+        if options.autoscale_check:
+            video_options += '--autoscale 1 '
+        else:
+            video_options += '--autoscale 0 '
 
-    video_options += ' --xscale ' + str(options.xscale_spin)
-    video_options += ' --yscale ' + str(options.yscale_spin)
-    video_options += ' '
+        video_options += ' --xscale ' + str(options.xscale_spin)
+        video_options += ' --yscale ' + str(options.yscale_spin)
+        video_options += ' '
     
-    # lua/movie
-    other_options = ''
-    if options.luafile:
-        other_options += '--loadlua ' + options.luafile + ' '
-    if options.moviefile:
-        other_options += '--playmov ' + options.moviefile + ' '
+        # lua/movie
+        other_options = ''
+        if options.luafile:
+            other_options += '--loadlua ' + options.luafile + ' '
+        if options.moviefile:
+            other_options += '--playmov ' + options.moviefile + ' '
           
     
-    # Netplay is fucked right now
+        # Netplay is fucked right now
+        if options.join_radio:
+            if options.join_pass == '':
+                netpass = ''
+            else:
+                netpass = '--pass ' + options.join_pass
+            network = '--net ' + options.join_add +\
+                ' --port '+ str(options.join_port) + ' ' + netpass
+        else:
+            network = ''
    
-    if options.join_radio:
-      if options.join_pass == '':
-        netpass = ''
-      else:
-        netpass = '--pass ' + options.join_pass
-      network = '--net ' + options.join_add +\
-      ' --port '+ str(options.join_port) + ' ' + netpass
-    else:
-      network = ''
-   
-    if options.host_radio:
-      """
-      if options.host_pass == '':
-        netpass = ' '
-      else:
-#        netpass = ' --pass ' + '"' + options.host_pass + '" '
-        netpass = ' --pass ' + options.host_pass 
-      network = '--net localhost --port '+\
-      str(options.host_port) + netpass + ' '    
-      """
-      network = ''
+        if options.host_radio:
+            """
+            if options.host_pass == '':
+                netpass = ' '
+            else:
+                netpass = ' --pass ' + '"' + options.host_pass + '" '
+            network = '--net localhost --port '+\
+                str(options.host_port) + netpass + ' '"""
+            network = ''
       
-    if local:
-      network = ''
+        if local:
+            network = ''
    
     
-    command =  self.fceux_binary + ' ' + sound_options + video_options +\
-    network + other_options + options.extra_entry + ' '+ rom_name
-    self.msg('Command: ' + command)
+        command =  self.fceux_binary + ' ' + sound_options + video_options +\
+        network + other_options + options.extra_entry + ' '+ rom_name
+        self.msg('Command: ' + command)
 
-    # more code to disable because netplay is fucked
-    """
+        # more code to disable because netplay is fucked
+        """
     if options.host_radio:
       xterm_binary = find_binary("xterm")
       if xterm_binary == None:
@@ -395,173 +392,173 @@ class GfceuxApp:
         args.append("--password")
         args.append(options.host_pass)
       pid = Popen(args).pid
-    """  
-    widgets.get_object("main_window").hide()
+        """  
+        widgets.get_object("main_window").hide()
     
-    # os.system() is a blocker, so we must force
-    # gtk to process our events.
-    while gtk.events_pending():
-      gtk.main_iteration_do()
+        # os.system() is a blocker, so we must force
+        # gtk to process our events.
+        while gtk.events_pending():
+            gtk.main_iteration_do()
     
-    os.system(command)
-    widgets.get_object("main_window").show()
+        os.system(command)
+        widgets.get_object("main_window").show()
     
-    # another part of netplay code
-    """
-    if options.host_radio:
-      os.kill(pid, 9)
-    """
-    
-  ### Callbacks
-  def launch_button_clicked(self, arg1):
-
-    global options
-    options.romfile = widgets.get_object("rom_entry").get_text()
-    if widgets.get_object("rom_entry").get_text() == '':
-      self.msg('Please specify a ROM to open in the main tab.', True)
-      return
+        # another part of netplay code
+        """
+        if options.host_radio:
+        os.kill(pid, 9)
+        """
+        
+    ### Callbacks
+    def launch_button_clicked(self, arg1):
+        global options
+        options.romfile = widgets.get_object("rom_entry").get_text()
+        if widgets.get_object("rom_entry").get_text() == '':
+            self.msg('Please specify a ROM to open in the main tab.', True)
+            return
       
-    self.launch('"'+ options.romfile +'"')
+        self.launch('"'+ options.romfile +'"')
   
-  def autoscale_check_toggled(self, menuitem, data=None):
-    if widgets.get_object("autoscale_check").get_active():
-	  widgets.get_object("scaling_frame").set_sensitive(False)
-    else:
-	  widgets.get_object("scaling_frame").set_sensitive(True)
+    def autoscale_check_toggled(self, menuitem, data=None):
+        if widgets.get_object("autoscale_check").get_active():
+            widgets.get_object("scaling_frame").set_sensitive(False)
+        else:
+            widgets.get_object("scaling_frame").set_sensitive(True)
     
-  def about_button_clicked(self, menuitem, data=None):
-    widgets.get_object("about_dialog").set_name('GFCE UltraX '+version)
-    widgets.get_object("about_dialog").run()
-    widgets.get_object("about_dialog").hide()
+    def about_button_clicked(self, menuitem, data=None):
+        widgets.get_object("about_dialog").set_name('GFCE UltraX '+version)
+        widgets.get_object("about_dialog").run()
+        widgets.get_object("about_dialog").hide()
   
-  def lua_browse_button_clicked(self, menuitem, data=None):
-    global options
-    set_options()
-    chooser = gtk.FileChooserDialog("Open...",  None,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
+    def lua_browse_button_clicked(self, menuitem, data=None):
+        global options
+        set_options()
+        chooser = gtk.FileChooserDialog("Open...",  None,
+                gtk.FILE_CHOOSER_ACTION_OPEN,
   			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
   			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-    chooser.set_property("local-only", False)
-    chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser.set_property("local-only", False)
+        chooser.set_default_response(gtk.RESPONSE_OK)
     
-    filter=gtk.FileFilter()
-    filter.set_name("Lua scripts")
-    filter.add_pattern("*.lua")
-    chooser.add_filter(filter)
+        filter=gtk.FileFilter()
+        filter.set_name("Lua scripts")
+        filter.add_pattern("*.lua")
+        chooser.add_filter(filter)
     
-    filter = gtk.FileFilter()
-    filter.set_name("All files")
-    filter.add_pattern("*")
-    chooser.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name("All files")
+        filter.add_pattern("*")
+        chooser.add_filter(filter)
     
-    if options.luafile == '':
-      folder = os.getenv('HOME')
-    else:
-      folder = os.path.split(options.luafile)[0]
+        if options.luafile == '':
+            folder = os.getenv('HOME')
+        else:
+            folder = os.path.split(options.luafile)[0]
       
-    chooser.set_current_folder (folder)
+        chooser.set_current_folder (folder)
     
-    response = chooser.run()
-    chooser.hide()
+        response = chooser.run()
+        chooser.hide()
     
-    if response == gtk.RESPONSE_OK:
-      if chooser.get_filename():
-        x = chooser.get_filename()
-        widgets.get_object("lua_entry").set_text(x)
-        options.luafile = x
+        if response == gtk.RESPONSE_OK:
+            if chooser.get_filename():
+                x = chooser.get_filename()
+                widgets.get_object("lua_entry").set_text(x)
+                options.luafile = x
   
-  def movie_browse_button_clicked(self, menuitem, data=None):
-    global options
-    set_options()
-    chooser = gtk.FileChooserDialog("Open...",  None,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
+    def movie_browse_button_clicked(self, menuitem, data=None):
+        global options
+        set_options()
+        chooser = gtk.FileChooserDialog("Open...",  None,
+                gtk.FILE_CHOOSER_ACTION_OPEN,
   			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
   			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-    chooser.set_property("local-only", False)
-    chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser.set_property("local-only", False)
+        chooser.set_default_response(gtk.RESPONSE_OK)
     
-    filter=gtk.FileFilter()
-    filter.set_name("FM2 movies")
-    filter.add_pattern("*.fm2")
-    chooser.add_filter(filter)
+        filter=gtk.FileFilter()
+        filter.set_name("FM2 movies")
+        filter.add_pattern("*.fm2")
+        chooser.add_filter(filter)
     
-    filter = gtk.FileFilter()
-    filter.set_name("All files")
-    filter.add_pattern("*")
-    chooser.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name("All files")
+        filter.add_pattern("*")
+        chooser.add_filter(filter)
     
-    if options.moviefile == '':
-      folder = os.getenv('HOME')
-    else:
-      folder = os.path.split(options.moviefile)[0]
+        if options.moviefile == '':
+            folder = os.getenv('HOME')
+        else:
+            folder = os.path.split(options.moviefile)[0]
       
-    chooser.set_current_folder (folder)
+        chooser.set_current_folder (folder)
     
-    response = chooser.run()
-    chooser.hide()
+        response = chooser.run()
+        chooser.hide()
     
-    if response == gtk.RESPONSE_OK:
-      if chooser.get_filename():
-        x = chooser.get_filename()
-        widgets.get_object("movie_entry").set_text(x)
-        options.moviefile = x
+        if response == gtk.RESPONSE_OK:
+            if chooser.get_filename():
+                x = chooser.get_filename()
+                widgets.get_object("movie_entry").set_text(x)
+                options.moviefile = x
     
-  def rom_browse_button_clicked(self, menuitem, data=None):
-    global options
-    set_options()
-    chooser = gtk.FileChooserDialog("Open...",  None,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
+    def rom_browse_button_clicked(self, menuitem, data=None):
+        global options
+        set_options()
+        chooser = gtk.FileChooserDialog("Open...",  None,
+                gtk.FILE_CHOOSER_ACTION_OPEN,
   			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
   			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-    chooser.set_property("local-only", False)
-    chooser.set_default_response(gtk.RESPONSE_OK)
+        chooser.set_property("local-only", False)
+        chooser.set_default_response(gtk.RESPONSE_OK)
     
-    filter=gtk.FileFilter()
-    filter.set_name("NES Roms")
-    filter.add_mime_type("application/x-nes-rom")
-    filter.add_mime_type("application/zip")
-    filter.add_pattern("*.nes")
-    filter.add_pattern("*.zip")
-    chooser.add_filter(filter)
+        filter=gtk.FileFilter()
+        filter.set_name("NES Roms")
+        filter.add_mime_type("application/x-nes-rom")
+        filter.add_mime_type("application/zip")
+        filter.add_pattern("*.nes")
+        filter.add_pattern("*.zip")
+        chooser.add_filter(filter)
     
-    filter = gtk.FileFilter()
-    filter.set_name("All files")
-    filter.add_pattern("*")
-    chooser.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name("All files")
+        filter.add_pattern("*")
+        chooser.add_filter(filter)
     
-    if options.romfile == '':
-      folder = os.getenv('HOME')
-    else:
-      folder = os.path.split(options.romfile)[0]
+        if options.romfile == '':
+            folder = os.getenv('HOME')
+        else:
+            folder = os.path.split(options.romfile)[0]
       
-    chooser.set_current_folder (folder)
+        chooser.set_current_folder (folder)
     
-    response = chooser.run()
-    chooser.hide()
+        response = chooser.run()
+        chooser.hide()
     
-    if response == gtk.RESPONSE_OK:
-      if chooser.get_filename():
-        x = chooser.get_filename()
-        widgets.get_object("rom_entry").set_text(x)
-        # reset lua and movie entries on rom change
-        widgets.get_object("movie_entry").set_text("")
-        widgets.get_object("lua_entry").set_text("")
-        options.romfile = x
-  # fix this global its ugly
-  gamepad_config = "0"
+        if response == gtk.RESPONSE_OK:
+            if chooser.get_filename():
+                x = chooser.get_filename()
+                widgets.get_object("rom_entry").set_text(x)
+                # reset lua and movie entries on rom change
+                widgets.get_object("movie_entry").set_text("")
+                widgets.get_object("lua_entry").set_text("")
+                options.romfile = x
+    
+    # fix this global its ugly
+    gamepad_config = "0"
   
-  def gamepad_clicked(self, widget, data=None):
-    widgets.get_object("gamepad_config_window").show_all()
+    def gamepad_clicked(self, widget, data=None):
+        widgets.get_object("gamepad_config_window").show_all()
 
-    d = {'gp1_button' : "0",
-         'gp2_button' : "1",
-         'gp3_button' : "2",
-         'gp4_button' : "3"}
-    self.gamepad_config = d[widget.name]
+        d = {'gp1_button' : "0",
+            'gp2_button' : "1",
+            'gp3_button' : "2",
+            'gp4_button' : "3"}
+        self.gamepad_config = d[widget.name]
     
 
-  def button_clicked(self, widget, data=None):
-    d = {'right_button' : "SDL.Input.GamePad." + self.gamepad_config + "Right",
+    def button_clicked(self, widget, data=None):
+        d = {'right_button' : "SDL.Input.GamePad." + self.gamepad_config + "Right",
          'left_button' : "SDL.Input.GamePad." + self.gamepad_config + "Left",
          'up_button' : "SDL.Input.GamePad." + self.gamepad_config + "Up",
          'down_button' : "SDL.Input.GamePad." + self.gamepad_config + "Down",
@@ -569,85 +566,82 @@ class GfceuxApp:
          'start_button' : "SDL.Input.GamePad." + self.gamepad_config + "Start",
          'a_button' : "SDL.Input.GamePad." + self.gamepad_config + "A",
          'b_button' : "SDL.Input.GamePad." + self.gamepad_config + "B"}
-    kg = KeyGrabber()
-    key = kg.get_key()
-    cp = FceuxConfigParser(configfile)
-    cp.writeKey(d[widget.name], key)
-    print d[widget.name]
+        kg = KeyGrabber()
+        key = kg.get_key()
+        cp = FceuxConfigParser(configfile)
+        cp.writeKey(d[widget.name], key)
   
-  
-  def gamepad_clicked_old(self, widget, data=None):
-
-    d = {'gp1_button' : '1',
+    def gamepad_clicked_old(self, widget, data=None):
+        d = {'gp1_button' : '1',
          'gp2_button' : '2',
          'gp3_button' : '3',
          'gp4_button' : '4'}
-    command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
-    self.launch(command, True)
+        command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
+        self.launch(command, True)
     
-  def gamepad_window_close(self, widget, data=None):
-    widgets.get_object("gamepad_config_window").hide()
-    return True
+    def gamepad_window_close(self, widget, data=None):
+        widgets.get_object("gamepad_config_window").hide()
+        return True
 
-  def config_help_button_clicked(self, menuitem, data=None):
-    msgbox = gtk.MessageDialog(parent=None, flags=0,
-      type=gtk.MESSAGE_INFO, buttons=gtk.BUTTONS_CLOSE)
-    msgbox.set_markup("Once a gamepad is seleceted, a titlebar will be displayed\
-   indicating a NES button.  Press the button or key you would like to have\
-   associated with the button indicated on the titlebar.  This process\
-   will repeat until all buttons on the gamepad are configured.")
-    msgbox.run()
-    msgbox.hide()
+    def config_help_button_clicked(self, menuitem, data=None):
+        msgbox = gtk.MessageDialog(parent=None, flags=0,
+            type=gtk.MESSAGE_INFO, buttons=gtk.BUTTONS_CLOSE)
+        msgbox.set_markup("Once a gamepad is seleceted, a titlebar will be displayed\
+            indicating a NES button.  Press the button or key you would like to have\
+            associated with the button indicated on the titlebar.  This process\
+            will repeat until all buttons on the gamepad are configured.")
+        msgbox.run()
+        msgbox.hide()
 
-
-  def join_radio_clicked(self, menuitem, data=None):
-    global options
-    widgets.get_object("join_frame").set_sensitive(True)
-    widgets.get_object("host_frame").set_sensitive(False)
-    options.join_radio = True
-    options.host_radio = False
-    options.no_network_radio = False
+    def join_radio_clicked(self, menuitem, data=None):
+        global options
+        widgets.get_object("join_frame").set_sensitive(True)
+        widgets.get_object("host_frame").set_sensitive(False)
+        options.join_radio = True
+        options.host_radio = False
+        options.no_network_radio = False
     
-  def host_radio_clicked(self, menuitem, data=None):
-    if widgets.get_object("host_radio").get_active():
-      self.server_binary = find_binary('fceu-server')
+    def host_radio_clicked(self, menuitem, data=None):
+        """
+        this is broken in fceux right now
+        if widgets.get_object("host_radio").get_active():
+            self.server_binary = find_binary('fceu-server')
       
-      if self.server_binary == None:
-        if os.name == 'nt':
-          self.print_error("The fceu server software cannot be found. \n\
-          Ensure that it is installed in the same directory as \n\
-          GFCE Ultra.", 102, True, False)
+        if self.server_binary == None:
+            if os.name == 'nt':
+                self.print_error("The fceu server software cannot be found. \n\
+                    Ensure that it is installed in the same directory as \n\
+                    GFCE Ultra.", 102, True, False)
         else:
-          self.print_error("The fceu server software cannot be found on \n\
-          this system.  Ensure that it is installed and in your path.",
-          101, True, False)
-        widgets.get_object("no_network_radio").set_active(True)
+            self.print_error("The fceu server software cannot be found on \n\
+                this system.  Ensure that it is installed and in your path.",
+                101, True, False)
+            widgets.get_object("no_network_radio").set_active(True)
+            options.no_network_radio = True
+            return False
+
+        widgets.get_object("join_frame").set_sensitive(False)
+        widgets.get_object("host_frame").set_sensitive(True)
+        options.join_radio = False
+        options.host_radio = True
+        options.no_network_radio = False
+        """
+        pass
+
+    def no_network_radio_clicked(self, menuitem, data=None):
+        widgets.get_object("join_frame").set_sensitive(False)
+        widgets.get_object("host_frame").set_sensitive(False)
+        options.join_radio = False
+        options.host_radio = False
         options.no_network_radio = True
-        return False
-
-      widgets.get_object("join_frame").set_sensitive(False)
-      widgets.get_object("host_frame").set_sensitive(True)
-      options.join_radio = False
-      options.host_radio = True
-      options.no_network_radio = False
-
-  def no_network_radio_clicked(self, menuitem, data=None):
-    widgets.get_object("join_frame").set_sensitive(False)
-    widgets.get_object("host_frame").set_sensitive(False)
-    options.join_radio = False
-    options.host_radio = False
-    options.no_network_radio = True
   
-  def end(self, menuitem, data=None):
-    set_options()
-    save_options()
-    gtk.main_quit()
-
-
+    def end(self, menuitem, data=None):
+        set_options()
+        save_options()
+        gtk.main_quit()
 
 if __name__ == '__main__':
-  parser = OptionParser(version='%prog '+ version)
-  parser.parse_args()
+    parser = OptionParser(version='%prog '+ version)
+    parser.parse_args()
 
-  app = GfceuxApp()
-  
+    app = GfceuxApp()
