@@ -556,7 +556,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 		}
 	}
 
-
 	if(EmulationPaused&2)
 		EmulationPaused &= ~1;        // clear paused flag temporarily (frame advance)
 	else if((EmulationPaused&1))
@@ -571,7 +570,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 
 	AutoFire();
-	UpdateAutosave();
+	if(!EnableAutosave)	UpdateAutosave();
 
 	#ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
@@ -597,35 +596,19 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	*pXBuf=skip?0:XBuf;
 	*SoundBuf=WaveFinal;
 	*SoundBufSize=ssize;
-
-	//if we were asked to frame advance, then since we have just finished a frame, we should switch to regular pause
-	if (frameAdvanceLagSkip)
-	{  //Holy nested loops Batman!
-		if (!lagFlag) 
-		{
-			if(EmulationPaused&2)
-			{
-				EmulationPaused = 1;   // restore paused flag
-				#ifdef WIN32
-					if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
-						*SoundBufSize=0;       // keep sound muted
-				#endif
-				JustFrameAdvanced = true;
-			}
-		}
-	}
-	else
+	
+	if (EmulationPaused&2 && ( !frameAdvanceLagSkip || !lagFlag) )
+	//Lots of conditions here.  EmulationPaused&2 must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
 	{
-	if(EmulationPaused&2)
-			{
-			EmulationPaused = 1;   // restore paused flag
-			#ifdef WIN32
-				if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
-					*SoundBufSize=0;       // keep sound muted
-				#endif
-				JustFrameAdvanced = true;
-			}
-	} //I apologize to anyone who comes in and tries to figure out this IF branching
+		EmulationPaused = 1;		   // restore paused flag
+		JustFrameAdvanced = true;
+		#ifdef WIN32
+			if(soundoptions&SO_MUTEFA) //mute the frame advance if the user requested it
+				*SoundBufSize=0;       //keep sound muted
+		#endif
+		
+	}
+	
 	currMovieData.TryDumpIncremental();
 	if (lagFlag) 
 	{
@@ -872,9 +855,9 @@ static int AutosaveCounter = 0;
 
 void UpdateAutosave(void)
 {
-	if(!EnableAutosave)
+	/*if(!EnableAutosave)
 		return;
-
+	*/
 	char * f;
 	AutosaveCounter = (AutosaveCounter + 1) % 256;
 	if(AutosaveCounter == 0)
