@@ -2,9 +2,9 @@ You can install gfceux with setup.py:
 
 $ sudo python setup.py install --prefix=/usr/local
 
-TODO: 12/5/2008 - Work out build system with new modules.
-
 You can change the prefix to whatever you like.
+
+FIXME - 12/5/2008 - You can only run gfceux out of its source folder.
 
 Requirements:
 Python (tested with 2.5); (Ubuntu package name:  python) 

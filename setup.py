@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 setup(name="gfceux",
-		version="2.0.0",
+		version="2.0.4",
 		scripts = ['gfceux'],
 		data_files=[('share/gfceux/',['gfceux.xml', 'gfceux_big.png', 'gfceux.png']),
                 ('share/pixmaps/', ['gfceux.png']),
