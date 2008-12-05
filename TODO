@@ -1,5 +1,6 @@
-TODO: 
-* improve button config now that config system is resolved
+TODO:
+* joystick input support
+* hotkey config
 * resolution
 * parse normal options (etc quiet)
 * Browser

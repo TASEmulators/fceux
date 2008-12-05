@@ -597,10 +597,7 @@ class GfceuxApp:
     def config_help_button_clicked(self, menuitem, data=None):
         msgbox = gtk.MessageDialog(parent=None, flags=0,
             type=gtk.MESSAGE_INFO, buttons=gtk.BUTTONS_CLOSE)
-        msgbox.set_markup("Once a gamepad is seleceted, a titlebar will be displayed\
-            indicating a NES button.  Press the button or key you would like to have\
-            associated with the button indicated on the titlebar.  This process\
-            will repeat until all buttons on the gamepad are configured.")
+        msgbox.set_markup("You should be able to figure it out from here.")
         msgbox.run()
         msgbox.hide()
 

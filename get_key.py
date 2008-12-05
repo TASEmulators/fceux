@@ -20,6 +20,10 @@ class KeyGrabber:
                 if event.type == KEYDOWN:
                     pygame.display.quit()
                     return event.key
+                # TODO: Make work with joystick.   Do buttons first.    
+                #if event.type == JOYBUTTONDOWN:
+                #    pygame.display.quit()
+                #    return event.joy, event.button
           
 if __name__ == "__main__":
     kg = KeyGrabber()
