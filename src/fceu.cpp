@@ -545,15 +545,12 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	JustFrameAdvanced = false;
 
-	if(frameAdvanceRequested) {
-		if(frameAdvanceDelay==0) {
+	if (frameAdvanceRequested)
+	{
+		if (frameAdvanceDelay==0 || frameAdvanceDelay>=10)
 			EmulationPaused = 3;
+		if (frameAdvanceDelay==0 || frameAdvanceDelay < 10)
 			frameAdvanceDelay++;
-		} else {
-			if(frameAdvanceDelay>=10) {
-				EmulationPaused = 3;
-			} else frameAdvanceDelay++;
-		}
 	}
 
 	if(EmulationPaused&2)
@@ -572,9 +569,10 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	AutoFire();
 	if(!EnableAutosave)	UpdateAutosave();
 
-	#ifdef _S9XLUA_H
+#ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
-	#endif
+#endif
+
 	FCEU_UpdateInput();
 	lagFlag = 1;
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
@@ -586,12 +584,11 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	UpdateCheatList();
 	UpdateTextHooker();
 	RamChange();
-	//   FCEUI_AviVideoUpdate(XBuf);
+	//FCEUI_AviVideoUpdate(XBuf);
 #endif
 
 	timestampbase += timestamp;
 	timestamp = 0;
-
 
 	*pXBuf=skip?0:XBuf;
 	*SoundBuf=WaveFinal;
@@ -610,6 +607,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 	
 	currMovieData.TryDumpIncremental();
+	
 	if (lagFlag) 
 	{
 		lagCounter++;
