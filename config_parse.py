@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
-#TODO: fix writing
-#TODO
+# config_parse.py 
+#   This module handles the reading and writing of keys to the fceux
+#   config file.
+#
+# Lukas Sabota
+# Licensed under the GPL
 
 import re
 import os
@@ -10,18 +14,24 @@ class FceuxConfigParser:
     def __init__(self, filename):
         self.fn = filename
     
-    def _open(self):
+    def _open(self, mode):
         try:
-            self.f = open(self.fn, "r")
+            self.f = open(self.fn, mode)
             return 1
         except:
-            print "Can't open config."
+            if mode == "r":
+                print "Can't open config for reading."
+            else:
+                print "Couldn't write to the config."
             return 0
 		
         
 	
     def readKey(self, keyname):
-        self._open()
+        """ readKey()
+                reads a key from the configfile and returns the value
+        """
+        self._open("r")
 		# do some lines
         while 1:
             line = self.f.readline()
@@ -33,10 +43,22 @@ class FceuxConfigParser:
 
         # key not found
         self.f.close()
-        return 0
-    
+        return None
+        
+    def addKey(self, keyname, value=""):
+        """ addKey()
+                adds a key with a (optional) value to the config file.
+        """
+        
+        self._open("a")
+        self.f.write(keyname + " = " + str(value))
+        self.f.close()
+        
     def writeKey(self, keyname, value):
-        self._open()
+        """ writeKey()
+                modifies an existing key in the config file.
+        """
+        self._open("r")
         
         buf = ""
 
@@ -46,7 +68,7 @@ class FceuxConfigParser:
             data = self.f.read(keyname.__len__())
             buf += data
             if data == "":
-                return 0
+                return None
             if data == keyname:
                 break
             else:
@@ -72,16 +94,7 @@ class FceuxConfigParser:
         self.f.close()
 
         # write the buffer to the config file
-        self.f = open(self.fn, 'w')
+        self.f._open('w')
         self.f.write(buf)
         self.f.close()
 		
-
-
-
-
-            
-        
-        
-        
-    
