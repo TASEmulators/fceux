@@ -1,5 +1,8 @@
 TODO:
-* update build scripts to refle
+* implement UI for --special (combo box)
+* use combo box for bpp
+* use combo box to select gamepad to configure, simply UI
+* update build scripts to reflect new files
 * joystick input support
 * hotkey config
 * resolution
