@@ -2,12 +2,21 @@ You can install gfceux with setup.py:
 
 $ sudo python setup.py install --prefix=/usr/local
 
+TODO: 12/5/2008 - Work out build system with new modules.
+
 You can change the prefix to whatever you like.
 
 Requirements:
-Python (tested with 2.5); (Ubuntu package name:  python)
-PyGTK, and GTK;  (Ubuntu package name: (python-gtk2 libgtk2.0-0)
-FceuX 2.0 
+Python (tested with 2.5); (Ubuntu package name:  python) 
+  NOTE: gfceux is not yet compatible with python 3.x
+PyGTK and GTK;  (Ubuntu package name: (python-gtk2 libgtk2.0-0)
+Fceux 2.x
 
-NOTE: fceu 1.x is no longer supported in the gfceu 2.x series.  if you still want/need a front-end for gfceu use gfceu .7
+Recommended dependencies
+Pygame (Ubuntu package name: python-pygame) - This will allow graphical conifguraion of input
+
+NOTE: fceu 1.x is no longer supported in the gfceu 2.x series.  
+      If you still want/need a front-end for gfceu use gfceu 0.x
+      
+
 

@@ -1,3 +1,5 @@
+* Cleaned up glade file to silence warnings
+* Pygame is no longer required for gfceux to run, just for the input GUI
 * Turbo A and Turbo B support for gamepad GUI
 * Added initial support for a graphical UI for configuring gamepads
 * Moved gfceu options data file into .fceux instead of .fceultra

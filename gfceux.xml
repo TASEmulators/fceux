@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Fri Dec  5 02:36:02 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Dec  5 03:16:36 2008 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">5</property>
     <property name="lower">1</property>
     <property name="page_increment">1</property>
     <property name="step_increment">0.5</property>
-    <property name="page_size">10</property>
+    <property name="page_size">0</property>
     <property name="value">2</property>
   </object>
   <object class="GtkAdjustment" id="adjustment2">
@@ -14,7 +14,7 @@
     <property name="lower">1</property>
     <property name="page_increment">1</property>
     <property name="step_increment">0.5</property>
-    <property name="page_size">10</property>
+    <property name="page_size">0</property>
     <property name="value">2</property>
   </object>
   <object class="GtkAdjustment" id="adjustment3">
@@ -22,7 +22,7 @@
     <property name="lower">1</property>
     <property name="page_increment">10</property>
     <property name="step_increment">1</property>
-    <property name="page_size">10</property>
+    <property name="page_size">0</property>
     <property name="value">4046</property>
   </object>
   <object class="GtkAdjustment" id="adjustment4">
@@ -30,7 +30,7 @@
     <property name="lower">1</property>
     <property name="page_increment">10</property>
     <property name="step_increment">1</property>
-    <property name="page_size">10</property>
+    <property name="page_size">0</property>
     <property name="value">4046</property>
   </object>
   <object class="GtkWindow" id="gamepad_config_window">
@@ -673,6 +673,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="adjustment">adjustment1</property>
+                                    <property name="climb_rate">0.099999999776482579</property>
                                     <property name="digits">1</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -704,6 +705,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="adjustment">adjustment2</property>
+                                    <property name="climb_rate">0.10000000000000001</property>
                                     <property name="digits">1</property>
                                     <property name="numeric">True</property>
                                     <property name="update_policy">GTK_UPDATE_IF_VALID</property>
