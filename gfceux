@@ -564,14 +564,17 @@ class GfceuxApp:
     
 
     def button_clicked(self, widget, data=None):
-        d = {'right_button' : "SDL.Input.GamePad." + self.gamepad_config + "Right",
-         'left_button' : "SDL.Input.GamePad." + self.gamepad_config + "Left",
-         'up_button' : "SDL.Input.GamePad." + self.gamepad_config + "Up",
-         'down_button' : "SDL.Input.GamePad." + self.gamepad_config + "Down",
-         'select_button' : "SDL.Input.GamePad." + self.gamepad_config + "Select",
-         'start_button' : "SDL.Input.GamePad." + self.gamepad_config + "Start",
-         'a_button' : "SDL.Input.GamePad." + self.gamepad_config + "A",
-         'b_button' : "SDL.Input.GamePad." + self.gamepad_config + "B"}
+        prefix = "SDL.Input.GamePad" + self.gamepad_config 
+        d = {'right_button' : prefix + "Right",
+         'left_button' : prefix + "Left",
+         'up_button' : prefix + "Up",
+         'down_button' : prefix + "Down",
+         'select_button' : prefix + "Select",
+         'start_button' : prefix + "Start",
+         'a_button' : prefix + "A",
+         'b_button' : prefix + "B",
+         'turbo_a_button' : prefix + "TurboA",
+         'turbo_b_button' : prefix + "TurboB"}
         kg = KeyGrabber()
         key = kg.get_key()
         cp = FceuxConfigParser(configfile)

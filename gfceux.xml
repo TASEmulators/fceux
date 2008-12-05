@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.5 on Tue Dec  2 15:32:04 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Dec  5 02:36:02 2008 -->
 <interface>
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">5</property>
@@ -207,24 +207,58 @@
                 <property name="visible">True</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <object class="GtkHBox" id="hbox5">
+                  <object class="GtkVBox" id="vbox1">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkButton" id="b_button">
+                      <object class="GtkHBox" id="hbox5">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">B</property>
-                        <signal handler="button_clicked" name="clicked"/>
+                        <child>
+                          <object class="GtkButton" id="b_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">B</property>
+                            <signal handler="button_clicked" name="clicked"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="a_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">A</property>
+                            <signal handler="button_clicked" name="clicked"/>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkButton" id="a_button">
+                      <object class="GtkHBox" id="hbox14">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">A</property>
-                        <signal handler="button_clicked" name="clicked"/>
+                        <child>
+                          <object class="GtkButton" id="turbo_b_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">Turbo B</property>
+                            <signal handler="button_clicked" name="clicked"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="turbo_a_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">Turbo A</property>
+                            <signal handler="button_clicked" name="clicked"/>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="position">1</property>

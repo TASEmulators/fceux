@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Dec  2 15:32:04 2008 -->
+<!--Generated with glade3 3.4.5 on Fri Dec  5 02:36:02 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="gamepad_config_window">
     <signal name="destroy" handler="gamepad_window_close"/>
@@ -188,26 +188,62 @@
                 <property name="visible">True</property>
                 <property name="left_padding">12</property>
                 <child>
-                  <widget class="GtkHBox" id="hbox5">
+                  <widget class="GtkVBox" id="vbox1">
                     <property name="visible">True</property>
                     <child>
-                      <widget class="GtkButton" id="b_button">
+                      <widget class="GtkHBox" id="hbox5">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">B</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="button_clicked"/>
+                        <child>
+                          <widget class="GtkButton" id="b_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">B</property>
+                            <property name="response_id">0</property>
+                            <signal name="clicked" handler="button_clicked"/>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="a_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">A</property>
+                            <property name="response_id">0</property>
+                            <signal name="clicked" handler="button_clicked"/>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="a_button">
+                      <widget class="GtkHBox" id="hbox14">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">A</property>
-                        <property name="response_id">0</property>
-                        <signal name="clicked" handler="button_clicked"/>
+                        <child>
+                          <widget class="GtkButton" id="turbo_b_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">Turbo B</property>
+                            <property name="response_id">0</property>
+                            <signal name="clicked" handler="button_clicked"/>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkButton" id="turbo_a_button">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="label" translatable="yes">Turbo A</property>
+                            <property name="response_id">0</property>
+                            <signal name="clicked" handler="button_clicked"/>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </widget>
                       <packing>
                         <property name="position">1</property>

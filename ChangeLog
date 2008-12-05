@@ -1,3 +1,4 @@
+* Turbo A and Turbo B support for gamepad GUI
 * Added initial support for a graphical UI for configuring gamepads
 * Moved gfceu options data file into .fceux instead of .fceultra
 ================= version 2.0.3 =================================
