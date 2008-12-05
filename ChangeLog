@@ -1,3 +1,5 @@
+================= version 2.0.4 ( yet to be released) ============
+* Udated about box UI
 * Updated UI, explains joystick support isn't complete yet in the GUI
 * Cleaned up glade file to silence warnings
 * Pygame is no longer required for gfceux to run, just for the input GUI
