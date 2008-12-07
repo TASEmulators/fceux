@@ -68,6 +68,7 @@ class FceuxConfigParser:
             data = self.f.read(keyname.__len__())
             buf += data
             if data == "":
+                print "key " + keyname + " not found"
                 return None
             if data == keyname:
                 break
@@ -94,7 +95,7 @@ class FceuxConfigParser:
         self.f.close()
 
         # write the buffer to the config file
-        self.f._open('w')
+        self._open('w')
         self.f.write(buf)
         self.f.close()
 		

@@ -14,6 +14,10 @@ class KeyGrabber:
         pygame.joystick.init()
         if pygame.joystick.get_count() > 0:
             print "Joystick found!"
+            for x in range(0, pygame.joystick.get_count()):
+                joy = pygame.joystick.Joystick(x)
+                joy.init()
+                print "joy " + str(x) + " initialized."
         screen = pygame.display.set_mode((width, height))
         pygame.display.set_caption("Press any key. . .")
         
@@ -23,14 +27,17 @@ class KeyGrabber:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
                     pygame.display.quit()
-                    return event.key
+                    return ("Keyboard", event.key)
                 # TODO: Make work with joystick.   Do buttons first.    
                 if event.type == JOYBUTTONDOWN:
                     pygame.display.quit()
                     # TODO: Make sure we're returning the data we need
                     #   for config file here.  I'm not sure if this is 
                     #   the correct data.
-                    return event.joy, event.button
+                    return ("Joystick",  event.button, event.joy)
+                #if event.type == JOYAXISMOTION:
+                #    pygame.display.quit()
+                #    return event.joy, event.axis, event.value
           
 if __name__ == "__main__":
     kg = KeyGrabber()

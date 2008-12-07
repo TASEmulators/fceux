@@ -557,15 +557,15 @@ class GfceuxApp:
     def gamepad_clicked(self, widget, data=None):
         widgets.get_object("gamepad_config_window").show_all()
 
-        d = {'gp1_button' : "1",
-            'gp2_button' : "2",
-            'gp3_button' : "3",
-            'gp4_button' : "4"}
+        d = {'gp1_button' : "0",
+            'gp2_button' : "1",
+            'gp3_button' : "2",
+            'gp4_button' : "3"}
         self.gamepad_config_no = d[widget.name]
     
 
     def button_clicked(self, widget, data=None):
-        prefix = "SDL.Input.GamePad" + self.gamepad_config_no
+        prefix = "SDL.Input.GamePad." + self.gamepad_config_no
         d = {'right_button' : prefix + "Right",
          'left_button' : prefix + "Left",
          'up_button' : prefix + "Up",
@@ -582,9 +582,16 @@ class GfceuxApp:
             self.gamepad_clicked_old(widget)
         else:
             kg = get_key.KeyGrabber()
-            key = kg.get_key()
+            key_tuple = kg.get_key()
             cp = FceuxConfigParser(configfile)
-            cp.writeKey(d[widget.name], key)
+            cp.writeKey(prefix + "DeviceType", key_tuple[0])
+            if key_tuple[0] == "Keyboard":
+                print key_tuple
+                cp.writeKey(d[widget.name], key_tuple[1])
+            if key_tuple[0] == "Joystick":
+                print key_tuple
+                cp.writeKey(prefix + "DeviceNum", key_tuple[2])
+                cp.writeKey(d[widget.name], key_tuple[1])
   
     def gamepad_clicked_old(self, widget, data=None):
         command = '--inputcfg gamepad' + self.gamepad_config_no

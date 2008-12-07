@@ -1,4 +1,5 @@
 ================= version 2.0.4 ( yet to be released) ============
+* Initial joystick config support: supports buttons, but hot hats and axes
 * Documented and cleaned fceux config parser
 * Udated about box UI
 * Updated UI, explains joystick support isn't complete yet in the GUI
