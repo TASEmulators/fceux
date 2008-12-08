@@ -83,7 +83,7 @@ extern int EnableAutosave;
 extern bool frameAdvanceLagSkip;
 extern bool movieSubtitles;
 extern bool turbo;
-
+extern int luaRunning;
 // Extern functions
 
 char *md5_asciistr(uint8 digest[16]);
@@ -1454,6 +1454,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,ID_FILE_STOPLUASCRIPT,MF_BYCOMMAND | (luaRunning?MF_ENABLED:MF_GRAYED));
 	default:
 proco:
 		return DefWindowProc(hWnd,msg,wParam,lParam);

@@ -78,7 +78,7 @@ static lua_State *L;
 static char *luaScriptName = NULL;
 
 // Are we running any code right now?
-static int luaRunning = FALSE;
+int luaRunning = FALSE;
 
 // True at the frame boundary, false otherwise.
 static int frameBoundary = FALSE;
