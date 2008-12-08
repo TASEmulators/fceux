@@ -923,7 +923,11 @@ void RamChange()
 	if (!RamChangeInitialize) return;
 	for (int x = 0; x < MAX_RAMMONITOR; x++)
 	{
-		MWRec& mwrec = mwrecs[x];
+		int whichRec;
+		if (x<2) whichRec = x;
+		else whichRec = x+10;	//If ramchange monitor 3 or 4, must use 1st two of 2nd column (12 & 13)
+		MWRec& mwrec = mwrecs[whichRec];
+		
 		if(mwrec.valid && GameInfo)
 		{
 			int whichADDR = 0;

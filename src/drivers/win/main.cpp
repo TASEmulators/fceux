@@ -97,9 +97,8 @@
 #endif
 
 // External functions
-extern std::string cfgFile;
-extern bool turbo;
-int counter = 0;
+extern std::string cfgFile;		//Contains the filename of the config file used.
+extern bool turbo;				//Is game in turbo mode?
 void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
@@ -128,7 +127,8 @@ int pal_emulation = 0;
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
 int PauseAfterLoad;
-unsigned int skippy = 0; //Frame skip
+unsigned int skippy = 0;  //Frame skip
+int frameSkipCounter = 0; //Counter for managing frame skip
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, macro, input presets, lua scripts, base
 char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -681,14 +681,14 @@ doloopy:
 			
 			if (turbo) 
 			{
-				if (!counter) 
+				if (!frameSkipCounter) 
 				{
-					counter = 15;
+					frameSkipCounter = 15;
 					skippy = 0;
 				}
 				else 
 				{
-					counter--;
+					frameSkipCounter--;
 					skippy = 1;
 				}
 				
