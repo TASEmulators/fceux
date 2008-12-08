@@ -1499,7 +1499,7 @@ void FCEUD_TurboToggle(void)
 	}
 
 	turbo = !turbo; 
-	if (muteTurbo)
+	if (muteTurbo & !soundo)
 	{
 		if (turbo) TrashSound();
 		if (!turbo) InitSound();

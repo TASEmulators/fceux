@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+08-dec-2008 - adelikat - win32 - fix bug where no sound + mute turbo caused chirps when toggling
+08-dec-2008 - adelikat - win32 - sound dialog - disabling sound disabled sound options
 08-dec-2008 - adelikat - win32 - opening a rom runs closerom first, fixes bug where new sav file was not getting loaded
 07-dec-2008 - adelikat - win32 - turbo now employs frame skip
 30-nov-2008 - punkrockguy - commit 1000

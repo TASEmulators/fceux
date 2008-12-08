@@ -394,7 +394,6 @@ static void UpdateSD(HWND hwndDlg)
 	CheckDlgButton(hwndDlg,CHECK_SOUND_GLOBAL_FOCUS,(soundoptions&SO_GFOCUS)?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_MUTEFA,(soundoptions&SO_MUTEFA)?BST_CHECKED:BST_UNCHECKED);
 	CheckDlgButton(hwndDlg,CHECK_SOUND_MUTETURBO,(muteTurbo)?BST_CHECKED:BST_UNCHECKED);
-	
 	// The option formerly flagged by SO_OLDUP can no longer be enabled.
 	// CheckDlgButton(hwndDlg,131,(soundoptions&SO_OLDUP)?BST_CHECKED:BST_UNCHECKED);
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_SETCURSEL,soundquality,(LPARAM)(LPSTR)0);
@@ -404,6 +403,31 @@ static void UpdateSD(HWND hwndDlg)
 	else if(soundrate==48000) t=3;
 	else if(soundrate==96000) t=4;
 	SendDlgItemMessage(hwndDlg,COMBO_SOUND_RATE,CB_SETCURSEL,t,(LPARAM)(LPSTR)0);
+
+	if (!soundo) 
+	{
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_8BIT),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,124),FALSE);
+		
+		
+	}
+	else 
+	{
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTETURBO),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_MUTEFA),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CHECK_SOUND_8BIT),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,124),TRUE);
+	}
 }
 
 BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
