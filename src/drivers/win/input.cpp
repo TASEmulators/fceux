@@ -1480,7 +1480,6 @@ void FCEUD_TurboOn    (void)
 	{ 
 		tempwinsync = winsync;	//Store winsync setting
 		winsync = 0;			//turn off winsync for turbo (so that turbo can function even with VBlank sync methods
-
 		turbo = true; 
 		if (muteTurbo) TrashSound();
 	}

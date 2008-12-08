@@ -98,6 +98,8 @@
 
 // External functions
 extern std::string cfgFile;
+extern bool turbo;
+int counter = 0;
 void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);
@@ -126,7 +128,7 @@ int pal_emulation = 0;
 int ntsccol = 0, ntsctint, ntschue;
 std::string BaseDirectory;
 int PauseAfterLoad;
-
+unsigned int skippy = 0; //Frame skip
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, macro, input presets, lua scripts, base
 char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -676,8 +678,24 @@ doloopy:
 	        uint8 *gfx=0; ///contains framebuffer
 			int32 *sound=0; ///contains sound data buffer
 			int32 ssize=0; ///contains sound samples count
+			
+			if (turbo) 
+			{
+				if (!counter) 
+				{
+					counter = 15;
+					skippy = 0;
+				}
+				else 
+				{
+					counter--;
+					skippy = 1;
+				}
+				
+			}
+			else skippy = 0;
 
-			FCEUI_Emulate(&gfx, &sound, &ssize, 0); //emulate a single frame
+			FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
 
 			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
@@ -716,7 +734,6 @@ void _updateWindow()
 	UpdateLogWindow();
 	UpdateMemWatch();
 	NTViewDoBlit(0);
-	//UpdateCheatList(); Moved to FCEUI_Emulate
 	UpdateTasEdit();
 }
 
