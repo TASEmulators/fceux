@@ -621,6 +621,7 @@ void CloseGame()
 
 void ALoad(char *nameo, char* innerFilename)
 {
+	if (GameInfo) FCEUI_CloseGame();
 	if(FCEUI_LoadGameVirtual(nameo, 1))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
