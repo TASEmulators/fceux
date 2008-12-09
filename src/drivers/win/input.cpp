@@ -411,6 +411,7 @@ void InitInputPorts(bool fourscore)
 			FCEUI_SetInput(i,(ESI)InputType[i],InputDPtr,attrib);
 		}
 	}
+	FCEUI_SetInputFourscore(fourscore);
 
 	attrib=0;
 	InputDPtr=0;
