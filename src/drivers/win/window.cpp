@@ -109,7 +109,7 @@ static LONG WindowXC=1<<30,WindowYC;
 int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
-
+bool CommentSubtitle = false;		//Toggle for comment/subtitle dialog box
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
@@ -957,11 +957,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			
 			//Emulation submenu
 			case ID_NES_PAUSE:
-				EmulationPaused ^= 1;
+				FCEUI_ToggleEmulationPause();
 				UpdateCheckedMenuItems();
-				break;
-			case ID_NES_FRAMEADVANCE:
-				FCEUI_FrameAdvance();
 				break;
 			case ID_NES_TURBO:
 				FCEUD_TurboToggle();
@@ -1999,24 +1996,26 @@ LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, 
 	
 
 	static int *success;
-	//string message;
-	char message[128];
-	stringstream frame;
-	frame << currFrameCounter;
-	string Subtitle;
+	char message[128];			//Will contain the contents of the edit box
+	stringstream frame;			//Converts current frame number to stringstream
+	frame << currFrameCounter;	
+	string Subtitle;			//Subtitle string
+	wstring Comment;			//Comment string
+
+	
 	switch (uMsg)
 	{
 	case WM_INITDIALOG:
-		{
-			if (lParam)
-				SetDlgItemText(hDlg,INSERTCS_STATIC, "Insert Comment:");
-			else
-				SetDlgItemText(hDlg, INSERTCS_STATIC, "Insert Subtitle:");
-		// Nothing very useful to do
+	{
+		if (CommentSubtitle)
+			SetDlgItemText(hDlg,INSERTCS_STATIC, "Insert Comment:");
+		else
+			SetDlgItemText(hDlg, INSERTCS_STATIC, "Insert Subtitle:");
 		success = (int*)lParam;
 		return true;
-		}
-		break;
+	}
+	break;
+
 	case WM_CLOSE:
 	case WM_DESTROY:
 	case WM_QUIT:
@@ -2030,13 +2029,22 @@ LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, 
 		{
 			case INSERTCS_IDOK:
 			{
-				GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);
-				Subtitle = frame.str() + " " + message;
-				FCEU_printf("%s",Subtitle.c_str());
-				currMovieData.subtitles.push_back(Subtitle);
+				if (CommentSubtitle) //Comment
+				{
+					GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);	//Place the text in the edit box into message[128]
+					Comment = mbstowcs(message);
+					currMovieData.comments.push_back(Comment);
+				}
+				else				//Subtitle
+				{
+				GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);	//Place the text in the edit box into message[128]
+				Subtitle = frame.str() + " " + message;					//Add frame number to beginning of message
+				FCEU_printf("%s",Subtitle.c_str());						//Debug, output string
+				//currMovieData.subtitles.push_back(Subtitle);
 				EndDialog(hDlg, 0);
 				return true;
 				break;
+				}
 			}
 			
 			case INSERTCS_IDCANCEL:
@@ -2052,14 +2060,13 @@ LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, 
 }
 void InsertSubtitle(HWND main)
 {
+	//TODO: unless more commands are added these two functions can be consolidated to 1 with a bool argument
+	CommentSubtitle = false;
 	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
-	//string Subtitle = "1000 Poop";
-	//currMovieData.subtitles.push_back(Subtitle);				
 }
 
 void InsertComment(HWND main)
 {
-	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 1);
-	//wstring adelikat = mbstowcs("adelikat");
-	//currMovieData.comments.push_back(L"author " + adelikat);
+	CommentSubtitle = true;
+	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
 }

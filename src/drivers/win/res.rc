@@ -84,7 +84,6 @@ BEGIN
         POPUP "Emulation"
         BEGIN
             MENUITEM "Pause",                       ID_NES_PAUSE
-            MENUITEM "Frame Advance",               ID_NES_FRAMEADVANCE
             MENUITEM "Turbo",                       ID_NES_TURBO
         END
         POPUP "Emulation Speed"
@@ -1622,7 +1621,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",INSERTCS_IDOK,7,55,50,14
     PUSHBUTTON      "Cancel",INSERTCS_IDCANCEL,89,55,50,14
     EDITTEXT        INSERTCS_MESSAGE,7,30,133,14,ES_AUTOHSCROLL
-    LTEXT           "Insert Message:",INSERTCS_STATIC,39,14,53,8
+    LTEXT           "Insert Message",INSERTCS_STATIC,34,14,87,8
 END
 
 
