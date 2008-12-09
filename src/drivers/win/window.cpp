@@ -880,6 +880,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_OPEN_FILE:
 				LoadNewGamey(hWnd, 0);
 				break;
+			case FCEU_CONTEXT_CLOSEROM:
 			case MENU_CLOSE_FILE:
 				CloseGame();
 				break;
@@ -899,9 +900,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				// Replay movie menu was selected
 				FCEUD_MovieReplayFrom();
 				break;
+			case FCEU_CONTEXT_STOPMOVIE:
 			case MENU_STOP_MOVIE:
 				FCEUI_StopMovie();
 				break;
+			case FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING:
 			case ID_FILE_PLAYMOVIEFROMBEGINNING:
 				FCEUI_MoviePlayFromBeginning();
 				break;

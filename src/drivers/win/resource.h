@@ -600,6 +600,12 @@
 #define ID_FILE_RECORDAVI               40290
 #define ID_FILE_LUA                     40291
 #define ID_NES_EMULATION                40292
+#define ID_GAME_PLAYMOVIEFROMBEGINNING  40293
+#define ID_GAME_STOPMOVIE               40294
+#define FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING 40295
+#define FCEU_CONTEXT_STOPMOVIE          40296
+#define ID_GAME_CLOSEROM                40297
+#define FCEU_CONTEXT_CLOSEROM           40298
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -609,7 +615,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40293
+#define _APS_NEXT_COMMAND_VALUE         40299
 #define _APS_NEXT_CONTROL_VALUE         1191
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

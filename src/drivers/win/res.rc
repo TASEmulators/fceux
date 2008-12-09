@@ -326,6 +326,9 @@ FCEUCONTEXTMENUS MENU
 BEGIN
     POPUP "Game+Movie"
     BEGIN
+        MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
+        MENUITEM "Stop Movie",                  FCEU_CONTEXT_STOPMOVIE
+        MENUITEM SEPARATOR
         MENUITEM "Insert Subtitle",             FCEU_CONTEXT_INSERTSUBTITLE
         MENUITEM "Insert Comment",              FCEU_CONTEXT_INSERTCOMMENT
         MENUITEM SEPARATOR
@@ -334,6 +337,8 @@ BEGIN
     POPUP "Game+NoMovie"
     BEGIN
         MENUITEM "&Replay Movie",               FCEUX_CONTEXT_REPLAYMOVIE
+        MENUITEM SEPARATOR
+        MENUITEM "Close ROM",                   FCEU_CONTEXT_CLOSEROM
     END
     POPUP "NoGame"
     BEGIN
