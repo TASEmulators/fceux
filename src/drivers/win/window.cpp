@@ -875,428 +875,154 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			switch(LOWORD(wParam))
 			{
-				//-------
-				//mbg merge 7/18/06 added XD tools
-			case MENU_DEBUGGER:
-				DoDebug(0);
+			//File Menu-------------------------------------------------------------
+			case FCEU_CONTEXT_OPENROM:
+			case MENU_OPEN_FILE:
+				LoadNewGamey(hWnd, 0);
+				break;
+			case MENU_CLOSE_FILE:
+				CloseGame();
+				break;
+			case MENU_SAVE_STATE:	//Save state as
+				FCEUD_SaveStateAs();
+				break;
+			case MENU_LOAD_STATE:	//Load state as
+				FCEUD_LoadStateFrom();
 				break;
 
-			case MENU_PPUVIEWER:
-				DoPPUView();
+			//Movie submenu
+			case MENU_RECORD_MOVIE:
+				FCEUD_MovieRecordTo();
+				break;
+			case FCEUX_CONTEXT_REPLAYMOVIE:
+			case MENU_REPLAY_MOVIE:
+				// Replay movie menu was selected
+				FCEUD_MovieReplayFrom();
+				break;
+			case MENU_STOP_MOVIE:
+				FCEUI_StopMovie();
+				break;
+			case ID_FILE_PLAYMOVIEFROMBEGINNING:
+				FCEUI_MoviePlayFromBeginning();
 				break;
 
-			case MENU_RAMFILTER:
-				DoByteMonitor(); 
+			//Record Avi/Wav submenu
+			case MENU_RECORD_AVI:
+				FCEUD_AviRecordTo();
+				break;
+			case MENU_STOP_AVI:
+				FCEUD_AviStop();
+				break;
+			case MENU_RECORD_WAV: 
+				loggingSound = CreateSoundSave();
+				break;
+			case MENU_STOP_WAV: 
+				CloseWave();
+				loggingSound = false;
 				break;
 
-			case MENU_NAMETABLEVIEWER:
-				DoNTView();
+			case ID_FILE_SCREENSHOT:
+				FCEUI_SaveSnapshot();
 				break;
 
-			case MENU_HEXEDITOR:
-				DoMemView();
+			//Lua submenu
+			case ID_FILE_RUNLUASCRIPT:
+				FCEUD_LuaRunFrom(); 
+				break;
+			case ID_FILE_STOPLUASCRIPT:
+				FCEU_LuaStop();
 				break;
 
-			case MENU_TRACELOGGER:
-				DoTracer();
+			case MENU_EXIT:
+				DoFCEUExit();
 				break;
 
-			case MENU_GAMEGENIEDECODER:
-				DoGGConv();
+			//NES Menu--------------------------------------------------------------
+			case MENU_RESET:
+				FCEUI_ResetNES();
 				break;
-
-			case MENU_CDLOGGER:
-				DoCDLogger();
+			case MENU_POWER:
+				FCEUI_PowerNES();
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_1:
-				SetAutoFirePattern(1,1);
-				CheckedAutoFirePattern = wParam;
+			case MENU_EJECT_DISK:
+				FCEUI_FDSInsert();
+				break;
+			case MENU_SWITCH_DISK:
+				FCEUI_FDSSelect();
+				break;
+			case MENU_INSERT_COIN:
+				FCEUI_VSUniCoin();
+				break;
+			
+			//Emulation submenu
+			case ID_NES_PAUSE:
+				EmulationPaused ^= 1;
 				UpdateCheckedMenuItems();
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_2:
-				SetAutoFirePattern(1,2);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			case ID_NES_FRAMEADVANCE:
+				FCEUI_FrameAdvance();
+				break;
+			case ID_NES_TURBO:
+				FCEUD_TurboToggle();
 				break;
 
-			case MENU_AUTOFIRE_PATTERN_3:
-				SetAutoFirePattern(1,3);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			//Emulation speed submenu
+			case ID_NES_SPEEDUP:
+				FCEUD_SetEmulationSpeed(3);
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_4:
-				SetAutoFirePattern(1,4);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			case ID_NES_SLOWDOWN:
+				FCEUD_SetEmulationSpeed(1);
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_5:
-				SetAutoFirePattern(1,5);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			case ID_NES_SLOWESTSPEED:
+				FCEUD_SetEmulationSpeed(0);
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_6:
-				SetAutoFirePattern(2,1);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			case ID_NES_NORMALSPEED:
+				FCEUD_SetEmulationSpeed(2);
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_7:
-				SetAutoFirePattern(2,2);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
+			case ID_NES_FASTESTSPEED:
+				FCEUD_SetEmulationSpeed(4);
 				break;
-
-			case MENU_AUTOFIRE_PATTERN_8:
-				SetAutoFirePattern(2,3);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_9:
-				SetAutoFirePattern(2,4);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_10:
-				SetAutoFirePattern(3,1);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_11:
-				SetAutoFirePattern(3,2);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_12:
-				SetAutoFirePattern(3,3);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_13:
-				SetAutoFirePattern(4,1);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_14:
-				SetAutoFirePattern(4,2);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_PATTERN_15:
-				SetAutoFirePattern(5,1);
-				CheckedAutoFirePattern = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_AUTOFIRE_OFFSET_1:
-			case MENU_AUTOFIRE_OFFSET_2:
-			case MENU_AUTOFIRE_OFFSET_3:
-			case MENU_AUTOFIRE_OFFSET_4:
-			case MENU_AUTOFIRE_OFFSET_5:
-			case MENU_AUTOFIRE_OFFSET_6:
-				SetAutoFireOffset(wParam - MENU_AUTOFIRE_OFFSET_1);
-				CheckedAutoFireOffset = wParam;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_ALTERNATE_AB:
-				SetAutoFireDesynch(GetAutoFireDesynch()^1);
-				UpdateCheckedMenuItems();
-				break;
-
-			case ACCEL_CTRL_E:
-			case MENU_TASEDIT:
-				DoTasEdit();
-				break;
-
+			
+			//Config Menu-----------------------------------------------------------
 			case MENU_HIDE_MENU:
-				// Hide menu menu was selected
 				ToggleHideMenu();
 				break;
-
 			case MENU_PAUSEAFTERPLAYBACK:
 				pauseAfterPlayback = pauseAfterPlayback?0:1;
 				UpdateCheckedMenuItems();
 				break;
-
 			case MENU_RUN_IN_BACKGROUND:
-				// Run in Background menu was selected
-				
 				eoptions ^= EO_BGRUN;
-
 				if((eoptions & EO_BGRUN) == 0)
 				{
 					EnableBackgroundInput = 0;
 					KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
 					JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
 				}
-
 				UpdateCheckedMenuItems();
 				break;
-
 			case MENU_BACKGROUND_INPUT:
-				// Enable background input menu was selected
-				
 				EnableBackgroundInput ^= 1;
 				eoptions |= EO_BGRUN * EnableBackgroundInput;
 				KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
 				JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
 				UpdateCheckedMenuItems();
 				break;
-
 			case MENU_ENABLE_AUTOSAVE:
 				EnableAutosave ^= 1;
 				UpdateCheckedMenuItems();
 				break;
-
-			case ID_DISPLAY_FRAMECOUNTER:
-				FCEUI_MovieToggleFrameDisplay();
+			case MENU_DISPLAY_FA_LAGSKIP:
+				frameAdvanceLagSkip ^= 1;
 				UpdateCheckedMenuItems();
-				break;
-
-			case ID_DISPLAY_MOVIESUBTITLES:
-				movieSubtitles ^= 1;
-				if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
-				else FCEU_DispMessage("Movie subtitles off");
-				UpdateCheckedMenuItems();
-				break;
-
-			case ID_DISPLAY_MOVIESUBTITLES_AVI:
-				subtitlesOnAVI ^= 1;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_SHOW_STATUS_ICON:
-				// Show status icon menu was selected
-				status_icon = !status_icon;
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_GAME_GENIE:
-				// Game Genie menu was selected
-				genie ^= 1;
-				FCEUI_SetGameGenie(genie!=0);
-				UpdateCheckedMenuItems();
-				break;
-
-			case MENU_PAL:
-				//	PAL Emulation menu was selected
-				pal_emulation ^= 1;
-				FCEUI_SetVidSystem(pal_emulation);
-				RefreshThrottleFPS();
-				UpdateCheckedMenuItems();
-				PushCurrentVideoSettings();
-				break;
-			
-			case MENU_DISPLAY_BG:
-			case MENU_DISPLAY_OBJ:
-				{
-					bool spr, bg;
-					FCEUI_GetRenderPlanes(spr,bg);
-					if(LOWORD(wParam)==MENU_DISPLAY_BG)
-						bg = !bg;
-					else
-						spr = !spr;
-					FCEUI_SetRenderPlanes(spr,bg);
-				}
-				break;
-
-
-			case MENU_CHEATS:
-				ConfigCheats(hWnd);
-				break;
-
-			case MENU_DIRECTORIES:
-				// Directories menu was selected
-				ConfigDirectories();
-				break;
-
-			case MENU_GUI_OPTIONS:
-				// GUI Options menu was selected.
-				ConfigGUI();
-				break;
-
-			case MENU_INPUT:
-				// Input menu was selected
-				ConfigInput(hWnd);
-				break;
-
-			case MENU_TIMING:
-				// Timing menu was selected
-				ConfigTiming();
-				break;
-
-			case MENU_NETWORK:
-				// Network Play menu was selected
-				ShowNetplayConsole();
-				break;
-
-			case MENU_PALETTE:
-				// Palette menu was selected
-				ConfigPalette();
-				break;
-
-			case MENU_SOUND:
-				// Sound menu was selected
-				ConfigSound();
-				break;
-
-			case MENU_VIDEO:
-				// Video menu was selected
-				ConfigVideo();
-				break;
-
-			case MENU_HOTKEYS:
-				// Hotkeys menu was selected
-				MapInput();
-				break;
-			
-			case MENU_RESET:
-				// The reset menu was selected
-				FCEUI_ResetNES();
-				break;
-
-			case MENU_POWER:
-				// The power menu was selected
-				FCEUI_PowerNES();
-				break;
-
-			case MENU_SWITCH_DISK:
-				// Switch disk menu was selected
-				FCEUI_FDSSelect();
-				break;
-
-			case MENU_EJECT_DISK:
-				// Eject disk menu was selected
-				FCEUI_FDSInsert();
-				break;
-
-			case MENU_INSERT_COIN:
-				// Insert coin menu was selected
-				FCEUI_VSUniCoin();
-				break;
-
-			case MENU_MEMORY_WATCH:
-				CreateMemWatch();
-				break;
-			
-			case FCEU_CONTEXT_OPENROM:
-			case MENU_OPEN_FILE:
-				// User selected the Open File menu => Show the file selection dialog
-				LoadNewGamey(hWnd, 0);
-				break;
-			
-			case MENU_CLOSE_FILE:
-				// User selected the Close File menu => Close the game if necessary
-				CloseGame();
-				break;
-
-			case MENU_CONVERT_MOVIE:
-				ConvertFCM(hWnd);
-				break;
-
-			case MENU_SAVE_STATE:
-				// Save state as menu was selected
-				FCEUD_SaveStateAs();
-				break;
-
-			case MENU_LOAD_STATE:
-				// Load state from menu was selected
-				FCEUD_LoadStateFrom();
-				break;
-
-				//mbg merge 7/18/06 changed ID from 120
-				//jeb rewrite 6/3/08 (for UI consistency)
-			case MENU_RECORD_WAV: 
-				loggingSound = CreateSoundSave();
-				break;
-
-			case MENU_STOP_WAV: 
-				CloseWave();
-				loggingSound = false;
-				break;
-
-			case MENU_EXIT:
-				// Exit menu was selected
-				DoFCEUExit();
-				break;
-
-			case MENU_RECORD_MOVIE:
-				// Record movie menu was selected
-				FCEUD_MovieRecordTo();
-				break;
-
-			case FCEUX_CONTEXT_REPLAYMOVIE:
-			case MENU_REPLAY_MOVIE:
-				// Replay movie menu was selected
-				FCEUD_MovieReplayFrom();
-				break;
-
-			case MENU_STOP_MOVIE:
-				// Stop movie menu was selected
-				FCEUI_StopMovie();
-				break;
-
-			case ID_FILE_PLAYMOVIEFROMBEGINNING:
-				FCEUI_MoviePlayFromBeginning();
-				break;
-
-			case MENU_RECORD_AVI:
-				// Record AVI menu was selected
-				FCEUD_AviRecordTo();
-				break;
-
-			case MENU_STOP_AVI:
-				// Stop AVI menu was selected
-				FCEUD_AviStop();
-				break;
-
-			case ID_TOOLS_TEXTHOOKER:
-				DoTextHooker();
-				break;
-
-			case MENU_ABOUT:
-				// About menu was selected
-				ShowAboutBox();
-				break;
-
-			case MENU_HELP:
-				// Help Menu is selected
-				OpenHelpWindow();
-				break;
-
-			case MENU_MSGLOG:
-				// Message Log menu was selected
-				MakeLogWindow();
-				break;
-
-			case ID_FILE_RUNLUASCRIPT:
-				FCEUD_LuaRunFrom(); 
-				break;
-			
-			case ID_FILE_STOPLUASCRIPT:
-				FCEU_LuaStop();
 				break;
 			case MENU_CONFIG_BINDSAVES:
 				bindSavestate ^= 1;
 				UpdateCheckedMenuItems();
-			case MENU_DISPLAY_LAGCOUNTER:
-				lagCounterDisplay ^= 1;
-				UpdateCheckedMenuItems();
-				break;
-			case MENU_DISPLAY_FA_LAGSKIP:
-				frameAdvanceLagSkip ^= 1;
+
+			//Display submenu
+			case MENU_SHOW_STATUS_ICON:
+				status_icon = !status_icon;
 				UpdateCheckedMenuItems();
 				break;
 			case MENU_INPUTDISPLAY_0: //Input display off
@@ -1315,35 +1041,222 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				input_display = 4;
 				UpdateCheckedMenuItems();
 				break;
-
-			case ID_FILE_SCREENSHOT:
-				FCEUI_SaveSnapshot();
-				break;
-
-			case ID_NES_PAUSE:
-				EmulationPaused ^= 1;
+			case MENU_DISPLAY_LAGCOUNTER:
+				lagCounterDisplay ^= 1;
 				UpdateCheckedMenuItems();
 				break;
-			case ID_NES_FRAMEADVANCE:
-				FCEUI_FrameAdvance();
+			case ID_DISPLAY_FRAMECOUNTER:
+				FCEUI_MovieToggleFrameDisplay();
+				UpdateCheckedMenuItems();
 				break;
-			case ID_NES_SPEEDUP:
-				FCEUD_SetEmulationSpeed(3);
+			case ID_DISPLAY_MOVIESUBTITLES:
+				movieSubtitles ^= 1;
+				if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
+				else FCEU_DispMessage("Movie subtitles off");
+				UpdateCheckedMenuItems();
 				break;
-			case ID_NES_SLOWDOWN:
-				FCEUD_SetEmulationSpeed(1);
+			case ID_DISPLAY_MOVIESUBTITLES_AVI:
+				subtitlesOnAVI ^= 1;
+				UpdateCheckedMenuItems();
 				break;
-			case ID_NES_SLOWESTSPEED:
-				FCEUD_SetEmulationSpeed(0);
+			case MENU_DISPLAY_BG:
+			case MENU_DISPLAY_OBJ:
+				{
+					bool spr, bg;
+					FCEUI_GetRenderPlanes(spr,bg);
+					if(LOWORD(wParam)==MENU_DISPLAY_BG)
+						bg = !bg;
+					else
+						spr = !spr;
+					FCEUI_SetRenderPlanes(spr,bg);
+				}
 				break;
-			case ID_NES_NORMALSPEED:
-				FCEUD_SetEmulationSpeed(2);
+
+			case MENU_GAME_GENIE:
+				genie ^= 1;
+				FCEUI_SetGameGenie(genie!=0);
+				UpdateCheckedMenuItems();
 				break;
-			case ID_NES_FASTESTSPEED:
-				FCEUD_SetEmulationSpeed(4);
+			case MENU_PAL:
+				pal_emulation ^= 1;
+				FCEUI_SetVidSystem(pal_emulation);
+				RefreshThrottleFPS();
+				UpdateCheckedMenuItems();
+				PushCurrentVideoSettings();
 				break;
-			case ID_NES_TURBO:
-				FCEUD_TurboToggle();
+				case MENU_DIRECTORIES:
+				ConfigDirectories();
+				break;
+			case MENU_GUI_OPTIONS:
+				ConfigGUI();
+				break;
+			case MENU_INPUT:
+				ConfigInput(hWnd);
+				break;
+			case MENU_NETWORK:
+				ShowNetplayConsole();
+				break;
+			case MENU_PALETTE:
+				ConfigPalette();
+				break;
+			case MENU_SOUND:
+				ConfigSound();
+				break;
+			case MENU_TIMING:
+				ConfigTiming();
+				break;
+			case MENU_VIDEO:
+				ConfigVideo();
+				break;
+			case MENU_HOTKEYS:
+				MapInput();
+				break;
+
+			//Tools Menu---------------------------------------------------------------
+			case MENU_CHEATS:
+				ConfigCheats(hWnd);
+				break;
+			case MENU_MEMORY_WATCH:
+				CreateMemWatch();
+				break;
+			case MENU_RAMFILTER:
+				DoByteMonitor(); 
+				break;
+			case ACCEL_CTRL_E:
+			case MENU_TASEDIT:
+				DoTasEdit();
+				break;
+			case MENU_CONVERT_MOVIE:
+				ConvertFCM(hWnd);
+				break;
+
+			//AutoFire Pattern submenu
+			case MENU_AUTOFIRE_PATTERN_1:
+				SetAutoFirePattern(1,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_2:
+				SetAutoFirePattern(1,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_3:
+				SetAutoFirePattern(1,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_4:
+				SetAutoFirePattern(1,4);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_5:
+				SetAutoFirePattern(1,5);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_6:
+				SetAutoFirePattern(2,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_7:
+				SetAutoFirePattern(2,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_8:
+				SetAutoFirePattern(2,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_9:
+				SetAutoFirePattern(2,4);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_10:
+				SetAutoFirePattern(3,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_11:
+				SetAutoFirePattern(3,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_12:
+				SetAutoFirePattern(3,3);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_13:
+				SetAutoFirePattern(4,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_14:
+				SetAutoFirePattern(4,2);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_AUTOFIRE_PATTERN_15:
+				SetAutoFirePattern(5,1);
+				CheckedAutoFirePattern = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			//Autofire Offset submenu
+			case MENU_AUTOFIRE_OFFSET_1:
+			case MENU_AUTOFIRE_OFFSET_2:
+			case MENU_AUTOFIRE_OFFSET_3:
+			case MENU_AUTOFIRE_OFFSET_4:
+			case MENU_AUTOFIRE_OFFSET_5:
+			case MENU_AUTOFIRE_OFFSET_6:
+				SetAutoFireOffset(wParam - MENU_AUTOFIRE_OFFSET_1);
+				CheckedAutoFireOffset = wParam;
+				UpdateCheckedMenuItems();
+				break;
+			case MENU_ALTERNATE_AB:
+				SetAutoFireDesynch(GetAutoFireDesynch()^1);
+				UpdateCheckedMenuItems();
+				break;
+			case ID_TOOLS_TEXTHOOKER:
+				DoTextHooker();
+				break;
+
+			//Debug Menu-------------------------------------------------------------
+			case MENU_DEBUGGER:
+				DoDebug(0);
+				break;
+			case MENU_PPUVIEWER:
+				DoPPUView();
+				break;
+			case MENU_NAMETABLEVIEWER:
+				DoNTView();
+				break;
+			case MENU_HEXEDITOR:
+				DoMemView();
+				break;
+			case MENU_TRACELOGGER:
+				DoTracer();
+				break;
+			case MENU_CDLOGGER:
+				DoCDLogger();
+				break;
+			case MENU_GAMEGENIEDECODER:
+				DoGGConv();
+				break;
+
+			//Help Menu--------------------------------------------------------------
+			case MENU_HELP:
+				OpenHelpWindow();
+				break;
+			case MENU_MSGLOG:
+				MakeLogWindow();
+				break;
+			case MENU_ABOUT:
+				ShowAboutBox();
 				break;
 			
 			//Context Menus------------------------------------------------------
@@ -1362,13 +1275,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEU_CONTEXT_FCEUHELP:
 				OpenHelpWindow(gettingstartedhelp);
 				break;
-			
-
-
 			}
 		}
 		break;
-
 
 	case WM_SYSCOMMAND:
 		if(GameInfo && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
