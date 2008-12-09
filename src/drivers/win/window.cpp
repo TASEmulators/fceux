@@ -308,8 +308,6 @@ void UpdateCheckedMenuItems()
 	static int polo2[]={ MENU_GAME_GENIE, MENU_PAL, MENU_SHOW_STATUS_ICON };
 	int x;
 
-	
-
 	// Check or uncheck the necessary menu items
 	for(x = 0; x < sizeof(polo) / sizeof(*polo); x++)
 	{
@@ -746,7 +744,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		else
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
 
-		TrackPopupMenu(hfceuxcontextsub,0,mousex,mousey,TPM_RIGHTBUTTON,hWnd,0);
+		TrackPopupMenu(hfceuxcontextsub,0,(MainWindow_wndx+mousex),(MainWindow_wndy+mousey),TPM_RIGHTBUTTON,hWnd,0);
 	}
 
 	case WM_MOVE: 
