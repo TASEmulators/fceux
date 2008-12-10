@@ -34,7 +34,7 @@ static void (*MMC1PRGHook16)(uint32 A, uint8 V);
 
 static uint8 *WRAM=NULL;
 static uint8 *CHRRAM=NULL;
-static int is155;
+static int is155, is171;
 
 static DECLFW(MBWRAM)
 {
@@ -58,6 +58,7 @@ static void MMC1CHR(void)
     else
       setprg8r(0x10,0x6000,(DRegs[1]>>3)&1);
   }
+
   if(MMC1CHRHook4)
   {
     if(DRegs[0]&0x10)
@@ -103,7 +104,9 @@ static void MMC1PRG(void)
                 break;
     }
   }
-  else switch(DRegs[0]&0xC)
+  else
+  {
+    switch(DRegs[0]&0xC)
   {
     case 0xC: setprg16(0x8000,(DRegs[3]+offs));
               setprg16(0xC000,0xF+offs);
@@ -118,9 +121,11 @@ static void MMC1PRG(void)
               break;
   }
 }
+}
 
 static void MMC1MIRROR(void)
 {
+  if(!is171) 
   switch(DRegs[0]&3)
   {
     case 2: setmirror(MI_V); break;
@@ -135,15 +140,18 @@ static DECLFW(MMC1_write)
 {
   int n=(A>>13)-4;
   //FCEU_DispMessage("%016x",timestampbase+timestamp);
-  //printf("$%04x:$%02x, $%04x\n",A,V,X.PC);
+//  FCEU_printf("$%04x:$%02x, $%04x\n",A,V,X.PC);
   //DumpMem("out",0xe000,0xffff);
 
   /* The MMC1 is busy so ignore the write. */
   /* As of version FCE Ultra 0.81, the timestamp is only
      increased before each instruction is executed(in other words
      precision isn't that great), but this should still work to
-     deal with 2 writes in a row from a single RMW instruction. */
-  if((timestampbase+timestamp)<(lreset+2)) return;
+	   deal with 2 writes in a row from a single RMW instruction.
+	*/
+  if((timestampbase+timestamp)<(lreset+2))
+    return;
+//  FCEU_printf("Write %04x:%02x\n",A,V);
   if(V&0x80)
   {
     DRegs[0]|=0xC;
@@ -152,7 +160,9 @@ static DECLFW(MMC1_write)
     lreset=timestampbase+timestamp;
     return;
   }
+
   Buffer|=(V&1)<<(BufferShift++);
+
   if(BufferShift==5)
   {
     DRegs[n] = Buffer;
@@ -178,10 +188,12 @@ static void MMC1_Restore(int version)
 static void MMC1CMReset(void)
 {
   int i;
+
   for(i=0;i<4;i++)
      DRegs[i]=0;
   Buffer = BufferShift = 0;
   DRegs[0]=0x1F;
+
   DRegs[1]=0;
   DRegs[2]=0;                  // Should this be something other than 0?
   DRegs[3]=0;
@@ -233,6 +245,7 @@ static void NWCCHRHook(uint32 A, uint8 V)
     NWCIRQCount=0;
     X6502_IRQEnd(FCEU_IQEXT);
   }
+
   NWCRec=V;
   if(V&0x08)
     MMC1PRG();
@@ -311,7 +324,8 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int battery)
   {
     WRAM=(uint8*)FCEU_gmalloc(wram*1024);
 	//mbg 6/17/08 - this shouldve been cleared to re-initialize save ram
-	memset(WRAM,0,wram*1024);
+	//ch4 10/12/08 - nope, this souldn't
+	//memset(WRAM,0,wram*1024);
     mmc1opts|=1;
     if(wram>8) mmc1opts|=4;
     SetupCartPRGMapping(0x10,WRAM,wram*1024,1);
@@ -349,6 +363,14 @@ void Mapper155_Init(CartInfo *info)
 {
   GenMMC1Init(info,512,256,8,info->battery);
   is155=1;
+}
+
+/* Same as mapper 1, with different (or without) mirroring control. */
+/* Kaiser KS7058 board, KS203 custom chip */
+void Mapper171_Init(CartInfo *info)
+{
+  GenMMC1Init(info,32,32,0,0);
+  is171=1;
 }
 
 void SAROM_Init(CartInfo *info)

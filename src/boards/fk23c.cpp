@@ -22,7 +22,7 @@
 #include "mmc3.h"
 
 static uint8 unromchr;
-static uint8 dipswitch;
+static uint32 dipswitch;
 
 static void BMCFK23CCW(uint32 A, uint8 V)
 {
@@ -42,11 +42,16 @@ static void BMCFK23CCW(uint32 A, uint8 V)
 
 static void BMCFK23CPW(uint32 A, uint8 V)
 {
-  if(EXPREGS[0]&4)
+  if((EXPREGS[0]&7)==4)
     setprg32(0x8000,EXPREGS[1]>>1);
+  else if ((EXPREGS[0]&7)==3)
+  {
+    setprg16(0x8000,EXPREGS[1]);
+    setprg16(0xC000,EXPREGS[1]);
+  }  
   else
   { 
-    if(EXPREGS[0]&2)
+    if(EXPREGS[0]&3)
       setprg8(A,(V&(0x3F>>(EXPREGS[0]&3)))|(EXPREGS[1]<<1));
     else
       setprg8(A,V);
@@ -62,7 +67,7 @@ static DECLFW(BMCFK23CHiWrite)
 {
   if(EXPREGS[0]&0x40)
   {
-    if(EXPREGS[0]&0x20)
+    if(EXPREGS[0]&0x30)
       unromchr=0;
     else
     {
@@ -99,7 +104,7 @@ static DECLFW(BMCFK23CWrite)
 static void BMCFK23CReset(void)
 {
   dipswitch++;
-  dipswitch&=3;
+  dipswitch&=7;
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
   MMC3RegReset();
@@ -110,7 +115,7 @@ static void BMCFK23CPower(void)
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
   GenMMC3Power();
-  SetWriteHandler(0x5001,0x5fff,BMCFK23CWrite);
+  SetWriteHandler(0x5000,0x5fff,BMCFK23CWrite);
   SetWriteHandler(0x8000,0xFFFF,BMCFK23CHiWrite);
 }
 

@@ -37,6 +37,7 @@ static DECLFW(Mapper33_write)
          case 0x8001:ROM_BANK8(0xA000,V); break;
          case 0x8002:VROM_BANK2(0x0000,V);break;
          case 0x8003:VROM_BANK2(0x0800,V);break;
+         case 0xe000:MIRROR_SET((V>>6)&1);break;
         }
 }
 
@@ -73,7 +74,7 @@ void Mapper33_init(void)
 
 void Mapper48_init(void)
 {
-        SetWriteHandler(0x8000,0xffff,Mapper33_write);
+        SetWriteHandler(0x8000,0xbfff,Mapper33_write);
         SetWriteHandler(0xc000,0xffff,Mapper48_HiWrite);
         GameHBIRQHook=heho;
         is48=1;

@@ -547,6 +547,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 
 	//    ROM_size = head.ROM_size;
 	VROM_size = head.VROM_size;
+
 	ROM_size=uppow2(ROM_size);
 
 	if(VROM_size)
@@ -620,9 +621,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	ResetExState(0,0);
 
 	SetupCartPRGMapping(0,ROM,ROM_size*0x4000,0);
-	SetupCartPRGMapping(1,WRAM,8192,1);
+//    SetupCartPRGMapping(1,WRAM,8192,1);
 
-	FCEU_fread(ROM,0x4000,head.ROM_size,fp);
+    FCEU_fread(ROM,0x4000,ROM_size,fp);
 
 	if(VROM_size)
 		FCEU_fread(VROM,0x2000,head.VROM_size,fp);
@@ -643,7 +644,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	iNESCart.CRC32=iNESGameCRC32;
 
 	FCEU_printf(" PRG ROM:  %3d x 16KiB\n CHR ROM:  %3d x  8KiB\n ROM CRC32:  0x%08lx\n",
-		head.ROM_size,head.VROM_size,iNESGameCRC32);
+    ROM_size,head.VROM_size,iNESGameCRC32);
 
 	{
 		int x;
@@ -740,7 +741,7 @@ int iNesSave(){
 		fwrite(trainerpoo,512,1,fp);
 	}
 
-	fwrite(ROM,0x4000,head.ROM_size,fp);
+	fwrite(ROM,0x4000,ROM_size,fp);
 
 	if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
 	fclose(fp);
@@ -888,15 +889,15 @@ void (*MapInitTab[256])(void)=
 	0, 
 	0, //Mapper13_init,
 	0,
-	Mapper15_init,
-	Mapper16_init,
+    0, //Mapper15_init,
+    0, //Mapper16_init,
 	Mapper17_init,
 	Mapper18_init,
 	0,
 	0,
 	Mapper21_init,
 	Mapper22_init,
-	Mapper23_init,
+    0, //Mapper23_init,
 	Mapper24_init,
 	Mapper25_init,
 	Mapper26_init,
@@ -941,7 +942,7 @@ void (*MapInitTab[256])(void)=
 	Mapper65_init,
 	0,//Mapper66_init,
 	Mapper67_init,
-	Mapper68_init,
+    0,//Mapper68_init,
 	Mapper69_init,
 	0,//Mapper70_init,
 	Mapper71_init,
@@ -1026,7 +1027,7 @@ void (*MapInitTab[256])(void)=
 	0,
 	Mapper151_init,
 	0, //Mapper152_init,
-	Mapper153_init,
+    0, //Mapper153_init,
 	0, //Mapper154_init,
 	0,
 	Mapper156_init,
@@ -1141,12 +1142,6 @@ static DECLFR(AWRAM)
 	return WRAM[A-0x6000];
 }
 
-#ifdef DEBUG_MAPPER
-static DECLFW(WriteHandler)
-{
-	FCEU_printf("$%04x:$%02x\n",A,V);
-}
-#endif
 
 void (*MapStateRestore)(int version);
 void iNESStateRestore(int version)
@@ -1186,21 +1181,18 @@ static void iNESPower(void)
 	MapStateRestore=0;
 
 	setprg8r(1,0x6000,0);
+
 	SetReadHandler(0x6000,0x7FFF,AWRAM);
 	SetWriteHandler(0x6000,0x7FFF,BWRAM);
 	FCEU_CheatAddRAM(8,0x6000,WRAM);
-	/*
-	#ifdef DEBUG_MAPPER
-	if(type==0) SetWriteHandler(0x4020,0xFFFF,WriteHandler);
-	#endif
-	*/
+
 	/* This statement represents atrocious code.  I need to rewrite
 	all of the iNES mapper code... */
 	IRQCount=IRQLatch=IRQa=0;
 	if(head.ROM_type&2)
-		memset(GameMemBlock+8192,0,131072-8192);
+      memset(GameMemBlock+8192,0,sizeof(GameMemBlock)-8192);
 	else
-		memset(GameMemBlock,0,131072);
+      memset(GameMemBlock,0,sizeof(GameMemBlock));
 
 	NONE_init();
 	ResetExState(0,0);
@@ -1209,7 +1201,6 @@ static void iNESPower(void)
 		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
 	AddExState(WRAM, 8192, 0, "WRAM");
-
 	if(type==19 || type==6 || type==69 || type==85 || type==96)
 		AddExState(MapperExRAM, 32768, 0, "MEXR");
 	if((!VROM_size || type==6 || type==19) && (type!=13 && type!=96))
@@ -1247,70 +1238,7 @@ typedef struct {
 	int number;   
 	void (*init)(CartInfo *);
 } BMAPPING;
-/*
-static BMAPPING bmap[] = {
-{1,   Mapper1_Init},
-{2,   UNROM_Init},
-{3,   CNROM_Init},
-{4,   Mapper4_Init},
-{5,   Mapper5_Init},
-{12,  Mapper12_Init},
-{13,  CPROM_Init},
-{19,  Mapper19_Init},
-{44,  Mapper44_Init},
-{45,  Mapper45_Init},
-{47,  Mapper47_Init},
-{49,  Mapper49_Init},
-{52,  Mapper52_Init},
-{74,  Mapper74_Init},
-{90,  Mapper90_Init},
-{95,  Mapper95_Init},
-{105, Mapper105_Init},
-{112, Mapper112_Init},
-{114, Mapper114_Init},
-{115, Mapper115_Init},
-{116, Mapper116_Init},
-{118, Mapper118_Init},
-{119, Mapper119_Init},
-{133, SA72008_Init},
-{137, S8259D_Init},
-{138, S8259B_Init},
-{139, S8259C_Init},
-{141, S8259A_Init},
-{143, TCA01_Init},
-{145, SA72007_Init},
-{146, SA0161M_Init},
-{147, TCU01_Init},
-{148, SA0037_Init},
-{149, SA0036_Init},
-{150, S74LS374N_Init},
-{155, Mapper155_Init},
-{160, Mapper90_Init},
-{163, Mapper163_Init},
-{164, Mapper164_Init},
-{165, Mapper165_Init},
-{182, Mapper182_Init},
-{183, Mapper183_Init},
-{186, Mapper186_Init},
-{187, Mapper187_Init},
-{188, Mapper188_Init},
-{191, Mapper191_Init},
-{205, Mapper205_Init},
-{206, DEIROM_Init},
-{208, Mapper208_Init},
-{209, Mapper209_Init},
-{210, Mapper210_Init},
-{215, Mapper215_Init},
-{216, Mapper216_Init},
-{217, Mapper217_Init},
-{243, S74LS374NA_Init},
-{245, Mapper245_Init},
-{249, Mapper249_Init},
-{250, Mapper250_Init},
-{254, Mapper254_Init},
-{  0,        0}
-};
-*/
+
 static BMAPPING bmap[] = {
 	{0,   NROM_Init},
 	{1,   Mapper1_Init},
@@ -1322,8 +1250,13 @@ static BMAPPING bmap[] = {
 	{11,  Mapper11_Init},
 	{12,  Mapper12_Init},
 	{13,  CPROM_Init},
+    {15,  Mapper15_Init},
+    {16,  Mapper16_Init},
 	{19,  Mapper19_Init},
+    {23,  Mapper23_Init},
+    {36,  Mapper36_Init}, // TXC Policeman
 	{37,  Mapper37_Init},
+    {38,  Mapper38_Init}, // Bit Corp. Crime Busters
 	{43,  Mapper43_Init},
 	{44,  Mapper44_Init},
 	{45,  Mapper45_Init},
@@ -1334,6 +1267,7 @@ static BMAPPING bmap[] = {
 	{58,  BMCGK192_Init},
 	{60,  BMCD1038_Init},
 	{66,  MHROM_Init},
+    {68,  Mapper68_Init},
 	{70,  Mapper70_Init},
 	{74,  Mapper74_Init},
 	{78,  Mapper78_Init},
@@ -1343,23 +1277,34 @@ static BMAPPING bmap[] = {
 	{93,  SUNSOFT_UNROM_Init},
 	{94,  Mapper94_Init},
 	{95,  Mapper95_Init},
+    {101, Mapper101_Init},
+    {103, Mapper103_Init},
 	{105, Mapper105_Init},
+    {106, Mapper106_Init},
 	{107, Mapper107_Init},
+    {108, Mapper108_Init},
 	{112, Mapper112_Init},
 	{113, Mapper113_Init},
 	{114, Mapper114_Init},
 	{115, Mapper115_Init},
 	{116, Mapper116_Init},
+//    {116, UNLSL1632_Init},
 	{117, Mapper117_Init},
 	{118, TKSROM_Init},
 	{119, Mapper119_Init},
+    {120, Mapper120_Init},
+    {121, Mapper121_Init},
+    {123, UNLH2288_Init},
 	{132, UNL22211_Init},
 	{133, SA72008_Init},
+    {134, Mapper134_Init},
+    {136, TCU02_Init},
 	{137, S8259D_Init},
 	{138, S8259B_Init},
 	{139, S8259C_Init},
 	{140, Mapper140_Init},
 	{141, S8259A_Init},
+    {142, UNLKS7032_Init},
 	{143, TCA01_Init},
 	{144, Mapper144_Init},
 	{145, SA72007_Init},
@@ -1369,12 +1314,20 @@ static BMAPPING bmap[] = {
 	{149, SA0036_Init},
 	{150, S74LS374N_Init},
 	{152, Mapper152_Init},
+    {153, Mapper153_Init},
 	{154, Mapper154_Init},
 	{155, Mapper155_Init},
-	{160, Mapper90_Init},
+    {160, SA009_Init},
 	{163, Mapper163_Init},
 	{164, Mapper164_Init},
 	{165, Mapper165_Init},
+//    {169, Mapper169_Init},
+    {171, Mapper171_Init},
+    {172, Mapper172_Init},
+    {173, Mapper173_Init},
+    {177, Mapper177_Init},
+    {178, Mapper178_Init},
+    {179, Mapper179_Init},
 	{180, Mapper180_Init},
 	{181, Mapper181_Init},
 	{182, Mapper182_Init},
@@ -1389,6 +1342,8 @@ static BMAPPING bmap[] = {
 	{192, Mapper192_Init},
 	{194, Mapper194_Init},
 	{195, Mapper195_Init},
+    {196, Mapper196_Init},
+    {197, Mapper197_Init},
 	{198, Mapper198_Init},
 	{199, Mapper199_Init},
 	{200, Mapper200_Init},
@@ -1401,15 +1356,20 @@ static BMAPPING bmap[] = {
 	{215, Mapper215_Init},
 	{216, Mapper216_Init},
 	{217, Mapper217_Init},
+    {219, UNLA9746_Init},
 
-	{218, UNLA9711_Init},
-	{219, UNLSL1632_Init},
-	{220, UNLCN22M_Init},
-	{221, BMCFK23C_Init},
-
+//    {220, BMCFK23C_Init},
+//    {220, UNL3DBlock_Init},
+//    {220, UNLTF1201_Init},
+//    {220, TCU02_Init},
+//    {220, UNLCN22M_Init},
+    {220, BMCT2271_Init},
+    
+    {221, UNLN625092_Init},
 	{222, Mapper222_Init},
 	{226, Mapper226_Init},
 	{235, Mapper235_Init},
+    {238, UNL6035052_Init},
 	{240, Mapper240_Init},
 	{243, S74LS374NA_Init},
 	{245, Mapper245_Init},

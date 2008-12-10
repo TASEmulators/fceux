@@ -52,8 +52,6 @@ static DECLFW(Mapper69_SWH)
              int x;
              GameExpSound.Fill=AYSound;
              GameExpSound.HiFill=AYSoundHQ;
-			 //mbg merge 7/17/06 
-			 //TODO cah4e3 - is this an error?
              if(FSettings.SndRate)
              switch(sunindex)
              {

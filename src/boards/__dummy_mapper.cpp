@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2006 CaH4e3
+ *  Copyright (C) 2006-2007 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,6 +91,11 @@ void MapperNNN_Init(CartInfo *info)
   WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
   SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
   AddExState(WRAM, WRAMSIZE, 0, "WRAM");
+  if(info->battery)
+  {
+    info->SaveGame[0]=WRAM;
+    info->SaveGameLen[0]=WRAMSIZE;
+  }
 */
   AddExState(&StateRegs, ~0, 0, 0);
 }

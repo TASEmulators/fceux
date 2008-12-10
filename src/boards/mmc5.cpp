@@ -133,33 +133,28 @@ uint8 mmc5_PPURead(uint32 A) {
 // ETROM seems to have 16KB of WRAM, ELROM seems to have 8KB
 // EWROM seems to have 32KB of WRAM
 
-#define MMC5_NOCARTS 14
-cartdata MMC5CartList[MMC5_NOCARTS]=
+
+cartdata MMC5CartList[]=
 {
   {0x9c18762b,2},         /* L'Empereur */
   {0x26533405,2},
   {0x6396b988,2},
-
   {0xaca15643,2},        /* Uncharted Waters */
   {0xfe3488d1,2},        /* Dai Koukai Jidai */
-
   {0x15fe6d0f,2},        /* BKAC             */
   {0x39f2ce4b,2},        /* Suikoden              */
-
   {0x8ce478db,2},        /* Nobunaga's Ambition 2 */
   {0xeee9a682,2},
-
+  {0xf9b4240f,2},
   {0x1ced086f,2},        /* Ishin no Arashi */
-
   {0xf540677b,4},        /* Nobunaga...Bushou Fuuun Roku */
-
   {0x6f4e4312,4},        /* Aoki Ookami..Genchou */
-
   {0xf011e490,4},        /* Romance of the 3 Kingdoms 2 */
   {0x184c2124,4},        /* Sangokushi 2 */
+  {0xee8e6553,4},
 };
 
-
+#define MMC5_NOCARTS		(sizeof(MMC5CartList)/sizeof(MMC5CartList[0]))
 int DetectMMC5WRAMSize(uint32 crc32)
 {
 	int x;
@@ -172,7 +167,9 @@ int DetectMMC5WRAMSize(uint32 crc32)
 
 	//mbg 8/4/08 - previously, this was returning 8KB
 	//but I changed it to return 64 because unlisted carts are probably homebrews, and they should probably use 64 (why not use it all?)
-	return 64;
+	//ch4 10/12/08 - then f***ng for what all this shit above? let's give em all this 64k shit! Damn
+	//               homebrew must use it's own emulators or standart features.
+	return 8;
 }
 
 static void BuildWRAMSizeTable(void)
@@ -395,10 +392,7 @@ static DECLFW(Mapper5_write)
                  break;
     case 0x5102: WRAMMaskEnable[0]=V;break;
     case 0x5103: WRAMMaskEnable[1]=V;break;
-    case 0x5104: 
-		CHRMode=V;
-		MMC5HackCHRMode=V&3;
-		break;
+    case 0x5104: CHRMode=V;MMC5HackCHRMode=V&3;break;
     case 0x5106: if(V!=NTFill)
                  {
                    uint32 t;

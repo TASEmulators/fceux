@@ -20,7 +20,7 @@
 
 #include "mapinc.h"
 
-static uint8 prgreg[4], chrreg[8];
+static uint8 prgreg[4], chrreg[8], mirror;
 static uint8 IRQa, IRQCount, IRQLatch;
 
 static SFORMAT StateRegs[]=
@@ -30,6 +30,7 @@ static SFORMAT StateRegs[]=
   {&IRQLatch, 1, "IRQL"},
   {prgreg, 4, "PREGS"},
   {chrreg, 8, "CREGS"},
+  {&mirror, 1, "MREG"},
   {0}
 };
 
@@ -42,6 +43,7 @@ static void Sync(void)
   setprg8(0xe000,prgreg[3]);
   for(i=0; i<8; i++)
      setchr1(i<<10,chrreg[i]);     
+  setmirror(mirror^1);   
 }
 
 static DECLFW(M117Write)
@@ -62,6 +64,7 @@ static DECLFW(M117Write)
          case 0xc003: IRQCount=IRQLatch; IRQa|=2; break;
          case 0xe000: IRQa&=~1; IRQa|=V&1; X6502_IRQEnd(FCEU_IQEXT); break;
          case 0xc002: X6502_IRQEnd(FCEU_IQEXT); break;
+         case 0xd000: mirror=V&1;
        }
 }
 

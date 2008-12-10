@@ -83,6 +83,10 @@ void Mapper96_init(void)
  GameStateRestore=M96Sync;
 }
 
+// DIS23C01 Open Soft, Korea
+// Metal Force (K)
+// Buzz and Waldog (K)
+
 static DECLFW(M156Write)
 {
  if(A>=0xc000 && A<=0xC003)

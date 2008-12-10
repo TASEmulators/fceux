@@ -70,7 +70,7 @@ static DECLFW(Mapper16_write)
 // of it a hack(I think the current PRG block would depend on whatever the
 // lowest bit of the CHR bank switching register that corresponds to the
 // last CHR address read).
-
+/*
 static void PRGO(void)
 {
  uint32 base=(mapbyte1[0]&1)<<4;
@@ -110,21 +110,21 @@ static DECLFW(Mapper153_write)
                    IRQLatch|=V<<8;
                   break;
         }
-}
+}*/
 
-void Mapper16_init(void)
-{
- MapIRQHook=BandaiIRQHook;
- SetWriteHandler(0x6000,0xFFFF,Mapper16_write);
-}
+//void Mapper16_init(void)
+//{
+// MapIRQHook=BandaiIRQHook;
+//SetWriteHandler(0x6000,0xFFFF,Mapper16_write);
+//}
 
-void Mapper153_init(void)
-{
- MapIRQHook=BandaiIRQHook;
- SetWriteHandler(0x8000,0xFFFF,Mapper153_write);
+//void Mapper153_init(void)
+//{
+// MapIRQHook=BandaiIRQHook;
+// SetWriteHandler(0x8000,0xFFFF,Mapper153_write);
  /* This mapper/board seems to have WRAM at $6000-$7FFF, so I'll let the
     main ines code take care of that memory region. */
-}
+//}
 
 
 static uint8 BarcodeData[256];

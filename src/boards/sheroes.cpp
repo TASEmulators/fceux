@@ -21,8 +21,7 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-//mbg 7/23/06 todo CaH4e3 - should this have been declared here? its in mmc3.cpp also
-//static uint8 *CHRRAM;
+static uint8 *CHRRAM;
 static uint8 tekker;
 
 static void MSHCW(uint32 A, uint8 V)

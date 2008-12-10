@@ -443,7 +443,7 @@ void Mapper19_Init(CartInfo *info)
     Mapper19_ESI();
 
   AddExState(WRAM, 8192, 0, "WRAM");
-  AddExState(IRAM, 128, 0, "WRAM");
+  AddExState(IRAM, 128, 0, "IRAM");
   AddExState(N106_StateRegs, ~0, 0, 0);
 
   if(info->battery)

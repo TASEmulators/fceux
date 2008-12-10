@@ -24,10 +24,12 @@ static uint8 prg_reg;
 static uint8 chr_reg;
 
 static uint8 sim0reg, sim0bit, sim0byte, sim0parity, sim0bcnt;
-static uint16 sim0data;
+static uint8 sim0bitw, sim0bytew, sim0parityw, sim0bcntw;
+
+static uint16 sim0data, sim0dataw, sim0iswrite;
 static uint8 sim0array[128] =
 {
-  0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+  0x14, 0x55, 0x45, 0xd3, 0x18, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
   0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
   0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
   0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
@@ -36,6 +38,7 @@ static uint8 sim0array[128] =
   0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
   0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0xAA,
 };
+static uint8 sim0cmd[16];
 
 static SFORMAT StateRegs[]=
 {
@@ -65,25 +68,64 @@ static DECLFW(M216WriteHi)
 
 static DECLFW(M216Write5000)
 {
-// FCEU_printf("WRITE: %04x:%04x\n",A,V);
   sim0reg=V;
   if(!sim0reg)
   {
     sim0bit=sim0byte=sim0parity=0;
+    sim0bitw=sim0bytew=sim0parityw=0;
     sim0data=sim0array[0];
-    sim0bcnt=0x80;
+    sim0bcnt=0x7F;
   }
-  else if(sim0reg&0x20)
+  if(sim0reg&0x20)
   {
-    sim0bcnt=0x20;
+    sim0bcnt=0x1E;
+    sim0bcntw=4;
   }
+  if(sim0reg&0x08)
+  {
+    uint8 sim0in=0;
+    sim0iswrite=0x2C;
+    if(sim0bitw<8)
+    {
+      sim0in=(V&0x10)>>4;
+      sim0parityw+=sim0in;
+      sim0dataw|=sim0in<<7;
+      sim0dataw>>=1;
+      sim0bitw++;
+    }
+    else if(sim0bitw==8)
+    {
+      sim0bitw++;
+    }
+    else if(sim0bitw==9)
+    {
+      sim0parityw=0;
+      sim0bitw=0;
+      if(sim0bytew==sim0bcntw)
+      {
+        sim0reg=0x60;
+        sim0iswrite=0;
+      }
+      else
+      {
+        sim0cmd[sim0bytew++]=sim0dataw;
+        sim0dataw=0;
+      }
+    }
+  }
+                 
+  FCEU_printf("WRITE: %04x:%04x (PC=%02x cnt=%02x)\n",A,V,X.PC,sim0bcnt);
 }
 
 static DECLFR(M216Read5000)
 {
   if(sim0reg&0x60)
   {
+    if(sim0iswrite)
+       sim0iswrite--;
+    else
     sim0reg=(sim0reg^(sim0reg<<1))&0x40;
+    FCEU_printf("READ: %04x PC=%04x reg=%02x\n",A,X.PC,sim0reg);
     return sim0reg;
   }
   else
@@ -91,30 +133,33 @@ static DECLFR(M216Read5000)
     uint8 sim0out=0;
     if(sim0bit<8)
     {
-//       sim0data=((sim0array[sim0byte]<<(sim0bit))&0x80)>>1;
-      sim0out=(sim0data&1)<<6;
-      sim0data>>=1;
+      sim0out=(sim0data&0x80)>>7;
+      sim0parity+=sim0out;
+      sim0out<<=6;
+      sim0data<<=1;
       sim0bit++;
-      sim0parity+=sim0data;
     }
     else if(sim0bit==8)
     {
       sim0bit++;
-      sim0out=sim0parity&1;
+      sim0out=(sim0parity&1)<<6;
     }
     else if(sim0bit==9)
     {
+      sim0parity=0;
+        sim0bit=0;
       if(sim0byte==sim0bcnt)
+      {
+        sim0reg=0x40;
         sim0out=0x60;
+      }
       else
       {
-        sim0bit=0;
-        sim0byte++;
-        sim0data=sim0array[sim0byte];
         sim0out=0;
+        sim0data=sim0array[sim0byte++];
       }
     }
-//    FCEU_printf("READ: %04x (%04x-%02x,%04x)\n",A,X.PC,sim0out,sim0byte);
+    FCEU_printf("READ: %04x PC=%04x out=%02x byte=%02x cnt=%02x bit=%02x\n",A,X.PC,sim0out,sim0byte,sim0bcnt,sim0bit);
     return sim0out;
   }
 }

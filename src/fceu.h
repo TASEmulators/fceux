@@ -87,7 +87,7 @@ typedef struct {
 	int UsrFirstSLine[2];
 	int UsrLastSLine[2];
 	
-	bool SnapName;
+	int SnapName;
 	uint32 SndRate;
 	int soundq;
 	int lowpass;

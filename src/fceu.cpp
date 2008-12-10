@@ -798,9 +798,9 @@ void FCEUI_SetGameGenie(bool a)
 	FSettings.GameGenie = a;
 }
 
-void FCEUI_SetSnapName(bool a)
+void FCEUI_SetSnapName(int a)
 {
-	FSettings.SnapName= a;
+	FSettings.SnapName = a;
 }
 
 int32 FCEUI_GetDesiredFPS(void)

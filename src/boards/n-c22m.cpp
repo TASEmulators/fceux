@@ -16,16 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+ * Mortal Kombat 2 YOKO */
 
 #include "mapinc.h"
-
-//mbg merge 7/17/06 - TODO CaH4e3 / does it make sense to #include mmc3.h here? it uses some vars from it..
-//also, CaH4e3, discuss with me whether this implies that 0xA000 and 0xE000 can have their own 8k banks (
 #include "mmc3.h"
-//mbg merge 7/17/06 we get these externs from mmc3.h
-//uint8 IRQCount,IRQLatch,IRQa;
-//uint8 IRQReload;
 
 static uint8 reg[8];
 
@@ -54,7 +48,7 @@ static void Sync(void)
 
 static DECLFW(MCN22MWrite)
 {
-FCEU_printf("bs %04x %02x\n",A,V);
+//FCEU_printf("bs %04x %02x\n",A,V);
   switch(A)
   {
     case 0x8c00:
@@ -70,6 +64,7 @@ FCEU_printf("bs %04x %02x\n",A,V);
 
 static void MCN22MPower(void)
 {
+  reg[0]=reg[1]=reg[2]=0;
   Sync();  
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x8000,0xFFFF,MCN22MWrite);

@@ -46,7 +46,9 @@ void MALEE_Init(CartInfo *info);
 void CNROM_Init(CartInfo *info);
 void CPROM_Init(CartInfo *info);
 void GNROM_Init(CartInfo *info);
+void UNL3DBlock_Init(CartInfo *info);
 
+void TBROM_Init(CartInfo *info);
 void TEROM_Init(CartInfo *info);
 void TFROM_Init(CartInfo *info);
 void TGROM_Init(CartInfo *info);
@@ -62,6 +64,7 @@ void DEIROM_Init(CartInfo *info);
 
 void TCA01_Init(CartInfo *info);
 void TCU01_Init(CartInfo *info);
+void TCU02_Init(CartInfo *info);
 void S8259A_Init(CartInfo *info);
 void S8259B_Init(CartInfo *info);
 void S8259C_Init(CartInfo *info);
@@ -72,6 +75,7 @@ void SA0161M_Init(CartInfo *info);
 
 void SA72007_Init(CartInfo *info);
 void SA72008_Init(CartInfo *info);
+void SA009_Init(CartInfo *info);
 void SA0036_Init(CartInfo *info);
 void SA0037_Init(CartInfo *info);
 
@@ -89,6 +93,11 @@ void BMCFK23C_Init(CartInfo *info);
 void BMCD1038_Init(CartInfo *info);
 void BMCA65AS_Init(CartInfo *info);
 void BMCGK192_Init(CartInfo *info);
+void BMCGS2004_Init(CartInfo *info);
+void BMCGS2013_Init(CartInfo *info);
+void BMC190in1_Init(CartInfo *info);
+void BMCGhostbusters63in1_Init(CartInfo *info);
+void BMCBS5_Init(CartInfo *info);
 
 void DreamTech01_Init(CartInfo *info);
 void Mapper190_Init(CartInfo *info);
@@ -96,15 +105,27 @@ void UNLCC21_Init(CartInfo *info);
 void UNLCN22M_Init(CartInfo *info);
 void UNLSL1632_Init(CartInfo *info);
 void UNLKOF97_Init(CartInfo *info);
-void UNLA9711_Init(CartInfo *info);
+void UNLA9746_Init(CartInfo *info);
 void UNLSHeroes_Init(CartInfo *info);
 void UNLH2288_Init(CartInfo *info);
 void UNL8237_Init(CartInfo *info);
 void UNL8157_Init(CartInfo *info);
 void UNL22211_Init(CartInfo *info);
+void UNLTF1201_Init(CartInfo *info);
+void UNLKS7032_Init(CartInfo *info);
+void UNLT230_Init(CartInfo *info);
+void UNLAX5705_Init(CartInfo *info);
 
 void UNLEDU2000_Init(CartInfo *info);
 void UNL6035052_Init(CartInfo *info);
+void UNLN625092_Init(CartInfo *info);
+void UNLSMB2J_Init(CartInfo *info);
+//void UNL09034A_Init(CartInfo *info);
+void BMC411120C_Init(CartInfo *info);
+void BMC830118C_Init(CartInfo *info);
+void BMCT2271_Init(CartInfo *info);
+
+void MapperCopyFamiMMC3_Init(CartInfo *info);
 
 extern uint8 *UNIFchrrama;  // Meh.  So I can stop CHR RAM
          // bank switcherooing with certain boards...

@@ -20,7 +20,6 @@
 
 #include "mapinc.h"
 #include "mmc3.h"
-#include "../sound.h"
 
 static void M187CW(uint32 A, uint8 V)
 {
@@ -87,7 +86,7 @@ static void M187Power(void)
 {
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=0;
   GenMMC3Power();
-  Write_IRQFM(0x4017,0x40);
+//  Write_IRQFM(0x4017,0x40);
   SetReadHandler(0x5000,0x5FFF,M187Read);
   SetWriteHandler(0x5000,0x5FFF,M187WriteLo);
   SetWriteHandler(0x8000,0x8000,M187Write8000);

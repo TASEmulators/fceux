@@ -21,7 +21,7 @@
  */
 
 /*  Code for emulating iNES mappers 4,12,44,45,47,49,52,74,114,115,116,118,
-    119,148,165,205,214,215,245,249,250,254
+    119,165,205,214,215,245,249,250,254
 */
 
 #include "mapinc.h"
@@ -128,7 +128,9 @@ DECLFW(MMC3_CMDWrite)
  {
   case 0x8000:
        if((V&0x40) != (MMC3_cmd&0x40))
+       {
           FixMMC3PRG(V);
+       }
        if((V&0x80) != (MMC3_cmd&0x80))
           FixMMC3CHR(V);
        MMC3_cmd = V;
@@ -170,7 +172,6 @@ DECLFW(MMC3_CMDWrite)
        break;
   case 0xA001:
        A001B=V;
-       Write_IRQFM(0x4017,0x40);
        break;
  }
 }
@@ -232,7 +233,8 @@ void GenMMC3Restore(int version)
 
 static void GENCWRAP(uint32 A, uint8 V)
 {
- if(!UNIFchrrama) setchr1(A,V);
+// if(!UNIFchrrama) // Yong Zhe Dou E Long - Dragon Quest VI (As).nes NEEDS THIS
+   setchr1(A,V);    // Business Wars NEEDS THIS
 }
 
 static void GENPWRAP(uint32 A, uint8 V)
@@ -535,8 +537,9 @@ static void M45CW(uint32 A, uint8 V)
    uint32 NV=V;
    if(EXPREGS[2]&8)
       NV&=(1<<((EXPREGS[2]&7)+1))-1;
-//   else
-//      NV&=0;
+   else
+      if(EXPREGS[2])
+         NV&=0; // hack ;( don't know exactly how it should be
    NV|=EXPREGS[0]|((EXPREGS[2]&0xF0)<<4);
    setchr1(A,NV);
  }
@@ -854,6 +857,8 @@ static void M115CW(uint32 A, uint8 V)
 
 static DECLFW(M115Write)
 {
+// FCEU_printf("%04x:%04x\n",A,V);
+ if(A==0x5080) EXPREGS[2]=V;
  if(A==0x6000)
     EXPREGS[0]=V;
  else if(A==0x6001)
@@ -861,11 +866,16 @@ static DECLFW(M115Write)
  FixMMC3PRG(MMC3_cmd);
 }
 
+static DECLFR(M115Read)
+{
+ return EXPREGS[2];
+}
+
 static void M115Power(void)
 {
  GenMMC3Power();
  SetWriteHandler(0x4100,0x7FFF,M115Write);
- SetReadHandler(0x4100,0x7FFF,0);
+ SetReadHandler(0x5000,0x5FFF,M115Read);
 }
 
 void Mapper115_Init(CartInfo *info)
@@ -954,6 +964,48 @@ void Mapper119_Init(CartInfo *info)
  CHRRAMSize=8192;
  CHRRAM=(uint8*)FCEU_gmalloc(CHRRAMSize);
  SetupCartCHRMapping(0x10, CHRRAM, CHRRAMSize, 1);
+}
+
+// ---------------------------- Mapper 134 ------------------------------
+
+static void M134PW(uint32 A, uint8 V)
+{
+  setprg8(A,(V&0x1F)|((EXPREGS[0]&2)<<4));
+}
+
+static void M134CW(uint32 A, uint8 V)
+{
+  setchr1(A,(V&0xFF)|((EXPREGS[0]&0x20)<<3));
+}
+
+static DECLFW(M134Write)
+{
+  EXPREGS[0]=V;
+  FixMMC3CHR(MMC3_cmd);
+  FixMMC3PRG(MMC3_cmd);
+}
+
+static void M134Power(void)
+{
+ EXPREGS[0]=0;
+ GenMMC3Power();
+ SetWriteHandler(0x6001,0x6001,M134Write);
+}
+
+static void M134Reset(void)
+{
+ EXPREGS[0]=0;
+ MMC3RegReset();
+}
+
+void Mapper134_Init(CartInfo *info)
+{
+ GenMMC3_Init(info, 256, 256, 0, 0);
+ pwrap=M134PW;
+ cwrap=M134CW;
+ info->Power=M134Power;
+ info->Reset=M134Reset;
+ AddExState(EXPREGS, 4, 0, "EXPR");
 }
 
 // ---------------------------- Mapper 165 ------------------------------
@@ -1157,6 +1209,29 @@ void Mapper195_Init(CartInfo *info)
  SetupCartPRGMapping(0x10, wramtw, wramsize, 1);
  AddExState(CHRRAM, CHRRAMSize, 0, "CHRR");
  AddExState(wramtw, wramsize, 0, "WRAMTW");
+}
+
+// ---------------------------- Mapper 196 -------------------------------
+
+static DECLFW(Mapper196Write)
+{
+  A=(A&0xFFFE)|((A>>2)&1)|((A>>3)&1)|((A>>1)&1);
+  if(A >= 0xC000)
+   MMC3_IRQWrite(A,V);
+  else
+   MMC3_CMDWrite(A,V);
+}
+
+static void Mapper196Power(void)
+{
+  GenMMC3Power();
+  SetWriteHandler(0x8000,0xFFFF,Mapper196Write);
+}
+
+void Mapper196_Init(CartInfo *info)
+{
+  GenMMC3_Init(info, 128, 128, 0, 0);
+  info->Power=Mapper196Power;
 }
 
 // ---------------------------- Mapper 197 -------------------------------
@@ -1559,6 +1634,11 @@ void Mapper254_Init(CartInfo *info)
 }
 
 // ---------------------------- UNIF Boards -----------------------------
+
+void TBROM_Init(CartInfo *info)
+{
+ GenMMC3_Init(info, 64, 64, 0, 0);
+}
 
 void TEROM_Init(CartInfo *info)
 {

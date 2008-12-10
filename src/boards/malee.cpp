@@ -28,6 +28,7 @@ static void MALEEPower(void)
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetReadHandler(0x6000,0x67FF,CartBR);
   SetReadHandler(0x7000,0x77FF,CartBR);
+  SetWriteHandler(0x7000,0x77FF,CartBW);
   setprg2r(1,0x6000,0);
   setprg32(0x8000,0);
   setchr8(0);

@@ -16,18 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * NTDEC, ASDER games
  */
 
 #include "mapinc.h"
 
 static uint8 reg[8];
-static uint8 mirror, cmd;
+static uint8 mirror, cmd, bank;
 static uint8 *WRAM=NULL;
 
 static SFORMAT StateRegs[]=
 {
   {&cmd, 1, "CMD"},
   {&mirror, 1, "MIRR"},
+  {&bank, 1, "BANK"},
   {reg, 8, "REGS"},
   {0}
 };
@@ -37,23 +39,22 @@ static void Sync(void)
   setmirror(mirror^1);
   setprg8(0x8000,reg[0]);
   setprg8(0xA000,reg[1]);
-  setchr2(0x0000,reg[2]>>1);
-  setchr2(0x0800,reg[3]>>1);
-  setchr1(0x1000,reg[4]);
-  setchr1(0x1400,reg[5]);
-  setchr1(0x1800,reg[6]);
-  setchr1(0x1C00,reg[7]);
+  setchr2(0x0000,(reg[2]>>1));
+  setchr2(0x0800,(reg[3]>>1));
+  setchr1(0x1000,((bank&0x10)<<4)|reg[4]);
+  setchr1(0x1400,((bank&0x20)<<3)|reg[5]);
+  setchr1(0x1800,((bank&0x40)<<2)|reg[6]);
+  setchr1(0x1C00,((bank&0x80)<<1)|reg[7]);
 }
 
 static DECLFW(M112Write)
 {
-//    FCEU_printf("bs %04x %02x\n",A,V);
   switch(A)
   {
     case 0xe000: mirror=V&1; Sync(); ;break;
     case 0x8000: cmd=V&7; break;
     case 0xa000: reg[cmd]=V; Sync(); break;
-//    default:   FCEU_printf("bs %04x %02x\n",A,V);
+    case 0xc000: bank=V; Sync(); break;
   }
 }
 
@@ -66,6 +67,7 @@ static void M112Close(void)
 
 static void M112Power(void)
 {
+  bank=0;
   setprg16(0xC000,~0);
   setprg8r(0x10,0x6000,0);
   SetReadHandler(0x8000,0xFFFF,CartBR);

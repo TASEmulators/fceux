@@ -189,12 +189,27 @@ static void M87Sync(void)
 {
   setprg16(0x8000,0);
   setprg16(0xC000,1);
-  setchr8(latche>>1);
+  setchr8(((latche>>1)&1)|((latche<<1)&2));
+//  setchr8(latche);
 }
 
 void Mapper87_Init(CartInfo *info)
 { 
   Latch_Init(info, M87Sync, ~0, 0x6000, 0xFFFF);
+}
+
+//------------------ Map 101 ---------------------------
+
+static void M101Sync(void)
+{
+  setprg16(0x8000,0);
+  setprg16(0xC000,1);
+  setchr8(latche);
+}
+
+void Mapper101_Init(CartInfo *info)
+{
+  Latch_Init(info, M101Sync, ~0, 0x6000, 0x7FFF);
 }
 
 //------------------ Map 11 ---------------------------
@@ -215,6 +230,31 @@ void Mapper144_Init(CartInfo *info)
   Latch_Init(info, M11Sync, 0, 0x8001, 0xFFFF);
 }
 
+//------------------ Map 38 ---------------------------
+
+static void M38Sync(void)
+{
+  setprg32(0x8000,latche&3);
+  setchr8(latche>>2);
+}
+
+void Mapper38_Init(CartInfo *info)
+{
+  Latch_Init(info, M38Sync, 0, 0x7000, 0x7FFF);
+}
+
+//------------------ Map 36 ---------------------------
+
+static void M36Sync(void)
+{
+  setprg32(0x8000,latche>>4);
+  setchr8((latche)&0xF);
+}
+
+void Mapper36_Init(CartInfo *info)
+{
+  Latch_Init(info, M36Sync, 0, 0x8400, 0xfffe);
+}
 //------------------ UNROM ---------------------------
 
 static void UNROMSync(void)

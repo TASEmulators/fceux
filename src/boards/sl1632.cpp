@@ -22,7 +22,7 @@
 #include "mmc3.h"
 
 // brk is a system call in *nix, and is an illegal variable name - soules
-static uint8 chrcmd[8], prg0, prg1, bbrk, latc, mirr;
+static uint8 chrcmd[8], prg0, prg1, bbrk, mirr, swap;
 static SFORMAT StateRegs[]=
 {
   {chrcmd, 8, "CHRCMD"},
@@ -30,16 +30,17 @@ static SFORMAT StateRegs[]=
   {&prg1, 1, "PRG1"},
   {&bbrk, 1, "BRK"},
   {&mirr, 1, "MIRR"},
+  {&swap, 1, "SWAP"},
   {0}
 };
 
 static void Sync(void)
 {
+  int i;
   setprg8(0x8000,prg0);
   setprg8(0xA000,prg1);
   setprg8(0xC000,~1);
   setprg8(0xE000,~0);
-  int i;
   for(i=0; i<8; i++)
      setchr1(i<<10,chrcmd[i]);
   setmirror(mirr^1);
@@ -63,19 +64,16 @@ static void UNLSL1632CW(uint32 A, uint8 V)
 
 static DECLFW(UNLSL1632CMDWrite)
 {
-  if((A&0xA131)==0xA131)
+  if(A==0xA131)
   {
     bbrk=V;
-    latc = bbrk;
   }
   if(bbrk&2)
   {
     FixMMC3PRG(MMC3_cmd);
     FixMMC3CHR(MMC3_cmd);
     if(A<0xC000)
-    {
       MMC3_CMDWrite(A,V);
-    }
     else
       MMC3_IRQWrite(A,V);
   }
@@ -113,7 +111,7 @@ static void UNLSL1632Power(void)
 {
   GenMMC3Power();
   SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,UNLSL1632CMDWrite);
+  SetWriteHandler(0x4100,0xFFFF,UNLSL1632CMDWrite);
 }
 
 void UNLSL1632_Init(CartInfo *info)

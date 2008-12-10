@@ -1,7 +1,12 @@
     {0x9cbadc25,5,8},  /* JustBreed */
 
     {0x6e68e31a,16,8},     /* Dragon Ball 3*/
+    {0xbfc7a2e9,16,8},
+    {0x33b899c9,16,-1},    /* Dragon Ball - Dai Maou Fukkatsu (J) [!] */
     {0x3f15d20d,153,8},    /* Famicom Jump 2 */
+//    {0xb049a8c4,153,-1},    /* SD Gundam Gaiden - Knight Gundam Monogatari 2 - Hikari no Kishi (J) [!] */
+//    NOT 16, since uses WRAM but 8000-FFFF address range for bankswitching, 
+
     {0x983d8175,157,8},  /* Datach Battle Rush */
     {0x894efdbc,157,8},  /* Datach Crayon Shin Chan */
     {0x19e81461,157,8},  /* Datach DBZ */
@@ -17,16 +22,17 @@
     {0x063b1151,209,-1},  /* Power Rangers 4 */
     {0xdd8ced31,209,-1},  /* Power Rangers 3 */
 
-    {0x0c47946d,210,-1},  /* Chibi Maruko Chan */
-    {0xbd523011,210,-1},  /* Dream Master */
-    {0xc247cc80,210,-1},   /* Family Circuit '91 */
-    {0x6ec51de5,210,-1},  /* Famista '92 */
-    {0xadffd64f,210,-1},  /* Famista '93 */
-    {0x429103c9,210,-1},  /* Famista '94 */
-    {0x81b7f1a8,210,-1},  /* Heisei Tensai Bakabon */
-    {0x2447e03b,210,-1},  /* Top Striker */
-    {0x1dc0f740,210,-1},  /* Wagyan Land 2 */
-    {0xd323b806,210,-1},  /* Wagyan Land 3 */
+    {0x0c47946d,210,1},  /* Chibi Maruko Chan */
+    {0xbd523011,210,0},  /* Dream Master */
+    {0xc247cc80,210,1},   /* Family Circuit '91 */
+    {0x6ec51de5,210,1},  /* Famista '92 */
+    {0xadffd64f,210,1},  /* Famista '93 */
+    {0x429103c9,210,1},  /* Famista '94 */
+    {0x81b7f1a8,210,1},  /* Heisei Tensai Bakabon */
+    {0x2447e03b,210,1},  /* Top Striker */
+    {0x1dc0f740,210,1},  /* Wagyan Land 2 */
+    {0xd323b806,210,1},  /* Wagyan Land 3 */
+
     {0x07eb2c12,208,-1},  /* Street Fighter IV */
     {0x96ce586e,189,8},  /* Street Fighter 2 YOKO */
     {0x7678f1d5,207,8},  /* Fudou Myouou Den */
@@ -90,9 +96,9 @@
 {0xbb7c5f7a,89,8},  /* Mito Koumon or something similar */
 
 /* Probably a Namco MMC3-workalike */
-{0xa5e6baf9,4,1|4},  /* Dragon Slayer 4 */
-{0xe40b4973,4,1|4},  /* Metro Cross */
-{0xd97c31b0,4,1|4},  /* Rasaaru Ishii no Childs Quest */
+//{0xa5e6baf9,4,1|4},  /* Dragon Slayer 4 */
+//{0xe40b4973,4,1|4},  /* Metro Cross */
+//{0xd97c31b0,4,1|4},  /* Rasaaru Ishii no Childs Quest */
 
 {0x84382231,9,0},  /* Punch Out (J) */
 
@@ -163,6 +169,7 @@
 {0xd26efd78,66,1},  /* SMB Duck Hunt */
 {0x811f06d9,66,1},  /* Dragon Power */
 {0x3293afea,140,1},  /* Mississippi Satsujin Jiken */
+{0xe46b1c5d,140,1},  /* Mississippi Satsujin Jiken */
 {0xe84274c5,66,1},  /* "" "" */
 {0x9552e8df,66,1},  /* Dragon Ball */
 
@@ -206,6 +213,8 @@
    {0xd5224fde,195,-1},/* Crystalis (c) */
    {0x1bc0be6c,195,-1},/* Captain Tsubasa Vol 2 - Super Striker (C) */
    {0x33c5df92,195,-1},
+   {0xb616885c,195,0}, /* CHaos WOrld (Ch)*/
+   {0x7f3dbf1b,195,0},
    {0xdd431ba7,198,-1},/* Tenchi wo kurau 2 (c) */
    {0x28192599,198,-1},
    {0x700705f4,198,-1},
@@ -216,7 +225,6 @@
    {0xed481b7c,199,-1},/* Dragon Ball Z Gaiden - Saiya Jin Zetsumetsu Keikaku (C) */
    {0x44c20420,199,-1},/* San Guo Zhi 2 (C) */
 
-   {0x1f1326d4,218,-1},
    {0xa1dc16c0,116,-1},
    
    {0xcc868d4e,149,-1}, /* 16 Mahjong [p1][!] */
@@ -225,11 +233,20 @@
    {0xa62b79e1,146,-1}, /* Side Winder (HES) [!] */
    {0x73fb55ac,150,-1}, /* 2-in-1 Cosmo Cop + Cyber Monster (Sachen) [!] */
    {0xddcbda16,150,-1}, /* 2-in-1 Tough Cop + Super Tough Cop (Sachen) [!] */
+   {0x47918d84,150,-1}, /* auto-upturn */
    {0x29582ca1,150,-1},
    {0x40dbf7a2,150,-1},
    {0x5aefbc94,133,-1}, /* Jovial Race (Sachen) [a1][!] */
+   {0x58152b42,160,1},  /* Pipe 5 (Sachen) */
    
    {0x22d6d5bd,4,1},
    {0x6a03d3f3,114,-1},
+   
+   {0x02c41438,179,-1}, /* Xing He Zhan Shi (C) */
+   
+   {0x0da5e32e,101,-1}, /* new Uruusey Yatsura */
+   {0x4f2f1846,-1,1}, /* Famista '89 - Kaimaku Han!! (J) */
+   {0x6c71feae,45,-1}, /* Kunio 8-in-1 */
+//   {0xbdbe3c96,238,-1}, /* Contra Fighter iNES version */
    
    {0,-1,-1}
