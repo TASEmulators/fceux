@@ -196,7 +196,7 @@ void SetDirs()
 		FCEUIOD_AVI,
 		FCEUIOD__COUNT};
 
-	FCEUI_SetSnapName(eoptions & EO_SNAPNAME);
+	FCEUI_SetSnapName((eoptions & EO_SNAPNAME)!=0);
 
 	for(x=0; x < sizeof(jlist) / sizeof(*jlist); x++)
 	{
