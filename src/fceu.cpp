@@ -570,7 +570,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 
 	AutoFire();
-	if(!EnableAutosave)	UpdateAutosave();
+	UpdateAutosave();
 
 #ifdef _S9XLUA_H
 	FCEU_LuaFrameBoundary();
@@ -856,9 +856,9 @@ static int AutosaveCounter = 0;
 
 void UpdateAutosave(void)
 {
-	/*if(!EnableAutosave)
+	if(!EnableAutosave)
 		return;
-	*/
+	
 	char * f;
 	AutosaveCounter = (AutosaveCounter + 1) % 256;
 	if(AutosaveCounter == 0)
