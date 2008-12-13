@@ -22,9 +22,6 @@
 #ifndef __FCEU_TYPES
 #define __FCEU_TYPES
 
-#include <stdlib.h>
-#include <iosfwd>
-
 #define FCEU_NAME "FCEUX"
 #define FCEU_VERSION_STRING "2.0.4-interim"
 #define FCEU_VERSION_NUMERIC 20004
@@ -44,11 +41,6 @@ typedef unsigned int uint32;
 typedef signed char int8;
 typedef signed short int16;
 typedef signed int int32;
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <io.h>
-#include <direct.h>
-#include <malloc.h>
 #define dup _dup
 #define stat _stat
 #define fstat _fstat

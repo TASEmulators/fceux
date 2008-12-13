@@ -1,7 +1,7 @@
 #ifndef __FCEU_ENDIAN
 #define __FCEU_ENDIAN
 
-//#include <iosfwd>
+#include <iosfwd>
 #include <stdio.h>
 
 

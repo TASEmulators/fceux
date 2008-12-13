@@ -1,4 +1,3 @@
-#include <string.h>
 #include "../types.h"
 #include "../x6502.h"
 #include "../fceu.h"

@@ -1,5 +1,3 @@
-#include<stdio.h>
-#include<string.h>
 #include "../types.h"
 #include "../utils/memory.h"
 #include "../x6502.h"

@@ -28,6 +28,7 @@
 #undef LPCWAVEFORMATEX
 #include "dsound.h"
 #include "dinput.h"
+#include <direct.h>
 #include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
 #undef uint8
@@ -544,9 +545,11 @@ void initDirectories()
 		strcpy(directory_names[NUMBER_OF_DIRECTORIES - 1], BaseDirectory.c_str());
 	}
 }
-
+#include "x6502.h"
 int main(int argc,char *argv[])
 {
+	printf("%08x",opsize);
+
 	char *t;
 
 	initArchiveSystem();

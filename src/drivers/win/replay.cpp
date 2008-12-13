@@ -1,3 +1,4 @@
+#include <io.h>
 #include "replay.h"
 #include "common.h"
 #include "main.h"
