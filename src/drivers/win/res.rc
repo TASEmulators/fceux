@@ -328,9 +328,6 @@ BEGIN
         MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
         MENUITEM "Stop Movie",                  FCEU_CONTEXT_STOPMOVIE
         MENUITEM SEPARATOR
-        MENUITEM "Insert Subtitle",             FCEU_CONTEXT_INSERTSUBTITLE
-        MENUITEM "Insert Comment",              FCEU_CONTEXT_INSERTCOMMENT
-        MENUITEM SEPARATOR
         MENUITEM "&Help....",                   FCEU_CONTEXT_MOVIEHELP
     END
     POPUP "Game+NoMovie"

@@ -1258,13 +1258,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			
 			//Context Menus------------------------------------------------------
-			//Game+Movie
-			case FCEU_CONTEXT_INSERTSUBTITLE:
-				InsertSubtitle(hWnd);				
-				break;
-			case FCEU_CONTEXT_INSERTCOMMENT:
-				InsertComment(hWnd);
-				break;
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
 				break;
@@ -1988,85 +1981,4 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
 	combined = "Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
-}
-
-LRESULT CALLBACK InsertCommentSubtitleProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	
-	
-
-	static int *success;
-	char message[128];			//Will contain the contents of the edit box
-	stringstream frame;			//Converts current frame number to stringstream
-	frame << currFrameCounter;	
-	string Subtitle;			//Subtitle string
-	wstring Comment;			//Comment string
-
-	
-	switch (uMsg)
-	{
-	case WM_INITDIALOG:
-	{
-		if (CommentSubtitle)
-			SetDlgItemText(hDlg,INSERTCS_STATIC, "Insert Comment:");
-		else
-			SetDlgItemText(hDlg, INSERTCS_STATIC, "Insert Subtitle:");
-		success = (int*)lParam;
-		return true;
-	}
-	break;
-
-	case WM_CLOSE:
-	case WM_DESTROY:
-	case WM_QUIT:
-		{
-			EndDialog(hDlg, 0);
-			return true;
-		}
-
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) 
-		{
-			case INSERTCS_IDOK:
-			{
-				if (CommentSubtitle) //Comment
-				{
-					GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);	//Place the text in the edit box into message[128]
-					Comment = mbstowcs(message);
-					currMovieData.comments.push_back(Comment);
-				}
-				else				//Subtitle
-				{
-				GetDlgItemText(hDlg, INSERTCS_MESSAGE, message, 128);	//Place the text in the edit box into message[128]
-				Subtitle = frame.str() + " " + message;					//Add frame number to beginning of message
-				FCEU_printf("%s",Subtitle.c_str());						//Debug, output string
-				//currMovieData.subtitles.push_back(Subtitle);
-				EndDialog(hDlg, 0);
-				return true;
-				break;
-				}
-			}
-			
-			case INSERTCS_IDCANCEL:
-			{
-				EndDialog(hDlg, 0);
-				return true;
-				break;
-			}
-			
-		}
-	}
-	return 0;
-}
-void InsertSubtitle(HWND main)
-{
-	//TODO: unless more commands are added these two functions can be consolidated to 1 with a bool argument
-	CommentSubtitle = false;
-	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
-}
-
-void InsertComment(HWND main)
-{
-	CommentSubtitle = true;
-	DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(INSERTCOMMENTSUBTITLE), main, (DLGPROC) InsertCommentSubtitleProc,(LPARAM) 0);
 }
