@@ -77,15 +77,15 @@ HMENU hfceuxcontext;		//Handle to context menu
 HMENU hfceuxcontextsub;		//Handle to context sub menu
 
 //Extern variables------------------------------------
-
+extern bool movieSubtitles;
 extern FCEUGI *GameInfo;
 extern int EnableAutosave;
 extern bool frameAdvanceLagSkip;
-extern bool movieSubtitles;
 extern bool turbo;
 extern int luaRunning;
-// Extern functions
+extern bool movie_readonly;
 
+// Extern functions
 char *md5_asciistr(uint8 digest[16]);
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
@@ -109,7 +109,7 @@ static LONG WindowXC=1<<30,WindowYC;
 int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
-bool CommentSubtitle = false;		//Toggle for comment/subtitle dialog box
+
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
@@ -732,9 +732,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	{
 		hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
 
-		//If There is a movie loaded
-		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))		
+		//If There is a movie loaded in read only
+		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)		
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
+
+		//If there is a movie loaded in read+write
+		else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
+			hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
 		
 		//If there is a ROM loaded but no movie
 		else if (GameInfo)
@@ -890,6 +894,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			//Movie submenu
+			case FCEUX_CONTEXT_RECORDMOVIE:
 			case MENU_RECORD_MOVIE:
 				FCEUD_MovieRecordTo();
 				break;
@@ -922,6 +927,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				loggingSound = false;
 				break;
 
+			case FCEUX_CONTEXT_SCREENSHOT:
 			case ID_FILE_SCREENSHOT:
 				FCEUI_SaveSnapshot();
 				break;
@@ -1258,6 +1264,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			
 			//Context Menus------------------------------------------------------
+			case FCEUX_CONTEXT_REWINDTOLASTAUTO:
+				FCEUI_Autosave();
+				break;
+
+			//Movie help
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
 				break;
