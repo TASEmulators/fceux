@@ -1795,7 +1795,7 @@ void ChangeMenuItemText(int menuitem, string text)
 
 void UpdateMenuHotkeys()
 {
-	//Update all menu items that can be called rom a hotkey
+	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
 	string combo, combined;
 
 	//-------------------------------FILE---------------------------------------

@@ -111,7 +111,7 @@ void RebuildSubCheats(void)
 {
 	int x;
 	struct CHEATF *c=cheats;
-
+	FCEU_DispMessage("Numcheats: %d",numsubcheats);
 	for(x=0;x<numsubcheats;x++)
 		SetReadHandler(SubCheats[x].addr,SubCheats[x].addr,SubCheats[x].PrevRead);
 

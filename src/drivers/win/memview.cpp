@@ -1107,6 +1107,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			AppendMenu(sub, MF_SEPARATOR, ID_ADDRESS_FRZ_SEP, "-");
 			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE_ALL, "Unfreeze all");
 
+			if (CursorEndAddy - CursorStartAddy > 256)	//There is a limit of 256 possible frozen addresses, therefore if the user has selected more than this limit, disable freeze menu items
+			{
+				EnableMenuItem(sub,ID_ADDRESS_FRZ_TOGGLE_STATE,MF_GRAYED);
+				EnableMenuItem(sub,ID_ADDRESS_FRZ_FREEZE,MF_GRAYED);				
+			}
 			continue;
 		}
 		// ################################## End of SP CODE ###########################
