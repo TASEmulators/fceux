@@ -1395,19 +1395,11 @@
 					Name="res"
 					>
 					<File
-						RelativePath="..\src\drivers\win\res\EXE.ico"
+						RelativePath="..\src\drivers\win\res\ICON_1.ico"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\res\FAM.ico"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\res\FDS.ico"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\res\NES.ico"
+						RelativePath="..\src\drivers\win\res\ICON_2.ico"
 						>
 					</File>
 					<File
