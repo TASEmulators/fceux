@@ -347,6 +347,7 @@
 #define IDC_HACKYEXPORT                 1133
 #define IDC_BUTTON1                     1133
 #define TASEDIT_REWIND                  1133
+#define MEMW_EXPANDCOLLAPSE             1133
 #define IDC_BUTTON2                     1134
 #define TASEDIT_FOWARD                  1134
 #define IDC_BUTTON3                     1135

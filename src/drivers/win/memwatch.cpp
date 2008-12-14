@@ -38,6 +38,7 @@ static HMENU memwrecentmenu;//Handle to Recent Files Menu
 
 int MemWatch_wndx=0, MemWatch_wndy=0; //Window Position
 
+bool MemWCollapsed = false;		//Flag to determine if window is currently collapsed
 //Memory Watch globals-----------------------------------------
 const int NUMWATCHES = 24;		//Maximum Number of Watches
 const int LABELLENGTH = 64;		//Maximum Length of a Watch label
@@ -60,7 +61,6 @@ const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
 
 
-
 //Ram change monitor globals-----------------------------------
 bool RamChangeInitialize = false;		//Set true during memw WM_INIT
 const int MAX_RAMMONITOR = 4;			//Maximum number of Ram values that can be monitored
@@ -71,7 +71,9 @@ int editnow[MAX_RAMMONITOR];			//current address value
 unsigned int editcount[MAX_RAMMONITOR];	//Current counter value
 char editchangem[MAX_RAMMONITOR][5];	//counter converted to string
 
-void RamChangeReset(int x);
+//Prototypes
+void RamChangeReset(int x);	//Called when user hits reset button
+void CollapseWindow(void);	//Called when user collapses or expands window
 //-------------------------------------------------
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
@@ -685,6 +687,13 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		hdc = GetDC(hwndDlg);
 		SelectObject (hdc, debugSystem->hFixedFont);
 		SetTextAlign(hdc,TA_UPDATECP | TA_TOP | TA_LEFT);
+		
+		//Collapse window if necesasry
+		if (MemWCollapsed) 
+		{
+			MemWCollapsed = false;  //This is necessary in order for CollapseWindow to collapse properly
+			CollapseWindow();		//If flagged as collapsed mode collapse
+		}
 
 		//find the positions where we should draw string values
 		for(int i=0;i<MWNUM;i++) {
@@ -783,6 +792,11 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case MEMW_HELP_WCOMMANDS:
 			OpenHelpWindow(memwhelp);
 			break;
+
+		case MEMW_EXPANDCOLLAPSE:
+			CollapseWindow();
+			break;
+			
 		case MEMW_EDIT00RESET:
 			RamChangeReset(0);	
 			break;
@@ -899,8 +913,14 @@ void CreateMemWatch()
 			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
 		}
 	}
-if (MemWatchLoadFileOnStart) OpenMemwatchRecentFile(0);
-else fileChanged = false;
+	if (MemWatchLoadFileOnStart) OpenMemwatchRecentFile(0);
+	else fileChanged = false;
+
+	if (MemWCollapsed) 
+	{
+		MemWCollapsed = false;  //This is necessary in order for CollapseWindow to collapse properly
+		CollapseWindow();		//If flagged as collapsed mode collapse
+	}
 }
 void AddMemWatch(char memaddress[32])
 {
@@ -998,4 +1018,27 @@ void RamChangeReset(int x)
 	editcount[x] = 0;
 	sprintf(editchangem[x], "%d", editcount[x]);					//Convert counter to text
 	SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
+}
+
+void CollapseWindow(void)
+{
+	RECT wrect;
+	int left,right,top,bottom;
+	
+	GetWindowRect(hwndMemWatch,&wrect);	//Get currect window size
+		
+	if (!MemWCollapsed)						//If window is full size collapse it
+	{
+		wrect.right = (wrect.right - ((wrect.right-wrect.left)/2));
+		MemWCollapsed = true;
+		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, ">"); //Put Address value
+	}
+	else
+	{
+		wrect.right = (wrect.right + (wrect.right-wrect.left));
+		MemWCollapsed = false;
+		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, "<"); //Put Address value
+	}
+		
+	SetWindowPos(hwndMemWatch,HWND_TOPMOST,MemWatch_wndx,MemWatch_wndy,(wrect.right-wrect.left),(wrect.bottom-wrect.top),SWP_SHOWWINDOW);
 }
