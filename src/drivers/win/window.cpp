@@ -91,7 +91,7 @@ void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
-
+extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 //AutoFire-----------------------------------------------
 
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
@@ -1264,6 +1264,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			
 			//Context Menus------------------------------------------------------
+			//View comments and subtitles
+			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
+				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc, (LPARAM)0);
+
+			//Load last auto-save
 			case FCEUX_CONTEXT_REWINDTOLASTAUTO:
 				FCEUI_Autosave();
 				break;
