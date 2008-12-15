@@ -577,7 +577,8 @@ void dumpToFile(const char* buffer, unsigned int size)
 void FreezeRam(int address, int mode, int final){
 	// mode: -1 == Unfreeze; 0 == Toggle; 1 == Freeze
 	// ################################## End of SP CODE ###########################
-	if((address < 0x2000) || ((address >= 0x6000) && (address <= 0x7FFF))){
+	if(FrozenAddressCount <= 256 && (address < 0x2000) || ((address >= 0x6000) && (address <= 0x7FFF))){
+		//adelikat:  added FrozenAddressCount check to if statement to prevent user from freezing more than 256 address (unfreezing when > 256 crashes)
 		addrtodelete = address;
 		cheatwasdeleted = 0;
 
@@ -841,6 +842,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	TEXTMETRIC tm;
 	SCROLLINFO si;
 	int x, y, i, j;
+	int tempAddy;
 
 	const int MemFontWidth = debugSystem->fixedFontWidth;
 	const int MemFontHeight = debugSystem->fixedFontHeight;
@@ -1106,9 +1108,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE, "Unfreeze");
 			AppendMenu(sub, MF_SEPARATOR, ID_ADDRESS_FRZ_SEP, "-");
 			AppendMenu(sub, MF_STRING, ID_ADDRESS_FRZ_UNFREEZE_ALL, "Unfreeze all");
-
-			if (CursorEndAddy - CursorStartAddy > 256)	//There is a limit of 256 possible frozen addresses, therefore if the user has selected more than this limit, disable freeze menu items
-			{
+			
+			if (CursorEndAddy == -1) tempAddy = CursorStartAddy;
+			else tempAddy = CursorEndAddy;								//This is necessary because CursorEnd = -1 if only 1 address is selected
+			if (tempAddy - CursorStartAddy + FrozenAddressCount > 255)	//There is a limit of 256 possible frozen addresses, therefore if the user has selected more than this limit, disable freeze menu items
+			{														
 				EnableMenuItem(sub,ID_ADDRESS_FRZ_TOGGLE_STATE,MF_GRAYED);
 				EnableMenuItem(sub,ID_ADDRESS_FRZ_FREEZE,MF_GRAYED);				
 			}

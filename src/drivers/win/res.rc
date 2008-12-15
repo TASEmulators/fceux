@@ -291,6 +291,8 @@ BEGIN
     BEGIN
         MENUITEM "Load on Startup",             MEMW_OPTIONS_LOADSTART
         MENUITEM "Load Last File on Startup",   MEMW_OPTIONS_LOADLASTFILE
+        MENUITEM SEPARATOR
+        MENUITEM "Collapse to 1 column",        MEMW_OPTIONS_EXPANDCOLLAPSE
     END
     POPUP "Help"
     BEGIN

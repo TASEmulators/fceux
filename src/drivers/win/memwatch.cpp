@@ -23,6 +23,7 @@
 #include "memwatch.h"
 #include "../../debug.h"
 #include "debugger.h"
+#include "cheat.h"
 #include "../../utils/xstring.h"
 #include "help.h"
 #include <string>
@@ -270,6 +271,15 @@ void UpdateMemWatch()
 		{
 			MWRec& mwrec = mwrecs[i];
 
+			//Display blue if address is frozen
+			for (unsigned int x = 0; x < FrozenAddressCount; x++)
+			{
+				if (mwrec.addr == FrozenAddresses[x])
+				{
+					SetTextColor(hdc,RGB(0,0,255));
+				}
+			}
+
 			char* text;
 			if(mwrec.valid && GameInfo)
 			{
@@ -308,6 +318,7 @@ void UpdateMemWatch()
 
 			MoveToEx(hdc,xPositions[i],yPositions[i],NULL);
 			TextOut(hdc,0,0,text,strlen(text));
+			SetTextColor(hdc,RGB(0,0,0));
 		}
 		
 	}
@@ -793,6 +804,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			OpenHelpWindow(memwhelp);
 			break;
 
+		case MEMW_OPTIONS_EXPANDCOLLAPSE:
 		case MEMW_EXPANDCOLLAPSE:
 			CollapseWindow();
 			break;
@@ -1020,11 +1032,21 @@ void RamChangeReset(int x)
 	SetDlgItemText(hwndMemWatch, EDIT00_RESULTS+x, editchangem[x]);	//Display text in results box
 }
 
+void ChangeMemwMenuItemText(int menuitem, string text)
+{
+	MENUITEMINFO moo;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(memwmenu, menuitem, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)text.c_str();
+	SetMenuItemInfo(memwmenu, menuitem, FALSE, &moo);
+}
+
 void CollapseWindow(void)
 {
 	RECT wrect;
-	int left,right,top,bottom;
-	
+		
 	GetWindowRect(hwndMemWatch,&wrect);	//Get currect window size
 		
 	if (!MemWCollapsed)						//If window is full size collapse it
@@ -1032,13 +1054,17 @@ void CollapseWindow(void)
 		wrect.right = (wrect.right - ((wrect.right-wrect.left)/2));
 		MemWCollapsed = true;
 		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, ">"); //Put Address value
+		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "Expand to 2 columns");
 	}
 	else
 	{
 		wrect.right = (wrect.right + (wrect.right-wrect.left));
 		MemWCollapsed = false;
 		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, "<"); //Put Address value
+		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "Collapse to 1 column");
 	}
-		
+	
 	SetWindowPos(hwndMemWatch,HWND_TOPMOST,MemWatch_wndx,MemWatch_wndy,(wrect.right-wrect.left),(wrect.bottom-wrect.top),SWP_SHOWWINDOW);
+	
+	
 }

@@ -33,7 +33,13 @@
 #include "memory.h"
 #include "driver.h"
 
+using namespace std;
+
 static uint8 *CheatRPtrs[64];
+
+vector<uint16> FrozenAddresses;			//List of addresses that are currently frozen
+void UpdateFrozenList(void);			//Function that populates the list of frozen addresses
+unsigned int FrozenAddressCount=0;		//Keeps up with the Frozen address count, necessary for using in other dialogs (such as hex editor)
 
 void FCEU_CheatResetRAM(void)
 {
@@ -111,7 +117,6 @@ void RebuildSubCheats(void)
 {
 	int x;
 	struct CHEATF *c=cheats;
-	FCEU_DispMessage("Numcheats: %d",numsubcheats);
 	for(x=0;x<numsubcheats;x++)
 		SetReadHandler(SubCheats[x].addr,SubCheats[x].addr,SubCheats[x].PrevRead);
 
@@ -137,6 +142,7 @@ void RebuildSubCheats(void)
 		}
 		c=c->next;
 	}
+	FrozenAddressCount = numsubcheats;		//Update the frozen address list
 }
 
 void FCEU_PowerCheats()
@@ -369,6 +375,7 @@ int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int ty
 	}
 	savecheats=1;
 	RebuildSubCheats();
+	UpdateFrozenList();
 	return(1);
 }
 
@@ -414,7 +421,7 @@ int FCEUI_DelCheat(uint32 which)
 
 	savecheats=1;
 	RebuildSubCheats();
-
+	UpdateFrozenList();
 	return(1);
 }
 
@@ -925,4 +932,20 @@ void FCEU_CheatSetByte(uint32 A, uint8 V)
     CheatRPtrs[A>>10][A]=V;
    else if(A < 0x10000)
     BWrite[A](A, V);
+}
+
+void UpdateFrozenList(void)
+{
+	//The purpose of this function is to keep an up to date list of addresses that are currently frozen
+	//and make these accessible to other dialogs that deal with memory addresses such as
+	//memwatch, hex editor, ramfilter, etc.
+	
+	int x;
+	FrozenAddresses.clear();		//Clear vector and repopulate
+	for(x=0;x<numsubcheats;x++)
+	{
+		FrozenAddresses.push_back(SubCheats[x].addr);
+		//FCEU_printf("Address %d: %d \n",x,FrozenAddresses[x]); //Debug
+	}
+	//FCEUI_DispMessage("FrozenCount: %d",FrozenAddressCount);//Debug
 }

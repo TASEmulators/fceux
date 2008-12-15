@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+14-dec-2008 - adelikat - win32 - memwatch - frozen addresses will display as blue
 14-dec-2008 - adelikat - win32 - hexeditor - prevent the user from freezing more than 256 addresses at once
 14-dec-2008 - adelikat - win32 - memwatch - collapsable to 1 column
 08-dec-2008 - adelikat - win32 - stop lua menu item gray if no lua script is running
