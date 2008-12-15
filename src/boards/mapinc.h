@@ -8,4 +8,5 @@
 #include "../cart.h"
 #include "../cheat.h"
 #include "../unif.h"
-
+#include <stdio.h>
+#include <string.h>
