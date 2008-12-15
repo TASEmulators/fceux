@@ -143,6 +143,8 @@ void RebuildSubCheats(void)
 		c=c->next;
 	}
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
+	UpdateFrozenList();
+	FCEUI_DispMessage("Active Cheats: %d", FrozenAddresses.size()/*FrozenAddressCount*/); //Debug
 }
 
 void FCEU_PowerCheats()
@@ -375,7 +377,7 @@ int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int ty
 	}
 	savecheats=1;
 	RebuildSubCheats();
-	UpdateFrozenList();
+	
 	return(1);
 }
 
@@ -421,7 +423,6 @@ int FCEUI_DelCheat(uint32 which)
 
 	savecheats=1;
 	RebuildSubCheats();
-	UpdateFrozenList();
 	return(1);
 }
 
