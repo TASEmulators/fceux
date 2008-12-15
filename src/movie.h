@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <ostream>
+#include <stdlib.h>
 
 #include "input/zapper.h"
 #include "utils/guid.h"
