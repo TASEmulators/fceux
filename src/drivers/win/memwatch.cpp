@@ -262,7 +262,7 @@ static struct MWRec
 //Update the values in the Memory Watch window
 void UpdateMemWatch()
 {
-	if(hwndMemWatch)
+	if(hwndMemWatch && GameInfo)
 	{
 		SetTextColor(hdc,RGB(0,0,0));
 		SetBkColor(hdc,GetSysColor(COLOR_3DFACE));
@@ -272,12 +272,15 @@ void UpdateMemWatch()
 			MWRec& mwrec = mwrecs[i];
 
 			//Display blue if address is frozen
+			if (FrozenAddressCount && FrozenAddresses.size())
+			{
 			for (unsigned int x = 0; x < FrozenAddressCount; x++)
 			{
 				if (mwrec.addr == FrozenAddresses[x])
 				{
 					SetTextColor(hdc,RGB(0,0,255));
 				}
+			}
 			}
 
 			char* text;
