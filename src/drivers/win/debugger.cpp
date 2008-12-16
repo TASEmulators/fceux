@@ -65,6 +65,16 @@ static SCROLLINFO si;
 #define MAX_NAME_SIZE 200
 #define MAX_CONDITION_SIZE 200
 
+void RestoreSize(HWND hwndDlg)
+{
+	//As of the writing of this function (revision 1053) the Debugger default width = 821 and height of 523
+	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
+	const int DEFAULT_WIDTH = 821;	//Original width
+	const int DEFAULT_HEIGHT = 523;	//Original height
+	
+	SetWindowPos(hwndDlg,HWND_TOPMOST,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
+}
+
 unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
 {
 	char startOffsetBuffer[5] = {0};
@@ -1192,6 +1202,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				switch(HIWORD(wParam)) {
 					case BN_CLICKED:
 						switch(LOWORD(wParam)) {
+							case IDC_DEBUGGER_RESTORESIZE: 
+								RestoreSize(hwndDlg); 
+								break;
 							case IDC_DEBUGGER_BP_ADD:
 								childwnd = 1;
 								if (DialogBox(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB)) AddBreakList();
@@ -1285,7 +1298,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_ENABLE_SYMBOLIC: UpdateDebugger(); break;
 							
 // ################################## End of SP CODE ###########################
-
+							
 							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break;
 						}
 						//UpdateDebugger();

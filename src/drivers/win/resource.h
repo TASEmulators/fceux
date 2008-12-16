@@ -383,6 +383,8 @@
 #define MEMW_EDIT02RMADDRESS            1190
 #define INSERTCS_STATIC                 1190
 #define MEMW_EDIT03RMADDRESS            1191
+#define IDC_DEBUG_RESTORESIZE           1191
+#define IDC_DEBUGGER_RESTORESIZE        1191
 #define MEMW_EDIT04RMADDRESS            1192
 #define EDIT00_RESULTS                  1193
 #define EDIT01_RESULTS                  1194
@@ -633,7 +635,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
 #define _APS_NEXT_COMMAND_VALUE         40315
-#define _APS_NEXT_CONTROL_VALUE         1191
+#define _APS_NEXT_CONTROL_VALUE         1192
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

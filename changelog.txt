@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+16-dec-2008 - adelikat - win32 - debugger - added "Restore original window size" button
 16-dec-2008 - adelikat - win32 - debugger - fixed SF2073113 - Debugger now has a minimum valid size
 15-dec-2008 - adelikat - win32 - cheats - number of active cheats listed, freezing ram addresses in hex editor automatically updates cheats dialog
 15-dec-2008 - adelikat - win32 - hexeditor - added minimize & maximize buttons
