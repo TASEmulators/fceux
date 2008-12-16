@@ -9,6 +9,7 @@ void ConfigCheats(HWND hParent);
 void DoGGConv();
 void SetGGConvFocus(int address,int compare);
 void UpdateCheatList();
+void UpdateCheatsAdded();
 
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;

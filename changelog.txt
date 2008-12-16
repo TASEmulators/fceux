@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+15-dec-2008 - adelikat - win32 - cheats - number of active cheats listed, freezing ram addresses in hex editor automatically updates cheats dialog
+15-dec-2008 - adelikat - win32 - hexeditor - added minimize & maximize buttons
 14-dec-2008 - adelikat - win32 - memwatch - frozen addresses will display as blue
 14-dec-2008 - adelikat - win32 - hexeditor - prevent the user from freezing more than 256 addresses at once
 14-dec-2008 - adelikat - win32 - memwatch - collapsable to 1 column

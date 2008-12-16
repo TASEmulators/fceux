@@ -25,8 +25,12 @@
 #include "debugger.h"
 #include "../../fceu.h"
 #include "../../cart.h"
-static HWND pwindow = 0;
-HWND hCheat; //mbg merge 7/19/06 had to add
+
+static HWND pwindow = 0;	//Handle to Cheats dialog
+HWND hCheat;				//mbg merge 7/19/06 had to add
+
+void InitializeCheatsAdded(HWND hwndDlg);
+
 int CheatWindow;
 int CheatStyle=1;
 
@@ -154,7 +158,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			if (ChtPosX==-32000) ChtPosX=0; //Just in case
 			if (ChtPosY==-32000) ChtPosY=0;
 			SetWindowPos(hwndDlg,0,ChtPosX,ChtPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
-
+			
 			//setup font
 			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
 			GetObject(hFont, sizeof(LOGFONT), &lf);
@@ -191,9 +195,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			else EnableCheatButtons(hwndDlg,FALSE);
 
 			//misc setup
-			RedoCheatsLB(hwndDlg);
+			//RedoCheatsLB(hwndDlg); //adelikat: Moved to UpdateCheatsAdded() function
 			searchdone=0;
 			SetDlgItemText(hwndDlg,IDC_CHEAT_VAL_KNOWN,(LPTSTR)U8ToStr(knownvalue));
+			InitializeCheatsAdded(hwndDlg);
 			break;
 
 		case WM_NCACTIVATE:
@@ -342,6 +347,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 								EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),TRUE);
 							}
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+							UpdateCheatsAdded();
 							break;
 						case IDC_BTN_CHEAT_DEL:
 							if (selcheat >= 0) {
@@ -355,6 +361,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_DEL),FALSE);
 							EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_UPD),FALSE);
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
+							UpdateCheatsAdded();
 							break;
 						case IDC_BTN_CHEAT_UPD:
 							if (selcheat < 0) break;
@@ -538,6 +545,52 @@ void UpdateCheatList()
 		ShowResults(pwindow);
 }
 
+//This is necessary during the intialization of the cheats dialog, it is redundant with UpdateCheatsAdded except the handle is passed by CheatConsoleCallB
+void InitializeCheatsAdded(HWND hwndDlg)
+{
+	char temp[64];
+	if (FrozenAddressCount < 256)
+			sprintf(temp,"Active Cheats %d", FrozenAddressCount);
+		
+		else if (FrozenAddressCount == 256)
+		{
+			sprintf(temp,"Active Cheats %d (Max Limit)", FrozenAddressCount);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
+		}
+		else
+		{
+			sprintf(temp,"%d Error: Too many cheats loaded!", FrozenAddressCount);
+			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_ADD),FALSE);
+		}
+		SetDlgItemText(hwndDlg,201,temp);
+		RedoCheatsLB(hwndDlg);
+}
+
+//Used by cheats and external dialogs such as hex editor to update items in the cheat search dialog
+void UpdateCheatsAdded()
+{
+	char temp[64];
+	if(!pwindow)
+		return;
+	else
+	{
+		if (FrozenAddressCount < 256)
+			sprintf(temp,"Active Cheats %d", FrozenAddressCount);
+		
+		else if (FrozenAddressCount == 256)
+		{
+			sprintf(temp,"Active Cheats %d (Max Limit)", FrozenAddressCount);
+			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADD),FALSE);
+		}
+		else
+		{
+			sprintf(temp,"%d Error: Too many cheats loaded!", FrozenAddressCount);
+			EnableWindow(GetDlgItem(hCheat,IDC_BTN_CHEAT_ADD),FALSE);
+		}
+		SetDlgItemText(hCheat,201,temp);
+		RedoCheatsLB(hCheat);
+	}
+}
 
 BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	char str[100];

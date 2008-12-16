@@ -144,7 +144,7 @@ void RebuildSubCheats(void)
 	}
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
 	UpdateFrozenList();
-	FCEUI_DispMessage("Active Cheats: %d", FrozenAddresses.size()/*FrozenAddressCount*/); //Debug
+	//FCEUI_DispMessage("Active Cheats: %d", FrozenAddresses.size()/*FrozenAddressCount*/); //Debug
 }
 
 void FCEU_PowerCheats()

@@ -603,6 +603,7 @@ void FreezeRam(int address, int mode, int final){
 		UpdateColorTable();
 		}*/
 		//mbg merge 6/29/06 - WTF
+		UpdateCheatsAdded();
 	}
 }
 
@@ -1544,7 +1545,7 @@ void DoMemView() {
 
 		hMemView = CreateWindowEx(0,"MEMVIEW","Memory Editor",
 			//WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */
-			WS_SYSMENU|WS_THICKFRAME|WS_VSCROLL,
+			WS_SYSMENU|WS_MAXIMIZEBOX|WS_MINIMIZEBOX|WS_THICKFRAME|WS_VSCROLL,
 			CW_USEDEFAULT,CW_USEDEFAULT,625,242,  /* X,Y ; Width, Height */
 			NULL,NULL,fceu_hInstance,NULL ); 
 		ShowWindow (hMemView, SW_SHOW) ;
