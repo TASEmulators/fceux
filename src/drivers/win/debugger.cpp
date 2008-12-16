@@ -856,17 +856,17 @@ static RECT newDebuggerRect;
 //used to move all child items in the dialog when you resize (except for the dock fill controls which are resized)
 BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 {
-	int dx = (newDebuggerRect.right-newDebuggerRect.left)-(currDebuggerRect.right-currDebuggerRect.left);
-	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);
+	int dx = (newDebuggerRect.right-newDebuggerRect.left)-(currDebuggerRect.right-currDebuggerRect.left);	//Calculate & store difference in width of old size vs new size
+	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);	//ditto wtih height
 
-	HWND editbox = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY);
-	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);
-	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);
-	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);
+	HWND editbox = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY);		//Get handle for Disassembly list box (large guy on the left)
+	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);		//Get handle for IContray, vertical column to the left of disassembly
+	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
+	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
 
 	RECT crect;
-	GetWindowRect(hwnd,&crect);
-	ScreenToClient(hDebug,(LPPOINT)&crect);
+	GetWindowRect(hwnd,&crect);					//Get rect of current child to be resized
+	ScreenToClient(hDebug,(LPPOINT)&crect);		//Convert rect coordinates to client area coordinates
 	ScreenToClient(hDebug,((LPPOINT)&crect)+1);
 
 	if(hwnd == editbox) {
@@ -889,6 +889,7 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		 SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
 	} else {
 		crect.left += dx;
+		//if (crect.left < 256) crect.left = 256;		//Limit how far left the remaining child windows will move
 		SetWindowPos(hwnd,0,crect.left,crect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
 	}
 	return TRUE;
@@ -985,15 +986,35 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		}
 
 		case WM_SIZE: {
-			if(wParam == SIZE_RESTORED)
+			if(wParam == SIZE_RESTORED)										//If dialog was resized
 			{
-				GetWindowRect(hwndDlg,&newDebuggerRect);
-				DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;
-				DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
-				EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);
-				currDebuggerRect = newDebuggerRect;
-				InvalidateRect(hwndDlg,0,TRUE);
-				UpdateWindow(hwndDlg);
+				GetWindowRect(hwndDlg,&newDebuggerRect);					//Get new size
+				//Force a minimum Dialog size-------------------------------
+				if (newDebuggerRect.right - newDebuggerRect.left < 368 || newDebuggerRect.bottom - newDebuggerRect.top < 150)	//If either x or y is too small run the force size routine
+				{
+					if (newDebuggerRect.right - newDebuggerRect.left < 367)	//If width is too small reset to previous width
+					{
+						newDebuggerRect.right = currDebuggerRect.right;
+						newDebuggerRect.left = currDebuggerRect.left;
+						
+					}
+					if (newDebuggerRect.bottom - newDebuggerRect.top < 150)	//If heigth is too small reset to previous height
+					{
+						newDebuggerRect.top = currDebuggerRect.top;
+						newDebuggerRect.bottom = currDebuggerRect.bottom;
+					}
+				SetWindowPos(hwndDlg,HWND_TOPMOST,newDebuggerRect.left,newDebuggerRect.top,(newDebuggerRect.right-newDebuggerRect.left),(newDebuggerRect.bottom-newDebuggerRect.top),SWP_SHOWWINDOW);
+				}
+				//Else run normal resizing procedure-------------------------
+				else														
+				{
+					DbgSizeX = newDebuggerRect.right-newDebuggerRect.left;	//Store new size (this will be used to store in the .cfg file)	
+					DbgSizeY = newDebuggerRect.bottom-newDebuggerRect.top;
+					EnumChildWindows(hwndDlg,DebuggerEnumWindowsProc,0);	//Initiate callback for resizing child windows
+					currDebuggerRect = newDebuggerRect;						//Store current debugger window size (for future calculations in EnumChildWindows
+					InvalidateRect(hwndDlg,0,TRUE);
+					UpdateWindow(hwndDlg);
+				}
 			}
 			break;
 		}
