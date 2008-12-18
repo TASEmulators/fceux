@@ -21,7 +21,7 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-static uint8 *CHRRAM;
+//static uint8 *CHRRAM;
 static uint8 tekker;
 
 static void MSHCW(uint32 A, uint8 V)
