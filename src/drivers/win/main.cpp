@@ -150,11 +150,11 @@ HRESULT ddrval;
 
 static char TempArray[2048];
 
-
 static int exiting = 0;
 static volatile int moocow = 0;
 
 int windowedfailed;
+int fullscreen = 0;	//Windows files only, variable that keeps track of fullscreen status
 
 static volatile int _userpause = 0; //mbg merge 7/18/06 changed tasbuild was using this only in a couple of places
 
