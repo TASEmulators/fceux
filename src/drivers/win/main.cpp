@@ -686,7 +686,7 @@ doloopy:
 			{
 				if (!frameSkipCounter) 
 				{
-					frameSkipCounter = 15;
+					frameSkipCounter = 18;
 					skippy = 0;
 				}
 				else 
@@ -757,11 +757,11 @@ void win_debuggerLoop()
 // Update the game and gamewindow with a new frame
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
-	win_SoundSetScale(fps_scale);
-
+	win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
+	
 	//write all the sound we generated.
-	if(soundo && Buffer && Count) {
-		win_SoundWriteData(Buffer,Count);
+	if(soundo && Buffer && Count && !(muteTurbo && turbo)) {
+		win_SoundWriteData(Buffer,Count); //If turboing and mute turbo is true, bypass this
 	}
 	
 	//blit the framebuffer
@@ -775,7 +775,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//MBG TODO - think about this logic
 	//throttle
-	extern bool turbo; //needs to be declared better
+	
 	if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
 		if(!turbo) //and turbo is disabled..
 			if(!FCEUI_EmulationPaused() 
