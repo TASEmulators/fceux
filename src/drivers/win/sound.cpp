@@ -26,6 +26,8 @@
 #include "common.h"
 #include "main.h"
 
+extern bool turbo;		//If turbo is running
+
 /// controls whether playback is muted
 static bool mute = false;
 /// indicates whether we've been coerced into outputting 8bit audio
@@ -503,7 +505,7 @@ case WM_COMMAND:
 					if(soundrate<44100)
 					{
 						soundquality=0;
-						FCEUI_SetSoundQuality(0);
+						if (!turbo) FCEUI_SetSoundQuality(0);	///If turbo is running, don't do this call, turbo will handle it instead
 						UpdateSD(hwndDlg);
 					}
 					if(soundo)
@@ -519,7 +521,7 @@ case WM_COMMAND:
 		case COMBO_SOUND_QUALITY:
 			soundquality=SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 			if(soundrate<44100) soundquality=0;
-			FCEUI_SetSoundQuality(soundquality);
+			if (!turbo) FCEUI_SetSoundQuality(soundquality);	//If turbo is running, don't do this call, turbo will handle it instead
 			UpdateSD(hwndDlg);
 			break;
 		}

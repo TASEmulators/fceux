@@ -40,9 +40,10 @@ LPDIRECTINPUT7 lpDI=0;
 
 void InitInputPorts(bool fourscore);
 
-int tempwinsync = 0;
+int tempwinsync = 0;		//Temp variable used by turbo to turn of sync settings
+int tempsoundquality = 0;	//Temp variable used by turbo to turn of sound quality settings
 extern int winsync;
-
+extern int soundquality;
 //UsrInputType[] is user-specified.  InputType[] is current
 //        (game/savestate/movie loading can override user settings)
 
@@ -1481,22 +1482,32 @@ void FCEUD_TurboOn    (void)
 	{ 
 		tempwinsync = winsync;	//Store winsync setting
 		winsync = 0;			//turn off winsync for turbo (so that turbo can function even with VBlank sync methods
+		tempsoundquality = soundquality;	//Store sound quality settings
+		FCEUI_SetSoundQuality(0);			//Turn sound quality to low
 		turbo = true; 
 		if (muteTurbo && soundo) TrashSound();
 	}
 void FCEUD_TurboOff   (void) 
 	{
-		winsync = tempwinsync;			//Restore winsync setting
+		winsync = tempwinsync;				//Restore winsync setting
+		soundquality = tempsoundquality;	//Restore sound quality settings
+		FCEUI_SetSoundQuality(soundquality);
 		turbo = false; 
 		if (muteTurbo && soundo) InitSound();
 	}
 void FCEUD_TurboToggle(void) 
 { 
-	if (turbo) winsync = tempwinsync;	//If turbo was on, restore winsync
+	if (turbo) {
+		winsync = tempwinsync;	//If turbo was on, restore winsync
+		soundquality = tempsoundquality; //and restore sound quality setting
+		FCEUI_SetSoundQuality(soundquality);
+	}
 	else
 	{
-		tempwinsync = winsync; 
-		winsync = 0;	//If turbo was off, turn off winsync (so that turbo can function even with VBlank sync methods
+		tempwinsync = winsync;				//Store video sync settings
+		tempsoundquality = soundquality;	//Store sound quality settings
+		winsync = 0;				//If turbo was off, turn off winsync (so that turbo can function even with VBlank sync methods
+		FCEUI_SetSoundQuality(0);	//Set sound quality to low
 	}
 
 	turbo = !turbo; 
