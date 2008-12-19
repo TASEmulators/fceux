@@ -56,4 +56,3 @@ void FCEUD_LoadStateFrom()
 		FCEUI_LoadState(nameo);
 	}
 }
-

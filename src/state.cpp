@@ -48,6 +48,8 @@
 #include "zlib.h"
 #include "driver.h"
 
+using namespace std;
+
 static void (*SPreSave)(void);
 static void (*SPostSave)(void);
 
@@ -795,6 +797,7 @@ void FCEUI_LoadState(const char *fname)
 	information expected in newer save states, desynchronization won't occur(at least not
 	from this ;)).
 	*/
+	BackupSaveState();
 
 	if(FCEUSS_Load(fname))
 	{
@@ -834,5 +837,17 @@ void FCEU_DrawSaveStates(uint8 *XBuf)
 
 	FCEU_DrawNumberRow(XBuf,SaveStateStatus,CurrentState);
 	StateShow--;
+}
+
+void BackupSaveState()
+{
+	//Everytime a load state is loaded, this is run prior so that the user has a backup of the previous emulator state
+	string filename;
+	int x;
+	
+	filename = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());	//Generate normal savestate filename
+	x = filename.find_last_of(".");		//Find last dot
+	filename = filename.substr(0,x);	//Chop off file extension
+	filename.append(".bak");			//add .bak
 }
 

@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+19-dec-2008 - adelikat - Backup savestate is made before loading a state
 18-dec-2008 - adelikat - win32 - turbo bypasses sound better if muteturbo is checked
 18-dec-2008 - shinydoofy - sdl - fixed compiling errors for SDL due to r1037
 18-dec-2008 - adelikat - win32 - fullscreen mode fixed (both enters and returns to fullscreen just fine)
