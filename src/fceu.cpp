@@ -544,6 +544,8 @@ void UpdateAutosave(void);
 ///Skip may be passed in, if FRAMESKIP is #defined, to cause this to emulate more than one frame
 void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int skip)
 {
+	//skip initiates frame skip if 1, or frame skip and sound skip if 2
+	
 	int r,ssize;
 
 	JustFrameAdvanced = false;
@@ -581,8 +583,8 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
 	r = FCEUPPU_Loop(skip);
 
-	ssize=FlushEmulateSound();
-
+	if (skip != 2) ssize=FlushEmulateSound(); //If skip = 2 we are skipping sound processing
+	
 #ifdef WIN32
 	UpdateCheatList();
 	UpdateTextHooker();
@@ -594,9 +596,17 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	timestamp = 0;
 
 	*pXBuf=skip?0:XBuf;
-	*SoundBuf=WaveFinal;
-	*SoundBufSize=ssize;
-	
+	if (skip == 2) //If skip = 2, then bypass sound
+	{
+		*SoundBuf=0;
+		*SoundBufSize=0;
+	}
+	else 
+	{
+		*SoundBuf=WaveFinal;
+		*SoundBufSize=ssize;
+	}
+		
 	if (EmulationPaused&2 && ( !frameAdvanceLagSkip || !lagFlag) )
 	//Lots of conditions here.  EmulationPaused&2 must be true.  In addition frameAdvanceLagSkip or lagFlag must be false
 	{

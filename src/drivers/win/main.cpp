@@ -692,7 +692,8 @@ doloopy:
 				else 
 				{
 					frameSkipCounter--;
-					skippy = 1;
+					if (muteTurbo) skippy = 2;	//If mute turbo is on, we want to bypass sound too, so set it to 2
+						skippy = 1;				//Else set it to 1 to just frameskip
 				}
 				
 			}
