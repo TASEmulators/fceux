@@ -21,7 +21,8 @@
 
 #ifndef _INES_H_
 #define _INES_H_
-
+#include <stdlib.h>
+#include <string.h>
 #ifdef INESPRIV
 
 void iNESStateRestore(int version);
