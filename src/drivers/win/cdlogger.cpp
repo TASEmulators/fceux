@@ -237,10 +237,12 @@ void DoCDLogger(){
 }
 
 void UpdateCDLogger(){
+	if(!hCDLogger)return;
+	
 	char str[50];
 	float fcodecount = codecount, fdatacount = datacount,
 		fundefinedcount = undefinedcount, fromsize = PRGsize[0];
-	if(!hCDLogger)return;
+	
 	sprintf(str,"0x%06x %.2f%%",codecount,fcodecount/fromsize*100);
 	SetDlgItemText(hCDLogger,LBL_CDLOGGER_CODECOUNT,str);
 	sprintf(str,"0x%06x %.2f%%",datacount,fdatacount/fromsize*100);

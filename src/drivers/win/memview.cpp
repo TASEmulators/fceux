@@ -320,6 +320,7 @@ void UnloadTableFile(){
 }
 void UpdateMemoryView(int draw_all)
 {
+	if (!hMemView) return;
 	int MemFontWidth = debugSystem->fixedFontWidth;
 	int MemFontHeight = debugSystem->fixedFontHeight;
 
@@ -328,8 +329,7 @@ void UpdateMemoryView(int draw_all)
 	//int curlength;
 	char str[100];
 	char str2[100];
-	if (!hMemView) return;
-
+	
 	/*
 	if(draw_all){
 	for(i = CurOffset;i < CurOffset+DataAmount;i+=16){
