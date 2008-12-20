@@ -169,7 +169,9 @@ int DetectMMC5WRAMSize(uint32 crc32)
 	//but I changed it to return 64 because unlisted carts are probably homebrews, and they should probably use 64 (why not use it all?)
 	//ch4 10/12/08 - then f***ng for what all this shit above? let's give em all this 64k shit! Damn
 	//               homebrew must use it's own emulators or standart features.
-	return 8;
+	//adelikat 12/20/08 - reverting back to return 64, sounds like it was changed back to 8 simply on principle.  FCEUX is all encompassing, and that include
+	//rom-hacking.  We want it to be the best emulator for such purposes.  So unless return 64 harms compatibility with anything else, I see now reason not to have it
+	return 64;
 }
 
 static void BuildWRAMSizeTable(void)

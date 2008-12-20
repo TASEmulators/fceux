@@ -1067,7 +1067,7 @@ void CollapseWindow(void)
 		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "Collapse to 1 column");
 	}
 	
-	SetWindowPos(hwndMemWatch,HWND_TOPMOST,MemWatch_wndx,MemWatch_wndy,(wrect.right-wrect.left),(wrect.bottom-wrect.top),SWP_SHOWWINDOW);
+	SetWindowPos(hwndMemWatch,NULL,MemWatch_wndx,MemWatch_wndy,(wrect.right-wrect.left),(wrect.bottom-wrect.top),NULL);
 	
 	
 }
