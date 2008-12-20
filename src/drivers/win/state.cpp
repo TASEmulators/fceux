@@ -6,7 +6,9 @@
 using namespace std;
 
 //Externs
-extern int CurrentState;	//Declared in src/state.cpp
+extern int CurrentState;					//Declared in src/state.cpp
+extern bool FCEUSS_Load(const char *fname); //Declared in src/state.cpp
+extern string GetBackupFileName();			//Declared in src/state.cpp
 
 bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
 /**
@@ -69,26 +71,21 @@ void FCEUD_LoadStateFrom()
 bool CheckBackupSaveStateExist()
 {
 	//This function simply checks to see if the backup savestate of the appropriate filename exists
-	string filename;
-	int x;
-
-	filename = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());	//Generate normal savestate filename
-	x = filename.find_last_of(".");		//Find last dot
-	filename = filename.substr(0,x);	//Chop off file extension
-	filename.append(".bak");			//add .bak
-	
+	string filename = GetBackupFileName(); //Get backup savestate filename
+		
 	//Check if this filename exists
 	fstream test;
 	test.open(filename.c_str(),fstream::in);
-
+		FCEUI_printf("Checking %s\n",filename.c_str());
 	if (test.fail())
 	{
-		test.close();
+		test.close(); FCEUI_printf("Fail\n");
 		return false;
 	}
 	else
 	{
-		test.close();
+		test.close(); FCEUI_printf("Succeed\n");
 		return true;
 	}
 }
+

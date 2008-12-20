@@ -340,6 +340,7 @@ BEGIN
         MENUITEM "&Replay Movie",               FCEUX_CONTEXT_REPLAYMOVIE
         MENUITEM "Record Movie",                FCEUX_CONTEXT_RECORDMOVIE
         MENUITEM SEPARATOR
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM "Screenshot",                  FCEUX_CONTEXT_SCREENSHOT
         MENUITEM SEPARATOR
@@ -357,6 +358,7 @@ BEGIN
         MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM SEPARATOR
+        MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM SEPARATOR
         MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP

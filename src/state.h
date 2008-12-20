@@ -62,3 +62,4 @@ void AddExState(void *v, uint32 s, int type, char *desc);
 void FCEU_DrawSaveStates(uint8 *XBuf);
 
 void BackupSaveState();				//Makes a backupsavestate
+void LoadBackup();					//Loads the backupsavestate

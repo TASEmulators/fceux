@@ -839,16 +839,28 @@ void FCEU_DrawSaveStates(uint8 *XBuf)
 	StateShow--;
 }
 
-void BackupSaveState()
+string GetBackupFileName()
 {
-	//Everytime a load state is loaded, this is run prior so that the user has a backup of the previous emulator state
 	string filename;
 	int x;
 	
 	filename = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());	//Generate normal savestate filename
 	x = filename.find_last_of(".");		//Find last dot
 	filename = filename.substr(0,x);	//Chop off file extension
-	filename.append(".bak");			//add .bak
-	FCEUI_printf("%s\n",filename.c_str());
+	filename.append(".bak.fc0");		//add .bak
+
+	return filename;
 }
 
+void BackupSaveState()
+{
+	string filename = GetBackupFileName();
+	FCEUSS_Save(filename.c_str());
+	FCEUI_printf("File %s loaded.\n",filename.c_str());
+}
+
+void LoadBackup()
+{
+	string filename = GetBackupFileName();
+	FCEUSS_Load(filename.c_str());
+}

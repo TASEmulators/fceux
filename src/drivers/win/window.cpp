@@ -93,6 +93,7 @@ void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
+extern void LoadBackup();
 //AutoFire-----------------------------------------------
 
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
@@ -409,6 +410,34 @@ void UpdateCheckedMenuItems()
 	}
 }
 
+void UpdateContextMenuItems(HMENU context, int whichContext)
+{
+	bool exist;
+	
+	switch(whichContext)
+	{
+		//0 = Game + Movie in read only	
+		case 0:
+			break;
+		//1 = Game + No Movie
+		case 1:
+			exist = CheckBackupSaveStateExist(); 
+			EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
+			break;
+		//2 = No Game
+		case 2:
+			break;
+		//3 = Game + Movie in read + write
+		case 3:
+			exist = CheckBackupSaveStateExist(); 
+			EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
+			break;
+		default:
+			break;
+	}
+}
+
+
 /// Updates recent files / recent directories menu
 /// @param menu Menu handle of the main window's menu
 /// @param strs Strings to add to the menu
@@ -721,6 +750,8 @@ void GetMouseData(uint32 (&md)[3])
 //Message loop of the main window
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
+	int whichContext = 0;
+
 	switch(msg)
 	{
 	case WM_LBUTTONDOWN:
@@ -734,22 +765,36 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
 
 		//If There is a movie loaded in read only
-		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)		
+		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)
+		{
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
-
+			whichContext = 0;
+		}
+		
 		//If there is a movie loaded in read+write
 		else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
+		{
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
+			whichContext = 3;
+		}
+
 		
 		//If there is a ROM loaded but no movie
 		else if (GameInfo)
+		{
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
+			whichContext = 1;
+		}
 		
 		//Else no ROM
 		else
+		{
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
-
+			whichContext = 2;
+		}
+UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 		TrackPopupMenu(hfceuxcontextsub,0,(MainWindow_wndx+mousex),(MainWindow_wndy+mousey),TPM_RIGHTBUTTON,hWnd,0);
+		
 	}
 
 	case WM_MOVE: 
@@ -1268,18 +1313,25 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//View comments and subtitles
 			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
 				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc, (LPARAM)0);
+				break;
+
+			//Undo Loadstate
+			case FCEUX_CONTEXT_UNDOLOADSTATE:
+				if (CheckBackupSaveStateExist())
+					LoadBackup();
+				break;
 
 			//Load last auto-save
 			case FCEUX_CONTEXT_REWINDTOLASTAUTO:
 				FCEUI_Autosave();
 				break;
 
-			//Movie help
+			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
 				break;
 			
-			//No Game
+			//No Game - Help
 			case FCEU_CONTEXT_FCEUHELP:
 				OpenHelpWindow(gettingstartedhelp);
 				break;
