@@ -76,15 +76,15 @@ bool CheckBackupSaveStateExist()
 	//Check if this filename exists
 	fstream test;
 	test.open(filename.c_str(),fstream::in);
-		FCEUI_printf("Checking %s\n",filename.c_str());
+		
 	if (test.fail())
 	{
-		test.close(); FCEUI_printf("Fail\n");
+		test.close();
 		return false;
 	}
 	else
 	{
-		test.close(); FCEUI_printf("Succeed\n");
+		test.close();
 		return true;
 	}
 }

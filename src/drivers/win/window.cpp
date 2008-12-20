@@ -437,7 +437,6 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	}
 }
 
-
 /// Updates recent files / recent directories menu
 /// @param menu Menu handle of the main window's menu
 /// @param strs Strings to add to the menu
@@ -834,8 +833,14 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 		if(!fullscreen && !changerecursive)
 			switch(wParam)
 		{
-			case SIZE_MAXIMIZED: ismaximized = 1;SetMainWindowStuff();break;
-			case SIZE_RESTORED: ismaximized = 0;SetMainWindowStuff();break;
+			case SIZE_MAXIMIZED: 
+				ismaximized = 1;
+				SetMainWindowStuff();
+				break;
+			case SIZE_RESTORED: 
+				ismaximized = 0;
+				SetMainWindowStuff();
+				break;
 		}
 		break;
 	case WM_SIZING:

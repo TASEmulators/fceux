@@ -780,6 +780,7 @@ void FCEUI_SaveState(const char *fname)
 	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
 
 	StateShow=0;
+
 	FCEUSS_Save(fname);
 }
 
@@ -856,7 +857,6 @@ void BackupSaveState()
 {
 	string filename = GetBackupFileName();
 	FCEUSS_Save(filename.c_str());
-	FCEUI_printf("File %s loaded.\n",filename.c_str());
 }
 
 void LoadBackup()
