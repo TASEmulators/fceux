@@ -92,6 +92,7 @@ void SetAutoFireOffset(int offset);
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
+extern bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
 //AutoFire-----------------------------------------------
 
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
@@ -929,7 +930,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			case FCEUX_CONTEXT_SCREENSHOT:
 			case ID_FILE_SCREENSHOT:
-				FCEUI_SaveSnapshot();
+				FCEUI_SaveSnapshot(); 
 				break;
 
 			//Lua submenu

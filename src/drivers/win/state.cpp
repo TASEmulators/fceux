@@ -1,5 +1,14 @@
 #include "common.h"
+#include <string>
+#include <string.h>
+#include <fstream>
 
+using namespace std;
+
+//Externs
+extern int CurrentState;	//Declared in src/state.cpp
+
+bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
 /**
 * Show an Save File dialog and save a savegame state to the selected file.
 **/
@@ -54,5 +63,32 @@ void FCEUD_LoadStateFrom()
 	{
 		// Load save state if a file was selected.
 		FCEUI_LoadState(nameo);
+	}
+}
+
+bool CheckBackupSaveStateExist()
+{
+	//This function simply checks to see if the backup savestate of the appropriate filename exists
+	string filename;
+	int x;
+
+	filename = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());	//Generate normal savestate filename
+	x = filename.find_last_of(".");		//Find last dot
+	filename = filename.substr(0,x);	//Chop off file extension
+	filename.append(".bak");			//add .bak
+	
+	//Check if this filename exists
+	fstream test;
+	test.open(filename.c_str(),fstream::in);
+
+	if (test.fail())
+	{
+		test.close();
+		return false;
+	}
+	else
+	{
+		test.close();
+		return true;
 	}
 }

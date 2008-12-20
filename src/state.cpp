@@ -849,5 +849,6 @@ void BackupSaveState()
 	x = filename.find_last_of(".");		//Find last dot
 	filename = filename.substr(0,x);	//Chop off file extension
 	filename.append(".bak");			//add .bak
+	FCEUI_printf("%s\n",filename.c_str());
 }
 
