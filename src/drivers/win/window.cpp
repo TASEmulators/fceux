@@ -94,7 +94,7 @@ void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 
 // Function declarations
-void MakeBackup(bool dispMessage);			//Makes a backup of current movie file
+void MakeBackupMovie(bool dispMessage);			//Makes a backup of current movie file
 bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 
 //AutoFire-----------------------------------------------
@@ -1317,7 +1317,7 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 			//Context Menus------------------------------------------------------
 			//View comments and subtitles
 			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
-				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc, (LPARAM)0);
+				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc);
 				break;
 
 			//Undo Loadstate
@@ -1333,7 +1333,7 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 
 			//Create a backup movie file
 			case FCEUX_CONTEXT_MAKEBACKUP:
-				MakeBackup(true);
+				MakeBackupMovie(true);
 				break;
 			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
@@ -2061,8 +2061,9 @@ void UpdateMenuHotkeys()
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
 }
 
-void MakeBackup(bool dispMessage)
+void MakeBackupMovie(bool dispMessage)
 {
+	//This function generates backup movie files
 	string currentFn;					//Current movie fillename
 	string backupFn;					//Target backup filename
 	string tempFn;						//temp used in back filename creation
