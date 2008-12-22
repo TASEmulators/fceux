@@ -357,6 +357,7 @@ BEGIN
         MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
         MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
+        MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
         MENUITEM SEPARATOR
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO

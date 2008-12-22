@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-dec-2008 - adelikat - Win32 - context menu item "create backup" for backing up movie files
 21-dec-2008 - adelikat - Win32 - Name Table Viewer - Refresh value default to 15, Refresh value stored in config file
 21-dec-2008 - adelikat - Win32 - PPU Viewer - Refresh value default to 15, Refresh value stored in config file
 19-dec-2008 - adelikat - Loadbackup function added, Win32 - Undo Loadstate context menu item

@@ -628,6 +628,8 @@
 #define FCEUX_CONTEXT_UNDOLOADSTATE     40316
 #define ID_GAME_UNDOLOADSTATE40317      40317
 #define ID_GAME_UNDOLOADSTATE40318      40318
+#define ID_GAME_MAKEBACKUP              40319
+#define FCEUX_CONTEXT_MAKEBACKUP        40320
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -637,7 +639,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40319
+#define _APS_NEXT_COMMAND_VALUE         40321
 #define _APS_NEXT_CONTROL_VALUE         1192
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

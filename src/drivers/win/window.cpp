@@ -63,6 +63,7 @@
 #include "mapinput.h"
 
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 //********************************************************************************
@@ -87,15 +88,20 @@ extern bool movie_readonly;
 
 // Extern functions
 char *md5_asciistr(uint8 digest[16]);
-void SetAutoFirePattern(int onframes, int offframes);
-void SetAutoFireOffset(int offset);
+
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
 extern void LoadBackup();
-//AutoFire-----------------------------------------------
 
+// Function definitions
+void MakeBackup(bool dispMessage);			//Makes a backup of current movie file
+bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
+
+//AutoFire-----------------------------------------------
+void SetAutoFirePattern(int onframes, int offframes);
+void SetAutoFireOffset(int offset);
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
 static int CheckedAutoFireOffset = MENU_AUTOFIRE_OFFSET_1;
 int GetCheckedAutoFirePattern();
@@ -1331,6 +1337,10 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 				FCEUI_Autosave();
 				break;
 
+			//Create a backup movie file
+			case FCEUX_CONTEXT_MAKEBACKUP:
+				MakeBackup(true);
+				break;
 			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
@@ -2055,4 +2065,68 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
 	combined = "Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
+}
+
+void MakeBackup(bool dispMessage)
+{
+	string currentFn;					//Current movie fillename
+	string backupFn;					//Target backup filename
+	string tempFn;						//temp used in back filename creation
+	stringstream stream;
+	int x;								//Temp variable for string manip
+	bool exist = false;					//Used to test if filename exists
+
+	currentFn = curMovieFilename;		//Get current moviefilename
+	backupFn = curMovieFilename;		//Make backup filename the same as current moviefilename
+	x = backupFn.find_last_of(".");		 //Find file extension
+	backupFn = backupFn.substr(0,x);	//Remove extension
+	tempFn = backupFn;					//Store the filename at this point
+	for (unsigned int backNum=0;backNum<256;backNum++) //256 = arbituary limit to backup files
+	{
+		stream.str("");					 //Clear stream
+		if (backNum > 9)
+			stream << "-" << backNum;	 //assign backNum to stream
+		else
+			stream << "-0" << backNum;	 //Make it 01, etc if single digit
+		backupFn.append(stream.str());	 //add number to bak filename
+		backupFn.append(".bak");		 //add extension
+
+		exist = CheckFileExists(backupFn.c_str());	//Check if file exists
+		
+		if (!exist) 
+			break;						//Yeah yeah, I should use a do loop or something
+		else
+			backupFn = tempFn;			//Before we loop again, reset the filename
+	}
+
+	MovieData md = currMovieData;								//Get current movie data
+	std::fstream* outf = FCEUD_UTF8_fstream(backupFn, "wb");	//open/create file
+	md.dump(outf,false);										//dump movie data
+	delete outf;												//clean up, delete file object
+	
+	//TODO, decide if fstream successfully opened the file and print error message if it doesn't
+
+	if (dispMessage) FCEUI_DispMessage("%s created",backupFn.c_str()); //Inform user it told to
+}
+
+bool CheckFileExists(const char* filename)
+{
+	//This function simply checks to see if the given filename exists
+	string checkFilename;
+	checkFilename = filename;
+		
+	//Check if this filename exists
+	fstream test;
+	test.open(checkFilename.c_str(),fstream::in);
+		
+	if (test.fail())
+	{
+		test.close();
+		return false;
+	}
+	else
+	{
+		test.close();
+		return true;
+	}
 }
