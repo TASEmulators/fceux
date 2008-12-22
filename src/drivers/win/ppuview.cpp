@@ -86,13 +86,19 @@ void DrawPatternTable(uint8 *bitmap, uint8 *table, uint8 pal) {
         uint8 *pbitmap = bitmap;
 
         pal <<= 2;
-        for (i = 0; i < 16; i++) {
-                for (j = 0; j < 16; j++) {
-                        for (y = 0; y < 8; y++) {
+        for (i = 0; i < 16; i++)		//Columns
+		{				
+                for (j = 0; j < 16; j++) //Rows
+				{		
+                        //-----------------------------------------------
+						///8x8 sprite
+						for (y = 0; y < 8; y++) 
+						{
                                 chr0 = table[index];
                                 chr1 = table[index+8];
                                 tmp=7;
-                                for (x = 0; x < 8; x++) {
+                                for (x = 0; x < 8; x++) 
+								{
                                         p  =  (chr0>>tmp)&1;
                                         p |= ((chr1>>tmp)&1)<<1;
                                         p = palcache[p|pal];
@@ -104,7 +110,8 @@ void DrawPatternTable(uint8 *bitmap, uint8 *table, uint8 pal) {
                                 }
                                 index++;
                                 pbitmap += ((PALETTEBITWIDTH>>2)-24);
-                        }
+						}
+						//------------------------------------------------
                         index+=8;
                         pbitmap -= (((PALETTEBITWIDTH>>2)<<3)-24);
                 }

@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+21-dec-2008 - adelikat - Win32 - Name Table Viewer - Refresh value default to 15, Refresh value stored in config file
 21-dec-2008 - adelikat - Win32 - PPU Viewer - Refresh value default to 15, Refresh value stored in config file
 19-dec-2008 - adelikat - Loadbackup function added, Win32 - Undo Loadstate context menu item
 19-dec-2008 - adelikat - Backup savestate is made before loading a state

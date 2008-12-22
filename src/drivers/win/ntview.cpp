@@ -48,7 +48,8 @@ int NTViewPosX,NTViewPosY;
 
 static uint8 palcache[32]; //palette cache //mbg merge 7/19/06 needed to be static
 int NTViewScanline=0,NTViewer=0;
-int NTViewSkip,NTViewRefresh;
+int NTViewSkip;
+int NTViewRefresh = 15;
 static int mouse_x,mouse_y; //todo: is static needed here? --mbg 7/19/06 - i think so
 bool redrawtables = false;
 int chrchanged = 0;
