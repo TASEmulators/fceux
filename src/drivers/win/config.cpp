@@ -48,7 +48,7 @@ extern bool frameAdvanceLagSkip;
 extern int ClipSidesOffset;
 extern bool movieSubtitles;
 extern bool subtitlesOnAVI;
-
+extern int PPUViewRefresh;
 extern uint8 gNoBGFillColor;
 
 //window positions and sizes:
@@ -213,6 +213,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(subtitlesOnAVI),
 	AC(bindSavestate),
 	AC(ClipSidesOffset),
+	AC(PPUViewRefresh),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };

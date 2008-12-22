@@ -34,7 +34,8 @@ uint8 *pattern0,*pattern1; //pattern table bitmap arrays
 uint8 *ppuv_palette;
 static int pindex0=0,pindex1=0;
 int PPUViewScanline=0,PPUViewer=0;
-int PPUViewSkip,PPUViewRefresh;
+int PPUViewSkip;
+int PPUViewRefresh = 15;
 int mouse_x,mouse_y;
 
 #define PATTERNWIDTH        128
@@ -328,7 +329,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                 case WM_HSCROLL:
                         if(lParam) { //refresh trackbar
                                 PPUViewRefresh = SendDlgItemMessage(hwndDlg,CTL_PPUVIEW_TRACKBAR,TBM_GETPOS,0,0);
-                        }
+						}
                         break;
         }
         return FALSE;
