@@ -37,7 +37,7 @@ void UpdateCheckBoxes(HWND hwndDlg)
 	CheckDlgButton(hwndDlg, IDC_MOVIE_BINDSAVESTATES, bindSavestate ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSTATUSICON, status_icon ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSUBTITLES, movieSubtitles ? BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSUBTITLES, subtitlesOnAVI ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_MOVIE_SUBTITLESINAVI, subtitlesOnAVI ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_AUTOBACKUP, autoMovieBackup ? BST_CHECKED : BST_UNCHECKED);
 }
 
@@ -78,7 +78,7 @@ BOOL CALLBACK MovieOptionsCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						break;
 
 					case IDC_MOVIE_DISPLAYSTATUSICON:
-						status_icon = pauseAfterPlayback?0:1;
+						status_icon = status_icon?0:1;
 						break;
 
 					case IDC_MOVIE_DISPLAYSUBTITLES:

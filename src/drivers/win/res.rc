@@ -99,15 +99,12 @@ BEGIN
     POPUP "&Config"
     BEGIN
         MENUITEM "Hide Menu",                   MENU_HIDE_MENU
-        MENUITEM "Pause After Playback",        MENU_PAUSEAFTERPLAYBACK
         MENUITEM "Enable Run in Background",    MENU_RUN_IN_BACKGROUND
         MENUITEM "Enable Background Input",     MENU_BACKGROUND_INPUT
         MENUITEM "Enable Auto-save",            MENU_ENABLE_AUTOSAVE
         MENUITEM "Frame Adv. - Skip Lag",       MENU_DISPLAY_FA_LAGSKIP
-        MENUITEM "Bind savestates to movie",    MENU_CONFIG_BINDSAVES
         POPUP "Display"
         BEGIN
-            MENUITEM "Movie Status Icon",           MENU_SHOW_STATUS_ICON
             POPUP "Input Display"
             BEGIN
                 MENUITEM "Off",                         MENU_INPUTDISPLAY_0
@@ -117,8 +114,6 @@ BEGIN
             END
             MENUITEM "Lag Counter",                 MENU_DISPLAY_LAGCOUNTER
             MENUITEM "Frame Counter",               ID_DISPLAY_FRAMECOUNTER
-            MENUITEM "Movie Subtitles",             ID_DISPLAY_MOVIESUBTITLES
-            MENUITEM "Movie Subtitles in AVI",      ID_DISPLAY_MOVIESUBTITLES_AVI
             MENUITEM SEPARATOR
             MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
             MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ

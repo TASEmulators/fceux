@@ -1043,10 +1043,6 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 			case MENU_HIDE_MENU:
 				ToggleHideMenu();
 				break;
-			case MENU_PAUSEAFTERPLAYBACK:
-				pauseAfterPlayback = pauseAfterPlayback?0:1;
-				UpdateCheckedMenuItems();
-				break;
 			case MENU_RUN_IN_BACKGROUND:
 				eoptions ^= EO_BGRUN;
 				if((eoptions & EO_BGRUN) == 0)
@@ -1072,15 +1068,8 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 				frameAdvanceLagSkip ^= 1;
 				UpdateCheckedMenuItems();
 				break;
-			case MENU_CONFIG_BINDSAVES:
-				bindSavestate ^= 1;
-				UpdateCheckedMenuItems();
-
+			
 			//Display submenu
-			case MENU_SHOW_STATUS_ICON:
-				status_icon = !status_icon;
-				UpdateCheckedMenuItems();
-				break;
 			case MENU_INPUTDISPLAY_0: //Input display off
 				input_display = 0;
 				UpdateCheckedMenuItems();
@@ -1103,16 +1092,6 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 				break;
 			case ID_DISPLAY_FRAMECOUNTER:
 				FCEUI_MovieToggleFrameDisplay();
-				UpdateCheckedMenuItems();
-				break;
-			case ID_DISPLAY_MOVIESUBTITLES:
-				movieSubtitles ^= 1;
-				if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
-				else FCEU_DispMessage("Movie subtitles off");
-				UpdateCheckedMenuItems();
-				break;
-			case ID_DISPLAY_MOVIESUBTITLES_AVI:
-				subtitlesOnAVI ^= 1;
 				UpdateCheckedMenuItems();
 				break;
 			case MENU_DISPLAY_BG:

@@ -214,6 +214,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(movieSubtitles),
 	AC(subtitlesOnAVI),
 	AC(bindSavestate),
+	AC(autoMovieBackup),
 	AC(ClipSidesOffset),
 	AC(PPUViewRefresh),
 	AC(NTViewRefresh),
