@@ -70,7 +70,6 @@ bool justLagged = false;
 bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
 
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
-#include "x6502.h"
 
 FCEUGI::FCEUGI()
 : filename(0)

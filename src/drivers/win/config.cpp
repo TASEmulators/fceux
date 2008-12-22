@@ -35,6 +35,7 @@
 #include "fceu.h"
 #include "file.h"
 #include "texthook.h"
+#include "movieoptions.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];

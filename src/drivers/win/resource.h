@@ -381,10 +381,18 @@
 #define MEMW_EDIT03RMADDRESS            1191
 #define IDC_DEBUGGER_RESTORESIZE        1191
 #define MEMW_EDIT04RMADDRESS            1192
+#define IDC_MOVIE_CANCEL                1192
+#define IDC_MOVIE_CLOSE                 1192
 #define EDIT00_RESULTS                  1193
+#define IDC_MOVIE_PAUSEAFTERPLAYBACK    1193
 #define EDIT01_RESULTS                  1194
+#define IDC_MOVIE_BINDSAVESTATES        1194
 #define EDIT02_RESULTS                  1195
+#define IDC_MOVIE_DISPLAYSTATUSICON     1195
 #define EDIT03_RESULTS                  1196
+#define IDC_MOVIE_DISPLAYSUBTITLES      1196
+#define IDC_MOVIE_SUBTITLESINAVI        1197
+#define IDC_MOVIE_AUTOBACKUP            1198
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -626,6 +634,8 @@
 #define ID_GAME_UNDOLOADSTATE40318      40318
 #define ID_GAME_MAKEBACKUP              40319
 #define FCEUX_CONTEXT_MAKEBACKUP        40320
+#define ID_CONFIG_MOVIEOPTIONS          40321
+#define MENU_MOVIEOPTIONS               40322
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -635,8 +645,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40321
-#define _APS_NEXT_CONTROL_VALUE         1192
+#define _APS_NEXT_COMMAND_VALUE         40323
+#define _APS_NEXT_CONTROL_VALUE         1199
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

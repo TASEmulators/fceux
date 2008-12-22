@@ -136,6 +136,7 @@ BEGIN
         MENUITEM "&Timing...",                  MENU_TIMING
         MENUITEM "&Video...",                   MENU_VIDEO
         MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
+        MENUITEM "&Movie options...",           MENU_MOVIEOPTIONS
     END
     POPUP "&Tools"
     BEGIN
@@ -777,73 +778,24 @@ BEGIN
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,146,12
 END
 
-VIDEOCONFIG DIALOGEX 65520, 76, 384, 296
+MOVIEOPTIONS DIALOGEX 65520, 76, 127, 157
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Video Configuration"
+CAPTION "Movie Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "Full Screen Settings",65453,10,8,364,115,WS_GROUP
-    CONTROL         "Full Screen",IDC_VIDEOCONFIG_FS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,23,145,12
-    CONTROL         "Enter full screen mode after game is loaded.",IDC_VIDEOCONFIG_AUTO_FS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,39,151,12
-    LTEXT           "Sync Method:",65452,20,82,48,10
-    COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_FS,72,79,93,50,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Video Mode:",65451,20,62,42,10
-    COMBOBOX        IDC_VIDEOCONFIG_MODE,72,59,93,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_FS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,103,145,12
-    GROUPBOX        "Custom Video Mode",65450,177,18,186,97,WS_GROUP
-    LTEXT           "Mode:",13,186,32,25,8
-    EDITTEXT        IDC_VIDEOCONFIG_XRES,214,30,27,12,ES_RIGHT
-    LTEXT           "by",12,244,32,11,8
-    EDITTEXT        IDC_VIDEOCONFIG_YRES,258,30,27,12,ES_RIGHT
-    LTEXT           "@",11,289,32,12,8
-    COMBOBOX        IDC_VIDEOCONFIG_BPP,302,30,35,60,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "bpp",10,341,32,17,8
-    GROUPBOX        "Image Size Transform",65445,185,47,170,61,WS_GROUP
-    LTEXT           "Special scaler:",65444,192,61,60,8
-    COMBOBOX        IDC_VIDEOCONFIG_SCALER_FS,281,58,65,46,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Scale dimensions by:",IDC_RADIO_SCALE,"Button",BS_AUTORADIOBUTTON,192,76,85,12
-    CONTROL         "Stretch to Fill Screen",IDC_RADIO_STRETCH,"Button",BS_AUTORADIOBUTTON,192,91,88,12
-    LTEXT           "X:",65443,282,78,10,8
-    EDITTEXT        IDC_VIDEOCONFIG_XSCALE,292,76,20,12
-    LTEXT           "Y:",65442,316,78,11,8
-    EDITTEXT        IDC_VIDEOCONFIG_YSCALE,326,76,20,12
-    GROUPBOX        "Windowed Settings",65441,10,127,178,141,WS_GROUP
-    LTEXT           "Size Multiplier:",65440,20,149,50,8
-    CTEXT           "X:",65439,83,137,42,8
-    CTEXT           "Y:",65438,134,137,42,8
-    EDITTEXT        IDC_WINSIZE_MUL_X,83,148,42,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_WINSIZE_MUL_Y,134,148,42,12,ES_AUTOHSCROLL
-    CONTROL         "Force integral scaling factors.",IDC_FORCE_INT_VIDEO_SCALARS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,164,145,12
-    CONTROL         "Force aspect ratio correction.",IDC_FORCE_ASPECT_CORRECTION,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,179,145,12
-    LTEXT           "Special scaler:",65429,20,215,51,8
-    COMBOBOX        IDC_VIDEOCONFIG_SCALER_WIN,83,213,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Sync Method:",65437,20,235,51,8
-    COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_WIN,83,233,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_WIN,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,250,145,12
-    GROUPBOX        "Drawing Area",65494,196,127,178,86,WS_GROUP
-    LTEXT           "First Line:",65436,218,153,39,8
-    LTEXT           "Last Line:",65435,218,173,43,8
-    CTEXT           "NTSC",65434,262,140,27,8
-    CTEXT           "PAL",65433,313,140,27,8
-    EDITTEXT        IDC_SCANLINE_FIRST_NTSC,263,152,27,12,ES_RIGHT
-    EDITTEXT        IDC_SCANLINE_LAST_NTSC,263,171,27,12,ES_RIGHT
-    EDITTEXT        IDC_SCANLINE_FIRST_PAL,313,152,27,12,ES_RIGHT
-    EDITTEXT        IDC_SCANLINE_LAST_PAL,313,171,27,12,ES_RIGHT
-    CONTROL         "Clip left and right sides (8 columns on each).",IDC_VIDEOCONFIG_CLIPSIDES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,192,157,12
-    DEFPUSHBUTTON   "Close",BTN_CLOSE,318,274,56,14
-    LTEXT           "Current Pixel Aspect Ratio:",65432,20,197,88,8
-    EDITTEXT        IDC_VIDEOCONFIG_ASPECT_X,109,195,28,12,ES_AUTOHSCROLL
-    CTEXT           ":",65431,139,197,8,8
-    EDITTEXT        IDC_VIDEOCONFIG_ASPECT_Y,148,195,28,12,ES_AUTOHSCROLL
-    CONTROL         "Allow more than 8 sprites per scanline.",IDC_VIDEOCONFIG_NO8LIM,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,250,157,11
-    GROUPBOX        "Emulation",65430,196,236,178,32,WS_GROUP
+    DEFPUSHBUTTON   "Close",IDC_MOVIE_CLOSE,35,138,49,14
+    CONTROL         "Pause after playback",IDC_MOVIE_PAUSEAFTERPLAYBACK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,17,83,10
+    CONTROL         "Bind savestates to movies",IDC_MOVIE_BINDSAVESTATES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,37,98,10
+    CONTROL         "Display movie status icon",IDC_MOVIE_DISPLAYSTATUSICON,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,57,95,10
+    CONTROL         "Display movie subtitles",IDC_MOVIE_DISPLAYSUBTITLES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,77,87,10
+    CONTROL         "Put movie subtitles in AVI",IDC_MOVIE_SUBTITLESINAVI,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,93,95,10
+    CONTROL         "Automatically backup movies",IDC_MOVIE_AUTOBACKUP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,5,113,107,10
 END
 
 DWBDIALOGSIMPLE DIALOGEX 33, 99, 250, 39
@@ -1435,6 +1387,75 @@ BEGIN
     PUSHBUTTON      "Browse...",1359,129,7,50,14
 END
 
+VIDEOCONFIG DIALOGEX 65520, 76, 384, 296
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Video Configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Full Screen Settings",65453,10,8,364,115,WS_GROUP
+    CONTROL         "Full Screen",IDC_VIDEOCONFIG_FS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,23,145,12
+    CONTROL         "Enter full screen mode after game is loaded.",IDC_VIDEOCONFIG_AUTO_FS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,39,151,12
+    LTEXT           "Sync Method:",65452,20,82,48,10
+    COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_FS,72,79,93,50,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Video Mode:",65451,20,62,42,10
+    COMBOBOX        IDC_VIDEOCONFIG_MODE,72,59,93,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_FS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,103,145,12
+    GROUPBOX        "Custom Video Mode",65450,177,18,186,97,WS_GROUP
+    LTEXT           "Mode:",13,186,32,25,8
+    EDITTEXT        IDC_VIDEOCONFIG_XRES,214,30,27,12,ES_RIGHT
+    LTEXT           "by",12,244,32,11,8
+    EDITTEXT        IDC_VIDEOCONFIG_YRES,258,30,27,12,ES_RIGHT
+    LTEXT           "@",11,289,32,12,8
+    COMBOBOX        IDC_VIDEOCONFIG_BPP,302,30,35,60,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "bpp",10,341,32,17,8
+    GROUPBOX        "Image Size Transform",65445,185,47,170,61,WS_GROUP
+    LTEXT           "Special scaler:",65444,192,61,60,8
+    COMBOBOX        IDC_VIDEOCONFIG_SCALER_FS,281,58,65,46,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Scale dimensions by:",IDC_RADIO_SCALE,"Button",BS_AUTORADIOBUTTON,192,76,85,12
+    CONTROL         "Stretch to Fill Screen",IDC_RADIO_STRETCH,"Button",BS_AUTORADIOBUTTON,192,91,88,12
+    LTEXT           "X:",65443,282,78,10,8
+    EDITTEXT        IDC_VIDEOCONFIG_XSCALE,292,76,20,12
+    LTEXT           "Y:",65442,316,78,11,8
+    EDITTEXT        IDC_VIDEOCONFIG_YSCALE,326,76,20,12
+    GROUPBOX        "Windowed Settings",65441,10,127,178,141,WS_GROUP
+    LTEXT           "Size Multiplier:",65440,20,149,50,8
+    CTEXT           "X:",65439,83,137,42,8
+    CTEXT           "Y:",65438,134,137,42,8
+    EDITTEXT        IDC_WINSIZE_MUL_X,83,148,42,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_WINSIZE_MUL_Y,134,148,42,12,ES_AUTOHSCROLL
+    CONTROL         "Force integral scaling factors.",IDC_FORCE_INT_VIDEO_SCALARS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,164,145,12
+    CONTROL         "Force aspect ratio correction.",IDC_FORCE_ASPECT_CORRECTION,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,179,145,12
+    LTEXT           "Special scaler:",65429,20,215,51,8
+    COMBOBOX        IDC_VIDEOCONFIG_SCALER_WIN,83,213,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Sync Method:",65437,20,235,51,8
+    COMBOBOX        IDC_VIDEOCONFIG_SYNC_METHOD_WIN,83,233,93,47,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Disable hardware acceleration.",IDC_DISABLE_HW_ACCEL_WIN,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,20,250,145,12
+    GROUPBOX        "Drawing Area",65494,196,127,178,86,WS_GROUP
+    LTEXT           "First Line:",65436,218,153,39,8
+    LTEXT           "Last Line:",65435,218,173,43,8
+    CTEXT           "NTSC",65434,262,140,27,8
+    CTEXT           "PAL",65433,313,140,27,8
+    EDITTEXT        IDC_SCANLINE_FIRST_NTSC,263,152,27,12,ES_RIGHT
+    EDITTEXT        IDC_SCANLINE_LAST_NTSC,263,171,27,12,ES_RIGHT
+    EDITTEXT        IDC_SCANLINE_FIRST_PAL,313,152,27,12,ES_RIGHT
+    EDITTEXT        IDC_SCANLINE_LAST_PAL,313,171,27,12,ES_RIGHT
+    CONTROL         "Clip left and right sides (8 columns on each).",IDC_VIDEOCONFIG_CLIPSIDES,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,192,157,12
+    DEFPUSHBUTTON   "Close",BTN_CLOSE,318,274,56,14
+    LTEXT           "Current Pixel Aspect Ratio:",65432,20,197,88,8
+    EDITTEXT        IDC_VIDEOCONFIG_ASPECT_X,109,195,28,12,ES_AUTOHSCROLL
+    CTEXT           ":",65431,139,197,8,8
+    EDITTEXT        IDC_VIDEOCONFIG_ASPECT_Y,148,195,28,12,ES_AUTOHSCROLL
+    CONTROL         "Allow more than 8 sprites per scanline.",IDC_VIDEOCONFIG_NO8LIM,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,206,250,157,11
+    GROUPBOX        "Emulation",65430,196,236,178,32,WS_GROUP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1500,12 +1521,12 @@ BEGIN
         BOTTOMMARGIN, 52
     END
 
-    "VIDEOCONFIG", DIALOG
+    "MOVIEOPTIONS", DIALOG
     BEGIN
-        LEFTMARGIN, 10
-        RIGHTMARGIN, 374
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 118
         TOPMARGIN, 8
-        BOTTOMMARGIN, 268
+        BOTTOMMARGIN, 152
     END
 
     "MEMWATCH", DIALOG
@@ -1605,6 +1626,14 @@ BEGIN
         RIGHTMARGIN, 179
         TOPMARGIN, 7
         BOTTOMMARGIN, 59
+    END
+
+    "VIDEOCONFIG", DIALOG
+    BEGIN
+        LEFTMARGIN, 10
+        RIGHTMARGIN, 374
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 268
     END
 END
 #endif    // APSTUDIO_INVOKED

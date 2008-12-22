@@ -48,7 +48,7 @@
 
 using namespace std;
 
-bool bindSavestate = true;	//Toggle that determines if a savestate filename will include the movie filename
+
 static std::string BaseDirectory;
 static char FileExt[2048];	//Includes the . character, as in ".nes"
 char FileBase[2048];

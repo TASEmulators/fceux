@@ -61,6 +61,7 @@
 #include "utils/xstring.h"
 #include "file.h"
 #include "mapinput.h"
+#include "movieoptions.h"
 
 #include <fstream>
 #include <sstream>
@@ -106,7 +107,7 @@ int GetCheckedAutoFirePattern();
 int GetCheckedAutoFireOffset();
 
 //Internal variables-------------------------------------
-int pauseAfterPlayback = 0;			//Flag for pausing emulator when movie is finished
+
 static int winwidth, winheight;
 static volatile int nofocus = 0;
 static int tog = 0;					//Toggle for Hide Menu
@@ -1165,6 +1166,9 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 				break;
 			case MENU_HOTKEYS:
 				MapInput();
+				break;
+			case MENU_MOVIEOPTIONS:
+				OpenMovieOptions();
 				break;
 
 			//Tools Menu---------------------------------------------------------------
