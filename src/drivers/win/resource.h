@@ -134,6 +134,7 @@
 #define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
 #define INSERTCOMMENTSUBTITLE           124
+#define GETFILENAME                     124
 #define CHECK_SOUND_ENABLED             126
 #define CTL_LATENCY_TRACKBAR            128
 #define COMBO_SOUND_QUALITY             129

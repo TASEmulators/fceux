@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../../state.h"
 #include <string>
 #include <string.h>
 #include <fstream>
@@ -6,11 +7,8 @@
 using namespace std;
 
 //Externs
-extern int CurrentState;					//Declared in src/state.cpp
-extern bool FCEUSS_Load(const char *fname); //Declared in src/state.cpp
 extern string GetBackupFileName();			//Declared in src/state.cpp
 
-bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
 /**
 * Show an Save File dialog and save a savegame state to the selected file.
 **/

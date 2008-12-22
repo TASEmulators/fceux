@@ -92,10 +92,8 @@ char *md5_asciistr(uint8 digest[16]);
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
-extern bool CheckBackupSaveStateExist();	//Checks if backupsavestate exists
-extern void LoadBackup();
 
-// Function definitions
+// Function declarations
 void MakeBackup(bool dispMessage);			//Makes a backup of current movie file
 bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 
@@ -127,10 +125,6 @@ const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*rec
 
 int EnableBackgroundInput = 0;
 int ismaximized = 0;
-
-//Subtitles/Comments
-void InsertSubtitle(HWND main);
-void InsertComment(HWND main);
 
 //Help Menu subtopics
 string moviehelp = "{695C964E-B83F-4A6E-9BA2-1A975387DB55}";		 //Movie Recording
