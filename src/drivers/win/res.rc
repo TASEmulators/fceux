@@ -1636,17 +1636,6 @@ BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,311,214
 END
 
-GETFILENAME DIALOGEX 0, 0, 147, 82
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Movie filename"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",INSERTCS_IDOK,7,55,50,14
-    PUSHBUTTON      "Cancel",INSERTCS_IDCANCEL,89,55,50,14
-    EDITTEXT        INSERTCS_MESSAGE,7,30,133,14,ES_AUTOHSCROLL
-    LTEXT           "Type filename: (blank for default)",INSERTCS_STATIC,20,14,114,8
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1662,14 +1651,6 @@ BEGIN
         RIGHTMARGIN, 318
         TOPMARGIN, 7
         BOTTOMMARGIN, 243
-    END
-
-    GETFILENAME, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 140
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 75
     END
 END
 #endif    // APSTUDIO_INVOKED

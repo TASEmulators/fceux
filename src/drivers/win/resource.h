@@ -134,7 +134,6 @@
 #define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124
 #define INSERTCOMMENTSUBTITLE           124
-#define GETFILENAME                     124
 #define CHECK_SOUND_ENABLED             126
 #define CTL_LATENCY_TRACKBAR            128
 #define COMBO_SOUND_QUALITY             129
@@ -376,13 +375,9 @@
 #define MEMW_EDIT01RESET                1185
 #define MEMW_EDIT02RESET                1186
 #define MEMW_EDIT03RESET                1187
-#define INSERTCS_MESSAGE                1187
 #define MEMW_EDIT00RMADDRESS            1188
-#define INSERTCS_IDOK                   1188
 #define MEMW_EDIT01RMADDRESS            1189
-#define INSERTCS_IDCANCEL               1189
 #define MEMW_EDIT02RMADDRESS            1190
-#define INSERTCS_STATIC                 1190
 #define MEMW_EDIT03RMADDRESS            1191
 #define IDC_DEBUGGER_RESTORESIZE        1191
 #define MEMW_EDIT04RMADDRESS            1192
