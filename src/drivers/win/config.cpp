@@ -49,6 +49,8 @@ extern bool frameAdvanceLagSkip;
 extern int ClipSidesOffset;
 extern bool movieSubtitles;
 extern bool subtitlesOnAVI;
+extern bool autoMovieBackup;
+extern bool bindSavestate;
 extern int PPUViewRefresh;
 extern int NTViewRefresh;
 extern uint8 gNoBGFillColor;

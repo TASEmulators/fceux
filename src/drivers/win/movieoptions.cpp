@@ -23,13 +23,14 @@
 
 //internal variables
 int pauseAfterPlayback = 0;		//Flag for pausing emulator when movie is finished
-bool bindSavestate = true;		//Toggle that determines if a savestate filename will include the movie filename
-bool autoMovieBackup = false;	//Toggle that determines if movies should be backed up automatically before altering them
+
 
 //external
 extern int status_icon;		//In main.cpp - For displaying movie status icons (play,record,pause)
 extern bool movieSubtitles; //In fceu.cpp - Toggle for displaying movie subtitles
 extern bool subtitlesOnAVI; //In movie.cpp - Toggle for putting movie subtitles in an AVI
+extern bool autoMovieBackup;//In fceu.cpp - Toggle that determines if movies should be backed up automatically before altering them
+extern bool bindSavestate ;		//Toggle that determines if a savestate filename will include the movie filename
 
 void UpdateCheckBoxes(HWND hwndDlg)
 {
