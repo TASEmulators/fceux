@@ -124,6 +124,10 @@ static void CloseGame(void)
 
 		delete GameInfo;
 		GameInfo = 0;
+
+		lastSavestateMade[0] = 0;
+		undoSS = false;
+		redoSS = false;
 	}
 }
 

@@ -94,7 +94,10 @@ void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
-extern void SwapSaveState();
+//From src/state.cpp
+extern bool undoSS;				//Decides if undo savestate is eligible
+extern bool redoSS;				//Decides if it should be called redo instead of undo
+extern void SwapSaveState();	//Performs the undo/redo operation
 
 //AutoFire-----------------------------------------------
 void SetAutoFirePattern(int onframes, int offframes);
@@ -114,6 +117,10 @@ static LONG WindowXC=1<<30,WindowYC;
 int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
+
+//Function Declarations
+void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
+void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters a context menu item name
 
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -412,7 +419,24 @@ void UpdateCheckedMenuItems()
 void UpdateContextMenuItems(HMENU context, int whichContext)
 {
 	bool exist;
+	string redoSavestate = "Redo savestate";
+	string undoSavestate = "Undo savestate";
 	
+	//Undo Loadstate
+	exist = CheckBackupSaveStateExist(); 
+	EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
+	
+	//Undo Savestate
+	if (undoSS || redoSS)		//If undo or redo, enable Undo savestate, else keep it gray
+		EnableMenuItem(context,FCEUX_CONTEXT_UNDOSAVESTATE,MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(context,FCEUX_CONTEXT_UNDOSAVESTATE,MF_BYCOMMAND | MF_GRAYED);
+	if (redoSS)
+		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, redoSavestate, context);
+	else
+		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, undoSavestate, context);
+
+	//Case specific menu item handling
 	switch(whichContext)
 	{
 		//0 = Game + Movie in read only	
@@ -420,16 +444,12 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 			break;
 		//1 = Game + No Movie
 		case 1:
-			exist = CheckBackupSaveStateExist(); 
-			EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
 			break;
 		//2 = No Game
 		case 2:
 			break;
 		//3 = Game + Movie in read + write
 		case 3:
-			exist = CheckBackupSaveStateExist(); 
-			EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
 			break;
 		default:
 			break;
@@ -790,7 +810,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
 			whichContext = 2;
 		}
-UpdateContextMenuItems(hfceuxcontextsub, whichContext);
+		UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 		TrackPopupMenu(hfceuxcontextsub,0,(MainWindow_wndx+mousex),(MainWindow_wndy+mousey),TPM_RIGHTBUTTON,hWnd,0);
 		
 	}
@@ -1828,6 +1848,17 @@ void FCEUD_LuaRunFrom(void)
 	{
 		FCEU_LoadLuaCode(szFileName);
 	}
+}
+
+void ChangeContextMenuItemText(int menuitem, string text, HMENU menu)
+{
+	MENUITEMINFO moo;
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.cch = NULL;
+	GetMenuItemInfo(menu, menuitem, FALSE, &moo);
+	moo.dwTypeData = (LPSTR)text.c_str();
+	SetMenuItemInfo(menu, menuitem, FALSE, &moo);
 }
 
 void ChangeMenuItemText(int menuitem, string text)

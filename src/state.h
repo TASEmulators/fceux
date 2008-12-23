@@ -62,6 +62,9 @@ void AddExState(void *v, uint32 s, int type, char *desc);
 void FCEU_DrawSaveStates(uint8 *XBuf);
 
 void CreateBackupSaveState(const char *fname); //backsup a savestate before overwriting it with a new one
-void BackupLoadState();				//Makes a backup savestate before any loadstate
-void LoadBackup();					//Loads the backupsavestate
-void SwapSaveState();				//Swaps a savestate with its backup state
+void BackupLoadState();				 //Makes a backup savestate before any loadstate
+void LoadBackup();					 //Loads the backupsavestate
+void SwapSaveState();				 //Swaps a savestate with its backup state
+extern bool undoSS;					 //undo savestate flag
+extern bool redoSS;					 //redo savestate flag
+extern char lastSavestateMade[2048]; //Filename of last savestate used

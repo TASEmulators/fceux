@@ -60,7 +60,8 @@ static int StateShow;
 bool FCEU_state_loading_old_format;
 
 char lastSavestateMade[2048]; //Stores the last savestate made (needed for UndoSavestate)
-bool redoSS = false;		 //This will be true if UndoSaveState is run, will turn false when a new savestate is made
+bool undoSS = false;		  //This will be true if there is a backup state for lastSavestateMade
+bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
 
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
@@ -435,10 +436,10 @@ void FCEUSS_Save(const char *fname)
 		{
 			CreateBackupSaveState(fname);		//Make a backup of previous savestate before overwriting it
 			strcpy(lastSavestateMade,fname);	//Remember what the last savestate filename was (for undoing later)
-			redoSS = true;						//Backup was created so redo is possible
+			undoSS = true;						//Backup was created so redo is possible
 		}
 		else
-			redoSS = false;					//No backup was needed, so lastSavestateMade does not contain a file that has a backup
+			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
 
 		st =FCEUD_UTF8_fstream(fname, "wb");
 	}
@@ -452,10 +453,10 @@ void FCEUSS_Save(const char *fname)
 		{
 			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
 			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
-			redoSS = true;					//Backup was created so redo is possible
+			undoSS = true;					//Backup was created so redo is possible
 		}
 		else
-			redoSS = false;					//No backup was needed, so lastSavestateMade does not contain a file that has a backup
+			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
 		
 		st = FCEUD_UTF8_fstream(fn,"wb");
 		free(fn);
@@ -889,33 +890,12 @@ string GenerateBackupSaveStateFn(const char *fname)
 
 void CreateBackupSaveState(const char *fname)
 {
-	string filename = GenerateBackupSaveStateFn(fname);
-	std::fstream* st = 0;
-	st = FCEUD_UTF8_fstream(filename.c_str(),"wb");
-
-	if(st == NULL)
-		{
-			FCEU_DispMessage("State %d save error.",filename.c_str());
-			return;
-		}
-
-	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
-		FCEUSS_SaveMS(st,-1);
-	else
-		FCEUSS_SaveMS(st,0);
-
-	delete st;
+	string newFilename = GenerateBackupSaveStateFn(fname);	//Get backup savestate filename
+	if (CheckFileExists(newFilename.c_str()))				//See if backup already exists
+		remove(newFilename.c_str())	;						//If so, delete it
+	rename(fname,newFilename.c_str());						//Rename savestate to backup filename
+	undoSS = true;		//There is a backup savestate file to mast last loaded, so undo is possible
 }
-//---------------------------------------------------------------------------------------------------------------------------------------------------
-//Logic - undo available until a new savestate is made,game is closed, or fcuex is closed
-
-//What we need is a concept of if you are undoing or redoing as well
-//Undo should know there is a bak file before making a decision.  the main platform code should know this before calling it.
-//Once it is undone, it should know this and call it a redo if called again on the same file.  It should remember as long as it knows about undo.
-//The undo redo is meaningless information for this function as it simply swaps.
-//perhaps a combo of flag(s) and a function to handle flag situations is called for?
-//This function would then simply swap the files, which means it is both undo and redo
-	//And extra function needs to be in charge of flags to keep up with which one is being done, but that is purely cosmetic
 
 void SwapSaveState()
 {
@@ -946,7 +926,13 @@ void SwapSaveState()
 	rename(backup.c_str(),temp.c_str());		//rename backup file to temp file
 	rename(lastSavestateMade,backup.c_str());	//rename current as backup
 	rename(temp.c_str(),lastSavestateMade);		//rename backup as current
-		
+	
+	undoSS = true;	//Just in case, if this was run, then there is definately a last savestate and backup
+	if (redoSS)				//This was a redo function, so if run again it will be an undo again
+		redoSS = false;
+	else					//This was an undo function so next will be redo, so flag it
+		redoSS = true;
+
 	FCEUI_DispMessage("%s restored",backup.c_str());
 	FCEUI_printf("%s restored\n",backup.c_str());
 }	

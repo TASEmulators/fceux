@@ -68,7 +68,8 @@ void FCEUD_LoadStateFrom()
 
 bool CheckBackupSaveStateExist()
 {
-	//This function simply checks to see if the backup savestate of the appropriate filename exists
+	//This function simply checks to see if the backup loadstate exists, the backup loadstate is a special savestate
+	//That is made before loading any state, so that the user never loses his data
 	string filename = GetBackupFileName(); //Get backup savestate filename
 		
 	//Check if this filename exists
