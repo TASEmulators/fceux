@@ -46,6 +46,12 @@ std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
 std::vector<string> subtitleMessages;	//Messages of subtitles
 
 bool subtitlesOnAVI = false;
+bool autoMovieBackup = false; //Toggle that determines if movies should be backed up automatically before altering them
+bool freshMovie = false;	  //True when a movie loads, false when movie is altered.  Used to determine if a movie has been altered since opening
+
+// Function declarations------------------------
+bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
+
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
 //which the user would have already converted from fcm
@@ -620,6 +626,7 @@ void FCEUI_StopMovie()
 		StopRecording();
 
 	curMovieFilename[0] = 0;
+	freshMovie = false;
 }
 
 static void poweron(bool shouldDisableBatteryLoading)
@@ -733,6 +740,8 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
 	LoadSubtitles();
 	delete fp;
+
+	freshMovie = true;	//Movie has been loaded, so it must be unaltered
 
 	//fully reload the game to reinitialize everything before playing any movie
 	poweron(true);
@@ -1226,4 +1235,87 @@ void FCEU_DisplaySubtitles(char *format, ...)
 
 	subtitleMessage.howlong = 300;
 	subtitleMessage.isMovieMessage = subtitlesOnAVI;
+}
+
+void FCEUI_MakeBackupMovie(bool dispMessage)
+{
+	//This function generates backup movie files
+	string currentFn;					//Current movie fillename
+	string backupFn;					//Target backup filename
+	string tempFn;						//temp used in back filename creation
+	stringstream stream;
+	int x;								//Temp variable for string manip
+	bool exist = false;					//Used to test if filename exists
+	bool overflow = false;				//Used for special situation when backup numbering exceeds limit
+
+	currentFn = curMovieFilename;		//Get current moviefilename
+	backupFn = curMovieFilename;		//Make backup filename the same as current moviefilename
+	x = backupFn.find_last_of(".");		 //Find file extension
+	backupFn = backupFn.substr(0,x);	//Remove extension
+	tempFn = backupFn;					//Store the filename at this point
+	for (unsigned int backNum=0;backNum<999;backNum++) //999 = arbituary limit to backup files
+	{
+		stream.str("");					 //Clear stream
+		if (backNum > 99)
+			stream << "-" << backNum;	 //assign backNum to stream
+		else if (backNum <=99 && backNum >= 10)
+			stream << "-0";				//Make it 010, etc if two digits
+		else
+			stream << "-00" << backNum;	 //Make it 001, etc if single digit
+		backupFn.append(stream.str());	 //add number to bak filename
+		backupFn.append(".bak");		 //add extension
+
+		exist = CheckFileExists(backupFn.c_str());	//Check if file exists
+		
+		if (!exist) 
+			break;						//Yeah yeah, I should use a do loop or something
+		else
+		{
+			backupFn = tempFn;			//Before we loop again, reset the filename
+			
+			if (backNum == 999)			//If 999 exists, we have overflowed, let's handle that
+			{
+				backupFn.append("-001.bak"); //We are going to simply overwrite 001.bak
+				overflow = true;		//Flag that we have exceeded limit
+				break;					//Just in case
+			}
+		}
+	}
+
+	MovieData md = currMovieData;								//Get current movie data
+	std::fstream* outf = FCEUD_UTF8_fstream(backupFn, "wb");	//open/create file
+	md.dump(outf,false);										//dump movie data
+	delete outf;												//clean up, delete file object
+	
+	//TODO, decide if fstream successfully opened the file and print error message if it doesn't
+
+	if (dispMessage)	//If we should inform the user 
+	{
+		if (overflow)
+			FCEUI_DispMessage("Overwriting %s",backupFn.c_str()); //Inform user of overflow
+		else
+			FCEUI_DispMessage("%s created",backupFn.c_str()); //Inform user of backup filename
+	}
+}
+
+bool CheckFileExists(const char* filename)
+{
+	//This function simply checks to see if the given filename exists
+	string checkFilename;
+	checkFilename = filename;
+		
+	//Check if this filename exists
+	fstream test;
+	test.open(checkFilename.c_str(),fstream::in);
+		
+	if (test.fail())
+	{
+		test.close();
+		return false;
+	}
+	else
+	{
+		test.close();
+		return true;
+	}
 }

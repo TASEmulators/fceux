@@ -234,8 +234,12 @@ extern MovieData currMovieData;
 extern int currFrameCounter;
 extern char curMovieFilename[512];
 extern bool subtitlesOnAVI;
-//---------
+extern bool freshMovie;
+extern bool movie_readonly;
+extern bool autoMovieBackup;
+//--------------------------------------------------
 
+void FCEUI_MakeBackupMovie(bool dispMessage);
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
 void FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
@@ -250,7 +254,5 @@ void FCEUI_ToggleInputDisplay(void);
 void LoadSubtitles(void);
 void ProcessSubtitles(void);
 void FCEU_DisplaySubtitles(char *format, ...);
-
-
 
 #endif //__MOVIE_H_

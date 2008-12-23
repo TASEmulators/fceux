@@ -799,7 +799,11 @@ void FCEUI_LoadState(const char *fname)
 	from this ;)).
 	*/
 	BackupSaveState();
-
+	
+	if (!movie_readonly && autoMovieBackup && freshMovie) //If auto-backup is on, movie has not been altered this session and the movie is in read+write mode
+	{
+		FCEUI_MakeBackupMovie(false);	//Backup the movie before the contents get altered, but do not display messages						  
+	}
 	if(FCEUSS_Load(fname))
 	{
 		//mbg todo netplay
@@ -825,6 +829,7 @@ void FCEUI_LoadState(const char *fname)
 
 			free(fn);
 		}*/
+		freshMovie = false;		//The movie has been altered so it is no longer fresh
 	}
 	else
 	{

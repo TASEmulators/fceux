@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-dec-2008 - adelikat - Movie auto-backup feature implemented
 22-dec-2008 - adelikat - win32 - moved movie related menu items to a movie options dialog box
 22-dec-2008 - adelikat - Win32 - context menu item "create backup" for backing up movie files
 21-dec-2008 - adelikat - Win32 - Name Table Viewer - Refresh value default to 15, Refresh value stored in config file

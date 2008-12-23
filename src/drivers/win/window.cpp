@@ -94,7 +94,6 @@ void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 
-extern void MakeBackupMovie(bool dispMessage);		//Makes a backup of current movie file
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 
 //AutoFire-----------------------------------------------
@@ -1315,7 +1314,7 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 
 			//Create a backup movie file
 			case FCEUX_CONTEXT_MAKEBACKUP:
-				MakeBackupMovie(true);
+				FCEUI_MakeBackupMovie(true);
 				break;
 			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
