@@ -452,7 +452,6 @@ void FCEUSS_Save(const char *fname)
 		{
 			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
 			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
-			FCEUI_printf("Last save made: %s\n",lastSavestateMade);
 			redoSS = true;					//Backup was created so redo is possible
 		}
 		else
@@ -883,7 +882,7 @@ string GenerateBackupSaveStateFn(const char *fname)
 	filename = fname;	//Convert fname to a string object
 	int x = filename.find_last_of("."); //Find file extension
 	filename.insert(x,"-bak");		//add "-bak" before the dot.  
-	FCEUI_printf("Generating filename of %s\n",filename.c_str());
+	
 	return filename;
 }
 
@@ -920,33 +919,36 @@ void CreateBackupSaveState(const char *fname)
 
 void SwapSaveState()
 {
-	if (!lastSavestateMade) return;	//If there is no last savestate, can't undo
+	//--------------------------------------------------------------------------------------------
+	//Both files must exist
+	//--------------------------------------------------------------------------------------------
+	
+	if (!lastSavestateMade) 
+	{
+		FCEUI_DispMessage("Can't Undo");
+		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a recently used savestate.\n");
+		return;		//If there is no last savestate, can't undo
+	}
 	string backup = GenerateBackupSaveStateFn(lastSavestateMade);	//Get filename of backup state
 	if (!CheckFileExists(backup.c_str())) 
 	{
-		FCEUI_printf("%s exists",backup.c_str());
-		return;					//If no backup, can't undo
+		FCEUI_DispMessage("Can't Undo");
+		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a backup of the last used savestate.\n");
+		return;		//If no backup, can't undo
 	}
 
 	//--------------------------------------------------------------------------------------------
 	//So both exists, now swap the last savestate and its backup
 	//--------------------------------------------------------------------------------------------
-	string temp;							//Create a temp string object
-	temp = backup;							//Put backup filename in temp
+	string temp = backup;					//Put backup filename in temp
 	temp.append("x");						//Add x
-	
-	FILE* backupf = fopen(backup.c_str(),"r");	//Open backup file
-	FILE* currentf = fopen(lastSavestateMade,"w");		//create temp file
 	
 	rename(backup.c_str(),temp.c_str());		//rename backup file to temp file
 	rename(lastSavestateMade,backup.c_str());	//rename current as backup
 	rename(temp.c_str(),lastSavestateMade);		//rename backup as current
-	
-	fclose(backupf);						//Cleanup, close backup file
-	fclose(currentf);						//Cleanup, close current file
+		
 	FCEUI_DispMessage("%s restored",backup.c_str());
 	FCEUI_printf("%s restored\n",backup.c_str());
-	//TODO: deal with error handling if any of these files does/doesn't exist unexpectedly
 }	
 	
 //------------------------------------------------------------------------------------------------------------------------------------------------------

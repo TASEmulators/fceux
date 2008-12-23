@@ -1304,7 +1304,7 @@ bool CheckFileExists(const char* filename)
 
 	if (filename)
 		checkFilename = filename;
-	FCEUI_printf("Checking file %s\n",checkFilename.c_str());		
+			
 	//Check if this filename exists
 	fstream test;
 	test.open(checkFilename.c_str(),fstream::in);
