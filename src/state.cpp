@@ -431,16 +431,6 @@ void FCEUSS_Save(const char *fname)
 
 	if(fname)	//If filename is given use it.
 	{
-		//backup existing savestate first
-		if (CheckFileExists(fname)) 
-		{
-			CreateBackupSaveState(fname);		//Make a backup of previous savestate before overwriting it
-			strcpy(lastSavestateMade,fname);	//Remember what the last savestate filename was (for undoing later)
-			undoSS = true;						//Backup was created so redo is possible
-		}
-		else
-			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
-
 		st =FCEUD_UTF8_fstream(fname, "wb");
 	}
 	else		//Else, generate one
@@ -956,6 +946,28 @@ string GetBackupFileName()
 	filename.append(".bak.fc0");		//add .bak
 
 	return filename;
+}
+
+bool CheckBackupSaveStateExist()
+{
+	//This function simply checks to see if the backup loadstate exists, the backup loadstate is a special savestate
+	//That is made before loading any state, so that the user never loses his data
+	string filename = GetBackupFileName(); //Get backup savestate filename
+		
+	//Check if this filename exists
+	fstream test;
+	test.open(filename.c_str(),fstream::in);
+		
+	if (test.fail())
+	{
+		test.close();
+		return false;
+	}
+	else
+	{
+		test.close();
+		return true;
+	}
 }
 
 void BackupLoadState()

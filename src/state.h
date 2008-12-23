@@ -68,3 +68,4 @@ void SwapSaveState();				 //Swaps a savestate with its backup state
 extern bool undoSS;					 //undo savestate flag
 extern bool redoSS;					 //redo savestate flag
 extern char lastSavestateMade[2048]; //Filename of last savestate used
+bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists

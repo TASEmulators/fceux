@@ -66,25 +66,3 @@ void FCEUD_LoadStateFrom()
 	}
 }
 
-bool CheckBackupSaveStateExist()
-{
-	//This function simply checks to see if the backup loadstate exists, the backup loadstate is a special savestate
-	//That is made before loading any state, so that the user never loses his data
-	string filename = GetBackupFileName(); //Get backup savestate filename
-		
-	//Check if this filename exists
-	fstream test;
-	test.open(filename.c_str(),fstream::in);
-		
-	if (test.fail())
-	{
-		test.close();
-		return false;
-	}
-	else
-	{
-		test.close();
-		return true;
-	}
-}
-

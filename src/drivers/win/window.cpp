@@ -22,6 +22,7 @@
 //                   does not include functions relevant for dialog windows.
 
 #include "../../input.h"
+#include "../../state.h"
 #include "window.h"
 #include "main.h"
 #include "state.h"
@@ -94,10 +95,6 @@ void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
-//From src/state.cpp
-extern bool undoSS;				//Decides if undo savestate is eligible
-extern bool redoSS;				//Decides if it should be called redo instead of undo
-extern void SwapSaveState();	//Performs the undo/redo operation
 
 //AutoFire-----------------------------------------------
 void SetAutoFirePattern(int onframes, int offframes);
