@@ -50,7 +50,6 @@ bool autoMovieBackup = false; //Toggle that determines if movies should be backe
 bool freshMovie = false;	  //True when a movie loads, false when movie is altered.  Used to determine if a movie has been altered since opening
 
 // Function declarations------------------------
-bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 
 
 //TODO - remove the synchack stuff from the replay gui and require it to be put into the fm2 file
@@ -1301,8 +1300,10 @@ void FCEUI_MakeBackupMovie(bool dispMessage)
 bool CheckFileExists(const char* filename)
 {
 	//This function simply checks to see if the given filename exists
-	string checkFilename;
-	checkFilename = filename;
+	string checkFilename; 
+		
+	if (filename)
+		checkFilename = filename;
 		
 	//Check if this filename exists
 	fstream test;

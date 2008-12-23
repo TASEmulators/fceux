@@ -432,6 +432,10 @@ void FCEUSS_Save(const char *fname)
 		//FCEU_PrintError("daCurrentState=%d",CurrentState);
 		fn = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
 		st = FCEUD_UTF8_fstream(fn,"wb");
+
+		//backup existing savestate first
+		if (CheckFileExists(fn)) CreateBackupSaveState(fn);
+
 		free(fn);
 	}
 
@@ -440,7 +444,6 @@ void FCEUSS_Save(const char *fname)
 		FCEU_DispMessage("State %d save error.",CurrentState);
 		return;
 	}
-
 
 	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		FCEUSS_SaveMS(st,-1);
@@ -780,7 +783,7 @@ void FCEUI_SaveState(const char *fname)
 	if(!FCEU_IsValidUI(FCEUI_SAVESTATE)) return;
 
 	StateShow=0;
-
+	
 	FCEUSS_Save(fname);
 }
 
@@ -798,7 +801,7 @@ void FCEUI_LoadState(const char *fname)
 	information expected in newer save states, desynchronization won't occur(at least not
 	from this ;)).
 	*/
-	BackupSaveState();
+	BackupLoadState();	//Backup the current state before loading a new one
 	
 	if (!movie_readonly && autoMovieBackup && freshMovie) //If auto-backup is on, movie has not been altered this session and the movie is in read+write mode
 	{
@@ -847,6 +850,8 @@ void FCEU_DrawSaveStates(uint8 *XBuf)
 
 string GetBackupFileName()
 {
+	//This backup savestate is a special one specifically made whenever a loadstate occurs so that the user's place in a movie/game is never lost
+	//particularly from unintentional loadstating
 	string filename;
 	int x;
 	
@@ -858,7 +863,31 @@ string GetBackupFileName()
 	return filename;
 }
 
-void BackupSaveState()
+void CreateBackupSaveState(const char *fname)
+{
+	string filename;
+	filename = fname;	//Convert fname to a string object
+	int x = filename.find_last_of("."); //Find file extension
+	filename.insert(x-1,"-bak");		//add "-bak" before the dot.  Ex: smb.fc0 becomes smb-bak.fc0
+	
+	std::fstream* st = 0;
+	st = FCEUD_UTF8_fstream(filename.c_str(),"wb");
+
+	if(st == NULL)
+		{
+			FCEU_DispMessage("State %d save error.",CurrentState);
+			return;
+		}
+
+	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+		FCEUSS_SaveMS(st,-1);
+	else
+		FCEUSS_SaveMS(st,0);
+
+	delete st;
+}
+
+void BackupLoadState()
 {
 	string filename = GetBackupFileName();
 	FCEUSS_Save(filename.c_str());

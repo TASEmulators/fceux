@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-dec-2008 - adelikat - backupSavestate system added.
 22-dec-2008 - shinydoofy - sdl - added Shift+M for toggling automatic movie backups for SDL
 22-dec-2008 - adelikat - Movie auto-backup feature implemented
 22-dec-2008 - adelikat - win32 - moved movie related menu items to a movie options dialog box
