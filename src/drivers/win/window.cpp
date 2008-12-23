@@ -93,8 +93,8 @@ char *md5_asciistr(uint8 digest[16]);
 void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
 void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
-
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
+extern void SwapSaveState();
 
 //AutoFire-----------------------------------------------
 void SetAutoFirePattern(int onframes, int offframes);
@@ -1299,6 +1299,11 @@ UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 			//View comments and subtitles
 			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
 				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc);
+				break;
+
+			//Undo Savestate
+			case FCEUX_CONTEXT_UNDOSAVESTATE:
+				SwapSaveState();
 				break;
 
 			//Undo Loadstate

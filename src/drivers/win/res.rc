@@ -336,6 +336,7 @@ BEGIN
         MENUITEM "&Replay Movie",               FCEUX_CONTEXT_REPLAYMOVIE
         MENUITEM "Record Movie",                FCEUX_CONTEXT_RECORDMOVIE
         MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM "Screenshot",                  FCEUX_CONTEXT_SCREENSHOT

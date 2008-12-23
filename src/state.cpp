@@ -59,6 +59,9 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format;
 
+char lastSavestateMade[2048]; //Stores the last savestate made (needed for UndoSavestate)
+bool redoSS = false;		 //This will be true if UndoSaveState is run, will turn false when a new savestate is made
+
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
 static int SFEXINDEX;
@@ -425,17 +428,37 @@ void FCEUSS_Save(const char *fname)
 		return;
 	}
 
-	if(fname)
+	if(fname)	//If filename is given use it.
+	{
+		//backup existing savestate first
+		if (CheckFileExists(fname)) 
+		{
+			CreateBackupSaveState(fname);		//Make a backup of previous savestate before overwriting it
+			strcpy(lastSavestateMade,fname);	//Remember what the last savestate filename was (for undoing later)
+			redoSS = true;						//Backup was created so redo is possible
+		}
+		else
+			redoSS = false;					//No backup was needed, so lastSavestateMade does not contain a file that has a backup
+
 		st =FCEUD_UTF8_fstream(fname, "wb");
-	else
+	}
+	else		//Else, generate one
 	{
 		//FCEU_PrintError("daCurrentState=%d",CurrentState);
 		fn = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
-		st = FCEUD_UTF8_fstream(fn,"wb");
 
 		//backup existing savestate first
-		if (CheckFileExists(fn)) CreateBackupSaveState(fn);
-
+		if (CheckFileExists(fn)) 
+		{
+			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
+			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
+			FCEUI_printf("Last save made: %s\n",lastSavestateMade);
+			redoSS = true;					//Backup was created so redo is possible
+		}
+		else
+			redoSS = false;					//No backup was needed, so lastSavestateMade does not contain a file that has a backup
+		
+		st = FCEUD_UTF8_fstream(fn,"wb");
 		free(fn);
 	}
 
@@ -848,6 +871,90 @@ void FCEU_DrawSaveStates(uint8 *XBuf)
 	StateShow--;
 }
 
+//*************************************************************************
+//Savestate backup functions
+//(Used when making savestates)
+//*************************************************************************
+
+string GenerateBackupSaveStateFn(const char *fname)
+{
+	//This backup is for the backup "slot" for any savestate made.  Example: smb.fc0 becomes smb-bak.fc0
+	string filename;
+	filename = fname;	//Convert fname to a string object
+	int x = filename.find_last_of("."); //Find file extension
+	filename.insert(x,"-bak");		//add "-bak" before the dot.  
+	FCEUI_printf("Generating filename of %s\n",filename.c_str());
+	return filename;
+}
+
+
+void CreateBackupSaveState(const char *fname)
+{
+	string filename = GenerateBackupSaveStateFn(fname);
+	std::fstream* st = 0;
+	st = FCEUD_UTF8_fstream(filename.c_str(),"wb");
+
+	if(st == NULL)
+		{
+			FCEU_DispMessage("State %d save error.",filename.c_str());
+			return;
+		}
+
+	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+		FCEUSS_SaveMS(st,-1);
+	else
+		FCEUSS_SaveMS(st,0);
+
+	delete st;
+}
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+//Logic - undo available until a new savestate is made,game is closed, or fcuex is closed
+
+//What we need is a concept of if you are undoing or redoing as well
+//Undo should know there is a bak file before making a decision.  the main platform code should know this before calling it.
+//Once it is undone, it should know this and call it a redo if called again on the same file.  It should remember as long as it knows about undo.
+//The undo redo is meaningless information for this function as it simply swaps.
+//perhaps a combo of flag(s) and a function to handle flag situations is called for?
+//This function would then simply swap the files, which means it is both undo and redo
+	//And extra function needs to be in charge of flags to keep up with which one is being done, but that is purely cosmetic
+
+void SwapSaveState()
+{
+	if (!lastSavestateMade) return;	//If there is no last savestate, can't undo
+	string backup = GenerateBackupSaveStateFn(lastSavestateMade);	//Get filename of backup state
+	if (!CheckFileExists(backup.c_str())) 
+	{
+		FCEUI_printf("%s exists",backup.c_str());
+		return;					//If no backup, can't undo
+	}
+
+	//--------------------------------------------------------------------------------------------
+	//So both exists, now swap the last savestate and its backup
+	//--------------------------------------------------------------------------------------------
+	string temp;							//Create a temp string object
+	temp = backup;							//Put backup filename in temp
+	temp.append("x");						//Add x
+	
+	FILE* backupf = fopen(backup.c_str(),"r");	//Open backup file
+	FILE* currentf = fopen(lastSavestateMade,"w");		//create temp file
+	
+	rename(backup.c_str(),temp.c_str());		//rename backup file to temp file
+	rename(lastSavestateMade,backup.c_str());	//rename current as backup
+	rename(temp.c_str(),lastSavestateMade);		//rename backup as current
+	
+	fclose(backupf);						//Cleanup, close backup file
+	fclose(currentf);						//Cleanup, close current file
+	FCEUI_DispMessage("%s restored",backup.c_str());
+	FCEUI_printf("%s restored\n",backup.c_str());
+	//TODO: deal with error handling if any of these files does/doesn't exist unexpectedly
+}	
+	
+//------------------------------------------------------------------------------------------------------------------------------------------------------
+//*************************************************************************
+//Loadstate backup functions
+//(Used when Loading savestates)
+//*************************************************************************
+
 string GetBackupFileName()
 {
 	//This backup savestate is a special one specifically made whenever a loadstate occurs so that the user's place in a movie/game is never lost
@@ -861,30 +968,6 @@ string GetBackupFileName()
 	filename.append(".bak.fc0");		//add .bak
 
 	return filename;
-}
-
-void CreateBackupSaveState(const char *fname)
-{
-	string filename;
-	filename = fname;	//Convert fname to a string object
-	int x = filename.find_last_of("."); //Find file extension
-	filename.insert(x-1,"-bak");		//add "-bak" before the dot.  Ex: smb.fc0 becomes smb-bak.fc0
-	
-	std::fstream* st = 0;
-	st = FCEUD_UTF8_fstream(filename.c_str(),"wb");
-
-	if(st == NULL)
-		{
-			FCEU_DispMessage("State %d save error.",CurrentState);
-			return;
-		}
-
-	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
-		FCEUSS_SaveMS(st,-1);
-	else
-		FCEUSS_SaveMS(st,0);
-
-	delete st;
 }
 
 void BackupLoadState()

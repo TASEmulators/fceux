@@ -1301,10 +1301,10 @@ bool CheckFileExists(const char* filename)
 {
 	//This function simply checks to see if the given filename exists
 	string checkFilename; 
-		
+
 	if (filename)
 		checkFilename = filename;
-		
+	FCEUI_printf("Checking file %s\n",checkFilename.c_str());		
 	//Check if this filename exists
 	fstream test;
 	test.open(checkFilename.c_str(),fstream::in);
@@ -1312,11 +1312,11 @@ bool CheckFileExists(const char* filename)
 	if (test.fail())
 	{
 		test.close();
-		return false;
+		return false; 
 	}
 	else
 	{
 		test.close();
-		return true;
+		return true; 
 	}
 }

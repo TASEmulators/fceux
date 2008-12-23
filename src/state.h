@@ -64,3 +64,4 @@ void FCEU_DrawSaveStates(uint8 *XBuf);
 void CreateBackupSaveState(const char *fname); //backsup a savestate before overwriting it with a new one
 void BackupLoadState();				//Makes a backup savestate before any loadstate
 void LoadBackup();					//Loads the backupsavestate
+void SwapSaveState();				//Swaps a savestate with its backup state
