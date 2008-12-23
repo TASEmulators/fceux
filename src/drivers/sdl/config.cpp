@@ -279,12 +279,12 @@ InitConfig()
     #endif
     config->addOption(prefix + "RenderBG", SDLK_F4);
     config->addOption(prefix + "SaveState", SDLK_F5);
-	config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
+    config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_F6);
     config->addOption(prefix + "LoadState", SDLK_F7);
-	config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
+    config->addOption(prefix + "LagCounterDisplay", SDLK_F8);
     config->addOption(prefix + "MovieToggleFrameDisplay", SDLK_F9);
-	config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
-	config->addOption(prefix + "Reset", SDLK_F11);
+    config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
+    config->addOption(prefix + "Reset", SDLK_F11);
     config->addOption(prefix + "Screenshot", SDLK_F12);
     config->addOption(prefix + "Pause", SDLK_PAUSE);
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);

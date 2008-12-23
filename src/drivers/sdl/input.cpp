@@ -331,6 +331,14 @@ KeyboardCommands()
     if(KEY(TAB)) {
         NoWaiting |= 1;
     }
+    
+    // Toggle Movie auto-backup
+    if(keyonly(M) && is_shift) {
+        autoMovieBackup ^= 1;
+        FCEUI_DispMessage("Automatic movie backup %sabled.",
+          autoMovieBackup ? "en" : "dis");
+    }
+    
 
     // Famicom disk-system games
     if(gametype==GIT_FDS) 
