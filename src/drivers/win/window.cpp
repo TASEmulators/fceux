@@ -318,6 +318,9 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
+	//File Maneu
+	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
+
 	//NES Menu
 	CheckMenuItem(fceumenu, ID_NES_PAUSE, EmulationPaused ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_NES_TURBO, turbo ? MF_CHECKED : MF_UNCHECKED);
@@ -972,6 +975,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_PLAYMOVIEFROMBEGINNING:
 				FCEUI_MoviePlayFromBeginning();
 				break;
+			case ID_FILE_MOVIE_TOGGLEREAD:
+				FCEUI_MovieToggleReadOnly();
+				break;
 
 			//Record Avi/Wav submenu
 			case MENU_RECORD_AVI:
@@ -999,6 +1005,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case ID_FILE_STOPLUASCRIPT:
 				FCEU_LuaStop();
+				break;
+			case ID_FILE_LUA_RELOADLUASCRIPT:
+				FCEU_ReloadLuaCode();
 				break;
 
 			case MENU_EXIT:
@@ -1044,10 +1053,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_NES_NORMALSPEED:
 				FCEUD_SetEmulationSpeed(2);
 				break;
-			case ID_NES_FASTESTSPEED:
-				FCEUD_SetEmulationSpeed(4);
-				break;
-			
+						
 			//Config Menu-----------------------------------------------------------
 			case MENU_HIDE_MENU:
 				ToggleHideMenu();
@@ -1904,9 +1910,9 @@ void UpdateMenuHotkeys()
 	combined = "Record Movie...\t" + combo;
 	ChangeMenuItemText(MENU_RECORD_MOVIE, combined);
 
-	//Replay movie
+	//Play movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_REPLAY_FROM]);
-	combined = "Replay Movie...\t" + combo;
+	combined = "Play Movie...\t" + combo;
 	ChangeMenuItemText(MENU_REPLAY_MOVIE, combined); 
 
 	//Stop movie
@@ -1918,6 +1924,11 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PLAY_FROM_BEGINNING]);
 	combined = "Play from beginning\t" + combo;
 	ChangeMenuItemText(ID_FILE_PLAYMOVIEFROMBEGINNING, combined); 
+
+	//Read only
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_READONLY_TOGGLE]);
+	combined = "Read only\t" + combo;
+	ChangeMenuItemText(ID_FILE_MOVIE_TOGGLEREAD, combined); 
 
 	//Screenshot
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCREENSHOT]);
@@ -1934,6 +1945,11 @@ void UpdateMenuHotkeys()
 	combined = "Stop AVI\t" + combo;
 	ChangeMenuItemText(MENU_STOP_AVI, combined); 
 
+	//Reload Lua Script
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCRIPT_RELOAD]);
+	combined = "Reload Lua Script\t" + combo;
+	ChangeMenuItemText(ID_FILE_LUA_RELOADLUASCRIPT, combined); 
+	
 	//-------------------------------NES----------------------------------------
 	//Reset
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_RESET]);
@@ -1965,11 +1981,6 @@ void UpdateMenuHotkeys()
 	combined = "Pause\t" + combo;
 	ChangeMenuItemText(ID_NES_PAUSE, combined);
 
-	//Frame Advance
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FRAME_ADVANCE]);
-	combined = "Frame Advance\t" + combo;
-	ChangeMenuItemText(ID_NES_FRAMEADVANCE, combined);
-
 	//Turbo
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_TURBO_TOGGLE]);
 	combined = "Turbo\t" + combo;
@@ -1994,11 +2005,6 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_NORMAL]);
 	combined = "Normal Speed\t" + combo;
 	ChangeMenuItemText(ID_NES_NORMALSPEED, combined);
-
-	//Fastest Speed
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_FASTEST]);
-	combined = "Fastest Speed\t" + combo;
-	ChangeMenuItemText(ID_NES_FASTESTSPEED, combined);
 
 	//-------------------------------Config-------------------------------------
 	//Hide Menu

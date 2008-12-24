@@ -49,9 +49,11 @@ BEGIN
         POPUP "Movie"
         BEGIN
             MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
-            MENUITEM "Replay Movie...",             MENU_REPLAY_MOVIE
+            MENUITEM "Play Movie...",               MENU_REPLAY_MOVIE
             MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
             MENUITEM "Play from beginning",         ID_FILE_PLAYMOVIEFROMBEGINNING
+            MENUITEM SEPARATOR
+            MENUITEM "Read-only",                   ID_FILE_MOVIE_TOGGLEREAD
         END
         POPUP "Record AVI/Wav"
         BEGIN
@@ -67,6 +69,7 @@ BEGIN
         BEGIN
             MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
             MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
+            MENUITEM "Reload Lua Script",           ID_FILE_LUA_RELOADLUASCRIPT
         END
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
@@ -331,8 +334,8 @@ BEGIN
     END
     POPUP "Game+NoMovie"
     BEGIN
-        MENUITEM "&Replay Movie",               FCEUX_CONTEXT_REPLAYMOVIE
-        MENUITEM "Record Movie",                FCEUX_CONTEXT_RECORDMOVIE
+        MENUITEM "&Play Movie",                 FCEUX_CONTEXT_REPLAYMOVIE
+        MENUITEM "&Record Movie",               FCEUX_CONTEXT_RECORDMOVIE
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
