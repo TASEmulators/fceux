@@ -1301,6 +1301,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			
 			//Context Menus------------------------------------------------------
+			
+			//Recent ROM 1
+			case FCEUX_CONTEXT_RECENTROM1:
+				if(recent_files[0])
+					ALoad(recent_files[0]);
+				break;
+
 			//View comments and subtitles
 			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
 				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc);
