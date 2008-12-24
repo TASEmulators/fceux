@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+23-dec-2008 - adelikat - Win32 - Undo/redo loadstate and Undo/redo savestate context menu items added
+23-dec-2008 - adelikat - undo/redo loadstate and undo/redo savestate implemented
 22-dec-2008 - adelikat - backupSavestate system added.
 22-dec-2008 - shinydoofy - sdl - added Shift+M for toggling automatic movie backups for SDL
 22-dec-2008 - adelikat - Movie auto-backup feature implemented

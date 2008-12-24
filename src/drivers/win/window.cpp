@@ -415,14 +415,21 @@ void UpdateCheckedMenuItems()
 
 void UpdateContextMenuItems(HMENU context, int whichContext)
 {
-	bool exist;
+	string undoLoadstate = "Undo loadstate";
+	string redoLoadstate = "Redo loadstate";
 	string redoSavestate = "Redo savestate";
 	string undoSavestate = "Undo savestate";
 	
 	//Undo Loadstate
-	exist = CheckBackupSaveStateExist(); 
-	EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | exist ? MF_ENABLED : MF_GRAYED);
-	
+	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
+		EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | MF_GRAYED);
+	if (redoLS)
+		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOLOADSTATE, redoLoadstate, context);
+	else
+		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOLOADSTATE, undoLoadstate, context);
+
 	//Undo Savestate
 	if (undoSS || redoSS)		//If undo or redo, enable Undo savestate, else keep it gray
 		EnableMenuItem(context,FCEUX_CONTEXT_UNDOSAVESTATE,MF_BYCOMMAND | MF_ENABLED);
@@ -432,25 +439,6 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, redoSavestate, context);
 	else
 		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, undoSavestate, context);
-
-	//Case specific menu item handling
-	switch(whichContext)
-	{
-		//0 = Game + Movie in read only	
-		case 0:
-			break;
-		//1 = Game + No Movie
-		case 1:
-			break;
-		//2 = No Game
-		case 2:
-			break;
-		//3 = Game + Movie in read + write
-		case 3:
-			break;
-		default:
-			break;
-	}
 }
 
 /// Updates recent files / recent directories menu
@@ -1325,7 +1313,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			//Undo Loadstate
 			case FCEUX_CONTEXT_UNDOLOADSTATE:
-				if (CheckBackupSaveStateExist())
+				if (CheckBackupSaveStateExist() && redoLS)
+					RedoLoadState();
+				else if (CheckBackupSaveStateExist() && undoLS)
 					LoadBackup();
 				break;
 

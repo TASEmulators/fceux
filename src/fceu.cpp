@@ -128,6 +128,9 @@ static void CloseGame(void)
 		lastSavestateMade[0] = 0;
 		undoSS = false;
 		redoSS = false;
+		lastLoadstateMade[0] = 0;
+		undoLS = false;
+		redoLS = false;
 	}
 }
 

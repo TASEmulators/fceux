@@ -327,6 +327,7 @@ BEGIN
         MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM SEPARATOR
         MENUITEM "&Help....",                   FCEU_CONTEXT_MOVIEHELP
@@ -356,6 +357,7 @@ BEGIN
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
         MENUITEM SEPARATOR
+        MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM SEPARATOR

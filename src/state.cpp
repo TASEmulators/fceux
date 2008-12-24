@@ -59,9 +59,13 @@ static int StateShow;
 //tells the save system innards that we're loading the old format
 bool FCEU_state_loading_old_format;
 
-char lastSavestateMade[2048]; //Stores the last savestate made (needed for UndoSavestate)
-bool undoSS = false;		  //This will be true if there is a backup state for lastSavestateMade
+char lastSavestateMade[2048]; //Stores the filename of the last savestate made (needed for UndoSavestate)
+bool undoSS = false;		  //This will be true if there is lastSavestateMade, it was made since ROM was loaded, a backup state for lastSavestateMade exists
 bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn false when a new savestate is made
+
+char lastLoadstateMade[2048]; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
+bool undoLS = false;		  //This will be true if a backupstate was made and it was made since ROM was loaded
+bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning redoLoadState can be run
 
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
@@ -663,7 +667,9 @@ bool FCEUSS_Load(const char *fname)
 	}
 	else
 	{
-		st=FCEUD_UTF8_fstream(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname),"rb");
+		string fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
+		st=FCEUD_UTF8_fstream(fn,"rb");
+		strcpy(lastLoadstateMade,fn.c_str());
 	}
 
 	if(st == NULL)
@@ -974,10 +980,31 @@ void BackupLoadState()
 {
 	string filename = GetBackupFileName();
 	FCEUSS_Save(filename.c_str());
+	undoLS = true;
 }
 
 void LoadBackup()
 {
-	string filename = GetBackupFileName();
-	FCEUSS_Load(filename.c_str());
+	if (!undoLS) return;
+	string filename = GetBackupFileName();	//Get backup filename
+	if (CheckBackupSaveStateExist())
+	{
+		FCEUSS_Load(filename.c_str());		//Load it
+		redoLS = true;						//Flag redoLoadState
+		undoLS = false;						//Flag that LoadBackup cannot be run again
+	}
+	else
+		FCEUI_DispMessage("Error: Could not load %s",filename.c_str());
+}
+
+void RedoLoadState()
+{
+	if (!redoLS) return;
+	if (lastLoadstateMade && redoLS)
+	{
+		FCEUSS_Load(lastLoadstateMade);
+		FCEUI_printf("Redoing %s\n",lastLoadstateMade);
+	}
+	redoLS = false;		//Flag that RedoLoadState can not be run again
+	undoLS = true;		//Flag that LoadBackup can be run again
 }
