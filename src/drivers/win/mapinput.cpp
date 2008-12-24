@@ -41,13 +41,10 @@ static struct
 	{ EMUCMD_SAVE_SLOT_8, 				SCAN_8, },
 	{ EMUCMD_SAVE_SLOT_9, 				SCAN_9, },
 	{ EMUCMD_SAVE_STATE, 				SCAN_I, }, //adelikat, set to my defaults for lack of something better
-	{ EMUCMD_LOAD_STATE, 				SCAN_P, }, //most people use the loadslotx / savestlotx style system which requires hogging all th F Keys.  So I set it up in FCEUX that way.
+	{ EMUCMD_LOAD_STATE, 				SCAN_P, }, //most people use the loadslotx / savestlotx style system which requires hogging all th F Keys.
 	{ EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE, 	SCAN_PERIOD, },
-	//{ EMUCMD_FDS_EJECT_INSERT, 			SCAN_F8, },  //These two can be removed, as they can cause nasty errors and the F keys are needed
-	//{ EMUCMD_FDS_SIDE_SELECT, 			SCAN_F6, },
 	{ EMUCMD_MOVIE_INPUT_DISPLAY_TOGGLE, 	SCAN_COMMA, },
-	//{ EMUCMD_MOVIE_READONLY_TOGGLE, 	SCAN_8 | CMD_KEY_SHIFT, },*/
-	//{ EMUCMD_MISC_AUTOSAVE, SCAN_R, },  adelikat - Since Auto-save is disabled by default, so should the hotkey mapping
+	{ EMUCMD_MOVIE_READONLY_TOGGLE, 	SCAN_Q, },
 	{ EMUCMD_SAVE_STATE_SLOT_0, 		SCAN_F10 | CMD_KEY_SHIFT, },
 	{ EMUCMD_SAVE_STATE_SLOT_1, 		SCAN_F1 | CMD_KEY_SHIFT, },
 	{ EMUCMD_SAVE_STATE_SLOT_2, 		SCAN_F2 | CMD_KEY_SHIFT, },
@@ -68,18 +65,6 @@ static struct
 	{ EMUCMD_LOAD_STATE_SLOT_7, 		SCAN_F7, },
 	{ EMUCMD_LOAD_STATE_SLOT_8, 		SCAN_F8, },
 	{ EMUCMD_LOAD_STATE_SLOT_9, 		SCAN_F9, },
-	//{ EMUCMD_MOVIE_SLOT_0, 				SCAN_0 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_1, 				SCAN_1 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_2, 				SCAN_2 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_3, 				SCAN_3 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_4, 				SCAN_4 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_5, 				SCAN_5 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_6, 				SCAN_6 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_7, 				SCAN_7 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_8, 				SCAN_8 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_SLOT_9, 				SCAN_9 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_RECORD, 				SCAN_F5 | CMD_KEY_ALT, },
-	//{ EMUCMD_MOVIE_REPLAY, 				SCAN_F7 | CMD_KEY_ALT, },
 	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, SCAN_R | CMD_KEY_SHIFT		},
 	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | CMD_KEY_SHIFT		},
 	{ EMUCMD_OPENROM,					SCAN_O | CMD_KEY_CTRL	    },
