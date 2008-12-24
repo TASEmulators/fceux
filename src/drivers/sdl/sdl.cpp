@@ -57,6 +57,9 @@ int eoptions=0;
 static void DriverKill(void);
 static int DriverInitialize(FCEUGI *gi);
 int gametype = 0;
+#ifdef CREATE_AVI
+int mutecapture;
+#endif
 
 char *DriverUsage="\
 --pal          {0|1}   Uses PAL timing.\n\
@@ -124,6 +127,7 @@ static void ShowUsage(char *prog)
 	#endif
 	#ifdef CREATE_AVI
 	puts ("--videolog      c      Calls mencoder to grab the video and audio streams to\n                       encode them. Check the documentation for more on this.");
+	puts ("--mute         {0|1}   Mutes FCEUX while still passing the audio stream to\n                       mencoder.");
 	#endif
 	puts("");
 }
@@ -312,7 +316,8 @@ FCEUD_Update(uint8 *XBuf,
       if(inited & 1)
       {
         if(Count > GetWriteSound()) Count = GetWriteSound();
-        if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
+        if (!mutecapture)
+          if(Count > 0 && Buffer) WriteSound(Buffer,Count);   
       }
       if(inited & 2)
         FCEUD_UpdateInput();
@@ -337,7 +342,10 @@ FCEUD_Update(uint8 *XBuf,
         if(can > Count) can=Count;
         else uflow=0;
 
-        WriteSound(Buffer,can);
+        #ifdef CREATE_AVI
+        if (!mutecapture)
+        #endif
+          WriteSound(Buffer,can);
 
         //if(uflow) puts("Underflow");
         tmpcan = GetWriteSound();
@@ -351,10 +359,16 @@ FCEUD_Update(uint8 *XBuf,
                 if(NoWaiting) {
                     can=GetWriteSound();
                     if(Count>can) Count=can;
-                    WriteSound(Buffer,Count);
+                    #ifdef CREATE_AVI
+                    if (!mutecapture)
+                    #endif
+                      WriteSound(Buffer,Count);
                 } else {
                     while(Count>0) {
-                        WriteSound(Buffer,(Count<ocount) ? Count : ocount);
+                        #ifdef CREATE_AVI
+                        if (!mutecapture)
+                        #endif
+                          WriteSound(Buffer,(Count<ocount) ? Count : ocount);
                         Count -= ocount;
                     }
                 }
@@ -364,7 +378,10 @@ FCEUD_Update(uint8 *XBuf,
             if(Count > tmpcan) Count=tmpcan;
             while(tmpcan > 0) {
                 //    printf("Overwrite: %d\n", (Count <= tmpcan)?Count : tmpcan);
-                WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
+                #ifdef CREATE_AVI
+                if (!mutecapture)
+                #endif
+                  WriteSound(Buffer, (Count <= tmpcan)?Count : tmpcan);
                 tmpcan -= Count;
             }
         }
@@ -556,6 +573,9 @@ SDL_GL_LoadLibrary(0);
     {
         NESVideoSetVideoCmd(s.c_str());
         LoggingEnabled = 1;
+        g_config->getOption("SDL.MuteCapture", &mutecapture);
+    } else {
+        mutecapture = 0;
     }
     #endif
 	

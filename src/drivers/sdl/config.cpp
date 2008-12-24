@@ -188,6 +188,7 @@ InitConfig()
     
     #ifdef CREATE_AVI
     config->addOption("videolog",  "SDL.VideoLog",  "");
+    config->addOption("mute", "SDL.MuteCapture", 0);
     #endif
     
     config->addOption("fcmconvert", "SDL.FCMConvert", "");
