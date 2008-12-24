@@ -72,7 +72,7 @@ using namespace std;
 int AFon = 1, AFoff = 1, AutoFireOffset = 0; //For keeping track of autofire settings
 bool justLagged = false;
 bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip over lag frame (i.e. it will emulate 2 frames instead of 1)
-
+bool AutoSS = false;		//Flagged true when the first auto-savestate is made while a game is loaded, flagged false on game close
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 
 FCEUGI::FCEUGI()
@@ -125,12 +125,14 @@ static void CloseGame(void)
 		delete GameInfo;
 		GameInfo = 0;
 
+		//Reset flags for Undo/Redo/Auto Savestating
 		lastSavestateMade[0] = 0;
 		undoSS = false;
 		redoSS = false;
 		lastLoadstateMade[0] = 0;
 		undoLS = false;
 		redoLS = false;
+		AutoSS = false;
 	}
 }
 
@@ -886,6 +888,7 @@ void UpdateAutosave(void)
 		AutosaveIndex = (AutosaveIndex + 1) % 4;
 		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE,AutosaveIndex,0).c_str());
 		FCEUSS_Save(f);
+		AutoSS = true;	//Flag that an auto-savestate was made
 		free(f);
 		AutosaveStatus[AutosaveIndex] = 1;
 	}
@@ -893,7 +896,7 @@ void UpdateAutosave(void)
 
 void FCEUI_Autosave(void)
 {
-	if(!EnableAutosave)
+	if(!EnableAutosave || !AutoSS)
 		return;
 
 	if(AutosaveStatus[AutosaveIndex] == 1)

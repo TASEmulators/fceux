@@ -87,7 +87,7 @@ extern bool frameAdvanceLagSkip;
 extern bool turbo;
 extern int luaRunning;
 extern bool movie_readonly;
-
+extern bool AutoSS;			//flag for whether an auto-save has been made
 // Extern functions
 char *md5_asciistr(uint8 digest[16]);
 
@@ -439,6 +439,12 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, redoSavestate, context);
 	else
 		ChangeContextMenuItemText(FCEUX_CONTEXT_UNDOSAVESTATE, undoSavestate, context);
+	
+	//Rewind to last auto-save
+	if(EnableAutosave && AutoSS)
+		EnableMenuItem(context,FCEUX_CONTEXT_REWINDTOLASTAUTO,MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(context,FCEUX_CONTEXT_REWINDTOLASTAUTO,MF_BYCOMMAND | MF_GRAYED);
 }
 
 /// Updates recent files / recent directories menu
