@@ -1291,7 +1291,7 @@ void FCEUI_MakeBackupMovie(bool dispMessage)
 	if (dispMessage)	//If we should inform the user 
 	{
 		if (overflow)
-			FCEUI_DispMessage("Overwriting %s",backupFn.c_str()); //Inform user of overflow
+			FCEUI_DispMessage("Backup overflow, overwriting %s",backupFn.c_str()); //Inform user of overflow
 		else
 			FCEUI_DispMessage("%s created",backupFn.c_str()); //Inform user of backup filename
 	}
