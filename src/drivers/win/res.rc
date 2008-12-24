@@ -323,6 +323,7 @@ FCEUCONTEXTMENUS MENU
 BEGIN
     POPUP "Game+Movie+readonly"
     BEGIN
+        MENUITEM "Toggle to read+write",        FCEUX_CONTEXT_READONLYTOGGLE
         MENUITEM "Play Movie from Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
         MENUITEM "Stop Movie Replay",           FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
@@ -353,6 +354,7 @@ BEGIN
     END
     POPUP "Game+Movie+readwrite"
     BEGIN
+        MENUITEM "Toggle to Read-only",         FCEUX_CONTEXT_READONLYTOGGLE
         MENUITEM "Play Movie From Beginning",   FCEU_CONTEXT_PLAYMOVIEFROMBEGINNING
         MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES

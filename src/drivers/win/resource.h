@@ -646,6 +646,9 @@
 #define ID_FILE_MOVIE_TOGGLEREAD        40331
 #define ID_LUA_RELOADLUASCRIPT          40332
 #define ID_FILE_LUA_RELOADLUASCRIPT     40333
+#define ID_GAME_SWITCHTOREAD            40334
+#define FCEUX_CONTEXT_READONLYTOGGLE    40335
+#define ID_GAME_TOGGLETOREAD            40336
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -655,7 +658,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40334
+#define _APS_NEXT_COMMAND_VALUE         40337
 #define _APS_NEXT_CONTROL_VALUE         1199
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -975,6 +975,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_PLAYMOVIEFROMBEGINNING:
 				FCEUI_MoviePlayFromBeginning();
 				break;
+			case FCEUX_CONTEXT_READONLYTOGGLE:
 			case ID_FILE_MOVIE_TOGGLEREAD:
 				FCEUI_MovieToggleReadOnly();
 				break;

@@ -41,6 +41,7 @@ using namespace std;
 #define MOVIE_VERSION           3 
 
 extern char FileBase[];
+extern bool AutoSS;		//Declared in fceu.cpp, keeps track if a auto-savestate has been made
 
 std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
 std::vector<string> subtitleMessages;	//Messages of subtitles
@@ -624,8 +625,9 @@ void FCEUI_StopMovie()
 	else if(movieMode == MOVIEMODE_RECORD)
 		StopRecording();
 
-	curMovieFilename[0] = 0;
-	freshMovie = false;
+	curMovieFilename[0] = 0;			//No longer a current movie filename
+	freshMovie = false;					//No longer a fresh movie loaded
+	if (bindSavestate) AutoSS = false;	//If bind movies to savestates is true, then there is no longer a valid auto-save to load
 }
 
 static void poweron(bool shouldDisableBatteryLoading)
@@ -741,7 +743,7 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	delete fp;
 
 	freshMovie = true;	//Movie has been loaded, so it must be unaltered
-
+	if (bindSavestate) AutoSS = false;	//If bind savestate to movie is true, then their isn't a valid auto-save to load, so flag it
 	//fully reload the game to reinitialize everything before playing any movie
 	poweron(true);
 
