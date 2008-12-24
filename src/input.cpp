@@ -594,6 +594,7 @@ static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
 static void MovieSubtitleToggle(void);
+static void UndoRedoSavestate(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -704,7 +705,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
-	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0}
+	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -912,4 +914,10 @@ static void MovieSubtitleToggle(void)
 	movieSubtitles ^= 1;
 	if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
 	else FCEU_DispMessage("Movie subtitles off");
+}
+
+static void UndoRedoSavestate(void)
+{
+	if (lastSavestateMade && (undoSS || redoSS))
+		SwapSaveState();
 }

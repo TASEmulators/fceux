@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+24-dec-2008 - adelikat - added undo/redo savestate hotkey.  Win32 - made undo/redo default key mapping Ctrl+Z
 24-dec-2008 - adelikat - win32 - added Last ROM used context menu item when no game loaded
 24-dec-2008 - shinydoofy - sdl - added option to mute FCEUX for avi capturing, check the docs for more detail
 23-dec-2008 - adelikat - Win32 - Undo/redo loadstate and Undo/redo savestate context menu items added

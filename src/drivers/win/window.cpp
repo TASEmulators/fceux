@@ -417,9 +417,9 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 {
 	string undoLoadstate = "Undo loadstate";
 	string redoLoadstate = "Redo loadstate";
-	string redoSavestate = "Redo savestate";
 	string undoSavestate = "Undo savestate";
-	
+	string redoSavestate = "Redo savestate";
+
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
 		EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | MF_ENABLED);
@@ -1315,7 +1315,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 			//Undo Savestate
 			case FCEUX_CONTEXT_UNDOSAVESTATE:
-				SwapSaveState();
+				if (undoSS || redoSS)
+					SwapSaveState();
 				break;
 
 			//Undo Loadstate

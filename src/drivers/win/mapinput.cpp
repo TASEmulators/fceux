@@ -84,6 +84,7 @@ static struct
 	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | CMD_KEY_SHIFT		},
 	{ EMUCMD_OPENROM,					SCAN_O | CMD_KEY_CTRL	    },
 	{ EMUCMD_CLOSEROM,					SCAN_W | CMD_KEY_CTRL		},
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | CMD_KEY_CTRL		},
 };
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))

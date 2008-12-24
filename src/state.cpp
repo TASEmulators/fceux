@@ -447,7 +447,7 @@ void FCEUSS_Save(const char *fname)
 		{
 			CreateBackupSaveState(fn);		//Make a backup of previous savestate before overwriting it
 			strcpy(lastSavestateMade,fn);	//Remember what the last savestate filename was (for undoing later)
-			undoSS = true;					//Backup was created so redo is possible
+			undoSS = true;					//Backup was created so undo is possible
 		}
 		else
 			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
@@ -474,6 +474,7 @@ void FCEUSS_Save(const char *fname)
 		SaveStateStatus[CurrentState]=1;
 		FCEU_DispMessage("State %d saved.",CurrentState);
 	}
+		redoSS = false;					//we have a new savestate so redo is not possible
 }
 
 int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
