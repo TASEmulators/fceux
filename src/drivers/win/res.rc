@@ -81,19 +81,16 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
         MENUITEM SEPARATOR
-        POPUP "Emulation"
-        BEGIN
-            MENUITEM "Pause",                       ID_NES_PAUSE
-            MENUITEM "Turbo",                       ID_NES_TURBO
-        END
+        MENUITEM "Emulation",                   ID_NES_EMULATION40329
         POPUP "Emulation Speed"
         BEGIN
             MENUITEM "Speed Up",                    ID_NES_SPEEDUP
             MENUITEM "Slow Down",                   ID_NES_SLOWDOWN
             MENUITEM SEPARATOR
+            MENUITEM "Pause",                       ID_NES_PAUSE
             MENUITEM "Slowest Speed",               ID_NES_SLOWESTSPEED
             MENUITEM "Normal Speed",                ID_NES_NORMALSPEED
-            MENUITEM "Fastest Speed",               ID_NES_FASTESTSPEED
+            MENUITEM "Turbo",                       ID_NES_TURBO
         END
     END
     POPUP "&Config"
