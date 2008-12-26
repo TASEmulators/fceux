@@ -149,6 +149,7 @@ void FCEUD_SoundToggle(void);
 void FCEUD_SoundVolumeAdjust(int);
 
 int FCEUI_SelectState(int, int);
+extern void FCEUI_SelectStateNext(int);
 
 //"fname" overrides the default save state filename code if non-NULL.
 void FCEUI_SaveState(const char *fname);
@@ -317,6 +318,7 @@ void FCEUD_VideoChanged();
 enum EFCEUI
 {
 	FCEUI_STOPAVI, FCEUI_QUICKSAVE, FCEUI_QUICKLOAD, FCEUI_SAVESTATE, FCEUI_LOADSTATE,
+	FCEUI_NEXTSAVESTATE,FCEUI_PREVIOUSSAVESTATE,
 	FCEUI_STOPMOVIE, FCEUI_RECORDMOVIE, FCEUI_PLAYMOVIE,
 	FCEUI_OPENGAME, FCEUI_CLOSEGAME,
 	FCEUI_TASEDIT,

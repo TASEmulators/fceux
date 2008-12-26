@@ -957,12 +957,17 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_LOADSTATE:	//Load State
 				FCEUI_LoadState(0);
 				break;
-
 			case MENU_SAVE_STATE:	//Save state as
 				FCEUD_SaveStateAs();
 				break;
 			case MENU_LOAD_STATE:	//Load state as
 				FCEUD_LoadStateFrom();
+				break;
+			case MENU_NEXTSAVESTATE:	//Next Save slot
+				FCEUI_SelectStateNext(1);
+				break;
+			case MENU_PREVIOUSSAVESTATE: //Previous Save slot
+				FCEUI_SelectStateNext(-1);
 				break;
 
 			//Movie submenu
@@ -1454,7 +1459,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_LOADSTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKLOAD)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVE_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SAVESTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
-		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_NEXTSAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_NEXTSAVESTATE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_PREVIOUSSAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PREVIOUSSAVESTATE)?MF_ENABLED:MF_GRAYED));
+				EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_STOPLUASCRIPT,MF_BYCOMMAND | (luaRunning?MF_ENABLED:MF_GRAYED));
 	default:
@@ -1925,6 +1932,17 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE_AS]);
 	combined = "Save State As...\t" + combo;
 	ChangeMenuItemText(MENU_SAVE_STATE, combined);
+
+	//Next Save Slot
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_NEXT]);
+	combined = "Next save slot\t" + combo;
+	ChangeMenuItemText(MENU_NEXTSAVESTATE, combined);
+
+	//Previous Save Slot
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_PREV]);
+	combined = "Previous save slot\t" + combo;
+	ChangeMenuItemText(MENU_PREVIOUSSAVESTATE, combined);
+
 
 	//Record Movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_TO]);

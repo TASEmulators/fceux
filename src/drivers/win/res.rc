@@ -49,6 +49,9 @@ BEGIN
             MENUITEM "Save State",                  MENU_SAVESTATE
             MENUITEM "Load State From...",          MENU_LOAD_STATE
             MENUITEM "Save State As...",            MENU_SAVE_STATE
+            MENUITEM SEPARATOR
+            MENUITEM "Next save slot",              MENU_NEXTSAVESTATE
+            MENUITEM "Previous save slot",          MENU_PREVIOUSSAVESTATE
         END
         POPUP "Movie"
         BEGIN
