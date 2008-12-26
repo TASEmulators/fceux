@@ -937,6 +937,8 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_RECORDMOVIE:
 	case FCEUI_PLAYMOVIE:
+	case FCEUI_QUICKSAVE:
+	case FCEUI_QUICKLOAD:
 	case FCEUI_SAVESTATE:
 	case FCEUI_LOADSTATE:
 		if(!GameInfo) return false;

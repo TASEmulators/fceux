@@ -43,9 +43,13 @@ BEGIN
         MENUITEM "&Close",                      MENU_CLOSE_FILE
         MENUITEM "&Recent",                     MENU_RECENT_FILES
         MENUITEM SEPARATOR
-        MENUITEM "Load State From...",          MENU_LOAD_STATE
-        MENUITEM "Save State As...",            MENU_SAVE_STATE
-        MENUITEM SEPARATOR
+        POPUP "Savestate"
+        BEGIN
+            MENUITEM "Load State",                  MENU_LOADSTATE
+            MENUITEM "Save State",                  MENU_SAVESTATE
+            MENUITEM "Load State From...",          MENU_LOAD_STATE
+            MENUITEM "Save State As...",            MENU_SAVE_STATE
+        END
         POPUP "Movie"
         BEGIN
             MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
@@ -55,22 +59,20 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Read-only",                   ID_FILE_MOVIE_TOGGLEREAD
         END
-        POPUP "Record AVI/Wav"
+        POPUP "AVI/Wav"
         BEGIN
             MENUITEM "Record AVI...",               MENU_RECORD_AVI
             MENUITEM "Stop AVI",                    MENU_STOP_AVI
             MENUITEM "Record WAV...",               MENU_RECORD_WAV
             MENUITEM "Stop WAV",                    MENU_STOP_WAV
         END
-        MENUITEM SEPARATOR
-        MENUITEM "Screenshot",                  ID_FILE_SCREENSHOT
-        MENUITEM SEPARATOR
         POPUP "Lua"
         BEGIN
             MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
             MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
             MENUITEM "Reload Lua Script",           ID_FILE_LUA_RELOADLUASCRIPT
         END
+        MENUITEM "Screenshot",                  ID_FILE_SCREENSHOT
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
     END
@@ -81,10 +83,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Eject/Insert Disk",          MENU_EJECT_DISK
         MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
-        MENUITEM SEPARATOR
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
         MENUITEM SEPARATOR
-        MENUITEM "Emulation",                   ID_NES_EMULATION40329
         POPUP "Emulation Speed"
         BEGIN
             MENUITEM "Speed Up",                    ID_NES_SPEEDUP
@@ -99,10 +99,13 @@ BEGIN
     POPUP "&Config"
     BEGIN
         MENUITEM "Hide Menu",                   MENU_HIDE_MENU
-        MENUITEM "Enable Run in Background",    MENU_RUN_IN_BACKGROUND
-        MENUITEM "Enable Background Input",     MENU_BACKGROUND_INPUT
-        MENUITEM "Enable Auto-save",            MENU_ENABLE_AUTOSAVE
-        MENUITEM "Frame Adv. - Skip Lag",       MENU_DISPLAY_FA_LAGSKIP
+        POPUP "Enable"
+        BEGIN
+            MENUITEM "Run in Background",           MENU_RUN_IN_BACKGROUND
+            MENUITEM "Background Input",            MENU_BACKGROUND_INPUT
+            MENUITEM "Auto-savestates",             MENU_ENABLE_AUTOSAVE
+            MENUITEM "Frame Adv. - Skip Lag",       MENU_DISPLAY_FA_LAGSKIP
+        END
         POPUP "Display"
         BEGIN
             POPUP "Input Display"
@@ -130,8 +133,8 @@ BEGIN
         MENUITEM "&Sound...",                   MENU_SOUND
         MENUITEM "&Timing...",                  MENU_TIMING
         MENUITEM "&Video...",                   MENU_VIDEO
-        MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
         MENUITEM "&Movie options...",           MENU_MOVIEOPTIONS
+        MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
     END
     POPUP "&Tools"
     BEGIN

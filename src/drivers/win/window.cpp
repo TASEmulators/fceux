@@ -950,6 +950,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_CLOSE_FILE:
 				CloseGame();
 				break;
+			//Savestate Submenu
+			case MENU_SAVESTATE:	//Save State
+				FCEUI_SaveState(0);
+				break;
+			case MENU_LOADSTATE:	//Load State
+				FCEUI_LoadState(0);
+				break;
+
 			case MENU_SAVE_STATE:	//Save state as
 				FCEUD_SaveStateAs();
 				break;
@@ -1442,6 +1450,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_PLAYMOVIEFROMBEGINNING,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYFROMBEGINNING)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_SAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKSAVE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_LOADSTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKLOAD)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVE_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_SAVESTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
@@ -1895,6 +1905,16 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_CLOSEROM]);
 	combined = "&Close\t" + combo;
 	ChangeMenuItemText(MENU_CLOSE_FILE, combined);
+
+	//Load State
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE]);
+	combined = "Load State\t" + combo;
+	ChangeMenuItemText(MENU_LOADSTATE, combined);
+
+	//Save State
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE]);
+	combined = "Save State\t" + combo;
+	ChangeMenuItemText(MENU_SAVESTATE, combined);
 
 	//Loadstate from
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE_FROM]);
