@@ -9,6 +9,8 @@
 
 static const char* fm2ext[] = {"fm2",0};
 
+int MetaPosX,MetaPosY;
+
 // Used when deciding to automatically make the stop movie checkbox checked
 static bool stopframeWasEditedByUser = false;
 
@@ -290,10 +292,15 @@ void AbsoluteToRelative(char *const dst, const char *const dir, const char *cons
 
 BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	RECT wrect;
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
 		{
+			if (MetaPosX==-32000) MetaPosX=0; //Just in case
+			if (MetaPosY==-32000) MetaPosY=0;
+			SetWindowPos(hwndDlg,0,MetaPosX,MetaPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+
 			//setup columns
 			HWND hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
 			
@@ -391,6 +398,11 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 			
 		}
 		break;
+	case WM_MOVE:
+		GetWindowRect(hwndDlg,&wrect);
+		MetaPosX = wrect.left;
+		MetaPosY = wrect.top;
+        break;
 
 	case WM_COMMAND:
 		switch(LOWORD(wParam))

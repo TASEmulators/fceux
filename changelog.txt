@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+26-dec-2008 - adelikat - Metadata - remember window position
 24-dec-2008 - adelikat - auto-save fixes, prevent loading an auto-save from previous session.  Win32 - added flags for enabling auto-save menu item.
 24-dec-2008 - adelikat - added undo/redo savestate hotkey.  Win32 - made undo/redo default key mapping Ctrl+Z
 24-dec-2008 - adelikat - win32 - added Last ROM used context menu item when no game loaded

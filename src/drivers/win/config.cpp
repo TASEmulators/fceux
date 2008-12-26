@@ -70,7 +70,7 @@ extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
 extern int TasEdit_wndx, TasEdit_wndy;
-
+extern int MetaPosX,MetaPosY;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -206,6 +206,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TasEdit_wndy),
 	AC(TextHookerPosX),
 	AC(TextHookerPosY),
+	AC(MetaPosX),
+	AC(MetaPosY),
 
 	AC(pauseAfterPlayback),
 	AC(AFon),
