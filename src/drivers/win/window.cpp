@@ -763,6 +763,7 @@ void GetMouseData(uint32 (&md)[3])
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	int whichContext = 0;
+	POINT pt;
 
 	switch(msg)
 	{
@@ -805,8 +806,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			whichContext = 2;
 		}
 		UpdateContextMenuItems(hfceuxcontextsub, whichContext);
-		TrackPopupMenu(hfceuxcontextsub,0,(MainWindow_wndx+mousex),(MainWindow_wndy+mousey),TPM_RIGHTBUTTON,hWnd,0);
-		
+		pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
+		pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
+		ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
+		TrackPopupMenu(hfceuxcontextsub,0,(pt.x),(pt.y),TPM_RIGHTBUTTON,hWnd,0);	//Create menu
 	}
 
 	case WM_MOVE: 
