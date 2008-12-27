@@ -661,6 +661,8 @@
 #define ID_SAVESTATE_PREVIOUSSAVESLOT   40346
 #define MENU_NEXTSAVESTATE              40347
 #define MENU_PREVIOUSSAVESTATE          40348
+#define ID_SAVESTATE_VIEWSAVESLOTS      40349
+#define MENU_VIEWSAVESLOTS              40350
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -670,7 +672,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40349
+#define _APS_NEXT_COMMAND_VALUE         40351
 #define _APS_NEXT_CONTROL_VALUE         1199
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

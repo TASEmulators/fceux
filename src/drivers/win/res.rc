@@ -52,6 +52,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Next save slot",              MENU_NEXTSAVESTATE
             MENUITEM "Previous save slot",          MENU_PREVIOUSSAVESTATE
+            MENUITEM "View save slots",             MENU_VIEWSAVESLOTS
         END
         POPUP "Movie"
         BEGIN

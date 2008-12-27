@@ -943,6 +943,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 	case FCEUI_LOADSTATE:
 	case FCEUI_NEXTSAVESTATE:
 	case FCEUI_PREVIOUSSAVESTATE:
+	case FCEUI_VIEWSLOTS:
 		if(!GameInfo) return false;
 		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
 		break;

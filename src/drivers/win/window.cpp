@@ -969,6 +969,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_PREVIOUSSAVESTATE: //Previous Save slot
 				FCEUI_SelectStateNext(-1);
 				break;
+			case MENU_VIEWSAVESLOTS:	//View save slots
+				FCEUI_SelectState(CurrentState, 1);
+				break;
 
 			//Movie submenu
 			case FCEUX_CONTEXT_RECORDMOVIE:
@@ -1461,7 +1464,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_LOAD_STATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_LOADSTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_NEXTSAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_NEXTSAVESTATE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_PREVIOUSSAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PREVIOUSSAVESTATE)?MF_ENABLED:MF_GRAYED));
-				EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_VIEWSAVESLOTS,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_VIEWSLOTS)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_STOPLUASCRIPT,MF_BYCOMMAND | (luaRunning?MF_ENABLED:MF_GRAYED));
 	default:
@@ -1943,6 +1947,10 @@ void UpdateMenuHotkeys()
 	combined = "Previous save slot\t" + combo;
 	ChangeMenuItemText(MENU_PREVIOUSSAVESTATE, combined);
 
+	//View Save Slots
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_SHOWSTATES]);
+	combined = "View save slots\t" + combo;
+	ChangeMenuItemText(MENU_VIEWSAVESLOTS, combined);
 
 	//Record Movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_TO]);

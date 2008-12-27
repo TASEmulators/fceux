@@ -644,7 +644,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							ofn.lpstrInitialDir = pn;
 							ofn.Flags = OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
 							ofn.lpstrDefExt = "fm2";
-							ofn.lpstrTitle = "Replay Movie from File";
+							ofn.lpstrTitle = "Play Movie from File";
 	
 							if(GetOpenFileName(&ofn))
 							{
