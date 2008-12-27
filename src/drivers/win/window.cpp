@@ -114,7 +114,7 @@ static LONG WindowXC=1<<30,WindowYC;
 int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
-
+int menuYoffset = 0;
 //Function Declarations
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
 void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters a context menu item name
@@ -252,7 +252,7 @@ void CalcWindowSize(RECT *al)
 	al->left = 0;
 	al->right = VNSWID * winsizemulx;
 	al->top = 0;
-	al->bottom = FSettings.TotalScanlines() * winsizemuly;
+	al->bottom = (FSettings.TotalScanlines() * winsizemuly) + menuYoffset;
 
 	AdjustWindowRectEx(al,
 		GetWindowLong(hAppWnd, GWL_STYLE),
@@ -764,6 +764,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	int whichContext = 0;
 	POINT pt;
+	RECT file_rect;
+	RECT help_rect;
+	RECT clientrect;
+	int x = 0;
 
 	switch(msg)
 	{
@@ -887,6 +891,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			winheight=srect.bottom;
 			wrect->right = wrect->left + srect.right;
 			wrect->bottom = wrect->top + srect.bottom;
+		
+			GetMenuItemRect(hWnd, fceumenu, 0, &file_rect);
+			GetMenuItemRect(hWnd, fceumenu, 5, &help_rect);
+			menuYoffset = help_rect.top-file_rect.top;
 		}
 		//sizchange=1;
 		//break;
