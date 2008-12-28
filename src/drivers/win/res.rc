@@ -72,6 +72,7 @@ BEGIN
         END
         POPUP "Lua"
         BEGIN
+            MENUITEM "Recent",                      MENU_LUA_RECENT
             MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
             MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
             MENUITEM "Reload Lua Script",           ID_FILE_LUA_RELOADLUASCRIPT

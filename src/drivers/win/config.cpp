@@ -92,6 +92,12 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(memw_recent_files[3]),
 	ACS(memw_recent_files[4]),
 
+	ACS(recent_lua[0]),
+	ACS(recent_lua[1]),
+	ACS(recent_lua[2]),
+	ACS(recent_lua[3]),
+	ACS(recent_lua[4]),
+
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
 

@@ -41,6 +41,10 @@ extern "C"
 #define FALSE 0
 #endif
 
+#ifdef WIN32
+extern void AddRecentLuaFile(const char *filename);
+#endif
+
 struct LuaSaveState {
 	std::string filename;
 	memorystream *data;
@@ -1729,7 +1733,9 @@ int FCEU_LoadLuaCode(const char *filename) {
 		lua_settop(L,0);
 		return 0; // Oh shit.
 	}
-
+#ifdef WIN32
+	AddRecentLuaFile(filename); //Add the filename to our recent lua menu
+#endif
 	
 	// Get our function into it
 	lua_xmove(L, thread, 1);
