@@ -419,7 +419,7 @@ static int joypad_read(lua_State *L) {
 	int which = luaL_checkinteger(L,1);
 	
 	if (which < 1 || which > 4) {
-		luaL_error(L,"Invalid input port (valid range 1-2, specified %d)", which);
+		luaL_error(L,"Invalid input port (valid range 1-4, specified %d)", which);
 	}
 	
 	// Use the OS-specific code to do the reading.
