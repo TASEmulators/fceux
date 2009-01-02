@@ -23,19 +23,18 @@
 #include "common.h"
 #include "../common/args.h"
 
-char* MovieToLoad = 0;
-char* StateToLoad = 0;
-char* ConfigToLoad = 0;
+char* MovieToLoad = 0;		//Loads a movie file on startup
+char* StateToLoad = 0;		//Loads a savestate on startup (after a movie is loaded, if any)
+char* ConfigToLoad = 0;		//Loads a specific .cfg file (loads before any other commandline options
 extern bool turbo;
 
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
 
-/**
-* Parses commandline arguments
-**/
+//-------------------------------------------------------------
+// Parses commandline arguments
+//-------------------------------------------------------------
 char *ParseArgies(int argc, char *argv[])
 {         
-        //int x;  //mbg merge 7/17/06 removed
         static ARGPSTRUCT FCEUArgs[]={
          {"-pal",0,&pal_emulation,0},
          {"-noicon",0,&status_icon,0},

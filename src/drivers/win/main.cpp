@@ -673,7 +673,7 @@ int main(int argc,char *argv[])
 	SetAutoFirePattern(AFon, AFoff);
 	UpdateCheckedMenuItems();
 doloopy:
-	UpdateFCEUWindow();  
+	UpdateFCEUWindow();
 	if(GameInfo)
 	{
 		while(GameInfo)
@@ -776,7 +776,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//MBG TODO - think about this logic
 	//throttle
 	
-	if(!(eoptions&EO_NOTHROTTLE)) //if throttling is enabled..
+	if(!(eoptions&EO_NOTHROTTLE) && (!soundo)) //if throttling is enabled..
 		if(!turbo) //and turbo is disabled..
 			if(!FCEUI_EmulationPaused() 
 				||JustFrameAdvanced
