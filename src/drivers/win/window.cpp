@@ -72,7 +72,7 @@ using namespace std;
 //Globals
 //********************************************************************************
 
-//Handles---------------------------------------------
+//Handles----------------------------------------------
 static HMENU fceumenu = 0;	//Main menu.
 HWND pwindow;				//Client Area
 static HMENU recentmenu;	//Recent Menu
@@ -80,7 +80,7 @@ static HMENU recentluamenu; //Recent Lua Files Menu
 HMENU hfceuxcontext;		//Handle to context menu
 HMENU hfceuxcontextsub;		//Handle to context sub menu
 
-//Extern variables------------------------------------
+//Extern variables-------------------------------------
 extern bool movieSubtitles;
 extern FCEUGI *GameInfo;
 extern int EnableAutosave;
@@ -671,7 +671,7 @@ void UpdateRecentLuaArray(const char* addString, char** bufferArray, unsigned in
 				bufferArray[0] = tmp;
 
 				// Update the recent files menu
-				UpdateRMenu(menu, bufferArray, menuItem, baseId);
+				UpdateLuaRMenu(menu, bufferArray, menuItem, baseId);
 
 				return;
 			}
