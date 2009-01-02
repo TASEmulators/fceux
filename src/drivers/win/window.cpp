@@ -454,6 +454,13 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		EnableMenuItem(context,FCEUX_CONTEXT_REWINDTOLASTAUTO,MF_BYCOMMAND | MF_ENABLED);
 	else
 		EnableMenuItem(context,FCEUX_CONTEXT_REWINDTOLASTAUTO,MF_BYCOMMAND | MF_GRAYED);
+
+	//Load last ROM
+	if (recent_files[0])
+		EnableMenuItem(context,FCEUX_CONTEXT_RECENTROM1,MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(context,FCEUX_CONTEXT_RECENTROM1,MF_BYCOMMAND | MF_GRAYED);
+
 }
 
 /// Updates recent files / recent directories menu
