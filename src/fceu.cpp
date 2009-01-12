@@ -479,6 +479,11 @@ bool FCEUI_Initialize()
 	FSettings.UsrLastSLine[0]=239;
 	FSettings.UsrLastSLine[1]=239;
 	FSettings.SoundVolume=100;
+	FSettings.TriangleVolume=150;
+	FSettings.Square1Volume=150;
+	FSettings.Square2Volume=150;
+	FSettings.NoiseVolume=150;
+	FSettings.PCMVolume=150;
 
 	FCEUPPU_Init();
 

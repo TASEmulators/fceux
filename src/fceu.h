@@ -72,7 +72,12 @@ extern uint8 PAL;
 typedef struct {
 	int PAL;
 	int NetworkPlay;
-	int SoundVolume;
+	int SoundVolume;		//Master volume
+	int TriangleVolume;	
+	int Square1Volume;	
+	int Square2Volume;
+	int NoiseVolume;
+	int PCMVolume;
 	bool GameGenie;
 
 	//the currently selected first and last rendered scanlines.

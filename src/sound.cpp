@@ -552,7 +552,7 @@ void RDoPCM(void)
 }
 
 /* This has the correct phase.  Don't mess with it. */
-static INLINE void RDoSQ(int x)
+static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
 {
    int32 V;
    int32 amp;
@@ -572,8 +572,12 @@ static INLINE void RDoSQ(int x)
    if(EnvUnits[x].Mode&0x1)
     amp=EnvUnits[x].Speed;
    else
-    amp=EnvUnits[x].decvolume;
-//   printf("%d\n",amp);
+    amp=EnvUnits[x].decvolume;	//Set the volume of the Square Wave
+   int32 zzz = amp;
+   //if (x==0) amp<<=128;  //Alter sqaurewave volumes here
+   //else amp>>=8;
+   // FCEU_DispMessage("Before = %d After = %d",zzz,amp); //Debug
+   //   printf("%d\n",amp);
    amp<<=24;
 
    rthresh=RectDuties[(PSG[(x<<2)]&0xC0)>>6];
@@ -1195,26 +1199,50 @@ void SetSoundVariables(void)
 
 void FCEUI_Sound(int Rate)
 {
- FSettings.SndRate=Rate;
- SetSoundVariables();
+	FSettings.SndRate=Rate;
+	SetSoundVariables();
 }
 
 void FCEUI_SetLowPass(int q)
 {
- FSettings.lowpass=q;
+	FSettings.lowpass=q;
 }
 
 void FCEUI_SetSoundQuality(int quality)
 {
- FSettings.soundq=quality;
- SetSoundVariables();
+	FSettings.soundq=quality;
+	SetSoundVariables();
 }
 
 void FCEUI_SetSoundVolume(uint32 volume)
 {
- FSettings.SoundVolume=volume;
+	FSettings.SoundVolume=volume;
 }
 
+void FCEUI_SetTriangleVolume(uint32 volume)
+{
+	FSettings.TriangleVolume=volume;
+}
+
+void FCEUI_SetSquare1Volume(uint32 volume)
+{
+	FSettings.Square1Volume=volume;
+}
+
+void FCEUI_SetSquare2Volume(uint32 volume)
+{
+	FSettings.Square2Volume=volume;
+}
+
+void FCEUI_SetNoiseVolume(uint32 volume)
+{
+	FSettings.NoiseVolume=volume;
+}
+
+void FCEUI_SetPCMVolume(uint32 volume)
+{
+	FSettings.PCMVolume=volume;
+}
 
 SFORMAT FCEUSND_STATEINFO[]={
 

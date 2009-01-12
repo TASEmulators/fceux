@@ -143,6 +143,12 @@ void FCEUI_SetPaletteArray(uint8 *pal);
 //If "Rate" equals 0, sound is disabled.
 void FCEUI_Sound(int Rate);
 void FCEUI_SetSoundVolume(uint32 volume);
+void FCEUI_SetTriangleVolume(uint32 volume);
+void FCEUI_SetSquare1Volume(uint32 volume);
+void FCEUI_SetSquare2Volume(uint32 volume);
+void FCEUI_SetNoiseVolume(uint32 volume);
+void FCEUI_SetPCMVolume(uint32 volume);
+
 void FCEUI_SetSoundQuality(int quality);
 
 void FCEUD_SoundToggle(void);

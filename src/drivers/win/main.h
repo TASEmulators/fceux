@@ -77,7 +77,13 @@ extern int ismaximized;
 extern int soundoptions;
 extern int soundrate;
 extern int soundbuftime;
-extern int soundvolume;
+extern int soundvolume;		//Master volume control
+extern int soundTrianglevol;//Sound channel Triangle - volume control
+extern int soundSquare1vol;	//Sound channel Square1 - volume control
+extern int soundSquare2vol;	//Sound channel Square2 - volume control
+extern int soundNoisevol;	//Sound channel Noise - volume control
+extern int soundPCMvol;		//Sound channel PCM - volume control
+
 extern int soundquality;
 extern bool muteTurbo;
 

@@ -441,10 +441,34 @@ case WM_NCMBUTTONDOWN:
 case WM_NCLBUTTONDOWN:break;
 
 case WM_INITDIALOG:
-	/* Volume Trackbar */
+	//Volume Trackbars--------------------------------------------------------------
+	//Master
 	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETRANGE,1,MAKELONG(0,150));
 	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETTICFREQ,25,0);
 	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETPOS,1,150-soundvolume);
+	//Triangle
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,150-soundTrianglevol);
+	//Square1
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,150-soundSquare1vol);
+
+	//Square2
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,150-soundSquare2vol);
+
+	//Noise
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,150-soundNoisevol);
+
+	//PCM
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETRANGE,1,MAKELONG(0,150));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETTICFREQ,25,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,150-soundPCMvol);
 
 	/* buffer size time trackbar */
 	SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_SETRANGE,1,MAKELONG(15,200));
@@ -470,9 +494,43 @@ case WM_INITDIALOG:
 	UpdateSD(hwndDlg);
 	break;
 case WM_VSCROLL:
-	soundvolume=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_GETPOS,0,0);
-	FCEUI_SetSoundVolume(soundvolume);
-	break;
+	{
+	if (LOWORD(wParam) == SB_ENDSCROLL)
+		return true;
+	int i = CTL_VOLUME_TRACKBAR;
+	while (GetDlgItem(hwndDlg,i) != (HWND) lParam)
+		i++;
+		switch (i)
+		{
+			case CTL_VOLUME_TRACKBAR:
+				soundvolume=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_GETPOS,0,0);
+				FCEUI_SetSoundVolume(soundvolume);
+				break;
+			case CTL_VOLUME_TRACKBAR_TRIANGLE:
+				soundTrianglevol=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_GETPOS,0,0);
+				FCEUI_SetTriangleVolume(soundTrianglevol);
+				break;
+			case CTL_VOLUME_TRACKBAR_SQUARE1:
+				soundSquare1vol=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_GETPOS,0,0);
+				FCEUI_SetSquare1Volume(soundSquare1vol);
+				break;
+			case CTL_VOLUME_TRACKBAR_SQUARE2:
+				soundSquare2vol=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_GETPOS,0,0);
+				FCEUI_SetSquare2Volume(soundSquare2vol);
+				break;
+			case CTL_VOLUME_TRACKBAR_NOISE:
+				soundNoisevol=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_GETPOS,0,0);
+				FCEUI_SetNoiseVolume(soundNoisevol);
+				break;
+			case CTL_VOLUME_TRACKBAR_PCM:
+				soundPCMvol=150-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_GETPOS,0,0);
+				FCEUI_SetPCMVolume(soundPCMvol);
+				break;
+			default:
+				break;
+		}
+		return true;
+	}
 case WM_HSCROLL:
 	{
 		char tbuf[8];
