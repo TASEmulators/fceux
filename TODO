@@ -1,4 +1,5 @@
 TODO:
+* clean setup.py
 * implement UI for --special (combo box)
 * use combo box for bpp
 * use combo box to select gamepad to configure, simply UI

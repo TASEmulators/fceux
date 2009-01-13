@@ -553,8 +553,9 @@ class GfceuxApp:
     # fix this global its ugly
     # specifies which NES gamepad we are configuring
     gamepad_config_no = "0"
-  
-    def gamepad_clicked(self, widget, data=None):
+    
+    # This isn't used yet because it doesn't work with joysticks.
+    def gamepad_clicked_new(self, widget, data=None):
         widgets.get_object("gamepad_config_window").show_all()
 
         d = {'gp1_button' : "0",
@@ -593,7 +594,7 @@ class GfceuxApp:
                 cp.writeKey(prefix + "DeviceNum", key_tuple[2])
                 cp.writeKey(d[widget.name], key_tuple[1])
   
-    def gamepad_clicked_old(self, widget, data=None):
+    def gamepad_clicked(self, widget, data=None):
         command = '--inputcfg gamepad' + self.gamepad_config_no
         self.launch(command, True)
     
