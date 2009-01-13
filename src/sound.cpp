@@ -573,7 +573,7 @@ static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
     amp=EnvUnits[x].Speed;
    else
     amp=EnvUnits[x].decvolume;	//Set the volume of the Square Wave
-   int32 zzz = amp;
+   //int32 zzz = amp;
    //if (x==0) amp<<=128;  //Alter sqaurewave volumes here
    //else amp>>=8;
    // FCEU_DispMessage("Before = %d After = %d",zzz,amp); //Debug
