@@ -1114,6 +1114,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\movieoptions.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\netplay.cpp"
 					>
 					<FileConfiguration

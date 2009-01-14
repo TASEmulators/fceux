@@ -47,7 +47,9 @@ typedef signed int int32;
 #define mkdir _mkdir
 #define alloca _alloca
 #define snprintf _snprintf
+#if _MSC_VER < 1500
 #define vsnprintf _vsnprintf
+#endif
 #define W_OK 2
 #define R_OK 2
 #define X_OK 1
