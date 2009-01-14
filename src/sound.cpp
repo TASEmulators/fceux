@@ -573,11 +573,11 @@ static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
     amp=EnvUnits[x].Speed;
    else
     amp=EnvUnits[x].decvolume;	//Set the volume of the Square Wave
-   //int32 zzz = amp;
-   //if (x==0) amp<<=128;  //Alter sqaurewave volumes here
-   //else amp>>=8;
-   // FCEU_DispMessage("Before = %d After = %d",zzz,amp); //Debug
-   //   printf("%d\n",amp);
+   
+   //Modify Square wave volume based on channel volume modifiers
+   if (x && FSettings.Square2Volume != 150) amp = amp << (FSettings.Square2Volume / 5); //&& FSettings.Sqauare2 added to save processing power if volume is at default
+   else if (FSettings.Square1Volume != 150) amp = amp << (FSettings.Square1Volume / 5);
+         
    amp<<=24;
 
    rthresh=RectDuties[(PSG[(x<<2)]&0xC0)>>6];
@@ -717,7 +717,7 @@ static void RDoTriangle(void)
 {
  uint32 V; //mbg merge 7/17/06 made uitn32
  int32 tcout;
-
+ if (FSettings.TriangleVolume < 150) return; //On/Off for now
  tcout=(tristep&0xF);
  if(!(tristep&0x10)) tcout^=0xF;
  tcout=(tcout*3) << 16;  //(tcout<<1);
@@ -891,7 +891,9 @@ static void RDoNoise(void)
   amptab[0]=EnvUnits[2].Speed;
  else
   amptab[0]=EnvUnits[2].decvolume;
-
+ //Modfiy Noise channel volume based on channel volume setting
+ if (FSettings.NoiseVolume != 150) amptab[0] = amptab[0] << ((150 - FSettings.NoiseVolume) / 5); //if() to reduce save processing power if volume modifier is the default setting
+  
  amptab[0]<<=16;
  amptab[1]=0;
 

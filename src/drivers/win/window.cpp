@@ -890,7 +890,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	POINT pt;
 	RECT file_rect;
 	RECT help_rect;
-	RECT clientrect;
 	int x = 0;
 
 	switch(msg)
