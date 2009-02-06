@@ -636,6 +636,22 @@ case WM_COMMAND:
 			else soundo=InitSound();
 			UpdateSD(hwndDlg);
 			break;
+		case IDC_SOUND_RESTOREDEFAULTVOL:
+			//Restore default values
+			soundvolume = 150;
+			soundTrianglevol = 100;		
+			soundSquare1vol = 100;	
+			soundSquare2vol = 100;
+			soundNoisevol = 100;
+			soundPCMvol = 100;
+			//Update trackbars
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETPOS,1,150-soundvolume);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,150-soundTrianglevol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,150-soundSquare1vol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,150-soundSquare2vol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,150-soundNoisevol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,150-soundPCMvol);			
+			break;
 		}
 	}
 

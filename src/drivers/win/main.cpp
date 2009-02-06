@@ -122,12 +122,12 @@ int soundbuftime = 50;
 int soundquality = 0;
 
 //Sound volume controls (range 0-150 by 10's)j-----
-int soundvolume = 100;			//Master sound volume
-int soundTrianglevol = 150;		//Sound channel Triangle - volume control
-int soundSquare1vol = 150;		//Sound channel Square1 - volume control
-int soundSquare2vol = 150;		//Sound channel Square2 - volume control
-int soundNoisevol = 150;		//Sound channel Noise - volume control
-int soundPCMvol = 150;			//Sound channel PCM - volume control
+int soundvolume = 150;			//Master sound volume
+int soundTrianglevol = 100;		//Sound channel Triangle - volume control
+int soundSquare1vol = 100;		//Sound channel Square1 - volume control
+int soundSquare2vol = 100;		//Sound channel Square2 - volume control
+int soundNoisevol = 100;		//Sound channel Noise - volume control
+int soundPCMvol = 100;			//Sound channel PCM - volume control
 //-------------------------------------------------
 
 double saspectw = 1, saspecth = 1;

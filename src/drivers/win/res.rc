@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -750,12 +749,12 @@ BEGIN
     PUSHBUTTON      "6",305,126,23,16,12
 END
 
-SOUNDCONFIG DIALOGEX 8, 95, 334, 268
+SOUNDCONFIG DIALOGEX 8, 95, 334, 282
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Sound Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",BTN_CLOSE,280,246,44,14
+    DEFPUSHBUTTON   "Close",BTN_CLOSE,280,260,44,14
     GROUPBOX        "Output/Output Format:",302,10,9,131,93,WS_GROUP
     CONTROL         "Sound enabled.",CHECK_SOUND_ENABLED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,22,117,12
     CONTROL         "Force 8-bit sound.",CHECK_SOUND_8BIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,38,117,11
@@ -785,7 +784,8 @@ BEGIN
     CONTROL         "",CTL_VOLUME_TRACKBAR_NOISE,"msctls_trackbar32",TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,229,150,28,83
     GROUPBOX        "PCM",135,271,142,44,93,WS_GROUP
     CONTROL         "",CTL_VOLUME_TRACKBAR_PCM,"msctls_trackbar32",TBS_AUTOTICKS | TBS_VERT | TBS_BOTH | WS_TABSTOP,279,150,28,83
-    GROUPBOX        "Volume Control",IDC_STATIC,10,127,314,118
+    GROUPBOX        "Volume Control",IDC_STATIC,10,127,314,127
+    PUSHBUTTON      "Restore defaults",IDC_SOUND_RESTOREDEFAULTVOL,19,238,56,11
 END
 
 TIMINGCONFIG DIALOGEX 23, 157, 203, 60
@@ -1531,7 +1531,7 @@ BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 324
         TOPMARGIN, 8
-        BOTTOMMARGIN, 260
+        BOTTOMMARGIN, 274
     END
 
     "TIMINGCONFIG", DIALOG
@@ -1766,8 +1766,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

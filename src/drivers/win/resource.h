@@ -354,6 +354,7 @@
 #define IDC_BUTTON1                     1133
 #define TASEDIT_REWIND                  1133
 #define MEMW_EXPANDCOLLAPSE             1133
+#define IDC_SOUND_RESTOREDEFAULTVOL     1133
 #define IDC_BUTTON2                     1134
 #define TASEDIT_FOWARD                  1134
 #define IDC_BUTTON3                     1135
@@ -398,6 +399,7 @@
 #define IDC_MOVIE_DISPLAYSUBTITLES      1196
 #define IDC_MOVIE_SUBTITLESINAVI        1197
 #define IDC_MOVIE_AUTOBACKUP            1198
+#define IDC_SOUNDS_RESTOREDEFAULTS      1199
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -681,7 +683,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
 #define _APS_NEXT_COMMAND_VALUE         40353
-#define _APS_NEXT_CONTROL_VALUE         1199
+#define _APS_NEXT_CONTROL_VALUE         1200
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
