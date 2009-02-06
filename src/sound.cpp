@@ -656,6 +656,10 @@ static void RDoSQLQ(void)
     else
      amp[x]=EnvUnits[x].decvolume;
 
+	//Modify Square wave volume based on channel volume modifiers
+	//adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
+	if (FSettings.Square1Volume != 100) amp[x] = (amp[x] * FSettings.Square1Volume) / 100; //&& FSettings.Sqauare2 added to save processing power if volume is at default
+
     if(!inie[x]) amp[x]=0;    /* Correct? Buzzing in MM2, others otherwise... */
 
     rthresh[x]=RectDuties[(PSG[x*4]&0xC0)>>6];
@@ -789,6 +793,11 @@ static void RDoTriangleNoisePCMLQ(void)
     amptab[0]=EnvUnits[2].Speed;
    else
     amptab[0]=EnvUnits[2].decvolume;
+
+   //Modify Square wave volume based on channel volume modifiers
+   //adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
+   if (FSettings.TriangleVolume != 100) amptab[0] = (amptab[0] * FSettings.TriangleVolume) / 100; //&& FSettings.Sqauare2 added to save processing power if volume is at default
+   
    amptab[1]=0;
    amptab[0]<<=1;
 
