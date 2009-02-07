@@ -59,6 +59,7 @@ extern uint8 gNoBGFillColor;
 extern int ChtPosX,ChtPosY;
 extern int DbgPosX,DbgPosY;
 extern int DbgSizeX,DbgSizeY;
+extern int MemViewSizeX,MemViewSizeY;
 extern int MemView_wndx, MemView_wndy;
 extern int MemFind_wndx, MemFind_wndy;
 extern int NTViewPosX,NTViewPosY;
@@ -193,6 +194,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(DbgPosY),
 	AC(DbgSizeX),
 	AC(DbgSizeY),
+	AC(MemViewSizeX),
+	AC(MemViewSizeY),
 	AC(MemView_wndx),
 	AC(MemView_wndy),
 	AC(MemFind_wndx), 

@@ -120,6 +120,8 @@ int TableFileLoaded;
 
 int MemView_wndx, MemView_wndy;
 int MemFind_wndx, MemFind_wndy;
+int MemViewSizeX=0,MemViewSizeY=0;
+static RECT newMemViewRect;
 
 char chartable[256];
 
@@ -867,8 +869,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		return 0;
 
 	case WM_CREATE:
-		SetWindowPos(hwnd,0,MemView_wndx,MemView_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
-
+		SetWindowPos(hwnd,0,MemView_wndx,MemView_wndy,MemViewSizeX,MemViewSizeY,SWP_NOZORDER|SWP_NOOWNERZORDER);
 		// ################################## Start of SP CODE ###########################
 		debuggerWasActive = 1;
 		// ################################## End of SP CODE ###########################
@@ -1305,6 +1306,12 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		return 0;
 
 	case WM_SIZE:
+		if(wParam == SIZE_RESTORED)										//If dialog was resized
+		{
+			GetWindowRect(hwnd,&newMemViewRect);						//Get new size
+			MemViewSizeX = newMemViewRect.right-newMemViewRect.left;	//Store new size (this will be used to store in the .cfg file)	
+			MemViewSizeY = newMemViewRect.bottom-newMemViewRect.top;
+		}
 		ClientHeight = HIWORD (lParam);
 		if(DataAmount != ((ClientHeight/MemFontHeight)*16)){
 			DataAmount = ((ClientHeight/MemFontHeight)*16);
@@ -1552,7 +1559,6 @@ void DoMemView() {
 		UpdateCaption();
 	}
 	if (hMemView) {
-		SetWindowPos(hMemView,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		//UpdateMemView(0);
 		//MemViewDoBlit();
 	}
