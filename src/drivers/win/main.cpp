@@ -784,8 +784,14 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//MBG TODO - think about this logic
 	//throttle
+
+	bool throttle = true;
+	if( (eoptions&EO_NOTHROTTLE) )
+	{
+		if(!soundo) throttle = false;
+	}
 	
-	if(!(eoptions&EO_NOTHROTTLE) && (!soundo)) //if throttling is enabled..
+	if(throttle)  //if throttling is enabled..
 		if(!turbo) //and turbo is disabled..
 			if(!FCEUI_EmulationPaused() 
 				||JustFrameAdvanced
