@@ -736,7 +736,7 @@ static void RDoTriangle(void)
   int32 count = SOUNDTS - ChannelBC[2];
   while(count--)
   {
-   *start += tcout;
+   *start += (tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
    start++;
   }
   //for(V=ChannelBC[2];V<SOUNDTS;V++)
@@ -745,7 +745,7 @@ static void RDoTriangle(void)
  else
   for(V=ChannelBC[2];V<SOUNDTS;V++)
   {
-    WaveHi[V]+=tcout;
+    WaveHi[V]+=(tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
     wlcount[2]--;
     if(!wlcount[2])
     {
