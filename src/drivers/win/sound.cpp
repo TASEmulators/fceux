@@ -650,7 +650,15 @@ case WM_COMMAND:
 			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,150-soundSquare1vol);
 			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,150-soundSquare2vol);
 			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,150-soundNoisevol);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,150-soundPCMvol);			
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,150-soundPCMvol);
+
+			//Set sound volumes
+			FCEUI_SetSoundVolume(soundvolume);
+			FCEUI_SetTriangleVolume(soundTrianglevol);
+			FCEUI_SetSquare1Volume(soundSquare1vol);
+			FCEUI_SetSquare2Volume(soundSquare2vol);
+			FCEUI_SetNoiseVolume(soundNoisevol);
+			FCEUI_SetPCMVolume(soundPCMvol);
 			break;
 		}
 	}
