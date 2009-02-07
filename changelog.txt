@@ -1,6 +1,8 @@
 ---version 2.0.4 yet to be released---
+07-feb-2009 - adelikat - win32 - Fix bug in screenshot numbering that caused numbering to not reset when changing ROMs
 06-feb-2009 - adelikat - win32 - Hex editor - remembers window size
 06-feb-2009 - adelikat - Win32 - sound config dialog - added sliders for individual sound channel volume control
+06-feb-2009 - zeromus - Force processor affinity, fixes throttling problem on AMD dualcore machines
 06-feb-2009 - adelikat - Sound channels now have individual volume control
 01-jan-2009 - adelikat - Win32 - Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off
 26-dec-2008 - adelikat - Metadata - remember window position

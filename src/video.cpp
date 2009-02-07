@@ -413,7 +413,7 @@ static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
 
 int SaveSnapshot(void)
 {
-	static unsigned int lastu=0;
+	unsigned int lastu=0;
 
 	char *fn=0;
 	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
