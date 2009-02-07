@@ -546,8 +546,7 @@ void RDoPCM(void)
  uint32 V; //mbg merge 7/17/06 made uint32
 
  for(V=ChannelBC[4];V<SOUNDTS;V++)
-  WaveHi[V]+=RawDALatch<<16;
-
+  WaveHi[V]+=(((RawDALatch<<16)/100) * FSettings.PCMVolume)&(~0xFFFF);
  ChannelBC[4]=SOUNDTS;
 }
 
