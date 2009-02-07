@@ -252,6 +252,7 @@ void OAKRA_Module_OutputDS::beginThread() {
 	threadData = new ThreadData();
 	((ThreadData *)threadData)->ds = this;
 	HANDLE updateThread = CreateThread(0,0,updateProc,threadData,0,&updateThreadId);
+	SetThreadAffinityMask(updateThread,1);
 	SetThreadPriority(updateThread,THREAD_PRIORITY_TIME_CRITICAL);
 	//SetThreadPriority(updateThread,THREAD_PRIORITY_HIGHEST);
 }

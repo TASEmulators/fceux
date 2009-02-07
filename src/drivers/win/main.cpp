@@ -557,6 +557,8 @@ void initDirectories()
 #include "x6502.h"
 int main(int argc,char *argv[])
 {
+	SetThreadAffinityMask(GetCurrentThread(),1);
+
 	printf("%08x",opsize);
 
 	char *t;
