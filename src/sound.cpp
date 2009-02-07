@@ -722,9 +722,6 @@ static void RDoTriangle(void)
 {
  uint32 V; //mbg merge 7/17/06 made uitn32
  int32 tcout;
-
- //Modify Square wave volume based on channel volume modifiers
- if (FSettings.TriangleVolume < 100) return; //On/Off for now
  
  tcout=(tristep&0xF);
  if(!(tristep&0x10)) tcout^=0xF;
@@ -736,6 +733,7 @@ static void RDoTriangle(void)
   int32 count = SOUNDTS - ChannelBC[2];
   while(count--)
   {
+   //Modify volume based on channel volume modifiers
    *start += (tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
    start++;
   }
@@ -745,7 +743,8 @@ static void RDoTriangle(void)
  else
   for(V=ChannelBC[2];V<SOUNDTS;V++)
   {
-    WaveHi[V]+=(tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
+    //Modify volume based on channel volume modifiers
+	WaveHi[V]+=(tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
     wlcount[2]--;
     if(!wlcount[2])
     {
