@@ -29,7 +29,7 @@ import os
 import pickle
 import shutil
 from optparse import OptionParser
-from config_parse import FceuxConfigParser
+#from config_parse import FceuxConfigParser
 import get_key
 #from subprocess import Popen
 
@@ -563,8 +563,10 @@ class GfceuxApp:
             'gp3_button' : "2",
             'gp4_button' : "3"}
         self.gamepad_config_no = d[widget.name]
-    
 
+	"""
+#Disabled for now
+#TODO: Full joystick support
     def button_clicked(self, widget, data=None):
         prefix = "SDL.Input.GamePad." + self.gamepad_config_no
         d = {'right_button' : prefix + "Right",
@@ -592,8 +594,8 @@ class GfceuxApp:
             if key_tuple[0] == "Joystick":
                 print key_tuple
                 cp.writeKey(prefix + "DeviceNum", key_tuple[2])
-                cp.writeKey(d[widget.name], key_tuple[1])
-  
+                cp.writeKey(d[widget.name], key_tuple[1])	
+	"""  
     def gamepad_clicked(self, widget, data=None):
         command = '--inputcfg gamepad' + self.gamepad_config_no
         self.launch(command, True)
