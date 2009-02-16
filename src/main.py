@@ -28,9 +28,9 @@ import sys
 import os
 import pickle
 import shutil
-from optparse import OptionParser
+#from optparse import OptionParser
 #from config_parse import FceuxConfigParser
-import get_key
+#import get_key
 #from subprocess import Popen
 
 try:
@@ -659,7 +659,4 @@ class GfceuxApp:
         gtk.main_quit()
 
 if __name__ == '__main__':
-    parser = OptionParser(version='%prog '+ version)
-    parser.parse_args()
-
     app = GfceuxApp()

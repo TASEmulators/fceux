@@ -1,4 +1,7 @@
 ================= version 2.0.4 ( yet to be released) ============
+* Uninstall script works better
+* Is now distributed as a python package.  This makes things easier
+for maintanence
 * Is now installable 
 * Disabled gamepad GUI until joystick support can be completed
 * Initial joystick config support: supports buttons, but hot hats and axes
