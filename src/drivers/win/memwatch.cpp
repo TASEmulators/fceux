@@ -31,6 +31,15 @@
 
 using namespace std;
 
+//Memory Watch named constants-----------------------------------
+const int NUMWATCHES = 24;		//Maximum Number of Watches
+const int LABELLENGTH = 64;		//Maximum Length of a Watch label
+const int ADDRESSLENGTH = 16;	//Maximum Length of a Ram Address
+
+//Prototypes
+void RamChangeReset(int x);	//Called when user hits reset button
+void CollapseWindow(void);	//Called when user collapses or expands window
+
 //Memory Watch GUI Handles & Globals---------------------------
 HWND hwndMemWatch=0;		//Handle to Memwatch Window
 static HDC hdc;				//Handle to to Device Context
@@ -38,12 +47,7 @@ static HMENU memwmenu = 0;	//Handle to Memwatch Menu
 static HMENU memwrecentmenu;//Handle to Recent Files Menu
 
 int MemWatch_wndx=0, MemWatch_wndy=0; //Window Position
-
 bool MemWCollapsed = false;		//Flag to determine if window is currently collapsed
-//Memory Watch globals-----------------------------------------
-const int NUMWATCHES = 24;		//Maximum Number of Watches
-const int LABELLENGTH = 64;		//Maximum Length of a Watch label
-const int ADDRESSLENGTH = 16;	//Maximum Length of a Ram Address
 
 static char addresses[NUMWATCHES][ADDRESSLENGTH];	//Stores all address labels
 static char labels[NUMWATCHES][LABELLENGTH];		//Stores all label lengths
@@ -72,9 +76,6 @@ int editnow[MAX_RAMMONITOR];			//current address value
 unsigned int editcount[MAX_RAMMONITOR];	//Current counter value
 char editchangem[MAX_RAMMONITOR][5];	//counter converted to string
 
-//Prototypes
-void RamChangeReset(int x);	//Called when user hits reset button
-void CollapseWindow(void);	//Called when user collapses or expands window
 //-------------------------------------------------
 
 void UpdateMemw_RMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
@@ -577,55 +578,57 @@ static void LoadMemWatch()
 fileChanged = false;
 }
 
-// Loads a recent file given the recent files array number(0-4) 
+//Loads a recent file given the recent files array number(0-4) 
 void OpenMemwatchRecentFile(int memwRFileNumber)
 {
-	int rnum=memwRFileNumber;
-		if (rnum > MEMW_MAX_NUMBER_OF_RECENT_FILES) return; //just in case
+	if (memwRFileNumber > MEMW_MAX_NUMBER_OF_RECENT_FILES) return; //just in case
 		
-	char* x = memw_recent_files[rnum];
+	char* x = memw_recent_files[memwRFileNumber];
 	if (x == NULL) return; //If no recent files exist just return.  Useful for Load last file on startup (or if something goes screwy)
 	char watchfcontents[2048];
 
-	FILE *fp=FCEUD_UTF8fopen(x,"r");
-	strcpy(memwLastFilename,x);
-
-	if (rnum != 0) //Change order of recent files if not most recent
-		MemwAddRecentFile(x);
-
-	int i,j;
-	for(i=0;i<NUMWATCHES;i++)
-		{
-			fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
-			for(j = 0; j < ADDRESSLENGTH; j++)
-				addresses[i][j] = watchfcontents[j];
-			fscanf(fp, "%s\n", watchfcontents);
-			for(j = 0; j < LABELLENGTH; j++)
-				labels[i][j] = watchfcontents[j];
-
-			//Replace dummy strings with empty strings
-			if(addresses[i][0] == '|')
+	FILE *fp=FCEUD_UTF8fopen(x,"r");	//Open the recent file
+	if (fp)		//Check if file opening was successful, if not, abort
+	{
+		strcpy(memwLastFilename,x);
+		if (memwRFileNumber != 0) //Change order of recent files if not most recent
+			MemwAddRecentFile(x);
+		int i,j;
+		for(i=0;i<NUMWATCHES;i++)
 			{
-				addresses[i][0] = 0;
-			}
-			if(labels[i][0] == '|')
-			{
-				labels[i][0] = 0;
-			}
-			PutInSpaces(i);
+				fscanf(fp, "%s ", watchfcontents); //Reads contents of newly opened file
+				for(j = 0; j < ADDRESSLENGTH; j++)
+					addresses[i][j] = watchfcontents[j];
+				fscanf(fp, "%s\n", watchfcontents);
+				for(j = 0; j < LABELLENGTH; j++)
+					labels[i][j] = watchfcontents[j];
 
-			int templl = LABELLENGTH - 1;
-			int tempal = ADDRESSLENGTH - 1;
-			addresses[i][tempal] = 0;
-			labels[i][templl] = 0; //just in case
+				//Replace dummy strings with empty strings
+				if(addresses[i][0] == '|')
+				{
+					addresses[i][0] = 0;
+				}
+				if(labels[i][0] == '|')
+				{
+					labels[i][0] = 0;
+				}
+				PutInSpaces(i);
 
-			SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
-			SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
-			SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
+				int templl = LABELLENGTH - 1;
+				int tempal = ADDRESSLENGTH - 1;
+				addresses[i][tempal] = 0;
+				labels[i][templl] = 0; //just in case
+
+				SetDlgItemText(hwndMemWatch,MW_VAL (i),(LPTSTR) "---");
+				SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+				SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
+		}
+		fclose(fp);				//Close the file
+		fileChanged = false;	//Flag that the memwatch file has not been changed since last save
 	}
-		fclose(fp);
-
-fileChanged = false;
+	else		//Opening fp failed
+		MessageBox(hwndMemWatch,"Error: Could not open recent file", "Memory Watch Recent File", MB_OK);
+		//TODO: Remove this file from the recent list
 }
 
 void CloseMemoryWatch()
