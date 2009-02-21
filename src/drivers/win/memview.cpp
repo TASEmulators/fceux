@@ -120,7 +120,7 @@ int TableFileLoaded;
 
 int MemView_wndx, MemView_wndy;
 int MemFind_wndx, MemFind_wndy;
-int MemViewSizeX=0,MemViewSizeY=0;
+int MemViewSizeX=625,MemViewSizeY=242;
 static RECT newMemViewRect;
 
 char chartable[256];
@@ -846,7 +846,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	SCROLLINFO si;
 	int x, y, i, j;
 	int tempAddy;
-
+					RECT wrect;
 	const int MemFontWidth = debugSystem->fixedFontWidth;
 	const int MemFontHeight = debugSystem->fixedFontHeight;
 
@@ -870,6 +870,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 	case WM_CREATE:
 		SetWindowPos(hwnd,0,MemView_wndx,MemView_wndy,MemViewSizeX,MemViewSizeY,SWP_NOZORDER|SWP_NOOWNERZORDER);
+		
 		// ################################## Start of SP CODE ###########################
 		debuggerWasActive = 1;
 		// ################################## End of SP CODE ###########################
