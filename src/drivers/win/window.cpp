@@ -2192,7 +2192,7 @@ void UpdateMenuHotkeys()
 
 	//Slowest Speed
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWEST]);
-	combined = "Slowest Speeed\t" + combo;
+	combined = "Slowest Speed\t" + combo;
 	ChangeMenuItemText(ID_NES_SLOWESTSPEED, combined);
 
 	//Normal Speed

@@ -193,9 +193,9 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "Help...",                     MENU_HELP
-        MENUITEM "&Message Log...",             MENU_MSGLOG
+        MENUITEM "&Message Log",                MENU_MSGLOG
         MENUITEM SEPARATOR
-        MENUITEM "&About...",                   MENU_ABOUT
+        MENUITEM "&About",                      MENU_ABOUT
     END
 END
 
