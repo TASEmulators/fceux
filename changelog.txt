@@ -1,5 +1,6 @@
 ---version 2.0.4 yet to be released---
-19-feb-2009 - adelikat - win32 - memory watch - fixed recent file menu - no longer crashes when attempting to load a non existent recent file
+21-feb-2009 - adelikat - win32 - Message Log - remembers X,Y position
+19-feb-2009 - adelikat - win32 - Memory Watch - fixed recent file menu - no longer crashes when attempting to load a non existent recent file
 07-feb-2009 - adelikat - win32 - Fix bug in screenshot numbering that caused numbering to not reset when changing ROMs
 06-feb-2009 - adelikat - win32 - Hex editor - remembers window size
 06-feb-2009 - adelikat - Win32 - sound config dialog - added sliders for individual sound channel volume control

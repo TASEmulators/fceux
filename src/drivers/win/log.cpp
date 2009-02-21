@@ -6,6 +6,8 @@ static HWND logwin = 0;
 static char *logtext[MAXIMUM_NUMBER_OF_LOGS];
 static unsigned int logcount=0;
 
+int MLogPosX=0,MLogPosY=0;	//X,Y coordinates of dialog
+
 unsigned int truncated_logcount()
 {
 	return logcount & ( MAXIMUM_NUMBER_OF_LOGS - 1 );
@@ -56,9 +58,18 @@ void RedoText(void)
 **/
 BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	RECT wrect;	//For remembering window position
 	switch(uMsg)
 	{
 		case WM_INITDIALOG:
+			if (MLogPosX==-32000) MLogPosX=0; //Just in case
+			if (MLogPosY==-32000) MLogPosY=0;
+			SetWindowPos(hwndDlg,0,MLogPosX,MLogPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+			break;
+		case WM_MOVE:
+			GetWindowRect(hwndDlg,&wrect);	//Remember X,Y coordinates
+			MLogPosX = wrect.left;
+			MLogPosY = wrect.top;
 			break;
 		case WM_COMMAND:
 			if(HIWORD(wParam)==BN_CLICKED)
