@@ -43,41 +43,41 @@ BEGIN
         MENUITEM "&Close",                      MENU_CLOSE_FILE
         MENUITEM "&Recent",                     MENU_RECENT_FILES
         MENUITEM SEPARATOR
-        POPUP "Savestate"
+        POPUP "&Savestate"
         BEGIN
-            MENUITEM "Load State",                  MENU_LOADSTATE
-            MENUITEM "Save State",                  MENU_SAVESTATE
-            MENUITEM "Load State From...",          MENU_LOAD_STATE
-            MENUITEM "Save State As...",            MENU_SAVE_STATE
+            MENUITEM "&Load State",                 MENU_LOADSTATE
+            MENUITEM "&Save State",                 MENU_SAVESTATE
+            MENUITEM "Load State &From...",         MENU_LOAD_STATE
+            MENUITEM "Save State &As...",           MENU_SAVE_STATE
             MENUITEM SEPARATOR
-            MENUITEM "Next save slot",              MENU_NEXTSAVESTATE
-            MENUITEM "Previous save slot",          MENU_PREVIOUSSAVESTATE
-            MENUITEM "View save slots",             MENU_VIEWSAVESLOTS
+            MENUITEM "&Next save slot",             MENU_NEXTSAVESTATE
+            MENUITEM "&Previous save slot",         MENU_PREVIOUSSAVESTATE
+            MENUITEM "&View save slots",            MENU_VIEWSAVESLOTS
         END
-        POPUP "Movie"
+        POPUP "&Movie"
         BEGIN
-            MENUITEM "Record Movie...",             MENU_RECORD_MOVIE
-            MENUITEM "Play Movie...",               MENU_REPLAY_MOVIE
-            MENUITEM "Stop Movie",                  MENU_STOP_MOVIE
-            MENUITEM "Play from beginning",         ID_FILE_PLAYMOVIEFROMBEGINNING
+            MENUITEM "&Record Movie...",            MENU_RECORD_MOVIE
+            MENUITEM "&Play Movie...",              MENU_REPLAY_MOVIE
+            MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE
+            MENUITEM "Play from &Beginning",        ID_FILE_PLAYMOVIEFROMBEGINNING
             MENUITEM SEPARATOR
-            MENUITEM "Read-only",                   ID_FILE_MOVIE_TOGGLEREAD
+            MENUITEM "&Read-only",                  ID_FILE_MOVIE_TOGGLEREAD
         END
-        POPUP "AVI/Wav"
+        POPUP "&AVI/Wav"
         BEGIN
-            MENUITEM "Record AVI...",               MENU_RECORD_AVI
-            MENUITEM "Stop AVI",                    MENU_STOP_AVI
-            MENUITEM "Record WAV...",               MENU_RECORD_WAV
-            MENUITEM "Stop WAV",                    MENU_STOP_WAV
+            MENUITEM "&Record AVI...",              MENU_RECORD_AVI
+            MENUITEM "&Stop AVI",                   MENU_STOP_AVI
+            MENUITEM "&Record WAV...",              MENU_RECORD_WAV
+            MENUITEM "&Stop WAV",                   MENU_STOP_WAV
         END
-        POPUP "Lua"
+        POPUP "&Lua"
         BEGIN
-            MENUITEM "Recent",                      MENU_LUA_RECENT
-            MENUITEM "Run Lua Script...",           ID_FILE_RUNLUASCRIPT
-            MENUITEM "Stop Lua Script",             ID_FILE_STOPLUASCRIPT
-            MENUITEM "Reload Lua Script",           ID_FILE_LUA_RELOADLUASCRIPT
+            MENUITEM "&Recent",                     MENU_LUA_RECENT
+            MENUITEM "Run &Lua Script...",          ID_FILE_RUNLUASCRIPT
+            MENUITEM "&Stop Lua Script",            ID_FILE_STOPLUASCRIPT
+            MENUITEM "&Reload Lua Script",          ID_FILE_LUA_RELOADLUASCRIPT
         END
-        MENUITEM "Screenshot",                  ID_FILE_SCREENSHOT
+        MENUITEM "&Screenshot",                 ID_FILE_SCREENSHOT
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
     END
@@ -90,45 +90,45 @@ BEGIN
         MENUITEM "&Switch Disk Side",           MENU_SWITCH_DISK
         MENUITEM "&Insert Coin",                MENU_INSERT_COIN
         MENUITEM SEPARATOR
-        POPUP "Emulation Speed"
+        POPUP "E&mulation Speed"
         BEGIN
-            MENUITEM "Speed Up",                    ID_NES_SPEEDUP
-            MENUITEM "Slow Down",                   ID_NES_SLOWDOWN
+            MENUITEM "Speed &Up",                   ID_NES_SPEEDUP
+            MENUITEM "Slow &Down",                  ID_NES_SLOWDOWN
             MENUITEM SEPARATOR
-            MENUITEM "Pause",                       ID_NES_PAUSE
-            MENUITEM "Slowest Speed",               ID_NES_SLOWESTSPEED
-            MENUITEM "Normal Speed",                ID_NES_NORMALSPEED
-            MENUITEM "Turbo",                       ID_NES_TURBO
+            MENUITEM "&Pause",                      ID_NES_PAUSE
+            MENUITEM "&Slowest Speed",              ID_NES_SLOWESTSPEED
+            MENUITEM "&Normal Speed",               ID_NES_NORMALSPEED
+            MENUITEM "&Turbo",                      ID_NES_TURBO
         END
     END
     POPUP "&Config"
     BEGIN
-        MENUITEM "Hide Menu",                   MENU_HIDE_MENU
-        POPUP "Enable"
+        MENUITEM "&Hide Menu",                  MENU_HIDE_MENU
+        POPUP "&Enable"
         BEGIN
-            MENUITEM "Run in Background",           MENU_RUN_IN_BACKGROUND
-            MENUITEM "Background Input",            MENU_BACKGROUND_INPUT
-            MENUITEM "Auto-savestates",             MENU_ENABLE_AUTOSAVE
-            MENUITEM "Frame Adv. - Skip Lag",       MENU_DISPLAY_FA_LAGSKIP
+            MENUITEM "&Run in Background",          MENU_RUN_IN_BACKGROUND
+            MENUITEM "&Background Input",           MENU_BACKGROUND_INPUT
+            MENUITEM "&Auto-savestates",            MENU_ENABLE_AUTOSAVE
+            MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
         END
-        POPUP "Display"
+        POPUP "&Display"
         BEGIN
-            POPUP "Input Display"
+            POPUP "&Input Display"
             BEGIN
-                MENUITEM "Off",                         MENU_INPUTDISPLAY_0
-                MENUITEM "1 player",                    MENU_INPUTDISPLAY_1
-                MENUITEM "2 player",                    MENU_INPUTDISPLAY_2
-                MENUITEM "4 player",                    MENU_INPUTDISPLAY_4
+                MENUITEM "&Off",                        MENU_INPUTDISPLAY_0
+                MENUITEM "&1 player",                   MENU_INPUTDISPLAY_1
+                MENUITEM "&2 player",                   MENU_INPUTDISPLAY_2
+                MENUITEM "&4 player",                   MENU_INPUTDISPLAY_4
             END
-            MENUITEM "Lag Counter",                 MENU_DISPLAY_LAGCOUNTER
-            MENUITEM "Frame Counter",               ID_DISPLAY_FRAMECOUNTER
+            MENUITEM "&Lag Counter",                MENU_DISPLAY_LAGCOUNTER
+            MENUITEM "&Frame Counter",              ID_DISPLAY_FRAMECOUNTER
             MENUITEM SEPARATOR
-            MENUITEM "Graphics: BG",                MENU_DISPLAY_BG
-            MENUITEM "Graphics: OBJ",               MENU_DISPLAY_OBJ
+            MENUITEM "Graphics: &BG",               MENU_DISPLAY_BG
+            MENUITEM "Graphics: &OBJ",              MENU_DISPLAY_OBJ
         END
         MENUITEM SEPARATOR
-        MENUITEM "Game Genie",                  MENU_GAME_GENIE
-        MENUITEM "PAL Emulation",               MENU_PAL
+        MENUITEM "&Game Genie",                 MENU_GAME_GENIE
+        MENUITEM "&PAL Emulation",              MENU_PAL
         MENUITEM SEPARATOR
         MENUITEM "&Directories...",             MENU_DIRECTORIES
         MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
@@ -146,8 +146,8 @@ BEGIN
         MENUITEM "&Cheats...",                  MENU_CHEATS
         MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
         MENUITEM "&RAM Filter...",              MENU_RAMFILTER
-        MENUITEM "TAS Edit...",                 MENU_TASEDIT, INACTIVE
-        MENUITEM "Convert FCM...",              MENU_CONVERT_MOVIE
+        MENUITEM "&TAS Edit...",                MENU_TASEDIT, INACTIVE
+        MENUITEM "Convert &FCM...",             MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
         POPUP "Autofire &Pattern"
         BEGIN
@@ -178,21 +178,21 @@ BEGIN
         END
         MENUITEM "&Alternate A and B",          MENU_ALTERNATE_AB
         MENUITEM SEPARATOR
-        MENUITEM "Text Hooker...",              ID_TOOLS_TEXTHOOKER
+        MENUITEM "Te&xt Hooker...",             ID_TOOLS_TEXTHOOKER
     END
     POPUP "&Debug"
     BEGIN
-        MENUITEM "Debugger...",                 MENU_DEBUGGER
-        MENUITEM "PPU Viewer...",               MENU_PPUVIEWER
-        MENUITEM "Name Table Viewer...",        MENU_NAMETABLEVIEWER
-        MENUITEM "Hex Editor...",               MENU_HEXEDITOR
-        MENUITEM "Trace Logger...",             MENU_TRACELOGGER
-        MENUITEM "Code/Data Logger...",         MENU_CDLOGGER
-        MENUITEM "Game Genie Decoder/Encoder...", MENU_GAMEGENIEDECODER
+        MENUITEM "&Debugger...",                MENU_DEBUGGER
+        MENUITEM "&PPU Viewer...",              MENU_PPUVIEWER
+        MENUITEM "&Name Table Viewer...",       MENU_NAMETABLEVIEWER
+        MENUITEM "&Hex Editor...",              MENU_HEXEDITOR
+        MENUITEM "&Trace Logger...",            MENU_TRACELOGGER
+        MENUITEM "&Code/Data Logger...",        MENU_CDLOGGER
+        MENUITEM "&Game Genie Decoder/Encoder...", MENU_GAMEGENIEDECODER
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "Help...",                     MENU_HELP
+        MENUITEM "&Help...",                    MENU_HELP
         MENUITEM "&Message Log",                MENU_MSGLOG
         MENUITEM SEPARATOR
         MENUITEM "&About",                      MENU_ABOUT
@@ -655,13 +655,13 @@ BEGIN
     RTEXT           "Filter:",65484,6,255,21,12,SS_CENTERIMAGE | NOT WS_GROUP
 END
 
-MESSAGELOG DIALOG  33, 38, 370, 184
+MESSAGELOG DIALOGEX 33, 38, 262, 237
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Message Log"
-FONT 9, "Terminal"
+FONT 9, "Terminal", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",1,299,157,56,14
-    EDITTEXT        LBL_LOG_TEXT,19,15,339,130,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+    DEFPUSHBUTTON   "Close",1,224,220,34,14
+    EDITTEXT        LBL_LOG_TEXT,4,15,254,202,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
 END
 
 NETMOO DIALOGEX 44, 59, 365, 209

@@ -2066,82 +2066,82 @@ void UpdateMenuHotkeys()
 
 	//Load State
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE]);
-	combined = "Load State\t" + combo;
+	combined = "&Load State\t" + combo;
 	ChangeMenuItemText(MENU_LOADSTATE, combined);
 
 	//Save State
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE]);
-	combined = "Save State\t" + combo;
+	combined = "&Save State\t" + combo;
 	ChangeMenuItemText(MENU_SAVESTATE, combined);
 
 	//Loadstate from
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_LOAD_STATE_FROM]);
-	combined = "Load State From...\t" + combo;
+	combined = "Load State &From...\t" + combo;
 	ChangeMenuItemText(MENU_LOAD_STATE, combined);
 
 	//Savestate as
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_STATE_AS]);
-	combined = "Save State As...\t" + combo;
+	combined = "Save State &As...\t" + combo;
 	ChangeMenuItemText(MENU_SAVE_STATE, combined);
 
 	//Next Save Slot
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_NEXT]);
-	combined = "Next save slot\t" + combo;
+	combined = "&Next save slot\t" + combo;
 	ChangeMenuItemText(MENU_NEXTSAVESTATE, combined);
 
 	//Previous Save Slot
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SAVE_SLOT_PREV]);
-	combined = "Previous save slot\t" + combo;
+	combined = "&Previous save slot\t" + combo;
 	ChangeMenuItemText(MENU_PREVIOUSSAVESTATE, combined);
 
 	//View Save Slots
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_SHOWSTATES]);
-	combined = "View save slots\t" + combo;
+	combined = "&View save slots\t" + combo;
 	ChangeMenuItemText(MENU_VIEWSAVESLOTS, combined);
 
 	//Record Movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_RECORD_TO]);
-	combined = "Record Movie...\t" + combo;
+	combined = "&Record Movie...\t" + combo;
 	ChangeMenuItemText(MENU_RECORD_MOVIE, combined);
 
 	//Play movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_REPLAY_FROM]);
-	combined = "Play Movie...\t" + combo;
+	combined = "&Play Movie...\t" + combo;
 	ChangeMenuItemText(MENU_REPLAY_MOVIE, combined); 
 
 	//Stop movie
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_STOP]);
-	combined = "Stop Movie\t" + combo;
+	combined = "&Stop Movie\t" + combo;
 	ChangeMenuItemText(MENU_STOP_MOVIE, combined); 
 
 	//Play Movie from Beginning
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_PLAY_FROM_BEGINNING]);
-	combined = "Play from beginning\t" + combo;
+	combined = "Play from &Beginning\t" + combo;
 	ChangeMenuItemText(ID_FILE_PLAYMOVIEFROMBEGINNING, combined); 
 
 	//Read only
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_READONLY_TOGGLE]);
-	combined = "Read only\t" + combo;
+	combined = "&Read only\t" + combo;
 	ChangeMenuItemText(ID_FILE_MOVIE_TOGGLEREAD, combined); 
 
 	//Screenshot
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCREENSHOT]);
-	combined = "Screenshot\t" + combo;
+	combined = "&Screenshot\t" + combo;
 	ChangeMenuItemText(ID_FILE_SCREENSHOT, combined); 
 
 	//Record AVI
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_RECORD_AS]);
-	combined = "Record AVI...\t" + combo;
+	combined = "&Record AVI...\t" + combo;
 	ChangeMenuItemText(MENU_RECORD_AVI, combined); 
 
 	//Stop AVI
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_STOP]);
-	combined = "Stop AVI\t" + combo;
+	combined = "&Stop AVI\t" + combo;
 	ChangeMenuItemText(MENU_STOP_AVI, combined); 
 
 	//Reload Lua Script
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCRIPT_RELOAD]);
-	combined = "Reload Lua Script\t" + combo;
+	combined = "&Reload Lua Script\t" + combo;
 	ChangeMenuItemText(ID_FILE_LUA_RELOADLUASCRIPT, combined); 
 	
 	//-------------------------------NES----------------------------------------
@@ -2169,76 +2169,66 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_VSUNI_COIN]);
 	combined = "&Insert Coin\t" + combo;
 	ChangeMenuItemText(MENU_INSERT_COIN, combined);
-
-	//Pause
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-	combined = "Pause\t" + combo;
-	ChangeMenuItemText(ID_NES_PAUSE, combined);
-
-	//Turbo
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_TURBO_TOGGLE]);
-	combined = "Turbo\t" + combo;
-	ChangeMenuItemText(ID_NES_TURBO, combined);
-
+		
 	//Speed Up
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_FASTER]);
-	combined = "Speed Up\t" + combo;
+	combined = "Speed &Up\t" + combo;
 	ChangeMenuItemText(ID_NES_SPEEDUP, combined);
 
 	//Slow Down
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWER]);
-	combined = "Slow Down\t" + combo;
+	combined = "Slow &Down\t" + combo;
 	ChangeMenuItemText(ID_NES_SLOWDOWN, combined);
 
+	//Pause
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+	combined = "&Pause\t" + combo;
+	ChangeMenuItemText(ID_NES_PAUSE, combined);
+	
 	//Slowest Speed
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_SLOWEST]);
-	combined = "Slowest Speed\t" + combo;
+	combined = "&Slowest Speed\t" + combo;
 	ChangeMenuItemText(ID_NES_SLOWESTSPEED, combined);
 
 	//Normal Speed
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_NORMAL]);
-	combined = "Normal Speed\t" + combo;
+	combined = "&Normal Speed\t" + combo;
 	ChangeMenuItemText(ID_NES_NORMALSPEED, combined);
+
+	//Turbo
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SPEED_TURBO_TOGGLE]);
+	combined = "&Turbo\t" + combo;
+	ChangeMenuItemText(ID_NES_TURBO, combined);
 
 	//-------------------------------Config-------------------------------------
 	//Hide Menu
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_HIDE_MENU_TOGGLE]);
-	combined = "Hide Menu\t" + combo;
+	combined = "&Hide Menu\t" + combo;
 	ChangeMenuItemText(MENU_HIDE_MENU, combined);
 
 	//Frame Adv. skip lag
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_FRAMEADV_SKIPLAG]);
-	combined = "Frame Adv. - Skip Lag\t" + combo;
+	combined = "&Frame Adv. - Skip Lag\t" + combo;
 	ChangeMenuItemText(MENU_DISPLAY_FA_LAGSKIP, combined);
-
-	//Movie Status Icon
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE]);
-	combined = "Movie Status Icon\t" + combo;
-	ChangeMenuItemText(MENU_SHOW_STATUS_ICON, combined);
 
 	//Lag Counter
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE]);
-	combined = "Lag Counter\t" + combo;
+	combined = "&Lag Counter\t" + combo;
 	ChangeMenuItemText(MENU_DISPLAY_LAGCOUNTER, combined);
 
 	//Frame Counter
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE]);
-	combined = "Frame Counter\t" + combo;
+	combined = "&Frame Counter\t" + combo;
 	ChangeMenuItemText(ID_DISPLAY_FRAMECOUNTER, combined);
-
-	//Movie Subtitles
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_MOVIESUBTITLES]);
-	combined = "Movie Subtitles\t" + combo;
-	ChangeMenuItemText(ID_DISPLAY_MOVIESUBTITLES, combined);
-
+	
 	//Graphics: BG
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);
-	combined = "Graphics: BG\t" + combo;
+	combined = "Graphics: &BG\t" + combo;
 	ChangeMenuItemText(MENU_DISPLAY_BG, combined);
 
 	//Graphics: OBJ
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_OBJ_TOGGLE]);
-	combined = "Graphics: OBJ\t" + combo;
+	combined = "Graphics: &OBJ\t" + combo;
 	ChangeMenuItemText(MENU_DISPLAY_OBJ, combined);
 
 	//-------------------------------Tools--------------------------------------
@@ -2255,26 +2245,26 @@ void UpdateMenuHotkeys()
 	//-------------------------------Debug--------------------------------------
 	//Open Debugger
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENDEBUGGER]);
-	combined = "Debugger...\t" + combo;
+	combined = "&Debugger...\t" + combo;
 	ChangeMenuItemText(MENU_DEBUGGER, combined);
 
 	//Open PPU Viewer
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENPPU]);
-	combined = "PPU Viewer...\t" + combo;
+	combined = "&PPU Viewer...\t" + combo;
 	ChangeMenuItemText(MENU_PPUVIEWER, combined);
 
 	//Open Hex editor
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENHEX]);
-	combined = "Hex Editor...\t" + combo;
+	combined = "&Hex Editor...\t" + combo;
 	ChangeMenuItemText(MENU_HEXEDITOR, combined);
 
 	//Open Trace Logger
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENTRACELOGGER]);
-	combined = "Trace Logger...\t" + combo;
+	combined = "&Trace Logger...\t" + combo;
 	ChangeMenuItemText(MENU_TRACELOGGER, combined);
 	
 	//Open Code/Data Logger
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
-	combined = "Code/Data Logger...\t" + combo;
+	combined = "&Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
 }
