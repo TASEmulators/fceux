@@ -67,10 +67,10 @@ static SCROLLINFO si;
 
 void RestoreSize(HWND hwndDlg)
 {
-	//As of the writing of this function (revision 1053) the Debugger default width = 821 and height of 523
+	//As of the writing of this function (revision 1137) the Debugger default width = 821 and height of 523
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
 	const int DEFAULT_WIDTH = 821;	//Original width
-	const int DEFAULT_HEIGHT = 523;	//Original height
+	const int DEFAULT_HEIGHT = 549;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOPMOST,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -179,7 +179,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char str[8]={0};
 	int tmp;
-
+				
 	switch(uMsg) {
 		case WM_INITDIALOG:
 			CenterWindow(hwndDlg);
@@ -187,7 +187,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_END,EM_SETLIMITTEXT,4,0);
 			if (WP_edit >= 0) {
 				SetWindowText(hwndDlg,"Edit Breakpoint...");
-
+						
 				sprintf(str,"%04X",watchpoint[WP_edit].address);
 				SetDlgItemText(hwndDlg,IDC_ADDBP_ADDR_START,str);
 				sprintf(str,"%04X",watchpoint[WP_edit].endaddress);
@@ -536,7 +536,15 @@ void UpdateDebugger()
 	sprintf(str, "%02X", PPU[3]);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SPR, str);
 
-	sprintf(str, "Scanline: %d", scanline);
+	extern int linestartts; FCEUI_DispMessage("linestartts = %d",linestartts);
+	#define GETLASTPIXEL    (PAL?((timestamp*48-linestartts)/15) : ((timestamp*48-linestartts)/16) )
+	
+	int ppupixel = GETLASTPIXEL;
+
+	if (ppupixel>999)
+		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
+
+	sprintf(str, "Scanline: %d, Pixel %d", scanline,ppupixel);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SLINE, str);
 
 	tmp = X.S|0x0100;
@@ -1233,6 +1241,34 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									UpdateRegs(hwndDlg);
 								}
 								FCEUI_Debugger().step = true;
+								FCEUI_SetEmulationPaused(0);
+								UpdateDebugger();
+								break;
+							case IDC_DEBUGGER_RUN_LINE:
+								if (FCEUI_EmulationPaused()) {
+									UpdateRegs(hwndDlg);
+								}
+								FCEUI_Debugger().runline = true;
+								{
+									uint64 ts=timestampbase;
+									ts+=timestamp;
+									ts+=341/3;
+									FCEUI_Debugger().runline_end_time=ts;
+								}
+								FCEUI_SetEmulationPaused(0);
+								UpdateDebugger();
+								break;
+							case IDC_DEBUGGER_RUN_FRAME2:
+								if (FCEUI_EmulationPaused()) {
+									UpdateRegs(hwndDlg);
+								}
+								FCEUI_Debugger().runline = true;
+								{
+									uint64 ts=timestampbase;
+									ts+=timestamp;
+									ts+=128*341/3;
+									FCEUI_Debugger().runline_end_time=ts;
+								}
 								FCEUI_SetEmulationPaused(0);
 								UpdateDebugger();
 								break;

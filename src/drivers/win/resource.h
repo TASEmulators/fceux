@@ -125,9 +125,12 @@
 #define BTN_CLEAR_AH                    114
 #define IDC_CHECK_LOG_NEW_INSTRUCTIONS  114
 #define IDD_DIALOG1                     114
+#define IDC_DEBUGGER_RUN_LINE           114
 #define LBL_AUTO_HOLD                   115
 #define IDC_CHECK_LOG_NEW_DATA          115
 #define IDD_DIALOG2                     115
+#define IDC_DEBUGGER_STEP_OUT3          115
+#define IDC_DEBUGGER_RUN_FRAME2         115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
 #define CHECK_SOUND_8BIT                122

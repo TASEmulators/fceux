@@ -691,7 +691,7 @@ static DECLFW(B4014)
 
 static uint8 *Pline,*Plinef;
 static int firsttile;  
-static int linestartts;
+int linestartts;	//no longer static so the debugger can see it
 static int tofix=0;
 
 static void ResetRL(uint8 *target)
