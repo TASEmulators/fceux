@@ -680,7 +680,7 @@ int main(int argc,char *argv[])
 		free(StateToLoad);
 		StateToLoad = NULL;
 	}
-	if(LuaToLoad);
+	if(GameInfo && LuaToLoad)
 	{
 		FCEU_LoadLuaCode(LuaToLoad);
 		free(LuaToLoad);
