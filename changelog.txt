@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-feb-2009 - adelikat - Increased lua gui.text height (and DrawTextTransWH() height)
 21-feb-2009 - adelikat - win32 - Lua - Added -lua commandline argment, loads a lua script on startup
 21-feb-2009 - adelikat - win32 - Debugger - Added pixel display after scanline display - Thanks to DWEdit for this patch
 21-feb-2009 - adelikat - win32 - Debugger - Added Run Line, Run 128 Lines buttons - Thanks to DWEdit for this patch

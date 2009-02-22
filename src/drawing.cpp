@@ -423,7 +423,7 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 				int c = (d >> (7-nx)) & 1;
 				if(c)
 				{
-					if(y+ny >= 18) goto textoverflow;
+					if(y+ny >= 62) goto textoverflow;
 					target[y+ny][x+nx] = 2;
 				}
 				else
@@ -434,7 +434,7 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 		if(x >= width) { x=beginx; y+=8; }
 	}
 textoverflow:
-	for(y=0; y<20; ++y)
+	for(y=0; y<62; ++y)			//Max border is 2, so the max safe y is 62 (since 64 is the max for the target array
 		for(x=0; x<width; ++x)
 		{
 			int offs = y*width+x;
