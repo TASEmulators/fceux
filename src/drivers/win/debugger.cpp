@@ -536,7 +536,7 @@ void UpdateDebugger()
 	sprintf(str, "%02X", PPU[3]);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SPR, str);
 
-	extern int linestartts; FCEUI_DispMessage("linestartts = %d",linestartts);
+	extern int linestartts;
 	#define GETLASTPIXEL    (PAL?((timestamp*48-linestartts)/15) : ((timestamp*48-linestartts)/16) )
 	
 	int ppupixel = GETLASTPIXEL;
