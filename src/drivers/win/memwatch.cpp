@@ -1060,14 +1060,14 @@ void CollapseWindow(void)
 		wrect.right = (wrect.right - ((wrect.right-wrect.left)/2));
 		MemWCollapsed = true;
 		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, ">"); //Put Address value
-		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "Expand to 2 columns");
+		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "&Expand to 2 columns");
 	}
 	else
 	{
 		wrect.right = (wrect.right + (wrect.right-wrect.left));
 		MemWCollapsed = false;
 		SetDlgItemText(hwndMemWatch, MEMW_EXPANDCOLLAPSE, "<"); //Put Address value
-		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "Collapse to 1 column");
+		ChangeMemwMenuItemText(MEMW_OPTIONS_EXPANDCOLLAPSE, "&Collapse to 1 column");
 	}
 	
 	SetWindowPos(hwndMemWatch,NULL,MemWatch_wndx,MemWatch_wndy,(wrect.right-wrect.left),(wrect.bottom-wrect.top),NULL);
