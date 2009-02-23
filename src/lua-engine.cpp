@@ -149,7 +149,10 @@ static void FCEU_LuaOnStop() {
 	gui_used = GUI_CLEAR;
 	if (wasPaused && !FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
-	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
+	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
+#ifdef WIN32										//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
+	FCEUD_TurboOff();	//Turn off turbo
+#endif
 }
 
 
@@ -282,11 +285,15 @@ static int fceu_speedmode(lua_State *L) {
 		luaL_error(L, "Invalid mode %s to FCEU.speedmode",mode);
 	
 	//printf("new speed mode:  %d\n", speedmode);
-        if (speedmode == SPEED_NORMAL) FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
-        else FCEUD_SetEmulationSpeed(EMUSPEED_FASTEST);
-
+        if (speedmode == SPEED_NORMAL) 
+			FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
+#ifdef WIN32
+        else if (speedmode == SPEED_TURBO)				//adelikat: Making turbo actually use turbo in Win32.
+			FCEUD_TurboOn();							//In Win32, turbo and max speed are two different results.  Turbo employs frame skipping and sound bypassing if mute turbo option is enabled.
+#endif													//This makes it faster but with frame skipping.  Therefore, maximum is still a useful feature, in case the user is recording an avi or making screenshots (or something else that needs all frames)
+		else											
+			FCEUD_SetEmulationSpeed(EMUSPEED_FASTEST);  //TODO: Make nothrottle turn off throttle, or remove the option
 	return 0;
-
 }
 
 
