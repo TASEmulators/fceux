@@ -1,6 +1,6 @@
 void UpdateMemWatch();
 void CreateMemWatch();
-void CloseMemoryWatch();
+bool CloseMemoryWatch();
 void AddMemWatch(char memaddress[32]);
 void RamChange();
 extern char * MemWatchDir;

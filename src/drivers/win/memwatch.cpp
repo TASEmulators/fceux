@@ -383,8 +383,8 @@ bool iftextchanged()
 		}
 		for(;j<LABELLENGTH;j++)
 		{
-		if(labels[i][j] != NULL)
-			return true;
+			if(labels[i][j] != NULL)
+				return true;
 		}
 	}
 	return false;
@@ -631,24 +631,34 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 		//TODO: Remove this file from the recent list
 }
 
-void CloseMemoryWatch()
+bool CloseMemoryWatch()
 {
+	int result = 0;	//Flag for asking to save changes
+
 	if(hwndMemWatch)
 	{
 		SaveStrings();
 
-		if (fileChanged==true)
+		if (fileChanged)
 		{
-			if(MessageBox(hwndMemWatch, "Save Changes?", "Memory Watch Settings", MB_YESNO)==IDYES)
+			result = MessageBox(hwndMemWatch, "Save Changes?", "Memory Watch Settings", MB_YESNOCANCEL);
+			if (result == IDYES)
 			{
 				SaveMemWatch();
+				DestroyWindow(hwndMemWatch);
+				hwndMemWatch=0;
+				return true;	//true = User did not choose to cancel operation
 			}
+			else if (result == IDNO)
+			{
+				DestroyWindow(hwndMemWatch);
+				hwndMemWatch=0;
+				return true;	//Don't run SaveMemWatch, but return true
+			}
+			else
+				return false;	//User requested cancel, so abort the attempt to close
 		}
-
-		DestroyWindow(hwndMemWatch);
-		hwndMemWatch=0;
 	}
-
 }
 
 //New File
@@ -764,8 +774,8 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		switch(LOWORD(wParam))
 		{
 		case MEMW_FILE_CLOSE:  
-			CloseMemoryWatch();
-			RamChangeInitialize = false;
+			if (CloseMemoryWatch())
+				RamChangeInitialize = false;
 			break;
 
 		case ACCEL_CTRL_O:
