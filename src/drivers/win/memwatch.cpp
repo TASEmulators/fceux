@@ -654,30 +654,26 @@ void CloseMemoryWatch()
 //New File
 void ClearAllText()
 {
+	//Ask to save changes first, if necessary
 	if (fileChanged==true) //If contents have changed
-		{
-			if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
-			{
-				SaveMemWatch();
-
-			}
-		}
-					
-					int i;
-					for(i=0;i<MWNUM;i++)
-					{
-						addresses[i][0] = 0;
-						labels[i][0] = 0;
-						SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
-						SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
-					}
-					//Now clear last file used variable (memwLastFilename)
-					for (int i=0;i<2048;i++)
-					{
-						memwLastFilename[i] = NULL;
-					}
-fileChanged = false;
-				
+	{
+		if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
+			SaveMemWatch();
+	}
+	//Clear all strings			
+	for(int i=0;i<MWNUM;i++)
+	{
+		addresses[i][0] = 0;
+		labels[i][0] = 0;
+		SetDlgItemText(hwndMemWatch,MW_ADDR(i),(LPTSTR) addresses[i]);
+		SetDlgItemText(hwndMemWatch,MW_NAME(i),(LPTSTR) labels[i]);
+	}
+	//Now clear last file used variable (memwLastFilename)
+	for (int i=0;i<2048;i++)
+		memwLastFilename[i] = NULL;
+	
+	//A new file, so file has not changed
+	fileChanged = false;				
 }
 
 static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
