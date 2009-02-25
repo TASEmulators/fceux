@@ -659,6 +659,7 @@ bool CloseMemoryWatch()
 				return false;	//User requested cancel, so abort the attempt to close
 		}
 	}
+	return true;
 }
 
 //New File
@@ -667,7 +668,10 @@ void ClearAllText()
 	//Ask to save changes first, if necessary
 	if (fileChanged==true) //If contents have changed
 	{
-		if(MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNO)==IDYES)
+		int result = MessageBox(hwndMemWatch, "Save Changes?", "Save", MB_YESNOCANCEL);
+		if(result==IDCANCEL)
+			return;
+		else if (result == IDYES)
 			SaveMemWatch();
 	}
 	//Clear all strings			
