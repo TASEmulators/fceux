@@ -1,5 +1,6 @@
 ---version 2.0.4 yet to be released---
-25-feb-2009 - adelikat - 2in32 - Memwatch - added cancel to save changes? message box
+01-mar-2009 - adelikat - win32 - Drag & Drop Lua files
+25-feb-2009 - adelikat - win32 - Memwatch - added cancel to save changes? message box
 22-feb-2009 - adelikat - win32 - Lua - made speedmode("turbo") turn on turbo (which employs frameskipping) rather than max speed
 22-feb-2009 - adelikat - Increased lua gui.text height (and DrawTextTransWH() height)
 21-feb-2009 - adelikat - win32 - Lua - Added -lua commandline argment, loads a lua script on startup

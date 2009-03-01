@@ -1046,6 +1046,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
 				}
 				//-------------------------------------------------------
+				//Check if Lua file
+				//-------------------------------------------------------
+				else if (!(fileDropped.find(".lua") == string::npos) && !(fileDropped.find(".lua") == string::npos))
+					FCEU_LoadLuaCode(ftmp);
+				//-------------------------------------------------------
 				//If not a movie, Load it as a ROM file
 				//-------------------------------------------------------
 				else
