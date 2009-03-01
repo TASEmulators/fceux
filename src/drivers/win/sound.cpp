@@ -414,10 +414,14 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_SOUND_RESTOREDEFAULTVOL),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,124),FALSE);
-		
-		
 	}
 	else 
 	{
@@ -427,7 +431,13 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_QUALITY),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,COMBO_SOUND_RATE),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_LATENCY_TRACKBAR),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,IDC_SOUND_RESTOREDEFAULTVOL),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,124),TRUE);
 	}
 }
