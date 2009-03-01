@@ -68,6 +68,12 @@
 #include <sstream>
 
 using namespace std;
+
+//----Context Menu - Some dynamically added menu items
+#define FCEUX_CONTEXT_UNHIDEMENU  60000
+#define FCEUX_CONTEXT_LOADLASTLUA 60001
+#define FCEUX_CONTEXT_STOPLUA	  60002
+
 //********************************************************************************
 //Globals
 //********************************************************************************
@@ -461,6 +467,24 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	else
 		EnableMenuItem(context,FCEUX_CONTEXT_RECENTROM1,MF_BYCOMMAND | MF_GRAYED);
 
+	//Add Lua separator if either lua condition is true (yeah, a little ugly but it works)
+	if (recent_lua[0] || luaRunning)
+		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
+
+	//If a recent lua file exists, add Load Last Lua
+	if (recent_lua[0])
+		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_LOADLASTLUA, "Load last Lua");
+		
+	//If lua is loaded, add a stop lua item
+	if (luaRunning)
+		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_STOPLUA, "Stop Lua script");
+
+	//If menu is hidden, add an Unhide menu option
+	if (tog)
+	{
+		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
+		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
+	}
 }
 
 /// Updates recent files / recent directories menu
@@ -1169,6 +1193,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_RUNLUASCRIPT:
 				FCEUD_LuaRunFrom(); 
 				break;
+			case FCEUX_CONTEXT_STOPLUA:
 			case ID_FILE_STOPLUASCRIPT:
 				FCEU_LuaStop();
 				break;
@@ -1221,6 +1246,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 						
 			//Config Menu-----------------------------------------------------------
+			case FCEUX_CONTEXT_UNHIDEMENU:
 			case MENU_HIDE_MENU:
 				ToggleHideMenu();
 				break;
@@ -1484,6 +1510,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEUX_CONTEXT_RECENTROM1:
 				if(recent_files[0])
 					ALoad(recent_files[0]);
+				break;
+
+			//Recent Lua 1
+			case FCEUX_CONTEXT_LOADLASTLUA:
+				if(recent_lua[0])
+					FCEU_LoadLuaCode(recent_lua[0]);
 				break;
 
 			//View comments and subtitles

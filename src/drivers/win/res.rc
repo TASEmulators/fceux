@@ -358,7 +358,7 @@ BEGIN
         MENUITEM "Open ROM",                    FCEU_CONTEXT_OPENROM
         MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
         MENUITEM SEPARATOR
-        MENUITEM "Help....",                    FCEU_CONTEXT_FCEUHELP
+        MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
     END
     POPUP "Game+Movie+readwrite"
     BEGIN
