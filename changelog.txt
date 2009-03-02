@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+02-mar-2009 - adelikat - win32 - Drag & Drop for Memwatch dialog (.txt files)
 01-mar-2009 - adelikat - win32 - Drag & Drop Lua files
 25-feb-2009 - adelikat - win32 - Memwatch - added cancel to save changes? message box
 22-feb-2009 - adelikat - win32 - Lua - made speedmode("turbo") turn on turbo (which employs frameskipping) rather than max speed

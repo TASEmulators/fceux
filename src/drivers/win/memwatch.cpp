@@ -777,6 +777,33 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	case WM_QUIT:
 		CloseMemoryWatch();
 		break;
+
+	case WM_DROPFILES:
+	{
+		unsigned int len;
+		char *ftmp;
+
+		len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+		if((ftmp=(char*)malloc(len))) 
+		{
+			DragQueryFile((HDROP)wParam,0,ftmp,len); 
+			string fileDropped = ftmp;
+			
+			//-------------------------------------------------------
+			//Check if .txt file
+			//-------------------------------------------------------
+			if (!(fileDropped.find(".txt") == string::npos))	 //ROM is already loaded and .txt in filename
+			{
+				if (GameInfo && !(fileDropped.find(".txt") == string::npos)) //.txt is at the end of the filename so that must be the extension
+				{
+					MemwAddRecentFile(ftmp);
+					OpenMemwatchRecentFile(0);
+				}
+			}
+		}            
+	}
+	break;
+
 	case WM_COMMAND:
 
 		//Menu Items

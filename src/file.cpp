@@ -483,7 +483,7 @@ static char *odirs[FCEUIOD__COUNT]={0,0,0,0,0,0,0,0,0,0,0,0,0};     // odirs, od
 
 void FCEUI_SetDirOverride(int which, char *n)
 {
-	//	FCEU_PrintError("odirs[%d]=%s->%s", which, odirs[which], n);
+		FCEU_PrintError("odirs[%d]=%s->%s", which, odirs[which], n);
 	if (which < FCEUIOD__COUNT)
 	{
 		odirs[which] = n;
