@@ -658,6 +658,11 @@ bool CloseMemoryWatch()
 			else
 				return false;	//User requested cancel, so abort the attempt to close
 		}
+		else	//File was not changed so just close
+		{
+			DestroyWindow(hwndMemWatch);
+			hwndMemWatch=0;
+		}
 	}
 	return true;
 }
