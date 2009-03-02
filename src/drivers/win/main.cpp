@@ -534,6 +534,8 @@ void do_exit()
 }
 
 //Puts the default directory names into the elements of the directory_names array that aren't already defined.
+//adelikat: commenting out this function, we don't need this.  This turns the idea of directory overrides to directory assignment
+/*
 void initDirectories()
 {
 	for (unsigned int i = 0; i < NUMBER_OF_DEFAULT_DIRECTORIES; i++)
@@ -558,6 +560,7 @@ void initDirectories()
 		strcpy(directory_names[NUMBER_OF_DIRECTORIES - 1], BaseDirectory.c_str());
 	}
 }
+*/
 #include "x6502.h"
 int main(int argc,char *argv[])
 {
@@ -596,11 +599,13 @@ int main(int argc,char *argv[])
 	
 	if (ConfigToLoad) cfgFile.assign(ConfigToLoad);
 
+	//initDirectories();
+
 	// Load the config information
 	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 	LoadConfig(TempArray);
 
-	initDirectories();
+
 
 	//Bleh, need to find a better place for this.
 	{

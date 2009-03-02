@@ -78,8 +78,7 @@ void CloseDirectoriesDialog(HWND hwndDlg)
 		}
 
 	}
-
-	initDirectories();
+	//initDirectories();	//adelikat 03/02/09 - commenting out.  This function fills in empty directory overrides, which is not what we want, we want the user to have the option of leaving them blank
 	CreateDirs();   // Create needed directories.
 	SetDirs();      // Set the directories in the core.
 

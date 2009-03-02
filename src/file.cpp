@@ -505,7 +505,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 	}
 	#endif
 
-std::string FCEU_GetPath(int type)
+std::string  FCEU_GetPath(int type)
 {
 	char ret[FILENAME_MAX];
 	switch(type)
@@ -526,8 +526,10 @@ std::string FCEU_GetPath(int type)
 			if(odirs[FCEUIOD_MEMW])
 				return (odirs[FCEUIOD_MEMW]);
 			else
-				return BaseDirectory + PSS + "tools";
+				return "";	//adelikat: 03/02/09 - return null so it defaults to last directory used
+				//return BaseDirectory + PSS + "tools";
 			break;
+		//adelikat: TODO: this no longer exist and could be removed (but that would require changing a lot of other directory arrays
 		case FCEUMKF_BBOT:
 			if(odirs[FCEUIOD_BBOT])
 				return (odirs[FCEUIOD_BBOT]);
@@ -538,7 +540,7 @@ std::string FCEU_GetPath(int type)
 			if(odirs[FCEUIOD_ROMS])
 				return (odirs[FCEUIOD_ROMS]);
 			else
-				return BaseDirectory;
+				return "";	//adelikat: removing base directory return, should return null it goes to last used directory
 			break;
 		case FCEUMKF_INPUT:
 			if(odirs[FCEUIOD_INPUT])
@@ -548,7 +550,8 @@ std::string FCEU_GetPath(int type)
 			break;
 		case FCEUMKF_LUA:
 			if(odirs[FCEUIOD_LUA])
-				return (odirs[FCEUIOD_LUA]);
+				return "";	//adelikat: 03/02/09 - return null so it defaults to last directory used
+				//return (odirs[FCEUIOD_LUA]);
 			else
 				return BaseDirectory + PSS + "tools";
 			break;
@@ -556,7 +559,8 @@ std::string FCEU_GetPath(int type)
 			if(odirs[FCEUIOD_AVI])
 				return (odirs[FCEUIOD_AVI]);
 			else
-				return BaseDirectory + PSS + "tools";
+				return "";		//adelikat - 03/02/09 - if no override, should return null and allow the last directory to be used intead
+				//return BaseDirectory + PSS + "tools";
 			break;
 	}
 

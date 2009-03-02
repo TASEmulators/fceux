@@ -865,9 +865,13 @@ void LoadNewGamey(HWND hParent, const char *initialdir)
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY; //OFN_EXPLORER|OFN_ENABLETEMPLATE|OFN_ENABLEHOOK;
-	std::string stdinitdir =FCEU_GetPath(FCEUMKF_ROMS);
-	ofn.lpstrInitialDir = initialdir ? initialdir : stdinitdir.c_str();
-
+	string stdinitdir =FCEU_GetPath(FCEUMKF_ROMS);
+	
+	if (initialdir)					//adelikat: If a directory is specified in the function parameter, it should take priority
+		ofn.lpstrInitialDir = initialdir;
+	else							//adelikat: Else just use the override, if no override it will default to 0 - last directory used.
+		ofn.lpstrInitialDir = stdinitdir.c_str();
+	
 	// Show the Open File dialog
 	if(GetOpenFileName(&ofn))
 	{
@@ -1913,7 +1917,7 @@ void FCEUD_AviRecordTo(void)
 		
 	std::string aviDirectory = FCEU_GetPath(21);  //21 = FCEUMKF_AVI
 	if (aviDirectory.find_last_of("\\") != (aviDirectory.size()-1))
-		aviDirectory.append("\\");			//if directory override has no / then add one
+		aviDirectory.append("\\");			//if directory override has no \ then add one
 
 	//if we are playing a movie, construct the filename from the current movie.
 	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
