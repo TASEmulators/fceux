@@ -333,7 +333,7 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		return FALSE;
 
 		case WM_COMMAND:
-			if(LOWORD(wParam) == BTN_CANCEL && HIWORD(wParam) == BN_CLICKED)
+			if(LOWORD(wParam) == BTN_CANCELED && HIWORD(wParam) == BN_CLICKED) //adelikat: changed BTN_CANCEL to BTN_CANCELED so that the esc key does not default to this button (so it can be assigned as a hotkey)
 			{
 				key = 0;
 

@@ -1,4 +1,6 @@
 ---version 2.0.4 yet to be released---
+04-mar-2009 - adelikat - win32 - Fix bug so that Escape can now be assigned as a hotkey
+03-mar-2009 - adelikat - win32 - Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug
 02-mar-2009 - adelikat - win32 - Drag & Drop for Memwatch dialog (.txt files)
 01-mar-2009 - adelikat - win32 - Drag & Drop Lua files
 25-feb-2009 - adelikat - win32 - Memwatch - added cancel to save changes? message box
