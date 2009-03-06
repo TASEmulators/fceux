@@ -938,7 +938,6 @@ bool FCEU_IsValidUI(EFCEUI ui)
 	case FCEUI_CLOSEGAME:
 		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
 		break;
-
 	case FCEUI_RECORDMOVIE:
 	case FCEUI_PLAYMOVIE:
 	case FCEUI_QUICKSAVE:

@@ -1637,7 +1637,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME)?MF_ENABLED:MF_GRAYED));
-		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && recent_files[0]) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when tasedit is not engaged
 		EnableMenuItem(fceumenu,MENU_OPEN_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
