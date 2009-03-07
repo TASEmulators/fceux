@@ -651,6 +651,16 @@ int movie_framecount(lua_State *L) {
 	return 1;
 }
 
+//int fceu.lagcount()
+//
+// Gets the current lag count
+int fceu_lagcount(lua_State *L) {
+
+	lua_pushinteger(L, FCEUI_GetLagCount());
+	return 1;
+}
+
+
 // string movie.mode()
 //
 //   "record", "playback" or nil
@@ -684,9 +694,6 @@ static int movie_stop(lua_State *L) {
 	return 0;
 
 }
-
-
-
 
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
@@ -1533,6 +1540,7 @@ static const struct luaL_reg fceulib [] = {
 	{"exec_time", fceu_exec_time},
 	{"setrenderplanes", fceu_setrenderplanes},
 	{"message", fceu_message},
+	{"lagcount", fceu_lagcount},
 	{NULL,NULL}
 };
 
