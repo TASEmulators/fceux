@@ -413,6 +413,35 @@ static int memory_register(lua_State *L) {
 }
 
 
+// table zapper.read 
+//int which unecessary because zapper is always controller 2
+//Reads the zapper coordinates and a click value (1 if clicked, 0 if not, 2 if right click (but this is not used for zapper input)
+static int zapper_read(lua_State *L){
+	
+	lua_newtable(L);
+	
+	extern void GetMouseData(uint32 (&md)[3]);
+
+	uint32 MouseData[3];
+	GetMouseData (MouseData);
+	int x = MouseData[0];
+	int y = MouseData[1];
+	int click = MouseData[2];		///adelikat TODO: remove the ability to store the value 2?  Since 2 is right-clicking and not part of zapper input and is used for context menus
+
+	FCEUI_DispMessage("X: %d Y: %d, Click: %d",x,y,click);
+
+	lua_pushinteger(L, x);
+	lua_setfield(L, -2, "x");
+	lua_pushinteger(L, y);
+	lua_setfield(L, -2, "y");
+	lua_pushinteger(L, click);
+	lua_setfield(L, -2, "click");	
+
+	return 1;
+}
+
+
+
 // table joypad.read(int which = 1)
 //
 //  Reads the joypads as inputted by the user.
@@ -1572,6 +1601,11 @@ static const struct luaL_reg joypadlib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg zapperlib[] = {
+	{"read", zapper_read},
+	{NULL,NULL}
+};
+
 static const struct luaL_reg savestatelib[] = {
 	{"create", savestate_create},
 	{"save", savestate_save},
@@ -1701,6 +1735,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 		luaL_register(L, "memory", memorylib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
+		luaL_register(L, "zapper", zapperlib);
 		luaL_register(L, "savestate", savestatelib);
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);

@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+08-mar-2009 - adelikat - Lua - added zapper.read() function
 07-mar-2009 - adelikat - Lua - added FCEU.lagcount() function
 04-mar-2009 - adelikat - win32 - Fix bug so that Escape can now be assigned as a hotkey
 03-mar-2009 - adelikat - win32 - Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug
