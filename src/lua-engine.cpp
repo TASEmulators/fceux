@@ -689,6 +689,12 @@ int fceu_lagcount(lua_State *L) {
 	return 1;
 }
 
+int fceu_lagged (lua_State *L) {
+
+	bool Lag_Frame = FCEUI_GetLagged();
+	lua_pushboolean(L, Lag_Frame);
+	return 1;
+}
 
 // string movie.mode()
 //
@@ -1570,6 +1576,7 @@ static const struct luaL_reg fceulib [] = {
 	{"setrenderplanes", fceu_setrenderplanes},
 	{"message", fceu_message},
 	{"lagcount", fceu_lagcount},
+	{"lagged", fceu_lagged},
 	{NULL,NULL}
 };
 

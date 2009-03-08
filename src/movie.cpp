@@ -426,6 +426,12 @@ int FCEUI_GetLagCount(void)
 	return lagCounter;
 }
 
+bool FCEUI_GetLagged(void)
+{
+	if (lagFlag) return true;
+	else return false;
+}
+
 bool FCEUMOV_ShouldPause(void)
 {
 	if(pauseframe && currFrameCounter == pauseframe)

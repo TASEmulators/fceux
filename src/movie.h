@@ -75,6 +75,7 @@ inline bool FCEUMOV_IsRecording() { return FCEUMOV_Mode(MOVIEMODE_RECORD); }
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
 int FCEUI_GetLagCount(void);
+bool FCEUI_GetLagged(void);
 
 int FCEUMOV_WriteState(std::ostream* os);
 bool FCEUMOV_ReadState(std::istream* is, uint32 size);
