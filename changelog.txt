@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+08-mar-2009 - adelikat - Lua - memory.readbyte will recognize frozen addresses
 08-mar-2009 - adelikat - Lua - added FCEU.lagged() function
 08-mar-2009 - adelikat - Lua - added zapper.read() function
 07-mar-2009 - adelikat - Lua - added FCEU.lagcount() function
