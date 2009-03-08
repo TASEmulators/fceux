@@ -428,8 +428,6 @@ static int zapper_read(lua_State *L){
 	int y = MouseData[1];
 	int click = MouseData[2];		///adelikat TODO: remove the ability to store the value 2?  Since 2 is right-clicking and not part of zapper input and is used for context menus
 
-	FCEUI_DispMessage("X: %d Y: %d, Click: %d",x,y,click);
-
 	lua_pushinteger(L, x);
 	lua_setfield(L, -2, "x");
 	lua_pushinteger(L, y);
