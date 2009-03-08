@@ -412,6 +412,191 @@ static int memory_register(lua_State *L) {
 	return 0;
 }
 
+//adelikat: table pulled from GENS.  credz nitsuja!
+
+#ifdef _WIN32
+const char* s_keyToName[256] =
+{
+	NULL,
+	"leftclick",
+	"rightclick",
+	NULL,
+	"middleclick",
+	NULL,
+	NULL,
+	NULL,
+	"backspace",
+	"tab",
+	NULL,
+	NULL,
+	NULL,
+	"enter",
+	NULL,
+	NULL,
+	"shift", // 0x10
+	"control",
+	"alt",
+	"pause",
+	"capslock",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"escape",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"space", // 0x20
+	"pageup",
+	"pagedown",
+	"end",
+	"home",
+	"left",
+	"up",
+	"right",
+	"down",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"insert",
+	"delete",
+	NULL,
+	"0","1","2","3","4","5","6","7","8","9",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	"A","B","C","D","E","F","G","H","I","J",
+	"K","L","M","N","O","P","Q","R","S","T",
+	"U","V","W","X","Y","Z",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"numpad0","numpad1","numpad2","numpad3","numpad4","numpad5","numpad6","numpad7","numpad8","numpad9",
+	"numpad*","numpad+",
+	NULL,
+	"numpad-","numpad.","numpad/",
+	"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12",
+	"F13","F14","F15","F16","F17","F18","F19","F20","F21","F22","F23","F24",
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	"numlock",
+	"scrolllock",
+	NULL, // 0x92
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, // 0xB9
+	"semicolon",
+	"plus",
+	"comma",
+	"minus",
+	"period",
+	"slash",
+	"tilde",
+	NULL, // 0xC1
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, // 0xDA
+	"leftbracket",
+	"backslash",
+	"rightbracket",
+	"quote",
+};
+#endif
+
+//adelikat - the code for the keys is copied directly from GENS.  Props to nitsuja
+//			 the code for the mouse is simply the same code from zapper.get
+// input.get()
+// takes no input, returns a lua table of entries representing the current input state,
+// independent of the joypad buttons the emulated game thinks are pressed
+// for example:
+//   if the user is holding the W key and the left mouse button
+//   and has the mouse at the bottom-right corner of the game screen,
+//   then this would return {W=true, leftclick=true, xmouse=319, ymouse=223}
+static int input_get(lua_State *L) {
+	lua_newtable(L);
+
+#ifdef _WIN32
+	// keyboard and mouse button status
+	{
+		extern int EnableBackgroundInput;
+		unsigned char keys [256];
+		if(!EnableBackgroundInput)
+		{
+			if(GetKeyboardState(keys))
+			{
+				for(int i = 1; i < 255; i++)
+				{
+					int mask = (i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL) ? 0x01 : 0x80;
+					if(keys[i] & mask)
+					{
+						const char* name = s_keyToName[i];
+						if(name)
+						{
+							lua_pushboolean(L, true);
+							lua_setfield(L, -2, name);
+						}
+					}
+				}
+			}
+		}
+		else // use a slightly different method that will detect background input:
+		{
+			for(int i = 1; i < 255; i++)
+			{
+				const char* name = s_keyToName[i];
+				if(name)
+				{
+					int active;
+					if(i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL)
+						active = GetKeyState(i) & 0x01;
+					else
+						active = GetAsyncKeyState(i) & 0x8000;
+					if(active)
+					{
+						lua_pushboolean(L, true);
+						lua_setfield(L, -2, name);
+					}
+				}
+			}
+		}
+	}
+	// mouse position in game screen pixel coordinates
+		
+	extern void GetMouseData(uint32 (&md)[3]);
+
+	uint32 MouseData[3];
+	GetMouseData (MouseData);
+	int x = MouseData[0];
+	int y = MouseData[1];
+	int click = MouseData[2];		///adelikat TODO: remove the ability to store the value 2?  Since 2 is right-clicking and not part of zapper input and is used for context menus
+
+	lua_pushinteger(L, x);
+	lua_setfield(L, -2, "x");
+	lua_pushinteger(L, y);
+	lua_setfield(L, -2, "y");
+	lua_pushinteger(L, click);
+	lua_setfield(L, -2, "click");		
+
+
+#else
+	// NYI (well, return an empty table)
+#endif
+
+	return 1;
+}
 
 // table zapper.read 
 //int which unecessary because zapper is always controller 2
@@ -1611,6 +1796,11 @@ static const struct luaL_reg zapperlib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg inputlib[] = {
+	{"get", input_get},
+	{NULL,NULL}
+};
+
 static const struct luaL_reg savestatelib[] = {
 	{"create", savestate_create},
 	{"save", savestate_save},
@@ -1741,6 +1931,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "zapper", zapperlib);
+		luaL_register(L, "input", inputlib);
 		luaL_register(L, "savestate", savestatelib);
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);
