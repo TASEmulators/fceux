@@ -1779,8 +1779,8 @@ int CreateMainWindow()
 	winclass.cbClsExtra = 0;
 	winclass.cbWndExtra = 0;
 	winclass.hInstance = fceu_hInstance;
-	winclass.hIcon = LoadIcon(fceu_hInstance, "ICON_1");
-	winclass.hIconSm = LoadIcon(fceu_hInstance, "ICON_1");
+	winclass.hIcon = LoadIcon(fceu_hInstance, "ICON_2");
+	winclass.hIconSm = LoadIcon(fceu_hInstance, "ICON_2");
 	winclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
 	winclass.lpszClassName = "FCEULTRA";
