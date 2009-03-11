@@ -476,6 +476,7 @@ SFORMAT FCEUCTRL_STATEINFO[]={
 	{ &ZD[1].bogo,	1, "ZBG1"},
 	{ &lagFlag,		1, "LAGF"},
 	{ &lagCounter,	4, "LAGC"},
+	{ &currFrameCounter, 4, "FRAM"},
 	{ 0 }
 };
 
