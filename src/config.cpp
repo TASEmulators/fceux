@@ -14,8 +14,14 @@ static char *aboutString = 0;
 ///returns a string suitable for use in an aboutbox
 char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
-	FCEU_NAME_AND_VERSION"\n\
-~CAST~\n\
+	"\t" FCEU_NAME_AND_VERSION "\n\n\
+Authors\n\
+zeromus, adelikat, CaH4e3\n\
+\n\
+FCEUX 2.0\n\
+qfox, _mz, nitsujrehtona, Lukas Sabota, SP\
+\n\n\
+Previous versions:\n\n\
 FCE - Bero\n\
 FCEU - Xodnizel\n\
 FCEU XD - Bbitmaster & Parasyte\n\
@@ -23,11 +29,6 @@ FCEU XD SP - Sebastian Porst\n\
 FCEU MM - CaH4e3\n\
 FCEU TAS - blip & nitsuja\n\
 FCEU TAS+ - Luke Gustafson\n\
-FCEUX\n\
- - SP, zeromus\n\
- - CaH4e3, Luke Gustafson, qfox\n\
- - adelikat, _mz, nitsujrehtona\n\
- - Lukas Sabota \n\
 \n\
 "__TIME__" "__DATE__"\n";
 

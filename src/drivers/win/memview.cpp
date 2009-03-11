@@ -1544,10 +1544,10 @@ void DoMemView() {
 		wndclass.hInstance     = fceu_hInstance;
 		wndclass.hIcon         = LoadIcon(fceu_hInstance, "ICON_1");
 		wndclass.hIconSm       = LoadIcon(fceu_hInstance, "ICON_1");
-		wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
-		wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH) ;
-		wndclass.lpszMenuName  = "MEMVIEWMENU" ; //TODO: add a menu
-		wndclass.lpszClassName = "MEMVIEW" ;
+		wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW);
+		wndclass.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
+		wndclass.lpszMenuName  = "MEMVIEWMENU";
+		wndclass.lpszClassName = "MEMVIEW";
 
 		if(!RegisterClassEx(&wndclass)) {FCEUD_PrintError("Error Registering MEMVIEW Window Class."); return;}
 

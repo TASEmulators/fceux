@@ -699,8 +699,7 @@ int TextHookerSaveTableFile(){
 	FP = fopen(nameo,"wb");
 	line = 0; //init the line counter
 
-	//char hex[2] = "00"; //holds the hex string to write
-	char hex[] = { 0 ,0 }; //adelikat changed ^ to this
+	char hex[] = { 0 ,0 };
 	
 	//write the table file to the file
 	for ( i = 0; i < 256; i++ ) { //go through each possible hex value
