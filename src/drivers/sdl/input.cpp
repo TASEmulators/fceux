@@ -559,7 +559,7 @@ do {                                              \
  * integers that store <x, y, button state>.
  */
 static void
-GetMouseData(uint32 *d)
+GetMouseData(uint32 (&d)[3])
 {
     int x,y;
     uint32 t;
