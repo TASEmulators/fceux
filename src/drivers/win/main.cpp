@@ -761,7 +761,7 @@ void _updateWindow()
 	PPUViewDoBlit();
 	UpdateMemoryView(0);
 	UpdateCDLogger();
-	//UpdateLogWindow();
+	//UpdateLogWindow();	//adelikat: Moved to FCEUI_Emulate
 	UpdateMemWatch();
 	NTViewDoBlit(0);
 	UpdateTasEdit();
