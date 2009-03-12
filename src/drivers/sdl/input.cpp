@@ -558,7 +558,7 @@ do {                                              \
  * Return the state of the mouse buttons.  Input 'd' is an array of 3
  * integers that store <x, y, button state>.
  */
-static void
+void // removed static for a call in lua-engine.cpp
 GetMouseData(uint32 (&d)[3])
 {
     int x,y;
