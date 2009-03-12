@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+11-mar-2009 - adelikat - Win32 - Trace Logger - changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping
 11-mar-2009 - adelikat - Added frame counter to savestates
 08-mar-2009 - adelikat - Lua - added input.get() function
 08-mar-2009 - adelikat - Lua - memory.readbyte will recognize frozen addresses

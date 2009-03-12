@@ -32,6 +32,12 @@
 #include "tracer.h"
 #include "memview.h"
 
+//Used to determine the current hotkey mapping for the pause key in order to display on the dialog
+#include "mapinput.h"
+#include "input.h"
+
+using namespace std;
+
 //#define LOG_SKIP_UNMAPPED 4
 //#define LOG_ADD_PERIODS 8
 
@@ -68,6 +74,12 @@ void EnableTracerMenuItems(void);
 int PromptForCDLogger(void);
 
 BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	//Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
+	string m1 = "Press " ;
+	string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+	string m3 = " to pause the game, or snap \r\nthe debugger to update this window.\r\n";
+	string message = m1+m2+m3;
+	
 	int i;
 	LOGFONT lf;
 	switch(uMsg) {
@@ -168,7 +180,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							//todo: if this gets unchecked then we need to clear out the window
 							log_update_window ^= 1;
 							if(!FCEUI_EmulationPaused() && !log_update_window) //mbg merge 7/19/06 changed to use EmulationPaused()
-								SetDlgItemText(hTracer, IDC_TRACER_LOG, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
+								SetDlgItemText(hTracer, IDC_TRACER_LOG, message.c_str());
 							//PauseLoggingSequence();
 							break;
 						case IDC_BTN_LOG_BROWSE:
@@ -218,6 +230,12 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 void BeginLoggingSequence(void){
+	//Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
+	string m1 = "Press ";
+	string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+	string m3 = " to pause the game, or snap \r\nthe debugger to update this window.\r\n";
+	string pauseMessage = m1 + m2 + m3;
+	
 	char str[2048], str2[100];
 	int i, j;
 
@@ -242,7 +260,7 @@ void BeginLoggingSequence(void){
 		}
 		sprintf(str2,"%d Bytes Allocated...\r\n",j*80);
 		strcat(str,str2);
-		strcat(str,"Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
+		strcat(str,pauseMessage.c_str());
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
 		tracelogbufpos = tracelogbufusedsize = 0;
 	}
