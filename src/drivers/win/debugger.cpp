@@ -541,10 +541,10 @@ void UpdateDebugger()
 	
 	int ppupixel = GETLASTPIXEL;
 
-	if (ppupixel>999)
+	if (ppupixel>341)	//maximum number of pixels per scanline
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
-	sprintf(str, "Scanline: %d, Pixel %d", scanline,ppupixel);
+	sprintf(str, "Scanline %d, PPU pixel %d", scanline,ppupixel);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SLINE, str);
 
 	tmp = X.S|0x0100;
