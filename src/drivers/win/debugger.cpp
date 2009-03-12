@@ -47,6 +47,8 @@ extern int myNumWPs;
 
 // ################################## End of SP CODE ###########################
 
+extern int vblankScanLines;
+
 int childwnd;
 
 extern readfunc ARead[0x10000];
@@ -544,7 +546,11 @@ void UpdateDebugger()
 	if (ppupixel>341)	//maximum number of pixels per scanline
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
-	sprintf(str, "Scanline %d, PPU pixel %d", scanline,ppupixel);
+	if (scanline == 240 && vblankScanLines < 22)
+		sprintf(str, "Scanline %d, PPU pixel %d", scanline+vblankScanLines,ppupixel);
+	else	
+		sprintf(str, "Scanline %d, PPU pixel %d", scanline,ppupixel);
+	
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SLINE, str);
 
 	tmp = X.S|0x0100;
@@ -1254,6 +1260,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									uint64 ts=timestampbase;
 									ts+=timestamp;
 									ts+=341/3;
+									//if (scanline == 240) vblankScanLines++;
+									//else vblankScanLines = 0;
 									FCEUI_Debugger().runline_end_time=ts;
 								}
 								FCEUI_SetEmulationPaused(0);
@@ -1270,6 +1278,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									ts+=timestamp;
 									ts+=128*341/3;
 									FCEUI_Debugger().runline_end_time=ts;
+									//if (scanline+128 >= 240 && scanline+128 <= 257) vblankScanLines = (scanline+128)-240;
+									//else vblankScanLines = 0;
 								}
 								FCEUI_SetEmulationPaused(0);
 								UpdateDebugger();

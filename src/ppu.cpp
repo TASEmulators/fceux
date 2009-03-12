@@ -68,7 +68,7 @@ static uint32 ppulut2[256];
 static uint32 ppulut3[128];
 
 PPUPHASE ppuphase;
-
+int test = 0;
 
 template<typename T, int BITS>
 struct BITREVLUT {
@@ -1680,9 +1680,11 @@ int FCEUPPU_Loop(int skip)
 				DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
 			}
+			
 			if(MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);
 			for(x=1,max=0,maxref=0;x<7;x++)
 			{
+				
 				if(deempcnt[x]>max)
 				{
 					max=deempcnt[x];
@@ -1852,7 +1854,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 			ppuphase = PPUPHASE_BG;
 
-			if(sl != 0) {
+			if(sl != 0) { 
 				DEBUG(FCEUD_UpdatePPUView(scanline=yp,1));
 				DEBUG(FCEUD_UpdateNTView(scanline=yp,1));
 			}

@@ -13,9 +13,9 @@
 #include "driver.h"
 #include "ppu.h"
 
-
-
 #include "x6502abbrev.h"
+
+int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
 
 int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
@@ -504,7 +504,7 @@ void BreakHit(bool force = false) {
 
 ///fires a breakpoint
 void breakpoint() {
-	int i;
+	int i; 
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
 
@@ -534,6 +534,7 @@ void breakpoint() {
 		return;
 	}
 	//if we're running for a scanline, we want to check if we've hit the cycle limit
+	
 	if (dbgstate.runline) {
 		uint64 ts = timestampbase;
 		ts+=timestamp;
@@ -611,8 +612,16 @@ void breakpoint() {
 
 int debug_tracing;
 
-
 void DebugCycle() {
+	
+	if (scanline == 240)
+	{
+		vblankScanLines = (timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508
+		//FCEUI_printf("ts: %d line: %d\n", timestamp, vblankScanLines); //Debug
+	}
+	else
+		vblankScanLines = 0;
+	
 	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak) 
 		breakpoint();
 	if(debug_loggingCD) LogCDData();
