@@ -16,7 +16,7 @@
 #include "x6502abbrev.h"
 
 int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
-
+int vblankPixel = 0;		//Used to calculate the pixels in vblank
 int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = 0;
@@ -617,6 +617,8 @@ void DebugCycle() {
 	if (scanline == 240)
 	{
 		vblankScanLines = (timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508
+		if (vblankScanLines) vblankPixel =  341 / vblankScanLines;	//314 pixels per scanline
+		//FCEUI_printf("vbPixel = %d",vblankPixel);					     //Debug
 		//FCEUI_printf("ts: %d line: %d\n", timestamp, vblankScanLines); //Debug
 	}
 	else

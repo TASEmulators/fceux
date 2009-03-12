@@ -48,6 +48,7 @@ extern int myNumWPs;
 // ################################## End of SP CODE ###########################
 
 extern int vblankScanLines;
+extern int vblankPixel;
 
 int childwnd;
 
@@ -547,7 +548,7 @@ void UpdateDebugger()
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
 	if (scanline == 240 && vblankScanLines < 22)
-		sprintf(str, "Scanline %d, PPU pixel %d", scanline+vblankScanLines,ppupixel);
+		sprintf(str, "Scanline %d, PPU pixel %d", scanline+vblankScanLines,vblankPixel);
 	else	
 		sprintf(str, "Scanline %d, PPU pixel %d", scanline,ppupixel);
 	
