@@ -761,7 +761,7 @@ void _updateWindow()
 	PPUViewDoBlit();
 	UpdateMemoryView(0);
 	UpdateCDLogger();
-	UpdateLogWindow();
+	//UpdateLogWindow();
 	UpdateMemWatch();
 	NTViewDoBlit(0);
 	UpdateTasEdit();

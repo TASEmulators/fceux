@@ -1243,6 +1243,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								FCEUI_Debugger().step = true;
 								FCEUI_SetEmulationPaused(0);
 								UpdateDebugger();
+								UpdateLogWindow();
 								break;
 							case IDC_DEBUGGER_RUN_LINE:
 								if (FCEUI_EmulationPaused()) {
@@ -1257,6 +1258,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								FCEUI_SetEmulationPaused(0);
 								UpdateDebugger();
+								UpdateLogWindow();
 								break;
 							case IDC_DEBUGGER_RUN_FRAME2:
 								if (FCEUI_EmulationPaused()) {
@@ -1271,6 +1273,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								FCEUI_SetEmulationPaused(0);
 								UpdateDebugger();
+								UpdateLogWindow();
 								break;
 							case IDC_DEBUGGER_STEP_OUT:
 								//mbg merge 7/18/06 changed pausing check and set
@@ -1285,7 +1288,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									//UpdateDebugger();
 								}
 								break;
-                                                        case IDC_DEBUGGER_STEP_OVER:
+							case IDC_DEBUGGER_STEP_OVER:
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
@@ -1296,6 +1299,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									}
 									else FCEUI_Debugger().step = true;
 									FCEUI_SetEmulationPaused(0);
+								UpdateLogWindow();
 								}
 								break;
 							case IDC_DEBUGGER_SEEK_PC:

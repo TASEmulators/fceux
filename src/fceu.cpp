@@ -63,6 +63,7 @@
 #include "drivers/win/cheat.h"
 #include "drivers/win/texthook.h"
 #include "drivers/win/memwatch.h"
+#include "drivers/win/tracer.h"
 #else
 #include "drivers/sdl/sdl.h"
 #endif
@@ -602,9 +603,11 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	if (skip != 2) ssize=FlushEmulateSound(); //If skip = 2 we are skipping sound processing
 	
 #ifdef WIN32
+	//These Windows only dialogs need to be updated only once per frame so they are included here
 	UpdateCheatList();
 	UpdateTextHooker();
 	RamChange();
+	UpdateLogWindow();
 	//FCEUI_AviVideoUpdate(XBuf);
 #endif
 
