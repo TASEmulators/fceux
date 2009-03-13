@@ -126,6 +126,9 @@ static void CloseGame(void)
 		delete GameInfo;
 		GameInfo = 0;
 
+		//Reset frame counter
+		currFrameCounter = 0;
+
 		//Reset flags for Undo/Redo/Auto Savestating
 		lastSavestateMade[0] = 0;
 		undoSS = false;
