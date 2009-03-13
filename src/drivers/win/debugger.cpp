@@ -547,8 +547,14 @@ void UpdateDebugger()
 	if (ppupixel>341)	//maximum number of pixels per scanline
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
+	//If not in the 0-239 pixel range, make special cases for display
 	if (scanline == 240 && vblankScanLines < 22)
-		sprintf(str, "Scanline %d, PPU pixel %d", scanline+vblankScanLines,vblankPixel);
+	{
+		if (scanline + vblankScanLines == 261)
+			sprintf(str, "Scanline -1, PPU pixel %d", vblankPixel);	//Pre-render
+		else
+			sprintf(str, "Scanline %d, PPU pixel %d", scanline+vblankScanLines,vblankPixel);
+	}
 	else	
 		sprintf(str, "Scanline %d, PPU pixel %d", scanline,ppupixel);
 	
