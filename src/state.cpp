@@ -669,7 +669,6 @@ bool FCEUSS_Load(const char *fname)
 	else
 	{
 		string fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
-		FCEUI_printf("%s",fn.c_str());
 		st=FCEUD_UTF8_fstream(fn,"rb");
 		strcpy(lastLoadstateMade,fn.c_str());
 	}
