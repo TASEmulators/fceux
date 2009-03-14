@@ -32,9 +32,9 @@ if os.environ.has_key('CXX'):
 if os.environ.has_key('WINDRES'):
   env.Replace(WINDRES = os.environ['WINDRES'])
 if os.environ.has_key('CFLAGS'):
-  env.Append(CCFLAGS = os.environ['CFLAGS'])
+  env.Append(CCFLAGS = os.environ['CFLAGS'].split())
 if os.environ.has_key('LDFLAGS'):
-  env.Append(LINKFLAGS = os.environ['LDFLAGS'])
+  env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
 
 print "platform: ", env['PLATFORM']
 
