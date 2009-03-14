@@ -191,18 +191,30 @@ static uint8 ReadGPVS(int w)
 
 static void UpdateGP(int w, void *data, int arg)
 {
-	if(w==0)
+	if(w==0)	//adelikat, 3/14/09: Changing the joypads to inclusive OR the user's joypad + the Lua joypad, this way lua only takes over the buttons it explicity says to
 	{
 		#ifdef _S9XLUA_H
-		joy[0]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr;
-		joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(2) : *(uint32 *)joyports[0].ptr >> 16;
+		//joy[0]= FCEU_LuaUsingJoypad(0) ? FCEU_LuaReadJoypad(0) : *(uint32 *)joyports[0].ptr;
+		joy[0]= FCEU_LuaUsingJoypad(0) ? (FCEU_LuaReadJoypad(0) | (*(uint32 *)joyports[0].ptr)) : *(uint32 *)joyports[0].ptr;
+		if (FCEU_LuaReadJoypadFalse(0))
+			joy[0] &= FCEU_LuaReadJoypadFalse(0);
+		//joy[2]= FCEU_LuaUsingJoypad(2) ? FCEU_LuaReadJoypad(2) : *(uint32 *)joyports[0].ptr >> 16;
+		joy[2]= FCEU_LuaUsingJoypad(2) ? (FCEU_LuaReadJoypad(2) | (*(uint32 *)joyports[0].ptr >> 16)) : *(uint32 *)joyports[0].ptr >> 16;
+		if (FCEU_LuaReadJoypadFalse(2))
+			joy[2] &= FCEU_LuaReadJoypadFalse(2);
 		#endif
 	}
 	else
 	{
 		#ifdef _S9XLUA_H
-		joy[1]= FCEU_LuaUsingJoypad(1) ? FCEU_LuaReadJoypad(1) : *(uint32 *)joyports[1].ptr >> 8;
-		joy[3]= FCEU_LuaUsingJoypad(3) ? FCEU_LuaReadJoypad(3) : *(uint32 *)joyports[1].ptr >> 24;
+		//joy[1]= FCEU_LuaUsingJoypad(1) ? FCEU_LuaReadJoypad(1) : *(uint32 *)joyports[1].ptr >> 8;
+		joy[1]= FCEU_LuaUsingJoypad(1) ? (FCEU_LuaReadJoypad(1) | (*(uint32 *)joyports[1].ptr >> 8)) : *(uint32 *)joyports[1].ptr >> 8;
+		if (FCEU_LuaReadJoypadFalse(1))
+			joy[1] &= FCEU_LuaReadJoypadFalse(1);
+		//joy[3]= FCEU_LuaUsingJoypad(3) ? FCEU_LuaReadJoypad(3) : *(uint32 *)joyports[1].ptr >> 24;
+		joy[3]= FCEU_LuaUsingJoypad(3) ? (FCEU_LuaReadJoypad(3) | (*(uint32 *)joyports[1].ptr >> 24)) : *(uint32 *)joyports[1].ptr >> 24;
+		if (FCEU_LuaReadJoypadFalse(3))
+			joy[3] &= FCEU_LuaReadJoypadFalse(3);
 		#endif
 	}
 

@@ -113,7 +113,9 @@ static int transparency;
 // Our joypads.
 static uint8 lua_joypads[4];
 static uint8 lua_joypads_used;
-
+//adelikat - adding these to generate the condition of false (previously false resulted in the "on" condition)
+static uint8 lua_joypads_false[4];
+static uint8 lua_joypads_used_false;
 
 static enum { GUI_USED_SINCE_LAST_DISPLAY, GUI_USED_SINCE_LAST_FRAME, GUI_CLEAR } gui_used = GUI_CLEAR;
 static uint8 *gui_data = NULL;
@@ -146,11 +148,12 @@ static const char *button_mappings[] = {
 static void FCEU_LuaOnStop() {
 	luaRunning = FALSE;
 	lua_joypads_used = 0;
+	lua_joypads_used_false = 0;
 	gui_used = GUI_CLEAR;
 	if (wasPaused && !FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
 	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
-								//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
+													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
 	FCEUD_TurboOff();	//Turn off turbo
 }
 
@@ -659,7 +662,7 @@ static int joypad_read(lua_State *L) {
 }
 
 
-// joypad.write(int which, table buttons)
+// joypad.set(int which, table buttons)
 //
 //   Sets the given buttons to be pressed during the next
 //   frame advance. The table should have the right 
@@ -680,11 +683,29 @@ static int joypad_set(lua_State *L) {
 	lua_joypads_used |= 1 << (which-1);
 	lua_joypads[which-1] = 0;
 
+	lua_joypads_used_false |= 1 << (which -1);
+	lua_joypads[which-1] = 0;
+
 	int i;
 	for (i=0; i < 8; i++) {
 		lua_getfield(L, 2, button_mappings[i]);
-		if (!lua_isnil(L,-1))
-			lua_joypads[which-1] |= 1 << i;
+		
+		//Button is not nil, so find out if it is true/false
+		if (!lua_isnil(L,-1))	
+		{
+			if (lua_toboolean(L,-1))        //True
+				lua_joypads[which-1] |= 1 << i;
+			else							//False
+			{
+				lua_joypads_false[which-1] = 1 << i;						//Create a false joypad to overlay on the regular input, 0's will result in turning off and overriding the input
+				lua_joypads_false[which-1] = ~lua_joypads_false[which-1];	//1's will mean it does not take control
+			}
+		}
+		//Button is nil, so leave that button blank
+		else
+		{
+
+		}
 		lua_pop(L,1);
 	}
 	
@@ -2069,6 +2090,8 @@ int FCEU_LuaUsingJoypad(int which) {
 	return lua_joypads_used & (1 << which);
 }
 
+//adelikat: TODO: should I have a FCEU_LuaUsingJoypadFalse?
+
 /**
  * Reads the buttons Lua is feeding for the given joypad, in the same
  * format as the OS-specific code.
@@ -2079,6 +2102,13 @@ int FCEU_LuaUsingJoypad(int which) {
 uint8 FCEU_LuaReadJoypad(int which) {
 	lua_joypads_used &= ~(1 << which);
 	return lua_joypads[which];
+}
+
+//adelikat: Returns the buttons that will be specifically set to false (as opposed to on or nil)
+//This will be used in input.cpp to &(and) against the input to override a button with a false value.  This is a work around to allow 3 conditions to be sent be lua, true, false, nil
+uint8 FCEU_LuaReadJoypadFalse(int which) {
+	lua_joypads_used_false &= ~(1 << which);
+	return lua_joypads_false[which];
 }
 
 /**
