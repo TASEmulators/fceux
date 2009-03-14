@@ -743,6 +743,9 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 		if(SFMDATA[x].desc)
 			free(SFMDATA[x].desc);
 	}
+	// adelikat, 3/14/09:  had to add this to clear out the size parameter.  NROM(mapper 0) games were having savestate crashes if loaded after a non NROM game	because the size variable was carrying over and causing savestates to save too much data
+	SFMDATA[0].s = 0;		
+	
 	SPreSave = PreSave;
 	SPostSave = PostSave;
 	SFEXINDEX=0;

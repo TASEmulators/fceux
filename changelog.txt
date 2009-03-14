@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+14-mar-2009 - adelikat - Fix major crash issue where NROM game savestates were writing erroneous information if a non NROM game was loaded prior
 13-mar-2009 - adelikat - Closing game / Opening new game resets the frame counter
 13-mar-2009 - adelikat - Win32 - Debugger - Scanlines and PPU Pixels are displayed even in vblank (lines 240-261)
 12-mar-2009 - shinydoofy - sdl - fixed compilation error and reactivated the mouse pointer in the SDL window
