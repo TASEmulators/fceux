@@ -975,10 +975,17 @@ static int movie_length (lua_State *L) {
 //FCEU.getreadonly
 //
 //returns true is emulator is in read-only mode, false if it is in read+wrte
-static int fceu_readonly (lua_State *L) {
+static int fceu_getreadonly (lua_State *L) {
 	lua_pushboolean(L, FCEUI_GetMovieToggleReadOnly());
 
 	return 1;
+}
+
+static int fceu_setreadonly (lua_State *L) {
+	bool which = (lua_toboolean( L, 1 ) == 1);
+	FCEUI_SetMovieToggleReadOnly(which);
+	
+	return 0;
 }
 
 // Common code by the gui library: make sure the screen array is ready
@@ -1828,7 +1835,8 @@ static const struct luaL_reg fceulib [] = {
 	{"message", fceu_message},
 	{"lagcount", fceu_lagcount},
 	{"lagged", fceu_lagged},
-	{"getreadonly", fceu_readonly},
+	{"getreadonly", fceu_getreadonly},
+	{"setreadonly", fceu_setreadonly},
 	{NULL,NULL}
 };
 

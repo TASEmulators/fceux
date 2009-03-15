@@ -1164,6 +1164,30 @@ bool FCEUI_GetMovieToggleReadOnly()
 	return movie_readonly;
 }
 
+void FCEUI_SetMovieToggleReadOnly(bool which)
+{
+	if (which)	//If set to readonly
+	{
+		if (!movie_readonly)	//If not already set
+		{
+			movie_readonly = true;
+			FCEU_DispMessage("Movie is now Read-Only.");
+		}
+		else					//Else restate message
+			FCEU_DispMessage("Movie is Read-Only.");
+	}
+	else		//If set to read+write
+	{
+		if (movie_readonly)		//If not already set
+		{
+			movie_readonly = false;
+			FCEU_DispMessage("Movie is now Read+Write.");
+		}
+		else					//Else restate message
+			FCEU_DispMessage("Movie is Read+Write.");
+	}
+}
+
 void FCEUI_MovieToggleReadOnly()
 {
 	if(movie_readonly)
