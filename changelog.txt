@@ -1,5 +1,5 @@
 ---version 2.0.4 yet to be released---
-15-mar-2009 - adelikat - Lua - added movie.rerecordcount() and movie.length()
+15-mar-2009 - adelikat - Lua - added movie.rerecordcount(), movie.length(), FCEU.getreadonly()
 14-mar-2009 - adelikat - Lua - added movie.active() - returns a bool value based on whether a movie is currently loaded
 14-mar-2009 - adelikat - Fixed Joypad.set, it uses 3 values instead of 2 now.  True will take control of a button and make it on, False will take control and make it off, and Nil will not take control (allowing the user to press the button)
 14-mar-2009 - adelikat - Fix major crash issue where NROM game savestates were writing erroneous information if a non NROM game was loaded prior
