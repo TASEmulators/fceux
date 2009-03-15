@@ -1004,6 +1004,16 @@ static int movie_getname (lua_State *L) {
 	return 1;
 }
 
+//movie.playbeginning
+//
+//calls the play movie from beginning function
+static int movie_playbeginning (lua_State *L) {
+
+	FCEUI_MoviePlayFromBeginning();
+
+	return 0;
+}
+
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
 	if (!gui_data)
@@ -1913,6 +1923,7 @@ static const struct luaL_reg movielib[] = {
 	{"length", movie_length},
 	{"rerecordcount", movie_rerecordcount},
 	{"getname", movie_getname},
+	{"playbeginning", movie_playbeginning},
 //	{"record", movie_record},
 //	{"playback", movie_playback},
 
