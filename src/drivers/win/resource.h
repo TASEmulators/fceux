@@ -405,6 +405,7 @@
 #define IDC_SOUNDS_RESTOREDEFAULTS      1199
 #define BTN_CANCELED                    1200
 #define ID_SOUND_TRITOP                 1201
+#define ID_SOUND_QUALITYNOTIFY          1202
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -688,7 +689,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
 #define _APS_NEXT_COMMAND_VALUE         40353
-#define _APS_NEXT_CONTROL_VALUE         1202
+#define _APS_NEXT_CONTROL_VALUE         1203
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

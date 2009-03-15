@@ -433,6 +433,9 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,133),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,134),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,135),FALSE);
+		//Static text boxes in volume group box
+		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_QUALITYNOTIFY),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_TRITOP),FALSE);
 	}
 	else 
 	{
@@ -457,6 +460,9 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,133),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
+		//Static text boxes in volume group box
+		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_QUALITYNOTIFY),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_TRITOP),TRUE);
 	}
 	
 	UpdateSoundChannelQualityMode(hwndDlg);
@@ -728,6 +734,8 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 		SetDlgItemText(hwndDlg, 133, "Square 2");
 		SetDlgItemText(hwndDlg, 134, "Noise");
 		SetDlgItemText(hwndDlg, 135, "PCM");
+		//Set quality message off
+		SetDlgItemText(hwndDlg, ID_SOUND_QUALITYNOTIFY, "");
 	}
 	else				//If low
 	{
@@ -746,6 +754,8 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 		SetDlgItemText(hwndDlg, 133, "Disabled");	//Set Square 2 to disabled
 		SetDlgItemText(hwndDlg, 134, "Disabled");	//Set Noise to disabled
 		SetDlgItemText(hwndDlg, 135, "Disabled");	//Set PCM to disabled
+		//Set quality message on
+		SetDlgItemText(hwndDlg, ID_SOUND_QUALITYNOTIFY, "(To enable these, use a higher quality setting)");
 	}
 
 	return;
