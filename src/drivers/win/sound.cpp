@@ -39,6 +39,10 @@ static int bits;
 
 OAKRA_Module_OutputDS *dsout;
 bool muteTurbo=false;
+
+//prototypes
+void UpdateSoundChannelQualityMode(HWND hwndDlg);	//Updates the sound channel volume sliders, disables and renames them for low quality
+
 //manages a set of small buffers which together work as one large buffer capable of resizing itsself and 
 //shrinking when a larger buffer is no longer necessary
 class BufferSet {
@@ -422,6 +426,13 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,IDC_SOUND_RESTOREDEFAULTVOL),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,124),FALSE);
+		//Slider group boxes
+		EnableWindow(GetDlgItem(hwndDlg,125),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,131),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,132),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,133),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,134),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,135),FALSE);
 	}
 	else 
 	{
@@ -439,7 +450,16 @@ static void UpdateSD(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,IDC_SOUND_RESTOREDEFAULTVOL),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,124),TRUE);
+		//Slider group boxes
+		EnableWindow(GetDlgItem(hwndDlg,125),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,131),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,132),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,133),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
 	}
+	
+	UpdateSoundChannelQualityMode(hwndDlg);
 }
 
 BOOL CALLBACK SoundConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -589,7 +609,7 @@ case WM_COMMAND:
 		case COMBO_SOUND_QUALITY:
 			soundquality=SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 			if(soundrate<44100) soundquality=0;
-			if (!turbo) FCEUI_SetSoundQuality(soundquality);	//If turbo is running, don't do this call, turbo will handle it instead
+			if (!turbo) FCEUI_SetSoundQuality(soundquality);	FCEUI_DispMessage("%d",soundquality);//If turbo is running, don't do this call, turbo will handle it instead
 			UpdateSD(hwndDlg);
 			break;
 		}
@@ -685,6 +705,51 @@ gornk:
 	}
 	return 0;
 }
+
+void UpdateSoundChannelQualityMode(HWND hwndDlg)
+{
+	//If high quality, enable all
+	//If low quality, we only have two sliders, sq1 and triangle, rename them and disable the others
+	
+	if (soundquality)	//If high or highest
+	{
+		//Enable sliders & corresponding group boxes
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),TRUE);
+		//Enable group boxes
+		EnableWindow(GetDlgItem(hwndDlg,133),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
+		//Set text for group boxes
+		SetDlgItemText(hwndDlg, 131, "Triangle");
+		SetDlgItemText(hwndDlg, 132, "Square 1");
+		SetDlgItemText(hwndDlg, 133, "Square 2");
+		SetDlgItemText(hwndDlg, 134, "Noise");
+		SetDlgItemText(hwndDlg, 135, "PCM");
+	}
+	else				//If low
+	{
+		//Disable sliders
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),FALSE);
+		//Disable group boxes
+		EnableWindow(GetDlgItem(hwndDlg,133),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,134),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,135),FALSE);
+		//Set text for group boxes
+		SetDlgItemText(hwndDlg, 131, "Tri/noise/pcm");
+		SetDlgItemText(hwndDlg, 132, "Square");
+		SetDlgItemText(hwndDlg, 133, "Disabled");	//Set Square 2 to disabled
+		SetDlgItemText(hwndDlg, 134, "Disabled");	//Set Noise to disabled
+		SetDlgItemText(hwndDlg, 135, "Disabled");	//Set PCM to disabled
+	}
+
+	return;
+}
+
+
 
 /// Shows the sounds configuration dialog.
 void ConfigSound()
