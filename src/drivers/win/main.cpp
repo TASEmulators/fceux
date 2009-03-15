@@ -623,6 +623,11 @@ int main(int argc,char *argv[])
 
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
+		FCEUI_SetTriangleVolume(soundTrianglevol);
+		FCEUI_SetSquare1Volume(soundSquare1vol);
+		FCEUI_SetSquare2Volume(soundSquare2vol);
+		FCEUI_SetNoiseVolume(soundNoisevol);
+		FCEUI_SetPCMVolume(soundPCMvol);
 	}
 	
 	//Since a game doesn't have to be loaded before the GUI can be used, make
