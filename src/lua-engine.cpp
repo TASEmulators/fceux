@@ -893,6 +893,9 @@ int fceu_lagcount(lua_State *L) {
 	return 1;
 }
 
+//fceu_lagged()
+//
+//Returns true if the game is currently on a lag frame
 int fceu_lagged (lua_State *L) {
 
 	bool Lag_Frame = FCEUI_GetLagged();
@@ -932,6 +935,16 @@ static int movie_stop(lua_State *L) {
 	FCEUI_StopMovie();
 	return 0;
 
+}
+
+// movie.active()
+//
+//returns a bool value is there is a movie currently opn
+int movie_active (lua_State *L) {
+
+	bool movieactive = (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying());
+	lua_pushboolean(L, movieactive);
+	return 1;
 }
 
 // Common code by the gui library: make sure the screen array is ready
@@ -1837,6 +1850,7 @@ static const struct luaL_reg movielib[] = {
 	{"mode", movie_mode},
 	{"rerecordcounting", movie_rerecordcounting},
 	{"stop", movie_stop},
+	{"active", movie_active},
 //	{"record", movie_record},
 //	{"playback", movie_playback},
 
