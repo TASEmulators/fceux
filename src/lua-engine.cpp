@@ -939,11 +939,36 @@ static int movie_stop(lua_State *L) {
 
 // movie.active()
 //
-//returns a bool value is there is a movie currently opn
+//returns a bool value is there is a movie currently open
 int movie_active (lua_State *L) {
 
 	bool movieactive = (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying());
 	lua_pushboolean(L, movieactive);
+	return 1;
+}
+
+//movie.rerecordcount()
+//
+//returns the rerecord count of the current movie
+static int movie_rerecordcount (lua_State *L) {
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+		luaL_error(L, "No movie loaded.");
+
+	lua_pushinteger(L, FCEUI_GetMovieRerecordCount());
+	
+	return 1;
+}
+
+//movie.length()
+//
+//returns an int value representing the total length of the current movie loaded
+
+static int movie_length (lua_State *L) {
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+		luaL_error(L, "No movie loaded.");
+
+	lua_pushinteger(L, FCEUI_GetMovieLength());
+
 	return 1;
 }
 
@@ -1851,6 +1876,8 @@ static const struct luaL_reg movielib[] = {
 	{"rerecordcounting", movie_rerecordcounting},
 	{"stop", movie_stop},
 	{"active", movie_active},
+	{"length", movie_length},
+	{"rerecordcount", movie_rerecordcount},
 //	{"record", movie_record},
 //	{"playback", movie_playback},
 

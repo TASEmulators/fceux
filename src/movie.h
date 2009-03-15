@@ -250,6 +250,8 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount = fa
 char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();
+int FCEUI_GetMovieLength();
+int FCEUI_GetMovieRerecordCount();
 void FCEUI_MovieToggleFrameDisplay();
 void FCEUI_ToggleInputDisplay(void);
 

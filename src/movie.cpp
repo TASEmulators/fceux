@@ -1149,6 +1149,16 @@ void FCEUI_ToggleInputDisplay(void)
 	}
 }
 
+int FCEUI_GetMovieLength()
+{
+	return currMovieData.records.size();
+}
+
+int FCEUI_GetMovieRerecordCount()
+{
+	return currMovieData.rerecordCount;
+}
+
 bool FCEUI_GetMovieToggleReadOnly()
 {
 	return movie_readonly;
