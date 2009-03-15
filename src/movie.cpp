@@ -1187,7 +1187,6 @@ void FCEUI_SetMovieToggleReadOnly(bool which)
 			FCEU_DispMessage("Movie is Read+Write.");
 	}
 }
-
 void FCEUI_MovieToggleReadOnly()
 {
 	if(movie_readonly)
@@ -1209,6 +1208,10 @@ void FCEUI_MoviePlayFromBeginning(void)
 	}
 }
 
+string FCEUI_GetMovieName(void)
+{
+	return curMovieFilename;
+}
 
 bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 {

@@ -981,11 +981,27 @@ static int fceu_getreadonly (lua_State *L) {
 	return 1;
 }
 
+//FCEU.setreadonly
+//
+//Sets readonly / read+write status
 static int fceu_setreadonly (lua_State *L) {
 	bool which = (lua_toboolean( L, 1 ) == 1);
 	FCEUI_SetMovieToggleReadOnly(which);
 	
 	return 0;
+}
+
+//movie.getname
+//
+//returns the filename of the movie loaded
+static int movie_getname (lua_State *L) {
+
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+		luaL_error(L, "No movie loaded.");
+	
+	std::string name = FCEUI_GetMovieName();
+	lua_pushstring(L, name.c_str());
+	return 1;
 }
 
 // Common code by the gui library: make sure the screen array is ready
@@ -1896,6 +1912,7 @@ static const struct luaL_reg movielib[] = {
 	{"active", movie_active},
 	{"length", movie_length},
 	{"rerecordcount", movie_rerecordcount},
+	{"getname", movie_getname},
 //	{"record", movie_record},
 //	{"playback", movie_playback},
 
