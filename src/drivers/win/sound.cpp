@@ -722,6 +722,7 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
 		//Set text for group boxes
+		SetDlgItemText(hwndDlg, ID_SOUND_TRITOP, "");	//Hacky, a static text box above the group box so I have more text space
 		SetDlgItemText(hwndDlg, 131, "Triangle");
 		SetDlgItemText(hwndDlg, 132, "Square 1");
 		SetDlgItemText(hwndDlg, 133, "Square 2");
@@ -739,7 +740,8 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,134),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,135),FALSE);
 		//Set text for group boxes
-		SetDlgItemText(hwndDlg, 131, "Tri/noise/pcm");
+		SetDlgItemText(hwndDlg, ID_SOUND_TRITOP, "Triangle/");	//Hacky, a static text box above the group box so I have more text space
+		SetDlgItemText(hwndDlg, 131, "noise/pcm");
 		SetDlgItemText(hwndDlg, 132, "Square");
 		SetDlgItemText(hwndDlg, 133, "Disabled");	//Set Square 2 to disabled
 		SetDlgItemText(hwndDlg, 134, "Disabled");	//Set Noise to disabled
