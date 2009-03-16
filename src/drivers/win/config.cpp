@@ -54,6 +54,7 @@ extern bool bindSavestate;
 extern int PPUViewRefresh;
 extern int NTViewRefresh;
 extern uint8 gNoBGFillColor;
+extern bool rightClickEnabled;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -239,6 +240,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(ClipSidesOffset),
 	AC(PPUViewRefresh),
 	AC(NTViewRefresh),
+	AC(rightClickEnabled),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };

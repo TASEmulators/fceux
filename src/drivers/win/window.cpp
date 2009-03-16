@@ -122,7 +122,10 @@ int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 int menuYoffset = 0;
-//Function Declarations
+
+bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
+
+//Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
 void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters a context menu item name
 
@@ -933,41 +936,44 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 	case WM_RBUTTONUP:
 	{
-		hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
+		if (rightClickEnabled)
+		{
+			hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
 
-		//If There is a movie loaded in read only
-		if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)
-		{
-			hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
-			whichContext = 0;
-		}
-		
-		//If there is a movie loaded in read+write
-		else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
-		{
-			hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
-			whichContext = 3;
-		}
+			//If There is a movie loaded in read only
+			if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)
+			{
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
+				whichContext = 0;
+			}
+			
+			//If there is a movie loaded in read+write
+			else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
+			{
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
+				whichContext = 3;
+			}
 
-		
-		//If there is a ROM loaded but no movie
-		else if (GameInfo)
-		{
-			hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
-			whichContext = 1;
+			
+			//If there is a ROM loaded but no movie
+			else if (GameInfo)
+			{
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
+				whichContext = 1;
+			}
+			
+			//Else no ROM
+			else
+			{
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
+				whichContext = 2;
+			}
+			UpdateContextMenuItems(hfceuxcontextsub, whichContext);
+			pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
+			pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
+			ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
+			TrackPopupMenu(hfceuxcontextsub,0,(pt.x),(pt.y),TPM_RIGHTBUTTON,hWnd,0);	//Create menu
 		}
-		
-		//Else no ROM
-		else
-		{
-			hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
-			whichContext = 2;
-		}
-		UpdateContextMenuItems(hfceuxcontextsub, whichContext);
-		pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
-		pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
-		ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
-		TrackPopupMenu(hfceuxcontextsub,0,(pt.x),(pt.y),TPM_RIGHTBUTTON,hWnd,0);	//Create menu
 	}
 
 	case WM_MOVE: 

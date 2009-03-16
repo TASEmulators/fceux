@@ -2,6 +2,8 @@
 #include "main.h"
 #include "gui.h"
 
+extern bool rightClickEnabled;	//Declared in window.cpp and only an extern here
+
 /**
 * Processes information from the GUI options dialog after
 * the dialog was closed.
@@ -40,6 +42,16 @@ void CloseGuiDialog(HWND hwndDlg)
 		goptions |= GOO_DISABLESS;
 	}
 
+	if(IsDlgButtonChecked(hwndDlg, CB_ENABLECONTEXTMENU)==BST_CHECKED)
+	{
+		rightClickEnabled = true;
+	}
+
+	else
+	{
+		rightClickEnabled = false;
+	}
+
 	EndDialog(hwndDlg,0);
 }
 
@@ -70,6 +82,11 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if(goptions & GOO_DISABLESS)
 			{
 				CheckDlgButton(hwndDlg, CB_DISABLE_SCREEN_SAVER, BST_CHECKED);
+			}
+
+			if(rightClickEnabled)
+			{
+				CheckDlgButton(hwndDlg, CB_ENABLECONTEXTMENU, BST_CHECKED);
 			}
 
 			CenterWindowOnScreen(hwndDlg);
