@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+#
+# GTK2 GUI for FCE UltraX
+#
+# Lukas Sabota <ltsmooth42 _at_ gmail _dot_ com>
+#
+# <http://fceux.com>
+
+from gfceux import main
+
+app = main.GfceuxApp()
+
+
