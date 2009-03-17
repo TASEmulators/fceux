@@ -558,11 +558,7 @@ class GfceuxApp:
     def gamepad_clicked_new(self, widget, data=None):
         widgets.get_object("gamepad_config_window").show_all()
 
-        d = {'gp1_button' : "0",
-            'gp2_button' : "1",
-            'gp3_button' : "2",
-            'gp4_button' : "3"}
-        self.gamepad_config_no = d[widget.name]
+       
 
 	"""
 #Disabled for now
@@ -597,6 +593,11 @@ class GfceuxApp:
                 cp.writeKey(d[widget.name], key_tuple[1])	
 	"""  
     def gamepad_clicked(self, widget, data=None):
+        d = {'gp1_button' : "1",
+            'gp2_button' : "2",
+            'gp3_button' : "3",
+            'gp4_button' : "4"}
+        self.gamepad_config_no = d[widget.name]
         command = '--inputcfg gamepad' + self.gamepad_config_no
         self.launch(command, True)
     

@@ -16,7 +16,7 @@ except ImportError:
 
 class KeyGrabber:
     """ KeyGrabber is a wrapper that gets an SDL key from the user using pygame """
-    def __init__(self, width=300, height=100):
+    def __init__(self, width=800, height=100):
         pygame.init()
         pygame.joystick.init()
         if pygame.joystick.get_count() > 0:
