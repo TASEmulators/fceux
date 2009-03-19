@@ -86,7 +86,7 @@ void KeyboardUpdateState(void)
 		else
 			keys_nr[i] = 0; // deactivate key
 
-	memcpy(keys,keys_nr,256);
+	memcpy(keys,keys_nr,sizeof(keys));
 
 	// key-down detection
 	for(int i = 0 ; i < 256 ; i++)
