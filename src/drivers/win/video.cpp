@@ -36,7 +36,7 @@ static int bpp;
 static int vflags;
 static int veflags;
 
-int disvaccel = 0;      //Disable video hardware acceleration.
+int disvaccel = 1;      //Disable video hardware acceleration.  1 by default (meaning disable in windowed but not Fullscreen)
 
 int fssync=0;
 int winsync=0;

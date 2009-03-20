@@ -120,7 +120,7 @@ int eoptions = EO_BGRUN | EO_FORCEISCALE;
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
 int soundrate = 44100;
 int soundbuftime = 50;
-int soundquality = 0;
+int soundquality = 1;
 
 //Sound volume controls (range 0-150 by 10's)j-----
 int soundvolume = 150;			//Master sound volume

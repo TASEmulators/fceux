@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+19-mar-2009 - adelikat - Win32 - make Video - windowed mode - disable hardware accel the default setting.  Made high quality sound the default setting.
 16-mar-2009 - adelikat - Win32 - GUI Dialog - added an option to disable the context menu
 15-mar-2009 - adelikat - Lua - added movie.rerecordcount(), movie.length(), movie.getname(), movie.playbeginning(), FCEU.getreadonly(), FCEU.setreadonly()
 14-mar-2009 - adelikat - Lua - added movie.active() - returns a bool value based on whether a movie is currently loaded
