@@ -15,8 +15,10 @@ static char *aboutString = 0;
 char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
 	"\t" FCEU_NAME_AND_VERSION "\n\n\
-Authors\n\
-zeromus, adelikat, CaH4e3\n\
+Authors:\n\
+zeromus, adelikat, CaH4e3\n\n\
+Contributers:\n\
+DWEdit,QFox\n\
 \n\
 FCEUX 2.0\n\
 qfox, _mz, nitsujrehtona, Lukas Sabota, SP\
