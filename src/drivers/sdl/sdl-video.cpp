@@ -371,7 +371,7 @@ InitVideo(FCEUGI *gi)
     if(gi->name) {
         SDL_WM_SetCaption((const char *)gi->name, (const char *)gi->name);
     } else {
-        SDL_WM_SetCaption("FCE UltraX","FCE Ultra");
+        SDL_WM_SetCaption(FCEU_NAME_AND_VERSION,"FCE Ultra");
     }
 
     // create the surface for displaying graphical messages
