@@ -80,10 +80,10 @@ char *DriverUsage="\
 --fullscreen   {0|1}   Enables full screen mode.\n\
 --clipsides    {0|1}   Clips left and rightmost 8 columns of pixels.\n\
 --noframe      {0|1}   Hides title bar and window decorations.\n\
---slstart    {0 - 239} Sets the first drawn emulated scanline.\n\
---special     {1 - 4}  Use special video scaling filters\n\
+--slstart    {0-239}   Sets the first drawn emulated scanline.\n\
+--special     {1-4}    Use special video scaling filters\n\
                           (1 = hq2x 2 = Scale2x 3 = hq3x 4 = Scale3x)\n\
---slend      {0 - 239} Sets the last drawn emulated scanline.\n\
+--slend      {0-239}   Sets the last drawn emulated scanline.\n\
 --ntsccolor    {0|1}   Emulates an NTSC TV's colors.\n\
 --hue           x      Sets hue for NTSC color emulation.\n\
 --tint          x      Sets tint for NTSC color emulation.\n\
@@ -92,7 +92,12 @@ char *DriverUsage="\
 --soundrate     x      Sets sound playback rate to x Hz.\n\
 --soundq       {0|1}   Enables high sound quality.\n\
 --soundbufsize  x      Sets sound buffer size to x ms.\n\
---volume     {0 - 100} Sets volume.\n\
+--volume      {0-100}  Sets volume.\n\
+--trianglevol {0-100}  Sets Triangle volume.\n\
+--square1vol  {0-100}  Sets Square 1 volume.\n\
+--square2vol  {0-100}  Sets Square 2 volume.\n\
+--noisevol    {0-100}  Sets Noise volume.\n\
+--pcmvol      {0-100}  Sets PCM volume.\n\
 --lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
 --soundrecord   f      Records sound to file f.\n\
 --input(1,2)    d      Set the input device for input 1 or 2.\n\

@@ -79,7 +79,7 @@ fillaudio(void *udata,
 int
 InitSound(FCEUGI *gi)
 {
-    int sound, soundrate, soundbufsize, soundvolume, soundq;
+    int sound, soundrate, soundbufsize, soundvolume, soundtrianglevolume, soundsquare1volume, soundsquare2volume, soundnoisevolume, soundpcmvolume, soundq;
     SDL_AudioSpec spec;
 
     g_config->getOption("SDL.Sound", &sound);
@@ -99,6 +99,11 @@ InitSound(FCEUGI *gi)
     g_config->getOption("SDL.SoundBufSize", &soundbufsize);
     g_config->getOption("SDL.SoundVolume", &soundvolume);
     g_config->getOption("SDL.SoundQuality", &soundq);
+    g_config->getOption("SDL.TriangleVolume", &soundtrianglevolume);
+    g_config->getOption("SDL.Square1Volume", &soundsquare1volume);
+    g_config->getOption("SDL.Square2Volume", &soundsquare2volume);
+    g_config->getOption("SDL.NoiseVolume", &soundnoisevolume);
+    g_config->getOption("SDL.PCMVolume", &soundpcmvolume);
 
     spec.freq = soundrate;
     spec.format = AUDIO_S16SYS;
@@ -128,6 +133,11 @@ InitSound(FCEUGI *gi)
     FCEUI_SetSoundVolume(soundvolume);
     FCEUI_SetSoundQuality(soundq);
     FCEUI_Sound(soundrate);
+    FCEUI_SetTriangleVolume(soundtrianglevolume);
+    FCEUI_SetSquare1Volume(soundsquare1volume);
+    FCEUI_SetSquare2Volume(soundsquare2volume);
+    FCEUI_SetNoiseVolume(soundnoisevolume);
+    FCEUI_SetPCMVolume(soundpcmvolume);
     return(1);
 }
 

@@ -116,6 +116,11 @@ InitConfig()
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
     config->addOption("volume", "SDL.SoundVolume", 100);
+    config->addOption("trianglevol", "SDL.TriangleVolume", 100);
+    config->addOption("square1vol", "SDL.Square1Volume", 100);
+    config->addOption("square2vol", "SDL.Square2Volume", 100);
+    config->addOption("noisevol", "SDL.NoiseVolume", 100);
+    config->addOption("pcmvol", "SDL.PCMVolume", 100);
     config->addOption("soundrate", "SDL.SoundRate", 11000);
     config->addOption("soundq", "SDL.SoundQuality", 1);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
