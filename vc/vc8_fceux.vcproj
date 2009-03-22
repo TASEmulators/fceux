@@ -411,6 +411,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\175.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\176.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\177.cpp"
 				>
 			</File>
@@ -559,6 +567,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\dance.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\datalatch.cpp"
 				>
 			</File>
@@ -644,6 +656,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\sachen.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\sc-127.cpp"
 				>
 			</File>
 			<File
