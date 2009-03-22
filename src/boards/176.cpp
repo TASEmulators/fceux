@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2009 CaH4e3
+ *  Copyright (C) 2007 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,54 +20,53 @@
 
 #include "mapinc.h"
 
-static uint8 reg[8];
-/*
+static uint8 prg, chr;
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
-static uint8 *CHRRAM=NULL;
-static uint32 CHRRAMSIZE;
-*/
 
 static SFORMAT StateRegs[]=
 {
-  {reg, 8, "REGS"},
+  {&prg, 1, "PRG"},
+  {&chr, 1, "CHR"},
   {0}
 };
 
 static void Sync(void)
 {
+  setprg8r(0x10,0x6000,0);
+  setprg32(0x8000,prg>>1);
+  setchr8(chr);
 }
 
-static DECLFW(MNNNWrite)
-{
+static DECLFW(M176Write1)
+{ 
+  prg = V;
+  Sync();
 }
 
-static void MNNNPower(void)
+static DECLFW(M176Write2)
+{ 
+  chr = V;
+  Sync();
+}
+
+static void M176Power(void)
 {
-//  SetReadHandler(0x6000,0x7fff,CartBR);
-// SetWriteHandler(0x6000,0x7fff,CartBW);
+  prg = ~0;
+  SetReadHandler(0x6000,0x7fff,CartBR);
+  SetWriteHandler(0x6000,0x7fff,CartBW);
   SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0x8000,0xFFFF,MNNNWrite);
+  SetWriteHandler(0x5ff1,0x5ff1,M176Write1);
+  SetWriteHandler(0x5ff2,0x5ff2,M176Write2);
+  Sync();
 }
 
-static void MNNNReset(void)
-{
-}
 
-/*
-static void MNNNClose(void)
+static void M176Close(void)
 {
   if(WRAM)
     FCEU_gfree(WRAM);
-  if(CHRRAM)
-    FCEU_gfree(CHRRAM);
-  WRAM=CHRRAM=NULL;
-}
-*/
-
-static void MNNNIRQHook(void)
-{
-  X6502_IRQBegin(FCEU_IQEXT);
+  WRAM=NULL;
 }
 
 static void StateRestore(int version)
@@ -75,29 +74,16 @@ static void StateRestore(int version)
   Sync();
 }
 
-void MapperNNN_Init(CartInfo *info)
+void Mapper176_Init(CartInfo *info)
 {
-  info->Reset=MNNNReset;
-  info->Power=MNNNPower;
-//  info->Close=MNNNClose;
-  GameHBIRQHook=MNNNIRQHook;
+  info->Power=M176Power;
+  info->Close=M176Close;
+
   GameStateRestore=StateRestore;
-/*
-  CHRRAMSIZE=8192;
-  CHRRAM=(uint8*)FCEU_gmalloc(CHRRAMSIZE);
-  SetupCartPRGMapping(0x10,CHRRAM,CHRRAMSIZE,1);
-  AddExState(CHRRAM, CHRRAMSIZE, 0, "WRAM");
-*/
-/*
+
   WRAMSIZE=8192;
   WRAM=(uint8*)FCEU_gmalloc(WRAMSIZE);
   SetupCartPRGMapping(0x10,WRAM,WRAMSIZE,1);
   AddExState(WRAM, WRAMSIZE, 0, "WRAM");
-  if(info->battery)
-  {
-    info->SaveGame[0]=WRAM;
-    info->SaveGameLen[0]=WRAMSIZE;
-  }
-*/
   AddExState(&StateRegs, ~0, 0, 0);
 }

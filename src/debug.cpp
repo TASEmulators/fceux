@@ -504,7 +504,7 @@ void BreakHit(bool force = false) {
 
 ///fires a breakpoint
 void breakpoint() {
-	int i; 
+	int i;
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
 

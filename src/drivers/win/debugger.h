@@ -38,7 +38,7 @@ public:
 	
 	HFONT hFixedFont;
 	static const int fixedFontWidth = 8;
-	static const int fixedFontHeight = 13;
+	static const int fixedFontHeight = 14;
 } *debugSystem;
 
 

@@ -1578,13 +1578,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 		if(wParam==SC_KEYMENU)
 		{
-			if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
+			if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
 				break;
 			if(lParam == VK_RETURN || fullscreen || tog) break;
 		}
 		goto proco;
 	case WM_SYSKEYDOWN:
-		if(GameInfo && InputType[2]==SIFC_FKB && cidisabled)
+		if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
 			break; // Hopefully this won't break DInput...
 
 		if(fullscreen || tog)
@@ -1592,6 +1592,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(wParam==VK_MENU)
 				break;
 		}
+
+        if(wParam==VK_F10)
+            break;			// 11.12.08 CH4 Disable F10 as System Key dammit
 
 		if(wParam == VK_RETURN)
 		{
@@ -1620,6 +1623,16 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				}
 				if(cidisabled)
 					break; // Hopefully this won't break DInput...
+			}
+			if(InputType[2]==SIFC_SUBORKB)
+			{
+				if(wParam==VK_SCROLL)
+				{
+					cidisabled^=1;
+					FCEUI_DispMessage("Subor Keyboard %sabled.",cidisabled?"en":"dis");
+				}
+				if(cidisabled)
+					break;
 			}
 		}
 		goto proco;

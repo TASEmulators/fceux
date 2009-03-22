@@ -101,8 +101,8 @@ void UpdateControls(HWND hwndDlg, unsigned int rule)
 
 BOOL updateResults(HWND hwndDlg, int rule)
 {
-	char buff[100];
-	char buff2[100];
+	char buff[0x100];
+	char buff2[0x100];
 	char input_buff[8] = { 0 };
 	
 	int chosen_rules[NUMBER_OF_RULES] = { 0 };

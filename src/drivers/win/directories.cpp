@@ -8,14 +8,16 @@
 void CloseDirectoriesDialog(HWND hwndDlg)
 {
 	// Update the information from the screenshot naming checkbox
-	if(IsDlgButtonChecked(hwndDlg, CHECK_SCREENSHOT_NAMES) == BST_CHECKED)
-	{
-		eoptions |= EO_SNAPNAME;
-	}
-	else
-	{
-		eoptions &= ~EO_SNAPNAME;
-	}
+	
+	// this variable isn't used at all, snap is always name-based
+	//if(IsDlgButtonChecked(hwndDlg, CHECK_SCREENSHOT_NAMES) == BST_CHECKED)
+	//{
+	//	eoptions |= EO_SNAPNAME;
+	//}
+	//else
+	//{
+	//	eoptions &= ~EO_SNAPNAME;
+	//}
 
 	RemoveDirs();   // Remove empty directories.
 
@@ -99,10 +101,11 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			}
 
 			// Check the screenshot naming checkbox if necessary
-			if(eoptions & EO_SNAPNAME)
-			{
-				CheckDlgButton(hwndDlg, CHECK_SCREENSHOT_NAMES, BST_CHECKED);
-			}
+			// this variable isn't used at all, snap is always name-based
+			//if(eoptions & EO_SNAPNAME)
+			//{
+			//	CheckDlgButton(hwndDlg, CHECK_SCREENSHOT_NAMES, BST_CHECKED);
+			//}
 
 			CenterWindowOnScreen(hwndDlg);
 

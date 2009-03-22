@@ -36,7 +36,7 @@ static void Sync(void)
     setchr8((((cmd^reg[2])>>3)&2)|(((cmd^reg[2])>>5)&1)); // 1991 DU MA Racing probably CHR bank sequence is WRONG, so it is possible to
                                                           // rearrange CHR banks for normal UNIF board and mapper 172 is unneccessary
   else
-  setchr8(reg[2]&3);
+    setchr8(reg[2]&3);
 }
 
 static DECLFW(UNL22211WriteLo)

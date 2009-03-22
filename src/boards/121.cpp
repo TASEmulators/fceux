@@ -28,7 +28,7 @@ static uint8 readbyte = 0;
 
 static DECLFW(M121Write)
 {
-  FCEU_printf("write: %04x:%04x\n",A&0xE003,V);
+//  FCEU_printf("write: %04x:%04x\n",A&0xE003,V);
   if((A&0xF003)==0x8003)
   {
 //    FCEU_printf("       prot write");
@@ -65,12 +65,12 @@ static uint8 prot_array[16] = { 0x83, 0x83, 0x42, 0x00 };
 static DECLFW(M121LoWrite)
 {
   EXPREGS[0] = prot_array[V&3];  // 0x100 bit in address seems to be switch arrays 0, 2, 2, 3 (Contra Fighter)
-  FCEU_printf("write: %04x:%04x\n",A,V);
+//  FCEU_printf("write: %04x:%04x\n",A,V);
 }
 
 static DECLFR(M121Read)
 { 
-  FCEU_printf("read:  %04x\n",A);
+//  FCEU_printf("read:  %04x\n",A);
   return EXPREGS[0];
 }
 

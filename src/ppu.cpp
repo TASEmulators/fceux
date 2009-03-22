@@ -388,8 +388,8 @@ void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = 0;
 
 #define CALL_PPUWRITE(A,V) (FFCEUX_PPUWrite?FFCEUX_PPUWrite(A,V):FFCEUX_PPUWrite_Default(A,V))
 
-//whether to use the new ppu
-int newppu=0;
+//whether to use the new ppu (new PPU doesn't handle MMC5 extra nametables at all
+int newppu = 0;
 //---------------
 
 static DECLFR(A2002)
@@ -1854,7 +1854,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 			ppuphase = PPUPHASE_BG;
 
-			if(sl != 0) { 
+			if(sl != 0) {
 				DEBUG(FCEUD_UpdatePPUView(scanline=yp,1));
 				DEBUG(FCEUD_UpdateNTView(scanline=yp,1));
 			}

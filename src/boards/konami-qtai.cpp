@@ -147,15 +147,18 @@ static void VRC5IRQ(int a)
     if(IRQCount&0x10000)
     {
       X6502_IRQBegin(FCEU_IQEXT);
-      IRQCount=IRQLatch;
+//      IRQCount=IRQLatch;
     }
   }
 }
 
 static void Mapper190_PPU(uint32 A)
 {
-  if(A<0x2000)
+  if(A>=0x2000)
+  {
+     setchr4r(0x10,0x0000,QTAINTRAM[A&0x1FFF]&1);
      setchr4r(0x10,0x1000,QTAINTRAM[A&0x1FFF]&1);
+  }
 //  else
 //     chrSync();
 }
@@ -219,7 +222,7 @@ void Mapper190_Init(CartInfo *info)
   GameStateRestore=StateRestore;
 
   MapIRQHook=VRC5IRQ;
-//  PPU_hook=Mapper190_PPU;
+  //PPU_hook=Mapper190_PPU;
 
   CHRRAM=(uint8*)FCEU_gmalloc(CHRSIZE);
   SetupCartCHRMapping(0x10,CHRRAM,CHRSIZE,1);

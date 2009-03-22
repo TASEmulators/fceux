@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -185,7 +185,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\7z.dll&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\7z.dll&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -410,15 +410,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\175.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\176.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\177.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\src\boards\178.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\src\boards\179.cpp"
 				>
 			</File>
 			<File
@@ -566,6 +570,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\dance.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\datalatch.cpp"
 				>
 			</File>
@@ -651,6 +659,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\sachen.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\sc-127.cpp"
 				>
 			</File>
 			<File
@@ -1706,8 +1718,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm &quot;$(OutDir)&quot;&#x0D;&#x0A;"
-								Outputs="$(OutDir)\fceux.chm"
+								CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\help\fceux.chm&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -1715,8 +1726,7 @@
 							>
 							<Tool
 								Name="VCCustomBuildTool"
-								CommandLine="copy /y ..\src\drivers\win\help\fceux.chm &quot;$(OutDir)&quot;&#x0D;&#x0A;"
-								Outputs="$(OutDir)\fceux.chm"
+								CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\help\fceux.chm&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 							/>
 						</FileConfiguration>
 					</File>
@@ -2481,8 +2491,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
-					Outputs="$(OutDir)\auxlib.lua"
+					CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\auxlib.lua&quot;  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -2490,8 +2499,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy /y  ..\src\auxlib.lua  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
-					Outputs="$(OutDir)\auxlib.lua"
+					CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\auxlib.lua&quot;  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
 				/>
 			</FileConfiguration>
 		</File>

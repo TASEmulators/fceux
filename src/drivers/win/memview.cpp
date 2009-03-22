@@ -846,7 +846,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	SCROLLINFO si;
 	int x, y, i, j;
 	int tempAddy;
-					RECT wrect;
+	RECT wrect;
 	const int MemFontWidth = debugSystem->fixedFontWidth;
 	const int MemFontHeight = debugSystem->fixedFontHeight;
 

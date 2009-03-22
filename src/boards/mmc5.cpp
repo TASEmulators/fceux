@@ -130,9 +130,9 @@ uint8 mmc5_PPURead(uint32 A) {
 
 
 
-// ETROM seems to have 16KB of WRAM, ELROM seems to have 8KB
+// ELROM seems to have 8KB of RAM
+// ETROM seems to have 16KB of WRAM
 // EWROM seems to have 32KB of WRAM
-
 
 cartdata MMC5CartList[]=
 {
@@ -864,8 +864,8 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery)
  MMC5HackSPMode=MMC5HackSPScroll=MMC5HackSPPage=0;
  Mapper5_ESI();
 
-	FFCEUX_PPURead = mmc5_PPURead;
-	FFCEUX_PPUWrite = mmc5_PPUWrite;
+ FFCEUX_PPURead = mmc5_PPURead;
+ FFCEUX_PPUWrite = mmc5_PPUWrite;
 }
 
 void Mapper5_Init(CartInfo *info)

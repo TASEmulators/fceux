@@ -5,7 +5,7 @@
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
-#define BTN_CANCEL                      2
+#define BTN_CANCEL                      800
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROMS                       100
 #define LBL_LOG_TEXT                    100
@@ -202,7 +202,7 @@
 #define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define BTN_NETMOO_CONNECT              250
 #define MENU_HIDE_MENU                  300
-#define CHECK_SCREENSHOT_NAMES          300
+//#define CHECK_SCREENSHOT_NAMES          300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
 #define IDC_LABEL_LENGTH                300

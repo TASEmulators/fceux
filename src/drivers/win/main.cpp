@@ -124,11 +124,11 @@ int soundquality = 1;
 
 //Sound volume controls (range 0-150 by 10's)j-----
 int soundvolume = 150;			//Master sound volume
-int soundTrianglevol = 100;		//Sound channel Triangle - volume control
-int soundSquare1vol = 100;		//Sound channel Square1 - volume control
-int soundSquare2vol = 100;		//Sound channel Square2 - volume control
-int soundNoisevol = 100;		//Sound channel Noise - volume control
-int soundPCMvol = 100;			//Sound channel PCM - volume control
+int soundTrianglevol = 256;		//Sound channel Triangle - volume control
+int soundSquare1vol = 256;		//Sound channel Square1 - volume control
+int soundSquare2vol = 256;		//Sound channel Square2 - volume control
+int soundNoisevol = 256;		//Sound channel Noise - volume control
+int soundPCMvol = 256;			//Sound channel PCM - volume control
 //-------------------------------------------------
 
 double saspectw = 1, saspecth = 1;
@@ -207,7 +207,7 @@ void SetDirs()
 		FCEUIOD_AVI,
 		FCEUIOD__COUNT};
 
-	FCEUI_SetSnapName((eoptions & EO_SNAPNAME)!=0);
+//	FCEUI_SetSnapName((eoptions & EO_SNAPNAME)!=0);
 
 	for(x=0; x < sizeof(jlist) / sizeof(*jlist); x++)
 	{

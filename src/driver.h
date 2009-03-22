@@ -84,7 +84,8 @@ void FCEUI_UseInputPreset(int preset);
 //New interface functions
 
 //0 to order screen snapshots numerically(0.png), 1 to order them file base-numerically(smb3-0.png).
-void FCEUI_SetSnapName(bool a);
+//this variable isn't used at all, snap is always name-based
+//void FCEUI_SetSnapName(bool a);
 
 //0 to keep 8-sprites limitation, 1 to remove it
 void FCEUI_DisableSpriteLimitation(int a);

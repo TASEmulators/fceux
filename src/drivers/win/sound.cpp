@@ -483,28 +483,28 @@ case WM_INITDIALOG:
 	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETTICFREQ,25,0);
 	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETPOS,1,150-soundvolume);
 	//Triangle
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETRANGE,1,MAKELONG(0,100));
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,100-soundTrianglevol);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETRANGE,1,MAKELONG(0,256));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETTICFREQ,32,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,256-soundTrianglevol);
 	//Square1
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETRANGE,1,MAKELONG(0,100));
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,100-soundSquare1vol);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETRANGE,1,MAKELONG(0,256));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETTICFREQ,32,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,256-soundSquare1vol);
 
 	//Square2
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETRANGE,1,MAKELONG(0,100));
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,100-soundSquare2vol);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETRANGE,1,MAKELONG(0,256));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETTICFREQ,32,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,256-soundSquare2vol);
 
 	//Noise
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETRANGE,1,MAKELONG(0,100));
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,100-soundNoisevol);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETRANGE,1,MAKELONG(0,256));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETTICFREQ,32,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,256-soundNoisevol);
 
 	//PCM
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETRANGE,1,MAKELONG(0,100));
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETTICFREQ,25,0);
-	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,100-soundPCMvol);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETRANGE,1,MAKELONG(0,256));
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETTICFREQ,32,0);
+	SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,256-soundPCMvol);
 
 	/* buffer size time trackbar */
 	SendDlgItemMessage(hwndDlg,CTL_LATENCY_TRACKBAR,TBM_SETRANGE,1,MAKELONG(15,200));
@@ -543,23 +543,23 @@ case WM_VSCROLL:
 				FCEUI_SetSoundVolume(soundvolume);
 				break;
 			case CTL_VOLUME_TRACKBAR_TRIANGLE:
-				soundTrianglevol=100-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_GETPOS,0,0);
+				soundTrianglevol=256-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_GETPOS,0,0);
 				FCEUI_SetTriangleVolume(soundTrianglevol);
 				break;
 			case CTL_VOLUME_TRACKBAR_SQUARE1:
-				soundSquare1vol=100-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_GETPOS,0,0);
+				soundSquare1vol=256-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_GETPOS,0,0);
 				FCEUI_SetSquare1Volume(soundSquare1vol);
 				break;
 			case CTL_VOLUME_TRACKBAR_SQUARE2:
-				soundSquare2vol=100-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_GETPOS,0,0);
+				soundSquare2vol=256-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_GETPOS,0,0);
 				FCEUI_SetSquare2Volume(soundSquare2vol);
 				break;
 			case CTL_VOLUME_TRACKBAR_NOISE:
-				soundNoisevol=100-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_GETPOS,0,0);
+				soundNoisevol=256-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_GETPOS,0,0);
 				FCEUI_SetNoiseVolume(soundNoisevol);
 				break;
 			case CTL_VOLUME_TRACKBAR_PCM:
-				soundPCMvol=100-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_GETPOS,0,0);
+				soundPCMvol=256-SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_GETPOS,0,0);
 				FCEUI_SetPCMVolume(soundPCMvol);
 				break;
 			default:
@@ -675,18 +675,18 @@ case WM_COMMAND:
 		case IDC_SOUND_RESTOREDEFAULTVOL:
 			//Restore default values
 			soundvolume = 150;
-			soundTrianglevol = 100;		
-			soundSquare1vol = 100;	
-			soundSquare2vol = 100;
-			soundNoisevol = 100;
-			soundPCMvol = 100;
+			soundTrianglevol = 256;		
+			soundSquare1vol = 256;	
+			soundSquare2vol = 256;
+			soundNoisevol = 256;
+			soundPCMvol = 256;
 			//Update trackbars
 			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR,TBM_SETPOS,1,150-soundvolume);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,100-soundTrianglevol);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,100-soundSquare1vol);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,100-soundSquare2vol);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,100-soundNoisevol);
-			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,100-soundPCMvol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_TRIANGLE,TBM_SETPOS,1,256-soundTrianglevol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE1,TBM_SETPOS,1,256-soundSquare1vol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2,TBM_SETPOS,1,256-soundSquare2vol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE,TBM_SETPOS,1,256-soundNoisevol);
+			SendDlgItemMessage(hwndDlg,CTL_VOLUME_TRACKBAR_PCM,TBM_SETPOS,1,256-soundPCMvol);
 
 			//Set sound volumes
 			FCEUI_SetSoundVolume(soundvolume);

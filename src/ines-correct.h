@@ -242,7 +242,7 @@
    {0x22d6d5bd,4,1},
    {0x6a03d3f3,114,-1},
    
-   {0x02c41438,179,-1}, /* Xing He Zhan Shi (C) */
+   {0x02c41438,176,-1}, /* Xing He Zhan Shi (C) */
    
    {0x0da5e32e,101,-1}, /* new Uruusey Yatsura */
    {0x4f2f1846,-1,1}, /* Famista '89 - Kaimaku Han!! (J) */

@@ -92,7 +92,8 @@ typedef struct {
 	int UsrFirstSLine[2];
 	int UsrLastSLine[2];
 	
-	int SnapName;
+	//this variable isn't used at all, snap is always name-based
+	//bool SnapName;
 	uint32 SndRate;
 	int soundq;
 	int lowpass;

@@ -22,10 +22,10 @@ static struct
 	int key;
 } DefaultCommandMapping[]=
 {
-	{ EMUCMD_RESET, 					SCAN_R | CMD_KEY_CTRL },
+	{ EMUCMD_RESET, 					SCAN_R | CMD_KEY_CTRL, },
 	{ EMUCMD_PAUSE, 					SCAN_PAUSE, },
 	{ EMUCMD_FRAME_ADVANCE, 			SCAN_BACKSLASH, },
-	{ EMUCMD_SCREENSHOT,				SCAN_F12 },
+	{ EMUCMD_SCREENSHOT,				SCAN_F12, },
 	{ EMUCMD_HIDE_MENU_TOGGLE,			SCAN_ESCAPE },
 	{ EMUCMD_SPEED_SLOWER, 				SCAN_MINUS, }, 
 	{ EMUCMD_SPEED_FASTER, 				SCAN_EQUAL, },
@@ -65,11 +65,11 @@ static struct
 	{ EMUCMD_LOAD_STATE_SLOT_7, 		SCAN_F7, },
 	{ EMUCMD_LOAD_STATE_SLOT_8, 		SCAN_F8, },
 	{ EMUCMD_LOAD_STATE_SLOT_9, 		SCAN_F9, },
-	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, SCAN_R | CMD_KEY_SHIFT		},
-	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | CMD_KEY_SHIFT		},
-	{ EMUCMD_OPENROM,					SCAN_O | CMD_KEY_CTRL	    },
-	{ EMUCMD_CLOSEROM,					SCAN_W | CMD_KEY_CTRL		},
-	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | CMD_KEY_CTRL		},
+	{ EMUCMD_MOVIE_PLAY_FROM_BEGINNING, SCAN_R | CMD_KEY_SHIFT,		},
+	{ EMUCMD_SCRIPT_RELOAD,				SCAN_L | CMD_KEY_SHIFT,		},
+	{ EMUCMD_OPENROM,					SCAN_O | CMD_KEY_CTRL,	    },
+	{ EMUCMD_CLOSEROM,					SCAN_W | CMD_KEY_CTRL,		},
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | CMD_KEY_CTRL,		},
 };
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))
@@ -333,21 +333,21 @@ BOOL CALLBACK ChangeInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 		return FALSE;
 
 		case WM_COMMAND:
-			if(LOWORD(wParam) == BTN_CANCELED && HIWORD(wParam) == BN_CLICKED) //adelikat: changed BTN_CANCEL to BTN_CANCELED so that the esc key does not default to this button (so it can be assigned as a hotkey)
+			switch(LOWORD(wParam))	 // CaH4e3: BN_CLICKED redundant define removed since it always 0, Esc mapping used to be handled as well (I need it too :))
 			{
-				key = 0;
-
-				// Send quit message.
-				PostMessage(hwndDlg, WM_USER + 1, 0, 0);
+				case BTN_CANCEL:
+					key = 0;
+					// Send quit message.
+					PostMessage(hwndDlg, WM_USER + 1, 0, 0);
+					break;
+				case BTN_CLEAR:
+					key = -1;
+					// Send quit message.
+					PostMessage(hwndDlg, WM_USER + 1, 0, 0);
+					break;
+				default:
+					break;
 			}
-			else if(LOWORD(wParam) == BTN_CLEAR && HIWORD(wParam) == BN_CLICKED)
-			{
-				key = -1;
-
-				// Send quit message.
-				PostMessage(hwndDlg, WM_USER+1, 0, 0);
-			}
-
 			break;
 
 		case WM_USER:
@@ -700,7 +700,7 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 				EndDialog(hwndDlg, 1);
 				return TRUE;
 
-			case IDCANCEL:
+			case BTN_CANCEL:  // here true cause of ESC button handling as EXIT ;)
 				EndDialog(hwndDlg, 0);
 				return TRUE;
 

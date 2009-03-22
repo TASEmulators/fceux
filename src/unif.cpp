@@ -433,6 +433,9 @@ static BMAPPING bmap[] = {
 	{ "DREAMTECH01", DreamTech01_Init,0},
 	{ "KONAMI-QTAI", Mapper190_Init,0},
 
+ { "DANCE", UNLDANCE_Init,0},
+ { "SC-127", UNLSC127_Init,0},
+
 	{ "TEK90", Mapper90_Init,0},
 
  { "COPYFAMI_MMC3", MapperCopyFamiMMC3_Init,0},

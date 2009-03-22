@@ -213,7 +213,9 @@ enum EMUCMD
 	//-----------------------------
 	EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,
 	EMUCMD_MISC_UNDOREDOSAVESTATE,
-	EMUCMD_MAX
+	EMUCMD_MAX,
+	//For campatibility with old configuration files
+	EMUCMD_EXIT
 };
 
 enum EMUCMDTYPE

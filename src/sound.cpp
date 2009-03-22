@@ -546,7 +546,7 @@ void RDoPCM(void)
  uint32 V; //mbg merge 7/17/06 made uint32
 
  for(V=ChannelBC[4];V<SOUNDTS;V++)
-  WaveHi[V]+=(((RawDALatch<<16)/100) * FSettings.PCMVolume)&(~0xFFFF);
+  WaveHi[V]+=(((RawDALatch<<16)/256) * FSettings.PCMVolume)&(~0xFFFF); // TODO get rid of floating calculations to binary. set log volume scaling. 
  ChannelBC[4]=SOUNDTS;
 }
 
@@ -554,7 +554,7 @@ void RDoPCM(void)
 static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
 {
    int32 V;
-   int32 amp;
+   int32 amp, ampx;
    int32 rthresh;
    int32 *D;
    int32 currdc;
@@ -575,8 +575,8 @@ static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
    
    //Modify Square wave volume based on channel volume modifiers
    //adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
-   if (x && FSettings.Square2Volume != 100) amp = (amp * FSettings.Square2Volume) / 100; //&& FSettings.Sqauare2 added to save processing power if volume is at default
-   else if (FSettings.Square1Volume != 100) amp = (amp * FSettings.Square1Volume) / 100;
+   ampx = x ? FSettings.Square1Volume : FSettings.Square2Volume; // TODO OPTIMIZE ME!
+   if (ampx != 256) amp = (amp * ampx) / 256; // CaH4e3: fixed - setting up maximum volume for square2 caused complete mute square2 channel
          
    amp<<=24;
 
@@ -624,7 +624,7 @@ static void RDoSQLQ(void)
 {
    int32 start,end;    
    int32 V;
-   int32 amp[2];
+   int32 amp[2], ampx;
    int32 rthresh[2];
    int32 freq[2];
    int x;
@@ -657,7 +657,8 @@ static void RDoSQLQ(void)
 
 	//Modify Square wave volume based on channel volume modifiers
 	//adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
-	if (FSettings.Square1Volume != 100) amp[x] = (amp[x] * FSettings.Square1Volume) / 100; //&& FSettings.Sqauare2 added to save processing power if volume is at default
+    ampx = x ? FSettings.Square1Volume : FSettings.Square2Volume;  // TODO OPTIMIZE ME!
+    if (ampx != 256) amp[x] = (amp[x] * ampx) / 256; // CaH4e3: fixed - setting up maximum volume for square2 caused complete mute square2 channel
 
     if(!inie[x]) amp[x]=0;    /* Correct? Buzzing in MM2, others otherwise... */
 
@@ -721,7 +722,7 @@ static void RDoTriangle(void)
 {
  uint32 V; //mbg merge 7/17/06 made uitn32
  int32 tcout;
- 
+
  tcout=(tristep&0xF);
  if(!(tristep&0x10)) tcout^=0xF;
  tcout=(tcout*3) << 16;  //(tcout<<1);
@@ -733,7 +734,7 @@ static void RDoTriangle(void)
   while(count--)
   {
    //Modify volume based on channel volume modifiers
-   *start += (tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
+   *start += (tcout/256*FSettings.TriangleVolume)&(~0xFFFF);  // TODO OPTIMIZE ME NOW DAMMIT!
    start++;
   }
   //for(V=ChannelBC[2];V<SOUNDTS;V++)
@@ -743,7 +744,7 @@ static void RDoTriangle(void)
   for(V=ChannelBC[2];V<SOUNDTS;V++)
   {
     //Modify volume based on channel volume modifiers
-	WaveHi[V]+=(tcout/100*FSettings.TriangleVolume)&(~0xFFFF);
+	WaveHi[V]+=(tcout/256*FSettings.TriangleVolume)&(~0xFFFF);  // TODO OPTIMIZE ME!
     wlcount[2]--;
     if(!wlcount[2])
     {
@@ -792,9 +793,9 @@ static void RDoTriangleNoisePCMLQ(void)
    else
     amptab[0]=EnvUnits[2].decvolume;
 
-   //Modify Square wave volume based on channel volume modifiers
+   //Modify Square wave volume based on channel volume modifiers 
    //adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
-   if (FSettings.TriangleVolume != 100) amptab[0] = (amptab[0] * FSettings.TriangleVolume) / 100; //&& FSettings.Sqauare2 added to save processing power if volume is at default
+   if (FSettings.TriangleVolume != 256) amptab[0] = (amptab[0] * FSettings.TriangleVolume) / 256;  // TODO OPTIMIZE ME!
    
    amptab[1]=0;
    amptab[0]<<=1;
@@ -905,7 +906,7 @@ static void RDoNoise(void)
 
  //Modfiy Noise channel volume based on channel volume setting
  //adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
- if (FSettings.NoiseVolume != 100) amptab[0] = (amptab[0] * FSettings.NoiseVolume) / 100; //if() to save processing power if volume modifier is the default setting
+ if (FSettings.NoiseVolume != 256) amptab[0] = (amptab[0] * FSettings.NoiseVolume) / 256;  // TODO OPTIMIZE ME!
  amptab[0]<<=16;
  amptab[1]=0;
 

@@ -483,11 +483,11 @@ bool FCEUI_Initialize()
 	FSettings.UsrLastSLine[0]=239;
 	FSettings.UsrLastSLine[1]=239;
 	FSettings.SoundVolume=150;		//0-150 scale
-	FSettings.TriangleVolume=100;	//0-100 scale (100 is max volume)
-	FSettings.Square1Volume=100;	//0-100 scale (100 is max volume)
-	FSettings.Square2Volume=100;	//0-100 scale (100 is max volume)
-	FSettings.NoiseVolume=100;		//0-100 scale (100 is max volume)
-	FSettings.PCMVolume=100;		//0-100 scale (100 is max volume)
+	FSettings.TriangleVolume=256;	//0-256 scale (256 is max volume)
+	FSettings.Square1Volume=256;	//0-256 scale (256 is max volume)
+	FSettings.Square2Volume=256;	//0-256 scale (256 is max volume)
+	FSettings.NoiseVolume=256;		//0-256 scale (256 is max volume)
+	FSettings.PCMVolume=256;		//0-256 scale (256 is max volume)
 
 	FCEUPPU_Init();
 
@@ -833,10 +833,11 @@ void FCEUI_SetGameGenie(bool a)
 	FSettings.GameGenie = a;
 }
 
-void FCEUI_SetSnapName(bool a)
-{
-	FSettings.SnapName = a;
-}
+//this variable isn't used at all, snap is always name-based
+//void FCEUI_SetSnapName(bool a)
+//{
+//	FSettings.SnapName = a;
+//}
 
 int32 FCEUI_GetDesiredFPS(void)
 {

@@ -1254,6 +1254,7 @@ static BMAPPING bmap[] = {
     {16,  Mapper16_Init},
 	{19,  Mapper19_Init},
     {23,  Mapper23_Init},
+    {35,  UNLSC127_Init}, // Wario Land 2
     {36,  Mapper36_Init}, // TXC Policeman
 	{37,  Mapper37_Init},
     {38,  Mapper38_Init}, // Bit Corp. Crime Busters
@@ -1325,9 +1326,10 @@ static BMAPPING bmap[] = {
     {171, Mapper171_Init},
     {172, Mapper172_Init},
     {173, Mapper173_Init},
+    {175, Mapper175_Init},
+    {176, BMCFK23C_Init},
     {177, Mapper177_Init},
     {178, Mapper178_Init},
-    {179, Mapper179_Init},
 	{180, Mapper180_Init},
 	{181, Mapper181_Init},
 	{182, Mapper182_Init},
@@ -1363,7 +1365,8 @@ static BMAPPING bmap[] = {
 //    {220, UNLTF1201_Init},
 //    {220, TCU02_Init},
 //    {220, UNLCN22M_Init},
-    {220, BMCT2271_Init},
+//    {220, BMCT2271_Init},
+//	  {220, UNLDANCE_Init},
     
     {221, UNLN625092_Init},
 	{222, Mapper222_Init},
