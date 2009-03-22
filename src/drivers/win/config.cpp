@@ -110,8 +110,8 @@ static CFGSTRUCT fceuconfig[] = {
 	NAC("vgamode",vmod),
 	NAC("sound",soundo),
 	NAC("sicon",status_icon),
-	//ch4: cause newppu mode fixation after changing through config file lol
-    //AC(newppu),
+	//adelikat - we want this behvaior //ch4: cause newppu mode fixation after changing through config file lol
+    AC(newppu),
 
 	NACS("odroms",directory_names[0]),
 	NACS("odnonvol",directory_names[1]),
