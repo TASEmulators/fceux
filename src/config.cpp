@@ -14,14 +14,15 @@ static char *aboutString = 0;
 ///returns a string suitable for use in an aboutbox
 char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
-	"\t" FCEU_NAME_AND_VERSION "\n\n\
+	FCEU_NAME_AND_VERSION "\n\n\
 Authors:\n\
 zeromus, adelikat, CaH4e3\n\n\
 Contributers:\n\
 DWEdit,QFox\n\
 \n\
 FCEUX 2.0\n\
-qfox, _mz, nitsujrehtona, Lukas Sabota, SP\
+mz, nitsujrehtona, Lukas Sabota,\n\
+SP, Ugly Joe\n\
 \n\n\
 Previous versions:\n\n\
 FCE - Bero\n\
