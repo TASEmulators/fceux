@@ -608,6 +608,7 @@ static void OpenRom(void);
 static void CloseRom(void);
 static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
+static void FCEUI_DoExit(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -617,12 +618,9 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
-	//fixed: current command key handling handle only command table record index with
-	//the same as cmd enumerarot index, or else does wrong key mapping
-	//...i returned it back.
-	//adelikat, try to find true cause of problem before reversing it
-	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	DoFCEUExit,			  0, 0, "Exit", 0},
-
+	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	FCEUI_DoExit,			  0, 0, "Exit", 0},
+	//adelikat: CaH4e3, perhaps finding the true cause should be on the person who made the change?
+	//Also, removing the windows only function from this table.  This is a core file and should stay compatible with the SDL build
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", 0 },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", 0 },
 	{ EMUCMD_SPEED_NORMAL,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Normal Speed", 0 },
@@ -944,4 +942,11 @@ static void UndoRedoSavestate(void)
 {
 	if (lastSavestateMade && (undoSS || redoSS))
 		SwapSaveState();
+}
+
+static void FCEUI_DoExit(void)
+{
+#ifdef WIN32
+	DoFCEUExit();
+#endif
 }
