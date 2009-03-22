@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -204,17 +203,17 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New Project\tCtrl+N",        ID_FILE_NEWPROJECT
+        MENUITEM "&New Project\tCtrl+N",        ID_FILE_NEWPROJECT, INACTIVE
         MENUITEM "&Open Project...\tCtrl+O",    ID_FILE_OPENPROJECT
-        MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT
-        MENUITEM "S&ave Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS
+        MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT, INACTIVE
+        MENUITEM "S&ave Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS, INACTIVE
         MENUITEM SEPARATOR
-        MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2
+        MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2, INACTIVE
         MENUITEM "&Export to FM2",              ID_FILE_EXPORTFM2
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_TASEDIT_FILE_CLOSE
     END
-    POPUP "&Edit"
+    POPUP "&Edit", INACTIVE
     BEGIN
         MENUITEM "&Select All",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
@@ -230,7 +229,7 @@ BEGIN
         MENUITEM "&Truncate\tCtrl+T",           ID_EDIT_TRUNCATE
         MENUITEM "&Branch\tCtrl+B",             ID_EDIT_BRANCH
     END
-    MENUITEM "&View",                       ID_VIEW
+    MENUITEM "&View",                       ID_VIEW, INACTIVE
     POPUP "&Help"
     BEGIN
         MENUITEM "&TASEdit Help...",            ID_HELP_TASEDITHELP
@@ -309,22 +308,22 @@ TASEDITCONTEXTMENUS MENU
 BEGIN
     POPUP "Stray"
     BEGIN
-        MENUITEM "Insert Frames",               MENU_CONTEXT_STRAY_INSERTFRAMES
+        MENUITEM "Insert Frames",               MENU_CONTEXT_STRAY_INSERTFRAMES, INACTIVE
         MENUITEM SEPARATOR
         MENUITEM "Truncate",                    ID_CONTEXT_STRAY_TRUNCATE
     END
     POPUP "Selected"
     BEGIN
-        MENUITEM "Insert Frame(s)",             ID_CONTEXT_SELECTED_INSERTFRAMES
+        MENUITEM "Insert Frame(s)",             ID_CONTEXT_SELECTED_INSERTFRAMES, INACTIVE
         MENUITEM "Delete Frame(s)",             ID_CONTEXT_SELECTED_DELETEFRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Paste to New",                ID_CONTEXT_SELECTED_PASTETONEW
+        MENUITEM "Paste to New",                ID_CONTEXT_SELECTED_PASTETONEW, INACTIVE
         MENUITEM SEPARATOR
-        MENUITEM "Add Marker",                  ID_CONTEXT_SELECTED_ADDMARKER
-        MENUITEM "Remove Marker",               ID_CONTEXT_SELECTED_REMOVEMARKER
+        MENUITEM "Add Marker",                  ID_CONTEXT_SELECTED_ADDMARKER, INACTIVE
+        MENUITEM "Remove Marker",               ID_CONTEXT_SELECTED_REMOVEMARKER, INACTIVE
         MENUITEM SEPARATOR
         MENUITEM "Truncate",                    ID_CONTEXT_SELECTED_TRUNCATE
-        MENUITEM "Branch",                      ID_CONTEXT_SELECTED_BRANCH
+        MENUITEM "Branch",                      ID_CONTEXT_SELECTED_BRANCH, INACTIVE
     END
 END
 
@@ -1233,20 +1232,20 @@ MENU TASEDITMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,11,324,364
-    PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16
+    PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16,WS_DISABLED
     LTEXT           "Any number of these icon buttons are pressed",IDC_STATIC,395,84,47,34
-    PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14
-    PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14
-    PUSHBUTTON      "<<",TASEDIT_REWIND_FULL,341,25,26,14
-    PUSHBUTTON      ">>",TASEDIT_FOWARD_FULL,417,25,26,14
+    PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14,WS_DISABLED
+    PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14,WS_DISABLED
+    PUSHBUTTON      "<<",TASEDIT_REWIND_FULL,341,25,26,14,WS_DISABLED
+    PUSHBUTTON      ">>",TASEDIT_FOWARD_FULL,417,25,26,14,WS_DISABLED
     GROUPBOX        "Static",IDC_STATIC,335,11,120,176
     GROUPBOX        "Project Input Logs",IDC_STATIC,335,200,120,175
-    PUSHBUTTON      "Record P1",IDC_BUTTON5,340,95,50,14
-    PUSHBUTTON      "Record P2",IDC_BUTTON7,340,79,50,14
+    PUSHBUTTON      "Record P1",IDC_BUTTON5,340,95,50,14,WS_DISABLED
+    PUSHBUTTON      "Record P2",IDC_BUTTON7,340,79,50,14,WS_DISABLED
     LTEXT           "After current frame",IDC_STATIC,337,62,67,11
-    PUSHBUTTON      "Union Mode",IDC_BUTTON8,340,111,50,14
+    PUSHBUTTON      "Union Mode",IDC_BUTTON8,340,111,50,14,WS_DISABLED
     EDITTEXT        IDC_EDIT1,341,149,40,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Send",IDC_BUTTON9,385,148,31,14
+    PUSHBUTTON      "Send",IDC_BUTTON9,385,148,31,14,WS_DISABLED
     LTEXT           "Sends to Notes column",IDC_STATIC,341,137,74,8
     CONTROL         "",IDC_LIST2,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,340,215,115,160
 END
@@ -1498,7 +1497,6 @@ BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 295
         TOPMARGIN, 8
-        BOTTOMMARGIN, 263
     END
 
     "GUICONFIG", DIALOG
@@ -1779,8 +1777,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

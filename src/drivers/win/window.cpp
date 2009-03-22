@@ -291,6 +291,7 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_POWER,
 		MENU_INSERT_COIN,
 		MENU_SWITCH_DISK,
+		MENU_EJECT_DISK,
 		MENU_RECORD_AVI,
 		MENU_STOP_AVI,
 		MENU_RECORD_WAV,
