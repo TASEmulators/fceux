@@ -106,6 +106,7 @@ char *DriverUsage="\
                         Devices: quizking hypershot mahjong toprider ftrainer\n\
                          familykeyboard oekakids arkanoid shadow bworld 4player\n\
 --inputcfg      d      Configures input device d on startup.\n\
+--inputdisplay{0|1|2|4}Displays game input.\n\
 --playmov       f      Plays back a recorded movie from filename f.\n\
 --fcmconvert    f      Converts fcm movie file f to fm2.";
 
@@ -583,6 +584,13 @@ SDL_GL_LoadLibrary(0);
         mutecapture = 0;
     }
     #endif
+
+    {
+    int id;
+    g_config->getOption("SDL.InputDisplay", &id);
+    extern int input_display;
+    input_display = id;
+    }
 	
 	// load the hotkeys from the config life
 	setHotKeys();

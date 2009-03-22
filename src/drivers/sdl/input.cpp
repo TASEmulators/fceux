@@ -167,6 +167,7 @@ int stateKey[10];
 int movieToggleFrameDisplayKey;
 int lagCounterDisplayKey;
 int SubtitleDisplayKey;
+int InputDisplayKey;
 
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
@@ -203,6 +204,7 @@ void setHotKeys()
 	g_config->getOption("SDL.Hotkeys.LagCounterDisplay", &lagCounterDisplayKey);
 	g_config->getOption("SDL.Hotkeys.MovieToggleFrameDisplay", &movieToggleFrameDisplayKey);
 	g_config->getOption("SDL.Hotkeys.SubtitleDisplay", &SubtitleDisplayKey);
+	g_config->getOption("SDL.Hotkeys.InputDisplay", &InputDisplayKey);
 	/*
 	config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
 	config->addOption(prefix + "Power", 0);
@@ -407,6 +409,12 @@ KeyboardCommands()
 
     if(_keyonly(movieToggleFrameDisplayKey)) {
         FCEUI_MovieToggleFrameDisplay();
+    }
+    
+    if(_keyonly(InputDisplayKey)) {
+        FCEUI_ToggleInputDisplay();
+        extern int input_display;
+        g_config->setOption("SDL.InputDisplay", input_display);
     }
 
     if(_keyonly(pauseKey)) {

@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+22-mar-2009 - shinydoofy - sdl - added hotkey I and --inputdisplay {0|1|2|4} for toggling input display.
 22-mar-2009 - shinydoofy - sdl - added commandline options for sound channels' volumes
 22-mar-2009 - shinydoofy - sdl - updated window title
 19-mar-2009 - adelikat - Win32 - make Video - windowed mode - disable hardware accel the default setting.  Made high quality sound the default setting.

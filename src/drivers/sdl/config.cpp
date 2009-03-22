@@ -183,6 +183,9 @@ InitConfig()
     // allow for input configuration
     config->addOption('i', "inputcfg", "SDL.InputCfg", InputCfg);
     
+    // display input
+    config->addOption("inputdisplay", "SDL.InputDisplay", 0);
+    
     // video playback
     config->addOption("playmov", "SDL.Movie", "");
     
@@ -296,6 +299,7 @@ InitConfig()
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
+    config->addOption(prefix + "InputDisplay", SDLK_i);
     //config->addOption(prefix + "Power", 0);
     
     
