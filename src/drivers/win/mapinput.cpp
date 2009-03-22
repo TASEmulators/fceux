@@ -416,15 +416,15 @@ bool ShouldDisplayMapping(int mapn, int filter, const int* conflictTable)
 	}
 	else if(filter == EMUCMDTYPE_MAX + 1) /* Assigned */
 	{
-		return FCEUD_CommandMapping[mapn] != 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] != 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 2) /* Unassigned */
 	{
-		return FCEUD_CommandMapping[mapn] == 0;
+		return FCEUD_CommandMapping[FCEUI_CommandTable[mapn].cmd] == 0;
 	}
 	else if(filter == EMUCMDTYPE_MAX + 3) /* Conflicts */
 	{
-		return conflictTable[mapn] != 0;
+		return conflictTable[FCEUI_CommandTable[mapn].cmd] != 0;
 	}
 	else 
 	{
@@ -501,7 +501,7 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.iItem = idx;
 			lvi.iSubItem = 0;
 			lvi.pszText = (char*)FCEUI_CommandTypeNames[FCEUI_CommandTable[i].type];
-			lvi.lParam = (LPARAM)i;
+			lvi.lParam = (LPARAM)FCEUI_CommandTable[i].cmd;
 
 			if(newItemCount<num)
 				SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
@@ -522,7 +522,7 @@ void PopulateMappingDisplay(HWND hwndDlg)
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = idx;
 			lvi.iSubItem = 2;
-			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[i]);
+			lvi.pszText = GetKeyComboName(FCEUD_CommandMapping[FCEUI_CommandTable[i].cmd]);
 
 			SendMessage(hwndListView, LVM_SETITEM, (WPARAM)0, (LPARAM)&lvi);
 

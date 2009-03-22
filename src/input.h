@@ -108,6 +108,11 @@ enum EMUCMD
 	EMUCMD_FRAME_ADVANCE,
 	EMUCMD_SCREENSHOT,
 	EMUCMD_HIDE_MENU_TOGGLE,
+	//fixed: current command key handling handle only command table record index with
+	//the same as cmd enumerarot index, or else does wrong key mapping, fixed it but placed this enum here anyway 
+	//...i returned it back.
+	//adelikat, try to find true cause of problem before reversing it
+	EMUCMD_EXIT,
 
 	EMUCMD_SPEED_SLOWEST,
 	EMUCMD_SPEED_SLOWER,
@@ -213,9 +218,7 @@ enum EMUCMD
 	//-----------------------------
 	EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,
 	EMUCMD_MISC_UNDOREDOSAVESTATE,
-	EMUCMD_MAX,
-	//For campatibility with old configuration files
-	//EMUCMD_EXIT	//adelikat, EXIT hotkey commented out in input.cpp so commented out here too
+	EMUCMD_MAX
 };
 
 enum EMUCMDTYPE

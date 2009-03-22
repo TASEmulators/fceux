@@ -617,7 +617,11 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
-	//{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	DoFCEUExit,			  0, 0, "Exit", 0}, //adelikat: This can't be added here without throwing off the entire enum table (which causes the default mappings to be incorrect and can lead to some crashes).  Sorry, needs to be added to the end of the enum or more workarounds need to be done
+	//fixed: current command key handling handle only command table record index with
+	//the same as cmd enumerarot index, or else does wrong key mapping
+	//...i returned it back.
+	//adelikat, try to find true cause of problem before reversing it
+	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	DoFCEUExit,			  0, 0, "Exit", 0},
 
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", 0 },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", 0 },
@@ -725,34 +729,40 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
 
-static int execcmd;
+// jabberwoocky my son, don't be aware lol
+// this is much mindfucking thing i ever seen here
+// even when i fixed it, there is a lot of possibilities to break all key input stuff with one
+// unarranged command enumerator.
+static int execcmd, i;
 
 void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 {
 	bool tasedit = FCEUMOV_Mode(MOVIEMODE_TASEDIT);
-	for(execcmd=0; execcmd<NUM_EMU_CMDS; ++execcmd)
+	for(i=0; i<NUM_EMU_CMDS; ++i)
 	{
-		int new_state = (*testfn)(execcmd);
-		int old_state = FCEUI_CommandTable[execcmd].state;
+		int new_state;
+		int old_state = FCEUI_CommandTable[i].state;
+		execcmd = FCEUI_CommandTable[i].cmd;
+		new_state = (*testfn)(execcmd);
 		//in tasedit, forbid commands without the tasedit flag
 		bool allow = true;
-		if(tasedit && !(FCEUI_CommandTable[execcmd].flags & EMUCMDFLAG_TASEDIT))
+		if(tasedit && !(FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDIT))
 			allow = false;
 		
 		if(allow)
 		{
-			if (new_state == 1 && old_state == 0 && FCEUI_CommandTable[execcmd].fn_on)
-				(*(FCEUI_CommandTable[execcmd].fn_on))();
-			else if (new_state == 0 && old_state == 1 && FCEUI_CommandTable[execcmd].fn_off)
-				(*(FCEUI_CommandTable[execcmd].fn_off))();
+			if (new_state == 1 && old_state == 0 && FCEUI_CommandTable[i].fn_on)
+				(*(FCEUI_CommandTable[i].fn_on))();
+			else if (new_state == 0 && old_state == 1 && FCEUI_CommandTable[i].fn_off)
+				(*(FCEUI_CommandTable[i].fn_off))();
 		}
-		FCEUI_CommandTable[execcmd].state = new_state;
+		FCEUI_CommandTable[i].state = new_state;
 	}
 }
 
 static void CommandUnImpl(void)
 {
-	FCEU_DispMessage("command '%s' unimplemented.", FCEUI_CommandTable[execcmd].name);
+	FCEU_DispMessage("command '%s' unimplemented.", FCEUI_CommandTable[i].name);
 }
 
 static void CommandToggleDip(void)
