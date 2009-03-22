@@ -115,12 +115,12 @@ InitConfig()
 
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
-    config->addOption("volume", "SDL.SoundVolume", 100);
-    config->addOption("trianglevol", "SDL.TriangleVolume", 100);
-    config->addOption("square1vol", "SDL.Square1Volume", 100);
-    config->addOption("square2vol", "SDL.Square2Volume", 100);
-    config->addOption("noisevol", "SDL.NoiseVolume", 100);
-    config->addOption("pcmvol", "SDL.PCMVolume", 100);
+    config->addOption("volume", "SDL.SoundVolume", 150);
+    config->addOption("trianglevol", "SDL.TriangleVolume", 256);
+    config->addOption("square1vol", "SDL.Square1Volume", 256);
+    config->addOption("square2vol", "SDL.Square2Volume", 256);
+    config->addOption("noisevol", "SDL.NoiseVolume", 256);
+    config->addOption("pcmvol", "SDL.PCMVolume", 256);
     config->addOption("soundrate", "SDL.SoundRate", 11000);
     config->addOption("soundq", "SDL.SoundQuality", 1);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
@@ -358,8 +358,9 @@ UpdateEMUCore(Config *config)
     config->getOption("SDL.DisableSpriteLimit", &flag);
     FCEUI_DisableSpriteLimitation(flag ? 1 : 0);
 
-    config->getOption("SDL.SnapName", &flag);
-    FCEUI_SetSnapName(flag ? true : false);
+    //Not used anymore.
+    //config->getOption("SDL.SnapName", &flag);
+    //FCEUI_SetSnapName(flag ? true : false);
 
     config->getOption("SDL.ScanLineStart", &start);
     config->getOption("SDL.ScanLineEnd", &end);

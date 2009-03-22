@@ -45,7 +45,7 @@ D6-D0 - Small Page High Address (D6,D5,D4,D3,D2,D1,D0,A11,A10,A9,A8,A7,A6,A5,A4,
 
 static uint8 reg[3];
 
-static uint8 *CHRRAM=NULL;
+//static uint8 *CHRRAM=NULL; // already declared in mmc3.h. static != extern
 static uint32 CHRRAMSIZE;
 
 static SFORMAT StateRegs[]=

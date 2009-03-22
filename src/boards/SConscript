@@ -9,6 +9,8 @@ my_list =  Split("""
 121.cpp
 15.cpp
 164.cpp
+175.cpp
+176.cpp
 177.cpp
 178.cpp
 179.cpp
@@ -46,6 +48,7 @@ bmc70in1.cpp
 bonza.cpp
 bs-5.cpp
 copyfami_mmc3.cpp
+dance.cpp
 datalatch.cpp
 deirom.cpp
 dream.cpp
@@ -69,6 +72,7 @@ n106.cpp
 n625092.cpp
 novel.cpp
 sachen.cpp
+sc-127.cpp
 sheroes.cpp
 sl1632.cpp
 smb2j.cpp

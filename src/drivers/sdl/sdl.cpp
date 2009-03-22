@@ -92,12 +92,12 @@ char *DriverUsage="\
 --soundrate     x      Sets sound playback rate to x Hz.\n\
 --soundq       {0|1}   Enables high sound quality.\n\
 --soundbufsize  x      Sets sound buffer size to x ms.\n\
---volume      {0-100}  Sets volume.\n\
---trianglevol {0-100}  Sets Triangle volume.\n\
---square1vol  {0-100}  Sets Square 1 volume.\n\
---square2vol  {0-100}  Sets Square 2 volume.\n\
---noisevol    {0-100}  Sets Noise volume.\n\
---pcmvol      {0-100}  Sets PCM volume.\n\
+--volume      {0-150}  Sets volume.\n\
+--trianglevol {0-256}  Sets Triangle volume.\n\
+--square1vol  {0-256}  Sets Square 1 volume.\n\
+--square2vol  {0-256}  Sets Square 2 volume.\n\
+--noisevol    {0-256}  Sets Noise volume.\n\
+--pcmvol      {0-256}  Sets PCM volume.\n\
 --lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
 --soundrecord   f      Records sound to file f.\n\
 --input(1,2)    d      Set the input device for input 1 or 2.\n\
