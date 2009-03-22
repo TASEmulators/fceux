@@ -28,12 +28,12 @@
 #include "mmc3.h"
 
 uint8 MMC3_cmd;
-uint8 *WRAM;
-uint8 *CHRRAM;
 uint32 CHRRAMSize;
 uint8 DRegBuf[8];
 uint8 EXPREGS[8];    /* For bootleg games, mostly. */
 
+static uint8 *WRAM;
+static uint8 *CHRRAM;
 static uint8 A000B,A001B;
 
 #undef IRQCount

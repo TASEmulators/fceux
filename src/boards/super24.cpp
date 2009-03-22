@@ -21,7 +21,8 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-//static uint8 *CHRRAM = NULL; // CHRRAM is already declared in mmc3.h. Besides, static and extern don't really go well together.
+static uint8 *CHRRAM = NULL; // there is no more extern CHRRAM in mmc3.h
+							 // I need chrram here and local   static == local
 static int masko8[8]={63,31,15,1,3,0,0,0};
 
 static void Super24PW(uint32 A, uint8 V)

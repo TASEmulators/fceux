@@ -21,7 +21,8 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
-//static uint8 *CHRRAM; // already declared in mmc3.h. static != extern
+static uint8 *CHRRAM;		 // there is no more extern CHRRAM in mmc3.h
+							 // I need chrram here and local   static == local
 static uint8 tekker;
 
 static void MSHCW(uint32 A, uint8 V)

@@ -26,6 +26,8 @@
 #include "mapinc.h"
 #include "mmc3.h"
 
+static uint8 *CHRRAM=NULL; // and here too
+
 static void M199PW(uint32 A, uint8 V)
 {
   setprg8(A,V);
