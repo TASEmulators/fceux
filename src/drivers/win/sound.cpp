@@ -748,8 +748,10 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 		EnableWindow(GetDlgItem(hwndDlg,134),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,135),FALSE);
 		//Set text for group boxes
-		SetDlgItemText(hwndDlg, ID_SOUND_TRITOP, "Triangle/");	//Hacky, a static text box above the group box so I have more text space
-		SetDlgItemText(hwndDlg, 131, "noise/pcm");
+			//These disabled until there is some control for pcm & triangle in low quality setting
+			//SetDlgItemText(hwndDlg, ID_SOUND_TRITOP, "Triangle/");	//Hacky, a static text box above the group box so I have more text space
+			//SetDlgItemText(hwndDlg, 131, "noise/pcm");
+		SetDlgItemText(hwndDlg, 131, "Noise");
 		SetDlgItemText(hwndDlg, 132, "Square");
 		SetDlgItemText(hwndDlg, 133, "Disabled");	//Set Square 2 to disabled
 		SetDlgItemText(hwndDlg, 134, "Disabled");	//Set Noise to disabled
