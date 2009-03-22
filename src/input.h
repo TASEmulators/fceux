@@ -215,7 +215,7 @@ enum EMUCMD
 	EMUCMD_MISC_UNDOREDOSAVESTATE,
 	EMUCMD_MAX,
 	//For campatibility with old configuration files
-	EMUCMD_EXIT
+	//EMUCMD_EXIT	//adelikat, EXIT hotkey commented out in input.cpp so commented out here too
 };
 
 enum EMUCMDTYPE

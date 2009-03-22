@@ -617,7 +617,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	DoFCEUExit,			  0, 0, "Exit", 0},
+	//{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	DoFCEUExit,			  0, 0, "Exit", 0}, //adelikat: This can't be added here without throwing off the entire enum table (which causes the default mappings to be incorrect and can lead to some crashes).  Sorry, needs to be added to the end of the enum or more workarounds need to be done
 
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", 0 },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", 0 },
