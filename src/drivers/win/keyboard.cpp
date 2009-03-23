@@ -45,7 +45,7 @@ void KeyboardUpdateState(void)
 	unsigned char tk[256];
 
 	ddrval=IDirectInputDevice7_GetDeviceState(lpdid,256,tk);
-
+	if (tk[0]) tk[0] = 0;	//adelikat: HACK.  If a keyboard key is recognized as this, the effect is that all non assigned hotkeys are run.  This prevents the key from being used, but also prevent "hotkey explosion".  Also, they essentially couldn't use it anyway since FCEUX doesn't know it is a shift key, and it can't be assigned in the hotkeys
 	// HACK because DirectInput is totally wacky about recognizing the PAUSE/BREAK key
 	if(GetAsyncKeyState(VK_PAUSE)) // normally this should have & 0x8000, but apparently this key is too special for that to work
 		tk[0xC5] = 0x80;
