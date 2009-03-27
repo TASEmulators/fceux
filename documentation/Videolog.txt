@@ -10,6 +10,7 @@ Here's an example:
   --pal 0 \
   --sound 1 --soundq 1 --soundrate 48000 --mute 1 \
   --nospritelim 1 \
+  --no-config 1 \
   --videolog "mencoder - -o myfirstencodedrun.avi \
     -ovc x264 -x264encopts qp=0 \
     -oac pcm \
@@ -27,6 +28,7 @@ First of all, we started fceux with "./fceux" and gave it some options:
  "--soundrate 48000" sets the sound rate to 48kHz.
  "--mute 1" mutes FCEUX while still passing the sound to mencoder. This way you can capture a movie and still listen to your music without having the NES sounds in the background.
  "--nospritelim" deactivates the NES's 8 sprites per scanlines limit.
+ "--no-config 1" is used not to destroy your settings when creating an avi movie.
  "--videolog" calls mencoder:
   "-" states that we're getting the video stream from stdin.
   "-o" determines the name of the produced avi file.
@@ -43,5 +45,4 @@ First of all, we started fceux with "./fceux" and gave it some options:
  Lastly, we load our desired ROM (in this case it's "myROM.nes").
 
 To go for faster encoding and thus less quality, change "-ovc x264 -x264encopts qp=0" to "-ovc xvid -xvidencopts bitrate=200" and "-oac pcm" to "-oac mp3lame -lameopts mode=3:preset=60" to create a 200 kbps xvid video with 60 kbps of mono mp3 audio.
-One last reminder: setting all these options for FCEUX of course changes the settings you've set before (like sound quality or whether or not to scale the video image). So be sure to backup your config file first (you'll find it in ~/.fceux/) if you don't want set it all up again after encoding.
 Good luck! :)

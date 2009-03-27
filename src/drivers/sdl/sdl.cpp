@@ -60,6 +60,7 @@ int gametype = 0;
 #ifdef CREATE_AVI
 int mutecapture;
 #endif
+static int noconfig;
 
 char *DriverUsage="\
 --pal          {0|1}   Uses PAL timing.\n\
@@ -108,7 +109,8 @@ char *DriverUsage="\
 --inputcfg      d      Configures input device d on startup.\n\
 --inputdisplay{0|1|2|4}Displays game input.\n\
 --playmov       f      Plays back a recorded movie from filename f.\n\
---fcmconvert    f      Converts fcm movie file f to fm2.";
+--fcmconvert    f      Converts fcm movie file f to fm2.\n\
+--no-config    {0,1}   Don't change the config file";
 
 /* Moved network options out while netplay is broken.
 --net s, -n s	Connects to server 's' for TCP/IP network play.\n\
@@ -274,7 +276,8 @@ DriverInitialize(FCEUGI *gi)
 static void
 DriverKill()
 {
-    g_config->save();
+    if (!noconfig)
+        g_config->save();
 
 #ifndef WIN32
     // XXX soules - capturing all these signals seems pointless
@@ -517,7 +520,10 @@ SDL_GL_LoadLibrary(0);
 	//in case you didnt specify a rom filename
 	  // This is here so that a default fceux.cfg will be created on first
 	  // run, even without a valid ROM to play.
-	  g_config->save();
+	  // Unless, of course, there's actually --no-config given
+	  g_config->getOption("SDL.NoConfig", &noconfig);
+	  if (!noconfig)
+	    g_config->save();
 	std::string s;
 	g_config->getOption("SDL.InputCfg", &s);
 	
@@ -611,8 +617,12 @@ SDL_GL_LoadLibrary(0);
     {
         if(fname.find(".fm2") != std::string::npos)
         {
-		    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
+	    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
             FCEUI_LoadMovie(fname.c_str(), false, false, false);
+        }
+        else
+        {
+          FCEUI_printf("Sorry, I don't know how to play back %s\n", fname.c_str());
         }
     }
 	

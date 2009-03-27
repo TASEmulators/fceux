@@ -186,6 +186,9 @@ InitConfig()
     // display input
     config->addOption("inputdisplay", "SDL.InputDisplay", 0);
     
+    // overwrite the config file?
+    config->addOption("no-config", "SDL.NoConfig", 0);
+    
     // video playback
     config->addOption("playmov", "SDL.Movie", "");
     
