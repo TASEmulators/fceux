@@ -1,4 +1,5 @@
 ---version 2.0.4 yet to be released---
+28-mar-2009 - shinydoofy - sdl - fix fm2 playback and fcm->fm2 conversion crash at the cost of ugly 0x00 bytes behind the author's comment line
 28-mar-2009 - adelikat - Lua - added FCEU.poweron() and FCEU.softreset()
 27-mar-2009 - shinydoofy - sdl - added --no-config
 23-mar-2009 - adelikat - Win32 - blocked "hotkey explosion" by rshift on some laptops
