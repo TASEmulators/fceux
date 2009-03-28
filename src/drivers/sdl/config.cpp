@@ -303,6 +303,7 @@ InitConfig()
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
     config->addOption(prefix + "InputDisplay", SDLK_i);
+    config->addOption(prefix + "Quit", SDLK_ESCAPE);
     //config->addOption(prefix + "Power", 0);
     
     
