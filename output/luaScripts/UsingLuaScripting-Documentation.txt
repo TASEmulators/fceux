@@ -1,3 +1,8 @@
+Learning to use Lua Sctripting for FCEUX
+Written by QFox
+
+Windows users - see also the Lua Scripting chapter for the FCEUX sHelp manual (fceux.chm)
+
 Ok. Lua. Let's see.
 
 Lua is a scripting language. It is used in games like Farcry and World of Warcraft (and many other games and applications!). Even though you can find all kinds of tutorials online, let me help you with the basics.

@@ -1,3 +1,7 @@
+--Memory Watch
+--Creates a Dialog box for monitoring a game's RAM values.
+
+--Version History
 -- v0.01a (not yet done!)
 -- include some iup stuff and take care of cleanup
 require 'auxlib';
