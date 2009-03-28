@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceux - Graphical launcher for fceux.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "2.0.4svn"
+version = "2.1"
 title = "gfceux"
 # Copyright (C) 2008  Lukas Sabota <ltsmooth42 _at_ gmail.com>
 ##

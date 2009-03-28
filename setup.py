@@ -3,10 +3,10 @@
 from distutils.core import setup
 
 setup(name="gfceux",
-		version="2.0.4",
+		version="2.1",
 		scripts = ['gfceux'],
 		packages = ['gfceux'],
-    	package_dir = {'gfceux': 'src'},
+    		package_dir = {'gfceux': 'src'},
 		data_files=[
 		    ('share/gfceux/',
 		    ['data/gfceux.xml', 'data/gfceux_big.png', 'data/gfceux.png',
