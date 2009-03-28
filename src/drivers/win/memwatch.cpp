@@ -265,7 +265,8 @@ void UpdateMemWatch()
 {
 	if(hwndMemWatch && GameInfo)
 	{
-		SetTextColor(hdc,RGB(0,0,0));
+		//SetTextColor(hdc,RGB(0,0,0));
+		SetTextColor(hdc,GetSysColor(COLOR_WINDOWTEXT));	//adelikat-changed colors to Windows System Colors.  Hardcoded colors run the risk of incompatibiliyt (for instance if someone uses custom colors and makes dialogs black, addresses would be unreadable)
 		SetBkColor(hdc,GetSysColor(COLOR_3DFACE));
 
 		for(int i = 0; i < MWNUM; i++)
@@ -279,7 +280,8 @@ void UpdateMemWatch()
 			{
 				if (mwrec.addr == FrozenAddresses[x])
 				{
-					SetTextColor(hdc,RGB(0,0,255));
+					//SetTextColor(hdc,RGB(0,0,255));
+					SetTextColor(hdc,GetSysColor(COLOR_HIGHLIGHT));
 				}
 			}
 			}
