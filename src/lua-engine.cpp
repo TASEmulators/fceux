@@ -297,6 +297,25 @@ static int fceu_speedmode(lua_State *L) {
 	return 0;
 }
 
+// FCEU.poweron()
+//
+// Executes a power cycle
+static int fceu_poweron(lua_State *L) {
+	if (GameInfo)
+		FCEUI_PowerNES();
+	
+	return 0;
+}
+
+// FCEU.softreset()
+//
+// Executes a power cycle
+static int fceu_softreset(lua_State *L) {
+	if (GameInfo)
+		FCEUI_ResetNES();
+	
+	return 0;
+}
 
 // FCEU.frameadvance()
 //
@@ -1845,6 +1864,8 @@ static int fceu_exec_time(lua_State *L) { return 0; }
   
 static const struct luaL_reg fceulib [] = {
 
+	{"poweron", fceu_poweron},
+	{"softreset", fceu_softreset},
 	{"speedmode", fceu_speedmode},
 	{"frameadvance", fceu_frameadvance},
 	{"pause", fceu_pause},
