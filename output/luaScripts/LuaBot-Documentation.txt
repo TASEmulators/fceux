@@ -1,3 +1,8 @@
+LuaBot
+Documentation
+Written by Qfox
+
+
 LuaBot is a trial and error script that exhausts the input-search-space by simply trying to push buttons. 
 
 You can program it to limit this searchspace, as it can become exponentially large. Just do the math. You can press eight possible buttons at any frame. That makes up for 8! or 8*7*6*5*4*3*2*1 possible combinations for one single frame. There are 60 frames in one second, that's 60 to the power of (8!).
