@@ -1,3 +1,5 @@
+--x_functions - various functions needed for scripts witten by Xkeeper
+--Written by Xkeeper
 
 x_func_version	= 5;
 

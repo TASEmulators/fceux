@@ -1,6 +1,7 @@
+-- Tetris - displays block stats and shows hitboxes
+-- Written by QFox
 -- http://www.datacrystal.org/wiki/Tetris:RAM_map
 -- Tetris (U) [!].rom
--- qFox
 
 local function getPiece(n) -- returns table with information about this piece
 	-- every piece consists of 4 blocks

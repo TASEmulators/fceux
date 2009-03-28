@@ -1,6 +1,7 @@
 -- Teenage Mutant Ninja Turtles (U)[!].rom
--- qFox
+-- Written by QFox
 -- 31 july 2008
+-- Displays Hitboxes, Enemy HP, and various stats on screen
 
 local function box(x1,y1,x2,y2,color)
 	-- gui.text(50,50,x1..","..y1.." "..x2..","..y2);

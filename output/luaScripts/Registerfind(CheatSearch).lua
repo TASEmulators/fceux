@@ -1,3 +1,7 @@
+--RegisterFind
+--written by QFox
+--Weeds out RAM addresses along the lines of Cheat Search and Ram Filter.  Has some features not present in either of those 2 hardcoded dialogs.
+
 -- v0.1a (far from done!)
 -- include some iup stuff and take care of cleanup
 require 'auxlib';

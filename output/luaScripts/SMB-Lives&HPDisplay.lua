@@ -1,6 +1,6 @@
-
--- SMB1 script by 4matsy. Yay.
+-- Super Mario Bros. script by 4matsy.
 -- 2008, September 11th.
+--Displays the # of lives for Mario and a HP meter for Bowswer
 
 require("shapedefs");
 

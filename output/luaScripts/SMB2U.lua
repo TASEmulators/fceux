@@ -1,11 +1,13 @@
--- unfinished mario bros 2 script
+-- Super Mario Bros. 2 USA - Grids & Contents (Unfinished)
+-- Super Mario Bros. 2 (U) (PRG0) [!].nes
+-- Written by QFox
+-- 31 July 2008
+
 -- shows (proper!) grid and contents. disable grid by setting variable to false
 -- shows any non-air grid's tile-id
--- can be heavy on light systems
+-- Slow! Will be heavy on lighter systems
 
--- Super Mario Bros. 2 (U) (PRG0) [!].rom
--- qFox
--- 31 july 2008
+
 
 local angrybirdo = false; -- makes birdo freak, but can skew other creatures with timing :)
 local drawgrid = true; -- draws a green grid

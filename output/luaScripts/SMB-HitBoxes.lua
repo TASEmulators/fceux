@@ -1,6 +1,6 @@
--- super mario bros 1 hitbox script
--- Super Mario Bros. (JU) (PRG0) [!].rom
--- by qFox
+-- Super Mario Bros.  hitbox script
+-- Super Mario Bros (JU) (PRG0) [!].nes
+-- Written by qFox
 -- 28 july 2008
 
 -- This script shows hitboxes of anything that has them
