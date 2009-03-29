@@ -7,4 +7,4 @@ move /y ..\vc\fceux.exe .
 ..\vc\zip -X -9 -r ..\vc\fceux.zip auxlib.lua
 cd ..\
 ..\vc\zip -X -9 -r ..\vc\fceux.zip documentation
-cd ..\vc
+cd vc
