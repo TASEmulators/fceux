@@ -12,16 +12,16 @@
    </p>
    <p>
      The concept behind FCEUX  is to merge elements from FCE Ultra, FCEU rerecording, FCEUXD, FCEUXDSP, and FCEU-mm into a single branch of FCEU.
-     As the X implies, it is an all-encompassing FCEU emulator that gives the best of all worlds for the general player,
-     the ROM-hacking community, and the Tool-Assisted Speedrun Community.
+     As the X implies, it is an all-encompassing FCEU emulator that gives the best of all worlds for the casual player,
+     the ROM-hacking community, Lua Scripters, and the Tool-Assisted Speedrun Community.
    </p>
    <p>
      We are particularly excited by the Lua scripting capabilities which have been ported over from FCEU rerecording and prepped for 
-further development.  In order to use Lua in the windows build you will need the luapack [<a 
+further development.  FCEUX2.1 comes pre-packaged with all Lua related .dlls.  In order to use Lua in windows builds prior to 2.1 you will need the luapack [<a 
 href="http://fceux.com/luapack">fceux.com/luapack</a>] which should be unzipped alongside your fceux.exe. The large numbers of dlls 
 wasn't our choice; but it will enable the iup user interface library which will permit scripts to create their own guis, as well as 
-rendering the base fceux distribution more compact.  Examples of lua scripts may be found in the subversion repository <a 
-href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/documentation/examplelua/">here</a>
+rendering the base FCEUX distribution more compact.  Examples of lua scripts may be found in the subversion repository <a 
+href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/LuaScripts/">here</a>.  In addition, FCEUX2.1 comes pre-packaged with these scripts.
   <p>
     You can find out what we've been up to since the last release by checking the <a href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/changelog.txt">changelog</a> directly.
 </p><p>
@@ -39,6 +39,192 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/documentation/exa
 </div>
 
 <div class="mainbox">
+  <h2 class="boxhead">News</h2>
+  <!-- News section -->
+  <div class="boxbody">
+
+    <h3 class="boxsubhead">02 November 2008</h3>
+    <p>
+      <strong>FCEUX 2.1 release</strong>
+    </p>
+    <p>
+      Jump to the <a href="download.php">download</a> page.
+      <p>
+        The 2.1 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
+        feature enhancements to both the Win32 and SDL ports.
+        <pre>
+<b>Major Bug / Crash Bug Fixes</b>
+
+*Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode).
+*Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior.
+*Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game.
+*Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug.
+
+<b>Minor Bug fixes</b>
+
+*Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys
+*Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off
+*Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag & frame counters, messages, etc)
+*Fixed bug where having sound off and Mute turbo caused chirps when toggling
+*Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly
+*Auto-save cleanup -prevent loading an auto-save from previous session.  Added flags for enabling auto-save menu item.
+*Fixed issues related to big endian compiling.
+*Fix bug so that Escape can now be assigned as a hotkey
+*Fixed bug in screenshot numbering that caused numbering to not reset when changing games.
+
+<b>SDL</b>
+*SDL Movie subtitle support and subtitle toggle hotkey added.
+*SDL Added fcm to fm2 converter tool to SDL version.
+*SDL Improved the SDL sound code; drastically improves quality of sound.
+*SDL Savestate slots are now mappable.
+*SDL Major updates to SDL documentation
+*SDL Added Shift+M for toggling automatic movie backups.
+*SDL Added option to mute FCEUX for avi capturing, check the documentation for more details.
+*SDL Added --noconfig command line option
+*SDL Frame Advance Skip Lag frames toggle implemented
+
+<b>New Features Win32</b>
+
+*The latest mappers and mapper fixes from FCEU-mm.  Adds support for many new games such as Warioland II (Unl), Shu Qi Yu,  and Street Dance
+*Full screen mode fixed!  Also, Alt+Enter properly toggles full screen.
+*Individual control for sound channels! (See sound config for details).
+*Undo/Redo Savestate/Loadstate features installed!  No more loss of data to unintentional presses.  (See getting started for details).
+*Movie subtitles can now be included in .fm2 files.  See .fm2 documentation for details and Movie options for details on customizing.
+*Auto-backup for movie files.  (See movie options for details).
+*A Ram change monitor for the Memory watch dialog. (see memwatch for details).
+*Frame counter works even without a movie loaded.
+*AVI Directory Override option.
+
+<b>GUI / Menu Enhancements</b>
+
+*A right-click context menu added!  Includes many commonly used items for a variety of situations.
+*Menu items that are hotkey mappable now show their current hotkey mapping
+*Major overhaul to the Menu organization.
+*All FCEUX features are now accessible in the menu
+*Alt Menu Shortcuts properly configured
+*Menu items are properly grayed when not useable
+*All movie related menu items moved to a Movie options dialog
+*Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open & Close ROM)
+*Drag & Drop for .fm2 and .lua files
+*Many new functions added to the context menu (See context menu for details)
+*New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles
+
+<b>Lua</b>
+
+*Added input.get() !  Returns the mouse info and all keyboard buttons pressed by the user.
+*Fixed joypad.set().  False now sets a button to off.  Nil does not affect the button at all (allowing the user to still control it).
+*gui.text() Increased height (to approx. 7 lines).
+*speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed.
+*memory.readbyte will recognize frozen addresses (cheats).
+*movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded).
+*Added FCEU.poweron()
+*Added FCEU.softreset()
+*Added FCEU.lagged()
+*Added FCEU.lagcount()
+*Added FCEU.getreadonly()
+*Added FCEU.setreadonly()
+*Added FCEU.fceu_setrenderplanes(sprites, background)
+*Added movie.active()
+*Added movie.rerecordcount()
+*Added movie.length()
+*Added movie.getname()
+*Added movie.playbeginning()
+*Added -lua command line argment, loads a Lua script on startup
+*Added zapper.read() - returns the zapper (mouse) data.  (Currently does return zapper data in movie playback).
+*Added joypad.write and joypad.get for naming consistency.
+*Added rom.readbyte()
+*Added rom.readbytesigned()
+
+<b>Sound Config</b>
+
+*Turning sound off disabled sound config controls
+*Re-enabled sound buffer time slider control
+
+<b>Hex Editor</b>
+
+*Freezing ram addresses automatically updates the Cheats dialog if it is open.
+* Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs).
+*Dialog remembers window size.
+*Dump Rom & Dump PPU to file Dialogs use ROM to build default filename
+*Maximize and minimize buttons added.
+*Help menu item added
+
+<b>Memory Watch</b>
+
+*Dialog now includes Ram change monitoring. (see memwatch for details).
+*Dialog is now collapsible to 1 column.
+*No longer crashes when attempting to load an invalid file from the recent file menu.
+*Cancel option added to the save changes dialog.
+*Memory address values that are frozen by the debugger or hex editor are displayed in blue.
+*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
+*Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename
+*Drag and drop for .txt (memory watch) files.
+*Minor menu and hotkey fixes.
+*Watch values now compatible with custom windows dialog colors.
+
+<b>Debugger</b>
+
+*Shows scanlines and PPU pixel values
+*Shows scanlines even while in VBlank
+*Added a Run Line button (runs 1 scanline per click)
+*Run 128 Lines button (runs 128 scanlines per click)
+*Number of active cheats listed.
+*Cheats list automatically updated if ram addresses are frozen in the hex editor.
+*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
+*Debugger now has a minimum valid size
+*Added "Restore original window size" button
+
+<b>PPU Viewer</b>
+
+*Default refresh value set to 15
+*Refresh value stored in the .cfg file
+
+<b>Nametable Viewer</b>
+
+*Default refresh value set to 15
+*Refresh value stored in the .cfg file
+
+<b>Trace Logger</b>
+
+*Fixed bug where user can't scroll the log window while it is auto-updating.
+*Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping.
+
+<b>Text Hooker</b>
+
+*Saving a .tht file no longer crashes
+*Dialog updates every frame
+*Initialization error checking reinstalled,
+*Dialog remembers window position
+*Fixed bug where canceling save as produces an error message.
+*Save As produces default filename based on the current ROM
+
+<b>Message Log</b>
+
+*Remembers X,Y position
+*Resized width and height
+*Allowed more lines of text to appear on the screen at once.
+
+<b>Metadata</b>
+
+*Remembers window position
+*Can be called from the context menu if a movie is loaded (see context menu for details).
+
+<b>TASEdit</b>
+
+*added help menu item
+*disabled menu items that are not currently implemented.
+
+<b>Turbo</b>
+*Turbo now employs frame skip, greatly increasing its speed
+*The mute turbo option completely bypasses sound processing (another big speed boost)
+*Turbo now works with the Lazy wait for VBlank sync setting
+        </pre>
+      </p>
+    </p>
+    -- adelikat
+    </p>
+
+    <div class="mainbox">
 <h2 class="boxhead">News</h2>   <!-- News section -->
 <div class="boxbody">
 

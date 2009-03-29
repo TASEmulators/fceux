@@ -16,7 +16,8 @@ GTK launcher GUI.  The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).
     <li>Network play is not presently functional. Fixing it is a high priority.</li>
     <li>Win32:
     <ul>
-     <li>Lua is enabled by use of the [<a href="http://fceux.com/luapack">fceux.com/luapack</a>] which should be unzipped alongside your fceux.exe. 
+      <li>Lua is enabled and has all necessary files in the 2.1 release.  It also comes with a number of examples which show some of Lua's full potential</li>
+      <li>These files are also available in the [<a href="http://fceux.com/luapack">fceux.com/luapack</a>] (to use these, they must be in the same folder as fceux.exe). 
      <li>Be sure to check out the .chm file. We work pretty hard on keeping that up to date.
      <li>The latest win32 interim build is generally fresh within a day 
 or two at <a href="http://fceux.com/zip">http://fceux.com/zip</a> -- If you are 
