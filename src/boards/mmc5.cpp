@@ -165,12 +165,15 @@ int DetectMMC5WRAMSize(uint32 crc32)
 		}
 	}
 
-	//mbg 8/4/08 - previously, this was returning 8KB
+	//mbg 04-aug-08 - previously, this was returning 8KB
 	//but I changed it to return 64 because unlisted carts are probably homebrews, and they should probably use 64 (why not use it all?)
-	//ch4 10/12/08 - then f***ng for what all this shit above? let's give em all this 64k shit! Damn
+	//ch4 10-dec-08 - then f***ng for what all this shit above? let's give em all this 64k shit! Damn
 	//               homebrew must use it's own emulators or standart features.
-	//adelikat 12/20/08 - reverting back to return 64, sounds like it was changed back to 8 simply on principle.  FCEUX is all encompassing, and that include
+	//adelikat 20-dec-08 - reverting back to return 64, sounds like it was changed back to 8 simply on principle.  FCEUX is all encompassing, and that include
 	//rom-hacking.  We want it to be the best emulator for such purposes.  So unless return 64 harms compatibility with anything else, I see now reason not to have it
+	//mbg 29-mar-09 - I should note that mmc5 is in principle capable of 64KB, even if no real carts ever supported it.
+	//This does not in principle break any games which share this mapper, and it should be OK for homebrew.
+	//if there are games which need 8KB instead of 64KB default then lets add them to the list
 	return 64;
 }
 

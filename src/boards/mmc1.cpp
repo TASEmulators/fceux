@@ -323,9 +323,11 @@ static void GenMMC1Init(CartInfo *info, int prg, int chr, int wram, int battery)
   if(wram)
   {
     WRAM=(uint8*)FCEU_gmalloc(wram*1024);
-	//mbg 6/17/08 - this shouldve been cleared to re-initialize save ram
-	//ch4 10/12/08 - nope, this souldn't
-	//memset(WRAM,0,wram*1024);
+	//mbg 17-jun-08 - this shouldve been cleared to re-initialize save ram
+	//ch4 10-dec-08 - nope, this souldn't
+	//mbg 29-mar-09 - no time to debate this, we need to keep from breaking some old stuff.
+	//we really need to make up a policy for how compatibility and accuracy can be resolved.
+	memset(WRAM,0,wram*1024);
     mmc1opts|=1;
     if(wram>8) mmc1opts|=4;
     SetupCartPRGMapping(0x10,WRAM,wram*1024,1);
