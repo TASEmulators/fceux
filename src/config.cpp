@@ -18,7 +18,7 @@ char *FCEUI_GetAboutString() {
 Authors:\n\
 zeromus, adelikat, CaH4e3\n\n\
 Contributers:\n\
-DWEdit,QFox\n\
+Acmlm,DWEdit,QFox\n\
 \n\
 FCEUX 2.0\n\
 mz, nitsujrehtona, Lukas Sabota,\n\

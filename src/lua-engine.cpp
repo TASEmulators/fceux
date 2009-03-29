@@ -2036,7 +2036,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 	if (!L) {
 		
 		#ifdef WIN32
-			HMODULE test = LoadLibrary("dll\\lua5.1.dll");
+			HMODULE test = LoadLibrary("lua5.1.dll");
 			if(!test)
 			{
 				FCEUD_PrintError("Couldn't initialize lua system due to failure loading lua5.1.dll");
