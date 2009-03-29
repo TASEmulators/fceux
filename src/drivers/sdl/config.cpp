@@ -303,7 +303,9 @@ InitConfig()
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
     config->addOption(prefix + "InputDisplay", SDLK_i);
+    #ifdef CREATE_AVI
     config->addOption(prefix + "MuteCapture", SDLK_DELETE);
+    #endif
     config->addOption(prefix + "Quit", SDLK_ESCAPE);
     //config->addOption(prefix + "Power", 0);
     

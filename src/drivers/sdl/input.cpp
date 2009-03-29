@@ -168,7 +168,9 @@ int movieToggleFrameDisplayKey;
 int lagCounterDisplayKey;
 int SubtitleDisplayKey;
 int InputDisplayKey;
+#ifdef CREATE_AVI
 int MuteCaptureKey;
+#endif
 
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
@@ -206,7 +208,9 @@ void setHotKeys()
 	g_config->getOption("SDL.Hotkeys.MovieToggleFrameDisplay", &movieToggleFrameDisplayKey);
 	g_config->getOption("SDL.Hotkeys.SubtitleDisplay", &SubtitleDisplayKey);
 	g_config->getOption("SDL.Hotkeys.InputDisplay", &InputDisplayKey);
+	#ifdef CREATE_AVI
 	g_config->getOption("SDL.Hotkeys.MuteCapture", &MuteCaptureKey);
+	#endif
 	/*
 	config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
 	config->addOption(prefix + "Power", 0);
@@ -419,10 +423,12 @@ KeyboardCommands()
         g_config->setOption("SDL.InputDisplay", input_display);
     }
     
+    #ifdef CREATE_AVI
     if(_keyonly(MuteCaptureKey)) {
         extern int mutecapture;
         mutecapture ^= 1;
     }
+    #endif
 
     if(_keyonly(pauseKey)) {
         FCEUI_ToggleEmulationPause();
