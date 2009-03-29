@@ -1,14 +1,15 @@
---x_functions - various functions needed for scripts witten by Xkeeper
---Written by Xkeeper
 
-x_func_version	= 5;
+x_func_version	= 6;
 
 --[[
 	Minor version history:
 
-	v 5 -----------
+	v5 -----------
 	- Added Bisqwit's 'clone table' function.
-
+	
+	v6 -----------
+	- added pairs by keys
+	- added hitbox functions
 
 
 
@@ -50,7 +51,12 @@ end;
 -- Draws a rectangle from x1,y1 to x2, y2
 function box(x1,y1,x2,y2,color)
 	if (x1 >= 0 and x1 <= 255 and x2 >= 0 and x2 <= 255 and y1 >= 0 and y1 <= 244 and y2 >= 0 and y2 <= 244) then
-		gui.drawbox(x1,y1,x2,y2,color);
+--[[	local success = pcall(function() gui.drawbox(x1,y1,x2,y2,color); end);
+		if not success then 
+			text(60, 150, string.format("%3d %3d %3d %3d", x1, y1, x2, y2));
+			FCEU.pause();
+		end;
+]]		gui.drawbox(x1,y1,x2,y2,color);
 	end;
 end;
 
@@ -147,6 +153,87 @@ table.clone = function(table)
   return res
 end
 
+spairs		= function (t, f)
+	local a = {}
+	for n in pairs(t) do table.insert(a, n) end
+	table.sort(a, f)
+	local i = 0      -- iterator variable
+	local iter = function ()   -- iterator function
+		i = i + 1
+		if a[i] == nil then return nil
+		else return a[i], t[a[i]]
+		end
+	end
+	return iter
+end
+
+
+-- ****************************************************************************
+-- * hitbox( coords1, coords2, con, coff )
+-- * Checks if any point of coords1 is within coords2. 
+-- * con/coff determine what colors of box to draw.
+-- ****************************************************************************
+function hitbox(b1x1, b1y1, b1x2, b1y2, b2x1, b2y1, b2x2, b2y2, con, coff)
+
+	if not b1x1 then
+		text(0, 8, "ERROR!!!!");
+		return;
+	end;
+
+	local noboxes	= false;
+	if con == nil and coff == nil then
+		noboxes	= true;
+	else
+		if coff == nil then
+			coff = "#00ff00"
+		end;
+
+		if con == nil then
+			con	= "#dd0000";
+		end;
+		if coff == nil then
+			coff = "#00ff00"
+		end;
+	end;
+
+	boxes	= {{
+			x	= {b1x1, b1x2},
+			y	= {b1y1, b1y2},
+		}, {
+			x	= {b2x1, b2x2},
+			y	= {b2y1, b2y2},
+		}};
+
+	hit	= false;
+
+	for xc = 1, 2 do
+		for yc = 1, 2 do
+
+			if	(boxes[1]['x'][xc] >= boxes[2]['x'][1]) and
+				(boxes[1]['y'][yc] >= boxes[2]['y'][1]) and
+				(boxes[1]['x'][xc] <= boxes[2]['x'][2]) and
+				(boxes[1]['y'][yc] <= boxes[2]['y'][2]) then
+
+				hit	= true;
+				-- TODO: make this break out of the for loop? might not be worth it
+			end;
+		end;
+	end;
+
+	if hit == true then
+		if not noboxes then box(b2x1, b2y1, b2x2, b2y2, con); end;
+		return true;
+	else
+		if not noboxes then box(b2x1, b2y1, b2x2, b2y2, coff); end;
+		return false;
+	end;
+
+	return true;
+
+end;
+
+
+
 function x_requires(required)
 	-- Sanity check. If they require a newer version, let them know.
 	timer	= 1;
@@ -162,7 +249,7 @@ function x_requires(required)
 			text( 10, 32, string.format("This Lua script requires version %02d or greater.", required));
 			text( 43, 42, string.format("Your x_functions.lua is version %02d.", x_func_version));
 			text( 29, 58, "Please check for an updated version at");
-			text( 14, 69, "http://xkeeper.shacknet.nu/");
+			text( 14, 69, "http://xkeeper.shacknet.nu:5/");
 			text(114, 78, "emu/nes/lua/x_functions.lua");
 
 			warningboxcolor	= string.format("%02X", math.floor(math.abs(30 - math.fmod(timer, 60)) / 30 * 0xFF));
