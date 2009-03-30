@@ -21,7 +21,7 @@ further development.  FCEUX2.1 comes pre-packaged with all Lua related .dlls.  I
 href="http://fceux.com/luapack">fceux.com/luapack</a>] which should be unzipped alongside your fceux.exe. The large numbers of dlls 
 wasn't our choice; but it will enable the iup user interface library which will permit scripts to create their own guis, as well as 
 rendering the base FCEUX distribution more compact.  Examples of lua scripts may be found in the subversion repository <a 
-href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/LuaScripts/">here</a>.  In addition, FCEUX2.1 comes pre-packaged with these scripts.
+href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts/">here</a>.  In addition, FCEUX2.1 comes pre-packaged with these scripts.
   <p>
     You can find out what we've been up to since the last release by checking the <a href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/changelog.txt">changelog</a> directly.
 </p><p>
