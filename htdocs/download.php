@@ -40,13 +40,13 @@ port are reccommended to install and use this, unless you particullarly prefer t
 </td></tr>
 <tr><th class="boxhead">Version</th><th class="boxhead">Date</th><th class="boxhead">Description</th></tr>
 <tr>
-    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.3.win32.zip?download">2.0.3 win32 binary</a></td>
-    <td>02 November 2008</td>
+    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.0.win32.zip">2.1.0 win32 binary</a></td>
+    <td>29 March 2009</td>
     <td>This is the latest official release</td>
 </tr>
 <tr>
-    <td><a href="http://prdownloads.sourceforge.net/fceultra/fceux-2.0.3.src.tar.bz2?download">2.0.3 source</a></td>
-    <td>02 November 2008</td>
+    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.0.src.tar.bz2">2.1.0 source</a></td>
+    <td>29 March 2009</td>
     <td>This is the latest official release</td>
 </tr>
 </table>
