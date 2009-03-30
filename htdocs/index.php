@@ -43,7 +43,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/LuaScripts
   <!-- News section -->
   <div class="boxbody">
 
-    <h3 class="boxsubhead">02 November 2008</h3>
+    <h3 class="boxsubhead">29 March 2009</h3>
     <p>
       <strong>FCEUX 2.1 release</strong>
     </p>
