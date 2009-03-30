@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -2500,6 +2500,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\auxlib.lua&quot;  &quot;$(OutDir)&quot;&#x0D;&#x0A;"
+					Outputs="$(OutDir)/auxlib.lua"
 				/>
 			</FileConfiguration>
 		</File>
