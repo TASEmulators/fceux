@@ -49,6 +49,13 @@ port are reccommended to install and use this, unless you particullarly prefer t
     <td>29 March 2009</td>
     <td>This is the latest official release</td>
 </tr>
+<tr>
+    <td><a 
+href="http://downloads.sourceforge.net/fceultra/fceux_2.1_i386.deb">2.1.0 i386 deb package</a></td>
+    <td>29 March 2009</td>
+    <td>This is the latest official release</td>
+</tr>
+<tr>
 </table>
 
 <?php include("footer.php"); ?>
