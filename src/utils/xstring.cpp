@@ -602,7 +602,7 @@ namespace UtfConverter
             delete [] widestringnative;
             return resultstring;
         }
-        else if (sizeof(wchar_t) == 4)
+        else if (sizeof(wchar_t) == 4) // somewhat pointless as it's always 2 on WIN32, but whatever.
         {
             wchar_t* widestringnative = new wchar_t[widesize];
             const UTF8* sourcestart = reinterpret_cast<const UTF8*>(utf8string.c_str());
@@ -650,7 +650,7 @@ namespace UtfConverter
             delete [] utf8stringnative;
             return resultstring;
         }
-        else if (sizeof(wchar_t) == 4)
+        else if (sizeof(wchar_t) == 4) // again, sizeof(wchar_t) == 2 in win32
         {
             size_t utf8size = 4 * widesize + 1;
             char* utf8stringnative = new char[utf8size];
@@ -677,7 +677,7 @@ namespace UtfConverter
     }
 }
 #else
-namespace UTF8
+namespace UtfConverter
 {
     void SeqValue(std::string& result, unsigned n)
     {
@@ -722,20 +722,23 @@ namespace UTF8
         pos += len;
         return result;
     }
-}
 
-void UTF8toUCS4(std::string& input,
-                std::vector<unsigned>& result)
-{
-    for(std::string::size_type pos = 0; pos < input.size(); )
-        result.push_back( UTF8::DecData(input, pos) );
-}
 
-void UCS4toUTF8(std::vector<unsigned>& input,
-                std::string& result)
-{
-    for(std::string::size_type pos = 0; pos < input.size(); ++pos)
-        UTF8::SeqValue(result, input[pos]);
+    std::wstring FromUtf8(std::string& input) // string -> wstring
+    {
+        std::wstring result;
+        for(std::string::size_type pos = 0; pos < input.size(); )
+            result += DecData(input, pos);
+        return result;
+    }
+    
+    std::string ToUtf8(std::wstring& input) // wstring -> string
+    {
+        std::string result;
+        for(std::string::size_type pos = 0; pos < input.size(); ++pos)
+            SeqValue(result, input[pos]);
+        return result;
+    }
 }
 #endif
 
@@ -744,16 +747,7 @@ void UCS4toUTF8(std::vector<unsigned>& input,
 std::wstring mbstowcs(std::string str) // UTF8->UTF32
 {
 	try {
-		#ifdef WIN32
 		return UtfConverter::FromUtf8(str);
-		#else
-		std::vector<unsigned> result; // will store the UTF32'd result as a vector
-		UTF8toUCS4(str, result);
-		std::wstring wideresult; // will store the UTF32'd result as a wstring
-		for (std::vector<unsigned>::iterator it = result.begin(); it != result.end(); ++it) // iterate through the vector and put its contents into a wstring to be returned
-			wideresult.append (1, (wchar_t)(*it));
-		return wideresult;
-		#endif
 	} catch(std::exception) {
 		return L"(failed UTF-8 conversion)";
 	}
@@ -762,16 +756,7 @@ std::wstring mbstowcs(std::string str) // UTF8->UTF32
 //convert a std::wstring to std::string
 std::string wcstombs(std::wstring str) // UTF32->UTF8
 {
-	#ifdef WIN32
 	return UtfConverter::ToUtf8(str);
-	#else
-	std::string result; // will store the UTF8'd result as a string
-	std::vector<unsigned> input; // 
-	for (std::wstring::iterator it = str.begin(); it < str.end(); it++) // interate through the wstring and put its contents into a vector to be processed
-		input.push_back((unsigned)(*it));
-	UCS4toUTF8(input, result);
-	return result;
-	#endif
 }
 
 
