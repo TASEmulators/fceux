@@ -576,6 +576,7 @@ std::string mass_replace(const std::string &source, const std::string &victim, c
 	return answer;
 }
 
+#ifdef WIN32 // this code tends to crash on SDL.
 //http://www.codeproject.com/KB/string/UtfConverter.aspx
 #include "ConvertUTF.h"
 namespace UtfConverter
@@ -675,20 +676,102 @@ namespace UtfConverter
         return "";
     }
 }
+#else
+namespace UTF8
+{
+    void SeqValue(std::string& result, unsigned n)
+    {
+        if(n < 0x80)                 // <=7 bits
+            result += (char)n;
+        else
+        {
+            if(n < 0x800)            // <=11 bits
+                result += (char)(0xC0 + (n>>6));
+            else
+            {
+                if(n < 0x10000)      // <=16 bits
+                    result += (char)(0xE0 + (n>>12));
+                else                 // <=21 bits
+                {
+                    result += (char)(0xF0 + (n>>18));
+                    result += (char)(0x80 + ((n>>12)&63));
+                }
+                result += (char)(0x80 + ((n>>6)&63));
+            }
+            result += (char)(0x80 + (n&63));
+        }
+    }
+
+    unsigned DecData(const std::string& input, size_t& pos)
+    {
+        unsigned char headbyte = input[pos];
+        static const char sizes[16] =  { 1,1,1,1,1,1,1,1, 0,0,0,0,2,2,3,4 };
+        static const unsigned minimums[4] = { 0, 0x80, 0x800, 0x10000 };
+        static const char     masks[4]    = { 0x7F, 0x1F, 0x0F, 0x07 };
+        unsigned len = sizes[headbyte >> 4];
+        if(len < 1 || pos+len > input.size()) { ++pos; return '?'; }
+        unsigned result=0, shl=0;
+        for(unsigned n = len; --n > 0; shl += 6)
+        {
+            unsigned char byte = input[pos+n];
+            if((byte & 0xC0) != 0x80) { ++pos; return '?'; }
+            result |= (byte & 0x3F) << shl;
+        }
+        result |= (headbyte & masks[len-1]) << shl;
+        if(result < minimums[len-1]) { ++pos; return '?'; }
+        pos += len;
+        return result;
+    }
+}
+
+void UTF8toUCS4(std::string& input,
+                std::vector<unsigned>& result)
+{
+    for(std::string::size_type pos = 0; pos < input.size(); )
+        result.push_back( UTF8::DecData(input, pos) );
+}
+
+void UCS4toUTF8(std::vector<unsigned>& input,
+                std::string& result)
+{
+    for(std::string::size_type pos = 0; pos < input.size(); ++pos)
+        UTF8::SeqValue(result, input[pos]);
+}
+#endif
+
   
 //convert a std::string to std::wstring
-std::wstring mbstowcs(std::string str)
+std::wstring mbstowcs(std::string str) // UTF8->UTF32
 {
 	try {
+		#ifdef WIN32
 		return UtfConverter::FromUtf8(str);
+		#else
+		std::vector<unsigned> result; // will store the UTF32'd result as a vector
+		UTF8toUCS4(str, result);
+		std::wstring wideresult; // will store the UTF32'd result as a wstring
+		for (std::vector<unsigned>::iterator it = result.begin(); it != result.end(); ++it) // iterate through the vector and put its contents into a wstring to be returned
+			wideresult.append (1, (wchar_t)(*it));
+		return wideresult;
+		#endif
 	} catch(std::exception) {
 		return L"(failed UTF-8 conversion)";
 	}
 }
 
-std::string wcstombs(std::wstring str)
+//convert a std::wstring to std::string
+std::string wcstombs(std::wstring str) // UTF32->UTF8
 {
+	#ifdef WIN32
 	return UtfConverter::ToUtf8(str);
+	#else
+	std::string result; // will store the UTF8'd result as a string
+	std::vector<unsigned> input; // 
+	for (std::wstring::iterator it = str.begin(); it < str.end(); it++) // interate through the wstring and put its contents into a vector to be processed
+		input.push_back((unsigned)(*it));
+	UCS4toUTF8(input, result);
+	return result;
+	#endif
 }
 
 

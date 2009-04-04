@@ -1,3 +1,4 @@
+04-apr-2009 - shinydoofy - fixed fcm->fm2 code once again (this time for good, hopefully). Thanks to Bisqwit!
 04-apr-2009 - shinydoofy - Reverted UTF8<->UTF32 code changes to fix up the win32 build for now
 01-apr-2009 - adelikat - Beginning 2.1.1
 ---version 2.1.0 released---
