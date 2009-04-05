@@ -45,12 +45,12 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
 
     <h3 class="boxsubhead">05 April 2009</h3>
     <p>
-      <strong>FCEUX 2.1 release</strong>
+      <strong>FCEUX 2.1.0a release</strong>
     </p>
     <p>
       Jump to the <a href="download.php">download</a> page.
       <p>
-        The 2.1.0a fixes a minor issue involving movie recording on both platforms.  It fixes an issue where extra bytes where being appended 
+        2.1.0a fixes a minor issue involving movie recording on both platforms.  It fixes an issue where extra bytes where being appended 
         to the author field of the .fm2 file, resulting in bloated files.
       </p>
     </p>
@@ -64,7 +64,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
 
     <h3 class="boxsubhead">29 March 2009</h3>
     <p>
-      <strong>FCEUX 2.1 release</strong>
+      <strong>FCEUX 2.1.0 release</strong>
     </p>
     <p>
       Jump to the <a href="download.php">download</a> page.
