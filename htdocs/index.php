@@ -43,6 +43,25 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
   <!-- News section -->
   <div class="boxbody">
 
+    <h3 class="boxsubhead">05 April 2009</h3>
+    <p>
+      <strong>FCEUX 2.1 release</strong>
+    </p>
+    <p>
+      Jump to the <a href="download.php">download</a> page.
+      <p>
+        The 2.1.0a fixes a minor issue involving movie recording on both platforms.  It fixes an issue where extra bytes where being appended 
+        to the author field of the .fm2 file, resulting in bloated files.
+      </p>
+    </p>
+    -- adelikat
+    </p>
+
+<div class="mainbox">
+  <h2 class="boxhead">News</h2>
+  <!-- News section -->
+  <div class="boxbody">
+
     <h3 class="boxsubhead">29 March 2009</h3>
     <p>
       <strong>FCEUX 2.1 release</strong>
@@ -50,7 +69,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
     <p>
       Jump to the <a href="download.php">download</a> page.
       <p>
-        The 2.1 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
+        The 2.1.0 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
         feature enhancements to both the Win32 and SDL ports.
         <pre>
 <b>Major Bug / Crash Bug Fixes</b>
