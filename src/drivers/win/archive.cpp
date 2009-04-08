@@ -312,7 +312,7 @@ static BOOL CALLBACK ArchiveFileSelectorCallback(HWND hwndDlg, UINT uMsg, WPARAM
 				return TRUE;
 
 			case IDOK:
-				EndDialog(hwndDlg,SendMessage((HWND)lParam,LB_GETCURSEL,0,0));
+				EndDialog(hwndDlg,SendMessage(GetDlgItem(hwndDlg,IDC_LIST1),LB_GETCURSEL,0,0));
 				return TRUE;
 
 			case IDCANCEL:
