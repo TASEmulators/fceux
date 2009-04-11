@@ -1,8 +1,11 @@
+11-apr-2009 - adelikat - made default save slot 0 instead of 1, Win32 - remember last slot used
 11-apr-2009 - shinydoofy - sdl - added --pauseframe to pause movie playback on frame x
 11-apr-2009 - shinydoofy - sdl - dropped UTFConverter.c from SDL build and added hotkey Q for toggling read-only/read+write movie playback
+
+--version 2.1.0a released----
 04-apr-2009 - shinydoofy - fixed fcm->fm2 code once again (this time for good, hopefully). Thanks to Bisqwit!
 04-apr-2009 - shinydoofy - Reverted UTF8<->UTF32 code changes to fix up the win32 build for now
-01-apr-2009 - adelikat - Beginning 2.1.1
+
 ---version 2.1.0 released---
 29-mar-2009 - adelikat - Win32 - reverted acmlm's /dll folder change
 28-mar-2009 - shinydoofy - sdl - added hotkey Del to toggle mute avi capturing

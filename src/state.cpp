@@ -332,7 +332,7 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 	return ret;
 }
 
-int CurrentState=1;
+int CurrentState=0;
 extern int geniestage;
 
 

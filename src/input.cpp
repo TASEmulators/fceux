@@ -619,8 +619,6 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	FCEUI_DoExit,			  0, 0, "Exit", 0},
-	//adelikat: CaH4e3, perhaps finding the true cause should be on the person who made the change?
-	//Also, removing the windows only function from this table.  This is a core file and should stay compatible with the SDL build
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", 0 },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", 0 },
 	{ EMUCMD_SPEED_NORMAL,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Normal Speed", 0 },
@@ -727,10 +725,6 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
 
-// jabberwoocky my son, don't be aware lol
-// this is much mindfucking thing i ever seen here
-// even when i fixed it, there is a lot of possibilities to break all key input stuff with one
-// unarranged command enumerator.
 static int execcmd, i;
 
 void FCEUI_HandleEmuCommands(TestCommandState* testfn)
