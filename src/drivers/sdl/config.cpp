@@ -303,6 +303,7 @@ InitConfig()
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
     config->addOption(prefix + "InputDisplay", SDLK_i);
+    config->addOption(prefix + "MovieToggleReadWrite", SDLK_q);
     #ifdef CREATE_AVI
     config->addOption(prefix + "MuteCapture", SDLK_DELETE);
     #endif

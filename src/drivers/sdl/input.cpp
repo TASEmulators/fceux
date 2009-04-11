@@ -168,6 +168,7 @@ int movieToggleFrameDisplayKey;
 int lagCounterDisplayKey;
 int SubtitleDisplayKey;
 int InputDisplayKey;
+int movieToggleReadWriteKey;
 #ifdef CREATE_AVI
 int MuteCaptureKey;
 #endif
@@ -208,6 +209,7 @@ void setHotKeys()
 	g_config->getOption("SDL.Hotkeys.MovieToggleFrameDisplay", &movieToggleFrameDisplayKey);
 	g_config->getOption("SDL.Hotkeys.SubtitleDisplay", &SubtitleDisplayKey);
 	g_config->getOption("SDL.Hotkeys.InputDisplay", &InputDisplayKey);
+	g_config->getOption("SDL.Hotkeys.MovieToggleReadWrite", &movieToggleReadWriteKey);
 	#ifdef CREATE_AVI
 	g_config->getOption("SDL.Hotkeys.MuteCapture", &MuteCaptureKey);
 	#endif
@@ -421,6 +423,10 @@ KeyboardCommands()
         FCEUI_ToggleInputDisplay();
         extern int input_display;
         g_config->setOption("SDL.InputDisplay", input_display);
+    }
+    
+    if(_keyonly(movieToggleReadWriteKey)) {
+        FCEUI_SetMovieToggleReadOnly(!FCEUI_GetMovieToggleReadOnly());
     }
     
     #ifdef CREATE_AVI
