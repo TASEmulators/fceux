@@ -186,6 +186,9 @@ InitConfig()
     // display input
     config->addOption("inputdisplay", "SDL.InputDisplay", 0);
     
+    // pause movie playback at frame x
+    config->addOption("pauseframe", "SDL.PauseFrame", 0);
+    
     // overwrite the config file?
     config->addOption("no-config", "SDL.NoConfig", 0);
     

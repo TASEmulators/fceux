@@ -109,6 +109,7 @@ char *DriverUsage="\
 --inputcfg      d      Configures input device d on startup.\n\
 --inputdisplay{0|1|2|4}Displays game input.\n\
 --playmov       f      Plays back a recorded movie from filename f.\n\
+--pauseframe    x      Pauses movie playback at frame x.\n\
 --fcmconvert    f      Converts fcm movie file f to fm2.\n\
 --no-config    {0,1}   Don't change the config file";
 
@@ -617,8 +618,11 @@ SDL_GL_LoadLibrary(0);
     {
         if(fname.find(".fm2") != std::string::npos)
         {
-	    FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
-            FCEUI_LoadMovie(fname.c_str(), false, false, false);
+            static int pauseframe;
+            g_config->getOption("SDL.PauseFrame", &pauseframe);
+            g_config->setOption("SDL.PauseFrame", 0);
+            FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
+            FCEUI_LoadMovie(fname.c_str(), false, false, pauseframe ? pauseframe : false);
         }
         else
         {
