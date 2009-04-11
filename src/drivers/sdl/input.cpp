@@ -228,7 +228,8 @@ void setHotKeys()
 	config->addOption(prefix + "SelectState6", SDLK_6);
 	config->addOption(prefix + "SelectState7", SDLK_7);
 	config->addOption(prefix + "SelectState8", SDLK_8);
-	config->addOption(prefix + "SelectState9", SDLK_9);*/
+	config->addOption(prefix + "SelectState9", SDLK_9);
+	*/
 	return;
 }
 
@@ -236,13 +237,13 @@ void setHotKeys()
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
  * */
-std::string GetFilename(const char* title)
+std::string GetFilename(const char* title, bool save)
 {
     if (FCEUI_EmulationPaused() == 0)
         FCEUI_ToggleEmulationPause();
     std::string fname = "";
     
-    #ifdef WIN32
+    #ifdef WIN32 // seriously?
     OPENFILENAME ofn;       // common dialog box structure
     char szFile[260];       // buffer for file name
     HWND hwnd;              // owner window
@@ -276,6 +277,8 @@ std::string GetFilename(const char* title)
     std::string command = "zenity --file-selection --title=\"";
     command.append(title);
     command.append("\"");
+    if (save) // Do we want to save a file or load one?
+      command.append(" --save --confirm-overwrite");
     if ( !(fpipe = (FILE*)popen(command.c_str(),"r")) )
     {  // If fpipe is NULL
         FCEUD_PrintError("Pipe error on opening zenity");
@@ -284,9 +287,7 @@ std::string GetFilename(const char* title)
     int c; 
     while( (c = fgetc(fpipe)) )
     {
-        if (c == EOF)
-            break;
-        if (c == '\n')
+        if (c == EOF || c == '\n')
             break;
         fname += c;
     }
@@ -387,7 +388,7 @@ KeyboardCommands()
             if(is_shift) {
                 FCEUI_StopMovie();
                 std::string fname;
-                fname = GetFilename("Open FM2 movie for playback...");
+                fname = GetFilename("Open FM2 movie for playback...", false);
                 if(fname != "")
                 {
                     if(fname.find(".fm2") != std::string::npos)
@@ -471,7 +472,7 @@ KeyboardCommands()
     #ifdef _S9XLUA_H
     if(_keyonly(loadLuaKey)) {
         std::string fname;
-        fname = GetFilename("Open LUA script...");
+        fname = GetFilename("Open LUA script...", false);
         if(fname != "")
             FCEU_LoadLuaCode(fname.c_str());
     }
