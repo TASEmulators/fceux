@@ -33,6 +33,7 @@
 #include "../../movie.h"
 #include "../../fceu.h"
 #include "../../driver.h"
+#include "../../utils/xstring.h"
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif
@@ -237,7 +238,7 @@ void setHotKeys()
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
  * */
-std::string GetFilename(const char* title, bool save)
+std::string GetFilename(const char* title, bool save, const char* filter)
 {
     if (FCEUI_EmulationPaused() == 0)
         FCEUI_ToggleEmulationPause();
@@ -276,9 +277,15 @@ std::string GetFilename(const char* title, bool save)
     FILE *fpipe;
     std::string command = "zenity --file-selection --title=\"";
     command.append(title);
+    command.append("\" --file-filter=\"");
+    command.append(filter);
     command.append("\"");
     if (save) // Do we want to save a file or load one?
-      command.append(" --save --confirm-overwrite");
+    {
+      command.append(" --save --confirm-overwrite --filename=\".");
+      command.append(getExtension(filter));
+      command.append("\"");
+    }
     if ( !(fpipe = (FILE*)popen(command.c_str(),"r")) )
     {  // If fpipe is NULL
         FCEUD_PrintError("Pipe error on opening zenity");
@@ -295,6 +302,55 @@ std::string GetFilename(const char* title, bool save)
     #endif
     FCEUI_ToggleEmulationPause();
     return fname;
+}
+
+/**
+ * This function opens a text entry dialog and returns the user's input
+ */
+std::string GetUserText(const char* title)
+{
+	if (FCEUI_EmulationPaused() == 0)
+        	FCEUI_ToggleEmulationPause(); // pause emulation
+	
+	int fullscreen = 0; 
+	g_config->getOption("SDL.Fullscreen", &fullscreen);
+	if(fullscreen)
+		ToggleFS(); // disable fullscreen emulation
+	
+	FILE *fpipe;
+	std::string command = "zenity --entry --title=\"";
+	command.append(title);
+	command.append("\" --text=\"");
+	command.append(title);
+	command.append(":\"");
+	
+	if (!(fpipe = (FILE*)popen(command.c_str(),"r"))) // If fpipe is NULL
+		FCEUD_PrintError("Pipe error on opening zenity");
+	int c;
+	std::string input;
+	while((c = fgetc(fpipe)))
+	{
+		if (c == EOF || c == '\n')
+			break;
+		input += c;
+	}
+	pclose(fpipe);
+	FCEUI_ToggleEmulationPause(); // unpause emulation
+	return input;
+}
+
+
+/**
+* Lets the user start a new .fm2 movie file
+**/
+void FCEUD_MovieRecordTo()
+{
+	std::string fname = GetFilename("Save FM2 movie for recording", true, "FM2 movies|*.fm2");
+	if (!fname.size())
+	  return; // no filename selected, quit the whole thing
+	std::wstring author = mbstowcs(GetUserText("Author name")); // the author can be empty, so no need to check here
+	
+	FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
 }
 
 /**
@@ -350,6 +406,10 @@ KeyboardCommands()
           autoMovieBackup ? "en" : "dis");
     }
     
+    // Start recording an FM2 movie on Alt+R
+    if(keyonly(R) && is_alt) {
+        FCEUD_MovieRecordTo();
+    }
 
     // Famicom disk-system games
     if(gametype==GIT_FDS) 
@@ -388,7 +448,7 @@ KeyboardCommands()
             if(is_shift) {
                 FCEUI_StopMovie();
                 std::string fname;
-                fname = GetFilename("Open FM2 movie for playback...", false);
+                fname = GetFilename("Open FM2 movie for playback...", false, "FM2 movies|*.fm2");
                 if(fname != "")
                 {
                     if(fname.find(".fm2") != std::string::npos)
@@ -472,7 +532,7 @@ KeyboardCommands()
     #ifdef _S9XLUA_H
     if(_keyonly(loadLuaKey)) {
         std::string fname;
-        fname = GetFilename("Open LUA script...", false);
+        fname = GetFilename("Open LUA script...", false, "Lua scripts|*.lua");
         if(fname != "")
             FCEU_LoadLuaCode(fname.c_str());
     }

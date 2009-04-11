@@ -1,3 +1,4 @@
+11-apr-2009 - shinydoofy - sdl - implemented starting an FM2 movie on Alt+R
 11-apr-2009 - adelikat - made default save slot 0 instead of 1, Win32 - remember last slot used
 11-apr-2009 - shinydoofy - sdl - added --pauseframe to pause movie playback on frame x
 11-apr-2009 - shinydoofy - sdl - dropped UTFConverter.c from SDL build and added hotkey Q for toggling read-only/read+write movie playback
