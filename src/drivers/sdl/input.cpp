@@ -353,6 +353,31 @@ void FCEUD_MovieRecordTo()
 	FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
 }
 
+
+/**
+* Lets the user save a savestate to a specific file
+**/
+void FCEUD_SaveStateAs()
+{
+	std::string fname = GetFilename("Save savestate as...", true, "Savestates|*.fc0");
+	if (!fname.size())
+          return; // no filename selected, quit the whole thing
+	
+	FCEUI_SaveState(fname.c_str());
+}
+
+/**
+* Lets the user load a savestate from a specific file
+*/
+void FCEUD_LoadStateFrom()
+{
+	std::string fname = GetFilename("Load savestate from...", false, "Savestates|*.fc?");
+	if (!fname.size())
+	  return; // no filename selected, quit the whole thing
+        
+        FCEUI_LoadState(fname.c_str());
+}
+
 /**
  * Parse keyboard commands and execute accordingly.
  */
@@ -409,6 +434,16 @@ KeyboardCommands()
     // Start recording an FM2 movie on Alt+R
     if(keyonly(R) && is_alt) {
         FCEUD_MovieRecordTo();
+    }
+    
+    // Save a state from a file
+    if(keyonly(S) && is_alt) {
+        FCEUD_SaveStateAs();
+    }
+    
+    // Load a state from a file
+    if(keyonly(L) && is_alt) {
+        FCEUD_LoadStateFrom();
     }
 
     // Famicom disk-system games

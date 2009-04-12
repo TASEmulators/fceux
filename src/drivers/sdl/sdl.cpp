@@ -713,8 +713,6 @@ void FCEUD_PrintError(const char *errormsg)
 
 #define DUMMY(__f) void __f(void) {printf("%s\n", #__f); FCEU_DispMessage("Not implemented.");}
 DUMMY(FCEUD_HideMenuToggle)
-DUMMY(FCEUD_SaveStateAs)
-DUMMY(FCEUD_LoadStateFrom)
 DUMMY(FCEUD_MovieReplayFrom)
 DUMMY(FCEUD_ToggleStatusIcon)
 DUMMY(FCEUD_AviRecordTo)
