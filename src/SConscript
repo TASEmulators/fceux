@@ -12,6 +12,7 @@ file.cpp
 filter.cpp 
 ines.cpp
 input.cpp
+lua-engine.cpp
 netplay.cpp
 nsf.cpp
 oldmovie.cpp
@@ -39,9 +40,6 @@ mappers
 
 Import('env')
 Export('env')
-
-if env['LUA']:
-  file_list.append('lua-engine.cpp')
 
 if env['CREATE_AVI']:
   subdirs.append('drivers/videolog')

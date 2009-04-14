@@ -8,7 +8,6 @@ opts.AddOptions(
   BoolOption('OPENGL',    'Enable OpenGL support', 1),
   BoolOption('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
   BoolOption('DEBUG',     'Build with debugging symbols', 0),
-  BoolOption('LUA',       'Enable Lua support', 1),
   BoolOption('NEWPPU',    'Enable new PPU core', 0),
   BoolOption('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
   BoolOption('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1')
@@ -57,12 +56,12 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
-  if env['LUA']:
-    lua51 = conf.CheckLib('lua5.1', autoadd=1)
-    lua = conf.CheckLib('lua', autoadd=1)
-    if lua == 0 and lua51 == 0:
-      print 'Did not find liblua5.1, liblua, lua.lib or lua5.1.lib, compiling anyway!'
-      env['LUA'] = 0
+  lua51 = conf.CheckLib('lua5.1', autoadd=1)
+  lua = conf.CheckLib('lua', autoadd=1)
+  if lua == 0 and lua51 == 0:
+    print 'Did not find liblua5.1, liblua, lua.lib or lua5.1.lib, exiting!'
+    Exit(1)
+   
     
   ### Search for zenity if we're not in windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin':
@@ -103,13 +102,12 @@ else:
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
-  if env['LUA']:
-    # parse liblua cflags
-    if lua51:
-      env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
-    if lua:
-      env.Append(CPPPATH = ['/usr/local/include/lua', '/usr/include/lua'])
-    env.Append(CPPDEFINES=["_S9XLUA_H"])
+  # parse liblua cflags
+  if lua51:
+    env.Append(CPPPATH = ['/usr/local/include/lua5.1', '/usr/include/lua5.1'])
+  if lua:
+    env.Append(CPPPATH = ['/usr/local/include/lua', '/usr/include/lua'])
+  env.Append(CPPDEFINES=["_S9XLUA_H"])
   env = conf.Finish()
 
 if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
