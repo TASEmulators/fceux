@@ -1,3 +1,4 @@
+15-apr-2009 - shinydoofy - sdl - Lua is optional again, fixed the real issue
 14-apr-2009 - punkrockguy - sdl - LUA is NO longer optional, so the SConscripts have been updated to reflect that change.  This fixes the mysterious non-working input issue.
 12-apr-2009 - shinydoofy - sdl - implemented saving/loading a savestate from a specific file on Alt+S/L
 11-apr-2009 - shinydoofy - sdl - implemented starting an FM2 movie on Alt+R

@@ -202,6 +202,9 @@ static void UpdateGP(int w, void *data, int arg)
 		joy[2]= FCEU_LuaUsingJoypad(2) ? (FCEU_LuaReadJoypad(2) | (*(uint32 *)joyports[0].ptr >> 16)) : *(uint32 *)joyports[0].ptr >> 16;
 		if (FCEU_LuaReadJoypadFalse(2))
 			joy[2] &= FCEU_LuaReadJoypadFalse(2);
+		#else // without this, there seems to be no input at all without Lua
+		joy[0] = *(uint32 *)joyports[0].ptr;;
+		joy[2] = *(uint32 *)joyports[0].ptr >> 16;
 		#endif
 	}
 	else
@@ -215,6 +218,9 @@ static void UpdateGP(int w, void *data, int arg)
 		joy[3]= FCEU_LuaUsingJoypad(3) ? (FCEU_LuaReadJoypad(3) | (*(uint32 *)joyports[1].ptr >> 24)) : *(uint32 *)joyports[1].ptr >> 24;
 		if (FCEU_LuaReadJoypadFalse(3))
 			joy[3] &= FCEU_LuaReadJoypadFalse(3);
+		#else // same goes for the other two pads
+		joy[1] = *(uint32 *)joyports[1].ptr >> 8;
+		joy[3] = *(uint32 *)joyports[1].ptr >> 24;
 		#endif
 	}
 

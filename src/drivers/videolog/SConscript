@@ -6,7 +6,6 @@ rgbtorgb.cpp
 Import('env')
 
 if env['LOGO']:
-  env.Append(LIBS = ["gd"])
   env.Append(CCFLAGS = "-DHAVE_GD")
 
 for x in range(len(my_list)):
