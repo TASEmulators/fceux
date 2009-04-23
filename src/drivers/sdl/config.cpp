@@ -205,7 +205,11 @@ InitConfig()
     config->addOption("mute", "SDL.MuteCapture", 0);
     #endif
     
+    // fcm -> fm2 conversion
     config->addOption("fcmconvert", "SDL.FCMConvert", "");
+    
+    // fm2 -> srt conversion
+    config->addOption("ripsubs", "SDL.RipSubs", "");
 	
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", "0");

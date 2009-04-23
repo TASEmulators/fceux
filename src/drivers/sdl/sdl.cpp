@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <limits.h>
+#include <math.h>
 
 
 #include "main.h"
@@ -111,6 +113,7 @@ char *DriverUsage="\
 --playmov       f      Plays back a recorded movie from filename f.\n\
 --pauseframe    x      Pauses movie playback at frame x.\n\
 --fcmconvert    f      Converts fcm movie file f to fm2.\n\
+--ripsubs       f      Converts movie's subtitles to srt\n\
 --no-config    {0,1}   Don't change the config file";
 
 /* Moved network options out while netplay is broken.
@@ -538,7 +541,7 @@ SDL_GL_LoadLibrary(0);
     {
       int okcount = 0;
       std::string infname = s.c_str();
-      // procude output filename
+      // produce output filename
       std::string outname;
       size_t dot = infname.find_last_of (".");
       if (dot == std::string::npos)
@@ -559,10 +562,78 @@ SDL_GL_LoadLibrary(0);
       } else {
         FCEUD_Message ("Something went wrong while converting your file...\n");
       }
+      
       DriverKill();
       SDL_Quit();
       return 0;
+    }
+    
+    // check for a .fm2 file to rip the subtitles
+    g_config->getOption("SDL.RipSubs", &s);
+    g_config->setOption("SDL.RipSubs", "");
+    if (!s.empty())
+    {
+      MovieData md;
+      std::string infname;
+      infname = s.c_str();
+      FCEUFILE *fp = FCEU_fopen(s.c_str(), 0, "rb", 0);
       
+      // load the movie and and subtitles
+      extern bool LoadFM2(MovieData&, std::istream*, int, bool);
+      LoadFM2(md, fp->stream, INT_MAX, false);
+      LoadSubtitles(md); // fill subtitleFrames and subtitleMessages
+      delete fp;
+      
+      // produce .srt file's name and open it for writing
+      std::string outname;
+      size_t dot = infname.find_last_of (".");
+      if (dot == std::string::npos)
+        outname = infname + ".srt";
+      else
+        outname = infname.substr(0,dot) + ".srt";
+      FILE *srtfile;
+      srtfile = fopen(outname.c_str(), "w");
+      
+      if (srtfile != NULL)
+      {
+        extern std::vector<int> subtitleFrames;
+        extern std::vector<std::string> subtitleMessages;
+        float fps = (md.palFlag == 0 ? 60.0988 : 50.0069); // NTSC vs PAL
+        float subduration = 3; // seconds for the subtitles to be displayed
+        for (int i = 0; i < subtitleFrames.size(); i++)
+        {
+          fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
+          double seconds, ms, endseconds, endms;
+          seconds = subtitleFrames[i]/fps;
+          if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one
+          {
+            if (subtitleFrames[i+1]-subtitleFrames[i] < subduration*fps) // avoid two subtitles at the same time
+            {
+              endseconds = (subtitleFrames[i+1]-1)/fps; // frame x: subtitle1; frame x+1 subtitle2
+            } else {
+              endseconds = seconds+subduration;
+            }
+          } else {
+            endseconds = seconds+subduration;
+          }
+          ms = modf(seconds, &seconds);
+          endms = modf(endseconds, &endseconds);
+          // this is just beyond ugly, don't show it to your kids
+          fprintf(srtfile,
+            "%02.0f:%02d:%02d,%03d --> %02.0f:%02d:%02d,%03d\n", // hh:mm:ss,ms --> hh:mm:ss,ms
+            floor(seconds/3600),    (int)floor(seconds/60   ) % 60, (int)floor(seconds)    % 60, (int)(ms*1000),
+            floor(endseconds/3600), (int)floor(endseconds/60) % 60, (int)floor(endseconds) % 60, (int)(endms*1000));
+          fprintf(srtfile, "%s\n\n", subtitleMessages[i].c_str()); // new line for every subtitle
+        }
+        fclose(srtfile);
+        printf("%d subtitles have been ripped.\n", subtitleFrames.size());
+      } else {
+        FCEUD_Message("Couldn't create output srt file...\n");
+      }
+      
+      DriverKill();
+      SDL_Quit();
+      return 0;
     }
 	
     if(romIndex <= 0) {

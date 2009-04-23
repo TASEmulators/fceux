@@ -496,7 +496,7 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 }
 
 //yuck... another custom text parser.
-static bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
+bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
 	//first, look for an fcm signature
 	char fcmbuf[3];
@@ -750,7 +750,7 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	}
 
 	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
-	LoadSubtitles();
+	LoadSubtitles(currMovieData);
 	delete fp;
 
 	freshMovie = true;	//Movie has been loaded, so it must be unaltered
@@ -1235,13 +1235,12 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 }
 
 //This function creates an array of frame numbers and corresponding strings for displaying subtitles
-void LoadSubtitles(void)
+void LoadSubtitles(MovieData moviedata)
 {
-	
 	extern std::vector<string> subtitles;
-	for(uint32 i=0;i<currMovieData.subtitles.size();i++)
+	for(uint32 i=0; i < moviedata.subtitles.size() ; i++)
 	{
-		std::string& subtitle = currMovieData.subtitles[i];
+		std::string& subtitle = moviedata.subtitles[i];
 		size_t splitat = subtitle.find_first_of(' ');
 		std::string key, value;
 		
