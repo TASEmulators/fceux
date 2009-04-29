@@ -1,3 +1,7 @@
+* Changed glade filename from gfceux.xml -> gfceux.glade
+* Removed the need of running ./generate.ui after every glade change
+* Got rid of some silly glade errors
+* Changed the installation instructions to avoid breakage
 * Gfceux now runs properly from the source directory without 
 being installed
 ================= version 2.1 ====================== ============

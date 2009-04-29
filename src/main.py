@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # gfceux - Graphical launcher for fceux.
 # Designed on Ubuntu, with platfrom independence in mind.
-version = "2.1"
+version = "2.2svn"
 title = "gfceux"
 # Copyright (C) 2008  Lukas Sabota <ltsmooth42 _at_ gmail.com>
 ##
@@ -280,11 +280,11 @@ class GfceuxApp:
         global widgets
         """ Search for the glade XML file and load it """
         # Check first in the directory of this script.
-        if os.path.isfile('data/gfceux.xml'):
-            glade_file = 'data/gfceux.xml'
+        if os.path.isfile('data/gfceux.glade'):
+            glade_file = 'data/gfceux.glade'
         # Then check to see if its installed on a *nix system
-        elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')):
-            glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')
+        elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.glade')):
+            glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.glade')
         else:
             print 'ERROR.'
             print 'Could not find the glade UI file.'

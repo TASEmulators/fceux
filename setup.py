@@ -3,13 +3,13 @@
 from distutils.core import setup
 
 setup(name="gfceux",
-		version="2.1",
+		version="2.2svn",
 		scripts = ['gfceux'],
 		packages = ['gfceux'],
     		package_dir = {'gfceux': 'src'},
 		data_files=[
 		    ('share/gfceux/',
-		    ['data/gfceux.xml', 'data/gfceux_big.png', 'data/gfceux.png',
+		    ['data/gfceux.glade', 'data/gfceux_big.png', 'data/gfceux.png',
 		    'COPYING']),
             ('share/pixmaps/',
             ['data/gfceux.png']),
