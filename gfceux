@@ -5,8 +5,10 @@
 # Lukas Sabota <ltsmooth42 _at_ gmail _dot_ com>
 #
 # <http://fceux.com>
-
-from gfceux import main
+try:
+	from gfceux import main
+except:
+	from src import main
 
 app = main.GfceuxApp()
 

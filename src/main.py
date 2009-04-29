@@ -280,14 +280,14 @@ class GfceuxApp:
         global widgets
         """ Search for the glade XML file and load it """
         # Check first in the directory of this script.
-        if os.path.isfile('gfceux.xml'):
-            glade_file = 'gfceux.xml'
+        if os.path.isfile('data/gfceux.xml'):
+            glade_file = 'data/gfceux.xml'
         # Then check to see if its installed on a *nix system
         elif os.path.isfile(os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')):
             glade_file = os.path.join(os.path.dirname(sys.argv[0]), '../share/gfceux/gfceux.xml')
         else:
             print 'ERROR.'
-            print 'Could not find the ' + glade_file + ' file.'
+            print 'Could not find the glade UI file.'
             print 'Try reinstalling the application.'
             sys.exit(1)
     

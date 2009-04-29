@@ -1,4 +1,6 @@
-================= version 2.1 ( yet to be released) ============
+* Gfceux now runs properly from the source directory without 
+being installed
+================= version 2.1 ====================== ============
 * Increased the width of the sdl inputcfg window to be more visible
 with larger font sizes
 * Uninstall script works better
