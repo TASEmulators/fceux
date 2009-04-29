@@ -6,9 +6,9 @@
 #
 # <http://fceux.com>
 try:
-	from gfceux import main
-except:
 	from src import main
+except:
+	from gfceux import main
 
 app = main.GfceuxApp()
 
