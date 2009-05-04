@@ -434,7 +434,7 @@ bool FCEUI_GetLagged(void)
 
 bool FCEUMOV_ShouldPause(void)
 {
-	if(pauseframe && currFrameCounter == pauseframe)
+	if(pauseframe && currFrameCounter == (pauseframe-1))	//adelikat: changed to pauseframe -1 to prevent an off by 1 error.  THis is probably the hackiest solution but I think it would cause some major restructuring to fix it properly.
 	{
 		pauseframe = 0; //only pause once!
 		return true;
