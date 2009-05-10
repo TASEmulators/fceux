@@ -1005,11 +1005,16 @@ FCEUD_UpdateInput()
 void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
 {
 	eoptions &= ~EO_FOURSCORE;
-	if(fourscore) eoptions |= EO_FOURSCORE;
-
-	InputType[0]=port0;
-	InputType[1]=port1;
-	InputType[2]=fcexp;
+	if(fourscore) { // Four Score emulation, only support gamepads, nothing else
+		eoptions |= EO_FOURSCORE;
+		InputType[0] = SI_GAMEPAD; // Controllers 1 and 3
+		InputType[1] = SI_GAMEPAD; // Controllers 2 and 4
+		InputType[2] = SIFC_NONE;  // No extension
+	} else { // no Four Core emulation, check the config/movie file for controller types
+        	InputType[0]=port0;
+		InputType[1]=port1;
+		InputType[2]=fcexp;
+	}
 	InitInputInterface();
 }
 
