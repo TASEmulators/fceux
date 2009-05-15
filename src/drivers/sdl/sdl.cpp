@@ -114,6 +114,7 @@ char *DriverUsage="\
 --pauseframe    x      Pauses movie playback at frame x.\n\
 --fcmconvert    f      Converts fcm movie file f to fm2.\n\
 --ripsubs       f      Converts movie's subtitles to srt\n\
+--subtitles    {0,1}   Enables subtitle display\n\
 --no-config    {0,1}   Don't change the config file";
 
 /* Moved network options out while netplay is broken.
@@ -668,6 +669,9 @@ SDL_GL_LoadLibrary(0);
     g_config->getOption("SDL.InputDisplay", &id);
     extern int input_display;
     input_display = id;
+    g_config->getOption("SDL.SubtitleDisplay", &id); // not exactly an id as an true/false switch; still better than creating another int for that
+    extern int movieSubtitles;
+    movieSubtitles = id;
     }
 	
 	// load the hotkeys from the config life
