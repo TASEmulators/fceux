@@ -1,4 +1,5 @@
-15-max-2009 - shinydoofy - sdl - added --subtitles
+21-may-2009 - adelikat - win32 - made fullscreen toggle (Alt+Enter) remappable
+15-may-2009 - shinydoofy - sdl - added --subtitles
 10-may-2009 - shinydoofy - sdl - fixed Four Score movie playback
 02-may-2009 - adelikat - win32 - stop movie at frame x feature - fixed off by 1 error
 23-apr-2009 - shinydoofy - sdl - added --ripsubs for converting fm2 movie subtitles to an srt file

@@ -1596,7 +1596,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
         if(wParam==VK_F10)
             break;			// 11.12.08 CH4 Disable F10 as System Key dammit
-
+/*
 		if(wParam == VK_RETURN)
 		{
 			if(!(lParam&(1<<30)))
@@ -1609,6 +1609,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			break;
 		}
+adelikat: Outsourced this to a remappable hotkey
+*/
 		goto proco;
 
 	case WM_KEYDOWN:

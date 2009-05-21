@@ -615,6 +615,7 @@ static void CloseRom(void);
 static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
 static void FCEUI_DoExit(void);
+static void ToggleFullscreen(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -726,7 +727,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
-	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0}
+	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
+	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0}
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -948,5 +950,19 @@ static void FCEUI_DoExit(void)
 {
 #ifdef WIN32
 	DoFCEUExit();
+#endif
+}
+
+static void ToggleFullscreen(void)
+{
+#ifdef WIN32
+	extern int SetVideoMode(int fs);		//adelikat: Yeah, I know, hacky
+	extern void UpdateCheckedMenuItems();
+	
+	UpdateCheckedMenuItems();
+	changerecursive=1;
+	if(!SetVideoMode(fullscreen^1))
+		SetVideoMode(fullscreen);
+	changerecursive=0;
 #endif
 }
