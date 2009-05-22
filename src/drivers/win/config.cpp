@@ -76,6 +76,8 @@ extern int TasEdit_wndx, TasEdit_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
+extern int RowHeightBorder;
+
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
 
@@ -244,6 +246,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(NTViewRefresh),
 	AC(rightClickEnabled),
 	AC(CurrentState),
+	AC(RowHeightBorder),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };

@@ -59,6 +59,8 @@ using namespace std;
 
 string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help Page
 
+int RowHeightBorder = 0;	//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
+
 // This defines all of our right click popup menus
 struct
 {
@@ -324,7 +326,7 @@ void UpdateMemoryView(int draw_all)
 {
 	if (!hMemView) return;
 	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight;
+	int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
 
 	int i, j;
 	//LPVOID lpMsgBuf;
@@ -763,7 +765,7 @@ int GetHexScreenCoordx(int offset){
 }
 
 int GetHexScreenCoordy(int offset){
-	return (offset/16)*debugSystem->fixedFontHeight;
+	return (offset/16)*(debugSystem->fixedFontHeight+RowHeightBorder);
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
@@ -773,7 +775,7 @@ int GetHexScreenCoordy(int offset){
 int GetAddyFromCoord(int x,int y)
 {
 	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight;
+	int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
 
 	if(y < 0)y = 0;
 	if(x < 8*MemFontWidth)x = 8*MemFontWidth+1;
@@ -848,7 +850,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	int tempAddy;
 
 	const int MemFontWidth = debugSystem->fixedFontWidth;
-	const int MemFontHeight = debugSystem->fixedFontHeight;
+	const int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
 
 	char c[2];
 	char str[100];
