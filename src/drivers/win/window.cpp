@@ -811,12 +811,14 @@ void CloseGame()
 		FCEUI_CloseGame();
 		KillMemView();
 		updateGameDependentMenus(GameInfo != 0);
+		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
 	}
 }
 
 void ALoad(char *nameo, char* innerFilename)
 {
 	if (GameInfo) FCEUI_CloseGame();
+
 	if(FCEUI_LoadGameVirtual(nameo, 1))
 	{
 		pal_emulation = FCEUI_GetCurrentVidSystem(0, 0);
@@ -844,7 +846,16 @@ void ALoad(char *nameo, char* innerFilename)
 		{
 			SetFSVideoMode();
 		}
+		
+		//Add the filename to the window caption
+		extern char FileBase[];
+		string str = FCEU_NAME_AND_VERSION;
+		str.append(": ");
+		str.append(FileBase);
+		SetWindowText(hAppWnd, str.c_str());
 	}
+	else
+		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);	//adelikat: If game fails to load while a previous one was open, the previous would have been closed, so reflect that in the window caption
 
 	ParseGIInput(GameInfo);
 
@@ -1844,7 +1855,6 @@ int CreateMainWindow()
 		NULL );  
 
 	//CenterWindowOnScreen(hAppWnd);
-
 	DragAcceptFiles(hAppWnd, 1);
 
 	SetMainWindowStuff();
