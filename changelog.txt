@@ -1,3 +1,4 @@
+22-may-2009 - adelikat - win32 - Hex Editor - Save Rom As... menu option enabled and implemented
 22-may-2009 - adelikat - win32 - Window caption shows the name of the ROM loaded
 22-may-2009 - adelikat - win32 - Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file
 21-may-2009 - adelikat - win32 - reverted fixedFontHeight to 13 instead of 14.  Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file

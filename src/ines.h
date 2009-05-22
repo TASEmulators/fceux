@@ -74,6 +74,7 @@ extern uint8 *VROM;
 extern uint32 VROM_size;
 extern uint32 ROM_size;
 extern int iNesSave(); //bbit Edited: line added
+extern int iNesSaveAs(char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added
 
 //mbg merge 7/19/06 changed to c++ decl format

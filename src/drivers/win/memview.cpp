@@ -249,6 +249,37 @@ static int GetRomFileSize(){ //todo: fix or remove this?
 	return 0;
 }
 
+
+void SaveRomAs()
+{
+	const char filter[]="NES ROM file (*.nes)\0*.nes\0";
+	char nameo[2048];
+	std::string tempName;
+	int x;
+
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Save Nes ROM as...";
+	ofn.lpstrFilter=filter;
+	strcpy(nameo,GetRomName());
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hMemView;
+	if (GetSaveFileName(&ofn))
+	{
+		//if user did not add .nes, add it for them
+		tempName = nameo;
+		x = tempName.find_last_of(".nes");
+		if (x < 0)
+			tempName.append(".nes");
+		strcpy(nameo, tempName.c_str());
+		iNesSaveAs(nameo);
+	}
+}
+
 //should return -1, otherwise returns the line number it had the error on
 int LoadTableFile(){
 	char str[50];
@@ -1357,6 +1388,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		case MENU_MV_FILE_SAVE_AS:
+			SaveRomAs();
 			return 0;
 
 		case MENU_MV_FILE_LOAD_TBL:

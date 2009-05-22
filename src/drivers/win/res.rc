@@ -241,7 +241,7 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Save Rom",                   MENU_MV_FILE_SAVE
-        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS, INACTIVE
+        MENUITEM "S&ave Rom As...",             MENU_MV_FILE_SAVE_AS
         MENUITEM "&Load *.TBL File",            MENU_MV_FILE_LOAD_TBL
         MENUITEM "&Unload *.TBL file",          MENU_MV_FILE_UNLOAD_TBL
         POPUP "&Dump to file"

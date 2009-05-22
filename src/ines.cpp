@@ -749,6 +749,33 @@ int iNesSave(){
 	return 1;
 }
 
+int iNesSaveAs(char* name)
+{
+	//adelikat: TODO: iNesSave() and this have pretty much the same code, outsource the common code to a single function
+	FILE *fp;
+	
+	if(GameInfo->type != GIT_CART)return 0;
+	if(GameInterface!=iNESGI)return 0;
+
+	fp = fopen(name,"wb");
+	int x = 0;
+	if (!fp)
+		int x = 1;
+	if(fwrite(&head,1,16,fp)!=16)return 0;
+
+	if(head.ROM_type&4) 	/* Trainer */
+	{
+		fwrite(trainerpoo,512,1,fp);
+	}
+
+	fwrite(ROM,0x4000,ROM_size,fp);
+
+	if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
+	fclose(fp);
+
+	return 1;
+}
+
 //para edit: added function below
 char *iNesShortFName() {
 	char *ret;
