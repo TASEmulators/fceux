@@ -59,7 +59,17 @@ using namespace std;
 
 string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help Page
 
-int RowHeightBorder = 0;	//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
+int HexRowHeightBorder = 0;	//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
+
+int HexBackColorR = 255;
+int HexBackColorG = 255;
+int HexBackColorB = 255;
+int HexForeColorR = 0;
+int HexForeColorG = 0;
+int HexForeColorB = 0;
+int HexFreezeColorR = 0;
+int HexFreezeColorG = 0;
+int HexFreezeColorB = 255;
 
 // This defines all of our right click popup menus
 struct
@@ -326,7 +336,7 @@ void UpdateMemoryView(int draw_all)
 {
 	if (!hMemView) return;
 	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
+	int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
 
 	int i, j;
 	//LPVOID lpMsgBuf;
@@ -357,8 +367,8 @@ void UpdateMemoryView(int draw_all)
 	for(i = CurOffset;i < CurOffset+DataAmount;i+=16){
 		if((OldCurOffset != CurOffset) || draw_all){
 			MoveToEx(HDataDC,0,MemFontHeight*((i-CurOffset)/16),NULL);
-			SetTextColor(HDataDC,RGB(0,0,0));
-			SetBkColor(HDataDC,RGB(255,255,255));
+			SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//addresses text color			000 = black, 255255255 = white
+			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));		//addresses back color
 			sprintf(str,"%06X: ",i);
 			TextOut(HDataDC,0,0,str,strlen(str));
 		}
@@ -372,20 +382,20 @@ void UpdateMemoryView(int draw_all)
 					SetBkColor(HDataDC,RGB(255,255,255));
 					SetTextColor(HDataDC,RGB(255,0,0));
 					TextOut(HDataDC,0,0,str2,1);
-					SetTextColor(HDataDC,RGB(255,255,255));
-					SetBkColor(HDataDC,RGB(0,0,0));
+					SetTextColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
+					SetBkColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));
 					TextOut(HDataDC,0,0,&str[1],1);
 				} else {
-					SetTextColor(HDataDC,RGB(255,255,255));
+					SetTextColor(HDataDC,RGB(255,255,255));		//single address highlight
 					SetBkColor(HDataDC,RGB(0,0,0));
 					TextOut(HDataDC,0,0,str,1);
-					SetTextColor(HDataDC,RGB(0,0,0));
-					SetBkColor(HDataDC,RGB(255,255,255));
+					SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//single address highlight 2nd address
+					SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
 					TextOut(HDataDC,0,0,&str[1],1);
 				}
 				TextOut(HDataDC,0,0," ",1);
 
-				SetTextColor(HDataDC,RGB(255,255,255));
+				SetTextColor(HDataDC,RGB(255,255,255));			//single addres highlight - right column
 				SetBkColor(HDataDC,RGB(0,0,0));
 				MoveToEx(HDataDC,(59+j)*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL); //todo: try moving this above the for loop
 				str[0] = chartable[GetMemViewData(i+j)];
@@ -414,8 +424,8 @@ void UpdateMemoryView(int draw_all)
 		}
 		if(draw_all){
 			MoveToEx(HDataDC,56*MemFontWidth,MemFontHeight*((i-CurOffset)/16),NULL);
-			SetTextColor(HDataDC,RGB(0,0,0));
-			SetBkColor(HDataDC,RGB(255,255,255));
+			SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//Column separator
+			SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
 			TextOut(HDataDC,0,0," : ",3);
 		}/*
 		 for(j = 0;j < 16;j++){
@@ -435,7 +445,7 @@ void UpdateMemoryView(int draw_all)
 	//	}
 
 	SetTextColor(HDataDC,RGB(0,0,0));
-	SetBkColor(HDataDC,RGB(255,255,255));
+	SetBkColor(HDataDC,RGB(0,0,0));
 
 	MoveToEx(HDataDC,0,0,NULL);	
 	OldCurOffset = CurOffset;
@@ -478,13 +488,13 @@ void UpdateColorTable(){
 	if(!hMemView)return;
 	for(i = 0;i < DataAmount;i++){
 		if((i+CurOffset >= CursorStartAddy) && (i+CurOffset <= CursorEndAddy)){
-			BGColorList[i] = RGB(0,0,0);
-			TextColorList[i] = RGB(255,255,255);
+			BGColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);			//Highlighter color bg	- 2 columns
+			TextColorList[i] = RGB(HexBackColorR,HexBackColorG,HexBackColorB);		//Highlighter color text - 2 columns
 			continue;
 		}
 
-		BGColorList[i] = RGB(255,255,255);
-		TextColorList[i] = RGB(0,0,0);
+		BGColorList[i] = RGB(HexBackColorR,HexBackColorG,HexBackColorB);			//Regular color bb - 2columns
+		TextColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);		//Regular color text - 2 columns
 	}
 
 	//mbg merge 6/29/06 - added argument
@@ -516,7 +526,7 @@ void UpdateColorTable(){
 			//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
 			for(i = tmp->addr;i < tmp->addr+tmp->size;i++){
 				if((i > CurOffset) && (i < CurOffset+DataAmount))
-					TextColorList[i-CurOffset] = RGB(255,0,0);
+					TextColorList[i-CurOffset] = RGB(HexFreezeColorR,HexFreezeColorG,HexFreezeColorB);
 			}
 			tmp=tmp->last;
 		}
@@ -529,7 +539,7 @@ void UpdateColorTable(){
 int UpdateCheatColorCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, void *data) {
 
 	if((a >= (uint32)CurOffset) && (a < (uint32)CurOffset+DataAmount)){
-		if(s)TextColorList[a-CurOffset] = RGB(0,0,255);
+		if(s)TextColorList[a-CurOffset] = RGB(HexFreezeColorR,HexFreezeColorG,HexFreezeColorB);
 	}
 	return 1;
 }
@@ -765,7 +775,7 @@ int GetHexScreenCoordx(int offset){
 }
 
 int GetHexScreenCoordy(int offset){
-	return (offset/16)*(debugSystem->fixedFontHeight+RowHeightBorder);
+	return (offset/16)*(debugSystem->fixedFontHeight+HexRowHeightBorder);
 }
 
 //0000E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  : ................
@@ -775,7 +785,7 @@ int GetHexScreenCoordy(int offset){
 int GetAddyFromCoord(int x,int y)
 {
 	int MemFontWidth = debugSystem->fixedFontWidth;
-	int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
+	int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
 
 	if(y < 0)y = 0;
 	if(x < 8*MemFontWidth)x = 8*MemFontWidth+1;
@@ -850,7 +860,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	int tempAddy;
 
 	const int MemFontWidth = debugSystem->fixedFontWidth;
-	const int MemFontHeight = debugSystem->fixedFontHeight + RowHeightBorder;
+	const int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
 
 	char c[2];
 	char str[100];

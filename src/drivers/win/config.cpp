@@ -76,7 +76,16 @@ extern int TasEdit_wndx, TasEdit_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
-extern int RowHeightBorder;
+extern int HexRowHeightBorder;
+extern int HexBackColorR;
+extern int HexBackColorG;
+extern int HexBackColorB;
+extern int HexForeColorR;
+extern int HexForeColorG;
+extern int HexForeColorB;
+extern int HexFreezeColorR;
+extern int HexFreezeColorG;
+extern int HexFreezeColorB;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -246,7 +255,16 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(NTViewRefresh),
 	AC(rightClickEnabled),
 	AC(CurrentState),
-	AC(RowHeightBorder),
+	AC(HexRowHeightBorder),
+	AC(HexBackColorR),
+	AC(HexBackColorG),
+	AC(HexBackColorB),
+	AC(HexForeColorR),
+	AC(HexForeColorG),
+	AC(HexForeColorB),
+	AC(HexFreezeColorR),
+	AC(HexFreezeColorG),
+	AC(HexFreezeColorB),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };
