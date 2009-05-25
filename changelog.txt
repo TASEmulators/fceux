@@ -1,3 +1,4 @@
+23-may-2009 - adelikat - win32 - added opton to remove a recent item to the roms, lua, and movie recent menus
 23-may-2009 - adelikat - win32 - Added a remove recent item function and hooked it up to memwatch recent menu, now if a bad recent item is clicked, the user has a choice to remove it from the list
 23-may-2009 - adelikat - win32 - Load Last Movie context menu item added
 23-may-2009 - adelikat - win32 - Recent Movie Menu added
