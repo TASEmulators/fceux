@@ -642,12 +642,12 @@ void FreezeRam(int address, int mode, int final){
 		}
 		// ################################## End of SP CODE ###########################
 
-		/*if (final)
-		{
-		if(hCheat)RedoCheatsLB(hCheat);
+		//if (final)
+		//{
+		//if(hCheat)RedoCheatsLB(hCheat);
 		UpdateColorTable();
-		}*/
-		//mbg merge 6/29/06 - WTF
+		//}
+		
 		UpdateCheatsAdded();
 	}
 }
