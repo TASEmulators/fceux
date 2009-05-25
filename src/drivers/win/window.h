@@ -29,7 +29,7 @@ void ByebyeWindow();
 void DoTimingConfigFix();
 int CreateMainWindow();
 void UpdateCheckedMenuItems();
-void ALoad(char* nameo, char* innerFilename=0);
+bool ALoad(char* nameo, char* innerFilename=0);
 void LoadNewGamey(HWND hParent, const char *initialdir);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);
 void UpdateCheckedMenuItems();

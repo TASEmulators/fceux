@@ -971,7 +971,7 @@ void CloseGame()
 	}
 }
 
-void ALoad(char *nameo, char* innerFilename)
+bool ALoad(char *nameo, char* innerFilename)
 {
 	if (GameInfo) FCEUI_CloseGame();
 
@@ -1011,11 +1011,15 @@ void ALoad(char *nameo, char* innerFilename)
 		SetWindowText(hAppWnd, str.c_str());
 	}
 	else
+	{
 		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);	//adelikat: If game fails to load while a previous one was open, the previous would have been closed, so reflect that in the window caption
+		return false;
+	}
 
 	ParseGIInput(GameInfo);
 
 	updateGameDependentMenus(GameInfo != 0);
+	return true;
 }
 
 /// Shows an Open File dialog and opens the ROM if the user selects a ROM file.
@@ -1280,7 +1284,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				char*& fname = recent_files[wParam - MENU_FIRST_RECENT_FILE];
 				if(fname)
 				{
-					ALoad(fname);
+					if (!ALoad(fname))
+					{
+						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						if (result == IDYES)
+						{
+							RemoveRecentItem((wParam - MENU_FIRST_RECENT_FILE), recent_files, MAX_NUMBER_OF_RECENT_FILES);
+							UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+						}
+					}
 				}
 			}
 			
