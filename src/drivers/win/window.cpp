@@ -1737,7 +1737,17 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//Recent Lua 1
 			case FCEUX_CONTEXT_LOADLASTLUA:
 				if(recent_lua[0])
-					FCEU_LoadLuaCode(recent_lua[0]);
+				{
+					if (!FCEU_LoadLuaCode(recent_lua[0]))
+					{
+						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						if (result == IDYES)
+						{
+							RemoveRecentItem(0, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
+							UpdateRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
+						}
+					}
+				}
 				break;
 
 			case FCEUX_CONTEXT_LOADLASTMOVIE:
