@@ -1588,6 +1588,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		if(GameInfo && wParam == SC_SCREENSAVE && (goptions & GOO_DISABLESS))
 			return(0);
 
+		//adelikat: If we are going to disable screensave, we should disable monitor off as well
+		if(GameInfo && wParam == SC_MONITORPOWER && (goptions & GOO_DISABLESS))
+			return(0);
+
 		if(wParam==SC_KEYMENU)
 		{
 			if(GameInfo && ((InputType[2]==SIFC_FKB) || (InputType[2]==SIFC_SUBORKB)) && cidisabled)
