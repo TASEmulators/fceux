@@ -33,6 +33,9 @@
 #include "memview.h"
 #include "cheat.h"
 #include "gui.h"
+#include "ntview.h"
+#include "cdlogger.h"
+#include "ppuview.h"
 
 // ################################## Start of SP CODE ###########################
 
@@ -67,6 +70,16 @@ static SCROLLINFO si;
 
 #define MAX_NAME_SIZE 200
 #define MAX_CONDITION_SIZE 200
+
+void UpdateDebuggingDialogs()
+{
+	//adelikat: This updates all the other dialogs such as ppu, nametable, logger, etc in one function, should be applied to all the step type buttons
+	UpdateDebugger();		//Debugger 
+	NTViewDoBlit(0);		//Nametable Viewer
+	UpdateLogWindow();		//Trace Logger
+	UpdateCDLogger();		//Code/Data Logger
+	PPUViewDoBlit();		//PPU Viewer
+}
 
 void RestoreSize(HWND hwndDlg)
 {
@@ -1251,14 +1264,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								break;
 							case IDC_DEBUGGER_STEP_IN:
-								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
 								}
 								FCEUI_Debugger().step = true;
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebugger();
-								UpdateLogWindow();
+								UpdateDebuggingDialogs();
+								
 								break;
 							case IDC_DEBUGGER_RUN_LINE:
 								if (FCEUI_EmulationPaused()) {
@@ -1274,8 +1286,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									FCEUI_Debugger().runline_end_time=ts;
 								}
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebugger();
-								UpdateLogWindow();
+								UpdateDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_RUN_FRAME2:
 								if (FCEUI_EmulationPaused()) {
@@ -1291,8 +1302,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									//else vblankScanLines = 0;
 								}
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebugger();
-								UpdateLogWindow();
+								UpdateDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_STEP_OUT:
 								//mbg merge 7/18/06 changed pausing check and set
