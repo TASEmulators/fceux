@@ -1727,6 +1727,7 @@
 							<Tool
 								Name="VCCustomBuildTool"
 								CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\help\fceux.chm&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
+								Outputs="$(OutDir)/fceux.chm"
 							/>
 						</FileConfiguration>
 					</File>
