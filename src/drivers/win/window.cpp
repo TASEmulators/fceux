@@ -1713,7 +1713,17 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//Recent ROM 1
 			case FCEUX_CONTEXT_RECENTROM1:
 				if(recent_files[0])
-					ALoad(recent_files[0]);
+				{
+				if (!ALoad(recent_files[0]))
+					{
+						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						if (result == IDYES)
+						{
+							RemoveRecentItem(0, recent_files, MAX_NUMBER_OF_RECENT_FILES);
+							UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+						}
+					}
+				}
 				break;
 
 			//Recent Lua 1
