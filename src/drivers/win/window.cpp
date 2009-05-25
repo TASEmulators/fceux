@@ -1677,6 +1677,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					FCEU_LoadLuaCode(recent_lua[0]);
 				break;
 
+			case FCEUX_CONTEXT_LOADLASTMOVIE:
+				if(recent_movie[0])
+					FCEUI_LoadMovie(recent_movie[0], 1, false, false);
+				break;
+
 			//View comments and subtitles
 			case FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES:
 				CreateDialog(fceu_hInstance, "IDD_REPLAY_METADATA", hWnd, ReplayMetadataDialogProc);

@@ -346,6 +346,7 @@ BEGIN
     BEGIN
         MENUITEM "Play Movie...",               FCEUX_CONTEXT_REPLAYMOVIE
         MENUITEM "Record Movie...",             FCEUX_CONTEXT_RECORDMOVIE
+        MENUITEM "Load Last Movie",             FCEUX_CONTEXT_LOADLASTMOVIE
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE
