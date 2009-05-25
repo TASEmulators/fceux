@@ -500,6 +500,39 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	}
 }
 
+
+//adelikat: This removes a recent menu item from any recent menu, and shrinks the list accordingly
+//The update recent menu function will need to be run after this
+void RemoveRecentItem(unsigned int which, char**bufferArray, const unsigned int MAX)
+{
+	//which = array item to remove
+	//buffer = char array of the recent menu
+	//MAX = max number of array items
+
+	//Just in case
+	if (which >= MAX)
+		return;
+	
+	//Remove the item
+	if(bufferArray[which])
+	{
+		free(bufferArray[which]);
+	}
+
+	//If the item is not the last one in the list, shift the remaining ones up
+	if (which < (MAX-1))
+	{
+		//Move the remaining items up
+		for(unsigned int x = which+1; x < MAX; x++)
+		{
+			bufferArray[x-1] = bufferArray[x];	//Shift each remaining item up by 1
+		}
+	}
+	
+	bufferArray[MAX-1] = 0;	//Clear out the last item since it is empty now no matter what
+}
+
+
 /// Updates recent files / recent directories menu
 /// @param menu Menu handle of the main window's menu
 /// @param strs Strings to add to the menu

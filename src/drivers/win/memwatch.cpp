@@ -65,6 +65,7 @@ char *memw_recent_files[] = { 0 ,0 ,0 ,0 ,0 };
 const unsigned int MEMW_MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MEMW_MAX_NUMBER_OF_RECENT_FILES = sizeof(memw_recent_files)/sizeof(*memw_recent_files);
 
+extern void RemoveRecentItem(unsigned int which, char**bufferArray, const unsigned int MAX);	//For removing erroneous recent files
 
 //Ram change monitor globals-----------------------------------
 bool RamChangeInitialize = false;		//Set true during memw WM_INIT
@@ -629,8 +630,14 @@ void OpenMemwatchRecentFile(int memwRFileNumber)
 		fileChanged = false;	//Flag that the memwatch file has not been changed since last save
 	}
 	else		//Opening fp failed
-		MessageBox(hwndMemWatch,"Error: Could not open recent file", "Memory Watch Recent File", MB_OK);
-		//TODO: Remove this file from the recent list
+	{
+		int result = MessageBox(hwndMemWatch,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+		if (result == IDYES)
+		{
+			RemoveRecentItem(memwRFileNumber, memw_recent_files, MEMW_MAX_NUMBER_OF_RECENT_FILES);
+			UpdateMemw_RMenu(memwrecentmenu, memw_recent_files, ID_FILE_RECENT, MEMW_MENU_FIRST_RECENT_FILE);
+		}
+	}
 }
 
 bool CloseMemoryWatch()
