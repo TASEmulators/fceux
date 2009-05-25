@@ -726,10 +726,10 @@ void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
 }
 
 //begin playing an existing movie
-void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
+bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
 {
 	if(!tasedit && !FCEU_IsValidUI(FCEUI_PLAYMOVIE))
-		return;
+		return true;	//adelikat: file did not fail to load, so let's return true here, just do nothing
 
 	assert(fname);
 
@@ -744,10 +744,10 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	
 	strcpy(curMovieFilename, fname);
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
-	if (!fp) return;
+	if (!fp) return false;
 	if(fp->isArchive() && !_read_only) {
 		FCEU_PrintError("Cannot open a movie in read+write from an archive.");
-		return;
+		return true;	//adelikat: file did not fail to load, so return true (false is only for file not exist/unable to open errors
 	}
 
 #ifdef WIN32
@@ -768,7 +768,7 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	if(currMovieData.savestate.size() != 0)
 	{
 		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
-		if(!success) return;
+		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was god?
 	}
 
 	//if there is no savestate, we won't have this crucial piece of information at the start of the movie.
@@ -810,6 +810,8 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	    LoggingEnabled = 2;
 	}
 	#endif
+	
+	return true;
 }
 
 static void openRecordingMovie(const char* fname)
