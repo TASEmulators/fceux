@@ -56,6 +56,7 @@ BEGIN
         END
         POPUP "&Movie"
         BEGIN
+            MENUITEM "Recent",                      MENU_MOVIE_RECENT
             MENUITEM "&Record Movie...",            MENU_RECORD_MOVIE
             MENUITEM "&Play Movie...",              MENU_REPLAY_MOVIE
             MENUITEM "&Stop Movie",                 MENU_STOP_MOVIE

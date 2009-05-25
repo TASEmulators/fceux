@@ -34,6 +34,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+extern void AddRecentMovieFile(const char *filename);
 #endif
 
 using namespace std;
@@ -748,6 +749,11 @@ void FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 		FCEU_PrintError("Cannot open a movie in read+write from an archive.");
 		return;
 	}
+
+#ifdef WIN32
+	//Add to the recent movie menu
+	AddRecentMovieFile(fname);
+#endif
 
 	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
 	LoadSubtitles(currMovieData);

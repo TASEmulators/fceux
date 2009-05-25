@@ -5,7 +5,6 @@
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
-#define BTN_CANCEL                      800
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROMS                       100
 #define LBL_LOG_TEXT                    100
@@ -202,7 +201,6 @@
 #define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define BTN_NETMOO_CONNECT              250
 #define MENU_HIDE_MENU                  300
-//#define CHECK_SCREENSHOT_NAMES          300
 #define COMBO_FILTER                    300
 #define IDC_EDIT_AUTHORINFO             300
 #define IDC_LABEL_LENGTH                300
@@ -286,6 +284,7 @@
 #define IDC_VIDEOCONFIG_NO8LIM          600
 #define IDC_DEBUGGER_ROM_PATCHER        602
 #define LIST_DEBUGGER_BOOKMARKS         701
+#define BTN_CANCEL                      800
 #define IDC_EDIT_OFFSET                 1000
 #define IDC_GAME_GENIE_CODE             1000
 #define IDC_MEMVIEWFIND_WHAT            1000
@@ -681,6 +680,8 @@
 #define MENU_VIEWSAVESLOTS              40350
 #define ID_LUA_RECENT                   40351
 #define MENU_LUA_RECENT                 40352
+#define ID_Menu40353                    40353
+#define MENU_MOVIE_RECENT               40354
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -690,7 +691,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40353
+#define _APS_NEXT_COMMAND_VALUE         40355
 #define _APS_NEXT_CONTROL_VALUE         1204
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

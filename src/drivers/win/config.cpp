@@ -113,6 +113,12 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(recent_lua[3]),
 	ACS(recent_lua[4]),
 
+	ACS(recent_movie[0]),
+	ACS(recent_movie[1]),
+	ACS(recent_movie[2]),
+	ACS(recent_movie[3]),
+	ACS(recent_movie[4]),
+
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
 

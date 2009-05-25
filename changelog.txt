@@ -1,3 +1,4 @@
+23-may-2009 - adelikat - win32 - Recent Movie Menu added
 22-may-2009 - adelikat - win32 - "Disable screen saver" gui option now also diables the monitor powersave
 22-may-2009 - adelikat - win32 - Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.
 22-may-2009 - adelikat - win32 - Hex Editor - Save Rom As... menu option enabled and implemented

@@ -79,12 +79,13 @@ using namespace std;
 //********************************************************************************
 
 //Handles----------------------------------------------
-static HMENU fceumenu = 0;	//Main menu.
-HWND pwindow;				//Client Area
-static HMENU recentmenu;	//Recent Menu
-static HMENU recentluamenu; //Recent Lua Files Menu
-HMENU hfceuxcontext;		//Handle to context menu
-HMENU hfceuxcontextsub;		//Handle to context sub menu
+static HMENU fceumenu = 0;	  //Main menu.
+HWND pwindow;				  //Client Area
+static HMENU recentmenu;	  //Recent Menu
+static HMENU recentluamenu;   //Recent Lua Files Menu
+static HMENU recentmoviemenu; //Recent Movie Files Menu
+HMENU hfceuxcontext;		  //Handle to context menu
+HMENU hfceuxcontextsub;		  //Handle to context sub menu
 
 //Extern variables-------------------------------------
 extern bool movieSubtitles;
@@ -134,10 +135,15 @@ char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
 
-//Lua Recent Menu ---------------------------------------
+//Recent Lua Menu ----------------------------------------
 char *recent_lua[] = {0,0,0,0,0};
 const unsigned int LUA_FIRST_RECENT_FILE = 50000;
 const unsigned int MAX_NUMBER_OF_LUA_RECENT_FILES = sizeof(recent_lua)/sizeof(*recent_lua);
+
+//Recent Movie Menu -------------------------------------
+char *recent_movie[] = {0,0,0,0,0};
+const unsigned int MOVIE_FIRST_RECENT_FILE = 51000;
+const unsigned int MAX_NUMBER_OF_MOVIE_RECENT_FILES = sizeof(recent_movie)/sizeof(*recent_movie);
 
 //Exported variables ------------------------------------
 
@@ -745,6 +751,123 @@ void AddRecentLuaFile(const char *filename)
 	UpdateRecentLuaArray(filename, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES, recentluamenu, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE); 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UpdateMovieRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
+{
+	MENUITEMINFO moo;
+	int x;
+
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
+
+	GetMenuItemInfo(GetSubMenu(fceumenu, 0), mitem, FALSE, &moo);
+	moo.hSubMenu = menu;
+	moo.fState = strs[0] ? MFS_ENABLED : MFS_GRAYED;
+
+	SetMenuItemInfo(GetSubMenu(fceumenu, 0), mitem, FALSE, &moo);
+
+	// Remove all recent files submenus
+	for(x = 0; x < MAX_NUMBER_OF_MOVIE_RECENT_FILES; x++)
+	{
+		RemoveMenu(menu, baseid + x, MF_BYCOMMAND);
+	}
+
+	// Recreate the menus
+	for(x = MAX_NUMBER_OF_MOVIE_RECENT_FILES - 1; x >= 0; x--)
+	{  
+		// Skip empty strings
+		if(!strs[x])
+			continue;
+
+		string tmp = strs[x];
+		
+		//clamp this string to 128 chars
+		if(tmp.size()>128)
+			tmp = tmp.substr(0,128);
+
+		moo.cbSize = sizeof(moo);
+		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
+		
+		// Insert the menu item
+		moo.cch = tmp.size();
+		moo.fType = 0;
+		moo.wID = baseid + x;
+		moo.dwTypeData = (LPSTR)tmp.c_str();
+		InsertMenuItem(menu, 0, 1, &moo);
+	}
+
+	DrawMenuBar(hAppWnd);
+}
+
+void UpdateRecentMovieArray(const char* addString, char** bufferArray, unsigned int arrayLen, HMENU menu, unsigned int menuItem, unsigned int baseId)
+{
+	// Try to find out if the filename is already in the recent files list.
+	for(unsigned int x = 0; x < arrayLen; x++)
+	{
+		if(bufferArray[x])
+		{
+			if(!strcmp(bufferArray[x], addString))    // Item is already in list.
+			{
+				// If the filename is in the file list don't add it again.
+				// Move it up in the list instead.
+
+				int y;
+				char *tmp;
+
+				// Save pointer.
+				tmp = bufferArray[x];
+
+				for(y = x; y; y--)
+				{
+					// Move items down.
+					bufferArray[y] = bufferArray[y - 1];
+				}
+
+				// Put item on top.
+				bufferArray[0] = tmp;
+
+				// Update the recent files menu
+				UpdateMovieRMenu(menu, bufferArray, menuItem, baseId);
+
+				return;
+			}
+		}
+	}
+
+	// The filename wasn't found in the list. That means we need to add it.
+
+	// If there's no space left in the recent files list, get rid of the last
+	// item in the list.
+	if(bufferArray[arrayLen - 1])
+	{
+		free(bufferArray[arrayLen - 1]);
+	}
+
+	// Move the other items down.
+	for(unsigned int x = arrayLen - 1; x; x--)
+	{
+		bufferArray[x] = bufferArray[x - 1];
+	}
+
+	// Add the new item.
+	bufferArray[0] = (char*)malloc(strlen(addString) + 1); //mbg merge 7/17/06 added cast
+	strcpy(bufferArray[0], addString);
+
+	// Update the recent files menu
+	UpdateMovieRMenu(menu, bufferArray, menuItem, baseId);
+
+}
+
+void AddRecentMovieFile(const char *filename)
+{
+	UpdateRecentMovieArray(filename, recent_movie, MAX_NUMBER_OF_MOVIE_RECENT_FILES, recentmoviemenu, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE); 
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Hides the main menu.
 //@param hide_menu Flag to turn the main menu on (0) or off (1) 
 void HideMenu(unsigned int hide_menu)
@@ -1137,6 +1260,17 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					FCEU_LoadLuaCode(fname);
 				}
 			}
+
+			// A menu item for the recent movie files menu was clicked.
+			if(wParam >= MOVIE_FIRST_RECENT_FILE && wParam <= MOVIE_FIRST_RECENT_FILE + MAX_NUMBER_OF_MOVIE_RECENT_FILES - 1)
+			{
+				char*& fname = recent_movie[wParam - MOVIE_FIRST_RECENT_FILE];
+				if(fname)
+				{
+					FCEUI_LoadMovie(fname, 1, false, false);
+				}
+			}
+
 			switch(LOWORD(wParam))
 			{
 			//File Menu-------------------------------------------------------------
@@ -1681,6 +1815,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_OPEN_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_MOVIE_RECENT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_STOPMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_PLAYMOVIEFROMBEGINNING,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYFROMBEGINNING)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_SAVESTATE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_QUICKSAVE)?MF_ENABLED:MF_GRAYED));
@@ -1836,10 +1971,12 @@ int CreateMainWindow()
 
 	recentmenu = CreateMenu();
 	recentluamenu = CreateMenu();
+	recentmoviemenu = CreateMenu();
 
 	// Update recent files menu
 	UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
 	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
+	UpdateMovieRMenu(recentmoviemenu, recent_movie, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE);
 
 	updateGameDependentMenus(0);
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
