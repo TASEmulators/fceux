@@ -129,6 +129,7 @@ bool rightClickEnabled = true;		//If set to false, the right click context menu 
 //Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
 void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters a context menu item name
+void SaveMovieAs();	//Gets a filename for Save Movie As...
 
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -1758,6 +1759,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				}
 				break;
 
+			//Recent Movie 1
 			case FCEUX_CONTEXT_LOADLASTMOVIE:
 				if(recent_movie[0])
 				{
@@ -1801,6 +1803,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEUX_CONTEXT_MAKEBACKUP:
 				FCEUI_MakeBackupMovie(true);
 				break;
+
+			//Create a backup based on user entering a filename
+			case FCEUX_CONTEXT_SAVEMOVIEAS:
+				SaveMovieAs();
+				break;
+
 			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
@@ -2580,4 +2588,34 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENCDLOGGER]);
 	combined = "&Code/Data Logger...\t" + combo;
 	ChangeMenuItemText(MENU_CDLOGGER, combined);
+}
+
+//This function is for the context menu item Save Movie As...
+//It gets a filename from the user then calls CreateMovie()
+void SaveMovieAs()
+{
+	const char filter[]="NES Movie file (*.fm2)\0*.fm2\0";
+	char nameo[2048];
+	std::string tempName;
+	int x;
+
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Save Movie as...";
+	ofn.lpstrFilter=filter;
+	strcpy(nameo,curMovieFilename);
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hMemView;
+	if (GetSaveFileName(&ofn))
+	{
+		tempName = nameo;
+		x = tempName.find_last_of(".");	//Check to see if the user provided a file extension
+		if (x < 0)
+			tempName.append(".fm2");	//If not, make it .fm2
+		FCEUI_CreateMovieFile(tempName);
+	}
 }

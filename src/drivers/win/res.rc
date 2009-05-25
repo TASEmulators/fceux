@@ -369,6 +369,7 @@ BEGIN
         MENUITEM "Stop Movie Recording",        FCEU_CONTEXT_STOPMOVIE
         MENUITEM "View comments and subtitles", FCEUX_CONTEXT_VIEWCOMMENTSSUBTITLES
         MENUITEM "Make backup",                 FCEUX_CONTEXT_MAKEBACKUP
+        MENUITEM "Save Movie As...",            FCEUX_CONTEXT_SAVEMOVIEAS
         MENUITEM SEPARATOR
         MENUITEM "Undo savestate",              FCEUX_CONTEXT_UNDOSAVESTATE
         MENUITEM "Undo loadstate",              FCEUX_CONTEXT_UNDOLOADSTATE

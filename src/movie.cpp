@@ -1293,6 +1293,14 @@ void FCEU_DisplaySubtitles(char *format, ...)
 	subtitleMessage.isMovieMessage = subtitlesOnAVI;
 }
 
+void FCEUI_CreateMovieFile(std::string fn)
+{
+	MovieData md = currMovieData;							//Get current movie data
+	std::fstream* outf = FCEUD_UTF8_fstream(fn, "wb");		//open/create file
+	md.dump(outf,false);									//dump movie data
+	delete outf;											//clean up, delete file object
+}
+
 void FCEUI_MakeBackupMovie(bool dispMessage)
 {
 	//This function generates backup movie files
@@ -1337,12 +1345,8 @@ void FCEUI_MakeBackupMovie(bool dispMessage)
 			}
 		}
 	}
-
-	MovieData md = currMovieData;								//Get current movie data
-	std::fstream* outf = FCEUD_UTF8_fstream(backupFn, "wb");	//open/create file
-	md.dump(outf,false);										//dump movie data
-	delete outf;												//clean up, delete file object
-	
+	FCEUI_CreateMovieFile(backupFn);
+		
 	//TODO, decide if fstream successfully opened the file and print error message if it doesn't
 
 	if (dispMessage)	//If we should inform the user 

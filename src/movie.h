@@ -242,6 +242,7 @@ extern bool autoMovieBackup;
 //--------------------------------------------------
 bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 void FCEUI_MakeBackupMovie(bool dispMessage);
+void FCEUI_CreateMovieFile(std::string fn);
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
 bool FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
