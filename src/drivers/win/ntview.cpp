@@ -234,7 +234,7 @@ void DrawNameTable(int scanline, int ntnum, bool invalidateCache) {
 	c.curr_vnapage = vnapage[ntnum];
 	
 	//HACK: never cache anything
-	//invalid = true;
+	invalid = true;
 
 	pbitmap = bitmap;
 	for(int y=0;y<30;y++){
