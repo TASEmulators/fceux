@@ -92,11 +92,18 @@ static const uint8 lengthtable[0x20]=
 	10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
 	12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
 };
-
-static const uint32 NoiseFreqTable[0x10]=
+static const uint32 NoiseFreqTableNTSC[0x10] = 
 {
- 2,4,8,0x10,0x20,0x30,0x40,0x50,0x65,0x7f,0xbe,0xfe,0x17d,0x1fc,0x3f9,0x7f2
+	4, 8, 16, 32, 64, 96, 128, 160, 202, 
+	254, 380, 508, 762, 1016, 2034, 4068
 };
+static const uint32 NoiseFreqTablePAL[0x10] = 
+{
+	4, 7, 14, 30, 60, 88, 118, 148, 188, 
+	236, 354, 472, 708,  944, 1890, 3778
+};
+
+static const uint32 *NoiseFreqTable;
 
 static const uint32 NTSCDMCTable[0x10]=
 {
@@ -104,10 +111,16 @@ static const uint32 NTSCDMCTable[0x10]=
  190,160,142,128,106, 84 ,72,54
 };
 
+/* Previous values for PAL DMC was value - 1,
+ * I am not certain if this is if FCEU handled
+ * PAL differently or not, the NTSC values are right,
+ * so I am assuming that the current value is handled
+ * the same way NTSC is handled. */
+
 static const uint32 PALDMCTable[0x10]=
 {
- 397, 353, 315, 297, 265, 235, 209, 198, 
- 176, 148, 131, 118, 98, 78, 66, 50, 
+	398, 354, 316, 298, 276, 236, 210, 198, 
+	176, 148, 132, 118,  98,  78,  66,  50
 };
 
 // $4010        -        Frequency
@@ -1063,25 +1076,32 @@ due to that whole MegaMan 2 Game Genie thing.
 
 void FCEUSND_Reset(void)
 {
-        int x;
-
+	int x;
+	
 	IRQFrameMode=0x0;
-        fhcnt=fhinc;
-        fcnt=0;
+	fhcnt=fhinc;
+	fcnt=0;
+	nreg=1;
 
-        nreg=1;
-        for(x=0;x<2;x++)
+	if (PAL)
+		NoiseFreqTable = NoiseFreqTableNTSC;
+	else
+		NoiseFreqTable = NoiseFreqTablePAL;
+
+	for(x=0;x<2;x++)
 	{
-         wlcount[x]=2048;
-	 if(nesincsize) // lq mode
-	  sqacc[x]=((uint32)2048<<17)/nesincsize;
-	 else
-	  sqacc[x]=1;
-	 sweepon[x]=0;
-	 curfreq[x]=0;
+		wlcount[x]=2048;
+		if(nesincsize) // lq mode
+			sqacc[x]=((uint32)2048<<17)/nesincsize;
+		else
+			sqacc[x]=1;
+		sweepon[x]=0;
+		curfreq[x]=0;
 	}
-  wlcount[2]=1;  //2048;
-        wlcount[3]=2048;
+	
+	wlcount[2]=1;  //2048;
+	wlcount[3]=2048;
+
 	DMCHaveDMA=DMCHaveSample=0;
 	SIRQStat=0x00;
 
