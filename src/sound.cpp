@@ -1084,9 +1084,9 @@ void FCEUSND_Reset(void)
 	nreg=1;
 
 	if (PAL)
-		NoiseFreqTable = NoiseFreqTableNTSC;
-	else
 		NoiseFreqTable = NoiseFreqTablePAL;
+	else
+		NoiseFreqTable = NoiseFreqTableNTSC;
 
 	for(x=0;x<2;x++)
 	{
