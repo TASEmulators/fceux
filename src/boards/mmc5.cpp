@@ -50,7 +50,7 @@ static INLINE void MMC5BGVROM_BANK8(uint32 V) {if(CHRptr[0]){V&=CHRmask8[0];MMC5
 
 static uint8 PRGBanks[4];
 static uint8 WRAMPage;
-static uint8 CHRBanksA[8], CHRBanksB[4];
+static uint16 CHRBanksA[8], CHRBanksB[4];
 static uint8 WRAMMaskEnable[2];
 uint8 mmc5ABMode;                /* A=0, B=1 */
 
@@ -352,7 +352,8 @@ static DECLFW(Mapper5_write)
   if(A>=0x5120&&A<=0x5127)
   {
     mmc5ABMode = 0;
-    CHRBanksA[A&7]=V;
+    CHRBanksA[A&7]=V | ((MMC50x5130&0x3)<<8); //if we had a test case for this then we could test this, but it hasnt been verified
+	//CHRBanksA[A&7]=V;
     MMC5CHRA();
   }
   else switch(A)
@@ -416,6 +417,8 @@ static DECLFW(Mapper5_write)
                  }
                  ATFill=V;
                  break;
+    case 0x5130: MMC50x5130=V;break;
+
     case 0x5200: MMC5HackSPMode=V;break;
     case 0x5201: MMC5HackSPScroll=(V>>3)&0x1F;break;
     case 0x5202: MMC5HackSPPage=V&0x3F;break;
@@ -804,8 +807,8 @@ static void GenMMC5Reset(void)
 
 static SFORMAT MMC5_StateRegs[]={
         { PRGBanks, 4, "PRGB"},
-        { CHRBanksA, 8, "CHRA"},
-        { CHRBanksB, 4, "CHRB"},
+        { CHRBanksA, 16, "CHRA"},
+        { CHRBanksB, 8, "CHRB"},
         { &WRAMPage, 1, "WRMP"},
         { WRAMMaskEnable, 2, "WRME"},
         { &mmc5ABMode, 1, "ABMD"},
@@ -844,6 +847,7 @@ static void GenMMC5_Init(CartInfo *info, int wsize, int battery)
  AddExState(&MMC5HackSPMode, 1, 0, "SPLM");
  AddExState(&MMC5HackSPScroll, 1, 0, "SPLS");
  AddExState(&MMC5HackSPPage, 1, 0, "SPLP");
+ AddExState(&MMC50x5130, 1, 0, "5130");
 
  MMC5WRAMsize=wsize/8;
  BuildWRAMSizeTable();

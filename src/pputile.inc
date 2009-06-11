@@ -76,6 +76,7 @@ pshift[1]<<=8;
 		C = MMC5HackVROMPTR;
 		C += (((MMC5HackExNTARAMPtr[RefreshAddr & 0x3ff]) & 0x3f & 
 			MMC5HackVROMMask) << 12) + (vadr & 0xfff);
+		C += (MMC50x5130&0x3)<<18; //11-jun-2009 for kuja_killer
 	#elif defined(PPUT_MMC5)
 		C=MMC5BGVRAMADR(vadr);
 	#else

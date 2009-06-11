@@ -261,6 +261,7 @@ uint8 *MMC5HackExNTARAMPtr=0;
 uint8 *MMC5HackVROMPTR=0;
 uint8 MMC5HackCHRMode=0;
 uint8 MMC5HackSPMode=0;   
+uint8 MMC50x5130=0;
 uint8 MMC5HackSPScroll=0; 
 uint8 MMC5HackSPPage=0;
 
@@ -320,6 +321,7 @@ uint8* FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr) {
 		if(MMC5HackCHRMode==1) {
 			uint8 *C = MMC5HackVROMPTR;
 			C += (((MMC5HackExNTARAMPtr[refreshaddr & 0x3ff]) & 0x3f & MMC5HackVROMMask) << 12) + (vadr & 0xfff);
+			C += (MMC50x5130&0x3)<<18; //11-jun-2009 for kuja_killer
 			return C;
 		} else {
 			return MMC5BGVRAMADR(vadr);
