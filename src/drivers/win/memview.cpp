@@ -70,6 +70,9 @@ int HexForeColorB = 0;
 int HexFreezeColorR = 0;
 int HexFreezeColorG = 0;
 int HexFreezeColorB = 255;
+int RomFreezeColorR = 255;
+int RomFreezeColorG = 0;
+int RomFreezeColorB = 0;
 
 // This defines all of our right click popup menus
 struct
@@ -557,7 +560,7 @@ void UpdateColorTable(){
 			//if((tmp->addr < CurOffset+DataAmount) && (tmp->addr+tmp->size > CurOffset))
 			for(i = tmp->addr;i < tmp->addr+tmp->size;i++){
 				if((i > CurOffset) && (i < CurOffset+DataAmount))
-					TextColorList[i-CurOffset] = RGB(HexFreezeColorR,HexFreezeColorG,HexFreezeColorB);
+					TextColorList[i-CurOffset] = RGB(RomFreezeColorR,RomFreezeColorG,RomFreezeColorB);
 			}
 			tmp=tmp->last;
 		}

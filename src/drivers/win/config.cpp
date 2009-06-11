@@ -86,6 +86,9 @@ extern int HexForeColorB;
 extern int HexFreezeColorR;
 extern int HexFreezeColorG;
 extern int HexFreezeColorB;
+extern int RomFreezeColorR;
+extern int RomFreezeColorG;
+extern int RomFreezeColorB;
 
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
@@ -271,6 +274,9 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(HexFreezeColorR),
 	AC(HexFreezeColorG),
 	AC(HexFreezeColorB),
+	AC(RomFreezeColorR),
+	AC(RomFreezeColorG),
+	AC(RomFreezeColorB),
 	//ACS(memwLastfile[2048]),
 	ENDCFGSTRUCT
 };

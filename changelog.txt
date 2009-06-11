@@ -1,3 +1,4 @@
+11-jun-2009 - adelikat - Win32 - Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
 06-jun-2009 - rheiny - Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)
 23-may-2009 - adelikat - win32 - hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)
 23-may-2009 - adelikat - win32 - context menu - Save Movie As... menu item (for when a movie is loaded in read+write mode)
