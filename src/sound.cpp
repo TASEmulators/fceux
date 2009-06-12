@@ -973,20 +973,11 @@ DECLFW(Write_IRQFM)
   FrameSoundUpdate();
  fcnt=1;
  fhcnt=fhinc;
-<<<<<<< .mine
  if (V & 0x01)
  {
  	X6502_IRQEnd(FCEU_IQFCOUNT);
  	SIRQStat&=~0x40;
  }
-=======
- //X6502_IRQEnd(FCEU_IQFCOUNT);
- if (V & 0x1)
- {
-	 X6502_IRQEnd(FCEU_IQFCOUNT);
- 	SIRQStat&=~0x40;
- }
->>>>>>> .r1322
  IRQFrameMode=V;
 }
 
