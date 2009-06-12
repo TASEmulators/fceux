@@ -103,7 +103,7 @@ static const uint32 NoiseFreqTablePAL[0x10] =
 	236, 354, 472, 708,  944, 1890, 3778
 };
 
-static const uint32 *NoiseFreqTable;
+static const uint32 *NoiseFreqTable = NoiseFreqTableNTSC;
 
 static const uint32 NTSCDMCTable[0x10]=
 {
@@ -973,12 +973,20 @@ DECLFW(Write_IRQFM)
   FrameSoundUpdate();
  fcnt=1;
  fhcnt=fhinc;
+<<<<<<< .mine
+ if (V & 0x01)
+ {
+ 	X6502_IRQEnd(FCEU_IQFCOUNT);
+ 	SIRQStat&=~0x40;
+ }
+=======
  //X6502_IRQEnd(FCEU_IQFCOUNT);
  if (V & 0x1)
  {
 	 X6502_IRQEnd(FCEU_IQFCOUNT);
  	SIRQStat&=~0x40;
  }
+>>>>>>> .r1322
  IRQFrameMode=V;
 }
 
