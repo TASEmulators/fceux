@@ -24,7 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <limits.h>
 #include "types.h"
 #include "fceu.h"
 #include "ppu.h"
@@ -293,7 +293,7 @@ void setchr8r(int r, unsigned int V)
 	if(CHRram[r])
 		PPUCHRRAM|=(255);
 	else
-		PPUCHRRAM&=~(255);
+		PPUCHRRAM=0; 
 }
 
 void setchr1(unsigned int A, unsigned int V)
@@ -640,7 +640,7 @@ void FCEU_SaveGameSave(CartInfo *LocalHWInfo)
 		std::string soot = FCEU_MakeFName(FCEUMKF_SAV,0,"sav");
 		if((sp=FCEUD_UTF8fopen(soot,"wb"))==NULL)
 		{
-			FCEU_PrintError("WRAM file \"%s\" cannot be written to.\n",soot);
+			FCEU_PrintError("WRAM file \"%s\" cannot be written to.\n",soot.c_str());
 		}
 		else
 		{
