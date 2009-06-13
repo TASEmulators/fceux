@@ -2,16 +2,16 @@ import os
 import sys
 import platform 
 
-opts = Options()
-opts.AddOptions(
-  BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
-  BoolOption('OPENGL',    'Enable OpenGL support', 1),
-  BoolOption('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
-  BoolOption('DEBUG',     'Build with debugging symbols', 0),
-  BoolOption('LUA',       'Enable Lua support', 1),
-  BoolOption('NEWPPU',    'Enable new PPU core', 0),
-  BoolOption('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
-  BoolOption('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1')
+opts = Variables()
+opts.AddVariables(
+  BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
+  BoolVariable('OPENGL',    'Enable OpenGL support', 1),
+  BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
+  BoolVariable('DEBUG',     'Build with debugging symbols', 0),
+  BoolVariable('LUA',       'Enable Lua support', 1),
+  BoolVariable('NEWPPU',    'Enable new PPU core', 0),
+  BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
+  BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1')
 )
 
 env = Environment(options = opts)
