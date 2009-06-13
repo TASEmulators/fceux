@@ -242,7 +242,7 @@ zpfail:
 		unzCloseCurrentFile(tz);
 		unzClose(tz);
 
-		FCEUFILE *fceufp=fceufp = new FCEUFILE();
+		FCEUFILE *fceufp = new FCEUFILE();
 		fceufp->stream = ms;
 		fceufp->size = size;
 		return fceufp;
@@ -259,7 +259,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 
 	bool read = (std::string)mode == "rb";
 	bool write = (std::string)mode == "wb";
-	if(read&&write || (!read&&!write))
+	if((read&&write) || (!read&&!write))
 	{
 		FCEU_PrintError("invalid file open mode specified (only wb and rb are supported)");
 		return 0;
