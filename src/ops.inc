@@ -343,8 +343,9 @@ case 0x6B: {
 /* ASR */
 case 0x4B: LD_IM(AND;LSRA);
 
-/* ATX(OAL) Is this(OR with $EE) correct? */
-case 0xAB: LD_IM(_A|=0xEE;AND;_X=_A);
+/* ATX(OAL) Is this(OR with $EE) correct? Blargg did some test
+   and found the constant to be OR with is $FF for NES */
+case 0xAB: LD_IM(_A|=0xFF;AND;_X=_A);
 
 /* AXS */ 
 case 0xCB: LD_IM(AXS);
