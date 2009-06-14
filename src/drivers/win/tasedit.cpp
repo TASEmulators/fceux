@@ -12,6 +12,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 #include "help.h"
+#include "main.h"	//So we can use the GetRomName() function!
 
 using namespace std;
 
@@ -35,6 +36,37 @@ static TSelectionFrames selectionFrames;
 //hacky.. we need to think about how to convey information from the driver to the movie code.
 //add a new fceud_ function?? blehhh maybe
 extern EMOVIEMODE movieMode;
+
+//The project file struct
+struct TASEDIT_PROJECT
+{
+	std::string mainFilename;	//The main fm2's file name and location
+	std::string getFilename();
+	std::string setFilename();
+	std::string projectFilename;	//Name of the actual project's file
+};
+
+TASEDIT_PROJECT project;	//Create an instance of the project
+
+std::string getFilename()	//Get fm2 file name
+{
+	return project.mainFilename;	//Speaks for itself really!
+}
+
+void setFilename(std::string e)	//Guess what? Sets the project's fm2 file name!
+{
+	project.mainFilename = e;	//Yep
+}
+
+std::string getProjectname()	//Get TASEedit project's name
+{
+	return project.projectFilename;	//Speaks for itself really!
+}
+
+void setProjectname(std::string e)	//Guess what? Sets the project's name!
+{
+	project.projectFilename = e;	//Yep
+}
 
 static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -528,6 +560,28 @@ static void NewProject()
 //if so, ask to save changes
 //close current project
 //create new project
+	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";
+
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Save TASEdit Project As...";
+	ofn.lpstrFilter=TPfilter;
+
+	char nameo[2048];
+	strcpy(nameo, GetRomName());
+
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);
+	ofn.lpstrInitialDir=initdir.c_str();
+
+	if(GetSaveFileName(&ofn))
+	{
+		//TODO: Save project and reinitialise TASEdit
+	}
 }
 
 //Opens a new Project file
@@ -685,7 +739,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			{
 			case ACCEL_CTRL_N:
 			case ID_FILE_NEWPROJECT:
-				NewProject();  
+				NewProject();
 				break;
 
 			case ACCEL_CTRL_O:
