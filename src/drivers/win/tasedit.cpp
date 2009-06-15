@@ -1,5 +1,6 @@
 #include <set>
 #include <fstream>
+#include <iostream>	//Allows us to save the project and other data :)
 
 #include "common.h"
 #include "tasedit.h"
@@ -40,32 +41,61 @@ extern EMOVIEMODE movieMode;
 //The project file struct
 struct TASEDIT_PROJECT
 {
-	std::string mainFilename;	//The main fm2's file name and location
-	std::string getFilename();
-	std::string setFilename();
-	std::string projectFilename;	//Name of the actual project's file
-};
+	//The TASEdit Project's name
+	std::string projectName;
+	//The FM2's file name
+	std::string fm2FileName;
+	//The TASEdit Project's filename (For saving purposes)
+	std::string projectFile;
 
+	std::string GetProjectName();
+	void SetProjectName(std::string e);
+
+	std::string GetFM2Name();
+	void SetFM2Name(std::string e);
+
+	std::string GetProjectFile();
+	void SetProjectFile(std::string e);
+};
 TASEDIT_PROJECT project;	//Create an instance of the project
 
-std::string getFilename()	//Get fm2 file name
+
+//All the get/set functions...
+std::string TASEDIT_PROJECT::GetProjectName()
 {
-	return project.mainFilename;	//Speaks for itself really!
+	return project.projectName;
+}
+void TASEDIT_PROJECT::SetProjectName(std::string e)
+{
+	project.projectName = e;
+}
+std::string TASEDIT_PROJECT::GetFM2Name()
+{
+	return project.fm2FileName;
+}
+void TASEDIT_PROJECT::SetFM2Name(std::string e)
+{
+	project.fm2FileName = e;
+}
+std::string TASEDIT_PROJECT::GetProjectFile()
+{
+	return project.projectFile;
+}
+void TASEDIT_PROJECT::SetProjectFile(std::string e)
+{
+	project.projectFile = e;
 }
 
-void setFilename(std::string e)	//Guess what? Sets the project's fm2 file name!
-{
-	project.mainFilename = e;	//Yep
-}
 
-std::string getProjectname()	//Get TASEedit project's name
+void SaveProjectToDisk()
 {
-	return project.projectFilename;	//Speaks for itself really!
-}
-
-void setProjectname(std::string e)	//Guess what? Sets the project's name!
-{
-	project.projectFilename = e;	//Yep
+	std::string PFN = project.GetProjectFile();
+	const char* filename = PFN.c_str();
+	ofstream ofs;
+	ofs.open(filename);
+	ofs << project.GetProjectName() << endl;
+	ofs << project.GetFM2Name() << endl;
+	ofs.close();
 }
 
 static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
@@ -559,29 +589,49 @@ static void NewProject()
 //determine if current project changed
 //if so, ask to save changes
 //close current project
-//create new project
-	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";
+	//Creation of a save window
+	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";	//Filetype filter
 
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
+	OPENFILENAME ofn;								//New instance of OPENFILENAME
+	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
+	ofn.lStructSize=sizeof(ofn);					//Various parameters
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save TASEdit Project As...";
 	ofn.lpstrFilter=TPfilter;
 
-	char nameo[2048];
-	strcpy(nameo, GetRomName());
+	char nameo[2048];								//File name
+	strcpy(nameo, GetRomName());					//For now, just use ROM name
 
-	ofn.lpstrFile=nameo;
+	ofn.lpstrFile=nameo;							//More parameters
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);
+	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
 	ofn.lpstrInitialDir=initdir.c_str();
 
-	if(GetSaveFileName(&ofn))
+	if(GetSaveFileName(&ofn))						//If it is a valid filename
 	{
-		//TODO: Save project and reinitialise TASEdit
+		std::string tempstr = nameo;				//Make a temporary string for filename
+		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
+		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
+		{
+			tempstr.append(".tas");					//Stick it on ourselves
+			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
+			std::string filename = name;			//Get the filename
+			filename.append(ext);					//Shove the extension back onto it...
+			project.SetProjectFile(filename);		//And update the project's filename.
+		} else {									//If they've been nice and done it for us...
+			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
+			std::string filename = name;			//Grab the name...
+			filename.append(ext);					//Stick extension back on...
+			project.SetProjectFile(filename);		//And update the project's filename.
+		}
+		project.SetProjectName(GetRomName());		//Set the project's name to the ROM name
+		std::string thisfm2name = project.GetProjectName();
+		thisfm2name.append(".fm2");					//Setup the fm2 name
+		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
+		SaveProjectToDisk();
 	}
+	//TODO: Reinitialise project
 }
 
 //Opens a new Project file
