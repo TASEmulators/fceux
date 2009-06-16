@@ -208,6 +208,7 @@ BEGIN
         MENUITEM "&Open Project...\tCtrl+O",    ID_FILE_OPENPROJECT
         MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT, INACTIVE
         MENUITEM "S&ave Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS
+        MENUITEM "Recent",                      ID_TASEDIT_FILE_RECENT
         MENUITEM SEPARATOR
         MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2, INACTIVE
         MENUITEM "&Export to FM2",              ID_FILE_EXPORTFM2

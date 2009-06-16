@@ -686,6 +686,8 @@
 #define FCEUX_CONTEXT_LOADLASTMOVIE     40356
 #define ID_GAME_SAVEMOVIEAS             40357
 #define FCEUX_CONTEXT_SAVEMOVIEAS       40358
+#define ID_FILE_RECENT40359             40359
+#define ID_TASEDIT_FILE_RECENT          40360
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -695,7 +697,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40359
+#define _APS_NEXT_COMMAND_VALUE         40361
 #define _APS_NEXT_CONTROL_VALUE         1204
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
