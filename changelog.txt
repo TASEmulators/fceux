@@ -1,3 +1,4 @@
+16-jun-2009 - adelikat - sound core fix - square 1 & square 2 volume controls no longer backwards
 11-jun-2009 - zeromus - sound core fix, length counters for APU now correct variables
 11-jun-2009 - adelikat - Win32 - Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
 06-jun-2009 - rheiny - Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)
