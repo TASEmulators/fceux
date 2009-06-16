@@ -8,18 +8,9 @@
 
 #include <string>
 
-using namespace std;
-
 class TASEDIT_PROJECT
 {
 public:
-	//The TASEdit Project's name
-	std::string projectName;
-	//The FM2's file name
-	std::string fm2FileName;
-	//The TASEdit Project's filename (For saving purposes)
-	std::string projectFile;
-
 	std::string GetProjectName();
 	void SetProjectName(std::string e);
 
@@ -31,4 +22,12 @@ public:
 
 	//Guess what this function is for...
 	void SaveProject();
+
+private:
+	//The TASEdit Project's name
+	std::string projectName;
+	//The FM2's file name
+	std::string fm2FileName;
+	//The TASEdit Project's filename (For saving purposes)
+	std::string projectFile;
 };

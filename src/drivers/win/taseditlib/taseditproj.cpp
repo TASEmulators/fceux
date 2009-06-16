@@ -4,6 +4,16 @@
 //Contains all the TASEDit project and all files/settings associated with it
 //Also contains all methods for manipulating the project files/settings, and saving them to disk
 
+/*
+	//Private members
+	//The TASEdit Project's name
+	std::string projectName;
+	//The FM2's file name
+	std::string fm2FileName;
+	//The TASEdit Project's filename (For saving purposes)
+	std::string projectFile;
+*/
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -42,7 +52,7 @@ void TASEDIT_PROJECT::SaveProject()
 	const char* filename = PFN.c_str();
 	std::ofstream ofs;
 	ofs.open(filename);
-	ofs << GetProjectName() << endl;
-	ofs << GetFM2Name() << endl;
+	ofs << GetProjectName() << std::endl;
+	ofs << GetFM2Name() << std::endl;
 	ofs.close();
 }

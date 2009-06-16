@@ -1,6 +1,5 @@
 #include <set>
 #include <fstream>
-#include <iostream>	//Allows us to save the project and other data :)
 
 #include "common.h"
 #include "tasedit.h"
