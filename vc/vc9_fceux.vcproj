@@ -1754,6 +1754,18 @@
 						</File>
 					</Filter>
 				</Filter>
+				<Filter
+					Name="taseditlib"
+					>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\taseditproj.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\taseditproj.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
