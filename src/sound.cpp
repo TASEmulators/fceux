@@ -588,7 +588,7 @@ static INLINE void RDoSQ(int x)		//Int x decides if this is Square Wave 1 or 2
    
    //Modify Square wave volume based on channel volume modifiers
    //adelikat: Note: the formulat x = x * y /100 does not yield exact results, but is "close enough" and avoids the need for using double vales or implicit cohersion which are slower (we need speed here)
-   ampx = x ? FSettings.Square1Volume : FSettings.Square2Volume; // TODO OPTIMIZE ME!
+   ampx = x ? FSettings.Square2Volume : FSettings.Square1Volume; // TODO OPTIMIZE ME!
    if (ampx != 256) amp = (amp * ampx) / 256; // CaH4e3: fixed - setting up maximum volume for square2 caused complete mute square2 channel
          
    amp<<=24;
