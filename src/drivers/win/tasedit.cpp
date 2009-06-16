@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "tasedit.h"
+#include "taseditlib/taseditproj.h"
 #include "fceu.h"
 #include "debugger.h"
 #include "replay.h"
@@ -38,65 +39,7 @@ static TSelectionFrames selectionFrames;
 //add a new fceud_ function?? blehhh maybe
 extern EMOVIEMODE movieMode;
 
-//The project file struct
-struct TASEDIT_PROJECT
-{
-	//The TASEdit Project's name
-	std::string projectName;
-	//The FM2's file name
-	std::string fm2FileName;
-	//The TASEdit Project's filename (For saving purposes)
-	std::string projectFile;
-
-	std::string GetProjectName();
-	void SetProjectName(std::string e);
-
-	std::string GetFM2Name();
-	void SetFM2Name(std::string e);
-
-	std::string GetProjectFile();
-	void SetProjectFile(std::string e);
-};
 TASEDIT_PROJECT project;	//Create an instance of the project
-
-
-//All the get/set functions...
-std::string TASEDIT_PROJECT::GetProjectName()
-{
-	return project.projectName;
-}
-void TASEDIT_PROJECT::SetProjectName(std::string e)
-{
-	project.projectName = e;
-}
-std::string TASEDIT_PROJECT::GetFM2Name()
-{
-	return project.fm2FileName;
-}
-void TASEDIT_PROJECT::SetFM2Name(std::string e)
-{
-	project.fm2FileName = e;
-}
-std::string TASEDIT_PROJECT::GetProjectFile()
-{
-	return project.projectFile;
-}
-void TASEDIT_PROJECT::SetProjectFile(std::string e)
-{
-	project.projectFile = e;
-}
-
-
-void SaveProjectToDisk()
-{
-	std::string PFN = project.GetProjectFile();
-	const char* filename = PFN.c_str();
-	ofstream ofs;
-	ofs.open(filename);
-	ofs << project.GetProjectName() << endl;
-	ofs << project.GetFM2Name() << endl;
-	ofs.close();
-}
 
 static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -629,7 +572,7 @@ static void NewProject()
 		std::string thisfm2name = project.GetProjectName();
 		thisfm2name.append(".fm2");					//Setup the fm2 name
 		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
-		SaveProjectToDisk();
+		project.SaveProject();
 	}
 	//TODO: Reinitialise project
 }
