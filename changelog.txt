@@ -1,3 +1,8 @@
+17-jun-2009 - qeed - Sound core fix, updated with the correct values for the noise and DMC table, 
+                     and also fixed the IRQ inhibit behavior for register $4017. Also fixed the CPU 
+                     unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested 
+                     by blargg's. These fixes passes the IRQ flags test from blargg, and also one more 
+                     opcode test from blargg's cpu.nes test.
 16-jun-2009 - adelikat - sound core fix - square 1 & square 2 volume controls no longer backwards
 11-jun-2009 - zeromus - sound core fix, length counters for APU now correct variables
 11-jun-2009 - adelikat - Win32 - Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
