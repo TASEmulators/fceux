@@ -127,9 +127,6 @@ struct PPUREGS {
 	}
 
 	void install_h_latches() {
-		if(ht!=_ht || h != _h) {
-			int zzz=9;
-		}
 		ht = _ht;
 		h = _h;
 	}
@@ -620,15 +617,8 @@ static DECLFW(B2006)
 		ppur._ht = V&31;
 
 		ppur.install_latches();
-
-		if(RefreshAddr==0x18DE) {
-			int zzz=9;
-		}
 	}
 
-	if(ppur._fv == 1) {
-		int zzz=9;
-	}
 	vtoggle^=1;
 }
 
@@ -646,13 +636,6 @@ static DECLFW(B2007)
 	else
 	{
 		//printf("%04x ",tmp);
-		if(tmp==0x2679)
-		{
-			int zzz=9;
-		}
-				if(tmp == 0x3f13 ) {
-			int zzz=9;
-		}
 		PPUGenLatch=V;
 		if(tmp>=0x3F00)
 		{
