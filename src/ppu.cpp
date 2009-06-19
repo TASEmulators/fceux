@@ -49,6 +49,7 @@
 #define SpriteON  (PPU[1]&0x10)   //Show Sprite
 #define ScreenON  (PPU[1]&0x08)   //Show screen
 #define PPUON    (PPU[1]&0x18)		//PPU should operate
+#define GRAYSCALE (PPU[1]&0x01) //Grayscale (AND palette entries with 0x30)
 
 #define SpriteLeft8 (PPU[1]&0x04)
 #define BGLeft8 (PPU[1]&0x02)
@@ -341,24 +342,41 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 //new ppu-----
 inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
-
 	if(tmp>=0x3F00)
-		{
-			// hmmm....
-			if(!(tmp&0xf))
+    {
+		// hmmm....
+        switch (tmp & 0x1F)
+        {
+            case 0x10: case 0x14: case 0x18: case 0x1C:
+                PALRAM[tmp & 0x0C] =
+                PALRAM[tmp & 0x1C] = V & 0x3F;
+                break;
+				
+            case 0x0: case 0x4: case 0x8: case 0xC:
+			
+                PALRAM[tmp & 0x1F] =
+				PALRAM[(tmp & 0x1F) | 0x10] = V & 0x3F;
+                break;
+				
+            default:
+                PALRAM[tmp & 0x1F] = V & 0x3F;
+			
+        }
+		/*	if(!(tmp&0xf))
 				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
-		}
-		else if(tmp<0x2000)
-		{
-			if(PPUCHRRAM&(1<<(tmp>>10)))
-				VPage[tmp>>10][tmp]=V;
-		}   
-		else
-		{
-			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
-				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
-		}
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;*/
+    }
+
+	else if(tmp<0x2000)
+	{
+		if(PPUCHRRAM&(1<<(tmp>>10)))
+			VPage[tmp>>10][tmp]=V;
+	}   
+	else
+	{
+		if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
+			vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+	}
 }
 
 uint8 FFCEUX_PPURead_Default(uint32 A) {
@@ -455,14 +473,27 @@ static DECLFR(A2007)
 	uint32 tmp=RefreshAddr&0x3FFF;
 
 	if(newppu) {
-		//mbg
+        //mbg
 		ret = VRAMBuffer;
-		RefreshAddr = ppur.get_2007access();
-		VRAMBuffer = CALL_PPUREAD(RefreshAddr);
+		RefreshAddr = ppur.get_2007access() & 0x3FFF;
+        if ((RefreshAddr & 0x3F00) == 0x3F00)
+        {
+            //if it is in the palette range bypass the 
+            //delayed read, and what gets filled in the temp
+            //buffer is the address - 0x1000, also
+            //if grayscale is set then the return is AND with 0x30
+            //to get a gray color reading
+            ret = PALRAM[RefreshAddr & 0x1F];
+            if (GRAYSCALE)
+                ret &= 0x30;
+            VRAMBuffer = CALL_PPUREAD(RefreshAddr - 0x1000);
+        }
+        else
+		    VRAMBuffer = CALL_PPUREAD(RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
-		return ret;
-	} else {
+		return ret;   
+    } else {
 		FCEUPPU_LineUpdate();
 
 		ret=VRAMBuffer;
@@ -477,10 +508,18 @@ static DECLFR(A2007)
 			{
 				VRAMBuffer=VPage[tmp>>10][tmp];
 			}
-			else
+            else if (tmp < 0x3F00)
 			{   
 				VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 			}
+            else 
+            {
+                ret = PALRAM[RefreshAddr & 0x1F];
+                if (GRAYSCALE)
+                    ret &= 0x30;
+                VRAMBuffer = vnapage[(tmp>>10)&0x3][tmp&0x3FF];
+            }
+
 		}
 	#ifdef FCEUDEF_DEBUGGER
 		if(!fceuindbg)
@@ -627,7 +666,7 @@ static DECLFW(B2007)
 	uint32 tmp=RefreshAddr&0x3FFF;
 
 	if(newppu) {
-		RefreshAddr = ppur.get_2007access();
+		RefreshAddr = ppur.get_2007access() & 0x3FFF;
 		CALL_PPUWRITE(RefreshAddr,V);
 		//printf("%04x ",RefreshAddr);
 		ppur.increment2007(INC32!=0);
@@ -637,13 +676,28 @@ static DECLFW(B2007)
 	{
 		//printf("%04x ",tmp);
 		PPUGenLatch=V;
-		if(tmp>=0x3F00)
+        if(tmp>=0x3F00)
 		{
+            switch (tmp & 0x1F)
+			{
+				case 0x10: case 0x14: case 0x18: case 0x1C:
+					PALRAM[tmp & 0x0C] =
+					PALRAM[tmp & 0x1C] = V & 0x3F;
+					break;
+				case 0x0: case 0x4: case 0x8: case 0xC:
+					PALRAM[tmp & 0x1F] =
+					PALRAM[(tmp & 0x1F) | 0x10] = V & 0x3F;
+					break;
+				default:
+					PALRAM[tmp & 0x1F] = V & 0x3F;
+			}
+            /*
 			// hmmm....
 			if(!(tmp&0xf))
 				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;*/
 		}
+
 		else if(tmp<0x2000)
 		{
 			if(PPUCHRRAM&(1<<(tmp>>10)))
