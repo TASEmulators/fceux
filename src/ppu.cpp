@@ -49,6 +49,7 @@
 #define SpriteON  (PPU[1]&0x10)   //Show Sprite
 #define ScreenON  (PPU[1]&0x08)   //Show screen
 #define PPUON    (PPU[1]&0x18)		//PPU should operate
+#define GRAYSCALE (PPU[1]&0x01) //Grayscale (AND palette entries with 0x30)
 
 #define SpriteLeft8 (PPU[1]&0x04)
 #define BGLeft8 (PPU[1]&0x02)
@@ -289,8 +290,8 @@ static uint32 scanlines_per_frame;
 uint8 PPU[4];
 uint8 PPUSPL;
 uint8 NTARAM[0x800],PALRAM[0x20],SPRAM[0x100],SPRBUF[0x100];
-
-
+uint8 UPALRAM[0x03]; //for 0x4/0x8/0xC addresses in palette, the ones in
+                     //0x20 are 0 to not break fceu rendering.
 
 
 #define MMC5SPRVRAMADR(V)      &MMC5SPRVPage[(V)>>10][(V)]
@@ -342,36 +343,59 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
 
-	if(tmp>=0x3F00)
-		{
-			// hmmm....
-			if(!(tmp&0xf))
-				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
-		}
-		else if(tmp<0x2000)
-		{
-			if(PPUCHRRAM&(1<<(tmp>>10)))
-				VPage[tmp>>10][tmp]=V;
-		}   
-		else
-		{
-			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
-				vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
-		}
+    if(tmp<0x2000)
+    {
+        if(PPUCHRRAM&(1<<(tmp>>10)))
+            VPage[tmp>>10][tmp]=V;
+    }   
+    else if (tmp<0x3F00)
+    {
+        if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
+            vnapage[((tmp&0xF00)>>10)][tmp&0x3FF]=V;
+    }
+    else
+    {
+        if (!(tmp & 3))
+        {
+            if (!(tmp & 0xC))
+                  PALRAM[0x00] = PALRAM[0x04] = 
+                  PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
+            else
+                UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
+        }
+        else
+            PALRAM[tmp & 0x1F] = V & 0x3F;
+    }
 }
 
 uint8 FFCEUX_PPURead_Default(uint32 A) {
 	uint32 tmp = A;
-
+    
 	if(tmp<0x2000)
 	{
 		return VPage[tmp>>10][tmp];
 	}
-	else
+	else if (tmp < 0x3F00)
 	{   
 		return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 	}
+    else
+    {
+        uint8 ret;
+        if (!(tmp & 3))
+        {
+            if (!(tmp & 0xC))
+                ret = PALRAM[0x00];
+            else
+                ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+        }
+        else
+            ret = PALRAM[tmp & 0x1F];
+            
+        if (GRAYSCALE)
+            ret &= 0x30;
+        return ret;
+    }
 }
 
 
@@ -455,14 +479,34 @@ static DECLFR(A2007)
 	uint32 tmp=RefreshAddr&0x3FFF;
 
 	if(newppu) {
-		//mbg
-		ret = VRAMBuffer;
-		RefreshAddr = ppur.get_2007access();
-		VRAMBuffer = CALL_PPUREAD(RefreshAddr);
+        ret = VRAMBuffer;
+		RefreshAddr = ppur.get_2007access() & 0x3FFF;
+        if ((RefreshAddr & 0x3F00) == 0x3F00)
+        {
+            //if it is in the palette range bypass the 
+            //delayed read, and what gets filled in the temp
+            //buffer is the address - 0x1000, also
+            //if grayscale is set then the return is AND with 0x30
+            //to get a gray color reading
+            if (!(tmp & 3))
+            {
+                if (!(tmp & 0xC))
+                    ret = PALRAM[0x00];
+                else
+                    ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+            }
+            else
+                ret = PALRAM[tmp & 0x1F];
+            if (GRAYSCALE)
+                ret &= 0x30;
+            VRAMBuffer = CALL_PPUREAD(RefreshAddr - 0x1000);
+        }
+        else
+		    VRAMBuffer = CALL_PPUREAD(RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
-		return ret;
-	} else {
+        return ret;
+    } else {
 		FCEUPPU_LineUpdate();
 
 		ret=VRAMBuffer;
@@ -477,10 +521,29 @@ static DECLFR(A2007)
 			{
 				VRAMBuffer=VPage[tmp>>10][tmp];
 			}
-			else
+			else if (tmp < 0x3F00)
 			{   
 				VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 			}
+            else
+            {
+                if (!(tmp & 3))
+                {
+                
+                    if (!(tmp & 0xC))
+                        ret = PALRAM[0x00];
+                    else
+                        ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
+                }
+            
+                else
+                    ret = PALRAM[tmp & 0x1F];
+            
+                if (GRAYSCALE)
+                    ret &= 0x30;
+            
+                VRAMBuffer = vnapage[((tmp-0x1000)>>10)&0x3][tmp&0x3FF];
+            }
 		}
 	#ifdef FCEUDEF_DEBUGGER
 		if(!fceuindbg)
@@ -627,7 +690,7 @@ static DECLFW(B2007)
 	uint32 tmp=RefreshAddr&0x3FFF;
 
 	if(newppu) {
-		RefreshAddr = ppur.get_2007access();
+		RefreshAddr = ppur.get_2007access() & 0x3FFF;
 		CALL_PPUWRITE(RefreshAddr,V);
 		//printf("%04x ",RefreshAddr);
 		ppur.increment2007(INC32!=0);
@@ -640,9 +703,17 @@ static DECLFW(B2007)
 		if(tmp>=0x3F00)
 		{
 			// hmmm....
-			if(!(tmp&0xf))
-				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
-			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
+            if (!(tmp & 3))
+            {
+                if (!(tmp & 0xC))
+                    PALRAM[0x00] = PALRAM[0x04] = 
+                        PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
+                else
+                    UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
+        
+            }
+            else
+                PALRAM[tmp & 0x1F] = V & 0x3F;
 		}
 		else if(tmp<0x2000)
 		{
@@ -1533,7 +1604,8 @@ void FCEUPPU_Power(void)
 	int x;
 
 	memset(NTARAM,0x00,0x800);
-	memset(PALRAM,0x00,0x20); 
+	memset(PALRAM,0x00,0x20);
+    memset(UPALRAM,0x00,0x03);
 	memset(SPRAM,0x00,0x100); 
 	FCEUPPU_Reset();
 
