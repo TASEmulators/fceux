@@ -370,7 +370,7 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 
 uint8 FFCEUX_PPURead_Default(uint32 A) {
 	uint32 tmp = A;
-    
+
 	if(tmp<0x2000)
 	{
 		return VPage[tmp>>10][tmp];
@@ -525,25 +525,6 @@ static DECLFR(A2007)
 			{   
 				VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 			}
-            else
-            {
-                if (!(tmp & 3))
-                {
-                
-                    if (!(tmp & 0xC))
-                        ret = PALRAM[0x00];
-                    else
-                        ret = UPALRAM[((tmp & 0xC) >> 2) - 1];
-                }
-            
-                else
-                    ret = PALRAM[tmp & 0x1F];
-            
-                if (GRAYSCALE)
-                    ret &= 0x30;
-            
-                VRAMBuffer = vnapage[((tmp-0x1000)>>10)&0x3][tmp&0x3FF];
-            }
 		}
 	#ifdef FCEUDEF_DEBUGGER
 		if(!fceuindbg)
@@ -703,17 +684,9 @@ static DECLFW(B2007)
 		if(tmp>=0x3F00)
 		{
 			// hmmm....
-            if (!(tmp & 3))
-            {
-                if (!(tmp & 0xC))
-                    PALRAM[0x00] = PALRAM[0x04] = 
-                        PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
-                else
-                    UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
-        
-            }
-            else
-                PALRAM[tmp & 0x1F] = V & 0x3F;
+			if(!(tmp&0xf))
+				PALRAM[0x00]=PALRAM[0x04]=PALRAM[0x08]=PALRAM[0x0C]=V&0x3F;
+			else if(tmp&3) PALRAM[(tmp&0x1f)]=V&0x3f;
 		}
 		else if(tmp<0x2000)
 		{
