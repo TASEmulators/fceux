@@ -428,6 +428,7 @@ static void SaveMemWatch()
 		}
 
 		//quick get length of memwLastFilename
+		strcpy(memwLastFilename,nameo);
 		for(i=0;i<2048;i++)
 		{
 			if(memwLastFilename[i] == 0)
