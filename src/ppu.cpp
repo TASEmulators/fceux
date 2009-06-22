@@ -100,6 +100,25 @@ struct BITREVLUT {
 };
 BITREVLUT<uint8,8> bitrevlut;
 
+struct PPUSTATUS 
+{
+    int cycle, end_cycle;
+    int sl;
+};
+
+struct SPRITE_READ
+{
+    int num;
+    int count;
+    int fetch;
+    int found;
+    int found_pos[8];
+    int ret;
+    int last;
+    int mode;
+};
+struct SPRITE_READ spr_read = { 0 };
+
 //uses the internal counters concept at http://nesdev.icequake.net/PPU%20addressing.txt
 struct PPUREGS {
 	uint32 fv;//3
@@ -111,13 +130,17 @@ struct PPUREGS {
 	uint32 s;//1
 	uint32 par;//8
 	uint32 ar;//2
-
-	uint32 _fv, _v, _h, _vt, _ht;
-
+     
+    uint32 _fv, _v, _h, _vt, _ht;
+    
+    struct PPUSTATUS status;
+        
 	PPUREGS()
 		: fv(0), v(0), h(0), vt(0), ht(0), fh(0), s(0), par(0), ar(0)
 		,  _fv(0), _v(0), _h(0), _vt(0), _ht(0)
-	{}
+    { status.cycle = 0; status.end_cycle = 341;
+      status.sl = 241;
+    }
 
 	void install_latches() {
 		fv = _fv;
@@ -442,6 +465,200 @@ static DECLFR(A2002)
 	return ret;
 }
 
+static DECLFR(A2004)
+{
+    if (newppu)
+    {
+        if (0)
+        //if ((ppur.status.sl < 241) && PPUON)
+        {
+            /* from cycles 0 to 63, the
+             * 32 byte OAM buffer gets init
+             * to 0xFF */
+            if (ppur.status.cycle < 64)
+                return spr_read.ret = 0xFF;
+            else 
+            {
+                for (int i = spr_read.last; 
+                     i != ppur.status.cycle; ++i)
+                {
+                    if (i < 256)
+                    {
+                        switch (spr_read.mode)
+                        {
+                            case 0:
+                                if (spr_read.count < 2)
+                                    spr_read.ret = (PPU[3] & 0xF8) 
+                                    + (spr_read.count << 2);
+                                else
+                                    spr_read.ret = spr_read.count << 2;
+                                spr_read.found_pos[spr_read.found] = spr_read.ret;
+
+                                spr_read.ret = SPRAM[spr_read.ret];
+
+                                if (i & 1) //odd cycle
+                                {
+                                    //see if in range
+                                    if ( (ppur.status.sl - 1 - spr_read.ret) 
+                                            & ~(Sprite16 ? 0xF : 0x7) )
+
+                                    {
+                                        ++spr_read.found;
+                                        spr_read.fetch = 1;
+                                        spr_read.mode = 1;
+                                    }
+                                    else 
+                                    {
+                                        if (++spr_read.count == 64)
+                                        {
+                                            spr_read.mode = 4;
+                                            spr_read.count = 0;
+                                        }
+                                        else if (spr_read.found == 8)
+                                        {
+                                            spr_read.fetch = 0;
+                                            spr_read.mode = 2;
+                                        }
+                                    }
+                                }
+                                break;
+                            case 1: //sprite is in range fetch the next 4 bytes
+                                if (i & 1)
+                                {
+                                    ++spr_read.fetch;
+                                    if (spr_read.fetch == 4)
+                                    {
+                                        spr_read.fetch = 1;
+                                        if (++spr_read.count == 64)
+                                        {
+                                            spr_read.count = 0;
+                                            spr_read.mode = 4;
+                                        }
+                                        else if (spr_read.found == 8)
+                                        {
+                                            spr_read.fetch = 0;
+                                            spr_read.mode = 2;
+                                        }
+                                        else
+                                            spr_read.mode = 0;
+                                    }
+                                }
+
+                                if (spr_read.count < 2)
+                                    spr_read.ret = (PPU[3] & 0xF8) 
+                                        + (spr_read.count << 2);
+                                else
+                                    spr_read.ret = spr_read.count << 2;
+
+                                spr_read.ret = SPRAM[spr_read.ret | 
+                                    spr_read.fetch];
+                                break;
+                            case 2: //8th sprite fetched 
+                                spr_read.ret = SPRAM[(spr_read.count << 2) 
+                                    | spr_read.fetch];
+                                if (i & 1)
+                                {
+                                    if ( (ppur.status.sl - 1 - 
+                                                SPRAM[(spr_read.count << 2) |
+                                                spr_read.fetch]) 
+                                            & ~(Sprite16 ? 0xF : 0x7) )
+                                    {
+                                        spr_read.fetch = 1;
+                                        spr_read.mode = 3;
+                                    }
+                                    else
+                                    {
+                                        if (++spr_read.count == 64)
+                                        {
+                                            spr_read.count = 0;
+                                            spr_read.mode = 4;
+                                        }
+                                        spr_read.fetch = (spr_read.fetch + 1) & 3;
+                                    }
+                                }
+                                spr_read.ret = spr_read.count;
+                                break;
+                            case 3: //9th sprite overflow detected
+                                spr_read.ret = SPRAM[spr_read.count | spr_read.fetch];
+                                if (i & 1)
+                                {
+                                    if (++spr_read.fetch == 4)
+                                    {
+                                        spr_read.count = (spr_read.count + 1) & 63;
+                                        spr_read.mode = 4;
+                                    }
+                                }
+                                break;
+                            case 4: //read OAM[n][0] until hblank
+                                if (i & 1)
+                                    spr_read.count = (spr_read.count + 1) & 63;
+                                spr_read.fetch = 0;
+                                spr_read.ret = SPRAM[spr_read.count << 2];
+                                break;
+                        }
+                    }
+                    else if (i < 320)
+                    {
+                        spr_read.ret = (i & 0x38) >> 3;
+                        if (spr_read.found < (spr_read.ret + 1))
+                        {
+                            if (spr_read.num)
+                            {
+                                spr_read.ret = SPRAM[252];
+                                spr_read.num = 0;
+                            }
+                            else 
+                                spr_read.ret = 0xFF;
+                        }
+                        else if ((i & 7) < 4)
+                        { 
+                            spr_read.ret = SPRAM[spr_read.found_pos[spr_read.ret] 
+                                                 | spr_read.fetch++];
+                            if (spr_read.fetch == 4)
+                                spr_read.fetch = 0;
+                        }
+                        else
+                            spr_read.ret = SPRAM[spr_read.found_pos[spr_read.ret | 3]];
+                    }
+                    else 
+                    {
+                        if (!spr_read.found)
+                            spr_read.ret = SPRAM[252];
+                        else
+                            spr_read.ret = SPRAM[spr_read.found_pos[0]];
+                        break;
+                    }
+                }
+                spr_read.last = ppur.status.cycle;
+                return spr_read.ret;
+            }
+        }
+        //hack from nintendulator to get micro machines working properly until
+        //the per cycle thing is debugged more
+        //thanks!
+        else if ((ppur.status.sl < 241) && PPUON)
+        {
+            if (ppur.status.cycle < 64)
+                return 0xFF;
+            else if (ppur.status.cycle < 192)
+                return SPRAM[((ppur.status.cycle - 64) << 1) & 0xFC];
+            else if (ppur.status.cycle < 256)
+                return (ppur.status.cycle & 1) ? SPRAM[0xFC] : SPRAM[((ppur.status.cycle - 192) << 1) & 0xFC];
+            else if (ppur.status.cycle < 320)
+                return 0xFF;
+            else	
+                return SPRAM[0];
+        }
+        else
+            return SPRAM[PPU[3]];
+    }
+    else
+    {
+        FCEUPPU_LineUpdate();
+        return PPUGenLatch;
+    }
+}
+
 static DECLFR(A200x)  /* Not correct for $2004 reads. */
 {
 	FCEUPPU_LineUpdate();
@@ -568,7 +785,7 @@ static DECLFW(B2001)
 	if(V&0xE0)
 		deemp=V>>5;
 }
-
+//
 static DECLFW(B2002)
 {
 	PPUGenLatch=V;
@@ -585,21 +802,32 @@ static DECLFW(B2003)
 static DECLFW(B2004)
 {
 	//printf("Wr: %04x:$%02x\n",A,V);
-
-	PPUGenLatch=V;
-	if(PPUSPL>=8) 
-	{
-		if(PPU[3]>=8)
-			SPRAM[PPU[3]]=V;
-	}
-	else
-	{   
-		//printf("$%02x:$%02x\n",PPUSPL,V);
-		SPRAM[PPUSPL]=V;
-	}
-	PPU[3]++;
-	PPUSPL++;
-
+    PPUGenLatch=V;
+    if (newppu)
+    {
+        //the attribute upper bits are not connected
+        //so AND them out on write, since reading them
+        //should return 0 in those bits.
+        if ((PPU[3] & 3) == 2)
+            V &= 0xE3;
+        SPRAM[PPU[3]] = V;
+        PPU[3] = (PPU[3] + 1) & 0xFF; 
+    }  
+    else
+    {
+        if(PPUSPL>=8) 
+        {
+            if(PPU[3]>=8)
+                SPRAM[PPU[3]]=V;
+        }
+        else
+        {   
+            //printf("$%02x:$%02x\n",PPUSPL,V);
+            SPRAM[PPUSPL]=V;
+        }
+        PPU[3]++;
+        PPUSPL++;
+    }
 }
 
 static DECLFW(B2005)
@@ -1568,7 +1796,6 @@ void FCEUPPU_Reset(void)
 	vtoggle = 0;
 	ppudead = 2;
 	kook = 0;
-
 	//	XOffset=0;
 }
 
@@ -1592,7 +1819,7 @@ void FCEUPPU_Power(void)
 		BWrite[x+2]=B2002;
 		ARead[x+3]=A200x;
 		BWrite[x+3]=B2003;
-		ARead[x+4]=A200x; //A2004;
+		ARead[x+4]=A2004; //A2004;
 		BWrite[x+4]=B2004;
 		ARead[x+5]=A200x;
 		BWrite[x+5]=B2005;
@@ -1783,11 +2010,13 @@ int pputime=0;
 int totpputime=0;
 const int kLineTime=341;
 const int kFetchTime=2;
-int idleSynch = 0;
+int idleSynch = 1;
 
 void runppu(int x) {
 	//pputime+=x;
 	//if(cputodo<200) return;
+    ppur.status.cycle = (ppur.status.cycle + x) % 
+                           ppur.status.end_cycle;
 	X6502_Run(x);
 	//pputime -= cputodo<<2;
 }
@@ -1804,24 +2033,30 @@ struct BGData {
 
 				RefreshAddr = ppur.get_atread();
 				at = CALL_PPUREAD(RefreshAddr);
-				runppu(kFetchTime);
-
+				
 				//modify at to get appropriate palette shift
 				if(ppur.vt&2) at >>= 4;
 				if(ppur.ht&2) at >>= 2;
 				at &= 0x03;
 				at <<= 2;
-
-				ppur.par = nt;
+                //horizontal scroll clocked at cycle 3 and then
+                //vertical scroll at 251
+                runppu(1);
+                if (PPUON)
+                {
+			        ppur.increment_hsc();
+                    if (ppur.status.cycle == 251) 
+                        ppur.increment_vs();
+                }
+                runppu(1);
+				
+                ppur.par = nt;
 				RefreshAddr = ppur.get_ptread();
 				pt[0] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
 				RefreshAddr |= 8;
 				pt[1] = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
-
-				if(PPUON)
-					ppur.increment_hsc();
 			}
 		};
 
@@ -1832,15 +2067,24 @@ struct BGData {
 int framectr=0;
 int FCEUX_PPU_Loop(int skip) {
 	//262 scanlines
-
-	if(ppudead)
-	{
-		memset(XBuf, 0x80, 256*240);
-		runppu(262*kLineTime);
-		ppudead--;
-		goto finish;
-	}
-
+    if (ppudead)
+    {
+        /* not quite emulating all the NES power up behavior
+         * since it is known that the NES ignores writes to some
+         * register before around a full frame, but no games
+         * should write to those regs during that time, it needs
+         * to wait for vblank  */
+        ppur.status.sl = 241;
+        if (PAL)
+            runppu(70*kLineTime);
+        else
+            runppu(20*kLineTime);
+        ppur.status.sl = 0;
+        runppu(242*kLineTime);
+        ppudead = 0;
+        goto finish;
+    }
+   
 	{
 		PPU_status |= 0x80;
 		ppuphase = PPUPHASE_VBL;
@@ -1848,16 +2092,16 @@ int FCEUX_PPU_Loop(int skip) {
 		//Not sure if this is correct.  According to Matt Conte and my own tests, it is.
 		//Timing is probably off, though.  
 		//NOTE:  Not having this here breaks a Super Donkey Kong game. 
-		//PPU[3]=PPUSPL=0;       
-
+		PPU[3]=PPUSPL=0;       
 		const int delay = 20; //fceu used 12 here but I couldnt get it to work in marble madness and pirates.
-		runppu(delay); //X6502_Run(12);
+        
+        ppur.status.sl = 241; //for sprite reads
+		
+        runppu(delay); //X6502_Run(12);
 		if(VBlankON) TriggerNMI();
 		runppu(20*(kLineTime)-delay);
-
 		//this seems to run just before the dummy scanline begins
-		PPU_status&=0x1f;
-
+		PPU_status = 0;
 		//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
 		//if(!PPUON) { runppu(kLineTime*242); goto finish; }
 
@@ -1867,8 +2111,8 @@ int FCEUX_PPU_Loop(int skip) {
 		//rendering data for the first time in a frame (this update won't happen if 
 		//all rendering is disabled via 2001.3 and 2001.4).
 
-		if(PPUON)
-			ppur.install_latches();
+		//if(PPUON)
+		//	ppur.install_latches();
 
 		uint8 oams[2][64][7];
 		int oamcounts[2]={0,0};
@@ -1877,11 +2121,19 @@ int FCEUX_PPU_Loop(int skip) {
 
 		//capture the initial xscroll
 		//int xscroll = ppur.fh;
-
 		//render 241 scanlines (including 1 dummy at beginning)
 		for(int sl=0;sl<241;sl++) {
-			int yp = sl-1;
+            spr_read.num = 1;
+            spr_read.found = 0;
+            spr_read.fetch = 1;
+            spr_read.count = 0;
+            spr_read.last = 64;
+            spr_read.mode = 0;
+            memset(spr_read.found_pos, 0, sizeof(spr_read.found_pos));
 
+            ppur.status.sl = sl;
+
+			int yp = sl-1;
 			ppuphase = PPUPHASE_BG;
 
 			if(sl != 0) {
@@ -1905,7 +2157,7 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int xt=0;xt<32;xt++) {
 				bgdata.main[xt+2].Read();
 
-				//ok, we're also going to draw here.
+                //ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
 				if(sl != 0) {
 					int xstart = xt<<3;
@@ -1917,7 +2169,6 @@ int FCEUX_PPU_Loop(int skip) {
 					//check all the conditions that can cause things to render in these 8px
 					bool renderspritenow = SpriteON && rendersprites && (xt>0 || SpriteLeft8);
 					bool renderbgnow = ScreenON && renderbg && (xt>0 || BGLeft8);
-
 					for(int xp=0;xp<8;xp++,rasterpos++) {
 
 						//bg pos is different from raster pos due to its offsetability.
@@ -2017,14 +2268,19 @@ int FCEUX_PPU_Loop(int skip) {
 			//FV is clocked by the PPU's horizontal blanking impulse, and therefore will increment every scanline.
 			//well, according to (which?) tests, maybe at the end of hblank. 
 			//but, according to what it took to get crystalis working, it is at the beginning of hblank.
-			if(PPUON && sl != 0)
-				ppur.increment_vs();
+            
+            //this is done at cycle 251 
+            //rendering scanline, it doesn't need to be scanline 0, 
+            //because on the first scanline when the increment is 0, the vs_scroll is reloaded.
+			//if(PPUON && sl != 0)
+			//	ppur.increment_vs();
 
 			//todo - think about clearing oams to a predefined value to force deterministic behavior
 
 			//so.. this is the end of hblank. latch horizontal scroll values
-			if(PPUON && sl != 0)
-				ppur.install_h_latches();
+            //do it cycle at 251 
+			 if(PPUON && sl != 0)
+				ppur.install_h_latches(); 
 
 			ppuphase = PPUPHASE_OBJ;
 
@@ -2065,7 +2321,23 @@ int FCEUX_PPU_Loop(int skip) {
 				patternAddress += line&7;
 
 				//garbage nametable fetches
-				if(realSprite) runppu(kFetchTime);
+                //reset the scroll counter, happens at cycle 304
+                if (realSprite)
+                {
+                    if ((sl == 0) && PPUON)
+                    {
+                        if (ppur.status.cycle == 304)
+                        {
+                            runppu(1);
+                            ppur.install_latches();
+                            runppu(1);
+                        }
+                        else
+                            runppu(kFetchTime);
+                    }
+                    else
+                        runppu(kFetchTime);
+                }
 
 				if(((PPU[0]&0x38)!=0x18) && s == 2 && SpriteON ) {
 					//(The MMC3 scanline counter is based entirely on PPU A12, triggered on rising edges (after the line remains low for a sufficiently long period of time))
@@ -2080,14 +2352,15 @@ int FCEUX_PPU_Loop(int skip) {
 
 				if(realSprite) runppu(kFetchTime);
 
+
 				//pattern table fetches
 				RefreshAddr = patternAddress;
 				oam[4] = CALL_PPUREAD(RefreshAddr);
 				if(realSprite) runppu(kFetchTime);
+
 				RefreshAddr += 8;
 				oam[5] = CALL_PPUREAD(RefreshAddr);
 				if(realSprite) runppu(kFetchTime);
-
 
 				//hflip
 				if(!(oam[2]&0x40)) {
@@ -2107,29 +2380,32 @@ int FCEUX_PPU_Loop(int skip) {
 			//same nametable address that points to the 3rd tile to be rendered on the 
 			//screen (or basically, the first nametable address that will be accessed when 
 			//the PPU is fetching background data on the next scanline).
-			//(not implemented yet)
+			//(not implemented yet) 
 			runppu(kFetchTime);
+            if (sl == 0)
+            {
+                if (idleSynch && PPUON && !PAL)
+                    ppur.status.end_cycle = 340;
+                else
+                    ppur.status.end_cycle = 341;
+                idleSynch ^= 1;
+            }
+            else
+                ppur.status.end_cycle = 341;
 			runppu(kFetchTime);
 
-
-			//After memory access 170, the PPU simply rests for 4 cycles (or the 
+            //After memory access 170, the PPU simply rests for 4 cycles (or the 
 			//equivelant of half a memory access cycle) before repeating the whole 
 			//pixel/scanline rendering process. If the scanline being rendered is the very 
 			//first one on every second frame, then this delay simply doesn't exist.
-			if(sl==0 && idleSynch==0)
-			{}
-			else 
-				runppu(1);
-		}
-		
-		idleSynch ++;
-		if(idleSynch==2) idleSynch = 0;
+            if (ppur.status.end_cycle == 341)
+                runppu(1);
+        }
 
 		if(MMC5Hack && PPUON) MMC5_hb(240);
 
 		//idle for one line
 		runppu(kLineTime);
-
 		framectr++;
 
 	}
