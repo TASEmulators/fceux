@@ -973,7 +973,7 @@ DECLFW(Write_IRQFM)
   FrameSoundUpdate();
  fcnt=1;
  fhcnt=fhinc;
- if (V & 0x01)
+ //if (V & 0x01)
  {
  	X6502_IRQEnd(FCEU_IQFCOUNT);
  	SIRQStat&=~0x40;
