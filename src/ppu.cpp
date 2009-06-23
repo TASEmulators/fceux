@@ -469,8 +469,7 @@ static DECLFR(A2004)
 {
     if (newppu)
     {
-        if (0)
-        //if ((ppur.status.sl < 241) && PPUON)
+        if ((ppur.status.sl < 241) && PPUON)
         {
             /* from cycles 0 to 63, the
              * 32 byte OAM buffer gets init
@@ -492,15 +491,17 @@ static DECLFR(A2004)
                                     + (spr_read.count << 2);
                                 else
                                     spr_read.ret = spr_read.count << 2;
-                                spr_read.found_pos[spr_read.found] = spr_read.ret;
+                                spr_read.found_pos[spr_read.found] = 
+                                    spr_read.ret;
 
                                 spr_read.ret = SPRAM[spr_read.ret];
 
                                 if (i & 1) //odd cycle
                                 {
                                     //see if in range
-                                    if ( (ppur.status.sl - 1 - spr_read.ret) 
-                                            & ~(Sprite16 ? 0xF : 0x7) )
+                                    if ( !((ppur.status.sl - 1 - 
+                                            spr_read.ret) 
+                                            & ~(Sprite16 ? 0xF : 0x7)) )
 
                                     {
                                         ++spr_read.found;
@@ -522,7 +523,7 @@ static DECLFR(A2004)
                                     }
                                 }
                                 break;
-                            case 1: //sprite is in range fetch the next 4 bytes
+                            case 1: //sprite is in range fetch next 3 bytes
                                 if (i & 1)
                                 {
                                     ++spr_read.fetch;
@@ -558,10 +559,10 @@ static DECLFR(A2004)
                                     | spr_read.fetch];
                                 if (i & 1)
                                 {
-                                    if ( (ppur.status.sl - 1 - 
-                                                SPRAM[(spr_read.count << 2) |
-                                                spr_read.fetch]) 
-                                            & ~(Sprite16 ? 0xF : 0x7) )
+                                    if ( !((ppur.status.sl - 1 - 
+                                              SPRAM[((spr_read.count << 2)
+                                                    | spr_read.fetch)]) 
+                                            & ~((Sprite16) ? 0xF : 0x7)) ) 
                                     {
                                         spr_read.fetch = 1;
                                         spr_read.mode = 3;
@@ -573,25 +574,29 @@ static DECLFR(A2004)
                                             spr_read.count = 0;
                                             spr_read.mode = 4;
                                         }
-                                        spr_read.fetch = (spr_read.fetch + 1) & 3;
+                                        spr_read.fetch = 
+                                            (spr_read.fetch + 1) & 3;
                                     }
                                 }
                                 spr_read.ret = spr_read.count;
                                 break;
                             case 3: //9th sprite overflow detected
-                                spr_read.ret = SPRAM[spr_read.count | spr_read.fetch];
+                                spr_read.ret = SPRAM[spr_read.count 
+                                               | spr_read.fetch];
                                 if (i & 1)
                                 {
                                     if (++spr_read.fetch == 4)
                                     {
-                                        spr_read.count = (spr_read.count + 1) & 63;
+                                        spr_read.count = (spr_read.count 
+                                                + 1) & 63;
                                         spr_read.mode = 4;
                                     }
                                 }
                                 break;
                             case 4: //read OAM[n][0] until hblank
                                 if (i & 1)
-                                    spr_read.count = (spr_read.count + 1) & 63;
+                                    spr_read.count = 
+                                        (spr_read.count + 1) & 63;
                                 spr_read.fetch = 0;
                                 spr_read.ret = SPRAM[spr_read.count << 2];
                                 break;
@@ -612,13 +617,15 @@ static DECLFR(A2004)
                         }
                         else if ((i & 7) < 4)
                         { 
-                            spr_read.ret = SPRAM[spr_read.found_pos[spr_read.ret] 
-                                                 | spr_read.fetch++];
+                            spr_read.ret = 
+                                SPRAM[spr_read.found_pos[spr_read.ret] 
+                                      | spr_read.fetch++];
                             if (spr_read.fetch == 4)
                                 spr_read.fetch = 0;
                         }
                         else
-                            spr_read.ret = SPRAM[spr_read.found_pos[spr_read.ret | 3]];
+                            spr_read.ret = SPRAM[spr_read.found_pos
+                                                 [spr_read.ret | 3]];
                     }
                     else 
                     {
@@ -632,22 +639,6 @@ static DECLFR(A2004)
                 spr_read.last = ppur.status.cycle;
                 return spr_read.ret;
             }
-        }
-        //hack from nintendulator to get micro machines working properly until
-        //the per cycle thing is debugged more
-        //thanks!
-        else if ((ppur.status.sl < 241) && PPUON)
-        {
-            if (ppur.status.cycle < 64)
-                return 0xFF;
-            else if (ppur.status.cycle < 192)
-                return SPRAM[((ppur.status.cycle - 64) << 1) & 0xFC];
-            else if (ppur.status.cycle < 256)
-                return (ppur.status.cycle & 1) ? SPRAM[0xFC] : SPRAM[((ppur.status.cycle - 192) << 1) & 0xFC];
-            else if (ppur.status.cycle < 320)
-                return 0xFF;
-            else	
-                return SPRAM[0];
         }
         else
             return SPRAM[PPU[3]];
