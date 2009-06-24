@@ -1267,7 +1267,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 							FCEUI_LoadState(fileDropped.c_str());
 						}
 					}
-
 				}
 				//-------------------------------------------------------
 				//Check if Lua file
@@ -1281,8 +1280,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				{
 				ALoad(ftmp);
 				free(ftmp);
-				}
-				
+				}	
 			}            
 		}
 		break;
