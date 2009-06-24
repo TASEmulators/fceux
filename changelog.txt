@@ -1,3 +1,4 @@
+23-jun-2009 - adelikat - win32 - Drag & Drop support for savestates
 22-jun-2009 - qeed - Revert IRQ inhibit fix, since this seems to break Dragon
 					 Warrior 4, added palette reading cases for the new PPU.
 21-jun-2009 - adelikat - win32 - memwatch - save menu item is grayed if file hasn't changed

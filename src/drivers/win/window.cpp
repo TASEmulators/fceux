@@ -1252,13 +1252,27 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				if (!(fileDropped.find(".fm2") == string::npos))	 //ROM is already loaded and .fm2 in filename
 				{
-					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension
+					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension		TODO: This doesn't do anything to check if it is at the end
 						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
+				}
+				//-------------------------------------------------------
+				//Check if Savestate file
+				//-------------------------------------------------------
+				else if (!(fileDropped.find(".fc") == string::npos))
+				{
+					if (fileDropped.find(".fc") == fileDropped.length()-4)	//Check to see it is both at the end (file extension) and there is on more character
+					{
+						if (fileDropped[fileDropped.length()-1] >= '0' && fileDropped[fileDropped.length()-1] <= '9')	//If last character is 0-9 (making .fc0 - .fc9)
+						{
+							FCEUI_LoadState(fileDropped.c_str());
+						}
+					}
+
 				}
 				//-------------------------------------------------------
 				//Check if Lua file
 				//-------------------------------------------------------
-				else if (!(fileDropped.find(".lua") == string::npos) && !(fileDropped.find(".lua") == string::npos))
+				else if (!(fileDropped.find(".lua") == string::npos) && !(fileDropped.find(".lua") == string::npos))	//TODO && same thing ? this needs to check that .lua is the file extension using .length method
 					FCEU_LoadLuaCode(ftmp);
 				//-------------------------------------------------------
 				//If not a movie, Load it as a ROM file
