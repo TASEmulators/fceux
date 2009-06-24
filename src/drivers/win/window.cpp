@@ -1246,13 +1246,21 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			{
 				DragQueryFile((HDROP)wParam,0,ftmp,len); 
 				string fileDropped = ftmp;
-				
+				//-------------------------------------------------------
+				//Check if .fcm file, if so, convert it
+				//-------------------------------------------------------
+				//if (!(fileDropped.find(".fcm") == string::npos) && (fileDropped.find(".fcm") == fileDropped.length()-4))
+				//{
+					//adelikat: TODO: set this one up, it will be tricky because convert fcm is tied in with the OPENFILE dialog
+					//I'm thinking it converts it to the original directory of the .fcm then loads the resulting .fm2 automatically
+				//}
+
 				//-------------------------------------------------------
 				//Check if Movie file
 				//-------------------------------------------------------
-				if (!(fileDropped.find(".fm2") == string::npos))	 //ROM is already loaded and .fm2 in filename
+				/*else*/ if (!(fileDropped.find(".fm2") == string::npos) && (fileDropped.find(".fm2") == fileDropped.length()-4))	 //ROM is already loaded and .fm2 in filename
 				{
-					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension		TODO: This doesn't do anything to check if it is at the end
+					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension		
 						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
 				}
 				//-------------------------------------------------------
@@ -1271,7 +1279,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				//Check if Lua file
 				//-------------------------------------------------------
-				else if (!(fileDropped.find(".lua") == string::npos) && !(fileDropped.find(".lua") == string::npos))	//TODO && same thing ? this needs to check that .lua is the file extension using .length method
+				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 					FCEU_LoadLuaCode(ftmp);
 				//-------------------------------------------------------
 				//If not a movie, Load it as a ROM file
