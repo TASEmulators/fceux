@@ -5,6 +5,24 @@
 
 uint8 cpalette[192];
 
+bool SetPalette(const char* nameo)
+{
+	FILE *fp;
+	if((fp = FCEUD_UTF8fopen(nameo, "rb")))
+	{
+		fread(cpalette, 1, 192, fp);
+		fclose(fp);
+		FCEUI_SetPaletteArray(cpalette);
+		eoptions |= EO_CPALETTE;
+		return true;
+	}
+	else
+	{
+		FCEUD_PrintError("Error opening palette file!");
+		return false;
+	}
+}
+
 /**
 * Prompts the user for a palette file and opens that file.
 *
@@ -14,7 +32,7 @@ int LoadPaletteFile()
 {
 	const char filter[]="All usable files(*.pal)\0*.pal\0All files (*.*)\0*.*\0";
 
-	FILE *fp;
+	bool success = false;
 	char nameo[2048];
 
 	// Display open file dialog
@@ -32,23 +50,10 @@ int LoadPaletteFile()
 
 	if(GetOpenFileName(&ofn))
 	{
-		if((fp = FCEUD_UTF8fopen(nameo, "rb")))
-		{
-			fread(cpalette, 1, 192, fp);
-			fclose(fp);
-
-			FCEUI_SetPaletteArray(cpalette);
-			
-			eoptions |= EO_CPALETTE;
-			return 1;
-		}
-		else
-		{
-			FCEUD_PrintError("Error opening palette file!");
-		}
+		success = SetPalette(nameo);
 	}
 
-	return 0;
+	return success;
 }
 
 /**

@@ -1,3 +1,4 @@
+24-jun-2009 - adelikat - win32 - Drag & Drop support for palette files
 23-jun-2009 - adelikat - win32 - Drag & Drop support for savestates
 22-jun-2009 - qeed - Revert IRQ inhibit fix, since this seems to break Dragon
 					 Warrior 4, added palette reading cases for the new PPU.

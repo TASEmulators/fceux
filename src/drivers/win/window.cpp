@@ -1246,6 +1246,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			{
 				DragQueryFile((HDROP)wParam,0,ftmp,len); 
 				string fileDropped = ftmp;
+				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
 				//-------------------------------------------------------
 				//Check if .fcm file, if so, convert it
 				//-------------------------------------------------------
@@ -1256,9 +1257,17 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//}
 
 				//-------------------------------------------------------
+				//Check if Palette file
+				//-------------------------------------------------------
+				/*else*/ if (!(fileDropped.find(".pal") == string::npos) && (fileDropped.find(".pal") == fileDropped.length()-4))
+				{
+					SetPalette(fileDropped.c_str());	
+				}
+
+				//-------------------------------------------------------
 				//Check if Movie file
 				//-------------------------------------------------------
-				/*else*/ if (!(fileDropped.find(".fm2") == string::npos) && (fileDropped.find(".fm2") == fileDropped.length()-4))	 //ROM is already loaded and .fm2 in filename
+				else if (!(fileDropped.find(".fm2") == string::npos) && (fileDropped.find(".fm2") == fileDropped.length()-4))	 //ROM is already loaded and .fm2 in filename
 				{
 					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) //.fm2 is at the end of the filename so that must be the extension		
 						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
