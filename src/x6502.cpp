@@ -29,7 +29,8 @@
 #endif
 
 #include "x6502abbrev.h"
-
+extern int newppu;
+extern int cpu_ignore;
 X6502 X;
 uint32 timestamp;
 void (*MapIRQHook)(int a);
@@ -40,6 +41,15 @@ void (*MapIRQHook)(int a);
  _tcount+=__x;    \
  _count-=__x*48;  \
  timestamp+=__x;  \
+}
+
+#define XADDCYC(x) \
+{     \
+ int __x=x;       \
+ _tcount+=__x;    \
+ _count-=__x*48;  \
+ timestamp+=__x;  \
+ if (newppu) cpu_ignore += x; \
 }
 
 //normal memory read
@@ -111,11 +121,11 @@ static uint8 ZNTable[256];
   int32 disp;  \
   disp=(int8)RdMem(_PC);  \
   _PC++;  \
-  ADDCYC(1);  \
+  XADDCYC(1);  \
   tmp=_PC;  \
   _PC+=disp;  \
   if((tmp^_PC)&0x100)  \
-  ADDCYC(1);  \
+  XADDCYC(1);  \
  }  \
  else _PC++;  \
 }
@@ -220,7 +230,7 @@ static uint8 ZNTable[256];
  {  \
   target&=0xFFFF;  \
   RdMem(target^0x100);  \
-  ADDCYC(1);  \
+  XADDCYC(1);  \
  }  \
 }
 
@@ -277,7 +287,7 @@ static uint8 ZNTable[256];
  {  \
   target&=0xFFFF;  \
   RdMem(target^0x100);  \
-  ADDCYC(1);  \
+  XADDCYC(1);  \
  }  \
 }
 
@@ -445,7 +455,7 @@ extern int test; test++;
     {
      if(!_jammed)
      {
-      ADDCYC(7);
+      XADDCYC(7);
       PUSH(_PC>>8);
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));
@@ -460,7 +470,7 @@ extern int test; test++;
     {
      if(!(_PI&I_FLAG) && !_jammed)
      {
-      ADDCYC(7);
+      XADDCYC(7);
       PUSH(_PC>>8);
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));

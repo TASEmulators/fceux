@@ -100,12 +100,13 @@ struct BITREVLUT {
 };
 BITREVLUT<uint8,8> bitrevlut;
 
-struct PPUSTATUS 
-{
-    int cycle, end_cycle;
-    int sl;
-};
+int cpu_ignore;
 
+struct PPUSTATUS
+{
+    int sl;
+    int cycle, end_cycle;
+};
 struct SPRITE_READ
 {
     int num;
@@ -139,7 +140,7 @@ struct PPUREGS {
 		: fv(0), v(0), h(0), vt(0), ht(0), fh(0), s(0), par(0), ar(0)
 		,  _fv(0), _v(0), _h(0), _vt(0), _ht(0)
     { status.cycle = 0; status.end_cycle = 341;
-      status.sl = 241;
+      status.sl = 241; 
     }
 
 	void install_latches() {
@@ -2008,7 +2009,18 @@ void runppu(int x) {
 	//if(cputodo<200) return;
     ppur.status.cycle = (ppur.status.cycle + x) % 
                            ppur.status.end_cycle;
-	X6502_Run(x);
+    if (cpu_ignore)
+    {
+        if (cpu_ignore <= x)
+        {
+            cpu_ignore = 0;
+            X6502_Run(x-cpu_ignore);
+        }
+        else
+            cpu_ignore -= x;
+    }
+    else
+	   X6502_Run(x);
 	//pputime -= cputodo<<2;
 }
 
@@ -2071,8 +2083,10 @@ int FCEUX_PPU_Loop(int skip) {
         else
             runppu(20*kLineTime);
         ppur.status.sl = 0;
+        cpu_ignore = 0;
         runppu(242*kLineTime);
         ppudead = 0;
+        cpu_ignore = 0;
         goto finish;
     }
    
@@ -2090,7 +2104,12 @@ int FCEUX_PPU_Loop(int skip) {
 		
         runppu(delay); //X6502_Run(12);
 		if(VBlankON) TriggerNMI();
-		runppu(20*(kLineTime)-delay);
+        if (PAL)
+            runppu(70*(kLineTime)-delay);
+        else
+		    runppu(20*(kLineTime)-delay);
+        
+        cpu_ignore = 0; //no ignores because NMI runs full cycle 
 		//this seems to run just before the dummy scanline begins
 		PPU_status = 0;
 		//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
@@ -2397,6 +2416,7 @@ int FCEUX_PPU_Loop(int skip) {
 
 		//idle for one line
 		runppu(kLineTime);
+        cpu_ignore = 0;
 		framectr++;
 
 	}
