@@ -1250,16 +1250,34 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				//Check if .fcm file, if so, convert it
 				//-------------------------------------------------------
-				//if (!(fileDropped.find(".fcm") == string::npos) && (fileDropped.find(".fcm") == fileDropped.length()-4))
-				//{
-					//adelikat: TODO: set this one up, it will be tricky because convert fcm is tied in with the OPENFILE dialog
-					//I'm thinking it converts it to the original directory of the .fcm then loads the resulting .fm2 automatically
-				//}
+				if (!(fileDropped.find(".fcm") == string::npos) && (fileDropped.find(".fcm") == fileDropped.length()-4))
+				{
+					//produce output filename
+					std::string outname;
+					size_t dot = fileDropped.find_last_of(".");
+					if(dot == std::string::npos)
+						outname = fileDropped + ".fm2";
+					else
+						outname = fileDropped.substr(0,dot) + ".fm2";
+
+					MovieData md;
+					EFCM_CONVERTRESULT result = convert_fcm(md, fileDropped.c_str());
+					if(result==FCM_CONVERTRESULT_SUCCESS)
+					{
+						std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
+						md.dump(outf,false);
+						delete outf;
+						FCEUI_LoadMovie(outname.c_str(), 1, false, false);
+					} else {
+						std::string msg = "Failure converting " + fileDropped + "\r\n\r\n" + EFCM_CONVERTRESULT_message(result);
+						MessageBox(hWnd,msg.c_str(),"Failure converting fcm", 0);
+					}
+				}
 
 				//-------------------------------------------------------
 				//Check if Palette file
 				//-------------------------------------------------------
-				/*else*/ if (!(fileDropped.find(".pal") == string::npos) && (fileDropped.find(".pal") == fileDropped.length()-4))
+				else if (!(fileDropped.find(".pal") == string::npos) && (fileDropped.find(".pal") == fileDropped.length()-4))
 				{
 					SetPalette(fileDropped.c_str());	
 				}
