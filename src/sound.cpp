@@ -92,19 +92,13 @@ static const uint8 lengthtable[0x20]=
 	10,254, 20,  2, 40,  4, 80,  6, 160,  8, 60, 10, 14, 12, 26, 14,
 	12, 16, 24, 18, 48, 20, 96, 22, 192, 24, 72, 26, 16, 28, 32, 30
 };
-static const uint32 NoiseFreqTableNTSC[0x10] = 
-{
-2,4,8,0x10,0x20,0x30,0x40,0x50,0x65,0x7f,0xbe,0xfe,0x17d,0x1fc,0x3f9,0x7f2
-};
-/* this seems to get double dragon 2 sound wrong so we'll revert
- * to the old ones until we figure out what is wrong */
 
-/*
+
 static const uint32 NoiseFreqTableNTSC[0x10] = 
 {
 	4, 8, 16, 32, 64, 96, 128, 160, 202, 
 	254, 380, 508, 762, 1016, 2034, 4068
-};*/
+};
 
 static const uint32 NoiseFreqTablePAL[0x10] = 
 {
@@ -859,7 +853,9 @@ static void RDoTriangleNoisePCMLQ(void)
     if(noiseacc<=0)
     {
      rea2:
-     noiseacc+=NoiseFreqTable[PSG[0xE]&0xF]<<(16+2);
+        //used to added <<(16+2) when the noise table
+        //values were half.
+     noiseacc+=NoiseFreqTable[PSG[0xE]&0xF]<<(16+1);
      nreg=(nreg<<1)+(((nreg>>nshift)^(nreg>>14))&1);
      nreg&=0x7fff;
      noiseout=amptab[(nreg>>0xe)];
@@ -898,7 +894,9 @@ static void RDoTriangleNoisePCMLQ(void)
      if(noiseacc<=0)
      {
       area2:
-      noiseacc+=NoiseFreqTable[PSG[0xE]&0xF]<<(16+2);
+         //used to be added <<(16+2) when the noise table
+         //values were half.
+      noiseacc+=NoiseFreqTable[PSG[0xE]&0xF]<<(16+1);
       nreg=(nreg<<1)+(((nreg>>nshift)^(nreg>>14))&1);
       nreg&=0x7fff;
       noiseout=amptab[(nreg>>0xe)];
@@ -949,7 +947,7 @@ static void RDoNoise(void)
    if(!wlcount[3])
    {
     uint8 feedback;
-    wlcount[3]=NoiseFreqTable[PSG[0xE]&0xF]<<1;
+    wlcount[3]=NoiseFreqTable[PSG[0xE]&0xF];
     feedback=((nreg>>8)&1)^((nreg>>14)&1);
     nreg=(nreg<<1)+feedback;
     nreg&=0x7fff;
@@ -964,7 +962,7 @@ static void RDoNoise(void)
    if(!wlcount[3])
    {
     uint8 feedback;
-    wlcount[3]=NoiseFreqTable[PSG[0xE]&0xF]<<1;
+    wlcount[3]=NoiseFreqTable[PSG[0xE]&0xF];
     feedback=((nreg>>13)&1)^((nreg>>14)&1);
     nreg=(nreg<<1)+feedback;
     nreg&=0x7fff;
