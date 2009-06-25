@@ -94,9 +94,18 @@ static const uint8 lengthtable[0x20]=
 };
 static const uint32 NoiseFreqTableNTSC[0x10] = 
 {
+2,4,8,0x10,0x20,0x30,0x40,0x50,0x65,0x7f,0xbe,0xfe,0x17d,0x1fc,0x3f9,0x7f2
+};
+/* this seems to get double dragon 2 sound wrong so we'll revert
+ * to the old ones until we figure out what is wrong */
+
+/*
+static const uint32 NoiseFreqTableNTSC[0x10] = 
+{
 	4, 8, 16, 32, 64, 96, 128, 160, 202, 
 	254, 380, 508, 762, 1016, 2034, 4068
-};
+};*/
+
 static const uint32 NoiseFreqTablePAL[0x10] = 
 {
 	4, 7, 14, 30, 60, 88, 118, 148, 188, 
@@ -973,11 +982,8 @@ DECLFW(Write_IRQFM)
   FrameSoundUpdate();
  fcnt=1;
  fhcnt=fhinc;
- //if (V & 0x01)
- {
- 	X6502_IRQEnd(FCEU_IQFCOUNT);
- 	SIRQStat&=~0x40;
- }
+ X6502_IRQEnd(FCEU_IQFCOUNT);
+ SIRQStat&=~0x40;
  IRQFrameMode=V;
 }
 
