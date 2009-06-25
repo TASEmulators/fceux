@@ -206,6 +206,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWatchLoadOnStart),
 	AC(MemWatchLoadFileOnStart),
 	AC(MemWCollapsed),
+	AC(BindToMain),
 	AC(EnableAutosave),
 	AC(frameAdvanceLagSkip),
 

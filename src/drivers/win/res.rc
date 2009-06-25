@@ -298,6 +298,8 @@ BEGIN
         MENUITEM "Load Last &File on Startup",  MEMW_OPTIONS_LOADLASTFILE
         MENUITEM SEPARATOR
         MENUITEM "&Collapse to 1 column",       MEMW_OPTIONS_EXPANDCOLLAPSE
+        MENUITEM SEPARATOR
+        MENUITEM "Bind to Main Window",         ID_OPTIONS_BINDTOMAINWINDOW
     END
     POPUP "&Help"
     BEGIN

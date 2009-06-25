@@ -1,4 +1,5 @@
-24-jun-2009 - adelikat - win32 - 
+24-jun-2009 - adelikat - win32 - memory watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized
+24-jun-2009 - adelikat - win32 - palette commandline options
 24-jun-2009 - adelikat - win32 - Sound Dialog - cleanup, when sound is off, all controls are grayed out
 24-jun-2009 - adelikat - win32 - Hex Editor - Drag & Drop for .tbl files
 24-jun-2009 - adelikat - win32 - Drag & Drop for .fcm, it converts and then loads the converted movie automatically

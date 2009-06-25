@@ -28,6 +28,7 @@
 #include "help.h"
 #include <string>
 #include "main.h"
+#include "window.h" //adelikat: For GetMainHWDN()
 
 using namespace std;
 
@@ -57,6 +58,7 @@ char memwLastFilename[2048];						//Last watch file used by memwatch
 bool fileChanged = false;							//Determines if Save Changes should appear
 bool MemWatchLoadOnStart = false;					//Load on Start Flag
 bool MemWatchLoadFileOnStart = false;				//Load last file Flag
+bool BindToMain = false;							//Whether or not FCEUX is in control of this dialog (by default all dialogs in FCEUX aren't)
 
 string memwhelp = "{01ABA5FD-D54A-44EF-961A-42C7AA586D95}"; //Name of memory watch chapter in .chm (sure would be nice to get better names for these!"
 
@@ -785,6 +787,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	case WM_INITMENU:
 		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADSTART, MemWatchLoadOnStart ? MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(memwmenu, ID_OPTIONS_BINDTOMAINWINDOW, BindToMain ? MF_CHECKED : MF_UNCHECKED);
 		break;
 	case WM_CLOSE:
 	case WM_QUIT:
@@ -859,6 +862,11 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		case MEMW_OPTIONS_LOADLASTFILE: //Load last file when opening memwatch
 			MemWatchLoadFileOnStart ^= 1;
 			CheckMenuItem(memwmenu, MEMW_OPTIONS_LOADLASTFILE, MemWatchLoadFileOnStart ? MF_CHECKED : MF_UNCHECKED);
+			break;
+
+		case ID_OPTIONS_BINDTOMAINWINDOW:	//adelikat: This option will attach/detach memwatch from the main window, if attached it doesn't not have its own taskbar item and will minimize when FCEUX is minimized
+			BindToMain ^= 1;
+			CheckMenuItem(memwmenu, ID_OPTIONS_BINDTOMAINWINDOW, BindToMain ? MF_CHECKED : MF_UNCHECKED);
 			break;
 
 		case MEMW_HELP_WCOMMANDS:
@@ -968,7 +976,13 @@ void CreateMemWatch()
 	}
 
 	//Create
-	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",NULL,MemWatchCallB);
+	HWND Parent;
+	if (BindToMain)
+		Parent = GetMainHWND();
+	else
+		Parent = NULL;
+
+	hwndMemWatch=CreateDialog(fceu_hInstance,"MEMWATCH",Parent,MemWatchCallB);
 	memwmenu=GetMenu(hwndMemWatch);
 	UpdateMemWatch();
 	memwrecentmenu = CreateMenu();
