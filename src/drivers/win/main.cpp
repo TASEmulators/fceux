@@ -57,7 +57,7 @@
 #include "cdlogger.h"
 #include "throttle.h"
 #include "tasedit.h"
-
+#include "palette.h" //For the SetPalette function
 #include "main.h"
 #include "args.h"
 #include "config.h"
@@ -637,7 +637,7 @@ int main(int argc,char *argv[])
 	// Initialize default directories
 	CreateDirs();
 	SetDirs();
-
+	
 	DoVideoConfigFix();
 	DoTimingConfigFix();
 
@@ -676,6 +676,12 @@ int main(int argc,char *argv[])
 		LoadNewGamey(hAppWnd, 0);
 	}
 
+	if(PaletteToLoad)
+	{
+		SetPalette(PaletteToLoad);	
+		free(PaletteToLoad);
+		PaletteToLoad = NULL;
+	}
 
 	if(GameInfo && MovieToLoad)
 	{

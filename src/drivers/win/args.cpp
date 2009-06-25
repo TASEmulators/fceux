@@ -27,6 +27,7 @@ char* MovieToLoad = 0;		//Loads a movie file on startup
 char* StateToLoad = 0;		//Loads a savestate on startup (after a movie is loaded, if any)
 char* ConfigToLoad = 0;		//Loads a specific .cfg file (loads before any other commandline options
 char* LuaToLoad = 0;		//Loads a specific lua file
+char* PaletteToLoad = 0;	//Loads a specific palette file
 extern bool turbo;
 
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
@@ -46,6 +47,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-nothrottle",0,&eoptions,0x8000|EO_NOTHROTTLE},
          {"-playmovie",0,&MovieToLoad,0x4001},
 		 {"-lua",0,&LuaToLoad,0x4001},
+		 {"-palette",0,&PaletteToLoad,0x4001},
          {"-loadstate",0,&StateToLoad,0x4001},
          {"-readonly",0,&replayReadOnlySetting,0},
          {"-stopframe",0,&replayStopFrameSetting,0},
