@@ -273,7 +273,6 @@ BEGIN
     POPUP "&Bookmarks"
     BEGIN
         MENUITEM "&Remove all bookmarks",       MENU_MV_BOOKMARKS_RM_ALL
-        MENUITEM SEPARATOR
     END
     POPUP "Help"
     BEGIN
