@@ -86,6 +86,7 @@ static HMENU recentluamenu;   //Recent Lua Files Menu
 static HMENU recentmoviemenu; //Recent Movie Files Menu
 HMENU hfceuxcontext;		  //Handle to context menu
 HMENU hfceuxcontextsub;		  //Handle to context sub menu
+HWND MainhWnd;				  //Main FCEUX(Parent) window Handle.  Dialogs should use GetMainHWND() to get this
 
 //Extern variables-------------------------------------
 extern bool movieSubtitles;
@@ -156,6 +157,11 @@ string moviehelp = "{695C964E-B83F-4A6E-9BA2-1A975387DB55}";		 //Movie Recording
 string gettingstartedhelp = "{C76AEBD9-1E27-4045-8A37-69E5A52D0F9A}";//Getting Started
 
 //********************************************************************************
+
+HWND GetMainHWND()
+{
+	return MainhWnd;
+}
 
 int GetCheckedAutoFirePattern()
 {
@@ -1093,6 +1099,7 @@ void GetMouseData(uint32 (&md)[3])
 //Message loop of the main window
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
+	MainhWnd = hWnd;
 	int whichContext = 0;
 	POINT pt;
 	RECT file_rect;

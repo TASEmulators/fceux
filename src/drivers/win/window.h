@@ -21,6 +21,8 @@ extern char *recent_lua[];
 extern char *recent_movie[];
 extern HWND pwindow;
 
+HWND GetMainHWND();
+
 void HideFWindow(int h);
 void SetMainWindowStuff();
 int GetClientAbsRect(LPRECT lpRect);
