@@ -100,8 +100,6 @@ struct BITREVLUT {
 };
 BITREVLUT<uint8,8> bitrevlut;
 
-int cpu_ignore;
-
 struct PPUSTATUS
 {
     int sl;
@@ -2009,18 +2007,7 @@ void runppu(int x) {
 	//if(cputodo<200) return;
     ppur.status.cycle = (ppur.status.cycle + x) % 
                            ppur.status.end_cycle;
-    if (cpu_ignore)
-    {
-        if (cpu_ignore <= x)
-        {
-            cpu_ignore = 0;
-            X6502_Run(x-cpu_ignore);
-        }
-        else
-            cpu_ignore -= x;
-    }
-    else
-	   X6502_Run(x);
+	X6502_Run(x);
 	//pputime -= cputodo<<2;
 }
 
@@ -2083,10 +2070,8 @@ int FCEUX_PPU_Loop(int skip) {
         else
             runppu(20*kLineTime);
         ppur.status.sl = 0;
-        cpu_ignore = 0;
         runppu(242*kLineTime);
         ppudead = 0;
-        cpu_ignore = 0;
         goto finish;
     }
    
@@ -2109,7 +2094,6 @@ int FCEUX_PPU_Loop(int skip) {
         else
 		    runppu(20*(kLineTime)-delay);
         
-        cpu_ignore = 0; //no ignores because NMI runs full cycle 
 		//this seems to run just before the dummy scanline begins
 		PPU_status = 0;
 		//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
@@ -2416,7 +2400,6 @@ int FCEUX_PPU_Loop(int skip) {
 
 		//idle for one line
 		runppu(kLineTime);
-        cpu_ignore = 0;
 		framectr++;
 
 	}
