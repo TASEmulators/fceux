@@ -283,27 +283,12 @@ void SaveRomAs()
 	}
 }
 
-//should return -1, otherwise returns the line number it had the error on
-int LoadTableFile(){
+int LoadTable(const char* nameo)
+{
 	char str[50];
 	FILE *FP;
 	int i, line, charcode1, charcode2;
-
-	const char filter[]="Table Files (*.TBL)\0*.tbl\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Load Table File...";
-	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.hwndOwner = hCDLogger;
-	if(!GetOpenFileName(&ofn))return -1;
-
+	
 	for(i = 0;i < 256;i++){
 		chartable[i] = 0;
 	}
@@ -352,7 +337,27 @@ int LoadTableFile(){
 	TableFileLoaded = 1;
 	fclose(FP);
 	return -1;
+}
 
+//should return -1, otherwise returns the line number it had the error on
+int LoadTableFile(){
+	const char filter[]="Table Files (*.TBL)\0*.tbl\0";
+	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Load Table File...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hCDLogger;
+	if(!GetOpenFileName(&ofn))return -1;
+
+	int result = LoadTable(nameo);
+	return result;
 }
 
 void UnloadTableFile(){
@@ -946,6 +951,33 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		EndPaint(hwnd, &ps);
 		UpdateMemoryView(1);
 		return 0;
+
+	case WM_DROPFILES:
+		{
+			UINT len;
+			char *ftmp;
+
+			len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+			if((ftmp=(char*)malloc(len))) 
+			{
+				DragQueryFile((HDROP)wParam,0,ftmp,len); 
+				string fileDropped = ftmp;
+				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
+				//-------------------------------------------------------
+				//Check if .tbl
+				//-------------------------------------------------------
+				if (!(fileDropped.find(".tbl") == string::npos) && (fileDropped.find(".tbl") == fileDropped.length()-4))
+				{
+					LoadTable(fileDropped.c_str());
+				}
+				else
+				{
+					std::string str = "Could not open " + fileDropped;
+					MessageBox(hwnd, str.c_str(), "File error", 0);
+				}
+			}            
+		}
+		break;
 	case WM_VSCROLL:
 
 		ZeroMemory(&si, sizeof(SCROLLINFO));
@@ -1606,6 +1638,9 @@ void DoMemView() {
 		ShowWindow (hMemView, SW_SHOW) ;
 		UpdateCaption();
 	}
+
+	DragAcceptFiles(hMemView, 1);
+
 	if (hMemView) {
 		//UpdateMemView(0);
 		//MemViewDoBlit();
