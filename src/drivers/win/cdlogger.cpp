@@ -30,6 +30,8 @@
 #define INESPRIV
 #include "../../ines.h"
 
+using namespace std;
+
 void LoadCDLogFile();
 void SaveCDLogFileAs();
 void SaveCDLogFile();
@@ -49,9 +51,39 @@ int CDLogger_wndx=0, CDLogger_wndy=0;
 HWND hCDLogger;
 char loadedcdfile[1024];
 
+//Prototypes
+void LoadCDLog (const char* nameo);
 
 BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
+		case WM_DROPFILES:
+			{
+				UINT len;
+				char *ftmp;
+
+				len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+				if((ftmp=(char*)malloc(len))) 
+				{
+					DragQueryFile((HDROP)wParam,0,ftmp,len); 
+					string fileDropped = ftmp;
+					//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
+					//-------------------------------------------------------
+					//Check if .tbl
+					//-------------------------------------------------------
+					if (!(fileDropped.find(".cdl") == string::npos) && (fileDropped.find(".cdl") == fileDropped.length()-4))
+					{
+						LoadCDLog(fileDropped.c_str());
+					}
+					else
+					{
+						std::string str = "Could not open " + fileDropped;
+						MessageBox(hwndDlg, str.c_str(), "File error", 0);
+					}
+				}            
+			}
+
+			break;
+
 		case WM_MOVE: {
 			RECT wrect;
 			GetWindowRect(hwndDlg,&wrect);
@@ -135,23 +167,11 @@ MB_OK);
 	return FALSE;
 }
 
-void LoadCDLogFile(){
+void LoadCDLog (const char* nameo)
+{
 	FILE *FP;
-	int i, j;
-	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Load Code Data Log File...";
-	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.hwndOwner = hCDLogger;
-	if(!GetOpenFileName(&ofn))return;
+	int i,j;
+
 	strcpy(loadedcdfile,nameo);
 	//FCEUD_PrintError(loadedcdfile);
 	
@@ -182,6 +202,24 @@ void LoadCDLogFile(){
 	fclose(FP);
 	UpdateCDLogger();
 	return;
+}
+
+void LoadCDLogFile(){
+	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
+	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Load Code Data Log File...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hCDLogger;
+	if(!GetOpenFileName(&ofn))return;
+	LoadCDLog(nameo);
 }
 
 void SaveCDLogFileAs(){

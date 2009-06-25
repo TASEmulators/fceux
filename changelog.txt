@@ -1,3 +1,4 @@
+25-jun-2009 - adelikat - Win32 - CD Logger - Drag and Drop for .cdl files
 24-jun-2009 - qeed - sound/ppu - reverted to old noise table value since
 								 this seems to get correct sound for
 							     double dragon 2. Also added experimental
