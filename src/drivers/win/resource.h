@@ -407,6 +407,7 @@
 #define ID_SOUND_QUALITYNOTIFY          1202
 #define IDC_CHECK1                      1203
 #define CB_ENABLECONTEXTMENU            1203
+#define IDC_VOLUMEGROUP                 1204
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -698,7 +699,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
 #define _APS_NEXT_COMMAND_VALUE         40361
-#define _APS_NEXT_CONTROL_VALUE         1204
+#define _APS_NEXT_CONTROL_VALUE         1205
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

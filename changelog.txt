@@ -1,3 +1,4 @@
+24-jun-2009 - adelikat - win32 - Sound Dialog - cleanup, when sound is off, all controls are grayed out
 24-jun-2009 - adelikat - win32 - Hex Editor - Drag & Drop for .tbl files
 24-jun-2009 - adelikat - win32 - Drag & Drop for .fcm, it converts and then loads the converted movie automatically
 24-jun-2009 - adelikat - win32 - Drag & Drop support for palette files

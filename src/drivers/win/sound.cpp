@@ -436,6 +436,19 @@ static void UpdateSD(HWND hwndDlg)
 		//Static text boxes in volume group box
 		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_QUALITYNOTIFY),FALSE);
 		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_TRITOP),FALSE);
+		//Volume group box
+		EnableWindow(GetDlgItem(hwndDlg,IDC_VOLUMEGROUP),FALSE);
+		//Buffer group box
+		EnableWindow(GetDlgItem(hwndDlg,127),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65459),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65456),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65458),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65457),FALSE);
+		//Misc. Output Format group
+		EnableWindow(GetDlgItem(hwndDlg,65455),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65461),FALSE);
+		EnableWindow(GetDlgItem(hwndDlg,65460),FALSE);
+		
 	}
 	else 
 	{
@@ -463,6 +476,19 @@ static void UpdateSD(HWND hwndDlg)
 		//Static text boxes in volume group box
 		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_QUALITYNOTIFY),TRUE);
 		EnableWindow(GetDlgItem(hwndDlg,ID_SOUND_TRITOP),TRUE);
+		//Volume group box
+		EnableWindow(GetDlgItem(hwndDlg,IDC_VOLUMEGROUP),TRUE);
+		//Buffer group box
+		EnableWindow(GetDlgItem(hwndDlg,127),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65459),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65456),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65458),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65457),TRUE);
+		//Misc. Output Format group
+		EnableWindow(GetDlgItem(hwndDlg,65455),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65461),TRUE);
+		EnableWindow(GetDlgItem(hwndDlg,65460),TRUE);
+		
 	}
 	
 	UpdateSoundChannelQualityMode(hwndDlg);
@@ -720,13 +746,16 @@ void UpdateSoundChannelQualityMode(HWND hwndDlg)
 	if (soundquality)	//If high or highest
 	{
 		//Enable sliders & corresponding group boxes
-		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),TRUE);
-		//Enable group boxes
-		EnableWindow(GetDlgItem(hwndDlg,133),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
-		EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
+		if (soundo)
+		{
+			EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_SQUARE2),TRUE);
+			EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_NOISE),TRUE);
+			EnableWindow(GetDlgItem(hwndDlg,CTL_VOLUME_TRACKBAR_PCM),TRUE);
+			//Enable group boxes
+			EnableWindow(GetDlgItem(hwndDlg,133),TRUE);
+			EnableWindow(GetDlgItem(hwndDlg,134),TRUE);
+			EnableWindow(GetDlgItem(hwndDlg,135),TRUE);
+		}
 		//Set text for group boxes
 		SetDlgItemText(hwndDlg, ID_SOUND_TRITOP, "");	//Hacky, a static text box above the group box so I have more text space
 		SetDlgItemText(hwndDlg, 131, "Triangle");
