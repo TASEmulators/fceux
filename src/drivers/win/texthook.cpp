@@ -413,10 +413,9 @@ int TextHookerLoadTableFile(){
 	unsigned int i, j, line, charcode1, charcode2; //various useful variables
 
 	//initialize the "File open" dialogue box
-	const char filter[]="Table Files (*.THT)\0*.tht\0";
+	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
-	//StopSound(); //mbg merge 6/30/08
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;

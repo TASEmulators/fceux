@@ -42,7 +42,7 @@ void FCEUD_SaveStateAs()
 **/
 void FCEUD_LoadStateFrom()
 {
-	const char filter[]= FCEU_NAME" Save State (*.fc?)\0*.fc?\0";
+	const char filter[]= FCEU_NAME" Save State (*.fc?)\0*.fc?\0All Files (*.*)\0*.*\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 

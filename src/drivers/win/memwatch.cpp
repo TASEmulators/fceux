@@ -511,7 +511,7 @@ static void QuickSaveMemWatch() //Save rather than Save as
 //Open Memwatch File
 static void LoadMemWatch()
 {
-	const char filter[]="Memory address list(*.txt)\0*.txt\0";
+	const char filter[]="Memory address list(*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
 	char watchfcontents[2048]; 
 	
 	//Now clear last file used variable (memwLastFilename)
