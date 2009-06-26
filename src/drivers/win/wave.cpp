@@ -21,6 +21,7 @@
 
 #include "common.h"
 #include "../../wave.h"
+#include "main.h" //For GetRomName()
 
 int CloseWave()
 {
@@ -43,7 +44,7 @@ bool CreateSoundSave()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Log Sound As...";
 	ofn.lpstrFilter=filter;
-	nameo[0]=0;
+	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;

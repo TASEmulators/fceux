@@ -24,7 +24,7 @@ void FCEUD_SaveStateAs()
 	ofn.lpstrTitle = "Save State As...";
 	ofn.lpstrFilter = filter;
 	ofn.lpstrDefExt = "fcs";
-	nameo[0] = 0;
+	strcpy(nameo,FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
 	ofn.lpstrFile = nameo;
 	std::string initdir = FCEU_GetPath(FCEUMKF_STATE);
 	ofn.lpstrInitialDir = initdir.c_str();

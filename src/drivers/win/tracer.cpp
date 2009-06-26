@@ -31,6 +31,7 @@
 #include "cdlogger.h"
 #include "tracer.h"
 #include "memview.h"
+#include "main.h" //for GetRomName()
 
 //Used to determine the current hotkey mapping for the pause key in order to display on the dialog
 #include "mapinput.h"
@@ -583,7 +584,7 @@ void ShowLogDirDialog(void){
  ofn.hInstance=fceu_hInstance;
  ofn.lpstrTitle="Log Trace As...";
  ofn.lpstrFilter=filter;
- nameo[0]=0;
+ strcpy(nameo,GetRomName());
  ofn.lpstrFile=nameo;
  ofn.nMaxFile=256;
  ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;

@@ -26,6 +26,7 @@
 #include "debugger.h"
 #include "tracer.h"
 #include "cdlogger.h"
+#include "main.h" //for GetRomName()
 
 #define INESPRIV
 #include "../../ines.h"
@@ -206,7 +207,7 @@ void LoadCDLog (const char* nameo)
 
 void LoadCDLogFile(){
 	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
@@ -224,14 +225,14 @@ void LoadCDLogFile(){
 
 void SaveCDLogFileAs(){
 	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	char nameo[2048]; 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
-	nameo[0]=0;
+	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
@@ -320,7 +321,7 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Stripped Rom File As...";
 	ofn.lpstrFilter=filter;
-	sromfilename[0]=0;
+	strcpy(sromfilename,GetRomName());
 	ofn.lpstrFile=sromfilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
