@@ -1,10 +1,8 @@
+25-jun-2009 - qeed - sound/ppu - fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesnt work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. 
 25-jun-2009 - adelikat - Win32 - CD Logger - Drag and Drop for .cdl files
-24-jun-2009 - qeed - sound/ppu - reverted to old noise table value since
-								 this seems to get correct sound for
-							     double dragon 2. Also added experimental
-							     $2004 reading support to play micro
-							     machines with (little) shakes, and fixed
-							     some timing in the new PPU.
+24-jun-2009 - qeed - sound/ppu - reverted to old noise table value since this seems to get correct sound for double 
+dragon 2. Also added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some 
+timing in the new PPU.
 24-jun-2009 - adelikat - win32 - memory watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized
 24-jun-2009 - adelikat - win32 - palette commandline options
 24-jun-2009 - adelikat - win32 - Sound Dialog - cleanup, when sound is off, all controls are grayed out
