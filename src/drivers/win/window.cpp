@@ -23,6 +23,7 @@
 
 #include "../../input.h"
 #include "../../state.h"
+#include "../../cheat.h" //adelikat: For FCEU_LoadGameCheats()
 #include "window.h"
 #include "main.h"
 #include "state.h"
@@ -1254,10 +1255,20 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				DragQueryFile((HDROP)wParam,0,ftmp,len); 
 				string fileDropped = ftmp;
 				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
+				
 				//-------------------------------------------------------
-				//Check if .fcm file, if so, convert it
+				//Check if a cheats (.cht) file
 				//-------------------------------------------------------
-				if (!(fileDropped.find(".fcm") == string::npos) && (fileDropped.find(".fcm") == fileDropped.length()-4))
+				if (!(fileDropped.find(".cht") == string::npos) && (fileDropped.find(".cht") == fileDropped.length()-4))
+				{
+					FILE* file = FCEUD_UTF8fopen(fileDropped.c_str(),"rb");
+					FCEU_LoadGameCheats(file);
+				}
+				
+				//-------------------------------------------------------
+				//Check if .fcm file, if so, convert it and play the resulting .fm2
+				//-------------------------------------------------------
+				else if (!(fileDropped.find(".fcm") == string::npos) && (fileDropped.find(".fcm") == fileDropped.length()-4))
 				{
 					//produce output filename
 					std::string outname;

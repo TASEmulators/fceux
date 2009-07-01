@@ -1,3 +1,4 @@
+01-july-2009 - adelikat - win32 - drag & drop for cheat (.cht) files
 25-jun-2009 - qeed - sound/ppu - fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesnt work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. 
 25-jun-2009 - adelikat - Win32 - CD Logger - Drag and Drop for .cdl files
 24-jun-2009 - qeed - sound/ppu - reverted to old noise table value since this seems to get correct sound for double 
