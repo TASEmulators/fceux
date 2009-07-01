@@ -407,29 +407,13 @@ void KillTextHooker() {
  * It should return -1, otherwise returns the line number it had the error on
  */
 
-int TextHookerLoadTableFile(){
+//adelikat:  Pulled this from TextHookerLoadTableFile so that a specific file can be loaded (such as in drag & drop)
+int TextHookerLoadTable(const char* nameo)
+{
 	char str[500]; //holds the current line of the table file
 	FILE *FP; //file pointer
 	unsigned int i, j, line, charcode1, charcode2; //various useful variables
-
-	//initialize the "File open" dialogue box
-	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0";
-	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Load Table File...";
-	ofn.lpstrFilter=filter;
-	nameo[0]=0;
-	ofn.lpstrFile=nameo;
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
-	ofn.hwndOwner = hCDLogger;
-
-	//get the file name or stop
-	if(!GetOpenFileName(&ofn))return -1;
-
+	
 	//get rid of any existing table info
 	TextHookerUnloadTableFile();
 
@@ -655,7 +639,30 @@ int TextHookerLoadTableFile(){
 	fclose(FP);
 	//return successfully
 	return -1;
+}
 
+int TextHookerLoadTableFile(){
+	//initialize the "File open" dialogue box
+	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0";
+	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
+	OPENFILENAME ofn;
+	memset(&ofn,0,sizeof(ofn));
+	ofn.lStructSize=sizeof(ofn);
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Load Table File...";
+	ofn.lpstrFilter=filter;
+	nameo[0]=0;
+	ofn.lpstrFile=nameo;
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.hwndOwner = hCDLogger;
+
+	//get the file name or stop
+	if(!GetOpenFileName(&ofn))return -1;
+
+	int result = TextHookerLoadTable(nameo);
+
+	return result;
 }
 
 
@@ -828,6 +835,31 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			SetDlgItemText(hwndDlg,121,"1");
 
 			TextHooker=1;
+			break;
+		case WM_DROPFILES:
+			{
+				//adelikat:  Drag and Drop does not check extension, it will simply attempt to open it as a table file
+				UINT len;
+				char *ftmp;
+				len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
+				if((ftmp=(char*)malloc(len))) 
+				{
+					DragQueryFile((HDROP)wParam,0,ftmp,len); 
+					std::string fileDropped = ftmp;
+					
+					int result = TextHookerLoadTable(fileDropped.c_str());
+					//write a response message to str based on x's value
+					if ( result == -1 ) 
+						sprintf( str, "Table Loaded Successfully!" );
+					 else 
+						sprintf( str, "Table is not Loaded!\r\nError on line: %d", result );
+					//store the current text into the buffer
+					GetDlgItemText(hwndDlg,102,bufferstr,10240);
+					strcat( bufferstr, "\r\n" ); //add a newline
+					strcat( bufferstr, str ); //add the status message to the buffer
+					SetDlgItemText(hwndDlg,102,bufferstr); //display the buffer
+				}
+			}
 			break;
 		case WM_PAINT:
 			TextHookerDoBlit();
