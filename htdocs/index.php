@@ -51,6 +51,66 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
       Jump to the <a href="download.php">download</a> page.
       <p>
         2.1.1 features a new, more accurate sound core.  In addition it provides numerous small fixes and enhancements to both the Win32 and SDL ports.
+        <pre>
+          <b>Common - Bug fixes</b>
+          *Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)
+          *made default save slot 0 instead of 1
+
+          <b>Improved Sound core/PPU</b>
+          *Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesnt work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that.
+          *Updated with the correct values for the noise and DMC table,
+          *Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more  opcode test from blargg's cpu.nes test.
+          *Square 1 & square 2 volume controls no longer backwards
+          *Length counters for APU now correct variables
+
+          <b>NewPPU (still experimental, enabled by setting newppu 1 in the config file)</b>
+          *Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.
+          *Added palette reading cases for the new PPU.
+
+          <b>Win32</b>
+          *Minor Bug fixes
+          *Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number
+          *Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
+          *Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full
+          *Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.
+          *"Disable screen saver" gui option now also diables the monitor powersave
+          *Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list
+          *Sound Config Dialog - When sound is off, all controls are grayed out
+          *Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item
+          *Memory Watch - save menu item is grayed if file hasn't changed
+
+
+          <b>GUI/Enhancements</b>
+          *Last save slot used is stored in the config file
+          *Made fullscreen toggle (Alt+Enter) remappable
+          *Hex editor - Reverted fixedFontHeight to 13 instead of 14.  Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file
+          *Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file
+          *Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)
+          *Hex Editor - Save Rom As... menu option enabled and implemented
+          *Window caption shows the name of the ROM loaded
+          *Recent Movie Menu added
+          *Load Last Movie context menu item added
+          *Save Movie As... context menu item (for when a movie is loaded in read+write mode)
+          *Drag & Drop support for all files related to FCEUX including:
+          *.fcm (autoconverts to .fm2 and begins movie playback)
+          *Savestates
+          *Palette files (.pal)
+          *Commandline - -palette commandline option
+          *Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized
+
+          <b>SDL</b>
+
+          *added --subtitles
+          *fixed Four Score movie playback
+          *added --ripsubs for converting fm2 movie subtitles to an srt file
+          *Lua is optional again, fixed the real issue
+          *Lua is NO longer optional, so the SConscripts have been updated to reflect that change.  This fixes the mysterious non-working input issue.
+          *implemented saving/loading a savestate from a specific file on Alt+S/L
+          *implemented starting an FM2 movie on Alt+R
+          *added --pauseframe to pause movie playback on frame x
+          *dropped UTFConverter.c from SDL build
+          *added hotkey Q for toggling read-only/read+write movie playback
+        </pre>
       </p>
     </p>
     -- adelikat
@@ -70,66 +130,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
       <p>
         2.1.0a fixes a minor issue involving movie recording on both platforms.  It fixes an issue where extra bytes where being appended 
         to the author field of the .fm2 file, resulting in bloated files.
-        <pre>
-<b>Common - Bug fixes</b>
-*Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)
-*made default save slot 0 instead of 1
-
-<b>Improved Sound core/PPU</b>
-*Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesnt work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that.
-*Updated with the correct values for the noise and DMC table,
-*Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more  opcode test from blargg's cpu.nes test.
-*Square 1 & square 2 volume controls no longer backwards
-*Length counters for APU now correct variables
-
-<b>NewPPU (still experimental, enabled by setting newppu 1 in the config file)</b>
-*Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.
-*Added palette reading cases for the new PPU.
-
-<b>Win32</b>
-*Minor Bug fixes
-*Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number
-*Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
-*Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full
-*Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.
-*"Disable screen saver" gui option now also diables the monitor powersave
-*Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list
-*Sound Config Dialog - When sound is off, all controls are grayed out
-*Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item
-*Memory Watch - save menu item is grayed if file hasn't changed
-
-
-<b>GUI/Enhancements</b>
-*Last save slot used is stored in the config file
-*Made fullscreen toggle (Alt+Enter) remappable
-*Hex editor - Reverted fixedFontHeight to 13 instead of 14.  Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file
-*Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file
-*Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)
-*Hex Editor - Save Rom As... menu option enabled and implemented
-*Window caption shows the name of the ROM loaded
-*Recent Movie Menu added
-*Load Last Movie context menu item added
-*Save Movie As... context menu item (for when a movie is loaded in read+write mode)
-*Drag & Drop support for all files related to FCEUX including:
-*.fcm (autoconverts to .fm2 and begins movie playback)
-*Savestates
-*Palette files (.pal)
-*Commandline - -palette commandline option
-*Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized
-
-<b>SDL</b>
-
-*added --subtitles
-*fixed Four Score movie playback
-*added --ripsubs for converting fm2 movie subtitles to an srt file
-*Lua is optional again, fixed the real issue
-*Lua is NO longer optional, so the SConscripts have been updated to reflect that change.  This fixes the mysterious non-working input issue.
-*implemented saving/loading a savestate from a specific file on Alt+S/L
-*implemented starting an FM2 movie on Alt+R
-*added --pauseframe to pause movie playback on frame x
-*dropped UTFConverter.c from SDL build
-*added hotkey Q for toggling read-only/read+write movie playback
-        </pre>
+       
       </p>
     </p>
     -- adelikat
