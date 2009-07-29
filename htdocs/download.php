@@ -16,7 +16,7 @@ GTK launcher GUI.  The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).
     <li>Network play is not presently functional. Fixing it is a high priority.</li>
     <li>Win32:
     <ul>
-      <li>Lua is enabled and has all necessary files in the 2.1 release.  It also comes with a number of examples which show some of Lua's full potential</li>
+      <li>Lua is enabled and has all necessary files in 2.1.x releases.  It also comes with a number of examples which show some of Lua's full potential</li>
       <li>These files are also available in the [<a href="http://fceux.com/luapack">fceux.com/luapack</a>] (to use these, they must be in the same folder as fceux.exe). 
      <li>Be sure to check out the .chm file. We work pretty hard on keeping that up to date.
      <li>The latest win32 interim build is generally fresh within a day 
@@ -40,13 +40,13 @@ port are reccommended to install and use this, unless you particullarly prefer t
 </td></tr>
 <tr><th class="boxhead">Version</th><th class="boxhead">Date</th><th class="boxhead">Description</th></tr>
 <tr>
-    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.0a.win32.zip">2.1.0 win32 binary</a></td>
-    <td>29 March 2009</td>
+    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.1.win32.zip">2.1.0 win32 binary</a></td>
+    <td>29 July 2009</td>
     <td>This is the latest official release</td>
 </tr>
 <tr>
-    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.0a.src.tar.bz2">2.1.0 source</a></td>
-    <td>29 March 2009</td>
+    <td><a href="http://downloads.sourceforge.net/fceultra/fceux-2.1.1.src.tar.bz2">2.1.0 source</a></td>
+    <td>29 July 2009</td>
     <td>This is the latest official release</td>
 </tr>
 <tr>
