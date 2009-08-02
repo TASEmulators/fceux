@@ -641,7 +641,7 @@ case WM_COMMAND:
 		case COMBO_SOUND_QUALITY:
 			soundquality=SendDlgItemMessage(hwndDlg,COMBO_SOUND_QUALITY,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 			if(soundrate<44100) soundquality=0;
-			if (!turbo) FCEUI_SetSoundQuality(soundquality);	FCEUI_DispMessage("%d",soundquality);//If turbo is running, don't do this call, turbo will handle it instead
+			if (!turbo) FCEUI_SetSoundQuality(soundquality); //If turbo is running, don't do this call, turbo will handle it instead
 			UpdateSD(hwndDlg);
 			break;
 		}
