@@ -14,11 +14,13 @@
 #include "palette.h"
 #include "input.h"
 #include "fceu.h"
+#include "netplay.h"
 #include "driver.h"
 #include "state.h"
 #include "file.h"
 #include "video.h"
 #include "movie.h"
+#include "fds.h"
 #ifdef _S9XLUA_H
 #include "fceulua.h"
 #endif
@@ -918,6 +920,12 @@ void FCEUMOV_AddInputState()
 			if(mr->command_reset())
 				ResetNES();
 
+			if(mr->command_fds_insert())
+				FCEU_FDSInsert();
+			
+			if(mr->command_fds_select())
+				FCEU_FDSSelect();
+
 			joyports[0].load(mr);
 			joyports[1].load(mr);
 		}
@@ -968,6 +976,11 @@ void FCEUMOV_AddCommand(int cmd)
 
 	//NOTE: EMOVIECMD matches FCEUNPCMD_RESET and FCEUNPCMD_POWER
 	//we are lucky (well, I planned it that way)
+
+	switch(cmd) {
+		case FCEUNPCMD_FDSINSERT: cmd = MOVIECMD_FDS_INSERT; break;
+		case FCEUNPCMD_FDSSELECT: cmd = MOVIECMD_FDS_SELECT; break;
+	}
 
 	_currCommand |= cmd;
 }

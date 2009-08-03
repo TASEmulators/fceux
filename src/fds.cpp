@@ -35,6 +35,7 @@
 #include "cart.h"
 #include "netplay.h"
 #include "driver.h"
+#include "movie.h"
 
 //  TODO:  Add code to put a delay in between the time a disk is inserted
 //	and the when it can be successfully read/written to.  This should
@@ -147,6 +148,7 @@ static void FDSInit(void)
 
 void FCEU_FDSInsert(void)
 {
+	FCEUMOV_AddCommand(FCEUNPCMD_FDSINSERT);
 	if(TotalSides==0)
 	{
 		FCEU_DispMessage("Not FDS; can't eject disk.");  
@@ -171,6 +173,7 @@ InDisk=255;
 */
 void FCEU_FDSSelect(void)
 {
+	FCEUMOV_AddCommand(FCEUNPCMD_FDSSELECT);
 	if(TotalSides==0)
 	{
 		FCEU_DispMessage("Not FDS; can't select disk.");
