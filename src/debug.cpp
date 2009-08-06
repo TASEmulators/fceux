@@ -627,7 +627,10 @@ void DebugCycle() {
 	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak) 
 		breakpoint();
 	if(debug_loggingCD) LogCDData();
+	
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
  	//if(logging || (hMemView && (EditingMode == 2))) LogInstruction();
-	FCEUD_TraceInstruction();
+
+	extern volatile int logging;
+	if(logging) FCEUD_TraceInstruction();
 }

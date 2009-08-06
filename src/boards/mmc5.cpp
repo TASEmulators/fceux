@@ -115,7 +115,7 @@ static void mmc5_PPUWrite(uint32 A, uint8 V) {
 		}
 }
 
-uint8 mmc5_PPURead(uint32 A) {
+uint8 FASTCALL mmc5_PPURead(uint32 A) {
 	if(A<0x2000)
 	{
 		if(ppuphase == PPUPHASE_BG)

@@ -99,6 +99,8 @@ void ResetCartMapping(void)
 {
 	int x;
 
+	PPU_ResetHooks();
+
 	for(x=0;x<32;x++)
 	{
 		Page[x]=nothing-x*2048;

@@ -18,7 +18,14 @@ void FCEUPPU_SaveState(void);
 void FCEUPPU_LoadState(int version);
 uint8* FCEUPPU_GetCHR(uint32 vadr, uint32 refreshaddr);
 
-extern uint8 (*FFCEUX_PPURead)(uint32 A);
+#ifdef _MSC_VER
+#define FASTCALL __fastcall
+#else
+#define FASTCALL
+#endif
+
+void PPU_ResetHooks();
+extern uint8 (FASTCALL *FFCEUX_PPURead)(uint32 A);
 extern void (*FFCEUX_PPUWrite)(uint32 A, uint8 V);
 
 extern int scanline;

@@ -40,6 +40,7 @@
 #include  "input.h"
 #include "driver.h"
 
+
 #define VBlankON  (PPU[0]&0x80)   //Generate VBlank NMI
 #define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8 
 #define BGAdrHI   (PPU[0]&0x10)   //BG pattern adr $0000/$1000
@@ -68,7 +69,6 @@ static uint32 ppulut1[256];
 static uint32 ppulut2[256];
 static uint32 ppulut3[128];
 
-PPUPHASE ppuphase;
 int test = 0;
 
 template<typename T, int BITS>
@@ -102,45 +102,81 @@ BITREVLUT<uint8,8> bitrevlut;
 
 struct PPUSTATUS
 {
-    int sl;
-    int cycle, end_cycle;
+    int32 sl;
+    int32 cycle, end_cycle;
 };
 struct SPRITE_READ
 {
-    int num;
-    int count;
-    int fetch;
-    int found;
-    int found_pos[8];
-    int ret;
-    int last;
-    int mode;
+    int32 num;
+    int32 count;
+    int32 fetch;
+    int32 found;
+    int32 found_pos[8];
+    int32 ret;
+    int32 last;
+    int32 mode;
+
+	void reset() {
+		num = count = fetch = found = ret = last = mode = 0;
+		found_pos[0] = found_pos[1] = found_pos[2] = found_pos[3] = 0;
+		found_pos[4] = found_pos[5] = found_pos[6] = found_pos[7] = 0;
+	}
+
+	void start_scanline()
+	{
+		num = 1;
+        found = 0;
+        fetch = 1;
+        count = 0;
+        last = 64;
+        mode = 0;
+		found_pos[0] = found_pos[1] = found_pos[2] = found_pos[3] = 0;
+		found_pos[4] = found_pos[5] = found_pos[6] = found_pos[7] = 0;
+	}
 };
-struct SPRITE_READ spr_read = { 0 };
+
+//doesn't need to be savestated as it is just a reflection of the current position in the ppu loop
+PPUPHASE ppuphase;
+
+//this needs to be savestated since a game may be trying to read from this across vblanks
+SPRITE_READ spr_read;
+
+//definitely needs to be savestated
+uint8 idleSynch = 1;
 
 //uses the internal counters concept at http://nesdev.icequake.net/PPU%20addressing.txt
 struct PPUREGS {
+	//normal clocked regs. as the game can interfere with these at any time, they need to be savestated
 	uint32 fv;//3
 	uint32 v;//1
 	uint32 h;//1
 	uint32 vt;//5
 	uint32 ht;//5
-	uint32 fh;//3
-	uint32 s;//1
-	uint32 par;//8
-	uint32 ar;//2
-     
-    uint32 _fv, _v, _h, _vt, _ht;
-    
-    struct PPUSTATUS status;
-        
-	PPUREGS()
-		: fv(0), v(0), h(0), vt(0), ht(0), fh(0), s(0), par(0), ar(0)
-		,  _fv(0), _v(0), _h(0), _vt(0), _ht(0)
-    { status.cycle = 0; status.end_cycle = 341;
-      status.sl = 241; 
-    }
 
+	//temp unlatched regs (need savestating, can be written to at any time)
+    uint32 _fv, _v, _h, _vt, _ht;
+	
+	//other regs that need savestating
+	uint32 fh;//3 (horz scroll)
+	uint32 s;//1 ($2000 bit 4: "Background pattern table address (0: $0000; 1: $1000)")
+
+	//other regs that don't need saving
+	uint32 par;//8 (sort of a hack, just stored in here, but not managed by this system)
+
+	//cached state data. these are always reset at the beginning of a frame and don't need saving
+	//but just to be safe, we're gonna save it
+    PPUSTATUS status;
+
+	void reset()
+	{
+		fv = v = h = vt = ht = 0;
+		fh = par = s = 0;
+		_fv = _v = _h = _vt = _ht = 0;
+		status.cycle = 0; 
+		status.end_cycle = 341;
+		status.sl = 241; 
+	}
+        
 	void install_latches() {
 		fv = _fv;
 		v = _v;
@@ -390,7 +426,7 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
     }
 }
 
-uint8 FFCEUX_PPURead_Default(uint32 A) {
+uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 	uint32 tmp = A;
 
 	if(tmp<0x2000)
@@ -421,15 +457,10 @@ uint8 FFCEUX_PPURead_Default(uint32 A) {
 }
 
 
-uint8 (*FFCEUX_PPURead)(uint32 A) = 0;
+uint8 (FASTCALL *FFCEUX_PPURead)(uint32 A) = 0;
 void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = 0;
 
-#define CALL_PPUREAD(A) (FFCEUX_PPURead?FFCEUX_PPURead(A):(\
-	((A)<0x2000)? \
-		VPage[(A)>>10][(A)] \
-		: vnapage[((A)>>10)&0x3][(A)&0x3FF] \
-		))
-		
+#define CALL_PPUREAD(A) (FFCEUX_PPURead(A))
 
 #define CALL_PPUWRITE(A,V) (FFCEUX_PPUWrite?FFCEUX_PPUWrite(A,V):FFCEUX_PPUWrite_Default(A,V))
 
@@ -1777,6 +1808,11 @@ void FCEUPPU_Init(void)
 	makeppulut();
 }
 
+void PPU_ResetHooks()
+{
+	FFCEUX_PPURead = FFCEUX_PPURead_Default;
+}
+
 void FCEUPPU_Reset(void)
 {
 	VRAMBuffer=PPU[0]=PPU[1]=PPU_status=PPU[3]=0;   
@@ -1786,7 +1822,11 @@ void FCEUPPU_Reset(void)
 	vtoggle = 0;
 	ppudead = 2;
 	kook = 0;
+	idleSynch = 1;
 	//	XOffset=0;
+
+	ppur.reset();
+	spr_read.reset();
 }
 
 void FCEUPPU_Power(void)
@@ -1988,6 +2028,41 @@ SFORMAT FCEUPPU_STATEINFO[]={
 	{ 0 }
 };
 
+SFORMAT FCEU_NEWPPU_STATEINFO[] = {
+	{ &idleSynch, 1, "IDLS" },
+	{ &spr_read.num, 4|FCEUSTATE_RLSB, "SR_0" },
+	{ &spr_read.count, 4|FCEUSTATE_RLSB, "SR_1" },
+	{ &spr_read.fetch, 4|FCEUSTATE_RLSB, "SR_2" },
+	{ &spr_read.found, 4|FCEUSTATE_RLSB, "SR_3" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx0" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx1" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx2" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx3" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx4" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx5" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx6" },
+	{ &spr_read.found_pos[0], 4|FCEUSTATE_RLSB, "SRx7" },
+	{ &spr_read.ret, 4|FCEUSTATE_RLSB, "SR_4" },
+	{ &spr_read.last, 4|FCEUSTATE_RLSB, "SR_5" },
+	{ &spr_read.mode, 4|FCEUSTATE_RLSB, "SR_6" },
+	{ &ppur.fv, 4|FCEUSTATE_RLSB, "PFVx" },
+	{ &ppur.v, 4|FCEUSTATE_RLSB, "PVxx" },
+	{ &ppur.h, 4|FCEUSTATE_RLSB, "PHxx" },
+	{ &ppur.vt, 4|FCEUSTATE_RLSB, "PVTx" },
+	{ &ppur.ht, 4|FCEUSTATE_RLSB, "PHTx" },
+	{ &ppur._fv, 4|FCEUSTATE_RLSB, "P_FV" },
+	{ &ppur._v, 4|FCEUSTATE_RLSB, "P_Vx" },
+	{ &ppur._h, 4|FCEUSTATE_RLSB, "P_Hx" },
+	{ &ppur._vt, 4|FCEUSTATE_RLSB, "P_VT" },
+	{ &ppur._ht, 4|FCEUSTATE_RLSB, "P_HT" },
+	{ &ppur.fh, 4|FCEUSTATE_RLSB, "PFHx" },
+	{ &ppur.s, 4|FCEUSTATE_RLSB, "PSxx" },
+	{ &ppur.status.sl, 4|FCEUSTATE_RLSB, "PST0" },
+	{ &ppur.status.cycle, 4|FCEUSTATE_RLSB, "PST1" },
+	{ &ppur.status.end_cycle, 4|FCEUSTATE_RLSB, "PST2" },
+	{ 0 }
+};
+
 void FCEUPPU_SaveState(void)
 {
 	TempAddrT=TempAddr;   
@@ -2000,13 +2075,14 @@ int pputime=0;
 int totpputime=0;
 const int kLineTime=341;
 const int kFetchTime=2;
-int idleSynch = 1;
 
 void runppu(int x) {
 	//pputime+=x;
 	//if(cputodo<200) return;
+
     ppur.status.cycle = (ppur.status.cycle + x) % 
                            ppur.status.end_cycle;
+
 	X6502_Run(x);
 	//pputime -= cputodo<<2;
 }
@@ -2016,7 +2092,7 @@ struct BGData {
 		struct Record {
 			uint8 nt, at, pt[2];
 
-			void Read() {
+			INLINE void Read() {
 				RefreshAddr = ppur.get_ntread();
 				nt = CALL_PPUREAD(RefreshAddr);
 				runppu(kFetchTime);
@@ -2056,6 +2132,7 @@ struct BGData {
 
 int framectr=0;
 int FCEUX_PPU_Loop(int skip) {
+
 	//262 scanlines
     if (ppudead)
     {
@@ -2108,26 +2185,20 @@ int FCEUX_PPU_Loop(int skip) {
 		//if(PPUON)
 		//	ppur.install_latches();
 
-		uint8 oams[2][64][7];
-		int oamcounts[2]={0,0};
-		int oamslot=0;
-		int oamcount;
+		static uint8 oams[2][64][8]; //[7] turned to [8] for faster indexing
+		static int oamcounts[2]={0,0};
+		static int oamslot=0;
+		static int oamcount;
 
 		//capture the initial xscroll
 		//int xscroll = ppur.fh;
 		//render 241 scanlines (including 1 dummy at beginning)
 		for(int sl=0;sl<241;sl++) {
-            spr_read.num = 1;
-            spr_read.found = 0;
-            spr_read.fetch = 1;
-            spr_read.count = 0;
-            spr_read.last = 64;
-            spr_read.mode = 0;
-            memset(spr_read.found_pos, 0, sizeof(spr_read.found_pos));
+            spr_read.start_scanline();
 
             ppur.status.sl = sl;
 
-			int yp = sl-1;
+			const int yp = sl-1;
 			ppuphase = PPUPHASE_BG;
 
 			if(sl != 0) {
@@ -2139,8 +2210,8 @@ int FCEUX_PPU_Loop(int skip) {
 			
 
 			//twiddle the oam buffers
-			int scanslot = oamslot^1;
-			int renderslot = oamslot;
+			const int scanslot = oamslot^1;
+			const int renderslot = oamslot;
 			oamslot ^= 1;
 
 			oamcount = oamcounts[renderslot];
@@ -2151,25 +2222,26 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int xt=0;xt<32;xt++) {
 				bgdata.main[xt+2].Read();
 
+
                 //ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
 				if(sl != 0) {
 					int xstart = xt<<3;
 					oamcount = oamcounts[renderslot];
-					uint8 *target=XBuf+(yp<<8)+xstart;
+					uint8 * const target=XBuf+(yp<<8)+xstart;
 					uint8 *ptr = target;
 					int rasterpos = xstart;
 
 					//check all the conditions that can cause things to render in these 8px
-					bool renderspritenow = SpriteON && rendersprites && (xt>0 || SpriteLeft8);
-					bool renderbgnow = ScreenON && renderbg && (xt>0 || BGLeft8);
+					const bool renderspritenow = SpriteON && rendersprites && (xt>0 || SpriteLeft8);
+					const bool renderbgnow = ScreenON && renderbg && (xt>0 || BGLeft8);
 					for(int xp=0;xp<8;xp++,rasterpos++) {
 
 						//bg pos is different from raster pos due to its offsetability.
 						//so adjust for that here
-						int bgpos = rasterpos + ppur.fh;
-						int bgpx = bgpos&7;
-						int bgtile = bgpos>>3;
+						const int bgpos = rasterpos + ppur.fh;
+						const int bgpx = bgpos&7;
+						const int bgtile = bgpos>>3;
 						
 						uint8 pixel=0, pixelcolor;
 
@@ -2236,7 +2308,7 @@ int FCEUX_PPU_Loop(int skip) {
 			//look for sprites (was supposed to run concurrent with bg rendering)
 			oamcounts[scanslot] = 0;
 			oamcount=0;
-			int spriteHeight = Sprite16?16:8;
+			const int spriteHeight = Sprite16?16:8;
 			for(int i=0;i<64;i++) {
 				uint8* spr = SPRAM+i*4;
 				if(yp >= spr[0] && yp < spr[0]+spriteHeight) {
@@ -2289,9 +2361,9 @@ int FCEUX_PPU_Loop(int skip) {
 				//this is how we support the no 8 sprite limit feature.
 				//not that at some point we may need a virtual CALL_PPUREAD which just peeks and doesnt increment any counters
 				//this could be handy for the debugging tools also
-				bool realSprite = (s<8);
+				const bool realSprite = (s<8);
 
-				uint8* oam = oams[scanslot][s];
+				uint8* const oam = oams[scanslot][s];
 				uint32 line = yp - oam[0];
 				if(oam[2]&0x80) //vflip
 					line = spriteHeight-line-1;
