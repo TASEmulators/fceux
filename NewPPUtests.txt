@@ -1,0 +1,17 @@
+NewPPU tests
+
+Bad
+Mike Tyson's Punch-out!! - Intro screens, In between round screens, in game
+Dragon's Lair - Black screen for level 1 (music plays)
+
+Good
+Battletoads
+Double Dragon 2
+SMB2j
+Doki Doki panic
+Duck Tales
+DW4
+Eggerland
+Final Fantasy
+Metroid
+
