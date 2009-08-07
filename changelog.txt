@@ -1,3 +1,4 @@
+07-august-2009 - ugetab - win32 - imported NSF features from FCEU-XDSP-NSF
 05-august-2009 - adelikat - win32 - fixed an erroneous assumption made in 2.1.1 that caused the recent roms menu to be grayed out even when there were recent roms (however, it uncovered an underlying bug in the recent menu saving that needs to be fixed at some point).
 
 ---r1375 - FCEUX 2.1.1---
