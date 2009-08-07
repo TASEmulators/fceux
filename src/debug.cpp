@@ -611,7 +611,7 @@ void breakpoint() {
 //bbit edited: this is the end of the inserted code
 
 int debug_tracing;
-
+int logging;
 void DebugCycle() {
 	
 	if (scanline == 240)
@@ -631,6 +631,6 @@ void DebugCycle() {
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
  	//if(logging || (hMemView && (EditingMode == 2))) LogInstruction();
 
-	extern volatile int logging;
+//	extern volatile int logging;
 	if(logging) FCEUD_TraceInstruction();
 }
