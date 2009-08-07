@@ -16,9 +16,11 @@ char *FCEUI_GetAboutString() {
 	const char *aboutTemplate = 
 	FCEU_NAME_AND_VERSION "\n\n\
 Authors:\n\
-zeromus, adelikat, CaH4e3\n\n\
+zeromus, adelikat,\n\n\
 Contributers:\n\
-Acmlm,DWEdit,QFox\n\
+Acmlm,CaH4e3\n\
+DWEdit,QFox\n\
+qeed,Shinydoofy,ubetab\n\
 \n\
 FCEUX 2.0\n\
 mz, nitsujrehtona, Lukas Sabota,\n\
