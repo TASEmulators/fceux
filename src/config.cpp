@@ -20,7 +20,7 @@ zeromus, adelikat,\n\n\
 Contributers:\n\
 Acmlm,CaH4e3\n\
 DWEdit,QFox\n\
-qeed,Shinydoofy,ubetab\n\
+qeed,Shinydoofy,ugetab\n\
 \n\
 FCEUX 2.0\n\
 mz, nitsujrehtona, Lukas Sabota,\n\
