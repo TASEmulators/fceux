@@ -333,7 +333,7 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Save Stripped file As...";
+	ofn.lpstrTitle="Save Stripped File As...";
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
 	}

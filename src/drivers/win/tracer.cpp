@@ -319,6 +319,8 @@ void FCEUD_TraceInstruction(){
 	uint8 opcode[3], tmp;
 	static int unloggedlines;
 
+	if((GameInfo->type==GIT_NSF) && (addr >= 0x3800) && (addr <= 0x3824)) return;
+
 	if(((logging_options & LOG_NEW_INSTRUCTIONS) && (oldcodecount != codecount)) ||
 	   ((logging_options & LOG_NEW_DATA) && (olddatacount != datacount))){//something new was logged
 		oldcodecount = codecount;
