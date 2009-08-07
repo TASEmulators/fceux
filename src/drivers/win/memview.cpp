@@ -510,8 +510,14 @@ int GetMemViewData(uint32 i){
 	if(EditingMode == 1){
 		i &= 0x3FFF;
 		if(i < 0x2000)return VPage[(i)>>10][(i)];
-		if(i < 0x3F00)return vnapage[(i>>10)&0x3][i&0x3FF];
-		return PALRAM[i&0x1F];
+		//NSF PPU Viewer crash here (UGETAB)
+		if (GameInfo->type==GIT_NSF) {
+			return (0);
+		}
+		else {
+			if(i < 0x3F00)return vnapage[(i>>10)&0x3][i&0x3FF];
+			return PALRAM[i&0x1F];
+		}
 	}
 	if(EditingMode == 2){ //todo: use getfiledata() here
 		if(i < 16) return *((unsigned char *)&head+i);
@@ -768,10 +774,10 @@ CursorStartAddy++;
 void ChangeMemViewFocus(int newEditingMode, int StartOffset,int EndOffset){
 	SCROLLINFO si;
 
-	if (GameInfo->type==GIT_NSF) {
-		FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
-		return;
-	}
+	//if (GameInfo->type==GIT_NSF) {
+	//	FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
+	//	return;
+	//}
 
 	if(!hMemView)DoMemView();
 	if(EditingMode != newEditingMode)
@@ -1608,10 +1614,10 @@ void DoMemView() {
 		FCEUD_PrintError("You must have a game loaded before you can use the Memory Viewer.");
 		return;
 	}
-	if (GameInfo->type==GIT_NSF) {
-		FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
-		return;
-	}
+	//if (GameInfo->type==GIT_NSF) {
+	//	FCEUD_PrintError("Sorry, you can't yet use the Memory Viewer with NSFs.");
+	//	return;
+	//}
 
 	if (!hMemView){
 		memset(&wndclass,0,sizeof(wndclass));

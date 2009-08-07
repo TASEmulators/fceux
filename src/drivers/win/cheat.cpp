@@ -522,10 +522,10 @@ void ConfigCheats(HWND hParent) {
 		FCEUD_PrintError("You must have a game loaded before you can manipulate cheats.");
 		return;
 	}
-	if (GameInfo->type==GIT_NSF) {
-		FCEUD_PrintError("Sorry, you can't cheat with NSFs.");
-		return;
-	}
+	//if (GameInfo->type==GIT_NSF) {
+	//	FCEUD_PrintError("Sorry, you can't cheat with NSFs.");
+	//	return;
+	//}
 
 	if (!CheatWindow) {
 		selcheat=-1;

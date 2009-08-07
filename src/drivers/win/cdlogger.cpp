@@ -31,6 +31,8 @@
 #define INESPRIV
 #include "../../ines.h"
 
+#include "../../nsf.h"
+
 using namespace std;
 
 void LoadCDLogFile();
@@ -45,6 +47,11 @@ int CDLogger_wndx=0, CDLogger_wndy=0;
 
 //extern uint8 *ROM;
 //extern uint8 *VROM;
+
+extern uint8 *NSFDATA;
+extern int NSFMaxBank;
+static uint8 NSFLoadLow;
+static uint8 NSFLoadHigh;
 
 //volatile int loggingcodedata;
 //int cdlogger_open;
@@ -263,10 +270,10 @@ void DoCDLogger(){
 		FCEUD_PrintError("You must have a game loaded before you can use the Code Data Logger.");
 		return;
 	}
-	if (GameInfo->type==GIT_NSF) { //todo: NSF support!
-		FCEUD_PrintError("Sorry, you can't yet use the Code Data Logger with NSFs.");
-		return;
-	}
+	//if (GameInfo->type==GIT_NSF) { //todo: NSF support!
+	//	FCEUD_PrintError("Sorry, you can't yet use the Code Data Logger with NSFs.");
+	//	return;
+	//}
 
 	if(!hCDLogger){
 		CreateDialog(fceu_hInstance,"CDLOGGER",NULL,CDLoggerCallB);
@@ -307,11 +314,18 @@ void LogPCM(int romaddress){
 
 void SaveStrippedRom(){ //this is based off of iNesSave()
 	//todo: make this support nsfs
-	const char filter[]="Stripped iNes Rom file(*.NES)\0*.nes\0";
+	const char NESfilter[]="Stripped iNes Rom file(*.NES)\0*.nes\0";
+	const char NSFfilter[]="Stripped NSF file(*.NSF)\0*.nsf\0";
 	char sromfilename[MAX_PATH];
 	FILE *fp;
 	OPENFILENAME ofn;
 	int i;
+
+	if (GameInfo->type==GIT_NSF) {
+		MessageBox(NULL, "Sorry, you're not allowed to save optimized NSFs yet. Please don't optimize individual banks, as there are still some issues with several NSFs to be fixed, and it is easier to fix those issues with as much of the bank data intact as possible.", "Disallowed", MB_OK);
+		return;
+	}
+
 	if(codecount == 0){
 		MessageBox(NULL, "Unable to Generate Stripped Rom. Get Something Logged and try again.", "Error", MB_OK);
 		return;
@@ -319,8 +333,13 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Save Stripped Rom File As...";
-	ofn.lpstrFilter=filter;
+	ofn.lpstrTitle="Save Stripped file As...";
+	if (GameInfo->type==GIT_NSF) {
+		ofn.lpstrFilter=NSFfilter;
+	}
+	else {
+		ofn.lpstrFilter=NESfilter;
+	}
 	strcpy(sromfilename,GetRomName());
 	ofn.lpstrFile=sromfilename;
 	ofn.nMaxFile=256;
@@ -330,6 +349,32 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 
 	fp = fopen(sromfilename,"wb");
 
+if(GameInfo->type==GIT_NSF)
+{
+    //Not used because if bankswitching, the addresses involved
+    //could still end up being used through writes
+    //static uint16 LoadAddr;
+    //LoadAddr=NSFHeader.LoadAddressLow;
+    //LoadAddr|=(NSFHeader.LoadAddressHigh&0x7F)<<8;
+    
+    //Simple store/restore for writing a working NSF header
+    NSFLoadLow = NSFHeader.LoadAddressLow;
+    NSFLoadHigh = NSFHeader.LoadAddressHigh;
+    NSFHeader.LoadAddressLow=0;
+    NSFHeader.LoadAddressHigh&=0xF0;
+    fwrite(&NSFHeader,1,0x8,fp);
+    NSFHeader.LoadAddressLow = NSFLoadLow;
+    NSFHeader.LoadAddressHigh = NSFLoadHigh;
+    
+	fseek(fp,0x8,SEEK_SET);
+	for(i = 0;i < ((NSFMaxBank+1)*4096);i++){
+		if(cdloggerdata[i] & 3)fputc(NSFDATA[i],fp);
+		else fputc(0,fp);
+	}
+
+}
+else
+{
 	if(fwrite(&head,1,16,fp)!=16)return;
 
 	if(head.ROM_type&4) 	/* Trainer */
@@ -344,5 +389,7 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	//fwrite(ROM,0x4000,head.ROM_size,fp);
 
 	if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
+}
 	fclose(fp);
 }
+

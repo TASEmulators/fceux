@@ -353,7 +353,7 @@ void ResetGameLoaded(void)
 int UNIFLoad(const char *name, FCEUFILE *fp);
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode);
 int FDSLoad(const char *name, FCEUFILE *fp);
-int NSFLoad(FCEUFILE *fp);
+int NSFLoad(const char *name, FCEUFILE *fp);
 
 //char lastLoadedGameName [2048] = {0,}; // hack for movie WRAM clearing on record from poweron
 
@@ -416,7 +416,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 		goto endlseq;*/
 	if(iNESLoad(name,fp,OverwriteVidMode))
 		goto endlseq;
-	if(NSFLoad(fp))
+	if(NSFLoad(name,fp))
 		goto endlseq;
 	if(UNIFLoad(name,fp))
 		goto endlseq;

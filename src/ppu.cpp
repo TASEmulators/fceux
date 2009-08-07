@@ -1863,7 +1863,7 @@ void FCEUPPU_Power(void)
 
 int FCEUPPU_Loop(int skip)
 {
-	if(newppu) {
+	if((newppu) && (GameInfo->type!=GIT_NSF)) {
 		int FCEUX_PPU_Loop(int skip);
 		return FCEUX_PPU_Loop(skip);
 	}

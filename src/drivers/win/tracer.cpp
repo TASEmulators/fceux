@@ -604,10 +604,10 @@ void DoTracer(){
 		FCEUD_PrintError("You must have a game loaded before you can use the Trace Logger.");
 		return;
 	}
-	if (GameInfo->type==GIT_NSF) { //todo: NSF support!
-		FCEUD_PrintError("Sorry, you can't yet use the Trace Logger with NSFs.");
-		return;
-	}
+	//if (GameInfo->type==GIT_NSF) { //todo: NSF support!
+	//	FCEUD_PrintError("Sorry, you can't yet use the Trace Logger with NSFs.");
+	//	return;
+	//}
 
 	if(!hTracer){
 		CreateDialog(fceu_hInstance,"TRACER",NULL,TracerCallB);
