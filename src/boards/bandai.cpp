@@ -26,7 +26,7 @@
 static uint8 reg[16], is153;
 static uint8 IRQa;
 static uint16 IRQLatch;
-static int16  IRQCount;
+static int32  IRQCount;
 
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
