@@ -611,7 +611,7 @@ void breakpoint() {
 //bbit edited: this is the end of the inserted code
 
 int debug_tracing;
-//int logging; //UGETAB: This is turning it into a local variable. Prevents logging.
+
 void DebugCycle() {
 	
 	if (scanline == 240)
@@ -635,7 +635,11 @@ void DebugCycle() {
 	
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
  	//if(logging || (hMemView && (EditingMode == 2))) LogInstruction();
-
+ 
+//This needs to be windows only or else the linux build system will fail since logging is declared in a 
+//windows source file
+#ifdef WIN32
 	extern volatile int logging; //UGETAB: This is required to be an extern, because the info isn't set here
 	if(logging) FCEUD_TraceInstruction();
+#endif
 }
