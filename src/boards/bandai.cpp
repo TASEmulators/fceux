@@ -35,7 +35,7 @@ static SFORMAT StateRegs[]=
 {
   {reg, 16, "REGS"},
   {&IRQa, 1, "IRQA"},
-  {&IRQCount, 2, "IRQC"},
+  {&IRQCount, 4, "IRQC"},
   {&IRQLatch, 2, "IRQL"},
   {0}
 };
