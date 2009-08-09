@@ -76,18 +76,18 @@ static void BandaiSync(void)
     setprg16(0x8000,reg[8]);
     setprg16(0xC000,~0);
   }
-  switch(reg[9])
+  switch(reg[9]&3)
   {
     case 0: setmirror(MI_V); break;
     case 1: setmirror(MI_H); break;
     case 2: setmirror(MI_0); break;
     case 3: setmirror(MI_1); break;
-  }  
+  }
 }
 
 static DECLFW(BandaiWrite)
 {
-  A&=0x0F;  
+  A&=0x0F;
   if(A<0x0A)
   {
     reg[A&0x0F]=V;
@@ -97,19 +97,19 @@ static DECLFW(BandaiWrite)
     switch(A)
     {
         /* disch's docs say that the writing to 0x0B and 0x0C will change
-         * the counter value directly, not reload value 
+         * the counter value directly, not reload value
          * but keep the old code here in case something goes wrong */
-       /* 
+       /*
       case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa=V&1; IRQCount=IRQLatch; break;
-      case 0x0B: IRQLatch&=0xFF00; IRQLatch|=V;  break;  
-      case 0x0C: IRQLatch&=0xFF; IRQLatch|=V<<8; break; 
+      case 0x0B: IRQLatch&=0xFF00; IRQLatch|=V;  break;
+      case 0x0C: IRQLatch&=0xFF; IRQLatch|=V<<8; break;
       */
-      
+
       case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa=V&1; break;
       case 0x0B: IRQCount &= 0xFF00; IRQCount |= V; break;
       case 0x0C: IRQCount &= 0xFF; IRQCount |= (V << 8); break;
-      
-      case 0x0D: break;// Serial EEPROM control port 
+
+      case 0x0D: break;// Serial EEPROM control port
     }
 }
 
