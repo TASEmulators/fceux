@@ -25,8 +25,7 @@
 
 static uint8 reg[16], is153;
 static uint8 IRQa;
-static uint16 IRQLatch;
-static int32  IRQCount;
+static int16 IRQCount, IRQLatch;
 
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
@@ -35,8 +34,8 @@ static SFORMAT StateRegs[]=
 {
   {reg, 16, "REGS"},
   {&IRQa, 1, "IRQA"},
-  {&IRQCount, 4, "IRQC"},
-  {&IRQLatch, 2, "IRQL"},
+  {&IRQCount, 2, "IRQC"},
+  {&IRQLatch, 2, "IRQL"}, // need for Famicom Jump II - Saikyou no 7 Nin (J) [!]
   {0}
 };
 
@@ -96,19 +95,9 @@ static DECLFW(BandaiWrite)
   else
     switch(A)
     {
-        /* disch's docs say that the writing to 0x0B and 0x0C will change
-         * the counter value directly, not reload value
-         * but keep the old code here in case something goes wrong */
-       /*
       case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa=V&1; IRQCount=IRQLatch; break;
       case 0x0B: IRQLatch&=0xFF00; IRQLatch|=V;  break;
       case 0x0C: IRQLatch&=0xFF; IRQLatch|=V<<8; break;
-      */
-
-      case 0x0A: X6502_IRQEnd(FCEU_IQEXT); IRQa=V&1; break;
-      case 0x0B: IRQCount &= 0xFF00; IRQCount |= V; break;
-      case 0x0C: IRQCount &= 0xFF; IRQCount |= (V << 8); break;
-
       case 0x0D: break;// Serial EEPROM control port
     }
 }
