@@ -401,6 +401,8 @@ int FCEUPPU_GetAttr(int ntnum, int xt, int yt) {
 inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 	uint32 tmp = A;
 
+	if(PPU_hook) PPU_hook(A);
+
     if(tmp<0x2000)
     {
         if(PPUCHRRAM&(1<<(tmp>>10)))
@@ -428,6 +430,8 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
 
 uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 	uint32 tmp = A;
+
+	if(PPU_hook) PPU_hook(A);
 
 	if(tmp<0x2000)
 	{
