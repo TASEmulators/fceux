@@ -1,3 +1,4 @@
+10-august-2009 - adelikat - fixed bug that caused new movies be created in /movie instead of /movies
 08-august-2009 - qeed - mappers - fixed mapper irq count, dragon ball z 3
 should be playable again.
 07-august-2009 - ugetab - win32 - imported NSF features from FCEU-XDSP-NSF
