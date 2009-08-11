@@ -1,7 +1,6 @@
 NewPPU tests
 
 Bad
-Mike Tyson's Punch-out!! - Intro screens, In between round screens, in game
 Dragon's Lair - Black screen for level 1 (music plays)
 
 Good
@@ -21,3 +20,4 @@ Super Mario Bros 2 USA
 Super Mario Bros 3
 TMNT
 Transformers
+Mike Tyson's Punch-out!!/Punch-out!!
