@@ -690,6 +690,11 @@
 #define ID_FILE_RECENT40359             40359
 #define ID_TASEDIT_FILE_RECENT          40360
 #define ID_OPTIONS_BINDTOMAINWINDOW     40361
+#define ID_CONFIG_PPU                   40362
+#define ID_PPU_NEWPPU                   40363
+#define ID_PPU_OLDPPU                   40364
+#define ID_NEWPPU                       40365
+#define ID_OLDPPU                       40366
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -699,7 +704,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40362
+#define _APS_NEXT_COMMAND_VALUE         40367
 #define _APS_NEXT_CONTROL_VALUE         1205
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

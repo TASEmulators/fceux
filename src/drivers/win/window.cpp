@@ -98,6 +98,7 @@ extern bool turbo;
 extern int luaRunning;
 extern bool movie_readonly;
 extern bool AutoSS;			//flag for whether an auto-save has been made
+extern int newppu;
 // Extern functions
 char *md5_asciistr(uint8 digest[16]);
 
@@ -1611,6 +1612,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				}
 				break;
 
+			case ID_NEWPPU:
+				newppu = 1;
+				break;
+			case ID_OLDPPU:
+				newppu = 0;
+				break;
 			case MENU_GAME_GENIE:
 				genie ^= 1;
 				FCEUI_SetGameGenie(genie!=0);
@@ -2008,6 +2015,10 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_STOPLUASCRIPT,MF_BYCOMMAND | (luaRunning?MF_ENABLED:MF_GRAYED));
+
+		CheckMenuItem(fceumenu, ID_NEWPPU, newppu ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(fceumenu, ID_OLDPPU, !newppu ? MF_CHECKED : MF_UNCHECKED);
+
 	default:
 proco:
 		return DefWindowProc(hWnd,msg,wParam,lParam);

@@ -131,6 +131,11 @@ BEGIN
         MENUITEM "&Game Genie",                 MENU_GAME_GENIE
         MENUITEM "&PAL Emulation",              MENU_PAL
         MENUITEM SEPARATOR
+        POPUP "PPU"
+        BEGIN
+            MENUITEM "New PPU",                     ID_NEWPPU
+            MENUITEM "Old PPU",                     ID_OLDPPU
+        END
         MENUITEM "&Directories...",             MENU_DIRECTORIES
         MENUITEM "&GUI...",                     MENU_GUI_OPTIONS
         MENUITEM "&Input...",                   MENU_INPUT
