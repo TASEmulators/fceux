@@ -359,6 +359,26 @@ static int fceu_pause(lua_State *L) {
 	
 }
 
+//FCEU.unpause()
+//
+//adelikat:  Why wasn't this added sooner?
+//Gives the user a way to unpause the emulator via lua
+static int fceu_unpause(lua_State *L) {
+	
+	if (FCEUI_EmulationPaused())
+		FCEUI_ToggleEmulationPause();
+	speedmode = SPEED_NORMAL;
+
+	// Return control if we're midway through a frame. We can't pause here.
+	if (frameAdvanceWaiting) {
+		return 0;
+	}
+
+	// If it's on a frame boundary, we also yield.	
+	frameAdvanceWaiting = TRUE;
+	return lua_yield(L, 0);
+	
+}
 
 
 // FCEU.message(string msg)
@@ -1869,6 +1889,7 @@ static const struct luaL_reg fceulib [] = {
 	{"speedmode", fceu_speedmode},
 	{"frameadvance", fceu_frameadvance},
 	{"pause", fceu_pause},
+	{"unpause", fceu_unpause},
 	{"exec_count", fceu_exec_count},
 	{"exec_time", fceu_exec_time},
 	{"setrenderplanes", fceu_setrenderplanes},
