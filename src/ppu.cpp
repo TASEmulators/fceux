@@ -2152,7 +2152,7 @@ int FCEUX_PPU_Loop(int skip) {
             runppu(20*kLineTime);
         ppur.status.sl = 0;
         runppu(242*kLineTime);
-        ppudead = 0;
+        --ppudead;
         goto finish;
     }
    
