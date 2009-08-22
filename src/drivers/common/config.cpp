@@ -335,7 +335,7 @@ void SaveFCEUConfig(const char *filename, const CFGSTRUCT *cfgst)
 
 	if(fp==NULL)
 		return;
-
+	fclose(fp);		//adelikat:  Adding this so it will let go of the file handle without having to close the emulator!
 	fp = fopen(filename,"wb");
 	cfg_OldToNew(cfgst);
 	cfg_Save(fp);

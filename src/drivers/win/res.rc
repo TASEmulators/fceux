@@ -146,6 +146,8 @@ BEGIN
         MENUITEM "&Video...",                   MENU_VIDEO
         MENUITEM "&Movie options...",           MENU_MOVIEOPTIONS
         MENUITEM "&Map Hotkeys...",             MENU_HOTKEYS
+        MENUITEM SEPARATOR
+        MENUITEM "Save Config File",            ID_CONFIG_SAVECONFIGFILE
     END
     POPUP "&Tools"
     BEGIN

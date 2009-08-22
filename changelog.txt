@@ -1,3 +1,4 @@
+22-august-2009 - adelikat - Win32 - Added a Save Config File menu item
 12-august-2009 - adelikat - Win32 - Added a menu item to toggle to New PPU
 10-august-2009 - adelikat - fixed bug that caused new movies be created in /movie instead of /movies
 08-august-2009 - qeed - mappers - fixed mapper irq count, dragon ball z 3

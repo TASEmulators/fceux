@@ -64,6 +64,7 @@
 #include "file.h"
 #include "mapinput.h"
 #include "movieoptions.h"
+#include "config.h" //adelikat: For SaveConfigFile()
 
 #include <fstream>
 #include <sstream>
@@ -1119,6 +1120,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	RECT help_rect;
 	int x = 0;
 
+	char TempArray[2048];
+
 	switch(msg)
 	{
 	case WM_LBUTTONDOWN:
@@ -1659,6 +1662,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case MENU_MOVIEOPTIONS:
 				OpenMovieOptions();
+				break;
+
+			case ID_CONFIG_SAVECONFIGFILE:
+				extern string cfgFile;
+				sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
+				SaveConfig(TempArray);
 				break;
 
 			//Tools Menu---------------------------------------------------------------
