@@ -1,3 +1,4 @@
+22-august-2009 - adelikat - Win32 - Map Hotkeys Dialog - Fixed but where "X" and Alt+F4 would not close dialog
 22-august-2009 - adelikat - Win32 - Added a Save Config File menu item
 12-august-2009 - adelikat - Win32 - Added a menu item to toggle to New PPU
 10-august-2009 - adelikat - fixed bug that caused new movies be created in /movie instead of /movies

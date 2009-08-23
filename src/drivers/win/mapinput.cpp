@@ -693,7 +693,7 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			PopulateMappingDisplay(hwndDlg);
 			break;
 		}
-
+		
 		switch(LOWORD(wParam))
 		{
 			case IDOK:
@@ -714,7 +714,12 @@ BOOL CALLBACK MapInputDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 				break;
 		}
 		break;
-
+		
+	case WM_CLOSE:
+	case WM_DESTROY:
+	case WM_QUIT:
+			EndDialog(hwndDlg, 0);
+			break;
 	case WM_NOTIFY:
 
 		switch(LOWORD(wParam))
