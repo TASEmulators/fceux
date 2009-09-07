@@ -5,10 +5,11 @@
 # Lukas Sabota <ltsmooth42 _at_ gmail _dot_ com>
 #
 # <http://fceux.com>
-import platform 
+import platform
+import sys
 if platform.python_version() < '2.5.0':
     print "Python version too old, use one greater than 2.5.0";
-    exit();
+    sys.exit();
 
 try:
 	from src import main
