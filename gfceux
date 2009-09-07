@@ -1,10 +1,15 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 #
 # GTK2 GUI for FCE UltraX
 #
 # Lukas Sabota <ltsmooth42 _at_ gmail _dot_ com>
 #
 # <http://fceux.com>
+import platform 
+if platform.python_version() < '2.5.0':
+    print "Python version too old, use one greater than 2.5.0";
+    exit();
+
 try:
 	from src import main
 except:
