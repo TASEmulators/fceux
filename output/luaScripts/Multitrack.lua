@@ -3,6 +3,7 @@
 -- It may get obsolete when TASEdit comes around.
 --FatRatKnight
 -- Rewind added by DarkKobold
+-- Test comment. Checking write access to SVN. No immediate improvements (FatRatKnight)
 
 
 -- Stuff that you are encouraged to change to fit what you need.
