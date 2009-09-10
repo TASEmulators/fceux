@@ -2,27 +2,33 @@
 -- To make up for the lack of an internal multi-track rerecording in FCEUX.
 -- It may get obsolete when TASEdit comes around.
 --FatRatKnight
--- Rewind added by DarkKobold
--- Test comment. Checking write access to SVN. No immediate improvements (FatRatKnight)
+-- Rewind (by Antony Lavelle) added by DarkKobold
 
 
 -- Stuff that you are encouraged to change to fit what you need.
 --*****************************************************************************
 local players= 2             -- You may tweak the number of players here.
 
-local saveMax= 1000;         -- Max Rewind Power
+local saveMax= 1000          -- Max Rewind Power. Set to 0 to disable
 
 local opaque= 0              -- Default opacity. 0 is solid, 4 is invisible.
 
 local dispX, dispY= 10, 99   -- For the display stuffs
 
+local Past, Future= -10, 10  -- Keep Past negative; Range of display stuffs
+
 -- Control scheme. You may want to change these.
 local selectplayer = "S"     -- For selecting which player
 local recordingtype= "space" -- For selecting how to record
+
 local show, hide   = "pageup", "pagedown" -- Opacity adjuster
-local scrlup, scrldown, scrlleft, scrlright= "numpad8", "numpad2", "numpad4", "numpad6"  -- Input display mover
-local add, remove  = "insert", "delete"   -- Movin' frames around...
-local rewind = "R"
+local scrlup,   scrldown = "numpad8", "numpad2"  -- Move the input display
+local scrlleft, scrlright= "numpad4", "numpad6"  -- Not a fast method, though.
+local MorePast,   LessPast  = "numpad7", "numpad1"  -- See more or less input!
+local MoreFuture, LessFuture= "numpad3", "numpad9"  -- Good use of screen space
+
+local add, remove  = "insert", "delete"   -- Moves input around
+local rewind = "R"    -- The button used to rewind things
 local key = {"right", "left", "down", "up",   "C",      "V",   "X", "Z"}
 
 local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
@@ -40,14 +46,12 @@ local FrameAdvance= false    -- Frame advance detection
 local framed= nil            -- "frameadvance", "stateload", or nil
 local pl= 1                  -- Player selected
 local plmin, plmax= 1, 1     -- For the all option
-local repeater= 0;           -- for holding a button
+local repeater= 0            -- for holding a button
 local rewinding= false       -- For unpaused rewinding
 
 
 
---The stuff below is for more advanced users, enter at your own peril!
-
-
+--The stuff below is adapted from the original Rewinding script by Antony Lavelle
 
 local saveArray = {};--the Array in which the save states are stored
 local saveCount = 0;--used for finding which array position to cycle through
@@ -141,6 +145,7 @@ end                             -- Yes, a stateload on the same frame
 function RewindThis()
 --*****************************************************************************
 --Added by DarkKobold; Made into function that returns T/F by FatRatKnight
+-- Original Rewinder by Antony Lavelle. Seems quite useful here!
 -- Loads a state that was saved just the frame prior
 -- Lets you know whether it was successful by returning true or false.
 -- Accesses: rewindCount, saveArray, saveCount, saveMax
@@ -270,14 +275,20 @@ function DisplayInput()
 -- Converted into function form. There might be other ways of handling it.
 -- Accesses: dispX, dispY, Pin[], thisInput[], players
 
-dispX= math.min(math.max(dispX,-2),219) -- Limits
-dispY= math.min(math.max(dispY,51),185)
-
-if pl > players then
+dispX= math.min(math.max(dispX,-2),219)
+if pl > players then -- All players, man?
     dispX= math.min(dispX,243-16*players)
 end
 
-    for i= -10, 10 do
+if (Future-Past) > 53 then
+    Past= math.max(Past, -53)
+    Future= Past + 53
+end
+Past  = math.min(Past  ,0)
+Future= math.max(Future,0)
+dispY= math.min(math.max(dispY,11-4*Past),225-4*Future)
+
+    for i= Past, Future do
 
         local Y= dispY
         if i < 0 then
@@ -326,7 +337,7 @@ function itisyourturn()
     framed= NewFrame()      -- Are we looking at a new frame?
 
 -- State: Rewind
- if saveMax > 0 then
+ if saveMax > 0 then  -- Disable Rewind if none exists
     if pressrepeater(rewind) or rewinding then
         rewinding= false
         if RewindThis() then
@@ -350,11 +361,11 @@ function itisyourturn()
 
 -- For standard player loops for allplayer option
     if pl > players then
-        plmin= 1
-        plmax= players
+        plmin= 1         -- Go from 1 to last player
+        plmax= players   -- The all players option
     else
-        plmin= pl
-        plmax= pl
+        plmin= pl        -- Go from selected player to itself
+        plmax= pl        -- The one player option
     end
 
 
@@ -402,6 +413,20 @@ function itisyourturn()
         dispY= dispY + keys.ymouse - lastkeys.ymouse
     end
 
+-- Option: Adjust input display range
+    if pressrepeater(MorePast) then
+        Past= Past-1                  -- Remember, Past is negative.
+    end                               -- Making it more negative would
+    if pressrepeater(LessPast) then   -- let you see more of the past.
+        Past= Past+1
+    end
+    if pressrepeater(MoreFuture) then -- On the other hand, I want to
+        Future= Future+1              -- make the Future positive.
+    end                               -- Don't we all want to be
+    if pressrepeater(LessFuture) then -- positive about the future?
+        Future= Future-1
+    end
+
 
 -- Begin start of frame change
     if framed then
@@ -444,7 +469,8 @@ function itisyourturn()
 -- Begin checking key input
 -- Are you setting button options?
     if keys[recordingtype] then
-        for i= 1, 8 do
+        gui.transparency(0)  -- Override current opacity
+        for i= 1, 8 do -- key loop
 
 -- Set current options
             for P= plmin, plmax do
@@ -457,7 +483,6 @@ function itisyourturn()
             end
 
 -- Display current options
-            gui.transparency(0)
             gui.text(20,20+12*i,btn[i])
 
             if pl >= players + 1 then
@@ -484,7 +509,7 @@ function itisyourturn()
             for P= plmin, plmax do
                 op= option[P][btn[i]]
                 if op == 1  or  op == 2 then   -- "Both" or "Keys"
-                    if press(key[i]) then          -- Spread the AND to the next line
+                    if press(key[i]) then
                         if thisInput[P][btn[i]] then
                             thisInput[P][btn[i]]= nil
                         else
@@ -534,10 +559,11 @@ FCEU.pause();              -- Immediate pause is nice
 while true do  -- Main loop
 --*****************************************************************************
 -- Most of the stuff here by DarkKobold. Minor stuff by FatRatKnight
+-- Rewinding feature originally by Antony Lavelle.
 -- Keep in mind stuff here only happens on a frame advance or when unpaused.
     FCEU.frameadvance()
 
- if saveMax > 0 then  -- Don't process if no Rewind
+ if saveMax > 0 then  -- Don't process if Rewind is disabled
     if keys[rewind] then
         rewinding= true
     else
