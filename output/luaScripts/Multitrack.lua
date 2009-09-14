@@ -17,11 +17,15 @@ local dispX, dispY= 10, 99   -- For the display stuffs
 
 local Past, Future= -10, 10  -- Keep Past negative; Range of display stuffs
 
+local immediate= false       -- true:  Changes apply to list upon happening
+                             -- false: Changes only apply on frame advance
+
 -- Control scheme. You may want to change these.
 local selectplayer = "S"     -- For selecting which player
 local recordingtype= "space" -- For selecting how to record
+local SetImmediate = "numpad5"--Toggle immediate option
 
-local show, hide   = "pageup", "pagedown" -- Opacity adjuster
+local show, hide   = "pageup", "pagedown"  -- Opacity adjuster
 local scrlup,   scrldown = "numpad8", "numpad2"  -- Move the input display
 local scrlleft, scrlright= "numpad4", "numpad6"  -- Not a fast method, though.
 local MorePast,   LessPast  = "numpad7", "numpad1"  -- See more or less input!
@@ -48,7 +52,6 @@ local pl= 1                  -- Player selected
 local plmin, plmax= 1, 1     -- For the all option
 local repeater= 0            -- for holding a button
 local rewinding= false       -- For unpaused rewinding
-
 
 
 --The stuff below is adapted from the original Rewinding script by Antony Lavelle
@@ -87,8 +90,8 @@ function press(button)
 
     if keys[button] and not lastkeys[button] then
         return true
-
     end
+
     return false
 end
 
@@ -145,18 +148,17 @@ end                             -- Yes, a stateload on the same frame
 function RewindThis()
 --*****************************************************************************
 --Added by DarkKobold; Made into function that returns T/F by FatRatKnight
--- Original Rewinder by Antony Lavelle. Seems quite useful here!
 -- Loads a state that was saved just the frame prior
 -- Lets you know whether it was successful by returning true or false.
 -- Accesses: rewindCount, saveArray, saveCount, saveMax
 
-    if rewindCount==0 then
+    if rewindCount<=0 then
         return false    -- Failed to rewind
     else
         savestate.load(saveArray[saveCount]);
         saveCount = saveCount-1;
         rewindCount = rewindCount-1;
-        if saveCount==0 then
+        if saveCount<=0 then
             saveCount = saveMax;
         end;
     end;
@@ -320,10 +322,23 @@ dispY= math.min(math.max(dispY,11-4*Past),225-4*Future)
             end
         end
     end
+
+    local color= "white" -- immediate == true
+    if not immediate then
+        color= "blue"
+        for P= plmin, plmax do
+            local TestInput= GetNextInput(P)
+            for i=1, 8 do
+                if not TestInput or TestInput[btn[i]] ~= thisInput[P][btn[i]] then
+                    color= "green"
+                end
+            end
+        end
+    end
     if pl <= players then
-        gui.drawbox(dispX+2,dispY-2,dispX+36,dispY+4,"blue")
+        gui.drawbox(dispX+2,dispY-2,dispX+36,dispY+4,color)
     else
-        gui.drawbox(dispX+2,dispY-2,dispX+12 +16*players,dispY+4,"blue")
+        gui.drawbox(dispX+2,dispY-2,dispX+12 +16*players,dispY+4,color)
     end
 end
 
@@ -344,8 +359,8 @@ function itisyourturn()
             fc= movie.framecount()  -- Definite change here!
             framed= "stateload"     -- Don't even bother with NewFrame()...
             movie.rerecordcounting(true)
-        else
-            keys[rewind]= nil
+        end
+        if rewindCount <= 0 then
             FCEU.pause()
         end
     end
@@ -356,16 +371,16 @@ function itisyourturn()
         pl= pl + 1                 -- self-explanatory.
         if (pl > players+1)  or  (players == 1) then
             pl= 1                  -- If not, it... Selects a player...
-        end                        -- Joy.
+        end
     end
 
 -- For standard player loops for allplayer option
     if pl > players then
-        plmin= 1         -- Go from 1 to last player
-        plmax= players   -- The all players option
+        plmin= 1
+        plmax= players
     else
-        plmin= pl        -- Go from selected player to itself
-        plmax= pl        -- The one player option
+        plmin= pl
+        plmax= pl
     end
 
 
@@ -373,8 +388,10 @@ function itisyourturn()
     if press(add) then                 -- Part of the reason for
         for P= plmin, plmax do         -- speedy insertions and
             BufLen[P]= BufLen[P]+1     -- deletions is due to the
-            BufInput[P][BufLen[P]]= {} -- fact that I don't shift
-            LoadStoredInput(P)         -- frames upon add/remove.
+            if BufLen[P] > 0 then      -- fact that I don't shift
+                BufInput[P][BufLen[P]]= {} -- frames immediately.
+            end
+            LoadStoredInput(P)
         end
     end                                -- I only shift once you
     if press(remove) then              -- begin rewind or load a
@@ -382,6 +399,15 @@ function itisyourturn()
            BufLen[P]= BufLen[P]-1      -- it may take a while if
            LoadStoredInput(P)          -- there's enough frames
         end                            -- to shift around.
+    end
+
+-- Input: Should thisInput always instantly write to input table?
+    if press(SetImmediate) then
+        if not immediate then
+            immediate= true
+        else
+            immediate= false
+        end
     end
 
 -- Option: Opacity
@@ -529,6 +555,25 @@ function itisyourturn()
         end
     end -- Done with "options" if
 
+-- Force copy of thisInput into the input table if immediate is on
+    if immediate then
+        for P= 1, players do
+            if not GetNextInput(P) then
+                Pin[P][fc-BufLen[P]]= {}
+            end -- Inserted frames always defined! Don't check for that
+
+            if BufLen[P] > 0 then
+                for i= 1, 8 do
+                    BufInput[P][BufLen[P]][btn[i]]= thisInput[P][btn[i]]
+                end
+            else
+                for i= 1, 8 do
+                    Pin[P][fc-BufLen[P]][btn[i]]= thisInput[P][btn[i]]
+                end
+            end
+        end
+    end
+
 -- Display selected player. Or other odds and ends.
     if pl <= players then
        gui.text(30,10,pl)
@@ -561,10 +606,12 @@ while true do  -- Main loop
 -- Most of the stuff here by DarkKobold. Minor stuff by FatRatKnight
 -- Rewinding feature originally by Antony Lavelle.
 -- Keep in mind stuff here only happens on a frame advance or when unpaused.
+
+    FrameAdvance= true -- For the NewFrame function
     FCEU.frameadvance()
 
  if saveMax > 0 then  -- Don't process if Rewind is disabled
-    if keys[rewind] then
+    if keys[rewind] and rewindCount > 0 then
         rewinding= true
     else
         saveCount=saveCount+1;
@@ -584,8 +631,7 @@ while true do  -- Main loop
     end
  end
 
-    FrameAdvance= true -- For the NewFrame function
-end
+end -- Main loop ends
 
 
 -- Possible inconveniences include:
