@@ -706,6 +706,9 @@ static int joypad_read(lua_State *L) {
 //   Sets the given buttons to be pressed during the next
 //   frame advance. The table should have the right 
 //   keys (no pun intended) set.
+/*FatRatKnight: Attempted a fix of joypad_set
+  Lines changed marked by comments
+  Lines that were once in place are commented out*/
 static int joypad_set(lua_State *L) {
 
 	// Which joypad we're tampering with
@@ -723,7 +726,7 @@ static int joypad_set(lua_State *L) {
 	lua_joypads[which-1] = 0;
 
 	lua_joypads_used_false |= 1 << (which -1);
-	lua_joypads[which-1] = 0;
+/**/lua_joypads_false[which-1] = 0xFF;      /*lua_joypads[which-1] = 0;*/
 
 	int i;
 	for (i=0; i < 8; i++) {
@@ -736,8 +739,10 @@ static int joypad_set(lua_State *L) {
 				lua_joypads[which-1] |= 1 << i;
 			else							//False
 			{
-				lua_joypads_false[which-1] = 1 << i;						//Create a false joypad to overlay on the regular input, 0's will result in turning off and overriding the input
-				lua_joypads_false[which-1] = ~lua_joypads_false[which-1];	//1's will mean it does not take control
+/**/			lua_joypads_false[which-1] &= 0xFF - (1 << i);	//Create a false joypad to overlay on the regular input, 0's will result in turning off and overriding the input
+																//1's will mean it does not take control
+			/*	lua_joypads_false[which-1] = 1 << i;
+				lua_joypads_false[which-1] = ~lua_joypads_false[which-1];*/
 			}
 		}
 		//Button is nil, so leave that button blank
