@@ -10,9 +10,7 @@ void FCEU_ReloadLuaCode();
 void FCEU_LuaStop();
 int FCEU_LuaRunning();
 
-int FCEU_LuaUsingJoypad(int);
-uint8 FCEU_LuaReadJoypad(int);
-uint8 FCEU_LuaReadJoypadFalse(int which);	//adelikat - will be used to generate a 3rd button condition - false (in addition to true & nil)
+uint8 FCEU_LuaReadJoypad(int,uint8); // HACK - Function needs controller input
 int FCEU_LuaSpeed();
 int FCEU_LuaFrameskip();
 int FCEU_LuaRerecordCountSkip();
