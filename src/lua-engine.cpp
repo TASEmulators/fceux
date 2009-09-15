@@ -709,7 +709,7 @@ static int joypad_read(lua_State *L) {
 //   frame advance. The table should have the right 
 //   keys (no pun intended) set.
 /*FatRatKnight: I changed some of the logic.
-  */
+  Now with 4 options!*/
 static int joypad_set(lua_State *L) {
 
 	// Which joypad we're tampering with
@@ -733,10 +733,9 @@ static int joypad_set(lua_State *L) {
 		//Button is not nil, so find out if it is true/false
 		if (!lua_isnil(L,-1))	
 		{
-			if (lua_toboolean(L,-1))        //True
+			if (lua_toboolean(L,-1))							//True or string
 				luajoypads2[which-1] |= 1 << i;
-			else							//False
-			//if (lua_toboolean == 0 || 'string is "invert"'
+			if (lua_toboolean(L,-1) == 0 || lua_isstring(L,-1))	//False or string
 				luajoypads1[which-1] &= ~(1 << i);
 		}
 
