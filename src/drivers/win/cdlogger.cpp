@@ -298,20 +298,6 @@ void UpdateCDLogger(){
 	return;
 }
 
-void LogPCM(int romaddress){
-	int i = GetPRGAddress(romaddress);
-	if(i == -1)return;
-	if(cdloggerdata[i] & 0x40)return;
-	cdloggerdata[i] |= 0x40;
-
-	if(!(cdloggerdata[i] & 2)){
-		datacount++;
-		cdloggerdata[i] |= 2;
-		if(!(cdloggerdata[i] & 1))undefinedcount--;
-	}
-	return;
-}
-
 void SaveStrippedRom(){ //this is based off of iNesSave()
 	//todo: make this support nsfs
 	const char NESfilter[]="Stripped iNes Rom file(*.NES)\0*.nes\0";
