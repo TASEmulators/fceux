@@ -5,10 +5,10 @@
 
 
 local EHP= 0x0398  -- Enemy HP address
-local TMR= 21      -- Frames in advance for your punches.
+local TMR= 23      -- Frames in advance for your punches.
 local BND= -8      -- KEEP NEGATIVE!! Frames after the golden zone.
 
-local DISPx= 200
+local DISPx= 180
 local DISPy= 180
 
 local timer= 0
