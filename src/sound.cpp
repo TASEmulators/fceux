@@ -31,6 +31,7 @@
 #include "filter.h"
 #include "state.h"
 #include "wave.h"
+#include "debug.h"
 
 static uint32 wlookup1[32];
 static uint32 wlookup2[203];
@@ -159,6 +160,12 @@ static uint32 ChannelBC[5];
 //savestate sync hack stuff
 int movieSyncHackOn=0,resetDMCacc=0,movieConvertOffset1,movieConvertOffset2;
 
+#ifdef WIN32
+extern volatile int datacount, undefinedcount;
+extern int debug_loggingCD;
+extern unsigned char *cdloggerdata;
+#endif
+
 static void LoadDMCPeriod(uint8 V)
 {
  if(PAL)
@@ -171,6 +178,31 @@ static void PrepDPCM()
 {
  DMCAddress=0x4000+(DMCAddressLatch<<6);
  DMCSize=(DMCSizeLatch<<4)+1;
+
+ #ifdef WIN32
+ if(debug_loggingCD)LogDPCM(0x8000+DMCAddress, DMCSize);
+ #endif
+
+}
+
+void LogDPCM(int romaddress, int dpcmsize){
+	int i = GetPRGAddress(romaddress);
+
+	if(i == -1)return;
+
+	for (int dpcmstart = i; dpcmstart < (i + dpcmsize); dpcmstart++) {
+		if(!(cdloggerdata[dpcmstart] & 0x40)) {
+			cdloggerdata[dpcmstart] |= 0x40;
+
+			if(!(cdloggerdata[dpcmstart] & 2)){
+				datacount++;
+				cdloggerdata[dpcmstart] |= 2;
+				if(!(cdloggerdata[dpcmstart] & 1))undefinedcount--;
+			}
+		}
+	}
+
+	return;
 }
 
 /* Instantaneous?  Maybe the new freq value is being calculated all of the time... */

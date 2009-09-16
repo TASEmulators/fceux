@@ -51,6 +51,12 @@ extern int32 WaveFinal[2048+512];
 extern int32 WaveHi[];
 extern uint32 soundtsinc;
 
+#ifdef WIN32
+extern volatile int datacount, undefinedcount;
+extern int debug_loggingCD;
+extern unsigned char *cdloggerdata;
+#endif
+
 extern uint32 soundtsoffs;
 #define SOUNDTS (timestamp + soundtsoffs)
 
@@ -64,5 +70,7 @@ void FCEUSND_LoadState(int version);
 
 void FCEU_SoundCPUHook(int);
 void Write_IRQFM (uint32 A, uint8 V); //mbg merge 7/17/06 brought over from latest mmbuild
+
+void LogDPCM(int romaddress, int dpcmsize);
 
 #endif
