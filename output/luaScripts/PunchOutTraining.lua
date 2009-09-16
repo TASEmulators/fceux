@@ -5,10 +5,10 @@
 
 
 local EHP= 0x0398  -- Enemy HP address
-local TMR= 22      -- Frames in advance for your punches.
+local TMR= 21      -- Frames in advance for your punches.
 local BND= -8      -- KEEP NEGATIVE!! Frames after the golden zone.
 
-local DISPx= 220
+local DISPx= 200
 local DISPy= 180
 
 local timer= 0     -- Unused variable
@@ -46,7 +46,7 @@ while true do
 --*****************************************************************************
     EnemyHP= memory.readbyte(EHP)
     local tap
-    gui.text(140,10,EnemyHP)
+    gui.text(144,22,EnemyHP)
 
     if IsHit() then
         LastHit= TMR
