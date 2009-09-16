@@ -11,14 +11,16 @@ local BND= -8      -- KEEP NEGATIVE!! Frames after the golden zone.
 local DISPx= 200
 local DISPy= 180
 
-local timer= 0     -- Unused variable
+local timer= 0
 
 local EnemyHP
 local lastEHP
 local LastHit=-50
+local poke
+local FreakingAwesome
 
 --*****************************************************************************
-function IsHit()
+function Is_Hit()
 --*****************************************************************************
     if EnemyHP ~= lastEHP then
         return true
@@ -27,14 +29,16 @@ function IsHit()
 end
 
 
+local LastButtons= {}
+local Buttons= {}
 --*****************************************************************************
 function IsPress()
 --*****************************************************************************
--- Unused function
+    LastButtons["A"]= Buttons["A"]
+    LastButtons["B"]= Buttons["B"]
 
-    local buttons= {}
-    buttons= joypad.get()
-    if buttons["A"] or buttons["B"] then
+    Buttons= joypad.get(1)
+    if (Buttons["A"] and not LastButtons["A"]) or (Buttons["B"] and not LastButtons["B"]) then
         return true
     end
     return false
@@ -45,39 +49,68 @@ end
 while true do
 --*****************************************************************************
     EnemyHP= memory.readbyte(EHP)
-    local tap
     gui.text(144,22,EnemyHP)
 
-    if IsHit() then
-        LastHit= TMR
-        -- Hrm... Not a lot I can think of...
+    if IsPress() then
+        poke= true
     end
 
+    if Is_Hit() then
+        LastHit= TMR
+        poke= false
+    end
 
     for i= 1, TMR do
         local color= "black"
         if i == LastHit then
-            color= "green"
+            if poke then
+               color= "red"
+            else
+                color= "green"
+            end
         end
         gui.drawbox(DISPx, DISPy-3 - 4*i,DISPx+7, DISPy-1 - 4*i,color)
     end
 
-    local color= "black"
-    if LastHit == 0 then
-        color= "green"
+    if FreakingAwesome then
+        gui.text(128,50,"OK")
+        local color= "white"
+        if (timer % 3) == 0 then
+            color= "green"
+        elseif (timer % 3) == 1 then
+            color= "blue"
+        end
+        gui.drawbox(DISPx  , DISPy  , DISPx+7, DISPy+2, color)
+        gui.drawbox(DISPx-2, DISPy-2, DISPx+9, DISPy+4, color)
+    else
+        local color= "black"
+        if LastHit == 0 then
+            if poke then
+                color= "blue"
+            else
+                color= "green"
+            end
+        end
+        gui.drawbox(DISPx  , DISPy  ,DISPx+7, DISPy+2,color)
+        gui.drawbox(DISPx-2, DISPy-2,DISPx+9, DISPy+4,"white")
     end
-    gui.drawbox(DISPx  , DISPy  ,DISPx+7, DISPy+2,color)
-    gui.drawbox(DISPx-2, DISPy-2,DISPx+9, DISPy+4,"white")
 
     for i= BND, -1 do
         local color= "black"
         if i == LastHit then
-            color= "green"
+            if poke then
+                color= "red"
+            else
+                color= "green"
+            end
         end
         gui.drawbox(DISPx, DISPy+3 - 4*i,DISPx+7, DISPy+5 - 4*i,color)
     end
 
-    LastHit= LastHit-1
+    if not poke then
+        LastHit= LastHit-1
+    end
     FCEU.frameadvance()
     lastEHP= EnemyHP
+    timer= timer+1
 end
