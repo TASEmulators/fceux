@@ -19,11 +19,17 @@ local Past, Future= -10, 10  -- Keep Past negative; Range of display stuffs
 
 local immediate= false       -- true:  Changes apply to list upon happening
                              -- false: Changes only apply on frame advance
+local JoyOn = "inv"        -- true   OR  "inv"   If true, disable turn-off
+local JoyOff= nil          -- false  OR  nil     If false, disable turn-on
+
+local MsgDuration= 60        -- How long should messages stay?
 
 -- Control scheme. You may want to change these.
 local selectplayer = "S"     -- For selecting which player
 local recordingtype= "space" -- For selecting how to record
 local SetImmediate = "numpad5"--Toggle immediate option
+local TrueSwitch   = "home"  -- Toggle whether joypad can turn off input
+local FalseSwitch  = "end"   -- Toggle whether joypad can turn on input
 
 local show, hide   = "pageup", "pagedown"  -- Opacity adjuster
 local scrlup,   scrldown = "numpad8", "numpad2"  -- Move the input display
@@ -52,6 +58,8 @@ local pl= 1                  -- Player selected
 local plmin, plmax= 1, 1     -- For the all option
 local repeater= 0            -- for holding a button
 local rewinding= false       -- For unpaused rewinding
+local MsgTmr= 0              -- To time how long messages stay
+local Message= "Activated Multitrack recording script. Have fun!"
 
 
 --The stuff below is adapted from the original Rewinding script by Antony Lavelle
@@ -61,6 +69,7 @@ local saveCount = 0;--used for finding which array position to cycle through
 local saver; -- the variable used for storing the save state
 local rewindCount = 0;--this stops you looping back around the array if theres nothing at the end
 local savePreventBuffer = 1;--Used for more control over when save states will be saved, not really used in this version much.
+
 
 -- Initialize tables for each player.
 for i= 1, players do
@@ -114,6 +123,32 @@ function pressrepeater(button)
        repeater= 0
     end;
     return false
+end
+
+
+--*****************************************************************************
+function NewMsg(text)
+--*****************************************************************************
+--FatRatKnight
+-- Sets the message and resets the timer
+-- Accesses: MsgTmr, Message
+
+    MsgTmr= 0
+    Message= text
+end
+
+
+--*****************************************************************************
+function DispMsg()
+--*****************************************************************************
+--FatRatKnight
+-- Merely displays whatever text happens to be in Message
+-- Accesses: MsgTmr, Message, MsgDuration
+
+    if MsgTmr < MsgDuration then
+        MsgTmr= MsgTmr + 1
+        gui.text(0,20,Message)
+    end
 end
 
 
@@ -288,7 +323,7 @@ if (Future-Past) > 53 then
 end
 Past  = math.min(Past  ,0)
 Future= math.max(Future,0)
-dispY= math.min(math.max(dispY,11-4*Past),225-4*Future)
+dispY = math.min(math.max(dispY,11-4*Past),225-4*Future)
 
     for i= Past, Future do
 
@@ -327,9 +362,9 @@ dispY= math.min(math.max(dispY,11-4*Past),225-4*Future)
     if not immediate then
         color= "blue"
         for P= plmin, plmax do
-            local TestInput= GetNextInput(P)
+            local TI= GetNextInput(P)
             for i=1, 8 do
-                if not TestInput or TestInput[btn[i]] ~= thisInput[P][btn[i]] then
+                if not TI or (TI[btn[i]] and not thisInput[P][btn[i]]) or (not TI[btn[i]] and thisInput[P][btn[i]])then
                     color= "green"
                 end
             end
@@ -409,6 +444,27 @@ function itisyourturn()
             immediate= false
         end
     end
+
+-- Input: Allow joypad to toggle input?
+    if press(TrueSwitch) then
+        if JoyOn == true then
+            JoyOn= "inv"
+            NewMsg("Joypad may now cancel input from the list")
+        else
+            JoyOn= true
+            NewMsg("Disabled joypad input cancellation")
+        end
+    end
+    if press(FalseSwitch) then
+        if JoyOff == false then
+            JoyOff= nil
+            NewMsg("Joypad may now write input into the list")
+        else
+            JoyOff= false
+            NewMsg("Disabled joypad input activation")
+        end
+    end
+
 
 -- Option: Opacity
     if press(hide) and opaque < 4 then
@@ -581,6 +637,19 @@ function itisyourturn()
     else
        gui.text(30,10,"A")
     end;
+
+    DispMsg() -- Also display whatever message is in there.
+
+-- Change thisInput to conform to options
+    for P= 1, players do
+        for i= 1, 8 do
+            if thisInput[P][btn[i]] then
+                thisInput[P][btn[i]]= JoyOn  -- Use the right kind of true
+            else
+                thisInput[P][btn[i]]= JoyOff -- And the right kind of false
+            end
+        end
+    end
 
 -- Feed the input to the emulation.
     if movie.mode() ~= "playback" then
