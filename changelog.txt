@@ -1,4 +1,5 @@
-15-september-2009 - FatRatKnight - Finally got in that "invert" value for joypad.set. This value simply inverts the player input. Actually, any string will invert it, since we have not used strings for anything else in joypad.set.
+16-september-2009 - ugetab - win32 - Restored DPCM Logging when Code/Data Logger is active
+september-2009 - FatRatKnight - Finally got in that "invert" value for joypad.set. This value simply inverts the player input. Actually, any string will invert it, since we have not used strings for anything else in joypad.set.
 15-september-2009 - FatRatKnight - Reworked how input is taken from lua, and generally everything related to joypad.set and what it affects. Now setting stuff to false will: Prevent user control for exactly one frame, and allow more than one false button as a time. Yeah, bug fixes. Hopefully runs a little faster now.
 22-august-2009 - adelikat - Win32 - Map Hotkeys Dialog - Fixed but where "X" and Alt+F4 would not close dialog
 22-august-2009 - adelikat - Win32 - Added a Save Config File menu item
