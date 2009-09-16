@@ -1,6 +1,5 @@
 -- Just something quick for Mike Tyson's Punch Out!!
 -- Intended to help time hits in real time.
--- Just quickly worked something up. Didn't bother with bells and whistles.
 --FatRatKnight
 
 
@@ -10,14 +9,14 @@ local BND= -8      -- KEEP NEGATIVE!! Frames after the golden zone.
 
 local DISPx= 180
 local DISPy= 180
+local DISPx2= DISPx+11 -- Right side of box. Adjust that plus to your need
 
 local timer= 0
 
 local EnemyHP
 local lastEHP
 local LastHit=-50
-local poke
-local FreakingAwesome
+local HitTiming= BND-1
 
 --*****************************************************************************
 function Is_Hit()
@@ -52,64 +51,59 @@ while true do
     gui.text(144,22,EnemyHP)
 
     if IsPress() then
-        poke= true
+        HitTiming= LastHit
+        LastHit= BND-1
+        timer= -18
     end
 
     if Is_Hit() then
         LastHit= TMR
-        poke= false
     end
+
 
     for i= 1, TMR do
         local color= "black"
         if i == LastHit then
-            if poke then
-               color= "red"
-            else
-                color= "green"
-            end
+            color= "green"
+        elseif i == HitTiming and timer < 0 then
+            color= "red"
+            gui.text(100,80,"early " .. i)
         end
-        gui.drawbox(DISPx, DISPy-3 - 4*i,DISPx+7, DISPy-1 - 4*i,color)
+        gui.drawbox(DISPx, DISPy-3 - 4*i,DISPx2, DISPy-1 - 4*i,color)
     end
 
-    if FreakingAwesome then
-        gui.text(128,50,"OK")
+    if HitTiming == 0 and timer < 0 then
+        gui.text(128,80,"OK")
+        gui.drawbox(128,80,144,90,"green")
         local color= "white"
-        if (timer % 3) == 0 then
+        if     (timer % 3) == 0 then
             color= "green"
         elseif (timer % 3) == 1 then
             color= "blue"
         end
-        gui.drawbox(DISPx  , DISPy  , DISPx+7, DISPy+2, color)
-        gui.drawbox(DISPx-2, DISPy-2, DISPx+9, DISPy+4, color)
+        gui.drawbox(DISPx  , DISPy  , DISPx2, DISPy+2, color)
+        gui.drawbox(DISPx-2, DISPy-2, DISPx2+2, DISPy+4, color)
     else
         local color= "black"
-        if LastHit == 0 then
-            if poke then
-                color= "blue"
-            else
-                color= "green"
-            end
+        if i == LastHit then
+            color= "green"
         end
-        gui.drawbox(DISPx  , DISPy  ,DISPx+7, DISPy+2,color)
-        gui.drawbox(DISPx-2, DISPy-2,DISPx+9, DISPy+4,"white")
+        gui.drawbox(DISPx  , DISPy  ,DISPx2, DISPy+2,color)
+        gui.drawbox(DISPx-2, DISPy-2,DISPx2+2, DISPy+4,"white")
     end
 
     for i= BND, -1 do
         local color= "black"
         if i == LastHit then
-            if poke then
-                color= "red"
-            else
-                color= "green"
-            end
+            color= "green"
+        elseif i == HitTiming and timer < 0 then
+            color= "red"
+            gui.text(146,80,"late " .. -i)
         end
-        gui.drawbox(DISPx, DISPy+3 - 4*i,DISPx+7, DISPy+5 - 4*i,color)
+        gui.drawbox(DISPx, DISPy+3 - 4*i,DISPx2, DISPy+5 - 4*i,color)
     end
 
-    if not poke then
-        LastHit= LastHit-1
-    end
+    LastHit= LastHit-1
     FCEU.frameadvance()
     lastEHP= EnemyHP
     timer= timer+1
