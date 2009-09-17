@@ -11,10 +11,14 @@ local threshold= 15-- How many frames before the target timing does it allow?
 local DISPx= 180
 local DISPy= 180
 local DISPx2= DISPx+11 -- Right side of box. Adjust that plus to your need
+local DisplayBar= true
 
 local timer= 0
 local held= 0
 local accuracy= 0
+local earlies= 0
+local lates= 0
+
 local perfect= 0
 
 local EnemyHP
@@ -28,7 +32,7 @@ function Is_Hit()
     if lastEHP then
         if EnemyHP < lastEHP then
             return true
-        end    
+        end
     end
     return false
 end
@@ -41,6 +45,7 @@ function IsPress()
 --*****************************************************************************
     LastButtons["A"]= Buttons["A"]
     LastButtons["B"]= Buttons["B"]
+    LastButtons["select"]= Buttons["select"]
 
     Buttons= joypad.get(1)
     if (Buttons["A"] and not LastButtons["A"]) or (Buttons["B"] and not LastButtons["B"]) then
@@ -63,8 +68,10 @@ while true do
             timer= -18
             if HitTiming > 0 then
                 accuracy= accuracy + HitTiming
+                earlies= earlies + 1
             elseif HitTiming < 0 then
                 accuracy= accuracy - HitTiming
+                lates= lates + 1
             else
                 perfect= perfect + 1
             end
@@ -86,6 +93,7 @@ while true do
     end
 
 
+ if DisplayBar then
     for i= 1, TMR do
         local color= "black"
         if i == LastHit then
@@ -127,9 +135,19 @@ while true do
         end
         gui.drawbox(DISPx, DISPy+3 - 4*i,DISPx2, DISPy+5 - 4*i,color)
     end
+ end
 
+    if Buttons["select"] and not LastButtons["select"] then
+        if DisplayBar then
+            DisplayBar= false
+        else
+            DisplayBar= true
+        end
+    end
     gui.text(5,120,"Timing error: " .. accuracy)
     gui.text(5,140,"Perfect hits: " .. perfect)
+    gui.text(5,160,"Early: " .. earlies)
+    gui.text(5,170,"Late: " .. lates)
     LastHit= LastHit-1
     FCEU.frameadvance()
     lastEHP= EnemyHP
