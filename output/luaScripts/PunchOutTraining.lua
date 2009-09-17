@@ -13,6 +13,9 @@ local DISPy= 180
 local DISPx2= DISPx+11 -- Right side of box. Adjust that plus to your need
 
 local timer= 0
+local held= 0
+local accuracy= 0
+local perfect= 0
 
 local EnemyHP
 local lastEHP
@@ -53,10 +56,29 @@ while true do
     EnemyHP= memory.readbyte(EHP)
     gui.text(144,22,EnemyHP)
 
-    if IsPress() and LastHit <= threshold then
-        HitTiming= LastHit
-        LastHit= BND-1
-        timer= -18
+    if IsPress() then
+        if LastHit <= threshold and LastHit >= BND then
+            HitTiming= LastHit
+            LastHit= BND-1
+            timer= -18
+            if HitTiming > 0 then
+                accuracy= accuracy + HitTiming
+            elseif HitTiming < 0 then
+                accuracy= accuracy - HitTiming
+            else
+                perfect= perfect + 1
+            end
+        end
+    end
+
+    if Buttons["A"] or Buttons["B"] then
+        held= held + 1
+    else
+        if held == 1 then
+            timer= 0
+            LastHit= HitTiming-1
+        end
+        held= 0
     end
 
     if Is_Hit() then
@@ -106,6 +128,8 @@ while true do
         gui.drawbox(DISPx, DISPy+3 - 4*i,DISPx2, DISPy+5 - 4*i,color)
     end
 
+    gui.text(5,120,"Timing error: " .. accuracy)
+    gui.text(5,140,"Perfect hits: " .. perfect)
     LastHit= LastHit-1
     FCEU.frameadvance()
     lastEHP= EnemyHP
