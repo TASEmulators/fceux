@@ -893,6 +893,7 @@ void DebuggerExit()
 {
 	FCEUI_Debugger().badopbreak = 0;
 	debugger_open = 0;
+	inDebugger = false;
 	DestroyWindow(hDebug);
 }
 
@@ -1015,6 +1016,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				}
 
 				numWPs = myNumWPs;
+		
+				if (numWPs < 64) {
+				watchpoint[numWPs + 1].address = 0;
+				watchpoint[numWPs + 1].endaddress = 0;
+				watchpoint[numWPs + 1].flags = 0;
+				}
+
 			}
 			else
 			{
@@ -1027,6 +1035,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			FCEUI_Debugger().badopbreak = false;
 			debugger_open = 1;
+			inDebugger = true;
 			FillBreakList(hwndDlg);
 			break;
 		}

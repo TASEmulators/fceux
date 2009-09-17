@@ -28,6 +28,7 @@ extern void AddBreakList();
 
 void UpdateDebugger();
 void DoDebug(uint8 halt);
+void DebuggerExit();
 
 extern bool inDebugger;
 

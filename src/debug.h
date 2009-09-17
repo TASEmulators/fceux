@@ -95,7 +95,7 @@ extern uint8 PPU[4],PALRAM[0x20],SPRAM[0x100],VRAMBuffer,PPUGenLatch,XOffset;
 extern uint32 RefreshAddr;
 
 extern int debug_loggingCD;
-extern int numWPs; 
+extern int numWPs;
 
 ///encapsulates the operational state of the debugger core
 class DebuggerState {

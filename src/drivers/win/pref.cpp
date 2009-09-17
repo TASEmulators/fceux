@@ -29,6 +29,7 @@
 #include "../../debug.h"
 
 extern char symbDebugEnabled;
+bool wasinDebugger = false;
 
 /**
 * Stores debugger preferences in a file
@@ -42,7 +43,7 @@ int storeDebuggerPreferences(FILE* f)
 
 	// Flag that says whether symbolic debugging should be enabled
 	if (fwrite(&symbDebugEnabled, 1, 1, f) != 1) return 1;
-	
+
 	// Write the number of active CPU bookmarks
 	if (fwrite(&bookmarks, sizeof(unsigned int), 1, f) != 1) return 1;
 	// Write the addresses of those bookmarks
@@ -125,6 +126,24 @@ int storePreferences(char* romname)
 {
 	FILE* f;
 	char* filename;
+	int result;
+	int Counter;
+
+	// Prevent any attempts at file usage if the debugger is open
+	//if (inDebugger) return 0;
+	
+	wasinDebugger = inDebugger;
+	
+	// Prevent any attempts at file usage if the debugger is open
+	if (wasinDebugger) {
+		DebuggerExit();
+	}
+
+	while ((inDebugger) || (Counter == 300000)) {
+	Counter++;
+	}
+
+	//while (inDebugger);
 
 	if (!debuggerWasActive)
 	{
@@ -138,7 +157,13 @@ int storePreferences(char* romname)
 
 	free(filename);
 	
-	return !f || storeDebuggerPreferences(f) || storeHexPreferences(f);
+	result = !f || storeDebuggerPreferences(f) || storeHexPreferences(f);
+
+	if (f) {
+		fclose(f);
+	}
+
+	return result;
 }
 
 int myNumWPs = 0;
@@ -153,6 +178,7 @@ int loadDebugDataFailed = 0;
 int loadDebuggerPreferences(FILE* f)
 {
 	unsigned int i;
+
 	// Read flag that says if symbolic debugging is enabled
 	if (fread(&symbDebugEnabled, sizeof(symbDebugEnabled), 1, f) != 1) return 1;
 	
@@ -268,6 +294,10 @@ int loadHexPreferences(FILE* f)
 int loadPreferences(char* romname)
 {
 	FILE* f;
+	int result;
+
+	myNumWPs = 0;
+
 	// Get the name of the preferences file
 	char* filename = (char*)malloc(strlen(romname) + 5);
 	sprintf(filename, "%s.deb", romname);
@@ -275,6 +305,16 @@ int loadPreferences(char* romname)
 	f = fopen(filename, "rb");
 	free(filename);
 	
+	result = f ? loadDebuggerPreferences(f) || loadHexPreferences(f) : 0;
+
+	if (f) {
+		fclose(f);
+	}
+
+	if (wasinDebugger){
+		DoDebug(0);
+	}
+
 	// Attempt to load the preferences
-	return f ? loadDebuggerPreferences(f) || loadHexPreferences(f) : 0;
+	return result;
 }

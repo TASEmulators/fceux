@@ -21,6 +21,7 @@
 #include <windows.h>
 
 extern int myNumWPs;
+extern bool inDebugger;
 
 int storePreferences(char* romname);
 int loadPreferences(char* romname);
