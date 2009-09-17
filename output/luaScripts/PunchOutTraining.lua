@@ -6,6 +6,7 @@
 local EHP= 0x0398  -- Enemy HP address
 local TMR= 23      -- Frames in advance for your punches.
 local BND= -8      -- KEEP NEGATIVE!! Frames after the golden zone.
+local threshold= 15-- How many frames before the target timing does it allow?
 
 local DISPx= 180
 local DISPy= 180
@@ -52,7 +53,7 @@ while true do
     EnemyHP= memory.readbyte(EHP)
     gui.text(144,22,EnemyHP)
 
-    if IsPress() then
+    if IsPress() and LastHit <= threshold then
         HitTiming= LastHit
         LastHit= BND-1
         timer= -18
