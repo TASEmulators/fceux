@@ -21,8 +21,10 @@ local HitTiming= BND-1
 --*****************************************************************************
 function Is_Hit()
 --*****************************************************************************
-    if EnemyHP ~= lastEHP then
-        return true
+    if lastEHP then
+        if EnemyHP < lastEHP then
+            return true
+        end    
     end
     return false
 end
