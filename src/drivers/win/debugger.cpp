@@ -1016,12 +1016,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				}
 
 				numWPs = myNumWPs;
-		
-				if (numWPs < 64) {
-				watchpoint[numWPs + 1].address = 0;
-				watchpoint[numWPs + 1].endaddress = 0;
-				watchpoint[numWPs + 1].flags = 0;
-				}
 
 			}
 			else

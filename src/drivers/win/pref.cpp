@@ -127,7 +127,7 @@ int storePreferences(char* romname)
 	FILE* f;
 	char* filename;
 	int result;
-	int Counter;
+	int Counter = 0;
 
 	// Prevent any attempts at file usage if the debugger is open
 	//if (inDebugger) return 0;
@@ -143,13 +143,29 @@ int storePreferences(char* romname)
 	Counter++;
 	}
 
-	//while (inDebugger);
-
 	if (!debuggerWasActive)
 	{
 		return 0;
 	}
-	
+
+	/*
+	// With some work, this could be made to prevent writing empty .deb files.
+	// Currently, it doesn't account for fully-deleted lists when deciding to write.
+	int i;
+	int makeDebugFile = 0;
+
+	for (i=0;i<65;i++)
+	{
+		if (watchpoint[i].address || watchpoint[i].endaddress || watchpoint[i].flags || hexBookmarks[i].address || hexBookmarks[i].description[0])
+		makeDebugFile = 1;	
+	}
+
+	if (!makeDebugFile) 
+	{
+		return 0;
+	}
+	*/
+
 	filename = (char*)malloc(strlen(romname) + 5);
 	sprintf(filename, "%s.deb", romname);
 
@@ -212,15 +228,15 @@ int loadDebuggerPreferences(FILE* f)
 		// Read the length of the BP description
 		if (fread(&len, sizeof(len), 1, f) != 1) return 1;
 		
+		// Delete eventual older conditions
+		if (watchpoint[myNumWPs].condText)
+			free(watchpoint[myNumWPs].condText);
+				
+		watchpoint[myNumWPs].condText = (char*)malloc(len + 1);
+		watchpoint[myNumWPs].condText[len] = 0;
 		if (len)
 		{
-			// Delete eventual older conditions
-			if (watchpoint[myNumWPs].condText)
-				free(watchpoint[myNumWPs].condText);
-				
 			// Read the breakpoint condition
-			watchpoint[myNumWPs].condText = (char*)malloc(len + 1);
-			watchpoint[myNumWPs].condText[len] = 0;
 			if (fread(watchpoint[myNumWPs].condText, 1, len, f) != len) return 1;
 			
 			// TODO: Check return value
@@ -230,19 +246,23 @@ int loadDebuggerPreferences(FILE* f)
 		// Read length of the BP description
 		if (fread(&len, sizeof(len), 1, f) != 1) return 1;
 		
+		// Delete eventual older description
+		if (watchpoint[myNumWPs].desc)
+			free(watchpoint[myNumWPs].desc);
+				
+		watchpoint[myNumWPs].desc = (char*)malloc(len + 1);
+		watchpoint[myNumWPs].desc[len] = 0;
 		if (len)
 		{
-			// Delete eventual older description
-			if (watchpoint[myNumWPs].desc)
-				free(watchpoint[myNumWPs].desc);
-				
 			// Read breakpoint description
-			watchpoint[myNumWPs].desc = (char*)malloc(len + 1);
-			watchpoint[myNumWPs].desc[len] = 0;
 			if (fread(watchpoint[myNumWPs].desc, 1, len, f) != len) return 1;
 		}
 		
-		// Activate breapoint
+		watchpoint[i].address = 0;
+		watchpoint[i].endaddress = 0;
+		watchpoint[i].flags = 0;
+
+		// Activate breakpoint
 		if (start || end || flags)
 		{
 			watchpoint[myNumWPs].address = start;
@@ -253,9 +273,10 @@ int loadDebuggerPreferences(FILE* f)
 		}
 		
 	}
-	
+
 	return 0;
 }
+
 
 /**
 * Loads HexView preferences from a file
@@ -295,6 +316,7 @@ int loadPreferences(char* romname)
 {
 	FILE* f;
 	int result;
+	int i;
 
 	myNumWPs = 0;
 
@@ -309,6 +331,16 @@ int loadPreferences(char* romname)
 
 	if (f) {
 		fclose(f);
+	}
+
+	// This prevents information from traveling between debugger interations.
+	// It needs to be run pretty much regardless of whether there's a .deb file or not,
+	// successful read or failure. Otherwise, it's basically leaving previous info around.
+	for (i=myNumWPs;i<=64;i++)
+	{
+		watchpoint[i].address = 0;
+		watchpoint[i].endaddress = 0;
+		watchpoint[i].flags = 0;
 	}
 
 	if (wasinDebugger){

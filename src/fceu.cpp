@@ -100,17 +100,12 @@ static void CloseGame(void)
 
 #ifdef WIN32
 // ################################## Start of SP CODE ###########################
-	//This subroutine works if used here, but it randomly overwrites the
-	//list of opened games when those games are later closed, I believe.
-	//
-	//The problem may be a load issue, but the save is what commits the error.
-	//
-	//extern char LoadedRomFName[2048];
+	extern char LoadedRomFName[2048];
 
-	//if (storePreferences(LoadedRomFName))
-	//{
-	//	FCEUD_PrintError("Couldn't store debugging data");
-	//}
+	if (storePreferences(LoadedRomFName))
+	{
+		FCEUD_PrintError("Couldn't store debugging data");
+	}
 // ################################## End of SP CODE ###########################
 #endif
 
