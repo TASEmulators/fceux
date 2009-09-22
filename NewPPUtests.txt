@@ -2,7 +2,6 @@ NewPPU tests
 
 Bad
 Dragon's Lair - Black screen for level 1 (music plays)
-Earthworm Jim 3 - Black screen only (works in old ppu)
 Tecmo Super Bowl (U) [!] - Intro screen messed up, menus out of whack, Team selection screen bad, pre game screen, field is messed up.
 Nightshade (U) - flickering
 
