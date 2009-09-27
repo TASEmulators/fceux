@@ -518,6 +518,17 @@ typedef struct {
 	void (*init)(CartInfo *);
 } NewMI;
 
+//this is for games that is not the a power of 2
+//mapper based for now... 
+//not really accurate but this works since games
+//that are not in the power of 2 tends to come 
+//in obscure mappers themselves which supports such
+//size
+static int not_power2[] =
+{
+    228 
+};
+
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 {
 	struct md5_context md5;
@@ -532,6 +543,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 
 	memset(&iNESCart,0,sizeof(iNESCart));
 
+	MapperNo = (head.ROM_type>>4);
+	MapperNo|=(head.ROM_type2&0xF0);
+	Mirroring = (head.ROM_type&1);
 
 
 	//  int ROM_size=0;
@@ -543,19 +557,29 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 		//head.ROM_size++;
 	}
 	else
-		ROM_size=head.ROM_size;
+		ROM_size=uppow2(head.ROM_size);
 
 	//    ROM_size = head.ROM_size;
 	VROM_size = head.VROM_size;
+    
+    int round = true;
+    for (int i = 0; i != sizeof(not_power2)/sizeof(not_power2[0]); ++i)
+    {
+        //for games not to the power of 2, so we just read enough 
+        //prg rom from it, but we have to keep ROM_size to the power of 2
+        //since PRGCartMapping wants ROM_size to be to the power of 2
+        //so instead if not to power of 2, we just use head.ROM_size when
+        //we use FCEU_read
+        if (not_power2[i] == MapperNo)
+        {
+            round = false;
+            break;
+        }
+    }
 
-	ROM_size=uppow2(ROM_size);
-
-	if(VROM_size)
+    if(VROM_size)
 		VROM_size=uppow2(VROM_size);
 
-	MapperNo = (head.ROM_type>>4);
-	MapperNo|=(head.ROM_type2&0xF0);
-	Mirroring = (head.ROM_type&1);
 
 	if(head.ROM_type&8) Mirroring=2;
 
@@ -621,9 +645,9 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	ResetExState(0,0);
 
 	SetupCartPRGMapping(0,ROM,ROM_size*0x4000,0);
-//    SetupCartPRGMapping(1,WRAM,8192,1);
+   // SetupCartPRGMapping(1,WRAM,8192,1);
 
-    FCEU_fread(ROM,0x4000,ROM_size,fp);
+    FCEU_fread(ROM,0x4000,(round) ? ROM_size : head.ROM_size,fp);
 
 	if(VROM_size)
 		FCEU_fread(VROM,0x2000,head.VROM_size,fp);
@@ -644,7 +668,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	iNESCart.CRC32=iNESGameCRC32;
 
 	FCEU_printf(" PRG ROM:  %3d x 16KiB\n CHR ROM:  %3d x  8KiB\n ROM CRC32:  0x%08lx\n",
-    ROM_size,head.VROM_size,iNESGameCRC32);
+                (round) ? ROM_size : head.ROM_size, head.VROM_size,iNESGameCRC32);
 
 	{
 		int x;
