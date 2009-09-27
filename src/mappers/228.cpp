@@ -20,34 +20,49 @@
 
 #include "mapinc.h"
 
+//16 bits of ram in total
+//only use bottom 4 bits as ram
+static int mapper228_ram[4];
+
+static DECLFR(Mapper228_read)
+{
+    return mapper228_ram[A & 3] & 0xF;
+}
 static DECLFW(Mapper228_write)
 {
- uint32 page,pagel,pageh;
+    uint32 page, pagel, pageh;
 
- MIRROR_SET((A>>13)&1);
+    //write to ram
+    if (A < 0x6000)
+    {
+        mapper228_ram[A & 3] = V;
+        return;
+    }
+    MIRROR_SET((A >> 13) & 1);
+    page = (A >> 7) & 0x3F;
 
- page=(A>>7)&0x3F;
- //printf("%04x\n",A);
- if((page&0x30)==0x30)
-  page-=0x10;
- 
- pagel=pageh=(page<<1) + (((A>>6)&1)&((A>>5)&1));
- pageh+=((A>>5)&1)^1;
+    if( (page & 0x30) == 0x30)
+        page -= 0x10;
 
- ROM_BANK16(0x8000,pagel);
- ROM_BANK16(0xC000,pageh);
- VROM_BANK8( (V&0x3) | ((A&0xF)<<2) );
+    pagel = pageh = (page << 1) + (((A >> 6) & 1) & ((A >> 5) & 1));
+    pageh += ((A >> 5) & 1) ^ 1;
+  
+    ROM_BANK16(0x8000,pagel);
+    ROM_BANK16(0xC000,pageh);
+    VROM_BANK8( (V&0x3) | ((A&0xF)<<2) );
 }
 
 static void A52Reset(void)
 {
- Mapper228_write(0,0);
+    Mapper228_write(0x8000, 0);
 }
 
 void Mapper228_init(void)
 {
-  MapperReset=A52Reset;
-  A52Reset();
-  SetWriteHandler(0x8000,0xffff,Mapper228_write);
+    MapperReset=A52Reset;
+    A52Reset();
+    SetWriteHandler(0x8000, 0xFFFF, Mapper228_write);
+    SetWriteHandler(0x4020, 0x5FFF, Mapper228_write);
+    SetReadHandler (0x4020, 0x5FFF, Mapper228_read);
 }
 
