@@ -363,7 +363,8 @@ void FCEUD_UpdateInput()
 			UpdateGamepad();
 
 		if(mouse)
-			GetMouseData(MouseData);
+			if(FCEUMOV_Mode() != MOVIEMODE_PLAY)	//FatRatKnight: Moved this if out of the function
+				GetMouseData(MouseData);			//A more concise fix may be desired.
 	}
 }
 
