@@ -139,7 +139,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		if(ismovie)
 		{
 			char tmp[256];
-			uint32 div;
+			double div;
 
 			sprintf(tmp, "%u", (unsigned)info.num_frames);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES), tmp);                   // frames
@@ -148,13 +148,13 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 			EnableWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),TRUE);
 
-			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50 : 60;				// PAL timing
-			float tempCount = (info.num_frames % 60); //Get fraction of a second
-			float getTime = ((tempCount / div) * 100); //Convert to 2 digit number
-			int fraction = getTime; //Convert to 2 digit int
-			int seconds = (info.num_frames / div) % 60;
-			int minutes = (info.num_frames/(div*60))%60;
-			int hours = info.num_frames/(div*60*60);
+			div = (FCEUI_GetCurrentVidSystem(0,0)) ? 50.006977968268290849 : 60.098813897440515532;				// PAL timing
+			double tempCount = (info.num_frames / div) + 0.005; // +0.005s for rounding
+			int num_seconds = (int)tempCount;
+			int fraction = (int)((tempCount - num_seconds) * 100);
+			int seconds = num_seconds % 60;
+			int minutes = (num_seconds / 60) % 60;
+			int hours = (num_seconds / 60 / 60) % 60;
 			sprintf(tmp, "%02d:%02d:%02d.%02d", hours, minutes, seconds, fraction);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH), tmp);                   // length
 

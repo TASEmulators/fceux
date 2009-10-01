@@ -323,7 +323,7 @@ MovieData::MovieData()
 	: version(MOVIE_VERSION)
 	, emuVersion(FCEU_VERSION_NUMERIC)
 	, palFlag(false)
-	, rerecordCount(1)
+	, rerecordCount(0)
 	, binaryFlag(false)
 	, greenZoneCount(0)
 {
