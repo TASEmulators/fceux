@@ -21,13 +21,20 @@
 #include "mapinc.h"
 
 //16 bits of ram in total
-//only use bottom 4 bits as ram
-static int mapper228_ram[4];
+//only use bottom 4 bits as ram though
+static uint8 mapper228_ram[4];
+
+static SFORMAT StateRegs[]=
+{
+  { mapper228_ram, 4, "MAPPER_RAM" },
+  { 0 }
+};
 
 static DECLFR(Mapper228_read)
 {
     return mapper228_ram[A & 3] & 0xF;
 }
+
 static DECLFW(Mapper228_write)
 {
     uint32 page, pagel, pageh;
@@ -64,5 +71,6 @@ void Mapper228_init(void)
     SetWriteHandler(0x8000, 0xFFFF, Mapper228_write);
     SetWriteHandler(0x4020, 0x5FFF, Mapper228_write);
     SetReadHandler (0x4020, 0x5FFF, Mapper228_read);
+    AddExState(StateRegs, ~0, 0, 0);
 }
 
