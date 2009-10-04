@@ -1429,6 +1429,7 @@ static BMAPPING bmap[] = {
 	{245, Mapper245_Init},
 	{249, Mapper249_Init},
 	{250, Mapper250_Init},
+    {253, Mapper253_Init},
 	{254, Mapper254_Init},
 	{  0,        0}
 };

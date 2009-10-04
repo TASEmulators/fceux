@@ -107,6 +107,7 @@ struct iNES_HEADER {
 		}
 	}
 };
+extern struct iNES_HEADER head; //for mappers usage
 
 void VRAM_BANK1(uint32 A, uint8 V);
 void VRAM_BANK4(uint32 A,uint32 V);
@@ -341,7 +342,7 @@ void Mapper247_init(void);
 void Mapper249_init(void);
 void Mapper251_init(void);
 void Mapper252_init(void);
-void Mapper253_init(void);
+//void Mapper253_init(void);
 void Mapper255_init(void);
 
 void NSFVRC6_Init(void);
@@ -452,6 +453,7 @@ void Mapper240_Init(CartInfo *);
 void Mapper245_Init(CartInfo *);
 void Mapper249_Init(CartInfo *);
 void Mapper250_Init(CartInfo *);
+void Mapper253_Init(CartInfo *);
 void Mapper254_Init(CartInfo *);
 
 #endif
