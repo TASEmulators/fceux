@@ -54,7 +54,17 @@ static void Sync(void)
     setprg2r(0x10,0xd000,7);
     setprg2(0xd800,(0xe<<2)+3);
   }
-  setmirror(reg1);
+  setmirror(reg1^1);
+}
+
+static DECLFW(M103RamWrite0)
+{
+  WRAM[A&0x1FFF]=V;
+}
+
+static DECLFW(M103RamWrite1)
+{
+  WRAM[0x2000+((A-0xB800)&0x1FFF)]=V;
 }
 
 static DECLFW(M103Write0)
@@ -80,9 +90,9 @@ static void M103Power(void)
   reg0=reg1=0; reg2=0;
   Sync();
   SetReadHandler(0x6000,0x7FFF,CartBR);
-  SetWriteHandler(0x6000,0x7FFF,CartBW);
+  SetWriteHandler(0x6000,0x7FFF,M103RamWrite0);
   SetReadHandler(0x8000,0xFFFF,CartBR);
-  SetWriteHandler(0xB800,0xD7FF,CartBW);
+  SetWriteHandler(0xB800,0xD7FF,M103RamWrite1);
   SetWriteHandler(0x8000,0x8FFF,M103Write0);
   SetWriteHandler(0xE000,0xEFFF,M103Write1);
   SetWriteHandler(0xF000,0xFFFF,M103Write2);
