@@ -1,10 +1,10 @@
 //Thanks to VirtualNES developer for reverse engineering this mapper 
-
+//first screen add 32 to chr
+//second screen at 0x42000
 #include "mapinc.h"
 
-static uint8 reg[9];
-static uint8 irq_enable, irq_counter, irq_latch, irq_clock; 
-static uint8 VRAM_switch;
+static uint8 reg[9], VRAM_switch;
+static int32 irq_enable, irq_counter, irq_latch, irq_clock; 
 
 static void Mapper253_IRQHook(int cycles)
 {
@@ -40,13 +40,17 @@ static void	SetBank_PPUSUB(int bank, int page)
     }
     if ((page == 4) || (page == 5)) 
     {
+        printf("Page in 4 5: %d\n", page);
         if(VRAM_switch == 0)
-            setchr1( bank, page ); //CHR-ROM
+            setchr1( bank << 10, page ); //CHR-ROM
         else 
-            setchr1( bank, page ); //CHR-RAM
+            setchr1( bank << 10, page ); //CHR-RAM
     } 
     else 
-        setchr1( bank, page );
+	{
+		printf("Page: %d\n", page);
+        setchr1(bank << 10, page);
+	}
 }
 
 static DECLFW(Mapper253_Write)
@@ -166,7 +170,8 @@ static DECLFW(Mapper253_Write)
             X6502_IRQEnd(FCEU_IQEXT);
             break;
         default:
-            printf("Not handled 0x%X 0x%X", A, V);
+			break;
+            //printf("Not handled 0x%X 0x%X", A, V);
     }
 }
 
@@ -185,8 +190,8 @@ static void Mapper253_Power(void)
    
     setprg16(0x8000, 0); //first bank
     setprg16(0xC000, head.ROM_size - 1); //last bank
-    setchr8(0); //first bank
-        
+    setchr8(0);
+
     SetWriteHandler(0x8000, 0xFFFF, Mapper253_Write);
     SetReadHandler(0x8000, 0xFFFF, CartBR);
 }
