@@ -1137,8 +1137,6 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			}
 			break;
 
-#if 0
-		// this message is never received
 		case WM_KEYDOWN: // handle accelerator keys
 		{
 			SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
@@ -1150,7 +1148,6 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			if(RamWatchAccels && TranslateAccelerator(hDlg, RamWatchAccels, &msg))
 				return true;
 		}	break;
-#endif
 
 //		case WM_CLOSE:
 //			RamWatchHWnd = NULL;

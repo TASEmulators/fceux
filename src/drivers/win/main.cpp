@@ -53,6 +53,8 @@
 #include "cheat.h"
 #include "debug.h"
 #include "ntview.h"
+#include "ram_search.h"
+#include "ramwatch.h"
 #include "memview.h"
 #include "tracer.h"
 #include "cdlogger.h"
@@ -308,6 +310,20 @@ int BlockingCheck()
 				if(!handled)
 					handled = IsDialogMessage(hwndMemWatch,&msg);
 			}
+			if(RamSearchHWnd)
+			{
+				handled |= IsDialogMessage(RamSearchHWnd, &msg);
+			}
+			if(RamWatchHWnd)
+			{
+				if(IsDialogMessage(RamWatchHWnd, &msg))
+				{
+					if(msg.message == WM_KEYDOWN) // send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
+						SendMessage(RamWatchHWnd, msg.message, msg.wParam, msg.lParam);
+					handled = true;
+				}
+			}
+
 			if(!handled && hwndTasEdit)
 			{
 				if(IsChild(hwndTasEdit,msg.hwnd))
