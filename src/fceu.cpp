@@ -629,11 +629,20 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	FCEU_UpdateInput();
 	lagFlag = 1;
+
+#ifdef _S9XLUA_H
+	CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
+#endif
+
 	if(geniestage!=1) FCEU_ApplyPeriodicCheats();
 	r = FCEUPPU_Loop(skip);
 
 	if (skip != 2) ssize=FlushEmulateSound(); //If skip = 2 we are skipping sound processing
-	
+
+#ifdef _S9XLUA_H
+	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+#endif
+
 #ifdef WIN32
 	//These Windows only dialogs need to be updated only once per frame so they are included here
 	UpdateCheatList();

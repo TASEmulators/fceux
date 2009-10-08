@@ -1,5 +1,14 @@
 #ifdef _S9XLUA_H
 
+enum LuaCallID
+{
+	LUACALL_BEFOREEMULATION,
+	LUACALL_AFTEREMULATION,
+	LUACALL_BEFOREEXIT,
+
+	LUACALL_COUNT
+};
+extern void CallRegisteredLuaFunctions(LuaCallID calltype);
 
 // Just forward function declarations 
 

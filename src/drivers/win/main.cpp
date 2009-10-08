@@ -40,6 +40,7 @@
 #include "../../state.h"
 #include "../../debug.h"
 #include "../../movie.h"
+#include "../../fceulua.h"
 
 #include "archive.h"
 #include "input.h"
@@ -400,16 +401,15 @@ void DoFCEUExit()
 			}
 		}
 
-		
-
 		KillDebugger(); //mbg merge 7/19/06 added
 
 		FCEUI_StopMovie();
 		FCEUD_AviStop();
+		FCEU_LuaStop(); // kill lua script before the gui dies
 
 		exiting = 1;
 		closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
-		}
+	}
 }
 
 void FCEUD_OnCloseGame()

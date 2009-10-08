@@ -142,6 +142,16 @@ static const char *button_mappings[] = {
 	"A", "B", "select", "start", "up", "down", "left", "right"
 };
 
+static const char* luaCallIDStrings [] =
+{
+	"CALL_BEFOREEMULATION",
+	"CALL_AFTEREMULATION",
+	"CALL_BEFOREEXIT",
+};
+#ifdef WIN32 // uh... yeah
+static const int _makeSureWeHaveTheRightNumberOfStrings [sizeof(luaCallIDStrings)/sizeof(*luaCallIDStrings) == LUACALL_COUNT ? 1 : 0];
+#endif
+
 /**
  * Resets emulator speed / pause states after script exit.
  */
@@ -394,6 +404,41 @@ static int fceu_message(lua_State *L) {
 	return 0;
 
 }
+
+
+static int fceu_registerbefore(lua_State *L) {
+	if (!lua_isnil(L,1))
+		luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_settop(L,1);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEMULATION]);
+	lua_insert(L,1);
+	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEMULATION]);
+	//StopScriptIfFinished(luaStateToUIDMap[L]);
+	return 1;
+}
+
+static int fceu_registerafter(lua_State *L) {
+	if (!lua_isnil(L,1))
+		luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_settop(L,1);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_AFTEREMULATION]);
+	lua_insert(L,1);
+	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_AFTEREMULATION]);
+	//StopScriptIfFinished(luaStateToUIDMap[L]);
+	return 1;
+}
+
+static int fceu_registerexit(lua_State *L) {
+	if (!lua_isnil(L,1))
+		luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_settop(L,1);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEXIT]);
+	lua_insert(L,1);
+	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEXIT]);
+	//StopScriptIfFinished(luaStateToUIDMap[L]);
+	return 1;
+}
+
 
 
 static int rom_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_ReadRomByte(luaL_checkinteger(L,1))); return 1; }
@@ -2031,6 +2076,9 @@ static const struct luaL_reg fceulib [] = {
 	{"lagged", fceu_lagged},
 	{"getreadonly", fceu_getreadonly},
 	{"setreadonly", fceu_setreadonly},
+	{"registerbefore", fceu_registerbefore},
+	{"registerafter", fceu_registerafter},
+	{"registerexit", fceu_registerexit},
 	{NULL,NULL}
 };
 
@@ -2118,6 +2166,68 @@ static const struct luaL_reg guilib[] = {
 
 };
 
+void HandleCallbackError(lua_State* L)
+{
+	//if(L->errfunc || L->errorJmp)
+	//	luaL_error(L, "%s", lua_tostring(L,-1));
+	//else
+	{
+		lua_pushnil(L);
+		lua_setfield(L, LUA_REGISTRYINDEX, guiCallbackTable);
+
+		// Error?
+#ifdef WIN32
+		MessageBox( hAppWnd, lua_tostring(L,-1), "Lua run error", MB_OK | MB_ICONSTOP);
+#else
+		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(LUA,-1));
+#endif
+
+		FCEU_LuaStop();
+	}
+}
+
+void CallExitFunction() {
+	if (!L)
+		return;
+
+	lua_settop(L, 0);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_BEFOREEXIT]);
+
+	int errorcode = 0;
+	if (lua_isfunction(L, -1))
+	{
+		//chdir(luaCWD);
+		errorcode = lua_pcall(L, 0, 0, 0);
+		//_getcwd(luaCWD, _MAX_PATH);
+	}
+
+	if (errorcode)
+		HandleCallbackError(L);
+}
+
+void CallRegisteredLuaFunctions(LuaCallID calltype)
+{
+	assert((unsigned int)calltype < (unsigned int)LUACALL_COUNT);
+	const char* idstring = luaCallIDStrings[calltype];
+
+	if (!L)
+		return;
+
+	lua_settop(L, 0);
+	lua_getfield(L, LUA_REGISTRYINDEX, idstring);
+
+	int errorcode = 0;
+	if (lua_isfunction(L, -1))
+	{
+		errorcode = lua_pcall(L, 0, 0, 0);
+		if (errorcode)
+			HandleCallbackError(L);
+	}
+	else
+	{
+		lua_pop(L, 1);
+	}
+}
 
 void FCEU_LuaFrameBoundary() {
 
@@ -2202,7 +2312,8 @@ int FCEU_LoadLuaCode(const char *filename) {
 		L = lua_open();
 		luaL_openlibs(L);
 
-		luaL_register(L, "FCEU", fceulib);
+		luaL_register(L, "emu", fceulib); // added for better cross-emulator compatibility
+		luaL_register(L, "FCEU", fceulib); // kept for backward compatibility
 		luaL_register(L, "memory", memorylib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
@@ -2223,13 +2334,6 @@ int FCEU_LoadLuaCode(const char *filename) {
 
 		luabitop_validate(L);
 
-		lua_newtable(L);
-		lua_setglobal(L,"emu");
-		lua_getglobal(L,"emu");
-		lua_newtable(L);
-		lua_setfield(L,-2,"OnClose");
-
-		
 		lua_newtable(L);
 		lua_setfield(L, LUA_REGISTRYINDEX, memoryWatchTable);
 		lua_newtable(L);
@@ -2308,14 +2412,7 @@ void FCEU_LuaStop() {
 	if (!L) return;
 
 	//execute the user's shutdown callbacks
-	//onCloseCallback
-	lua_getglobal(L, "emu");
-	lua_getfield(L, -1, "OnClose");
-	lua_pushnil(L);
-	while (lua_next(L, -2) != 0)
-	{
-		lua_call(L,0,0);
-	}
+	CallExitFunction();
 
 	//sometimes iup uninitializes com
 	//MBG TODO - test whether this is really necessary. i dont think it is
