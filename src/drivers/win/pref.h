@@ -25,4 +25,4 @@ extern bool inDebugger;
 
 int storePreferences(char* romname);
 int loadPreferences(char* romname);
-
+void DoDebuggerRunCheck();

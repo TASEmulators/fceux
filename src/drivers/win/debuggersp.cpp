@@ -21,6 +21,7 @@
 #include "common.h"
 #include "debuggersp.h"
 #include "debugger.h"
+#include "../../fceu.h"
 #include "../../debug.h"
 #include "../../conddebug.h"
 
@@ -98,7 +99,16 @@ void replaceString(char* src, const char* r, const char* w)
 **/
 int getBank(int offs)
 {
-	int addr = 0; //MBG TODO GetNesFileAddress(offs);
+	//NSF data is easy to overflow the return on.
+	//Anything over FFFFF will kill it.
+
+
+	//GetNesFileAddress doesn't work well with Unif files
+	int addr = GetNesFileAddress(offs)-16;
+
+	if (GameInfo->type==GIT_NSF) {
+	return addr != -1 ? addr / 0x1000 : -1;
+	}
 	return addr != -1 ? addr / 0x4000 : -1;
 }
 

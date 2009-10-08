@@ -482,6 +482,8 @@ endlseq:
 	if(GameInfo->type!=GIT_NSF)
 		FCEU_LoadGameCheats(0);
 
+	DoDebuggerRunCheck(); //Can't safely do it in loadPreferences
+
 	return GameInfo;
 }
 

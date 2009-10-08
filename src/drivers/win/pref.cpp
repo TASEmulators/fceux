@@ -182,6 +182,13 @@ int storePreferences(char* romname)
 	return result;
 }
 
+void DoDebuggerRunCheck()
+{
+	if (wasinDebugger){
+		DoDebug(0);
+	}
+}
+
 int myNumWPs = 0;
 int loadDebugDataFailed = 0;
 
@@ -341,10 +348,6 @@ int loadPreferences(char* romname)
 		watchpoint[i].address = 0;
 		watchpoint[i].endaddress = 0;
 		watchpoint[i].flags = 0;
-	}
-
-	if (wasinDebugger){
-		DoDebug(0);
 	}
 
 	// Attempt to load the preferences

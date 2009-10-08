@@ -1,3 +1,4 @@
+08-october-2009 - ugetab - win32 - fixed a debugger crash error, Unif/FDS filename issue, and enabled debugger bank display
 01-october-2009 - gocha - win32 - movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 & 50
 26-september-2009 - qeed - fixed action 52 game that was broken in fceux >2.0.3 
 16-september-2009 - ugetab - win32 - Restored DPCM Logging when Code/Data Logger is active

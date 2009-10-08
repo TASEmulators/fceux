@@ -593,6 +593,8 @@ int UNIFLoad(const char *name, FCEUFILE *fp)
 		goto aborto;
 
 	FCEU_LoadGameSave(&UNIFCart);
+
+	strcpy(LoadedRomFName,name); //For the debugger list
 	GameInterface=UNIFGI;
 	return 1;
 
