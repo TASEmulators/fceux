@@ -66,6 +66,8 @@
 #include "drivers/win/main.h"
 #include "drivers/win/cheat.h"
 #include "drivers/win/texthook.h"
+#include "drivers/win/ram_search.h"
+#include "drivers/win/ramwatch.h"
 #include "drivers/win/memwatch.h"
 #include "drivers/win/tracer.h"
 #else
@@ -647,6 +649,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	//These Windows only dialogs need to be updated only once per frame so they are included here
 	UpdateCheatList();
 	UpdateTextHooker();
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	RamChange();
 	UpdateLogWindow();
 	//FCEUI_AviVideoUpdate(XBuf);

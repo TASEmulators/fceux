@@ -1233,6 +1233,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\ram_search.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ram_search.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ramwatch.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ramwatch.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\replay.cpp"
 					>
 				</File>

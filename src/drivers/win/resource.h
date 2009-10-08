@@ -148,6 +148,11 @@
 #define MENU_RECORD_AVI                 151
 #define MENU_STOP_AVI                   152
 #define MENU_EXIT                       153
+#define IDD_RAMSEARCH                   154
+#define IDD_RAMWATCH                    155
+#define IDD_EDITWATCH                   156
+#define IDD_PROMPT                      157
+#define IDR_RWACCELERATOR               158
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -408,6 +413,49 @@
 #define IDC_CHECK1                      1203
 #define CB_ENABLECONTEXTMENU            1203
 #define IDC_VOLUMEGROUP                 1204
+#define IDC_RAMLIST                     1205
+#define IDC_C_SEARCH                    1206
+#define IDC_C_ADDCHEAT                  1207
+#define IDC_C_WATCH                     1208
+#define IDC_C_RESET                     1209
+#define IDC_C_ELIMINATE                 1210
+#define IDC_LESSTHAN                    1211
+#define IDC_MORETHAN                    1212
+#define IDC_NOMORETHAN                  1213
+#define IDC_NOLESSTHAN                  1214
+#define IDC_EQUALTO                     1215
+#define IDC_DIFFERENTFROM               1216
+#define IDC_DIFFERENTBY                 1217
+#define IDC_MODULO                      1218
+#define IDC_EDIT_DIFFBY                 1219
+#define IDC_EDIT_MODBY                  1220
+#define IDC_PREVIOUSVALUE               1221
+#define IDC_SPECIFICVALUE               1222
+#define IDC_SPECIFICADDRESS             1223
+#define IDC_NUMBEROFCHANGES             1224
+#define IDC_EDIT_COMPAREVALUE           1225
+#define IDC_EDIT_COMPAREADDRESS         1226
+#define IDC_EDIT_COMPARECHANGES         1227
+#define IDC_SIGNED                      1228
+#define IDC_UNSIGNED                    1229
+#define IDC_HEX                         1230
+#define IDC_C_AUTOSEARCH                1231
+#define IDC_1_BYTE                      1232
+#define IDC_2_BYTES                     1233
+#define IDC_4_BYTES                     1234
+#define IDC_MISALIGN                    1235
+#define IDC_C_RESET_CHANGES             1236
+#define IDC_C_UNDO                      1237
+#define IDC_WATCHLIST                   1238
+#define IDC_C_WATCH_EDIT                1239
+#define IDC_C_WATCH_REMOVE              1240
+#define IDC_C_WATCH_DUPLICATE           1241
+#define ID_WATCHES_UPDOWN               1242
+#define IDC_C_WATCH_UP                  1243
+#define IDC_C_WATCH_DOWN                1244
+#define IDC_PROMPT_TEXT                 1245
+#define IDC_PROMPT_TEXT2                1246
+#define IDC_PROMPT_EDIT                 1247
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -696,6 +744,18 @@
 #define ID_NEWPPU                       40365
 #define ID_OLDPPU                       40366
 #define ID_CONFIG_SAVECONFIGFILE        40367
+#define RAMMENU_FILE_AUTOLOAD           40368
+#define RAMMENU_FILE_SAVEWINDOW         40369
+#define RAMMENU_FILE_SAVE               40370
+#define RAMMENU_FILE_SAVEAS             40371
+#define RAMMENU_FILE_OPEN               40372
+#define RAMMENU_FILE_APPEND             40373
+#define RAMMENU_FILE_NEW                40374
+#define RAMMENU_FILE_RECENT             40375
+#define ID_RAM_SEARCH                   40376
+#define ID_RAM_WATCH                    40377
+#define RW_MENU_FIRST_RECENT_FILE       40380
+#define RW_MENU_LAST_RECENT_FILE        40400
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -704,9 +764,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40368
-#define _APS_NEXT_CONTROL_VALUE         1205
+#define _APS_NEXT_RESOURCE_VALUE        159
+#define _APS_NEXT_COMMAND_VALUE         40401
+#define _APS_NEXT_CONTROL_VALUE         1248
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

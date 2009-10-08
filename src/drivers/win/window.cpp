@@ -35,6 +35,8 @@
 #include "input.h"
 #include "fceu.h"
 
+#include "ram_search.h"
+#include "ramwatch.h"
 #include "memwatch.h"
 #include "ppuview.h"
 #include "debugger.h"
@@ -332,6 +334,8 @@ void updateGameDependentMenus(unsigned int enable)
 		MENU_CDLOGGER,
 		MENU_GAMEGENIEDECODER,
 		MENU_CHEATS,
+		ID_RAM_SEARCH,
+		ID_RAM_WATCH,
 		ID_TOOLS_TEXTHOOKER
 	};
 
@@ -1337,6 +1341,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 					FCEU_LoadLuaCode(ftmp);
 				//-------------------------------------------------------
+				//Check if memory watchlist file
+				//-------------------------------------------------------
+				else if (!(fileDropped.find(".wch") == string::npos) && (fileDropped.find(".wch") == fileDropped.length()-4)) {
+					if (GameInfo) {
+						SendMessage(hWnd, WM_COMMAND, (WPARAM)ID_RAM_WATCH,(LPARAM)(NULL));
+						Load_Watches(true, fileDropped.c_str());
+					}
+				}
+				//-------------------------------------------------------
 				//If not a movie, Load it as a ROM file
 				//-------------------------------------------------------
 				else
@@ -1776,6 +1789,25 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case ID_TOOLS_TEXTHOOKER:
 				DoTextHooker();
+				break;
+
+			case ID_RAM_SEARCH:
+				if(!RamSearchHWnd)
+				{
+					reset_address_info();
+					RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+				}
+				else
+					SetForegroundWindow(RamSearchHWnd);
+				break;
+
+			case ID_RAM_WATCH:
+				if(!RamWatchHWnd)
+				{
+					RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+				}
+				else
+					SetForegroundWindow(RamWatchHWnd);
 				break;
 
 			//Debug Menu-------------------------------------------------------------

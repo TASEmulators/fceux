@@ -84,6 +84,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="$(ProjectDir)../src/drivers/win/fceu_x86.manifest"
 				VerboseOutput="true"
 			/>
 			<Tool
@@ -249,6 +250,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="$(ProjectDir)../src/drivers/win/fceu_x86.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -1223,6 +1225,22 @@
 				</File>
 				<File
 					RelativePath="..\src\drivers\win\pref.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ram_search.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ram_search.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ramwatch.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\win\ramwatch.h"
 					>
 				</File>
 				<File
