@@ -1,3 +1,4 @@
+#include "../../version.h"
 #include "common.h"
 #include "main.h"
 #include "window.h"

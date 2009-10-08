@@ -21,6 +21,7 @@
 #include "../common/cheat.h"
 #include "../../fceu.h"
 #include "../../movie.h"
+#include "../../version.h"
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
 #endif

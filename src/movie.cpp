@@ -9,6 +9,7 @@
 #include <stdarg.h>
 
 
+#include "version.h"
 #include "types.h"
 #include "utils/endian.h"
 #include "palette.h"

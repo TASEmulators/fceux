@@ -28,6 +28,7 @@
 #include "../../file.h"
 #include "../../debug.h"
 #include "../../asm.h"
+#include "../../version.h"
 #include "cdlogger.h"
 #include "tracer.h"
 #include "memview.h"

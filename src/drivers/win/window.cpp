@@ -24,6 +24,7 @@
 #include "../../input.h"
 #include "../../state.h"
 #include "../../cheat.h" //adelikat: For FCEU_LoadGameCheats()
+#include "../../version.h"
 #include "window.h"
 #include "main.h"
 #include "state.h"

@@ -1,3 +1,4 @@
+#include "version.h"
 #include "types.h"
 #include "fceu.h"
 #include "driver.h"

@@ -29,6 +29,7 @@
 #include "sdl-opengl.h"
 #include "../common/vidblit.h"
 #include "../../fceu.h"
+#include "../../version.h"
 
 #include "sdl-icon.h"
 #include "dface.h"

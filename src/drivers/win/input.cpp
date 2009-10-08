@@ -21,6 +21,8 @@
 // For commctrl.h below
 #define _WIN32_IE	0x0300
 
+#include "../../version.h"
+
 #include "common.h"
 #include "dinput.h"
 #include <windows.h>

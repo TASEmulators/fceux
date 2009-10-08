@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../../version.h"
 #include "../../state.h"
 #include <string>
 #include <string.h>
