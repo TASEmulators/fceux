@@ -48,6 +48,13 @@
 #include "zlib.h"
 #include "driver.h"
 
+//TODO - we really need some kind of global platform-specific options api
+#ifdef WIN32
+#include "drivers/win/main.h"
+#include "drivers/win/ram_search.h"
+#include "drivers/win/ramwatch.h"
+#endif
+
 using namespace std;
 
 static void (*SPreSave)(void);
@@ -703,6 +710,9 @@ bool FCEUSS_Load(const char *fname)
 			SaveStateStatus[CurrentState]=1;
 		}
 		delete st;
+#ifdef WIN32
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
+#endif
 		return true;
 	}
 	else
