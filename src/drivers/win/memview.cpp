@@ -510,7 +510,7 @@ int GetMemViewData(uint32 i){
 	if(EditingMode == 1){
 		i &= 0x3FFF;
 		if(i < 0x2000)return VPage[(i)>>10][(i)];
-		//NSF PPU Viewer crash here (UGETAB)
+		//NSF PPU Viewer crash here (UGETAB) (Also disabled by 'MaxSize = 0x2000')
 		if (GameInfo->type==GIT_NSF) {
 			return (0);
 		}
@@ -1538,7 +1538,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				else CheckMenuItem(GetMenu(hMemView),MENU_MV_VIEW_RAM+i,MF_UNCHECKED);
 			}
 			if(EditingMode == 0)MaxSize = 0x10000;
-			if(EditingMode == 1)MaxSize = 0x4000;
+			if(EditingMode == 1){
+				if (GameInfo->type==GIT_NSF) {MaxSize = 0x2000;} //Also disabled under GetMemViewData
+				else {MaxSize = 0x4000;}
+			}
 			if(EditingMode == 2)MaxSize = 16+CHRsize[0]+PRGsize[0]; //todo: add trainer size
 			if(DataAmount+CurOffset > MaxSize)CurOffset = MaxSize-DataAmount;
 			if(CursorEndAddy > MaxSize)CursorEndAddy = -1;
