@@ -7,16 +7,18 @@ local UntilStar = 0x0347		--Number of punches to land until Mac can get a star
 local NumHearts   = 0x0321	--Number of hearts, single digit
 local NumHearts10 = 0x0322	--Number of hearts, 10's digit
 
+local TigerDizzyKOFlag = 0x00BA  -- If Great Tiger will be knocked down by a punch
+
 local OpponentIDA = 0x0031
 local OPpoenentID = 0 --Stores contents of OpponentIDA
 --Oppenent ID Table
 --Round 1, R2, R3
-	--36	Glass Joe
+	--36,47,64, 66	Glass Joe	47 = After round 1 Jump back begins
 	--114	Von Kaiser
 	--220	Piston Honda I
 	--225	Don I
 	--52,62,66 	King Hippo
-	--217	Great Tiger
+	--226,241	Great Tiger
 	--207	Bald Bull
 	--23	Piston Honda
 	--71,87,95	Soda Popinski
@@ -50,6 +52,7 @@ local OppHitFlag = 0x03E0
 local OppHit
 local OppHitTimer = 0
 local OppHitToDisplay = 0
+local OppJustHit = false
 
 local joy = {}
 joy.select = 1
@@ -131,6 +134,8 @@ while true do
     if OppIsHit() then
 	    OppHitToDisplay = lastEHP - EnemyHP
 	    OppHitTimer = 60
+	    OppJustHit = true
+    else  OppJustHit = false
     end
     --***************************************
 
@@ -155,27 +160,53 @@ while true do
     --***************************************
 
 
-   
+    --***************************************
+    --Glass Joe custom mods
+    --***************************************
+    if OpponentID == 36 or OpponentID == 47 or OpponentID == 64 then
+		if OppJustHit and OppHitToDisplay < 5 and EnemyHP > 1 then
+			EMod = EnemyHP + 3
+		end
+        whichPunch = memory.readbyte(0x0090)
+       if whichPunch == 25 then
+          memory.writebyte(0x0090, 1)
+       end
+    end
+    
     --***************************************
     --King Hippo custom mods
     --***************************************
     if OpponentID == 52 then	--Round 1 only
-    	    gui.text(10,10,"King Hippo")
-    	    if Timer1 == 0 and Timer2 == 0 then
-		EMod = 128
-	    end
-    end
-    if OpponentID == 52 or OpponentID == 62 or OpponentID == 66 then	--All rounds
+    	if Timer1 == 0 and Timer2 == 0 then
+			EMod = 128
+			end
+		end
+		if OpponentID == 52 or OpponentID == 62 or OpponentID == 66 then	--All rounds
+		  gui.text(10,10,"King Hippo")
+		if OppJustHit and OppHitToDisplay < 4 and OppHitToDisplay > 0 and EnemyHP > 1 then
+			EMod = EnemyHP + 2
+		end
     end
 
     
+    --***************************************
+    --Great Tiger custom mods
+    --***************************************
+    if OpponentID == 230 then	--Round 1 Tiger punch only
+      gui.text(10,10,"Great Tiger")
+	    IsTigerDizzy = memory.readbyte(TigerDizzyKOFlag)
+	    gui.text(10,80,IsTigerDizzy)   	    
+	    if IsTigerDizzy > 0 then
+		memory.writebyte(TigerDizzyKOFlag, 0)
+	    end
+    end
 
     --***************************************
     --Soda Popinski Custom mods
     if OpponentID == 71 or OpponentID == 87 or OpponentID == 95 then
     gui.text(10,10,"Soda Popinski")
       --Nullify the instant star knockdown, and punish mac for trying!
-      Soda = memory.readbyte(0x03CB)
+      Soda = memory.readbyte(0x03CB)	--TODO declare a variable instead of using 0x03CB (this is the soda instand knockdown flag)
 	if Soda > 0 then
 		
 		memory.writebyte(0x03CB, 0)      --Return it back to 0
