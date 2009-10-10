@@ -2179,7 +2179,7 @@ void HandleCallbackError(lua_State* L)
 #ifdef WIN32
 		MessageBox( hAppWnd, lua_tostring(L,-1), "Lua run error", MB_OK | MB_ICONSTOP);
 #else
-		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(LUA,-1));
+		fprintf(stderr, "Lua thread bombed out: %s\n", lua_tostring(L,-1));
 #endif
 
 		FCEU_LuaStop();

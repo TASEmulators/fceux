@@ -238,11 +238,9 @@ readfunc GetReadHandler(int32 a)
 	else
 		return ARead[a];
 }
-
 void SetReadHandler(int32 start, int32 end, readfunc func)
 {
 	int32 x;
-
 	if(!func)
 		func=ANull;
 
@@ -482,7 +480,9 @@ endlseq:
 	if(GameInfo->type!=GIT_NSF)
 		FCEU_LoadGameCheats(0);
 
+#if defined (WIN32) || defined (WIN64)
 	DoDebuggerRunCheck(); //Can't safely do it in loadPreferences
+#endif
 
 	return GameInfo;
 }
