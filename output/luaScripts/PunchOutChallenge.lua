@@ -6,15 +6,24 @@ local NumStars = 0x0342
 local UntilStar = 0x0347		--Number of punches to land until Mac can get a star
 local NumHearts   = 0x0321	--Number of hearts, single digit
 local NumHearts10 = 0x0322	--Number of hearts, 10's digit
+local CurrentRoundA = 0x0006 --Address for which round we are in
+local Round	 = 0				 --Stores which round we are on
+local OppMove = 0x0090			 --What move the opponent is making
 
-local TigerDizzyKOFlag = 0x00BA  -- If Great Tiger will be knocked down by a punch
+local DizzyFlag = 0x00BA  -- If Opponent will be insta-knocked down by any punch
+local StarKOFlag = 0x03CB -- If OPponent will be insta-knocked down by a star
+local KaiserKOFlag = 0x004B -- Setting this to 0 disables his ability to be stunned, thus you can't KO Star him
+
+local OppDodgeStar = 0x0348 -- Counter for how many unstunned stars before the opponent starts to dodge
 
 local OpponentIDA = 0x0031
 local OPpoenentID = 0 --Stores contents of OpponentIDA
+local AltOppIDAddress = 0x0330 --Alternate flag for determining the opponent, 5 = Kaiser, 3 = Flamenco
+local OppIDAlt
 --Oppenent ID Table
 --Round 1, R2, R3
 	--36,47,64, 66	Glass Joe	47 = After round 1 Jump back begins
-	--114	Von Kaiser
+	--114,116,118,120=R1	Von Kaiser
 	--220	Piston Honda I
 	--225	Don I
 	--52,62,66 	King Hippo
@@ -98,7 +107,13 @@ while true do
     gui.text(MHPx,MHPy,MacHP)
 
     OpponentID = memory.readbyte(OpponentIDA)
-    gui.text(10,150,OpponentID)
+    OppIDAlt = memory.readbyte(AltOppIDAddress)
+    OppWhichMove = memory.readbyte(OppMove)
+    
+    Round = memory.readbyte(CurrentRoundA)
+    
+    
+    
     --***************************************
     --Display how much health the opponent will get up with
 
@@ -167,10 +182,45 @@ while true do
 		if OppJustHit and OppHitToDisplay < 5 and EnemyHP > 1 then
 			EMod = EnemyHP + 3
 		end
-        whichPunch = memory.readbyte(0x0090)
-       if whichPunch == 25 then
-          memory.writebyte(0x0090, 1)
+        
+       if OppWhichMove == 25 then
+			memory.writebyte(OppMove, 1)	--Remove his jump back and replace with a regular punch
        end
+    end
+    
+    --***************************************
+    --Von Kaiser custom mods
+    --***************************************
+    if OppIDAlt == 5 then
+		gui.text(10,10,"Von Kaiser")
+		memory.writebyte(KaiserKOFlag, 1)
+		if Timer1 == 0 and Timer2 == 0 and Round == 1 then
+			memory.writebyte(OppDodgeStar, 2)
+		end
+    end
+    
+    --***************************************
+    --Piston Honda I custom mods
+    --***************************************
+    if (OppIDAlt == 0 and (Timer3 > 0 or Timer2 > 0 or Timer1 > 0)) then
+		gui.text(10,10,"Piston Honda I")
+		if Timer1 == 0 and Timer2 == 0 and Round == 1 then
+			memory.writebyte(OppDodgeStar, 2)
+		end
+		
+		if OppWhichMove == 25 then
+		    memory.writebyte(OppMove, 1)	--Remove his jump back and replace with a regular punch
+       end
+    end
+    
+    --***************************************
+    --Don Flamenco I custom mods
+    --***************************************
+    if OppIDAlt == 3 then
+		gui.text(10,10,"Don Flamenco I")
+		if Timer1 == 0 and Timer2 == 0 and Round == 1 then
+			memory.writebyte(OppDodgeStar, 0)
+		end
     end
     
     --***************************************
@@ -194,19 +244,28 @@ while true do
     --***************************************
     if OpponentID == 230 then	--Round 1 Tiger punch only
       gui.text(10,10,"Great Tiger")
-	    IsTigerDizzy = memory.readbyte(TigerDizzyKOFlag)
-	    gui.text(10,80,IsTigerDizzy)   	    
+	    IsTigerDizzy = memory.readbyte(DizzyFlag)
 	    if IsTigerDizzy > 0 then
-		memory.writebyte(TigerDizzyKOFlag, 0)
+		memory.writebyte(DizzyFlag, 0)
 	    end
     end
+    
+    --***************************************
+    --Bald Bull I Custom mods
+    --***************************************
+    
+    --***************************************
+    --Piston Honda II Custom mods
+    --***************************************
+    
 
     --***************************************
     --Soda Popinski Custom mods
+    --***************************************
     if OpponentID == 71 or OpponentID == 87 or OpponentID == 95 then
     gui.text(10,10,"Soda Popinski")
       --Nullify the instant star knockdown, and punish mac for trying!
-      Soda = memory.readbyte(0x03CB)	--TODO declare a variable instead of using 0x03CB (this is the soda instand knockdown flag)
+      Soda = memory.readbyte(StarKOFlag)	--TODO declare a variable instead of using 0x03CB (this is the soda instand knockdown flag)
 	if Soda > 0 then
 		
 		memory.writebyte(0x03CB, 0)      --Return it back to 0
@@ -216,6 +275,27 @@ while true do
       end
    
     end
+    
+    --***************************************
+    --Bald Bull II Custom mods
+    --***************************************
+        
+    --***************************************
+    --Don Flamenco II Custom mods
+    --***************************************
+    
+    --***************************************
+    --Mr Sandman Custom mods
+    --***************************************
+    
+    --***************************************
+    --Super Macho Man Custom mods
+    --***************************************
+    
+    --***************************************
+    --Mike Tyson
+    --***************************************
+    
   --***************************************
     FCEU.frameadvance()
     if EMod > 0 then    
