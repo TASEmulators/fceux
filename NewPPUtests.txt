@@ -2,7 +2,6 @@ NewPPU tests
 
 Bad
 Dragon's Lair - Black screen for level 1 (music plays)
-Tecmo Super Bowl (U) [!] - Intro screen messed up, menus out of whack, Team selection screen bad, pre game screen, field is messed up.
 Nightshade (U) - flickering
 
 Good
@@ -63,6 +62,7 @@ Super Mario Bros 2 USA
 Super Mario Bros 3
 Tecmobowl
 Tecmo NBA Basketball (U)
+Tecmo Super Bowl (U) [!] - [FIXED] Intro screen messed up, menus out of whack, Team selection screen bad, pre game screen, field is messed up.
 TMNT
 Transformers
 Zanac

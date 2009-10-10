@@ -208,6 +208,7 @@ struct PPUREGS {
 	void increment_vs() {
 		fv++;
 		vt += (fv>>3);
+		vt &= 31; //fixed tecmo super bowl
 		v += (vt==30)?1:0;
 		fv &= 7;
 		if(vt==30) vt=0;
