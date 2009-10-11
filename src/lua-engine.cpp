@@ -262,10 +262,10 @@ void FCEU_LuaWriteInform() {
 
 /**
  * Toggle certain rendering planes
- * FCEU.setrenderingplanes(sprites, background)
+ * emu.setrenderingplanes(sprites, background)
  * Accepts two (lua) boolean values and acts accordingly
 */
-static int fceu_setrenderplanes(lua_State *L) {
+static int emu_setrenderplanes(lua_State *L) {
 	bool sprites = (lua_toboolean( L, 1 ) == 1);
 	bool background = (lua_toboolean( L, 2 ) == 1);
 	FCEUI_SetRenderPlanes(sprites, background);
@@ -276,7 +276,7 @@ static int fceu_setrenderplanes(lua_State *L) {
 
 
 
-// FCEU.speedmode(string mode)
+// emu.speedmode(string mode)
 //
 //   Takes control of the emulation speed
 //   of the system. Normal is normal speed (60fps, 50 for PAL),
@@ -284,7 +284,7 @@ static int fceu_setrenderplanes(lua_State *L) {
 //   turbo renders only a few frames in order to speed up emulation,
 //   maximum renders no frames
 //   TODO: better enforcement, done in the same way as basicbot...
-static int fceu_speedmode(lua_State *L) {
+static int emu_speedmode(lua_State *L) {
 	const char *mode = luaL_checkstring(L,1);
 	
 	if (strcasecmp(mode, "normal")==0) {
@@ -296,7 +296,7 @@ static int fceu_speedmode(lua_State *L) {
 	} else if (strcasecmp(mode, "maximum")==0) {
 		speedmode = SPEED_MAXIMUM;
 	} else
-		luaL_error(L, "Invalid mode %s to FCEU.speedmode",mode);
+		luaL_error(L, "Invalid mode %s to emu.speedmode",mode);
 	
 	//printf("new speed mode:  %d\n", speedmode);
         if (speedmode == SPEED_NORMAL) 
@@ -309,35 +309,35 @@ static int fceu_speedmode(lua_State *L) {
 	return 0;
 }
 
-// FCEU.poweron()
+// emu.poweron()
 //
 // Executes a power cycle
-static int fceu_poweron(lua_State *L) {
+static int emu_poweron(lua_State *L) {
 	if (GameInfo)
 		FCEUI_PowerNES();
 	
 	return 0;
 }
 
-// FCEU.softreset()
+// emu.softreset()
 //
 // Executes a power cycle
-static int fceu_softreset(lua_State *L) {
+static int emu_softreset(lua_State *L) {
 	if (GameInfo)
 		FCEUI_ResetNES();
 	
 	return 0;
 }
 
-// FCEU.frameadvance()
+// emu.frameadvance()
 //
 //  Executes a frame advance. Occurs by yielding the coroutine, then re-running
 //  when we break out.
-static int fceu_frameadvance(lua_State *L) {
+static int emu_frameadvance(lua_State *L) {
 	// We're going to sleep for a frame-advance. Take notes.
 
 	if (frameAdvanceWaiting) 
-		return luaL_error(L, "can't call FCEU.frameadvance() from here");
+		return luaL_error(L, "can't call emu.frameadvance() from here");
 
 	frameAdvanceWaiting = TRUE;
 
@@ -349,12 +349,12 @@ static int fceu_frameadvance(lua_State *L) {
 }
 
 
-// FCEU.pause()
+// emu.pause()
 //
 //  Pauses the emulator, function "waits" until the user unpauses.
 //  This function MAY be called from a non-frame boundary, but the frame
 //  finishes executing anwyays. In this case, the function returns immediately.
-static int fceu_pause(lua_State *L) {
+static int emu_pause(lua_State *L) {
 	
 	if (!FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
@@ -371,11 +371,11 @@ static int fceu_pause(lua_State *L) {
 	
 }
 
-//FCEU.unpause()
+//emu.unpause()
 //
 //adelikat:  Why wasn't this added sooner?
 //Gives the user a way to unpause the emulator via lua
-static int fceu_unpause(lua_State *L) {
+static int emu_unpause(lua_State *L) {
 	
 	if (FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
@@ -393,10 +393,10 @@ static int fceu_unpause(lua_State *L) {
 }
 
 
-// FCEU.message(string msg)
+// emu.message(string msg)
 //
 //  Displays the given message on the screen.
-static int fceu_message(lua_State *L) {
+static int emu_message(lua_State *L) {
 
 	const char *msg = luaL_checkstring(L,1);
 	FCEU_DispMessage("%s", msg);
@@ -406,7 +406,7 @@ static int fceu_message(lua_State *L) {
 }
 
 
-static int fceu_registerbefore(lua_State *L) {
+static int emu_registerbefore(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -417,7 +417,7 @@ static int fceu_registerbefore(lua_State *L) {
 	return 1;
 }
 
-static int fceu_registerafter(lua_State *L) {
+static int emu_registerafter(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -428,7 +428,7 @@ static int fceu_registerafter(lua_State *L) {
 	return 1;
 }
 
-static int fceu_registerexit(lua_State *L) {
+static int emu_registerexit(lua_State *L) {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L,1);
@@ -959,19 +959,19 @@ int movie_framecount(lua_State *L) {
 	return 1;
 }
 
-//int fceu.lagcount()
+//int emu.lagcount()
 //
 // Gets the current lag count
-int fceu_lagcount(lua_State *L) {
+int emu_lagcount(lua_State *L) {
 
 	lua_pushinteger(L, FCEUI_GetLagCount());
 	return 1;
 }
 
-//fceu_lagged()
+//emu_lagged()
 //
 //Returns true if the game is currently on a lag frame
-int fceu_lagged (lua_State *L) {
+int emu_lagged (lua_State *L) {
 
 	bool Lag_Frame = FCEUI_GetLagged();
 	lua_pushboolean(L, Lag_Frame);
@@ -1047,19 +1047,19 @@ static int movie_length (lua_State *L) {
 	return 1;
 }
 
-//FCEU.getreadonly
+//emu.getreadonly
 //
 //returns true is emulator is in read-only mode, false if it is in read+wrte
-static int fceu_getreadonly (lua_State *L) {
+static int emu_getreadonly (lua_State *L) {
 	lua_pushboolean(L, FCEUI_GetMovieToggleReadOnly());
 
 	return 1;
 }
 
-//FCEU.setreadonly
+//emu.setreadonly
 //
 //Sets readonly / read+write status
-static int fceu_setreadonly (lua_State *L) {
+static int emu_setreadonly (lua_State *L) {
 	bool which = (lua_toboolean( L, 1 ) == 1);
 	FCEUI_SetMovieToggleReadOnly(which);
 	
@@ -1989,14 +1989,14 @@ static void FCEU_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 
 }
 
-static void fceu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
+static void emu_exec_count_hook(lua_State *L, lua_Debug *dbg) {
 	luaL_error(L, "exec_count timeout");
 }
 
-static int fceu_exec_count(lua_State *L) {
+static int emu_exec_count(lua_State *L) {
 	int count = (int)luaL_checkinteger(L,1);
 	lua_pushvalue(L, 2);
-	lua_sethook(L, fceu_exec_count_hook, LUA_MASKCOUNT, count);
+	lua_sethook(L, emu_exec_count_hook, LUA_MASKCOUNT, count);
 	int ret = lua_pcall(L, 0, 0, 0);
 	lua_sethook(L, NULL, 0, 0);
 	lua_settop(L,0);
@@ -2006,7 +2006,7 @@ static int fceu_exec_count(lua_State *L) {
 
 #ifdef WIN32
 static HANDLE readyEvent, goEvent;
-DWORD WINAPI fceu_exec_time_proc(LPVOID lpParameter)
+DWORD WINAPI emu_exec_time_proc(LPVOID lpParameter)
 {
 	SetEvent(readyEvent);
 	WaitForSingleObject(goEvent,INFINITE);
@@ -2019,18 +2019,18 @@ DWORD WINAPI fceu_exec_time_proc(LPVOID lpParameter)
 	return 0;
 }
 
-static void fceu_exec_time_hook(lua_State *L, lua_Debug *dbg) {
+static void emu_exec_time_hook(lua_State *L, lua_Debug *dbg) {
 	luaL_error(L, "exec_time timeout");
 }
 
-static int fceu_exec_time(lua_State *L)
+static int emu_exec_time(lua_State *L)
 {
 	int count = (int)luaL_checkinteger(L,1);
 
 	readyEvent = CreateEvent(0,true,false,0);
 	goEvent = CreateEvent(0,true,false,0);
 	DWORD threadid;
-	HANDLE thread = CreateThread(0,0,fceu_exec_time_proc,(LPVOID)L,0,&threadid);
+	HANDLE thread = CreateThread(0,0,emu_exec_time_proc,(LPVOID)L,0,&threadid);
 	SetThreadAffinityMask(thread,1);
 	//wait for the lua thread to start
 	WaitForSingleObject(readyEvent,INFINITE);
@@ -2041,7 +2041,7 @@ static int fceu_exec_time(lua_State *L)
 	WaitForSingleObject(readyEvent,count);
 	
 	//kill lua (if it hasnt already been killed)
-	lua_sethook(L, fceu_exec_time_hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
+	lua_sethook(L, emu_exec_time_hook, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
 
 	//keep on waiting for the lua thread to come back
 	WaitForSingleObject(readyEvent,count);
@@ -2057,28 +2057,28 @@ static int fceu_exec_time(lua_State *L)
 }
 
 #else
-static int fceu_exec_time(lua_State *L) { return 0; }
+static int emu_exec_time(lua_State *L) { return 0; }
 #endif
   
 static const struct luaL_reg fceulib [] = {
 
-	{"poweron", fceu_poweron},
-	{"softreset", fceu_softreset},
-	{"speedmode", fceu_speedmode},
-	{"frameadvance", fceu_frameadvance},
-	{"pause", fceu_pause},
-	{"unpause", fceu_unpause},
-	{"exec_count", fceu_exec_count},
-	{"exec_time", fceu_exec_time},
-	{"setrenderplanes", fceu_setrenderplanes},
-	{"message", fceu_message},
-	{"lagcount", fceu_lagcount},
-	{"lagged", fceu_lagged},
-	{"getreadonly", fceu_getreadonly},
-	{"setreadonly", fceu_setreadonly},
-	{"registerbefore", fceu_registerbefore},
-	{"registerafter", fceu_registerafter},
-	{"registerexit", fceu_registerexit},
+	{"poweron", emu_poweron},
+	{"softreset", emu_softreset},
+	{"speedmode", emu_speedmode},
+	{"frameadvance", emu_frameadvance},
+	{"pause", emu_pause},
+	{"unpause", emu_unpause},
+	{"exec_count", emu_exec_count},
+	{"exec_time", emu_exec_time},
+	{"setrenderplanes", emu_setrenderplanes},
+	{"message", emu_message},
+	{"lagcount", emu_lagcount},
+	{"lagged", emu_lagged},
+	{"getreadonly", emu_getreadonly},
+	{"setreadonly", emu_setreadonly},
+	{"registerbefore", emu_registerbefore},
+	{"registerafter", emu_registerafter},
+	{"registerexit", emu_registerexit},
 	{NULL,NULL}
 };
 
