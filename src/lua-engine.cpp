@@ -2550,6 +2550,7 @@ static const struct luaL_reg movielib[] = {
 	{"close", movie_stop},
 	{"getname", movie_getname},
 //	{"playback", movie_playback},
+	{"playbeginning", movie_replay},
 	{"getreadonly", movie_getreadonly},
 	{NULL,NULL}
 
