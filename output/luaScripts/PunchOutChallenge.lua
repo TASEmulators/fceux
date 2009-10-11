@@ -17,9 +17,8 @@ local KaiserKOFlag = 0x004B -- Setting this to 0 disables his ability to be stun
 local OppDodgeStar = 0x0348 -- Counter for how many unstunned stars before the opponent starts to dodge
 
 local OpponentIDA = 0x0031
-local OPpoenentID = 0 --Stores contents of OpponentIDA
-local AltOppIDAddress = 0x0330 --Alternate flag for determining the opponent, 5 = Kaiser, 3 = Flamenco
-local OppIDAlt
+local OpponentID = 0 --Stores contents of OpponentIDA
+
 --Oppenent ID Table
 --Round 1, R2, R3
 	--36,47,64, 66	Glass Joe	47 = After round 1 Jump back begins
@@ -37,6 +36,28 @@ local OppIDAlt
 	--105	Super Macho Man
 	--34	Mike Tyson (Mr. Dream)
 
+	
+local AltOppIDAddress = 0x0330 --Alternate flag for determining the opponent
+--0 = Kaiser R2, PistonI R1 R2 R3
+--1 = Tiger R1
+--2 = Don I R2, Don I R3
+--3 = Don I R1
+--4 = Tyson R1
+--5 = Glass Joe R3, Von R1, Von R3, Soda R1
+--6 = Piston II R1
+--7 = Bull I R1, BullI R1, Sandman R1, Macho R1
+--9 = Glass R1, Glass R2, KHippo RI & Don II
+
+
+
+
+
+
+
+
+
+local OppIDAlt	--stores the contents of 0x0330
+	
 local EHP = 0x0398  -- Enemy HP address
 local EHPx= 178
 local EHPy= 14
@@ -174,6 +195,9 @@ while true do
     end
     --***************************************
 
+    
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------  
 
     --***************************************
     --Glass Joe custom mods
@@ -229,10 +253,10 @@ while true do
     if OpponentID == 52 then	--Round 1 only
     	if Timer1 == 0 and Timer2 == 0 then
 			EMod = 128
-			end
 		end
-		if OpponentID == 52 or OpponentID == 62 or OpponentID == 66 then	--All rounds
-		  gui.text(10,10,"King Hippo")
+	end
+	if OpponentID == 52 or OpponentID == 62 or OpponentID == 66 then	--All rounds
+		gui.text(10,10,"King Hippo")
 		if OppJustHit and OppHitToDisplay < 4 and OppHitToDisplay > 0 and EnemyHP > 1 then
 			EMod = EnemyHP + 2
 		end
@@ -242,9 +266,11 @@ while true do
     --***************************************
     --Great Tiger custom mods
     --***************************************
+    if OppIDAlt == 3 then
+    	gui.text(10,10,"Great Tiger")
+    end
     if OpponentID == 230 then	--Round 1 Tiger punch only
-      gui.text(10,10,"Great Tiger")
-	    IsTigerDizzy = memory.readbyte(DizzyFlag)
+        IsTigerDizzy = memory.readbyte(DizzyFlag)
 	    if IsTigerDizzy > 0 then
 		memory.writebyte(DizzyFlag, 0)
 	    end
@@ -296,7 +322,8 @@ while true do
     --Mike Tyson
     --***************************************
     
-  --***************************************
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
     FCEU.frameadvance()
     if EMod > 0 then    
 	memory.writebyte(EHP, EMod) 

@@ -2461,6 +2461,8 @@ static const struct luaL_reg emulib [] = {
 	{"registerbefore", emu_registerbefore},
 	{"registerafter", emu_registerafter},
 	{"registerexit", emu_registerexit},
+	{"readonly", movie_getreadonly},
+	{"setreadonly", movie_setreadonly},
 	{NULL,NULL}
 };
 
@@ -2478,12 +2480,12 @@ static const struct luaL_reg memorylib [] = {
 	{"readbyte", memory_readbyte},
 	{"readbyterange", memory_readbyterange},
 	{"readbytesigned", memory_readbytesigned},
+	// alternate naming scheme for unsigned
+	{"readbyteunsigned", memory_readbyte},
 	{"writebyte", memory_writebyte},
 	{"getregister", memory_getregister},
 	{"setregister", memory_setregister},
-	// alternate naming scheme for unsigned
-	{"readbyteunsigned", memory_readbyte},
-
+	
 	// memory hooks
 	{"registerwrite", memory_registerwrite},
 	//{"registerread", memory_registerread}, TODO
