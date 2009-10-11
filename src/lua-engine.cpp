@@ -33,6 +33,8 @@ extern "C"
 #include "movie.h"
 #include "driver.h"
 #include "cheat.h"
+#include "x6502.h"
+#include "x6502abbrev.h"
 #include "utils/xstring.h"
 #include "utils/memory.h"
 #include "fceulua.h"
@@ -428,6 +430,100 @@ static int memory_readbyterange(lua_State *L) {
 	lua_pushlstring(L,buf,range_size);
 	
 	return 1;
+}
+
+struct registerPointerMap
+{
+	const char* registerName;
+	unsigned int* pointer;
+	int dataSize;
+};
+
+#define RPM_ENTRY(name,var) {name, (unsigned int*)&var, sizeof(var)},
+
+registerPointerMap regPointerMap [] = {
+	RPM_ENTRY("a", _A)
+	RPM_ENTRY("x", _X)
+	RPM_ENTRY("y", _Y)
+	RPM_ENTRY("pc", _PC)
+	{}
+};
+
+struct cpuToRegisterMap
+{
+	const char* cpuName;
+	registerPointerMap* rpmap;
+}
+cpuToRegisterMaps [] =
+{
+	{"", regPointerMap},
+};
+
+
+//DEFINE_LUA_FUNCTION(memory_getregister, "cpu_dot_registername_string")
+static int memory_getregister(lua_State *L)
+{
+	const char* qualifiedRegisterName = luaL_checkstring(L,1);
+	lua_settop(L,0);
+	for(int cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
+	{
+		cpuToRegisterMap ctrm = cpuToRegisterMaps[cpu];
+		int cpuNameLen = strlen(ctrm.cpuName);
+		if(!strnicmp(qualifiedRegisterName, ctrm.cpuName, cpuNameLen))
+		{
+			qualifiedRegisterName += cpuNameLen;
+			for(int reg = 0; ctrm.rpmap[reg].dataSize; reg++)
+			{
+				registerPointerMap rpm = ctrm.rpmap[reg];
+				if(!stricmp(qualifiedRegisterName, rpm.registerName))
+				{
+					switch(rpm.dataSize)
+					{ default:
+					case 1: lua_pushinteger(L, *(unsigned char*)rpm.pointer); break;
+					case 2: lua_pushinteger(L, *(unsigned short*)rpm.pointer); break;
+					case 4: lua_pushinteger(L, *(unsigned long*)rpm.pointer); break;
+					}
+					return 1;
+				}
+			}
+			lua_pushnil(L);
+			return 1;
+		}
+	}
+	lua_pushnil(L);
+	return 1;
+}
+//DEFINE_LUA_FUNCTION(memory_setregister, "cpu_dot_registername_string,value")
+static int memory_setregister(lua_State *L)
+{
+	const char* qualifiedRegisterName = luaL_checkstring(L,1);
+	unsigned long value = (unsigned long)(luaL_checkinteger(L,2));
+	lua_settop(L,0);
+	for(int cpu = 0; cpu < sizeof(cpuToRegisterMaps)/sizeof(*cpuToRegisterMaps); cpu++)
+	{
+		cpuToRegisterMap ctrm = cpuToRegisterMaps[cpu];
+		int cpuNameLen = strlen(ctrm.cpuName);
+		if(!strnicmp(qualifiedRegisterName, ctrm.cpuName, cpuNameLen))
+		{
+			qualifiedRegisterName += cpuNameLen;
+			for(int reg = 0; ctrm.rpmap[reg].dataSize; reg++)
+			{
+				registerPointerMap rpm = ctrm.rpmap[reg];
+				if(!stricmp(qualifiedRegisterName, rpm.registerName))
+				{
+					switch(rpm.dataSize)
+					{ default:
+					case 1: *(unsigned char*)rpm.pointer = (unsigned char)(value & 0xFF); break;
+					case 2: *(unsigned short*)rpm.pointer = (unsigned short)(value & 0xFFFF); break;
+					case 4: *(unsigned long*)rpm.pointer = value; break;
+					}
+					return 0;
+				}
+			}
+			return 0;
+		}
+	}
+	return 0;
 }
 
 
@@ -2383,6 +2479,8 @@ static const struct luaL_reg memorylib [] = {
 	{"readbyterange", memory_readbyterange},
 	{"readbytesigned", memory_readbytesigned},
 	{"writebyte", memory_writebyte},
+	{"getregister", memory_getregister},
+	{"setregister", memory_setregister},
 	// alternate naming scheme for unsigned
 	{"readbyteunsigned", memory_readbyte},
 
