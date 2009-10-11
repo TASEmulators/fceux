@@ -2137,7 +2137,6 @@ struct BGData {
 
 int framectr=0;
 int FCEUX_PPU_Loop(int skip) {
-
 	//262 scanlines
     if (ppudead)
     {
@@ -2286,8 +2285,9 @@ int FCEUX_PPU_Loop(int skip) {
 								//2. is the bg pixel nonzero?
 								//then, it is spritehit.
 								if(oam[6] == 0 && pixel != 0)
+                                {
 									PPU_status |= 0x40;
-
+                                }
 								havepixel = true;
 
 								//priority handling
@@ -2409,14 +2409,18 @@ int FCEUX_PPU_Loop(int skip) {
                     else
                         runppu(kFetchTime);
                 }
-
-				if(((PPU[0]&0x38)!=0x18) && s == 2 && SpriteON ) {
+                //Dragon's Lair (Europe version mapper 4) 
+                //does not set SpriteON in the beginning but it does
+                //set the bg on so if using the conditional SpriteON the MMC3 counter
+                //the counter will never count and no IRQs will be fired so use PPUON
+				if(((PPU[0]&0x38)!=0x18) && s == 2 && PPUON) { //SpriteON ) {
 					//(The MMC3 scanline counter is based entirely on PPU A12, triggered on rising edges (after the line remains low for a sufficiently long period of time))
 					//http://nesdevwiki.org/wiki/index.php/Nintendo_MMC3
 					//test cases for timing: SMB3, Crystalis
 					//crystalis requires deferring this til somewhere in sprite [1,3]
 					//kirby requires deferring this til somewhere in sprite [2,5..
-					if(PPUON && GameHBIRQHook) {
+                    //if (PPUON && GameHBIRQHook) {
+					if(GameHBIRQHook) {
 						GameHBIRQHook();
 					}
 				}
