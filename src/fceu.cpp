@@ -325,7 +325,7 @@ static DECLFW(BRAML)
 {  
 	RAM[A]=V;
 	#ifdef _S9XLUA_H
-	FCEU_LuaWriteInform();
+	CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
 	#endif
 }
 
@@ -333,7 +333,7 @@ static DECLFW(BRAMH)
 {
 	RAM[A&0x7FF]=V;
 	#ifdef _S9XLUA_H
-	FCEU_LuaWriteInform();
+	CallRegisteredLuaMemHook(A&0x7FF, 1, V, LUAMEMHOOK_WRITE);
 	#endif
 }
 

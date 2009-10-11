@@ -10,6 +10,19 @@ enum LuaCallID
 };
 extern void CallRegisteredLuaFunctions(LuaCallID calltype);
 
+enum LuaMemHookType
+{
+	LUAMEMHOOK_WRITE,
+	LUAMEMHOOK_READ,
+	LUAMEMHOOK_EXEC,
+	LUAMEMHOOK_WRITE_SUB,
+	LUAMEMHOOK_READ_SUB,
+	LUAMEMHOOK_EXEC_SUB,
+
+	LUAMEMHOOK_COUNT
+};
+void CallRegisteredLuaMemHook(unsigned int address, int size, unsigned int value, LuaMemHookType hookType);
+
 // Just forward function declarations 
 
 //void FCEU_LuaWrite(uint32 addr);
@@ -33,7 +46,7 @@ char *FCEU_GetFreezeFilename(int slot);
 // Call this before writing into a buffer passed to FCEU_CheatAddRAM().
 // (That way, Lua-based memwatch will work as expected for somebody
 // used to FCEU's memwatch.)
-void FCEU_LuaWriteInform();
+//void FCEU_LuaWriteInform(); // DEADBEEF
 
 
 #endif

@@ -442,7 +442,7 @@ static DECLFR(NSF_read)
 					BANKSET(0x8000+x*4096,NSFHeader.BankSwitch[x]);
 			}
 			#ifdef _S9XLUA_H
-			FCEU_LuaWriteInform();
+			//CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE); FIXME
 			#endif
 			return (CurrentSong-1);
 		}
