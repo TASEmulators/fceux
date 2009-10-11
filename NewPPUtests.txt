@@ -1,7 +1,6 @@
 NewPPU tests
 
 Bad
-Dragon's Lair - Black screen for level 1 (music plays)
 Nightshade (U) - flickering
 
 Good
@@ -41,6 +40,7 @@ Double Dragon 2
 Double Dragon 3
 Donky Kong Classics
 Doki Doki panic
+Dragon's Lair - [FIXED] Black screen for level 1 (music plays)
 Duck Tales
 Duck Tales
 Earthworm Jim 2
