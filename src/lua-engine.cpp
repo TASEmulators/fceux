@@ -1015,10 +1015,24 @@ static int movie_stop(lua_State *L) {
 // movie.active()
 //
 //returns a bool value is there is a movie currently open
-int movie_active (lua_State *L) {
+int movie_isactive (lua_State *L) {
 
 	bool movieactive = (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying());
 	lua_pushboolean(L, movieactive);
+	return 1;
+}
+
+// movie.recording()
+int movie_isrecording (lua_State *L) {
+
+	lua_pushboolean(L, FCEUMOV_IsRecording());
+	return 1;
+}
+
+// movie.playing()
+int movie_isplaying (lua_State *L) {
+
+	lua_pushboolean(L, FCEUMOV_IsPlaying());
 	return 1;
 }
 
@@ -1038,7 +1052,7 @@ static int movie_rerecordcount (lua_State *L) {
 //
 //returns an int value representing the total length of the current movie loaded
 
-static int movie_length (lua_State *L) {
+static int movie_getlength (lua_State *L) {
 	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
 		luaL_error(L, "No movie loaded.");
 
@@ -1079,10 +1093,10 @@ static int movie_getname (lua_State *L) {
 	return 1;
 }
 
-//movie.playbeginning
+//movie.replay
 //
 //calls the play movie from beginning function
-static int movie_playbeginning (lua_State *L) {
+static int movie_replay (lua_State *L) {
 
 	FCEUI_MoviePlayFromBeginning();
 
@@ -2143,19 +2157,22 @@ static const struct luaL_reg movielib[] = {
 	{"mode", movie_mode},
 	{"rerecordcounting", movie_rerecordcounting},
 	{"stop", movie_stop},
-	{"active", movie_active},
-	{"length", movie_length},
+	{"active", movie_isactive},
+	{"recording", movie_isrecording},
+	{"playing", movie_isplaying},
+	{"length", movie_getlength},
 	{"rerecordcount", movie_rerecordcount},
 	{"name", movie_getname},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
-	{"playbeginning", movie_playbeginning},
+	{"replay", movie_replay},
 //	{"record", movie_record},
-//	{"playback", movie_playback},
+//	{"play", movie_playback},
 
 	// alternative names
 	{"close", movie_stop},
 	{"getname", movie_getname},
+//	{"playback", movie_playback},
 	{"getreadonly", movie_getreadonly},
 	{NULL,NULL}
 
