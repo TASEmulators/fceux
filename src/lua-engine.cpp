@@ -470,12 +470,12 @@ static int memory_readbytesigned(lua_State *L) {
 	return 1;
 }
 
-// memory.register(int address, function func)
+// memory.registerwrite(int address, function func)
 //
 //  Calls the given function when the indicated memory address is
 //  written to. No args are given to the function. The write has already
 //  occurred, so the new address is readable.
-static int memory_register(lua_State *L) {
+static int memory_registerwrite(lua_State *L) {
 
 	// Check args
 	unsigned int addr = luaL_checkinteger(L, 1);
@@ -950,10 +950,10 @@ static int savestate_load(lua_State *L) {
 }
 
 
-// int movie.framecount()
+// int emu.framecount()
 //
-//   Gets the frame counter for the movie, or nil if no movie running.
-int movie_framecount(lua_State *L) {
+//   Gets the frame counter
+int emu_framecount(lua_State *L) {
 		
 	lua_pushinteger(L, FCEUMOV_GetFrame());
 	return 1;
@@ -1047,19 +1047,19 @@ static int movie_length (lua_State *L) {
 	return 1;
 }
 
-//emu.getreadonly
+//movie.readonly
 //
-//returns true is emulator is in read-only mode, false if it is in read+wrte
-static int emu_getreadonly (lua_State *L) {
+//returns true is emulator is in read-only mode, false if it is in read+write
+static int movie_getreadonly (lua_State *L) {
 	lua_pushboolean(L, FCEUI_GetMovieToggleReadOnly());
 
 	return 1;
 }
 
-//emu.setreadonly
+//movie.setreadonly
 //
 //Sets readonly / read+write status
-static int emu_setreadonly (lua_State *L) {
+static int movie_setreadonly (lua_State *L) {
 	bool which = (lua_toboolean( L, 1 ) == 1);
 	FCEUI_SetMovieToggleReadOnly(which);
 	
@@ -1198,8 +1198,8 @@ static uint16 gui_getcolour(lua_State *L, int offset) {
 	two = temp;   \
 }
 
-// gui.drawpixel(x,y,colour)
-static int gui_drawpixel(lua_State *L) {
+// gui.pixel(x,y,colour)
+static int gui_pixel(lua_State *L) {
 
 	int x = luaL_checkinteger(L, 1);
 	int y = luaL_checkinteger(L,2);
@@ -1216,8 +1216,8 @@ static int gui_drawpixel(lua_State *L) {
 	return 0;
 }
 
-// gui.drawline(x1,y1,x2,y2,type colour)
-static int gui_drawline(lua_State *L) {
+// gui.line(x1,y1,x2,y2,type colour)
+static int gui_line(lua_State *L) {
 
 	int x1,y1,x2,y2;
 	uint8 colour;
@@ -1285,8 +1285,8 @@ static int gui_drawline(lua_State *L) {
 	return 0;
 }
 
-// gui.drawbox(x1, y1, x2, y2, colour)
-static int gui_drawbox(lua_State *L) {
+// gui.box(x1, y1, x2, y2, colour)
+static int gui_box(lua_State *L) {
 
 	int x1,y1,x2,y2;
 	uint8 colour;
@@ -2060,7 +2060,7 @@ static int emu_exec_time(lua_State *L)
 static int emu_exec_time(lua_State *L) { return 0; }
 #endif
   
-static const struct luaL_reg fceulib [] = {
+static const struct luaL_reg emulib [] = {
 
 	{"poweron", emu_poweron},
 	{"softreset", emu_softreset},
@@ -2072,10 +2072,9 @@ static const struct luaL_reg fceulib [] = {
 	{"exec_time", emu_exec_time},
 	{"setrenderplanes", emu_setrenderplanes},
 	{"message", emu_message},
+	{"framecount", emu_framecount},
 	{"lagcount", emu_lagcount},
 	{"lagged", emu_lagged},
-	{"getreadonly", emu_getreadonly},
-	{"setreadonly", emu_setreadonly},
 	{"registerbefore", emu_registerbefore},
 	{"registerafter", emu_registerafter},
 	{"registerexit", emu_registerexit},
@@ -2085,6 +2084,8 @@ static const struct luaL_reg fceulib [] = {
 static const struct luaL_reg romlib [] = {
 	{"readbyte", rom_readbyte},
 	{"readbytesigned", rom_readbytesigned},
+	// alternate naming scheme for unsigned
+	{"readbyteunsigned", rom_readbyte},
 	{NULL,NULL}
 };
 
@@ -2095,18 +2096,23 @@ static const struct luaL_reg memorylib [] = {
 	{"readbyterange", memory_readbyterange},
 	{"readbytesigned", memory_readbytesigned},
 	{"writebyte", memory_writebyte},
+	// alternate naming scheme for unsigned
+	{"readbyteunsigned", memory_readbyte},
 
-	{"register", memory_register},
+	// memory hooks
+	{"registerwrite", memory_registerwrite},
+	// alternate names
+	{"register", memory_registerwrite},
 
 	{NULL,NULL}
 };
 
 static const struct luaL_reg joypadlib[] = {
-	{"read", joypad_read},
 	{"get", joypad_read},
-	{"write", joypad_set},
 	{"set", joypad_set},
-
+	// alternative names
+	{"read", joypad_read},
+	{"write", joypad_set},
 	{NULL,NULL}
 };
 
@@ -2117,6 +2123,8 @@ static const struct luaL_reg zapperlib[] = {
 
 static const struct luaL_reg inputlib[] = {
 	{"get", input_get},
+	// alternative names
+	{"read", input_get},
 	{NULL,NULL}
 };
 
@@ -2131,18 +2139,24 @@ static const struct luaL_reg savestatelib[] = {
 
 static const struct luaL_reg movielib[] = {
 
-	{"framecount", movie_framecount},
+	{"framecount", emu_framecount}, // for those familiar with other emulators that have movie.framecount() instead of emulatorname.framecount()
 	{"mode", movie_mode},
 	{"rerecordcounting", movie_rerecordcounting},
 	{"stop", movie_stop},
 	{"active", movie_active},
 	{"length", movie_length},
 	{"rerecordcount", movie_rerecordcount},
-	{"getname", movie_getname},
+	{"name", movie_getname},
+	{"readonly", movie_getreadonly},
+	{"setreadonly", movie_setreadonly},
 	{"playbeginning", movie_playbeginning},
 //	{"record", movie_record},
 //	{"playback", movie_playback},
 
+	// alternative names
+	{"close", movie_stop},
+	{"getname", movie_getname},
+	{"getreadonly", movie_getreadonly},
 	{NULL,NULL}
 
 };
@@ -2150,9 +2164,9 @@ static const struct luaL_reg movielib[] = {
 
 static const struct luaL_reg guilib[] = {
 	
-	{"drawpixel", gui_drawpixel},
-	{"drawline", gui_drawline},
-	{"drawbox", gui_drawbox},
+	{"pixel", gui_pixel},
+	{"line", gui_line},
+	{"box", gui_box},
 	{"text", gui_text},
 
 	{"gdscreenshot", gui_gdscreenshot},
@@ -2160,10 +2174,20 @@ static const struct luaL_reg guilib[] = {
 	{"transparency", gui_transparency},
 
 	{"register", gui_register},
-	
-	{"popup", gui_popup},
-	{NULL,NULL}
 
+	{"popup", gui_popup},
+	// alternative names
+	{"drawtext", gui_text},
+	{"drawbox", gui_box},
+	{"drawline", gui_line},
+	{"drawpixel", gui_pixel},
+	{"setpixel", gui_pixel},
+	{"writepixel", gui_pixel},
+	{"rect", gui_box},
+	{"drawrect", gui_box},
+	{"drawimage", gui_gdoverlay},
+	{"image", gui_gdoverlay},
+	{NULL,NULL}
 };
 
 void HandleCallbackError(lua_State* L)
@@ -2312,8 +2336,8 @@ int FCEU_LoadLuaCode(const char *filename) {
 		L = lua_open();
 		luaL_openlibs(L);
 
-		luaL_register(L, "emu", fceulib); // added for better cross-emulator compatibility
-		luaL_register(L, "FCEU", fceulib); // kept for backward compatibility
+		luaL_register(L, "emu", emulib); // added for better cross-emulator compatibility
+		luaL_register(L, "FCEU", emulib); // kept for backward compatibility
 		luaL_register(L, "memory", memorylib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
