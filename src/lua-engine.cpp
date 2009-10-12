@@ -48,9 +48,14 @@ extern "C"
 #endif
 
 #ifdef __unix__
-#define stricmp  strcasecmp
-#define strnicmp strncasecmp
-#define __forceinline __attribute__ ((always_inline))
+ #define stricmp  strcasecmp
+ #define strnicmp strncasecmp
+ 
+ #ifdef __GNUC__
+  #define __forceinline __attribute__ ((always_inline))
+ #else 
+  #define __forceinline 
+ #endif
 #endif
 
 #ifdef WIN32
