@@ -50,8 +50,9 @@ extern "C"
 #ifdef __unix__
 #define stricmp  strcasecmp
 #define strnicmp strncasecmp
-#endif
 #define __forceinline __attribute__ ((always_inline))
+#endif
+
 #ifdef WIN32
 extern void AddRecentLuaFile(const char *filename);
 #endif
