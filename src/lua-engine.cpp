@@ -3597,21 +3597,17 @@ void FCEU_LuaGui(uint8 *XBuf) {
 	for (y = 0; y < LUA_SCREEN_HEIGHT; y++) {
 		for (x=0; x < LUA_SCREEN_WIDTH; x++) {
 			const uint8 gui_alpha = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+3];
+			if (gui_alpha == 0) {
+				// do nothing
+				continue;
+			}
+
 			const uint8 gui_red   = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+2];
 			const uint8 gui_green = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+1];
 			const uint8 gui_blue  = gui_data[(y*LUA_SCREEN_WIDTH+x)*4];
 
-			uint8 scr_red, scr_green, scr_blue;
-			FCEUD_GetPalette(XBuf[(y+8)*256+x], &scr_red, &scr_green, &scr_blue);
-
 			int r, g, b;
-			if (gui_alpha == 0) {
-				// do nothing
-				r = scr_red;
-				g = scr_green;
-				b = scr_blue;
-			}
-			else if (gui_alpha == 255) {
+			if (gui_alpha == 255) {
 				// direct copy
 				r = gui_red;
 				g = gui_green;
@@ -3619,6 +3615,8 @@ void FCEU_LuaGui(uint8 *XBuf) {
 			}
 			else {
 				// alpha-blending
+				uint8 scr_red, scr_green, scr_blue;
+				FCEUD_GetPalette(XBuf[(y+8)*256+x], &scr_red, &scr_green, &scr_blue);
 				r = (((int) gui_red   - scr_red)   * gui_alpha / 255 + scr_red)   & 255;
 				g = (((int) gui_green - scr_green) * gui_alpha / 255 + scr_green) & 255;
 				b = (((int) gui_blue  - scr_blue)  * gui_alpha / 255 + scr_blue)  & 255;
