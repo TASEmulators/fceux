@@ -1686,9 +1686,29 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_MEMORY_WATCH:
 				CreateMemWatch();
 				break;
-			case MENU_RAMFILTER:
-				DoByteMonitor(); 
+			
+			case ID_RAM_SEARCH:
+				if(!RamSearchHWnd)
+				{
+					reset_address_info();
+					RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+				}
+				else
+					SetForegroundWindow(RamSearchHWnd);
 				break;
+
+			case ID_RAM_WATCH:
+				if(!RamWatchHWnd)
+				{
+					RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+				}
+				else
+					SetForegroundWindow(RamWatchHWnd);
+				break;	
+			//case MENU_RAMFILTER:
+			//	DoByteMonitor(); 
+			//	break;
+			//  Removing this tool since it is redundant to both 
 			case ACCEL_CTRL_E:
 			case MENU_TASEDIT:
 				DoTasEdit();
@@ -1790,25 +1810,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case ID_TOOLS_TEXTHOOKER:
 				DoTextHooker();
-				break;
-
-			case ID_RAM_SEARCH:
-				if(!RamSearchHWnd)
-				{
-					reset_address_info();
-					RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
-				}
-				else
-					SetForegroundWindow(RamSearchHWnd);
-				break;
-
-			case ID_RAM_WATCH:
-				if(!RamWatchHWnd)
-				{
-					RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
-				}
-				else
-					SetForegroundWindow(RamWatchHWnd);
 				break;
 
 			//Debug Menu-------------------------------------------------------------

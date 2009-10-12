@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -153,10 +152,9 @@ BEGIN
     POPUP "&Tools"
     BEGIN
         MENUITEM "&Cheats...",                  MENU_CHEATS
-        MENUITEM "RAM Watch...",                ID_RAM_WATCH
         MENUITEM "RAM Search...",               ID_RAM_SEARCH
+        MENUITEM "RAM Watch...",                ID_RAM_WATCH
         MENUITEM "&Memory Watch...",            MENU_MEMORY_WATCH
-        MENUITEM "&RAM Filter...",              MENU_RAMFILTER
         MENUITEM "&TAS Edit...",                MENU_TASEDIT, INACTIVE
         MENUITEM "Convert &FCM...",             MENU_CONVERT_MOVIE
         MENUITEM SEPARATOR
@@ -391,7 +389,7 @@ BEGIN
     END
 END
 
-RAMWATCH_MENU MENU
+RAMWATCH_MENU MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -1610,7 +1608,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,120,80,50,14
 END
 
-IDD_PROMPT DIALOG 0, 0, 186, 68
+IDD_PROMPT DIALOG  0, 0, 186, 68
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Input Prompt"
 FONT 8, "Ms Shell Dlg 2"
@@ -1897,7 +1895,7 @@ BEGIN
     "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_RWACCELERATOR ACCELERATORS
+IDR_RWACCELERATOR ACCELERATORS 
 BEGIN
     "N",            RAMMENU_FILE_NEW,       VIRTKEY, CONTROL
     "O",            RAMMENU_FILE_OPEN,      VIRTKEY, CONTROL
@@ -1928,8 +1926,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
