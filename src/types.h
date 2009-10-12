@@ -125,4 +125,8 @@ typedef uint8 (*readfunc)(uint32 A);
 
 #include "utils/endian.h"
 
+#ifndef CTASSERT
+#define CTASSERT(x)  typedef char __assert ## y[(x) ? 1 : -1];
+#endif
+
 #endif

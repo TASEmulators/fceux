@@ -24,7 +24,6 @@ extern "C"
 #include <lualib.h>
 }
 
-
 #include "types.h"
 #include "fceu.h"
 #include "video.h"
@@ -48,6 +47,11 @@ extern "C"
 #define FALSE 0
 #endif
 
+#ifdef __unix__
+#define stricmp  strcasecmp
+#define strnicmp strncasecmp
+#endif
+#define __forceinline __attribute__ ((always_inline))
 #ifdef WIN32
 extern void AddRecentLuaFile(const char *filename);
 #endif
@@ -144,7 +148,9 @@ static const char* luaCallIDStrings [] =
 	"CALL_AFTEREMULATION",
 	"CALL_BEFOREEXIT",
 };
-static const int _makeSureWeHaveTheRightNumberOfStrings [sizeof(luaCallIDStrings)/sizeof(*luaCallIDStrings) == LUACALL_COUNT ? 1 : 0];
+
+//make sure we have the right number of strings
+CTASSERT(sizeof(luaCallIDStrings)/sizeof(*luaCallIDStrings) == LUACALL_COUNT)
 
 static const char* luaMemHookTypeStrings [] =
 {
@@ -156,7 +162,9 @@ static const char* luaMemHookTypeStrings [] =
 	"MEMHOOK_READ_SUB",
 	"MEMHOOK_EXEC_SUB",
 };
-static const int _makeSureWeHaveTheRightNumberOfStrings2 [sizeof(luaMemHookTypeStrings)/sizeof(*luaMemHookTypeStrings) == LUAMEMHOOK_COUNT ? 1 : 0];
+
+//make sure we have the right number of strings
+CTASSERT(sizeof(luaMemHookTypeStrings)/sizeof(*luaMemHookTypeStrings) ==  LUAMEMHOOK_COUNT)
 
 /**
  * Resets emulator speed / pause states after script exit.
@@ -577,14 +585,13 @@ struct TieredRegion
 				lastEnd = addr+1;
 			}
 		}
-
 		bool Contains(unsigned int address, int size) const
 		{
-			std::vector<Island>::const_iterator iter = islands.begin();
-			std::vector<Island>::const_iterator end = islands.end();
-			for(; iter != end; ++iter)
-				if(iter->Contains(address, size))
-					return true;
+            for (size_t i = 0; i != islands.size(); ++i)
+            {
+                if (islands[i].Contains(address, size))
+                    return true;
+            }
 			return false;
 		}
 	};
@@ -604,7 +611,8 @@ struct TieredRegion
 
 	TieredRegion()
 	{
-		Calculate(std::vector<unsigned int>());
+        std::vector <unsigned int> temp;
+		Calculate(temp);
 	}
 
 	__forceinline int NotEmpty()
