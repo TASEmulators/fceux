@@ -2639,13 +2639,6 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	char *t;
 #ifdef __linux
 
-	// The Linux backend has a "FromPause" variable.
-	// If set to 1, assume some known external event has screwed with the flow of time.
-	// Since this pauses the emulator waiting for a response, we set it to 1.
-	extern int FromPause;
-	FromPause = 1;
-
-
 	int pid; // appease compiler
 
 	// Before doing any work, verify the correctness of the parameters.
