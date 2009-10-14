@@ -3435,6 +3435,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 	luaRunning = TRUE;
 	skipRerecords = FALSE;
 	numMemHooks = 0;
+	transparencyModifier = 255; // opaque
 
 	wasPaused = FCEUI_EmulationPaused();
 	if (wasPaused) FCEUI_ToggleEmulationPause();
