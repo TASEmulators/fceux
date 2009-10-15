@@ -771,8 +771,8 @@ static int memory_registerHook(lua_State* L, LuaMemHookType hookType, int defaul
 {
 	// get first argument: address
 	unsigned int addr = luaL_checkinteger(L,1);
-	if((addr & ~0xFFFFFF) == ~0xFFFFFF)
-		addr &= 0xFFFFFF;
+	//if((addr & ~0xFFFFFF) == ~0xFFFFFF)
+	//	addr &= 0xFFFFFF;
 
 	// get optional second argument: size
 	int size = defaultSize;
@@ -870,7 +870,7 @@ static int memory_registerread(lua_State *L)
 }
 static int memory_registerexec(lua_State *L)
 {
-	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_EXEC), 2);
+	return memory_registerHook(L, MatchHookTypeToCPU(L,LUAMEMHOOK_EXEC), 1);
 }
 
 //adelikat: table pulled from GENS.  credz nitsuja!
