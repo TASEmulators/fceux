@@ -519,7 +519,7 @@ bool inDebugger = false;
 
 //this code enters the debugger.
 void FCEUD_DebugBreakpoint() {
-	UpdateDebugger();
+	UpdateDebuggingDialogs(); //Keeps the debugging windows updating smoothly when stepping
 	void win_debuggerLoop(); //HACK
 	win_debuggerLoop();
 }
@@ -1331,7 +1331,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									}
 									else FCEUI_Debugger().step = true;
 									FCEUI_SetEmulationPaused(0);
-								UpdateLogWindow();
+								//UpdateLogWindow();
 								}
 								break;
 							case IDC_DEBUGGER_SEEK_PC:
