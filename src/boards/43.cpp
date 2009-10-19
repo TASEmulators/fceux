@@ -18,14 +18,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+//ccording to nestopia, BTL_SMB2_C, otherwise known as UNL-SMB2J
+
 #include "mapinc.h"
 
 static uint8 reg;
-static uint8 IRQCount, IRQa;
+static uint8 IRQa;
+static uint32 IRQCount;
 
 static SFORMAT StateRegs[]=
 {
-  {&IRQCount, 1, "IRQC"},
+  {&IRQCount, 4, "IRQC"},
   {&IRQa, 1, "IRQA"},
   {&reg, 1, "REG"},
   {0}
