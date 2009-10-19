@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 #include <ctype.h>
 #include <zlib.h>
@@ -9,13 +8,13 @@
 #include <map>
 #include <string>
 #include <algorithm>
+#include <stdlib.h>
 
 #ifdef __linux
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #endif
-
 
 extern "C"
 {
@@ -47,7 +46,7 @@ extern "C"
 #define FALSE 0
 #endif
 
-#ifdef __unix__
+#ifndef _MSC_VER
  #define stricmp  strcasecmp
  #define strnicmp strncasecmp
  
