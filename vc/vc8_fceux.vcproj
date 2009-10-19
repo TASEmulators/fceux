@@ -1077,6 +1077,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\win\luaconsole.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\win\main.cpp"
 					>
 				</File>

@@ -75,9 +75,9 @@
 using namespace std;
 
 //----Context Menu - Some dynamically added menu items
-#define FCEUX_CONTEXT_UNHIDEMENU  60000
-#define FCEUX_CONTEXT_LOADLASTLUA 60001
-#define FCEUX_CONTEXT_STOPLUA	  60002
+#define FCEUX_CONTEXT_UNHIDEMENU        60000
+#define FCEUX_CONTEXT_LOADLASTLUA       60001
+#define FCEUX_CONTEXT_CLOSELUAWINDOWS   60002
 
 //********************************************************************************
 //Globals
@@ -99,7 +99,6 @@ extern FCEUGI *GameInfo;
 extern int EnableAutosave;
 extern bool frameAdvanceLagSkip;
 extern bool turbo;
-extern int luaRunning;
 extern bool movie_readonly;
 extern bool AutoSS;			//flag for whether an auto-save has been made
 extern int newppu;
@@ -142,6 +141,10 @@ void SaveMovieAs();	//Gets a filename for Save Movie As...
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
+
+//Lua Console --------------------------------------------
+extern HWND LuaConsoleHWnd;
+extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //Recent Lua Menu ----------------------------------------
 char *recent_lua[] = {0,0,0,0,0};
@@ -371,6 +374,7 @@ void UpdateCheckedMenuItems()
 	}
 	//File Maneu
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
 
 	//NES Menu
 	CheckMenuItem(fceumenu, ID_NES_PAUSE, EmulationPaused ? MF_CHECKED : MF_UNCHECKED);
@@ -507,7 +511,7 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		EnableMenuItem(context,FCEUX_CONTEXT_RECENTROM1,MF_BYCOMMAND | MF_GRAYED);
 
 	//Add Lua separator if either lua condition is true (yeah, a little ugly but it works)
-	if (recent_lua[0] || luaRunning)
+	if (recent_lua[0] || FCEU_LuaRunning())
 		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
 
 	//If a recent lua file exists, add Load Last Lua
@@ -515,8 +519,8 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_LOADLASTLUA, "Load last Lua");
 		
 	//If lua is loaded, add a stop lua item
-	if (luaRunning)
-		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_STOPLUA, "Stop Lua script");
+	if (FCEU_LuaRunning())
+		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_CLOSELUAWINDOWS, "Close All Script Windows");
 
 	//If menu is hidden, add an Unhide menu option
 	if (tog)
@@ -1500,15 +1504,31 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			//Lua submenu
-			case ID_FILE_RUNLUASCRIPT:
-				FCEUD_LuaRunFrom(); 
+			case ID_FILE_OPENLUAWINDOW:
+				if(!LuaConsoleHWnd)
+					LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hWnd, (DLGPROC) DlgLuaScriptDialog);
+				else
+					SetForegroundWindow(LuaConsoleHWnd);
 				break;
-			case FCEUX_CONTEXT_STOPLUA:
-			case ID_FILE_STOPLUASCRIPT:
-				FCEU_LuaStop();
+			case FCEUX_CONTEXT_CLOSELUAWINDOWS:
+			case ID_FILE_CLOSELUAWINDOWS:
+				if(LuaConsoleHWnd)
+					PostMessage(LuaConsoleHWnd, WM_CLOSE, 0, 0);
 				break;
-			case ID_FILE_LUA_RELOADLUASCRIPT:
-				FCEU_ReloadLuaCode();
+			//Recent Lua 1
+			case FCEUX_CONTEXT_LOADLASTLUA:
+				if(recent_lua[0])
+				{
+					if (!FCEU_LoadLuaCode(recent_lua[0]))
+					{
+						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						if (result == IDYES)
+						{
+							RemoveRecentItem(0, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
+							UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
+						}
+					}
+				}
 				break;
 
 			case MENU_EXIT:
@@ -1864,22 +1884,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				}
 				break;
 
-			//Recent Lua 1
-			case FCEUX_CONTEXT_LOADLASTLUA:
-				if(recent_lua[0])
-				{
-					if (!FCEU_LoadLuaCode(recent_lua[0]))
-					{
-						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
-						if (result == IDYES)
-						{
-							RemoveRecentItem(0, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
-							UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
-						}
-					}
-				}
-				break;
-
 			//Recent Movie 1
 			case FCEUX_CONTEXT_LOADLASTMOVIE:
 				if(recent_movie[0])
@@ -2052,7 +2056,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_VIEWSAVESLOTS,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_VIEWSLOTS)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
-		EnableMenuItem(fceumenu,ID_FILE_STOPLUASCRIPT,MF_BYCOMMAND | (luaRunning?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,ID_FILE_CLOSELUAWINDOWS,MF_BYCOMMAND | (LuaConsoleHWnd?MF_ENABLED:MF_GRAYED));
 
 		CheckMenuItem(fceumenu, ID_NEWPPU, newppu ? MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(fceumenu, ID_OLDPPU, !newppu ? MF_CHECKED : MF_UNCHECKED);
@@ -2376,102 +2380,6 @@ bool FCEUD_PauseAfterPlayback()
 	return pauseAfterPlayback!=0;
 }
 
-INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-
-	static int *success;
-
-	switch (msg) {
-	case WM_INITDIALOG:
-		{
-
-		// Nothing very useful to do
-		success = (int*)lParam;
-		return TRUE;
-		}
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-			case IDOK:
-			{
-				char filename[MAX_PATH];
-				GetDlgItemText(hDlg, 1096, filename, MAX_PATH);
-				if (FCEU_LoadLuaCode(filename)) {
-					*success = 1;
-					// For user's convenience, don't close dialog unless we're done.
-					// Users who make syntax errors and fix/reload will thank us.
-					EndDialog(hDlg, 1);
-				} else {
-					//MessageBox(hDlg, "Couldn't load script.", "Oops", MB_OK); // XXX better if errors are displayed by the Lua code.
-					*success = 0;
-				}
-				return TRUE;
-			}
-			case IDCANCEL:
-			{
-				EndDialog(hDlg, 0);
-				return TRUE;
-			}
-			case 1359:
-			{
-				OPENFILENAME  ofn;
-				char  szFileName[MAX_PATH];
-				szFileName[0] = '\0';
-				ZeroMemory( (LPVOID)&ofn, sizeof(OPENFILENAME) );
-				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.hwndOwner = hDlg;
-				ofn.lpstrFilter = "Lua scripts\0*.lua\0All files\0*.*\0\0";
-				ofn.lpstrFile = szFileName;
-				ofn.lpstrDefExt = "lua";
-				ofn.nMaxFile = MAX_PATH;
-				ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
-				if(GetOpenFileName( &ofn ))
-				{
-					SetWindowText(GetDlgItem(hDlg, 1096), szFileName);
-				}
-				//SetCurrentDirectory(movieDirectory);
-				return TRUE;
-			}
-		}
-
-
-	}
-	//char message[1024];
-//	sprintf(message, "Unkonwn command %d,%d",msg,wParam);
-	//MessageBox(hDlg, message, TEXT("Range Error"), MB_OK);
-
-//	printf("Unknown entry %d,%d,%d\n",msg,wParam,lParam);
-	// All else, fall off
-	return FALSE;
-
-}
-
-void FCEUD_LuaRunFrom(void)
-{
-	int success = 0;
-
-	//mbg 8/2/08 - i decided i didnt like this dialog box. so for now we are just going to run the script directly
-	//DialogBoxParam(fceu_hInstance, "IDD_LUA_ADD", hAppWnd, DlgLuaScriptDialog,(LPARAM) &success);
-
-	OPENFILENAME  ofn;
-	char  szFileName[MAX_PATH];
-	szFileName[0] = '\0';
-	ZeroMemory( (LPVOID)&ofn, sizeof(OPENFILENAME) );
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = hAppWnd;
-	ofn.lpstrFilter = "Lua scripts (*.lua)\0*.lua\0All files (*.*)\0*.*\0\0";
-	ofn.lpstrFile = szFileName;
-	ofn.lpstrDefExt = "lua";
-	ofn.nMaxFile = MAX_PATH;
-	ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
-	std::string initdir = FCEU_GetPath(FCEUMKF_LUA);
-	ofn.lpstrInitialDir=initdir.c_str();
-	if(GetOpenFileName( &ofn ))
-	{
-		AddRecentLuaFile(szFileName);
-		FCEU_LoadLuaCode(szFileName);
-	}
-}
-
 void ChangeContextMenuItemText(int menuitem, string text, HMENU menu)
 {
 	MENUITEMINFO moo;
@@ -2584,11 +2492,6 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_AVI_STOP]);
 	combined = "&Stop AVI\t" + combo;
 	ChangeMenuItemText(MENU_STOP_AVI, combined); 
-
-	//Reload Lua Script
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_SCRIPT_RELOAD]);
-	combined = "&Reload Lua Script\t" + combo;
-	ChangeMenuItemText(ID_FILE_LUA_RELOADLUASCRIPT, combined); 
 	
 	//-------------------------------NES----------------------------------------
 	//Reset

@@ -40,6 +40,8 @@ int FCEU_LuaRerecordCountSkip();
 void FCEU_LuaGui(uint8 *XBuf);
 void FCEU_LuaUpdatePalette();
 
+char* FCEU_GetLuaScriptName();
+
 // And some interesting REVERSE declarations!
 char *FCEU_GetFreezeFilename(int slot);
 
