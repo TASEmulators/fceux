@@ -1,3 +1,4 @@
+19-october-2009 - qeed   - Mapper 253 mostly implemented, known game [ES-1064] Qi Long Zhu (C) is mostly playable (some minor graphic glitches). Thanks to VirtualNESEX for reverse engineering this, gil for giving me the mapper src for implementation reference, and Dead_Body for figuring out this game had to use chr-ram 
 10-october-2009 - qeed   - fixed dragon's lair the mapper 4 europe version in new PPU
 10-october-2009 - zeromus - fixed Tecmo Super Bowl in new PPU
 08-october-2009 - ugetab - win32 - fixed a debugger crash error, Unif/FDS filename issue, and enabled debugger bank display
