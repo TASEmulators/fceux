@@ -47,9 +47,9 @@ static void	SetBank_PPUSUB(int bank, int page)
         // [ES-1064] Qi Long Zhu (C).NES game uses CHR-RAM for these pages
         //and doesn't seem to set VRAM switch so use
         //CHR-RAM as default for now
-        //if (VRAM_switch == 0)
-        //    setchr1(bank << 10, page); //CHR-ROM
-        else
+        /*if (VRAM_switch == 0)
+            setchr1(bank << 10, page); //CHR-ROM
+        else*/
             setvramb1(&CHRRAM[page << 10], page << 10, 0); //CHR-RAM
     } 
     else 
