@@ -6,6 +6,17 @@
 static uint8 reg[9], VRAM_switch;
 static int32 irq_enable, irq_counter, irq_latch, irq_clock; 
 
+static SFORMAT StateRegs[]=
+{
+  { reg, sizeof(reg), "MAPPER_REGS" },
+  { &VRAM_switch, sizeof(VRAM_switch), "MAPPER_VRAMSWITCH" },
+  { &irq_enable, sizeof(irq_enable), "MAPPER_IRQ_ENABLE" },
+  { &irq_counter, sizeof(irq_counter), "MAPPER_IRQ_COUNTER" },
+  { &irq_latch, sizeof(irq_latch), "MAPPER_IRQ_LATCH" },
+  { &irq_clock, sizeof(irq_clock), "MAPPER_IRQ_CLOCK" },
+  { 0 }
+};
+
 static void Mapper253_IRQHook(int cycles)
 {
     //basically, this happens at every frame
@@ -88,6 +99,7 @@ static DECLFW(Mapper253_Write)
                 setmirror(MI_1);
                 break;
         }
+        return;
     }
 
     switch (A & 0xF00C)
@@ -206,5 +218,6 @@ void Mapper253_Init(CartInfo *info)
     info->Close = Mapper253_Close;
     SetWriteHandler(0x8000, 0xFFFF, Mapper253_Write);
     SetReadHandler(0x8000, 0xFFFF, CartBR);
+    AddExState(StateRegs, ~0, 0, 0);
 }
 
