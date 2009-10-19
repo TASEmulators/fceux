@@ -141,7 +141,9 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				SendDlgItemMessage(hDlg,IDC_EDIT_LUAPATH,WM_GETTEXT,(WPARAM)512,(LPARAM)Str_Tmp);
 				// tell the OS to open the file with its associated editor,
 				// without blocking on it or leaving a command window open.
-				ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL);
+				if((int)ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
+					if((int)ShellExecute(NULL, "open", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
+						ShellExecute(NULL, NULL, "notepad", Str_Tmp, NULL, SW_SHOWNORMAL);
 			}	break;
 
 			case IDC_BUTTON_LUABROWSE:
