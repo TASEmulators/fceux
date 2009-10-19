@@ -781,10 +781,12 @@ struct registerPointerMap
 #define RPM_ENTRY(name,var) {name, (unsigned int*)&var, sizeof(var)},
 
 registerPointerMap regPointerMap [] = {
+	RPM_ENTRY("pc", _PC)
 	RPM_ENTRY("a", _A)
 	RPM_ENTRY("x", _X)
 	RPM_ENTRY("y", _Y)
-	RPM_ENTRY("pc", _PC)
+	RPM_ENTRY("s", _S)
+	RPM_ENTRY("p", _P)
 	{}
 };
 
