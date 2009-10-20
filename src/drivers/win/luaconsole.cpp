@@ -9,6 +9,39 @@ extern HWND hAppWnd;
 
 HWND LuaConsoleHWnd = NULL;
 
+struct ControlLayoutInfo
+{
+	int controlID;
+	
+	enum LayoutType // what to do when the containing window resizes
+	{
+		NONE, // leave the control where it was
+		RESIZE_END, // resize the control
+		MOVE_START, // move the control
+	};
+	LayoutType horizontalLayout;
+	LayoutType verticalLayout;
+};
+struct ControlLayoutState
+{
+	int x,y,width,height;
+	bool valid;
+	ControlLayoutState() : valid(false) {}
+};
+
+static ControlLayoutInfo controlLayoutInfos [] = {
+	{IDC_LUACONSOLE, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::RESIZE_END},
+	{IDC_EDIT_LUAPATH, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::NONE},
+	{IDC_BUTTON_LUARUN, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
+	{IDC_BUTTON_LUASTOP, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
+};
+static const int numControlLayoutInfos = sizeof(controlLayoutInfos)/sizeof(*controlLayoutInfos);
+
+struct {
+	int width; int height;
+	ControlLayoutState layoutState [numControlLayoutInfos];
+} windowInfo;
+
 void PrintToWindowConsole(int hDlgAsInt, const char* str)
 {
 	HWND hDlg = (HWND)hDlgAsInt;
@@ -72,11 +105,6 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 	case WM_INITDIALOG:
 	{
-		// disable resizing
-		LONG wndStyle = GetWindowLong(hDlg, GWL_STYLE);
-		wndStyle &= ~WS_THICKFRAME;
-		SetWindowLong(hDlg, GWL_STYLE, wndStyle);
-
 		// remove the 30000 character limit from the console control
 		SendMessage(GetDlgItem(hDlg, IDC_LUACONSOLE),EM_LIMITTEXT,0,0);
 
@@ -111,9 +139,87 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 		SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 
+		RECT r3;
+		GetClientRect(hDlg, &r3);
+		windowInfo.width = r3.right - r3.left;
+		windowInfo.height = r3.bottom - r3.top;
+		for(int i = 0; i < numControlLayoutInfos; i++) {
+			ControlLayoutState& layoutState = windowInfo.layoutState[i];
+			layoutState.valid = false;
+		}
+
 		DragAcceptFiles(hDlg, true);
 		SetDlgItemText(hDlg, IDC_EDIT_LUAPATH, FCEU_GetLuaScriptName());
 		return true;
+	}	break;
+
+	case WM_SIZE:
+	{
+		// resize or move controls in the window as necessary when the window is resized
+
+		//LuaPerWindowInfo& windowInfo = LuaWindowInfo[hDlg];
+		int prevDlgWidth = windowInfo.width;
+		int prevDlgHeight = windowInfo.height;
+
+		int dlgWidth = LOWORD(lParam);
+		int dlgHeight = HIWORD(lParam);
+
+		int deltaWidth = dlgWidth - prevDlgWidth;
+		int deltaHeight = dlgHeight - prevDlgHeight;
+
+		for(int i = 0; i < numControlLayoutInfos; i++)
+		{
+			ControlLayoutInfo layoutInfo = controlLayoutInfos[i];
+			ControlLayoutState& layoutState = windowInfo.layoutState[i];
+
+			HWND hCtrl = GetDlgItem(hDlg,layoutInfo.controlID);
+
+			int x,y,width,height;
+			if(layoutState.valid)
+			{
+				x = layoutState.x;
+				y = layoutState.y;
+				width = layoutState.width;
+				height = layoutState.height;
+			}
+			else
+			{
+				RECT r;
+				GetWindowRect(hCtrl, &r);
+				POINT p = {r.left, r.top};
+				ScreenToClient(hDlg, &p);
+				x = p.x;
+				y = p.y;
+				width = r.right - r.left;
+				height = r.bottom - r.top;
+			}
+
+			switch(layoutInfo.horizontalLayout)
+			{
+				case ControlLayoutInfo::RESIZE_END: width += deltaWidth; break;
+				case ControlLayoutInfo::MOVE_START: x += deltaWidth; break;
+				default: break;
+			}
+			switch(layoutInfo.verticalLayout)
+			{
+				case ControlLayoutInfo::RESIZE_END: height += deltaHeight; break;
+				case ControlLayoutInfo::MOVE_START: y += deltaHeight; break;
+				default: break;
+			}
+
+			SetWindowPos(hCtrl, 0, x,y, width,height, 0);
+
+			layoutState.x = x;
+			layoutState.y = y;
+			layoutState.width = width;
+			layoutState.height = height;
+			layoutState.valid = true;
+		}
+
+		windowInfo.width = dlgWidth;
+		windowInfo.height = dlgHeight;
+
+		RedrawWindow(hDlg, NULL, NULL, RDW_INVALIDATE);
 	}	break;
 
 	case WM_COMMAND:
