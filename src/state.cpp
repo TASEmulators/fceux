@@ -1063,9 +1063,9 @@ void LoadBackup()
 	string filename = GetBackupFileName();	//Get backup filename
 	if (CheckBackupSaveStateExist())
 	{
-		internalSaveLoad = true;
+		//internalSaveLoad = true;
 		FCEUSS_Load(filename.c_str());		//Load it
-		internalSaveLoad = false;
+		//internalSaveLoad = false;
 		redoLS = true;						//Flag redoLoadState
 		undoLS = false;						//Flag that LoadBackup cannot be run again
 	}
