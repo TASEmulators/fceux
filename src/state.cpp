@@ -48,6 +48,9 @@
 #include "input.h"
 #include "zlib.h"
 #include "driver.h"
+#ifdef _S9XLUA_H
+#include "fceulua.h"
+#endif
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
@@ -74,6 +77,8 @@ bool redoSS = false;		  //This will be true if UndoSaveState is run, will turn f
 char lastLoadstateMade[2048]; //Stores the filename of the last state loaded (needed for Undo/Redo loadstate)
 bool undoLS = false;		  //This will be true if a backupstate was made and it was made since ROM was loaded
 bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning redoLoadState can be run
+
+bool internalSaveLoad = false;
 
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
@@ -436,7 +441,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 void FCEUSS_Save(const char *fname)
 {
 	std::fstream* st = 0;
-	char *fn;
+	char fn[2048];
 
 	if(geniestage==1)
 	{
@@ -447,11 +452,12 @@ void FCEUSS_Save(const char *fname)
 	if(fname)	//If filename is given use it.
 	{
 		st =FCEUD_UTF8_fstream(fname, "wb");
+		strcpy(fn, fname);
 	}
 	else		//Else, generate one
 	{
 		//FCEU_PrintError("daCurrentState=%d",CurrentState);
-		fn = strdup(FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
+		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
 
 		//backup existing savestate first
 		if (CheckFileExists(fn)) 
@@ -464,7 +470,6 @@ void FCEUSS_Save(const char *fname)
 			undoSS = false;					//so backup made so lastSavestateMade does have a backup file, so no undo
 		
 		st = FCEUD_UTF8_fstream(fn,"wb");
-		free(fn);
 	}
 
 	if(st == NULL)
@@ -472,6 +477,32 @@ void FCEUSS_Save(const char *fname)
 		FCEU_DispMessage("State %d save error.",CurrentState);
 		return;
 	}
+
+	#ifdef _S9XLUA_H
+	if (!internalSaveLoad)
+	{
+		LuaSaveData saveData;
+		CallRegisteredLuaSaveFunctions(CurrentState, saveData);
+
+		char luaSaveFilename [512];
+		strncpy(luaSaveFilename, fn, 512);
+		luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
+		strcat(luaSaveFilename, ".luasav");
+		if(saveData.recordList)
+		{
+			FILE* luaSaveFile = fopen(luaSaveFilename, "wb");
+			if(luaSaveFile)
+			{
+				saveData.ExportRecords(luaSaveFile);
+				fclose(luaSaveFile);
+			}
+		}
+		else
+		{
+			unlink(luaSaveFilename);
+		}
+	}
+	#endif
 
 	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		FCEUSS_SaveMS(st,-1);
@@ -660,6 +691,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 bool FCEUSS_Load(const char *fname)
 {
 	std::fstream* st;
+	char fn[2048];
 
 	//mbg movie - this needs to be overhauled
 	////this fixes read-only toggle problems
@@ -676,12 +708,13 @@ bool FCEUSS_Load(const char *fname)
 	if(fname)
 	{
 		st=FCEUD_UTF8_fstream(fname, "rb");
+		strcpy(fn, fname);
 	}
 	else
 	{
-		string fn = FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname);
+		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
 		st=FCEUD_UTF8_fstream(fn,"rb");
-		strcpy(lastLoadstateMade,fn.c_str());
+		strcpy(lastLoadstateMade,fn);
 	}
 
 	if(st == NULL)
@@ -711,6 +744,27 @@ bool FCEUSS_Load(const char *fname)
 			SaveStateStatus[CurrentState]=1;
 		}
 		delete st;
+
+		#ifdef _S9XLUA_H
+		if (!internalSaveLoad)
+		{
+			LuaSaveData saveData;
+
+			char luaSaveFilename [512];
+			strncpy(luaSaveFilename, fn, 512);
+			luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
+			strcat(luaSaveFilename, ".luasav");
+			FILE* luaSaveFile = fopen(luaSaveFilename, "rb");
+			if(luaSaveFile)
+			{
+				saveData.ImportRecords(luaSaveFile);
+				fclose(luaSaveFile);
+			}
+
+			CallRegisteredLuaLoadFunctions(CurrentState, saveData);
+		}
+		#endif
+
 #ifdef WIN32
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
@@ -997,7 +1051,9 @@ bool CheckBackupSaveStateExist()
 void BackupLoadState()
 {
 	string filename = GetBackupFileName();
+	internalSaveLoad = true;
 	FCEUSS_Save(filename.c_str());
+	internalSaveLoad = false;
 	undoLS = true;
 }
 
@@ -1007,7 +1063,9 @@ void LoadBackup()
 	string filename = GetBackupFileName();	//Get backup filename
 	if (CheckBackupSaveStateExist())
 	{
+		internalSaveLoad = true;
 		FCEUSS_Load(filename.c_str());		//Load it
+		internalSaveLoad = false;
 		redoLS = true;						//Flag redoLoadState
 		undoLS = false;						//Flag that LoadBackup cannot be run again
 	}
