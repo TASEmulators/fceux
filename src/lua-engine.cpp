@@ -16,14 +16,6 @@
 #include <sys/wait.h>
 #endif
 
-extern "C"
-{
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-#include <lstate.h>
-}
-
 #include "types.h"
 #include "fceu.h"
 #include "video.h"
@@ -41,6 +33,14 @@ extern "C"
 #ifdef WIN32
 #include "drivers/win/common.h"
 #endif
+
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+#include <lstate.h>
+}
 
 #ifndef TRUE
 #define TRUE 1
