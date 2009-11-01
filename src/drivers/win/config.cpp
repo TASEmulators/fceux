@@ -91,6 +91,9 @@ extern int RomFreezeColorR;
 extern int RomFreezeColorG;
 extern int RomFreezeColorB;
 
+//adelikat:  Hacky fix for Ram Watch recent menu
+char* ramWatchRecent[] = {0, 0, 0, 0, 0};
+
 //Structure that contains configuration information
 static CFGSTRUCT fceuconfig[] = {
 
@@ -122,6 +125,12 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(recent_movie[2]),
 	ACS(recent_movie[3]),
 	ACS(recent_movie[4]),
+
+	ACS(ramWatchRecent[0]),
+	ACS(ramWatchRecent[1]),
+	ACS(ramWatchRecent[2]),
+	ACS(ramWatchRecent[3]),
+	ACS(ramWatchRecent[4]),
 
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),
@@ -291,6 +300,13 @@ static CFGSTRUCT fceuconfig[] = {
 
 void SaveConfig(const char *filename)
 {
+	//adelikat: Hacky fix for Ram Watch recent menu
+	for (int x = 0; x < 5; x++)
+	{
+		strcpy(ramWatchRecent[x],rw_recent_files[x]);
+	}
+	//-----------------------------------
+
 	SaveFCEUConfig(filename,fceuconfig);
 }
 
@@ -301,5 +317,12 @@ void LoadConfig(const char *filename)
 	LoadFCEUConfig(filename, fceuconfig);
 
 	FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+
+	//adelikat:Hacky fix for Ram Watch recent menu
+	for (int x = 0; x < 5; x++)
+	{
+		strncpy(rw_recent_files[x], ramWatchRecent[x]);
+	}
+	//-----------------------------------
 }
 
