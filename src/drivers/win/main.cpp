@@ -397,7 +397,7 @@ void DoFCEUExit()
 	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
 
-	if (CloseMemoryWatch())		//If user was asked to save changes in the memory watch dialog, and chose cancel, don't close FCEUX!	
+	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!	
 	{
 		if(goptions & GOO_CONFIRMEXIT)
 		{
