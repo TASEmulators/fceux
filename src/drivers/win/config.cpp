@@ -300,10 +300,12 @@ static CFGSTRUCT fceuconfig[] = {
 
 void SaveConfig(const char *filename)
 {
+	std::string rwtemp[5];
 	//adelikat: Hacky fix for Ram Watch recent menu
 	for (int x = 0; x < 5; x++)
 	{
-		strcpy(ramWatchRecent[x],rw_recent_files[x]);
+		rwtemp[x] = rw_recent_files[x];
+		ramWatchRecent[x] = (char*)rwtemp[x].c_str();
 	}
 	//-----------------------------------
 
@@ -321,7 +323,16 @@ void LoadConfig(const char *filename)
 	//adelikat:Hacky fix for Ram Watch recent menu
 	for (int x = 0; x < 5; x++)
 	{
-		strncpy(rw_recent_files[x], ramWatchRecent[x]);
+		if(ramWatchRecent[x])
+		{
+			strncpy(rw_recent_files[x], ramWatchRecent[x], 1024);
+			free(ramWatchRecent[x]);
+			ramWatchRecent[x] = 0;
+		}
+		else
+		{
+			rw_recent_files[x][0] = 0;
+		}
 	}
 	//-----------------------------------
 }

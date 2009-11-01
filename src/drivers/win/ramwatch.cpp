@@ -24,7 +24,7 @@ using namespace std;
 static HMENU ramwatchmenu;
 static HMENU rwrecentmenu;
 /*static*/ HACCEL RamWatchAccels = NULL;
-char rw_recent_files[MAX_RECENT_WATCHES][1024];
+char rw_recent_files[MAX_RECENT_WATCHES][1024] = {"","","","",""};
 //char Watch_Dir[1024]="";
 bool RWfileChanged = false; //Keeps track of whether the current watch file has been changed, if so, ramwatch will prompt to save changes
 bool AutoRWLoad = false;    //Keeps track of whether Auto-load is checked
