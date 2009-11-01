@@ -1,20 +1,21 @@
-19-october-2009 - qeed   - Mapper 253 mostly implemented, known game [ES-1064] Qi Long Zhu (C) is mostly playable (some minor graphic glitches). Thanks to VirtualNESEX for reverse engineering this, gil for giving me the mapper src for implementation reference, and Dead_Body for figuring out this game had to use chr-ram 
-10-october-2009 - qeed   - fixed dragon's lair the mapper 4 europe version in new PPU
-10-october-2009 - zeromus - fixed Tecmo Super Bowl in new PPU
-08-october-2009 - ugetab - win32 - fixed a debugger crash error, Unif/FDS filename issue, and enabled debugger bank display
-01-october-2009 - gocha - win32 - movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 & 50
-26-september-2009 - qeed - fixed action 52 game that was broken in fceux >2.0.3 
-16-september-2009 - ugetab - win32 - Restored DPCM Logging when Code/Data Logger is active
-september-2009 - FatRatKnight - Finally got in that "invert" value for joypad.set. This value simply inverts the player input. Actually, any string will invert it, since we have not used strings for anything else in joypad.set.
-15-september-2009 - FatRatKnight - Reworked how input is taken from lua, and generally everything related to joypad.set and what it affects. Now setting stuff to false will: Prevent user control for exactly one frame, and allow more than one false button as a time. Yeah, bug fixes. Hopefully runs a little faster now.
-22-august-2009 - adelikat - Win32 - Map Hotkeys Dialog - Fixed but where "X" and Alt+F4 would not close dialog
-22-august-2009 - adelikat - Win32 - Added a Save Config File menu item
-12-august-2009 - adelikat - Win32 - Added a menu item to toggle to New PPU
-10-august-2009 - adelikat - fixed bug that caused new movies be created in /movie instead of /movies
-08-august-2009 - qeed - mappers - fixed mapper irq count, dragon ball z 3
+31-oct-2009 - adelikat - win32 - Memwatch - Save Changes prompt - Selecting yes will do quicksave first, save as 2nd (instead of always defaulting to save as)
+19-oct-2009 - qeed   - Mapper 253 mostly implemented, known game [ES-1064] Qi Long Zhu (C) is mostly playable (some minor graphic glitches). Thanks to VirtualNESEX for reverse engineering this, gil for giving me the mapper src for implementation reference, and Dead_Body for figuring out this game had to use chr-ram 
+10-oct-2009 - qeed   - fixed dragon's lair the mapper 4 europe version in new PPU
+10-oct-2009 - zeromus - fixed Tecmo Super Bowl in new PPU
+08-oct-2009 - ugetab - win32 - fixed a debugger crash error, Unif/FDS filename issue, and enabled debugger bank display
+01-oct-2009 - gocha - win32 - movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 & 50
+26-sept-2009 - qeed - fixed action 52 game that was broken in fceux >2.0.3 
+16-sept-2009 - ugetab - win32 - Restored DPCM Logging when Code/Data Logger is active
+sept-2009 - FatRatKnight - Finally got in that "invert" value for joypad.set. This value simply inverts the player input. Actually, any string will invert it, since we have not used strings for anything else in joypad.set.
+15-sept-2009 - FatRatKnight - Reworked how input is taken from lua, and generally everything related to joypad.set and what it affects. Now setting stuff to false will: Prevent user control for exactly one frame, and allow more than one false button as a time. Yeah, bug fixes. Hopefully runs a little faster now.
+22-aug-2009 - adelikat - Win32 - Map Hotkeys Dialog - Fixed but where "X" and Alt+F4 would not close dialog
+22-aug-2009 - adelikat - Win32 - Added a Save Config File menu item
+12-aug-2009 - adelikat - Win32 - Added a menu item to toggle to New PPU
+10-aug-2009 - adelikat - fixed bug that caused new movies be created in /movie instead of /movies
+08-aug-2009 - qeed - mappers - fixed mapper irq count, dragon ball z 3
 should be playable again.
-07-august-2009 - ugetab - win32 - imported NSF features from FCEU-XDSP-NSF
-05-august-2009 - adelikat - win32 - fixed an erroneous assumption made in 2.1.1 that caused the recent roms menu to be grayed out even when there were recent roms (however, it uncovered an underlying bug in the recent menu saving that needs to be fixed at some point).
+07-aug-2009 - ugetab - win32 - imported NSF features from FCEU-XDSP-NSF
+05-aug-2009 - adelikat - win32 - fixed an erroneous assumption made in 2.1.1 that caused the recent roms menu to be grayed out even when there were recent roms (however, it uncovered an underlying bug in the recent menu saving that needs to be fixed at some point).
 
 ---r1375 - FCEUX 2.1.1---
 ---July 29, 2009---

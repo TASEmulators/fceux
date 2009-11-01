@@ -656,7 +656,7 @@ bool CloseMemoryWatch()
 			result = MessageBox(hwndMemWatch, "Save Changes?", "Memory Watch Settings", MB_YESNOCANCEL);
 			if (result == IDYES)
 			{
-				SaveMemWatch();
+				QuickSaveMemWatch();
 				DestroyWindow(hwndMemWatch);
 				hwndMemWatch=0;
 				return true;	//true = User did not choose to cancel operation
