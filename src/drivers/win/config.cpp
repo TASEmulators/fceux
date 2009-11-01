@@ -36,6 +36,7 @@
 #include "file.h"
 #include "texthook.h"
 #include "movieoptions.h"
+#include "ramwatch.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -279,6 +280,12 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(RomFreezeColorG),
 	AC(RomFreezeColorB),
 	//ACS(memwLastfile[2048]),
+
+	AC(AutoRWLoad),
+	AC(RWSaveWindowPos),
+	AC(ramw_x),
+	AC(ramw_y),
+
 	ENDCFGSTRUCT
 };
 
