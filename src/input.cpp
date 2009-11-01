@@ -601,6 +601,8 @@ static void LaunchPPU(void);
 static void LaunchHex(void);
 static void LaunchTraceLogger(void);
 static void LaunchCodeDataLogger(void);
+static void LaunchRamWatch(void);
+static void LaunchRamSearch(void);
 static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
@@ -720,7 +722,9 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
-	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0}
+	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
+	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,   0, 0, "Open Ram Watch",		  0},
+	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,  0, 0, "Open Ram Search",		  0},
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -904,6 +908,24 @@ static void LaunchCheats(void)
 	ConfigCheats(pwindow);
 #endif
 }
+
+static void LaunchRamWatch(void)
+{
+#ifdef WIN32
+	extern void OpenRamWatch();	//adelikat: Blah blah hacky, I know
+	OpenRamWatch();
+#endif
+}
+
+static void LaunchRamSearch(void)
+{
+#ifdef WIN32
+	extern void OpenRamSearch();
+	OpenRamSearch();
+#endif
+}
+
+
 
 static void FA_SkipLag(void)
 {

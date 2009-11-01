@@ -136,6 +136,8 @@ bool rightClickEnabled = true;		//If set to false, the right click context menu 
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
 void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters a context menu item name
 void SaveMovieAs();	//Gets a filename for Save Movie As...
+void OpenRamSearch();
+void OpenRamWatch();
 
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -1710,8 +1712,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_RAM_SEARCH:
 				if(!RamSearchHWnd)
 				{
-					reset_address_info();
-					RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), hWnd, (DLGPROC) RamSearchProc);
+					OpenRamSearch();
 				}
 				else
 					SetForegroundWindow(RamSearchHWnd);
@@ -1720,7 +1721,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_RAM_WATCH:
 				if(!RamWatchHWnd)
 				{
-					RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), hWnd, (DLGPROC) RamWatchProc);
+					OpenRamWatch();
 				}
 				else
 					SetForegroundWindow(RamWatchHWnd);
@@ -2646,4 +2647,15 @@ void SaveMovieAs()
 			tempName.append(".fm2");	//If not, make it .fm2
 		FCEUI_CreateMovieFile(tempName);
 	}
+}
+
+void OpenRamSearch()
+{
+	reset_address_info();
+	RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC) RamSearchProc);
+}
+
+void OpenRamWatch()
+{
+	RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, (DLGPROC) RamWatchProc);
 }
