@@ -1041,6 +1041,11 @@ bool ALoad(char *nameo, char* innerFilename)
 		str.append(": ");
 		str.append(FileBase);
 		SetWindowText(hAppWnd, str.c_str());
+
+		if (AutoRWLoad)
+		{
+			OpenRamWatch();
+		}
 	}
 	else
 	{
