@@ -478,7 +478,7 @@ static void DriverKill(void)
 
 	if(soundo)
 	{
-		TrashSound();
+		TrashSoundNow();
 	}
 
 	CloseWave();
