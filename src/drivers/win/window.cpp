@@ -1406,12 +1406,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				{
 					if (!FCEU_LoadLuaCode(fname))
 					{
-						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
-						if (result == IDYES)
-						{
-							RemoveRecentItem((wParam - LUA_FIRST_RECENT_FILE), recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
-							UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
-						}
+						//int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						//if (result == IDYES)
+						//{
+						//	RemoveRecentItem((wParam - LUA_FIRST_RECENT_FILE), recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
+						//	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
+						//}
+						//adelikat: Commenting this code out because it is annoyin in context lua scripts since lua scripts will frequently give errors to those developing them.  It is frustrating for this to pop up every time.
 					}
 				}
 			}
