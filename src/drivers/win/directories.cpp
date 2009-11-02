@@ -115,6 +115,7 @@ static BOOL CALLBACK DirConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 		case WM_CLOSE:
 		case WM_QUIT:
 			CloseDirectoriesDialog(hwndDlg);
+			CloseDirectoriesDialog(hwndDlg);	//adelikat:  Hacky but this fixes the directory overides bug (or at least some instances of it).  This of course really just puts a band-aid on the real problem.
 			break;
 
 		case WM_COMMAND:
