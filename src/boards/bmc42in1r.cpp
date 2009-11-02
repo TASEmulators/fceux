@@ -24,17 +24,21 @@
 
 extern uint32 ROM_size;
 static uint8 hrd_sw;
-static uint8 latche;
+static uint8 latche[2];
 static SFORMAT StateRegs[]=
 {
   {&hrd_sw, 1, "DIPSW"},
-  {&latche, 1, "LATCHE"},
+  {&latche, sizeof(latche), "LATCHE"},
   {&hrd_sw, 1, "HRDSW"},
   {0}
 };
 
 static void Sync(void)
 {
+    int bank = (latche[0] >> 1 & 0x0F) | 
+               (latche[0] >> 3 & 0x10) |
+               (latche[1] << 5 & 0x20);
+ 
 /*  if(!(latche&0x02))
     setprg32r(0,0x8000,(latche&0x3F)>>1);
   else
@@ -43,6 +47,8 @@ static void Sync(void)
     setprg16r(0,0xC000,latche&0x3f);
   }
 */
+   /* the old one, doesnt work with 76 in 1 game
+    * since it doesn't account for all the PRG-ROM
   if(!(latche&0x20))
     setprg32r(hrd_sw,0x8000,(latche>>1)&0x0f);
   else
@@ -50,13 +56,23 @@ static void Sync(void)
     setprg16r(hrd_sw,0x8000,latche&0x1f);
     setprg16r(hrd_sw,0xC000,latche&0x1f);
   }
-  setmirror((latche>>6)&1);
+  setmirror((latche>>6)&1);*/
+  if(!(latche[0] & 0x20))
+      setprg32r(hrd_sw,0x8000,bank);
+  else
+  {
+      bank = (bank << 1) | (latche[0] & 1);
+      setprg16r(hrd_sw,0x8000,bank);
+      setprg16r(hrd_sw,0xC000,bank);
+  }
+  setmirror((latche[0] & 0x40) ? MI_V : MI_H);
 }
 
 static DECLFW(BMC42in1rWrite)
 {
-  latche=V;
-  Sync();
+    latche[A & 1] = V;
+    //latche = V;
+    Sync();
 }
 
 static void BMC42in1rReset(void)
@@ -67,7 +83,7 @@ static void BMC42in1rReset(void)
 
 static void BMC42in1rPower(void)
 {
-  latche=0;
+  latche[0] = latche[1] = 0;
   hrd_sw=0;
   setchr8(0);
   Sync();
@@ -92,7 +108,7 @@ static void M226Power(void)
 {
   if(ROM_size==64)
     SetupCartPRGMapping(1,PRGptr[0]+512*1024,512,0);
-  latche=0;
+  latche[0] = 0;
   hrd_sw=0;
   setchr8(0);
   Sync();

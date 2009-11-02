@@ -1,3 +1,4 @@
+02-nov-2009 - qeed - fixed mapper 226, 76-in-1 seems to work now, also super 42 also seems to work with this fix, but people with save states with this game should make a new one. Since the the save state format for this game was changed a little.
 31-oct-2009 - adelikat - win32 - Memwatch - Save Changes prompt - Selecting yes will do quicksave first, save as 2nd (instead of always defaulting to save as)
 19-oct-2009 - qeed   - Mapper 253 mostly implemented, known game [ES-1064] Qi Long Zhu (C) is mostly playable (some minor graphic glitches). Thanks to VirtualNESEX for reverse engineering this, gil for giving me the mapper src for implementation reference, and Dead_Body for figuring out this game had to use chr-ram 
 10-oct-2009 - qeed   - fixed dragon's lair the mapper 4 europe version in new PPU
