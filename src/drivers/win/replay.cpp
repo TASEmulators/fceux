@@ -716,8 +716,9 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				SetTextColor(hdcStatic, RGB(0,0,0));		// use black color for a match (or no comparison)
 			else
 				SetTextColor(hdcStatic, RGB(255,0,0));		// use red for a mismatch
-			
-			return FALSE;
+		
+			SetBkMode((HDC)wParam,TRANSPARENT);
+			return (BOOL)GetSysColorBrush(COLOR_BTNFACE);
 		}
 		else
 			return FALSE;
