@@ -14,13 +14,14 @@
 -- callback function to clean up our mess
 -- this is called when the script exits (forced or natural)
 -- you need to close all the open dialogs here or FCEUX crashes
-function emu.OnClose.iuplua()
+--function emu.OnClose.iuplua()
 	-- gui.popup("OnClose!");
-	if(emu and emu.OnCloseIup ~= nil) then
-		emu.OnCloseIup();
-	end
+	--if(emu and emu.OnCloseIup ~= nil) then
+	--	emu.OnCloseIup();
+	--end
 	--iup.Close(); 
-end
+--end
+
 
 -- this system allows you to open a number of dialogs without
 -- having to bother about cleanup when the script exits
@@ -28,7 +29,7 @@ handles = {}; -- this table should hold the handle to all dialogs created in lua
 dialogs = 0; -- should be incremented PRIOR to creating a new dialog
 
 -- called by the onclose event (above)
-function emu.OnCloseIup()
+function OnCloseIup()
 	if (handles) then -- just in case the user was "smart" enough to clear this
 		local i = 1;
 		while (handles[i] ~= nil) do -- cycle through all handles, false handles are skipped, nil denotes the end
@@ -40,3 +41,5 @@ function emu.OnCloseIup()
 		end;
 	end;
 end;
+
+emu.registerexit(OnCloseIup);
