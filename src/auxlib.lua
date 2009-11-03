@@ -1,12 +1,15 @@
 -- this includes the iup system
-local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
-if(iuplua_open == nil) then require("libiuplua51"); end
-iuplua_open();
+--local iuplua_open = package.loadlib("iuplua51.dll", "iuplua_open");
+--if(iuplua_open == nil) then require("libiuplua51"); end
+--iuplua_open();
 
 -- this includes the "special controls" of iup (dont change the order though)
- local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
-if(iupcontrolslua_open == nil) then require("libiupluacontrols51"); end
-iupcontrolslua_open();
+--local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
+--if(iupcontrolslua_open == nil) then require("libiupluacontrols51"); end
+--iupcontrolslua_open();
+
+--TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+--LUACALL_BEFOREEXIT use that instead of emu.OnClose below
 
 -- callback function to clean up our mess
 -- this is called when the script exits (forced or natural)
@@ -16,7 +19,7 @@ function emu.OnClose.iuplua()
 	if(emu and emu.OnCloseIup ~= nil) then
 		emu.OnCloseIup();
 	end
-	iup.Close(); 
+	--iup.Close(); 
 end
 
 -- this system allows you to open a number of dialogs without

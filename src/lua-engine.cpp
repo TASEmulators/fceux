@@ -40,6 +40,10 @@ extern "C"
 #include <lauxlib.h>
 #include <lualib.h>
 #include <lstate.h>
+#ifdef WIN32
+	int iuplua_open(lua_State * L);
+	int iupcontrolslua_open(lua_State * L);
+#endif
 }
 
 #ifndef TRUE
@@ -4403,6 +4407,10 @@ int FCEU_LoadLuaCode(const char *filename) {
 		
 		L = lua_open();
 		luaL_openlibs(L);
+		#ifdef WIN32
+		iuplua_open(L);
+		iupcontrolslua_open(L);
+		#endif
 
 		luaL_register(L, "emu", emulib); // added for better cross-emulator compatibility
 		luaL_register(L, "FCEU", emulib); // kept for backward compatibility
