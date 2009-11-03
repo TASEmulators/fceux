@@ -43,6 +43,33 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
   <!-- News section -->
   <div class="boxbody">
 
+    <h3 class="boxsubhead">3 November 2009</h3>
+    <p>
+      <strong>FCEUX 2.1.2 release</strong>
+    </p>
+    <p>
+      Jump to the <a href="download.php">download</a> page.
+      <p>
+        The 2.1.2 release that fixes some bugs of 2.1.0a, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.
+      </p>
+        
+      <p>
+      Checkout our <a href="pressrelease-2.1.2.html">Press release</a> for details.
+      
+      or
+      
+      Jump to the <a href="download.php">download</a> page.
+      </p>
+	<p>
+	-adelikat
+	</p>
+
+
+<div class="mainbox">
+  <h2 class="boxhead">News</h2>
+  <!-- News section -->
+  <div class="boxbody">
+
     <h3 class="boxsubhead">29 July 2009</h3>
     <p>
       <strong>FCEUX 2.1.1 release</strong>
@@ -113,7 +140,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
         </pre>
       </p>
     </p>
-    -- adelikat
+    adelikat
     </p>
 
 <div class="mainbox">
