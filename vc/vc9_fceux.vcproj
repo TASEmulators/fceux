@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib lua/lua-5.1.4-x86.lib"
+				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib"
 				LinkIncremental="2"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
@@ -235,7 +235,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib  lua/lua-5.1.4-x86.lib"
+				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib"
 				LinkIncremental="1"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
@@ -2511,6 +2511,222 @@
 			</File>
 			<File
 				RelativePath="..\src\palettes\rp2c05004.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="lua"
+			>
+			<File
+				RelativePath="..\src\lua\src\lapi.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lapi.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lauxlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lauxlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lbaselib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lcode.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldblib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldebug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldebug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ldump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lfunc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lfunc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lgc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lgc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\liolib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\llex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\llex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\llimits.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lmathlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lmem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lmem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\loadlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lobject.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lobject.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lopcodes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\loslib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lparser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lparser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lstate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lstate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lstring.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lstrlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ltable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ltable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ltablib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ltm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\ltm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\luaconf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lualib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lundump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lundump.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lvm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lvm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lzio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\lzio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\lua\src\print.c"
 				>
 			</File>
 		</Filter>

@@ -34,6 +34,7 @@ fir
 input
 utils
 mappers
+lua
 """)
 #palettes
 

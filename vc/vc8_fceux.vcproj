@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib lua/lua-5.1.4-x86.lib"
+				AdditionalDependencies="delayimp.lib Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib"
 				LinkIncremental="2"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
@@ -102,88 +102,6 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\7z.dll&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="../zlib"
-				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				DisableLanguageExtensions="false"
-				ForceConformanceInForLoopScope="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				EntryPointSymbol="mainCRTStartup"
-				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
@@ -271,6 +189,88 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="xcopy /y /d &quot;$(ProjectDir)\..\src\drivers\win\7z.dll&quot; &quot;$(OutDir)&quot;&#x0D;&#x0A;&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../zlib"
+				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				DisableLanguageExtensions="false"
+				ForceConformanceInForLoopScope="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				CompileAs="1"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="dxguid.lib winmm.lib dinput.lib ws2_32.lib ddraw.lib dsound.lib"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				EntryPointSymbol="mainCRTStartup"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
@@ -732,7 +732,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|x64"
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -741,7 +741,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32"
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -891,7 +891,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|x64"
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -900,7 +900,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32"
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1017,7 +1017,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|x64"
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1026,7 +1026,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32"
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1149,7 +1149,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Debug|x64"
+						Name="Release|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1158,7 +1158,7 @@
 						/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="Release|Win32"
+						Name="Debug|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2323,15 +2323,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32"
 					>
 					<Tool
@@ -2339,6 +2330,15 @@
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						CompileAs="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -2400,7 +2400,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2409,7 +2409,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2520,6 +2520,222 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="lua5.1.4"
+			>
+			<File
+				RelativePath="..\lua5.1.4\src\lapi.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lapi.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lauxlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lauxlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lbaselib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lcode.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldblib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldebug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldebug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ldump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lfunc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lfunc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lgc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lgc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\liolib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\llex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\llex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\llimits.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lmathlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lmem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lmem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\loadlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lobject.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lobject.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lopcodes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\loslib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lparser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lparser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lstate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lstate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lstring.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lstrlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ltable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ltable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ltablib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ltm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\ltm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\luaconf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lualib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lundump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lundump.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lvm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lvm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lzio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\lzio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\lua5.1.4\src\print.c"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\src\asm.cpp"
 			>
@@ -2579,7 +2795,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -2588,7 +2804,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32"
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
