@@ -50,7 +50,7 @@ href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/output/luaScripts
     <p>
       Jump to the <a href="download.php">download</a> page.
       <p>
-        The 2.1.2 release that fixes some bugs of 2.1.0a, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.
+        The 2.1.2 release that fixes some bugs of 2.1.1, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.
       </p>
         
       <p>
