@@ -1,65 +1,58 @@
-<pre>
-29 July 2009
+<html>
 
-FCEUX 2.1.1 release
+<head>
+<title>Press Release 2.1.2</title>
+</head>
 
-The 2.1 new release that fixes some bugs of 2.1.0a, improves the accuracy of the sound core, and adds useability enhancements to the windows port.
+<body>
+<h1>FCEUX 2.1.2 Release</h1>
+04 November 2009
+<p>
+The 2.1.2 release that fixes some bugs of 2.1.0a, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.
+</p>
 
-Common - Bug fixes
-Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)
-made default save slot 0 instead of 1
+<h2>Common</h2>
+New PPU is now functional!  You can access it by changing the newPPU flag in the config file.  Windows users can access it from Config > PPU > New PPU <br>
+Dragon Ball Z 3 now playable again <br>
+Fixed action 52 game that was broken in post-FCEUX 2.0.3 versions <br>
+Mapper 253 mostly implemented <br>
+Mapper 43 fixed bug <br>
 
-Improved Sound core/PPU
-Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesnt work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. 
-Updated with the correct values for the noise and DMC table, 
-Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more  opcode test from blargg's cpu.nes test.
-Square 1 & square 2 volume controls no longer backwards
-Length counters for APU now correct variables
+<h2>Win32</h2>
 
-NewPPU (still experimental, enabled by setting newppu 1 in the config file)
-Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.
-Added palette reading cases for the new PPU.
+Imported NSF features from FCEUXDSP-NSF.  Debugging tools are now compatible with NSF files. <br>
+Movies now record FDS disk swapping commands<br>
+Movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 and 50<br>
+Ram Watch and Ram Search dialogs imported from GENS rerecording<br>
+Ram Filter dialog removed (now redundant compared to both cheat search and ram search)<br>
+Lua script window ported from GENS<br>
+Fix for the directory overrides bug that caused overrides to reset<br>
+Debugger:  .deb file saving/loading restored<br>
+"Save config file" menu item <br>
+"New PPU" menu item<br>
 
-Win32
-Minor Bug fixes
-Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number
-Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor
-Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full
-Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.
-"Disable screen saver" gui option now also diables the monitor powersave
-Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list
-Sound Config Dialog - When sound is off, all controls are grayed out
-Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item
-Memory Watch - save menu item is grayed if file hasn't changed
+<h3>Minor Bug fixes</h3>
+Minor fixes to recent menus<br>
+Fixed a bug that prevented the Map Hotkeys dialog's X button from closing the dialog<br>
+Restored DPCM Logging when Code/Data Logger is active<br>
+Memory watch - Save Changes Prompt - clicking save will default to quicksave first and save as 2nd (instead of always defaulting to save as)<br>
+Made Trace Logger refresh adequately when using stepping options in the debugger.<br>
 
+<h2>Lua</h2>
+joypad.set() fixed.  True,False, and Nil now work properly for all buttons.  In addition there is a new "invert" option.<br>
+Lua5.1.dll no longer required to use lua.<br>
+fceu.unpause()<br>
+Added savestate.registerload(), savestate.registersave(), savestate.loadscriptdata()<br>
+emu. library, has all the same functions as fceu. library for better compatibility between lua emulators<br>
+Many additional function names to increase consistency with other lua emulators<br>
+Added movie.recording() and movie.playing()<br>
+Added memory.getregister() and memory.setregister()<br>
+Added gui.popup and input.popup<br>
+Added savestate.registerload(), savestate.registersave(), and savestate.loadscriptdata()<br>
 
-GUI/Enhancements
-Last save slot used is stored in the config file
-Made fullscreen toggle (Alt+Enter) remappable
-Hex editor - Reverted fixedFontHeight to 13 instead of 14.  Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file
-Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file
-Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)
-Hex Editor - Save Rom As... menu option enabled and implemented
-Window caption shows the name of the ROM loaded
-Recent Movie Menu added
-Load Last Movie context menu item added
-Save Movie As... context menu item (for when a movie is loaded in read+write mode)
-Drag & Drop support for all files related to FCEUX including:
-    .fcm (autoconverts to .fm2 and begins movie playback)
-    Savestates
-    Palette files (.pal)
-Commandline - -palette commandline option
-Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized
+<h2>New Lua Scripts</h2>
+A multi-track movie recording tools written by FatRatKnight.  Allows input for different players to be recorded separately.<br>
+A rewinding tool written by Jonathan Blow<br>
 
-SDL
-
-added --subtitles
-fixed Four Score movie playback
-added --ripsubs for converting fm2 movie subtitles to an srt file
-Lua is optional again, fixed the real issue
-Lua is NO longer optional, so the SConscripts have been updated to reflect that change.  This fixes the mysterious non-working input issue.
-implemented saving/loading a savestate from a specific file on Alt+S/L
-implemented starting an FM2 movie on Alt+R
-added --pauseframe to pause movie playback on frame x
-dropped UTFConverter.c from SDL build
-added hotkey Q for toggling read-only/read+write movie playback
+</body>
+</html>
