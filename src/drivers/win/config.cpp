@@ -37,6 +37,7 @@
 #include "texthook.h"
 #include "movieoptions.h"
 #include "ramwatch.h"
+#include "debugger.h"
 
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
@@ -219,7 +220,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(BindToMain),
 	AC(EnableAutosave),
 	AC(frameAdvanceLagSkip),
-
+	AC(debuggerAutoload),
 	AC(allowUDLR),
 
 	//window positions

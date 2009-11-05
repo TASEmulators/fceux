@@ -1,4 +1,4 @@
-
+04-nov-2009 - adelikat - win32 - debugger - added an auto-load feature
 
 ---r1527 - FCEUX 2.1.2 Released---
 ---November 3, 2009---

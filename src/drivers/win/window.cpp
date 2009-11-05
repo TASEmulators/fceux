@@ -1044,8 +1044,12 @@ bool ALoad(char *nameo, char* innerFilename)
 
 		if (AutoRWLoad)
 		{
-			if (AutoRWLoad) OpenRWRecentFile(0);	//adelikat: TODO: This command should be called internally from the RamWatch dialog in order for it to be more portable
+			OpenRWRecentFile(0);	//adelikat: TODO: This command should be called internally from the RamWatch dialog in order for it to be more portable
 			OpenRamWatch();
+		}
+		if (debuggerAutoload)
+		{
+			DoDebug(0);
 		}
 	}
 	else

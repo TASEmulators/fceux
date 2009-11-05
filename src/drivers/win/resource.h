@@ -413,6 +413,7 @@
 #define ID_SOUND_QUALITYNOTIFY          1202
 #define IDC_CHECK1                      1203
 #define CB_ENABLECONTEXTMENU            1203
+#define DEBUGAUTOLOAD                   1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_RAMLIST                     1205
 #define IDC_C_SEARCH                    1206

@@ -65,6 +65,8 @@ HWND hDebug;
 static HFONT hFont;
 static SCROLLINFO si;
 
+bool debuggerAutoload = false;
+
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
 
@@ -953,6 +955,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	//these messages get handled at any time
 	switch(uMsg) {
 		case WM_INITDIALOG: {
+			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? MF_CHECKED : MF_UNCHECKED);
 			extern int loadDebugDataFailed;
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
 			if (DbgPosY==-32000) DbgPosY=0;
@@ -1081,6 +1084,15 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			DbgPosX = wrect.left;
 			DbgPosY = wrect.top;
 			break;
+
+		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload
+		case WM_COMMAND:
+			switch(LOWORD(wParam))
+			{
+				case DEBUGAUTOLOAD:
+					debuggerAutoload ^= 1;
+					break;
+			}
 	}
 
 	//these messages only get handled when a game is loaded
@@ -1405,8 +1417,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				break;
 		}
 	}
-
-
+	
+	
 	return FALSE; //TRUE;
 }
 
