@@ -243,6 +243,7 @@ extern bool subtitlesOnAVI;
 extern bool freshMovie;
 extern bool movie_readonly;
 extern bool autoMovieBackup;
+extern int pauseframe;
 //--------------------------------------------------
 bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 void FCEUI_MakeBackupMovie(bool dispMessage);

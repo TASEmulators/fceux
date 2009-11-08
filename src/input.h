@@ -265,6 +265,7 @@ extern struct EMUCMDTABLE FCEUI_CommandTable[];
 extern unsigned int lagCounter;
 extern bool lagCounterDisplay;
 extern char lagFlag;
+extern bool turbo;
 void LagCounterReset();
 
 #endif //_INPUT_H_

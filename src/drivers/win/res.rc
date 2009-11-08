@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -1274,6 +1275,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,11,324,364
     PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16,WS_DISABLED
+    //PUSHBUTTON      "Commit",IDC_HACKY2,404,46,51,16,WS_DISABLED
     LTEXT           "Any number of these icon buttons are pressed",IDC_STATIC,395,84,47,34
     PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14,WS_DISABLED
     PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14,WS_DISABLED
@@ -1922,7 +1924,8 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

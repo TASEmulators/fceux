@@ -133,6 +133,9 @@ void MovieData::TryDumpIncremental()
 			
 			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount++;
+		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
+		{
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 		}
 	}
 }
@@ -678,19 +681,26 @@ static void poweron(bool shouldDisableBatteryLoading)
 
 void FCEUMOV_EnterTasEdit()
 {
-	//stop any current movie activity
-	FCEUI_StopMovie();
+	if (movieMode == MOVIEMODE_INACTIVE)
+	{
+		//stop any current movie activity
+		FCEUI_StopMovie();
 
-	//clear the current movie
-	currFrameCounter = 0;
-	currMovieData = MovieData();
-	currMovieData.guid.newGuid();
-	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
-	currMovieData.romChecksum = GameInfo->MD5;
-	currMovieData.romFilename = FileBase;
+		//clear the current movie
+		currFrameCounter = 0;
+		currMovieData = MovieData();
+		currMovieData.guid.newGuid();
+		currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
+		currMovieData.romChecksum = GameInfo->MD5;
+		currMovieData.romFilename = FileBase;
 
-	//reset the rom
-	poweron(false);
+		//reset the rom
+		poweron(false);
+	} else {
+		FCEUI_StopMovie();
+
+		currMovieData.greenZoneCount=currFrameCounter;
+	}
 
 	//todo - think about this
 	//ResetInputTypes();

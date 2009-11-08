@@ -108,10 +108,12 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	case CDDS_SUBITEMPREPAINT:
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		if((msg->iSubItem-2)/8==0)
-			if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount)
+			if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
+				!currMovieData.records[msg->nmcd.dwItemSpec].savestate.empty())
 				msg->clrTextBk = RGB(192,255,192);
 			else {}
-		else if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount)
+		else if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
+			!currMovieData.records[msg->nmcd.dwItemSpec].savestate.empty())
 				msg->clrTextBk = RGB(144,192,144);
 			else msg->clrTextBk = RGB(192,192,192);
 		return CDRF_DODEFAULT;
@@ -124,6 +126,12 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 void UpdateTasEdit()
 {
 	if(!hwndTasEdit) return;
+
+	if(FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
+	{
+		FCEUI_ToggleEmulationPause();
+		turbo = false;
+	}
 
 	//update the number of items
 	int currLVItemCount = ListView_GetItemCount(hwndList);
@@ -209,9 +217,78 @@ void RightClick(LPNMITEMACTIVATE info)
 	RightClickMenu(info);
 }
 
+void LockGreenZone(int newstart)
+{
+	for (int i=1; i<newstart; ++i)
+	{
+		currMovieData.records[i].savestate.clear();
+	}
+}
+
 void InvalidateGreenZone(int after)
 {
 	currMovieData.greenZoneCount = std::min(after+1,currMovieData.greenZoneCount);
+}
+
+/* A function that tries jumping to a given frame.  If unsuccessful, it than tries to jump to
+   a previously good frame and fastforward to it. 
+
+   Returns true if a jump to the frame is made, false if nothing done. 
+   */
+bool JumpToFrame(int index)
+{
+	/* Work only within the greenzone. */
+	if (index>currMovieData.greenZoneCount)
+	{
+		return JumpToFrame(currMovieData.greenZoneCount);
+	}
+
+	if (!currMovieData.records[index].savestate.empty() &&
+		MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
+	{
+			currFrameCounter = index;
+			return true;
+	}
+	else 
+	{
+		/* Disable pause. */
+		if (FCEUI_EmulationPaused())
+			FCEUI_ToggleEmulationPause();
+
+		/* Search for an earlier frame, and try warping to the current. */
+		for (int i=index-1; i>0; --i)
+		{
+			if (!currMovieData.records[index].savestate.empty() &&
+				MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
+			{
+				currFrameCounter=i;
+				turbo=i+256<index; // turbo unless close
+				pauseframe=index;
+				return true;
+			}
+		}
+
+		extern int disableBatteryLoading;
+		disableBatteryLoading = 1;
+		PowerNES();
+		disableBatteryLoading = 0;
+		currFrameCounter=0;
+		turbo = index>256;
+		pauseframe=index;
+	}
+
+	// Simply do a reset. 
+	if (index==0)
+	{
+		extern int disableBatteryLoading;
+		disableBatteryLoading = 1;
+		PowerNES();
+		disableBatteryLoading = 0;
+		currFrameCounter=0;
+		return true;
+	}
+
+	return false;
 }
 
 void DoubleClick(LPNMITEMACTIVATE info)
@@ -228,8 +305,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		//if the row is in the green zone, then move to it
 		if(index < currMovieData.greenZoneCount)
 		{
-			MovieData::loadSavestateFrom(&currMovieData.records[index].savestate);
-			currFrameCounter = index;	
+			JumpToFrame(index);
 		}
 	}
 	else //if an input column was clicked:
@@ -243,6 +319,14 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		ListView_Update(hwndList,index);
 
 		InvalidateGreenZone(index);
+
+		// If the change is in the past, move to it. 
+		if(index < currFrameCounter &&
+           index < currMovieData.greenZoneCount)
+		{
+			JumpToFrame(index);
+		}
+
 
 		//redraw everything to show the reduced green zone
 		RedrawList();
@@ -522,6 +606,7 @@ void KillTasEdit()
 	//TODO: determine if project has changed, and ask to save changes
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
+	turbo=false;
 	FCEUMOV_ExitTasEdit();
 }
 
@@ -806,6 +891,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//hacky1: delete all items after the current selection
 				currMovieData.records.resize(currFrameCounter+1);
 				InvalidateGreenZone(currFrameCounter);
+				UpdateTasEdit();
+				break;
+
+			case IDC_HACKY2:
+				//hacky2: delete earlier savestates (conserve memory)
+				LockGreenZone(currFrameCounter);
 				UpdateTasEdit();
 				break;
 
