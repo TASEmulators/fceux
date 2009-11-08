@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2009 CaH4e3, qeed
+ *  Copyright (C) 2009 CaH4e3
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "mapinc.h"
 
-static uint8 chrlo[8], chrhi[8], prg[2], mirr;
+static uint8 chrlo[8], chrhi[8], prg[2], mirr, vlock;
 static int32 IRQa, IRQCount, IRQLatch, IRQClock; 
 static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
@@ -33,6 +33,7 @@ static SFORMAT StateRegs[]=
   {chrhi, 8, "CHRHI"},
   {prg, 2, "PRGR"},
   {&mirr, 1, "MIRR"},
+  {&vlock, 1, "VLOCK"},
   {&IRQa, 4, "IRQA"},
   {&IRQCount, 4, "IRQC"},
   {&IRQLatch, 4, "IRQL"},
@@ -51,7 +52,17 @@ static void Sync(void)
   for(i=0; i<8; i++)
   {
     uint32 chr = chrlo[i]|(chrhi[i]<<8);
-    if ((chrlo[i]==4)||(chrlo[i]==5)) // [ES-1064] Qi Long Zhu (C)
+    if(chrlo[i]==0xc8)
+    {
+      vlock = 0;
+      continue;
+    }
+    else if(chrlo[i]==0x88)
+    {
+      vlock = 1;
+      continue;
+    }
+    if(((chrlo[i]==4)||(chrlo[i]==5))&&!vlock)
       setchr1r(0x10,i<<10,chr&1);
     else
       setchr1(i<<10,chr);
@@ -72,7 +83,7 @@ static DECLFW(M253Write)
     uint8 ind=((((A&8)|(A>>8))>>3)+2)&7;
     uint8 sar=A&4;
     chrlo[ind]=(chrlo[ind]&(0xF0>>sar))|((V&0x0F)<<sar);
-    if(sar)
+    if(A&4)
       chrhi[ind]=V>>4;
     Sync();
   }
@@ -124,7 +135,7 @@ static void M253IRQ(int cycles)
       if(IRQCount==0xFF)  
       {
         IRQCount = IRQLatch;
-        IRQa = (IRQa&2)|((IRQa&0x01)<<1);
+        IRQa = IRQa|((IRQa&1)<<1);
         X6502_IRQBegin(FCEU_IQEXT);
       }
       else 
