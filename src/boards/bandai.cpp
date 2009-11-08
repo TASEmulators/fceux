@@ -48,7 +48,7 @@ static void BandaiIRQHook(int a)
     {
       X6502_IRQBegin(FCEU_IQEXT);
       IRQa = 0;
-      IRQCount = 0xFFFF;
+      IRQCount = -1;
     }
   }
 }

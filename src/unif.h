@@ -83,7 +83,6 @@ void Supervision16_Init(CartInfo *info);
 void Super24_Init(CartInfo *info);
 void Novel_Init(CartInfo *info);
 
-void BMC42in1r_Init(CartInfo *info);
 void BMC64in1nr_Init(CartInfo *info);
 void BMC70in1_Init(CartInfo *info);
 void BMC70in1B_Init(CartInfo *info);

@@ -409,7 +409,6 @@ static BMAPPING bmap[] = {
 	{ "Supervision16in1", Supervision16_Init,0},
 	{ "NovelDiamond9999999in1", Novel_Init,0},
 	{ "Super24in1SC03", Super24_Init,0},
-	{ "42in1ResetSwitch", BMC42in1r_Init, 0},
 	{ "64in1NoRepeat", BMC64in1nr_Init, 0},
 	{ "13in1JY110", BMC13in1JY110_Init, 0},
 	{ "70in1", BMC70in1_Init, 0},
