@@ -42,6 +42,9 @@ extern uint8 MMC50x5130;
 extern uint8 MMC5HackSPScroll;
 extern uint8 MMC5HackSPPage;
 
+
+#define GAME_MEM_BLOCK_SIZE 131072
+
 extern  uint8  *RAM;            //shared memory modifications
 extern  uint8  *GameMemBlock;   //shared memory modifications
 extern int EmulationPaused;
@@ -74,8 +77,8 @@ typedef struct {
 	int PAL;
 	int NetworkPlay;
 	int SoundVolume;		//Master volume
-	int TriangleVolume;	
-	int Square1Volume;	
+	int TriangleVolume;
+	int Square1Volume;
 	int Square2Volume;
 	int NoiseVolume;
 	int PCMVolume;
@@ -88,11 +91,11 @@ typedef struct {
 	//the number of scanlines in the currently selected configuration
 	int TotalScanlines() { return LastSLine - FirstSLine + 1; }
 
-	//Driver-supplied user-selected first and last rendered scanlines. 
+	//Driver-supplied user-selected first and last rendered scanlines.
 	//Usr*SLine[0] is for NTSC, Usr*SLine[1] is for PAL.
 	int UsrFirstSLine[2];
 	int UsrLastSLine[2];
-	
+
 	//this variable isn't used at all, snap is always name-based
 	//bool SnapName;
 	uint32 SndRate;
@@ -121,7 +124,7 @@ extern uint8 Exit;
 extern uint8 pale;
 extern uint8 vsdip;
 
-//#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 - cleaning out conditional compiles 
+//#define FCEUDEF_DEBUGGER //mbg merge 7/17/06 - cleaning out conditional compiles
 
 #define JOY_A   1
 #define JOY_B   2

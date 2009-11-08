@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
 *
 * Copyright notice for this file:
-*  Copyright (C) 1998 BERO 
+*  Copyright (C) 1998 BERO
 *  Copyright (C) 2002 Xodnizel
 *
 * This program is free software; you can redistribute it and/or modify
@@ -78,7 +78,7 @@ void (*MapperReset)(void);
 
 static int MapperNo=0;
 
-/*  MapperReset() is called when the NES is reset(with the reset button).  
+/*  MapperReset() is called when the NES is reset(with the reset button).
 Mapperxxx_init is called when the NES has been powered on.
 */
 
@@ -130,8 +130,8 @@ void iNESGI(GI h) //bbit edited: removed static keyword
 		 {
 			 if(mapROM)
 			 {
-				 UnmapViewOfFile(mapROM); 
-				 CloseHandle(mapROM); 
+				 UnmapViewOfFile(mapROM);
+				 CloseHandle(mapROM);
 				 ROM=0;
 			 }
 			 else
@@ -183,79 +183,79 @@ static void SetInput(void)
 {
 	static struct INPSEL moo[]=
 	{
-		{0x3a1694f9,SI_GAMEPAD,SI_GAMEPAD,SIFC_4PLAYER},       // Nekketsu Kakutou Densetsu 
+		{0x3a1694f9,SI_GAMEPAD,SI_GAMEPAD,SIFC_4PLAYER},       // Nekketsu Kakutou Densetsu
 
-		{0xc3c0811d,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  // The two "Oeka Kids" games 
-		{0x9d048ea4,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  //           
+		{0xc3c0811d,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  // The two "Oeka Kids" games
+		{0x9d048ea4,SI_GAMEPAD,SI_GAMEPAD,SIFC_OEKAKIDS},  //
 
-		{0xaf4010ea,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // World Class Track Meet 
-		{0xd74b2719,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Super Team Games 
-		{0x61d86167,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Street Cop 
-		{0x6435c095,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Short Order/Eggsplode 
+		{0xaf4010ea,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // World Class Track Meet
+		{0xd74b2719,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Super Team Games
+		{0x61d86167,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Street Cop
+		{0x6435c095,SI_GAMEPAD,SI_POWERPADB,SIFC_UNSET},  // Short Order/Eggsplode
 
 
-		{0x47232739,SI_GAMEPAD,SI_GAMEPAD,SIFC_TOPRIDER},  // Top Rider 
+		{0x47232739,SI_GAMEPAD,SI_GAMEPAD,SIFC_TOPRIDER},  // Top Rider
 
-		{0x48ca0ee1,SI_GAMEPAD,SI_GAMEPAD,SIFC_BWORLD},    // Barcode World 
-		{0x9f8f200a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Super Mogura Tataki!! - Pokkun Moguraa 
-		{0x9044550e,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Rairai Kyonshizu 
-		{0x2f128512,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Jogging Race 
-		{0x60ad090a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Athletic World 
+		{0x48ca0ee1,SI_GAMEPAD,SI_GAMEPAD,SIFC_BWORLD},    // Barcode World
+		{0x9f8f200a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Super Mogura Tataki!! - Pokkun Moguraa
+		{0x9044550e,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Rairai Kyonshizu
+		{0x2f128512,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Jogging Race
+		{0x60ad090a,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERA}, // Athletic World
 
-		{0x8a12a7d9,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Totsugeki Fuuun Takeshi Jou 
-		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Running Stadium 
-		{0x370ceb65,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Meiro Dai Sakusen 
-		// Bad dump? {0x69ffb014,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Fuun Takeshi Jou 2 
-		{0x6cca1c1f,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Dai Undoukai 
-		{0x29de87af,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Aerobics Studio 
-		{0xbba58be5,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer: Manhattan Police 
-		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer:  Running Stadium 
+		{0x8a12a7d9,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Totsugeki Fuuun Takeshi Jou
+		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Running Stadium
+		{0x370ceb65,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Meiro Dai Sakusen
+		// Bad dump? {0x69ffb014,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Fuun Takeshi Jou 2
+		{0x6cca1c1f,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB}, // Dai Undoukai
+		{0x29de87af,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Aerobics Studio
+		{0xbba58be5,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer: Manhattan Police
+		{0xea90f3e2,SI_GAMEPAD,SI_GAMEPAD,SIFC_FTRAINERB},  // Family Trainer:  Running Stadium
 
-		{0xd9f45be9,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 
-		{0x1545bd13,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 2 
+		{0xd9f45be9,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ...
+		{0x1545bd13,SI_GAMEPAD,SI_GAMEPAD,SIFC_QUIZKING},  // Gimme a Break ... 2
 
-		{0x7b44fb2a,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 2 
-		{0x9fae4d46,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 
+		{0x7b44fb2a,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong 2
+		{0x9fae4d46,SI_GAMEPAD,SI_GAMEPAD,SIFC_MAHJONG},  // Ide Yousuke Meijin no Jissen Mahjong
 
-		{0x980be936,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic 
-		{0x21f85681,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic (Gentei Ban) 
-		{0x915a53a7,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Sports 
-		{0xad9c63e2,SI_GAMEPAD,SI_UNSET,SIFC_SHADOW},  // Space Shadow 
+		{0x980be936,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic
+		{0x21f85681,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Olympic (Gentei Ban)
+		{0x915a53a7,SI_GAMEPAD,SI_GAMEPAD,SIFC_HYPERSHOT}, // Hyper Sports
+		{0xad9c63e2,SI_GAMEPAD,SI_UNSET,SIFC_SHADOW},  // Space Shadow
 
-		{0x24598791,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Duck Hunt 
-		{0xff24d794,SI_UNSET,SI_ZAPPER,SIFC_NONE},   // Hogan's Alley 
-		{0xbeb8ab01,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gumshoe 
-		{0xde8fd935,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // To the Earth 
-		{0xedc3662b,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf 
-		{0x2a6559a1,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf (J) 
+		{0x24598791,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Duck Hunt
+		{0xff24d794,SI_UNSET,SI_ZAPPER,SIFC_NONE},   // Hogan's Alley
+		{0xbeb8ab01,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gumshoe
+		{0xde8fd935,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // To the Earth
+		{0xedc3662b,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf
+		{0x2a6559a1,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf (J)
 
-		{0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // The Lone Ranger 
-		{0xb8b9aca3,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman 
-		{0x5112dc21,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman 
-		{0x4318a2f8,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Barker Bill's Trick Shooting 
-		{0x5ee6008e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Mechanized Attack 
-		{0x3e58a87e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Freedom Force 
+		{0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // The Lone Ranger
+		{0xb8b9aca3,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman
+		{0x5112dc21,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman
+		{0x4318a2f8,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Barker Bill's Trick Shooting
+		{0x5ee6008e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Mechanized Attack
+		{0x3e58a87e,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Freedom Force
 		{0xe9a7fe9e,SI_UNSET,SI_MOUSE,SIFC_NONE}, // Educational Computer 2000  //mbg merge 7/17/06 added -- appears to be from newer MM build
-		{0x851eb9be,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Shooting Range 
-		{0x74bea652,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Supergun 3-in-1 
-		{0x32fb0583,SI_UNSET,SI_ARKANOID,SIFC_NONE}, // Arkanoid(NES) 
-		{0xd89e5a67,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid (J) 
-		{0x0f141525,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid 2(J) 
+		{0x851eb9be,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Shooting Range
+		{0x74bea652,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // Supergun 3-in-1
+		{0x32fb0583,SI_UNSET,SI_ARKANOID,SIFC_NONE}, // Arkanoid(NES)
+		{0xd89e5a67,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid (J)
+		{0x0f141525,SI_UNSET,SI_UNSET,SIFC_ARKANOID}, // Arkanoid 2(J)
 
-		{0x912989dc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Playbox BASIC 
-		{0xf7606810,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.0A 
-		{0x895037bc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.1a 
-		{0xb2530afc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 3.0 
-		{0x82f1fb96,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Subor 1.0 Russian 
-		{0xabb2f974,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Study and Game 32-in-1 
-		{0xd5d6eac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Edu (As) 
-		{0x589b6b0d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV20 
-		{0x5e073a1b,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Supor English (Chinese) 
+		{0x912989dc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Playbox BASIC
+		{0xf7606810,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.0A
+		{0x895037bc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 2.1a
+		{0xb2530afc,SI_UNSET,SI_UNSET,SIFC_FKB},  // Family BASIC 3.0
+		{0x82f1fb96,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Subor 1.0 Russian
+		{0xabb2f974,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Study and Game 32-in-1
+		{0xd5d6eac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Edu (As)
+		{0x589b6b0d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV20
+		{0x5e073a1b,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // Supor English (Chinese)
 		{0x8b265862,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
-		{0x41401c6d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV40 
+		{0x41401c6d,SI_UNSET,SI_UNSET,SIFC_SUBORKB},  // SuporV40
 		{0x41ef9ac4,SI_UNSET,SI_UNSET,SIFC_SUBORKB},
-		{0x368c19a8,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Study Cartridge 
-		{0x543ab532,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Color Lines 
+		{0x368c19a8,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Study Cartridge
+		{0x543ab532,SI_UNSET,SI_UNSET,SIFC_SUBORKB},   // LIKO Color Lines
 		{0,SI_UNSET,SI_UNSET,SIFC_UNSET}
 	};
 	int x=0;
@@ -309,7 +309,7 @@ void CheckBad(uint64 md5partial)
 
 
 struct CHINF {
-	uint32 crc32;	
+	uint32 crc32;
 	int32 mapper;
 	int32 mirror;
 };
@@ -491,7 +491,7 @@ static void CheckHInfo(void)
 
 	/* Four-screen mirroring implicitly set. */
 	if(MapperNo==99)
-		Mirroring=2;   
+		Mirroring=2;
 
 	if(tofix)
 	{
@@ -505,7 +505,7 @@ static void CheckHInfo(void)
 			sprintf(gigastr+strlen(gigastr),"Mirroring should be set to \"%s\".  ",mstr[Mirroring&3]);
 		}
 		if(tofix&4)
-			strcat(gigastr,"The battery-backed bit should be set.  ");  
+			strcat(gigastr,"The battery-backed bit should be set.  ");
 		if(tofix&8)
 			strcat(gigastr,"This game should not have any CHR ROM.  ");
 		strcat(gigastr,"\n");
@@ -519,14 +519,14 @@ typedef struct {
 } NewMI;
 
 //this is for games that is not the a power of 2
-//mapper based for now... 
+//mapper based for now...
 //not really accurate but this works since games
-//that are not in the power of 2 tends to come 
+//that are not in the power of 2 tends to come
 //in obscure mappers themselves which supports such
 //size
 static int not_power2[] =
 {
-    228 
+    228
 };
 
 int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
@@ -561,11 +561,11 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 
 	//    ROM_size = head.ROM_size;
 	VROM_size = head.VROM_size;
-    
+
     int round = true;
     for (int i = 0; i != sizeof(not_power2)/sizeof(not_power2[0]); ++i)
     {
-        //for games not to the power of 2, so we just read enough 
+        //for games not to the power of 2, so we just read enough
         //prg rom from it, but we have to keep ROM_size to the power of 2
         //since PRGCartMapping wants ROM_size to be to the power of 2
         //so instead if not to power of 2, we just use head.ROM_size when
@@ -612,7 +612,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 		{
 			mapVROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, VROM_size<<13,"fceu.VROM");
 			VROM   = (uint8 *)MapViewOfFile(mapVROM, FILE_MAP_WRITE, 0, 0, 0);
-			if( !VROM ) 
+			if( !VROM )
 			{
 				UnmapViewOfFile(mapROM);
 				CloseHandle(mapROM);
@@ -652,7 +652,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	if(VROM_size)
 		FCEU_fread(VROM,0x2000,head.VROM_size,fp);
 
-	md5_starts(&md5);  
+	md5_starts(&md5);
 	md5_update(&md5,ROM,ROM_size<<14);
 
 	iNESGameCRC32=CalcCRC32(0,ROM,ROM_size<<14);
@@ -673,7 +673,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	{
 		int x;
 		FCEU_printf(" ROM MD5:  0x");
-		for(x=0;x<16;x++) 
+		for(x=0;x<16;x++)
 			FCEU_printf("%02x",iNESCart.MD5[x]);
 		FCEU_printf("\n");
 	}
@@ -690,7 +690,7 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 		for(x=0;x<8;x++)
 		{
 			partialmd5 |= (uint64)iNESCart.MD5[7-x] << (x*8);
-		} 
+		}
 
 		FCEU_VSUniCheck(partialmd5, &MapperNo, &Mirroring);
 	}
@@ -777,7 +777,7 @@ int iNesSaveAs(char* name)
 {
 	//adelikat: TODO: iNesSave() and this have pretty much the same code, outsource the common code to a single function
 	FILE *fp;
-	
+
 	if(GameInfo->type != GIT_CART)return 0;
 	if(GameInterface!=iNESGI)return 0;
 
@@ -873,12 +873,12 @@ void ROM_BANK8(uint32 A, uint32 V)
 void ROM_BANK16(uint32 A, uint32 V)
 {
 	setprg16(A,V);
-	if(A>=0x8000) 
+	if(A>=0x8000)
 	{
 		PRGBankList[((A-0x8000)>>13)]=V<<1;
 		PRGBankList[((A-0x8000)>>13)+1]=(V<<1)+1;
 	}
-} 
+}
 
 void ROM_BANK32(uint32 V)
 {
@@ -918,7 +918,7 @@ static void NONE_init(void)
 	ROM_BANK16(0x8000,0);
 	ROM_BANK16(0xC000,~0);
 
-	if(VROM_size) 
+	if(VROM_size)
 		VROM_BANK8(0);
 	else
 		setvram8(CHRRAM);
@@ -937,7 +937,7 @@ void (*MapInitTab[256])(void)=
 	Mapper9_init,
 	Mapper10_init,
 	0, //Mapper11_init,
-	0, 
+	0,
 	0, //Mapper13_init,
 	0,
     0, //Mapper15_init,
@@ -1205,7 +1205,7 @@ void iNESStateRestore(int version)
 		setprg8(0x8000+x*8192,PRGBankList[x]);
 
 	if(VROM_size)
-		for(x=0;x<8;x++) 
+		for(x=0;x<8;x++)
 			setchr1(0x400*x,CHRBankList[x]);
 
 	if(0) switch(Mirroring)
@@ -1243,7 +1243,7 @@ static void iNESPower(void)
 	if(head.ROM_type&2)
       memset(GameMemBlock+8192,0,sizeof(GameMemBlock)-8192);
 	else
-      memset(GameMemBlock,0,sizeof(GameMemBlock));
+      memset(GameMemBlock,0,GAME_MEM_BLOCK_SIZE);
 
 	NONE_init();
 	ResetExState(0,0);
@@ -1259,7 +1259,7 @@ static void iNESPower(void)
 	if(head.ROM_type&8)
 		AddExState(ExtraNTARAM, 2048, 0, "EXNR");
 
-	/* Exclude some mappers whose emulation code handle save state stuff 
+	/* Exclude some mappers whose emulation code handle save state stuff
 	themselves. */
 	if(type && type!=13 && type!=96)
 	{
@@ -1272,7 +1272,7 @@ static void iNESPower(void)
 		for(x=0;x<8;x++)
 		{
 			char tak[8];
-			sprintf(tak,"CBL%d",x);         
+			sprintf(tak,"CBL%d",x);
 			AddExState(&CHRBankList[x], 2, 1,tak);
 		}
 	}
@@ -1286,7 +1286,7 @@ static void iNESPower(void)
 
 
 typedef struct {
-	int number;   
+	int number;
 	void (*init)(CartInfo *);
 } BMAPPING;
 
@@ -1418,7 +1418,7 @@ static BMAPPING bmap[] = {
 //    {220, UNLCN22M_Init},
 //    {220, BMCT2271_Init},
 //	  {220, UNLDANCE_Init},
-    
+
     {221, UNLN625092_Init},
 	{222, Mapper222_Init},
 	{226, Mapper226_Init},
