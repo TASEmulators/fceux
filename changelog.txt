@@ -1,3 +1,8 @@
+08-nov-2009 - gocha - Win32 - Lua console - added a menu
+08-nov-2009 - gocha - change gui.line, gui.box, joypad.get to function like GENS rerecording
+08-nov-2009 - gocha - New lua functions: gui.parsecolor, joypad.getup, joypad.getdown, emu.emulating.
+08-nov-2009 - CaH4e3 - Fixes for mappers 253 & 226
+08-nov-2009 - CaH4e3 - Fix crashing on game loading for any battery backed roms with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J) 
 04-nov-2009 - adelikat - win32 - debugger - added an auto-load feature
 
 ---r1527 - FCEUX 2.1.2 Released---
