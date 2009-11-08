@@ -51,7 +51,7 @@ static void Sync(void)
   for(i=0; i<8; i++)
   {
     uint32 chr = chrlo[i]|(chrhi[i]<<8);
-    if ((chr==4)||(chr==5)) // [ES-1064] Qi Long Zhu (C)
+    if ((chrlo[i]==4)||(chrlo[i]==5)) // [ES-1064] Qi Long Zhu (C)
       setchr1r(0x10,i<<10,chr&1);
     else
       setchr1(i<<10,chr);
@@ -72,7 +72,7 @@ static DECLFW(M253Write)
     uint8 ind=((((A&8)|(A>>8))>>3)+2)&7;
     uint8 sar=A&4;
     chrlo[ind]=(chrlo[ind]&(0xF0>>sar))|((V&0x0F)<<sar);
-    if(A&4)
+    if(sar)
       chrhi[ind]=V>>4;
     Sync();
   }
@@ -147,7 +147,7 @@ void Mapper253_Init(CartInfo *info)
 
   CHRRAMSIZE=4096;
   CHRRAM=(uint8*)FCEU_gmalloc(CHRRAMSIZE);
-  SetupCartPRGMapping(0x10,CHRRAM,CHRRAMSIZE,1);
+  SetupCartCHRMapping(0x10,CHRRAM,CHRRAMSIZE,1);
   AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
 
   WRAMSIZE=8192;

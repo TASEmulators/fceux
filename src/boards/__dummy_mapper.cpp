@@ -85,8 +85,8 @@ void MapperNNN_Init(CartInfo *info)
 /*
   CHRRAMSIZE=8192;
   CHRRAM=(uint8*)FCEU_gmalloc(CHRRAMSIZE);
-  SetupCartPRGMapping(0x10,CHRRAM,CHRRAMSIZE,1);
-  AddExState(CHRRAM, CHRRAMSIZE, 0, "WRAM");
+  SetupCartCHRMapping(0x10,CHRRAM,CHRRAMSIZE,1);
+  AddExState(CHRRAM, CHRRAMSIZE, 0, "CRAM");
 */
 /*
   WRAMSIZE=8192;
