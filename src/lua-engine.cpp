@@ -2719,9 +2719,9 @@ static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour)
 {
 	if (x1 > x2)
-		std::swap<int> (x1, x2);
+		std::swap(x1, x2);
 	if (y1 > y2)
-		std::swap<int> (y1, y2);
+		std::swap(y1, y2);
 	if (x1 < 0)
 		x1 = 0;
 	if (y1 < 0)
@@ -2994,9 +2994,9 @@ static int gui_box(lua_State *L) {
 	outlinecolor = gui_optcolour(L,6,LUA_BUILD_PIXEL(255, LUA_PIXEL_R(fillcolor), LUA_PIXEL_G(fillcolor), LUA_PIXEL_B(fillcolor)));
 
 	if (x1 > x2) 
-		std::swap<int>(x1, x2);
+		std::swap(x1, x2);
 	if (y1 > y2) 
-		std::swap<int>(y1, y2);
+		std::swap(y1, y2);
 
 	gui_prepare();
 
