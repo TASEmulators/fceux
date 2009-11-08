@@ -417,6 +417,15 @@ BEGIN
     END
 END
 
+LUAWINDOW_MENU MENU
+BEGIN
+    POPUP "Console"
+    BEGIN
+        MENUITEM "&Font...",                    IDC_LUACONSOLE_CHOOSEFONT
+        MENUITEM "Clear",                       IDC_LUACONSOLE_CLEAR
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1451,6 +1460,7 @@ END
 IDD_LUA DIALOGEX 0, 0, 270, 150
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Lua Script"
+MENU LUAWINDOW_MENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     PUSHBUTTON      "Browse...",IDC_BUTTON_LUABROWSE,7,31,48,16

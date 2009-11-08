@@ -2088,9 +2088,8 @@ static int zapper_read(lua_State *L){
 // table joypad.read(int which = 1)
 //
 //  Reads the joypads as inputted by the user.
-//  This is really the only way to get input to the system.
 //  TODO: Don't read in *everything*...
-static int joypad_read(lua_State *L) {
+static int joy_get_internal(lua_State *L, bool reportUp, bool reportDown) {
 
 	// Reads the joypads as inputted by the user
 	int which = luaL_checkinteger(L,1);
@@ -2109,13 +2108,35 @@ static int joypad_read(lua_State *L) {
 	
 	int i;
 	for (i = 0; i < 8; i++) {
-		if (buttons & (1<<i)) {
-			lua_pushinteger(L,1);
+		bool pressed = (buttons & (1<<i))!=0;
+		if ((pressed && reportDown) || (!pressed && reportUp)) {
+			lua_pushboolean(L, pressed);
 			lua_setfield(L, -2, button_mappings[i]);
 		}
 	}
 	
 	return 1;
+}
+// joypad.get(which)
+// returns a table of every game button,
+// true meaning currently-held and false meaning not-currently-held
+// (as of last frame boundary)
+// this WILL read input from a currently-playing movie
+static int joypad_get(lua_State *L)
+{
+	return joy_get_internal(L, true, true);
+}
+// joypad.getdown(which)
+// returns a table of every game button that is currently held
+static int joypad_getdown(lua_State *L)
+{
+	return joy_get_internal(L, false, true);
+}
+// joypad.getup(which)
+// returns a table of every game button that is not currently held
+static int joypad_getup(lua_State *L)
+{
+	return joy_get_internal(L, true, false);
 }
 
 
@@ -2393,6 +2414,12 @@ int emu_lagged (lua_State *L) {
 	return 1;
 }
 
+// boolean emu.emulating()
+int emu_emulating(lua_State *L) {
+	lua_pushboolean(L, GameInfo != NULL);
+	return 1;
+}
+
 // string movie.mode()
 //
 //   "record", "playback" or nil
@@ -2535,6 +2562,10 @@ static void gui_prepare() {
 #define DECOMPOSE_PIXEL_ARGB8888(PIX,A,R,G,B) { (A) = ((PIX) >> 24) & 0xff; (R) = ((PIX) >> 16) & 0xff; (G) = ((PIX) >> 8) & 0xff; (B) = (PIX) & 0xff; }
 #define LUA_BUILD_PIXEL BUILD_PIXEL_ARGB8888
 #define LUA_DECOMPOSE_PIXEL DECOMPOSE_PIXEL_ARGB8888
+#define LUA_PIXEL_A(PIX) (((PIX) >> 24) & 0xff)
+#define LUA_PIXEL_R(PIX) (((PIX) >> 16) & 0xff)
+#define LUA_PIXEL_G(PIX) (((PIX) >> 8) & 0xff)
+#define LUA_PIXEL_B(PIX) ((PIX) & 0xff)
 
 template <class T> static void swap(T &one, T &two) {
 	T temp = one;
@@ -2684,6 +2715,33 @@ static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 	gui_drawline_internal(x2, y1, x2, y2, true, colour);
 }
 
+// draw fill rect on gui_data
+static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour)
+{
+	if (x1 > x2)
+		std::swap<int> (x1, x2);
+	if (y1 > y2)
+		std::swap<int> (y1, y2);
+	if (x1 < 0)
+		x1 = 0;
+	if (y1 < 0)
+		y1 = 0;
+	if (x2 >= LUA_SCREEN_WIDTH)
+		x2 = LUA_SCREEN_WIDTH - 1;
+	if (y2 >= LUA_SCREEN_HEIGHT)
+		y2 = LUA_SCREEN_HEIGHT - 1;
+
+	//gui_prepare();
+	int ix, iy;
+	for (iy = y1; iy <= y2; iy++)
+	{
+		for (ix = x1; ix <= x2; ix++)
+		{
+			gui_drawpixel_fast(ix, iy, colour);
+		}
+	}
+}
+
 enum
 {
 	GUI_COLOUR_CLEAR
@@ -2819,6 +2877,35 @@ static inline uint32 gui_getcolour_wrapped(lua_State *L, int offset, bool hasDef
 			uint32 colour = (uint32) lua_tointeger(L,offset);
 			return colour;
 		}
+	case LUA_TTABLE:
+		{
+			int color = 0xFF;
+			lua_pushnil(L); // first key
+			int keyIndex = lua_gettop(L);
+			int valueIndex = keyIndex + 1;
+			bool first = true;
+			while(lua_next(L, offset))
+			{
+				bool keyIsString = (lua_type(L, keyIndex) == LUA_TSTRING);
+				bool keyIsNumber = (lua_type(L, keyIndex) == LUA_TNUMBER);
+				int key = keyIsString ? tolower(*lua_tostring(L, keyIndex)) : (keyIsNumber ? lua_tointeger(L, keyIndex) : 0);
+				int value = lua_tointeger(L, valueIndex);
+				if(value < 0) value = 0;
+				if(value > 255) value = 255;
+				switch(key)
+				{
+				case 1: case 'r': color |= value << 24; break;
+				case 2: case 'g': color |= value << 16; break;
+				case 3: case 'b': color |= value << 8; break;
+				case 4: case 'a': color = (color & ~0xFF) | value; break;
+				}
+				lua_pop(L, 1);
+			}
+			return color;
+		}	break;
+	case LUA_TFUNCTION:
+		luaL_error(L, "invalid colour"); // NYI
+		return 0;
 	default:
 		if (hasDefaultValue)
 			return defaultColour;
@@ -2873,32 +2960,55 @@ static int gui_pixel(lua_State *L) {
 	return 0;
 }
 
-// gui.line(x1,y1,x2,y2,type colour)
+// gui.line(x1,y1,x2,y2,color,skipFirst)
 static int gui_line(lua_State *L) {
 
 	int x1,y1,x2,y2;
-	uint32 colour;
+	uint32 color;
 	x1 = luaL_checkinteger(L,1);
 	y1 = luaL_checkinteger(L,2);
 	x2 = luaL_checkinteger(L,3);
 	y2 = luaL_checkinteger(L,4);
-	colour = gui_getcolour(L,5);
-
-//	if (!gui_check_boundary(x1, y1))
-//		luaL_error(L,"bad coordinates");
-//
-//	if (!gui_check_boundary(x2, y2))
-//		luaL_error(L,"bad coordinates");
+	color = gui_optcolour(L,5,LUA_BUILD_PIXEL(255, 255, 255, 255));
+	int skipFirst = lua_toboolean(L,6);
 
 	gui_prepare();
 
-	gui_drawline_internal(x1, y1, x2, y2, true, colour);
+	gui_drawline_internal(x2, y2, x1, y1, !skipFirst, color);
 
 	return 0;
 }
 
-// gui.box(x1, y1, x2, y2, colour)
+// gui.box(x1, y1, x2, y2, fillcolor, outlinecolor)
 static int gui_box(lua_State *L) {
+
+	int x1,y1,x2,y2;
+	uint32 fillcolor;
+	uint32 outlinecolor;
+
+	x1 = luaL_checkinteger(L,1);
+	y1 = luaL_checkinteger(L,2);
+	x2 = luaL_checkinteger(L,3);
+	y2 = luaL_checkinteger(L,4);
+	fillcolor = gui_optcolour(L,5,LUA_BUILD_PIXEL(63, 255, 255, 255));
+	outlinecolor = gui_optcolour(L,6,LUA_BUILD_PIXEL(255, LUA_PIXEL_R(fillcolor), LUA_PIXEL_G(fillcolor), LUA_PIXEL_B(fillcolor)));
+
+	if (x1 > x2) 
+		std::swap<int>(x1, x2);
+	if (y1 > y2) 
+		std::swap<int>(y1, y2);
+
+	gui_prepare();
+
+	gui_drawbox_internal(x1, y1, x2, y2, outlinecolor);
+	if ((x2 - x1) >= 2 && (y2 - y1) >= 2)
+		gui_fillbox_internal(x1+1, y1+1, x2-1, y2-1, fillcolor);
+
+	return 0;
+}
+
+// (old) gui.box(x1, y1, x2, y2, color)
+static int gui_box_old(lua_State *L) {
 
 	int x1,y1,x2,y2;
 	uint32 colour;
@@ -2920,6 +3030,18 @@ static int gui_box(lua_State *L) {
 	gui_drawbox_internal(x1, y1, x2, y2, colour);
 
 	return 0;
+}
+
+static int gui_parsecolor(lua_State *L)
+{
+	int r, g, b, a;
+	uint32 color = gui_getcolour(L,1);
+	LUA_DECOMPOSE_PIXEL(color, a, r, g, b);
+	lua_pushinteger(L, r);
+	lua_pushinteger(L, g);
+	lua_pushinteger(L, b);
+	lua_pushinteger(L, a);
+	return 4;
 }
 
 
@@ -4182,6 +4304,7 @@ static const struct luaL_reg emulib [] = {
 	{"framecount", emu_framecount},
 	{"lagcount", emu_lagcount},
 	{"lagged", emu_lagged},
+	{"emulating", emu_emulating},
 	{"registerbefore", emu_registerbefore},
 	{"registerafter", emu_registerafter},
 	{"registerexit", emu_registerexit},
@@ -4224,11 +4347,15 @@ static const struct luaL_reg memorylib [] = {
 };
 
 static const struct luaL_reg joypadlib[] = {
-	{"get", joypad_read},
+	{"get", joypad_get},
+	{"getdown", joypad_getdown},
+	{"getup", joypad_getup},
 	{"set", joypad_set},
 	// alternative names
-	{"read", joypad_read},
+	{"read", joypad_get},
 	{"write", joypad_set},
+	{"readdown", joypad_getdown},
+	{"readup", joypad_getup},
 	{NULL,NULL}
 };
 
