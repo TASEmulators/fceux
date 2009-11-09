@@ -237,13 +237,16 @@ void InvalidateGreenZone(int after)
    */
 bool JumpToFrame(int index)
 {
+	if (index<0) return false; 
+
 	/* Work only within the greenzone. */
 	if (index>currMovieData.greenZoneCount)
 	{
 		return JumpToFrame(currMovieData.greenZoneCount);
 	}
 
-	if (!currMovieData.records[index].savestate.empty() &&
+	if (index<currMovieData.records.size() && 
+		!currMovieData.records[index].savestate.empty() &&
 		MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
 	{
 			currFrameCounter = index;
@@ -255,15 +258,19 @@ bool JumpToFrame(int index)
 		if (FCEUI_EmulationPaused())
 			FCEUI_ToggleEmulationPause();
 
+		int i = index-1;
+		if (i>=currMovieData.records.size())
+			i=currMovieData.records.size()-1;
+
 		/* Search for an earlier frame, and try warping to the current. */
-		for (int i=index-1; i>0; --i)
+		for (; i>0; --i)
 		{
-			if (!currMovieData.records[index].savestate.empty() &&
-				MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
+			if (!currMovieData.records[i].savestate.empty() &&
+				MovieData::loadSavestateFrom(&currMovieData.records[i].savestate))
 			{
 				currFrameCounter=i;
-				turbo=i+256<index; // turbo unless close
-				pauseframe=index;
+				turbo=i+60<index; // turbo unless close
+				pauseframe=index+1;
 				return true;
 			}
 		}
@@ -273,8 +280,8 @@ bool JumpToFrame(int index)
 		PowerNES();
 		disableBatteryLoading = 0;
 		currFrameCounter=0;
-		turbo = index>256;
-		pauseframe=index;
+		turbo = index>60;
+		pauseframe=index+1;
 	}
 
 	// Simply do a reset. 
@@ -932,17 +939,21 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			
 			case TASEDIT_FOWARD:
 				//advance 1 frame
+				JumpToFrame(currFrameCounter+1);
 				break;
 
 			case TASEDIT_REWIND:
 				//rewinds 1 frame
+				JumpToFrame(currFrameCounter-1);
 				break;
 
 			case TASEDIT_REWIND_FULL:
 				//rewinds to beginning of movie
+				JumpToFrame(0);
 				break;
 			case TASEDIT_FOWARD_FULL:
 				//moves to the end of the move (or green zone?)
+				JumpToFrame(currMovieData.records.size()-1 );
 				break;
 
 			}

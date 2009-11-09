@@ -223,21 +223,21 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_TASEDIT_FILE_CLOSE
     END
-    POPUP "&Edit", INACTIVE
+    POPUP "&Edit"
     BEGIN
-        MENUITEM "&Select All",                 ID_EDIT_SELECTALL
+        MENUITEM "&Select All",                 ID_EDIT_SELECTALL, INACTIVE
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE
-        MENUITEM "Paste to &New\tCtrl+Shift+V", ID_TASEDIT_PASTETONEW
-        MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE
+        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT, INACTIVE
+        MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY, INACTIVE
+        MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE, INACTIVE
+        MENUITEM "Paste to &New\tCtrl+Shift+V", ID_TASEDIT_PASTETONEW, INACTIVE
+        MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE, INACTIVE
         MENUITEM SEPARATOR
-        MENUITEM "&Add Marker",                 ID_EDIT_ADDMARKER
-        MENUITEM "&Remove Marker",              ID_EDIT_REMOVEMARKER
+        MENUITEM "&Add Marker",                 ID_EDIT_ADDMARKER, INACTIVE
+        MENUITEM "&Remove Marker",              ID_EDIT_REMOVEMARKER, INACTIVE
         MENUITEM SEPARATOR
         MENUITEM "&Truncate\tCtrl+T",           ID_EDIT_TRUNCATE
-        MENUITEM "&Branch\tCtrl+B",             ID_EDIT_BRANCH
+        MENUITEM "&Branch\tCtrl+B",             ID_EDIT_BRANCH, INACTIVE
     END
     MENUITEM "&View",                       ID_VIEW, INACTIVE
     POPUP "&Help"
@@ -1283,13 +1283,13 @@ MENU TASEDITMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,11,324,364
-    PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16,WS_DISABLED
+    PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16
     //PUSHBUTTON      "Commit",IDC_HACKY2,404,46,51,16,WS_DISABLED
     LTEXT           "Any number of these icon buttons are pressed",IDC_STATIC,395,84,47,34
-    PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14,WS_DISABLED
-    PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14,WS_DISABLED
-    PUSHBUTTON      "<<",TASEDIT_REWIND_FULL,341,25,26,14,WS_DISABLED
-    PUSHBUTTON      ">>",TASEDIT_FOWARD_FULL,417,25,26,14,WS_DISABLED
+    PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14
+    PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14
+    PUSHBUTTON      "<<",TASEDIT_REWIND_FULL,341,25,26,14
+    PUSHBUTTON      ">>",TASEDIT_FOWARD_FULL,417,25,26,14
     GROUPBOX        "Static",IDC_STATIC,335,11,120,176
     GROUPBOX        "Project Input Logs",IDC_STATIC,335,200,120,175
     PUSHBUTTON      "Record P1",IDC_BUTTON5,340,95,50,14,WS_DISABLED
