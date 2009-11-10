@@ -1,30 +1,64 @@
--- Multi-track rerecording for FCEUX
+-- Multi-track rerecording for FCEUX 2.1.2 or later (script V2)
 -- To make up for the lack of an internal multi-track rerecording in FCEUX.
 -- It may get obsolete when TASEdit comes around.
 --FatRatKnight
 -- Rewind (by Antony Lavelle) added by DarkKobold
 
+--   Instructions:
+-- The script has its own buttons, defined in the junk below.
+-- If you're not sure what they do, experiment by pressing the button!
+-- If you're still not sure, I'll give you some basic idea here.
+
+-- With the script buttons, defined by key down there, you can
+-- toggle the input on or off for the next frame. Just push
+-- the key button, and you'll see a light change. I don't
+-- recommend HOLDing down the key button, especially if they
+-- overlap with the actual controls you've set up on your
+-- emulator. Especially there, since that's where problems begin.
+
+-- I also have options to determine whether the input from
+-- the emulator should apply or whether the script should
+-- bother. Hold space (default keys), and you can switch
+-- individual buttons on or off. The script will decide
+-- whether to ignore the script keys here or the input stored
+-- away in its list, with the options that pop up.
+
+-- There's a player switch as well. Just hit the S key
+-- (default keys) and it'll change to player 2. Or 3, or 4.
+-- Or all players at once. This will make the script keys
+-- start working on other players instead of just 1.
+
+-- Then there's the joypad input. home or end (default keys)
+-- grants varying levels of control to the emulator joypad.
+-- If you want to get rid of all control from the joypad setup
+-- of the emulator, you can do that. The defaults are to allow
+-- the controllers to toggle whatever input the script has.
+-- I did not implement a way to give this decision to
+-- individual joypad keys.
+
+-- That's the basics of controlling input with this script.
+-- The script buttons let you decide input without a frame
+-- advance, and the joypad keys are there if you're so used
+-- to holding things down while pressing frame advance.
+
+
+-- A few more advanced things are in here. I will briefly mention them:
+  -- Rewind:  Back up a frame or two with a press of a button!
+    -- Seems to hog up CPU greatly. Disable if you want things run smoothly.
+  -- Insert/Delete: Found a time saver, yet want to keep later input?
+    -- This lets you slide a chunk of frames forward or back.
+    -- I display a number that says how many frames are buffered.
+  -- Immediate: Good if you want to change input while rewinding.
+    -- Okay, its use is quite rare, but it's there.
+
+-- Hopefully, this is enough to let you get started. Good luck!
+
+
 
 -- Stuff that you are encouraged to change to fit what you need.
 --*****************************************************************************
-local players= 2             -- You may tweak the number of players here.
+-- Control scheme. Just experiment a little with the buttons.
 
-local saveMax= 1000          -- Max Rewind Power. Set to 0 to disable
-
-local opaque= 0              -- Default opacity. 0 is solid, 4 is invisible.
-
-local dispX, dispY= 10, 99   -- For the display stuffs
-
-local Past, Future= -10, 10  -- Keep Past negative; Range of display stuffs
-
-local immediate= false       -- true:  Changes apply to list upon happening
-                             -- false: Changes only apply on frame advance
-local JoyOn = "inv"        -- true   OR  "inv"   If true, disable turn-off
-local JoyOff= nil          -- false  OR  nil     If false, disable turn-on
-
-local MsgDuration= 60        -- How long should messages stay?
-
--- Control scheme. You may want to change these.
 local selectplayer = "S"     -- For selecting which player
 local recordingtype= "space" -- For selecting how to record
 local SetImmediate = "numpad5"--Toggle immediate option
@@ -39,10 +73,37 @@ local MoreFuture, LessFuture= "numpad3", "numpad9"  -- Good use of screen space
 
 local add, remove  = "insert", "delete"   -- Moves input around
 local rewind = "R"    -- The button used to rewind things
-local key = {"right", "left", "down", "up",   "C",      "V",   "X", "Z"}
 
+local key = {"right", "left", "down", "up",   "L",      "O",   "J", "K"}
 local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
--- Don't change btn, unless it's to adjust the spacing to keep it lined up neatly.
+
+-- key links to the keyboard keys, so change those to fit your control needs.
+-- btn links to joypad buttons. Don't change what's in there.
+-- However, feel free to reorder the strings in btn! It will change the display!
+
+
+--*****************************************************************************
+-- Values to change. players, saveMax, and MsgDuration aren't changed in the
+-- code. All others are simply default values which can dynamically change.
+
+local players= 2             -- You may tweak the number of players here.
+
+local saveMax= 1000          -- Max Rewind Power. Set to 0 to disable
+
+local opaque= 0              -- Default opacity. 0 is solid, 4 is invisible.
+
+local dispX, dispY= 10, 99   -- Default input display position.
+
+local Past, Future= -10, 10  -- Keep Past negative; Range of input display
+
+local immediate= false       -- true:  Changes apply to list upon happening
+                             -- false: Changes only apply on frame advance
+local JoyOn = "inv"        -- true   OR  "inv"   If true, disable turn-off
+local JoyOff= nil          -- false  OR  nil     If false, disable turn-on
+
+local MsgDuration= 60        -- How long should messages stay?
+
+
 --*****************************************************************************
 
 -- Stuff that really shouldn't be messed with, unless you plan to change the code significantly.
@@ -51,9 +112,8 @@ local keys, lastkeys= {}, {} -- To hold keyboard input
 local Pin, thisInput= {}, {} -- Input manipulation array
 local BufInput, BufLen= {},{}-- In case you want to insert or remove frames.
 local option= {}             -- Options for individual button input by script
-local fc, lastfc= nil, nil   -- Frame counters
+local fc, lastfc= 0, 0       -- Frame counters
 local FrameAdvance= false    -- Frame advance detection
-local framed= nil            -- "frameadvance", "stateload", or nil
 local pl= 1                  -- Player selected
 local plmin, plmax= 1, 1     -- For the all option
 local repeater= 0            -- for holding a button
@@ -151,33 +211,6 @@ function DispMsg()
     end
 end
 
-
---*****************************************************************************
-function NewFrame()
---*****************************************************************************
---FatRatKnight
--- Psuedo-detection of frame-advance or state load.
--- The lack of a function to otherwise detect state loads calls for this function
--- Accesses: fc, lastfc, FrameAdvance
-
-    if FrameAdvance then        -- Main loop sets this flag
-        FrameAdvance= false     -- Don't re-detect FA.
-
-        if fc-1 == lastfc then     -- Sanity versus an unpaused
-            return "frameadvance"  -- game during a stateload.
-
-        else                       -- fc-1 instead of lastfc+1
-            return "stateload"     -- is used as lastfc isn't
-        end                        -- necessarily defined.
-    end
-
-    if fc ~= lastfc    then     -- Main loop didn't set FrameAdvance,
-        return "stateload"      -- so here we are, checking if the
-    end                         -- frame did change.
-
-    return nil                  -- fc == lastfc. No advance or load
-end                             -- Yes, a stateload on the same frame
-                                -- is counted as a nil.
 
 --*****************************************************************************
 function RewindThis()
@@ -305,6 +338,79 @@ end
 
 
 --*****************************************************************************
+function NewFrame()
+--*****************************************************************************
+--FatRatKnight
+-- Psuedo-detection of frame-advance or state load.
+-- The lack of a function to otherwise detect state loads calls for this function
+-- Accesses: fc, lastfc, FrameAdvance
+
+    fc= movie.framecount()
+
+    for P= 1, players do
+        InputSnap(P)
+        LoadStoredInput(P)
+    end
+end
+
+savestate.registerload(NewFrame)
+
+
+--*****************************************************************************
+local Draw= {}   --Draw[button]( Left , Top , color )
+--*****************************************************************************
+--FatRatKnight
+-- A set of functions for which to draw unique objects for each button.
+-- The functions are in a table, so I can index them easy.
+-- For use with DisplayInput()
+
+function Draw.right(x,y,color)       --    ##
+    gui.line(x  ,y  ,x+1,y  ,color)  --      #
+    gui.line(x  ,y+2,x+1,y+2,color)  --    ##
+    gui.pixel(x+2,y+1,color)
+end
+
+function Draw.left(x,y,color)        --     ##
+    gui.line(x+1,y  ,x+2,y  ,color)  --    #
+    gui.line(x+1,y+2,x+2,y+2,color)  --     ##
+    gui.pixel(x  ,y+1,color)
+end
+
+function Draw.up(x,y,color)          --     #
+    gui.line(x  ,y+1,x  ,y+2,color)  --    # #
+    gui.line(x+2,y+1,x+2,y+2,color)  --    # #
+    gui.pixel(x+1,y  ,color)
+end
+
+function Draw.down(x,y,color)        --    # #
+    gui.line(x  ,y  ,x  ,y+1,color)  --    # #
+    gui.line(x+2,y  ,x+2,y+1,color)  --     #
+    gui.pixel(x+1,y+2,color)
+end
+
+function Draw.start(x,y,color)       --     #
+    gui.line(x+1,y  ,x+1,y+2,color)  --    ###
+    gui.line(x  ,y+1,x+2,y+1,color)  --     #
+end
+
+function Draw.select(x,y,color)      --    ###
+    gui.box(x  ,y  ,x+2,y+2,color)   --    # #
+end                                  --    ###
+
+function Draw.A(x,y,color)           --    ###
+    gui.box(x  ,y  ,x+2,y+1,color)   --    ###
+    gui.pixel(x  ,y+2,color)         --    # #
+    gui.pixel(x+2,y+2,color)
+end
+
+function Draw.B(x,y,color)           --    # #
+    gui.line(x  ,y  ,x  ,y+2,color)  --    ##
+    gui.line(x+1,y+1,x+2,y+2,color)  --    # #
+    gui.pixel(x+2,y  ,color)
+end
+
+
+--*****************************************************************************
 function DisplayInput()
 --*****************************************************************************
 --FatRatKnight; Changes by DarkKobold.
@@ -323,11 +429,11 @@ if (Future-Past) > 53 then
 end
 Past  = math.min(Past  ,0)
 Future= math.max(Future,0)
-dispY = math.min(math.max(dispY,11-4*Past),225-4*Future)
+dispY = math.min(math.max(dispY, 3-4*Past),217-4*Future)
 
     for i= Past, Future do
 
-        local Y= dispY
+        local X,Y= dispX,dispY
         if i < 0 then
             Y= Y-3
         elseif i > 0 then
@@ -349,10 +455,10 @@ dispY = math.min(math.max(dispY,11-4*Past),225-4*Future)
                 end
 
                 if pl <= players then
-                    gui.drawbox(dispX +4*j,Y +4*i,dispX+2 +4*j,Y+2 +4*i,color)
+                    Draw[btn[j]]( X +4*j , Y +4*i , color)
                 else  -- all players
-                    local bx= dispX+1 +j +2*players*(j-1) +2*P
-                    gui.drawbox(bx , Y+4*i , bx+1 , Y+4*i +2  ,color)
+                    local bx= X+1 +j +2*players*(j-1) +2*P
+                    gui.box(bx , Y+4*i , bx+1 , Y+4*i +2  ,color)
                 end
             end
         end
@@ -371,9 +477,9 @@ dispY = math.min(math.max(dispY,11-4*Past),225-4*Future)
         end
     end
     if pl <= players then
-        gui.drawbox(dispX+2,dispY-2,dispX+36,dispY+4,color)
+        gui.box(dispX+2,dispY-2,dispX+36,dispY+4,color)
     else
-        gui.drawbox(dispX+2,dispY-2,dispX+12 +16*players,dispY+4,color)
+        gui.box(dispX+2,dispY-2,dispX+12 +16*players,dispY+4,color)
     end
 end
 
@@ -384,38 +490,40 @@ function itisyourturn()
 --*****************************************************************************
     keys= input.get()       -- We need the keyboard and mouse!
     fc= movie.framecount()  -- We also need the Frame Count.
-    framed= NewFrame()      -- Are we looking at a new frame?
 
 -- State: Rewind
  if saveMax > 0 then  -- Disable Rewind if none exists
     if pressrepeater(rewind) or rewinding then
         rewinding= false
         if RewindThis() then
-            fc= movie.framecount()  -- Definite change here!
-            framed= "stateload"     -- Don't even bother with NewFrame()...
+            NewFrame()
             movie.rerecordcounting(true)
         end
         if rewindCount <= 0 then
-            FCEU.pause()
+            emu.pause()
         end
     end
  end
 
+    if (fc == 0) and (lastfc ~= 0) then  -- Hacky bit of script...
+        NewFrame()                       -- In case of resets that aren't
+    end                                  -- considered stateloads.
+
 -- Selection: Players
-    if press(selectplayer) then    -- Hopefully, this block is
-        pl= pl + 1                 -- self-explanatory.
+    if press(selectplayer) then
+        pl= pl + 1
         if (pl > players+1)  or  (players == 1) then
-            pl= 1                  -- If not, it... Selects a player...
+            pl= 1
         end
-    end
 
 -- For standard player loops for allplayer option
-    if pl > players then
-        plmin= 1
-        plmax= players
-    else
-        plmin= pl
-        plmax= pl
+        if pl > players then
+            plmin= 1
+            plmax= players
+        else
+            plmin= pl
+            plmax= pl
+        end
     end
 
 
@@ -511,30 +619,23 @@ function itisyourturn()
 
 
 -- Begin start of frame change
-    if framed then
+    if FrameAdvance then
         for P= 1, players do
-            if not Pin[P][lastfc]  or  framed == "stateload" then
+            if not Pin[P][lastfc] then
                 InputSnap(P)     -- If last frame was empty, kill the shift
             end                  -- Don't track more than one buffer for loads
 
-
-            if framed == "frameadvance" then
-                if not Pin[P][lastfc] then
-                    Pin[P][lastfc]= {}
-                end
-
 -- Scroll the BufInput if there's anything in there.
 -- This can potentially slow things if you insert enough frames.
-                if BufLen[P] > 0 then
-                    for i= BufLen[P], 1, -1 do
-                        BufInput[P][i]= BufInput[P][i-1]
-                    end
-                    BufInput[P][1]= Pin[P][lastfc]
+            if BufLen[P] > 0 then
+                for i= BufLen[P], 1, -1 do
+                    BufInput[P][i]= BufInput[P][i-1]
                 end
+                BufInput[P][1]= Pin[P][lastfc]
+            end
 
 -- Store input
-                Pin[P][lastfc]= joypad.get(P)
-            end
+            Pin[P][lastfc]= joypad.get(P)
 
             LoadStoredInput(P)
         end -- Loop for each player
@@ -568,7 +669,6 @@ function itisyourturn()
             gui.text(20,20+12*i,btn[i])
 
             if pl >= players + 1 then
-                local z
                 local q= optType[option[1][btn[i]]]
                 for z= 2, players do
                     if q ~= optType[option[z][btn[i]]] then
@@ -578,9 +678,9 @@ function itisyourturn()
                 end
                 gui.text(50,20+12*i,q)
             else
-               gui.text(50,20+12*i,optType[option[pl][btn[i]]])
-
+                gui.text(50,20+12*i,optType[option[pl][btn[i]]])
             end
+
         end -- key loop
 
 -- Are you setting actual input?
@@ -660,6 +760,7 @@ function itisyourturn()
 
     lastfc= fc        -- Standard "this happened last time" stuff
     lastkeys= keys    -- Don't want to keep registering key hits.
+    FrameAdvance= false
 
 end  -- Yes, finally! The end of itisyourturn!
 --*****************************************************************************
@@ -667,7 +768,7 @@ end  -- Yes, finally! The end of itisyourturn!
 
 gui.register(itisyourturn) -- Need to call while in between frames
 
-FCEU.pause();              -- Immediate pause is nice
+emu.pause();               -- Immediate pause is nice
 
 --*****************************************************************************
 while true do  -- Main loop
@@ -676,8 +777,8 @@ while true do  -- Main loop
 -- Rewinding feature originally by Antony Lavelle.
 -- Keep in mind stuff here only happens on a frame advance or when unpaused.
 
-    FrameAdvance= true -- For the NewFrame function
-    FCEU.frameadvance()
+    FrameAdvance= true
+    emu.frameadvance()
 
  if saveMax > 0 then  -- Don't process if Rewind is disabled
     if keys[rewind] and rewindCount > 0 then
@@ -701,9 +802,3 @@ while true do  -- Main loop
  end
 
 end -- Main loop ends
-
-
--- Possible inconveniences include:
--- * You should reload the script every time you switch through movies.
---   Failure to reload will result in old, "junk" input showing up. It hasn't been erased yet.
--- * Won't care about what you set up for your normal player input. Though it works with it fine.
