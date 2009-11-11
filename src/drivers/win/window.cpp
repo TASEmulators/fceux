@@ -1358,7 +1358,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 					FCEU_LoadLuaCode(ftmp);
 				//-------------------------------------------------------
-				//Check if memory watchlist file
+				//Check if Ram Watch file
 				//-------------------------------------------------------
 				else if (!(fileDropped.find(".wch") == string::npos) && (fileDropped.find(".wch") == fileDropped.length()-4)) {
 					if (GameInfo) {
@@ -1416,7 +1416,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						//	RemoveRecentItem((wParam - LUA_FIRST_RECENT_FILE), recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
 						//	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
 						//}
-						//adelikat: Commenting this code out because it is annoyin in context lua scripts since lua scripts will frequently give errors to those developing them.  It is frustrating for this to pop up every time.
+						//adelikat: Commenting this code out because it is annoying in context lua scripts since lua scripts will frequently give errors to those developing them.  It is frustrating for this to pop up every time.
 					}
 				}
 			}
@@ -1534,12 +1534,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				{
 					if (!FCEU_LoadLuaCode(recent_lua[0]))
 					{
-						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
-						if (result == IDYES)
-						{
-							RemoveRecentItem(0, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
-							UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
-						}
+						//int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
+						//if (result == IDYES)
+						//{
+						//	RemoveRecentItem(0, recent_lua, MAX_NUMBER_OF_LUA_RECENT_FILES);
+						//	UpdateLuaRMenu(recentluamenu, recent_lua, MENU_LUA_RECENT, LUA_FIRST_RECENT_FILE);
+						//}
+						//adelikat: Forgot to comment this out for 2.1.2 release.  FCEUX shouldn't ask in this case because it is too likely that lua script will error many times for a user developing a lua script.
 					}
 				}
 				break;
