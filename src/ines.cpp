@@ -1241,7 +1241,7 @@ static void iNESPower(void)
 	all of the iNES mapper code... */
 	IRQCount=IRQLatch=IRQa=0;
 	if(head.ROM_type&2)
-      memset(GameMemBlock+8192,0,sizeof(GameMemBlock)-8192);
+      memset(GameMemBlock+8192,0,GAME_MEM_BLOCK_SIZE-8192);
 	else
       memset(GameMemBlock,0,GAME_MEM_BLOCK_SIZE);
 
