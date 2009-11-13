@@ -75,3 +75,5 @@ extern bool undoLS;					 //undo loadstate flag
 extern bool redoLS;					 //redo savestate flag
 extern bool backupSavestates;		 //Whether or not to make backups, true by default
 bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
+
+extern bool compressSavestates;		//Whether or not to compress non-movie savestates (by default, yes)

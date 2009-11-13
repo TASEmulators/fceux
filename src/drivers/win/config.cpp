@@ -299,6 +299,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(ramw_y),
 
 	AC(backupSavestates),
+	AC(compressSavestates),
 
 	ENDCFGSTRUCT
 };

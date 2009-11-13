@@ -81,6 +81,7 @@ bool redoLS = false;		  //This will be true if a backupstate was loaded, meaning
 bool internalSaveLoad = false;
 
 bool backupSavestates = true;
+bool compressSavestates = true;  //By default FCEUX compresses savestates when a movie is inactive.
 
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
@@ -416,7 +417,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	int error = Z_OK;
 	uint8* cbuf = (uint8*)ms.buf();
 	uLongf comprlen = -1;
-	if(compressionLevel != Z_NO_COMPRESSION)
+	if(compressionLevel != Z_NO_COMPRESSION && compressSavestates)
 	{
 		//worst case compression.
 		//zlib says "0.1% larger than sourceLen plus 12 bytes"

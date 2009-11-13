@@ -111,6 +111,7 @@ BEGIN
             MENUITEM "&Auto-savestates",            MENU_ENABLE_AUTOSAVE
             MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
             MENUITEM "Backup Savestates",           ID_ENABLE_BACKUPSAVESTATES
+            MENUITEM "Compress Savestates",         ID_ENABLE_COMPRESSSAVESTATES
         END
         POPUP "&Display"
         BEGIN
