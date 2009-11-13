@@ -39,6 +39,8 @@
 #include "ramwatch.h"
 #include "debugger.h"
 
+#include "../../state.h"	//adelikat: For bool backupSavestates
+
 extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
@@ -295,6 +297,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(RWSaveWindowPos),
 	AC(ramw_x),
 	AC(ramw_y),
+
+	AC(backupSavestates),
 
 	ENDCFGSTRUCT
 };

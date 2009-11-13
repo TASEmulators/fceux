@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -111,6 +110,7 @@ BEGIN
             MENUITEM "&Background Input",           MENU_BACKGROUND_INPUT
             MENUITEM "&Auto-savestates",            MENU_ENABLE_AUTOSAVE
             MENUITEM "&Frame Adv. - Skip Lag",      MENU_DISPLAY_FA_LAGSKIP
+            MENUITEM "Backup Savestates",           ID_ENABLE_BACKUPSAVESTATES
         END
         POPUP "&Display"
         BEGIN
@@ -417,7 +417,7 @@ BEGIN
     END
 END
 
-LUAWINDOW_MENU MENU
+LUAWINDOW_MENU MENU 
 BEGIN
     POPUP "Console"
     BEGIN
@@ -1284,7 +1284,6 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,11,324,364
     PUSHBUTTON      "Truncate",IDC_HACKY1,338,46,51,16
-    //PUSHBUTTON      "Commit",IDC_HACKY2,404,46,51,16,WS_DISABLED
     LTEXT           "Any number of these icon buttons are pressed",IDC_STATIC,395,84,47,34
     PUSHBUTTON      "<",TASEDIT_REWIND,367,25,26,14
     PUSHBUTTON      ">",TASEDIT_FOWARD,391,25,26,14
@@ -1934,8 +1933,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

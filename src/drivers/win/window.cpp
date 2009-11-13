@@ -102,15 +102,12 @@ extern bool turbo;
 extern bool movie_readonly;
 extern bool AutoSS;			//flag for whether an auto-save has been made
 extern int newppu;
-// Extern functions
-char *md5_asciistr(uint8 digest[16]);
-
-void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
-void MapInput(void);
 extern BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);	//Metadata dialog
 extern bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 
 //AutoFire-----------------------------------------------
+void ShowNetplayConsole(void); //mbg merge 7/17/06 YECH had to add
+void MapInput(void);
 void SetAutoFirePattern(int onframes, int offframes);
 void SetAutoFireOffset(int offset);
 static int CheckedAutoFirePattern = MENU_AUTOFIRE_PATTERN_1;
@@ -119,7 +116,7 @@ int GetCheckedAutoFirePattern();
 int GetCheckedAutoFireOffset();
 
 //Internal variables-------------------------------------
-
+char *md5_asciistr(uint8 digest[16]);
 static int winwidth, winheight;
 static volatile int nofocus = 0;
 static int tog = 0;					//Toggle for Hide Menu
@@ -389,6 +386,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_FA_LAGSKIP, frameAdvanceLagSkip?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_CONFIG_BINDSAVES, bindSavestate?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, backupSavestates?MF_CHECKED : MF_UNCHECKED);
 
 	//Config - Display SubMenu
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
@@ -1617,6 +1615,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case MENU_DISPLAY_FA_LAGSKIP:
 				frameAdvanceLagSkip ^= 1;
+				UpdateCheckedMenuItems();
+				break;
+			case ID_ENABLE_BACKUPSAVESTATES:
+				backupSavestates ^=1;
 				UpdateCheckedMenuItems();
 				break;
 			

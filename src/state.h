@@ -73,4 +73,5 @@ extern bool redoSS;					 //redo savestate flag
 extern char lastLoadstateMade[2048]; //Filename of last state loaded
 extern bool undoLS;					 //undo loadstate flag
 extern bool redoLS;					 //redo savestate flag
+extern bool backupSavestates;		 //Whether or not to make backups, true by default
 bool CheckBackupSaveStateExist();	 //Checks if backupsavestate exists
