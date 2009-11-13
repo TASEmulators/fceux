@@ -1,3 +1,5 @@
+13-nov-2009 - adelikat - made savestate compression togglable
+13-nov-2009 - adelikat - made savestate backups togglable
 08-nov-2009 - gocha - Win32 - Lua console - added a menu
 08-nov-2009 - gocha - change gui.line, gui.box, joypad.get to function like GENS rerecording
 08-nov-2009 - gocha - New lua functions: gui.parsecolor, joypad.getup, joypad.getdown, emu.emulating.
