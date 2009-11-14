@@ -11,6 +11,8 @@
 class TASEDIT_PROJECT
 {
 public:
+	void init();
+
 	std::string GetProjectName();
 	void SetProjectName(std::string e);
 
@@ -20,8 +22,9 @@ public:
 	std::string GetProjectFile();
 	void SetProjectFile(std::string e);
 
-	//Guess what this function is for...
-	void SaveProject();
+	//Guess what these functions are for...
+	bool SaveProject();
+	bool LoadProject(std::string PFN);
 
 private:
 	//The TASEdit Project's name
@@ -30,4 +33,7 @@ private:
 	std::string fm2FileName;
 	//The TASEdit Project's filename (For saving purposes)
 	std::string projectFile;
+
+	// If there are unsaved changes. 
+	bool changed;
 };

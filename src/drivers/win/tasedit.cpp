@@ -275,10 +275,7 @@ bool JumpToFrame(int index)
 			}
 		}
 
-		extern int disableBatteryLoading;
-		disableBatteryLoading = 1;
-		PowerNES();
-		disableBatteryLoading = 0;
+		poweron(true);
 		currFrameCounter=0;
 		turbo = index>60;
 		pauseframe=index+1;
@@ -461,6 +458,9 @@ static void ColumnSet(int column)
 //Highlights all frames in current input log
 static void SelectAll()
 {
+	for(int i=0;i<=currMovieData.records.size();i++)
+		selectionFrames.insert(i);
+
 }
 
 //cuts the current selection and copies to the clipboard
@@ -607,10 +607,16 @@ static void InitDialog()
 	UpdateTasEdit();
 }
 
+bool CheckSaveChanges()
+{
+	//TODO: determine if project has changed, and ask to save changes
+	return true; 
+}
 
 void KillTasEdit()
 {
-	//TODO: determine if project has changed, and ask to save changes
+	if (!CheckSaveChanges())
+		return;
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
 	turbo=false;
@@ -623,6 +629,70 @@ static void NewProject()
 //determine if current project changed
 //if so, ask to save changes
 //close current project
+
+	if (!CheckSaveChanges())
+		return;
+
+	//TODO: Reinitialise project
+}
+
+//Opens a new Project file
+static void OpenProject()
+{
+//determine if current project changed
+//if so, ask to save changes
+//close current project
+//open dialog for new project file
+
+		const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";	//Filetype filter
+
+	OPENFILENAME ofn;								//New instance of OPENFILENAME
+	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
+	ofn.lStructSize=sizeof(ofn);					//Various parameters
+	ofn.hInstance=fceu_hInstance;
+	ofn.lpstrTitle="Save TASEdit Project As...";
+	ofn.lpstrFilter=TPfilter;
+
+	char nameo[2048];								//File name
+	strcpy(nameo, GetRomName());					//For now, just use ROM name
+
+	ofn.lpstrFile=nameo;							//More parameters
+	ofn.nMaxFile=256;
+	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
+	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
+	ofn.lpstrInitialDir=initdir.c_str();
+
+	if(GetOpenFileName(&ofn)){						//If it is a valid filename
+		std::string tempstr = nameo;				//Make a temporary string for filename
+		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
+		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
+		{
+			tempstr.append(".tas");					//Stick it on ourselves
+			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
+			std::string filename = name;			//Get the filename
+			filename.append(ext);					//Shove the extension back onto it...
+			project.SetProjectFile(filename);		//And update the project's filename.
+		} else {									//If they've been nice and done it for us...
+			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
+			std::string filename = name;			//Grab the name...
+			filename.append(ext);					//Stick extension back on...
+			project.SetProjectFile(filename);		//And update the project's filename.
+		}
+		project.SetProjectName(GetRomName());		//Set the project's name to the ROM name
+		std::string thisfm2name = project.GetProjectName();
+		thisfm2name.append(".fm2");					//Setup the fm2 name
+		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
+		project.LoadProject(project.GetProjectFile());
+	}
+
+}
+
+// Saves current project
+static void SaveProjectAs()
+{
+//Save project as new user selected filename
+//flag project as not changed
+
 	//Creation of a save window
 	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";	//Filetype filter
 
@@ -665,29 +735,17 @@ static void NewProject()
 		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
 		project.SaveProject();
 	}
-	//TODO: Reinitialise project
-}
 
-//Opens a new Project file
-static void OpenProject()
-{
-//determine if current project changed
-//if so, ask to save changes
-//close current project
-//open dialog for new project file
 }
 
 //Saves current project
 static void SaveProject()
 {
-//determine if file exists, if not, do SaveProjectAs()
+//TODO: determine if file exists, if not, do SaveProjectAs()
 //Save work, flag project as not changed
-}
+	if (!project.SaveProject())
+		SaveProjectAs();
 
-static void SaveProjectAs()
-{
-//Save project as new user selected filename
-//flag project as not changed
 }
 
 //Takes a selected .fm2 file and adds it to the Project inputlog
@@ -828,7 +886,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			case ACCEL_CTRL_O:
 			case ID_FILE_OPENPROJECT:
-				Replay_LoadMovie(true); //TODO: change function name to LoadProject(true)?
+				//Replay_LoadMovie(true); //TODO: change function name to LoadProject(true)?
+				OpenProject();
 				break;
 			
 			case ACCEL_CTRL_S:

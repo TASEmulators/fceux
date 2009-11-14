@@ -648,7 +648,7 @@ void FCEUI_StopMovie()
 	if (bindSavestate) AutoSS = false;	//If bind movies to savestates is true, then there is no longer a valid auto-save to load
 }
 
-static void poweron(bool shouldDisableBatteryLoading)
+void poweron(bool shouldDisableBatteryLoading)
 {
 	//// make a for-movie-recording power-on clear the game's save data, too
 	//extern char lastLoadedGameName [2048];

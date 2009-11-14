@@ -19,6 +19,16 @@
 #include <fstream>
 
 #include "taseditproj.h"
+#include "movie.h"
+
+void TASEDIT_PROJECT::init()
+{
+	projectName="";
+	fm2FileName="";
+	projectFile="";
+
+	changed=false;
+}
 
 //All the get/set functions...
 std::string TASEDIT_PROJECT::GetProjectName()
@@ -46,13 +56,40 @@ void TASEDIT_PROJECT::SetProjectFile(std::string e)
 	projectFile = e;
 }
 
-void TASEDIT_PROJECT::SaveProject()
+bool TASEDIT_PROJECT::SaveProject()
 {
 	std::string PFN = GetProjectFile();
 	const char* filename = PFN.c_str();
 	std::ofstream ofs;
+	//ofs << GetProjectName() << std::endl;
+	//ofs << GetFM2Name() << std::endl;
 	ofs.open(filename);
-	ofs << GetProjectName() << std::endl;
-	ofs << GetFM2Name() << std::endl;
+	
+	currMovieData.dump(&ofs, true);
 	ofs.close();
+
+	changed=false;
+	return true;
+}
+
+extern bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader);
+
+
+bool TASEDIT_PROJECT::LoadProject(std::string PFN)
+{
+	const char* filename = PFN.c_str();
+	//char buf[4096];
+	SetProjectName(PFN);
+	std::ifstream ifs;
+	ifs.open(filename);
+	//ifs.getline(ifs, 4090);
+	//ifs.getline(ifs, 4090);
+	LoadFM2(currMovieData, &ifs, INT_MAX, false);
+	LoadSubtitles(currMovieData);
+	poweron(true);
+
+	ifs.close();
+
+	changed=false;
+	return true;
 }

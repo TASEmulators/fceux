@@ -9,6 +9,7 @@
 
 #include "input/zapper.h"
 #include "utils/guid.h"
+#include "utils/md5.h"
 
 struct FCEUFILE;
 
@@ -266,5 +267,8 @@ void FCEUI_ToggleInputDisplay(void);
 void LoadSubtitles(MovieData);
 void ProcessSubtitles(void);
 void FCEU_DisplaySubtitles(char *format, ...);
+
+void poweron(bool shouldDisableBatteryLoading);
+
 
 #endif //__MOVIE_H_

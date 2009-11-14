@@ -226,7 +226,7 @@ BEGIN
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Select All",                 ID_EDIT_SELECTALL, INACTIVE
+        MENUITEM "&Select All",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT, INACTIVE
         MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY, INACTIVE
