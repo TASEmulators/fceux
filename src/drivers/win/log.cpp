@@ -16,13 +16,13 @@ unsigned int truncated_logcount()
 /**
 * Concatenates formerly logged messages into a single string and
 * displays that string in the log window.
-*
-* TODO: This function contains a potential buffer overflow
 **/
 void RedoText(void)
 {
 	char textbuf[65536] = { 0 };
 	unsigned int x;
+	int tbs=0; // textbuf size
+	int cs; // current log size
 
 	// TODO: This if can be made much simpler.
 	if(logcount >= MAXIMUM_NUMBER_OF_LOGS)
@@ -32,7 +32,17 @@ void RedoText(void)
 
 		for(;;)
 		{
-			strcat(textbuf, logtext[x]);
+			cs=strlen(logtext[x]);
+			if (tbs+cs>=65536)
+			{
+				//SetDlgItemText(logwin, LBL_LOG_TEXT, textbuf);
+				//SendDlgItemMessage(logwin, LBL_LOG_TEXT, EM_LINESCROLL, 0, 200);
+				//textbuf[0]='\0';
+				//tbs=0;
+				break;
+			}
+			strcat(textbuf+tbs, logtext[x]);
+			tbs+=cs;
 			x = ( x + 1 ) & ( MAXIMUM_NUMBER_OF_LOGS - 1 );
 
 			if(x == truncated_logcount())
@@ -45,7 +55,13 @@ void RedoText(void)
 	{
 		for(x = 0; x < logcount; x++)
 		{
-			strcat(textbuf,logtext[x]);
+			cs=strlen(logtext[x]);
+			if (tbs+cs>=65536)
+			{
+				break;
+			}
+			strcat(textbuf+tbs,logtext[x]);
+			tbs+=cs;
 		}
 	}
 
