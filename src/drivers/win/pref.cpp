@@ -135,13 +135,7 @@ int storePreferences(char* romname)
 	wasinDebugger = inDebugger;
 	
 	// Prevent any attempts at file usage if the debugger is open
-	if (wasinDebugger) {
-		DebuggerExit();
-	}
-
-	while ((inDebugger) || (Counter == 300000)) {
-	Counter++;
-	}
+	// Moved debugger exit code due to complaints and the Debugger menu option being enabled
 
 	if (!debuggerWasActive)
 	{
@@ -185,6 +179,7 @@ int storePreferences(char* romname)
 void DoDebuggerRunCheck()
 {
 	if (wasinDebugger){
+		DebuggerExit();
 		DoDebug(0);
 	}
 }
