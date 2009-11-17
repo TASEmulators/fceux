@@ -106,7 +106,7 @@ int getBank(int offs)
 	//GetNesFileAddress doesn't work well with Unif files
 	int addr = GetNesFileAddress(offs)-16;
 
-	if (GameInfo->type==GIT_NSF) {
+	if (GameInfo && GameInfo->type==GIT_NSF) {
 	return addr != -1 ? addr / 0x1000 : -1;
 	}
 	return addr != -1 ? addr / 0x4000 : -1;

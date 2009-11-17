@@ -243,7 +243,8 @@ uint8 GetMem(uint16 A) {
 		}
 	}
 	else if ((A >= 0x4000) && (A < 0x6000)) return 0xFF; //fix me
-	return ARead[A](A);
+	if (GameInfo) return ARead[A](A);					 //adelikat: 11/17/09: Prevent crash if this is called with no game loaded.
+	else return 0;
 }
 
 uint8 GetPPUMem(uint8 A) {
