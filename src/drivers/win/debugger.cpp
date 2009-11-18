@@ -277,7 +277,7 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 								EndDialog(hwndDlg,1);
 								break;
 							}
-							if ((tmp=AddBreak,(hwndDlg)) == TOO_MANY_BREAKPOINTS) {
+							if ((tmp=AddBreak(hwndDlg)) == TOO_MANY_BREAKPOINTS) {
 								MessageBox(hwndDlg, "Too many breakpoints, please delete one and try again", "Breakpoint Error", MB_OK);
 								goto endaddbrk;
 							}
