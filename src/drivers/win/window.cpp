@@ -126,6 +126,7 @@ int MainWindow_wndx, MainWindow_wndy;
 static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 int menuYoffset = 0;
+bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
 
@@ -1145,8 +1146,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		mouseb=wParam;
 		goto proco;
 
-	case WM_SETFOCUS:
-		break;
 	case WM_RBUTTONUP:
 	{
 		if (rightClickEnabled)
@@ -2045,7 +2044,15 @@ adelikat: Outsourced this to a remappable hotkey
 	case WM_QUIT:
 		DoFCEUExit();
 		break;
-	case WM_ACTIVATEAPP:       
+	case WM_SETFOCUS:
+		FCEUI_printf("wasPausedbyCheats = %d\n",wasPausedByCheats);
+		if (wasPausedByCheats)
+		{
+			EmulationPaused = 0;
+			wasPausedByCheats = false;
+		}
+		break;
+	case WM_ACTIVATEAPP:
 		if((BOOL)wParam)
 		{
 			nofocus=0;

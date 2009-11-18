@@ -32,6 +32,7 @@ HWND hCheat;				//mbg merge 7/19/06 had to add
 void InitializeCheatsAdded(HWND hwndDlg);
 
 bool pauseWhileActive = false;	//For checkbox "Pause while active"
+extern bool wasPausedByCheats;
 
 int CheatWindow;
 int CheatStyle=1;
@@ -212,7 +213,11 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			if (pauseWhileActive) 
 			{
 				if (EmulationPaused == 0) 
+				{
 					EmulationPaused = 1;
+					wasPausedByCheats = true;
+					FCEU_printf("Emulation paused: %d\n", EmulationPaused);
+				}
 			
 			}
 			if ((CheatStyle) && (scrollnum)) {
