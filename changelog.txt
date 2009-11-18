@@ -1,3 +1,4 @@
+17-nov-2009 - adelikat - Win32 - Cheats - Pause while active checkbox installed
 17-nov-2009 - adelikat - Win32 - Fix debug window so it doesn't crash if unminimized with no game loaded.
 13-nov-2009 - mart0258 - Win32 - TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)
 13-nov-2009 - adelikat - made savestate compression togglable

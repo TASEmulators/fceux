@@ -31,6 +31,8 @@ HWND hCheat;				//mbg merge 7/19/06 had to add
 
 void InitializeCheatsAdded(HWND hwndDlg);
 
+bool pauseWhileActive = false;	//For checkbox "Pause while active"
+
 int CheatWindow;
 int CheatStyle=1;
 
@@ -159,6 +161,8 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			if (ChtPosY==-32000) ChtPosY=0;
 			SetWindowPos(hwndDlg,0,ChtPosX,ChtPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			
+			CheckDlgButton(hwndDlg, IDC_CHEAT_PAUSEWHENACTIVE, pauseWhileActive ? MF_CHECKED : MF_UNCHECKED);
+
 			//setup font
 			hFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
 			GetObject(hFont, sizeof(LOGFONT), &lf);
@@ -201,13 +205,22 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			InitializeCheatsAdded(hwndDlg);
 			break;
 
+		case WM_KILLFOCUS:
+			break;
+
 		case WM_NCACTIVATE:
+			if (pauseWhileActive) 
+			{
+				if (EmulationPaused == 0) 
+					EmulationPaused = 1;
+			
+			}
 			if ((CheatStyle) && (scrollnum)) {
 				if ((!wParam) && (searchdone)) {
 					searchdone=0;
 					FCEUI_CheatSearchSetCurrentAsOriginal();
 				}
-				ShowResults(hwndDlg);
+				ShowResults(hwndDlg);   
 			}
 			break;
 
@@ -325,6 +338,9 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch (LOWORD(wParam)) {
+						case IDC_CHEAT_PAUSEWHENACTIVE:
+							pauseWhileActive ^= 1;
+						break;
 						case IDC_BTN_CHEAT_ADD:
 							GetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,str,5);
 							a=StrToU16(str);

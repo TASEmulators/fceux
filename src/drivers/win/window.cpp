@@ -1145,6 +1145,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		mouseb=wParam;
 		goto proco;
 
+	case WM_SETFOCUS:
+		break;
 	case WM_RBUTTONUP:
 	{
 		if (rightClickEnabled)
