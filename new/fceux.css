@@ -1,0 +1,49 @@
+﻿  /* CSS layout */
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#masthead {
+}
+
+#top_nav {	
+}
+
+#container {
+	min-width: 600px;
+}
+
+#left_col {
+	width: 200px;
+	float: left;
+}
+
+#page_content {
+	margin-left: 200px;
+}
+
+#footer {
+	clear: both;
+	text-align: center;
+}
+.Font {
+	font-family: Arial, Helvetica, sans-serif;
+}
+body {
+	background-color: #E9E9E9;
+}
+h1 {
+	background-color: #999999;
+	padding: 2px;
+	margin: auto;
+	border-style: ridge;
+}
+h2 {
+	background-color: #B4B4B4;
+	padding: 1px;
+	margin: 1px;
+}
+li {
+	background-color: #F8F8F8;
+}
