@@ -901,7 +901,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 
 			case ID_FILE_IMPORTFM2:
-				Import();
+				Replay_LoadMovie(true);
+				//Import(); //adelikat:  Putting the play movie dialog in its place until the import concept is refined.
 				break;
 
 			case ID_FILE_EXPORTFM2:
