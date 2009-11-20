@@ -25,7 +25,7 @@
 #include "keyboard.h"
 
 static HRESULT  ddrval; //mbg merge 7/17/06 made static
-
+static int background = 0;
 static LPDIRECTINPUTDEVICE7 lpdid=0;
 
 void KeyboardClose(void)
@@ -146,7 +146,7 @@ int KeyboardInitialize(void)
 		return 0;
 	}
 
-	ddrval=IDirectInputDevice7_SetCooperativeLevel(lpdid, hAppWnd,DISCL_FOREGROUND|DISCL_NONEXCLUSIVE);
+	ddrval=IDirectInputDevice7_SetCooperativeLevel(lpdid, hAppWnd,(background?DISCL_BACKGROUND:DISCL_FOREGROUND)|DISCL_NONEXCLUSIVE);
 	if(ddrval != DI_OK)
 	{
 		FCEUD_PrintError("DirectInput: Error setting keyboard cooperative level.");
@@ -181,7 +181,6 @@ int KeyboardInitialize(void)
 	return 1;
 }
 
-static int background = 0;
 static bool curr = false;
 
 

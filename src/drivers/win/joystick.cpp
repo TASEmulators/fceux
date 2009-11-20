@@ -32,6 +32,7 @@ static GUID JoyGUID[MAX_JOYSTICKS];
 static int numjoysticks = 0;
 static int HavePolled[MAX_JOYSTICKS];
 
+static int background = 0;
 static DIJOYSTATE2 StatusSave[MAX_JOYSTICKS];
 
 static int FindByGUID(GUID how)
@@ -374,7 +375,7 @@ static BOOL CALLBACK JoystickFound(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
   return(DIENUM_CONTINUE);
  }
 
- if(DI_OK != IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],*(HWND *)pvRef, DISCL_FOREGROUND|DISCL_NONEXCLUSIVE))
+ if(DI_OK != IDirectInputDevice7_SetCooperativeLevel(Joysticks[n],*(HWND *)pvRef, (background?DISCL_BACKGROUND:DISCL_FOREGROUND)|DISCL_NONEXCLUSIVE))
  {
   FCEU_printf("Cooperative level set of a joystick failed during init.\n");
   IDirectInputDevice7_Release(Joysticks[n]);
@@ -412,16 +413,6 @@ int InitJoysticks(HWND hwnd)
  return(1);
 }
 
-void SetJoystickBackgroundAccess(int background)
-{
-
-}
-
-
-
-
-
-static int background = 0;
 static bool curr = false;
 
 

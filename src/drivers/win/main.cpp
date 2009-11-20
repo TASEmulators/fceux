@@ -638,6 +638,9 @@ int main(int argc,char *argv[])
         pauseAfterPlayback = !!pauseAfterPlayback;
         EnableBackgroundInput = !!EnableBackgroundInput;
 
+		KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
+		JoystickSetBackgroundAccess(EnableBackgroundInput!=0);
+
         FCEUI_SetSoundVolume(soundvolume);
 		FCEUI_SetSoundQuality(soundquality);
 		FCEUI_SetTriangleVolume(soundTrianglevol);
