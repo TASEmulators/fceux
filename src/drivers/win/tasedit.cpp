@@ -81,7 +81,7 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 					item.pszText[0] = MovieRecord::mnemonics[bit];
 					item.pszText[1] = 0;
 				} else 
-					item.pszText[1] = 0;
+					item.pszText[0] = 0;
 			}
 			break;
 		}
@@ -284,11 +284,9 @@ bool JumpToFrame(int index)
 	// Simply do a reset. 
 	if (index==0)
 	{
-		extern int disableBatteryLoading;
-		disableBatteryLoading = 1;
-		PowerNES();
-		disableBatteryLoading = 0;
+		poweron(false);
 		currFrameCounter=0;
+		MovieData::dumpSavestateTo(&currMovieData.records[0].savestate,0);
 		return true;
 	}
 
@@ -355,18 +353,8 @@ void DoubleClick(LPNMITEMACTIVATE info)
 static void ClearSelection()
 {
 	int frameCount = ListView_GetItemCount(hwndList);
-	//LVITEM lvi;
-	//lvi.mask = LVIF_STATE;
-	//lvi.state = 0;
-	//lvi.stateMask = LVIS_SELECTED;
 
 	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
-
-	//for(int i=0;i<frameCount;i++)
-	//{
-	//	lvi.iItem = i;
-	//	ListView_SetItem(hwndList,&lvi);
-	//}
 
 	selectionFrames.clear();
 	lastCursor=-1;
@@ -480,26 +468,178 @@ static void ColumnSet(int column)
 static void SelectAll()
 {
 	ClearSelection();
-	for(int i=0;i<currMovieData.records.size();i++)
+	for(unsigned int i=0;i<currMovieData.records.size();i++)
 		selectionFrames.insert(i);
 
 	UpdateTasEdit();
 	RedrawList();
 }
 
-//cuts the current selection and copies to the clipboard
-static void Cut()
+//copies the current selection to the clipboard
+static bool Copy()
 {
+	if (selectionFrames.size()==0) return false;
+
+	int cframe=*selectionFrames.begin()-1;
+    try 
+	{
+		int range = *selectionFrames.rbegin() - *selectionFrames.begin()+1;
+		//std::string outbuf clipString("TAS");
+
+		std::stringstream clipString;
+		clipString << "TAS " << range << std::endl;
+
+		for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+		{
+			if (*it>cframe+1)
+			{
+				clipString << '+' << (*it-cframe) << '|';
+			}
+			cframe=*it;
+
+			int cjoy=0;
+			for (int joy=0; joy<2; ++joy)
+			{
+				while (currMovieData.records[*it].joysticks[joy] && cjoy<joy) 
+				{
+					clipString << '|';
+					++cjoy;
+				}
+				for (int bit=0; bit<8; ++bit)
+				{
+					if (currMovieData.records[*it].joysticks[joy] & (1<<bit))
+					{
+						clipString << MovieRecord::mnemonics[bit];
+					}
+				}
+			}
+			clipString << std::endl;
+
+			if (!OpenClipboard(hwndTasEdit))
+				return false;
+			EmptyClipboard();
+
+			HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, clipString.str().size()+1);
+
+			if (hGlobal==INVALID_HANDLE_VALUE)
+			{
+				CloseClipboard();
+				return false;
+			}
+			char *pGlobal = (char*)GlobalLock(hGlobal);
+			strcpy(pGlobal, clipString.str().c_str());
+			GlobalUnlock(hGlobal);
+			SetClipboardData(CF_TEXT, hGlobal);
+
+			CloseClipboard();
+		}
+		
+	}
+	catch (std::bad_alloc e)
+	{
+		return false;
+	}
+
+	return true;
 }
 
-//copies the current selection to the clipboard
-static void Copy()
+//cuts the current selection, copying it to the clipboard
+static void Cut()
 {
+	if (Copy())
+	{
+		DeleteFrames();
+	}
 }
 
 //pastes the current clipboard selection into current inputlog
-static void Paste()
+static bool Paste()
 {
+	bool result = false;
+	if (selectionFrames.size()==0)
+		return false;
+
+	int pos = *selectionFrames.begin();
+
+	if (!OpenClipboard(hwndTasEdit))
+		return false;
+	
+	HANDLE hGlobal = GetClipboardData(CF_TEXT);
+	if (hGlobal)
+	{
+		char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
+
+		// TAS recording info starts with "TAS ".
+		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
+		{
+			int range;
+
+			// Extract number of frames
+			sscanf (pGlobal+3, "%d", &range);
+			if (currMovieData.records.size()<pos+range)
+			{
+				currMovieData.insertEmpty(currMovieData.records.size(),pos+range-currMovieData.records.size());
+			}
+
+			pGlobal = strchr(pGlobal, '\n');
+			int joy=0;
+			--pos;
+			
+			while (pGlobal++ && *pGlobal!='\0')
+			{
+				char *frame = pGlobal;
+
+				// Detect skipped frames in paste.
+				if (frame[0]=='+')
+				{
+					pos += atoi(frame+1);
+					while (*frame && *frame != '\n' && *frame!='|')
+						++frame;
+					if (*frame=='|') ++frame;
+				} else
+				{
+					++pos;
+				}
+
+				currMovieData.records[pos].joysticks[0]=0;
+				currMovieData.records[pos].joysticks[1]=0;
+				int joy=0;
+
+				while (*frame && *frame != '\n' && *frame !='\r')
+				{
+					switch (*frame)
+					{
+					case '|': // Joystick marker
+						++joy;
+						break;
+					default:
+						for (int bit=0; bit<8; ++bit)
+						{
+							if (*frame==MovieRecord::mnemonics[bit])
+							{
+								currMovieData.records[pos].joysticks[joy]|=(1<<bit);
+								break;
+							}
+						}
+						break;
+					}
+					++frame;
+				}
+
+				pGlobal = strchr(pGlobal, '\n');
+			}
+
+			// Invalidate and redraw.
+			InvalidateGreenZone(*selectionFrames.begin());
+			RedrawList();
+			result=true;
+		}
+
+		GlobalUnlock(hGlobal);
+	}
+
+	CloseClipboard();
+	return result;
 }
 
 //pastes the current clipboard selection into a new inputlog
@@ -675,7 +815,7 @@ static void OpenProject()
 	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
 	ofn.lStructSize=sizeof(ofn);					//Various parameters
 	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Save TASEdit Project As...";
+	ofn.lpstrTitle="Open TASEdit Project...";
 	ofn.lpstrFilter=TPfilter;
 
 	char nameo[2048];								//File name
@@ -942,14 +1082,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				SelectAll();
 				break;
 			
+			case ACCEL_CTRL_X:
 			case ID_TASEDIT_CUT:
 				Cut();
 				break;
 
+			case ACCEL_CTRL_C:
 			case ID_TASEDIT_COPY:
 				Copy();
 				break;
 
+			case ACCEL_CTRL_V:
 			case ID_TASEDIT_PASTE:
 				Paste();
 				break;
@@ -1029,7 +1172,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			case TASEDIT_REWIND:
 				//rewinds 1 frame
-				JumpToFrame(currFrameCounter-1);
+				if (currFrameCounter>0)
+					JumpToFrame(currFrameCounter-1);
 				break;
 
 			case TASEDIT_REWIND_FULL:

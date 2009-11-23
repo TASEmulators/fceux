@@ -228,9 +228,9 @@ BEGIN
     BEGIN
         MENUITEM "&Select All",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT, INACTIVE
-        MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY, INACTIVE
-        MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE, INACTIVE
+        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE
         MENUITEM "Paste to &New\tCtrl+Shift+V", ID_TASEDIT_PASTETONEW, INACTIVE
         MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE
         MENUITEM SEPARATOR
