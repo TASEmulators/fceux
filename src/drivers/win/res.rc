@@ -232,7 +232,7 @@ BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY, INACTIVE
         MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE, INACTIVE
         MENUITEM "Paste to &New\tCtrl+Shift+V", ID_TASEDIT_PASTETONEW, INACTIVE
-        MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE, INACTIVE
+        MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE
         MENUITEM SEPARATOR
         MENUITEM "&Add Marker",                 ID_EDIT_ADDMARKER, INACTIVE
         MENUITEM "&Remove Marker",              ID_EDIT_REMOVEMARKER, INACTIVE

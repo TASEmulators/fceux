@@ -326,7 +326,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 				currMovieData.records[*it].toggleBit(joy,bit);
 			}
 
-			index=*selectionFrames.begin()
+			index=*selectionFrames.begin();
 		} 
 		else 
 		{
@@ -355,17 +355,21 @@ void DoubleClick(LPNMITEMACTIVATE info)
 static void ClearSelection()
 {
 	int frameCount = ListView_GetItemCount(hwndList);
-	LVITEM lvi;
-	lvi.mask = LVIF_STATE;
-	lvi.state = 0;
-	lvi.stateMask = LVIS_SELECTED;
-	for(int i=0;i<frameCount;i++)
-	{
-		lvi.iItem = i;
-		ListView_SetItem(hwndList,&lvi);
-	}
+	//LVITEM lvi;
+	//lvi.mask = LVIF_STATE;
+	//lvi.state = 0;
+	//lvi.stateMask = LVIS_SELECTED;
+
+	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
+
+	//for(int i=0;i<frameCount;i++)
+	//{
+	//	lvi.iItem = i;
+	//	ListView_SetItem(hwndList,&lvi);
+	//}
 
 	selectionFrames.clear();
+	lastCursor=-1;
 }
 
 //insert frames at the currently selected positions.
@@ -408,11 +412,14 @@ static void DeleteFrames()
 		currMovieData.records.erase(currMovieData.records.begin()+*it);
 	}
 
-	InvalidateGreenZone(*selectionFrames.begin());
+	int index = *selectionFrames.begin();
+	if (index>0) --index;
+	InvalidateGreenZone(index);
 
 	//in the particular case of deletion, we need to make sure we reset currFrameCounter to something reasonable
 	//why not the current green zone max?
-	currFrameCounter = currMovieData.greenZoneCount-1;
+	if (currFrameCounter>=index) 
+		JumpToFrame(index);
 	ClearSelection();
 	UpdateTasEdit();
 	RedrawList();
@@ -472,9 +479,12 @@ static void ColumnSet(int column)
 //Highlights all frames in current input log
 static void SelectAll()
 {
-	for(int i=0;i<=currMovieData.records.size();i++)
+	ClearSelection();
+	for(int i=0;i<currMovieData.records.size();i++)
 		selectionFrames.insert(i);
 
+	UpdateTasEdit();
+	RedrawList();
 }
 
 //cuts the current selection and copies to the clipboard
@@ -500,6 +510,7 @@ static void PastetoNew()
 //removes the current selection (does not put in clipboard)
 static void Delete()
 {
+	DeleteFrames();
 }
 
 //Adds a marker to left column at selected frame (if multiple frames selected, it is placed at end of selection)
