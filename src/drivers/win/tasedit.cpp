@@ -317,20 +317,34 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		//toggle the bit
 		int joy = (info->iSubItem - 2)/8;
 		int bit = (info->iSubItem - 2)%8;
-		currMovieData.records[index].toggleBit(joy,bit);
-		
-		//update the row
-		ListView_Update(hwndList,index);
+
+		if (info->uKeyFlags&(LVKF_SHIFT|LVKF_CONTROL))
+		{
+			//update multiple rows 
+			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+			{
+				currMovieData.records[*it].toggleBit(joy,bit);
+			}
+
+			index=*selectionFrames.begin()
+		} 
+		else 
+		{
+			//update one row
+			currMovieData.records[index].toggleBit(joy,bit);
+			
+			ListView_Update(hwndList,index);
+
+		}
 
 		InvalidateGreenZone(index);
 
 		// If the change is in the past, move to it. 
 		if(index < currFrameCounter &&
-           index < currMovieData.greenZoneCount)
+		   index < currMovieData.greenZoneCount)
 		{
 			JumpToFrame(index);
 		}
-
 
 		//redraw everything to show the reduced green zone
 		RedrawList();
