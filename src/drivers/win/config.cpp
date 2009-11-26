@@ -45,7 +45,7 @@ extern CFGSTRUCT NetplayConfig[];
 extern CFGSTRUCT InputConfig[];
 extern CFGSTRUCT HotkeyConfig[];
 extern int autoHoldKey, autoHoldClearKey;
-extern int EnableAutosave;
+extern int EnableAutosave, AutosaveQty, AutosaveFrequency;
 extern int AFon, AFoff, AutoFireOffset;
 extern int DesynchAutoFire;
 extern bool lagCounterDisplay;
@@ -222,6 +222,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MemWCollapsed),
 	AC(BindToMain),
 	AC(EnableAutosave),
+	AC(AutosaveQty),
+	AC(AutosaveFrequency),
 	AC(frameAdvanceLagSkip),
 	AC(debuggerAutoload),
 	AC(allowUDLR),

@@ -183,8 +183,10 @@ int frameAdvanceDelay;
 //indicates that the emulation core just frame advanced (consumed the frame advance state and paused)
 bool JustFrameAdvanced=false;
 
-static int AutosaveStatus[4] = {0, 0, 0, 0}; //is it safe to load Auto-savestate
+static int *AutosaveStatus; //is it safe to load Auto-savestate
 static int AutosaveIndex = 0; //which Auto-savestate we're on
+int AutosaveQty = 4; // Number of Autosaves to store
+int AutosaveFrequency = 256; // Number of frames between autosaves
 
 // Flag that indicates whether the Auto-save option is enabled or not
 int EnableAutosave = 0;
@@ -406,8 +408,10 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	ResetGameLoaded();
 
-	AutosaveStatus[0] = AutosaveStatus[1] = 0;
-	AutosaveStatus[2] = AutosaveStatus[3] = 0;
+	if (!AutosaveStatus)
+		AutosaveStatus = (int*)malloc(sizeof(int)*AutosaveQty);
+	for (AutosaveIndex=0; AutosaveIndex<AutosaveQty; ++AutosaveIndex)
+		AutosaveStatus[AutosaveIndex] = 0;
 
 	CloseGame();
 	GameInfo = new FCEUGI();
@@ -937,10 +941,10 @@ void UpdateAutosave(void)
 		return;
 
 	char * f;
-	AutosaveCounter = (AutosaveCounter + 1) % 256;
-	if(AutosaveCounter == 0)
+	if(++AutosaveCounter >= AutosaveFrequency)
 	{
-		AutosaveIndex = (AutosaveIndex + 1) % 4;
+		AutosaveCounter = 0;
+		AutosaveIndex = (AutosaveIndex + 1) % AutosaveQty;
 		f = strdup(FCEU_MakeFName(FCEUMKF_AUTOSTATE,AutosaveIndex,0).c_str());
 		FCEUSS_Save(f);
 		AutoSS = true;	//Flag that an auto-savestate was made
@@ -962,9 +966,9 @@ void FCEUI_Autosave(void)
 		free(f);
 
 		//Set pointer to previous available slot
-		if(AutosaveStatus[(AutosaveIndex + 3)%4] == 1)
+		if(AutosaveStatus[(AutosaveIndex + AutosaveQty-1)%AutosaveQty] == 1)
 		{
-			AutosaveIndex = (AutosaveIndex + 3)%4;
+			AutosaveIndex = (AutosaveIndex + AutosaveQty-1)%AutosaveQty;
 		}
 
 		//Reset time to next Auto-save

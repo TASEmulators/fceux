@@ -1098,6 +1098,10 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				);
 			}
 
+			// Fix to deal with corrupted config. 
+			if (InputType[port]>SI_COUNT || InputType[port]<0)
+				InputType[port]=SI_UNSET; 
+
 			// Update the combobox selection according to the
 			// currently selected input mode.
 			SendDlgItemMessage(hwndDlg,
@@ -1132,6 +1136,9 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				(LPARAM)(LPSTR)ESIFC_Name((ESIFC)current_device)
 			);
 		}
+
+		if (InputType[FAMICOM_POSITION]>SI_COUNT || InputType[FAMICOM_POSITION]<0)
+			InputType[FAMICOM_POSITION]=SI_UNSET; 
 
 		// Update the combobox selection according to the
 		// currently selected input mode.
