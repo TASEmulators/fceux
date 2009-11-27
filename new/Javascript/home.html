@@ -1,0 +1,113 @@
+﻿<html>
+<head>
+<title>Andres Delikat</title>
+<script language= "javascript" type="text/javascript">
+myName = "Andrés Delikat"
+myEmail = "andres.delikat@gmail.com"
+myPhone = "(352) 275-2854"
+myWebsite = "http://tasvideos.org"
+myBooks = new Array("Chronicles of Narnia", "Lord of the Rings", "To Kill a Mockingbird", "A Tree Grows in Brooklyn", "The old man and the Sea", "The Odyssey", "The lliad")
+authors = new Array("C.S. Lewis","J.R.R. Tolkien","Harper Lee","Betty Smith","Earnest Hemingway","Homer","Homer")
+</script>
+</head>
+<body>
+<h1>Andres Delikat&nbsp;
+</h1>
+
+<form method="post">
+<input type="Button" name="" value="Home"
+onClick="window.location.pathname = 'home.html'">
+<input type="Button" name="" value="Career"
+onClick="window.location.pathname = 'career.html'">
+<input type="Button" name="" value="About Me"
+onClick="window.location.pathname = 'aboutme.html'">
+<input type="Button" name="" value="Browser"
+onClick="window.location.pathname = 'browser.html'">
+</form>
+
+<br><br>
+<a href="home.html#Picture"
+onMouseOver="window.status='See a picture of me';
+return true"
+onMouseOut="window.status=' '; return true">
+My info</a>
+
+<a href="home.html#Books"
+onMouseOver="window.status='See my favorite books';
+return true"
+onMouseOut="window.status=' '; return true">
+Books</a>
+
+
+<a href="home.html#Quote"
+onMouseOver="window.status='See my favorite quote';
+return true"
+onMouseOut="window.status=' '; return true">
+Bio</a>
+
+
+<h2><a name="Picture"></a>My Picture</h2>
+<img name="delikat" alt ="" src="http://dl.getdropbox.com/u/75355/HostedImages/bombcrag.png" height="34" width="33"></>
+<br></>
+<script language="javascript" type="text/javascript">
+document.write("Img Src: ", window.document.delikat.src, "<br>")
+document.write("Img Width: ", window.document.delikat.width, "<br>")
+document.write("Img Height: ", window.document.delikat.height, "<br>")
+</script>
+
+<h2><a name="Books"></a>My favorite books</h2>
+<script language="javascript" type="text/javascript">
+//Display the array of books
+
+for (var x = 0; x < myBooks.length; x++)
+{
+	document.write(x+1, ". ", myBooks[x], " by ", authors[x], "<br>")
+}
+</script>
+
+<p><b>Last Update:</b>
+<script language="javascript" type="text/javascript">
+if (document.lastModified == 0)
+{
+	document.write("unknown")
+}
+else
+{
+	document.write(document.lastModified)
+}
+</script>
+</p>
+
+<script language="javascript" type="text/javascript">
+document.write("<h2><a name='Quote'</a>My Favorite Quote</h2>")
+document.write("<blockquote>The only thing we have to fear is fear itself</blockquote>")
+</script>
+
+<script language="javascript" type="text/javascript">
+document.write("This site maintained by: ", myName, "<br>")
+document.write("Email: ", "<a href= \'", myEmail, "\'>", myEmail, "</a>","<br>")
+document.write(" Phone: ", myPhone, "<br>")
+document.write("<a href= \'", myWebsite, "\'>", myWebsite, "</a>")
+</script>
+
+<br><br>
+<a href="home.html#Picture"
+onMouseOver="window.status='See a picture of me';
+return true"
+onMouseOut="window.status=' '; return true">
+My info</a>
+
+<a href="home.html#Quote"
+onMouseOver="window.status='See my favorite quote';
+return true"
+onMouseOut="window.status=' '; return true">
+Bio</a>
+
+<a href="home.html#Quote"
+onMouseOver="window.status='See my favorite quote';
+return true"
+onMouseOut="window.status=' '; return true">
+Bio</a>
+
+</body>
+</html>

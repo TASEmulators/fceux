@@ -1,0 +1,44 @@
+﻿<html>
+<head>
+<title>My Browser</title>
+</head>
+
+<body>
+
+<form method="post">
+<input type="Button" name="" value="Home"
+onClick="window.location.pathname = 'home.html'">
+<input type="Button" name="" value="Career"
+onClick="window.location.pathname = 'career.html'">
+<input type="Button" name="" value="About Me"
+onClick="window.location.pathname = 'aboutme.html'">
+<input type="Button" name="" value="Browser"
+onClick="window.location.pathname = 'browser.html'">
+</form>
+
+<br><br>
+<a href="browser.html#Browser"
+onMouseOver="window.status='See browser information';
+return true"
+onMouseOut="window.status=' '; return true">
+Browser</a>
+
+<h2><a name="Browser"></a>My Browser</h2>
+<script language="javascript" type="text/javascript">
+document.write("appCodeName: ", navigator.appCodeName, '<br>')
+document.write("appName: ", navigator.appName, "<br>")
+document.write("platform: ", navigator.platform, "<br>")
+document.write("userAgent: " , navigator.userAgent, "<br>")
+document.write("Screen resolution: ", window.screen.width, " x ", window.screen.height, "<br>")
+document.write("Window resolution: ", window.innerWidth, " x ", window.innerHeight, "<br>")
+document.write("Location: ", window.location.protocol, window.location.host, window.location.pathname, "<br>")
+</script>
+
+<br><br>
+<a href="browser.html#Browser"
+onMouseOver="window.status='See browser information';
+return true"
+onMouseOut="window.status=' '; return true">
+Browser</a>
+</body>
+</html>

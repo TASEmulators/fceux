@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 1</title>
+</head>
+
+<body>
+<script language="javascript" type="text/javascript"><!--
+
+//Andres Delikat
+//Assignment 8
+//Javascript Scripting exercises #1,2,3
+
+var ans1 = prompt("Please enter a number: ", 0)
+var ans2 = prompt("Please enter a number: ", 0)
+
+var type1 = typeof(ans1)
+var type2 = typeof(ans2)
+
+document.write("You entered: ", ans1, " (", type1, ") ")
+document.write(" and ", ans2, " (", type2, ") ", "<br>")
+
+var num1 = parseFloat(ans1)
+var num2 = parseFloat(ans2)
+
+var booltest = num1 == num2
+document.write(num1, " == ", num2, "? ", booltest, "<br>")
+var booltest = num1 != num2
+document.write(num1, " != ", num2, "? ", booltest, "<br>")
+var booltest = num1 === num2
+document.write(num1, " === ", num2, "? ", booltest, "<br>")
+var booltest = num1 !== num2
+document.write(num1, " !== ", num2, "? ", booltest, "<br>")
+var booltest = num1 < num2
+document.write(num1, " < ", num2, "? ", booltest, "<br>")
+var booltest = num1 <= num2
+document.write(num1, " <= ", num2, "? ", booltest, "<br>")
+var booltest = num1 > num2
+document.write(num1, " > ", num2, "? ", booltest, "<br>")
+var booltest = num1 >= num2
+document.write(num1, " >= ", num2, "? ", booltest, "<br>")
+
+var sum = num1 + num2
+var difference = num1 - num2
+var product = num1 * num2
+var quotient = num1 / num2
+var mod = num1 % num2
+
+document.write("Sum: ", sum, "<br>")
+document.write("Difference: ", difference, "<br>")
+document.write("Product: ", product, "<br>")
+document.write("Modulus: ", mod, "<br>")
+
+
+
+//Andres Delikat
+//Assignment 8
+//Javascript Scripting exercises #4
+
+var ans1 = prompt("Please enter a number: ", 0)
+var ans2 = prompt("Please enter a second number: ", 0)
+var ans3 = prompt("PLease enter a third nubmer: ", 0)
+
+var num1 = parseFloat(ans1)
+var num2 = parseFloat(ans2)
+var num3 = parseFloat(ans3)
+
+var average = (num1 + num2 + num3) / 3
+
+document.write("You gave 3 answers: ", num1, ", ", num2, ", and ", num3, "<br>")
+document.write("Their average is ", average, "<br>")
+
+
+
+//Andres Delikat
+//Assignment 8
+//Javascript Scripting exercises #5
+
+var hours = prompt("Enter the number of hours you worked this week: ", 0)
+var rate  = prompt("Enter your hourly rate: ", 0)
+
+var hours = parseFloat(hours)
+var rate = parseFloat(rate)
+var overtimeRate = rate * 1.5
+var overtimeHours = hours - 40
+var regularPay		//First 40 hours times hourly rate
+var overtimePay		//Overtime hours times time and a half
+var totalPay		//Total pay
+
+if (hours > 40)		//If over 40 hours, figure out overtime hours
+{
+	overtimeHours = hours - 40	
+	hours = 40
+}
+else				//Else no overtime hours
+{
+	overtimeHours = 0
+}
+
+//Calculate pay
+regularPay = hours * rate
+overtimePay = overtimeHours * overtimeRate
+totalPay = regularPay + overtimePay
+
+//Display calculations to the user
+document.write("Total Hours Worked: ", hours, "<br>")
+document.write("Regular Pay: ", hours, " hours @ $", rate, "/hour = $", regularPay, "<br>")
+document.write("Overtime Pay: ", overtimeHours, " hours @ $", overtimeRate, "/hour = $", overtimePay, "<br>")
+document.write("Total Pay: $", totalPay, "<br>")
+
+
+
+//-->
+</script>
+</body>
+
+</html>

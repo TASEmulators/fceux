@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Untitled 1</title>
+</head>
+
+<body>
+<script language="javascript" type="text/javascript"><!--
+//Andres Delikat
+//Assignment 8
+//Javascript Scripting exercises #6
+
+//Get a dolloar amount
+var amount = parseFloat(prompt("Enter a dollar amount: "))
+if (isNaN(amount))	//In case the user types something invalid, go with 0
+{
+	amount = 0
+}
+//Exchange rates according to google on 10/14/2009
+var GBPe = 1.5998		//British pounds	
+var HKDe = 0.129032		//Hong Kong Dollar
+var MXNe = 0.076508		//Mexican Pesos
+
+//Calculate amounts in each currency
+var GBP = amount / GBPe
+var HKD = amount / HKDe
+var MXN = amount / MXNe
+
+//Format the currency to 2 decimal places
+GBP = GBP.toFixed(2)
+HKD = HKD.toFixed(2)
+MXN = MXN.toFixed(2)
+
+//Display results to the user
+document.write("$", amount, " in U.S. Currency is equivalent to: <br>")
+document.write(GBP, " GBP (British Pounds) <br>")
+document.write(HKD, " HKD (Hong Kong Dollars) <br>")
+document.write(MXN, " MXN (Mexican Pesos) <br>")
+
+//-->
+
+</script>
+
+</body>
+
+</html>
