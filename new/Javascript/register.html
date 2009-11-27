@@ -14,50 +14,61 @@ type="text/javascript">
 
 <script language="Javascript" type="text/javascript">
 
-function SubmitForm(Name,Password,Confirm)
+function SubmitForm(Name,Email)
 {
-	if (Password == Confirm)
-	{
-		document.write("You have successfully registered!<br>")
-		document.write(Name,"<br>")			//Debug
-		document.write(Password,"<br>")		//Debug
-		document.write(Confirm,"<br>")		//Debug
+	document.write("You have successfully registered!<br>")
 		
-		//Store info in cookie
-	}
-	else
-	{
-		document.write("Error, password fields to do not match<br>")
-	}
+	//Store info in cookie
+	var expDate = new Date(now.getTime() + (365*24*60*60*1000))
+	SetCookie("Username", Name, expDate, "/")
+	SetCookie("Email", Email, expDate, "/")
+	SetCookie("Registered", true")
 }
 
 </script>
 
 </head>
 
-<!--<body onload="PopupRegistration()">-->
 <body>
 <h1>Greetings!</h1>
 
-<h2>Please register</h2>
-<form name="CustomerData"
-action="mailto:js@javascriptconcepts.com" method="post">
+<script language= "javascript" type="text/javascript">
+var cookieName = GetCookie("Username")
+var cookieEmail = GetCookie("Email")
+var registered = GetCookie("Registered")
 
+
+//Keep track of the number of times visited this page
+var visitCount = GetCookie("Visited")
+visitCount = visitCount + 1
+//var exp = new Date(now.getTime() + (365*24*60*60*1000))
+var exp = new Date(99999999)
+SetCookie("Visited", visitCount, exp, "/")
+
+if (registered)
+{
+	document.write("Welcome back, ", cookieName, "<br>")
+	document.write("This is visit number: ", visitCount)
+}
+else if (visitCount == 1 || visitCount % 3 == 0)
+{
+	document.write("Please register")
+}
+
+</script>
+
+<form name='LoginData' method='post'>
 <table border="0">
 <tr>
 	<td>Name:</td>
 	<td><input type = "text" name = "username"></td>
 </tr>
 <tr>
-	<td>Password:</td>
-	<td><input type = "password" name = "password"></td>
+	<td>Email:</td>
+	<td><input type = "text" name = "email"></td>
 </tr>
 <tr>
-	<td>Confirm password:</td>
-	<td><input type = "password" name = "confirm"></td>
-</tr>
-<tr>
-	<td><input type = "button" value="Submit" onClick="SubmitForm(name.text,password.text,confirm.text)"></td>
+	<td><input type = "button" value="Submit" onClick="SubmitForm(document.LoginData.username.value,document.LoginData.email.value)"></td>
 </tr>
 </table>
 </form>
