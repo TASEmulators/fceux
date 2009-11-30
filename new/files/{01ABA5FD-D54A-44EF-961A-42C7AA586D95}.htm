@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Memory Watch</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 18pt;
+}
+span.rvts11
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+a.rvts12, span.rvts12
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts12:hover { color: #0000ff; }
+span.rvts13
+{
+ font-size: 14pt;
+}
+span.rvts14
+{
+ font-size: 16pt;
+}
+span.rvts15
+{
+ font-weight: bold;
+}
+span.rvts16
+{
+ font-size: 12pt;
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts17 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts18 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts19 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts20, span.rvts20 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{01ABA5FD-D54A-44EF-961A-42C7AA586D95}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts17>Memory Watch</span></p>
+<p><span class=rvts11>Memory Watch</span></p>
+<p><span class=rvts10><br></span></p>
+<p><span class=rvts10>Overview</span></p>
+<p><span class=rvts10><br></span></p>
+<p>Memory watch is a tool designed to values of specific known memory values in the game's <a class=rvts12 href="{C652C305-E5FC-4C80-BCCD-721D9B6235EF}.htm">RAM</a>. Memory watch does not find values.&nbsp; To find useful values to monitor, see <a class=rvts12 href="{B37E7A47-E65F-4544-BDDF-39BE708BA68F}.htm">Cheats</a>, <span class=rvts12>Ram filter</span>, <a class=rvts12 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">Hex Editor</a>, and <a class=rvts12 href="{8A78E5FE-C7EB-418D-A921-F9A6782663F0}.htm">Debugger</a>.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts13>Inserting Values</span></p>
+<p><br></p>
+<p>To display a ram value, simply type its address into one of the address fields.&nbsp; The name field allows you to put a brief description of the value.&nbsp;&nbsp; </p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts14>Prefixes</span></p>
+<p><br></p>
+<p>You must put in the hexi-decimal value of the address,&nbsp; but the value will be displayed will be decimal by default.</p>
+<p><br></p>
+<p>To display the value in hex, use a prefix of "x" (such as x00FD).&nbsp; </p>
+<p><br></p>
+<p>Use the prefix "!" to display a 2 byte value. </p>
+<p><br></p>
+<p>Use a prefix of "X" to watch a 2 byte value in hex.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts14>Saving/Loading Watch files</span></p>
+<p><br></p>
+<p>You can save your addresses into watch files, as well as loading previous files using the standard save,load,new options in the File menu.</p>
+<p><br></p>
+<p>FCEUX uses the /memw folder by default but you can specify a new default folder in the <a class=rvts12 href="{D6DDB3DB-500D-4DCE-8D48-10A67F896057}.htm">Directory Override</a> menu.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts14>Options Menu</span></p>
+<p><br></p>
+<p>If you select <span class=rvts15>Load on Start up</span>, Memory watch will load up automatically when FCEU is started. </p>
+<p><br></p>
+<p>If you select <span class=rvts15>Load Last File on Start up</span>, the most recent file in the Recent folder will be loaded when memory watch is loaded.</p>
+<p><br></p>
+<p>If you select <span class=rvts15>Collapse to 1 Column </span>(or press the right arrow button on the bottom left of the dialog), the memory watch dialog is reduced to just 1 column.</p>
+<p><br></p>
+<p><span class=rvts13>Frozen Memory Addresses</span></p>
+<p><br></p>
+<p>If one of the watched addresses is frozen by the <a class=rvts12 href="{B37E7A47-E65F-4544-BDDF-39BE708BA68F}.htm">cheats dialog</a> or the <a class=rvts12 href="{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}.htm">hex editor</a>, it will display blue in the memory watch dialog.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts10>Memory Change Monitor</span></p>
+<p><br></p>
+<p>The bottom of the memory watch dialog displays a memory change monitoring section.&nbsp; This monitors the 1st two values of each memory watch column.&nbsp; Rather than monitoring the value itself, this monitors the value's behavior.&nbsp; </p>
+<p><br></p>
+<p>The address being monitored is under the address column.</p>
+<p><br></p>
+<p>The Formula drop down box shows which criteria the change monitoring is using.</p>
+<p><br></p>
+<p>The count value displays how many times the value has changed based on the criteria.</p>
+<p><br></p>
+<p>Reset will reset the count to 0.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts16>Usage Example:</span></p>
+<p><br></p>
+<p>As an example of the memory change monitoring, Let's say we are recording a movie of the game Super C and want to keep track of when the game lags.</p>
+<p>The ram address 001C functions as a "lag flag".&nbsp; It will remain 0, then change to a positive value on a frame that the game lags.</p>
+<p><br></p>
+<p>We could put 001C in one of the 1st two memory watch edit boxes.&nbsp; Then set the corresponding formula in the memory change monitoring to "&gt; then" (greater than).&nbsp; Now the count will show us how many lag frames occur in the movie.</p>
+<p class=rvps3><span class=rvts18>2008</span></p>
+<p class=rvps4><span class=rvts19>This help file has been generated by the freeware version of </span><a class=rvts20 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

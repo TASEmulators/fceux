@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>What's New? 2.1.1 (changelog)</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 18pt;
+ text-decoration: underline;
+}
+span.rvts12
+{
+}
+span.rvts13
+{
+ font-size: 14pt;
+}
+span.rvts14
+{
+ font-size: 16pt;
+}
+span.rvts15 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts18, span.rvts18 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{E8C88001-1C74-44F1-99FC-BB02C5001F76}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts15>What's New? 2.1.1 (changelog)</span></p>
+<p><span class=rvts10>What's New? </span><span class=rvts11>2.1.1</span></p>
+<p>Released July 29, 2009</p>
+<p><br></p>
+<p>This release includes a multitude of new features, major fixes, and enhancements.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts12>The 2.1 new release that fixes some bugs of 2.1.0a, improves the accuracy of the sound core, and adds useability enhancements to the windows port.</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts13>Common - Bug fixes</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)</span></li>
+<li><span class=rvts12>Made default save slot 0 instead of 1</span></li>
+</ul>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts13>Improved Sound core/PPU</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesn't work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. </span></li>
+<li><span class=rvts12>Updated with the correct values for the noise and DMC table, </span></li>
+<li><span class=rvts12>Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more&nbsp; opcode test from blargg's cpu.nes test.</span></li>
+<li><span class=rvts12>Square 1 &amp; square 2 volume controls no longer backwards</span></li>
+<li><span class=rvts12>Length counters for APU now correct variables</span></li>
+</ul>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts13>NewPPU</span><span class=rvts12> (still experimental, enabled by setting newppu 1 in the config file)</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.</span></li>
+<li><span class=rvts12>Added palette reading cases for the new PPU.</span></li>
+</ul>
+<p><span class=rvts14><br></span></p>
+<p><span class=rvts14>Win32</span></p>
+<p><span class=rvts14><br></span></p>
+<p><span class=rvts13>Minor Bug fixes</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number</span></li>
+<li><span class=rvts12>Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor</span></li>
+<li><span class=rvts12>Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full</span></li>
+<li><span class=rvts12>Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.</span></li>
+<li><span class=rvts12>"Disable screen saver" gui option now also diables the monitor powersave</span></li>
+<li><span class=rvts12>Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list</span></li>
+<li><span class=rvts12>Sound Config Dialog - When sound is off, all controls are grayed out</span></li>
+<li><span class=rvts12>Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item</span></li>
+<li><span class=rvts12>Memory Watch - save menu item is grayed if file hasn't changed</span></li>
+</ul>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts13>GUI/Enhancements</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Last save slot used is stored in the config file</span></li>
+<li><span class=rvts12>Made fullscreen toggle (Alt+Enter) remappable</span></li>
+<li><span class=rvts12>Hex editor - Reverted fixedFontHeight to 13 instead of 14.&nbsp; Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file</span></li>
+<li><span class=rvts12>Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file</span></li>
+<li><span class=rvts12>Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)</span></li>
+<li><span class=rvts12>Hex Editor - Save Rom As... menu option enabled and implemented</span></li>
+<li><span class=rvts12>Window caption shows the name of the ROM loaded</span></li>
+<li><span class=rvts12>Recent Movie Menu added</span></li>
+<li><span class=rvts12>Load Last Movie context menu item added</span></li>
+<li><span class=rvts12>Save Movie As... context menu item (for when a movie is loaded in read+write mode)</span></li>
+<li><span class=rvts12>Drag &amp; Drop support for all files related to FCEUX including:</span></li>
+</ul>
+<p><span class=rvts12>&nbsp;&nbsp;&nbsp; .fcm (autoconverts to .fm2 and begins movie playback)</span></p>
+<p><span class=rvts12>&nbsp;&nbsp;&nbsp; Savestates</span></p>
+<p><span class=rvts12>&nbsp;&nbsp;&nbsp; Palette files (.pal)</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>Commandline - -palette commandline option</span></li>
+<li><span class=rvts12>Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized</span></li>
+</ul>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts14>SDL</span></p>
+<p><span class=rvts12><br></span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class=rvts12>added --subtitles</span></li>
+<li><span class=rvts12>fixed Four Score movie playback</span></li>
+<li><span class=rvts12>added --ripsubs for converting fm2 movie subtitles to an srt file</span></li>
+<li><span class=rvts12>Lua is optional again, fixed the real issue</span></li>
+<li><span class=rvts12>Lua is NO longer optional, so the SConscripts have been updated to reflect that change.&nbsp; This fixes the mysterious non-working input issue.</span></li>
+<li><span class=rvts12>implemented saving/loading a savestate from a specific file on Alt+S/L</span></li>
+<li><span class=rvts12>implemented starting an FM2 movie on Alt+R</span></li>
+<li><span class=rvts12>added --pauseframe to pause movie playback on frame x</span></li>
+<li><span class=rvts12>dropped UTFConverter.c from SDL build</span></li>
+<li><span class=rvts12>added hotkey Q for toggling read-only/read+write movie playback</span></li>
+</ul>
+<p class=rvps3><span class=rvts16>2008</span></p>
+<p class=rvps4><span class=rvts17>This help file has been generated by the freeware version of </span><a class=rvts18 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>

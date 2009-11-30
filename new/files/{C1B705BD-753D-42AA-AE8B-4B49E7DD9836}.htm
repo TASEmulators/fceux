@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Customizing through the Config File</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 14pt;
+}
+span.rvts12
+{
+}
+span.rvts13
+{
+ font-size: 14pt;
+}
+span.rvts14
+{
+ font-size: 11pt;
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts15 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts16 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts17 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts18, span.rvts18 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{C1B705BD-753D-42AA-AE8B-4B49E7DD9836}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts15>Customizing through the Config File</span></p>
+<p><span class=rvts10>Customizing through the Config File</span></p>
+<p><br></p>
+<p>There are some options that can only be done by directly editing the config (fceux.cfg) file.&nbsp; All of those options are documented here.</p>
+<p><br></p>
+<p>The .cfg file is a text file and can be opened by any text editor (just as wordpad).</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Emulator background Color when Graphics Background is disabled</span></p>
+<p><br></p>
+<p><span class=rvts14>gNoBGFillColor</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>When you disable the backgrounds (Config &gt; Display &gt; Graphics: GB), the default color is black.&nbsp; You can change that color by modifying this value.&nbsp; By default it is 255 (black).</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts13>Hex Editor</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>HexRowHeightBorder 0</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>This value determines the number of pixels between each row of values in the Hex Editor.&nbsp; By default it is 0.</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>HexBackColorR 255</span></p>
+<p><span class=rvts12>HexBackColorG 255</span></p>
+<p><span class=rvts12>HexBackColorB 255</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>HexForeColorR 0</span></p>
+<p><span class=rvts12>HexForeColorG 0</span></p>
+<p><span class=rvts12>HexForeColorB 0</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>HexFreezeColorR 0</span></p>
+<p><span class=rvts12>HexFreezeColorG 0</span></p>
+<p><span class=rvts12>HexFreezeColorB 255</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>These values allows are the Hex Editor color scheme values (RGB).&nbsp; The background color is 255,255,255 (white) by default.&nbsp; The foreground color (text) is 0,0,0 (black) by default.&nbsp; When an address is frozen it is 0,0,255 (blue) by default.</span></p>
+<p><span class=rvts12><br></span></p>
+<p class=rvps3><span class=rvts16>2008</span></p>
+<p class=rvps4><span class=rvts17>This help file has been generated by the freeware version of </span><a class=rvts18 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>
