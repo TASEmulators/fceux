@@ -1,0 +1,48 @@
+<pre>
+02 November 2008
+
+FCEUX 2.0.3 release
+
+We have been trying to address issues which are holding back adoption of FCEUX for both the SDL and windows builds.
+
+emulator:
+bug: fix fcm conversion, recording, and playback of reset and power commands
+bug: prevent excessively long movie filenames
+bug: SF [ 2085437 ] should fix issues with missing author field in fcm convert crashing fceux
+bug: fix savestate recovery code which prevented aborted savestate loads from recovering emulator state correctly.
+bug: gracefully handle non-convertible broken utf-8 text without crashing
+enh: permit user optionally to proceed through the movie savestate mismatch error condition, in case he knows what he is doing.
+enh: Adding an experimental (optional and undocumented) new PPU. Slow, but more precise in some ways. 
+     Contact developers if you think you need more precision
+
+sdl: 
+bug: fixed issue where windowed mode would always be set to 32 bpp
+bug: SF [ 2062823 ] fixed ppc build errors and added LSB_FIRST option to build scripts
+bug: SF [ 2057008 ] lua is now optional, thanks shinydoofy for a patch.  also fixed some build issues.
+bug: SF [ 2008437 ] fixed an issue where flawed movie would crash fceux on every startup
+enh: added support for AVI creation for SDL, see documention/Videolog.txt for more
+enh: toggle lag frame counter for SDL, default hotkey F8
+enh: toggle skipping of lag frames for SDL, default hotkey F6
+enh: made the input config window more usable
+enh: --inputcfg can now be used without a filename
+enh: SF [ 2179829 ] user ability to toggle "bind savestates to movie" added for SDL, default hotkey F2
+enh: SF [ 2047057 ] added uninstall script for gfceux
+
+windows:
+bug: SF [ 2073113 ] Child windows inside debugging window get invalid sizes
+bug: Sound config dialog will now look to see if Mute Turbo should be checked
+bug: hex editor find dialog does not reopen (fixed)
+bug: SF [ 2058942 ] Load state as... does not use the savestate override dir (fixed; now, it does)
+bug: fix problem where replay dialog couldnt work when the process current directory 
+     had changed to something other than emulator base directory
+bug: fix issue where keyboard keys get stuck when switching between debugger window and main window
+enh: added a toggle for binding savestates to movies
+enh: added -cfg (config file) command line argument
+enh: add maximize button to debugger window
+enh: bind a menu option for display framecounter
+enh: autoload the only useful rom or movie from an archive, in cases where there is only one
+enh: don't read every archive file when scanning for replay dialog. scan them, and only look for *.fm2
+
+emulua:
+bug: SF [ 2153843 ] Lua ignores second joypad.set()
+enh: add execute timeout functions useful for lua contests

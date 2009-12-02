@@ -1,0 +1,5 @@
+Make a header with navigation buttons for all pages
+Modify H3 css with a different gray shade
+Make the li css property the same color as H3
+Add a link to the manual on documentation
+Make sure all pages of a name

@@ -43,7 +43,9 @@ h2 {
 	background-color: #B4B4B4;
 	padding: 1px;
 	margin: 1px;
+	border-style: ridge;
 }
 li {
-	background-color: #F8F8F8;
+	background-color: #E9E9E9;
+	padding-left: 14px; 
 }

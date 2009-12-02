@@ -1,0 +1,58 @@
+<html>
+
+<head>
+<title>Press Release 2.1.2</title>
+</head>
+
+<body>
+<h1>FCEUX 2.1.2 Release</h1>
+03 November 2009
+<p>
+The 2.1.2 release that fixes some bugs of 2.1.1, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.
+</p>
+
+<h2>Common</h2>
+New PPU is now functional!  You can access it by changing the newPPU flag in the config file.  Windows users can access it from Config > PPU > New PPU <br>
+Dragon Ball Z 3 now playable again <br>
+Fixed action 52 game that was broken in post-FCEUX 2.0.3 versions <br>
+Mapper 253 mostly implemented <br>
+Mapper 43 fixed bug <br>
+
+<h2>Win32</h2>
+
+Imported NSF features from FCEUXDSP-NSF.  Debugging tools are now compatible with NSF files. <br>
+Movies now record FDS disk swapping commands<br>
+Movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 and 50<br>
+Ram Watch and Ram Search dialogs imported from GENS rerecording<br>
+Ram Filter dialog removed (now redundant compared to both cheat search and ram search)<br>
+Lua script window ported from GENS<br>
+Fix for the directory overrides bug that caused overrides to reset<br>
+Debugger:  .deb file saving/loading restored<br>
+"Save config file" menu item <br>
+"New PPU" menu item<br>
+
+<h3>Minor Bug fixes</h3>
+Minor fixes to recent menus<br>
+Fixed a bug that prevented the Map Hotkeys dialog's X button from closing the dialog<br>
+Restored DPCM Logging when Code/Data Logger is active<br>
+Memory watch - Save Changes Prompt - clicking save will default to quicksave first and save as 2nd (instead of always defaulting to save as)<br>
+Made Trace Logger refresh adequately when using stepping options in the debugger.<br>
+
+<h2>Lua</h2>
+joypad.set() fixed.  True,False, and Nil now work properly for all buttons.  In addition there is a new "invert" option.<br>
+Lua5.1.dll no longer required to use lua.<br>
+fceu.unpause()<br>
+Added savestate.registerload(), savestate.registersave(), savestate.loadscriptdata()<br>
+emu. library, has all the same functions as fceu. library for better compatibility between lua emulators<br>
+Many additional function names to increase consistency with other lua emulators<br>
+Added movie.recording() and movie.playing()<br>
+Added memory.getregister() and memory.setregister()<br>
+Added gui.popup and input.popup<br>
+Added savestate.registerload(), savestate.registersave(), and savestate.loadscriptdata()<br>
+
+<h2>New Lua Scripts</h2>
+A multi-track movie recording tools written by FatRatKnight.  Allows input for different players to be recorded separately.<br>
+A rewinding tool written by Jonathan Blow<br>
+
+</body>
+</html>
