@@ -23,29 +23,43 @@ body {
 	margin-left: 200px;
 }
 
-#footer {
-	clear: both;
-	text-align: center;
-}
 .Font {
 	font-family: Arial, Helvetica, sans-serif;
 }
 body {
 	background-color: #E9E9E9;
 }
+
+#footer {
+	text-align: center;
+	padding-top: 16px;
+}
+
 h1 {
+	background-image:url('assests/ICON_1.ICO'); 
+	background-repeat: no-repeat;
+	background-position: left;
 	background-color: #999999;
 	padding: 2px;
 	margin: auto;
 	border-style: ridge;
+	text-indent:40px;
 }
 h2 {
 	background-color: #B4B4B4;
 	padding: 1px;
-	margin: 1px;
+	border-top-width:4px;
 	border-style: ridge;
+	padding-top: 16px;
+}
+h3 {
+	border-style: solid;
+	border-color: #999999;
+	border-width: 1px;
+	text-align: left;
+	background-color: #E1E1E1
 }
 li {
 	background-color: #E9E9E9;
-	padding-left: 14px; 
+	padding-left: 1px; 
 }

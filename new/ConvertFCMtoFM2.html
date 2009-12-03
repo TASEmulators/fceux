@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>Convert FCM to FM2</title>
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="masthead">
+</div>
+<div id="top_nav">
+</div>
+<div id="container">
+	<div id="left_col">
+	</div>
+	<div id="page_content">
+	<h1>Convert FCM to FM2</h1>
+	<p>This page documents the conversion process of .fcm to .fm2. It also documents known issues with conversion as well as known cases where conversion fails.</p>
+	<p>FCEUX uses the file format .fm2. It does NOT play .fcm files (Older versions of FCEU). However any .fcm file can be converted to .fm2 by opening FCEUX and going to tools > Convert .fm2. You can mass convert files by highlighting them in the open dialog box. On the SDL build, you can run ./fceux --fcmconvert filename.fcm</p>
+	<dd><p><b>See also:</b></p></dd>
+	<dd><dd><li>FM2 format</li></dd></dd>
+	<dd><dd><li>FCM format</li></dd></dd>
+	<dd><dd><li>Movie making</li></dd></dd>
+	<h2>FM2 concept</h2>
+	<p>The old FCEUltra had a big problem with its movie recording. Every single movie was recorded with power-on, followed by a savestate. This means that WRAM (or save RAM) was being stored in its initialized state. As a consequence, many games that use save systems would go through an accelerated boot process since the save files were already initialized.</p>
+	<p>Typically, a  movie maker would load his game and let it sit at the title screen while he sipped his drink or adjusted his pants or steeled his nerves or whatever and then triggered the movie record. At that point the savefile was initialized, and the recording was already compromised.
+	<p>When preparing FCEUX for release, we decided that this was unacceptable. Therefore, every FCEUX movie is recorded from a fresh power-on with no WRAM or save RAM. Additionally, the "record from reset" was taken out because it is even worse. Now the game would be starting from initialized WRAM and initialized main ram. This can further confuse matters.</p>
+	<p>So, your movies might desync because on FCEUX the game is taking longer to boot, while it is initializing its WRAM and/or main ram.</p>
+	<p>Luckily, these are often easy to fix: since FM2 is a text format, it is trivial to insert additional empty frames into the correct locations during the game boot-up process. We have successfully used this approach to salvage a few movies. So, if you have trouble, let us know, and maybe since we have a bit of experience, we can help.</p>
+	<p>Also, when a game is initializing, I bet it is uncommon for the RNG to be running so you might get lucky there also.</p>
+	<p>Another trick is to add a boot-up time window to the beginning of your movie. Add empty frames to the very beginning, followed by the very first converted frame which should include a reset flag. This simulates what FCEUltra did, giving the game time to initialize its WRAM and possibly main RAM before your input events begin.</p>
+	<p>We have been excruciatingly careful not to do anything else which would adversely affect synching. We take this seriously. We have only found few desynching movies so far that we aren't able to fix.</p>
+	<h2>Sync issues</h2>
+	<p>Nearly all published .fcm files will convert without problem</p>
+	<p>Exceptions are noted:
+	<dd><li>Any movie made with FCEU .10 or earlier (such as <a href="http://tasvideos.org/192M.html">Dragon's Lair</a>, <a href="http://tasvideos.org/193M.html">Powerblade</a></li></dd>
+	<dd><li>Any <a href="http://tasvideos.org/519M.html">Dragon Warrior 4</a> movie due to quirky VRAM handling of this game.  Movies will only sync in the version in which they were created.</li></dd>
+	<dd><li>Any movie that starts from savestate (since savestates aren't compatible between FCEU and FCEUX) (Note: old savestates from 0.98.x can be loaded into FCEUX. However, they can not be used with movies since the new savestates handle movie data in drastically different ways.)</li></dd>
+	<dd><li><a href="http://tasvideos.org/355M.html">Battle Toads from FCEU .12</a> - Due to significant mapper 7 changes since FCEU .13</li></dd>
+	</p>
+	<p>Converting from FMV to FCM to FM2 may work, but it fails at least for these movies:</p>
+	<dd><a href="http://tasvideos.org/89M.html">Boku Dracula-kun by Phil and Genisto</a></dd>
+	<h3>Known desyncs fixed with added frames</h3>
+	<p>Some movies will desync but can be fixed by adding frames to the beginning of the movie. Basically any movie that was recorded from soft reset and uses battery backed ram will probably desync. This is because the soft reset allowed the SRAM to be cleared ahead of time, so frames were not needed to clear it in the movie (This is arguably cheating anyway, and recording from soft reset was removed in FCEUX).</p>
+	<p>Known desyncs that were fixed by adding frames:</p>
+	<dd><a href="http://tasvideos.org/868M.html">Legent of Zelda "1st Quest" by Baxter and Phil</a> - 3 frames added</dd>
+	<dd><a href="http://tasvideos.org/222M.html">Vice: Project Doom by FunkDoc</a> - 10 frames added</dd>
+	<h3>Known desyncs that could not be snced (to our knowledge)</h3>
+	<p>Movies that don't meet the above criteria but desync anyway</p>
+		<dd><a href="http://tasvideos.org/1021M.html">Addams Family</a> - Nothing up to 16 frames worked</dd>
+		<dd><a href="http://tasvideos.org/589M.html">Kattou Ninden Teyandee by Ferret Warlord</a> - Nothing up to 16 frames worked</dd>
+		<dd><a href="http://tasvideos.org/469M.html">Dragon Warrior by acmlm</a> - Adding 2 frames makes it sync up to around 46540</dd>
+	</p>
+	</div>
+</div>
+
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a>
+</div>
+
+
+</body>
+
+</html>

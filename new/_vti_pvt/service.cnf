@@ -16,7 +16,7 @@ vti_navbuttonnextlabel:SR|Next
 vti_approvallevels:VR|Approved Rejected Pending\\ Review
 vti_showhiddenpages:IR|1
 vti_hassearchbot:BR|false
-vti_dependenciesood:IR|0
+vti_dependenciesood:IR|1
 vti_navbuttonhomelabel:SR|Home
 vti_featurelist:VX|vti_ACAll vti_ServiceMarkUrlDirBrowse vti_ServiceMarkUrlDirExec vti_ServiceMarkUrlDirScript vti_ACIPAddresses vti_ServerEmailTransport vti_ServerIndexServer vti_ServerASP vti_ServerCollab vti_ServerWebParts vti_RulesScript vti_TimedDocEvents
 vti_categories:VR|Travel Expense\\ Report Business Competition Goals/Objectives Ideas Miscellaneous Waiting VIP In\\ Process Planning Schedule
