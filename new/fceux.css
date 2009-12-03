@@ -32,7 +32,12 @@ body {
 
 #footer {
 	text-align: center;
-	padding-top: 16px;
+	border-style: inset;
+	border-width: thick;
+	margin-left: 128px;
+	margin-right: 128px;
+	margin-top: 24px;
+	border-color: #999999;
 }
 
 h1 {
@@ -40,24 +45,28 @@ h1 {
 	background-repeat: no-repeat;
 	background-position: left;
 	background-color: #999999;
-	padding: 2px;
+	padding: 0px;
 	margin: auto;
 	border-style: ridge;
 	text-indent:40px;
 }
 h2 {
 	background-color: #B4B4B4;
-	padding: 1px;
+	padding: 0px;
 	border-top-width:4px;
 	border-style: ridge;
 	padding-top: 16px;
+	margin-top: 20px;
+	margin-left: 0px;
+	margin-right: 80px;
 }
 h3 {
 	border-style: solid;
 	border-color: #999999;
 	border-width: 1px;
 	text-align: left;
-	background-color: #E1E1E1
+	background-color: #E1E1E1;
+	margin-right: 120px;
 }
 li {
 	background-color: #E9E9E9;

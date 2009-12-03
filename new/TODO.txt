@@ -1,4 +1,4 @@
 Make a header with navigation buttons for all pages
 Add a link to the manual on documentation, add a section for movie recording as well, in that section add links to fm2, fcm and convert fcm
 Convert FCM to FM2 - add links on see also list
-Home image (SMB3) needs to be to have some kind of text wrap
+Movies.html - add links
