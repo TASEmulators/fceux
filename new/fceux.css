@@ -15,12 +15,12 @@ body {
 }
 
 #left_col {
-	width: 200px;
+	width: 150px;
 	float: left;
 }
 
 #page_content {
-	margin-left: 200px;
+	margin-left: 150px;
 }
 
 .Font {

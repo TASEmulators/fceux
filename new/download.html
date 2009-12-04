@@ -17,11 +17,40 @@
 	</div>
 	<div id="page_content">
 	<h1>Downloads</h1>
+		<p>FCEUX is written for two platforms: SDL and Win32. The two ports have some significant differences. 
+		The Win32 port has an extensive set of native gui amenities and tools. 
+		The SDL port supports many of the features of the Win32 build (Lua scripting, movie recording), 
+		however some of the Win32 features are exclusive to the platform. The Win32 port has a built-in GUI, 
+		whereas the SDL port has a GTK launcher GUI. The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).
+		</p>
+		
+		<p>Network play is not presently functional. Fixing it is a high priority.</p>
+		
+		<h4>Win32</h4>
 		<ul>
-			<li><a href="http://fceux.com/zip">Latest Interim Build</a></li>
+			<li>As of 2.1.2, Lua is integrated into the binary, the luapack is no longer necessary.</li>
+			<li>Be sure to check out the .chm file (Under Help > Help... in the emulator main menu). We work pretty hard on keeping that up to date. 
+				<ul><li>We also keep a (fairly) up to date <a href="fceux-2.0.2.htm">online version</a></li></ul>
+			</li>
+		</ul>
+		
+		<h4>SDL</h4>
+		<ul>
+			<li><a href="http://scons.org/">Scons is required to build from source.</a></li>
+			<li>Requires SDL, libz, and zenity</li>
+			<li>Liblua5.1 and OpenGL are optional, but recommended.</li>
+			<li><a href="http://dietschnitzel.com/gfceu">GFCEUX</a>, a GTK2 GUI for fceux, is included in the source release. All non-windows users of the SDL port are reccommended to install and use this, unless you particularly prefer the command-line.</li>
+			<li>For instructions on installing on an Ubuntu or Debian system, check the how to at <a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums.</a></li>
+		</ul>
+		
+		<h3>Download</h3>
+		<ul>
 			<li><a href="https://sourceforge.net/projects/fceultra/files/Binaries/2.1.2%20binaries/fceux-2.1.2-win32.zip/download">FCEUX 2.1.2 win32 Binary</a></li>
 			<li><a href="https://sourceforge.net/projects/fceultra/files/Source%20Code/2.1.2%20src/fceux-2.1.2.src.tar.bz2/download">FCEUX 2.1.2 src</a></li>
 		</ul>
+		<p>The latest win32 interim build is generally fresh within a day or two.  
+		If you are working with a developer to fix an issue affecting you then this is where you will find your fixed build. </p>
+		<ul><li><a href="http://fceux.com/zip">Latest Interim Build</a></li></ul>
 	</div>
 </div>
 
@@ -29,6 +58,7 @@
 	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
 	<a href="documentation.html">Documentation</a> | <a href="version.html">
 	Version History</a> | <a href="contact.html">Contact</a>
+		<br>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc. 
 </div>
 
 

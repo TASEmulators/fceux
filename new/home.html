@@ -38,59 +38,74 @@
 	   the ROM-hacking community, and the <a href="http://tasvideos.org">Tool-Assisted Speedrun Community.</a></p>
 
 	<p>For more details see the <a href="version.html">version history</a></p>
+	
+	<p>You can find out what we've been up to since the last release by checking the <a href="http://fceultra.svn.sourceforge.net/viewvc/fceultra/fceu/changelog.txt">changelog</a> directly.<br>
+	We also have and IRC channel #fceu on freenode.net</p>
+	
 	<p>&nbsp;</p>
-	
-	
+		
 	<h1>Latest Release</h1>
+	
 	<h2>FCEUX 2.1.2</h2>
 	<p>03 November 2009</p>
 	<p>The 2.1.2 release that fixes some bugs of 2.1.1, increases game compatibility, launches a new PPU core, and adds usability enhancements to the windows port.</p>
+	
 	<h3>Common</h3>
-	<p>
-	<li>New PPU is now functional! You can access it by changing the newPPU flag in the config file. Windows users can access it from Config > PPU > New PPU</li>
-	<li>Dragon Ball Z 3 now playable again</li>
-	<li>Fixed action 52 game that was broken in post-FCEUX 2.0.3 versions</li>
-	<li>Mapper 253 mostly implemented</li>
-	<li>Mapper 43 fixed bug</li>
+	<ul>
+		<li>New PPU is now functional! You can access it by changing the newPPU flag in the config file. Windows users can access it from Config > PPU > New PPU</li>
+		<li>Dragon Ball Z 3 now playable again</li>
+		<li>Fixed action 52 game that was broken in post-FCEUX 2.0.3 versions</li>
+		<li>Mapper 253 mostly implemented</li>
+		<li>Mapper 43 fixed bug</li>
+	</ul>
 	
 	<h3>Win32</h3>
-	<li>Imported NSF features from FCEUXDSP-NSF. Debugging tools are now compatible with NSF files.</li>
-	<li>Movies now record FDS disk swapping commands</li>
-	<li>Movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 and 50</li>
-	<li>Ram Watch and Ram Search dialogs imported from GENS rerecording</li>
-	<li>Ram Filter dialog removed (now redundant compared to both cheat search and ram search)</li>
-	<li>Lua script window ported from GENS</li>
-	<li>Fix for the directory overrides bug that caused overrides to reset</li>
-	<li>Debugger: .deb file saving/loading restored</li>
-	<li>"Save config file" menu item</li>
-	<li>"New PPU" menu item</li>
-	<li>Minor Bug fixes</li>
-	<li>Minor fixes to recent menus</li>
-	<li>Fixed a bug that prevented the Map Hotkeys dialog's X button from closing the dialog</li>
-	<li>Restored DPCM Logging when Code/Data Logger is active</li>
-	<li>Memory watch - Save Changes Prompt - clicking save will default to quicksave first and save as 2nd (instead of always defaulting to save as)</li>
-	<li>Made Trace Logger refresh adequately when using stepping options in the debugger.</li>
+	<ul>
+		<li>Imported NSF features from FCEUXDSP-NSF. Debugging tools are now compatible with NSF files.</li>
+		<li>Movies now record FDS disk swapping commands</li>
+		<li>Movie play dialog displays movie time based on ~60.1 (~50.1 PAL) instead of 60 and 50</li>
+		<li>Ram Watch and Ram Search dialogs imported from GENS rerecording</li>
+		<li>Ram Filter dialog removed (now redundant compared to both cheat search and ram search)</li>
+		<li>Lua script window ported from GENS</li>
+		<li>Fix for the directory overrides bug that caused overrides to reset</li>
+		<li>Debugger: .deb file saving/loading restored</li>
+		<li>"Save config file" menu item</li>
+		<li>"New PPU" menu item</li>
+		<li>Minor Bug fixes</li>
+		<li>Minor fixes to recent menus</li>
+		<li>Fixed a bug that prevented the Map Hotkeys dialog's X button from closing the dialog</li>
+		<li>Restored DPCM Logging when Code/Data Logger is active</li>
+		<li>Memory watch - Save Changes Prompt - clicking save will default to quicksave first and save as 2nd (instead of always defaulting to save as)</li>
+		<li>Made Trace Logger refresh adequately when using stepping options in the debugger.</li>
+	</ul>
+	
 	<h3>Lua</h3>
-	<li>joypad.set() fixed. True,False, and Nil now work properly for all buttons. In addition there is a new "invert" option.</li>
-	<li>Lua5.1.dll no longer required to use lua.</li>
-	<li>fceu.unpause()</li>
-	<li>Added savestate.registerload(), savestate.registersave(), savestate.loadscriptdata()</li>
-	<li>emu. library, has all the same functions as fceu. library for better compatibility between lua emulators</li>
-	<li>Many additional function names to increase consistency with other lua emulators</li>
-	<li>Added movie.recording() and movie.playing()</li>
-	<li>Added memory.getregister() and memory.setregister()</li>
-	<li>Added gui.popup and input.popup</li>
-	<li>Added savestate.registerload(), savestate.registersave(), and savestate.loadscriptdata()</li>
+	<ul>
+		<li>joypad.set() fixed. True,False, and Nil now work properly for all buttons. In addition there is a new "invert" option.</li>
+		<li>Lua5.1.dll no longer required to use lua.</li>
+		<li>fceu.unpause()</li>
+		<li>Added savestate.registerload(), savestate.registersave(), savestate.loadscriptdata()</li>
+		<li>emu. library, has all the same functions as fceu. library for better compatibility between lua emulators</li>
+		<li>Many additional function names to increase consistency with other lua emulators</li>
+		<li>Added movie.recording() and movie.playing()</li>
+		<li>Added memory.getregister() and memory.setregister()</li>
+		<li>Added gui.popup and input.popup</li>
+		<li>Added savestate.registerload(), savestate.registersave(), and savestate.loadscriptdata()</li>
+	</ul>
+	
 	<h3>New Lua Scripts</h3>
+	<ul>
 	<li>A multi-track movie recording tools written by FatRatKnight. Allows input for different players to be recorded separately.</li>
 	<li>A rewinding tool written by Jonathan Blow</li>
-	<p>
+	</ul>
+
 	</div>
 </div>
 <div id="footer">
 	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
 	<a href="documentation.html">Documentation</a> | <a href="version.html">
 	Version History</a> | <a href="contact.html">Contact</a>
+	<br>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc. 
 </div>
 
 </body>
