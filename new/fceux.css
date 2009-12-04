@@ -5,9 +5,31 @@ body {
 }
 
 #masthead {
+	
+	background-repeat: no-repeat;
+	background-position: left;
+	background-color: #999999;
+	padding: 0px;
+	margin: auto;
+	border-style: solid;
+	text-align:center;
+	font-weight:bold;
+	font-size:medium;
+	padding-top:0px;
+	padding-bottom:1px;
+
 }
 
-#top_nav {	
+#top_nav {
+	text-align: center;
+	border-style: solid;
+	border-width: thin;
+	margin-left: 32px;
+	margin-right: 32px;
+	margin-top: 0px;
+	margin-bottom: 32px;
+	background-color: #999999;
+
 }
 
 #container {
@@ -41,21 +63,23 @@ body {
 }
 
 h1 {
-	background-image:url('assests/ICON_1.ICO'); 
+background-image:url('assests/ICON_1.ICO'); 
 	background-repeat: no-repeat;
 	background-position: left;
 	background-color: #999999;
 	padding: 0px;
 	margin: auto;
-	border-style: ridge;
+	border-style:solid;
+	border-width: thin;
 	text-indent:40px;
 }
 h2 {
 	background-color: #B4B4B4;
 	padding: 0px;
 	border-top-width:4px;
-	border-style: ridge;
-	padding-top: 16px;
+	border-style: solid;
+	border-width: thin;
+	padding-top: 4px;
 	margin-top: 20px;
 	margin-left: 0px;
 	margin-right: 80px;
@@ -63,7 +87,7 @@ h2 {
 h3 {
 	border-style: solid;
 	border-color: #999999;
-	border-width: 1px;
+	border-width: thin;
 	text-align: left;
 	background-color: #E1E1E1;
 	margin-right: 120px;
@@ -71,4 +95,8 @@ h3 {
 li {
 	background-color: #E9E9E9;
 	padding-left: 1px; 
+}
+.largerfont {
+	font-weight:bold;
+	font-size:xx-large;
 }
