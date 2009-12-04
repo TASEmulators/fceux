@@ -91,14 +91,12 @@ BlitOpenGL(uint8 *buf)
 {
     p_glBindTexture(GL_TEXTURE_2D, textures[0]);
     if(HiBuffer) {
-        static int xo = 0;
-        xo = (xo + 1) & 3;
         Blit8ToHigh(buf, (uint8*)HiBuffer, 256, 240, 256*4, 1, 1);
-        if(!xo) {
-            p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
-                           GL_RGBA, GL_UNSIGNED_BYTE, HiBuffer);
-        }
-    } else {
+    
+        p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 256, 0,
+                       GL_RGBA, GL_UNSIGNED_BYTE, HiBuffer);
+    }
+    else {
         //glPixelStorei(GL_UNPACK_ROW_LENGTH, 256);
         p_glTexImage2D(GL_TEXTURE_2D, 0, GL_COLOR_INDEX8_EXT, 256, 256, 0,
                        GL_COLOR_INDEX,GL_UNSIGNED_BYTE,buf);
