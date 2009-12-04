@@ -24,8 +24,8 @@ body {
 	text-align: center;
 	border-style: solid;
 	border-width: thin;
-	margin-left: 220px;
-	margin-right: 220px;
+	margin-left: 200px;
+	margin-right: 200px;
 	margin-top: 0px;
 	padding-top: 8px;
 	padding-bottom: 4px;
@@ -38,12 +38,12 @@ body {
 }
 
 #left_col {
-	width: 150px;
+	width: 190px;
 	float: left;
 }
 
 #page_content {
-	margin-left: 150px;
+	margin-left: 200px;
 }
 
 .Font {
@@ -54,13 +54,14 @@ body {
 }
 
 #footer {
+	font-size: small;
 	text-align: center;
 	border-style: inset;
 	border-width: thick;
-	margin-left: 128px;
-	margin-right: 128px;
+	margin-left: 200px;
+	margin-right: 200px;
 	margin-top: 24px;
-	border-color: #999999;
+	border-color: #E9E9E9;
 }
 
 h1 {
@@ -91,7 +92,7 @@ h3 {
 	border-width: thin;
 	text-align: left;
 	background-color: #E1E1E1;
-	margin-right: 120px;
+	margin-right: 80px;
 }
 li {
 	background-color: #E9E9E9;

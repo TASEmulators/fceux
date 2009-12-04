@@ -15,44 +15,20 @@
 	margin-bottom: 64px;
 }
 </style>
-<script type="text/javascript">
-<!--
-function FP_preloadImgs() {//v1.0
- var d=document,a=arguments; if(!d.FP_imgs) d.FP_imgs=new Array();
- for(var i=0; i<a.length; i++) { d.FP_imgs[i]=new Image; d.FP_imgs[i].src=a[i]; }
-}
-
-function FP_swapImg() {//v1.0
- var doc=document,args=arguments,elm,n; doc.$imgSwaps=new Array(); for(n=2; n<args.length;
- n+=2) { elm=FP_getObjectByID(args[n]); if(elm) { doc.$imgSwaps[doc.$imgSwaps.length]=elm;
- elm.$src=elm.src; elm.src=args[n+1]; } }
-}
-
-function FP_getObjectByID(id,o) {//v1.0
- var c,el,els,f,m,n; if(!o)o=document; if(o.getElementById) el=o.getElementById(id);
- else if(o.layers) c=o.layers; else if(o.all) el=o.all[id]; if(el) return el;
- if(o.id==id || o.name==id) return o; if(o.childNodes) c=o.childNodes; if(c)
- for(n=0; n<c.length; n++) { el=FP_getObjectByID(id,c[n]); if(el) return el; }
- f=o.forms; if(f) for(n=0; n<f.length; n++) { els=f[n].elements;
- for(m=0; m<els.length; m++){ el=FP_getObjectByID(id,els[n]); if(el) return el; } }
- return null;
-}
-// -->
-</script>
+<script type="text/javascript" src="Javascript/buttons.js"></script>
 </head>
 
-<body onload="FP_preloadImgs(/*url*/'assests/button67.jpg',/*url*/'assests/button68.jpg',/*url*/'assests/button80.jpg',/*url*/'assests/button81.jpg',/*url*/'assests/button87.jpg',/*url*/'assests/button88.jpg',/*url*/'assests/button92.jpg',/*url*/'assests/button93.jpg',/*url*/'assests/button98.jpg',/*url*/'assests/button99.jpg')">
+<body onload="FP_preloadImgs(/*url*/'assests/button67.jpg',/*url*/'assests/button68.jpg',/*url*/'assests/button80.jpg',/*url*/'assests/button81.jpg',/*url*/'assests/button87.jpg',/*url*/'assests/button88.jpg',/*url*/'assests/button92.jpg',/*url*/'assests/button93.jpg',/*url*/'assests/button98.jpg',/*url*/'assests/button99.jpg',/*url*/'assests/button4.jpg',/*url*/'assests/button5.jpg')">
 <div id="masthead">
 	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom Emulator
 </div>
 <div id="top_nav">
 	<a href="home.html"><img id="img1" alt="Home" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img1',/*url*/'assests/button68.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img1',/*url*/'assests/button66.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img1',/*url*/'assests/button67.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img1',/*url*/'assests/button67.jpg')" src="assests/button66.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Home" --></a>
 	<a href="download.html"><img id="img2" alt="Download" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img2',/*url*/'assests/button81.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img2',/*url*/'assests/button7F.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img2',/*url*/'assests/button80.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img2',/*url*/'assests/button80.jpg')" src="assests/button7F.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Download" --></a>
+	<a href="documentation.html"><img id="img6" alt="Documentation" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img6',/*url*/'assests/button5.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img6',/*url*/'assests/button3.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img6',/*url*/'assests/button4.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img6',/*url*/'assests/button4.jpg')" src="assests/button3.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Documentation" --></a>
 	<a href="version.html"><img id="img3" alt="Versions" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img3',/*url*/'assests/button88.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img3',/*url*/'assests/button86.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img3',/*url*/'assests/button87.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img3',/*url*/'assests/button87.jpg')" src="assests/button86.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Versions" --></a>
-	<a href="contact.html">
-	<img id="img4" alt="Contact" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img4',/*url*/'assests/button93.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img4',/*url*/'assests/button91.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img4',/*url*/'assests/button92.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img4',/*url*/'assests/button92.jpg')" src="assests/button91.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Contact" --></a>
-	<a href="links.html">
-	<img id="img5" alt="Links" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img5',/*url*/'assests/button99.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img5',/*url*/'assests/button97.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img5',/*url*/'assests/button98.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img5',/*url*/'assests/button98.jpg')" src="assests/button97.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Links" --></a></div>
+	<a href="contact.html"><img id="img4" alt="Contact" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img4',/*url*/'assests/button93.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img4',/*url*/'assests/button91.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img4',/*url*/'assests/button92.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img4',/*url*/'assests/button92.jpg')" src="assests/button91.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Contact" --></a>
+	<a href="links.html"><img id="img5" alt="Links" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img5',/*url*/'assests/button99.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img5',/*url*/'assests/button97.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img5',/*url*/'assests/button98.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img5',/*url*/'assests/button98.jpg')" src="assests/button97.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Links" --></a></div>
 <div id="container">
 	<div id="left_col">
 		</div>
