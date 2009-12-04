@@ -13,7 +13,7 @@ body {
 	margin: auto;
 	border-style: solid;
 	text-align:center;
-	font-weight:bold;
+	font-weight:bold;                                                                                                                   
 	font-size:medium;
 	padding-top:0px;
 	padding-bottom:1px;
@@ -24,12 +24,13 @@ body {
 	text-align: center;
 	border-style: solid;
 	border-width: thin;
-	margin-left: 32px;
-	margin-right: 32px;
+	margin-left: 220px;
+	margin-right: 220px;
 	margin-top: 0px;
+	padding-top: 8px;
+	padding-bottom: 4px;
 	margin-bottom: 32px;
-	background-color: #999999;
-
+	background-color:#B7B7B7;
 }
 
 #container {
@@ -63,7 +64,7 @@ body {
 }
 
 h1 {
-background-image:url('assests/ICON_1.ICO'); 
+	background-image:url('assests/ICON_1.ICO'); 
 	background-repeat: no-repeat;
 	background-position: left;
 	background-color: #999999;
