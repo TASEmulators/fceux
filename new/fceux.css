@@ -61,11 +61,12 @@ body {
 	margin-left: 200px;
 	margin-right: 200px;
 	margin-top: 24px;
-	border-color: #E9E9E9;
+	margin-bottom: 8px;
+	border-color: #E2E2E2;
 }
 
 h1 {
-	background-image:url('assests/ICON_1.ICO'); 
+	background-image:url('assets/ICON_1.ico'); 
 	background-repeat: no-repeat;
 	background-position: left;
 	background-color: #999999;

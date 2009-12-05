@@ -1,5 +1,2 @@
-Movies.html - add links
 GoogleAds
-assests folders?  really? I'm lame
-Metadata - make a screenshot and put into movies.html
 Fix up press releases
