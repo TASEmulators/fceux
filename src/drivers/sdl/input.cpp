@@ -1453,9 +1453,19 @@ void
 InputCfg(const std::string &text)
 {
     if(text.find("gamepad") != std::string::npos) {
-        ConfigDevice(FCFGD_GAMEPAD, (text[strlen("gamepad")] - '1') & 3);
+		int device = (text[strlen("gamepad")] - '1');
+		if(device<0 || device>3) {
+			FCEUD_PrintError("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
+			exit(-1);
+		}
+        ConfigDevice(FCFGD_GAMEPAD, device);
     } else if(text.find("powerpad") != std::string::npos) {
-        ConfigDevice(FCFGD_POWERPAD, (text[strlen("powerpad")] - '1') & 1);
+		int device = (text[strlen("powerpad")] - '1');
+		if(device<0 || device>1) {
+			FCEUD_PrintError("Invalid powerpad device specified; must be powerpad1 or powerpad2");
+			exit(-1);
+		}
+        ConfigDevice(FCFGD_POWERPAD, device);
     } else if(text.find("hypershot") != std::string::npos) {
         ConfigDevice(FCFGD_HYPERSHOT, 0);
     } else if(text.find("quizking") != std::string::npos) {
