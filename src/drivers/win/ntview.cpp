@@ -299,10 +299,8 @@ void FCEUD_UpdateNTView(int scanline, bool drawall) {
 	//uint8 *pbitmap = ppuv_palette;
 	if (!hNTView) return;
 	
-	xpos = ((RefreshAddr & 0x400) >> 2) | ((RefreshAddr & 0x1F) << 3) | XOffset;
+	ppu_getScroll(xpos,ypos);
 
-	ypos = ((RefreshAddr & 0x3E0) >> 2) | ((RefreshAddr & 0x7000) >> 12); 
-		if(RefreshAddr & 0x800) ypos += 240;
 
 	//char str[50];
 	//sprintf(str,"%d,%d,%d",horzscroll,vertscroll,ntmirroring);

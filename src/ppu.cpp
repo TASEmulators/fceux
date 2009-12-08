@@ -266,6 +266,7 @@ struct PPUREGS {
 	}
 } ppur;
 
+
 static void makeppulut(void)
 {
 	int x;
@@ -471,6 +472,22 @@ void (*FFCEUX_PPUWrite)(uint32 A, uint8 V) = 0;
 
 //whether to use the new ppu (new PPU doesn't handle MMC5 extra nametables at all
 int newppu = 0;
+
+void ppu_getScroll(int &xpos, int &ypos)
+{
+	if(newppu)
+	{
+		ypos = ppur._vt*8 + ppur._fv + ppur._v*256;
+		xpos = ppur._ht*8 + ppur.fh + ppur._h*256;
+	}
+	else
+	{
+		xpos = ((RefreshAddr & 0x400) >> 2) | ((RefreshAddr & 0x1F) << 3) | XOffset;
+
+		ypos = ((RefreshAddr & 0x3E0) >> 2) | ((RefreshAddr & 0x7000) >> 12); 
+			if(RefreshAddr & 0x800) ypos += 240;
+	}
+}
 //---------------
 
 static DECLFR(A2002)
