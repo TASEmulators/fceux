@@ -1,3 +1,4 @@
+07-dec-2009 - qeed - NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix
 ??-???-2009 - CaH4e3 - fixed mappers 82, 25, 21, and 18.  Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable
 17-nov-2009 - adelikat - Win32 - Cheats - Pause while active checkbox installed
 17-nov-2009 - adelikat - Win32 - Fix debug window so it doesn't crash if unminimized with no game loaded.
