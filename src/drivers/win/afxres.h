@@ -2,6 +2,9 @@
 #define _AFXRES_H
 #if __GNUC__ >= 3
 #pragma GCC system_header
+
+// MINGW hack for Commctrl.h
+#define _WIN32_IE	0x0600
 #endif
 
 #ifdef __cplusplus

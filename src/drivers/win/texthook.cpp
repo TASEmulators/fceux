@@ -71,7 +71,7 @@ uint8 tileToggles[32][30]; //keeps track of which tiles in the selection window 
 uint8 pausedTileToggles[32][30]; //same as above, but is used during the emulator's paused state
 int lmousedown = 0; //keeps track of the the left mousebuttons down state (for click/drag selection)
 int drawingorerasing = 1; //keeps track of whether the user is selecting or deselecting on the selection window
-char chartable[256][4]; //used for table mappings
+static char chartable[256][4]; //used for table mappings
 static int TableFileLoaded = 0; //boolean for whether a table file is loaded or not
 uint16 tile = 0x0000; //used to store the value of a tile at a given x,y location
 int tileattr = 0; //used to store the corresponding attribute location for tile (see getTextHookerTile)
@@ -781,7 +781,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 	char str[2048];
 	char bufferstr[10240]; //holds the entire buffer, so it needs to be big...
 	char bufferstrtemp[10240];
-	void* found = "\0";
+	void* found = (void*)"\0";
 	char binstring[165];
 	char byteline[165];
 	int bytecounter;

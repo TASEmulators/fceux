@@ -355,8 +355,7 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 			//Display Subtitle Heading
 			if (currSubtitles.size() > 0)	//If no subtitles, don't bother with this heading
 			{
-			string Heading = "SUBTITLES";
-			std::wstring& rHeading = mbstowcs(Heading);
+			std::wstring rHeading = mbstowcs(string("SUBTITLES"));
 						
 			LVITEM lvSubtitle;
 				lvSubtitle.iItem = 0;

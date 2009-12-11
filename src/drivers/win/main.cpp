@@ -422,7 +422,9 @@ void DoFCEUExit()
 
 		FCEUI_StopMovie();
 		FCEUD_AviStop();
+		#ifdef _S9XLUA_H
 		FCEU_LuaStop(); // kill lua script before the gui dies
+		#endif
 
 		exiting = 1;
 		closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes

@@ -1566,7 +1566,11 @@ struct TieredRegion
 		{
 			unsigned int start;
 			unsigned int end;
+#ifdef NEED_MINGW_HACKS
+			bool Contains(unsigned int address, int size) const { return address < end && address+size > start; }
+#else
 			__forceinline bool Contains(unsigned int address, int size) const { return address < end && address+size > start; }
+#endif
 		};
 		std::vector<Island> islands;
 
@@ -4534,7 +4538,7 @@ int FCEU_LoadLuaCode(const char *filename) {
 		
 		L = lua_open();
 		luaL_openlibs(L);
-		#ifdef WIN32
+		#if defined( WIN32) && !defined(NEED_MINGW_HACKS)
 		iuplua_open(L);
 		iupcontrolslua_open(L);
 		#endif

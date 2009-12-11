@@ -513,6 +513,7 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		EnableMenuItem(context,FCEUX_CONTEXT_RECENTROM1,MF_BYCOMMAND | MF_GRAYED);
 
 	//Add Lua separator if either lua condition is true (yeah, a little ugly but it works)
+	#ifdef _S9XLUA_H
 	if (recent_lua[0] || FCEU_LuaRunning())
 		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
 
@@ -523,6 +524,7 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	//If lua is loaded, add a stop lua item
 	if (FCEU_LuaRunning())
 		InsertMenu(context, 0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_CLOSELUAWINDOWS, "Close All Script Windows");
+	#endif
 
 	//If menu is hidden, add an Unhide menu option
 	if (tog)
@@ -1355,8 +1357,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				//Check if Lua file
 				//-------------------------------------------------------
+				#ifdef _S9XLUA_H
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 					FCEU_LoadLuaCode(ftmp);
+				#endif
 				//-------------------------------------------------------
 				//Check if Ram Watch file
 				//-------------------------------------------------------
@@ -1403,6 +1407,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			
 			// A menu item for the recent lua files menu was clicked.
+			#ifdef _S9XLUA_H
 			if(wParam >= LUA_FIRST_RECENT_FILE && wParam <= LUA_FIRST_RECENT_FILE + MAX_NUMBER_OF_LUA_RECENT_FILES - 1)
 			{
 				char*& fname = recent_lua[wParam - LUA_FIRST_RECENT_FILE];
@@ -1420,6 +1425,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					}
 				}
 			}
+			#endif
 
 			// A menu item for the recent movie files menu was clicked.
 			if(wParam >= MOVIE_FIRST_RECENT_FILE && wParam <= MOVIE_FIRST_RECENT_FILE + MAX_NUMBER_OF_MOVIE_RECENT_FILES - 1)
@@ -1529,6 +1535,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					PostMessage(LuaConsoleHWnd, WM_CLOSE, 0, 0);
 				break;
 			//Recent Lua 1
+			#ifdef _S9XLUA_H
 			case FCEUX_CONTEXT_LOADLASTLUA:
 				if(recent_lua[0])
 				{
@@ -1544,6 +1551,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					}
 				}
 				break;
+			#endif
 
 			case MENU_EXIT:
 				DoFCEUExit();
@@ -1716,10 +1724,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case ID_CONFIG_SAVECONFIGFILE:
-				extern string cfgFile;
-				sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
-				SaveConfig(TempArray);
-				break;
+				{
+					extern string cfgFile;
+					sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
+					SaveConfig(TempArray);
+					break;
+				}
 
 			//Tools Menu---------------------------------------------------------------
 			case MENU_CHEATS:

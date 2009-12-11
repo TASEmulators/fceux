@@ -117,6 +117,10 @@ typedef uint32_t uint32;
 #define PSS ":"
 #define PS ':'
 
+#else
+
+#error PSS_STYLE undefined or invalid; see "types.h" for possible values, and add as compile-time option.  
+
 #endif
 
 

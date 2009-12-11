@@ -246,7 +246,7 @@ public:
 
 		if (origin < 3)
 		{
-			std::ios::off_type offtype;
+			std::ios::seekdir offtype;
 			switch(origin)
 			{
 			case 0: offtype = std::ios::beg; break;

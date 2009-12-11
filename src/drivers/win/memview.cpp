@@ -120,6 +120,9 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void FindNext();
 void OpenFindDialog();
+static int GetFileData(uint32 offset);
+static int WriteFileData(uint32 offset,int data);
+
 
 HWND hMemView, hMemFind;
 HDC mDC;
@@ -138,7 +141,7 @@ int MemFind_wndx, MemFind_wndy;
 int MemViewSizeX=625,MemViewSizeY=242;
 static RECT newMemViewRect;
 
-char chartable[256];
+static char chartable[256];
 
 //SCROLLINFO memsi;
 //HBITMAP HDataBmp;

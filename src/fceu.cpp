@@ -95,7 +95,7 @@ FCEUGI::~FCEUGI()
 	if(archiveFilename) delete archiveFilename;
 }
 
-static void CloseGame(void)
+static void FCEU_CloseGame(void)
 {
 	if(GameInfo)
 	{
@@ -352,7 +352,7 @@ static DECLFR(ARAMH)
 
 void ResetGameLoaded(void)
 {
-	if(GameInfo) CloseGame();
+	if(GameInfo) FCEU_CloseGame();
 	EmulationPaused = 0; //mbg 5/8/08 - loading games while paused was bad news. maybe this fixes it
 	GameStateRestore=0;
 	PPU_hook=0;
@@ -413,7 +413,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	for (AutosaveIndex=0; AutosaveIndex<AutosaveQty; ++AutosaveIndex)
 		AutosaveStatus[AutosaveIndex] = 0;
 
-	CloseGame();
+	FCEU_CloseGame();
 	GameInfo = new FCEUGI();
 	memset(GameInfo, 0, sizeof(FCEUGI));
 
@@ -706,7 +706,7 @@ void FCEUI_CloseGame(void)
 	if(!FCEU_IsValidUI(FCEUI_CLOSEGAME))
 		return;
 
-	CloseGame();
+	FCEU_CloseGame();
 }
 
 void ResetNES(void)
