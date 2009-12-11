@@ -7,3 +7,8 @@ To compile and install FCE Ultra, follow these steps:
       sudo apt-get install zenity
   3.  Run "scons" to build fceux.
   4.  To install on Linux/BSD run "scons install" as root.
+
+Users of Microsoft Visual Studio can use the solution files within the vc directory.
+These solution files will compile FCEUX and some included libraries for full functionality.
+
+CMake, while it can be used to compile, is currently deprecated in favor of SCons. 
