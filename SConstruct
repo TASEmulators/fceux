@@ -57,6 +57,17 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
+
+  ### Lua platform defines
+  ### Applies to all files even though only lua needs it, but should be ok
+  if env['LUA']:
+    if env['PLATFORM'] == 'darwin':
+      # Define LUA_USE_MACOSX otherwise we can't bind external libs from lua
+      env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])      
+    if env['PLATFORM'] == 'posix':
+      # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
+      # Should work on any *nix
+      env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
     
   ### Search for zenity if we're not in windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin':
