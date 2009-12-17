@@ -57,6 +57,9 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
+  ### TODO: clean this up
+  ## Uncomment below for experimental (broken) GTK support
+  #env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
 
   ### Lua platform defines
   ### Applies to all files even though only lua needs it, but should be ok

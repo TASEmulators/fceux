@@ -14,6 +14,12 @@
 #include <math.h>
 
 
+//#define GTK_GUI
+#ifdef GTK_GUI
+#include <gtk/gtk.h>
+#include "gui.cpp"
+#endif
+
 #include "main.h"
 #include "throttle.h"
 #include "config.h"
@@ -678,6 +684,11 @@ SDL_GL_LoadLibrary(0);
 	// load the hotkeys from the config life
 	setHotKeys();
 	
+	
+	#ifdef GTK_GUI
+	InitGTKSubsystem(argc, argv);
+	#endif
+	
     // load the specified game
     error = LoadGame(argv[romIndex]);
     if(error != 1) {
@@ -726,11 +737,17 @@ SDL_GL_LoadLibrary(0);
         FCEU_LoadLuaCode(fname.c_str());
     }*/
 	
+	//TODO: Work this bullshit out
+	
 	
 	
     // loop playing the game
     while(GameInfo) {
         DoFun(frameskip);
+        #ifdef GTK_GUI
+        while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+        #endif
     }
     CloseGame();
 
