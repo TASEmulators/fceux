@@ -68,7 +68,6 @@ static int noconfig;
 char *DriverUsage="\
 --pal          {0|1}   Uses PAL timing.\n\
 --gamegenie    {0|1}   Enables emulated Game Genie.\n\
---nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n\
 --newppu       {0|1}   Enables the new PPU core. (WARNING: May break savestates)\n\
 --frameskip     x      Sets # of frames to skip per emulated frame.\n\
 --xres          x      Sets horizontal resolution to x for full screen mode.\n\
@@ -80,29 +79,13 @@ char *DriverUsage="\
 --(x/y)stretch {0|1}   Stretches to fill surface on x/y axis (OpenGL only).\n\
 --bpp        {8|16|32} Sets bits per pixel.\n\
 --opengl       {0|1}   Enables OpenGL support.\n\
---doublebuf    {0|1}   Enables SDL double-buffering if x is nonzero.\n\
 --fullscreen   {0|1}   Enables full screen mode.\n\
---clipsides    {0|1}   Clips left and rightmost 8 columns of pixels.\n\
 --noframe      {0|1}   Hides title bar and window decorations.\n\
---slstart    {0-239}   Sets the first drawn emulated scanline.\n\
 --special     {1-4}    Use special video scaling filters\n\
                           (1 = hq2x 2 = Scale2x 3 = hq3x 4 = Scale3x)\n\
---slend      {0-239}   Sets the last drawn emulated scanline.\n\
---ntsccolor    {0|1}   Emulates an NTSC TV's colors.\n\
---hue           x      Sets hue for NTSC color emulation.\n\
---tint          x      Sets tint for NTSC color emulation.\n\
 --palette       f      Loads a custom global palette from file f.\n\
 --sound        {0|1}   Enables sound.\n\
---soundrate     x      Sets sound playback rate to x Hz.\n\
---soundq       {0|1}   Enables high sound quality.\n\
---soundbufsize  x      Sets sound buffer size to x ms.\n\
 --volume      {0-150}  Sets volume.\n\
---trianglevol {0-256}  Sets Triangle volume.\n\
---square1vol  {0-256}  Sets Square 1 volume.\n\
---square2vol  {0-256}  Sets Square 2 volume.\n\
---noisevol    {0-256}  Sets Noise volume.\n\
---pcmvol      {0-256}  Sets PCM volume.\n\
---lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
 --soundrecord   f      Records sound to file f.\n\
 --input(1,2)    d      Set the input device for input 1 or 2.\n\
                         Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
@@ -126,7 +109,24 @@ char *DriverUsage="\
 --netkey s, -k s	Uses key 's' to create a unique session for the game loaded.\n\
 --players x, -l x	Sets the number of local players.\n\
 */
-
+// these should be moved to the man file
+// --nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n\ 
+//--trianglevol {0-256}  Sets Triangle volume.\n\
+//--square1vol  {0-256}  Sets Square 1 volume.\n\
+//--square2vol  {0-256}  Sets Square 2 volume.\n\
+//--noisevol    {0-256}  Sets Noise volume.\n\
+//--pcmvol      {0-256}  Sets PCM volume.\n\
+//--lowpass      {0|1}   Enables low-pass filter if x is nonzero.\n\
+//--doublebuf    {0|1}   Enables SDL double-buffering if x is nonzero.\n\
+//--slend      {0-239}   Sets the last drawn emulated scanline.\n\
+//--ntsccolor    {0|1}   Emulates an NTSC TV's colors.\n\
+//--hue           x      Sets hue for NTSC color emulation.\n\
+//--tint          x      Sets tint for NTSC color emulation.\n\
+//--soundrate     x      Sets sound playback rate to x Hz.\n\
+//--soundq       {0|1}   Enables high sound quality.\n\
+//--soundbufsize  x      Sets sound buffer size to x ms.\n\
+//--slstart    {0-239}   Sets the first drawn emulated scanline.\n\
+//--clipsides    {0|1}   Clips left and rightmost 8 columns of pixels.\n\
 
 // global configuration object
 Config *g_config;
