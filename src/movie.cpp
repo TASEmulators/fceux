@@ -470,8 +470,6 @@ int MovieData::loadGreenzone(std::istream *is, bool binary)
 	}
 	greenZoneCount=size;
 
-	UpdateTasEdit();
-
 	return 1;
 }
 
