@@ -2338,9 +2338,10 @@ int FCEUX_PPU_Loop(int skip) {
 				if(yp >= spr[0] && yp < spr[0]+spriteHeight) {
 					//if we already have maxsprites, then this new one causes an overflow,
 					//set the flag and bail out.
-					if(oamcount == maxsprites) { 
+					if(oamcount >= 8 && PPUON) {
 						PPU_status |= 0x20;
-						break;
+                        if (maxsprites == 8)
+						    break;
 					}
 
 					//just copy some bytes into the internal sprite buffer
