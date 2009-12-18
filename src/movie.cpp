@@ -559,8 +559,9 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 //yuck... another custom text parser.
 bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
 {
+    std::string a("length"), b("-1");
 	// Non-TAS projects consume until EOF
-	movieData.installValue(std::string("length"), std::string("-1"));
+	movieData.installValue(a, b);
 
 	//first, look for an fcm signature
 	char fcmbuf[3];
