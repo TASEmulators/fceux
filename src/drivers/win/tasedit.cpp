@@ -158,6 +158,19 @@ void UpdateTasEdit()
 		
 		lastCursor = newCursor;
 	}
+
+	static int old_movie_readonly=-1;
+	if (old_movie_readonly != movie_readonly)
+	{
+		old_movie_readonly = movie_readonly;
+		if (movie_readonly)
+		{
+			SetWindowText(hwndTasEdit, "TAS Editor");
+		} else 
+		{
+			SetWindowText(hwndTasEdit, "TAS Editor (Recording)");
+		}
+	}
 }
 
 void RedrawList()

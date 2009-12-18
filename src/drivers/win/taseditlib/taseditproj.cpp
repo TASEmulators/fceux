@@ -63,9 +63,12 @@ bool TASEDIT_PROJECT::SaveProject()
 	std::ofstream ofs;
 	//ofs << GetProjectName() << std::endl;
 	//ofs << GetFM2Name() << std::endl;
-	ofs.open(filename);
+	ofs.open(filename, std::ios_base::binary);
 	
 	currMovieData.dump(&ofs, true);
+	ofs.put('\0'); // TODO: Add main branch name. 
+	currMovieData.dumpGreenzone(&ofs, true);
+
 	ofs.close();
 
 	changed=false;
@@ -78,14 +81,18 @@ extern bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopA
 bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 {
 	const char* filename = PFN.c_str();
-	//char buf[4096];
+
 	SetProjectName(PFN);
 	std::ifstream ifs;
-	ifs.open(filename);
-	//ifs.getline(ifs, 4090);
-	//ifs.getline(ifs, 4090);
+	ifs.open(filename, std::ios_base::binary);
+
 	LoadFM2(currMovieData, &ifs, INT_MAX, false);
 	LoadSubtitles(currMovieData);
+
+	char asdf;
+	ifs.get(asdf); // TODO: Add main branch name. 
+	currMovieData.loadGreenzone(&ifs, true);
+
 	poweron(true);
 
 	ifs.close();
