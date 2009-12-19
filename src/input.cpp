@@ -975,8 +975,10 @@ static void ToggleFullscreen(void)
 	
 	UpdateCheckedMenuItems();
 	changerecursive=1;
-	if(!SetVideoMode(fullscreen^1))
-		SetVideoMode(fullscreen);
+
+	int oldmode = fullscreen;
+	if(!SetVideoMode(oldmode ^1))
+		SetVideoMode(oldmode);
 	changerecursive=0;
 #endif
 }

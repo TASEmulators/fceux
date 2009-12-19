@@ -234,6 +234,7 @@ int SetVideoMode(int fs)
 	PaletteChanged=1;
 
 	ResetVideo();
+	fullscreen=fs;
 
 	if(!InitializeDDraw(fs)) return(1);     // DirectDraw not initialized
 
@@ -410,6 +411,7 @@ int SetVideoMode(int fs)
 				ShowDDErr("Error getting attached surface.");
 				return 0;
 			}
+			// FIXME: The back buffer isn't cleared properly, causing massive flickering. 
 		}
 
 		if(!GetBPP())
@@ -479,6 +481,8 @@ static void BlitScreenWindow(unsigned char *XBuf)
 	RECT drect;
 	int specialmul;
 
+	if (!lpDDSBack) return;
+
 	if(winspecial == 2 || winspecial == 1)
 		specialmul = 2;
 	else if(winspecial == 4 || winspecial == 3)
@@ -547,11 +551,12 @@ static void BlitScreenFull(uint8 *XBuf)
 	else
 		specmul = 1;
 
-
 	if(fssync==3)
 		lpDDSVPrimary=lpDDSDBack;
 	else
 		lpDDSVPrimary=lpDDSPrimary;
+
+	if (!lpDDSVPrimary) return;
 
 	if(PaletteChanged==1)
 	{
