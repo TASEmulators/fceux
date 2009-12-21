@@ -3,6 +3,9 @@
 
 #include<SDL/SDL.h>
 
+#include "../../driver.h"
+#include "../../version.h"
+
 #include "../common/configSys.h"
 #include "sdl.h"
 #include "gui.h"
@@ -39,10 +42,37 @@ gint mainLoop(gpointer data)
 
 void quit ()
 {
+	FCEUI_Kill();
 	SDL_Quit();
 	gtk_main_quit();
 	exit(0);
 }
+
+
+GtkWidget* aboutDialog;
+
+inline void quitAbout(void) { gtk_widget_hide_all(aboutDialog);}
+
+void showAbout ()
+{
+	
+	aboutDialog = gtk_about_dialog_new ();
+	gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(aboutDialog), "About fceuX");
+	gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(aboutDialog), "fceuX");
+	gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(aboutDialog), FCEU_VERSION_STRING);
+	gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(aboutDialog), "GPL-2; See COPYING");
+	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(aboutDialog), "http://fceux.com");
+	
+	
+	gtk_widget_show_all(GTK_WIDGET(aboutDialog));
+	
+	g_signal_connect(G_OBJECT(aboutDialog), "delete-event", quitAbout, NULL);
+
+	
+
+}
+
+
 
 void loadGame ()
 {
@@ -80,9 +110,9 @@ gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",         NULL,         NULL,           0, "<Branch>" },
   //{ "/File/_New",     "<control>N", NULL,    0, "<StockItem>", GTK_STOCK_NEW },
-  { "/File/_Open",    "<control>O", loadGame,    0, "<StockItem>", GTK_STOCK_OPEN },
-  { "/File/_Close",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
-  { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
+  { "/File/_Open ROM",    "<control>O", loadGame,    0, "<StockItem>", GTK_STOCK_OPEN },
+  { "/File/_Close ROM",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
+ // { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
   { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
@@ -93,7 +123,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/Rad2",  NULL,         NULL,			2, "/Options/Rad1" },
   { "/Options/Rad3",  NULL,         NULL,			3, "/Options/Rad1" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
-  { "/_Help/About",   NULL,         NULL,           0, "<Item>" },
+  { "/_Help/About",   NULL,         showAbout,           0, "<Item>" },
 };
 
 static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
