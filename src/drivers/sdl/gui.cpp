@@ -10,9 +10,9 @@
 #include "sdl.h"
 #include "gui.h"
 
-//#define WIDTH 600
-//#define HEIGHT 600
-
+#ifdef _S9XLUA_H
+#include "../../fceulua.h"
+#endif
 
 extern Config *g_config;
 
@@ -71,8 +71,26 @@ void showAbout ()
 	
 
 }
-
-
+#ifdef _S9XLUA_H
+void loadLua ()
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open LUA Script", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		FCEU_LoadLuaCode(filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+}
+#endif
 
 void loadGame ()
 {
@@ -114,6 +132,9 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/File/_Close ROM",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
  // { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
   { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
+#ifdef _S9XLUA_H  
+  { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
+#endif
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },

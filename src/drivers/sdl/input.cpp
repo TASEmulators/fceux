@@ -151,7 +151,9 @@ static int g_fkbEnabled = 0;
 
 // key definitions
 int cheatMenuKey;
+#ifdef _S9XLUA_H
 int loadLuaKey;
+#endif
 int renderBgKey;
 int saveStateKey;
 int loadStateKey;

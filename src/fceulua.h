@@ -1,4 +1,6 @@
 #ifdef _S9XLUA_H
+#ifndef _FCEULUA_H
+#define _FCEULUA_H
 
 enum LuaCallID
 {
@@ -83,4 +85,5 @@ char* FCEU_GetLuaScriptName();
 char *FCEU_GetFreezeFilename(int slot);
 
 
+#endif
 #endif
