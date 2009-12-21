@@ -642,12 +642,16 @@ SDL_GL_LoadLibrary(0);
       return 0;
     }
 	
+	#ifndef _GTK2
     if(romIndex <= 0) {
+		
         ShowUsage(argv[0]);
         FCEUD_Message("\nError parsing command line arguments\n");
         SDL_Quit();
         return -1;
     }
+    #endif
+    
 
 
     
@@ -687,13 +691,16 @@ SDL_GL_LoadLibrary(0);
 	InitGTKSubsystem(argc, argv);
 	#endif
 	
-    // load the specified game
-    error = LoadGame(argv[romIndex]);
-    if(error != 1) {
-        DriverKill();
-        SDL_Quit();
-        return -1;
-    }
+	if(romIndex >= 0)
+	{
+		// load the specified game
+		error = LoadGame(argv[romIndex]);
+		if(error != 1) {
+			DriverKill();
+			SDL_Quit();
+			return -1;
+		}
+	}
     
     // movie playback
     std::string fname;
@@ -735,12 +742,14 @@ SDL_GL_LoadLibrary(0);
         FCEU_LoadLuaCode(fname.c_str());
     }*/
 	
-	//TODO: Work this bullshit out
-	
-	
 	
     // loop playing the game
+    #ifndef _GTK2
     while(GameInfo) {
+	#else
+	while(1) {
+		if(GameInfo)
+	#endif
         DoFun(frameskip);
         #ifdef _GTK2
         while(gtk_events_pending())

@@ -17,6 +17,7 @@ extern Config *g_config;
 //SDL_Surface* screen = NULL;
 //SDL_Surface* hello = NULL;
 
+GtkWidget* MainWindow = NULL;
 
 
 // we're not using this loop right now since integrated sdl is broken 
@@ -43,6 +44,28 @@ void quit ()
 	exit(0);
 }
 
+void loadGame ()
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open ROM", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		LoadGame(filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+
+}
+
+void closeGame() { CloseGame(); }
+
 // this is not used currently; it is used in rendering sdl in
 // the gtk window which is broken
 gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
@@ -56,9 +79,9 @@ gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
 /* Our menu, an array of GtkItemFactoryEntry structures that defines each menu item */
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",         NULL,         NULL,           0, "<Branch>" },
-  { "/File/_New",     "<control>N", NULL,    0, "<StockItem>", GTK_STOCK_NEW },
-  { "/File/_Open",    "<control>O", NULL,    0, "<StockItem>", GTK_STOCK_OPEN },
-  { "/File/_Save",    "<control>S", NULL,    0, "<StockItem>", GTK_STOCK_SAVE },
+  //{ "/File/_New",     "<control>N", NULL,    0, "<StockItem>", GTK_STOCK_NEW },
+  { "/File/_Open",    "<control>O", loadGame,    0, "<StockItem>", GTK_STOCK_OPEN },
+  { "/File/_Close",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
   { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
   { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
@@ -101,8 +124,9 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 
 int InitGTKSubsystem(int argc, char** argv)
 {
-	GtkWidget* MainWindow;
+	//GtkWidget* MainWindow;
 	GtkWidget* Menubar;
+	GtkWidget* vbox;
 	int xres, yres;
 	
 	g_config->getOption("SDL.XResolution", &xres);
@@ -113,9 +137,14 @@ int InitGTKSubsystem(int argc, char** argv)
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), "fceuX GTK GUI - WIP");
 	
+	vbox = gtk_vbox_new(FALSE, 3);
+	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
+	
 	Menubar = CreateMenubar(MainWindow);
 	
-	gtk_container_add(GTK_CONTAINER(MainWindow), Menubar);
+	//gtk_container_add(GTK_CONTAINER(vbox), Menubar);
+	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
+	
 	
 	// broken SDL embedding code
 	//gtk_widget_set_usize(MainWindow, xres, yres);
@@ -161,7 +190,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
 	//gtk_idle_add(mainLoop, MainWindow);
-	
+	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
+
 	gtk_widget_show_all(MainWindow);
 	
 	

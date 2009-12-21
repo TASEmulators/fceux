@@ -8,4 +8,7 @@
 
 static void DoFun(int frameskip);
 
+int LoadGame(const char *path);
+int CloseGame(void);
+
 #endif
