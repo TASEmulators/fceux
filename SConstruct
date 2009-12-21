@@ -11,7 +11,8 @@ opts.AddVariables(
   BoolVariable('LUA',       'Enable Lua support', 1),
   BoolVariable('NEWPPU',    'Enable new PPU core', 0),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
-  BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1')
+  BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
+  BoolVariable('GTK2', 'Enable experimental integrated GTK2 GUI (BROKEN, Devs only!)', 0)
 )
 
 env = Environment(options = opts)
@@ -57,9 +58,9 @@ else:
   if not conf.CheckLib('z', autoadd=1):
     print 'Did not find libz or z.lib, exiting!'
     Exit(1)
-  ### TODO: clean this up
-  ## Uncomment below for experimental (broken) GTK support
-  #env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
+  if env['GTK2']:
+	# Add compiler and linker flags from pkg-config
+	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
 
   ### Lua platform defines
   ### Applies to all files even though only lua needs it, but should be ok
