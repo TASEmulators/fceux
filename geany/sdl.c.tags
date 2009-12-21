@@ -1,0 +1,2451 @@
+# format=tagmanager
+AUDIO_S16Ã65536÷0
+AUDIO_S16LSBÃ65536÷0
+AUDIO_S16MSBÃ65536÷0
+AUDIO_S16SYSÃ65536÷0
+AUDIO_S8Ã65536÷0
+AUDIO_U16Ã65536÷0
+AUDIO_U16LSBÃ65536÷0
+AUDIO_U16MSBÃ65536÷0
+AUDIO_U16SYSÃ65536÷0
+AUDIO_U8Ã65536÷0
+AlossÃ64ŒSDL_PixelFormat÷0œUint8
+AmaskÃ64ŒSDL_PixelFormat÷0œUint32
+AshiftÃ64ŒSDL_PixelFormat÷0œUint8
+BIG_ENDIANÃ65536÷0
+BUFSIZÃ65536÷0
+BYTE_ORDERÃ65536÷0
+BitsPerPixelÃ64ŒSDL_PixelFormat÷0œUint8
+BlossÃ64ŒSDL_PixelFormat÷0œUint8
+BmaskÃ64ŒSDL_PixelFormat÷0œUint32
+BshiftÃ64ŒSDL_PixelFormat÷0œUint8
+BytesPerPixelÃ64ŒSDL_PixelFormat÷0œUint8
+CD_ERRORÃ4Œanon_enum_36÷0
+CD_FPSÃ65536÷0
+CD_INDRIVEÃ131072Õ(status)÷0
+CD_PAUSEDÃ4Œanon_enum_36÷0
+CD_PLAYINGÃ4Œanon_enum_36÷0
+CD_STOPPEDÃ4Œanon_enum_36÷0
+CD_TRAYEMPTYÃ4Œanon_enum_36÷0
+CDstatusÃ4096÷0œanon_enum_36
+DECLSPECÃ65536÷0
+DUMMY_ENUM_VALUEÃ4Œanon_enum_29÷0
+EOFÃ65536÷0
+EXIT_FAILUREÃ65536÷0
+EXIT_SUCCESSÃ65536÷0
+FD_CLRÃ131072Õ(fd,fdsetp)÷0
+FD_ISSETÃ131072Õ(fd,fdsetp)÷0
+FD_SETÃ131072Õ(fd,fdsetp)÷0
+FD_SETSIZEÃ65536÷0
+FD_ZEROÃ131072Õ(fdsetp)÷0
+FILEÃ4096÷0œ_IO_FILE
+FILENAME_MAXÃ65536÷0
+FOPEN_MAXÃ65536÷0
+FRAMES_TO_MSFÃ131072Õ(f,M,S,F)÷0
+GlossÃ64ŒSDL_PixelFormat÷0œUint8
+GmaskÃ64ŒSDL_PixelFormat÷0œUint32
+GshiftÃ64ŒSDL_PixelFormat÷0œUint8
+HAVE_ABSÃ65536÷0
+HAVE_ALLOCAÃ65536÷0
+HAVE_ALLOCA_HÃ65536÷0
+HAVE_ATOFÃ65536÷0
+HAVE_ATOIÃ65536÷0
+HAVE_BCOPYÃ65536÷0
+HAVE_CALLOCÃ65536÷0
+HAVE_CTYPE_HÃ65536÷0
+HAVE_DLVSYMÃ65536÷0
+HAVE_FREEÃ65536÷0
+HAVE_GETENVÃ65536÷0
+HAVE_GETPAGESIZEÃ65536÷0
+HAVE_ICONVÃ65536÷0
+HAVE_ICONV_HÃ65536÷0
+HAVE_INTTYPES_HÃ65536÷0
+HAVE_LIBCÃ65536÷0
+HAVE_MALLOCÃ65536÷0
+HAVE_MALLOC_HÃ65536÷0
+HAVE_MATH_HÃ65536÷0
+HAVE_MEMCMPÃ65536÷0
+HAVE_MEMCPYÃ65536÷0
+HAVE_MEMMOVEÃ65536÷0
+HAVE_MEMORY_HÃ65536÷0
+HAVE_MEMSETÃ65536÷0
+HAVE_MPROTECTÃ65536÷0
+HAVE_NANOSLEEPÃ65536÷0
+HAVE_PUTENVÃ65536÷0
+HAVE_QSORTÃ65536÷0
+HAVE_REALLOCÃ65536÷0
+HAVE_SETJMPÃ65536÷0
+HAVE_SIGACTIONÃ65536÷0
+HAVE_SIGNAL_HÃ65536÷0
+HAVE_SNPRINTFÃ65536÷0
+HAVE_SSCANFÃ65536÷0
+HAVE_STDARG_HÃ65536÷0
+HAVE_STDINT_HÃ65536÷0
+HAVE_STDIO_HÃ65536÷0
+HAVE_STDLIB_HÃ65536÷0
+HAVE_STRCASECMPÃ65536÷0
+HAVE_STRCHRÃ65536÷0
+HAVE_STRCMPÃ65536÷0
+HAVE_STRDUPÃ65536÷0
+HAVE_STRINGS_HÃ65536÷0
+HAVE_STRING_HÃ65536÷0
+HAVE_STRLENÃ65536÷0
+HAVE_STRNCASECMPÃ65536÷0
+HAVE_STRNCMPÃ65536÷0
+HAVE_STRRCHRÃ65536÷0
+HAVE_STRSTRÃ65536÷0
+HAVE_STRTODÃ65536÷0
+HAVE_STRTOLÃ65536÷0
+HAVE_STRTOLLÃ65536÷0
+HAVE_STRTOULÃ65536÷0
+HAVE_STRTOULLÃ65536÷0
+HAVE_SYS_TYPES_HÃ65536÷0
+HAVE_UNSETENVÃ65536÷0
+HAVE_VSNPRINTFÃ65536÷0
+KMOD_ALTÃ65536÷0
+KMOD_CAPSÃ4Œanon_enum_38÷0
+KMOD_CTRLÃ65536÷0
+KMOD_LALTÃ4Œanon_enum_38÷0
+KMOD_LCTRLÃ4Œanon_enum_38÷0
+KMOD_LMETAÃ4Œanon_enum_38÷0
+KMOD_LSHIFTÃ4Œanon_enum_38÷0
+KMOD_METAÃ65536÷0
+KMOD_MODEÃ4Œanon_enum_38÷0
+KMOD_NONEÃ4Œanon_enum_38÷0
+KMOD_NUMÃ4Œanon_enum_38÷0
+KMOD_RALTÃ4Œanon_enum_38÷0
+KMOD_RCTRLÃ4Œanon_enum_38÷0
+KMOD_RESERVEDÃ4Œanon_enum_38÷0
+KMOD_RMETAÃ4Œanon_enum_38÷0
+KMOD_RSHIFTÃ4Œanon_enum_38÷0
+KMOD_SHIFTÃ65536÷0
+LITTLE_ENDIANÃ65536÷0
+L_ctermidÃ65536÷0
+L_cuseridÃ65536÷0
+L_tmpnamÃ65536÷0
+MB_CUR_MAXÃ65536÷0
+MSF_TO_FRAMESÃ131072Õ(M,S,F)÷0
+NFDBITSÃ65536÷0
+NULLÃ65536÷0
+PDP_ENDIANÃ65536÷0
+P_tmpdirÃ65536÷0
+RAND_MAXÃ65536÷0
+RW_SEEK_CURÃ65536÷0
+RW_SEEK_ENDÃ65536÷0
+RW_SEEK_SETÃ65536÷0
+RlossÃ64ŒSDL_PixelFormat÷0œUint8
+RmaskÃ64ŒSDL_PixelFormat÷0œUint32
+RshiftÃ64ŒSDL_PixelFormat÷0œUint8
+SDLCALLÃ65536÷0
+SDLK_0Ã4Œanon_enum_37÷0
+SDLK_1Ã4Œanon_enum_37÷0
+SDLK_2Ã4Œanon_enum_37÷0
+SDLK_3Ã4Œanon_enum_37÷0
+SDLK_4Ã4Œanon_enum_37÷0
+SDLK_5Ã4Œanon_enum_37÷0
+SDLK_6Ã4Œanon_enum_37÷0
+SDLK_7Ã4Œanon_enum_37÷0
+SDLK_8Ã4Œanon_enum_37÷0
+SDLK_9Ã4Œanon_enum_37÷0
+SDLK_AMPERSANDÃ4Œanon_enum_37÷0
+SDLK_ASTERISKÃ4Œanon_enum_37÷0
+SDLK_ATÃ4Œanon_enum_37÷0
+SDLK_BACKQUOTEÃ4Œanon_enum_37÷0
+SDLK_BACKSLASHÃ4Œanon_enum_37÷0
+SDLK_BACKSPACEÃ4Œanon_enum_37÷0
+SDLK_BREAKÃ4Œanon_enum_37÷0
+SDLK_CAPSLOCKÃ4Œanon_enum_37÷0
+SDLK_CARETÃ4Œanon_enum_37÷0
+SDLK_CLEARÃ4Œanon_enum_37÷0
+SDLK_COLONÃ4Œanon_enum_37÷0
+SDLK_COMMAÃ4Œanon_enum_37÷0
+SDLK_COMPOSEÃ4Œanon_enum_37÷0
+SDLK_DELETEÃ4Œanon_enum_37÷0
+SDLK_DOLLARÃ4Œanon_enum_37÷0
+SDLK_DOWNÃ4Œanon_enum_37÷0
+SDLK_ENDÃ4Œanon_enum_37÷0
+SDLK_EQUALSÃ4Œanon_enum_37÷0
+SDLK_ESCAPEÃ4Œanon_enum_37÷0
+SDLK_EUROÃ4Œanon_enum_37÷0
+SDLK_EXCLAIMÃ4Œanon_enum_37÷0
+SDLK_F1Ã4Œanon_enum_37÷0
+SDLK_F10Ã4Œanon_enum_37÷0
+SDLK_F11Ã4Œanon_enum_37÷0
+SDLK_F12Ã4Œanon_enum_37÷0
+SDLK_F13Ã4Œanon_enum_37÷0
+SDLK_F14Ã4Œanon_enum_37÷0
+SDLK_F15Ã4Œanon_enum_37÷0
+SDLK_F2Ã4Œanon_enum_37÷0
+SDLK_F3Ã4Œanon_enum_37÷0
+SDLK_F4Ã4Œanon_enum_37÷0
+SDLK_F5Ã4Œanon_enum_37÷0
+SDLK_F6Ã4Œanon_enum_37÷0
+SDLK_F7Ã4Œanon_enum_37÷0
+SDLK_F8Ã4Œanon_enum_37÷0
+SDLK_F9Ã4Œanon_enum_37÷0
+SDLK_FIRSTÃ4Œanon_enum_37÷0
+SDLK_GREATERÃ4Œanon_enum_37÷0
+SDLK_HASHÃ4Œanon_enum_37÷0
+SDLK_HELPÃ4Œanon_enum_37÷0
+SDLK_HOMEÃ4Œanon_enum_37÷0
+SDLK_INSERTÃ4Œanon_enum_37÷0
+SDLK_KP0Ã4Œanon_enum_37÷0
+SDLK_KP1Ã4Œanon_enum_37÷0
+SDLK_KP2Ã4Œanon_enum_37÷0
+SDLK_KP3Ã4Œanon_enum_37÷0
+SDLK_KP4Ã4Œanon_enum_37÷0
+SDLK_KP5Ã4Œanon_enum_37÷0
+SDLK_KP6Ã4Œanon_enum_37÷0
+SDLK_KP7Ã4Œanon_enum_37÷0
+SDLK_KP8Ã4Œanon_enum_37÷0
+SDLK_KP9Ã4Œanon_enum_37÷0
+SDLK_KP_DIVIDEÃ4Œanon_enum_37÷0
+SDLK_KP_ENTERÃ4Œanon_enum_37÷0
+SDLK_KP_EQUALSÃ4Œanon_enum_37÷0
+SDLK_KP_MINUSÃ4Œanon_enum_37÷0
+SDLK_KP_MULTIPLYÃ4Œanon_enum_37÷0
+SDLK_KP_PERIODÃ4Œanon_enum_37÷0
+SDLK_KP_PLUSÃ4Œanon_enum_37÷0
+SDLK_LALTÃ4Œanon_enum_37÷0
+SDLK_LASTÃ4Œanon_enum_37÷0
+SDLK_LCTRLÃ4Œanon_enum_37÷0
+SDLK_LEFTÃ4Œanon_enum_37÷0
+SDLK_LEFTBRACKETÃ4Œanon_enum_37÷0
+SDLK_LEFTPARENÃ4Œanon_enum_37÷0
+SDLK_LESSÃ4Œanon_enum_37÷0
+SDLK_LMETAÃ4Œanon_enum_37÷0
+SDLK_LSHIFTÃ4Œanon_enum_37÷0
+SDLK_LSUPERÃ4Œanon_enum_37÷0
+SDLK_MENUÃ4Œanon_enum_37÷0
+SDLK_MINUSÃ4Œanon_enum_37÷0
+SDLK_MODEÃ4Œanon_enum_37÷0
+SDLK_NUMLOCKÃ4Œanon_enum_37÷0
+SDLK_PAGEDOWNÃ4Œanon_enum_37÷0
+SDLK_PAGEUPÃ4Œanon_enum_37÷0
+SDLK_PAUSEÃ4Œanon_enum_37÷0
+SDLK_PERIODÃ4Œanon_enum_37÷0
+SDLK_PLUSÃ4Œanon_enum_37÷0
+SDLK_POWERÃ4Œanon_enum_37÷0
+SDLK_PRINTÃ4Œanon_enum_37÷0
+SDLK_QUESTIONÃ4Œanon_enum_37÷0
+SDLK_QUOTEÃ4Œanon_enum_37÷0
+SDLK_QUOTEDBLÃ4Œanon_enum_37÷0
+SDLK_RALTÃ4Œanon_enum_37÷0
+SDLK_RCTRLÃ4Œanon_enum_37÷0
+SDLK_RETURNÃ4Œanon_enum_37÷0
+SDLK_RIGHTÃ4Œanon_enum_37÷0
+SDLK_RIGHTBRACKETÃ4Œanon_enum_37÷0
+SDLK_RIGHTPARENÃ4Œanon_enum_37÷0
+SDLK_RMETAÃ4Œanon_enum_37÷0
+SDLK_RSHIFTÃ4Œanon_enum_37÷0
+SDLK_RSUPERÃ4Œanon_enum_37÷0
+SDLK_SCROLLOCKÃ4Œanon_enum_37÷0
+SDLK_SEMICOLONÃ4Œanon_enum_37÷0
+SDLK_SLASHÃ4Œanon_enum_37÷0
+SDLK_SPACEÃ4Œanon_enum_37÷0
+SDLK_SYSREQÃ4Œanon_enum_37÷0
+SDLK_TABÃ4Œanon_enum_37÷0
+SDLK_UNDERSCOREÃ4Œanon_enum_37÷0
+SDLK_UNDOÃ4Œanon_enum_37÷0
+SDLK_UNKNOWNÃ4Œanon_enum_37÷0
+SDLK_UPÃ4Œanon_enum_37÷0
+SDLK_WORLD_0Ã4Œanon_enum_37÷0
+SDLK_WORLD_1Ã4Œanon_enum_37÷0
+SDLK_WORLD_10Ã4Œanon_enum_37÷0
+SDLK_WORLD_11Ã4Œanon_enum_37÷0
+SDLK_WORLD_12Ã4Œanon_enum_37÷0
+SDLK_WORLD_13Ã4Œanon_enum_37÷0
+SDLK_WORLD_14Ã4Œanon_enum_37÷0
+SDLK_WORLD_15Ã4Œanon_enum_37÷0
+SDLK_WORLD_16Ã4Œanon_enum_37÷0
+SDLK_WORLD_17Ã4Œanon_enum_37÷0
+SDLK_WORLD_18Ã4Œanon_enum_37÷0
+SDLK_WORLD_19Ã4Œanon_enum_37÷0
+SDLK_WORLD_2Ã4Œanon_enum_37÷0
+SDLK_WORLD_20Ã4Œanon_enum_37÷0
+SDLK_WORLD_21Ã4Œanon_enum_37÷0
+SDLK_WORLD_22Ã4Œanon_enum_37÷0
+SDLK_WORLD_23Ã4Œanon_enum_37÷0
+SDLK_WORLD_24Ã4Œanon_enum_37÷0
+SDLK_WORLD_25Ã4Œanon_enum_37÷0
+SDLK_WORLD_26Ã4Œanon_enum_37÷0
+SDLK_WORLD_27Ã4Œanon_enum_37÷0
+SDLK_WORLD_28Ã4Œanon_enum_37÷0
+SDLK_WORLD_29Ã4Œanon_enum_37÷0
+SDLK_WORLD_3Ã4Œanon_enum_37÷0
+SDLK_WORLD_30Ã4Œanon_enum_37÷0
+SDLK_WORLD_31Ã4Œanon_enum_37÷0
+SDLK_WORLD_32Ã4Œanon_enum_37÷0
+SDLK_WORLD_33Ã4Œanon_enum_37÷0
+SDLK_WORLD_34Ã4Œanon_enum_37÷0
+SDLK_WORLD_35Ã4Œanon_enum_37÷0
+SDLK_WORLD_36Ã4Œanon_enum_37÷0
+SDLK_WORLD_37Ã4Œanon_enum_37÷0
+SDLK_WORLD_38Ã4Œanon_enum_37÷0
+SDLK_WORLD_39Ã4Œanon_enum_37÷0
+SDLK_WORLD_4Ã4Œanon_enum_37÷0
+SDLK_WORLD_40Ã4Œanon_enum_37÷0
+SDLK_WORLD_41Ã4Œanon_enum_37÷0
+SDLK_WORLD_42Ã4Œanon_enum_37÷0
+SDLK_WORLD_43Ã4Œanon_enum_37÷0
+SDLK_WORLD_44Ã4Œanon_enum_37÷0
+SDLK_WORLD_45Ã4Œanon_enum_37÷0
+SDLK_WORLD_46Ã4Œanon_enum_37÷0
+SDLK_WORLD_47Ã4Œanon_enum_37÷0
+SDLK_WORLD_48Ã4Œanon_enum_37÷0
+SDLK_WORLD_49Ã4Œanon_enum_37÷0
+SDLK_WORLD_5Ã4Œanon_enum_37÷0
+SDLK_WORLD_50Ã4Œanon_enum_37÷0
+SDLK_WORLD_51Ã4Œanon_enum_37÷0
+SDLK_WORLD_52Ã4Œanon_enum_37÷0
+SDLK_WORLD_53Ã4Œanon_enum_37÷0
+SDLK_WORLD_54Ã4Œanon_enum_37÷0
+SDLK_WORLD_55Ã4Œanon_enum_37÷0
+SDLK_WORLD_56Ã4Œanon_enum_37÷0
+SDLK_WORLD_57Ã4Œanon_enum_37÷0
+SDLK_WORLD_58Ã4Œanon_enum_37÷0
+SDLK_WORLD_59Ã4Œanon_enum_37÷0
+SDLK_WORLD_6Ã4Œanon_enum_37÷0
+SDLK_WORLD_60Ã4Œanon_enum_37÷0
+SDLK_WORLD_61Ã4Œanon_enum_37÷0
+SDLK_WORLD_62Ã4Œanon_enum_37÷0
+SDLK_WORLD_63Ã4Œanon_enum_37÷0
+SDLK_WORLD_64Ã4Œanon_enum_37÷0
+SDLK_WORLD_65Ã4Œanon_enum_37÷0
+SDLK_WORLD_66Ã4Œanon_enum_37÷0
+SDLK_WORLD_67Ã4Œanon_enum_37÷0
+SDLK_WORLD_68Ã4Œanon_enum_37÷0
+SDLK_WORLD_69Ã4Œanon_enum_37÷0
+SDLK_WORLD_7Ã4Œanon_enum_37÷0
+SDLK_WORLD_70Ã4Œanon_enum_37÷0
+SDLK_WORLD_71Ã4Œanon_enum_37÷0
+SDLK_WORLD_72Ã4Œanon_enum_37÷0
+SDLK_WORLD_73Ã4Œanon_enum_37÷0
+SDLK_WORLD_74Ã4Œanon_enum_37÷0
+SDLK_WORLD_75Ã4Œanon_enum_37÷0
+SDLK_WORLD_76Ã4Œanon_enum_37÷0
+SDLK_WORLD_77Ã4Œanon_enum_37÷0
+SDLK_WORLD_78Ã4Œanon_enum_37÷0
+SDLK_WORLD_79Ã4Œanon_enum_37÷0
+SDLK_WORLD_8Ã4Œanon_enum_37÷0
+SDLK_WORLD_80Ã4Œanon_enum_37÷0
+SDLK_WORLD_81Ã4Œanon_enum_37÷0
+SDLK_WORLD_82Ã4Œanon_enum_37÷0
+SDLK_WORLD_83Ã4Œanon_enum_37÷0
+SDLK_WORLD_84Ã4Œanon_enum_37÷0
+SDLK_WORLD_85Ã4Œanon_enum_37÷0
+SDLK_WORLD_86Ã4Œanon_enum_37÷0
+SDLK_WORLD_87Ã4Œanon_enum_37÷0
+SDLK_WORLD_88Ã4Œanon_enum_37÷0
+SDLK_WORLD_89Ã4Œanon_enum_37÷0
+SDLK_WORLD_9Ã4Œanon_enum_37÷0
+SDLK_WORLD_90Ã4Œanon_enum_37÷0
+SDLK_WORLD_91Ã4Œanon_enum_37÷0
+SDLK_WORLD_92Ã4Œanon_enum_37÷0
+SDLK_WORLD_93Ã4Œanon_enum_37÷0
+SDLK_WORLD_94Ã4Œanon_enum_37÷0
+SDLK_WORLD_95Ã4Œanon_enum_37÷0
+SDLK_aÃ4Œanon_enum_37÷0
+SDLK_bÃ4Œanon_enum_37÷0
+SDLK_cÃ4Œanon_enum_37÷0
+SDLK_dÃ4Œanon_enum_37÷0
+SDLK_eÃ4Œanon_enum_37÷0
+SDLK_fÃ4Œanon_enum_37÷0
+SDLK_gÃ4Œanon_enum_37÷0
+SDLK_hÃ4Œanon_enum_37÷0
+SDLK_iÃ4Œanon_enum_37÷0
+SDLK_jÃ4Œanon_enum_37÷0
+SDLK_kÃ4Œanon_enum_37÷0
+SDLK_lÃ4Œanon_enum_37÷0
+SDLK_mÃ4Œanon_enum_37÷0
+SDLK_nÃ4Œanon_enum_37÷0
+SDLK_oÃ4Œanon_enum_37÷0
+SDLK_pÃ4Œanon_enum_37÷0
+SDLK_qÃ4Œanon_enum_37÷0
+SDLK_rÃ4Œanon_enum_37÷0
+SDLK_sÃ4Œanon_enum_37÷0
+SDLK_tÃ4Œanon_enum_37÷0
+SDLK_uÃ4Œanon_enum_37÷0
+SDLK_vÃ4Œanon_enum_37÷0
+SDLK_wÃ4Œanon_enum_37÷0
+SDLK_xÃ4Œanon_enum_37÷0
+SDLK_yÃ4Œanon_enum_37÷0
+SDLK_zÃ4Œanon_enum_37÷0
+SDLKeyÃ4096÷0œanon_enum_37
+SDLModÃ4096÷0œanon_enum_38
+SDL_ACTIVEEVENTÃ4ŒSDL_Events÷0
+SDL_ACTIVEEVENTMASKÃ4ŒSDL_EventMasks÷0
+SDL_ADDEVENTÃ4Œanon_enum_41÷0
+SDL_ALLEVENTSÃ65536÷0
+SDL_ALL_HOTKEYSÃ65536÷0
+SDL_ALPHA_OPAQUEÃ65536÷0
+SDL_ALPHA_TRANSPARENTÃ65536÷0
+SDL_ANYFORMATÃ65536÷0
+SDL_APPACTIVEÃ65536÷0
+SDL_APPINPUTFOCUSÃ65536÷0
+SDL_APPMOUSEFOCUSÃ65536÷0
+SDL_ASSEMBLY_ROUTINESÃ65536÷0
+SDL_ASYNCBLITÃ65536÷0
+SDL_AUDIO_DRIVER_ALSAÃ65536÷0
+SDL_AUDIO_DRIVER_DISKÃ65536÷0
+SDL_AUDIO_DRIVER_DUMMYÃ65536÷0
+SDL_AUDIO_DRIVER_ESDÃ65536÷0
+SDL_AUDIO_DRIVER_NASÃ65536÷0
+SDL_AUDIO_DRIVER_OSSÃ65536÷0
+SDL_AUDIO_DRIVER_PULSEÃ65536÷0
+SDL_AUDIO_PAUSEDÃ4Œanon_enum_35÷0
+SDL_AUDIO_PLAYINGÃ4Œanon_enum_35÷0
+SDL_AUDIO_STOPPEDÃ4Œanon_enum_35÷0
+SDL_AUDIO_TRACKÃ65536÷0
+SDL_ActiveEventÃ2048÷0
+SDL_ActiveEventÃ4096÷0
+SDL_AddTimerÃ1024Õ(Uint32 interval, SDL_NewTimerCallback callback, void *param)÷0œSDL_TimerID
+SDL_AllocRWÃ1024Õ(void)÷0œSDL_RWops *
+SDL_AllocSurfaceÃ65536÷0
+SDL_AudioCVTÃ2048÷0
+SDL_AudioCVTÃ4096÷0
+SDL_AudioDriverNameÃ1024Õ(char *namebuf, int maxlen)÷0œchar *
+SDL_AudioInitÃ1024Õ(const char *driver_name)÷0œint
+SDL_AudioQuitÃ1024Õ(void)÷0œvoid
+SDL_AudioSpecÃ2048÷0
+SDL_AudioSpecÃ4096÷0
+SDL_BIG_ENDIANÃ65536÷0
+SDL_BUTTONÃ131072Õ(X)÷0
+SDL_BUTTON_LEFTÃ65536÷0
+SDL_BUTTON_LMASKÃ65536÷0
+SDL_BUTTON_MIDDLEÃ65536÷0
+SDL_BUTTON_MMASKÃ65536÷0
+SDL_BUTTON_RIGHTÃ65536÷0
+SDL_BUTTON_RMASKÃ65536÷0
+SDL_BUTTON_WHEELDOWNÃ65536÷0
+SDL_BUTTON_WHEELUPÃ65536÷0
+SDL_BUTTON_X1Ã65536÷0
+SDL_BUTTON_X1MASKÃ65536÷0
+SDL_BUTTON_X2Ã65536÷0
+SDL_BUTTON_X2MASKÃ65536÷0
+SDL_BYTEORDERÃ65536÷0
+SDL_BlitSurfaceÃ65536÷0
+SDL_BuildAudioCVTÃ1024Õ(SDL_AudioCVT *cvt, Uint16 src_format, Uint8 src_channels, int src_rate, Uint16 dst_format, Uint8 dst_channels, int dst_rate)÷0œint
+SDL_CDÃ2048÷0
+SDL_CDÃ4096÷0
+SDL_CDCloseÃ1024Õ(SDL_CD *cdrom)÷0œvoid
+SDL_CDEjectÃ1024Õ(SDL_CD *cdrom)÷0œint
+SDL_CDNameÃ1024Õ(int drive)÷0œconst char *
+SDL_CDNumDrivesÃ1024Õ(void)÷0œint
+SDL_CDOpenÃ1024Õ(int drive)÷0œSDL_CD *
+SDL_CDPauseÃ1024Õ(SDL_CD *cdrom)÷0œint
+SDL_CDPlayÃ1024Õ(SDL_CD *cdrom, int start, int length)÷0œint
+SDL_CDPlayTracksÃ1024Õ(SDL_CD *cdrom, int start_track, int start_frame, int ntracks, int nframes)÷0œint
+SDL_CDROM_LINUXÃ65536÷0
+SDL_CDResumeÃ1024Õ(SDL_CD *cdrom)÷0œint
+SDL_CDStatusÃ1024Õ(SDL_CD *cdrom)÷0œCDstatus
+SDL_CDStopÃ1024Õ(SDL_CD *cdrom)÷0œint
+SDL_CDtrackÃ2048÷0
+SDL_CDtrackÃ4096÷0
+SDL_COMPILEDVERSIONÃ65536÷0
+SDL_COMPILE_TIME_ASSERTÃ131072Õ(name,x)÷0
+SDL_ClearErrorÃ1024Õ(void)÷0œvoid
+SDL_CloseAudioÃ1024Õ(void)÷0œvoid
+SDL_ColorÃ2048÷0
+SDL_ColorÃ4096÷0
+SDL_ColourÃ65536÷0
+SDL_CondBroadcastÃ1024Õ(SDL_cond *cond)÷0œint
+SDL_CondSignalÃ1024Õ(SDL_cond *cond)÷0œint
+SDL_CondWaitÃ1024Õ(SDL_cond *cond, SDL_mutex *mut)÷0œint
+SDL_CondWaitTimeoutÃ1024Õ(SDL_cond *cond, SDL_mutex *mutex, Uint32 ms)÷0œint
+SDL_ConvertAudioÃ1024Õ(SDL_AudioCVT *cvt)÷0œint
+SDL_ConvertSurfaceÃ1024Õ(SDL_Surface *src, SDL_PixelFormat *fmt, Uint32 flags)÷0œSDL_Surface *
+SDL_CreateCondÃ1024Õ(void)÷0œSDL_cond *
+SDL_CreateCursorÃ1024Õ(Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)÷0œSDL_Cursor *
+SDL_CreateMutexÃ1024Õ(void)÷0œSDL_mutex *
+SDL_CreateRGBSurfaceÃ1024Õ(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)÷0œSDL_Surface *
+SDL_CreateRGBSurfaceFromÃ1024Õ(void *pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)÷0œSDL_Surface *
+SDL_CreateSemaphoreÃ1024Õ(Uint32 initial_value)÷0œSDL_sem *
+SDL_CreateThreadÃ1024Õ(int ( *fn)(void *), void *data)÷0œSDL_Thread *
+SDL_CreateYUVOverlayÃ1024Õ(int width, int height, Uint32 format, SDL_Surface *display)÷0œSDL_Overlay *
+SDL_CursorÃ2048÷0
+SDL_CursorÃ4096÷0
+SDL_DATA_TRACKÃ65536÷0
+SDL_DEFAULT_REPEAT_DELAYÃ65536÷0
+SDL_DEFAULT_REPEAT_INTERVALÃ65536÷0
+SDL_DISABLEÃ65536÷0
+SDL_DOUBLEBUFÃ65536÷0
+SDL_DUMMY_ENUMÃ4096÷0œanon_enum_29
+SDL_DelayÃ1024Õ(Uint32 ms)÷0œvoid
+SDL_DestroyCondÃ1024Õ(SDL_cond *cond)÷0œvoid
+SDL_DestroyMutexÃ1024Õ(SDL_mutex *mutex)÷0œvoid
+SDL_DestroySemaphoreÃ1024Õ(SDL_sem *sem)÷0œvoid
+SDL_DisplayFormatÃ1024Õ(SDL_Surface *surface)÷0œSDL_Surface *
+SDL_DisplayFormatAlphaÃ1024Õ(SDL_Surface *surface)÷0œSDL_Surface *
+SDL_DisplayYUVOverlayÃ1024Õ(SDL_Overlay *overlay, SDL_Rect *dstrect)÷0œint
+SDL_EFREADÃ4Œanon_enum_30÷0
+SDL_EFSEEKÃ4Œanon_enum_30÷0
+SDL_EFWRITEÃ4Œanon_enum_30÷0
+SDL_ENABLEÃ65536÷0
+SDL_ENOMEMÃ4Œanon_enum_30÷0
+SDL_EVENTMASKÃ131072Õ(X)÷0
+SDL_EVENT_RESERVED2Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVED3Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVED4Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVED5Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVED6Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVED7Ã4ŒSDL_Events÷0
+SDL_EVENT_RESERVEDAÃ4ŒSDL_Events÷0
+SDL_EVENT_RESERVEDBÃ4ŒSDL_Events÷0
+SDL_EnableKeyRepeatÃ1024Õ(int delay, int interval)÷0œint
+SDL_EnableUNICODEÃ1024Õ(int enable)÷0œint
+SDL_ErrorÃ1024Õ(SDL_errorcode code)÷0œvoid
+SDL_EventÃ4096÷0
+SDL_EventÃ8192÷0
+SDL_EventFilterÃ4096÷0œtypedef int
+SDL_EventMaskÃ4096÷0œSDL_EventMasks
+SDL_EventMasksÃ2÷0
+SDL_EventStateÃ1024Õ(Uint8 type, int state)÷0œUint8
+SDL_EventTypeÃ4096÷0œSDL_Events
+SDL_EventsÃ2÷0
+SDL_ExposeEventÃ2048÷0
+SDL_ExposeEventÃ4096÷0
+SDL_FALSEÃ4ŒSDL_bool÷0
+SDL_FULLSCREENÃ65536÷0
+SDL_FillRectÃ1024Õ(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)÷0œint
+SDL_FlipÃ1024Õ(SDL_Surface *screen)÷0œint
+SDL_FreeCursorÃ1024Õ(SDL_Cursor *cursor)÷0œvoid
+SDL_FreeRWÃ1024Õ(SDL_RWops *area)÷0œvoid
+SDL_FreeSurfaceÃ1024Õ(SDL_Surface *surface)÷0œvoid
+SDL_FreeWAVÃ1024Õ(Uint8 *audio_buf)÷0œvoid
+SDL_FreeYUVOverlayÃ1024Õ(SDL_Overlay *overlay)÷0œvoid
+SDL_GETEVENTÃ4Œanon_enum_41÷0
+SDL_GL_ACCELERATED_VISUALÃ4Œanon_enum_39÷0
+SDL_GL_ACCUM_ALPHA_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_ACCUM_BLUE_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_ACCUM_GREEN_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_ACCUM_RED_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_ALPHA_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_BLUE_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_BUFFER_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_DEPTH_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_DOUBLEBUFFERÃ4Œanon_enum_39÷0
+SDL_GL_GREEN_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_GetAttributeÃ1024Õ(SDL_GLattr attr, int* value)÷0œint
+SDL_GL_GetProcAddressÃ1024Õ(const char* proc)÷0œvoid *
+SDL_GL_LoadLibraryÃ1024Õ(const char *path)÷0œint
+SDL_GL_LockÃ1024Õ(void)÷0œvoid
+SDL_GL_MULTISAMPLEBUFFERSÃ4Œanon_enum_39÷0
+SDL_GL_MULTISAMPLESAMPLESÃ4Œanon_enum_39÷0
+SDL_GL_RED_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_STENCIL_SIZEÃ4Œanon_enum_39÷0
+SDL_GL_STEREOÃ4Œanon_enum_39÷0
+SDL_GL_SWAP_CONTROLÃ4Œanon_enum_39÷0
+SDL_GL_SetAttributeÃ1024Õ(SDL_GLattr attr, int value)÷0œint
+SDL_GL_SwapBuffersÃ1024Õ(void)÷0œvoid
+SDL_GL_UnlockÃ1024Õ(void)÷0œvoid
+SDL_GL_UpdateRectsÃ1024Õ(int numrects, SDL_Rect* rects)÷0œvoid
+SDL_GLattrÃ4096÷0œanon_enum_39
+SDL_GRAB_FULLSCREENÃ4Œanon_enum_40÷0
+SDL_GRAB_OFFÃ4Œanon_enum_40÷0
+SDL_GRAB_ONÃ4Œanon_enum_40÷0
+SDL_GRAB_QUERYÃ4Œanon_enum_40÷0
+SDL_GetAppStateÃ1024Õ(void)÷0œUint8
+SDL_GetAudioStatusÃ1024Õ(void)÷0œSDL_audiostatus
+SDL_GetClipRectÃ1024Õ(SDL_Surface *surface, SDL_Rect *rect)÷0œvoid
+SDL_GetCursorÃ1024Õ(void)÷0œSDL_Cursor *
+SDL_GetErrorÃ1024Õ(void)÷0œchar *
+SDL_GetEventFilterÃ1024Õ(void)÷0œSDL_EventFilter
+SDL_GetGammaRampÃ1024Õ(Uint16 *red, Uint16 *green, Uint16 *blue)÷0œint
+SDL_GetKeyNameÃ1024Õ(SDLKey key)÷0œchar *
+SDL_GetKeyRepeatÃ1024Õ(int *delay, int *interval)÷0œvoid
+SDL_GetKeyStateÃ1024Õ(int *numkeys)÷0œUint8 *
+SDL_GetModStateÃ1024Õ(void)÷0œSDLMod
+SDL_GetMouseStateÃ1024Õ(int *x, int *y)÷0œUint8
+SDL_GetRGBÃ1024Õ(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r, Uint8 *g, Uint8 *b)÷0œvoid
+SDL_GetRGBAÃ1024Õ(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)÷0œvoid
+SDL_GetRelativeMouseStateÃ1024Õ(int *x, int *y)÷0œUint8
+SDL_GetThreadIDÃ1024Õ(SDL_Thread *thread)÷0œUint32
+SDL_GetTicksÃ1024Õ(void)÷0œUint32
+SDL_GetVideoInfoÃ1024Õ(void)÷0œconst SDL_VideoInfo *
+SDL_GetVideoSurfaceÃ1024Õ(void)÷0œSDL_Surface *
+SDL_GrabModeÃ4096÷0œanon_enum_40
+SDL_HAS_64BIT_TYPEÃ65536÷0
+SDL_HAT_CENTEREDÃ65536÷0
+SDL_HAT_DOWNÃ65536÷0
+SDL_HAT_LEFTÃ65536÷0
+SDL_HAT_LEFTDOWNÃ65536÷0
+SDL_HAT_LEFTUPÃ65536÷0
+SDL_HAT_RIGHTÃ65536÷0
+SDL_HAT_RIGHTDOWNÃ65536÷0
+SDL_HAT_RIGHTUPÃ65536÷0
+SDL_HAT_UPÃ65536÷0
+SDL_HWACCELÃ65536÷0
+SDL_HWPALETTEÃ65536÷0
+SDL_HWSURFACEÃ65536÷0
+SDL_Has3DNowÃ1024Õ(void)÷0œSDL_bool
+SDL_Has3DNowExtÃ1024Õ(void)÷0œSDL_bool
+SDL_HasAltiVecÃ1024Õ(void)÷0œSDL_bool
+SDL_HasMMXÃ1024Õ(void)÷0œSDL_bool
+SDL_HasMMXExtÃ1024Õ(void)÷0œSDL_bool
+SDL_HasRDTSCÃ1024Õ(void)÷0œSDL_bool
+SDL_HasSSEÃ1024Õ(void)÷0œSDL_bool
+SDL_HasSSE2Ã1024Õ(void)÷0œSDL_bool
+SDL_ICONV_E2BIGÃ65536÷0
+SDL_ICONV_EILSEQÃ65536÷0
+SDL_ICONV_EINVALÃ65536÷0
+SDL_ICONV_ERRORÃ65536÷0
+SDL_IGNOREÃ65536÷0
+SDL_INIT_AUDIOÃ65536÷0
+SDL_INIT_CDROMÃ65536÷0
+SDL_INIT_EVENTTHREADÃ65536÷0
+SDL_INIT_EVERYTHINGÃ65536÷0
+SDL_INIT_JOYSTICKÃ65536÷0
+SDL_INIT_NOPARACHUTEÃ65536÷0
+SDL_INIT_TIMERÃ65536÷0
+SDL_INIT_VIDEOÃ65536÷0
+SDL_INLINE_OKAYÃ65536÷0
+SDL_INPUT_LINUXEVÃ65536÷0
+SDL_IYUV_OVERLAYÃ65536÷0
+SDL_InitÃ1024Õ(Uint32 flags)÷0œint
+SDL_InitSubSystemÃ1024Õ(Uint32 flags)÷0œint
+SDL_JOYAXISMOTIONÃ4ŒSDL_Events÷0
+SDL_JOYAXISMOTIONMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYBALLMOTIONÃ4ŒSDL_Events÷0
+SDL_JOYBALLMOTIONMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYBUTTONDOWNÃ4ŒSDL_Events÷0
+SDL_JOYBUTTONDOWNMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYBUTTONUPÃ4ŒSDL_Events÷0
+SDL_JOYBUTTONUPMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYEVENTMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYHATMOTIONÃ4ŒSDL_Events÷0
+SDL_JOYHATMOTIONMASKÃ4ŒSDL_EventMasks÷0
+SDL_JOYSTICK_LINUXÃ65536÷0
+SDL_JoyAxisEventÃ2048÷0
+SDL_JoyAxisEventÃ4096÷0
+SDL_JoyBallEventÃ2048÷0
+SDL_JoyBallEventÃ4096÷0
+SDL_JoyButtonEventÃ2048÷0
+SDL_JoyButtonEventÃ4096÷0
+SDL_JoyHatEventÃ2048÷0
+SDL_JoyHatEventÃ4096÷0
+SDL_JoystickÃ4096÷0œ_SDL_Joystick
+SDL_JoystickCloseÃ1024Õ(SDL_Joystick *joystick)÷0œvoid
+SDL_JoystickEventStateÃ1024Õ(int state)÷0œint
+SDL_JoystickGetAxisÃ1024Õ(SDL_Joystick *joystick, int axis)÷0œSint16
+SDL_JoystickGetBallÃ1024Õ(SDL_Joystick *joystick, int ball, int *dx, int *dy)÷0œint
+SDL_JoystickGetButtonÃ1024Õ(SDL_Joystick *joystick, int button)÷0œUint8
+SDL_JoystickGetHatÃ1024Õ(SDL_Joystick *joystick, int hat)÷0œUint8
+SDL_JoystickIndexÃ1024Õ(SDL_Joystick *joystick)÷0œint
+SDL_JoystickNameÃ1024Õ(int device_index)÷0œconst char *
+SDL_JoystickNumAxesÃ1024Õ(SDL_Joystick *joystick)÷0œint
+SDL_JoystickNumBallsÃ1024Õ(SDL_Joystick *joystick)÷0œint
+SDL_JoystickNumButtonsÃ1024Õ(SDL_Joystick *joystick)÷0œint
+SDL_JoystickNumHatsÃ1024Õ(SDL_Joystick *joystick)÷0œint
+SDL_JoystickOpenÃ1024Õ(int device_index)÷0œSDL_Joystick *
+SDL_JoystickOpenedÃ1024Õ(int device_index)÷0œint
+SDL_JoystickUpdateÃ1024Õ(void)÷0œvoid
+SDL_KEYDOWNÃ4ŒSDL_Events÷0
+SDL_KEYDOWNMASKÃ4ŒSDL_EventMasks÷0
+SDL_KEYEVENTMASKÃ4ŒSDL_EventMasks÷0
+SDL_KEYUPÃ4ŒSDL_Events÷0
+SDL_KEYUPMASKÃ4ŒSDL_EventMasks÷0
+SDL_KeyboardEventÃ2048÷0
+SDL_KeyboardEventÃ4096÷0
+SDL_KillThreadÃ1024Õ(SDL_Thread *thread)÷0œvoid
+SDL_LASTERRORÃ4Œanon_enum_30÷0
+SDL_LIL_ENDIANÃ65536÷0
+SDL_LOADSO_DLOPENÃ65536÷0
+SDL_LOGPALÃ65536÷0
+SDL_Linked_VersionÃ1024Õ(void)÷0œconst SDL_version *
+SDL_ListModesÃ1024Õ(SDL_PixelFormat *format, Uint32 flags)÷0œSDL_Rect * *
+SDL_LoadBMPÃ131072Õ(file)÷0
+SDL_LoadBMP_RWÃ1024Õ(SDL_RWops *src, int freesrc)÷0œSDL_Surface *
+SDL_LoadFunctionÃ1024Õ(void *handle, const char *name)÷0œvoid *
+SDL_LoadObjectÃ1024Õ(const char *sofile)÷0œvoid *
+SDL_LoadWAVÃ131072Õ(file,spec,audio_buf,audio_len)÷0
+SDL_LoadWAV_RWÃ1024Õ(SDL_RWops *src, int freesrc, SDL_AudioSpec *spec, Uint8 **audio_buf, Uint32 *audio_len)÷0œSDL_AudioSpec *
+SDL_LockAudioÃ1024Õ(void)÷0œvoid
+SDL_LockMutexÃ131072Õ(m)÷0
+SDL_LockSurfaceÃ1024Õ(SDL_Surface *surface)÷0œint
+SDL_LockYUVOverlayÃ1024Õ(SDL_Overlay *overlay)÷0œint
+SDL_LowerBlitÃ1024Õ(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)÷0œint
+SDL_MAJOR_VERSIONÃ65536÷0
+SDL_MAX_TRACKSÃ65536÷0
+SDL_MINOR_VERSIONÃ65536÷0
+SDL_MIX_MAXVOLUMEÃ65536÷0
+SDL_MOUSEBUTTONDOWNÃ4ŒSDL_Events÷0
+SDL_MOUSEBUTTONDOWNMASKÃ4ŒSDL_EventMasks÷0
+SDL_MOUSEBUTTONUPÃ4ŒSDL_Events÷0
+SDL_MOUSEBUTTONUPMASKÃ4ŒSDL_EventMasks÷0
+SDL_MOUSEEVENTMASKÃ4ŒSDL_EventMasks÷0
+SDL_MOUSEMOTIONÃ4ŒSDL_Events÷0
+SDL_MOUSEMOTIONMASKÃ4ŒSDL_EventMasks÷0
+SDL_MUSTLOCKÃ131072Õ(surface)÷0
+SDL_MUTEX_MAXWAITÃ65536÷0
+SDL_MUTEX_TIMEDOUTÃ65536÷0
+SDL_MapRGBÃ1024Õ(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g, const Uint8 b)÷0œUint32
+SDL_MapRGBAÃ1024Õ(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)÷0œUint32
+SDL_MixAudioÃ1024Õ(Uint8 *dst, const Uint8 *src, Uint32 len, int volume)÷0œvoid
+SDL_MouseButtonEventÃ2048÷0
+SDL_MouseButtonEventÃ4096÷0
+SDL_MouseMotionEventÃ2048÷0
+SDL_MouseMotionEventÃ4096÷0
+SDL_NOEVENTÃ4ŒSDL_Events÷0
+SDL_NOFRAMEÃ65536÷0
+SDL_NUMEVENTSÃ4ŒSDL_Events÷0
+SDL_NewTimerCallbackÃ4096÷0œtypedef Uint32
+SDL_NumJoysticksÃ1024Õ(void)÷0œint
+SDL_OPENGLÃ65536÷0
+SDL_OPENGLBLITÃ65536÷0
+SDL_OpenAudioÃ1024Õ(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)÷0œint
+SDL_OutOfMemoryÃ131072Õ()÷0
+SDL_OverlayÃ2048÷0
+SDL_OverlayÃ4096÷0
+SDL_PATCHLEVELÃ65536÷0
+SDL_PEEKEVENTÃ4Œanon_enum_41÷0
+SDL_PHYSPALÃ65536÷0
+SDL_PREALLOCÃ65536÷0
+SDL_PRESSEDÃ65536÷0
+SDL_PaletteÃ2048÷0
+SDL_PaletteÃ4096÷0
+SDL_PauseAudioÃ1024Õ(int pause_on)÷0œvoid
+SDL_PeepEventsÃ1024Õ(SDL_Event *events, int numevents, SDL_eventaction action, Uint32 mask)÷0œint
+SDL_PixelFormatÃ2048÷0
+SDL_PixelFormatÃ4096÷0
+SDL_PollEventÃ1024Õ(SDL_Event *event)÷0œint
+SDL_PumpEventsÃ1024Õ(void)÷0œvoid
+SDL_PushEventÃ1024Õ(SDL_Event *event)÷0œint
+SDL_QUERYÃ65536÷0
+SDL_QUITÃ4ŒSDL_Events÷0
+SDL_QUITMASKÃ4ŒSDL_EventMasks÷0
+SDL_QuitÃ1024Õ(void)÷0œvoid
+SDL_QuitEventÃ2048÷0
+SDL_QuitEventÃ4096÷0
+SDL_QuitRequestedÃ131072Õ()÷0
+SDL_QuitSubSystemÃ1024Õ(Uint32 flags)÷0œvoid
+SDL_RELEASEDÃ65536÷0
+SDL_RESIZABLEÃ65536÷0
+SDL_RLEACCELÃ65536÷0
+SDL_RLEACCELOKÃ65536÷0
+SDL_RWFromConstMemÃ1024Õ(const void *mem, int size)÷0œSDL_RWops *
+SDL_RWFromFPÃ1024Õ(FILE *fp, int autoclose)÷0œSDL_RWops *
+SDL_RWFromFileÃ1024Õ(const char *file, const char *mode)÷0œSDL_RWops *
+SDL_RWFromMemÃ1024Õ(void *mem, int size)÷0œSDL_RWops *
+SDL_RWcloseÃ131072Õ(ctx)÷0
+SDL_RWopsÃ2048÷0
+SDL_RWopsÃ4096÷0
+SDL_RWreadÃ131072Õ(ctx,ptr,size,n)÷0
+SDL_RWseekÃ131072Õ(ctx,offset,whence)÷0
+SDL_RWtellÃ131072Õ(ctx)÷0
+SDL_RWwriteÃ131072Õ(ctx,ptr,size,n)÷0
+SDL_ReadBE16Ã1024Õ(SDL_RWops *src)÷0œUint16
+SDL_ReadBE32Ã1024Õ(SDL_RWops *src)÷0œUint32
+SDL_ReadBE64Ã1024Õ(SDL_RWops *src)÷0œUint64
+SDL_ReadLE16Ã1024Õ(SDL_RWops *src)÷0œUint16
+SDL_ReadLE32Ã1024Õ(SDL_RWops *src)÷0œUint32
+SDL_ReadLE64Ã1024Õ(SDL_RWops *src)÷0œUint64
+SDL_RectÃ2048÷0
+SDL_RectÃ4096÷0
+SDL_RemoveTimerÃ1024Õ(SDL_TimerID t)÷0œSDL_bool
+SDL_ResizeEventÃ2048÷0
+SDL_ResizeEventÃ4096÷0
+SDL_SRCALPHAÃ65536÷0
+SDL_SRCCOLORKEYÃ65536÷0
+SDL_SWSURFACEÃ65536÷0
+SDL_SYSWMEVENTÃ4ŒSDL_Events÷0
+SDL_SYSWMEVENTMASKÃ4ŒSDL_EventMasks÷0
+SDL_SaveBMPÃ131072Õ(surface,file)÷0
+SDL_SaveBMP_RWÃ1024Õ(SDL_Surface *surface, SDL_RWops *dst, int freedst)÷0œint
+SDL_SemPostÃ1024Õ(SDL_sem *sem)÷0œint
+SDL_SemTryWaitÃ1024Õ(SDL_sem *sem)÷0œint
+SDL_SemValueÃ1024Õ(SDL_sem *sem)÷0œUint32
+SDL_SemWaitÃ1024Õ(SDL_sem *sem)÷0œint
+SDL_SemWaitTimeoutÃ1024Õ(SDL_sem *sem, Uint32 ms)÷0œint
+SDL_SetAlphaÃ1024Õ(SDL_Surface *surface, Uint32 flag, Uint8 alpha)÷0œint
+SDL_SetClipRectÃ1024Õ(SDL_Surface *surface, const SDL_Rect *rect)÷0œSDL_bool
+SDL_SetColorKeyÃ1024Õ(SDL_Surface *surface, Uint32 flag, Uint32 key)÷0œint
+SDL_SetColorsÃ1024Õ(SDL_Surface *surface, SDL_Color *colors, int firstcolor, int ncolors)÷0œint
+SDL_SetCursorÃ1024Õ(SDL_Cursor *cursor)÷0œvoid
+SDL_SetErrorÃ1024Õ(const char *fmt, ...)÷0œvoid
+SDL_SetEventFilterÃ1024Õ(SDL_EventFilter filter)÷0œvoid
+SDL_SetGammaÃ1024Õ(float red, float green, float blue)÷0œint
+SDL_SetGammaRampÃ1024Õ(const Uint16 *red, const Uint16 *green, const Uint16 *blue)÷0œint
+SDL_SetModStateÃ1024Õ(SDLMod modstate)÷0œvoid
+SDL_SetPaletteÃ1024Õ(SDL_Surface *surface, int flags, SDL_Color *colors, int firstcolor, int ncolors)÷0œint
+SDL_SetTimerÃ1024Õ(Uint32 interval, SDL_TimerCallback callback)÷0œint
+SDL_SetVideoModeÃ1024Õ(int width, int height, int bpp, Uint32 flags)÷0œSDL_Surface *
+SDL_ShowCursorÃ1024Õ(int toggle)÷0œint
+SDL_SoftStretchÃ1024Õ(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)÷0œint
+SDL_SurfaceÃ2048÷0
+SDL_SurfaceÃ4096÷0
+SDL_Swap16Ã16Õ(Uint16 x)÷0œinline
+SDL_Swap32Ã16Õ(Uint32 x)÷0œinline
+SDL_Swap64Ã16Õ(Uint64 x)÷0œinline
+SDL_SwapBE16Ã131072Õ(X)÷0
+SDL_SwapBE32Ã131072Õ(X)÷0
+SDL_SwapBE64Ã131072Õ(X)÷0
+SDL_SwapLE16Ã131072Õ(X)÷0
+SDL_SwapLE32Ã131072Õ(X)÷0
+SDL_SwapLE64Ã131072Õ(X)÷0
+SDL_SysWMEventÃ2048÷0
+SDL_SysWMEventÃ4096÷0
+SDL_SysWMmsgÃ4096÷0
+SDL_SysWMmsgÃ32768÷0
+SDL_TABLESIZEÃ131072Õ(table)÷0
+SDL_THREAD_PTHREADÃ65536÷0
+SDL_THREAD_PTHREAD_RECURSIVE_MUTEXÃ65536÷0
+SDL_TIMER_UNIXÃ65536÷0
+SDL_TIMESLICEÃ65536÷0
+SDL_TRUEÃ4ŒSDL_bool÷0
+SDL_ThreadÃ4096÷0
+SDL_ThreadÃ32768÷0
+SDL_ThreadIDÃ1024Õ(void)÷0œUint32
+SDL_TimerCallbackÃ4096÷0œtypedef Uint32
+SDL_TimerIDÃ4096÷0œ_SDL_TimerID
+SDL_UNSUPPORTEDÃ4Œanon_enum_30÷0
+SDL_USEREVENTÃ4ŒSDL_Events÷0
+SDL_UYVY_OVERLAYÃ65536÷0
+SDL_UnloadObjectÃ1024Õ(void *handle)÷0œvoid
+SDL_UnlockAudioÃ1024Õ(void)÷0œvoid
+SDL_UnlockMutexÃ131072Õ(m)÷0
+SDL_UnlockSurfaceÃ1024Õ(SDL_Surface *surface)÷0œvoid
+SDL_UnlockYUVOverlayÃ1024Õ(SDL_Overlay *overlay)÷0œvoid
+SDL_UnsupportedÃ131072Õ()÷0
+SDL_UpdateRectÃ1024Õ(SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h)÷0œvoid
+SDL_UpdateRectsÃ1024Õ(SDL_Surface *screen, int numrects, SDL_Rect *rects)÷0œvoid
+SDL_UpperBlitÃ1024Õ(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect)÷0œint
+SDL_UserEventÃ2048÷0
+SDL_UserEventÃ4096÷0
+SDL_VERSIONÃ131072Õ(X)÷0
+SDL_VERSIONNUMÃ131072Õ(X,Y,Z)÷0
+SDL_VERSION_ATLEASTÃ131072Õ(X,Y,Z)÷0
+SDL_VIDEOEXPOSEÃ4ŒSDL_Events÷0
+SDL_VIDEOEXPOSEMASKÃ4ŒSDL_EventMasks÷0
+SDL_VIDEORESIZEÃ4ŒSDL_Events÷0
+SDL_VIDEORESIZEMASKÃ4ŒSDL_EventMasks÷0
+SDL_VIDEO_DRIVER_AALIBÃ65536÷0
+SDL_VIDEO_DRIVER_CACAÃ65536÷0
+SDL_VIDEO_DRIVER_DGAÃ65536÷0
+SDL_VIDEO_DRIVER_DIRECTFBÃ65536÷0
+SDL_VIDEO_DRIVER_DUMMYÃ65536÷0
+SDL_VIDEO_DRIVER_FBCONÃ65536÷0
+SDL_VIDEO_DRIVER_X11Ã65536÷0
+SDL_VIDEO_DRIVER_X11_DGAMOUSEÃ65536÷0
+SDL_VIDEO_DRIVER_X11_DPMSÃ65536÷0
+SDL_VIDEO_DRIVER_X11_DYNAMICÃ65536÷0
+SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXTÃ65536÷0
+SDL_VIDEO_DRIVER_X11_VIDMODEÃ65536÷0
+SDL_VIDEO_DRIVER_X11_XINERAMAÃ65536÷0
+SDL_VIDEO_DRIVER_X11_XMEÃ65536÷0
+SDL_VIDEO_DRIVER_X11_XVÃ65536÷0
+SDL_VIDEO_OPENGLÃ65536÷0
+SDL_VIDEO_OPENGL_GLXÃ65536÷0
+SDL_VideoDriverNameÃ1024Õ(char *namebuf, int maxlen)÷0œchar *
+SDL_VideoInfoÃ2048÷0
+SDL_VideoInfoÃ4096÷0
+SDL_VideoInitÃ1024Õ(const char *driver_name, Uint32 flags)÷0œint
+SDL_VideoModeOKÃ1024Õ(int width, int height, int bpp, Uint32 flags)÷0œint
+SDL_VideoQuitÃ1024Õ(void)÷0œvoid
+SDL_WM_GetCaptionÃ1024Õ(char **title, char **icon)÷0œvoid
+SDL_WM_GrabInputÃ1024Õ(SDL_GrabMode mode)÷0œSDL_GrabMode
+SDL_WM_IconifyWindowÃ1024Õ(void)÷0œint
+SDL_WM_SetCaptionÃ1024Õ(const char *title, const char *icon)÷0œvoid
+SDL_WM_SetIconÃ1024Õ(SDL_Surface *icon, Uint8 *mask)÷0œvoid
+SDL_WM_ToggleFullScreenÃ1024Õ(SDL_Surface *surface)÷0œint
+SDL_WaitEventÃ1024Õ(SDL_Event *event)÷0œint
+SDL_WaitThreadÃ1024Õ(SDL_Thread *thread, int *status)÷0œvoid
+SDL_WarpMouseÃ1024Õ(Uint16 x, Uint16 y)÷0œvoid
+SDL_WasInitÃ1024Õ(Uint32 flags)÷0œUint32
+SDL_WriteBE16Ã1024Õ(SDL_RWops *dst, Uint16 value)÷0œint
+SDL_WriteBE32Ã1024Õ(SDL_RWops *dst, Uint32 value)÷0œint
+SDL_WriteBE64Ã1024Õ(SDL_RWops *dst, Uint64 value)÷0œint
+SDL_WriteLE16Ã1024Õ(SDL_RWops *dst, Uint16 value)÷0œint
+SDL_WriteLE32Ã1024Õ(SDL_RWops *dst, Uint32 value)÷0œint
+SDL_WriteLE64Ã1024Õ(SDL_RWops *dst, Uint64 value)÷0œint
+SDL_YUY2_OVERLAYÃ65536÷0
+SDL_YV12_OVERLAYÃ65536÷0
+SDL_YVYU_OVERLAYÃ65536÷0
+SDL_absÃ65536÷0
+SDL_arraysizeÃ131072Õ(array)÷0
+SDL_atofÃ65536÷0
+SDL_atoiÃ65536÷0
+SDL_audiostatusÃ4096÷0œanon_enum_35
+SDL_blitÃ4096÷0œtypedef int
+SDL_boolÃ2÷0
+SDL_boolÃ4096÷0
+SDL_callocÃ65536÷0
+SDL_condÃ4096÷0
+SDL_condÃ32768÷0
+SDL_dummy_enumÃ4096÷0œint
+SDL_dummy_sint16Ã4096÷0œint
+SDL_dummy_sint32Ã4096÷0œint
+SDL_dummy_sint64Ã4096÷0œint
+SDL_dummy_sint8Ã4096÷0œint
+SDL_dummy_uint16Ã4096÷0œint
+SDL_dummy_uint32Ã4096÷0œint
+SDL_dummy_uint64Ã4096÷0œint
+SDL_dummy_uint8Ã4096÷0œint
+SDL_errorcodeÃ4096÷0œanon_enum_30
+SDL_eventactionÃ4096÷0œanon_enum_41
+SDL_freeÃ65536÷0
+SDL_getenvÃ65536÷0
+SDL_iconvÃ1024Õ(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)÷0œsize_t
+SDL_iconv_closeÃ65536÷0
+SDL_iconv_openÃ65536÷0
+SDL_iconv_stringÃ1024Õ(const char *tocode, const char *fromcode, const char *inbuf, size_t inbytesleft)÷0œchar *
+SDL_iconv_tÃ65536÷0
+SDL_iconv_utf8_localeÃ131072Õ(S)÷0
+SDL_iconv_utf8_ucs2Ã131072Õ(S)÷0
+SDL_iconv_utf8_ucs4Ã131072Õ(S)÷0
+SDL_isdigitÃ131072Õ(X)÷0
+SDL_isspaceÃ131072Õ(X)÷0
+SDL_itoaÃ131072Õ(value,string,radix)÷0
+SDL_keysymÃ2048÷0
+SDL_keysymÃ4096÷0
+SDL_lltoaÃ1024Õ(Sint64 value, char *string, int radix)÷0œchar *
+SDL_ltoaÃ1024Õ(long value, char *string, int radix)÷0œchar *
+SDL_mallocÃ65536÷0
+SDL_maxÃ131072Õ(x,y)÷0
+SDL_memcmpÃ65536÷0
+SDL_memcpyÃ65536÷0
+SDL_memcpy4Ã131072Õ(dst,src,len)÷0
+SDL_memmoveÃ65536÷0
+SDL_memsetÃ65536÷0
+SDL_memset4Ã131072Õ(dst,val,len)÷0
+SDL_minÃ131072Õ(x,y)÷0
+SDL_mutexÃ4096÷0
+SDL_mutexÃ32768÷0
+SDL_mutexPÃ1024Õ(SDL_mutex *mutex)÷0œint
+SDL_mutexVÃ1024Õ(SDL_mutex *mutex)÷0œint
+SDL_putenvÃ65536÷0
+SDL_qsortÃ65536÷0
+SDL_reallocÃ65536÷0
+SDL_revcpyÃ1024Õ(void *dst, const void *src, size_t len)÷0œvoid *
+SDL_semÃ4096÷0œSDL_semaphore
+SDL_semaphoreÃ32768÷0
+SDL_snprintfÃ65536÷0
+SDL_sscanfÃ65536÷0
+SDL_stack_allocÃ131072Õ(type,count)÷0
+SDL_stack_freeÃ131072Õ(data)÷0
+SDL_strcasecmpÃ65536÷0
+SDL_strchrÃ65536÷0
+SDL_strcmpÃ65536÷0
+SDL_strdupÃ65536÷0
+SDL_strlcatÃ1024Õ(char *dst, const char *src, size_t maxlen)÷0œsize_t
+SDL_strlcpyÃ1024Õ(char *dst, const char *src, size_t maxlen)÷0œsize_t
+SDL_strlenÃ65536÷0
+SDL_strlwrÃ1024Õ(char *string)÷0œchar *
+SDL_strncasecmpÃ65536÷0
+SDL_strncmpÃ65536÷0
+SDL_strrchrÃ65536÷0
+SDL_strrevÃ1024Õ(char *string)÷0œchar *
+SDL_strstrÃ65536÷0
+SDL_strtodÃ65536÷0
+SDL_strtolÃ65536÷0
+SDL_strtollÃ65536÷0
+SDL_strtoulÃ65536÷0
+SDL_strtoullÃ65536÷0
+SDL_struprÃ1024Õ(char *string)÷0œchar *
+SDL_tolowerÃ131072Õ(X)÷0
+SDL_toupperÃ131072Õ(X)÷0
+SDL_uitoaÃ131072Õ(value,string,radix)÷0
+SDL_ulltoaÃ1024Õ(Uint64 value, char *string, int radix)÷0œchar *
+SDL_ultoaÃ1024Õ(unsigned long value, char *string, int radix)÷0œchar *
+SDL_versionÃ2048÷0
+SDL_versionÃ4096÷0
+SDL_vsnprintfÃ65536÷0
+SEEK_CURÃ65536÷0
+SEEK_ENDÃ65536÷0
+SEEK_SETÃ65536÷0
+STDC_HEADERSÃ65536÷0
+Sint16Ã4096÷0œint16_t
+Sint32Ã4096÷0œint32_t
+Sint64Ã4096÷0œint64_t
+Sint8Ã4096÷0œint8_t
+TIMER_RESOLUTIONÃ65536÷0
+TMP_MAXÃ65536÷0
+Uint16Ã4096÷0œuint16_t
+Uint32Ã4096÷0œuint32_t
+Uint64Ã4096÷0œuint64_t
+Uint8Ã4096÷0œuint8_t
+UnusedBitsÃ64ŒSDL_Overlay÷0œUint32
+UnusedBits1Ã64ŒSDL_VideoInfo÷0œUint32
+UnusedBits2Ã64ŒSDL_VideoInfo÷0œUint32
+UnusedBits3Ã64ŒSDL_VideoInfo÷0œUint32
+WCONTINUEDÃ65536÷0
+WEXITEDÃ65536÷0
+WEXITSTATUSÃ131072Õ(status)÷0
+WIFCONTINUEDÃ131072Õ(status)÷0
+WIFEXITEDÃ131072Õ(status)÷0
+WIFSIGNALEDÃ131072Õ(status)÷0
+WIFSTOPPEDÃ131072Õ(status)÷0
+WMcursorÃ4096÷0
+WNOHANGÃ65536÷0
+WNOWAITÃ65536÷0
+WSTOPPEDÃ65536÷0
+WSTOPSIGÃ131072Õ(status)÷0
+WTERMSIGÃ131072Õ(status)÷0
+WUNTRACEDÃ65536÷0
+_ALLOCA_HÃ65536÷0
+_ANSI_STDARG_H_Ã65536÷0
+_ANSI_STDDEF_HÃ65536÷0
+_ATFILE_SOURCEÃ65536÷0
+_BITS_BYTESWAP_HÃ65536÷0
+_BITS_PTHREADTYPES_HÃ65536÷0
+_BITS_TYPESIZES_HÃ65536÷0
+_BITS_TYPES_HÃ65536÷0
+_BITS_WCHAR_HÃ65536÷0
+_BSD_PTRDIFF_T_Ã65536÷0
+_BSD_SIZE_T_Ã65536÷0
+_BSD_SIZE_T_DEFINED_Ã65536÷0
+_BSD_SOURCEÃ65536÷0
+_BSD_WCHAR_T_Ã65536÷0
+_CTYPE_HÃ65536÷0
+_ENDIAN_HÃ65536÷0
+_ExitÃ1024Õ(int __status)÷0œvoid
+_FEATURES_HÃ65536÷0
+_FORTIFY_SOURCEÃ65536÷0
+_GCC_PTRDIFF_TÃ65536÷0
+_GCC_SIZE_TÃ65536÷0
+_GCC_WCHAR_TÃ65536÷0
+_GNU_SOURCEÃ65536÷0
+_G_ARGSÃ131072Õ(ARGLIST)÷0
+_G_BUFSIZÃ65536÷0
+_G_FSTAT64Ã131072Õ(fd,buf)÷0
+_G_HAVE_ATEXITÃ65536÷0
+_G_HAVE_BOOLÃ65536÷0
+_G_HAVE_IO_FILE_OPENÃ65536÷0
+_G_HAVE_IO_GETLINE_INFOÃ65536÷0
+_G_HAVE_LONG_DOUBLE_IOÃ65536÷0
+_G_HAVE_MMAPÃ65536÷0
+_G_HAVE_MREMAPÃ65536÷0
+_G_HAVE_PRINTF_FPÃ65536÷0
+_G_HAVE_ST_BLKSIZEÃ65536÷0
+_G_HAVE_SYS_CDEFSÃ65536÷0
+_G_HAVE_SYS_WAITÃ65536÷0
+_G_IO_IO_FILE_VERSIONÃ65536÷0
+_G_LSEEK64Ã65536÷0
+_G_MMAP64Ã65536÷0
+_G_NAMES_HAVE_UNDERSCOREÃ65536÷0
+_G_NEED_STDARG_HÃ65536÷0
+_G_OPEN64Ã65536÷0
+_G_USING_THUNKSÃ65536÷0
+_G_VTABLE_LABEL_HAS_LENGTHÃ65536÷0
+_G_VTABLE_LABEL_PREFIXÃ65536÷0
+_G_VTABLE_LABEL_PREFIX_IDÃ65536÷0
+_G_config_hÃ65536÷0
+_G_fpos64_tÃ4096÷0œanon_struct_20
+_G_fpos_tÃ4096÷0œanon_struct_19
+_G_int16_tÃ4096÷0œint
+_G_int32_tÃ4096÷0œint
+_G_off64_tÃ65536÷0
+_G_off_tÃ65536÷0
+_G_pid_tÃ65536÷0
+_G_size_tÃ65536÷0
+_G_ssize_tÃ65536÷0
+_G_stat64Ã65536÷0
+_G_uid_tÃ65536÷0
+_G_uint16_tÃ4096÷0œint
+_G_uint32_tÃ4096÷0œint
+_G_va_listÃ65536÷0
+_G_wchar_tÃ65536÷0
+_G_wint_tÃ65536÷0
+_ICONV_HÃ65536÷0
+_INTTYPES_HÃ65536÷0
+_IOFBFÃ65536÷0
+_IOLBFÃ65536÷0
+_IONBFÃ65536÷0
+_IOS_APPENDÃ65536÷0
+_IOS_ATENDÃ65536÷0
+_IOS_BINÃ65536÷0
+_IOS_INPUTÃ65536÷0
+_IOS_NOCREATEÃ65536÷0
+_IOS_NOREPLACEÃ65536÷0
+_IOS_OUTPUTÃ65536÷0
+_IOS_TRUNCÃ65536÷0
+_IO_2_1_stderr_Ã32768÷0œ_IO_FILE_plus
+_IO_2_1_stdin_Ã32768÷0œ_IO_FILE_plus
+_IO_2_1_stdout_Ã32768÷0œ_IO_FILE_plus
+_IO_BAD_SEENÃ65536÷0
+_IO_BEÃ131072Õ(expr,res)÷0
+_IO_BOOLALPHAÃ65536÷0
+_IO_BUFSIZÃ65536÷0
+_IO_CURRENTLY_PUTTINGÃ65536÷0
+_IO_DECÃ65536÷0
+_IO_DELETE_DONT_CLOSEÃ65536÷0
+_IO_DONT_CLOSEÃ65536÷0
+_IO_EOF_SEENÃ65536÷0
+_IO_ERR_SEENÃ65536÷0
+_IO_FILEÃ2048÷0
+_IO_FILEÃ32768÷0
+_IO_FILE_plusÃ32768÷0
+_IO_FIXEDÃ65536÷0
+_IO_FLAGS2_MMAPÃ65536÷0
+_IO_FLAGS2_NOTCANCELÃ65536÷0
+_IO_FLAGS2_USER_WBUFÃ65536÷0
+_IO_HAVE_ST_BLKSIZEÃ65536÷0
+_IO_HAVE_SYS_WAITÃ65536÷0
+_IO_HEXÃ65536÷0
+_IO_INTERNALÃ65536÷0
+_IO_IN_BACKUPÃ65536÷0
+_IO_IS_APPENDINGÃ65536÷0
+_IO_IS_FILEBUFÃ65536÷0
+_IO_LEFTÃ65536÷0
+_IO_LINE_BUFÃ65536÷0
+_IO_LINKEDÃ65536÷0
+_IO_MAGICÃ65536÷0
+_IO_MAGIC_MASKÃ65536÷0
+_IO_NO_READSÃ65536÷0
+_IO_NO_WRITESÃ65536÷0
+_IO_OCTÃ65536÷0
+_IO_PENDING_OUTPUT_COUNTÃ131072Õ(_fp)÷0
+_IO_RIGHTÃ65536÷0
+_IO_SCIENTIFICÃ65536÷0
+_IO_SHOWBASEÃ65536÷0
+_IO_SHOWPOINTÃ65536÷0
+_IO_SHOWPOSÃ65536÷0
+_IO_SKIPWSÃ65536÷0
+_IO_STDIOÃ65536÷0
+_IO_STDIO_HÃ65536÷0
+_IO_TIED_PUT_GETÃ65536÷0
+_IO_UNBUFFEREDÃ65536÷0
+_IO_UNIFIED_JUMPTABLESÃ65536÷0
+_IO_UNITBUFÃ65536÷0
+_IO_UPPERCASEÃ65536÷0
+_IO_USER_BUFÃ65536÷0
+_IO_USER_LOCKÃ65536÷0
+_IO_backup_baseÃ64Œ_IO_FILE÷0œchar
+_IO_buf_baseÃ64Œ_IO_FILE÷0œchar
+_IO_buf_endÃ64Œ_IO_FILE÷0œchar
+_IO_cleanup_region_endÃ131072Õ(_Doit)÷0
+_IO_cleanup_region_startÃ131072Õ(_fct,_fp)÷0
+_IO_cookie_fileÃ32768÷0
+_IO_cookie_initÃ1024Õ(struct _IO_cookie_file *__cfile, int __read_write, void *__cookie, _IO_cookie_io_functions_t __fns)÷0œvoid
+_IO_cookie_io_functions_tÃ4096÷0œanon_struct_21
+_IO_feofÃ1024Õ(_IO_FILE *__fp)÷0œint
+_IO_feof_unlockedÃ131072Õ(__fp)÷0
+_IO_ferrorÃ1024Õ(_IO_FILE *__fp)÷0œint
+_IO_ferror_unlockedÃ131072Õ(__fp)÷0
+_IO_file_flagsÃ65536÷0
+_IO_flockfileÃ1024Õ(_IO_FILE *)÷0œvoid
+_IO_flockfileÃ131072Õ(_fp)÷0
+_IO_fpos64_tÃ65536÷0
+_IO_fpos_tÃ65536÷0
+_IO_free_backup_areaÃ1024Õ(_IO_FILE *)÷0œvoid
+_IO_ftrylockfileÃ1024Õ(_IO_FILE *)÷0œint
+_IO_ftrylockfileÃ131072Õ(_fp)÷0
+_IO_funlockfileÃ1024Õ(_IO_FILE *)÷0œvoid
+_IO_funlockfileÃ131072Õ(_fp)÷0
+_IO_getcÃ1024Õ(_IO_FILE *__fp)÷0œint
+_IO_getc_unlockedÃ131072Õ(_fp)÷0
+_IO_iconv_tÃ65536÷0
+_IO_jump_tÃ32768÷0
+_IO_lock_tÃ4096÷0œvoid
+_IO_markerÃ2048÷0
+_IO_off64_tÃ65536÷0
+_IO_off_tÃ65536÷0
+_IO_padnÃ1024Õ(_IO_FILE *, int, __ssize_t)÷0œ__ssize_t
+_IO_peekcÃ131072Õ(_fp)÷0
+_IO_peekc_lockedÃ1024Õ(_IO_FILE *__fp)÷0œint
+_IO_peekc_unlockedÃ131072Õ(_fp)÷0
+_IO_pid_tÃ65536÷0
+_IO_pos_tÃ65536÷0
+_IO_putcÃ1024Õ(int __c, _IO_FILE *__fp)÷0œint
+_IO_putc_unlockedÃ131072Õ(_ch,_fp)÷0
+_IO_read_baseÃ64Œ_IO_FILE÷0œchar
+_IO_read_endÃ64Œ_IO_FILE÷0œchar
+_IO_read_ptrÃ64Œ_IO_FILE÷0œchar
+_IO_save_baseÃ64Œ_IO_FILE÷0œchar
+_IO_save_endÃ64Œ_IO_FILE÷0œchar
+_IO_seekoffÃ1024Õ(_IO_FILE *, __off64_t, int, int)÷0œ__off64_t
+_IO_seekposÃ1024Õ(_IO_FILE *, __off64_t, int)÷0œ__off64_t
+_IO_sgetnÃ1024Õ(_IO_FILE *, void *, size_t)÷0œsize_t
+_IO_size_tÃ65536÷0
+_IO_ssize_tÃ65536÷0
+_IO_stderrÃ65536÷0
+_IO_stdinÃ65536÷0
+_IO_stdoutÃ65536÷0
+_IO_uid_tÃ65536÷0
+_IO_va_listÃ65536÷0
+_IO_vfprintfÃ1024Õ(_IO_FILE *, const char *, __gnuc_va_list)÷0œint
+_IO_vfscanfÃ1024Õ(_IO_FILE * , const char * , __gnuc_va_list, int *)÷0œint
+_IO_wint_tÃ65536÷0
+_IO_write_baseÃ64Œ_IO_FILE÷0œchar
+_IO_write_endÃ64Œ_IO_FILE÷0œchar
+_IO_write_ptrÃ64Œ_IO_FILE÷0œchar
+_ISOC99_SOURCEÃ65536÷0
+_ISalnumÃ4Œanon_enum_28÷0
+_ISalphaÃ4Œanon_enum_28÷0
+_ISbitÃ131072Õ(bit)÷0
+_ISblankÃ4Œanon_enum_28÷0
+_IScntrlÃ4Œanon_enum_28÷0
+_ISdigitÃ4Œanon_enum_28÷0
+_ISgraphÃ4Œanon_enum_28÷0
+_ISlowerÃ4Œanon_enum_28÷0
+_ISprintÃ4Œanon_enum_28÷0
+_ISpunctÃ4Œanon_enum_28÷0
+_ISspaceÃ4Œanon_enum_28÷0
+_ISupperÃ4Œanon_enum_28÷0
+_ISxdigitÃ4Œanon_enum_28÷0
+_LARGEFILE64_SOURCEÃ65536÷0
+_LARGEFILE_SOURCEÃ65536÷0
+_OLD_STDIO_MAGICÃ65536÷0
+_PARAMSÃ131072Õ(protos)÷0
+_POSIX_C_SOURCEÃ65536÷0
+_POSIX_SOURCEÃ65536÷0
+_PREDEFS_HÃ65536÷0
+_PTRDIFF_TÃ65536÷0
+_PTRDIFF_T_Ã65536÷0
+_SDL_HÃ65536÷0
+_SDL_JoystickÃ32768÷0
+_SDL_active_hÃ65536÷0
+_SDL_audio_hÃ65536÷0
+_SDL_cdrom_hÃ65536÷0
+_SDL_config_hÃ65536÷0
+_SDL_cpuinfo_hÃ65536÷0
+_SDL_endian_hÃ65536÷0
+_SDL_error_hÃ65536÷0
+_SDL_events_hÃ65536÷0
+_SDL_joystick_hÃ65536÷0
+_SDL_keyboard_hÃ65536÷0
+_SDL_keysym_hÃ65536÷0
+_SDL_loadso_hÃ65536÷0
+_SDL_main_hÃ65536÷0
+_SDL_mouse_hÃ65536÷0
+_SDL_mutex_hÃ65536÷0
+_SDL_platform_hÃ65536÷0
+_SDL_quit_hÃ65536÷0
+_SDL_rwops_hÃ65536÷0
+_SDL_stdinc_hÃ65536÷0
+_SDL_thread_hÃ65536÷0
+_SDL_timer_hÃ65536÷0
+_SDL_version_hÃ65536÷0
+_SDL_video_hÃ65536÷0
+_SIGSET_H_typesÃ65536÷0
+_SIGSET_NWORDSÃ65536÷0
+_SIZET_Ã65536÷0
+_SIZE_TÃ65536÷0
+_SIZE_T_Ã65536÷0
+_SIZE_T_DECLAREDÃ65536÷0
+_SIZE_T_DEFINEDÃ65536÷0
+_SIZE_T_DEFINED_Ã65536÷0
+_STDARG_HÃ65536÷0
+_STDDEF_HÃ65536÷0
+_STDDEF_H_Ã65536÷0
+_STDINT_HÃ65536÷0
+_STDIO_HÃ65536÷0
+_STDIO_USES_IOSTREAMÃ65536÷0
+_STDLIB_HÃ65536÷0
+_STRINGS_HÃ65536÷0
+_STRING_HÃ65536÷0
+_STRUCT_TIMEVALÃ65536÷0
+_SVID_SOURCEÃ65536÷0
+_SYS_CDEFS_HÃ65536÷0
+_SYS_SELECT_HÃ65536÷0
+_SYS_SIZE_T_HÃ65536÷0
+_SYS_SYSMACROS_HÃ65536÷0
+_SYS_TYPES_HÃ65536÷0
+_T_PTRDIFFÃ65536÷0
+_T_PTRDIFF_Ã65536÷0
+_T_SIZEÃ65536÷0
+_T_SIZE_Ã65536÷0
+_T_WCHARÃ65536÷0
+_T_WCHAR_Ã65536÷0
+_VA_LISTÃ65536÷0
+_VA_LIST_Ã65536÷0
+_VA_LIST_DEFINEDÃ65536÷0
+_VA_LIST_T_HÃ65536÷0
+_WCHAR_TÃ65536÷0
+_WCHAR_T_Ã65536÷0
+_WCHAR_T_DECLAREDÃ65536÷0
+_WCHAR_T_DEFINEDÃ65536÷0
+_WCHAR_T_DEFINED_Ã65536÷0
+_WCHAR_T_HÃ65536÷0
+_WINT_TÃ65536÷0
+_XLOCALE_HÃ65536÷0
+_XOPEN_SOURCEÃ65536÷0
+_XOPEN_SOURCE_EXTENDEDÃ65536÷0
+__BEGIN_DECLSÃ65536÷0
+__BEGIN_NAMESPACE_C99Ã65536÷0
+__BEGIN_NAMESPACE_STDÃ65536÷0
+__BIG_ENDIANÃ65536÷0
+__BIT_TYPES_DEFINED__Ã65536÷0
+__BLKCNT64_T_TYPEÃ65536÷0
+__BLKCNT_T_TYPEÃ65536÷0
+__BLKSIZE_T_TYPEÃ65536÷0
+__BYTE_ORDERÃ65536÷0
+__CLOCKID_T_TYPEÃ65536÷0
+__CLOCK_T_TYPEÃ65536÷0
+__COMPAR_FN_TÃ65536÷0
+__CONCATÃ131072Õ(x,y)÷0
+__DADDR_T_TYPEÃ65536÷0
+__DEV_T_TYPEÃ65536÷0
+__END_DECLSÃ65536÷0
+__END_NAMESPACE_C99Ã65536÷0
+__END_NAMESPACE_STDÃ65536÷0
+__FAVOR_BSDÃ65536÷0
+__FDELTÃ65536÷0
+__FDELTÃ131072Õ(d)÷0
+__FDMASKÃ65536÷0
+__FDMASKÃ131072Õ(d)÷0
+__FDS_BITSÃ131072Õ(set)÷0
+__FD_CLRÃ131072Õ(d,set)÷0
+__FD_ISSETÃ131072Õ(d,set)÷0
+__FD_SETÃ131072Õ(d,set)÷0
+__FD_SETSIZEÃ65536÷0
+__FD_ZEROÃ131072Õ(set)÷0
+__FILEÃ4096÷0œ_IO_FILE
+__FILE_definedÃ65536÷0
+__FLOAT_WORD_ORDERÃ65536÷0
+__FSBLKCNT64_T_TYPEÃ65536÷0
+__FSBLKCNT_T_TYPEÃ65536÷0
+__FSFILCNT64_T_TYPEÃ65536÷0
+__FSFILCNT_T_TYPEÃ65536÷0
+__FSID_T_TYPEÃ65536÷0
+__GID_T_TYPEÃ65536÷0
+__GLIBC_MINOR__Ã65536÷0
+__GLIBC_PREREQÃ131072Õ(maj,min)÷0
+__GLIBC__Ã65536÷0
+__GNUC_PREREQÃ131072Õ(maj,min)÷0
+__GNUC_VA_LISTÃ65536÷0
+__GNU_LIBRARY__Ã65536÷0
+__HAVE_COLUMNÃ65536÷0
+__ID_T_TYPEÃ65536÷0
+__INO64_T_TYPEÃ65536÷0
+__INO_T_TYPEÃ65536÷0
+__INT_WCHAR_T_HÃ65536÷0
+__KERNEL_STRICT_NAMESÃ65536÷0
+__KEY_T_TYPEÃ65536÷0
+__LDBL_REDIRÃ131072Õ(name,proto)÷0
+__LDBL_REDIR1Ã131072Õ(name,proto,alias)÷0
+__LDBL_REDIR1_NTHÃ131072Õ(name,proto,alias)÷0
+__LDBL_REDIR_DECLÃ131072Õ(name)÷0
+__LDBL_REDIR_NTHÃ131072Õ(name,proto)÷0
+__LITTLE_ENDIANÃ65536÷0
+__LONG_LONG_PAIRÃ131072Õ(HI,LO)÷0
+__MODE_T_TYPEÃ65536÷0
+__NFDBITSÃ65536÷0
+__NLINK_T_TYPEÃ65536÷0
+__NTHÃ131072Õ(fct)÷0
+__OFF64_T_TYPEÃ65536÷0
+__OFF_T_TYPEÃ65536÷0
+__PÃ65536÷0
+__PÃ131072Õ(args)÷0
+__PDP_ENDIANÃ65536÷0
+__PID_T_TYPEÃ65536÷0
+__PMTÃ65536÷0
+__PMTÃ131072Õ(args)÷0
+__PTRDIFF_TÃ65536÷0
+__PTRDIFF_TYPE__Ã65536÷0
+__RLIM64_T_TYPEÃ65536÷0
+__RLIM_T_TYPEÃ65536÷0
+__S16_TYPEÃ65536÷0
+__S32_TYPEÃ65536÷0
+__S64_TYPEÃ65536÷0
+__SIZEOF_PTHREAD_ATTR_TÃ65536÷0
+__SIZEOF_PTHREAD_BARRIERATTR_TÃ65536÷0
+__SIZEOF_PTHREAD_BARRIER_TÃ65536÷0
+__SIZEOF_PTHREAD_CONDATTR_TÃ65536÷0
+__SIZEOF_PTHREAD_COND_TÃ65536÷0
+__SIZEOF_PTHREAD_MUTEXATTR_TÃ65536÷0
+__SIZEOF_PTHREAD_MUTEX_TÃ65536÷0
+__SIZEOF_PTHREAD_RWLOCKATTR_TÃ65536÷0
+__SIZEOF_PTHREAD_RWLOCK_TÃ65536÷0
+__SIZE_TÃ65536÷0
+__SIZE_TYPE__Ã65536÷0
+__SIZE_T__Ã65536÷0
+__SLONG32_TYPEÃ65536÷0
+__SLONGWORD_TYPEÃ65536÷0
+__SQUAD_TYPEÃ65536÷0
+__SSIZE_T_TYPEÃ65536÷0
+__STDC_HOSTED__Ã65536÷0
+__STDC_IEC_559_COMPLEX__Ã65536÷0
+__STDC_IEC_559__Ã65536÷0
+__STDC_ISO_10646__Ã65536÷0
+__STDC__Ã65536÷0
+__STDDEF_H__Ã65536÷0
+__STD_TYPEÃ65536÷0
+__STRINGÃ131072Õ(x)÷0
+__SUSECONDS_T_TYPEÃ65536÷0
+__SWBLK_T_TYPEÃ65536÷0
+__SWORD_TYPEÃ65536÷0
+__THROWÃ65536÷0
+__TIMER_T_TYPEÃ65536÷0
+__TIME_T_TYPEÃ65536÷0
+__U16_TYPEÃ65536÷0
+__U32_TYPEÃ65536÷0
+__U64_TYPEÃ65536÷0
+__UID_T_TYPEÃ65536÷0
+__ULONG32_TYPEÃ65536÷0
+__ULONGWORD_TYPEÃ65536÷0
+__UQUAD_TYPEÃ65536÷0
+__USECONDS_T_TYPEÃ65536÷0
+__USE_ANSIÃ65536÷0
+__USE_ATFILEÃ65536÷0
+__USE_BSDÃ65536÷0
+__USE_FILE_OFFSET64Ã65536÷0
+__USE_FORTIFY_LEVELÃ65536÷0
+__USE_GNUÃ65536÷0
+__USE_ISOC95Ã65536÷0
+__USE_ISOC99Ã65536÷0
+__USE_LARGEFILEÃ65536÷0
+__USE_LARGEFILE64Ã65536÷0
+__USE_MISCÃ65536÷0
+__USE_POSIXÃ65536÷0
+__USE_POSIX199309Ã65536÷0
+__USE_POSIX199506Ã65536÷0
+__USE_POSIX2Ã65536÷0
+__USE_REENTRANTÃ65536÷0
+__USE_SVIDÃ65536÷0
+__USE_UNIX98Ã65536÷0
+__USE_XOPENÃ65536÷0
+__USE_XOPEN2KÃ65536÷0
+__USE_XOPEN2K8Ã65536÷0
+__USE_XOPEN_EXTENDEDÃ65536÷0
+__USING_NAMESPACE_C99Ã131072Õ(name)÷0
+__USING_NAMESPACE_STDÃ131072Õ(name)÷0
+__UWORD_TYPEÃ65536÷0
+__WAIT_INTÃ131072Õ(status)÷0
+__WAIT_STATUSÃ65536÷0
+__WAIT_STATUS_DEFNÃ65536÷0
+__WALLÃ65536÷0
+__WCHAR_MAXÃ65536÷0
+__WCHAR_MINÃ65536÷0
+__WCHAR_TÃ65536÷0
+__WCHAR_TYPE__Ã65536÷0
+__WCHAR_T__Ã65536÷0
+__WCLONEÃ65536÷0
+__WCOREDUMPÃ131072Õ(status)÷0
+__WCOREFLAGÃ65536÷0
+__WEXITSTATUSÃ131072Õ(status)÷0
+__WIFCONTINUEDÃ131072Õ(status)÷0
+__WIFEXITEDÃ131072Õ(status)÷0
+__WIFSIGNALEDÃ131072Õ(status)÷0
+__WIFSTOPPEDÃ131072Õ(status)÷0
+__WINT_TYPE__Ã65536÷0
+__WNOTHREADÃ65536÷0
+__WORDSIZEÃ65536÷0
+__WSTOPSIGÃ131072Õ(status)÷0
+__WTERMSIGÃ131072Õ(status)÷0
+__W_CONTINUEDÃ65536÷0
+__W_EXITCODEÃ131072Õ(ret,sig)÷0
+__W_STOPCODEÃ131072Õ(sig)÷0
+____FILE_definedÃ65536÷0
+____gwchar_t_definedÃ65536÷0
+___int_ptrdiff_t_hÃ65536÷0
+___int_size_t_hÃ65536÷0
+___int_wchar_t_hÃ65536÷0
+__aÃ64Œdrand48_data÷0œlong
+__alignÃ64Œanon_union_11÷0œint
+__alignÃ64Œanon_union_12÷0œlong
+__alignÃ64Œanon_union_14÷0œlong
+__alignÃ64Œanon_union_15÷0œlong
+__alignÃ64Œanon_union_16÷0œint
+__alignÃ64Œanon_union_5÷0œlong
+__alignÃ64Œanon_union_6÷0œlong
+__alignÃ64Œanon_union_8÷0œint
+__alignÃ64Œanon_union_9÷0œlong
+__always_inlineÃ65536÷0
+__asprintfÃ1024Õ(char ** __ptr, const char * __fmt, ...)÷0œint
+__attribute__Ã131072Õ(xyz)÷0
+__attribute_deprecated__Ã65536÷0
+__attribute_format_arg__Ã131072Õ(x)÷0
+__attribute_format_strfmon__Ã131072Õ(a,b)÷0
+__attribute_malloc__Ã65536÷0
+__attribute_noinline__Ã65536÷0
+__attribute_pure__Ã65536÷0
+__attribute_used__Ã65536÷0
+__attribute_warn_unused_result__Ã65536÷0
+__blkcnt64_tÃ4096÷0œ__quad_t
+__blkcnt_tÃ4096÷0œlong
+__blkcnt_t_definedÃ65536÷0
+__blksize_tÃ4096÷0œlong
+__blksize_t_definedÃ65536÷0
+__bosÃ131072Õ(ptr)÷0
+__bos0Ã131072Õ(ptr)÷0
+__boundedÃ65536÷0
+__broadcast_seqÃ64Œanon_union_9::anon_struct_10÷0œint
+__bswap_16Ã131072Õ(x)÷0
+__bswap_32Ã131072Õ(x)÷0
+__bswap_constant_16Ã131072Õ(x)÷0
+__bswap_constant_32Ã131072Õ(x)÷0
+__bzeroÃ1024Õ(void *__s, size_t __n)÷0œvoid
+__cÃ64Œdrand48_data÷0œshort
+__caddr_tÃ4096÷0œchar
+__cleanup_fct_attributeÃ65536÷0
+__clock_tÃ4096÷0œlong
+__clock_t_definedÃ65536÷0
+__clockid_tÃ4096÷0œint
+__clockid_t_definedÃ65536÷0
+__clockid_time_tÃ65536÷0
+__codecvt_errorÃ4Œ__codecvt_result÷0
+__codecvt_noconvÃ4Œ__codecvt_result÷0
+__codecvt_okÃ4Œ__codecvt_result÷0
+__codecvt_partialÃ4Œ__codecvt_result÷0
+__codecvt_resultÃ2÷0
+__compar_d_fn_tÃ4096÷0œtypedef int
+__compar_fn_tÃ4096÷0œtypedef int
+__constÃ65536÷0
+__countÃ64Œanon_struct_17÷0œint
+__countÃ64Œanon_union_6::__pthread_mutex_s÷0œint
+__cplusplusÃ65536÷0
+__ctype_bÃ64Œ__locale_struct÷0œshort
+__ctype_b_locÃ1024Õ(void)÷0œconst unsigned short int * *
+__ctype_get_mb_cur_maxÃ1024Õ(void)÷0œsize_t
+__ctype_tolowerÃ64Œ__locale_struct÷0œint
+__ctype_tolower_locÃ1024Õ(void)÷0œconst __int32_t * *
+__ctype_toupperÃ64Œ__locale_struct÷0œint
+__ctype_toupper_locÃ1024Õ(void)÷0œconst __int32_t * *
+__daddr_tÃ4096÷0œint
+__daddr_t_definedÃ65536÷0
+__dataÃ64Œanon_union_12÷0œanon_struct_13
+__dataÃ64Œanon_union_6÷0œ__pthread_mutex_s
+__dataÃ64Œanon_union_9÷0œanon_struct_10
+__dev_tÃ4096÷0œ__u_quad_t
+__dev_t_definedÃ65536÷0
+__errordeclÃ131072Õ(name,msg)÷0
+__exctypeÃ131072Õ(name)÷0
+__exctype_lÃ131072Õ(name)÷0
+__extension__Ã65536÷0
+__fd_maskÃ4096÷0œlong
+__flagsÃ64Œanon_union_12::anon_struct_13÷0œchar
+__flexarrÃ65536÷0
+__fsblkcnt64_tÃ4096÷0œ__u_quad_t
+__fsblkcnt_tÃ4096÷0œlong
+__fsblkcnt_t_definedÃ65536÷0
+__fsfilcnt64_tÃ4096÷0œ__u_quad_t
+__fsfilcnt_tÃ4096÷0œlong
+__fsfilcnt_t_definedÃ65536÷0
+__fsid_tÃ4096÷0œanon_struct_2
+__futexÃ64Œanon_union_9::anon_struct_10÷0œint
+__getdelimÃ1024Õ(char ** __lineptr, size_t * __n, int __delimiter, FILE * __stream)÷0œ__ssize_t
+__gid_tÃ4096÷0œint
+__gid_t_definedÃ65536÷0
+__gnuc_va_listÃ4096÷0œ__builtin_va_list
+__gwchar_tÃ65536÷0
+__id_tÃ4096÷0œint
+__id_t_definedÃ65536÷0
+__initÃ64Œdrand48_data÷0œshort
+__inlineÃ65536÷0
+__inline__Ã65536÷0
+__ino64_tÃ4096÷0œ__u_quad_t
+__ino64_t_definedÃ65536÷0
+__ino_tÃ4096÷0œlong
+__ino_t_definedÃ65536÷0
+__int16_tÃ4096÷0œshort
+__int32_tÃ4096÷0œint
+__int8_tÃ4096÷0œchar
+__int8_t_definedÃ65536÷0
+__intptr_tÃ4096÷0œint
+__intptr_t_definedÃ65536÷0
+__io_close_fnÃ4096÷0œtypedef int
+__io_read_fnÃ4096÷0œtypedef __ssize_t
+__io_seek_fnÃ4096÷0œtypedef int
+__io_write_fnÃ4096÷0œtypedef __ssize_t
+__isalnum_lÃ131072Õ(c,l)÷0
+__isalpha_lÃ131072Õ(c,l)÷0
+__isasciiÃ131072Õ(c)÷0
+__isascii_lÃ131072Õ(c,l)÷0
+__isblank_lÃ131072Õ(c,l)÷0
+__iscntrl_lÃ131072Õ(c,l)÷0
+__isctypeÃ131072Õ(c,type)÷0
+__isctype_lÃ131072Õ(c,type,locale)÷0
+__isdigit_lÃ131072Õ(c,l)÷0
+__isgraph_lÃ131072Õ(c,l)÷0
+__islower_lÃ131072Õ(c,l)÷0
+__isprint_lÃ131072Õ(c,l)÷0
+__ispunct_lÃ131072Õ(c,l)÷0
+__isspace_lÃ131072Õ(c,l)÷0
+__isupper_lÃ131072Õ(c,l)÷0
+__isxdigit_lÃ131072Õ(c,l)÷0
+__key_tÃ4096÷0œint
+__key_t_definedÃ65536÷0
+__kindÃ64Œanon_union_6::__pthread_mutex_s÷0œint
+__ldiv_t_definedÃ65536÷0
+__listÃ64Œanon_union_6::__pthread_mutex_s::anon_union_7÷0œ__pthread_slist_t
+__lldiv_t_definedÃ65536÷0
+__locale_structÃ2048÷0
+__locale_tÃ4096÷0œ__locale_struct
+__localesÃ64Œ__locale_struct÷0œlocale_data
+__lockÃ64Œanon_union_12::anon_struct_13÷0œint
+__lockÃ64Œanon_union_6::__pthread_mutex_s÷0œint
+__lockÃ64Œanon_union_9::anon_struct_10÷0œint
+__loff_tÃ4096÷0œ__off64_t
+__long_double_tÃ65536÷0
+__malloc_and_calloc_definedÃ65536÷0
+__mbstate_tÃ4096÷0œanon_struct_17
+__mbstate_t_definedÃ65536÷0
+__mempcpyÃ1024Õ(void * __dest, const void * __src, size_t __n)÷0œvoid *
+__mode_tÃ4096÷0œint
+__mode_t_definedÃ65536÷0
+__mutexÃ64Œanon_union_9::anon_struct_10÷0œvoid
+__namesÃ64Œ__locale_struct÷0œchar
+__need_FILEÃ65536÷0
+__need_NULLÃ65536÷0
+__need___FILEÃ65536÷0
+__need___va_listÃ65536÷0
+__need_clock_tÃ65536÷0
+__need_clockid_tÃ65536÷0
+__need_malloc_and_callocÃ65536÷0
+__need_mbstate_tÃ65536÷0
+__need_ptrdiff_tÃ65536÷0
+__need_size_tÃ65536÷0
+__need_time_tÃ65536÷0
+__need_timer_tÃ65536÷0
+__need_timespecÃ65536÷0
+__need_timevalÃ65536÷0
+__need_wchar_tÃ65536÷0
+__need_wint_tÃ65536÷0
+__nextÃ64Œ__pthread_internal_slist÷0œ__pthread_internal_slist
+__nlink_tÃ4096÷0œint
+__nlink_t_definedÃ65536÷0
+__nonnullÃ131072Õ(params)÷0
+__nr_readersÃ64Œanon_union_12::anon_struct_13÷0œint
+__nr_readers_queuedÃ64Œanon_union_12::anon_struct_13÷0œint
+__nr_writers_queuedÃ64Œanon_union_12::anon_struct_13÷0œint
+__nusersÃ64Œanon_union_6::__pthread_mutex_s÷0œint
+__nwaitersÃ64Œanon_union_9::anon_struct_10÷0œint
+__off64_tÃ4096÷0œ__quad_t
+__off64_t_definedÃ65536÷0
+__off_tÃ4096÷0œlong
+__off_t_definedÃ65536÷0
+__old_xÃ64Œdrand48_data÷0œshort
+__overflowÃ1024Õ(_IO_FILE *, int)÷0œint
+__ownerÃ64Œanon_union_6::__pthread_mutex_s÷0œint
+__pad1Ã64Œ_IO_FILE÷0œvoid
+__pad1Ã64Œanon_union_12::anon_struct_13÷0œchar
+__pad2Ã64Œ_IO_FILE÷0œvoid
+__pad2Ã64Œanon_union_12::anon_struct_13÷0œchar
+__pad3Ã64Œ_IO_FILE÷0œvoid
+__pad4Ã64Œ_IO_FILE÷0œvoid
+__pad5Ã64Œ_IO_FILE÷0œsize_t
+__pid_tÃ4096÷0œint
+__pid_t_definedÃ65536÷0
+__posÃ64Œanon_struct_19÷0œ__off_t
+__posÃ64Œanon_struct_20÷0œ__off64_t
+__pthread_internal_slistÃ2048÷0
+__pthread_mutex_sÃ2048Œanon_union_6÷0
+__pthread_slist_tÃ4096÷0œ__pthread_internal_slist
+__ptr_tÃ65536÷0
+__ptrvalueÃ65536÷0
+__qaddr_tÃ4096÷0œ__quad_t
+__quad_tÃ4096÷0œanon_struct_0
+__readers_wakeupÃ64Œanon_union_12::anon_struct_13÷0œint
+__restrictÃ65536÷0
+__restrict_arrÃ65536÷0
+__rlim64_tÃ4096÷0œ__u_quad_t
+__rlim_tÃ4096÷0œlong
+__secure_getenvÃ1024Õ(const char *__name)÷0œchar *
+__sharedÃ64Œanon_union_12::anon_struct_13÷0œchar
+__sig_atomic_tÃ4096÷0œint
+__signedÃ65536÷0
+__sigset_tÃ4096÷0œanon_struct_3
+__sigset_t_definedÃ65536÷0
+__sizeÃ64Œanon_union_11÷0œchar
+__sizeÃ64Œanon_union_12÷0œchar
+__sizeÃ64Œanon_union_14÷0œchar
+__sizeÃ64Œanon_union_15÷0œchar
+__sizeÃ64Œanon_union_16÷0œchar
+__sizeÃ64Œanon_union_5÷0œchar
+__sizeÃ64Œanon_union_6÷0œchar
+__sizeÃ64Œanon_union_8÷0œchar
+__sizeÃ64Œanon_union_9÷0œchar
+__size_tÃ65536÷0
+__size_t__Ã65536÷0
+__socklen_tÃ4096÷0œint
+__spinsÃ64Œanon_union_6::__pthread_mutex_s::anon_union_7÷0œint
+__ssize_tÃ4096÷0œint
+__ssize_t_definedÃ65536÷0
+__stateÃ64Œanon_struct_19÷0œ__mbstate_t
+__stateÃ64Œanon_struct_20÷0œ__mbstate_t
+__stpcpyÃ1024Õ(char * __dest, const char * __src)÷0œchar *
+__stpncpyÃ1024Õ(char * __dest, const char * __src, size_t __n)÷0œchar *
+__strtok_rÃ1024Õ(char * __s, const char * __delim, char ** __save_ptr)÷0œchar *
+__stub___kernel_coslÃ65536÷0
+__stub___kernel_sinlÃ65536÷0
+__stub___kernel_tanlÃ65536÷0
+__stub_chflagsÃ65536÷0
+__stub_fattachÃ65536÷0
+__stub_fchflagsÃ65536÷0
+__stub_fdetachÃ65536÷0
+__stub_gttyÃ65536÷0
+__stub_lchmodÃ65536÷0
+__stub_revokeÃ65536÷0
+__stub_setloginÃ65536÷0
+__stub_sigreturnÃ65536÷0
+__stub_sstkÃ65536÷0
+__stub_sttyÃ65536÷0
+__suseconds_tÃ4096÷0œlong
+__suseconds_t_definedÃ65536÷0
+__swblk_tÃ4096÷0œlong
+__time_tÃ4096÷0œlong
+__time_t_definedÃ65536÷0
+__timer_tÃ4096÷0œvoid
+__timer_t_definedÃ65536÷0
+__timespec_definedÃ65536÷0
+__toasciiÃ131072Õ(c)÷0
+__toascii_lÃ131072Õ(c,l)÷0
+__tobodyÃ131072Õ(c,f,a,args)÷0
+__tolower_lÃ1024Õ(int __c, __locale_t __l)÷0œint
+__total_seqÃ64Œanon_union_9::anon_struct_10÷0œlong
+__toupper_lÃ1024Õ(int __c, __locale_t __l)÷0œint
+__u_charÃ4096÷0œchar
+__u_char_definedÃ65536÷0
+__u_intÃ4096÷0œint
+__u_longÃ4096÷0œlong
+__u_quad_tÃ4096÷0œanon_struct_1
+__u_shortÃ4096÷0œshort
+__uflowÃ1024Õ(_IO_FILE *)÷0œint
+__uid_tÃ4096÷0œint
+__uid_t_definedÃ65536÷0
+__uint16_tÃ4096÷0œshort
+__uint32_tÃ4096÷0œint
+__uint32_t_definedÃ65536÷0
+__uint8_tÃ4096÷0œchar
+__unboundedÃ65536÷0
+__underflowÃ1024Õ(_IO_FILE *)÷0œint
+__useconds_tÃ4096÷0œint
+__useconds_t_definedÃ65536÷0
+__va_copyÃ131072Õ(d,s)÷0
+__va_list__Ã65536÷0
+__valÃ64Œanon_struct_0÷0œlong
+__valÃ64Œanon_struct_1÷0œ__u_long
+__valÃ64Œanon_struct_2÷0œint
+__valÃ64Œanon_struct_3÷0œlong
+__valueÃ64Œanon_struct_17÷0œanon_union_18
+__volatileÃ65536÷0
+__w_coredumpÃ64Œwait::anon_struct_22÷0œint
+__w_retcodeÃ64Œwait::anon_struct_22÷0œint
+__w_stopsigÃ64Œwait::anon_struct_23÷0œint
+__w_stopvalÃ64Œwait::anon_struct_23÷0œint
+__w_termsigÃ64Œwait::anon_struct_22÷0œint
+__wait_stoppedÃ64Œwait÷0œanon_struct_23
+__wait_terminatedÃ64Œwait÷0œanon_struct_22
+__wakeup_seqÃ64Œanon_union_9::anon_struct_10÷0œlong
+__warnattrÃ131072Õ(msg)÷0
+__warndeclÃ131072Õ(name,msg)÷0
+__wchÃ64Œanon_struct_17::anon_union_18÷0œint
+__wchar_t__Ã65536÷0
+__wchbÃ64Œanon_struct_17::anon_union_18÷0œchar
+__woken_seqÃ64Œanon_union_9::anon_struct_10÷0œlong
+__writerÃ64Œanon_union_12::anon_struct_13÷0œint
+__writer_wakeupÃ64Œanon_union_12::anon_struct_13÷0œint
+__wurÃ65536÷0
+__xÃ64Œdrand48_data÷0œshort
+_begin_code_hÃ65536÷0
+_chainÃ64Œ_IO_FILE÷0œ_IO_FILE
+_cur_columnÃ64Œ_IO_FILE÷0œshort
+_filenoÃ64Œ_IO_FILE÷0œint
+_flagsÃ64Œ_IO_FILE÷0œint
+_flags2Ã64Œ_IO_FILE÷0œint
+_lockÃ64Œ_IO_FILE÷0œ_IO_lock_t
+_markersÃ64Œ_IO_FILE÷0œ_IO_marker
+_modeÃ64Œ_IO_FILE÷0œint
+_nextÃ64Œ_IO_marker÷0œ_IO_marker
+_offsetÃ64Œ_IO_FILE÷0œ__off64_t
+_old_offsetÃ64Œ_IO_FILE÷0œ__off_t
+_posÃ64Œ_IO_marker÷0œint
+_sbufÃ64Œ_IO_marker÷0œ_IO_FILE
+_shortbufÃ64Œ_IO_FILE÷0œchar
+_sys_errlistÃ32768÷0œchar
+_sys_nerrÃ32768÷0œint
+_tolowerÃ1024Õ(int)÷0œint
+_toupperÃ1024Õ(int)÷0œint
+_unused2Ã64Œ_IO_FILE÷0œchar
+_vtable_offsetÃ64Œ_IO_FILE÷0œchar
+a64lÃ1024Õ(const char *__s)÷0œlong int
+abortÃ1024Õ(void)÷0œvoid
+absÃ1024Õ(int __x)÷0œint
+activeÃ64ŒSDL_Event÷0œSDL_ActiveEvent
+allocaÃ1024Õ(size_t __size)÷0œvoid *
+allocaÃ65536÷0
+alphaÃ64ŒSDL_PixelFormat÷0œUint8
+anon_enum_28Ã2÷0
+anon_enum_29Ã2÷0
+anon_enum_30Ã2÷0
+anon_enum_35Ã2÷0
+anon_enum_36Ã2÷0
+anon_enum_37Ã2÷0
+anon_enum_38Ã2÷0
+anon_enum_39Ã2÷0
+anon_enum_40Ã2÷0
+anon_enum_41Ã2÷0
+anon_struct_0Ã2048÷0
+anon_struct_1Ã2048÷0
+anon_struct_10Ã2048Œanon_union_9÷0
+anon_struct_13Ã2048Œanon_union_12÷0
+anon_struct_17Ã2048÷0
+anon_struct_19Ã2048÷0
+anon_struct_2Ã2048÷0
+anon_struct_20Ã2048÷0
+anon_struct_21Ã2048÷0
+anon_struct_22Ã2048Œwait÷0
+anon_struct_23Ã2048Œwait÷0
+anon_struct_24Ã2048÷0
+anon_struct_25Ã2048÷0
+anon_struct_26Ã2048÷0
+anon_struct_27Ã2048÷0
+anon_struct_3Ã2048÷0
+anon_struct_32Ã2048ŒSDL_RWops::anon_union_31÷0
+anon_struct_33Ã2048ŒSDL_RWops::anon_union_31÷0
+anon_struct_34Ã2048ŒSDL_RWops::anon_union_31÷0
+anon_struct_4Ã2048÷0
+anon_union_11Ã8192÷0
+anon_union_12Ã8192÷0
+anon_union_14Ã8192÷0
+anon_union_15Ã8192÷0
+anon_union_16Ã8192÷0
+anon_union_18Ã8192Œanon_struct_17÷0
+anon_union_31Ã8192ŒSDL_RWops÷0
+anon_union_5Ã8192÷0
+anon_union_6Ã8192÷0
+anon_union_7Ã8192Œanon_union_6::__pthread_mutex_s÷0
+anon_union_8Ã8192÷0
+anon_union_9Ã8192÷0
+areaÃ64ŒSDL_Cursor÷0œSDL_Rect
+asprintfÃ1024Õ(char ** __ptr, const char * __fmt, ...)÷0œint
+atexitÃ1024Õ(void (*__func) (void))÷0œint
+atofÃ1024Õ(const char *__nptr)÷0œdouble
+atoiÃ1024Õ(const char *__nptr)÷0œint
+atolÃ1024Õ(const char *__nptr)÷0œlong int
+atollÃ1024Õ(const char *__nptr)÷0œlong long int
+autocloseÃ64ŒSDL_RWops::anon_union_31::anon_struct_32÷0œint
+axisÃ64ŒSDL_JoyAxisEvent÷0œUint8
+bÃ64ŒSDL_Color÷0œUint8
+ballÃ64ŒSDL_JoyBallEvent÷0œUint8
+baseÃ64ŒSDL_RWops::anon_union_31::anon_struct_33÷0œUint8
+basenameÃ1024Õ(const char *__filename)÷0œchar *
+bcmpÃ1024Õ(const void *__s1, const void *__s2, size_t __n)÷0œint
+bcopyÃ1024Õ(const void *__src, void *__dest, size_t __n)÷0œvoid
+be16tohÃ131072Õ(x)÷0
+be32tohÃ131072Õ(x)÷0
+be64tohÃ131072Õ(x)÷0
+blit_fillÃ64ŒSDL_VideoInfo÷0œUint32
+blit_hwÃ64ŒSDL_VideoInfo÷0œUint32
+blit_hw_AÃ64ŒSDL_VideoInfo÷0œUint32
+blit_hw_CCÃ64ŒSDL_VideoInfo÷0œUint32
+blit_swÃ64ŒSDL_VideoInfo÷0œUint32
+blit_sw_AÃ64ŒSDL_VideoInfo÷0œUint32
+blit_sw_CCÃ64ŒSDL_VideoInfo÷0œUint32
+blkcnt64_tÃ4096÷0œ__blkcnt64_t
+blkcnt_tÃ4096÷0œ__blkcnt_t
+blksize_tÃ4096÷0œ__blksize_t
+bsearchÃ1024Õ(const void *__key, const void *__base, size_t __nmemb, size_t __size, __compar_fn_t __compar)÷0œvoid *
+bufÃ64ŒSDL_AudioCVT÷0œUint8
+buttonÃ64ŒSDL_Event÷0œSDL_MouseButtonEvent
+buttonÃ64ŒSDL_JoyButtonEvent÷0œUint8
+buttonÃ64ŒSDL_MouseButtonEvent÷0œUint8
+bzeroÃ1024Õ(void *__s, size_t __n)÷0œvoid
+caddr_tÃ4096÷0œ__caddr_t
+callbackÃ1024Õ(void *userdata, Uint8 *stream, int len)ŒSDL_AudioSpec÷0œvoid
+callocÃ1024Õ(size_t __nmemb, size_t __size)÷0œvoid *
+canonicalize_file_nameÃ1024Õ(const char *__name)÷0œchar *
+cfreeÃ1024Õ(void *__ptr)÷0œvoid
+channelsÃ64ŒSDL_AudioSpec÷0œUint8
+clearenvÃ1024Õ(void)÷0œint
+clearerrÃ1024Õ(FILE *__stream)÷0œvoid
+clearerr_unlockedÃ1024Õ(FILE *__stream)÷0œvoid
+clip_rectÃ64ŒSDL_Surface÷0œSDL_Rect
+clock_tÃ4096÷0œ__clock_t
+clockid_tÃ4096÷0œ__clockid_t
+closeÃ1024Õ(struct SDL_RWops *context)ŒSDL_RWops÷0œint
+closeÃ64Œanon_struct_21÷0œ__io_close_fn
+codeÃ64ŒSDL_UserEvent÷0œint
+colorkeyÃ64ŒSDL_PixelFormat÷0œUint32
+colorsÃ64ŒSDL_Palette÷0œSDL_Color
+comparison_fn_tÃ4096÷0œ__compar_fn_t
+cookie_close_function_tÃ4096÷0œ__io_close_fn
+cookie_io_functions_tÃ4096÷0œ_IO_cookie_io_functions_t
+cookie_read_function_tÃ4096÷0œ__io_read_fn
+cookie_seek_function_tÃ4096÷0œ__io_seek_fn
+cookie_write_function_tÃ4096÷0œ__io_write_fn
+ctermidÃ1024Õ(char *__s)÷0œchar *
+cur_frameÃ64ŒSDL_CD÷0œint
+cur_trackÃ64ŒSDL_CD÷0œint
+current_hÃ64ŒSDL_VideoInfo÷0œint
+current_wÃ64ŒSDL_VideoInfo÷0œint
+cuseridÃ1024Õ(char *__s)÷0œchar *
+daddr_tÃ4096÷0œ__daddr_t
+dataÃ64ŒSDL_Cursor÷0œUint8
+data1Ã64ŒSDL_RWops::anon_union_31::anon_struct_34÷0œvoid
+data1Ã64ŒSDL_UserEvent÷0œvoid
+data2Ã64ŒSDL_UserEvent÷0œvoid
+dev_tÃ4096÷0œ__dev_t
+divÃ1024Õ(int __numer, int __denom)÷0œdiv_t
+div_tÃ4096÷0œanon_struct_24
+dprintfÃ1024Õ(int __fd, const char * __fmt, ...)÷0œint
+drand48Ã1024Õ(void)÷0œdouble
+drand48_dataÃ2048÷0
+drand48_rÃ1024Õ(struct drand48_data * __buffer, double * __result)÷0œint
+dst_formatÃ64ŒSDL_AudioCVT÷0œUint16
+ecvtÃ1024Õ(double __value, int __ndigit, int * __decpt, int * __sign)÷0œchar *
+ecvt_rÃ1024Õ(double __value, int __ndigit, int * __decpt, int * __sign, char * __buf, size_t __len)÷0œint
+end_ptrÃ64Œrandom_data÷0œint32_t
+erand48Ã1024Õ(unsigned short int __xsubi[3])÷0œdouble
+erand48_rÃ1024Õ(unsigned short int __xsubi[3], struct drand48_data * __buffer, double * __result)÷0œint
+exitÃ1024Õ(int __status)÷0œvoid
+exposeÃ64ŒSDL_Event÷0œSDL_ExposeEvent
+fcloseÃ1024Õ(FILE *__stream)÷0œint
+fcloseallÃ1024Õ(void)÷0œint
+fcvtÃ1024Õ(double __value, int __ndigit, int * __decpt, int * __sign)÷0œchar *
+fcvt_rÃ1024Õ(double __value, int __ndigit, int * __decpt, int * __sign, char * __buf, size_t __len)÷0œint
+fd_maskÃ4096÷0œ__fd_mask
+fd_setÃ4096÷0œanon_struct_4
+fdopenÃ1024Õ(int __fd, const char *__modes)÷0œFILE *
+fds_bitsÃ64Œanon_struct_4÷0œ__fd_mask
+feofÃ1024Õ(FILE *__stream)÷0œint
+feof_unlockedÃ1024Õ(FILE *__stream)÷0œint
+ferrorÃ1024Õ(FILE *__stream)÷0œint
+ferror_unlockedÃ1024Õ(FILE *__stream)÷0œint
+fflushÃ1024Õ(FILE *__stream)÷0œint
+fflush_unlockedÃ1024Õ(FILE *__stream)÷0œint
+ffsÃ1024Õ(int __i)÷0œint
+ffslÃ1024Õ(long int __l)÷0œint
+fgetcÃ1024Õ(FILE *__stream)÷0œint
+fgetc_unlockedÃ1024Õ(FILE *__stream)÷0œint
+fgetposÃ1024Õ(FILE * __stream, fpos_t * __pos)÷0œint
+fgetpos64Ã1024Õ(FILE * __stream, fpos64_t * __pos)÷0œint
+fgetsÃ1024Õ(char * __s, int __n, FILE * __stream)÷0œchar *
+fgets_unlockedÃ1024Õ(char * __s, int __n, FILE * __stream)÷0œchar *
+filenoÃ1024Õ(FILE *__stream)÷0œint
+fileno_unlockedÃ1024Õ(FILE *__stream)÷0œint
+filter_indexÃ64ŒSDL_AudioCVT÷0œint
+filtersÃ1024Õ(struct SDL_AudioCVT *cvt, Uint16 format)ŒSDL_AudioCVT÷0œvoid
+flagsÃ64ŒSDL_Surface÷0œUint32
+flockfileÃ1024Õ(FILE *__stream)÷0œvoid
+fmemopenÃ1024Õ(void *__s, size_t __len, const char *__modes)÷0œFILE *
+fopenÃ1024Õ(const char * __filename, const char * __modes)÷0œFILE *
+fopen64Ã1024Õ(const char * __filename, const char * __modes)÷0œFILE *
+fopencookieÃ1024Õ(void * __magic_cookie, const char * __modes, _IO_cookie_io_functions_t __io_funcs)÷0œFILE *
+formatÃ64ŒSDL_AudioSpec÷0œUint16
+formatÃ64ŒSDL_Overlay÷0œUint32
+formatÃ64ŒSDL_Surface÷0œSDL_PixelFormat
+format_versionÃ64ŒSDL_Surface÷0œint
+fpÃ64ŒSDL_RWops::anon_union_31::anon_struct_32÷0œFILE
+fpos64_tÃ4096÷0œ_G_fpos64_t
+fpos_tÃ4096÷0œ_G_fpos_t
+fprintfÃ1024Õ(FILE * __stream, const char * __format, ...)÷0œint
+fptrÃ64Œrandom_data÷0œint32_t
+fputcÃ1024Õ(int __c, FILE *__stream)÷0œint
+fputc_unlockedÃ1024Õ(int __c, FILE *__stream)÷0œint
+fputsÃ1024Õ(const char * __s, FILE * __stream)÷0œint
+fputs_unlockedÃ1024Õ(const char * __s, FILE * __stream)÷0œint
+freadÃ1024Õ(void * __ptr, size_t __size, size_t __n, FILE * __stream)÷0œsize_t
+fread_unlockedÃ1024Õ(void * __ptr, size_t __size, size_t __n, FILE * __stream)÷0œsize_t
+freeÃ1024Õ(void *__ptr)÷0œvoid
+freopenÃ1024Õ(const char * __filename, const char * __modes, FILE * __stream)÷0œFILE *
+freopen64Ã1024Õ(const char * __filename, const char * __modes, FILE * __stream)÷0œFILE *
+freqÃ64ŒSDL_AudioSpec÷0œint
+fsblkcnt64_tÃ4096÷0œ__fsblkcnt64_t
+fsblkcnt_tÃ4096÷0œ__fsblkcnt_t
+fscanfÃ1024Õ(FILE * __stream, const char * __format, ...)÷0œint
+fseekÃ1024Õ(FILE *__stream, long int __off, int __whence)÷0œint
+fseekoÃ1024Õ(FILE *__stream, __off_t __off, int __whence)÷0œint
+fseeko64Ã1024Õ(FILE *__stream, __off64_t __off, int __whence)÷0œint
+fsetposÃ1024Õ(FILE *__stream, const fpos_t *__pos)÷0œint
+fsetpos64Ã1024Õ(FILE *__stream, const fpos64_t *__pos)÷0œint
+fsfilcnt64_tÃ4096÷0œ__fsfilcnt64_t
+fsfilcnt_tÃ4096÷0œ__fsfilcnt_t
+fsid_tÃ4096÷0œ__fsid_t
+ftellÃ1024Õ(FILE *__stream)÷0œlong int
+ftelloÃ1024Õ(FILE *__stream)÷0œ__off_t
+ftello64Ã1024Õ(FILE *__stream)÷0œ__off64_t
+ftrylockfileÃ1024Õ(FILE *__stream)÷0œint
+funlockfileÃ1024Õ(FILE *__stream)÷0œvoid
+fwriteÃ1024Õ(const void * __ptr, size_t __size, size_t __n, FILE * __s)÷0œsize_t
+fwrite_unlockedÃ1024Õ(const void * __ptr, size_t __size, size_t __n, FILE * __stream)÷0œsize_t
+gÃ64ŒSDL_Color÷0œUint8
+gainÃ64ŒSDL_ActiveEvent÷0œUint8
+gcvtÃ1024Õ(double __value, int __ndigit, char *__buf)÷0œchar *
+getcÃ1024Õ(FILE *__stream)÷0œint
+getcÃ131072Õ(_fp)÷0
+getc_unlockedÃ1024Õ(FILE *__stream)÷0œint
+getcharÃ1024Õ(void)÷0œint
+getchar_unlockedÃ1024Õ(void)÷0œint
+getdelimÃ1024Õ(char ** __lineptr, size_t * __n, int __delimiter, FILE * __stream)÷0œ__ssize_t
+getenvÃ1024Õ(const char *__name)÷0œchar *
+getlineÃ1024Õ(char ** __lineptr, size_t * __n, FILE * __stream)÷0œ__ssize_t
+getloadavgÃ1024Õ(double __loadavg[], int __nelem)÷0œint
+getptÃ1024Õ(void)÷0œint
+getsÃ1024Õ(char *__s)÷0œchar *
+getsuboptÃ1024Õ(char ** __optionp, char *const * __tokens, char ** __valuep)÷0œint
+getwÃ1024Õ(FILE *__stream)÷0œint
+gid_tÃ4096÷0œ__gid_t
+grantptÃ1024Õ(int __fd)÷0œint
+hÃ64ŒSDL_Overlay÷0œint
+hÃ64ŒSDL_Rect÷0œUint16
+hÃ64ŒSDL_ResizeEvent÷0œint
+hÃ64ŒSDL_Surface÷0œint
+hatÃ64ŒSDL_JoyHatEvent÷0œUint8
+hereÃ64ŒSDL_RWops::anon_union_31::anon_struct_33÷0œUint8
+hiddenÃ64ŒSDL_RWops÷0œanon_union_31
+hot_xÃ64ŒSDL_Cursor÷0œSint16
+hot_yÃ64ŒSDL_Cursor÷0œSint16
+htobe16Ã131072Õ(x)÷0
+htobe32Ã131072Õ(x)÷0
+htobe64Ã131072Õ(x)÷0
+htole16Ã131072Õ(x)÷0
+htole32Ã131072Õ(x)÷0
+htole64Ã131072Õ(x)÷0
+hw_availableÃ64ŒSDL_VideoInfo÷0œUint32
+hw_overlayÃ64ŒSDL_Overlay÷0œUint32
+hwdataÃ64ŒSDL_Overlay÷0œprivate_yuvhwdata
+hwdataÃ64ŒSDL_Surface÷0œprivate_hwdata
+hwfuncsÃ64ŒSDL_Overlay÷0œprivate_yuvhwfuncs
+iconvÃ1024Õ(iconv_t __cd, char ** __inbuf, size_t * __inbytesleft, char ** __outbuf, size_t * __outbytesleft)÷0œsize_t
+iconv_closeÃ1024Õ(iconv_t __cd)÷0œint
+iconv_openÃ1024Õ(const char *__tocode, const char *__fromcode)÷0œiconv_t
+iconv_tÃ4096÷0œvoid
+idÃ64ŒSDL_CD÷0œint
+idÃ64ŒSDL_CDtrack÷0œUint8
+id_tÃ4096÷0œ__id_t
+imaxabsÃ1024Õ(intmax_t __n)÷0œintmax_t
+imaxdivÃ1024Õ(intmax_t __numer, intmax_t __denom)÷0œimaxdiv_t
+imaxdiv_tÃ4096÷0œanon_struct_27
+indexÃ1024Õ(const char *__s, int __c)÷0œchar *
+initstateÃ1024Õ(unsigned int __seed, char *__statebuf, size_t __statelen)÷0œchar *
+initstate_rÃ1024Õ(unsigned int __seed, char * __statebuf, size_t __statelen, struct random_data * __buf)÷0œint
+ino64_tÃ4096÷0œ__ino64_t
+ino_tÃ4096÷0œ__ino_t
+int16_tÃ4096÷0œshort
+int32_tÃ4096÷0œint
+int8_tÃ4096÷0œchar
+int_fast16_tÃ4096÷0œint
+int_fast32_tÃ4096÷0œint
+int_fast64_tÃ4096÷0œlong
+int_fast8_tÃ4096÷0œchar
+int_least16_tÃ4096÷0œshort
+int_least32_tÃ4096÷0œint
+int_least64_tÃ4096÷0œlong
+int_least8_tÃ4096÷0œchar
+intmax_tÃ4096÷0œlong
+intptr_tÃ4096÷0œint
+isalnumÃ1024Õ(int)÷0œint
+isalnum_lÃ1024Õ(int, __locale_t)÷0œint
+isalnum_lÃ131072Õ(c,l)÷0
+isalphaÃ1024Õ(int)÷0œint
+isalpha_lÃ1024Õ(int, __locale_t)÷0œint
+isalpha_lÃ131072Õ(c,l)÷0
+isasciiÃ1024Õ(int __c)÷0œint
+isascii_lÃ131072Õ(c,l)÷0
+isblankÃ1024Õ(int)÷0œint
+isblank_lÃ1024Õ(int, __locale_t)÷0œint
+isblank_lÃ131072Õ(c,l)÷0
+iscntrlÃ1024Õ(int)÷0œint
+iscntrl_lÃ1024Õ(int, __locale_t)÷0œint
+iscntrl_lÃ131072Õ(c,l)÷0
+isctypeÃ1024Õ(int __c, int __mask)÷0œint
+isdigitÃ1024Õ(int)÷0œint
+isdigit_lÃ1024Õ(int, __locale_t)÷0œint
+isdigit_lÃ131072Õ(c,l)÷0
+isgraphÃ1024Õ(int)÷0œint
+isgraph_lÃ1024Õ(int, __locale_t)÷0œint
+isgraph_lÃ131072Õ(c,l)÷0
+islowerÃ1024Õ(int)÷0œint
+islower_lÃ1024Õ(int, __locale_t)÷0œint
+islower_lÃ131072Õ(c,l)÷0
+isprintÃ1024Õ(int)÷0œint
+isprint_lÃ1024Õ(int, __locale_t)÷0œint
+isprint_lÃ131072Õ(c,l)÷0
+ispunctÃ1024Õ(int)÷0œint
+ispunct_lÃ1024Õ(int, __locale_t)÷0œint
+ispunct_lÃ131072Õ(c,l)÷0
+isspaceÃ1024Õ(int)÷0œint
+isspace_lÃ1024Õ(int, __locale_t)÷0œint
+isspace_lÃ131072Õ(c,l)÷0
+isupperÃ1024Õ(int)÷0œint
+isupper_lÃ1024Õ(int, __locale_t)÷0œint
+isupper_lÃ131072Õ(c,l)÷0
+isxdigitÃ1024Õ(int)÷0œint
+isxdigit_lÃ1024Õ(int, __locale_t)÷0œint
+isxdigit_lÃ131072Õ(c,l)÷0
+jaxisÃ64ŒSDL_Event÷0œSDL_JoyAxisEvent
+jballÃ64ŒSDL_Event÷0œSDL_JoyBallEvent
+jbuttonÃ64ŒSDL_Event÷0œSDL_JoyButtonEvent
+jhatÃ64ŒSDL_Event÷0œSDL_JoyHatEvent
+jrand48Ã1024Õ(unsigned short int __xsubi[3])÷0œlong int
+jrand48_rÃ1024Õ(unsigned short int __xsubi[3], struct drand48_data * __buffer, long int * __result)÷0œint
+keyÃ64ŒSDL_Event÷0œSDL_KeyboardEvent
+key_tÃ4096÷0œ__key_t
+keysymÃ64ŒSDL_KeyboardEvent÷0œSDL_keysym
+l64aÃ1024Õ(long int __n)÷0œchar *
+labsÃ1024Õ(long int __x)÷0œlong int
+lcong48Ã1024Õ(unsigned short int __param[7])÷0œvoid
+lcong48_rÃ1024Õ(unsigned short int __param[7], struct drand48_data *__buffer)÷0œint
+ldivÃ1024Õ(long int __numer, long int __denom)÷0œldiv_t
+ldiv_tÃ4096÷0œanon_struct_25
+le16tohÃ131072Õ(x)÷0
+le32tohÃ131072Õ(x)÷0
+le64tohÃ131072Õ(x)÷0
+lenÃ64ŒSDL_AudioCVT÷0œint
+len_cvtÃ64ŒSDL_AudioCVT÷0œint
+len_multÃ64ŒSDL_AudioCVT÷0œint
+len_ratioÃ64ŒSDL_AudioCVT÷0œdouble
+lengthÃ64ŒSDL_CDtrack÷0œUint32
+llabsÃ1024Õ(long long int __x)÷0œlong long int
+lldivÃ1024Õ(long long int __numer, long long int __denom)÷0œlldiv_t
+lldiv_tÃ4096÷0œanon_struct_26
+locale_tÃ4096÷0œ__locale_t
+lockedÃ64ŒSDL_Surface÷0œUint32
+loff_tÃ4096÷0œ__loff_t
+lrand48Ã1024Õ(void)÷0œlong int
+lrand48_rÃ1024Õ(struct drand48_data * __buffer, long int * __result)÷0œint
+majorÃ64ŒSDL_version÷0œUint8
+mallocÃ1024Õ(size_t __size)÷0œvoid *
+mapÃ64ŒSDL_Surface÷0œSDL_BlitMap
+maskÃ64ŒSDL_Cursor÷0œUint8
+mblenÃ1024Õ(const char *__s, size_t __n)÷0œint
+mbstowcsÃ1024Õ(wchar_t * __pwcs, const char * __s, size_t __n)÷0œsize_t
+mbtowcÃ1024Õ(wchar_t * __pwc, const char * __s, size_t __n)÷0œint
+memÃ64ŒSDL_RWops::anon_union_31÷0œanon_struct_33
+memccpyÃ1024Õ(void * __dest, const void * __src, int __c, size_t __n)÷0œvoid *
+memchrÃ1024Õ(const void *__s, int __c, size_t __n)÷0œvoid *
+memcmpÃ1024Õ(const void *__s1, const void *__s2, size_t __n)÷0œint
+memcpyÃ1024Õ(void * __dest, const void * __src, size_t __n)÷0œvoid *
+memfrobÃ1024Õ(void *__s, size_t __n)÷0œvoid *
+memmemÃ1024Õ(const void *__haystack, size_t __haystacklen, const void *__needle, size_t __needlelen)÷0œvoid *
+memmoveÃ1024Õ(void *__dest, const void *__src, size_t __n)÷0œvoid *
+mempcpyÃ1024Õ(void * __dest, const void * __src, size_t __n)÷0œvoid *
+memrchrÃ1024Õ(const void *__s, int __c, size_t __n)÷0œvoid *
+memsetÃ1024Õ(void *__s, int __c, size_t __n)÷0œvoid *
+minorÃ64ŒSDL_version÷0œUint8
+mkdtempÃ1024Õ(char *__template)÷0œchar *
+mkostempÃ1024Õ(char *__template, int __flags)÷0œint
+mkostemp64Ã1024Õ(char *__template, int __flags)÷0œint
+mkstempÃ1024Õ(char *__template)÷0œint
+mkstemp64Ã1024Õ(char *__template)÷0œint
+mktempÃ1024Õ(char *__template)÷0œchar *
+modÃ64ŒSDL_keysym÷0œSDLMod
+mode_tÃ4096÷0œ__mode_t
+motionÃ64ŒSDL_Event÷0œSDL_MouseMotionEvent
+mrand48Ã1024Õ(void)÷0œlong int
+mrand48_rÃ1024Õ(struct drand48_data * __buffer, long int * __result)÷0œint
+msgÃ64ŒSDL_SysWMEvent÷0œSDL_SysWMmsg
+ncolorsÃ64ŒSDL_Palette÷0œint
+neededÃ64ŒSDL_AudioCVT÷0œint
+nlink_tÃ4096÷0œ__nlink_t
+nrand48Ã1024Õ(unsigned short int __xsubi[3])÷0œlong int
+nrand48_rÃ1024Õ(unsigned short int __xsubi[3], struct drand48_data * __buffer, long int * __result)÷0œint
+numtracksÃ64ŒSDL_CD÷0œint
+obstackÃ32768÷0
+obstack_printfÃ1024Õ(struct obstack * __obstack, const char * __format, ...)÷0œint
+obstack_vprintfÃ1024Õ(struct obstack * __obstack, const char * __format, __gnuc_va_list __args)÷0œint
+off64_tÃ4096÷0œ__off64_t
+off_tÃ4096÷0œ__off_t
+offsetÃ64ŒSDL_CDtrack÷0œUint32
+offsetÃ64ŒSDL_Surface÷0œint
+offsetofÃ131072Õ(TYPE,MEMBER)÷0
+on_exitÃ1024Õ(void (*__func) (int __status, void *__arg), void *__arg)÷0œint
+open_memstreamÃ1024Õ(char **__bufloc, size_t *__sizeloc)÷0œFILE *
+paddingÃ64ŒSDL_AudioSpec÷0œUint16
+paletteÃ64ŒSDL_PixelFormat÷0œSDL_Palette
+patchÃ64ŒSDL_version÷0œUint8
+pcloseÃ1024Õ(FILE *__stream)÷0œint
+perrorÃ1024Õ(const char *__s)÷0œvoid
+pid_tÃ4096÷0œ__pid_t
+pitchÃ64ŒSDL_Surface÷0œUint16
+pitchesÃ64ŒSDL_Overlay÷0œUint16
+pixelsÃ64ŒSDL_Overlay÷0œUint8
+pixelsÃ64ŒSDL_Surface÷0œvoid
+planesÃ64ŒSDL_Overlay÷0œint
+popenÃ1024Õ(const char *__command, const char *__modes)÷0œFILE *
+posix_memalignÃ1024Õ(void **__memptr, size_t __alignment, size_t __size)÷0œint
+posix_openptÃ1024Õ(int __oflag)÷0œint
+printfÃ1024Õ(const char * __format, ...)÷0œint
+pselectÃ1024Õ(int __nfds, fd_set * __readfds, fd_set * __writefds, fd_set * __exceptfds, const struct timespec * __timeout, const __sigset_t * __sigmask)÷0œint
+pthread_attr_tÃ4096÷0œanon_union_5
+pthread_barrier_tÃ4096÷0œanon_union_15
+pthread_barrierattr_tÃ4096÷0œanon_union_16
+pthread_cond_tÃ4096÷0œanon_union_9
+pthread_condattr_tÃ4096÷0œanon_union_11
+pthread_key_tÃ4096÷0œint
+pthread_mutex_tÃ4096÷0œanon_union_6
+pthread_mutexattr_tÃ4096÷0œanon_union_8
+pthread_once_tÃ4096÷0œint
+pthread_rwlock_tÃ4096÷0œanon_union_12
+pthread_rwlockattr_tÃ4096÷0œanon_union_14
+pthread_spinlock_tÃ4096÷0œint
+pthread_tÃ4096÷0œlong
+ptrdiff_tÃ4096÷0œlong
+ptsnameÃ1024Õ(int __fd)÷0œchar *
+ptsname_rÃ1024Õ(int __fd, char *__buf, size_t __buflen)÷0œint
+putcÃ1024Õ(int __c, FILE *__stream)÷0œint
+putcÃ131072Õ(_ch,_fp)÷0
+putc_unlockedÃ1024Õ(int __c, FILE *__stream)÷0œint
+putcharÃ1024Õ(int __c)÷0œint
+putchar_unlockedÃ1024Õ(int __c)÷0œint
+putenvÃ1024Õ(char *__string)÷0œint
+putsÃ1024Õ(const char *__s)÷0œint
+putwÃ1024Õ(int __w, FILE *__stream)÷0œint
+qecvtÃ1024Õ(long double __value, int __ndigit, int * __decpt, int * __sign)÷0œchar *
+qecvt_rÃ1024Õ(long double __value, int __ndigit, int * __decpt, int * __sign, char * __buf, size_t __len)÷0œint
+qfcvtÃ1024Õ(long double __value, int __ndigit, int * __decpt, int * __sign)÷0œchar *
+qfcvt_rÃ1024Õ(long double __value, int __ndigit, int * __decpt, int * __sign, char * __buf, size_t __len)÷0œint
+qgcvtÃ1024Õ(long double __value, int __ndigit, char *__buf)÷0œchar *
+qsortÃ1024Õ(void *__base, size_t __nmemb, size_t __size, __compar_fn_t __compar)÷0œvoid
+qsort_rÃ1024Õ(void *__base, size_t __nmemb, size_t __size, __compar_d_fn_t __compar, void *__arg)÷0œvoid
+quad_tÃ4096÷0œ__quad_t
+quick_exitÃ1024Õ(int __status)÷0œvoid
+quitÃ64ŒSDL_Event÷0œSDL_QuitEvent
+quotÃ64Œanon_struct_24÷0œint
+quotÃ64Œanon_struct_25÷0œlong
+quotÃ64Œanon_struct_26÷0œlong
+quotÃ64Œanon_struct_27÷0œlong
+rÃ64ŒSDL_Color÷0œUint8
+randÃ1024Õ(void)÷0œint
+rand_degÃ64Œrandom_data÷0œint
+rand_rÃ1024Õ(unsigned int *__seed)÷0œint
+rand_sepÃ64Œrandom_data÷0œint
+rand_typeÃ64Œrandom_data÷0œint
+randomÃ1024Õ(void)÷0œlong int
+random_dataÃ2048÷0
+random_rÃ1024Õ(struct random_data * __buf, int32_t * __result)÷0œint
+rate_incrÃ64ŒSDL_AudioCVT÷0œdouble
+rawmemchrÃ1024Õ(const void *__s, int __c)÷0œvoid *
+readÃ1024Õ(struct SDL_RWops *context, void *ptr, int size, int maxnum)ŒSDL_RWops÷0œint
+readÃ64Œanon_struct_21÷0œ__io_read_fn
+reallocÃ1024Õ(void *__ptr, size_t __size)÷0œvoid *
+realpathÃ1024Õ(const char * __name, char * __resolved)÷0œchar *
+refcountÃ64ŒSDL_Surface÷0œint
+register_tÃ4096÷0œint
+remÃ64Œanon_struct_24÷0œint
+remÃ64Œanon_struct_25÷0œlong
+remÃ64Œanon_struct_26÷0œlong
+remÃ64Œanon_struct_27÷0œlong
+removeÃ1024Õ(const char *__filename)÷0œint
+renameÃ1024Õ(const char *__old, const char *__new)÷0œint
+renameatÃ1024Õ(int __oldfd, const char *__old, int __newfd, const char *__new)÷0œint
+resizeÃ64ŒSDL_Event÷0œSDL_ResizeEvent
+rewindÃ1024Õ(FILE *__stream)÷0œvoid
+rindexÃ1024Õ(const char *__s, int __c)÷0œchar *
+rpmatchÃ1024Õ(const char *__response)÷0œint
+rptrÃ64Œrandom_data÷0œint32_t
+samplesÃ64ŒSDL_AudioSpec÷0œUint16
+saveÃ64ŒSDL_Cursor÷0œUint8
+scancodeÃ64ŒSDL_keysym÷0œUint8
+scanfÃ1024Õ(const char * __format, ...)÷0œint
+seed48Ã1024Õ(unsigned short int __seed16v[3])÷0œunsigned short int *
+seed48_rÃ1024Õ(unsigned short int __seed16v[3], struct drand48_data *__buffer)÷0œint
+seekÃ1024Õ(struct SDL_RWops *context, int offset, int whence)ŒSDL_RWops÷0œint
+seekÃ64Œanon_struct_21÷0œ__io_seek_fn
+selectÃ1024Õ(int __nfds, fd_set * __readfds, fd_set * __writefds, fd_set * __exceptfds, struct timeval * __timeout)÷0œint
+setbufÃ1024Õ(FILE * __stream, char * __buf)÷0œvoid
+setbufferÃ1024Õ(FILE * __stream, char * __buf, size_t __size)÷0œvoid
+setenvÃ1024Õ(const char *__name, const char *__value, int __replace)÷0œint
+setkeyÃ1024Õ(const char *__key)÷0œvoid
+setlinebufÃ1024Õ(FILE *__stream)÷0œvoid
+setstateÃ1024Õ(char *__statebuf)÷0œchar *
+setstate_rÃ1024Õ(char * __statebuf, struct random_data * __buf)÷0œint
+setvbufÃ1024Õ(FILE * __stream, char * __buf, int __modes, size_t __n)÷0œint
+sigset_tÃ4096÷0œ__sigset_t
+silenceÃ64ŒSDL_AudioSpec÷0œUint8
+sizeÃ64ŒSDL_AudioSpec÷0œUint32
+snprintfÃ1024Õ(char * __s, size_t __maxlen, const char * __format, ...)÷0œint
+sprintfÃ1024Õ(char * __s, const char * __format, ...)÷0œint
+srandÃ1024Õ(unsigned int __seed)÷0œvoid
+srand48Ã1024Õ(long int __seedval)÷0œvoid
+srand48_rÃ1024Õ(long int __seedval, struct drand48_data *__buffer)÷0œint
+srandomÃ1024Õ(unsigned int __seed)÷0œvoid
+srandom_rÃ1024Õ(unsigned int __seed, struct random_data *__buf)÷0œint
+src_formatÃ64ŒSDL_AudioCVT÷0œUint16
+sscanfÃ1024Õ(const char * __s, const char * __format, ...)÷0œint
+ssize_tÃ4096÷0œ__ssize_t
+stateÃ64ŒSDL_ActiveEvent÷0œUint8
+stateÃ64ŒSDL_JoyButtonEvent÷0œUint8
+stateÃ64ŒSDL_KeyboardEvent÷0œUint8
+stateÃ64ŒSDL_MouseButtonEvent÷0œUint8
+stateÃ64ŒSDL_MouseMotionEvent÷0œUint8
+stateÃ64Œrandom_data÷0œint32_t
+statusÃ64ŒSDL_CD÷0œCDstatus
+stderrÃ32768÷0œ_IO_FILE
+stderrÃ65536÷0
+stdinÃ32768÷0œ_IO_FILE
+stdinÃ65536÷0
+stdioÃ64ŒSDL_RWops::anon_union_31÷0œanon_struct_32
+stdoutÃ32768÷0œ_IO_FILE
+stdoutÃ65536÷0
+stopÃ64ŒSDL_RWops::anon_union_31::anon_struct_33÷0œUint8
+stpcpyÃ1024Õ(char * __dest, const char * __src)÷0œchar *
+stpncpyÃ1024Õ(char * __dest, const char * __src, size_t __n)÷0œchar *
+strcasecmpÃ1024Õ(const char *__s1, const char *__s2)÷0œint
+strcasecmp_lÃ1024Õ(const char *__s1, const char *__s2, __locale_t __loc)÷0œint
+strcasestrÃ1024Õ(const char *__haystack, const char *__needle)÷0œchar *
+strcatÃ1024Õ(char * __dest, const char * __src)÷0œchar *
+strchrÃ1024Õ(const char *__s, int __c)÷0œchar *
+strchrnulÃ1024Õ(const char *__s, int __c)÷0œchar *
+strcmpÃ1024Õ(const char *__s1, const char *__s2)÷0œint
+strcollÃ1024Õ(const char *__s1, const char *__s2)÷0œint
+strcoll_lÃ1024Õ(const char *__s1, const char *__s2, __locale_t __l)÷0œint
+strcpyÃ1024Õ(char * __dest, const char * __src)÷0œchar *
+strcspnÃ1024Õ(const char *__s, const char *__reject)÷0œsize_t
+strdupÃ1024Õ(const char *__s)÷0œchar *
+strerrorÃ1024Õ(int __errnum)÷0œchar *
+strerror_lÃ1024Õ(int __errnum, __locale_t __l)÷0œchar *
+strerror_rÃ1024Õ(int __errnum, char *__buf, size_t __buflen)÷0œchar *
+strfryÃ1024Õ(char *__string)÷0œchar *
+strlenÃ1024Õ(const char *__s)÷0œsize_t
+strncasecmpÃ1024Õ(const char *__s1, const char *__s2, size_t __n)÷0œint
+strncasecmp_lÃ1024Õ(const char *__s1, const char *__s2, size_t __n, __locale_t __loc)÷0œint
+strncatÃ1024Õ(char * __dest, const char * __src, size_t __n)÷0œchar *
+strncmpÃ1024Õ(const char *__s1, const char *__s2, size_t __n)÷0œint
+strncpyÃ1024Õ(char * __dest, const char * __src, size_t __n)÷0œchar *
+strndupÃ1024Õ(const char *__string, size_t __n)÷0œchar *
+strnlenÃ1024Õ(const char *__string, size_t __maxlen)÷0œsize_t
+strpbrkÃ1024Õ(const char *__s, const char *__accept)÷0œchar *
+strrchrÃ1024Õ(const char *__s, int __c)÷0œchar *
+strsepÃ1024Õ(char ** __stringp, const char * __delim)÷0œchar *
+strsignalÃ1024Õ(int __sig)÷0œchar *
+strspnÃ1024Õ(const char *__s, const char *__accept)÷0œsize_t
+strstrÃ1024Õ(const char *__haystack, const char *__needle)÷0œchar *
+strtodÃ1024Õ(const char * __nptr, char ** __endptr)÷0œdouble
+strtod_lÃ1024Õ(const char * __nptr, char ** __endptr, __locale_t __loc)÷0œdouble
+strtofÃ1024Õ(const char * __nptr, char ** __endptr)÷0œfloat
+strtof_lÃ1024Õ(const char * __nptr, char ** __endptr, __locale_t __loc)÷0œfloat
+strtoimaxÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œintmax_t
+strtokÃ1024Õ(char * __s, const char * __delim)÷0œchar *
+strtok_rÃ1024Õ(char * __s, const char * __delim, char ** __save_ptr)÷0œchar *
+strtolÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œlong int
+strtol_lÃ1024Õ(const char * __nptr, char ** __endptr, int __base, __locale_t __loc)÷0œlong int
+strtoldÃ1024Õ(const char * __nptr, char ** __endptr)÷0œlong double
+strtold_lÃ1024Õ(const char * __nptr, char ** __endptr, __locale_t __loc)÷0œlong double
+strtollÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œlong long int
+strtoll_lÃ1024Õ(const char * __nptr, char ** __endptr, int __base, __locale_t __loc)÷0œlong long int
+strtoulÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œunsigned long int
+strtoul_lÃ1024Õ(const char * __nptr, char ** __endptr, int __base, __locale_t __loc)÷0œunsigned long int
+strtoullÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œunsigned long long int
+strtoull_lÃ1024Õ(const char * __nptr, char ** __endptr, int __base, __locale_t __loc)÷0œunsigned long long int
+strtoumaxÃ1024Õ(const char * __nptr, char ** __endptr, int __base)÷0œuintmax_t
+strverscmpÃ1024Õ(const char *__s1, const char *__s2)÷0œint
+strxfrmÃ1024Õ(char * __dest, const char * __src, size_t __n)÷0œsize_t
+strxfrm_lÃ1024Õ(char *__dest, const char *__src, size_t __n, __locale_t __l)÷0œsize_t
+suseconds_tÃ4096÷0œ__suseconds_t
+symÃ64ŒSDL_keysym÷0œSDLKey
+sys_errlistÃ32768÷0œchar
+sys_nerrÃ32768÷0œint
+systemÃ1024Õ(const char *__command)÷0œint
+syswmÃ64ŒSDL_Event÷0œSDL_SysWMEvent
+tempnamÃ1024Õ(const char *__dir, const char *__pfx)÷0œchar *
+time_tÃ4096÷0œ__time_t
+timer_tÃ4096÷0œ__timer_t
+timespecÃ2048÷0
+timevalÃ2048÷0
+tmpfileÃ1024Õ(void)÷0œFILE *
+tmpfile64Ã1024Õ(void)÷0œFILE *
+tmpnamÃ1024Õ(char *__s)÷0œchar *
+tmpnam_rÃ1024Õ(char *__s)÷0œchar *
+toasciiÃ1024Õ(int __c)÷0œint
+toascii_lÃ131072Õ(c,l)÷0
+tolowerÃ1024Õ(int __c)÷0œint
+tolower_lÃ1024Õ(int __c, __locale_t __l)÷0œint
+toupperÃ1024Õ(int __c)÷0œint
+toupper_lÃ1024Õ(int __c, __locale_t __l)÷0œint
+trackÃ64ŒSDL_CD÷0œSDL_CDtrack
+tv_nsecÃ64Œtimespec÷0œlong
+tv_secÃ64Œtimespec÷0œ__time_t
+tv_secÃ64Œtimeval÷0œ__time_t
+tv_usecÃ64Œtimeval÷0œ__suseconds_t
+typeÃ64ŒSDL_ActiveEvent÷0œUint8
+typeÃ64ŒSDL_CDtrack÷0œUint8
+typeÃ64ŒSDL_Event÷0œUint8
+typeÃ64ŒSDL_ExposeEvent÷0œUint8
+typeÃ64ŒSDL_JoyAxisEvent÷0œUint8
+typeÃ64ŒSDL_JoyBallEvent÷0œUint8
+typeÃ64ŒSDL_JoyButtonEvent÷0œUint8
+typeÃ64ŒSDL_JoyHatEvent÷0œUint8
+typeÃ64ŒSDL_KeyboardEvent÷0œUint8
+typeÃ64ŒSDL_MouseButtonEvent÷0œUint8
+typeÃ64ŒSDL_MouseMotionEvent÷0œUint8
+typeÃ64ŒSDL_QuitEvent÷0œUint8
+typeÃ64ŒSDL_RWops÷0œUint32
+typeÃ64ŒSDL_ResizeEvent÷0œUint8
+typeÃ64ŒSDL_SysWMEvent÷0œUint8
+typeÃ64ŒSDL_UserEvent÷0œUint8
+u_charÃ4096÷0œ__u_char
+u_intÃ4096÷0œ__u_int
+u_int16_tÃ4096÷0œshort
+u_int32_tÃ4096÷0œint
+u_int8_tÃ4096÷0œchar
+u_longÃ4096÷0œ__u_long
+u_quad_tÃ4096÷0œ__u_quad_t
+u_shortÃ4096÷0œ__u_short
+uid_tÃ4096÷0œ__uid_t
+uintÃ4096÷0œint
+uint16_tÃ4096÷0œshort
+uint32_tÃ4096÷0œint
+uint64_tÃ4096÷0œlong
+uint8_tÃ4096÷0œchar
+uint_fast16_tÃ4096÷0œint
+uint_fast32_tÃ4096÷0œint
+uint_fast64_tÃ4096÷0œlong
+uint_fast8_tÃ4096÷0œchar
+uint_least16_tÃ4096÷0œshort
+uint_least32_tÃ4096÷0œint
+uint_least64_tÃ4096÷0œlong
+uint_least8_tÃ4096÷0œchar
+uintmax_tÃ4096÷0œlong
+uintptr_tÃ4096÷0œint
+ulongÃ4096÷0œlong
+ungetcÃ1024Õ(int __c, FILE *__stream)÷0œint
+unicodeÃ64ŒSDL_keysym÷0œUint16
+unknownÃ64ŒSDL_RWops::anon_union_31÷0œanon_struct_34
+unlockptÃ1024Õ(int __fd)÷0œint
+unsetenvÃ1024Õ(const char *__name)÷0œint
+unusedÃ64ŒSDL_CDtrack÷0œUint16
+unusedÃ64ŒSDL_Color÷0œUint8
+unused1Ã64ŒSDL_Surface÷0œUint32
+useconds_tÃ4096÷0œ__useconds_t
+userÃ64ŒSDL_Event÷0œSDL_UserEvent
+userdataÃ64ŒSDL_AudioSpec÷0œvoid
+ushortÃ4096÷0œshort
+va_argÃ131072Õ(v,l)÷0
+va_copyÃ131072Õ(d,s)÷0
+va_endÃ131072Õ(v)÷0
+va_listÃ4096÷0œ__gnuc_va_list
+va_startÃ131072Õ(v,l)÷0
+vallocÃ1024Õ(size_t __size)÷0œvoid *
+valueÃ64ŒSDL_JoyAxisEvent÷0œSint16
+valueÃ64ŒSDL_JoyHatEvent÷0œUint8
+vasprintfÃ1024Õ(char ** __ptr, const char * __f, __gnuc_va_list __arg)÷0œint
+vdprintfÃ1024Õ(int __fd, const char * __fmt, __gnuc_va_list __arg)÷0œint
+vfmtÃ64ŒSDL_VideoInfo÷0œSDL_PixelFormat
+vfprintfÃ1024Õ(FILE * __s, const char * __format, __gnuc_va_list __arg)÷0œint
+vfscanfÃ1024Õ(FILE * __s, const char * __format, __gnuc_va_list __arg)÷0œint
+video_memÃ64ŒSDL_VideoInfo÷0œUint32
+vprintfÃ1024Õ(const char * __format, __gnuc_va_list __arg)÷0œint
+vscanfÃ1024Õ(const char * __format, __gnuc_va_list __arg)÷0œint
+vsnprintfÃ1024Õ(char * __s, size_t __maxlen, const char * __format, __gnuc_va_list __arg)÷0œint
+vsprintfÃ1024Õ(char * __s, const char * __format, __gnuc_va_list __arg)÷0œint
+vsscanfÃ1024Õ(const char * __s, const char * __format, __gnuc_va_list __arg)÷0œint
+wÃ64ŒSDL_Overlay÷0œint
+wÃ64ŒSDL_Rect÷0œUint16
+wÃ64ŒSDL_ResizeEvent÷0œint
+wÃ64ŒSDL_Surface÷0œint
+w_coredumpÃ65536÷0
+w_retcodeÃ65536÷0
+w_statusÃ64Œwait÷0œint
+w_stopsigÃ65536÷0
+w_stopvalÃ65536÷0
+w_termsigÃ65536÷0
+waitÃ8192÷0
+wcstoimaxÃ1024Õ(const wchar_t * __nptr, wchar_t ** __endptr, int __base)÷0œintmax_t
+wcstombsÃ1024Õ(char * __s, const wchar_t * __pwcs, size_t __n)÷0œsize_t
+wcstoumaxÃ1024Õ(const wchar_t * __nptr, wchar_t ** __endptr, int __base)÷0œuintmax_t
+wctombÃ1024Õ(char *__s, wchar_t __wchar)÷0œint
+whichÃ64ŒSDL_JoyAxisEvent÷0œUint8
+whichÃ64ŒSDL_JoyBallEvent÷0œUint8
+whichÃ64ŒSDL_JoyButtonEvent÷0œUint8
+whichÃ64ŒSDL_JoyHatEvent÷0œUint8
+whichÃ64ŒSDL_KeyboardEvent÷0œUint8
+whichÃ64ŒSDL_MouseButtonEvent÷0œUint8
+whichÃ64ŒSDL_MouseMotionEvent÷0œUint8
+wint_tÃ4096÷0œint
+wm_availableÃ64ŒSDL_VideoInfo÷0œUint32
+wm_cursorÃ64ŒSDL_Cursor÷0œWMcursor
+writeÃ1024Õ(struct SDL_RWops *context, const void *ptr, int size, int num)ŒSDL_RWops÷0œint
+writeÃ64Œanon_struct_21÷0œ__io_write_fn
+xÃ64ŒSDL_MouseButtonEvent÷0œUint16
+xÃ64ŒSDL_MouseMotionEvent÷0œUint16
+xÃ64ŒSDL_Rect÷0œSint16
+xrelÃ64ŒSDL_JoyBallEvent÷0œSint16
+xrelÃ64ŒSDL_MouseMotionEvent÷0œSint16
+yÃ64ŒSDL_MouseButtonEvent÷0œUint16
+yÃ64ŒSDL_MouseMotionEvent÷0œUint16
+yÃ64ŒSDL_Rect÷0œSint16
+yrelÃ64ŒSDL_JoyBallEvent÷0œSint16
+yrelÃ64ŒSDL_MouseMotionEvent÷0œSint16

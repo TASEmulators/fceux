@@ -1,0 +1,5 @@
+These files are for the geany IDE (great for liunx dev)
+
+You can load the tags from the Tools->Load Tags menu.
+
+Since geany uses make for build, I've set up my build command in execute and use f5 for build

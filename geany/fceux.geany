@@ -1,0 +1,22 @@
+
+[indentation]
+indent_width=4
+indent_type=1
+indent_hard_tab_width=8
+detect_indent=false
+indent_mode=2
+
+[project]
+name=fceux
+base_path=../
+make_in_base_path=true
+description=
+run_cmd=gksudo scons install
+
+[files]
+current_page=2
+FILE_NAME_0=663;None;0;16;1;1;0;/home/lukas/code/fceultra/fceu/SConstruct;0
+FILE_NAME_1=5288;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/gui.cpp;0
+FILE_NAME_2=6783;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/sdl.cpp;0
+FILE_NAME_3=956;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/gui.h;0
+FILE_NAME_4=215;C;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/sdl.h;0
