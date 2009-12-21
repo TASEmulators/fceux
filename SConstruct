@@ -12,7 +12,7 @@ opts.AddVariables(
   BoolVariable('NEWPPU',    'Enable new PPU core', 0),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
-  BoolVariable('GTK2', 'Enable experimental integrated GTK2 GUI (BROKEN, Devs only!)', 0)
+  BoolVariable('GTK2', 'Enable experimental integrated GTK2 GUI (BROKEN, SDL Devs only!)', 0)
 )
 
 env = Environment(options = opts)
@@ -60,6 +60,7 @@ else:
     Exit(1)
   if env['GTK2']:
 	# Add compiler and linker flags from pkg-config
+	env.Append(CPPDEFINES=["_GTK2"])
 	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
 
   ### Lua platform defines
@@ -112,6 +113,7 @@ else:
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
+  
   env.Append(CPPDEFINES=["_S9XLUA_H"])
   env = conf.Finish()
 

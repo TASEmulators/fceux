@@ -13,9 +13,7 @@
 #include <limits.h>
 #include <math.h>
 
-
-//#define GTK_GUI
-#ifdef GTK_GUI
+#ifdef _GTK2
 #include <gtk/gtk.h>
 #include "gui.cpp"
 #endif
@@ -685,7 +683,7 @@ SDL_GL_LoadLibrary(0);
 	setHotKeys();
 	
 	
-	#ifdef GTK_GUI
+	#ifdef _GTK2
 	InitGTKSubsystem(argc, argv);
 	#endif
 	
@@ -744,7 +742,7 @@ SDL_GL_LoadLibrary(0);
     // loop playing the game
     while(GameInfo) {
         DoFun(frameskip);
-        #ifdef GTK_GUI
+        #ifdef _GTK2
         while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
         #endif

@@ -13,29 +13,34 @@
 
 extern Config *g_config;
 
-
+// test rendering
 //SDL_Surface* screen = NULL;
 //SDL_Surface* hello = NULL;
 
 
 
+// we're not using this loop right now since integrated sdl is broken 
 gint mainLoop(gpointer data)
 {
-	//SDL_UpdateRect(screen, 0, 0, xres, yres);
-	// TODO: integrate main SDL loop here
-	
 	// test render
-	//SDL_BlitSurface (hello, NULL, screen, NULL);
+	/*
+	SDL_UpdateRect(screen, 0, 0, xres, yres);
 	
-	//SDL_Flip( screen );
+	
+	SDL_BlitSurface (hello, NULL, screen, NULL);
+	
+	SDL_Flip( screen );
+	*/
 	DoFun(0);
 	
 	return TRUE;
 }
 
+// this is not used currently; it is used in rendering sdl in
+// the gtk window which is broken
 gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
 {
-	//???
+	//neccessary for SDL rendering on gtk win (i think?)
 	//s_screen = SDL_SetVideoMode(event->width, event->height, 0, 0);
 	
 	return TRUE;
@@ -58,11 +63,16 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	// event handlers
 	gtk_widget_add_events(MainWindow, GDK_BUTTON_PRESS_MASK);
-	gtk_signal_connect(GTK_OBJECT(MainWindow), "configure_event",
-		GTK_SIGNAL_FUNC(configureEvent), 0);
+	//gtk_signal_connect(GTK_OBJECT(MainWindow), "configure_event",
+	//	GTK_SIGNAL_FUNC(configureEvent), 0);
 	
 	
-	
+	// PRG: this code here is the the windowID "hack" to render SDL
+	// in a GTK window.  however, I can't get it to work right now
+	// so i'm commenting it out and haivng a seperate GTK2 window with 
+	// controls
+	// 12/21/09
+	/*
 	GtkWidget* socket = gtk_socket_new();
 	gtk_widget_show (socket) ; 
 	gtk_container_add (GTK_CONTAINER(MainWindow), socket);
@@ -83,12 +93,10 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	
 	
-	
+	// test rendering
 	//screen = SDL_SetVideoMode(xres, yres, 0, 0);
-	
-	
 	//hello = SDL_LoadBMP( "hello.bmp" );
-	
+	*/
 	
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", gtk_main_quit, NULL);
@@ -96,10 +104,6 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	gtk_widget_show_all(MainWindow);
 	
-	// TODO: we're not going to want to use gtk_main here so we can control
-	// the event loop and use SDL events rather than GTK events
-	//gtk_main();
-	//SDL_Quit();
 	
 	return 0;
 }
