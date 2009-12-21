@@ -28,6 +28,7 @@
 
 
 #include "sdl-video.h"
+#include "sdl.h"
 
 #include "../common/cheat.h"
 #include "../../movie.h"
@@ -562,7 +563,7 @@ KeyboardCommands()
     }
 	
     if(_keyonly(quitKey)) {
-        FCEUI_CloseGame();
+        CloseGame();
     }
     #ifdef _S9XLUA_H
     if(_keyonly(loadLuaKey)) {
@@ -720,7 +721,7 @@ UpdatePhysicalInput()
     while(SDL_PollEvent(&event)) {
         switch(event.type) {
         case SDL_QUIT:
-            FCEUI_CloseGame();
+            CloseGame();
             puts("Quit");
             break;
         default:
