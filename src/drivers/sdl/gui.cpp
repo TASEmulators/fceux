@@ -98,34 +98,27 @@ void openPrefs(void)
 	
 	GtkWidget* vbox;
 	GtkWidget* hbox;
-	GtkWidget* soundLabel;
-	GtkWidget* soundCheck;
+	GtkWidget* someLabel;
+	GtkWidget* someCheck;
 	GtkWidget* closeButton;
 	
 	prefsWin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(prefsWin), "Preferences");
 	vbox = gtk_vbox_new(TRUE, 5);
 	hbox = gtk_hbox_new(TRUE, 5);
-	soundLabel = gtk_label_new("Enable sound: ");
-	soundCheck = gtk_check_button_new();
+	someLabel = gtk_label_new("Enable something: ");
+	someCheck = gtk_check_button_new();
 	closeButton = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-	int s;
-	g_config->getOption("SDL.Sound", &s);
-	if(s)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), FALSE);
 	
 	gtk_container_add(GTK_CONTAINER(prefsWin), vbox);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox), soundLabel, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox), soundCheck, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), someLabel, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), someCheck, TRUE, TRUE, 5);
 	gtk_box_pack_end(GTK_BOX(vbox), closeButton, TRUE, TRUE, 5);
 	
 	gtk_widget_show_all(prefsWin);
 	
-	gtk_signal_connect(GTK_OBJECT(soundCheck), "clicked", G_CALLBACK(toggleSound), NULL);
-	gtk_signal_connect(GTK_OBJECT(prefsWin), "delete-event", closePrefs, NULL);
+	gtk_signal_connect(GTK_OBJECT(prefsWin), "delete-event", G_CALLBACK(closePrefs), NULL);
 	gtk_signal_connect(GTK_OBJECT(closeButton), "clicked", closePrefs, NULL);
 	
 	
@@ -239,6 +232,9 @@ int InitGTKSubsystem(int argc, char** argv)
 	//GtkWidget* MainWindow;
 	GtkWidget* Menubar;
 	GtkWidget* vbox;
+	GtkWidget* soundLabel;
+	GtkWidget* soundCheck;
+	GtkWidget* soundHbox;
 	int xres, yres;
 	
 	g_config->getOption("SDL.XResolution", &xres);
@@ -248,14 +244,30 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), "fceuX GTK GUI - WIP");
+	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
 	
 	vbox = gtk_vbox_new(FALSE, 3);
+	soundHbox = gtk_hbox_new(FALSE, 5);
+	soundLabel = gtk_label_new("Enable sound: ");
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
 	
+	soundCheck = gtk_check_button_new();
+	
+	int s;
+	g_config->getOption("SDL.Sound", &s);
+	if(s)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), FALSE);
+		
 	//gtk_container_add(GTK_CONTAINER(vbox), Menubar);
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), soundHbox, TRUE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(soundHbox), soundLabel, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(soundHbox), soundCheck, FALSE, TRUE, 5);
+
 	
 	
 	// broken SDL embedding code
@@ -301,6 +313,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
+	
+	gtk_signal_connect(GTK_OBJECT(soundCheck), "clicked", G_CALLBACK(toggleSound), NULL);
 	//gtk_idle_add(mainLoop, MainWindow);
 	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
 
