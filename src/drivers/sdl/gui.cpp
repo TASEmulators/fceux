@@ -71,6 +71,66 @@ void showAbout ()
 	
 
 }
+GtkWidget* prefsWin;
+
+void toggleSound(GtkWidget* check, gpointer data)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check)))
+	{
+		g_config->setOption("SDL.Sound", 1);
+		InitSound();
+	}
+	else
+	{
+		g_config->setOption("SDL.Sound", 0);
+		KillSound();
+	}
+}
+
+void closePrefs(void)
+{
+	gtk_widget_hide_all(prefsWin);
+	//g_free(prefsWin);
+}
+
+void openPrefs(void)
+{
+	
+	GtkWidget* vbox;
+	GtkWidget* hbox;
+	GtkWidget* soundLabel;
+	GtkWidget* soundCheck;
+	GtkWidget* closeButton;
+	
+	prefsWin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(prefsWin), "Preferences");
+	vbox = gtk_vbox_new(TRUE, 5);
+	hbox = gtk_hbox_new(TRUE, 5);
+	soundLabel = gtk_label_new("Enable sound: ");
+	soundCheck = gtk_check_button_new();
+	closeButton = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+	int s;
+	g_config->getOption("SDL.Sound", &s);
+	if(s)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), FALSE);
+	
+	gtk_container_add(GTK_CONTAINER(prefsWin), vbox);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), soundLabel, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox), soundCheck, TRUE, TRUE, 5);
+	gtk_box_pack_end(GTK_BOX(vbox), closeButton, TRUE, TRUE, 5);
+	
+	gtk_widget_show_all(prefsWin);
+	
+	gtk_signal_connect(GTK_OBJECT(soundCheck), "clicked", G_CALLBACK(toggleSound), NULL);
+	gtk_signal_connect(GTK_OBJECT(prefsWin), "delete-event", closePrefs, NULL);
+	gtk_signal_connect(GTK_OBJECT(closeButton), "clicked", closePrefs, NULL);
+	
+	
+}
+
 #ifdef _S9XLUA_H
 void loadLua ()
 {
@@ -137,6 +197,7 @@ static GtkItemFactoryEntry menu_items[] = {
 #endif
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
+  { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/Check", NULL,         NULL,		   1, "<CheckItem>" },
   { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },

@@ -77,7 +77,7 @@ fillaudio(void *udata,
  * Initialize the audio subsystem.
  */
 int
-InitSound(FCEUGI *gi)
+InitSound()
 {
     int sound, soundrate, soundbufsize, soundvolume, soundtrianglevolume, soundsquare1volume, soundsquare2volume, soundnoisevolume, soundpcmvolume, soundq;
     SDL_AudioSpec spec;

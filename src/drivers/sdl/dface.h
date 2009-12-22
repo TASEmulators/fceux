@@ -9,7 +9,7 @@ extern char *DriverUsage;
 
 void DoDriverArgs(void);
 
-int InitSound(FCEUGI *gi);
+int InitSound();
 void WriteSound(int32 *Buffer, int Count);
 int KillSound(void);
 uint32 GetMaxSound(void);

@@ -270,7 +270,7 @@ DriverInitialize(FCEUGI *gi)
     if(InitVideo(gi) < 0) return 0;
     inited|=4;
 
-    if(InitSound(gi))
+    if(InitSound())
         inited|=1;
 
     if(InitJoysticks())
