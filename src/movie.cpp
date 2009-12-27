@@ -135,6 +135,8 @@ void MovieData::TryDumpIncremental()
 			currMovieData.greenZoneCount++;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
+			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
+				return;
 			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 		}
 	}

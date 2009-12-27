@@ -129,6 +129,9 @@ void UpdateTasEdit()
 		turbo = false;
 	}
 
+	if (turbo && (currFrameCounter &0xf))
+		return;
+
 	//update the number of items
 	int currLVItemCount = ListView_GetItemCount(hwndList);
 	if(currMovieData.getNumRecords() != currLVItemCount)
@@ -248,10 +251,20 @@ bool JumpToFrame(int index)
 {
 	if (index<0) return false; 
 
-	/* Work only within the greenzone. */
+	/* Handle jumps outside greenzone. */
 	if (index>currMovieData.greenZoneCount)
 	{
-		return JumpToFrame(currMovieData.greenZoneCount);
+		if (JumpToFrame(currMovieData.greenZoneCount))
+		{
+			if (FCEUI_EmulationPaused())
+				FCEUI_ToggleEmulationPause();
+
+			turbo=currMovieData.greenZoneCount+60<index; // turbo unless close
+			pauseframe=index+1;
+
+			return true;
+		}
+		return false;
 	}
 
 	if (index<currMovieData.records.size() && 
@@ -267,7 +280,7 @@ bool JumpToFrame(int index)
 		if (FCEUI_EmulationPaused())
 			FCEUI_ToggleEmulationPause();
 
-		int i = index-1;
+		int i = index>0? index-1:0;
 		if (i>=currMovieData.records.size())
 			i=currMovieData.records.size()-1;
 
@@ -286,6 +299,7 @@ bool JumpToFrame(int index)
 
 		poweron(true);
 		currFrameCounter=0;
+		MovieData::dumpSavestateTo(&currMovieData.records[0].savestate,0);
 		turbo = index>60;
 		pauseframe=index+1;
 	}
@@ -313,11 +327,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	//if the icon or frame columns were double clicked:
 	if(info->iSubItem == 0 || info->iSubItem == 1)
 	{
-		//if the row is in the green zone, then move to it
-		if(index < currMovieData.greenZoneCount)
-		{
-			JumpToFrame(index);
-		}
+		JumpToFrame(index);
 	}
 	else //if an input column was clicked:
 	{
