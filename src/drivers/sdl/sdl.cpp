@@ -54,6 +54,8 @@ extern double g_fpsScale;
 
 extern bool MaxSpeed;
 
+bool turbo = false;
+
 int CloseGame(void);
 
 static int inited=0;
@@ -103,6 +105,7 @@ char *DriverUsage="\
 --fcmconvert    f      Converts fcm movie file f to fm2.\n\
 --ripsubs       f      Converts movie's subtitles to srt\n\
 --subtitles    {0,1}   Enables subtitle display\n\
+--fourscore    {0,1}   Enables fourscore emulation\n\
 --no-config    {0,1}   Don't change the config file";
 
 /* Moved network options out while netplay is broken.
@@ -275,6 +278,12 @@ DriverInitialize(FCEUGI *gi)
 
     if(InitJoysticks())
         inited|=2;
+
+	int fourscore=0;
+	g_config->getOption("SDL.FourScore", &fourscore);
+	eoptions &= ~EO_FOURSCORE;
+	if(fourscore)
+		eoptions |= EO_FOURSCORE;
 
     InitInputInterface();
     return 1;

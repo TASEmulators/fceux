@@ -195,6 +195,8 @@ InitConfig()
     // video playback
     config->addOption("playmov", "SDL.Movie", "");
     config->addOption("subtitles", "SDL.SubtitleDisplay", 1);
+	
+	config->addOption("fourscore", "SDL.FourScore", 0);
     
     #ifdef _S9XLUA_H
     // load lua script
