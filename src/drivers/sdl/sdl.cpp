@@ -761,6 +761,8 @@ SDL_GL_LoadLibrary(0);
 	#endif
         DoFun(frameskip);
         #ifdef _GTK2
+        else
+			SDL_Delay(10);
         while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
         #endif

@@ -173,7 +173,7 @@ WriteSound(int32 *buf,
 		{
             while(s_BufferIn == s_BufferSize) 
 			{
-                SDL_Delay(1);
+                SDL_Delay(0);
             }
 
             s_Buffer[s_BufferWrite] = *buf;
