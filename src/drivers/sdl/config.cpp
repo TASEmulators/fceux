@@ -166,14 +166,14 @@ InitConfig()
     config->addOption("SDL.SpecialFX", 0);
 
     // network play options - netplay is broken
-    /*
-    config->addOption('n', "net", "SDL.NetworkServer", "");
+    config->addOption("server", "SDL.NetworkIsServer", 0);
+    config->addOption('n', "net", "SDL.NetworkIP", "");
     config->addOption('u', "user", "SDL.NetworkUsername", "");
     config->addOption('w', "pass", "SDL.NetworkPassword", "");
     config->addOption('k', "netkey", "SDL.NetworkGameKey", "");
-    config->addOption( 0, "port", "SDL.NetworkPort", 4046);
-    config->addOption('l', "players", "SDL.NetworkNumPlayers", 1);
-    */ 
+    config->addOption("port", "SDL.NetworkPort", 4046);
+    config->addOption("players", "SDL.NetworkPlayers", 1);
+     
     // input configuration options
     config->addOption("input1", "SDL.Input.0", "GamePad.0");
     config->addOption("input2", "SDL.Input.1", "GamePad.1");

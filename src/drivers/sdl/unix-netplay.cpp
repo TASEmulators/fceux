@@ -94,7 +94,7 @@ FCEUD_NetworkConnect(void)
     // get any required configuration variables
     int port, localPlayers;
     std::string server, username, password, key;
-    g_config->getOption("SDL.NetworkServer", &server);
+    g_config->getOption("SDL.NetworkIP", &server);
     g_config->getOption("SDL.NetworkUsername", &username);
     g_config->getOption("SDL.NetworkPassword", &password);
     g_config->getOption("SDL.NetworkGameKey", &key);
