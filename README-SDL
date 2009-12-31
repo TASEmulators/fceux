@@ -1,0 +1,67 @@
+FCEUX SDL 2.1.3 SDL README
+By Lukas Sabota (punkrockguy318)
+
+Table of Contents
+1.  Requirements
+2.  Installation
+3.  Compile-time options
+4.  GUI
+5.  Run-time options
+6.  FAQ
+7.  Contact
+
+1. Requirements
+	* libsdl1.2 - It is strongly recommended that you upgrade to the latest
+		version of sdl (1.2.14).  There are known audio problems with
+		versions <= 1.2.13.
+	* libz - Requred for opening archived ROMs.
+	* scons - Required to build fceux.
+
+2. Installation
+	Fceux is installed with the scons utility.  To compile, run:
+
+	scons
+
+	To compile and install to /usr/bin, run (as root):
+
+	scons install
+
+3. Compile-time options
+	You can enable and disable certain features of fceux at build time. 
+To edit these options, edit the SConstruct file in this source directory.  The
+default options here will be fine for most users, but power users may want to
+tweak these.
+
+4. GUI
+	There are currently two options for a GUI with the SDL build.  
+
+	The first and currently more flexible is gfceux.  Gfceux should be included with this source in a seperate directory.  Check that directory for installation instructions.  Gfceux is a GTK launcher for fceux that allows you to configure controls and tweak options.
+	
+	The other option is the GTK GUI support in fceux.  BE WARNED that this is currently experimental and probably has some bugs right now.  You can enable this by changing the GTK2 value in the SConstruct to 1.
+
+5.  Run-time options
+	TODO
+
+6.  FAQ
+
+	Q.  I'm having issues with my sound!
+	A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
+
+	export SDL_AUDIODRIVER="driver"
+
+	where "driver" is either:
+		"pulse" for pulseaudio
+		"alsa" for ALSA
+		"oss" for OSS
+		"esd" for ESD
+
+	ALSA or pulseaudio is recommended, but if you are having sound issues try a different driver.
+
+	There are sound options that you can tweak at runtime through command line switches:
+
+	-soundq x 		internal sound quality hack value (0 off)
+	-soundrate x    	sound rate (sane values: 28000 48000
+	-soundbuffersize x 	(in ms)  sane values (30, 50, 100, 120)
+	
+7.  Contact
+	If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact me personally, e-mail me at <LTsmooth42 <at> gmail.com>.  You can also check the developers out at #fceu on irc.freenode.net.	
