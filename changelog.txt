@@ -1,3 +1,4 @@
+31-dec-2009 - prg318 - added gtk gui
 08-dec-2009 - Zeromus - Fix Name Table Viewer - Fix for use with New PPU
 08-dec-2009 - - mart0258 - FDS - show name of missing bios file in error message
 07-dec-2009 - qeed - NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix
