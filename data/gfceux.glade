@@ -1041,7 +1041,6 @@ Invalid options may cause GFCE UltraX to behave incorrectly.
             <child>
               <object class="GtkVBox" id="network_vbox">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="border_width">5</property>
                 <property name="spacing">5</property>
                 <child>
@@ -1285,7 +1284,6 @@ Invalid options may cause GFCE UltraX to behave incorrectly.
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label13">
-                <property name="sensitive">False</property>
                 <property name="label" translatable="yes">Network</property>
               </object>
               <packing>

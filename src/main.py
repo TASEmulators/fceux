@@ -382,8 +382,7 @@ class GfceuxApp:
         network + other_options + options.extra_entry + ' '+ rom_name
         self.msg('Command: ' + command)
 
-        # more code to disable because netplay is fucked
-        """
+        
     if options.host_radio:
       xterm_binary = find_binary("xterm")
       if xterm_binary == None:
@@ -398,7 +397,7 @@ class GfceuxApp:
         args.append("--password")
         args.append(options.host_pass)
       pid = Popen(args).pid
-        """  
+          
         widgets.get_object("main_window").hide()
     
         # os.system() is a blocker, so we must force
@@ -409,11 +408,11 @@ class GfceuxApp:
         os.system(command)
         widgets.get_object("main_window").show()
     
-        # another part of netplay code
-        """
+        
+        
         if options.host_radio:
-        os.kill(pid, 9)
-        """
+          os.kill(pid, 9)
+        
         
     ### Callbacks
     def launch_button_clicked(self, arg1):
@@ -621,18 +620,16 @@ class GfceuxApp:
         options.no_network_radio = False
     
     def host_radio_clicked(self, menuitem, data=None):
-        """
-        this is broken in fceux right now
         if widgets.get_object("host_radio").get_active():
-            self.server_binary = find_binary('fceu-server')
+            self.server_binary = find_binary('fceux-server')
       
         if self.server_binary == None:
             if os.name == 'nt':
-                self.print_error("The fceu server software cannot be found. \n\
+                self.print_error("The fceux server software cannot be found. \n\
                     Ensure that it is installed in the same directory as \n\
                     GFCE Ultra.", 102, True, False)
         else:
-            self.print_error("The fceu server software cannot be found on \n\
+            self.print_error("The fceux server software cannot be found on \n\
                 this system.  Ensure that it is installed and in your path.",
                 101, True, False)
             widgets.get_object("no_network_radio").set_active(True)
@@ -644,8 +641,6 @@ class GfceuxApp:
         options.join_radio = False
         options.host_radio = True
         options.no_network_radio = False
-        """
-        pass
 
     def no_network_radio_clicked(self, menuitem, data=None):
         widgets.get_object("join_frame").set_sensitive(False)
