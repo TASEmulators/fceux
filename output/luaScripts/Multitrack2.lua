@@ -4,6 +4,9 @@ local players= 2             -- You may tweak the number of players here.
 local PlayerSwitch= "S"    -- For selecting other players
 local opt= "space"         -- For changing control options
 
+local Insert= "insert"
+local Delete= "delete"
+
 local solid= "pageup"      -- Make the display less
 local clear= "pagedown"    -- or more transparant.
 
@@ -31,6 +34,8 @@ local BufInput, BufLen= {},{}
 local InputList= {}
 local ThisInput= {}
 local TrueSwitch, FalseSwitch= {}, {}
+local ReadList= {}
+local ScriptEdit= {}
 for pl= 1, players do
     InputList[pl]= {}
     ThisInput[pl]= {}
@@ -39,9 +44,13 @@ for pl= 1, players do
 
     TrueSwitch[pl]= {}
     FalseSwitch[pl]= {}
+    ReadList[pl]= {}
+    ScriptEdit[pl]= {}
     for i= 1, 8 do
         TrueSwitch[pl][i]= "inv"
         FalseSwitch[pl][i]= nil
+        ReadList[pl][i]= true
+        ScriptEdit[pl][i]= false
     end
 end
 
@@ -209,6 +218,12 @@ function limits( value , low , high )
     return math.max(math.min(value,high),low)
 end
 
+--*****************************************************************************
+function within( value , low , high )
+--*****************************************************************************
+    return ( value >= low ) and ( value <= high )
+end
+
 
 local keys, lastkeys= {}, {}
 --*****************************************************************************
@@ -345,6 +360,7 @@ local white= "#FFFFFFFF"
 local red=   "#FF2000FF"
 local green= 0x00FF00FF
 local blue=  0x0040FFFF
+local yellow="#FFC000FF"
 
 --Are we showing all players or just one?
     local HighlightButton= ShowOnePlayer
@@ -394,7 +410,11 @@ local blue=  0x0040FFFF
                 if not scanz then
                     color= white
                 elseif ReadJoynum(scanz,button) then
-                    color= green
+                    if (i > 0) and not (ReadList[pl][button]) then
+                        color= yellow
+                    else
+                        color= green
+                    end
                 else
                     color= red
                 end
@@ -425,7 +445,7 @@ function SetInput()
         end
 
         for i= 1, 8 do
-            if temp and ReadJoynum(temp,i) then
+            if temp and ReadJoynum(temp,i) and ReadList[pl][i] then
                 ThisInput[pl][btn[i]]= TrueSwitch[pl][i]
             else
                 ThisInput[pl][btn[i]]= FalseSwitch[pl][button]
@@ -447,7 +467,78 @@ end
 --*****************************************************************************
 function HandleOptions()
 --*****************************************************************************
+    Draw.B(    32,2,"red")
+    Draw.right(37,2,"white")
+    Draw.B(    42,2,"green")
 
+    Draw.B(    52,2,"green")
+    Draw.right(57,2,"white")
+    Draw.B(    62,2,"red")
+
+    Draw.right(72,2,"green")
+    Draw.right(72,6,"green")
+    Draw.left( 76,2,"green")
+    Draw.left( 76,6,"red")
+    Draw.down( 80,2,"red")
+    Draw.down( 80,6,"green")
+
+    for i= 1, 8 do
+        gui.text( 1, 12*i, btn[i])
+
+        if FalseSwitch[plmin][i] == nil then
+            gui.text(31, 12*i, "Yes")
+        else
+            gui.text(31, 12*i, "No")
+        end
+        if TrueSwitch[plmin][i] == "inv" then
+            gui.text(51, 12*i, "Yes")
+        else
+            gui.text(51, 12*i, "No")
+        end
+
+        if ReadList[plmin][i] then
+            gui.text(71, 12*i, "Yes")
+        else
+            gui.text(71, 12*i, "No")
+        end
+        if ScriptEdit[plmin][i] then
+            gui.text(91, 12*i, "Yes")
+        else
+            gui.text(91, 12*i, "No")
+        end
+    end
+
+    if press("leftclick") then
+        local BtnX= math.floor((keys.xmouse- 8)/20)
+        local BtnY= math.floor((keys.ymouse- 4)/12)
+        if within( BtnY , 1 , 8 ) then
+            if     BtnX == 1 then
+                if FalseSwitch[plmin][BtnY] == nil then
+                    FalseSwitch[plmin][BtnY]= false
+                else
+                    FalseSwitch[plmin][BtnY]= nil
+                end
+            elseif BtnX == 2 then
+                if TrueSwitch[plmin][BtnY] == "inv" then
+                    TrueSwitch[plmin][BtnY]= true
+                else
+                    TrueSwitch[plmin][BtnY]= "inv"
+                end
+            elseif BtnX == 3 then
+                if ReadList[plmin][BtnY] then
+                    ReadList[plmin][BtnY]= false
+                else
+                    ReadList[plmin][BtnY]= true
+                end
+            elseif BtnX == 4 then
+                if ScriptEdit[plmin][BtnY] then
+                    ScriptEdit[plmin][BtnY]= false
+                else
+                    ScriptEdit[plmin][BtnY]= true
+                end
+            end
+        end
+    end
 end
 
 --*****************************************************************************
@@ -480,6 +571,7 @@ function ItIsYourTurn()
 
     if fc ~= fc_ then -- Sanity versus unusual jump (Reset cycle?)
         OnLoad()
+        fc= fc_
     end
 
     if press(PlayerSwitch) then
@@ -494,14 +586,41 @@ function ItIsYourTurn()
     end
 
     if plmin == plmax then
-        gui.text(20,1,plmin)
+        gui.text(1,2,plmin)
     else
-        gui.text(20,1,"A")
+        gui.text(1,2,"A")
     end
 
     if keys[opt] then
+        gui.opacity(1)
         HandleOptions()
+
     else
+        if pressrepeater(Insert) then
+            for pl= plmin, plmax do
+                table.insert(InputList[pl],fc,0)
+            end
+            SetInput()
+        end
+        if pressrepeater(Delete) then
+            for pl= plmin, plmax do
+                table.remove(InputList[pl],fc)
+            end
+            SetInput()
+        end
+
+        for pl= plmin, plmax do
+            for i= 1, 8 do
+                if press(key[i]) and ScriptEdit[pl][i] then
+                    if ThisInput[pl][btn[i]] then
+                        ThisInput[pl][btn[i]]= FalseSwitch[pl][i]
+                    else
+                        ThisInput[pl][btn[i]]= TrueSwitch[pl][i]
+                    end
+                end
+            end
+        end
+
         DisplayInput()
     end
 
