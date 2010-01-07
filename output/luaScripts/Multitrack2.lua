@@ -1,4 +1,7 @@
-local players= 2             -- You may tweak the number of players here.
+-- Multitrack v2 for FCEUX by FatRatKnight
+
+
+local players= 2           -- You may tweak the number of players here.
 
 
 local PlayerSwitch= "S"    -- For selecting other players
@@ -24,6 +27,13 @@ local ResetFP=  "numpad5"
 local key = {"right", "left", "down", "up",   "L",      "O",   "J", "K"}
 local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
 
+
+local shade= 0x00000080
+local white= "#FFFFFFFF"
+local red=   "#FF2000FF"
+local green= 0x00FF00FF
+local blue=  0x0040FFFF
+local orange="#FFC000FF"
 
 
 
@@ -172,7 +182,6 @@ Draw[5],Draw[6],Draw[7],Draw[8],Draw[9]=Draw.D5,Draw.D6,Draw.D7,Draw.D8,Draw.D9
 --*****************************************************************************
 function DrawNum(right, top, Number, color, bkgnd)
 --*****************************************************************************
---FatRatKnight
 -- Paints the input number as right-aligned.
 -- Returns the x position where it would paint another digit.
 -- It only works with integers. Rounds fractions toward zero.
@@ -213,29 +222,45 @@ end
 
 
 --*****************************************************************************
-function limits( value , low , high )
+function limits( value , low , high )  -- Expects numbers
 --*****************************************************************************
+-- Returns value, low, or high. high is returned if value exceeds high,
+-- and low is returned if value is beneath low.
+
     return math.max(math.min(value,high),low)
 end
 
 --*****************************************************************************
-function within( value , low , high )
+function within( value , low , high )  -- Expects numbers
 --*****************************************************************************
+-- Returns true if value is between low and high. False otherwise.
+
     return ( value >= low ) and ( value <= high )
 end
 
 
 local keys, lastkeys= {}, {}
 --*****************************************************************************
-function press(button)
+function press(button)  -- Expects a key
 --*****************************************************************************
+-- Returns true or false.
+-- Generally, if keys is pressed, the next loop around will set lastkeys,
+-- and thus prevent returning true more than once if held.
+
     return (keys[button] and not lastkeys[button])
 end
 
 local repeater= 0
 --*****************************************************************************
-function pressrepeater(button)
+function pressrepeater(button)  -- Expects a key
 --*****************************************************************************
+--DarkKobold & FatRatKnight
+-- Returns true or false.
+-- Acts much like press if you don't hold the key down. Once held long enough,
+-- it will repeatedly return true.
+-- Try not to call this function more than once per main loop, since I've only
+-- set one repeater variable. Inside a for loop is real bad.
+
     if keys[button] then
        if not lastkeys[button] or repeater >= 3 then
            return true
@@ -250,8 +275,11 @@ function pressrepeater(button)
 end
 
 --*****************************************************************************
-function JoyToNum(Joys)
+function JoyToNum(Joys)  -- Expects a table containing joypad buttons
 --*****************************************************************************
+-- Returns a number from 0 to 255, representing button presses.
+-- These numbers are the primary storage for this version of this script.
+
     local joynum= 0
 
     for i= 1, 8 do
@@ -263,28 +291,22 @@ function JoyToNum(Joys)
     return joynum
 end
 
-local MsgTmr, Message= 0, "Activated multitrack script. Have fun!"
 --*****************************************************************************
-function NewMsg(text)
+function ReadJoynum(input, button)  -- Expects... Certain numbers!
 --*****************************************************************************
-    MsgTmr= 0
-    Message= text
-end
-
-local MsgDuration= 60
---*****************************************************************************
-function DispMsg()
---*****************************************************************************
-    if MsgTmr < MsgDuration then
-        MsgTmr= MsgTmr + 1
-        gui.text(0,20,Message)
-    end
+-- Returns true or false. True if the indicated button is pressed
+-- according to the input. False otherwise.
+-- Helper function
+    return ( bit.band(input , bit.rshift( 0x100,button )) ~= 0 )
 end
 
 
 --*****************************************************************************
 function ShowOnePlayer(x,y,color,button,pl)
 --*****************************************************************************
+-- Displays an individual button.
+-- Helper function for DisplayInput.
+
     x= x + 4*button - 3
     Draw[btn[button]](x,y,color)
 end
@@ -292,6 +314,9 @@ end
 --*****************************************************************************
 function ShowManyPlayers(x,y,color,button,pl)
 --*****************************************************************************
+-- Displays an individual button. Uses 2x3 boxes instead of button graphics.
+-- Helper function for DisplayInput.
+
     x= x + (2*players + 1)*(button - 1) + 2*pl - 1
     gui.box(x,y,x+1,y+2,0,color)
 end
@@ -301,8 +326,11 @@ local DispX, DispY= 190, 70
 local Past, Future= -12, 20
 local Opaque= 1
 --*****************************************************************************
-function DisplayOptions(width)
+function DisplayOptions(width)  -- Expects width calculated by DisplayInput
 --*****************************************************************************
+-- Returns true if Opaque is 0, as a signal to don't bother painting.
+-- Separated from DisplayInput to make it clear which half is doing what.
+
 
 -- Change opacity?
     if pressrepeater(solid) then Opaque= Opaque + 1/8 end
@@ -355,12 +383,7 @@ end
 --*****************************************************************************
 function DisplayInput()
 --*****************************************************************************
-local shade= 0x00000080
-local white= "#FFFFFFFF"
-local red=   "#FF2000FF"
-local green= 0x00FF00FF
-local blue=  0x0040FFFF
-local yellow="#FFC000FF"
+-- Paints on the screen the current input stored within the script's list.
 
 --Are we showing all players or just one?
     local HighlightButton= ShowOnePlayer
@@ -411,7 +434,7 @@ local yellow="#FFC000FF"
                     color= white
                 elseif ReadJoynum(scanz,button) then
                     if (i > 0) and not (ReadList[pl][button]) then
-                        color= yellow
+                        color= orange
                     else
                         color= green
                     end
@@ -423,13 +446,6 @@ local yellow="#FFC000FF"
             end
         end
     end
-end
-
-
---*****************************************************************************
-function ReadJoynum(input, button)
---*****************************************************************************
-    return ( bit.band(input , bit.rshift( 0x100,button )) ~= 0 )
 end
 
 
@@ -448,7 +464,7 @@ function SetInput()
             if temp and ReadJoynum(temp,i) and ReadList[pl][i] then
                 ThisInput[pl][btn[i]]= TrueSwitch[pl][i]
             else
-                ThisInput[pl][btn[i]]= FalseSwitch[pl][button]
+                ThisInput[pl][btn[i]]= FalseSwitch[pl][i]
             end
         end
     end
@@ -464,86 +480,119 @@ function ApplyInput()
     end
 end
 
+local XStart, XDiff= 30, 25
+local YStart, YDiff= 12, 15
+local Status= { {},{},{},{} }
+local TargA= {FalseSwitch,TrueSwitch,ReadList,ScriptEdit}
+local TrueA= {   nil     ,   "inv"  ,  true  ,  true    }
+local FalsA= {   false   ,   true   ,  false ,  false   }
+
+local BasicText= {"Activate: Lets the joypad activate input.",
+                  "Remove: Allows the joypad to remove input.",
+                  "List: Should the script remember button presses?",
+                  "Keys: Allow the script-specific keys to work?"}
+
 --*****************************************************************************
 function HandleOptions()
 --*****************************************************************************
-    Draw.B(    32,2,"red")
-    Draw.right(37,2,"white")
-    Draw.B(    42,2,"green")
+-- Lets the user make adjustments on the various controls of this script.
+-- The interface here still needs some work. Bleh.
 
-    Draw.B(    52,2,"green")
-    Draw.right(57,2,"white")
-    Draw.B(    62,2,"red")
+    Draw.B(    XStart + XDiff     ,YStart,red)
+    Draw.right(XStart + XDiff  + 5,YStart,white)
+    Draw.B(    XStart + XDiff  +10,YStart,green)
 
-    Draw.right(72,2,"green")
-    Draw.right(72,6,"green")
-    Draw.left( 76,2,"green")
-    Draw.left( 76,6,"red")
-    Draw.down( 80,2,"red")
-    Draw.down( 80,6,"green")
+    Draw.B(    XStart + XDiff*2   ,YStart,green)
+    Draw.right(XStart + XDiff*2+ 5,YStart,white)
+    Draw.B(    XStart + XDiff*2+10,YStart,red)
 
-    for i= 1, 8 do
-        gui.text( 1, 12*i, btn[i])
+    Draw.right(XStart + XDiff*3   ,YStart  ,green)
+    Draw.right(XStart + XDiff*3   ,YStart+4,green)
+    Draw.left( XStart + XDiff*3+ 4,YStart  ,green)
+    Draw.left( XStart + XDiff*3+ 4,YStart+4,red)
+    Draw.down( XStart + XDiff*3+ 8,YStart  ,red)
+    Draw.down( XStart + XDiff*3+ 8,YStart+4,green)
 
-        if FalseSwitch[plmin][i] == nil then
-            gui.text(31, 12*i, "Yes")
-        else
-            gui.text(31, 12*i, "No")
+    local BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
+    local BtnY= math.floor((keys.ymouse- YStart-6)/YDiff)
+
+    for i= 1, 4 do
+        for j= 1, 8 do
+            Status[i][j]= TargA[i][plmin][j]
+            local pl= plmin+1
+            while (pl <= plmax) do
+                if Status[i][j] ~= TargA[i][pl][j] then
+                    Status[i][j]= "???"
+                    break
+                end
+                pl= pl+1
+            end
+            if     Status[i][j] == TrueA[i] then  Status[i][j]= "Yes"
+            elseif Status[i][j] == FalsA[i] then  Status[i][j]= "No" end
         end
-        if TrueSwitch[plmin][i] == "inv" then
-            gui.text(51, 12*i, "Yes")
-        else
-            gui.text(51, 12*i, "No")
-        end
+    end
 
-        if ReadList[plmin][i] then
-            gui.text(71, 12*i, "Yes")
-        else
-            gui.text(71, 12*i, "No")
+    if within( BtnY , 1 , 9 ) then
+        if within( BtnX , 1 , 4 ) then
+            local LowX=BtnX*XDiff +XStart -4
+            local LowY=BtnY*YDiff +YStart -3
+            gui.box(LowX,LowY,LowX+XDiff-2,LowY+YDiff-2,blue,blue)
+            gui.text(1,170,BasicText[BtnX])
         end
-        if ScriptEdit[plmin][i] then
-            gui.text(91, 12*i, "Yes")
-        else
-            gui.text(91, 12*i, "No")
+    end
+
+    for i= 1, 5 do
+        local Xpos= XStart + XDiff*i -5
+        gui.line(Xpos,0,Xpos,YStart + YDiff*10,green)
+    end
+
+    for j= 1, 8 do
+        local Ypos= YStart + YDiff*j
+        gui.line( 0, Ypos-4, XStart + XDiff*5, Ypos-4, green)
+        gui.text( 1, Ypos, btn[j])
+        Draw[btn[j]](XStart + XDiff - 12, Ypos, green)
+
+        for i= 1, 4 do
+            gui.text(XStart + XDiff*i, Ypos, Status[i][j])
         end
+    end
+
+    for i= 1, 4 do
+        gui.text(XStart + XDiff*i, YStart + YDiff*9, "All")
     end
 
     if press("leftclick") then
-        local BtnX= math.floor((keys.xmouse- 8)/20)
-        local BtnY= math.floor((keys.ymouse- 4)/12)
-        if within( BtnY , 1 , 8 ) then
-            if     BtnX == 1 then
-                if FalseSwitch[plmin][BtnY] == nil then
-                    FalseSwitch[plmin][BtnY]= false
-                else
-                    FalseSwitch[plmin][BtnY]= nil
+        if within( BtnY , 1 , 9 ) then
+            if within( BtnX , 1 , 4 ) then
+                local LoopS, LoopF= 1, 8
+                if within( BtnY , 1 , 8 ) then
+                    LoopS, LoopF= BtnY, BtnY
                 end
-            elseif BtnX == 2 then
-                if TrueSwitch[plmin][BtnY] == "inv" then
-                    TrueSwitch[plmin][BtnY]= true
-                else
-                    TrueSwitch[plmin][BtnY]= "inv"
+
+                local Target, TstT, TstF= TargA[BtnX], TrueA[BtnX], FalsA[BtnX]
+
+                for pl= plmin, plmax do
+                    for Loop= LoopS, LoopF do
+                        if Target[plmax][LoopF] == TstT then
+                            Target[pl][Loop]= TstF
+                        else
+                            Target[pl][Loop]= TstT
+                        end
+                    end
                 end
-            elseif BtnX == 3 then
-                if ReadList[plmin][BtnY] then
-                    ReadList[plmin][BtnY]= false
-                else
-                    ReadList[plmin][BtnY]= true
-                end
-            elseif BtnX == 4 then
-                if ScriptEdit[plmin][BtnY] then
-                    ScriptEdit[plmin][BtnY]= false
-                else
-                    ScriptEdit[plmin][BtnY]= true
-                end
+
             end
         end
     end
+
 end
 
 --*****************************************************************************
 function CatchInput()
 --*****************************************************************************
+-- For use with registerbefore. It will get the input and paste it into
+-- the input list, no questions asked.
+
     fc= movie.framecount()
     for pl= 1, players do
         InputList[pl][fc-1]= JoyToNum(joypad.get(pl))
@@ -556,6 +605,9 @@ emu.registerbefore(CatchInput)
 --*****************************************************************************
 function OnLoad()
 --*****************************************************************************
+-- For use with registerload. It updates ThisInput so we're not stuck with
+-- junk being carried over when we load something.
+
     fc= movie.framecount()
     SetInput()
     ApplyInput() -- Sanity versus unpaused stateload
@@ -566,12 +618,14 @@ savestate.registerload(OnLoad)
 --*****************************************************************************
 function ItIsYourTurn()
 --*****************************************************************************
+-- For use with gui.register. I need to catch input while paused!
+-- Needed for a half-decent interface.
+
     local fc_= movie.framecount()
     keys= input.get()
 
     if fc ~= fc_ then -- Sanity versus unusual jump (Reset cycle?)
         OnLoad()
-        fc= fc_
     end
 
     if press(PlayerSwitch) then
@@ -594,7 +648,7 @@ function ItIsYourTurn()
     if keys[opt] then
         gui.opacity(1)
         HandleOptions()
-
+        SetInput()
     else
         if pressrepeater(Insert) then
             for pl= plmin, plmax do
@@ -627,13 +681,56 @@ function ItIsYourTurn()
     ApplyInput()
 
     lastkeys= keys
-    gui.pixel(0,0,"clear")
 end
 gui.register(ItIsYourTurn)
 
 
 emu.pause()
 
-while true do
+--*****************************************************************************
+while true do  -- Main loop
+--*****************************************************************************
+-- Currently does nothing. Everything that needs to be done are in registers.
+-- I could just remove this, if I can't make reason to keep it.
     emu.frameadvance()
 end
+
+
+
+--Someday, I'll implement these texts!
+
+
+
+--With both joypad options on, you have full control.
+--Held buttons will toggle the script's stored input.
+
+--With this on-off set-up, auto-hold will not
+--accidentally cancel input, such as from load state.
+
+--With this off-on set, you can use auto-hold to
+--elegantly strip off unwanted input.
+
+--With both joypad options off, you ensure you can't
+--accidentally change what's stored in the script.
+
+
+--List on: Script will apply input stored within.
+--This is the whole point of the script, ya know.
+
+--List off: Stored input is ignored. A good idea if
+--you don't want the script interfering.
+
+
+--Keys on: Script keys will toggle the button press
+--for the current frame. Meant for precise edits.
+
+--Keys off: Script-specific keys are no longer a
+--factor. Long-term control is meant for joypad!
+
+
+--Apparently, you've selected "All players" and
+--they have different options set.
+
+
+--This is the 'All' button. Selecting this will set
+--all 'Yes' or all 'No' for this particular option.
