@@ -13,7 +13,7 @@ import os
 import dircache
 import sys
 
-prefix = "/usr/"
+prefix = "/usr/local"
 try:
     if sys.argv[1]:
         prefix = sys.argv[1]

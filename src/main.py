@@ -365,13 +365,12 @@ class GfceuxApp:
             network = ''
    
         if options.host_radio:
-            """
             if options.host_pass == '':
                 netpass = ' '
             else:
                 netpass = ' --pass ' + '"' + options.host_pass + '" '
             network = '--net localhost --port '+\
-                str(options.host_port) + netpass + ' '"""
+                str(options.host_port) + netpass + ' '
             network = ''
       
         if local:
@@ -383,27 +382,27 @@ class GfceuxApp:
         self.msg('Command: ' + command)
 
         
-    if options.host_radio:
-      xterm_binary = find_binary("xterm")
-      if xterm_binary == None:
-        gfceu_error("Cannot find xterm on this system.  You will not \n\
-        be informed of server output.", 102, True, False)
-        args = [self.server_binary]
-      else:
-        args = [xterm_binary, "-e", self.server_binary]
-      args.append('--port')
-      args.append(str(options.host_port))
-      if options.host_pass:
-        args.append("--password")
-        args.append(options.host_pass)
-      pid = Popen(args).pid
-          
+        if options.host_radio:
+          xterm_binary = find_binary("xterm")
+          if xterm_binary == None:
+            gfceu_error("Cannot find xterm on this system.  You will not \n\
+            be informed of server output.", 102, True, False)
+            args = [self.server_binary]
+          else:
+            args = [xterm_binary, "-e", self.server_binary]
+          args.append('--port')
+          args.append(str(options.host_port))
+          if options.host_pass:
+            args.append("--password")
+            args.append(options.host_pass)
+          pid = Popen(args).pid
+           
         widgets.get_object("main_window").hide()
     
         # os.system() is a blocker, so we must force
         # gtk to process our events.
         while gtk.events_pending():
-            gtk.main_iteration_do()
+          gtk.main_iteration_do()
     
         os.system(command)
         widgets.get_object("main_window").show()
@@ -621,9 +620,9 @@ class GfceuxApp:
     
     def host_radio_clicked(self, menuitem, data=None):
         if widgets.get_object("host_radio").get_active():
-            self.server_binary = find_binary('fceux-server')
+            options.server_binary = find_binary('fceux-server')
       
-        if self.server_binary == None:
+        if options.server_binary == None:
             if os.name == 'nt':
                 self.print_error("The fceux server software cannot be found. \n\
                     Ensure that it is installed in the same directory as \n\
