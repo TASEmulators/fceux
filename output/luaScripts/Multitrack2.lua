@@ -1,15 +1,35 @@
 -- Multitrack v2 for FCEUX by FatRatKnight
 
 
+--***************
 local players= 2           -- You may tweak the number of players here.
+--***************
 
 
-local PlayerSwitch= "S"    -- For selecting other players
-local opt= "space"         -- For changing control options
+-- Rewind options
+local saveMax= 50          -- How many save states to keep?
+local SaveBuf= 12          -- How many frames between saves? Don't use 0, ever.
+local rewind= "R"          -- What key do you wish to hit for rewind?
 
-local Insert= "insert"
-local Delete= "delete"
 
+--Control
+local PlayerSwitch= "home" -- For selecting other players
+local opt= "end"           -- For changing control options
+
+local key = {"right", "left", "down", "up",   "L",      "O",   "J", "K"}
+local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
+
+--Try to avoid changing btn. You may reorder btn's stuff if you don't
+--like the default order, however. Line up with key for good reasons.
+--key is the actual script control over the buttons. Change that!
+
+
+--Insertions and deletions
+local Insert= "insert"     -- Inserts a frame at the frame you're at
+local Delete= "delete"     -- Eliminates current frame
+
+
+--Display
 local solid= "pageup"      -- Make the display less
 local clear= "pagedown"    -- or more transparant.
 
@@ -24,8 +44,7 @@ local MorePast= "numpad7"  -- how many frames you
 local LessPast= "numpad9"  -- want to display.
 local ResetFP=  "numpad5"
 
-local key = {"right", "left", "down", "up",   "L",      "O",   "J", "K"}
-local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
+
 
 
 local shade= 0x00000080
@@ -34,13 +53,16 @@ local red=   "#FF2000FF"
 local green= 0x00FF00FF
 local blue=  0x0040FFFF
 local orange="#FFC000FF"
-
-
+--*****************************************************************************
+--Please do not change the following, unless you plan to change the code:
 
 local plmin , plmax= 1 , 1
 local fc= 0
+local LastLoad= movie.framecount()
+local saveCount= 0
+local saveArray= {}
+local rewinding= false
 
-local BufInput, BufLen= {},{}
 local InputList= {}
 local ThisInput= {}
 local TrueSwitch, FalseSwitch= {}, {}
@@ -49,8 +71,6 @@ local ScriptEdit= {}
 for pl= 1, players do
     InputList[pl]= {}
     ThisInput[pl]= {}
-    BufInput[pl]= {}
-    BufLen[pl]= 0
 
     TrueSwitch[pl]= {}
     FalseSwitch[pl]= {}
@@ -63,6 +83,8 @@ for pl= 1, players do
         ScriptEdit[pl][i]= false
     end
 end
+
+
 
 
 --*****************************************************************************
@@ -302,6 +324,21 @@ end
 
 
 --*****************************************************************************
+function RewindThis()
+--*****************************************************************************
+--DarkKobold & FatRatKnight; Original concept by Antony Lavelle
+
+    if saveCount <= 0 then
+        return false    -- Failed to rewind
+    else
+        savestate.load(saveArray[saveCount]);
+        saveCount = saveCount-1;
+    end;
+    return true         -- Yay, rewind!
+end
+
+
+--*****************************************************************************
 function ShowOnePlayer(x,y,color,button,pl)
 --*****************************************************************************
 -- Displays an individual button.
@@ -380,6 +417,7 @@ function DisplayOptions(width)  -- Expects width calculated by DisplayInput
     return nil -- Signal to display the input
 end
 
+
 --*****************************************************************************
 function DisplayInput()
 --*****************************************************************************
@@ -452,13 +490,10 @@ end
 --*****************************************************************************
 function SetInput()
 --*****************************************************************************
+-- Prepares ThisInput for joypad use.
+
     for pl= 1, players do
-        local temp
-        if BufLen[pl] > 0 then
-            temp= BufInput[pl][BufLen[pl]]
-        else
-            temp= InputList[pl][fc-BufLen[pl]]
-        end
+        local temp= InputList[pl][fc]
 
         for i= 1, 8 do
             if temp and ReadJoynum(temp,i) and ReadList[pl][i] then
@@ -473,6 +508,8 @@ end
 --*****************************************************************************
 function ApplyInput()
 --*****************************************************************************
+-- Shoves ThisInput into the actual emulator joypads.
+
     if movie.mode() ~= "playback" then
         for pl= 1, players do
             joypad.set(pl, ThisInput[pl])
@@ -480,12 +517,16 @@ function ApplyInput()
     end
 end
 
+
+
+
 local XStart, XDiff= 30, 25
 local YStart, YDiff= 12, 15
 local Status= { {},{},{},{} }
 local TargA= {FalseSwitch,TrueSwitch,ReadList,ScriptEdit}
 local TrueA= {   nil     ,   "inv"  ,  true  ,  true    }
 local FalsA= {   false   ,   true   ,  false ,  false   }
+local BtnX, BtnY= 0, 0
 
 local BasicText= {"Activate: Lets the joypad activate input.",
                   "Remove: Allows the joypad to remove input.",
@@ -496,7 +537,7 @@ local BasicText= {"Activate: Lets the joypad activate input.",
 function HandleOptions()
 --*****************************************************************************
 -- Lets the user make adjustments on the various controls of this script.
--- The interface here still needs some work. Bleh.
+-- The interface, apparently, is most of the work!
 
     Draw.B(    XStart + XDiff     ,YStart,red)
     Draw.right(XStart + XDiff  + 5,YStart,white)
@@ -513,8 +554,27 @@ function HandleOptions()
     Draw.down( XStart + XDiff*3+ 8,YStart  ,red)
     Draw.down( XStart + XDiff*3+ 8,YStart+4,green)
 
-    local BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
-    local BtnY= math.floor((keys.ymouse- YStart-6)/YDiff)
+    if (keys.xmouse ~= lastkeys.xmouse) or (keys.ymouse ~= lastkeys.ymouse) then
+        BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
+        BtnY= math.floor((keys.ymouse- YStart-6)/YDiff)
+    else
+        if press(DispN) then
+            BtnX= limits(BtnX  ,1,4)
+            BtnY= limits(BtnY-1,1,9)
+        end
+        if press(DispS) then
+            BtnX= limits(BtnX  ,1,4)
+            BtnY= limits(BtnY+1,1,9)
+        end
+        if press(DispE) then
+            BtnX= limits(BtnX+1,1,4)
+            BtnY= limits(BtnY  ,1,9)
+        end
+        if press(DispW) then
+            BtnX= limits(BtnX-1,1,4)
+            BtnY= limits(BtnY  ,1,9)
+        end
+    end
 
     for i= 1, 4 do
         for j= 1, 8 do
@@ -561,7 +621,7 @@ function HandleOptions()
         gui.text(XStart + XDiff*i, YStart + YDiff*9, "All")
     end
 
-    if press("leftclick") then
+    if press("leftclick") or press(ResetFP) then
         if within( BtnY , 1 , 9 ) then
             if within( BtnX , 1 , 4 ) then
                 local LoopS, LoopF= 1, 8
@@ -607,8 +667,11 @@ function OnLoad()
 --*****************************************************************************
 -- For use with registerload. It updates ThisInput so we're not stuck with
 -- junk being carried over when we load something.
+-- Also clears whatever rewind stuff is stored.
 
     fc= movie.framecount()
+    LastLoad= fc
+    saveCount= 0
     SetInput()
     ApplyInput() -- Sanity versus unpaused stateload
 end
@@ -626,6 +689,16 @@ function ItIsYourTurn()
 
     if fc ~= fc_ then -- Sanity versus unusual jump (Reset cycle?)
         OnLoad()
+    end
+
+    if pressrepeater(rewind) or rewinding then
+        rewinding= false
+        if RewindThis() then
+            movie.rerecordcounting(true)
+            fc= movie.framecount()
+            SetInput()
+            if saveCount == 0 then  emu.pause()  end
+        end
     end
 
     if press(PlayerSwitch) then
@@ -681,6 +754,8 @@ function ItIsYourTurn()
     ApplyInput()
 
     lastkeys= keys
+
+    collectgarbage("collect")
 end
 gui.register(ItIsYourTurn)
 
@@ -690,8 +765,30 @@ emu.pause()
 --*****************************************************************************
 while true do  -- Main loop
 --*****************************************************************************
--- Currently does nothing. Everything that needs to be done are in registers.
--- I could just remove this, if I can't make reason to keep it.
+-- Contains the saving part of the Rewind engine.
+-- Original by Antony Lavelle, added by DarkKobold, messed by FatRatKnight
+
+ if saveMax > 0 then  -- Don't process if Rewind is disabled
+    if keys[rewind] and saveCount > 0 then
+        rewinding= true
+
+    elseif (fc - LastLoad)%SaveBuf == 0 then
+        if saveCount >= saveMax then
+            table.remove(saveArray,1)
+        else
+            saveCount= saveCount+1
+        end
+
+        if saveArray[saveCount] == nil then
+            saveArray[saveCount]= savestate.create();
+        end
+
+        savestate.save(saveArray[saveCount]);
+
+        movie.rerecordcounting(false)
+    end
+ end
+
     emu.frameadvance()
 end
 
