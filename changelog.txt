@@ -1,3 +1,4 @@
+08-jan-2010 - rheiny - Win32 - Trace Logger - Trace logger now logs the values of the stack pointer register
 31-dec-2009 - prg318 - added gtk gui
 08-dec-2009 - Zeromus - Fix Name Table Viewer - Fix for use with New PPU
 08-dec-2009 - - mart0258 - FDS - show name of missing bios file in error message

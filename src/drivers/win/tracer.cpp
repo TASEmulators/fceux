@@ -313,7 +313,7 @@ done:
 void FCEUD_TraceInstruction(){
 	if(!logging) return;
 
-	char address[7], data[11], disassembly[28], axystate[16], procstatus[12];
+	char address[7], data[11], disassembly[28], axystate[21], procstatus[12];
 	char str[96];
 	int addr=X.PC;
 	int size, j;
@@ -377,7 +377,7 @@ void FCEUD_TraceInstruction(){
 	}
 
 	if(logging_options & LOG_REGISTERS){
-		sprintf(axystate,"A:%02X X:%02X Y:%02X",(X.A),(X.X),(X.Y));
+		sprintf(axystate,"A:%02X X:%02X Y:%02X S:%02X",(X.A),(X.X),(X.Y),(X.S));
 	}
 	
 	if(logging_options & LOG_PROCESSOR_STATUS){
