@@ -21,7 +21,7 @@ local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
 
 --Try to avoid changing btn. You may reorder btn's stuff if you don't
 --like the default order, however. Line up with key for good reasons.
---key is the actual script control over the buttons. Change that!
+--key is the actual keyboard control over the buttons. Change that!
 
 
 --Insertions and deletions
@@ -65,12 +65,16 @@ local rewinding= false
 
 local InputList= {}
 local ThisInput= {}
+local BufInput= {}
+local BufLen= {}
 local TrueSwitch, FalseSwitch= {}, {}
 local ReadList= {}
 local ScriptEdit= {}
 for pl= 1, players do
     InputList[pl]= {}
     ThisInput[pl]= {}
+    BufInput[pl]= {}
+    BufLen[pl]= 0
 
     TrueSwitch[pl]= {}
     FalseSwitch[pl]= {}
@@ -449,8 +453,9 @@ function DisplayInput()
     if Past <= 0 and Future >= 0 then
         local color= blue
         for pl= plmin, plmax do
-            local ThisFrame= JoyToNum(ThisInput[pl])
-            if ThisFrame ~= InputList[pl][fc] then  color= green  end
+            local ThisFrame= InputList[pl][fc-BufLen[pl]]
+            if BufLen[pl] > 0 then  ThisFrame= BufInput[pl][1]  end
+            if ThisFrame ~= JoyToNum(ThisInput[pl]) then  color= green  end
         end
         gui.box(DispX-1,DispY-2,DispX+width+1,DispY+4,0,color)
     end
@@ -462,9 +467,13 @@ function DisplayInput()
         elseif i > 0 then  Y=Y+2 end
         gui.box(DispX,Y-1,DispX+width,Y+3,shade,shade)
         for pl= plmin, plmax do
-            local ThisFrame= JoyToNum(ThisInput[pl])
-            local scanz= InputList[pl][fc+i]
-            if i == 0 then  scanz= ThisFrame  end
+            local scanz
+            if     i  < 0 then scanz= InputList[pl][fc+i]
+            elseif i == 0 then scanz= JoyToNum(ThisInput[pl])
+            elseif i  < BufLen[pl]  then
+                               scanz= BufInput[pl][i+1]
+            else               scanz= InputList[pl][fc+i-BufLen[pl]]
+            end
             for button= 1, 8 do
 
                 local color
@@ -493,7 +502,10 @@ function SetInput()
 -- Prepares ThisInput for joypad use.
 
     for pl= 1, players do
-        local temp= InputList[pl][fc]
+        local temp= InputList[pl][fc-BufLen[pl]]
+        if BufLen[pl] > 0 then
+            temp= BufInput[pl][1]
+        end
 
         for i= 1, 8 do
             if temp and ReadJoynum(temp,i) and ReadList[pl][i] then
@@ -505,6 +517,7 @@ function SetInput()
     end
 end
 
+
 --*****************************************************************************
 function ApplyInput()
 --*****************************************************************************
@@ -514,6 +527,50 @@ function ApplyInput()
         for pl= 1, players do
             joypad.set(pl, ThisInput[pl])
         end
+    end
+end
+
+
+--*****************************************************************************
+function InputSnap()
+--*****************************************************************************
+-- Will shove the input list over.
+-- Might end up freezing for a moment if there's a few thousand frames to shift
+-- Accesses: BufLen, BufInput[], Pin[], players
+
+    for pl= 1, players do
+
+       if BufLen[pl] < 0 then  -- Squish!
+           local pointer= fc
+           while InputList[pl][pointer] do
+               InputList[pl][pointer]= InputList[pl][pointer-BufLen[pl]]
+               pointer= pointer+1
+           end
+       end
+
+
+       if BufLen[pl] > 0 then -- Foom!
+           local pointer= fc
+           while InputList[pl][pointer] do
+               pointer= pointer+1
+           end
+           -- pointer is now looking at a null frame.
+           -- Assume later frames are also null.
+
+           while pointer > fc do
+               pointer= pointer-1
+               InputList[pl][pointer+BufLen[pl]]= InputList[pl][pointer]
+           end
+           -- pointer should now match fc.
+           -- Everything at fc and beyond should be moved over by BufLen.
+
+           for i=0, BufLen[pl]-1 do
+               InputList[pl][fc +i]= table.remove(BufInput[pl],1)
+           end
+       end
+
+       BufLen[pl]= 0 -- If it ain't zero before, we want it zero now!
+
     end
 end
 
@@ -539,6 +596,8 @@ function HandleOptions()
 -- Lets the user make adjustments on the various controls of this script.
 -- The interface, apparently, is most of the work!
 
+
+-- Silly little graphics
     Draw.B(    XStart + XDiff     ,YStart,red)
     Draw.right(XStart + XDiff  + 5,YStart,white)
     Draw.B(    XStart + XDiff  +10,YStart,green)
@@ -554,6 +613,13 @@ function HandleOptions()
     Draw.down( XStart + XDiff*3+ 8,YStart  ,red)
     Draw.down( XStart + XDiff*3+ 8,YStart+4,green)
 
+    gui.box(XStart+XDiff*4   ,YStart  ,XStart + XDiff*4+14,YStart+6,0,green)
+    Draw.select(XStart + XDiff*4+ 2,YStart+2,green)
+    Draw.B(     XStart + XDiff*4+ 6,YStart+2,green)
+    Draw.A(     XStart + XDiff*4+10,YStart+2,green)
+
+
+-- Button selection
     if (keys.xmouse ~= lastkeys.xmouse) or (keys.ymouse ~= lastkeys.ymouse) then
         BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
         BtnY= math.floor((keys.ymouse- YStart-6)/YDiff)
@@ -576,56 +642,13 @@ function HandleOptions()
         end
     end
 
-    for i= 1, 4 do
-        for j= 1, 8 do
-            Status[i][j]= TargA[i][plmin][j]
-            local pl= plmin+1
-            while (pl <= plmax) do
-                if Status[i][j] ~= TargA[i][pl][j] then
-                    Status[i][j]= "???"
-                    break
-                end
-                pl= pl+1
-            end
-            if     Status[i][j] == TrueA[i] then  Status[i][j]= "Yes"
-            elseif Status[i][j] == FalsA[i] then  Status[i][j]= "No" end
-        end
-    end
 
-    if within( BtnY , 1 , 9 ) then
-        if within( BtnX , 1 , 4 ) then
-            local LowX=BtnX*XDiff +XStart -4
-            local LowY=BtnY*YDiff +YStart -3
-            gui.box(LowX,LowY,LowX+XDiff-2,LowY+YDiff-2,blue,blue)
-            gui.text(1,170,BasicText[BtnX])
-        end
-    end
-
-    for i= 1, 5 do
-        local Xpos= XStart + XDiff*i -5
-        gui.line(Xpos,0,Xpos,YStart + YDiff*10,green)
-    end
-
-    for j= 1, 8 do
-        local Ypos= YStart + YDiff*j
-        gui.line( 0, Ypos-4, XStart + XDiff*5, Ypos-4, green)
-        gui.text( 1, Ypos, btn[j])
-        Draw[btn[j]](XStart + XDiff - 12, Ypos, green)
-
-        for i= 1, 4 do
-            gui.text(XStart + XDiff*i, Ypos, Status[i][j])
-        end
-    end
-
-    for i= 1, 4 do
-        gui.text(XStart + XDiff*i, YStart + YDiff*9, "All")
-    end
-
+--Did you punch something?
     if press("leftclick") or press(ResetFP) then
         if within( BtnY , 1 , 9 ) then
             if within( BtnX , 1 , 4 ) then
                 local LoopS, LoopF= 1, 8
-                if within( BtnY , 1 , 8 ) then
+                if BtnY ~= 9 then
                     LoopS, LoopF= BtnY, BtnY
                 end
 
@@ -645,16 +668,78 @@ function HandleOptions()
         end
     end
 
+
+--Figure out the status
+    for i= 1, 4 do
+        for j= 1, 8 do
+            Status[i][j]= TargA[i][plmin][j]
+            local pl= plmin+1
+            while (pl <= plmax) do
+                if Status[i][j] ~= TargA[i][pl][j] then
+                    Status[i][j]= "???"
+                    break
+                end
+                pl= pl+1
+            end
+            if     Status[i][j] == TrueA[i] then  Status[i][j]= "Yes"
+            elseif Status[i][j] == FalsA[i] then  Status[i][j]= "No" end
+        end
+    end
+
+
+--Highlight button
+    if within( BtnY , 1 , 9 ) then
+        if within( BtnX , 1 , 4 ) then
+            local LowX=BtnX*XDiff +XStart -4
+            local LowY=BtnY*YDiff +YStart -3
+            gui.box(LowX,LowY,LowX+XDiff-2,LowY+YDiff-2,blue,blue)
+            gui.text(1,170,BasicText[BtnX])
+        end
+    end
+
+
+--Lines!
+    for i= 1, 5 do
+        local Xpos= XStart + XDiff*i -5
+        gui.line(Xpos,0,Xpos,YStart + YDiff*10-4,green)
+    end
+
+    for j= 1, 9 do
+        local Ypos= YStart + YDiff*j -4
+        gui.line( 0, Ypos, XStart + XDiff*5-5, Ypos, green)
+    end
+    gui.line(XStart+XDiff-4, YStart + YDiff*10-4, XStart + XDiff*5-5, YStart + YDiff*10-4, green)
+
+
+--Button labels!
+    for j= 1, 8 do
+        local Ypos= YStart + YDiff*j
+        gui.text( 1, Ypos, btn[j])
+        Draw[btn[j]](XStart + XDiff - 12, Ypos, green)
+
+        for i= 1, 4 do
+            gui.text(XStart + XDiff*i, Ypos, Status[i][j])
+        end
+    end
+
+    for i= 1, 4 do
+        gui.text(XStart + XDiff*i, YStart + YDiff*9, "All")
+    end
+
 end
 
 --*****************************************************************************
 function CatchInput()
 --*****************************************************************************
 -- For use with registerbefore. It will get the input and paste it into
--- the input list, no questions asked.
+-- the input list.
 
     fc= movie.framecount()
     for pl= 1, players do
+        if BufLen[pl] > 0 then
+            table.remove(BufInput[pl],1)
+            table.insert(BufInput[pl],InputList[pl][fc-1])
+        end
         InputList[pl][fc-1]= JoyToNum(joypad.get(pl))
     end
     SetInput()
@@ -668,6 +753,8 @@ function OnLoad()
 -- For use with registerload. It updates ThisInput so we're not stuck with
 -- junk being carried over when we load something.
 -- Also clears whatever rewind stuff is stored.
+
+    InputSnap()
 
     fc= movie.framecount()
     LastLoad= fc
@@ -714,6 +801,7 @@ function ItIsYourTurn()
 
     if plmin == plmax then
         gui.text(1,2,plmin)
+        gui.text(11,2,BufLen[plmin])
     else
         gui.text(1,2,"A")
     end
@@ -725,13 +813,19 @@ function ItIsYourTurn()
     else
         if pressrepeater(Insert) then
             for pl= plmin, plmax do
-                table.insert(InputList[pl],fc,0)
+                BufLen[pl]= BufLen[pl] + 1
+                if BufLen[pl] > 0 then
+                    table.insert(BufInput[pl],1,0)
+                end
             end
             SetInput()
         end
         if pressrepeater(Delete) then
             for pl= plmin, plmax do
-                table.remove(InputList[pl],fc)
+                if BufLen[pl] > 0 then
+                    table.remove(BufInput[pl],1)
+                end
+                BufLen[pl]= BufLen[pl] - 1
             end
             SetInput()
         end
