@@ -7,7 +7,7 @@ local players= 2           -- You may tweak the number of players here.
 
 
 -- Rewind options
-local saveMax= 50          -- How many save states to keep?
+local saveMax= 50          -- How many save states to keep? Set to 0 to disable
 local SaveBuf= 12          -- How many frames between saves? Don't use 0, ever.
 local rewind= "R"          -- What key do you wish to hit for rewind?
 
@@ -57,7 +57,7 @@ local orange="#FFC000FF"
 --Please do not change the following, unless you plan to change the code:
 
 local plmin , plmax= 1 , 1
-local fc= 0
+local fc= movie.framecount()
 local LastLoad= movie.framecount()
 local saveCount= 0
 local saveArray= {}
@@ -536,7 +536,6 @@ function InputSnap()
 --*****************************************************************************
 -- Will shove the input list over.
 -- Might end up freezing for a moment if there's a few thousand frames to shift
--- Accesses: BufLen, BufInput[], Pin[], players
 
     for pl= 1, players do
 
@@ -585,10 +584,43 @@ local TrueA= {   nil     ,   "inv"  ,  true  ,  true    }
 local FalsA= {   false   ,   true   ,  false ,  false   }
 local BtnX, BtnY= 0, 0
 
-local BasicText= {"Activate: Lets the joypad activate input.",
-                  "Remove: Allows the joypad to remove input.",
-                  "List: Should the script remember button presses?",
-                  "Keys: Allow the script-specific keys to work?"}
+local BasicText= {
+"Activate: Lets the joypad activate input.",
+"Remove: Allows the joypad to remove input.",
+"List: Should the script remember button presses?",
+"Keys: Allow the script-specific keys to work?"}
+
+local AdvText= {
+{"With both joypad options on, you have full control.",
+ "Held buttons will toggle the script's stored input."}, -- 1
+
+{"With this on-off set-up, auto-hold will not",
+ "accidentally cancel input, such as from load state."}, -- 2
+
+{"With this off-on set, you can use auto-hold to",
+ "elegantly strip off unwanted input."},                 -- 3
+
+{"With both joypad options off, you ensure you can't",
+ "accidentally change what's stored in the script."},    -- 4
+
+{"List on: Script will apply input stored within.",
+ "This is the whole point of the script, ya know."},     -- 5
+
+{"List off: Stored input is ignored. A good idea if",
+ "you don't want the script interfering."},              -- 6
+
+{"Keys on: Script keys will toggle the button press",
+ "for the current frame. Meant for precise edits."},     -- 7
+
+{"Keys off: Script-specific keys are no longer a",
+ "factor. Long-term control is meant for joypad!"},      -- 8
+
+{"Apparently, you've selected 'All players'",
+ "and they have different options set."},                -- 9
+
+{"This is the 'All' button. Selecting this will set",
+ "all 'Yes' or all 'No' for this particular option."}    --10
+}
 
 --*****************************************************************************
 function HandleOptions()
@@ -613,10 +645,10 @@ function HandleOptions()
     Draw.down( XStart + XDiff*3+ 8,YStart  ,red)
     Draw.down( XStart + XDiff*3+ 8,YStart+4,green)
 
-    gui.box(XStart+XDiff*4   ,YStart  ,XStart + XDiff*4+14,YStart+6,0,green)
-    Draw.select(XStart + XDiff*4+ 2,YStart+2,green)
-    Draw.B(     XStart + XDiff*4+ 6,YStart+2,green)
-    Draw.A(     XStart + XDiff*4+10,YStart+2,green)
+    gui.box(XStart+XDiff*4,YStart,XStart+XDiff*4+14,YStart+6,0,green)
+    Draw.select(XStart+ XDiff*4+ 2,YStart+2,green)
+    Draw.B(    XStart + XDiff*4+ 6,YStart+2,green)
+    Draw.A(    XStart + XDiff*4+10,YStart+2,green)
 
 
 -- Button selection
@@ -693,7 +725,36 @@ function HandleOptions()
             local LowX=BtnX*XDiff +XStart -4
             local LowY=BtnY*YDiff +YStart -3
             gui.box(LowX,LowY,LowX+XDiff-2,LowY+YDiff-2,blue,blue)
-            gui.text(1,170,BasicText[BtnX])
+
+--Handle text. Feels sort of hard-coded, however
+            gui.text(1,160,BasicText[BtnX])
+
+            local adv
+            if BtnY == 9 then
+                adv= 10
+            elseif Status[BtnX][BtnY] == "???" then
+                adv=  9
+            elseif within(BtnX,1,2) and ((Status[3-BtnX][BtnY] == "???")) then
+                adv=  9
+            elseif within(BtnX,1,2) then
+                adv=  1
+                if Status[2][BtnY] == "No" then
+                    adv= adv + 1
+                end
+                if Status[1][BtnY] == "No" then
+                    adv= adv + 2
+                end
+            else
+                adv= 5
+                if BtnX == 4 then
+                    adv= adv+2
+                end
+                if Status[BtnX][BtnY] == "No" then
+                    adv= adv+1
+                end
+            end
+            gui.text(1,175,AdvText[adv][1])
+            gui.text(1,183,AdvText[adv][2])
         end
     end
 
@@ -771,6 +832,7 @@ function ItIsYourTurn()
 -- For use with gui.register. I need to catch input while paused!
 -- Needed for a half-decent interface.
 
+--Ensure things are nice, shall we?
     local fc_= movie.framecount()
     keys= input.get()
 
@@ -778,16 +840,21 @@ function ItIsYourTurn()
         OnLoad()
     end
 
+--Process Rewind
+ if saveMax > 0 then  -- Don't process if Rewind is disabled
     if pressrepeater(rewind) or rewinding then
         rewinding= false
         if RewindThis() then
+            InputSnap()
             movie.rerecordcounting(true)
             fc= movie.framecount()
             SetInput()
-            if saveCount == 0 then  emu.pause()  end
+            if saveCount <= 1 then  emu.pause()  end
         end
     end
+ end
 
+--Switch players on keypress
     if press(PlayerSwitch) then
         if plmin ~= plmax then
             plmax= 1
@@ -799,6 +866,7 @@ function ItIsYourTurn()
         end
     end
 
+--Display which player we're selecting. Upperleft corner seems good.
     if plmin == plmax then
         gui.text(1,2,plmin)
         gui.text(11,2,BufLen[plmin])
@@ -806,11 +874,17 @@ function ItIsYourTurn()
         gui.text(1,2,"A")
     end
 
+--Check if we want to see control optiions
     if keys[opt] then
         gui.opacity(1)
         HandleOptions()
         SetInput()
+
+--Otherwise, handle what we can see
     else
+
+--Inserts and deletes.
+--table functions don't work well on tables that don't connect from 1.
         if pressrepeater(Insert) then
             for pl= plmin, plmax do
                 BufLen[pl]= BufLen[pl] + 1
@@ -830,6 +904,7 @@ function ItIsYourTurn()
             SetInput()
         end
 
+--Script key handler
         for pl= plmin, plmax do
             for i= 1, 8 do
                 if press(key[i]) and ScriptEdit[pl][i] then
@@ -845,6 +920,7 @@ function ItIsYourTurn()
         DisplayInput()
     end
 
+--Last bits of odds and ends
     ApplyInput()
 
     lastkeys= keys
@@ -854,8 +930,8 @@ end
 gui.register(ItIsYourTurn)
 
 
-emu.pause()
 
+emu.pause()
 --*****************************************************************************
 while true do  -- Main loop
 --*****************************************************************************
@@ -885,43 +961,3 @@ while true do  -- Main loop
 
     emu.frameadvance()
 end
-
-
-
---Someday, I'll implement these texts!
-
-
-
---With both joypad options on, you have full control.
---Held buttons will toggle the script's stored input.
-
---With this on-off set-up, auto-hold will not
---accidentally cancel input, such as from load state.
-
---With this off-on set, you can use auto-hold to
---elegantly strip off unwanted input.
-
---With both joypad options off, you ensure you can't
---accidentally change what's stored in the script.
-
-
---List on: Script will apply input stored within.
---This is the whole point of the script, ya know.
-
---List off: Stored input is ignored. A good idea if
---you don't want the script interfering.
-
-
---Keys on: Script keys will toggle the button press
---for the current frame. Meant for precise edits.
-
---Keys off: Script-specific keys are no longer a
---factor. Long-term control is meant for joypad!
-
-
---Apparently, you've selected "All players" and
---they have different options set.
-
-
---This is the 'All' button. Selecting this will set
---all 'Yes' or all 'No' for this particular option.
