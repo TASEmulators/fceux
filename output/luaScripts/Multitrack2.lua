@@ -9,7 +9,7 @@ local players= 2           -- You may tweak the number of players here.
 -- Rewind options
 local saveMax= 50          -- How many save states to keep? Set to 0 to disable
 local SaveBuf= 12          -- How many frames between saves? Don't use 0, ever.
-local rewind= "R"          -- What key do you wish to hit for rewind?
+local rewind= "numpad0"    -- What key do you wish to hit for rewind?
 
 
 --Control
@@ -46,7 +46,7 @@ local ResetFP=  "numpad5"
 
 
 
-
+--Various colors I'm using. If you wish to bother, go ahead.
 local shade= 0x00000080
 local white= "#FFFFFFFF"
 local red=   "#FF2000FF"
@@ -88,8 +88,75 @@ for pl= 1, players do
     end
 end
 
+--*****************************************************************************
+-- Just painting instructions here.
+
+print("Running Multitrack Script made by FatRatKnight.",
+  "\r\nIts primary use is to preserve input after a loadstate.",
+  "\r\nIt also gives precise control on changing this stored input.",
+  "\r\nEdit the script if you need to change stuff. All options are near the top.",
+  "\r\nThe script is currently set as follows:\r\n")
+
+print("Players:",players)
+if players > 1 then
+    print("Player Switch key:",PlayerSwitch,
+    "\r\nThere is an All Players view as well, beyond the last player.\r\n")
+else
+    print("With only one player, the PlayerSwitch button is disabled.\r\n")
+end
+
+print("Maximum rewind states:",saveMax)
+if saveMax > 0 then
+    local CalcSeconds= math.floor(saveMax*SaveBuf*100/60)/100
+    print("Frames between saves:",SaveBuf,
+      "\r\nRewind key:",rewind,
+      "\r\nThis can go backwards up to about",CalcSeconds,"seconds.",
+      "\r\nRewind is a quick and easy way to back up just a few frames.",
+      "\r\nJust hit",rewind,"and back you go!\r\n")
+else
+    print("Rewind function is disabled. Cheap on memory!\r\n")
+end
+
+print("Hold >",opt,"< to view control options.",
+  "\r\nYou may use the mouse or keyboard to toggle options.",
+  "\r\nFor keyboard, use",DispN,DispS,DispE,DispW,"to choose an option and",
+  ResetFP,"to toggle the option.",
+  "\r\nIf All Players is selected, changing options will affect all players.\r\n")
+
+print("For the frame display, you can drag it around with the mouse.",
+  "\r\nTo move it by keyboard:",DispN,DispS,DispE,DispW,
+  "\r\nTo change frames to display:",MoreFutr,LessFutr,MorePast,LessPast,
+  "\r\nTo recenter display around current frame:",ResetFP,
+  "\r\nLastly, hide it with >",clear,"< and show it with >",solid,"<\r\n")
+
+print("Insert frame:",Insert,
+  "\r\nDelete frame:",Delete,
+  "\r\nThese keys allow you to shift frames around the current frame.",
+      "Perhaps you found an improvement to a segment and want to delete frames.",
+      "Or this small trick you wanted to add requires shifting a few frames forward.",
+      "These buttons let you shift frames around without forcing you to",
+      "modify each and every one of them individually.\r\n")
 
 
+print("Script keys:",
+  "\r\nJoy - Keyboard",
+  "\r\n------------")
+for i= 1, 8 do
+    print(btn[i],"-",key[i])
+end
+print("By default, these are disabled. Enable them through the control options.",
+  "\r\nThey are a one-tap joypad switch for precision control.",
+  "\r\nIt will affect the currently displayed player, or all of them if",
+      "it's displaying All Players.\r\n")
+
+print("Remember, edit the script if you don't like the current options. All",
+      "the options you should care about are near the top, clearly marked.",
+      "Change the control keys through there, as well as number of players or rewind limits.",
+  "\r\nThis script works with the joypad you actually set from FCEUX's config,",
+      "and they can even cancel input stored in this script.",
+
+"\r\n\r\nAnd have fun with this script. I hope your experiments with this script goes well.",
+"\r\n\r\nLeeland Kirwan, the FatRatKnight.")
 
 --*****************************************************************************
 local Draw= {}   --Draw[button]( Left , Top , color )
