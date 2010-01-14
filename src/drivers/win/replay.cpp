@@ -104,7 +104,7 @@ static char* GetSavePath(HWND hwndDlg)
 	LONG lIndex = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETCURSEL, 0, 0);
 	LONG lStringLength = SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETLBTEXTLEN, (WPARAM)lIndex, 0);
 
-	fn = (char*)malloc(lStringLength);
+	fn = (char*)malloc(lStringLength+1);  //CB_GETLBTEXTLEN doesn't include NULL terminator. 
 	SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_GETLBTEXT, (WPARAM)lIndex, (LPARAM)fn);
 
 	_splitpath(fn, szDrive, szDirectory, szFilename, szExt);
@@ -821,7 +821,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 			free(findGlob);
 
 			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_INSERTSTRING, i++, (LPARAM)"Browse...");
-			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, 0, 0);				// choose "from reset" as a default
+			SendDlgItemMessage(hwndDlg, IDC_COMBO_RECORDFROM, CB_SETCURSEL, p->recordFrom, 0);
 		}
 		UpdateRecordDialog(hwndDlg);
 
@@ -880,7 +880,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					p->szFilename = GetRecordPath(hwndDlg);
 					p->recordFrom = (int)lIndex;
 					p->author = GetDlgItemTextW<500>(hwndDlg,IDC_EDIT_AUTHOR);
-					if(lIndex>=3)
+					if(lIndex>=2)
 						p->szSavestateFilename = GetSavePath(hwndDlg);
 					EndDialog(hwndDlg, 1);
 				}
@@ -918,12 +918,13 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 //Show the record movie dialog and record a movie.
 void FCEUD_MovieRecordTo()
 {
-	struct CreateMovieParameters p;
+	static struct CreateMovieParameters p;
 	p.szFilename = strdup(FCEU_MakeFName(FCEUMKF_MOVIE,0,0).c_str());
+	if(p.recordFrom >= 2) p.recordFrom=1;
 
 	if(DialogBoxParam(fceu_hInstance, "IDD_RECORDINP", hAppWnd, RecordDialogProc, (LPARAM)&p))
 	{
-		if(p.recordFrom >= 3)
+		if(p.recordFrom >= 2)
 		{
 			// attempt to load the savestate
 			// FIXME:  pop open a messagebox if this fails
