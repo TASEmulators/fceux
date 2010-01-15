@@ -87,7 +87,8 @@ static void booga(int version)
 
 void Mapper80_init(void)
 {
- SetWriteHandler(0x4020,0x7fff,Mapper80_write);
+ SetWriteHandler(0x4020,0x7eff,Mapper80_write);// 7f00-7fff battery backed ram inside mapper chip,
+                                               // controlled by 7ef8 register, A8 - enable, FF - disable (?)
  MapStateRestore=booga;
  isfu=0;
 }

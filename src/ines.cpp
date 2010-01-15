@@ -388,6 +388,8 @@ static void CheckHInfo(void)
 		0x1b084107d0878bd0LL,    /* Startropics 2*/
 
 		0x836c0ff4f3e06e45LL,    /* Zelda 2 */
+	    
+		0x82000965f04a71bbLL,    /* Mirai Shinwa Jarvas */
 
 		0      /* Abandon all hope if the game has 0 in the lower 64-bits of its MD5 hash */
 	};
