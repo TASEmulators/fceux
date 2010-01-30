@@ -11,6 +11,8 @@ local saveMax= 50          -- How many save states to keep? Set to 0 to disable
 local SaveBuf= 12          -- How many frames between saves? Don't use 0, ever.
 local rewind= "numpad0"    -- What key do you wish to hit for rewind?
 
+--Keep in mind: Higher saveMax, more savestates, more memory needed.
+
 
 --Control
 local PlayerSwitch= "home" -- For selecting other players
@@ -44,6 +46,13 @@ local MorePast= "numpad7"  -- how many frames you
 local LessPast= "numpad9"  -- want to display.
 local ResetFP=  "numpad5"
 
+
+--Control options by keyboard
+local OptUp= "numpad8"
+local OptDn= "numpad2"     -- Controls for changing
+local OptRt= "numpad6"     -- options by keyboard.
+local OptLf= "numpad4"
+local OptHit="numpad5"
 
 
 --Various colors I'm using. If you wish to bother, go ahead.
@@ -106,8 +115,8 @@ else
 end
 
 print("Maximum rewind states:",saveMax)
+local CalcSeconds= math.floor(saveMax*SaveBuf*100/60)/100
 if saveMax > 0 then
-    local CalcSeconds= math.floor(saveMax*SaveBuf*100/60)/100
     print("Frames between saves:",SaveBuf,
       "\r\nRewind key:",rewind,
       "\r\nThis can go backwards up to about",CalcSeconds,"seconds.",
@@ -119,9 +128,10 @@ end
 
 print("Hold >",opt,"< to view control options.",
   "\r\nYou may use the mouse or keyboard to toggle options.",
-  "\r\nFor keyboard, use",DispN,DispS,DispE,DispW,"to choose an option and",
-  ResetFP,"to toggle the option.",
-  "\r\nIf All Players is selected, changing options will affect all players.\r\n")
+  "\r\nFor keyboard, use",OptUp,OptDn,OptRt,OptLf,"to choose an option and",
+  OptHit,"to toggle the option.",
+  "\r\nFor mouse, it's as simple at point and click.",
+  "\r\nIf viewing All Players, changing options will affect all players.\r\n")
 
 print("For the frame display, you can drag it around with the mouse.",
   "\r\nTo move it by keyboard:",DispN,DispS,DispE,DispW,
@@ -149,6 +159,12 @@ print("By default, these are disabled. Enable them through the control options."
   "\r\nIt will affect the currently displayed player, or all of them if",
       "it's displaying All Players.\r\n")
 
+print("If you want to \"load\" an fm2 into this script, run the play file",
+      "while running this script. As the movie on read-only plays out, the",
+      "script will pick up its input. The script does not need to start from",
+      "frame 1 -- Load a state near the end of a movie if you so wish!",
+      "Once input is loaded, you may continue whatever you were doing.\r\n")
+
 print("Remember, edit the script if you don't like the current options. All",
       "the options you should care about are near the top, clearly marked.",
       "Change the control keys through there, as well as number of players or rewind limits.",
@@ -157,6 +173,44 @@ print("Remember, edit the script if you don't like the current options. All",
 
 "\r\n\r\nAnd have fun with this script. I hope your experiments with this script goes well.",
 "\r\n\r\nLeeland Kirwan, the FatRatKnight.")
+
+print("Players:",players,"  - -  ",CalcSeconds,"seconds of rewind.")
+
+
+--*****************************************************************************
+function FBoxOld(x1, y1, x2, y2, color)
+--*****************************************************************************
+-- Gets around FCEUX's problem of double-painting the corners.
+-- The double-paint is visible with non-opaque drawing.
+-- It acts like the old-style border-only box.
+
+    if     (x1 == x2) and (y1 == y2) then
+        gui.pixel(x1,y1,color)
+
+    elseif (x1 == x2) or  (y1 == y2) then
+        gui.line(x1,y1,x2,y2,color)
+
+    else --(x1 ~= x2) and (y1 ~= y2)
+        gui.line(x1  ,y1  ,x2-1,y1  ,color) -- top
+        gui.line(x2  ,y1  ,x2  ,y2-1,color) -- right
+        gui.line(x1+1,y2  ,x2  ,y2  ,color) -- bottom
+        gui.line(x1  ,y1+1,x1  ,y2  ,color) -- left
+    end
+end
+
+
+--*****************************************************************************
+function FakeBox(x1, y1, x2, y2, Fill, Border)
+--*****************************************************************************
+-- Gets around FCEUX's problem of double-painting the corners.
+-- It acts like the new-style fill-and-border box.
+
+if not Border then   Border= Fill   end
+
+    gui.box(x1,y1,x2,y2,Fill,0)
+    FBoxOld(x1,y1,x2,y2,Border)
+end
+
 
 --*****************************************************************************
 local Draw= {}   --Draw[button]( Left , Top , color )
@@ -188,15 +242,16 @@ end
 
 function Draw.start(x,y,color)       --     #
     gui.line(x+1,y  ,x+1,y+2,color)  --    ###
-    gui.line(x  ,y+1,x+2,y+1,color)  --     #
+    gui.pixel(x  ,y+1,color)         --     #
+    gui.pixel(x+2,y+1,color)
 end
 
 function Draw.select(x,y,color)      --    ###
-    gui.box(x  ,y  ,x+2,y+2,0,color) --    # #
+    FBoxOld(x  ,y  ,x+2,y+2,color)   --    # #
 end                                  --    ###
 
 function Draw.A(x,y,color)           --    ###
-    gui.box(x  ,y  ,x+2,y+1,0,color) --    ###
+    FBoxOld(x  ,y  ,x+2,y+1,color)   --    ###
     gui.pixel(x  ,y+2,color)         --    # #
     gui.pixel(x+2,y+2,color)
 end
@@ -210,7 +265,7 @@ end
 
 
 function Draw.D0(left, top, color)
-    gui.box(left  ,top  ,left+2,top+4,0,color)
+    FBoxOld(left  ,top  ,left+2,top+4,color)
 end
 
 function Draw.D1(left, top, color)
@@ -249,7 +304,7 @@ function Draw.D5(left, top, color)
 end
 
 function Draw.D6(left, top, color)
-    gui.box(left  ,top+2,left+2,top+4,0,color)
+    FBoxOld(left  ,top+2,left+2,top+4,color)
     gui.line(left  ,top  ,left+2,top  ,color)
     gui.pixel(left  ,top+1,color)
 end
@@ -260,12 +315,12 @@ function Draw.D7(left, top, color)
 end
 
 function Draw.D8(left, top, color)
-    gui.box(left,top,left+2,top+4,0,color)
+    FBoxOld(left,top,left+2,top+4,color)
     gui.pixel(left+1,top+2,color)
 end
 
 function Draw.D9(left, top, color)
-    gui.box(left  ,top  ,left+2,top+2,0,color)
+    FBoxOld(left  ,top  ,left+2,top+2,color)
     gui.line(left  ,top+4,left+2,top+4,color)
     gui.pixel(left+2,top+3,color)
 end
@@ -290,7 +345,7 @@ function DrawNum(right, top, Number, color, bkgnd)
     if not bkgnd then bkgnd= "clear" end
 
     if Number < 1 then
-        gui.box(right+1,top-1,right-2,top+5,bkgnd,bkgnd)
+        gui.box(right+1,top-1,right-2,top+5,bkgnd)
         Draw[0](right-2,top,color)
         right= right-4
     end
@@ -299,13 +354,13 @@ function DrawNum(right, top, Number, color, bkgnd)
         local digit= Number % 10
         Number= math.floor(Number/10)
 
-        gui.box(right+1,top-1,right-2,top+5,bkgnd,bkgnd)
+        gui.box(right+1,top-1,right-2,top+5,bkgnd)
         Draw[digit](right-2,top,color)
         right= right-4
     end
 
     if Negative then
-        gui.box(right+1,top-1,right-2,top+5,bkgnd,bkgnd)
+        gui.box(right+1,top-1,right-2,top+5,bkgnd)
         gui.line(right, top+2,right-2,top+2,color)
         right= right-4
     end
@@ -426,7 +481,7 @@ function ShowManyPlayers(x,y,color,button,pl)
 -- Helper function for DisplayInput.
 
     x= x + (2*players + 1)*(button - 1) + 2*pl - 1
-    gui.box(x,y,x+1,y+2,0,color)
+    FBoxOld(x,y,x+1,y+2,color)
 end
 
 
@@ -524,7 +579,7 @@ function DisplayInput()
             if BufLen[pl] > 0 then  ThisFrame= BufInput[pl][1]  end
             if ThisFrame ~= JoyToNum(ThisInput[pl]) then  color= green  end
         end
-        gui.box(DispX-1,DispY-2,DispX+width+1,DispY+4,0,color)
+        FBoxOld(DispX-1,DispY-2,DispX+width+1,DispY+4,color)
     end
 
 --Finally, we get to show the actual buttons!
@@ -690,7 +745,7 @@ local AdvText= {
 }
 
 --*****************************************************************************
-function HandleOptions()
+function ControlOptions()
 --*****************************************************************************
 -- Lets the user make adjustments on the various controls of this script.
 -- The interface, apparently, is most of the work!
@@ -723,19 +778,19 @@ function HandleOptions()
         BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
         BtnY= math.floor((keys.ymouse- YStart-6)/YDiff)
     else
-        if press(DispN) then
+        if press(OptUp) then
             BtnX= limits(BtnX  ,1,4)
             BtnY= limits(BtnY-1,1,9)
         end
-        if press(DispS) then
+        if press(OptDn) then
             BtnX= limits(BtnX  ,1,4)
             BtnY= limits(BtnY+1,1,9)
         end
-        if press(DispE) then
+        if press(OptRt) then
             BtnX= limits(BtnX+1,1,4)
             BtnY= limits(BtnY  ,1,9)
         end
-        if press(DispW) then
+        if press(OptLf) then
             BtnX= limits(BtnX-1,1,4)
             BtnY= limits(BtnY  ,1,9)
         end
@@ -743,7 +798,7 @@ function HandleOptions()
 
 
 --Did you punch something?
-    if press("leftclick") or press(ResetFP) then
+    if press("leftclick") or press(OptHit) then
         if within( BtnY , 1 , 9 ) then
             if within( BtnX , 1 , 4 ) then
                 local LoopS, LoopF= 1, 8
@@ -941,10 +996,10 @@ function ItIsYourTurn()
         gui.text(1,2,"A")
     end
 
---Check if we want to see control optiions
+--Check if we want to see control options
     if keys[opt] then
         gui.opacity(1)
-        HandleOptions()
+        ControlOptions()
         SetInput()
 
 --Otherwise, handle what we can see
@@ -997,8 +1052,8 @@ end
 gui.register(ItIsYourTurn)
 
 
-
 emu.pause()
+
 --*****************************************************************************
 while true do  -- Main loop
 --*****************************************************************************
