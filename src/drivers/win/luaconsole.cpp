@@ -34,6 +34,7 @@ struct ControlLayoutState
 static ControlLayoutInfo controlLayoutInfos [] = {
 	{IDC_LUACONSOLE, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::RESIZE_END},
 	{IDC_EDIT_LUAPATH, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::NONE},
+	{IDC_EDIT_LUAARGS, ControlLayoutInfo::RESIZE_END, ControlLayoutInfo::NONE},
 	{IDC_BUTTON_LUARUN, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
 	{IDC_BUTTON_LUASTOP, ControlLayoutInfo::MOVE_START, ControlLayoutInfo::NONE},
 };
@@ -73,7 +74,7 @@ void WinLuaOnStart(int hDlgAsInt)
 	//info.started = true;
 	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUABROWSE), false); // disable browse while running because it misbehaves if clicked in a frameadvance loop
 	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUASTOP), true);
-	SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_LUARUN), "Restart");
+	SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_LUARUN), "&Restart");
 	SetWindowText(GetDlgItem(hDlg, IDC_LUACONSOLE), ""); // clear the console
 //	Show_Genesis_Screen(HWnd); // otherwise we might never show the first thing the script draws
 }
@@ -90,7 +91,7 @@ void WinLuaOnStop(int hDlgAsInt)
 	//info.started = false;
 	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUABROWSE), true);
 	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUASTOP), false);
-	SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_LUARUN), "Run");
+	SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_LUARUN), "&Run");
 //	if(statusOK)
 //		Show_Genesis_Screen(MainWindow->getHWnd()); // otherwise we might never show the last thing the script draws
 	//if(info.closeOnStop)
@@ -118,17 +119,18 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		dx2 = (r2.right - r2.left) / 2;
 		dy2 = (r2.bottom - r2.top) / 2;
 
-		int windowIndex = 0;//std::find(LuaScriptHWnds.begin(), LuaScriptHWnds.end(), hDlg) - LuaScriptHWnds.begin();
-		int staggerOffset = windowIndex * 24;
-		r.left += staggerOffset;
-		r.right += staggerOffset;
-		r.top += staggerOffset;
-		r.bottom += staggerOffset;
+		//int windowIndex = 0;//std::find(LuaScriptHWnds.begin(), LuaScriptHWnds.end(), hDlg) - LuaScriptHWnds.begin();
+		//int staggerOffset = windowIndex * 24;
+		//r.left += staggerOffset;
+		//r.right += staggerOffset;
+		//r.top += staggerOffset;
+		//r.bottom += staggerOffset;
 
 		// push it away from the main window if we can
 		const int width = (r.right-r.left); 
 		const int width2 = (r2.right-r2.left); 
-		if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
+		const int rspace = GetSystemMetrics(SM_CXSCREEN)- (r.left+width2+width);
+		if(rspace > r.left && r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
 		{
 			r.right += width;
 			r.left += width;
@@ -137,6 +139,11 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		{
 			r.right -= width2;
 			r.left -= width2;
+		}
+		else if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
+		{
+			r.right += width;
+			r.left += width;
 		}
 
 		SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
@@ -236,8 +243,10 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 			case IDC_BUTTON_LUARUN:
 			{
 				char filename[MAX_PATH];
+				char args[MAX_PATH];
 				GetDlgItemText(hDlg, IDC_EDIT_LUAPATH, filename, MAX_PATH);
-				FCEU_LoadLuaCode(filename);
+				GetDlgItemText(hDlg, IDC_EDIT_LUAARGS, args, MAX_PATH);
+				FCEU_LoadLuaCode(filename, args);
 			}	break;
 
 			case IDC_BUTTON_LUASTOP:

@@ -104,7 +104,6 @@
 // External functions
 extern std::string cfgFile;		//Contains the filename of the config file used.
 extern bool turbo;				//Is game in turbo mode?
-extern int FCEU_LoadLuaCode(const char *filename);	//From lua-engine.cpp.  Used here to auto-load a lua script from commandline
 void ResetVideo(void);
 void ShowCursorAbs(int w);
 void HideFWindow(int h);

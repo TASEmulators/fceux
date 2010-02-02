@@ -467,6 +467,7 @@
 #define IDC_BUTTON_LUAEDIT              1253
 #define IDC_LUACONSOLE_CLEAR            1254
 #define IDC_LUACONSOLE_CHOOSEFONT       1255
+#define IDC_EDIT_LUAARGS                1256
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -779,7 +780,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
 #define _APS_NEXT_COMMAND_VALUE         40403
-#define _APS_NEXT_CONTROL_VALUE         1256
+#define _APS_NEXT_CONTROL_VALUE         1257
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

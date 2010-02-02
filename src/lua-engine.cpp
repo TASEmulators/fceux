@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <algorithm>
+#include <algorithm> 
 #include <stdlib.h>
 
 #ifdef __linux
@@ -3049,6 +3049,17 @@ static int gui_parsecolor(lua_State *L)
 }
 
 
+// gui.savescreenshot()
+//
+// Causes FCEUX to write a screenshot to a file as if the user pressed the associated hotkey. 
+//
+// Unconditionally retrns 1; any failure in taking a screenshot would be reported on-screen
+// from the function ReallySnap(). 
+static int gui_savescreenshot(lua_State *L) {
+	FCEUI_SaveSnapshot();
+	return 1;
+}
+
 // gui.gdscreenshot()
 //
 //  Returns a screen shot as a string in gd's v1 file format.
@@ -4425,6 +4436,7 @@ static const struct luaL_reg guilib[] = {
 	{"box", gui_box},
 	{"text", gui_text},
 
+	{"savescreenshot", gui_savescreenshot},
 	{"gdscreenshot", gui_gdscreenshot},
 	{"gdoverlay", gui_gdoverlay},
 	{"opacity", gui_setopacity},
@@ -4524,7 +4536,7 @@ void FCEU_LuaFrameBoundary() {
  *
  * Returns true on success, false on failure.
  */
-int FCEU_LoadLuaCode(const char *filename) {
+int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	if (filename != luaScriptName)
 	{
 		if (luaScriptName) free(luaScriptName);
@@ -4568,6 +4580,16 @@ int FCEU_LoadLuaCode(const char *filename) {
 		lua_register(L, "XOR", bit_bxor);
 		lua_register(L, "SHIFT", bit_bshift_emulua);
 		lua_register(L, "BIT", bitbit);
+
+		if (arg)
+		{
+			luaL_Buffer b;
+			luaL_buffinit(L, &b);
+			luaL_addstring(&b, arg);
+			luaL_pushresult(&b);
+
+			lua_setglobal(L, "arg");
+		}
 
 		luabitop_validate(L);
 

@@ -7,7 +7,8 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -1464,14 +1465,16 @@ CAPTION "Lua Script"
 MENU LUAWINDOW_MENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Browse...",IDC_BUTTON_LUABROWSE,7,31,48,16
-    PUSHBUTTON      "Run",IDC_BUTTON_LUARUN,213,31,50,16
-    PUSHBUTTON      "Stop",IDC_BUTTON_LUASTOP,160,31,50,16
+    PUSHBUTTON      "&Browse...",IDC_BUTTON_LUABROWSE,7,31,48,16
+    PUSHBUTTON      "&Run",IDC_BUTTON_LUARUN,213,31,50,16
+    PUSHBUTTON      "&Stop",IDC_BUTTON_LUASTOP,160,31,50,16
     EDITTEXT        IDC_EDIT_LUAPATH,7,16,256,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_LUACONSOLE,7,61,256,81,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
-    LTEXT           "Output Console",IDC_STATIC,7,51,51,8
-    LTEXT           "Script File",IDC_STATIC,7,7,32,8
-    PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
+    EDITTEXT        IDC_EDIT_LUAARGS,47,50,216,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_LUACONSOLE,7,80,256,60,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
+	LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
+	LTEXT           "Script File:",IDC_STATIC,7,7,36,8
+	LTEXT           "Arugments:",IDC_STATIC,7,52,40,8
+PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
 END
 
 VIDEOCONFIG DIALOGEX 65520, 76, 384, 296
@@ -1935,7 +1938,8 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
