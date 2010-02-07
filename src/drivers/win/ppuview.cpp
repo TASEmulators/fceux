@@ -270,6 +270,16 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         GetWindowRect(hwndDlg,&wrect);
                         PPUViewPosX = wrect.left;
                         PPUViewPosY = wrect.top;
+
+						#ifdef WIN32
+						if (wrect.right < 59) {
+						PPUViewPosX = 0;
+						}
+						if (PPUViewPosY < -18) {
+						PPUViewPosY = -18;
+						}
+						#endif
+
                         break;
                 case WM_RBUTTONDBLCLK:
                 case WM_RBUTTONDOWN:

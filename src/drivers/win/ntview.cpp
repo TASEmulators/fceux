@@ -424,6 +424,16 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetWindowRect(hwndDlg,&wrect);
 			NTViewPosX = wrect.left;
 			NTViewPosY = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			NTViewPosX = 0;
+			}
+			if (NTViewPosY < -18) {
+			NTViewPosY = -18;
+			}
+			#endif
+
 			break;
 		case WM_RBUTTONDBLCLK:
 		case WM_RBUTTONDOWN:

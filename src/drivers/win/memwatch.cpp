@@ -724,6 +724,16 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		GetWindowRect(hwndDlg,&wrect);
 		MemWatch_wndx = wrect.left;
 		MemWatch_wndy = wrect.top;
+
+		#ifdef WIN32
+		if (wrect.right < 59) {
+		MemWatch_wndx = 0;
+		}
+		if (MemWatch_wndy < -18) {
+		MemWatch_wndy = -18;
+		}
+		#endif
+
 		break;
 	};
 

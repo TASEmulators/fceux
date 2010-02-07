@@ -1196,6 +1196,16 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		GetWindowRect(hWnd,&wrect);
 		MainWindow_wndx = wrect.left;
 		MainWindow_wndy = wrect.top;
+
+		#ifdef WIN32
+		if (wrect.right < 59) {
+		MainWindow_wndx = 0;
+		}
+		if (MainWindow_wndy < -18) {
+		MainWindow_wndy = -18;
+		}
+		#endif
+
 	}
 
 	case WM_MOUSEMOVE:

@@ -1596,6 +1596,16 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		GetWindowRect(hwnd,&wrect);
 		MemView_wndx = wrect.left;
 		MemView_wndy = wrect.top;
+
+		#ifdef WIN32
+		if (wrect.right < 59) {
+		MemView_wndx = 59 - MemViewSizeX;
+		}
+		if (MemView_wndy < -18) {
+		MemView_wndy = -18;
+		}
+		#endif
+		
 		return 0;
 				  }
 
@@ -1694,6 +1704,16 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		GetWindowRect(hwndDlg,&wrect);
 		MemFind_wndx = wrect.left;
 		MemFind_wndy = wrect.top;
+		
+		#ifdef WIN32
+		if (wrect.right < 59) {
+		MemFind_wndx = 0;
+		}
+		if (MemFind_wndy < -18) {
+		MemFind_wndy = -18;
+		}
+		#endif
+
 		break;
 				  }
 	case WM_RBUTTONDBLCLK:

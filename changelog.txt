@@ -1,3 +1,4 @@
+02-feb-2010 - ugetab - Win32 - Added window positions bounds checks. Accounts for -32000 positions & less out-of-range too
 08-jan-2010 - rheiny - Win32 - Trace Logger - Trace logger now logs the values of the stack pointer register
 31-dec-2009 - prg318 - added gtk gui
 08-dec-2009 - Zeromus - Fix Name Table Viewer - Fix for use with New PPU

@@ -401,6 +401,15 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 		GetWindowRect(hwndDlg,&wrect);
 		MetaPosX = wrect.left;
 		MetaPosY = wrect.top;
+
+		#ifdef WIN32
+		if (wrect.right < 59) {
+		MetaPosX = 0;
+		}
+		if (MetaPosY < -18) {
+		MetaPosY = -18;
+		}
+		#endif
         break;
 
 	case WM_COMMAND:

@@ -1083,6 +1083,15 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			GetWindowRect(hwndDlg,&wrect);
 			DbgPosX = wrect.left;
 			DbgPosY = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			DbgPosX = 59 - DbgSizeX;
+			}
+			if (DbgPosY < -18) {
+			DbgPosY = -18;
+			}
+			#endif
 			break;
 
 		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload

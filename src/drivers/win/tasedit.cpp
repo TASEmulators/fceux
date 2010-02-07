@@ -1021,6 +1021,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				GetWindowRect(hwndDlg,&wrect);
 				TasEdit_wndx = wrect.left;
 				TasEdit_wndy = wrect.top;
+
+				#ifdef WIN32
+				if (wrect.right < 59) {
+				TasEdit_wndx = 0;
+				}
+				if (TasEdit_wndy < -18) {
+				TasEdit_wndy = -18;
+				}
+				#endif
+
 				break;
 				  }
 

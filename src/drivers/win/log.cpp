@@ -86,6 +86,16 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetWindowRect(hwndDlg,&wrect);	//Remember X,Y coordinates
 			MLogPosX = wrect.left;
 			MLogPosY = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			MLogPosX = 0;
+			}
+			if (MLogPosY < -18) {
+			MLogPosY = -18;
+			}
+			#endif
+
 			break;
 		case WM_COMMAND:
 			if(HIWORD(wParam)==BN_CLICKED)

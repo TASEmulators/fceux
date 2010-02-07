@@ -97,6 +97,15 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			GetWindowRect(hwndDlg,&wrect);
 			CDLogger_wndx = wrect.left;
 			CDLogger_wndy = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			CDLogger_wndx = 0;
+			}
+			if (CDLogger_wndy < -18) {
+			CDLogger_wndy = -18;
+			}
+			#endif
 			break;
 		};
 		case WM_INITDIALOG:

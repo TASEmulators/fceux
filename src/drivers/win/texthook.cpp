@@ -875,6 +875,16 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			GetWindowRect(hwndDlg,&wrect);
 			TextHookerPosX = wrect.left;
 			TextHookerPosY = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			TextHookerPosX = 0;
+			}
+			if (TextHookerPosY < -18) {
+			TextHookerPosY = -18;
+			}
+			#endif
+
 			break;
 		case WM_RBUTTONDBLCLK:
 			sprintf(str,"aaaa");

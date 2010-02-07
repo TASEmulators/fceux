@@ -830,6 +830,16 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			GetWindowRect(hDlg,&wrect);
 			ramw_x = wrect.left;
 			ramw_y = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			ramw_x = 0;
+			}
+			if (ramw_y < -18) {
+			ramw_y = -18;
+			}
+			#endif
+
 			//regSetDwordValue(RAMWX, ramw_x); TODO
 			//regSetDwordValue(RAMWY, ramw_y); TODO
 		}	break;

@@ -244,6 +244,15 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			GetWindowRect(hwndDlg,&wrect);
 			ChtPosX = wrect.left;
 			ChtPosY = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			ChtPosX = 0;
+			}
+			if (ChtPosY < -18) {
+			ChtPosY = -18;
+			}
+			#endif
 			break;
 
 		case WM_VSCROLL:
@@ -623,6 +632,15 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GetWindowRect(hwndDlg,&wrect);
 			GGConv_wndx = wrect.left;
 			GGConv_wndy = wrect.top;
+
+			#ifdef WIN32
+			if (wrect.right < 59) {
+			GGConv_wndx = 0;
+			}
+			if (GGConv_wndy < -18) {
+			GGConv_wndy = -18;
+			}
+			#endif
 			break;
 		};
 		case WM_INITDIALOG:
