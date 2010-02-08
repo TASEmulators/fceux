@@ -726,12 +726,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		MemWatch_wndy = wrect.top;
 
 		#ifdef WIN32
-		if (wrect.right < 59) {
-		MemWatch_wndx = 0;
-		}
-		if (MemWatch_wndy < -18) {
-		MemWatch_wndy = -18;
-		}
+		WindowBoundsCheckNoResize(MemWatch_wndx,MemWatch_wndy,wrect.right);
 		#endif
 
 		break;

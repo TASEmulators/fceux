@@ -272,12 +272,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                         PPUViewPosY = wrect.top;
 
 						#ifdef WIN32
-						if (wrect.right < 59) {
-						PPUViewPosX = 0;
-						}
-						if (PPUViewPosY < -18) {
-						PPUViewPosY = -18;
-						}
+						WindowBoundsCheckNoResize(PPUViewPosX,PPUViewPosY,wrect.right);
 						#endif
 
                         break;

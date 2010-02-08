@@ -317,29 +317,6 @@ void SaveConfig(const char *filename)
 	}
 	//-----------------------------------
 
-	//ugetab: window positions could use some bounds checking.
-	// MemView_wndx and MemView_wndy verified to sometimes end up -32000
-	//CDLogger_wndx
-	//CDLogger_wndy
-	//GGConv_wndx
-	//GGConv_wndy
-	//MainWindow_wndx
-	//MainWindow_wndy
-	//MemFind_wndx
-	//MemFind_wndy
-	//MemView_wndx
-	//MemView_wndy
-	//MemWatch_wndx
-	//MemWatch_wndy
-	//Monitor_wndx
-	//Monitor_wndy
-	//TasEdit_wndx
-	//TasEdit_wndy
-	//Tracer_wndx
-	//Tracer_wndy
-
-	//-----------------------------------
-
 	SaveFCEUConfig(filename,fceuconfig);
 }
 

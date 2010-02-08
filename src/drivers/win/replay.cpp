@@ -403,12 +403,7 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 		MetaPosY = wrect.top;
 
 		#ifdef WIN32
-		if (wrect.right < 59) {
-		MetaPosX = 0;
-		}
-		if (MetaPosY < -18) {
-		MetaPosY = -18;
-		}
+		WindowBoundsCheckNoResize(MetaPosX,MetaPosY,wrect.right);
 		#endif
         break;
 

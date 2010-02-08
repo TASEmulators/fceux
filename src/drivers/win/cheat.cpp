@@ -246,12 +246,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			ChtPosY = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			ChtPosX = 0;
-			}
-			if (ChtPosY < -18) {
-			ChtPosY = -18;
-			}
+			WindowBoundsCheckNoResize(ChtPosX,ChtPosY,wrect.right);
 			#endif
 			break;
 
@@ -634,12 +629,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			GGConv_wndy = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			GGConv_wndx = 0;
-			}
-			if (GGConv_wndy < -18) {
-			GGConv_wndy = -18;
-			}
+			WindowBoundsCheckNoResize(GGConv_wndx,GGConv_wndy,wrect.right);
 			#endif
 			break;
 		};

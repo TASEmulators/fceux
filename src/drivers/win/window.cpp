@@ -1198,12 +1198,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		MainWindow_wndy = wrect.top;
 
 		#ifdef WIN32
-		if (wrect.right < 59) {
-		MainWindow_wndx = 0;
-		}
-		if (MainWindow_wndy < -18) {
-		MainWindow_wndy = -18;
-		}
+		WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
 		#endif
 
 	}

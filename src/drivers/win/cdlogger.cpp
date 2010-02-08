@@ -99,12 +99,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			CDLogger_wndy = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			CDLogger_wndx = 0;
-			}
-			if (CDLogger_wndy < -18) {
-			CDLogger_wndy = -18;
-			}
+			WindowBoundsCheckNoResize(CDLogger_wndx,CDLogger_wndy,wrect.right);
 			#endif
 			break;
 		};

@@ -92,12 +92,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			Tracer_wndy = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			Tracer_wndx = 0;
-			}
-			if (Tracer_wndy < -18) {
-			Tracer_wndy = -18;
-			}
+			WindowBoundsCheckNoResize(Tracer_wndx,Tracer_wndy,wrect.right);
 			#endif
 
 			break;

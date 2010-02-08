@@ -88,12 +88,7 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			MLogPosY = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			MLogPosX = 0;
-			}
-			if (MLogPosY < -18) {
-			MLogPosY = -18;
-			}
+			WindowBoundsCheckNoResize(MLogPosX,MLogPosY,wrect.right);
 			#endif
 
 			break;

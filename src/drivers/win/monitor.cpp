@@ -229,12 +229,7 @@ BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			Monitor_wndy = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			Monitor_wndx = 0;
-			}
-			if (Monitor_wndy < -18) {
-			Monitor_wndy = -18;
-			}
+			WindowBoundsCheckNoResize(Monitor_wndx,Monitor_wndy,wrect.right);
 			#endif
 
 			break;

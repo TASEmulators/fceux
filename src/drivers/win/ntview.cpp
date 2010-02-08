@@ -426,12 +426,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			NTViewPosY = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			NTViewPosX = 0;
-			}
-			if (NTViewPosY < -18) {
-			NTViewPosY = -18;
-			}
+			WindowBoundsCheckNoResize(NTViewPosX,NTViewPosY,wrect.right);
 			#endif
 
 			break;

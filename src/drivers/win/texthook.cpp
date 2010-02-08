@@ -877,12 +877,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			TextHookerPosY = wrect.top;
 
 			#ifdef WIN32
-			if (wrect.right < 59) {
-			TextHookerPosX = 0;
-			}
-			if (TextHookerPosY < -18) {
-			TextHookerPosY = -18;
-			}
+			WindowBoundsCheckNoResize(TextHookerPosX,TextHookerPosY,wrect.right);
 			#endif
 
 			break;

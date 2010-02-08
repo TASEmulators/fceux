@@ -1598,12 +1598,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		MemView_wndy = wrect.top;
 
 		#ifdef WIN32
-		if (wrect.right < 59) {
-		MemView_wndx = 59 - MemViewSizeX;
-		}
-		if (MemView_wndy < -18) {
-		MemView_wndy = -18;
-		}
+		WindowBoundsCheckResize(MemView_wndx,MemView_wndy,MemViewSizeX,wrect.right);
 		#endif
 		
 		return 0;
@@ -1706,12 +1701,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		MemFind_wndy = wrect.top;
 		
 		#ifdef WIN32
-		if (wrect.right < 59) {
-		MemFind_wndx = 0;
-		}
-		if (MemFind_wndy < -18) {
-		MemFind_wndy = -18;
-		}
+		WindowBoundsCheckNoResize(MemFind_wndx,MemFind_wndy,wrect.right);
 		#endif
 
 		break;

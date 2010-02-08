@@ -50,4 +50,6 @@ extern int eoptions;
 #define EO_FOURSCORE  32768
 
 bool directoryExists(const char* dirname);
+void WindowBoundsCheckResize(int &windowPosX, int &windowPosY, int windowSizeX, long windowRight);
+void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRight);
 #endif
