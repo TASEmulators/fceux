@@ -135,7 +135,7 @@ static int
 _keyonly(int a)
 {
 	// check for valid key
-	if(a > 350 || a < 0)
+	if(a > SDLK_LAST+1 || a < 0)
 		return(0);
     if(g_keyState[a]) {
         if(!keyonce[a]) {
