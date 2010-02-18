@@ -9,6 +9,7 @@
 #include "../common/configSys.h"
 #include "sdl.h"
 #include "gui.h"
+#include "dface.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -138,6 +139,10 @@ void emuResume ()
 	FCEUI_SetEmulationPaused(0);
 }
 
+void enableFullscreen ()
+{
+	ToggleFS();
+}
 
 #ifdef _S9XLUA_H
 void loadLua ()
@@ -211,11 +216,11 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
   { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
-  { "/Options/Check", NULL,         NULL,		   1, "<CheckItem>" },
-  { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },
-  { "/Options/Rad1",  NULL,         NULL,			1, "<RadioItem>" },
-  { "/Options/Rad2",  NULL,         NULL,			2, "/Options/Rad1" },
-  { "/Options/Rad3",  NULL,         NULL,			3, "/Options/Rad1" },
+  { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
+ // { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },
+ // { "/Options/Rad1",  NULL,         NULL,			1, "<RadioItem>" },
+ // { "/Options/Rad2",  NULL,         NULL,			2, "/Options/Rad1" },
+ // { "/Options/Rad3",  NULL,         NULL,			3, "/Options/Rad1" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
   { "/_Help/About",   NULL,         showAbout,           0, "<Item>" },
 };
@@ -262,7 +267,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_init(&argc, &argv);
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(MainWindow), "fceuX GTK GUI - WIP");
+	gtk_window_set_title(GTK_WINDOW(MainWindow), "FceuX");
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
 	
 	vbox = gtk_vbox_new(FALSE, 3);
