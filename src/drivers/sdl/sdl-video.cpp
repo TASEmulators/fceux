@@ -194,7 +194,11 @@ InitVideo(FCEUGI *gi)
     // check if we are rendering fullscreen
     if(s_fullscreen) {
         flags |= SDL_FULLSCREEN;
+        SDL_ShowCursor(0);
     }
+    else {
+		SDL_ShowCursor(1);
+	}
     
     if(noframe) {
         flags |= SDL_NOFRAME;
