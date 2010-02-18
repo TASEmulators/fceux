@@ -124,6 +124,21 @@ void openPrefs(void)
 	
 }
 
+void emuReset ()
+{
+	
+}
+
+void emuPause ()
+{
+	FCEUI_SetEmulationPaused(1);
+}
+void emuResume ()
+{
+	FCEUI_SetEmulationPaused(0);
+}
+
+
 #ifdef _S9XLUA_H
 void loadLua ()
 {
@@ -190,6 +205,10 @@ static GtkItemFactoryEntry menu_items[] = {
 #endif
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
+  { "/_Emulator",	NULL,			NULL,			0, "<Branch>"  },
+  { "/Emulator/_Reset", 	NULL, emuReset, 0, "<Item>"},
+  { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
+  { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
   { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/Check", NULL,         NULL,		   1, "<CheckItem>" },
