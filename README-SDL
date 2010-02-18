@@ -62,6 +62,8 @@ tweak these.
 	-soundq x 		internal sound quality hack value (0 off)
 	-soundrate x    	sound rate (sane values: 28000 48000
 	-soundbuffersize x 	(in ms)  sane values (30, 50, 100, 120)
+
+	* Running fceux through esddsp is known to fix some audio issues with pulseaudio
 	
 7.  Contact
 	If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact me personally, e-mail me at <LTsmooth42 <at> gmail.com>.  You can also check the developers out at #fceu on irc.freenode.net.	
