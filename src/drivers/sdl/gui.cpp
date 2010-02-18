@@ -197,6 +197,49 @@ gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
 	return TRUE;
 }
 
+void saveStateAs()
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Save State As", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		FCEUI_SaveState(filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+	
+	
+}
+
+void loadStateFrom()
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Load State From", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		FCEUI_LoadState(filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+	
+	
+}
+	
+
 /* Our menu, an array of GtkItemFactoryEntry structures that defines each menu item */
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",         NULL,         NULL,           0, "<Branch>" },
@@ -205,9 +248,14 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/File/_Close ROM",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
  // { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
   { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
+  { "/File/Savestate", NULL, NULL, 0, "<Branch>" },
+  { "/File/Savestate/Load State _From", NULL, loadStateFrom, 0, "<Item>"},
+  { "/File/Savestate/Save State _As", NULL, saveStateAs, 0, "<Item>"},
 #ifdef _S9XLUA_H  
   { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
 #endif
+  { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
+
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
   { "/_Emulator",	NULL,			NULL,			0, "<Branch>"  },
