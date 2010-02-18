@@ -7,12 +7,12 @@ opts.AddVariables(
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
-  BoolVariable('DEBUG',     'Build with debugging symbols', 0),
+  BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
-  BoolVariable('NEWPPU',    'Enable new PPU core', 0),
+  BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
-  BoolVariable('GTK2', 'Enable GTK2 GUI (SDL only) (EXPERIMENTAL!)', 0)
+  BoolVariable('GTK2', 'Enable GTK2 GUI (SDL only)', 0)
 )
 
 env = Environment(options = opts)
