@@ -148,6 +148,53 @@ void setQuality(GtkWidget* w, gpointer p)
 	return;
 }
 
+void setScaler(GtkWidget* w, gpointer p)
+{
+	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
+	g_config->setOption("SDL.SpecialFilter", x);
+}
+
+void openVideoConfig()
+{
+	GtkWidget* win;
+	GtkWidget* vbox;
+	GtkWidget* hbox1;
+	GtkWidget* scalerLbl;
+	GtkWidget* scalerCombo;
+	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
+	gtk_widget_set_size_request(win, 250, 400);
+	
+	vbox = gtk_vbox_new(FALSE, 3);
+	
+	// scalar widgets
+	hbox1 = gtk_hbox_new(FALSE, 3);
+	scalerLbl = gtk_label_new("Special Scaler: ");
+	scalerCombo = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "none");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq2x");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale2x");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq3x");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale3x");
+	
+	// sync with cfg
+	int buf;
+	g_config->getOption("SDL.SpecialFilter", &buf);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(scalerCombo), buf);
+	
+	g_signal_connect(GTK_OBJECT(scalerCombo), "changed", G_CALLBACK(setScaler), NULL);
+	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 2);
+		
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
+	
+	gtk_container_add(GTK_CONTAINER(win), vbox);
+	gtk_widget_show_all(win);
+	
+	return;
+}
+
 void openSoundConfig()
 {
 	GtkWidget* win;
@@ -260,7 +307,7 @@ void quit ()
 	FCEUI_Kill();
 	SDL_Quit();
 	gtk_main_quit();
-	return;
+	exit(0);
 }
 
 
@@ -437,6 +484,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
+  { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
@@ -541,7 +589,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
-	g_signal_connect(G_OBJECT(MainWindow), "destroy-event", quit, NULL);
+	//g_signal_connect(G_OBJECT(MainWindow), "destroy-event", quit, NULL);
 	
 		//gtk_idle_add(mainLoop, MainWindow);
 	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
