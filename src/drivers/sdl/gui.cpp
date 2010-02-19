@@ -27,7 +27,7 @@ int configGamepadButton(GtkButton* button, gpointer p)
 {
 	int x = GPOINTER_TO_INT(p);
 	int padNo = 0;
-	char* padStr = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(padNoCombo)->entry));
+	char* padStr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(padNoCombo));
 
 	if(!strcmp(padStr, "1"))
 		padNo = 0;
@@ -77,20 +77,18 @@ void openGamepadConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Gamepad Config");
-	gtk_widget_set_size_request(win, 300, 600);
+	gtk_widget_set_size_request(win, 250, 500);
 	vbox = gtk_vbox_new(TRUE, 2);
 	hboxPadNo = gtk_hbox_new(TRUE, 1);
 	padNoLabel = gtk_label_new("Gamepad Number:");
+
+	padNoCombo = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "2");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "3");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "4");
 	
-	padNoCombo = gtk_combo_new();
-	GList *padList = NULL;
-	
-	padList = g_list_append (padList, (void*)"1");
-	padList = g_list_append (padList, (void*)"2");
-	padList = g_list_append (padList, (void*)"3");
-	padList = g_list_append (padList, (void*)"4");
-	
-	gtk_combo_set_popdown_strings(GTK_COMBO(padNoCombo), padList);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(padNoCombo), 0);
 	
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 0);
@@ -151,7 +149,6 @@ void openSoundConfig()
 	GtkWidget* vbox;
 	GtkWidget* soundChk;
 	GtkWidget* hbox1;
-	GtkListStore* qualityList;
 	GtkWidget* qualityCombo;
 	GtkWidget* qualityLbl;
 	GtkWidget* hbox2;
