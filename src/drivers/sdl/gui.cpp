@@ -3,8 +3,11 @@
 
 #include<SDL/SDL.h>
 
+#include "../../types.h"
+#include "../../fceu.h"
 #include "../../driver.h"
 #include "../../version.h"
+
 
 #include "../common/configSys.h"
 #include "sdl.h"
@@ -23,6 +26,7 @@ extern Config *g_config;
 GtkWidget* MainWindow = NULL;
 GtkWidget* padNoCombo;
 
+// This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
 	int x = GPOINTER_TO_INT(p);
@@ -64,8 +68,7 @@ int configGamepadButton(GtkButton* button, gpointer p)
     return 0;
 }
 
-// TODO:  Implement something for gamepads 1 - 4
-// shouldnt be hard but im lazy right now
+// creates and opens the gamepad config window
 void openGamepadConfig()
 {
 	GtkWidget* win;
@@ -109,13 +112,15 @@ void openGamepadConfig()
 	return;
 }
 
-void setBufSize(GtkWidget* w, gpointer p)
+int setBufSize(GtkWidget* w, gpointer p)
 {
 	int x = gtk_range_get_value(GTK_RANGE(w));
 	g_config->setOption("SDL.SoundBufSize", x);
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
+	
+	return false;
 }
 
 void setRate(GtkWidget* w, gpointer p)
@@ -163,9 +168,13 @@ void openSoundConfig()
 	vbox = gtk_vbox_new(False, 2);
 	gtk_widget_set_size_request(win, 350, 250);
 	
+	
+	// sound enable check
+	soundChk = gtk_check_button_new_with_label("Enable sound");
+	
+	// sync with cfg
 	int cfgBuf;
 	g_config->getOption("SDL.Sound", &cfgBuf);
-	soundChk = gtk_check_button_new_with_label("Enable sound");
 	if(cfgBuf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), TRUE);
 	else
@@ -174,6 +183,7 @@ void openSoundConfig()
 	gtk_signal_connect(GTK_OBJECT(soundChk), "clicked",
 	 G_CALLBACK(toggleSound), NULL);
 	
+	// sound quality combo box
 	hbox1 = gtk_hbox_new(FALSE, 3);
 	qualityCombo = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Low");
@@ -214,6 +224,8 @@ void openSoundConfig()
 		
 	g_signal_connect(rateCombo, "changed", G_CALLBACK(setRate), NULL);
 	
+	
+	// sound rate widgets
 	rateLbl = gtk_label_new("Rate (Hz): ");
 	
 	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 3);
@@ -229,9 +241,9 @@ void openSoundConfig()
 	g_config->getOption("SDL.SoundBufSize", &cfgBuf);
 	gtk_range_set_value(GTK_RANGE(bufferHscale), cfgBuf);
 	
-	g_signal_connect(bufferHscale, "value-changed", G_CALLBACK(setBufSize), NULL);
+	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
 	
-	
+	// packing some boxes
 	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 2);
@@ -248,7 +260,7 @@ void quit ()
 	FCEUI_Kill();
 	SDL_Quit();
 	gtk_main_quit();
-	exit(0);
+	return;
 }
 
 
@@ -270,11 +282,7 @@ void showAbout ()
 	gtk_widget_show_all(GTK_WIDGET(aboutDialog));
 	
 	g_signal_connect(G_OBJECT(aboutDialog), "delete-event", quitAbout, NULL);
-
-	
-
 }
-GtkWidget* prefsWin;
 
 void toggleSound(GtkWidget* check, gpointer data)
 {
@@ -290,46 +298,9 @@ void toggleSound(GtkWidget* check, gpointer data)
 	}
 }
 
-void closePrefs(void)
-{
-	gtk_widget_hide_all(prefsWin);
-	//g_free(prefsWin);
-}
-
-void openPrefs(void)
-{
-	
-	GtkWidget* vbox;
-	GtkWidget* hbox;
-	GtkWidget* someLabel;
-	GtkWidget* someCheck;
-	GtkWidget* closeButton;
-	
-	prefsWin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(prefsWin), "Preferences");
-	vbox = gtk_vbox_new(TRUE, 5);
-	hbox = gtk_hbox_new(TRUE, 5);
-	someLabel = gtk_label_new("Enable something: ");
-	someCheck = gtk_check_button_new();
-	closeButton = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-	
-	gtk_container_add(GTK_CONTAINER(prefsWin), vbox);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox), someLabel, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox), someCheck, TRUE, TRUE, 5);
-	gtk_box_pack_end(GTK_BOX(vbox), closeButton, TRUE, TRUE, 5);
-	
-	gtk_widget_show_all(prefsWin);
-	
-	gtk_signal_connect(GTK_OBJECT(prefsWin), "delete-event", G_CALLBACK(closePrefs), NULL);
-	gtk_signal_connect(GTK_OBJECT(closeButton), "clicked", closePrefs, NULL);
-	
-	
-}
-
 void emuReset ()
 {
-	
+	ResetNES();
 }
 
 void emuPause ()
@@ -464,15 +435,10 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_Reset", 	NULL, emuReset, 0, "<Item>"},
   { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
-  { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
- // { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },
- // { "/Options/Rad1",  NULL,         NULL,			1, "<RadioItem>" },
- // { "/Options/Rad2",  NULL,         NULL,			2, "/Options/Rad1" },
- // { "/Options/Rad3",  NULL,         NULL,			3, "/Options/Rad1" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
   { "/_Help/About",   NULL,         showAbout,           0, "<Item>" },
 };
@@ -575,12 +541,12 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
+	g_signal_connect(G_OBJECT(MainWindow), "destroy-event", quit, NULL);
 	
 		//gtk_idle_add(mainLoop, MainWindow);
 	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
 
 	gtk_widget_show_all(MainWindow);
-	
 	
 	return 0;
 }
