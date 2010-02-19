@@ -16,6 +16,8 @@
 #include "../../fceulua.h"
 #endif
 
+void toggleSound(GtkWidget* check, gpointer data);
+
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
@@ -109,12 +111,47 @@ void openGamepadConfig()
 	return;
 }
 
+void setBufSize(GtkWidget* w, gpointer p)
+{
+	int x = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.SoundBufSize", x);
+	// reset sound subsystem for changes to take effect
+	KillSound();
+	InitSound();
+}
+
+void setRate(GtkWidget* w, gpointer p)
+{
+	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
+	g_config->setOption("SDL.SoundRate", atoi(str));
+	// reset sound subsystem for changes to take effect
+	KillSound();
+	InitSound();
+		
+	return;
+}
+
+void setQuality(GtkWidget* w, gpointer p)
+{
+	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
+	if(!strcmp(str, "High"))
+		g_config->setOption("SDL.SoundQuality", 1);
+	if(!strcmp(str, "Low"))
+		g_config->setOption("SDL.SoundQuality", 0);
+	// reset sound subsystem for changes to take effect
+	KillSound();
+	InitSound();
+		
+	return;
+}
+
 void openSoundConfig()
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
 	GtkWidget* soundChk;
 	GtkWidget* hbox1;
+	GtkListStore* qualityList;
 	GtkWidget* qualityCombo;
 	GtkWidget* qualityLbl;
 	GtkWidget* hbox2;
@@ -127,34 +164,58 @@ void openSoundConfig()
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
 	vbox = gtk_vbox_new(False, 2);
+	gtk_widget_set_size_request(win, 350, 250);
 	
+	int cfgBuf;
+	g_config->getOption("SDL.Sound", &cfgBuf);
 	soundChk = gtk_check_button_new_with_label("Enable sound");
+	if(cfgBuf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), FALSE);
+	
+	gtk_signal_connect(GTK_OBJECT(soundChk), "clicked",
+	 G_CALLBACK(toggleSound), NULL);
 	
 	hbox1 = gtk_hbox_new(FALSE, 3);
-	qualityCombo = gtk_combo_new();
-	GList *qualityList = NULL;
-	
-	qualityList = g_list_append (qualityList, (void*)"Low");
-	qualityList = g_list_append (qualityList, (void*)"High");
-	
-	gtk_combo_set_popdown_strings(GTK_COMBO(qualityCombo), qualityList);
+	qualityCombo = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Low");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "High");
+
+	// sync widget with cfg 
+	g_config->getOption("SDL.SoundQuality", &cfgBuf);
+	if(cfgBuf)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 1);
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 0);
+		
+	g_signal_connect(qualityCombo, "changed", G_CALLBACK(setQuality), NULL);
 	
 	qualityLbl = gtk_label_new("Quality: ");
 	
 	gtk_box_pack_start(GTK_BOX(hbox1), qualityLbl, FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(hbox1), qualityCombo, FALSE, FALSE, 3);
 	
+	// sound rate widgets
 	hbox2 = gtk_hbox_new(FALSE, 3);
-	rateCombo = gtk_combo_new();
-	GList *rateList = NULL;
+	rateCombo = gtk_combo_box_new_text();
 	
-	rateList = g_list_append (rateList, (void*)"11025");
-	rateList = g_list_append (rateList, (void*)"22050");
-	rateList = g_list_append (rateList, (void*)"44100");
-	rateList = g_list_append (rateList, (void*)"48000");
-	rateList = g_list_append (rateList, (void*)"96000");
+	const int rates[5] = {11025, 22050, 44100, 48000, 96000};
 	
-	gtk_combo_set_popdown_strings(GTK_COMBO(rateCombo), rateList);
+	char buf[8];
+	for(int i=0; i<5;i++)
+	{
+		sprintf(buf, "%d", rates[i]);
+		gtk_combo_box_append_text(GTK_COMBO_BOX(rateCombo), buf);	
+	}
+	
+	// sync widget with cfg 
+	g_config->getOption("SDL.SoundRate", &cfgBuf);
+	for(int i=0; i<5; i++)
+		if(cfgBuf == rates[i])
+			gtk_combo_box_set_active(GTK_COMBO_BOX(rateCombo), i);
+		
+	g_signal_connect(rateCombo, "changed", G_CALLBACK(setRate), NULL);
 	
 	rateLbl = gtk_label_new("Rate (Hz): ");
 	
@@ -166,6 +227,12 @@ void openSoundConfig()
 	bufferLbl = gtk_label_new("Buffer size (ms): ");
 	gtk_box_pack_start(GTK_BOX(hbox3), bufferLbl, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox3), bufferHscale, TRUE, TRUE, 2);
+	
+	// sync widget with cfg 
+	g_config->getOption("SDL.SoundBufSize", &cfgBuf);
+	gtk_range_set_value(GTK_RANGE(bufferHscale), cfgBuf);
+	
+	g_signal_connect(bufferHscale, "value-changed", G_CALLBACK(setBufSize), NULL);
 	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 2);
@@ -444,9 +511,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	//GtkWidget* MainWindow;
 	GtkWidget* Menubar;
 	GtkWidget* vbox;
-	GtkWidget* soundLabel;
-	GtkWidget* soundCheck;
-	GtkWidget* soundHbox;
+
 	int xres, yres;
 	
 	g_config->getOption("SDL.XResolution", &xres);
@@ -459,26 +524,14 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
 	
 	vbox = gtk_vbox_new(FALSE, 3);
-	soundHbox = gtk_hbox_new(FALSE, 5);
-	soundLabel = gtk_label_new("Enable sound: ");
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
 	
-	soundCheck = gtk_check_button_new();
-	
-	int s;
-	g_config->getOption("SDL.Sound", &s);
-	if(s)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), TRUE);
-	else
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundCheck), FALSE);
 		
 	//gtk_container_add(GTK_CONTAINER(vbox), Menubar);
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), soundHbox, TRUE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(soundHbox), soundLabel, FALSE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(soundHbox), soundCheck, FALSE, TRUE, 5);
+	
 
 	
 	
@@ -526,8 +579,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	// signal handlers
 	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
 	
-	gtk_signal_connect(GTK_OBJECT(soundCheck), "clicked", G_CALLBACK(toggleSound), NULL);
-	//gtk_idle_add(mainLoop, MainWindow);
+		//gtk_idle_add(mainLoop, MainWindow);
 	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
 
 	gtk_widget_show_all(MainWindow);
