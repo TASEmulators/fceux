@@ -527,7 +527,7 @@ static GtkItemFactoryEntry menu_items[] = {
 #endif
   { "/File/Load _Movie", NULL, loadMovie, 0, "<Item>"},
   { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
-
+  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
   { "/_Emulator",	NULL,			NULL,			0, "<Branch>"  },
@@ -537,7 +537,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
-  { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
+  { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
   { "/_Help/About",   NULL,         showAbout,           0, "<Item>" },
