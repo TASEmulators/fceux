@@ -10,6 +10,7 @@
 #include "sdl.h"
 #include "gui.h"
 #include "dface.h"
+#include "input.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -17,28 +18,62 @@
 
 extern Config *g_config;
 
-// test rendering
-//SDL_Surface* screen = NULL;
-//SDL_Surface* hello = NULL;
-
 GtkWidget* MainWindow = NULL;
 
-
-// we're not using this loop right now since integrated sdl is broken 
-gint mainLoop(gpointer data)
+int configGamepadButton(GtkButton* button, gpointer p)
 {
-	// test render
-	/*
-	SDL_UpdateRect(screen, 0, 0, xres, yres);
+	int x = GPOINTER_TO_INT(p);
+	int padNo = 0;
+    char buf[256];
+    std::string prefix;
+    
+    ButtonConfigBegin();
+    
+    snprintf(buf, 256, "SDL.Input.GamePad.%d", padNo);
+    prefix = buf;
+    ConfigButton("Press key twice to bind...", &GamePadConfig[padNo][x]);
+
+    g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[0]);
+
+    if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
+    {
+		g_config->setOption(prefix + "DeviceType", "Keyboard");
+    } else if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK) {
+        g_config->setOption(prefix + "DeviceType", "Joystick");
+    } else {
+        g_config->setOption(prefix + "DeviceType", "Unknown");
+    }
+    g_config->setOption(prefix + "DeviceNum", GamePadConfig[padNo][0].DeviceNum[0]);
+
+    ButtonConfigEnd();
+    
+    return 0;
+}
+
+// TODO:  Implement something for gamepads 1 - 4
+// shouldnt be hard but im lazy right now
+void openGamepadConfig()
+{
+	GtkWidget* win;
+	GtkWidget* vbox;
+	GtkWidget* buttons[10];
 	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win), "Gamepad 1 Config");
+	gtk_widget_set_size_request(win, 250, 600);
+	vbox = gtk_vbox_new(TRUE, 2);
+	for(int i=0; i<10; i++)
+	{
+		buttons[i] = gtk_button_new_with_label(GamePadNames[i]);
+		gtk_box_pack_start(GTK_BOX(vbox), buttons[i], TRUE, TRUE, 5);
+		gtk_signal_connect(GTK_OBJECT(buttons[i]), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));	
+	}
 	
-	SDL_BlitSurface (hello, NULL, screen, NULL);
+	gtk_container_add(GTK_CONTAINER(win), vbox);
 	
-	SDL_Flip( screen );
-	*/
-	DoFun(0);
+	gtk_widget_show_all(win);
 	
-	return TRUE;
+	return;
 }
 
 void quit ()
@@ -263,6 +298,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
   { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
+  { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
  // { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },
@@ -395,3 +431,4 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	return 0;
 }
+

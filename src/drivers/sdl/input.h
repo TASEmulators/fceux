@@ -16,6 +16,9 @@ extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys();
+int ButtonConfigBegin();
+void ButtonConfigEnd();
+void ConfigButton(char *text, ButtConfig *bc);
 
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01
@@ -28,12 +31,10 @@ void setHotKeys();
 
 void InitInputInterface(void);
 void InputUserActiveFix(void);
-#ifdef EXTGUI
 extern ButtConfig GamePadConfig[4][10];
-extern ButtConfig powerpadsc[2][12];
-extern ButtConfig QuizKingButtons[6];
-extern ButtConfig FTrainerButtons[12];
-#endif
+//extern ButtConfig powerpadsc[2][12];
+//extern ButtConfig QuizKingButtons[6];
+//extern ButtConfig FTrainerButtons[12];
 
 void IncreaseEmulationSpeed(void);
 void DecreaseEmulationSpeed(void);
@@ -44,5 +45,7 @@ void FCEUD_UpdateInput(void);
 
 void UpdateInput(Config *config);
 void InputCfg(const std::string &);
+
+
 
 #endif

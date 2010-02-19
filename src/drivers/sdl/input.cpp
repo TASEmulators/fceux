@@ -745,7 +745,7 @@ static int bcpv,bcpj;
  *  subsystems into a well-known state.  Button configuration really
  *  needs to be cleaned up after the new config system is in place.
  */
-static int
+int
 ButtonConfigBegin()
 {
     SDL_Surface *screen;
@@ -781,7 +781,7 @@ ButtonConfigBegin()
  *  subsystems to their previous state.  Button configuration really
  *  needs to be cleaned up after the new config system is in place.
  */
-static void
+void
 ButtonConfigEnd()
 { 
     extern FCEUGI *GameInfo;
@@ -829,7 +829,7 @@ DTestButton(ButtConfig *bc)
 #define MKZ()       {{0},{0},{0},0}
 #define GPZ()       {MKZ(), MKZ(), MKZ(), MKZ()}
 
-static ButtConfig GamePadConfig[4][10]={
+ButtConfig GamePadConfig[4][10]={
         /* Gamepad 1 */
         { MK(KP3), MK(KP2), MK(TAB), MK(ENTER),
           MK(W), MK(Z), MK(A), MK(S), MKZ(), MKZ() },
@@ -1321,7 +1321,7 @@ DWaitButton(const uint8 *text,
  * used as input for the specified button, thus allowing up to four
  * possible settings for each input button.
  */
-static void
+void
 ConfigButton(char *text,
        ButtConfig *bc)
 {
@@ -1713,7 +1713,6 @@ UpdateInput(Config *config)
         fkbmap[j].NumC = 1;
     }
 }
-
 // Definitions from main.h:
 // GamePad defaults
 const char *GamePadNames[GAMEPAD_NUM_BUTTONS] =
@@ -1807,3 +1806,4 @@ const int DefaultFamilyKeyBoard[FAMILYKEYBOARD_NUM_BUTTONS] =
       SDLK_n, SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH, SDLK_RALT,
       SDLK_RSHIFT, SDLK_LALT, SDLK_SPACE, SDLK_DELETE, SDLK_END, SDLK_PAGEDOWN,
       SDLK_UP, SDLK_LEFT, SDLK_RIGHT, SDLK_DOWN };
+
