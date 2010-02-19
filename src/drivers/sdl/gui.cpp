@@ -19,11 +19,23 @@
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
+GtkWidget* padNoCombo;
 
 int configGamepadButton(GtkButton* button, gpointer p)
 {
 	int x = GPOINTER_TO_INT(p);
 	int padNo = 0;
+	char* padStr = (char*)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(padNoCombo)->entry));
+
+	if(!strcmp(padStr, "1"))
+		padNo = 0;
+	if(!strcmp(padStr, "2"))
+		padNo = 1;
+	if(!strcmp(padStr, "3"))
+		padNo = 2;
+	if(!strcmp(padStr, "4"))
+		padNo = 3;
+		
     char buf[256];
     std::string prefix;
     
@@ -31,7 +43,7 @@ int configGamepadButton(GtkButton* button, gpointer p)
     
     snprintf(buf, 256, "SDL.Input.GamePad.%d", padNo);
     prefix = buf;
-    ConfigButton("Press key twice to bind...", &GamePadConfig[padNo][x]);
+    ConfigButton((char*)GamePadNames[x], &GamePadConfig[padNo][x]);
 
     g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[0]);
 
@@ -56,16 +68,37 @@ void openGamepadConfig()
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
+	GtkWidget* hboxPadNo;
+	GtkWidget* padNoLabel;
+	
 	GtkWidget* buttons[10];
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "Gamepad 1 Config");
-	gtk_widget_set_size_request(win, 250, 600);
+	gtk_window_set_title(GTK_WINDOW(win), "Gamepad Config");
+	gtk_widget_set_size_request(win, 300, 600);
 	vbox = gtk_vbox_new(TRUE, 2);
+	hboxPadNo = gtk_hbox_new(TRUE, 1);
+	padNoLabel = gtk_label_new("Gamepad Number:");
+	
+	padNoCombo = gtk_combo_new();
+	GList *padList = NULL;
+	
+	padList = g_list_append (padList, (void*)"1");
+	padList = g_list_append (padList, (void*)"2");
+	padList = g_list_append (padList, (void*)"3");
+	padList = g_list_append (padList, (void*)"4");
+	
+	gtk_combo_set_popdown_strings(GTK_COMBO(padNoCombo), padList);
+	
+	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hboxPadNo, TRUE, TRUE, 5);
+	
+	// create gamepad buttons
 	for(int i=0; i<10; i++)
 	{
 		buttons[i] = gtk_button_new_with_label(GamePadNames[i]);
-		gtk_box_pack_start(GTK_BOX(vbox), buttons[i], TRUE, TRUE, 5);
+		gtk_box_pack_start(GTK_BOX(vbox), buttons[i], TRUE, TRUE, 2);
 		gtk_signal_connect(GTK_OBJECT(buttons[i]), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));	
 	}
 	
