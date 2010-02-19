@@ -20,5 +20,6 @@
 #ifndef FCEUX_GUI_H
 #define FCEUX_GUI_H
 int InitGTKSubsystem(int argc, char** argv);
-
+void pushOutputToGTK(const char* str);
+void showGui(bool b);
 #endif

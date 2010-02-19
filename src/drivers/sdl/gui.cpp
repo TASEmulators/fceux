@@ -3,6 +3,8 @@
 
 #include<SDL/SDL.h>
 
+//#include <vte/vte.h>
+
 #include "../../types.h"
 #include "../../fceu.h"
 #include "../../driver.h"
@@ -567,14 +569,39 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	/* Finally, return the actual menu bar created by the item factory. */
 	return gtk_item_factory_get_widget (item_factory, "<main>");
 }
+//GtkTextBuffer* gtkConsoleBuf;
+//GtkWidget* consoleOutput;
+//GtkTextIter iter;
+char* buf;
+//GtkWidget* term;
 
+void pushOutputToGTK(const char* str)
+{
+	
+	//printf(str);
+	//gtk_text_buffer_insert(GTK_TEXT_BUFFER(gtkConsoleBuf), &iter, str, -1);
+	//gtk_text_buffer_set_text(gtkConsoleBuf, str, -1);
+	
+	//vte_terminal_feed_child(VTE_TERMINAL(term), str, -1);
+	return;
+}
+
+void showGui(bool b)
+{
+	if(b)
+		gtk_widget_show_all(MainWindow);
+	else
+		gtk_widget_hide_all(MainWindow);
+}
 
 int InitGTKSubsystem(int argc, char** argv)
 {
 	//GtkWidget* MainWindow;
 	GtkWidget* Menubar;
 	GtkWidget* vbox;
-
+	
+	
+	
 	int xres, yres;
 	
 	g_config->getOption("SDL.XResolution", &xres);
@@ -591,9 +618,21 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	Menubar = CreateMenubar(MainWindow);
 	
+	//consoleOutput = gtk_text_view_new_with_buffer(gtkConsoleBuf);
+	//gtk_text_view_set_editable(GTK_TEXT_VIEW(consoleOutput), FALSE);
+	
+	//gtkConsoleBuf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(consoleOutput));
+	//gtk_text_buffer_get_iter_at_offset(gtkConsoleBuf, &iter, 0);
+	//gtk_text_buffer_insert(gtkConsoleBuf, &iter, "FceuX GUI Started.\n", -1);
+	// = vte_terminal_new();
+	//vte_terminal_feed(VTE_TERMINAL(term), "FceuX GUI Started", -1);
+	
+	
+	
 		
 	//gtk_container_add(GTK_CONTAINER(vbox), Menubar);
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
+	//gtk_box_pack_start (GTK_BOX(vbox), term, TRUE, TRUE, 0);
 	
 
 	

@@ -806,6 +806,9 @@ FCEUD_GetTimeFreq(void)
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
+	#ifdef _GTK2
+	pushOutputToGTK(text);
+	#endif
 }
 
 /**

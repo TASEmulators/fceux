@@ -41,6 +41,10 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
+#ifdef _GTK2
+#include "gui.h"
+#endif
+
 // GLOBALS
 extern Config *g_config;
 
@@ -434,7 +438,12 @@ ToggleFS()
 
     // flip the fullscreen flag
     g_config->setOption("SDL.Fullscreen", !fullscreen);
-
+#ifdef _GTK2
+	if(!fullscreen)
+		showGui(0);
+	else
+		showGui(1);
+#endif
     // try to initialize the video
     error = InitVideo(GameInfo);
     if(error) {
