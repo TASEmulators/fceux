@@ -109,6 +109,76 @@ void openGamepadConfig()
 	return;
 }
 
+void openSoundConfig()
+{
+	GtkWidget* win;
+	GtkWidget* vbox;
+	GtkWidget* soundChk;
+	GtkWidget* hbox1;
+	GtkWidget* qualityCombo;
+	GtkWidget* qualityLbl;
+	GtkWidget* hbox2;
+	GtkWidget* rateCombo;
+	GtkWidget* rateLbl;
+	GtkWidget* hbox3;
+	GtkWidget* bufferLbl;
+	GtkWidget* bufferHscale;
+	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
+	vbox = gtk_vbox_new(False, 2);
+	
+	soundChk = gtk_check_button_new_with_label("Enable sound");
+	
+	hbox1 = gtk_hbox_new(FALSE, 3);
+	qualityCombo = gtk_combo_new();
+	GList *qualityList = NULL;
+	
+	qualityList = g_list_append (qualityList, (void*)"Low");
+	qualityList = g_list_append (qualityList, (void*)"High");
+	
+	gtk_combo_set_popdown_strings(GTK_COMBO(qualityCombo), qualityList);
+	
+	qualityLbl = gtk_label_new("Quality: ");
+	
+	gtk_box_pack_start(GTK_BOX(hbox1), qualityLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(hbox1), qualityCombo, FALSE, FALSE, 3);
+	
+	hbox2 = gtk_hbox_new(FALSE, 3);
+	rateCombo = gtk_combo_new();
+	GList *rateList = NULL;
+	
+	rateList = g_list_append (rateList, (void*)"11025");
+	rateList = g_list_append (rateList, (void*)"22050");
+	rateList = g_list_append (rateList, (void*)"44100");
+	rateList = g_list_append (rateList, (void*)"48000");
+	rateList = g_list_append (rateList, (void*)"96000");
+	
+	gtk_combo_set_popdown_strings(GTK_COMBO(rateCombo), rateList);
+	
+	rateLbl = gtk_label_new("Rate (Hz): ");
+	
+	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 3);
+	
+	hbox3 = gtk_hbox_new(FALSE, 2);
+	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
+	bufferLbl = gtk_label_new("Buffer size (ms): ");
+	gtk_box_pack_start(GTK_BOX(hbox3), bufferLbl, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox3), bufferHscale, TRUE, TRUE, 2);
+	
+	
+	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox3, FALSE, FALSE, 2);
+	gtk_container_add(GTK_CONTAINER(win), vbox);
+	
+	gtk_widget_show_all(win);
+	
+	return;
+}
+
 void quit ()
 {
 	FCEUI_Kill();
@@ -332,6 +402,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
   { "/Options/_Preferences", "<CTRL>P" , openPrefs, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
+  { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/tear",  NULL,         NULL,           0, "<Tearoff>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
  // { "/Options/sep",   NULL,         NULL,           0, "<Separator>" },
