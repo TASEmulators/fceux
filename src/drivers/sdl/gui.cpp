@@ -7,6 +7,7 @@
 #include "../../fceu.h"
 #include "../../driver.h"
 #include "../../version.h"
+#include "../../movie.h"
 
 
 #include "../common/configSys.h"
@@ -154,19 +155,31 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.SpecialFilter", x);
 }
 
+void setGL(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_config->setOption("SDL.OpenGL", 1);
+	else
+		g_config->setOption("SDL.OpenGL", 0);
+}
+
 void openVideoConfig()
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
+	GtkWidget* lbl;
 	GtkWidget* hbox1;
 	GtkWidget* scalerLbl;
 	GtkWidget* scalerCombo;
+	GtkWidget* glChk;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
 	gtk_widget_set_size_request(win, 250, 400);
 	
 	vbox = gtk_vbox_new(FALSE, 3);
+	
+	lbl = gtk_label_new("Video options do not take \neffect until the emulator is restared.");
 	
 	// scalar widgets
 	hbox1 = gtk_hbox_new(FALSE, 3);
@@ -186,8 +199,23 @@ void openVideoConfig()
 	g_signal_connect(GTK_OBJECT(scalerCombo), "changed", G_CALLBACK(setScaler), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 2);
-		
+	
+	// openGL check
+	glChk = gtk_check_button_new_with_label("Enable OpenGL");
+	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(setGL), NULL);
+	
+	// sync with config
+	g_config->getOption("SDL.OpenGL", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 0);
+	
+	
+	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 2);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 2);
+	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);
 	gtk_widget_show_all(win);
@@ -364,6 +392,29 @@ void enableFullscreen ()
 	ToggleFS();
 }
 
+void loadMovie ()
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open FM2 Movie", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* fname;
+		
+		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		static int pauseframe;
+        g_config->getOption("SDL.PauseFrame", &pauseframe);
+        g_config->setOption("SDL.PauseFrame", 0);
+        FCEUI_printf("Playing back movie located at %s\n", fname);
+        FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false);
+		g_free(fname);
+	}
+	gtk_widget_destroy (fileChooser);
+}
+
 #ifdef _S9XLUA_H
 void loadLua ()
 {
@@ -474,6 +525,7 @@ static GtkItemFactoryEntry menu_items[] = {
 #ifdef _S9XLUA_H  
   { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
 #endif
+  { "/File/Load _Movie", NULL, loadMovie, 0, "<Item>"},
   { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
 
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
