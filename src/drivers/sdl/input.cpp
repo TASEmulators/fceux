@@ -166,6 +166,7 @@ int pauseKey;
 int decreaseSpeedKey;
 int increaseSpeedKey;
 int frameAdvanceKey;
+int ffKey;
 int powerKey;
 int bindStateKey;
 int frameAdvanceLagSkipKey;
@@ -198,6 +199,7 @@ void setHotKeys()
 	g_config->getOption("SDL.Hotkeys.IncreaseSpeed", &increaseSpeedKey);
 	g_config->getOption("SDL.Hotkeys.DecreaseSpeed", &decreaseSpeedKey);
 	g_config->getOption("SDL.Hotkeys.FrameAdvance", &frameAdvanceKey);
+	g_config->getOption("SDL.Hotkeys.FastForward", &ffKey);
 	g_config->getOption("SDL.Hotkeys.Power", &powerKey);
 	g_config->getOption("SDL.Hotkeys.Pause", &bindStateKey);
 	g_config->getOption("SDL.Hotkeys.FrameAdvanceLagSkip", &frameAdvanceLagSkipKey);
@@ -424,11 +426,7 @@ KeyboardCommands()
         ToggleFS();
     }
 
-    // Toggle throttling
-    NoWaiting &= ~1;
-    if(KEY(TAB)) {
-        NoWaiting |= 1;
-    }
+    
     
     // Toggle Movie auto-backup
     if(keyonly(M) && is_shift) {
@@ -507,7 +505,7 @@ KeyboardCommands()
             }
         }
     }
-
+	
     
     if(_keyonly(decreaseSpeedKey)) {
         DecreaseEmulationSpeed();
@@ -540,6 +538,12 @@ KeyboardCommands()
 
     if(_keyonly(pauseKey)) {
         FCEUI_ToggleEmulationPause();
+    }
+    
+    // Toggle throttling
+    NoWaiting &= ~1;
+	if(g_keyState[ffKey]) {
+        NoWaiting |= 1;
     }
     
     static bool frameAdvancing = false;
