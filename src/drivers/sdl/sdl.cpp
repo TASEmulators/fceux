@@ -190,6 +190,15 @@ int LoadGame(const char *path)
     if(!DriverInitialize(GameInfo)) {
         return(0);
     }
+    
+    // set pal/ntsc
+    int buf;
+    g_config->getOption("SDL.PAL", &buf);
+    if(buf)
+		FCEUI_SetVidSystem(1);
+	else
+		FCEUI_SetVidSystem(0);
+	
 
     g_config->getOption("SDL.SoundRecordFile", &filename);
     if(filename.size()) {
@@ -519,6 +528,7 @@ SDL_GL_LoadLibrary(0);
 
     // Initialize the configuration system
     g_config = InitConfig();
+    
 	
     if(!g_config) {
         SDL_Quit();
@@ -532,7 +542,7 @@ SDL_GL_LoadLibrary(0);
         SDL_Quit();
         return -1;
     }
-
+    
     int romIndex = g_config->parse(argc, argv);
 
 	//mbg 8/23/2008 - this is also here so that the inputcfg routines can have a chance to dump the new inputcfg to the fceux.cfg
@@ -543,11 +553,14 @@ SDL_GL_LoadLibrary(0);
 	  g_config->getOption("SDL.NoConfig", &noconfig);
 	  if (!noconfig)
 	    g_config->save();
+	
 	std::string s;
 	g_config->getOption("SDL.InputCfg", &s);
 	
 	// update the input devices
     UpdateInput(g_config);
+    
+
 
     // check for a .fcm file to convert to .fm2
     g_config->getOption ("SDL.FCMConvert", &s);
@@ -831,7 +844,6 @@ DUMMY(FCEUD_MovieReplayFrom)
 DUMMY(FCEUD_ToggleStatusIcon)
 DUMMY(FCEUD_AviRecordTo)
 DUMMY(FCEUD_AviStop)
-DUMMY(FCEUD_VideoChanged);
 void FCEUI_AviVideoUpdate(const unsigned char* buffer) { }
 int FCEUD_ShowStatusIcon(void) {return 0;}
 bool FCEUI_AviIsRecording(void) {return false;}

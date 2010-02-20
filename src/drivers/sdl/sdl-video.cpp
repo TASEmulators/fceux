@@ -133,7 +133,15 @@ inline double GetYScale(int yres)
 {
     return ((double)yres) / s_tlines;
 }
-    
+void FCEUD_VideoChanged()
+{
+	int buf;
+	g_config->getOption("SDL.PAL", &buf);
+	if(buf)
+		PAL = 1;
+	else
+		PAL = 0;
+}
 /**
  * Attempts to initialize the graphical video display.  Returns 0 on
  * success, -1 on failure.

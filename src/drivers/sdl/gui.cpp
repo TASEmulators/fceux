@@ -157,6 +157,21 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.SpecialFilter", x);
 }
 
+void setPal(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+	{
+		g_config->setOption("SDL.PAL", 1);
+		FCEUI_SetVidSystem(1);
+	}
+	else
+	{
+		g_config->setOption("SDL.PAL", 0);
+		FCEUI_SetVidSystem(0);
+	}
+	return;
+}
+
 void setGL(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -174,6 +189,7 @@ void openVideoConfig()
 	GtkWidget* scalerLbl;
 	GtkWidget* scalerCombo;
 	GtkWidget* glChk;
+	GtkWidget* palChk;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
@@ -212,11 +228,23 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 0);
+		
+	// PAL check
+	palChk = gtk_check_button_new_with_label("Enable PAL mode");
+	g_signal_connect(GTK_OBJECT(palChk), "clicked", G_CALLBACK(setPal), NULL);
+	
+	// sync with config
+	g_config->getOption("SDL.PAL", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 0);
 	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 2);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE, 2);
 	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);
