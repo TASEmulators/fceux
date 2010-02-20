@@ -664,6 +664,16 @@ SDL_GL_LoadLibrary(0);
       return 0;
     }
 	
+	for(int i=0; i<argc;i++)
+	{
+		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+		{
+			ShowUsage(argv[0]);
+			SDL_Quit();
+			return 0;
+		}
+	}
+	
 	#ifndef _GTK2
     if(romIndex <= 0) {
 		
