@@ -662,7 +662,7 @@ Config::save()
         config.open(configFile.c_str(), std::ios::out | std::ios::trunc);
 
         // write a warning
-        strcpy(buf, "# Auto-generated\n");
+        strcpy(buf, "# Auto-generated\n# SDL keycodes defined in /usr/include/SDL/SDL_keysym.h\n");
         config.write(buf, strlen(buf));
 
         // write each configuration setting
