@@ -765,9 +765,12 @@ SDL_GL_LoadLibrary(0);
     }
 	#endif
 	
-	g_config->getOption("SDL.NewPPU", &fname);
-	if (fname == "1")
+	{
+	int id;
+	g_config->getOption("SDL.NewPPU", &id);
+	if (id)
 		newppu = 1;
+	}
 	/*g_config->setOption("SDL.LuaScript", "");
     if (fname != "")
     {

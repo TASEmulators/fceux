@@ -122,7 +122,7 @@ int setBufSize(GtkWidget* w, gpointer p)
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
-	
+	g_config->save();
 	return false;
 }
 
@@ -133,7 +133,7 @@ void setRate(GtkWidget* w, gpointer p)
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
-		
+	g_config->save();	
 	return;
 }
 
@@ -147,7 +147,7 @@ void setQuality(GtkWidget* w, gpointer p)
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
-		
+	g_config->save();	
 	return;
 }
 
@@ -155,6 +155,7 @@ void setScaler(GtkWidget* w, gpointer p)
 {
 	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
 	g_config->setOption("SDL.SpecialFilter", x);
+	g_config->save();
 }
 
 void setPal(GtkWidget* w, gpointer p)
@@ -169,7 +170,23 @@ void setPal(GtkWidget* w, gpointer p)
 		g_config->setOption("SDL.PAL", 0);
 		FCEUI_SetVidSystem(0);
 	}
+	g_config->save();
 	return;
+}
+
+void setPpu(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+	{
+		g_config->setOption("SDL.NewPPU", 1);
+		newppu = 1;
+	}
+	else
+	{
+		g_config->setOption("SDL.NewPPU", 0);
+		newppu = 0;
+	}
+	g_config->save();
 }
 
 void setGL(GtkWidget* w, gpointer p)
@@ -178,6 +195,7 @@ void setGL(GtkWidget* w, gpointer p)
 		g_config->setOption("SDL.OpenGL", 1);
 	else
 		g_config->setOption("SDL.OpenGL", 0);
+	g_config->save();
 }
 
 void openVideoConfig()
@@ -190,6 +208,7 @@ void openVideoConfig()
 	GtkWidget* scalerCombo;
 	GtkWidget* glChk;
 	GtkWidget* palChk;
+	GtkWidget* ppuChk;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
@@ -239,12 +258,25 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 0);
+		
+	// New PPU check
+	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
+	g_signal_connect(GTK_OBJECT(ppuChk), "clicked", G_CALLBACK(setPpu), NULL);
+	
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.NewPPU", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
 	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 2);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 2);
 	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);
