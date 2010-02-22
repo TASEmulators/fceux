@@ -158,43 +158,15 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->save();
 }
 
-void setPal(GtkWidget* w, gpointer p)
+// Wrapper for pushing GTK options into the config file
+// p : pointer to the string that names the config option
+// w : toggle widget
+void toggleOption(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
-	{
-		g_config->setOption("SDL.PAL", 1);
-		FCEUI_SetVidSystem(1);
-	}
+		g_config->setOption((char*)p, 1);
 	else
-	{
-		g_config->setOption("SDL.PAL", 0);
-		FCEUI_SetVidSystem(0);
-	}
-	g_config->save();
-	return;
-}
-
-void setPpu(GtkWidget* w, gpointer p)
-{
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
-	{
-		g_config->setOption("SDL.NewPPU", 1);
-		newppu = 1;
-	}
-	else
-	{
-		g_config->setOption("SDL.NewPPU", 0);
-		newppu = 0;
-	}
-	g_config->save();
-}
-
-void setGL(GtkWidget* w, gpointer p)
-{
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
-		g_config->setOption("SDL.OpenGL", 1);
-	else
-		g_config->setOption("SDL.OpenGL", 0);
+		g_config->setOption((char*)p, 0);
 	g_config->save();
 }
 
@@ -239,7 +211,7 @@ void openVideoConfig()
 	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
-	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(setGL), NULL);
+	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGL");
 	
 	// sync with config
 	g_config->getOption("SDL.OpenGL", &buf);
@@ -250,7 +222,7 @@ void openVideoConfig()
 		
 	// PAL check
 	palChk = gtk_check_button_new_with_label("Enable PAL mode");
-	g_signal_connect(GTK_OBJECT(palChk), "clicked", G_CALLBACK(setPal), NULL);
+	g_signal_connect(GTK_OBJECT(palChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
 	
 	// sync with config
 	g_config->getOption("SDL.PAL", &buf);
@@ -261,7 +233,7 @@ void openVideoConfig()
 		
 	// New PPU check
 	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
-	g_signal_connect(GTK_OBJECT(ppuChk), "clicked", G_CALLBACK(setPpu), NULL);
+	g_signal_connect(GTK_OBJECT(ppuChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
 	
 	// sync with config
 	buf = 0;
