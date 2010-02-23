@@ -167,6 +167,8 @@ void setRate(GtkWidget* w, gpointer p)
 void setQuality(GtkWidget* w, gpointer p)
 {
 	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
+	if(!strcmp(str, "Very High"))
+		g_config->setOption("SDL.SoundQuality", 2);
 	if(!strcmp(str, "High"))
 		g_config->setOption("SDL.SoundQuality", 1);
 	if(!strcmp(str, "Low"))
@@ -313,10 +315,13 @@ void openSoundConfig()
 	qualityCombo = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Low");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "High");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Very High");
 
 	// sync widget with cfg 
 	g_config->getOption("SDL.SoundQuality", &cfgBuf);
-	if(cfgBuf)
+	if(cfgBuf == 2)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 2);
+	else if(cfgBuf == 1)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 1);
 	else
 		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 0);
