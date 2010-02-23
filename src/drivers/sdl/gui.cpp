@@ -71,6 +71,20 @@ int configGamepadButton(GtkButton* button, gpointer p)
     return 0;
 }
 
+
+// Wrapper for pushing GTK options into the config file
+// p : pointer to the string that names the config option
+// w : toggle widget
+void toggleOption(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_config->setOption((char*)p, 1);
+	else
+		g_config->setOption((char*)p, 0);
+	g_config->save();
+}
+
+
 // creates and opens the gamepad config window
 void openGamepadConfig()
 {
@@ -78,15 +92,17 @@ void openGamepadConfig()
 	GtkWidget* vbox;
 	GtkWidget* hboxPadNo;
 	GtkWidget* padNoLabel;
+	GtkWidget* fourScoreChk;
 	
 	GtkWidget* buttons[10];
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Gamepad Config");
 	gtk_widget_set_size_request(win, 250, 500);
-	vbox = gtk_vbox_new(TRUE, 2);
-	hboxPadNo = gtk_hbox_new(TRUE, 1);
+	vbox = gtk_vbox_new(TRUE, 4);
+	hboxPadNo = gtk_hbox_new(FALSE, 5);
 	padNoLabel = gtk_label_new("Gamepad Number:");
+	fourScoreChk = gtk_check_button_new_with_label("Enable four score");
 
 	padNoCombo = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "1");
@@ -96,15 +112,26 @@ void openGamepadConfig()
 	
 	gtk_combo_box_set_active(GTK_COMBO_BOX(padNoCombo), 0);
 	
-	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 0);
+	// sync with config
+	int buf = 0;
+	g_config->getOption("SDL.FourScore", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 0);
+	
+	g_signal_connect(GTK_OBJECT(fourScoreChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.FourScore");
+	
+	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hboxPadNo, TRUE, TRUE, 5);
 	
+	gtk_box_pack_start(GTK_BOX(vbox), fourScoreChk, TRUE, TRUE, 5);
 	// create gamepad buttons
 	for(int i=0; i<10; i++)
 	{
 		buttons[i] = gtk_button_new_with_label(GamePadNames[i]);
-		gtk_box_pack_start(GTK_BOX(vbox), buttons[i], TRUE, TRUE, 2);
+		gtk_box_pack_start(GTK_BOX(vbox), buttons[i], TRUE, TRUE, 3);
 		gtk_signal_connect(GTK_OBJECT(buttons[i]), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));	
 	}
 	
@@ -158,17 +185,6 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->save();
 }
 
-// Wrapper for pushing GTK options into the config file
-// p : pointer to the string that names the config option
-// w : toggle widget
-void toggleOption(GtkWidget* w, gpointer p)
-{
-	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
-		g_config->setOption((char*)p, 1);
-	else
-		g_config->setOption((char*)p, 0);
-	g_config->save();
-}
 
 void openVideoConfig()
 {
@@ -184,9 +200,9 @@ void openVideoConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
-	gtk_widget_set_size_request(win, 250, 400);
+	gtk_widget_set_size_request(win, 250, 250);
 	
-	vbox = gtk_vbox_new(FALSE, 3);
+	vbox = gtk_vbox_new(FALSE, 5);
 	
 	lbl = gtk_label_new("Video options do not take \neffect until the emulator is restared.");
 	
@@ -206,8 +222,8 @@ void openVideoConfig()
 	gtk_combo_box_set_active(GTK_COMBO_BOX(scalerCombo), buf);
 	
 	g_signal_connect(GTK_OBJECT(scalerCombo), "changed", G_CALLBACK(setScaler), NULL);
-	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 5);
 	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
@@ -244,11 +260,11 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
 	
 	
-	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 2);	
-	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
+	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);
@@ -274,8 +290,8 @@ void openSoundConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
-	vbox = gtk_vbox_new(False, 2);
-	gtk_widget_set_size_request(win, 350, 250);
+	vbox = gtk_vbox_new(False, 5);
+	gtk_widget_set_size_request(win, 300, 200);
 	
 	
 	// sound enable check
@@ -309,8 +325,8 @@ void openSoundConfig()
 	
 	qualityLbl = gtk_label_new("Quality: ");
 	
-	gtk_box_pack_start(GTK_BOX(hbox1), qualityLbl, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(hbox1), qualityCombo, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(hbox1), qualityLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox1), qualityCombo, FALSE, FALSE, 5);
 	
 	// sound rate widgets
 	hbox2 = gtk_hbox_new(FALSE, 3);
@@ -337,14 +353,14 @@ void openSoundConfig()
 	// sound rate widgets
 	rateLbl = gtk_label_new("Rate (Hz): ");
 	
-	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 3);
-	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(hbox2), rateLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox2), rateCombo, FALSE, FALSE, 5);
 	
 	hbox3 = gtk_hbox_new(FALSE, 2);
 	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
 	bufferLbl = gtk_label_new("Buffer size (ms): ");
-	gtk_box_pack_start(GTK_BOX(hbox3), bufferLbl, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(hbox3), bufferHscale, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(hbox3), bufferLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(hbox3), bufferHscale, TRUE, TRUE, 5);
 	
 	// sync widget with cfg 
 	g_config->getOption("SDL.SoundBufSize", &cfgBuf);
@@ -353,10 +369,10 @@ void openSoundConfig()
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
 	
 	// packing some boxes
-	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 2);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox3, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox3, FALSE, FALSE, 5);
 	gtk_container_add(GTK_CONTAINER(win), vbox);
 	
 	gtk_widget_show_all(win);
@@ -642,7 +658,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_init(&argc, &argv);
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(MainWindow), "FceuX");
+	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
 	
 	vbox = gtk_vbox_new(FALSE, 3);
