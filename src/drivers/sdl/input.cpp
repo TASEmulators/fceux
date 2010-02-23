@@ -137,7 +137,13 @@ _keyonly(int a)
 	// check for valid key
 	if(a > SDLK_LAST+1 || a < 0)
 		return(0);
-    if(g_keyState[a]) {
+	#if SDL_VERSION_ATLEAST(1, 3, 0)
+    if(g_keyState[SDL_GetScancodeFromKey((SDLKey)a)])
+    #else
+    if(g_keyState[a])
+    #endif
+    {
+	
         if(!keyonce[a]) {
             keyonce[a] = 1;
             return(1);
@@ -393,9 +399,14 @@ static void
 KeyboardCommands()
 {
     int is_shift, is_alt;
+    
     char* movie_fname = "";
     // get the keyboard input
+    #if SDL_VERSION_ATLEAST(1, 3, 0)
+    g_keyState = SDL_GetKeyboardState(NULL);
+    #else
     g_keyState = SDL_GetKeyState(NULL);
+    #endif
 
     // check if the family keyboard is enabled
     if(InputType[2] == SIFC_FKB) {
@@ -410,8 +421,10 @@ KeyboardCommands()
         }
     }
 
-    is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
-    is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
+    //is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
+    //is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
+    is_shift = 0;
+    is_alt = 0;
     
     if(_keyonly(renderBgKey)) {
         if(is_shift) {
@@ -638,8 +651,10 @@ KeyboardCommands()
 
         if(keyonly(H)) FCEUI_NTSCSELHUE();
         if(keyonly(T)) FCEUI_NTSCSELTINT();
-        if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
-        if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
+       
+       // TEMPORAILY DISABLED!  DO NOT COMMIT! TODO!
+       // if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
+       // if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
 
         if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
             if(keyonly(F8)) {
@@ -813,7 +828,11 @@ DTestButton(ButtConfig *bc)
 
     for(x = 0; x < bc->NumC; x++) {
         if(bc->ButtType[x] == BUTTC_KEYBOARD) {
+			#if SDL_VERSION_ATLEAST(1,3,0)
+			if(g_keyState[SDL_GetScancodeFromKey((SDLKey)bc->ButtonNum[x])]) {
+			#else
             if(g_keyState[bc->ButtonNum[x]]) {
+			#endif
                 return(1);
             }
         } else if(bc->ButtType[x] == BUTTC_JOYSTICK) {
