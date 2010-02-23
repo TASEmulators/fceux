@@ -423,11 +423,11 @@ KeyboardCommands()
     }
 	
 	mod = SDL_GetModState();
-	if(mod | KMOD_LSHIFT || mod | KMOD_RSHIFT)
+	if(mod & (KMOD_LSHIFT|KMOD_RSHIFT))
 		is_shift = 1;
 	else
 		is_shift = 0;
-	if(mod | KMOD_LALT || mod | KMOD_RALT)
+	if(mod & (KMOD_LALT| KMOD_RALT))
 		is_alt = 1;
 	else
 		is_alt = 0;

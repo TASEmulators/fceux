@@ -115,16 +115,16 @@ InitConfig()
 
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
-    config->addOption("volume", "SDL.SoundVolume", 150);
+    config->addOption("volume", "SDL.SoundVolume", 256);
     config->addOption("trianglevol", "SDL.TriangleVolume", 256);
     config->addOption("square1vol", "SDL.Square1Volume", 256);
     config->addOption("square2vol", "SDL.Square2Volume", 256);
     config->addOption("noisevol", "SDL.NoiseVolume", 256);
     config->addOption("pcmvol", "SDL.PCMVolume", 256);
-    config->addOption("soundrate", "SDL.SoundRate", 11000);
+    config->addOption("soundrate", "SDL.SoundRate", 44100);
     config->addOption("soundq", "SDL.SoundQuality", 1);
     config->addOption("soundrecord", "SDL.SoundRecordFile", "");
-    config->addOption("soundbufsize", "SDL.SoundBufSize", 48);
+    config->addOption("soundbufsize", "SDL.SoundBufSize", 128);
 
     // old EOptions
     config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
@@ -215,7 +215,7 @@ InitConfig()
     config->addOption("ripsubs", "SDL.RipSubs", "");
 	
 	// enable new PPU core
-	config->addOption("newppu", "SDL.NewPPU", 0);
+	config->addOption("newppu", "SDL.NewPPU", 1);
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {
