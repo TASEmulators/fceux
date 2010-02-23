@@ -653,8 +653,12 @@ KeyboardCommands()
         if(keyonly(T)) FCEUI_NTSCSELTINT();
        
        // TEMPORAILY DISABLED!  DO NOT COMMIT! TODO!
-       // if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
-       // if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
+       #if SDL_VERSION_ATLEAST(1,3,0)
+       
+       #else
+       if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
+       if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
+       #endif
 
         if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
             if(keyonly(F8)) {
