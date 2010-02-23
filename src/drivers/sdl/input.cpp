@@ -399,6 +399,7 @@ static void
 KeyboardCommands()
 {
     int is_shift, is_alt;
+    SDLMod mod;
     
     char* movie_fname = "";
     // get the keyboard input
@@ -420,11 +421,17 @@ KeyboardCommands()
             return;
         }
     }
-
-    //is_shift = KEY(LEFTSHIFT) | KEY(RIGHTSHIFT);
-    //is_alt = KEY(LEFTALT) | KEY(RIGHTALT);
-    is_shift = 0;
-    is_alt = 0;
+	
+	mod = SDL_GetModState();
+	if(mod | KMOD_LSHIFT || mod | KMOD_RSHIFT)
+		is_shift = 1;
+	else
+		is_shift = 0;
+	if(mod | KMOD_LALT || mod | KMOD_RALT)
+		is_alt = 1;
+	else
+		is_alt = 0;
+    
     
     if(_keyonly(renderBgKey)) {
         if(is_shift) {
@@ -652,9 +659,10 @@ KeyboardCommands()
         if(keyonly(H)) FCEUI_NTSCSELHUE();
         if(keyonly(T)) FCEUI_NTSCSELTINT();
        
-       // TEMPORAILY DISABLED!  DO NOT COMMIT! TODO!
-       #if SDL_VERSION_ATLEAST(1,3,0)
        
+       
+       #if SDL_VERSION_ATLEAST(1,3,0)
+       // TODO:  clean this shit up and make it work for 1.3
        #else
        if(KEY(KP_MINUS) || KEY(MINUS)) FCEUI_NTSCDEC();
        if(KEY(KP_PLUS) || KEY(EQUAL)) FCEUI_NTSCINC();
