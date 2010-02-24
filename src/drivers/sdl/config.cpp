@@ -314,7 +314,7 @@ InitConfig()
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
-    config->addOption(prefix + "FastForward", SDLK_TAB);
+    config->addOption(prefix + "FastForward", SDLK_BACKQUOTE);
     config->addOption(prefix + "InputDisplay", SDLK_i);
     config->addOption(prefix + "MovieToggleReadWrite", SDLK_q);
     #ifdef CREATE_AVI
