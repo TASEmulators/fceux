@@ -475,15 +475,15 @@ KeyboardCommands()
     }
 
     // Famicom disk-system games
-    //if(gametype==GIT_FDS) 
-	//{
+    if(gametype==GIT_FDS) 
+	{
         if(_keyonly(fdsSelectDiskKey)) {
             FCEUI_FDSSelect();
         }
         if(_keyonly(fdsEjectKey)) {
             FCEUI_FDSInsert();
         }
-	//}
+	}
     
     if(_keyonly(screenshotKey)) {
         FCEUI_SaveSnapshot();
