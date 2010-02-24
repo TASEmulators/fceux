@@ -3,6 +3,9 @@
 
 #include<SDL/SDL.h>
 
+#include <fstream>
+#include <iostream>
+
 //#include <vte/vte.h>
 
 #include "../../types.h"
@@ -751,9 +754,23 @@ void loadMovie ()
 {
 	GtkWidget* fileChooser;
 	
+	GtkFileFilter* filterFm2;
+	GtkFileFilter* filterAll;
+	
+	filterFm2 = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterFm2, "*.fm2");
+	gtk_file_filter_set_name(filterFm2, "FM2 Movies");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
 	fileChooser = gtk_file_chooser_dialog_new ("Open FM2 Movie", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -774,10 +791,23 @@ void loadMovie ()
 void loadLua ()
 {
 	GtkWidget* fileChooser;
+	GtkFileFilter* filterLua;
+	GtkFileFilter* filterAll;
+	
+	filterLua = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterLua, "*.lua");
+	gtk_file_filter_set_name(filterLua, "Lua scripts");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open LUA Script", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterLua);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -791,13 +821,79 @@ void loadLua ()
 }
 #endif
 
+
+void loadFdsBios ()
+{
+	GtkWidget* fileChooser;
+	GtkFileFilter* filterDiskSys;
+	GtkFileFilter* filterRom;
+	GtkFileFilter* filterAll;
+	
+	
+	filterDiskSys = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterDiskSys, "disksys.rom");
+	gtk_file_filter_set_name(filterDiskSys, "FDS BIOS");
+	
+	filterRom = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterRom, "*.rom");
+	gtk_file_filter_set_name(filterRom, "*.rom");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Load FDS BIOS (disksys.rom)", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterDiskSys);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		// copy BIOS file to proper place (~/.fceux/disksys.rom)
+		std::ifstream f1 (filename,std::fstream::binary);
+		std::string fn_out = FCEU_MakeFName(FCEUMKF_FDSROM, 0, "");
+		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
+ 
+ 
+ 
+		f2<<f1.rdbuf();
+		g_free(filename);
+	}
+	gtk_widget_destroy (fileChooser);
+
+}
+
 void loadGame ()
 {
 	GtkWidget* fileChooser;
+	GtkFileFilter* filterNes;
+	GtkFileFilter* filterFds;
+	GtkFileFilter* filterAll;
+	
+	
+	filterNes = gtk_file_filter_new();
+	filterFds = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterNes, "*.nes");
+	gtk_file_filter_add_pattern(filterFds, "*.fds");
+	gtk_file_filter_set_name(filterNes, "NES ROM files");
+	gtk_file_filter_set_name(filterFds, "FDS ROM files");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Open ROM", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFds);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -892,6 +988,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS", NULL, NULL, 0, "<Branch>"},
   { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
+  { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
