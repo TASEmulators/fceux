@@ -801,7 +801,7 @@ int FDSLoad(const char *name, FCEUFILE *fp)
 
 	fclose(zp);
 
-if (!disableBatteryLoading)
+	if (!disableBatteryLoading)
 	{
 		FCEUFILE *tp;
 		char *fn=strdup(FCEU_MakeFName(FCEUMKF_FDS,0,0).c_str());
@@ -813,7 +813,7 @@ if (!disableBatteryLoading)
 			memcpy(diskdatao[x],diskdata[x],65500);
 		}
 
-		if((tp=FCEU_fopen(fn,0,"rb",0)))
+		if((tp=FCEU_fopen(fn,0,"wb",0)))
 		{
 			FreeFDSMemory();
 			if(!SubLoad(tp))
