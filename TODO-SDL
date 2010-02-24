@@ -22,11 +22,11 @@ TODO-SVN:
 		* gamegenie
 		* DONE! lowpass
 		* keepratio
-		*pcm/ "noise" volume?
 		* OpenGLip
 		* Scanline end/start
-		* pallete
+		* DONE! pallete
 * Integrate SDL window into GTK GUI
 * Fix opening compressed ROMs
-* Fix Famicom Disk System
-* Add a key to resume normal playback when finished frameskipping
+* DONE! Fix Famicom Disk System
+* DONE!(PAUSE) Add a key to resume normal playback when finished frameskipping
+* Make GetUserInput not depend on zenity

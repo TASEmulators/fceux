@@ -1,3 +1,6 @@
+24-feb-2010 - prockguy - GTK - added basic movie controls
+24-feb-2010 - prockguy - GTK - added file filters; added Load FDS function
+24-feb-2010 - prockguy - GTK - added palette config dialog
 23-feb-2010 - prockguy - GTK - added UI elemnts for x/y scale; added lowpass UI option
 23-feb-2010 - prockguy - GTK - added GUI for color/tint/hue
 23-feb-2010 - prockguy - GTK - implemented sound mixer dialog (for square1, 2, triangle, etc)
