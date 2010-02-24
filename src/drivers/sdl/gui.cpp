@@ -102,18 +102,6 @@ void toggleOption(GtkWidget* w, gpointer p)
 	g_config->save();
 }
 
-int setColor(GtkWidget* w, gpointer p)
-{
-	int v = gtk_range_get_value(GTK_RANGE(w));
-	g_config->setOption("SDL.Color", v);
-	g_config->save();
-	int t, h;
-	g_config->getOption("SDL.Tint", &t);
-	g_config->getOption("SDL.Hue", &h);
-	FCEUI_SetNTSCTH(v, t, h);
-	
-	return 0;
-}
 int setTint(GtkWidget* w, gpointer p)
 {
 	int v = gtk_range_get_value(GTK_RANGE(w));
@@ -183,10 +171,9 @@ void openPaletteConfig()
 	GtkWidget* paletteButton;
 	GtkWidget* paletteEntry;
 	GtkWidget* clearButton;
+	GtkWidget* ntscColorChk;
 	GtkWidget* slidersFrame;
 	GtkWidget* slidersVbox;
-	GtkWidget* colorFrame;
-	GtkWidget* colorHscale;
 	GtkWidget* tintFrame;
 	GtkWidget* tintHscale;
 	GtkWidget* hueFrame;
@@ -221,15 +208,24 @@ void openPaletteConfig()
 	g_config->getOption("SDL.Palette", &fn);
 	gtk_entry_set_text(GTK_ENTRY(paletteEntry), fn.c_str());
 	
+	// ntsc color check
 	
+	ntscColorChk = gtk_check_button_new_with_label("Enable NTSC colors");
+	
+	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Color");
+	
+	int b;
+	// sync with config
+	g_config->getOption("SDL.Color", &b);
+	if(b)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 0);
 	
 	
 	// color / tint / hue sliders
 	slidersFrame = gtk_frame_new("Video controls");
 	slidersVbox = gtk_vbox_new(TRUE, 2);
-	colorFrame = gtk_frame_new("Color");
-	colorHscale = gtk_hscale_new_with_range(0, 128, 1);
-	gtk_container_add(GTK_CONTAINER(colorFrame), colorHscale);
 	tintFrame = gtk_frame_new("Tint");
 	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
@@ -237,27 +233,23 @@ void openPaletteConfig()
 	hueHscale = gtk_hscale_new_with_range(0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(hueFrame), hueHscale);
 	
-	// disabled for now until I can figure out how to get these options to even work
-	// custom palette?
-	g_signal_connect(colorHscale, "button-release-event", G_CALLBACK(setColor), NULL);
 	g_signal_connect(tintHscale, "button-release-event", G_CALLBACK(setTint), NULL);
 	g_signal_connect(hueHscale, "button-release-event", G_CALLBACK(setHue), NULL);
 	
 	// sync with config
-	int c, h, t;
-	g_config->getOption("SDL.Color", &c);
+	int h, t;
 	g_config->getOption("SDL.Hue", &h);
 	g_config->getOption("SDL.Tint", &t);
-	gtk_range_set_value(GTK_RANGE(colorHscale), c);
+
 	gtk_range_set_value(GTK_RANGE(hueHscale), h);
 	gtk_range_set_value(GTK_RANGE(tintHscale), t);
 	
 	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 2);
 	
 	gtk_box_pack_start(GTK_BOX(vbox), paletteHbox, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), ntscColorChk, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
 	gtk_widget_show_all(win);
