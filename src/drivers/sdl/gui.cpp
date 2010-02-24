@@ -11,6 +11,7 @@
 #include "../../version.h"
 #include "../../movie.h"
 #include "../../palette.h"
+#include "../../fds.h"
 
 
 #include "../common/configSys.h"
@@ -896,6 +897,9 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_Reset", 	NULL, emuReset, 0, "<Item>"},
   { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
+  { "/Emulator/_FDS", NULL, NULL, 0, "<Branch>"},
+  { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
+  { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },

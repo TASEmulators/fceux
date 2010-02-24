@@ -186,6 +186,8 @@ int movieToggleReadWriteKey;
 #ifdef CREATE_AVI
 int MuteCaptureKey;
 #endif
+int fdsSelectDiskKey;
+int fdsEjectKey;
 
 // this function loads the sdl hotkeys from the config file into the
 // global scope.  this elimates the need for accessing the config file
@@ -228,6 +230,8 @@ void setHotKeys()
 	#ifdef CREATE_AVI
 	g_config->getOption("SDL.Hotkeys.MuteCapture", &MuteCaptureKey);
 	#endif
+	g_config->getOption("SDL.Hotkeys.FDSSelect", &fdsSelectDiskKey);
+	g_config->getOption("SDL.Hotkeys.FDSEject", &fdsEjectKey);
 	/*
 	config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
 	config->addOption(prefix + "Power", 0);
@@ -471,15 +475,15 @@ KeyboardCommands()
     }
 
     // Famicom disk-system games
-    if(gametype==GIT_FDS) 
-	{
-        if(keyonly(F6)) {
+    //if(gametype==GIT_FDS) 
+	//{
+        if(_keyonly(fdsSelectDiskKey)) {
             FCEUI_FDSSelect();
         }
-        if(keyonly(F8)) {
+        if(_keyonly(fdsEjectKey)) {
             FCEUI_FDSInsert();
         }
-	}
+	//}
     
     if(_keyonly(screenshotKey)) {
         FCEUI_SaveSnapshot();
