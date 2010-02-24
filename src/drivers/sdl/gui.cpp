@@ -151,7 +151,15 @@ void loadPalette (GtkWidget* w, gpointer p)
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		g_config->setOption("SDL.Palette", filename);
-		LoadCPalette(filename);
+		if(LoadCPalette(filename))
+		{
+			GtkWidget* msgbox;
+			msgbox = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+			"Failed to load the palette.");
+			gtk_dialog_run(GTK_DIALOG(msgbox));
+			gtk_widget_hide_all(msgbox);
+		}
+			
 		gtk_entry_set_text(GTK_ENTRY(p), filename);
 		
 		g_free(filename);
@@ -159,6 +167,13 @@ void loadPalette (GtkWidget* w, gpointer p)
 	}
 	gtk_widget_destroy (fileChooser);
 }
+
+void clearPalette(GtkWidget* w, gpointer p)
+{
+	g_config->setOption("SDL.Palette", 0);
+	gtk_entry_set_text(GTK_ENTRY(p), "");
+}
+
 void openPaletteConfig()
 {
 	GtkWidget* win;
@@ -166,6 +181,7 @@ void openPaletteConfig()
 	GtkWidget* paletteHbox;
 	GtkWidget* paletteButton;
 	GtkWidget* paletteEntry;
+	GtkWidget* clearButton;
 	GtkWidget* slidersFrame;
 	GtkWidget* slidersVbox;
 	GtkWidget* colorFrame;
@@ -188,15 +204,23 @@ void openPaletteConfig()
 	paletteEntry = gtk_entry_new();
 	gtk_entry_set_editable(GTK_ENTRY(paletteEntry), FALSE);
 	
+	clearButton = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
+	
 	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteButton, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteEntry, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(paletteHbox), clearButton, FALSE, FALSE, 0);
 	
 	g_signal_connect(paletteButton, "clicked", G_CALLBACK(loadPalette), paletteEntry);
+	g_signal_connect(clearButton, "clicked", G_CALLBACK(clearPalette), paletteEntry);
+	
+	
 	
 	// sync with config
 	std::string fn;
 	g_config->getOption("SDL.Palette", &fn);
 	gtk_entry_set_text(GTK_ENTRY(paletteEntry), fn.c_str());
+	
+	
 	
 	
 	// color / tint / hue sliders
@@ -680,13 +704,9 @@ void quit ()
 	exit(0);
 }
 
-
-GtkWidget* aboutDialog;
-
-inline void quitAbout(void) { gtk_widget_hide_all(aboutDialog);}
-
 void showAbout ()
 {
+	GtkWidget* aboutDialog;
 	
 	aboutDialog = gtk_about_dialog_new ();
 	gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(aboutDialog), "About fceuX");
@@ -696,9 +716,9 @@ void showAbout ()
 	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(aboutDialog), "http://fceux.com");
 	
 	
-	gtk_widget_show_all(GTK_WIDGET(aboutDialog));
+	gtk_dialog_run(GTK_DIALOG(aboutDialog));
+	gtk_widget_hide_all(aboutDialog);
 	
-	g_signal_connect(G_OBJECT(aboutDialog), "delete-event", quitAbout, NULL);
 }
 
 void toggleSound(GtkWidget* check, gpointer data)

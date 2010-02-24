@@ -5,6 +5,6 @@
 
 Config *InitConfig(void);
 void UpdateEMUCore(Config *);
-void LoadCPalette(const std::string &file);
+int LoadCPalette(const std::string &file);
 
 #endif

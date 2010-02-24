@@ -29,7 +29,7 @@
 /**
  * Read a custom pallete from a file and load it into the core.
  */
-void
+int
 LoadCPalette(const std::string &file)
 {
 	printf("Loading custom palette from file...\n");
@@ -38,11 +38,12 @@ LoadCPalette(const std::string &file)
 
     if(!(fp = FCEUD_UTF8fopen(file.c_str(), "rb"))) {
         printf(" Error loading custom palette from file: %s\n", file.c_str());
-        return;
+        return -1;
     }
     fread(tmpp, 1, 192, fp);
     FCEUI_SetPaletteArray(tmpp);
     fclose(fp);
+    return 0;
 }
 
 /**
