@@ -750,6 +750,45 @@ void enableFullscreen ()
 	ToggleFS();
 }
 
+void recordMovie ()
+{
+	GtkWidget* fileChooser;
+	
+	GtkFileFilter* filterFm2;
+	GtkFileFilter* filterAll;
+	
+	filterFm2 = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterFm2, "*.fm2");
+	gtk_file_filter_set_name(filterFm2, "FM2 Movies");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Save FM2 movie for recording", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		std::string fname;
+		
+		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		if (!fname.size())
+			return; // no filename selected, quit the whole thing
+		// TODO: don't use GetUserText; or implement it in GTK rather than zenity
+		GtkWidget* ad = gtk_input_dialog_new();
+		
+		std::wstring author = (wchar_t*)GetUserText("Author name").c_str(); // the author can be empty, so no need to check here
+		
+		FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
+	}
+	gtk_widget_destroy (fileChooser);
+}
+
 void loadMovie ()
 {
 	GtkWidget* fileChooser;
@@ -976,7 +1015,11 @@ static GtkItemFactoryEntry menu_items[] = {
 #ifdef _S9XLUA_H  
   { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
 #endif
+  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
   { "/File/Load _Movie", NULL, loadMovie, 0, "<Item>"},
+  { "/File/Stop Movie", NULL, FCEUI_StopMovie, 0, "<Item>"},
+  { "/File/_Record Movie", NULL, recordMovie, 0, "<Item>"},
+  { "/File/sep3",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
   { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
