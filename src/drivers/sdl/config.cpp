@@ -29,7 +29,7 @@
 /**
  * Read a custom pallete from a file and load it into the core.
  */
-static void
+void
 LoadCPalette(const std::string &file)
 {
 	printf("Loading custom palette from file...\n");

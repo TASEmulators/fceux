@@ -18,6 +18,7 @@
 #include "gui.h"
 #include "dface.h"
 #include "input.h"
+#include "config.h"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -100,6 +101,145 @@ void toggleOption(GtkWidget* w, gpointer p)
 	g_config->save();
 }
 
+int setColor(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Color", v);
+	g_config->save();
+	int t, h;
+	g_config->getOption("SDL.Tint", &t);
+	g_config->getOption("SDL.Hue", &h);
+	FCEUI_SetNTSCTH(v, t, h);
+	
+	return 0;
+}
+int setTint(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Tint", v);
+	g_config->save();
+	int c, h;
+	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.Hue", &h);
+	FCEUI_SetNTSCTH(c, v, h);
+	
+	return 0;
+}
+int setHue(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Hue", v);
+	g_config->save();
+	int c, t;
+	g_config->getOption("SDL.Tint", &t);
+	g_config->getOption("SDL.Color", &c);
+	FCEUI_SetNTSCTH(c, t, v);
+	
+	return 0;
+}
+void loadPalette (GtkWidget* w, gpointer p)
+{
+	GtkWidget* fileChooser;
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open NES Palette", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		g_config->setOption("SDL.Palette", filename);
+		LoadCPalette(filename);
+		gtk_entry_set_text(GTK_ENTRY(p), filename);
+		
+		g_free(filename);
+		
+	}
+	gtk_widget_destroy (fileChooser);
+}
+void openPaletteConfig()
+{
+	GtkWidget* win;
+	GtkWidget* vbox;
+	GtkWidget* paletteHbox;
+	GtkWidget* paletteButton;
+	GtkWidget* paletteEntry;
+	GtkWidget* slidersFrame;
+	GtkWidget* slidersVbox;
+	GtkWidget* colorFrame;
+	GtkWidget* colorHscale;
+	GtkWidget* tintFrame;
+	GtkWidget* tintHscale;
+	GtkWidget* hueFrame;
+	GtkWidget* hueHscale;
+	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win),"Palette Options");
+	vbox = gtk_vbox_new(FALSE, 5);
+	gtk_container_add(GTK_CONTAINER(win), vbox);
+	
+	gtk_widget_set_size_request(win, 460, 275);
+	
+	paletteHbox = gtk_hbox_new(FALSE, 5);
+	paletteButton = gtk_button_new_from_stock(GTK_STOCK_OPEN);
+	gtk_button_set_label(GTK_BUTTON(paletteButton), "Open palette");
+	paletteEntry = gtk_entry_new();
+	gtk_entry_set_editable(GTK_ENTRY(paletteEntry), FALSE);
+	
+	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteButton, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(paletteHbox), paletteEntry, TRUE, TRUE, 5);
+	
+	g_signal_connect(paletteButton, "clicked", G_CALLBACK(loadPalette), paletteEntry);
+	
+	// sync with config
+	std::string fn;
+	g_config->getOption("SDL.Palette", &fn);
+	gtk_entry_set_text(GTK_ENTRY(paletteEntry), fn.c_str());
+	
+	
+	// color / tint / hue sliders
+	slidersFrame = gtk_frame_new("Video controls");
+	slidersVbox = gtk_vbox_new(TRUE, 2);
+	colorFrame = gtk_frame_new("Color");
+	colorHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(colorFrame), colorHscale);
+	tintFrame = gtk_frame_new("Tint");
+	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
+	hueFrame = gtk_frame_new("Hue");
+	hueHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(hueFrame), hueHscale);
+	
+	// disabled for now until I can figure out how to get these options to even work
+	// custom palette?
+	g_signal_connect(colorHscale, "button-release-event", G_CALLBACK(setColor), NULL);
+	g_signal_connect(tintHscale, "button-release-event", G_CALLBACK(setTint), NULL);
+	g_signal_connect(hueHscale, "button-release-event", G_CALLBACK(setHue), NULL);
+	
+	// sync with config
+	int c, h, t;
+	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.Hue", &h);
+	g_config->getOption("SDL.Tint", &t);
+	gtk_range_set_value(GTK_RANGE(colorHscale), c);
+	gtk_range_set_value(GTK_RANGE(hueHscale), h);
+	gtk_range_set_value(GTK_RANGE(tintHscale), t);
+	
+	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 2);
+	
+	gtk_box_pack_start(GTK_BOX(vbox), paletteHbox, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
+	
+	gtk_widget_show_all(win);
+	
+	return;
+}
+	
 
 // creates and opens the gamepad config window
 void openGamepadConfig()
@@ -202,42 +342,7 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.SpecialFilter", x);
 	g_config->save();
 }
-int setColor(GtkWidget* w, gpointer p)
-{
-	int v = gtk_range_get_value(GTK_RANGE(w));
-	g_config->setOption("SDL.Color", v);
-	g_config->save();
-	int t, h;
-	g_config->getOption("SDL.Tint", &t);
-	g_config->getOption("SDL.Hue", &h);
-	FCEUI_SetNTSCTH(v, t, h);
-	
-	return 0;
-}
-int setTint(GtkWidget* w, gpointer p)
-{
-	int v = gtk_range_get_value(GTK_RANGE(w));
-	g_config->setOption("SDL.Tint", v);
-	g_config->save();
-	int c, h;
-	g_config->getOption("SDL.Color", &c);
-	g_config->getOption("SDL.Hue", &h);
-	FCEUI_SetNTSCTH(c, v, h);
-	
-	return 0;
-}
-int setHue(GtkWidget* w, gpointer p)
-{
-	int v = gtk_range_get_value(GTK_RANGE(w));
-	g_config->setOption("SDL.Hue", v);
-	g_config->save();
-	int c, t;
-	g_config->getOption("SDL.Tint", &t);
-	g_config->getOption("SDL.Color", &c);
-	FCEUI_SetNTSCTH(c, t, v);
-	
-	return 0;
-}
+
 
 int setXscale(GtkWidget* w, gpointer p)
 {
@@ -272,14 +377,7 @@ void openVideoConfig()
 	GtkWidget* yscaleLbl;
 	GtkWidget* xscaleHbox;
 	GtkWidget* yscaleHbox;
-	GtkWidget* slidersFrame;
-	GtkWidget* slidersVbox;
-	GtkWidget* colorFrame;
-	GtkWidget* colorHscale;
-	GtkWidget* tintFrame;
-	GtkWidget* tintHscale;
-	GtkWidget* hueFrame;
-	GtkWidget* hueHscale;
+	
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
@@ -365,42 +463,7 @@ void openVideoConfig()
 	g_config->getOption("SDL.YScale", &f);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(yscaleSpin), f);
 	
-	
-	
-	
-	// color / tint / hue sliders
-	slidersFrame = gtk_frame_new("Video controls");
-	slidersVbox = gtk_vbox_new(TRUE, 2);
-	colorFrame = gtk_frame_new("Color");
-	colorHscale = gtk_hscale_new_with_range(0, 128, 1);
-	gtk_container_add(GTK_CONTAINER(colorFrame), colorHscale);
-	tintFrame = gtk_frame_new("Tint");
-	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
-	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
-	hueFrame = gtk_frame_new("Hue");
-	hueHscale = gtk_hscale_new_with_range(0, 128, 1);
-	gtk_container_add(GTK_CONTAINER(hueFrame), hueHscale);
-	
-	// disabled for now until I can figure out how to get these options to even work
-	// custom palette?
-	g_signal_connect(colorHscale, "button-release-event", G_CALLBACK(setColor), NULL);
-	g_signal_connect(tintHscale, "button-release-event", G_CALLBACK(setTint), NULL);
-	g_signal_connect(hueHscale, "button-release-event", G_CALLBACK(setHue), NULL);
-	
-	// sync with config
-	int c, h, t;
-	g_config->getOption("SDL.Color", &c);
-	g_config->getOption("SDL.Hue", &h);
-	g_config->getOption("SDL.Tint", &t);
-	gtk_range_set_value(GTK_RANGE(colorHscale), c);
-	gtk_range_set_value(GTK_RANGE(hueHscale), h);
-	gtk_range_set_value(GTK_RANGE(tintHscale), t);
-	
-	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 2);
-	
+
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
@@ -409,7 +472,6 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);
@@ -817,6 +879,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
+  { "/Options/_Palette Config", NULL , openPaletteConfig, 0, "<Item>" },
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
