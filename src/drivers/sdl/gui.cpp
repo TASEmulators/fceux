@@ -72,6 +72,21 @@ int configGamepadButton(GtkButton* button, gpointer p)
     return 0;
 }
 
+void toggleLowPass(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+	{
+		g_config->setOption("SDL.LowPass", 1);
+		FCEUI_SetLowPass(1);
+	}
+	else
+	{
+		g_config->setOption("SDL.LowPass", 0);
+		FCEUI_SetLowPass(0);
+	}
+	g_config->save();
+	
+}
 
 // Wrapper for pushing GTK options into the config file
 // p : pointer to the string that names the config option
@@ -224,6 +239,22 @@ int setHue(GtkWidget* w, gpointer p)
 	return 0;
 }
 
+int setXscale(GtkWidget* w, gpointer p)
+{
+	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
+	g_config->setOption("SDL.XScale", v);
+	g_config->save();
+	return 0;
+}
+
+int setYscale(GtkWidget* w, gpointer p)
+{
+	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
+	g_config->setOption("SDL.YScale", v);
+	g_config->save();
+	return 0;
+}
+
 void openVideoConfig()
 {
 	GtkWidget* win;
@@ -235,6 +266,12 @@ void openVideoConfig()
 	GtkWidget* glChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
+	GtkWidget* xscaleSpin;
+	GtkWidget* yscaleSpin;
+	GtkWidget* xscaleLbl;
+	GtkWidget* yscaleLbl;
+	GtkWidget* xscaleHbox;
+	GtkWidget* yscaleHbox;
 	GtkWidget* slidersFrame;
 	GtkWidget* slidersVbox;
 	GtkWidget* colorFrame;
@@ -304,10 +341,36 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
+		
+	// xscale / yscale
+	xscaleHbox = gtk_hbox_new(FALSE, 5);
+	xscaleLbl = gtk_label_new("X scaling factor");
+	xscaleSpin = gtk_spin_button_new_with_range(1.0, 10.0, .1);
+	yscaleHbox = gtk_hbox_new(FALSE, 5);
+	yscaleLbl = gtk_label_new("Y scaling factor");
+	yscaleSpin = gtk_spin_button_new_with_range(1.0, 10.0, .1);
+	
+	gtk_box_pack_start(GTK_BOX(xscaleHbox), xscaleLbl, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(xscaleHbox), xscaleSpin, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(yscaleHbox), yscaleLbl, FALSE, FALSE, 2);
+	gtk_box_pack_start(GTK_BOX(yscaleHbox), yscaleSpin, FALSE, FALSE, 2);
+	
+	g_signal_connect(xscaleSpin, "button-release-event", G_CALLBACK(setXscale), NULL);
+	g_signal_connect(yscaleSpin, "button-release-event", G_CALLBACK(setYscale), NULL);
+	
+	double f;
+	// sync with config
+	g_config->getOption("SDL.XScale", &f);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(xscaleSpin), f);
+	g_config->getOption("SDL.YScale", &f);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(yscaleSpin), f);
+	
+	
+	
 	
 	// color / tint / hue sliders
 	slidersFrame = gtk_frame_new("Video controls");
-	slidersVbox = gtk_vbox_new(TRUE, 5);
+	slidersVbox = gtk_vbox_new(TRUE, 2);
 	colorFrame = gtk_frame_new("Color");
 	colorHscale = gtk_hscale_new_with_range(0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(colorFrame), colorHscale);
@@ -334,9 +397,9 @@ void openVideoConfig()
 	gtk_range_set_value(GTK_RANGE(tintHscale), t);
 	
 	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 2);
 	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
@@ -344,6 +407,8 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
 	
@@ -385,6 +450,7 @@ void openSoundConfig()
 	GtkWidget* main_hbox;
 	GtkWidget* vbox;
 	GtkWidget* soundChk;
+	GtkWidget* lowpassChk;
 	GtkWidget* hbox1;
 	GtkWidget* qualityCombo;
 	GtkWidget* qualityLbl;
@@ -420,6 +486,19 @@ void openSoundConfig()
 	
 	gtk_signal_connect(GTK_OBJECT(soundChk), "clicked",
 	 G_CALLBACK(toggleSound), NULL);
+	 
+
+	// low pass filter check
+	lowpassChk = gtk_check_button_new_with_label("Enable low pass filter");
+	
+	// sync with cfg
+	g_config->getOption("SDL.LowPass", &cfgBuf);
+	if(cfgBuf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), TRUE);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), FALSE);
+	
+	gtk_signal_connect(GTK_OBJECT(lowpassChk), "clicked", G_CALLBACK(toggleLowPass), NULL);
 	
 	// sound quality combo box
 	hbox1 = gtk_hbox_new(FALSE, 3);
@@ -516,6 +595,7 @@ void openSoundConfig()
 	
 	gtk_box_pack_start(GTK_BOX(main_hbox), vbox, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), lowpassChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), bufferLbl, FALSE, FALSE, 5);
