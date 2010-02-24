@@ -380,6 +380,19 @@ int setYscale(GtkWidget* w, gpointer p)
 	return 0;
 }
 
+void setGl(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_config->setOption("SDL.OpenGL", 1);
+	else
+		g_config->setOption("SDL.OpenGL", 0);
+	g_config->save();
+	
+	// set scpecial scaler to none; openGL crashes with special scalers on
+	gtk_combo_box_set_active(GTK_COMBO_BOX(p), 0);
+}
+	
+
 void openVideoConfig()
 {
 	GtkWidget* win;
@@ -428,7 +441,7 @@ void openVideoConfig()
 	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
-	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGL");
+	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(setGl), (gpointer)scalerCombo);
 	
 	// sync with config
 	g_config->getOption("SDL.OpenGL", &buf);
