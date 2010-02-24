@@ -10,6 +10,7 @@
 #include "../../driver.h"
 #include "../../version.h"
 #include "../../movie.h"
+#include "../../palette.h"
 
 
 #include "../common/configSys.h"
@@ -186,7 +187,42 @@ void setScaler(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.SpecialFilter", x);
 	g_config->save();
 }
-
+int setColor(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Color", v);
+	g_config->save();
+	int t, h;
+	g_config->getOption("SDL.Tint", &t);
+	g_config->getOption("SDL.Hue", &h);
+	FCEUI_SetNTSCTH(v, t, h);
+	
+	return 0;
+}
+int setTint(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Tint", v);
+	g_config->save();
+	int c, h;
+	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.Hue", &h);
+	FCEUI_SetNTSCTH(c, v, h);
+	
+	return 0;
+}
+int setHue(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	g_config->setOption("SDL.Hue", v);
+	g_config->save();
+	int c, t;
+	g_config->getOption("SDL.Tint", &t);
+	g_config->getOption("SDL.Color", &c);
+	FCEUI_SetNTSCTH(c, t, v);
+	
+	return 0;
+}
 
 void openVideoConfig()
 {
@@ -199,10 +235,18 @@ void openVideoConfig()
 	GtkWidget* glChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
+	GtkWidget* slidersFrame;
+	GtkWidget* slidersVbox;
+	GtkWidget* colorFrame;
+	GtkWidget* colorHscale;
+	GtkWidget* tintFrame;
+	GtkWidget* tintHscale;
+	GtkWidget* hueFrame;
+	GtkWidget* hueHscale;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
-	gtk_widget_set_size_request(win, 250, 250);
+	//gtk_widget_set_size_request(win, 250, 250);
 	
 	vbox = gtk_vbox_new(FALSE, 5);
 	
@@ -261,12 +305,46 @@ void openVideoConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
 	
+	// color / tint / hue sliders
+	slidersFrame = gtk_frame_new("Video controls");
+	slidersVbox = gtk_vbox_new(TRUE, 5);
+	colorFrame = gtk_frame_new("Color");
+	colorHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(colorFrame), colorHscale);
+	tintFrame = gtk_frame_new("Tint");
+	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
+	hueFrame = gtk_frame_new("Hue");
+	hueHscale = gtk_hscale_new_with_range(0, 128, 1);
+	gtk_container_add(GTK_CONTAINER(hueFrame), hueHscale);
+	
+	// disabled for now until I can figure out how to get these options to even work
+	// custom palette?
+	g_signal_connect(colorHscale, "button-release-event", G_CALLBACK(setColor), NULL);
+	g_signal_connect(tintHscale, "button-release-event", G_CALLBACK(setTint), NULL);
+	g_signal_connect(hueHscale, "button-release-event", G_CALLBACK(setHue), NULL);
+	
+	// sync with config
+	int c, h, t;
+	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.Hue", &h);
+	g_config->getOption("SDL.Tint", &t);
+	gtk_range_set_value(GTK_RANGE(colorHscale), c);
+	gtk_range_set_value(GTK_RANGE(hueHscale), h);
+	gtk_range_set_value(GTK_RANGE(tintHscale), t);
+	
+	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), colorFrame, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 5);
+	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
 	
 	gtk_container_add(GTK_CONTAINER(win), vbox);

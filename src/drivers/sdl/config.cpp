@@ -32,6 +32,7 @@
 static void
 LoadCPalette(const std::string &file)
 {
+	printf("Loading custom palette from file...\n");
     uint8 tmpp[192];
     FILE *fp;
 
