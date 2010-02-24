@@ -749,8 +749,15 @@ void enableFullscreen ()
 {
 	ToggleFS();
 }
-
-void recordMovie ()
+void recordMovie()
+{
+	char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
+	FCEUI_printf("Recording movie to %s\n", movie_fname);
+    FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
+    
+    return;
+}
+void recordMovieAs ()
 {
 	GtkWidget* fileChooser;
 	
@@ -1015,10 +1022,6 @@ static GtkItemFactoryEntry menu_items[] = {
 #ifdef _S9XLUA_H  
   { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
 #endif
-  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
-  { "/File/Load _Movie", NULL, loadMovie, 0, "<Item>"},
-  { "/File/Stop Movie", NULL, FCEUI_StopMovie, 0, "<Item>"},
-  { "/File/_Record Movie", NULL, recordMovie, 0, "<Item>"},
   { "/File/sep3",     NULL,         NULL,           0, "<Separator>" },
   { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
   { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
@@ -1032,6 +1035,14 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
+  { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
+  { "/Movie/_Open", NULL, loadMovie, 0, "<Item>"},
+  { "/Movie/S_top", NULL, FCEUI_StopMovie, 0, "<Item>"},
+  { "/Movie/_Pause", NULL, emuPause, 0, "<Item>"},
+  { "/Movie/R_esume", NULL, emuResume, 0, "<Item>"},
+  { "/Movie/sep2",     NULL,         NULL,           0, "<Separator>" },
+  { "/Movie/_Record", NULL, recordMovie, 0, "<Item>"},
+  { "/Movie/Record _as", NULL, recordMovieAs, 0, "<Item>"},
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
@@ -1039,7 +1050,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
-  { "/_Help/About",   NULL,         showAbout,           0, "<Item>" },
+  { "/Help/About",   NULL,         showAbout,           0, "<Item>" },
 };
 
 static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
