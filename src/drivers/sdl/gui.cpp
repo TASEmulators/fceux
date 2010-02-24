@@ -274,10 +274,37 @@ void openVideoConfig()
 	
 	return;
 }
+const char* mixerStrings[6] = {"Volume", "Triangle", "Square1", "Square2", "Noise", "PCM"};
+
+int mixerChanged(GtkWidget* w, gpointer p)
+{
+	int v = gtk_range_get_value(GTK_RANGE(w));
+	GtkWidget* parent = gtk_widget_get_parent(w);
+	char* lbl = (char*)gtk_frame_get_label(GTK_FRAME(parent));
+	if(strcmp(lbl, "Volume") == 0)
+		g_config->setOption("SDL.SoundVolume", v);
+	if(strcmp(lbl, "Triangle") == 0)
+		g_config->setOption("SDL.TriangleVolume", v);
+	if(strcmp(lbl, "Square1") == 0)
+		g_config->setOption("SDL.Square1Volume", v);
+	if(strcmp(lbl, "Square2") == 0)
+		g_config->setOption("SDL.Square2Volume", v);
+	if(strcmp(lbl, "Noise") == 0)
+		g_config->setOption("SDL.NoiseVolume", v);
+	if(strcmp(lbl, "PCM") == 0)
+		g_config->setOption("SDL.PCMVolume", v);
+
+	g_config->save();
+	KillSound();
+	InitSound();
+	return 0;
+}
+	
 
 void openSoundConfig()
 {
 	GtkWidget* win;
+	GtkWidget* main_hbox;
 	GtkWidget* vbox;
 	GtkWidget* soundChk;
 	GtkWidget* hbox1;
@@ -289,11 +316,17 @@ void openSoundConfig()
 	GtkWidget* hbox3;
 	GtkWidget* bufferLbl;
 	GtkWidget* bufferHscale;
+	GtkWidget* mixerFrame;
+	GtkWidget* mixerHbox;
+	GtkWidget* mixers[6];
+	GtkWidget* mixerFrames[6];
+	
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
+	main_hbox = gtk_hbox_new(FALSE, 15);
 	vbox = gtk_vbox_new(False, 5);
-	gtk_widget_set_size_request(win, 300, 200);
+	//gtk_widget_set_size_request(win, 300, 200);
 	
 	
 	// sound enable check
@@ -363,9 +396,7 @@ void openSoundConfig()
 	
 	hbox3 = gtk_hbox_new(FALSE, 2);
 	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
-	bufferLbl = gtk_label_new("Buffer size (ms): ");
-	gtk_box_pack_start(GTK_BOX(hbox3), bufferLbl, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(hbox3), bufferHscale, TRUE, TRUE, 5);
+	bufferLbl = gtk_label_new("Buffer size (in ms)");
 	
 	// sync widget with cfg 
 	g_config->getOption("SDL.SoundBufSize", &cfgBuf);
@@ -373,12 +404,48 @@ void openSoundConfig()
 	
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
 	
+	
+	// mixer
+	mixerFrame = gtk_frame_new("Mixer:");
+	mixerHbox = gtk_hbox_new(TRUE, 5);
+	for(int i=0; i<6; i++)
+	{
+		mixers[i] = gtk_vscale_new_with_range(0, 256, 1);
+		gtk_range_set_inverted(GTK_RANGE(mixers[i]), TRUE);
+		mixerFrames[i] = gtk_frame_new(mixerStrings[i]);
+		gtk_container_add(GTK_CONTAINER(mixerFrames[i]), mixers[i]);
+		gtk_box_pack_start(GTK_BOX(mixerHbox), mixerFrames[i], FALSE, TRUE, 5);
+		g_signal_connect(mixers[i], "button-release-event", G_CALLBACK(mixerChanged), (gpointer)i); 
+	}
+	
+	// sync with cfg
+	int v;
+	g_config->getOption("SDL.SoundVolume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[0]), v);
+	g_config->getOption("SDL.TriangleVolume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[1]), v);
+	g_config->getOption("SDL.Square1Volume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[2]), v);
+	g_config->getOption("SDL.Square2Volume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[3]), v);
+	g_config->getOption("SDL.NoiseVolume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[4]), v);
+	g_config->getOption("SDL.PCMVolume", &v);
+	gtk_range_set_value(GTK_RANGE(mixers[5]), v);
+
+	
 	// packing some boxes
+	
+	gtk_box_pack_start(GTK_BOX(main_hbox), vbox, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), soundChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox3, FALSE, FALSE, 5);
-	gtk_container_add(GTK_CONTAINER(win), vbox);
+	gtk_box_pack_start(GTK_BOX(vbox), bufferLbl, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), bufferHscale, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(main_hbox), mixerFrame, TRUE, TRUE, 5);
+	gtk_container_add(GTK_CONTAINER(mixerFrame), mixerHbox);
+	
+	gtk_container_add(GTK_CONTAINER(win), main_hbox);
 	
 	gtk_widget_show_all(win);
 	
