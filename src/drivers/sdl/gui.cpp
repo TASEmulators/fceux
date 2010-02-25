@@ -1123,7 +1123,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Movie/Record _as", NULL, recordMovieAs, 0, "<Item>"},
   { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
-  { "/Options/_Vound Config", NULL , openVideoConfig, 0, "<Item>" },
+  { "/Options/_Video Config", NULL , openVideoConfig, 0, "<Item>" },
   { "/Options/_Palette Config", NULL , openPaletteConfig, 0, "<Item>" },
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
