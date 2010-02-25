@@ -838,11 +838,20 @@ void loadMovie ()
 		char* fname;
 		
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		gtk_widget_destroy (fileChooser);
 		static int pauseframe;
         g_config->getOption("SDL.PauseFrame", &pauseframe);
         g_config->setOption("SDL.PauseFrame", 0);
         FCEUI_printf("Playing back movie located at %s\n", fname);
-        FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false);
+        if(FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false) == FALSE)
+        {
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+				"Could not open the selected FM2 file.");
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
+
 		g_free(fname);
 	}
 	gtk_widget_destroy (fileChooser);
@@ -875,10 +884,19 @@ void loadLua ()
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-		FCEU_LoadLuaCode(filename);
+		gtk_widget_destroy(fileChooser);
+		if(FCEU_LoadLuaCode(filename) == 0)
+		{
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+				"Could not open the selected lua script.");
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
 		g_free(filename);
 	}
-	gtk_widget_destroy (fileChooser);
+	else
+		gtk_widget_destroy (fileChooser);
 }
 #endif
 
@@ -919,13 +937,18 @@ void loadFdsBios ()
 		std::ifstream f1 (filename,std::fstream::binary);
 		std::string fn_out = FCEU_MakeFName(FCEUMKF_FDSROM, 0, "");
 		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
- 
- 
- 
+		gtk_widget_destroy (fileChooser);
+		GtkWidget* d;
+		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
+			"Famicom Disk System BIOS loaded.  If you are you having issues, make sure your BIOS file is 8KB in size.");
+		gtk_dialog_run(GTK_DIALOG(d));
+		gtk_widget_destroy(d);
+	
 		f2<<f1.rdbuf();
 		g_free(filename);
 	}
-	gtk_widget_destroy (fileChooser);
+	else
+		gtk_widget_destroy (fileChooser);
 
 }
 
@@ -963,9 +986,10 @@ void loadGame ()
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		gtk_widget_destroy (fileChooser);
 		if(LoadGame(filename) == 0)
 		{
-			gtk_widget_destroy (fileChooser);
+			
 			GtkWidget* d;
 			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
 				"Could not open the selected ROM file.");
