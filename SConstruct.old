@@ -6,7 +6,7 @@ import os
 import sys
 import platform 
 
-opts = Options)
+opts = Options()
 opts.AddOptions(
   BoolOption('FRAMESKIP', 'Enable frameskipping', 1),
   BoolOption('OPENGL',    'Enable OpenGL support', 1),
