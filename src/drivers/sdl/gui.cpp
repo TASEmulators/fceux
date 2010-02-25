@@ -963,20 +963,19 @@ void loadGame ()
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-		LoadGame(filename);
+		if(LoadGame(filename) == 0)
+		{
+			gtk_widget_destroy (fileChooser);
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+				"Could not open the selected ROM file.");
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
 		g_free(filename);
 	}
-	gtk_widget_destroy (fileChooser);
-	
-	#ifdef _S9XLUA_H
-	std::string s;
-	g_config->getOption("SDL.LuaRC", &s);
-	if (!s.empty())
-	{
-		FCEU_LoadLuaCode(s.c_str());
-	}
-#endif
-
+	else
+		gtk_widget_destroy (fileChooser);
 }
 
 void closeGame() { CloseGame(); }
