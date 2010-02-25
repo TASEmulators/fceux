@@ -788,7 +788,7 @@ void recordMovieAs ()
 	fileChooser = gtk_file_chooser_dialog_new ("Save FM2 movie for recording", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-			
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".fm2");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
@@ -820,6 +820,7 @@ void loadMovie ()
 	
 	filterFm2 = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterFm2, "*.fm2");
+	gtk_file_filter_add_pattern(filterFm2, "*.FM2f");
 	gtk_file_filter_set_name(filterFm2, "FM2 Movies");
 	
 	filterAll = gtk_file_filter_new();
@@ -866,6 +867,7 @@ void loadLua ()
 	
 	filterLua = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterLua, "*.lua");
+	gtk_file_filter_add_pattern(filterLua, "*.LUA");
 	gtk_file_filter_set_name(filterLua, "Lua scripts");
 	
 	filterAll = gtk_file_filter_new();
@@ -1017,10 +1019,24 @@ gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
 void saveStateAs()
 {
 	GtkWidget* fileChooser;
+	GtkFileFilter* filterSav;
+	GtkFileFilter* filterAll;
+	
+	filterSav = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterSav, "*.sav");
+	gtk_file_filter_add_pattern(filterSav, "*.SAV");
+	gtk_file_filter_set_name(filterSav, "SAV files");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Save State As", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".sav");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterSav);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1038,10 +1054,23 @@ void saveStateAs()
 void loadStateFrom()
 {
 	GtkWidget* fileChooser;
+	GtkFileFilter* filterSav;
+	GtkFileFilter* filterAll;
+	
+	filterSav = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterSav, "*.sav");
+	gtk_file_filter_add_pattern(filterSav, "*.SAV");
+	gtk_file_filter_set_name(filterSav, "SAV files");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Load State From", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterSav);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
