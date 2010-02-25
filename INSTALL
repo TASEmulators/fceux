@@ -1,10 +1,8 @@
 To compile and install FCE Ultra, follow these steps:
-  1.  Ensure that SCons, SDL, libz, and liblua5.1 are installed on your system.
+  1.  Ensure that SCons, SDL, and libz are installed on your system.
     On an ubuntu/debian system, run:
-      sudo apt-get install scons libsdl1.2-dev libsdl1.2debian-esd liblua5.1-dev zlib1g-dev zenity
-  2.  If you are running linux, ensure zenity is installed on your system.
-    On an ubuntu/debian system, run:
-      sudo apt-get install zenity
+      sudo apt-get install scons libsdl1.2-dev libsdl1.2debian-esd zlib1g-dev
+  2.  Enable options you would like to enable in SConstruct file (GUI and AVI creation disabled by default)
   3.  Run "scons" to build fceux.
   4.  To install on Linux/BSD run "scons install" as root.
 
