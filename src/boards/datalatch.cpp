@@ -20,6 +20,7 @@
 
 #include "mapinc.h"
 
+static uint8 bus_conflict = 0;
 static uint8 latche, latcheinit;
 static uint16 addrreg0, addrreg1;
 static void(*WSync)(void);
@@ -27,6 +28,9 @@ static void(*WSync)(void);
 static DECLFW(LatchWrite)
 {
 //  FCEU_printf("bs %04x %02x\n",A,V);
+  if(bus_conflict)
+    latche=V&CartBR(A);
+  else
   latche=V;
   WSync();
 }
@@ -53,6 +57,7 @@ static void Latch_Init(CartInfo *info, void (*proc)(void), uint8 init, uint16 ad
   info->Power=LatchPower;
   GameStateRestore=StateRestore;
   AddExState(&latche, 1, 0, "LATC");
+  AddExState(&bus_conflict, 1, 0, "BUSC");
 }
 
 //------------------ CPROM ---------------------------
@@ -98,6 +103,7 @@ static void CNROMSync(void)
 
 void CNROM_Init(CartInfo *info)
 {
+  bus_conflict = 1;
   Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF);
 }
 
@@ -168,17 +174,17 @@ static void MHROMSync(void)
 }
 
 void MHROM_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, MHROMSync, 0, 0x8000, 0xFFFF);
 }
 
 void Mapper140_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, MHROMSync, 0, 0x6000, 0x7FFF);
 }
 
 void Mapper240_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, MHROMSync, 0, 0x4020, 0x5FFF);
   // need SRAM.
 }
@@ -194,7 +200,7 @@ static void M87Sync(void)
 }
 
 void Mapper87_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, M87Sync, ~0, 0x6000, 0xFFFF);
 }
 
@@ -221,12 +227,12 @@ static void M11Sync(void)
 }
 
 void Mapper11_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, M11Sync, 0, 0x8000, 0xFFFF);
 }
 
 void Mapper144_Init(CartInfo *info)
-{ 
+{
   Latch_Init(info, M11Sync, 0, 0x8001, 0xFFFF);
 }
 
@@ -266,6 +272,7 @@ static void UNROMSync(void)
 
 void UNROM_Init(CartInfo *info)
 {
+  bus_conflict = 1;
   Latch_Init(info, UNROMSync, 0, 0x8000, 0xFFFF);
 }
 
@@ -342,7 +349,7 @@ void Mapper113_Init(CartInfo *info)
 
 // actually, there is two cart in one... First have extra mirroring
 // mode (one screen) and 32K bankswitching, second one have only
-// 16 bankswitching mode and normal mirroring... But there is no any 
+// 16 bankswitching mode and normal mirroring... But there is no any
 // correlations between modes and they can be used in one mapper code.
 
 static void BMCA65ASSync(void)
