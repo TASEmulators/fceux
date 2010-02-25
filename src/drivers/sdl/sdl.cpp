@@ -13,8 +13,10 @@
 #include <limits.h>
 #include <math.h>
 
-#ifdef _GTK2
+#ifdef _GTK_LITE
 #include <gtk/gtk.h>
+#endif
+#ifdef _GTK
 #include "gui.cpp"
 #endif
 
@@ -143,15 +145,18 @@ static void ShowUsage(char *prog)
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts("Options:");
 	puts(DriverUsage);
-	#ifdef _S9XLUA_H
+#ifdef _S9XLUA_H
 	puts ("--loadlua       f      Loads lua script from filename f.");
-	#endif
-	#ifdef CREATE_AVI
+#endif
+#ifdef CREATE_AVI
 	puts ("--videolog      c      Calls mencoder to grab the video and audio streams to\n                       encode them. Check the documentation for more on this.");
 	puts ("--mute         {0|1}   Mutes FCEUX while still passing the audio stream to\n                       mencoder.");
-	#endif
+#endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
+#ifdef GTK_LITE
+	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
+#endif
 	
 }
 
@@ -665,7 +670,9 @@ SDL_GL_LoadLibrary(0);
       SDL_Quit();
       return 0;
     }
-	
+
+    g_config->setOption("SDL.RipSubs", "");
+    if (!s.empty())
 	for(int i=0; i<argc;i++)
 	{
 		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
@@ -676,7 +683,7 @@ SDL_GL_LoadLibrary(0);
 		}
 	}
 	
-	#ifndef _GTK2
+#ifndef _GTK
     if(romIndex <= 0) {
 		
         ShowUsage(argv[0]);
@@ -684,7 +691,7 @@ SDL_GL_LoadLibrary(0);
         SDL_Quit();
         return -1;
     }
-    #endif
+#endif
     
 
 
@@ -720,10 +727,13 @@ SDL_GL_LoadLibrary(0);
 	// load the hotkeys from the config life
 	setHotKeys();
 	
-	
-	#ifdef _GTK2
+#ifdef _GTK_LITE
+	gtk_init(&argc, &argv);
+#endif	
+#ifdef _GTK
 	InitGTKSubsystem(argc, argv);
-	#endif
+#endif
+
 	
 	if(romIndex >= 0)
 	{
@@ -781,19 +791,19 @@ SDL_GL_LoadLibrary(0);
 	
 	
     // loop playing the game
-    #ifndef _GTK2
+#ifndef _GTK
     while(GameInfo) {
-	#else
+#else
 	while(1) {
 		if(GameInfo)
-	#endif
+#endif
         DoFun(frameskip);
-        #ifdef _GTK2
+#ifdef _GTK
         else
 			SDL_Delay(10);
         while(gtk_events_pending())
 			gtk_main_iteration_do(FALSE);
-        #endif
+#endif
     }
     CloseGame();
 
@@ -834,9 +844,9 @@ FCEUD_GetTimeFreq(void)
 void FCEUD_Message(const char *text)
 {
 	fputs(text, stdout);
-	#ifdef _GTK2
+#ifdef _GTK
 	pushOutputToGTK(text);
-	#endif
+#endif
 }
 
 /**

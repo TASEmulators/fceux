@@ -353,7 +353,7 @@ InitConfig()
 
     config->addOption("SDL.Zapper.0.DeviceType", "Mouse");
     config->addOption("SDL.Zapper.0.DeviceNum", 0);
-
+    
     return config;
 }
 

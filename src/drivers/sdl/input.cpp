@@ -39,6 +39,10 @@
 #include "../../fceulua.h"
 #endif
 
+#ifdef _GTK_LITE
+#include<gtk/gtk.h>
+#endif
+
 
 /** GLOBALS **/
 int NoWaiting=1;
@@ -262,7 +266,7 @@ std::string GetFilename(const char* title, bool save, const char* filter)
         FCEUI_ToggleEmulationPause();
     std::string fname = "";
     
-    #ifdef WIN32 // seriously?
+#ifdef WIN32 
     OPENFILENAME ofn;       // common dialog box structure
     char szFile[260];       // buffer for file name
     HWND hwnd;              // owner window
@@ -287,11 +291,50 @@ std::string GetFilename(const char* title, bool save, const char* filter)
     // Display the Open dialog box. 
     fname = GetOpenFileName(&ofn);
 
-    #else
+#endif
+#ifdef _GTK_LITE
 	int fullscreen = 0;
 	g_config->getOption("SDL.Fullscreen", &fullscreen);
 	if(fullscreen)
 		ToggleFS();
+		
+	GtkWidget* fileChooser;
+	
+	GtkFileFilter* filterX;
+	GtkFileFilter* filterAll;
+	
+	filterX = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterX, filter);
+	gtk_file_filter_set_name(filterX, filter);
+	
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	if(save)
+		fileChooser = gtk_file_chooser_dialog_new ("Save as", NULL,
+			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_SAVE_AS, GTK_RESPONSE_ACCEPT, NULL);
+	else
+		fileChooser = gtk_file_chooser_dialog_new ("Open", NULL,
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+		
+	// TODO: make file filters case insensitive	
+	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
+	while(gtk_events_pending())
+			gtk_main_iteration_do(TRUE);
+		
+	fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+
+	gtk_widget_destroy (fileChooser);
+	
+	while(gtk_events_pending())
+			gtk_main_iteration_do(TRUE);
+/*	
     FILE *fpipe;
     std::string command = "zenity --file-selection --title=\"";
     command.append(title);
@@ -316,8 +359,8 @@ std::string GetFilename(const char* title, bool save, const char* filter)
             break;
         fname += c;
     }
-    pclose(fpipe);
-    #endif
+    pclose(fpipe);*/
+#endif
     FCEUI_ToggleEmulationPause();
     return fname;
 }
@@ -327,14 +370,33 @@ std::string GetFilename(const char* title, bool save, const char* filter)
  */
 std::string GetUserText(const char* title)
 {
-	if (FCEUI_EmulationPaused() == 0)
+#ifdef _GTK_LITE
+
+	GtkWidget* d;
+	GtkWidget* entry;
+	
+	d = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_MODAL, GTK_STOCK_OK, GTK_RESPONSE_OK); 
+	
+	entry = gtk_entry_new();
+	
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(d)->vbox), entry);
+	
+	gtk_widget_show_all(d);
+	
+	int response = gtk_dialog_run(GTK_DIALOG(d));
+	while(gtk_events_pending())
+			gtk_main_iteration_do(TRUE);
+
+		std::string input = gtk_entry_get_text(GTK_ENTRY(entry));
+	
+		if (FCEUI_EmulationPaused() == 0)
         	FCEUI_ToggleEmulationPause(); // pause emulation
 	
-	int fullscreen = 0; 
-	g_config->getOption("SDL.Fullscreen", &fullscreen);
-	if(fullscreen)
-		ToggleFS(); // disable fullscreen emulation
-	
+		int fullscreen = 0; 
+		g_config->getOption("SDL.Fullscreen", &fullscreen);
+		if(fullscreen)
+			ToggleFS(); // disable fullscreen emulation
+	/*
 	FILE *fpipe;
 	std::string command = "zenity --entry --title=\"";
 	command.append(title);
@@ -352,9 +414,18 @@ std::string GetUserText(const char* title)
 			break;
 		input += c;
 	}
-	pclose(fpipe);
-	FCEUI_ToggleEmulationPause(); // unpause emulation
-	return input;
+	pclose(fpipe);*/
+		gtk_widget_destroy(d);
+		
+	
+	while(gtk_events_pending())
+			gtk_main_iteration_do(TRUE);
+	
+		FCEUI_ToggleEmulationPause(); // unpause emulation
+		return input;
+
+#endif
+	return "";
 }
 
 

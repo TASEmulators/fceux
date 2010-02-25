@@ -14,9 +14,8 @@ description=
 run_cmd=gksudo scons install
 
 [files]
-current_page=2
-FILE_NAME_0=663;None;0;16;1;1;0;/home/lukas/code/fceultra/fceu/SConstruct;0
-FILE_NAME_1=5288;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/gui.cpp;0
-FILE_NAME_2=6783;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/sdl.cpp;0
-FILE_NAME_3=956;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/gui.h;0
-FILE_NAME_4=215;C;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/sdl.h;0
+current_page=3
+FILE_NAME_0=3845;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/sdl/sdl-sound.cpp;0
+FILE_NAME_1=6651;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/drivers/win/sound.cpp;0
+FILE_NAME_2=3961;C++;0;16;1;1;0;/home/lukas/code/fceultra/fceu/src/sound.cpp;0
+FILE_NAME_3=0;C++;0;16;1;1;0;/home/lukas/code/vba-m/src/Sound.cpp;0

@@ -5,7 +5,7 @@
 
 #include <fstream>
 #include <iostream>
-
+#include <cstdlib>
 //#include <vte/vte.h>
 
 #include "../../types.h"
@@ -802,7 +802,9 @@ void recordMovieAs ()
 		// TODO: don't use GetUserText; or implement it in GTK rather than zenity
 		GtkWidget* ad = gtk_input_dialog_new();
 		
-		std::wstring author = (wchar_t*)GetUserText("Author name").c_str(); // the author can be empty, so no need to check here
+		std::string s = GetUserText("Author name");
+		std::wstring author(s.begin(), s.end());
+
 		
 		FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
 	}
@@ -938,7 +940,9 @@ void loadGame ()
 	filterNes = gtk_file_filter_new();
 	filterFds = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterNes, "*.nes");
+	gtk_file_filter_add_pattern(filterNes, "*.NES");
 	gtk_file_filter_add_pattern(filterFds, "*.fds");
+	gtk_file_filter_add_pattern(filterFds, "*.FDS");
 	gtk_file_filter_set_name(filterNes, "NES ROM files");
 	gtk_file_filter_set_name(filterFds, "FDS ROM files");
 	
@@ -963,6 +967,15 @@ void loadGame ()
 		g_free(filename);
 	}
 	gtk_widget_destroy (fileChooser);
+	
+	#ifdef _S9XLUA_H
+	std::string s;
+	g_config->getOption("SDL.LuaRC", &s);
+	if (!s.empty())
+	{
+		FCEU_LoadLuaCode(s.c_str());
+	}
+#endif
 
 }
 
@@ -1128,7 +1141,6 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_config->getOption("SDL.XResolution", &xres);
 		g_config->getOption("SDL.YResolution", &yres);
 	
-	gtk_init(&argc, &argv);
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);

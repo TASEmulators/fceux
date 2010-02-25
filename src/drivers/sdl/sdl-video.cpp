@@ -41,7 +41,7 @@
 #include "../videolog/nesvideos-piece.h"
 #endif
 
-#ifdef _GTK2
+#ifdef _GTK
 #include "gui.h"
 #endif
 
@@ -446,7 +446,7 @@ ToggleFS()
 
     // flip the fullscreen flag
     g_config->setOption("SDL.Fullscreen", !fullscreen);
-#ifdef _GTK2
+#ifdef _GTK
 	if(!fullscreen)
 		showGui(0);
 	else
