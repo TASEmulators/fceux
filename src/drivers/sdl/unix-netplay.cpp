@@ -109,7 +109,9 @@ FCEUD_NetworkConnect(void)
 
     TSocket = socket(AF_INET, SOCK_STREAM, 0);
     if(TSocket < 0) {
-        puts("Error creating stream socket.");
+		char* s = "Error creating stream socket.";
+        puts(s);
+        FCEU_DispMessage(s);
         FCEUD_NetworkClose();
         return 0;
     }
@@ -138,6 +140,7 @@ FCEUD_NetworkConnect(void)
         phostentb = gethostbyname(server.c_str());
         if(!phostentb) {
             puts("Error getting host network information.");
+            FCEU_DispMessage("Error getting host info");
             close(TSocket);
             FCEUD_NetworkClose();
             return(0);
@@ -150,6 +153,7 @@ FCEUD_NetworkConnect(void)
     error = connect(TSocket, (struct sockaddr *)&sockin, sizeof(sockin));
     if(error < 0) {
         puts("Error connecting to remote host.");
+        FCEU_DispMessage("Error connecting to server");
         close(TSocket);
         FCEUD_NetworkClose();
         return 0;
@@ -218,6 +222,7 @@ FCEUD_NetworkConnect(void)
     netdivisor = buf[0];
 
     puts("*** Connection established.");
+    FCEU_DispMessage("Connection established.");
 
     FCEUDnetplay = 1;
     FCEUI_NetplayStart(localPlayers, netdivisor);

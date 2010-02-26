@@ -259,7 +259,65 @@ void openPaletteConfig()
 	
 	return;
 }
+
+void openNetworkConfig()
+{
+	GtkWidget* win;
+	GtkWidget* box;
+	GtkWidget* frame;
+	GtkWidget* vbox;
+	GtkWidget* ipBox;
+	GtkWidget* ipLbl;
+	GtkWidget* ipEntry;
+	GtkWidget* portBox;
+	GtkWidget* portLbl;
+	GtkWidget* portSpin;
+	//GtkWidget* localPlayersCbo;
+	GtkWidget* pwBox;
+	GtkWidget* pwLbl;
+	GtkWidget* pwEntry;
+	GtkWidget* btn;
 	
+	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	box = gtk_vbox_new(FALSE, 3);
+	frame = gtk_frame_new("Network options");
+	vbox = gtk_vbox_new(FALSE, 5);
+	ipBox = gtk_hbox_new(FALSE, 5);
+	ipLbl = gtk_label_new("Server IP:");
+	ipEntry = gtk_entry_new();
+	portBox = gtk_hbox_new(FALSE, 5);
+	portLbl = gtk_label_new("Server port:");
+	portSpin = gtk_spin_button_new_with_range(0, 999999, 1);
+	//localPlayersCbo = gtk_combo_box_new_text();
+	pwBox = gtk_hbox_new(FALSE, 3);
+	pwLbl = gtk_label_new("Server password:");
+	pwEntry = gtk_entry_new();
+	btn = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
+	
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(portSpin), 4046);
+	
+	gtk_box_pack_start(GTK_BOX(portBox), portLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(portBox), portSpin, FALSE , FALSE, 3);
+	
+	gtk_box_pack_start(GTK_BOX(ipBox), ipLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(ipBox), ipEntry, TRUE , TRUE, 3);
+	
+	gtk_box_pack_start(GTK_BOX(pwBox), pwLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(pwBox), pwEntry, TRUE , TRUE, 3);
+	
+	gtk_box_pack_start_defaults(GTK_BOX(vbox), ipBox);
+	gtk_box_pack_start_defaults(GTK_BOX(vbox), portBox);
+	//gtk_box_pack_start_defaults(GTK_BOX(vbox), localPlayersCbo);
+	gtk_box_pack_start_defaults(GTK_BOX(vbox), pwBox);
+	
+	gtk_container_add(GTK_CONTAINER(frame), vbox);
+	
+	gtk_box_pack_start_defaults(GTK_BOX(box), frame);
+	gtk_box_pack_start(GTK_BOX(box), btn, FALSE, FALSE, 5);
+	gtk_container_add(GTK_CONTAINER(win), box);
+	
+	gtk_widget_show_all(win);
+}
 
 // creates and opens the gamepad config window
 void openGamepadConfig()
@@ -1143,6 +1201,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
   { "/Options/_Video Config", NULL , openVideoConfig, 0, "<Item>" },
   { "/Options/_Palette Config", NULL , openPaletteConfig, 0, "<Item>" },
+  { "/Options/_Network Config", NULL , openNetworkConfig, 0, "<Item>" },
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
