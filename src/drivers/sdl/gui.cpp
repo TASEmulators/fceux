@@ -957,19 +957,35 @@ void loadFdsBios ()
 void loadGame ()
 {
 	GtkWidget* fileChooser;
+	GtkFileFilter* filterFCEU;
 	GtkFileFilter* filterNes;
 	GtkFileFilter* filterFds;
+	GtkFileFilter* filterZip;
 	GtkFileFilter* filterAll;
 	
-	
+	filterFCEU = gtk_file_filter_new();
 	filterNes = gtk_file_filter_new();
 	filterFds = gtk_file_filter_new();
+	filterZip = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterFCEU, "*.nes");
+	gtk_file_filter_add_pattern(filterFCEU, "*.NES");
+	gtk_file_filter_add_pattern(filterFCEU, "*.fds");
+	gtk_file_filter_add_pattern(filterFCEU, "*.FDS");
+	gtk_file_filter_add_pattern(filterFCEU, "*.zip");
+	gtk_file_filter_add_pattern(filterFCEU, "*.ZIP");
+	gtk_file_filter_add_pattern(filterFCEU, "*.Nes");
+	gtk_file_filter_add_pattern(filterFCEU, "*.Fds");
+	gtk_file_filter_add_pattern(filterFCEU, "*.Zip");
 	gtk_file_filter_add_pattern(filterNes, "*.nes");
 	gtk_file_filter_add_pattern(filterNes, "*.NES");
 	gtk_file_filter_add_pattern(filterFds, "*.fds");
-	gtk_file_filter_add_pattern(filterFds, "*.FDS");
+	gtk_file_filter_add_pattern(filterZip, "*.FDS");
+	gtk_file_filter_add_pattern(filterZip, "*.zip");
+	gtk_file_filter_add_pattern(filterZip, "*.zip");
+	gtk_file_filter_set_name(filterFCEU, "*.nes;*.fds;*.zip");
 	gtk_file_filter_set_name(filterNes, "NES ROM files");
 	gtk_file_filter_set_name(filterFds, "FDS ROM files");
+	gtk_file_filter_set_name(filterZip, "Zip archives");
 	
 	filterAll = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterAll, "*");
@@ -979,8 +995,10 @@ void loadGame ()
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFCEU);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFds);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterZip);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
