@@ -100,6 +100,12 @@ FCEUD_NetworkConnect(void)
     g_config->getOption("SDL.NetworkGameKey", &key);
     g_config->getOption("SDL.NetworkPort", &port);
     g_config->getOption("SDL.NetworkPlayers", &localPlayers);
+    
+    
+    g_config->setOption("SDL.NetworkIP", "");
+    g_config->setOption("SDL.NetworkPassword", "");
+    g_config->setOption("SDL.NetworkGameKey", "");
+    
 
 
     // only initialize if remote server is specified

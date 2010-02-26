@@ -29,6 +29,7 @@
 #endif
 
 void toggleSound(GtkWidget* check, gpointer data);
+void loadGame ();
 
 extern Config *g_config;
 
@@ -260,26 +261,70 @@ void openPaletteConfig()
 	return;
 }
 
+GtkWidget* ipEntry;
+GtkWidget* portSpin;
+GtkWidget* pwEntry;
+void launchNet(GtkWidget* w, gpointer p)
+{
+	char* ip = (char*)gtk_entry_get_text(GTK_ENTRY(ipEntry));
+	char* pw = (char*)gtk_entry_get_text(GTK_ENTRY(pwEntry));
+	int port = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(portSpin));
+	
+	g_config->setOption("SDL.NetworkIP", ip);
+	g_config->setOption("SDL.NetworkPassword", pw);
+	g_config->setOption("SDL.NetworkPort", port);
+	
+	gtk_widget_destroy(GTK_WIDGET(p));
+	
+	loadGame();
+}
+void closeNet(GtkWidget* w, gpointer p)
+{
+	gtk_widget_destroy(GTK_WIDGET(p));
+}
+
+void setUsername(GtkWidget* w, gpointer p)
+{
+	char* s = (char*)gtk_entry_get_text(GTK_ENTRY(w));
+	g_config->setOption("SDL.NetworkUsername", s);
+}
+
 void openNetworkConfig()
 {
 	GtkWidget* win;
 	GtkWidget* box;
+	GtkWidget* userBox;
+	GtkWidget* userEntry;
+	GtkWidget* userLbl;
 	GtkWidget* frame;
 	GtkWidget* vbox;
 	GtkWidget* ipBox;
 	GtkWidget* ipLbl;
-	GtkWidget* ipEntry;
+	
 	GtkWidget* portBox;
 	GtkWidget* portLbl;
-	GtkWidget* portSpin;
+	
 	//GtkWidget* localPlayersCbo;
 	GtkWidget* pwBox;
 	GtkWidget* pwLbl;
-	GtkWidget* pwEntry;
-	GtkWidget* btn;
+	
+	GtkWidget* bb;
+	GtkWidget* conBtn;
+	GtkWidget* closeBtn;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	box = gtk_vbox_new(FALSE, 3);
+	
+	userBox = gtk_hbox_new(FALSE, 3);
+	userLbl = gtk_label_new("Username:");
+	userEntry = gtk_entry_new();
+	std::string s;
+	g_config->getOption("SDL.NetworkUsername", &s);
+	gtk_entry_set_text(GTK_ENTRY(userEntry), s.c_str());
+	
+	g_signal_connect(userEntry, "changed", G_CALLBACK(setUsername), NULL);
+
+	
 	frame = gtk_frame_new("Network options");
 	vbox = gtk_vbox_new(FALSE, 5);
 	ipBox = gtk_hbox_new(FALSE, 5);
@@ -292,9 +337,14 @@ void openNetworkConfig()
 	pwBox = gtk_hbox_new(FALSE, 3);
 	pwLbl = gtk_label_new("Server password:");
 	pwEntry = gtk_entry_new();
-	btn = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
+	bb = gtk_hbox_new(FALSE, 5);
+	conBtn = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
+	closeBtn = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
 	
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(portSpin), 4046);
+	
+	gtk_box_pack_start(GTK_BOX(userBox), userLbl, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(userBox), userEntry, TRUE , TRUE, 3);
 	
 	gtk_box_pack_start(GTK_BOX(portBox), portLbl, FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(portBox), portSpin, FALSE , FALSE, 3);
@@ -312,11 +362,18 @@ void openNetworkConfig()
 	
 	gtk_container_add(GTK_CONTAINER(frame), vbox);
 	
+	gtk_box_pack_start_defaults(GTK_BOX(box), userBox);
 	gtk_box_pack_start_defaults(GTK_BOX(box), frame);
-	gtk_box_pack_start(GTK_BOX(box), btn, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(bb), closeBtn, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(bb), conBtn, FALSE, FALSE, 5);
+	
+	gtk_box_pack_start_defaults(GTK_BOX(box), bb);
 	gtk_container_add(GTK_CONTAINER(win), box);
 	
 	gtk_widget_show_all(win);
+	
+	g_signal_connect(closeBtn, "clicked", G_CALLBACK(closeNet), win);
+	g_signal_connect(conBtn, "clicked", G_CALLBACK(launchNet), win);
 }
 
 // creates and opens the gamepad config window
