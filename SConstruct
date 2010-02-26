@@ -12,8 +12,8 @@ opts.AddVariables(
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
-  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 0),
-  BoolVariable('GTK_LITE', 'Enable GTK2 for dialogs only', 1)
+  BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
+  BoolVariable('GTK_LITE', 'Enable GTK2 for dialogs only', 0)
 )
 
 env = Environment(options = opts)
@@ -55,9 +55,6 @@ else:
   conf = Configure(env)
   if not conf.CheckLib('SDL'):
     print 'Did not find libSDL or SDL.lib, exiting!'
-    Exit(1)
-  if not conf.CheckLib('z', autoadd=1):
-    print 'Did not find libz or z.lib, exiting!'
     Exit(1)
   if env['GTK'] or env['GTK_LITE']:
     # Add compiler and linker flags from pkg-config
