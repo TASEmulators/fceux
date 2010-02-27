@@ -376,6 +376,45 @@ void openNetworkConfig()
 	g_signal_connect(conBtn, "clicked", G_CALLBACK(launchNet), win);
 }
 
+// creates and opens hotkey config window
+void openHotkeyConfig()
+{
+	std::string prefix = "SDL.Hotkeys.";
+	GtkWidget* win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	enum
+	{
+	COMMAND_COLUMN,
+	KEY_COLUMN,
+	N_COLUMNS
+	};
+	GtkListStore* store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+	GtkTreeIter iter;
+	
+	gtk_list_store
+	gtk_list_store_append(store, &iter); // aquire iter
+	
+	
+		int buf;
+	for(int i=0; i<HK_MAX; i++)
+	{
+		//g_config->getOption(prefix + HotkeyStrings[i], &buf);
+		gtk_list_store_set(store, &iter, 
+				COMMAND_COLUMN, prefix + HotkeyStrings[i], 
+				KEY_COLUMN, "TODO", -1);
+	}
+	GtkWidget* tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	GtkCellRenderer *renderer;
+	GtkTreeViewColumn *column;
+	
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", 0, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	
+	gtk_container_add(GTK_CONTAINER(win),tree);
+	gtk_widget_show_all(win);
+}
+		
+
 // creates and opens the gamepad config window
 void openGamepadConfig()
 {
@@ -1259,6 +1298,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/_Video Config", NULL , openVideoConfig, 0, "<Item>" },
   { "/Options/_Palette Config", NULL , openPaletteConfig, 0, "<Item>" },
   { "/Options/_Network Config", NULL , openNetworkConfig, 0, "<Item>" },
+  //{ "/Options/Map _Hotkeys", NULL , openHotkeyConfig, 0, "<Item>" },
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
   { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
