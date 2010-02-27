@@ -32,18 +32,17 @@
 int
 LoadCPalette(const std::string &file)
 {
-	printf("Loading custom palette from file...\n");
     uint8 tmpp[192];
     FILE *fp;
 
     if(!(fp = FCEUD_UTF8fopen(file.c_str(), "rb"))) {
         printf(" Error loading custom palette from file: %s\n", file.c_str());
-        return -1;
+        return 0;
     }
     fread(tmpp, 1, 192, fp);
     FCEUI_SetPaletteArray(tmpp);
     fclose(fp);
-    return 0;
+    return 1;
 }
 
 /**
@@ -294,35 +293,49 @@ InitConfig()
                           DefaultFamilyKeyBoard[j]);
     }
     
-    // Hotkeys
-    prefix = "SDL.Hotkeys.";
-    config->addOption(prefix + "CheatMenu", SDLK_F1);
-	config->addOption(prefix + "BindState", SDLK_F2);
-    #ifdef _S9XLUA_H
-    config->addOption(prefix + "LoadLua", SDLK_F3);
-    #endif
-    config->addOption(prefix + "RenderBG", SDLK_F4);
-    config->addOption(prefix + "SaveState", SDLK_F5);
-    config->addOption(prefix + "FrameAdvanceLagSkip", SDLK_LEFTBRACKET);
-    config->addOption(prefix + "LoadState", SDLK_F7);
-    config->addOption(prefix + "LagCounterDisplay", SDLK_RIGHTBRACKET);
-    config->addOption(prefix + "MovieToggleFrameDisplay", SDLK_F9);
-    config->addOption(prefix + "SubtitleDisplay", SDLK_F10);
-    config->addOption(prefix + "Reset", SDLK_F11);
-    config->addOption(prefix + "Screenshot", SDLK_F12);
+    const int Hotkeys[HK_MAX] = {
+		SDLK_F1, // cheat menu
+		SDLK_F2, // bind state
+		SDLK_F3, // load lua
+		SDLK_F4, // toggleBG
+		SDLK_F5, // save state
+		SDLK_F6, // fds select
+		SDLK_F7, // load state
+		SDLK_F8, // fds eject
+		SDLK_F9, // toggle frame display
+		SDLK_F10, // toggle subtitle
+		SDLK_F11, // reset
+		SDLK_F12, // screenshot
+		SDLK_PAUSE, // pause
+		SDLK_MINUS, // speed++
+		SDLK_EQUALS, // speed--
+		SDLK_BACKSLASH, //frame advnace
+		SDLK_TAB, // turbo
+		SDLK_i, // toggle input display
+		SDLK_o, // toggle movie RW
+		SDLK_p, // toggle mute capture
+		0, // quit
+		SDLK_DELETE, // frame advance lag skip
+		SDLK_ESCAPE, // lag counter display
+		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
+		SDLK_6, SDLK_7, SDLK_8, SDLK_9}; 
+	
+	prefix = "SDL.Hotkeys.";	
+    for(int i=0; i < HK_MAX; i++)
+		config->addOption(prefix + HotkeyStrings[i], Hotkeys[i]);
+		
+  /*
     config->addOption(prefix + "Pause", SDLK_PAUSE);
     config->addOption(prefix + "DecreaseSpeed", SDLK_MINUS);
     config->addOption(prefix + "IncreaseSpeed", SDLK_EQUALS);
     config->addOption(prefix + "FrameAdvance", SDLK_BACKSLASH);
-    config->addOption(prefix + "FastForward", SDLK_BACKQUOTE);
+    config->addOption(prefix + "FastForward", SDLK_TAB);
     config->addOption(prefix + "InputDisplay", SDLK_i);
     config->addOption(prefix + "MovieToggleReadWrite", SDLK_q);
     #ifdef CREATE_AVI
     config->addOption(prefix + "MuteCapture", SDLK_DELETE);
     #endif
     config->addOption(prefix + "Quit", SDLK_ESCAPE);
-    config->addOption(prefix + "FDSSelect", SDLK_F6);
-    config->addOption(prefix + "FDSEject", SDLK_F8);
     //config->addOption(prefix + "Power", 0);
     
     
@@ -339,7 +352,7 @@ InitConfig()
 	config->addOption(prefix + "SelectState8", SDLK_8);
 	config->addOption(prefix + "SelectState9", SDLK_9);
 	
-    
+    */
 
     // All mouse devices
     config->addOption("SDL.OekaKids.0.DeviceType", "Mouse");
@@ -353,7 +366,7 @@ InitConfig()
 
     config->addOption("SDL.Zapper.0.DeviceType", "Mouse");
     config->addOption("SDL.Zapper.0.DeviceNum", 0);
-    
+
     return config;
 }
 
