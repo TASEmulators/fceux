@@ -390,7 +390,6 @@ void openHotkeyConfig()
 	GtkListStore* store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 	GtkTreeIter iter;
 	
-	gtk_list_store
 	gtk_list_store_append(store, &iter); // aquire iter
 	
 	
