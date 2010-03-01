@@ -13,9 +13,10 @@ Table of Contents
 1. Requirements
 	* libsdl1.2 - It is strongly recommended that you upgrade to the latest
 		version of sdl (1.2.14).  There are known audio problems with
-		versions <= 1.2.13.
-	* libz - Requred for opening archived ROMs.
+		versions <= 1.2.13. 
+		* libsdl1.2debian-esd is recommended on ubuntu/debian systems
 	* scons - Required to build fceux.
+	* libgtk2.0 (OPTIONAL) - it's recomended that you install version >= 2.18
 
 2. Installation
 	Fceux is installed with the scons utility.  To compile, run:
@@ -47,15 +48,15 @@ tweak these.
 	Q.  I'm having issues with my sound!
 	A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
 
-	export SDL_AUDIODRIVER="driver"
+	export SDL_AUDIODRIVER=driver
 
-	where "driver" is either:
-		"pulse" for pulseaudio
-		"alsa" for ALSA
-		"oss" for OSS
-		"esd" for ESD
+	where driver is either:
+		pulse for pulseaudio
+		alsa for ALSA
+		oss for OSS
+		esd for ESD
 
-	ALSA or pulseaudio is recommended, but if you are having sound issues try a different driver.
+	ESD provides crystal clear playback on my machine.
 
 	There are sound options that you can tweak at runtime through command line switches:
 
