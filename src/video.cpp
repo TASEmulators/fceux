@@ -345,6 +345,8 @@ void FCEU_DispMessageOnMovie(char *format, ...)
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = true;
+	if (FCEUI_AviIsRecording() && FCEUI_AviDisableMovieMessages())
+		guiMessage.howlong = 0;
 }
 
 void FCEU_DispMessage(char *format, ...)
@@ -358,6 +360,7 @@ void FCEU_DispMessage(char *format, ...)
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = false;
 	
+	//adelikat: Pretty sure this code fails, Movie playback stopped is done with FCEU_DispMessageOnMovie()
 	#ifdef CREATE_AVI
 	if(LoggingEnabled == 2)
 	{

@@ -7,8 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -71,6 +70,7 @@ BEGIN
             MENUITEM "&Stop AVI",                   MENU_STOP_AVI
             MENUITEM "&Record WAV...",              MENU_RECORD_WAV
             MENUITEM "&Stop WAV",                   MENU_STOP_WAV
+            MENUITEM "Disable Movie Messages",      ID_AVI_DISMOVIEMESSAGE
         END
         POPUP "&Lua"
         BEGIN
@@ -1471,10 +1471,10 @@ BEGIN
     EDITTEXT        IDC_EDIT_LUAPATH,7,16,256,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_LUAARGS,47,50,216,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_LUACONSOLE,7,80,256,60,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
-	LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
-	LTEXT           "Script File:",IDC_STATIC,7,7,36,8
-	LTEXT           "Arugments:",IDC_STATIC,7,52,40,8
-PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
+    LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
+    LTEXT           "Script File:",IDC_STATIC,7,7,36,8
+    LTEXT           "Arugments:",IDC_STATIC,7,52,40,8
+    PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
 END
 
 VIDEOCONFIG DIALOGEX 65520, 76, 384, 296
@@ -1938,8 +1938,7 @@ IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

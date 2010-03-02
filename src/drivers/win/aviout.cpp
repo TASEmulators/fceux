@@ -14,6 +14,9 @@ extern PALETTEENTRY *color_palette;
 
 #define VIDEO_WIDTH		256
 
+//adelikat: TODO - perhaps put this in AVIFile
+bool				disableMovieMessages = false;
+
 static struct AVIFile
 {
 	int					valid;
@@ -432,3 +435,17 @@ bool FCEUI_AviIsRecording()
 
 	return false;
 }
+
+bool FCEUI_AviDisableMovieMessages()
+{
+	if (disableMovieMessages)
+		return true;
+
+	return false;
+}
+
+void FCEUI_SetAviDisableMovieMessages(bool disable)
+{
+	disableMovieMessages = disable;
+}
+

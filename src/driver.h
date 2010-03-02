@@ -271,6 +271,8 @@ void FCEUI_AviEnd(void);
 void FCEUI_AviVideoUpdate(const unsigned char* buffer);
 void FCEUI_AviSoundUpdate(void* soundData, int soundLen);
 bool FCEUI_AviIsRecording();
+bool FCEUI_AviDisableMovieMessages();
+void FCEUI_SetAviDisableMovieMessages(bool disable);
 
 void FCEUD_AviRecordTo(void);
 void FCEUD_AviStop(void);

@@ -770,6 +770,9 @@
 #define RW_MENU_LAST_RECENT_FILE        40400
 #define ID_ENABLE_BACKUPSAVESTATES      40401
 #define ID_ENABLE_COMPRESSSAVESTATES    40402
+#define ID_AVI_DISABLEMOV               40403
+#define ID_AVI_DISMOVIEMESS             40404
+#define ID_AVI_DISMOVIEMESSAGE          40405
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -779,7 +782,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40403
+#define _APS_NEXT_COMMAND_VALUE         40406
 #define _APS_NEXT_CONTROL_VALUE         1257
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

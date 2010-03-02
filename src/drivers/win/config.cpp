@@ -61,6 +61,7 @@ extern uint8 gNoBGFillColor;
 extern bool rightClickEnabled;
 extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
+extern bool AVIdisableMovieMessages;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -304,6 +305,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(backupSavestates),
 	AC(compressSavestates),
 	AC(pauseWhileActive),
+	AC(AVIdisableMovieMessages),
 
 	ENDCFGSTRUCT
 };

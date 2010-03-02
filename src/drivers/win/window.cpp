@@ -116,6 +116,7 @@ int GetCheckedAutoFirePattern();
 int GetCheckedAutoFireOffset();
 
 //Internal variables-------------------------------------
+bool AVIdisableMovieMessages = false;
 char *md5_asciistr(uint8 digest[16]);
 static int winwidth, winheight;
 static volatile int nofocus = 0;
@@ -375,6 +376,7 @@ void UpdateCheckedMenuItems()
 	//File Maneu
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_AVI_DISMOVIEMESSAGE, AVIdisableMovieMessages ? MF_CHECKED : MF_UNCHECKED);
 
 	//NES Menu
 	CheckMenuItem(fceumenu, ID_NES_PAUSE, EmulationPaused ? MF_CHECKED : MF_UNCHECKED);
@@ -1520,6 +1522,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case MENU_STOP_WAV: 
 				CloseWave();
 				loggingSound = false;
+				break;
+			case ID_AVI_DISMOVIEMESSAGE:
+				AVIdisableMovieMessages ^= 1;
+				FCEUI_SetAviDisableMovieMessages(AVIdisableMovieMessages);
 				break;
 
 			case FCEUX_CONTEXT_SCREENSHOT:
