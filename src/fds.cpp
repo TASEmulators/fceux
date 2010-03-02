@@ -43,6 +43,8 @@
 //	when the virtual motor is on(mmm...virtual motor).
 extern int disableBatteryLoading; 
 
+bool isFDS = false;	//flag for determining if a FDS game is loaded, movie.cpp needs this
+
 static DECLFR(FDSRead4030);
 static DECLFR(FDSRead4031);
 static DECLFR(FDSRead4032);
@@ -833,6 +835,7 @@ int FDSLoad(const char *name, FCEUFILE *fp)
 
 	GameInfo->type=GIT_FDS;
 	GameInterface=FDSGI;
+	isFDS = true;
 
 	SelectDisk=0;
 	InDisk=255;
@@ -877,6 +880,7 @@ void FDSClose(void)
 {
 	FILE *fp;
 	int x;
+	isFDS = false;
 	char *fn=strdup(FCEU_MakeFName(FCEUMKF_FDS,0,0).c_str());
 
 	if(!DiskWritten) return;

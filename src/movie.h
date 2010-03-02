@@ -161,6 +161,7 @@ public:
 
 	int version;
 	int emuVersion;
+	int fds;
 	//todo - somehow force mutual exclusion for poweron and reset (with an error in the parser)
 	bool palFlag;
 	MD5DATA romChecksum;
