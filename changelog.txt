@@ -1,3 +1,4 @@
+01-march-2010 - adelikat - win32 - cheats dialog - toggling a cheat in the cheats list now updates the active cheats count
 01-march-2010 - adelikat - win32 - a disable movie messages menu item
 25-feb-2010 - prockguy - unix netplay is now functional; gtk network gui created
 24-feb-2010 - prockguy - GTK - added basic movie controls

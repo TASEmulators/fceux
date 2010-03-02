@@ -464,16 +464,16 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							if (EmulationPaused == 1)	//We only want to send info to memwatch if paused
 							{							//otherwise we will be sending info while it is updating causing unpredictable behavior
 								lbfocus=1;				   
-							SendDlgItemMessage(hwndDlg,
-							                   IDC_CHEAT_LIST_POSSIBILITIES,
-							                   LB_GETTEXT,
-							                   SendDlgItemMessage(hwndDlg,
-							                                      IDC_CHEAT_LIST_POSSIBILITIES,
-							                                      LB_GETCURSEL,0,0),
-							                   (LPARAM)(LPCTSTR)str);
-							strcpy(str2,str+1);
-							str2[4] = 0;
-							AddMemWatch(str2);
+								SendDlgItemMessage(hwndDlg,
+								IDC_CHEAT_LIST_POSSIBILITIES,
+								LB_GETTEXT,
+								SendDlgItemMessage(hwndDlg,
+								IDC_CHEAT_LIST_POSSIBILITIES,
+								LB_GETCURSEL,0,0),
+								(LPARAM)(LPCTSTR)str);
+								strcpy(str2,str+1);
+								str2[4] = 0;
+								AddMemWatch(str2);
 							}
 							break;
 						case IDC_LIST_CHEATS:
@@ -488,6 +488,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_DELETESTRING,selcheat,0);
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_INSERTSTRING,selcheat,(LPARAM)(LPSTR)str);
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
+							UpdateCheatsAdded();
 							UpdateColorTable();
 							break;
 					}
