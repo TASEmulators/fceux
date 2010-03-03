@@ -36,6 +36,28 @@ extern Config *g_config;
 GtkWidget* MainWindow = NULL;
 GtkWidget* padNoCombo;
 
+GtkTextBuffer* tb = gtk_text_buffer_new(NULL);
+
+void openGTKterm()
+{
+	GtkWidget* win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget* vbox = gtk_vbox_new(FALSE, 5);
+	
+	GtkWidget* textV = gtk_text_view_new_with_buffer(tb);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(textV), FALSE);
+	GtkWidget* entry = gtk_entry_new();
+	gtk_text_buffer_set_text(tb, "HELLO FCEUX!", -1);
+	
+	gtk_box_pack_start(GTK_BOX(vbox), textV, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
+	
+	gtk_container_add(GTK_CONTAINER(win), vbox);
+	
+	gtk_widget_show_all(win);
+	
+	return;
+}
+
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
@@ -1284,6 +1306,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
+  //{ "/Emulator/GTKterm (DEV)", NULL, openGTKterm, 0, "<Item>"},
   { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
   { "/Movie/_Open", NULL, loadMovie, 0, "<Item>"},
   { "/Movie/S_top", NULL, FCEUI_StopMovie, 0, "<Item>"},
