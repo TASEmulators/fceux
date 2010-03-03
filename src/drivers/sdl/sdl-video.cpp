@@ -75,10 +75,6 @@ static int s_paletterefresh;
 
 extern bool MaxSpeed;
 
-bool FCEUI_AviDisableMovieMessages()
-{
-	return false;
-}
 /**
  * Attempts to destroy the graphical video display.  Returns 0 on
  * success, -1 on failure.
@@ -723,4 +719,17 @@ PtoV(uint16 x,
     }
     y += s_srendline;
     return (x | (y << 16));
+}
+bool disableMovieMessages = false;
+bool FCEUI_AviDisableMovieMessages()
+{
+	if (disableMovieMessages)
+		return true;
+
+	return false;
+}
+
+void FCEUI_SetAviDisableMovieMessages(bool disable)
+{
+	disableMovieMessages = disable;
 }

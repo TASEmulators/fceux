@@ -189,6 +189,7 @@ InitConfig()
     
     // pause movie playback at frame x
     config->addOption("pauseframe", "SDL.PauseFrame", 0);
+    config->addOption("moviemsg", "SDL.MovieMsg", 1);
     
     // overwrite the config file?
     config->addOption("no-config", "SDL.NoConfig", 0);

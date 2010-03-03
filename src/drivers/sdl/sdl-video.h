@@ -4,5 +4,7 @@ uint32 PtoV(uint16 x, uint16 y);
 bool FCEUD_ShouldDrawInputAids();
 bool FCEUI_AviDisableMovieMessages();
 static SDL_Surface *s_screen;
+bool FCEUI_AviDisableMovieMessages();
+void FCEUI_SetAviDisableMovieMessages(bool disable);
 
 #endif

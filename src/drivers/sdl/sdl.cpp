@@ -606,6 +606,15 @@ SDL_GL_LoadLibrary(0);
       return 0;
     }
     
+    // check to see if movie messages are disabled
+    int mm;
+    g_config->getOption("SDL.MovieMsg", &mm);
+    if( mm == 0)
+		FCEUI_SetAviDisableMovieMessages(true);
+	else
+		FCEUI_SetAviDisableMovieMessages(false);
+	
+	
     // check for a .fm2 file to rip the subtitles
     g_config->getOption("SDL.RipSubs", &s);
     g_config->setOption("SDL.RipSubs", "");
