@@ -1,3 +1,4 @@
+03-march-2010 - prockguy - fceux - now prints the name of the mapper on rom load
 03-march-2010 - prockguy - SDL - VS unisystem keys now configable
 03-march-2010 - prcokguy - SDL - changed default hotkeys and keys to match w32
 03-march-2010 - prockguy - SDL - fixed dpad/joyhat support
