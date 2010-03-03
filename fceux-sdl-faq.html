@@ -23,56 +23,64 @@
 	<div id="page_content">
 
   <center><h1>FCEUX SDL FAQ</h1></center>
-  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.3</i> by punkrockguy318<br>
+  <center><i>Last updated March 3, 2010<br />Valid as of FCEUX 2.2.0</i> by punkrockguy318<br>
   </center>
  <p><b>Table of Contents:</b></p>
  <ul>
-  <li><a href="#win-vs-sdl">What's the difference between the windows and sdl ports?</a></li>
+  <li><a href="#svn">What is the subversion build and how can I get it?</a></li>
   <li><a href="#config">How do I configure a gamepad?</a></li>
-  <li><a href="#lua">Why do I need lua5.1 to compile/run FCEUX?</a></li>
+  <li><a href="#sound">My sound is stuttery/laggy.  How can I fix this?</a></li>
+  <li><a href="#hotkeys1">How can I change my hotkey bindings?</a></li>
+  <li><a href="#hotkeys2">Can I map hotkeys to my gamepad?</a></li>
  </ul>
-  
- <a name="intro"><h2>What's the difference between the windows and sdl ports?</h2></a>
- <p>A lot of work that has been done on the FCE code base was been windows only, so 
- some features have not been implemented into the more portable SDL version. </p>
- <p>Here is a list of planned features that are currently in the Win32 build 
- but are missing from the SDL build:</p>
- <ul>
-   <li>Autosaving</li>
-   <li>Hotkey mapping</li>
-   <li>More graphical ways of configuring FCEUX</li>
- </ul>
- <p>I'm going to reiterate that much of the work that has been done of the FCEUX 
- code base has been windows only, so some features will probably never be ported 
- to the SDL version.  If you are a casual user that just wants to play old NES games, the SDL 
- build will be sufficient for you.  However, if you want to use the extensive
- TAS and debugging features that FCEUX has to offer, you are better of using
- the windows build in <a href=http://winehq.org>wine</a>.  Here is a list of features
- that will most likely never be ported to the SDL port.</p>
- <ul>
-   <li />Memory watch
-   <li />Ram filter
-   <li />TAS edit
-   <li />Most of the debugging features
- </ul>
+ <a name="subversion"><h3>What is the subversion build and how can I get it?</h3></a>
+ <p>The latest and greatest changes to fceuX are reflected immediately on our
+ sourceforge subversion server.  You can checkout our source code and build
+ fceuX with the latest changes that have been made.  Use this command:</p>
+ <p><b>svn co https://fceultra.svn.sourceforge.net/svnroot/fceultra fceultra</b></p>
  <a name="config"><h3>How do I configure a gamepad?</h3></a>
  <p>
-  You can configure the first gamepad by running <b>fceux --inputcfg gamepad1</b> </p>
-  <p>When you do this, you'll be presented with a black window with a titlebar
-  indicating what button to map.  FCEUX will look for two
+ <p>If you have the GTK GUI compiled in, you can configure the gamepad by
+ selecting Options...Gamepad in the menu.</p>
+  You can allso configure the first gamepad by running <b>fceux --inputcfg gamepad1</b> </p>
+  <p>When you configure a button you will be presented with a black window with a titlebar
+  indicating what button to map.  FceuX will look for two
   of the same keypress/joystick event in a row.  If it doesn't find two of the same 
-  keypresses in a row, it will allow you to map the button to four seperate keys.</p>
-  <p>Input configuration is planned for gfceux.</p>
+  keypresses in a row, it will allow you to map the button to two seperate keys.</p>
  </p>
- <a name="lua"><h4>Why do I need lua5.1 to compile/run fceux?</h4></a>
- <p>You don't! As of version 2.0.3, lua is optional.  However, the lua scritping 
- engine in fceux is very powerful, and will be used more and more by fceux in the future.</p>
+ <a name="sound"><h3>My sound is stuttery/laggy.  How can I fix this?</h3></a>
+ <p>Try using different SDL audio drivers.  You can set the SDL audio driver with
+ the following command</p>
+ <p><b>export SDL_AUDIODRIVER=driver</b></p>
+ <p>where driver is: esd,oss,alsa,pulse,nas,arts  .  You should probably 
+ try them in that order.  esd is the best choice if you are using pulseaudio 
+ or the esound daemon.  OSS (with ALSA being seond here)is best if you have
+ no sound daemon running.  I can't confirm if nas or arts work at all (but
+ I'd definately avoid arts altogether). SDL's pulse driver has a lot of issues if you are using
+ older versions of SDL or pulseaudio.  If you are having problems and you use 
+ pulseaudio try the esd SDL driver.
+ </p>
+ <a name="hotkeys1"><h3>How can I change my hotkey bindings?</h3></a>
+ <p>You need to edit your ~/.fceux/fceux.cfg file.  The SDL.Hotkeys.* values
+ are SDL keysyms, which can be found in SDL_keysym.h (probably
+ /usr/include/SDL/SDL_keysym.h on your system).  At the time of writing,
+ hotkeys are not mappable from the GUI in sdl.
+ </p>
+ <a name="hotkeys2"><h3>Can I map hotkeys to my gamepad?</h3></a>
+ <p>No, not from within fceuX.  However, there is a great script available
+ called jkeys that will convert joystick button presses and axis movements to keyboard
+ keypresses.  You can map your joystick buttons to whatever hotkey you'd like.
+ <a href="http://code.google.com/p/jkeys/">Jkeys</a> works great with fceuX.
+ There aren't any releases on the website, but don't let that scare you.
+ You can easily obtain the script via subversion:</p>
+ <p><b>svn checkout http://jkeys.googlecode.com/svn/trunk/ jkeys-read-only</b></p>
+
         
  <a name="credits"><h2>Credits</h2></a>
  <p>
  <table border width="100%">
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
-  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">punkrockguy318</a></td>
+  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
   <td>Author of this document</td></tr>
  </table>
  </p>

@@ -23,7 +23,7 @@
 	<div id="page_content">
 
   <center><h1>FCEUX SDL Documentation</h1></center>
-  <center><i>Last updated November 30, 2008<br />Valid as of FCEUX 2.0.4</i><br>
+  <center><i>Last updated March 10, 2010<br />Valid as of FCEUX 2.2</i><br>
   <b>Please note that this document is INCOMPLETE and may be INACCURATE.
   Contributions welcome.</b></center>
  <p>
@@ -190,13 +190,13 @@ necessarily 100% accurate or complete):
  <tr><td>F3</td><td>Load lua script.</td></tr>
  <tr><td>F4</td><td>Toggle background rendering.</td></tr>
  <tr><td>F5</td><td>Save state.</td></tr>
- <tr><td>F6</td><td>Toggle skipping lag in frame advance.</td></tr>
+ <tr><td>F6</td><td>FDS select side.</td></tr>
  <tr><td>F7</td><td>Load state.</td></tr>
- <tr><td>F8</td><td>Toggle lag counter display.</td></tr>
- <tr><td>F9</td><td>Toggle movie frame counter.</td></tr>
+ <tr><td>F8</td><td>FDS eject.</td></tr>
+ <tr><td>.</td><td>Toggle movie frame counter.</td></tr>
  <tr><td>F10</td><td>Toggle movie subtitles.</td></tr>
- <tr><td>F11</td><td>Reset emulation.</td></tr>
- <tr><td>F12</td><td>Save screen snapshot.</td></tr>
+ <tr><td>F11</td><td>Reset emulator.</td></tr>
+ <tr><td>F12</td><td>Save screenshot (to basedir/snaps/).</td></tr>
  <tr><td>Shift + F5</td><td>Begin movie recording.</td></tr>
  <tr><td>Shift + F7</td><td>Open a movie for playback.</td></tr>
  <tr><td>0-9</td><td>Select save state slot.</td></tr>
@@ -204,11 +204,15 @@ necessarily 100% accurate or complete):
  <tr><td>=</td><td>Increase emulation speed.</td></tr>
  <tr><td>Pause</td><td>Pause emulation.</td></tr>
  <tr><td>\</td><td>Advance a single frame.</td></tr>
+ <tr><td>TAB</td><td>Hold for turbo emulation speed.</td></tr>
+ <tr><td>,</td><td>Toggle input display.</td></tr>
+ <tr><td>q</td><td>Toggle movie read-only</td></tr>
+ <tr><td>'</td><td>Advance a single frame.</td></tr>
  </table>
  </p>
  <a name="using-keys-vs"><h4>VS Unisystem</h4></a>
  <p> 
- Could someone test this please?
+ <B>NOTE: This is currently broken in SDL.</B>
  <table border>
  <tr><th>Key:</th><th>Action:</th></tr>
  <tr><td>F8</td><td>Insert coin.</td></tr>
@@ -226,18 +230,18 @@ necessarily 100% accurate or complete):
  </table>
  </p>
  <a name="using-keys-gamepad"><h4>Gamepad</h4></a>
- <p> These are the default keys for the first player gamepad.  These can
- be remapped using the --inputcfg command line parameter or using gfceux.
+ <p> These are the default keys for the P1 gamepad.  These can
+ be remapped using the --inputcfg command line parameter or the GTK GUI
  <table border>
  <tr><th>Key:</th><th nowrap>Button on Emulated Gamepad:</th></tr>
- <tr><td>K</td><td>B</td></tr>
- <tr><td>J</td><td>A</td></tr>
+ <tr><td>D</td><td>B</td></tr>
+ <tr><td>F</td><td>A</td></tr>
  <tr><td>Enter/Return</td><td>Start</td></tr>
- <tr><td>Tab</td><td>Select</td></tr>
- <tr><td>W</td><td>Up</td></tr>
- <tr><td>A</td><td>Left</td></tr>
- <tr><td>S</td><td>Down</td></tr>
- <tr><td>D</td><td>Right</td></tr>
+ <tr><td>S</td><td>Select</td></tr>
+ <tr><td>Keypad up</td><td>Up</td></tr>
+ <tr><td>Keypad left</td><td>Left</td></tr>
+ <tr><td>Keypad down</td><td>Down</td></tr>
+ <tr><td>Keypad right</td><td>Right</td></tr>
  </table>
  </p> 
  <a name="using-keys-powerpad"><h4>Power Pad</h4></a>
@@ -304,7 +308,7 @@ necessarily 100% accurate or complete):
  <p>
  <table border width="100%">
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
-  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">punkrockguy318</a></td>
+  <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
   <td>FCEUX SDL Documentation rewrite.</td></tr>
  </table>
  </p>
