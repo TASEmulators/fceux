@@ -1321,6 +1321,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
+  { "/Emulator/_Insert coin", NULL, FCEUI_VSUniCoin, 0, "<Item>"},
   //{ "/Emulator/GTKterm (DEV)", NULL, openGTKterm, 0, "<Item>"},
   { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
   { "/Movie/_Open", NULL, loadMovie, 0, "<Item>"},
