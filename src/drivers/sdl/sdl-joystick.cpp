@@ -43,8 +43,19 @@ DTestButtonJoy(ButtConfig *bc)
 {
     int x;
 
-    for(x = 0; x < bc->NumC; x++) {
-        if(bc->ButtonNum[x] & 0x8000) {
+    for(x = 0; x < bc->NumC; x++)
+    {
+		if(bc->ButtonNum[x] & 0x2000)
+        {
+            /* Hat "button" */
+            if(SDL_JoystickGetHat(s_Joysticks[bc->DeviceNum[x]],
+                                  ((bc->ButtonNum[x] >> 8) & 0x1F)) & 
+                                   (bc->ButtonNum[x]&0xFF))
+                return(1);
+          
+		}
+        else if(bc->ButtonNum[x] & 0x8000) 
+        {
             /* Axis "button" */
             int pos;
             pos = SDL_JoystickGetAxis(s_Joysticks[bc->DeviceNum[x]],
@@ -54,17 +65,10 @@ DTestButtonJoy(ButtConfig *bc)
             } else if (!(bc->ButtonNum[x] & 0x4000) && pos >= 16363) {
                 return(1);
             }
-        } else if(bc->ButtonNum[x] & 0x2000) {
-            /* Hat "button" */
-            if(SDL_JoystickGetHat(s_Joysticks[bc->DeviceNum[x]],
-                                  (((bc->ButtonNum[x] >> 8) & 0x1F) & 
-                                   (bc->ButtonNum[x]&0xFF)))) {
-                return(1);
-            }
-       } else if(SDL_JoystickGetButton(s_Joysticks[bc->DeviceNum[x]],
-                                       bc->ButtonNum[x])) { 
+        } 
+        else if(SDL_JoystickGetButton(s_Joysticks[bc->DeviceNum[x]],
+                                       bc->ButtonNum[x]))
            return(1);
-       }
     }
     return(0);
 }
