@@ -302,7 +302,7 @@ InitConfig()
 		SDLK_F6, // fds select
 		SDLK_F7, // load state
 		SDLK_F8, // fds eject
-		SDLK_F9, // toggle frame display
+		SDLK_PERIOD, // toggle frame display
 		SDLK_F10, // toggle subtitle
 		SDLK_F11, // reset
 		SDLK_F12, // screenshot
@@ -311,12 +311,12 @@ InitConfig()
 		SDLK_EQUALS, // speed--
 		SDLK_BACKSLASH, //frame advnace
 		SDLK_TAB, // turbo
-		SDLK_i, // toggle input display
-		SDLK_o, // toggle movie RW
-		SDLK_p, // toggle mute capture
+		SDLK_COMMA, // toggle input display
+		SDLK_q, // toggle movie RW
+		SDLK_QUOTE, // toggle mute capture
 		0, // quit
 		SDLK_DELETE, // frame advance lag skip
-		SDLK_ESCAPE, // lag counter display
+		SDLK_SLASH, // lag counter display
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
 		SDLK_6, SDLK_7, SDLK_8, SDLK_9}; 
 	
