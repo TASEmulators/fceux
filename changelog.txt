@@ -1,3 +1,4 @@
+03-march-2010 - prockguy - SDL - fixed dpad/joyhat support
 01-march-2010 - adelikat - Movie file format header now has a FDS flag
 01-march-2010 - adelikat - win32 - cheats dialog - toggling a cheat in the cheats list now updates the active cheats count
 01-march-2010 - adelikat - win32 - a disable movie messages menu item
