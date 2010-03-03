@@ -886,7 +886,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="width_chars">6</property>
-                        <property name="text" translatable="yes">11000</property>
+                        <property name="text" translatable="yes">48000</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
