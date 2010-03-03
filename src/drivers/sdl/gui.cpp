@@ -695,21 +695,36 @@ int mixerChanged(GtkWidget* w, gpointer p)
 	GtkWidget* parent = gtk_widget_get_parent(w);
 	char* lbl = (char*)gtk_frame_get_label(GTK_FRAME(parent));
 	if(strcmp(lbl, "Volume") == 0)
+	{
 		g_config->setOption("SDL.SoundVolume", v);
+		FCEUI_SetSoundVolume(v);
+	}
 	if(strcmp(lbl, "Triangle") == 0)
+	{
 		g_config->setOption("SDL.TriangleVolume", v);
+		FCEUI_SetTriangleVolume(v);
+	}
 	if(strcmp(lbl, "Square1") == 0)
+	{
 		g_config->setOption("SDL.Square1Volume", v);
+		FCEUI_SetSquare1Volume(v);
+	}
 	if(strcmp(lbl, "Square2") == 0)
+	{
 		g_config->setOption("SDL.Square2Volume", v);
+		FCEUI_SetSquare2Volume(v);
+	}
 	if(strcmp(lbl, "Noise") == 0)
+	{
 		g_config->setOption("SDL.NoiseVolume", v);
+		FCEUI_SetNoiseVolume(v);
+	}
 	if(strcmp(lbl, "PCM") == 0)
+	{
 		g_config->setOption("SDL.PCMVolume", v);
-
-	g_config->save();
-	KillSound();
-	InitSound();
+		FCEUI_SetPCMVolume(v);
+	}
+	
 	return 0;
 }
 	
