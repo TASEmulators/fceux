@@ -93,6 +93,10 @@ InitSound()
         KillSound();
         return(0);
     }
+    char driverName[8];
+    SDL_AudioDriverName(driverName, 8);
+    
+    fprintf(stderr, "Loading SDL sound with %s driver...\n", driverName);
 
     // load configuration variables
     g_config->getOption("SDL.SoundRate", &soundrate);

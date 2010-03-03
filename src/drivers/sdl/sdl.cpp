@@ -154,8 +154,11 @@ static void ShowUsage(char *prog)
 #endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
+	SDL_Version* v = SDL_Linked_Version();
+	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
 #ifdef GTK_LITE
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
+	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 #endif
 	
 }
