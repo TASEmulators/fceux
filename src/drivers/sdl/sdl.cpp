@@ -154,7 +154,7 @@ static void ShowUsage(char *prog)
 #endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
-	SDL_Version* v = SDL_Linked_Version();
+	const SDL_version* v = SDL_Linked_Version();
 	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
 #ifdef GTK_LITE
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
@@ -675,16 +675,15 @@ SDL_GL_LoadLibrary(0);
     }
 
     g_config->setOption("SDL.RipSubs", "");
-    if (!s.empty())
-	for(int i=0; i<argc;i++)
-	{
+    for(int i=0; i<argc;i++)
+    {
 		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
 		{
 			ShowUsage(argv[0]);
 			SDL_Quit();
 			return 0;
 		}
-	}
+    }
 	
 #ifndef _GTK
     if(romIndex <= 0) {
