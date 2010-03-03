@@ -31,3 +31,4 @@ TODO-SVN:
 * DONE!(PAUSE) Add a key to resume normal playback when finished frameskipping
 * DONE! Make GetUserInput not depend on zenity
 * DONE! Fixed dpad/hat support
+* DONE! Fixed VS Unisystem in SDL and make hotkeys mappable

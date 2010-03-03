@@ -303,6 +303,8 @@ InitConfig()
 		SDLK_F6, // fds select
 		SDLK_F7, // load state
 		SDLK_F8, // fds eject
+		SDLK_F6, // VS insert coin
+		SDLK_F8, // VS toggle dipswitch
 		SDLK_PERIOD, // toggle frame display
 		SDLK_F10, // toggle subtitle
 		SDLK_F11, // reset

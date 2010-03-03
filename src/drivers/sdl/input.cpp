@@ -630,10 +630,10 @@ KeyboardCommands()
     // VS Unisystem games
     if(gametype == GIT_VSUNI) {
         // insert coin
-        if(keyonly(F8)) FCEUI_VSUniCoin();
+        if(_keyonly(Hotkeys[HK_VS_INSERT_COIN])) FCEUI_VSUniCoin();
 
         // toggle dipswitch display
-        if(keyonly(F6)) {
+        if(_keyonly(Hotkeys[HK_VS_TOGGLE_DIPSWITCH])) {
             DIPS^=1;
             FCEUI_VSUniToggleDIPView();
         }
@@ -655,16 +655,11 @@ KeyboardCommands()
 
         if(keyonly(H)) FCEUI_NTSCSELHUE();
         if(keyonly(T)) FCEUI_NTSCSELTINT();
-       
-       
-       
+
 		if (_keyonly(Hotkeys[HK_DECREASE_SPEED]))
 			FCEUI_NTSCDEC();
 		if (_keyonly(Hotkeys[HK_INCREASE_SPEED]))
 			FCEUI_NTSCINC();
-		
-       
-       
 
         if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
             if(keyonly(F8)) {
