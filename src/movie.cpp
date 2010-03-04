@@ -346,7 +346,7 @@ void MovieData::installValue(std::string& key, std::string& val)
 	//todo - use another config system, or drive this from a little data structure. because this is gross
 	if(key == "FDS")
 		installInt(val,fds);
-	if(key == "version")
+	else if(key == "version")
 		installInt(val,version);
 	else if(key == "emuVersion")
 		installInt(val,emuVersion);
