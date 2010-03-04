@@ -246,7 +246,9 @@ std::string GetFilename(const char* title, bool save, const char* filter)
 	// TODO: make file filters case insensitive	
 	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
-	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
+	gtk_dialog_run (GTK_DIALOG (fileChooser));
+	
+	// flush gtk events
 	while(gtk_events_pending())
 			gtk_main_iteration_do(TRUE);
 		
@@ -256,32 +258,6 @@ std::string GetFilename(const char* title, bool save, const char* filter)
 	
 	while(gtk_events_pending())
 			gtk_main_iteration_do(TRUE);
-/*	
-    FILE *fpipe;
-    std::string command = "zenity --file-selection --title=\"";
-    command.append(title);
-    command.append("\" --file-filter=\"");
-    command.append(filter);
-    command.append("\"");
-    if (save) // Do we want to save a file or load one?
-    {
-      command.append(" --save --confirm-overwrite --filename=\".");
-      command.append(getExtension(filter));
-      command.append("\"");
-    }
-    if ( !(fpipe = (FILE*)popen(command.c_str(),"r")) )
-    {  // If fpipe is NULL
-        FCEUD_PrintError("Pipe error on opening zenity");
-    }
-      
-    int c; 
-    while( (c = fgetc(fpipe)) )
-    {
-        if (c == EOF || c == '\n')
-            break;
-        fname += c;
-    }
-    pclose(fpipe);*/
 #endif
     FCEUI_ToggleEmulationPause();
     return fname;
@@ -305,7 +281,9 @@ std::string GetUserText(const char* title)
 	
 	gtk_widget_show_all(d);
 	
-	int response = gtk_dialog_run(GTK_DIALOG(d));
+	gtk_dialog_run(GTK_DIALOG(d));
+	
+	// flush gtk events
 	while(gtk_events_pending())
 			gtk_main_iteration_do(TRUE);
 
