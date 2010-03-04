@@ -1340,6 +1340,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
   { "/_Options",      NULL,         NULL,           0, "<Branch>" },
   { "/_Emulator",	NULL,			NULL,			0, "<Branch>"  },
+  { "/Emulator/P_ower", 	NULL, FCEUI_PowerNES, 0, "<Item>"},
   { "/Emulator/_Reset", 	NULL, emuReset, 0, "<Item>"},
   { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
   { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
