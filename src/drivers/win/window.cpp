@@ -2066,7 +2066,6 @@ adelikat: Outsourced this to a remappable hotkey
 		DoFCEUExit();
 		break;
 	case WM_SETFOCUS:
-		FCEUI_printf("wasPausedbyCheats = %d\n",wasPausedByCheats);
 		if (wasPausedByCheats)
 		{
 			EmulationPaused = 0;
