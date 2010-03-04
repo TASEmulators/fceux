@@ -434,7 +434,19 @@ void openHotkeyConfig()
 	gtk_container_add(GTK_CONTAINER(win),tree);
 	gtk_widget_show_all(win);
 }
-		
+GtkWidget* 	typeCombo;
+
+// TODO: finish this
+int setInputDevice(GtkWidget* w, gpointer p)
+{
+	std::string s = "SDL.Input.";
+	s = s + (char*)p;
+	printf("%s", s);
+	g_config->setOption(s, gtk_combo_box_get_active_text(GTK_COMBO_BOX(typeCombo)));
+	g_config->save();
+	
+	return 1;
+}
 
 // creates and opens the gamepad config window
 void openGamepadConfig()
@@ -454,7 +466,17 @@ void openGamepadConfig()
 	hboxPadNo = gtk_hbox_new(FALSE, 5);
 	padNoLabel = gtk_label_new("Gamepad Number:");
 	fourScoreChk = gtk_check_button_new_with_label("Enable four score");
-
+	
+	typeCombo = gtk_combo_box_new_text();
+	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "gamepad");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "zapper");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "powerpad.0");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "powerpad.1");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "arkanoid");
+	
+	gtk_combo_box_set_active(GTK_COMBO_BOX(typeCombo), 0);
+	
+	
 	padNoCombo = gtk_combo_box_new_text();
 	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "1");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "2");
@@ -462,6 +484,9 @@ void openGamepadConfig()
 	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "4");
 	
 	gtk_combo_box_set_active(GTK_COMBO_BOX(padNoCombo), 0);
+	
+	g_signal_connect(GTK_OBJECT(typeCombo), "changed", G_CALLBACK(setInputDevice), 
+		gtk_combo_box_get_active_text(GTK_COMBO_BOX(typeCombo)));
 	
 	// sync with config
 	int buf = 0;
@@ -476,6 +501,7 @@ void openGamepadConfig()
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hboxPadNo, TRUE, TRUE, 5);
+	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
 	
 	gtk_box_pack_start(GTK_BOX(vbox), fourScoreChk, TRUE, TRUE, 5);
 	// create gamepad buttons
