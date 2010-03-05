@@ -255,7 +255,7 @@ int NSFLoad(const char *name, FCEUFILE *fp)
 
 	strcpy(LoadedRomFName,name);
 
-	FCEU_printf("NSF Loaded.  File information:\n\n");
+	FCEU_printf("\nNSF Loaded.\nFile information:\n");
 	FCEU_printf(" Name:       %s\n Artist:     %s\n Copyright:  %s\n\n",NSFHeader.SongName,NSFHeader.Artist,NSFHeader.Copyright);
 	if(NSFHeader.SoundChip)
 	{
