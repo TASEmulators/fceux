@@ -1170,18 +1170,69 @@ void loadFdsBios ()
 
 }
 
+void loadNSF ()
+{
+	GtkWidget* fileChooser;
+	GtkFileFilter* filterNSF;
+	GtkFileFilter* filterZip;
+	GtkFileFilter* filterAll;
+	
+	filterNSF = gtk_file_filter_new();
+	filterZip = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterNSF, "*.nsf");
+	gtk_file_filter_add_pattern(filterNSF, "*.NSF");
+	gtk_file_filter_add_pattern(filterZip, "*.zip");
+	gtk_file_filter_add_pattern(filterZip, "*.ZIP");
+	gtk_file_filter_set_name(filterNSF, "NSF sound files");
+	gtk_file_filter_set_name(filterZip, "Zip archives");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Open NSF File", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNSF);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterZip);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		gtk_widget_destroy (fileChooser);
+		if(LoadGame(filename) == 0)
+		{
+			
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+				"Could not open the selected NSF file.");
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
+		g_free(filename);
+	}
+	else
+		gtk_widget_destroy (fileChooser);
+}
+
 void loadGame ()
 {
 	GtkWidget* fileChooser;
 	GtkFileFilter* filterFCEU;
 	GtkFileFilter* filterNes;
 	GtkFileFilter* filterFds;
+	GtkFileFilter* filterNSF;
 	GtkFileFilter* filterZip;
 	GtkFileFilter* filterAll;
 	
 	filterFCEU = gtk_file_filter_new();
 	filterNes = gtk_file_filter_new();
 	filterFds = gtk_file_filter_new();
+	filterNSF = gtk_file_filter_new();
 	filterZip = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterFCEU, "*.nes");
 	gtk_file_filter_add_pattern(filterFCEU, "*.NES");
@@ -1192,15 +1243,20 @@ void loadGame ()
 	gtk_file_filter_add_pattern(filterFCEU, "*.Nes");
 	gtk_file_filter_add_pattern(filterFCEU, "*.Fds");
 	gtk_file_filter_add_pattern(filterFCEU, "*.Zip");
+	gtk_file_filter_add_pattern(filterFCEU, "*.nsf");
+	gtk_file_filter_add_pattern(filterFCEU, "*.NSF");
 	gtk_file_filter_add_pattern(filterNes, "*.nes");
 	gtk_file_filter_add_pattern(filterNes, "*.NES");
 	gtk_file_filter_add_pattern(filterFds, "*.fds");
-	gtk_file_filter_add_pattern(filterZip, "*.FDS");
+	gtk_file_filter_add_pattern(filterFds, "*.FDS");
+	gtk_file_filter_add_pattern(filterNSF, "*.nsf");
+	gtk_file_filter_add_pattern(filterNSF, "*.NSF");
 	gtk_file_filter_add_pattern(filterZip, "*.zip");
 	gtk_file_filter_add_pattern(filterZip, "*.zip");
-	gtk_file_filter_set_name(filterFCEU, "*.nes;*.fds;*.zip");
+	gtk_file_filter_set_name(filterFCEU, "*.nes;*.fds;*.nsf;*.zip");
 	gtk_file_filter_set_name(filterNes, "NES ROM files");
 	gtk_file_filter_set_name(filterFds, "FDS ROM files");
+	gtk_file_filter_set_name(filterNSF, "NSF sound files");
 	gtk_file_filter_set_name(filterZip, "Zip archives");
 	
 	filterAll = gtk_file_filter_new();
@@ -1214,6 +1270,7 @@ void loadGame ()
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFCEU);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFds);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNSF);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterZip);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
@@ -1328,6 +1385,8 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/File/_Close ROM",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
  // { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
   { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
+  { "/File/_Play NSF",    "<control>N", loadNSF,    0, "<StockItem>", GTK_STOCK_OPEN },
+  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
   { "/File/Savestate", NULL, NULL, 0, "<Branch>" },
   { "/File/Savestate/Load State _From", NULL, loadStateFrom, 0, "<Item>"},
   { "/File/Savestate/Save State _As", NULL, saveStateAs, 0, "<Item>"},
