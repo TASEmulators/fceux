@@ -246,13 +246,14 @@ std::string GetFilename(const char* title, bool save, const char* filter)
 	// TODO: make file filters case insensitive	
 	//gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterX);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
-	gtk_dialog_run (GTK_DIALOG (fileChooser));
+	int response = gtk_dialog_run (GTK_DIALOG (fileChooser));
 	
 	// flush gtk events
 	while(gtk_events_pending())
 			gtk_main_iteration_do(TRUE);
 		
-	fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+	if (response == GTK_RESPONSE_ACCEPT)
+		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 
 	gtk_widget_destroy (fileChooser);
 	
