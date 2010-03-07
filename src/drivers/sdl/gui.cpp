@@ -35,28 +35,6 @@ extern Config *g_config;
 GtkWidget* MainWindow = NULL;
 GtkWidget* padNoCombo;
 
-GtkTextBuffer* tb = gtk_text_buffer_new(NULL);
-
-void openGTKterm()
-{
-	GtkWidget* win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	GtkWidget* vbox = gtk_vbox_new(FALSE, 5);
-	
-	GtkWidget* textV = gtk_text_view_new_with_buffer(tb);
-	gtk_text_view_set_editable(GTK_TEXT_VIEW(textV), FALSE);
-	GtkWidget* entry = gtk_entry_new();
-	gtk_text_buffer_set_text(tb, "HELLO FCEUX!", -1);
-	
-	gtk_box_pack_start(GTK_BOX(vbox), textV, TRUE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, TRUE, 5);
-	
-	gtk_container_add(GTK_CONTAINER(win), vbox);
-	
-	gtk_widget_show_all(win);
-	
-	return;
-}
-
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
