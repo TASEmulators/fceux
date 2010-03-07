@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-//#include <vte/vte.h>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -176,8 +175,6 @@ void loadPalette (GtkWidget* w, gpointer p)
 		}
 			
 		gtk_entry_set_text(GTK_ENTRY(p), filename);
-		
-		g_free(filename);
 		
 	}
 	gtk_widget_destroy (fileChooser);
@@ -1055,7 +1052,6 @@ void loadMovie ()
 		char* fname;
 		
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-		gtk_widget_destroy (fileChooser);
 		static int pauseframe;
         g_config->getOption("SDL.PauseFrame", &pauseframe);
         g_config->setOption("SDL.PauseFrame", 0);
@@ -1068,8 +1064,6 @@ void loadMovie ()
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
 		}
-
-		g_free(fname);
 	}
 	gtk_widget_destroy (fileChooser);
 }
@@ -1480,17 +1474,8 @@ void showGui(bool b)
 
 int InitGTKSubsystem(int argc, char** argv)
 {
-	//GtkWidget* MainWindow;
 	GtkWidget* Menubar;
 	GtkWidget* vbox;
-	
-	
-	
-	int xres, yres;
-	
-	g_config->getOption("SDL.XResolution", &xres);
-		g_config->getOption("SDL.YResolution", &yres);
-	
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
@@ -1525,7 +1510,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	//gtk_widget_realize(MainWindow);
 	
 	// event handlers
-	gtk_widget_add_events(MainWindow, GDK_BUTTON_PRESS_MASK);
+	//gtk_widget_add_events(MainWindow, GDK_BUTTON_PRESS_MASK);
 	//gtk_signal_connect(GTK_OBJECT(MainWindow), "configure_event",
 	//	GTK_SIGNAL_FUNC(configureEvent), 0);
 	
@@ -1560,13 +1545,12 @@ int InitGTKSubsystem(int argc, char** argv)
 	//screen = SDL_SetVideoMode(xres, yres, 0, 0);
 	//hello = SDL_LoadBMP( "hello.bmp" );
 	*/
-	
-	// signal handlers
-	g_signal_connect(G_OBJECT(MainWindow), "delete-event", quit, NULL);
-	//g_signal_connect(G_OBJECT(MainWindow), "destroy-event", quit, NULL);
+	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	
 		//gtk_idle_add(mainLoop, MainWindow);
-	gtk_widget_set_size_request (GTK_WIDGET(MainWindow), 300, 200);
+	// signal handlers
+	g_signal_connect(MainWindow, "delete-event", quit, NULL);
+	
 
 	gtk_widget_show_all(MainWindow);
 	
