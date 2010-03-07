@@ -39,7 +39,11 @@ LoadCPalette(const std::string &file)
         printf(" Error loading custom palette from file: %s\n", file.c_str());
         return 0;
     }
-    fread(tmpp, 1, 192, fp);
+    size_t result = fread(tmpp, 1, 192, fp);
+    if(result != 192) {
+		printf(" Error reading custom palette from file: %s\n", file.c_str());
+		return 0;
+	}
     FCEUI_SetPaletteArray(tmpp);
     fclose(fp);
     return 1;

@@ -143,7 +143,7 @@ void loadPalette (GtkWidget* w, gpointer p)
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		g_config->setOption("SDL.Palette", filename);
-		if(LoadCPalette(filename))
+		if(LoadCPalette(filename) == 0)
 		{
 			GtkWidget* msgbox;
 			msgbox = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
@@ -261,6 +261,7 @@ void openPaletteConfig()
 GtkWidget* ipEntry;
 GtkWidget* portSpin;
 GtkWidget* pwEntry;
+
 void launchNet(GtkWidget* w, gpointer p)
 {
 	char* ip = (char*)gtk_entry_get_text(GTK_ENTRY(ipEntry));
@@ -374,7 +375,7 @@ void openNetworkConfig()
 }
 
 // creates and opens hotkey config window
-void openHotkeyConfig()
+/*void openHotkeyConfig()
 {
 	std::string prefix = "SDL.Hotkeys.";
 	GtkWidget* win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -408,7 +409,7 @@ void openHotkeyConfig()
 	
 	gtk_container_add(GTK_CONTAINER(win),tree);
 	gtk_widget_show_all(win);
-}
+}*/
 GtkWidget* 	typeCombo;
 
 // TODO: finish this
@@ -416,7 +417,7 @@ int setInputDevice(GtkWidget* w, gpointer p)
 {
 	std::string s = "SDL.Input.";
 	s = s + (char*)p;
-	printf("%s", s);
+	printf("%s", s.c_str());
 	g_config->setOption(s, gtk_combo_box_get_active_text(GTK_COMBO_BOX(typeCombo)));
 	g_config->save();
 	
@@ -990,8 +991,6 @@ void recordMovieAs ()
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		if (!fname.size())
 			return; // no filename selected, quit the whole thing
-		// TODO: don't use GetUserText; or implement it in GTK rather than zenity
-		GtkWidget* ad = gtk_input_dialog_new();
 		
 		std::string s = GetUserText("Author name");
 		std::wstring author(s.begin(), s.end());
@@ -1531,7 +1530,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 
 	gtk_widget_show_all(MainWindow);
-	
+	 
 	return 0;
 }
 
