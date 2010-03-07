@@ -938,21 +938,25 @@ void toggleSound(GtkWidget* check, gpointer data)
 
 void emuReset ()
 {
-	ResetNES();
+	if(isloaded)
+		ResetNES();
 }
 
 void emuPause ()
 {
-	FCEUI_SetEmulationPaused(1);
+	if(isloaded)
+		FCEUI_SetEmulationPaused(1);
 }
 void emuResume ()
 {
-	FCEUI_SetEmulationPaused(0);
+	if(isloaded)
+		FCEUI_SetEmulationPaused(0);
 }
 
 void enableFullscreen ()
 {
-	ToggleFS();
+	if(isloaded)
+		ToggleFS();
 }
 void recordMovie()
 {

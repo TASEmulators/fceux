@@ -7,6 +7,7 @@
 #include "input.h"
 
 static void DoFun(int frameskip);
+static int isloaded = 0;
 
 int LoadGame(const char *path);
 int CloseGame(void);

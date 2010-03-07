@@ -59,8 +59,7 @@ bool turbo = false;
 
 int CloseGame(void);
 
-static int inited = 0;
-static int isloaded = 0;	
+static int inited = 0;	
 
 int eoptions=0;
 
