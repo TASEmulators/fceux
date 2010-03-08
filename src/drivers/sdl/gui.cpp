@@ -143,11 +143,13 @@ void loadPalette (GtkWidget* w, gpointer p)
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		g_config->setOption("SDL.Palette", filename);
+		g_config->setOption("SDL.Color", 0);
 		if(LoadCPalette(filename) == 0)
 		{
 			GtkWidget* msgbox;
 			msgbox = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 			"Failed to load the palette.");
+			
 			gtk_dialog_run(GTK_DIALOG(msgbox));
 			gtk_widget_hide_all(msgbox);
 		}
@@ -168,6 +170,7 @@ void openPaletteConfig()
 {
 	GtkWidget* win;
 	GtkWidget* vbox;
+	GtkWidget* paletteFrame;
 	GtkWidget* paletteHbox;
 	GtkWidget* paletteButton;
 	GtkWidget* paletteEntry;
@@ -187,7 +190,10 @@ void openPaletteConfig()
 	
 	gtk_widget_set_size_request(win, 460, 275);
 	
+	paletteFrame = gtk_frame_new("Custom palette: ");
 	paletteHbox = gtk_hbox_new(FALSE, 5);
+	gtk_container_set_border_width(GTK_CONTAINER(paletteHbox), 5);
+	gtk_container_add(GTK_CONTAINER(paletteFrame), paletteHbox);
 	paletteButton = gtk_button_new_from_stock(GTK_STOCK_OPEN);
 	gtk_button_set_label(GTK_BUTTON(paletteButton), "Open palette");
 	paletteEntry = gtk_entry_new();
@@ -211,7 +217,7 @@ void openPaletteConfig()
 	
 	// ntsc color check
 	
-	ntscColorChk = gtk_check_button_new_with_label("Enable NTSC colors");
+	ntscColorChk = gtk_check_button_new_with_label("Use NTSC palette");
 	
 	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Color");
 	
@@ -225,8 +231,8 @@ void openPaletteConfig()
 	
 	
 	// color / tint / hue sliders
-	slidersFrame = gtk_frame_new("Video controls");
-	slidersVbox = gtk_vbox_new(TRUE, 2);
+	slidersFrame = gtk_frame_new("NTSC palette controls");
+	slidersVbox = gtk_vbox_new(FALSE, 2);
 	tintFrame = gtk_frame_new("Tint");
 	tintHscale = gtk_hscale_new_with_range(0, 128, 1);
 	gtk_container_add(GTK_CONTAINER(tintFrame), tintHscale);
@@ -246,11 +252,12 @@ void openPaletteConfig()
 	gtk_range_set_value(GTK_RANGE(tintHscale), t);
 	
 	gtk_container_add(GTK_CONTAINER(slidersFrame), slidersVbox);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 2);
-	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), ntscColorChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), tintFrame, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 5);
 	
-	gtk_box_pack_start(GTK_BOX(vbox), paletteHbox, FALSE, TRUE, 5);
-	gtk_box_pack_start(GTK_BOX(vbox), ntscColorChk, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), paletteFrame, FALSE, TRUE, 5);
+	
 	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
 	gtk_widget_show_all(win);
