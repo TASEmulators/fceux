@@ -81,12 +81,12 @@ void toggleLowPass(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
 	{
-		g_config->setOption("SDL.LowPass", 1);
+		g_config->setOption("SDL.Sound.LowPass", 1);
 		FCEUI_SetLowPass(1);
 	}
 	else
 	{
-		g_config->setOption("SDL.LowPass", 0);
+		g_config->setOption("SDL.Sound.LowPass", 0);
 		FCEUI_SetLowPass(0);
 	}
 	g_config->save();
@@ -111,7 +111,7 @@ int setTint(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.Tint", v);
 	g_config->save();
 	int c, h;
-	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.NTSCpalette", &c);
 	g_config->getOption("SDL.Hue", &h);
 	FCEUI_SetNTSCTH(c, v, h);
 	
@@ -124,7 +124,7 @@ int setHue(GtkWidget* w, gpointer p)
 	g_config->save();
 	int c, t;
 	g_config->getOption("SDL.Tint", &t);
-	g_config->getOption("SDL.Color", &c);
+	g_config->getOption("SDL.SDL.NTSCpalette", &c);
 	FCEUI_SetNTSCTH(c, t, v);
 	
 	return 0;
@@ -143,7 +143,7 @@ void loadPalette (GtkWidget* w, gpointer p)
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		g_config->setOption("SDL.Palette", filename);
-		g_config->setOption("SDL.Color", 0);
+		g_config->setOption("SDL.SDL.NTSCpalette", 0);
 		if(LoadCPalette(filename) == 0)
 		{
 			GtkWidget* msgbox;
@@ -219,11 +219,11 @@ void openPaletteConfig()
 	
 	ntscColorChk = gtk_check_button_new_with_label("Use NTSC palette");
 	
-	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Color");
+	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NTSCpalette");
 	
 	int b;
 	// sync with config
-	g_config->getOption("SDL.Color", &b);
+	g_config->getOption("SDL.NTSCpalette", &b);
 	if(b)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 1);
 	else
@@ -505,7 +505,7 @@ void openGamepadConfig()
 int setBufSize(GtkWidget* w, gpointer p)
 {
 	int x = gtk_range_get_value(GTK_RANGE(w));
-	g_config->setOption("SDL.SoundBufSize", x);
+	g_config->setOption("SDL.Sound.BufSize", x);
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
@@ -516,7 +516,7 @@ int setBufSize(GtkWidget* w, gpointer p)
 void setRate(GtkWidget* w, gpointer p)
 {
 	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
-	g_config->setOption("SDL.SoundRate", atoi(str));
+	g_config->setOption("SDL.Sound.Rate", atoi(str));
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
@@ -528,11 +528,11 @@ void setQuality(GtkWidget* w, gpointer p)
 {
 	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
 	if(!strcmp(str, "Very High"))
-		g_config->setOption("SDL.SoundQuality", 2);
+		g_config->setOption("SDL.Sound.Quality", 2);
 	if(!strcmp(str, "High"))
-		g_config->setOption("SDL.SoundQuality", 1);
+		g_config->setOption("SDL.Sound.Quality", 1);
 	if(!strcmp(str, "Low"))
-		g_config->setOption("SDL.SoundQuality", 0);
+		g_config->setOption("SDL.Sound.Quality", 0);
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
@@ -705,32 +705,32 @@ int mixerChanged(GtkWidget* w, gpointer p)
 	char* lbl = (char*)gtk_frame_get_label(GTK_FRAME(parent));
 	if(strcmp(lbl, "Volume") == 0)
 	{
-		g_config->setOption("SDL.SoundVolume", v);
+		g_config->setOption("SDL.Sound.Volume", v);
 		FCEUI_SetSoundVolume(v);
 	}
 	if(strcmp(lbl, "Triangle") == 0)
 	{
-		g_config->setOption("SDL.TriangleVolume", v);
+		g_config->setOption("SDL.Sound.TriangleVolume", v);
 		FCEUI_SetTriangleVolume(v);
 	}
 	if(strcmp(lbl, "Square1") == 0)
 	{
-		g_config->setOption("SDL.Square1Volume", v);
+		g_config->setOption("SDL.Sound.Square1Volume", v);
 		FCEUI_SetSquare1Volume(v);
 	}
 	if(strcmp(lbl, "Square2") == 0)
 	{
-		g_config->setOption("SDL.Square2Volume", v);
+		g_config->setOption("SDL.Sound.Square2Volume", v);
 		FCEUI_SetSquare2Volume(v);
 	}
 	if(strcmp(lbl, "Noise") == 0)
 	{
-		g_config->setOption("SDL.NoiseVolume", v);
+		g_config->setOption("SDL.Sound.NoiseVolume", v);
 		FCEUI_SetNoiseVolume(v);
 	}
 	if(strcmp(lbl, "PCM") == 0)
 	{
-		g_config->setOption("SDL.PCMVolume", v);
+		g_config->setOption("SDL.Sound.PCMVolume", v);
 		FCEUI_SetPCMVolume(v);
 	}
 	
@@ -786,7 +786,7 @@ void openSoundConfig()
 	lowpassChk = gtk_check_button_new_with_label("Enable low pass filter");
 	
 	// sync with cfg
-	g_config->getOption("SDL.LowPass", &cfgBuf);
+	g_config->getOption("SDL.Sound.LowPass", &cfgBuf);
 	if(cfgBuf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), TRUE);
 	else
@@ -802,7 +802,7 @@ void openSoundConfig()
 	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Very High");
 
 	// sync widget with cfg 
-	g_config->getOption("SDL.SoundQuality", &cfgBuf);
+	g_config->getOption("SDL.Sound.Quality", &cfgBuf);
 	if(cfgBuf == 2)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(qualityCombo), 2);
 	else if(cfgBuf == 1)
@@ -831,7 +831,7 @@ void openSoundConfig()
 	}
 	
 	// sync widget with cfg 
-	g_config->getOption("SDL.SoundRate", &cfgBuf);
+	g_config->getOption("SDL.Sound.Rate", &cfgBuf);
 	for(int i=0; i<5; i++)
 		if(cfgBuf == rates[i])
 			gtk_combo_box_set_active(GTK_COMBO_BOX(rateCombo), i);
@@ -850,7 +850,7 @@ void openSoundConfig()
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
 	
 	// sync widget with cfg 
-	g_config->getOption("SDL.SoundBufSize", &cfgBuf);
+	g_config->getOption("SDL.Sound.BufSize", &cfgBuf);
 	gtk_range_set_value(GTK_RANGE(bufferHscale), cfgBuf);
 	
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
@@ -871,17 +871,17 @@ void openSoundConfig()
 	
 	// sync with cfg
 	int v;
-	g_config->getOption("SDL.SoundVolume", &v);
+	g_config->getOption("SDL.Sound.Volume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[0]), v);
-	g_config->getOption("SDL.TriangleVolume", &v);
+	g_config->getOption("SDL.Sound.TriangleVolume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[1]), v);
-	g_config->getOption("SDL.Square1Volume", &v);
+	g_config->getOption("SDL.Sound.Square1Volume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[2]), v);
-	g_config->getOption("SDL.Square2Volume", &v);
+	g_config->getOption("SDL.Sound.Square2Volume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[3]), v);
-	g_config->getOption("SDL.NoiseVolume", &v);
+	g_config->getOption("SDL.Sound.NoiseVolume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[4]), v);
-	g_config->getOption("SDL.PCMVolume", &v);
+	g_config->getOption("SDL.Sound.PCMVolume", &v);
 	gtk_range_set_value(GTK_RANGE(mixers[5]), v);
 
 	

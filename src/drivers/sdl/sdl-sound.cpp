@@ -99,15 +99,15 @@ InitSound()
     fprintf(stderr, "Loading SDL sound with %s driver...\n", driverName);
 
     // load configuration variables
-    g_config->getOption("SDL.SoundRate", &soundrate);
-    g_config->getOption("SDL.SoundBufSize", &soundbufsize);
-    g_config->getOption("SDL.SoundVolume", &soundvolume);
-    g_config->getOption("SDL.SoundQuality", &soundq);
-    g_config->getOption("SDL.TriangleVolume", &soundtrianglevolume);
-    g_config->getOption("SDL.Square1Volume", &soundsquare1volume);
-    g_config->getOption("SDL.Square2Volume", &soundsquare2volume);
-    g_config->getOption("SDL.NoiseVolume", &soundnoisevolume);
-    g_config->getOption("SDL.PCMVolume", &soundpcmvolume);
+    g_config->getOption("SDL.Sound.Rate", &soundrate);
+    g_config->getOption("SDL.Sound.BufSize", &soundbufsize);
+    g_config->getOption("SDL.Sound.Volume", &soundvolume);
+    g_config->getOption("SDL.Sound.Quality", &soundq);
+    g_config->getOption("SDL.Sound.TriangleVolume", &soundtrianglevolume);
+    g_config->getOption("SDL.Sound.Square1Volume", &soundsquare1volume);
+    g_config->getOption("SDL.Sound.Square2Volume", &soundsquare2volume);
+    g_config->getOption("SDL.Sound.NoiseVolume", &soundnoisevolume);
+    g_config->getOption("SDL.Sound.PCMVolume", &soundpcmvolume);
 
     spec.freq = soundrate;
     spec.format = AUDIO_S16SYS;

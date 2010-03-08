@@ -120,20 +120,19 @@ InitConfig()
 
     // sound options
     config->addOption('s', "sound", "SDL.Sound", 1);
-    config->addOption("volume", "SDL.SoundVolume", 256);
-    config->addOption("trianglevol", "SDL.TriangleVolume", 256);
-    config->addOption("square1vol", "SDL.Square1Volume", 256);
-    config->addOption("square2vol", "SDL.Square2Volume", 256);
-    config->addOption("noisevol", "SDL.NoiseVolume", 256);
-    config->addOption("pcmvol", "SDL.PCMVolume", 256);
-    config->addOption("soundrate", "SDL.SoundRate", 44100);
-    config->addOption("soundq", "SDL.SoundQuality", 1);
-    config->addOption("soundrecord", "SDL.SoundRecordFile", "");
-    config->addOption("soundbufsize", "SDL.SoundBufSize", 128);
-
-    // old EOptions
+    config->addOption("volume", "SDL.Sound.Volume", 150);
+    config->addOption("trianglevol", "SDL.Sound.TriangleVolume", 256);
+    config->addOption("square1vol", "SDL.Sound.Square1Volume", 256);
+    config->addOption("square2vol", "SDL.Sound.Square2Volume", 256);
+    config->addOption("noisevol", "SDL.Sound.NoiseVolume", 256);
+    config->addOption("pcmvol", "SDL.Sound.PCMVolume", 256);
+    config->addOption("soundrate", "SDL.Sound.Rate", 44100);
+    config->addOption("soundq", "SDL.Sound.Quality", 1);
+    config->addOption("soundrecord", "SDL.Sound.RecordFile", "");
+    config->addOption("soundbufsize", "SDL.Sound.BufSize", 128);
+	config->addOption("lowpass", "SDL.Sound.LowPass", 0);
+    
     config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
-    config->addOption("lowpass", "SDL.LowPass", 0);
     config->addOption("pal", "SDL.PAL", 0);
     config->addOption("frameskip", "SDL.Frameskip", 0);
     config->addOption("clipsides", "SDL.ClipSides", 0);
@@ -143,7 +142,7 @@ InitConfig()
     config->addOption('p', "palette", "SDL.Palette", "");
     config->addOption("tint", "SDL.Tint", 56);
     config->addOption("hue", "SDL.Hue", 72);
-    config->addOption("ntsccolor", "SDL.Color", 0);
+    config->addOption("ntsccolor", "SDL.NTSCpalette", 0);
 
     // scanline settings
     config->addOption("slstart", "SDL.ScanLineStart", 0);
@@ -383,7 +382,7 @@ UpdateEMUCore(Config *config)
     int ntsccol, ntsctint, ntschue, flag, start, end;
     std::string cpalette;
 
-    config->getOption("SDL.Color", &ntsccol);
+    config->getOption("SDL.NTSCpalette", &ntsccol);
     config->getOption("SDL.Tint", &ntsctint);
     config->getOption("SDL.Hue", &ntschue);
     FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
@@ -399,7 +398,7 @@ UpdateEMUCore(Config *config)
     config->getOption("SDL.GameGenie", &flag);
     FCEUI_SetGameGenie(flag ? 1 : 0);
 
-    config->getOption("SDL.LowPass", &flag);
+    config->getOption("SDL.Sound.LowPass", &flag);
     FCEUI_SetLowPass(flag ? 1 : 0);
 
     config->getOption("SDL.DisableSpriteLimit", &flag);

@@ -204,10 +204,10 @@ int LoadGame(const char *path)
 		FCEUI_SetVidSystem(0);
 	
 	std::string filename;
-	g_config->getOption("SDL.SoundRecordFile", &filename);
+	g_config->getOption("SDL.Sound.RecordFile", &filename);
 	if(filename.size()) {
 		if(!FCEUI_BeginWaveRecord(filename.c_str())) {
-			g_config->setOption("SDL.SoundRecordFile", "");
+			g_config->setOption("SDL.Sound.RecordFile", "");
 		}
 	}
 	isloaded = 1;
@@ -232,7 +232,7 @@ CloseGame()
 	isloaded = 0;
 	GameInfo = 0;
 
-	g_config->getOption("SDL.SoundRecordFile", &filename);
+	g_config->getOption("SDL.Sound.RecordFile", &filename);
 	if(filename.size()) {
 		FCEUI_EndWaveRecord();
 	}
