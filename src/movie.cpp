@@ -124,6 +124,12 @@ void MovieData::TryDumpIncremental()
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
 		//only log the savestate if we are appending to the green zone
+		if (turbo && pauseframe!=-1 && currFrameCounter<currMovieData.records.size())
+		{
+			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
+				return;
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+		}
 		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
 			if(currFrameCounter == (int)currMovieData.records.size() || currMovieData.records.size()==0)
@@ -135,9 +141,12 @@ void MovieData::TryDumpIncremental()
 			currMovieData.greenZoneCount++;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
-			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
-				return;
 			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+		} else if (currFrameCounter > currMovieData.greenZoneCount && currMovieData.greenZoneCount<currMovieData.records.size())
+		{
+			/* May be required in some malformed TAS projects. */
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.greenZoneCount= currFrameCounter+1;
 		}
 	}
 }

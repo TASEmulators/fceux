@@ -89,11 +89,13 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	LoadFM2(currMovieData, &ifs, INT_MAX, false);
 	LoadSubtitles(currMovieData);
 
-	char asdf;
-	ifs.get(asdf); // TODO: Add main branch name. 
+	char branchname;
+	ifs.get(branchname); // TODO: Add main branch name. 
 	currMovieData.loadGreenzone(&ifs, true);
 
 	poweron(true);
+	currFrameCounter = currMovieData.greenZoneCount;
+	currMovieData.TryDumpIncremental();
 
 	ifs.close();
 

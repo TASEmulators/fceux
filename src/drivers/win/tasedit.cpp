@@ -395,6 +395,8 @@ static void InsertFrames()
 		currMovieData.insertEmpty(*it,1);
 	}
 
+	if (currFrameCounter>=*selectionFrames.begin()) 
+		JumpToFrame(*selectionFrames.begin());
 	InvalidateGreenZone(*selectionFrames.begin());
 	UpdateTasEdit();
 	RedrawList();
@@ -1175,7 +1177,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					int frames;
 					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
 					{
-						currMovieData.insertEmpty(-1,frames);
+						currMovieData.insertEmpty(currFrameCounter,frames);
+						InvalidateGreenZone(currFrameCounter);
 						RedrawList();
 					}
 				}
