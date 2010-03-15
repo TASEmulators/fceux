@@ -228,6 +228,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(frameAdvanceLagSkip),
 	AC(debuggerAutoload),
 	AC(allowUDLR),
+	AC(debuggerSaveLoadDEBFiles),
 
 	//window positions
 	AC(ChtPosX),

@@ -66,6 +66,7 @@ static HFONT hFont;
 static SCROLLINFO si;
 
 bool debuggerAutoload = false;
+bool debuggerSaveLoadDEBFiles = true;
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2

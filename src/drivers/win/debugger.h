@@ -19,6 +19,7 @@ extern HWND hDebug;
 
 extern int childwnd,numWPs; //mbg merge 7/18/06 had to make extern
 extern bool debuggerAutoload;
+extern bool debuggerSaveLoadDEBFiles;
 
 void CenterWindow(HWND hwndDlg);
 void DoPatcher(int address,HWND hParent);

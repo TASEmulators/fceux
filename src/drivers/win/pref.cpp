@@ -124,6 +124,12 @@ int storeHexPreferences(FILE* f)
 **/
 int storePreferences(char* romname)
 {
+
+	if (debuggerSaveLoadDEBFiles == false) {
+		return 0;
+	}
+
+
 	FILE* f;
 	char* filename;
 	int result;
@@ -178,6 +184,10 @@ int storePreferences(char* romname)
 
 void DoDebuggerRunCheck()
 {
+	if (debuggerSaveLoadDEBFiles == false) {
+		return;
+	}
+
 	if (wasinDebugger){
 		DebuggerExit();
 		DoDebug(0);
@@ -316,6 +326,10 @@ int loadHexPreferences(FILE* f)
 **/
 int loadPreferences(char* romname)
 {
+	if (debuggerSaveLoadDEBFiles == false) {
+		return 0;
+	}
+
 	FILE* f;
 	int result;
 	int i;
