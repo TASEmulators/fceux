@@ -438,13 +438,14 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts15>table zapper.read()</span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts11>Returns the mouse data (which is used to generate zapper input, as well as the arkanoid paddle).</span></p>
+<p><span class=rvts11>Returns the zapper data</span></p>
+<p><span class=rvts11>When no movie is loaded this input is the same as the internal mouse input (which is used to generate zapper input, as well as the arkanoid paddle).</span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts11>The return table consists of 3 values: xmouse, ymouse, and click.&nbsp; xmouse and ymouse are the x,y coordinates of the cursor in terms of pixels.&nbsp; click represents the mouse click.&nbsp; 0 = no click, 1 = left cick, 2 = right click.&nbsp; </span></p>
+<p><span class=rvts11>When a movie is playing, it returns the zapper data in the movie code.</span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts11>Currently, zapper data is ignored while a movie is playing.</span></p>
+<p><span class=rvts11>The return table consists of 3 values: x, y, and fire.&nbsp; x and y are the x,y coordinates of the zapper target in terms of pixels.&nbsp; fire represents the zapper firing.&nbsp; 0 = not firing, 1 = firing</span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts11>Note: The right-click isn't used in zapper data</span></p>
+<p><span class=rvts11><br></span></p>
 <p><span class=rvts11>Note: The zapper is always controller 2 on the NES so there is no player argument to this function.</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11><br></span></p>
