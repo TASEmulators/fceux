@@ -10,7 +10,7 @@ local Z_MAX = 60 --maximum amount of boxes on screen
 local zbuf = {}
 local zindex = 1
 local timer = 0
-local lastclick = zapper.read().click
+local lastclick = zapper.read().fire
 local lastx = zapper.read().x
 local lasty = zapper.read().y
 
@@ -31,9 +31,9 @@ end
 
  
  while(true) do
-	local x = zapper.read().xmouse
-	local y = zapper.read().ymouse
-	local click = zapper.read().click
+	local x = zapper.read().x
+	local y = zapper.read().y
+	local click = zapper.read().fire
 	--gui.text(0, 8, string.format("x=%d",x));
 	--gui.text(0, 18, string.format("y=%d",y));
 	--gui.text(0, 28, string.format("click=%d",click));

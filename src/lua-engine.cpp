@@ -2069,21 +2069,30 @@ static int zapper_read(lua_State *L){
 	
 	lua_newtable(L);
 	
-	extern void GetMouseData(uint32 (&md)[3]);
-
-	uint32 MouseData[3];
-	GetMouseData (MouseData);
-	int x = MouseData[0];
-	int y = MouseData[1];
-	int click = MouseData[2];		///adelikat TODO: remove the ability to store the value 2?  Since 2 is right-clicking and not part of zapper input and is used for context menus
-
+	extern void GetMouseData(uint32 (&md)[3]); //adelikat: shouldn't this be ifdef'ed for Win32?
+	int x,y,click;
+	if (FCEUMOV_IsPlaying())
+	{
+		x = currMovieData.records[currFrameCounter].zappers[1].x;	//adelikat:  Used hardcoded port 1 since as far as I know, only port 1 is valid for zappers
+		y = currMovieData.records[currFrameCounter].zappers[1].y;
+		click = currMovieData.records[currFrameCounter].zappers[1].b;
+	}
+	else
+	{
+		uint32 MouseData[3];
+		GetMouseData (MouseData);
+		x = MouseData[0];
+		y = MouseData[1];
+		click = MouseData[2];		
+		if (click > 1)
+			click = 1;	//adelikat: This is zapper.read() thus should only give valid zapper input (instead of simply mouse input
+	}
 	lua_pushinteger(L, x);
-	lua_setfield(L, -2, "xmouse");
+	lua_setfield(L, -2, "x");
 	lua_pushinteger(L, y);
-	lua_setfield(L, -2, "ymouse");
+	lua_setfield(L, -2, "y");
 	lua_pushinteger(L, click);
-	lua_setfield(L, -2, "click");	
-
+	lua_setfield(L, -2, "fire");	
 	return 1;
 }
 
