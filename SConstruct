@@ -87,7 +87,7 @@ else:
   if conf.CheckFunc('asprintf'):
     conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c++', autoadd=1):
-    conf.env.Append(CCFLAGS = " -DOPENGL")
+    conf.env.Append(CCFLAGS = "-DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
