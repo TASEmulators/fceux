@@ -720,6 +720,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		EnableMenuItem(memwmenu,MEMW_FILE_SAVE,MF_BYCOMMAND | fileChanged ? MF_ENABLED:MF_GRAYED);
 		break;
 	case WM_MOVE: {
+		if (!IsIconic(hwndDlg)) {
 		RECT wrect;
 		GetWindowRect(hwndDlg,&wrect);
 		MemWatch_wndx = wrect.left;
@@ -728,7 +729,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		#ifdef WIN32
 		WindowBoundsCheckNoResize(MemWatch_wndx,MemWatch_wndy,wrect.right);
 		#endif
-
+		}
 		break;
 	};
 

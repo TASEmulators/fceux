@@ -267,6 +267,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
                 case WM_MOVING:
                         break;
                 case WM_MOVE:
+						if (!IsIconic(hwndDlg)) {
                         GetWindowRect(hwndDlg,&wrect);
                         PPUViewPosX = wrect.left;
                         PPUViewPosY = wrect.top;
@@ -274,7 +275,7 @@ BOOL CALLBACK PPUViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						#ifdef WIN32
 						WindowBoundsCheckNoResize(PPUViewPosX,PPUViewPosY,wrect.right);
 						#endif
-
+						}
                         break;
                 case WM_RBUTTONDBLCLK:
                 case WM_RBUTTONDOWN:

@@ -421,6 +421,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_MOVING:
 			break;
 		case WM_MOVE:
+			if (!IsIconic(hwndDlg)) {
 			GetWindowRect(hwndDlg,&wrect);
 			NTViewPosX = wrect.left;
 			NTViewPosY = wrect.top;
@@ -428,7 +429,7 @@ BOOL CALLBACK NTViewCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(NTViewPosX,NTViewPosY,wrect.right);
 			#endif
-
+			}
 			break;
 		case WM_RBUTTONDBLCLK:
 		case WM_RBUTTONDOWN:

@@ -1081,6 +1081,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_MOVING:
 			break;
 		case WM_MOVE:
+			if (!IsIconic(hwndDlg)) {
 			GetWindowRect(hwndDlg,&wrect);
 			DbgPosX = wrect.left;
 			DbgPosY = wrect.top;
@@ -1088,6 +1089,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			#ifdef WIN32
 			WindowBoundsCheckResize(DbgPosX,DbgPosY,DbgSizeX,wrect.right);
 			#endif
+			}
 			break;
 
 		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload

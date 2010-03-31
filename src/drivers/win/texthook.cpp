@@ -872,6 +872,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			//StopSound(); //mbg merge 6/30/08
 			break;
 		case WM_MOVE:
+			if (!IsIconic(hwndDlg)) {
 			GetWindowRect(hwndDlg,&wrect);
 			TextHookerPosX = wrect.left;
 			TextHookerPosY = wrect.top;
@@ -879,7 +880,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(TextHookerPosX,TextHookerPosY,wrect.right);
 			#endif
-
+			}
 			break;
 		case WM_RBUTTONDBLCLK:
 			sprintf(str,"aaaa");

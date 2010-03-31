@@ -86,6 +86,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	LOGFONT lf;
 	switch(uMsg) {
 		case WM_MOVE: {
+			if (!IsIconic(hwndDlg)) {
 			RECT wrect;
 			GetWindowRect(hwndDlg,&wrect);
 			Tracer_wndx = wrect.left;
@@ -94,7 +95,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(Tracer_wndx,Tracer_wndy,wrect.right);
 			#endif
-
+			}
 			break;
 		};
 		case WM_INITDIALOG:

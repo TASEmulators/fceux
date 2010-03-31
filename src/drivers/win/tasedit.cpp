@@ -1019,6 +1019,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			break; 
 
 		case WM_MOVE: {
+				if (!IsIconic(hwndDlg)) {
 				RECT wrect;
 				GetWindowRect(hwndDlg,&wrect);
 				TasEdit_wndx = wrect.left;
@@ -1027,7 +1028,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				#ifdef WIN32
 				WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
 				#endif
-
+				}
 				break;
 				  }
 

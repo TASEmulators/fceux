@@ -826,6 +826,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 	switch(uMsg)
 	{
 		case WM_MOVE: {
+			if (!IsIconic(hDlg)) {
 			RECT wrect;
 			GetWindowRect(hDlg,&wrect);
 			ramw_x = wrect.left;
@@ -834,7 +835,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(ramw_x,ramw_y,wrect.right);
 			#endif
-
+			}
 			//regSetDwordValue(RAMWX, ramw_x); TODO
 			//regSetDwordValue(RAMWY, ramw_y); TODO
 		}	break;

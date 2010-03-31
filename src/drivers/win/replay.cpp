@@ -398,6 +398,7 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 		}
 		break;
 	case WM_MOVE:
+		if (!IsIconic(hwndDlg)) {
 		GetWindowRect(hwndDlg,&wrect);
 		MetaPosX = wrect.left;
 		MetaPosY = wrect.top;
@@ -405,6 +406,7 @@ BOOL CALLBACK ReplayMetadataDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, L
 		#ifdef WIN32
 		WindowBoundsCheckNoResize(MetaPosX,MetaPosY,wrect.right);
 		#endif
+		}
         break;
 
 	case WM_COMMAND:

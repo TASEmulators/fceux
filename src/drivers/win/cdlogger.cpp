@@ -93,6 +93,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			break;
 
 		case WM_MOVE: {
+			if (!IsIconic(hwndDlg)) {
 			RECT wrect;
 			GetWindowRect(hwndDlg,&wrect);
 			CDLogger_wndx = wrect.left;
@@ -101,6 +102,7 @@ BOOL CALLBACK CDLoggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(CDLogger_wndx,CDLogger_wndy,wrect.right);
 			#endif
+			}
 			break;
 		};
 		case WM_INITDIALOG:

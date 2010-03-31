@@ -1194,6 +1194,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 	case WM_MOVE: 
 	{
+		if (!IsIconic(hWnd)) {
 		RECT wrect;
 		GetWindowRect(hWnd,&wrect);
 		MainWindow_wndx = wrect.left;
@@ -1202,7 +1203,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		#ifdef WIN32
 		WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
 		#endif
-
+		}
 	}
 
 	case WM_MOUSEMOVE:

@@ -241,6 +241,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			break;
 
 		case WM_MOVE:
+			if (!IsIconic(hwndDlg)) {
 			GetWindowRect(hwndDlg,&wrect);
 			ChtPosX = wrect.left;
 			ChtPosY = wrect.top;
@@ -248,6 +249,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(ChtPosX,ChtPosY,wrect.right);
 			#endif
+			}
 			break;
 
 		case WM_VSCROLL:
@@ -624,6 +626,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	switch(uMsg) {
 		case WM_MOVE: {
+			if (!IsIconic(hwndDlg)) {
 			RECT wrect;
 			GetWindowRect(hwndDlg,&wrect);
 			GGConv_wndx = wrect.left;
@@ -632,6 +635,7 @@ BOOL CALLBACK GGConvCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(GGConv_wndx,GGConv_wndy,wrect.right);
 			#endif
+			}
 			break;
 		};
 		case WM_INITDIALOG:

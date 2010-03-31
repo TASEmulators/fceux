@@ -223,6 +223,7 @@ BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 {
 	switch(uMsg) {
 		case WM_MOVE: {
+			if (!IsIconic(hwndDlg)) {
 			RECT wrect;
 			GetWindowRect(hwndDlg,&wrect);
 			Monitor_wndx = wrect.left;
@@ -231,7 +232,7 @@ BOOL CALLBACK MonitorCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(Monitor_wndx,Monitor_wndy,wrect.right);
 			#endif
-
+			}
 			break;
 		};
 

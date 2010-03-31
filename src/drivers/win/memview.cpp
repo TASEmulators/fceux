@@ -1592,6 +1592,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 
 	case WM_MOVE: {
+		if (!IsIconic(hwnd)) {
 		RECT wrect;
 		GetWindowRect(hwnd,&wrect);
 		MemView_wndx = wrect.left;
@@ -1600,7 +1601,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		#ifdef WIN32
 		WindowBoundsCheckResize(MemView_wndx,MemView_wndy,MemViewSizeX,wrect.right);
 		#endif
-		
+		}
 		return 0;
 				  }
 
@@ -1695,6 +1696,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_MOVING:
 		break;
 	case WM_MOVE: {
+		if (!IsIconic(hwndDlg)) {
 		RECT wrect;
 		GetWindowRect(hwndDlg,&wrect);
 		MemFind_wndx = wrect.left;
@@ -1703,7 +1705,7 @@ BOOL CALLBACK MemFindCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		#ifdef WIN32
 		WindowBoundsCheckNoResize(MemFind_wndx,MemFind_wndy,wrect.right);
 		#endif
-
+		}
 		break;
 				  }
 	case WM_RBUTTONDBLCLK:

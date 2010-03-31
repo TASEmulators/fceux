@@ -83,6 +83,7 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetWindowPos(hwndDlg,0,MLogPosX,MLogPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			break;
 		case WM_MOVE:
+			if (!IsIconic(hwndDlg)) {
 			GetWindowRect(hwndDlg,&wrect);	//Remember X,Y coordinates
 			MLogPosX = wrect.left;
 			MLogPosY = wrect.top;
@@ -90,7 +91,7 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			#ifdef WIN32
 			WindowBoundsCheckNoResize(MLogPosX,MLogPosY,wrect.right);
 			#endif
-
+			}
 			break;
 		case WM_COMMAND:
 			if(HIWORD(wParam)==BN_CLICKED)
