@@ -348,7 +348,7 @@ InitVideo(FCEUGI *gi)
             return -1;
         }
         if(s_sponge) {
-			FCEUD_PrintError("scalers not openGL compatible.");
+			FCEUD_PrintError("scalers not compatible with openGL mode.");
 			KillVideo();
 			return -1;
 		}
