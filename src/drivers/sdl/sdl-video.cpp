@@ -347,6 +347,11 @@ InitVideo(FCEUGI *gi)
             KillVideo();
             return -1;
         }
+        if(s_sponge) {
+			FCEUD_PrintError("scalers not openGL compatible.");
+			KillVideo();
+			return -1;
+		}
 #endif
         
         s_screen = SDL_SetVideoMode((int)(NWIDTH * s_exs),
