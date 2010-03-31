@@ -571,9 +571,6 @@ void setGl(GtkWidget* w, gpointer p)
 	else
 		g_config->setOption("SDL.OpenGL", 0);
 	g_config->save();
-	
-	// set scpecial scaler to none; openGL crashes with special scalers on
-	gtk_combo_box_set_active(GTK_COMBO_BOX(p), 0);
 }
 	
 
