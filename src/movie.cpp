@@ -1339,7 +1339,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 }
 
 //This function creates an array of frame numbers and corresponding strings for displaying subtitles
-void LoadSubtitles(MovieData moviedata)
+void LoadSubtitles(MovieData &moviedata)
 {
 	extern std::vector<string> subtitles;
 	for(uint32 i=0; i < moviedata.subtitles.size() ; i++)

@@ -269,7 +269,7 @@ std::string FCEUI_GetMovieName(void);
 void FCEUI_MovieToggleFrameDisplay();
 void FCEUI_ToggleInputDisplay(void);
 
-void LoadSubtitles(MovieData);
+void LoadSubtitles(MovieData &);
 void ProcessSubtitles(void);
 void FCEU_DisplaySubtitles(char *format, ...);
 
