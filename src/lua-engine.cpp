@@ -211,8 +211,8 @@ static void FCEU_LuaOnStop() {
 		luajoypads2[i]= 0x00;
 	}
 	gui_used = GUI_CLEAR;
-	if (wasPaused && !FCEUI_EmulationPaused())
-		FCEUI_ToggleEmulationPause();
+	//if (wasPaused && !FCEUI_EmulationPaused())
+	//	FCEUI_ToggleEmulationPause();
 	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
 	FCEUD_TurboOff();	//Turn off turbo
@@ -4647,8 +4647,8 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	numMemHooks = 0;
 	transparencyModifier = 255; // opaque
 
-	wasPaused = FCEUI_EmulationPaused();
-	if (wasPaused) FCEUI_ToggleEmulationPause();
+	//wasPaused = FCEUI_EmulationPaused();
+	//if (wasPaused) FCEUI_ToggleEmulationPause();
 
 	// And run it right now. :)
 	//FCEU_LuaFrameBoundary();
