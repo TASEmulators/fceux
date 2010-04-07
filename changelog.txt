@@ -1,4 +1,5 @@
-07-april-2010 - adelikat - Lua console no longer unpauses the emulator when a script is loaded
+07-april-2010 - adelikat - Win32 - Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked
+07-april-2010 - adelikat - Lua no longer unpauses the emulator when a script is loaded
 30-march-2010 - ugetab - Win32 - Closing minimized windows no longer moves them the next time they get opened
 28-march-2010 - adelikat - lua - fixed zapper.read() to read movie data if a movie is playing.  Also changed the struct values to x,y,fire.  This breaks lua scripts that used it previous, sorry.  
 04-march-2010 - prockguy - added menu buttons for loading nsf files

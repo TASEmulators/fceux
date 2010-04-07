@@ -3578,8 +3578,8 @@ static int gui_text(lua_State *L) {
 	y = luaL_checkinteger(L,2);
 	msg = luaL_checkstring(L,3);
 
-//	if (x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= (LUA_SCREEN_HEIGHT - font_height))
-//		luaL_error(L,"bad coordinates");
+	//if (x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= (LUA_SCREEN_HEIGHT - font_height))
+	//	luaL_error(L,"bad coordinates");
 
 #if 0
 	uint32 colour = gui_optcolour(L,4,LUA_BUILD_PIXEL(255, 255, 255, 255));

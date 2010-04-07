@@ -144,8 +144,10 @@ const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
 
 //Lua Console --------------------------------------------
+//TODO: these need to be in a header file instead
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
+extern void UpdateLuaConsole(const char* fname);
 
 //Recent Lua Menu ----------------------------------------
 char *recent_lua[] = {0,0,0,0,0};
@@ -1369,7 +1371,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				#ifdef _S9XLUA_H
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
+				{
 					FCEU_LoadLuaCode(ftmp);
+					UpdateLuaConsole(fileDropped.c_str());
+				}
 				#endif
 				//-------------------------------------------------------
 				//Check if Ram Watch file
@@ -1433,6 +1438,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						//}
 						//adelikat: Commenting this code out because it is annoying in context lua scripts since lua scripts will frequently give errors to those developing them.  It is frustrating for this to pop up every time.
 					}
+					UpdateLuaConsole(fname);
 				}
 			}
 			#endif

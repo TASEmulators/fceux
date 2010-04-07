@@ -7,6 +7,8 @@
 
 extern HWND hAppWnd;
 
+void UpdateLuaConsole(const char* fname);
+
 HWND LuaConsoleHWnd = NULL;
 HFONT hFont = NULL;
 LOGFONT LuaConsoleLogFont;
@@ -354,4 +356,11 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 	return false;
 
+}
+
+void UpdateLuaConsole(const char* fname)
+{
+	if (!LuaConsoleHWnd) return;
+
+	SetWindowText(GetDlgItem(LuaConsoleHWnd, IDC_EDIT_LUAPATH), fname);
 }
