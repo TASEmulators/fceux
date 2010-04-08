@@ -597,10 +597,10 @@ void breakpoint() {
 			else { //CPU mem breaks
 				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type)) {
 					if (watchpoint[i].endaddress) {
-						if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
+						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit();
 					}
-					else if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address == A)) ||
+					else if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
 				}
 			}
