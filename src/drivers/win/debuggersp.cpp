@@ -90,29 +90,6 @@ void replaceString(char* src, const char* r, const char* w)
 }
 
 /**
-* Returns the bank for a given offset.
-* Technically speaking this function does not calculate the actual bank
-* where the offset resides but the 0x4000 bytes large chunk of the ROM of the offset.
-* 
-* @param offs The offset
-* @return The bank of that offset or -1 if the offset is not part of the ROM.
-**/
-int getBank(int offs)
-{
-	//NSF data is easy to overflow the return on.
-	//Anything over FFFFF will kill it.
-
-
-	//GetNesFileAddress doesn't work well with Unif files
-	int addr = GetNesFileAddress(offs)-16;
-
-	if (GameInfo && GameInfo->type==GIT_NSF) {
-	return addr != -1 ? addr / 0x1000 : -1;
-	}
-	return addr != -1 ? addr / 0x4000 : -1;
-}
-
-/**
 * Parses a line from a NL file.
 * @param line The line to parse
 * @param n The name structure to write the information to

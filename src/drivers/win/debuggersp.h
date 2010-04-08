@@ -42,6 +42,5 @@ void AddDebuggerBookmark(HWND hwnd);
 void AddDebuggerBookmark2(HWND hwnd, char* buffer);
 void DeleteDebuggerBookmark(HWND hwnd);
 void GoToDebuggerBookmark(HWND hwnd);
-int getBank(int offs);
 void dumpBookmarks(HWND hwmd);
 int isHex(char c);

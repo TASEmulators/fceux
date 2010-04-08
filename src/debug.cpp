@@ -202,6 +202,29 @@ int GetPRGAddress(int A){
 	else return result;
 }
 
+/**
+* Returns the bank for a given offset.
+* Technically speaking this function does not calculate the actual bank
+* where the offset resides but the 0x4000 bytes large chunk of the ROM of the offset.
+* 
+* @param offs The offset
+* @return The bank of that offset or -1 if the offset is not part of the ROM.
+**/
+int getBank(int offs)
+{
+	//NSF data is easy to overflow the return on.
+	//Anything over FFFFF will kill it.
+
+
+	//GetNesFileAddress doesn't work well with Unif files
+	int addr = GetNesFileAddress(offs)-16;
+
+	if (GameInfo && GameInfo->type==GIT_NSF) {
+	return addr != -1 ? addr / 0x1000 : -1;
+	}
+	return addr != -1 ? addr / 0x4000 : -1;
+}
+
 int GetNesFileAddress(int A){
 	unsigned int result;
 	if((A < 0x8000) || (A > 0xFFFF))return -1;
@@ -278,9 +301,10 @@ int evaluate(Condition* c)
 		}
 	}
 
-	if (c->type1 == TYPE_ADDR)
+	switch(c->type1)
 	{
-		value1 = GetMem(value1);
+		case TYPE_ADDR: value1 = GetMem(value1);
+		case TYPE_BANK: value1 = getBank(_PC);
 	}
 
 	f = value1;
@@ -301,10 +325,11 @@ int evaluate(Condition* c)
 			}
 		}
 
-		if (c->type2 == TYPE_ADDR)
-		{
-			value2 = GetMem(value2);
-		}
+	switch(c->type2)
+	{
+		case TYPE_ADDR: value2 = GetMem(value2);
+		case TYPE_BANK: value2 = getBank(_PC);
+	}
 
 		switch (c->op)
 		{

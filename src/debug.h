@@ -55,6 +55,7 @@ typedef struct {
 //mbg merge 7/18/06 had to make this extern
 extern watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
 
+int getBank(int offs);
 int GetNesFileAddress(int A);
 int GetPRGAddress(int A);
 int GetRomAddress(int A);

@@ -36,6 +36,7 @@
 * Address   -> '$' [1-9A-F]* | '$' '[' Connect ']'
 * Register  -> 'A' | 'X' | 'Y' | 'R'
 * Flag      -> 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'
+* PC Bank   -> 'K'
 */
 
 #include <stdio.h>
@@ -131,6 +132,12 @@ int isRegister(char c)
 	return c == 'A' || c == 'X' || c == 'Y' || c == 'P';
 }
 
+// Determines if a character is for bank
+int isBank(char c)
+{
+	return c == 'K';
+}
+
 // Reads a hexadecimal number from str
 int getNumber(unsigned int* number, const char** str)
 {
@@ -210,6 +217,23 @@ Condition* Primitive(const char** str, Condition* c)
 		else
 		{
 			c->type2 = TYPE_REG;
+			c->value2 = next;
+		}
+
+		scan(str);
+
+		return c;
+	}
+	else if (isBank(next)) /* Registers */
+	{
+		if (c->type1 == TYPE_NO)
+		{
+			c->type1 = TYPE_BANK;
+			c->value1 = next;
+		}
+		else
+		{
+			c->type2 = TYPE_BANK;
 			c->value2 = next;
 		}
 

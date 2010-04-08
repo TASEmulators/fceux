@@ -26,6 +26,7 @@
 #define TYPE_FLAG 2
 #define TYPE_NUM 3
 #define TYPE_ADDR 4
+#define TYPE_BANK 5
 
 #define OP_NO 0
 #define OP_EQ 1
