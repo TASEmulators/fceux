@@ -223,6 +223,19 @@ int loadDebuggerPreferences(FILE* f)
 	
 	myNumWPs = 0;
 	
+	// Ugetab:
+	// This took far too long to figure out...
+	// Nullifying the data is better than using free(), because
+	// a simple if(watchpoint[i].cond) can still evaluate to true.
+	// This causes several tests to fail, one of which kills
+	// conditional text loading when reusing a used condText.
+	for (i=0;i<65;i++)
+	{
+		watchpoint[i].cond = NULL;
+		watchpoint[i].condText = NULL;
+		watchpoint[i].desc = NULL;
+	}
+
 	// Read the breakpoints
 	for (i=0;i<65;i++)
 	{
