@@ -2068,14 +2068,19 @@ static int input_get(lua_State *L) {
 static int zapper_read(lua_State *L){
 	
 	lua_newtable(L);
-	
+	int z = 0;
 	extern void GetMouseData(uint32 (&md)[3]); //adelikat: shouldn't this be ifdef'ed for Win32?
 	int x,y,click;
-	if (FCEUMOV_IsPlaying())
+	if (/*FCEUMOV_IsPlaying()*/ FCEUMOV_Mode(MOVIEMODE_PLAY))
 	{
-		x = currMovieData.records[currFrameCounter].zappers[1].x;	//adelikat:  Used hardcoded port 1 since as far as I know, only port 1 is valid for zappers
-		y = currMovieData.records[currFrameCounter].zappers[1].y;
-		click = currMovieData.records[currFrameCounter].zappers[1].b;
+		if (!currFrameCounter)
+			z = 0;
+		else
+			z = currFrameCounter -1;
+
+		x = currMovieData.records[z].zappers[1].x;	//adelikat:  Used hardcoded port 1 since as far as I know, only port 1 is valid for zappers
+		y = currMovieData.records[z].zappers[1].y;
+		click = currMovieData.records[z].zappers[1].b;
 	}
 	else
 	{
