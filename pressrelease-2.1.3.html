@@ -1,0 +1,56 @@
+﻿<html>
+
+<head>
+<title>Press Release 2.1.3</title>
+</head>
+
+<body>
+<h1>FCEUX 2.1.3 Release</h1>
+08 April 2010
+<p>
+The 2.1.3 release that fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port
+</p>
+
+<h2>Common</h2>
+Fixed mappers 82, 25, 21, and 18.  Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable<br>
+Fixes for mappers 253 & 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)<br>
+Fix crashing on game loading for any battery backed roms with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J) <br>
+FDS - show name of missing bios file in error message<br>
+NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix<br>
+.fm2 file format header now has an FDS flag<br>
+
+<h2>SDL</h2>
+A GUI!  A graphic user interface (using GTK) with many basic menu options<br>
+ported to SDL 1.3; compatibility maintained with 1.2<br>
+unix netplay is now functional; gtk network gui created<br>
+now prints the name of the mapper on ROM load<br>
+fixed dpad/joyhat support<br>
+VS unisystem keys now configable<br>
+changed default hotkeys and keys to match win32<br>
+disallow --inputcfg gamepad0 and gamepad5<br>
+
+<h2>Win32</h2>
+Made savestate backups optional (config - enable - backup savestates)<br>
+Made savestate compression togglable (config - enable - compress savestates)<br>
+Cheats dialog - Pause while active checkbox<br>
+Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count<br>
+Debugger - added an auto-load feature<br>
+Debugger - Fix so it doesn't crash if unminimized with no game loaded <br>
+Closing minimized windows no longer moves them the next time they get opened<br>
+Lua console - added a menu <br>
+Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked<br>
+Name Table Viewer - Fix for use with New PPU<br>
+Trace Logger - Trace logger now logs the values of the stack pointer register<br>
+If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear <br>
+disable movie messages menu item<br>
+Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too<br>
+TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)<br>
+<h2>Lua</h2>
+New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()<br>
+Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording<br>
+fixed zapper.read() to read movie data if a movie is playing.  Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry<br>
+gui.text() now has out of bounds checking<br>
+Lua no longer unpauses the emulator when a script is loaded<br>
+
+</body>
+</html>
