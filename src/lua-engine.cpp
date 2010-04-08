@@ -3503,7 +3503,7 @@ static int JoedCharWidth(uint8 ch)
 	return FCEUFont[FixJoedChar(ch)*8];
 }
 
-void LuaDrawTextTransWH(const char *str, int x, int y, uint32 color, uint32 backcolor)
+void LuaDrawTextTransWH(const char *str, size_t l, int x, int y, uint32 color, uint32 backcolor)
 {
 	int Opac = (color >> 24) & 0xFF;
 	int backOpac = (backcolor >> 24) & 0xFF;
@@ -3512,22 +3512,27 @@ void LuaDrawTextTransWH(const char *str, int x, int y, uint32 color, uint32 back
 	if(!Opac && !backOpac)
 		return;
 
-	int len = strlen(str);
+	size_t len = l;
 	int defaultAlpha = std::max(0, std::min(transparencyModifier, 255));
+	int diffx;
+	int diffy = std::max(0, std::min(7, LUA_SCREEN_HEIGHT - y));
 
 	while(*str && len && y < LUA_SCREEN_HEIGHT)
 	{
 		int c = *str++;
-		while (x > LUA_SCREEN_WIDTH && c != '\n') {
+		while (x >= LUA_SCREEN_WIDTH && c != '\n') {
 			c = *str;
 			if (c == '\0')
 				break;
 			str++;
+			if (!(--len))
+				break;
 		}
 		if(c == '\n')
 		{
 			x = origX;
 			y += 8;
+			diffy = std::max(0, std::min(7, LUA_SCREEN_HEIGHT - y));
 			continue;
 		}
 		else if(c == '\t') // just in case
@@ -3537,10 +3542,11 @@ void LuaDrawTextTransWH(const char *str, int x, int y, uint32 color, uint32 back
 			continue;
 		}
 
+		diffx = std::max(0, std::min(7, LUA_SCREEN_WIDTH - x));
 		int ch  = FixJoedChar(c);
-		int wid = JoedCharWidth(c);
+		int wid = std::min(diffx, JoedCharWidth(c));
 
-		for(int y2 = 0; y2 < 7; y2++)
+		for(int y2 = 0; y2 < diffy; y2++)
 		{
 			uint8 d = FCEUFont[ch*8 + 1+y2];
 			for(int x2 = 0; x2 < wid; x2++)
@@ -3553,9 +3559,9 @@ void LuaDrawTextTransWH(const char *str, int x, int y, uint32 color, uint32 back
 			}
 		}
 		// shadows :P
-		for(int x2 = 0; x2 < wid; x2++)
+		if (diffy >= 7) for(int x2 = 0; x2 < wid; x2++)
 			gui_drawpixel_internal(x+x2, y+7, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
-		if (*str == '\0' || *str == '\n') for(int y2 = 0; y2 < 7; y2++)
+		if (*str == '\0' || *str == '\n') for(int y2 = 0; y2 < diffy; y2++)
 			gui_drawpixel_internal(x+wid, y+y2, LUA_BUILD_PIXEL(defaultAlpha, 0, 0, 0));
 
 		x += wid;
@@ -3573,10 +3579,11 @@ static int gui_text(lua_State *L) {
 	extern int font_height;
 	const char *msg;
 	int x, y;
+	size_t l;
 
 	x = luaL_checkinteger(L,1);
 	y = luaL_checkinteger(L,2);
-	msg = luaL_checkstring(L,3);
+	msg = luaL_checklstring(L,3,&l);
 
 	//if (x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= (LUA_SCREEN_HEIGHT - font_height))
 	//	luaL_error(L,"bad coordinates");
@@ -3594,7 +3601,7 @@ static int gui_text(lua_State *L) {
 
 	gui_prepare();
 
-	LuaDrawTextTransWH(msg, x, y, color, bgcolor);
+	LuaDrawTextTransWH(msg, l, x, y, color, bgcolor);
 #endif
 	return 0;
 
