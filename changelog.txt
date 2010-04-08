@@ -1,3 +1,4 @@
+07-april-2010 - sgrunt - Lua - gui.text now has out of bounds checking
 07-april-2010 - adelikat - Win32 - Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked
 07-april-2010 - adelikat - Lua no longer unpauses the emulator when a script is loaded
 30-march-2010 - ugetab - Win32 - Closing minimized windows no longer moves them the next time they get opened
