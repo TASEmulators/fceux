@@ -263,7 +263,7 @@ static void cfg_OldToNew(const CFGSTRUCT *cfgst)
 		else
 		{
 			//string data
-			if(*(char*)cfgst[x].ptr)
+			if(*(char**)cfgst[x].ptr)
 				cfgmap[cfgst[x].name] = *(char**)cfgst[x].ptr;
 			else cfgmap[cfgst[x].name] = "";
 		}
