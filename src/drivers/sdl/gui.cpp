@@ -594,12 +594,12 @@ void openVideoConfig()
 	
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "Video Prefernces");
+	gtk_window_set_title(GTK_WINDOW(win), "Video Preferences");
 	//gtk_widget_set_size_request(win, 250, 250);
 	
 	vbox = gtk_vbox_new(FALSE, 5);
 	
-	lbl = gtk_label_new("Video options do not take \neffect until the emulator is restared.");
+	lbl = gtk_label_new("Video options will not take\neffect until the emulator is restarted.");
 	
 	// scalar widgets
 	hbox1 = gtk_hbox_new(FALSE, 3);
