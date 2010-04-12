@@ -79,6 +79,7 @@ local BufLen= {}
 local TrueSwitch, FalseSwitch= {}, {}
 local ReadList= {}
 local ScriptEdit= {}
+
 for pl= 1, players do
     InputList[pl]= {}
     ThisInput[pl]= {}
@@ -183,6 +184,7 @@ function FBoxOld(x1, y1, x2, y2, color)
 -- Gets around FCEUX's problem of double-painting the corners.
 -- The double-paint is visible with non-opaque drawing.
 -- It acts like the old-style border-only box.
+-- Slightly messes up when x2 or y2 are less than their counterparts.
 
     if     (x1 == x2) and (y1 == y2) then
         gui.pixel(x1,y1,color)
@@ -265,7 +267,10 @@ end
 
 
 function Draw.D0(left, top, color)
-    FBoxOld(left  ,top  ,left+2,top+4,color)
+    gui.line(left  ,top  ,left  ,top+4,color)
+    gui.line(left+2,top  ,left+2,top+4,color)
+    gui.pixel(left+1,top  ,color)
+    gui.pixel(left+1,top+4,color)
 end
 
 function Draw.D1(left, top, color)
@@ -304,9 +309,11 @@ function Draw.D5(left, top, color)
 end
 
 function Draw.D6(left, top, color)
-    FBoxOld(left  ,top+2,left+2,top+4,color)
     gui.line(left  ,top  ,left+2,top  ,color)
-    gui.pixel(left  ,top+1,color)
+    gui.line(left  ,top+1,left  ,top+4,color)
+    gui.line(left+2,top+2,left+2,top+4,color)
+    gui.pixel(left+1,top+2,color)
+    gui.pixel(left+1,top+4,color)
 end
 
 function Draw.D7(left, top, color)
@@ -315,15 +322,22 @@ function Draw.D7(left, top, color)
 end
 
 function Draw.D8(left, top, color)
-    FBoxOld(left,top,left+2,top+4,color)
+    gui.line(left  ,top  ,left  ,top+4,color)
+    gui.line(left+2,top  ,left+2,top+4,color)
+    gui.pixel(left+1,top  ,color)
     gui.pixel(left+1,top+2,color)
+    gui.pixel(left+1,top+4,color)
 end
 
 function Draw.D9(left, top, color)
-    FBoxOld(left  ,top  ,left+2,top+2,color)
+    gui.line(left  ,top  ,left  ,top+2,color)
+    gui.line(left+2,top  ,left+2,top+3,color)
     gui.line(left  ,top+4,left+2,top+4,color)
+    gui.pixel(left+1,top  ,color)
+    gui.pixel(left+1,top+2,color)
     gui.pixel(left+2,top+3,color)
 end
+
 
 Draw[0],Draw[1],Draw[2],Draw[3],Draw[4]=Draw.D0,Draw.D1,Draw.D2,Draw.D3,Draw.D4
 Draw[5],Draw[6],Draw[7],Draw[8],Draw[9]=Draw.D5,Draw.D6,Draw.D7,Draw.D8,Draw.D9
@@ -334,6 +348,7 @@ function DrawNum(right, top, Number, color, bkgnd)
 -- Returns the x position where it would paint another digit.
 -- It only works with integers. Rounds fractions toward zero.
 
+    local Digit= {}
     local Negative= false
     if Number < 0 then
         Number= -Number
@@ -344,27 +359,33 @@ function DrawNum(right, top, Number, color, bkgnd)
     if not color then color= "white" end
     if not bkgnd then bkgnd= "clear" end
 
+    local i= 0
     if Number < 1 then
-        gui.box(right+1,top-1,right-2,top+5,bkgnd)
-        Draw[0](right-2,top,color)
-        right= right-4
+        Digit[1]= 0
+        i= 1
     end
 
     while (Number >= 1) do
-        local digit= Number % 10
+        i= i+1
+        Digit[i]= Number % 10
         Number= math.floor(Number/10)
+    end
 
-        gui.box(right+1,top-1,right-2,top+5,bkgnd)
-        Draw[digit](right-2,top,color)
+    if Negative then  i= i+1  end
+    local left= right - i*4
+    FakeBox(left+1, top-1, right+1, top+5,bkgnd,bkgnd)
+
+    i= 1
+    while Draw[Digit[i]] do
+        Draw[Digit[i]](right-2,top,color)
         right= right-4
+        i=i+1
     end
 
     if Negative then
-        gui.box(right+1,top-1,right-2,top+5,bkgnd)
         gui.line(right, top+2,right-2,top+2,color)
         right= right-4
     end
-    gui.line(right+1,top-1,right+1,top+5,bkgnd)
     return right
 end
 
@@ -582,12 +603,28 @@ function DisplayInput()
         FBoxOld(DispX-1,DispY-2,DispX+width+1,DispY+4,color)
     end
 
+--Shade the proper regions efficiently
+    if Past < 0 then
+        local Y1= DispY + 4*Past -3
+        local Y2= DispY - 3
+        if Future < -1 then  Y2= DispY + 4*Future +1  end
+        FakeBox(DispX,Y1,DispX+width,Y2,shade,shade)
+    end
+    if Future > 0 then
+        local Y1= DispY + 5
+        local Y2= DispY + 4*Future+5
+        if Past > 1 then  Y1= DispY + 4*Past +1  end
+        FakeBox(DispX,Y1,DispX+width,Y2,shade,shade)
+    end
+    if  Past <= 0  and  Future >= 0  then
+        FakeBox(DispX,DispY-1,DispX+width,DispY+3,shade,shade)
+    end
+
 --Finally, we get to show the actual buttons!
     for i= Past, Future do
         local Y= DispY + 4*i
         if     i < 0 then  Y=Y-2
         elseif i > 0 then  Y=Y+2 end
-        gui.box(DispX,Y-1,DispX+width,Y+3,shade,shade)
         for pl= plmin, plmax do
             local scanz
             if     i  < 0 then scanz= InputList[pl][fc+i]
@@ -751,28 +788,6 @@ function ControlOptions()
 -- The interface, apparently, is most of the work!
 
 
--- Silly little graphics
-    Draw.B(    XStart + XDiff     ,YStart,red)
-    Draw.right(XStart + XDiff  + 5,YStart,white)
-    Draw.B(    XStart + XDiff  +10,YStart,green)
-
-    Draw.B(    XStart + XDiff*2   ,YStart,green)
-    Draw.right(XStart + XDiff*2+ 5,YStart,white)
-    Draw.B(    XStart + XDiff*2+10,YStart,red)
-
-    Draw.right(XStart + XDiff*3   ,YStart  ,green)
-    Draw.right(XStart + XDiff*3   ,YStart+4,green)
-    Draw.left( XStart + XDiff*3+ 4,YStart  ,green)
-    Draw.left( XStart + XDiff*3+ 4,YStart+4,red)
-    Draw.down( XStart + XDiff*3+ 8,YStart  ,red)
-    Draw.down( XStart + XDiff*3+ 8,YStart+4,green)
-
-    gui.box(XStart+XDiff*4,YStart,XStart+XDiff*4+14,YStart+6,0,green)
-    Draw.select(XStart+ XDiff*4+ 2,YStart+2,green)
-    Draw.B(    XStart + XDiff*4+ 6,YStart+2,green)
-    Draw.A(    XStart + XDiff*4+10,YStart+2,green)
-
-
 -- Button selection
     if (keys.xmouse ~= lastkeys.xmouse) or (keys.ymouse ~= lastkeys.ymouse) then
         BtnX= math.floor((keys.xmouse- XStart+4)/XDiff)
@@ -839,6 +854,37 @@ function ControlOptions()
             elseif Status[i][j] == FalsA[i] then  Status[i][j]= "No" end
         end
     end
+
+--=============================================================================
+--Begin drawing. Finally...
+
+
+--Shade the whole freaking screen
+    FakeBox(0,0,255,223,shade,shade)
+
+-- Silly little graphics
+-- Perhaps I shouldn't always assume that button right is a right arrow...
+    Draw.B(     XStart + XDiff     ,YStart,red)
+    Draw.right( XStart + XDiff  + 5,YStart,white)
+    Draw.B(     XStart + XDiff  +10,YStart,green)
+
+    Draw.B(     XStart + XDiff*2   ,YStart,green)
+    Draw.right( XStart + XDiff*2+ 5,YStart,white)
+    Draw.B(     XStart + XDiff*2+10,YStart,red)
+
+    Draw[btn[1]](XStart + XDiff*3   ,YStart  ,green)
+    Draw[btn[1]](XStart + XDiff*3   ,YStart+4,green)
+    Draw[btn[2]](XStart + XDiff*3+ 4,YStart  ,green)
+    Draw[btn[2]](XStart + XDiff*3+ 4,YStart+4,red)
+    Draw[btn[3]](XStart + XDiff*3+ 8,YStart  ,red)
+    Draw[btn[3]](XStart + XDiff*3+ 8,YStart+4,green)
+    Draw[btn[4]](XStart + XDiff*3+12,YStart  ,red)
+    Draw[btn[4]](XStart + XDiff*3+12,YStart+4,red)
+
+    gui.box(XStart+XDiff*4,YStart,XStart+XDiff*4+14,YStart+6,0,green)
+    Draw[btn[6]](XStart + XDiff*4+ 2,YStart+2,green)
+    Draw[btn[7]](XStart + XDiff*4+ 6,YStart+2,green)
+    Draw[btn[8]](XStart + XDiff*4+10,YStart+2,green)
 
 
 --Highlight button
@@ -971,7 +1017,7 @@ function ItIsYourTurn()
             movie.rerecordcounting(true)
             fc= movie.framecount()
             SetInput()
-            if saveCount <= 1 then  emu.pause()  end
+--            if saveCount < 1 then  emu.pause()  end
         end
     end
  end
@@ -1052,19 +1098,16 @@ end
 gui.register(ItIsYourTurn)
 
 
-emu.pause()
-
 --*****************************************************************************
-while true do  -- Main loop
+function Rewinder()
 --*****************************************************************************
 -- Contains the saving part of the Rewind engine.
 -- Original by Antony Lavelle, added by DarkKobold, messed by FatRatKnight
-
  if saveMax > 0 then  -- Don't process if Rewind is disabled
     if keys[rewind] and saveCount > 0 then
         rewinding= true
 
-    elseif (fc - LastLoad)%SaveBuf == 0 then
+    elseif (fc-1 - LastLoad)%SaveBuf == 0 then
         if saveCount >= saveMax then
             table.remove(saveArray,1)
         else
@@ -1081,5 +1124,25 @@ while true do  -- Main loop
     end
  end
 
-    emu.frameadvance()
 end
+
+emu.registerafter(Rewinder)
+
+emu.pause()
+--while true do
+--    Rewinder()
+--    emu.frameadvance()
+--end
+
+
+--If you wish, you can include this file using:
+--require("Multitrack2.lua")
+--This uses gui.register, emu.registerbefore, and emu.registerafter
+--It also uses keyboard keys as defined at the start of this script.
+--And of course, the display, which can be turned off, mostly.
+
+--I got rid of emu.pause() inside my controls. This has the drawback of
+--unpaused rewinds remaining unpaused when there's no more rewind to go
+--back through, but leaving it in there has the emulator buzz me an error.
+--Regardless, this script can be tacked on to any other by using
+--require("Multitrack2") now.
