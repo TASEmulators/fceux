@@ -1328,6 +1328,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
 						md.dump(outf,false);
 						delete outf;
+						if (!GameInfo)				//If no game is loaded, load the Open Game dialog
+							LoadNewGamey(hWnd, 0);
 						FCEUI_LoadMovie(outname.c_str(), 1, false, false);
 					} else {
 						std::string msg = "Failure converting " + fileDropped + "\r\n\r\n" + EFCM_CONVERTRESULT_message(result);

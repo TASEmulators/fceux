@@ -1,3 +1,4 @@
+20-april-2010 - adelikat - Win32 - Drag & Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)
 08-april-2010 - ugetab - Win32 - Added conditional debugging option 'K', for bank PC is on
 07-april-2010 - adelikat - fix bug that caused zapper.read() to crash when movie playback ends
 
