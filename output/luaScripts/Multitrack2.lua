@@ -1,4 +1,5 @@
 -- Multitrack v2 for FCEUX by FatRatKnight
+-- Recent addition: Backup list. Looking good!
 
 
 --***************
@@ -18,6 +19,9 @@ local rewind= "numpad0"    -- What key do you wish to hit for rewind?
 local PlayerSwitch= "home" -- For selecting other players
 local opt= "end"           -- For changing control options
 
+local BackupReadSwitch=  "numpad-" -- Revert to backup copy
+local BackupWriteSwitch= "numpad+" -- Copy input into backup
+
 local key = {"right", "left", "down", "up",   "L",      "O",   "J", "K"}
 local btn = {"right", "left", "down", "up", "start", "select", "B", "A"}
 
@@ -32,6 +36,8 @@ local Delete= "delete"     -- Eliminates current frame
 
 
 --Display
+local BackupDisplaySwitch= "numpad." -- Care to see the backup?
+
 local solid= "pageup"      -- Make the display less
 local clear= "pagedown"    -- or more transparant.
 
@@ -62,6 +68,41 @@ local red=   "#FF2000FF"
 local green= 0x00FF00FF
 local blue=  0x0040FFFF
 local orange="#FFC000FF"
+local yellow="#FFFF00FF"
+local cyan=  0x00FFFFFF
+local purple="#8020FFFF"
+
+--Default display stuff. Try to keep Past negative.
+local DispX, DispY= 190, 70     --Position on screen to appear
+local Past, Future= -12, 20     --How much input to see
+local Opaque= 1                 --0=unseen   1=visible   Decimal in between works
+
+
+local ListOfBtnClr= {  -- Colors for individual buttons
+--NotExist Off      Ignored  On
+
+  white,   red,     orange,  green,    -- No backup to display
+  white,   red,     orange,  green,    -- Backup button is off
+  blue,    blue,    blue,    cyan,     -- Backup button is on
+
+  white,   red,     orange,  green,    -- Same stuff as above.
+  white,   red,     orange,  green,    -- However, we're reading
+  blue,    blue,    blue,    cyan,     -- from backup here.
+
+  white,   red,     orange,  green,    -- Likewise, but instead
+  white,   red,     orange,  green,    -- of read, we're writing
+  blue,    blue,    blue,    cyan      -- to the backup. Joy...
+}
+
+local ListOfChangesClr= {  -- Colors for backup-main comparisons
+--NoMain   NoMatch  Equal
+
+  white,   green,   blue,              -- Backup just sits there...
+  white,   orange,  green,             -- Reading from backup...
+  white,   yellow,  purple             -- Writing to backup...
+}
+
+
 --*****************************************************************************
 --Please do not change the following, unless you plan to change the code:
 
@@ -71,6 +112,10 @@ local LastLoad= movie.framecount()
 local saveCount= 0
 local saveArray= {}
 local rewinding= false
+
+local BackupList= {}
+local BackupOverride= false
+local DisplayBackup= true
 
 local InputList= {}
 local ThisInput= {}
@@ -82,6 +127,7 @@ local ScriptEdit= {}
 
 for pl= 1, players do
     InputList[pl]= {}
+    BackupList[pl]= {}
     ThisInput[pl]= {}
     BufInput[pl]= {}
     BufLen[pl]= 0
@@ -443,6 +489,7 @@ function pressrepeater(button)  -- Expects a key
     return false
 end
 
+
 --*****************************************************************************
 function JoyToNum(Joys)  -- Expects a table containing joypad buttons
 --*****************************************************************************
@@ -506,9 +553,7 @@ function ShowManyPlayers(x,y,color,button,pl)
 end
 
 
-local DispX, DispY= 190, 70
-local Past, Future= -12, 20
-local Opaque= 1
+Future= limits(Future,Past,Past+53) --Idiot-proofing
 --*****************************************************************************
 function DisplayOptions(width)  -- Expects width calculated by DisplayInput
 --*****************************************************************************
@@ -557,7 +602,9 @@ function DisplayOptions(width)  -- Expects width calculated by DisplayInput
         DispY= DispY + keys.ymouse - lastkeys.ymouse
     end
 
-    DispX= limits(DispX,1,254-width)
+--Miscellaneous
+    if press(BackupDisplaySwitch) then DisplayBackup= not DisplayBackup end
+    DispX= limits(DispX,2,254-width)
     DispY= limits(DispY,3-4*Past,218-4*Future)
 
 
@@ -625,6 +672,7 @@ function DisplayInput()
         local Y= DispY + 4*i
         if     i < 0 then  Y=Y-2
         elseif i > 0 then  Y=Y+2 end
+
         for pl= plmin, plmax do
             local scanz
             if     i  < 0 then scanz= InputList[pl][fc+i]
@@ -635,24 +683,61 @@ function DisplayInput()
             end
             for button= 1, 8 do
 
+-- Take a number, oh mighty color. There's too much of ya!
                 local color
                 if not scanz then
-                    color= white
+                    color= 1        --Does not exist
                 elseif ReadJoynum(scanz,button) then
-                    if (i > 0) and not (ReadList[pl][button]) then
-                        color= orange
+                    if ReadList[pl][button] then
+                        color= 4    --Button on
                     else
-                        color= green
+                        color= 3    --Button on, will be ignored
                     end
                 else
-                    color= red
+                    color= 2        --Button off
                 end
 
-                HighlightButton(DispX,Y,color,button,pl)
+                if DisplayBackup then
+                    if BackupList[pl][fc+i] then
+                        if ReadJoynum(BackupList[pl][fc+i],button) then
+                            color= color+8
+                        else
+                            color= color+4
+                        end
+                    end
+                    if BackupOverride == "read" then
+                        color= color+12
+                    elseif BackupOverride == "write" then
+                        color= color+24
+                    end
+                end
+
+                HighlightButton(DispX,Y,ListOfBtnClr[color],button,pl)
+
+            end -- button loop
+
+-- Draw cute lines if we wish to see the backup
+            if DisplayBackup and BackupList[pl][fc+i] then
+                local color
+                if not scanz then
+                    color= 1
+                elseif scanz == BackupList[pl][fc+i] then
+                    color= 3
+                else
+                    color= 2
+                end
+                if BackupOverride == "read" then
+                    color= color+3
+                elseif BackupOverride == "write" then
+                    color= color+6
+                end
+
+                gui.line(DispX-2,Y,DispX-2,Y+2,ListOfChangesClr[color])
             end
-        end
-    end
-end
+
+        end -- player loop
+    end -- loop from Past to Future
+end --function
 
 
 --*****************************************************************************
@@ -661,9 +746,15 @@ function SetInput()
 -- Prepares ThisInput for joypad use.
 
     for pl= 1, players do
-        local temp= InputList[pl][fc-BufLen[pl]]
-        if BufLen[pl] > 0 then
-            temp= BufInput[pl][1]
+        local temp
+        if BackupOverride == "read" then
+            temp= BackupList[pl][fc]
+        else
+            if BufLen[pl] > 0 then
+                temp= BufInput[pl][1]
+            else
+                temp= InputList[pl][fc-BufLen[pl]]
+            end
         end
 
         for i= 1, 8 do
@@ -957,6 +1048,7 @@ function ControlOptions()
 
 end
 
+
 --*****************************************************************************
 function CatchInput()
 --*****************************************************************************
@@ -969,7 +1061,11 @@ function CatchInput()
             table.remove(BufInput[pl],1)
             table.insert(BufInput[pl],InputList[pl][fc-1])
         end
-        InputList[pl][fc-1]= JoyToNum(joypad.get(pl))
+        local NewJoy= JoyToNum(joypad.get(pl))
+        InputList[pl][fc-1]= NewJoy
+        if not BackupList[pl][fc-1]  or  (BackupOverride == "write") then
+            BackupList[pl][fc-1]= NewJoy
+        end
     end
     SetInput()
 end
@@ -984,6 +1080,7 @@ function OnLoad()
 -- Also clears whatever rewind stuff is stored.
 
     InputSnap()
+    BackupOverride= false    --Assume user is done messing with backup on load
 
     fc= movie.framecount()
     LastLoad= fc
@@ -1021,6 +1118,30 @@ function ItIsYourTurn()
         end
     end
  end
+
+--Should we bother the backups today?
+    if press(BackupReadSwitch) then
+        if BackupOverride ~= "read" then
+            BackupOverride= "read"
+        else
+            BackupOverride= false
+        end
+    end
+    if press(BackupWriteSwitch) then
+        if BackupOverride ~= "write" then
+            BackupOverride= "write"
+        else
+            BackupOverride= false
+        end
+    end
+
+    if keys[BackupReadSwitch] and keys[BackupWriteSwitch] then
+        gui.text(30,1,"Hey, quit holding both buttons!")
+    elseif keys[BackupReadSwitch] then
+        gui.text(30,1,"This lets the script revert to the backup.")
+    elseif keys[BackupWriteSwitch] then
+        gui.text(30,1,"This stores input into the backup.")
+    end
 
 --Switch players on keypress
     if press(PlayerSwitch) then
