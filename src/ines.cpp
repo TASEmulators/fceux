@@ -534,9 +534,9 @@ typedef struct {
 	char* name;
 	int number;
 	void (*init)(CartInfo *);
-} BMAPPING;
+} BMAPPINGLocal;
 
-static BMAPPING bmap[] = {
+static BMAPPINGLocal bmap[] = {
 	{"NROM",				0,   NROM_Init},
 	{"MMC1",    			1,	 Mapper1_Init},
 	{"UNROM",				2,   UNROM_Init},
@@ -829,8 +829,20 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 			FCEU_printf("%02x",iNESCart.MD5[x]);
 		FCEU_printf("\n");
 	}
+
+	char* mappername = "Not Listed";
+
+	for(int mappertest=0;mappertest< (sizeof bmap / sizeof bmap[0]) - 1;mappertest++)
+	{
+		if (bmap[mappertest].number == MapperNo) {
+			mappername = bmap[mappertest].name;
+			break;
+		}
+	}
+
 	FCEU_printf(" Mapper #:  %d\n Mapper name: %s\n Mirroring: %s\n",
-	 MapperNo, bmap[MapperNo].name, Mirroring==2?"None(Four-screen)":Mirroring?"Vertical":"Horizontal");
+		MapperNo, mappername, Mirroring==2?"None(Four-screen)":Mirroring?"Vertical":"Horizontal");
+
 	if(head.ROM_type&2) FCEU_printf(" Battery-backed.\n");
 	if(head.ROM_type&4) FCEU_printf(" Trained.\n");
 
@@ -1439,7 +1451,7 @@ static void iNESPower(void)
 
 static int NewiNES_Init(int num)
 {
-	BMAPPING *tmp=bmap;
+	BMAPPINGLocal *tmp=bmap;
 
 	if(GameInfo->type == GIT_VSUNI)
 		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
