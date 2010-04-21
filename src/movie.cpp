@@ -53,6 +53,7 @@ std::vector<string> subtitleMessages;	//Messages of subtitles
 bool subtitlesOnAVI = false;
 bool autoMovieBackup = false; //Toggle that determines if movies should be backed up automatically before altering them
 bool freshMovie = false;	  //True when a movie loads, false when movie is altered.  Used to determine if a movie has been altered since opening
+bool movieFromPoweron = true;
 
 // Function declarations------------------------
 
@@ -797,6 +798,10 @@ void FCEUMOV_ExitTasEdit()
 	currMovieData = MovieData();
 }
 
+bool FCEUMOV_FromPoweron()
+{
+	return movieFromPoweron;
+}
 bool MovieData::loadSavestateFrom(std::vector<char>* buf)
 {
 	memorystream ms(buf);
@@ -852,8 +857,11 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	//WE NEED TO LOAD A SAVESTATE
 	if(currMovieData.savestate.size() != 0)
 	{
+		movieFromPoweron = false;
 		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
 		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was god?
+	} else {
+		movieFromPoweron = true;
 	}
 
 	//if there is no savestate, we won't have this crucial piece of information at the start of the movie.
@@ -938,10 +946,12 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 	if(flags & MOVIE_FLAG_FROM_POWERON)
 	{
+		movieFromPoweron = true;
 		poweron(true);
 	}
 	else
 	{
+		movieFromPoweron = false;
 		MovieData::dumpSavestateTo(&currMovieData.savestate,Z_BEST_COMPRESSION);
 	}
 

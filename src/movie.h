@@ -87,6 +87,7 @@ bool FCEUMOV_PostLoad();
 
 void FCEUMOV_EnterTasEdit();
 void FCEUMOV_ExitTasEdit();
+bool FCEUMOV_FromPoweron();
 
 class MovieData;
 class MovieRecord

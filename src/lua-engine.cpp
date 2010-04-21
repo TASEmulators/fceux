@@ -120,7 +120,6 @@ int luaRunning = FALSE;
 // True at the frame boundary, false otherwise.
 static int frameBoundary = FALSE;
 
-
 // The execution speed we're running at.
 static enum {SPEED_NORMAL, SPEED_NOTHROTTLE, SPEED_TURBO, SPEED_MAXIMUM} speedmode = SPEED_NORMAL;
 
@@ -2567,8 +2566,9 @@ static int movie_replay (lua_State *L) {
 //
 //If movie is recorded from power-on
 static int movie_ispoweron (lua_State *L) {
-	if (FCEUMOV_IsRecording() && FCEUMOV_IsPlaying())
-		return (currMovieData.savestate.size() == 0);
+	if (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying()) {
+		return FCEUMOV_FromPoweron();
+	}
 	else
 		return 0;
 }
@@ -2577,8 +2577,9 @@ static int movie_ispoweron (lua_State *L) {
 //
 //If movie is recorded from a savestate
 static int movie_isfromsavestate (lua_State *L) {
-	if (FCEUMOV_IsRecording() && FCEUMOV_IsPlaying())		
-		return (currMovieData.savestate.size() != 0);
+	if (FCEUMOV_IsRecording() || FCEUMOV_IsPlaying()) {
+		return !FCEUMOV_FromPoweron();
+	}
 	else
 		return 0;
 }
