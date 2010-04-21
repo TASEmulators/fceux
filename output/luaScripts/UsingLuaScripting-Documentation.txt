@@ -1,6 +1,17 @@
 Learning to use Lua Sctripting for FCEUX
 Written by QFox
 
+This is a document designed primarily to help someone use FCEUX specific commands with LUA, and tends to assume that you have some programming experience. It is best used for basic coding reference, and it is not comprehensive, in that there are a large number of things that LUA can do which aren't mentioned here. For a broad overview of the LUA language, check here:
+
+The Manual: (Good for learning LUA's basic capabilities, but you don't need to learn it all before using LUA)
+http://www.lua.org/manual/
+
+Programming in LUA: (Good for finding exact coding syntax, such as for LUA arrays, or to get coding examples)
+http://www.lua.org/pil/
+
+Other .lua files:
+Don't be afraid to copy, look through, and break existing .lua scripts in order to make your own. Taking a piece of other people's code and learning how it works, modifying it, or outright duplicating it for your own project generally isn't frowned upon, as long as you know that what you release may eventually be used by others for their projects.
+
 Windows users - see also the Lua Scripting chapter for the FCEUX sHelp manual (fceux.chm)
 
 Ok. Lua. Let's see.
