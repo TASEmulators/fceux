@@ -2563,6 +2563,27 @@ static int movie_replay (lua_State *L) {
 	return 0;
 }
 
+//movie.ispoweron
+//
+//If movie is recorded from power-on
+static int movie_ispoweron (lua_State *L) {
+	if (FCEUMOV_IsRecording() && FCEUMOV_IsPlaying())
+		return (currMovieData.savestate.size() == 0);
+	else
+		return 0;
+}
+
+//movie.isfromsavestate()
+//
+//If movie is recorded from a savestate
+static int movie_isfromsavestate (lua_State *L) {
+	if (FCEUMOV_IsRecording() && FCEUMOV_IsPlaying())		
+		return (currMovieData.savestate.size() != 0);
+	else
+		return 0;
+}
+
+
 #define LUA_SCREEN_WIDTH    256
 #define LUA_SCREEN_HEIGHT   224
 
@@ -4445,6 +4466,8 @@ static const struct luaL_reg movielib[] = {
 //	{"playback", movie_playback},
 	{"playbeginning", movie_replay},
 	{"getreadonly", movie_getreadonly},
+	{"ispoweron", movie_ispoweron},					//If movie recorded from power-on
+	{"isfromsavestate", movie_isfromsavestate},		//If movie is recorded from savestate
 	{NULL,NULL}
 
 };
