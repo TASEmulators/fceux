@@ -469,7 +469,7 @@ void BreakHit(bool force = false) {
 		//check to see whether we fall in any forbid zone
 		for (int i = 0; i < numWPs; i++) {
 			watchpointinfo& wp = watchpoint[i];
-			if(!(wp.flags & WP_F))
+			if(!(wp.flags & WP_F) || !(wp.flags & WP_E))
 				continue;
 
 			if (condition(&wp))
