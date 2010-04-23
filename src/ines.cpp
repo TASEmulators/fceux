@@ -888,6 +888,14 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	FCEU_LoadGameSave(&iNESCart);
 
 	strcpy(LoadedRomFName,name); //bbit edited: line added
+	
+	// Extract Filename only. Should account for Windows/Unix this way.
+	if (strrchr(name, '/')) {
+	name = strrchr(name, '/') + 1;
+	} else if(strrchr(name, '\\')) {
+	name = strrchr(name, '\\') + 1;
+	}
+
 	GameInterface=iNESGI;
 	FCEU_printf("\n");
 
