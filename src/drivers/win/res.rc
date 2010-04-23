@@ -601,21 +601,23 @@ BEGIN
     PUSHBUTTON      "Turbo A",318,195,122,32,12
 END
 
-GUICONFIG DIALOGEX 16, 123, 184, 108
+GUICONFIG DIALOGEX 16, 123, 184, 123
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "GUI Configuration"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,64,86,56,14
+    DEFPUSHBUTTON   "Close",BUTTON_CLOSE,64,101,56,14
     CONTROL         "Load ""File Open"" dialog when FCEUX starts.",CB_LOAD_FILE_OPEN,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,164,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,8,168,12
     CONTROL         "Automatically hide menu on game load.",CB_AUTO_HIDE_MENU,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,23,164,12
-    CONTROL         "Ask confirmation on exit attempt.",CB_ASK_EXIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,38,164,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,23,168,12
+    CONTROL         "Ask confirmation on exit attempt.",CB_ASK_EXIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,38,168,12
     CONTROL         "Disable screen saver while game is loaded.",CB_DISABLE_SCREEN_SAVER,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,53,164,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,53,168,12
     CONTROL         "Enable right-click context menu",CB_ENABLECONTEXTMENU,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,70,115,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,68,168,12
+    CONTROL         "Partially disable Visual Themes (Requires restart)",CB_PARTIALVISUALTHEME,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,83,168,12
 END
 
 INPUTCONFIG DIALOGEX 122, 105, 349, 199

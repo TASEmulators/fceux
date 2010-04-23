@@ -10,6 +10,31 @@ extern bool rightClickEnabled;	//Declared in window.cpp and only an extern here
 *
 * @param hwndDlg Handle of the dialog window.
 **/
+char* ManifestFilePath()
+{
+			char tempfilepath[2048];
+			GetModuleFileName(0, tempfilepath, 2048);
+			//std::string TestFilepath = tempfilepath;
+
+			strcat(tempfilepath,".manifest");
+
+			return tempfilepath;
+}
+
+bool ManifestFileExists()
+{
+			long endPos = 0;
+
+			FILE * stream = fopen( ManifestFilePath(), "r" );
+			if (stream) {
+			fseek( stream, 0L, SEEK_END );
+			endPos = ftell( stream );
+			fclose( stream );
+			}
+
+			return (endPos > 0);
+}
+
 void CloseGuiDialog(HWND hwndDlg)
 {
 	if(IsDlgButtonChecked(hwndDlg, CB_LOAD_FILE_OPEN) == BST_CHECKED)
@@ -52,6 +77,21 @@ void CloseGuiDialog(HWND hwndDlg)
 		rightClickEnabled = false;
 	}
 
+	if(IsDlgButtonChecked(hwndDlg, CB_PARTIALVISUALTHEME)==BST_CHECKED)
+	{
+		FILE * stream = fopen( ManifestFilePath(), "w" );
+		if (stream) {
+			fputs ("<\?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"\?>\n<assembly\n  xmlns=\"urn:schemas-microsoft-com:asm.v1\"\n  manifestVersion=\"1.0\">\n<assemblyIdentity\n    name=\"FCEUX\"\n    processorArchitecture=\"x86\"\n    version=\"1.0.0.0\"\n    type=\"win32\"/>\n<description>FCEUX</description>\n</assembly>\n",stream);
+			fclose(stream);
+		}
+	}
+
+	else
+	{
+		remove(ManifestFilePath());
+	}
+
+
 	EndDialog(hwndDlg,0);
 }
 
@@ -89,6 +129,10 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				CheckDlgButton(hwndDlg, CB_ENABLECONTEXTMENU, BST_CHECKED);
 			}
 
+			if(ManifestFileExists() > 0) {
+				CheckDlgButton(hwndDlg, CB_PARTIALVISUALTHEME, BST_CHECKED);
+			}
+
 			CenterWindowOnScreen(hwndDlg);
 
 			break;
@@ -118,4 +162,3 @@ void ConfigGUI()
 {
 	DialogBox(fceu_hInstance, "GUICONFIG", hAppWnd, GUIConCallB);  
 }
-
