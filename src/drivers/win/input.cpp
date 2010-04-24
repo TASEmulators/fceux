@@ -321,11 +321,17 @@ void HandleHotkeys()
 void FCEUD_UpdateInput()
 {
 	bool joy=false,mouse=false;
+	EMOVIEMODE FCEUMOVState = FCEUMOV_Mode();
 
+	extern bool justloadedstate;
+	if(((FCEUMOVState != MOVIEMODE_PLAY) && (FCEUMOVState != MOVIEMODE_RECORD)) || !justloadedstate) {
 	KeyboardUpdateState();
 	UpdateJoysticks();
 
 	HandleHotkeys();
+	}
+	justloadedstate = false;
+	
 
 	{
 		for(int x=0;x<2;x++)
@@ -365,7 +371,7 @@ void FCEUD_UpdateInput()
 			UpdateGamepad();
 
 		if(mouse)
-			if(FCEUMOV_Mode() != MOVIEMODE_PLAY)	//FatRatKnight: Moved this if out of the function
+			if(FCEUMOVState != MOVIEMODE_PLAY)	//FatRatKnight: Moved this if out of the function
 				GetMouseData(MouseData);			//A more concise fix may be desired.
 	}
 }
