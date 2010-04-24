@@ -120,7 +120,6 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 
 			GetModuleFileName(0, ManifestFilePath, 2048);
-			//std::string TestFilepath = tempfilepath;
 
 			strcat((char*)ManifestFilePath,".manifest");
 

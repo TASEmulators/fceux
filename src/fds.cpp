@@ -793,6 +793,15 @@ int FDSLoad(const char *name, FCEUFILE *fp)
 
 	free(fn);
 
+	fseek( zp, 0L, SEEK_END );
+	if (ftell( zp ) != 8192 ) {
+		fclose(zp);
+		FreeFDSMemory();
+		FCEU_PrintError("FDS BIOS ROM image incompatible: %s", FCEU_MakeFName(FCEUMKF_FDSROM,0,0).c_str());
+		return 0;
+	}
+	fseek( zp, 0L, SEEK_SET );
+
 	if(fread(FDSBIOS,1,8192,zp)!=8192)
 	{
 		fclose(zp);
