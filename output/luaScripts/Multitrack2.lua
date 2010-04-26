@@ -61,6 +61,7 @@ local OptLf= "numpad4"
 local OptHit="numpad5"
 
 
+
 --Various colors I'm using. If you wish to bother, go ahead.
 local shade= 0x00000080
 local white= "#FFFFFFFF"
@@ -114,7 +115,7 @@ local saveArray= {}
 local rewinding= false
 
 local BackupList= {}
-local BackupOverride= false
+local BackupOverride= {}
 local DisplayBackup= true
 
 local InputList= {}
@@ -128,6 +129,7 @@ local ScriptEdit= {}
 for pl= 1, players do
     InputList[pl]= {}
     BackupList[pl]= {}
+    BackupOverride[pl]= false
     ThisInput[pl]= {}
     BufInput[pl]= {}
     BufLen[pl]= 0
@@ -490,6 +492,7 @@ function pressrepeater(button)  -- Expects a key
 end
 
 
+
 --*****************************************************************************
 function JoyToNum(Joys)  -- Expects a table containing joypad buttons
 --*****************************************************************************
@@ -673,6 +676,7 @@ function DisplayInput()
         if     i < 0 then  Y=Y-2
         elseif i > 0 then  Y=Y+2 end
 
+        local BackupColor= nil -- For displaying a line for backup
         for pl= plmin, plmax do
             local scanz
             if     i  < 0 then scanz= InputList[pl][fc+i]
@@ -705,9 +709,9 @@ function DisplayInput()
                             color= color+4
                         end
                     end
-                    if BackupOverride == "read" then
+                    if     BackupOverride[pl] == "read"  then
                         color= color+12
-                    elseif BackupOverride == "write" then
+                    elseif BackupOverride[pl] == "write" then
                         color= color+24
                     end
                 end
@@ -718,24 +722,35 @@ function DisplayInput()
 
 -- Draw cute lines if we wish to see the backup
             if DisplayBackup and BackupList[pl][fc+i] then
-                local color
-                if not scanz then
-                    color= 1
-                elseif scanz == BackupList[pl][fc+i] then
-                    color= 3
-                else
-                    color= 2
-                end
-                if BackupOverride == "read" then
-                    color= color+3
-                elseif BackupOverride == "write" then
-                    color= color+6
-                end
+                if not BackUpColor then
+                    if not scanz then
+                        BackupColor= 1
+                    elseif scanz == BackupList[pl][fc+i] then
+                        BackupColor= 3
+                    else
+                        BackupColor= 2
+                    end
+                    if     BackupOverride[pl] == "read"  then
+                        BackupColor= BackupColor+3
+                    elseif BackupOverride[pl] == "write" then
+                        BackupColor= BackupColor+6
+                    end
 
-                gui.line(DispX-2,Y,DispX-2,Y+2,ListOfChangesClr[color])
+                else -- Eh, we already have a BackupColor?
+                    local CheckColor= (BackupColor-1)%3
+                    if not scanz then
+                        BackupColor= BackupColor - CheckColor
+                    elseif (scanz ~= BackupList[pl][fc+i]) and (CheckColor == 2) then
+                        BackupColor= BackupColor - 1
+                    end
+                end
             end
 
         end -- player loop
+
+        if BackupColor then
+            gui.line(DispX-2,Y,DispX-2,Y+2,ListOfChangesClr[BackupColor])
+        end
     end -- loop from Past to Future
 end --function
 
@@ -747,7 +762,7 @@ function SetInput()
 
     for pl= 1, players do
         local temp
-        if BackupOverride == "read" then
+        if BackupOverride[pl] == "read" then
             temp= BackupList[pl][fc]
         else
             if BufLen[pl] > 0 then
@@ -1063,7 +1078,7 @@ function CatchInput()
         end
         local NewJoy= JoyToNum(joypad.get(pl))
         InputList[pl][fc-1]= NewJoy
-        if not BackupList[pl][fc-1]  or  (BackupOverride == "write") then
+        if not BackupList[pl][fc-1]  or  (BackupOverride[pl] == "write") then
             BackupList[pl][fc-1]= NewJoy
         end
     end
@@ -1080,7 +1095,9 @@ function OnLoad()
 -- Also clears whatever rewind stuff is stored.
 
     InputSnap()
-    BackupOverride= false    --Assume user is done messing with backup on load
+    for pl= 1, players do    --Assume user is done messing with backup on load
+        BackupOverride[pl]= false
+    end
 
     fc= movie.framecount()
     LastLoad= fc
@@ -1114,24 +1131,26 @@ function ItIsYourTurn()
             movie.rerecordcounting(true)
             fc= movie.framecount()
             SetInput()
---            if saveCount < 1 then  emu.pause()  end
+            if saveCount < 1 then  emu.pause()  end
         end
     end
  end
 
 --Should we bother the backups today?
-    if press(BackupReadSwitch) then
-        if BackupOverride ~= "read" then
-            BackupOverride= "read"
-        else
-            BackupOverride= false
+    for pl= plmin, plmax do
+        if press(BackupReadSwitch) then
+                if BackupOverride[pl] ~= "read" then
+                    BackupOverride[pl]= "read"
+                else
+                    BackupOverride[pl]= false
+                end
         end
-    end
-    if press(BackupWriteSwitch) then
-        if BackupOverride ~= "write" then
-            BackupOverride= "write"
-        else
-            BackupOverride= false
+        if press(BackupWriteSwitch) then
+            if BackupOverride[pl] ~= "write" then
+                BackupOverride[pl]= "write"
+            else
+                BackupOverride[pl]= false
+            end
         end
     end
 
@@ -1228,7 +1247,7 @@ function Rewinder()
     if keys[rewind] and saveCount > 0 then
         rewinding= true
 
-    elseif (fc-1 - LastLoad)%SaveBuf == 0 then
+    elseif (fc - LastLoad)%SaveBuf == 0 then
         if saveCount >= saveMax then
             table.remove(saveArray,1)
         else
@@ -1247,23 +1266,10 @@ function Rewinder()
 
 end
 
-emu.registerafter(Rewinder)
+--emu.registerafter(Rewinder)
 
 emu.pause()
---while true do
---    Rewinder()
---    emu.frameadvance()
---end
-
-
---If you wish, you can include this file using:
---require("Multitrack2.lua")
---This uses gui.register, emu.registerbefore, and emu.registerafter
---It also uses keyboard keys as defined at the start of this script.
---And of course, the display, which can be turned off, mostly.
-
---I got rid of emu.pause() inside my controls. This has the drawback of
---unpaused rewinds remaining unpaused when there's no more rewind to go
---back through, but leaving it in there has the emulator buzz me an error.
---Regardless, this script can be tacked on to any other by using
---require("Multitrack2") now.
+while true do
+    Rewinder()
+    emu.frameadvance()
+end
