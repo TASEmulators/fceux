@@ -323,15 +323,10 @@ void FCEUD_UpdateInput()
 	bool joy=false,mouse=false;
 	EMOVIEMODE FCEUMOVState = FCEUMOV_Mode();
 
-	extern bool justloadedstate;
-	if(((FCEUMOVState != MOVIEMODE_PLAY) && (FCEUMOVState != MOVIEMODE_RECORD)) || !justloadedstate) {
 	KeyboardUpdateState();
 	UpdateJoysticks();
 
 	HandleHotkeys();
-	}
-	justloadedstate = false;
-	
 
 	{
 		for(int x=0;x<2;x++)

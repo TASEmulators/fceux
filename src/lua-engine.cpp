@@ -2116,8 +2116,8 @@ static int joy_get_internal(lua_State *L, bool reportUp, bool reportDown) {
 	}
 	
 	// Use the OS-specific code to do the reading.
-	extern void FCEUD_UpdateInput(void);
-	FCEUD_UpdateInput();
+	/*extern void FCEUD_UpdateInput(void);	FatRatKnight: What's this call doing here?
+	FCEUD_UpdateInput();					I commented it out. Should we delete it?*/
 	extern SFORMAT FCEUCTRL_STATEINFO[];
 	uint8 buttons = ((uint8 *) FCEUCTRL_STATEINFO[1].v)[which - 1];
 	
