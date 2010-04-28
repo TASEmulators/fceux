@@ -295,6 +295,11 @@ void MovieRecord::dumpBinary(MovieData* md, std::ostream* os, int index)
 
 void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 {
+	if (currMovieData.binaryFlag)
+	{
+		dumpBinary(md, os, index);
+		return;
+	}
 	//dump the misc commands
 	//*os << '|' << setw(1) << (int)commands;
 	os->put('|');
@@ -1211,6 +1216,15 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			currMovieData.rerecordCount = currRerecordCount;
 
 			openRecordingMovie(curMovieFilename);
+
+			/*
+			is->seekg((uint32)curr);
+			char *str = new char[size];
+			is->read(str, size);
+			osRecordingMovie->write(str,size);
+			delete[] str;
+			*/
+			
 			currMovieData.dump(osRecordingMovie, currMovieData.binaryFlag);
 			movieMode = MOVIEMODE_RECORD;
 		}
@@ -1313,12 +1327,15 @@ void FCEUI_MovieToggleReadOnly()
 
 void FCEUI_MoviePlayFromBeginning(void)
 {
-	if (movieMode != MOVIEMODE_INACTIVE)
+	if (movieMode != MOVIEMODE_INACTIVE && movieMode != MOVIEMODE_TASEDIT)
 	{
-		char *fname = strdup(curMovieFilename);
-		FCEUI_LoadMovie(fname, true, false, 0);
+		movie_readonly=true;
+		poweron(true);
+		
+		currFrameCounter=0;
+		movieMode = MOVIEMODE_PLAY;
+
 		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.");
-		free(fname);
 	}
 }
 
