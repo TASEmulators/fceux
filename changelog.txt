@@ -1,3 +1,4 @@
+28-april-2010 - ugetab - Added microphone support option. When enabled, Port 2 Start activates the Microphone. Movies also support this.
 25-april-2010 - FatRatKnight - Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate.
 23-april-2010 - ugetab - Win32 - Added Tools>GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases.
 20-april-2010 - adelikat - New lua functions movie.ispoweron() and movie.isfromsavestate()

@@ -127,16 +127,13 @@ static DECLFR(JPRead)
 
 	// Not verified against hardware.
 	if (replaceP2StartWithMicrophone) {
-	// This line is iffy, may cause trouble. Needs more testing.
-		if (joy_readbit[1] >= 8) {
-			if (joy[1]&8) {
-				microphone = !microphone;
-				if (microphone) {
-					ret|=4;
-				}
-			} else {
-				microphone = false;
+		if (joy[1]&8) {
+			microphone = !microphone;
+			if (microphone) {
+				ret|=4;
 			}
+		} else {
+			microphone = false;
 		}
 	}
 
