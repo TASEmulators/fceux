@@ -1211,7 +1211,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			currMovieData.rerecordCount = currRerecordCount;
 
 			openRecordingMovie(curMovieFilename);
-			currMovieData.dump(osRecordingMovie, false);
+			currMovieData.dump(osRecordingMovie, currMovieData.binaryFlag);
 			movieMode = MOVIEMODE_RECORD;
 		}
 	}
