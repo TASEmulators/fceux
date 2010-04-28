@@ -46,6 +46,7 @@ int tempwinsync = 0;		//Temp variable used by turbo to turn of sync settings
 int tempsoundquality = 0;	//Temp variable used by turbo to turn of sound quality settings
 extern int winsync;
 extern int soundquality;
+extern bool replaceP2StartWithMicrophone;
 //UsrInputType[] is user-specified.  InputType[] is current
 //        (game/savestate/movie loading can override user settings)
 
@@ -371,10 +372,12 @@ void FCEUD_UpdateInput()
 	}
 }
 
-void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
+void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC fcexp)
 {
 	eoptions &= ~EO_FOURSCORE;
 	if(fourscore) eoptions |= EO_FOURSCORE;
+
+	replaceP2StartWithMicrophone = microphone;
 
 	InputType[0]=port0;
 	InputType[1]=port1;
@@ -1086,6 +1089,9 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		//update the fourscore checkbox
 		CheckDlgButton(hwndDlg,CHECK_ENABLE_FOURSCORE,(eoptions & EO_FOURSCORE)?BST_CHECKED:BST_UNCHECKED);
 
+		//update the microphone checkbox
+		CheckDlgButton(hwndDlg,CHECK_ENABLE_MICROPHONE,replaceP2StartWithMicrophone?BST_CHECKED:BST_UNCHECKED);
+
 		// Initialize the controls for the input ports
 		for(unsigned int port = 0; port < NUMBER_OF_PORTS; port++)        
 		{
@@ -1219,9 +1225,17 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == CHECK_ENABLE_FOURSCORE)
 		{
 			eoptions ^= EO_FOURSCORE;
-			FCEU_printf("Fourscore toggled to \n",(eoptions & EO_FOURSCORE)?"ON":"OFF");
+			FCEU_printf("Fourscore toggled to %s\n",(eoptions & EO_FOURSCORE)?"ON":"OFF");
 			UpdateFourscoreState(hwndDlg);
 		}
+
+		//Handle the fourscore button
+		if(HIWORD(wParam) == BN_CLICKED && LOWORD(wParam) == CHECK_ENABLE_MICROPHONE)
+		{
+			replaceP2StartWithMicrophone = !replaceP2StartWithMicrophone;
+			FCEU_printf("Microphone toggled to %s\n",replaceP2StartWithMicrophone?"ON":"OFF");
+		}
+		
 
 		if(HIWORD(wParam) == CBN_SELENDOK)
 		{

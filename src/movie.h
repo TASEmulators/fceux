@@ -158,7 +158,7 @@ class MovieData
 {
 public:
 	MovieData();
-	
+	// Default Values: MovieData::MovieData()
 
 	int version;
 	int emuVersion;
@@ -182,6 +182,8 @@ public:
 	int ports[3];
 	//whether fourscore is enabled
 	bool fourscore;
+	//whether microphone is enabled
+	bool microphone;
 	
 	//----TasEdit stuff---
 	int greenZoneCount;

@@ -97,6 +97,7 @@ SFORMAT FCEUMOV_STATEINFO[]={
 
 char curMovieFilename[512] = {0};
 MovieData currMovieData;
+MovieData defaultMovieData;
 int currRerecordCount;
 
 void MovieData::clearRecordRange(int start, int len)
@@ -347,6 +348,7 @@ MovieData::MovieData()
 	, rerecordCount(0)
 	, binaryFlag(false)
 	, greenZoneCount(0)
+	, microphone(false)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
 }
@@ -377,6 +379,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		guid = FCEU_Guid::fromString(val);
 	else if(key == "fourscore")
 		installBool(val,fourscore);
+	else if(key == "microphone")
+		installBool(val,microphone);
 	else if(key == "port0")
 		installInt(val,ports[0]);
 	else if(key == "port1")
@@ -416,6 +420,7 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
 	*os << "guid " << guid.toString() << endl;
 	*os << "fourscore " << (fourscore?1:0) << endl;
+	*os << "microphone " << (microphone?1:0) << endl;
 	*os << "port0 " << ports[0] << endl;
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
@@ -783,7 +788,7 @@ void FCEUMOV_EnterTasEdit()
 	//todo - think about this
 	//ResetInputTypes();
 	//todo - maybe this instead
-	//FCEUD_SetInput(currMovieData.fourscore,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
+	//FCEUD_SetInput(currMovieData.fourscore,currMovieData.microphone,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
 
 	//pause the emulator
 	FCEUI_SetEmulationPaused(1);
@@ -877,7 +882,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 		FCEUI_SetVidSystem(0);
 
 	//force the input configuration stored in the movie to apply
-	FCEUD_SetInput(currMovieData.fourscore,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
+	FCEUD_SetInput(currMovieData.fourscore,currMovieData.microphone,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
 
 	//stuff that should only happen when we're ready to positively commit to the replay
 	if(tasedit)
@@ -945,6 +950,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	currMovieData.romChecksum = GameInfo->MD5;
 	currMovieData.romFilename = FileBase;
 	currMovieData.fourscore = FCEUI_GetInputFourscore();
+	currMovieData.microphone = FCEUI_GetInputMicrophone();
 	currMovieData.ports[0] = joyports[0].type;
 	currMovieData.ports[1] = joyports[1].type;
 	currMovieData.ports[2] = portFC.type;

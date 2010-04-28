@@ -77,6 +77,8 @@ void FCEUI_SetInputFC(ESIFC type, void *ptr, int attrib);
 void FCEUI_SetInputFourscore(bool attachFourscore);
 //tells whether a fourscore is attached
 bool FCEUI_GetInputFourscore();
+//tells whether the microphone is used
+bool FCEUI_GetInputMicrophone();
 
 void FCEUI_UseInputPreset(int preset);
 
@@ -167,7 +169,7 @@ void FCEUD_LoadStateFrom(void);
 
 //at the minimum, you should call FCEUI_SetInput, FCEUI_SetInputFC, and FCEUI_SetInputFourscore
 //you may also need to maintain your own internal state
-void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp);
+void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC fcexp);
 
 
 void FCEUD_MovieRecordTo(void);

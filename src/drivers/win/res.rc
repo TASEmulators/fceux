@@ -664,6 +664,8 @@ BEGIN
     CTEXT           "3",IDC_STATIC,18,128,8,8
     CONTROL         "Attach four-score (implies four gamepads)",CHECK_ENABLE_FOURSCORE,
                     "Button",BS_AUTOCHECKBOX,18,18,142,12
+    CONTROL         "Replace Port 2 Start With Microphone",CHECK_ENABLE_MICROPHONE,
+                    "Button",BS_AUTOCHECKBOX,174,18,142,12
 END
 
 MAHJONGDIALOG DIALOG  65510, 106, 340, 110

@@ -85,7 +85,7 @@ static uint8 joy_readbit[2];
 uint8 joy[4]={0,0,0,0}; //HACK - should be static but movie needs it
 static uint8 LastStrobe;
 
-bool replaceFDSStartWithMicrophone = true;
+bool replaceP2StartWithMicrophone = false;
 
 #ifdef _USE_SHARED_MEMORY_
 static uint32 BotPointer = 0; //mbg merge 7/18/06 changed to uint32
@@ -109,40 +109,39 @@ static DECLFR(JPRead)
 {
 	lagFlag = 0;
 	uint8 ret=0;
-	bool port=false;
 	static bool microphone = false;
 
-	// Test if the controller 2 start button is being pressed.
-	// On a famicom, c.2 start shouldn't exist, so it replaces it.
-	
-	if (replaceFDSStartWithMicrophone) {
-		if ((joy[1]&8) == 8) {
-			// Test if this is a Famicom game.
-			if (GameInfo->type==GIT_FDS) {
-				port=((A&1)==0);
-				joy[1]&=0xF7;
-			} else {
-				microphone = false;
-			}
-		}
-	}
 	ret|=joyports[A&1].driver->Read(A&1);
+
+	// Test if the port 2 start button is being pressed.
+	// On a famicom, port 2 start shouldn't exist, so this removes it.
+	// Games can't automatically be checked for NES/Famicom status,
+	// so it's an all-encompassing change in the input config menu.
+	if ((replaceP2StartWithMicrophone) && (A&1) && (joy_readbit[1] == 4)) {
+	// Nullify Port 2 Start Button
+	ret&=0xFE;
+	}
 
 	if(portFC.driver)
 		ret = portFC.driver->Read(A&1,ret);
 
 	// Not verified against hardware.
+	if (replaceP2StartWithMicrophone) {
 	// This line is iffy, may cause trouble. Needs more testing.
-	if (joy_readbit[1] >= 8) {
-		if (port) {
-			microphone = !microphone;
-			if (microphone) {
-				ret|=4;
+		if (joy_readbit[1] >= 8) {
+			if (joy[1]&8) {
+				microphone = !microphone;
+				if (microphone) {
+					ret|=4;
+				}
+			} else {
+				microphone = false;
 			}
 		}
 	}
 
 	ret|=X.DB&0xC0;
+
 	return(ret);
 }
 
@@ -499,6 +498,10 @@ void InitializeInput(void)
 bool FCEUI_GetInputFourscore()
 {
 	return FSAttached;
+}
+bool FCEUI_GetInputMicrophone()
+{
+	return replaceP2StartWithMicrophone;
 }
 void FCEUI_SetInputFourscore(bool attachFourscore)
 {

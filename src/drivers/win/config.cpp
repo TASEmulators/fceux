@@ -62,7 +62,7 @@ extern bool rightClickEnabled;
 extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool AVIdisableMovieMessages;
-extern bool replaceFDSStartWithMicrophone;
+extern bool replaceP2StartWithMicrophone;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -308,7 +308,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(compressSavestates),
 	AC(pauseWhileActive),
 	AC(AVIdisableMovieMessages),
-	AC(replaceFDSStartWithMicrophone),
+	AC(replaceP2StartWithMicrophone),
 
 	ENDCFGSTRUCT
 };
