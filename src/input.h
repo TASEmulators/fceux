@@ -94,6 +94,7 @@ void FCEU_UpdateInput(void);
 void InitializeInput(void);
 void FCEU_UpdateBot(void);
 extern void (*PStrobe[2])(void);
+void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC fcexp);
 
 //called from PPU on scanline events.
 extern void InputScanlineHook(uint8 *bg, uint8 *spr, uint32 linets, int final);

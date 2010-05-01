@@ -12,8 +12,14 @@
 
 #ifdef __linux
 #include <unistd.h>
+#define SetCurrentDir chdir
 #include <sys/types.h>
 #include <sys/wait.h>
+#endif
+
+#ifdef WIN32
+#include <direct.h>
+#define SetCurrentDir _chdir
 #endif
 
 #include "types.h"
@@ -4589,6 +4595,14 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		if (luaScriptName) free(luaScriptName);
 		luaScriptName = strdup(filename);
 	}
+
+#if defined(WIN32) || defined(__linux)
+	std::string getfilepath = filename;
+
+	getfilepath = getfilepath.substr(0,getfilepath.find_last_of("/\\") + 1);
+
+	SetCurrentDir(getfilepath.c_str());
+#endif
 
 	//stop any lua we might already have had running
 	FCEU_LuaStop();
