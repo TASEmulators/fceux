@@ -111,6 +111,8 @@ extern void WinLuaOnStop(int hDlgAsInt);
 
 static lua_State *L;
 
+static int luaexiterrorcount = 8;
+
 // Are we running any code right now?
 static char *luaScriptName = NULL;
 
@@ -4591,6 +4593,9 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 	//stop any lua we might already have had running
 	FCEU_LuaStop();
 
+	//Reinit the error count
+	luaexiterrorcount = 8;
+
 	if (!L) {
 		
 		L = lua_open();
@@ -4734,8 +4739,18 @@ void FCEU_LuaStop() {
 	//already killed
 	if (!L) return;
 
-	//execute the user's shutdown callbacks
-	CallExitFunction();
+	// Since the script is exiting, we want to prevent an infinite loop.
+	// CallExitFunction() > HandleCallbackError() > FCEU_LuaStop() > CallExitFunction() ...
+	if (luaexiterrorcount > 0) {
+		luaexiterrorcount = luaexiterrorcount - 1;
+		//execute the user's shutdown callbacks
+		CallExitFunction();
+	}
+
+	luaexiterrorcount = luaexiterrorcount + 1;
+
+	//already killed (after multiple errors)
+	if (!L) return;
 
 	/*info.*/numMemHooks = 0;
 	for(int i = 0; i < LUAMEMHOOK_COUNT; i++)
