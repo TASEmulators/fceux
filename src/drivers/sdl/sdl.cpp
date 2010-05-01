@@ -116,7 +116,7 @@ Option         Value   Description\n\
 --pass         x       Set password to use for connecting to the server.\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
 --players      x       Set the number of local players.\n\
---rp2mic       {0,1}    Replace Port 2 Start with microphone (Famicom).\n";
+--rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n";
 
 
 // these should be moved to the man file
