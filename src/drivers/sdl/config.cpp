@@ -234,7 +234,7 @@ InitConfig()
             config->addOption(prefix + GamePadNames[j], DefaultGamePad[i][j]);
         }
     }
-
+    
     // PowerPad 0 - 1
     for(unsigned int i = 0; i < POWERPAD_NUM_DEVICES; i++) {
         char buf[64];
@@ -296,7 +296,13 @@ InitConfig()
         config->addOption(prefix + FamilyKeyBoardNames[j],
                           DefaultFamilyKeyBoard[j]);
     }
+
+    // for FAMICOM microphone in pad 2 pad 1 didn't have it
+    // Takeshi no Chousenjou uses it for example.
+    prefix = "SDL.Input.FamicomPad2.";
+    config->addOption("rp2mic", prefix + "EnableMic", 0);
     
+
     const int Hotkeys[HK_MAX] = {
 		SDLK_F1, // cheat menu
 		SDLK_F2, // bind state

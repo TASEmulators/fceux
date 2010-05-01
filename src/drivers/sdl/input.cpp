@@ -379,11 +379,11 @@ KeyboardCommands()
     
     char* movie_fname = "";
     // get the keyboard input
-    #if SDL_VERSION_ATLEAST(1, 3, 0)
-    g_keyState = SDL_GetKeyboardState(NULL);
-    #else
     g_keyState = SDL_GetKeyState(NULL);
-    #endif
+    if (g_keyState[SDLK_BACKQUOTE])
+        IncreaseEmulationSpeed();
+    else
+        DecreaseEmulationSpeed();
 
     // check if the family keyboard is enabled
     if(InputType[2] == SIFC_FKB) {
@@ -1015,7 +1015,7 @@ FCEUD_UpdateInput()
     }
 }
 
-void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
+void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC fcexp)
 {
 	eoptions &= ~EO_FOURSCORE;
 	if(fourscore) { // Four Score emulation, only support gamepads, nothing else
@@ -1028,6 +1028,9 @@ void FCEUD_SetInput(bool fourscore, ESI port0, ESI port1, ESIFC fcexp)
 		InputType[1]=port1;
 		InputType[2]=fcexp;
 	}
+    
+	replaceP2StartWithMicrophone = microphone;
+
 	InitInputInterface();
 }
 

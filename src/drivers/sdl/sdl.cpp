@@ -115,7 +115,9 @@ Option         Value   Description\n\
 --user         x       Set the nickname to use in network play.\n\
 --pass         x       Set password to use for connecting to the server.\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
---players      x       Set the number of local players.\n";
+--players      x       Set the number of local players.\n\
+--rp2mic       {0,1}    Replace Port 2 Start with microphone (Famicom).\n";
+
 
 // these should be moved to the man file
 //--nospritelim  {0|1}   Disables the 8 sprites per scanline limitation.\n
@@ -542,10 +544,18 @@ int main(int argc, char *argv[])
 	
 	std::string s;
 	g_config->getOption("SDL.InputCfg", &s);
-	
-	// update the input devices
+    
+    // set the FAMICOM PAD 2 Mic thing 
+    {
+        int t;
+        g_config->getOption("SDL.Input.FamicomPad2.EnableMic", &t);
+		if (t)	
+        	replaceP2StartWithMicrophone = t;
+	}
+
+    // update the input devices
 	UpdateInput(g_config);
-	
+
 	// check for a .fcm file to convert to .fm2
 	g_config->getOption ("SDL.FCMConvert", &s);
 	g_config->setOption ("SDL.FCMConvert", "");
@@ -768,7 +778,7 @@ int main(int argc, char *argv[])
 		if (id)
 			newppu = 1;
 	}
-	
+
 	g_config->getOption("SDL.Frameskip", &frameskip);
 	// loop playing the game
 #ifdef _GTK
