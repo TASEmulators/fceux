@@ -1,5 +1,7 @@
 -- Multitrack v2 for FCEUX by FatRatKnight
--- Recent addition: Backup list. Looking good!
+-- Recent addition: Experimental save. Same format as in .fm2
+-- Did not include support to not have it trigger on script exit. Sorry...
+-- Additionally, there's no *loading* mechanism in this script. Eh...
 
 
 --***************
@@ -84,15 +86,15 @@ local ListOfBtnClr= {  -- Colors for individual buttons
 
   white,   red,     orange,  green,    -- No backup to display
   white,   red,     orange,  green,    -- Backup button is off
-  blue,    blue,    blue,    cyan,     -- Backup button is on
+  blue,    blue,    purple,  cyan,     -- Backup button is on
 
   white,   red,     orange,  green,    -- Same stuff as above.
   white,   red,     orange,  green,    -- However, we're reading
-  blue,    blue,    blue,    cyan,     -- from backup here.
+  blue,    blue,    purple,  cyan,     -- from backup here.
 
   white,   red,     orange,  green,    -- Likewise, but instead
   white,   red,     orange,  green,    -- of read, we're writing
-  blue,    blue,    blue,    cyan      -- to the backup. Joy...
+  blue,    blue,    purple,  cyan      -- to the backup. Joy...
 }
 
 local ListOfChangesClr= {  -- Colors for backup-main comparisons
@@ -102,6 +104,10 @@ local ListOfChangesClr= {  -- Colors for backup-main comparisons
   white,   orange,  green,             -- Reading from backup...
   white,   yellow,  purple             -- Writing to backup...
 }
+
+
+
+local BackupFileLimit= 9
 
 
 --*****************************************************************************
@@ -224,6 +230,7 @@ print("Remember, edit the script if you don't like the current options. All",
 "\r\n\r\nLeeland Kirwan, the FatRatKnight.")
 
 print("Players:",players,"  - -  ",CalcSeconds,"seconds of rewind.")
+
 
 
 --*****************************************************************************
@@ -383,7 +390,6 @@ function Draw.D9(left, top, color)
     gui.line(left  ,top+4,left+2,top+4,color)
     gui.pixel(left+1,top  ,color)
     gui.pixel(left+1,top+2,color)
-    gui.pixel(left+2,top+3,color)
 end
 
 
@@ -692,7 +698,7 @@ function DisplayInput()
                 if not scanz then
                     color= 1        --Does not exist
                 elseif ReadJoynum(scanz,button) then
-                    if ReadList[pl][button] then
+                    if (i <= 0) or (ReadList[pl][button]) then
                         color= 4    --Button on
                     else
                         color= 3    --Button on, will be ignored
@@ -1116,6 +1122,7 @@ function ItIsYourTurn()
 
 --Ensure things are nice, shall we?
     local fc_= movie.framecount()
+    lastkeys= keys
     keys= input.get()
 
     if fc ~= fc_ then -- Sanity versus unusual jump (Reset cycle?)
@@ -1231,8 +1238,6 @@ function ItIsYourTurn()
 --Last bits of odds and ends
     ApplyInput()
 
-    lastkeys= keys
-
     collectgarbage("collect")
 end
 gui.register(ItIsYourTurn)
@@ -1268,8 +1273,99 @@ end
 
 --emu.registerafter(Rewinder)
 
+
+
+
+
+
+
+
+local TestNumOfDoom= 0
+local TestFile= io.open("Backup" .. TestNumOfDoom .. ".txt" , "r")
+while TestFile do
+    TestFile:close()
+    TestNumOfDoom= TestNumOfDoom+1
+    if TestNumOfDoom >= BackupFileLimit then break end
+    TestFile= io.open("Backup" .. TestNumOfDoom .. ".txt" , "r")
+end
+
+
+
+
+local FCEUXbtn= {"right", "left", "down", "up", "start", "select", "B", "A"}
+local FCEUXfrm= {"R","L","D","U","T","S","B","A"}
+local FCEUXorder= {}
+
+for i= 1, 8 do
+    for j= 1, 8 do
+        if btn[i] == FCEUXbtn[j] then
+            FCEUXorder[j]= i
+            break
+        end
+    end
+end
+
+--*****************************************************************************
+function SaveToFile()
+--*****************************************************************************
+-- Creates a file that, effectively, stores whatever's in the script at the
+-- time.
+-- List of known glitches:
+--   It only reads player 1 when deciding when to start or stop.
+
+    InputSnap()
+    local LatestIndex= 0
+    local EarliestIndex= math.huge
+    for Frame, Pads in pairs(InputList[1]) do
+        LatestIndex= math.max(LatestIndex,Frame)
+        EarliestIndex= math.min(EarliestIndex,Frame)
+    end
+
+
+    local BFile = io.open("Backup" .. TestNumOfDoom .. ".txt" , "w")
+    BFile:write("StartFrame: " .. EarliestIndex .. "\n")
+
+    for Frame= EarliestIndex, LatestIndex do
+        BFile:write("|0")
+        for pl= 1, 4 do
+            BFile:write("|")
+            if InputList[pl] then
+                if InputList[pl][Frame] then
+                    local Pads= InputList[pl][Frame]
+                    for i= 1, 8 do
+                        if ReadJoynum(Pads,FCEUXorder[i]) then
+                            BFile:write(FCEUXfrm[i])
+                        else
+                            BFile:write(".")
+                        end
+                    end
+                else
+                    BFile:write("        ")
+                end
+            end
+        end
+        BFile:write("\n")
+    end
+    BFile:close()
+
+end
+
+emu.registerexit(SaveToFile)
+
+
+
+
+
+
+
+
+
+
+
 emu.pause()
+
 while true do
     Rewinder()
+
     emu.frameadvance()
 end
