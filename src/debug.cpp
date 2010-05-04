@@ -295,16 +295,16 @@ int evaluate(Condition* c)
 	{
 		switch(c->type1)
 		{
-			case TYPE_ADDR:
+			case TYPE_ADDR: // This is intended to not break, and use the TYPE_NUM code
 			case TYPE_NUM: value1 = c->value1; break;
-			default: value1 = getValue(c->value1);
+			default: value1 = getValue(c->value1); break;
 		}
 	}
 
 	switch(c->type1)
 	{
-		case TYPE_ADDR: value1 = GetMem(value1);
-		case TYPE_BANK: value1 = getBank(_PC);
+		case TYPE_ADDR: value1 = GetMem(value1); break;
+		case TYPE_BANK: value1 = getBank(_PC); break;
 	}
 
 	f = value1;
@@ -319,16 +319,16 @@ int evaluate(Condition* c)
 		{
 			switch(c->type2)
 			{
-				case TYPE_ADDR:
+				case TYPE_ADDR: // This is intended to not break, and use the TYPE_NUM code
 				case TYPE_NUM: value2 = c->value2; break;
-				default: value2 = getValue(c->type2);
+				default: value2 = getValue(c->type2); break;
 			}
 		}
 
 	switch(c->type2)
 	{
-		case TYPE_ADDR: value2 = GetMem(value2);
-		case TYPE_BANK: value2 = getBank(_PC);
+		case TYPE_ADDR: value2 = GetMem(value2); break;
+		case TYPE_BANK: value2 = getBank(_PC); break;
 	}
 
 		switch (c->op)
