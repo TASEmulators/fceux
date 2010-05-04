@@ -36,6 +36,7 @@
 #include "main.h"
 #include "string.h"
 #include "help.h"
+#include "Win32InputBox.h"
 
 using namespace std;
 
@@ -221,6 +222,28 @@ void UndoLastPatch(){
 	free(tmp->data);
 	free(tmp);
 	return;
+}
+
+void GotoAddress(HWND hwnd) {
+	char* gotoaddressstring;
+	int gotoaddress;
+	char* gototitle;
+	
+	gototitle = (char*)malloc(18);
+	gotoaddressstring = (char*)malloc(8);
+	gotoaddressstring[0] = '\0';
+	sprintf(gototitle, "%s%X%s", "Goto (0-", MaxSize-1, ")");
+	if(CWin32InputBox::InputBox(gototitle, "Goto which address:", gotoaddressstring, 8, false, hwnd) == IDOK)
+	{
+		if(EOF != sscanf(gotoaddressstring, "%x", &gotoaddress))
+		{
+			if (gotoaddress > (MaxSize-1))
+				gotoaddress = (MaxSize-1);
+			CursorStartAddy = gotoaddress;
+			CursorEndAddy = -1;
+			ChangeMemViewFocus(EditingMode,CursorStartAddy,-1);
+		}
+	}
 }
 
 static void FlushUndoBuffer(){
@@ -1061,7 +1084,11 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		MemViewCallB(hMemView,WM_COMMAND,MENU_MV_EDIT_PASTE,0);
 		return 0;
 	case 0x5a: //Ctrl+Z
-		UndoLastPatch();
+		UndoLastPatch(); break;
+	case 0x41: //Ctrl+A
+		// Fall through to Ctrl+G
+	case 0x47: //Ctrl+G
+		GotoAddress(hwnd); break;
 			}
 		}
 
@@ -1479,6 +1506,10 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			KillMemView();
 			return 0;
 		
+		case MENU_MV_FILE_GOTO_ADDRESS:
+			GotoAddress(hwnd);
+			return 0;
+
 		case MENU_MV_EDIT_UNDO:
 			UndoLastPatch();
 			return 0;

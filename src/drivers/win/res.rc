@@ -261,6 +261,7 @@ BEGIN
             MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
         END
+        MENUITEM "&Goto Address\tCtrl+A",           MENU_MV_FILE_GOTO_ADDRESS
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_MEMWVIEW_FILE_CLOSE
     END

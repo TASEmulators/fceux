@@ -618,6 +618,7 @@
 #define ID_FILE_CLOSECTRL40216          40216
 #define ID_MEMWVIEW_FILE_CLOSE          40217
 #define ID_FILE_CLOSE40218              40218
+#define MENU_MV_FILE_GOTO_ADDRESS       40219
 #define MENU_BASIC_BOT2                 40220
 #define ID_FILE_OPENLUAWINDOW           40229
 #define ID_FILE_CLOSELUAWINDOWS         40230
