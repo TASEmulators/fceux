@@ -379,11 +379,11 @@ KeyboardCommands()
     
     char* movie_fname = "";
     // get the keyboard input
+    #if SDL_VERSION_ATLEAST(1, 3, 0)	 
+    g_keyState = SDL_GetKeyboardState(NULL);	 
+    #else
     g_keyState = SDL_GetKeyState(NULL);
-    if (g_keyState[SDLK_BACKQUOTE])
-        IncreaseEmulationSpeed();
-    else
-        DecreaseEmulationSpeed();
+	#endif
 
     // check if the family keyboard is enabled
     if(InputType[2] == SIFC_FKB) {
