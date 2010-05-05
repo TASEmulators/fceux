@@ -592,6 +592,7 @@ void ShowLogDirDialog(void){
  ofn.lpstrTitle="Log Trace As...";
  ofn.lpstrFilter=filter;
  strcpy(nameo,GetRomName());
+ strcat(nameo,"_log.txt");
  ofn.lpstrFile=nameo;
  ofn.nMaxFile=256;
  ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
