@@ -245,8 +245,8 @@ void SaveCDLogFileAs(){
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
+	ofn.lpstrDefExt = "cdl";
 	strcpy(nameo,GetRomName());
-	strcat(nameo,".cdl");
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
@@ -329,17 +329,13 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	ofn.lpstrTitle="Save Stripped File As...";
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
+		ofn.lpstrDefExt = "nsf";
 	}
 	else {
 		ofn.lpstrFilter=NESfilter;
+		ofn.lpstrDefExt = "nes";
 	}
 	strcpy(sromfilename,GetRomName());
-	if (GameInfo->type==GIT_NSF) {
-		strcat(sromfilename,"_cdl.nsf");
-	}
-	else {
-		strcat(sromfilename,"_cdl.nes");
-	}
 	ofn.lpstrFile=sromfilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;

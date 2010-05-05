@@ -406,6 +406,7 @@ static void SaveMemWatch()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Memory Watch As...";
 	ofn.lpstrFilter=filter;
+	ofn.lpstrDefExt="txt";
 	char nameo[2048];
 	if (!memwLastFilename[0])
 		strcpy(nameo,GetRomName());

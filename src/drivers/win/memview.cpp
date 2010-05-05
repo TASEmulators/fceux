@@ -294,6 +294,7 @@ void SaveRomAs()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Nes ROM as...";
 	ofn.lpstrFilter=filter;
+	ofn.lpstrDefExt="nes";
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
