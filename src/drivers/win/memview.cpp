@@ -633,7 +633,7 @@ int DeleteCheatCallB(char *name, uint32 a, uint8 v, int compare,int s,int type, 
 
 // ################################## Start of SP CODE ###########################
 
-void dumpToFile(const char* buffer, unsigned int size, char *nameappend)
+void dumpToFile(const char* buffer, unsigned int size)
 {
 	char name[513] = {0};
 
@@ -642,9 +642,9 @@ void dumpToFile(const char* buffer, unsigned int size, char *nameappend)
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save to file ...";
-	ofn.lpstrFilter="All files (*.*)\0*.*\0";
+	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0";
+	ofn.lpstrDefExt="bin";
 	strcpy(name,GetRomName());
-	strcat(name,nameappend);
 	ofn.lpstrFile=name;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY;
@@ -1486,7 +1486,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 				unsigned int i;
 				for (i=0;i<sizeof(bar);i++) bar[i] = GetMem(i);
 
-				dumpToFile(bar, sizeof(bar),"_ram.bin");
+				dumpToFile(bar, sizeof(bar));
 				return 0;
 			}
 		case MENU_MV_FILE_DUMP_PPU:
@@ -1501,7 +1501,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					else if(i < 0x3F00) bar[i] = vnapage[(i>>10)&0x3][i&0x3FF];
 					else bar[i] = PALRAM[i&0x1F];
 				}
-				dumpToFile(bar, sizeof(bar),"_ppu.bin");
+				dumpToFile(bar, sizeof(bar));
 				return 0;
 			}
 			// ################################## End of SP CODE ###########################
