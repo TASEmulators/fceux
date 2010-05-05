@@ -237,6 +237,8 @@ void GotoAddress(HWND hwnd) {
 	{
 		if(EOF != sscanf(gotoaddressstring, "%x", &gotoaddress))
 		{
+			if (gotoaddress < 0)
+				gotoaddress = 0;
 			if (gotoaddress > (MaxSize-1))
 				gotoaddress = (MaxSize-1);
 			CursorStartAddy = gotoaddress;
