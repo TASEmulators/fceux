@@ -62,16 +62,17 @@ string memviewhelp = "{06F7BBD5-399E-4CA0-8E4E-75BE0ACC525A}"; //Hex Editor Help
 
 int HexRowHeightBorder = 0;	//adelikat:  This will determine the number of pixels between rows in the hex editor, to alter this, the user can change it in the .cfg file, changing one will revert to the way FCEUX2.1.0 did it
 
-int HexBackColorR = 255;
+// Partial List of Color Definitions
+int HexBackColorR = 255;	// White
 int HexBackColorG = 255;
 int HexBackColorB = 255;
-int HexForeColorR = 0;
+int HexForeColorR = 0;		// Black
 int HexForeColorG = 0;
 int HexForeColorB = 0;
-int HexFreezeColorR = 0;
+int HexFreezeColorR = 0;	// Blue
 int HexFreezeColorG = 0;
 int HexFreezeColorB = 255;
-int RomFreezeColorR = 255;
+int RomFreezeColorR = 255;	// Red
 int RomFreezeColorG = 0;
 int RomFreezeColorB = 0;
 
@@ -446,6 +447,7 @@ void UpdateMemoryView(int draw_all)
 				OldValues[i+j-CurOffset] = -1; //set it to redraw this one next time
 				MoveToEx(HDataDC,8*MemFontWidth+(j*3*MemFontWidth),MemFontHeight*((i-CurOffset)/16),NULL);
 				if(TempData != -1){
+					// Typing New Data
 					sprintf(str2,"%X",TempData);
 					SetBkColor(HDataDC,RGB(255,255,255));
 					SetTextColor(HDataDC,RGB(255,0,0));
@@ -454,10 +456,11 @@ void UpdateMemoryView(int draw_all)
 					SetBkColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));
 					TextOut(HDataDC,0,0,&str[1],1);
 				} else {
+					// Selecting a Single Byte
 					SetTextColor(HDataDC,RGB(255,255,255));		//single address highlight
 					SetBkColor(HDataDC,RGB(0,0,0));
 					TextOut(HDataDC,0,0,str,1);
-					SetTextColor(HDataDC,RGB(HexForeColorR,HexForeColorG,HexForeColorB));	//single address highlight 2nd address
+					SetTextColor(HDataDC,TextColorList[CursorStartAddy]);	//single address highlight 2nd address
 					SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
 					TextOut(HDataDC,0,0,&str[1],1);
 				}
@@ -571,18 +574,18 @@ void UpdateColorTable(){
 		TextColorList[i] = RGB(HexForeColorR,HexForeColorG,HexForeColorB);		//Regular color text - 2 columns
 	}
 
-	//mbg merge 6/29/06 - added argument
-	if(EditingMode == 0)FCEUI_ListCheats(UpdateCheatColorCallB,0);
-
 	// ################################## Start of SP CODE ###########################
 
 	for (j=0;j<nextBookmark;j++)
 	{
 		if(((int)hexBookmarks[j].address >= CurOffset) && ((int)hexBookmarks[j].address < CurOffset+DataAmount))
-			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0);
+			TextColorList[hexBookmarks[j].address - CurOffset] = RGB(0,0xCC,0); // Green for Bookmarks
 	}
 
 	// ################################## End of SP CODE ###########################
+
+	//mbg merge 6/29/06 - added argument
+	if(EditingMode == 0)FCEUI_ListCheats(UpdateCheatColorCallB,0);
 
 	if(EditingMode == 2){
 		if(cdloggerdata) {
