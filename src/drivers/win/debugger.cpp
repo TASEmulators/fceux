@@ -658,8 +658,19 @@ void FillBreakList(HWND hwndDlg) {
 	int i;
 
 	for (i = 0; i < numWPs; i++) {
+			SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,i,0);
+	}
+
+	for (i = 0; i < numWPs; i++) {
 		SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,-1,(LPARAM)(LPSTR)BreakToText(i));
 	}
+}
+
+void ClearBreakList(HWND hwndDlg) {
+	
+	SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_RESETCONTENT,0,0);
+
+	numWPs = 0;
 }
 
 void EnableBreak(int sel) {
@@ -945,6 +956,46 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	return TRUE;
 }
 
+void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
+	
+	extern int loadDebugDataFailed;
+	
+	if (!hwndDlg)
+		return;
+
+	if (!loadDebugDataFailed)
+	{
+		ClearDebuggerBookmarkListbox(hwndDlg);
+		if (bookmarks)
+		{
+
+			unsigned int i;
+			for (i=0;i<bookmarks;i++)
+			{
+				char buffer[5];
+				sprintf(buffer, "%X", bookmarkData[i]);
+				AddDebuggerBookmark2(hwndDlg, buffer);
+			}
+		}
+		
+		if (symbDebugEnabled)
+		{
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
+		}
+		
+		ClearBreakList(hwndDlg);
+
+		numWPs = myNumWPs;
+		
+	}
+	else
+	{
+		bookmarks = 0;
+	}
+	
+	FillBreakList(hwndDlg);
+}
+
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
 	char str[256]={0},*ptr,dotdot[4];
@@ -956,8 +1007,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	//these messages get handled at any time
 	switch(uMsg) {
 		case WM_INITDIALOG: {
+			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? MF_CHECKED : MF_UNCHECKED);
-			extern int loadDebugDataFailed;
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
 			if (DbgPosY==-32000) DbgPosY=0;
 			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
@@ -1000,33 +1051,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 // ################################## Start of SP CODE ###########################
 
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BOOKMARK,EM_SETLIMITTEXT,4,0);
-					
-			if (!loadDebugDataFailed)
-			{
-				if (bookmarks)
-				{
-					unsigned int i;
-					for (i=0;i<bookmarks;i++)
-					{
-						char buffer[5];
-						sprintf(buffer, "%X", bookmarkData[i]);
-						AddDebuggerBookmark2(hwndDlg, buffer);
-					}
-				}
-				
-				if (symbDebugEnabled)
-				{
-					CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
-				}
-
-				numWPs = myNumWPs;
-
-			}
-			else
-			{
-				bookmarks = 0;
-			}
 			
+			LoadGameDebuggerData(hwndDlg);
+
 			debuggerWasActive = 1;
 			
 // ################################## End of SP CODE ###########################
@@ -1034,7 +1061,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			FCEUI_Debugger().badopbreak = false;
 			debugger_open = 1;
 			inDebugger = true;
-			FillBreakList(hwndDlg);
 			break;
 		}
 
@@ -1099,6 +1125,10 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case DEBUGAUTOLOAD:
 					debuggerAutoload ^= 1;
 					break;
+				case DEBUGLOADDEB:
+					debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
+					break;
+
 			}
 	}
 
@@ -1472,6 +1502,15 @@ void UpdatePatcher(HWND hwndDlg){
 	else EnableWindow(GetDlgItem(hwndDlg,IDC_ROMPATCHER_BTN_SAVE),TRUE);
 }
 
+/// Updates debugger controls that should be enabled/disabled if a game is loaded.
+/// @param enable Flag that indicates whether the menus should be enabled (1) or disabled (0). 
+void updateGameDependentMenusDebugger(unsigned int enable) {
+	if (!hDebug)
+		return;
+
+	EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
+}
+
 void DoDebug(uint8 halt) {
 	if (!debugger_open) {
 		hDebug = CreateDialog(fceu_hInstance,"DEBUGGER",NULL,DebuggerCallB);
@@ -1480,6 +1519,9 @@ void DoDebug(uint8 halt) {
 	}
 	if (hDebug) {
 		SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		
+		updateGameDependentMenusDebugger(GameInfo != 0);
+
 		if (GameInfo) UpdateDebugger();
 	}
 }

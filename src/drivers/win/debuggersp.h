@@ -41,6 +41,8 @@ void replaceNames(Name* list, char* str);
 void AddDebuggerBookmark(HWND hwnd);
 void AddDebuggerBookmark2(HWND hwnd, char* buffer);
 void DeleteDebuggerBookmark(HWND hwnd);
+void ClearDebuggerBookmarkListbox(HWND hwnd);
+
 void GoToDebuggerBookmark(HWND hwnd);
 void dumpBookmarks(HWND hwmd);
 int isHex(char c);

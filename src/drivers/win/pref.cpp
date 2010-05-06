@@ -29,7 +29,6 @@
 #include "../../debug.h"
 
 extern char symbDebugEnabled;
-bool wasinDebugger = false;
 
 /**
 * Stores debugger preferences in a file
@@ -134,11 +133,6 @@ int storePreferences(char* romname)
 	char* filename;
 	int result;
 	int Counter = 0;
-
-	// Prevent any attempts at file usage if the debugger is open
-	//if (inDebugger) return 0;
-	
-	wasinDebugger = inDebugger;
 	
 	// Prevent any attempts at file usage if the debugger is open
 	// Moved debugger exit code due to complaints and the Debugger menu option being enabled
@@ -182,16 +176,20 @@ int storePreferences(char* romname)
 	return result;
 }
 
-void DoDebuggerRunCheck()
+void DoDebuggerDataReload()
 {
 	if (debuggerSaveLoadDEBFiles == false) {
 		return;
 	}
+	
+	extern HWND hDebug;
+	LoadGameDebuggerData(hDebug);
+	
+//	if (wasinDebugger){
+//		DebuggerExit();
+//		DoDebug(0);
+//	}
 
-	if (wasinDebugger){
-		DebuggerExit();
-		DoDebug(0);
-	}
 }
 
 int myNumWPs = 0;
@@ -231,9 +229,9 @@ int loadDebuggerPreferences(FILE* f)
 	// conditional text loading when reusing a used condText.
 	for (i=0;i<65;i++)
 	{
-		watchpoint[i].cond = NULL;
-		watchpoint[i].condText = NULL;
-		watchpoint[i].desc = NULL;
+		watchpoint[i].cond = 0;
+		watchpoint[i].condText = 0;
+		watchpoint[i].desc = 0;
 	}
 
 	// Read the breakpoints

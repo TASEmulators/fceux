@@ -772,6 +772,17 @@ void DeleteDebuggerBookmark(HWND hwnd)
 	}
 }
 
+/**
+* Removes all debugger bookmarks
+* 
+* @param hwnd HWND of the debugger window
+**/
+void ClearDebuggerBookmarkListbox(HWND hwnd)
+{		
+	SendDlgItemMessage(hwnd, LIST_DEBUGGER_BOOKMARKS, LB_RESETCONTENT, 0, 0);
+	//dumpBookmarks(hwnd);
+}
+
 void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr);
 
 /**
@@ -789,6 +800,5 @@ void GoToDebuggerBookmark(HWND hwnd)
 	
 	n = getBookmarkAddress(hwnd, selectedItem);
 	
-	//Disassemble(hwnd, 300, 301, n);
-	//MBG TODO
+	Disassemble(hwnd, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, n);
 }

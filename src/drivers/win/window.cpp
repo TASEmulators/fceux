@@ -1005,6 +1005,7 @@ void CloseGame()
 		FCEUI_CloseGame();
 		KillMemView();
 		updateGameDependentMenus(GameInfo != 0);
+		updateGameDependentMenusDebugger(GameInfo != 0);
 		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
 	}
 }
@@ -1067,6 +1068,7 @@ bool ALoad(char *nameo, char* innerFilename)
 	ParseGIInput(GameInfo);
 
 	updateGameDependentMenus(GameInfo != 0);
+	updateGameDependentMenusDebugger(GameInfo != 0);
 	return true;
 }
 
@@ -2272,6 +2274,7 @@ int CreateMainWindow()
 	UpdateMovieRMenu(recentmoviemenu, recent_movie, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE);
 
 	updateGameDependentMenus(0);
+	updateGameDependentMenusDebugger(0);
 	if (MainWindow_wndx==-32000) MainWindow_wndx=0; //Just in case
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
 	hAppWnd = CreateWindowEx(

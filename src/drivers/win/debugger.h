@@ -32,6 +32,9 @@ void UpdateDebugger();
 void DoDebug(uint8 halt);
 void DebuggerExit();
 
+void LoadGameDebuggerData(HWND hwndDlg);
+void updateGameDependentMenusDebugger(unsigned int enable);
+
 extern bool inDebugger;
 
 extern class DebugSystem {

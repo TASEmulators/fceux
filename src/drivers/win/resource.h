@@ -470,6 +470,7 @@
 #define IDC_LUACONSOLE_CHOOSEFONT       1255
 #define IDC_EDIT_LUAARGS                1256
 #define CB_PARTIALVISUALTHEME           1257
+#define DEBUGLOADDEB                    1258
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042

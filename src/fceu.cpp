@@ -485,7 +485,7 @@ endlseq:
 		FCEU_LoadGameCheats(0);
 
 #if defined (WIN32) || defined (WIN64)
-	DoDebuggerRunCheck(); //Can't safely do it in loadPreferences
+	DoDebuggerDataReload(); // Reloads data without reopening window
 #endif
 
 	return GameInfo;
