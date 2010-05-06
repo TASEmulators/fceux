@@ -7,6 +7,7 @@ using namespace std;
 #include "resource.h"
 #include "ram_search.h"
 #include "ramwatch.h"
+#include "cheat.h"
 #include <assert.h>
 #include <windows.h>
 #include <commctrl.h>
@@ -1139,6 +1140,25 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 							numberType = 2;
 
 						// TODO: open add-cheat dialog
+						// TODO: add add button
+
+						switch (sizeType) {
+						case 0: {
+								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue,-1,1);
+								break; }
+						case 1: {
+								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue & 0xFF,-1,1);
+								FCEUI_AddCheat("",address + 1,(rswatches[watchIndex].CurValue & 0xFF00) / 0x100,-1,1);
+								break; }
+						case 2: {
+								FCEUI_AddCheat("",address,rswatches[watchIndex].CurValue & 0xFF,-1,1);
+								FCEUI_AddCheat("",address + 1,(rswatches[watchIndex].CurValue & 0xFF00) / 0x100,-1,1);
+								FCEUI_AddCheat("",address + 2,(rswatches[watchIndex].CurValue & 0xFF0000) / 0x10000,-1,1);
+								FCEUI_AddCheat("",address + 3,(rswatches[watchIndex].CurValue & 0xFF000000) / 0x1000000,-1,1);
+								break; }
+						}
+
+						UpdateCheatsAdded();
 					}
 				}
 				break;

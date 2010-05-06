@@ -33,6 +33,7 @@
 #include "resource.h"
 #include "ram_search.h"
 #include "ramwatch.h"
+#include "cheat.h"
 #include <assert.h>
 #include <commctrl.h>
 #include <list>
@@ -1698,6 +1699,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if(watchItemIndex >= 0)
 					{
 						unsigned long address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
+						unsigned long curvalue = CALL_WITH_T_SIZE_TYPES_1(GetCurValueFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
 
 						int sizeType = -1;
 						if(rs_type_size == 'b')
@@ -1716,6 +1718,25 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							numberType = 2;
 
 						// TODO: open add-cheat dialog
+
+						switch (sizeType) {
+						case 0: {
+								FCEUI_AddCheat("",address,curvalue,-1,1);
+								break; }
+						case 1: {
+								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
+								break; }
+						case 2: {
+								FCEUI_AddCheat("",address,curvalue & 0xFF,-1,1);
+								FCEUI_AddCheat("",address + 1,(curvalue & 0xFF00) / 0x100,-1,1);
+								FCEUI_AddCheat("",address + 2,(curvalue & 0xFF0000) / 0x10000,-1,1);
+								FCEUI_AddCheat("",address + 3,(curvalue & 0xFF000000) / 0x1000000,-1,1);
+								break; }
+						}
+
+						UpdateCheatsAdded();
+
 					}
 				}	{rv = true; break;}
 				case IDC_C_RESET:
