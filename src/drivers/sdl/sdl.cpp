@@ -787,6 +787,7 @@ int main(int argc, char *argv[])
 		if(GameInfo)
 #else
 	while(GameInfo)
+	{
 #endif
 		DoFun(frameskip);
 #ifdef _GTK
