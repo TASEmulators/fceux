@@ -91,7 +91,7 @@ void RestoreSize(HWND hwndDlg)
 	const int DEFAULT_WIDTH = 821;	//Original width
 	const int DEFAULT_HEIGHT = 549;	//Original height
 	
-	SetWindowPos(hwndDlg,HWND_TOPMOST,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
+	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
 
 unsigned int NewBreakWindows(HWND hwndDlg, unsigned int num, bool enable)
