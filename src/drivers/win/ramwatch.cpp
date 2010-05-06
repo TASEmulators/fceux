@@ -480,6 +480,8 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 {
 	OPENFILENAME ofn;
 
+	char *TempExt = 0;
+
 	SetCurrentDirectory(applicationPath);
 
 	if (!strcmp(Dest, ""))
@@ -499,10 +501,19 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 	ofn.nFilterIndex = 1;
 	ofn.lpstrInitialDir = Dir;
 	ofn.lpstrTitle = Titre;
-	ofn.lpstrDefExt = Ext;
+	//ofn.lpstrDefExt = Ext;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
 
-	if (GetSaveFileName(&ofn)) return 1;
+	if (GetSaveFileName(&ofn)) {
+		TempExt=(char*)malloc(sizeof(Ext)+2);
+		strcpy(TempExt, ".");
+		strcat(TempExt, Ext);
+		
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(Dest, 1024, TempExt);	//1024 checked manually
+
+		return 1;
+	}
 
 	return 0;
 }
@@ -514,7 +525,7 @@ bool Save_Watches()
 	char* dot = strrchr(Str_Tmp, '.');
 	if(dot) *dot = 0;
 	strcat(Str_Tmp,".wch");
-	if(Change_File_S(Str_Tmp, applicationPath, "Save Watches", "Watchlist\0*.wch\0All Files\0*.*\0\0", "wch", RamWatchHWnd))
+	if(Change_File_S(Str_Tmp, applicationPath, "Save Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
 	{
 		FILE *WatchFile = fopen(Str_Tmp,"r+b");
 		if (!WatchFile) WatchFile = fopen(Str_Tmp,"w+b");
@@ -618,7 +629,7 @@ bool Load_Watches(bool clear)
 	char* dot = strrchr(Str_Tmp, '.');
 	if(dot) *dot = 0;
 	strcat(Str_Tmp,".wch");
-	if(Change_File_L(Str_Tmp, applicationPath, "Load Watches", "Watchlist\0*.wch\0All Files\0*.*\0\0", "wch", RamWatchHWnd))
+	if(Change_File_L(Str_Tmp, applicationPath, "Load Watches", "Watchlist (*.wch)\0*.wch\0All Files (*.*)\0*.*\0\0", "wch", RamWatchHWnd))
 	{
 		return Load_Watches(clear, Str_Tmp);
 	}

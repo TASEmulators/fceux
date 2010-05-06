@@ -583,7 +583,7 @@ int PromptForCDLogger(void){
 }
 
 void ShowLogDirDialog(void){
- const char filter[]="6502 Trace Log File(*.log,*.txt)\0*.log;*.txt\0";
+ const char filter[]="6502 Trace Log File(*.log)\0*.log;*.txt\0" "6502 Trace Log File(*.txt)\0*.log;*.txt\0All Files (*.*)\0*.*\0\0"; //'" "' used to prevent octal conversion on the numbers
  char nameo[2048];
  OPENFILENAME ofn;
  memset(&ofn,0,sizeof(ofn));
@@ -591,14 +591,18 @@ void ShowLogDirDialog(void){
  ofn.hInstance=fceu_hInstance;
  ofn.lpstrTitle="Log Trace As...";
  ofn.lpstrFilter=filter;
- ofn.lpstrDefExt="log";
+ //ofn.lpstrDefExt="log";
  strcpy(nameo,GetRomName());
  ofn.lpstrFile=nameo;
  ofn.nMaxFile=256;
  ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
  ofn.hwndOwner = hTracer;
- GetSaveFileName(&ofn);
- if(nameo[0]){
+ if(GetSaveFileName(&ofn)){
+	if (ofn.nFilterIndex == 1)
+		AddExtensionIfMissing(nameo, sizeof(nameo), ".log");
+	else if (ofn.nFilterIndex == 2)
+		AddExtensionIfMissing(nameo, sizeof(nameo), ".txt");
+
 	if(logfilename)free(logfilename);
 	logfilename = (char*)malloc(strlen(nameo)+1); //mbg merge 7/19/06 added cast
 	strcpy(logfilename,nameo);

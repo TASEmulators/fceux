@@ -643,7 +643,7 @@ int TextHookerLoadTable(const char* nameo)
 
 int TextHookerLoadTableFile(){
 	//initialize the "File open" dialogue box
-	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0";
+	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -682,7 +682,7 @@ int TextHookerSaveTableFile(){
 	int i, line; //counters
 
 	//init the "Save File" dialogue
-	const char filter[]="Table Files (*.THT)\0*.tht\0";
+	const char filter[]="Table Files (*.THT)\0*.tht\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
 	//StopSound(); //mbg merge 6/30/08
@@ -693,13 +693,16 @@ int TextHookerSaveTableFile(){
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
-	ofn.lpstrDefExt="tht";
+	//ofn.lpstrDefExt="tht";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_EXTENSIONDIFFERENT;
 	ofn.hwndOwner = hCDLogger;
 
 	//get the file name or quit
 	if(!GetSaveFileName(&ofn))return 0;
+
+	if (ofn.nFilterIndex == 1)
+		AddExtensionIfMissing(nameo, sizeof(nameo), ".tht");
 
 	//open the file
 	FP = fopen(nameo,"wb");

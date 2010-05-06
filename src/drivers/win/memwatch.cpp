@@ -398,7 +398,7 @@ bool iftextchanged()
 //Save as...
 static void SaveMemWatch()
 {
-	const char filter[]="Memory address list(*.txt)\0*.txt\0";
+	const char filter[]="Memory address list(*.txt)\0*.txt\0All Files (*.*)\0*.*\0\0";
 	 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -406,7 +406,7 @@ static void SaveMemWatch()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Memory Watch As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt="txt";
+	//ofn.lpstrDefExt="txt";
 	char nameo[2048];
 	if (!memwLastFilename[0])
 		strcpy(nameo,GetRomName());
@@ -430,26 +430,11 @@ static void SaveMemWatch()
 			MemWatchDir[ofn.nFileOffset]=0;
 		}
 
-		//quick get length of memwLastFilename
-		strcpy(memwLastFilename,nameo);
-		for(i=0;i<2048;i++)
-		{
-			if(memwLastFilename[i] == 0)
-			{
-				break;
-			}
-		}
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".txt");
 
-		//add .txt if memwLastFilename doesn't have it
-		if((i < 4 || memwLastFilename[i-4] != '.') && i < 2040)
-		{
-			memwLastFilename[i] = '.';
-			memwLastFilename[i+1] = 't';
-			memwLastFilename[i+2] = 'x';
-			memwLastFilename[i+3] = 't';
-			memwLastFilename[i+4] = 0;
-		}
-		
+		strcpy(memwLastFilename,nameo);
+
 		SaveStrings();
 		FILE *fp=FCEUD_UTF8fopen(memwLastFilename,"w");
 		for(i=0;i<NUMWATCHES;i++)
@@ -512,7 +497,7 @@ static void QuickSaveMemWatch() //Save rather than Save as
 //Open Memwatch File
 static void LoadMemWatch()
 {
-	const char filter[]="Memory address list(*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+	const char filter[]="Memory address list(*.txt)\0*.txt\0All Files (*.*)\0*.*\0\0";
 	char watchfcontents[2048]; 
 	
 	//Now clear last file used variable (memwLastFilename)

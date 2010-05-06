@@ -15,7 +15,7 @@ extern string GetBackupFileName();			//Declared in src/state.cpp
 **/
 void FCEUD_SaveStateAs()
 {
-	const char filter[] = FCEU_NAME" Save State (*.fc?)\0*.fc?\0";
+	const char filter[] = FCEU_NAME" Save State (*.fc?)\0*.fc?\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 
@@ -24,7 +24,7 @@ void FCEUD_SaveStateAs()
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Save State As...";
 	ofn.lpstrFilter = filter;
-	ofn.lpstrDefExt = "fcs";
+	//ofn.lpstrDefExt = "fcs";
 	strcpy(nameo,FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
 	ofn.lpstrFile = nameo;
 	std::string initdir = FCEU_GetPath(FCEUMKF_STATE);
@@ -34,6 +34,9 @@ void FCEUD_SaveStateAs()
 
 	if(GetSaveFileName(&ofn))
 	{
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".fcs");
+
 		FCEUI_SaveState(nameo);
 	}
 }
@@ -43,7 +46,7 @@ void FCEUD_SaveStateAs()
 **/
 void FCEUD_LoadStateFrom()
 {
-	const char filter[]= FCEU_NAME" Save State (*.fc?)\0*.fc?\0All Files (*.*)\0*.*\0";
+	const char filter[]= FCEU_NAME" Save State (*.fc?)\0*.fc?\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 

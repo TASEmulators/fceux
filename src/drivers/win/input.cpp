@@ -1556,7 +1556,7 @@ void FCEUI_UseInputPreset(int preset)
 
 static void PresetExport(int preset)
 {
-	const char filter[]="Input Preset File(*.pre)\0*.pre\0";
+	const char filter[]="Input Preset File(*.pre)\0*.pre\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -1572,7 +1572,6 @@ static void PresetExport(int preset)
 	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
-		int i;
 		//Save the directory
 		if(ofn.nFileOffset < 1024)
 		{
@@ -1582,24 +1581,8 @@ static void PresetExport(int preset)
 			InputPresetDir[ofn.nFileOffset]=0;
 		}
 
-		//quick get length of nameo
-		for(i=0;i<2048;i++)
-		{
-			if(nameo[i] == 0)
-			{
-				break;
-			}
-		}
-
-		//add .pre if nameo doesn't have it
-		if((i < 4 || nameo[i-4] != '.') && i < 2040)
-		{
-			nameo[i] = '.';
-			nameo[i+1] = 'p';
-			nameo[i+2] = 'r';
-			nameo[i+3] = 'e';
-			nameo[i+4] = 0;
-		}
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".pre");
 
 		FILE *fp=FCEUD_UTF8fopen(nameo,"w");
 		switch(preset)
@@ -1614,7 +1597,7 @@ static void PresetExport(int preset)
 
 static void PresetImport(int preset)
 {
-	const char filter[]="Input Preset File(*.pre)\0*.pre\0";
+	const char filter[]="Input Preset File(*.pre)\0*.pre\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));

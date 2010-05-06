@@ -281,13 +281,10 @@ static int GetRomFileSize(){ //todo: fix or remove this?
 	return 0;
 }
 
-
 void SaveRomAs()
 {
-	const char filter[]="NES ROM file (*.nes)\0*.nes\0";
+	const char filter[]="NES ROM file (*.nes)\0*.nes\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
-	std::string tempName;
-	int x;
 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -295,7 +292,7 @@ void SaveRomAs()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Nes ROM as...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt="nes";
+	//ofn.lpstrDefExt="nes";
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
@@ -303,12 +300,9 @@ void SaveRomAs()
 	ofn.hwndOwner = hMemView;
 	if (GetSaveFileName(&ofn))
 	{
-		//if user did not add .nes, add it for them
-		tempName = nameo;
-		x = tempName.find_last_of(".nes");
-		if (x < 0)
-			tempName.append(".nes");
-		strcpy(nameo, tempName.c_str());
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".nes");
+
 		iNesSaveAs(nameo);
 	}
 }
@@ -371,7 +365,7 @@ int LoadTable(const char* nameo)
 
 //should return -1, otherwise returns the line number it had the error on
 int LoadTableFile(){
-	const char filter[]="Table Files (*.TBL)\0*.tbl\0All files (*.*)\0*.*\0";
+	const char filter[]="Table Files (*.TBL)\0*.tbl\0All files (*.*)\0*.*\0\0";
 	char nameo[2048]; //todo: possibly no need for this? can lpstrfilter point to loadedcdfile instead?
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -645,16 +639,19 @@ void dumpToFile(const char* buffer, unsigned int size)
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save to file ...";
-	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0";
-	ofn.lpstrDefExt="bin";
+	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0All Files (*.*)\0*.*\0\0";
+	//ofn.lpstrDefExt="bin";
 	strcpy(name,GetRomName());
 	ofn.lpstrFile=name;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY;
 
-	if (GetOpenFileName(&ofn))
+	if (GetSaveFileName(&ofn))
 	{
-		FILE* memfile = fopen(ofn.lpstrFile, "wb");
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(name, sizeof(name), ".bin");
+
+		FILE* memfile = fopen(name, "wb");
 
 		if (!memfile || fwrite(buffer, 1, size, memfile) != size)
 		{

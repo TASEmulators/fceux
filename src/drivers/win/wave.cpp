@@ -33,7 +33,7 @@ int CloseWave()
 /// @return Flag that indicates failure (0) or success (1).
 bool CreateSoundSave()
 {
-	const char filter[]="MS WAVE(*.wav)\0*.wav\0";
+	const char filter[]="MS WAVE(*.wav)\0*.wav\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 
@@ -44,7 +44,7 @@ bool CreateSoundSave()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Log Sound As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt="wav";
+	//ofn.lpstrDefExt="wav";
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
@@ -52,6 +52,9 @@ bool CreateSoundSave()
 
 	if(GetSaveFileName(&ofn))
 	{
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".wav");
+
 		return FCEUI_BeginWaveRecord(nameo);
 	}
 

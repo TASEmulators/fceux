@@ -219,7 +219,7 @@ void LoadCDLog (const char* nameo)
 }
 
 void LoadCDLogFile(){
-	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
+	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -237,7 +237,7 @@ void LoadCDLogFile(){
 }
 
 void SaveCDLogFileAs(){
-	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0";
+	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048]; 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -245,13 +245,16 @@ void SaveCDLogFileAs(){
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt = "cdl";
+	//ofn.lpstrDefExt = "cdl";
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
 	if(!GetSaveFileName(&ofn))return;
+	if (ofn.nFilterIndex == 1)
+		AddExtensionIfMissing(nameo, sizeof(nameo), ".cdl");
+
 	strcpy(loadedcdfile,nameo);
 	SaveCDLogFile();
 	return;
@@ -307,8 +310,8 @@ void UpdateCDLogger(){
 
 void SaveStrippedRom(){ //this is based off of iNesSave()
 	//todo: make this support nsfs
-	const char NESfilter[]="Stripped iNes Rom file(*.NES)\0*.nes\0";
-	const char NSFfilter[]="Stripped NSF file(*.NSF)\0*.nsf\0";
+	const char NESfilter[]="Stripped iNes Rom file(*.NES)\0*.nes\0All Files (*.*)\0*.*\0\0";
+	const char NSFfilter[]="Stripped NSF file(*.NSF)\0*.nsf\0All Files (*.*)\0*.*\0\0";
 	char sromfilename[MAX_PATH];
 	FILE *fp;
 	OPENFILENAME ofn;
@@ -329,11 +332,10 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	ofn.lpstrTitle="Save Stripped File As...";
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
-		ofn.lpstrDefExt = "nsf";
-	}
-	else {
+		//ofn.lpstrDefExt = "nsf";
+	}	else {
 		ofn.lpstrFilter=NESfilter;
-		ofn.lpstrDefExt = "nes";
+		//ofn.lpstrDefExt = "nes";
 	}
 	strcpy(sromfilename,GetRomName());
 	ofn.lpstrFile=sromfilename;
@@ -341,6 +343,14 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
 	if(!GetSaveFileName(&ofn))return;
+	
+	if (ofn.nFilterIndex == 1) {
+		if (GameInfo->type==GIT_NSF) {
+			AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nsf");
+		} else {
+			AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nes");
+		}
+	}
 
 	fp = fopen(sromfilename,"wb");
 

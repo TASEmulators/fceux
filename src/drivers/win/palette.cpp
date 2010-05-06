@@ -31,7 +31,7 @@ bool SetPalette(const char* nameo)
 **/
 int LoadPaletteFile()
 {
-	const char filter[]="All usable files(*.pal)\0*.pal\0All files (*.*)\0*.*\0";
+	const char filter[]="All usable files(*.pal)\0*.pal\0All files (*.*)\0*.*\0\0";
 
 	bool success = false;
 	char nameo[2048];

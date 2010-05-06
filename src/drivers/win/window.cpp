@@ -1077,7 +1077,7 @@ bool ALoad(char *nameo, char* innerFilename)
 /// @param initialdir Directory that's pre-selected in the Open File dialog.
 void LoadNewGamey(HWND hParent, const char *initialdir)
 {
-	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0";
+	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0\0";
 	char nameo[2048];
 
 	// Create the Open File dialog
@@ -2413,9 +2413,9 @@ void FCEUD_AviRecordTo(void)
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hAppWnd;
-	ofn.lpstrFilter = "AVI Files (*.avi)\0*.avi\0\0";
+	ofn.lpstrFilter = "AVI Files (*.avi)\0*.avi\0All Files (*.*)\0*.*\0\0";
 	ofn.lpstrFile = szChoice;
-	ofn.lpstrDefExt = "avi";
+	//ofn.lpstrDefExt = "avi";
 	ofn.lpstrTitle = "Save AVI as";
 
 	ofn.nMaxFile = MAX_PATH;
@@ -2423,6 +2423,9 @@ void FCEUD_AviRecordTo(void)
 
 	if(GetSaveFileName(&ofn))
 	{
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(szChoice, sizeof(szChoice), ".avi");
+
 		FCEUI_AviBegin(szChoice);
 	}
 }
@@ -2685,10 +2688,9 @@ void UpdateMenuHotkeys()
 //It gets a filename from the user then calls CreateMovie()
 void SaveMovieAs()
 {
-	const char filter[]="NES Movie file (*.fm2)\0*.fm2\0";
+	const char filter[]="NES Movie file (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	std::string tempName;
-	int x;
 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -2704,9 +2706,10 @@ void SaveMovieAs()
 	if (GetSaveFileName(&ofn))
 	{
 		tempName = nameo;
-		x = tempName.find_last_of(".");	//Check to see if the user provided a file extension
-		if (x < 0)
-			tempName.append(".fm2");	//If not, make it .fm2
+
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(tempName, ".fm2");
+
 		FCEUI_CreateMovieFile(tempName);
 	}
 }

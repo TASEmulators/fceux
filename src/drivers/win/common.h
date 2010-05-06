@@ -52,4 +52,6 @@ extern int eoptions;
 bool directoryExists(const char* dirname);
 void WindowBoundsCheckResize(int &windowPosX, int &windowPosY, int windowSizeX, long windowRight);
 void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRight);
+void AddExtensionIfMissing(char * name,unsigned int maxsize,const char * extension);
+void AddExtensionIfMissing(std::string &name,const char * extension);
 #endif

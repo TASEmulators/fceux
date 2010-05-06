@@ -830,7 +830,7 @@ static void OpenProject()
 //close current project
 //open dialog for new project file
 
-		const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";	//Filetype filter
+		const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";	//Filetype filter
 
 	OPENFILENAME ofn;								//New instance of OPENFILENAME
 	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
@@ -880,7 +880,7 @@ static void SaveProjectAs()
 //flag project as not changed
 
 	//Creation of a save window
-	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0";	//Filetype filter
+	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";	//Filetype filter
 
 	OPENFILENAME ofn;								//New instance of OPENFILENAME
 	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
@@ -900,21 +900,17 @@ static void SaveProjectAs()
 
 	if(GetSaveFileName(&ofn))						//If it is a valid filename
 	{
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(nameo, sizeof(nameo), ".tas");
+
 		std::string tempstr = nameo;				//Make a temporary string for filename
 		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
-		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
-		{
-			tempstr.append(".tas");					//Stick it on ourselves
-			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
-			std::string filename = name;			//Get the filename
-			filename.append(ext);					//Shove the extension back onto it...
-			project.SetProjectFile(filename);		//And update the project's filename.
-		} else {									//If they've been nice and done it for us...
-			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
-			std::string filename = name;			//Grab the name...
-			filename.append(ext);					//Stick extension back on...
-			project.SetProjectFile(filename);		//And update the project's filename.
-		}
+
+		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
+		std::string filename = name;			//Grab the name...
+		filename.append(ext);					//Stick extension back on...
+		project.SetProjectFile(filename);		//And update the project's filename.
+
 		project.SetProjectName(GetRomName());		//Set the project's name to the ROM name
 		std::string thisfm2name = project.GetProjectName();
 		thisfm2name.append(".fm2");					//Setup the fm2 name
@@ -942,7 +938,7 @@ static void Import()
 //Takes current inputlog and saves it as a .fm2 file
 static void Export()
 {
-	const char filter[]="FCEUX Movie File(*.fm2)\0*.fm2\0";
+	const char filter[]="FCEUX Movie File(*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 	char fname[2048] = {0};
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -956,7 +952,10 @@ static void Export()
 	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
-		fstream* osRecordingMovie = FCEUD_UTF8_fstream(ofn.lpstrFile, "wb");
+		if (ofn.nFilterIndex == 1)
+			AddExtensionIfMissing(fname, sizeof(fname), ".fm2");
+
+		fstream* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
 		currMovieData.dump(osRecordingMovie,false);
 		delete osRecordingMovie;
 		osRecordingMovie = 0;

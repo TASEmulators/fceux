@@ -907,11 +907,15 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					ofn.hwndOwner = hwndDlg;
 					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0All files(*.*)\0*.*\0\0";
 					ofn.lpstrFile = szChoice;
-					ofn.lpstrDefExt = "fm2";
+					//ofn.lpstrDefExt = "fm2";
 					ofn.nMaxFile = MAX_PATH;
 					ofn.Flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-					if(GetSaveFileName(&ofn))
+					if(GetSaveFileName(&ofn)) {
+						if (ofn.nFilterIndex == 1)
+							AddExtensionIfMissing(szChoice, sizeof(szChoice), ".fm2");
+
 						UpdateRecordDialogPath(hwndDlg,szChoice);
+					}
 				}
 				return TRUE;
 			}
