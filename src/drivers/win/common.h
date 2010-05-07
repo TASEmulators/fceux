@@ -54,4 +54,5 @@ void WindowBoundsCheckResize(int &windowPosX, int &windowPosY, int windowSizeX, 
 void WindowBoundsCheckNoResize(int &windowPosX, int &windowPosY, long windowRight);
 void AddExtensionIfMissing(char * name,unsigned int maxsize,const char * extension);
 void AddExtensionIfMissing(std::string &name,const char * extension);
+std::string GetPath(std::string filename);
 #endif

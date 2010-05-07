@@ -55,3 +55,8 @@ void AddExtensionIfMissing(std::string &name,const char * extension) {
 	if ((x < (name.size() - 6)) || (x == -1))
 		name.append(extension);
 }
+
+std::string GetPath(std::string filename)
+{
+	return filename.substr(0,filename.find_last_of("/\\") + 1);
+}
