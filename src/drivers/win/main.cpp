@@ -61,6 +61,7 @@
 #include "cdlogger.h"
 #include "throttle.h"
 #include "tasedit.h"
+#include "replay.h"
 #include "palette.h" //For the SetPalette function
 #include "main.h"
 #include "args.h"
@@ -711,6 +712,7 @@ int main(int argc,char *argv[])
 				replayReadOnlySetting = true;
 
 		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, false, replayStopFrameSetting!=0);
+		FCEUX_LoadMovieExtras(MovieToLoad);
 		free(MovieToLoad);
 		MovieToLoad = NULL;
 	}
@@ -784,7 +786,9 @@ doloopy:
 	return(0);
 }
 
-		
+void FCEUX_LoadMovieExtras(const char * fname) {
+	UpdateReplayCommentsSubs(fname);
+}
 
 //mbg merge 7/19/06 - the function that contains the code that used to just be UpdateFCEUWindow() and FCEUD_UpdateInput()
 void _updateWindow()

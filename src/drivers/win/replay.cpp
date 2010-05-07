@@ -118,6 +118,21 @@ static char* GetSavePath(HWND hwndDlg)
 	return fn;
 }
 
+void UpdateReplayCommentsSubs(const char * fname) {
+
+	MOVIE_INFO info;
+	
+	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
+	bool scanok = FCEUI_MovieGetInfo(fp, info, true);
+	delete fp;
+
+	if(!scanok)
+		return;
+
+	currComments = info.comments;
+	currSubtitles = info.subtitles;
+}
+
 void UpdateReplayDialog(HWND hwndDlg)
 {
 	int doClear=1;

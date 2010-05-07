@@ -118,6 +118,7 @@ void DoPriority();
 void RemoveDirs();
 void CreateDirs();
 void SetDirs();
+void FCEUX_LoadMovieExtras(const char * fname);
 //void initDirectories();	//adelikat 03/02/09 - commenting out reference to a directory that I commented out
 
 #endif
