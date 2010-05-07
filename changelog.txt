@@ -1,3 +1,5 @@
+06-may-2010 - ugetab - win32 - Add Cheat buttons for Ram Search and Ram Watch
+06-may-2010 - ugetab - win32 - Hex editor -  Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color.
 04-may-2010 - ugetab - Win32 - Added "Goto" command for hex editor.
 28-april-2010 - ugetab - Added microphone support option. When enabled, Port 2 Start activates the Microphone. Movies also support this.
 25-april-2010 - FatRatKnight - Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate.
