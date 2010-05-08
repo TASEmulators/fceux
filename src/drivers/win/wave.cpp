@@ -44,9 +44,10 @@ bool CreateSoundSave()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Log Sound As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt="wav";
 	strcpy(nameo,GetRomName());
+	AddExtensionIfMissing(nameo, sizeof(nameo), ".wav");
 	ofn.lpstrFile=nameo;
+	//ofn.lpstrDefExt="wav";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 

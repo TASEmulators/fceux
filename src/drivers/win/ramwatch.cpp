@@ -482,6 +482,9 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 	OPENFILENAME ofn;
 
 	char *TempExt = 0;
+	TempExt=(char*)malloc(sizeof(Ext)+2);
+	strcpy(TempExt, ".");
+	strcat(TempExt, Ext);
 
 	SetCurrentDirectory(applicationPath);
 
@@ -496,20 +499,17 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.hwndOwner = hwnd;
 	ofn.hInstance = hInst;
+	AddExtensionIfMissing(Dest, 1024, TempExt);	//1024 checked manually
 	ofn.lpstrFile = Dest;
 	ofn.nMaxFile = 2047;
 	ofn.lpstrFilter = Filter;
 	ofn.nFilterIndex = 1;
 	ofn.lpstrInitialDir = Dir;
 	ofn.lpstrTitle = Titre;
-	ofn.lpstrDefExt = Ext;
+	//ofn.lpstrDefExt = Ext;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
 
 	if (GetSaveFileName(&ofn)) {
-		TempExt=(char*)malloc(sizeof(Ext)+2);
-		strcpy(TempExt, ".");
-		strcat(TempExt, Ext);
-		
 		if (ofn.nFilterIndex == 1)
 			AddExtensionIfMissing(Dest, 1024, TempExt);	//1024 checked manually
 

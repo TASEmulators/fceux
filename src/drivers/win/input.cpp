@@ -1564,8 +1564,10 @@ static void PresetExport(int preset)
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Export Input Preset To...";
 	ofn.lpstrFilter=filter;
-	nameo[0]=0;
+	nameo[0]=0; //No default filename
+	//AddExtensionIfMissing(nameo, sizeof(nameo), ".pre");
 	ofn.lpstrFile=nameo;
+	//ofn.lpstrDefExt="pre";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	std::string initdir = FCEU_GetPath(FCEUMKF_INPUT).c_str();

@@ -591,9 +591,9 @@ void ShowLogDirDialog(void){
  ofn.hInstance=fceu_hInstance;
  ofn.lpstrTitle="Log Trace As...";
  ofn.lpstrFilter=filter;
- //ofn.lpstrDefExt="log";
  strcpy(nameo,GetRomName());
  ofn.lpstrFile=nameo;
+ //ofn.lpstrDefExt="log";
  ofn.nMaxFile=256;
  ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
  ofn.hwndOwner = hTracer;

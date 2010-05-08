@@ -2421,8 +2421,9 @@ void FCEUD_AviRecordTo(void)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hAppWnd;
 	ofn.lpstrFilter = "AVI Files (*.avi)\0*.avi\0All Files (*.*)\0*.*\0\0";
+	AddExtensionIfMissing(szChoice, sizeof(szChoice), ".avi");
 	ofn.lpstrFile = szChoice;
-	ofn.lpstrDefExt = "avi";
+	//ofn.lpstrDefExt = "avi";
 	ofn.lpstrTitle = "Save AVI as";
 
 	ofn.nMaxFile = MAX_PATH;
@@ -2706,7 +2707,9 @@ void SaveMovieAs()
 	ofn.lpstrTitle="Save Movie as...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,curMovieFilename);
+	AddExtensionIfMissing(tempName, ".fm2");
 	ofn.lpstrFile=nameo;
+	//ofn.lpstrDefExt="fm2";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hMemView;

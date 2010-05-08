@@ -892,7 +892,9 @@ static void SaveProjectAs()
 	char nameo[2048];								//File name
 	strcpy(nameo, GetRomName());					//For now, just use ROM name
 
+	AddExtensionIfMissing(nameo, sizeof(nameo), ".tas");
 	ofn.lpstrFile=nameo;							//More parameters
+	//ofn.lpstrDefExt="tas";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
@@ -946,7 +948,9 @@ static void Export()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Export TAS as...";
 	ofn.lpstrFilter=filter;
+	AddExtensionIfMissing(fname, sizeof(fname), ".fm2");
 	ofn.lpstrFile=fname;
+	//ofn.lpstrDefExt="fm2";
 	ofn.nMaxFile=256;
 	std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
 	ofn.lpstrInitialDir=initdir.c_str();

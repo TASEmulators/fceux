@@ -406,13 +406,15 @@ static void SaveMemWatch()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Memory Watch As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt="txt";
+	//ofn.lpstrDefExt="txt";
 	char nameo[2048];
 	if (!memwLastFilename[0])
 		strcpy(nameo,GetRomName());
 	else
 		strcpy(nameo,memwLastFilename);
+	AddExtensionIfMissing(nameo, sizeof(nameo), ".txt");
 	ofn.lpstrFile=nameo;
+	//ofn.lpstrDefExt="txt";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	string initdir =  FCEU_GetPath(FCEUMKF_MEMW);

@@ -245,9 +245,10 @@ void SaveCDLogFileAs(){
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
-	ofn.lpstrDefExt = "cdl";
 	strcpy(nameo,GetRomName());
+	AddExtensionIfMissing(nameo, sizeof(nameo), ".cdl");
 	ofn.lpstrFile=nameo;
+	//ofn.lpstrDefExt = "cdl";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
@@ -330,14 +331,16 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Stripped File As...";
+	strcpy(sromfilename,GetRomName());
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
-		ofn.lpstrDefExt = "nsf";
+		//ofn.lpstrDefExt = "nsf";
+		AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nsf");
 	}	else {
 		ofn.lpstrFilter=NESfilter;
-		ofn.lpstrDefExt = "nes";
+		//ofn.lpstrDefExt = "nes";
+		AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nes");
 	}
-	strcpy(sromfilename,GetRomName());
 	ofn.lpstrFile=sromfilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
