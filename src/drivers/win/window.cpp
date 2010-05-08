@@ -1163,15 +1163,15 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//If There is a movie loaded in read only
 			if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)
 			{
-				hfceuxcontextsub = GetSubMenu(hfceuxcontext,0);
-				whichContext = 0;
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext,0); 
+				whichContext = 0; // Game+Movie+readonly
 			}
 			
 			//If there is a movie loaded in read+write
 			else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
 			{
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
-				whichContext = 3;
+				whichContext = 3; // Game+Movie+readwrite
 			}
 
 			
@@ -1179,14 +1179,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			else if (GameInfo)
 			{
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
-				whichContext = 1;
+				whichContext = 1; // Game+NoMovie
 			}
 			
 			//Else no ROM
 			else
 			{
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
-				whichContext = 2;
+				whichContext = 2; // NoGame
 			}
 			UpdateContextMenuItems(hfceuxcontextsub, whichContext);
 			pt.x = LOWORD(lParam);		//Get mouse x in terms of client area

@@ -238,15 +238,21 @@ void GotoAddress(HWND hwnd) {
 	{
 		if(EOF != sscanf(gotoaddressstring, "%x", &gotoaddress))
 		{
-			if (gotoaddress < 0)
-				gotoaddress = 0;
-			if (gotoaddress > (MaxSize-1))
-				gotoaddress = (MaxSize-1);
-			CursorStartAddy = gotoaddress;
-			CursorEndAddy = -1;
-			ChangeMemViewFocus(EditingMode,CursorStartAddy,-1);
+			SetHexEditorAddress(gotoaddress);
 		}
 	}
+}
+
+void SetHexEditorAddress(int gotoaddress) {
+
+	if (gotoaddress < 0)
+		gotoaddress = 0;
+	if (gotoaddress > (MaxSize-1))
+		gotoaddress = (MaxSize-1);
+	
+	CursorStartAddy = gotoaddress;
+	CursorEndAddy = -1;
+	ChangeMemViewFocus(EditingMode,CursorStartAddy,-1);
 }
 
 static void FlushUndoBuffer(){
@@ -454,7 +460,7 @@ void UpdateMemoryView(int draw_all)
 					SetTextColor(HDataDC,RGB(255,255,255));		//single address highlight
 					SetBkColor(HDataDC,RGB(0,0,0));
 					TextOut(HDataDC,0,0,str,1);
-					SetTextColor(HDataDC,TextColorList[CursorStartAddy]);	//single address highlight 2nd address
+					SetTextColor(HDataDC,TextColorList[i+j-CurOffset]);	//single address highlight 2nd address
 					SetBkColor(HDataDC,RGB(HexBackColorR,HexBackColorG,HexBackColorB));
 					TextOut(HDataDC,0,0,&str[1],1);
 				}

@@ -26,8 +26,10 @@
 #include "../../fceu.h"
 #include "../../cart.h"
 
-static HWND pwindow = 0;	//Handle to Cheats dialog
-HWND hCheat;				//mbg merge 7/19/06 had to add
+static HWND pwindow = 0;	    //Handle to Cheats dialog
+HWND hCheat;				    //mbg merge 7/19/06 had to add
+static HMENU hCheatcontext;     //Handle to context menu
+static HMENU hCheatcontextsub;  //Handle to context sub menu
 
 void InitializeCheatsAdded(HWND hwndDlg);
 
@@ -204,6 +206,10 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			searchdone=0;
 			SetDlgItemText(hwndDlg,IDC_CHEAT_VAL_KNOWN,(LPTSTR)U8ToStr(knownvalue));
 			InitializeCheatsAdded(hwndDlg);
+
+			// Enable Context Sub-Menus
+			hCheatcontext = LoadMenu(fceu_hInstance,"CHEATCONTEXTMENUS");
+
 			break;
 
 		case WM_KILLFOCUS:
@@ -345,10 +351,49 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			}
 			break;
 
+			case WM_CONTEXTMENU:
+			{
+				// Handle certain subborn context menus for nearly incapable controls.
+
+				// Only need 9, but I'd rather double it to be safe
+				//char TestHwnd[17];
+				//char TestwParam[17];
+
+				// Convert wParam to a string
+				sprintf(str,"%08x",wParam);
+
+				// Convert HWND of IDC_LIST_CHEATS to a string
+				sprintf(str2,"%08x",GetDlgItem(hwndDlg,IDC_LIST_CHEATS));
+
+				// Compare the now-compatible data with strcmp.
+				if (!strcmp(str, str2)) {
+					// Only open the menu if a cheat is selected
+					if (selcheat >= 0) {
+						// Open IDC_LIST_CHEATS Context Menu
+						hCheatcontextsub = GetSubMenu(hCheatcontext,0);
+						TrackPopupMenu(hCheatcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+					}
+				}
+			
+			}
+			break;
+
 		case WM_COMMAND:
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
 					switch (LOWORD(wParam)) {
+						case CHEAT_CONTEXT_TOGGLECHEAT:
+							CheatConsoleCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_LIST_CHEATS), lParam);
+						break;
+						case CHEAT_CONTEXT_POKECHEATVALUE:
+							FCEUI_GetCheat(selcheat,&name,&a,&v,NULL,&s,NULL);
+							BWrite[a](a,v);
+						break;
+						case CHEAT_CONTEXT_GOTOINHEXEDITOR:
+							DoMemView();
+							FCEUI_GetCheat(selcheat,&name,&a,&v,NULL,&s,NULL);
+							SetHexEditorAddress(a);
+						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
 							pauseWhileActive ^= 1;
 						break;
@@ -489,9 +534,9 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							//strcat(str,name);
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_DELETESTRING,selcheat,0);
 							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_INSERTSTRING,selcheat,(LPARAM)(LPSTR)str);
-							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
 							UpdateCheatsAdded();
 							UpdateColorTable();
+							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETCURSEL,selcheat,0);
 							break;
 					}
 					break;
@@ -836,3 +881,8 @@ void DoGGConv(){
 	return;
 }
 
+/*
+void ListBox::OnRButtonDown(UINT nFlags, CPoint point)
+{
+CPoint test = point;
+} */

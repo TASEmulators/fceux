@@ -132,6 +132,9 @@
 #define IDC_DEBUGGER_RUN_FRAME2         115
 #define LBL_CLEAR_AH                    116
 #define IDC_CHECK_LOG_UPDATE_WINDOW     116
+#define CHEAT_CONTEXT_TOGGLECHEAT       117
+#define CHEAT_CONTEXT_POKECHEATVALUE    118
+#define CHEAT_CONTEXT_GOTOINHEXEDITOR   119
 #define CHECK_SOUND_8BIT                122
 #define IDD_DIALOG3                     123
 #define CHECK_SOUND_GLOBAL_FOCUS        124

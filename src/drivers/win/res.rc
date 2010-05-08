@@ -420,6 +420,16 @@ BEGIN
     END
 END
 
+CHEATCONTEXTMENUS MENU 
+BEGIN
+    POPUP "CheatListPopup"
+    BEGIN
+	    MENUITEM "Toggle Cheat",                CHEAT_CONTEXT_TOGGLECHEAT
+        MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_POKECHEATVALUE
+        MENUITEM "Goto In Hex Editor",          CHEAT_CONTEXT_GOTOINHEXEDITOR
+    END
+END
+
 LUAWINDOW_MENU MENU 
 BEGIN
     POPUP "Console"
