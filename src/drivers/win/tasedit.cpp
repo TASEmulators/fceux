@@ -281,7 +281,7 @@ bool JumpToFrame(int index)
 			FCEUI_ToggleEmulationPause();
 
 		int i = index>0? index-1:0;
-		if (static_cast<unsigned int>(i)>=currMovieData.records.size())
+		if (i>=static_cast<int>(currMovieData.records.size()))
 			i=currMovieData.records.size()-1;
 
 		/* Search for an earlier frame, and try warping to the current. */
