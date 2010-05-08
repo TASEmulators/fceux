@@ -1717,7 +1717,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						else if(rs_t == 'h')
 							numberType = 2;
 
-						// TODO: open add-cheat dialog
+						// Don't open cheat dialog
 
 						switch (sizeType) {
 						case 0: {

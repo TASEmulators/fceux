@@ -1129,8 +1129,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						else if(rswatches[watchIndex].Type == 'h')
 							numberType = 2;
 
-						// TODO: open add-cheat dialog
-						// TODO: add add button
+						// Don't open cheat dialog
 
 						switch (sizeType) {
 						case 0: {

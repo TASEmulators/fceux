@@ -448,6 +448,77 @@ static int emu_registerexit(lua_State *L) {
 	return 1;
 }
 
+static int emu_addgamegenie(lua_State *L) {
+	
+	const char *msg = luaL_checkstring(L,1);
+
+	// Add a Game Genie code if it hasn't already been added
+	int GGaddr, GGcomp, GGval;
+	int i=0;
+
+	uint32 Caddr;
+	uint8 Cval;
+	int Ccompare, Ctype;
+	
+	if (!FCEUI_DecodeGG(msg, &GGaddr, &GGval, &GGcomp)) {
+		return 0;
+	}
+
+	while (FCEUI_GetCheat(i,NULL,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
+
+		if ((GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
+			// Already Added, so consider it a success
+			return 1;
+		}
+
+		i = i + 1;
+	}
+	
+	if (FCEUI_AddCheat(msg,GGaddr,GGval,GGcomp,1)) {
+		// Code was added
+		// Can't manage the display update the way I want, so I won't bother with it
+		// UpdateCheatsAdded();
+		return 1;
+	} else {
+		// Code didn't get added
+		return 0;
+	}
+}
+
+static int emu_delgamegenie(lua_State *L) {
+	
+	const char *msg = luaL_checkstring(L,1);
+
+	// Remove a Game Genie code. Very restrictive about deleted code.
+	int GGaddr, GGcomp, GGval;
+	uint32 i=0;
+
+	char * Cname;
+	uint32 Caddr;
+	uint8 Cval;
+	int Ccompare, Ctype;
+	
+	if (!FCEUI_DecodeGG(msg, &GGaddr, &GGval, &GGcomp)) {
+		return 0;
+	}
+
+	while (FCEUI_GetCheat(i,&Cname,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
+
+		if ((!strcmp(msg,Cname)) && (GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
+			// Delete cheat code
+			if (FCEUI_DelCheat(i))
+				return 1;
+			else
+				return 0;
+		}
+
+		i = i + 1;
+	}
+
+	// Cheat didn't exist, so it's not an error
+	return 1;
+}
+
 
 // can't remember what the best way of doing this is...
 #if defined(i386) || defined(__i386) || defined(__i386__) || defined(M_I86) || defined(_M_IX86) || defined(WIN32)
@@ -4374,6 +4445,8 @@ static const struct luaL_reg emulib [] = {
 	{"registerbefore", emu_registerbefore},
 	{"registerafter", emu_registerafter},
 	{"registerexit", emu_registerexit},
+	{"addgamegenie", emu_addgamegenie},
+	{"delgamegenie", emu_delgamegenie},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"print", print}, // sure, why not
