@@ -892,9 +892,8 @@ static void SaveProjectAs()
 	char nameo[2048];								//File name
 	strcpy(nameo, GetRomName());					//For now, just use ROM name
 
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".tas");
 	ofn.lpstrFile=nameo;							//More parameters
-	//ofn.lpstrDefExt="tas";
+	ofn.lpstrDefExt="tas";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
@@ -902,9 +901,6 @@ static void SaveProjectAs()
 
 	if(GetSaveFileName(&ofn))						//If it is a valid filename
 	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(nameo, sizeof(nameo), ".tas");
-
 		std::string tempstr = nameo;				//Make a temporary string for filename
 		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
 
@@ -948,17 +944,13 @@ static void Export()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Export TAS as...";
 	ofn.lpstrFilter=filter;
-	AddExtensionIfMissing(fname, sizeof(fname), ".fm2");
 	ofn.lpstrFile=fname;
-	//ofn.lpstrDefExt="fm2";
+	ofn.lpstrDefExt="fm2";
 	ofn.nMaxFile=256;
 	std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
 	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(fname, sizeof(fname), ".fm2");
-
 		fstream* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
 		currMovieData.dump(osRecordingMovie,false);
 		delete osRecordingMovie;

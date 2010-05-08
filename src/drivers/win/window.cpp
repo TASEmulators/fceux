@@ -2421,21 +2421,15 @@ void FCEUD_AviRecordTo(void)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hAppWnd;
 	ofn.lpstrFilter = "AVI Files (*.avi)\0*.avi\0All Files (*.*)\0*.*\0\0";
-	AddExtensionIfMissing(szChoice, sizeof(szChoice), ".avi");
 	ofn.lpstrFile = szChoice;
-	//ofn.lpstrDefExt = "avi";
+	ofn.lpstrDefExt = "avi";
 	ofn.lpstrTitle = "Save AVI as";
 
 	ofn.nMaxFile = MAX_PATH;
 	ofn.Flags = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 
 	if(GetSaveFileName(&ofn))
-	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(szChoice, sizeof(szChoice), ".avi");
-
 		FCEUI_AviBegin(szChoice);
-	}
 }
 
 //Stop AVI recording
@@ -2707,18 +2701,14 @@ void SaveMovieAs()
 	ofn.lpstrTitle="Save Movie as...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,curMovieFilename);
-	AddExtensionIfMissing(tempName, ".fm2");
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="fm2";
+	ofn.lpstrDefExt="fm2";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hMemView;
 	if (GetSaveFileName(&ofn))
 	{
 		tempName = nameo;
-
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(tempName, ".fm2");
 
 		FCEUI_CreateMovieFile(tempName);
 	}

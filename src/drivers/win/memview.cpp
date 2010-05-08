@@ -299,19 +299,13 @@ void SaveRomAs()
 	ofn.lpstrTitle="Save Nes ROM as...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".nes");
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="nes";
+	ofn.lpstrDefExt="nes";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hMemView;
 	if (GetSaveFileName(&ofn))
-	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(nameo, sizeof(nameo), ".nes");
-
 		iNesSaveAs(nameo);
-	}
 }
 
 int LoadTable(const char* nameo)
@@ -648,17 +642,13 @@ void dumpToFile(const char* buffer, unsigned int size)
 	ofn.lpstrTitle="Save to file ...";
 	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0All Files (*.*)\0*.*\0\0";
 	strcpy(name,GetRomName());
-	AddExtensionIfMissing(name, sizeof(name), ".bin");
 	ofn.lpstrFile=name;
-	//ofn.lpstrDefExt="bin";
+	ofn.lpstrDefExt="bin";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY;
 
 	if (GetSaveFileName(&ofn))
 	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(name, sizeof(name), ".bin");
-
 		FILE* memfile = fopen(name, "wb");
 
 		if (!memfile || fwrite(buffer, 1, size, memfile) != size)

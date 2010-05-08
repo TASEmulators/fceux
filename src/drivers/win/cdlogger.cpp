@@ -237,7 +237,10 @@ void LoadCDLogFile(){
 }
 
 void SaveCDLogFileAs(){
+	//don't be stupid
 	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
+	//this feature not for select desired file extension for saved filename
+	//this feature only for filter file list only for desired file extension.
 	char nameo[2048]; 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -246,16 +249,23 @@ void SaveCDLogFileAs(){
 	ofn.lpstrTitle="Save Code Data Log File As...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".cdl");
+	//don't be stupid, 
+	ofn.lpstrDefExt = "cdl";
+	//do this automatically with system function, it is doing exactly what it written for
+	//why do you need to do this one more time? All we need here, filled extension in dialog window
+	//BEFORE saving it, there is no other options.
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt = "cdl";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
+	//after that we will get complete file with ext added automatically from DefExt string
+	//change ext in Save Dialog and it will be saved 
 	if(!GetSaveFileName(&ofn))return;
-	if (ofn.nFilterIndex == 1)
-		AddExtensionIfMissing(nameo, sizeof(nameo), ".cdl");
+	//there is bad if something is written AFTER i selectdesired file extension in Save Dialog
+	//when I want NOT to have any extension, it will write me default one, that is stupid,
+	//in addition, this is silently forcing default extension to file, but user didn't know about it at all
 
+	//that's all what needed to work. I checked this and it works exactly what it should
 	strcpy(loadedcdfile,nameo);
 	SaveCDLogFile();
 	return;
@@ -334,26 +344,16 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 	strcpy(sromfilename,GetRomName());
 	if (GameInfo->type==GIT_NSF) {
 		ofn.lpstrFilter=NSFfilter;
-		//ofn.lpstrDefExt = "nsf";
-		AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nsf");
+		ofn.lpstrDefExt = "nsf";
 	}	else {
 		ofn.lpstrFilter=NESfilter;
-		//ofn.lpstrDefExt = "nes";
-		AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nes");
+		ofn.lpstrDefExt = "nes";
 	}
 	ofn.lpstrFile=sromfilename;
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 	ofn.hwndOwner = hCDLogger;
 	if(!GetSaveFileName(&ofn))return;
-	
-	if (ofn.nFilterIndex == 1) {
-		if (GameInfo->type==GIT_NSF) {
-			AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nsf");
-		} else {
-			AddExtensionIfMissing(sromfilename, sizeof(sromfilename), ".nes");
-		}
-	}
 
 	fp = fopen(sromfilename,"wb");
 

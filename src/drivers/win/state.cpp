@@ -25,21 +25,15 @@ void FCEUD_SaveStateAs()
 	ofn.lpstrTitle = "Save State As...";
 	ofn.lpstrFilter = filter;
 	strcpy(nameo,FCEU_MakeFName(FCEUMKF_STATE,CurrentState,0).c_str());
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".fcs");
 	ofn.lpstrFile = nameo;
-	//ofn.lpstrDefExt = "fcs";
+	ofn.lpstrDefExt = "fcs";
 	std::string initdir = FCEU_GetPath(FCEUMKF_STATE);
 	ofn.lpstrInitialDir = initdir.c_str();
 	ofn.nMaxFile = 256;
 	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 
 	if(GetSaveFileName(&ofn))
-	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(nameo, sizeof(nameo), ".fcs");
-
 		FCEUI_SaveState(nameo);
-	}
 }
 
 /**

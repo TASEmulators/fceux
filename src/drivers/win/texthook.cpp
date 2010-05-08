@@ -692,18 +692,14 @@ int TextHookerSaveTableFile(){
 	ofn.lpstrTitle="Load Table File...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".tht");
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="tht";
+	ofn.lpstrDefExt="tht";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_EXTENSIONDIFFERENT;
 	ofn.hwndOwner = hCDLogger;
 
 	//get the file name or quit
 	if(!GetSaveFileName(&ofn))return 0;
-
-	if (ofn.nFilterIndex == 1)
-		AddExtensionIfMissing(nameo, sizeof(nameo), ".tht");
 
 	//open the file
 	FP = fopen(nameo,"wb");

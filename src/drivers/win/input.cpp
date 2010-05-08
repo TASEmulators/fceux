@@ -1565,9 +1565,8 @@ static void PresetExport(int preset)
 	ofn.lpstrTitle="Export Input Preset To...";
 	ofn.lpstrFilter=filter;
 	nameo[0]=0; //No default filename
-	//AddExtensionIfMissing(nameo, sizeof(nameo), ".pre");
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="pre";
+	ofn.lpstrDefExt="pre";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 	std::string initdir = FCEU_GetPath(FCEUMKF_INPUT).c_str();
@@ -1582,9 +1581,6 @@ static void PresetExport(int preset)
 			strcpy(InputPresetDir,ofn.lpstrFile);
 			InputPresetDir[ofn.nFileOffset]=0;
 		}
-
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(nameo, sizeof(nameo), ".pre");
 
 		FILE *fp=FCEUD_UTF8fopen(nameo,"w");
 		switch(preset)

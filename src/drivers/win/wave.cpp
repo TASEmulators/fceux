@@ -45,19 +45,13 @@ bool CreateSoundSave()
 	ofn.lpstrTitle="Log Sound As...";
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
-	AddExtensionIfMissing(nameo, sizeof(nameo), ".wav");
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="wav";
+	ofn.lpstrDefExt="wav";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
 
 	if(GetSaveFileName(&ofn))
-	{
-		if (ofn.nFilterIndex == 1)
-			AddExtensionIfMissing(nameo, sizeof(nameo), ".wav");
-
 		return FCEUI_BeginWaveRecord(nameo);
-	}
 
 	return false;
 }
