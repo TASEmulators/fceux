@@ -693,7 +693,7 @@ int TextHookerSaveTableFile(){
 	ofn.lpstrFilter=filter;
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
-	//ofn.lpstrDefExt="tht";
+	ofn.lpstrDefExt="tht";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_EXTENSIONDIFFERENT;
 	ofn.hwndOwner = hCDLogger;

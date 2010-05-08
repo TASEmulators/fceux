@@ -502,7 +502,7 @@ int Change_File_S(char *Dest, char *Dir, char *Titre, char *Filter, char *Ext, H
 	ofn.nFilterIndex = 1;
 	ofn.lpstrInitialDir = Dir;
 	ofn.lpstrTitle = Titre;
-	//ofn.lpstrDefExt = Ext;
+	ofn.lpstrDefExt = Ext;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_HIDEREADONLY;
 
 	if (GetSaveFileName(&ofn)) {

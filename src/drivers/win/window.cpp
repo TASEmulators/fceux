@@ -2422,7 +2422,7 @@ void FCEUD_AviRecordTo(void)
 	ofn.hwndOwner = hAppWnd;
 	ofn.lpstrFilter = "AVI Files (*.avi)\0*.avi\0All Files (*.*)\0*.*\0\0";
 	ofn.lpstrFile = szChoice;
-	//ofn.lpstrDefExt = "avi";
+	ofn.lpstrDefExt = "avi";
 	ofn.lpstrTitle = "Save AVI as";
 
 	ofn.nMaxFile = MAX_PATH;

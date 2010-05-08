@@ -298,7 +298,7 @@ void SaveRomAs()
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save Nes ROM as...";
 	ofn.lpstrFilter=filter;
-	//ofn.lpstrDefExt="nes";
+	ofn.lpstrDefExt="nes";
 	strcpy(nameo,GetRomName());
 	ofn.lpstrFile=nameo;
 	ofn.nMaxFile=256;
@@ -646,7 +646,7 @@ void dumpToFile(const char* buffer, unsigned int size)
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save to file ...";
 	ofn.lpstrFilter="Binary File (*.BIN)\0*.bin\0All Files (*.*)\0*.*\0\0";
-	//ofn.lpstrDefExt="bin";
+	ofn.lpstrDefExt="bin";
 	strcpy(name,GetRomName());
 	ofn.lpstrFile=name;
 	ofn.nMaxFile=256;
