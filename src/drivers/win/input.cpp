@@ -1556,7 +1556,7 @@ void FCEUI_UseInputPreset(int preset)
 
 static void PresetExport(int preset)
 {
-	const char filter[]="Input Preset File(*.pre)\0*.pre\0All Files (*.*)\0*.*\0\0";
+	const char filter[]="Input Preset File (*.pre)\0*.pre\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -1597,7 +1597,7 @@ static void PresetExport(int preset)
 
 static void PresetImport(int preset)
 {
-	const char filter[]="Input Preset File(*.pre)\0*.pre\0\0";
+	const char filter[]="Input Preset File (*.pre)\0*.pre\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));

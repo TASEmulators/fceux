@@ -658,7 +658,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0Archive files(*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All files(*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0Archive Files (*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All Files (*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;
@@ -873,7 +873,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 				memset(&ofn, 0, sizeof(ofn));
 				ofn.lStructSize = sizeof(ofn);
 				ofn.hwndOwner = hwndDlg;
-				ofn.lpstrFilter = "FCEU Save State(*.fc?)\0*.fc?\0\0";
+				ofn.lpstrFilter = "FCEU Save State (*.fc?)\0*.fc?\0\0";
 				ofn.lpstrFile = szChoice;
 				ofn.lpstrDefExt = "fcs";
 				ofn.nMaxFile = MAX_PATH;
@@ -920,7 +920,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 					memset(&ofn, 0, sizeof(ofn));
 					ofn.lStructSize = sizeof(ofn);
 					ofn.hwndOwner = hwndDlg;
-					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0All files(*.*)\0*.*\0\0";
+					ofn.lpstrFilter = "FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 					ofn.lpstrFile = szChoice;
 					//ofn.lpstrDefExt = "fm2";
 					ofn.nMaxFile = MAX_PATH;

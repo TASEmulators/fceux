@@ -230,7 +230,7 @@ static void ConvertFCM(HWND hwndOwner)
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hwndOwner;
-	ofn.lpstrFilter = "FCEU <2.0 Movie Files (*.fcm)\0*.fcm\0All files(*.*)\0*.*\0\0";
+	ofn.lpstrFilter = "FCEU <2.0 Movie Files (*.fcm)\0*.fcm\0All Files (*.*)\0*.*\0\0";
 	ofn.lpstrFile = new char[640*1024]; //640K should be enough for anyone
 	ofn.lpstrFile[0] = 0;
 	ofn.nMaxFile = 640*1024;
@@ -1077,7 +1077,7 @@ bool ALoad(char *nameo, char* innerFilename)
 /// @param initialdir Directory that's pre-selected in the Open File dialog.
 void LoadNewGamey(HWND hParent, const char *initialdir)
 {
-	const char filter[] = "All usable files(*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0All non-compressed usable files(*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All files (*.*)\0*.*\0\0";
+	const char filter[] = "All usable files (*.nes,*.nsf,*.fds,*.unf,*.zip,*.rar,*.7z,*.gz)\0*.nes;*.nsf;*.fds;*.unf;*.zip;*.rar;*.7z;*.gz\0All non-compressed usable files (*.nes,*.nsf,*.fds,*.unf)\0*.nes;*.nsf;*.fds;*.unf\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 
 	// Create the Open File dialog

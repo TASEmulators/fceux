@@ -33,7 +33,7 @@ int CloseWave()
 /// @return Flag that indicates failure (0) or success (1).
 bool CreateSoundSave()
 {
-	const char filter[]="MS WAVE(*.wav)\0*.wav\0All Files (*.*)\0*.*\0\0";
+	const char filter[]="MS WAVE (*.wav)\0*.wav\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 

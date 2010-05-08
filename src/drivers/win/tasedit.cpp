@@ -163,7 +163,7 @@ void UpdateTasEdit()
 	}
 
 	static int old_movie_readonly=-1;
-	if (old_movie_readonly != movie_readonly)
+	if ((!old_movie_readonly) == movie_readonly) //Originally (old_movie_readonly = movie_readonly)
 	{
 		old_movie_readonly = movie_readonly;
 		if (movie_readonly)
@@ -267,7 +267,7 @@ bool JumpToFrame(int index)
 		return false;
 	}
 
-	if (index<currMovieData.records.size() && 
+	if (static_cast<unsigned int>(index)<currMovieData.records.size() && 
 		!currMovieData.records[index].savestate.empty() &&
 		MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
 	{
@@ -281,7 +281,7 @@ bool JumpToFrame(int index)
 			FCEUI_ToggleEmulationPause();
 
 		int i = index>0? index-1:0;
-		if (i>=currMovieData.records.size())
+		if (static_cast<unsigned int>(i)>=currMovieData.records.size())
 			i=currMovieData.records.size()-1;
 
 		/* Search for an earlier frame, and try warping to the current. */
@@ -597,7 +597,7 @@ static bool Paste()
 
 			// Extract number of frames
 			sscanf (pGlobal+3, "%d", &range);
-			if (currMovieData.records.size()<pos+range)
+			if (currMovieData.records.size()<static_cast<unsigned int>(pos+range))
 			{
 				currMovieData.insertEmpty(currMovieData.records.size(),pos+range-currMovieData.records.size());
 			}
@@ -938,7 +938,7 @@ static void Import()
 //Takes current inputlog and saves it as a .fm2 file
 static void Export()
 {
-	const char filter[]="FCEUX Movie File(*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
+	const char filter[]="FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 	char fname[2048] = {0};
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));

@@ -275,7 +275,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				ZeroMemory( (LPVOID)&ofn, sizeof(OPENFILENAME) );
 				ofn.lStructSize = sizeof(OPENFILENAME);
 				ofn.hwndOwner = hAppWnd;
-				ofn.lpstrFilter = "Lua scripts (*.lua)\0*.lua\0All files (*.*)\0*.*\0\0";
+				ofn.lpstrFilter = "Lua scripts (*.lua)\0*.lua\0All Files (*.*)\0*.*\0\0";
 				ofn.lpstrFile = szFileName;
 				ofn.lpstrDefExt = "lua";
 				ofn.nMaxFile = MAX_PATH;

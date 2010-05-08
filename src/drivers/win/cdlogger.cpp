@@ -219,7 +219,7 @@ void LoadCDLog (const char* nameo)
 }
 
 void LoadCDLogFile(){
-	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0\0";
+	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0\0";
 	char nameo[2048];
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -237,7 +237,7 @@ void LoadCDLogFile(){
 }
 
 void SaveCDLogFileAs(){
-	const char filter[]="Code Data Log File(*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
+	const char filter[]="Code Data Log File (*.CDL)\0*.cdl\0All Files (*.*)\0*.*\0\0";
 	char nameo[2048]; 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -310,8 +310,8 @@ void UpdateCDLogger(){
 
 void SaveStrippedRom(){ //this is based off of iNesSave()
 	//todo: make this support nsfs
-	const char NESfilter[]="Stripped iNes Rom file(*.NES)\0*.nes\0All Files (*.*)\0*.*\0\0";
-	const char NSFfilter[]="Stripped NSF file(*.NSF)\0*.nsf\0All Files (*.*)\0*.*\0\0";
+	const char NESfilter[]="Stripped iNes Rom file (*.NES)\0*.nes\0All Files (*.*)\0*.*\0\0";
+	const char NSFfilter[]="Stripped NSF file (*.NSF)\0*.nsf\0All Files (*.*)\0*.*\0\0";
 	char sromfilename[MAX_PATH];
 	FILE *fp;
 	OPENFILENAME ofn;

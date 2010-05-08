@@ -583,7 +583,7 @@ int PromptForCDLogger(void){
 }
 
 void ShowLogDirDialog(void){
- const char filter[]="6502 Trace Log File(*.log)\0*.log;*.txt\0" "6502 Trace Log File(*.txt)\0*.log;*.txt\0All Files (*.*)\0*.*\0\0"; //'" "' used to prevent octal conversion on the numbers
+ const char filter[]="6502 Trace Log File (*.log)\0*.log;*.txt\0" "6502 Trace Log File (*.txt)\0*.log;*.txt\0All Files (*.*)\0*.*\0\0"; //'" "' used to prevent octal conversion on the numbers
  char nameo[2048];
  OPENFILENAME ofn;
  memset(&ofn,0,sizeof(ofn));
