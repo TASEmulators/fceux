@@ -254,7 +254,6 @@ extern bool movie_readonly;
 extern bool autoMovieBackup;
 extern int pauseframe;
 //--------------------------------------------------
-bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
 void FCEUI_MakeBackupMovie(bool dispMessage);
 void FCEUI_CreateMovieFile(std::string fn);
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);

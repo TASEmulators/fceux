@@ -1,3 +1,4 @@
+08-may-2010 - ugetab - Added savestate.object() which is savestate.create() with intuitive numbering under windows
 08-may-2010 - ugetab - Added emu.addgamegenie() and emu.delgamegenie() LUA functions.
 07-may-2010 - ugetab - Win32 - Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor
 07-may-2010 - ugetab - Win32 - Made enabling/disabling cheats no longer deselect the selected cheat.

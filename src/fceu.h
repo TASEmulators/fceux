@@ -108,6 +108,8 @@ int FCEU_TextScanlineOffsetFromBottom(int y);
 
 extern FCEUS FSettings;
 
+bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and checks to see if that file exists
+
 void FCEU_PrintError(char *format, ...);
 void FCEU_printf(char *format, ...);
 void FCEU_DispMessage(char *format, ...);

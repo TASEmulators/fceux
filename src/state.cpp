@@ -621,6 +621,10 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	//maybe make a backup savestate
 	memorystream msBackupSavestate;
 	bool backup = (params == SSLOADPARAM_BACKUP);
+
+	if(!is)
+		return false;
+
 	if(backup)
 		FCEUSS_SaveMS(&msBackupSavestate,Z_NO_COMPRESSION);
 

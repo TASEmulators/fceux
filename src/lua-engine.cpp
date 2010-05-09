@@ -2328,12 +2328,14 @@ static int savestate_gc(lua_State *L) {
 	return 0;
 }
 
-// object savestate.create(int which = nil)
+//  Referenced by:
+//  savestate.create(int which = nil)
+//  savestate.object(int which = nil)
 //
 //  Creates an object used for savestates.
 //  The object can be associated with a player-accessible savestate
 //  ("which" between 1 and 10) or not (which == nil).
-static int savestate_create(lua_State *L) {
+static int savestate_create_aliased(lua_State *L, bool newnumbering) {
 	int which = -1;
 	if (lua_gettop(L) >= 1) {
 		which = luaL_checkinteger(L, 1);
@@ -2348,8 +2350,17 @@ static int savestate_create(lua_State *L) {
 	if (which > 0) {
 		// Find an appropriate filename. This is OS specific, unfortunately.
 		// So I turned the filename selection code into my bitch. :)
-		// Numbers are 0 through 9 though.
+		// Numbers are 0 through 9.
+		if (newnumbering) //1-9, 10 = 0. QWERTY style.
+		ss->filename = FCEU_MakeFName(FCEUMKF_STATE, (which % 10), 0);
+		else // Note: Windows Slots 1-10 = Which 2-10, 1
 		ss->filename = FCEU_MakeFName(FCEUMKF_STATE, which - 1, 0);
+
+		// Only ensure load if the file exists
+		// Also makes it persistent, but files are like that
+		if (CheckFileExists(ss->filename.c_str()))
+			ss->ensureLoad();
+		
 	}
 	else {
 		//char tempbuf[100] = "snluaXXXXXX";
@@ -2387,6 +2398,30 @@ static int savestate_create(lua_State *L) {
 	return 1;
 }
 
+// object savestate.object(int which = nil)
+//
+//  Creates an object used for savestates.
+//  The object can be associated with a player-accessible savestate
+//  ("which" between 1 and 10) or not (which == nil).
+//  Uses more windows-friendly slot numbering
+static int savestate_object(lua_State *L) {
+	// New Save Slot Numbers:
+	// 1-9 refer to 1-9, 10 refers to 0. QWERTY style.
+	return savestate_create_aliased(L,true);
+}
+
+// object savestate.create(int which = nil)
+//
+//  Creates an object used for savestates.
+//  The object can be associated with a player-accessible savestate
+//  ("which" between 1 and 10) or not (which == nil).
+//  Uses original slot numbering
+static int savestate_create(lua_State *L) {
+	// Original Save Slot Numbers:
+	// 1-10, 1 refers to slot 0, 2-10 refer to 1-9
+	return savestate_create_aliased(L,false);
+}
+
 
 // savestate.save(object state)
 //
@@ -2396,6 +2431,11 @@ static int savestate_save(lua_State *L) {
 	//char *filename = savestateobj2filename(L,1);
 
 	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
+	if (!ss) {
+		luaL_error(L, "Invalid savestate.save object");
+		return 0;
+	}
+
 	if(ss->data) delete ss->data;
 	ss->data = new memorystream();
 
@@ -2425,10 +2465,20 @@ static int savestate_load(lua_State *L) {
 
 	LuaSaveState *ss = (LuaSaveState *)lua_touserdata(L, 1);
 
+	if (!ss) {
+		luaL_error(L, "Invalid savestate.load object");
+		return 0;
+	}
+
 	numTries--;
 
-	FCEUSS_LoadFP(ss->data,SSLOADPARAM_NOBACKUP);
-	ss->data->seekg(0);
+	/*if (!ss->data) {
+		luaL_error(L, "Invalid savestate.load data");
+		return 0;
+	} */
+	if (FCEUSS_LoadFP(ss->data,SSLOADPARAM_NOBACKUP))
+		ss->data->seekg(0);
+
 	return 0;
 
 }
@@ -4513,6 +4563,7 @@ static const struct luaL_reg inputlib[] = {
 
 static const struct luaL_reg savestatelib[] = {
 	{"create", savestate_create},
+	{"object", savestate_object},
 	{"save", savestate_save},
 	{"persist", savestate_persist},
 	{"load", savestate_load},

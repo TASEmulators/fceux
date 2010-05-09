@@ -95,6 +95,30 @@ FCEUGI::~FCEUGI()
 	if(archiveFilename) delete archiveFilename;
 }
 
+bool CheckFileExists(const char* filename)
+{
+	//This function simply checks to see if the given filename exists
+	string checkFilename; 
+
+	if (filename)
+		checkFilename = filename;
+			
+	//Check if this filename exists
+	fstream test;
+	test.open(checkFilename.c_str(),fstream::in);
+		
+	if (test.fail())
+	{
+		test.close();
+		return false; 
+	}
+	else
+	{
+		test.close();
+		return true; 
+	}
+}
+
 static void FCEU_CloseGame(void)
 {
 	if(GameInfo)
