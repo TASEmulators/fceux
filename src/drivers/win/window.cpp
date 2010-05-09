@@ -78,6 +78,8 @@ using namespace std;
 #define FCEUX_CONTEXT_UNHIDEMENU        60000
 #define FCEUX_CONTEXT_LOADLASTLUA       60001
 #define FCEUX_CONTEXT_CLOSELUAWINDOWS   60002
+#define FCEUX_CONTEXT_TOGGLESUBTITLES   60003
+
 
 //********************************************************************************
 //Globals
@@ -375,7 +377,7 @@ void UpdateCheckedMenuItems()
 	{
 		CheckMenuItem(fceumenu, polo2[x], *polo[x] ? MF_CHECKED : MF_UNCHECKED);
 	}
-	//File Maneu
+	//File Menu
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_AVI_DISMOVIEMESSAGE, AVIdisableMovieMessages ? MF_CHECKED : MF_UNCHECKED);
@@ -397,11 +399,13 @@ void UpdateCheckedMenuItems()
 	//Config - Display SubMenu
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_DISPLAY_FRAMECOUNTER, frame_display ? MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
-	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES_AVI, subtitlesOnAVI?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
-	
+
+	//Config - Movie Options, no longer in menu
+	//CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
+	//CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES_AVI, subtitlesOnAVI?MF_CHECKED:MF_UNCHECKED);
+
 	//Tools Menu
 	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
 
@@ -535,6 +539,11 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	{
 		InsertMenu(context, 0xFFFF, MF_SEPARATOR, 0, "");
 		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
+	}
+
+	// At position 3 is View comments and subtitles. Insert this there:
+	if ((whichContext == 0) || (whichContext == 3)) {
+		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off");
 	}
 }
 
@@ -1960,6 +1969,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						FCEUX_LoadMovieExtras(recent_movie[0]);
 					}
 				}
+				break;
+
+			//Toggle subtitles
+			case FCEUX_CONTEXT_TOGGLESUBTITLES:
+				movieSubtitles ^= 1;
 				break;
 
 			//View comments and subtitles
