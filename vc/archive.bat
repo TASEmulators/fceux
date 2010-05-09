@@ -1,7 +1,7 @@
 del /s fceux.zip
 copy ..\output\fceux.exe .
 upx ..\output\fceux.exe
-IF ERRORLEVEL 1 GOTO UPXFailed
+IF ERRORLEVEL 1 IF NOT ERRORLEVEL 2 GOTO UPXFailed
 cd ..\output
 ..\vc\zip -X -9 -r ..\vc\fceux.zip fceux.exe fceux.chm 7z.dll *.dll palettes luaScripts
 move /y ..\vc\fceux.exe .
