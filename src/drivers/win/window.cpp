@@ -71,6 +71,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <cmath>
 
 using namespace std;
 
@@ -79,6 +80,7 @@ using namespace std;
 #define FCEUX_CONTEXT_LOADLASTLUA       60001
 #define FCEUX_CONTEXT_CLOSELUAWINDOWS   60002
 #define FCEUX_CONTEXT_TOGGLESUBTITLES   60003
+#define FCEUX_CONTEXT_DUMPSUBTITLES     60004
 
 
 //********************************************************************************
@@ -541,9 +543,11 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
 	}
 
-	// At position 3 is View comments and subtitles. Insert this there:
 	if ((whichContext == 0) || (whichContext == 3)) {
+		// At position 3 is "View comments and subtitles". Insert this there:
 		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off");
+		// At position 4(+1) is after View comments and subtitles. Insert this there:
+		InsertMenu(context,0x5, MF_BYPOSITION, FCEUX_CONTEXT_DUMPSUBTITLES, "Dump Subtitles to SRT file");
 	}
 }
 
@@ -1142,6 +1146,69 @@ void GetMouseData(uint32 (&md)[3])
 	md[1] += FSettings.FirstSLine;
 	md[2] = ((mouseb == MK_LBUTTON) ? 1 : 0) | (( mouseb == MK_RBUTTON ) ? 2 : 0);
 }
+
+void DumpSubtitles(HWND hWnd)
+{ 
+	const char filter[]="Subtitles files (*.srt)\0*.srt\0All Files (*.*)\0*.*\0\0";
+	char nameo[2048];
+
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hWnd;
+	ofn.lpstrTitle="Save Subtitles as...";
+	ofn.lpstrFilter = filter;
+	strcpy(nameo,GetRomName());
+	ofn.lpstrFile = nameo;
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = "srt";
+
+	if (GetSaveFileName(&ofn))
+	{
+		FILE *srtfile;
+		srtfile = fopen(nameo, "w");
+		if (srtfile) 
+		{
+			extern std::vector<int> subtitleFrames;
+			extern std::vector<std::string> subtitleMessages;
+			float fps = (currMovieData.palFlag == 0 ? 60.0988 : 50.0069); // NTSC vs PAL
+			float subduration = 3; // seconds for the subtitles to be displayed
+
+			for (unsigned int i = 0; i < subtitleFrames.size(); i++)
+			{
+				fprintf(srtfile, "%i\n", i+1); // starts with 1, not 0
+				double seconds, ms, endseconds, endms;
+				seconds = subtitleFrames[i]/fps;
+				if (i+1 < subtitleFrames.size()) // there's another subtitle coming after this one
+				{
+					if (subtitleFrames[i+1]-subtitleFrames[i] < subduration*fps) // avoid two subtitles at the same time
+					{
+						endseconds = (subtitleFrames[i+1]-1)/fps; // frame x: subtitle1; frame x+1 subtitle2
+					} else {
+						endseconds = seconds+subduration;
+					}
+				} else {
+					endseconds = seconds+subduration;
+				}
+				
+				ms = modf(seconds, &seconds);
+				endms = modf(endseconds, &endseconds);
+				// this is just beyond ugly, don't show it to your kids
+				fprintf(srtfile,
+				"%02.0f:%02d:%02d,%03d --> %02.0f:%02d:%02d,%03d\n", // hh:mm:ss,ms --> hh:mm:ss,ms
+				floor(seconds/3600),	(int)floor(seconds/60   ) % 60, (int)floor(seconds)	% 60, (int)(ms*1000),
+				floor(endseconds/3600), (int)floor(endseconds/60) % 60, (int)floor(endseconds) % 60, (int)(endms*1000));
+				fprintf(srtfile, "%s\n\n", subtitleMessages[i].c_str()); // new line for every subtitle
+			}
+		}
+	fclose(srtfile);
+	}
+
+	return;
+
+}
+
 
 //Message loop of the main window
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
@@ -1974,6 +2041,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//Toggle subtitles
 			case FCEUX_CONTEXT_TOGGLESUBTITLES:
 				movieSubtitles ^= 1;
+				break;
+
+			case FCEUX_CONTEXT_DUMPSUBTITLES:
+				DumpSubtitles(hWnd);
 				break;
 
 			//View comments and subtitles
