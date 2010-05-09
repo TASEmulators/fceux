@@ -661,6 +661,41 @@ void dumpToFile(const char* buffer, unsigned int size)
 	}
 }
 
+void UnfreezeAllRam() {
+
+	int i=0;
+
+	char * Cname;
+	uint32 Caddr;
+	int Ctype;
+
+	// Get last cheat number + 1
+	while (FCEUI_GetCheat(i,NULL,NULL,NULL,NULL,NULL,NULL)) {
+		i = i + 1;
+	}
+
+	// Subtract 1 to be on last cheat
+	i = i - 1;
+
+	while (i >= 0) {
+
+		// Since this is automated, only remove unnamed variables, as they
+		// would be added by the freeze command. Manual unfreeze should let them
+		// make that mistake once or twice, in case they like it that way.
+		FCEUI_GetCheat(i,&Cname,&Caddr,NULL,NULL,NULL,&Ctype);
+		if ((Cname[0] == '\0') && (((Caddr >= 0) && (Caddr < 0x2000)) || ((Caddr >= 0x6000) && (Caddr < 0x8000))) && (Ctype == 1)) {
+			// Already Added, so consider it a success
+			FreezeRam(Caddr,-1,1);
+
+		}
+
+		i = i - 1;
+	}
+
+	return;
+}
+
+
 void FreezeRam(int address, int mode, int final){
 	// mode: -1 == Unfreeze; 0 == Toggle; 1 == Freeze
 	// ################################## End of SP CODE ###########################
@@ -1302,15 +1337,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		}
 	case ID_ADDRESS_FRZ_UNFREEZE_ALL:
 		{
-			int n;
-			for (n=0;n<0x2000;n++)
-			{
-				FreezeRam(n, -1, 0);
-			}
-			for (n=0x6000;n<0x8000;n++)
-			{
-				FreezeRam(n, -1, n == 0x7FFF);
-			}
+			UnfreezeAllRam();
 			break;
 		}
 		// ################################## End of SP CODE ###########################
