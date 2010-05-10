@@ -3186,6 +3186,7 @@ static int emu_getscreenpixel(lua_State *L) {
 	
 	int x = luaL_checkinteger(L, 1);
 	int y = luaL_checkinteger(L,2);
+	bool getemuscreen = (lua_toboolean(L,3) == 1);
 
 	int r, g, b;
 	int palette;
@@ -3208,10 +3209,10 @@ static int emu_getscreenpixel(lua_State *L) {
 		return 4;
 	}
 	
-	uint32 pixelinfo = GetScreenPixel(x,y);
+	uint32 pixelinfo = GetScreenPixel(x,y,getemuscreen);
 
 	LUA_DECOMPOSE_PIXEL(pixelinfo, palette, r, g, b);
-	palette = GetScreenPixelPalette(x,y);
+	palette = GetScreenPixelPalette(x,y,getemuscreen);
 
 	lua_pushinteger(L, r);
 	lua_pushinteger(L, g);

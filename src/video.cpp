@@ -414,24 +414,32 @@ static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
 	return 1;
 }
 
-uint32 GetScreenPixel(int x, int y) {
+uint32 GetScreenPixel(int x, int y, bool usebackup) {
 	
 	uint8 r,g,b;
 
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
-	FCEUD_GetPalette(XBuf[(y*256)+x],&r,&g,&b);
+	if (usebackup)
+		FCEUD_GetPalette(XBackBuf[(y*256)+x],&r,&g,&b);
+	else
+		FCEUD_GetPalette(XBuf[(y*256)+x],&r,&g,&b);
+
 
 	return ((int) (r) << 16) | ((int) (g) << 8) | (int) (b);
 }
 
-int GetScreenPixelPalette(int x, int y) {
+int GetScreenPixelPalette(int x, int y, bool usebackup) {
 
 	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
 		return -1;
 
-	return XBuf[(y*256)+x] & 0x3f;
+	if (usebackup)
+		return XBackBuf[(y*256)+x] & 0x3f;
+	else
+		return XBuf[(y*256)+x] & 0x3f;
+
 }
 
 int SaveSnapshot(void)
