@@ -1171,10 +1171,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			{
 				// Handle certain subborn context menus for nearly incapable controls.
 
-				// Only need 9, but I'd rather double it to be safe
-				//char TestHwnd[17];
-				//char TestwParam[17];
-
 				// Convert wParam to a string
 				sprintf(str,"%08x",wParam);
 
@@ -1184,11 +1180,18 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				// Compare the now-compatible data with strcmp.
 				if (!strcmp(str, str2)) {
 					// Only open the menu if a cheat is selected
-					int test = SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0);
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
 						// Open IDC_LIST_CHEATS Context Menu
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
-						TrackPopupMenu(hDebugcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+
+						if (lParam != -1)
+							TrackPopupMenu(hDebugcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+						else { // Handle the context menu keyboard key
+							GetWindowRect(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST), &wrect);
+							TrackPopupMenu(hDebugcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+						}
+						
+
 					}
 				}
 			

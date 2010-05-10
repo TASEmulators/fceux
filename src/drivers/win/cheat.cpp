@@ -355,10 +355,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			{
 				// Handle certain subborn context menus for nearly incapable controls.
 
-				// Only need 9, but I'd rather double it to be safe
-				//char TestHwnd[17];
-				//char TestwParam[17];
-
 				// Convert wParam to a string
 				sprintf(str,"%08x",wParam);
 
@@ -371,7 +367,14 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 					if (selcheat >= 0) {
 						// Open IDC_LIST_CHEATS Context Menu
 						hCheatcontextsub = GetSubMenu(hCheatcontext,0);
-						TrackPopupMenu(hCheatcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+
+						if (lParam != -1)
+							TrackPopupMenu(hCheatcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+						else { // Handle the context menu keyboard key
+							GetWindowRect(GetDlgItem(hwndDlg,IDC_LIST_CHEATS), &wrect);
+							TrackPopupMenu(hCheatcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+						}
+
 					}
 				}
 			
