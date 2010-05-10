@@ -461,13 +461,16 @@ static int emu_addgamegenie(lua_State *L) {
 	int Ccompare, Ctype;
 	
 	if (!FCEUI_DecodeGG(msg, &GGaddr, &GGval, &GGcomp)) {
-		return 0;
+		luaL_error(L, "Failed to decode game genie code");
+		lua_pushboolean(L, false);
+		return 1;
 	}
 
 	while (FCEUI_GetCheat(i,NULL,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
 
 		if ((GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
 			// Already Added, so consider it a success
+			lua_pushboolean(L, true);
 			return 1;
 		}
 
@@ -478,10 +481,12 @@ static int emu_addgamegenie(lua_State *L) {
 		// Code was added
 		// Can't manage the display update the way I want, so I won't bother with it
 		// UpdateCheatsAdded();
+		lua_pushboolean(L, true);
 		return 1;
 	} else {
 		// Code didn't get added
-		return 0;
+		lua_pushboolean(L, false);
+		return 1;
 	}
 }
 
@@ -499,23 +504,30 @@ static int emu_delgamegenie(lua_State *L) {
 	int Ccompare, Ctype;
 	
 	if (!FCEUI_DecodeGG(msg, &GGaddr, &GGval, &GGcomp)) {
-		return 0;
+		luaL_error(L, "Failed to decode game genie code");
+		lua_pushboolean(L, false);
+		return 1;
 	}
 
 	while (FCEUI_GetCheat(i,&Cname,&Caddr,&Cval,&Ccompare,NULL,&Ctype)) {
 
 		if ((!strcmp(msg,Cname)) && (GGaddr == Caddr) && (GGval == Cval) && (GGcomp == Ccompare) && (Ctype == 1)) {
 			// Delete cheat code
-			if (FCEUI_DelCheat(i))
+			if (FCEUI_DelCheat(i)) {
+				lua_pushboolean(L, true);
 				return 1;
-			else
-				return 0;
+			}
+			else {
+				lua_pushboolean(L, false);
+				return 1;
+			}
 		}
 
 		i = i + 1;
 	}
 
 	// Cheat didn't exist, so it's not an error
+	lua_pushboolean(L, true);
 	return 1;
 }
 
@@ -3129,6 +3141,86 @@ static int gui_pixel(lua_State *L) {
 	return 0;
 }
 
+// Usage: 
+// local r,g,b,a = gui.getpixel(255, 223)
+// Gets the LUA set pixel color
+static int gui_getpixel(lua_State *L) {
+	
+	int x = luaL_checkinteger(L, 1);
+	int y = luaL_checkinteger(L,2);
+
+	int r, g, b, a;
+
+	if (!gui_check_boundary(x, y))
+		luaL_error(L,"bad coordinates. Use 0-%d x 0-%d", LUA_SCREEN_WIDTH - 1, LUA_SCREEN_HEIGHT - 1);
+
+	if (!gui_data) {
+		// Return all 0s, including for alpha.
+		// If alpha == 0, there was no color data for that spot
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		return 4;
+	}
+	
+	//uint8 *dst = (uint8*) &gui_data[(y*LUA_SCREEN_WIDTH+x)*4];
+	
+	//uint32 color = *(uint32*) &gui_data[(y*LUA_SCREEN_WIDTH+x)*4];
+
+	LUA_DECOMPOSE_PIXEL(*(uint32*) &gui_data[(y*LUA_SCREEN_WIDTH+x)*4], a, r, g, b);
+
+	lua_pushinteger(L, r);
+	lua_pushinteger(L, g);
+	lua_pushinteger(L, b);
+	lua_pushinteger(L, a);
+	return 4;
+
+}
+
+// Usage: 
+// local r,g,b,palette = gui.getpixel(255, 255)
+// Gets the screen pixel color
+// Palette will be 254 on error
+static int emu_getscreenpixel(lua_State *L) {
+	
+	int x = luaL_checkinteger(L, 1);
+	int y = luaL_checkinteger(L,2);
+
+	int r, g, b;
+	int palette;
+
+	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 239))) {
+		luaL_error(L,"bad coordinates. Use 0-255 x 0-239");
+
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 254);
+		return 4;
+	}
+	
+	if (!XBuf) {
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, 254);
+		return 4;
+	}
+	
+	uint32 pixelinfo = GetScreenPixel(x,y);
+
+	LUA_DECOMPOSE_PIXEL(pixelinfo, palette, r, g, b);
+	palette = GetScreenPixelPalette(x,y);
+
+	lua_pushinteger(L, r);
+	lua_pushinteger(L, g);
+	lua_pushinteger(L, b);
+	lua_pushinteger(L, palette);
+	return 4;
+
+}
+
 // gui.line(x1,y1,x2,y2,color,skipFirst)
 static int gui_line(lua_State *L) {
 
@@ -4497,6 +4589,7 @@ static const struct luaL_reg emulib [] = {
 	{"registerexit", emu_registerexit},
 	{"addgamegenie", emu_addgamegenie},
 	{"delgamegenie", emu_delgamegenie},
+	{"getscreenpixel", emu_getscreenpixel},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"print", print}, // sure, why not
@@ -4609,6 +4702,7 @@ static const struct luaL_reg movielib[] = {
 static const struct luaL_reg guilib[] = {
 	
 	{"pixel", gui_pixel},
+	{"getpixel", gui_getpixel},
 	{"line", gui_line},
 	{"box", gui_box},
 	{"text", gui_text},

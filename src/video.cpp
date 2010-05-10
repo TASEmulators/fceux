@@ -414,6 +414,26 @@ static int WritePNGChunk(FILE *fp, uint32 size, char *type, uint8 *data)
 	return 1;
 }
 
+uint32 GetScreenPixel(int x, int y) {
+	
+	uint8 r,g,b;
+
+	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
+		return -1;
+
+	FCEUD_GetPalette(XBuf[(y*256)+x],&r,&g,&b);
+
+	return ((int) (r) << 16) | ((int) (g) << 8) | (int) (b);
+}
+
+int GetScreenPixelPalette(int x, int y) {
+
+	if (((x < 0) || (x > 255)) || ((y < 0) || (y > 255)))
+		return -1;
+
+	return XBuf[(y*256)+x] & 0x3f;
+}
+
 int SaveSnapshot(void)
 {
 	unsigned int lastu=0;
