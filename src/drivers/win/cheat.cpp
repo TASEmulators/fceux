@@ -351,35 +351,28 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 			}
 			break;
 
-			case WM_CONTEXTMENU:
-			{
-				// Handle certain subborn context menus for nearly incapable controls.
+		case WM_CONTEXTMENU:
+		{
+			// Handle certain subborn context menus for nearly incapable controls.
 
-				// Convert wParam to a string
-				sprintf(str,"%08x",wParam);
-
-				// Convert HWND of IDC_LIST_CHEATS to a string
-				sprintf(str2,"%08x",GetDlgItem(hwndDlg,IDC_LIST_CHEATS));
-
-				// Compare the now-compatible data with strcmp.
-				if (!strcmp(str, str2)) {
-					// Only open the menu if a cheat is selected
-					if (selcheat >= 0) {
-						// Open IDC_LIST_CHEATS Context Menu
-						hCheatcontextsub = GetSubMenu(hCheatcontext,0);
-
-						if (lParam != -1)
-							TrackPopupMenu(hCheatcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
-						else { // Handle the context menu keyboard key
-							GetWindowRect(GetDlgItem(hwndDlg,IDC_LIST_CHEATS), &wrect);
-							TrackPopupMenu(hCheatcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
-						}
-
+			if (wParam == (uint32)GetDlgItem(hwndDlg,IDC_LIST_CHEATS)) {
+				// Only open the menu if a cheat is selected
+				if (selcheat >= 0) {
+					// Open IDC_LIST_CHEATS Context Menu
+					hCheatcontextsub = GetSubMenu(hCheatcontext,0);
+					
+					if (lParam != -1)
+						TrackPopupMenu(hCheatcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+					else { // Handle the context menu keyboard key
+						GetWindowRect(GetDlgItem(hwndDlg,IDC_LIST_CHEATS), &wrect);
+						TrackPopupMenu(hCheatcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
 					}
+
 				}
-			
 			}
-			break;
+		
+		}
+		break;
 
 		case WM_COMMAND:
 			switch (HIWORD(wParam)) {

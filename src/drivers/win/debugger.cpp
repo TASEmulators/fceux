@@ -1001,7 +1001,7 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
 
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
-	char str[256]={0},str2[256]={0},*ptr,dotdot[4];
+	char str[256]={0},*ptr,dotdot[4];
 	int tmp,tmp2;
 	int mouse_x,mouse_y;
 	int ret,i;
@@ -1171,14 +1171,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			{
 				// Handle certain subborn context menus for nearly incapable controls.
 
-				// Convert wParam to a string
-				sprintf(str,"%08x",wParam);
-
-				// Convert HWND of IDC_LIST_CHEATS to a string
-				sprintf(str2,"%08x",GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST));
-
-				// Compare the now-compatible data with strcmp.
-				if (!strcmp(str, str2)) {
+				if (wParam == (uint32)GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST)) {
 					// Only open the menu if a cheat is selected
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
 						// Open IDC_LIST_CHEATS Context Menu
@@ -1191,7 +1184,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							TrackPopupMenu(hDebugcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
 						}
 						
-
 					}
 				}
 			
