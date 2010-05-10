@@ -424,9 +424,17 @@ CHEATCONTEXTMENUS MENU
 BEGIN
     POPUP "CheatListPopup"
     BEGIN
-	    MENUITEM "Toggle Cheat",                CHEAT_CONTEXT_TOGGLECHEAT
+	    MENUITEM "Toggle Cheat\tDbl-Clk",       CHEAT_CONTEXT_TOGGLECHEAT
         MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_POKECHEATVALUE
         MENUITEM "Goto In Hex Editor",          CHEAT_CONTEXT_GOTOINHEXEDITOR
+    END
+END
+
+DEBUGCONTEXTMENUS MENU 
+BEGIN
+    POPUP "DebugListPopup"
+    BEGIN
+	    MENUITEM "Toggle Breakpoint\tDbl-Clk",  DEBUGGER_CONTEXT_TOGGLEBREAK
     END
 END
 

@@ -145,6 +145,7 @@
 #define CHECK_SOUND_MUTEFA              130
 #define IDC_DISABLE_HW_ACCEL_WIN        130
 #define IDC_DISABLE_HW_ACCEL_FS         131
+#define DEBUGGER_CONTEXT_TOGGLEBREAK    132
 #define MENU_RECORD_MOVIE               141
 #define MENU_REPLAY_MOVIE               142
 #define MENU_STOP_MOVIE                 143

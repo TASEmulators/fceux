@@ -62,6 +62,9 @@ int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
 HWND hDebug;
+static HMENU hDebugcontext;     //Handle to context menu
+static HMENU hDebugcontextsub;  //Handle to context sub menu
+
 static HFONT hFont;
 static SCROLLINFO si;
 
@@ -998,7 +1001,7 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
 
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
-	char str[256]={0},*ptr,dotdot[4];
+	char str[256]={0},str2[256]={0},*ptr,dotdot[4];
 	int tmp,tmp2;
 	int mouse_x,mouse_y;
 	int ret,i;
@@ -1057,6 +1060,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			debuggerWasActive = 1;
 			
 // ################################## End of SP CODE ###########################
+
+			// Enable Context Sub-Menus
+			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
 
 			FCEUI_Debugger().badopbreak = false;
 			debugger_open = 1;
@@ -1160,6 +1166,34 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
 				}
 				break;
+
+			case WM_CONTEXTMENU:
+			{
+				// Handle certain subborn context menus for nearly incapable controls.
+
+				// Only need 9, but I'd rather double it to be safe
+				//char TestHwnd[17];
+				//char TestwParam[17];
+
+				// Convert wParam to a string
+				sprintf(str,"%08x",wParam);
+
+				// Convert HWND of IDC_LIST_CHEATS to a string
+				sprintf(str2,"%08x",GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST));
+
+				// Compare the now-compatible data with strcmp.
+				if (!strcmp(str, str2)) {
+					// Only open the menu if a cheat is selected
+					int test = SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0);
+					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
+						// Open IDC_LIST_CHEATS Context Menu
+						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
+						TrackPopupMenu(hDebugcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+					}
+				}
+			
+			}
+			break;
 
 			case WM_MOUSEWHEEL: //just handle page up/down and mousewheel messages together
 				i = (short)HIWORD(wParam);///WHEEL_DELTA;
@@ -1421,6 +1455,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 // ################################## End of SP CODE ###########################
 							
 							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break;
+							case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), lParam); break;
 						}
 						//UpdateDebugger();
 						break;
