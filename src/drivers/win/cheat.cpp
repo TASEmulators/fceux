@@ -147,6 +147,34 @@ void EnableCheatButtons(HWND hwndDlg, int enable) {
 	EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_CHEAT_LT),enable);
 }
 
+void CheatDialogSearchEQ() {
+	searchdone=1;
+	FCEUI_CheatSearchEnd(2,0,0);
+	ShowResults(hCheat);
+	return;
+}
+
+void CheatDialogSearchNE() {
+	searchdone=1;
+	FCEUI_CheatSearchEnd(3,0,0);
+	ShowResults(hCheat);
+	return;
+}
+
+void CheatDialogSearchGT() {
+	searchdone=1;
+	FCEUI_CheatSearchEnd(5,0,0);
+	ShowResults(hCheat);
+	return;
+}
+
+void CheatDialogSearchLT() {
+	searchdone=1;
+	FCEUI_CheatSearchEnd(6,0,0);
+	ShowResults(hCheat);
+	return;
+}
+
 BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	LOGFONT lf;
 	RECT wrect;
@@ -468,36 +496,37 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							ShowResults(hwndDlg);
 							break;
 						case IDC_BTN_CHEAT_EQ:
-							searchdone=1;
-							FCEUI_CheatSearchEnd(2,0,0);
-							ShowResults(hwndDlg);
+							CheatDialogSearchEQ();
+							//searchdone=1;
+							//FCEUI_CheatSearchEnd(2,0,0);
+							//ShowResults(hwndDlg);
 							break;
 						case IDC_BTN_CHEAT_NE:
-							searchdone=1;
 							if (IsDlgButtonChecked(hwndDlg,IDC_CHEAT_CHECK_NE_BY) == BST_CHECKED) {
+								searchdone=1;
 								GetDlgItemText(hwndDlg,IDC_CHEAT_VAL_NE_BY,str,3);
 								FCEUI_CheatSearchEnd(2,0,StrToU8(str));
+								ShowResults(hwndDlg);
 							}
-							else FCEUI_CheatSearchEnd(3,0,0);
-							ShowResults(hwndDlg);
+							else CheatDialogSearchNE(); //FCEUI_CheatSearchEnd(3,0,0);
 							break;
 						case IDC_BTN_CHEAT_GT:
-							searchdone=1;
 							if (IsDlgButtonChecked(hwndDlg,IDC_CHEAT_CHECK_GT_BY) == BST_CHECKED) {
+								searchdone=1;
 								GetDlgItemText(hwndDlg,IDC_CHEAT_VAL_GT_BY,str,3);
 								FCEUI_CheatSearchEnd(7,0,StrToU8(str));
+								ShowResults(hwndDlg);
 							}
-							else FCEUI_CheatSearchEnd(5,0,0);
-							ShowResults(hwndDlg);
+							else CheatDialogSearchGT();
 							break;
 						case IDC_BTN_CHEAT_LT:
-							searchdone=1;
 							if (IsDlgButtonChecked(hwndDlg,IDC_CHEAT_CHECK_LT_BY) == BST_CHECKED) {
+								searchdone=1;
 								GetDlgItemText(hwndDlg,IDC_CHEAT_VAL_LT_BY,str,3);
 								FCEUI_CheatSearchEnd(8,0,StrToU8(str));
+								ShowResults(hwndDlg);
 							}
-							else FCEUI_CheatSearchEnd(6,0,0);
-							ShowResults(hwndDlg);
+							else CheatDialogSearchLT();
 							break;
 					}
 					break;
