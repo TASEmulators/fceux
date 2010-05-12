@@ -10,10 +10,6 @@ void DoGGConv();
 void SetGGConvFocus(int address,int compare);
 void UpdateCheatList();
 void UpdateCheatsAdded();
-void CheatDialogSearchEQ();
-void CheatDialogSearchNE();
-void CheatDialogSearchGT();
-void CheatDialogSearchLT();
 
 extern unsigned int FrozenAddressCount;
 extern std::vector<uint16> FrozenAddresses;

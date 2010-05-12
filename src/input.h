@@ -275,4 +275,3 @@ extern bool turbo;
 void LagCounterReset();
 
 #endif //_INPUT_H_
-
