@@ -58,7 +58,8 @@ enum EMOVIEMODE
 	MOVIEMODE_INACTIVE = 1,
 	MOVIEMODE_RECORD = 2,
 	MOVIEMODE_PLAY = 4,
-	MOVIEMODE_TASEDIT = 8
+	MOVIEMODE_TASEDIT = 8,
+	MOVIEMODE_FINISHED = 16
 };
 
 enum EMOVIECMD
@@ -72,8 +73,9 @@ enum EMOVIECMD
 EMOVIEMODE FCEUMOV_Mode();
 bool FCEUMOV_Mode(EMOVIEMODE modemask);
 bool FCEUMOV_Mode(int modemask);
-inline bool FCEUMOV_IsPlaying() { return FCEUMOV_Mode(MOVIEMODE_PLAY); }
+inline bool FCEUMOV_IsPlaying() { return (FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_FINISHED)); }
 inline bool FCEUMOV_IsRecording() { return FCEUMOV_Mode(MOVIEMODE_RECORD); }
+inline bool FCEUMOV_IsFinished() { return FCEUMOV_Mode(MOVIEMODE_FINISHED);}
 
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);

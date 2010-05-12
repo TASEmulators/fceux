@@ -284,7 +284,7 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 				read_snd=1;
 			break;
 		case 6:
-			if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
+			if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED))
 			{
 				if(!ReadStateChunk(is,FCEUMOV_STATEINFO,size)) ret=false;
 			}
@@ -372,7 +372,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	totalsize+=WriteStateChunk(os,31,FCEU_NEWPPU_STATEINFO);
 	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
 	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
-	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED))
 	{
 		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
 
@@ -776,7 +776,7 @@ bool FCEUSS_Load(const char *fname)
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;
 		extern uint8 FCEU_GetJoyJoy(void);
-		if (FCEUMOV_Mode(MOVIEMODE_RECORD) || FCEUMOV_Mode(MOVIEMODE_PLAY)) //adelikat: just doing GetJoyJoy regardless should work, but I just felt conceptually movies should be relying on movie data.  There might be some fringe cases where this is necessary.
+		if (FCEUMOV_Mode(MOVIEMODE_RECORD|MOVIEMODE_PLAY|MOVIEMODE_FINISHED)) //adelikat: just doing GetJoyJoy regardless should work, but I just felt conceptually movies should be relying on movie data.  There might be some fringe cases where this is necessary.
 			memcpy(&cur_input_display,currMovieData.records[currFrameCounter-1].joysticks.data,4);
 		else
 			cur_input_display = FCEU_GetJoyJoy();

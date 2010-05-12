@@ -721,7 +721,7 @@ void FCEUI_StopMovie()
 	if(suppressMovieStop)
 		return;
 	
-	if(movieMode == MOVIEMODE_PLAY)
+	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
 		StopPlayback();
 	else if(movieMode == MOVIEMODE_RECORD)
 		StopRecording();
@@ -834,7 +834,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	assert(fname);
 
 	//mbg 6/10/08 - we used to call StopMovie here, but that cleared curMovieFilename and gave us crashes...
-	if(movieMode == MOVIEMODE_PLAY)
+	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
 		StopPlayback();
 	else if(movieMode == MOVIEMODE_RECORD)
 		StopRecording();
@@ -978,6 +978,14 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 static int _currCommand = 0;
 
+
+// Stop movie playback without closing the movie.
+static void FinishPlayback()
+{
+	FCEU_DispMessage("Movie finished playing.");
+	movieMode = MOVIEMODE_FINISHED;
+}
+
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
@@ -1009,9 +1017,9 @@ void FCEUMOV_AddInputState()
 	else if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
-		if(currFrameCounter == currMovieData.records.size())
+		if(currFrameCounter == (int)currMovieData.records.size())
 		{
-			StopPlayback();
+			FinishPlayback();
 		}
 		else
 		{
@@ -1099,6 +1107,8 @@ void FCEU_DrawMovies(uint8 *XBuf)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
 		else if(movieMode == MOVIEMODE_RECORD) 
 			sprintf(counterbuf,"%d",currMovieData.records.size());
+		else if (movieMode == MOVIEMODE_FINISHED)
+			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
 		else
 			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
 
@@ -1127,7 +1137,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
-	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
+	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
 		return currMovieData.dump(os, true);
 	else return 0;
 }
@@ -1151,7 +1161,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		is->seekg((uint32)curr+size);
 		extern bool FCEU_state_loading_old_format;
 		if(FCEU_state_loading_old_format) {
-			if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD) {
+			if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_FINISHED) {
 				FCEUI_StopMovie();			
 				FCEU_PrintError("You have tried to use an old savestate while playing a movie. This is unsupported (since the old savestate has old-format movie data in it which can't be converted on the fly)");
 			}
@@ -1178,7 +1188,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	//  then, we must discard this movie and just load the savestate
 
 
-	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD)
+	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_FINISHED)
 	{
 		//handle moviefile mismatch
 		if(tempMovieData.guid != currMovieData.guid)
@@ -1203,8 +1213,10 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			//if the frame counter is longer than our current movie, then error
 			if(currFrameCounter > (int)currMovieData.records.size())
 			{
-				FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
-				return false;
+				FinishPlayback();
+				//TODO: turn frame counter to red to get attention
+				//FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
+				//return false;
 			}
 			movieMode = MOVIEMODE_PLAY;
 		}

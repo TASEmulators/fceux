@@ -2161,7 +2161,7 @@ static int zapper_read(lua_State *L){
 	int z = 0;
 	extern void GetMouseData(uint32 (&md)[3]); //adelikat: shouldn't this be ifdef'ed for Win32?
 	int x,y,click;
-	if (/*FCEUMOV_IsPlaying()*/ FCEUMOV_Mode(MOVIEMODE_PLAY))
+	if (FCEUMOV_Mode(MOVIEMODE_PLAY))
 	{
 		if (!currFrameCounter)
 			z = 0;
@@ -2580,10 +2580,12 @@ int emu_emulating(lua_State *L) {
 
 // string movie.mode()
 //
-//   "record", "playback" or nil
+//   "record", "playback", "finished", or nil
 int movie_mode(lua_State *L) {
 	if (FCEUMOV_IsRecording())
 		lua_pushstring(L, "record");
+	else if (FCEUMOV_IsFinished())
+		lua_pushstring(L, "finished"); //Note: this comes before plaback since playback checks for finished as well
 	else if (FCEUMOV_IsPlaying())
 		lua_pushstring(L, "playback");
 	else

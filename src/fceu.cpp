@@ -611,7 +611,7 @@ void AutoFire(void)
 	//doesn't get screwed up when loading.
 	if(FCEUMOV_Mode(MOVIEMODE_RECORD | MOVIEMODE_PLAY))
 	{
-		rapidAlternator= AutoFirePattern[(AutoFireOffset + FCEUMOV_GetFrame())%AutoFirePatternLength];
+		rapidAlternator= AutoFirePattern[(AutoFireOffset + FCEUMOV_GetFrame())%AutoFirePatternLength]; //adelikat: TODO: Think through this, MOVIEMODE_FINISHED should not use movie data for auto-fire?
 	}
 	else
 	{
@@ -1032,7 +1032,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_STOPMOVIE:
 	case FCEUI_PLAYFROMBEGINNING:
-		return FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD);
+		return (FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED));
 
 	case FCEUI_STOPAVI:
 		return FCEUI_AviIsRecording();
@@ -1043,7 +1043,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_RESET:
 		if(!GameInfo) return false;
-		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT|MOVIEMODE_PLAY)) return false;
+		if(FCEUMOV_Mode(MOVIEMODE_FINISHED|MOVIEMODE_TASEDIT|MOVIEMODE_PLAY)) return false;
 		break;
 
 	case FCEUI_POWER:

@@ -1237,14 +1237,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
 
 			//If There is a movie loaded in read only
-			if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && movie_readonly)
+			if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && movie_readonly)
 			{
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext,0); 
 				whichContext = 0; // Game+Movie+readonly
 			}
 			
 			//If there is a movie loaded in read+write
-			else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD) && !movie_readonly)
+			else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && !movie_readonly)
 			{
 				hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
 				whichContext = 3; // Game+Movie+readwrite
@@ -2484,7 +2484,7 @@ void FCEUD_AviRecordTo(void)
 		aviDirectory.append("\\");			//if directory override has no \ then add one
 
 	//if we are playing a movie, construct the filename from the current movie.
-	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD))
+	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD)) //adelikat: TOOD: Think about this.  I think MOVIEMODE_FINISHED shouldn't not be included here.  Am I wrong?
 	{
 		tempFilename = GetMfn();	//get movie filename
 		tempFilename.erase(0,1);	//remove dot
