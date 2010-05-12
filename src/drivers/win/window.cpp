@@ -2255,18 +2255,26 @@ void FixWXY(int pref)
 		{
 			if(eoptions&EO_FORCEASPECT)
 				winsizemuly *= mult / winsizemulx;
-			winsizemulx = mult;
+
+			if (winsizemulx < mult)
+				winsizemulx = mult;
 		}
 		if(winsizemuly < mult && mult < 3) //11/14/2008, adelikat: added && mult < 3 and extra code to meet mult >=3 conditions
 		{
 			if(eoptions&EO_FORCEASPECT)
 				winsizemulx *= mult / winsizemuly;
-			winsizemuly = mult;
+			
+			if (winsizemuly < mult)
+				winsizemuly = mult;
+
 		}
-		else if (winsizemuly < mult&& mult >= 3) //11/14/2008, adelikat: This was probably a hacky solution.  But when special scalar = 3 and aspect correction is on,
+		else if (winsizemuly < mult&& mult >= 3) { //11/14/2008, adelikat: This was probably a hacky solution.  But when special scalar = 3 and aspect correction is on,
 			if(eoptions&EO_FORCEASPECT)			//then x is corrected to a wider ratio (.5 of what this code seems to expect) so I added a special circumstance for these 2 situations
 				winsizemulx *= (mult+0.5) / winsizemuly;	//And adjusted the special scaling by .5
-			winsizemuly = mult;
+
+			if (winsizemuly < mult)
+				winsizemuly = mult;
+		}
 	}
 
 	if(winsizemulx<0.1)
