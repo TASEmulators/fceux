@@ -744,9 +744,6 @@ bool FCEUSS_Load(const char *fname)
 		}
 		else
 		{
-			//This looks redudant to me... but why bother deleting it:) //adelikat: TODO: remove this later
-			SaveStateStatus[CurrentState]=1;
-
 			FCEU_DispMessage("State %d loaded.",CurrentState);
 			SaveStateStatus[CurrentState]=1;
 		}
@@ -778,8 +775,8 @@ bool FCEUSS_Load(const char *fname)
 		
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;
-		if (FCEUMOV_Mode(MOVIEMODE_RECORD) ) //TODO: the memcpy line doesn't work if playback mode, figure out why and have it up date during that mode as well
-			memcpy(&cur_input_display,currMovieData.records[currMovieData.getNumRecords()-1].joysticks.data,4);
+		if (FCEUMOV_Mode(MOVIEMODE_RECORD) || FCEUMOV_Mode(MOVIEMODE_PLAY))
+			memcpy(&cur_input_display,currMovieData.records[currFrameCounter-1].joysticks.data,4);
 
 		return true;
 	}

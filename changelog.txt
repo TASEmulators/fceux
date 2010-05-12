@@ -1,5 +1,5 @@
 11-may-2010 - ugetab - Win32 - Added Ram Search hotkeys for the first 6 search types in the list.
-10-may-2010 - adelikat - Loadstate while in record mode update input display
+10-may-2010 - adelikat - Loadstate while movie is loaded updates input display
 10-may-2010 - ugetab - Added gui.getpixel() which gets any gui.pixel() set pixel colors, and possibly other functions. Added emu.getscreenpixel() which gets the RGB and Palette of any pixel on the screen.
 08-may-2010 - ugetab - Added savestate.object() which is savestate.create() with intuitive numbering under windows
 08-may-2010 - ugetab - Added emu.addgamegenie() and emu.delgamegenie() LUA functions.
