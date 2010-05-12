@@ -632,10 +632,19 @@ static void LaunchTraceLogger(void);
 static void LaunchCodeDataLogger(void);
 static void LaunchRamWatch(void);
 static void LaunchRamSearch(void);
+<<<<<<< .mine
+static void RamSearchOpLT(void);
+static void RamSearchOpGT(void);
+static void RamSearchOpLTE(void);
+static void RamSearchOpGTE(void);
+static void RamSearchOpEQ(void);
+static void RamSearchOpNE(void);
+=======
 static void CheatSearchEQ(void);
 static void CheatSearchNE(void);
 static void CheatSearchGT(void);
 static void CheatSearchLT(void);
+>>>>>>> .r1856
 static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
@@ -758,10 +767,19 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
 	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,	  0, 0, "Open Ram Watch",		  0},
 	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,  0, 0, "Open Ram Search",		  0},
+<<<<<<< .mine
+	{ EMUCMD_TOOL_RAMSEARCHLT,				EMUCMDTYPE_TOOL,	RamSearchOpLT,	  0, 0, "Ram Search - Less Than", 0},
+	{ EMUCMD_TOOL_RAMSEARCHGT,				EMUCMDTYPE_TOOL,	RamSearchOpGT,	  0, 0, "Ram Search - Greater Than", 0},
+	{ EMUCMD_TOOL_RAMSEARCHLTE,				EMUCMDTYPE_TOOL,	RamSearchOpLTE,	  0, 0, "Ram Search - Less Than or Equal", 0},
+	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,	  0, 0, "Ram Search - Greater Than or Equal", 0},
+	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,	  0, 0, "Ram Search - Equal",	  0},
+	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
+=======
 	{ EMUCMD_CHEAT_SEARCHEQ,				EMUCMDTYPE_TOOL,	CheatSearchEQ,	  0, 0, "Cheat Search Equal",		  0},
 	{ EMUCMD_CHEAT_SEARCHNE,				EMUCMDTYPE_TOOL,	CheatSearchNE,	  0, 0, "Cheat Search Not Equal",		  0},
 	{ EMUCMD_CHEAT_SEARCHGT,				EMUCMDTYPE_TOOL,	CheatSearchGT,	  0, 0, "Cheat Search Greater Than",		  0},
 	{ EMUCMD_CHEAT_SEARCHLT,				EMUCMDTYPE_TOOL,	CheatSearchLT,	  0, 0, "Cheat Search Less Than",		  0},
+>>>>>>> .r1856
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -962,6 +980,16 @@ static void LaunchRamSearch(void)
 #endif
 }
 
+<<<<<<< .mine
+static void RamSearchOpLT(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(0);
+	DoRamSearchOperation();
+#endif
+}
+=======
 static void CheatSearchEQ(void)
 {
 #ifdef WIN32
@@ -969,7 +997,18 @@ static void CheatSearchEQ(void)
 	CheatDialogSearchEQ();
 #endif
 }
+>>>>>>> .r1856
 
+<<<<<<< .mine
+static void RamSearchOpGT(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(1);
+	DoRamSearchOperation();
+#endif
+}
+=======
 static void CheatSearchNE(void)
 {
 #ifdef WIN32
@@ -977,7 +1016,46 @@ static void CheatSearchNE(void)
 	CheatDialogSearchNE();
 #endif
 }
+>>>>>>> .r1856
 
+<<<<<<< .mine
+static void RamSearchOpLTE(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(2);
+	DoRamSearchOperation();
+#endif
+}
+
+static void RamSearchOpGTE(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(3);
+	DoRamSearchOperation();
+#endif
+}
+
+static void RamSearchOpEQ(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(4);
+	DoRamSearchOperation();
+#endif
+}
+
+static void RamSearchOpNE(void) {
+#ifdef WIN32
+	extern void SetSearchType(int SearchType);
+	extern void DoRamSearchOperation();
+	SetSearchType(5);
+	DoRamSearchOperation();
+#endif
+}
+
+=======
 static void CheatSearchGT(void)
 {
 #ifdef WIN32
@@ -996,6 +1074,7 @@ static void CheatSearchLT(void)
 
 
 
+>>>>>>> .r1856
 static void FA_SkipLag(void)
 {
 	frameAdvanceLagSkip ^= 1;

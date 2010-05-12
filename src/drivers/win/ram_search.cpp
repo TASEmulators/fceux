@@ -1335,7 +1335,6 @@ static BOOL SelectingByKeyboard()
 	return (a | b | c | d) & 0x80;
 }
 
-
 LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT r;
@@ -2052,4 +2051,56 @@ void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidt
 	}
 
 	ListView_SetExtendedListViewStyle(Box, LVS_EX_FULLROWSELECT);
+}
+
+void SetSearchType(int SearchType) {
+	EnableWindow(GetDlgItem(RamSearchHWnd,IDC_EDIT_DIFFBY),false);
+	EnableWindow(GetDlgItem(RamSearchHWnd,IDC_EDIT_MODBY),false);
+	
+	SendDlgItemMessage(RamSearchHWnd, IDC_LESSTHAN, BM_SETCHECK, SearchType == 0 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(RamSearchHWnd, IDC_MORETHAN, BM_SETCHECK, SearchType == 1 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(RamSearchHWnd, IDC_NOMORETHAN, BM_SETCHECK, SearchType == 2 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(RamSearchHWnd, IDC_NOLESSTHAN, BM_SETCHECK, SearchType == 3 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(RamSearchHWnd, IDC_EQUALTO, BM_SETCHECK, SearchType == 4 ? BST_CHECKED : BST_UNCHECKED, 0);
+	SendDlgItemMessage(RamSearchHWnd, IDC_DIFFERENTFROM, BM_SETCHECK, SearchType == 5 ? BST_CHECKED : BST_UNCHECKED, 0);
+
+	switch(SearchType)
+	{
+		case 0:
+			// Less Than
+			//SendDlgItemMessage(RamSearchHWnd, IDC_LESSTHAN, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = '<';
+			break;
+		case 1:
+			// Greater Than
+			//SendDlgItemMessage(RamSearchHWnd, IDC_MORETHAN, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = '>';
+			break;
+		case 2:
+			// Less Than or Equal
+			//SendDlgItemMessage(RamSearchHWnd, IDC_NOMORETHAN, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = 'l';
+			break;
+		case 3:
+			// Greater Than or Equal
+			//SendDlgItemMessage(RamSearchHWnd, IDC_NOLESSTHAN, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = 'm';
+			break;
+		case 4: 
+			// Equal
+			//SendDlgItemMessage(RamSearchHWnd, IDC_EQUALTO, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = '=';
+			break;
+		case 5:
+			// Not Equal
+			//SendDlgItemMessage(RamSearchHWnd, IDC_DIFFERENTFROM, BM_SETCHECK, BST_CHECKED, 0);
+			rs_o = '!';
+			break;
+	}
+	return;
+}
+
+void DoRamSearchOperation() {
+	RamSearchProc(RamSearchHWnd, WM_COMMAND, IDC_C_SEARCH, 0);
+	return;
 }
