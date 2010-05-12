@@ -775,8 +775,11 @@ bool FCEUSS_Load(const char *fname)
 		
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;
-		if (FCEUMOV_Mode(MOVIEMODE_RECORD) || FCEUMOV_Mode(MOVIEMODE_PLAY))
+		extern uint8 FCEU_GetJoyJoy(void);
+		if (FCEUMOV_Mode(MOVIEMODE_RECORD) || FCEUMOV_Mode(MOVIEMODE_PLAY)) //adelikat: just doing GetJoyJoy regardless should work, but I just felt conceptually movies should be relying on movie data.  There might be some fringe cases where this is necessary.
 			memcpy(&cur_input_display,currMovieData.records[currFrameCounter-1].joysticks.data,4);
+		else
+			cur_input_display = FCEU_GetJoyJoy();
 
 		return true;
 	}
