@@ -17,7 +17,6 @@ void JoyClearBC(ButtConfig *bc);
 
 void UpdateJoysticks(void);
 int DTestButtonJoy(ButtConfig *bc);
-int DTestButtonJoyImmediate(ButtConfig *bc);
 
 #define JOYBACKACCESS_OLDSTYLE 1
 #define JOYBACKACCESS_TASEDIT 2

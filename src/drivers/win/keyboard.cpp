@@ -58,14 +58,14 @@ int DTestButtonImmediate(ButtConfig *bc)
 			}
 		}
 	}
-	if(DTestButtonJoyImmediate(bc)) return(1); // Needs joystick.h
+	if(DTestButtonJoy(bc)) return(1); // Needs joystick.h. Tested with PPJoy mapped with Print Screen
 	return(0);
 }
 
 uint32 GetGamepadPressedImmediate()
 {
 	// Get selected joypad buttons, ignoring NES polling
-	// Basically checks for immediate joypad input.
+	// Basically checks for immediate gamepad input.
 	extern ButtConfig GamePadConfig[4][10];
 	extern int allowUDLR;
 
