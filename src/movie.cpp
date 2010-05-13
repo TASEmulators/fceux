@@ -296,7 +296,7 @@ void MovieRecord::dumpBinary(MovieData* md, std::ostream* os, int index)
 
 void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 {
-	if (currMovieData.binaryFlag)
+	if (false/*currMovieData.binaryFlag*/)
 	{
 		dumpBinary(md, os, index);
 		return;
@@ -1243,7 +1243,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			delete[] str;
 			*/
 			
-			currMovieData.dump(osRecordingMovie, currMovieData.binaryFlag);
+			currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
 			movieMode = MOVIEMODE_RECORD;
 		}
 	}
