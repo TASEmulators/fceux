@@ -22,6 +22,7 @@ void DestroyInput(void);
 void InputScreenChanged(int fs);
 void SetAutoFireDesynch(int DesynchOn);
 int GetAutoFireDesynch();
+uint32 GetGamepadPressedImmediate();
 
 extern LPDIRECTINPUT7 lpDI;
 

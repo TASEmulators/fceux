@@ -50,6 +50,11 @@
 #include "fceulua.h"
 #endif
 
+#ifdef WIN32
+#include "drivers/win/common.h" //For DirectX constants
+#include "drivers/win/input.h"
+#endif
+
 #ifdef CREATE_AVI
 #include "drivers/videolog/nesvideos-piece.h"
 #endif
@@ -262,11 +267,14 @@ void FCEU_PutImage(void)
 					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
 
-			extern uint32 JSImmediate;
-
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
-			ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:JSImmediate >> (controller * 8);
+#ifdef WIN32
+			ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
+#else
+			// Put other port info here
+			ci = 0;
+#endif
 
 			c &= 255;
 			ci &= 255;
