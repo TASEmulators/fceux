@@ -245,8 +245,11 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
+		
 		int controller, c, color;
 		int i, j;
+		int on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7; //0xB7 possible light color
+		static int off = 0xCF;
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
 		for(controller = 0; controller < input_display; controller++, t += 56)
@@ -259,8 +262,9 @@ void FCEU_PutImage(void)
 					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
 			c &= 255;
+			
 			//A
-			color = c&1?0xA7:0xCF;
+			color = c&1?on:off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -271,7 +275,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//B
-			color = c&2?0xA7:0xCF;
+			color = c&2?on:off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -282,21 +286,21 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Select
-			color = c&4?0xA7:0xCF;
+			color = c&4?on:off;
 			for(i = 0; i < 4; i++)
 			{
 				t[11+5*256+i] = color;
 				t[11+6*256+i] = color;
 			}
 			//Start
-			color = c&8?0xA7:0xCF;
+			color = c&8?on:off;
 			for(i = 0; i < 4; i++)
 			{
 				t[17+5*256+i] = color;
 				t[17+6*256+i] = color;
 			}
 			//Up
-			color = c&16?0xA7:0xCF;
+			color = c&16?on:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -305,7 +309,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Down
-			color = c&32?0xA7:0xCF;
+			color = c&32?on:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -314,7 +318,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Left
-			color = c&64?0xA7:0xCF;
+			color = c&64?on:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -323,7 +327,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Right
-			color = c&128?0xA7:0xCF;
+			color = c&128?on:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)

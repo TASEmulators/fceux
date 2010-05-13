@@ -1,3 +1,4 @@
+12-may-2010 - adelikat - Input Display - displays a silver color when input is from a movie rather than the user
 12-may-2010 - ugetab - Win32 - With special scaler in window mode, it's possible to resize to anything above the minimum.
 12-may-2010 - adelikat - Movies now have a "finished" option.  If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded.  Similar functionality as DeSmuME and GENS rerecording
 11-may-2010 - adelikat - Loadstate updates input display
