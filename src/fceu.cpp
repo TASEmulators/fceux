@@ -82,6 +82,9 @@ bool frameAdvanceLagSkip = false; //If this is true, frame advance will skip ove
 bool AutoSS = false;		//Flagged true when the first auto-savestate is made while a game is loaded, flagged false on game close
 bool movieSubtitles = true; //Toggle for displaying movie subtitles
 
+// GetGamepadPressedImmediate() transfer is being a pain to access.
+uint32 JSImmediate=0;
+
 FCEUGI::FCEUGI()
 : filename(0)
 , archiveFilename(0)

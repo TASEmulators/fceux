@@ -23,6 +23,7 @@
 
 #include "input.h"
 #include "keyboard.h"
+#include "joystick.h"
 
 static HRESULT  ddrval; //mbg merge 7/17/06 made static
 static int background = 0;
@@ -40,6 +41,58 @@ static unsigned int keys_jd[256] = {0,}; // just-down
 static unsigned int keys_jd_lock[256] = {0,}; // just-down released lock
 int autoHoldKey = 0, autoHoldClearKey = 0;
 int ctr=0;
+
+// Test button state using current keyboard data.
+// Clone of DTestButton, but uses local variables.
+int DTestButtonImmediate(ButtConfig *bc)
+{
+	uint32 x;//mbg merge 7/17/06 changed to uint
+
+	for(x=0;x<bc->NumC;x++)
+	{
+		if(bc->ButtType[x]==BUTTC_KEYBOARD)
+		{
+			if(keys_nr[bc->ButtonNum[x]])
+			{
+				return(1);
+			}
+		}
+	}
+	if(DTestButtonJoyImmediate(bc)) return(1); // Needs joystick.h
+	return(0);
+}
+
+uint32 GetGamepadPressedImmediate()
+{
+	// Get selected joypad buttons, ignoring NES polling
+	// Basically checks for immediate joypad input.
+	extern ButtConfig GamePadConfig[4][10];
+	extern int allowUDLR;
+
+	uint32 JSButtons=0;
+	int x;
+	int wg;
+
+	for(wg=0;wg<4;wg++)
+	{
+
+		for(x=0;x<8;x++)
+			if(DTestButtonImmediate(&GamePadConfig[wg][x]))
+				JSButtons|=(1<<x)<<(wg<<3);
+
+		// Check if U+D/L+R is disabled
+		if(!allowUDLR)
+		{
+			for(x=0;x<32;x+=8)
+			{
+				if((JSButtons & (0xC0<<x) ) == (0xC0<<x) ) JSButtons&=~(0xC0<<x);
+				if((JSButtons & (0x30<<x) ) == (0x30<<x) ) JSButtons&=~(0x30<<x);
+			}
+		}
+	}
+	return JSButtons;
+}
+
 void KeyboardUpdateState(void)
 {
 	unsigned char tk[256];
@@ -117,6 +170,9 @@ void KeyboardUpdateState(void)
 	extern uint8 autoHoldOn, autoHoldReset;
 	autoHoldOn = autoHoldKey && keys[autoHoldKey] != 0;
 	autoHoldReset = autoHoldClearKey && keys[autoHoldClearKey] != 0;
+
+	extern uint32 JSImmediate;
+	JSImmediate = GetGamepadPressedImmediate();
 }
 
 unsigned int *GetKeyboard(void)

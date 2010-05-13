@@ -245,9 +245,10 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
-		int controller, c, color; 
+		int controller, c, ci, color; 
 		int i, j;
 		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7; //0xB7 possible light color
+		uint32 oni = 0x90; //Color for immediate keyboard buttons
 		static uint32 off = 0xCF;
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
@@ -260,10 +261,18 @@ void FCEU_PutImage(void)
 				for(j = 3; j< 6; j++)
 					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
+
+			extern uint32 JSImmediate;
+
+			// This doesn't work in anything except windows for now.
+			// It doesn't get set anywhere in other ports.
+			ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:JSImmediate >> (controller * 8);
+
 			c &= 255;
+			ci &= 255;
 			
 			//A
-			color = c&1?on:off;
+			color = c&1?on:ci&1?oni:off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -274,7 +283,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//B
-			color = c&2?on:off;
+			color = c&2?on:ci&2?oni:off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -285,21 +294,21 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Select
-			color = c&4?on:off;
+			color = c&4?on:ci&4?oni:off;
 			for(i = 0; i < 4; i++)
 			{
 				t[11+5*256+i] = color;
 				t[11+6*256+i] = color;
 			}
 			//Start
-			color = c&8?on:off;
+			color = c&8?on:ci&8?oni:off;
 			for(i = 0; i < 4; i++)
 			{
 				t[17+5*256+i] = color;
 				t[17+6*256+i] = color;
 			}
 			//Up
-			color = c&16?on:off;
+			color = c&16?on:ci&16?oni:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -308,7 +317,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Down
-			color = c&32?on:off;
+			color = c&32?on:ci&32?oni:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -317,7 +326,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Left
-			color = c&64?on:off;
+			color = c&64?on:ci&64?oni:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -326,7 +335,7 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Right
-			color = c&128?on:off;
+			color = c&128?on:ci&128?oni:off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)

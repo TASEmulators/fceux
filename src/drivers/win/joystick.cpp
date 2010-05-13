@@ -34,6 +34,7 @@ static int HavePolled[MAX_JOYSTICKS];
 
 static int background = 0;
 static DIJOYSTATE2 StatusSave[MAX_JOYSTICKS];
+static DIJOYSTATE2 StatusSaveImmediate[MAX_JOYSTICKS];
 
 static int FindByGUID(GUID how)
 {
@@ -182,6 +183,79 @@ int DTestButtonJoy(ButtConfig *bc)
   else                                  /* Normal button */
   {
    if(StatusSave[n].rgbButtons[bc->ButtonNum[x] & 127]&0x80)
+    return(1);
+  }
+
+ }
+
+ return(0);
+}
+
+// Ugetab: I can't test this. It may be inefficient, or even ineffective
+int DTestButtonJoyImmediate(ButtConfig *bc)
+{
+ uint32 x; //mbg merge 7/17/06 changed to uint
+
+ for(x=0;x<bc->NumC;x++)
+ {
+  HRESULT dival;
+  int n = bc->DeviceNum[x];
+
+  if(n == 0xFF)
+   continue;
+
+  if(bc->ButtType[x] != BUTTC_JOYSTICK) continue;
+  if(n >= numjoysticks) continue;
+
+  while((dival = IDirectInputDevice7_Poll(Joysticks[n])) != DI_OK)
+  {
+   if(dival == DI_NOEFFECT) break;
+
+   if(!JoyAutoRestore(dival,Joysticks[n]))
+   {
+    return(0);
+   }
+  }
+
+  IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&StatusSaveImmediate[n]);
+  HavePolled[n] = 1;
+  
+  
+  if(bc->ButtonNum[x]&0x8000)	/* Axis "button" */
+  {
+   int sa = bc->ButtonNum[x]&3;
+   long source;
+
+   if(sa == 0) source=((int64)StatusSaveImmediate[n].lX - ranges[n].MinX) * 262144 /
+                (ranges[n].MaxX - ranges[n].MinX) - 131072;
+   else if(sa == 1) source=((int64)StatusSaveImmediate[n].lY - ranges[n].MinY) * 262144 /
+                (ranges[n].MaxY - ranges[n].MinY) - 131072;
+   else if(sa == 2) source=((int64)StatusSaveImmediate[n].lZ - ranges[n].MinZ) * 262144 /
+                (ranges[n].MaxZ - ranges[n].MinZ) - 131072;
+
+   /* Now, source is of the range -131072 to 131071.  Good enough. */
+   if(bc->ButtonNum[x] & 0x4000)
+   {
+    if(source <= (0 - 262144/4))
+     return(1);
+   }
+   else
+   {
+    if(source >= (262144/4))
+     return(1);
+   }
+  }
+  else if(bc->ButtonNum[x]&0x2000)      /* Hat "button" */
+  {
+   int wpov = StatusSaveImmediate[n].rgdwPOV[(bc->ButtonNum[x] >> 4) &3];
+   int tpov = bc->ButtonNum[x] & 3;
+
+   if(POVFix(wpov, 0) == tpov || POVFix(wpov, 1) == tpov)
+    return(1);
+  }
+  else                                  /* Normal button */
+  {
+   if(StatusSaveImmediate[n].rgbButtons[bc->ButtonNum[x] & 127]&0x80)
     return(1);
   }
 
