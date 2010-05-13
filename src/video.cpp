@@ -245,11 +245,10 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
-		
-		int controller, c, color;
+		int controller, c, color; 
 		int i, j;
-		int on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7; //0xB7 possible light color
-		static int off = 0xCF;
+		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7; //0xB7 possible light color
+		static uint32 off = 0xCF;
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
 		for(controller = 0; controller < input_display; controller++, t += 56)
