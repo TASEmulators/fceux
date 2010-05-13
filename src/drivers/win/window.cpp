@@ -543,8 +543,9 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 		InsertMenu(context,0xFFFF, MF_BYCOMMAND, FCEUX_CONTEXT_UNHIDEMENU, "Unhide Menu");
 	}
 
-	if ((whichContext == 0) || (whichContext == 3)) {
+	if ( ( (whichContext == 0) || (whichContext == 3) ) && (currMovieData.subtitles.size()) ){
 		// At position 3 is "View comments and subtitles". Insert this there:
+		
 		InsertMenu(context,0x3, MF_BYPOSITION, FCEUX_CONTEXT_TOGGLESUBTITLES, movieSubtitles ? "Subtitle Display: On" : "Subtitle Display: Off");
 		// At position 4(+1) is after View comments and subtitles. Insert this there:
 		InsertMenu(context,0x5, MF_BYPOSITION, FCEUX_CONTEXT_DUMPSUBTITLES, "Dump Subtitles to SRT file");
