@@ -122,6 +122,8 @@ BEGIN
                 MENUITEM "&1 player",                   MENU_INPUTDISPLAY_1
                 MENUITEM "&2 player",                   MENU_INPUTDISPLAY_2
                 MENUITEM "&4 player",                   MENU_INPUTDISPLAY_4
+                MENUITEM SEPARATOR
+                MENUITEM "old style disp.",             ID_INPUTDISPLAY_OLDSTYLEDISP
             END
             MENUITEM "&Lag Counter",                MENU_DISPLAY_LAGCOUNTER
             MENUITEM "&Frame Counter",              ID_DISPLAY_FRAMECOUNTER
@@ -261,7 +263,7 @@ BEGIN
             MENUITEM "&Ram",                        MENU_MV_FILE_DUMP_RAM
             MENUITEM "&PPU Memory",                 MENU_MV_FILE_DUMP_PPU
         END
-        MENUITEM "&Goto Address\tCtrl+A",           MENU_MV_FILE_GOTO_ADDRESS
+        MENUITEM "&Goto Address\tCtrl+A",       MENU_MV_FILE_GOTO_ADDRESS
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_MEMWVIEW_FILE_CLOSE
     END
@@ -424,7 +426,7 @@ CHEATCONTEXTMENUS MENU
 BEGIN
     POPUP "CheatListPopup"
     BEGIN
-	    MENUITEM "Toggle Cheat\tDbl-Clk",       CHEAT_CONTEXT_TOGGLECHEAT
+        MENUITEM "Toggle Cheat\tDbl-Clk",       CHEAT_CONTEXT_TOGGLECHEAT
         MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_POKECHEATVALUE
         MENUITEM "Goto In Hex Editor",          CHEAT_CONTEXT_GOTOINHEXEDITOR
     END
@@ -434,7 +436,7 @@ DEBUGCONTEXTMENUS MENU
 BEGIN
     POPUP "DebugListPopup"
     BEGIN
-	    MENUITEM "Toggle Breakpoint\tDbl-Clk",  DEBUGGER_CONTEXT_TOGGLEBREAK
+        MENUITEM "Toggle Breakpoint\tDbl-Clk",  DEBUGGER_CONTEXT_TOGGLEBREAK
     END
 END
 

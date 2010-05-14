@@ -63,6 +63,7 @@ extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool AVIdisableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
+extern bool oldInputDisplay;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -275,6 +276,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
 	AC(lagCounterDisplay),
+	AC(oldInputDisplay),
 	AC(movieSubtitles),
 	AC(subtitlesOnAVI),
 	AC(bindSavestate),
