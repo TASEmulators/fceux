@@ -138,6 +138,7 @@ public:
 		return (joysticks[joy] & mask(bit))!=0;
 	}
 
+	bool Compare(MovieRecord& compareRec);
 	void clear();
 	
 	//a waste of memory in lots of cases..  maybe make it a pointer later?

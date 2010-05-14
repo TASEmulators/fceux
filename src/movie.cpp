@@ -160,6 +160,32 @@ void MovieRecord::clear()
 	memset(zappers,0,sizeof(zappers));
 }
 
+bool MovieRecord::Compare(MovieRecord& compareRec)
+{
+	//Joysticks, Zappers, and commands
+
+	if (this->joysticks != compareRec.joysticks) 
+		return false;
+	
+	if (this->commands != compareRec.commands) 
+		return false;
+	
+	if (this->zappers[0].x != compareRec.zappers[0].x) return false;
+	if (this->zappers[0].y != compareRec.zappers[0].y) return false;
+	if (this->zappers[0].zaphit != compareRec.zappers[0].zaphit) return false;
+	if (this->zappers[0].b != compareRec.zappers[0].b) return false;
+	if (this->zappers[0].bogo != compareRec.zappers[0].bogo) return false;
+
+	if (this->zappers[1].x != compareRec.zappers[1].x) return false;
+	if (this->zappers[1].y != compareRec.zappers[1].y) return false;
+	if (this->zappers[1].zaphit != compareRec.zappers[1].zaphit) return false;
+	if (this->zappers[1].b != compareRec.zappers[1].b) return false;
+	if (this->zappers[1].bogo != compareRec.zappers[1].bogo) return false;
+
+
+	return true;
+}
+
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
 void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
 {
@@ -1146,6 +1172,28 @@ int FCEUMOV_WriteState(std::ostream* os)
 	else return 0;
 }
 
+bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
+{
+	bool isInTimeline = true;
+	int length;
+	if (stateMovie.getNumRecords() > currMovie.getNumRecords()) 
+		return false; //TODO: this should be a precheck, so this function isn't even called in this situation
+	else
+		length = currMovie.getNumRecords();
+
+	for (int x = 0; x < stateMovie.getNumRecords(); x++)
+	{
+		if (!stateMovie.records[x].Compare(currMovie.records[x]))
+		{
+			isInTimeline = false;
+			break;
+		}
+	}
+
+	return isInTimeline;
+}
+
+
 static bool load_successful;
 
 bool FCEUMOV_ReadState(std::istream* is, uint32 size)
@@ -1216,15 +1264,25 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 
 		if(movie_readonly)
 		{
-			//if the frame counter is longer than our current movie, then error
-			if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode causes a crash if savestate is saved and loaded past movie frame count
+			//bool sameTimeline = CheckTimelines(tempMovieData, currMovieData);
+
+			if (sameTimeline)
 			{
-				FinishPlayback();
-				//TODO: turn frame counter to red to get attention
-				FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
-				//return false;
+				//if the frame counter is longer than our current movie, then error
+				if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode needs something different here
+				{
+					FinishPlayback();
+					//TODO: turn frame counter to red to get attention
+					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
+					//return false;
+				}
+				movieMode = MOVIEMODE_PLAY;
 			}
-			movieMode = MOVIEMODE_PLAY;
+			else
+			{
+				//Wrong time line failed, do apprioriate logic here
+				FCEU_PrintError("Error: Savestate not in the same timeline as movie!");
+			}
 		}
 		else
 		{
