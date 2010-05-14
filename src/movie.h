@@ -37,7 +37,7 @@ typedef struct
 	int movie_version;					// version of the movie format in the file
 	uint32 num_frames;
 	uint32 rerecord_count;
-	bool poweron, pal, nosynchack;
+	bool poweron, pal, nosynchack, ppuflag;
 	bool reset; //mbg 6/21/08 - this flag isnt used anymore.. but maybe one day we can scan it out of the first record in the movie file
 	uint32 emu_version_used;				// 9813 = 0.98.13
 	MD5DATA md5_of_rom_used;

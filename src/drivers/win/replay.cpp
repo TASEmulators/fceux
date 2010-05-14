@@ -198,6 +198,12 @@ void UpdateReplayDialog(HWND hwndDlg)
 				if (!info.pal)
 					strcpy(boolstring, "Off");
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_PALUSED),boolstring);
+				if (info.ppuflag)
+					strcpy(boolstring, "On ");
+				else
+					strcpy(boolstring, "Off");
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_NEWPPUUSED),boolstring);
+
 
 
 				if(info.emu_version_used < 20000 )

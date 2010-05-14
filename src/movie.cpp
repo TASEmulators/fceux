@@ -345,6 +345,7 @@ MovieData::MovieData()
 	: version(MOVIE_VERSION)
 	, emuVersion(FCEU_VERSION_NUMERIC)
 	, palFlag(false)
+	, PPUflag(false)
 	, rerecordCount(0)
 	, binaryFlag(false)
 	, greenZoneCount(0)
@@ -363,7 +364,7 @@ void MovieData::installValue(std::string& key, std::string& val)
 	//todo - use another config system, or drive this from a little data structure. because this is gross
 	if(key == "FDS")
 		installInt(val,fds);
-	else if(key == "New PPU")
+	else if(key == "NewPPU")
 		installBool(val,PPUflag);
 	else if(key == "version")
 		installInt(val,version);
@@ -427,7 +428,7 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
 	*os << "FDS " << isFDS << endl;
-	*os << "New PPU " << newppu << endl;
+	*os << "NewPPU " << newppu << endl;
 
 	for(uint32 i=0;i<comments.size();i++)
 		*os << "comment " << wcstombs(comments[i]) << endl;
@@ -1381,6 +1382,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.movie_version = md.version;
 	info.poweron = md.savestate.size()==0;
 	info.pal = md.palFlag;
+	info.ppuflag = md.PPUflag;
 	info.nosynchack = true;
 	info.num_frames = md.records.size();
 	info.md5_of_rom_used = md.romChecksum;
