@@ -1173,12 +1173,14 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	//----------------
 	//if we are playing or recording and toggled read-only:
 	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error.
-	//  the savestate is assumed to be in the same timeline as the current movie.
+	//  ---the savestate is assumed to be in the same timeline as the current movie.---
+	//		adelikat: correction: the savestate timeline should not be assumed, because a read-only desync is still potentially destructive
+	//			playing from a desynced state, making a new savestate, and loading it in write mode will destroy a movie, and it isn't always obvious that there is a desync
 	//  if the current movie is not long enough to get to the savestate's frame#, then it is an error. 
 	//  the movie contained in the savestate will be discarded.
 	//  the emulator will be put into play mode.
 	//if we are playing or recording and toggled read+write
-	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error.
+	//  then, the movie we are playing must match the guid of the one stored in the savestate or else error, give the option to load it anyway.
 	//  the movie contained in the savestate will be loaded into memory
 	//  the frames in the movie after the savestate frame will be discarded
 	//  the in-memory movie will have its rerecord count incremented
@@ -1211,11 +1213,11 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		if(movie_readonly)
 		{
 			//if the frame counter is longer than our current movie, then error
-			if(currFrameCounter > (int)currMovieData.records.size())
+			if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode is going to throw this off
 			{
 				FinishPlayback();
 				//TODO: turn frame counter to red to get attention
-				//FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
+				FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
 				//return false;
 			}
 			movieMode = MOVIEMODE_PLAY;
@@ -1249,11 +1251,6 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	}
 	
 	load_successful = true;
-
-	//// Maximus: Show the last input combination entered from the
-	//// movie within the state
-	//if(current!=0) // <- mz: only if playing or recording a movie
-	//	memcpy(&cur_input_display, joop, 4);
 
 	return true;
 }
