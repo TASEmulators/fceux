@@ -1137,7 +1137,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
-	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
+	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
 		return currMovieData.dump(os, true);
 	else return 0;
 }
@@ -1213,7 +1213,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		if(movie_readonly)
 		{
 			//if the frame counter is longer than our current movie, then error
-			if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode is going to throw this off
+			if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode causes a crash if savestate is saved and loaded past movie frame count
 			{
 				FinishPlayback();
 				//TODO: turn frame counter to red to get attention
