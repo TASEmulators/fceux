@@ -167,8 +167,13 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 	if (this->joysticks != compareRec.joysticks) 
 		return false;
 	
-	if (this->commands != compareRec.commands) 
-		return false;
+	//if (this->commands != compareRec.commands) 
+	//	return false;
+
+	if(this->command_reset() != compareRec.command_reset()) return false;
+	if(this->command_power() != compareRec.command_reset()) return false;
+	if(this->command_fds_insert() != compareRec.command_fds_insert()) return false;
+	if(this->command_fds_select() != compareRec.command_fds_select()) return false;
 	
 	if (this->zappers[0].x != compareRec.zappers[0].x) return false;
 	if (this->zappers[0].y != compareRec.zappers[0].y) return false;
@@ -1264,7 +1269,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 
 		if(movie_readonly)
 		{
-			//bool sameTimeline = CheckTimelines(tempMovieData, currMovieData);
+			bool sameTimeline = true; //= CheckTimelines(tempMovieData, currMovieData);
 
 			if (sameTimeline)
 			{
