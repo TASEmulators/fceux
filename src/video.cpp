@@ -71,6 +71,8 @@ GUIMESSAGE subtitleMessage;
 extern int input_display;
 extern uint32 cur_input_display;
 
+bool oldInputDisplay = false;
+
 #ifdef _USE_SHARED_MEMORY_
 HANDLE mapXBuf;
 #endif
@@ -252,10 +254,11 @@ void FCEU_PutImage(void)
 	{
 		int controller, c, ci, color; 
 		int i, j;
-		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7; //0xB7 possible light color
-		uint32 oni = 0x90; //Color for immediate keyboard buttons
+		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	
+		uint32 oni = 0xA0;										//Color for immediate keyboard buttons
+		uint32 blend = 0xB7;
 		static uint32 off = 0xCF;
-		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20; //mbg merge 7/17/06 changed t to uint8*
+		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
 		for(controller = 0; controller < input_display; controller++, t += 56)
 		{
@@ -270,7 +273,8 @@ void FCEU_PutImage(void)
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
 #ifdef WIN32
-			ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
+			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
+			else ci = 0;
 #else
 			// Put other port info here
 			ci = 0;
@@ -280,7 +284,9 @@ void FCEU_PutImage(void)
 			ci &= 255;
 			
 			//A
-			color = c&1?on:ci&1?oni:off;
+			//color = c&1?on:ci&1?oni:off;
+			if (c&1) color = (ci&1) ? blend : on;
+			else color = (ci&1) ? oni : off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -291,7 +297,8 @@ void FCEU_PutImage(void)
 				}
 			}
 			//B
-			color = c&2?on:ci&2?oni:off;
+			if (c&2) color = (ci&2) ? blend : on;
+			else color = (ci&2) ? oni : off;
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -302,21 +309,24 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Select
-			color = c&4?on:ci&4?oni:off;
+			if (c&4) color = (ci&4) ? blend : on;
+			else color = (ci&4) ? oni : off;
 			for(i = 0; i < 4; i++)
 			{
 				t[11+5*256+i] = color;
 				t[11+6*256+i] = color;
 			}
 			//Start
-			color = c&8?on:ci&8?oni:off;
+			if (c&8) color = (ci&8) ? blend : on;
+			else color = (ci&8) ? oni : off;
 			for(i = 0; i < 4; i++)
 			{
 				t[17+5*256+i] = color;
 				t[17+6*256+i] = color;
 			}
 			//Up
-			color = c&16?on:ci&16?oni:off;
+			if (c&16) color = (ci&16) ? blend : on;
+			else color = (ci&16) ? oni : off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -325,7 +335,8 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Down
-			color = c&32?on:ci&32?oni:off;
+			if (c&32) color = (ci&32) ? blend : on;
+			else color = (ci&32) ? oni : off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -334,7 +345,8 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Left
-			color = c&64?on:ci&64?oni:off;
+			if (c&64) color = (ci&64) ? blend : on;
+			else color = (ci&64) ? oni : off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -343,7 +355,8 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Right
-			color = c&128?on:ci&128?oni:off;
+			if (c&128) color = (ci&128) ? blend : on;
+			else color = (ci&128) ? oni : off;
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)

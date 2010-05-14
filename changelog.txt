@@ -1,3 +1,4 @@
+13-may-2010 - adelikat - input display overhaul - a more desmume style system which shows both keys held the previous frame and immiately held keys that will be put in on the next frame
 12-may-2010 - ugetab - Win32 - Added rudamentry Between-Frames input display code for adelikat to customize.
 12-may-2010 - adelikat - Input Display - displays a silver color when input is from a movie rather than the user
 12-may-2010 - ugetab - Win32 - With special scaler in window mode, it's possible to resize to anything above the minimum.
