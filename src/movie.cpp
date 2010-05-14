@@ -363,6 +363,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 	//todo - use another config system, or drive this from a little data structure. because this is gross
 	if(key == "FDS")
 		installInt(val,fds);
+	else if(key == "New PPU")
+		installBool(val,PPUflag);
 	else if(key == "version")
 		installInt(val,version);
 	else if(key == "emuVersion")
@@ -425,6 +427,7 @@ int MovieData::dump(std::ostream *os, bool binary)
 	*os << "port1 " << ports[1] << endl;
 	*os << "port2 " << ports[2] << endl;
 	*os << "FDS " << isFDS << endl;
+	*os << "New PPU " << newppu << endl;
 
 	for(uint32 i=0;i<comments.size();i++)
 		*os << "comment " << wcstombs(comments[i]) << endl;

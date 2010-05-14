@@ -167,6 +167,7 @@ public:
 	int fds;
 	//todo - somehow force mutual exclusion for poweron and reset (with an error in the parser)
 	bool palFlag;
+	bool PPUflag;
 	MD5DATA romChecksum;
 	std::string romFilename;
 	std::vector<char> savestate;
