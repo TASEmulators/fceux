@@ -256,7 +256,7 @@ void FCEU_PutImage(void)
 		int i, j;
 		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	
 		uint32 oni = 0xA0;										//Color for immediate keyboard buttons
-		uint32 blend = 0xB7;
+		uint32 blend = 0xB6;
 		static uint32 off = 0xCF;
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
