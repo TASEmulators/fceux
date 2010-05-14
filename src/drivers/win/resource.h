@@ -254,6 +254,8 @@
 #define IDC_DEBUGGER_STACK_CONTENTS     308
 #define IDC_BTN_CHEAT_LT                309
 #define IDC_DEBUGGER_VAL_PCSEEK         309
+#define IDC_LABEL_EMULATORUSED2         309
+#define IDC_LABEL_PALUSED               309
 #define MENU_GAME_GENIE                 310
 #define IDC_DEBUGGER_VAL_PPU            310
 #define MENU_PAL                        311

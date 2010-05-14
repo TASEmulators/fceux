@@ -194,6 +194,11 @@ void UpdateReplayDialog(HWND hwndDlg)
 				char emuStr[128];
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),info.name_of_rom_used.c_str());
 				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),md5_asciistr(info.md5_of_rom_used));
+				char boolstring[4] = "On ";
+				if (!info.pal)
+					strcpy(boolstring, "Off");
+				SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_PALUSED),boolstring);
+
 
 				if(info.emu_version_used < 20000 )
 					sprintf(emuStr, "FCEU %d.%02d.%02d%s", info.emu_version_used/10000, (info.emu_version_used/100)%100, (info.emu_version_used)%100, info.emu_version_used < 9813 ? " (blip)" : "");

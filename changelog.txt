@@ -1,3 +1,4 @@
+14-may-2010 - adelikat - Win32 - Replay dialog shows PAL flag
 14-may-2010 - adelikat - New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)
 13-may-2010 - adelikat - input display overhaul - a more desmume style system which shows both keys held the previous frame and immiately held keys that will be put in on the next frame
 12-may-2010 - ugetab - Win32 - Added rudamentry Between-Frames input display code for adelikat to customize.
