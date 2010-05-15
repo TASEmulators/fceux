@@ -1,3 +1,4 @@
+14-may-2010 - adelikat - Win32 - Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead.
 14-may-2010 - adelikat - Win32 - When recording a movie, add it to recent movies
 14-may-2010 - adelikat - Win32 - Replay dialog shows PAL flag & New PPU flag
 14-may-2010 - adelikat - New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)

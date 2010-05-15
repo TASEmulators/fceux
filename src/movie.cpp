@@ -917,8 +917,14 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	}
 
 #ifdef WIN32
-	//Add to the recent movie menu
-	AddRecentMovieFile(fname);
+	//Fix relative path if necessary and then add to the recent movie menu
+	extern std::string BaseDirectory;
+	string name = fname;
+	if (name[0] == '.' && name[1] == '\\')
+	{
+		name = BaseDirectory + '\\' + name.substr(2, name.length());
+	}
+	AddRecentMovieFile(name.c_str());
 #endif
 
 	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
