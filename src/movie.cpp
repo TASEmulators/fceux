@@ -131,7 +131,7 @@ void MovieData::TryDumpIncremental()
 		{
 			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
 				return;
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 		}
 		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
@@ -140,15 +140,15 @@ void MovieData::TryDumpIncremental()
 				currMovieData.insertEmpty(-1,1);
 			}
 			
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount++;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 		} else if (currFrameCounter > currMovieData.greenZoneCount && static_cast<unsigned int>(currMovieData.greenZoneCount)<currMovieData.records.size())
 		{
 			/* May be required in some malformed TAS projects. */
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount= currFrameCounter+1;
 		}
 	}
@@ -174,14 +174,6 @@ MovieRecord::MovieRecord()
 	zappers[1].x = 0;
 	zappers[1].y = 0;
 	zappers[1].zaphit = 0;
-
-	savestate = NULL;
-}
-
-MovieRecord::~MovieRecord() 
-{
-	if (savestate != NULL) 
-		delete savestate;
 }
 
 void MovieRecord::clear()
@@ -529,14 +521,14 @@ int MovieData::dumpGreenzone(std::ostream *os, bool binary)
 	int frame, size;
 	for (int i=0; i<(int)records.size(); ++i)
 	{
-		if (records[i].GetSavestate().empty())
+		if (records[i].savestate.empty())
 			continue;
 		frame=i;
-		size=records[i].GetSavestate().size();
+		size=records[i].savestate.size();
 		write32le(frame, os);
 		write32le(size, os);
 
-		os->write(&records[i].GetSavestate()[0], size);
+		os->write(&records[i].savestate[0], size);
 	}
 	frame=-1;
 	size=currMovieData.greenZoneCount;

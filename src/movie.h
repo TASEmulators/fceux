@@ -97,7 +97,6 @@ class MovieRecord
 
 public:
 	MovieRecord();
-	~MovieRecord(); 
 	ValueArray<uint8,4> joysticks;
 	
 	struct {
@@ -143,6 +142,9 @@ public:
 	bool Compare(MovieRecord& compareRec);
 	void clear();
 	
+	//a waste of memory in lots of cases..  maybe make it a pointer later?
+	std::vector<char> savestate;
+
 	void parse(MovieData* md, std::istream* is);
 	bool parseBinary(MovieData* md, std::istream* is);
 	void dump(MovieData* md, std::ostream* os, int index);
@@ -152,16 +154,7 @@ public:
 	
 	static const char mnemonics[8];
 
-	std::vector<char>& GetSavestate()
-	{
-		if (savestate == NULL) 
-			savestate = new std::vector<char>;
-		return *savestate;
-	}
 private:
-	//a waste of memory in lots of cases..  maybe make it a pointer later?
-	std::vector<char> *savestate;
-
 	int mask(int bit) { return 1<<bit; }
 };
 
