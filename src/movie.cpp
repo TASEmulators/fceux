@@ -68,8 +68,6 @@ bool movieFromPoweron = true;
 //todo - consider a MemoryBackedFile class..
 //..a lot of work.. instead lets just read back from the current fcm
 
-//todo - handle case where read+write is requested, but the file is actually readonly (could be confusing)
-
 //todo - could we, given a field size, over-read from an inputstream and then parse out an integer?
 //that would be faster than several reads, perhaps.
 
@@ -77,7 +75,6 @@ bool movieFromPoweron = true;
 bool suppressMovieStop=false;
 
 //----movie engine main state
-
 EMOVIEMODE movieMode = MOVIEMODE_INACTIVE;
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
@@ -1207,7 +1204,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 int FCEUMOV_WriteState(std::ostream* os)
 {
 	//we are supposed to dump the movie data into the savestate
-	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY)
+	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
 		return currMovieData.dump(os, true);
 	else return 0;
 }
@@ -1217,11 +1214,13 @@ bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
 	bool isInTimeline = true;
 	int length;
 	if (stateMovie.getNumRecords() > currMovie.getNumRecords()) 
-		return false; //TODO: this should be a precheck, so this function isn't even called in this situation
-	else
 		length = currMovie.getNumRecords();
+	else
+		length = stateMovie.getNumRecords();	//Whichever one is smaller
+	//length logic - after this function we will check and handle statemovies that are bigger than the curent movie
+	//all we want to know at this time is if their timelines match for the data we do have
 
-	for (int x = 0; x < stateMovie.getNumRecords(); x++)
+	for (int x = 0; x < length; x++)
 	{
 		if (!stateMovie.records[x].Compare(currMovie.records[x]))
 		{
@@ -1311,7 +1310,6 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 				//if the frame counter is longer than our current movie, then error
 				if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode needs something different here
 				{
-					FinishPlayback();
 					//TODO: turn frame counter to red to get attention
 					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
 					return false;
