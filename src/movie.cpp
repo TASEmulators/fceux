@@ -989,6 +989,10 @@ static void openRecordingMovie(const char* fname)
 	if(!osRecordingMovie)
 		FCEU_PrintError("Error opening movie output file: %s",fname);
 	strcpy(curMovieFilename, fname);
+#ifdef WIN32
+	//Add to the recent movie menu
+	AddRecentMovieFile(fname);
+#endif
 }
 
 
