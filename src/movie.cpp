@@ -130,7 +130,7 @@ void MovieData::TryDumpIncremental()
 		{
 			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
 				return;
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
 		}
 		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
@@ -139,18 +139,48 @@ void MovieData::TryDumpIncremental()
 				currMovieData.insertEmpty(-1,1);
 			}
 			
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount++;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
 		} else if (currFrameCounter > currMovieData.greenZoneCount && static_cast<unsigned int>(currMovieData.greenZoneCount)<currMovieData.records.size())
 		{
 			/* May be required in some malformed TAS projects. */
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].GetSavestate(),Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount= currFrameCounter+1;
 		}
 	}
+}
+
+MovieRecord::MovieRecord()
+{
+	joysticks.data[0] = 0;
+	joysticks.data[1] = 0;
+	joysticks.data[2] = 0;
+	joysticks.data[3] = 0;
+
+	commands = 0;
+
+	zappers[0].b = 0;
+	zappers[0].bogo = 0;
+	zappers[0].x = 0;
+	zappers[0].y = 0;
+	zappers[0].zaphit = 0;
+
+	zappers[1].b = 0;
+	zappers[1].bogo = 0;
+	zappers[1].x = 0;
+	zappers[1].y = 0;
+	zappers[1].zaphit = 0;
+
+	savestate = NULL;
+}
+
+MovieRecord::~MovieRecord() 
+{
+	if (savestate != NULL) 
+		delete savestate;
 }
 
 void MovieRecord::clear()
@@ -170,6 +200,7 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 	//if (this->commands != compareRec.commands) 
 	//	return false;
 
+	//if new commands are ever recordable, they need to be added here if we go with this method
 	if(this->command_reset() != compareRec.command_reset()) return false;
 	if(this->command_power() != compareRec.command_reset()) return false;
 	if(this->command_fds_insert() != compareRec.command_fds_insert()) return false;
@@ -497,14 +528,14 @@ int MovieData::dumpGreenzone(std::ostream *os, bool binary)
 	int frame, size;
 	for (int i=0; i<(int)records.size(); ++i)
 	{
-		if (records[i].savestate.empty())
+		if (records[i].GetSavestate().empty())
 			continue;
 		frame=i;
-		size=records[i].savestate.size();
+		size=records[i].GetSavestate().size();
 		write32le(frame, os);
 		write32le(size, os);
 
-		os->write(&records[i].savestate[0], size);
+		os->write(&records[i].GetSavestate()[0], size);
 	}
 	frame=-1;
 	size=currMovieData.greenZoneCount;
@@ -1269,7 +1300,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 
 		if(movie_readonly)
 		{
-			bool sameTimeline = true; //= CheckTimelines(tempMovieData, currMovieData);
+			bool sameTimeline =  CheckTimelines(tempMovieData, currMovieData);
 
 			if (sameTimeline)
 			{
