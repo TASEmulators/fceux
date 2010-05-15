@@ -3013,6 +3013,7 @@ s_colorMapping [] =
  * offset to a RGB32 colour. Several encodings are supported.
  * The user may construct their own RGB value, given a simple colour name,
  * or an HTML-style "#09abcd" colour. 16 bit reduction doesn't occur at this time.
+ * NES palettes added with notation "P00" to "P3F". "P40" to "P7F" denote LUA palettes.
  */
 static inline bool str2colour(uint32 *colour, lua_State *L, const char *str) {
 	if (str[0] == '#') {
@@ -3023,6 +3024,29 @@ static inline bool str2colour(uint32 *colour, lua_State *L, const char *str) {
 		color <<= missing << 2;
 		if(missing >= 2) color |= 0xFF;
 		*colour = color;
+		return true;
+	}
+	else if (str[0] == 'P') {
+		uint8 palette;
+		uint8 tr, tg, tb;
+
+		if (strlen(str+1) == 2) {
+			palette = ((hex2int(L, str[1]) * 0x10) + hex2int(L, str[2]));
+		} else if (strlen(str+1) == 1) {
+			palette = (hex2int(L, str[1]));
+		} else {
+			luaL_error(L, "palettes are defined with P## hex notion");
+			return false;
+		}
+
+		if (palette > 0x7F) {
+			luaL_error(L, "palettes range from P00 to P7F");
+			return false;
+		}
+		
+		FCEUD_GetPalette(palette + 0x80, &tr, &tg, &tb);
+		// Feeding it RGBA, because it will spit out the right value for me
+		*colour = LUA_BUILD_PIXEL(tr, tg, tb, 0xFF);
 		return true;
 	}
 	else {
