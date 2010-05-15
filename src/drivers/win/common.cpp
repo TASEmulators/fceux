@@ -60,3 +60,34 @@ std::string GetPath(std::string filename)
 {
 	return filename.substr(0,filename.find_last_of("/\\") + 1);
 }
+
+bool IsRelativePath(char* name)
+{
+	if (name[0] == '.')
+		if (name[1] == '\\') return true;
+		else if (name[1] == '.' && name[2] == '\\') return true;
+	return false;
+}
+
+bool IsRelativePath(const char* name)
+{
+	if (name[0] == '.')
+		if (name[1] == '\\') return true;
+		else if (name[1] == '.' && name[2] == '\\') return true;
+	return false;
+}
+
+bool IsRelativePath(std::string name)
+{
+	if (name[0] == '.')
+		if (name[1] == '\\') return true;
+		else if (name[1] == '.' && name[2] == '\\') return true;
+	return false;
+}
+
+//Precondition: IsRelativePath() == true
+std::string ConvertRelativePath(std::string name)
+{
+	extern std::string BaseDirectory;
+	return BaseDirectory + '\\' + name.substr(2, name.length());
+}

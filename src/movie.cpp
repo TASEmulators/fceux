@@ -37,6 +37,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include "./drivers/win/common.h"
 extern void AddRecentMovieFile(const char *filename);
 #endif
 
@@ -919,10 +920,11 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 #ifdef WIN32
 	//Fix relative path if necessary and then add to the recent movie menu
 	extern std::string BaseDirectory;
+
 	string name = fname;
-	if (name[0] == '.' && name[1] == '\\')
+	if (IsRelativePath(fname))
 	{
-		name = BaseDirectory + '\\' + name.substr(2, name.length());
+		name = ConvertRelativePath(name);
 	}
 	AddRecentMovieFile(name.c_str());
 #endif
