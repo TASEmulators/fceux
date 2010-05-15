@@ -1084,7 +1084,7 @@ void FCEUMOV_AddInputState()
 	else if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
-		if(currFrameCounter == (int)currMovieData.records.size())
+		if(currFrameCounter >= (int)currMovieData.records.size())
 		{
 			FinishPlayback();
 		}
@@ -1307,11 +1307,13 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 
 			if (sameTimeline)
 			{
-				//if the frame counter is longer than our current movie, then error
-				if(currFrameCounter > (int)currMovieData.records.size()) //adelikat: TODO: finished mode needs something different here
+				//if we made it this far, then the savestate has identical movie data but we want to know now if the stateMOVIE size is greater than current movie size and make this error
+				//then we want to know if currFramecoutner > currmoviedata.records.size so we can know it is time for movie finished handling
+				//currFrameCounter is currently savestate frame counter (not savestate movie size
+				if(tempMovieData.records.size() > currMovieData.records.size()) 
 				{
 					//TODO: turn frame counter to red to get attention
-					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
+					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
 					return false;
 				}
 				movieMode = MOVIEMODE_PLAY;
@@ -1323,7 +1325,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 				return false;
 			}
 		}
-		else
+		else //Read + write
 		{
 			//truncate before we copy, just to save some time
 			tempMovieData.truncateAt(currFrameCounter);
