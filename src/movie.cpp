@@ -1314,14 +1314,15 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 					FinishPlayback();
 					//TODO: turn frame counter to red to get attention
 					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
-					//return false;
+					return false;
 				}
 				movieMode = MOVIEMODE_PLAY;
 			}
 			else
 			{
-				//Wrong time line failed, do apprioriate logic here
+				//Wrong timeline, do apprioriate logic here
 				FCEU_PrintError("Error: Savestate not in the same timeline as movie!");
+				return false;
 			}
 		}
 		else
