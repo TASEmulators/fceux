@@ -202,7 +202,7 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 
 	//if new commands are ever recordable, they need to be added here if we go with this method
 	if(this->command_reset() != compareRec.command_reset()) return false;
-	if(this->command_power() != compareRec.command_reset()) return false;
+	if(this->command_power() != compareRec.command_power()) return false;
 	if(this->command_fds_insert() != compareRec.command_fds_insert()) return false;
 	if(this->command_fds_select() != compareRec.command_fds_select()) return false;
 	
