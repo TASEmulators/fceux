@@ -831,8 +831,8 @@
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
     <None Include="..\src\drivers\win\res\te_arrow.bmp" />
     <CustomBuild Include="..\src\drivers\win\help\fceux.chm">
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xcopy /y /d "$(ProjectDir)\..\src\drivers\win\help\fceux.chm" "$(OutDir)"
-</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xcopy /y /d "$(ProjectDir)\..\src\drivers\win\help\fceux.chm" "$(OutDir)"
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)fceux.chm;%(Outputs)</Outputs>
