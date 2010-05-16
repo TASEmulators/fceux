@@ -275,6 +275,9 @@ void FCEU_PutImage(void)
 					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
 
+			// Do this before shifting away data
+			held &= 255;
+
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
 #ifdef WIN32
@@ -291,7 +294,6 @@ void FCEU_PutImage(void)
 
 			c &= 255;
 			ci &= 255;
-			held &= 255;
 
 			//adelikat: I apologize to anyone who ever sifts through this color assignment
 			//A

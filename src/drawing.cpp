@@ -136,7 +136,7 @@ void DrawMessage(bool beforeMovie)
 		uint8 *t;
 		guiMessage.howlong--;
 
-		if (guiMessage.linesFromBottom) 
+		if (guiMessage.linesFromBottom > 0) 
 			t=XBuf+FCEU_TextScanlineOffsetFromBottom(guiMessage.linesFromBottom)+1;
 		else
 			t=XBuf+FCEU_TextScanlineOffsetFromBottom(20)+1;
