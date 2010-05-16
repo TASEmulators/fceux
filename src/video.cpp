@@ -252,12 +252,17 @@ void FCEU_PutImage(void)
 	//Fancy input display code
 	if(input_display)
 	{
+		extern uint32 JSAutoHeld;
+		uint32 held = JSAutoHeld;
+
 		int controller, c, ci, color; 
 		int i, j;
-		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	
-		uint32 oni = 0xA0;										//Color for immediate keyboard buttons
-		uint32 blend = 0xB6;
+		static uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	//Standard, or Gray depending on movie mode
+		static uint32 oni = 0xA0;		//Color for immediate keyboard buttons
+		static uint32 blend = 0xB6;		//Blend of immiate and last held buttons
+		static uint32 ahold = 0x87;		//Auto hold
 		static uint32 off = 0xCF;
+		
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
 		for(controller = 0; controller < input_display; controller++, t += 56)
@@ -282,10 +287,11 @@ void FCEU_PutImage(void)
 
 			c &= 255;
 			ci &= 255;
-			
+			held &= 255;
 			//A
-			//color = c&1?on:ci&1?oni:off;
-			if (c&1) color = (ci&1) ? blend : on;
+			if (held&1) 
+				color = ahold;
+			else if (c&1) color = (ci&1) ? blend : on;
 			else color = (ci&1) ? oni : off;
 			for(i=0; i < 4; i++)
 			{
