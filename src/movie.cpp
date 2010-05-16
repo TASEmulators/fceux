@@ -1342,29 +1342,32 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 		}
 		else //Read + write
 		{
-			//truncate before we copy, just to save some time
-			tempMovieData.truncateAt(currFrameCounter);
-			currMovieData = tempMovieData;
-			
-			#ifdef _S9XLUA_H
-			if(!FCEU_LuaRerecordCountSkip())
+			if (currFrameCounter > (int)tempMovieData.records.size())
+			{
+				//This is a post movie savestate, handle it differently
+				//Recplae movie contents but then switch to movie finished mode
+				currMovieData = tempMovieData;	
+				openRecordingMovie(curMovieFilename);
+				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
+				FinishPlayback();
+			}
+			else
+			{
+				//truncate before we copy, just to save some time
+				tempMovieData.truncateAt(currFrameCounter); //we can only assume this here since we have checked that the frame counter is not greater than the movie data
+				currMovieData = tempMovieData;				
+#ifdef _S9XLUA_H
+				if(!FCEU_LuaRerecordCountSkip())
+					currRerecordCount++;
+#else
 				currRerecordCount++;
-			#endif
-			
-			currMovieData.rerecordCount = currRerecordCount;
+#endif
+				currMovieData.rerecordCount = currRerecordCount;
+				openRecordingMovie(curMovieFilename);
+				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
+				movieMode = MOVIEMODE_RECORD;
 
-			openRecordingMovie(curMovieFilename);
-
-			/*
-			is->seekg((uint32)curr);
-			char *str = new char[size];
-			is->read(str, size);
-			osRecordingMovie->write(str,size);
-			delete[] str;
-			*/
-			
-			currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);
-			movieMode = MOVIEMODE_RECORD;
+			}
 		}
 	}
 	
