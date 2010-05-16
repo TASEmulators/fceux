@@ -1209,7 +1209,7 @@ int FCEUMOV_WriteState(std::ostream* os)
 	else return 0;
 }
 
-bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
+bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie, int& error)
 {
 	bool isInTimeline = true;
 	int length;
@@ -1225,6 +1225,7 @@ bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
 		if (!stateMovie.records[x].Compare(currMovie.records[x]))
 		{
 			isInTimeline = false;
+			error = x;
 			break;
 		}
 	}
@@ -1303,7 +1304,8 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 
 		if(movie_readonly)
 		{
-			bool sameTimeline =  CheckTimelines(tempMovieData, currMovieData);
+			int errorFrame = 0;
+			bool sameTimeline =  CheckTimelines(tempMovieData, currMovieData, errorFrame);
 
 			if (sameTimeline)
 			{
@@ -1336,7 +1338,7 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			else
 			{
 				//Wrong timeline, do apprioriate logic here
-				FCEU_PrintError("Error: Savestate not in the same timeline as movie!");
+				FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", errorFrame);
 				return false;
 			}
 		}

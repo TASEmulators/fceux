@@ -6,7 +6,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fceux", "vc10_fceux.vcxproj
 		{36835D12-7AE3-47EE-96EF-A50D88737893} = {36835D12-7AE3-47EE-96EF-A50D88737893}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaPerks", "..\..\LuaPerks\LuaPerks.vcxproj", "{36835D12-7AE3-47EE-96EF-A50D88737893}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaPerks", "..\..\luaperks\LuaPerks.vcxproj", "{36835D12-7AE3-47EE-96EF-A50D88737893}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F8647A59-ED57-4975-B40C-054BA8588E4E}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
