@@ -1308,15 +1308,30 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 			if (sameTimeline)
 			{
 				//if we made it this far, then the savestate has identical movie data but we want to know now if the stateMOVIE size is greater than current movie size and make this error
-				//then we want to know if currFramecoutner > currmoviedata.records.size so we can know it is time for movie finished handling
-				//currFrameCounter is currently savestate frame counter (not savestate movie size
+				
+				
 				if(tempMovieData.records.size() > currMovieData.records.size()) 
 				{
 					//TODO: turn frame counter to red to get attention
 					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
 					return false;
 				}
-				movieMode = MOVIEMODE_PLAY;
+				else
+				{
+					//Final test, if the savestate frame count is > savestate movie length, this was a post movie savestate
+					//currFrameCounter is currently savestate frame counter (not savestate movie size
+					if (currFrameCounter > (int)tempMovieData.records.size())
+					{
+						FinishPlayback();
+					}
+					else
+					{
+						//Finally, this is a savestate file for this movie
+						movieMode = MOVIEMODE_PLAY;
+					}
+
+				}
+				
 			}
 			else
 			{
