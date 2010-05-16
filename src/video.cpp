@@ -253,7 +253,7 @@ void FCEU_PutImage(void)
 	if(input_display)
 	{
 		extern uint32 JSAutoHeld;
-		uint32 held = JSAutoHeld;
+		uint32 held;
 
 		int controller, c, ci, color; 
 		int i, j;
@@ -275,25 +275,19 @@ void FCEU_PutImage(void)
 					t[i+j*256] = 0xCF;
 			c = cur_input_display >> (controller * 8);
 
-			// Do this before shifting away data
-			held &= 255;
-
 			// This doesn't work in anything except windows for now.
 			// It doesn't get set anywhere in other ports.
 #ifdef WIN32
 			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
 			else ci = 0;
 
-			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held = (held >> 8);
+			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held = (JSAutoHeld >> (controller * 8));
 			else held = 0;
 #else
 			// Put other port info here
 			ci = 0;
 			held = 0;
 #endif
-
-			c &= 255;
-			ci &= 255;
 
 			//adelikat: I apologize to anyone who ever sifts through this color assignment
 			//A
