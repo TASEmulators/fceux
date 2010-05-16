@@ -295,14 +295,15 @@ void UpdateGamepad()
 					}
 				}
 
-				char inputstr [32];
+				char inputstr [64];
 				{
 					uint32 c = JSAutoHeld;
-					sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
+					sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
 						(c&0x40)?'<':' ', (c&0x10)?'^':' ', (c&0x80)?'>':' ', (c&0x20)?'v':' ',
 						(c&0x01)?'A':' ', (c&0x02)?'B':' ', (c&0x08)?'S':' ', (c&0x04)?'s':' ',
 						(c&0x4000)?'<':' ', (c&0x1000)?'^':' ', (c&0x8000)?'>':' ', (c&0x2000)?'v':' ',
-						(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ');
+						(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ',
+						(c&0x40000)?'A':' ');
 					if(!(c&0xff00))
 						inputstr[8] = '\0';
 				}

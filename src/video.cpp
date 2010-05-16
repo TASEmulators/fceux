@@ -257,11 +257,11 @@ void FCEU_PutImage(void)
 
 		int controller, c, ci, color; 
 		int i, j;
-		static uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	//Standard, or Gray depending on movie mode
-		static uint32 oni = 0xA0;		//Color for immediate keyboard buttons
-		static uint32 blend = 0xB6;		//Blend of immiate and last held buttons
-		static uint32 ahold = 0x87;		//Auto hold
-		static uint32 off = 0xCF;
+		uint32 on  = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0x90:0xA7;	//Standard, or Gray depending on movie mode
+		uint32 oni = 0xA0;		//Color for immediate keyboard buttons
+		uint32 blend = 0xB6;		//Blend of immiate and last held buttons
+		uint32 ahold = 0x87;		//Auto hold
+		uint32 off = 0xCF;
 		
 		uint8 *t = XBuf+(FSettings.LastSLine-9)*256 + 20;		//mbg merge 7/17/06 changed t to uint8*
 		if(input_display > 4) input_display = 4;
@@ -280,19 +280,30 @@ void FCEU_PutImage(void)
 #ifdef WIN32
 			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
 			else ci = 0;
+
+			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held >>= (controller * 8);
+			else held = 0;
 #else
 			// Put other port info here
 			ci = 0;
+			held = 0;
 #endif
 
 			c &= 255;
 			ci &= 255;
 			held &= 255;
+
+			//adelikat: I apologize to anyone who ever sifts through this color assignment
 			//A
-			if (held&1) 
-				color = ahold;
-			else if (c&1) color = (ci&1) ? blend : on;
-			else color = (ci&1) ? oni : off;
+			if (held&1)	{ //If auto-hold
+				if (!(ci&1) ) color = ahold;	
+				else 
+					color = (c&1) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&1) color = (ci&1) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&1) ? oni : off;
+			}
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -303,8 +314,15 @@ void FCEU_PutImage(void)
 				}
 			}
 			//B
-			if (c&2) color = (ci&2) ? blend : on;
-			else color = (ci&2) ? oni : off;
+			if (held&2)	{ //If auto-hold
+				if (!(ci&2) ) color = ahold;	
+				else 
+					color = (c&2) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&2) color = (ci&2) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&2) ? oni : off;
+			}
 			for(i=0; i < 4; i++)
 			{
 				for(j = 0; j < 4; j++)
@@ -315,24 +333,45 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Select
-			if (c&4) color = (ci&4) ? blend : on;
-			else color = (ci&4) ? oni : off;
+			if (held&4)	{ //If auto-hold
+				if (!(ci&4) ) color = ahold;	
+				else 
+					color = (c&4) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&4) color = (ci&4) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&4) ? oni : off;
+			}
 			for(i = 0; i < 4; i++)
 			{
 				t[11+5*256+i] = color;
 				t[11+6*256+i] = color;
 			}
 			//Start
-			if (c&8) color = (ci&8) ? blend : on;
-			else color = (ci&8) ? oni : off;
+			if (held&8)	{ //If auto-hold
+				if (!(ci&8) ) color = ahold;	
+				else 
+					color = (c&8) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&8) color = (ci&8) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&8) ? oni : off;
+			}
 			for(i = 0; i < 4; i++)
 			{
 				t[17+5*256+i] = color;
 				t[17+6*256+i] = color;
 			}
 			//Up
-			if (c&16) color = (ci&16) ? blend : on;
-			else color = (ci&16) ? oni : off;
+			if (held&16)	{ //If auto-hold
+				if (!(ci&16) ) color = ahold;	
+				else 
+					color = (c&16) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&16) color = (ci&16) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&16) ? oni : off;
+			}
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -341,8 +380,15 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Down
-			if (c&32) color = (ci&32) ? blend : on;
-			else color = (ci&32) ? oni : off;
+			if (held&32)	{ //If auto-hold
+				if (!(ci&32) ) color = ahold;	
+				else 
+					color = (c&32) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&32) color = (ci&32) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&32) ? oni : off;
+			}
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -351,8 +397,15 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Left
-			if (c&64) color = (ci&64) ? blend : on;
-			else color = (ci&64) ? oni : off;
+			if (held&64)	{ //If auto-hold
+				if (!(ci&64) ) color = ahold;	
+				else 
+					color = (c&64) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&64) color = (ci&64) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&64) ? oni : off;
+			}
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
@@ -361,8 +414,15 @@ void FCEU_PutImage(void)
 				}
 			}
 			//Right
-			if (c&128) color = (ci&128) ? blend : on;
-			else color = (ci&128) ? oni : off;
+			if (held&128)	{ //If auto-hold
+				if (!(ci&128) ) color = ahold;	
+				else 
+					color = (c&128) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
+			}
+			else {
+				if (c&128) color = (ci&128) ? blend : on;	//If immedaite buttons are pressed and they match the previous frame, blend the colors
+				else color = (ci&128) ? oni : off;
+			}
 			for(i = 0; i < 3; i++)
 			{
 				for(j = 0; j < 3; j++)
