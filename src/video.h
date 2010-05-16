@@ -17,6 +17,9 @@ extern struct GUIMESSAGE
 	//indicates that the movie should be drawn even on top of movies
 	bool isMovieMessage;
 
+	//in case of multiple lines, allow one to move the message
+	int linesFromBottom;
+
 } guiMessage;
 
 extern GUIMESSAGE subtitleMessage;

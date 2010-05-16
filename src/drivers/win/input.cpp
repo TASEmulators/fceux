@@ -295,19 +295,26 @@ void UpdateGamepad()
 					}
 				}
 
-				char inputstr [64];
+				char inputstr [45];
 				{
 					uint32 c = JSAutoHeld;
-					sprintf(inputstr, "%c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c",
+					sprintf(inputstr, "1%c%c%c%c%c%c%c%c 2%c%c%c%c%c%c%c%c\n    3%c%c%c%c%c%c%c%c 4%c%c%c%c%c%c%c%c",
 						(c&0x40)?'<':' ', (c&0x10)?'^':' ', (c&0x80)?'>':' ', (c&0x20)?'v':' ',
 						(c&0x01)?'A':' ', (c&0x02)?'B':' ', (c&0x08)?'S':' ', (c&0x04)?'s':' ',
 						(c&0x4000)?'<':' ', (c&0x1000)?'^':' ', (c&0x8000)?'>':' ', (c&0x2000)?'v':' ',
 						(c&0x0100)?'A':' ', (c&0x0200)?'B':' ', (c&0x0800)?'S':' ', (c&0x0400)?'s':' ',
-						(c&0x40000)?'A':' ');
-					if(!(c&0xff00))
-						inputstr[8] = '\0';
+						(c&0x400000)?'<':' ', (c&0x100000)?'^':' ', (c&0x800000)?'>':' ', (c&0x200000)?'v':' ',
+						(c&0x010000)?'A':' ', (c&0x020000)?'B':' ', (c&0x080000)?'S':' ', (c&0x040000)?'s':' ',
+						(c&0x40000000)?'<':' ', (c&0x10000000)?'^':' ', (c&0x80000000)?'>':' ', (c&0x20000000)?'v':' ',
+						(c&0x01000000)?'A':' ', (c&0x02000000)?'B':' ', (c&0x08000000)?'S':' ', (c&0x04000000)?'s':' ');
+					if(!(c&0xffffff00))
+						inputstr[9] = '\0';
+					if(!(c&0xffff0000))
+						inputstr[19] = '\0';
+					if(!(c&0xff000000))
+						inputstr[30] = '\0';
 				}
-				FCEU_DispMessage("Held: %s", inputstr);
+				FCEU_DispMessage("Held: %s", 40, inputstr);
 	}
 	else
 	{
@@ -317,7 +324,7 @@ void UpdateGamepad()
 
 	if(autoHoldReset)
 	{
-		FCEU_DispMessage("Held:         ");
+		FCEU_DispMessage("Held:          ",0);
 		JSAutoHeld = 0;
 		JSAutoHeldAffected = 0;
 		autoHoldRefire = 0;
@@ -1604,7 +1611,7 @@ void FCEUI_UseInputPreset(int preset)
 		case 1: memcpy(GamePadConfig, GamePadPreset2, sizeof(GamePadPreset2)); break;
 		case 2: memcpy(GamePadConfig, GamePadPreset3, sizeof(GamePadPreset3)); break;
 	}
-	FCEU_DispMessage("Using input preset %d.",preset+1);
+	FCEU_DispMessage("Using input preset %d.",0,preset+1);
 }
 
 static void PresetExport(int preset)

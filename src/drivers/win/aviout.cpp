@@ -359,7 +359,7 @@ int FCEUI_AviBegin(const char* fname)
 
 	// Don't display at file splits
 	if(!avi_segnum)
-		FCEU_DispMessage("AVI recording started.");
+		FCEU_DispMessage("AVI recording started.",0);
 
 	strncpy(saved_cur_avi_fnameandext,fname,MAX_PATH);
 	strncpy(saved_avi_fname,fname,MAX_PATH);
@@ -423,7 +423,7 @@ void FCEUI_AviEnd()
 
 	// Don't display if we're just starting another segment
 	if(avi_file->tBytes <= 2097152000)
-		FCEU_DispMessage("AVI recording ended.");
+		FCEU_DispMessage("AVI recording ended.",0);
 
 	avi_destroy(&avi_file);
 }

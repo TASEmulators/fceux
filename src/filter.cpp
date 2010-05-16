@@ -56,7 +56,7 @@ void SexyFilter(int32 *in, int32 *out, int32 count)
  mul2=(24<<16)/FSettings.SndRate;
  vmul=(FSettings.SoundVolume<<16)*3/4/100;
 
- //FCEU_DispMessage("SoundVolume %d, vmul %d",FSettings.SoundVolume,vmul);
+ //FCEU_DispMessage("SoundVolume %d, vmul %d",0,FSettings.SoundVolume,vmul);
  if(FSettings.soundq) vmul/=4;
  else vmul*=2;			/* TODO:  Increase volume in low quality sound rendering code itself */
 

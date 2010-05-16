@@ -188,9 +188,9 @@ static void ReallySnap(void)
 {
 	int x=SaveSnapshot();
 	if(!x)
-		FCEU_DispMessage("Error saving screen snapshot.");
+		FCEU_DispMessage("Error saving screen snapshot.",0);
 	else
-		FCEU_DispMessage("Screen snapshot %d saved.",x-1);
+		FCEU_DispMessage("Screen snapshot %d saved.",0,x-1);
 }
 
 void FCEU_PutImage(void)
@@ -281,7 +281,7 @@ void FCEU_PutImage(void)
 			if (!oldInputDisplay) ci = FCEUMOV_Mode(MOVIEMODE_PLAY) ? 0:GetGamepadPressedImmediate() >> (controller * 8);
 			else ci = 0;
 
-			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held >>= (controller * 8);
+			if (!oldInputDisplay && !FCEUMOV_Mode(MOVIEMODE_PLAY)) held = (held >> 8);
 			else held = 0;
 #else
 			// Put other port info here
@@ -382,7 +382,7 @@ void FCEU_PutImage(void)
 			//Down
 			if (held&32)	{ //If auto-hold
 				if (!(ci&32) ) color = ahold;	
-				else 
+				else
 					color = (c&32) ? on : off; //If the button is pressed down (immediate) that negates auto hold, however it is only off if the previous frame the button wasn't pressed!
 			}
 			else {
@@ -444,21 +444,25 @@ void FCEU_DispMessageOnMovie(char *format, ...)
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = true;
+	guiMessage.linesFromBottom = 0;
+
 	if (FCEUI_AviIsRecording() && FCEUI_AviDisableMovieMessages())
 		guiMessage.howlong = 0;
 }
 
-void FCEU_DispMessage(char *format, ...)
+void FCEU_DispMessage(char *format, int disppos=0, ...)
 {
 	va_list ap;
 
-	va_start(ap,format);
+	va_start(ap,disppos);
 	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
 	va_end(ap);
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = false;
-	
+
+	guiMessage.linesFromBottom = disppos;
+
 	//adelikat: Pretty sure this code fails, Movie playback stopped is done with FCEU_DispMessageOnMovie()
 	#ifdef CREATE_AVI
 	if(LoggingEnabled == 2)
@@ -476,6 +480,7 @@ void FCEU_ResetMessages()
 {
 	guiMessage.howlong = 0;
 	guiMessage.isMovieMessage = false;
+	guiMessage.linesFromBottom = 0;
 }
 
 

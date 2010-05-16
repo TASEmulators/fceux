@@ -2002,7 +2002,7 @@ int FCEUPPU_Loop(int skip)
 				}
 				deempcnt[x]=0;
 			}
-			//FCEU_DispMessage("%2x:%2x:%2x:%2x:%2x:%2x:%2x:%2x %d",deempcnt[0],deempcnt[1],deempcnt[2],deempcnt[3],deempcnt[4],deempcnt[5],deempcnt[6],deempcnt[7],maxref);
+			//FCEU_DispMessage("%2x:%2x:%2x:%2x:%2x:%2x:%2x:%2x %d",0,deempcnt[0],deempcnt[1],deempcnt[2],deempcnt[3],deempcnt[4],deempcnt[5],deempcnt[6],deempcnt[7],maxref);
 			//memset(deempcnt,0,sizeof(deempcnt));
 			SetNESDeemph(maxref,0);
 		}

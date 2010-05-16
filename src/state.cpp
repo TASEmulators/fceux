@@ -448,7 +448,7 @@ void FCEUSS_Save(const char *fname)
 
 	if(geniestage==1)
 	{
-		FCEU_DispMessage("Cannot save FCS in GG screen.");
+		FCEU_DispMessage("Cannot save FCS in GG screen.",0);
 		return;
 	}
 
@@ -477,7 +477,7 @@ void FCEUSS_Save(const char *fname)
 
 	if(st == NULL)
 	{
-		FCEU_DispMessage("State %d save error.",CurrentState);
+		FCEU_DispMessage("State %d save error.",0,CurrentState);
 		return;
 	}
 
@@ -517,7 +517,7 @@ void FCEUSS_Save(const char *fname)
 	if(!fname)
 	{
 		SaveStateStatus[CurrentState]=1;
-		FCEU_DispMessage("State %d saved.",CurrentState);
+		FCEU_DispMessage("State %d saved.",0,CurrentState);
 	}
 		redoSS = false;					//we have a new savestate so redo is not possible
 }
@@ -709,7 +709,7 @@ bool FCEUSS_Load(const char *fname)
 
 	if(geniestage==1)
 	{
-		FCEU_DispMessage("Cannot load FCS in GG screen.");
+		FCEU_DispMessage("Cannot load FCS in GG screen.",0);
 		return false;
 	}
 	if(fname)
@@ -726,7 +726,7 @@ bool FCEUSS_Load(const char *fname)
 
 	if(st == NULL)
 	{
-		FCEU_DispMessage("State %d load error.",CurrentState);
+		FCEU_DispMessage("State %d load error.",0,CurrentState);
 		SaveStateStatus[CurrentState]=0;
 		return false;
 	}
@@ -740,11 +740,11 @@ bool FCEUSS_Load(const char *fname)
 		{
 			char szFilename[260]={0};
 			splitpath(fname, 0, 0, szFilename, 0);
-			FCEU_DispMessage("State %s loaded.",szFilename);
+			FCEU_DispMessage("State %s loaded.",0,szFilename);
 		}
 		else
 		{
-			FCEU_DispMessage("State %d loaded.",CurrentState);
+			FCEU_DispMessage("State %d loaded.",0,CurrentState);
 			SaveStateStatus[CurrentState]=1;
 		}
 		delete st;
@@ -787,7 +787,7 @@ bool FCEUSS_Load(const char *fname)
 		{
 			SaveStateStatus[CurrentState]=1;
 		}
-		FCEU_DispMessage("Error(s) reading state %d!",CurrentState);
+		FCEU_DispMessage("Error(s) reading state %d!",0,CurrentState);
 		delete st;
 		return 0;
 	}
@@ -875,7 +875,7 @@ int FCEUI_SelectState(int w, int show)
 	if(show)
 	{
 		StateShow=180;
-		FCEU_DispMessage("-select state-");
+		FCEU_DispMessage("-select state-",0);
 	}
 	return oldstate;
 }
@@ -984,14 +984,14 @@ void SwapSaveState()
 	
 	if (!lastSavestateMade) 
 	{
-		FCEUI_DispMessage("Can't Undo");
+		FCEUI_DispMessage("Can't Undo",0);
 		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a recently used savestate.\n");
 		return;		//If there is no last savestate, can't undo
 	}
 	string backup = GenerateBackupSaveStateFn(lastSavestateMade);	//Get filename of backup state
 	if (!CheckFileExists(backup.c_str())) 
 	{
-		FCEUI_DispMessage("Can't Undo");
+		FCEUI_DispMessage("Can't Undo",0);
 		FCEUI_printf("Undo savestate was attempted but unsuccessful because there was not a backup of the last used savestate.\n");
 		return;		//If no backup, can't undo
 	}
@@ -1012,8 +1012,8 @@ void SwapSaveState()
 	else					//This was an undo function so next will be redo, so flag it
 		redoSS = true;
 
-	FCEUI_DispMessage("%s restored",backup.c_str());
-	FCEUI_printf("%s restored\n",backup.c_str());
+	FCEUI_DispMessage("%s restored",0,backup.c_str());
+	FCEUI_printf("%s restored\n",0,backup.c_str());
 }	
 	
 //------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1081,7 +1081,7 @@ void LoadBackup()
 		undoLS = false;						//Flag that LoadBackup cannot be run again
 	}
 	else
-		FCEUI_DispMessage("Error: Could not load %s",filename.c_str());
+		FCEUI_DispMessage("Error: Could not load %s",0,filename.c_str());
 }
 
 void RedoLoadState()

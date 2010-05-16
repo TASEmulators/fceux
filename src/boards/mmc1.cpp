@@ -139,7 +139,7 @@ static uint64 lreset;
 static DECLFW(MMC1_write)
 {
   int n=(A>>13)-4;
-  //FCEU_DispMessage("%016x",timestampbase+timestamp);
+  //FCEU_DispMessage("%016x",0,timestampbase+timestamp);
 //  FCEU_printf("$%04x:$%02x, $%04x\n",A,V,X.PC);
   //DumpMem("out",0xe000,0xffff);
 

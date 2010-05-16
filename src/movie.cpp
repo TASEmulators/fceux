@@ -764,7 +764,7 @@ static void StopPlayback()
 /// Stop movie recording
 static void StopRecording()
 {
-	FCEU_DispMessage("Movie recording stopped.");
+	FCEU_DispMessage("Movie recording stopped.",0);
 
 	movieMode = MOVIEMODE_INACTIVE;
 	
@@ -854,13 +854,13 @@ void FCEUMOV_EnterTasEdit()
 	
 	currMovieData.TryDumpIncremental();
 
-	FCEU_DispMessage("Tasedit engaged");
+	FCEU_DispMessage("Tasedit engaged",0);
 }
 
 void FCEUMOV_ExitTasEdit()
 {
 	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("Tasedit disengaged");
+	FCEU_DispMessage("Tasedit disengaged",0);
 	currMovieData = MovieData();
 }
 
@@ -964,15 +964,15 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 		currRerecordCount = currMovieData.rerecordCount;
 
 		if(movie_readonly)
-			FCEU_DispMessage("Replay started Read-Only.");
+			FCEU_DispMessage("Replay started Read-Only.",0);
 		else
-			FCEU_DispMessage("Replay started Read+Write.");
+			FCEU_DispMessage("Replay started Read+Write.",0);
 	}
 	
 	#ifdef CREATE_AVI
 	if(LoggingEnabled)
 	{
-	    FCEU_DispMessage("Video recording enabled.\n");
+	    FCEU_DispMessage("Video recording enabled.\n",0);
 	    LoggingEnabled = 2;
 	}
 	#endif
@@ -1040,7 +1040,7 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	movie_readonly = false;
 	currRerecordCount = 0;
 	
-	FCEU_DispMessage("Movie recording started.");
+	FCEU_DispMessage("Movie recording started.",0);
 }
 
 static int _currCommand = 0;
@@ -1049,7 +1049,7 @@ static int _currCommand = 0;
 // Stop movie playback without closing the movie.
 static void FinishPlayback()
 {
-	FCEU_DispMessage("Movie finished playing.");
+	FCEU_DispMessage("Movie finished playing.",0);
 	movieMode = MOVIEMODE_FINISHED;
 }
 
@@ -1122,7 +1122,7 @@ void FCEUMOV_AddInputState()
 		if(FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
 		{
 			FCEUI_ToggleEmulationPause();
-			FCEU_DispMessage("Paused at specified movie frame");
+			FCEU_DispMessage("Paused at specified movie frame",0);
 		}
 		
 	}
@@ -1435,20 +1435,20 @@ void FCEUI_SetMovieToggleReadOnly(bool which)
 		if (!movie_readonly)	//If not already set
 		{
 			movie_readonly = true;
-			FCEU_DispMessage("Movie is now Read-Only.");
+			FCEU_DispMessage("Movie is now Read-Only.",0);
 		}
 		else					//Else restate message
-			FCEU_DispMessage("Movie is Read-Only.");
+			FCEU_DispMessage("Movie is Read-Only.",0);
 	}
 	else		//If set to read+write
 	{
 		if (movie_readonly)		//If not already set
 		{
 			movie_readonly = false;
-			FCEU_DispMessage("Movie is now Read+Write.");
+			FCEU_DispMessage("Movie is now Read+Write.",0);
 		}
 		else					//Else restate message
-			FCEU_DispMessage("Movie is Read+Write.");
+			FCEU_DispMessage("Movie is Read+Write.",0);
 	}
 }
 void FCEUI_MovieToggleReadOnly()
@@ -1467,7 +1467,7 @@ void FCEUI_MovieToggleReadOnly()
 	else if (movieMode == MOVIEMODE_FINISHED)
 		strcat(message, " (finished)");
 	
-	FCEU_DispMessage(message);
+	FCEU_DispMessage(message,0);
 	movie_readonly = !movie_readonly;
 }
 
@@ -1481,7 +1481,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 		currFrameCounter=0;
 		movieMode = MOVIEMODE_PLAY;
 
-		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.");
+		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 	}
 }
 
@@ -1561,6 +1561,7 @@ void FCEU_DisplaySubtitles(char *format, ...)
 
 	subtitleMessage.howlong = 300;
 	subtitleMessage.isMovieMessage = subtitlesOnAVI;
+	subtitleMessage.linesFromBottom = 0;
 }
 
 void FCEUI_CreateMovieFile(std::string fn)
@@ -1622,9 +1623,9 @@ void FCEUI_MakeBackupMovie(bool dispMessage)
 	if (dispMessage)	//If we should inform the user 
 	{
 		if (overflow)
-			FCEUI_DispMessage("Backup overflow, overwriting %s",backupFn.c_str()); //Inform user of overflow
+			FCEUI_DispMessage("Backup overflow, overwriting %s",0,backupFn.c_str()); //Inform user of overflow
 		else
-			FCEUI_DispMessage("%s created",backupFn.c_str()); //Inform user of backup filename
+			FCEUI_DispMessage("%s created",0,backupFn.c_str()); //Inform user of backup filename
 	}
 }
 

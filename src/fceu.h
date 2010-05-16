@@ -112,7 +112,7 @@ bool CheckFileExists(const char* filename);	//Receives a filename (fullpath) and
 
 void FCEU_PrintError(char *format, ...);
 void FCEU_printf(char *format, ...);
-void FCEU_DispMessage(char *format, ...);
+void FCEU_DispMessage(char *format, int disppos, ...);
 void FCEU_DispMessageOnMovie(char *format, ...);
 
 void SetNESDeemph(uint8 d, int force);

@@ -799,7 +799,7 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 
 static void CommandUnImpl(void)
 {
-	FCEU_DispMessage("command '%s' unimplemented.", FCEUI_CommandTable[i].name);
+	FCEU_DispMessage("command '%s' unimplemented.",0, FCEUI_CommandTable[i].name);
 }
 
 static void CommandToggleDip(void)
@@ -1043,8 +1043,8 @@ static void CloseRom(void)
 static void MovieSubtitleToggle(void)
 {
 	movieSubtitles ^= 1;
-	if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
-	else FCEU_DispMessage("Movie subtitles off");
+	if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on",0);
+	else FCEU_DispMessage("Movie subtitles off",0);
 }
 
 static void UndoRedoSavestate(void)

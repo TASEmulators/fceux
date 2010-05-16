@@ -2154,7 +2154,7 @@ adelikat: Outsourced this to a remappable hotkey
 				if(wParam==VK_SCROLL)
 				{
 					cidisabled^=1;
-					FCEUI_DispMessage("Family Keyboard %sabled.",cidisabled?"en":"dis");
+					FCEUI_DispMessage("Family Keyboard %sabled.",0,cidisabled?"en":"dis");
 				}
 				if(cidisabled)
 					break; // Hopefully this won't break DInput...
@@ -2164,7 +2164,7 @@ adelikat: Outsourced this to a remappable hotkey
 				if(wParam==VK_SCROLL)
 				{
 					cidisabled^=1;
-					FCEUI_DispMessage("Subor Keyboard %sabled.",cidisabled?"en":"dis");
+					FCEUI_DispMessage("Subor Keyboard %sabled.",0,cidisabled?"en":"dis");
 				}
 				if(cidisabled)
 					break;

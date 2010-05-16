@@ -408,7 +408,7 @@ static int emu_unpause(lua_State *L) {
 static int emu_message(lua_State *L) {
 
 	const char *msg = luaL_checkstring(L,1);
-	FCEU_DispMessage("%s", msg);
+	FCEU_DispMessage("%s",0, msg);
 	
 	return 0;
 
@@ -4814,7 +4814,7 @@ void FCEU_LuaFrameBoundary() {
 
 	} else {
 		FCEU_LuaOnStop();
-		FCEU_DispMessage("Script died of natural causes.\n");
+		FCEU_DispMessage("Script died of natural causes.\n",0);
 	}
 
 	// Past here, the nes actually runs, so any Lua code is called mid-frame. We must
@@ -4981,7 +4981,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 void FCEU_ReloadLuaCode()
 {
 	if (!luaScriptName)
-		FCEU_DispMessage("There's no script to reload.");
+		FCEU_DispMessage("There's no script to reload.",0);
 	else
 		FCEU_LoadLuaCode(luaScriptName);
 }

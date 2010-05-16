@@ -148,5 +148,5 @@ void FCEUD_SetEmulationSpeed(int cmd)
 
 	RefreshThrottleFPS();
 
-	FCEU_DispMessage("emulation speed %d%%",(fps_scale*100)>>8);
+	FCEU_DispMessage("emulation speed %d%%",0,(fps_scale*100)>>8);
 }

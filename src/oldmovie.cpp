@@ -350,7 +350,7 @@ uint16 metadata_ucs2[];     // ucs-2, ick!  sizeof(metadata) = offset_to_savesta
 //	framets=0;
 //	nextts=0;
 //	nextd = -1;
-//	FCEU_DispMessage("Movie playback started.");
+//	FCEU_DispMessage("Movie playback started.",0);
 //}
 //
 //static int FCEUI_MovieGetInfo_v1(const char* fname, MOVIE_INFO* info)

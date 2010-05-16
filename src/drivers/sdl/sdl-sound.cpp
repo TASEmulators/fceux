@@ -246,7 +246,7 @@ FCEUD_SoundVolumeAdjust(int n)
     FCEUI_SetSoundVolume(soundvolume);
     g_config->setOption("SDL.SoundVolume", soundvolume);
 
-    FCEU_DispMessage("Sound volume %d.", soundvolume);
+    FCEU_DispMessage("Sound volume %d.",0, soundvolume);
 }
 
 /**
@@ -261,10 +261,10 @@ FCEUD_SoundToggle(void)
 
         s_mute = 0;
         FCEUI_SetSoundVolume(soundvolume);
-        FCEU_DispMessage("Sound mute off.");
+        FCEU_DispMessage("Sound mute off.",0);
     } else {
         s_mute = 1;
         FCEUI_SetSoundVolume(0);
-        FCEU_DispMessage("Sound mute on.");
+        FCEU_DispMessage("Sound mute on.",0);
     }
 }

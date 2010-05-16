@@ -389,7 +389,7 @@ KeyboardCommands()
     if(InputType[2] == SIFC_FKB) {
         if(keyonly(SCROLLLOCK)) {
             g_fkbEnabled ^= 1;
-            FCEUI_DispMessage("Family Keyboard %sabled.",
+            FCEUI_DispMessage("Family Keyboard %sabled.",0,
                               g_fkbEnabled ? "en" : "dis");
         }
         SDL_WM_GrabInput(g_fkbEnabled ? SDL_GRAB_ON : SDL_GRAB_OFF);
@@ -427,7 +427,7 @@ KeyboardCommands()
     // Toggle Movie auto-backup
     if(keyonly(M) && is_shift) {
         autoMovieBackup ^= 1;
-        FCEUI_DispMessage("Automatic movie backup %sabled.",
+        FCEUI_DispMessage("Automatic movie backup %sabled.",0,
           autoMovieBackup ? "en" : "dis");
     }
     
@@ -585,13 +585,13 @@ KeyboardCommands()
 	
 	if(_keyonly(Hotkeys[HK_BIND_STATE])) {
         bindSavestate ^= 1;
-        FCEUI_DispMessage("Savestate binding to movie %sabled.",
+        FCEUI_DispMessage("Savestate binding to movie %sabled.",0,
             bindSavestate ? "en" : "dis");
     }
     
     if(_keyonly(Hotkeys[HK_FA_LAG_SKIP])) {
         frameAdvanceLagSkip ^= 1;
-        FCEUI_DispMessage("Skipping lag in Frame Advance %sabled.",
+        FCEUI_DispMessage("Skipping lag in Frame Advance %sabled.",0,
             frameAdvanceLagSkip ? "en" : "dis");
     }
     
@@ -602,7 +602,7 @@ KeyboardCommands()
     if (_keyonly(Hotkeys[HK_TOGGLE_SUBTITLE])) {
         extern int movieSubtitles;
         movieSubtitles ^= 1;
-        FCEUI_DispMessage("Movie subtitles o%s.",
+        FCEUI_DispMessage("Movie subtitles o%s.",0,
             movieSubtitles ? "n" : "ff");
     }
 
@@ -650,10 +650,10 @@ KeyboardCommands()
                     } else {
                         FCEUI_DatachSet(bbuf);
                     }
-                    FCEUI_DispMessage("Barcode Entered");
+                    FCEUI_DispMessage("Barcode Entered",0);
                 } else { 
                     bbuft = 0;
-                    FCEUI_DispMessage("Enter Barcode");
+                    FCEUI_DispMessage("Enter Barcode",0);
                 }
             }
         } else {
@@ -667,7 +667,7 @@ do {                                              \
             bbuf[bbuft++] = '0' + x;              \
             bbuf[bbuft] = 0;                      \
         }                                         \
-        FCEUI_DispMessage("Barcode: %s", bbuf);   \
+        FCEUI_DispMessage("Barcode: %s",0, bbuf);   \
 	}                                             \
 } while(0)
 

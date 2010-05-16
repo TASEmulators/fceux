@@ -84,8 +84,8 @@ BOOL CALLBACK MovieOptionsCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 					case IDC_MOVIE_DISPLAYSUBTITLES:
 						movieSubtitles ^= 1;
-						if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on");
-						else FCEU_DispMessage("Movie subtitles off");
+						if (movieSubtitles)	FCEU_DispMessage("Movie subtitles on",0);
+						else FCEU_DispMessage("Movie subtitles off",0);
 						break;
 
 					case IDC_MOVIE_SUBTITLESINAVI:

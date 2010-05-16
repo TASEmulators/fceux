@@ -812,12 +812,12 @@ void FCEUD_SoundToggle(void)
 	if(mute)
 	{
 		mute = false;
-		FCEU_DispMessage("Sound unmuted");
+		FCEU_DispMessage("Sound unmuted",0);
 	}
 	else
 	{
 		mute = true;
-		FCEU_DispMessage("Sound muted");
+		FCEU_DispMessage("Sound muted",0);
 	}
 }
 
@@ -831,5 +831,5 @@ void FCEUD_SoundVolumeAdjust(int n)
 	}
 	mute = false;
 	FCEUI_SetSoundVolume(soundvolume);
-	FCEU_DispMessage("Sound volume %d.", soundvolume);
+	FCEU_DispMessage("Sound volume %d.",0, soundvolume);
 }

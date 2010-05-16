@@ -50,7 +50,7 @@ static int netdcount;
 
 static void NetError(void)
 {
-	FCEU_DispMessage("Network error/connection lost!");
+	FCEU_DispMessage("Network error/connection lost!",0);
 	FCEUD_NetworkClose();
 }
 
@@ -310,7 +310,7 @@ void NetplayUpdate(uint8 *joyp)
 				if(FCEUSS_LoadFP(fp,SSLOADPARAM_BACKUP))
 			 {
 			 fclose(fp);				
-			 FCEU_DispMessage("Remote state loaded.");
+			 FCEU_DispMessage("Remote state loaded.",0);
 			 } else FCEUD_PrintError("File error.  (K)ill, (M)aim, (D)estroy?");
 			 }
 			 break;*/

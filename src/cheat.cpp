@@ -128,7 +128,7 @@ void RebuildSubCheats(void)
 			if(GetReadHandler(c->addr)==SubCheatsRead)
 			{
 				/* Prevent a catastrophe by this check. */
-				//FCEU_DispMessage("oops");
+				//FCEU_DispMessage("oops",0);
 			}
 			else
 			{
@@ -144,7 +144,7 @@ void RebuildSubCheats(void)
 	}
 	FrozenAddressCount = numsubcheats;		//Update the frozen address list
 	UpdateFrozenList();
-	//FCEUI_DispMessage("Active Cheats: %d", FrozenAddresses.size()/*FrozenAddressCount*/); //Debug
+	//FCEUI_DispMessage("Active Cheats: %d",0, FrozenAddresses.size()/*FrozenAddressCount*/); //Debug
 }
 
 void FCEU_PowerCheats()
@@ -214,8 +214,8 @@ void FCEU_LoadGameCheats(FILE *override)
 		if(!fp) return;
 	}
 
-	FCEU_DispMessage("Cheats file loaded."); //Tells user a cheats file was loaded.
-	FCEU_printf("Cheats file loaded.\n");	 //Sends message to message log.
+	FCEU_DispMessage("Cheats file loaded.",0); //Tells user a cheats file was loaded.
+	FCEU_printf("Cheats file loaded.\n",0);	 //Sends message to message log.
 	while(fgets(linebuf,2048,fp)>0)
 	{
 		char *tbuf=linebuf;
@@ -948,5 +948,5 @@ void UpdateFrozenList(void)
 		FrozenAddresses.push_back(SubCheats[x].addr);
 		//FCEU_printf("Address %d: %d \n",x,FrozenAddresses[x]); //Debug
 	}
-	//FCEUI_DispMessage("FrozenCount: %d",FrozenAddressCount);//Debug
+	//FCEUI_DispMessage("FrozenCount: %d",0,FrozenAddressCount);//Debug
 }
