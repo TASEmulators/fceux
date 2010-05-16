@@ -493,6 +493,7 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditproj.cpp" />
+    <ClCompile Include="..\src\emufile.cpp" />
     <ClCompile Include="..\src\input\arkanoid.cpp" />
     <ClCompile Include="..\src\input\bworld.cpp" />
     <ClCompile Include="..\src\input\cursor.cpp" />
@@ -737,6 +738,7 @@
     <ClInclude Include="..\src\drivers\win\lua\include\luaconf.h" />
     <ClInclude Include="..\src\drivers\win\lua\include\lualib.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditproj.h" />
+    <ClInclude Include="..\src\emufile.h" />
     <ClInclude Include="..\src\fir\c44100ntsc.h" />
     <ClInclude Include="..\src\fir\c44100pal.h" />
     <ClInclude Include="..\src\fir\c48000ntsc.h" />

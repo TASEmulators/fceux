@@ -906,6 +906,7 @@
     <ClCompile Include="..\src\vsuni.cpp" />
     <ClCompile Include="..\src\wave.cpp" />
     <ClCompile Include="..\src\x6502.cpp" />
+    <ClCompile Include="..\src\emufile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1343,6 +1344,7 @@
     <ClInclude Include="..\src\lua\src\lzio.h">
       <Filter>drivers\win\lua</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\emufile.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
