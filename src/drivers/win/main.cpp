@@ -920,28 +920,14 @@ static void FCEUD_MakePathDirs(const char *fname)
 	} while(1);
 }
 
-std::fstream* FCEUD_UTF8_fstream(const char *n, const char *m)
+EMUFILE_FILE* FCEUD_UTF8_fstream(const char *n, const char *m)
 {
 	if(strchr(m, 'w') || strchr(m, '+'))
 	{
 		FCEUD_MakePathDirs(n);
 	}
 
-	std::ios_base::openmode mode = std::ios_base::binary;
-	if(!strcmp(m,"r") || !strcmp(m,"rb"))
-		mode |= std::ios_base::in;
-	else if(!strcmp(m,"w") || !strcmp(m,"wb"))
-		mode |= std::ios_base::out | std::ios_base::trunc;
-	else if(!strcmp(m,"a") || !strcmp(m,"ab"))
-		mode |= std::ios_base::out | std::ios_base::app;
-	else if(!strcmp(m,"r+") || !strcmp(m,"r+b"))
-		mode |= std::ios_base::in | std::ios_base::out;
-	else if(!strcmp(m,"w+") || !strcmp(m,"w+b"))
-		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
-	else if(!strcmp(m,"a+") || !strcmp(m,"a+b"))
-		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
-	
-	std::fstream *fs = new std::fstream(n,mode);
+	EMUFILE_FILE *fs = new EMUFILE_FILE(n,m);
 	if(!fs->is_open()) {
 		delete fs;
 		return 0;

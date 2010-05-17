@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <stdarg.h>
 
-
+#include "emufile.h"
 #include "version.h"
 #include "types.h"
 #include "utils/endian.h"
@@ -27,7 +27,6 @@
 #endif
 #include "utils/guid.h"
 #include "utils/memory.h"
-#include "utils/memorystream.h"
 #include "utils/xstring.h"
 #include <sstream>
 
@@ -79,7 +78,7 @@ EMOVIEMODE movieMode = MOVIEMODE_INACTIVE;
 
 //this should not be set unless we are in MOVIEMODE_RECORD!
 //FILE* fpRecordingMovie = 0;
-std::ostream* osRecordingMovie = 0;
+EMUFILE* osRecordingMovie = NULL;
 
 int currFrameCounter;
 uint32 cur_input_display = 0;
@@ -213,7 +212,7 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 }
 
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};
-void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
+void MovieRecord::dumpJoy(EMUFILE* os, uint8 joystate)
 {
 	//these are mnemonics for each joystick bit.
 	//since we usually use the regular joypad, these will be more helpful.
@@ -225,16 +224,16 @@ void MovieRecord::dumpJoy(std::ostream* os, uint8 joystate)
 		char mnemonic = mnemonics[bit];
 		//if the bit is set write the mnemonic
 		if(joystate & bitmask)
-			os->put(mnemonic);
+			os->fwrite(&mnemonic,1);
 		else //otherwise write an unset bit
-			os->put('.');
+			write8le('.',os);
 	}
 }
 
-void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
+void MovieRecord::parseJoy(EMUFILE* is, uint8& joystate)
 {
 	char buf[8];
-	is->read(buf,8);
+	is->fread(buf,8);
 	joystate = 0;
 	for(int i=0;i<8;i++)
 	{
@@ -243,22 +242,22 @@ void MovieRecord::parseJoy(std::istream* is, uint8& joystate)
 	}
 }
 
-void MovieRecord::parse(MovieData* md, std::istream* is)
+void MovieRecord::parse(MovieData* md, EMUFILE* is)
 {
 	//by the time we get in here, the initial pipe has already been extracted
 
 	//extract the commands
 	commands = uint32DecFromIstream(is);
 	//*is >> commands;
-	is->get(); //eat the pipe
+	is->fgetc(); //eat the pipe
 
 	//a special case: if fourscore is enabled, parse four gamepads
 	if(md->fourscore)
 	{
-		parseJoy(is,joysticks[0]); is->get(); //eat the pipe
-		parseJoy(is,joysticks[1]); is->get(); //eat the pipe
-		parseJoy(is,joysticks[2]); is->get(); //eat the pipe
-		parseJoy(is,joysticks[3]); is->get(); //eat the pipe
+		parseJoy(is,joysticks[0]); is->fgetc(); //eat the pipe
+		parseJoy(is,joysticks[1]); is->fgetc(); //eat the pipe
+		parseJoy(is,joysticks[2]); is->fgetc(); //eat the pipe
+		parseJoy(is,joysticks[3]); is->fgetc(); //eat the pipe
 	}
 	else
 	{
@@ -275,40 +274,40 @@ void MovieRecord::parse(MovieData* md, std::istream* is)
 				zappers[port].zaphit = uint64DecFromIstream(is);
 			}
 			
-			is->get(); //eat the pipe
+			is->fgetc(); //eat the pipe
 		}
 	}
 
 	//(no fcexp data is logged right now)
-	is->get(); //eat the pipe
+	is->fgetc(); //eat the pipe
 
 	//should be left at a newline
 }
 
 
-bool MovieRecord::parseBinary(MovieData* md, std::istream* is)
+bool MovieRecord::parseBinary(MovieData* md, EMUFILE* is)
 {
-	commands = (uint8)is->get();
+	commands = (uint8)is->fgetc();
 
 	//check for eof
-	if(is->gcount() != 1) return false;
+	if(is->eof()) return false;
 
 	if(md->fourscore)
 	{
-		is->read((char*)&joysticks,4);
+		is->fread((char*)&joysticks,4);
 	}
 	else
 	{
 		for(int port=0;port<2;port++)
 		{
 			if(md->ports[port] == SI_GAMEPAD)
-				joysticks[port] = (uint8)is->get();
+				joysticks[port] = (uint8)is->fgetc();
 			else if(md->ports[port] == SI_ZAPPER)
 			{
-				zappers[port].x = (uint8)is->get();
-				zappers[port].y = (uint8)is->get();
-				zappers[port].b = (uint8)is->get();
-				zappers[port].bogo = (uint8)is->get();
+				zappers[port].x = (uint8)is->fgetc();
+				zappers[port].y = (uint8)is->fgetc();
+				zappers[port].b = (uint8)is->fgetc();
+				zappers[port].bogo = (uint8)is->fgetc();
 				read64le(&zappers[port].zaphit,is);
 			}
 		}
@@ -318,35 +317,33 @@ bool MovieRecord::parseBinary(MovieData* md, std::istream* is)
 }
 
 
-void MovieRecord::dumpBinary(MovieData* md, std::ostream* os, int index)
+void MovieRecord::dumpBinary(MovieData* md, EMUFILE* os, int index)
 {
-	os->put(commands);
+	write8le(commands,os);
 	if(md->fourscore)
 	{
-		os->put(joysticks[0]);
-		os->put(joysticks[1]);
-		os->put(joysticks[2]);
-		os->put(joysticks[3]);
+		for(int i=0;i<4;i++)
+			os->fwrite(&joysticks[i],sizeof(joysticks[i]));
 	}
 	else
 	{
 		for(int port=0;port<2;port++)
 		{
 			if(md->ports[port] == SI_GAMEPAD)
-				os->put(joysticks[port]);
+				os->fwrite(&joysticks[port],sizeof(joysticks[port]));
 			else if(md->ports[port] == SI_ZAPPER)
 			{
-				os->put(zappers[port].x);
-				os->put(zappers[port].y);
-				os->put(zappers[port].b);
-				os->put(zappers[port].bogo);
+				write8le(zappers[port].x,os);
+				write8le(zappers[port].y,os);
+				write8le(zappers[port].b,os);
+				write8le(zappers[port].bogo,os);
 				write64le(zappers[port].zaphit, os);
 			}
 		}
 	}
 }
 
-void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
+void MovieRecord::dump(MovieData* md, EMUFILE* os, int index)
 {
 	if (false/*currMovieData.binaryFlag*/)
 	{
@@ -355,42 +352,42 @@ void MovieRecord::dump(MovieData* md, std::ostream* os, int index)
 	}
 	//dump the misc commands
 	//*os << '|' << setw(1) << (int)commands;
-	os->put('|');
+	os->fputc('|');
 	putdec<uint8,1,true>(os,commands);
 
 	//a special case: if fourscore is enabled, dump four gamepads
 	if(md->fourscore)
 	{
-		os->put('|');
-		dumpJoy(os,joysticks[0]); os->put('|');
-		dumpJoy(os,joysticks[1]); os->put('|');
-		dumpJoy(os,joysticks[2]); os->put('|');
-		dumpJoy(os,joysticks[3]); os->put('|');
+		os->fputc('|');
+		dumpJoy(os,joysticks[0]); os->fputc('|');
+		dumpJoy(os,joysticks[1]); os->fputc('|');
+		dumpJoy(os,joysticks[2]); os->fputc('|');
+		dumpJoy(os,joysticks[3]); os->fputc('|');
 	}
 	else
 	{
 		for(int port=0;port<2;port++)
 		{
-			os->put('|');
+			os->fputc('|');
 			if(md->ports[port] == SI_GAMEPAD)
 				dumpJoy(os, joysticks[port]);
 			else if(md->ports[port] == SI_ZAPPER)
 			{
-				putdec<uint8,3,true>(os,zappers[port].x); os->put(' ');
-				putdec<uint8,3,true>(os,zappers[port].y); os->put(' ');
-				putdec<uint8,1,true>(os,zappers[port].b); os->put(' ');
-				putdec<uint8,1,true>(os,zappers[port].bogo); os->put(' ');
+				putdec<uint8,3,true>(os,zappers[port].x); os->fputc(' ');
+				putdec<uint8,3,true>(os,zappers[port].y); os->fputc(' ');
+				putdec<uint8,1,true>(os,zappers[port].b); os->fputc(' ');
+				putdec<uint8,1,true>(os,zappers[port].bogo); os->fputc(' ');
 				putdec<uint64,20,false>(os,zappers[port].zaphit);
 			}
 		}
-		os->put('|');
+		os->fputc('|');
 	}
 	
 	//(no fcexp data is logged right now)
-	os->put('|');
+	os->fputc('|');
 
 	//each frame is on a new line
-	os->put('\n');
+	os->fputc('\n');
 }
 
 MovieData::MovieData()
@@ -464,43 +461,43 @@ void MovieData::installValue(std::string& key, std::string& val)
 	}
 }
 
-int MovieData::dump(std::ostream *os, bool binary)
+int MovieData::dump(EMUFILE *os, bool binary)
 {
-	int start = os->tellp();
-	*os << "version " << version << endl;
-	*os << "emuVersion " << emuVersion << endl;
-	*os << "rerecordCount " << rerecordCount << endl;
-	*os << "palFlag " << (palFlag?1:0) << endl;
-	*os << "romFilename " << romFilename << endl;
-	*os << "romChecksum " << BytesToString(romChecksum.data,MD5DATA::size) << endl;
-	*os << "guid " << guid.toString() << endl;
-	*os << "fourscore " << (fourscore?1:0) << endl;
-	*os << "microphone " << (microphone?1:0) << endl;
-	*os << "port0 " << ports[0] << endl;
-	*os << "port1 " << ports[1] << endl;
-	*os << "port2 " << ports[2] << endl;
-	*os << "FDS " << isFDS << endl;
-	*os << "NewPPU " << newppu << endl;
+	int start = os->ftell();
+	os->fprintf("version %d\n", version);
+	os->fprintf("emuVersion %d\n", emuVersion);
+	os->fprintf("rerecordCount %d\n", rerecordCount);
+	os->fprintf("palFlag %d\n" , (palFlag?1:0) );
+	os->fprintf("romFilename %s\n" , romFilename.c_str() );
+	os->fprintf("romChecksum %s\n" , BytesToString(romChecksum.data,MD5DATA::size).c_str() );
+	os->fprintf("guid %s\n" , guid.toString().c_str() );
+	os->fprintf("fourscore %d\n" , (fourscore?1:0) );
+	os->fprintf("microphone %d\n" , (microphone?1:0) );
+	os->fprintf("port0 %d\n" , ports[0] );
+	os->fprintf("port1 %d\n" , ports[1] );
+	os->fprintf("port2 %d\n" , ports[2] );
+	os->fprintf("FDS %d\n" , isFDS?1:0 );
+	os->fprintf("NewPPU %d\n" , newppu?1:0 );
 
 	for(uint32 i=0;i<comments.size();i++)
-		*os << "comment " << wcstombs(comments[i]) << endl;
+		os->fprintf("comment %s\n" , wcstombs(comments[i]).c_str() );
 
 	for(uint32 i=0;i<subtitles.size();i++)
-		*os << "subtitle " << subtitles[i] << endl;
+		os->fprintf("subtitle %s\n" , subtitles[i].c_str() );
 	
 	if(binary)
-		*os << "binary 1" << endl;
+		os->fprintf("binary 1\n" );
 		
 	if(savestate.size() != 0)
-		*os << "savestate " << BytesToString(&savestate[0],savestate.size()) << endl;
+		os->fprintf("savestate %s\n" , BytesToString(&savestate[0],savestate.size()).c_str() );
 
 	if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-		*os << "length " << this->records.size() << endl;
+		os->fprintf("length %d\n" , this->records.size() );
 
 	if(binary)
 	{
 		//put one | to start the binary dump
-		os->put('|');
+		os->fputc('|');
 		for(int i=0;i<(int)records.size();i++)
 			records[i].dumpBinary(this,os,i);
 	}
@@ -508,13 +505,13 @@ int MovieData::dump(std::ostream *os, bool binary)
 		for(int i=0;i<(int)records.size();i++)
 			records[i].dump(this,os,i);
 
-	int end = os->tellp();
+	int end = os->ftell();
 	return end-start;
 }
 
-int MovieData::dumpGreenzone(std::ostream *os, bool binary)
+int MovieData::dumpGreenzone(EMUFILE *os, bool binary)
 {
-	int start = os->tellp();
+	int start = os->ftell();
 	int frame, size;
 	for (int i=0; i<(int)records.size(); ++i)
 	{
@@ -525,19 +522,19 @@ int MovieData::dumpGreenzone(std::ostream *os, bool binary)
 		write32le(frame, os);
 		write32le(size, os);
 
-		os->write(&records[i].savestate[0], size);
+		os->fwrite(&records[i].savestate[0], size);
 	}
 	frame=-1;
 	size=currMovieData.greenZoneCount;
 	write32le(frame, os);
 	write32le(size, os);
 
-	int end= os->tellp();
+	int end= os->ftell();
 
 	return end-start;
 }
 
-int MovieData::loadGreenzone(std::istream *is, bool binary)
+int MovieData::loadGreenzone(EMUFILE *is, bool binary)
 {
 	int frame, size;
 	while(1)
@@ -545,9 +542,9 @@ int MovieData::loadGreenzone(std::istream *is, bool binary)
 		if (!read32le((uint32 *)&frame, is)) {size=0; break;}
 		if (!read32le((uint32 *)&size, is)) {size=0; break;} 
 		if (frame==-1) break;
-		int pos = is->tellg();
+		int pos = is->ftell();
 		FCEUSS_LoadFP(is, SSLOADPARAM_NOBACKUP);
-		is->seekg(pos+size);
+		is->fseek(pos+size,SEEK_SET);
 	}
 	greenZoneCount=size;
 
@@ -599,7 +596,7 @@ bool FCEUMOV_Mode(int modemask)
 	return FCEUMOV_Mode((EMOVIEMODE)modemask);
 }
 
-static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size)
+static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 {
 	int recordsize = 1; //1 for the command
 	if(movieData.fourscore)
@@ -617,11 +614,11 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 	}
 
 	//find out how much remains in the file
-	int curr = fp->tellg();
-	fp->seekg(0,std::ios::end);
-	int end = fp->tellg();
+	int curr = fp->ftell();
+	fp->fseek(0,SEEK_END);
+	int end = fp->ftell();
 	int flen = end-curr;
-	fp->seekg(curr,std::ios::beg);
+	fp->fseek(curr,SEEK_SET);
 
 	//the amount todo is the min of the limiting size we received and the remaining contents of the file
 	int todo = std::min(size, flen);
@@ -638,7 +635,7 @@ static void LoadFM2_binarychunk(MovieData& movieData, std::istream* fp, int size
 }
 
 //yuck... another custom text parser.
-bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader)
+bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 {
     std::string a("length"), b("-1");
 	// Non-TAS projects consume until EOF
@@ -646,9 +643,9 @@ bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHea
 
 	//first, look for an fcm signature
 	char fcmbuf[3];
-	std::ios::pos_type curr = fp->tellg();
-	fp->read(fcmbuf,3);
-	fp->seekg(curr);
+	std::ios::pos_type curr = fp->ftell();
+	fp->fread(fcmbuf,3);
+	fp->fseek(curr,SEEK_SET);
 	if(!strncmp(fcmbuf,"FCM",3)) {
 		FCEU_PrintError("FCM File format is no longer supported. Please use Tools > Convert FCM");
 		return false;
@@ -656,9 +653,9 @@ bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHea
 
 	//movie must start with "version 3"
 	char buf[9];
-	curr = fp->tellg();
-	fp->read(buf,9);
-	fp->seekg(curr);
+	curr = fp->ftell();
+	fp->fread(buf,9);
+	fp->fseek(curr,SEEK_SET);
 	if(fp->fail()) return false;
 	if(memcmp(buf,"version 3",9)) 
 		return false;
@@ -673,7 +670,7 @@ bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHea
 		bool iswhitespace, isrecchar, isnewline;
 		int c;
 		if(size--<=0) goto bail;
-		c = fp->get();
+		c = fp->fgetc();
 		if(c == -1)
 			goto bail;
 		iswhitespace = (c==' '||c=='\t');
@@ -702,9 +699,9 @@ bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHea
 				if (stopAfterHeader) return true;
 				int currcount = movieData.records.size();
 				movieData.records.resize(currcount+1);
-				int preparse = fp->tellg();
+				int preparse = fp->ftell();
 				movieData.records[currcount].parse(&movieData, fp);
-				int postparse = fp->tellg();
+				int postparse = fp->ftell();
 				size -= (postparse-preparse);
 				state = NEWLINE;
 				break;
@@ -868,15 +865,15 @@ bool FCEUMOV_FromPoweron()
 {
 	return movieFromPoweron;
 }
-bool MovieData::loadSavestateFrom(std::vector<char>* buf)
+bool MovieData::loadSavestateFrom(std::vector<uint8>* buf)
 {
-	memorystream ms(buf);
+	EMUFILE_MEMORY ms(buf);
 	return FCEUSS_LoadFP(&ms,SSLOADPARAM_BACKUP);
 }
 
-void MovieData::dumpSavestateTo(std::vector<char>* buf, int compressionLevel)
+void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 {
-	memorystream ms(buf);
+	EMUFILE_MEMORY ms(buf);
 	FCEUSS_SaveMS(&ms,compressionLevel);
 	ms.trim();
 }
@@ -1201,7 +1198,7 @@ void FCEU_DrawLagCounter(uint8 *XBuf)
 	}
 }
 
-int FCEUMOV_WriteState(std::ostream* os)
+int FCEUMOV_WriteState(EMUFILE* os)
 {
 	//we are supposed to dump the movie data into the savestate
 	if(movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_FINISHED)
@@ -1241,7 +1238,7 @@ bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie, int& error)
 
 static bool load_successful;
 
-bool FCEUMOV_ReadState(std::istream* is, uint32 size)
+bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 {
 	load_successful = false;
 
@@ -1253,9 +1250,9 @@ bool FCEUMOV_ReadState(std::istream* is, uint32 size)
 	}
 
 	MovieData tempMovieData = MovieData();
-	std::ios::pos_type curr = is->tellg();
+	std::ios::pos_type curr = is->ftell();
 	if(!LoadFM2(tempMovieData, is, size, false)) {
-		is->seekg((uint32)curr+size);
+		is->fseek((uint32)curr+size,SEEK_SET);
 		extern bool FCEU_state_loading_old_format;
 		if(FCEU_state_loading_old_format) {
 			if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_FINISHED) {
@@ -1574,7 +1571,7 @@ void FCEU_DisplaySubtitles(char *format, ...)
 void FCEUI_CreateMovieFile(std::string fn)
 {
 	MovieData md = currMovieData;							//Get current movie data
-	std::fstream* outf = FCEUD_UTF8_fstream(fn, "wb");		//open/create file
+	EMUFILE* outf = FCEUD_UTF8_fstream(fn, "wb");		//open/create file
 	md.dump(outf,false);									//dump movie data
 	delete outf;											//clean up, delete file object
 }

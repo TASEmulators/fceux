@@ -287,7 +287,7 @@ static void ConvertFCM(HWND hwndOwner)
 			if(result==FCM_CONVERTRESULT_SUCCESS)
 			{
 				okcount++;
-				std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
+				EMUFILE_FILE* outf = FCEUD_UTF8_fstream(outname, "wb");
 				md.dump(outf,false);
 				delete outf;
 			} else {
@@ -1406,7 +1406,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					EFCM_CONVERTRESULT result = convert_fcm(md, fileDropped.c_str());
 					if(result==FCM_CONVERTRESULT_SUCCESS)
 					{
-						std::fstream* outf = FCEUD_UTF8_fstream(outname, "wb");
+						EMUFILE* outf = FCEUD_UTF8_fstream(outname, "wb");
 						md.dump(outf,false);
 						delete outf;
 						if (!GameInfo)				//If no game is loaded, load the Open Game dialog

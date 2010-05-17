@@ -82,8 +82,8 @@ int FCEUMOV_GetFrame(void);
 int FCEUI_GetLagCount(void);
 bool FCEUI_GetLagged(void);
 
-int FCEUMOV_WriteState(std::ostream* os);
-bool FCEUMOV_ReadState(std::istream* is, uint32 size);
+int FCEUMOV_WriteState(EMUFILE* os);
+bool FCEUMOV_ReadState(EMUFILE* is, uint32 size);
 void FCEUMOV_PreLoad();
 bool FCEUMOV_PostLoad();
 
@@ -143,14 +143,14 @@ public:
 	void clear();
 	
 	//a waste of memory in lots of cases..  maybe make it a pointer later?
-	std::vector<char> savestate;
+	std::vector<uint8> savestate;
 
-	void parse(MovieData* md, std::istream* is);
-	bool parseBinary(MovieData* md, std::istream* is);
-	void dump(MovieData* md, std::ostream* os, int index);
-	void dumpBinary(MovieData* md, std::ostream* os, int index);
-	void parseJoy(std::istream* is, uint8& joystate);
-	void dumpJoy(std::ostream* os, uint8 joystate);
+	void parse(MovieData* md, EMUFILE* is);
+	bool parseBinary(MovieData* md, EMUFILE* is);
+	void dump(MovieData* md, EMUFILE* os, int index);
+	void dumpBinary(MovieData* md, EMUFILE* os, int index);
+	void parseJoy(EMUFILE* is, uint8& joystate);
+	void dumpJoy(EMUFILE* os, uint8 joystate);
 	
 	static const char mnemonics[8];
 
@@ -172,7 +172,7 @@ public:
 	bool PPUflag;
 	MD5DATA romChecksum;
 	std::string romFilename;
-	std::vector<char> savestate;
+	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
@@ -227,15 +227,15 @@ public:
 
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
-	int dump(std::ostream* os, bool binary);
-	int dumpGreenzone(std::ostream *os, bool binary);
-	int loadGreenzone(std::istream *is, bool binary);
+	int dump(EMUFILE* os, bool binary);
+	int dumpGreenzone(EMUFILE *os, bool binary);
+	int loadGreenzone(EMUFILE *is, bool binary);
 
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);
 	
-	static bool loadSavestateFrom(std::vector<char>* buf);
-	static void dumpSavestateTo(std::vector<char>* buf, int compressionLevel);
+	static bool loadSavestateFrom(std::vector<uint8>* buf);
+	static void dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel);
 	void TryDumpIncremental();
 
 private:

@@ -36,7 +36,6 @@
 #include "sound.h"
 #include "utils/endian.h"
 #include "utils/memory.h"
-#include "utils/memorystream.h"
 #include "utils/xstring.h"
 #include "file.h"
 #include "fds.h"
@@ -120,7 +119,7 @@ SFORMAT SFCPUC[]={
 
 void foo(uint8* test) { (void)test; }
 
-static int SubWrite(std::ostream* os, SFORMAT *sf)
+static int SubWrite(EMUFILE* os, SFORMAT *sf)
 {
 	uint32 acc=0;
 
@@ -142,7 +141,7 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 
 		if(os)			//Are we writing or calculating the size of this block?
 		{
-			os->write(sf->desc,4);
+			os->fwrite(sf->desc,4);
 			write32le(sf->s&(~FCEUSTATE_FLAGS),os);
 
 #ifndef LSB_FIRST
@@ -151,9 +150,9 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 #endif
 
 			if(sf->s&FCEUSTATE_INDIRECT)
-				os->write(*(char **)sf->v,sf->s&(~FCEUSTATE_FLAGS));
+				os->fwrite(*(char **)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 			else
-				os->write((char*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
+				os->fwrite((char*)sf->v,sf->s&(~FCEUSTATE_FLAGS));
 
 			//Now restore the original byte order.
 #ifndef LSB_FIRST
@@ -167,10 +166,10 @@ static int SubWrite(std::ostream* os, SFORMAT *sf)
 	return(acc);
 }
 
-static int WriteStateChunk(std::ostream* os, int type, SFORMAT *sf)
+static int WriteStateChunk(EMUFILE* os, int type, SFORMAT *sf)
 {
-	os->put(type);
-	int bsize = SubWrite((std::ostream*)0,sf);
+	os->fputc(type);
+	int bsize = SubWrite((EMUFILE*)0,sf);
 	write32le(bsize,os);
 
 	if(!SubWrite(os,sf))
@@ -203,16 +202,16 @@ static SFORMAT *CheckS(SFORMAT *sf, uint32 tsize, char *desc)
 	return(0);
 }
 
-static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
+static bool ReadStateChunk(EMUFILE* is, SFORMAT *sf, int size)
 {
 	SFORMAT *tmp;
-	int temp = is->tellg();
+	int temp = is->ftell();
 
-	while(is->tellg()<temp+size)
+	while(is->ftell()<temp+size)
 	{
 		uint32 tsize;
 		char toa[4];
-		if(is->read(toa,4).gcount()<4)
+		if(is->fread(toa,4)<4)
 			return false;
 
 		read32le(&tsize,is);
@@ -220,9 +219,9 @@ static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
 		if((tmp=CheckS(sf,tsize,toa)))
 		{
 			if(tmp->s&FCEUSTATE_INDIRECT)
-				is->read(*(char **)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
+				is->fread(*(char **)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 			else
-				is->read((char *)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
+				is->fread((char *)tmp->v,tmp->s&(~FCEUSTATE_FLAGS));
 
 #ifndef LSB_FIRST
 			if(tmp->s&RLSB)
@@ -230,7 +229,7 @@ static bool ReadStateChunk(std::istream* is, SFORMAT *sf, int size)
 #endif
 		}
 		else
-			is->seekg(tsize,std::ios::cur);
+			is->fseek(tsize,SEEK_CUR);
 	} // while(...)
 	return true;
 }
@@ -239,7 +238,7 @@ static int read_sfcpuc=0, read_snd=0;
 
 void FCEUD_BlitScreen(uint8 *XBuf); //mbg merge 7/17/06 YUCKY had to add
 void UpdateFCEUWindow(void);  //mbg merge 7/17/06 YUCKY had to add
-static bool ReadStateChunks(std::istream* is, int32 totalsize)
+static bool ReadStateChunks(EMUFILE* is, int32 totalsize)
 {
 	int t;
 	uint32 size;
@@ -256,7 +255,7 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 
 	while(totalsize > 0)
 	{
-		t=is->get();
+		t=is->fgetc();
 		if(t==EOF) break;
 		if(!read32le(&size,is)) break;
 		totalsize -= size + 5;
@@ -290,14 +289,14 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 			}
 			else
 			{
-				is->seekg(size,std::ios::cur);
+				is->fseek(size,SEEK_CUR);
 			}
 			break;
 		case 8:
 			// load back buffer
 			{
 				extern uint8 *XBackBuf;
-				if(is->read((char*)XBackBuf,size).gcount() != size)
+				if(is->fread((char*)XBackBuf,size) != size)
 					ret = false;
 
 				//MBG TODO - can this be moved to a better place?
@@ -329,7 +328,7 @@ static bool ReadStateChunks(std::istream* is, int32 totalsize)
 				warned=true;
 			}
 			//if(fseek(st,size,SEEK_CUR)<0) goto endo;break;
-			is->seekg(size,std::ios::cur);
+			is->fseek(size,SEEK_CUR);
 		}
 	}
 	//endo:
@@ -354,13 +353,13 @@ int CurrentState=0;
 extern int geniestage;
 
 
-bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
+bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
 	//a temp memory stream. we'll dump some data here and then compress
 	//TODO - support dumping directly without compressing to save a buffer copy
 
-	memorystream ms;
-	std::ostream* os = (std::ostream*)&ms;
+	EMUFILE_MEMORY ms;
+	EMUFILE* os = &ms;
 
 	uint32 totalsize = 0;
 
@@ -380,12 +379,12 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
 		if(!FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 		{
-			os->seekp(5,std::ios::cur);
+			os->fseek(5,SEEK_CUR);
 			int size = FCEUMOV_WriteState(os);
-			os->seekp(-(size+5),std::ios::cur);
-			os->put(7);
+			os->fseek(-(size+5),SEEK_CUR);
+			os->fputc(7);
 			write32le(size, os);
-			os->seekp(size,std::ios::cur);
+			os->fseek(size,SEEK_CUR);
 
 			totalsize += 5 + size;
 		}
@@ -394,9 +393,9 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	{
 		extern uint8 *XBackBuf;
 		uint32 size = 256 * 256 + 8;
-		os->put(8);
+		os->fputc(8);
 		write32le(size, os);
-		os->write((char*)XBackBuf,size);
+		os->fwrite((char*)XBackBuf,size);
 		totalsize += 5 + size;
 	}
 
@@ -433,8 +432,8 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 	FCEU_en32lsb(header+12, comprlen);
 
 	//dump it to the destination file
-	outstream->write((char*)header,16);
-	outstream->write((char*)cbuf,comprlen==-1?totalsize:comprlen);
+	outstream->fwrite((char*)header,16);
+	outstream->fwrite((char*)cbuf,comprlen==-1?totalsize:comprlen);
 
 	if(cbuf != (uint8*)ms.buf()) delete[] cbuf;
 	return error == Z_OK;
@@ -443,7 +442,7 @@ bool FCEUSS_SaveMS(std::ostream* outstream, int compressionLevel)
 
 void FCEUSS_Save(const char *fname)
 {
-	std::fstream* st = 0;
+	EMUFILE* st = 0;
 	char fn[2048];
 
 	if(geniestage==1)
@@ -454,7 +453,7 @@ void FCEUSS_Save(const char *fname)
 
 	if(fname)	//If filename is given use it.
 	{
-		st =FCEUD_UTF8_fstream(fname, "wb");
+		st = FCEUD_UTF8_fstream(fname, "wb");
 		strcpy(fn, fname);
 	}
 	else		//Else, generate one
@@ -522,7 +521,7 @@ void FCEUSS_Save(const char *fname)
 		redoSS = false;					//we have a new savestate so redo is not possible
 }
 
-int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
+int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)
 {
 	//if(params==SSLOADPARAM_DUMMY && suppress_scan_chunks)
 	//	return 1;
@@ -558,7 +557,7 @@ int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
 	{
 		FCEUMOV_PreLoad();
 	}
-	is->read((char*)&header,16);
+	is->fread((char*)&header,16);
 	if(memcmp(header,"FCS",3))
 	{
 		return(0);
@@ -616,10 +615,10 @@ int FCEUSS_LoadFP_old(std::istream* is, ENUM_SSLOADPARAMS params)
 }
 
 
-bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
+bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 {
 	//maybe make a backup savestate
-	memorystream msBackupSavestate;
+	EMUFILE_MEMORY msBackupSavestate;
 	bool backup = (params == SSLOADPARAM_BACKUP);
 
 	if(!is)
@@ -631,10 +630,10 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	uint8 header[16];
 
 	//read and analyze the header
-	is->read((char*)&header,16);
+	is->fread((char*)&header,16);
 	if(memcmp(header,"FCSX",4)) {
 		//its not an fceux save file.. perhaps it is an fceu savefile
-		is->seekg(0);
+		is->fseek(0,SEEK_SET);
 		FCEU_state_loading_old_format = true;
 		bool ret = FCEUSS_LoadFP_old(is,params)!=0;
 		FCEU_state_loading_old_format = false;
@@ -646,14 +645,14 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	int stateversion = FCEU_de32lsb(header + 8);
 	int comprlen = FCEU_de32lsb(header + 12);
 
-	std::vector<char> buf(totalsize);
+	std::vector<uint8> buf(totalsize);
 
 	//not compressed:
 	if(comprlen != -1)
 	{
 		//load the compressed chunk and decompress
 		std::vector<char> cbuf(comprlen);
-		is->read((char*)&cbuf[0],comprlen);
+		is->fread((char*)&cbuf[0],comprlen);
 
 		uLongf uncomprlen = totalsize;
 		int error = uncompress((uint8*)&buf[0],&uncomprlen,(uint8*)&cbuf[0],comprlen);
@@ -663,12 +662,12 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	}
 	else
 	{
-		is->read((char*)&buf[0],totalsize);
+		is->fread((char*)&buf[0],totalsize);
 	}
 
 	FCEUMOV_PreLoad();
 
-	memorystream mstemp(&buf);
+	EMUFILE_MEMORY mstemp(&buf);
 	bool x = ReadStateChunks(&mstemp,totalsize)!=0;
 
 	//mbg 5/24/08 - we don't support old states, so this shouldnt matter.
@@ -687,7 +686,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 	}
 
 	if(!x && backup) {
-		msBackupSavestate.sync();
+		msBackupSavestate.fseek(0,SEEK_SET);
 		FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
 	}
 
@@ -697,7 +696,7 @@ bool FCEUSS_LoadFP(std::istream* is, ENUM_SSLOADPARAMS params)
 
 bool FCEUSS_Load(const char *fname)
 {
-	std::fstream* st;
+	EMUFILE* st;
 	char fn[2048];
 
 	//mbg movie - this needs to be overhauled

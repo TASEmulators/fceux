@@ -17,7 +17,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
+#include "../main.h"
 #include "taseditproj.h"
 #include "movie.h"
 
@@ -60,22 +60,21 @@ bool TASEDIT_PROJECT::SaveProject()
 {
 	std::string PFN = GetProjectFile();
 	const char* filename = PFN.c_str();
-	std::ofstream ofs;
+	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
 	//ofs << GetProjectName() << std::endl;
 	//ofs << GetFM2Name() << std::endl;
-	ofs.open(filename, std::ios_base::binary);
 	
-	currMovieData.dump(&ofs, true);
-	ofs.put('\0'); // TODO: Add main branch name. 
-	currMovieData.dumpGreenzone(&ofs, true);
+	currMovieData.dump(ofs, true);
+	ofs->fputc('\0'); // TODO: Add main branch name. 
+	currMovieData.dumpGreenzone(ofs, true);
 
-	ofs.close();
+	delete ofs;
 
 	changed=false;
 	return true;
 }
 
-extern bool LoadFM2(MovieData& movieData, std::istream* fp, int size, bool stopAfterHeader);
+extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 
 
 bool TASEDIT_PROJECT::LoadProject(std::string PFN)
@@ -83,21 +82,18 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	const char* filename = PFN.c_str();
 
 	SetProjectName(PFN);
-	std::ifstream ifs;
-	ifs.open(filename, std::ios_base::binary);
+	EMUFILE_FILE ifs(filename, "rb");
 
 	LoadFM2(currMovieData, &ifs, INT_MAX, false);
 	LoadSubtitles(currMovieData);
 
 	char branchname;
-	ifs.get(branchname); // TODO: Add main branch name. 
+	branchname = ifs.fgetc(); // TODO: Add main branch name. 
 	currMovieData.loadGreenzone(&ifs, true);
 
 	poweron(true);
 	currFrameCounter = currMovieData.greenZoneCount;
 	currMovieData.TryDumpIncremental();
-
-	ifs.close();
 
 	changed=false;
 	return true;

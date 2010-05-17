@@ -23,11 +23,20 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "types-des.h"
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <stdarg.h>
+
+//should be changed to #ifdef FCEUX but too much work
+#ifndef DESMUME
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef char s8;
+typedef short s16;
+typedef int s32;
+#endif
 
 #ifdef _XBOX
 #undef min;
@@ -97,6 +106,11 @@ public:
 	EMUFILE_MEMORY(std::vector<u8> *underlying) : vec(underlying), ownvec(false), pos(0), len(underlying->size()) { }
 	EMUFILE_MEMORY(u32 preallocate) : vec(new std::vector<u8>()), ownvec(true), pos(0), len(0) { vec->reserve(preallocate); }
 	EMUFILE_MEMORY() : vec(new std::vector<u8>()), ownvec(true), pos(0), len(0) { vec->reserve(1024); }
+	EMUFILE_MEMORY(void* buf, s32 size) : vec(new std::vector<u8>()), ownvec(true), pos(0), len(size) { 
+		vec->reserve(size);
+		if(size != 0)
+			memcpy(&vec[0],buf,size);
+	}
 
 	~EMUFILE_MEMORY() {
 		if(ownvec) delete vec;
@@ -180,6 +194,11 @@ public:
 		return pos;
 	}
 
+	void trim()
+	{
+		vec->resize(len);
+	}
+
 	virtual int size() { return (int)len; }
 };
 
@@ -187,14 +206,18 @@ class EMUFILE_FILE : public EMUFILE {
 protected:
 	FILE* fp;
 
-public:
-
-	EMUFILE_FILE(const char* fname, const char* mode)
+private:
+	void open(const char* fname, const char* mode)
 	{
 		fp = fopen(fname,mode);
 		if(!fp)
 			failbit = true;
-	};
+	}
+
+public:
+
+	EMUFILE_FILE(const std::string& fname, const char* mode) { open(fname.c_str(),mode); }
+	EMUFILE_FILE(const char* fname, const char* mode) { open(fname,mode); }
 
 	virtual ~EMUFILE_FILE() {
 		if(NULL != fp)
@@ -204,6 +227,8 @@ public:
 	virtual FILE *get_fp() {
 		return fp; 
 	}
+
+	bool is_open() { return fp != NULL; }
 
 	virtual int fprintf(const char *format, ...) {
 		va_list argptr;

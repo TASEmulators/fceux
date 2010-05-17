@@ -9,7 +9,6 @@
 
 #include "7zip/IArchive.h"
 #include "file.h"
-#include "utils/memorystream.h"
 #include "utils/guid.h"
 
 #include "driver.h"
@@ -203,7 +202,7 @@ public:
 		if(inf) delete inf;
 	}
 
-	std::fstream* inf;
+	EMUFILE_FILE* inf;
 
 	InFileStream(std::string fname)
 	: inf(0)
@@ -211,9 +210,8 @@ public:
 		inf = FCEUD_UTF8_fstream(fname,"rb");
 		if(inf)
 		{
-			inf->seekg(0,std::ios::end);
-			size = inf->tellg();
-			inf->seekg(0,std::ios::beg);
+			size = inf->size();
+			inf->fseek(0,SEEK_SET);
 		}
 	}
 
@@ -223,8 +221,7 @@ public:
 
 		if (data != NULL || length == 0)
 		{
-			inf->read((char*)data,length);
-			length = inf->gcount();
+			length = inf->fread((char*)data,length);
 			
 			//do we need to do 
 			//return E_FAIL;
@@ -246,17 +243,17 @@ public:
 
 		if (origin < 3)
 		{
-			std::ios::seekdir offtype;
+			UInt32 offtype;
 			switch(origin)
 			{
-			case 0: offtype = std::ios::beg; break;
-			case 1: offtype = std::ios::cur; break;
-			case 2: offtype = std::ios::end; break;
+			case 0: offtype = SEEK_SET; break;
+			case 1: offtype = SEEK_CUR; break;
+			case 2: offtype = SEEK_END; break;
 			default:
 				return E_INVALIDARG;
 			}
-			inf->seekg(offset,offtype);
-			origin = inf->tellg();
+			inf->fseek(offset,offtype);
+			origin = inf->ftell();
 
 			if (pos)
 				*pos = origin;
@@ -409,18 +406,18 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 	}
 
 	//check the file against the signatures
-	std::fstream* inf = FCEUD_UTF8_fstream(fname,"rb");
+	EMUFILE* inf = FCEUD_UTF8_fstream(fname,"rb");
 	if(!inf) return ArchiveScanRecord();
 
 	int matchingFormat = -1;
 	for(uint32 i=0;i<(int)formatRecords.size();i++)
 	{
-		inf->seekg(0);
+		inf->fseek(0,SEEK_SET);
 		int size = formatRecords[i].signature.size();
 		if(size==0)
 			continue; //WHY??
 		char* temp = new char[size];
-		inf->read((char*)temp,size);
+		inf->fread((char*)temp,size);
 		if(!memcmp(&formatRecords[i].signature[0],temp,size))
 		{
 			delete[] temp;
@@ -542,7 +539,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 			if(ret != LB_ERR)
 			{
 				FCEUARCHIVEFILEINFO_ITEM& item = (*currFileSelectorContext)[ret];
-				memorystream* ms = new memorystream(item.size);
+				EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(item.size);
 				OutStream outStream( item.index, ms->buf(), item.size);
 				const uint32 indices[1] = {item.index};
 				HRESULT hr = object->Extract(indices,1,0,&outStream);

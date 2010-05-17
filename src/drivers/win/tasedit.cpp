@@ -1,5 +1,6 @@
 #include <set>
 #include <fstream>
+#include <sstream>
 
 #include "common.h"
 #include "tasedit.h"
@@ -951,7 +952,7 @@ static void Export()
 	ofn.lpstrInitialDir=initdir.c_str();
 	if(GetSaveFileName(&ofn))
 	{
-		fstream* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+		EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
 		currMovieData.dump(osRecordingMovie,false);
 		delete osRecordingMovie;
 		osRecordingMovie = 0;

@@ -74,7 +74,7 @@ extern void AddRecentLuaFile(const char *filename);
 
 struct LuaSaveState {
 	std::string filename;
-	memorystream *data;
+	EMUFILE_MEMORY *data;
 	bool anonymous, persisted;
 	LuaSaveState()
 		: data(0) 
@@ -97,7 +97,7 @@ struct LuaSaveState {
 		fseek(inf,0,SEEK_END);
 		int len = ftell(inf);
 		fseek(inf,0,SEEK_SET);
-		data = new memorystream(len);
+		data = new EMUFILE_MEMORY(len);
 		fread(data->buf(),1,len,inf);
 		fclose(inf);
 	}
@@ -2449,7 +2449,7 @@ static int savestate_save(lua_State *L) {
 	}
 
 	if(ss->data) delete ss->data;
-	ss->data = new memorystream();
+	ss->data = new EMUFILE_MEMORY();
 
 //	printf("saving %s\n", filename);
 
@@ -2457,7 +2457,7 @@ static int savestate_save(lua_State *L) {
 	numTries--;
 
 	FCEUSS_SaveMS(ss->data,Z_NO_COMPRESSION);
-	ss->data->sync();
+	ss->data->fseek(0,SEEK_SET);
 	return 0;
 }
 
@@ -2489,7 +2489,7 @@ static int savestate_load(lua_State *L) {
 		return 0;
 	} */
 	if (FCEUSS_LoadFP(ss->data,SSLOADPARAM_NOBACKUP))
-		ss->data->seekg(0);
+		ss->data->fseek(0,SEEK_SET);
 
 	return 0;
 

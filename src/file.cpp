@@ -44,7 +44,6 @@
 #include "movie.h"
 #include "driver.h"
 #include "utils/xstring.h"
-#include "utils/memorystream.h"
 
 using namespace std;
 
@@ -139,8 +138,7 @@ void ApplyIPS(FILE *ips, FCEUFILE* fp)
 	FCEU_printf(" Hard IPS end!\n");
 end:
 	fclose(ips);
-	memorystream* ms = new memorystream(buf,fp->size);
-	ms->giveBuf();
+	EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(buf,fp->size);
 	fp->SetStream(ms);
 }
 
@@ -237,7 +235,7 @@ zpfail:
 		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
 		
 		int size = ufo.uncompressed_size;
-		memorystream* ms = new memorystream(size);
+		EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
 		unzReadCurrentFile(tz,ms->buf(),ufo.uncompressed_size);
 		unzCloseCurrentFile(tz);
 		unzClose(tz);
@@ -279,7 +277,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		if(!asr.isArchive())
 		{
 			//if the archive contained no files, try to open it the old fashioned way
-			std::fstream* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
+			EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
 			if(!fp)
 			{
 				return 0;
@@ -302,10 +300,10 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			{
 				uint32 magic;
 				
-				magic = fp->get();
-				magic|=fp->get()<<8;
-				magic|=fp->get()<<16;
-				fp->seekg(0,std::ios::beg);
+				magic = fp->fgetc();
+				magic|=fp->fgetc()<<8;
+				magic|=fp->fgetc()<<16;
+				fp->fseek(0,SEEK_SET);
 
 				if(magic==0x088b1f) {
 					 // maybe gzip... 
@@ -316,7 +314,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 
 						int size;
 						for(size=0; gzgetc(gzfile) != EOF; size++) {}
-						memorystream* ms = new memorystream(size);
+						EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
 						gzseek(gzfile,0,SEEK_SET);
 						gzread(gzfile,ms->buf(),size);
 						gzclose(gzfile);
@@ -340,7 +338,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 			fceufp->logicalPath = fileToOpen;
 			fceufp->fullFilename = fileToOpen;
 			fceufp->archiveIndex = -1;
-			fceufp->stream = (std::iostream*)fp;
+			fceufp->stream = fp;
 			FCEU_fseek(fceufp,0,SEEK_END);
 			fceufp->size = FCEU_ftell(fceufp);
 			FCEU_fseek(fceufp,0,SEEK_SET);
@@ -382,56 +380,26 @@ int FCEU_fclose(FCEUFILE *fp)
 
 uint64 FCEU_fread(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
-	fp->stream->read((char*)ptr,size*nmemb);
-	uint32 read = fp->stream->gcount();
-	return read/size;
+	return fp->stream->fread((char*)ptr,size*nmemb);
 }
 
 uint64 FCEU_fwrite(void *ptr, size_t size, size_t nmemb, FCEUFILE *fp)
 {
-	fp->stream->write((char*)ptr,size*nmemb);
+	fp->stream->fwrite((char*)ptr,size*nmemb);
 	//todo - how do we tell how many bytes we wrote?
 	return nmemb;
 }
 
 int FCEU_fseek(FCEUFILE *fp, long offset, int whence)
 {
-	//if(fp->type==1)
-	//{
-	//	return( (gzseek(fp->fp,offset,whence)>0)?0:-1);
-	//}
-	//else if(fp->type>=2)
-	//{
-	//	MEMWRAP *wz;
-	//	wz=(MEMWRAP*)fp->fp;
-
-	//	switch(whence)
-	//	{
-	//	case SEEK_SET:if(offset>=(long)wz->size) //mbg merge 7/17/06 - added cast to long
-	//					  return(-1);
-	//		wz->location=offset;break;
-	//	case SEEK_CUR:if(offset+wz->location>wz->size)
-	//					  return (-1);
-	//		wz->location+=offset;
-	//		break;
-	//	}
-	//	return 0;
-	//}
-	//else
-	//	return fseek((FILE *)fp->fp,offset,whence);
-
-	fp->stream->seekg(offset,(std::ios_base::seekdir)whence);
-	fp->stream->seekp(offset,(std::ios_base::seekdir)whence);
+	fp->stream->fseek(offset,whence);
 
 	return FCEU_ftell(fp);
 }
 
 uint64 FCEU_ftell(FCEUFILE *fp)
 {
-	if(fp->mode == FCEUFILE::READ)
-		return fp->stream->tellg();
-	else
-		return fp->stream->tellp();
+	return fp->stream->ftell();
 }
 
 int FCEU_read16le(uint16 *val, FCEUFILE *fp)
@@ -446,7 +414,7 @@ int FCEU_read32le(uint32 *Bufo, FCEUFILE *fp)
 
 int FCEU_fgetc(FCEUFILE *fp)
 {
-	return fp->stream->get();
+	return fp->stream->fgetc();
 }
 
 uint64 FCEU_fgetsize(FCEUFILE *fp)

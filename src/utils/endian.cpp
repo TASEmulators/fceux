@@ -26,6 +26,27 @@
 #include <fstream>
 #include "../types.h"
 #include "endian.h"
+#include "emufile.h"
+
+//OMG ! configure this correctly
+#define LOCAL_LE
+
+/* little endian to local endianess convert macros */
+#ifdef LOCAL_BE	/* local arch is big endian */
+# define LE_TO_LOCAL_16(x) ((((x)&0xff)<<8)|(((x)>>8)&0xff))
+# define LE_TO_LOCAL_32(x) ((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)>>8)&0xff00)|(((x)>>24)&0xff))
+# define LE_TO_LOCAL_64(x) ((((x)&0xff)<<56)|(((x)&0xff00)<<40)|(((x)&0xff0000)<<24)|(((x)&0xff000000)<<8)|(((x)>>8)&0xff000000)|(((x)>>24)&0xff00)|(((x)>>40)&0xff00)|(((x)>>56)&0xff))
+# define LOCAL_TO_LE_16(x) ((((x)&0xff)<<8)|(((x)>>8)&0xff))
+# define LOCAL_TO_LE_32(x) ((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)>>8)&0xff00)|(((x)>>24)&0xff))
+# define LOCAL_TO_LE_64(x) ((((x)&0xff)<<56)|(((x)&0xff00)<<40)|(((x)&0xff0000)<<24)|(((x)&0xff000000)<<8)|(((x)>>8)&0xff000000)|(((x)>>24)&0xff00)|(((x)>>40)&0xff00)|(((x)>>56)&0xff))
+#else		/* local arch is little endian */
+# define LE_TO_LOCAL_16(x) (x)
+# define LE_TO_LOCAL_32(x) (x)
+# define LE_TO_LOCAL_64(x) (x)
+# define LOCAL_TO_LE_16(x) (x)
+# define LOCAL_TO_LE_32(x) (x)
+# define LOCAL_TO_LE_64(x) (x)
+#endif
 
 ///endian-flips count bytes.  count should be even and nonzero.
 void FlipByteOrder(uint8 *src, uint32 count)
@@ -193,4 +214,100 @@ uint32 FCEU_de32lsb(uint8 *morp)
 uint16 FCEU_de16lsb(uint8 *morp)
 {
 	return morp[0]|(morp[1]<<8);
+}
+
+
+//well. just for the sake of consistency
+int write8le(u8 b, EMUFILE*os)
+{
+	os->fwrite((char*)&b,1);
+	return 1;
+}
+
+//well. just for the sake of consistency
+int read8le(u8 *Bufo, EMUFILE*is)
+{
+	if(is->_fread((char*)Bufo,1) != 1)
+		return 0;
+	return 1;
+}
+
+///writes a little endian 16bit value to the specified file
+int write16le(u16 b, EMUFILE *fp)
+{
+	u8 s[2];
+	s[0]=(u8)b;
+	s[1]=(u8)(b>>8);
+	fp->fwrite(s,2);
+	return 2;
+}
+
+
+///writes a little endian 32bit value to the specified file
+int write32le(u32 b, EMUFILE *fp)
+{
+	uint8 s[4];
+	s[0]=(u8)b;
+	s[1]=(u8)(b>>8);
+	s[2]=(u8)(b>>16);
+	s[3]=(u8)(b>>24);
+	fp->fwrite(s,4);
+	return 4;
+}
+
+void writebool(bool b, EMUFILE* os) { write32le(b?1:0,os); }
+
+int write64le(uint64 b, EMUFILE* os)
+{
+	uint8 s[8];
+	s[0]=(u8)b;
+	s[1]=(u8)(b>>8);
+	s[2]=(u8)(b>>16);
+	s[3]=(u8)(b>>24);
+	s[4]=(u8)(b>>32);
+	s[5]=(u8)(b>>40);
+	s[6]=(u8)(b>>48);
+	s[7]=(u8)(b>>56);
+	os->fwrite((char*)&s,8);
+	return 8;
+}
+
+
+int read32le(uint32 *Bufo, EMUFILE *fp)
+{
+	uint32 buf;
+	if(fp->_fread(&buf,4)<4)
+		return 0;
+#ifdef LOCAL_LE
+	*(u32*)Bufo=buf;
+#else
+	*(u32*)Bufo=((buf&0xFF)<<24)|((buf&0xFF00)<<8)|((buf&0xFF0000)>>8)|((buf&0xFF000000)>>24);
+#endif
+	return 1;
+}
+
+int read16le(u16 *Bufo, EMUFILE *is)
+{
+	u16 buf;
+	if(is->_fread((char*)&buf,2) != 2)
+		return 0;
+#ifdef LOCAL_LE
+	*Bufo=buf;
+#else
+	*Bufo = LE_TO_LOCAL_16(buf);
+#endif
+	return 1;
+}
+
+int read64le(uint64 *Bufo, EMUFILE *is)
+{
+	uint64 buf;
+	if(is->_fread((char*)&buf,8) != 8)
+		return 0;
+#ifdef LOCAL_LE
+	*Bufo=buf;
+#else
+	*Bufo = LE_TO_LOCAL_64(buf);
+#endif
+	return 1;
 }
