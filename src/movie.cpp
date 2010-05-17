@@ -1213,12 +1213,17 @@ bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie, int& error)
 {
 	bool isInTimeline = true;
 	int length;
-	if (stateMovie.getNumRecords() > currMovie.getNumRecords()) 
-		length = currMovie.getNumRecords();
+
+	//First check, make sure we are checking is for a post-movie savestate, we just want to adjust the length for now, we will handle this situation later in another function
+	if (currFrameCounter <= stateMovie.getNumRecords())
+		length = currFrameCounter;
 	else
-		length = stateMovie.getNumRecords();	//Whichever one is smaller
-	//length logic - after this function we will check and handle statemovies that are bigger than the curent movie
-	//all we want to know at this time is if their timelines match for the data we do have
+		length = stateMovie.getNumRecords();
+
+	//Now that we know the length of the records of the savestate we plan to load, let's match the length against the movie
+	//If length < currMovie records then this is a "future" event from the current movie, againt we will handle this situation later, we just want to find the right number of frames to compare
+	if (length > currMovie.getNumRecords())
+		length = currMovie.getNumRecords();
 
 	for (int x = 0; x < length; x++)
 	{
