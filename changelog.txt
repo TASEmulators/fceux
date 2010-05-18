@@ -1,3 +1,6 @@
+17-may-2010 - adelikat - Made gamepad 2 off by default.
+17-may-2010 - adelikat - Movies - fully implemented "bulletproof" read-only
+17-may-2010 - zeromus - Movie loading (& movie-savestate saving/loading) should now be faster due to the use of a emufile class instead of std::ostream for dumping
 16-may-2010 - ugetab - Added player 3 and 4 to autohold notification window. Made FCEU_DispMessage able to display to different screen locations to do it. Made sure to update SDL with the change. Hope SDL still compiles ok.
 15-may-2010 - ugetab - Win32 - Added option for palette selection as color for LUA colors. Included an LUA script to display all choices with the value used to pick displayed color.
 14-may-2010 - adelikat - Win32 - Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead.

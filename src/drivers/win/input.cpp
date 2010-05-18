@@ -51,7 +51,7 @@ extern bool replaceP2StartWithMicrophone;
 //        (game/savestate/movie loading can override user settings)
 
 //int UsrInputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
-int InputType[3]={SI_GAMEPAD,SI_GAMEPAD,SIFC_NONE};
+int InputType[3]={SI_GAMEPAD,SI_NONE,SIFC_NONE};
 
 int InitDInput(void)
 {
