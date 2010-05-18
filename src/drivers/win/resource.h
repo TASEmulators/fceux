@@ -423,6 +423,7 @@
 #define CB_ENABLECONTEXTMENU            1203
 #define DEBUGAUTOLOAD                   1203
 #define IDC_CHEAT_PAUSEWHENACTIVE       1203
+#define IDC_FULLSAVESTATES              1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_RAMLIST                     1205
 #define IDC_C_SEARCH                    1206
@@ -785,6 +786,9 @@
 #define ID_AVI_DISMOVIEMESS             40404
 #define ID_AVI_DISMOVIEMESSAGE          40405
 #define ID_INPUTDISPLAY_OLDSTYLEDISP    40406
+#define ID_GAME_RECOVERY                40407
+#define ID_SAVESTATE_RECOVERY           40408
+#define ID_CONTEXT_FULLSAVESTATES       40409
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -794,7 +798,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40407
+#define _APS_NEXT_COMMAND_VALUE         40410
 #define _APS_NEXT_CONTROL_VALUE         1257
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

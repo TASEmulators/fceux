@@ -492,6 +492,8 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	string undoSavestate = "Undo savestate";
 	string redoSavestate = "Redo savestate";
 
+	CheckMenuItem(context,ID_CONTEXT_FULLSAVESTATES,MF_BYCOMMAND | fullSaveStateLoads?MF_CHECKED:MF_UNCHECKED);
+
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
 		EnableMenuItem(context,FCEUX_CONTEXT_UNDOLOADSTATE,MF_BYCOMMAND | MF_ENABLED);
@@ -949,9 +951,6 @@ void AddRecentMovieFile(const char *filename)
 {
 	UpdateRecentMovieArray(filename, recent_movie, MAX_NUMBER_OF_MOVIE_RECENT_FILES, recentmoviemenu, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE); 
 }
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2091,6 +2090,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//Game + Movie - Help
 			case FCEU_CONTEXT_MOVIEHELP:
 				OpenHelpWindow(moviehelp);
+				break;
+
+			case ID_CONTEXT_FULLSAVESTATES:
+				fullSaveStateLoads ^= 1;
 				break;
 			
 			//No Game - Help

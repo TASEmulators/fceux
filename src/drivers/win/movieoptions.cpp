@@ -31,6 +31,7 @@ extern bool movieSubtitles; //In fceu.cpp - Toggle for displaying movie subtitle
 extern bool subtitlesOnAVI; //In movie.cpp - Toggle for putting movie subtitles in an AVI
 extern bool autoMovieBackup;//In fceu.cpp - Toggle that determines if movies should be backed up automatically before altering them
 extern bool bindSavestate ;		//Toggle that determines if a savestate filename will include the movie filename
+extern bool fullSaveStateLoads;	//Toggle that does "VBA style" loadstates in record mode.  Input is truncated on next frame instead of immediately
 
 void UpdateCheckBoxes(HWND hwndDlg)
 {
@@ -98,6 +99,10 @@ BOOL CALLBACK MovieOptionsCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 					case IDC_MOVIE_CLOSE:
 						CloseMovieOptionsDialog(hwndDlg);
+						break;
+
+					case IDC_FULLSAVESTATES:
+						fullSaveStateLoads ^= 1;
 						break;
 				}
 			}

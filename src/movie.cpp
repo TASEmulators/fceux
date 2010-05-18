@@ -1133,6 +1133,11 @@ void FCEUMOV_AddInputState()
 		mr.commands = _currCommand;
 		_currCommand = 0;
 
+		//Adelikat: in normal mode, this is done at the time of loading a savestate in read+write mode
+		//If the user chooses it can be delayed to here
+		if (fullSaveStateLoads && (currFrameCounter < (int)currMovieData.records.size()))
+			currMovieData.truncateAt(currFrameCounter);
+
 		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());
 		currMovieData.records.push_back(mr);
 	}
@@ -1171,7 +1176,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		if(movieMode == MOVIEMODE_PLAY)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
 		else if(movieMode == MOVIEMODE_RECORD) 
-			sprintf(counterbuf,"%d",currMovieData.records.size());
+			sprintf(counterbuf,"%d",currFrameCounter/*currMovieData.records.size()*/);
 		else if (movieMode == MOVIEMODE_FINISHED)
 			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
 		else

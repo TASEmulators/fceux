@@ -64,6 +64,7 @@ extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool AVIdisableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
 extern bool oldInputDisplay;
+extern bool fullSaveStateLoads;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -231,6 +232,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(debuggerAutoload),
 	AC(allowUDLR),
 	AC(debuggerSaveLoadDEBFiles),
+	AC(fullSaveStateLoads),
 
 	//window positions
 	AC(ChtPosX),
