@@ -72,6 +72,7 @@ typedef uint32_t uint32;
 
 #ifdef __GNUC__
  typedef unsigned long long uint64;
+ typedef uint64 u64;
  typedef long long int64;
  #define INLINE inline
  #define GINLINE inline
@@ -127,10 +128,10 @@ typedef uint32_t uint32;
 typedef void (*writefunc)(uint32 A, uint8 V);
 typedef uint8 (*readfunc)(uint32 A);
 
-#include "utils/endian.h"
-
 #ifndef CTASSERT
 #define CTASSERT(x)  typedef char __assert ## y[(x) ? 1 : -1];
 #endif
+
+#include "utils/endian.h"
 
 #endif

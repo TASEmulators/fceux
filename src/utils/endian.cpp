@@ -26,7 +26,7 @@
 #include <fstream>
 #include "../types.h"
 #include "endian.h"
-#include "emufile.h"
+#include "../emufile.h"
 
 //OMG ! configure this correctly
 #define LOCAL_LE
