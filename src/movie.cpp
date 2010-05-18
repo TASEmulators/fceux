@@ -86,6 +86,7 @@ int pauseframe = -1;
 bool movie_readonly = true;
 int input_display = 0;
 int frame_display = 0;
+bool fullSaveStateLoads = false;	//Option for loading a savestates full contents in read+write mode instead of up to the frame count in the savestate (useful as a recovery option)
 
 SFORMAT FCEUMOV_STATEINFO[]={
 	{ &currFrameCounter, 4|FCEUSTATE_RLSB, "FCNT"},
@@ -1213,14 +1214,11 @@ bool CheckTimelines(MovieData& stateMovie, MovieData& currMovie, int& errorFr)
 
 	//First check, make sure we are checking is for a post-movie savestate, we just want to adjust the length for now, we will handle this situation later in another function
 	if (currFrameCounter <= stateMovie.getNumRecords())
-		length = currFrameCounter;
+		length = currFrameCounter;							//Note: currFrameCounter corresponds to the framecounter in the savestate
+	else if (currFrameCounter > currMovie.getNumRecords())  //Now that we know the length of the records of the savestate we plan to load, let's match the length against the movie
+		length = currMovie.getNumRecords();				    //If length < currMovie records then this is a "future" event from the current movie, againt we will handle this situation later, we just want to find the right number of frames to compare
 	else
 		length = stateMovie.getNumRecords();
-
-	//Now that we know the length of the records of the savestate we plan to load, let's match the length against the movie
-	//If length < currMovie records then this is a "future" event from the current movie, againt we will handle this situation later, we just want to find the right number of frames to compare
-	if (length > currMovie.getNumRecords())
-		length = currMovie.getNumRecords();
 
 	for (int x = 0; x < length; x++)
 	{
@@ -1357,8 +1355,9 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			}
 			else
 			{
-				//truncate before we copy, just to save some time
-				tempMovieData.truncateAt(currFrameCounter); //we can only assume this here since we have checked that the frame counter is not greater than the movie data
+				//truncate before we copy, just to save some time, unless the user selects a full copy option
+				if (!fullSaveStateLoads)
+					tempMovieData.truncateAt(currFrameCounter); //we can only assume this here since we have checked that the frame counter is not greater than the movie data
 				currMovieData = tempMovieData;				
 #ifdef _S9XLUA_H
 				if(!FCEU_LuaRerecordCountSkip())
