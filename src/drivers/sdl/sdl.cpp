@@ -440,7 +440,7 @@ FCEUD_Update(uint8 *XBuf,
 /**
  * Opens a file to be read a byte at a time.
  */
-std::fstream* FCEUD_UTF8_fstream(const char *fn, const char *m)
+EMUFILE_FILE* FCEUD_UTF8_fstream(const char *fn, const char *m)
 {
 	std::ios_base::openmode mode = std::ios_base::binary;
 	if(!strcmp(m,"r") || !strcmp(m,"rb"))
@@ -455,8 +455,8 @@ std::fstream* FCEUD_UTF8_fstream(const char *fn, const char *m)
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::trunc;
 	else if(!strcmp(m,"a+") || !strcmp(m,"a+b"))
 		mode |= std::ios_base::in | std::ios_base::out | std::ios_base::app;
-
-	return new std::fstream(fn,mode);
+    return new EMUFILE_FILE(fn, m);
+	//return new std::fstream(fn,mode);
 }
 
 /**
@@ -576,7 +576,8 @@ int main(int argc, char *argv[])
 
 		if (result == FCM_CONVERTRESULT_SUCCESS) {
 			okcount++;
-		std::fstream* outf = FCEUD_UTF8_fstream (outname, "wb");
+        // *outf = new EMUFILE;
+		EMUFILE_FILE* outf = FCEUD_UTF8_fstream (outname, "wb");
 		md.dump (outf,false);
 		delete outf;
 		FCEUD_Message ("Your file has been converted to FM2.\n");
@@ -610,7 +611,7 @@ int main(int argc, char *argv[])
 		FCEUFILE *fp = FCEU_fopen(s.c_str(), 0, "rb", 0);
 		
 		// load the movie and and subtitles
-		extern bool LoadFM2(MovieData&, std::istream*, int, bool);
+		extern bool LoadFM2(MovieData&, EMUFILE*, int, bool);
 		LoadFM2(md, fp->stream, INT_MAX, false);
 		LoadSubtitles(md); // fill subtitleFrames and subtitleMessages
 		delete fp;
