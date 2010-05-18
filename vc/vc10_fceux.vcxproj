@@ -495,7 +495,9 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditproj.cpp" />
     <ClCompile Include="..\src\emufile.cpp" />
     <ClCompile Include="..\src\input\arkanoid.cpp" />
-    <ClCompile Include="..\src\input\bworld.cpp" />
+    <ClCompile Include="..\src\input\bworld.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4789</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="..\src\input\cursor.cpp" />
     <ClCompile Include="..\src\input\fkb.cpp" />
     <ClCompile Include="..\src\input\ftrainer.cpp" />
