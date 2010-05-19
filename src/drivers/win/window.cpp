@@ -1786,15 +1786,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 
 			case ID_NEWPPU:
-				FCEU_DispMessage("New PPU loaded", 0); //TODO: movie this stuff to a core file (fceu.cpp probably) called TogglePPU(), have movie code run it should it load a ppu based on the flag
-				FCEUI_printf("New PPU loaded");
-				newppu = 1;
-				break;
 			case ID_OLDPPU:
-				FCEU_DispMessage("Old PPU loaded", 0);
-				FCEUI_printf("Old PPU loaded");
-				newppu = 0;
-				break;
+				FCEU_TogglePPU();
 			case MENU_GAME_GENIE:
 				genie ^= 1;
 				FCEUI_SetGameGenie(genie!=0);

@@ -119,6 +119,21 @@ bool CheckFileExists(const char* filename)
 	}
 }
 
+void FCEU_TogglePPU(void)
+{
+	newppu ^= 1;
+	if (newppu)
+	{
+		FCEU_DispMessage("New PPU loaded", 0);
+		FCEUI_printf("New PPU loaded");
+	}
+	else
+	{
+		FCEU_DispMessage("Old PPU loaded", 0);
+		FCEUI_printf("Old PPU loaded");
+	}
+}
+
 static void FCEU_CloseGame(void)
 {
 	if(GameInfo)
