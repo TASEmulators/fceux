@@ -1172,18 +1172,21 @@ void FCEU_DrawMovies(uint8 *XBuf)
 	if(frame_display && movieMode != MOVIEMODE_TASEDIT)
 	{
 		char counterbuf[32] = {0};
-
+		int color = 0x20;
 		if(movieMode == MOVIEMODE_PLAY)
 			sprintf(counterbuf,"%d/%d",currFrameCounter,currMovieData.records.size());
 		else if(movieMode == MOVIEMODE_RECORD) 
-			sprintf(counterbuf,"%d",currFrameCounter/*currMovieData.records.size()*/);
+			sprintf(counterbuf,"%d",currFrameCounter);
 		else if (movieMode == MOVIEMODE_FINISHED)
+		{
 			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
+			color = 0x17; //Show red to get attention
+		}
 		else
 			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
 
 		if(counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, 0x20+0x80);
+			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
 	}
 }
 

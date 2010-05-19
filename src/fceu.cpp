@@ -621,7 +621,8 @@ void SetAutoFireOffset(int offset)
 void AutoFire(void)
 {
 	static int counter = 0;
-	if (justLagged == false) counter = (counter + 1) % (8*7*5*3);
+	if (justLagged == false) 
+		counter = (counter + 1) % (8*7*5*3);
 	//If recording a movie, use the frame # for the autofire so the offset
 	//doesn't get screwed up when loading.
 	if(FCEUMOV_Mode(MOVIEMODE_RECORD | MOVIEMODE_PLAY))
