@@ -25,9 +25,7 @@ class OutStream : public IArchiveExtractCallback
 {
 	class SeqStream : public ISequentialOutStream
 	{
-		uint8* const output;
-		uint32 pos;
-		const uint32 size;
+		EMUFILE_MEMORY* ms;
 		ULONG refCount;
 
 		HRESULT STDMETHODCALLTYPE QueryInterface(REFGUID,void**)
@@ -37,18 +35,12 @@ class OutStream : public IArchiveExtractCallback
 
 		HRESULT STDMETHODCALLTYPE Write(const void* data,UInt32 length,UInt32* save)
 		{
-			if (data != NULL || size == 0)
+			if (data != NULL)
 			{
 				//NST_VERIFY( length <= size - pos );
 
-				if (length > size - pos)
-					length = size - pos;
-
-				std::memcpy( output + pos, data, length );
-				pos += length;
-
-				if (save)
-					*save = length;
+				ms->fwrite(data,length);
+				if(save) *save = length;
 
 				return S_OK;
 			}
@@ -70,12 +62,13 @@ class OutStream : public IArchiveExtractCallback
 
 	public:
 
-		SeqStream(void* d,uint32 s)
-		: output(static_cast<uint8*>(d)), pos(0), size(s), refCount(0) {}
+		SeqStream(EMUFILE_MEMORY* dest,uint32 s)
+		: ms(dest)
+		, refCount(0) {}
 
 		uint32 Size() const
 		{
-			return pos;
+			return ms->size();
 		}
 	};
 
@@ -140,7 +133,7 @@ class OutStream : public IArchiveExtractCallback
 
 public:
 
-	OutStream(uint32 index,void* data,uint32 size)
+	OutStream(uint32 index,EMUFILE_MEMORY* data,uint32 size)
 	: seqStream(data,size), index(index), refCount(0) {}
 
 	uint32 Size() const
@@ -540,7 +533,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 			{
 				FCEUARCHIVEFILEINFO_ITEM& item = (*currFileSelectorContext)[ret];
 				EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(item.size);
-				OutStream outStream( item.index, ms->buf(), item.size);
+				OutStream outStream( item.index, ms, item.size);
 				const uint32 indices[1] = {item.index};
 				HRESULT hr = object->Extract(indices,1,0,&outStream);
 				if (SUCCEEDED(hr))
@@ -555,6 +548,7 @@ static FCEUFILE* FCEUD_OpenArchive(ArchiveScanRecord& asr, std::string& fname, s
 					fp->size = item.size;
 					fp->stream = ms;
 					fp->archiveCount = (int)asr.numFilesInArchive;
+					ms->fseek(0,SEEK_SET); //rewind so that the rom analyzer sees a freshly opened file
 				} 
 				else
 				{
