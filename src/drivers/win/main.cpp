@@ -185,10 +185,14 @@ int erendlinep = 239;
 //mbg 6/30/06 - indicates that the main loop should close the game as soon as it can
 bool closeGame = false;
 
-
 // Counts the number of frames that have not been displayed.
 // Used for the bot, to skip frames (makes things faster).
 int BotFramesSkipped = 0;
+
+// Instantiated FCEUX stuff:
+bool SingleInstanceOnly=false; // Enable/disable option
+bool DoInstantiatedExit=false;
+HWND DoInstantiatedExitWindow;
 
 // Internal functions
 void SetDirs()
@@ -580,6 +584,48 @@ void initDirectories()
 	}
 }
 */
+
+static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
+{
+	//LPSTR lpClassName = '\0';
+	std::string TempString;
+	char buf[512];
+	bool PassedTest=true;
+
+	GetClassName(hWnd, buf, 511);
+	//Console.WriteLine(lpClassName.ToString());
+
+	TempString = buf;
+
+	if (TempString != "FCEUXWindowClass")
+		return true;
+
+	//memset(buf, 0, 512 * sizeof(char));
+	GetWindowText(hWnd, buf, 512 * sizeof(char));
+
+	if (hWnd != hAppWnd) {
+		PassedTest = (PassedTest & (buf[0] == 'F'));
+		PassedTest = (PassedTest & (buf[1] == 'C'));
+		PassedTest = (PassedTest & (buf[2] == 'E'));
+		PassedTest = (PassedTest & (buf[3] == 'U'));
+		PassedTest = (PassedTest & (buf[4] == 'X'));
+		PassedTest = (PassedTest & (buf[5] == ' '));
+		PassedTest = (PassedTest & ((buf[6] >= '2') & (buf[6] <= '9')));
+		PassedTest = (PassedTest & (buf[7] == '.'));
+		PassedTest = (PassedTest & ((buf[8] >= '1') & (buf[8] <= '9')));
+		PassedTest = (PassedTest & (buf[9] == '.'));
+		PassedTest = (PassedTest & ((buf[10] >= '4') & (buf[10] <= '9')));
+		
+		if (PassedTest) {
+			DoInstantiatedExit=true;
+			DoInstantiatedExitWindow = hWnd;
+		}
+	}
+
+	//printf("[%03i] Found '%s'\n", ++WinCount, buf);
+	return true;
+} 
+
 #include "x6502.h"
 int main(int argc,char *argv[])
 {
@@ -623,8 +669,6 @@ int main(int argc,char *argv[])
 	// Load the config information
 	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
 	LoadConfig(TempArray);
-
-
 
 	//Bleh, need to find a better place for this.
 	{
@@ -674,6 +718,33 @@ int main(int argc,char *argv[])
 	}
 
 	CreateMainWindow();
+
+	// Do single instance coding, since we now know if the user wants it,
+	// and we have a source window to send from
+	// http://wiki.github.com/ffi/ffi/windows-examples
+	if (SingleInstanceOnly) {
+		// Checks window names / hWnds, decides if there's going to be a conflict.
+		EnumDesktopWindows(NULL, EnumCallbackFCEUXInstantiated, (LPARAM)0);
+
+		if (DoInstantiatedExit) {
+
+			if(t)
+			{
+				COPYDATASTRUCT cData;
+				DATA tData;
+				
+				sprintf(tData.strFilePath,"%s",t);
+				
+				cData.dwData = 1;
+				cData.cbData = sizeof ( tData );
+				cData.lpData = &tData;
+
+				SendMessage(DoInstantiatedExitWindow,WM_COPYDATA,(WPARAM)(HWND)hAppWnd, (LPARAM)(LPVOID) &cData);
+				do_exit();
+				return 0;
+			}
+		}
+	}
 
 	if(!InitDInput())
 	{

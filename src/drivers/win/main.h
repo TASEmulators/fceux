@@ -23,6 +23,13 @@
 #define GOO_CONFIRMEXIT 2       /* Confirmation before exiting. */
 #define GOO_POWERRESET  4       /* Confirm on power/reset. */
 
+//For single instance mode, transfers with WM_COPYDATA
+//http://www.go4expert.com/forums/showthread.php?t=19730
+typedef struct WMCopyStruct
+{
+	char strFilePath[2048];
+} DATA;
+
 extern int maxconbskip;
 extern int ffbskip;
 extern void LoadNewGamey(HWND hParent, const char *initialdir);

@@ -1221,11 +1221,25 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	RECT file_rect;
 	RECT help_rect;
 	int x = 0;
-
+	
 	char TempArray[2048];
+	PCOPYDATASTRUCT pcData;
 
 	switch(msg)
 	{
+	case WM_COPYDATA:
+
+		pcData = (PCOPYDATASTRUCT) lParam;
+
+	    switch ( pcData->dwData )
+		{ 
+	    case 1: //cData.dwData = 1; (can use for other types as well)
+			if (!ALoad((LPSTR) ( (DATA *) (pcData->lpData) )-> strFilePath))
+				MessageBox(hWnd,"File from second instance failed to open", "Failed to open file", MB_OK);
+			break;
+		}
+		break;
+
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
@@ -2360,7 +2374,7 @@ int CreateMainWindow()
 	winclass.hIconSm = LoadIcon(fceu_hInstance, "ICON_1");
 	winclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
-	winclass.lpszClassName = "FCEULTRA";
+	winclass.lpszClassName = "FCEUXWindowClass";
 
 	if(!RegisterClassEx(&winclass))
 	{
@@ -2386,7 +2400,7 @@ int CreateMainWindow()
 	if (MainWindow_wndy==-32000) MainWindow_wndy=0;
 	hAppWnd = CreateWindowEx(
 		0,
-		"FCEULTRA",
+		"FCEUXWindowClass",
 		FCEU_NAME_AND_VERSION,
 		WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS,  /* Style */
 		MainWindow_wndx,

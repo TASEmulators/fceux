@@ -1,3 +1,4 @@
+19-may-2010 - ugetab - Win32 - Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.
 18-may-2010 - adelikat - Movie + loadstate errors are handled more gracefully now, more informative error messages and the movie doesn't have to stop
 18-may-2010 - adelikat - Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr & SNES9x-rr.  In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately.  Instead it waits until input is recording into the movie (next frame).  For win32 this feature is togglable in movie options and the context menu.  For SDL this is off by default and a toggle will need to be added.
 17-may-2010 - adelikat - Made gamepad 2 off by default.

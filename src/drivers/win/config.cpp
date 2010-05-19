@@ -63,6 +63,7 @@ extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool AVIdisableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
+extern bool SingleInstanceOnly;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 
@@ -313,6 +314,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(pauseWhileActive),
 	AC(AVIdisableMovieMessages),
 	AC(replaceP2StartWithMicrophone),
+	AC(SingleInstanceOnly),
 
 	ENDCFGSTRUCT
 };
