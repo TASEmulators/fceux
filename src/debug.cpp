@@ -195,10 +195,10 @@ unsigned int NewBreak(const char* name, int start, int end, unsigned int type, c
 }
 
 int GetPRGAddress(int A){
-	unsigned int result;
+	int result;
 	if((A < 0x8000) || (A > 0xFFFF))return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > PRGsize[0]) || (result < 0))return -1;
+	if((result > (int)PRGsize[0]) || (result < 0))return -1;
 	else return result;
 }
 
@@ -360,93 +360,94 @@ int condition(watchpointinfo* wp)
 //---------------------
 
 volatile int codecount, datacount, undefinedcount;
-//HWND hCDLogger=0;
 unsigned char *cdloggerdata;
 char *cdlogfilename;
-//char loadedcdfile[MAX_PATH];
 static int indirectnext;
 
 int debug_loggingCD;
 
 //called by the cpu to perform logging if CDLogging is enabled
 void LogCDVectors(int which){
-	int i = 0xFFFA+(which*2);
 	int j;
-	j = GetPRGAddress(i);
+	j = GetPRGAddress(which);
 	if(j == -1){
 		return;
 	}
 
-	if(cdloggerdata[j] == 0){
-	cdloggerdata[j] |= 0x0E; // we're in the last bank and recording it as data so 0x1110 or 0xE should be what we need
-	datacount++;
-	undefinedcount--;
+	if(!(cdloggerdata[j] & 2)){
+		cdloggerdata[j] |= 0x0E; // we're in the last bank and recording it as data so 0x1110 or 0xE should be what we need
+		datacount++;
+		if(!(cdloggerdata[j] & 1))undefinedcount--;
 	}
 	j++;
 	
-	if(cdloggerdata[j] == 0){
-	cdloggerdata[j] |= 0x0E; // we're in the last bank and recording it as data so 0x1110 or 0xE should be what we need
-	datacount++;
-	undefinedcount--;
+	if(!(cdloggerdata[j] & 2)){
+		cdloggerdata[j] |= 0x0E;
+		datacount++;
+		if(!(cdloggerdata[j] & 1))undefinedcount--;
 	}
-
-	return;
 }
 
 void LogCDData(){
 	int i, j;
-	uint16 A=0; 
-	uint8 opcode[3] = {0};
+	uint16 A = 0; 
+	uint8 opcode[3] = {0}, memop = 0;
 
 	j = GetPRGAddress(_PC);
 
-	opcode[0] = GetMem(_PC);
-	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
+	if(j != -1) {
+		opcode[0] = GetMem(_PC);
+		switch (opsize[opcode[0]]) {
+			case 2:
+				opcode[1] = GetMem(_PC + 1);
+				break;
+			case 3:
+				opcode[1] = GetMem(_PC + 1);
+				opcode[2] = GetMem(_PC + 2);
+				break;
+		}
 	
-	if(j != -1){
 		for (i = 0; i < opsize[opcode[0]]; i++){
 			if(cdloggerdata[j+i] & 1)continue; //this has been logged so skip
 			cdloggerdata[j+i] |= 1;
-			cdloggerdata[j+i] |=((_PC+i)>>11)&12;
+			cdloggerdata[j+i] |=((_PC+i)>>11)&0x0c;
 			if(indirectnext)cdloggerdata[j+i] |= 0x10;
 			codecount++; 
-			if(!(cdloggerdata[j+i] & 0x42))undefinedcount--;
+			if(!(cdloggerdata[j+i] & 2))undefinedcount--;
+		}
+
+		//log instruction jumped to in an indirect jump
+		if(opcode[0] == 0x6c) indirectnext = 1; else indirectnext = 0;
+
+		switch (optype[opcode[0]]) {
+			case 0: break;
+			case 1:
+				A = (opcode[1]+_X) & 0xFF;
+				A = GetMem(A) | (GetMem(A+1)<<8);
+				memop = 0x20;
+				break;
+			case 2: A = opcode[1]; break;
+			case 3: A = opcode[1] | opcode[2]<<8; break;
+			case 4:
+				A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1)<<8))+_Y;
+				memop = 0x20;
+				break;
+			case 5: A = opcode[1]+_X; break;
+			case 6: A = (opcode[1] | (opcode[2]<<8))+_Y; break;
+			case 7: A = (opcode[1] | (opcode[2]<<8))+_X; break;
+			case 8: A = opcode[1]+_Y; break;
+		}
+
+		if((j = GetPRGAddress(A)) != -1) {
+			if(!(cdloggerdata[j] & 2)) {
+				cdloggerdata[j] |= 2;
+				cdloggerdata[j] |=(A>>11)&0x0c;
+				cdloggerdata[j] |= memop;
+				datacount++; 
+				if(!(cdloggerdata[j] & 1))undefinedcount--;
+			}
 		}
 	}
-	indirectnext = 0;
-	//log instruction jumped to in an indirect jump
-	if(opcode[0] == 0x6c){
-		indirectnext = 1;
-	}
-
-	switch (optype[opcode[0]]) {
-		case 0: break;
-		case 1:
-			A = (opcode[1]+_X) & 0xFF;
-			A = GetMem(A) | (GetMem(A+1))<<8;
-			break;
-		case 2: A = opcode[1]; break;
-		case 3: A = opcode[1] | opcode[2]<<8; break;
-		case 4: A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1))<<8)+_Y; break;
-		case 5: A = opcode[1]+_X; break;
-		case 6: A = (opcode[1] | opcode[2]<<8)+_Y; break;
-		case 7: A = (opcode[1] | opcode[2]<<8)+_X; break;
-		case 8: A = opcode[1]+_Y; break;
-	}
-
-	//if(opbrktype[opcode[0]] != WP_R)return; //we only want reads
-
-	if((j = GetPRGAddress(A)) == -1)return;
-	//if(j == 0)BreakHit();
-
-
-	if(cdloggerdata[j] & 2)return; 
-	cdloggerdata[j] |= 2;
-	cdloggerdata[j] |=((A/*+i*/)>>11)&12;
-	if((optype[opcode[0]] == 1) || (optype[opcode[0]] == 4))cdloggerdata[j] |= 0x20;
-	datacount++; 
-	if(!(cdloggerdata[j+i] & 1))undefinedcount--;
-	return;
 }
 
 //-----------debugger stuff
@@ -492,41 +493,6 @@ void BreakHit(bool force = false) {
 	
 	FCEUD_DebugBreakpoint();
 }
-/*
-	//very ineffecient, but this shouldn't get executed THAT much
-	if(!(cdloggerdata[GetPRGAddress(0xFFFA)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFA)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	if(!(cdloggerdata[GetPRGAddress(0xFFFB)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFB)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	if(!(cdloggerdata[GetPRGAddress(0xFFFC)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFC)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	if(!(cdloggerdata[GetPRGAddress(0xFFFD)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFD)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	if(!(cdloggerdata[GetPRGAddress(0xFFFE)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFE)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	if(!(cdloggerdata[GetPRGAddress(0xFFFF)] & 2)){
-		cdloggerdata[GetPRGAddress(0xFFFF)]|=2;
-		codecount++;
-		undefinedcount--;
-	}
-	return;
-}
-*/
 
 ///fires a breakpoint
 void breakpoint() {

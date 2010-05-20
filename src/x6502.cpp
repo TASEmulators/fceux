@@ -428,7 +428,7 @@ extern int test; test++;
    {
     if(_IRQlow&FCEU_IQRESET)
     {
-	if(debug_loggingCD) LogCDVectors(0);
+	 DEBUG( if(debug_loggingCD) LogCDVectors(0xFFFC); )
      _PC=RdMem(0xFFFC);
      _PC|=RdMem(0xFFFD)<<8;
      _jammed=0;
@@ -449,7 +449,7 @@ extern int test; test++;
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));
       _P|=I_FLAG;
-	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
+	  DEBUG( if(debug_loggingCD) LogCDVectors(0xFFFA) );
       _PC=RdMem(0xFFFA);
       _PC|=RdMem(0xFFFB)<<8;
       _IRQlow&=~FCEU_IQNMI;
@@ -464,7 +464,7 @@ extern int test; test++;
       PUSH(_PC);
       PUSH((_P&~B_FLAG)|(U_FLAG));
       _P|=I_FLAG;
-	  DEBUG( if(debug_loggingCD) LogCDVectors(1) );
+	  DEBUG( if(debug_loggingCD) LogCDVectors(0xFFFE) );
       _PC=RdMem(0xFFFE);
       _PC|=RdMem(0xFFFF)<<8;
      }

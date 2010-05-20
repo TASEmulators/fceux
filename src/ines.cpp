@@ -841,10 +841,10 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 	}
 
 	FCEU_printf(" Mapper #:  %d\n Mapper name: %s\n Mirroring: %s\n",
-		MapperNo, mappername, Mirroring==2?"None(Four-screen)":Mirroring?"Vertical":"Horizontal");
+		MapperNo, mappername, Mirroring==2?"None (Four-screen)":Mirroring?"Vertical":"Horizontal");
 
-	FCEU_printf(" Battery-backed: %s\n", (head.ROM_type&2)?"True":"False");
-	FCEU_printf(" Trained: %s\n", (head.ROM_type&4)?"True":"False");
+	FCEU_printf(" Battery-backed: %s\n", (head.ROM_type&2)?"Yes":"No");
+	FCEU_printf(" Trained: %s\n", (head.ROM_type&4)?"Yes":"No");
 	// (head.ROM_type&8) = Mirroring: None(Four-screen)
 
 	SetInput();
