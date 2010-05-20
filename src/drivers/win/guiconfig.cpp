@@ -3,6 +3,7 @@
 #include "gui.h"
 
 extern bool rightClickEnabled;	//Declared in window.cpp and only an extern here
+extern bool SingleInstanceOnly;
 char ManifestFilePath[2048];
 
 bool ManifestFileExists()
@@ -67,6 +68,16 @@ void CloseGuiDialog(HWND hwndDlg)
 		rightClickEnabled = false;
 	}
 
+	if(IsDlgButtonChecked(hwndDlg, IDC_SINGLEINSTANCE)==BST_CHECKED)
+	{
+		SingleInstanceOnly = true;
+	}
+
+	else
+	{
+		SingleInstanceOnly = false;
+	}
+
 	if(IsDlgButtonChecked(hwndDlg, CB_PARTIALVISUALTHEME)==BST_CHECKED)
 	{
 		FILE * stream = fopen( ManifestFilePath, "w" );
@@ -125,6 +136,10 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			if(ManifestFileExists()) {
 				CheckDlgButton(hwndDlg, CB_PARTIALVISUALTHEME, BST_CHECKED);
+			}
+
+			if(SingleInstanceOnly){
+				CheckDlgButton(hwndDlg, IDC_SINGLEINSTANCE, BST_CHECKED);
 			}
 
 			CenterWindowOnScreen(hwndDlg);

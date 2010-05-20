@@ -479,6 +479,8 @@
 #define IDC_EDIT_LUAARGS                1256
 #define CB_PARTIALVISUALTHEME           1257
 #define DEBUGLOADDEB                    1258
+#define IDC_CHECK2                      1258
+#define IDC_SINGLEINSTANCE              1258
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -799,7 +801,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
 #define _APS_NEXT_COMMAND_VALUE         40410
-#define _APS_NEXT_CONTROL_VALUE         1257
+#define _APS_NEXT_CONTROL_VALUE         1259
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
