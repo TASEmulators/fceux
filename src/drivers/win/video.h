@@ -40,6 +40,7 @@ typedef struct {
 // left, top, right, bottom
 extern vmdef vmodes[11];
 extern int winspecial;
+extern int NTSCwinspecial;
 
 extern int disvaccel;
 extern int fssync;

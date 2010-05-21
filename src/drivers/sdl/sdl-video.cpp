@@ -279,15 +279,16 @@ InitVideo(FCEUGI *gi)
         } else {
             desbpp = 0;
         }
-
+        
+        // -Video Modes Tag-
         if(s_sponge) {
-            if(s_sponge == 3 || s_sponge == 4) {
+            if(s_sponge == 4 || s_sponge == 5) {
                 s_exs = s_eys = 3;
             } else {
                 s_exs = s_eys = 2;
             }
             s_eefx = 0;
-            if(s_sponge == 1 || s_sponge == 3) {
+            if(s_sponge == 1 || s_sponge == 4) {
                 desbpp = 32;
             }
         }
@@ -322,9 +323,10 @@ InitVideo(FCEUGI *gi)
         g_config->getOption("SDL.XScale", &s_exs);
         g_config->getOption("SDL.YScale", &s_eys);
         g_config->getOption("SDL.SpecialFX", &s_eefx);
-
+        
+        // -Video Modes Tag-
         if(s_sponge) {
-            if(s_sponge >= 3) {
+            if(s_sponge >= 4) {
                 s_exs = s_eys = 3;
             } else {
                 s_exs = s_eys = 2;
@@ -416,7 +418,7 @@ InitVideo(FCEUGI *gi)
                            s_screen->format->Rmask,
                            s_screen->format->Gmask,
                            s_screen->format->Bmask,
-                           s_eefx, s_sponge);
+                           s_eefx, s_sponge, 0);
 #ifdef OPENGL
         if(s_useOpenGL) 
         {

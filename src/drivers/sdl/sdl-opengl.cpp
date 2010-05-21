@@ -216,9 +216,9 @@ InitOpenGL(int l,
   HiBuffer=malloc(4*256*256);
   memset(HiBuffer,0x00,4*256*256);
   #ifndef LSB_FIRST
-  InitBlitToHigh(4,0xFF000000,0xFF0000,0xFF00,efx&2,0);
+  InitBlitToHigh(4,0xFF000000,0xFF0000,0xFF00,efx&2,0,0);
   #else
-  InitBlitToHigh(4,0xFF,0xFF00,0xFF0000,efx&2,0);
+  InitBlitToHigh(4,0xFF,0xFF00,0xFF0000,efx&2,0,0);
   #endif
  }
 

@@ -323,6 +323,7 @@
     <ClCompile Include="..\src\drivers\common\configSys.cpp" />
     <ClCompile Include="..\src\drivers\common\hq2x.cpp" />
     <ClCompile Include="..\src\drivers\common\hq3x.cpp" />
+    <ClCompile Include="..\src\drivers\common\nes_ntsc.c" />
     <ClCompile Include="..\src\drivers\common\scale2x.cpp" />
     <ClCompile Include="..\src\drivers\common\scale3x.cpp" />
     <ClCompile Include="..\src\drivers\common\scalebit.cpp" />
@@ -686,6 +687,9 @@
     <ClInclude Include="..\src\drivers\common\configSys.h" />
     <ClInclude Include="..\src\drivers\common\hq2x.h" />
     <ClInclude Include="..\src\drivers\common\hq3x.h" />
+    <ClInclude Include="..\src\drivers\common\nes_ntsc.h" />
+    <ClInclude Include="..\src\drivers\common\nes_ntsc_config.h" />
+    <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h" />
     <ClInclude Include="..\src\drivers\common\scale2x.h" />
     <ClInclude Include="..\src\drivers\common\scale3x.h" />
     <ClInclude Include="..\src\drivers\common\scalebit.h" />

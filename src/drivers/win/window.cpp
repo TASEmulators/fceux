@@ -2269,8 +2269,9 @@ void FixWXY(int pref)
 	}
 	if(winspecial)
 	{
+		// -Video Modes Tag-
 		int mult;
-		if(winspecial == 1 || winspecial == 2) mult = 2;
+		if(winspecial >= 1 && winspecial <= 3) mult = 2;
 		else mult = 3;
 		if(winsizemulx < mult)
 		{

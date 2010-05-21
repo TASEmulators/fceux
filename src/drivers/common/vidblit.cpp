@@ -25,6 +25,11 @@
 
 #include "../../types.h"
 
+#include "nes_ntsc.h"
+
+nes_ntsc_t* nes_ntsc;
+uint8 burst_phase = 0;
+
 static uint32 CBM[3];
 static uint32 *palettetranslate=0;
 
@@ -36,7 +41,7 @@ static int backBpp, backshiftr[3], backshiftl[3];
 //static uint32 backmask[3];
 
 static uint8 *specbuf8bpp = NULL;	// For 2xscale, 3xscale.
-
+uint8 *ntscblit = NULL; // For nes_ntsc
 
 static int silt;
 
@@ -75,16 +80,51 @@ static void CalculateShift(uint32 *CBM, int *cshiftr, int *cshiftl)
 }
 
 
-int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int specfilt)
+int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int specfilt, int specfilteropt)
 {
- if(specfilt == 2 || specfilt == 4) // scale2x and scale3x
+
+ // -Video Modes Tag-
+ if(specfilt == 3) // NTSC 2x
+ {
+  int multi = (2 * 2);
+
+  //nes_ntsc variables
+  nes_ntsc_setup_t ntsc_setup = nes_ntsc_composite;
+  
+  switch (specfilteropt)
+  {
+  //case 0: // Composite
+  //ntsc_setup = nes_ntsc_composite;
+  //break;
+  case 1: //S-Video
+  ntsc_setup = nes_ntsc_svideo;
+  break;
+  case 2: //RGB
+  ntsc_setup = nes_ntsc_rgb;
+  break;
+  case 3: //Monochrome
+  ntsc_setup = nes_ntsc_monochrome;
+  break;
+
+  }
+
+  nes_ntsc = (nes_ntsc_t*) malloc( sizeof (nes_ntsc_t) );
+
+  if ( nes_ntsc ) {
+  nes_ntsc_init( nes_ntsc, &ntsc_setup, b, 2 );
+
+  ntscblit = (uint8*)malloc(256*257*b*multi); //Need to add multiplier for larger sizes
+  }
+
+ } // -Video Modes Tag-
+ else if(specfilt == 2 || specfilt == 5) // scale2x and scale3x
  {
   int multi = ((specfilt == 2) ? 2 * 2 : 3 * 3);
 
   specbuf8bpp = (uint8*)malloc(256*240*multi); //mbg merge 7/17/06 added cast
 
- }
- else if(specfilt == 1 || specfilt == 3) // hq2x and hq3x
+ } // -Video Modes Tag-
+ else if(specfilt == 1 || specfilt == 4) // hq2x and hq3x
  { 
   if(b == 1) 
    return(0);
@@ -116,8 +156,9 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
     // backshiftr[x] -= backshiftl[x];
     // End iffy code
    }
+   // -Video Modes Tag-
    if(specfilt == 1) specbuf32bpp = (uint32*)malloc(256*240*4*sizeof(uint32)); //mbg merge 7/17/06 added cast
-   else if(specfilt == 3) specbuf32bpp = (uint32*)malloc(256*240*9*sizeof(uint32)); //mbg merge 7/17/06 added cast
+   else if(specfilt == 4) specbuf32bpp = (uint32*)malloc(256*240*9*sizeof(uint32)); //mbg merge 7/17/06 added cast
   }
 
   efx=0;
@@ -126,7 +167,8 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
   gmask=0x3F<<5;
   bmask=0x1F;
 
-  if(specfilt == 3)
+  // -Video Modes Tag-
+  if(specfilt == 4)
    hq3x_InitLUTs();
   else
    hq2x_InitLUTs();
@@ -188,11 +230,20 @@ void KillBlitToHigh(void)
  }
  if(specbuf)
  {
-  if(silt == 3)
+ // -Video Modes Tag-
+  if(silt == 4)
    hq3x_Kill();
   else
    hq2x_Kill();
   specbuf=NULL;
+ }
+ if (nes_ntsc) {
+	free(nes_ntsc);
+	nes_ntsc = NULL;
+ }
+ if (ntscblit) {
+	free(ntscblit);
+	ntscblit = NULL;
  }
 }
 
@@ -348,6 +399,11 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
  int x,y;
  int pinc;
  
+ // -Video Modes Tag-
+ if(special==3) //NTSC 2x
+  return; //Incompatible with 8-bit output. This is here for SDL.
+
+ // -Video Modes Tag-
  if(special==2)
  {
   if(xscale!=2 || yscale!=2) return;
@@ -356,7 +412,8 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
   return;
  }
 
- if(special==4)
+ // -Video Modes Tag-
+ if(special==5)
  {
   if(xscale!=3 || yscale!=3) return;
   scale(3,dest,pitch,src,256,1,xr,yr);
@@ -442,6 +499,7 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch,
   int mult; 
   int base;
 
+  // -Video Modes Tag-
   if(silt == 2) mult = 2;
   else mult = 3;
 
@@ -673,31 +731,43 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch,
    switch(Bpp)
    {
     case 4:
-    pinc=pitch-((xr*xscale)<<2);
-    for(y=yr;y;y--,src+=256-xr)
-    {
-     int doo=yscale;
-             
-     if(highefx& FVB_SCANLINES)
-      doo-=yscale>>1;
-     do
+	if ( nes_ntsc ) {
+	 burst_phase ^= 1;
+	 nes_ntsc_blit( nes_ntsc, (unsigned char*)src, xr, burst_phase,
+	 xr, yr, ntscblit, xr * Bpp * xscale );
+	 
+	 //Multiply 4 by the multiplier on output, because it's 4 bpp
+	 //Top 2 lines = line 3, due to distracting flicker
+	 //memcpy(dest,ntscblit+(Bpp * xscale)+(Bpp * xr * xscale),(Bpp * xr * xscale));
+	 //memcpy(dest+(Bpp * xr * xscale),ntscblit+(Bpp * xscale)+(Bpp * xr * xscale * 2),(Bpp * xr * xscale));
+	 memcpy(dest+(Bpp * xr * xscale),ntscblit+(Bpp * xscale),(xr*yr*Bpp*xscale*yscale));
+	} else {
+     pinc=pitch-((xr*xscale)<<2);
+     for(y=yr;y;y--,src+=256-xr)
      {
-      for(x=xr;x;x--,src++)
+      int doo=yscale;
+              
+      if(highefx& FVB_SCANLINES)
+       doo-=yscale>>1;
+      do
       {
-       int too=xscale;
-       do
+       for(x=xr;x;x--,src++)
        {
-        *(uint32 *)dest=palettetranslate[*src]; 
-        dest+=4;
-       } while(--too);
-      }
-      src-=xr;
-      dest+=pinc;
-     } while(--doo);
-     src+=xr;
-     if(highefx&FVB_SCANLINES)
-      dest+=pitch*(yscale>>1);
-    }  
+        int too=xscale;
+        do
+        {
+         *(uint32 *)dest=palettetranslate[*src]; 
+         dest+=4;
+        } while(--too);
+       }
+       src-=xr;
+       dest+=pinc;
+      } while(--doo);
+      src+=xr;
+      if(highefx&FVB_SCANLINES)
+       dest+=pitch*(yscale>>1);
+     }
+	}
     break;
 
    case 3:
@@ -817,9 +887,10 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch,
  {
   if(specbuf32bpp)
   {
-   int mult = (silt == 3)?3:2;
+   // -Video Modes Tag-
+   int mult = (silt == 4)?3:2;
 
-   if(silt == 3)
+   if(silt == 4)
     hq3x_32((uint8 *)specbuf,(uint8*)specbuf32bpp,xr,yr,xr*3*sizeof(uint32));
    else
     hq2x_32((uint8 *)specbuf,(uint8*)specbuf32bpp,xr,yr,xr*2*sizeof(uint32));
@@ -831,7 +902,8 @@ void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch,
   }
   else
   {
-   if(silt == 3)
+   // -Video Modes Tag-
+   if(silt == 4)
     hq3x_32((uint8 *)specbuf,destbackup,xr,yr,pitchbackup);
    else
     hq2x_32((uint8 *)specbuf,destbackup,xr,yr,pitchbackup);

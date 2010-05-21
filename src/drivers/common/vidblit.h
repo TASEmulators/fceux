@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int eefx, int specfilt);
+int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int eefx, int specfilt, int specfilteropt);
 void SetPaletteBlitToHigh(uint8 *src);
 void KillBlitToHigh(void);
 void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale);

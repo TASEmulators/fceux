@@ -71,6 +71,7 @@ int mutecapture;
 #endif
 static int noconfig;
 
+// -Video Modes Tag- : See --special
 char *DriverUsage="\
 Option         Value   Description\n\
 --pal          {0|1}   Use PAL timing.\n\
@@ -90,7 +91,7 @@ Option         Value   Description\n\
 --fullscreen   {0|1}   Enable full screen mode.\n\
 --noframe      {0|1}   Hide title bar and window decorations.\n\
 --special      {1-4}   Use special video scaling filters\n\
-                         (1 = hq2x 2 = Scale2x 3 = hq3x 4 = Scale3x)\n\
+                         (1 = hq2x 2 = Scale2x 3 = NTSC 2x 4 = hq3x 5 = Scale3x)\n\
 --palette      f       Load custom global palette from file f.\n\
 --sound        {0|1}   Enable sound.\n\
 --soundrate	   x       Set sound playback rate to x Hz.\n\

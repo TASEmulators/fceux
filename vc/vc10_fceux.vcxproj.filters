@@ -907,6 +907,9 @@
     <ClCompile Include="..\src\wave.cpp" />
     <ClCompile Include="..\src\x6502.cpp" />
     <ClCompile Include="..\src\emufile.cpp" />
+    <ClCompile Include="..\src\drivers\common\nes_ntsc.c">
+      <Filter>drivers\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1342,6 +1345,15 @@
       <Filter>drivers\win\lua</Filter>
     </ClInclude>
     <ClInclude Include="..\src\emufile.h" />
+    <ClInclude Include="..\src\drivers\common\nes_ntsc.h">
+      <Filter>drivers\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\common\nes_ntsc_config.h">
+      <Filter>drivers\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h">
+      <Filter>drivers\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

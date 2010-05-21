@@ -605,9 +605,11 @@ void openVideoConfig()
 	hbox1 = gtk_hbox_new(FALSE, 3);
 	scalerLbl = gtk_label_new("Special Scaler: ");
 	scalerCombo = gtk_combo_box_new_text();
+	// -Video Modes Tag-
 	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "none");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq2x");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale2x");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "NTSC 2x");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq3x");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale3x");
 	

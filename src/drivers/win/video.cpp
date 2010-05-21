@@ -42,6 +42,7 @@ int fssync=0;
 int winsync=0;
 
 int winspecial = 0;
+int NTSCwinspecial = 0;
 int vmod = 0;
 
 vmdef vmodes[11]={
@@ -197,9 +198,18 @@ static int GetBPP(void)
 
 static int InitBPPStuff(int fs)
 {
+
+	int specfilteropt = 0;
+	switch (winspecial)
+	{
+	case 3:
+	specfilteropt = NTSCwinspecial;
+	break;
+	}
+
 	if(bpp >= 16)
 	{
-		InitBlitToHigh(bpp >> 3, CBM[0], CBM[1], CBM[2], 0, fs?vmodes[vmod].special:winspecial);
+		InitBlitToHigh(bpp >> 3, CBM[0], CBM[1], CBM[2], 0, fs?vmodes[vmod].special:winspecial,specfilteropt);
 	}
 	else if(bpp==8)
 	{
@@ -241,9 +251,10 @@ int SetVideoMode(int fs)
 
 	if(!fs)
 	{ 
-		if(winspecial == 2 || winspecial == 1)
+		// -Video Modes Tag-
+		if(winspecial <= 3 && winspecial >= 1)
 			specmul = 2;
-		else if(winspecial == 3 || winspecial == 4)
+		else if(winspecial >= 4 && winspecial <= 5)
 			specmul = 3;
 		else
 			specmul = 1;
@@ -334,9 +345,10 @@ int SetVideoMode(int fs)
 	{
 		if(vmod == 0)
 		{         
-			if(vmodes[0].special == 2 || vmodes[0].special == 1)
+			// -Video Modes Tag-
+			if(vmodes[0].special <= 3 && vmodes[0].special >= 1)
 				specmul = 2;
-			else if(vmodes[0].special == 3 || vmodes[0].special == 4)
+			else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 				specmul = 3;
 			else
 				specmul = 1;
@@ -483,9 +495,10 @@ static void BlitScreenWindow(unsigned char *XBuf)
 
 	if (!lpDDSBack) return;
 
-	if(winspecial == 2 || winspecial == 1)
+	// -Video Modes Tag-
+	if(winspecial <= 3 && winspecial >= 1)
 		specialmul = 2;
-	else if(winspecial == 4 || winspecial == 3)
+	else if(winspecial >= 4 && winspecial <= 5)
 		specialmul = 3;
 	else specialmul = 1;
 
@@ -544,9 +557,10 @@ static void BlitScreenFull(uint8 *XBuf)
 	RECT srect,drect;
 	LPDIRECTDRAWSURFACE7 lpDDSVPrimary;
 	int specmul;    // Special scaler size multiplier
-	if(vmodes[0].special == 2 || vmodes[0].special == 1)
+	// -Video Modes Tag-
+	if(vmodes[0].special <= 3 && vmodes[0].special >= 1)
 		specmul = 2;
-	else if(vmodes[0].special == 3 || vmodes[0].special == 4)
+	else if(vmodes[0].special >= 4 && vmodes[0].special <= 5)
 		specmul = 3;
 	else
 		specmul = 1;
@@ -739,6 +753,7 @@ static void BlitScreenFull(uint8 *XBuf)
 	{
 		if(!(vmodes[vmod].flags&VMDF_DXBLT))
 		{  
+			// -Video Modes Tag-
 			if(vmodes[vmod].special)
 				ScreenLoc += (vmodes[vmod].drect.left*(bpp>>3)) + ((vmodes[vmod].drect.top)*pitch);   
 			else
@@ -752,6 +767,7 @@ static void BlitScreenFull(uint8 *XBuf)
 		else
 		{
 			XBuf+=FSettings.FirstSLine*256+VNSCLIP;
+			// -Video Modes Tag-
 			if(vmodes[vmod].special)
 				Blit8To8(XBuf,(uint8*)ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,vmodes[vmod].xscale,vmodes[vmod].yscale,0,vmodes[vmod].special); //mbg merge 7/17/06 added cast
 			else
@@ -887,7 +903,8 @@ static int RecalcCustom(void)
 		cmode->drect.right=cmode->drect.left+VNSWID*cmode->xscale;
 	}
 
-	if((cmode->special == 1 || cmode->special == 3) && cmode->bpp == 8)
+	// -Video Modes Tag-
+	if((cmode->special == 1 || cmode->special == 4) && cmode->bpp == 8)
 	{
 		cmode->bpp = 32;
 		//FCEUD_PrintError("HQ2x/HQ3x requires 16bpp or 32bpp(best).");
@@ -963,9 +980,10 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		CheckRadioButton(hwndDlg,IDC_RADIO_SCALE,IDC_RADIO_STRETCH,(vmodes[0].flags&VMDF_STRFS)?IDC_RADIO_STRETCH:IDC_RADIO_SCALE);
 
 		{
-			char *str[]={"<none>","hq2x","Scale2x","hq3x","Scale3x"};
+			// -Video Modes Tag-
+			char *str[]={"<none>","hq2x","Scale2x","NTSC 2x","hq3x","Scale3x"};
 			int x;
-			for(x=0;x<5;x++)
+			for(x=0;x<6;x++)
 			{
 				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_FS,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);
 				SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_SCALER_WIN,CB_ADDSTRING,0,(LPARAM)(LPSTR)str[x]);

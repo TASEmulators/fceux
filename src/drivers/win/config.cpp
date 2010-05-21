@@ -168,6 +168,7 @@ static CFGSTRUCT fceuconfig[] = {
 	NACS("odbase",directory_names[13]),
 
 	AC(winspecial),
+	AC(NTSCwinspecial),
 	AC(winsizemulx),
 	AC(winsizemuly),
 	NAC("saspectw987",saspectw),
