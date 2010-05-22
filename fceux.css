@@ -38,8 +38,9 @@ body {
 }
 
 #left_col {
-	width: 200px;
+	width: 192px;
 	float: left;
+	padding-right: 8px
 }
 
 #page_content {
