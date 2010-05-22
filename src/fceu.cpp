@@ -98,14 +98,9 @@ FCEUGI::~FCEUGI()
 bool CheckFileExists(const char* filename)
 {
 	//This function simply checks to see if the given filename exists
-	string checkFilename; 
-
-	if (filename)
-		checkFilename = filename;
-			
-	//Check if this filename exists
+	if (!filename) return false;
 	fstream test;
-	test.open(checkFilename.c_str(),fstream::in);
+	test.open(filename,fstream::in);
 		
 	if (test.fail())
 	{
@@ -140,14 +135,13 @@ static void FCEU_CloseGame(void)
 	{
 
 #ifdef WIN32
-// ################################## Start of SP CODE ###########################
+//SP CODE
 	extern char LoadedRomFName[2048];
 
 	if (storePreferences(LoadedRomFName))
 	{
 		FCEUD_PrintError("Couldn't store debugging data");
 	}
-// ################################## End of SP CODE ###########################
 #endif
 
 		if(FCEUnetplay)
@@ -172,8 +166,7 @@ static void FCEU_CloseGame(void)
 
 		ResetExState(0,0);
 
-		//mbg 5/9/08 - clear screen when game is closed
-		//http://sourceforge.net/tracker/index.php?func=detail&aid=1787298&group_id=13536&atid=113536
+		//clear screen when game is closed
 		extern uint8 *XBuf;
 		if(XBuf)
 			memset(XBuf,0,256*256);
@@ -182,11 +175,10 @@ static void FCEU_CloseGame(void)
 
 		delete GameInfo;
 		GameInfo = 0;
-
-		//Reset frame counter
+				
 		currFrameCounter = 0;
 
-		//Reset flags for Undo/Redo/Auto Savestating
+		//Reset flags for Undo/Redo/Auto Savestating //adelikat: TODO: maybe this stuff would be cleaner as a struct or class
 		lastSavestateMade[0] = 0;
 		undoSS = false;
 		redoSS = false;
