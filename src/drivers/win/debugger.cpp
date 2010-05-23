@@ -61,6 +61,7 @@ int DbgSizeX=-1,DbgSizeY=-1;
 int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
+bool DebuggerWasUpdated = false;
 HWND hDebug;
 static HMENU hDebugcontext;     //Handle to context menu
 static HMENU hDebugcontextsub;  //Handle to context sub menu
@@ -514,10 +515,12 @@ int GetEditStack(HWND hwndDlg) {
 */
 
 void UpdateRegs(HWND hwndDlg) {
-	X.A = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_A);
-	X.X = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_X);
-	X.Y = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_Y);
-	X.PC = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_PC);
+	if (DebuggerWasUpdated) {
+		X.A = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_A);
+		X.X = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_X);
+		X.Y = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_Y);
+		X.PC = GetEditHex(hwndDlg,IDC_DEBUGGER_VAL_PC);
+	}
 }
 
 ///indicates whether we're under the control of the debugger
@@ -617,6 +620,8 @@ void UpdateDebugger()
 	if (tmp & I_FLAG) CheckDlgButton(hDebug, IDC_DEBUGGER_FLAG_I, BST_CHECKED);
 	if (tmp & Z_FLAG) CheckDlgButton(hDebug, IDC_DEBUGGER_FLAG_Z, BST_CHECKED);
 	if (tmp & C_FLAG) CheckDlgButton(hDebug, IDC_DEBUGGER_FLAG_C, BST_CHECKED);
+
+	DebuggerWasUpdated = true;
 }
 
 char *BreakToText(unsigned int num) {
@@ -1341,7 +1346,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								//mbg merge 7/18/06 changed pausing check and set
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
-									FCEUI_ToggleEmulationPause(); 
+									FCEUI_ToggleEmulationPause();
+									DebuggerWasUpdated = false;
 								}
 								break;
 							case IDC_DEBUGGER_STEP_IN:
