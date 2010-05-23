@@ -393,6 +393,13 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
 							pauseWhileActive ^= 1;
+							if ((bool)EmulationPaused != pauseWhileActive) 
+							{
+								EmulationPaused = (pauseWhileActive ? 1 : 0);
+								wasPausedByCheats = pauseWhileActive;
+								if (EmulationPaused)
+									FCEU_printf("Emulation paused: %d\n", EmulationPaused);
+							}
 						break;
 						case IDC_BTN_CHEAT_ADD:
 							GetDlgItemText(hwndDlg,IDC_CHEAT_ADDR,str,5);

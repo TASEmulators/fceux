@@ -1,3 +1,4 @@
+22-may-2010 - ugetab - Win32 - Made cheat menu's Pause When Active effect immediate.
 22-may-2010 - ugetab - Win32 - Enabled multi-select for Cheat menu to allow multiple toggles and deletes.
 20-may-2010 - ugetab - Added NTSC 2x scalar option with some CFG config options of it's own
 20-may-2010 - Cah4e3 - Win32 - CDLogger - fixed bug preventing correct interrupt vectors from logging
