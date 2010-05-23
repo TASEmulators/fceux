@@ -393,7 +393,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						break;
 						case IDC_CHEAT_PAUSEWHENACTIVE:
 							pauseWhileActive ^= 1;
-							if ((bool)EmulationPaused != pauseWhileActive) 
+							if ((EmulationPaused == 1 ? true : false) != pauseWhileActive) 
 							{
 								EmulationPaused = (pauseWhileActive ? 1 : 0);
 								wasPausedByCheats = pauseWhileActive;
