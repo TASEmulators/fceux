@@ -52,6 +52,7 @@ extern int myNumWPs;
 
 extern int vblankScanLines;
 extern int vblankPixel;
+extern bool DebuggerWasUpdated;
 
 int childwnd;
 
@@ -61,7 +62,6 @@ int DbgSizeX=-1,DbgSizeY=-1;
 int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
-bool DebuggerWasUpdated = false;
 HWND hDebug;
 static HMENU hDebugcontext;     //Handle to context menu
 static HMENU hDebugcontextsub;  //Handle to context sub menu
@@ -622,6 +622,7 @@ void UpdateDebugger()
 	if (tmp & C_FLAG) CheckDlgButton(hDebug, IDC_DEBUGGER_FLAG_C, BST_CHECKED);
 
 	DebuggerWasUpdated = true;
+	
 }
 
 char *BreakToText(unsigned int num) {
@@ -1347,7 +1348,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								if (FCEUI_EmulationPaused()) {
 									UpdateRegs(hwndDlg);
 									FCEUI_ToggleEmulationPause();
-									DebuggerWasUpdated = false;
+									//DebuggerWasUpdated = false done in above function;
 								}
 								break;
 							case IDC_DEBUGGER_STEP_IN:
