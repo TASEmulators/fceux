@@ -332,7 +332,6 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 						if (real == 16) {
 							SendMessage(hwndDlg,WM_VSCROLL,SB_LINEDOWN,0);
 							SendDlgItemMessage(hwndDlg,IDC_CHEAT_LIST_POSSIBILITIES,LB_SETCURSEL,real,0);
-							SendDlgItemMessage(hwndDlg,IDC_LIST_CHEATS,LB_SETSEL,(WPARAM)1,real);
 						}
 						return -1;
 						break;
