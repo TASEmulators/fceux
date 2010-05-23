@@ -201,8 +201,6 @@ void LogDPCM(int romaddress, int dpcmsize){
 			}
 		}
 	}
-
-	return;
 }
 
 /* Instantaneous?  Maybe the new freq value is being calculated all of the time... */

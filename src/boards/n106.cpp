@@ -467,4 +467,5 @@ void Mapper210_Init(CartInfo *info)
   GameStateRestore=Mapper210_StateRestore;
   info->Power=N106_Power;
   AddExState(WRAM, 8192, 0, "WRAM");
+  AddExState(N106_StateRegs, ~0, 0, 0);
 }

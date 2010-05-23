@@ -23,8 +23,8 @@
     {0xdd8ced31,209,-1},  /* Power Rangers 3 */
 
     {0x0c47946d,210,1},  /* Chibi Maruko Chan */
-    {0xbd523011,210,0},  /* Dream Master */
-    {0xc247cc80,210,1},   /* Family Circuit '91 */
+    {0xbd523011,210,2},  /* Dream Master */ // may be wrong, but seems it solve most problems
+    {0xc247cc80,210,1},  /* Family Circuit '91 */
     {0x6ec51de5,210,1},  /* Famista '92 */
     {0xadffd64f,210,1},  /* Famista '93 */
     {0x429103c9,210,1},  /* Famista '94 */
