@@ -218,7 +218,9 @@ static FCEUFILE * TryUnzip(const std::string& path) {
 				if(unzGoToNextFile(tz)!=UNZ_OK)
 				{
 					if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
-					break;
+					unzCloseCurrentFile(tz);
+					unzClose(tz);
+					return 0;
 				}
 			}
 			if(unzOpenCurrentFile(tz)!=UNZ_OK)
