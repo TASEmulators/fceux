@@ -971,7 +971,7 @@ static int AutosaveCounter = 0;
 
 void UpdateAutosave(void)
 {
-	if(!EnableAutosave)
+	if(!EnableAutosave || turbo)
 		return;
 
 	char * f;
