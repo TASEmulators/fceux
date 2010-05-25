@@ -21,7 +21,7 @@
 #include "taseditproj.h"
 #include "movie.h"
 
-void TASEDIT_PROJECT::init()
+void TASEDIT_PROJECT::init()	//TODO: rip this out! This should be the class constructor instead
 {
 	projectName="";
 	fm2FileName="";
@@ -29,6 +29,8 @@ void TASEDIT_PROJECT::init()
 
 	changed=false;
 }
+
+//TODO: a parameterized constructor that can serve as an import fm2 function
 
 //All the get/set functions...
 std::string TASEDIT_PROJECT::GetProjectName()
