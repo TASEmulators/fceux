@@ -1,18 +1,8 @@
 //Implementation file of TASEdit Project file object
-//Written by Chris220
 
 //Contains all the TASEDit project and all files/settings associated with it
 //Also contains all methods for manipulating the project files/settings, and saving them to disk
 
-/*
-	//Private members
-	//The TASEdit Project's name
-	std::string projectName;
-	//The FM2's file name
-	std::string fm2FileName;
-	//The TASEdit Project's filename (For saving purposes)
-	std::string projectFile;
-*/
 
 #include <string>
 #include <iostream>
@@ -20,6 +10,11 @@
 #include "../main.h"
 #include "taseditproj.h"
 #include "movie.h"
+
+TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads project with default values
+{
+
+}
 
 void TASEDIT_PROJECT::init()	//TODO: rip this out! This should be the class constructor instead
 {

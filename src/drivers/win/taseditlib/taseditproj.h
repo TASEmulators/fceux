@@ -47,6 +47,7 @@ struct TASEHeader
 class TASEDIT_PROJECT
 {
 public:
+	TASEDIT_PROJECT();
 	void init();
 
 	std::string GetProjectName();

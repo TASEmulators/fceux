@@ -14,7 +14,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 #include "help.h"
-#include "main.h"	//So we can use the GetRomName() function!
+#include "main.h"	//For the GetRomName() function
 
 using namespace std;
 
@@ -39,7 +39,7 @@ static TSelectionFrames selectionFrames;
 //add a new fceud_ function?? blehhh maybe
 extern EMOVIEMODE movieMode;
 
-TASEDIT_PROJECT project;	//Create an instance of the project
+TASEDIT_PROJECT project;
 
 static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -411,7 +411,7 @@ static void DeleteFrames()
 	if(frames == currMovieData.records.size())
 	{
 		MessageBox(hwndTasEdit,"Please don't delete all of the frames in the movie. This violates an internal invariant we need to keep.","Error deleting",0);
-		return;
+		return;	///adelikat: why not just add an empty frame in the event of deleting all frames?
 	}
 	//this is going to be _really_ slow.
 
@@ -820,22 +820,25 @@ static void NewProject()
 	if (!CheckSaveChanges())
 		return;
 
-	//TODO: Reinitialise project
+	//TODO: close current project instance, create a new one with a non-parameterized constructor
 }
 
 //Opens a new Project file
 static void OpenProject()
 {
-//determine if current project changed
-//if so, ask to save changes
-//close current project
-//open dialog for new project file
+//TODO
+	//determine if current project changed
+	//if so, ask to save changes
+	//close current project
+		
+	//If OPENFILENAME dialog successful, open up a completely new project instance and scrap the old one
+	//Run the project Load() function to pull all info from the .tas file into this new project instance
 
-		const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";	//Filetype filter
+	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";	
 
-	OPENFILENAME ofn;								//New instance of OPENFILENAME
-	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
-	ofn.lStructSize=sizeof(ofn);					//Various parameters
+	OPENFILENAME ofn;								
+	memset(&ofn,0,sizeof(ofn));						
+	ofn.lStructSize=sizeof(ofn);					
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Open TASEdit Project...";
 	ofn.lpstrFilter=TPfilter;
@@ -843,32 +846,32 @@ static void OpenProject()
 	char nameo[2048];								//File name
 	strcpy(nameo, GetRomName());					//For now, just use ROM name
 
-	ofn.lpstrFile=nameo;							//More parameters
+	ofn.lpstrFile=nameo;							
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
-	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
+	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	
 	ofn.lpstrInitialDir=initdir.c_str();
 
-	if(GetOpenFileName(&ofn)){						//If it is a valid filename
-		std::string tempstr = nameo;				//Make a temporary string for filename
+	if(GetOpenFileName(&ofn)){							//If it is a valid filename
+		std::string tempstr = nameo;					//Make a temporary string for filename
 		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
 		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
 		{
-			tempstr.append(".tas");					//Stick it on ourselves
+			tempstr.append(".tas");						//Stick it on ourselves
 			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
-			std::string filename = name;			//Get the filename
-			filename.append(ext);					//Shove the extension back onto it...
-			project.SetProjectFile(filename);		//And update the project's filename.
-		} else {									//If they've been nice and done it for us...
+			std::string filename = name;				//Get the filename
+			filename.append(ext);						//Shove the extension back onto it...
+			project.SetProjectFile(filename);			//And update the project's filename.
+		} else {										//If they've been nice and done it for us...
 			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
-			std::string filename = name;			//Grab the name...
-			filename.append(ext);					//Stick extension back on...
-			project.SetProjectFile(filename);		//And update the project's filename.
+			std::string filename = name;				//Grab the name...
+			filename.append(ext);						//Stick extension back on...
+			project.SetProjectFile(filename);			//And update the project's filename.
 		}
-		project.SetProjectName(GetRomName());		//Set the project's name to the ROM name
+		project.SetProjectName(GetRomName());			//Set the project's name to the ROM name
 		std::string thisfm2name = project.GetProjectName();
-		thisfm2name.append(".fm2");					//Setup the fm2 name
-		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
+		thisfm2name.append(".fm2");						//Setup the fm2 name
+		project.SetFM2Name(thisfm2name);				//Set the project's fm2 name
 		project.LoadProject(project.GetProjectFile());
 	}
 
@@ -880,40 +883,39 @@ static void SaveProjectAs()
 //Save project as new user selected filename
 //flag project as not changed
 
-	//Creation of a save window
 	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";	//Filetype filter
 
-	OPENFILENAME ofn;								//New instance of OPENFILENAME
-	memset(&ofn,0,sizeof(ofn));						//Set aside some memory
-	ofn.lStructSize=sizeof(ofn);					//Various parameters
+	OPENFILENAME ofn;								
+	memset(&ofn,0,sizeof(ofn));						
+	ofn.lStructSize=sizeof(ofn);					
 	ofn.hInstance=fceu_hInstance;
 	ofn.lpstrTitle="Save TASEdit Project As...";
 	ofn.lpstrFilter=TPfilter;
 
-	char nameo[2048];								//File name
-	strcpy(nameo, GetRomName());					//For now, just use ROM name
+	char nameo[2048];										//File name
+	strcpy(nameo, GetRomName());							//For now, just use ROM name
 
-	ofn.lpstrFile=nameo;							//More parameters
+	ofn.lpstrFile=nameo;									//More parameters
 	ofn.lpstrDefExt="tas";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	//Initial directory
+	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
 	ofn.lpstrInitialDir=initdir.c_str();
 
-	if(GetSaveFileName(&ofn))						//If it is a valid filename
+	if(GetSaveFileName(&ofn))								//If it is a valid filename
 	{
-		std::string tempstr = nameo;				//Make a temporary string for filename
-		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
+		std::string tempstr = nameo;						//Make a temporary string for filename
+		char drv[512], dir[512], name[512], ext[512];		//For getting the filename!
 
 		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
-		std::string filename = name;			//Grab the name...
-		filename.append(ext);					//Stick extension back on...
-		project.SetProjectFile(filename);		//And update the project's filename.
+		std::string filename = name;						//Grab the name...
+		filename.append(ext);								//Stick extension back on...
+		project.SetProjectFile(filename);					//And update the project's filename.
 
-		project.SetProjectName(GetRomName());		//Set the project's name to the ROM name
+		project.SetProjectName(GetRomName());				//Set the project's name to the ROM name
 		std::string thisfm2name = project.GetProjectName();
-		thisfm2name.append(".fm2");					//Setup the fm2 name
-		project.SetFM2Name(thisfm2name);			//Set the project's fm2 name
+		thisfm2name.append(".fm2");							//Setup the fm2 name
+		project.SetFM2Name(thisfm2name);					//Set the project's fm2 name
 		project.SaveProject();
 	}
 
@@ -926,17 +928,21 @@ static void SaveProject()
 //Save work, flag project as not changed
 	if (!project.SaveProject())
 		SaveProjectAs();
-
 }
 
 //Takes a selected .fm2 file and adds it to the Project inputlog
 static void Import()
 {
+	//Pull the fm2 header, comments, subtitle information out and put it into the project info
+	//Pull the input out and add it to the main branch input log file
 }
 
 //Takes current inputlog and saves it as a .fm2 file
 static void Export()
 {
+	//TODO: redesign this
+	//Dump project header info into file, then comments & subtitles, then input log
+	//This will require special prunctions, ::DumpHeader  ::DumpComments etc
 	const char filter[]="FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 	char fname[2048] = {0};
 	OPENFILENAME ofn;
@@ -1074,7 +1080,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			case ACCEL_CTRL_O:
 			case ID_FILE_OPENPROJECT:
-				//Replay_LoadMovie(true); //TODO: change function name to LoadProject(true)?
 				OpenProject();
 				break;
 			
