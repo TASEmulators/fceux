@@ -233,29 +233,36 @@ static struct MWRec
 		char TempArray[16];
 		GetDlgItemText(hwndMemWatch,ctl,TempArray,16);
 		TempArray[15]=0;
+		
+		int x = 0;
+		for (x = 0; x < 15; x++)
+		{
+			if (!(TempArray[x] == ' '))
+				break;
+		}	//The point of this loop is to ignore spaces at the begginning of a address box
 
 		valid = hex = twobytes = false;
-		switch(TempArray[0])
+		switch(TempArray[x])
 		{
 			case 0:
 				break;
 			case '!':
 				twobytes=true;
-				addr=FastStrToU16(TempArray+1,valid);
+				addr=FastStrToU16(TempArray+x+1,valid);
 				break;
 			case 'x':
 				hex = true;
 				valid = true;
-				addr=FastStrToU16(TempArray+1,valid);
+				addr=FastStrToU16(TempArray+x+1,valid);
 				break;
 			case 'X':
 				hex = twobytes = true;
 				valid = true;
-				addr = FastStrToU16(TempArray+1,valid);
+				addr = FastStrToU16(TempArray+x+1,valid);
 				break;
 			default:
 				valid = true;
-				addr=FastStrToU16(TempArray,valid);
+				addr=FastStrToU16(TempArray+x,valid);
 				break;
 			}
 	}

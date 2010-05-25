@@ -1,3 +1,4 @@
+24-may-2010 - adelikat - Win32 - Memwatch - ignore spaces at the beginnign of an address in the address boxes
 24-may-2010 - mart0258 - Disable auto-savestates during turbo
 24-may-2010 - mart0258 - Prevent .zip files containing no recognized files from causing crash
 23-may-2010 - adelikat - Win32 - Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset
