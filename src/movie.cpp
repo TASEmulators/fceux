@@ -1494,6 +1494,18 @@ void FCEUI_MoviePlayFromBeginning(void)
 			movieMode = MOVIEMODE_PLAY;
 			FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 		}
+		else
+		{
+			string str = curMovieFilename;
+			FCEUI_StopMovie();
+			if (FCEUI_LoadMovie(str.c_str(),1, 0, 0))
+			{
+				movieMode = MOVIEMODE_PLAY;
+				movie_readonly=true;
+				FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
+			}
+			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload		
+		}
 	}
 }
 
