@@ -17,7 +17,7 @@
 //All ilog files are listed in the input log list
 
 #include <string>
-
+#include "movie.h"
 
 //The notes feature, displays user notes in the notes column
 struct TASENote
@@ -62,6 +62,9 @@ public:
 	//Guess what these functions are for...
 	bool SaveProject();
 	bool LoadProject(std::string PFN);
+
+	bool Export2FM2(std::string filename);	//creates a fm2 out of header, comments, subtitles, and main branch input log, return false if any errors occur
+	void AddInputLog(std::vector<MovieRecord> records, std::string fn);	//Receives a vector of movie records & a filename, and saves them to disk (as .log files), and adds filename to inputlog vector
 
 private:
 	std::string projectName;			//The TASEdit Project's name
