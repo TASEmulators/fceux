@@ -1486,13 +1486,14 @@ void FCEUI_MoviePlayFromBeginning(void)
 {
 	if (movieMode != MOVIEMODE_INACTIVE && movieMode != MOVIEMODE_TASEDIT)
 	{
-		movie_readonly=true;
-		poweron(true);
-		
-		currFrameCounter=0;
-		movieMode = MOVIEMODE_PLAY;
-
-		FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
+		if (currMovieData.savestate.empty())
+		{
+			movie_readonly=true;
+			poweron(true);	//Bad, this assumes a movie doesn't start from savestate
+			currFrameCounter=0;
+			movieMode = MOVIEMODE_PLAY;
+			FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
+		}
 	}
 }
 
