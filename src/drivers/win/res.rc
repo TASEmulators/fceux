@@ -429,6 +429,7 @@ BEGIN
         MENUITEM "Toggle Cheat\tDbl-Clk",       CHEAT_CONTEXT_TOGGLECHEAT
         MENUITEM "Poke Cheat Value",            CHEAT_CONTEXT_POKECHEATVALUE
         MENUITEM "Goto In Hex Editor",          CHEAT_CONTEXT_GOTOINHEXEDITOR
+        MENUITEM "Delete Selected Cheats",      ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS
     END
 END
 

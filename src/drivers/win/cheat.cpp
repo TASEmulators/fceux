@@ -426,6 +426,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
 							UpdateCheatsAdded();
 							break;
+						case ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS:
 						case IDC_BTN_CHEAT_DEL:
 							if (selcheatcount > 1) {
 								if (IDYES == MessageBox(hwndDlg, "Multiple cheats selected. Continue with delete?", "Delete multiple cheats?", MB_ICONQUESTION | MB_YESNO)) { //Get message box
