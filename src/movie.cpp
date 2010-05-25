@@ -1522,6 +1522,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	
 	info.movie_version = md.version;
 	info.poweron = md.savestate.size()==0;
+	info.reset = false; //Soft-reset isn't used from starting movies anymore, so this will be false, better for FCEUFILE to have that info (as |1| on the first frame indicates it
 	info.pal = md.palFlag;
 	info.ppuflag = md.PPUflag;
 	info.nosynchack = true;

@@ -1,3 +1,4 @@
+23-may-2010 - adelikat - Win32 - Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset
 23-may-2010 - adelikat - Fix PlayMovieFromBeginning when using a movie that starts from savestate
 23-may-2010 - cah4e3  - mapper 19 savestate fix mirroring for "Dream Master (J)" corrected to "four-screen" by CRC check
 23-may-2010 - ugetab - Win32 - Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having teh CPU registers become corrupted.
