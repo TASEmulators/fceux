@@ -377,6 +377,8 @@
 #define TASEDIT_REWIND_FULL             1135
 #define IDC_BUTTON4                     1136
 #define TASEDIT_FOWARD_FULL             1136
+#define TASEDIT_REWIND2                 1137
+#define TASEDIT_PLAYSTOP                1137
 #define IDC_RADIO1                      1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140

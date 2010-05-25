@@ -1199,6 +1199,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				if (currFrameCounter>0)
 					JumpToFrame(currFrameCounter-1);
 				break;
+			
+			case TASEDIT_PLAYSTOP:
+				//Pause/Unpses (Play/Stop) movie
+				FCEUI_ToggleEmulationPause();
+				break;
 
 			case TASEDIT_REWIND_FULL:
 				//rewinds to beginning of movie
