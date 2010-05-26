@@ -37,6 +37,7 @@
 #ifdef WIN32
 #include <windows.h>
 #include "./drivers/win/common.h"
+#include "./drivers/win/tasedit.h"
 extern void AddRecentMovieFile(const char *filename);
 #endif
 
@@ -818,11 +819,16 @@ void poweron(bool shouldDisableBatteryLoading)
 
 void FCEUMOV_EnterTasEdit()
 {
+	//If no movie, start a new project, currMovieData will serve as the "main branch" file, so give it a filename and save that into the project
+	//Dump all header info int ot the project file
+
+	//Else use the currentmovie to create a new project
+
+	//BIG TODO: Why is this tasedit stuff in movie.cpp? Let's movie it out, it is win32 only anyway
 	if (movieMode == MOVIEMODE_INACTIVE)
 	{
 		//stop any current movie activity
 		FCEUI_StopMovie();
-
 		//clear the current movie
 		currFrameCounter = 0;
 		currMovieData = MovieData();
@@ -833,9 +839,10 @@ void FCEUMOV_EnterTasEdit()
 
 		//reset the rom
 		poweron(false);
-	} else {
+	} 
+	else 
+	{
 		FCEUI_StopMovie();
-
 		currMovieData.greenZoneCount=currFrameCounter;
 	}
 
@@ -843,15 +850,16 @@ void FCEUMOV_EnterTasEdit()
 	//ResetInputTypes();
 	//todo - maybe this instead
 	//FCEUD_SetInput(currMovieData.fourscore,currMovieData.microphone,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
+	
+#ifdef WIN32
+	CreateProject(currMovieData);
+#endif
 
-	//pause the emulator
-	FCEUI_SetEmulationPaused(1);
+	FCEUI_SetEmulationPaused(1); //pause the emulator
 
 	//and enter tasedit mode
 	movieMode = MOVIEMODE_TASEDIT;
-	
 	currMovieData.TryDumpIncremental();
-
 	FCEU_DispMessage("Tasedit engaged",0);
 }
 

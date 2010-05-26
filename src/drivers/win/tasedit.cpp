@@ -119,6 +119,10 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
+void CreateProject(MovieData data)
+{
+}
+
 // called from the rest of the emulator when things happen and the tasedit should change to reflect it
 void UpdateTasEdit()
 {
