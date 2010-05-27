@@ -495,12 +495,15 @@ void BreakHit(bool force = false) {
 }
 
 uint8 StackAddrBackup = X.S;
+uint16 StackNextIgnorePC = 0xFFFF;
 
 ///fires a breakpoint
 void breakpoint() {
 	int i,j;
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
+	uint8 stackop=0;
+	uint8 stackopstartaddr,stackopendaddr;
 
 	//inspect the current opcode
 	opcode[0] = GetMem(_PC);
@@ -565,6 +568,21 @@ void breakpoint() {
 		case 8: A = opcode[1]+_Y; break;
 	}
 
+	switch (opcode[0]) {
+		//Push Ops
+		case 0x08: //Fall to next
+		case 0x48: stackopstartaddr=stackopendaddr=X.S-1; stackop=WP_W; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
+		//Pull Ops
+		case 0x28: //Fall to next
+		case 0x68: stackopstartaddr=stackopendaddr=X.S+1; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=_PC+1; break;
+		//JSR (Includes return address - 1)
+		case 0x20: stackopstartaddr=stackopendaddr=X.S-1; stackop=WP_W; StackAddrBackup = X.S; StackNextIgnorePC=(opcode[1]|opcode[2]<<8); break;
+		//RTI (Includes processor status, and exact return address)
+		case 0x40: stackopstartaddr=X.S+1; stackopendaddr=X.S+3; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=(GetMem(X.S+2|0x0100)|GetMem(X.S+3|0x0100)<<8); break;
+		//RTS (Includes return address - 1)
+		case 0x60: stackopstartaddr=X.S+1; stackopendaddr=X.S+2; stackop=WP_R; StackAddrBackup = X.S; StackNextIgnorePC=(GetMem(stackopstartaddr|0x0100)|GetMem(stackopendaddr|0x0100)<<8)+1; break;
+	}
+
 	for (i = 0; i < numWPs; i++) {
 // ################################## Start of SP CODE ###########################
 		if (condition(&watchpoint[i]))
@@ -595,34 +613,50 @@ void breakpoint() {
 					}
 					else if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
-				} else if (watchpoint[i].flags & WP_E) {
+				}
+				else if (watchpoint[i].flags & WP_E) {
 					//brk_type independant coding
 
-					//Stack mem breaks
-					if (X.S < StackAddrBackup) {
-						//Pushes to stack
-						if (watchpoint[i].flags & WP_W) {
-						for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++) {
-							if (watchpoint[i].endaddress) {
-								if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
-									BreakHit();
+					if (stackop>0) {
+						//Announced stack mem breaks
+						//PHA, PLA, PHP, and PLP affect the stack data.
+						//TXS and TSX only deal with the pointer.
+						if (watchpoint[i].flags & stackop) {
+							for (j = (stackopstartaddr|0x0100); j <= (stackopendaddr|0x0100); j++) {
+								if (watchpoint[i].endaddress) {
+									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+								}
+								else if (watchpoint[i].address == j) BreakHit();
 							}
-							else if (watchpoint[i].address == j)
-								BreakHit();
-						}
 						}
 					}
-					else if (StackAddrBackup < X.S) {
-						//Pulls from stack
-						if (watchpoint[i].flags & WP_R) {
-						for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++) {
-							if (watchpoint[i].endaddress) {
-								if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
-									BreakHit();
+					if (StackNextIgnorePC==_PC) {
+						//Used to make it ignore the unannounced stack code one time
+						StackNextIgnorePC = 0xFFFF;
+					} else 
+					{
+						if ((X.S < StackAddrBackup) && (stackop==0)) {
+							//Unannounced stack mem breaks
+							//Pushes to stack
+							if (watchpoint[i].flags & WP_W) {
+								for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++) {
+									if (watchpoint[i].endaddress) {
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+									}
+									else if (watchpoint[i].address == j) BreakHit();
+								}
 							}
-							else if (watchpoint[i].address == j)
-								BreakHit();
 						}
+						else if ((StackAddrBackup < X.S) && (stackop==0)) {
+							//Pulls from stack
+							if (watchpoint[i].flags & WP_R) {
+								for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++) {
+									if (watchpoint[i].endaddress) {
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+									}
+									else if (watchpoint[i].address == j) BreakHit();
+								}
+							}
 						}
 					}
 
