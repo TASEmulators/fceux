@@ -570,14 +570,14 @@ void UpdateDebugger()
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
 	//If not in the 0-239 pixel range, make special cases for display
-	if (scanline == 240 && vblankScanLines < 22)
+	if (scanline == 240 && vblankScanLines < (PAL?72:22))
 	{
 		if (!vblankScanLines)								//Idle scanline (240)
 			sprintf(str, "Idle %d\t       %d",scanline,vblankPixel);
-		else if (scanline + vblankScanLines == 261)
+		else if (scanline + vblankScanLines == (PAL?311:261))
 			sprintf(str, "Prerender -1  %d", vblankPixel);	//Pre-render
 		else
-			sprintf(str, "Vblank %d    %d", scanline+vblankScanLines,vblankPixel);	//Vblank lines (241-260)
+			sprintf(str, "Vblank %d    %d", scanline+vblankScanLines,vblankPixel);	//Vblank lines (241-260/310)
 	}
 	else	
 		sprintf(str, "%d\t        %d", scanline,ppupixel);	//Scanlines 0 - 239

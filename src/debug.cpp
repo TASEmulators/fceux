@@ -644,8 +644,8 @@ void DebugCycle() {
 	
 	if (scanline == 240)
 	{
-		vblankScanLines = (timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508
-		if (vblankScanLines) vblankPixel =  341 / vblankScanLines;	//314 pixels per scanline
+		vblankScanLines = (PAL?int((double)timestamp / ((double)341 / (double)3.2)):timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508. NTSC: (341 / 3.0) PAL: (341 / 3.2). Uses (3.? * cpu_cycles) / 341.0, and assumes 1 cpu cycle.
+		if (vblankScanLines) vblankPixel = 341 / vblankScanLines;	//341 pixels per scanline
 		//FCEUI_printf("vbPixel = %d",vblankPixel);					     //Debug
 		//FCEUI_printf("ts: %d line: %d\n", timestamp, vblankScanLines); //Debug
 	}
