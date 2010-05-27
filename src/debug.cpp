@@ -494,15 +494,17 @@ void BreakHit(bool force = false) {
 	FCEUD_DebugBreakpoint();
 }
 
+uint8 StackAddrBackup = X.S;
+
 ///fires a breakpoint
 void breakpoint() {
-	int i;
+	int i,j;
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
 
 	//inspect the current opcode
 	opcode[0] = GetMem(_PC);
-	
+
 	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
 	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit(true);
 
@@ -593,12 +595,46 @@ void breakpoint() {
 					}
 					else if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
 							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
+				} else if (watchpoint[i].flags & WP_E) {
+					//brk_type independant coding
+
+					//Stack mem breaks
+					if (X.S < StackAddrBackup) {
+						//Pushes to stack
+						if (watchpoint[i].flags & WP_W) {
+						for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++) {
+							if (watchpoint[i].endaddress) {
+								if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
+									BreakHit();
+							}
+							else if (watchpoint[i].address == j)
+								BreakHit();
+						}
+						}
+					}
+					else if (StackAddrBackup < X.S) {
+						//Pulls from stack
+						if (watchpoint[i].flags & WP_R) {
+						for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++) {
+							if (watchpoint[i].endaddress) {
+								if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j))
+									BreakHit();
+							}
+							else if (watchpoint[i].address == j)
+								BreakHit();
+						}
+						}
+					}
+
 				}
 			}
 // ################################## Start of SP CODE ###########################
 		}
 // ################################## End of SP CODE ###########################
 	}
+
+	//Update the stack address with the current one, now that changes have registered.
+	StackAddrBackup = X.S;
 }
 //bbit edited: this is the end of the inserted code
 

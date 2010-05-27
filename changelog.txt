@@ -1,3 +1,4 @@
+27-may-2010 - ugetab - Win32 - Debugger - Made debugger able to break on and distinguish Stack reads/writes
 24-may-2010 - adelikat - Win32 - Memwatch - ignore spaces at the beginnign of an address in the address boxes
 24-may-2010 - mart0258 - Disable auto-savestates during turbo
 24-may-2010 - mart0258 - Prevent .zip files containing no recognized files from causing crash
