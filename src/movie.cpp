@@ -1347,7 +1347,15 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				if(currFrameCounter > (int)currMovieData.records.size()) 
 				{
 					//TODO: turn frame counter to red to get attention
-					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
+					
+					if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+					{
+						FCEU_PrintError("Error: Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", errorFrame);
+						FCEUI_StopMovie();
+					}
+					else
+						FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
+
 					return false;
 				}
 				else
