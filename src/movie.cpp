@@ -1310,9 +1310,24 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				extern HWND pwindow;
 				int result = MessageBox(pwindow,msg.c_str(),"Error loading savestate",MB_OKCANCEL);
 				if(result == IDCANCEL)
+				{
+					if (!backupSavestates) //If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+					{
+						FCEU_PrintError("Unable to restore backup, movie playback stopped.");
+						FCEUI_StopMovie();
+					}
+
 					return false;
+				}
 			#else
-				FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
+				if (!backupSavestates) //If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+				{
+					FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\nUnable to restore backup, movie playback stopped.\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
+					FCEUI_StopMovie();
+				}
+				else
+					FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
+
 				return false;
 			#endif
 		}
