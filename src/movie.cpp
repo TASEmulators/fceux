@@ -906,6 +906,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	
 	strcpy(curMovieFilename, fname);
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
+	fp->stream = EMUFILE::memwrap(fp->stream);
 	if (!fp) return false;
 	if(fp->isArchive() && !_read_only) {
 		FCEU_PrintError("Cannot open a movie in read+write from an archive.");

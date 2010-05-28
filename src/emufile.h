@@ -52,6 +52,10 @@ public:
 		: failbit(false)
 	{}
 
+
+	//takes control of the provided EMUFILE and returns a new EMUFILE which is guranteed to be in memory
+	static EMUFILE* memwrap(EMUFILE* fp);
+
 	virtual ~EMUFILE() {}
 	
 	static bool readAllBytes(std::vector<u8>* buf, const std::string& fname);
@@ -141,9 +145,19 @@ public:
 
 	virtual int fgetc() {
 		u8 temp;
-		if(_fread(&temp,1) != 1)
-			return EOF;
-		else return temp;
+
+		//need an optimized codepath
+		//if(_fread(&temp,1) != 1)
+		//	return EOF;
+		//else return temp;
+		u32 remain = len-pos;
+		if(remain<1) {
+			failbit = true;
+			return -1;
+		}
+		temp = buf()[pos];
+		pos++;
+		return temp;
 	}
 	virtual int fputc(int c) {
 		u8 temp = (u8)c;
