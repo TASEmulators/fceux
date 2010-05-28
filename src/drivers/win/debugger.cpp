@@ -1075,11 +1075,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			inDebugger = true;
 			break;
 		}
-		case WM_ACTIVATE: {
-			//Prevents numerous situations where the debugger is out of date with the data
-			UpdateDebugger();
-			break;
-		}
 		case WM_SIZE: {
 			if(wParam == SIZE_RESTORED)										//If dialog was resized
 			{
@@ -1151,6 +1146,17 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	//these messages only get handled when a game is loaded
 	if (GameInfo) {
 		switch(uMsg) {
+			case WM_ACTIVATE: {
+				//Prevents numerous situations where the debugger is out of date with the data
+				if (wParam != WA_INACTIVE)
+					UpdateDebugger();
+				else {
+				if (FCEUI_EmulationPaused())
+					UpdateRegs(hwndDlg);
+				}
+	
+				break;
+			}
 			case WM_VSCROLL:
 				//mbg merge 7/18/06 changed pausing check
 				if (FCEUI_EmulationPaused()) UpdateRegs(hwndDlg);
