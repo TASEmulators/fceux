@@ -1075,7 +1075,11 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			inDebugger = true;
 			break;
 		}
-
+		case WM_ACTIVATE: {
+			//Prevents numerous situations where the debugger is out of date with the data
+			UpdateDebugger();
+			break;
+		}
 		case WM_SIZE: {
 			if(wParam == SIZE_RESTORED)										//If dialog was resized
 			{
