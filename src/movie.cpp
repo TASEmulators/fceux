@@ -1355,7 +1355,15 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			else
 			{
 				//Wrong timeline, do apprioriate logic here
-				FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", errorFrame);
+				
+				if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+				{
+					FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline\nUnable to restore backup, movie playback stopped.", errorFrame);
+					FCEUI_StopMovie();
+				}
+				else
+					FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", errorFrame);
+
 				return false;
 			}
 		}
