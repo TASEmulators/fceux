@@ -2146,7 +2146,7 @@ static int input_get(lua_State *L) {
 
 
 #else
-	// NYI (well, return an empty table)
+	// NYI (well, return an empty table) //SDL TODO: implement this!
 #endif
 
 	return 1;
@@ -2691,6 +2691,22 @@ static int movie_getname (lua_State *L) {
 		luaL_error(L, "No movie loaded.");
 	
 	std::string name = FCEUI_GetMovieName();
+	lua_pushstring(L, name.c_str());
+	return 1;
+}
+
+//movie.getfilename
+//
+//returns the filename of movie loaded with no path
+static int movie_getfilename (lua_State *L) {
+	
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+		luaL_error(L, "No movie loaded.");
+	
+	std::string name = FCEUI_GetMovieName();
+	int x =  name.find_last_of("/\\") + 1;
+	if (x)
+		name = name.substr(x, name.length()-x);
 	lua_pushstring(L, name.c_str());
 	return 1;
 }
@@ -4707,6 +4723,7 @@ static const struct luaL_reg movielib[] = {
 	{"length", movie_getlength},
 	{"rerecordcount", movie_rerecordcount},
 	{"name", movie_getname},
+	{"filename", movie_getfilename},
 	{"readonly", movie_getreadonly},
 	{"setreadonly", movie_setreadonly},
 	{"replay", movie_replay},
