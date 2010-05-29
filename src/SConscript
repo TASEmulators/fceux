@@ -6,6 +6,7 @@ conddebug.cpp
 config.cpp
 debug.cpp
 drawing.cpp
+emufile.cpp
 fceu.cpp
 fds.cpp
 file.cpp 
