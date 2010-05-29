@@ -1,0 +1,92 @@
+﻿<html>
+
+<head>
+<title>Press Release 2.1.4</title>
+</head>
+
+<body>
+<h1>FCEUX 2.1.4 Release</h1>
+xx June 2010
+<p>
+The 2.1.4 release that fixes some many bugs and adds new features compared to 2.1.3.  In addition it also fixes up the movie code significantly; 
+fixing implementation problems, loading speed, adding new features, and fixing 
+bugs.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+<h2>Common</h2>
+Added microphone support option. When enabled, Port 2 Start activates the Microphone<br>
+Prevent .zip files containing no recognized files from causing crash<br>
+Autohold - Added player 3 and 4 to autohold notification window, labeled controller input<br>
+mapper 19 savestate fix mirroring for "Dream Master (J)" corrected to "four-screen" by CRC check<br>
+Disable auto-savestates during turbo
+<h3>Movies</h3>
+Fully implemented "bulletproof" read-only<br>
+Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate.<br>
+Movie support for microphone<br>
+Movies now have a "finished" mode.  If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded.  Similar functionality as DeSmuME and GENS rerecording<br>
+New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)<br>
+Much faster movie loading and movie-savestate loading<br>
+Made gamepad 2 off by default (so less movies should have unused player 2 data)<br>
+Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr.  In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately.  Instead it waits until input is recording into the movie (next frame).  For win32 this feature is togglable in movie options and the context menu.  For SDL this is off by default and a toggle will need to be added<br>
+Movie + loadstate errors are handled more gracefully now, with more informative error messages and the movie doesn't have to stop if backups are enabled<br>
+Fix PlayMovieFromBeginning when using a movie that starts from savestate<br>
+<h3>Lua</h3>
+fix bug that caused zapper.read() to crash when movie playback ends<br>
+Win32 - Added option for palette selection as color for LUA colors. Included is a LUA script to display all choices with the value used to pick displayed color<br>
+New Lua functions<br>
+<ul>
+<li>movie.ispoweron()</li>
+<li>movie.isfromsavestate()</li>
+<li>emu.addgamegenie()</li>
+<li>emu.delgamegenie()</li>
+<li>savestate.object() which is savestate.create() with intuitive numbering under windows</li>
+<li>gui.getpixel() which gets any gui.pixel() set pixel colors, and possibly other functions</li>
+<li>emu.getscreenpixel() which gets the RGB and Palette of any pixel on the screen</li>
+<li>lua function movie.getfilename() which returns the current movie filename without the path included</li>
+</ul>
+
+<h3>Input display</h3>
+Input display updates on loadstate<br>
+Input display overhaul that uses different colors for different input contexts<br>
+Input display now shows both currently pressed buttons and buttons held the previous frame<br>
+
+<h2>Win32</h2>
+Added NTSC 2x scalar option with some CFG config options of it's own
+Added Ram Search hotkeys for the first 6 search types in the list<br>
+Add Cheat buttons for Ram Search and Ram Watch<br>
+With special scaler in window mode, it's possible to resize to anything above the minimum.<br>
+Recording a new movie adds it to recent movies list<br>
+Replay dialog, when selecting a movie in a relative path (.\movies for example), the recent movies list stores an absolute path instead<br>
+Replay dialog shows PAL flag and New PPU flags<br>
+CDLogger - fixed bug preventing correct interrupt vectors from logging <br>
+Memwatch - ignore spaces at the beginnign of an address in the address boxes<br>
+Replay dialog - fix bug that was causing it to always report savestate movies as soft-reset<br>
+<h3>Debugger</h3>
+Added conditional debugging option 'K', for bank PC is on<br>
+Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having the CPU registers become corrupted<br>
+Made debugger able to break on and distinguish Stack reads/writes
+<h3>Hex Editor</h3>
+Added "Goto" command<br>
+Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color.
+
+<h3>Cheat Search</h3>
+Made enabling/disabling cheats no longer deselect the selected cheat<br>
+Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Cheat, Poke Cheat Value, and Goto In Hex Editor<br>
+Enabled multi-select for Cheat menu to allow multiple toggles and deletes<br>
+Made cheat menu's Pause When Active effect immediate<br>
+<h3>GUI</h3>
+Added Tools - GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases.
+Drag & Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)<br>
+Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.Mode off by default, togglable under Config - GUI<br>
+</body>
+</html>
