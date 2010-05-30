@@ -228,6 +228,7 @@ static void SetInput(void)
 		{0xde8fd935,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // To the Earth
 		{0xedc3662b,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf
 		{0x2a6559a1,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Operation Wolf (J)
+	    {0x4e959173,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Gotcha! - The Sport!
 
 		{0x23d17f5e,SI_GAMEPAD,SI_ZAPPER,SIFC_NONE},  // The Lone Ranger
 		{0xb8b9aca3,SI_UNSET,SI_ZAPPER,SIFC_NONE},  // Wild Gunman
