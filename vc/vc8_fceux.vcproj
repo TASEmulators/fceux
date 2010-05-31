@@ -1046,6 +1046,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\drivers\common\nes_ntsc.c"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\common\nes_ntsc.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\common\nes_ntsc_config.h"
+					>
+				</File>
+				<File
+					RelativePath="..\src\drivers\common\nes_ntsc_impl.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\drivers\common\scale2x.cpp"
 					>
 				</File>
