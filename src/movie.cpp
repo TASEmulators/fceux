@@ -1372,7 +1372,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				//if we made it this far, then the savestate has identical movie data but we want to know now if the stateMOVIE size is greater than current movie size and make this error
 				
 				//currFrameCounter at this point represents the savestate framecount
-				if(tempMovieData.records.size() > currMovieData.records.size()) 
+				if(currFrameCounter > currMovieData.records.size()) 
 				{
 					//TODO: turn frame counter to red to get attention
 					
