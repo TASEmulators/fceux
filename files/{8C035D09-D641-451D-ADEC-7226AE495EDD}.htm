@@ -204,7 +204,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>---- Section "CPUC" (emulator specific)</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name:&nbsp;&nbsp; Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;JAMM &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Non-zero value if CPU in a "jammed" state</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;IRQL &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Non-zero value if IRQs are to be generated constantly</p>
@@ -213,7 +213,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>---- Section "PPU"</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name:&nbsp;&nbsp; Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;NTAR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x800] &nbsp; &nbsp; &nbsp; &nbsp;2 KB of name/attribute table RAM</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;PRAM &nbsp; &nbsp; &nbsp; &nbsp;uint8[32] &nbsp; &nbsp; &nbsp; &nbsp;32 bytes of palette index RAM</p>
@@ -231,7 +231,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>---- Section "CTLR" (somewhat emulator specific)</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name:&nbsp;&nbsp; Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;J1RB &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Bit to be returned when first joystick is read.</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;J2RB &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Bit to be returned when second joystick is read.</p>
@@ -251,7 +251,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;For iNES-format games(incomplete, and doesn't apply to every game):</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name:&nbsp;&nbsp; Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;WRAM &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x2000] &nbsp; &nbsp; &nbsp; &nbsp;8KB of WRAM at $6000-$7fff</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;MEXR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x8000] &nbsp; &nbsp; &nbsp; &nbsp;(very emulator specific)</p>
@@ -267,23 +267,23 @@ p,ul,ol /* Paragraph Style */
 <p> &nbsp; &nbsp; &nbsp; &nbsp;IQL1 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ latch</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;IQL2 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ latch</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;IRQA &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Generic IRQ on/off register.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;PBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[4] &nbsp; &nbsp; &nbsp; &nbsp;List of 4 8KB ROM banks paged in at $8000-$FFFF</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;CBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[8] &nbsp; &nbsp; &nbsp; &nbsp;List of 8 1KB VROM banks page in at $0000-$1FFF(PPU).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;PBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[4] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;List of 4 8KB ROM banks paged in at $8000-$FFFF</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;CBL &nbsp; &nbsp; &nbsp; &nbsp;uint8[8] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;List of 8 1KB VROM banks page in at $0000-$1FFF(PPU).</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;For FDS games(incomplete):</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Name:&nbsp;&nbsp; Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description:</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;Name: &nbsp; &nbsp; &nbsp; &nbsp;Type: &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Description:</p>
 <p><br></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DDT&lt;x&gt;&nbsp; uint8[65500]&nbsp;&nbsp;&nbsp; Disk data for side x(0-3).</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;DDT&lt;x&gt;&nbsp; uint8[65500]&nbsp;&nbsp;&nbsp; Disk data for side x(0-3).</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;FDSR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x8000] &nbsp; &nbsp; &nbsp; &nbsp;32 KB of work RAM</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;CHRR &nbsp; &nbsp; &nbsp; &nbsp;uint8[0x2000] &nbsp; &nbsp; &nbsp; &nbsp;8 KB of CHR RAM</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IRQC&nbsp;&nbsp;&nbsp; uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IRQ counter</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IQL1&nbsp;&nbsp;&nbsp; uint32&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IRQ latch</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IRQA&nbsp;&nbsp;&nbsp; uint8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IRQ on/off.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQC &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ counter</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IQL1 &nbsp; &nbsp; &nbsp; &nbsp;uint32 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ latch</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;IRQA &nbsp; &nbsp; &nbsp; &nbsp;uint8 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;IRQ on/off.</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;WAVE &nbsp; &nbsp; &nbsp; &nbsp;uint8[64] &nbsp; &nbsp; &nbsp; &nbsp;Carrier waveform data.</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;MWAV &nbsp; &nbsp; &nbsp; &nbsp;uint8[32] &nbsp; &nbsp; &nbsp; &nbsp;Modulator waveform data.</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;AMPL &nbsp; &nbsp; &nbsp; &nbsp;uint8[2] &nbsp; &nbsp; &nbsp; &nbsp;Amplitude data.</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;AMPL &nbsp; &nbsp; &nbsp; &nbsp;uint8[2] &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Amplitude data.</p>
 <p><br></p>
 <p class=rvps3><span class=rvts11>2008</span></p>
 <p class=rvps4><span class=rvts12>This help file has been generated by the freeware version of </span><a class=rvts13 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>

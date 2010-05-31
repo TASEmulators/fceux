@@ -77,24 +77,30 @@ span.rvts12
 {
  font-size: 14pt;
 }
-span.rvts13 /* Font Style */
+a.rvts13, span.rvts13
+{
+ color: #0000ff;
+ text-decoration: underline;
+}
+a.rvts13:hover { color: #0000ff; }
+span.rvts14 /* Font Style */
 {
  font-size: 16pt;
  font-family: 'Tahoma', 'Geneva', sans-serif;
  color: #ffffff;
 }
-span.rvts14 /* Font Style */
+span.rvts15 /* Font Style */
 {
  font-family: 'MS Sans Serif', 'Geneva', sans-serif;
  color: #808080;
 }
-span.rvts15 /* Font Style */
+span.rvts16 /* Font Style */
 {
  font-family: 'Verdana', 'Geneva', sans-serif;
  font-style: italic;
  color: #c0c0c0;
 }
-a.rvts16, span.rvts16 /* Font Style */
+a.rvts17, span.rvts17 /* Font Style */
 {
  font-family: 'Verdana', 'Geneva', sans-serif;
  font-style: italic;
@@ -141,10 +147,10 @@ p,ul,ol /* Paragraph Style */
 <meta name="generator" content="HelpNDoc Free"></head>
 <body>
 
-<p class=rvps2><span class=rvts13>Debugger</span></p>
+<p class=rvps2><span class=rvts14>Debugger</span></p>
 <p><span class=rvts10>Debugger</span></p>
 <p><br></p>
-<p>Taken from the FCEUXDSP1.07 documentation.</p>
+<p>Taken from the FCEUXDSP 1.07 documentation.</p>
 <p><br></p>
 <p><span class=rvts11>Introduction</span></p>
 <p><br></p>
@@ -152,10 +158,10 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p><span class=rvts12>Debugger Features</span></p>
 <p><br></p>
-<p>-When you hold the mouse over the left pane in the debugger, you can now see the ROM file address of the data loaded there.&nbsp; -Right-click in that pane, it will bring up the Hex Editor at that address so you can immediately begin editing. </p>
+<p>-When you hold the mouse over the left pane in the debugger, you can now see the ROM file address of the data loaded there.</p>
+<p>-Right-click in that pane, it will bring up the Hex Editor at that address so you can immediately begin editing. </p>
 <p>-Left-clicking in that pane brings up the inline assembler. </p>
-<p>-"Break on bad opcode" feature; this can help you figure out where your game is crashing. Middle-clicking on a byte will bring up the </p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;Game Genie Encoder at that address, so you can easily make Game Genie codes.</p>
+<p>-"Break on bad opcode" feature; this can help you figure out where your game is crashing. Middle-clicking on a byte will bring up the <a class=rvts13 href="{ACA99B5B-9CA3-4E69-B7F7-106D70CF76BF}.htm">Game Genie Encoder</a> at that address, so you can easily make Game Genie codes.</p>
 <p>-Debugging data like breakpoints or bookmarks are automatically saved and restored when games are closed / opened.</p>
 <p>-Ability to give breakpoints a brief description/name. </p>
 <p>-All debugging information for addresses &lt; $8000 into the name list file romname.nes.ram.nl.</p>
@@ -172,7 +178,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>The most important feature (at least for me) that was introduced in FCEUXD SP is symbolic debugging.&nbsp; With this new feature it's possible to rename addresses in the disassembly window (like $C022) to easily understandable names (like AddHealthpoints). It's also possible to add comments to lines in the disassembly window.</p>
 <p><br></p>
-<p>To be able to use this feature it's necessary to create so called name list files (*.nl) which contain all names and comments you wish to display in the disassembly window. These files are plain ASCII files of the following format (example follows):</p>
+<p>To be able to use this feature it's necessary to create so called name list files (*.(bank).nl/*.ram.nl, Ex: NES Test Cart (PD).nes.0.nl, NES Test Cart (PD).nes.ram.nl) which contain all names and comments you wish to display in the disassembly window. These files are plain ASCII files of the following format (example follows):</p>
 <p><br></p>
 <p>$C000#NewName1#Comment1</p>
 <p>$C002##Comment2</p>
@@ -200,6 +206,10 @@ p,ul,ol /* Paragraph Style */
 <p>ROM bank 15. As 15 is 0x0F in hex the name of the nl file would be "Faxanadu (U).nes.F.nl". All</p>
 <p>nl files go into the same directory as the ROM file itself.</p>
 <p><br></p>
+<p>There is also the *.ram.nl file specification, which allows you to substitute RAM addresses for</p>
+<p>execution addresses, and have those named as well. In this case, you could use lines of this type:</p>
+<p>$00A5#Mic Test OK#00=Not Passed, 01=Passed</p>
+<p><br></p>
 <p>You can enable and disable symbolic debugging by clicking the checkbox "Symbolic Debugging" in</p>
 <p>the debugger window. To forcibly reload the nl files of the currently active ROM file press the</p>
 <p>button with the text "Reload Symbols".</p>
@@ -219,7 +229,7 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts12>Inline Assembler</span></p>
 <p><br></p>
 <p>The debugger an Inline Assembler designed by Parasyte.&nbsp; To activate it, left-click in the left pane of the debugger, beside the assembly display.&nbsp; To use it, type in some code and press Enter to add it to the patch list. If you make a mistake, press "Undo".&nbsp; Once the patch is set up the way you want it, press "Apply". Be aware that this cannot be undone unless you reload the ROM.&nbsp; Parasyte implemented this feature before I had the Hex Editor working, otherwise I would have implemented a way to undo it from there.&nbsp; Press "Save" to write to the ROM file on disk; note that this will also save any changes you may have done in the Hex Editor.</p>
-<p class=rvps3><span class=rvts14>2008</span></p>
-<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+<p class=rvps3><span class=rvts15>2008</span></p>
+<p class=rvps4><span class=rvts16>This help file has been generated by the freeware version of </span><a class=rvts17 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
 
 </body></html>

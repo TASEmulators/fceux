@@ -64,24 +64,28 @@ span.rvts9 /* Font Hint Italic */
  font-style: italic;
  color: #808080;
 }
-span.rvts10 /* Font Style */
+span.rvts10
+{
+ font-family: 'Courier New', 'Courier', monospace;
+}
+span.rvts11 /* Font Style */
 {
  font-size: 16pt;
  font-family: 'Tahoma', 'Geneva', sans-serif;
  color: #ffffff;
 }
-span.rvts11 /* Font Style */
+span.rvts12 /* Font Style */
 {
  font-family: 'MS Sans Serif', 'Geneva', sans-serif;
  color: #808080;
 }
-span.rvts12 /* Font Style */
+span.rvts13 /* Font Style */
 {
  font-family: 'Verdana', 'Geneva', sans-serif;
  font-style: italic;
  color: #c0c0c0;
 }
-a.rvts13, span.rvts13 /* Font Style */
+a.rvts14, span.rvts14 /* Font Style */
 {
  font-family: 'Verdana', 'Geneva', sans-serif;
  font-style: italic;
@@ -128,7 +132,7 @@ p,ul,ol /* Paragraph Style */
 <meta name="generator" content="HelpNDoc Free"></head>
 <body>
 
-<p class=rvps2><span class=rvts10>NES Sound</span></p>
+<p class=rvps2><span class=rvts11>NES Sound</span></p>
 <p>*******************************************</p>
 <p>*2A03 sound channel hardware documentation*</p>
 <p>*******************************************</p>
@@ -233,8 +237,8 @@ p,ul,ol /* Paragraph Style */
 <p>$4004-$4007 &nbsp; &nbsp; &nbsp; &nbsp;Square wave 2 (identical to the first, except for upward frequency sweeps (see "sweep unit" section))</p>
 <p>$4008-$400B &nbsp; &nbsp; &nbsp; &nbsp;Triangle</p>
 <p>$400C-$400F &nbsp; &nbsp; &nbsp; &nbsp;Noise</p>
-<p>$4015&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;Channel enable / length/frame counter status</p>
-<p>$4017&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;frame counter control</p>
+<p>$4015 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Channel enable / length/frame counter status</p>
+<p>$4017 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;frame counter control</p>
 <p><br></p>
 <p> Note that $4015 (and $4017, but is unrelated to sound hardware) are the only R/W registers. All others are write only (attempt to read them will most likely return the last byte on the bus (usually 040H), due to heavy capacitance on the NES's data bus). Reading a "write only" register, will have no effect on the specific register, or channel.</p>
 <p><br></p>
@@ -332,18 +336,18 @@ p,ul,ol /* Paragraph Style */
 <p>************************</p>
 <p> This section will describe the internal components making up each individual channel. Each component will then be described in full detail.</p>
 <p><br></p>
-<p>Device&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Triangle Noise&nbsp; Square</p>
-<p>------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -------- ------ ------</p>
-<p>triangle step generator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>linear counter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>programmable timer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>length counter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>4-bit DAC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>volume/envelope decay unit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>sweep unit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>duty cycle generator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>wavelength converter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
-<p>random number generator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</p>
+<p><span class=rvts10>Device &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Triangle Noise&nbsp; Square</span></p>
+<p><span class=rvts10>------ &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -------- ------ ------</span></p>
+<p><span class=rvts10>triangle step generator &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class=rvts10>linear counter &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class=rvts10>programmable timer &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>length counter &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>4-bit DAC &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>volume/envelope decay unit &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>sweep unit &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>duty cycle generator &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; X</span></p>
+<p><span class=rvts10>wavelength converter &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X</span></p>
+<p><span class=rvts10>random number generator &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; X</span></p>
 <p><br></p>
 <p><br></p>
 <p>+-------------------------+</p>
@@ -442,7 +446,7 @@ p,ul,ol /* Paragraph Style */
 <p> The 5-bit length value written, determines what 7-bit value the length counter will start counting from. A conversion table here will show how the values are translated.</p>
 <p><br></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;+-----------------------+</p>
-<p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;bit3=0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
+<p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;bit3=0 &nbsp; &nbsp; &nbsp; &nbsp;|</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;+-------+---------------+</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;| &nbsp; &nbsp; &nbsp; &nbsp;|frames &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;|</p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;|bits &nbsp; &nbsp; &nbsp; &nbsp;+-------+-------+</p>
@@ -680,7 +684,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p><br></p>
 <p>EOF</p>
-<p class=rvps3><span class=rvts11>2008</span></p>
-<p class=rvps4><span class=rvts12>This help file has been generated by the freeware version of </span><a class=rvts13 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+<p class=rvps3><span class=rvts12>2008</span></p>
+<p class=rvps4><span class=rvts13>This help file has been generated by the freeware version of </span><a class=rvts14 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
 
 </body></html>

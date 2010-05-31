@@ -36,7 +36,7 @@
 </div>
 <div id="page_content">
 <h1>FCEUX 2.1.4 Release</h1>
-xx June 2010
+31 May 2010
 <p>
 The 2.1.4 release that fixes some many bugs and adds new features compared to 2.1.3.  In addition it also fixes up the movie code significantly; 
 fixing implementation problems, loading speed, adding new features, and fixing 
@@ -52,16 +52,16 @@ Disable auto-savestates during turbo<br>
 Fixed so Gotcha! auto-enables zapper</br>
 <h3>Movies</h3>
 Fully implemented "bulletproof" read-only<br>
-Movie code now fully conforms to the <a href="http://tasvideos.org/LawsOfTAS/OnSavestates.html">Savestate section</a> of the <a href="http://tasvideos.org/LawsOfTAS">Laws of TAS</a><br>
+Movie code now fully conforms to the <a href="http://tasvideos.org/LawsOfTAS/OnSavestates.html">Savestate section</a> of the <a href="http://tasvideos.org/LawsOfTAS">Laws of TAS</a></br>
 Fixed a potential desync that plays out an extra frame without an update to the frame count involving heavy lua use, joypad.get, and a loadstate<br>
-Movie support for microphone<br>
+Movie support for microphone</br>
 Movies now have a "finished" mode.  If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded.  Similar functionality as DeSmuME and GENS rerecording<br>
-New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)<br>
+New PPU flag in movie headers (doesn't change an emulators PPU state when loading a movie)</br>
 Much faster movie loading and movie-savestate loading<br>
-Made gamepad 2 off by default (so less movies should have unused player 2 data)<br>
+Made gamepad 2 off by default (so less movies should have unused player 2 data)</br>
 Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr.  In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately.  Instead it waits until input is recording into the movie (next frame).  For win32 this feature is togglable in movie options and the context menu.  For SDL this is off by default and a toggle will need to be added<br>
 Movie + loadstate errors are handled more gracefully now, with more informative error messages and the movie doesn't have to stop if backups are enabled<br>
-Fix PlayMovieFromBeginning when using a movie that starts from savestate<br>
+Fix PlayMovieFromBeginning when using a movie that starts from savestate</br>
 <h3>Lua</h3>
 fix bug that caused zapper.read() to crash when movie playback ends<br>
 Win32 - Added option for palette selection as color for LUA colors. Included is a LUA script to display all choices with the value used to pick displayed color</br>
@@ -96,7 +96,7 @@ Replay dialog - fix bug that was causing it to always report savestate movies as
 <h3>Debugger</h3>
 Added conditional debugging option 'K', for bank PC is on<br>
 Fixed bug involving pausing emulation outside of the debugger, then trying to use the debugger commands, and having the CPU registers become corrupted</br>
-Made debugger able to break on and distinguish Stack reads/writes</br>
+Made debugger able to break on and distinguish Stack reads/writes<br></br>
 <h3>Hex Editor</h3>
 Added "Goto" command<br>
 Made the Hex Editor display the Frozen, Bookmarked, etc. status of the selected address, and made the Frozen color override the Bookmarked color</br>
@@ -107,9 +107,10 @@ Added context menu to Cheat Dialog Cheat Listbox, populated list with Toggle Che
 Enabled multi-select for Cheat menu to allow multiple toggles and deletes<br>
 Made cheat menu's Pause When Active effect immediate</br>
 <h3>GUI</h3>
-Added Tools - GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases<br>
+Added Tools -&gt; GUI option to partially disable visual themes, so the emulator can be made to look like it did in 2.1.1 and earlier releases<br>
 Drag &amp; Drop - if dropping a .fcm with no ROM loaded, prompt for one (same functionality that was added to .fm2 files)</br>
-Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit.Mode off by default, togglable under Config - GUI</br>
+Added single-instance mode, which makes starting a second copy of FCEUX load the file into the first, then exit. Mode off by default, toggleable under Config 
+	-&gt; GUI</br>
 </div>
 
 <div id="footer">

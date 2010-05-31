@@ -59,22 +59,26 @@
 	<p>&nbsp;</p>
 		
 	<h1>Latest Release</h1>
-	<p><span class="largerfont">FCEUX 2.1.3</span><br/>
-	08 April 2010</p>
-	<p>The 2.1.3 release that fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port</p>
-	<p><a href="pressrelease-2.1.3.html">Full changelog</a></p>	
+	<p><span class="largerfont">FCEUX 2.1.4</span><br/>
+	31 May 2010</p>
+	<p>The 2.1.4 release that fixes some many bugs and adds new features compared to 2.1.3.  In addition it also fixes up the movie code significantly; ixing implementation problems, loading speed, adding new features, and fixing bugs.</p>
+	<p><a href="pressrelease-2.1.4.html">Full changelog</a></p>	
 	<h3>Noteable changes</h3>
 	<ul>
-		<li>Now playable: SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden (mappers 82, 25, 21, and 18)</li>
-		<li>Now playable  Fire Emblem (J) and Fire Emblem Gaiden (J) (mappers 253 & 226)</li>
-		<li>Fix crashing on game loading for any battery backed roms with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</li>
-		<li>SDL - A GUI!  A graphic user interface (using GTK) with many basic menu options</li>
-		<li>SDL - ported to SDL 1.3; compatibility maintained with 1.2</li>
-		<li>unix netplay is now functional; gtk network gui created</li>
-		<li>SDL - fixed dpad/joyhat support</li>
-		<li>New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</li>
-		<li>fixed zapper.read() to read movie data if a movie is playing.  Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</li>
-		<li>gui.text() now has out of bounds checking</li>
+		<li>Added microphone support option. When enabled, Port 2 Start activates the Microphone.  Added movie recording of mircophone</li>
+		<li>Fully implemented "bulletproof" read-only</li>
+		<li>Movie code now fully conforms to the Savestate section of the Laws of TAS</li>
+		<li>Movies now have a "finished" mode. If a playback stops the movie isn't cleared from memory, and can be replayed or a state loaded. Similar functionality as DeSmuME and GENS rerecording</li>
+		<li>Implemented a "full savestate-movie load" mode similar to the implementation in VBA-rr and SNES9x-rr. In this mode loading a savestate in read+write doesn't truncate the movie to its frame count immediately. Instead it waits until input is recording into the movie (next frame). For win32 this feature is togglable in movie options and the context menu. For SDL this is off by default and a toggle will need to be added</li>
+		<li>Faster loading of Movies and Savestates</li>
+		<li>New lua functions</li>
+		<li>fixed zapper.read() crash on movie finished</li>
+		<li>Fix PlayMovieFromBeginning when using a movie that starts from savestate</li>
+		<li>New and improved input display</li>
+		<li>Autohold display fixed with 4 player support</li>
+		<li>Win32 NTSC Filter Video options</li>
+		<li>Win32 - Many feature enhancements to the Cheats dialog</li>
+		<li>Win32 - Debugger - many crash bug fixes and breakpoint handling fixes</li>
 	</ul>	
 	</div>
 </div>
