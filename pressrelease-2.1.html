@@ -1,173 +1,219 @@
-<pre>
-29 March 2009
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-FCEUX 2.1 release
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<link href="fceux.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="Javascript/buttons.js"></script>
+<title>Press Release 2.1.4</title>
+</head>
 
-The 2.1 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
-feature enhancements to both the Win32 and SDL ports.
+<body onload="FP_preloadImgs(/*url*/'assets/button67.jpg',/*url*/'assets/button68.jpg',/*url*/'assets/button80.jpg',/*url*/'assets/button81.jpg',/*url*/'assets/button87.jpg',/*url*/'assets/button88.jpg',/*url*/'assets/button92.jpg',/*url*/'assets/button93.jpg',/*url*/'assets/button98.jpg',/*url*/'assets/button99.jpg',/*url*/'assets/button4.jpg',/*url*/'assets/button5.jpg')">
+<div id="masthead">
+	<span class="largerfont">FCEUX<br/></span>The all in one NES/Famicom Emulator
+</div>
+<div id="top_nav">
+	<a href="home.html"><img id="img1" alt="Home" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img1',/*url*/'assets/button68.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img1',/*url*/'assets/button66.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img1',/*url*/'assets/button67.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img1',/*url*/'assets/button67.jpg')" src="assets/button66.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Home" --></a>
+	<a href="download.html"><img id="img2" alt="Download" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img2',/*url*/'assets/button81.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img2',/*url*/'assets/button7F.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img2',/*url*/'assets/button80.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img2',/*url*/'assets/button80.jpg')" src="assets/button7F.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Download" --></a>
+	<a href="documentation.html"><img id="img6" alt="Documentation" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img6',/*url*/'assets/button5.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img6',/*url*/'assets/button3.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img6',/*url*/'assets/button4.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img6',/*url*/'assets/button4.jpg')" src="assets/button3.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Documentation" --></a>
+	<a href="version.html"><img id="img3" alt="Versions" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img3',/*url*/'assets/button88.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img3',/*url*/'assets/button86.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img3',/*url*/'assets/button87.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img3',/*url*/'assets/button87.jpg')" src="assets/button86.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Versions" --></a>
+	<a href="contact.html"><img id="img4" alt="Contact" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img4',/*url*/'assets/button93.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img4',/*url*/'assets/button91.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img4',/*url*/'assets/button92.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img4',/*url*/'assets/button92.jpg')" src="assets/button91.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Contact" --></a>
+	<a href="links.html"><img id="img5" alt="Links" height="20" onmousedown="FP_swapImg(1,0,/*id*/'img5',/*url*/'assets/button99.jpg')" onmouseout="FP_swapImg(0,0,/*id*/'img5',/*url*/'assets/button97.jpg')" onmouseover="FP_swapImg(1,0,/*id*/'img5',/*url*/'assets/button98.jpg')" onmouseup="FP_swapImg(0,0,/*id*/'img5',/*url*/'assets/button98.jpg')" src="assets/button97.jpg" style="border: 0" width="100" /><!-- MSComment="ibutton" fp-style="fp-btn: Braided Row 5; fp-bgcolor: #B7B7B7" fp-title="Links" --></a>
+</div>
+<div id="container">
+	<div id="left_col">
+		<script type="text/javascript"><!--
+		google_ad_client = "pub-0764229755985190";
+		/* 180x150, created 5/22/10 */
+		google_ad_slot = "7648866201";
+		google_ad_width = 180;
+		google_ad_height = 150;
+		//-->
+	</script>
+	<script type="text/javascript"
+		src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+	</script>
+</div>
+<div id="page_content">
+<h1>FCEUX 2.1.0 Release</h1>
+<p>29 March 2009</p>
+<p>The 2.1 is a major new release that incorporates new mappers and mapper fixes from FCEU-mm.  In addition it offers a multitude of bug fixes, and 
+feature enhancements to both the Win32 and SDL ports.</p>
 
-Major Bug / Crash Bug Fixes
+<h2>Major Bug / Crash Bug Fixes / New support</h2>
+The latest mappers and mapper fixes from FCEU-mm.  Adds support for many new games such as Warioland II (Unl), Shu Qi Yu,  and Street Dance<br>
+Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode)<br>
+Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior</br>
+Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game<br>
+Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug</br>
 
-*Fixed throttling problems that resulted on AMD Dualcore processors. (Caused FCEUX to appear to be in turbo mode).
-*Fix major crash issue where NROM game (such as SMB) savestates were writing erroneous information if a non NROM game was loaded prior.
-*Fixed a bug that caused a new sav file to not get created when loading a 2nd battery backed game.
-*Fix Directory Overrides so to allow users to have no override.  Also fixes directory override reset bug.
+<h3>Minor Bug fixes</h3>
 
-Minor Bug fixes
+Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys<br>
+Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off</br>
+Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag 
+	&amp; frame counters, messages, etc)<br>
+Fixed bug where having sound off and Mute turbo caused chirps when toggling</br>
+Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly<br>
+Auto-save cleanup -prevent loading an auto-save from previous session.  Added flags for enabling auto-save menu item</br>
+Fixed issues related to big endian compiling<br>
+Fix bug so that Escape can now be assigned as a hotkey</br>
+Fixed bug in screenshot numbering that caused numbering to not reset when changing games<br></br>
 
-*Hotkeys - prevent "Hotkey explosion" where some laptop keys set off all unassigned hotkeys
-*Timing - "disable throttling when sound is off" now only affects FCEUX when sound is off
-*Clip Left and Right sides taken into account when drawing on screen (record/play/pause, lag & frame counters, messages, etc)
-*Fixed bug where having sound off and Mute turbo caused chirps when toggling
-*Video settings - fixed bug when both aspect ratio correction and special scaling 3x are set, video was getting resized incorrectly
-*Auto-save cleanup -prevent loading an auto-save from previous session.  Added flags for enabling auto-save menu item.
-*Fixed issues related to big endian compiling.
-*Fix bug so that Escape can now be assigned as a hotkey
-*Fixed bug in screenshot numbering that caused numbering to not reset when changing games.
+<h2>SDL</h2>
+Movie subtitle support and subtitle toggle hotkey added<br>
+Added fcm to fm2 converter tool to SDL version</br>
+Improved the SDL sound code; drastically improves quality of sound<br>
+Savestate slots are now mappable</br>
+Major updates to SDL documentation<br>
+Added Shift+M for toggling automatic movie backups</br>
+Added option to mute FCEUX for avi capturing, check the documentation for more details<br>
+Added --noconfig command line option</br>
+Frame Advance Skip Lag frames toggle implemented<br></br>
 
-SDL
-*SDL Movie subtitle support and subtitle toggle hotkey added.
-*SDL Added fcm to fm2 converter tool to SDL version.
-*SDL Improved the SDL sound code; drastically improves quality of sound.
-*SDL Savestate slots are now mappable.
-*SDL Major updates to SDL documentation
-*SDL Added Shift+M for toggling automatic movie backups.
-*SDL Added option to mute FCEUX for avi capturing, check the documentation for more details.
-*SDL Added --noconfig command line option
-*SDL Frame Advance Skip Lag frames toggle implemented
+<h2>New Features Win32</h2>
 
-New Features Win32
+Full screen mode fixed!  Also, Alt+Enter properly toggles full screen<br>
+Individual control for sound channels! (See sound config for details)</br>
+Undo/Redo Savestate/Loadstate features installed!  No more loss of data to unintentional presses.  (See getting started for details)<br>
+Movie subtitles can now be included in .fm2 files.  See .fm2 documentation for details and Movie options for details on customizing</br>
+Auto-backup for movie files.  (See movie options for details)<br>
+A Ram change monitor for the Memory watch dialog. (see memwatch for details)</br>
+Frame counter works even without a movie loaded<br>
+AVI Directory Override option</br>
 
-*The latest mappers and mapper fixes from FCEU-mm.  Adds support for many new games such as Warioland II (Unl), Shu Qi Yu,  and Street Dance
-*Full screen mode fixed!  Also, Alt+Enter properly toggles full screen.
-*Individual control for sound channels! (See sound config for details).
-*Undo/Redo Savestate/Loadstate features installed!  No more loss of data to unintentional presses.  (See getting started for details).
-*Movie subtitles can now be included in .fm2 files.  See .fm2 documentation for details and Movie options for details on customizing.
-*Auto-backup for movie files.  (See movie options for details).
-*A Ram change monitor for the Memory watch dialog. (see memwatch for details).
-*Frame counter works even without a movie loaded.
-*AVI Directory Override option.
+<h3>GUI / Menu Enhancements</h3>
 
-GUI / Menu Enhancements
+A right-click context menu added!  Includes many commonly used items for a variety of situations<br>
+Menu items that are hotkey mappable now show their current hotkey mapping</br>
+Major overhaul to the Menu organization<br>
+All FCEUX features are now accessible in the menu</br>
+Alt Menu Shortcuts properly configured<br>
+Menu items are properly grayed when not useable</br>
+All movie related menu items moved to a Movie options dialog<br>
+Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open and Close ROM)</br>
+Drag &amp; Drop for .fm2 and .lua files<br>
+Many new functions added to the context menu (See context menu for details)</br>
+New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles<br></br>
 
-*A right-click context menu added!  Includes many commonly used items for a variety of situations.
-*Menu items that are hotkey mappable now show their current hotkey mapping
-*Major overhaul to the Menu organization.
-*All FCEUX features are now accessible in the menu
-*Alt Menu Shortcuts properly configured
-*Menu items are properly grayed when not useable
-*All movie related menu items moved to a Movie options dialog
-*Removed hard-coded Accel keys and replaced with re-mappable hotkeys (Open & Close ROM)
-*Drag & Drop for .fm2 and .lua files
-*Many new functions added to the context menu (See context menu for details)
-*New Mappable Hotkeys: Open Cheats, Open ROM, Close ROM, Undo/Redo savestate, Toggle Movie Subtitles
+<h3>Lua</h3>
 
-Lua
+Added input.get() !  Returns the mouse info and all keyboard buttons pressed by the user<br>
+Fixed joypad.set().  False now sets a button to off.  Nil does not affect the button at all (allowing the user to still control it)</br>
+gui.text() Increased height (to approx. 7 lines)<br>
+speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed</br>
+memory.readbyte will recognize frozen addresses (cheats)<br>
+movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded)</br>
+Added FCEU.poweron()<br>
+Added FCEU.softreset()</br>
+Added FCEU.lagged()<br>
+Added FCEU.lagcount()</br>
+Added FCEU.getreadonly()<br>
+Added FCEU.setreadonly()</br>
+Added FCEU.fceu_setrenderplanes(sprites, background)<br>
+Added movie.active()</br>
+Added movie.rerecordcount()<br>
+Added movie.length()</br>
+Added movie.getname()<br>
+Added movie.playbeginning()</br>
+Added -lua command line argment, loads a Lua script on startup<br>
+Added zapper.read() - returns the zapper (mouse) data.  (Currently does return zapper data in movie playback)</br>
+Added joypad.write and joypad.get for naming consistency<br>
+Added rom.readbyte()</br>
+Added rom.readbytesigned()<br></br>
 
-*Added input.get() !  Returns the mouse info and all keyboard buttons pressed by the user.
-*Fixed joypad.set().  False now sets a button to off.  Nil does not affect the button at all (allowing the user to still control it).
-*gui.text() Increased height (to approx. 7 lines).
-*speedmode("turbo") now turns on turbo (which employs frame-skipping) rather than max speed.
-*memory.readbyte will recognize frozen addresses (cheats).
-*movie.framecount() always return a number, even when no movie is playing (since the frame counter is implemented without a movie loaded).
-*Added FCEU.poweron()
-*Added FCEU.softreset()
-*Added FCEU.lagged()
-*Added FCEU.lagcount()
-*Added FCEU.getreadonly()
-*Added FCEU.setreadonly()
-*Added FCEU.fceu_setrenderplanes(sprites, background)
-*Added movie.active()
-*Added movie.rerecordcount()
-*Added movie.length()
-*Added movie.getname()
-*Added movie.playbeginning()
-*Added -lua command line argment, loads a Lua script on startup
-*Added zapper.read() - returns the zapper (mouse) data.  (Currently does return zapper data in movie playback).
-*Added joypad.write and joypad.get for naming consistency.
-*Added rom.readbyte()
-*Added rom.readbytesigned()
+<h3>Sound Config</h3>
 
-Sound Config
+Turning sound off disabled sound config controls<br>
+Re-enabled sound buffer time slider control</br>
 
-*Turning sound off disabled sound config controls
-*Re-enabled sound buffer time slider control
+<h3>Hex Editor</h3>
 
-Hex Editor
+Freezing ram addresses automatically updates the Cheats dialog if it is open<br>
+Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs)</br>
+Dialog remembers window size<br>
+Dump Rom and Dump PPU to file Dialogs use ROM to build default filename</br>
+Maximize and minimize buttons added<br>
+Help menu item added</br>
 
-*Freezing ram addresses automatically updates the Cheats dialog if it is open.
-* Added prevention from freezing more than 256 addresses at once (doing so caused crash bugs).
-*Dialog remembers window size.
-*Dump Rom & Dump PPU to file Dialogs use ROM to build default filename
-*Maximize and minimize buttons added.
-*Help menu item added
+<h3>Memory Watch</h3>
 
-Memory Watch
+Dialog now includes Ram change monitoring. (see memwatch for details)<br>
+Dialog is now collapsible to 1 column</br>
+No longer crashes when attempting to load an invalid file from the recent file menu<br>
+Cancel option added to the save changes dialog</br>
+Memory address values that are frozen by the debugger or hex editor are displayed in blue<br>
+Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position</br>
+Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename<br>
+Drag and drop for .txt (memory watch) files</br>
+Minor menu and hotkey fixes<br>
+Watch values now compatible with custom windows dialog colors</br>
 
-*Dialog now includes Ram change monitoring. (see memwatch for details).
-*Dialog is now collapsible to 1 column.
-*No longer crashes when attempting to load an invalid file from the recent file menu.
-*Cancel option added to the save changes dialog.
-*Memory address values that are frozen by the debugger or hex editor are displayed in blue.
-*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
-*Save as dialog uses ROM name to build a default memory watch filename if there was no last used memory watch filename
-*Drag and drop for .txt (memory watch) files.
-*Minor menu and hotkey fixes.
-*Watch values now compatible with custom windows dialog colors.
+<h3>Debugger</h3>
 
-Debugger
+Shows scanlines and PPU pixel values<br>
+Shows scanlines even while in VBlank</br>
+Added a Run Line button (runs 1 scanline per click)<br>
+Run 128 Lines button (runs 128 scanlines per click)</br>
+Number of active cheats listed<br>
+Cheats list automatically updated if ram addresses are frozen in the hex editor</br>
+Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position<br>
+Debugger now has a minimum valid size</br>
+Added "Restore original window size" button<br></br>
 
-*Shows scanlines and PPU pixel values
-*Shows scanlines even while in VBlank
-*Added a Run Line button (runs 1 scanline per click)
-*Run 128 Lines button (runs 128 scanlines per click)
-*Number of active cheats listed.
-*Cheats list automatically updated if ram addresses are frozen in the hex editor.
-*Fixed bug that caused dialog to "disappear" due to saving -32000 as its window position.
-*Debugger now has a minimum valid size
-*Added "Restore original window size" button
+<h3>PPU Viewer</h3>
 
-PPU Viewer
+Default refresh value set to 15<br>
+Refresh value stored in the .cfg file</br>
 
-*Default refresh value set to 15
-*Refresh value stored in the .cfg file
+<h3>Nametable Viewer</h3>
 
-Nametable Viewer
+Default refresh value set to 15<br>
+Refresh value stored in the .cfg file</br>
 
-*Default refresh value set to 15
-*Refresh value stored in the .cfg file
+<h3>Trace Logger</h3>
 
-Trace Logger
+Fixed bug where user can't scroll the log window while it is auto-updating<br>
+Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping</br>
 
-*Fixed bug where user can't scroll the log window while it is auto-updating.
-*Changed message about F2 pause (left over from FCEUXDSP) to display the current hotkey mapping.
+<h3>Text Hooker</h3>
 
-Text Hooker
+Saving a .tht file no longer crashes<br>
+Dialog updates every frame</br>
+Initialization error checking reinstalled<br>
+Dialog remembers window position</br>
+Fixed bug where canceling save as produces an error message<br>
+Save As produces default filename based on the current ROM</br>
 
-*Saving a .tht file no longer crashes
-*Dialog updates every frame
-*Initialization error checking reinstalled,
-*Dialog remembers window position
-*Fixed bug where canceling save as produces an error message.
-*Save As produces default filename based on the current ROM
+<h3>Message Log</h3>
 
-Message Log
+Remembers X,Y position<br>
+Resized width and height</br>
+Allowed more lines of text to appear on the screen at once<br></br>
 
-*Remembers X,Y position
-*Resized width and height
-*Allowed more lines of text to appear on the screen at once.
+<h3>Metadata</h3>
 
-Metadata
+Remembers window position<br>
+Can be called from the context menu if a movie is loaded (see context menu for details)</br>
 
-*Remembers window position
-*Can be called from the context menu if a movie is loaded (see context menu for details).
+<h3>TASEdit</h3>
 
-TASEdit
+added help menu item
+disabled menu items that are not currently implemented.
 
-*added help menu item
-*disabled menu items that are not currently implemented.
+<h3>Turbo</h3>
+Turbo now employs frame skip, greatly increasing its speed<br>
+The mute turbo option completely bypasses sound processing (another big speed boost)</br>
+Turbo now works with the Lazy wait for VBlank sync setting<br></br>
+</div>
 
-Turbo
-*Turbo now employs frame skip, greatly increasing its speed
-*The mute turbo option completely bypasses sound processing (another big speed boost)
-*Turbo now works with the Lazy wait for VBlank sync setting
+<div id="footer">
+	<a href="home.html">Home</a> | <a href="download.html">Download</a> |
+	<a href="documentation.html">Documentation</a> | <a href="version.html">
+	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
+		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
+		<br/>©2009 adelikat
+</div>
+</div>
+</body>
+</html>
