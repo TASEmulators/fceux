@@ -1,3 +1,8 @@
+---r1984 - FCEUX 2.1.4a Release---
+---June 1 2010---
+01-june-2010 - zeromus - fix crash bug in fcm convert
+01-june-2010 - adelikat - fix logic error in read-only loadstate of movies, should not improperly report savestate after movie errors
+
 ---r1977 - FCEUX 2.1.4 Released---
 ---May 31 2010---
 
