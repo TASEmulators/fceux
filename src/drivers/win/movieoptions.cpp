@@ -41,6 +41,7 @@ void UpdateCheckBoxes(HWND hwndDlg)
 	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSUBTITLES, movieSubtitles ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_SUBTITLESINAVI, subtitlesOnAVI ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_AUTOBACKUP, autoMovieBackup ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_FULLSAVESTATES, fullSaveStateLoads ? BST_CHECKED : BST_UNCHECKED);
 }
 
 void CloseMovieOptionsDialog(HWND hwndDlg)

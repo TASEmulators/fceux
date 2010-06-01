@@ -1,3 +1,5 @@
+02-june-2010 - adelikat - Win32 - Movie Options Dialog - Fix so Full Savestate Load checkbox is updated on load
+
 ---r1984 - FCEUX 2.1.4a Release---
 ---June 1 2010---
 01-june-2010 - zeromus - fix crash bug in fcm convert
