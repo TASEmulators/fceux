@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Debugger Usage Guide (Intermediate)</title>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+body {
+  margin: 5px 5px 5px 5px;
+  background-color: #ffffff;
+}
+/* ========== Text Styles ========== */
+hr { color: #000000}
+body, table /* Normal text */
+{
+ font-size: 10pt;
+ font-family: 'Arial', 'Helvetica', sans-serif;
+ font-style: normal;
+ font-weight: normal;
+ color: #000000;
+ text-decoration: none;
+ ;
+}
+span.rvts1 /* Heading */
+{
+ font-weight: bold;
+ color: #0000ff;
+}
+span.rvts2 /* Subheading */
+{
+ font-weight: bold;
+ color: #000080;
+}
+span.rvts3 /* Keywords */
+{
+ font-style: italic;
+ color: #800000;
+}
+a.rvts4, span.rvts4 /* Jump 1 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+a.rvts5, span.rvts5 /* Jump 2 */
+{
+ color: #008000;
+ text-decoration: underline;
+}
+span.rvts6 /* Font Hint */
+{
+ color: #808080;
+}
+span.rvts7 /* Font Hint Title */
+{
+ font-size: 15pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ font-weight: bold;
+ color: #404040;
+}
+span.rvts8 /* Font Hint Bold */
+{
+ font-weight: bold;
+ color: #808080;
+}
+span.rvts9 /* Font Hint Italic */
+{
+ font-style: italic;
+ color: #808080;
+}
+span.rvts10
+{
+ font-size: 24pt;
+ text-decoration: underline;
+}
+span.rvts11
+{
+ font-size: 18pt;
+}
+span.rvts12
+{
+}
+span.rvts13 /* Font Style */
+{
+ font-size: 16pt;
+ font-family: 'Tahoma', 'Geneva', sans-serif;
+ color: #ffffff;
+}
+span.rvts14 /* Font Style */
+{
+ font-family: 'MS Sans Serif', 'Geneva', sans-serif;
+ color: #808080;
+}
+span.rvts15 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #c0c0c0;
+}
+a.rvts16, span.rvts16 /* Font Style */
+{
+ font-family: 'Verdana', 'Geneva', sans-serif;
+ font-style: italic;
+ color: #6666ff;
+ text-decoration: underline;
+}
+/* ========== Para Styles ========== */
+p,ul,ol /* Paragraph Style */
+{
+ text-align: left;
+ text-indent: 0px;
+ padding: 0px 0px 0px 0px;
+ margin: 0px 0px 0px 0px;
+}
+.rvps1 /* Centered */
+{
+ text-align: center;
+}
+.rvps2 /* Paragraph Style */
+{
+ background: #9fbed0;
+ margin: 0px 0px 20px 0px;
+}
+.rvps3 /* Paragraph Style */
+{
+ text-align: center;
+ background: #e4e4e4;
+ margin: 20px 0px 0px 0px;
+}
+.rvps4 /* Paragraph Style */
+{
+ border-color: #c0c0c0;
+ border-style: solid;
+ border-width: 1px;
+ border-right: none;
+ border-bottom: none;
+ border-left: none;
+ background: #ffffff;
+ padding: 3px 0px 0px 0px;
+ margin: 27px 0px 0px 0px;
+}
+--></style>
+<script type="text/javascript">if(top.frames.length == 0) { top.location.href="../fceux-2.0.2.htm?{E628BE35-72B4-4CC2-8509-A64B442A9AF7}.htm"; }</script>
+<meta name="generator" content="HelpNDoc Free"></head>
+<body>
+
+<p class=rvps2><span class=rvts13>Debugger Usage (Intermediate)</span></p>
+<p><span class=rvts10>Debugger Usage (Intermediate)</span></p>
+<p><br></p>
+<p><span class=rvts11>Intent</span></p>
+<p><br></p>
+<p>This guide assumes that you have a working knowledge of how to interpret Assembly instructions, and are willing to look up the table of 6502 instructions on your own. This document describes the debugger, and to a much lesser degree, how to tell it what you want to do in terms of the assembly.</p>
+<p><br></p>
+<p><span class=rvts11>Main Window</span></p>
+<p><br></p>
+<p>In the main window, you'll see lines like this on the left:</p>
+<p>1E:80E5:66 FF&nbsp;&nbsp;&nbsp;&nbsp; ROR $00FF = #$9A</p>
+<p><br></p>
+<p>This is the disassembly area.</p>
+<p><br></p>
+<p>On the right are Breakpoints, the stack address and partial contents, status flags, PC and registers, and several buttons and text boxes. Not all buttons and features will be described, simply because one can't write about what one hasn't used.</p>
+<p><br></p>
+<p>Of the buttons, the one's you'll likely use the most are Run, Step Into, and Step Out.</p>
+<p><br></p>
+<p>Run simply makes the program continue operating until it hits a condition that causes it to stop running.</p>
+<p><br></p>
+<p>Step Into allows you to move to the next line, and if you Step Into a JSR, you'll be taken to the address listed for it to continue running.</p>
+<p><br></p>
+<p>Step Out attempts to run until the debugger is outside of the function you Stepped Into. This doesn't always work, and may appear to make the emulator 'Run' instead. The next time you use Step Out, it will tell you it will erase the old Step Out watch to do the new one. Press OK to do so.</p>
+<p><br></p>
+<p>Other buttons include Step Over, which basically tries to run to the PC address after the JSR, Run Line, which runs a single VBlank line, 128 lines, which is the last button's action 128 times, "Seek To:" and a text box, which lets you move around the disassembly window quickly, and Seek PC, which orients you back to the code to be run without doing anything else.</p>
+<p><br></p>
+<p>Interpreting the line below is as follows:</p>
+<p>1E:80E5:66 FF&nbsp;&nbsp;&nbsp;&nbsp; ROR $00FF = #$9A</p>
+<p><br></p>
+<p>(1E:) is the bank used. A bank is 0x4000 in size for a .NES file(and 0x1000 for a .NSF file, but don't worry about this for now). 80E5, masked with 3FFF, equals 00E5. 0x1E multiplied by 4000 is 0x78000. Together, this gives 0x78000 + 0x00E5, which equals the address 0x780E5. Add 0x10 to this to account for the 0x10 byte .NES header, and you get 0x780F5, which is what the address is within the .NES file. That is all that this piece of information means.</p>
+<p><br></p>
+<p>1E:(80E5) is the address that the data that follows is being read from. The banking stated above allows the same address to show different data, but (1E:80E5) will always be the same address on the same page of data.</p>
+<p><br></p>
+<p>1E:80E5:(66 FF&nbsp;&nbsp;&nbsp;&nbsp; ROR $00FF) is the byte code for ROR, followed by the parameter that tells it to use $00FF. After that is the interpreted assembly code. Note that just because code can be interpreted doesn't mean that it can be run. Even data that's for graphics will inevitable look like code to a certain degree to the disassembly window.</p>
+<p><br></p>
+<p>1E:80E5:66 FF&nbsp;&nbsp;&nbsp;&nbsp; ROR $00FF( = #$9A) tells you what the value of $00FF is. $00FF refers to 00FF in RAM, and the value is 0x9A. If the program points to an address in ROM instead of RAM, it still shows the value for you.</p>
+<p><br></p>
+<p><span class=rvts11>Breakpoints</span></p>
+<p><br></p>
+<p>The breakpoint buttons are Add, Delete, and Edit. These should be self-explanatory. Delete removes the selected code. Edit will allow you to change an existing entry with the same window as you use to Add. Add will open an empty window, which allows you to fill in several details. Double-clicking a breakpoint will enable and disable it, so you don't have to delete items to stop them from causing the debugger to halt the game(the short term for this is called 'breaking' the debugger, referred to in the same way as one would refer to a broken vase)</p>
+<p><br></p>
+<p>In the Add Breakpoint window, you have 2 Address boxes [ ] - [ ]. You must put in at least 1 value, preferable in the left box. If you want to use a range of values, you can fill in the first box as the start, and the second box as the end. The addresses can be either RAM (0000-07FF), ROM (8000-FFFF), or the special addresses(6000-7FFF, which can be extra RAM, ROM, or unused, depending on game)</p>
+<p><br></p>
+<p>The Read, Write, and Execute checkboxes allow you to specify whether to break the debugger when that address is Read From, Written To, or Executed by the CPU. All of them can be checked at the same time if you don't know how the data is used, but are sure it's used somehow. Note that if it's the value to an assembly instruction, it won't cause a break, because the byte itself isn't the start of an instruction, and isn't read by the CPU so much as used for an instruction.</p>
+<p><br></p>
+<p>The Option boxes CPU Mem, PPU Mem, and Sprite Mem tell the debugger where to look. The Hex Viewer will show you CPU Mem by default, and PPU Mem if you tell it to. PPU Mem is where data is written to display the actual images on the screen, rather than to decide what it is that should be put there. My own experience is that this won't have to be touched unless you accidentally click off of CPU Mem. PPU debugging is more of an advanced skill, primarily because when something does go wrong, it's usually because an address outside of the normal PPU address is getting written to and causing very weird graphics errors.</p>
+<p><br></p>
+<p>Name is simply a name that can be seen to the right, if there's space for it.</p>
+<p><br></p>
+<p>The forbid option allows you to exclude a range of RAM or ROM from the breakpoint list. These can be enabled and disabled as of this writing.</p>
+<p><br></p>
+<p>Condition is part of the Conditional Debugging system. This system is slightly complicated, and extremely powerful when used correctly, and can make extremely hard problems to debug turn into lazy clicking when you understand how to use the feature.</p>
+<p><br></p>
+<p><span class=rvts11>Conditional Debugging</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Conditions only apply to the breakpoint they are applied to. You can breakpoint the same address multiple times with different conditions applied to each one.</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Registers: A, X, Y, (P = PC) (A==#12, to break if A = 12) (P!=#804C to NOT break when the PC is on 804C)</span></p>
+<p><span class=rvts12>Flags: N, C, Z, I, B, V, U, D (N==#0 for off, N==#1 for on)</span></p>
+<p><span class=rvts12>Bank: K (K!=#1E to NOT break when the bank is 1E)</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Addresses: ($0000!=#00 makes it test RAM address 0000, and if it's NOT 00, it can break)</span></p>
+<p><span class=rvts12>Numbers: (#0123 is interpreted as 123. It can be used in tests for known values to exclude or include)</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Numerical Comparisons:</span></p>
+<p><span class=rvts12>== = Equal</span></p>
+<p><span class=rvts12>!= = Not Equal</span></p>
+<p><span class=rvts12>&lt;= = Less Than or Equal</span></p>
+<p><span class=rvts12>&gt;= = Greater Than or Equal</span></p>
+<p><span class=rvts12>&lt; Less Than</span></p>
+<p><span class=rvts12>&gt; Greater Than</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Math Operators:</span></p>
+<p><span class=rvts12>+, -, *, / (which are add, subtract, multiply, divide)</span></p>
+<p><span class=rvts12>If you want to do complex math that involves 5 memory addresses, 2 ROM addresses, and a smattering of defined values, you can use these to do it. I've never had to, but if you want to, this is how.</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Multiple Tests:</span></p>
+<p><span class=rvts12>(N==#0||A!=#0 makes it break if EITHER N is off, or A isn't 00)</span></p>
+<p><span class=rvts12>(A!=#0&amp;&amp;X==#a5 makes it break is A isn't 00, AND X is A5)</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Brackets:</span></p>
+<p><span class=rvts12>$[#2CC + X] == #34: The value of the byte at address $2CC + X is 0x34</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>Parentheses:</span></p>
+<p><span class=rvts12>(#1 + #2)==#3 (This evaluates to true, so the breakpoint can break. If you need a different order of operation for math operators, you can use parentheses)</span></p>
+<p><span class=rvts12><br></span></p>
+<p><span class=rvts12>This is what's currently found in the source file for Conditional Debugging:</span></p>
+<p><span class=rvts12>P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; Connect</span></p>
+<p><span class=rvts12>Connect&nbsp;&nbsp; -&gt; Compare {('||' | '&amp;&amp;') Compare}</span></p>
+<p><span class=rvts12>Compare&nbsp;&nbsp; -&gt; Sum {('==' | '!=' | '&lt;=' | '&gt;=' | '&lt;' | '&gt;') Sum}</span></p>
+<p><span class=rvts12>Sum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; Product {('+' | '-') Product}</span></p>
+<p><span class=rvts12>Product&nbsp;&nbsp; -&gt; Primitive {('*' | '/') Primitive}</span></p>
+<p><span class=rvts12>Primitive -&gt; Number | Address | Register | Flag | '(' Connect ')'</span></p>
+<p><span class=rvts12>Number&nbsp;&nbsp;&nbsp; -&gt; '#' [1-9A-F]*</span></p>
+<p><span class=rvts12>Address&nbsp;&nbsp; -&gt; '$' [1-9A-F]* | '$' '[' Connect ']'</span></p>
+<p><span class=rvts12>Register&nbsp; -&gt; 'A' | 'X' | 'Y' | 'R'</span></p>
+<p><span class=rvts12>Flag&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; 'N' | 'C' | 'Z' | 'I' | 'B' | 'V'</span></p>
+<p><span class=rvts12>PC Bank&nbsp;&nbsp; -&gt; 'K'</span></p>
+<p class=rvps3><span class=rvts14>2008</span></p>
+<p class=rvps4><span class=rvts15>This help file has been generated by the freeware version of </span><a class=rvts16 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
+
+</body></html>
