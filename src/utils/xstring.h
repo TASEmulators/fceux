@@ -63,35 +63,9 @@ char *U16ToHexStr(uint16 a);
 
 std::string stditoa(int n);
 
-std::string readNullTerminatedAscii(std::istream* is);
+std::string readNullTerminatedAscii(EMUFILE* is);
 
 //extracts a decimal uint from an istream
-template<typename T> T templateIntegerDecFromIstream(std::istream* is)
-{
-	unsigned int ret = 0;
-	bool pre = true;
-
-	for(;;)
-	{
-		int c = is->get();
-		if(c == -1) return ret;
-		int d = c - '0';
-		if((d<0 || d>9))
-		{
-			if(!pre)
-				break;
-		}
-		else
-		{
-			pre = false;
-			ret *= 10;
-			ret += d;
-		}
-	}
-	is->unget();
-	return ret;
-}
-
 template<typename T> T templateIntegerDecFromIstream(EMUFILE* is)
 {
 	unsigned int ret = 0;
@@ -118,32 +92,8 @@ template<typename T> T templateIntegerDecFromIstream(EMUFILE* is)
 	return ret;
 }
 
-inline uint32 uint32DecFromIstream(std::istream* is) { return templateIntegerDecFromIstream<uint32>(is); }
-inline uint64 uint64DecFromIstream(std::istream* is) { return templateIntegerDecFromIstream<uint64>(is); }
 inline uint32 uint32DecFromIstream(EMUFILE* is) { return templateIntegerDecFromIstream<uint32>(is); }
 inline uint64 uint64DecFromIstream(EMUFILE* is) { return templateIntegerDecFromIstream<uint64>(is); }
-
-//puts an optionally 0-padded decimal integer of type T into the ostream (0-padding is quicker)
-template<typename T, int DIGITS, bool PAD> void putdec(std::ostream* os, T dec)
-{
-	char temp[DIGITS];
-	int ctr = 0;
-	for(int i=0;i<DIGITS;i++)
-	{
-		int quot = dec/10;
-		int rem = dec%10;
-		temp[DIGITS-1-i] = '0' + rem;
-		if(!PAD)
-		{
-			if(rem != 0) ctr = i;
-		}
-		dec = quot;
-	}
-	if(!PAD)
-		os->write(temp+DIGITS-ctr-1,ctr+1);
-	else
-		os->write(temp,DIGITS);
-}
 
 //puts an optionally 0-padded decimal integer of type T into the ostream (0-padding is quicker)
 template<typename T, int DIGITS, bool PAD> void putdec(EMUFILE* os, T dec)

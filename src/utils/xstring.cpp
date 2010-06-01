@@ -553,13 +553,13 @@ std::string stditoa(int n)
 }
 
 
-std::string readNullTerminatedAscii(std::istream* is)
+std::string readNullTerminatedAscii(EMUFILE* is)
 {
 	std::string ret;
 	ret.reserve(50);
 	for(;;) 
 	{
-		int c = is->get();
+		int c = is->fgetc();
 		if(c == 0) break;
 		else ret += (char)c;
 	}

@@ -542,11 +542,11 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	int movieConvertOffset1=0, movieConvertOffset2=0,movieSyncHackOn=0;
 
 
-	ifstream* fp = (ifstream*)FCEUD_UTF8_fstream(fname, "rb");
+	EMUFILE* fp = FCEUD_UTF8_fstream(fname, "rb");
 	if(!fp) false;
 
 	// read header
-	uint32 magic;
+	uint32 magic = 0;
 	uint32 version;
 	uint8 flags[4];
 
@@ -576,7 +576,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	}
 
 	
-	fp->read((char*)&flags,4);
+	fp->fread((char*)&flags,4);
 	read32le(&framecount, fp);
 	read32le(&rerecord_count, fp);
 	read32le(&moviedatasize, fp);
@@ -584,7 +584,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	read32le(&firstframeoffset, fp);
 
 	//read header values
-	fp->read((char*)&md.romChecksum,16);
+	fp->fread((char*)&md.romChecksum,16);
 	read32le((uint32*)&md.emuVersion,fp);
 
 	md.romFilename = readNullTerminatedAscii(fp);
@@ -625,9 +625,9 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 	//analyze input types?
 	//ResetInputTypes();
 
-	fp->seekg(firstframeoffset,ios::beg);
+	fp->fseek(firstframeoffset,SEEK_SET);
 	moviedata = (uint8*)realloc(moviedata, moviedatasize);
-	fp->read((char*)moviedata,moviedatasize);
+	fp->fread((char*)moviedata,moviedatasize);
 
 	frameptr = 0;
 	memset(joop,0,sizeof(joop));
