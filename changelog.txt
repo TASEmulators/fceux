@@ -1,3 +1,4 @@
+06-june-2010 - FatRatKnight - Added a return value to gui.text: The X position where the function would paint the next character.
 02-june-2010 - adelikat - Win32 - Movie Options Dialog - Fix so Full Savestate Load checkbox is updated on load
 
 ---r1984 - FCEUX 2.1.4a Release---

@@ -3794,7 +3794,7 @@ static int JoedCharWidth(uint8 ch)
 	return FCEUFont[FixJoedChar(ch)*8];
 }
 
-void LuaDrawTextTransWH(const char *str, size_t l, int x, int y, uint32 color, uint32 backcolor)
+void LuaDrawTextTransWH(const char *str, size_t l, int &x, int y, uint32 color, uint32 backcolor)
 {
 	int Opac = (color >> 24) & 0xFF;
 	int backOpac = (backcolor >> 24) & 0xFF;
@@ -3893,8 +3893,10 @@ static int gui_text(lua_State *L) {
 	gui_prepare();
 
 	LuaDrawTextTransWH(msg, l, x, y, color, bgcolor);
+
+    lua_pushinteger(L, x);
 #endif
-	return 0;
+	return 1;
 
 }
 
