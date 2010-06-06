@@ -1802,6 +1802,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_NEWPPU:
 			case ID_OLDPPU:
 				FCEU_TogglePPU();
+				break;
 			case MENU_GAME_GENIE:
 				genie ^= 1;
 				FCEUI_SetGameGenie(genie!=0);
