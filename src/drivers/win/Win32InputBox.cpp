@@ -79,7 +79,7 @@ static unsigned char definputbox_dlg[] =
     0xff,0xff,0xff,0xff,0xff,0x82,0x00,0x00,0x00,0x00,0x00
 };
 
-static LPCTSTR definputbox_buttonnames[] = { _T("OK"), _T("CANCEL") };
+static LPCTSTR definputbox_buttonnames[] = { _T("Ok"), _T("Cancel") };
 static const INT_PTR definputbox_buttonids[] = { IDOK, IDCANCEL };
 
 static const INT 
