@@ -56,4 +56,7 @@ void ResetVideo();
 void SetFSVideoMode();
 void PushCurrentVideoSettings();
 
+std::string FCEUI_GetSnapshotAsName();
+void FCEUI_SetSnapshotAsName(std::string name);
+
 #endif

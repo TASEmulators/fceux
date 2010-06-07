@@ -77,6 +77,11 @@ bool oldInputDisplay = false;
 HANDLE mapXBuf;
 #endif
 
+std::string AsSnapshotName ="";			//adelikat:this will set the snapshot name when for s savesnapshot as function
+
+void FCEUI_SetSnapshotAsName(std::string name) { AsSnapshotName = name; }
+std::string FCEUI_GetSnapshotAsName() { return AsSnapshotName; }
+
 void FCEU_KillVirtualVideo(void)
 {
 	//mbg merge TODO 7/17/06 temporarily removed
@@ -202,31 +207,12 @@ void FCEU_PutImage(void)
 #ifdef SHOWFPS
 	ShowFPS();
 #endif
-	if(dosnapsave==2)
+	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
 #ifdef WIN32
-		const char filter[] = "Snapshot (*.png)\0*.png\0All Files (*.*)\0*.*\0\0";
 		char nameo[512];
-		OPENFILENAME ofn;
-
-		memset(&ofn, 0, sizeof(ofn));
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hInstance = fceu_hInstance;
-		ofn.lpstrTitle = "Save Snapshot As...";
-		ofn.lpstrFilter = filter;
-		strcpy(nameo,FCEU_MakeFName(FCEUMKF_SNAP,0,"png").c_str());
-
-		nameo[strlen(nameo)-6] = '\0';
-
-		ofn.lpstrFile = nameo;
-		ofn.lpstrDefExt = "fcs";
-		std::string initdir = FCEU_GetPath(FCEUMKF_SNAP);
-		ofn.lpstrInitialDir = initdir.c_str();
-		ofn.nMaxFile = 256;
-		ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-		ofn.lpstrDefExt = "png";
-		dosnapsave=0;
-		if(GetSaveFileName(&ofn))
+		strcpy(nameo,FCEUI_GetSnapshotAsName().c_str());
+		if (nameo)
 		{
 			SaveSnapshot(nameo);
 			FCEU_DispMessage("Snapshot Saved.",0);
@@ -680,6 +666,8 @@ PNGerr:
 		fclose(pp);
 	return(0);
 }
+
+//overloaded SaveSnapshot for "Savesnapshot As" function
 int SaveSnapshot(char fileName[512])
 {
 	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;

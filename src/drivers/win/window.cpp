@@ -12,7 +12,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-*
+*f
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -133,7 +133,6 @@ static uint32 mousex,mousey,mouseb;
 static int vchanged = 0;
 int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
-
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
 
 //Function Prototypes
@@ -142,6 +141,7 @@ void ChangeContextMenuItemText(int menuitem, string text, HMENU menu);	//Alters 
 void SaveMovieAs();	//Gets a filename for Save Movie As...
 void OpenRamSearch();
 void OpenRamWatch();
+void SaveSnapshotAs();
 
 //Recent Menu Strings ------------------------------------
 char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
@@ -1643,7 +1643,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				FCEUI_SaveSnapshot(); 
 				break;
 			case ID_FILE_SAVESCREENSHOTAS:
-				FCEUI_SaveSnapshotAs();
+				SaveSnapshotAs();
 				break;
 
 			//Lua submenu
@@ -2842,4 +2842,31 @@ void OpenRamSearch()
 void OpenRamWatch()
 {
 	RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, (DLGPROC) RamWatchProc);
+}
+
+void SaveSnapshotAs()
+{
+	const char filter[] = "Snapshot (*.png)\0*.png\0All Files (*.*)\0*.*\0\0";
+	char nameo[512];
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Save Snapshot As...";
+	ofn.lpstrFilter = filter;
+	strcpy(nameo,FCEU_MakeFName(FCEUMKF_SNAP,0,"png").c_str());
+
+	nameo[strlen(nameo)-6] = '\0';
+
+	ofn.lpstrFile = nameo;
+	ofn.lpstrDefExt = "fcs";
+	std::string initdir = FCEU_GetPath(FCEUMKF_SNAP);
+	ofn.lpstrInitialDir = initdir.c_str();
+	ofn.nMaxFile = 256;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = "png";
+	
+	if(GetSaveFileName(&ofn))
+		FCEUI_SetSnapshotAsName(nameo);
+	FCEUI_SaveSnapshotAs();
 }
