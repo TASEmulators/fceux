@@ -129,7 +129,7 @@ void MovieData::TryDumpIncremental()
 		{
 			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
 				return;
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 		}
 		if(currFrameCounter == currMovieData.greenZoneCount)
 		{
@@ -138,15 +138,15 @@ void MovieData::TryDumpIncremental()
 				currMovieData.insertEmpty(-1,1);
 			}
 			
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount++;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 		} else if (currFrameCounter > currMovieData.greenZoneCount && static_cast<unsigned int>(currMovieData.greenZoneCount)<currMovieData.records.size())
 		{
 			/* May be required in some malformed TAS projects. */
-			MovieData::dumpSavestateTo(&currMovieData.records[currFrameCounter].savestate,Z_DEFAULT_COMPRESSION);
+			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount= currFrameCounter+1;
 		}
 	}
@@ -515,16 +515,16 @@ int MovieData::dumpGreenzone(EMUFILE *os, bool binary)
 {
 	int start = os->ftell();
 	int frame, size;
-	for (int i=0; i<(int)records.size(); ++i)
+	for (int i=0; i<(int)savestates.size(); ++i)
 	{
-		if (records[i].savestate.empty())
+		if (savestates[i].empty())
 			continue;
 		frame=i;
-		size=records[i].savestate.size();
+		size=savestates[i].size();
 		write32le(frame, os);
 		write32le(size, os);
 
-		os->fwrite(&records[i].savestate[0], size);
+		os->fwrite(&savestates[i][0], size);
 	}
 	frame=-1;
 	size=currMovieData.greenZoneCount;
@@ -546,6 +546,7 @@ int MovieData::loadGreenzone(EMUFILE *is, bool binary)
 		if (frame==-1) break;
 		int pos = is->ftell();
 		FCEUSS_LoadFP(is, SSLOADPARAM_NOBACKUP);
+		storeTasSavestate(frame, Z_DEFAULT_COMPRESSION);
 		is->fseek(pos+size,SEEK_SET);
 	}
 	greenZoneCount=size;
@@ -850,7 +851,7 @@ void FCEUMOV_EnterTasEdit()
 	//ResetInputTypes();
 	//todo - maybe this instead
 	//FCEUD_SetInput(currMovieData.fourscore,currMovieData.microphone,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
-	
+
 #ifdef WIN32
 	CreateProject(currMovieData);
 #endif
@@ -887,6 +888,24 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 	ms.trim();
 }
 
+bool MovieData::loadTasSavestate(int frame)
+{
+	if (frame<0 || frame>=currMovieData.records.size())
+		return false;
+	if (savestates.size()<=frame || savestates[frame].empty())
+		return false;
+
+	return MovieData::loadSavestateFrom(&savestates[frame]);
+}
+
+void MovieData::storeTasSavestate(int frame, int compression_level)
+{
+	if (savestates.size()<=frame)
+		savestates.resize(frame+1);
+
+	MovieData::dumpSavestateTo(&savestates[frame],compression_level);
+}
+
 //begin playing an existing movie
 bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
 {
@@ -906,7 +925,6 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	
 	strcpy(curMovieFilename, fname);
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
-	fp->stream = EMUFILE::memwrap(fp->stream);
 	if (!fp) return false;
 	if(fp->isArchive() && !_read_only) {
 		FCEU_PrintError("Cannot open a movie in read+write from an archive.");
@@ -925,7 +943,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	AddRecentMovieFile(name.c_str());
 #endif
 
-	LoadFM2(currMovieData, fp->stream, INT_MAX, false);
+	LoadFM2(currMovieData, fp->stream, fp->size, false);
 	LoadSubtitles(currMovieData);
 	delete fp;
 
@@ -1326,7 +1344,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
     * Current framecount changes to savestate framecount
     * User will have control of input as if Movie inactive mode 
 	*/
-	
+
 	if(movieMode == MOVIEMODE_PLAY || movieMode == MOVIEMODE_RECORD || movieMode == MOVIEMODE_FINISHED)
 	{
 		//handle moviefile mismatch
@@ -1354,7 +1372,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 					FCEUI_StopMovie();
 				}
 				else
-					FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
+				FCEU_PrintError("Mismatch between savestate's movie and current movie.\ncurrent: %s\nsavestate: %s\n",currMovieData.guid.toString().c_str(),tempMovieData.guid.toString().c_str());
 
 				return false;
 			#endif
@@ -1382,7 +1400,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 						FCEUI_StopMovie();
 					}
 					else
-						FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
+					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
 
 					return false;
 				}
@@ -1413,7 +1431,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 					FCEUI_StopMovie();
 				}
 				else
-					FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", errorFrame);
+				FCEU_PrintError("Error: Savestate not in the same timeline as movie!\nFrame %d branches from current timeline", errorFrame);
 
 				return false;
 			}
@@ -1585,7 +1603,7 @@ string FCEUI_GetMovieName(void)
 bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 {
 	MovieData md;
-	if(!LoadFM2(md, fp->stream, INT_MAX, skipFrameCount))
+	if(!LoadFM2(md, fp->stream, fp->size, skipFrameCount))
 		return false;
 	
 	info.movie_version = md.version;

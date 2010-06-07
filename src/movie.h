@@ -142,9 +142,6 @@ public:
 	bool Compare(MovieRecord& compareRec);
 	void clear();
 	
-	//a waste of memory in lots of cases..  maybe make it a pointer later?
-	std::vector<uint8> savestate;
-
 	void parse(MovieData* md, EMUFILE* is);
 	bool parseBinary(MovieData* md, EMUFILE* is);
 	void dump(MovieData* md, EMUFILE* os, int index);
@@ -174,6 +171,7 @@ public:
 	std::string romFilename;
 	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
+	std::vector<std::vector<uint8>> savestates;
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
 	//this is the RERECORD COUNT. please rename variable.
@@ -236,6 +234,9 @@ public:
 	
 	static bool loadSavestateFrom(std::vector<uint8>* buf);
 	static void dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel);
+
+	bool loadTasSavestate(int frame);
+	void storeTasSavestate(int frame, int compression_level);
 	void TryDumpIncremental();
 
 private:

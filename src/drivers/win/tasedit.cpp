@@ -106,11 +106,11 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		if((msg->iSubItem-2)/8==0)
 			if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
-				!currMovieData.records[msg->nmcd.dwItemSpec].savestate.empty())
+				!currMovieData.savestates[msg->nmcd.dwItemSpec].empty())
 				msg->clrTextBk = RGB(192,255,192);
 			else {}
 		else if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
-			!currMovieData.records[msg->nmcd.dwItemSpec].savestate.empty())
+			!currMovieData.savestates[msg->nmcd.dwItemSpec].empty())
 				msg->clrTextBk = RGB(144,192,144);
 			else msg->clrTextBk = RGB(192,192,192);
 		return CDRF_DODEFAULT;
@@ -238,7 +238,7 @@ void LockGreenZone(int newstart)
 {
 	for (int i=1; i<newstart; ++i)
 	{
-		currMovieData.records[i].savestate.clear();
+		currMovieData.savestates[i].clear();
 	}
 }
 
@@ -273,8 +273,7 @@ bool JumpToFrame(int index)
 	}
 
 	if (static_cast<unsigned int>(index)<currMovieData.records.size() && 
-		!currMovieData.records[index].savestate.empty() &&
-		MovieData::loadSavestateFrom(&currMovieData.records[index].savestate))
+		currMovieData.loadTasSavestate(index))
 	{
 			currFrameCounter = index;
 			return true;
@@ -292,8 +291,7 @@ bool JumpToFrame(int index)
 		/* Search for an earlier frame, and try warping to the current. */
 		for (; i>0; --i)
 		{
-			if (!currMovieData.records[i].savestate.empty() &&
-				MovieData::loadSavestateFrom(&currMovieData.records[i].savestate))
+			if (currMovieData.loadTasSavestate(i))
 			{
 				currFrameCounter=i;
 				turbo=i+60<index; // turbo unless close
@@ -304,7 +302,7 @@ bool JumpToFrame(int index)
 
 		poweron(true);
 		currFrameCounter=0;
-		MovieData::dumpSavestateTo(&currMovieData.records[0].savestate,0);
+		MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
 		turbo = index>60;
 		pauseframe=index+1;
 	}
@@ -314,7 +312,7 @@ bool JumpToFrame(int index)
 	{
 		poweron(false);
 		currFrameCounter=0;
-		MovieData::dumpSavestateTo(&currMovieData.records[0].savestate,0);
+		MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
 		return true;
 	}
 

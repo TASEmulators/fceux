@@ -81,7 +81,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	SetProjectName(PFN);
 	EMUFILE_FILE ifs(filename, "rb");
 
-	LoadFM2(currMovieData, &ifs, INT_MAX, false);
+	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
 
 	char branchname;
