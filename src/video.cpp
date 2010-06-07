@@ -182,6 +182,10 @@ void FCEUI_SaveSnapshot(void)
 	dosnapsave=1;
 }
 
+void FCEUI_SaveSnapshotAs(void)
+{
+	dosnapsave=2;
+}
 
 
 static void ReallySnap(void)
@@ -198,13 +202,44 @@ void FCEU_PutImage(void)
 #ifdef SHOWFPS
 	ShowFPS();
 #endif
+	if(dosnapsave==2)
+	{
+#ifdef WIN32
+		const char filter[] = "Snapshot (*.png)\0*.png\0All Files (*.*)\0*.*\0\0";
+		char nameo[512];
+		OPENFILENAME ofn;
 
+		memset(&ofn, 0, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hInstance = fceu_hInstance;
+		ofn.lpstrTitle = "Save Snapshot As...";
+		ofn.lpstrFilter = filter;
+		strcpy(nameo,FCEU_MakeFName(FCEUMKF_SNAP,0,"png").c_str());
+
+		nameo[strlen(nameo)-6] = '\0';
+
+		ofn.lpstrFile = nameo;
+		ofn.lpstrDefExt = "fcs";
+		std::string initdir = FCEU_GetPath(FCEUMKF_SNAP);
+		ofn.lpstrInitialDir = initdir.c_str();
+		ofn.nMaxFile = 256;
+		ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+		ofn.lpstrDefExt = "png";
+		dosnapsave=0;
+		if(GetSaveFileName(&ofn))
+		{
+			SaveSnapshot(nameo);
+			FCEU_DispMessage("Snapshot Saved.",0);
+		}
+#endif
+		dosnapsave=0;
+	}
 	if(GameInfo->type==GIT_NSF)
 	{
 		DrawNSF(XBuf);
 
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
-		if(dosnapsave)
+		if(dosnapsave==1)
 		{
 			ReallySnap();
 			dosnapsave=0;
@@ -229,7 +264,7 @@ void FCEU_PutImage(void)
 			FCEUI_AviVideoUpdate(XBuf);
 
 		//Save snapshot before overlay stuff is written.
-		if(dosnapsave)
+		if(dosnapsave==1)
 		{
 			ReallySnap();
 			dosnapsave=0;
@@ -636,6 +671,98 @@ int SaveSnapshot(void)
 	fclose(pp);
 
 	return u+1;
+
+
+PNGerr:
+	if(compmem)
+		free(compmem);
+	if(pp)
+		fclose(pp);
+	return(0);
+}
+int SaveSnapshot(char fileName[512])
+{
+	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
+	int x,y;
+	FILE *pp=NULL;
+	uint8 *compmem=NULL;
+	uLongf compmemsize=totallines*263+12;
+
+	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
+		return 0;
+
+	pp = fopen(fileName, "w");
+
+	if(!(pp=FCEUD_UTF8fopen(fileName,"wb")))
+	{
+		return 0;
+	}
+
+	{
+		static uint8 header[8]={137,80,78,71,13,10,26,10};
+		if(fwrite(header,8,1,pp)!=1)
+			goto PNGerr;
+	}
+
+	{
+		uint8 chunko[13];
+
+		chunko[0]=chunko[1]=chunko[3]=0;
+		chunko[2]=0x1;			// Width of 256
+
+		chunko[4]=chunko[5]=chunko[6]=0;
+		chunko[7]=totallines;			// Height
+
+		chunko[8]=8;				// bit depth
+		chunko[9]=3;				// Color type; indexed 8-bit
+		chunko[10]=0;				// compression: deflate
+		chunko[11]=0;				// Basic adapative filter set(though none are used).
+		chunko[12]=0;				// No interlace.
+
+		if(!WritePNGChunk(pp,13,"IHDR",chunko))
+			goto PNGerr;
+	}
+
+	{
+		uint8 pdata[256*3];
+		for(x=0;x<256;x++)
+			FCEUD_GetPalette(x,pdata+x*3,pdata+x*3+1,pdata+x*3+2);
+		if(!WritePNGChunk(pp,256*3,"PLTE",pdata))
+			goto PNGerr;
+	}
+
+	{
+		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
+		uint8 *dest,*mal,*mork;
+
+		if(!(mal=mork=dest=(uint8 *)malloc((totallines<<8)+totallines)))
+			goto PNGerr;
+		//   mork=dest=XBuf;
+
+		for(y=0;y<totallines;y++)
+		{
+			*dest=0;			// No filter.
+			dest++;
+			for(x=256;x;x--,tmp++,dest++)
+				*dest=*tmp; 	
+		}
+
+		if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
+		{
+			if(mal) free(mal);
+			goto PNGerr;
+		}
+		if(mal) free(mal);
+		if(!WritePNGChunk(pp,compmemsize,"IDAT",compmem))
+			goto PNGerr;
+	}
+	if(!WritePNGChunk(pp,0,"IEND",0))
+		goto PNGerr;
+
+	free(compmem);
+	fclose(pp);
+
+	return 0;
 
 
 PNGerr:

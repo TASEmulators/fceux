@@ -1,6 +1,7 @@
 int FCEU_InitVirtualVideo(void);
 void FCEU_KillVirtualVideo(void);
 int SaveSnapshot(void);
+int SaveSnapshot(char[]);
 uint32 GetScreenPixel(int x, int y, bool usebackup);
 int GetScreenPixelPalette(int x, int y, bool usebackup);
 extern uint8 *XBuf;

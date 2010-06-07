@@ -77,6 +77,7 @@ BEGIN
             MENUITEM "&Close All Script Windows",   ID_FILE_CLOSELUAWINDOWS
         END
         MENUITEM "&Screenshot",                 ID_FILE_SCREENSHOT
+        MENUITEM "Save Screenshot As...",       ID_FILE_SAVESCREENSHOTAS
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+F4",               MENU_EXIT
     END

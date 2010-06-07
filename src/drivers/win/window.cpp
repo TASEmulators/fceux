@@ -1642,6 +1642,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case ID_FILE_SCREENSHOT:
 				FCEUI_SaveSnapshot(); 
 				break;
+			case ID_FILE_SAVESCREENSHOTAS:
+				FCEUI_SaveSnapshotAs();
+				break;
 
 			//Lua submenu
 			case ID_FILE_OPENLUAWINDOW:

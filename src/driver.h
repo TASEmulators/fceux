@@ -178,6 +178,7 @@ void FCEUD_LuaRunFrom(void);
 
 int32 FCEUI_GetDesiredFPS(void);
 void FCEUI_SaveSnapshot(void);
+void FCEUI_SaveSnapshotAs(void);
 void FCEU_DispMessage(char *format, int disppos, ...);
 #define FCEUI_DispMessage FCEU_DispMessage
 

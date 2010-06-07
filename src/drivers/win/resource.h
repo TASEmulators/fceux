@@ -794,6 +794,7 @@
 #define ID_SAVESTATE_RECOVERY           40408
 #define ID_CONTEXT_FULLSAVESTATES       40409
 #define ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS 40410
+#define ID_FILE_SAVESCREENSHOTAS        40411
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -803,7 +804,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40411
+#define _APS_NEXT_COMMAND_VALUE         40412
 #define _APS_NEXT_CONTROL_VALUE         1259
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
