@@ -25,6 +25,7 @@
 #include "../../state.h"
 #include "../../cheat.h" //adelikat: For FCEU_LoadGameCheats()
 #include "../../version.h"
+#include "../../video.h" //adelikat: For ScreenshotAs Get/Set functions
 #include "window.h"
 #include "main.h"
 #include "state.h"
