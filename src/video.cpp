@@ -209,7 +209,6 @@ void FCEU_PutImage(void)
 #endif
 	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
-#ifdef WIN32
 		char nameo[512];
 		strcpy(nameo,FCEUI_GetSnapshotAsName().c_str());
 		if (nameo)
@@ -217,7 +216,6 @@ void FCEU_PutImage(void)
 			SaveSnapshot(nameo);
 			FCEU_DispMessage("Snapshot Saved.",0);
 		}
-#endif
 		dosnapsave=0;
 	}
 	if(GameInfo->type==GIT_NSF)
