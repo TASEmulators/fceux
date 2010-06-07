@@ -3349,6 +3349,26 @@ static int gui_parsecolor(lua_State *L)
 }
 
 
+// gui.savescreenshotas()
+//
+// Causes FCEUX to write a screenshot to a file based on a received filename, caution: will overwrite existing screenshot files
+//
+// Unconditionally retrns 1; any failure in taking a screenshot would be reported on-screen
+// from the function ReallySnap(). 
+static int gui_savescreenshotas(lua_State *L) {
+	const char* name = NULL;
+	size_t l;
+	name = luaL_checklstring(L,1,&l);
+	lua_pushstring(L, name);
+	if (name)
+		FCEUI_SetSnapshotAsName(name);
+	else
+		luaL_error(L,"gui.savesnapshotas must have a string parameter");
+	FCEUI_SaveSnapshotAs();
+	return 1;
+}
+
+
 // gui.savescreenshot()
 //
 // Causes FCEUX to write a screenshot to a file as if the user pressed the associated hotkey. 
@@ -4753,7 +4773,8 @@ static const struct luaL_reg guilib[] = {
 	{"box", gui_box},
 	{"text", gui_text},
 
-	{"savescreenshot", gui_savescreenshot},
+	{"savescreenshot",   gui_savescreenshot},
+	{"savescreenshotas", gui_savescreenshotas},
 	{"gdscreenshot", gui_gdscreenshot},
 	{"gdoverlay", gui_gdoverlay},
 	{"opacity", gui_setopacity},

@@ -1,3 +1,4 @@
+07-june-2010 - adelikat - Lua - new function: gui.screenshotas()
 07-june-2010 - Deign/adelikat - Win32 - Added a SavestateAs Menu item
 06-june-2010 - FatRatKnight - Added a return value to gui.text: The X position where the function would paint the next character.
 02-june-2010 - adelikat - Win32 - Movie Options Dialog - Fix so Full Savestate Load checkbox is updated on load
