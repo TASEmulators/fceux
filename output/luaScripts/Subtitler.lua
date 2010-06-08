@@ -157,7 +157,7 @@ end
 
 
 --*****************************************************************************
-local function SaveToFile()
+local function SaveToFm2()
 --*****************************************************************************
 -- Saves to a copy of the currently playing .fm2. It will append _S to the new
 -- filename, so run MySweetMovie.fm2, this script makes MySweetMovie_S.fm2
@@ -218,6 +218,29 @@ local function SaveToFile()
     return true
 end
 
+
+--*****************************************************************************
+local function SaveToTxt()
+--*****************************************************************************
+    FixSubs()
+    local OutFile, Err= io.open(SaveToThisFile,"w")
+    if not OutFile then
+        print("File write fail")
+        print(Err)
+        return false
+    end
+    local Subs= GetSortedSubs()
+    for i= 1, #Subs do
+        OutFile:write("subtitle ".. Subs[i] .." ".. WordyWords[Subs[i]] .."\n")
+    end
+    OutFile:close()
+    print("Saved",#Subs,"lines to",SaveToThisFile)
+
+    return true
+end
+
+
+
 --*****************************************************************************
 local KeyFunctions= {}
 --*****************************************************************************
@@ -264,7 +287,7 @@ KeyFunctions[PntAll]= KeyFunctions._PntAll
 
 
 function KeyFunctions._SaveTxt()  --Save to a file
-    SaveToFile()
+    SaveToTxt()
 end
 KeyFunctions[SaveTxt]= KeyFunctions._SaveTxt
 
@@ -288,7 +311,7 @@ function KeyFunctions._SvToMov()  --Saves directly to the movie itself
         print("Movie detected. Hit",SvToMov,"again to stop movie and",
               "save subtitles directly into movie! Advance a frame to cancel.")
     else
-        SaveToFile()
+        SaveToFm2()
     end
 end
 KeyFunctions[SvToMov]= KeyFunctions._SvToMov
@@ -332,7 +355,7 @@ end
 local function Ex()
 --*****************************************************************************
     if SaveOnExit then
-        if not SaveToFile() then
+        if not SaveToTxt() then
             print("Dumping subtitles in message box instead!")
             print("===========================")
             local S= GetSortedSubs()
