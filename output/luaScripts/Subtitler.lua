@@ -1,4 +1,4 @@
---FCEUX Subtitler Express, by FatRatKnight
+--FCEUX Subtitler Express v2, by FatRatKnight
 -- I find the built-in subtitles for FCEUX's .fm2 is somewhat inconvenient.
 -- This script should make the process smoother.
 
@@ -9,7 +9,12 @@
 
 -- Whatever the script outputs, you can copy that and paste it into the .fm2
 -- file in question, right before where all the actual frames begin. I suggest
--- WordPad to open the .fm2 file
+-- WordPad to open the .fm2 file.
+
+-- If you're really that lazy, run a movie, subtitle it, then hit pageup twice.
+-- The movie will be stopped, but this script will replace the old subtitles
+-- with the new ones. It will actually create a new file appended with _S in
+-- case the script royally screws up somehow.
 
 -- Let a frame pass, and the text becomes translucent. This is to signify that
 -- the text will remain visible as an actual subtitle, but you can put in a new
@@ -36,14 +41,15 @@ local SaveToThisFile= "ConvenientSubtitles.txt"  --Location to save a file
 local SaveOnExit= true          --Dost thou wish to save when the script exits?
 
 
--- List of hardcoded commands:
---   Backspace: Delete a single character
---   Delete: Erase the subtitle for this frame
---   Enter: Prints the line containing the subtitle at this frame for .fm2
---   Home: Prints subtitle count
---   End: Prints all subtitles in a format for .fm2
---   Page Down: Save subtitles to file
---   Insert: Toggle SaveOnExit
+-- List of commands:
+local DelChar= "backspace"  -- Delete a single character
+local DelSub=  "delete"     -- Erase the whole subtitle for this frame
+local ShoLine= "enter"      -- Prints displayed line in .fm2 readable format
+local SubCnt=  "home"       -- Counts current number of stored subtitles
+local PntAll=  "end"        -- Prints all subtitles formatted for .fm2
+local SaveTxt= "pagedown"   -- Saves subtitles to file
+local T_AutoS= "insert"     -- Toggles whether the script saves on exit
+local SvToMov= "pageup"     -- Saves subtitles to the movie file itself
 
 
 
@@ -66,7 +72,9 @@ SEMICOLON=":",QUOTE="\"",
 COMMA="<",PERIOD=">",SLASH="?",
 
 numpad1="1",numpad2="2",numpad3="3",numpad4="4",numpad5="5",
-numpad6="6",numpad7="7",numpad8="8",numpad9="9",numpad0="0"}
+numpad6="6",numpad7="7",numpad8="8",numpad9="9",numpad0="0",
+
+space= " ", SPACE= " "}
 
 KeyTable["1"]="!"
 KeyTable["2"]="@"
@@ -79,6 +87,12 @@ KeyTable["8"]="*"
 KeyTable["9"]="("
 KeyTable["0"]=")"
 
+--LengthsTable= {}
+
+--for k,v in pairs(KeyTable) do
+--    LengthsTable[v]= gui.text(0,0,v)
+--end
+
 
 local fc, lastfc= 0, 0
 --*****************************************************************************
@@ -90,6 +104,8 @@ local function UpdateFC()  lastfc= fc; fc= movie.framecount()  end
 --*****************************************************************************
 local function GetSortedSubs()
 --*****************************************************************************
+-- Returns a sorted array of frame numbers for every subtitle
+
     local ReturnTbl= {}
     local count= 0
     for frame,text in pairs(WordyWords) do
@@ -116,8 +132,8 @@ local function FixSubs()
     else
         WordyWords[lastfc]= CurrentStr
     end
- 
-   CurrentStr= WordyWords[fc]
+
+    CurrentStr= WordyWords[fc]
     if not CurrentStr then  CurrentStr= ""  end
 end
 
@@ -126,6 +142,9 @@ local LastSub= ""
 --*****************************************************************************
 local function GhostifySubs()
 --*****************************************************************************
+-- Displays subtitles. Needs a little support from emu.registerbefore to know
+-- how to see an old subtitle after you decide to erase a new one.
+
     if CurrentStr ~= "" then
         gui.text(  3,  9,CurrentStr)
     elseif (fc < LastSubfc+300) and (fc > LastSubfc) then
@@ -140,22 +159,139 @@ end
 --*****************************************************************************
 local function SaveToFile()
 --*****************************************************************************
+-- Saves to a copy of the currently playing .fm2. It will append _S to the new
+-- filename, so run MySweetMovie.fm2, this script makes MySweetMovie_S.fm2
+-- By the way, this script tells FCEUX to stop "owning" the file as a way to
+-- guarantee that this script can access it without interference.
+
     FixSubs()
-    local OutFile, Err= io.open(SaveToThisFile,"w")
-    if not OutFile then
-        print("File write fail")
-        print(Err)
+
+    if not movie.active() then
+        print("Error: No movie!")
         return false
     end
-    local Subs= GetSortedSubs()
-    for i= 1, #Subs do
-        OutFile:write("subtitle ".. Subs[i] .." ".. WordyWords[Subs[i]] .."\n")
-    end
-    OutFile:close()
-    print("Saved",#Subs,"lines to",SaveToThisFile)
 
+    local OurMovie= movie.name()
+
+    if string.match(OurMovie,".zip|") then
+        print("Error: File inside a zip!")
+        return false
+    end
+
+    movie.close()
+    local MyFile, err= io.open(OurMovie,"r")
+    if not MyFile then
+        print("Error: Unable to open file for some strange reason.")
+        print(err)
+        return false
+    end
+
+    local MovieData= MyFile:read("*a")
+    MyFile:close()
+
+    local PreSub=  string.find(MovieData,"\nsubtitle",1,true)
+    local PreData= string.find(MovieData,"\n|%d|")
+--    local RemovedSubs= nil
+    if PreSub then
+--        RemovedSubs= string.sub(MovieData,PreSub,PreData-1)
+        MovieData= (string.sub(MovieData,1,PreSub-1)
+                 .. string.sub(MovieData,PreData))
+        PreData= PreSub
+    end
+
+    local S= GetSortedSubs()
+    local Write= ""
+    for i= 1, #S do
+        Write= Write .. "subtitle " .. S[i] .. " ".. WordyWords[S[i]] .. "\n"
+    end
+
+    OurMovie= string.sub(OurMovie,1,-5) .. "_S" .. string.sub(OurMovie,-4)
+
+    MyFile= io.open(OurMovie,"w")
+    MyFile:write(string.sub(MovieData,1,PreData)
+              .. Write
+              .. string.sub(MovieData,PreData+1))
+    MyFile:close()
+
+--    print(RemovedSubs)
+    print("Success")
     return true
 end
+
+--*****************************************************************************
+local KeyFunctions= {}
+--*****************************************************************************
+-- Greatly simplifies KeyReader for me. Also, faster processing should the list
+-- get pretty large.
+-- Various odds and ends that I want done shall be done here.
+
+function KeyFunctions._DelChar()  --Remove a single character
+    if CurrentStr ~= "" then
+        CurrentStr= string.sub(CurrentStr,1,-2)
+    end
+end
+KeyFunctions[DelChar]= KeyFunctions._DelChar
+
+
+function KeyFunctions._DelSub()  --Remove the whole subtitle
+    CurrentStr= ""
+end
+KeyFunctions[DelSub]= KeyFunctions._DelSub
+
+
+function KeyFunctions._ShoLine()  --Dump the currently displayed line
+    print("subtitle",fc,CurrentStr)
+end
+KeyFunctions[ShoLine]= KeyFunctions._ShoLine
+
+
+function KeyFunctions._SubCnt()  --Count subtitles
+    local fr= GetSortedSubs()
+    print("Subtitle count:",#fr)
+end
+KeyFunctions[SubCnt]= KeyFunctions._SubCnt
+
+
+function KeyFunctions._PntAll()  --Dump all subtitles
+                FixSubs()
+                print("===========================")
+                local S= GetSortedSubs()
+                for i= 1, #S do
+                    print("subtitle",S[i],WordyWords[S[i]])
+                end
+end
+KeyFunctions[PntAll]= KeyFunctions._PntAll
+
+
+function KeyFunctions._SaveTxt()  --Save to a file
+    SaveToFile()
+end
+KeyFunctions[SaveTxt]= KeyFunctions._SaveTxt
+
+
+function KeyFunctions._T_AutoS()  --Toggle Save-On-Exit
+    SaveOnExit= not SaveOnExit
+    if SaveOnExit then print("SaveOnExit activated!")
+    else               print("Removed SaveOnExit.") end
+end
+KeyFunctions[T_AutoS]= KeyFunctions._T_AutoS
+
+local AmIClicked= false
+function KeyFunctions._SvToMov()  --Saves directly to the movie itself
+    if not movie.active() then
+        print("No movie detected. Doing nothing...")
+        return
+    end
+
+    if not AmIClicked then
+        AmIClicked= true
+        print("Movie detected. Hit",SvToMov,"again to stop movie and",
+              "save subtitles directly into movie! Advance a frame to cancel.")
+    else
+        SaveToFile()
+    end
+end
+KeyFunctions[SvToMov]= KeyFunctions._SvToMov
 
 
 local lastkeys= input.get()
@@ -172,32 +308,8 @@ local function KeyReader()
         if not lastkeys[k] then
             if     k == BypassFrameAdvanceKey then
                 --... It's a bypass. Don't process.
-            elseif k == "backspace" then
-                if CurrentStr ~= "" then
-                    CurrentStr= string.sub(CurrentStr,1,-2)
-                end
-            elseif k == "delete" then
-                CurrentStr= ""
-            elseif k == "space" then
-                CurrentStr= CurrentStr .. " "
-            elseif k == "enter" then
-                print("subtitle",fc,CurrentStr)
-            elseif k == "end" then
-                FixSubs()
-                print("===========================")
-                local fr= GetSortedSubs()
-                for i= 1, #fr do
-                    print("subtitle",fr[i],WordyWords[fr[i]])
-                end
-            elseif k == "home" then
-                local fr= GetSortedSubs()
-                print("Subtitle count:",#fr)
-            elseif k == "pagedown" then
-                SaveToFile()
-            elseif k == "insert" then
-                SaveOnExit= not SaveOnExit
-                if SaveOnExit then print("SaveOnExit activated!")
-                else               print("Removed SaveOnExit.") end
+            elseif KeyFunctions[k] then
+                KeyFunctions[k]()
             else
                 local ThisKey= k
                 if keys.shift then ThisKey= string.upper(ThisKey)
@@ -223,9 +335,9 @@ local function Ex()
         if not SaveToFile() then
             print("Dumping subtitles in message box instead!")
             print("===========================")
-            local fr= GetSortedSubs()
+            local S= GetSortedSubs()
             for i= 1, #fr do
-                print("subtitle",fr[i],WordyWords[fr[i]])
+                print("subtitle",S[i],WordyWords[S[i]])
             end
         end
     end
@@ -234,6 +346,8 @@ end
 --*****************************************************************************
 local function Bfr()
 --*****************************************************************************
+    AmIClicked= false
+
     if CurrentStr ~= "" then
         LastSubfc= fc
         LastSub= CurrentStr
