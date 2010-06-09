@@ -799,6 +799,14 @@ int main(int argc,char *argv[])
 		free(LuaToLoad);
 		LuaToLoad = NULL;
 	}
+
+	if(AviToLoad)
+	{
+		FCEUI_AviBegin(AviToLoad);
+		free(AviToLoad);
+		AviToLoad = NULL;
+	}
+
 	if (MemWatchLoadOnStart) CreateMemWatch();
 	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
 	SetAutoFirePattern(AFon, AFoff);
