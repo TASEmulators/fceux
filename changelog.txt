@@ -1,3 +1,4 @@
+09-june-2010 - adelikat - Movies - Fixed read-only loadstate error logic & messages
 07-june-2010 - mart0258 - Movie loading now faster - TAS savestates moved from class MovieRecord to class MovieData
 07-june-2010 - adelikat - Lua - new function: gui.screenshotas()
 07-june-2010 - Deign/adelikat - Win32 - Added a SavestateAs Menu item

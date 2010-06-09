@@ -1390,19 +1390,21 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				//if we made it this far, then the savestate has identical movie data but we want to know now if the state frame count is greater than current movie size and make this error
 				
 				//currFrameCounter at this point represents the savestate framecount
-				if(currFrameCounter > (int)currMovieData.records.size()) 
+				if(currFrameCounter > (int)currMovieData.records.size())
 				{
 					//TODO: turn frame counter to red to get attention
-					
-					if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+					if (! (currFrameCounter > (int)tempMovieData.records.size() ) ) //This seemingly redundant check is necessary in order to not flag a post movie savestate as an error
 					{
-						FCEU_PrintError("Error: Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", errorFrame);
-						FCEUI_StopMovie();
-					}
-					else
-					FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", tempMovieData.records.size(), currMovieData.records.size()-1);
+						if (!backupSavestates)	//If backups are disabled we can just resume normally since we can't restore so stop movie and inform user
+						{
+							FCEU_PrintError("Error: Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.\nUnable to restore backup, movie playback stopped.", currFrameCounter, currMovieData.records.size()-1);
+							FCEUI_StopMovie();
+						}
+						else
+						FCEU_PrintError("Savestate is from a frame (%d) after the final frame in the movie (%d). This is not permitted.", currFrameCounter, currMovieData.records.size()-1);
 
-					return false;
+						return false;
+					}
 				}
 				else
 				{
