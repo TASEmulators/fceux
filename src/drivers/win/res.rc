@@ -1511,7 +1511,7 @@ BEGIN
     EDITTEXT        IDC_LUACONSOLE,7,80,256,60,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL
     LTEXT           "Output Console:",IDC_STATIC,7,70,56,8
     LTEXT           "Script File:",IDC_STATIC,7,7,36,8
-    LTEXT           "Arugments:",IDC_STATIC,7,52,40,8
+    LTEXT           "Arguments:",IDC_STATIC,7,52,40,8
     PUSHBUTTON      "Edit",IDC_BUTTON_LUAEDIT,58,31,46,16
 END
 
