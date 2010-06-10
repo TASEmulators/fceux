@@ -1,12 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fceux", "vc10_fceux.vcxproj", "{6893EF44-FEA3-46DF-B236-C4C200F54294}"
-	ProjectSection(ProjectDependencies) = postProject
-		{36835D12-7AE3-47EE-96EF-A50D88737893} = {36835D12-7AE3-47EE-96EF-A50D88737893}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaPerks", "..\..\luaperks\LuaPerks.vcxproj", "{36835D12-7AE3-47EE-96EF-A50D88737893}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F8647A59-ED57-4975-B40C-054BA8588E4E}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,12 +22,6 @@ Global
 		{6893EF44-FEA3-46DF-B236-C4C200F54294}.Release|Win32.ActiveCfg = Release|Win32
 		{6893EF44-FEA3-46DF-B236-C4C200F54294}.Release|Win32.Build.0 = Release|Win32
 		{6893EF44-FEA3-46DF-B236-C4C200F54294}.Release|x64.ActiveCfg = Release|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Debug|Win32.ActiveCfg = Debug|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Debug|Win32.Build.0 = Debug|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Debug|x64.ActiveCfg = Debug|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Release|Win32.ActiveCfg = Release|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Release|Win32.Build.0 = Release|Win32
-		{36835D12-7AE3-47EE-96EF-A50D88737893}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
