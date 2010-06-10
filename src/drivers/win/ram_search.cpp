@@ -50,10 +50,11 @@ bool IsHardwareAddressValid(HWAddressType address)
 	if (!GameInfo)
 		return false;
 
-	if (address >= 0x0000 && address <= 0xffff)
+	if ((address >= 0x0000 && address <= 0x07ff) || (address >= 0x6000 && address <= 0x7FFF))
 		return true;
 	else
 		return false;
+
 }
 #define INVALID_HARDWARE_ADDRESS	((HWAddressType) -1)
 
