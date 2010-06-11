@@ -890,9 +890,9 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 
 bool MovieData::loadTasSavestate(int frame)
 {
-	if (frame<0 || frame>=currMovieData.records.size())
+	if (frame<0 || frame>=(int)currMovieData.records.size())
 		return false;
-	if (savestates.size()<=frame || savestates[frame].empty())
+	if ((int)savestates.size()<=frame || savestates[frame].empty())
 		return false;
 
 	return MovieData::loadSavestateFrom(&savestates[frame]);
@@ -900,7 +900,7 @@ bool MovieData::loadTasSavestate(int frame)
 
 void MovieData::storeTasSavestate(int frame, int compression_level)
 {
-	if (savestates.size()<=frame)
+	if ((int)savestates.size()<=frame)
 		savestates.resize(frame+1);
 
 	MovieData::dumpSavestateTo(&savestates[frame],compression_level);
