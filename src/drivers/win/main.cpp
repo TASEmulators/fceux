@@ -116,7 +116,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 void ApplyDefaultCommandMapping(void);
 
 // Internal variables
-
+int frameSkipAmt = 18;
 uint8 *xbsave = NULL;
 int eoptions = EO_BGRUN | EO_FORCEISCALE;
 
@@ -825,7 +825,7 @@ doloopy:
 			{
 				if (!frameSkipCounter) 
 				{
-					frameSkipCounter = 18;
+					frameSkipCounter = frameSkipAmt;
 					skippy = 0;
 				}
 				else 

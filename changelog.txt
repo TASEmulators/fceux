@@ -1,3 +1,8 @@
+12-june-2010 - adelikat - Save Turbo frame skip amount to config so that it can be customized by user
+12-june-2010 - adelikat - Lua - fix speed.mode() so that normal turns off turbo
+12-june-2010 - CaH4e3 - Fix Young Indiana Jones Chronicals
+10-june-2010 - Deign - Fix Ram Search to only display valid RAM addresses (0000-07FF and 6000-7FFF)
+10-june-2010 - zeromus - add luasocket to built in lua library
 09-june-2010 - adelikat - Movies - Fixed read-only loadstate error logic & messages
 07-june-2010 - mart0258 - Movie loading now faster - TAS savestates moved from class MovieRecord to class MovieData
 07-june-2010 - adelikat - Lua - new function: gui.screenshotas()

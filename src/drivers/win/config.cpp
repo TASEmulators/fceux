@@ -66,6 +66,7 @@ extern bool replaceP2StartWithMicrophone;
 extern bool SingleInstanceOnly;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
+extern int frameSkipAmt;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -235,6 +236,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(allowUDLR),
 	AC(debuggerSaveLoadDEBFiles),
 	AC(fullSaveStateLoads),
+	AC(frameSkipAmt),
 
 	//window positions
 	AC(ChtPosX),
