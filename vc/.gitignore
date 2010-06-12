@@ -1,6 +1,9 @@
+/Release
+/ipch
 /vc10_bin_Debug
 /vc10_fceux.vcxproj.user
 /vc10_obj_Debug
+/vc10_obj_Release
 /vc9_bin_Debug
 /vc9_fceux.ncb
 /vc9_fceux.suo

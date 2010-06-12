@@ -790,8 +790,15 @@ static DECLFR(A2007)
 		if(!fceuindbg)
 	#endif
 		{
-			if(INC32) RefreshAddr+=32;
-			else RefreshAddr++;
+			if(scanline<240)
+				Fixit1();
+			else
+			{
+				if (INC32)
+					RefreshAddr+=32;
+				else
+					RefreshAddr++;
+			}
 			if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
 		}
 
@@ -1333,25 +1340,19 @@ static void Fixit1(void)
 	{
 		uint32 rad=RefreshAddr;
 
-		if((rad&0x7000)==0x7000)
+		if((rad & 0x7000) == 0x7000)
 		{
-			rad^=0x7000;
-			if((rad&0x3E0)==0x3A0)
-			{
-				rad^=0x3A0;
-				rad^=0x800;
-			}
+			rad ^= 0x7000;
+			if((rad & 0x3E0) == 0x3A0)
+				rad ^= 0xBA0;
+			else if((rad & 0x3E0) == 0x3e0)
+				rad ^= 0x3e0;
 			else
-			{
-				if((rad&0x3E0)==0x3e0)
-					rad^=0x3e0;
-				else rad+=0x20;
-			}
+				rad += 0x20;
 		}
 		else
-			rad+=0x1000;
-		RefreshAddr=rad;
-		//PPU_hook(RefreshAddr); //,-1);
+			rad += 0x1000;
+		RefreshAddr = rad;
 	}
 }
 
