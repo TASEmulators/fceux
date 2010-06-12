@@ -313,7 +313,10 @@ static int emu_speedmode(lua_State *L) {
 	
 	//printf("new speed mode:  %d\n", speedmode);
         if (speedmode == SPEED_NORMAL) 
+		{
 			FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);
+			FCEUD_TurboOff();
+		}
         else if (speedmode == SPEED_TURBO)				//adelikat: Making turbo actually use turbo.
 			FCEUD_TurboOn();							//Turbo and max speed are two different results. Turbo employs frame skipping and sound bypassing if mute turbo option is enabled.
 												//This makes it faster but with frame skipping. Therefore, maximum is still a useful feature, in case the user is recording an avi or making screenshots (or something else that needs all frames)
