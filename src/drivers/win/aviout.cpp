@@ -15,7 +15,8 @@ extern PALETTEENTRY *color_palette;
 #define VIDEO_WIDTH		256
 
 //adelikat: TODO - perhaps put this in AVIFile
-bool				disableMovieMessages = false;
+bool disableMovieMessages = false;
+int AVICapture; //This initiates AVI capture mode with a frame number, on that frame number the AVI will stop, FCEUX will close, and a special return value will be set.  The intent is for this to be used in commandline 
 
 static struct AVIFile
 {

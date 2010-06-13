@@ -1,3 +1,4 @@
+13-june-2010 - adelikat - Win32 - avi capture commandline argument and related parameters
 12-june-2010 - adelikat - Save Turbo frame skip amount to config so that it can be customized by user
 12-june-2010 - adelikat - Lua - fix speed.mode() so that normal turns off turbo
 12-june-2010 - CaH4e3 - Fix Young Indiana Jones Chronicals

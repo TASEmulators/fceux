@@ -135,6 +135,8 @@ int soundNoisevol = 256;		//Sound channel Noise - volume control
 int soundPCMvol = 256;			//Sound channel PCM - volume control
 //-------------------------------------------------
 
+int KillFCEUXonFrame = 0; //TODO: clean up, this is used in fceux, move it over there?
+
 double saspectw = 1, saspecth = 1;
 double winsizemulx = 1, winsizemuly = 1;
 int genie = 0;
@@ -799,6 +801,15 @@ int main(int argc,char *argv[])
 		free(LuaToLoad);
 		LuaToLoad = NULL;
 	}
+	
+	//Initiates AVI capture mode, will set up proper settings, and close FCUEX once capturing is finished
+	if(AVICapture && AviToLoad)	//Must be used in conjunction with AviToLoad
+	{
+		//We want to disable flags that will pause the emulator
+		PauseAfterLoad = 0;
+		pauseAfterPlayback = 0;
+		KillFCEUXonFrame = AVICapture;
+	}
 
 	if(AviToLoad)
 	{
@@ -861,7 +872,7 @@ doloopy:
 	FCEUI_Kill();
 
 	delete debugSystem;
-
+		
 	return(0);
 }
 

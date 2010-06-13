@@ -29,6 +29,7 @@ char* ConfigToLoad = 0;		//Loads a specific .cfg file (loads before any other co
 char* LuaToLoad = 0;		//Loads a specific lua file
 char* PaletteToLoad = 0;	//Loads a specific palette file
 char* AviToLoad = 0;		//Starts an avi capture at startup
+
 extern bool turbo;
 
 // TODO: Parsing arguments needs to be improved a lot. A LOT.
@@ -61,6 +62,7 @@ char *ParseArgies(int argc, char *argv[])
 		 {"-pause",0,&PauseAfterLoad,0},
 		 {"-cfg",0,&ConfigToLoad,0x4001},
 		 {"-avi",0,&AviToLoad,0x4001},
+		 {"-avicapture",0,&AVICapture,0},
          {0, 0, 0, 0},
 	};
 

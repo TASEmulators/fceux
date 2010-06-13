@@ -692,6 +692,9 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	RamChange();
 	UpdateLogWindow();
 	//FCEUI_AviVideoUpdate(XBuf);
+	extern int KillFCEUXonFrame;
+	if (FCEUMOV_GetFrame() >= KillFCEUXonFrame)
+		DoFCEUExit();
 #endif
 
 	timestampbase += timestamp;

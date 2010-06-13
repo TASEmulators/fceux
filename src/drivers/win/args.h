@@ -7,4 +7,5 @@ extern char* AviToLoad;		//Contains the filename of the Avi to be captured speci
 extern bool replayReadOnlySetting;
 extern int replayStopFrameSetting;
 extern int PauseAfterLoad;
+extern int AVICapture;		//This initiates AVI capture mode with a frame number, on that frame number the AVI will stop, FCEUX will close, and a special return value will be set
 char *ParseArgies(int argc, char *argv[]);
