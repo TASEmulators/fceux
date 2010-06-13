@@ -1,19 +1,19 @@
 /* FCE Ultra - NES/Famicom Emulator
-* 
+*
 * Copyright notice for this file:
 *  Copyright (C) 1998 BERO
 *  Copyright (C) 2003 Xodnizel
-*  
+*
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or   
+* the Free Software Foundation; either version 2 of the License, or
 * (at your option) any later version.
-* 
+*
 * This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of 
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
-* 
+*
 * You should have received a copy of the GNU General Public License
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -42,7 +42,7 @@
 
 
 #define VBlankON  (PPU[0]&0x80)   //Generate VBlank NMI
-#define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8 
+#define Sprite16  (PPU[0]&0x20)   //Sprites 8x16/8x8
 #define BGAdrHI   (PPU[0]&0x10)   //BG pattern adr $0000/$1000
 #define SpAdrHI   (PPU[0]&0x08)   //Sprite pattern adr $0000/$1000
 #define INC32     (PPU[0]&0x04)   //auto increment 1/32
@@ -57,7 +57,7 @@
 
 #define PPU_status      (PPU[2])
 
-#define Pal     (PALRAM)   
+#define Pal     (PALRAM)
 
 static void FetchSpriteData(void);
 static void RefreshLine(int lastpixel);
@@ -155,7 +155,7 @@ struct PPUREGS {
 
 	//temp unlatched regs (need savestating, can be written to at any time)
     uint32 _fv, _v, _h, _vt, _ht;
-	
+
 	//other regs that need savestating
 	uint32 fh;//3 (horz scroll)
 	uint32 s;//1 ($2000 bit 4: "Background pattern table address (0: $0000; 1: $1000)")
@@ -172,11 +172,11 @@ struct PPUREGS {
 		fv = v = h = vt = ht = 0;
 		fh = par = s = 0;
 		_fv = _v = _h = _vt = _ht = 0;
-		status.cycle = 0; 
+		status.cycle = 0;
 		status.end_cycle = 341;
-		status.sl = 241; 
+		status.sl = 241;
 	}
-        
+
 	void install_latches() {
 		fv = _fv;
 		v = _v;
@@ -196,8 +196,8 @@ struct PPUREGS {
 	}
 
 	void increment_hsc() {
-		//The first one, the horizontal scroll counter, consists of 6 bits, and is 
-		//made up by daisy-chaining the HT counter to the H counter. The HT counter is 
+		//The first one, the horizontal scroll counter, consists of 6 bits, and is
+		//made up by daisy-chaining the HT counter to the H counter. The HT counter is
 		//then clocked every 8 pixel dot clocks (or every 8/3 CPU clock cycles).
 		ht++;
 		h += (ht>>5);
@@ -222,12 +222,12 @@ struct PPUREGS {
 	uint32 get_2007access() {
 		return ((fv&3)<<0xC) | (v<<0xB) | (h<<0xA) | (vt<<5) | ht;
 	}
-	
-	//The PPU has an internal 4-position, 2-bit shifter, which it uses for 
-	//obtaining the 2-bit palette select data during an attribute table byte 
-	//fetch. To represent how this data is shifted in the diagram, letters a..c 
-	//are used in the diagram to represent the right-shift position amount to 
-	//apply to the data read from the attribute data (a is always 0). This is why 
+
+	//The PPU has an internal 4-position, 2-bit shifter, which it uses for
+	//obtaining the 2-bit palette select data during an attribute table byte
+	//fetch. To represent how this data is shifted in the diagram, letters a..c
+	//are used in the diagram to represent the right-shift position amount to
+	//apply to the data read from the attribute data (a is always 0). This is why
 	//you only see bits 0 and 1 used off the read attribute data in the diagram.
 	uint32 get_atread() {
 		return 0x2000 | (v<<0xB) | (h<<0xA) | 0x3C0 | ((vt&0x1C)<<1) | ((ht&0x1C)>>2);
@@ -239,15 +239,15 @@ struct PPUREGS {
 	}
 
 	void increment2007(bool by32) {
-	
-		//If the VRAM address increment bit (2000.2) is clear (inc. amt. = 1), all the 
-		//scroll counters are daisy-chained (in the order of HT, VT, H, V, FV) so that 
-		//the carry out of each counter controls the next counter's clock rate. The 
-		//result is that all 5 counters function as a single 15-bit one. Any access to 
+
+		//If the VRAM address increment bit (2000.2) is clear (inc. amt. = 1), all the
+		//scroll counters are daisy-chained (in the order of HT, VT, H, V, FV) so that
+		//the carry out of each counter controls the next counter's clock rate. The
+		//result is that all 5 counters function as a single 15-bit one. Any access to
 		//2007 clocks the HT counter here.
 		//
-		//If the VRAM address increment bit is set (inc. amt. = 32), the only 
-		//difference is that the HT counter is no longer being clocked, and the VT 
+		//If the VRAM address increment bit is set (inc. amt. = 32), the only
+		//difference is that the HT counter is no longer being clocked, and the VT
 		//counter is now being clocked by access to 2007.
 		if(by32) {
 			vt++;
@@ -302,7 +302,7 @@ static void makeppulut(void)
 			//    printf("%08x\n",ppulut3[xo|(cc<<3)]);
 		}
 	}
-} 
+}
 
 static int ppudead=1;
 static int kook=0;
@@ -318,16 +318,16 @@ uint32 MMC5HackVROMMask=0;
 uint8 *MMC5HackExNTARAMPtr=0;
 uint8 *MMC5HackVROMPTR=0;
 uint8 MMC5HackCHRMode=0;
-uint8 MMC5HackSPMode=0;   
+uint8 MMC5HackSPMode=0;
 uint8 MMC50x5130=0;
-uint8 MMC5HackSPScroll=0; 
+uint8 MMC5HackSPScroll=0;
 uint8 MMC5HackSPPage=0;
 
 
 uint8 VRAMBuffer=0,PPUGenLatch=0;
 uint8 *vnapage[4];
-uint8 PPUNTARAM=0;  
-uint8 PPUCHRRAM=0;  
+uint8 PPUNTARAM=0;
+uint8 PPUCHRRAM=0;
 
 //Color deemphasis emulation.  Joy...
 static uint8 deemp=0;
@@ -341,7 +341,7 @@ uint8 XOffset=0;
 
 uint32 TempAddr=0,RefreshAddr=0;
 
-static int maxsprites=8;  
+static int maxsprites=8;
 
 //scanline is equal to the current visible scanline we're on.
 int scanline;
@@ -365,7 +365,7 @@ uint8 * MMC5BGVRAMADR(uint32 V) {
 		extern uint8 mmc5ABMode;                /* A=0, B=1 */
 		if(mmc5ABMode==0)
 			return MMC5SPRVRAMADR(V);
-		else 
+		else
 			return &MMC5BGVPage[(V)>>10][(V)];
 	} else return &MMC5BGVPage[(V)>>10][(V)];
 }
@@ -409,7 +409,7 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
     {
         if(PPUCHRRAM&(1<<(tmp>>10)))
             VPage[tmp>>10][tmp]=V;
-    }   
+    }
     else if (tmp<0x3F00)
     {
         if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
@@ -420,7 +420,7 @@ inline void FFCEUX_PPUWrite_Default(uint32 A, uint8 V) {
         if (!(tmp & 3))
         {
             if (!(tmp & 0xC))
-                  PALRAM[0x00] = PALRAM[0x04] = 
+                  PALRAM[0x00] = PALRAM[0x04] =
                   PALRAM[0x08] = PALRAM[0x0C] = V & 0x3F;
             else
                 UPALRAM[((tmp & 0xC) >> 2) - 1] = V & 0x3F;
@@ -440,7 +440,7 @@ uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
 		return VPage[tmp>>10][tmp];
 	}
 	else if (tmp < 0x3F00)
-	{   
+	{
 		return vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 	}
     else
@@ -455,7 +455,7 @@ uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A) {
         }
         else
             ret = PALRAM[tmp & 0x1F];
-            
+
         if (GRAYSCALE)
             ret &= 0x30;
         return ret;
@@ -484,7 +484,7 @@ void ppu_getScroll(int &xpos, int &ypos)
 	{
 		xpos = ((RefreshAddr & 0x400) >> 2) | ((RefreshAddr & 0x1F) << 3) | XOffset;
 
-		ypos = ((RefreshAddr & 0x3E0) >> 2) | ((RefreshAddr & 0x7000) >> 12); 
+		ypos = ((RefreshAddr & 0x3E0) >> 2) | ((RefreshAddr & 0x7000) >> 12);
 			if(RefreshAddr & 0x800) ypos += 240;
 	}
 }
@@ -498,7 +498,7 @@ static DECLFR(A2002)
 		//i think we should only reset the state machine for 2005/2006
 		//ppur.clear_latches();
 	}
-	
+
 	uint8 ret;
 
 	FCEUPPU_LineUpdate();
@@ -528,9 +528,9 @@ static DECLFR(A2004)
              * to 0xFF */
             if (ppur.status.cycle < 64)
                 return spr_read.ret = 0xFF;
-            else 
+            else
             {
-                for (int i = spr_read.last; 
+                for (int i = spr_read.last;
                      i != ppur.status.cycle; ++i)
                 {
                     if (i < 256)
@@ -539,11 +539,11 @@ static DECLFR(A2004)
                         {
                             case 0:
                                 if (spr_read.count < 2)
-                                    spr_read.ret = (PPU[3] & 0xF8) 
+                                    spr_read.ret = (PPU[3] & 0xF8)
                                     + (spr_read.count << 2);
                                 else
                                     spr_read.ret = spr_read.count << 2;
-                                spr_read.found_pos[spr_read.found] = 
+                                spr_read.found_pos[spr_read.found] =
                                     spr_read.ret;
 
                                 spr_read.ret = SPRAM[spr_read.ret];
@@ -551,8 +551,8 @@ static DECLFR(A2004)
                                 if (i & 1) //odd cycle
                                 {
                                     //see if in range
-                                    if ( !((ppur.status.sl - 1 - 
-                                            spr_read.ret) 
+                                    if ( !((ppur.status.sl - 1 -
+                                            spr_read.ret)
                                             & ~(Sprite16 ? 0xF : 0x7)) )
 
                                     {
@@ -560,7 +560,7 @@ static DECLFR(A2004)
                                         spr_read.fetch = 1;
                                         spr_read.mode = 1;
                                     }
-                                    else 
+                                    else
                                     {
                                         if (++spr_read.count == 64)
                                         {
@@ -598,23 +598,23 @@ static DECLFR(A2004)
                                 }
 
                                 if (spr_read.count < 2)
-                                    spr_read.ret = (PPU[3] & 0xF8) 
+                                    spr_read.ret = (PPU[3] & 0xF8)
                                         + (spr_read.count << 2);
                                 else
                                     spr_read.ret = spr_read.count << 2;
 
-                                spr_read.ret = SPRAM[spr_read.ret | 
+                                spr_read.ret = SPRAM[spr_read.ret |
                                     spr_read.fetch];
                                 break;
-                            case 2: //8th sprite fetched 
-                                spr_read.ret = SPRAM[(spr_read.count << 2) 
+                            case 2: //8th sprite fetched
+                                spr_read.ret = SPRAM[(spr_read.count << 2)
                                     | spr_read.fetch];
                                 if (i & 1)
                                 {
-                                    if ( !((ppur.status.sl - 1 - 
+                                    if ( !((ppur.status.sl - 1 -
                                               SPRAM[((spr_read.count << 2)
-                                                    | spr_read.fetch)]) 
-                                            & ~((Sprite16) ? 0xF : 0x7)) ) 
+                                                    | spr_read.fetch)])
+                                            & ~((Sprite16) ? 0xF : 0x7)) )
                                     {
                                         spr_read.fetch = 1;
                                         spr_read.mode = 3;
@@ -626,20 +626,20 @@ static DECLFR(A2004)
                                             spr_read.count = 0;
                                             spr_read.mode = 4;
                                         }
-                                        spr_read.fetch = 
+                                        spr_read.fetch =
                                             (spr_read.fetch + 1) & 3;
                                     }
                                 }
                                 spr_read.ret = spr_read.count;
                                 break;
                             case 3: //9th sprite overflow detected
-                                spr_read.ret = SPRAM[spr_read.count 
+                                spr_read.ret = SPRAM[spr_read.count
                                                | spr_read.fetch];
                                 if (i & 1)
                                 {
                                     if (++spr_read.fetch == 4)
                                     {
-                                        spr_read.count = (spr_read.count 
+                                        spr_read.count = (spr_read.count
                                                 + 1) & 63;
                                         spr_read.mode = 4;
                                     }
@@ -647,7 +647,7 @@ static DECLFR(A2004)
                                 break;
                             case 4: //read OAM[n][0] until hblank
                                 if (i & 1)
-                                    spr_read.count = 
+                                    spr_read.count =
                                         (spr_read.count + 1) & 63;
                                 spr_read.fetch = 0;
                                 spr_read.ret = SPRAM[spr_read.count << 2];
@@ -664,13 +664,13 @@ static DECLFR(A2004)
                                 spr_read.ret = SPRAM[252];
                                 spr_read.num = 0;
                             }
-                            else 
+                            else
                                 spr_read.ret = 0xFF;
                         }
                         else if ((i & 7) < 4)
-                        { 
-                            spr_read.ret = 
-                                SPRAM[spr_read.found_pos[spr_read.ret] 
+                        {
+                            spr_read.ret =
+                                SPRAM[spr_read.found_pos[spr_read.ret]
                                       | spr_read.fetch++];
                             if (spr_read.fetch == 4)
                                 spr_read.fetch = 0;
@@ -679,7 +679,7 @@ static DECLFR(A2004)
                             spr_read.ret = SPRAM[spr_read.found_pos
                                                  [spr_read.ret | 3]];
                     }
-                    else 
+                    else
                     {
                         if (!spr_read.found)
                             spr_read.ret = SPRAM[252];
@@ -716,7 +716,7 @@ uint8 ret;
 FCEUPPU_LineUpdate();
 ret = SPRAM[PPU[3]];
 
-if(PPUSPL>=8) 
+if(PPUSPL>=8)
 {
 if(PPU[3]>=8)
 ret = SPRAM[PPU[3]];
@@ -743,7 +743,7 @@ static DECLFR(A2007)
 		RefreshAddr = ppur.get_2007access() & 0x3FFF;
         if ((RefreshAddr & 0x3F00) == 0x3F00)
         {
-            //if it is in the palette range bypass the 
+            //if it is in the palette range bypass the
             //delayed read, and what gets filled in the temp
             //buffer is the address - 0x1000, also
             //if grayscale is set then the return is AND with 0x30
@@ -782,7 +782,7 @@ static DECLFR(A2007)
 				VRAMBuffer=VPage[tmp>>10][tmp];
 			}
 			else if (tmp < 0x3F00)
-			{   
+			{
 				VRAMBuffer=vnapage[(tmp>>10)&0x3][tmp&0x3FF];
 			}
 		}
@@ -790,8 +790,24 @@ static DECLFR(A2007)
 		if(!fceuindbg)
 	#endif
 		{
-			if(scanline<240)
-				Fixit1();
+			if((ScreenON || SpriteON) && (scanline < 240))
+			{
+				uint32 rad=RefreshAddr;
+
+				if((rad&0x7000)==0x7000)
+				{
+					rad^=0x7000;
+					if((rad&0x3E0)==0x3A0)
+						rad^=0xBA0;
+					else if((rad&0x3E0)==0x3e0)
+						rad^=0x3e0;
+					else
+						rad+=0x20;
+				}
+				else
+					rad+=0x1000;
+				RefreshAddr=rad;
+			}
 			else
 			{
 				if (INC32)
@@ -861,17 +877,17 @@ static DECLFW(B2004)
         if ((PPU[3] & 3) == 2)
             V &= 0xE3;
         SPRAM[PPU[3]] = V;
-        PPU[3] = (PPU[3] + 1) & 0xFF; 
-    }  
+        PPU[3] = (PPU[3] + 1) & 0xFF;
+    }
     else
     {
-        if(PPUSPL>=8) 
+        if(PPUSPL>=8)
         {
             if(PPU[3]>=8)
                 SPRAM[PPU[3]]=V;
         }
         else
-        {   
+        {
             //printf("$%02x:$%02x\n",PPUSPL,V);
             SPRAM[PPUSPL]=V;
         }
@@ -888,13 +904,13 @@ static DECLFW(B2005)
 	if(!vtoggle)
 	{
 		tmp&=0xFFE0;
-		tmp|=V>>3;  
+		tmp|=V>>3;
 		XOffset=V&7;
 		ppur._ht = V>>3;
 		ppur.fh = V&7;
 	}
 	else
-	{   
+	{
 		tmp&=0x8C1F;
 		tmp|=((V&~0x7)<<2);
 		tmp|=(V&7)<<12;
@@ -902,7 +918,7 @@ static DECLFW(B2005)
 		ppur._fv = V&7;
 	}
 	TempAddr=tmp;
-	vtoggle^=1;  
+	vtoggle^=1;
 }
 
 
@@ -913,11 +929,11 @@ static DECLFW(B2006)
 
 
 	PPUGenLatch=V;
-	if(!vtoggle)  
+	if(!vtoggle)
 	{
 		TempAddr&=0x00FF;
 		TempAddr|=(V&0x3f)<<8;
-		
+
 		ppur._vt &= 0x07;
 		ppur._vt |= (V&0x3)<<3;
 		ppur._h = (V>>2)&1;
@@ -925,7 +941,7 @@ static DECLFW(B2006)
 		ppur._fv = (V>>4)&3;
 	}
  	else
-	{   
+	{
 		TempAddr&=0xFF00;
 		TempAddr|=V;
 
@@ -954,7 +970,7 @@ static DECLFW(B2007)
 		//printf("%04x ",RefreshAddr);
 		ppur.increment2007(INC32!=0);
 		RefreshAddr = ppur.get_2007access();
-	} 
+	}
 	else
 	{
 		//printf("%04x ",tmp);
@@ -970,7 +986,7 @@ static DECLFW(B2007)
 		{
 			if(PPUCHRRAM&(1<<(tmp>>10)))
 				VPage[tmp>>10][tmp]=V;
-		}   
+		}
 		else
 		{
 			if(PPUNTARAM&(1<<((tmp&0xF00)>>10)))
@@ -997,7 +1013,7 @@ static DECLFW(B4014)
 #define GETLASTPIXEL    (PAL?((timestamp*48-linestartts)/15) : ((timestamp*48-linestartts)>>4) )
 
 static uint8 *Pline,*Plinef;
-static int firsttile;  
+static int firsttile;
 int linestartts;	//no longer static so the debugger can see it
 static int tofix=0;
 
@@ -1006,12 +1022,12 @@ static void ResetRL(uint8 *target)
 	memset(target,0xFF,256);
 	InputScanlineHook(0,0,0,0);
 	Plinef=target;
-	Pline=target; 
+	Pline=target;
 	firsttile=0;
 	linestartts=timestamp*48+X.count;
 	tofix=0;
 	FCEUPPU_LineUpdate();
-	tofix=1;  
+	tofix=1;
 }
 
 static uint8 sprlinebuf[256+8];
@@ -1026,7 +1042,7 @@ void FCEUPPU_LineUpdate(void)
 			int l=GETLASTPIXEL;
 			RefreshLine(l);
 		}
-} 
+}
 
 static bool rendersprites=true, renderbg=true;
 
@@ -1055,10 +1071,10 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg)
 //{
 //	uint8 *P=XBuf+16*256;
 //	int bgh;
-//	int y;  
-//	int X1; 
+//	int y;
+//	int X1;
 //	for(bgh=0;bgh<2;bgh++)
-//		for(y=0;y<16*8;y++)   
+//		for(y=0;y<16*8;y++)
 //			for(P=XBuf+bgh*128+(16+y)*256,X1=16;X1;X1--,P+=8)
 //			{
 //				uint8 *C;
@@ -1073,7 +1089,7 @@ void FCEUI_GetRenderPlanes(bool& sprites, bool& bg)
 //				cc=0;
 //				//#include "pputile.inc"
 //			}
-//} 
+//}
 
 static void CheckSpriteHit(int p);
 
@@ -1099,7 +1115,7 @@ static void CheckSpriteHit(int p)
 	for(x=sphitx;x<(sphitx+8) && x<l;x++)
 	{
 
-        if((sphitdata&(0x80>>(x-sphitx))) && !(Plinef[x]&64) && x < 255) 
+        if((sphitdata&(0x80>>(x-sphitx))) && !(Plinef[x]&64) && x < 255)
 		{
 			PPU_status|=0x40;
 			//printf("Ha:  %d, %d, Hita: %d, %d, %d, %d, %d\n",p,p&~7,scanline,GETLASTPIXEL-16,&Plinef[x],Pline,Pline-Plinef);
@@ -1110,12 +1126,12 @@ static void CheckSpriteHit(int p)
 			break;
 		}
 	}
-}   
+}
 
-//spork the world.  Any sprites on this line? Then this will be set to 1.  
+//spork the world.  Any sprites on this line? Then this will be set to 1.
 //Needed for zapper emulation and *gasp* sprite emulation.
-static int spork=0;     
-						
+static int spork=0;
+
 // lasttile is really "second to last tile."
 static void RefreshLine(int lastpixel)
 {
@@ -1176,7 +1192,7 @@ static void RefreshLine(int lastpixel)
 			tofix=0;
 		}
 
-		if((lastpixel-16)>=0) 
+		if((lastpixel-16)>=0)
 		{
 			InputScanlineHook(Plinef,spork?sprlinebuf:0,linestartts,lasttile*8-16);
 		}
@@ -1184,12 +1200,12 @@ static void RefreshLine(int lastpixel)
 	}
 
 	//Priority bits, needed for sprite emulation.
-	Pal[0]|=64; 
+	Pal[0]|=64;
 	Pal[4]|=64;
 	Pal[8]|=64;
 	Pal[0xC]|=64;
 
-	//This high-level graphics MMC5 emulation code was written for MMC5 carts in "CL" mode.  
+	//This high-level graphics MMC5 emulation code was written for MMC5 carts in "CL" mode.
 	//It's probably not totally correct for carts in "SL" mode.
 
 #define PPUT_MMC5
@@ -1209,7 +1225,7 @@ static void RefreshLine(int lastpixel)
 				}
 				else
 				{
-#include "pputile.inc"	    
+#include "pputile.inc"
 				}
 				tochange--;
 			}
@@ -1269,16 +1285,16 @@ static void RefreshLine(int lastpixel)
 #undef RefreshAddr
 
 	//Reverse changes made before.
-	Pal[0]&=63; 
+	Pal[0]&=63;
 	Pal[4]&=63;
 	Pal[8]&=63;
 	Pal[0xC]&=63;
 
 	RefreshAddr=smorkus;
-	if(firsttile<=2 && 2<lasttile && !(PPU[1]&2)) 
+	if(firsttile<=2 && 2<lasttile && !(PPU[1]&2))
 	{
 		uint32 tem;
-		tem=Pal[0]|(Pal[0]<<8)|(Pal[0]<<16)|(Pal[0]<<24);  
+		tem=Pal[0]|(Pal[0]<<8)|(Pal[0]<<16)|(Pal[0]<<24);
 		tem|=0x40404040;
 		*(uint32 *)Plinef=*(uint32 *)(Plinef+4)=tem;
 	}
@@ -1311,8 +1327,8 @@ static void RefreshLine(int lastpixel)
 	//CheckSpriteHit(lasttile*8); //lasttile*8); //lastpixel);
 
 	//This only works right because of a hack earlier in this function.
-	CheckSpriteHit(lastpixel);  
-	
+	CheckSpriteHit(lastpixel);
+
 	if((lastpixel-16)>=0)
 	{
 		InputScanlineHook(Plinef,spork?sprlinebuf:0,linestartts,lasttile*8-16);
@@ -1592,9 +1608,9 @@ static void FetchSpriteData(void)
 		}
 		//if(ns>=7)
 		//printf("%d %d\n",scanline,ns);
-		
-		//Handle case when >8 sprites per scanline option is enabled. 
-		if(ns>8) PPU_status|=0x20;  
+
+		//Handle case when >8 sprites per scanline option is enabled.
+		if(ns>8) PPU_status|=0x20;
 		else if(PPU_hook)
 		{
 			for(n=0;n<(8-ns);n++)
@@ -1646,13 +1662,13 @@ static void RefreshSprites(void)
 					((J>>1)&0x08) |
 					((J>>3)&0x04) |
 					((J>>5)&0x02) |
-					((J>>7)&0x01);                                          
+					((J>>7)&0x01);
 			}
 
 			C = sprlinebuf+x;
 			VB = (PALRAM+0x10)+((atr&3)<<2);
 
-			if(atr&SP_BACK) 
+			if(atr&SP_BACK)
 			{
 				if(atr&H_FLIP)
 				{
@@ -1672,9 +1688,9 @@ static void RefreshSprites(void)
 					pixdata>>=4;
 					if(J&0x01) C[0]=VB[pixdata]|0x40;
 				} else  {
-					if(J&0x80) C[0]=VB[pixdata&3]|0x40;   
+					if(J&0x80) C[0]=VB[pixdata&3]|0x40;
 					pixdata>>=4;
-					if(J&0x40) C[1]=VB[pixdata&3]|0x40;   
+					if(J&0x40) C[1]=VB[pixdata&3]|0x40;
 					pixdata>>=4;
 					if(J&0x20) C[2]=VB[pixdata&3]|0x40;
 					pixdata>>=4;
@@ -1691,9 +1707,9 @@ static void RefreshSprites(void)
 			} else {
 				if(atr&H_FLIP)
 				{
-					if(J&0x80) C[7]=VB[pixdata&3];   
+					if(J&0x80) C[7]=VB[pixdata&3];
 					pixdata>>=4;
-					if(J&0x40) C[6]=VB[pixdata&3];   
+					if(J&0x40) C[6]=VB[pixdata&3];
 					pixdata>>=4;
 					if(J&0x20) C[5]=VB[pixdata&3];
 					pixdata>>=4;
@@ -1706,10 +1722,10 @@ static void RefreshSprites(void)
 					if(J&0x02) C[1]=VB[pixdata&3];
 					pixdata>>=4;
 					if(J&0x01) C[0]=VB[pixdata];
-				}else{                 
-					if(J&0x80) C[0]=VB[pixdata&3];   
+				}else{
+					if(J&0x80) C[0]=VB[pixdata&3];
 					pixdata>>=4;
-					if(J&0x40) C[1]=VB[pixdata&3];   
+					if(J&0x40) C[1]=VB[pixdata&3];
 					pixdata>>=4;
 					if(J&0x20) C[2]=VB[pixdata&3];
 					pixdata>>=4;
@@ -1839,7 +1855,7 @@ void PPU_ResetHooks()
 
 void FCEUPPU_Reset(void)
 {
-	VRAMBuffer=PPU[0]=PPU[1]=PPU_status=PPU[3]=0;   
+	VRAMBuffer=PPU[0]=PPU[1]=PPU_status=PPU[3]=0;
 	PPUSPL=0;
 	PPUGenLatch=0;
 	RefreshAddr=TempAddr=0;
@@ -1860,7 +1876,7 @@ void FCEUPPU_Power(void)
 	memset(NTARAM,0x00,0x800);
 	memset(PALRAM,0x00,0x20);
     memset(UPALRAM,0x00,0x03);
-	memset(SPRAM,0x00,0x100); 
+	memset(SPRAM,0x00,0x100);
 	FCEUPPU_Reset();
 
 	for(x=0x2000;x<0x4000;x+=8)
@@ -1903,12 +1919,12 @@ int FCEUPPU_Loop(int skip)
 	{
 		X6502_Run(256+85);
 		PPU_status |= 0x80;
-		
+
 		//Not sure if this is correct.  According to Matt Conte and my own tests, it is.
-		//Timing is probably off, though.  
-		//NOTE:  Not having this here breaks a Super Donkey Kong game. 
-		PPU[3]=PPUSPL=0;       
-							   
+		//Timing is probably off, though.
+		//NOTE:  Not having this here breaks a Super Donkey Kong game.
+		PPU[3]=PPUSPL=0;
+
 		//I need to figure out the true nature and length of this delay.
 		X6502_Run(12);
 		if(GameInfo->type==GIT_NSF)
@@ -1918,7 +1934,7 @@ int FCEUPPU_Loop(int skip)
 			if(VBlankON)
 				TriggerNMI();
 		}
-		X6502_Run((scanlines_per_frame-242)*(256+85)-12); //-12); 
+		X6502_Run((scanlines_per_frame-242)*(256+85)-12); //-12);
 		PPU_status&=0x1f;
 		X6502_Run(256);
 
@@ -1936,9 +1952,9 @@ int FCEUPPU_Loop(int skip)
 			}
 			X6502_Run(85-16);
 			if(ScreenON || SpriteON)
-			{  
-				RefreshAddr=TempAddr;  
-				if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);  
+			{
+				RefreshAddr=TempAddr;
+				if(PPU_hook) PPU_hook(RefreshAddr&0x3fff);
 			}
 
 			//Clean this stuff up later.
@@ -1968,7 +1984,7 @@ int FCEUPPU_Loop(int skip)
 						GameHBIRQHook();
 					if(scanline==y && SpriteON) PPU_status|=0x40;
 					X6502_Run((scanline==239)?85:(256+85));
-				}    
+				}
 			}
 			else if(y<240)
 			{
@@ -1991,11 +2007,11 @@ int FCEUPPU_Loop(int skip)
 				DEBUG(FCEUD_UpdatePPUView(scanline, 1));
 				DoLine();
 			}
-			
+
 			if(MMC5Hack && (ScreenON || SpriteON)) MMC5_hb(scanline);
 			for(x=1,max=0,maxref=0;x<7;x++)
 			{
-				
+
 				if(deempcnt[x]>max)
 				{
 					max=deempcnt[x];
@@ -2009,7 +2025,7 @@ int FCEUPPU_Loop(int skip)
 		}
 	} //else... to if(ppudead)
 
-#ifdef FRAMESKIP   
+#ifdef FRAMESKIP
 	if(skip)
 	{
 		FCEU_PutImageDummy();
@@ -2020,9 +2036,9 @@ int FCEUPPU_Loop(int skip)
 	{
 		//mbg 6/21/08 - tileview is being ripped out since i dont know how long its been since it worked
 		//if(tileview) TileView();
-		FCEU_PutImage();     
+		FCEU_PutImage();
 		return(1);
-	}   
+	}
 }
 
 int (*PPU_MASTER)(int skip) = FCEUPPU_Loop;
@@ -2089,7 +2105,7 @@ SFORMAT FCEU_NEWPPU_STATEINFO[] = {
 
 void FCEUPPU_SaveState(void)
 {
-	TempAddrT=TempAddr;   
+	TempAddrT=TempAddr;
 	RefreshAddrT=RefreshAddr;
 }
 
@@ -2104,7 +2120,7 @@ void runppu(int x) {
 	//pputime+=x;
 	//if(cputodo<200) return;
 
-    ppur.status.cycle = (ppur.status.cycle + x) % 
+    ppur.status.cycle = (ppur.status.cycle + x) %
                            ppur.status.end_cycle;
 
 	X6502_Run(x);
@@ -2123,7 +2139,7 @@ struct BGData {
 
 				RefreshAddr = ppur.get_atread();
 				at = CALL_PPUREAD(RefreshAddr);
-				
+
 				//modify at to get appropriate palette shift
 				if(ppur.vt&2) at >>= 4;
 				if(ppur.ht&2) at >>= 2;
@@ -2135,11 +2151,11 @@ struct BGData {
                 if (PPUON)
                 {
 			        ppur.increment_hsc();
-                    if (ppur.status.cycle == 251) 
+                    if (ppur.status.cycle == 251)
                         ppur.increment_vs();
                 }
                 runppu(1);
-				
+
                 ppur.par = nt;
 				RefreshAddr = ppur.get_ptread();
 				pt[0] = CALL_PPUREAD(RefreshAddr);
@@ -2174,35 +2190,35 @@ int FCEUX_PPU_Loop(int skip) {
         --ppudead;
         goto finish;
     }
-   
+
 	{
 		PPU_status |= 0x80;
 		ppuphase = PPUPHASE_VBL;
-		
+
 		//Not sure if this is correct.  According to Matt Conte and my own tests, it is.
-		//Timing is probably off, though.  
-		//NOTE:  Not having this here breaks a Super Donkey Kong game. 
-		PPU[3]=PPUSPL=0;       
+		//Timing is probably off, though.
+		//NOTE:  Not having this here breaks a Super Donkey Kong game.
+		PPU[3]=PPUSPL=0;
 		const int delay = 20; //fceu used 12 here but I couldnt get it to work in marble madness and pirates.
-        
+
         ppur.status.sl = 241; //for sprite reads
-		
+
         runppu(delay); //X6502_Run(12);
 		if(VBlankON) TriggerNMI();
         if (PAL)
             runppu(70*(kLineTime)-delay);
         else
 		    runppu(20*(kLineTime)-delay);
-        
+
 		//this seems to run just before the dummy scanline begins
 		PPU_status = 0;
 		//this early out caused metroid to fail to boot. I am leaving it here as a reminder of what not to do
 		//if(!PPUON) { runppu(kLineTime*242); goto finish; }
 
-		//There are 2 conditions that update all 5 PPU scroll counters with the 
-		//contents of the latches adjacent to them. The first is after a write to 
-		//2006/2. The second, is at the beginning of scanline 20, when the PPU starts 
-		//rendering data for the first time in a frame (this update won't happen if 
+		//There are 2 conditions that update all 5 PPU scroll counters with the
+		//contents of the latches adjacent to them. The first is after a write to
+		//2006/2. The second, is at the beginning of scanline 20, when the PPU starts
+		//rendering data for the first time in a frame (this update won't happen if
 		//all rendering is disabled via 2001.3 and 2001.4).
 
 		//if(PPUON)
@@ -2230,7 +2246,7 @@ int FCEUX_PPU_Loop(int skip) {
 			}
 
 			if(sl != 0) if(MMC5Hack && PPUON) MMC5_hb(yp);
-			
+
 
 			//twiddle the oam buffers
 			const int scanslot = oamslot^1;
@@ -2238,7 +2254,7 @@ int FCEUX_PPU_Loop(int skip) {
 			oamslot ^= 1;
 
 			oamcount = oamcounts[renderslot];
-			
+
 			//the main scanline rendering loop:
 			//32 times, we will fetch a tile and then render 8 pixels.
 			//two of those tiles were read in the last scanline.
@@ -2265,7 +2281,7 @@ int FCEUX_PPU_Loop(int skip) {
 						const int bgpos = rasterpos + ppur.fh;
 						const int bgpx = bgpos&7;
 						const int bgtile = bgpos>>3;
-						
+
 						uint8 pixel=0, pixelcolor;
 
 						//generate the BG data
@@ -2280,7 +2296,7 @@ int FCEUX_PPU_Loop(int skip) {
 						bool havepixel = false;
 						for(int s=0;s<oamcount;s++) {
 							uint8* oam = oams[renderslot][s];
-							int x = oam[3]; 
+							int x = oam[3];
 							if(rasterpos>=x && rasterpos<x+8) {
 								//build the pixel.
 								//fetch the LSB of the patterns
@@ -2322,7 +2338,7 @@ int FCEUX_PPU_Loop(int skip) {
 							}
 						}
 
-						//fceu rendering system requires that this be set 
+						//fceu rendering system requires that this be set
 						//(so that it knows there is a valid pixel there?)
 						pixelcolor |= 0x80;
 						*ptr++ = pixelcolor;
@@ -2348,8 +2364,8 @@ int FCEUX_PPU_Loop(int skip) {
 					//just copy some bytes into the internal sprite buffer
 					for(int j=0;j<4;j++)
 						oams[scanslot][oamcount][j] = spr[j];
-					
-					//note that we stuff the oam index into [6]. 
+
+					//note that we stuff the oam index into [6].
 					//i need to turn this into a struct so we can have fewer magic numbers
 					oams[scanslot][oamcount][6] = (uint8)i;
 					oamcount++;
@@ -2358,11 +2374,11 @@ int FCEUX_PPU_Loop(int skip) {
 			oamcounts[scanslot] = oamcount;
 
 			//FV is clocked by the PPU's horizontal blanking impulse, and therefore will increment every scanline.
-			//well, according to (which?) tests, maybe at the end of hblank. 
+			//well, according to (which?) tests, maybe at the end of hblank.
 			//but, according to what it took to get crystalis working, it is at the beginning of hblank.
-            
-            //this is done at cycle 251 
-            //rendering scanline, it doesn't need to be scanline 0, 
+
+            //this is done at cycle 251
+            //rendering scanline, it doesn't need to be scanline 0,
             //because on the first scanline when the increment is 0, the vs_scroll is reloaded.
 			//if(PPUON && sl != 0)
 			//	ppur.increment_vs();
@@ -2370,9 +2386,9 @@ int FCEUX_PPU_Loop(int skip) {
 			//todo - think about clearing oams to a predefined value to force deterministic behavior
 
 			//so.. this is the end of hblank. latch horizontal scroll values
-            //do it cycle at 251 
+            //do it cycle at 251
 			 if(PPUON && sl != 0)
-				ppur.install_h_latches(); 
+				ppur.install_h_latches();
 
 			ppuphase = PPUPHASE_OBJ;
 
@@ -2380,7 +2396,7 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int s=0;s<maxsprites;s++) {
 
 				//if we have hit our eight sprite pattern and we dont have any more sprites, then bail
-				if(s==oamcount && s>=8) 
+				if(s==oamcount && s>=8)
 					break;
 
 				//if this is a real sprite sprite, then it is not above the 8 sprite limit.
@@ -2430,7 +2446,7 @@ int FCEUX_PPU_Loop(int skip) {
                     else
                         runppu(kFetchTime);
                 }
-                //Dragon's Lair (Europe version mapper 4) 
+                //Dragon's Lair (Europe version mapper 4)
                 //does not set SpriteON in the beginning but it does
                 //set the bg on so if using the conditional SpriteON the MMC3 counter
                 //the counter will never count and no IRQs will be fired so use PPUON
@@ -2471,12 +2487,12 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int xt=0;xt<2;xt++)
 				bgdata.main[xt].Read();
 
-			//I'm unclear of the reason why this particular access to memory is made. 
-			//The nametable address that is accessed 2 times in a row here, is also the 
-			//same nametable address that points to the 3rd tile to be rendered on the 
-			//screen (or basically, the first nametable address that will be accessed when 
+			//I'm unclear of the reason why this particular access to memory is made.
+			//The nametable address that is accessed 2 times in a row here, is also the
+			//same nametable address that points to the 3rd tile to be rendered on the
+			//screen (or basically, the first nametable address that will be accessed when
 			//the PPU is fetching background data on the next scanline).
-			//(not implemented yet) 
+			//(not implemented yet)
 			runppu(kFetchTime);
             if (sl == 0)
             {
@@ -2490,9 +2506,9 @@ int FCEUX_PPU_Loop(int skip) {
                 ppur.status.end_cycle = 341;
 			runppu(kFetchTime);
 
-            //After memory access 170, the PPU simply rests for 4 cycles (or the 
-			//equivelant of half a memory access cycle) before repeating the whole 
-			//pixel/scanline rendering process. If the scanline being rendered is the very 
+            //After memory access 170, the PPU simply rests for 4 cycles (or the
+			//equivelant of half a memory access cycle) before repeating the whole
+			//pixel/scanline rendering process. If the scanline being rendered is the very
 			//first one on every second frame, then this delay simply doesn't exist.
             if (ppur.status.end_cycle == 341)
                 runppu(1);
