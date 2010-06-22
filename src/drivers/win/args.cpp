@@ -57,6 +57,7 @@ char *ParseArgies(int argc, char *argv[])
          {"-inputdisplay",0,&input_display,0},
          {"-allowUDLR",0,&allowUDLR,0},
          {"-stopmovie",0,&pauseAfterPlayback,0},
+         {"-shutmovie",0,&closeFinishedMovie,0},
          {"-bginput",0,&EnableBackgroundInput,0},
          {"-turbo",0,&turbo,0},
 		 {"-pause",0,&PauseAfterLoad,0},

@@ -46,6 +46,7 @@ extern int frame_display;
 extern int input_display;
 extern int allowUDLR;
 extern int pauseAfterPlayback;
+extern int closeFinishedMovie;
 extern int EnableBackgroundInput;
 extern int AFon;
 extern int AFoff;

@@ -277,6 +277,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(MLogPosY),
 
 	AC(pauseAfterPlayback),
+	AC(closeFinishedMovie),
 	AC(AFon),
 	AC(AFoff),
 	AC(AutoFireOffset),

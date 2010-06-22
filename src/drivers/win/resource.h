@@ -483,6 +483,7 @@
 #define DEBUGLOADDEB                    1258
 #define IDC_CHECK2                      1258
 #define IDC_SINGLEINSTANCE              1258
+#define IDC_MOVIE_CLOSEAFTERPLAYBACK    1258
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042

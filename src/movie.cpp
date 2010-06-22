@@ -745,6 +745,26 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 	return true;
 }
 
+/// Stop movie playback.
+static void StopPlayback()
+{
+	FCEU_DispMessageOnMovie("Movie playback stopped.");
+	movieMode = MOVIEMODE_INACTIVE;
+}
+
+// Stop movie playback without closing the movie.
+static void FinishPlayback()
+{
+	extern int closeFinishedMovie;
+	if (closeFinishedMovie)
+		StopPlayback();
+	else
+	{
+		FCEU_DispMessage("Movie finished playing.",0);
+		movieMode = MOVIEMODE_FINISHED;
+	}
+}
+
 static void closeRecordingMovie()
 {
 	if(osRecordingMovie)
@@ -754,23 +774,14 @@ static void closeRecordingMovie()
 	}
 }
 
-/// Stop movie playback.
-static void StopPlayback()
-{
-	FCEU_DispMessageOnMovie("Movie playback stopped.");
-	movieMode = MOVIEMODE_INACTIVE;
-}
-
 /// Stop movie recording
 static void StopRecording()
 {
 	FCEU_DispMessage("Movie recording stopped.",0);
-
 	movieMode = MOVIEMODE_INACTIVE;
 	
 	closeRecordingMovie();
 }
-
 
 void FCEUI_StopMovie()
 {
@@ -1069,14 +1080,6 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 }
 
 static int _currCommand = 0;
-
-
-// Stop movie playback without closing the movie.
-static void FinishPlayback()
-{
-	FCEU_DispMessage("Movie finished playing.",0);
-	movieMode = MOVIEMODE_FINISHED;
-}
 
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie

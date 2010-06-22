@@ -684,6 +684,7 @@ int main(int argc,char *argv[])
         frame_display = !!frame_display;
         allowUDLR = !!allowUDLR;
         pauseAfterPlayback = !!pauseAfterPlayback;
+        closeFinishedMovie = !!closeFinishedMovie;
         EnableBackgroundInput = !!EnableBackgroundInput;
 
 		KeyboardSetBackgroundAccess(EnableBackgroundInput!=0);
