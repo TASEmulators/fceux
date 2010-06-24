@@ -57,6 +57,8 @@ extern bool MaxSpeed;
 
 bool turbo = false;
 
+int closeFinishedMovie = 0;
+
 int CloseGame(void);
 
 static int inited = 0;	
