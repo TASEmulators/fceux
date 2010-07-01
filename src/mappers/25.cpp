@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- * (VRC4 mapper)
+ * (VRCII mapper)
  */
 
 #include "mapinc.h"
@@ -26,9 +26,20 @@
 #define K4sel mapbyte1[0]
 
 static int acount=0;
+static int weirdo=0;
 static DECLFW(Mapper25_write)
 {
-        A=(A&0xF003)|((A&0xC)>>2);
+        if(A==0xC007)
+		{
+			weirdo=8; // Ganbare Goemon Gaiden does strange things!!! at the end credits
+		              // quick dirty hack, seems there is no other games with such PCB, so
+		              // we never know if it will not work for something else lol
+			VROM_BANK1(0x0000,0xFC);
+			VROM_BANK1(0x0400,0xFD);
+			VROM_BANK1(0x0800,0xFF);
+		}
+
+		A=(A&0xF003)|((A&0xC)>>2);
 
         if((A&0xF000)==0xA000)
           ROM_BANK8(0xA000,V);
@@ -38,7 +49,10 @@ static DECLFW(Mapper25_write)
 
          K4buf[x]&=(0xF0)>>((A&2)<<1);
          K4buf[x]|=(V&0xF)<<((A&2)<<1);
-         VROM_BANK1(x<<10,K4buf[x]);
+		 if(weirdo)
+			weirdo--;
+		 else
+			VROM_BANK1(x<<10,K4buf[x]);
         }
         else if((A&0xF000)==0x8000)
         {
