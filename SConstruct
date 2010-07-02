@@ -70,6 +70,7 @@ else:
   ### Lua platform defines
   ### Applies to all files even though only lua needs it, but should be ok
   if env['LUA']:
+    env.Append(CPPDEFINES=["_S9XLUA_H"])
     if env['PLATFORM'] == 'darwin':
       # Define LUA_USE_MACOSX otherwise we can't bind external libs from lua
       env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])      
@@ -93,7 +94,6 @@ else:
   # parse SDL cflags/libs
   env.ParseConfig('sdl-config --cflags --libs')
   
-  env.Append(CPPDEFINES=["_S9XLUA_H"])
   env = conf.Finish()
 
 if sys.byteorder == 'little' or env['PLATFORM'] == 'win32':
