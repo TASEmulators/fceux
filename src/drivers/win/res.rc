@@ -417,6 +417,7 @@ BEGIN
         MENUITEM "&Edit Watch\tE",              IDC_C_WATCH_EDIT
         MENUITEM "&Remove Watch\tR",            IDC_C_WATCH_REMOVE
         MENUITEM "Duplicate Watch\tA",          IDC_C_WATCH_DUPLICATE
+        MENUITEM "Add &Separator\tS",           IDC_C_WATCH_SEPARATE
         MENUITEM SEPARATOR
         MENUITEM "Move Up\tU",                  IDC_C_WATCH_UP
         MENUITEM "Move Down\tD",                IDC_C_WATCH_DOWN
@@ -1642,9 +1643,10 @@ BEGIN
     PUSHBUTTON      "Remove",IDC_C_WATCH_REMOVE,226,83,34,14
     PUSHBUTTON      "New",IDC_C_WATCH,226,100,34,14
     PUSHBUTTON      "Duplicate",IDC_C_WATCH_DUPLICATE,226,117,34,14
-    PUSHBUTTON      "Add Cheat",IDC_C_ADDCHEAT,222,140,42,16,WS_DISABLED
-    GROUPBOX        "Watches",IDC_STATIC,222,11,42,125
+    PUSHBUTTON      "Add Cheat",IDC_C_ADDCHEAT,223,168,42,16,WS_DISABLED
+    GROUPBOX        "Watches",IDC_STATIC,222,11,42,145
     CONTROL         "",ID_WATCHES_UPDOWN,"msctls_updown32",WS_TABSTOP,232,23,19,36
+    PUSHBUTTON      "Separator",IDC_C_WATCH_SEPARATE,225,137,36,14
 END
 
 IDD_EDITWATCH DIALOGEX 0, 0, 181, 95
@@ -1853,6 +1855,14 @@ BEGIN
         RIGHTMARGIN, 374
         TOPMARGIN, 8
         BOTTOMMARGIN, 268
+    END
+
+    IDD_RAMWATCH, DIALOG
+    BEGIN
+    END
+
+    IDD_EDITWATCH, DIALOG
+    BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED

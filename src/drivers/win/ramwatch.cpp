@@ -64,6 +64,7 @@ unsigned int GetCurrentValue(AddressWatcher& watch)
 
 bool IsSameWatch(const AddressWatcher& l, const AddressWatcher& r)
 {
+	if (r.Size == 'S') return false;
 	return ((l.Address == r.Address) && (l.Size == r.Size) && (l.Type == r.Type)/* && (l.WrongEndian == r.WrongEndian)*/);
 }
 
@@ -973,6 +974,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 										default: sprintf(num, formatString, t=='s' ? (char)(i&0xff) : (unsigned char)(i&0xff)); break;
 										case 'w': sprintf(num, formatString, t=='s' ? (short)(i&0xffff) : (unsigned short)(i&0xffff)); break;
 										case 'd': sprintf(num, formatString, t=='s' ? (long)(i&0xffffffff) : (unsigned long)(i&0xffffffff)); break;
+										case 'S': sprintf(num, "---------"); break;
 									}
 
 									Item->item.pszText = num;
@@ -1031,6 +1033,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));
 					if(watchIndex != -1)
 					{
+						if(rswatches[watchIndex].Size == 'S') return true;
 						DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_EDITWATCH), hDlg, (DLGPROC) EditWatchProc,(LPARAM) watchIndex);
 						SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
 					}
@@ -1054,6 +1057,17 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
 					}
 					return true;
+
+				case IDC_C_WATCH_SEPARATE:
+					AddressWatcher separator;
+					separator.Address = 0;
+					separator.WrongEndian = false;
+					separator.Size = 'S';
+					separator.Type = 'S';
+					InsertWatch(separator, "----------------------------");
+					SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
+					return true;
+					
 				case IDC_C_WATCH_UP:
 				{
 					watchIndex = ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST));

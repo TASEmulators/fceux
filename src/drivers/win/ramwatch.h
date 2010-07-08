@@ -21,8 +21,8 @@ extern bool RWfileChanged;
 struct AddressWatcher
 {
 	unsigned int Address; // hardware address
-	char Size;
-	char Type;
+	char Size; //'d' = 4 bytes, 'w' = 2 bytes, 'b' = 1 byte, and 'S' means it's a separator.
+	char Type;//'s' = signed integer, 'u' = unsigned, 'h' = hex, 'S' = separator
 	char* comment; // NULL means no comment, non-NULL means allocated comment
 	bool WrongEndian;
 	unsigned int CurValue;

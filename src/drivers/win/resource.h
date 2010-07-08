@@ -466,6 +466,8 @@
 #define IDC_C_WATCH_DUPLICATE           1241
 #define ID_WATCHES_UPDOWN               1242
 #define IDC_C_WATCH_UP                  1243
+#define IDC_C_WATCH_DUPLICATE2          1243
+#define IDC_C_WATCH_Separator           1243
 #define IDC_C_WATCH_DOWN                1244
 #define IDC_PROMPT_TEXT                 1245
 #define IDC_PROMPT_TEXT2                1246
@@ -484,6 +486,7 @@
 #define IDC_CHECK2                      1258
 #define IDC_SINGLEINSTANCE              1258
 #define IDC_MOVIE_CLOSEAFTERPLAYBACK    1258
+#define IDC_C_WATCH_SEPARATE            1259
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -796,6 +799,11 @@
 #define ID_CONTEXT_FULLSAVESTATES       40409
 #define ID_CHEATLISTPOPUP_DELETESELECTEDCHEATS 40410
 #define ID_FILE_SAVESCREENSHOTAS        40411
+#define ID_WATCHES_ADDSEPARATOR         40412
+#define ID_WATCHES_SEPARATOR            40413
+#define IDC_C_WATCHES_SEPARATOR         40414
+#define IDC_C_WATCH_SEPARATORS          40415
+#define IDC_C_WATCH_Separa              40416
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -805,8 +813,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40412
-#define _APS_NEXT_CONTROL_VALUE         1259
+#define _APS_NEXT_COMMAND_VALUE         40417
+#define _APS_NEXT_CONTROL_VALUE         1260
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
