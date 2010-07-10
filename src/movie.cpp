@@ -139,7 +139,7 @@ void MovieData::TryDumpIncremental()
 			}
 			
 			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-			currMovieData.greenZoneCount++;
+			currMovieData.greenZoneCount=currFrameCounter+1;
 		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
 		{
 			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);

@@ -128,14 +128,17 @@ void UpdateTasEdit()
 {
 	if(!hwndTasEdit) return;
 
-	if(FCEUMOV_ShouldPause() && FCEUI_EmulationPaused()==0)
+	if(FCEUI_EmulationPaused()==0)
 	{
-		FCEUI_ToggleEmulationPause();
-		turbo = false;
+		if (FCEUMOV_ShouldPause())
+		{
+			FCEUI_ToggleEmulationPause();
+			turbo = false;
+		}
+		else if (turbo && (currFrameCounter &0xf))
+			return;
 	}
 
-	if (turbo && (currFrameCounter &0xf))
-		return;
 
 	//update the number of items
 	int currLVItemCount = ListView_GetItemCount(hwndList);
@@ -1154,8 +1157,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_CONTEXT_STRAY_TRUNCATE:
 			case IDC_HACKY1:
 				//hacky1: delete all items after the current selection
-				currMovieData.records.resize(currFrameCounter+1);
+				currMovieData.truncateAt(currFrameCounter+1);
 				InvalidateGreenZone(currFrameCounter);
+				currMovieData.TryDumpIncremental();
 				UpdateTasEdit();
 				break;
 
