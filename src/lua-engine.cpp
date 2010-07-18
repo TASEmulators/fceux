@@ -2134,8 +2134,12 @@ static int input_get(lua_State *L) {
 			}
 		}
 	}
+#else
+	//SDL TODO: implement this for keyboard!!
+#endif
+
 	// mouse position in game screen pixel coordinates
-		
+	
 	extern void GetMouseData(uint32 (&md)[3]);
 
 	uint32 MouseData[3];
@@ -2150,11 +2154,6 @@ static int input_get(lua_State *L) {
 	lua_setfield(L, -2, "ymouse");
 	lua_pushinteger(L, click);
 	lua_setfield(L, -2, "click");		
-
-
-#else
-	// NYI (well, return an empty table) //SDL TODO: implement this!
-#endif
 
 	return 1;
 }
