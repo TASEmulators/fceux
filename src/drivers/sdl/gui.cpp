@@ -38,7 +38,8 @@ GtkWidget* padNoCombo;
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
-	int x = GPOINTER_TO_INT(p);
+	gint x = ((gint)(glong)(p));
+	//gint x = GPOINTER_TO_INT(p);
 	int padNo = 0;
 	char* padStr = gtk_combo_box_get_active_text(GTK_COMBO_BOX(padNoCombo));
 
