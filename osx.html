@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<title>Documentation</title>
+<title>OSX Building Documentation</title>
 <link href="fceux.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
 
@@ -60,44 +60,37 @@
 
 </div>
 	<div id="page_content">
-	<h1>Getting Started with FCEUX</h1>
-	<p>Tips for performing basic functions</p>
-	<h2>Playing games</h2>
-	<img alt="Controller" height="62" src="assets/Controller.jpg" width="94" class="style1"/>
-	<p>The most basic function of FCEUX is to play Nintendo Entertainment System (NES) and Famicom Disk System (FDS) games.</p>
-	<p>On the windows port, to play a game simply open a ROM by selecting &quot;Open&quot; in the File Menu (or press Ctrl+O).&nbsp; 
-	(See <a class="rvts12" href="files/{54E785A1-1E42-4B8F-B3E2-94BAA91750B9}.htm">Game Compatibility</a> for information regarding file types that are compatible with FCEU.)</p>
-	<h2>Playing movies</h2>
-	
-	<p>Movie features in FCEUX are designed specifically for making Tool-assisted Speedruns.</p>
-	<p>FCEUX offers extensive features and tools for making these movies.  The <a href="movies.html">Movies</a> has more detailed information.
-	
-	<br><a href="http://tasvideos.org">For more information visit TASVideos.</a></p>
-	
-	<h2>FAQs and Guides</h2>
-	<p><b>Win32</b></p>
-	<ul>
-		<li>The Win32 binary is packaged with documentation in the form of a help .chm with.
-		<ul><li>It is also available as an <a href="fceux-2.0.2.htm">online version</a></li></ul></li>
-		<li>Some of the SDL documentation might be informative to Windows users--so if the CHM doesn't answer your question, give it a shot.</li>
-	</ul>
-	<p><b>SDL</b></p>
-	<ul>
-		<li>(incomplete) Documentation for the SDL build is available <a href="fceux-sdl-docs.html">here</a>.</li>
-		<li>FAQ for the SDL build can be found <a href="fceux-sdl-faq.html">here</a>.</li>
-		<li>Some of the Windows documentation might be informative to SDL users--so if this documentation doesn't answer your question, give it a shot.</li>
-	</ul>
-	
-	<p><b>OSX</b></p>
-	<ul>
-		<li>Please reference this file: <a href="osx.html">osx.html</a>.</li>
-	</ul>	
-	
-	<h2>Archives</h2>
-	<ul>
-		<li><a href="archive.html">Old news and updates</a></li>
-	</ul>
-	
+    To compile FCEUX in osx, you must have fink or macports. The FCEUX developers recommend fink, since that's what they use, but then again, the only time they compile software on osx is when folks come nagging.<p>
+       <p>
+first, install the prerequisites.<p>
+<p>
+macports requires these prerequisites: scons, libsdl, zenity, lua, gtk2<p>
+fink requires these prerequisites: try all the same ones as macports, but i know at least one of them is named gtk+2 instead. please report your results.<p>
+<p>
+Building instructions for fink:<p>
+<p>
+CFLAGS=-I/sw/include LDFLAGS=-L/sw/lib scons<p>
+if you are getting link errors about 64bitness then your system is compiling fceux as 64bit but fink is providing i386 libraries. you need to force fceux to compile 32 bits:<p>
+CFLAGS="-I/sw/include -arch i386" LDFLAGS="-L/sw/lib -arch i386" scons<p>
+<p>
+None of the modifications listed at the paperkettle URL were necessary in our latest fink test only 18-jul-2010<p>
+<p>
+This URL is a little old, but he got FCEUX compiling via fink<p>
+http://beesbuzz.biz/blog/e/2009/04/14-how_to_build_fceux_for_mac_os_x.php<p>
+<p>
+Building instructions for macports:<p>
+<p>
+CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib scons<p>
+<p>
+This URL is fresh, and he got FCEUX compiling via macports:<p>
+http://www.paperkettle.com/blog/2010/07/17/fceux-2-14a-compiled-on-mac-osx-10-6/<p>
+<p>
+---<p>
+<p>
+At any given time while fooling around you may discover that scons begins behaving irrationally. To fix this, try deleting .sconsign.dblite which will clear out its memory of what has come before.<p>
+<p>
+To clean your scons build, issue the main scons build command as discussed above with the -c parameter<p>
+
 	</div>
 </div>
 
@@ -106,7 +99,7 @@
 	<a href="documentation.html">Documentation</a> | <a href="version.html">
 	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
 	<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc.
-	<br/>©2009 adelikat
+	<br/>�2009 adelikat
 </div>
 
 
