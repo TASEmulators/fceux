@@ -890,6 +890,15 @@ void FCEUI_SaveState(const char *fname)
 
 int loadStateFailed = 0; // hack, this function should return a value instead
 
+bool file_exists(const char * filename)
+{
+    if (FILE * file = fopen(filename, "r")) //I'm sure, you meant for READING =)
+    {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
 void FCEUI_LoadState(const char *fname)
 {
 	if(!FCEU_IsValidUI(FCEUI_LOADSTATE)) return;
@@ -907,6 +916,11 @@ void FCEUI_LoadState(const char *fname)
 	if (!movie_readonly && autoMovieBackup && freshMovie) //If auto-backup is on, movie has not been altered this session and the movie is in read+write mode
 	{
 		FCEUI_MakeBackupMovie(false);	//Backup the movie before the contents get altered, but do not display messages						  
+	}
+	if (!file_exists(fname))
+	{
+		loadStateFailed = 1;
+		return; // state doesn't exist; exit cleanly
 	}
 	if(FCEUSS_Load(fname))
 	{
