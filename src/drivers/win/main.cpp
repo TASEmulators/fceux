@@ -83,7 +83,7 @@
  #endif
  #ifdef _DEBUG
   #define _MSVC_BUILD "debug"
- #else 
+ #else
   #define _MSVC_BUILD "release"
  #endif
  #define __COMPILER__STRING__ "msvc " _Py_STRINGIZE(_MSC_VER) " " _MSVC_ARCH " " _MSVC_BUILD
@@ -94,7 +94,7 @@
 #elif defined(__GNUC__)
  #ifdef _DEBUG
   #define _GCC_BUILD "debug"
- #else 
+ #else
   #define _GCC_BUILD "release"
  #endif
  #define __COMPILER__STRING__ "gcc " __VERSION__ " " _GCC_BUILD
@@ -361,7 +361,7 @@ int BlockingCheck()
 }
 
 void UpdateRendBounds()
-{ 
+{
 	FCEUI_SetRenderedLines(srendlinen, erendlinen, srendlinep, erendlinep);
 }
 
@@ -370,14 +370,14 @@ void UpdateRendBounds()
 void FCEUD_PrintError(const char *errormsg)
 {
 	AddLogText(errormsg, 1);
-	
+
 	if(fullscreen)
 	{
 		ShowCursorAbs(1);
 	}
 
 	MessageBox(0, errormsg, FCEU_NAME" Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
-	
+
 	if(fullscreen)
 	{
 		ShowCursorAbs(0);
@@ -403,7 +403,7 @@ void DoFCEUExit()
 	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
 
-	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!	
+	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
 	{
 		if(goptions & GOO_CONFIRMEXIT)
 		{
@@ -474,7 +474,7 @@ int DriverInitialize()
 }
 
 static void DriverKill(void)
-{ 
+{
 	// Save config file
 	//sprintf(TempArray, "%s/fceux.cfg", BaseDirectory.c_str());
 	sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
@@ -501,53 +501,52 @@ HANDLE mapRAM;
 void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
 {
 	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
-
 	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		//mbg 7/28/06 - is this the proper error handling?
-		//do we need to indicate to user somehow that this failed in this emu instance?
-		CloseHandle(mapGameMemBlock);
-
-		mapGameMemBlock = NULL;
 		*GameMemBlock = (uint8 *) malloc(131072);
+	else
+		if((*GameMemBlock = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
+		{
+			CloseHandle(mapGameMemBlock);
+			mapGameMemBlock = NULL;
+			*GameMemBlock = (uint8 *) malloc(131072);
+		}
+	mapRAM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
+	if(mapRAM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
 		*RAM = (uint8 *) malloc(2048);
-	}
 	else
 	{
-		*GameMemBlock = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0);
-
-		// set up shared memory mappings
-		mapRAM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
-		*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0);
+		if((*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
+		{
+			CloseHandle(mapRAM);
+			mapRAM = NULL;
+			*RAM = (uint8 *) malloc(2048);
+		}
 	}
+
 
 }
 
 void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
 {
-	//clean up shared memory 
+	//clean up shared memory
 	if(mapRAM)
 	{
-		UnmapViewOfFile(mapRAM);
 		CloseHandle(mapRAM);
-		RAM = NULL;
+		mapRAM = NULL;
+		CloseHandle(RAM);
 	}
 	else
-	{
 		free(RAM);
-		RAM = NULL;
-	}
+	RAM = NULL;
 	if(mapGameMemBlock)
 	{
-		UnmapViewOfFile(mapGameMemBlock);
 		CloseHandle(mapGameMemBlock);
-		GameMemBlock = NULL;
+		mapGameMemBlock = NULL;
+		CloseHandle(GameMemBlock);
 	}
 	else
-	{
 		free(GameMemBlock);
-		GameMemBlock = NULL;
-	}
+	GameMemBlock = NULL;
 }
 #endif
 
@@ -617,7 +616,7 @@ static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 		PassedTest = (PassedTest & ((buf[8] >= '1') & (buf[8] <= '9')));
 		PassedTest = (PassedTest & (buf[9] == '.'));
 		PassedTest = (PassedTest & ((buf[10] >= '4') & (buf[10] <= '9')));
-		
+
 		if (PassedTest) {
 			DoInstantiatedExit=true;
 			DoInstantiatedExitWindow = hWnd;
@@ -626,7 +625,7 @@ static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 
 	//printf("[%03i] Found '%s'\n", ++WinCount, buf);
 	return true;
-} 
+}
 
 #include "x6502.h"
 int main(int argc,char *argv[])
@@ -660,10 +659,10 @@ int main(int argc,char *argv[])
 
 	// Get the base directory
 	GetBaseDirectory();
-	
+
 	// Parse the commandline arguments
 	t = ParseArgies(argc, argv);
-	
+
 	if (ConfigToLoad) cfgFile.assign(ConfigToLoad);
 
 	//initDirectories();
@@ -698,7 +697,7 @@ int main(int argc,char *argv[])
 		FCEUI_SetNoiseVolume(soundNoisevol);
 		FCEUI_SetPCMVolume(soundPCMvol);
 	}
-	
+
 	//Since a game doesn't have to be loaded before the GUI can be used, make
 	//sure the temporary input type variables are set.
 	ParseGIInput(NULL);
@@ -706,7 +705,7 @@ int main(int argc,char *argv[])
 	// Initialize default directories
 	CreateDirs();
 	SetDirs();
-	
+
 	DoVideoConfigFix();
 	DoTimingConfigFix();
 
@@ -735,9 +734,9 @@ int main(int argc,char *argv[])
 			{
 				COPYDATASTRUCT cData;
 				DATA tData;
-				
+
 				sprintf(tData.strFilePath,"%s",t);
-				
+
 				cData.dwData = 1;
 				cData.cbData = sizeof ( tData );
 				cData.lpData = &tData;
@@ -760,7 +759,7 @@ int main(int argc,char *argv[])
 		do_exit();
 		return 1;
 	}
- 
+
 	InitSpeedThrottle();
 
 	if(t)
@@ -774,7 +773,7 @@ int main(int argc,char *argv[])
 
 	if(PaletteToLoad)
 	{
-		SetPalette(PaletteToLoad);	
+		SetPalette(PaletteToLoad);
 		free(PaletteToLoad);
 		PaletteToLoad = NULL;
 	}
@@ -802,7 +801,7 @@ int main(int argc,char *argv[])
 		free(LuaToLoad);
 		LuaToLoad = NULL;
 	}
-	
+
 	//Initiates AVI capture mode, will set up proper settings, and close FCUEX once capturing is finished
 	if(AVICapture && AviToLoad)	//Must be used in conjunction with AviToLoad
 	{
@@ -832,21 +831,21 @@ doloopy:
 	        uint8 *gfx=0; ///contains framebuffer
 			int32 *sound=0; ///contains sound data buffer
 			int32 ssize=0; ///contains sound samples count
-			
-			if (turbo) 
+
+			if (turbo)
 			{
-				if (!frameSkipCounter) 
+				if (!frameSkipCounter)
 				{
 					frameSkipCounter = frameSkipAmt;
 					skippy = 0;
 				}
-				else 
+				else
 				{
 					frameSkipCounter--;
 					if (muteTurbo) skippy = 2;	//If mute turbo is on, we want to bypass sound too, so set it to 2
 						else skippy = 1;				//Else set it to 1 to just frameskip
 				}
-				
+
 			}
 			else skippy = 0;
 
@@ -873,7 +872,7 @@ doloopy:
 	FCEUI_Kill();
 
 	delete debugSystem;
-		
+
 	return(0);
 }
 
@@ -896,7 +895,7 @@ void _updateWindow()
 
 void win_debuggerLoop()
 {
-	//delay until something causes us to unpause. 
+	//delay until something causes us to unpause.
 	//either a hotkey or a debugger command
 	while(FCEUI_EmulationPaused() && !FCEUI_EmulationFrameStepped())
 	{
@@ -911,12 +910,12 @@ void win_debuggerLoop()
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
 	win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
-	
+
 	//write all the sound we generated.
 	if(soundo && Buffer && Count && !(muteTurbo && turbo)) {
 		win_SoundWriteData(Buffer,Count); //If turboing and mute turbo is true, bypass this
 	}
-	
+
 	//blit the framebuffer
 	if(XBuf)
 		FCEUD_BlitScreen(XBuf);
@@ -934,10 +933,10 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	{
 		if(!soundo) throttle = false;
 	}
-	
+
 	if(throttle)  //if throttling is enabled..
 		if(!turbo) //and turbo is disabled..
-			if(!FCEUI_EmulationPaused() 
+			if(!FCEUI_EmulationPaused()
 				||JustFrameAdvanced
 				)
 				//then throttle
@@ -970,7 +969,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 	//	FCEUI_Debugger().step = 1;
 	//	FCEUD_DebugBreakpoint();
 	//}
-	
+
 	//make sure to update the input once per frame
 	FCEUD_UpdateInput();
 
@@ -1002,7 +1001,7 @@ static void FCEUD_MakePathDirs(const char *fname)
 		mkdir(path);
 
 		div = fptr + 1;
-		
+
 		while(div[0] == '\\' || div[0] == '/')
 		{
 			div++;

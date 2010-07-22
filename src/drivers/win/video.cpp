@@ -231,7 +231,7 @@ static int InitBPPStuff(int fs)
 
 int SetVideoMode(int fs)
 {
-	int specmul;    // Special scaler size multiplier
+	int specmul = 1;    // Special scaler size multiplier
 
 
 	if(fs)

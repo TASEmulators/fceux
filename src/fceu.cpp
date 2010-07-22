@@ -342,7 +342,8 @@ static void AllocBuffers()
 #endif
 }
 
-static void FreeBuffers() {
+static void FreeBuffers()
+{
 #ifdef _USE_SHARED_MEMORY_
 	void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM);
 	win_FreeBuffers(GameMemBlock, RAM);

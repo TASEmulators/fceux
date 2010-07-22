@@ -37,6 +37,7 @@ static DECLFW(Mapper25_write)
 			VROM_BANK1(0x0000,0xFC);
 			VROM_BANK1(0x0400,0xFD);
 			VROM_BANK1(0x0800,0xFF);
+			VROM_BANK1(0x0c00,0xCF);
 		}
 
 		A=(A&0xF003)|((A&0xC)>>2);
