@@ -238,6 +238,7 @@ void Mapper69_init(void)
 {
  sunindex=0;
 
+ setprg8(0x6000,0);
  SetupCartPRGMapping(0x10,WRAM,8192,1);
 
  SetWriteHandler(0x8000,0xbfff,Mapper69_write);

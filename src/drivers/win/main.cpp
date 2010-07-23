@@ -533,7 +533,7 @@ void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
 	{
 		CloseHandle(mapRAM);
 		mapRAM = NULL;
-		CloseHandle(RAM);
+		UnmapViewOfFile(RAM);
 	}
 	else
 		free(RAM);
@@ -542,7 +542,7 @@ void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
 	{
 		CloseHandle(mapGameMemBlock);
 		mapGameMemBlock = NULL;
-		CloseHandle(GameMemBlock);
+		UnmapViewOfFile(GameMemBlock);
 	}
 	else
 		free(GameMemBlock);
