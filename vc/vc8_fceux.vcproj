@@ -414,7 +414,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib delayimp.lib"
+				AdditionalDependencies="Rpcrt4.lib comctl32.lib vfw32.lib winmm.lib ws2_32.lib htmlhelp.lib ../src/drivers/win/directx/dsound.lib ../src/drivers/win/directx/dxguid.lib ../src/drivers/win/directx/ddraw.lib ../src/drivers/win/directx/dinput.lib luaperks.lib delayimp.lib"
 				LinkIncremental="1"
 				DelayLoadDLLs="gdi32.dll"
 				GenerateDebugInformation="true"
