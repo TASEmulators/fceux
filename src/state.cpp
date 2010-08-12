@@ -917,7 +917,7 @@ void FCEUI_LoadState(const char *fname)
 	{
 		FCEUI_MakeBackupMovie(false);	//Backup the movie before the contents get altered, but do not display messages						  
 	}
-	if (!file_exists(fname) && fname != NULL)
+	if (fname != NULL && !file_exists(fname))
 	{
 		loadStateFailed = 1;
 		return; // state doesn't exist; exit cleanly

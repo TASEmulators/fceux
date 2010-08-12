@@ -587,6 +587,7 @@ int SaveSnapshot(void)
 	if(!(pp=FCEUD_UTF8fopen(fn,"wb")))
 	{
 		free(fn);
+		free(compmem);
 		return 0;
 	}
 	free(fn);
@@ -681,6 +682,7 @@ int SaveSnapshot(char fileName[512])
 
 	if(!(pp=FCEUD_UTF8fopen(fileName,"wb")))
 	{
+		free(compmem);
 		return 0;
 	}
 
