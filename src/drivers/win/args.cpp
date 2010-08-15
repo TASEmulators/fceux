@@ -72,7 +72,7 @@ char *ParseArgies(int argc, char *argv[])
 		   return(0);
 	   }
 
-       ParseArguments(argc-1, &argv[1], FCEUArgs);
+       int used = ParseArguments(argc-1, &argv[1], FCEUArgs);
 
-       return(argv[argc-1]);
+       return(argv[used+1]);
 }

@@ -7,6 +7,6 @@ typedef struct {
 	int substype;
 } ARGPSTRUCT;
 
-void ParseArguments(int argc, char *argv[], ARGPSTRUCT *argsps);
+int ParseArguments(int argc, char *argv[], ARGPSTRUCT *argsps);
 #define _DRIVERS_ARGH
 #endif
