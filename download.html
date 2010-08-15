@@ -68,10 +68,10 @@
 		<h4>SDL</h4>
 		<ul>
 			<li><a href="http://scons.org/">Scons is required to build from source.</a></li>
-			<li>Requires SDL, libz, and zenity</li>
-			<li>Liblua5.1 and OpenGL are optional, but recommended.</li>
-			<li><a href="http://dietschnitzel.com/gfceu">GFCEUX</a>, a GTK2 GUI for 
-			FCEUX, is included in the source release. All non-windows users of the SDL port are recommended to install and use this, unless you particularly prefer the command-line.</li>
+			<li>Requires SDL and libz</li>
+			<li>GTK2.0 and OpenGL are optional, but recommended.</li>
+			<li>The SDL port now has a GTK2 GUI built in, so gfceux is obsolete.  However, you can disable the GUI by setting GTK to 0 in the SConstruct file.
+			FCEUX, is included in the source release.  .</li>
 			<li>For instructions on installing on an Ubuntu or Debian system, check the how to at <a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums.</a></li>
 		</ul>
 		
@@ -93,8 +93,9 @@
 		<h4>Compiling</h4>
 		<ul>
 			<li>Win32 uses MS Visual Studio - 20010 and 2008 project files maintained (a 2005 one is available but outdated)</li>
-			<li>The SDL build uses SCON</li>
-			<li>Everything needed to compile is included in SVN</li>
+			<li>The SDL build uses SCONS</li>
+			<li>Everything needed to compile the win32 version is included in SVN</li>
+			<li>The GTK port requires the dependencies listed above.</li>
 		</ul>
 		<h3>Old Versions</h3>
 		<table border="1">
