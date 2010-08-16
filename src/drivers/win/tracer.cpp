@@ -250,6 +250,7 @@ void BeginLoggingSequence(void){
 	if(!PromptForCDLogger())return; //do nothing if user selected no and CD Logger is needed
 
 	if(logtofile){
+		if(logfilename == NULL) ShowLogDirDialog();
 		LOG_FP = fopen(logfilename,"w");
 		if(LOG_FP == NULL){
 			sprintf(str,"Error Opening File %s",logfilename);
