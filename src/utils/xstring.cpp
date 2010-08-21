@@ -774,3 +774,16 @@ std::string getExtension(const char* input) {
 		ext[k]=tolower(ext[k]);
 	return ext;
 }
+
+//strips the file extension off a filename
+std::string StripExtension(std::string filename)
+{
+	return filename.substr(0, filename.find_last_of("."));
+}
+
+//strips the path off a filename
+std::string StripPath(std::string filename)
+{
+	int x = filename.find_last_of("\\") + 1;
+	return filename.substr(x, filename.length() - x);
+}

@@ -38,6 +38,7 @@
 #include <windows.h>
 #include "./drivers/win/common.h"
 #include "./drivers/win/tasedit.h"
+#include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 #endif
 
@@ -796,6 +797,10 @@ void FCEUI_StopMovie()
 	curMovieFilename[0] = 0;			//No longer a current movie filename
 	freshMovie = false;					//No longer a fresh movie loaded
 	if (bindSavestate) AutoSS = false;	//If bind movies to savestates is true, then there is no longer a valid auto-save to load
+
+#ifdef WIN32
+	SetMainWindowText();
+#endif
 }
 
 void poweron(bool shouldDisableBatteryLoading)
@@ -1005,6 +1010,10 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 			FCEU_DispMessage("Replay started Read+Write.",0);
 	}
 	
+#ifdef WIN32
+	SetMainWindowText();
+#endif
+
 	#ifdef CREATE_AVI
 	if(LoggingEnabled)
 	{
@@ -1598,6 +1607,9 @@ void FCEUI_MoviePlayFromBeginning(void)
 			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload		
 		}
 	}
+#ifdef WIN32
+	SetMainWindowText();
+#endif
 }
 
 string FCEUI_GetMovieName(void)

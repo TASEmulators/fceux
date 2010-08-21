@@ -23,6 +23,7 @@ extern HWND pwindow;
 
 HWND GetMainHWND();
 
+void SetMainWindowText();
 void HideFWindow(int h);
 void SetMainWindowStuff();
 int GetClientAbsRect(LPRECT lpRect);

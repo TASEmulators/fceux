@@ -175,6 +175,27 @@ string moviehelp = "{695C964E-B83F-4A6E-9BA2-1A975387DB55}";		 //Movie Recording
 string gettingstartedhelp = "{C76AEBD9-1E27-4045-8A37-69E5A52D0F9A}";//Getting Started
 
 //********************************************************************************
+void SetMainWindowText()
+{
+	if (GameInfo)
+	{
+		//Add the filename to the window caption
+		extern char FileBase[];
+		string str = FCEU_NAME_AND_VERSION;
+		str.append(": ");
+		str.append(FileBase);
+		
+		if (FCEUMOV_IsLoaded())
+		{
+			str.append(" Playing: ");
+			str.append(StripPath(FCEUI_GetMovieName()));
+		}
+		SetWindowText(hAppWnd, str.c_str());
+	}
+	else
+		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
+}
+
 
 bool HasRecentFiles()
 {
@@ -1022,7 +1043,7 @@ void CloseGame()
 		KillMemView();
 		updateGameDependentMenus(GameInfo != 0);
 		updateGameDependentMenusDebugger(GameInfo != 0);
-		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
+		SetMainWindowText();
 	}
 }
 
@@ -1058,13 +1079,7 @@ bool ALoad(char *nameo, char* innerFilename)
 			SetFSVideoMode();
 		}
 		
-		//Add the filename to the window caption
-		extern char FileBase[];
-		string str = FCEU_NAME_AND_VERSION;
-		str.append(": ");
-		str.append(FileBase);
-		SetWindowText(hAppWnd, str.c_str());
-
+		
 		if (AutoRWLoad)
 		{
 			OpenRWRecentFile(0);	//adelikat: TODO: This command should be called internally from the RamWatch dialog in order for it to be more portable
@@ -1080,7 +1095,8 @@ bool ALoad(char *nameo, char* innerFilename)
 		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);	//adelikat: If game fails to load while a previous one was open, the previous would have been closed, so reflect that in the window caption
 		return false;
 	}
-
+	
+	SetMainWindowText();
 	ParseGIInput(GameInfo);
 
 	updateGameDependentMenus(GameInfo != 0);

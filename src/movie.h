@@ -76,6 +76,7 @@ bool FCEUMOV_Mode(int modemask);
 inline bool FCEUMOV_IsPlaying() { return (FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_FINISHED)); }
 inline bool FCEUMOV_IsRecording() { return FCEUMOV_Mode(MOVIEMODE_RECORD); }
 inline bool FCEUMOV_IsFinished() { return FCEUMOV_Mode(MOVIEMODE_FINISHED);}
+inline bool FCEUMOV_IsLoaded() { return (FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED)); }
 
 bool FCEUMOV_ShouldPause(void);
 int FCEUMOV_GetFrame(void);
@@ -268,7 +269,7 @@ bool FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopf
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount = false);
-char* FCEUI_MovieGetCurrentName(int addSlotNumber);
+//char* FCEUI_MovieGetCurrentName(int addSlotNumber);
 void FCEUI_MovieToggleReadOnly(void);
 bool FCEUI_GetMovieToggleReadOnly();
 void FCEUI_SetMovieToggleReadOnly(bool which);

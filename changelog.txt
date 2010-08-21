@@ -1,3 +1,4 @@
+20-aug-2010  - adelikat - Win32 - Display movie name at the top of the main window
 09-july-2010 - mart0258 - TasEdit - cleanup; prevent crash when truncating while turbo
 13-june-2010 - adelikat - Win32 - avi capture commandline argument and related parameters
 12-june-2010 - adelikat - Save Turbo frame skip amount to config so that it can be customized by user
