@@ -918,6 +918,7 @@ void DebuggerExit()
 	debugger_open = 0;
 	inDebugger = false;
 	DestroyWindow(hDebug);
+	hDebug=0;
 }
 
 static RECT currDebuggerRect;
