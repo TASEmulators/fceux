@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "../../driver.h"
+#include "../../fceu.h"
 
 static void GetString(char *s, int max)
 {
@@ -40,7 +41,7 @@ static uint32 GetH16(unsigned int def)
 {
  char buf[32];
 
- fgets(buf,32,stdin);
+ fgets(buf,ARRAY_SIZE(buf),stdin);
  if(buf[0]=='\n')
   return(def);
  if(buf[0]=='$')
@@ -55,7 +56,7 @@ static uint8 Get8(unsigned int def)
 {
  char buf[32];
 
- fgets(buf,32,stdin);
+ fgets(buf,ARRAY_SIZE(buf),stdin);
  if(buf[0]=='\n')
   return(def);
  sscanf(buf,"%u",&def);
@@ -66,7 +67,7 @@ static int GetI(int def)
 {
  char buf[32];
 
- fgets(buf,32,stdin);
+ fgets(buf,ARRAY_SIZE(buf),stdin);
  if(buf[0]=='\n')
   return(def);
  sscanf(buf,"%d",&def);
@@ -77,7 +78,7 @@ static int GetYN(int def)
 {
  char buf[32];
  printf("(Y/N)[%s]: ",def?"Y":"N");
- fgets(buf,32,stdin);
+ fgets(buf,ARRAY_SIZE(buf),stdin);
  if(buf[0]=='y' || buf[0]=='Y')
   return(1);
  if(buf[0]=='n' || buf[0]=='N')
@@ -113,7 +114,7 @@ int ListChoice(int hmm)
 
    tryagain:
    printf(" <'Enter' to continue, (S)top, or enter a number.> ");
-   fgets(buf,32,stdin);
+   fgets(buf,ARRAY_SIZE(buf),stdin);
    if(buf[0]=='s' || buf[0]=='S') return(-1);
    if(buf[0]=='\n') return(0);
    if(!sscanf(buf,"%d",&num))
@@ -127,7 +128,7 @@ int ListChoice(int hmm)
 
    tryagain2:
    printf(" <'Enter' to make no selection or enter a number.> ");
-   fgets(buf,32,stdin);
+   fgets(buf,ARRAY_SIZE(buf),stdin);
    if(buf[0]=='\n') return(0);
    if(!sscanf(buf,"%d",&num))
     return(0);
@@ -347,7 +348,7 @@ static void ListCheats(void)
  {
   char tmp[32];
   printf(" <(T)oggle status, (M)odify, or (D)elete this cheat.> ");
-  fgets(tmp,32,stdin);
+  fgets(tmp,ARRAY_SIZE(buf),stdin);
   switch(tolower(tmp[0]))
   {
    case 't':ToggleCheat(which);
@@ -404,7 +405,7 @@ static int ShowShortList(char *moe[], int n, int def)
  clo:
 
  printf("\nSelection [%d]> ",def+1);
- fgets(tmp,256,stdin);
+ fgets(tmp,ARRAY_SIZE(buf),stdin);
  if(tmp[0]=='\n')
   return def;
  c=tolower(tmp[0]);
@@ -481,7 +482,7 @@ static void DoMenu(MENU *men)
 
   recommand:
   printf("Command> ");
-  fgets(buf,32,stdin);
+  fgets(buf,ARRAY_SIZE(buf),stdin);
   c=tolower(buf[0]);
   if(c=='\n')
    goto recommand;
