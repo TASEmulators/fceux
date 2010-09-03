@@ -348,7 +348,7 @@ static void ListCheats(void)
  {
   char tmp[32];
   printf(" <(T)oggle status, (M)odify, or (D)elete this cheat.> ");
-  fgets(tmp,ARRAY_SIZE(buf),stdin);
+  fgets(tmp,ARRAY_SIZE(tmp),stdin);
   switch(tolower(tmp[0]))
   {
    case 't':ToggleCheat(which);
@@ -405,7 +405,7 @@ static int ShowShortList(char *moe[], int n, int def)
  clo:
 
  printf("\nSelection [%d]> ",def+1);
- fgets(tmp,ARRAY_SIZE(buf),stdin);
+ fgets(tmp,ARRAY_SIZE(tmp),stdin);
  if(tmp[0]=='\n')
   return def;
  c=tolower(tmp[0]);

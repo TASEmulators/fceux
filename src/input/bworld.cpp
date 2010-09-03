@@ -22,7 +22,7 @@
 #include "share.h"
 
 static int seq,ptr,bit,cnt,have;
-static uint8 bdata[20];
+static uint8 bdata[32];
 
 
 static uint8 Read(int w, uint8 ret)
@@ -60,8 +60,7 @@ static void Update(void *data, int arg)
   *(uint8 *)data=0;
   seq=ptr=0;
   have=1;
-  strcpy((char*)bdata,(char *)data+1); //mbg merge 7/17/06 added casts
-  strcpy((char*)&bdata[13],"SUNSOFT"); //mbg merge 7/17/06 added cast
+  snprintf((char*)bdata, ARRAY_SIZE(bdata), "%s%s", (char*) data + 1, "SUNSOFT"); //mbg merge 7/17/06
  }
 }
 

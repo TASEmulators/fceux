@@ -543,7 +543,7 @@ EFCM_CONVERTRESULT convert_fcm(MovieData& md, std::string fname)
 
 
 	EMUFILE* fp = FCEUD_UTF8_fstream(fname, "rb");
-	if(!fp) false;
+	if(!fp) FCM_CONVERTRESULT_FAILOPEN;
 
 	// read header
 	uint32 magic = 0;
