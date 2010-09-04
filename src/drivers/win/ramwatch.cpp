@@ -59,11 +59,10 @@ bool ResetWatches();
 
 unsigned int GetCurrentValue(AddressWatcher& watch)
 {
-	unsigned int x = 0;
 	//TODO: A similar if for 4-byte just to be through, but there shouldn't be any reason to have 4-byte on the NES!
 	if (watch.Size == 'w')	//Do little endian
 	{
-		x = ReadValueAtHardwareAddress(watch.Address+1, 1) * 256;
+		unsigned int x = ReadValueAtHardwareAddress(watch.Address+1, 1) * 256;
 		x += ReadValueAtHardwareAddress(watch.Address, 1);
 		return x;
 	}
