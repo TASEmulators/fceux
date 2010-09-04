@@ -1,3 +1,4 @@
+04-sept-2010 - adelikat - Win32 - Ramwatch - fix displaying of 2 byte values
 26-aug-2010  - mart0258 - W32 - fix crash when re-opening debugging window
 20-aug-2010  - adelikat - Win32 - Display movie name at the top of the main window
 09-july-2010 - mart0258 - TasEdit - cleanup; prevent crash when truncating while turbo
