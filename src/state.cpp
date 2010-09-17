@@ -557,7 +557,7 @@ int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	{
 		FCEUMOV_PreLoad();
 	}
-	is->fread((char*)&header,16);
+    is->fread((char*)&header,16);
 	if(memcmp(header,"FCS",3))
 	{
 		return(0);
@@ -720,10 +720,10 @@ bool FCEUSS_Load(const char *fname)
 	{
 		strcpy(fn, FCEU_MakeFName(FCEUMKF_STATE,CurrentState,fname).c_str());
 		st=FCEUD_UTF8_fstream(fn,"rb");
-		strcpy(lastLoadstateMade,fn);
+        strcpy(lastLoadstateMade,fn);
 	}
 
-	if(st == NULL)
+	if(st == NULL || (st->get_fp() == NULL))
 	{
 		FCEU_DispMessage("State %d load error.",0,CurrentState);
 		SaveStateStatus[CurrentState]=0;
