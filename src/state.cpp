@@ -725,7 +725,7 @@ bool FCEUSS_Load(const char *fname)
 
 	if(st == NULL || (st->get_fp() == NULL))
 	{
-		FCEU_DispMessage("State %d load error.",0,CurrentState);
+		FCEU_DispMessage("State %d load error. Filename: %s",0,CurrentState, fn);
 		SaveStateStatus[CurrentState]=0;
 		return false;
 	}
@@ -739,11 +739,11 @@ bool FCEUSS_Load(const char *fname)
 		{
 			char szFilename[260]={0};
 			splitpath(fname, 0, 0, szFilename, 0);
-			FCEU_DispMessage("State %s loaded.",0,szFilename);
+			FCEU_DispMessage("State %s loaded. Filename: %s",0,szFilename, fn);
 		}
 		else
 		{
-			FCEU_DispMessage("State %d loaded.",0,CurrentState);
+			FCEU_DispMessage("State %d loaded. Filename: %s",0,CurrentState, fn);
 			SaveStateStatus[CurrentState]=1;
 		}
 		delete st;
@@ -786,7 +786,7 @@ bool FCEUSS_Load(const char *fname)
 		{
 			SaveStateStatus[CurrentState]=1;
 		}
-		FCEU_DispMessage("Error(s) reading state %d!",0,CurrentState);
+		FCEU_DispMessage("Error(s) reading state %d! Filename: %s",0,CurrentState, fn);
 		delete st;
 		return 0;
 	}
