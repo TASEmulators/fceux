@@ -280,7 +280,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 		{
 			//if the archive contained no files, try to open it the old fashioned way
 			EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
-			if(!fp)
+			if(!fp || (fp->get_fp() == NULL))
 			{
 				return 0;
 			}
