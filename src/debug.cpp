@@ -135,6 +135,8 @@ int checkCondition(const char* condition, int num)
 		{
 			watchpoint[num].cond = c;
 			watchpoint[num].condText = (char*)malloc(strlen(condition) + 1);
+            if (!watchpoint[num].condText)
+                return 0;
 			strcpy(watchpoint[num].condText, condition);
 		}
 		else

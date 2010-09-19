@@ -76,3 +76,13 @@ void FCEU_free(void *ptr)    // Might do something with this and FCEU_malloc lat
 {
  free(ptr);
 }
+
+void *FCEU_dmalloc(uint32 size)
+{
+    return malloc(size);
+}
+
+void FCEU_dfree(void *ptr)
+{
+    free(ptr);
+}

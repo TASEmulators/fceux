@@ -14,6 +14,7 @@
 #include "sdl.h"
 #include "sdl-opengl.h"
 #include "../common/vidblit.h"
+#include "../../utils/memory.h"
 
 #ifndef APIENTRY
 #define APIENTRY
@@ -213,7 +214,7 @@ InitOpenGL(int l,
  {
   if(!(efx&2)) // Don't want to print out a warning message in this case...
    FCEU_printf("Paletted texture extension not found.  Using slower texture format...\n");
-  HiBuffer=malloc(4*256*256);
+  HiBuffer=FCEU_malloc(4*256*256);
   memset(HiBuffer,0x00,4*256*256);
   #ifndef LSB_FIRST
   InitBlitToHigh(4,0xFF000000,0xFF0000,0xFF00,efx&2,0,0);
@@ -246,7 +247,7 @@ InitOpenGL(int l,
   p_glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
   p_glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,ipolate?GL_LINEAR:GL_NEAREST);
 
-  buf=(uint8*)malloc(256*(256*2)*4);
+  buf=(uint8*)FCEU_dmalloc(256*(256*2)*4);
 
   for(y=0;y<(256*2);y++)
    for(x=0;x<256;x++)
@@ -259,7 +260,7 @@ InitOpenGL(int l,
    }
   p_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, (scanlines==2)?256*4:512, 0,
                 GL_RGBA,GL_UNSIGNED_BYTE,buf);
-  free(buf);
+  FCEU_dfree(buf);
  }
  p_glBindTexture(GL_TEXTURE_2D, textures[0]);
      

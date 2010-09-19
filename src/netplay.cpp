@@ -37,6 +37,7 @@
 #include "cheat.h"
 #include "input.h"
 #include "driver.h"
+#include "utils/memory.h"
 
 int FCEUnetplay=0;
 
@@ -120,11 +121,11 @@ int FCEUNET_SendFile(uint8 cmd, char *fn)
 
 	fstat(fileno(fp),&sb);
 	len = sb.st_size;
-	buf = (char*)malloc(len); //mbg merge 7/17/06 added cast
+	buf = (char*)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
 	fread(buf, 1, len, fp);
 	fclose(fp);
 
-	cbuf = (char*)malloc(4 + len + len / 1000 + 12); //mbg merge 7/17/06 added cast
+	cbuf = (char*)FCEU_dmalloc(4 + len + len / 1000 + 12); //mbg merge 7/17/06 added cast
 	FCEU_en32lsb((uint8*)cbuf, len); //mbg merge 7/17/06 added cast
 	compress2((uint8*)cbuf + 4, &clen, (uint8*)buf, len, 7); //mbg merge 7/17/06 added casts
 	free(buf);
@@ -164,9 +165,9 @@ static FILE *FetchFile(uint32 remlen)
 	}
 
 	//printf("Receiving file: %d...\n",clen);
-	if(fp = tmpfile())
+	if((fp = tmpfile()))
 	{
-		cbuf = (char *)malloc(clen); //mbg merge 7/17/06 added cast
+		cbuf = (char *)FCEU_dmalloc(clen); //mbg merge 7/17/06 added cast
 		if(!FCEUD_RecvData(cbuf, clen))
 		{
 			NetError();
@@ -183,7 +184,7 @@ static FILE *FetchFile(uint32 remlen)
 			free(cbuf);
 			return(0);
 		}
-		buf = (char *)malloc(len); //mbg merge 7/17/06 added cast
+		buf = (char *)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
 		uncompress((uint8*)buf, &len, (uint8*)cbuf + 4, clen - 4); //mbg merge 7/17/06 added casts
 
 		fwrite(buf, 1, len, fp);

@@ -442,7 +442,7 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 	ResetGameLoaded();
 
 	if (!AutosaveStatus)
-		AutosaveStatus = (int*)malloc(sizeof(int)*AutosaveQty);
+		AutosaveStatus = (int*)FCEU_dmalloc(sizeof(int)*AutosaveQty);
 	for (AutosaveIndex=0; AutosaveIndex<AutosaveQty; ++AutosaveIndex)
 		AutosaveStatus[AutosaveIndex] = 0;
 

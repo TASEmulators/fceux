@@ -30,8 +30,8 @@
 #include "fceu.h"
 #include "file.h"
 #include "cart.h"
-#include "memory.h"
 #include "driver.h"
+#include "utils/memory.h"
 
 using namespace std;
 
@@ -163,7 +163,7 @@ static void CheatMemErr(void)
 static int AddCheatEntry(char *name, uint32 addr, uint8 val, int compare, int status, int type)
 {
 	struct CHEATF *temp;
-	if(!(temp=(struct CHEATF *)malloc(sizeof(struct CHEATF))))
+	if(!(temp=(struct CHEATF *)FCEU_dmalloc(sizeof(struct CHEATF))))
 	{
 		CheatMemErr();
 		return(0);
@@ -248,7 +248,8 @@ void FCEU_LoadGameCheats(FILE *override)
 			char *neo=&tbuf[4+2+2+1+1+1];
 			if(sscanf(tbuf,"%04x%*[:]%02x%*[:]%02x",&addr,&val,&compare)!=3)
 				continue;
-			namebuf=(char *)malloc(strlen(neo)+1);
+			if (!(namebuf=(char *)FCEU_dmalloc(strlen(neo)+1)))
+                return;
 			strcpy(namebuf,neo);
 		}
 		else
@@ -256,7 +257,8 @@ void FCEU_LoadGameCheats(FILE *override)
 			char *neo=&tbuf[4+2+1+1];
 			if(sscanf(tbuf,"%04x%*[:]%02x",&addr,&val)!=2)
 				continue;
-			namebuf=(char *)malloc(strlen(neo)+1);
+			if (!(namebuf=(char *)FCEU_dmalloc(strlen(neo)+1)))
+                return;
 			strcpy(namebuf,neo);
 		}
 
@@ -364,7 +366,7 @@ int FCEUI_AddCheat(const char *name, uint32 addr, uint8 val, int compare, int ty
 {
 	char *t;
 
-	if(!(t=(char *)malloc(strlen(name)+1)))
+	if(!(t=(char *)FCEU_dmalloc(strlen(name)+1)))
 	{
 		CheatMemErr();
 		return(0);
@@ -660,7 +662,7 @@ static int InitCheatComp(void)
 {
 	uint32 x;
 
-	CheatComp=(uint16*)malloc(65536*sizeof(uint16));
+	CheatComp=(uint16*)FCEU_dmalloc(65536*sizeof(uint16));
 	if(!CheatComp)
 	{
 		CheatMemErr();

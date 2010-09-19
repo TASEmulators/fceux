@@ -46,6 +46,8 @@
 #include <ctype.h>
 
 #include "conddebug.h"
+#include "types.h"
+#include "utils/memory.h"
 
 // Next non-whitespace character in string
 char next;
@@ -93,7 +95,9 @@ Condition* InfixOperator(const char** str, Condition(*nextPart(const char**)), i
 			return 0;
 		}
 
-		mid = (Condition*)malloc(sizeof(Condition));
+		mid = (Condition*)FCEU_dmalloc(sizeof(Condition));
+        if (!mid)
+            return NULL;
 		memset(mid, 0, sizeof(Condition));
 
 		mid->lhs = t;
@@ -317,9 +321,13 @@ Condition* Primitive(const char** str, Condition* c)
 /* Handle * and / operators */
 Condition* Term(const char** str)
 {
-	Condition* t = (Condition*)malloc(sizeof(Condition));
-	Condition* t1;
+	Condition* t;
+    Condition* t1;
 	Condition* mid;
+    
+    t = (Condition*)FCEU_dmalloc(sizeof(Condition));
+    if (!t)
+        return NULL;
 
 	memset(t, 0, sizeof(Condition));
 
@@ -335,7 +343,9 @@ Condition* Term(const char** str)
 
 		scan(str);
 
-		t1 = (Condition*)malloc(sizeof(Condition));
+		if (!(t1 = (Condition*)FCEU_dmalloc(sizeof(Condition))))
+            return NULL;
+
 		memset(t1, 0, sizeof(Condition));
 
 		if (!Primitive(str, t1))
@@ -345,7 +355,9 @@ Condition* Term(const char** str)
 			return 0;
 		}
 
-		mid = (Condition*)malloc(sizeof(Condition));
+		if (!(mid = (Condition*)FCEU_dmalloc(sizeof(Condition))))
+            return NULL;
+        
 		memset(mid, 0, sizeof(Condition));
 
 		mid->lhs = t;

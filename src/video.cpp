@@ -628,7 +628,7 @@ int SaveSnapshot(void)
 		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
 		uint8 *dest,*mal,*mork;
 
-		if(!(mal=mork=dest=(uint8 *)malloc((totallines<<8)+totallines)))
+		if(!(mal=mork=dest=(uint8 *)FCEU_dmalloc((totallines<<8)+totallines)))
 			goto PNGerr;
 		//   mork=dest=XBuf;
 
@@ -723,7 +723,7 @@ int SaveSnapshot(char fileName[512])
 		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
 		uint8 *dest,*mal,*mork;
 
-		if(!(mal=mork=dest=(uint8 *)malloc((totallines<<8)+totallines)))
+		if(!(mal=mork=dest=(uint8 *)FCEU_dmalloc((totallines<<8)+totallines)))
 			goto PNGerr;
 		//   mork=dest=XBuf;
 

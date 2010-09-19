@@ -9,6 +9,7 @@
 #include "version.h"
 #include "fceu.h"
 #include "driver.h"
+#include "utils/memory.h"
 
 static char *aboutString = 0;
 
@@ -43,7 +44,9 @@ FCEU TAS+ - Luke Gustafson\n\
 	const char *compilerString = FCEUD_GetCompilerString();
 
 	//allocate the string and concatenate the template with the compiler string
-	aboutString = (char*)malloc(strlen(aboutTemplate) + strlen(compilerString) + 1);
-	sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
+	if (!(aboutString = (char*)FCEU_dmalloc(strlen(aboutTemplate) + strlen(compilerString) + 1)))
+        return NULL;
+	
+    sprintf(aboutString,"%s%s",aboutTemplate,compilerString);
 	return aboutString;
 }

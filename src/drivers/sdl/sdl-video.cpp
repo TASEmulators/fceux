@@ -31,6 +31,8 @@
 #include "../../fceu.h"
 #include "../../version.h"
 
+#include "../../utils/memory.h"
+
 #include "sdl-icon.h"
 #include "dface.h"
 
@@ -650,7 +652,7 @@ BlitScreen(uint8 *XBuf)
    if(!result || resultsize != width*height*3*2)
    {
        if(result) free(result);
-       result = (unsigned char*) malloc(resultsize = width*height*3*2);
+       result = (unsigned char*) FCEU_dmalloc(resultsize = width*height*3*2);
    }
    switch(s_curbpp)
    {

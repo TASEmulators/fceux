@@ -29,3 +29,8 @@ void *FCEU_gmalloc(uint32 size);
 void FCEU_gfree(void *ptr);
 void FCEU_free(void *ptr);
 void FCEU_memmove(void *d, void *s, uint32 l);
+
+// wrapper for debugging when its needed, otherwise act like
+// normal malloc/free
+void *FCEU_dmalloc(uint32 size);
+void FCEU_dfree(void *ptr);

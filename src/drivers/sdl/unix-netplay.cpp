@@ -47,6 +47,7 @@
 
 #include "../../fceu.h"
 #include "../../utils/md5.h"
+#include "../../utils/memory.h"
 
 #include <string>
 #include "../common/configSys.h"
@@ -173,7 +174,7 @@ FCEUD_NetworkConnect(void)
     uint32 sblen;
 
     sblen = 4 + 16 + 16 + 64 + 1 + username.size();
-    sendbuf = (uint8 *)malloc(sblen);
+    sendbuf = (uint8 *)FCEU_dmalloc(sblen);
     memset(sendbuf, 0, sblen);
 
     // XXX soules - should use htons instead of en32() from above!
@@ -218,7 +219,7 @@ FCEUD_NetworkConnect(void)
 #else
     send(s_Socket, sendbuf, sblen, 0);
 #endif
-    free(sendbuf);
+    FCEU_dfree(sendbuf);
 
 #ifdef WIN32
     recv(s_Socket, (char*)buf, 1, 0);
@@ -338,8 +339,10 @@ FCEUD_NetworkClose(void)
 void
 FCEUD_NetplayText(uint8 *text)
 {
-    char *tot = (char *)malloc(strlen((const char *)text) + 1);
+    char *tot = (char *)FCEU_dmalloc(strlen((const char *)text) + 1);
     char *tmp;
+    if (!tot)
+        return;
     strcpy(tot, (const char *)text);
     tmp = tot;
 
@@ -350,5 +353,5 @@ FCEUD_NetplayText(uint8 *text)
         tmp++;
     }
     puts(tot);
-    free(tot);
+    FCEU_dfree(tot);
 }

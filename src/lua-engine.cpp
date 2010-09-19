@@ -2763,7 +2763,7 @@ static int movie_isfromsavestate (lua_State *L) {
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
 	if (!gui_data)
-		gui_data = (uint8*) malloc(LUA_SCREEN_WIDTH*LUA_SCREEN_HEIGHT*4);
+		gui_data = (uint8*) FCEU_dmalloc(LUA_SCREEN_WIDTH*LUA_SCREEN_HEIGHT*4);
 	if (gui_used != GUI_USED_SINCE_LAST_DISPLAY)
 		memset(gui_data, 0, LUA_SCREEN_WIDTH*LUA_SCREEN_HEIGHT*4);
 	gui_used = GUI_USED_SINCE_LAST_DISPLAY;
@@ -4190,7 +4190,7 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 		*colon++ = 0;
 		
 		int len = strlen(current);
-		char *filename = (char*)malloc(len + 12); // always give excess
+		char *filename = (char*)FCEU_dmalloc(len + 12); // always give excess
 		snprintf(filename, len+12, "%s/xmessage", current);
 		
 		if (access(filename, X_OK) == 0) {

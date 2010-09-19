@@ -28,6 +28,8 @@
 #include "sdl.h"
 
 #include "../common/configSys.h"
+#include "../../utils/memory.h"
+
 extern Config *g_config;
 
 static volatile int *s_Buffer = 0;
@@ -122,7 +124,9 @@ InitSound()
     if (s_BufferSize < spec.samples * 2)
 	s_BufferSize = spec.samples * 2;
 
-    s_Buffer = (int *)malloc(sizeof(int) * s_BufferSize);
+    s_Buffer = (int *)FCEU_dmalloc(sizeof(int) * s_BufferSize);
+    if (!s_Buffer)
+        return 0;
     s_BufferRead = s_BufferWrite = s_BufferIn = 0;
 
     //printf("SDL Size: %d, Internal size: %d\n",spec.samples,s_BufferSize);

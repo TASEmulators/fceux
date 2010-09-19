@@ -24,7 +24,7 @@
 #include "hq3x.h"
 
 #include "../../types.h"
-
+#include "../../utils/memory.h"
 #include "nes_ntsc.h"
 
 nes_ntsc_t* nes_ntsc;
@@ -108,12 +108,12 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
 
   }
 
-  nes_ntsc = (nes_ntsc_t*) malloc( sizeof (nes_ntsc_t) );
+  nes_ntsc = (nes_ntsc_t*) FCEU_dmalloc( sizeof (nes_ntsc_t) );
 
   if ( nes_ntsc ) {
   nes_ntsc_init( nes_ntsc, &ntsc_setup, b, 2 );
 
-  ntscblit = (uint8*)malloc(256*257*b*multi); //Need to add multiplier for larger sizes
+  ntscblit = (uint8*)FCEU_dmalloc(256*257*b*multi); //Need to add multiplier for larger sizes
   }
 
  } // -Video Modes Tag-
@@ -121,7 +121,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
  {
   int multi = ((specfilt == 2) ? 2 * 2 : 3 * 3);
 
-  specbuf8bpp = (uint8*)malloc(256*240*multi); //mbg merge 7/17/06 added cast
+  specbuf8bpp = (uint8*)FCEU_dmalloc(256*240*multi); //mbg merge 7/17/06 added cast
 
  } // -Video Modes Tag-
  else if(specfilt == 1 || specfilt == 4) // hq2x and hq3x
@@ -157,8 +157,8 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
     // End iffy code
    }
    // -Video Modes Tag-
-   if(specfilt == 1) specbuf32bpp = (uint32*)malloc(256*240*4*sizeof(uint32)); //mbg merge 7/17/06 added cast
-   else if(specfilt == 4) specbuf32bpp = (uint32*)malloc(256*240*9*sizeof(uint32)); //mbg merge 7/17/06 added cast
+   if(specfilt == 1) specbuf32bpp = (uint32*)FCEU_dmalloc(256*240*4*sizeof(uint32)); //mbg merge 7/17/06 added cast
+   else if(specfilt == 4) specbuf32bpp = (uint32*)FCEU_dmalloc(256*240*9*sizeof(uint32)); //mbg merge 7/17/06 added cast
   }
 
   efx=0;
@@ -173,7 +173,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
   else
    hq2x_InitLUTs();
 
-  specbuf=(uint16*)malloc(256*240*sizeof(uint16)); //mbg merge 7/17/06 added cast
+  specbuf=(uint16*)FCEU_dmalloc(256*240*sizeof(uint16)); //mbg merge 7/17/06 added cast
  }
 
  silt = specfilt;
@@ -188,16 +188,16 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
  if(efx&FVB_BLUR)
  {
   if(Bpp==2)
-   palettetranslate=(uint32 *)malloc(65536*4);
+   palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
   else if(Bpp>=3)
-   palettetranslate=(uint32 *)malloc(65536*4);
+   palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
  }
  else
  {
   if(Bpp==2)
-   palettetranslate=(uint32*)malloc(65536*4);
+   palettetranslate=(uint32*)FCEU_dmalloc(65536*4);
   else if(Bpp>=3)
-   palettetranslate=(uint32*)malloc(256*4);
+   palettetranslate=(uint32*)FCEU_dmalloc(256*4);
  }
 
  if(!palettetranslate)
