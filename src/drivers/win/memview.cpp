@@ -1625,7 +1625,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			// ################################## Start of SP CODE ###########################
 		case MENU_MV_BOOKMARKS_RM_ALL:
-			//TODO: only ask if there is 1 or more bookmarks
 			if (nextBookmark)
 			{
 				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO) == IDYES)
