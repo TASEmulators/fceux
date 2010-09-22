@@ -966,7 +966,6 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 	SCROLLINFO si;
 	int x, y, i, j;
 	int tempAddy;
-
 	const int MemFontWidth = debugSystem->fixedFontWidth;
 	const int MemFontHeight = debugSystem->fixedFontHeight + HexRowHeightBorder;
 
@@ -1626,8 +1625,15 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			// ################################## Start of SP CODE ###########################
 		case MENU_MV_BOOKMARKS_RM_ALL:
-			removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
-			UpdateColorTable();
+			//TODO: only ask if there is 1 or more bookmarks
+			if (nextBookmark)
+			{
+				if (MessageBox(hwnd, "Remove All Bookmarks?", "Bookmarks", MB_YESNO) == IDYES)
+				{
+					removeAllBookmarks(GetSubMenu(GetMenu(hwnd), 3));
+					UpdateColorTable();
+				}
+			}
 			return 0;
 
 		case MENU_MV_HELP:
