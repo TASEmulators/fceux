@@ -775,16 +775,17 @@ static void RDoTriangle(void)
 
  if(!lengthcount[2] || !TriCount)
  {           /* Counter is halted, but we still need to output. */
-  int32 *start = &WaveHi[ChannelBC[2]];
+  /*int32 *start = &WaveHi[ChannelBC[2]];
   int32 count = SOUNDTS - ChannelBC[2];
   while(count--)
   {
    //Modify volume based on channel volume modifiers
    *start += (tcout/256*FSettings.TriangleVolume)&(~0xFFFF);  // TODO OPTIMIZE ME NOW DAMMIT!
    start++;
-  }
-  //for(V=ChannelBC[2];V<SOUNDTS;V++)
-  // WaveHi[V]+=tcout;
+  }*/
+  int32 cout = (tcout/256*FSettings.TriangleVolume)&(~0xFFFF);
+  for(V=ChannelBC[2];V<SOUNDTS;V++)
+   WaveHi[V]+=cout;
  }
  else
   for(V=ChannelBC[2];V<SOUNDTS;V++)
