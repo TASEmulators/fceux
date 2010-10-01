@@ -132,13 +132,21 @@ public:
 	virtual int fprintf(const char *format, ...) {
 		va_list argptr;
 		va_start(argptr, format);
-		
+
+		char *tempbuf = new char[size()];
+        int amt;
+        amt = vsnprintf(tempbuf, size(), format, argptr); 
+       
+        char *placeholder = new char[20];
+        placeholder[0] = 20;
 		//we dont generate straight into the buffer because it will null terminate (one more byte than we want)
-		int amt = vsnprintf(0,0,format,argptr);
+		/*int amt = vsnprintf(0,0,format,argptr);
 		char* tempbuf = new char[amt+1];
-		vsprintf(tempbuf,format,argptr);
-		fwrite(tempbuf,amt);
+		vsprintf(tempbuf,format,argptr);*/
+		
+        fwrite(tempbuf,amt);
 		delete[] tempbuf;
+        delete[] placeholder;
 		va_end(argptr);
 		return amt;
 	};

@@ -474,7 +474,7 @@ void FCEUSS_Save(const char *fname)
 		st = FCEUD_UTF8_fstream(fn,"wb");
 	}
 
-	if(st == NULL)
+	if(st == NULL || st->get_fp() == NULL)
 	{
 		FCEU_DispMessage("State %d save error.",0,CurrentState);
 		return;
@@ -729,7 +729,7 @@ bool FCEUSS_Load(const char *fname)
 		SaveStateStatus[CurrentState]=0;
 		return false;
 	}
-
+    
 	//If in bot mode, don't do a backup when loading.
 	//Otherwise you eat at the hard disk, since so many
 	//states are being loaded.
