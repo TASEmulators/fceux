@@ -133,16 +133,13 @@ public:
 		va_list argptr;
 		va_start(argptr, format);
 
-		char *tempbuf = new char[size()];
-        int amt;
-        
-        amt = vsnprintf(tempbuf, size(), format, argptr); 
-       
-        // this crashes for some reason
 		//we dont generate straight into the buffer because it will null terminate (one more byte than we want)
-		/*int amt = vsnprintf(0,0,format,argptr);
+		int amt = vsnprintf(0,0,format,argptr);
 		char* tempbuf = new char[amt+1];
-		vsprintf(tempbuf,format,argptr);*/
+
+		va_end(argptr);
+		va_start(argptr, format);
+		vsprintf(tempbuf,format,argptr);
 		
         fwrite(tempbuf,amt);
 		delete[] tempbuf;
