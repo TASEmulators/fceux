@@ -2169,6 +2169,15 @@ struct BGData {
 		Record main[34]; //one at the end is junk, it can never be rendered
 	} bgdata;
 
+static inline int PaletteAdjustPixel(int pixel)
+{
+	if((PPU[1]>>5)==0x7)
+		return (pixel&0x3f)|0xc0;
+	else if(PPU[1]&0xE0)
+		return pixel | 0x40;
+	else
+		return (pixel&0x3F)|0x80;
+}
 
 int framectr=0;
 int FCEUX_PPU_Loop(int skip) {
@@ -2338,10 +2347,7 @@ int FCEUX_PPU_Loop(int skip) {
 							}
 						}
 
-						//fceu rendering system requires that this be set
-						//(so that it knows there is a valid pixel there?)
-						pixelcolor |= 0x80;
-						*ptr++ = pixelcolor;
+						*ptr++ = PaletteAdjustPixel(pixelcolor);
 					}
 				}
 			}
