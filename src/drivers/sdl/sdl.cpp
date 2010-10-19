@@ -119,7 +119,8 @@ Option         Value   Description\n\
 --pass         x       Set password to use for connecting to the server.\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
 --players      x       Set the number of local players.\n\
---rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n";
+--rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n\
+--no-gui       {0,1}   Enable or disable the GTK GUI\n";
 
 
 // these should be moved to the man file
@@ -682,7 +683,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// if we're not building in the gui, exit if a rom isn't specified
+	// if we're not compiling w/ the gui, exit if a rom isn't specified
 #ifndef _GTK
 	if(romIndex <= 0) {
 		
@@ -732,7 +733,10 @@ int main(int argc, char *argv[])
 	gtk_init(&argc, &argv);
 #endif	
 #ifdef _GTK
-	InitGTKSubsystem(argc, argv);
+	int noGui;
+	g_config->getOption("SDL.NoGUI", &noGui);
+	if(noGui == false)
+		InitGTKSubsystem(argc, argv);
 #endif
 
 	if(romIndex >= 0)
@@ -786,21 +790,29 @@ int main(int argc, char *argv[])
 	g_config->getOption("SDL.Frameskip", &frameskip);
 	// loop playing the game
 #ifdef _GTK
-	while(1)
+	if(noGui == false)
 	{
-		if(GameInfo)
+		while(1)
+		{
+			if(GameInfo)
+				DoFun(frameskip);
+			else
+				SDL_Delay(1);
+			while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+		}
+	}
+	else
+	{
+		while(GameInfo)
+			DoFun(frameskip);
+	}
 #else
 	while(GameInfo)
 	{
-#endif
 		DoFun(frameskip);
-#ifdef _GTK
-	else
-		SDL_Delay(10);
-	while(gtk_events_pending())
-		gtk_main_iteration_do(FALSE);
-#endif
 	}
+#endif
 	CloseGame();
 
 	// exit the infrastructure
