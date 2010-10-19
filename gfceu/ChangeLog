@@ -1,49 +1,6 @@
-* Changed glade filename from gfceux.xml -> gfceux.glade
-* Removed the need of running ./generate.ui after every glade change
-* Got rid of some silly glade errors
-* Changed the installation instructions to avoid breakage
-* Gfceux now runs properly from the source directory without 
-being installed
-================= version 2.1 ====================== ============
-* Increased the width of the sdl inputcfg window to be more visible
-with larger font sizes
-* Uninstall script works better
-* Is now distributed as a python package.  This makes things easier
-for maintanence
-* Is now installable 
-* Disabled gamepad GUI until joystick support can be completed
-* Initial joystick config support: supports buttons, but hot hats and axes
-* Documented and cleaned fceux config parser
-* Udated about box UI
-* Updated UI, explains joystick support isn't complete yet in the GUI
-* Cleaned up glade file to silence warnings
-* Pygame is no longer required for gfceux to run, just for the input GUI
-* Turbo A and Turbo B support for gamepad GUI
-* Added initial support for a graphical UI for configuring gamepads
-* Moved gfceu options data file into .fceux instead of .fceultra
-================= version 2.0.3 =================================
-* Updated UI slightly.  Moved sound and advanced tabs; made autoscaling
-  configuration a bit more intuitive; rearranged some items; made some
-  text more clear
-* Changed gfceu code references to gfceux
-* Fixed error in which gfceux would display an ugly error message if
- the fceux binary could not be found.
-* Working on new config system for input.  you can try by configuring
- the third gamepad.  It's not functional yet, but it's a start on more
- intuitive gamepad configuration for sdl
-================== version 2.0.2 ================================
-* Now stores config file in .fceultra
-* If the .fceultra config directory doesn't exist yet, gfceux will
-     now create it.
-================== version 2.0.0 ================================
-* Supports movie playback
-* Support lua script loading
-* Supports autoscale
-* No longer requires GnomeVFS
-* Major code cleanup
-* Supports fceux command line options (different syntax from fceu)
-* Now requires pygtk >= 2.12
-* Transitioned from gtk.glade to gtk.Builder.
+========================== version 0.6.2 ========================
+* Minor string changes.
+========================== version 0.6.1 ========================
 * Changed some strings to reflect new email and website
 * Fixed and cleaned some stuff with the glade loading
 ========================== version 0.6.0 ========================
