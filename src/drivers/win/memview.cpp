@@ -1640,7 +1640,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			return 0;
 
 		default:
-			if (wParam >= ID_FIRST_BOOKMARK && wParam <= ID_FIRST_BOOKMARK)
+			if (wParam >= ID_FIRST_BOOKMARK && wParam < (ID_FIRST_BOOKMARK + 64))
 			{
 				int newValue = handleBookmarkMenu(wParam - ID_FIRST_BOOKMARK);
 
