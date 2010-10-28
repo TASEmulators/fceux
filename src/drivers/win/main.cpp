@@ -630,6 +630,21 @@ static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 #include "x6502.h"
 int main(int argc,char *argv[])
 {
+	{
+#ifdef MULTITHREAD_STDLOCALE_WORKAROUND
+		// Note: there's a known threading bug regarding std::locale with MSVC according to
+		// http://connect.microsoft.com/VisualStudio/feedback/details/492128/std-locale-constructor-modifies-global-locale-via-setlocale
+		int iPreviousFlag = ::_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+#endif
+		using std::locale;
+		locale::global(locale(locale::classic(), "", locale::collate | locale::ctype));
+
+#ifdef MULTITHREAD_STDLOCALE_WORKAROUND
+		if (iPreviousFlag > 0 )
+			::_configthreadlocale(iPreviousFlag);
+#endif
+	}
+
 	SetThreadAffinityMask(GetCurrentThread(),1);
 
 	printf("%08x",opsize);

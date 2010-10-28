@@ -449,7 +449,7 @@ ArchiveScanRecord FCEUD_ScanArchive(std::string fname)
 					PROPVARIANT prop;
 					prop.vt = VT_EMPTY;
 
-					if (FAILED(object->GetProperty( i, kpidSize, &prop )) || prop.vt != VT_UI8 || !prop.uhVal.LowPart || prop.uhVal.HighPart)
+					if (FAILED(object->GetProperty( i, kpidSize, &prop )) || prop.vt != VT_UI8 /*|| !prop.uhVal.LowPart*/ || prop.uhVal.HighPart)
 						goto bomb;
 
 					item.size = prop.uhVal.LowPart;
