@@ -1,6 +1,11 @@
+09-oct-2010  - zeromus - fix bug in new ppu that made some intensify bits not get applied to output (fixes flashing siren screen in werefolf
+09-oct-2010 - gocha - win32 - Ram Watch - fix the multiple selection of watches
+09-oct-2010 - gocha - Win32 - Ram Search - multiple selection of addresses, fix restoration of the selection range
+09-oct-2010 - gocha - Win32 - Ram Search - fix restoration of the selection range
+01-oct-2010 - qeed - Fix many segfaults related to file handling
 22-sept-2010 - adelikat - win32 - Hex Editor - ask before removing all bookmarks
 04-sept-2010 - adelikat - Win32 - Ramwatch - fix displaying of 2 byte values
-26-aug-2010  - mart0258 - W32 - fix crash when re-opening debugging window
+26-aug-2010  - mart0258 - Win32 - fix crash when re-opening debugging window
 20-aug-2010  - adelikat - Win32 - Display movie name at the top of the main window
 09-july-2010 - mart0258 - TasEdit - cleanup; prevent crash when truncating while turbo
 13-june-2010 - adelikat - Win32 - avi capture commandline argument and related parameters
