@@ -3399,15 +3399,6 @@ static int gui_savescreenshot(lua_State *L) {
 //  This allows us to make screen shots available without gd installed locally.
 //  Users can also just grab pixels via substring selection.
 //
-//  I think...  Does lua support grabbing byte values from a string?
-//  Well, either way, just install gd and do what you like with it.
-//  It really is easier that way.
-// gui.gdscreenshot()
-//
-//  Returns a screen shot as a string in gd's v1 file format.
-//  This allows us to make screen shots available without gd installed locally.
-//  Users can also just grab pixels via substring selection.
-//
 //  I think...  Does lua support grabbing byte values from a string? // yes, string.byte(str,offset)
 //  Well, either way, just install gd and do what you like with it.
 //  It really is easier that way.
