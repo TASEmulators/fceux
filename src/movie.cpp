@@ -1113,6 +1113,10 @@ void FCEUMOV_AddInputState()
 		}
 		else
 		{
+			if (currMovieData.greenZoneCount>currFrameCounter+1)
+			{
+				InvalidateGreenZone(currFrameCounter);
+			}
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			mr->commands = 0;

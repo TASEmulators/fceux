@@ -262,7 +262,7 @@ bool JumpToFrame(int index)
 	/* Handle jumps outside greenzone. */
 	if (index>currMovieData.greenZoneCount)
 	{
-		if (JumpToFrame(currMovieData.greenZoneCount))
+		if (JumpToFrame(currMovieData.greenZoneCount-1))
 		{
 			if (FCEUI_EmulationPaused())
 				FCEUI_ToggleEmulationPause();
@@ -278,8 +278,8 @@ bool JumpToFrame(int index)
 	if (static_cast<unsigned int>(index)<currMovieData.records.size() && 
 		currMovieData.loadTasSavestate(index))
 	{
-			currFrameCounter = index;
-			return true;
+		currFrameCounter = index;
+		return true;
 	}
 	else 
 	{
@@ -357,7 +357,6 @@ void DoubleClick(LPNMITEMACTIVATE info)
 			currMovieData.records[index].toggleBit(joy,bit);
 			
 			ListView_Update(hwndList,index);
-
 		}
 
 		InvalidateGreenZone(index);
@@ -970,6 +969,23 @@ static void Export()
 	}
 }
 
+static void Truncate()
+{
+	int frame = currFrameCounter;
+
+	if (selectionFrames.size()>0)
+	{
+		frame=*selectionFrames.begin();
+		JumpToFrame(frame);
+	}
+
+	currMovieData.truncateAt(frame+1);
+	InvalidateGreenZone(frame);
+	currMovieData.TryDumpIncremental();
+	UpdateTasEdit();
+
+}
+
 //likewise, handles a changed item range from the listview
 static void ItemRangeChanged(NMLVODSTATECHANGE* info)
 {
@@ -1156,11 +1172,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_CONTEXT_SELECTED_TRUNCATE:
 			case ID_CONTEXT_STRAY_TRUNCATE:
 			case IDC_HACKY1:
-				//hacky1: delete all items after the current selection
-				currMovieData.truncateAt(currFrameCounter+1);
-				InvalidateGreenZone(currFrameCounter);
-				currMovieData.TryDumpIncremental();
-				UpdateTasEdit();
+				Truncate();
 				break;
 
 			case IDC_HACKY2:

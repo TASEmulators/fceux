@@ -31,7 +31,7 @@
 * Compare   -> Sum {('==' | '!=' | '<=' | '>=' | '<' | '>') Sum}
 * Sum       -> Product {('+' | '-') Product}
 * Product   -> Primitive {('*' | '/') Primitive}
-* Primitive -> Number | Address | Register | Flag | '(' Connect ')'
+* Primitive -> Number | Address | Register | Flag | PC Bank | '(' Connect ')'
 * Number    -> '#' [1-9A-F]*
 * Address   -> '$' [1-9A-F]* | '$' '[' Connect ']'
 * Register  -> 'A' | 'X' | 'Y' | 'R'
@@ -228,7 +228,7 @@ Condition* Primitive(const char** str, Condition* c)
 
 		return c;
 	}
-	else if (isBank(next)) /* Registers */
+	else if (isBank(next)) /* PC Bank */
 	{
 		if (c->type1 == TYPE_NO)
 		{
@@ -322,9 +322,9 @@ Condition* Primitive(const char** str, Condition* c)
 Condition* Term(const char** str)
 {
 	Condition* t;
-    Condition* t1;
+	Condition* t1;
 	Condition* mid;
-    
+
     t = (Condition*)FCEU_dmalloc(sizeof(Condition));
     if (!t)
         return NULL;

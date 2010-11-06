@@ -1,3 +1,4 @@
+11-nov-2010 - mart0258 - TasEdit - Invalidate greenzone when re-recording earlier portions of a movie. 
 09-oct-2010  - zeromus - fix bug in new ppu that made some intensify bits not get applied to output (fixes flashing siren screen in werefolf
 09-oct-2010 - gocha - win32 - Ram Watch - fix the multiple selection of watches
 09-oct-2010 - gocha - Win32 - Ram Search - multiple selection of addresses, fix restoration of the selection range
