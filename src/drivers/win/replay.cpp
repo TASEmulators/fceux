@@ -123,7 +123,7 @@ void UpdateReplayCommentsSubs(const char * fname) {
 	MOVIE_INFO info;
 	
 	FCEUFILE *fp = FCEU_fopen(fname,0,"rb",0);
-	fp->stream = EMUFILE::memwrap(fp->stream);
+	fp->stream = fp->stream->memwrap();
 	bool scanok = FCEUI_MovieGetInfo(fp, info, true);
 	delete fp;
 
@@ -149,7 +149,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		MOVIE_INFO info;
 
 		FCEUFILE* fp = FCEU_fopen(fn,0,"rb",0);
-		fp->stream = EMUFILE::memwrap(fp->stream);
+		fp->stream = fp->stream->memwrap();
 		bool isarchive = FCEU_isFileInArchive(fn);
 		bool ismovie = FCEUI_MovieGetInfo(fp, info, false);
 		delete fp;
@@ -585,7 +585,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
 						if(!asr.isArchive()) {
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
-							fp->stream = EMUFILE::memwrap(fp->stream);
+							fp->stream = fp->stream->memwrap();
 							if(fp) {
 								HandleScan(hwndDlg,fp ,items);
 								delete fp;

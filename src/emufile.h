@@ -1,21 +1,26 @@
- /* Copyright (C) 2009 DeSmuME team
- *
- * This file is part of DeSmuME
- *
- * DeSmuME is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * DeSmuME is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with DeSmuME; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+/* 
+Copyright (C) 2009-2010 DeSmuME team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 */
+
+//don't use emufile for files bigger than 2GB! you have been warned! some day this will be fixed.
 
 #ifndef EMUFILE_H
 #define EMUFILE_H
@@ -28,19 +33,10 @@
 #include <string>
 #include <stdarg.h>
 
-//should be changed to #ifdef FCEUX but too much work
-#ifndef DESMUME
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef char s8;
-typedef short s16;
-typedef int s32;
-#endif
+#include "emufile_types.h"
 
-#ifdef _XBOX
-#undef min;
-#undef max;
+#ifdef _MSC_VER
+#include <io.h>
 #endif
 
 class EMUFILE {
@@ -53,14 +49,15 @@ public:
 	{}
 
 
-	//takes control of the provided EMUFILE and returns a new EMUFILE which is guranteed to be in memory
-	static EMUFILE* memwrap(EMUFILE* fp);
+	//returns a new EMUFILE which is guranteed to be in memory. the EMUFILE you call this on may be deleted. use the returned EMUFILE in its place
+	virtual EMUFILE* memwrap() = 0;
 
 	virtual ~EMUFILE() {}
 	
 	static bool readAllBytes(std::vector<u8>* buf, const std::string& fname);
 
-	bool fail() { return failbit; }
+	bool fail(bool unset=false) { bool ret = failbit; if(unset) unfail(); return ret; }
+	void unfail() { failbit=false; }
 
 	bool eof() { return size()==ftell(); }
 
@@ -87,10 +84,37 @@ public:
 
 	virtual void fwrite(const void *ptr, size_t bytes) = 0;
 
+	void write64le(u64* val);
+	void write64le(u64 val);
+	size_t read64le(u64* val);
+	u64 read64le();
+	void write32le(u32* val);
+	void write32le(s32* val) { write32le((u32*)val); }
+	void write32le(u32 val);
+	size_t read32le(u32* val);
+	size_t read32le(s32* val);
+	u32 read32le();
+	void write16le(u16* val);
+	void write16le(s16* val) { write16le((u16*)val); }
+	void write16le(u16 val);
+	size_t read16le(s16* Bufo);
+	size_t read16le(u16* val);
+	u16 read16le();
+	void write8le(u8* val);
+	void write8le(u8 val);
+	size_t read8le(u8* val);
+	u8 read8le();
+	void writedouble(double* val);
+	void writedouble(double val);
+	double readdouble();
+	size_t readdouble(double* val);
+
 	virtual int fseek(int offset, int origin) = 0;
 
 	virtual int ftell() = 0;
 	virtual int size() = 0;
+
+	virtual void truncate(s32 length) = 0;
 };
 
 //todo - handle read-only specially?
@@ -107,12 +131,12 @@ protected:
 
 public:
 
-	EMUFILE_MEMORY(std::vector<u8> *underlying) : vec(underlying), ownvec(false), pos(0), len(underlying->size()) { }
+	EMUFILE_MEMORY(std::vector<u8> *underlying) : vec(underlying), ownvec(false), pos(0), len((s32)underlying->size()) { }
 	EMUFILE_MEMORY(u32 preallocate) : vec(new std::vector<u8>()), ownvec(true), pos(0), len(0) { 
 		vec->resize(preallocate);
 		len = preallocate;
 	}
-	EMUFILE_MEMORY() : vec(new std::vector<u8>()), ownvec(true), pos(0), len(0) { vec->reserve(8192); }
+	EMUFILE_MEMORY() : vec(new std::vector<u8>()), ownvec(true), pos(0), len(0) { vec->reserve(1024); }
 	EMUFILE_MEMORY(void* buf, s32 size) : vec(new std::vector<u8>()), ownvec(true), pos(0), len(size) { 
 		vec->resize(size);
 		if(size != 0)
@@ -123,7 +147,19 @@ public:
 		if(ownvec) delete vec;
 	}
 
-	u8* buf() { return &(*vec)[0]; }
+	virtual EMUFILE* memwrap();
+
+	virtual void truncate(s32 length)
+	{
+		vec->resize(length);
+		len = length;
+		if(pos>length) pos=length;
+	}
+
+	u8* buf() { 
+		if(size()==0) reserve(1);
+		return &(*vec)[0];
+	}
 
 	std::vector<u8>* get_vec() { return vec; };
 
@@ -173,23 +209,15 @@ public:
 		return 0;
 	}
 
-	virtual size_t _fread(const void *ptr, size_t bytes){
-		u32 remain = len-pos;
-		u32 todo = std::min<u32>(remain,(u32)bytes);
-		memcpy((void*)ptr,buf()+pos,todo);
-		pos += todo;
-		if(todo<bytes)
-			failbit = true;
-		return todo;
-	}
+	virtual size_t _fread(const void *ptr, size_t bytes);
 
 	//removing these return values for now so we can find any code that might be using them and make sure
 	//they handle the return values correctly
 
 	virtual void fwrite(const void *ptr, size_t bytes){
-		reserve(pos+bytes);
+		reserve(pos+(s32)bytes);
 		memcpy(buf()+pos,ptr,bytes);
-		pos += bytes;
+		pos += (s32)bytes;
 		len = std::max(pos,len);
 	}
 
@@ -227,6 +255,8 @@ public:
 class EMUFILE_FILE : public EMUFILE { 
 protected:
 	FILE* fp;
+	std::string fname;
+	char mode[16];
 
 private:
 	void open(const char* fname, const char* mode)
@@ -234,6 +264,8 @@ private:
 		fp = fopen(fname,mode);
 		if(!fp)
 			failbit = true;
+		this->fname = fname;
+		strcpy(this->mode,mode);
 	}
 
 public:
@@ -250,7 +282,11 @@ public:
 		return fp; 
 	}
 
+	virtual EMUFILE* memwrap();
+
 	bool is_open() { return fp != NULL; }
+
+	virtual void truncate(s32 length);
 
 	virtual int fprintf(const char *format, ...) {
 		va_list argptr;
