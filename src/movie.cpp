@@ -141,7 +141,7 @@ void MovieData::TryDumpIncremental()
 			
 			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 			currMovieData.greenZoneCount=currFrameCounter+1;
-		} else if (currFrameCounter < currMovieData.greenZoneCount || !movie_readonly)
+		} else if (currFrameCounter < currMovieData.greenZoneCount && !movie_readonly)
 		{
 			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 		} else if (currFrameCounter > currMovieData.greenZoneCount && static_cast<unsigned int>(currMovieData.greenZoneCount)<currMovieData.records.size())
@@ -402,6 +402,7 @@ MovieData::MovieData()
 	, binaryFlag(false)
 	, greenZoneCount(0)
 	, microphone(false)
+	, tweakCount(0)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
 }
@@ -920,6 +921,7 @@ void MovieData::storeTasSavestate(int frame, int compression_level)
 		savestates.resize(frame+1);
 
 	MovieData::dumpSavestateTo(&savestates[frame],compression_level);
+	tweakCount++;
 }
 
 //begin playing an existing movie

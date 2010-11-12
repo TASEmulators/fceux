@@ -1032,6 +1032,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	switch(uMsg)
 	{
+		case WM_PAINT:
+			{
+				char temp[128];
+				sprintf(temp,"TweakCount: %d\n",currMovieData.tweakCount);
+				SetWindowText(GetDlgItem(hwndDlg,IDC_TWEAKCOUNT),temp);
+			}
+			break;
 		case WM_INITDIALOG:
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;

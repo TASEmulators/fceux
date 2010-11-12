@@ -192,6 +192,7 @@ public:
 	//----TasEdit stuff---
 	int greenZoneCount;
 	int loadFrameCount;
+	int tweakCount;
 	//----
 
 	int getNumRecords() { return records.size(); }

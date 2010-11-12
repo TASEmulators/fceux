@@ -487,6 +487,7 @@
 #define IDC_SINGLEINSTANCE              1258
 #define IDC_MOVIE_CLOSEAFTERPLAYBACK    1258
 #define IDC_C_WATCH_SEPARATE            1259
+#define IDC_TWEAKCOUNT                  1260
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -814,7 +815,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
 #define _APS_NEXT_COMMAND_VALUE         40417
-#define _APS_NEXT_CONTROL_VALUE         1260
+#define _APS_NEXT_CONTROL_VALUE         1261
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
