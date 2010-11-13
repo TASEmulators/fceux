@@ -423,7 +423,6 @@ int SetVideoMode(int fs)
 				ShowDDErr("Error getting attached surface.");
 				return 0;
 			}
-			// FIXME: The back buffer isn't cleared properly, causing massive flickering. 
 		}
 
 		if(!GetBPP())
@@ -548,6 +547,19 @@ static void BlitScreenWindow(unsigned char *XBuf)
 	}
 }
 
+static void DD_FillRect(LPDIRECTDRAWSURFACE7 surf, int left, int top, int right, int bottom, DWORD color)
+{
+	RECT r;
+	SetRect(&r,left,top,right,bottom);
+	DDBLTFX fx;
+	memset(&fx,0,sizeof(DDBLTFX));
+	fx.dwSize = sizeof(DDBLTFX);
+	//fx.dwFillColor = color;
+	fx.dwFillColor = 0; //color is just for debug
+	surf->Blt(&r,NULL,NULL,DDBLT_COLORFILL | DDBLT_WAIT,&fx);
+}
+
+
 static void BlitScreenFull(uint8 *XBuf)
 {
 	static int pitch;
@@ -617,6 +629,26 @@ static void BlitScreenFull(uint8 *XBuf)
 			drect.bottom=drect.top+(FSettings.TotalScanlines()*vmodes[vmod].yscale);
 			drect.left=(vmodes[vmod].x-VNSWID*vmodes[vmod].xscale)>>1;
 			drect.right=drect.left+VNSWID*vmodes[vmod].xscale;
+
+
+			RECT fullScreen;
+			fullScreen.left = fullScreen.top = 0;
+			fullScreen.right = vmodes[vmod].x;
+			fullScreen.bottom = vmodes[vmod].y;
+			RECT r;
+			r = drect;
+			int left = r.left;
+			int top = r.top;
+			int right = r.right;
+			int bottom = r.bottom;
+			DD_FillRect(lpDDSVPrimary,0,0,left,top,RGB(255,0,0)); //topleft
+			DD_FillRect(lpDDSVPrimary,left,0,right,top,RGB(128,0,0)); //topcenter
+			DD_FillRect(lpDDSVPrimary,right,0,fullScreen.right,top,RGB(0,255,0)); //topright
+			DD_FillRect(lpDDSVPrimary,0,top,left,bottom,RGB(0,128,0));  //left
+			DD_FillRect(lpDDSVPrimary,right,top,fullScreen.right,bottom,RGB(0,0,255)); //right
+			DD_FillRect(lpDDSVPrimary,0,bottom,left,fullScreen.bottom,RGB(0,0,128)); //bottomleft
+			DD_FillRect(lpDDSVPrimary,left,bottom,right,fullScreen.bottom,RGB(255,0,255)); //bottomcenter
+			DD_FillRect(lpDDSVPrimary,right,bottom,fullScreen.right,fullScreen.bottom,RGB(0,255,255)); //bottomright
 		}
 	}
 	else
@@ -788,7 +820,6 @@ static void BlitScreenFull(uint8 *XBuf)
 				veflags&=~2;
 			}
 		}
-
 
 		if(IDirectDrawSurface7_Blt(lpDDSVPrimary, &drect,lpDDSBack,&srect,DDBLT_ASYNC,0)!=DD_OK)
 		{
