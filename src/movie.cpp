@@ -1100,7 +1100,7 @@ void FCEUMOV_AddInputState()
 	//or something like that
 	//(input recording is just like standard read+write movie recording with input taken from gamepad)
 	//otherwise, it will come from the tasedit data.
-
+	#ifdef _WIN32
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
@@ -1117,14 +1117,17 @@ void FCEUMOV_AddInputState()
 		{
 			if (currMovieData.greenZoneCount>currFrameCounter+1)
 			{
+				
 				InvalidateGreenZone(currFrameCounter);
+				
 			}
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			mr->commands = 0;
 		}
 	}
-	else if(movieMode == MOVIEMODE_PLAY)
+	#endif
+	if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames
 		if(currFrameCounter >= (int)currMovieData.records.size())
