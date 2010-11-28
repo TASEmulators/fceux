@@ -260,6 +260,7 @@
     <ClCompile Include="..\src\boards\88.cpp" />
     <ClCompile Include="..\src\boards\90.cpp" />
     <ClCompile Include="..\src\boards\95.cpp" />
+    <ClCompile Include="..\src\boards\onebus.cpp" />
     <ClCompile Include="..\src\boards\__dummy_mapper.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -274,7 +275,6 @@
     <ClCompile Include="..\src\boards\bonza.cpp" />
     <ClCompile Include="..\src\boards\bs-5.cpp" />
     <ClCompile Include="..\src\boards\copyfami_mmc3.cpp" />
-    <ClCompile Include="..\src\boards\dance.cpp" />
     <ClCompile Include="..\src\boards\datalatch.cpp" />
     <ClCompile Include="..\src\boards\deirom.cpp" />
     <ClCompile Include="..\src\boards\dream.cpp" />

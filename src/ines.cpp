@@ -653,7 +653,8 @@ static BMAPPINGLocal bmap[] = {
 	{"",					215, Mapper215_Init},
 	{"",					216, Mapper216_Init},
 	{"",					217, Mapper217_Init},
-    {"UNLA9746",			219, UNLA9746_Init},
+	{"UNLA9746",			219, UNLA9746_Init},
+	{"OneBus",	 		    220, UNLOneBus_Init},
 
 //    {220, BMCFK23C_Init},
 //    {220, UNL3DBlock_Init},

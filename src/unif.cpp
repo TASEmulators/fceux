@@ -129,7 +129,7 @@ static int DoMirroring(FCEUFILE *fp)
 {
 	uint8 t;
 	t=FCEU_fgetc(fp);
-	mirrortodo=t; 
+	mirrortodo=t;
 
 	{
 		static char *stuffo[6]={"Horizontal","Vertical","$2000","$2400","\"Four-screen\"","Controlled by Mapper Hardware"};
@@ -266,7 +266,7 @@ static int LoadPRG(FCEUFILE *fp)
 	else
 		FCEU_printf("\n");
 
-	SetupCartPRGMapping(z,malloced[z],t,0); 
+	SetupCartPRGMapping(z,malloced[z],t,0);
 	return(1);
 }
 
@@ -324,11 +324,11 @@ static BMAPPING bmap[] = {
 	{ "Sachen-8259D", S8259D_Init,0},
 	{ "Sachen-74LS374N", S74LS374N_Init,0},
 	{ "Sachen-74LS374NA", S74LS374NA_Init,0}, //seems to be custom mapper
- { "SA-002", TCU02_Init, 0},
+	{ "SA-002", TCU02_Init, 0},
 	{ "SA-016-1M", SA0161M_Init,0},
 	{ "SA-72007", SA72007_Init,0},
 	{ "SA-72008", SA72008_Init,0},
- { "SA-009", SA009_Init,0},
+	{ "SA-009", SA009_Init,0},
 	{ "SA-0036", SA0036_Init,0},
 	{ "SA-0037", SA0037_Init,0},
 	{ "SA-NROM", TCA01_Init,0},
@@ -362,7 +362,7 @@ static BMAPPING bmap[] = {
 	{ "TGROM", TGROM_Init,0},
 	{ "TR1ROM", TFROM_Init,BMCFLAG_FORCE4},
 
- { "TBROM", TBROM_Init,0},
+	{ "TBROM", TBROM_Init,0},
 	{ "TEROM", TEROM_Init,0},
 	{ "TFROM", TFROM_Init,0},
 	{ "TLROM", TLROM_Init,0},
@@ -374,7 +374,7 @@ static BMAPPING bmap[] = {
 	{ "TQROM", TQROM_Init,0},
 	{ "TVROM", TLROM_Init,BMCFLAG_FORCE4},
 
- { "NTBROM", Mapper68_Init,0},
+	{ "NTBROM", Mapper68_Init,0},
 
 	{ "CPROM", CPROM_Init,BMCFLAG_16KCHRR},
 	{ "CNROM", CNROM_Init,0},
@@ -385,12 +385,12 @@ static BMAPPING bmap[] = {
 	{ "RROM-128", NROM_Init,0 }, //NROM128_Init,0 },
 	{ "MHROM", MHROM_Init,0},
 	{ "UNROM", UNROM_Init,0},
- { "UOROM", UNROM_Init,0},
+	{ "UOROM", UNROM_Init,0},
 	{ "SUNSOFT_UNROM", SUNSOFT_UNROM_Init,0},
 	{ "MARIO1-MALEE2", MALEE_Init,0},
- { "3D-BLOCK", UNL3DBlock_Init, 0},
- { "SMB2J", UNLSMB2J_Init, 0},
- { "AX5705", UNLAX5705_Init, 0},
+	{ "3D-BLOCK", UNL3DBlock_Init, 0},
+	{ "SMB2J", UNLSMB2J_Init, 0},
+	{ "AX5705", UNLAX5705_Init, 0},
 	{ "CC-21", UNLCC21_Init,0},
 
 	{ "H2288", UNLH2288_Init,0},
@@ -405,7 +405,7 @@ static BMAPPING bmap[] = {
 	{ "C-N22M", UNLCN22M_Init,0},
 	{ "EDU2000", UNLEDU2000_Init,0},
 	{ "603-5052", UNL6035052_Init,0},
- { "N625092", UNLN625092_Init,0},
+	{ "N625092", UNLN625092_Init,0},
 	{ "Supervision16in1", Supervision16_Init,0},
 	{ "NovelDiamond9999999in1", Novel_Init,0},
 	{ "Super24in1SC03", Super24_Init,0},
@@ -417,27 +417,28 @@ static BMAPPING bmap[] = {
 	{ "GK-192", BMCGK192_Init, 0},
 	{ "SuperHIK8in1", Mapper45_Init,0},
 	{ "22211", UNL22211_Init,0},
- { "TF1201", UNLTF1201_Init, 0},
- { "GS-2004", BMCGS2004_Init, 0},
- { "GS-2013", BMCGS2013_Init, 0},
- { "KS7032", UNLKS7032_Init, 0},
- { "T-230", UNLT230_Init, 0},
- { "190in1", BMC190in1_Init, 0},
- { "Ghostbusters63in1", BMCGhostbusters63in1_Init, 0},
- { "BS-5",BMCBS5_Init, 0},
- { "411120-C",BMC411120C_Init, 0},
- { "830118C",BMC830118C_Init, 0},
- { "T-227-1",BMCT2271_Init,0},
+	{ "TF1201", UNLTF1201_Init, 0},
+	{ "GS-2004", BMCGS2004_Init, 0},
+	{ "GS-2013", BMCGS2013_Init, 0},
+	{ "KS7032", UNLKS7032_Init, 0},
+	{ "T-230", UNLT230_Init, 0},
+	{ "190in1", BMC190in1_Init, 0},
+	{ "Ghostbusters63in1", BMCGhostbusters63in1_Init, 0},
+	{ "BS-5",BMCBS5_Init, 0},
+	{ "411120-C",BMC411120C_Init, 0},
+	{ "830118C",BMC830118C_Init, 0},
+	{ "T-227-1",BMCT2271_Init,0},
 
 	{ "DREAMTECH01", DreamTech01_Init,0},
 	{ "KONAMI-QTAI", Mapper190_Init,0},
 
- { "DANCE", UNLDANCE_Init,0},
- { "SC-127", UNLSC127_Init,0},
+	{ "DANCE", UNLDANCE_Init,0},
+	{ "OneBus", UNLOneBus_Init,0},
+	{ "SC-127", UNLSC127_Init,0},
 
 	{ "TEK90", Mapper90_Init,0},
 
- { "COPYFAMI_MMC3", MapperCopyFamiMMC3_Init,0},
+	{ "COPYFAMI_MMC3", MapperCopyFamiMMC3_Init,0},
 
 	{0,0,0}
 };
@@ -462,13 +463,13 @@ int LoadUNIFChunks(FCEUFILE *fp)
 	for(;;)
 	{
 		t=FCEU_fread(&uchead,1,4,fp);
-		if(t<4) 
+		if(t<4)
 		{
 			if(t>0)
-				return 0; 
+				return 0;
 			return 1;
 		}
-		if(!(FCEU_read32le(&uchead.info,fp))) 
+		if(!(FCEU_read32le(&uchead.info,fp)))
 			return 0;
 		t=0;
 		x=0;
@@ -480,7 +481,7 @@ int LoadUNIFChunks(FCEUFILE *fp)
 				if(!bfunc[x].init(fp))
 					return 0;
 				t=1;
-				break;     
+				break;
 			}
 			x++;
 		}
@@ -557,7 +558,7 @@ int UNIFLoad(const char *name, FCEUFILE *fp)
 	FCEU_fseek(fp,0,SEEK_SET);
 	FCEU_fread(&unhead,1,4,fp);
 	if(memcmp(&unhead,"UNIF",4))
-		return 0;        
+		return 0;
 
 	ResetCartMapping();
 

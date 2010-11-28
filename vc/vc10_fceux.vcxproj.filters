@@ -196,9 +196,6 @@
     <ClCompile Include="..\src\boards\copyfami_mmc3.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\dance.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\datalatch.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -909,6 +906,9 @@
     <ClCompile Include="..\src\emufile.cpp" />
     <ClCompile Include="..\src\drivers\common\nes_ntsc.c">
       <Filter>drivers\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\boards\onebus.cpp">
+      <Filter>boards</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

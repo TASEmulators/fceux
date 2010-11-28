@@ -115,6 +115,7 @@ void UNLKS7032_Init(CartInfo *info);
 void UNLT230_Init(CartInfo *info);
 void UNLAX5705_Init(CartInfo *info);
 void UNLDANCE_Init(CartInfo *info);
+void UNLOneBus_Init(CartInfo *info);
 void UNLSC127_Init(CartInfo *info);
 
 void UNLEDU2000_Init(CartInfo *info);
