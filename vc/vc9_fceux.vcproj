@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="fceux"
 	ProjectGUID="{6893EF44-FEA3-46DF-B236-C4C200F54294}"
 	RootNamespace="fceux"
@@ -572,10 +572,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\dance.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\boards\datalatch.cpp"
 				>
 			</File>
@@ -657,6 +653,10 @@
 			</File>
 			<File
 				RelativePath="..\src\boards\novel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\boards\onebus.cpp"
 				>
 			</File>
 			<File
