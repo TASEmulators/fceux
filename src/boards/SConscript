@@ -49,7 +49,6 @@ bmc70in1.cpp
 bonza.cpp
 bs-5.cpp
 copyfami_mmc3.cpp
-dance.cpp
 datalatch.cpp
 deirom.cpp
 dream.cpp
@@ -72,6 +71,7 @@ n-c22m.cpp
 n106.cpp
 n625092.cpp
 novel.cpp
+onebus.cpp
 sachen.cpp
 sc-127.cpp
 sheroes.cpp
