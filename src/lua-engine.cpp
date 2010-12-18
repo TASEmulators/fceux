@@ -2758,7 +2758,7 @@ static int movie_isfromsavestate (lua_State *L) {
 
 
 #define LUA_SCREEN_WIDTH    256
-#define LUA_SCREEN_HEIGHT   224
+#define LUA_SCREEN_HEIGHT   240
 
 // Common code by the gui library: make sure the screen array is ready
 static void gui_prepare() {
@@ -5210,7 +5210,7 @@ void FCEU_LuaGui(uint8 *XBuf) {
 				b = (((int) gui_blue  - scr_blue)  * gui_alpha / 255 + scr_blue)  & 255;
 			}
 
-			XBuf[(y+8)*256+x] = gui_colour_rgb(r, g, b);
+			XBuf[(y)*256+x] = gui_colour_rgb(r, g, b);
 		}
 	}
 
