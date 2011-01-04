@@ -357,6 +357,8 @@ BEGIN
         MENUITEM "Rewind to last auto-save",    FCEUX_CONTEXT_REWINDTOLASTAUTO
         MENUITEM SEPARATOR
         MENUITEM "Help....",                    FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
     POPUP "Game+NoMovie"
     BEGIN
@@ -370,6 +372,8 @@ BEGIN
         MENUITEM "Screenshot",                  FCEUX_CONTEXT_SCREENSHOT
         MENUITEM SEPARATOR
         MENUITEM "Close ROM",                   FCEU_CONTEXT_CLOSEROM
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
     POPUP "NoGame"
     BEGIN
@@ -377,6 +381,8 @@ BEGIN
         MENUITEM "Last ROM used",               FCEUX_CONTEXT_RECENTROM1
         MENUITEM SEPARATOR
         MENUITEM "Help...",                     FCEU_CONTEXT_FCEUHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
     POPUP "Game+Movie+readwrite"
     BEGIN
@@ -394,6 +400,8 @@ BEGIN
         MENUITEM "&Mode: Full state-movie loads", ID_CONTEXT_FULLSAVESTATES
         MENUITEM SEPARATOR
         MENUITEM "Help...",                     FCEU_CONTEXT_MOVIEHELP
+        MENUITEM SEPARATOR
+        MENUITEM "Use Config > Gui to get zapper right click", FCEUX_CONTEXT_GUICONFIG
     END
 END
 

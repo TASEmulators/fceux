@@ -2136,6 +2136,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEU_CONTEXT_FCEUHELP:
 				OpenHelpWindow(gettingstartedhelp);
 				break;
+
+            case FCEUX_CONTEXT_GUICONFIG:
+                ConfigGUI();
+                break;
 			}
 		}
 		break;
