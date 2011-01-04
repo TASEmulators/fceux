@@ -33,6 +33,7 @@ extern uint8 FASTCALL FFCEUX_PPURead_Default(uint32 A);
 void FFCEUX_PPUWrite_Default(uint32 A, uint8 V);
 
 extern int scanline;
+extern int g_rasterpos;
 extern uint8 PPU[4];
 
 enum PPUPHASE {

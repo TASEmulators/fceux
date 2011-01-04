@@ -345,6 +345,7 @@ static int maxsprites=8;
 
 //scanline is equal to the current visible scanline we're on.
 int scanline;
+int g_rasterpos;
 static uint32 scanlines_per_frame;
 
 uint8 PPU[4];
@@ -2244,6 +2245,7 @@ int FCEUX_PPU_Loop(int skip) {
 		for(int sl=0;sl<241;sl++) {
             spr_read.start_scanline();
 
+            g_rasterpos = 0;
             ppur.status.sl = sl;
 
 			const int yp = sl-1;
@@ -2270,7 +2272,6 @@ int FCEUX_PPU_Loop(int skip) {
 			for(int xt=0;xt<32;xt++) {
 				bgdata.main[xt+2].Read();
 
-
                 //ok, we're also going to draw here.
 				//unless we're on the first dummy scanline
 				if(sl != 0) {
@@ -2283,7 +2284,7 @@ int FCEUX_PPU_Loop(int skip) {
 					//check all the conditions that can cause things to render in these 8px
 					const bool renderspritenow = SpriteON && rendersprites && (xt>0 || SpriteLeft8);
 					const bool renderbgnow = ScreenON && renderbg && (xt>0 || BGLeft8);
-					for(int xp=0;xp<8;xp++,rasterpos++) {
+					for(int xp=0;xp<8;xp++,rasterpos++,g_rasterpos++) {
 
 						//bg pos is different from raster pos due to its offsetability.
 						//so adjust for that here
@@ -2518,7 +2519,8 @@ int FCEUX_PPU_Loop(int skip) {
 			//first one on every second frame, then this delay simply doesn't exist.
             if (ppur.status.end_cycle == 341)
                 runppu(1);
-        }
+
+        } //scanline loop
 
 		if(MMC5Hack && PPUON) MMC5_hb(240);
 

@@ -76,16 +76,52 @@ static void ZapperFrapper(int w, uint8 *bg, uint8 *spr, uint32 linets, int final
 	}
 endo:
 	ZD[w].zappo=final;
+
+    //if this was a miss, clear out the hit
+    if(ZD[w].mzb&2)
+        ZD[w].zaphit=0;
+        
 }      
 
 static INLINE int CheckColor(int w)
 {
 	FCEUPPU_LineUpdate();
 
-	if((ZD[w].zaphit+100)>=(timestampbase+timestamp)
-		&& !(ZD[w].mzb&2)) return(0);
+    if(newppu)
+    {
+        int x = (int)ZD[w].mzx;
+        int y = (int)ZD[w].mzy;
+        int b = (int)ZD[w].mzb;
+        bool  block = (b&2)!=0;
 
-	return(1);
+        int mousetime = y*256+x;
+        int nowtime = scanline*256 + g_rasterpos;
+
+        if(!block && mousetime < nowtime && mousetime >= nowtime - 384)
+        {
+            extern uint8 *XBuf;
+            uint8 *pix = XBuf+(ZD[w].mzy<<8);
+            uint8 a1 = pix[ZD[w].mzx];
+            a1&=63;
+            uint32 sum=palo[a1].r+palo[a1].g+palo[a1].b;
+            //return ZD[w].zaphit = sum != 0;
+            ZD[w].zaphit = (sum>=100*3)?1:0;
+        }
+        else
+        {
+            ZD[w].zaphit = 0;
+        }
+
+        return ZD[w].zaphit?0:1;
+    }
+
+
+    if((ZD[w].zaphit+100)>=(timestampbase+timestamp))
+    {
+        return 0;
+    }
+
+	return 1;
 }
 
 static uint8 ReadZapperVS(int w)
@@ -133,14 +169,25 @@ static void UpdateZapper(int w, void *data, int arg)
 {
 	uint32 *ptr=(uint32 *)data;
 
-	if(ZD[w].bogo)
-		ZD[w].bogo--;	
-	if(ptr[2]&3 && (!(ZD[w].mzb&3)))
-		ZD[w].bogo=5;
+    bool newclicked = (ptr[2]&3)!=0;
+    bool oldclicked = (ZD[w].lastInput)!=0;
 
-	ZD[w].mzx=ptr[0];
-	ZD[w].mzy=ptr[1];
-	ZD[w].mzb=ptr[2];
+	if(ZD[w].bogo)
+    {
+		ZD[w].bogo--;	
+    }
+
+    ZD[w].lastInput = ptr[2]&3;
+
+    //woah.. this looks like broken bit logic.
+	if(newclicked && !oldclicked)
+    {
+		ZD[w].bogo=5;
+	    ZD[w].mzb=ptr[2];
+	    ZD[w].mzx=ptr[0];
+	    ZD[w].mzy=ptr[1];
+    }
+
 }
 
 static void LogZapper(int w, MovieRecord* mr)

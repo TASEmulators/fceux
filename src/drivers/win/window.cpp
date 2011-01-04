@@ -1303,6 +1303,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
 			TrackPopupMenu(hfceuxcontextsub,0,(pt.x),(pt.y),TPM_RIGHTBUTTON,hWnd,0);	//Create menu
 		}
+        else
+        {
+            mouseb=wParam;
+        }
 	}
 
 	case WM_MOVE: 

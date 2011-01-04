@@ -10,6 +10,7 @@ struct ZAPPER
 	uint8 bogo;
 	int zappo;
 	uint64 zaphit;
+    uint32 lastInput;
 };
 
 #endif
