@@ -49,7 +49,7 @@
 #include "drivers/win/cdlogger.h"
 #include "drivers/win/tracer.h"
 #include "drivers/win/memview.h"
-
+#include "drivers/win/window.h"
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -641,6 +641,7 @@ static void RamSearchOpNE(void);
 static void FA_SkipLag(void);
 static void OpenRom(void);
 static void CloseRom(void);
+static void ReloadRom(void);
 static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
 static void FCEUI_DoExit(void);
@@ -755,6 +756,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
+  { EMUCMD_RELOADROM,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM", 0},
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
@@ -1037,6 +1039,17 @@ static void CloseRom(void)
 {
 #ifdef WIN32
 	CloseGame();
+#endif
+}
+
+static void ReloadRom(void)
+{
+#ifdef WIN32
+  char*& fname = recent_files[0];
+	if(fname)
+	{
+	  ALoad(fname);
+  }
 #endif
 }
 

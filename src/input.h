@@ -215,6 +215,7 @@ enum EMUCMD
 	//Currently only windows (but sdl could easily add onto these)
 	EMUCMD_OPENROM,
 	EMUCMD_CLOSEROM,
+  EMUCMD_RELOADROM,
 	//-----------------------------
 	EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,
 	EMUCMD_MISC_UNDOREDOSAVESTATE,
