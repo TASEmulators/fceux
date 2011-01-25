@@ -542,11 +542,43 @@ void setQuality(GtkWidget* w, gpointer p)
 	return;
 }
 
+void resizeGtkWindow()
+{
+	if(GameInfo == 0)
+	{
+		double xscale, yscale;
+		g_config->getOption("SDL.XScale", &xscale);
+		g_config->getOption("SDL.YScale", &yscale);
+		gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
+		GtkRequisition req;
+		gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+		gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+	}
+	return;
+}
+
 void setScaler(GtkWidget* w, gpointer p)
 {
 	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
 	g_config->setOption("SDL.SpecialFilter", x);
 	g_config->save();
+	
+	// 1 - hq2x 2 - Scale2x 3 - NTSC2x 4 - hq3x  5 - Scale3x
+	if (x >= 1 && x <= 3)
+	{
+		g_config->setOption("SDL.XScale", 2.0);
+		g_config->setOption("SDL.YScale", 2.0);
+		g_config->save();
+		resizeGtkWindow();
+	}
+	if (x >= 4 && x < 6)
+	{
+		g_config->setOption("SDL.XScale", 3.0);
+		g_config->setOption("SDL.YScale", 3.0);
+		g_config->save();
+		resizeGtkWindow();
+	}
+	
 }
 
 
@@ -555,13 +587,7 @@ int setXscale(GtkWidget* w, gpointer p)
 	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
 	g_config->setOption("SDL.XScale", v);
 	g_config->save();
-	double xscale, yscale;
-	g_config->getOption("SDL.XScale", &xscale);
-	g_config->getOption("SDL.YScale", &yscale);
-	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
-	GtkRequisition req;
-	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
-	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+	resizeGtkWindow();
 	return 0;
 }
 
@@ -570,13 +596,7 @@ int setYscale(GtkWidget* w, gpointer p)
 	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
 	g_config->setOption("SDL.YScale", v);
 	g_config->save();
-	double xscale, yscale;
-	g_config->getOption("SDL.XScale", &xscale);
-	g_config->getOption("SDL.YScale", &yscale);
-	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
-	GtkRequisition req;
-	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
-	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+	resizeGtkWindow();
 	return 0;
 }
 
@@ -1216,6 +1236,13 @@ void loadNSF ()
 		gtk_widget_destroy (fileChooser);
 }
 
+void closeGame()
+{
+	GdkColor bg = {0, 0, 0, 0};
+	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
+	CloseGame();
+}
+
 void loadGame ()
 {
 	GtkWidget* fileChooser;
@@ -1283,6 +1310,7 @@ void loadGame ()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
 		g_config->setOption("SDL.LastOpenFile", filename);
+		closeGame();
 		if(LoadGame(filename) == 0)
 		{
 			
@@ -1292,17 +1320,11 @@ void loadGame ()
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
 		}
+		resizeGtkWindow();
 		g_free(filename);
 	}
 	else
 		gtk_widget_destroy (fileChooser);
-}
-
-void closeGame()
-{
-	GdkColor bg = {0, 0, 0, 0};
-	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
-	CloseGame();
 }
 
 void saveStateAs()
