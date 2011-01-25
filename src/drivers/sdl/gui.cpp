@@ -1260,9 +1260,14 @@ void loadGame ()
 	gtk_file_filter_add_pattern(filterAll, "*");
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
+	
+	
 	fileChooser = gtk_file_chooser_dialog_new ("Open ROM", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	const char* last_dir;
+	g_config->getOption("SDL.LastOpenFile", &last_dir);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
 	
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFCEU);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
@@ -1277,6 +1282,7 @@ void loadGame ()
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
+		g_config->setOption("SDL.LastOpenFile", filename);
 		if(LoadGame(filename) == 0)
 		{
 			

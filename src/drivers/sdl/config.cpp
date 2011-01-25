@@ -213,6 +213,10 @@ InitConfig()
     config->addOption("mute", "SDL.MuteCapture", 0);
     #endif
     
+    #ifdef _GTK
+    config->addOption("", "SDL.LastOpenFile", "/");
+    #endif
+    
     // fcm -> fm2 conversion
     config->addOption("fcmconvert", "SDL.FCMConvert", "");
     
