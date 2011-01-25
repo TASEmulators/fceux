@@ -1593,7 +1593,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Options/_Network Config", NULL , openNetworkConfig, 0, "<Item>" },
   //{ "/Options/Map _Hotkeys", NULL , openHotkeyConfig, 0, "<Item>" },
   { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
-  { "/Options/_Fullscreen", NULL,         enableFullscreen,	   0, "<Item>" },
+  { "/Options/_Fullscreen", "<alt>Return",         enableFullscreen,	   0, "<Item>" },
   { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
   { "/Help/About",   NULL,         showAbout,           0, "<Item>" },
 };
