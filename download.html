@@ -48,14 +48,14 @@
 </div>
 	<div id="page_content">
 	<h1>Downloads</h1>
-		<p>FCEUX is written for two platforms: SDL and Win32. The two ports have some significant differences. 
+		<p>The FCEUX team maintains two ports: SDL and Win32.
 		The Win32 port has an extensive set of native gui amenities and tools. 
 		The SDL port supports many of the features of the Win32 build (Lua scripting, movie recording), 
-		however some of the Win32 features are exclusive to the platform. The Win32 port has a built-in GUI, 
-		whereas the SDL port has a GTK launcher GUI. The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).
+		but some of the Win32 features (debugger, TASedit) are exclusive to Windows.
+		The SDL port should run any UNIX-like OS (Linux/Solaris/BSD).
 		</p>
 		
-		<p>Network play is not presently functional. Fixing it is a high priority.</p>
+		<p>Network play in Win32 is not presently functional. Fixing it is a high priority.</p>
 		
 		<h4>Win32</h4>
 		<ul>
@@ -70,9 +70,8 @@
 			<li><a href="http://scons.org/">Scons is required to build from source.</a></li>
 			<li>Requires SDL and libz</li>
 			<li>GTK2.0 and OpenGL are optional, but recommended.</li>
-			<li>The SDL port now has a GTK2 GUI built in, so gfceux is obsolete.  However, you can disable the GUI by setting GTK to 0 in the SConstruct file.
-			FCEUX, is included in the source release.  .</li>
-			<li>For instructions on installing on an Ubuntu or Debian system, check the how to at <a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums.</a></li>
+			<li>The GTK GUI is enabled by default, but you can disable it by editing the SConstruct file.</li>
+			<li>For (somewhat outdated) instructions on installing on an Ubuntu or Debian system, check the how to at <a href="http://ubuntuforums.org/showthread.php?t=971455">Ubuntuforums.</a></li>
 		</ul>
 		
 		<h3>Download</h3>
@@ -89,13 +88,13 @@
 		<ul>
 		<li><a href="https://fceultra.svn.sourceforge.net/svnroot/fceultra">SVN repository</a></li>
 		</ul>
-		<p>FCEUX development is done via a sourceforge SVN repository.  The latest svn can be found there</p>
+		<p>FCEUX development is done via a sourceforge SVN repository.  The last version of the source can be found there.</p>
 		<h4>Compiling</h4>
 		<ul>
 			<li>Win32 uses MS Visual Studio - 20010 and 2008 project files maintained (a 2005 one is available but outdated)</li>
 			<li>The SDL build uses SCONS</li>
 			<li>Everything needed to compile the win32 version is included in SVN</li>
-			<li>The GTK port requires the dependencies listed above.</li>
+			<li>The GTK port requires SDL and libz</li>
 		</ul>
 		<h3>Old Versions</h3>
 		<table border="1">
