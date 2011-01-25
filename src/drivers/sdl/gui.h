@@ -20,6 +20,9 @@
 #ifndef FCEUX_GUI_H
 #define FCEUX_GUI_H
 #define GTK_LITE
+#include <gtk/gtk.h>
+extern GtkWidget* MainWindow;
+extern GtkWidget* socket;
 int InitGTKSubsystem(int argc, char** argv);
 void pushOutputToGTK(const char* str);
 void showGui(bool b);

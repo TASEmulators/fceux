@@ -45,6 +45,7 @@
 
 #ifdef _GTK
 #include "gui.h"
+#include <gdk/gdkx.h>
 #endif
 
 // GLOBALS
@@ -312,7 +313,7 @@ InitVideo(FCEUGI *gi)
                 return -1;
             }
 
-
+		
         s_screen = SDL_SetVideoMode(xres, yres, desbpp, flags);
         if(!s_screen) {
             FCEUD_PrintError(SDL_GetError());
@@ -357,6 +358,24 @@ InitVideo(FCEUGI *gi)
 			return -1;
 		}
 #endif
+
+#ifdef _GTK
+        while (gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+        
+        char SDL_windowhack[128];
+        sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
+        SDL_putenv(SDL_windowhack);
+        
+        // init SDL video
+		if (SDL_WasInit(SDL_INIT_VIDEO))
+			SDL_QuitSubSystem(SDL_INIT_VIDEO);
+		if ( SDL_InitSubSystem(SDL_INIT_VIDEO) < 0 )
+		{
+			fprintf(stderr, "Couldn't init SDL video: %s\n", SDL_GetError());
+			gtk_main_quit();
+		}
+#endif
         
         s_screen = SDL_SetVideoMode((int)(NWIDTH * s_exs),
                                   (int)(s_tlines * s_eys),
@@ -365,6 +384,12 @@ InitVideo(FCEUGI *gi)
             FCEUD_PrintError(SDL_GetError());
             return -1;
         }
+
+#ifdef _GTK
+        GtkRequisition req;
+        gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+        gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+#endif
     }
     s_curbpp = s_screen->format->BitsPerPixel;
     if(!s_screen) {

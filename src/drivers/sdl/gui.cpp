@@ -33,6 +33,7 @@ void loadGame ();
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
+GtkWidget* socket = NULL;
 GtkWidget* padNoCombo;
 
 // This function configures a single button on a gamepad
@@ -670,8 +671,8 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(yscaleHbox), yscaleLbl, FALSE, FALSE, 2);
 	gtk_box_pack_start(GTK_BOX(yscaleHbox), yscaleSpin, FALSE, FALSE, 2);
 	
-	g_signal_connect(xscaleSpin, "button-release-event", G_CALLBACK(setXscale), NULL);
-	g_signal_connect(yscaleSpin, "button-release-event", G_CALLBACK(setYscale), NULL);
+	g_signal_connect(xscaleSpin, "value-changed", G_CALLBACK(setXscale), NULL);
+	g_signal_connect(yscaleSpin, "value-changed", G_CALLBACK(setYscale), NULL);
 	
 	double f;
 	// sync with config
@@ -1277,16 +1278,11 @@ void loadGame ()
 		gtk_widget_destroy (fileChooser);
 }
 
-void closeGame() { CloseGame(); }
-
-// this is not used currently; it is used in rendering sdl in
-// the gtk window which is broken
-gint configureEvent (GtkWidget* widget, GdkEventConfigure* event)
+void closeGame()
 {
-	//neccessary for SDL rendering on gtk win (i think?)
-	//s_screen = SDL_SetVideoMode(event->width, event->height, 0, 0);
-	
-	return TRUE;
+	GdkColor bg = {0, 0, 0, 0};
+	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
+	CloseGame();
 }
 
 void saveStateAs()
@@ -1357,7 +1353,198 @@ void loadStateFrom()
 	
 	
 }
+
+
+// Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
+unsigned short GDKToSDLKeyval(int gdk_key)
+{
+	if (!(gdk_key & 0xFF00))
+	{
+		// ASCII symbol.
+		// SDL and GDK use the same values for these keys.
+		
+		// Make sure the key value is lowercase.
+		gdk_key = tolower(gdk_key);
+		
+		// Return the key value.
+		return gdk_key;
+	}
 	
+	if (gdk_key & 0xFFFF0000)
+	{
+		// Extended X11 key. Not supported by SDL.
+#ifdef GDK_WINDOWING_X11
+		fprintf(stderr, "Unhandled extended X11 key: 0x%08X (%s)", gdk_key, XKeysymToString(gdk_key));
+#else
+		fprintf(stderr, "Unhandled extended key: 0x%08X\n", gdk_key);
+#endif
+		return 0;
+	}
+	
+	// Non-ASCII symbol.
+	static const uint16_t gdk_to_sdl_table[0x100] =
+	{
+		// 0x00 - 0x0F
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		SDLK_BACKSPACE, SDLK_TAB, SDLK_RETURN, SDLK_CLEAR,
+		0x0000, SDLK_RETURN, 0x0000, 0x0000,
+		
+		// 0x10 - 0x1F
+		0x0000, 0x0000, 0x0000, SDLK_PAUSE,
+		SDLK_SCROLLOCK, SDLK_SYSREQ, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, SDLK_ESCAPE,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x20 - 0x2F
+		SDLK_COMPOSE, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x30 - 0x3F [Japanese keys]
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x40 - 0x4F [unused]
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x50 - 0x5F
+		SDLK_HOME, SDLK_LEFT, SDLK_UP, SDLK_RIGHT,
+		SDLK_DOWN, SDLK_PAGEUP, SDLK_PAGEDOWN, SDLK_END,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x60 - 0x6F
+		0x0000, SDLK_PRINT, 0x0000, SDLK_INSERT,
+		SDLK_UNDO, 0x0000, 0x0000, SDLK_MENU,
+		0x0000, SDLK_HELP, SDLK_BREAK, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0x70 - 0x7F [mostly unused, except for Alt Gr and Num Lock]
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, SDLK_MODE, SDLK_NUMLOCK,
+		
+		// 0x80 - 0x8F [mostly unused, except for some numeric keypad keys]
+		SDLK_KP5, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, SDLK_KP_ENTER, 0x0000, 0x0000,
+		
+		// 0x90 - 0x9F
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, SDLK_KP7, SDLK_KP4, SDLK_KP8,
+		SDLK_KP6, SDLK_KP2, SDLK_KP9, SDLK_KP3,
+		SDLK_KP1, SDLK_KP5, SDLK_KP0, SDLK_KP_PERIOD,
+		
+		// 0xA0 - 0xAF
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, SDLK_KP_MULTIPLY, SDLK_KP_PLUS,
+		0x0000, SDLK_KP_MINUS, SDLK_KP_PERIOD, SDLK_KP_DIVIDE,
+		
+		// 0xB0 - 0xBF
+		SDLK_KP0, SDLK_KP1, SDLK_KP2, SDLK_KP3,
+		SDLK_KP4, SDLK_KP5, SDLK_KP6, SDLK_KP7,
+		SDLK_KP8, SDLK_KP9, 0x0000, 0x0000,
+		0x0000, SDLK_KP_EQUALS, SDLK_F1, SDLK_F2,
+		
+		// 0xC0 - 0xCF
+		SDLK_F3, SDLK_F4, SDLK_F5, SDLK_F6,
+		SDLK_F7, SDLK_F8, SDLK_F9, SDLK_F10,
+		SDLK_F11, SDLK_F12, SDLK_F13, SDLK_F14,
+		SDLK_F15, 0x0000, 0x0000, 0x0000,
+		
+		// 0xD0 - 0xDF [L* and R* function keys]
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		
+		// 0xE0 - 0xEF
+		0x0000, SDLK_LSHIFT, SDLK_RSHIFT, SDLK_LCTRL,
+		SDLK_RCTRL, SDLK_CAPSLOCK, 0x0000, SDLK_LMETA,
+		SDLK_RMETA, SDLK_LALT, SDLK_RALT, SDLK_LSUPER,
+		SDLK_RSUPER, 0x0000, 0x0000, 0x0000,
+		
+		// 0xF0 - 0xFF [mostly unused, except for Delete]
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, 0x0000,
+		0x0000, 0x0000, 0x0000, SDLK_DELETE,		
+	};
+	
+	unsigned short sdl_key = gdk_to_sdl_table[gdk_key & 0xFF];
+	if (sdl_key == 0)
+	{
+		// Unhandled GDK key.
+		fprintf(stderr, "Unhandled GDK key: 0x%04X (%s)", gdk_key, gdk_keyval_name(gdk_key));
+		return 0;
+	}
+	
+	return sdl_key;
+}
+
+
+// Function adapted from Gens/GS (source/gens/input/input_sdl.c)
+gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
+{
+	SDL_Event sdlev;
+	SDLKey sdlkey;
+	int keystate;
+
+	// Only grab keys from the main window.
+	if (grab != MainWindow)
+	{
+		// Don't push this key onto the SDL event stack.
+		return FALSE;
+	}
+	
+	switch (event->type)
+	{
+		case GDK_KEY_PRESS:
+			sdlev.type = SDL_KEYDOWN;
+			sdlev.key.state = SDL_PRESSED;
+			keystate = 1;
+			break;
+		
+		case GDK_KEY_RELEASE:
+			sdlev.type = SDL_KEYUP;
+			sdlev.key.state = SDL_RELEASED;
+			keystate = 0;
+			break;
+		
+		default:
+			fprintf(stderr, "Unhandled GDK event type: %d", event->type);
+			return FALSE;
+	}
+	
+	// Convert this keypress from GDK to SDL.
+	sdlkey = (SDLKey)GDKToSDLKeyval(event->keyval);
+	
+	// Create an SDL event from the keypress.
+	sdlev.key.keysym.sym = sdlkey;
+	if (sdlkey != 0)
+	{
+		SDL_PushEvent(&sdlev);
+		#if SDL_VERSION_ATLEAST(1, 3, 0)
+		SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
+		#else
+		SDL_GetKeyState(NULL)[sdlkey] = keystate;
+		#endif
+	}
+	
+	// Allow GTK+ to process this key.
+	return FALSE;
+}
+
 
 /* Our menu, an array of GtkItemFactoryEntry structures that defines each menu item */
 static GtkItemFactoryEntry menu_items[] = {
@@ -1469,78 +1656,54 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
 	
-	vbox = gtk_vbox_new(FALSE, 3);
+	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
-	
-	//consoleOutput = gtk_text_view_new_with_buffer(gtkConsoleBuf);
-	//gtk_text_view_set_editable(GTK_TEXT_VIEW(consoleOutput), FALSE);
-	
-	//gtkConsoleBuf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(consoleOutput));
-	//gtk_text_buffer_get_iter_at_offset(gtkConsoleBuf, &iter, 0);
-	//gtk_text_buffer_insert(gtkConsoleBuf, &iter, "FceuX GUI Started.\n", -1);
-	// = vte_terminal_new();
-	//vte_terminal_feed(VTE_TERMINAL(term), "FceuX GUI Started", -1);
-	
-	
-	
 		
-	//gtk_container_add(GTK_CONTAINER(vbox), Menubar);
+	
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
-	//gtk_box_pack_start (GTK_BOX(vbox), term, TRUE, TRUE, 0);
-	
-
-	
-	
-	// broken SDL embedding code
-	//gtk_widget_set_usize(MainWindow, xres, yres);
-	//gtk_widget_realize(MainWindow);
-	
-	// event handlers
-	//gtk_widget_add_events(MainWindow, GDK_BUTTON_PRESS_MASK);
-	//gtk_signal_connect(GTK_OBJECT(MainWindow), "configure_event",
-	//	GTK_SIGNAL_FUNC(configureEvent), 0);
-	
-	
+		
 	// PRG: this code here is the the windowID "hack" to render SDL
 	// in a GTK window.	however, I can't get it to work right now
 	// so i'm commenting it out and haivng a seperate GTK2 window with 
 	// controls
 	// 12/21/09
-	/*
-	GtkWidget* socket = gtk_socket_new();
-	gtk_widget_show (socket) ; 
-	gtk_container_add (GTK_CONTAINER(MainWindow), socket);
+	// ---
+	// uncommented and fixed by Bryan Cain
+	// 1/24/11
+	//
+	// prg - Bryan Cain, you are the man!
+	GtkWidget* hbox = gtk_hbox_new(FALSE, 0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_end (GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	
-	gtk_widget_realize (socket);
-
-	char SDL_windowhack[24];
-	sprintf(SDL_windowhack, "SDL_WINDOWID=%ld", (long int)gtk_socket_get_id (GTK_SOCKET(socket)));
-	putenv(SDL_windowhack); 
+	socket = gtk_event_box_new();
+	gtk_box_pack_start (GTK_BOX(hbox), socket, TRUE, FALSE, 0);
+	double xscale, yscale;
+	printf("%f %f", xscale, yscale);
+	g_config->getOption("SDL.XScale", &xscale);
+	g_config->getOption("SDL.YScale", &yscale);
+	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
+	gtk_widget_realize(socket);
+	gtk_widget_show(socket);
 	
+	GdkColor bg = {0, 0, 0, 0};
+	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
 	
-	// init SDL
-	if ( SDL_Init(SDL_INIT_VIDEO) < 0 )
-	{
-		fprintf(stderr, "Couldn't init SDL: %s\n", SDL_GetError());
-		gtk_main_quit();
-	}
+	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
+	gtk_key_snooper_install(convertKeypress, NULL);
 	
-	
-	
-	// test rendering
-	//screen = SDL_SetVideoMode(xres, yres, 0, 0);
-	//hello = SDL_LoadBMP( "hello.bmp" );
-	*/
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	
-		//gtk_idle_add(mainLoop, MainWindow);
 	// signal handlers
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
 	
-
 	gtk_widget_show_all(MainWindow);
+	
+	GtkRequisition req;
+	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 	 
 	return 0;
 }

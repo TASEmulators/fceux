@@ -71,7 +71,7 @@ Debugger additions
 Shinydoofy - sf:shinydoofy
 SDL maintenence
 
-Lukas Sabota - ltsmooth42 at comcast.net (sf:punkrockguy318)
+Lukas Sabota - ltsmooth42 at gmail dot com (sf:punkrockguy318)
 Head SDL developer
 
 Soules - gimmedonutnow at gmail dot com (sf:gimmedonutnow)
@@ -79,6 +79,10 @@ Linux SDL driver maintenance
 
 radsaq - radsaq at gmail dot com (sf:radsaq)
 Build system, testing, and random cleanups
+
+bryan cain -
+sdl in gtk gui patch
+
 
 -----------------------------------------
 Included components:

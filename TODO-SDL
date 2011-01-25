@@ -1,9 +1,9 @@
 TODO-SVN: 
-* DONE! Working!Test and work on unix-netplay
+*** Auto-resize game window
+*** Add alt-enter for fullscreen in GTK
 * DONE! Get to compile with SDL 1.3
 	* segfaults when opening a second game
 	* segfaults on fullscreen entry
-* DONE! Fix sound stuttering/lag (fixed in SDL 1.1.14)
 * Flesh out GTK GUI
 	* Sound config
 		* DONE! Individual volume mixers
@@ -25,7 +25,7 @@ TODO-SVN:
 		* OpenGLip
 		* Scanline end/start
 		* DONE! pallete
-* Integrate SDL window into GTK GUI
+* THANKS BRYAN CAIN!  Integrate SDL window into GTK GUI
 * DONE! Fix opening compressed ROMs
 * DONE! Fix Famicom Disk System
 * DONE!(PAUSE) Add a key to resume normal playback when finished frameskipping
