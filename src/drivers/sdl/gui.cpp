@@ -555,6 +555,13 @@ int setXscale(GtkWidget* w, gpointer p)
 	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
 	g_config->setOption("SDL.XScale", v);
 	g_config->save();
+	double xscale, yscale;
+	g_config->getOption("SDL.XScale", &xscale);
+	g_config->getOption("SDL.YScale", &yscale);
+	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
+	GtkRequisition req;
+	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 	return 0;
 }
 
@@ -563,6 +570,13 @@ int setYscale(GtkWidget* w, gpointer p)
 	double v = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
 	g_config->setOption("SDL.YScale", v);
 	g_config->save();
+	double xscale, yscale;
+	g_config->getOption("SDL.XScale", &xscale);
+	g_config->getOption("SDL.YScale", &yscale);
+	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
+	GtkRequisition req;
+	gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+	gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
 	return 0;
 }
 
@@ -1654,7 +1668,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
-	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 359, 200);
+	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
 	
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
@@ -1680,8 +1694,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	socket = gtk_event_box_new();
 	gtk_box_pack_start (GTK_BOX(hbox), socket, TRUE, FALSE, 0);
+	
 	double xscale, yscale;
-	printf("%f %f", xscale, yscale);
 	g_config->getOption("SDL.XScale", &xscale);
 	g_config->getOption("SDL.YScale", &yscale);
 	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
