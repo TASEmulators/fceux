@@ -1,3 +1,6 @@
+25-jan-2010 - prg318 - gtk - filechooser now remembers last file opened
+25-jan-2010 - prg318 - gtk - fixed xscale/yscale spinbuttons not changing config
+24-jan-2010 - prg318 - gtk - game window integrated into sdl window (thanks bryan!)
 11-nov-2010 - mart0258 - TasEdit - Invalidate greenzone when re-recording earlier portions of a movie. 
 09-oct-2010  - zeromus - fix bug in new ppu that made some intensify bits not get applied to output (fixes flashing siren screen in werefolf
 09-oct-2010 - gocha - win32 - Ram Watch - fix the multiple selection of watches
