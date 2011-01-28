@@ -1354,7 +1354,7 @@ void saveStateAs()
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Save State As", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 			
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
 	
