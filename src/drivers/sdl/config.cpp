@@ -213,8 +213,13 @@ InitConfig()
     config->addOption("mute", "SDL.MuteCapture", 0);
     #endif
     
+    
+    // prefixed with _ because they are internal (not cli options)
     #ifdef _GTK
-    config->addOption("", "SDL.LastOpenFile", "/");
+    config->addOption("_lastopenfile", "SDL.LastOpenFile", "/");
+    config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", "/");
+    config->addOption("_lastopennsf", "SDL.LastOpenNSF", "/");
+    config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", "/");
     #endif
     
     // fcm -> fm2 conversion

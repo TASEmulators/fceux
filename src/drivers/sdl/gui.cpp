@@ -1211,6 +1211,10 @@ void loadNSF ()
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	
+	const char* last_dir;
+	g_config->getOption("SDL.LastOpenNSF", &last_dir);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
+	
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNSF);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterZip);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -1230,6 +1234,8 @@ void loadNSF ()
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
 		}
+		g_config->setOption("SDL.LastOpenNSF", filename);
+		g_config->save();
 		g_free(filename);
 	}
 	else
@@ -1310,6 +1316,7 @@ void loadGame ()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
 		g_config->setOption("SDL.LastOpenFile", filename);
+		g_config->save();
 		closeGame();
 		if(LoadGame(filename) == 0)
 		{
@@ -1342,9 +1349,15 @@ void saveStateAs()
 	gtk_file_filter_add_pattern(filterAll, "*");
 	gtk_file_filter_set_name(filterAll, "All Files");
 	
+	const char* last_dir;
+	g_config->getOption("SDL.LastSaveStateAs", &last_dir);
+	
 	fileChooser = gtk_file_chooser_dialog_new ("Save State As", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
+	
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".sav");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterSav);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -1355,6 +1368,8 @@ void saveStateAs()
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		FCEUI_SaveState(filename);
+		g_config->setOption("SDL.LastSaveStateAs", filename);
+		g_config->save();
 		g_free(filename);
 	}
 	gtk_widget_destroy (fileChooser);
@@ -1380,6 +1395,11 @@ void loadStateFrom()
 	fileChooser = gtk_file_chooser_dialog_new ("Load State From", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			
+	const char* last_dir;
+	g_config->getOption("SDL.LastLoadStateFrom", &last_dir);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
+
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterSav);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
@@ -1389,8 +1409,11 @@ void loadStateFrom()
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		FCEUI_LoadState(filename);
+		g_config->setOption("SDL.LastLoadStateFrom", filename);
+		g_config->save();
 		g_free(filename);
 	}
+	
 	gtk_widget_destroy (fileChooser);
 	
 	
