@@ -735,10 +735,14 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	int noGui;
 	g_config->getOption("SDL.NoGUI", &noGui);
-	if(noGui == false)
+	if(noGui == 0)
 		InitGTKSubsystem(argc, argv);
 #endif
-
+	
+#ifdef _GTK
+	while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+#endif
 	if(romIndex >= 0)
 	{
 		// load the specified game

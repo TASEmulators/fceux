@@ -214,12 +214,15 @@ InitConfig()
     #endif
     
     
-    // prefixed with _ because they are internal (not cli options)
+    
     #ifdef _GTK
+    // prefixed with _ because they are internal (not cli options)
     config->addOption("_lastopenfile", "SDL.LastOpenFile", "/");
     config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", "/");
     config->addOption("_lastopennsf", "SDL.LastOpenNSF", "/");
     config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", "/");
+	// option to disable gui (broken??)
+	config->addOption("nogui", "SDL.NoGUI", 0);
     #endif
     
     // fcm -> fm2 conversion
@@ -231,8 +234,6 @@ InitConfig()
 	// enable new PPU core
 	config->addOption("newppu", "SDL.NewPPU", 0);
 	
-	// option to disable gui
-	config->addOption("nogui", "SDL.NoGUI", 0);
 
     // GamePad 0 - 3
     for(unsigned int i = 0; i < GAMEPAD_NUM_DEVICES; i++) {

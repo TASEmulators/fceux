@@ -360,20 +360,25 @@ InitVideo(FCEUGI *gi)
 #endif
 
 #ifdef _GTK
-        while (gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-        
-        char SDL_windowhack[128];
-        sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
-        SDL_putenv(SDL_windowhack);
-        
-        // init SDL video
-		if (SDL_WasInit(SDL_INIT_VIDEO))
-			SDL_QuitSubSystem(SDL_INIT_VIDEO);
-		if ( SDL_InitSubSystem(SDL_INIT_VIDEO) < 0 )
+		int noGui;
+		g_config->getOption("SDL.NoGUI", &noGui);
+		if(noGui == 0)
 		{
-			fprintf(stderr, "Couldn't init SDL video: %s\n", SDL_GetError());
-			gtk_main_quit();
+			while (gtk_events_pending())
+				gtk_main_iteration_do(FALSE);
+        
+			char SDL_windowhack[128];
+			sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
+			SDL_putenv(SDL_windowhack);
+        
+			// init SDL video
+			if (SDL_WasInit(SDL_INIT_VIDEO))
+				SDL_QuitSubSystem(SDL_INIT_VIDEO);
+			if ( SDL_InitSubSystem(SDL_INIT_VIDEO) < 0 )
+			{
+				fprintf(stderr, "Couldn't init SDL video: %s\n", SDL_GetError());
+				gtk_main_quit();
+			}
 		}
 #endif
         
