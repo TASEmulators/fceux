@@ -1718,6 +1718,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	GtkWidget* vbox;
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
 	
