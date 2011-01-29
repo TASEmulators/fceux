@@ -216,11 +216,12 @@ InitConfig()
     
     
     #ifdef _GTK
+    char* home_dir = getenv("HOME");
     // prefixed with _ because they are internal (not cli options)
-    config->addOption("_lastopenfile", "SDL.LastOpenFile", "/");
-    config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", "/");
-    config->addOption("_lastopennsf", "SDL.LastOpenNSF", "/");
-    config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", "/");
+    config->addOption("_lastopenfile", "SDL.LastOpenFile", home_dir);
+    config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
+    config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
+    config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
 	// option to disable gui (broken??)
 	config->addOption("nogui", "SDL.NoGUI", 0);
     #endif
