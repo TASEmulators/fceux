@@ -55,9 +55,13 @@ fillaudio(void *udata,
 	//printf("s_BufferIn: %i s_BufferWrite = %i s_BufferRead = %i s_BufferSize = %i\n",
 	// s_BufferIn, s_BufferWrite, s_BufferRead, s_BufferSize);
 	
-	// ensure that we're not writing garbage data to the soundcard
-	if(s_BufferWrite > s_BufferRead)
-		s_BufferWrite = s_BufferRead; 
+/* XXX RDJ: WTF?  This doesn't make any sense at all.  This will ensure that garbage data *does*
+   make it to the sound card, both in theory (it breaks the idea of a ring buffer) and in practice
+   (I get all sorts of pops, snaps, and garbled noise on my machine with these lines in place).
+ 	// ensure that we're not writing garbage data to the soundcard
+ 	if(s_BufferWrite > s_BufferRead)
+		s_BufferWrite = s_BufferRead;
+*/
 		
     while(len) {
         int16 sample = 0;
@@ -187,7 +191,11 @@ WriteSound(int32 *buf,
             s_Buffer[s_BufferWrite] = *buf;
             Count--;
             s_BufferWrite = (s_BufferWrite + 1) % s_BufferSize;
+            
+            SDL_LockAudio();
             s_BufferIn++;
+            SDL_UnlockAudio();
+            
             buf++;
         }
 }
