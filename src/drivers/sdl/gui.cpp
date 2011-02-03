@@ -969,7 +969,8 @@ void toggleSound(GtkWidget* check, gpointer data)
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check)))
 	{
 		g_config->setOption("SDL.Sound", 1);
-		InitSound();
+		if(GameInfo)		
+			InitSound();
 	}
 	else
 	{

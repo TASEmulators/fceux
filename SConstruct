@@ -10,7 +10,7 @@ opts.AddVariables(
   BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
-  BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 0),
+  BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK_LITE', 'Enable GTK2 for dialogs only', 0)
