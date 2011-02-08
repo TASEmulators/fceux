@@ -22,6 +22,7 @@
 #include "dface.h"
 #include "input.h"
 #include "config.h"
+#include "icon.xpm"
 
 #ifdef _S9XLUA_H
 #include "../../fceulua.h"
@@ -1722,6 +1723,9 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
+	
+	GdkPixbuf* icon = gdk_pixbuf_new_from_xpm_data(icon_xpm);
+	gtk_window_set_icon(GTK_WINDOW(MainWindow), icon);
 	
 	vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
