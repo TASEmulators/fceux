@@ -620,6 +620,7 @@ void openVideoConfig()
 	GtkWidget* scalerLbl;
 	GtkWidget* scalerCombo;
 	GtkWidget* glChk;
+	GtkWidget* linearChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
 	GtkWidget* xscaleSpin;
@@ -669,6 +670,17 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 0);
+	
+	// openGL linear filter check
+	linearChk = gtk_check_button_new_with_label("Enable OpenGL linear filter");
+	g_signal_connect(GTK_OBJECT(linearChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
+	
+	// sync with config
+	g_config->getOption("SDL.OpenGLip", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 0);
 		
 	// PAL check
 	palChk = gtk_check_button_new_with_label("Enable PAL mode");
@@ -721,6 +733,7 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
