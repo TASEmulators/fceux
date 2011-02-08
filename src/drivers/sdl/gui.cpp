@@ -106,6 +106,7 @@ void toggleOption(GtkWidget* w, gpointer p)
 	else
 		g_config->setOption((char*)p, 0);
 	g_config->save();
+	UpdateEMUCore(g_config);
 }
 
 int setTint(GtkWidget* w, gpointer p)
@@ -623,6 +624,7 @@ void openVideoConfig()
 	GtkWidget* linearChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
+	GtkWidget* spriteLimitChk;
 	GtkWidget* xscaleSpin;
 	GtkWidget* yscaleSpin;
 	GtkWidget* xscaleLbl;
@@ -665,6 +667,7 @@ void openVideoConfig()
 	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(setGl), (gpointer)scalerCombo);
 	
 	// sync with config
+	buf = 0;
 	g_config->getOption("SDL.OpenGL", &buf);
 	if(buf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glChk), 1);
@@ -676,6 +679,7 @@ void openVideoConfig()
 	g_signal_connect(GTK_OBJECT(linearChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
 	
 	// sync with config
+	buf = 0;
 	g_config->getOption("SDL.OpenGLip", &buf);
 	if(buf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 1);
@@ -687,6 +691,7 @@ void openVideoConfig()
 	g_signal_connect(GTK_OBJECT(palChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
 	
 	// sync with config
+	buf = 0;
 	g_config->getOption("SDL.PAL", &buf);
 	if(buf)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(palChk), 1);
@@ -704,6 +709,18 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
+	
+	// disable 8 sprite limit check
+	spriteLimitChk = gtk_check_button_new_with_label("Disable Sprite Limit");
+	g_signal_connect(GTK_OBJECT(spriteLimitChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
+	
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.DisableSpriteLimit", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 0);
 		
 	// xscale / yscale
 	xscaleHbox = gtk_hbox_new(FALSE, 5);
@@ -736,6 +753,7 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
 	
