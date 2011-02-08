@@ -222,6 +222,14 @@ InitOpenGL(int l,
   InitBlitToHigh(4,0xFF,0xFF00,0xFF0000,efx&2,0,0);
   #endif
  }
+ 
+ if(screen->flags & SDL_FULLSCREEN)
+ {
+  xscale=(double)screen->w / (double)(r-l);
+  yscale=(double)screen->h / (double)(b-t);
+  if(xscale<yscale) yscale = xscale;
+  if(yscale<xscale) xscale = yscale;
+ }
 
  {
   int rw=(int)((r-l)*xscale);

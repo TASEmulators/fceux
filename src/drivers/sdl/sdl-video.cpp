@@ -70,6 +70,8 @@ static int s_eefx;
 static int s_clipSides;
 static int s_fullscreen;
 static int noframe;
+static int s_nativeWidth = -1;
+static int s_nativeHeight = -1;
 
 #define NWIDTH	(256 - (s_clipSides ? 16 : 0))
 #define NOFFSET	(s_clipSides ? 8 : 0)
@@ -206,6 +208,14 @@ InitVideo(FCEUGI *gi)
         flags |= SDL_HWSURFACE;
     }
     
+    // get the monitor's current resolution if we do not already have it
+    if(s_nativeWidth < 0) {
+    	s_nativeWidth = vinf->current_w;
+    }
+    if(s_nativeHeight < 0) {
+    	s_nativeHeight = vinf->current_h;
+    }
+    
     // check if we are rendering fullscreen
     if(s_fullscreen) {
         flags |= SDL_FULLSCREEN;
@@ -314,7 +324,9 @@ InitVideo(FCEUGI *gi)
             }
 
 		
-        s_screen = SDL_SetVideoMode(xres, yres, desbpp, flags);
+        s_screen = SDL_SetVideoMode(s_useOpenGL ? s_nativeWidth : xres,
+        							s_useOpenGL ? s_nativeHeight : yres,
+        							desbpp, flags);
         if(!s_screen) {
             FCEUD_PrintError(SDL_GetError());
             return -1;
@@ -359,7 +371,7 @@ InitVideo(FCEUGI *gi)
 		}
 #endif
 
-#ifdef _GTK
+#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
 		int noGui;
 		g_config->getOption("SDL.NoGUI", &noGui);
 		if(noGui == 0)
