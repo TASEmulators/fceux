@@ -80,9 +80,8 @@ Linux SDL driver maintenance
 radsaq - radsaq at gmail dot com (sf:radsaq)
 Build system, testing, and random cleanups
 
-bryan cain -
-sdl in gtk gui patch
-
+Bryan Cain - sf:plombo
+Patch to embed SDL in the GTK+ GUI, miscellaneous other SDL and GTK+ contributions
 
 -----------------------------------------
 Included components:
