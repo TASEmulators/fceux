@@ -90,6 +90,7 @@ SetOpenGLPalette(uint8 *data)
 void
 BlitOpenGL(uint8 *buf)
 {
+    p_glClear(GL_COLOR_BUFFER_BIT);
     p_glBindTexture(GL_TEXTURE_2D, textures[0]);
     if(HiBuffer) {
         Blit8ToHigh(buf, (uint8*)HiBuffer, 256, 240, 256*4, 1, 1);
@@ -277,11 +278,16 @@ InitOpenGL(int l,
  p_glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
  p_glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
  p_glEnable(GL_TEXTURE_2D);
+ p_glDisable(GL_DEPTH_TEST);
  p_glClearColor(0.0f, 0.0f, 0.0f, 0.0f);	// Background color to black.
  p_glMatrixMode(GL_MODELVIEW);
-
- p_glClear(GL_COLOR_BUFFER_BIT);
  p_glLoadIdentity();
+
+ // In a double buffered setup with page flipping, be sure to clear both buffers.
+ p_glClear(GL_COLOR_BUFFER_BIT);
+ SDL_GL_SwapBuffers();
+ p_glClear(GL_COLOR_BUFFER_BIT);
+ SDL_GL_SwapBuffers();
 
  return(1);
 }
