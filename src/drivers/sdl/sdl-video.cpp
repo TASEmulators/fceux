@@ -323,10 +323,14 @@ InitVideo(FCEUGI *gi)
                 return -1;
             }
 
-		
+#ifdef OPENGL
         s_screen = SDL_SetVideoMode(s_useOpenGL ? s_nativeWidth : xres,
         							s_useOpenGL ? s_nativeHeight : yres,
         							desbpp, flags);
+#else
+        s_screen = SDL_SetVideoMode(xres, yres, desbpp, flags);
+#endif
+
         if(!s_screen) {
             FCEUD_PrintError(SDL_GetError());
             return -1;
