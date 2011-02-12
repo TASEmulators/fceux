@@ -1210,8 +1210,8 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			);
 		}
 
-		if (InputType[FAMICOM_POSITION]>SI_COUNT || InputType[FAMICOM_POSITION]<0)
-			InputType[FAMICOM_POSITION]=SI_UNSET; 
+		if (InputType[FAMICOM_POSITION]>SIFC_COUNT || InputType[FAMICOM_POSITION]<0)
+			InputType[FAMICOM_POSITION]=SIFC_UNSET; 
 
 		// Update the combobox selection according to the
 		// currently selected input mode.
@@ -1325,7 +1325,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			{
 			case BTN_FAM:
 				{
-					const char *text = ESI_Name((ESI)InputType[FAMICOM_POSITION]);
+					const char *text = ESIFC_Name((ESIFC)InputType[FAMICOM_POSITION]);
 
 					DoTBType = DoTBPort = 0;
 

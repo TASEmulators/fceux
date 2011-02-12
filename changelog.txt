@@ -1,3 +1,4 @@
+12-feb-2010 - mart0258 - Fix input selection for Famicom Expansion port
 25-jan-2010 - prg318 - gtk - filechooser now remembers last file opened
 25-jan-2010 - prg318 - gtk - fixed xscale/yscale spinbuttons not changing config
 24-jan-2010 - prg318 - gtk - game window integrated into sdl window (thanks bryan!)
