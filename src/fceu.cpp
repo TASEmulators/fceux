@@ -205,6 +205,8 @@ static readfunc *AReadG;
 static writefunc *BWriteG;
 static int RWWrap=0;
 
+uint8 IOWriteLog[0x10000];
+
 //mbg merge 7/18/06 docs
 //bit0 indicates whether emulation is paused
 //bit1 indicates whether emulation is in frame step mode

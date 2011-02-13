@@ -239,6 +239,7 @@ static void SQReload(int x, uint8 V)
 
 static DECLFW(Write_PSG)
 {
+ IOWriteLog[A] = V;
  A&=0x1F;
  switch(A)
  {
@@ -311,6 +312,7 @@ static DECLFW(Write_PSG)
 
 static DECLFW(Write_DMCRegs)
 {
+ IOWriteLog[A] = V;
  A&=0xF;
 
  switch(A)
@@ -342,6 +344,7 @@ static DECLFW(Write_DMCRegs)
 static DECLFW(StatusWrite)
 {
 	int x;
+	IOWriteLog[A] = V;
 
         DoSQ1();
         DoSQ2();
@@ -1005,6 +1008,7 @@ static void RDoNoise(void)
 
 DECLFW(Write_IRQFM)
 {
+ IOWriteLog[A] = V;
  V=(V&0xC0)>>6;
  fcnt=0;
  if(V&0x2)  

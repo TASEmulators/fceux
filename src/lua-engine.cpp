@@ -1206,6 +1206,8 @@ static int rom_gethash(lua_State *L) {
 	else lua_pushstring(L, "");
 	return 1;
 }
+static int iowrite_readbyte(lua_State *L) {   int addr = luaL_checkinteger(L,1); lua_pushinteger(L, (addr >= 0 && addr <= 0xFFFF) ? IOWriteLog[addr] : 0); return 1; }
+static int iowrite_readbytesigned(lua_State *L) {   int addr = luaL_checkinteger(L,1); lua_pushinteger(L, (addr >= 0 && addr <= 0xFFFF) ? (signed char)IOWriteLog[addr] : 0); return 1; }
 static int memory_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1))); return 1; }
 static int memory_writebyte(lua_State *L) {   FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2)); return 0; }
 static int memory_readbyterange(lua_State *L) {
@@ -4699,6 +4701,16 @@ static const struct luaL_reg memorylib [] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg iowritelib [] = {
+
+	{"readbyte", iowrite_readbyte},
+	{"readbytesigned", iowrite_readbytesigned},
+	// alternate naming scheme for unsigned
+	{"readbyteunsigned", iowrite_readbyte},
+
+	{NULL,NULL}
+};
+
 static const struct luaL_reg joypadlib[] = {
 	{"get", joypad_get},
 	{"getdown", joypad_getdown},
@@ -4921,6 +4933,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "emu", emulib); // added for better cross-emulator compatibility
 		luaL_register(L, "FCEU", emulib); // kept for backward compatibility
 		luaL_register(L, "memory", memorylib);
+		luaL_register(L, "iowrite", iowritelib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "zapper", zapperlib);
