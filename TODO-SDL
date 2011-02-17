@@ -1,34 +1,22 @@
-TODO-SVN: 
-*** Auto-resize game window
-*** Add alt-enter for fullscreen in GTK
-* DONE! Get to compile with SDL 1.3
+TODO-SDL: 
+* Auto-resize game window
+test this? * Get to compile with SDL 1.3
 	* segfaults when opening a second game
 	* segfaults on fullscreen entry
-* Flesh out GTK GUI
-	* Sound config
-		* DONE! Individual volume mixers
-	* Save config
-		* Should be in menus
-	* Hotkeys
-		* DONE! Redesign internal data structures of hotkeys 
-		* design UI
-	* Video config
-		* DONE! Windowed scale amount
-		* DONE! Color / Hue / Tint
-	* Implement Cheat Editor in GTK
-	* Options to look into:
-		* bpp
-		* autoscale
-		* gamegenie
-		* DONE! lowpass
-		* keepratio
-		* OpenGLip
-		* Scanline end/start
-		* DONE! pallete
-* THANKS BRYAN CAIN!  Integrate SDL window into GTK GUI
-* DONE! Fix opening compressed ROMs
-* DONE! Fix Famicom Disk System
-* DONE!(PAUSE) Add a key to resume normal playback when finished frameskipping
-* DONE! Make GetUserInput not depend on zenity
-* DONE! Fixed dpad/hat support
-* DONE! Fixed VS Unisystem in SDL and make hotkeys mappable
+* Hotkeys Config
+	* DONE! Redesign internal data structures of hotkeys 
+	* design UI
+* Video config
+	* make nice error for shaders/openGL (currently "couldnt open rom file") and more descriptive error on console
+	* grey-out xyscale entries when scalers are set
+	* dont allow scalers and opengl 
+* Implement Cheat Editor in GTK
+* Game genie from GTK
+* GUI Options to look into:
+	* bpp
+	* autoscale
+	* gamegenie
+	* OpenGLip
+	* Scanline end/start
+* Fix 7Zipped ROMs
+* Think of good workaround for pushing F1 when run from a gui; currently drops to cheat menu with no terminal and is unrecoverable
