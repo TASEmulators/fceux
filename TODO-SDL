@@ -16,7 +16,7 @@ test this? * Get to compile with SDL 1.3
 	* bpp
 	* autoscale
 	* gamegenie
-	* OpenGLip
+	* DONE! OpenGLip
 	* Scanline end/start
 * Fix 7Zipped ROMs
 * Think of good workaround for pushing F1 when run from a gui; currently drops to cheat menu with no terminal and is unrecoverable
