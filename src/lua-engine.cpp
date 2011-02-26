@@ -4224,29 +4224,6 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "rp2a03");
 
 	return 1;
-
-/*
-#ifdef WIN32
-	// keyboard and mouse button status
-	{
-		extern int EnableBackgroundInput;
-		unsigned char keys [256];
-		if(!EnableBackgroundInput)
-		{
-			if(GetKeyboardState(keys))
-			{
-				for(int i = 1; i < 255; i++)
-				{
-					int mask = (i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL) ? 0x01 : 0x80;
-					if(keys[i] & mask)
-					{
-						const char* name = s_keyToName[i];
-						if(name)
-						{
-							lua_pushboolean(L, true);
-							lua_setfield(L, -2, name);
-						}
-						*/
 }
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
