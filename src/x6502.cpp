@@ -50,7 +50,6 @@ static INLINE uint8 RdMem(unsigned int A)
 //normal memory write
 static INLINE void WrMem(unsigned int A, uint8 V)
 {
-	IOWriteLog[A] = V;
 	BWrite[A](A,V);
 	#ifdef _S9XLUA_H
 	CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);
@@ -81,7 +80,6 @@ uint8 X6502_DMR(uint32 A)
 void X6502_DMW(uint32 A, uint8 V)
 {
  ADDCYC(1);
- IOWriteLog[A] = V;
  BWrite[A](A,V);
  #ifdef _S9XLUA_H
  CallRegisteredLuaMemHook(A, 1, V, LUAMEMHOOK_WRITE);

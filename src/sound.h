@@ -73,4 +73,12 @@ void Write_IRQFM (uint32 A, uint8 V); //mbg merge 7/17/06 brought over from late
 
 void LogDPCM(int romaddress, int dpcmsize);
 
+typedef struct {
+	uint8 Speed;
+	uint8 Mode;	/* Fixed volume(1), and loop(2) */
+	uint8 DecCountTo1;
+	uint8 decvolume;
+	int reloaddec;
+} ENVUNIT;
+
 #endif

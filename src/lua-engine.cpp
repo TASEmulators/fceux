@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm> 
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef __linux
 #include <unistd.h>
@@ -25,6 +26,7 @@
 #include "types.h"
 #include "fceu.h"
 #include "video.h"
+#include "sound.h"
 #include "drawing.h"
 #include "state.h"
 #include "movie.h"
@@ -1206,8 +1208,6 @@ static int rom_gethash(lua_State *L) {
 	else lua_pushstring(L, "");
 	return 1;
 }
-static int iowrite_readbyte(lua_State *L) {   int addr = luaL_checkinteger(L,1); lua_pushinteger(L, (addr >= 0 && addr <= 0xFFFF) ? IOWriteLog[addr] : 0); return 1; }
-static int iowrite_readbytesigned(lua_State *L) {   int addr = luaL_checkinteger(L,1); lua_pushinteger(L, (addr >= 0 && addr <= 0xFFFF) ? (signed char)IOWriteLog[addr] : 0); return 1; }
 static int memory_readbyte(lua_State *L) {   lua_pushinteger(L, FCEU_CheatGetByte(luaL_checkinteger(L,1))); return 1; }
 static int memory_writebyte(lua_State *L) {   FCEU_CheatSetByte(luaL_checkinteger(L,1), luaL_checkinteger(L,2)); return 0; }
 static int memory_readbyterange(lua_State *L) {
@@ -4098,6 +4098,157 @@ static int gui_register(lua_State *L) {
 
 }
 
+static int sound_get(lua_State *L)
+{	
+	extern ENVUNIT EnvUnits[3];
+	extern int CheckFreq(uint32 cf, uint8 sr);
+	extern int32 curfreq[2];
+	extern uint8 PSG[0x10];
+	extern int32 lengthcount[4]; 
+	extern uint8 TriCount;
+	extern const uint32 *NoiseFreqTable;
+	extern int32 DMCPeriod;
+	extern uint8 DMCAddressLatch, DMCSizeLatch;
+	extern uint8 DMCFormat;
+	extern char DMCHaveSample;
+
+	int freqReg;
+	double freq;
+
+	lua_newtable(L);
+
+	// rp2a03 start
+	lua_newtable(L);
+	// rp2a03 info setup
+	double nesVolumes[3];
+	for (int i = 0; i < 3; i++)
+	{
+		if ((EnvUnits[i].Mode & 1) != 0)
+			nesVolumes[i] = EnvUnits[i].Speed;
+		else
+			nesVolumes[i] = EnvUnits[i].decvolume;
+		nesVolumes[i] /= 15.0;
+	}
+	// rp2a03/square1
+	lua_newtable(L);
+	if((curfreq[0] < 8 || curfreq[0] > 0x7ff) ||
+			(CheckFreq(curfreq[0], PSG[1]) == 0) ||
+			(lengthcount[0] == 0))
+		lua_pushnumber(L, 0.0);
+	else
+		lua_pushnumber(L, nesVolumes[0]);
+	lua_setfield(L, -2, "volume");
+	lua_pushinteger(L, curfreq[0]);
+	lua_setfield(L, -2, "freqreg");
+	freq = (39375000.0/352.0) / curfreq[0];
+	lua_pushnumber(L, freq);
+	lua_setfield(L, -2, "frequency");
+	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
+	lua_setfield(L, -2, "midikey");
+	lua_pushinteger(L, (PSG[0] & 0xC0) >> 6);
+	lua_setfield(L, -2, "duty");
+	lua_setfield(L, -2, "square1");
+	// rp2a03/square2
+	lua_newtable(L);
+	if((curfreq[1] < 8 || curfreq[1] > 0x7ff) ||
+			(CheckFreq(curfreq[1], PSG[5]) == 0) ||
+			(lengthcount[1] == 0))
+		lua_pushnumber(L, 0.0);
+	else
+		lua_pushnumber(L, nesVolumes[1]);
+	lua_setfield(L, -2, "volume");
+	lua_pushinteger(L, curfreq[1]);
+	lua_setfield(L, -2, "freqreg");
+	freq = (39375000.0/352.0) / curfreq[1];
+	lua_pushnumber(L, freq);
+	lua_setfield(L, -2, "frequency");
+	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
+	lua_setfield(L, -2, "midikey");
+	lua_pushinteger(L, (PSG[4] & 0xC0) >> 6);
+	lua_setfield(L, -2, "duty");
+	lua_setfield(L, -2, "square2");
+	// rp2a03/triangle
+	lua_newtable(L);
+	if(lengthcount[2] == 0 || TriCount == 0)
+		lua_pushnumber(L, 0.0);
+	else
+		lua_pushnumber(L, 1.0);
+	lua_setfield(L, -2, "volume");
+	freqReg = PSG[0xa] | ((PSG[0xb] & 7) << 8);
+	lua_pushinteger(L, freqReg);
+	lua_setfield(L, -2, "freqreg");
+	freq = (39375000.0/704.0) / freqReg;
+	lua_pushnumber(L, freq);
+	lua_setfield(L, -2, "frequency");
+	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
+	lua_setfield(L, -2, "midikey");
+	lua_setfield(L, -2, "triangle");
+	// rp2a03/noise
+	lua_newtable(L);
+	if(lengthcount[3] == 0)
+		lua_pushnumber(L, 0.0);
+	else
+		lua_pushnumber(L, nesVolumes[2]);
+	lua_setfield(L, -2, "volume");
+	freqReg = PSG[0xE] & 0xF;
+	lua_pushinteger(L, freqReg);
+	lua_setfield(L, -2, "freqreg");
+	lua_pushboolean(L, (PSG[0xE] & 0x80) != 0);
+	lua_setfield(L, -2, "short");
+	freq = (39375000.0/44.0) / NoiseFreqTable[freqReg]; // probably wrong
+	lua_pushnumber(L, freq);
+	lua_setfield(L, -2, "frequency");
+	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
+	lua_setfield(L, -2, "midikey");
+	lua_setfield(L, -2, "noise");
+	// rp2a03/dpcm
+	lua_newtable(L);
+	if (DMCHaveSample == 0)
+		lua_pushnumber(L, 0.0);
+	else
+		lua_pushnumber(L, 1.0);
+	lua_setfield(L, -2, "volume");
+	lua_pushinteger(L, DMCFormat & 0xF);
+	lua_setfield(L, -2, "freqreg");
+	freq = (39375000.0/2.0) / DMCPeriod;
+	lua_pushnumber(L, freq);
+	lua_setfield(L, -2, "frequency");
+	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
+	lua_setfield(L, -2, "midikey");
+	lua_pushinteger(L, 0xC000 + (DMCAddressLatch << 6));
+	lua_setfield(L, -2, "dmcaddress");
+	lua_pushinteger(L, (DMCSizeLatch << 4) + 1);
+	lua_setfield(L, -2, "dmcsize");
+	lua_setfield(L, -2, "dpcm");
+	// rp2a03 end
+	lua_setfield(L, -2, "rp2a03");
+
+	return 1;
+
+/*
+#ifdef WIN32
+	// keyboard and mouse button status
+	{
+		extern int EnableBackgroundInput;
+		unsigned char keys [256];
+		if(!EnableBackgroundInput)
+		{
+			if(GetKeyboardState(keys))
+			{
+				for(int i = 1; i < 255; i++)
+				{
+					int mask = (i == VK_CAPITAL || i == VK_NUMLOCK || i == VK_SCROLL) ? 0x01 : 0x80;
+					if(keys[i] & mask)
+					{
+						const char* name = s_keyToName[i];
+						if(name)
+						{
+							lua_pushboolean(L, true);
+							lua_setfield(L, -2, name);
+						}
+						*/
+}
+
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	const char *str = luaL_checkstring(L, 1);
 	const char* type = lua_type(L,2) == LUA_TSTRING ? lua_tostring(L,2) : deftype;
@@ -4701,16 +4852,6 @@ static const struct luaL_reg memorylib [] = {
 	{NULL,NULL}
 };
 
-static const struct luaL_reg iowritelib [] = {
-
-	{"readbyte", iowrite_readbyte},
-	{"readbytesigned", iowrite_readbytesigned},
-	// alternate naming scheme for unsigned
-	{"readbyteunsigned", iowrite_readbyte},
-
-	{NULL,NULL}
-};
-
 static const struct luaL_reg joypadlib[] = {
 	{"get", joypad_get},
 	{"getdown", joypad_getdown},
@@ -4812,6 +4953,12 @@ static const struct luaL_reg guilib[] = {
 	{"drawrect", gui_box},
 	{"drawimage", gui_gdoverlay},
 	{"image", gui_gdoverlay},
+	{NULL,NULL}
+};
+
+static const struct luaL_reg soundlib[] = {
+	
+	{"get", sound_get},
 	{NULL,NULL}
 };
 
@@ -4933,7 +5080,6 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "emu", emulib); // added for better cross-emulator compatibility
 		luaL_register(L, "FCEU", emulib); // kept for backward compatibility
 		luaL_register(L, "memory", memorylib);
-		luaL_register(L, "iowrite", iowritelib);
 		luaL_register(L, "rom", romlib);
 		luaL_register(L, "joypad", joypadlib);
 		luaL_register(L, "zapper", zapperlib);
@@ -4941,6 +5087,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "savestate", savestatelib);
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);
+		luaL_register(L, "sound", soundlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(L, 0);		// clean the stack, because each call to luaL_register leaves a table on top
 
