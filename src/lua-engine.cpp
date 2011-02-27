@@ -4439,6 +4439,38 @@ use_console:
 
 }
 
+static int doOpenFilePopup(lua_State *L, bool saveFile) {
+#ifdef WIN32
+	char filename[PATH_MAX];
+	OPENFILENAME ofn;
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hAppWnd;
+	ofn.lpstrFilter = TEXT("All files (*.*)\0*.*\0\0");
+	ofn.nFilterIndex = 0;
+	filename[0] = TEXT('\0');
+	ofn.lpstrFile = filename;
+	ofn.nMaxFile = PATH_MAX;
+	ofn.Flags = OFN_NOCHANGEDIR | (saveFile ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+	BOOL bResult = saveFile ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn);
+	lua_newtable(L);
+	if (bResult)
+	{
+		lua_pushstring(L, filename);
+		lua_rawseti(L, -2, 1);
+	}
+#else
+	// TODO: more sophisticated interface
+	char filename[PATH_MAX];
+	printf("Enter %s filename: ", saveFile ? "save" : "open");
+	fgets(filename, PATH_MAX, stdin);
+	lua_newtable(L);
+	lua_pushstring(L, filename);
+	lua_rawseti(L, -2, 1);
+#endif
+	return 1;
+}
+
 // string gui.popup(string message, string type = "ok", string icon = "message")
 // string input.popup(string message, string type = "yesno", string icon = "question")
 static int gui_popup(lua_State *L)
@@ -4448,6 +4480,15 @@ static int gui_popup(lua_State *L)
 static int input_popup(lua_State *L)
 {
 	return doPopup(L, "yesno", "question");
+}
+
+static int input_openfilepopup(lua_State *L)
+{
+	return doOpenFilePopup(L, false);
+}
+static int input_savefilepopup(lua_State *L)
+{
+	return doOpenFilePopup(L, true);
 }
 
 // the following bit operations are ported from LuaBitOp 1.0.1,
@@ -4850,6 +4891,8 @@ static const struct luaL_reg zapperlib[] = {
 static const struct luaL_reg inputlib[] = {
 	{"get", input_get},
 	{"popup", input_popup},
+	{"openfilepopup", input_openfilepopup},
+	{"savefilepopup", input_savefilepopup},
 	// alternative names
 	{"read", input_get},
 	{NULL,NULL}
