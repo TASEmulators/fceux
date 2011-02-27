@@ -4111,6 +4111,7 @@ static int sound_get(lua_State *L)
 	extern uint8 DMCAddressLatch, DMCSizeLatch;
 	extern uint8 DMCFormat;
 	extern char DMCHaveSample;
+	extern uint8 InitialRawDALatch;
 
 	int freqReg;
 	double freq;
@@ -4219,6 +4220,10 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "dmcaddress");
 	lua_pushinteger(L, (DMCSizeLatch << 4) + 1);
 	lua_setfield(L, -2, "dmcsize");
+	lua_pushboolean(L, DMCFormat & 0x40);
+	lua_setfield(L, -2, "dmcloop");
+	lua_pushinteger(L, InitialRawDALatch);
+	lua_setfield(L, -2, "dmcseed");
 	lua_setfield(L, -2, "dpcm");
 	// rp2a03 end
 	lua_setfield(L, -2, "rp2a03");

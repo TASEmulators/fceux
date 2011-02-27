@@ -52,6 +52,7 @@ static int32 wlcount[4]={0,0,0,0};	/* Wave length counters.	*/
 static uint8 IRQFrameMode=0;	/* $4017 / xx000000 */
 /*static*/ uint8 PSG[0x10];
 static uint8 RawDALatch=0;	/* $4011 0xxxxxxx */
+/*static*/ uint8 InitialRawDALatch=0; // used only for lua
 
 uint8 EnabledChannels=0;		/* Byte written to $4015 */
 
@@ -322,7 +323,8 @@ static DECLFW(Write_DMCRegs)
 	    DMCFormat=V;
 	    break;
   case 0x01:DoPCM();
-	    RawDALatch=V&0x7F;
+	    InitialRawDALatch=V&0x7F;
+	    RawDALatch=InitialRawDALatch;
 	    break;
   case 0x02:DMCAddressLatch=V;break;
   case 0x03:DMCSizeLatch=V;break;
