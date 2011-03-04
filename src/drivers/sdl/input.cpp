@@ -40,7 +40,10 @@
 #endif
 
 #ifdef _GTK_LITE
-#include<gtk/gtk.h>
+#include "gui.h"
+#ifdef SDL_VIDEO_DRIVER_X11
+#include <gdk/gdkx.h>
+#endif
 #endif
 
 
@@ -762,15 +765,33 @@ ButtonConfigBegin()
  
     // reactivate the video subsystem
     if(!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if(SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
+    	if(!bcpv) {
+    		InitVideo(GameInfo);
+    	}
+        else {
+#if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
+            int noGui;
+            g_config->getOption("SDL.NoGUI", &noGui);
+            if(noGui == 0)
+            {
+                while (gtk_events_pending())
+                    gtk_main_iteration_do(FALSE);
+            
+                char SDL_windowhack[128];
+                sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
+                SDL_putenv(SDL_windowhack);
+            }
+#endif
+            if(SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
                 FCEUD_Message(SDL_GetError());
                 return(0);
+            }
+            
+            // set the screen and notify the user of button configuration
+            screen = SDL_SetVideoMode(420, 200, 8, 0); 
+            SDL_WM_SetCaption("Button Config",0);
         }
     }
-
-    // set the screen and notify the user of button configuration
-    screen = SDL_SetVideoMode(420, 200, 8, 0); 
-    SDL_WM_SetCaption("Button Config",0);
 
     // XXX soules - why did we shut this down?
     // initialize the joystick subsystem
@@ -791,12 +812,12 @@ ButtonConfigEnd()
 
     // shutdown the joystick and video subsystems
     KillJoysticks();
-    SDL_QuitSubSystem(SDL_INIT_VIDEO); 
+    //SDL_QuitSubSystem(SDL_INIT_VIDEO); 
 
     // re-initialize joystick and video subsystems if they were active before
-    if(!bcpv) {
+    /*if(!bcpv) {
         InitVideo(GameInfo);
-    }
+    }*/
     if(!bcpj) {
         InitJoysticks();
     }
@@ -1260,10 +1281,67 @@ UpdateFTrainer()
 }
 
 /**
+ * Get the display name of the key or joystick button mapped to a specific 
+ * NES gamepad button.
+ * @param bc the NES gamepad's button config
+ * @param which the index of the button
+ */
+const char*
+ButtonName(const ButtConfig* bc, int which)
+{
+	static char name[256];
+	
+	switch(bc->ButtType[which])
+	{
+		case BUTTC_KEYBOARD:
+			return SDL_GetKeyName((SDLKey)bc->ButtonNum[which]);
+		case BUTTC_JOYSTICK:
+			int joyNum, inputNum;
+			const char* inputType, *inputDirection;
+			
+			joyNum = bc->DeviceNum[which];
+			
+			if(bc->ButtonNum[which] & 0x8000)
+			{
+				inputType = "Axis";
+				inputNum = bc->ButtonNum[which] & 0x3FFF;
+				inputDirection = bc->ButtonNum[which] & 0x4000 ? "-" : "+";
+			}
+			else if(bc->ButtonNum[which] & 0x2000)
+			{
+				int inputValue;
+				char direction[128] = "";
+				
+				inputType = "Hat";
+				inputNum = (bc->ButtonNum[which] >> 8) & 0x1F;
+				inputValue = bc->ButtonNum[which] & 0xF;
+				
+				if(inputValue & SDL_HAT_UP)    strncat(direction, "Up ",    sizeof(direction));
+				if(inputValue & SDL_HAT_DOWN)  strncat(direction, "Down ",  sizeof(direction));
+				if(inputValue & SDL_HAT_LEFT)  strncat(direction, "Left ",  sizeof(direction));
+				if(inputValue & SDL_HAT_RIGHT) strncat(direction, "Right ", sizeof(direction));
+				
+				if(direction[0])
+					inputDirection = direction;
+				else
+					inputDirection = "Center";
+			}
+			else
+			{
+				inputType = "Button";
+				inputNum = bc->ButtonNum[which];
+				inputDirection = "";
+			}
+	}
+	
+	return name;
+}
+
+/**
  * Waits for a button input and returns the information as to which
  * button was pressed.  Used in button configuration.
  */
-static int
+int
 DWaitButton(const uint8 *text,
             ButtConfig *bc,
             int wb)
@@ -1281,44 +1359,60 @@ DWaitButton(const uint8 *text,
         }
     }
 
-    while(SDL_WaitEvent(&event)) {
-        switch(event.type) {
-        case SDL_KEYDOWN:
-            bc->ButtType[wb]  = BUTTC_KEYBOARD;
-            bc->DeviceNum[wb] = 0;
-            bc->ButtonNum[wb] = event.key.keysym.sym;
-            return(1);
-        case SDL_JOYBUTTONDOWN:
-            bc->ButtType[wb]  = BUTTC_JOYSTICK;
-            bc->DeviceNum[wb] = event.jbutton.which;
-            bc->ButtonNum[wb] = event.jbutton.button; 
-            return(1);
-        case SDL_JOYHATMOTION:
-            if(event.jhat.value != SDL_HAT_CENTERED) {
-                bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                bc->DeviceNum[wb] = event.jhat.which;
-                bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
-                                     event.jhat.value);
+    while(1) {
+        int done = 0;
+#ifdef _GTK
+        while(gtk_events_pending())
+            gtk_main_iteration_do(FALSE);
+#endif
+        while(SDL_PollEvent(&event)) {
+            done++;
+            switch(event.type) {
+            case SDL_KEYDOWN:
+                bc->ButtType[wb]  = BUTTC_KEYBOARD;
+                bc->DeviceNum[wb] = 0;
+                bc->ButtonNum[wb] = event.key.keysym.sym;
                 return(1);
-            }
-            break;
-        case SDL_JOYAXISMOTION: 
-            if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
-                if(abs(event.jaxis.value) < 1000) {
-                    LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
-                }
-            } else {
-                if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
+            case SDL_JOYBUTTONDOWN:
+                bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                bc->DeviceNum[wb] = event.jbutton.which;
+                bc->ButtonNum[wb] = event.jbutton.button; 
+                return(1);
+            case SDL_JOYHATMOTION:
+                if(event.jhat.value == SDL_HAT_CENTERED)
+                    done--;
+                else {
                     bc->ButtType[wb]  = BUTTC_JOYSTICK;
-                    bc->DeviceNum[wb] = event.jaxis.which;
-                    bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
-                                         ((event.jaxis.value < 0)
-                                          ? 0x4000 : 0));
+                    bc->DeviceNum[wb] = event.jhat.which;
+                    bc->ButtonNum[wb] = (0x2000 | ((event.jhat.hat & 0x1F) << 8) |
+                                         event.jhat.value);
                     return(1);
                 }
+                break;
+            case SDL_JOYAXISMOTION: 
+                if(LastAx[event.jaxis.which][event.jaxis.axis] == 0x100000) {
+                    if(abs(event.jaxis.value) < 1000) {
+                        LastAx[event.jaxis.which][event.jaxis.axis] = event.jaxis.value;
+                    }
+                    done--;
+                } else {
+                    if(abs(LastAx[event.jaxis.which][event.jaxis.axis] - event.jaxis.value) >= 8192)  {
+                        bc->ButtType[wb]  = BUTTC_JOYSTICK;
+                        bc->DeviceNum[wb] = event.jaxis.which;
+                        bc->ButtonNum[wb] = (0x8000 | event.jaxis.axis |
+                                             ((event.jaxis.value < 0)
+                                              ? 0x4000 : 0));
+                        return(1);
+                    }
+                    else
+                        done--;
+                }
+                break;
+            default:
+                done--;
             }
-            break;
         }
+        if(done) break;
     }
 
     return(0);

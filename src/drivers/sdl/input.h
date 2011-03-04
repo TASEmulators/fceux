@@ -19,6 +19,7 @@ void setHotKeys();
 int ButtonConfigBegin();
 void ButtonConfigEnd();
 void ConfigButton(char *text, ButtConfig *bc);
+int DWaitButton(const uint8 *text, ButtConfig *bc, int wb);
 
 #define BUTTC_KEYBOARD          0x00
 #define BUTTC_JOYSTICK          0x01
@@ -49,5 +50,6 @@ void UpdateInput(Config *config);
 void InputCfg(const std::string &);
 
 std::string GetUserText(const char* title);
+const char* ButtonName(const ButtConfig* bc, int which);
 
 #endif
