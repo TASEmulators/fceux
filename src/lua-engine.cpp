@@ -4139,8 +4139,6 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, nesVolumes[0]);
 	lua_setfield(L, -2, "volume");
-	lua_pushinteger(L, curfreq[0]);
-	lua_setfield(L, -2, "freqreg");
 	freq = (39375000.0/352.0) / curfreq[0];
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
@@ -4148,6 +4146,10 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "midikey");
 	lua_pushinteger(L, (PSG[0] & 0xC0) >> 6);
 	lua_setfield(L, -2, "duty");
+	lua_newtable(L);
+	lua_pushinteger(L, curfreq[0]);
+	lua_setfield(L, -2, "frequency");
+	lua_setfield(L, -2, "regs");
 	lua_setfield(L, -2, "square1");
 	// rp2a03/square2
 	lua_newtable(L);
@@ -4158,8 +4160,6 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, nesVolumes[1]);
 	lua_setfield(L, -2, "volume");
-	lua_pushinteger(L, curfreq[1]);
-	lua_setfield(L, -2, "freqreg");
 	freq = (39375000.0/352.0) / curfreq[1];
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
@@ -4167,6 +4167,10 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "midikey");
 	lua_pushinteger(L, (PSG[4] & 0xC0) >> 6);
 	lua_setfield(L, -2, "duty");
+	lua_newtable(L);
+	lua_pushinteger(L, curfreq[1]);
+	lua_setfield(L, -2, "frequency");
+	lua_setfield(L, -2, "regs");
 	lua_setfield(L, -2, "square2");
 	// rp2a03/triangle
 	lua_newtable(L);
@@ -4176,13 +4180,15 @@ static int sound_get(lua_State *L)
 		lua_pushnumber(L, 1.0);
 	lua_setfield(L, -2, "volume");
 	freqReg = PSG[0xa] | ((PSG[0xb] & 7) << 8);
-	lua_pushinteger(L, freqReg);
-	lua_setfield(L, -2, "freqreg");
 	freq = (39375000.0/704.0) / freqReg;
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
 	lua_setfield(L, -2, "midikey");
+	lua_newtable(L);
+	lua_pushinteger(L, freqReg);
+	lua_setfield(L, -2, "frequency");
+	lua_setfield(L, -2, "regs");
 	lua_setfield(L, -2, "triangle");
 	// rp2a03/noise
 	lua_newtable(L);
@@ -4192,8 +4198,6 @@ static int sound_get(lua_State *L)
 		lua_pushnumber(L, nesVolumes[2]);
 	lua_setfield(L, -2, "volume");
 	freqReg = PSG[0xE] & 0xF;
-	lua_pushinteger(L, freqReg);
-	lua_setfield(L, -2, "freqreg");
 	lua_pushboolean(L, (PSG[0xE] & 0x80) != 0);
 	lua_setfield(L, -2, "short");
 	freq = (39375000.0/44.0) / NoiseFreqTable[freqReg]; // probably wrong
@@ -4201,6 +4205,10 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "frequency");
 	lua_pushnumber(L, (log(freq / 440.0) * 12 / log(2.0)) + 69);
 	lua_setfield(L, -2, "midikey");
+	lua_newtable(L);
+	lua_pushinteger(L, freqReg);
+	lua_setfield(L, -2, "frequency");
+	lua_setfield(L, -2, "regs");
 	lua_setfield(L, -2, "noise");
 	// rp2a03/dpcm
 	lua_newtable(L);
@@ -4209,8 +4217,6 @@ static int sound_get(lua_State *L)
 	else
 		lua_pushnumber(L, 1.0);
 	lua_setfield(L, -2, "volume");
-	lua_pushinteger(L, DMCFormat & 0xF);
-	lua_setfield(L, -2, "freqreg");
 	freq = (39375000.0/2.0) / DMCPeriod;
 	lua_pushnumber(L, freq);
 	lua_setfield(L, -2, "frequency");
@@ -4224,6 +4230,10 @@ static int sound_get(lua_State *L)
 	lua_setfield(L, -2, "dmcloop");
 	lua_pushinteger(L, InitialRawDALatch);
 	lua_setfield(L, -2, "dmcseed");
+	lua_newtable(L);
+	lua_pushinteger(L, DMCFormat & 0xF);
+	lua_setfield(L, -2, "frequency");
+	lua_setfield(L, -2, "regs");
 	lua_setfield(L, -2, "dpcm");
 	// rp2a03 end
 	lua_setfield(L, -2, "rp2a03");
