@@ -1057,11 +1057,11 @@ static void DoTBConfig(HWND hParent, const char *text, char *_template, ButtConf
 
 
 const unsigned int NUMBER_OF_PORTS = 2;
-const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT;
-const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT;
+const unsigned int NUMBER_OF_NES_DEVICES = SI_COUNT + 1;
+const static unsigned int NUMBER_OF_FAMICOM_DEVICES = SIFC_COUNT + 1;
 //these are unfortunate lists. they match the ESI and ESIFC enums
-static const int configurable_nes[6]= { 0, 1, 0, 1, 1, 0 };
-static const int configurable_fam[14]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
+static const int configurable_nes[NUMBER_OF_NES_DEVICES]= { 0, 1, 0, 1, 1, 0 };
+static const int configurable_fam[NUMBER_OF_FAMICOM_DEVICES]= { 0,0,0,0, 1,1,0,1, 1,1,1,0, 0,0 };
 const unsigned int FAMICOM_POSITION = 2;
 
 static void UpdateComboPad(HWND hwndDlg, WORD id)

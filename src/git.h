@@ -49,10 +49,11 @@ inline const char* ESI_Name(ESI esi)
 		"Zapper",
 		"Power Pad A",
 		"Power Pad B",
-		"Arkanoid Paddle"
+		"Arkanoid Paddle",
+		"Mouse"
 	};
 
-	if(esi >= SI_NONE && esi < SI_COUNT)
+	if(esi >= SI_NONE && esi <= SI_COUNT)
 		return names[esi];
 	else return "<invalid ESI>";
 }
@@ -101,7 +102,7 @@ inline const char* ESIFC_Name(ESIFC esifc)
 		"Top Rider"
 	};
 
-	if(esifc >= SIFC_NONE && esifc < SIFC_COUNT)
+	if(esifc >= SIFC_NONE && esifc <= SIFC_COUNT)
 		return names[esifc];
 	else return "<invalid ESIFC>";
 }
