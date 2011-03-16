@@ -9,10 +9,8 @@ TODO-SDL:
 	* grey-out xyscale entries when scalers are set
 	* dont allow scalers and opengl 
 * Implement Cheat Editor in GTK
-* Game genie from GTK
 * GUI Options to look into:
 	* bpp
-	* gamegenie
 	* Scanline end/start
 * Fix 7Zipped ROMs
 * Think of good workaround for pushing F1 when run from a gui; currently drops to cheat menu with no terminal and is unrecoverable
