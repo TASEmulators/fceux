@@ -1310,6 +1310,18 @@ void loadFdsBios ()
 		gtk_widget_destroy (fileChooser);
 
 }
+// TODO: is there somewhere else we can move this?  works for now though
+void enableGameGenie()
+{
+	g_config->setOption("SDL.GameGenie", 1);
+	FCEUI_SetGameGenie(1);
+}
+
+void disableGameGenie()
+{
+	g_config->setOption("SDL.GameGenie", 0);
+	FCEUI_SetGameGenie(0);
+}
 
 void loadGameGenie ()
 {
@@ -1355,8 +1367,9 @@ void loadGameGenie ()
 		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
 		gtk_widget_destroy (fileChooser);
 		GtkWidget* d;
+		enableGameGenie();
 		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
-			"Game Genie ROM loaded.  Be sure to enable it in your configuration (~/.fceux/fceux.cfg).");
+			"Game Genie ROM copied to ~/.fceux/gg.rom.");
 		gtk_dialog_run(GTK_DIALOG(d));
 		gtk_widget_destroy(d);
 	
@@ -1786,6 +1799,9 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 }
 
 
+
+
+
 /* Our menu, an array of GtkItemFactoryEntry structures that defines each menu item */
 static GtkItemFactoryEntry menu_items[] = {
   { "/_File",         NULL,         NULL,           0, "<Branch>" },
@@ -1817,6 +1833,10 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
   { "/Emulator/_Load Game Genie ROM", NULL, loadGameGenie, 0, "<Item>"},
+  { "/Emulator/Enable Game _Genie", NULL, enableGameGenie, 0, "<Item>"},
+  { "/Emulator/_Disable Game Genie", NULL, disableGameGenie, 0, "<Item>"},
+  // this doesnt really work because we cant get the status of the checkbox through the callback
+  //{ "/Emulator/Enable Game _Genie", NULL, ggCallback, 0, "<CheckItem>"},
   { "/Emulator/_Insert coin", NULL, FCEUI_VSUniCoin, 0, "<Item>"},
   //{ "/Emulator/GTKterm (DEV)", NULL, openGTKterm, 0, "<Item>"},
   { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
