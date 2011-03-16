@@ -1311,6 +1311,64 @@ void loadFdsBios ()
 
 }
 
+void loadGameGenie ()
+{
+	GtkWidget* fileChooser;
+	GtkFileFilter* filterGG;
+	GtkFileFilter* filterRom;
+	GtkFileFilter* filterNes;
+	GtkFileFilter* filterAll;
+	
+	
+	filterGG = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterGG, "gg.rom");
+	gtk_file_filter_set_name(filterGG, "gg.rom");
+	
+	filterRom = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterRom, "*.rom");
+	gtk_file_filter_set_name(filterRom, "*.rom");
+	
+	filterNes = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterNes, "*.nes");
+	gtk_file_filter_set_name(filterNes, "*.nes");
+	
+	filterAll = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterAll, "*");
+	gtk_file_filter_set_name(filterAll, "All Files");
+	
+	
+	fileChooser = gtk_file_chooser_dialog_new ("Load Game Genie ROM", GTK_WINDOW(MainWindow),
+			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterGG);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	
+	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+		// copy file to proper place (~/.fceux/gg.rom)
+		std::ifstream f1 (filename,std::fstream::binary);
+		std::string fn_out = FCEU_MakeFName(FCEUMKF_GGROM, 0, "");
+		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
+		gtk_widget_destroy (fileChooser);
+		GtkWidget* d;
+		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
+			"Game Genie ROM loaded.  Be sure to enable it in your configuration (~/.fceux/fceux.cfg).");
+		gtk_dialog_run(GTK_DIALOG(d));
+		gtk_widget_destroy(d);
+	
+		f2<<f1.rdbuf();
+		g_free(filename);
+	}
+	else
+		gtk_widget_destroy (fileChooser);
+
+}
+
+
 void loadNSF ()
 {
 	GtkWidget* fileChooser;
@@ -1758,6 +1816,7 @@ static GtkItemFactoryEntry menu_items[] = {
   { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
   { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
   { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
+  { "/Emulator/_Load Game Genie ROM", NULL, loadGameGenie, 0, "<Item>"},
   { "/Emulator/_Insert coin", NULL, FCEUI_VSUniCoin, 0, "<Item>"},
   //{ "/Emulator/GTKterm (DEV)", NULL, openGTKterm, 0, "<Item>"},
   { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
@@ -1804,20 +1863,11 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	/* Finally, return the actual menu bar created by the item factory. */
 	return gtk_item_factory_get_widget (item_factory, "<main>");
 }
-//GtkTextBuffer* gtkConsoleBuf;
-//GtkWidget* consoleOutput;
-//GtkTextIter iter;
-char* buf;
-//GtkWidget* term;
+
 
 void pushOutputToGTK(const char* str)
 {
-	
-	//printf(str);
-	//gtk_text_buffer_insert(GTK_TEXT_BUFFER(gtkConsoleBuf), &iter, str, -1);
-	//gtk_text_buffer_set_text(gtkConsoleBuf, str, -1);
-	
-	//vte_terminal_feed_child(VTE_TERMINAL(term), str, -1);
+	// we don't really do anything with the output right now
 	return;
 }
 
