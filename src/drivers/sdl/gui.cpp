@@ -195,8 +195,6 @@ void openPaletteConfig()
 	vbox = gtk_vbox_new(FALSE, 5);
 	gtk_container_add(GTK_CONTAINER(win), vbox);
 	
-	gtk_widget_set_size_request(win, 460, 275);
-	
 	paletteFrame = gtk_frame_new("Custom palette: ");
 	paletteHbox = gtk_hbox_new(FALSE, 5);
 	gtk_container_set_border_width(GTK_CONTAINER(paletteHbox), 5);
