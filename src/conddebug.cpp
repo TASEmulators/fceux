@@ -91,13 +91,14 @@ Condition* InfixOperator(const char** str, Condition(*nextPart(const char**)), i
 
 		if (t1 == 0)
 		{
-			freeTree(t);
+			if(t)
+				freeTree(t);
 			return 0;
 		}
 
 		mid = (Condition*)FCEU_dmalloc(sizeof(Condition));
-        if (!mid)
-            return NULL;
+		if (!mid)
+			return NULL;
 		memset(mid, 0, sizeof(Condition));
 
 		mid->lhs = t;
