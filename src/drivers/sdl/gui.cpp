@@ -192,6 +192,7 @@ void openPaletteConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win),"Palette Options");
+	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_SELECT_COLOR);
 	vbox = gtk_vbox_new(FALSE, 5);
 	gtk_container_add(GTK_CONTAINER(win), vbox);
 	
@@ -323,6 +324,8 @@ void openNetworkConfig()
 	GtkWidget* closeBtn;
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win), "Network Options");
+	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_NETWORK);
 	box = gtk_vbox_new(FALSE, 3);
 	
 	userBox = gtk_hbox_new(FALSE, 3);
@@ -488,6 +491,7 @@ void openGamepadConfig()
 									  GTK_RESPONSE_OK,
 									  NULL);
 	gtk_window_set_title(GTK_WINDOW(win), "Controller Configuration");
+	gtk_window_set_icon_name(GTK_WINDOW(win), "input-gaming");
 	gtk_widget_set_size_request(win, 350, 500);
 	
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
@@ -725,6 +729,7 @@ void openVideoConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Video Preferences");
+	gtk_window_set_icon_name(GTK_WINDOW(win), "video-display");
 	//gtk_widget_set_size_request(win, 250, 250);
 	
 	vbox = gtk_vbox_new(FALSE, 5);
@@ -919,6 +924,7 @@ void openSoundConfig()
 	
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
+	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
 	main_hbox = gtk_hbox_new(FALSE, 15);
 	vbox = gtk_vbox_new(False, 5);
 	//gtk_widget_set_size_request(win, 300, 200);
