@@ -23,10 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _USE_SHARED_MEMORY_
-#include <windows.h>
-#endif
-
 #include "types.h"
 #include "x6502.h"
 #include "fceu.h"
@@ -55,9 +51,6 @@ uint8 *VROM = NULL;
 iNES_HEADER head ;
 
 
-#ifdef _USE_SHARED_MEMORY_
-HANDLE mapROM = NULL, mapVROM = NULL;
-#endif
 
 static CartInfo iNESCart;
 
@@ -125,35 +118,8 @@ void iNESGI(GI h) //bbit edited: removed static keyword
 			FCEU_SaveGameSave(&iNESCart);
 
 			if(iNESCart.Close) iNESCart.Close();
-#ifdef _USE_SHARED_MEMORY_
-			if(ROM)
-		 	{
-			 if(mapROM)
-			 {
-				 CloseHandle(mapROM);
-				 mapROM = NULL;
-				 UnmapViewOfFile(ROM);
-			 }
-			 else
-				 free(ROM);
-			 ROM = NULL;
-		 	}
-			if(VROM)
-		 	{
-			 if(mapVROM)
-			 {
-				 CloseHandle(mapVROM);
-				 mapVROM = NULL;
-				 UnmapViewOfFile(VROM);
-			 }
-			 else
-				 free(VROM);
-			 VROM = NULL;
-			}
-#else
 			if(ROM) {free(ROM); ROM = NULL;}
 			if(VROM) {free(VROM); VROM = NULL;}
-#endif
 			if(MapClose) MapClose();
 			if(trainerpoo) {FCEU_gfree(trainerpoo);trainerpoo=0;}
 		}
@@ -417,20 +383,7 @@ static void CheckHInfo(void)
 				if(moo[x].mapper&0x800 && VROM_size)
 				{
 					VROM_size=0;
-#ifdef _USE_SHARED_MEMORY_
-					if(mapVROM)
-					{
-						CloseHandle(mapVROM);
-						UnmapViewOfFile(VROM);
-						mapVROM = NULL;
-					}
-					else
-					{
-						free(VROM);
-					}
-#else
 					free(VROM);
-#endif
 					VROM = NULL;
 					tofix|=8;
 				}
@@ -734,63 +687,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 
 	if(head.ROM_type&8) Mirroring=2;
 
-#ifdef _USE_SHARED_MEMORY_
-	mapROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, ROM_size<<14,"fceu.ROM");
-	if(mapROM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		if((ROM = (uint8 *)FCEU_malloc(ROM_size<<14)) == NULL) return 0;
-	}
-	else
-	{
-		if((ROM = (uint8 *)MapViewOfFile(mapROM, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
-		{
-			CloseHandle(mapROM);
-			mapROM = NULL;
-			if((ROM = (uint8 *)FCEU_malloc(ROM_size<<14)) == NULL) return 0;
-		}
-	}
-	if(VROM_size)
-	{
-		mapVROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, VROM_size<<13,"fceu.VROM");
-		if(mapVROM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-		{
-			if((VROM=(uint8 *)FCEU_malloc(VROM_size<<13)) == NULL)
-			{
-				if(mapROM)
-				{
-					UnmapViewOfFile(mapROM);
-					mapROM = NULL;
-					CloseHandle(ROM);
-				}
-				else
-					free(ROM);
-				ROM = NULL;
-				return 0;
-			}
-		}
-		else
-		{
-			if((VROM = (uint8 *)MapViewOfFile(mapVROM, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
-			{
-				CloseHandle(mapVROM);
-				mapVROM = NULL;
-				if((VROM=(uint8 *)FCEU_malloc(VROM_size<<13)) == NULL)
-				{
-					if(mapROM)
-					{
-						UnmapViewOfFile(mapROM);
-						mapROM = NULL;
-						CloseHandle(ROM);
-					}
-					else
-						free(ROM);
-					ROM = NULL;
-					return 0;
-				}
-			}
-		}
-	}
-#else
 	if((ROM = (uint8 *)FCEU_malloc(ROM_size<<14)) == NULL) return 0;
 
 	if(VROM_size)
@@ -802,7 +698,6 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode)
 			return 0;
 		}
 	}
-#endif
 	memset(ROM,0xFF,ROM_size<<14);
 	if(VROM_size) memset(VROM,0xFF,VROM_size<<13);
 	if(head.ROM_type&4)   /* Trainer */
@@ -1499,26 +1394,7 @@ static int NewiNES_Init(int num)
 				{
 					CHRRAMSize=8192;
 				}
-#ifdef _USE_SHARED_MEMORY_
-				mapVROM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, CHRRAMSize,"fceu.VROM");
-				if(mapVROM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-				{
-					CloseHandle(mapVROM);
-					mapVROM = NULL;
-					if((VROM = (uint8 *)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
-				}
-				else
-				{
-					if((VROM = (uint8 *)MapViewOfFile(mapVROM, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
-					{
-						CloseHandle(mapVROM);
-						mapVROM = NULL;
-						if((VROM = (uint8 *)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
-					}
-				}
-#else
 				if((VROM = (uint8 *)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
-#endif
 				UNIFchrrama=VROM;
 				SetupCartCHRMapping(0,VROM,CHRRAMSize,1);
 				AddExState(VROM,CHRRAMSize, 0, "CHRR");

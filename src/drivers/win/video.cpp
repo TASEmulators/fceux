@@ -61,10 +61,6 @@ vmdef vmodes[11]={
 
 PALETTEENTRY *color_palette;
 
-#ifdef _USE_SHARED_MEMORY_
-HANDLE mapColorPalette;
-#endif //_USE_SHARED_MEMORY_
-
 static int PaletteChanged=0;
 
 LPDIRECTDRAWCLIPPER lpClipper=0;
@@ -123,17 +119,7 @@ static int InitializeDDraw(int fs)
 	//only init the palette the first time through
 	if(firstInitialize) {
 		firstInitialize = false;
-#ifdef _USE_SHARED_MEMORY_
-		mapColorPalette = CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE, 0, 256 * sizeof(PALETTEENTRY),"fceu.ColorPalette");
-		if(mapColorPalette == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-		{
-			CloseHandle(mapColorPalette);
-			mapColorPalette = NULL;
-			color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY)); //mbg merge 7/18/06 added cast
-		}
-		else
-			color_palette   = (PALETTEENTRY *)MapViewOfFile(mapColorPalette, FILE_MAP_WRITE, 0, 0, 0);
-#endif
+    color_palette = (PALETTEENTRY*)malloc(256 * sizeof(PALETTEENTRY));
 	}
 
 	//(disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:

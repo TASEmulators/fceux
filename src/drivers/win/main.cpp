@@ -494,62 +494,6 @@ static void DriverKill(void)
 	ByebyeWindow();
 }
 
-#ifdef _USE_SHARED_MEMORY_
-HANDLE mapGameMemBlock;
-HANDLE mapRAM;
-
-void win_AllocBuffers(uint8 **GameMemBlock, uint8 **RAM)
-{
-	mapGameMemBlock = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 131072,"fceu.GameMemBlock");
-	if(mapGameMemBlock == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-		*GameMemBlock = (uint8 *) malloc(131072);
-	else
-		if((*GameMemBlock = (uint8 *)MapViewOfFile(mapGameMemBlock, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
-		{
-			CloseHandle(mapGameMemBlock);
-			mapGameMemBlock = NULL;
-			*GameMemBlock = (uint8 *) malloc(131072);
-		}
-	mapRAM = CreateFileMapping((HANDLE)0xFFFFFFFF,NULL,PAGE_READWRITE, 0, 0x800,"fceu.RAM");
-	if(mapRAM == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
-		*RAM = (uint8 *) malloc(2048);
-	else
-	{
-		if((*RAM = (uint8 *)MapViewOfFile(mapRAM, FILE_MAP_WRITE, 0, 0, 0)) == NULL)
-		{
-			CloseHandle(mapRAM);
-			mapRAM = NULL;
-			*RAM = (uint8 *) malloc(2048);
-		}
-	}
-
-
-}
-
-void win_FreeBuffers(uint8 *GameMemBlock, uint8 *RAM)
-{
-	//clean up shared memory
-	if(mapRAM)
-	{
-		CloseHandle(mapRAM);
-		mapRAM = NULL;
-		UnmapViewOfFile(RAM);
-	}
-	else
-		free(RAM);
-	RAM = NULL;
-	if(mapGameMemBlock)
-	{
-		CloseHandle(mapGameMemBlock);
-		mapGameMemBlock = NULL;
-		UnmapViewOfFile(GameMemBlock);
-	}
-	else
-		free(GameMemBlock);
-	GameMemBlock = NULL;
-}
-#endif
-
 void do_exit()
 {
 	DriverKill();

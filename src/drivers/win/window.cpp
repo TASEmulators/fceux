@@ -375,14 +375,6 @@ void updateGameDependentMenus(unsigned int enable)
 
 	for (unsigned int i = 0; i < sizeof(menu_ids) / sizeof(*menu_ids); i++)
 	{
-/*
-adelikat: basicbot is gone
-#ifndef _USE_SHARED_MEMORY_
-		if(simpled[x] == MENU_BASIC_BOT)
-			EnableMenuItem(fceumenu,menu_ids[i],MF_BYCOMMAND| MF_GRAYED);
-		else
-#endif
-*/
 			EnableMenuItem(fceumenu, menu_ids[i], MF_BYCOMMAND | (enable ? MF_ENABLED : MF_GRAYED));
 	}
 }
