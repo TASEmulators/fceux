@@ -1310,17 +1310,17 @@ void loadFdsBios ()
 		gtk_widget_destroy (fileChooser);
 
 }
+
 // TODO: is there somewhere else we can move this?  works for now though
-void enableGameGenie()
+void enableGameGenie(int enabled)
 {
-	g_config->setOption("SDL.GameGenie", 1);
-	FCEUI_SetGameGenie(1);
+	g_config->setOption("SDL.GameGenie", enabled);
+	FCEUI_SetGameGenie(enabled);
 }
 
-void disableGameGenie()
+void toggleGameGenie(GtkToggleAction *action)
 {
-	g_config->setOption("SDL.GameGenie", 0);
-	FCEUI_SetGameGenie(0);
+	enableGameGenie(gtk_toggle_action_get_active(action));
 }
 
 void loadGameGenie ()
@@ -1367,7 +1367,7 @@ void loadGameGenie ()
 		std::ofstream f2 (fn_out.c_str(),std::fstream::trunc|std::fstream::binary);
 		gtk_widget_destroy (fileChooser);
 		GtkWidget* d;
-		enableGameGenie();
+		enableGameGenie(TRUE);
 		d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, 
 			"Game Genie ROM copied to ~/.fceux/gg.rom.");
 		gtk_dialog_run(GTK_DIALOG(d));
@@ -1800,88 +1800,144 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 
 
 
-
-
-/* Our menu, an array of GtkItemFactoryEntry structures that defines each menu item */
-static GtkItemFactoryEntry menu_items[] = {
-  { "/_File",         NULL,         NULL,           0, "<Branch>" },
-  //{ "/File/_New",     "<control>N", NULL,    0, "<StockItem>", GTK_STOCK_NEW },
-  { "/File/_Open ROM",    "<control>O", loadGame,    0, "<StockItem>", GTK_STOCK_OPEN },
-  { "/File/_Close ROM",    "<control>C", closeGame,    0, "<StockItem>", GTK_STOCK_CLOSE },
- // { "/File/Save _As", NULL,         NULL,           0, "<Item>" },
-  { "/File/sep1",     NULL,         NULL,           0, "<Separator>" },
-  { "/File/_Play NSF",    "<control>N", loadNSF,    0, "<StockItem>", GTK_STOCK_OPEN },
-  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
-  { "/File/Savestate", NULL, NULL, 0, "<Branch>" },
-  { "/File/Savestate/Load State _From", NULL, loadStateFrom, 0, "<Item>"},
-  { "/File/Savestate/Save State _As", NULL, saveStateAs, 0, "<Item>"},
-#ifdef _S9XLUA_H  
-  { "/File/Load _Lua Script", NULL, loadLua, 0, "<Item>"},
+// Our menu, in the XML markup format used by GtkUIManager
+static char* menuXml = 
+	"<ui>"
+	"  <menubar name='Menubar'>"
+	"    <menu action='FileMenuAction'>"
+	"      <menuitem action='OpenRomAction' />"
+	"      <menuitem action='CloseRomAction' />"
+	"      <separator />"
+	"      <menuitem action='PlayNsfAction' />"
+	"      <separator />"
+	"      <menu action='SavestateMenuAction'>"
+	"        <menuitem action='LoadStateFromAction' />"
+	"        <menuitem action='SaveStateAsAction' />"
+	"      </menu>"
+#ifdef _S9XLUA_H
+	"      <menuitem action='LoadLuaScriptAction' />"
 #endif
-  { "/File/sep3",     NULL,         NULL,           0, "<Separator>" },
-  { "/File/_Screenshot", "F12", FCEUI_SaveSnapshot, 0, "<Item>"},
-  { "/File/sep2",     NULL,         NULL,           0, "<Separator>" },
-  { "/File/_Quit",    "<CTRL>Q", quit, 0, "<StockItem>", GTK_STOCK_QUIT },
-  { "/_Options",      NULL,         NULL,           0, "<Branch>" },
-  { "/_Emulator",	NULL,			NULL,			0, "<Branch>"  },
-  { "/Emulator/P_ower", 	NULL, FCEUI_PowerNES, 0, "<Item>"},
-  { "/Emulator/_Reset", 	NULL, emuReset, 0, "<Item>"},
-  { "/Emulator/_Pause", NULL, emuPause, 0, "<Item>"},
-  { "/Emulator/R_esume", NULL, emuResume, 0, "<Item>"},
-  { "/Emulator/_FDS", NULL, NULL, 0, "<Branch>"},
-  { "/Emulator/_FDS/_Switch Disk", NULL, FCEU_FDSSelect, 0, "<Item>"},
-  { "/Emulator/_FDS/_Eject Disk", NULL, FCEU_FDSInsert, 0, "<Item>"},
-  { "/Emulator/_FDS/Load _BIOS File", NULL, loadFdsBios, 0, "<Item>"},
-  { "/Emulator/_Load Game Genie ROM", NULL, loadGameGenie, 0, "<Item>"},
-  { "/Emulator/Enable Game _Genie", NULL, enableGameGenie, 0, "<Item>"},
-  { "/Emulator/_Disable Game Genie", NULL, disableGameGenie, 0, "<Item>"},
-  // this doesnt really work because we cant get the status of the checkbox through the callback
-  //{ "/Emulator/Enable Game _Genie", NULL, ggCallback, 0, "<CheckItem>"},
-  { "/Emulator/_Insert coin", NULL, FCEUI_VSUniCoin, 0, "<Item>"},
-  //{ "/Emulator/GTKterm (DEV)", NULL, openGTKterm, 0, "<Item>"},
-  { "/_Movie",	NULL,			NULL,			0, "<Branch>"  },
-  { "/Movie/_Open", NULL, loadMovie, 0, "<Item>"},
-  { "/Movie/S_top", NULL, FCEUI_StopMovie, 0, "<Item>"},
-  { "/Movie/_Pause", NULL, emuPause, 0, "<Item>"},
-  { "/Movie/R_esume", NULL, emuResume, 0, "<Item>"},
-  { "/Movie/sep2",     NULL,         NULL,           0, "<Separator>" },
-  { "/Movie/_Record", NULL, recordMovie, 0, "<Item>"},
-  { "/Movie/Record _as", NULL, recordMovieAs, 0, "<Item>"},
-  { "/Options/_Gamepad Config", NULL , openGamepadConfig, 0, "<StockItem>", GTK_STOCK_PREFERENCES },
-  { "/Options/_Sound Config", NULL , openSoundConfig, 0, "<Item>" },
-  { "/Options/_Video Config", NULL , openVideoConfig, 0, "<Item>" },
-  { "/Options/_Palette Config", NULL , openPaletteConfig, 0, "<Item>" },
-  { "/Options/_Network Config", NULL , openNetworkConfig, 0, "<Item>" },
-  //{ "/Options/Map _Hotkeys", NULL , openHotkeyConfig, 0, "<Item>" },
-  { "/Options/sep1",  NULL,         NULL,           0, "<Separator>" },
-  { "/Options/_Fullscreen", "<alt>Return",         enableFullscreen,	   0, "<Item>" },
-  { "/_Help",         NULL,         NULL,           0, "<LastBranch>" },
-  { "/Help/About",   NULL,         showAbout,           0, "<Item>" },
+	"      <separator />"
+	"      <menuitem action='ScreenshotAction' />"
+	"      <separator />"
+	"      <menuitem action='QuitAction' />"
+	"    </menu>"
+	"    <menu action='OptionsMenuAction'>"
+	"      <menuitem action='GamepadConfigAction' />"
+	"      <menuitem action='SoundConfigAction' />"
+	"      <menuitem action='VideoConfigAction' />"
+	"      <menuitem action='PaletteConfigAction' />"
+	"      <menuitem action='NetworkConfigAction' />"
+	"      <separator />"
+	"      <menuitem action='FullscreenAction' />"
+	"    </menu>"
+	"    <menu action='EmulatorMenuAction'>"
+	"      <menuitem action='PowerAction' />"
+	"      <menuitem action='ResetAction' />"
+	"      <menuitem action='PauseAction' />"
+	"      <menuitem action='ResumeAction' />"
+	"      <menu action='FdsMenuAction'>"
+	"        <menuitem action='SwitchDiskAction' />"
+	"        <menuitem action='EjectDiskAction' />"
+	"        <menuitem action='LoadBiosAction' />"
+	"      </menu>"
+	"      <menuitem action='LoadGameGenieAction' />"
+	"      <menuitem action='GameGenieToggleAction' />"
+	"      <menuitem action='InsertCoinAction' />"
+	"    </menu>"
+	"    <menu action='MovieMenuAction'>"
+	"      <menuitem action='OpenMovieAction' />"
+	"      <menuitem action='StopMovieAction' />"
+	"      <menuitem action='PauseAction' />"
+	"      <menuitem action='ResumeAction' />"
+	"      <separator />"
+	"      <menuitem action='RecordMovieAction' />"
+	"      <menuitem action='RecordMovieAsAction' />"
+	"    </menu>"
+	"    <menu action='HelpMenuAction'>"
+	"      <menuitem action='AboutAction' />"
+	"    </menu>"
+	"  </menubar>"
+	"</ui>";
+
+// Menu items, as an array of GtkActionEntry structures that define each item
+static GtkActionEntry normal_entries[] = {
+	{"FileMenuAction", NULL, "_File"},
+	{"OpenRomAction", GTK_STOCK_OPEN, "_Open ROM", "<control>O", NULL, G_CALLBACK(loadGame)},
+	{"CloseRomAction", GTK_STOCK_CLOSE, "_Close ROM", "<control>C", NULL, G_CALLBACK(closeGame)},
+	{"PlayNsfAction", GTK_STOCK_OPEN, "_Play NSF", "<control>N", NULL, G_CALLBACK(loadNSF)},
+	{"SavestateMenuAction", NULL, "Savestate"},
+	{"LoadStateFromAction", NULL, "Load State _From", NULL, NULL, G_CALLBACK(loadStateFrom)},
+	{"SaveStateAsAction", NULL, "Save State _As", NULL, NULL, G_CALLBACK(saveStateAs)},
+#ifdef _S9XLUA_H
+	{"LoadLuaScriptAction", NULL, "Load _Lua Script", NULL, NULL, G_CALLBACK(loadLua)},
+#endif
+	{"ScreenshotAction", NULL, "_Screenshot", "F12", NULL, G_CALLBACK(FCEUI_SaveSnapshot)},
+	{"QuitAction", GTK_STOCK_QUIT, "_Quit", "<control>Q", NULL, G_CALLBACK(quit)},
+	
+	{"OptionsMenuAction", NULL, "_Options"},
+	{"GamepadConfigAction", GTK_STOCK_PREFERENCES, "_Gamepad Config", NULL, NULL, G_CALLBACK(openGamepadConfig)},
+	{"SoundConfigAction", NULL, "_Sound Config", NULL, NULL, G_CALLBACK(openSoundConfig)},
+	{"VideoConfigAction", NULL, "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
+	{"PaletteConfigAction", NULL, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
+	{"NetworkConfigAction", NULL, "_Network Config", NULL, NULL, G_CALLBACK(openNetworkConfig)},
+	{"FullscreenAction", NULL, "_Fullscreen", "<alt>Return", NULL, G_CALLBACK(enableFullscreen)},
+	
+	{"EmulatorMenuAction", NULL, "_Emulator"},
+	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
+	{"ResetAction", NULL, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
+	{"PauseAction", NULL, "_Pause", NULL, NULL, G_CALLBACK(emuPause)},
+	{"ResumeAction", NULL, "R_esume", NULL, NULL, G_CALLBACK(emuResume)},
+	{"FdsMenuAction", NULL, "_FDS"},
+	{"SwitchDiskAction", NULL, "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
+	{"EjectDiskAction", NULL, "_Eject Disk", NULL, NULL, G_CALLBACK(FCEU_FDSInsert)},
+	{"LoadBiosAction", NULL, "Load _BIOS File", NULL, NULL, G_CALLBACK(loadFdsBios)},
+	{"LoadGameGenieAction", NULL, "_Load Game Genie ROM", NULL, NULL, G_CALLBACK(loadGameGenie)},
+	{"InsertCoinAction", NULL, "_Insert Coin", NULL, NULL, G_CALLBACK(FCEUI_VSUniCoin)},
+	
+	{"MovieMenuAction", NULL, "_Movie"},
+	{"OpenMovieAction", NULL, "_Open", NULL, NULL, G_CALLBACK(loadMovie)},
+	{"StopMovieAction", NULL, "S_top", NULL, NULL, G_CALLBACK(FCEUI_StopMovie)},
+	{"RecordMovieAction", NULL, "_Record", NULL, NULL, G_CALLBACK(recordMovie)},
+	{"RecordMovieAsAction", NULL, "Record _As", NULL, NULL, G_CALLBACK(recordMovieAs)},
+	
+	{"HelpMenuAction", NULL, "_Help"},
+	{"AboutAction", GTK_STOCK_ABOUT, "_About", NULL, NULL, G_CALLBACK(showAbout)},
 };
 
-static gint nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
+// Menu items with a check box that can be toggled on or off
+static GtkToggleActionEntry toggle_entries[] = {
+	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE}
+};
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
 {
-	GtkItemFactory *item_factory;
-	GtkAccelGroup *accel_group;
+	GtkUIManager *ui_manager;
+	GtkActionGroup *action_group;
+	GError *error = NULL;
 
-	/* Make an accelerator group (shortcut keys) */
-	accel_group = gtk_accel_group_new ();
+	/* Make an UIManager (that makes a menubar) */
+	ui_manager = gtk_ui_manager_new ();
+	
+	/* Add the menu items to the UIManager as a GtkActionGroup */
+	action_group = gtk_action_group_new ("MenubarActions");
+	gtk_action_group_add_actions (action_group, normal_entries, G_N_ELEMENTS (normal_entries), NULL);
+    gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
+    gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
+    
+    /* Read the menu layout from the XML markup */
+    gtk_ui_manager_add_ui_from_string (ui_manager, menuXml, -1, &error);
+    if (error)
+    {
+        fprintf (stderr, "Unable to create menu bar: %s\n", error->message);
+        g_error_free (error);
+    }
+    
+    /* Attach the new accelerator group to the window. */
+    gtk_window_add_accel_group (GTK_WINDOW (window), gtk_ui_manager_get_accel_group (ui_manager));
 
-	/* Make an ItemFactory (that makes a menubar) */
-	item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-
-	/* This function generates the menu items. Pass the item factory,
-		 the number of items in the array, the array itself, and any
-		 callback data for the the menu items. */
-	gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
-
-	/* Attach the new accelerator group to the window. */
-	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
-
-	/* Finally, return the actual menu bar created by the item factory. */
-	return gtk_item_factory_get_widget (item_factory, "<main>");
+	/* Finally, return the actual menu bar created by the UIManager. */
+	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
 
 
