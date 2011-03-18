@@ -1,4 +1,5 @@
 TODO-SDL: 
+* GTK: rewrite menu code to replace depreciated GtkItemFactory
 * auto-resize game window (gtk)
 * SDL 1.3?
 	* segfaults when opening a second game
