@@ -1329,6 +1329,14 @@ void toggleGameGenie(GtkToggleAction *action)
 	enableGameGenie(gtk_toggle_action_get_active(action));
 }
 
+void togglePause(GtkToggleAction *action)
+{
+	if(gtk_toggle_action_get_active(action))
+		FCEUI_SetEmulationPaused(1);
+	else
+		FCEUI_SetEmulationPaused(0);
+}
+
 void loadGameGenie ()
 {
 	GtkWidget* fileChooser;
@@ -1840,8 +1848,7 @@ static char* menuXml =
 	"    <menu action='EmulatorMenuAction'>"
 	"      <menuitem action='PowerAction' />"
 	"      <menuitem action='ResetAction' />"
-	"      <menuitem action='PauseAction' />"
-	"      <menuitem action='ResumeAction' />"
+	"      <menuitem action='PauseToggleAction' />"
 	"      <menu action='FdsMenuAction'>"
 	"        <menuitem action='SwitchDiskAction' />"
 	"        <menuitem action='EjectDiskAction' />"
@@ -1893,7 +1900,6 @@ static GtkActionEntry normal_entries[] = {
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
 	{"PauseAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(emuPause)},
-	{"ResumeAction", GTK_STOCK_MEDIA_PLAY, "R_esume", NULL, NULL, G_CALLBACK(emuResume)},
 	{"FdsMenuAction", GTK_STOCK_FLOPPY, "_FDS"},
 	{"SwitchDiskAction", "go-jump", "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
 	{"EjectDiskAction", "media-eject", "_Eject Disk", NULL, NULL, G_CALLBACK(FCEU_FDSInsert)},
@@ -1913,7 +1919,8 @@ static GtkActionEntry normal_entries[] = {
 
 // Menu items with a check box that can be toggled on or off
 static GtkToggleActionEntry toggle_entries[] = {
-	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE}
+	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
+	{"PauseToggleAction", NULL, "_Pause Emulation", NULL, NULL, G_CALLBACK(togglePause), FALSE}
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
