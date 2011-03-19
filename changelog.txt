@@ -1,3 +1,4 @@
+19-mar-2011 - prg318 - gtk - added hard reset option (renamed reset->soft reset)
 18-mar-2011 - prg318 - sdl - removed GTK_LITE; --nogui made it obsolete
 12-feb-2010 - mart0258 - Fix input selection for Famicom Expansion port
 25-jan-2010 - prg318 - gtk - filechooser now remembers last file opened

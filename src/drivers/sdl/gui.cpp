@@ -30,7 +30,7 @@
 
 void toggleSound(GtkWidget* check, gpointer data);
 void loadGame ();
-
+void closeGame();
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
@@ -1119,6 +1119,26 @@ void emuReset ()
 		ResetNES();
 }
 
+void hardReset ()
+{
+	if(isloaded)
+	{
+		closeGame();
+		const char* lastFile;
+		g_config->getOption("SDL.LastOpenFile", &lastFile);
+		if(LoadGame(lastFile) == 0)
+		{
+			GtkWidget* d;
+			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+				"Error opening the ROM file.");
+			gtk_dialog_run(GTK_DIALOG(d));
+			gtk_widget_destroy(d);
+		}
+		resizeGtkWindow();
+	}
+}
+		
+
 void enableFullscreen ()
 {
 	if(isloaded)
@@ -1857,15 +1877,19 @@ static char* menuXml =
 	"    <menu action='EmulatorMenuAction'>"
 	"      <menuitem action='PowerAction' />"
 	"      <menuitem action='ResetAction' />"
+	"      <menuitem action='SoftResetAction' />"
 	"      <menuitem action='PauseToggleAction' />"
+	"      <separator />"
+	"      <menuitem action='GameGenieToggleAction' />"
+	"      <menuitem action='LoadGameGenieAction' />"
+	"      <separator />"
+	"      <menuitem action='InsertCoinAction' />"
+	"      <separator />"
 	"      <menu action='FdsMenuAction'>"
 	"        <menuitem action='SwitchDiskAction' />"
 	"        <menuitem action='EjectDiskAction' />"
 	"        <menuitem action='LoadBiosAction' />"
 	"      </menu>"
-	"      <menuitem action='LoadGameGenieAction' />"
-	"      <menuitem action='GameGenieToggleAction' />"
-	"      <menuitem action='InsertCoinAction' />"
 	"    </menu>"
 	"    <menu action='MovieMenuAction'>"
 	"      <menuitem action='OpenMovieAction' />"
@@ -1905,7 +1929,8 @@ static GtkActionEntry normal_entries[] = {
 	
 	{"EmulatorMenuAction", NULL, "_Emulator"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
-	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
+	{"SoftResetAction", GTK_STOCK_REFRESH, "_Soft Reset", NULL, NULL, G_CALLBACK(emuReset)},
+	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(hardReset)},
 	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", "Pause", NULL, G_CALLBACK(togglePause)},
 	{"FdsMenuAction", GTK_STOCK_FLOPPY, "_FDS"},
 	{"SwitchDiskAction", "go-jump", "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
