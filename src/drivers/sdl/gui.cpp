@@ -1076,7 +1076,7 @@ void quit ()
 	exit(0);
 }
 
-void showAbout ()
+void openAbout ()
 {
 	GtkWidget* aboutDialog;
 	
@@ -1899,7 +1899,7 @@ static GtkActionEntry normal_entries[] = {
 	{"RecordMovieAsAction", NULL, "Record _As", NULL, NULL, G_CALLBACK(recordMovieAs)},
 	
 	{"HelpMenuAction", NULL, "_Help"},
-	{"AboutAction", GTK_STOCK_ABOUT, "_About", NULL, NULL, G_CALLBACK(showAbout)},
+	{"AboutAction", GTK_STOCK_ABOUT, "_About", NULL, NULL, G_CALLBACK(openAbout)},
 };
 
 // Menu items with a check box that can be toggled on or off
