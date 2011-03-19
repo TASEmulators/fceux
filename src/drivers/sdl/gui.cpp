@@ -1114,17 +1114,6 @@ void emuReset ()
 		ResetNES();
 }
 
-void emuPause ()
-{
-	if(isloaded)
-		FCEUI_SetEmulationPaused(1);
-}
-void emuResume ()
-{
-	if(isloaded)
-		FCEUI_SetEmulationPaused(0);
-}
-
 void enableFullscreen ()
 {
 	if(isloaded)
@@ -1394,7 +1383,6 @@ void loadGameGenie ()
 		gtk_widget_destroy (fileChooser);
 
 }
-
 
 void loadNSF ()
 {
@@ -1861,8 +1849,6 @@ static char* menuXml =
 	"    <menu action='MovieMenuAction'>"
 	"      <menuitem action='OpenMovieAction' />"
 	"      <menuitem action='StopMovieAction' />"
-	"      <menuitem action='PauseAction' />"
-	"      <menuitem action='ResumeAction' />"
 	"      <separator />"
 	"      <menuitem action='RecordMovieAction' />"
 	"      <menuitem action='RecordMovieAsAction' />"
@@ -1899,7 +1885,6 @@ static GtkActionEntry normal_entries[] = {
 	{"EmulatorMenuAction", NULL, "_Emulator"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
-	{"PauseAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(emuPause)},
 	{"FdsMenuAction", GTK_STOCK_FLOPPY, "_FDS"},
 	{"SwitchDiskAction", "go-jump", "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
 	{"EjectDiskAction", "media-eject", "_Eject Disk", NULL, NULL, G_CALLBACK(FCEU_FDSInsert)},
@@ -1920,7 +1905,7 @@ static GtkActionEntry normal_entries[] = {
 // Menu items with a check box that can be toggled on or off
 static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
-	{"PauseToggleAction", NULL, "_Pause Emulation", NULL, NULL, G_CALLBACK(togglePause), FALSE}
+	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(togglePause), FALSE}
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
