@@ -1874,7 +1874,7 @@ static char* menuXml =
 	"      <separator />"
 	"      <menuitem action='FullscreenAction' />"
 	"    </menu>"
-	"    <menu action='EmulatorMenuAction'>"
+	"    <menu action='EmulationMenuAction'>"
 	"      <menuitem action='PowerAction' />"
 	"      <menuitem action='ResetAction' />"
 	"      <menuitem action='SoftResetAction' />"
@@ -1927,7 +1927,7 @@ static GtkActionEntry normal_entries[] = {
 	{"NetworkConfigAction", GTK_STOCK_NETWORK, "_Network Config", NULL, NULL, G_CALLBACK(openNetworkConfig)},
 	{"FullscreenAction", GTK_STOCK_FULLSCREEN, "_Fullscreen", "<alt>Return", NULL, G_CALLBACK(enableFullscreen)},
 	
-	{"EmulatorMenuAction", NULL, "_Emulator"},
+	{"EmulationMenuAction", NULL, "_Emulation"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"SoftResetAction", GTK_STOCK_REFRESH, "_Soft Reset", NULL, NULL, G_CALLBACK(emuReset)},
 	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(hardReset)},
