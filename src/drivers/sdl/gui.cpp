@@ -1090,6 +1090,7 @@ void openAbout ()
 	
 	GdkPixbuf* logo = gdk_pixbuf_new_from_xpm_data(icon_xpm);
 	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(aboutDialog), logo);
+	gtk_window_set_icon(GTK_WINDOW(aboutDialog), logo);
 	
 	
 	gtk_dialog_run(GTK_DIALOG(aboutDialog));
