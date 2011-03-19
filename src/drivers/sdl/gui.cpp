@@ -1970,6 +1970,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_container_add(GTK_CONTAINER(MainWindow), vbox);
 	
 	Menubar = CreateMenubar(MainWindow);
+	// turn of game genie by default, since its off by default in the menu
+	enableGameGenie(0); 
 		
 	
 	gtk_box_pack_start (GTK_BOX(vbox), Menubar, FALSE, TRUE, 0);
