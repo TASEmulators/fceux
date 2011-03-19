@@ -746,6 +746,9 @@ int main(int argc, char *argv[])
 			SDL_Quit();
 			return -1;
 		}
+		g_config->setOption("SDL.LastOpenFile", argv[romIndex]);
+		g_config->save();
+
 	}
 	
 	// movie playback
