@@ -1322,12 +1322,25 @@ void toggleGameGenie(GtkToggleAction *action)
 	enableGameGenie(gtk_toggle_action_get_active(action));
 }
 
-void togglePause(GtkToggleAction *action)
+void togglePause(GtkAction *action)
 {
-	if(gtk_toggle_action_get_active(action))
-		FCEUI_SetEmulationPaused(1);
-	else
-		FCEUI_SetEmulationPaused(0);
+	SDL_Event sdlev;
+	int paused;
+	
+	if(isloaded)
+	{
+		paused = FCEUI_EmulationPaused();
+	
+		sdlev.type = SDL_FCEU_HOTKEY_EVENT;
+		sdlev.user.code = HK_PAUSE;
+		if(SDL_PushEvent(&sdlev) < 0)
+		{
+			FCEU_printf("Failed to push SDL event to %s game.\n", paused ? "resume" : "pause");
+			return;
+		}
+		gtk_action_set_label(action, paused ? "Pause" : "Resume");
+		gtk_action_set_stock_id(action, paused ? GTK_STOCK_MEDIA_PAUSE : GTK_STOCK_MEDIA_PLAY);
+	}
 }
 
 void loadGameGenie ()
@@ -1889,6 +1902,7 @@ static GtkActionEntry normal_entries[] = {
 	{"EmulatorMenuAction", NULL, "_Emulator"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
+	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(togglePause)},
 	{"FdsMenuAction", GTK_STOCK_FLOPPY, "_FDS"},
 	{"SwitchDiskAction", "go-jump", "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
 	{"EjectDiskAction", "media-eject", "_Eject Disk", NULL, NULL, G_CALLBACK(FCEU_FDSInsert)},
@@ -1909,7 +1923,6 @@ static GtkActionEntry normal_entries[] = {
 // Menu items with a check box that can be toggled on or off
 static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
-	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(togglePause), FALSE}
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)

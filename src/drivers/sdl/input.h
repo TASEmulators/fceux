@@ -30,6 +30,8 @@ int DWaitButton(const uint8 *text, ButtConfig *bc, int wb);
 #define FCFGD_HYPERSHOT 3
 #define FCFGD_QUIZKING  4
 
+#define SDL_FCEU_HOTKEY_EVENT	SDL_USEREVENT
+
 void InitInputInterface(void);
 void InputUserActiveFix(void);
 

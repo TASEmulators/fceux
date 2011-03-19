@@ -735,6 +735,14 @@ UpdatePhysicalInput()
             CloseGame();
             puts("Quit");
             break;
+        case SDL_FCEU_HOTKEY_EVENT:
+            switch(event.user.code) {
+                case HK_PAUSE:
+                    FCEUI_ToggleEmulationPause();
+                    break;
+                default:
+                    FCEU_printf("Warning: unknown hotkey event %d\n", event.user.code);
+            }
         default:
             // do nothing
             break;
