@@ -1,31 +1,32 @@
-FCEUX SDL 2.1.3 SDL README
+FCEUX SDL 2.1.5 SDL README
 By Lukas Sabota (punkrockguy318)
+http://www.fceux.com
 
 Table of Contents
 1.  Requirements
 2.  Installation
 3.  Compile-time options
 4.  GUI
-5.  Run-time options
-6.  FAQ
-7.  Contact
+5.  FAQ
+6.  Contact
 
 1. Requirements
 	* libsdl1.2 - It is strongly recommended that you upgrade to the latest
-		version of sdl (1.2.14).  There are known audio problems with
-		versions <= 1.2.13. 
-		* libsdl1.2debian-esd is recommended on ubuntu/debian systems
+		version of sdl (1.2.14).
 	* scons - Required to build fceux.
-	* libgtk2.0 (OPTIONAL) - it's recomended that you install version >= 2.18
+	* libgtk2.0 (optional) - recomended that you install version >= 2.18
 
 2. Installation
 	Fceux is installed with the scons utility.  To compile, run:
 
 	scons
+	
+	After a sucessful compilation, the fceux binary will be generated to 
+	./src/fceux .  You can install it to your path with:
 
-	To compile and install to /usr/bin, run (as root):
+	sudo install -m 755 src/fceux /usr/local/bin/fceux
 
-	scons install
+	or by running the install.sh script which executes the same function.
 
 3. Compile-time options
 	You can enable and disable certain features of fceux at build time. 
@@ -34,16 +35,12 @@ default options here will be fine for most users, but power users may want to
 tweak these.
 
 4. GUI
-	There are currently two options for a GUI with the SDL build.  
+	You can enable the GTK GUI by setting GTK to 1 in the SConstruct build file. 
+	Gfceux is deprecatiated in favor of the new GTK GUI.  You can disable it at
+	run-time by passing the --nogui 1 option, or disable it build time by setting
+	GTK to 0 in the SConstruct file.
 
-	The first and currently more flexible is gfceux.  Gfceux should be included with this source in a seperate directory.  Check that directory for installation instructions.  Gfceux is a GTK launcher for fceux that allows you to configure controls and tweak options.
-	
-	The other option is the GTK GUI support in fceux.  BE WARNED that this is currently experimental and probably has some bugs right now.  You can enable this by changing the GTK2 value in the SConstruct to 1.
-
-5.  Run-time options
-	TODO
-
-6.  FAQ
+5.  FAQ
 
 	Q.  I'm having issues with my sound!
 	A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
@@ -56,15 +53,13 @@ tweak these.
 		oss for OSS
 		esd for ESD
 
-	ESD provides crystal clear playback on my machine.
-
 	There are sound options that you can tweak at runtime through command line switches:
 
 	-soundq x 		internal sound quality hack value (0 off)
 	-soundrate x    	sound rate (sane values: 28000 48000
 	-soundbuffersize x 	(in ms)  sane values (30, 50, 100, 120)
 
-	* Running fceux through esddsp is known to fix some audio issues with pulseaudio
+	* Running fceux through esddsp is known to fix some audio issues with pulseaudio on some older Ubuntu versions.
 	
-7.  Contact
-	If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact me personally, e-mail me at <LTsmooth42 <at> gmail.com>.  You can also check the developers out at #fceu on irc.freenode.net.	
+6.  Contact
+	If you have an issue with fceux, report it in the sourceforge bug tracker (see fceux.com).  If you would like to contact the author of this readme personally, e-mail LTsmooth42 <at> gmail <dot> com.  You can also check us out at #fceu on irc.freenode.net.
