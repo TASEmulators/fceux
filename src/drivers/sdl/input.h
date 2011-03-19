@@ -14,6 +14,7 @@ typedef struct {
 
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
+extern int Hotkeys[];
 void ParseGIInput(FCEUGI *GI);
 void setHotKeys();
 int ButtonConfigBegin();

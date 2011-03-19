@@ -1768,6 +1768,9 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 		return 0;
 	}
 	
+	// ignore Pause hotkey since it is handled by GTK+ as an accelerator
+	if (sdl_key == Hotkeys[HK_PAUSE]) return 0;
+	
 	return sdl_key;
 }
 
@@ -1902,7 +1905,7 @@ static GtkActionEntry normal_entries[] = {
 	{"EmulatorMenuAction", NULL, "_Emulator"},
 	{"PowerAction", NULL, "P_ower", NULL, NULL, G_CALLBACK(FCEUI_PowerNES)},
 	{"ResetAction", GTK_STOCK_REFRESH, "_Reset", NULL, NULL, G_CALLBACK(emuReset)},
-	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", NULL, NULL, G_CALLBACK(togglePause)},
+	{"PauseToggleAction", GTK_STOCK_MEDIA_PAUSE, "_Pause", "Pause", NULL, G_CALLBACK(togglePause)},
 	{"FdsMenuAction", GTK_STOCK_FLOPPY, "_FDS"},
 	{"SwitchDiskAction", "go-jump", "_Switch Disk", NULL, NULL, G_CALLBACK(FCEU_FDSSelect)},
 	{"EjectDiskAction", "media-eject", "_Eject Disk", NULL, NULL, G_CALLBACK(FCEU_FDSInsert)},
