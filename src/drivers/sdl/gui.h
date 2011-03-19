@@ -19,7 +19,7 @@
 
 #ifndef FCEUX_GUI_H
 #define FCEUX_GUI_H
-#define GTK_LITE
+#define GTK
 #include <gtk/gtk.h>
 extern GtkWidget* MainWindow;
 extern GtkWidget* socket;

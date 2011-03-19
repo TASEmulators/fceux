@@ -13,10 +13,8 @@
 #include <limits.h>
 #include <math.h>
 
-#ifdef _GTK_LITE
-#include <gtk/gtk.h>
-#endif
 #ifdef _GTK
+#include <gtk/gtk.h>
 #include "gui.cpp"
 #endif
 
@@ -158,7 +156,7 @@ static void ShowUsage(char *prog)
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
 	const SDL_version* v = SDL_Linked_Version();
 	printf("Linked with SDL version %d.%d.%d\n", v->major, v->minor, v->patch);
-#ifdef GTK_LITE
+#ifdef GTK
 	printf("Compiled with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 	//printf("Linked with GTK version %d.%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION );
 #endif
@@ -726,13 +724,9 @@ int main(int argc, char *argv[])
 	// load the hotkeys from the config life
 	setHotKeys();
 	
-	// GTK_LITE: gtk is linked for dialogs
-	//		gtk needs to be started somewhere
-	// GTK: full gtk GUI.  we're starting it here.
-#ifdef _GTK_LITE
-	gtk_init(&argc, &argv);
-#endif	
 #ifdef _GTK
+	gtk_init(&argc, &argv);
+
 	int noGui;
 	g_config->getOption("SDL.NoGUI", &noGui);
 	if(noGui == 0)

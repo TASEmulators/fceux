@@ -39,7 +39,7 @@
 #include "../../fceulua.h"
 #endif
 
-#ifdef _GTK_LITE
+#ifdef _GTK
 #include "gui.h"
 #ifdef SDL_VIDEO_DRIVER_X11
 #include <gdk/gdkx.h>
@@ -217,7 +217,7 @@ std::string GetFilename(const char* title, bool save, const char* filter)
     fname = GetOpenFileName(&ofn);
 
 #endif
-#ifdef _GTK_LITE
+#ifdef _GTK
 	int fullscreen = 0;
 	g_config->getOption("SDL.Fullscreen", &fullscreen);
 	if(fullscreen)
@@ -272,7 +272,7 @@ std::string GetFilename(const char* title, bool save, const char* filter)
  */
 std::string GetUserText(const char* title)
 {
-#ifdef _GTK_LITE
+#ifdef _GTK
 
 	GtkWidget* d;
 	GtkWidget* entry;

@@ -13,7 +13,6 @@ opts.AddVariables(
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
-  BoolVariable('GTK_LITE', 'Enable GTK2 for dialogs only', 0)
 )
 
 env = Environment(options = opts)
@@ -57,15 +56,12 @@ else:
   if not conf.CheckLib('SDL'):
     print 'Did not find libSDL or SDL.lib, exiting!'
     Exit(1)
-  if env['GTK'] or env['GTK_LITE']:
+  if env['GTK']:
     # Add compiler and linker flags from pkg-config
     env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
     env.Append(CPPDEFINES=["_GTK2"])
   if env['GTK']:
     env.Append(CCFLAGS = ["-D_GTK"])
-    env.Append(CCFLAGS =["-D_GTK_LITE"])
-  if env['GTK_LITE']:
-    env.Append(CCFLAGS =["-D_GTK_LITE"])
 
   ### Lua platform defines
   ### Applies to all files even though only lua needs it, but should be ok
