@@ -1041,6 +1041,8 @@ void CloseGame()
 
 bool ALoad(char *nameo, char* innerFilename)
 {
+  int oldPaused = EmulationPaused;
+
 	if (GameInfo) FCEUI_CloseGame();
 
 	if(FCEUI_LoadGameVirtual(nameo, 1))
@@ -1093,6 +1095,7 @@ bool ALoad(char *nameo, char* innerFilename)
 
 	updateGameDependentMenus(GameInfo != 0);
 	updateGameDependentMenusDebugger(GameInfo != 0);
+  EmulationPaused = oldPaused;
 	return true;
 }
 
