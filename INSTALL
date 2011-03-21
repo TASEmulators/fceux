@@ -1,10 +1,15 @@
-To compile and install FCE Ultra, follow these steps:
-  1.  Ensure that SCons and SDL are installed on your system.
+To compile and install FCEUX, follow these steps:
+
+  1.  Ensure that scons and SDL are installed on your system.
     On an ubuntu/debian system, run:
-      sudo apt-get install scons libsdl1.2-dev libsdl1.2debian-esd 
-  2.  Enable options you would like to enable in SConstruct file (GUI and AVI creation disabled by default)
+      sudo apt-get install scons libsdl1.2-dev libsdl1.2debian-all
+
+  2.  Enable options you would like to enable/disable in SConstruct file.
+
   3.  Run "scons" to build fceux.
-  4.  To install on Linux/BSD run "scons install" as root.
+
+  4.  To install on Linux/BSD run 
+       sudo install -m 755 src/fceux /usr/local/bin/fceux
 
 Users of Microsoft Visual Studio can use the solution files within the vc directory.
 These solution files will compile FCEUX and some included libraries for full functionality.
