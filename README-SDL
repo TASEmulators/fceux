@@ -50,7 +50,7 @@ tweak these.
 	where driver is either:
 		pulse for pulseaudio
 		alsa for ALSA
-		oss for OSS
+		dsp for OSS
 		esd for ESD
 
 	There are sound options that you can tweak at runtime through command line switches:
