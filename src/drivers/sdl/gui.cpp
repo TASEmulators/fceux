@@ -1070,9 +1070,14 @@ void openSoundConfig()
 
 void quit ()
 {
+	// manually flush GTK event queue
+	while(gtk_events_pending())
+		gtk_main_iteration_do(FALSE);
+	// this is not neccesary to be explicitly called
+	// it raises a GTK-Critical when its called
+	//gtk_main_quit();
 	FCEUI_Kill();
 	SDL_Quit();
-	gtk_main_quit();
 	exit(0);
 }
 

@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
 {
 	int error, frameskip;
 
-	FCEUD_Message("\nStarting "FCEU_NAME_AND_VERSION"...\n");
+	FCEUD_Message("Starting "FCEU_NAME_AND_VERSION"...\n");
 
 #ifdef WIN32
 	/* Taken from win32 sdl_main.c */
