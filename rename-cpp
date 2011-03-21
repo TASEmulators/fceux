@@ -1,7 +1,0 @@
-seek=.c$
-replace=.cpp
-for X in *.c
-do
-	fname=$(echo $X | sed -e "s/$seek/$replace/")
-	svn move $X $fname
-done
