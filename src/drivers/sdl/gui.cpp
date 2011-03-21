@@ -1080,6 +1080,17 @@ void quit ()
 	SDL_Quit();
 	exit(0);
 }
+const char* Authors[]= {
+	"Linux/SDL Developers:",
+	" Lukas Sabota", " Soules", " Bryan Cain", " radsaq", " Shinydoofy",
+	"FceuX 2.0 Developers:",
+	" SP", " zeromus", " adelikat", " caH4e3", " qfox",
+	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit",
+	"Pre 2.0 Guys:",
+	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
+	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte & bbitmaster",
+	" blip & nitsuja",
+	NULL};
 
 void openAbout ()
 {
@@ -1092,6 +1103,7 @@ void openAbout ()
 	gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(aboutDialog), "© 2011 FceuX development team");
 	gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(aboutDialog), "GPL-2; See COPYING");
 	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(aboutDialog), "http://fceux.com");
+	gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(aboutDialog), Authors);
 	
 	GdkPixbuf* logo = gdk_pixbuf_new_from_xpm_data(icon_xpm);
 	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(aboutDialog), logo);
