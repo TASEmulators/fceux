@@ -763,15 +763,8 @@ int
 ButtonConfigBegin()
 {
     SDL_Surface *screen;
-
-    // XXX soules - why are we doing this right before KillVideo()?
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-    // shut down the video and joystick subsystems
-    bcpv=KillVideo();
-    bcpj=KillJoysticks();
  
-    // reactivate the video subsystem
+    // activate the video subsystem if it is not already initialized
     if(!SDL_WasInit(SDL_INIT_VIDEO)) {
     	if(!bcpv) {
     		InitVideo(GameInfo);
@@ -800,10 +793,6 @@ ButtonConfigBegin()
             SDL_WM_SetCaption("Button Config",0);
         }
     }
-
-    // XXX soules - why did we shut this down?
-    // initialize the joystick subsystem
-    InitJoysticks();
  
     return(1);
 }
