@@ -1346,10 +1346,14 @@ DWaitButton(const uint8 *text,
     SDL_Event event;
     static int32 LastAx[64][64];
     int x,y;
-    std::string title = "Press a key for ";
-	title += (const char*)text;
-    SDL_WM_SetCaption(title.c_str(),0);
-    puts((const char *)text);
+    
+    if(text) {
+        std::string title = "Press a key for ";
+	    title += (const char*)text;
+        SDL_WM_SetCaption(title.c_str(),0);
+        puts((const char *)text);
+    }
+    
     for(x = 0; x < 64; x++) {
         for(y = 0; y < 64; y++) {
             LastAx[x][y]=0x100000;

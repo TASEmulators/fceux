@@ -58,7 +58,7 @@ int configGamepadButton(GtkButton* button, gpointer p)
     
     snprintf(buf, sizeof(buf), "SDL.Input.GamePad.%d", padNo);
     prefix = buf;
-    DWaitButton((const uint8*)"Press a button", &GamePadConfig[padNo][x], configNo);
+    DWaitButton(NULL, &GamePadConfig[padNo][x], configNo);
 
     g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[configNo]);
 
@@ -1091,7 +1091,6 @@ const char* Authors[]= {
 
 void openAbout ()
 {
-	GtkWidget* aboutDialog;
 	GdkPixbuf* logo = gdk_pixbuf_new_from_xpm_data(icon_xpm);
 	
 	gtk_show_about_dialog(GTK_WINDOW(MainWindow),
@@ -1102,7 +1101,7 @@ void openAbout ()
 		//"license-type", GTK_LICENSE_GPL_2_0,
 		"website", "http://fceux.com",
 		"authors", Authors,
-		"logo", logo);
+		"logo", logo, NULL);
 }
 
 void toggleSound(GtkWidget* check, gpointer data)
@@ -1837,11 +1836,16 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 	if (sdlkey != 0)
 	{
 		SDL_PushEvent(&sdlev);
-		#if SDL_VERSION_ATLEAST(1, 3, 0)
-		SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
-		#else
-		SDL_GetKeyState(NULL)[sdlkey] = keystate;
-		#endif
+		
+		// Only let the emulator handle the key event if this window has the input focus.
+		if(keystate == 0 || gtk_window_is_active(GTK_WINDOW(MainWindow)))
+		{
+			#if SDL_VERSION_ATLEAST(1, 3, 0)
+			SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(sdlkey)] = keystate;
+			#else
+			SDL_GetKeyState(NULL)[sdlkey] = keystate;
+			#endif
+		}
 	}
 	
 	// Allow GTK+ to process this key.
