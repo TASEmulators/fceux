@@ -1341,6 +1341,7 @@ void loadFdsBios ()
 void enableGameGenie(int enabled)
 {
 	g_config->setOption("SDL.GameGenie", enabled);
+	g_config->save();
 	FCEUI_SetGameGenie(enabled);
 }
 
