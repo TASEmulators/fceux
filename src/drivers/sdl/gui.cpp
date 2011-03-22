@@ -1095,24 +1095,17 @@ const char* Authors[]= {
 void openAbout ()
 {
 	GtkWidget* aboutDialog;
-	
-	aboutDialog = gtk_about_dialog_new ();
-	gtk_about_dialog_set_name(GTK_ABOUT_DIALOG(aboutDialog), "About fceuX");
-	gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(aboutDialog), "fceuX");
-	gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(aboutDialog), FCEU_VERSION_STRING);
-	gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(aboutDialog), "© 2011 FceuX development team");
-	gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(aboutDialog), "GPL-2; See COPYING");
-	gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(aboutDialog), "http://fceux.com");
-	gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(aboutDialog), Authors);
-	
 	GdkPixbuf* logo = gdk_pixbuf_new_from_xpm_data(icon_xpm);
-	gtk_about_dialog_set_logo(GTK_ABOUT_DIALOG(aboutDialog), logo);
-	gtk_window_set_icon(GTK_WINDOW(aboutDialog), logo);
 	
-	
-	gtk_dialog_run(GTK_DIALOG(aboutDialog));
-	gtk_widget_hide_all(aboutDialog);
-	
+	gtk_show_about_dialog(GTK_WINDOW(MainWindow),
+		"program-name", "fceuX",
+		"version", FCEU_VERSION_STRING,
+		"copyright", "© 2011 FceuX development team",
+		"license", "GPL-2; See COPYING",
+		//"license-type", GTK_LICENSE_GPL_2_0,
+		"website", "http://fceux.com",
+		"authors", Authors,
+		"logo", logo);
 }
 
 void toggleSound(GtkWidget* check, gpointer data)
@@ -2027,6 +2020,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
 	
 	GdkPixbuf* icon = gdk_pixbuf_new_from_xpm_data(icon_xpm);
+	gtk_window_set_default_icon(icon);
 	gtk_window_set_icon(GTK_WINDOW(MainWindow), icon);
 	
 	vbox = gtk_vbox_new(FALSE, 0);
