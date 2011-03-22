@@ -271,6 +271,7 @@ void openPaletteConfig()
 	return;
 }
 
+
 GtkWidget* ipEntry;
 GtkWidget* portSpin;
 GtkWidget* pwEntry;
@@ -441,9 +442,6 @@ int setInputDevice(GtkWidget* w, gpointer p)
 
 gboolean closeGamepadConfig(GtkWidget* w, GdkEvent* event, gpointer p)
 {
-	gint paused = ((gint)(glong)(p));
-	if(!paused)
-		FCEUI_SetEmulationPaused(0);
 	gtk_widget_destroy(w);
 	return FALSE;
 }
@@ -486,7 +484,7 @@ void openGamepadConfig()
 	
 	win = gtk_dialog_new_with_buttons("Controller Configuration",
 									  GTK_WINDOW(MainWindow),
-									  (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
 									  GTK_STOCK_CLOSE,
 									  GTK_RESPONSE_OK,
 									  NULL);
@@ -591,9 +589,8 @@ void openGamepadConfig()
 	
 	gtk_box_pack_start(GTK_BOX(vbox), buttonFrame, TRUE, TRUE, 5);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeGamepadConfig), GINT_TO_POINTER(FCEUI_EmulationPaused()));
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeGamepadConfig), GINT_TO_POINTER(FCEUI_EmulationPaused()));
-	FCEUI_SetEmulationPaused(1);
+	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeGamepadConfig), NULL);
+	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeGamepadConfig), NULL);
 	
 	gtk_widget_show_all(win);
 	
