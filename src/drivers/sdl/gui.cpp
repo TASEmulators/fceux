@@ -1796,8 +1796,9 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 		return 0;
 	}
 	
-	// ignore Pause hotkey since it is handled by GTK+ as an accelerator
-	if (sdl_key == Hotkeys[HK_PAUSE]) return 0;
+	// ignore pause and screenshot hotkeys since they is handled by GTK+ as accelerators
+	if (sdl_key == Hotkeys[HK_PAUSE] || sdl_key == Hotkeys[HK_SCREENSHOT])
+		return 0;
 	
 	return sdl_key;
 }
