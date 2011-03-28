@@ -83,6 +83,11 @@ int configGamepadButton(GtkButton* button, gpointer p)
     return 0;
 }
 
+void closeDialog(GtkWidget* w, GdkEvent* e, gpointer p)
+{
+	gtk_widget_destroy(w);
+}
+
 void toggleLowPass(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -190,11 +195,14 @@ void openPaletteConfig()
 	GtkWidget* hueFrame;
 	GtkWidget* hueHscale;
 	
-	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win),"Palette Options");
+	win = gtk_dialog_new_with_buttons("Palette Options",
+									  GTK_WINDOW(MainWindow),
+									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+									  GTK_STOCK_CLOSE,
+									  GTK_RESPONSE_OK,
+									  NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_SELECT_COLOR);
-	vbox = gtk_vbox_new(FALSE, 5);
-	gtk_container_add(GTK_CONTAINER(win), vbox);
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	paletteFrame = gtk_frame_new("Custom palette: ");
 	paletteHbox = gtk_hbox_new(FALSE, 5);
@@ -263,8 +271,10 @@ void openPaletteConfig()
 	gtk_box_pack_start(GTK_BOX(slidersVbox), hueFrame, FALSE, TRUE, 5);
 	
 	gtk_box_pack_start(GTK_BOX(vbox), paletteFrame, FALSE, TRUE, 5);
-	
 	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
+	
+	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	
@@ -286,19 +296,23 @@ void launchNet(GtkWidget* w, gpointer p)
 	g_config->setOption("SDL.NetworkPassword", pw);
 	g_config->setOption("SDL.NetworkPort", port);
 	
-	gtk_widget_destroy(GTK_WIDGET(p));
+	gtk_widget_destroy(GTK_WIDGET(w));
 	
 	loadGame();
-}
-void closeNet(GtkWidget* w, gpointer p)
-{
-	gtk_widget_destroy(GTK_WIDGET(p));
 }
 
 void setUsername(GtkWidget* w, gpointer p)
 {
 	char* s = (char*)gtk_entry_get_text(GTK_ENTRY(w));
 	g_config->setOption("SDL.NetworkUsername", s);
+}
+
+void netResponse(GtkWidget* w, gint response_id, gpointer p)
+{
+	if(response_id == GTK_RESPONSE_OK)
+		launchNet(w, p);
+	else
+		gtk_widget_destroy(w);
 }
 
 void openNetworkConfig()
@@ -320,14 +334,16 @@ void openNetworkConfig()
 	GtkWidget* pwBox;
 	GtkWidget* pwLbl;
 	
-	GtkWidget* bb;
-	GtkWidget* conBtn;
-	GtkWidget* closeBtn;
-	
-	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "Network Options");
+	win = gtk_dialog_new_with_buttons("Network Options",
+									  GTK_WINDOW(MainWindow),
+									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+									  GTK_STOCK_CLOSE,
+									  GTK_RESPONSE_CLOSE,
+									  GTK_STOCK_CONNECT,
+									  GTK_RESPONSE_OK,
+									  NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_NETWORK);
-	box = gtk_vbox_new(FALSE, 3);
+	box = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	userBox = gtk_hbox_new(FALSE, 3);
 	userLbl = gtk_label_new("Username:");
@@ -351,9 +367,6 @@ void openNetworkConfig()
 	pwBox = gtk_hbox_new(FALSE, 3);
 	pwLbl = gtk_label_new("Server password:");
 	pwEntry = gtk_entry_new();
-	bb = gtk_hbox_new(FALSE, 5);
-	conBtn = gtk_button_new_from_stock(GTK_STOCK_CONNECT);
-	closeBtn = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
 	
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(portSpin), 4046);
 	
@@ -378,16 +391,11 @@ void openNetworkConfig()
 	
 	gtk_box_pack_start_defaults(GTK_BOX(box), userBox);
 	gtk_box_pack_start_defaults(GTK_BOX(box), frame);
-	gtk_box_pack_start(GTK_BOX(bb), closeBtn, FALSE, FALSE, 5);
-	gtk_box_pack_start(GTK_BOX(bb), conBtn, FALSE, FALSE, 5);
-	
-	gtk_box_pack_start_defaults(GTK_BOX(box), bb);
-	gtk_container_add(GTK_CONTAINER(win), box);
 	
 	gtk_widget_show_all(win);
 	
-	g_signal_connect(closeBtn, "clicked", G_CALLBACK(closeNet), win);
-	g_signal_connect(conBtn, "clicked", G_CALLBACK(launchNet), win);
+	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(netResponse), NULL);
 }
 
 // creates and opens hotkey config window
@@ -724,12 +732,16 @@ void openVideoConfig()
 	GtkWidget* yscaleHbox;
 	
 	
-	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "Video Preferences");
+	win = gtk_dialog_new_with_buttons("Video Preferences",
+									  GTK_WINDOW(MainWindow),
+									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+									  GTK_STOCK_CLOSE,
+									  GTK_RESPONSE_OK,
+									  NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "video-display");
 	//gtk_widget_set_size_request(win, 250, 250);
 	
-	vbox = gtk_vbox_new(FALSE, 5);
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
 	lbl = gtk_label_new("Video options will not take\neffect until the emulator is restarted.");
 	
@@ -849,8 +861,9 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
 	
+	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
 	
-	gtk_container_add(GTK_CONTAINER(win), vbox);
 	gtk_widget_show_all(win);
 	
 	return;
@@ -919,8 +932,12 @@ void openSoundConfig()
 	GtkWidget* mixerFrames[6];
 	
 	
-	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "Sound Preferences");
+	win = gtk_dialog_new_with_buttons("Sound Preferences",
+									  GTK_WINDOW(MainWindow),
+									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+									  GTK_STOCK_CLOSE,
+									  GTK_RESPONSE_OK,
+									  NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
 	main_hbox = gtk_hbox_new(FALSE, 15);
 	vbox = gtk_vbox_new(False, 5);
@@ -1058,7 +1075,10 @@ void openSoundConfig()
 	gtk_box_pack_start(GTK_BOX(main_hbox), mixerFrame, TRUE, TRUE, 5);
 	gtk_container_add(GTK_CONTAINER(mixerFrame), mixerHbox);
 	
-	gtk_container_add(GTK_CONTAINER(win), main_hbox);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_hbox, TRUE, TRUE, 0);
+	
+	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	
