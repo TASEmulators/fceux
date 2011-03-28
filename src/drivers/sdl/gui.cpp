@@ -1832,7 +1832,8 @@ unsigned short GDKToSDLKeyval(int gdk_key)
 	}
 	
 	// ignore pause and screenshot hotkeys since they is handled by GTK+ as accelerators
-	if (sdl_key == Hotkeys[HK_PAUSE] || sdl_key == Hotkeys[HK_SCREENSHOT])
+	if (sdl_key == Hotkeys[HK_PAUSE] || sdl_key == Hotkeys[HK_SCREENSHOT] || 
+		sdl_key == Hotkeys[HK_SAVE_STATE] || sdl_key == Hotkeys[HK_LOAD_STATE])
 		return 0;
 	
 	return sdl_key;
@@ -2003,9 +2004,9 @@ static GtkActionEntry normal_entries[] = {
 	{"InsertCoinAction", NULL, "_Insert Coin", NULL, NULL, G_CALLBACK(FCEUI_VSUniCoin)},
 	
 	{"MovieMenuAction", NULL, "_Movie"},
-	{"OpenMovieAction", GTK_STOCK_OPEN, "_Open", "", NULL, G_CALLBACK(loadMovie)},
+	{"OpenMovieAction", GTK_STOCK_OPEN, "_Open", "<shift>F7", NULL, G_CALLBACK(loadMovie)},
 	{"StopMovieAction", GTK_STOCK_MEDIA_STOP, "S_top", NULL, NULL, G_CALLBACK(FCEUI_StopMovie)},
-	{"RecordMovieAction", GTK_STOCK_MEDIA_RECORD, "_Record", NULL, NULL, G_CALLBACK(recordMovie)},
+	{"RecordMovieAction", GTK_STOCK_MEDIA_RECORD, "_Record", "<shift>F5", NULL, G_CALLBACK(recordMovie)},
 	{"RecordMovieAsAction", NULL, "Record _As", NULL, NULL, G_CALLBACK(recordMovieAs)},
 	
 	{"HelpMenuAction", NULL, "_Help"},
