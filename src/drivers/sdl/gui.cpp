@@ -1681,6 +1681,21 @@ void loadStateFrom()
 	
 }
 
+void quickLoad()
+{
+	FCEUI_LoadState(NULL);
+}
+
+void quickSave()
+{
+	FCEUI_SaveState(NULL);
+}
+
+void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
+{
+	FCEUI_SelectState(gtk_radio_action_get_current_value(current), 1);
+}
+
 
 // Adapted from Gens/GS.  Converts a GDK key value into an SDL key value.
 unsigned short GDKToSDLKeyval(int gdk_key)
@@ -1886,10 +1901,23 @@ static char* menuXml =
 	"      <separator />"
 	"      <menuitem action='PlayNsfAction' />"
 	"      <separator />"
-	"      <menu action='SavestateMenuAction'>"
-	"        <menuitem action='LoadStateFromAction' />"
-	"        <menuitem action='SaveStateAsAction' />"
+	"      <menuitem action='LoadStateFromAction' />"
+	"      <menuitem action='SaveStateAsAction' />"
+	"      <menuitem action='QuickLoadAction' />"
+	"      <menuitem action='QuickSaveAction' />"
+	"      <menu action='ChangeStateMenuAction'>"
+	"        <menuitem action='State0Action' />"
+	"        <menuitem action='State1Action' />"
+	"        <menuitem action='State2Action' />"
+	"        <menuitem action='State3Action' />"
+	"        <menuitem action='State4Action' />"
+	"        <menuitem action='State5Action' />"
+	"        <menuitem action='State6Action' />"
+	"        <menuitem action='State7Action' />"
+	"        <menuitem action='State8Action' />"
+	"        <menuitem action='State9Action' />"
 	"      </menu>"
+	"      <separator />"
 #ifdef _S9XLUA_H
 	"      <menuitem action='LoadLuaScriptAction' />"
 #endif
@@ -1943,11 +1971,13 @@ static GtkActionEntry normal_entries[] = {
 	{"OpenRomAction", GTK_STOCK_OPEN, "_Open ROM", "<control>O", NULL, G_CALLBACK(loadGame)},
 	{"CloseRomAction", GTK_STOCK_CLOSE, "_Close ROM", "<control>C", NULL, G_CALLBACK(closeGame)},
 	{"PlayNsfAction", GTK_STOCK_OPEN, "_Play NSF", "<control>N", NULL, G_CALLBACK(loadNSF)},
-	{"SavestateMenuAction", NULL, "Savestate"},
 	{"LoadStateFromAction", GTK_STOCK_OPEN, "Load State _From", "", NULL, G_CALLBACK(loadStateFrom)},
 	{"SaveStateAsAction", GTK_STOCK_SAVE_AS, "Save State _As", NULL, NULL, G_CALLBACK(saveStateAs)},
+	{"QuickLoadAction", "go-jump", "Quick _Load", "F7", NULL, G_CALLBACK(quickLoad)},
+	{"QuickSaveAction", GTK_STOCK_SAVE, "_Quick Save", "F5", NULL, G_CALLBACK(quickSave)},
+	{"ChangeStateMenuAction", NULL, "C_hange State"},
 #ifdef _S9XLUA_H
-	{"LoadLuaScriptAction", GTK_STOCK_OPEN, "Load _Lua Script", "", NULL, G_CALLBACK(loadLua)},
+	{"LoadLuaScriptAction", GTK_STOCK_OPEN, "Load L_ua Script", "", NULL, G_CALLBACK(loadLua)},
 #endif
 	{"ScreenshotAction", NULL, "_Screenshot", "F12", NULL, G_CALLBACK(FCEUI_SaveSnapshot)},
 	{"QuitAction", GTK_STOCK_QUIT, "_Quit", "<control>Q", NULL, G_CALLBACK(quit)},
@@ -1987,6 +2017,20 @@ static GtkToggleActionEntry toggle_entries[] = {
 	{"GameGenieToggleAction", NULL, "Enable Game _Genie", NULL, NULL, G_CALLBACK(toggleGameGenie), FALSE},
 };
 
+// Menu items for selecting a save state slot using radio buttons
+static GtkRadioActionEntry radio_entries[] = {
+	{"State0Action", NULL, "0", "0", NULL, 0},
+	{"State1Action", NULL, "1", "1", NULL, 1},
+	{"State2Action", NULL, "2", "2", NULL, 2},
+	{"State3Action", NULL, "3", "3", NULL, 3},
+	{"State4Action", NULL, "4", "4", NULL, 4},
+	{"State5Action", NULL, "5", "5", NULL, 5},
+	{"State6Action", NULL, "6", "6", NULL, 6},
+	{"State7Action", NULL, "7", "7", NULL, 7},
+	{"State8Action", NULL, "8", "8", NULL, 8},
+	{"State9Action", NULL, "9", "9", NULL, 9},
+};
+
 static GtkWidget* CreateMenubar( GtkWidget* window)
 {
 	GtkUIManager *ui_manager;
@@ -2000,6 +2044,7 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	action_group = gtk_action_group_new ("MenubarActions");
 	gtk_action_group_add_actions (action_group, normal_entries, G_N_ELEMENTS (normal_entries), NULL);
     gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
+    gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
     gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
     
     /* Read the menu layout from the XML markup */
