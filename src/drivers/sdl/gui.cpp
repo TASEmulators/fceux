@@ -2020,16 +2020,16 @@ static GtkToggleActionEntry toggle_entries[] = {
 
 // Menu items for selecting a save state slot using radio buttons
 static GtkRadioActionEntry radio_entries[] = {
-	{"State0Action", NULL, "0", "0", NULL, 0},
-	{"State1Action", NULL, "1", "1", NULL, 1},
-	{"State2Action", NULL, "2", "2", NULL, 2},
-	{"State3Action", NULL, "3", "3", NULL, 3},
-	{"State4Action", NULL, "4", "4", NULL, 4},
-	{"State5Action", NULL, "5", "5", NULL, 5},
-	{"State6Action", NULL, "6", "6", NULL, 6},
-	{"State7Action", NULL, "7", "7", NULL, 7},
-	{"State8Action", NULL, "8", "8", NULL, 8},
-	{"State9Action", NULL, "9", "9", NULL, 9},
+	{"State0Action", NULL, "0", "", NULL, 0},
+	{"State1Action", NULL, "1", "", NULL, 1},
+	{"State2Action", NULL, "2", "", NULL, 2},
+	{"State3Action", NULL, "3", "", NULL, 3},
+	{"State4Action", NULL, "4", "", NULL, 4},
+	{"State5Action", NULL, "5", "", NULL, 5},
+	{"State6Action", NULL, "6", "", NULL, 6},
+	{"State7Action", NULL, "7", "", NULL, 7},
+	{"State8Action", NULL, "8", "", NULL, 8},
+	{"State9Action", NULL, "9", "", NULL, 9},
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
