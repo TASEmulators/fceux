@@ -334,14 +334,7 @@ void openNetworkConfig()
 	GtkWidget* pwBox;
 	GtkWidget* pwLbl;
 	
-	win = gtk_dialog_new_with_buttons("Network Options",
-									  GTK_WINDOW(MainWindow),
-									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-									  GTK_STOCK_CLOSE,
-									  GTK_RESPONSE_CLOSE,
-									  GTK_STOCK_CONNECT,
-									  GTK_RESPONSE_OK,
-									  NULL);
+	win = gtk_dialog_new_with_buttons("Network Options",GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),GTK_STOCK_CLOSE,  GTK_RESPONSE_CLOSE,  GTK_STOCK_CONNECT, GTK_RESPONSE_OK, NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), GTK_STOCK_NETWORK);
 	box = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
@@ -382,10 +375,10 @@ void openNetworkConfig()
 	gtk_box_pack_start(GTK_BOX(pwBox), pwLbl, FALSE, FALSE, 3);
 	gtk_box_pack_start(GTK_BOX(pwBox), pwEntry, TRUE , TRUE, 3);
 	
-	gtk_box_pack_start_defaults(GTK_BOX(vbox), ipBox);
-	gtk_box_pack_start_defaults(GTK_BOX(vbox), portBox);
+	gtk_box_pack_start(GTK_BOX(vbox), ipBox, FALSE, FALSE, 3);
+	gtk_box_pack_start(GTK_BOX(vbox), portBox, FALSE, FALSE, 3);
 	//gtk_box_pack_start_defaults(GTK_BOX(vbox), localPlayersCbo);
-	gtk_box_pack_start_defaults(GTK_BOX(vbox), pwBox);
+	gtk_box_pack_start(GTK_BOX(vbox), pwBox, FALSE, FALSE, 3);
 	
 	gtk_container_add(GTK_CONTAINER(frame), vbox);
 	
@@ -2020,16 +2013,16 @@ static GtkToggleActionEntry toggle_entries[] = {
 
 // Menu items for selecting a save state slot using radio buttons
 static GtkRadioActionEntry radio_entries[] = {
-	{"State0Action", NULL, "0", "", NULL, 0},
-	{"State1Action", NULL, "1", "", NULL, 1},
-	{"State2Action", NULL, "2", "", NULL, 2},
-	{"State3Action", NULL, "3", "", NULL, 3},
-	{"State4Action", NULL, "4", "", NULL, 4},
-	{"State5Action", NULL, "5", "", NULL, 5},
-	{"State6Action", NULL, "6", "", NULL, 6},
-	{"State7Action", NULL, "7", "", NULL, 7},
-	{"State8Action", NULL, "8", "", NULL, 8},
-	{"State9Action", NULL, "9", "", NULL, 9},
+	{"State0Action", NULL, "", "0", NULL, 0},
+	{"State1Action", NULL, "", "1", NULL, 1},
+	{"State2Action", NULL, "", "2", NULL, 2},
+	{"State3Action", NULL, "", "3", NULL, 3},
+	{"State4Action", NULL, "", "4", NULL, 4},
+	{"State5Action", NULL, "", "5", NULL, 5},
+	{"State6Action", NULL, "", "6", NULL, 6},
+	{"State7Action", NULL, "", "7", NULL, 7},
+	{"State8Action", NULL, "", "8", NULL, 8},
+	{"State9Action", NULL, "", "9", NULL, 9},
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
