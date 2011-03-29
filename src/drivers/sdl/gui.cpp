@@ -1688,7 +1688,7 @@ void quickSave()
 
 void changeState(GtkAction *action, GtkRadioAction *current, gpointer data)
 {
-	FCEUI_SelectState(gtk_radio_action_get_current_value(current), 1);
+	FCEUI_SelectState(gtk_radio_action_get_current_value(current), 0);
 }
 
 
