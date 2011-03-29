@@ -584,7 +584,12 @@ KeyboardCommands()
 	
 	for(int i=0; i<10; i++)
 		if(_keyonly(Hotkeys[HK_SELECT_STATE_0 + i]))
+		{
+#ifdef _GTK
+			gtk_radio_action_set_current_value(stateSlot, i);
+#endif
 			FCEUI_SelectState(i, 1);
+		}
 	
 	if(_keyonly(Hotkeys[HK_BIND_STATE])) {
         bindSavestate ^= 1;

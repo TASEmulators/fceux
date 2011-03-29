@@ -1,7 +1,8 @@
-#include<gtk/gtk.h>
-#include<gdk/gdkx.h>
+#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
+#include <gdk/gdkx.h>
 
-#include<SDL/SDL.h>
+#include <SDL/SDL.h>
 
 #include <fstream>
 #include <iostream>
@@ -38,6 +39,7 @@ GtkWidget* socket = NULL;
 GtkWidget* padNoCombo = NULL;
 GtkWidget* configNoCombo = NULL;
 GtkWidget* buttonMappings[10];
+GtkRadioAction* stateSlot = NULL;
 
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
@@ -2013,35 +2015,37 @@ static GtkToggleActionEntry toggle_entries[] = {
 
 // Menu items for selecting a save state slot using radio buttons
 static GtkRadioActionEntry radio_entries[] = {
-	{"State0Action", NULL, "", "0", NULL, 0},
-	{"State1Action", NULL, "", "1", NULL, 1},
-	{"State2Action", NULL, "", "2", NULL, 2},
-	{"State3Action", NULL, "", "3", NULL, 3},
-	{"State4Action", NULL, "", "4", NULL, 4},
-	{"State5Action", NULL, "", "5", NULL, 5},
-	{"State6Action", NULL, "", "6", NULL, 6},
-	{"State7Action", NULL, "", "7", NULL, 7},
-	{"State8Action", NULL, "", "8", NULL, 8},
-	{"State9Action", NULL, "", "9", NULL, 9},
+	{"State0Action", NULL, "0", NULL, NULL, 0},
+	{"State1Action", NULL, "1", NULL, NULL, 1},
+	{"State2Action", NULL, "2", NULL, NULL, 2},
+	{"State3Action", NULL, "3", NULL, NULL, 3},
+	{"State4Action", NULL, "4", NULL, NULL, 4},
+	{"State5Action", NULL, "5", NULL, NULL, 5},
+	{"State6Action", NULL, "6", NULL, NULL, 6},
+	{"State7Action", NULL, "7", NULL, NULL, 7},
+	{"State8Action", NULL, "8", NULL, NULL, 8},
+	{"State9Action", NULL, "9", NULL, NULL, 9},
 };
 
 static GtkWidget* CreateMenubar( GtkWidget* window)
 {
 	GtkUIManager *ui_manager;
 	GtkActionGroup *action_group;
+	GtkAccelGroup* accel_group;
 	GError *error = NULL;
+	GtkAction* state;
 
-	/* Make an UIManager (that makes a menubar) */
+	/* Make an UIManager (which makes a menubar). */
 	ui_manager = gtk_ui_manager_new ();
 	
-	/* Add the menu items to the UIManager as a GtkActionGroup */
+	/* Add the menu items to the UIManager as a GtkActionGroup. */
 	action_group = gtk_action_group_new ("MenubarActions");
 	gtk_action_group_add_actions (action_group, normal_entries, G_N_ELEMENTS (normal_entries), NULL);
     gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
     gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
     gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
     
-    /* Read the menu layout from the XML markup */
+    /* Read the menu layout from the XML markup. */
     gtk_ui_manager_add_ui_from_string (ui_manager, menuXml, -1, &error);
     if (error)
     {
@@ -2050,8 +2054,14 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
     }
     
     /* Attach the new accelerator group to the window. */
-    gtk_window_add_accel_group (GTK_WINDOW (window), gtk_ui_manager_get_accel_group (ui_manager));
-
+    accel_group = gtk_ui_manager_get_accel_group (ui_manager);
+    gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+    
+    /* Get an action that can be used to change the active state slot selection. */
+    state = gtk_action_group_get_action (action_group, "State0Action");
+    if (state && GTK_IS_RADIO_ACTION (state))
+    	stateSlot = GTK_RADIO_ACTION (state);
+    
 	/* Finally, return the actual menu bar created by the UIManager. */
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
 }
