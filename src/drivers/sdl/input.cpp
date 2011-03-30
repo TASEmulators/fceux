@@ -402,11 +402,11 @@ KeyboardCommands()
     }
 	
 	mod = SDL_GetModState();
-	if(mod & (KMOD_LSHIFT|KMOD_RSHIFT))
+	if(g_keyState[SDLK_LSHIFT] || g_keyState[SDLK_RSHIFT])
 		is_shift = 1;
 	else
 		is_shift = 0;
-	if(mod & (KMOD_LALT| KMOD_RALT))
+	if(g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
 		is_alt = 1;
 	else
 		is_alt = 0;
