@@ -378,7 +378,6 @@ static void
 KeyboardCommands()
 {
     int is_shift, is_alt;
-    SDLMod mod;
     
     char* movie_fname = "";
     // get the keyboard input
@@ -401,12 +400,19 @@ KeyboardCommands()
         }
     }
 	
-	mod = SDL_GetModState();
+	#if SDL_VERSION_ATLEAST(1, 3, 0)
+	if(g_keyState[SDL_GetScancodeFromKey(SDLK_LSHIFT)] || g_keyState[SDL_GetScancodeFromKey(SDLK_RSHIFT)])
+	#else
 	if(g_keyState[SDLK_LSHIFT] || g_keyState[SDLK_RSHIFT])
+	#endif
 		is_shift = 1;
 	else
 		is_shift = 0;
+	#if SDL_VERSION_ATLEAST(1, 3, 0)
+	if(g_keyState[SDL_GetScancodeFromKey(SDLK_LALT)] || g_keyState[SDL_GetScancodeFromKey(SDLK_RALT)])
+	#else
 	if(g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
+	#endif
 		is_alt = 1;
 	else
 		is_alt = 0;
