@@ -1970,7 +1970,7 @@ static GtkActionEntry normal_entries[] = {
 	{"LoadStateFromAction", GTK_STOCK_OPEN, "Load State _From", "", NULL, G_CALLBACK(loadStateFrom)},
 	{"SaveStateAsAction", GTK_STOCK_SAVE_AS, "Save State _As", NULL, NULL, G_CALLBACK(saveStateAs)},
 	{"QuickLoadAction", "go-jump", "Quick _Load", "F7", NULL, G_CALLBACK(quickLoad)},
-	{"QuickSaveAction", GTK_STOCK_SAVE, "_Quick Save", "F5", NULL, G_CALLBACK(quickSave)},
+	{"QuickSaveAction", GTK_STOCK_SAVE, "Qu_ick Save", "F5", NULL, G_CALLBACK(quickSave)},
 	{"ChangeStateMenuAction", NULL, "C_hange State"},
 #ifdef _S9XLUA_H
 	{"LoadLuaScriptAction", GTK_STOCK_OPEN, "Load L_ua Script", "", NULL, G_CALLBACK(loadLua)},
