@@ -494,6 +494,11 @@ InitVideo(FCEUGI *gi)
 void
 ToggleFS()
 {
+    // pause while we we are making the switch
+    bool paused = FCEUI_EmulationPaused();
+    if(!paused)
+        FCEUI_ToggleEmulationPause();
+
     int error, fullscreen = s_fullscreen;
 
     // shut down the current video system
@@ -514,6 +519,9 @@ ToggleFS()
         g_config->setOption("SDL.Fullscreen", fullscreen);
         InitVideo(GameInfo);
     }
+    // if we paused to make the switch; unpause
+    if(!paused)
+        FCEUI_ToggleEmulationPause();
 }
 
 static SDL_Color s_psdl[256];
