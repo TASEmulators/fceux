@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Fceux
+GenericName=NES/Famicom emulator
+Exec=fceux
+Icon=/usr/share/pixmaps/fceux.png
+Type=Application
+Categories=Game;Emulator;
+Encoding=UTF-8
+
+
