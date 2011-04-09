@@ -280,8 +280,10 @@ std::string GetUserText(const char* title)
 	d = gtk_dialog_new_with_buttons(title, NULL, GTK_DIALOG_MODAL, GTK_STOCK_OK, GTK_RESPONSE_OK); 
 	
 	entry = gtk_entry_new();
+
+	GtkWidget* vbox = gtk_dialog_get_content_area(GTK_DIALOG(d));
 	
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(d)->vbox), entry);
+	gtk_container_add(GTK_CONTAINER(vbox), entry);
 	
 	gtk_widget_show_all(d);
 	
