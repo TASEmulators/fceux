@@ -1,4 +1,8 @@
 TODO-SDL: 
+FOR 2.1.5:
+    - fix inputcfg under --nogui
+    - stress test everything under --nogui
+
 * work .desktop and .png into install scripts?
 done * GTK: rewrite menu code to replace depreciated GtkItemFactory
 * auto-resize game window (gtk)
