@@ -77,6 +77,11 @@ Option         Value   Description\n\
 --pal          {0|1}   Use PAL timing.\n\
 --newppu       {0|1}   Enable the new PPU core. (WARNING: May break savestates)\n\
 --inputcfg     d       Configures input device d on startup.\n\
+--input(1,2)   d       Set which input device to emulate for input 1 or 2.\n\
+                         Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
+--input(3,4)   d       Set the famicom expansion device to emulate for input(3, 4)\n\
+                         Devices: quizking hypershot mahjong toprider ftrainer\n\
+                         familykeyboard oekakids arkanoid shadow bworld 4player\n\
 --gamegenie    {0|1}   Enable emulated Game Genie.\n\
 --frameskip    x       Set # of frames to skip per emulated frame.\n\
 --xres         x       Set horizontal resolution for full screen mode.\n\
@@ -94,16 +99,11 @@ Option         Value   Description\n\
                          (1 = hq2x 2 = Scale2x 3 = NTSC 2x 4 = hq3x 5 = Scale3x)\n\
 --palette      f       Load custom global palette from file f.\n\
 --sound        {0|1}   Enable sound.\n\
---soundrate	   x       Set sound playback rate to x Hz.\n\
---soundq     {0|1|2}   Set sound quality. (0=Low;1=High;2=Very High)\n\
+--soundrate    x       Set sound playback rate to x Hz.\n\
+--soundq      {0|1|2}  Set sound quality. (0 = Low 1 = High 2 = Very High)\n\
 --soundbufsize x       Set sound buffer size to x ms.\n\
---volume     {0-256}   Set volume to x.\n\
+--volume      {0-256}  Set volume to x.\n\
 --soundrecord  f       Record sound to file f.\n\
---input(1,2)   d       Set the input device for input 1 or 2.\n\
-                         Devices:  gamepad zapper powerpad.0 powerpad.1 arkanoid\n\
---input(3,4)   d       Set the famicom expansion device for input(3, 4)\n\
-                         Devices: quizking hypershot mahjong toprider ftrainer\n\
-                         familykeyboard oekakids arkanoid shadow bworld 4player\n\
 --playmov      f       Play back a recorded FCM/FM2 movie from filename f.\n\
 --pauseframe   x       Pause movie playback at frame x.\n\
 --fcmconvert   f       Convert fcm movie file f to fm2.\n\
@@ -118,7 +118,7 @@ Option         Value   Description\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
 --players      x       Set the number of local players.\n\
 --rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n\
---nogui       {0,1}   Enable or disable the GTK GUI\n";
+--nogui        {0,1}   Enable or disable the GTK GUI\n";
 
 
 // these should be moved to the man file
@@ -143,7 +143,6 @@ Config *g_config;
 static void ShowUsage(char *prog)
 {
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
-	puts("Options:");
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
 	puts ("--loadlua      f        Loads lua script from filename f.");
