@@ -48,10 +48,10 @@ tweak these.
 	export SDL_AUDIODRIVER=driver
 
 	where driver is either:
-		pulse for pulseaudio
-		alsa for ALSA
-		dsp for OSS
-		esd for ESD
+		'pulse' for pulseaudio
+		'alsa' for ALSA
+		'dsp' for OSS
+		'esd' for ESD
 
 	There are sound options that you can tweak at runtime through command line switches:
 
