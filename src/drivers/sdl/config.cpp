@@ -341,7 +341,7 @@ InitConfig()
 		SDLK_COMMA, // toggle input display
 		SDLK_q, // toggle movie RW
 		SDLK_QUOTE, // toggle mute capture
-		0, // quit
+		SDLK_QUIT, // quit
 		SDLK_DELETE, // frame advance lag skip
 		SDLK_SLASH, // lag counter display
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
