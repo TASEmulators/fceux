@@ -799,7 +799,8 @@ ButtonConfigBegin()
                     gtk_main_iteration_do(FALSE);
             
                 char SDL_windowhack[128];
-                sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
+                if(gtk_widget_get_window(socket))
+					sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
                 SDL_putenv(SDL_windowhack);
             }
 #endif
@@ -1587,25 +1588,32 @@ ConfigDevice(int which,
 void
 InputCfg(const std::string &text)
 {
-    if(text.find("gamepad") != std::string::npos) {
-		int device = (text[strlen("gamepad")] - '1');
-		if(device<0 || device>3) {
-			FCEUD_PrintError("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
-			exit(-1);
+	int nogui;
+	g_config->getOption("SDL.NoGUI", &nogui);
+	if(nogui)
+	{
+		if(text.find("gamepad") != std::string::npos) {
+			int device = (text[strlen("gamepad")] - '1');
+			if(device<0 || device>3) {
+				FCEUD_PrintError("Invalid gamepad device specified; must be one of gamepad1 through gamepad4");
+				exit(-1);
+			}
+			ConfigDevice(FCFGD_GAMEPAD, device);
+		} else if(text.find("powerpad") != std::string::npos) {
+			int device = (text[strlen("powerpad")] - '1');
+			if(device<0 || device>1) {
+				FCEUD_PrintError("Invalid powerpad device specified; must be powerpad1 or powerpad2");
+				exit(-1);
+			}
+			ConfigDevice(FCFGD_POWERPAD, device);
+		} else if(text.find("hypershot") != std::string::npos) {
+			ConfigDevice(FCFGD_HYPERSHOT, 0);
+		} else if(text.find("quizking") != std::string::npos) {
+			ConfigDevice(FCFGD_QUIZKING, 0);
 		}
-        ConfigDevice(FCFGD_GAMEPAD, device);
-    } else if(text.find("powerpad") != std::string::npos) {
-		int device = (text[strlen("powerpad")] - '1');
-		if(device<0 || device>1) {
-			FCEUD_PrintError("Invalid powerpad device specified; must be powerpad1 or powerpad2");
-			exit(-1);
-		}
-        ConfigDevice(FCFGD_POWERPAD, device);
-    } else if(text.find("hypershot") != std::string::npos) {
-        ConfigDevice(FCFGD_HYPERSHOT, 0);
-    } else if(text.find("quizking") != std::string::npos) {
-        ConfigDevice(FCFGD_QUIZKING, 0);
-    }
+	} else 
+		printf("Please run \"fceux --nogui 1\" before using --inputcfg\n");
+	
 }
 
 
