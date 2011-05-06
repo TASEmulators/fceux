@@ -931,7 +931,7 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	int dy = (newDebuggerRect.bottom-newDebuggerRect.top)-(currDebuggerRect.bottom-currDebuggerRect.top);	//ditto wtih height
 
 	HWND editbox = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY);		//Get handle for Disassembly list box (large guy on the left)
-	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);		//Get handle for IContray, vertical column to the left of disassembly
+	HWND icontray = GetDlgItem(hDebug,IDC_DEBUGGER_ICONTRAY);		//Get handle for Icontray, vertical column to the left of disassembly
 	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
 	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
 
@@ -951,6 +951,7 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
 	} else if(hwnd == addrline) {
 		crect.top += dy;
+		crect.bottom += dy;
 		crect.right += dx;
 		SetWindowPos(hwnd,0,crect.left,crect.top,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER);
 	} else if(hwnd == vscr) {
@@ -1227,19 +1228,23 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//}
 				break;
 
-			case WM_MOUSEMOVE:
+			case WM_MOUSEMOVE: {
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
-// ################################## Start of SP CODE ###########################
 
-	// mouse_y < 538
-	// > 33) tmp = 33
+				bool setString = false;
+				if ((mouse_x > 8) && (mouse_x < 22) && (mouse_y > 12)) {
+					setString = true;
+					RECT rectDisassembly;
+					GetClientRect(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY),&rectDisassembly);
+					int height = rectDisassembly.bottom-rectDisassembly.top;
+					tmp = mouse_y - 12;
+					if(tmp > height) setString = false;
+					tmp /= 13;
+				}
 
-				if ((mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538)) {
-					if ((tmp=((mouse_y - 10) / 13)) > 33) tmp = 33;
-					
-// ################################## End of SP CODE ###########################
-
+				if(setString)
+				{
 					i = si.nPos;
 					while (tmp > 0) {
 						if ((tmp2=opsize[GetMem(i)]) == 0) tmp2++;
@@ -1263,6 +1268,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				}
 				else SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"");
 				break;
+			}
+
 			case WM_LBUTTONDOWN:
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
