@@ -1240,7 +1240,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					int height = rectDisassembly.bottom-rectDisassembly.top;
 					tmp = mouse_y - 12;
 					if(tmp > height) setString = false;
-					tmp /= 13;
+					tmp /= 12;
 				}
 
 				if(setString)
@@ -1588,7 +1588,7 @@ DebugSystem::DebugSystem()
 {
 	hFixedFont = CreateFont(13,8, /*Height,Width*/
 		0,0, /*escapement,orientation*/
-		400,FALSE,FALSE,FALSE, /*weight, italic,, underline, strikeout*/
+		FW_REGULAR,FALSE,FALSE,FALSE, /*weight, italic, underline, strikeout*/
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
 		"Courier"); /*font name*/
