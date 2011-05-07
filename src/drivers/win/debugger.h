@@ -43,8 +43,8 @@ public:
 	~DebugSystem();
 	
 	HFONT hFixedFont;
-	static const int fixedFontWidth = 8;
-	static const int fixedFontHeight = 13;
+	int fixedFontWidth;
+	int fixedFontHeight;
 } *debugSystem;
 
 

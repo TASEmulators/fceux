@@ -1240,7 +1240,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					int height = rectDisassembly.bottom-rectDisassembly.top;
 					tmp = mouse_y - 12;
 					if(tmp > height) setString = false;
-					tmp /= 12;
+					tmp /= debugSystem->fixedFontHeight;
 				}
 
 				if(setString)
@@ -1592,6 +1592,17 @@ DebugSystem::DebugSystem()
 		ANSI_CHARSET,OUT_DEVICE_PRECIS,CLIP_MASK, /*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH, /*quality, and pitch*/
 		"Courier"); /*font name*/
+ 
+	HDC hdc = GetDC(GetDesktopWindow());
+	HGDIOBJ old = SelectObject(hdc,hFixedFont);
+	TEXTMETRIC tm;
+	GetTextMetrics(hdc,&tm);
+	fixedFontHeight = tm.tmHeight;
+	fixedFontWidth = tm.tmAveCharWidth;
+	printf("fixed font height: %d\n",fixedFontHeight);
+	printf("fixed font width: %d\n",fixedFontWidth);
+	SelectObject(hdc,old);
+	DeleteDC(hdc);
 }
 
 DebugSystem::~DebugSystem()
