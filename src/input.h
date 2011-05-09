@@ -228,6 +228,9 @@ enum EMUCMD
 	EMUCMD_TOOL_RAMSEARCHGTE,
 	EMUCMD_TOOL_RAMSEARCHEQ,
 	EMUCMD_TOOL_RAMSEARCHNE,
+	//-----------------------------
+	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
+	EMUCMD_TOOL_OPENNTVIEW,
 	EMUCMD_MAX
 };
 

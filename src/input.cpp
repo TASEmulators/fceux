@@ -50,6 +50,7 @@
 #include "drivers/win/tracer.h"
 #include "drivers/win/memview.h"
 #include "drivers/win/window.h"
+#include "drivers/win/ntview.h"
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -623,6 +624,7 @@ static void LaunchMemoryWatch(void);
 static void LaunchCheats(void);
 static void LaunchDebugger(void);
 static void LaunchPPU(void);
+static void LaunchNTView(void);
 static void LaunchHex(void);
 static void LaunchTraceLogger(void);
 static void LaunchCodeDataLogger(void);
@@ -747,12 +749,13 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
 	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", 0},
 	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", 0},
+	{ EMUCMD_TOOL_OPENNTVIEW,					EMUCMDTYPE_TOOL,	LaunchNTView,		  0, 0, "Open Name Table Viewer", 0},
 	{ EMUCMD_TOOL_OPENTRACELOGGER,			EMUCMDTYPE_TOOL,	LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
 	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
-  { EMUCMD_RELOADROM,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM", 0},
+	{ EMUCMD_RELOADROM,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM", 0},
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
@@ -909,6 +912,13 @@ static void LaunchDebugger(void)
 {
 #ifdef WIN32
 	DoDebug(0);
+#endif
+}
+
+static void LaunchNTView(void)
+{
+#ifdef WIN32
+	DoNTView();
 #endif
 }
 

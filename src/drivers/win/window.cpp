@@ -2809,6 +2809,11 @@ void UpdateMenuHotkeys()
 	combined = "&PPU Viewer...\t" + combo;
 	ChangeMenuItemText(MENU_PPUVIEWER, combined);
 
+	//Open Nametable Viewer 
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENNTVIEW]);
+	combined = "&Name table Viewer...\t" + combo;
+	ChangeMenuItemText(MENU_NAMETABLEVIEWER, combined);
+
 	//Open Hex editor
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENHEX]);
 	combined = "&Hex Editor...\t" + combo;
