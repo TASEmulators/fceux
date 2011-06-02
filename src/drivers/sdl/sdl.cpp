@@ -499,11 +499,14 @@ int main(int argc, char *argv[])
   // this is a hackish check for the --help arguemnts
   // these are normally processed by the config parser, but SDL_Init
   // must be run before the config parser: so if even SDL_Init fails,
-  // these four lines will still print the help output
-	if( !strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
+  // these six lines will still print the help output
+	if(argc > 1)
 	{
-	    ShowUsage(argv[0]);
-	    return 0;
+            if(!strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
+    	    {
+	        ShowUsage(argv[0]);
+                return 0;
+            }
 	}
 
 	int error, frameskip;
