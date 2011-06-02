@@ -1,3 +1,4 @@
+1-jun-2011 - prg318 - sdl - print usage when --help is passed even if SDL fails
 plombo - added stock icons to menu items
 plombo - added new gamepad configuration dialog
 19-mar-2011 - prg318 - gtk - added hard reset option (renamed reset->soft reset)
