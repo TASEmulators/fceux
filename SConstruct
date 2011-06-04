@@ -18,6 +18,8 @@ opts.AddVariables(
 
 env = Environment(options = opts)
 
+# env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
+
 # LSB_FIRST must be off for PPC to compile
 if platform.system == "ppc":
   env['LSB_FIRST'] = 0
