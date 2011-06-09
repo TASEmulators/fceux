@@ -357,47 +357,51 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 
 	fp = fopen(sromfilename,"wb");
 
-if(GameInfo->type==GIT_NSF)
-{
-    //Not used because if bankswitching, the addresses involved
-    //could still end up being used through writes
-    //static uint16 LoadAddr;
-    //LoadAddr=NSFHeader.LoadAddressLow;
-    //LoadAddr|=(NSFHeader.LoadAddressHigh&0x7F)<<8;
-    
-    //Simple store/restore for writing a working NSF header
-    NSFLoadLow = NSFHeader.LoadAddressLow;
-    NSFLoadHigh = NSFHeader.LoadAddressHigh;
-    NSFHeader.LoadAddressLow=0;
-    NSFHeader.LoadAddressHigh&=0xF0;
-    fwrite(&NSFHeader,1,0x8,fp);
-    NSFHeader.LoadAddressLow = NSFLoadLow;
-    NSFHeader.LoadAddressHigh = NSFLoadHigh;
-    
-	fseek(fp,0x8,SEEK_SET);
-	for(i = 0;i < ((NSFMaxBank+1)*4096);i++){
-		if(cdloggerdata[i] & 3)fputc(NSFDATA[i],fp);
-		else fputc(0,fp);
-	}
-
-}
-else
-{
-	if(fwrite(&head,1,16,fp)!=16)return;
-
-	if(head.ROM_type&4) 	/* Trainer */
+	if(GameInfo->type==GIT_NSF)
 	{
- 	 fwrite(trainerpoo,512,1,fp);
-	}
+		//Not used because if bankswitching, the addresses involved
+		//could still end up being used through writes
+		//static uint16 LoadAddr;
+		//LoadAddr=NSFHeader.LoadAddressLow;
+		//LoadAddr|=(NSFHeader.LoadAddressHigh&0x7F)<<8;
+		
+		//Simple store/restore for writing a working NSF header
+		NSFLoadLow = NSFHeader.LoadAddressLow;
+		NSFLoadHigh = NSFHeader.LoadAddressHigh;
+		NSFHeader.LoadAddressLow=0;
+		NSFHeader.LoadAddressHigh&=0xF0;
+		fwrite(&NSFHeader,1,0x8,fp);
+		NSFHeader.LoadAddressLow = NSFLoadLow;
+		NSFHeader.LoadAddressHigh = NSFLoadHigh;
+		
+		fseek(fp,0x8,SEEK_SET);
+		for(i = 0;i < ((NSFMaxBank+1)*4096);i++){
+			if(cdloggerdata[i] & 3)fputc(NSFDATA[i],fp);
+			else fputc(0,fp);
+		}
 
-	for(i = 0;i < head.ROM_size*0x4000;i++){
-		if(cdloggerdata[i] & 3)fputc(ROM[i],fp);
-		else fputc(0,fp);
 	}
-	//fwrite(ROM,0x4000,head.ROM_size,fp);
+	else
+	{
+		if(fwrite(&head,1,16,fp)!=16)
+		{
+			fclose(fp);
+			return;
+		}
 
-	if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
-}
+		if(head.ROM_type&4) 	/* Trainer */
+		{
+			fwrite(trainerpoo,512,1,fp);
+		}
+
+		for(i = 0;i < head.ROM_size*0x4000;i++){
+			if(cdloggerdata[i] & 3)fputc(ROM[i],fp);
+			else fputc(0,fp);
+		}
+		//fwrite(ROM,0x4000,head.ROM_size,fp);
+
+		if(head.VROM_size)fwrite(VROM,0x2000,head.VROM_size,fp);
+	}
 	fclose(fp);
 }
 

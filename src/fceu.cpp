@@ -409,17 +409,13 @@ FCEUGI *FCEUI_LoadGameVirtual(const char *name, int OverwriteVidMode)
 
 	const char* romextensions[] = {"nes","fds",0};
 	fp=FCEU_fopen(name,0,"rb",0,-1,romextensions);
-	if(!fp)
-	{
-		return 0;
-	}
-
-	GetFileBase(fp->filename.c_str());
 
 	if(!fp) {
 		FCEU_PrintError("Error opening \"%s\"!",name);
 		return 0;
 	}
+
+	GetFileBase(fp->filename.c_str());
 	//---------
 
 	//file opened ok. start loading.

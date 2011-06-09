@@ -106,43 +106,43 @@ int32 NeoFilterSound(int32 *in, int32 *out, uint32 inlen, int32 *leftover)
         max=(inlen-1)<<16;
 
 	if(FSettings.soundq==2)
-         for(x=mrindex;x<max;x+=mrratio)
-         {
-          int32 acc=0,acc2=0;
-          unsigned int c;
-          int32 *S,*D;
+        for(x=mrindex;x<max;x+=mrratio)
+        {
+			int32 acc=0,acc2=0;
+			unsigned int c;
+			int32 *S,*D;
          
-          for(c=SQ2NCOEFFS,S=&in[(x>>16)-SQ2NCOEFFS],D=sq2coeffs;c;c--,D++)
-          {
-           acc+=(S[c]**D)>>6;
-           acc2+=(S[1+c]**D)>>6;
-          }
+			for(c=SQ2NCOEFFS,S=&in[(x>>16)-SQ2NCOEFFS],D=sq2coeffs;c;c--,D++)
+			{
+				acc+=(S[c]**D)>>6;
+				acc2+=(S[1+c]**D)>>6;
+			}
 
-          acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);
-          *out=acc;
-          out++;   
-          count++; 
-         }
+			acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);
+			*out=acc;
+			out++;   
+			count++; 
+        }
 	else
-         for(x=mrindex;x<max;x+=mrratio)
-         {
-          int32 acc=0,acc2=0;
-          unsigned int c;
-          const int32 *S,*D;
+		for(x=mrindex;x<max;x+=mrratio)
+		{
+			int32 acc=0,acc2=0;
+			unsigned int c;
+			const int32 *S,*D;
  
-          for(c=NCOEFFS,S=&in[(x>>16)-NCOEFFS],D=coeffs;c;c--,D++)
- 	  {
- 	   acc+=(S[c]**D)>>6;
- 	   acc2+=(S[1+c]**D)>>6;
- 	  }
+			for(c=NCOEFFS,S=&in[(x>>16)-NCOEFFS],D=coeffs;c;c--,D++)
+			{
+				acc+=(S[c]**D)>>6;
+				acc2+=(S[1+c]**D)>>6;
+			}
  
-          acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);  
-          *out=acc;
-          out++;
-          count++;
-         }
+			acc=((int64)acc*(65536-(x&65535))+(int64)acc2*(x&65535))>>(16+11);  
+			*out=acc;
+			out++;
+			count++;
+		}
 
-        mrindex=x-max;
+	mrindex=x-max;
 
 	if(FSettings.soundq==2)
 	{

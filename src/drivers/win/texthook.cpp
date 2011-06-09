@@ -705,7 +705,7 @@ int TextHookerSaveTableFile(){
 	FP = fopen(nameo,"wb");
 	line = 0; //init the line counter
 
-	char hex[] = { 0 ,0 };
+	char hex[3] = { 0, 0, 0 };
 	
 	//write the table file to the file
 	for ( i = 0; i < 256; i++ ) { //go through each possible hex value

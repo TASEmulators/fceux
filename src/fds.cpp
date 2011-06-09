@@ -890,16 +890,14 @@ void FDSClose(void)
 	FILE *fp;
 	int x;
 	isFDS = false;
-	char *fn=strdup(FCEU_MakeFName(FCEUMKF_FDS,0,0).c_str());
 
 	if(!DiskWritten) return;
 
-	if(!(fp=FCEUD_UTF8fopen(fn,"wb")))
+	const std::string &fn = FCEU_MakeFName(FCEUMKF_FDS,0,0);
+	if(!(fp=FCEUD_UTF8fopen(fn.c_str(),"wb")))
 	{
-		free(fn);
 		return;
 	}
-	free(fn);
 
 	for(x=0;x<TotalSides;x++)
 	{

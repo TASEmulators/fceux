@@ -585,8 +585,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
 						if(!asr.isArchive()) {
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
-							fp->stream = fp->stream->memwrap();
 							if(fp) {
+								fp->stream = fp->stream->memwrap();
 								HandleScan(hwndDlg,fp ,items);
 								delete fp;
 							}
@@ -787,11 +787,11 @@ static void UpdateRecordDialog(HWND hwndDlg)
 
 static void UpdateRecordDialogPath(HWND hwndDlg, const std::string &fname)
 {
-	char* baseMovieDir = strdup(FCEU_GetPath(FCEUMKF_MOVIE).c_str());
+	const std::string &baseMovieDir = FCEU_GetPath(FCEUMKF_MOVIE);
 	char* fn=0;
 
 	// display a shortened filename if the file exists in the base movie directory
-	if(!strncmp(fname.c_str(), baseMovieDir, strlen(baseMovieDir)))
+	if(!strncmp(fname.c_str(), baseMovieDir.c_str(), baseMovieDir.size()))
 	{
 		char szDrive[MAX_PATH]={0};
 		char szDirectory[MAX_PATH]={0};

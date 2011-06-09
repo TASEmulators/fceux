@@ -531,7 +531,6 @@ int SaveSnapshot(void)
 {
 	unsigned int lastu=0;
 
-	char *fn=0;
 	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
 	int x,u,y;
 	FILE *pp=NULL;
@@ -543,20 +542,19 @@ int SaveSnapshot(void)
 
 	for(u=lastu;u<99999;u++)
 	{
-		pp=FCEUD_UTF8fopen((fn=strdup(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str())),"rb");
+		pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
 		if(pp==NULL) break;
 		fclose(pp);
 	}
 
 	lastu=u;
 
-	if(!(pp=FCEUD_UTF8fopen(fn,"wb")))
+	if(!(pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"wb")))
 	{
-		free(fn);
 		free(compmem);
 		return 0;
 	}
-	free(fn);
+
 	{
 		static uint8 header[8]={137,80,78,71,13,10,26,10};
 		if(fwrite(header,8,1,pp)!=1)
@@ -643,8 +641,6 @@ int SaveSnapshot(char fileName[512])
 
 	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
 		return 0;
-
-	pp = fopen(fileName, "w");
 
 	if(!(pp=FCEUD_UTF8fopen(fileName,"wb")))
 	{

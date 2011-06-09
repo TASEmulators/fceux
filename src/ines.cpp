@@ -845,7 +845,11 @@ int iNesSave(){
 
 	fp = fopen(name,"wb");
 
-	if(fwrite(&head,1,16,fp)!=16)return 0;
+	if(fwrite(&head,1,16,fp)!=16)
+	{
+		fclose(fp);
+		return 0;
+	}
 
 	if(head.ROM_type&4) 	/* Trainer */
 	{
@@ -872,7 +876,11 @@ int iNesSaveAs(char* name)
 	int x = 0;
 	if (!fp)
 		int x = 1;
-	if(fwrite(&head,1,16,fp)!=16)return 0;
+	if(fwrite(&head,1,16,fp)!=16)
+	{
+		fclose(fp);
+		return 0;
+	}
 
 	if(head.ROM_type&4) 	/* Trainer */
 	{
