@@ -1,4 +1,6 @@
 TODO-SDL: 
+Features -
+   openGL Vsync toggle option
 FOR 2.1.5:
     - fix inputcfg under --nogui
     - stress test everything under --nogui
