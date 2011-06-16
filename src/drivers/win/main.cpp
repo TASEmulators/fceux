@@ -822,6 +822,8 @@ doloopy:
 		//xbsave = NULL;
 		RedrawWindow(hAppWnd,0,0,RDW_ERASE|RDW_INVALIDATE);
 	}
+  else
+    UpdateRawInputAndHotkeys();
 	Sleep(50);
 	if(!exiting)
 		goto doloopy;

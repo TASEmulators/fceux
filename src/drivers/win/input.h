@@ -23,6 +23,7 @@ void InputScreenChanged(int fs);
 void SetAutoFireDesynch(int DesynchOn);
 int GetAutoFireDesynch();
 uint32 GetGamepadPressedImmediate();
+void UpdateRawInputAndHotkeys();
 
 extern LPDIRECTINPUT7 lpDI;
 

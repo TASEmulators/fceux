@@ -385,15 +385,20 @@ void HandleHotkeys()
 	FCEUI_HandleEmuCommands(FCEUD_TestCommandState);
 }
 
+void UpdateRawInputAndHotkeys()
+{
+	KeyboardUpdateState();
+	UpdateJoysticks();
+
+	HandleHotkeys();
+}
+
 void FCEUD_UpdateInput()
 {
 	bool joy=false,mouse=false;
 	EMOVIEMODE FCEUMOVState = FCEUMOV_Mode();
 
-	KeyboardUpdateState();
-	UpdateJoysticks();
-
-	HandleHotkeys();
+  UpdateRawInputAndHotkeys();
 
 	{
 		for(int x=0;x<2;x++)
