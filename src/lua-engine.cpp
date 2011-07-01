@@ -3430,7 +3430,7 @@ static int gui_gdscreenshot(lua_State *L) {
 
 	for (int y=0; y < height; y++) {
 		for (int x=0; x < width; x++) {
-			uint8 index = XBuf[(y+8)*256 + x];
+			uint8 index = XBuf[(y)*256 + x];
 
 			// Write A,R,G,B (alpha=0 for us):
 			*ptr = 0;
@@ -5399,7 +5399,7 @@ void FCEU_LuaGui(uint8 *XBuf) {
 			else {
 				// alpha-blending
 				uint8 scr_red, scr_green, scr_blue;
-				FCEUD_GetPalette(XBuf[(y+8)*256+x], &scr_red, &scr_green, &scr_blue);
+				FCEUD_GetPalette(XBuf[(y)*256+x], &scr_red, &scr_green, &scr_blue);
 				r = (((int) gui_red   - scr_red)   * gui_alpha / 255 + scr_red)   & 255;
 				g = (((int) gui_green - scr_green) * gui_alpha / 255 + scr_green) & 255;
 				b = (((int) gui_blue  - scr_blue)  * gui_alpha / 255 + scr_blue)  & 255;
