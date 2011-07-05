@@ -682,7 +682,13 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	// check for --help or -h and display usage
+#ifdef _GTK
+	int noGui = 0;
+#else
+	int noGui = 1;
+#endif
+
+	// check for --help or -h and display usage; also check for --nogui
 	for(int i=0; i<argc;i++)
 	{
 		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
@@ -691,6 +697,10 @@ int main(int argc, char *argv[])
 			SDL_Quit();
 			return 0;
 		}
+#ifdef _GTK
+		else if(strcmp(argv[i], "--nogui") == 0)
+			noGui = 1;
+#endif
 	}
 
 	// if we're not compiling w/ the gui, exit if a rom isn't specified
@@ -739,8 +749,6 @@ int main(int argc, char *argv[])
 #ifdef _GTK
 	gtk_init(&argc, &argv);
 
-	int noGui;
-	g_config->getOption("SDL.NoGUI", &noGui);
 	if(noGui == 0)
 		InitGTKSubsystem(argc, argv);
 #endif

@@ -223,8 +223,6 @@ InitConfig()
     config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
     config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
     config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
-	// option to disable gui (broken??)
-	config->addOption("nogui", "SDL.NoGUI", 0);
     #endif
     
     // fcm -> fm2 conversion
