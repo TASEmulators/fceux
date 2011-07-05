@@ -1,4 +1,5 @@
 -r**** - FCEUX 2.1.5 release
+4-Jul-2011 - FatRatKnight - Lua console now gets the proper file path when selecting a file from the recent menu.
 1-jun-2011 - prg318 - sdl - print usage when --help is passed even if SDL fails
 plombo - added stock icons to menu items
 plombo - added new gamepad configuration dialog
