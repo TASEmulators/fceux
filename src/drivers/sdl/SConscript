@@ -1,3 +1,9 @@
+# Fix compliation error about 'XKeysymToString' by linking X11 explicitly
+# Thanks Antonio Ospite!
+Import('env')
+env.ParseConfig('pkg-config --cflags --libs x11')
+Export('env')
+
 my_list =  Split("""
 input.cpp
 config.cpp
