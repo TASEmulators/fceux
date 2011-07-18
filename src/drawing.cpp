@@ -419,6 +419,9 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 		ch  = FixJoedChar(*textmsg);
 		wid = JoedCharWidth(*textmsg);
 
+		int newx = x+wid;
+		if(newx >= width) { x=beginx; y+=8; }
+
 		for(int ny=0; ny<7; ++ny)
 		{
 			uint8 d = Font6x7[ch*8 + 1+ny];
@@ -434,8 +437,8 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 					target[y+ny][x+nx] = 1;
 			}
 		}
-		x += wid;
-		if(x >= width) { x=beginx; y+=8; }
+    x += wid;
+
 	}
 textoverflow:
 	for(y=0; y<62; ++y)			//Max border is 2, so the max safe y is 62 (since 64 is the max for the target array
