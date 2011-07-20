@@ -1,5 +1,7 @@
 --Written by Brandon Evans
 
+--You can change the number of controllers tracked here.
+local controllers = 2
 --You can change the position of the text here.
 local x = 0
 local y = 8
@@ -120,8 +122,10 @@ if parse() then
 else
     gui.text(x, y + 16, 'No movie parsed for data')
 end
-savestate.registerload(load)
-savestate.registersave(save)
+if savestate.registerload then
+    savestate.registerload(load)
+    savestate.registersave(save)
+end
 
 while true do
     --If this is the first frame, reset the data.
@@ -131,7 +135,7 @@ while true do
         presses = 0
     end
     --Check players one and two.
-    for player = 1, 2 do
+    for player = 1, controllers do
         local buttons = joypad.getdown(player)
         --Run through all of the pressed buttons.
         for i, v in pairs(buttons) do
