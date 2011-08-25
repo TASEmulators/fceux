@@ -198,7 +198,7 @@ enum ECONTEXTMENU
 void ShowMenu(ECONTEXTMENU which, POINT& pt)
 {
 	HMENU sub = GetSubMenu(hrmenu,(int)which);
-	TrackPopupMenu(sub,0,pt.x,pt.y,TPM_RIGHTBUTTON,hwndTasEdit,0);
+	TrackPopupMenu(sub,TPM_RIGHTBUTTON,pt.x,pt.y,0,hwndTasEdit,0);
 }
 
 void StrayClickMenu(LPNMITEMACTIVATE info)

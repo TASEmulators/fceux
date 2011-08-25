@@ -1196,10 +1196,10 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
 
 						if (lParam != -1)
-							TrackPopupMenu(hDebugcontextsub,0,LOWORD(lParam),HIWORD(lParam),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
 						else { // Handle the context menu keyboard key
 							GetWindowRect(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_LIST), &wrect);
-							TrackPopupMenu(hDebugcontextsub,0,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),TPM_RIGHTBUTTON,hwndDlg,0);	//Create menu
+							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,wrect.left + int((wrect.right - wrect.left) / 3),wrect.top + int((wrect.bottom - wrect.top) / 3),0,hwndDlg,0);	//Create menu
 						}
 						
 					}

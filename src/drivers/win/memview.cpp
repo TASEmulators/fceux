@@ -1304,7 +1304,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 					InsertMenuItem(hMenu,i+1,1,&MenuInfo);
 			}
 		}
-		if(i != 0)i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, x, y, hMemView, NULL);
+		if(i != 0)i = TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_RIGHTBUTTON, x, y, hMemView, NULL);
 		switch(i){
 	case ID_ADDRESS_FRZ_TOGGLE_STATE:
 		// ################################## Start of SP CODE ###########################

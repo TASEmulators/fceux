@@ -1296,7 +1296,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
 			pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
 			ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
-			TrackPopupMenu(hfceuxcontextsub,0,(pt.x),(pt.y),TPM_RIGHTBUTTON,hWnd,0);	//Create menu
+			TrackPopupMenu(hfceuxcontextsub,TPM_RIGHTBUTTON,(pt.x),(pt.y),0,hWnd,0);	//Create menu
 		}
         else
         {
