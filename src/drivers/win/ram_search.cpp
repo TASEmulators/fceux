@@ -1780,11 +1780,13 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
 					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST), 0);
 					RefreshRamListSelectedCountControlStatus(hDlg);
+					Update_RAM_Search();
 					{rv = true; break;}
 				}
 				case IDC_C_RESET_CHANGES:
 					memset(s_numChanges, 0, (sizeof(*s_numChanges)*(MAX_RAM_SIZE)));
 					ListView_Update(GetDlgItem(hDlg,IDC_RAMLIST), -1);
+					Update_RAM_Search();
 					//SetRamSearchUndoType(hDlg, 0);
 					{rv = true; break;}
 				case IDC_C_UNDO:

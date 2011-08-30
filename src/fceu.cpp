@@ -808,6 +808,10 @@ void PowerNES(void)
 	// clear back baffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf,0,256*256);
+
+#ifdef WIN32
+	Update_RAM_Search(); // Update_RAM_Watch() is also called.
+#endif
 }
 
 void FCEU_ResetVidSys(void)
