@@ -48,34 +48,27 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 	{
 		switch(item.iSubItem)
 		{
-		case 0:
+			case COLUMN_ARROW:
 			if(item.iImage == I_IMAGECALLBACK && item.iItem == currFrameCounter)
 				item.iImage = 0;
 			else
 				item.iImage = -1;
 			break;
-		case 1:
+			case COLUMN_FRAMENUM:
+			case COLUMN_FRAMENUM2:
 			U32ToDecStr(item.pszText,item.iItem);
 			break;
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9: 
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-		case 14:
-		case 15:
-		case 16:
-		case 17: 
+			case COLUMN_JOYPAD1_A: case COLUMN_JOYPAD1_B: case COLUMN_JOYPAD1_S: case COLUMN_JOYPAD1_T:
+			case COLUMN_JOYPAD1_U: case COLUMN_JOYPAD1_D: case COLUMN_JOYPAD1_L: case COLUMN_JOYPAD1_R:
+			case COLUMN_JOYPAD2_A: case COLUMN_JOYPAD2_B: case COLUMN_JOYPAD2_S: case COLUMN_JOYPAD2_T:
+			case COLUMN_JOYPAD2_U: case COLUMN_JOYPAD2_D: case COLUMN_JOYPAD2_L: case COLUMN_JOYPAD2_R:
+			case COLUMN_JOYPAD3_A: case COLUMN_JOYPAD3_B: case COLUMN_JOYPAD3_S: case COLUMN_JOYPAD3_T:
+			case COLUMN_JOYPAD3_U: case COLUMN_JOYPAD3_D: case COLUMN_JOYPAD3_L: case COLUMN_JOYPAD3_R:
+			case COLUMN_JOYPAD4_A: case COLUMN_JOYPAD4_B: case COLUMN_JOYPAD4_S: case COLUMN_JOYPAD4_T:
+			case COLUMN_JOYPAD4_U: case COLUMN_JOYPAD4_D: case COLUMN_JOYPAD4_L: case COLUMN_JOYPAD4_R:
 			{
-				int joy = (item.iSubItem - 2)/8;
-				int bit = (item.iSubItem - 2)%8;
+				int joy = (item.iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int bit = (item.iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				uint8 data = currMovieData.records[item.iItem].joysticks[joy];
 				if(data & (1<<bit))
 				{
@@ -96,6 +89,7 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 
 static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 {
+	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
@@ -104,15 +98,57 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		return CDRF_NOTIFYSUBITEMDRAW;
 	case CDDS_SUBITEMPREPAINT:
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
-		if((msg->iSubItem-2)/8==0)
-			if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
-				!currMovieData.savestates[msg->nmcd.dwItemSpec].empty())
-				msg->clrTextBk = RGB(192,255,192);
-			else {}
-		else if((int)msg->nmcd.dwItemSpec < currMovieData.greenZoneCount && 
-			!currMovieData.savestates[msg->nmcd.dwItemSpec].empty())
-				msg->clrTextBk = RGB(144,192,144);
-			else msg->clrTextBk = RGB(192,192,192);
+		cell_x = msg->iSubItem;
+		cell_y = msg->nmcd.dwItemSpec;
+		if(cell_x == 1 || cell_x == 34)
+		{
+			// frame number
+			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = RGB(217,254,253);
+				} else
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = RGB(220,255,220);
+				}
+			} else msg->clrTextBk = RGB(255,255,255);
+		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
+		{
+			// pad 1 or 3
+			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = RGB(195,255,250);
+				} else
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = RGB(195,255,195);
+				}
+			} else msg->clrTextBk = RGB(240,240,240);
+		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
+		{
+			// pad 2 or 4
+			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = RGB(170,220,218);
+				} else
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = RGB(170,220,170);
+				}
+			} else msg->clrTextBk = RGB(220,220,220);
+		}
 		return CDRF_DODEFAULT;
 	default:
 		return CDRF_DODEFAULT;
@@ -138,7 +174,6 @@ void UpdateTasEdit()
 		else if (turbo && (currFrameCounter &0xf))
 			return;
 	}
-
 
 	//update the number of items
 	int currLVItemCount = ListView_GetItemCount(hwndList);
@@ -198,7 +233,7 @@ enum ECONTEXTMENU
 void ShowMenu(ECONTEXTMENU which, POINT& pt)
 {
 	HMENU sub = GetSubMenu(hrmenu,(int)which);
-	TrackPopupMenu(sub,TPM_RIGHTBUTTON,pt.x,pt.y,0,hwndTasEdit,0);
+	TrackPopupMenu(sub,0,pt.x,pt.y,TPM_RIGHTBUTTON,hwndTasEdit,0);
 }
 
 void StrayClickMenu(LPNMITEMACTIVATE info)
@@ -331,15 +366,15 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		return;
 
 	//if the icon or frame columns were double clicked:
-	if(info->iSubItem == 0 || info->iSubItem == 1)
+	if(info->iSubItem == COLUMN_ARROW || info->iSubItem == COLUMN_FRAMENUM || info->iSubItem == COLUMN_FRAMENUM2)
 	{
 		JumpToFrame(index);
 	}
-	else //if an input column was clicked:
+	else if(info->iSubItem >= COLUMN_JOYPAD1_A && info->iSubItem <= COLUMN_JOYPAD4_R)
 	{
 		//toggle the bit
-		int joy = (info->iSubItem - 2)/8;
-		int bit = (info->iSubItem - 2)%8;
+		int joy = (info->iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+		int bit = (info->iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 
 		if (info->uKeyFlags&(LVKF_SHIFT|LVKF_CONTROL))
 		{
@@ -348,7 +383,6 @@ void DoubleClick(LPNMITEMACTIVATE info)
 			{
 				currMovieData.records[*it].toggleBit(joy,bit);
 			}
-
 			index=*selectionFrames.begin();
 		} 
 		else 
@@ -362,8 +396,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		InvalidateGreenZone(index);
 
 		// If the change is in the past, move to it. 
-		if(index < currFrameCounter &&
-		   index < currMovieData.greenZoneCount)
+		if(index < currFrameCounter && index < currMovieData.greenZoneCount)
 		{
 			JumpToFrame(index);
 		}
@@ -442,8 +475,9 @@ static void DeleteFrames()
 //the column set operation, for setting a button for a span of selected values
 static void ColumnSet(int column)
 {
-	int joy = (column-2)/8;
-	int button = (column-2)%8;
+	int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+	if (joy < 0 || joy >= NUM_JOYPADS) return;
+	int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 
 	//inspect the selected frames. count the set and unset rows
 	int set=0, unset=0;
@@ -524,14 +558,14 @@ static bool Copy()
 			cframe=*it;
 
 			int cjoy=0;
-			for (int joy=0; joy<2; ++joy)
+			for (int joy=0; joy<NUM_JOYPADS; ++joy)
 			{
 				while (currMovieData.records[*it].joysticks[joy] && cjoy<joy) 
 				{
 					clipString << '|';
 					++cjoy;
 				}
-				for (int bit=0; bit<8; ++bit)
+				for (int bit=0; bit<NUM_JOYPAD_BUTTONS; ++bit)
 				{
 					if (currMovieData.records[*it].joysticks[joy] & (1<<bit))
 					{
@@ -639,7 +673,7 @@ static bool Paste()
 						++joy;
 						break;
 					default:
-						for (int bit=0; bit<8; ++bit)
+						for (int bit=0; bit<NUM_JOYPAD_BUTTONS; ++bit)
 						{
 							if (*frame==MovieRecord::mnemonics[bit])
 							{
@@ -694,13 +728,13 @@ void Branch()
 {
 }
 
-
+// ---------------------------------------------------------------------------------
 //The subclass wndproc for the listview header
 static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	switch(msg)
 	{
-	case WM_LBUTTONDOWN:
+		case WM_LBUTTONDOWN:
 		{
 			//perform hit test
 			HD_HITTESTINFO info;
@@ -752,45 +786,29 @@ static void InitDialog()
 	//setup columns
 	LVCOLUMN lvc;
 	int colidx=0;
+	// arrow column - it's kinda obsolete now
 	lvc.mask = LVCF_WIDTH;
 	lvc.cx = 12;
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	// frame number column
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
 	lvc.cx = 95;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	// pads columns
 	lvc.cx = 20;
-	lvc.pszText = "A";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "B";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "S";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "T";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "U";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "D";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "L";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "R";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "A";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "B";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "S";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "T";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "U";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "D";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "L";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	lvc.pszText = "R";
+	char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
+	for (int joy = 0; joy < NUM_JOYPADS; ++joy)
+	{
+		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
+		{
+			lvc.pszText = buttonNames[btn];
+			ListView_InsertColumn(hwndList, colidx++, &lvc);
+		}
+	}
+	// frame number column again
+	lvc.cx = 95;
+	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	//-----------------------------
 
