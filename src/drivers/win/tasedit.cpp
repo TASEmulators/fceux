@@ -100,54 +100,45 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
-		if(cell_x == 1 || cell_x == 34)
+		if(cell_x == COLUMN_ARROW || cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 		{
 			// frame number
-			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			if (cell_y == currFrameCounter)
 			{
-				if (cell_y == currFrameCounter)
-				{
-					// current frame
-					msg->clrTextBk = RGB(217,254,253);
-				} else
-				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = RGB(220,255,220);
-				}
-			} else msg->clrTextBk = RGB(255,255,255);
+				// current frame
+				msg->clrTextBk = CUR_FRAMENUM_COLOR;
+			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				// TODO: redline for lag frames
+				// green zone frame
+				msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+			} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 		{
 			// pad 1 or 3
-			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			if (cell_y == currFrameCounter)
 			{
-				if (cell_y == currFrameCounter)
-				{
-					// current frame
-					msg->clrTextBk = RGB(195,255,250);
-				} else
-				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = RGB(195,255,195);
-				}
-			} else msg->clrTextBk = RGB(240,240,240);
+				// current frame
+				msg->clrTextBk = CUR_INPUT_COLOR1;
+			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				// TODO: redline for lag frames
+				// green zone frame
+				msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+			} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
 		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 		{
 			// pad 2 or 4
-			if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			if (cell_y == currFrameCounter)
 			{
-				if (cell_y == currFrameCounter)
-				{
-					// current frame
-					msg->clrTextBk = RGB(170,220,218);
-				} else
-				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = RGB(170,220,170);
-				}
-			} else msg->clrTextBk = RGB(220,220,220);
+				// current frame
+				msg->clrTextBk = CUR_INPUT_COLOR2;
+			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+			{
+				// TODO: redline for lag frames
+				// green zone frame
+				msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+			} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
 		}
 		return CDRF_DODEFAULT;
 	default:
@@ -283,6 +274,8 @@ void LockGreenZone(int newstart)
 void InvalidateGreenZone(int after)
 {
 	currMovieData.greenZoneCount = std::min(after+1,currMovieData.greenZoneCount);
+	if (currFrameCounter >= currMovieData.greenZoneCount)
+		JumpToFrame(currMovieData.greenZoneCount-1);
 }
 
 /* A function that tries jumping to a given frame.  If unsuccessful, it than tries to jump to
@@ -394,13 +387,6 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		}
 
 		InvalidateGreenZone(index);
-
-		// If the change is in the past, move to it. 
-		if(index < currFrameCounter && index < currMovieData.greenZoneCount)
-		{
-			JumpToFrame(index);
-		}
-
 		//redraw everything to show the reduced green zone
 		RedrawList();
 	}
@@ -734,7 +720,10 @@ static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lP
 {
 	switch(msg)
 	{
-		case WM_LBUTTONDOWN:
+	case WM_LBUTTONDBLCLK:
+	case WM_SETCURSOR:
+		return true;	// no column resizing
+	case WM_LBUTTONDOWN:
 		{
 			//perform hit test
 			HD_HITTESTINFO info;
@@ -755,6 +744,18 @@ static LRESULT APIENTRY ListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPar
 	{
 	case WM_CHAR:
 		return 0;
+	case WM_NOTIFY:
+		{
+			switch (((LPNMHDR)lParam)->code)
+			{
+			case HDN_BEGINTRACKW:
+			case HDN_BEGINTRACKA:
+			case HDN_TRACK:
+				return true;	// no column resizing
+			}
+			break;
+		}
+
 	}
 	return CallWindowProc(hwndList_oldWndProc,hWnd,msg,wParam,lParam);
 }
@@ -775,7 +776,7 @@ static void InitDialog()
 	hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList,GWL_WNDPROC,(LONG)ListWndProc);
 
 	//setup all images for the listview
-	HIMAGELIST himglist = ImageList_Create(12,12,ILC_COLOR32 | ILC_MASK,1,1);
+	HIMAGELIST himglist = ImageList_Create(8,12,ILC_COLOR32 | ILC_MASK,1,1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance,MAKEINTRESOURCE(IDB_TE_ARROW));
 	ImageList_AddMasked(himglist, bmp, RGB(255,0,255));
 	DeleteObject(bmp);
@@ -792,7 +793,7 @@ static void InitDialog()
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// frame number column
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
-	lvc.cx = 95;
+	lvc.cx = 92;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// pads columns
@@ -807,7 +808,7 @@ static void InitDialog()
 		}
 	}
 	// frame number column again
-	lvc.cx = 95;
+	lvc.cx = 92;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	//-----------------------------
@@ -1258,8 +1259,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				JumpToFrame(0);
 				break;
 			case TASEDIT_FOWARD_FULL:
-				//moves to the end of the move (or green zone?)
-				JumpToFrame(currMovieData.records.size()-1 );
+				//moves to the end of greenzone
+				JumpToFrame(currMovieData.greenZoneCount-1);
 				break;
 
 			}

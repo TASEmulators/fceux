@@ -1217,7 +1217,7 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
-	if(frame_display && movieMode != MOVIEMODE_TASEDIT)
+	if(frame_display)
 	{
 		char counterbuf[32] = {0};
 		int color = 0x20;
@@ -1229,8 +1229,10 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		{
 			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
 			color = 0x17; //Show red to get attention
-		}
-		else
+		} else if(movieMode == MOVIEMODE_TASEDIT)
+		{
+			sprintf(counterbuf,"%d",currFrameCounter);
+		} else
 			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
 
 		if(counterbuf[0])
