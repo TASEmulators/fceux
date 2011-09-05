@@ -67,6 +67,7 @@ extern bool SingleInstanceOnly;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
+extern bool TASEdit_follow_playback;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -282,6 +283,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AFoff),
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
+	AC(TASEdit_follow_playback),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

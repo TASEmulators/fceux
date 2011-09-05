@@ -244,7 +244,10 @@ BEGIN
         MENUITEM "&Truncate\tCtrl+T",           ID_EDIT_TRUNCATE
         MENUITEM "&Branch\tCtrl+B",             ID_EDIT_BRANCH, INACTIVE
     END
-    MENUITEM "&View",                       ID_VIEW, INACTIVE
+    POPUP "&View"
+    BEGIN
+	MENUITEM "&Follow playback",		ID_VIEW_FOLLOW_PLAYBACK
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&TASEdit Help...",            ID_HELP_TASEDITHELP

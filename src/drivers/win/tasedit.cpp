@@ -15,6 +15,7 @@
 #include "joystick.h"
 #include "help.h"
 #include "main.h"	//For the GetRomName() function
+//#include "config.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ using namespace std;
 //http://forums.devx.com/archive/index.php/t-37234.html
 
 int TasEdit_wndx, TasEdit_wndy;
+bool TASEdit_follow_playback = false;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 
@@ -100,45 +102,48 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
-		if(cell_x == COLUMN_ARROW || cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
+		if(cell_x > COLUMN_ARROW)
 		{
-			// frame number
-			if (cell_y == currFrameCounter)
+			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
-				// current frame
-				msg->clrTextBk = CUR_FRAMENUM_COLOR;
-			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+				// frame number
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = CUR_FRAMENUM_COLOR;
+				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
+			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
-				// TODO: redline for lag frames
-				// green zone frame
-				msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-			} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
-		{
-			// pad 1 or 3
-			if (cell_y == currFrameCounter)
+				// pad 1 or 3
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = CUR_INPUT_COLOR1;
+				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
+			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
-				// current frame
-				msg->clrTextBk = CUR_INPUT_COLOR1;
-			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
-			{
-				// TODO: redline for lag frames
-				// green zone frame
-				msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-			} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-		} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
-		{
-			// pad 2 or 4
-			if (cell_y == currFrameCounter)
-			{
-				// current frame
-				msg->clrTextBk = CUR_INPUT_COLOR2;
-			} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
-			{
-				// TODO: redline for lag frames
-				// green zone frame
-				msg->clrTextBk = GREENZONE_INPUT_COLOR2;
-			} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
+				// pad 2 or 4
+				if (cell_y == currFrameCounter)
+				{
+					// current frame
+					msg->clrTextBk = CUR_INPUT_COLOR2;
+				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
+				{
+					// TODO: redline for lag frames
+					// green zone frame
+					msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
+			}
 		}
 		return CDRF_DODEFAULT;
 	default:
@@ -173,26 +178,19 @@ void UpdateTasEdit()
 		ListView_SetItemCountEx(hwndList,currMovieData.getNumRecords(),LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 	}
 
-	//update the cursor
+	//update the cursor when playing
 	int newCursor = currFrameCounter;
 	if(newCursor != lastCursor)
 	{
-		//unselect all prior rows
-		TSelectionFrames oldSelected = selectionFrames;
-		for(TSelectionFrames::iterator it(oldSelected.begin()); it != oldSelected.end(); it++)
-			ListView_SetItemState(hwndList,*it,0, LVIS_FOCUSED|LVIS_SELECTED);
-
+	/* 	if (!FCEUI_EmulationPaused())
+			//select the row
+			ListView_SetItemState(hwndList,newCursor,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+	*/
 		//scroll to the row
-		ListView_EnsureVisible(hwndList,newCursor,FALSE);
-		//select the row
-		ListView_SetItemState(hwndList,newCursor,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
-		
+		if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,newCursor,FALSE);
 		//update the old and new rows
 		ListView_Update(hwndList,newCursor);
 		ListView_Update(hwndList,lastCursor);
-		for(TSelectionFrames::iterator it(oldSelected.begin()); it != oldSelected.end(); it++)
-			ListView_Update(hwndList,*it);
-		
 		lastCursor = newCursor;
 	}
 
@@ -515,9 +513,10 @@ static void SelectAll()
 {
 	ClearSelection();
 	for(unsigned int i=0;i<currMovieData.records.size();i++)
+	{
 		selectionFrames.insert(i);
-
-	UpdateTasEdit();
+		ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+	}
 	RedrawList();
 }
 
@@ -997,7 +996,8 @@ static void Truncate()
 		frame=*selectionFrames.begin();
 		JumpToFrame(frame);
 	}
-
+	ClearSelection();
+	
 	currMovieData.truncateAt(frame+1);
 	InvalidateGreenZone(frame);
 	currMovieData.TryDumpIncremental();
@@ -1242,27 +1242,28 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//advance 1 frame
 				JumpToFrame(currFrameCounter+1);
 				break;
-
 			case TASEDIT_REWIND:
 				//rewinds 1 frame
 				if (currFrameCounter>0)
 					JumpToFrame(currFrameCounter-1);
 				break;
-			
 			case TASEDIT_PLAYSTOP:
 				//Pause/Unpses (Play/Stop) movie
 				FCEUI_ToggleEmulationPause();
 				break;
-
 			case TASEDIT_REWIND_FULL:
-				//rewinds to beginning of movie
-				JumpToFrame(0);
+				//rewinds to beginning of greenzone
+				JumpToFrame(FindBeginningOfGreenZone(0));
 				break;
 			case TASEDIT_FOWARD_FULL:
 				//moves to the end of greenzone
 				JumpToFrame(currMovieData.greenZoneCount-1);
 				break;
-
+			case ID_VIEW_FOLLOW_PLAYBACK:
+				//switch "Follow playback" flag
+				TASEdit_follow_playback ^= 1;
+				CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+				break;
 			}
 			break;
 	}
@@ -1270,21 +1271,27 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
+int FindBeginningOfGreenZone(int starting_index)
+{
+	for (int i=starting_index; i<currMovieData.greenZoneCount; ++i)
+	{
+		if (!currMovieData.savestates[i].empty()) return i;
+	}
+	return starting_index;
+}
+
 void DoTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT))
 		return;
 
-	if(!hmenu)
-	{
-		hmenu = LoadMenu(fceu_hInstance,"TASEDITMENU");
-		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
-	}
-
-
 	lastCursor = -1;
 	if(!hwndTasEdit) 
-		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",NULL,WndprocTasEdit);
+		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
+	hmenu = GetMenu(hwndTasEdit);
+	hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
+	// check option ticks
+	CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 
 	if(hwndTasEdit)
 	{
