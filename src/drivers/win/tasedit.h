@@ -59,3 +59,4 @@ void CreateProject(MovieData data);
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
+void FollowPlayback();

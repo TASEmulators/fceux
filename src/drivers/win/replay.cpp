@@ -1007,5 +1007,5 @@ void Replay_LoadMovie(bool tasedit)
 /// Show movie replay dialog and replay the movie if necessary.
 void FCEUD_MovieReplayFrom()
 {
-	Replay_LoadMovie(false);
+	if (GameInfo) Replay_LoadMovie(false);
 }

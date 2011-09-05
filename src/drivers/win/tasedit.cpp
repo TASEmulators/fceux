@@ -15,7 +15,6 @@
 #include "joystick.h"
 #include "help.h"
 #include "main.h"	//For the GetRomName() function
-//#include "config.h"
 
 using namespace std;
 
@@ -23,7 +22,7 @@ using namespace std;
 //http://forums.devx.com/archive/index.php/t-37234.html
 
 int TasEdit_wndx, TasEdit_wndy;
-bool TASEdit_follow_playback = false;
+bool TASEdit_follow_playback = true;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 
@@ -178,20 +177,14 @@ void UpdateTasEdit()
 		ListView_SetItemCountEx(hwndList,currMovieData.getNumRecords(),LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 	}
 
-	//update the cursor when playing
-	int newCursor = currFrameCounter;
-	if(newCursor != lastCursor)
+	//update the cursor
+	if(currFrameCounter != lastCursor)
 	{
-	/* 	if (!FCEUI_EmulationPaused())
-			//select the row
-			ListView_SetItemState(hwndList,newCursor,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
-	*/
-		//scroll to the row
-		if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,newCursor,FALSE);
 		//update the old and new rows
-		ListView_Update(hwndList,newCursor);
 		ListView_Update(hwndList,lastCursor);
-		lastCursor = newCursor;
+		ListView_Update(hwndList,currFrameCounter);
+		lastCursor = currFrameCounter;
+		FollowPlayback();
 	}
 
 	static int old_movie_readonly=-1;
@@ -285,11 +278,12 @@ bool JumpToFrame(int index)
 {
 	if (index<0) return false; 
 
-	/* Handle jumps outside greenzone. */
-	if (index>currMovieData.greenZoneCount)
+	if (index >= currMovieData.greenZoneCount)
 	{
+		/* Handle jumps outside greenzone. */
 		if (JumpToFrame(currMovieData.greenZoneCount-1))
 		{
+			// continue from the end of greenzone
 			if (FCEUI_EmulationPaused())
 				FCEUI_ToggleEmulationPause();
 
@@ -300,42 +294,34 @@ bool JumpToFrame(int index)
 		}
 		return false;
 	}
-
-	if (static_cast<unsigned int>(index)<currMovieData.records.size() && 
-		currMovieData.loadTasSavestate(index))
+	/* Handle jumps inside greenzone. */
+	if (currMovieData.loadTasSavestate(index))
 	{
 		currFrameCounter = index;
 		return true;
-	}
-	else 
+	} else
 	{
-		/* Disable pause. */
-		if (FCEUI_EmulationPaused())
-			FCEUI_ToggleEmulationPause();
-
-		int i = index>0? index-1:0;
-		if (i>=static_cast<int>(currMovieData.records.size()))
-			i=currMovieData.records.size()-1;
-
-		/* Search for an earlier frame, and try warping to the current. */
-		for (; i>0; --i)
+		int i = (index > 0) ? index-1 : 0;
+		//if (i >= static_cast<int>(currMovieData.records.size())) i = currMovieData.records.size()-1;
+		//Search for an earlier frame with savestate
+		for (; i > 0; --i)
 		{
-			if (currMovieData.loadTasSavestate(i))
-			{
-				currFrameCounter=i;
-				turbo=i+60<index; // turbo unless close
-				pauseframe=index+1;
-				return true;
-			}
+			if (currMovieData.loadTasSavestate(i)) break;
 		}
-
-		poweron(true);
-		currFrameCounter=0;
-		MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
-		turbo = index>60;
+		// continue from the frame
+		currFrameCounter = i;
+		if (FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
+		turbo=i+60<index; // turbo unless close
 		pauseframe=index+1;
+		if (!i)
+		{
+			//starting from frame 0
+			poweron(true);
+			MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
+		}
+		return true;
 	}
-
+	/*
 	// Simply do a reset. 
 	if (index==0)
 	{
@@ -344,7 +330,7 @@ bool JumpToFrame(int index)
 		MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
 		return true;
 	}
-
+	*/
 	return false;
 }
 
@@ -1203,8 +1189,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			case IDC_HACKY2:
 				//hacky2: delete earlier savestates (conserve memory)
-				LockGreenZone(currFrameCounter);
-				UpdateTasEdit();
+				//LockGreenZone(currFrameCounter);
+				//UpdateTasEdit();
 				break;
 
 			case ACCEL_CTRL_B:
@@ -1241,11 +1227,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case TASEDIT_FOWARD:
 				//advance 1 frame
 				JumpToFrame(currFrameCounter+1);
+				FollowPlayback();
 				break;
 			case TASEDIT_REWIND:
 				//rewinds 1 frame
-				if (currFrameCounter>0)
-					JumpToFrame(currFrameCounter-1);
+				if (currFrameCounter>0) JumpToFrame(currFrameCounter-1);
+				FollowPlayback();
 				break;
 			case TASEDIT_PLAYSTOP:
 				//Pause/Unpses (Play/Stop) movie
@@ -1254,15 +1241,18 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case TASEDIT_REWIND_FULL:
 				//rewinds to beginning of greenzone
 				JumpToFrame(FindBeginningOfGreenZone(0));
+				FollowPlayback();
 				break;
 			case TASEDIT_FOWARD_FULL:
 				//moves to the end of greenzone
 				JumpToFrame(currMovieData.greenZoneCount-1);
+				FollowPlayback();
 				break;
 			case ID_VIEW_FOLLOW_PLAYBACK:
 				//switch "Follow playback" flag
 				TASEdit_follow_playback ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+				FollowPlayback();
 				break;
 			}
 			break;
@@ -1278,6 +1268,10 @@ int FindBeginningOfGreenZone(int starting_index)
 		if (!currMovieData.savestates[i].empty()) return i;
 	}
 	return starting_index;
+}
+void FollowPlayback()
+{
+	if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
 }
 
 void DoTasEdit()

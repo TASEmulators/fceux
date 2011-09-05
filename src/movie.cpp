@@ -125,31 +125,14 @@ void MovieData::TryDumpIncremental()
 {
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
-		//only log the savestate if we are appending to the green zone
-		if (turbo && pauseframe!=-1 && static_cast<unsigned int>(currFrameCounter)<currMovieData.records.size())
-		{
-			if (turbo && pauseframe-256>currFrameCounter && ((currFrameCounter-pauseframe)&0xff))
-				return;
-			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-		}
-		if(currFrameCounter == currMovieData.greenZoneCount)
-		{
-			if(currFrameCounter == (int)currMovieData.records.size() || currMovieData.records.size()==0)
-			{
-				currMovieData.insertEmpty(-1,1);
-			}
-			
-			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-			currMovieData.greenZoneCount=currFrameCounter+1;
-		} else if (currFrameCounter < currMovieData.greenZoneCount && !movie_readonly)
-		{
-			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-		} else if (currFrameCounter > currMovieData.greenZoneCount && static_cast<unsigned int>(currMovieData.greenZoneCount)<currMovieData.records.size())
-		{
-			/* May be required in some malformed TAS projects. */
-			currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-			currMovieData.greenZoneCount= currFrameCounter+1;
-		}
+		// if movie length is less than currFrame, pad it with empty frames
+		if(currFrameCounter >= (int)currMovieData.records.size() || currMovieData.records.size()==0)
+			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
+		//always log savestates in taseditor mode
+		currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
+		// update greenzone upper limit
+		if (currMovieData.greenZoneCount <= currFrameCounter)
+			currMovieData.greenZoneCount = currFrameCounter+1;
 	}
 }
 
