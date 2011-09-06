@@ -706,14 +706,15 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	}
 
-	currMovieData.TryDumpIncremental();
-
 	if (lagFlag)
 	{
 		lagCounter++;
 		justLagged = true;
 	}
 	else justLagged = false;
+
+	// auto-savestates for TASEditor
+	currMovieData.TryDumpIncremental();
 
 	if (movieSubtitles)
 		ProcessSubtitles();

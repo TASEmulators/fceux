@@ -246,6 +246,8 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
+	MENUITEM "Show &lag frames",		ID_VIEW_SHOW_LAG_FRAMES
+        MENUITEM SEPARATOR
 	MENUITEM "&Follow playback",		ID_VIEW_FOLLOW_PLAYBACK
     END
     POPUP "&Help"

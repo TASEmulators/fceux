@@ -23,6 +23,7 @@ using namespace std;
 
 int TasEdit_wndx, TasEdit_wndy;
 bool TASEdit_follow_playback = true;
+bool TASEdit_show_lag_frames = true;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 
@@ -112,9 +113,15 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = CUR_FRAMENUM_COLOR;
 				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
 				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+					if (TASEdit_show_lag_frames && currMovieData.frames_flags[cell_y] && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					{
+						// lag frame
+						msg->clrTextBk = LAG_FRAMENUM_COLOR;
+					} else
+					{
+						// green zone frame
+						msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+					}
 				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
@@ -125,9 +132,15 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = CUR_INPUT_COLOR1;
 				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
 				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+					if (TASEdit_show_lag_frames && currMovieData.frames_flags[cell_y] && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					{
+						// lag frame
+						msg->clrTextBk = LAG_INPUT_COLOR1;
+					} else
+					{
+						// green zone frame
+						msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+					}
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
@@ -138,9 +151,15 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = CUR_INPUT_COLOR2;
 				} else if(cell_y < currMovieData.greenZoneCount && !currMovieData.savestates[cell_y].empty())
 				{
-					// TODO: redline for lag frames
-					// green zone frame
-					msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+					if (TASEdit_show_lag_frames && currMovieData.frames_flags[cell_y] && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					{
+						// lag frame
+						msg->clrTextBk = LAG_INPUT_COLOR2;
+					} else
+					{
+						// green zone frame
+						msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+					}
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
 			}
 		}
@@ -264,9 +283,15 @@ void LockGreenZone(int newstart)
 
 void InvalidateGreenZone(int after)
 {
-	currMovieData.greenZoneCount = std::min(after+1,currMovieData.greenZoneCount);
-	if (currFrameCounter >= currMovieData.greenZoneCount)
-		JumpToFrame(currMovieData.greenZoneCount-1);
+	if (currMovieData.greenZoneCount > after+1)
+	{
+		currMovieData.greenZoneCount = after+1;
+		// increase tweakCount
+		currMovieData.tweakCount++;
+		InvalidateRect(hwndTasEdit,0,FALSE);
+		if (currFrameCounter >= currMovieData.greenZoneCount)
+			JumpToFrame(currMovieData.greenZoneCount-1);
+	}
 }
 
 /* A function that tries jumping to a given frame.  If unsuccessful, it than tries to jump to
@@ -287,7 +312,7 @@ bool JumpToFrame(int index)
 			if (FCEUI_EmulationPaused())
 				FCEUI_ToggleEmulationPause();
 
-			turbo=currMovieData.greenZoneCount+60<index; // turbo unless close
+			turbo = (currMovieData.greenZoneCount-1+FRAMES_TOO_FAR < index);
 			pauseframe=index+1;
 
 			return true;
@@ -299,39 +324,25 @@ bool JumpToFrame(int index)
 	{
 		currFrameCounter = index;
 		return true;
-	} else
-	{
-		int i = (index > 0) ? index-1 : 0;
-		//if (i >= static_cast<int>(currMovieData.records.size())) i = currMovieData.records.size()-1;
-		//Search for an earlier frame with savestate
-		for (; i > 0; --i)
-		{
-			if (currMovieData.loadTasSavestate(i)) break;
-		}
-		// continue from the frame
-		currFrameCounter = i;
-		if (FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
-		turbo=i+60<index; // turbo unless close
-		pauseframe=index+1;
-		if (!i)
-		{
-			//starting from frame 0
-			poweron(true);
-			MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
-		}
-		return true;
 	}
-	/*
-	// Simply do a reset. 
-	if (index==0)
+	//Search for an earlier frame with savestate
+	int i = (index>0)? index-1 : 0;
+	for (; i > 0; --i)
 	{
-		poweron(false);
-		currFrameCounter=0;
+		if (currMovieData.loadTasSavestate(i)) break;
+	}
+	// continue from the frame
+	currFrameCounter = i;
+	if (FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
+	turbo = (i+FRAMES_TOO_FAR < index);
+	pauseframe=index+1;
+	if (!i)
+	{
+		//starting from frame 0
+		poweron(true);
 		MovieData::dumpSavestateTo(&currMovieData.savestates[0],0);
-		return true;
 	}
-	*/
-	return false;
+	return true;
 }
 
 void DoubleClick(LPNMITEMACTIVATE info)
@@ -1237,6 +1248,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case TASEDIT_PLAYSTOP:
 				//Pause/Unpses (Play/Stop) movie
 				FCEUI_ToggleEmulationPause();
+				// also cancel turbo-seeking
+				if (FCEUI_EmulationPaused())
+				{
+					turbo = false;
+					pauseframe = -1;
+				}
 				break;
 			case TASEDIT_REWIND_FULL:
 				//rewinds to beginning of greenzone
@@ -1254,6 +1271,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 				FollowPlayback();
 				break;
+			case ID_VIEW_SHOW_LAG_FRAMES:
+				//switch "Show lag frames" flag
+				TASEdit_show_lag_frames ^= 1;
+				CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
+				RedrawList();
+				break;
+
 			}
 			break;
 	}
@@ -1286,6 +1310,7 @@ void DoTasEdit()
 	hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
 	// check option ticks
 	CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 
 	if(hwndTasEdit)
 	{

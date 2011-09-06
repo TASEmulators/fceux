@@ -130,6 +130,14 @@ void MovieData::TryDumpIncremental()
 			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
 		//always log savestates in taseditor mode
 		currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
+		// also log frame_flags
+		if (currFrameCounter > 0)
+		{
+			if ((int)currMovieData.frames_flags.size() <= currFrameCounter)
+				currMovieData.frames_flags.resize(currFrameCounter+1);
+			// lagFlag indicates that lag was in previous frame
+			currMovieData.frames_flags[currFrameCounter-1] = (lagFlag)?LAG_FLAG_BIT:0;
+		}
 		// update greenzone upper limit
 		if (currMovieData.greenZoneCount <= currFrameCounter)
 			currMovieData.greenZoneCount = currFrameCounter+1;
@@ -904,7 +912,6 @@ void MovieData::storeTasSavestate(int frame, int compression_level)
 		savestates.resize(frame+1);
 
 	MovieData::dumpSavestateTo(&savestates[frame],compression_level);
-	tweakCount++;
 }
 
 //begin playing an existing movie
