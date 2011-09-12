@@ -53,11 +53,11 @@ extern Config *g_config;
 extern bool bindSavestate, frameAdvanceLagSkip, lagCounterDisplay;
 
 
-/* UsrInputType[] is user-specified.  InputType[] is current
+/* UsrInputType[] is user-specified.  CurInputType[] is current
         (game loading can override user settings)
 */
 static int UsrInputType[NUM_INPUT_DEVICES];
-static int InputType[NUM_INPUT_DEVICES];
+static int CurInputType[NUM_INPUT_DEVICES];
 static int cspec = 0;
    
 extern int gametype;
@@ -70,7 +70,7 @@ InputUserActiveFix()
 {
     int x;
     for(x = 0; x < 3; x++) {
-        InputType[x] = UsrInputType[x];
+        CurInputType[x] = UsrInputType[x];
     }
 }
 
@@ -82,18 +82,18 @@ ParseGIInput(FCEUGI *gi)
 {
     gametype=gi->type;
  
-    InputType[0] = UsrInputType[0];
-    InputType[1] = UsrInputType[1];
-    InputType[2] = UsrInputType[2];
+    CurInputType[0] = UsrInputType[0];
+    CurInputType[1] = UsrInputType[1];
+    CurInputType[2] = UsrInputType[2];
  
     if(gi->input[0]>=0) {
-        InputType[0] = gi->input[0];
+        CurInputType[0] = gi->input[0];
     }
     if(gi->input[1]>=0) {
-        InputType[1] = gi->input[1];
+        CurInputType[1] = gi->input[1];
     }
     if(gi->inputfc>=0) {
-        InputType[2] = gi->inputfc;
+        CurInputType[2] = gi->inputfc;
     }
     cspec = gi->cspecial;
 }
@@ -390,7 +390,7 @@ KeyboardCommands()
 	#endif
 
     // check if the family keyboard is enabled
-    if(InputType[2] == SIFC_FKB) {
+    if(CurInputType[2] == SIFC_FKB) {
         if(keyonly(SCROLLLOCK)) {
             g_fkbEnabled ^= 1;
             FCEUI_DispMessage("Family Keyboard %sabled.",0,
@@ -656,11 +656,11 @@ KeyboardCommands()
 		if (_keyonly(Hotkeys[HK_INCREASE_SPEED]))
 			FCEUI_NTSCINC();
 
-        if((InputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
+        if((CurInputType[2] == SIFC_BWORLD) || (cspec == SIS_DATACH)) {
             if(keyonly(F8)) {
                 barcoder ^= 1;
                 if(!barcoder) {
-                    if(InputType[2] == SIFC_BWORLD) {
+                    if(CurInputType[2] == SIFC_BWORLD) {
                         strcpy((char *)&BWorldData[1], (char *)bbuf);
                         BWorldData[0] = 1;
                     } else {
@@ -999,7 +999,7 @@ FCEUD_UpdateInput()
     KeyboardCommands();
 
     for(x = 0; x < 2; x++) {
-        switch(InputType[x]) {
+        switch(CurInputType[x]) {
         case SI_GAMEPAD:
             t |= 1;
             break;
@@ -1016,7 +1016,7 @@ FCEUD_UpdateInput()
         }
     }
 
-    switch(InputType[2]) {
+    switch(CurInputType[2]) {
     case SIFC_ARKANOID:
         t |= 2;
         break;
@@ -1063,13 +1063,13 @@ void FCEUD_SetInput(bool fourscore, bool microphone, ESI port0, ESI port1, ESIFC
 	eoptions &= ~EO_FOURSCORE;
 	if(fourscore) { // Four Score emulation, only support gamepads, nothing else
 		eoptions |= EO_FOURSCORE;
-		InputType[0] = SI_GAMEPAD; // Controllers 1 and 3
-		InputType[1] = SI_GAMEPAD; // Controllers 2 and 4
-		InputType[2] = SIFC_NONE;  // No extension
+		CurInputType[0] = SI_GAMEPAD; // Controllers 1 and 3
+		CurInputType[1] = SI_GAMEPAD; // Controllers 2 and 4
+		CurInputType[2] = SIFC_NONE;  // No extension
 	} else { // no Four Core emulation, check the config/movie file for controller types
-        	InputType[0]=port0;
-		InputType[1]=port1;
-		InputType[2]=fcexp;
+        	CurInputType[0]=port0;
+		CurInputType[1]=port1;
+		CurInputType[2]=fcexp;
 	}
     
 	replaceP2StartWithMicrophone = microphone;
@@ -1093,7 +1093,7 @@ InitInputInterface()
         attrib    = 0;
         InputDPtr = 0;
 
-        switch(InputType[x]) {
+        switch(CurInputType[x]) {
         case SI_POWERPADA:
         case SI_POWERPADB:
             InputDPtr = &powerpadbuf[x];
@@ -1111,12 +1111,12 @@ InitInputInterface()
             attrib = 1;
             break;
         }
-        FCEUI_SetInput(x, (ESI)InputType[x], InputDPtr, attrib);
+        FCEUI_SetInput(x, (ESI)CurInputType[x], InputDPtr, attrib);
     }
 
     attrib    = 0;
     InputDPtr = 0;
-    switch(InputType[2]) {
+    switch(CurInputType[2]) {
     case SIFC_SHADOW:
         InputDPtr = MouseData;
         t |= 1;
@@ -1155,7 +1155,7 @@ InitInputInterface()
         break;
     }
 
-    FCEUI_SetInputFC((ESIFC)InputType[2], InputDPtr, attrib);
+    FCEUI_SetInputFC((ESIFC)CurInputType[2], InputDPtr, attrib);
     FCEUI_SetInputFourscore((eoptions & EO_FOURSCORE)!=0);
 }
 
