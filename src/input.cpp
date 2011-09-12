@@ -652,7 +652,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_PAUSE,							EMUCMDTYPE_MISC,	FCEUI_ToggleEmulationPause, 0, 0, "Pause", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", EMUCMDFLAG_TASEDIT },
+	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", 0 },
 	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	FCEUI_DoExit,			  0, 0, "Exit", 0},
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", EMUCMDFLAG_TASEDIT },

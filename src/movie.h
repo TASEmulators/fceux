@@ -13,6 +13,8 @@
 #include "utils/guid.h"
 #include "utils/md5.h"
 
+extern int InputType[3];
+
 struct FCEUFILE;
 
 enum EMOVIE_FLAG
@@ -39,6 +41,7 @@ typedef struct
 	int movie_version;					// version of the movie format in the file
 	uint32 num_frames;
 	uint32 rerecord_count;
+	uint32 tweak_count;
 	bool poweron, pal, nosynchack, ppuflag;
 	bool reset; //mbg 6/21/08 - this flag isnt used anymore.. but maybe one day we can scan it out of the first record in the movie file
 	uint32 emu_version_used;				// 9813 = 0.98.13
@@ -90,9 +93,9 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size);
 void FCEUMOV_PreLoad();
 bool FCEUMOV_PostLoad();
 
-void FCEUMOV_EnterTasEdit();
-void FCEUMOV_ExitTasEdit();
 bool FCEUMOV_FromPoweron();
+
+void CreateCleanMovie();
 
 class MovieData;
 class MovieRecord
@@ -231,8 +234,9 @@ public:
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
 	int dump(EMUFILE* os, bool binary);
+	void clearGreenzone();
 	int dumpGreenzone(EMUFILE *os, bool binary);
-	int loadGreenzone(EMUFILE *is, bool binary);
+	bool loadGreenzone(EMUFILE *is, bool binary);
 
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);

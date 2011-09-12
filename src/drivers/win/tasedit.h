@@ -39,6 +39,7 @@
 #define COLUMN_JOYPAD4_L 32
 #define COLUMN_JOYPAD4_R 33
 #define COLUMN_FRAMENUM2 34
+
 // listview colors
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
 #define CUR_FRAMENUM_COLOR 0xFCF1CE
@@ -56,8 +57,11 @@
 // -----------------------------
 void DoTasEdit();
 void UpdateTasEdit();
-void CreateProject(MovieData data);
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
 void FollowPlayback();
+void AddFourscoreColumns();
+void RemoveFourscoreColumns();
+void EnterTasEdit();
+void ExitTasEdit();

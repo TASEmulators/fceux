@@ -177,6 +177,8 @@ void UpdateReplayDialog(HWND hwndDlg)
 
 			sprintf(tmp, "%u", (unsigned)info.rerecord_count);
 			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT), tmp);                   // rerecord
+			sprintf(tmp, "%u", (unsigned)info.tweak_count);
+			SetWindowTextA(GetDlgItem(hwndDlg,IDC_LABEL_TWEAKCOUNT), tmp);
 
 			SendDlgItemMessage(hwndDlg,IDC_CHECK_READONLY,BM_SETCHECK,(replayReadOnlySetting ? BST_CHECKED : BST_UNCHECKED), 0);
 
@@ -271,6 +273,7 @@ void UpdateReplayDialog(HWND hwndDlg)
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_LENGTH),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_FRAMES),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_UNDOCOUNT),"");
+		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_TWEAKCOUNT),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMUSED),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_ROMCHECKSUM),"");
 		SetWindowText(GetDlgItem(hwndDlg,IDC_LABEL_RECORDEDFROM),"");

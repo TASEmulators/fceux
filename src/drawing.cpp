@@ -420,7 +420,7 @@ void DrawTextTransWH(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor, i
 		wid = JoedCharWidth(*textmsg);
 
 		int newx = x+wid;
-		if(newx >= width) { x=beginx; y+=8; }
+		if(newx >= (int)width) { x=beginx; y+=8; }
 
 		for(int ny=0; ny<7; ++ny)
 		{

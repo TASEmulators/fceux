@@ -463,10 +463,12 @@ void InitInputPorts(bool fourscore)
 
 	int attrib;
 
-	if(fourscore) {
+	if(fourscore)
+	{
 		FCEUI_SetInput(0,SI_GAMEPAD,&JSreturn,0);
 		FCEUI_SetInput(1,SI_GAMEPAD,&JSreturn,0);
-	} else {
+	} else
+	{
 		for(int i=0;i<2;i++)
 		{
 			attrib=0;

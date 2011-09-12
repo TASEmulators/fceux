@@ -24,14 +24,16 @@ using namespace std;
 int TasEdit_wndx, TasEdit_wndy;
 bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
+bool TASEdit_show_tweak_count = false;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
+char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
 
 HWND hwndTasEdit = 0;
 
 static HMENU hmenu, hrmenu;
 static int lastCursor;
-static HWND hwndList, hwndHeader;
+static HWND hwndList, hwndHeader, hwndTweakCount;
 static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
 
 typedef std::set<int> TSelectionFrames;
@@ -169,8 +171,32 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void CreateProject(MovieData data)
+void EnterTasEdit()
 {
+	if (movieMode == MOVIEMODE_INACTIVE)
+	{
+		FCEUI_StopMovie();
+		CreateCleanMovie();
+		//reset the rom
+		poweron(true);
+		currFrameCounter = 0;
+	}
+	else
+	{
+		//use current movie to create a new project
+		FCEUI_StopMovie();
+	}
+	// pause the emulator and enter tasedit mode
+	FCEUI_SetEmulationPaused(1);
+	movieMode = MOVIEMODE_TASEDIT;
+	currMovieData.TryDumpIncremental();
+	FCEU_DispMessage("Tasedit engaged",0);
+}
+void ExitTasEdit()
+{
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessage("Tasedit disengaged",0);
+	CreateCleanMovie();
 }
 
 // called from the rest of the emulator when things happen and the tasedit should change to reflect it
@@ -224,6 +250,10 @@ void RedrawList()
 {
 	InvalidateRect(hwndList,0,FALSE);
 }
+void RedrawTasedit()
+{
+	InvalidateRect(hwndTasEdit,0,FALSE);
+}
 
 enum ECONTEXTMENU
 {
@@ -273,14 +303,6 @@ void RightClick(LPNMITEMACTIVATE info)
 	RightClickMenu(info);
 }
 
-void LockGreenZone(int newstart)
-{
-	for (int i=1; i<newstart; ++i)
-	{
-		currMovieData.savestates[i].clear();
-	}
-}
-
 void InvalidateGreenZone(int after)
 {
 	if (currMovieData.greenZoneCount > after+1)
@@ -288,7 +310,7 @@ void InvalidateGreenZone(int after)
 		currMovieData.greenZoneCount = after+1;
 		// increase tweakCount
 		currMovieData.tweakCount++;
-		InvalidateRect(hwndTasEdit,0,FALSE);
+		RedrawTasedit();
 		if (currFrameCounter >= currMovieData.greenZoneCount)
 			JumpToFrame(currMovieData.greenZoneCount-1);
 	}
@@ -354,7 +376,11 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		return;
 
 	//if the icon or frame columns were double clicked:
-	if(info->iSubItem == COLUMN_ARROW || info->iSubItem == COLUMN_FRAMENUM || info->iSubItem == COLUMN_FRAMENUM2)
+	if(info->iSubItem == COLUMN_ARROW)
+	{
+		// set bookmark (of current bookmark slot) here
+
+	} else if(info->iSubItem == COLUMN_FRAMENUM || info->iSubItem == COLUMN_FRAMENUM2)
 	{
 		JumpToFrame(index);
 	}
@@ -794,8 +820,28 @@ static void InitDialog()
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// pads columns
 	lvc.cx = 20;
-	char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-	for (int joy = 0; joy < NUM_JOYPADS; ++joy)
+	// add pads 1 and 2
+	for (int joy = 0; joy < 2; ++joy)
+	{
+		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
+		{
+			lvc.pszText = buttonNames[btn];
+			ListView_InsertColumn(hwndList, colidx++, &lvc);
+		}
+	}
+	// add pads 3 and 4 and frame_number2
+	if (currMovieData.fourscore) AddFourscoreColumns();
+
+	//the initial update
+	UpdateTasEdit();
+}
+void AddFourscoreColumns()
+{
+	LVCOLUMN lvc;
+	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
+	lvc.cx = 20;
+	int colidx = COLUMN_JOYPAD3_A;
+	for (int joy = 0; joy < 2; ++joy)
 	{
 		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 		{
@@ -807,10 +853,13 @@ static void InitDialog()
 	lvc.cx = 92;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	//-----------------------------
-
-	//the initial update
-	UpdateTasEdit();
+}
+void RemoveFourscoreColumns()
+{
+	for (int i = COLUMN_FRAMENUM2; i >= COLUMN_JOYPAD3_A; --i)
+	{
+		ListView_DeleteColumn (hwndList, i);
+	}
 }
 
 bool CheckSaveChanges()
@@ -821,23 +870,20 @@ bool CheckSaveChanges()
 
 void KillTasEdit()
 {
-	if (!CheckSaveChanges())
-		return;
+	if (!CheckSaveChanges()) return;
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
-	turbo=false;
-	FCEUMOV_ExitTasEdit();
+	turbo = false;
+	ExitTasEdit();
 }
 
 //Creates a new TASEdit Project
 static void NewProject()
 {
-//determine if current project changed
-//if so, ask to save changes
-//close current project
-
-	if (!CheckSaveChanges())
-		return;
+	//determine if current project changed
+	//if so, ask to save changes
+	//close current project
+	if (!CheckSaveChanges()) return;
 
 	//TODO: close current project instance, create a new one with a non-parameterized constructor
 }
@@ -871,7 +917,8 @@ static void OpenProject()
 	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	
 	ofn.lpstrInitialDir=initdir.c_str();
 
-	if(GetOpenFileName(&ofn)){							//If it is a valid filename
+	if(GetOpenFileName(&ofn))							//If it is a valid filename
+	{							
 		std::string tempstr = nameo;					//Make a temporary string for filename
 		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
 		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
@@ -887,13 +934,21 @@ static void OpenProject()
 			filename.append(ext);						//Stick extension back on...
 			project.SetProjectFile(filename);			//And update the project's filename.
 		}
-		project.SetProjectName(GetRomName());			//Set the project's name to the ROM name
+		//Set the project's name to the ROM name
+		project.SetProjectName(GetRomName());
+		//Set the fm2 name
 		std::string thisfm2name = project.GetProjectName();
-		thisfm2name.append(".fm2");						//Setup the fm2 name
-		project.SetFM2Name(thisfm2name);				//Set the project's fm2 name
+		thisfm2name.append(".fm2");
+		project.SetFM2Name(thisfm2name);
+		// load project and change number of listview columns if needed
+		bool last_fourscore = currMovieData.fourscore;
 		project.LoadProject(project.GetProjectFile());
+		if (last_fourscore && !currMovieData.fourscore)
+			RemoveFourscoreColumns();
+		else if (!last_fourscore && currMovieData.fourscore)
+			AddFourscoreColumns();
+		FollowPlayback();
 	}
-
 }
 
 // Saves current project
@@ -997,7 +1052,7 @@ static void Truncate()
 	
 	currMovieData.truncateAt(frame+1);
 	InvalidateGreenZone(frame);
-	currMovieData.TryDumpIncremental();
+	//currMovieData.TryDumpIncremental();
 	UpdateTasEdit();
 
 }
@@ -1051,8 +1106,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_PAINT:
 			{
 				char temp[128];
-				sprintf(temp,"TweakCount: %d\n",currMovieData.tweakCount);
-				SetWindowText(GetDlgItem(hwndDlg,IDC_TWEAKCOUNT),temp);
+				if (TASEdit_show_tweak_count)
+					sprintf(temp,"Tweak count: %d\n",currMovieData.tweakCount);
+				else
+					sprintf(temp,"");
+				SetWindowText(hwndTweakCount,temp);
+				RedrawTasedit();
 			}
 			break;
 		case WM_INITDIALOG:
@@ -1061,6 +1120,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
+			hwndTweakCount = GetDlgItem(hwndDlg,IDC_TWEAKCOUNT);
 			InitDialog();
 			break; 
 
@@ -1272,10 +1332,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				FollowPlayback();
 				break;
 			case ID_VIEW_SHOW_LAG_FRAMES:
-				//switch "Show lag frames" flag
+				//switch "Highlight lag frames" flag
 				TASEdit_show_lag_frames ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 				RedrawList();
+				break;
+			case ID_VIEW_SHOW_TWEAK_COUNT:
+				//switch "Show Tweak count" flag
+				TASEdit_show_tweak_count ^= 1;
+				CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
+				
+				//RedrawList();
 				break;
 
 			}
@@ -1300,23 +1367,23 @@ void FollowPlayback()
 
 void DoTasEdit()
 {
-	if(!FCEU_IsValidUI(FCEUI_TASEDIT))
-		return;
+	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return;
 
 	lastCursor = -1;
-	if(!hwndTasEdit) 
-		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
-	hmenu = GetMenu(hwndTasEdit);
-	hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
-	// check option ticks
-	CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
+	EnterTasEdit();
 
+	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
 	if(hwndTasEdit)
 	{
 		KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
 		JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
-		FCEUMOV_EnterTasEdit();
+		hmenu = GetMenu(hwndTasEdit);
+		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
+		// check option ticks
+		CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
+
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
 }

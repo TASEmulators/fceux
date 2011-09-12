@@ -390,10 +390,10 @@ MovieData::MovieData()
 	, palFlag(false)
 	, PPUflag(false)
 	, rerecordCount(0)
+	, tweakCount(0)
 	, binaryFlag(false)
 	, greenZoneCount(0)
 	, microphone(false)
-	, tweakCount(0)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
 }
@@ -416,6 +416,8 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,emuVersion);
 	else if(key == "rerecordCount")
 		installInt(val,rerecordCount);
+	else if(key == "tweakCount")
+		installInt(val,tweakCount);
 	else if(key == "palFlag")
 		installBool(val,palFlag);
 	else if(key == "romFilename")
@@ -462,6 +464,7 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	os->fprintf("version %d\n", version);
 	os->fprintf("emuVersion %d\n", emuVersion);
 	os->fprintf("rerecordCount %d\n", rerecordCount);
+	os->fprintf("tweakCount %d\n", tweakCount);
 	os->fprintf("palFlag %d\n" , (palFlag?1:0) );
 	os->fprintf("romFilename %s\n" , romFilename.c_str() );
 	os->fprintf("romChecksum %s\n" , BytesToString(romChecksum.data,MD5DATA::size).c_str() );
@@ -471,8 +474,8 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	os->fprintf("port0 %d\n" , ports[0] );
 	os->fprintf("port1 %d\n" , ports[1] );
 	os->fprintf("port2 %d\n" , ports[2] );
-	os->fprintf("FDS %d\n" , isFDS?1:0 );
-	os->fprintf("NewPPU %d\n" , newppu?1:0 );
+	os->fprintf("FDS %d\n" , fds?1:0 );
+	os->fprintf("NewPPU %d\n" , PPUflag?1:0 );
 
 	for(uint32 i=0;i<comments.size();i++)
 		os->fprintf("comment %s\n" , wcstombs(comments[i]).c_str() );
@@ -504,47 +507,89 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	return end-start;
 }
 
+void MovieData::clearGreenzone()
+{
+	int size = currMovieData.savestates.size();
+	for (int i = 1; i < size; ++i)
+	{
+		currMovieData.savestates[i].clear();
+	}
+	greenZoneCount = 1;
+	currMovieData.frames_flags.resize(1);
+	// reset lua_colorings
+	// reset monitorings
+	
+}
+
 int MovieData::dumpGreenzone(EMUFILE *os, bool binary)
 {
+	// save savestates
 	int start = os->ftell();
 	int frame, size;
-	for (int i=0; i<(int)savestates.size(); ++i)
+	write32le(greenZoneCount, os);
+	for (frame = 0; frame < greenZoneCount; ++frame)
 	{
-		if (savestates[i].empty())
-			continue;
-		frame=i;
-		size=savestates[i].size();
+		if (savestates[frame].empty()) continue;
 		write32le(frame, os);
+		size = savestates[frame].size();
 		write32le(size, os);
+		// write savestate
+		os->fwrite(&savestates[frame][0], size);
+		// write frames_flags
+		os->fwrite(&frames_flags[frame], 1);
+		// write lua_colorings
+		// write monitorings
 
-		os->fwrite(&savestates[i][0], size);
 	}
-	frame=-1;
-	size=currMovieData.greenZoneCount;
-	write32le(frame, os);
-	write32le(size, os);
+	// write -1 as eof for greenzone
+	write32le(-1, os);
+	// finally write playback cursor position
+	write32le(currFrameCounter, os);
 
-	int end= os->ftell();
-
+	int end = os->ftell();
 	return end-start;
 }
 
-int MovieData::loadGreenzone(EMUFILE *is, bool binary)
+bool MovieData::loadGreenzone(EMUFILE *is, bool binary)
 {
-	int frame, size;
-	while(1)
+	clearGreenzone();
+	int frame = 0, prev_frame = 0, size = 0;
+	if (read32le((uint32 *)&size, is))
 	{
-		if (!read32le((uint32 *)&frame, is)) {size=0; break;}
-		if (!read32le((uint32 *)&size, is)) {size=0; break;} 
-		if (frame==-1) break;
-		int pos = is->ftell();
-		FCEUSS_LoadFP(is, SSLOADPARAM_NOBACKUP);
-		storeTasSavestate(frame, Z_DEFAULT_COMPRESSION);
-		is->fseek(pos+size,SEEK_SET);
-	}
-	greenZoneCount=size;
+		greenZoneCount = size;
+		frames_flags.resize(size);
+		savestates.resize(size);
+		while(1)
+		{
+			if (!read32le((uint32 *)&frame, is)) break;
+			if (frame == -1) break;
+			if (!read32le((uint32 *)&size, is)) break;
 
-	return 1;
+			if ((int)savestates.size() <= frame) savestates.resize(frame+1);
+			// load savestate
+			savestates[frame].resize(size);
+			if ((int)is->fread((char*)&savestates[frame][0],size) < size) break;
+			// load frames_flags
+			if ((int)is->fread(&frames_flags[frame],1) != 1) break;
+			// load lua_colorings
+			// load monitorings
+
+			prev_frame = frame;
+		}
+		greenZoneCount = prev_frame+1;	// cut greenZoneCount to last good frame
+		if (frame == -1)
+		{
+			// everything went fine - load savestate at cursor position
+			if (read32le((uint32 *)&currFrameCounter, is) && currMovieData.loadTasSavestate(currFrameCounter))
+			{
+				return true;
+			}
+		} else
+		{
+			// there was some error while reading greenzone
+		}
+	}
+	return false;
 }
 
 
@@ -636,6 +681,8 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
     std::string a("length"), b("-1");
 	// Non-TAS projects consume until EOF
 	movieData.installValue(a, b);
+    std::string a1("tweakCount"), b1("0");
+	movieData.installValue(a1, b1);
 
 	//first, look for an fcm signature
 	char fcmbuf[3];
@@ -824,59 +871,23 @@ void poweron(bool shouldDisableBatteryLoading)
 	disableBatteryLoading = 0;
 }
 
-
-
-void FCEUMOV_EnterTasEdit()
+void CreateCleanMovie()
 {
-	//If no movie, start a new project, currMovieData will serve as the "main branch" file, so give it a filename and save that into the project
-	//Dump all header info int ot the project file
-
-	//Else use the currentmovie to create a new project
-
-	//BIG TODO: Why is this tasedit stuff in movie.cpp? Let's movie it out, it is win32 only anyway
-	if (movieMode == MOVIEMODE_INACTIVE)
-	{
-		//stop any current movie activity
-		FCEUI_StopMovie();
-		//clear the current movie
-		currFrameCounter = 0;
-		currMovieData = MovieData();
-		currMovieData.guid.newGuid();
-		currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
-		currMovieData.romChecksum = GameInfo->MD5;
-		currMovieData.romFilename = FileBase;
-
-		//reset the rom
-		poweron(false);
-	} 
-	else 
-	{
-		FCEUI_StopMovie();
-		currMovieData.greenZoneCount=currFrameCounter;
-	}
-
-	//todo - think about this
-	//ResetInputTypes();
-	//todo - maybe this instead
-	//FCEUD_SetInput(currMovieData.fourscore,currMovieData.microphone,(ESI)currMovieData.ports[0],(ESI)currMovieData.ports[1],(ESIFC)currMovieData.ports[2]);
-
-#ifdef WIN32
-	CreateProject(currMovieData);
-#endif
-
-	FCEUI_SetEmulationPaused(1); //pause the emulator
-
-	//and enter tasedit mode
-	movieMode = MOVIEMODE_TASEDIT;
-	currMovieData.TryDumpIncremental();
-	FCEU_DispMessage("Tasedit engaged",0);
-}
-
-void FCEUMOV_ExitTasEdit()
-{
-	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("Tasedit disengaged",0);
 	currMovieData = MovieData();
+	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
+	currMovieData.romFilename = FileBase;
+	currMovieData.romChecksum = GameInfo->MD5;
+	currMovieData.guid.newGuid();
+	currMovieData.fourscore = FCEUI_GetInputFourscore();
+	currMovieData.microphone = FCEUI_GetInputMicrophone();
+	//currMovieData.ports[0] = InputType[0];
+	//currMovieData.ports[1] = InputType[1];
+	//currMovieData.ports[2] = InputType[2];
+	currMovieData.ports[0] = joyports[0].type;
+	currMovieData.ports[1] = joyports[1].type;
+	currMovieData.ports[2] = portFC.type;
+	currMovieData.fds = isFDS;
+	currMovieData.PPUflag = (newppu != 0);
 }
 
 bool FCEUMOV_FromPoweron()
@@ -985,8 +996,7 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	{
 		currFrameCounter = 0;
 		pauseframe = _pauseframe;
-
-		currMovieData.TryDumpIncremental();
+		//currMovieData.TryDumpIncremental();
 	}
 	else
 	{
@@ -1045,19 +1055,9 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 	currFrameCounter = 0;
 	LagCounterReset();
-
-	currMovieData = MovieData();
-	currMovieData.guid.newGuid();
-
+	CreateCleanMovie();
 	if(author != L"") currMovieData.comments.push_back(L"author " + author);
-	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
-	currMovieData.romChecksum = GameInfo->MD5;
-	currMovieData.romFilename = FileBase;
-	currMovieData.fourscore = FCEUI_GetInputFourscore();
-	currMovieData.microphone = FCEUI_GetInputMicrophone();
-	currMovieData.ports[0] = joyports[0].type;
-	currMovieData.ports[1] = joyports[1].type;
-	currMovieData.ports[2] = portFC.type;
+
 
 	if(flags & MOVIE_FLAG_FROM_POWERON)
 	{
@@ -1635,6 +1635,7 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.emu_version_used = md.emuVersion;
 	info.name_of_rom_used = md.romFilename;
 	info.rerecord_count = md.rerecordCount;
+	info.tweak_count = md.tweakCount;
 	info.comments = md.comments;
 	info.subtitles = md.subtitles;
 

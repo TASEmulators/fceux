@@ -261,6 +261,7 @@
 #define IDC_LABEL_NEWPPUUSED            310
 #define MENU_PAL                        311
 #define IDC_DEBUGGER_VAL_SPR            311
+#define IDC_LABEL_TWEAKCOUNT            311
 #define IDC_DEBUGGER_BOOKMARK           312
 #define MENU_DIRECTORIES                320
 #define MENU_INPUT                      321
@@ -807,8 +808,9 @@
 #define IDC_C_WATCH_Separa              40416
 #define ID_GAME_USECONFIG               40417
 #define FCEUX_CONTEXT_GUICONFIG         40418
-#define ID_VIEW_FOLLOW_PLAYBACK		40419
-#define ID_VIEW_SHOW_LAG_FRAMES		40420
+#define ID_VIEW_FOLLOW_PLAYBACK         40419
+#define ID_VIEW_SHOW_LAG_FRAMES         40420
+#define ID_VIEW_SHOW_TWEAK_COUNT        40421
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -818,7 +820,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40421
+#define _APS_NEXT_COMMAND_VALUE         40422
 #define _APS_NEXT_CONTROL_VALUE         1261
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

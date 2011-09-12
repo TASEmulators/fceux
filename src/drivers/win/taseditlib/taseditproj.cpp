@@ -86,12 +86,13 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 
 	char branchname;
 	branchname = ifs.fgetc(); // TODO: Add main branch name. 
-	currMovieData.loadGreenzone(&ifs, true);
-
-	poweron(true);
-	currFrameCounter = currMovieData.greenZoneCount;
-	currMovieData.TryDumpIncremental();
-
+	currMovieData.clearGreenzone();
+	if (!currMovieData.loadGreenzone(&ifs, true))
+	{
+		// there was some error while loading greenzone - reset playback to frame 0
+		poweron(true);
+		currFrameCounter = 0;
+	}
 	changed=false;
 	return true;
 }
