@@ -13,8 +13,6 @@
 #include "utils/guid.h"
 #include "utils/md5.h"
 
-extern int InputType[3];
-
 struct FCEUFILE;
 
 enum EMOVIE_FLAG

@@ -1094,23 +1094,23 @@ void FCEUMOV_AddInputState()
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if(movie_readonly)
+		if(movie_readonly || turbo || pauseframe > currFrameCounter)
 		{
+			// do not record buttons
 			//reset if necessary
-			if(mr->command_reset())
-				ResetNES();
-
+			if(mr->command_reset()) ResetNES();
 			joyports[0].load(mr);
 			joyports[1].load(mr);
 		}
 		else
 		{
+			// record buttons
 			if (currMovieData.greenZoneCount>currFrameCounter+1)
 			{
-				
 				InvalidateGreenZone(currFrameCounter);
-				
 			}
+			// TODO: multitracking
+
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			mr->commands = 0;

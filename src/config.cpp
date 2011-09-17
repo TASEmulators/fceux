@@ -23,7 +23,7 @@ Current Contributors:\n\
 punkrockguy318 (Lukas Sabota)\n\
 Plombo (Bryan Cain)\n\
 qeed, QFox, Shinydoofy, ugetab\n\
-CaH4e3, gocha, Acmlm, DWEdit\n\
+CaH4e3, gocha, Acmlm, DWEdit, AnS\n\
 \n\
 FCEUX 2.0:\n\
 mz, nitsujrehtona, Lukas Sabota,\n\

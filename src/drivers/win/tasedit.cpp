@@ -21,10 +21,14 @@ using namespace std;
 //to change header font
 //http://forums.devx.com/archive/index.php/t-37234.html
 
+int old_movie_readonly = -1;
+
+// vars saved in cfg file
 int TasEdit_wndx, TasEdit_wndy;
 bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_tweak_count = false;
+bool TASEdit_restore_position = false;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
@@ -34,6 +38,7 @@ HWND hwndTasEdit = 0;
 static HMENU hmenu, hrmenu;
 static int lastCursor;
 static HWND hwndList, hwndHeader, hwndTweakCount;
+static RECT rectTweakCount;
 static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
 
 typedef std::set<int> TSelectionFrames;
@@ -171,27 +176,6 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void EnterTasEdit()
-{
-	if (movieMode == MOVIEMODE_INACTIVE)
-	{
-		FCEUI_StopMovie();
-		CreateCleanMovie();
-		//reset the rom
-		poweron(true);
-		currFrameCounter = 0;
-	}
-	else
-	{
-		//use current movie to create a new project
-		FCEUI_StopMovie();
-	}
-	// pause the emulator and enter tasedit mode
-	FCEUI_SetEmulationPaused(1);
-	movieMode = MOVIEMODE_TASEDIT;
-	currMovieData.TryDumpIncremental();
-	FCEU_DispMessage("Tasedit engaged",0);
-}
 void ExitTasEdit()
 {
 	movieMode = MOVIEMODE_INACTIVE;
@@ -211,8 +195,6 @@ void UpdateTasEdit()
 			FCEUI_ToggleEmulationPause();
 			turbo = false;
 		}
-		else if (turbo && (currFrameCounter &0xf))
-			return;
 	}
 
 	//update the number of items
@@ -225,15 +207,15 @@ void UpdateTasEdit()
 	//update the cursor
 	if(currFrameCounter != lastCursor)
 	{
-		//update the old and new rows
-		ListView_Update(hwndList,lastCursor);
-		ListView_Update(hwndList,currFrameCounter);
-		lastCursor = currFrameCounter;
 		FollowPlayback();
+		//update the old and new rows
+		ListView_RedrawItems(hwndList,lastCursor,lastCursor);
+		ListView_RedrawItems(hwndList,currFrameCounter,currFrameCounter);
+		UpdateWindow(hwndList);
+		lastCursor = currFrameCounter;
 	}
-
-	static int old_movie_readonly=-1;
-	if ((!old_movie_readonly) == movie_readonly) //Originally (old_movie_readonly = movie_readonly)
+	// update window caption
+	if ((!old_movie_readonly) == movie_readonly)
 	{
 		old_movie_readonly = movie_readonly;
 		if (movie_readonly)
@@ -253,6 +235,10 @@ void RedrawList()
 void RedrawTasedit()
 {
 	InvalidateRect(hwndTasEdit,0,FALSE);
+}
+void RedrawTweakCount()
+{
+	InvalidateRect(hwndTasEdit,&rectTweakCount,FALSE);
 }
 
 enum ECONTEXTMENU
@@ -310,10 +296,22 @@ void InvalidateGreenZone(int after)
 		currMovieData.greenZoneCount = after+1;
 		// increase tweakCount
 		currMovieData.tweakCount++;
-		RedrawTasedit();
+		RedrawTweakCount();
+		// either set playback cursor to the end of greenzone or run seeking to restore playback position
 		if (currFrameCounter >= currMovieData.greenZoneCount)
-			JumpToFrame(currMovieData.greenZoneCount-1);
+		{
+			if (TASEdit_restore_position)
+			{
+				JumpToFrame(currFrameCounter);
+				turbo = true;
+			} else
+			{
+				JumpToFrame(currMovieData.greenZoneCount-1);
+			}
+		}
 	}
+	// redraw list even if greenzone didn't change
+	RedrawList();
 }
 
 /* A function that tries jumping to a given frame.  If unsuccessful, it than tries to jump to
@@ -331,12 +329,9 @@ bool JumpToFrame(int index)
 		if (JumpToFrame(currMovieData.greenZoneCount-1))
 		{
 			// continue from the end of greenzone
-			if (FCEUI_EmulationPaused())
-				FCEUI_ToggleEmulationPause();
-
+			if (FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
 			turbo = (currMovieData.greenZoneCount-1+FRAMES_TOO_FAR < index);
-			pauseframe=index+1;
-
+			pauseframe = index+1;
 			return true;
 		}
 		return false;
@@ -403,13 +398,9 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		{
 			//update one row
 			currMovieData.records[index].toggleBit(joy,bit);
-			
-			ListView_Update(hwndList,index);
+			//ListView_RedrawItems(hwndList,index,index);
 		}
-
 		InvalidateGreenZone(index);
-		//redraw everything to show the reduced green zone
-		RedrawList();
 	}
 }
 
@@ -440,8 +431,6 @@ static void InsertFrames()
 		currMovieData.insertEmpty(*it,1);
 	}
 
-	if (currFrameCounter>=*selectionFrames.begin()) 
-		JumpToFrame(*selectionFrames.begin());
 	InvalidateGreenZone(*selectionFrames.begin());
 	UpdateTasEdit();
 	RedrawList();
@@ -468,15 +457,9 @@ static void DeleteFrames()
 
 	int index = *selectionFrames.begin();
 	if (index>0) --index;
-	InvalidateGreenZone(index);
-
-	//in the particular case of deletion, we need to make sure we reset currFrameCounter to something reasonable
-	//why not the current green zone max?
-	if (currFrameCounter>=index) 
-		JumpToFrame(index);
 	ClearSelection();
+	InvalidateGreenZone(index);
 	UpdateTasEdit();
-	RedrawList();
 }
 
 //the column set operation, for setting a button for a span of selected values
@@ -518,17 +501,8 @@ static void ColumnSet(int column)
 	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 	{
 		currMovieData.records[*it].setBitValue(joy,button,newValue);
-		//we would do this if we wanted to update the affected record. but that results in big operations
-		//redrawing once per item set, which causes it to flicker and take forever.
-		//so now we rely on the update at the end.
-		//ListView_Update(hwndList,*it);
 	}
-
-	//reduce the green zone
 	InvalidateGreenZone(*selectionFrames.begin());
-
-	//redraw everything to show the reduced green zone
-	RedrawList();
 }
 
 //Highlights all frames in current input log
@@ -696,11 +670,8 @@ static bool Paste()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
-
-			// Invalidate and redraw.
 			InvalidateGreenZone(*selectionFrames.begin());
-			RedrawList();
-			result=true;
+			result = true;
 		}
 
 		GlobalUnlock(hGlobal);
@@ -809,9 +780,9 @@ static void InitDialog()
 	//setup columns
 	LVCOLUMN lvc;
 	int colidx=0;
-	// arrow column - it's kinda obsolete now
+	// arrow column
 	lvc.mask = LVCF_WIDTH;
-	lvc.cx = 12;
+	lvc.cx = 14;
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// frame number column
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
@@ -819,7 +790,7 @@ static void InitDialog()
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// pads columns
-	lvc.cx = 20;
+	lvc.cx = 21;
 	// add pads 1 and 2
 	for (int joy = 0; joy < 2; ++joy)
 	{
@@ -839,7 +810,7 @@ void AddFourscoreColumns()
 {
 	LVCOLUMN lvc;
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
-	lvc.cx = 20;
+	lvc.cx = 21;
 	int colidx = COLUMN_JOYPAD3_A;
 	for (int joy = 0; joy < 2; ++joy)
 	{
@@ -1052,9 +1023,7 @@ static void Truncate()
 	
 	currMovieData.truncateAt(frame+1);
 	InvalidateGreenZone(frame);
-	//currMovieData.TryDumpIncremental();
 	UpdateTasEdit();
-
 }
 
 //likewise, handles a changed item range from the listview
@@ -1111,7 +1080,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				else
 					sprintf(temp,"");
 				SetWindowText(hwndTweakCount,temp);
-				RedrawTasedit();
 			}
 			break;
 		case WM_INITDIALOG:
@@ -1121,22 +1089,23 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
 			hwndTweakCount = GetDlgItem(hwndDlg,IDC_TWEAKCOUNT);
+			GetClientRect(hwndTweakCount, &rectTweakCount);
 			InitDialog();
 			break; 
 
-		case WM_MOVE: {
-				if (!IsIconic(hwndDlg)) {
-				RECT wrect;
-				GetWindowRect(hwndDlg,&wrect);
-				TasEdit_wndx = wrect.left;
-				TasEdit_wndy = wrect.top;
+		case WM_MOVE:
+			{
+				if (!IsIconic(hwndDlg))
+				{
+					RECT wrect;
+					GetWindowRect(hwndDlg,&wrect);
+					TasEdit_wndx = wrect.left;
+					TasEdit_wndy = wrect.top;
 
-				#ifdef WIN32
-				WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
-				#endif
+					WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
 				}
 				break;
-				  }
+			}
 
 		case WM_NOTIFY:
 
@@ -1254,16 +1223,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_EDIT_TRUNCATE:
 			case ID_CONTEXT_SELECTED_TRUNCATE:
 			case ID_CONTEXT_STRAY_TRUNCATE:
-			case IDC_HACKY1:
 				Truncate();
 				break;
-
-			case IDC_HACKY2:
-				//hacky2: delete earlier savestates (conserve memory)
-				//LockGreenZone(currFrameCounter);
-				//UpdateTasEdit();
-				break;
-
 			case ACCEL_CTRL_B:
 			case ID_EDIT_BRANCH:
 			case ID_CONTEXT_SELECTED_BRANCH:
@@ -1276,13 +1237,23 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 
 			case MENU_CONTEXT_STRAY_INSERTFRAMES:
+			case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 				{
 					int frames;
 					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
 					{
-						currMovieData.insertEmpty(currFrameCounter,frames);
-						InvalidateGreenZone(currFrameCounter);
-						RedrawList();
+						if (selectionFrames.size())
+						{
+							// insert at selection
+							int index = *selectionFrames.begin();
+							currMovieData.insertEmpty(index,frames);
+							InvalidateGreenZone(index);
+						} else
+						{
+							// insert at playback cursor
+							currMovieData.insertEmpty(currFrameCounter,frames);
+							InvalidateGreenZone(currFrameCounter);
+						}
 					}
 				}
 				break;
@@ -1341,8 +1312,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//switch "Show Tweak count" flag
 				TASEdit_show_tweak_count ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
-				
-				//RedrawList();
+				RedrawTweakCount();
+				break;
+			case CHECK_AUTORESTORE_PLAYBACK:
+				TASEdit_restore_position ^= 1;
+				CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 				break;
 
 			}
@@ -1365,13 +1339,32 @@ void FollowPlayback()
 	if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
 }
 
-void DoTasEdit()
+void EnterTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return;
 
 	lastCursor = -1;
-	EnterTasEdit();
 
+	// either start new project or use current movie
+	if (movieMode == MOVIEMODE_INACTIVE)
+	{
+		FCEUI_StopMovie();
+		CreateCleanMovie();
+		//reset the rom
+		poweron(true);
+		currFrameCounter = 0;
+	}
+	else
+	{
+		//use current movie to create a new project
+		FCEUI_StopMovie();
+	}
+	// pause the emulator and enter tasedit mode
+	FCEUI_SetEmulationPaused(1);
+	FCEU_DispMessage("Tasedit engaged",0);
+	movieMode = MOVIEMODE_TASEDIT;
+	currMovieData.TryDumpIncremental();
+	// window stuff
 	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
 	if(hwndTasEdit)
 	{
@@ -1383,6 +1376,7 @@ void DoTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}

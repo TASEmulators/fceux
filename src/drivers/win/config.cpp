@@ -70,6 +70,7 @@ extern int frameSkipAmt;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_tweak_count;
+extern bool TASEdit_restore_position;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -288,6 +289,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_follow_playback),
 	AC(TASEdit_show_lag_frames),
 	AC(TASEdit_show_tweak_count),
+	AC(TASEdit_restore_position),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

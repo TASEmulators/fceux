@@ -1904,7 +1904,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//  Removing this tool since it is redundant to both 
 			case ACCEL_CTRL_E:
 			case MENU_TASEDIT:
-				DoTasEdit();
+				EnterTasEdit();
 				break;
 			case MENU_CONVERT_MOVIE:
 				ConvertFCM(hWnd);

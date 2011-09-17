@@ -64,6 +64,9 @@ Driver maintenance and refactoring
 DWEdit
 Debugger additions
 
+AnS - ansstuff at yandex dot ru (sf:ansstuff)
+TASEdit enhancements
+
 ---------linux devvers---------
 >= 2.0 - These guys concentrated on keeping fceux the premiere 
          linux-portable nes emu

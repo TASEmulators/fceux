@@ -55,7 +55,8 @@
 #define LAG_INPUT_COLOR2 0xB8B3E2
 
 // -----------------------------
-void DoTasEdit();
+void EnterTasEdit();
+void ExitTasEdit();
 void UpdateTasEdit();
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
@@ -63,5 +64,6 @@ int FindBeginningOfGreenZone(int starting_index);
 void FollowPlayback();
 void AddFourscoreColumns();
 void RemoveFourscoreColumns();
-void EnterTasEdit();
-void ExitTasEdit();
+void RedrawList();
+void RedrawTasedit();
+void RedrawTweakCount();

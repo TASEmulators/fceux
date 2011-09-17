@@ -1,6 +1,25 @@
--r**** - FCEUX 2.1.5 release
-30-Jul-2001 - mart0258 - Ram Search updates list when emulator is paused (on Power, or when resetting search)
-4-Jul-2011 - FatRatKnight - Lua console now gets the proper file path when selecting a file from the recent menu.
+
+17-sept-2011 - AnS - Tasedit: forced read-only behaviour when seeking or holding turbo; "Auto-restore last position" checkbox in playback controls; also fixed item drawing method, no more flicker and slowdowns
+12-sept-2011 - prg318 - sdl: rename InputType to CurInputType due to variable of same name in src/movie.h
+12-sept-2011 - AnS - Tasedit: rewrote project save/load functions; various bugfixes; Added string "Tweak Count" to Replay loading dialog
+6-sept-2011 - AnS - Tasedit: red lines for lag frames; different method of accounting tweakCount
+6-sept-2011 - AnS - fixed bug when trying to open Replay dialog without having ROM loaded
+3-sept-2011 - AnS - Tasedit: tweaks and bugfixes
+3-sept-2011 - CaH4e3 - fixed bus conflict emulation, no kage no densetsu bug anymore
+31-Aug-2011 - AnS - Tasedit: Added 4 pads support; also now current frame is shown by blue line; minor cleanups.
+30-Aug-2011 - mart0258 - Ram Search updates list when emulator is paused (on Power, or when resetting search)
+25-Aug-2011 - zeromus - win32: fix context menus to use rightclicks in context menus correctly
+19-Aug-2011 - CaH4e3 - PAL/NTSC noise fixed
+18-Jul-2011 - zeromus - slightly improve hud text rendering wrapping
+16-Jul-2011 - adelikat - Add Button Count lua script written by Brandon Evans
+15-Jul-2011 - prg318 - sdl: patch to resolve 'XKeysymToString' complication errors on debian sid and osx (thanks antonio ospite!)
+6-Jul-2011 - plombo - sdl: fixed --nogui option and removed SDL.NoGUI from fceux.cfg
+5-Jul-2011 - FatRatKnight - Lua console now gets the proper file path when selecting a file from the recent menu.
+
+---r2206 - FCEUX 2.1.5 Released---
+---June 21 2011---
+
+16-Jun-2011 - zeromus - win32: poll hotkeys while no rom is loaded
 1-jun-2011 - prg318 - sdl - print usage when --help is passed even if SDL fails
 plombo - added stock icons to menu items
 plombo - added new gamepad configuration dialog
@@ -34,8 +53,9 @@ plombo - added new gamepad configuration dialog
 06-june-2010 - FatRatKnight - Added a return value to gui.text: The X position where the function would paint the next character.
 02-june-2010 - adelikat - Win32 - Movie Options Dialog - Fix so Full Savestate Load checkbox is updated on load
 
----r1984 - FCEUX 2.1.4a Release---
+---r1984 - FCEUX 2.1.4a Released---
 ---June 1 2010---
+
 01-june-2010 - zeromus - fix crash bug in fcm convert
 01-june-2010 - adelikat - fix logic error in read-only loadstate of movies, should not improperly report savestate after movie errors
 
