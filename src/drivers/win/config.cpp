@@ -71,6 +71,7 @@ extern bool TASEdit_follow_playback;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_tweak_count;
 extern bool TASEdit_restore_position;
+extern int TASEdit_greenzone_capacity;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -290,6 +291,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_lag_frames),
 	AC(TASEdit_show_tweak_count),
 	AC(TASEdit_restore_position),
+	AC(TASEdit_greenzone_capacity),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

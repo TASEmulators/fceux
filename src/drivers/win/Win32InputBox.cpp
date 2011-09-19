@@ -13,6 +13,9 @@ History
 - Lessened the complexity of the class, made it less generic (since its purpose is to be simple)
 - Updated the dialog template and made OK button as default button
 
+18-Sept-2011
+- AnS: added szResult initializing to GetInteger
+
 */
 
 typedef struct _MSDN_DLGTEMPLATEEX 
@@ -228,7 +231,8 @@ INT_PTR CWin32InputBox::GetInteger(
 {
   WIN32INPUTBOX_PARAM param;
 
-  char szResult[20] = {'0'};
+  char szResult[20];
+  itoa(result,szResult,10);
   param.szTitle = szTitle;
   param.szPrompt = szPrompt;
   param.szResult = szResult;

@@ -233,8 +233,8 @@ public:
 	void installValue(std::string& key, std::string& val);
 	int dump(EMUFILE* os, bool binary);
 	void clearGreenzone();
-	int dumpGreenzone(EMUFILE *os, bool binary);
-	bool loadGreenzone(EMUFILE *is, bool binary);
+	int dumpGreenzone(EMUFILE *os);
+	bool loadGreenzone(EMUFILE *is);
 
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);
@@ -245,6 +245,8 @@ public:
 	bool loadTasSavestate(int frame);
 	void storeTasSavestate(int frame, int compression_level);
 	void TryDumpIncremental();
+	void ClearGreenzoneTail();
+	void ClearSavestate(int index);
 
 private:
 	void installInt(std::string& val, int& var)

@@ -1902,7 +1902,6 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	DoByteMonitor(); 
 			//	break;
 			//  Removing this tool since it is redundant to both 
-			case ACCEL_CTRL_E:
 			case MENU_TASEDIT:
 				EnterTasEdit();
 				break;

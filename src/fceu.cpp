@@ -1039,6 +1039,7 @@ bool FCEU_IsValidUI(EFCEUI ui)
 
 	case FCEUI_TASEDIT:
 		if(!GameInfo) return false;
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT)) return false;
 		break;
 
 	case FCEUI_RESET:

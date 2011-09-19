@@ -1,6 +1,7 @@
 #include <set>
 #include <fstream>
 #include <sstream>
+#include <time.h>
 
 #include "common.h"
 #include "tasedit.h"
@@ -22,6 +23,10 @@ using namespace std;
 //http://forums.devx.com/archive/index.php/t-37234.html
 
 int old_movie_readonly = -1;
+int lastCursor;
+int old_pauseframe;
+bool old_show_pauseframe;
+bool show_pauseframe;
 
 // vars saved in cfg file
 int TasEdit_wndx, TasEdit_wndy;
@@ -29,6 +34,7 @@ bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_tweak_count = false;
 bool TASEdit_restore_position = false;
+int TASEdit_greenzone_capacity = GREENZONE_DEFAULT_CAPACITY;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
@@ -36,7 +42,6 @@ char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R
 HWND hwndTasEdit = 0;
 
 static HMENU hmenu, hrmenu;
-static int lastCursor;
 static HWND hwndList, hwndHeader, hwndTweakCount;
 static RECT rectTweakCount;
 static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
@@ -114,7 +119,7 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
 				// frame number
-				if (cell_y == currFrameCounter)
+				if (cell_y == currFrameCounter || (cell_y == pauseframe-1 && show_pauseframe))
 				{
 					// current frame
 					msg->clrTextBk = CUR_FRAMENUM_COLOR;
@@ -133,7 +138,7 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
-				if (cell_y == currFrameCounter)
+				if (cell_y == currFrameCounter || (cell_y == pauseframe-1 && show_pauseframe))
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
@@ -152,7 +157,7 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
 				// pad 2 or 4
-				if (cell_y == currFrameCounter)
+				if (cell_y == currFrameCounter || (cell_y == pauseframe-1 && show_pauseframe))
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR2;
@@ -174,13 +179,6 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	default:
 		return CDRF_DODEFAULT;
 	}
-}
-
-void ExitTasEdit()
-{
-	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("Tasedit disengaged",0);
-	CreateCleanMovie();
 }
 
 // called from the rest of the emulator when things happen and the tasedit should change to reflect it
@@ -209,11 +207,22 @@ void UpdateTasEdit()
 	{
 		FollowPlayback();
 		//update the old and new rows
-		ListView_RedrawItems(hwndList,lastCursor,lastCursor);
-		ListView_RedrawItems(hwndList,currFrameCounter,currFrameCounter);
+		RedrawRow(lastCursor);
+		RedrawRow(currFrameCounter);
 		UpdateWindow(hwndList);
 		lastCursor = currFrameCounter;
 	}
+
+	// update flashing pauseframe
+	if (old_pauseframe != pauseframe && old_pauseframe > 0) RedrawRow(old_pauseframe-1);
+	old_pauseframe = pauseframe;
+	old_show_pauseframe = show_pauseframe;
+	if (pauseframe > 0)
+		show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD) & 1;
+	else
+		show_pauseframe = false;
+	if (old_show_pauseframe != show_pauseframe) RedrawRow(pauseframe-1);
+
 	// update window caption
 	if ((!old_movie_readonly) == movie_readonly)
 	{
@@ -228,13 +237,18 @@ void UpdateTasEdit()
 	}
 }
 
+void RedrawTasedit()
+{
+	InvalidateRect(hwndTasEdit,0,FALSE);
+}
 void RedrawList()
 {
 	InvalidateRect(hwndList,0,FALSE);
 }
-void RedrawTasedit()
+void RedrawRow(int index)
 {
-	InvalidateRect(hwndTasEdit,0,FALSE);
+	if (ListView_IsItemVisible(hwndList, index))
+		ListView_RedrawItems(hwndList,index,index);
 }
 void RedrawTweakCount()
 {
@@ -302,7 +316,10 @@ void InvalidateGreenZone(int after)
 		{
 			if (TASEdit_restore_position)
 			{
-				JumpToFrame(currFrameCounter);
+				if (pauseframe-1 > currFrameCounter)
+					JumpToFrame(pauseframe-1);
+				else
+					JumpToFrame(currFrameCounter);
 				turbo = true;
 			} else
 			{
@@ -314,13 +331,9 @@ void InvalidateGreenZone(int after)
 	RedrawList();
 }
 
-/* A function that tries jumping to a given frame.  If unsuccessful, it than tries to jump to
-   a previously good frame and fastforward to it. 
-
-   Returns true if a jump to the frame is made, false if nothing done. 
-   */
 bool JumpToFrame(int index)
 {
+	// Returns true if a jump to the frame is made, false if nothing's done. 
 	if (index<0) return false; 
 
 	if (index >= currMovieData.greenZoneCount)
@@ -340,6 +353,13 @@ bool JumpToFrame(int index)
 	if (currMovieData.loadTasSavestate(index))
 	{
 		currFrameCounter = index;
+		// if playback was seeking, pause emulation right here
+		if (pauseframe > 0)
+		{
+			if (!FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
+			pauseframe = -1;
+		}
+		turbo = false;
 		return true;
 	}
 	//Search for an earlier frame with savestate
@@ -373,11 +393,11 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	//if the icon or frame columns were double clicked:
 	if(info->iSubItem == COLUMN_ARROW)
 	{
-		// set bookmark (of current bookmark slot) here
 
 	} else if(info->iSubItem == COLUMN_FRAMENUM || info->iSubItem == COLUMN_FRAMENUM2)
 	{
 		JumpToFrame(index);
+		ClearSelection();
 	}
 	else if(info->iSubItem >= COLUMN_JOYPAD1_A && info->iSubItem <= COLUMN_JOYPAD4_R)
 	{
@@ -398,7 +418,6 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		{
 			//update one row
 			currMovieData.records[index].toggleBit(joy,bit);
-			//ListView_RedrawItems(hwndList,index,index);
 		}
 		InvalidateGreenZone(index);
 	}
@@ -412,7 +431,6 @@ static void ClearSelection()
 	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
 
 	selectionFrames.clear();
-	lastCursor=-1;
 }
 
 //insert frames at the currently selected positions.
@@ -681,31 +699,19 @@ static bool Paste()
 	return result;
 }
 
-//pastes the current clipboard selection into a new inputlog
-static void PastetoNew()
-{
-}
-
 //removes the current selection (does not put in clipboard)
 static void Delete()
 {
 	DeleteFrames();
 }
 
-//Adds a marker to left column at selected frame (if multiple frames selected, it is placed at end of selection)
 void AddMarker()
 {
 }
-
-//Removes marker from selected frame (if multiple frames selected, all markers in selection removed?
 void RemoveMarker()
 {
 }
 
-//Makes new branch (timeline), takes current frame and creates new input log of all frames before it, new input log will be in focus
-void Branch()
-{
-}
 
 // ---------------------------------------------------------------------------------
 //The subclass wndproc for the listview header
@@ -723,7 +729,7 @@ static LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lP
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			SendMessage(hWnd,HDM_HITTEST,0,(LPARAM)&info);
-			if(info.iItem != -1)
+			if(info.iItem >= COLUMN_JOYPAD1_A && info.iItem <= COLUMN_JOYPAD4_R)
 				ColumnSet(info.iItem);
 		}
 	}
@@ -769,9 +775,9 @@ static void InitDialog()
 	hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList,GWL_WNDPROC,(LONG)ListWndProc);
 
 	//setup all images for the listview
-	HIMAGELIST himglist = ImageList_Create(8,12,ILC_COLOR32 | ILC_MASK,1,1);
+	HIMAGELIST himglist = ImageList_Create(8,12,ILC_COLOR8 | ILC_MASK,1,1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance,MAKEINTRESOURCE(IDB_TE_ARROW));
-	ImageList_AddMasked(himglist, bmp, RGB(255,0,255));
+	ImageList_AddMasked(himglist, bmp, 0xFF00FF);
 	DeleteObject(bmp);
 	ListView_SetImageList(hwndList,himglist,LVSIL_SMALL);
 	//doesnt work well??
@@ -782,10 +788,11 @@ static void InitDialog()
 	int colidx=0;
 	// arrow column
 	lvc.mask = LVCF_WIDTH;
-	lvc.cx = 14;
+	lvc.cx = 12;
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// frame number column
-	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
+	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
+	lvc.fmt = LVCFMT_CENTER;
 	lvc.cx = 92;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
@@ -809,7 +816,8 @@ static void InitDialog()
 void AddFourscoreColumns()
 {
 	LVCOLUMN lvc;
-	lvc.mask = LVCF_WIDTH | LVCF_TEXT;
+	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
+	lvc.fmt = LVCFMT_CENTER;
 	lvc.cx = 21;
 	int colidx = COLUMN_JOYPAD3_A;
 	for (int joy = 0; joy < 2; ++joy)
@@ -918,7 +926,9 @@ static void OpenProject()
 			RemoveFourscoreColumns();
 		else if (!last_fourscore && currMovieData.fourscore)
 			AddFourscoreColumns();
+		if (!FCEUI_EmulationPaused()) FCEUI_ToggleEmulationPause();
 		FollowPlayback();
+		RedrawTasedit();
 	}
 }
 
@@ -1146,12 +1156,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
-			case ACCEL_CTRL_N:
 			case ID_FILE_NEWPROJECT:
 				NewProject();
 				break;
 
-			case ACCEL_CTRL_O:
 			case ID_FILE_OPENPROJECT:
 				OpenProject();
 				break;
@@ -1161,7 +1169,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				SaveProject();
 				break;
 
-			case ACCEL_CTRL_SHIFT_S:
 			case ID_FILE_SAVEPROJECTAS:
 				SaveProjectAs();
 				break;
@@ -1198,12 +1205,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				Paste();
 				break;
 
-			case ACCEL_CTRL_SHIFT_V:  //Takes selected frames and creates new inputlog files
-			case ID_TASEDIT_PASTETONEW:
-			case ID_CONTEXT_SELECTED_PASTETONEW:
-				PastetoNew();
-				break;
-
 			case ACCEL_CTRL_DELETE:
 			case ID_TASEDIT_DELETE:
 				Delete();
@@ -1225,11 +1226,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_CONTEXT_STRAY_TRUNCATE:
 				Truncate();
 				break;
-			case ACCEL_CTRL_B:
-			case ID_EDIT_BRANCH:
-			case ID_CONTEXT_SELECTED_BRANCH:
-				Branch();
-				break;
 
 			case ID_HELP_TASEDITHELP:
 				OpenHelpWindow(tasedithelp);
@@ -1239,20 +1235,23 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case MENU_CONTEXT_STRAY_INSERTFRAMES:
 			case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 				{
-					int frames;
+					int frames = 1;
 					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
 					{
-						if (selectionFrames.size())
+						if (frames > 0)
 						{
-							// insert at selection
-							int index = *selectionFrames.begin();
-							currMovieData.insertEmpty(index,frames);
-							InvalidateGreenZone(index);
-						} else
-						{
-							// insert at playback cursor
-							currMovieData.insertEmpty(currFrameCounter,frames);
-							InvalidateGreenZone(currFrameCounter);
+							if (selectionFrames.size())
+							{
+								// insert at selection
+								int index = *selectionFrames.begin();
+								currMovieData.insertEmpty(index,frames);
+								InvalidateGreenZone(index);
+							} else
+							{
+								// insert at playback cursor
+								currMovieData.insertEmpty(currFrameCounter,frames);
+								InvalidateGreenZone(currFrameCounter);
+							}
 						}
 					}
 				}
@@ -1296,11 +1295,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				JumpToFrame(currMovieData.greenZoneCount-1);
 				FollowPlayback();
 				break;
+			case ACCEL_CTRL_F:
 			case ID_VIEW_FOLLOW_PLAYBACK:
 				//switch "Follow playback" flag
 				TASEdit_follow_playback ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
-				FollowPlayback();
+				// if switched off then jump to selection
+				if (TASEdit_follow_playback)
+					FollowPlayback();
+				else if (selectionFrames.size())
+					ListView_EnsureVisible(hwndList,(int)*selectionFrames.begin(),FALSE);
 				break;
 			case ID_VIEW_SHOW_LAG_FRAMES:
 				//switch "Highlight lag frames" flag
@@ -1314,9 +1318,28 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
 				RedrawTweakCount();
 				break;
+			case ACCEL_CTRL_P:
 			case CHECK_AUTORESTORE_PLAYBACK:
+				//switch "Auto-restore last playback position" flag
 				TASEdit_restore_position ^= 1;
 				CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
+				break;
+			case ID_CONFIG_SETGREENZONECAPACITY:
+				//open input dialog
+				int new_capacity = TASEdit_greenzone_capacity;
+				if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?", new_capacity,  hwndDlg) == IDOK)
+				{
+					if (new_capacity < GREENZONE_MIN_CAPACITY)
+						new_capacity = GREENZONE_MIN_CAPACITY;
+					else if (new_capacity > GREENZONE_MAX_CAPACITY)
+						new_capacity = GREENZONE_MAX_CAPACITY;
+					if (new_capacity < TASEdit_greenzone_capacity)
+					{
+						TASEdit_greenzone_capacity = new_capacity;
+						currMovieData.ClearGreenzoneTail();
+						RedrawList();
+					} else TASEdit_greenzone_capacity = new_capacity;
+				}
 				break;
 
 			}
@@ -1343,7 +1366,9 @@ void EnterTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return;
 
-	lastCursor = -1;
+	// init variables
+	lastCursor = old_pauseframe = -1;
+	old_show_pauseframe = show_pauseframe = false;
 
 	// either start new project or use current movie
 	if (movieMode == MOVIEMODE_INACTIVE)
@@ -1380,4 +1405,11 @@ void EnterTasEdit()
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
+}
+void ExitTasEdit()
+{
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessage("Tasedit disengaged",0);
+	currMovieData.clearGreenzone();
+	CreateCleanMovie();
 }

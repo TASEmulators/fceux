@@ -3,6 +3,10 @@
 #define FRAMES_TOO_FAR 60
 #define NUM_JOYPADS 4
 #define NUM_JOYPAD_BUTTONS 8
+#define GREENZONE_DEFAULT_CAPACITY 50000
+#define GREENZONE_MIN_CAPACITY 1
+#define GREENZONE_MAX_CAPACITY 200000	// maybe even more
+#define PAUSEFRAME_BLINKING_PERIOD 100
 // listview column names
 #define COLUMN_ARROW 0
 #define COLUMN_FRAMENUM	 1
@@ -62,8 +66,10 @@ void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
 void FollowPlayback();
+void ClearSelection();
 void AddFourscoreColumns();
 void RemoveFourscoreColumns();
-void RedrawList();
 void RedrawTasedit();
+void RedrawList();
+void RedrawRow(int index);
 void RedrawTweakCount();

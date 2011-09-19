@@ -48,6 +48,7 @@ using namespace std;
 
 extern char FileBase[];
 extern bool AutoSS;		//Declared in fceu.cpp, keeps track if a auto-savestate has been made
+extern int TASEdit_greenzone_capacity;
 
 std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
 std::vector<string> subtitleMessages;	//Messages of subtitles
@@ -141,7 +142,26 @@ void MovieData::TryDumpIncremental()
 		// update greenzone upper limit
 		if (currMovieData.greenZoneCount <= currFrameCounter)
 			currMovieData.greenZoneCount = currFrameCounter+1;
+
+		ClearGreenzoneTail();
 	}
+}
+
+void MovieData::ClearGreenzoneTail()
+{
+	int tail_frame = currMovieData.greenZoneCount-1 - TASEdit_greenzone_capacity;
+	if (tail_frame >= currFrameCounter) tail_frame = currFrameCounter - 1;
+	for (;tail_frame >= 0; tail_frame--)
+	{
+		if (currMovieData.savestates[tail_frame].empty()) break;
+		ClearSavestate(tail_frame);
+		RedrawRow(tail_frame);
+	}
+}
+void MovieData::ClearSavestate(int index)
+{
+    std::vector<uint8> tmp;
+    currMovieData.savestates[index].swap(tmp);
 }
 
 MovieRecord::MovieRecord()
@@ -510,9 +530,9 @@ int MovieData::dump(EMUFILE *os, bool binary)
 void MovieData::clearGreenzone()
 {
 	int size = currMovieData.savestates.size();
-	for (int i = 1; i < size; ++i)
+	for (int i = 0; i < size; ++i)
 	{
-		currMovieData.savestates[i].clear();
+		ClearSavestate(i);
 	}
 	greenZoneCount = 1;
 	currMovieData.frames_flags.resize(1);
@@ -521,72 +541,79 @@ void MovieData::clearGreenzone()
 	
 }
 
-int MovieData::dumpGreenzone(EMUFILE *os, bool binary)
+int MovieData::dumpGreenzone(EMUFILE *os)
 {
-	// save savestates
 	int start = os->ftell();
 	int frame, size;
 	write32le(greenZoneCount, os);
+	write32le(currFrameCounter, os);
+	// write savestates
 	for (frame = 0; frame < greenZoneCount; ++frame)
 	{
 		if (savestates[frame].empty()) continue;
 		write32le(frame, os);
-		size = savestates[frame].size();
-		write32le(size, os);
-		// write savestate
-		os->fwrite(&savestates[frame][0], size);
 		// write frames_flags
 		os->fwrite(&frames_flags[frame], 1);
 		// write lua_colorings
 		// write monitorings
-
+		// write savestate
+		size = savestates[frame].size();
+		write32le(size, os);
+		os->fwrite(&savestates[frame][0], size);
 	}
 	// write -1 as eof for greenzone
 	write32le(-1, os);
-	// finally write playback cursor position
-	write32le(currFrameCounter, os);
 
 	int end = os->ftell();
 	return end-start;
 }
 
-bool MovieData::loadGreenzone(EMUFILE *is, bool binary)
+bool MovieData::loadGreenzone(EMUFILE *is)
 {
 	clearGreenzone();
 	int frame = 0, prev_frame = 0, size = 0;
 	if (read32le((uint32 *)&size, is))
 	{
 		greenZoneCount = size;
-		frames_flags.resize(size);
-		savestates.resize(size);
-		while(1)
+		savestates.resize(greenZoneCount);
+		frames_flags.resize(greenZoneCount);
+		savestates.resize(greenZoneCount);
+		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
+		if (read32le((uint32 *)&frame, is))
 		{
-			if (!read32le((uint32 *)&frame, is)) break;
-			if (frame == -1) break;
-			if (!read32le((uint32 *)&size, is)) break;
-
-			if ((int)savestates.size() <= frame) savestates.resize(frame+1);
-			// load savestate
-			savestates[frame].resize(size);
-			if ((int)is->fread((char*)&savestates[frame][0],size) < size) break;
-			// load frames_flags
-			if ((int)is->fread(&frames_flags[frame],1) != 1) break;
-			// load lua_colorings
-			// load monitorings
-
-			prev_frame = frame;
-		}
-		greenZoneCount = prev_frame+1;	// cut greenZoneCount to last good frame
-		if (frame == -1)
-		{
-			// everything went fine - load savestate at cursor position
-			if (read32le((uint32 *)&currFrameCounter, is) && currMovieData.loadTasSavestate(currFrameCounter))
+			currFrameCounter = frame;
+			while(1)
 			{
-				return true;
+				if (!read32le((uint32 *)&frame, is)) break;
+				if (frame == -1) break;
+				// read frames_flags
+				if ((int)is->fread(&frames_flags[frame],1) != 1) break;
+				// read lua_colorings
+				// read monitorings
+				// read savestate
+				if (!read32le((uint32 *)&size, is)) break;
+				if (frame > greenzone_tail_frame || frame == currFrameCounter)
+				{
+					// load savestate
+					savestates[frame].resize(size);
+					if ((int)is->fread((char*)&savestates[frame][0],size) < size) break;
+					prev_frame = frame;			// successfully read one greenzone frame info
+				} else
+				{
+					// skip loading this savestate
+					if (is->fseek(size,SEEK_CUR) != 0) break;
+				}
 			}
-		} else
-		{
-			// there was some error while reading greenzone
+			greenZoneCount = prev_frame+1;	// cut greenZoneCount to last good frame
+			if (frame == -1)
+			{
+				// everything went fine - load savestate at cursor position
+				if (currMovieData.loadTasSavestate(currFrameCounter))
+					return true;
+			} else
+			{
+				// there was some error while reading greenzone
+			}
 		}
 	}
 	return false;

@@ -63,7 +63,7 @@ bool TASEDIT_PROJECT::SaveProject()
 	
 	currMovieData.dump(ofs, true);
 	ofs->fputc('\0'); // TODO: Add main branch name. 
-	currMovieData.dumpGreenzone(ofs, true);
+	currMovieData.dumpGreenzone(ofs);
 
 	delete ofs;
 
@@ -86,8 +86,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 
 	char branchname;
 	branchname = ifs.fgetc(); // TODO: Add main branch name. 
-	currMovieData.clearGreenzone();
-	if (!currMovieData.loadGreenzone(&ifs, true))
+	if (!currMovieData.loadGreenzone(&ifs))
 	{
 		// there was some error while loading greenzone - reset playback to frame 0
 		poweron(true);
