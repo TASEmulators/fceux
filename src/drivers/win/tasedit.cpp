@@ -12,6 +12,7 @@
 #include "movie.h"
 #include "utils/xstring.h"
 #include "Win32InputBox.h"
+#include "window.h"
 #include "keyboard.h"
 #include "joystick.h"
 #include "help.h"
@@ -27,6 +28,8 @@ int lastCursor;
 int old_pauseframe;
 bool old_show_pauseframe;
 bool show_pauseframe;
+bool TASEdit_focus = false;
+int saved_eoptions = 0;
 
 // vars saved in cfg file
 int TasEdit_wndx, TasEdit_wndy;
@@ -35,12 +38,12 @@ bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_tweak_count = false;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_DEFAULT_CAPACITY;
+extern bool muteTurbo;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
 
 HWND hwndTasEdit = 0;
-
 static HMENU hmenu, hrmenu;
 static HWND hwndList, hwndHeader, hwndTweakCount;
 static RECT rectTweakCount;
@@ -398,6 +401,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	{
 		JumpToFrame(index);
 		ClearSelection();
+		RedrawList();
 	}
 	else if(info->iSubItem >= COLUMN_JOYPAD1_A && info->iSubItem <= COLUMN_JOYPAD4_R)
 	{
@@ -699,12 +703,6 @@ static bool Paste()
 	return result;
 }
 
-//removes the current selection (does not put in clipboard)
-static void Delete()
-{
-	DeleteFrames();
-}
-
 void AddMarker()
 {
 }
@@ -845,15 +843,6 @@ bool CheckSaveChanges()
 {
 	//TODO: determine if project has changed, and ask to save changes
 	return true; 
-}
-
-void KillTasEdit()
-{
-	if (!CheckSaveChanges()) return;
-	DestroyWindow(hwndTasEdit);
-	hwndTasEdit = 0;
-	turbo = false;
-	ExitTasEdit();
 }
 
 //Creates a new TASEdit Project
@@ -1150,9 +1139,15 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		
 		case WM_CLOSE:
 		case WM_QUIT:
-			KillTasEdit();
+			ExitTasEdit();
 			break;
 
+		case WM_ACTIVATEAPP:
+			if((BOOL)wParam)
+				TASEdit_focus = true;
+			else
+				TASEdit_focus = false;
+			return DefWindowProc(hwndDlg,uMsg,wParam,lParam);
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
@@ -1183,7 +1178,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 
 			case ID_TASEDIT_FILE_CLOSE:
-				KillTasEdit();
+				ExitTasEdit();
 				break;
 		
 			case ID_EDIT_SELECTALL:
@@ -1207,7 +1202,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 			case ACCEL_CTRL_DELETE:
 			case ID_TASEDIT_DELETE:
-				Delete();
+			case ID_CONTEXT_SELECTED_DELETEFRAMES:
+				if (selectionFrames.size()) DeleteFrames();
 				break;
 
 			case ID_EDIT_ADDMARKER:
@@ -1257,14 +1253,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				}
 				break;
 
+			case ACCEL_CTRL_INSERT:
 			case ID_CONTEXT_SELECTED_INSERTFRAMES:
-				InsertFrames();
+				if (selectionFrames.size()) InsertFrames();
 				break;
 
-			case ID_CONTEXT_SELECTED_DELETEFRAMES:
-				DeleteFrames();
-				break;
-			
 			case TASEDIT_FOWARD:
 				//advance 1 frame
 				JumpToFrame(currFrameCounter+1);
@@ -1325,6 +1318,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 				break;
 			case ID_CONFIG_SETGREENZONECAPACITY:
+				{
 				//open input dialog
 				int new_capacity = TASEdit_greenzone_capacity;
 				if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?", new_capacity,  hwndDlg) == IDOK)
@@ -1341,11 +1335,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					} else TASEdit_greenzone_capacity = new_capacity;
 				}
 				break;
+				}
+
+			case ID_CONFIG_MUTETURBO:
+				muteTurbo ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
+				break;
 
 			}
+		default:
 			break;
 	}
-
 	return FALSE;
 }
 
@@ -1393,8 +1393,20 @@ void EnterTasEdit()
 	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
 	if(hwndTasEdit)
 	{
+		// save "eoptions"
+		saved_eoptions = eoptions;
+		// clear "Run in background"
+		eoptions &= ~EO_BGRUN;
+		// set "Background TASEdit input"
 		KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
 		JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+		// "Set high-priority thread"
+		eoptions |= EO_HIGHPRIO;
+		DoPriority();
+		// clear "Disable speed throttling"
+		eoptions &= ~EO_NOTHROTTLE;
+		UpdateCheckedMenuItems();
+
 		hmenu = GetMenu(hwndTasEdit);
 		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
 		// check option ticks
@@ -1402,14 +1414,26 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
 }
 void ExitTasEdit()
 {
+	if (!CheckSaveChanges()) return;
+	DestroyWindow(hwndTasEdit);
+	hwndTasEdit = 0;
+	turbo = false;
+	pauseframe = -1;
+	TASEdit_focus = false;
+	// restore "eoptions"
+	eoptions = saved_eoptions;
+	DoPriority();
+	UpdateCheckedMenuItems();
+	// release memory
+	currMovieData.clearGreenzone();
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("Tasedit disengaged",0);
-	currMovieData.clearGreenzone();
 	CreateCleanMovie();
 }

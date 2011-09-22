@@ -820,6 +820,8 @@
 #define ACCEL_CTRL_F                    40429
 #define ACCEL_CTRL_P                    40430
 #define ID_CONFIG_SETGREENZONECAPACITY  40432
+#define ACCEL_CTRL_INSERT               40433
+#define ID_CONFIG_MUTETURBO             40435
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -829,7 +831,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40433
+#define _APS_NEXT_COMMAND_VALUE         40436
 #define _APS_NEXT_CONTROL_VALUE         1262
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -126,6 +126,7 @@ bool AVIdisableMovieMessages = false;
 char *md5_asciistr(uint8 digest[16]);
 static int winwidth, winheight;
 static volatile int nofocus = 0;
+extern bool TASEdit_focus;
 static int tog = 0;					//Toggle for Hide Menu
 static bool loggingSound = false;
 static LONG WindowXC=1<<30,WindowYC;
@@ -2223,13 +2224,9 @@ adelikat: Outsourced this to a remappable hotkey
 		break;
 	case WM_ACTIVATEAPP:
 		if((BOOL)wParam)
-		{
-			nofocus=0;
-		}
+			nofocus = 0;
 		else
-		{
-			nofocus=1;
-		}
+			nofocus = 1;
 		goto proco;
 	case WM_ENTERMENULOOP:
 		UpdateCheckedMenuItems();
@@ -2360,7 +2357,7 @@ void UpdateFCEUWindow(void)
 
 	if(!(eoptions & EO_BGRUN))
 	{
-		while(nofocus)
+		while(nofocus && !TASEdit_focus)
 		{
 
 			Sleep(75);

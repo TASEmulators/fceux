@@ -620,6 +620,7 @@ static void BackgroundDisplayToggle(void);
 static void ObjectDisplayToggle(void);
 static void LagCounterToggle(void);
 static void ViewSlots(void);
+static void LaunchTasEdit(void);
 static void LaunchMemoryWatch(void);
 static void LaunchCheats(void);
 static void LaunchDebugger(void);
@@ -743,13 +744,13 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_MISC_LAGCOUNTER_RESET,			EMUCMDTYPE_MISC,	LagCounterReset,  0, 0, "Lag Counter Reset", 0},
+	{ EMUCMD_MISC_OPENTASEDIT,				EMUCMDTYPE_TOOL,	LaunchTasEdit,  0, 0, "Open TAS Edit", 0},
 	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", 0},
 	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
 	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", 0},
 	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", 0},
-	{ EMUCMD_TOOL_OPENNTVIEW,					EMUCMDTYPE_TOOL,	LaunchNTView,		  0, 0, "Open Name Table Viewer", 0},
+	{ EMUCMD_TOOL_OPENNTVIEW,				EMUCMDTYPE_TOOL,	LaunchNTView,		  0, 0, "Open Name Table Viewer", 0},
 	{ EMUCMD_TOOL_OPENTRACELOGGER,			EMUCMDTYPE_TOOL,	LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
 	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
@@ -901,6 +902,14 @@ static void LagCounterToggle(void)
 	lagCounterDisplay ^= 1;
 }
 
+static void LaunchTasEdit(void)
+{
+#ifdef WIN32
+	extern void EnterTasEdit();
+	EnterTasEdit();
+#endif
+}
+
 static void LaunchMemoryWatch(void)
 {
 #ifdef WIN32
@@ -973,6 +982,7 @@ static void LaunchRamSearch(void)
 	OpenRamSearch();
 #endif
 }
+
 
 static void RamSearchOpLT(void) {
 #ifdef WIN32

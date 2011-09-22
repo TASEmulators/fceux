@@ -250,6 +250,7 @@ BEGIN
     POPUP "Config"
     BEGIN
         MENUITEM "Set greenzone capacity",      ID_CONFIG_SETGREENZONECAPACITY
+        MENUITEM "Mute Turbo",                  ID_CONFIG_MUTETURBO
     END
     POPUP "&Help"
     BEGIN
@@ -1988,14 +1989,15 @@ END
 
 IDR_ACCELERATOR1 ACCELERATORS
 BEGIN
-    VK_DELETE,      ACCEL_CTRL_DELETE,      VIRTKEY, CONTROL, NOINVERT
-    "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
-    "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
     "C",            ACCEL_CTRL_C,           VIRTKEY, CONTROL, NOINVERT
-    "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
-    "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ACCEL_CTRL_DELETE,      VIRTKEY, CONTROL, NOINVERT
     "F",            ACCEL_CTRL_F,           VIRTKEY, CONTROL, NOINVERT
     "P",            ACCEL_CTRL_P,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
+    "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
+    "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ACCEL_CTRL_INSERT,      VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_RWACCELERATOR ACCELERATORS
