@@ -67,7 +67,7 @@ BEGIN
             MENUITEM "&Record AVI...",              MENU_RECORD_AVI
             MENUITEM "&Stop AVI",                   MENU_STOP_AVI
             MENUITEM "&Record WAV...",              MENU_RECORD_WAV
-            MENUITEM "&Stop WAV",                   ID_AVI_STOPWAV
+            MENUITEM "&Stop WAV",                   MENU_STOP_WAV
             MENUITEM SEPARATOR
             MENUITEM "Enable HUD recording",        ID_AVI_ENABLEHUDRECORDING
             MENUITEM "Disable messages recording",  ID_AVI_DISMOVIEMESSAGE
@@ -1759,6 +1759,10 @@ BEGIN
         RIGHTMARGIN, 357
         TOPMARGIN, 8
         BOTTOMMARGIN, 201
+    END
+
+    "NEWINPUT", DIALOG
+    BEGIN
     END
 
     "PALCONFIG", DIALOG

@@ -63,7 +63,7 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 	{
 		switch(item.iSubItem)
 		{
-			case COLUMN_ARROW:
+			case COLUMN_ICONS:
 			if(item.iImage == I_IMAGECALLBACK && item.iItem == currFrameCounter)
 				item.iImage = 0;
 			else
@@ -115,7 +115,7 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
-		if(cell_x > COLUMN_ARROW)
+		if(cell_x > COLUMN_ICONS)
 		{
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
@@ -376,31 +376,29 @@ bool JumpToFrame(int index)
 	return true;
 }
 
-void DoubleClick(LPNMITEMACTIVATE info)
+void SingleClick(LPNMITEMACTIVATE info)
 {
 	int index = info->iItem;
+	if(index == -1) return;
+	int column_index = info->iSubItem;
 
-	//stray click
-	if(index == -1)
-		return;
-
-	//if the icon or frame columns were double clicked:
-	if(info->iSubItem == COLUMN_ARROW)
+	if(column_index == COLUMN_ICONS)
 	{
-
-	} else if(info->iSubItem == COLUMN_FRAMENUM || info->iSubItem == COLUMN_FRAMENUM2)
-	{
-		JumpToFrame(index);
+		// click on the "icons" column - jump to the frame
 		ClearSelection();
+		JumpToFrame(index);
 		RedrawList();
+	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+	{
+		// click on the "frame number" column - do nothing
 	}
-	else if(info->iSubItem >= COLUMN_JOYPAD1_A && info->iSubItem <= COLUMN_JOYPAD4_R)
+	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 	{
 		//toggle the bit
-		int joy = (info->iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-		int bit = (info->iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+		int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+		int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 
-		if (info->uKeyFlags&(LVKF_SHIFT|LVKF_CONTROL))
+		if (info->uKeyFlags & (LVKF_SHIFT|LVKF_CONTROL))
 		{
 			//update multiple rows 
 			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
@@ -418,12 +416,27 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	}
 }
 
+void DoubleClick(LPNMITEMACTIVATE info)
+{
+	int index = info->iItem;
+	if(index == -1) return;
+	int column_index = info->iSubItem;
+
+	if(column_index == COLUMN_ICONS || column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+	{
+		// double click sends playback to the frame
+		ClearSelection();
+		JumpToFrame(index);
+		RedrawList();
+	}
+}
+
 //removes all selections
 static void ClearSelection()
 {
 	int frameCount = ListView_GetItemCount(hwndList);
 
-	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
+	ListView_SetItemState(hwndList,-1,0, LVIS_FOCUSED|LVIS_SELECTED);
 
 	selectionFrames.clear();
 }
@@ -775,7 +788,7 @@ static void InitDialog()
 	//setup columns
 	LVCOLUMN lvc;
 	int colidx=0;
-	// arrow column
+	// icons column
 	lvc.mask = LVCF_WIDTH;
 	lvc.cx = 12;
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
@@ -1101,6 +1114,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					return TRUE;
 				case LVN_GETDISPINFO:
 					GetDispInfo((NMLVDISPINFO*)lParam);
+					break;
+				case NM_CLICK:
+					SingleClick((LPNMITEMACTIVATE)lParam);
 					break;
 				case NM_DBLCLK:
 					DoubleClick((LPNMITEMACTIVATE)lParam);

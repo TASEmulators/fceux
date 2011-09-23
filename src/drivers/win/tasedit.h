@@ -8,7 +8,7 @@
 #define GREENZONE_MAX_CAPACITY 200000	// maybe even more
 #define PAUSEFRAME_BLINKING_PERIOD 100
 // listview column names
-#define COLUMN_ARROW 0
+#define COLUMN_ICONS 0
 #define COLUMN_FRAMENUM	 1
 #define COLUMN_JOYPAD1_A 2
 #define COLUMN_JOYPAD1_B 3
