@@ -122,6 +122,7 @@ int GetCheckedAutoFirePattern();
 int GetCheckedAutoFireOffset();
 
 //Internal variables-------------------------------------
+bool AVIenableHUDrecording = false;
 bool AVIdisableMovieMessages = false;
 char *md5_asciistr(uint8 digest[16]);
 static int winwidth, winheight;
@@ -398,6 +399,7 @@ void UpdateCheckedMenuItems()
 	//File Menu
 	CheckMenuItem(fceumenu, ID_FILE_MOVIE_TOGGLEREAD, movie_readonly ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_FILE_OPENLUAWINDOW, LuaConsoleHWnd ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_AVI_ENABLEHUDRECORDING, AVIenableHUDrecording ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_AVI_DISMOVIEMESSAGE, AVIdisableMovieMessages ? MF_CHECKED : MF_UNCHECKED);
 
 	//NES Menu
@@ -418,6 +420,7 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_DISPLAY_FRAMECOUNTER, frame_display ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_DISPLAY_RERECORDCOUNTER, rerecord_display ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESTATUSICON, status_icon ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
@@ -1014,7 +1017,7 @@ void HideFWindow(int h)
 //Toggles the display status of the main menu.
 void ToggleHideMenu(void)
 { 
-	if(!fullscreen && (GameInfo || tog))
+	if(!fullscreen && !nofocus && (GameInfo || tog))
 	{
 		tog ^= 1;
 		HideMenu(tog);
@@ -1651,6 +1654,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				CloseWave();
 				loggingSound = false;
 				break;
+			case ID_AVI_ENABLEHUDRECORDING:
+				AVIenableHUDrecording ^= 1;
+				FCEUI_SetAviEnableHUDrecording(AVIenableHUDrecording);
+				break;
 			case ID_AVI_DISMOVIEMESSAGE:
 				AVIdisableMovieMessages ^= 1;
 				FCEUI_SetAviDisableMovieMessages(AVIdisableMovieMessages);
@@ -1811,6 +1818,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				rerecord_display ^= 1;
 				UpdateCheckedMenuItems();
 				break;
+			case ID_DISPLAY_MOVIESTATUSICON:
+				FCEUD_ToggleStatusIcon();
+				break;
+
 			case MENU_DISPLAY_BG:
 			case MENU_DISPLAY_OBJ:
 				{

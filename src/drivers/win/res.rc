@@ -67,8 +67,10 @@ BEGIN
             MENUITEM "&Record AVI...",              MENU_RECORD_AVI
             MENUITEM "&Stop AVI",                   MENU_STOP_AVI
             MENUITEM "&Record WAV...",              MENU_RECORD_WAV
-            MENUITEM "&Stop WAV",                   MENU_STOP_WAV
-            MENUITEM "Disable Movie Messages",      ID_AVI_DISMOVIEMESSAGE
+            MENUITEM "&Stop WAV",                   ID_AVI_STOPWAV
+            MENUITEM SEPARATOR
+            MENUITEM "Enable HUD recording",        ID_AVI_ENABLEHUDRECORDING
+            MENUITEM "Disable messages recording",  ID_AVI_DISMOVIEMESSAGE
         END
         POPUP "&Lua"
         BEGIN
@@ -127,6 +129,7 @@ BEGIN
             MENUITEM "&Lag Counter",                MENU_DISPLAY_LAGCOUNTER
             MENUITEM "&Frame Counter",              ID_DISPLAY_FRAMECOUNTER
             MENUITEM "&Rerecord Counter",           ID_DISPLAY_RERECORDCOUNTER
+            MENUITEM "Movie status icon",           ID_DISPLAY_MOVIESTATUSICON
             MENUITEM SEPARATOR
             MENUITEM "Graphics: &BG",               MENU_DISPLAY_BG
             MENUITEM "Graphics: &OBJ",              MENU_DISPLAY_OBJ
@@ -897,32 +900,31 @@ BEGIN
     CONTROL         "Set high-priority thread.",CB_SET_HIGH_PRIORITY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,24,146,12
 END
 
-MOVIEOPTIONS DIALOGEX 65520, 76, 147, 231
+MOVIEOPTIONS DIALOGEX 65520, 76, 147, 222
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Movie Options"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "Close",IDC_MOVIE_CLOSE,47,210,49,14,BS_CENTER
+    DEFPUSHBUTTON   "Close",IDC_MOVIE_CLOSE,48,200,49,14,BS_CENTER
     CONTROL         "Pause after playback",IDC_MOVIE_PAUSEAFTERPLAYBACK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,28,110,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,26,110,10
     CONTROL         "Bind savestates to movies",IDC_MOVIE_BINDSAVESTATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,66,111,10
-    CONTROL         "Display movie status icon",IDC_MOVIE_DISPLAYSTATUSICON,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,85,109,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,64,111,10
     CONTROL         "Display movie subtitles",IDC_MOVIE_DISPLAYSUBTITLES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,105,102,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,83,102,10
     CONTROL         "Put movie subtitles in AVI",IDC_MOVIE_SUBTITLESINAVI,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,33,124,102,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,33,101,102,10
     CONTROL         "Automatically backup movies",IDC_MOVIE_AUTOBACKUP,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,144,114,10
-    CONTROL         "Load full savestate-movies",IDC_FULLSAVESTATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,163,110,10
-    LTEXT           "loaded states in record mode not",IDC_STATIC,24,175,110,8
-    LTEXT           "truncated until next frame",IDC_STATIC,23,185,94,8
-    LTEXT           "(VBA-rr & SNES9x style)",IDC_STATIC,23,195,93,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,122,114,10
+    CONTROL         "Load full savestate-movies:",IDC_FULLSAVESTATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,141,110,10
+    LTEXT           "Loading states in record mode",IDC_STATIC,24,153,106,8
+    LTEXT           "does not immediately truncate",IDC_STATIC,23,163,107,8
+    LTEXT           "movie, next frame input does it",IDC_STATIC,23,173,108,8
     CONTROL         "Close after playback",IDC_MOVIE_CLOSEAFTERPLAYBACK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,47,89,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,45,89,10
     CONTROL         "Always suggest Read-Only replay",IDC_MOVIE_SUGGEST_READONLY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,10,125,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,8,125,10
+    LTEXT           "(VBA-rr and SNES9x style)",IDC_STATIC,24,184,93,8
 END
 
 DWBDIALOGSIMPLE DIALOGEX 33, 99, 250, 39
@@ -1792,7 +1794,7 @@ BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 138
         TOPMARGIN, 8
-        BOTTOMMARGIN, 226
+        BOTTOMMARGIN, 217
     END
 
     "DWBDIALOGSIMPLE", DIALOG

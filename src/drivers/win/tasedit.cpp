@@ -248,8 +248,7 @@ void RedrawList()
 }
 void RedrawRow(int index)
 {
-	if (ListView_IsItemVisible(hwndList, index))
-		ListView_RedrawItems(hwndList,index,index);
+	ListView_RedrawItems(hwndList,index,index);
 }
 
 enum ECONTEXTMENU

@@ -209,16 +209,15 @@ void FCEU_PutImage(void)
 		FCEU_LuaGui(XBuf);
 		#endif
 
-		//Update AVI before overlay stuff is written
-		if(!FCEUI_EmulationPaused())
-			FCEUI_AviVideoUpdate(XBuf);
-
-		//Save snapshot before overlay stuff is written.
+		//Save snapshot
 		if(dosnapsave==1)
 		{
 			ReallySnap();
 			dosnapsave=0;
 		}
+
+		if (!FCEUI_AviEnableHUDrecording()) snapAVI();
+
 		if(GameInfo->type==GIT_VSUNI)
 			FCEU_VSUniDraw(XBuf);
 
@@ -228,8 +227,6 @@ void FCEU_PutImage(void)
 		FCEU_DrawNTSCControlBars(XBuf);
 		FCEU_DrawRecordingStatus(XBuf);
 	}
-
-	DrawMessage(false);
 
 	if(FCEUD_ShouldDrawInputAids())
 		FCEU_DrawInput(XBuf);
@@ -413,6 +410,26 @@ void FCEU_PutImage(void)
 			}
 		}
 	}
+
+	if (FCEUI_AviEnableHUDrecording())
+	{
+		if (FCEUI_AviDisableMovieMessages())
+		{
+			snapAVI();
+			DrawMessage(false);
+		} else
+		{
+			DrawMessage(false);
+			snapAVI();
+		}
+	} else DrawMessage(false);
+
+}
+void snapAVI()
+{
+	//Update AVI
+	if(!FCEUI_EmulationPaused())
+		FCEUI_AviVideoUpdate(XBuf);
 }
 
 void FCEU_DispMessageOnMovie(char *format, ...)

@@ -15,6 +15,7 @@ extern PALETTEENTRY *color_palette;
 #define VIDEO_WIDTH		256
 
 //adelikat: TODO - perhaps put this in AVIFile
+bool enableHUDrecording = false;
 bool disableMovieMessages = false;
 int AVICapture; //This initiates AVI capture mode with a frame number, on that frame number the AVI will stop, FCEUX will close, and a special return value will be set.  The intent is for this to be used in commandline 
 
@@ -437,6 +438,18 @@ bool FCEUI_AviIsRecording()
 	return false;
 }
 
+bool FCEUI_AviEnableHUDrecording()
+{
+	if (enableHUDrecording)
+		return true;
+
+	return false;
+}
+void FCEUI_SetAviEnableHUDrecording(bool enable)
+{
+	enableHUDrecording = enable;
+}
+
 bool FCEUI_AviDisableMovieMessages()
 {
 	if (disableMovieMessages)
@@ -444,7 +457,6 @@ bool FCEUI_AviDisableMovieMessages()
 
 	return false;
 }
-
 void FCEUI_SetAviDisableMovieMessages(bool disable)
 {
 	disableMovieMessages = disable;

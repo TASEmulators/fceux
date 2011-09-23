@@ -29,3 +29,4 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);
 
 std::string FCEUI_GetSnapshotAsName();
 void FCEUI_SetSnapshotAsName(std::string name);
+void snapAVI();
