@@ -69,7 +69,6 @@ extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_show_lag_frames;
-extern bool TASEdit_show_tweak_count;
 extern bool TASEdit_restore_position;
 extern int TASEdit_greenzone_capacity;
 
@@ -226,6 +225,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(autoHoldKey),
 	AC(autoHoldClearKey),
 	AC(frame_display),
+	AC(rerecord_display),
 	AC(input_display),
 	ACS(MemWatchDir),
 	AC(EnableBackgroundInput),
@@ -283,13 +283,13 @@ static CFGSTRUCT fceuconfig[] = {
 
 	AC(pauseAfterPlayback),
 	AC(closeFinishedMovie),
+	AC(suggestReadOnlyReplay),
 	AC(AFon),
 	AC(AFoff),
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
 	AC(TASEdit_follow_playback),
 	AC(TASEdit_show_lag_frames),
-	AC(TASEdit_show_tweak_count),
 	AC(TASEdit_restore_position),
 	AC(TASEdit_greenzone_capacity),
 	AC(lagCounterDisplay),

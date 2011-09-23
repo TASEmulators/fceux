@@ -72,4 +72,3 @@ void RemoveFourscoreColumns();
 void RedrawTasedit();
 void RedrawList();
 void RedrawRow(int index);
-void RedrawTweakCount();

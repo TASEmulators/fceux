@@ -422,6 +422,8 @@
 #define IDC_SOUNDS_RESTOREDEFAULTS      1199
 #define BTN_CANCELED                    1200
 #define ID_SOUND_TRITOP                 1201
+#define IDC_MOVIE_ALWAYS_READONLY       1201
+#define IDC_MOVIE_SUGGEST_READONLY      1201
 #define ID_SOUND_QUALITYNOTIFY          1202
 #define IDC_CHECK1                      1203
 #define CB_ENABLECONTEXTMENU            1203
@@ -822,6 +824,7 @@
 #define ID_CONFIG_SETGREENZONECAPACITY  40432
 #define ACCEL_CTRL_INSERT               40433
 #define ID_CONFIG_MUTETURBO             40435
+#define ID_DISPLAY_RERECORDCOUNTER      40436
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -831,7 +834,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40436
+#define _APS_NEXT_COMMAND_VALUE         40437
 #define _APS_NEXT_CONTROL_VALUE         1262
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

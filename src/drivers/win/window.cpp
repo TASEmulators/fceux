@@ -417,6 +417,7 @@ void UpdateCheckedMenuItems()
 	//Config - Display SubMenu
 	CheckMenuItem(fceumenu, MENU_DISPLAY_LAGCOUNTER, lagCounterDisplay?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_DISPLAY_FRAMECOUNTER, frame_display ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(fceumenu, ID_DISPLAY_RERECORDCOUNTER, rerecord_display ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_BG, bg?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
@@ -1804,6 +1805,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				break;
 			case ID_DISPLAY_FRAMECOUNTER:
 				FCEUI_MovieToggleFrameDisplay();
+				UpdateCheckedMenuItems();
+				break;
+			case ID_DISPLAY_RERECORDCOUNTER:
+				rerecord_display ^= 1;
 				UpdateCheckedMenuItems();
 				break;
 			case MENU_DISPLAY_BG:

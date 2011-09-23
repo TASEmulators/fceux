@@ -24,6 +24,7 @@
 //internal variables
 int pauseAfterPlayback = 0;		//Flag for pausing emulator when movie is finished
 int closeFinishedMovie = 0;		//Flag for clossing movie when it is finished
+int suggestReadOnlyReplay = 1;
 
 //external
 extern int status_icon;		//In main.cpp - For displaying movie status icons (play,record,pause)
@@ -37,6 +38,7 @@ void UpdateCheckBoxes(HWND hwndDlg)
 {
 	CheckDlgButton(hwndDlg, IDC_MOVIE_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_CLOSEAFTERPLAYBACK, closeFinishedMovie ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_MOVIE_SUGGEST_READONLY, suggestReadOnlyReplay ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_BINDSAVESTATES, bindSavestate ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSTATUSICON, status_icon ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndDlg, IDC_MOVIE_DISPLAYSUBTITLES, movieSubtitles ? BST_CHECKED : BST_UNCHECKED);
@@ -79,6 +81,10 @@ BOOL CALLBACK MovieOptionsCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 					case IDC_MOVIE_CLOSEAFTERPLAYBACK:
 						closeFinishedMovie = closeFinishedMovie?0:1;
+						break;
+
+					case IDC_MOVIE_SUGGEST_READONLY:
+						suggestReadOnlyReplay = suggestReadOnlyReplay?0:1;
 						break;
 
 					case IDC_MOVIE_BINDSAVESTATES:

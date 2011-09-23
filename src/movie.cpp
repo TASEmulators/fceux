@@ -89,6 +89,7 @@ int pauseframe = -1;
 bool movie_readonly = true;
 int input_display = 0;
 int frame_display = 0;
+int rerecord_display = 0;
 bool fullSaveStateLoads = false;	//Option for loading a savestates full contents in read+write mode instead of up to the frame count in the savestate (useful as a recovery option)
 
 SFORMAT FCEUMOV_STATEINFO[]={
@@ -410,7 +411,6 @@ MovieData::MovieData()
 	, palFlag(false)
 	, PPUflag(false)
 	, rerecordCount(0)
-	, tweakCount(0)
 	, binaryFlag(false)
 	, greenZoneCount(0)
 	, microphone(false)
@@ -436,8 +436,6 @@ void MovieData::installValue(std::string& key, std::string& val)
 		installInt(val,emuVersion);
 	else if(key == "rerecordCount")
 		installInt(val,rerecordCount);
-	else if(key == "tweakCount")
-		installInt(val,tweakCount);
 	else if(key == "palFlag")
 		installBool(val,palFlag);
 	else if(key == "romFilename")
@@ -484,7 +482,6 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	os->fprintf("version %d\n", version);
 	os->fprintf("emuVersion %d\n", emuVersion);
 	os->fprintf("rerecordCount %d\n", rerecordCount);
-	os->fprintf("tweakCount %d\n", tweakCount);
 	os->fprintf("palFlag %d\n" , (palFlag?1:0) );
 	os->fprintf("romFilename %s\n" , romFilename.c_str() );
 	os->fprintf("romChecksum %s\n" , BytesToString(romChecksum.data,MD5DATA::size).c_str() );
@@ -708,8 +705,6 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
     std::string a("length"), b("-1");
 	// Non-TAS projects consume until EOF
 	movieData.installValue(a, b);
-    std::string a1("tweakCount"), b1("0");
-	movieData.installValue(a1, b1);
 
 	//first, look for an fcm signature
 	char fcmbuf[3];
@@ -1255,6 +1250,14 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		if(counterbuf[0])
 			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
 	}
+	if(rerecord_display)
+	{
+		char counterbuf[32] = {0};	
+		sprintf(counterbuf,"%d",currMovieData.rerecordCount);
+		
+		if(counterbuf[0])
+			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, 256, (uint8*)counterbuf, 0x38+0x80);
+	}
 }
 
 void FCEU_DrawLagCounter(uint8 *XBuf)
@@ -1662,7 +1665,6 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 	info.emu_version_used = md.emuVersion;
 	info.name_of_rom_used = md.romFilename;
 	info.rerecord_count = md.rerecordCount;
-	info.tweak_count = md.tweakCount;
 	info.comments = md.comments;
 	info.subtitles = md.subtitles;
 

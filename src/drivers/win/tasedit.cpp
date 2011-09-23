@@ -35,7 +35,6 @@ int saved_eoptions = 0;
 int TasEdit_wndx, TasEdit_wndy;
 bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
-bool TASEdit_show_tweak_count = false;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_DEFAULT_CAPACITY;
 extern bool muteTurbo;
@@ -45,8 +44,7 @@ char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R
 
 HWND hwndTasEdit = 0;
 static HMENU hmenu, hrmenu;
-static HWND hwndList, hwndHeader, hwndTweakCount;
-static RECT rectTweakCount;
+static HWND hwndList, hwndHeader;
 static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
 
 typedef std::set<int> TSelectionFrames;
@@ -253,10 +251,6 @@ void RedrawRow(int index)
 	if (ListView_IsItemVisible(hwndList, index))
 		ListView_RedrawItems(hwndList,index,index);
 }
-void RedrawTweakCount()
-{
-	InvalidateRect(hwndTasEdit,&rectTweakCount,FALSE);
-}
 
 enum ECONTEXTMENU
 {
@@ -311,9 +305,7 @@ void InvalidateGreenZone(int after)
 	if (currMovieData.greenZoneCount > after+1)
 	{
 		currMovieData.greenZoneCount = after+1;
-		// increase tweakCount
-		currMovieData.tweakCount++;
-		RedrawTweakCount();
+		currMovieData.rerecordCount++;
 		// either set playback cursor to the end of greenzone or run seeking to restore playback position
 		if (currFrameCounter >= currMovieData.greenZoneCount)
 		{
@@ -1073,12 +1065,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	{
 		case WM_PAINT:
 			{
-				char temp[128];
-				if (TASEdit_show_tweak_count)
-					sprintf(temp,"Tweak count: %d\n",currMovieData.tweakCount);
-				else
-					sprintf(temp,"");
-				SetWindowText(hwndTweakCount,temp);
 			}
 			break;
 		case WM_INITDIALOG:
@@ -1087,8 +1073,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 
 			hwndList = GetDlgItem(hwndDlg,IDC_LIST1);
-			hwndTweakCount = GetDlgItem(hwndDlg,IDC_TWEAKCOUNT);
-			GetClientRect(hwndTweakCount, &rectTweakCount);
 			InitDialog();
 			break; 
 
@@ -1305,12 +1289,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 				RedrawList();
 				break;
-			case ID_VIEW_SHOW_TWEAK_COUNT:
-				//switch "Show Tweak count" flag
-				TASEdit_show_tweak_count ^= 1;
-				CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
-				RedrawTweakCount();
-				break;
 			case ACCEL_CTRL_P:
 			case CHECK_AUTORESTORE_PLAYBACK:
 				//switch "Auto-restore last playback position" flag
@@ -1412,7 +1390,6 @@ void EnterTasEdit()
 		// check option ticks
 		CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_SHOW_TWEAK_COUNT, TASEdit_show_tweak_count?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 
@@ -1431,6 +1408,9 @@ void ExitTasEdit()
 	eoptions = saved_eoptions;
 	DoPriority();
 	UpdateCheckedMenuItems();
+	// clear "Background TASEdit input"
+	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
+	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
 	// release memory
 	currMovieData.clearGreenzone();
 	movieMode = MOVIEMODE_INACTIVE;
