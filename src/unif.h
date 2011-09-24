@@ -108,6 +108,7 @@ void UNLA9746_Init(CartInfo *info);
 void UNLSHeroes_Init(CartInfo *info);
 void UNLH2288_Init(CartInfo *info);
 void UNL8237_Init(CartInfo *info);
+void UNL8237A_Init(CartInfo *info);
 void UNL8157_Init(CartInfo *info);
 void UNL22211_Init(CartInfo *info);
 void UNLTF1201_Init(CartInfo *info);

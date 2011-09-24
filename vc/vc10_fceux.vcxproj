@@ -274,7 +274,6 @@
     <ClCompile Include="..\src\boards\bmc70in1.cpp" />
     <ClCompile Include="..\src\boards\bonza.cpp" />
     <ClCompile Include="..\src\boards\bs-5.cpp" />
-    <ClCompile Include="..\src\boards\copyfami_mmc3.cpp" />
     <ClCompile Include="..\src\boards\datalatch.cpp" />
     <ClCompile Include="..\src\boards\deirom.cpp" />
     <ClCompile Include="..\src\boards\dream.cpp" />

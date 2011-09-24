@@ -241,6 +241,8 @@
    
    {0x22d6d5bd,4,1},
    {0x6a03d3f3,114,-1},
+   {0x0d98db53,114,-1}, /* Pocahontas */
+   {0x4e7729ff,114,-1}, /* Super Donkey Kong */
    
    {0x02c41438,176,-1}, /* Xing He Zhan Shi (C) */
    

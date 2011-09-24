@@ -392,12 +392,12 @@ static BMAPPING bmap[] = {
 	{ "SMB2J", UNLSMB2J_Init, 0},
 	{ "AX5705", UNLAX5705_Init, 0},
 	{ "CC-21", UNLCC21_Init,0},
-
 	{ "H2288", UNLH2288_Init,0},
 	{ "KOF97", UNLKOF97_Init,0},
 	{ "SL1632", UNLSL1632_Init,0},
 	{ "SHERO", UNLSHeroes_Init,0},
 	{ "8237", UNL8237_Init,0},
+	{ "8237A", UNL8237A_Init,0},
 	{ "8157", UNL8157_Init,0},
 	{ "T-262", BMCT262_Init,0},
 	{ "FK23C", BMCFK23C_Init,0},

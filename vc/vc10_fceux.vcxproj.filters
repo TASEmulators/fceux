@@ -193,9 +193,6 @@
     <ClCompile Include="..\src\boards\bs-5.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\boards\copyfami_mmc3.cpp">
-      <Filter>boards</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\datalatch.cpp">
       <Filter>boards</Filter>
     </ClCompile>

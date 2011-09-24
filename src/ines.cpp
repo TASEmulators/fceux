@@ -580,7 +580,7 @@ static BMAPPINGLocal bmap[] = {
     {"",					178, Mapper178_Init},
 	{"",					180, Mapper180_Init},
 	{"",					181, Mapper181_Init},
-	{"",					182, Mapper182_Init},
+//	{"",					182, Mapper182_Init},	// identical to 114
 	{"",					183, Mapper183_Init},
 	{"",					184, Mapper184_Init},
 	{"",					185, Mapper185_Init},
@@ -603,9 +603,9 @@ static BMAPPINGLocal bmap[] = {
 	{"",					209, Mapper209_Init},
 	{"",					210, Mapper210_Init},
 	{"",					211, Mapper211_Init},
-	{"",					215, Mapper215_Init},
+	{"",					215, UNL8237_Init},
 	{"",					216, Mapper216_Init},
-	{"",					217, Mapper217_Init},
+//	{"",					217, Mapper217_Init},
 	{"UNLA9746",			219, UNLA9746_Init},
 	{"OneBus",	 		    220, UNLOneBus_Init},
 

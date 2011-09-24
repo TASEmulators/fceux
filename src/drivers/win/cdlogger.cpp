@@ -38,7 +38,7 @@ using namespace std;
 void LoadCDLogFile();
 void SaveCDLogFileAs();
 void SaveCDLogFile();
-void SaveStrippedRom();
+void SaveStrippedRom(int invert);
 
 extern iNES_HEADER head; //defined in ines.c
 extern uint8 *trainerpoo;
@@ -169,7 +169,10 @@ MB_OK);
 							SaveCDLogFile();
 							break;
 						case BTN_CDLOGGER_SAVE_STRIPPED:
-							SaveStrippedRom();
+							SaveStrippedRom(0);
+							break;
+						case BTN_CDLOGGER_SAVE_UNUSED:
+							SaveStrippedRom(1);
 							break;
 					}
 					break;
@@ -319,7 +322,7 @@ void UpdateCDLogger(){
 	return;
 }
 
-void SaveStrippedRom(){ //this is based off of iNesSave()
+void SaveStrippedRom(int invert){ //this is based off of iNesSave()
 	//todo: make this support nsfs
 	const char NESfilter[]="Stripped iNes Rom file (*.NES)\0*.nes\0All Files (*.*)\0*.*\0\0";
 	const char NSFfilter[]="Stripped NSF file (*.NSF)\0*.nsf\0All Files (*.*)\0*.*\0\0";
@@ -376,8 +379,12 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 		
 		fseek(fp,0x8,SEEK_SET);
 		for(i = 0;i < ((NSFMaxBank+1)*4096);i++){
-			if(cdloggerdata[i] & 3)fputc(NSFDATA[i],fp);
-			else fputc(0,fp);
+			unsigned char pchar;
+			if(cdloggerdata[i] & 3)
+				pchar = invert?0:NSFDATA[i];
+			else
+				pchar = invert?NSFDATA[i]:0;
+			fputc(pchar, fp);
 		}
 
 	}
@@ -395,8 +402,12 @@ void SaveStrippedRom(){ //this is based off of iNesSave()
 		}
 
 		for(i = 0;i < head.ROM_size*0x4000;i++){
-			if(cdloggerdata[i] & 3)fputc(ROM[i],fp);
-			else fputc(0,fp);
+			unsigned char pchar;
+			if(cdloggerdata[i] & 3)
+				pchar = invert?0:ROM[i];
+			else
+				pchar = invert?ROM[i]:0;
+			fputc(pchar, fp);
 		}
 		//fwrite(ROM,0x4000,head.ROM_size,fp);
 
