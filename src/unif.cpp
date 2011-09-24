@@ -438,8 +438,6 @@ static BMAPPING bmap[] = {
 
 	{ "TEK90", Mapper90_Init,0},
 
-	{ "COPYFAMI_MMC3", MapperCopyFamiMMC3_Init,0},
-
 	{0,0,0}
 };
 
