@@ -207,11 +207,15 @@ struct PPUREGS {
 
 	void increment_vs() {
 		fv++;
-		vt += (fv>>3);
+		int fv_overflow = (fv >> 3);
+		vt += fv_overflow;
 		vt &= 31; //fixed tecmo super bowl
-		v += (vt==30)?1:0;
+		if(vt == 30 && fv_overflow==1) //caution here (only do it at the exact instant of overflow) fixes p'radikus conflict
+		{
+			v++;
+			vt=0;
+		}
 		fv &= 7;
-		if(vt==30) vt=0;
 		v &= 1;
 	}
 
