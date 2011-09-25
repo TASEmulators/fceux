@@ -617,18 +617,17 @@ int FCEUSS_LoadFP_old(EMUFILE* is, ENUM_SSLOADPARAMS params)
 
 bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 {
+	if(!is) return false;
+
 	//maybe make a backup savestate
-	EMUFILE_MEMORY msBackupSavestate;
 	bool backup = (params == SSLOADPARAM_BACKUP);
-
-	if(!is)
-		return false;
-
+	EMUFILE_MEMORY msBackupSavestate;
 	if(backup)
+	{
 		FCEUSS_SaveMS(&msBackupSavestate,Z_NO_COMPRESSION);
+	}
 
 	uint8 header[16];
-
 	//read and analyze the header
 	is->fread((char*)&header,16);
 	if(memcmp(header,"FCSX",4)) {

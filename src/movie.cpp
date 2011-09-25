@@ -649,9 +649,9 @@ bool FCEUI_GetLagged(void)
 
 bool FCEUMOV_ShouldPause(void)
 {
-	if(pauseframe && currFrameCounter == (pauseframe-1))	//adelikat: changed to pauseframe -1 to prevent an off by 1 error.  THis is probably the hackiest solution but I think it would cause some major restructuring to fix it properly.
+	if(pauseframe && currFrameCounter+1 == pauseframe)
 	{
-		pauseframe = 0; //only pause once!
+		pauseframe = 0;
 		return true;
 	}
 	else
@@ -950,7 +950,8 @@ bool MovieData::loadTasSavestate(int frame)
 	if ((int)savestates.size()<=frame || savestates[frame].empty())
 		return false;
 
-	return MovieData::loadSavestateFrom(&savestates[frame]);
+	EMUFILE_MEMORY ms(&savestates[frame]);
+	return FCEUSS_LoadFP(&ms, SSLOADPARAM_NOBACKUP);
 }
 
 void MovieData::storeTasSavestate(int frame, int compression_level)

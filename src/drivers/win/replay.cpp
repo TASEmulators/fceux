@@ -953,6 +953,7 @@ static BOOL CALLBACK RecordDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LP
 //Show the record movie dialog and record a movie.
 void FCEUD_MovieRecordTo()
 {
+	if (!GameInfo) return;
 	static struct CreateMovieParameters p;
 	p.szFilename = strdup(FCEU_MakeFName(FCEUMKF_MOVIE,0,0).c_str());
 	if(p.recordFrom >= 2) p.recordFrom=1;

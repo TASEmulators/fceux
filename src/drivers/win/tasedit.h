@@ -7,6 +7,8 @@
 #define GREENZONE_MIN_CAPACITY 1
 #define GREENZONE_MAX_CAPACITY 200000	// maybe even more
 #define PAUSEFRAME_BLINKING_PERIOD 100
+#define PROGRESSBAR_WIDTH 200
+#define HOLD_REPEAT_DELAY 250			// in milliseconds
 // listview column names
 #define COLUMN_ICONS 0
 #define COLUMN_FRAMENUM	 1
@@ -62,6 +64,7 @@
 void EnterTasEdit();
 void ExitTasEdit();
 void UpdateTasEdit();
+void UpdateList();
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
@@ -72,3 +75,12 @@ void RemoveFourscoreColumns();
 void RedrawTasedit();
 void RedrawList();
 void RedrawRow(int index);
+void SeekingStart(int finish_frame);
+void SeekingStop();
+void Tasedit_ToggleEmulationPause();
+void PauseEmulation();
+void UnpauseEmulation();
+void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
+void Tasedit_RewindFrame();
+void Tasedit_ForwardFrame();
+void StartFromZero();

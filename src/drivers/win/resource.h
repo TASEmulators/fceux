@@ -374,11 +374,11 @@
 #define MEMW_EXPANDCOLLAPSE             1133
 #define IDC_SOUND_RESTOREDEFAULTVOL     1133
 #define IDC_BUTTON2                     1134
-#define TASEDIT_FOWARD                  1134
+#define TASEDIT_FORWARD			1134
 #define IDC_BUTTON3                     1135
 #define TASEDIT_REWIND_FULL             1135
 #define IDC_BUTTON4                     1136
-#define TASEDIT_FOWARD_FULL             1136
+#define TASEDIT_FORWARD_FULL		1136
 #define TASEDIT_REWIND2                 1137
 #define TASEDIT_PLAYSTOP                1137
 #define IDC_RADIO1                      1138
@@ -386,7 +386,7 @@
 #define IDC_RADIO3                      1140
 #define MEMW_EDIT00FORMULA              1142
 #define MEMW_EDIT01FORMULA              1143
-#define IDC_BUTTON5                     1144
+#define IDC_PROGRESS_BUTTON		1144
 #define MEMW_EDIT02FORMULA              1144
 #define IDC_BUTTON7                     1145
 #define MEMW_EDIT03FORMULA              1145
@@ -493,6 +493,7 @@
 #define IDC_C_WATCH_SEPARATE            1259
 #define IDC_TWEAKCOUNT                  1260
 #define CHECK_AUTORESTORE_PLAYBACK      1261
+#define IDC_PROGRESS1                   1262
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -839,7 +840,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
 #define _APS_NEXT_COMMAND_VALUE         40441
-#define _APS_NEXT_CONTROL_VALUE         1262
+#define _APS_NEXT_CONTROL_VALUE         1263
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
