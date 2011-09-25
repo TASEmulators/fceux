@@ -216,8 +216,9 @@ void FCEU_PutImage(void)
 			dosnapsave=0;
 		}
 #ifdef WIN32
-		if (!FCEUI_AviEnableHUDrecording()) snapAVI();
+		if (!FCEUI_AviEnableHUDrecording())
 #endif
+    snapAVI();
 		if(GameInfo->type==GIT_VSUNI)
 			FCEU_VSUniDraw(XBuf);
 
