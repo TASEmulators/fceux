@@ -48,7 +48,6 @@ bmc64in1nr.cpp
 bmc70in1.cpp
 bonza.cpp
 bs-5.cpp
-copyfami_mmc3.cpp
 datalatch.cpp
 deirom.cpp
 dream.cpp

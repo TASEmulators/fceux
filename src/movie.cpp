@@ -48,7 +48,9 @@ using namespace std;
 
 extern char FileBase[];
 extern bool AutoSS;		//Declared in fceu.cpp, keeps track if a auto-savestate has been made
+#ifdef WIN32
 extern int TASEdit_greenzone_capacity;
+#endif
 
 std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
 std::vector<string> subtitleMessages;	//Messages of subtitles
@@ -150,13 +152,20 @@ void MovieData::TryDumpIncremental()
 
 void MovieData::ClearGreenzoneTail()
 {
+#ifdef WIN32
 	int tail_frame = currMovieData.greenZoneCount-1 - TASEdit_greenzone_capacity;
+#else
+	int tail_frame = currMovieData.greenZoneCount-1;
+#endif
+
 	if (tail_frame >= currFrameCounter) tail_frame = currFrameCounter - 1;
 	for (;tail_frame >= 0; tail_frame--)
 	{
 		if (currMovieData.savestates[tail_frame].empty()) break;
 		ClearSavestate(tail_frame);
-		RedrawRow(tail_frame);
+#ifdef WIN32
+    RedrawRow(tail_frame);
+#endif
 	}
 }
 void MovieData::ClearSavestate(int index)
@@ -575,7 +584,12 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 		savestates.resize(greenZoneCount);
 		frames_flags.resize(greenZoneCount);
 		savestates.resize(greenZoneCount);
+#ifdef WIN32
 		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
+#else
+		int greenzone_tail_frame = greenZoneCount-1;
+#endif
+
 		if (read32le((uint32 *)&frame, is))
 		{
 			currFrameCounter = frame;
