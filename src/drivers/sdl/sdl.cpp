@@ -605,6 +605,14 @@ int main(int argc, char *argv[])
 	  return 0;
 	}
 	
+	// check to see if recording HUD to AVI is enabled
+	int rh;
+	g_config->getOption("SDL.RecordHUD", &rh);
+	if( rh == 0)
+		FCEUI_SetAviEnableHUDrecording(true);
+	else
+		FCEUI_SetAviEnableHUDrecording(false);
+
 	// check to see if movie messages are disabled
 	int mm;
 	g_config->getOption("SDL.MovieMsg", &mm);

@@ -215,10 +215,9 @@ void FCEU_PutImage(void)
 			ReallySnap();
 			dosnapsave=0;
 		}
-#ifdef WIN32
-		if (!FCEUI_AviEnableHUDrecording())
-#endif
-    snapAVI();
+
+		if (!FCEUI_AviEnableHUDrecording()) snapAVI();
+
 		if(GameInfo->type==GIT_VSUNI)
 			FCEU_VSUniDraw(XBuf);
 
@@ -411,7 +410,7 @@ void FCEU_PutImage(void)
 			}
 		}
 	}
-#ifdef WIN32
+
 	if (FCEUI_AviEnableHUDrecording())
 	{
 		if (FCEUI_AviDisableMovieMessages())
@@ -424,7 +423,7 @@ void FCEU_PutImage(void)
 			snapAVI();
 		}
 	} else DrawMessage(false);
-#endif
+
 }
 void snapAVI()
 {

@@ -783,6 +783,20 @@ PtoV(uint16 x,
     y += s_srendline;
     return (x | (y << 16));
 }
+
+bool enableHUDrecording = false;
+bool FCEUI_AviEnableHUDrecording()
+{
+	if (enableHUDrecording)
+		return true;
+
+	return false;
+}
+void FCEUI_SetAviEnableHUDrecording(bool enable)
+{
+	enableHUDrecording = enable;
+}
+
 bool disableMovieMessages = false;
 bool FCEUI_AviDisableMovieMessages()
 {
@@ -791,7 +805,6 @@ bool FCEUI_AviDisableMovieMessages()
 
 	return false;
 }
-
 void FCEUI_SetAviDisableMovieMessages(bool disable)
 {
 	disableMovieMessages = disable;
