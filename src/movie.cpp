@@ -1152,7 +1152,7 @@ void FCEUMOV_AddInputState()
 			joyports[1].log(mr);
 			mr->commands = 0;
 		}
-	}
+	} else
 	#endif
 	if(movieMode == MOVIEMODE_PLAY)
 	{
@@ -1635,9 +1635,9 @@ void FCEUI_MoviePlayFromBeginning(void)
 		if (currMovieData.savestate.empty())
 		{
 			movie_readonly=true;
+			movieMode = MOVIEMODE_PLAY;
 			poweron(true);	
 			currFrameCounter=0;
-			movieMode = MOVIEMODE_PLAY;
 			FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 		}
 		else
@@ -1650,7 +1650,7 @@ void FCEUI_MoviePlayFromBeginning(void)
 				movie_readonly=true;
 				FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 			}
-			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload		
+			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload
 		}
 	}
 #ifdef WIN32
