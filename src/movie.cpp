@@ -132,13 +132,13 @@ void MovieData::TryDumpIncremental()
 		// if movie length is less than currFrame, pad it with empty frames
 		if(currFrameCounter >= (int)currMovieData.records.size() || currMovieData.records.size()==0)
 			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
+		if (currFrameCounter >= (int)currMovieData.frames_flags.size())
+			currMovieData.frames_flags.resize(currFrameCounter+1);
 		//always log savestates in taseditor mode
 		currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 		// also log frame_flags
 		if (currFrameCounter > 0)
 		{
-			if ((int)currMovieData.frames_flags.size() <= currFrameCounter)
-				currMovieData.frames_flags.resize(currFrameCounter+1);
 			// lagFlag indicates that lag was in previous frame
 			currMovieData.frames_flags[currFrameCounter-1] = (lagFlag)?LAG_FLAG_BIT:0;
 		}

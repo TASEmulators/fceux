@@ -16,7 +16,7 @@ TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads projec
 
 }
 
-void TASEDIT_PROJECT::init()	//TODO: rip this out! This should be the class constructor instead
+void TASEDIT_PROJECT::init()
 {
 	projectName="";
 	fm2FileName="";
@@ -53,9 +53,10 @@ void TASEDIT_PROJECT::SetProjectFile(std::string e)
 	projectFile = e;
 }
 
-bool TASEDIT_PROJECT::SaveProject()
+bool TASEDIT_PROJECT::saveProject()
 {
 	std::string PFN = GetProjectFile();
+	if (PFN.empty()) return false;
 	const char* filename = PFN.c_str();
 	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
 	//ofs << GetProjectName() << std::endl;

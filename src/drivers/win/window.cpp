@@ -2805,10 +2805,25 @@ void UpdateMenuHotkeys()
 	combined = "&Cheats...\t" + combo;
 	ChangeMenuItemText(MENU_CHEATS, combined);
 
+	//Open RAM Search
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENRAMSEARCH]);
+	combined = "&RAM Search...\t" + combo;
+	ChangeMenuItemText(ID_RAM_SEARCH, combined);
+
+	//Open RAM Watch
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENRAMWATCH]);
+	combined = "&RAM Watch...\t" + combo;
+	ChangeMenuItemText(ID_RAM_WATCH, combined);
+
 	//Open Memory Watch
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_TOOL_OPENMEMORYWATCH]);
 	combined = "&Memory Watch...\t" + combo;
 	ChangeMenuItemText(MENU_MEMORY_WATCH, combined);
+
+	//Open TAS Edit
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDIT]);
+	combined = "&TAS Edit...\t" + combo;
+	ChangeMenuItemText(MENU_TASEDIT, combined);
 
 	//-------------------------------Debug--------------------------------------
 	//Open Debugger

@@ -23,9 +23,11 @@ using namespace std;
 //to change header font
 //http://forums.devx.com/archive/index.php/t-37234.html
 
-int old_movie_readonly = -1;
+bool old_project_changed;
+int old_multitrack_recording_joypad, multitrack_recording_joypad;
+bool old_movie_readonly;
 int lastCursor;
-bool old_emu_paused;
+bool old_emu_paused, emu_paused;
 int old_pauseframe;
 bool old_show_pauseframe, show_pauseframe;
 bool old_rewind_button_state, rewind_button_state;
@@ -33,7 +35,12 @@ bool old_forward_button_state, forward_button_state;
 int button_hold_time;
 int seeking_start_frame = 0;
 bool TASEdit_focus = false;
-int saved_eoptions = 0;
+// saved FCEU config
+int saved_eoptions;
+int saved_EnableAutosave;
+extern int EnableAutosave;
+bool saved_compressSavestates;
+extern bool compressSavestates;
 
 // vars saved in cfg file
 int TasEdit_wndx, TasEdit_wndy;
@@ -42,13 +49,20 @@ bool TASEdit_show_lag_frames = true;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_DEFAULT_CAPACITY;
 extern bool muteTurbo;
+bool TASEdit_show_dot = true;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-
+char windowCaptions[6][30] = {	"TAS Editor",
+								"TAS Editor (Recording All)",
+								"TAS Editor (Recording 1P)",
+								"TAS Editor (Recording 2P)",
+								"TAS Editor (Recording 3P)",
+								"TAS Editor (Recording 4P)"};
 HWND hwndTasEdit = 0;
 static HMENU hmenu, hrmenu;
 static HWND hwndList, hwndHeader, hwndProgressbar, hwndRewind, hwndForward;
+static HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
 static WNDPROC hwndHeader_oldWndproc, hwndList_oldWndProc;
 
 typedef std::set<int> TSelectionFrames;
@@ -93,8 +107,14 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 				{
 					item.pszText[0] = MovieRecord::mnemonics[bit];
 					item.pszText[1] = 0;
-				} else 
-					item.pszText[0] = 0;
+				} else
+				{
+					if (TASEdit_show_dot)
+					{
+						item.pszText[0] = 46;	// "."
+						item.pszText[1] = 0;
+					} else item.pszText[0] = 0;
+				}
 			}
 			break;
 		}
@@ -108,6 +128,8 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 
 static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 {
+	//LPNMCUSTOMDRAW
+
 	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
 	{
@@ -119,6 +141,9 @@ static LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
+
+		//msg->clrText = 0xFF0000;
+
 		if(cell_x > COLUMN_ICONS)
 		{
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
@@ -197,21 +222,21 @@ void UpdateTasEdit()
 			SeekingStop();
 
 	// update seeking progressbar
+	old_emu_paused = emu_paused;
+	emu_paused = (bool)FCEUI_EmulationPaused();
 	if (pauseframe)
 	{
 		SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * (currFrameCounter-seeking_start_frame) / (pauseframe-seeking_start_frame), 0);
-	} else if (old_emu_paused != (bool)FCEUI_EmulationPaused())
+	} else if (old_emu_paused != emu_paused)
 	{
 		// emulator got paused/unpaused externally
-		if (old_emu_paused && !FCEUI_EmulationPaused())
+		if (old_emu_paused && !emu_paused)
 			// externally unpaused - progressbar should be empty
 			SendMessage(hwndProgressbar, PBM_SETPOS, 0, 0);
 		else
 			// externally paused - progressbar should be full
 			SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH, 0);
 	}
-	old_emu_paused = (bool)FCEUI_EmulationPaused();
-
 	// update flashing pauseframe
 	if (old_pauseframe != pauseframe && old_pauseframe) RedrawRow(old_pauseframe-1);
 	old_pauseframe = pauseframe;
@@ -223,6 +248,7 @@ void UpdateTasEdit()
 	if (old_show_pauseframe != show_pauseframe) RedrawRow(pauseframe-1);
 
 	UpdateList();
+	//UpdateRecordingRadioButtons();
 
 	//update the cursor
 	if(currFrameCounter != lastCursor)
@@ -235,24 +261,11 @@ void UpdateTasEdit()
 		lastCursor = currFrameCounter;
 	}
 	
-	// update window caption
-	if ((!old_movie_readonly) == movie_readonly)
-	{
-		old_movie_readonly = movie_readonly;
-		if (movie_readonly)
-		{
-			SetWindowText(hwndTasEdit, "TAS Editor");
-		} else 
-		{
-			SetWindowText(hwndTasEdit, "TAS Editor (Recording)");
-		}
-	}
-
 	// update < and > buttons
-	if(FCEUI_EmulationPaused())
+	if(emu_paused)
 	{
 		old_rewind_button_state = rewind_button_state;
-		rewind_button_state = Button_GetState(hwndRewind) & BST_PUSHED;
+		rewind_button_state = (bool)(Button_GetState(hwndRewind) & BST_PUSHED);
 		if (rewind_button_state)
 		{
 			if (!old_rewind_button_state)
@@ -265,7 +278,7 @@ void UpdateTasEdit()
 			}
 		}
 		old_forward_button_state = forward_button_state;
-		forward_button_state = Button_GetState(hwndForward) & BST_PUSHED;
+		forward_button_state = (bool)(Button_GetState(hwndForward) & BST_PUSHED);
 		if (forward_button_state)
 		{
 			if (!old_forward_button_state)
@@ -278,6 +291,19 @@ void UpdateTasEdit()
 			}
 		}
 	}
+
+	// update window caption
+	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad || old_project_changed != project.changed)
+		RedrawWindowCaption();
+	old_project_changed = project.changed;
+
+	// update recording radio buttons if user used hotkey to switch R/W
+	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
+	{
+		UncheckRecordingRadioButtons();
+		RecheckRecordingRadioButtons();
+	}
+
 }
 
 void UpdateList()
@@ -290,6 +316,25 @@ void UpdateList()
 	}
 }
 
+void RedrawWindowCaption()
+{
+	char windowCaption[300];	// 260 + 30 + 1 + ...
+	if (movie_readonly)
+		strcpy(windowCaption, windowCaptions[0]);
+	else
+		strcpy(windowCaption, windowCaptions[multitrack_recording_joypad + 1]);
+	// add project name
+	std::string projectname = project.GetProjectName();
+	if (!projectname.empty())
+	{
+		strcat(windowCaption, " - ");
+		strcat(windowCaption, projectname.c_str());
+	}
+	// and * if project has unsaved changes
+	if (project.changed)
+		strcat(windowCaption, "*");
+	SetWindowText(hwndTasEdit, windowCaption);
+}
 void RedrawTasedit()
 {
 	InvalidateRect(hwndTasEdit,0,FALSE);
@@ -395,6 +440,15 @@ void RightClick(LPNMITEMACTIVATE info)
 	RightClickMenu(info);
 }
 
+void InputChanged()
+{
+	// keep input log
+	// update hot input
+
+
+	project.changed = true;
+}
+
 void InvalidateGreenZone(int after)
 {
 	if (currMovieData.greenZoneCount > after+1)
@@ -486,6 +540,7 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 		//update one row
 		currMovieData.records[row_index].toggleBit(joy,bit);
 	}
+	InputChanged();
 	InvalidateGreenZone(row_index);
 }
 
@@ -556,10 +611,10 @@ static void InsertFrames()
 	}
 
 	UpdateList();
+	InputChanged();
 	InvalidateGreenZone(*selectionFrames.begin());
 }
 
-//delete frames at the currently selected positions.
 static void DeleteFrames()
 {
 	//delete frames on each selection, going backwards
@@ -572,6 +627,7 @@ static void DeleteFrames()
 	if (!currMovieData.records.size())
 		StartFromZero();
 	// reduce list
+	InputChanged();
 	UpdateList();
 	int index = *selectionFrames.begin();
 	int delete_index;
@@ -589,6 +645,20 @@ static void DeleteFrames()
 	if (index>0) index--;
 	InvalidateGreenZone(index);
 }
+
+static void ClearFrames()
+{
+	//clear input on each selection
+	for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
+	{
+		currMovieData.records[*it].clear();
+	}
+	InputChanged();
+	// reduce greenzone
+	int index = *selectionFrames.begin();
+	InvalidateGreenZone(index);
+}
+
 
 //the column set operation, for setting a button for a span of selected values
 static void ColumnSet(int column)
@@ -630,6 +700,7 @@ static void ColumnSet(int column)
 	{
 		currMovieData.records[*it].setBitValue(joy,button,newValue);
 	}
+	InputChanged();
 	InvalidateGreenZone(*selectionFrames.begin());
 }
 
@@ -718,7 +789,7 @@ static void Cut()
 {
 	if (Copy())
 	{
-		DeleteFrames();
+		ClearFrames();
 	}
 }
 
@@ -798,6 +869,7 @@ static bool Paste()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
+			InputChanged();
 			InvalidateGreenZone(*selectionFrames.begin());
 			result = true;
 		}
@@ -808,14 +880,6 @@ static bool Paste()
 	CloseClipboard();
 	return result;
 }
-
-void AddMarker()
-{
-}
-void RemoveMarker()
-{
-}
-
 
 // ---------------------------------------------------------------------------------
 //The subclass wndproc for the listview header
@@ -913,13 +977,15 @@ static void InitDialog()
 		}
 	}
 	// add pads 3 and 4 and frame_number2
-	if (currMovieData.fourscore) AddFourscoreColumns();
+	if (currMovieData.fourscore) AddFourscore();
 
 	//the initial update
 	UpdateTasEdit();
 }
-void AddFourscoreColumns()
+
+void AddFourscore()
 {
+	// add list columns
 	LVCOLUMN lvc;
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 	lvc.fmt = LVCFMT_CENTER;
@@ -937,19 +1003,67 @@ void AddFourscoreColumns()
 	lvc.cx = 92;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	// enable radiobuttons for 3P/4P multitracking
+	EnableWindow(hwndRB_Rec3P, true);
+	EnableWindow(hwndRB_Rec4P, true);
+	// change eoptions
+	FCEUI_SetInputFourscore(true);
+
+
 }
-void RemoveFourscoreColumns()
+void RemoveFourscore()
 {
+	// remove list columns
 	for (int i = COLUMN_FRAMENUM2; i >= COLUMN_JOYPAD3_A; --i)
 	{
 		ListView_DeleteColumn (hwndList, i);
 	}
+	// disable radiobuttons for 3P/4P multitracking
+	EnableWindow(hwndRB_Rec3P, false);
+	EnableWindow(hwndRB_Rec4P, false);
+	// change eoptions
+	FCEUI_SetInputFourscore(false);
+
+
 }
 
-bool CheckSaveChanges()
+void UncheckRecordingRadioButtons()
 {
-	//TODO: determine if project has changed, and ask to save changes
-	return true; 
+	Button_SetCheck(hwndRB_RecOff, BST_UNCHECKED);
+	Button_SetCheck(hwndRB_RecAll, BST_UNCHECKED);
+	Button_SetCheck(hwndRB_Rec1P, BST_UNCHECKED);
+	Button_SetCheck(hwndRB_Rec2P, BST_UNCHECKED);
+	Button_SetCheck(hwndRB_Rec3P, BST_UNCHECKED);
+	Button_SetCheck(hwndRB_Rec4P, BST_UNCHECKED);
+}
+void RecheckRecordingRadioButtons()
+{
+	old_movie_readonly = movie_readonly;
+	old_multitrack_recording_joypad = multitrack_recording_joypad;
+	if (movie_readonly)
+	{
+		Button_SetCheck(hwndRB_RecOff, BST_CHECKED);
+	} else
+	{
+		switch(multitrack_recording_joypad)
+		{
+		case MULTITRACK_RECORDING_ALL:
+			Button_SetCheck(hwndRB_RecAll, BST_CHECKED);
+			break;
+		case MULTITRACK_RECORDING_1P:
+			Button_SetCheck(hwndRB_Rec1P, BST_CHECKED);
+			break;
+		case MULTITRACK_RECORDING_2P:
+			Button_SetCheck(hwndRB_Rec2P, BST_CHECKED);
+			break;
+		case MULTITRACK_RECORDING_3P:
+			Button_SetCheck(hwndRB_Rec3P, BST_CHECKED);
+			break;
+		case MULTITRACK_RECORDING_4P:
+			Button_SetCheck(hwndRB_Rec4P, BST_CHECKED);
+			break;
+		}
+	}
 }
 
 //Creates a new TASEdit Project
@@ -958,18 +1072,15 @@ static void NewProject()
 	//determine if current project changed
 	//if so, ask to save changes
 	//close current project
-	if (!CheckSaveChanges()) return;
+	if (!AskSaveProject()) return;
 
 	//TODO: close current project instance, create a new one with a non-parameterized constructor
 }
 
 //Opens a new Project file
-static void OpenProject()
+void OpenProject()
 {
-//TODO
-	//determine if current project changed
-	//if so, ask to save changes
-	//close current project
+	if (!AskSaveProject()) return;
 		
 	//If OPENFILENAME dialog successful, open up a completely new project instance and scrap the old one
 	//Run the project Load() function to pull all info from the .tas file into this new project instance
@@ -996,40 +1107,40 @@ static void OpenProject()
 	{							
 		std::string tempstr = nameo;					//Make a temporary string for filename
 		char drv[512], dir[512], name[512], ext[512];	//For getting the filename!
-		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it
-		{
-			tempstr.append(".tas");						//Stick it on ourselves
-			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
-			std::string filename = name;				//Get the filename
-			filename.append(ext);						//Shove the extension back onto it...
-			project.SetProjectFile(filename);			//And update the project's filename.
-		} else {										//If they've been nice and done it for us...
-			splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
-			std::string filename = name;				//Grab the name...
-			filename.append(ext);						//Stick extension back on...
-			project.SetProjectFile(filename);			//And update the project's filename.
-		}
+		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it, stick it on ourselves
+			tempstr.append(".tas");						
+		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
+		std::string filename = name;						//Get the filename
+		filename.append(ext);								//Shove the extension back onto it...
+		project.SetProjectFile(filename);					//And update the project's filename.
 		//Set the project's name to the ROM name
 		project.SetProjectName(GetRomName());
 		//Set the fm2 name
 		std::string thisfm2name = project.GetProjectName();
 		thisfm2name.append(".fm2");
 		project.SetFM2Name(thisfm2name);
-		// load project and change number of listview columns if needed
+		// switch to read-only mode, but first must uncheck radiobuttons explicitly
+		if (!movie_readonly) FCEUI_MovieToggleReadOnly();
+		UncheckRecordingRadioButtons();
+		RecheckRecordingRadioButtons();
+		// remember to update fourscore status
 		bool last_fourscore = currMovieData.fourscore;
+		// Load project
 		project.LoadProject(project.GetProjectFile());
 		if (last_fourscore && !currMovieData.fourscore)
-			RemoveFourscoreColumns();
+			RemoveFourscore();
 		else if (!last_fourscore && currMovieData.fourscore)
-			AddFourscoreColumns();
-		PauseEmulation();
+			AddFourscore();
+		SeekingStop();
 		FollowPlayback();
+		//UpdateTasEdit();
 		RedrawTasedit();
+		RedrawWindowCaption();
 	}
 }
 
 // Saves current project
-static void SaveProjectAs()
+bool SaveProjectAs()
 {
 //Save project as new user selected filename
 //flag project as not changed
@@ -1067,18 +1178,36 @@ static void SaveProjectAs()
 		std::string thisfm2name = project.GetProjectName();
 		thisfm2name.append(".fm2");							//Setup the fm2 name
 		project.SetFM2Name(thisfm2name);					//Set the project's fm2 name
-		project.SaveProject();
-	}
-
+		project.saveProject();
+	} else return false;
+	// saved successfully - remove * mark from caption
+	RedrawWindowCaption();
+	return true;
+}
+bool SaveProject()
+{
+	if (!project.saveProject())
+		return SaveProjectAs();
+	else
+		RedrawWindowCaption();
+	return true;
 }
 
-//Saves current project
-static void SaveProject()
+// returns false if user doesn't want to exit
+bool AskSaveProject()
 {
-//TODO: determine if file exists, if not, do SaveProjectAs()
-//Save work, flag project as not changed
-	if (!project.SaveProject())
-		SaveProjectAs();
+	bool changes_found = false;
+	if (project.changed) changes_found = true;
+
+	// ask saving project
+	if (changes_found)
+	{
+		int answer = MessageBox(hwndTasEdit, "Save Project changes?", "TAS Edit", MB_YESNOCANCEL);
+		if(answer == IDYES)
+			return SaveProject();
+		return (answer != IDCANCEL);
+	}
+	return true;
 }
 
 //Takes a selected .fm2 file and adds it to the Project inputlog
@@ -1126,6 +1255,7 @@ static void Truncate()
 		ClearSelection();
 	}
 	currMovieData.truncateAt(frame+1);
+	InputChanged();
 	UpdateList();
 	InvalidateGreenZone(frame);
 }
@@ -1184,11 +1314,18 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
 			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
-
+			// save references to dialog items
 			hwndList = GetDlgItem(hwndDlg, IDC_LIST1);
 			hwndProgressbar = GetDlgItem(hwndDlg, IDC_PROGRESS1);
+			SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
 			hwndRewind = GetDlgItem(hwndDlg, TASEDIT_REWIND);
 			hwndForward = GetDlgItem(hwndDlg, TASEDIT_FORWARD);
+			hwndRB_RecOff = GetDlgItem(hwndDlg, IDC_RADIO1);
+			hwndRB_RecAll = GetDlgItem(hwndDlg, IDC_RADIO2);
+			hwndRB_Rec1P = GetDlgItem(hwndDlg, IDC_RADIO3);
+			hwndRB_Rec2P = GetDlgItem(hwndDlg, IDC_RADIO4);
+			hwndRB_Rec3P = GetDlgItem(hwndDlg, IDC_RADIO5);
+			hwndRB_Rec4P = GetDlgItem(hwndDlg, IDC_RADIO6);
 			InitDialog();
 			break; 
 
@@ -1236,30 +1373,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					break;
 				}
 				break;
-			case TASEDIT_REWIND:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CLICK:
-				case NM_DBLCLK:
-					Tasedit_RewindFrame();
-					break;
-				}
-				break;
 			case TASEDIT_PLAYSTOP:
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CLICK:
 				case NM_DBLCLK:
 					Tasedit_ToggleEmulationPause();
-					break;
-				}
-				break;
-			case TASEDIT_FORWARD:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CLICK:
-				case NM_DBLCLK:
-					Tasedit_ForwardFrame();
 					break;
 				}
 				break;
@@ -1284,80 +1403,57 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_FILE_NEWPROJECT:
 				NewProject();
 				break;
-
 			case ID_FILE_OPENPROJECT:
 				OpenProject();
 				break;
-			
 			case ACCEL_CTRL_S:
 			case ID_FILE_SAVEPROJECT:
-				SaveProject();
+					SaveProject();
 				break;
-
 			case ID_FILE_SAVEPROJECTAS:
-				SaveProjectAs();
+					SaveProjectAs();
 				break;
-
 			case ID_FILE_IMPORTFM2:
 				Replay_LoadMovie(true);
 				//Import(); //adelikat:  Putting the play movie dialog in its place until the import concept is refined.
 				break;
-
 			case ID_FILE_EXPORTFM2:
-				Export();
+					Export();
 				break;
-
 			case ID_TASEDIT_FILE_CLOSE:
 				ExitTasEdit();
 				break;
-		
 			case ID_EDIT_SELECTALL:
 				SelectAll();
 				break;
-			
 			case ACCEL_CTRL_X:
 			case ID_TASEDIT_CUT:
 				Cut();
 				break;
-
 			case ACCEL_CTRL_C:
 			case ID_TASEDIT_COPY:
 				Copy();
 				break;
-
 			case ACCEL_CTRL_V:
 			case ID_TASEDIT_PASTE:
 				Paste();
 				break;
-
 			case ACCEL_CTRL_DELETE:
 			case ID_TASEDIT_DELETE:
 			case ID_CONTEXT_SELECTED_DELETEFRAMES:
 				if (selectionFrames.size()) DeleteFrames();
 				break;
-
-			case ID_EDIT_ADDMARKER:
-			case ID_CONTEXT_SELECTED_ADDMARKER:
-				AddMarker();
-				break;
-
-			case ID_EDIT_REMOVEMARKER:
-			case ID_CONTEXT_SELECTED_REMOVEMARKER:
-				RemoveMarker();
-				break;
-
 			case ACCEL_CTRL_T:
 			case ID_EDIT_TRUNCATE:
 			case ID_CONTEXT_SELECTED_TRUNCATE:
 			case ID_CONTEXT_STRAY_TRUNCATE:
 				Truncate();
 				break;
-
 			case ID_HELP_TASEDITHELP:
 				OpenHelpWindow(tasedithelp);
 				//link to TASEdit in help menu
 				break;
-
+			case ACCEL_INS:
 			case MENU_CONTEXT_STRAY_INSERTFRAMES:
 			case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 				{
@@ -1371,23 +1467,27 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								// insert at selection
 								int index = *selectionFrames.begin();
 								currMovieData.insertEmpty(index,frames);
+								InputChanged();
 								InvalidateGreenZone(index);
 							} else
 							{
 								// insert at playback cursor
 								currMovieData.insertEmpty(currFrameCounter,frames);
+								InputChanged();
 								InvalidateGreenZone(currFrameCounter);
 							}
 						}
 					}
 				}
 				break;
-
 			case ACCEL_CTRL_INSERT:
 			case ID_CONTEXT_SELECTED_INSERTFRAMES:
 				if (selectionFrames.size()) InsertFrames();
 				break;
-
+			case ACCEL_DEL:
+			case ID_CONTEXT_SELECTED_CLEARFRAMES:
+				if (selectionFrames.size()) ClearFrames();
+				break;
 			case TASEDIT_REWIND_FULL:
 				//rewinds to beginning of greenzone
 				JumpToFrame(FindBeginningOfGreenZone(0));
@@ -1443,14 +1543,46 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				}
 				break;
 				}
-
 			case ID_CONFIG_MUTETURBO:
 				muteTurbo ^= 1;
 				CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 				break;
-
 			case IDC_PROGRESS_BUTTON:
 				if (pauseframe) SeekingStop();
+				break;
+			case IDC_RADIO1:
+				// switch to readonly, no need to recheck radiobuttons
+				if (!movie_readonly) FCEUI_MovieToggleReadOnly();
+				break;
+			case IDC_RADIO2:
+				// switch to read+write for all, no need to recheck radiobuttons
+				if (movie_readonly) FCEUI_MovieToggleReadOnly();
+				multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
+				break;
+			case IDC_RADIO3:
+				// switch to read+write for 1P, no need to recheck radiobuttons
+				if (movie_readonly) FCEUI_MovieToggleReadOnly();
+				multitrack_recording_joypad = MULTITRACK_RECORDING_1P;
+				break;
+			case IDC_RADIO4:
+				// switch to read+write for 2P, no need to recheck radiobuttons
+				if (movie_readonly) FCEUI_MovieToggleReadOnly();
+				multitrack_recording_joypad = MULTITRACK_RECORDING_2P;
+				break;
+			case IDC_RADIO5:
+				// switch to read+write for 3P, no need to recheck radiobuttons
+				if (movie_readonly) FCEUI_MovieToggleReadOnly();
+				multitrack_recording_joypad = MULTITRACK_RECORDING_3P;
+				break;
+			case IDC_RADIO6:
+				// switch to read+write for 4P, no need to recheck radiobuttons
+				if (movie_readonly) FCEUI_MovieToggleReadOnly();
+				multitrack_recording_joypad = MULTITRACK_RECORDING_4P;
+				break;
+			case ID_VIEW_SHOWDOTINEMPTYCELLS:
+				TASEdit_show_dot ^= 1;
+				CheckMenuItem(hmenu, ID_VIEW_SHOWDOTINEMPTYCELLS, TASEdit_show_dot?MF_CHECKED : MF_UNCHECKED);
+				RedrawList();
 				break;
 
 			}
@@ -1494,6 +1626,14 @@ void EnterTasEdit()
 		DoPriority();
 		// clear "Disable speed throttling"
 		eoptions &= ~EO_NOTHROTTLE;
+		// switch off autosaves
+		saved_EnableAutosave = EnableAutosave;
+		EnableAutosave = 0;
+		// switch on savestates compression
+		saved_compressSavestates = compressSavestates;
+		compressSavestates = true;
+
+
 		UpdateCheckedMenuItems();
 
 		hmenu = GetMenu(hwndTasEdit);
@@ -1503,10 +1643,12 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_VIEW_SHOWDOTINEMPTYCELLS, TASEdit_show_dot?MF_CHECKED : MF_UNCHECKED);
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 	}
-	// either start new project or use current movie
+	project.init();
+	// either start new movie or use current movie
 	if (movieMode == MOVIEMODE_INACTIVE)
 	{
 		FCEUI_StopMovie();
@@ -1518,29 +1660,38 @@ void EnterTasEdit()
 		//use current movie to create a new project
 		FCEUI_StopMovie();
 	}
-	// set progressbar property
-	SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
+	// always start work from read-only mode, ready to switch to MULTITRACK_RECORDING_ALL
+	movie_readonly = true;
+	multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
+	RecheckRecordingRadioButtons();
+	movieMode = MOVIEMODE_TASEDIT;
 	// init variables
 	lastCursor = -1;
+	old_project_changed = false;
 	old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
-	old_emu_paused = true;
+	old_emu_paused = emu_paused = true;
 	SeekingStop();
-	FCEU_DispMessage("Tasedit engaged",0);
-	movieMode = MOVIEMODE_TASEDIT;
 	currMovieData.TryDumpIncremental();
+	FCEU_DispMessage("Tasedit engaged",0);
 }
-void ExitTasEdit()
+bool ExitTasEdit()
 {
-	if (!CheckSaveChanges()) return;
+	if (!AskSaveProject()) return false;
+
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
 	SeekingStop();
 	TASEdit_focus = false;
 	// restore "eoptions"
 	eoptions = saved_eoptions;
+	// restore autosaves
+	EnableAutosave = saved_EnableAutosave;
+	// restore compression
+	compressSavestates = saved_compressSavestates;
+
 	DoPriority();
 	UpdateCheckedMenuItems();
 	// clear "Background TASEdit input"
@@ -1551,4 +1702,5 @@ void ExitTasEdit()
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("Tasedit disengaged",0);
 	CreateCleanMovie();
+	return true;
 }

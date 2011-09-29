@@ -9,6 +9,12 @@
 #define PAUSEFRAME_BLINKING_PERIOD 100
 #define PROGRESSBAR_WIDTH 200
 #define HOLD_REPEAT_DELAY 250			// in milliseconds
+// multitrack
+#define MULTITRACK_RECORDING_ALL 0
+#define MULTITRACK_RECORDING_1P 1
+#define MULTITRACK_RECORDING_2P 2
+#define MULTITRACK_RECORDING_3P 3
+#define MULTITRACK_RECORDING_4P 4
 // listview column names
 #define COLUMN_ICONS 0
 #define COLUMN_FRAMENUM	 1
@@ -62,16 +68,18 @@
 
 // -----------------------------
 void EnterTasEdit();
-void ExitTasEdit();
+bool ExitTasEdit();
 void UpdateTasEdit();
 void UpdateList();
+void InputChanged();
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
 void FollowPlayback();
 void ClearSelection();
-void AddFourscoreColumns();
-void RemoveFourscoreColumns();
+void AddFourscore();
+void RemoveFourscore();
+void RedrawWindowCaption();
 void RedrawTasedit();
 void RedrawList();
 void RedrawRow(int index);
@@ -84,3 +92,11 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
 void Tasedit_RewindFrame();
 void Tasedit_ForwardFrame();
 void StartFromZero();
+void SwitchToReadOnly();
+void UncheckRecordingRadioButtons();
+void RecheckRecordingRadioButtons();
+void OpenProject();
+bool SaveProject();
+bool SaveProjectAs();
+bool AskSaveProject();
+

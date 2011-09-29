@@ -60,11 +60,13 @@ public:
 	void SetProjectFile(std::string e);
 
 	//Guess what these functions are for...
-	bool SaveProject();
+	bool saveProject();
 	bool LoadProject(std::string PFN);
 
 	bool Export2FM2(std::string filename);	//creates a fm2 out of header, comments, subtitles, and main branch input log, return false if any errors occur
 	void AddInputLog(std::vector<MovieRecord> records, std::string fn);	//Receives a vector of movie records & a filename, and saves them to disk (as .log files), and adds filename to inputlog vector
+
+	bool changed;						// If there are unsaved changes. 
 
 private:
 	std::string projectName;			//The TASEdit Project's name
@@ -76,5 +78,4 @@ private:
 	std::vector<std::string> comments;
 	std::vector<std::string> subtitles;
 
-	bool changed;						// If there are unsaved changes. 
 };

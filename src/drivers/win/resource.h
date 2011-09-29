@@ -374,19 +374,22 @@
 #define MEMW_EXPANDCOLLAPSE             1133
 #define IDC_SOUND_RESTOREDEFAULTVOL     1133
 #define IDC_BUTTON2                     1134
-#define TASEDIT_FORWARD			1134
+#define TASEDIT_FORWARD                 1134
 #define IDC_BUTTON3                     1135
 #define TASEDIT_REWIND_FULL             1135
 #define IDC_BUTTON4                     1136
-#define TASEDIT_FORWARD_FULL		1136
+#define TASEDIT_FORWARD_FULL            1136
 #define TASEDIT_REWIND2                 1137
 #define TASEDIT_PLAYSTOP                1137
 #define IDC_RADIO1                      1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140
+#define IDC_RADIO4                      1141
 #define MEMW_EDIT00FORMULA              1142
+#define IDC_RADIO5                      1142
 #define MEMW_EDIT01FORMULA              1143
-#define IDC_PROGRESS_BUTTON		1144
+#define IDC_RADIO6                      1143
+#define IDC_PROGRESS_BUTTON             1144
 #define MEMW_EDIT02FORMULA              1144
 #define IDC_BUTTON7                     1145
 #define MEMW_EDIT03FORMULA              1145
@@ -430,7 +433,9 @@
 #define DEBUGAUTOLOAD                   1203
 #define IDC_CHEAT_PAUSEWHENACTIVE       1203
 #define IDC_FULLSAVESTATES              1203
+#define IDC_SUPERIMPOSE                 1203
 #define IDC_VOLUMEGROUP                 1204
+#define IDC_OMITBLANK                   1204
 #define IDC_RAMLIST                     1205
 #define IDC_C_SEARCH                    1206
 #define IDC_C_ADDCHEAT                  1207
@@ -609,8 +614,6 @@
 #define ID_FILE_SAVEPROJECTAS           40182
 #define ID_FILE_EXPORTFM2               40183
 #define ACCEL_CTRL_X                    40184
-#define ID_EDIT_ADDMARKER               40186
-#define ID_EDIT_REMOVE_MARKER           40187
 #define ID_TASEDIT_CUT                  40188
 #define ID_TASEDIT_COPY                 40189
 #define ID_TASEDIT_COPYTONEW            40190
@@ -632,8 +635,6 @@
 #define ID_CONTEXT_SELECTED_DELETEFRAMES 40205
 #define ID_SELECTED_REMOVEMARKER        40206
 #define ID_CONTEXT_SELECTED_PASTETONEW  40207
-#define ID_CONTEXT_SELECTED_ADDMARKER   40208
-#define ID_CONTEXT_SELECTED_REMOVEMARKER 40209
 #define ID_CONTEXT_SELECTED_BRANCH      40210
 #define ID_EDIT_BRANCHCTRL              40211
 #define ID_EDIT_BRANCH                  40212
@@ -830,6 +831,12 @@
 #define ID_AVI_DISPLAYHUD               40438
 #define ID_AVI_STOPWAV                  40439
 #define ID_AVI_ENABLEHUDRECORDING       40440
+#define ID_VIEW_SHOWDOTINEMPTYCELLS     40441
+#define ACCEL_INS                       40442
+#define ACCEL_DEL                       40443
+#define ID_SELECTED_CLEARSELECTION      40445
+#define ID_CONTEXT_SELECTED_CLEARSELECTION 40446
+#define ID_CONTEXT_SELECTED_CLEARFRAMES 40447
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -839,7 +846,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40441
+#define _APS_NEXT_COMMAND_VALUE         40448
 #define _APS_NEXT_CONTROL_VALUE         1263
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
