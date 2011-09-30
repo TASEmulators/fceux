@@ -316,6 +316,11 @@ void UpdateList()
 	}
 }
 
+void UpdateProgressbar(int frame)
+{
+	SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * frame / currMovieData.greenZoneCount, 0);
+}
+
 void RedrawWindowCaption()
 {
 	char windowCaption[300];	// 260 + 30 + 1 + ...
@@ -604,10 +609,19 @@ static void InsertFrames()
 	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
 	currMovieData.records.reserve(currMovieData.records.size()+frames);
 
-	//insert frames before each selection
+	//insert frames before each selection, but consecutive selection lines are accounted as single region
+	frames = 1;
+	TSelectionFrames::reverse_iterator next_it;
 	for(TSelectionFrames::reverse_iterator it(selectionFrames.rbegin()); it != selectionFrames.rend(); it++)
 	{
-		currMovieData.insertEmpty(*it,1);
+		next_it = it;
+		next_it++;
+		if (next_it == selectionFrames.rend() || (int)*next_it < ((int)*it - 1))
+		{
+			// end of current region
+			currMovieData.insertEmpty(*it,frames);
+			frames = 1;
+		} else frames++;
 	}
 
 	UpdateList();
@@ -1110,17 +1124,17 @@ void OpenProject()
 		if(tempstr.rfind(".tas") == std::string::npos)	//If they haven't put ".tas" after it, stick it on ourselves
 			tempstr.append(".tas");						
 		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
+		project.SetProjectName(name);
 		std::string filename = name;						//Get the filename
 		filename.append(ext);								//Shove the extension back onto it...
 		project.SetProjectFile(filename);					//And update the project's filename.
-		//Set the project's name to the ROM name
-		project.SetProjectName(GetRomName());
 		//Set the fm2 name
-		std::string thisfm2name = project.GetProjectName();
+		std::string thisfm2name = name;
 		thisfm2name.append(".fm2");
 		project.SetFM2Name(thisfm2name);
 		// switch to read-only mode, but first must uncheck radiobuttons explicitly
 		if (!movie_readonly) FCEUI_MovieToggleReadOnly();
+		multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 		UncheckRecordingRadioButtons();
 		RecheckRecordingRadioButtons();
 		// remember to update fourscore status
@@ -1170,12 +1184,11 @@ bool SaveProjectAs()
 		char drv[512], dir[512], name[512], ext[512];		//For getting the filename!
 
 		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
+		project.SetProjectName(name);
 		std::string filename = name;						//Grab the name...
 		filename.append(ext);								//Stick extension back on...
 		project.SetProjectFile(filename);					//And update the project's filename.
-
-		project.SetProjectName(GetRomName());				//Set the project's name to the ROM name
-		std::string thisfm2name = project.GetProjectName();
+		std::string thisfm2name = name;
 		thisfm2name.append(".fm2");							//Setup the fm2 name
 		project.SetFM2Name(thisfm2name);					//Set the project's fm2 name
 		project.saveProject();
@@ -1457,8 +1470,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case MENU_CONTEXT_STRAY_INSERTFRAMES:
 			case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 				{
-					int frames = 1;
-					if(CWin32InputBox::GetInteger("Insert Frames", "How many frames?", frames, hwndDlg) == IDOK)
+					int frames = selectionFrames.size();
+					if (!frames) frames = 1;
+					if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, hwndDlg) == IDOK)
 					{
 						if (frames > 0)
 						{
@@ -1502,10 +1516,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				FollowPlayback();
 				break;
 			case ACCEL_CTRL_F:
-			case ID_VIEW_FOLLOW_PLAYBACK:
+			case CHECK_FOLLOW_CURSOR:
 				//switch "Follow playback" flag
 				TASEdit_follow_playback ^= 1;
-				CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+				CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 				// if switched off then jump to selection
 				if (TASEdit_follow_playback)
 					FollowPlayback();
@@ -1526,22 +1540,22 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 			case ID_CONFIG_SETGREENZONECAPACITY:
 				{
-				//open input dialog
-				int new_capacity = TASEdit_greenzone_capacity;
-				if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?", new_capacity,  hwndDlg) == IDOK)
-				{
-					if (new_capacity < GREENZONE_MIN_CAPACITY)
-						new_capacity = GREENZONE_MIN_CAPACITY;
-					else if (new_capacity > GREENZONE_MAX_CAPACITY)
-						new_capacity = GREENZONE_MAX_CAPACITY;
-					if (new_capacity < TASEdit_greenzone_capacity)
+					//open input dialog
+					int new_capacity = TASEdit_greenzone_capacity;
+					if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?", new_capacity,  hwndDlg) == IDOK)
 					{
-						TASEdit_greenzone_capacity = new_capacity;
-						currMovieData.ClearGreenzoneTail();
-						RedrawList();
-					} else TASEdit_greenzone_capacity = new_capacity;
-				}
-				break;
+						if (new_capacity < GREENZONE_MIN_CAPACITY)
+							new_capacity = GREENZONE_MIN_CAPACITY;
+						else if (new_capacity > GREENZONE_MAX_CAPACITY)
+							new_capacity = GREENZONE_MAX_CAPACITY;
+						if (new_capacity < TASEdit_greenzone_capacity)
+						{
+							TASEdit_greenzone_capacity = new_capacity;
+							currMovieData.ClearGreenzoneTail();
+							RedrawList();
+						} else TASEdit_greenzone_capacity = new_capacity;
+					}
+					break;
 				}
 			case ID_CONFIG_MUTETURBO:
 				muteTurbo ^= 1;
@@ -1639,7 +1653,7 @@ void EnterTasEdit()
 		hmenu = GetMenu(hwndTasEdit);
 		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
 		// check option ticks
-		CheckMenuItem(hmenu, ID_VIEW_FOLLOW_PLAYBACK, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+		CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);

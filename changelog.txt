@@ -1,4 +1,23 @@
 
+30-sept-2011 - AnS - logging all display messages to Message Log
+30-sept-2011 - AnS - Tasedit: special method of inserting frames; progressbar updating when loading/saving large projects; moved "Follow cursor" checkbox from View menu to main TASEdit window
+30-sept-2011 - AnS - Tasedit: View->Show dot in empty cells; ClearFrames (Del), Cut operation clears frames instead of deleting; checking unsaved project on Exit and Open project
+28-sept-2011 - CaH4e3 - resetexstate crash fix
+27-sept-2011 - AnS - Fixed old bug with "Play Movie From Beginning"
+26-sept-2011 - AnS - added support for "Enable HUD recording" option to SDL version
+25-sept-2011 - AnS - Tasedit: progressbar; holding "<" and ">" buttons; Ctrl-Delete bugfix
+25-sept-2011 - zeromus - newppu-fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict
+24-sept-2011 - CaH4e3 - latest mapper changes; code/data logger now can log data access from the RAM code; the new button to save unused data to the code/data logger
+24-sept-2011 - AnS - Tasedit: changed control scheme to single click instead of double click
+23-sept-2011 - AnS - File->AVI/Wav->Enable HUD recording
+23-sept-2011 - AnS - moved "Display movie status icon" from Config->Movie options to Config->Display
+23-sept-2011 - AnS - Config->Display->Rerecord counter; no more TweakCount
+23-sept-2011 - AnS - Config->Movie options->Always suggest Read-Only replay (for Replay dialog)
+22-sept-2011 - AnS - deleted "Lag Counter Reset" hotkey; added "Open TAS Edit" hotkey
+22-sept-2011 - AnS - fixed long "savestate" messages containing path
+22-sept-2011 - AnS - Tasedit: auto clear "Disable speed throttling" and "Run in background", auto set "Set high-priority thread" when entering TASEdit; FCEUX runs in bg when TASEdit has focus; Config->"Mute Turbo" check (same as in Config->Sound)
+19-sept-2011 - AnS - Tasedit: accelerator table; Config->"Set greenzone capacity"; pauseframe is shown by flashing color
+18-sept-2011 - zeromus - datalatch mapper-fix bug where wramless games would be able to do something mysterious to unmapped host emulator memory
 17-sept-2011 - AnS - Tasedit: forced read-only behaviour when seeking or holding turbo; "Auto-restore last position" checkbox in playback controls; also fixed item drawing method, no more flicker and slowdowns
 12-sept-2011 - prg318 - sdl: rename InputType to CurInputType due to variable of same name in src/movie.h
 12-sept-2011 - AnS - Tasedit: rewrote project save/load functions; various bugfixes; Added string "Tweak Count" to Replay loading dialog

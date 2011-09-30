@@ -454,6 +454,11 @@ void FCEU_DispMessage(char *format, int disppos=0, ...)
 
 	va_start(ap,disppos);
 	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
+	// also log messages
+	char temp[2048];
+	vsnprintf(temp,sizeof(temp),format,ap);
+	strcat(temp, "\n");
+	FCEU_printf(temp);
 	va_end(ap);
 
 	guiMessage.howlong = 180;

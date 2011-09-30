@@ -79,7 +79,6 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 {
 	const char* filename = PFN.c_str();
 
-	SetProjectName(PFN);
 	EMUFILE_FILE ifs(filename, "rb");
 
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);

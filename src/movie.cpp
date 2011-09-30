@@ -40,6 +40,9 @@
 #include "./drivers/win/tasedit.h"
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
+
+extern void UpdateProgressbar(int frame);
+
 #endif
 
 using namespace std;
@@ -155,7 +158,7 @@ void MovieData::ClearGreenzoneTail()
 #ifdef WIN32
 	int tail_frame = currMovieData.greenZoneCount-1 - TASEdit_greenzone_capacity;
 #else
-	int tail_frame = currMovieData.greenZoneCount-1;
+	int tail_frame = 0;
 #endif
 
 	if (tail_frame >= currFrameCounter) tail_frame = currFrameCounter - 1;
@@ -551,11 +554,21 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 {
 	int start = os->ftell();
 	int frame, size;
+	int last_tick = PROGRESSBAR_UPDATE_MIN;
+	// write size
 	write32le(greenZoneCount, os);
 	write32le(currFrameCounter, os);
 	// write savestates
 	for (frame = 0; frame < greenZoneCount; ++frame)
 	{
+#ifdef WIN32
+		// update TASEditor progressbar from time to time
+		if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+		{
+			UpdateProgressbar(frame);
+			last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+		}
+#endif
 		if (savestates[frame].empty()) continue;
 		write32le(frame, os);
 		// write frames_flags
@@ -566,6 +579,7 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 		size = savestates[frame].size();
 		write32le(size, os);
 		os->fwrite(&savestates[frame][0], size);
+
 	}
 	// write -1 as eof for greenzone
 	write32le(-1, os);
@@ -578,6 +592,8 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 {
 	clearGreenzone();
 	int frame = 0, prev_frame = 0, size = 0;
+	int last_tick = PROGRESSBAR_UPDATE_MIN;
+	// read size
 	if (read32le((uint32 *)&size, is))
 	{
 		greenZoneCount = size;
@@ -587,7 +603,7 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 #ifdef WIN32
 		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
 #else
-		int greenzone_tail_frame = greenZoneCount-1;
+		int greenzone_tail_frame = 0;
 #endif
 
 		if (read32le((uint32 *)&frame, is))
@@ -597,6 +613,14 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 			{
 				if (!read32le((uint32 *)&frame, is)) break;
 				if (frame == -1) break;
+#ifdef WIN32
+				// update TASEditor progressbar from time to time
+				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+				{
+					UpdateProgressbar(frame);
+					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+				}
+#endif
 				// read frames_flags
 				if ((int)is->fread(&frames_flags[frame],1) != 1) break;
 				// read lua_colorings
@@ -1141,6 +1165,8 @@ void FCEUMOV_AddInputState()
 		}
 		else
 		{
+			// TODO: check if input actually changed
+			InputChanged();
 			// record buttons
 			if (currMovieData.greenZoneCount>currFrameCounter+1)
 			{

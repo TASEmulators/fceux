@@ -498,6 +498,7 @@
 #define IDC_C_WATCH_SEPARATE            1259
 #define IDC_TWEAKCOUNT                  1260
 #define CHECK_AUTORESTORE_PLAYBACK      1261
+#define CHECK_FOLLOW_CURSOR             1263
 #define IDC_PROGRESS1                   1262
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
@@ -814,7 +815,6 @@
 #define IDC_C_WATCH_Separa              40416
 #define ID_GAME_USECONFIG               40417
 #define FCEUX_CONTEXT_GUICONFIG         40418
-#define ID_VIEW_FOLLOW_PLAYBACK         40419
 #define ID_VIEW_SHOW_LAG_FRAMES         40420
 #define ID_VIEW_SHOW_TWEAK_COUNT        40421
 #define ID_SELECTED_INSERTFRAMES        40422

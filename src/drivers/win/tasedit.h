@@ -71,6 +71,7 @@ void EnterTasEdit();
 bool ExitTasEdit();
 void UpdateTasEdit();
 void UpdateList();
+void UpdateProgressbar(int frame);
 void InputChanged();
 void InvalidateGreenZone(int after);
 bool JumpToFrame(int index);
