@@ -70,6 +70,8 @@ extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_show_lag_frames;
+extern bool TASEdit_show_markers;
+extern bool TASEdit_bind_markers;
 extern bool TASEdit_restore_position;
 extern bool TASEdit_show_dot;
 extern int TASEdit_greenzone_capacity;
@@ -292,6 +294,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(DesynchAutoFire),
 	AC(TASEdit_follow_playback),
 	AC(TASEdit_show_lag_frames),
+	AC(TASEdit_show_markers),
+	AC(TASEdit_bind_markers),
 	AC(TASEdit_restore_position),
 	AC(TASEdit_show_dot),
 	AC(TASEdit_greenzone_capacity),

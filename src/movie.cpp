@@ -53,6 +53,7 @@ extern char FileBase[];
 extern bool AutoSS;		//Declared in fceu.cpp, keeps track if a auto-savestate has been made
 #ifdef WIN32
 extern int TASEdit_greenzone_capacity;
+extern bool TASEdit_bind_markers;
 #endif
 
 std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
@@ -110,7 +111,10 @@ int currRerecordCount;
 void MovieData::clearRecordRange(int start, int len)
 {
 	for(int i=0;i<len;i++)
+	{
 		records[i+start].clear();
+		frames_flags[i+start] = 0;
+	}
 }
 
 void MovieData::insertEmpty(int at, int frames)
@@ -118,12 +122,20 @@ void MovieData::insertEmpty(int at, int frames)
 	if(at == -1) 
 	{
 		int currcount = records.size();
-		records.resize(records.size()+frames);
+		records.resize(currcount+frames);
+#ifdef WIN32
+		if (TASEdit_bind_markers)
+#endif
+			frames_flags.resize(currcount+frames);
 		clearRecordRange(currcount,frames);
 	}
 	else
 	{
 		records.insert(records.begin()+at,frames,MovieRecord());
+#ifdef WIN32
+		if (TASEdit_bind_markers)
+#endif
+			frames_flags.insert(frames_flags.begin()+at,frames,0);
 		clearRecordRange(at,frames);
 	}
 }
@@ -135,15 +147,16 @@ void MovieData::TryDumpIncremental()
 		// if movie length is less than currFrame, pad it with empty frames
 		if(currFrameCounter >= (int)currMovieData.records.size() || currMovieData.records.size()==0)
 			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
-		if (currFrameCounter >= (int)currMovieData.frames_flags.size())
-			currMovieData.frames_flags.resize(currFrameCounter+1);
 		//always log savestates in taseditor mode
 		currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
 		// also log frame_flags
 		if (currFrameCounter > 0)
 		{
 			// lagFlag indicates that lag was in previous frame
-			currMovieData.frames_flags[currFrameCounter-1] = (lagFlag)?LAG_FLAG_BIT:0;
+			if (lagFlag)
+				currMovieData.frames_flags[currFrameCounter-1] |= LAG_FLAG_BIT;
+			else
+				currMovieData.frames_flags[currFrameCounter-1] &= ~LAG_FLAG_BIT;
 		}
 		// update greenzone upper limit
 		if (currMovieData.greenZoneCount <= currFrameCounter)
@@ -591,14 +604,13 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 bool MovieData::loadGreenzone(EMUFILE *is)
 {
 	clearGreenzone();
+	frames_flags.resize(records.size());
 	int frame = 0, prev_frame = 0, size = 0;
 	int last_tick = PROGRESSBAR_UPDATE_MIN;
 	// read size
 	if (read32le((uint32 *)&size, is))
 	{
 		greenZoneCount = size;
-		savestates.resize(greenZoneCount);
-		frames_flags.resize(greenZoneCount);
 		savestates.resize(greenZoneCount);
 #ifdef WIN32
 		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;

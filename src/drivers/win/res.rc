@@ -219,11 +219,11 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&New Project\tCtrl+N",        ID_FILE_NEWPROJECT
-        MENUITEM "&Open Project...\tCtrl+O",    ID_FILE_OPENPROJECT
+        MENUITEM "&New Project",                ID_FILE_NEWPROJECT
+        MENUITEM "&Open Project...",            ID_FILE_OPENPROJECT
         MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT
-        MENUITEM "S&ave Project As...\tCtrl+Shift+S", ID_FILE_SAVEPROJECTAS
-        MENUITEM "Recent",                      ID_TASEDIT_FILE_RECENT
+        MENUITEM "S&ave Project As...",         ID_FILE_SAVEPROJECTAS
+        MENUITEM "&Recent",                     ID_TASEDIT_FILE_RECENT
         MENUITEM SEPARATOR
         MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2, INACTIVE
         MENUITEM "&Export to FM2",              ID_FILE_EXPORTFM2
@@ -233,23 +233,30 @@ BEGIN
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Select All",                 ID_EDIT_SELECTALL
+        MENUITEM "Select mid &Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE
-        MENUITEM "&Delete\tCtrl+Delete",        ID_TASEDIT_DELETE
         MENUITEM SEPARATOR
-        MENUITEM "&Truncate\tCtrl+T",           ID_EDIT_TRUNCATE
+        MENUITEM "C&lear\tDelete",              ID_EDIT_CLEAR
+        MENUITEM "&Delete\tCtrl+Del",           ID_TASEDIT_DELETE
+        MENUITEM "&Insert Frames\tCtrl+Ins",    ID_EDIT_INSERTFRAMES
+        MENUITEM "Insert # of Frames\tInsert",  ID_EDIT_INSERT
+        MENUITEM SEPARATOR
+        MENUITEM "T&runcate movie\tCtrl+T",     ID_EDIT_TRUNCATE
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "Highlight &lag frames",       ID_VIEW_SHOW_LAG_FRAMES
+        MENUITEM "Highlight &Lag Frames",       ID_VIEW_SHOW_LAG_FRAMES
+        MENUITEM "Show &Markers",               ID_VIEW_SHOW_MARKERS
         MENUITEM "Show &dot in empty cells",    ID_VIEW_SHOWDOTINEMPTYCELLS
     END
-    POPUP "Config"
+    POPUP "&Config"
     BEGIN
-        MENUITEM "Set greenzone capacity",      ID_CONFIG_SETGREENZONECAPACITY
-        MENUITEM "Mute Turbo",                  ID_CONFIG_MUTETURBO
+        MENUITEM "Set &greenzone capacity",     ID_CONFIG_SETGREENZONECAPACITY
+        MENUITEM "Mute &Turbo",                 ID_CONFIG_MUTETURBO
+        MENUITEM "&Bind Markers to Input",      ID_CONFIG_BINDMARKERSTOINPUT
     END
     POPUP "&Help"
     BEGIN
@@ -331,18 +338,20 @@ TASEDITCONTEXTMENUS MENU
 BEGIN
     POPUP "Stray"
     BEGIN
-        MENUITEM "Insert number of Frames",     MENU_CONTEXT_STRAY_INSERTFRAMES
+        MENUITEM "Insert # of Frames",          MENU_CONTEXT_STRAY_INSERTFRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Truncate",                    ID_CONTEXT_STRAY_TRUNCATE
+        MENUITEM "T&runcate movie",             ID_CONTEXT_STRAY_TRUNCATE
     END
     POPUP "Selected"
     BEGIN
-        MENUITEM "Insert Frame(s)",             ID_CONTEXT_SELECTED_INSERTFRAMES
-        MENUITEM "Insert number of Frames",     ID_CONTEXT_SELECTED_INSERTFRAMES2
-        MENUITEM "Delete Frame(s)",             ID_CONTEXT_SELECTED_DELETEFRAMES
-        MENUITEM "Clear Frame(s)",              ID_CONTEXT_SELECTED_CLEARFRAMES
+        MENUITEM "Select mid &Markers",         ID_SELECTED_SELECTMIDMARKERS
         MENUITEM SEPARATOR
-        MENUITEM "Truncate",                    ID_CONTEXT_SELECTED_TRUNCATE
+        MENUITEM "&Insert Frame(s)",            ID_CONTEXT_SELECTED_INSERTFRAMES
+        MENUITEM "Insert # of Frames",          ID_CONTEXT_SELECTED_INSERTFRAMES2
+        MENUITEM "&Delete Frame(s)",            ID_CONTEXT_SELECTED_DELETEFRAMES
+        MENUITEM "C&lear Frame(s)",             ID_CONTEXT_SELECTED_CLEARFRAMES
+        MENUITEM SEPARATOR
+        MENUITEM "T&runcate movie",             ID_CONTEXT_SELECTED_TRUNCATE
     END
 END
 
@@ -2014,8 +2023,9 @@ BEGIN
     "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
     "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
     "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ACCEL_INS,              VIRTKEY, NOINVERT
     VK_DELETE,      ACCEL_DEL,              VIRTKEY, NOINVERT
+    VK_INSERT,      ACCEL_INS,              VIRTKEY, NOINVERT
+    "A",            ACCEL_CTRL_A,           VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_RWACCELERATOR ACCELERATORS

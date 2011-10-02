@@ -54,9 +54,11 @@
 
 // listview colors
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
+#define MARKED_FRAMENUM_COLOR 0xC0FCFF
+#define CUR_MARKED_FRAMENUM_COLOR 0xDEF7F4
 #define CUR_FRAMENUM_COLOR 0xFCF1CE
-#define GREENZONE_FRAMENUM_COLOR 0xDCFFDC
-#define LAG_FRAMENUM_COLOR 0xDAD9FE
+#define GREENZONE_FRAMENUM_COLOR 0xDDFFDD
+#define LAG_FRAMENUM_COLOR 0xDBDAFF
 #define NORMAL_INPUT_COLOR1 0xF0F0F0
 #define CUR_INPUT_COLOR1 0xF7E9B2
 #define GREENZONE_INPUT_COLOR1 0xC3FFC3
@@ -78,6 +80,7 @@ bool JumpToFrame(int index);
 int FindBeginningOfGreenZone(int starting_index);
 void FollowPlayback();
 void ClearSelection();
+void ClearRowSelection(int index);
 void AddFourscore();
 void RemoveFourscore();
 void RedrawWindowCaption();
@@ -100,4 +103,6 @@ void OpenProject();
 bool SaveProject();
 bool SaveProjectAs();
 bool AskSaveProject();
+void SelectAll();
+void SelectMidMarkers();
 

@@ -498,8 +498,8 @@
 #define IDC_C_WATCH_SEPARATE            1259
 #define IDC_TWEAKCOUNT                  1260
 #define CHECK_AUTORESTORE_PLAYBACK      1261
-#define CHECK_FOLLOW_CURSOR             1263
 #define IDC_PROGRESS1                   1262
+#define CHECK_FOLLOW_CURSOR             1263
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -837,6 +837,16 @@
 #define ID_SELECTED_CLEARSELECTION      40445
 #define ID_CONTEXT_SELECTED_CLEARSELECTION 40446
 #define ID_CONTEXT_SELECTED_CLEARFRAMES 40447
+#define ID_VIEW_SHOW                    40448
+#define ID_VIEW_SHOW_MARKERS            40449
+#define ID_EDIT_CLEAR                   40450
+#define ID_EDIT_INSERTFRAMES            40451
+#define ID_EDIT_INSERT                  40452
+#define ID_EDIT_SELECTBETWEENMARKERS    40453
+#define ID_CONFIG_BINDMARKERSTOINPUT    40454
+#define ACCEL_CTRL_A                    40455
+#define ID_EDIT_SELECTMIDMARKERS        40457
+#define ID_SELECTED_SELECTMIDMARKERS    40458
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -846,7 +856,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40448
+#define _APS_NEXT_COMMAND_VALUE         40459
 #define _APS_NEXT_CONTROL_VALUE         1263
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
