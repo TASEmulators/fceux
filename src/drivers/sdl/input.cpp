@@ -777,11 +777,25 @@ ButtonConfigBegin()
 {
     SDL_Surface *screen;
 
+    //dont shut down video subsystem if we are using gtk to prevent the sdl window from becoming detached to GTK window
+    // prg318 - 10-2-2011
+#ifdef _GTK
+    int noGui;
+    g_config->getOption("SDL.NoGUI", &noGui);
+    if(noGui == 1)
+    {
+      SDL_QuitSubSystem(SDL_INIT_VIDEO);
+      bcpv=KillVideo();
+      printf("test");
+    }
+
+#else
     // XXX soules - why are we doing this right before KillVideo()?
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
     // shut down the video and joystick subsystems
     bcpv=KillVideo();
+#endif
     bcpj=KillJoysticks();
  
     // reactivate the video subsystem
@@ -791,8 +805,6 @@ ButtonConfigBegin()
     	}
         else {
 #if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-            int noGui;
-            g_config->getOption("SDL.NoGUI", &noGui);
             if(noGui == 0)
             {
                 while (gtk_events_pending())
