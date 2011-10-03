@@ -847,6 +847,10 @@
 #define ACCEL_CTRL_A                    40455
 #define ID_EDIT_SELECTMIDMARKERS        40457
 #define ID_SELECTED_SELECTMIDMARKERS    40458
+#define ID_EDIT_CLONEFRAME              40459
+#define ID_EDIT_CLONEFRAMES             40460
+#define ACCEL_SHIFT_INS                 40461
+#define ID_SELECTED_CLONE               40463
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -856,7 +860,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40459
+#define _APS_NEXT_COMMAND_VALUE         40464
 #define _APS_NEXT_CONTROL_VALUE         1263
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

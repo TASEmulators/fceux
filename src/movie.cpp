@@ -140,6 +140,20 @@ void MovieData::insertEmpty(int at, int frames)
 	}
 }
 
+void MovieData::cloneRegion(int at, int frames)
+{
+	if(at == -1) return;
+	
+	records.insert(records.begin()+at,frames,MovieRecord());
+#ifdef WIN32
+	if (TASEdit_bind_markers)
+#endif
+		frames_flags.insert(frames_flags.begin()+at,frames,0);
+
+	for(int i = 0; i < frames; i++)
+		records[i+at].Clone(records[i+at+frames]);
+}
+
 void MovieData::TryDumpIncremental()
 {
 	if(movieMode == MOVIEMODE_TASEDIT)
@@ -225,9 +239,6 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 
 	if (this->joysticks != compareRec.joysticks) 
 		return false;
-	
-	//if (this->commands != compareRec.commands) 
-	//	return false;
 
 	//if new commands are ever recordable, they need to be added here if we go with this method
 	if(this->command_reset() != compareRec.command_reset()) return false;
@@ -247,8 +258,28 @@ bool MovieRecord::Compare(MovieRecord& compareRec)
 	if (this->zappers[1].b != compareRec.zappers[1].b) return false;
 	if (this->zappers[1].bogo != compareRec.zappers[1].bogo) return false;
 
-
 	return true;
+}
+void MovieRecord::Clone(MovieRecord& sourceRec)
+{
+	this->joysticks[0] = sourceRec.joysticks[0];
+	this->joysticks[1] = sourceRec.joysticks[1];
+	this->joysticks[2] = sourceRec.joysticks[2];
+	this->joysticks[3] = sourceRec.joysticks[3];
+
+	this->zappers[0].x = sourceRec.zappers[0].x;
+	this->zappers[0].y = sourceRec.zappers[0].y;
+	this->zappers[0].zaphit = sourceRec.zappers[0].zaphit;
+	this->zappers[0].b = sourceRec.zappers[0].b;
+	this->zappers[0].bogo = sourceRec.zappers[0].bogo;
+
+	this->zappers[1].x = sourceRec.zappers[1].x;
+	this->zappers[1].y = sourceRec.zappers[1].y;
+	this->zappers[1].zaphit = sourceRec.zappers[1].zaphit;
+	this->zappers[1].b = sourceRec.zappers[1].b;
+	this->zappers[1].bogo = sourceRec.zappers[1].bogo;
+
+	this->commands = sourceRec.commands;
 }
 
 const char MovieRecord::mnemonics[8] = {'A','B','S','T','U','D','L','R'};

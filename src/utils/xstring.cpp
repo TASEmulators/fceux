@@ -526,6 +526,21 @@ char *U32ToDecStr(uint32 a)
 {
 	return U32ToDecStr(TempArray,a);
 }
+char *U32ToDecStr(char* buf, uint32 a, int digits)
+{
+	if (digits < 1)
+		digits = 1;
+	else if (digits > 10)
+		digits = 10;
+
+	for (int i = 1; i <= digits; ++i)
+	{
+		buf[digits - i] = '0' + (a % 10);
+		a /= 10;
+	}
+	buf[digits] = 0;
+	return buf;
+}
 
 char *U16ToHexStr(uint16 a)
 {

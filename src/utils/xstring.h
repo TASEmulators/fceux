@@ -57,6 +57,7 @@ uint16 FastStrToU16(char* s, bool& valid);
 char *U16ToDecStr(uint16 a);
 char *U32ToDecStr(uint32 a);
 char *U32ToDecStr(char* buf, uint32 a);
+char *U32ToDecStr(char* buf, uint32 a, int digits);
 char *U8ToDecStr(uint8 a);
 char *U8ToHexStr(uint8 a);
 char *U16ToHexStr(uint16 a);

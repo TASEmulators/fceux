@@ -51,7 +51,7 @@
 #define COLUMN_JOYPAD4_L 32
 #define COLUMN_JOYPAD4_R 33
 #define COLUMN_FRAMENUM2 34
-
+#define DIGITS_IN_FRAMENUM 7
 // listview colors
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
 #define MARKED_FRAMENUM_COLOR 0xC0FCFF
@@ -105,4 +105,6 @@ bool SaveProjectAs();
 bool AskSaveProject();
 void SelectAll();
 void SelectMidMarkers();
-
+void CloneFrames();
+void InsertFrames();
+void DeleteFrames();

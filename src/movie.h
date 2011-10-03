@@ -147,6 +147,7 @@ public:
 	}
 
 	bool Compare(MovieRecord& compareRec);
+	void Clone(MovieRecord& sourceRec);
 	void clear();
 	
 	void parse(MovieData* md, EMUFILE* is);
@@ -240,6 +241,7 @@ public:
 
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);
+	void cloneRegion(int at, int frames);
 	
 	static bool loadSavestateFrom(std::vector<uint8>* buf);
 	static void dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel);

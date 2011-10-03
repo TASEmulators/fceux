@@ -35,6 +35,7 @@ bool old_forward_button_state, forward_button_state;
 int button_hold_time;
 int seeking_start_frame = 0;
 bool TASEdit_focus = false;
+int listItems;	// number of items in list
 // saved FCEU config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -91,8 +92,10 @@ static void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 			break;
 			case COLUMN_FRAMENUM:
 			case COLUMN_FRAMENUM2:
-			U32ToDecStr(item.pszText,item.iItem);
-			break;
+			{
+				U32ToDecStr(item.pszText,item.iItem,DIGITS_IN_FRAMENUM);
+				break;
+			}
 			case COLUMN_JOYPAD1_A: case COLUMN_JOYPAD1_B: case COLUMN_JOYPAD1_S: case COLUMN_JOYPAD1_T:
 			case COLUMN_JOYPAD1_U: case COLUMN_JOYPAD1_D: case COLUMN_JOYPAD1_L: case COLUMN_JOYPAD1_R:
 			case COLUMN_JOYPAD2_A: case COLUMN_JOYPAD2_B: case COLUMN_JOYPAD2_S: case COLUMN_JOYPAD2_T:
@@ -586,7 +589,8 @@ void SingleClick(LPNMITEMACTIVATE info)
 			else
 				currMovieData.frames_flags[row_index] |= MARKER_FLAG_BIT;
 			MarkersChanged();
-			RedrawList();	// just to flicker-indicate that something has changed
+			ListView_SetItemState(hwndList,row_index,0,LVIS_SELECTED);
+			//RedrawList();
 		}
 	}
 	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
@@ -613,8 +617,34 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	}
 }
 
-//insert frames at the currently selected positions.
-static void InsertFrames()
+void CloneFrames()
+{
+	int frames = selectionFrames.size();
+
+	currMovieData.records.reserve(currMovieData.records.size()+frames);
+	currMovieData.frames_flags.reserve(currMovieData.frames_flags.size()+frames);
+
+	//insert frames before each selection, but consecutive selection lines are accounted as single region
+	frames = 1;
+	TSelectionFrames::reverse_iterator next_it;
+	for(TSelectionFrames::reverse_iterator it(selectionFrames.rbegin()); it != selectionFrames.rend(); it++)
+	{
+		next_it = it;
+		next_it++;
+		if (next_it == selectionFrames.rend() || (int)*next_it < ((int)*it - 1))
+		{
+			// end of current region
+			currMovieData.cloneRegion(*it,frames);
+			frames = 1;
+		} else frames++;
+	}
+
+	UpdateList();
+	InputChanged();
+	InvalidateGreenZone(*selectionFrames.begin());
+}
+
+void InsertFrames()
 {
 	int frames = selectionFrames.size();
 
@@ -644,7 +674,7 @@ static void InsertFrames()
 	InvalidateGreenZone(*selectionFrames.begin());
 }
 
-static void DeleteFrames()
+void DeleteFrames()
 {
 	//delete frames on each selection, going backwards
 	for(TSelectionFrames::reverse_iterator it(selectionFrames.rbegin()); it != selectionFrames.rend(); it++)
@@ -671,7 +701,6 @@ static void DeleteFrames()
 		if (!selectionFrames.size()) break;
 	}
 	// reduce greenzone
-	if (index>0) index--;
 	InvalidateGreenZone(index);
 }
 
@@ -716,7 +745,8 @@ static void ColumnSet(int column)
 				currMovieData.frames_flags[*it] &= ~MARKER_FLAG_BIT;
 		}
 		MarkersChanged();
-		RedrawList();	// just to flicker-indicate that something has changed
+		ClearSelection();
+		RedrawList();
 	} else
 	{
 		// buttons column
@@ -743,20 +773,16 @@ static void ColumnSet(int column)
 
 void ClearSelection()
 {
-	ListView_SetItemState(hwndList,-1,0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
 }
 void ClearRowSelection(int index)
 {
-	ListView_SetItemState(hwndList,index,0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(hwndList,index,0, LVIS_SELECTED);
 }
 
 void SelectAll()
 {
-	ListView_SetItemState(hwndList,-1,LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
-	for(int i = 0; i < currMovieData.records.size(); i++)
-	{
-		selectionFrames.insert(i);
-	}
+	ListView_SetItemState(hwndList,-1,LVIS_SELECTED, LVIS_SELECTED);
 	RedrawList();
 }
 void SelectMidMarkers()
@@ -771,7 +797,6 @@ void SelectMidMarkers()
 		upper_border = center = *selectionFrames.begin();
 		lower_border = *selectionFrames.rbegin();
 	} else lower_border = upper_border = center = currFrameCounter;
-	ClearSelection();
 
 	// find markers
 	// searching up starting from center-0
@@ -786,13 +811,15 @@ void SelectMidMarkers()
 		SelectAll();
 		return;
 	}
+
+	ClearSelection();
 	// selecting circle:
 	if (upper_border > upper_marker+1 || lower_border < lower_marker-1 || lower_border > lower_marker)
 	{
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(hwndList,i,LVIS_SELECTED,LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -801,32 +828,32 @@ void SelectMidMarkers()
 		if (lower_marker >= movie_size) lower_marker >= movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(hwndList,i,LVIS_SELECTED,LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
-		ListView_SetItemState(hwndList,lower_marker,0,LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(hwndList,lower_marker,0,LVIS_SELECTED);
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(hwndList,i,LVIS_SELECTED,LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
 		// selected all between markers and upper marker selected too - now deselect upper marker and (if lower marker < movie_size) reselect lower marker
-		ListView_SetItemState(hwndList,upper_marker,0,LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(hwndList,upper_marker,0,LVIS_SELECTED);
 		if (lower_marker >= movie_size) lower_marker >= movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(hwndList,i,LVIS_SELECTED,LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
-		ListView_SetItemState(hwndList,lower_marker,0,LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(hwndList,lower_marker,0,LVIS_SELECTED);
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(hwndList,i,LVIS_SELECTED,LVIS_SELECTED);
 		}
 	}
 }
@@ -1030,6 +1057,8 @@ static LRESULT APIENTRY ListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPar
 	{
 	case WM_CHAR:
 		return 0;
+	case WM_KILLFOCUS:
+		return 0;
 	case WM_NOTIFY:
 		{
 			switch (((LPNMHDR)lParam)->code)
@@ -1080,7 +1109,7 @@ static void InitDialog()
 	// frame number column
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 	lvc.fmt = LVCFMT_CENTER;
-	lvc.cx = 92;
+	lvc.cx = 75;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// pads columns
@@ -1118,7 +1147,7 @@ void AddFourscore()
 		}
 	}
 	// frame number column again
-	lvc.cx = 92;
+	lvc.cx = 75;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// enable radiobuttons for 3P/4P multitracking
@@ -1405,10 +1434,16 @@ static void ItemChanged(NMLISTVIEW* info)
 	{
 		if(OFF)
 		{
+			// clear all
 			selectionFrames.clear();
+		} else if (ON)
+		{
+			// select all
+			for(int i = 0; i < currMovieData.records.size(); i++)
+			{
+				selectionFrames.insert(i);
+			}
 		}
-		else
-			FCEUD_PrintError("Unexpected condition in TasEdit ItemChanged. Please report.");
 	}
 	else
 	{
@@ -1433,6 +1468,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 			// save references to dialog items
 			hwndList = GetDlgItem(hwndDlg, IDC_LIST1);
+			listItems = ListView_GetCountPerPage(hwndList);
+			FCEU_printf("listItems = %d\n\n",listItems);
+
 			hwndProgressbar = GetDlgItem(hwndDlg, IDC_PROGRESS1);
 			SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
 			hwndRewind = GetDlgItem(hwndDlg, TASEDIT_REWIND);
@@ -1488,6 +1526,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case LVN_ODSTATECHANGED:
 					ItemRangeChanged((LPNMLVODSTATECHANGE) lParam);
 					break;
+					/*
+				case LVN_ENDSCROLL:
+					// redraw upper and lower list rows (fix for known WinXP bug)
+					int start = ListView_GetTopIndex(hwndList);
+					ListView_RedrawItems(hwndList,start,start);
+					int end = start + listItems - 1;
+					ListView_RedrawItems(hwndList,end,end);
+					break;
+					*/
+
 				}
 				break;
 			case TASEDIT_PLAYSTOP:
@@ -1719,6 +1767,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_EDIT_SELECTMIDMARKERS:
 			case ID_SELECTED_SELECTMIDMARKERS:
 				SelectMidMarkers();
+				break;
+			case ACCEL_SHIFT_INS:
+			case ID_EDIT_CLONEFRAMES:
+			case ID_SELECTED_CLONE:
+				if (selectionFrames.size()) CloneFrames();
 				break;
 
 			}
