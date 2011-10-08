@@ -118,7 +118,7 @@ Option         Value   Description\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
 --players      x       Set the number of local players.\n\
 --rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n\
---nogui        {0,1}   Enable or disable the GTK GUI\n";
+--nogui                Don't load the GTK GUI\n";
 
 
 // these should be moved to the man file
@@ -491,6 +491,13 @@ void FCEUD_TraceInstruction() {
 }
 
 
+#ifdef _GTK
+	int noGui = 0;
+#else
+	int noGui = 1;
+#endif
+
+
 /**
  * The main loop for the SDL.
  */
@@ -545,6 +552,23 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
+	// check for --help or -h and display usage; also check for --nogui
+	for(int i=0; i<argc;i++)
+	{
+		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+		{
+			ShowUsage(argv[0]);
+			SDL_Quit();
+			return 0;
+		}
+#ifdef _GTK
+		else if(strcmp(argv[i], "--nogui") == 0)
+    {
+			noGui = 1;
+      argv[i] = "";
+    }
+#endif
+	}
 	int romIndex = g_config->parse(argc, argv);
 
 	// This is here so that a default fceux.cfg will be created on first
@@ -690,26 +714,6 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-#ifdef _GTK
-	int noGui = 0;
-#else
-	int noGui = 1;
-#endif
-
-	// check for --help or -h and display usage; also check for --nogui
-	for(int i=0; i<argc;i++)
-	{
-		if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
-		{
-			ShowUsage(argv[0]);
-			SDL_Quit();
-			return 0;
-		}
-#ifdef _GTK
-		else if(strcmp(argv[i], "--nogui") == 0)
-			noGui = 1;
-#endif
-	}
 
 	// if we're not compiling w/ the gui, exit if a rom isn't specified
 #ifndef _GTK
@@ -753,19 +757,24 @@ int main(int argc, char *argv[])
 	
 	// load the hotkeys from the config life
 	setHotKeys();
-	
-#ifdef _GTK
-	gtk_init(&argc, &argv);
 
+#ifdef _GTK
 	if(noGui == 0)
+  {
+	  gtk_init(&argc, &argv);
 		InitGTKSubsystem(argc, argv);
+  }
+#endif
+
+#ifdef _GTK
+  if(noGui == 0)
+  {
+	  while(gtk_events_pending())
+			gtk_main_iteration_do(FALSE);
+  }
 #endif
 	
-#ifdef _GTK
-	while(gtk_events_pending())
-			gtk_main_iteration_do(FALSE);
-#endif
-	if(romIndex >= 0)
+  if(romIndex >= 0)
 	{
 		// load the specified game
 		error = LoadGame(argv[romIndex]);

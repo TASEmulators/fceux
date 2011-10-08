@@ -1,3 +1,4 @@
+07-octo-2011 - prg318 - sdl: fixed some issues with --nogui .  "--nogui" no longer requires an argument and can be used like this "$ fceux --nogui rom.nes"
 07-octo-2011 - prg318 - gtk: support mouseclicks (ie zapper)
 30-sept-2011 - AnS - logging all display messages to Message Log
 30-sept-2011 - AnS - Tasedit: special method of inserting frames; progressbar updating when loading/saving large projects; moved "Follow cursor" checkbox from View menu to main TASEdit window

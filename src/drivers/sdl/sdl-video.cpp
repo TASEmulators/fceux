@@ -376,8 +376,6 @@ InitVideo(FCEUGI *gi)
 #endif
 
 #if defined(_GTK) && defined(SDL_VIDEO_DRIVER_X11)
-		int noGui;
-		g_config->getOption("SDL.NoGUI", &noGui);
 		if(noGui == 0)
 		{
 			while (gtk_events_pending())
@@ -407,9 +405,12 @@ InitVideo(FCEUGI *gi)
         }
 
 #ifdef _GTK
-        GtkRequisition req;
-        gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
-        gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+        if(noGui == 0)
+        {
+          GtkRequisition req;
+          gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
+          gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
+        }
 #endif
     }
     s_curbpp = s_screen->format->BitsPerPixel;
@@ -507,10 +508,13 @@ ToggleFS()
     // flip the fullscreen flag
     g_config->setOption("SDL.Fullscreen", !fullscreen);
 #ifdef _GTK
-	if(!fullscreen)
-		showGui(0);
-	else
-		showGui(1);
+  if(noGui == 0)
+  {
+	  if(!fullscreen)
+	  	showGui(0);
+	  else
+	  	showGui(1);
+  }
 #endif
     // try to initialize the video
     error = InitVideo(GameInfo);
