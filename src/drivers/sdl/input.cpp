@@ -718,6 +718,19 @@ GetMouseData(uint32 (&d)[3])
 
     // retrieve the state of the mouse from SDL
     t = SDL_GetMouseState(&x, &y);
+    SDL_Event event;
+#ifdef _GTK
+    // don't ask for gtk mouse info when in fullscreen
+    // we can use sdl directly in fullscreen
+    int fullscreen = 0;
+    g_config->getOption("SDL.Fullscreen", &fullscreen);
+    if(fullscreen == 0)
+    {
+      x=GtkMouseData[0];
+      y=GtkMouseData[1];
+      t=GtkMouseData[2];
+    }
+#endif
 
     d[2] = 0;
     if(t & SDL_BUTTON(1)) {

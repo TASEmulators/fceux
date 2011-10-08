@@ -1,4 +1,4 @@
-
+07-octo-2011 - prg318 - gtk: support mouseclicks (ie zapper)
 30-sept-2011 - AnS - logging all display messages to Message Log
 30-sept-2011 - AnS - Tasedit: special method of inserting frames; progressbar updating when loading/saving large projects; moved "Follow cursor" checkbox from View menu to main TASEdit window
 30-sept-2011 - AnS - Tasedit: View->Show dot in empty cells; ClearFrames (Del), Cut operation clears frames instead of deleting; checking unsaved project on Exit and Open project

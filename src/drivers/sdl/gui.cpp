@@ -1885,8 +1885,6 @@ gint convertKeypress(GtkWidget *grab, GdkEventKey *event, gpointer user_data)
 	return FALSE;
 }
 
-
-
 // Our menu, in the XML markup format used by GtkUIManager
 static char* menuXml = 
 	"<ui>"
@@ -2081,6 +2079,43 @@ void showGui(bool b)
 		gtk_widget_hide_all(MainWindow);
 }
 
+int GtkMouseData[3] = {0,0,0};
+
+gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data)
+{
+  GtkMouseData[0] = ((GdkEventButton*)event)->x;
+  GtkMouseData[1] = ((GdkEventButton*)event)->y;
+  int button = ((GdkEventButton*)event)->button;
+  if(!(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS))
+    GtkMouseData[2] = 0;
+  else
+  {
+    if(button == 1)
+      GtkMouseData[2] |= 0x1;
+    if(button == 3)
+      GtkMouseData[2] |= 0x3;
+  }
+  
+  // this doesn't work because we poll the mouse position rather
+  // than use events
+  /*
+  SDL_Event sdlev;
+  sdlev.type = SDL_MOUSEBUTTONDOWN;
+  if(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS)
+    sdlev.button.type = SDL_MOUSEBUTTONDOWN;
+  else
+    sdlev.button.type = SDL_MOUSEBUTTONUP;
+  sdlev.button.button = ((GdkEventButton*)event)->button;
+  sdlev.button.state = ((GdkEventButton*)event)->state;
+  sdlev.button.x = ((GdkEventButton*)event)->x;
+  sdlev.button.y = ((GdkEventButton*)event)->y;
+
+  SDL_PushEvent(&sdlev);
+  */
+  
+  return 0;
+}
+
 int InitGTKSubsystem(int argc, char** argv)
 {
 	GtkWidget* Menubar;
@@ -2134,6 +2169,11 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
 	gtk_key_snooper_install(convertKeypress, NULL);
+
+  // pass along mouse data from GTK to SDL
+  g_signal_connect(G_OBJECT(socket), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
+  g_signal_connect(G_OBJECT(socket), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
+
 	
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	
