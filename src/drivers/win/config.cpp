@@ -75,6 +75,8 @@ extern bool TASEdit_bind_markers;
 extern bool TASEdit_restore_position;
 extern bool TASEdit_show_dot;
 extern int TASEdit_greenzone_capacity;
+extern int TasEdit_undo_levels;
+extern bool TASEdit_jump_to_undo;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -299,6 +301,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_restore_position),
 	AC(TASEdit_show_dot),
 	AC(TASEdit_greenzone_capacity),
+	AC(TasEdit_undo_levels),
+	AC(TASEdit_jump_to_undo),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

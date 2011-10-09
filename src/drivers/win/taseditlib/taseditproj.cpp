@@ -3,21 +3,23 @@
 //Contains all the TASEDit project and all files/settings associated with it
 //Also contains all methods for manipulating the project files/settings, and saving them to disk
 
-
-#include <string>
 #include <iostream>
 #include <fstream>
 #include "../main.h"
 #include "taseditproj.h"
-#include "movie.h"
 
 TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads project with default values
 {
 
 }
 
-void TASEDIT_PROJECT::init()
+void TASEDIT_PROJECT::init(INPUT_HISTORY* history_ptr)
 {
+	// keep references to other Taseditor objects
+	history = history_ptr;
+	//greenzone = greenzone_ptr;
+	//bookmarks_bookmarks_ptr;
+
 	projectName="";
 	fm2FileName="";
 	projectFile="";
@@ -66,6 +68,8 @@ bool TASEDIT_PROJECT::saveProject()
 	ofs->fputc('\0'); // TODO: Add main branch name. 
 	currMovieData.dumpGreenzone(ofs);
 
+	history->save(ofs);
+
 	delete ofs;
 
 	changed=false;
@@ -86,12 +90,18 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 
 	char branchname;
 	branchname = ifs.fgetc(); // TODO: Add main branch name. 
+	
+	// try to load greenzone
 	if (!currMovieData.loadGreenzone(&ifs))
 	{
 		// there was some error while loading greenzone - reset playback to frame 0
 		poweron(true);
 		currFrameCounter = 0;
 	}
-	changed=false;
+	// try to load history
+	history->load(&ifs);
+
+	changed = false;
 	return true;
 }
+

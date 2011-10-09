@@ -418,6 +418,7 @@
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\tasedit.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
     <ClCompile Include="..\src\drivers\win\timing.cpp" />
@@ -729,6 +730,7 @@
     <ClInclude Include="..\src\drivers\win\sound.h" />
     <ClInclude Include="..\src\drivers\win\state.h" />
     <ClInclude Include="..\src\drivers\win\tasedit.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h" />
     <ClInclude Include="..\src\drivers\win\texthook.h" />
     <ClInclude Include="..\src\drivers\win\throttle.h" />
     <ClInclude Include="..\src\drivers\win\timing.h" />
@@ -851,6 +853,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)auxlib.lua;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="..\src\pputile.inc" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

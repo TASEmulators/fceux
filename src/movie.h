@@ -4,8 +4,7 @@
 #define LAG_FLAG_BIT 1
 #define MARKER_FLAG_BIT 2
 
-#define PROGRESSBAR_UPDATE_RATE 3000	// in frames of greenzone
-#define PROGRESSBAR_UPDATE_MIN 6000 / PROGRESSBAR_UPDATE_RATE
+#define PROGRESSBAR_UPDATE_RATE 2000	// in frames of greenzone
 
 #include <vector>
 #include <map>

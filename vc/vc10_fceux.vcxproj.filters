@@ -907,6 +907,7 @@
     <ClCompile Include="..\src\boards\onebus.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1351,6 +1352,7 @@
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
@@ -1368,6 +1370,7 @@
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\pputile.inc" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

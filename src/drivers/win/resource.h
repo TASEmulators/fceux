@@ -396,8 +396,8 @@
 #define IDC_BUTTON8                     1146
 #define IDC_EDIT1                       1147
 #define IDC_BUTTON9                     1148
-#define IDC_LIST2                       1149
-#define IDC_LIST3                       1150
+#define IDC_HISTORYLIST                 1149
+#define IDC_BOOKMARKSLIST               1150
 #define CHECK_SOUND_MUTETURBO           1179
 #define IDC_EDIT_AUTHOR                 1180
 #define MEMW_STATIC                     1181
@@ -851,6 +851,14 @@
 #define ID_EDIT_CLONEFRAMES             40460
 #define ACCEL_SHIFT_INS                 40461
 #define ID_SELECTED_CLONE               40463
+#define ID_CONFIG_Q                     40464
+#define ACCEL_CTRL_Z                    40465
+#define ACCEL_CTRL_Y                    40466
+#define ID_EDIT_UNDO                    40468
+#define ID_EDIT_REDO                    40469
+#define ID_CONFIG_SETMAXUNDOLEVELS      40470
+#define ID_VIEW_X                       40471
+#define ID_VIEW_JUMPWHENMAKINGUNDO      40472
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -860,7 +868,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40464
+#define _APS_NEXT_COMMAND_VALUE         40473
 #define _APS_NEXT_CONTROL_VALUE         1263
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

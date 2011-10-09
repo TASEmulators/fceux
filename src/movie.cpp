@@ -41,7 +41,7 @@
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 
-extern void UpdateProgressbar(int frame);
+extern void UpdateProgressbar(int a, int b);
 
 #endif
 
@@ -598,7 +598,7 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 {
 	int start = os->ftell();
 	int frame, size;
-	int last_tick = PROGRESSBAR_UPDATE_MIN;
+	int last_tick = 0;
 	// write size
 	write32le(greenZoneCount, os);
 	write32le(currFrameCounter, os);
@@ -609,7 +609,7 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 		// update TASEditor progressbar from time to time
 		if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 		{
-			UpdateProgressbar(frame);
+			UpdateProgressbar(frame, greenZoneCount);
 			last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 		}
 #endif
@@ -622,7 +622,7 @@ int MovieData::dumpGreenzone(EMUFILE *os)
 		// write savestate
 		size = savestates[frame].size();
 		write32le(size, os);
-		os->fwrite(&savestates[frame][0], size);
+		os->fwrite(savestates[frame].data(), size);
 
 	}
 	// write -1 as eof for greenzone
@@ -637,7 +637,7 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 	clearGreenzone();
 	frames_flags.resize(records.size());
 	int frame = 0, prev_frame = 0, size = 0;
-	int last_tick = PROGRESSBAR_UPDATE_MIN;
+	int last_tick = 0;
 	// read size
 	if (read32le((uint32 *)&size, is))
 	{
@@ -660,7 +660,7 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
-					UpdateProgressbar(frame);
+					UpdateProgressbar(frame, greenZoneCount);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
 #endif
@@ -674,7 +674,7 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 				{
 					// load savestate
 					savestates[frame].resize(size);
-					if ((int)is->fread((char*)&savestates[frame][0],size) < size) break;
+					if ((int)is->fread(savestates[frame].data(),size) < size) break;
 					prev_frame = frame;			// successfully read one greenzone frame info
 				} else
 				{
@@ -691,6 +691,7 @@ bool MovieData::loadGreenzone(EMUFILE *is)
 			} else
 			{
 				// there was some error while reading greenzone
+				FCEU_printf("Error loading greenzone\n");
 			}
 		}
 	}
@@ -774,6 +775,7 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 		numRecords=movieData.loadFrameCount;
 
 	movieData.records.resize(numRecords);
+	movieData.frames_flags.resize(numRecords);
 	for(int i=0;i<numRecords;i++)
 	{
 		movieData.records[i].parseBinary(&movieData,fp);
@@ -845,6 +847,7 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 				if (stopAfterHeader) return true;
 				int currcount = movieData.records.size();
 				movieData.records.resize(currcount+1);
+				movieData.frames_flags.resize(currcount+1);
 				int preparse = fp->ftell();
 				movieData.records[currcount].parse(&movieData, fp);
 				int postparse = fp->ftell();
@@ -1208,18 +1211,14 @@ void FCEUMOV_AddInputState()
 		}
 		else
 		{
-			// TODO: check if input actually changed
-			InputChanged();
 			// record buttons
-			if (currMovieData.greenZoneCount>currFrameCounter+1)
-			{
-				InvalidateGreenZone(currFrameCounter);
-			}
 			// TODO: multitracking
 
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			mr->commands = 0;
+
+			InputChangedRec();		// TODO: don't call function explicitly, taseditor should catch changes in UpdateTasedit function
 		}
 	} else
 	#endif

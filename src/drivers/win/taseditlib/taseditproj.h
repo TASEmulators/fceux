@@ -16,8 +16,8 @@
 //All notes are added to teh right columns
 //All ilog files are listed in the input log list
 
-#include <string>
 #include "movie.h"
+#include "inputhistory.h"
 
 //The notes feature, displays user notes in the notes column
 struct TASENote
@@ -48,7 +48,7 @@ class TASEDIT_PROJECT
 {
 public:
 	TASEDIT_PROJECT();
-	void init();
+	void init(INPUT_HISTORY* history_ptr);
 
 	std::string GetProjectName();
 	void SetProjectName(std::string e);
@@ -59,14 +59,13 @@ public:
 	std::string GetProjectFile();
 	void SetProjectFile(std::string e);
 
-	//Guess what these functions are for...
 	bool saveProject();
 	bool LoadProject(std::string PFN);
 
 	bool Export2FM2(std::string filename);	//creates a fm2 out of header, comments, subtitles, and main branch input log, return false if any errors occur
-	void AddInputLog(std::vector<MovieRecord> records, std::string fn);	//Receives a vector of movie records & a filename, and saves them to disk (as .log files), and adds filename to inputlog vector
 
-	bool changed;						// If there are unsaved changes. 
+	// public vars
+	bool changed;
 
 private:
 	std::string projectName;			//The TASEdit Project's name
@@ -78,4 +77,6 @@ private:
 	std::vector<std::string> comments;
 	std::vector<std::string> subtitles;
 
+	// references to other important objects of Taseditor 
+	INPUT_HISTORY* history;
 };
