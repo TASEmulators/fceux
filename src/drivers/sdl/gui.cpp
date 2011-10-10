@@ -1190,7 +1190,7 @@ void recordMovieAs ()
 	
 	fileChooser = gtk_file_chooser_dialog_new ("Save FM2 movie for recording", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+			GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".fm2");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
@@ -1202,12 +1202,13 @@ void recordMovieAs ()
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		if (!fname.size())
 			return; // no filename selected, quit the whole thing
+	  char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
 		
 		std::string s = GetUserText("Author name");
 		std::wstring author(s.begin(), s.end());
 
 		
-		FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_FROM_POWERON, author);
+		FCEUI_SaveMovie(fname.c_str(), MOVIE_FLAG_NONE, author);
 	}
 	gtk_widget_destroy (fileChooser);
 }
