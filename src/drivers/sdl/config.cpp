@@ -340,7 +340,7 @@ InitConfig()
 		SDLK_COMMA, // toggle input display
 		SDLK_q, // toggle movie RW
 		SDLK_QUOTE, // toggle mute capture
-		//SDLK_ESCAPE, // quit
+		0, // quit // edit 10/11/11 - don't map to escape, it causes ugly things to happen to sdl.  can be manually appended to config
 		SDLK_DELETE, // frame advance lag skip
 		SDLK_SLASH, // lag counter display
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
