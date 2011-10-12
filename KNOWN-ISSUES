@@ -1,0 +1,6 @@
+SDL:
+  *  Segfault on "Record As"
+  *  Single-window mode broken in OSX
+  *  F1 in GUI mode (with no terminal attached) causes endless hang
+  *  --inputcfg broken with GTK=1 atm
+  *  In OSX, Zapper input is taken in GTK window rather than SDL window
