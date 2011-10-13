@@ -418,7 +418,10 @@
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\tasedit.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
     <ClCompile Include="..\src\drivers\win\timing.cpp" />

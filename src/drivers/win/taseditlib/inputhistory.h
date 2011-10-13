@@ -1,9 +1,6 @@
-//Specification file for Input History and Input Snapshot classes
+//Specification file for Input History class
 
-#include <time.h>
-
-#define HOTCHANGE_BYTES_PER_JOY 4
-#define SNAPSHOT_DESC_MAX_LENGTH 50
+#define UNDO_HINT_TIME 200
 
 #define MODTYPE_INIT 0
 #define MODTYPE_CHANGE 1
@@ -18,48 +15,20 @@
 #define MODTYPE_PASTEINSERT 10
 #define MODTYPE_CLONE 11
 #define MODTYPE_RECORD 12
-#define MODTYPE_BRANCH_0 13
-#define MODTYPE_BRANCH_1 14
-#define MODTYPE_BRANCH_2 15
-#define MODTYPE_BRANCH_3 16
-#define MODTYPE_BRANCH_4 17
-#define MODTYPE_BRANCH_5 18
-#define MODTYPE_BRANCH_6 19
-#define MODTYPE_BRANCH_7 20
-#define MODTYPE_BRANCH_8 21
-#define MODTYPE_BRANCH_9 22
+#define MODTYPE_IMPORT 13
+#define MODTYPE_BRANCH_0 14
+#define MODTYPE_BRANCH_1 15
+#define MODTYPE_BRANCH_2 16
+#define MODTYPE_BRANCH_3 17
+#define MODTYPE_BRANCH_4 18
+#define MODTYPE_BRANCH_5 19
+#define MODTYPE_BRANCH_6 20
+#define MODTYPE_BRANCH_7 21
+#define MODTYPE_BRANCH_8 22
+#define MODTYPE_BRANCH_9 23
 
-class INPUT_SNAPSHOT
-{
-public:
-	INPUT_SNAPSHOT();
-	void init(MovieData& md);
-	void toMovie(MovieData& md, int start = 0);
-
-	void save(EMUFILE *os);
-	bool load(EMUFILE *is);
-	bool skipLoad(EMUFILE *is);
-
-	bool checkDiff(INPUT_SNAPSHOT& inp);
-	bool checkJoypadDiff(INPUT_SNAPSHOT& inp, int frame, int joy);
-	int findFirstChange(INPUT_SNAPSHOT& inp, int start = 0, int end = -1);
-	int findFirstChange(MovieData& md);
-
-	void SetMaxHotChange(int frame, int absolute_button);
-	int GetHotChangeInfo(int frame, int absolute_button);
-
-	int size;							// in frames
-	bool fourscore;
-	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
-	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
-
-	bool coherent;						// indicates whether this state was made by inputchange of previous state
-	int jump_frame;						// for jumping when making undo
-	char description[SNAPSHOT_DESC_MAX_LENGTH];
-
-private:
-
-};
+#define HISTORY_COHERENT_COLOR 0xF9DDE6
+#define HISTORY_NORMAL_COLOR 0xFFFFFF
 
 class INPUT_HISTORY
 {
@@ -67,6 +36,8 @@ public:
 	INPUT_HISTORY();
 	void init(int new_size);
 	void free();
+
+	void update();		// called every frame
 
 	void save(EMUFILE *os);
 	void load(EMUFILE *is);
@@ -85,10 +56,16 @@ public:
 
 	INPUT_SNAPSHOT& GetCurrentSnapshot();
 	INPUT_SNAPSHOT& GetNextToCurrentSnapshot();
-	int GetCursorPos();
-	int GetTotalItems();
 	char* GetItemDesc(int pos);
 	bool GetItemCoherence(int pos);
+	int GetUndoHint();
+
+	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
+	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
+	void Click(LPNMITEMACTIVATE info);
+
+	void RedrawHistoryList();
+	void UpdateHistoryList();
 
 private:
 	std::vector<INPUT_SNAPSHOT> input_snapshots;
@@ -97,6 +74,10 @@ private:
 	int history_start_pos;
 	int history_total_items;
 	int history_size;
+
+	int undo_hint_pos, old_undo_hint_pos;
+	int undo_hint_time;
+	bool old_show_undo_hint, show_undo_hint;
 
 };
 

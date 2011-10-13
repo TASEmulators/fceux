@@ -908,6 +908,9 @@
       <Filter>boards</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">

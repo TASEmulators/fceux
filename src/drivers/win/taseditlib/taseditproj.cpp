@@ -1,34 +1,89 @@
-//Implementation file of TASEdit Project file object
+//Implementation file of TASEdit Project class
 
-//Contains all the TASEDit project and all files/settings associated with it
-//Also contains all methods for manipulating the project files/settings, and saving them to disk
-
-#include <iostream>
-#include <fstream>
 #include "../main.h"
 #include "taseditproj.h"
+
+extern INPUT_HISTORY history;
+extern PLAYBACK playback;
+extern GREENZONE greenzone;
+
+extern void FCEU_printf(char *format, ...);
 
 TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads project with default values
 {
 
 }
 
-void TASEDIT_PROJECT::init(INPUT_HISTORY* history_ptr)
+void TASEDIT_PROJECT::init()
 {
-	// keep references to other Taseditor objects
-	history = history_ptr;
-	//greenzone = greenzone_ptr;
-	//bookmarks_bookmarks_ptr;
 
+	// init new project
 	projectName="";
 	fm2FileName="";
 	projectFile="";
 
-	changed=false;
+	reset();
+}
+void TASEDIT_PROJECT::reset()
+{
+	old_changed = changed = false;
+
+}
+void TASEDIT_PROJECT::update()
+{
+	old_changed = changed;
+
+
 }
 
-//TODO: a parameterized constructor that can serve as an import fm2 function
+bool TASEDIT_PROJECT::saveProject()
+{
+	std::string PFN = GetProjectFile();
+	if (PFN.empty()) return false;
+	const char* filename = PFN.c_str();
+	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
+	//ofs << GetProjectName() << std::endl;
+	//ofs << GetFM2Name() << std::endl;
+	
+	currMovieData.dump(ofs, true);
+	greenzone.dumpGreenzone(ofs);
+	history.save(ofs);
 
+	delete ofs;
+
+	playback.updateProgressbar();
+	this->reset();
+	return true;
+}
+
+extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
+
+
+bool TASEDIT_PROJECT::LoadProject(std::string PFN)
+{
+	const char* filename = PFN.c_str();
+
+	EMUFILE_FILE ifs(filename, "rb");
+
+	FCEU_printf("Loading project %s\n", filename);
+
+	LoadFM2(currMovieData, &ifs, ifs.size(), false);
+	LoadSubtitles(currMovieData);
+
+	// try to load greenzone
+	if (!greenzone.loadGreenzone(&ifs))
+	{
+		// there was some error while loading greenzone - reset playback to frame 0
+		poweron(true);
+		currFrameCounter = 0;
+		// try to load history
+		history.load(&ifs);
+	}
+
+	reset();
+	return true;
+}
+// -----------------------------------------------------------------
 //All the get/set functions...
 std::string TASEDIT_PROJECT::GetProjectName()
 {
@@ -53,55 +108,5 @@ std::string TASEDIT_PROJECT::GetProjectFile()
 void TASEDIT_PROJECT::SetProjectFile(std::string e)
 {
 	projectFile = e;
-}
-
-bool TASEDIT_PROJECT::saveProject()
-{
-	std::string PFN = GetProjectFile();
-	if (PFN.empty()) return false;
-	const char* filename = PFN.c_str();
-	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
-	//ofs << GetProjectName() << std::endl;
-	//ofs << GetFM2Name() << std::endl;
-	
-	currMovieData.dump(ofs, true);
-	ofs->fputc('\0'); // TODO: Add main branch name. 
-	currMovieData.dumpGreenzone(ofs);
-
-	history->save(ofs);
-
-	delete ofs;
-
-	changed=false;
-	return true;
-}
-
-extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
-
-
-bool TASEDIT_PROJECT::LoadProject(std::string PFN)
-{
-	const char* filename = PFN.c_str();
-
-	EMUFILE_FILE ifs(filename, "rb");
-
-	LoadFM2(currMovieData, &ifs, ifs.size(), false);
-	LoadSubtitles(currMovieData);
-
-	char branchname;
-	branchname = ifs.fgetc(); // TODO: Add main branch name. 
-	
-	// try to load greenzone
-	if (!currMovieData.loadGreenzone(&ifs))
-	{
-		// there was some error while loading greenzone - reset playback to frame 0
-		poweron(true);
-		currFrameCounter = 0;
-	}
-	// try to load history
-	history->load(&ifs);
-
-	changed = false;
-	return true;
 }
 

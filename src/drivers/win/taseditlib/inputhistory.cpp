@@ -1,15 +1,19 @@
-//Implementation file of Input History and Input Snapshot classes (for Undo feature)
+//Implementation file of Input History class (Undo feature)
 
 #include "movie.h"
+#include "../common.h"
+#include "../tasedit.h"
+#include "inputsnapshot.h"
 #include "inputhistory.h"
-#include "zlib.h"
+#include "playback.h"
+#include "greenzone.h"
 
+extern PLAYBACK playback;
 extern void FCEU_printf(char *format, ...);
-extern void RedrawHistoryList();
-extern void UpdateHistoryList();
-extern void UpdateProgressbar(int a, int b);
+extern HWND hwndHistoryList;
+extern GREENZONE greenzone;
 
-char modCaptions[23][12] = {"Init",
+char modCaptions[24][12] = {"Init",
 							"Change",
 							"Set",
 							"Unset",
@@ -22,6 +26,7 @@ char modCaptions[23][12] = {"Init",
 							"PasteInsert",
 							"Clone",
 							"Record",
+							"Import",
 							"Branch0",
 							"Branch1",
 							"Branch2",
@@ -34,311 +39,6 @@ char modCaptions[23][12] = {"Init",
 							"Branch9"};
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
-INPUT_SNAPSHOT::INPUT_SNAPSHOT()
-{
-
-}
-
-void INPUT_SNAPSHOT::init(MovieData& md)
-{
-	// retrieve input data from movie data
-	size = md.getNumRecords();
-	fourscore = md.fourscore;
-	int num = (fourscore)?4:2;
-	joysticks.resize(num*size);		// it's much faster to have this format [joy + frame << JOY_POWER] than have [frame][joy]
-	hot_changes.resize(num*size * HOTCHANGE_BYTES_PER_JOY);
-	int pos = 0;
-	if (fourscore)
-	{
-		for (int frame = 0; frame < size; ++frame)
-		{
-			joysticks[pos++] = md.records[frame].joysticks[0];
-			joysticks[pos++] = md.records[frame].joysticks[1];
-			joysticks[pos++] = md.records[frame].joysticks[2];
-			joysticks[pos++] = md.records[frame].joysticks[3];
-		}
-	} else
-	{
-		for (int frame = 0; frame < size; ++frame)
-		{
-			joysticks[pos++] = md.records[frame].joysticks[0];
-			joysticks[pos++] = md.records[frame].joysticks[1];
-		}
-	}
-	coherent = true;
-	// save time to description
-	time_t raw_time;
-	time(&raw_time);
-	struct tm * timeinfo = localtime(&raw_time);
-	strftime(description, 10, "%H:%M:%S ", timeinfo);
-}
-
-void INPUT_SNAPSHOT::toMovie(MovieData& md, int start)
-{
-	// write input data to movie data
-	md.records.resize(size);
-	md.frames_flags.resize(size);
-	if (fourscore)
-	{
-		int pos = start << 2;
-		for (int frame = start; frame < size; ++frame)
-		{
-			md.records[frame].joysticks[0] = joysticks[pos++];
-			md.records[frame].joysticks[1] = joysticks[pos++];
-			md.records[frame].joysticks[2] = joysticks[pos++];
-			md.records[frame].joysticks[3] = joysticks[pos++];
-		}
-	} else
-	{
-		int pos = start << 1;
-		for (int frame = start; frame < size; ++frame)
-		{
-			md.records[frame].joysticks[0] = joysticks[pos++];
-			md.records[frame].joysticks[1] = joysticks[pos++];
-		}
-	}
-}
-
-void INPUT_SNAPSHOT::save(EMUFILE *os)
-{
-	// write vars
-	write32le(size, os);
-	if (fourscore) write8le(4, os); else write8le((uint8)0, os);
-	if (coherent) write8le(1, os); else write8le((uint8)0, os);
-	write32le(jump_frame, os);
-	// write description
-	int len = strlen(description);
-	write8le(len, os);
-	os->fwrite(&description[0], len);
-	// compress and save joysticks data
-	len = joysticks.size();
-	int comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf(comprlen);
-	int e = compress(cbuf.data(), (uLongf*)&comprlen,(uint8*)joysticks.data(),len);
-	// write size
-	write32le(comprlen, os);
-	os->fwrite(cbuf.data(), comprlen);
-	// compress and save hot_changes data
-	len = hot_changes.size();
-	comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf2(comprlen);
-	e = compress(cbuf2.data(),(uLongf*)&comprlen,(uint8*)hot_changes.data(),len);
-	// write size
-	write32le(comprlen, os);
-	os->fwrite(cbuf2.data(), comprlen);
-}
-bool INPUT_SNAPSHOT::load(EMUFILE *is)
-{
-	int len;
-	uint8 tmp;
-	// read vars
-	if (!read32le(&size, is)) return false;
-	if (!read8le(&tmp, is)) return false;
-	fourscore = (tmp != 0);
-	if (!read8le(&tmp, is)) return false;
-	coherent = (tmp != 0);
-	if (!read32le(&jump_frame, is)) return false;
-	// read description
-	if (!read8le(&tmp, is)) return false;
-	if (tmp < 0 || tmp >= SNAPSHOT_DESC_MAX_LENGTH) return false;
-	if (is->fread(&description[0], tmp) != tmp) return false;
-	description[tmp] = 0;		// add '0' because it wasn't saved
-	// read and uncompress joysticks data
-	len = (fourscore)?4*size:2*size;
-	joysticks.resize(len);
-	// read size
-	int comprlen;
-	if (!read32le(&comprlen, is)) return false;
-	if (comprlen <= 0 || comprlen > len) return false;
-	std::vector<uint8> cbuf(comprlen);
-	if (is->fread(cbuf.data(),comprlen) != comprlen) return false;
-	int e = uncompress((uint8*)joysticks.data(),(uLongf*)&len,cbuf.data(),comprlen);
-	if (e != Z_OK && e != Z_BUF_ERROR) return false;
-	// read and uncompress hot_changes data
-	len = (fourscore) ? 4*size*HOTCHANGE_BYTES_PER_JOY : 2*size*HOTCHANGE_BYTES_PER_JOY;
-	hot_changes.resize(len);
-	// read size
-	if (!read32le(&comprlen, is)) return false;
-	if (comprlen <= 0 || comprlen > len) return false;
-	std::vector<uint8> cbuf2(comprlen);
-	if (is->fread(cbuf2.data(),comprlen) != comprlen) return false;
-	e = uncompress(hot_changes.data(),(uLongf*)&len,cbuf.data(),comprlen);
-	if (e != Z_OK && e != Z_BUF_ERROR) return false;
-	return true;
-}
-bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
-{
-	int tmp;
-	uint8 tmp1;
-	// read vars
-	if (!read32le(&tmp, is)) return false;
-	if (!read8le(&tmp1, is)) return false;
-	if (!read8le(&tmp1, is)) return false;
-	if (!read32le(&tmp, is)) return false;
-	// read description
-	if (!read8le(&tmp1, is)) return false;
-	if (is->fseek(tmp1, SEEK_CUR) != 0) return false;
-	// read joysticks data
-	if (!read32le(&tmp, is)) return false;
-	if (is->fseek(tmp, SEEK_CUR) != 0) return false;
-	// read hot_changes data
-	if (!read32le(&tmp, is)) return false;
-	if (is->fseek(tmp, SEEK_CUR) != 0) return false;
-	return true;
-}
-
-// return true if any difference is found
-bool INPUT_SNAPSHOT::checkDiff(INPUT_SNAPSHOT& inp)
-{
-	if (size != inp.size) return true;
-	if (findFirstChange(inp) >= 0)
-		return true;
-	else
-		return false;
-}
-
-// return true if joypads differ
-bool INPUT_SNAPSHOT::checkJoypadDiff(INPUT_SNAPSHOT& inp, int frame, int joy)
-{
-	if (fourscore)
-	{
-		int pos = frame << 2;
-		if (pos < (inp.size << 2))
-		{
-			if (joysticks[pos+joy] != inp.joysticks[pos+joy]) return true;
-		} else
-		{
-			if (joysticks[pos+joy]) return true;
-		}
-	} else
-	{
-		int pos = frame << 1;
-		if (pos < (inp.size << 1))
-		{
-			if (joysticks[pos+joy] != inp.joysticks[pos+joy]) return true;
-		} else
-		{
-			if (joysticks[pos+joy]) return true;
-		}
-	}
-	return false;
-}
-// return number of first frame of difference
-int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
-{
-	// search for differences to the specified end (or to size)
-	if (end < 0 || end >= size) end = size-1;
-
-	if (fourscore)
-	{
-		int inp_end = inp.size << 2;
-		end = (end << 2) + 3;
-		for (int pos = start << 2; pos <= end; ++pos)
-		{
-			// if found different byte, or found emptiness in inp when there's non-zero value here
-			if (pos < inp_end)
-			{
-				if (joysticks[pos] != inp.joysticks[pos]) return (pos >> 2);
-			} else
-			{
-				if (joysticks[pos]) return (pos >> 2);
-			}
-		}
-	} else
-	{
-		int inp_end = inp.size << 1;
-		end = (end << 1) + 1;
-		for (int pos = start << 1; pos <= end; ++pos)
-		{
-			// if found different byte, or found emptiness in inp when there's non-zero value here
-			if (pos < inp_end)
-			{
-				if (joysticks[pos] != inp.joysticks[pos]) return (pos >> 1);
-			} else
-			{
-				if (joysticks[pos]) return (pos >> 1);
-			}
-		}
-	}
-	// if current size is less then previous return size-1 as the frame of difference
-	if (size < inp.size) return size-1;
-
-	return -1;	// no changes were found
-}
-int INPUT_SNAPSHOT::findFirstChange(MovieData& md)
-{
-	// search for differences from the beginning to the end of movie (or to size)
-	int end = md.getNumRecords()-1;
-	if (end >= size) end = size-1;
-
-	if (fourscore)
-	{
-		for (int frame = 0, pos = 0; frame <= end; ++frame)
-		{
-			if (joysticks[pos++] != md.records[frame].joysticks[0]) return frame;
-			if (joysticks[pos++] != md.records[frame].joysticks[1]) return frame;
-			if (joysticks[pos++] != md.records[frame].joysticks[2]) return frame;
-			if (joysticks[pos++] != md.records[frame].joysticks[3]) return frame;
-		}
-	} else
-	{
-		for (int frame = 0, pos = 0; frame <= end; ++frame)
-		{
-			if (joysticks[pos++] != md.records[frame].joysticks[0]) return frame;
-			if (joysticks[pos++] != md.records[frame].joysticks[1]) return frame;
-		}
-	}
-	// if sizes differ, return last frame from the lesser of them
-	if (size != md.getNumRecords()) return end;
-
-	return -1;	// no changes were found
-}
-
-void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
-{
-	if (frame < 0 || frame >= size) return;
-	// set max value (15) to the button hotness
-	if (fourscore)
-	{
-		// 32 buttons, 16bytes
-		if (absolute_button & 1)
-			// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-			hot_changes[(frame << 4) | (absolute_button >> 1)] &= 0xF0;
-		else
-			// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-			hot_changes[(frame << 4) | (absolute_button >> 1)] &= 0x0F;
-	} else
-	{
-		// 16 buttons, 8bytes
-		if (absolute_button & 1)
-			// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-			hot_changes[(frame << 3) | (absolute_button >> 1)] &= 0xF0;
-		else
-			// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-			hot_changes[(frame << 3) | (absolute_button >> 1)] &= 0x0F;
-	}
-}
-int INPUT_SNAPSHOT::GetHotChangeInfo(int frame, int absolute_button)
-{
-	if (frame < 0 || frame >= size) return 0;
-	if (absolute_button < 0 || absolute_button > 31) return 0;
-
-	uint8 val;
-	if (fourscore)
-		// 32 buttons, 16bytes
-		val = hot_changes[(frame << 4) + (absolute_button >> 1)];
-	else
-		// 16 buttons, 8bytes
-		val = hot_changes[(frame << 3) + (absolute_button >> 1)];
-
-	if (absolute_button & 1)
-		// odd buttons (B, T, D, R) - upper 4 bits of the byte 
-		return val >> 4;
-	else
-		// even buttons (A, S, U, L) - lower 4 bits of the byte 
-		return val & 15;
-}
-// -----------------------------------------------------------------------------
 INPUT_HISTORY::INPUT_HISTORY()
 {
 
@@ -346,6 +46,9 @@ INPUT_HISTORY::INPUT_HISTORY()
 
 void INPUT_HISTORY::init(int new_size)
 {
+	// init vars
+	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
+	old_show_undo_hint = show_undo_hint = false;
 	history_size = new_size + 1;
 	// clear snapshots history
 	history_total_items = 0;
@@ -358,10 +61,33 @@ void INPUT_HISTORY::init(int new_size)
 	strcat(inp.description, modCaptions[0]);
 	inp.jump_frame = -1;
 	AddInputSnapshotToHistory(inp);
+
+	UpdateHistoryList();
+	RedrawHistoryList();
 }
 void INPUT_HISTORY::free()
 {
 	input_snapshots.resize(0);
+}
+
+void INPUT_HISTORY::update()
+{
+	// update undo_hint
+	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0) RedrawRow(old_undo_hint_pos);
+	old_undo_hint_pos = undo_hint_pos;
+	old_show_undo_hint = show_undo_hint;
+	show_undo_hint = false;
+	if (undo_hint_pos >= 0)
+	{
+		if ((int)clock() < undo_hint_time)
+			show_undo_hint = true;
+		else
+			undo_hint_pos = -1;	// finished hinting
+	}
+	if (old_show_undo_hint != show_undo_hint) RedrawRow(undo_hint_pos);
+
+
+
 }
 
 // returns frame of first input change (for greenzone invalidation)
@@ -370,6 +96,14 @@ int INPUT_HISTORY::jump(int new_pos)
 	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
 	// if nothing is done, do not invalidate greenzone
 	if (new_pos == history_cursor_pos) return -1;
+
+	// create undo_hint
+	if (new_pos < history_cursor_pos)
+		undo_hint_pos = GetCurrentSnapshot().jump_frame;
+	else
+		undo_hint_pos = GetNextToCurrentSnapshot().jump_frame;
+	undo_hint_time = clock() + UNDO_HINT_TIME;
+	show_undo_hint = true;
 
 	// make jump
 	history_cursor_pos = new_pos;
@@ -381,6 +115,7 @@ int INPUT_HISTORY::jump(int new_pos)
 	// update current movie
 	input_snapshots[real_pos].toMovie(currMovieData, first_change);
 	RedrawHistoryList();
+
 	return first_change;
 }
 int INPUT_HISTORY::undo()
@@ -390,34 +125,6 @@ int INPUT_HISTORY::undo()
 int INPUT_HISTORY::redo()
 {
 	return jump(history_cursor_pos + 1);
-}
-// ----------------------------
-INPUT_SNAPSHOT& INPUT_HISTORY::GetCurrentSnapshot()
-{
-	return input_snapshots[(history_start_pos + history_cursor_pos) % history_size];
-}
-INPUT_SNAPSHOT& INPUT_HISTORY::GetNextToCurrentSnapshot()
-{
-	if (history_cursor_pos < history_total_items)
-		return input_snapshots[(history_start_pos + history_cursor_pos + 1) % history_size];
-	else
-		return input_snapshots[(history_start_pos + history_cursor_pos) % history_size];
-}
-int INPUT_HISTORY::GetCursorPos()
-{
-	return history_cursor_pos;
-}
-int INPUT_HISTORY::GetTotalItems()
-{
-	return history_total_items;
-}
-char* INPUT_HISTORY::GetItemDesc(int pos)
-{
-	return input_snapshots[(history_start_pos + pos) % history_size].description;
-}
-bool INPUT_HISTORY::GetItemCoherence(int pos)
-{
-	return input_snapshots[(history_start_pos + pos) % history_size].coherent;
 }
 // ----------------------------
 void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
@@ -485,6 +192,7 @@ int INPUT_HISTORY::RegisterInputChanges(int mod_type, int start, int end)
 			case MODTYPE_TRUNCATE:
 			case MODTYPE_CLEAR:
 			case MODTYPE_CUT:
+			case MODTYPE_IMPORT:
 			case MODTYPE_BRANCH_0: case MODTYPE_BRANCH_1:
 			case MODTYPE_BRANCH_2: case MODTYPE_BRANCH_3:
 			case MODTYPE_BRANCH_4: case MODTYPE_BRANCH_5:
@@ -507,7 +215,7 @@ int INPUT_HISTORY::RegisterInputChanges(int mod_type, int start, int end)
 			case MODTYPE_RECORD:
 			{
 				// add info which joypads were affected
-				int num = (inp.fourscore)?4:2;
+				int num = (inp.input_type + 1) * 2;		// hacky, only for distingushing between normal2p and fourscore
 				for (int i = 0; i < num; ++i)
 				{
 					if (inp.checkJoypadDiff(input_snapshots[real_pos], first_changes, i))
@@ -531,7 +239,7 @@ int INPUT_HISTORY::RegisterInputChanges(int mod_type, int start, int end)
 	}
 	return first_changes;
 }
-// ----------------------------
+
 void INPUT_HISTORY::save(EMUFILE *os)
 {
 	int real_pos, last_tick = 0;
@@ -543,7 +251,7 @@ void INPUT_HISTORY::save(EMUFILE *os)
 	{
 		real_pos = (history_start_pos + i) % history_size;
 		input_snapshots[real_pos].save(os);
-		UpdateProgressbar(i, history_total_items);
+		playback.SetProgressbar(i, history_total_items);
 	}
 }
 void INPUT_HISTORY::load(EMUFILE *is)
@@ -555,6 +263,7 @@ void INPUT_HISTORY::load(EMUFILE *is)
 	// read vars
 	if (!read32le((uint32 *)&history_cursor_pos, is)) goto error;
 	if (!read32le((uint32 *)&history_total_items, is)) goto error;
+	if (history_cursor_pos > history_total_items) goto error;
 	history_start_pos = 0;
 	// read snapshots
 	int total = history_total_items;
@@ -582,19 +291,109 @@ void INPUT_HISTORY::load(EMUFILE *is)
 	{
 		// skip snapshots if current history_size is less then history_total_items
 		if (!input_snapshots[i].load(is)) goto error;
-		UpdateProgressbar(i, history_total_items);
+		playback.SetProgressbar(i, history_total_items);
 	}
 	// skip redo snapshots if needed
 	for (; i < total; ++i)
 		if (!inp.skipLoad(is)) goto error;
 
+	// init vars
+	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
+	old_show_undo_hint = show_undo_hint = false;
+
+	UpdateHistoryList();
+	RedrawHistoryList();
 	return;
 error:
 	// couldn't load full history - reset it
 	FCEU_printf("Error loading history\n");
 	init(history_size-1);
 }
+// ----------------------------
+void INPUT_HISTORY::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
+{
+	LVITEM& item = nmlvDispInfo->item;
+	if(item.mask & LVIF_TEXT)
+		strcpy(item.pszText, GetItemDesc(item.iItem));
+}
 
+LONG INPUT_HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
+{
+	switch(msg->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		return CDRF_NOTIFYITEMDRAW;
+	case CDDS_ITEMPREPAINT:
+		{
+			if (GetItemCoherence(msg->nmcd.dwItemSpec))
+				msg->clrTextBk = HISTORY_COHERENT_COLOR;
+			else
+				msg->clrTextBk = HISTORY_NORMAL_COLOR;
+			return CDRF_DODEFAULT;
+		}
+	default:
+		return CDRF_DODEFAULT;
+	}
 
+}
 
+void INPUT_HISTORY::Click(LPNMITEMACTIVATE info)
+{
+	// jump to pointed input snapshot
+	int item = info->iItem;
+	if (item >= 0)
+	{
+		int result = jump(item);
+		if (result >= 0)
+		{
+			UpdateList();
+			FollowUndo();
+			greenzone.InvalidateGreenZone(result);
+			return;
+		}
+	}
+	RedrawHistoryList();
+}
+
+void INPUT_HISTORY::UpdateHistoryList()
+{
+	//update the number of items in the history list
+	int currLVItemCount = ListView_GetItemCount(hwndHistoryList);
+	if(currLVItemCount != history_total_items)
+		ListView_SetItemCountEx(hwndHistoryList, history_total_items, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
+}
+
+void INPUT_HISTORY::RedrawHistoryList()
+{
+	ListView_SetItemState(hwndHistoryList, history_cursor_pos, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_EnsureVisible(hwndHistoryList, history_cursor_pos, FALSE);
+	InvalidateRect(hwndHistoryList, 0, FALSE);
+}
+// ----------------------------
+INPUT_SNAPSHOT& INPUT_HISTORY::GetCurrentSnapshot()
+{
+	return input_snapshots[(history_start_pos + history_cursor_pos) % history_size];
+}
+INPUT_SNAPSHOT& INPUT_HISTORY::GetNextToCurrentSnapshot()
+{
+	if (history_cursor_pos < history_total_items)
+		return input_snapshots[(history_start_pos + history_cursor_pos + 1) % history_size];
+	else
+		return input_snapshots[(history_start_pos + history_cursor_pos) % history_size];
+}
+char* INPUT_HISTORY::GetItemDesc(int pos)
+{
+	return input_snapshots[(history_start_pos + pos) % history_size].description;
+}
+bool INPUT_HISTORY::GetItemCoherence(int pos)
+{
+	return input_snapshots[(history_start_pos + pos) % history_size].coherent;
+}
+int INPUT_HISTORY::GetUndoHint()
+{
+	if (show_undo_hint)
+		return undo_hint_pos;
+	else
+		return -1;
+}
 

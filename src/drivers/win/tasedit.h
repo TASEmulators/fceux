@@ -2,9 +2,7 @@
 
 #define NUM_JOYPADS 4
 #define NUM_JOYPAD_BUTTONS 8
-#define PAUSEFRAME_BLINKING_PERIOD 100
 #define PROGRESSBAR_WIDTH 200
-#define HOLD_REPEAT_DELAY 250			// in milliseconds
 
 #define GREENZONE_CAPACITY_DEFAULT 100000
 #define GREENZONE_CAPACITY_MIN 1
@@ -13,8 +11,6 @@
 #define UNDO_LEVELS_MIN 1
 #define UNDO_LEVELS_MAX 999
 #define UNDO_LEVELS_DEFAULT 100
-
-#define UNDO_HINT_TIME 200
 
 // multitrack
 #define MULTITRACK_RECORDING_ALL 0
@@ -77,44 +73,26 @@
 #define CUR_INPUT_COLOR2 0xE4D8A8
 #define GREENZONE_INPUT_COLOR2 0xAEE2AE
 #define LAG_INPUT_COLOR2 0xB8B3E2
-
-#define HISTORY_COHERENT_COLOR 0xF9DDE6
-#define HISTORY_NORMAL_COLOR 0xFFFFFF
-
 // -----------------------------
 void EnterTasEdit();
 void InitDialog();
 bool ExitTasEdit();
 void UpdateTasEdit();
 void UpdateList();
-void UpdateHistoryList();
-void UpdateProgressbar(int a, int b);
 void InputChangedRec();
-void InvalidateGreenZone(int after);
-bool JumpToFrame(int index);
-int FindBeginningOfGreenZone(int starting_index);
 bool CheckItemVisible(int frame);
 void FollowPlayback();
 void FollowUndo();
-void FollowRedo();
 void ClearSelection();
 void ClearRowSelection(int index);
 void AddFourscore();
 void RemoveFourscore();
 void RedrawWindowCaption();
+void RedrawBookmarksCaption();
 void RedrawTasedit();
 void RedrawList();
-void RedrawHistoryList();
 void RedrawRow(int index);
-void SeekingStart(int finish_frame);
-void SeekingStop();
-void Tasedit_ToggleEmulationPause();
-void PauseEmulation();
-void UnpauseEmulation();
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
-void Tasedit_RewindFrame();
-void Tasedit_ForwardFrame();
-void StartFromZero();
 void SwitchToReadOnly();
 void UncheckRecordingRadioButtons();
 void RecheckRecordingRadioButtons();
@@ -128,12 +106,8 @@ void CloneFrames();
 void InsertFrames();
 void DeleteFrames();
 void ClearFrames(bool cut = false);
+void Truncate();
 void ColumnSet(int column);
 bool Copy();
 void Cut();
 bool Paste();
-void Truncate();
-void HistoryGetDispInfo(NMLVDISPINFO* nmlvDispInfo);
-LONG HistoryCustomDraw(NMLVCUSTOMDRAW* msg);
-void HistoryClick(LPNMITEMACTIVATE info);
-

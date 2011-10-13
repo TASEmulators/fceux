@@ -52,6 +52,9 @@
 
 #ifdef WIN32
 #include "drivers/win/pref.h"
+
+#include "drivers/win/taseditlib/greenzone.h"
+extern GREENZONE greenzone;
 #endif
 
 #include <fstream>
@@ -713,11 +716,13 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	}
 	else justLagged = false;
 
-	// auto-savestates for TASEditor
-	currMovieData.TryDumpIncremental();
-
 	if (movieSubtitles)
 		ProcessSubtitles();
+
+#ifdef WIN32
+	if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		greenzone.TryDumpIncremental(lagFlag);
+#endif
 }
 
 void FCEUI_CloseGame(void)

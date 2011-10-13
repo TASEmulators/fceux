@@ -37,12 +37,12 @@
 #ifdef WIN32
 #include <windows.h>
 #include "./drivers/win/common.h"
-#include "./drivers/win/tasedit.h"
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 
-extern void UpdateProgressbar(int a, int b);
-
+extern void InputChangedRec();
+extern int TASEdit_greenzone_capacity;
+extern bool TASEdit_bind_markers;
 #endif
 
 using namespace std;
@@ -51,10 +51,6 @@ using namespace std;
 
 extern char FileBase[];
 extern bool AutoSS;		//Declared in fceu.cpp, keeps track if a auto-savestate has been made
-#ifdef WIN32
-extern int TASEdit_greenzone_capacity;
-extern bool TASEdit_bind_markers;
-#endif
 
 std::vector<int> subtitleFrames;		//Frame numbers for subtitle messages
 std::vector<string> subtitleMessages;	//Messages of subtitles
@@ -152,56 +148,6 @@ void MovieData::cloneRegion(int at, int frames)
 
 	for(int i = 0; i < frames; i++)
 		records[i+at].Clone(records[i+at+frames]);
-}
-
-void MovieData::TryDumpIncremental()
-{
-	if(movieMode == MOVIEMODE_TASEDIT)
-	{
-		// if movie length is less than currFrame, pad it with empty frames
-		if(currFrameCounter >= (int)currMovieData.records.size() || currMovieData.records.size()==0)
-			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
-		//always log savestates in taseditor mode
-		currMovieData.storeTasSavestate(currFrameCounter, Z_DEFAULT_COMPRESSION);
-		// also log frame_flags
-		if (currFrameCounter > 0)
-		{
-			// lagFlag indicates that lag was in previous frame
-			if (lagFlag)
-				currMovieData.frames_flags[currFrameCounter-1] |= LAG_FLAG_BIT;
-			else
-				currMovieData.frames_flags[currFrameCounter-1] &= ~LAG_FLAG_BIT;
-		}
-		// update greenzone upper limit
-		if (currMovieData.greenZoneCount <= currFrameCounter)
-			currMovieData.greenZoneCount = currFrameCounter+1;
-
-		ClearGreenzoneTail();
-	}
-}
-
-void MovieData::ClearGreenzoneTail()
-{
-#ifdef WIN32
-	int tail_frame = currMovieData.greenZoneCount-1 - TASEdit_greenzone_capacity;
-#else
-	int tail_frame = 0;
-#endif
-
-	if (tail_frame >= currFrameCounter) tail_frame = currFrameCounter - 1;
-	for (;tail_frame >= 0; tail_frame--)
-	{
-		if (currMovieData.savestates[tail_frame].empty()) break;
-		ClearSavestate(tail_frame);
-#ifdef WIN32
-    RedrawRow(tail_frame);
-#endif
-	}
-}
-void MovieData::ClearSavestate(int index)
-{
-    std::vector<uint8> tmp;
-    currMovieData.savestates[index].swap(tmp);
 }
 
 MovieRecord::MovieRecord()
@@ -468,7 +414,6 @@ MovieData::MovieData()
 	, PPUflag(false)
 	, rerecordCount(0)
 	, binaryFlag(false)
-	, greenZoneCount(0)
 	, microphone(false)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));
@@ -579,125 +524,6 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	int end = os->ftell();
 	return end-start;
 }
-
-void MovieData::clearGreenzone()
-{
-	int size = currMovieData.savestates.size();
-	for (int i = 0; i < size; ++i)
-	{
-		ClearSavestate(i);
-	}
-	greenZoneCount = 1;
-	currMovieData.frames_flags.resize(1);
-	// reset lua_colorings
-	// reset monitorings
-	
-}
-
-int MovieData::dumpGreenzone(EMUFILE *os)
-{
-	int start = os->ftell();
-	int frame, size;
-	int last_tick = 0;
-	// write size
-	write32le(greenZoneCount, os);
-	write32le(currFrameCounter, os);
-	// write savestates
-	for (frame = 0; frame < greenZoneCount; ++frame)
-	{
-#ifdef WIN32
-		// update TASEditor progressbar from time to time
-		if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
-		{
-			UpdateProgressbar(frame, greenZoneCount);
-			last_tick = frame / PROGRESSBAR_UPDATE_RATE;
-		}
-#endif
-		if (savestates[frame].empty()) continue;
-		write32le(frame, os);
-		// write frames_flags
-		os->fwrite(&frames_flags[frame], 1);
-		// write lua_colorings
-		// write monitorings
-		// write savestate
-		size = savestates[frame].size();
-		write32le(size, os);
-		os->fwrite(savestates[frame].data(), size);
-
-	}
-	// write -1 as eof for greenzone
-	write32le(-1, os);
-
-	int end = os->ftell();
-	return end-start;
-}
-
-bool MovieData::loadGreenzone(EMUFILE *is)
-{
-	clearGreenzone();
-	frames_flags.resize(records.size());
-	int frame = 0, prev_frame = 0, size = 0;
-	int last_tick = 0;
-	// read size
-	if (read32le((uint32 *)&size, is))
-	{
-		greenZoneCount = size;
-		savestates.resize(greenZoneCount);
-#ifdef WIN32
-		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
-#else
-		int greenzone_tail_frame = 0;
-#endif
-
-		if (read32le((uint32 *)&frame, is))
-		{
-			currFrameCounter = frame;
-			while(1)
-			{
-				if (!read32le((uint32 *)&frame, is)) break;
-				if (frame == -1) break;
-#ifdef WIN32
-				// update TASEditor progressbar from time to time
-				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
-				{
-					UpdateProgressbar(frame, greenZoneCount);
-					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
-				}
-#endif
-				// read frames_flags
-				if ((int)is->fread(&frames_flags[frame],1) != 1) break;
-				// read lua_colorings
-				// read monitorings
-				// read savestate
-				if (!read32le((uint32 *)&size, is)) break;
-				if (frame > greenzone_tail_frame || frame == currFrameCounter)
-				{
-					// load savestate
-					savestates[frame].resize(size);
-					if ((int)is->fread(savestates[frame].data(),size) < size) break;
-					prev_frame = frame;			// successfully read one greenzone frame info
-				} else
-				{
-					// skip loading this savestate
-					if (is->fseek(size,SEEK_CUR) != 0) break;
-				}
-			}
-			greenZoneCount = prev_frame+1;	// cut greenZoneCount to last good frame
-			if (frame == -1)
-			{
-				// everything went fine - load savestate at cursor position
-				if (currMovieData.loadTasSavestate(currFrameCounter))
-					return true;
-			} else
-			{
-				// there was some error while reading greenzone
-				FCEU_printf("Error loading greenzone\n");
-			}
-		}
-	}
-	return false;
-}
-
 
 int FCEUMOV_GetFrame(void)
 {
@@ -1013,25 +839,6 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 	ms.trim();
 }
 
-bool MovieData::loadTasSavestate(int frame)
-{
-	if (frame<0 || frame>=(int)currMovieData.records.size())
-		return false;
-	if ((int)savestates.size()<=frame || savestates[frame].empty())
-		return false;
-
-	EMUFILE_MEMORY ms(&savestates[frame]);
-	return FCEUSS_LoadFP(&ms, SSLOADPARAM_NOBACKUP);
-}
-
-void MovieData::storeTasSavestate(int frame, int compression_level)
-{
-	if ((int)savestates.size()<=frame)
-		savestates.resize(frame+1);
-
-	MovieData::dumpSavestateTo(&savestates[frame],compression_level);
-}
-
 //begin playing an existing movie
 bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
 {
@@ -1103,7 +910,6 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	{
 		currFrameCounter = 0;
 		pauseframe = _pauseframe;
-		//currMovieData.TryDumpIncremental();
 	}
 	else
 	{
@@ -1193,13 +999,13 @@ static int _currCommand = 0;
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
 {
-	//todo - for tasedit, either dump or load depending on whether input recording is enabled
-	//or something like that
-	//(input recording is just like standard read+write movie recording with input taken from gamepad)
-	//otherwise, it will come from the tasedit data.
 	#ifdef _WIN32
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
+		// if movie length is less than currFrame, pad it with empty frames
+		if((int)currMovieData.records.size() <= currFrameCounter)
+			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
+
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
 		if(movie_readonly || turbo || pauseframe > currFrameCounter)
 		{
@@ -1218,7 +1024,7 @@ void FCEUMOV_AddInputState()
 			joyports[1].log(mr);
 			mr->commands = 0;
 
-			InputChangedRec();		// TODO: don't call function explicitly, taseditor should catch changes in UpdateTasedit function
+			InputChangedRec();
 		}
 	} else
 	#endif

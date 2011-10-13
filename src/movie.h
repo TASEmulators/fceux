@@ -178,7 +178,7 @@ public:
 	std::string romFilename;
 	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
-	std::vector<std::vector<uint8> > savestates;
+	//std::vector<std::vector<uint8> > savestates;
 	std::vector<uint8> frames_flags;
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
@@ -188,6 +188,7 @@ public:
 
 	//was the frame data stored in binary?
 	bool binaryFlag;
+	int loadFrameCount;
 
 	//which ports are defined for the movie
 	int ports[3];
@@ -196,11 +197,6 @@ public:
 	//whether microphone is enabled
 	bool microphone;
 	
-	//----TasEdit stuff---
-	int greenZoneCount;
-	int loadFrameCount;
-	//----
-
 	int getNumRecords() { return records.size(); }
 
 	class TDictionary : public std::map<std::string,std::string>
@@ -234,9 +230,6 @@ public:
 	void truncateAt(int frame);
 	void installValue(std::string& key, std::string& val);
 	int dump(EMUFILE* os, bool binary);
-	void clearGreenzone();
-	int dumpGreenzone(EMUFILE *os);
-	bool loadGreenzone(EMUFILE *is);
 
 	void clearRecordRange(int start, int len);
 	void insertEmpty(int at, int frames);
@@ -244,12 +237,6 @@ public:
 	
 	static bool loadSavestateFrom(std::vector<uint8>* buf);
 	static void dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel);
-
-	bool loadTasSavestate(int frame);
-	void storeTasSavestate(int frame, int compression_level);
-	void TryDumpIncremental();
-	void ClearGreenzoneTail();
-	void ClearSavestate(int index);
 
 private:
 	void installInt(std::string& val, int& var)
