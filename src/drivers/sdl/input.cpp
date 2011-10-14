@@ -273,7 +273,8 @@ std::string GetFilename(const char* title, bool save, const char* filter)
 std::string GetUserText(const char* title)
 {
 #ifdef _GTK
-
+/*	prg318 - 10/13/11 - this is broken in recent build and causes segfaults/very weird behavior
+	i'd rather remove it for now than it cause accidental segfaults
 	GtkWidget* d;
 	GtkWidget* entry;
 	
@@ -320,7 +321,7 @@ std::string GetUserText(const char* title)
 			break;
 		input += c;
 	}
-	pclose(fpipe);*/
+	pclose(fpipe);*//*
 		gtk_widget_destroy(d);
 		
 	
@@ -329,7 +330,7 @@ std::string GetUserText(const char* title)
 	
 		FCEUI_ToggleEmulationPause(); // unpause emulation
 		return input;
-
+*/
 #endif
 	return "";
 }
