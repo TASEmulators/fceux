@@ -5,10 +5,15 @@
 #include "taseditproj.h"
 #include "../tasedit.h"
 
+#ifdef _S9XLUA_H
+extern void ForceExecuteLuaFrameFunctions();
+#endif
+
 extern HWND hwndProgressbar, hwndList, hwndRewind, hwndForward;
 extern void FCEU_printf(char *format, ...);
 extern bool turbo;
 extern GREENZONE greenzone;
+extern bool Tasedit_rewind_now;
 
 PLAYBACK::PLAYBACK()
 {
@@ -59,9 +64,12 @@ void PLAYBACK::update()
 	old_pauseframe = pauseframe;
 	old_show_pauseframe = show_pauseframe;
 	if (pauseframe)
-		show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD) & 1;
-	else
-		show_pauseframe = false;
+	{
+		if (emu_paused)
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_PAUSED) & 1;
+		else
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
+	} else show_pauseframe = false;
 	if (old_show_pauseframe != show_pauseframe) RedrawRow(pauseframe-1);
 
 	//update the playback cursor
@@ -79,7 +87,7 @@ void PLAYBACK::update()
 	if(emu_paused)
 	{
 		old_rewind_button_state = rewind_button_state;
-		rewind_button_state = (Button_GetState(hwndRewind) & BST_PUSHED) != 0;
+		rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Tasedit_rewind_now);
 		if (rewind_button_state)
 		{
 			if (!old_rewind_button_state)
@@ -93,7 +101,7 @@ void PLAYBACK::update()
 		}
 		old_forward_button_state = forward_button_state;
 		forward_button_state = (Button_GetState(hwndForward) & BST_PUSHED) != 0;
-		if (forward_button_state)
+		if (forward_button_state && !rewind_button_state)
 		{
 			if (!old_forward_button_state)
 			{
@@ -156,14 +164,26 @@ void PLAYBACK::SeekingStop()
 
 void PLAYBACK::RewindFrame()
 {
-	if (currFrameCounter > 0) JumpToFrame(currFrameCounter-1);
+	if (currFrameCounter > 0) jump(currFrameCounter-1);
 	turbo = false;
 	FollowPlayback();
 }
 void PLAYBACK::ForwardFrame()
 {
-	JumpToFrame(currFrameCounter+1);
+	jump(currFrameCounter+1);
 	turbo = false;
+	FollowPlayback();
+}
+void PLAYBACK::RewindFull()
+{
+	// rewind to the beginning of greenzone
+	jump(greenzone.FindBeginningOfGreenZone());
+	FollowPlayback();
+}
+void PLAYBACK::ForwardFull()
+{
+	// move to the end of greenzone
+	jump(greenzone.greenZoneCount-1);
 	FollowPlayback();
 }
 
@@ -172,6 +192,19 @@ void PLAYBACK::StartFromZero()
 	poweron(true);
 	currFrameCounter = 0;
 	greenzone.TryDumpIncremental();
+}
+
+void PLAYBACK::jump(int frame)
+{
+	if (JumpToFrame(frame))
+		ForceExecuteLuaFrameFunctions();
+}
+void PLAYBACK::restorePosition()
+{
+	if (pauseframe)
+		jump(pauseframe-1);
+	else
+		jump(currFrameCounter);
 }
 
 bool PLAYBACK::JumpToFrame(int index)
@@ -209,14 +242,6 @@ bool PLAYBACK::JumpToFrame(int index)
 	// continue from the frame
 	SeekingStart(index+1);
 	return false;
-}
-
-void PLAYBACK::restorePosition()
-{
-	if (pauseframe)
-		JumpToFrame(pauseframe-1);
-	else
-		JumpToFrame(currFrameCounter);
 }
 
 int PLAYBACK::GetPauseFrame()

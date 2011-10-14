@@ -22,8 +22,9 @@ GREENZONE::GREENZONE()
 
 void GREENZONE::init()
 {
-
 	clearGreenzone();
+
+	currMovieData.frames_flags.resize(currMovieData.records.size());
 	reset();
 }
 void GREENZONE::reset()
@@ -42,7 +43,15 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 	if((int)currMovieData.records.size() <= currFrameCounter)
 		currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
 
-	// if frame chanegd - log savestate
+	// update greenzone upper limit
+	if (greenZoneCount <= currFrameCounter)
+		greenZoneCount = currFrameCounter+1;
+	if ((int)savestates.size() < greenZoneCount)
+		savestates.resize(greenZoneCount);
+	if ((int)currMovieData.frames_flags.size() < greenZoneCount)
+		currMovieData.frames_flags.resize(greenZoneCount);
+
+	// if frame changed - log savestate
 	storeTasSavestate(currFrameCounter);
 	// also log frame_flags
 	if (currFrameCounter > 0)
@@ -53,9 +62,8 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 		else
 			currMovieData.frames_flags[currFrameCounter-1] &= ~LAG_FLAG_BIT;
 	}
-	// update greenzone upper limit
-	if (greenZoneCount <= currFrameCounter)
-		greenZoneCount = currFrameCounter+1;
+
+
 
 	ClearGreenzoneTail();
 }
@@ -109,8 +117,9 @@ void GREENZONE::clearGreenzone()
 	{
 		ClearSavestate(i);
 	}
-	greenZoneCount = 1;
-	currMovieData.frames_flags.resize(1);
+	savestates.resize(0);
+	greenZoneCount = 0;
+	currMovieData.frames_flags.resize(0);
 	// reset lua_colorings
 	// reset monitorings
 	
@@ -226,7 +235,7 @@ void GREENZONE::InvalidateGreenZone(int after)
 			if (TASEdit_restore_position)
 				playback.restorePosition();
 			else
-				playback.JumpToFrame(greenZoneCount-1);
+				playback.jump(greenZoneCount-1);
 		}
 	}
 	// redraw list even if greenzone didn't change

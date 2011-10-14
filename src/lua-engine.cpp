@@ -1869,6 +1869,13 @@ void CallRegisteredLuaFunctions(LuaCallID calltype)
 	}
 }
 
+void ForceExecuteLuaFrameFunctions()
+{
+	FCEU_LuaFrameBoundary();
+	CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
+	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+}
+
 // Not for the signed versions though
 static int memory_readbytesigned(lua_State *L) {
 	signed char c = (signed char) FCEU_CheatGetByte(luaL_checkinteger(L,1));

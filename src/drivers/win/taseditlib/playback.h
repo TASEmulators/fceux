@@ -1,6 +1,8 @@
 //Specification file for Playback class
 
-#define PAUSEFRAME_BLINKING_PERIOD 100
+#define PAUSEFRAME_BLINKING_PERIOD_SEEKING 100
+#define PAUSEFRAME_BLINKING_PERIOD_PAUSED 250
+
 #define HOLD_REPEAT_DELAY 250			// in milliseconds
 
 
@@ -12,6 +14,9 @@ public:
 	void reset();
 	void update();
 
+	void jump(int frame);
+	void restorePosition();
+
 	void updateProgressbar();
 
 	void SeekingStart(int finish_frame);
@@ -22,9 +27,9 @@ public:
 
 	void RewindFrame();
 	void ForwardFrame();
+	void RewindFull();
+	void ForwardFull();
 
-	bool JumpToFrame(int index);
-	void restorePosition();
 
 	void StartFromZero();
 
@@ -34,6 +39,7 @@ public:
 	int pauseframe;
 
 private:
+	bool JumpToFrame(int index);
 
 	int lastCursor;		// for currentCursor we use external variable currFrameCounter
 	bool old_emu_paused, emu_paused;

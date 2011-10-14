@@ -51,6 +51,8 @@
 #include "drivers/win/memview.h"
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
+
+extern bool Tasedit_rewind_now;
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -645,6 +647,8 @@ static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
 static void FCEUI_DoExit(void);
 static void ToggleFullscreen(void);
+static void TaseditRewindOn(void);
+static void TaseditRewindOff(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -768,6 +772,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,	  0, 0, "Ram Search - Greater Than or Equal", 0},
 	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,	  0, 0, "Ram Search - Equal",	  0},
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
+	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_TOOL,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (Tasedit-only)", EMUCMDFLAG_TASEDIT},
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -1104,3 +1109,18 @@ static void ToggleFullscreen(void)
 	changerecursive=0;
 #endif
 }
+
+static void TaseditRewindOn(void)
+{
+#ifdef WIN32
+	Tasedit_rewind_now = true;
+#endif
+}
+static void TaseditRewindOff(void)
+{
+#ifdef WIN32
+	Tasedit_rewind_now = false;
+#endif
+}
+
+

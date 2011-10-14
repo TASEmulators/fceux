@@ -24,6 +24,7 @@ using namespace std;
 int old_multitrack_recording_joypad, multitrack_recording_joypad;
 bool old_movie_readonly;
 bool TASEdit_focus = false;
+bool Tasedit_rewind_now = false;
 int listItems;	// number of items per list page
 // saved FCEU config
 int saved_eoptions;
@@ -417,7 +418,7 @@ void SingleClick(LPNMITEMACTIVATE info)
 	{
 		// click on the "icons" column - jump to the frame
 		ClearSelection();
-		playback.JumpToFrame(row_index);
+		playback.jump(row_index);
 		RedrawList();
 	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 	{
@@ -450,7 +451,7 @@ void DoubleClick(LPNMITEMACTIVATE info)
 	{
 		// double click sends playback to the frame
 		ClearSelection();
-		playback.JumpToFrame(row_index);
+		playback.jump(row_index);
 		RedrawList();
 	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 	{
@@ -1034,9 +1035,7 @@ void OpenProject()
 			tempstr.append(".tas");						
 		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split the path...
 		project.SetProjectName(name);
-		std::string filename = name;						//Get the filename
-		filename.append(ext);								//Shove the extension back onto it...
-		project.SetProjectFile(filename);					//And update the project's filename.
+		project.SetProjectFile(tempstr);
 		//Set the fm2 name
 		std::string thisfm2name = name;
 		thisfm2name.append(".fm2");
@@ -1096,9 +1095,7 @@ bool SaveProjectAs()
 
 		splitpath(tempstr.c_str(), drv, dir, name, ext);	//Split it up...
 		project.SetProjectName(name);
-		std::string filename = name;						//Grab the name...
-		filename.append(ext);								//Stick extension back on...
-		project.SetProjectFile(filename);					//And update the project's filename.
+		project.SetProjectFile(tempstr);
 		std::string thisfm2name = name;
 		thisfm2name.append(".fm2");							//Setup the fm2 name
 		project.SetFM2Name(thisfm2name);					//Set the project's fm2 name
@@ -1425,17 +1422,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				if (selectionFrames.size()) ClearFrames();
 				break;
 			case TASEDIT_REWIND_FULL:
-				//rewinds to beginning of greenzone
-				playback.JumpToFrame(greenzone.FindBeginningOfGreenZone());
-				FollowPlayback();
+				playback.RewindFull();
 				break;
 			case TASEDIT_PLAYSTOP:
 				playback.ToggleEmulationPause();
 				break;
 			case TASEDIT_FORWARD_FULL:
-				//moves to the end of greenzone
-				playback.JumpToFrame(greenzone.greenZoneCount-1);
-				FollowPlayback();
+				playback.ForwardFull();
 				break;
 			case ACCEL_CTRL_F:
 			case CHECK_FOLLOW_CURSOR:
@@ -1741,6 +1734,7 @@ void EnterTasEdit()
 		project.init();
 		history.init(TasEdit_undo_levels);
 		SetFocus(hwndHistoryList);
+		greenzone.TryDumpIncremental(lagFlag != 0);
 		FCEU_DispMessage("Tasedit engaged",0);
 	}
 }

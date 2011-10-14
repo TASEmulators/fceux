@@ -1531,7 +1531,7 @@ int FCEUD_TestCommandState(int c)
 		//		else
 		//			keys_nr=GetKeyboard_nr();
 	}
-	else if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function, but right now Turbo is the only command that has it
+	else if(c != EMUCMD_SPEED_TURBO && c != EMUCMD_TASEDIT_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
 	{
 		keys=GetKeyboard_jd();
 		keys_nr=GetKeyboard_nr(); 

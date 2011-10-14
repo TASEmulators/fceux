@@ -178,7 +178,6 @@ public:
 	std::string romFilename;
 	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
-	//std::vector<std::vector<uint8> > savestates;
 	std::vector<uint8> frames_flags;
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;

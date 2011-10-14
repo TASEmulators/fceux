@@ -215,7 +215,7 @@ enum EMUCMD
 	//Currently only windows (but sdl could easily add onto these)
 	EMUCMD_OPENROM,
 	EMUCMD_CLOSEROM,
-  EMUCMD_RELOADROM,
+	EMUCMD_RELOADROM,
 	//-----------------------------
 	EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,
 	EMUCMD_MISC_UNDOREDOSAVESTATE,
@@ -228,9 +228,11 @@ enum EMUCMD
 	EMUCMD_TOOL_RAMSEARCHGTE,
 	EMUCMD_TOOL_RAMSEARCHEQ,
 	EMUCMD_TOOL_RAMSEARCHNE,
+	EMUCMD_TOOL_OPENNTVIEW,
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
-	EMUCMD_TOOL_OPENNTVIEW,
+	EMUCMD_TASEDIT_REWIND,
+
 	EMUCMD_MAX
 };
 
