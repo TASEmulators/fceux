@@ -47,6 +47,8 @@ private:
 	bool old_show_pauseframe, show_pauseframe;
 	bool old_rewind_button_state, rewind_button_state;
 	bool old_forward_button_state, forward_button_state;
+	bool old_rewind_full_button_state, rewind_full_button_state;
+	bool old_forward_full_button_state, forward_full_button_state;
 	int button_hold_time;
 	int seeking_start_frame;
 

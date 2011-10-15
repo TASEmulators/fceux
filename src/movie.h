@@ -1,9 +1,6 @@
 #ifndef __MOVIE_H_
 #define __MOVIE_H_
 
-#define LAG_FLAG_BIT 1
-#define MARKER_FLAG_BIT 2
-
 #define PROGRESSBAR_UPDATE_RATE 2000	// in frames of greenzone
 
 #include <vector>
@@ -178,7 +175,6 @@ public:
 	std::string romFilename;
 	std::vector<uint8> savestate;
 	std::vector<MovieRecord> records;
-	std::vector<uint8> frames_flags;
 	std::vector<std::wstring> comments;
 	std::vector<std::string> subtitles;
 	//this is the RERECORD COUNT. please rename variable.

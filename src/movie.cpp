@@ -109,7 +109,6 @@ void MovieData::clearRecordRange(int start, int len)
 	for(int i=0;i<len;i++)
 	{
 		records[i+start].clear();
-		frames_flags[i+start] = 0;
 	}
 }
 
@@ -118,20 +117,11 @@ void MovieData::insertEmpty(int at, int frames)
 	if(at == -1) 
 	{
 		int currcount = records.size();
-		records.resize(currcount+frames);
-#ifdef WIN32
-		if (TASEdit_bind_markers)
-#endif
-			frames_flags.resize(currcount+frames);
-		clearRecordRange(currcount,frames);
-	}
-	else
+		records.resize(currcount + frames);
+		clearRecordRange(currcount, frames);
+	} else
 	{
-		records.insert(records.begin()+at,frames,MovieRecord());
-#ifdef WIN32
-		if (TASEdit_bind_markers)
-#endif
-			frames_flags.insert(frames_flags.begin()+at,frames,0);
+		records.insert(records.begin() + at, frames, MovieRecord());
 		clearRecordRange(at,frames);
 	}
 }
@@ -140,14 +130,10 @@ void MovieData::cloneRegion(int at, int frames)
 {
 	if(at == -1) return;
 	
-	records.insert(records.begin()+at,frames,MovieRecord());
-#ifdef WIN32
-	if (TASEdit_bind_markers)
-#endif
-		frames_flags.insert(frames_flags.begin()+at,frames,0);
+	records.insert(records.begin() + at, frames, MovieRecord());
 
 	for(int i = 0; i < frames; i++)
-		records[i+at].Clone(records[i+at+frames]);
+		records[i+at].Clone(records[i + at + frames]);
 }
 
 MovieRecord::MovieRecord()
@@ -601,7 +587,6 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 		numRecords=movieData.loadFrameCount;
 
 	movieData.records.resize(numRecords);
-	movieData.frames_flags.resize(numRecords);
 	for(int i=0;i<numRecords;i++)
 	{
 		movieData.records[i].parseBinary(&movieData,fp);
@@ -673,7 +658,6 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 				if (stopAfterHeader) return true;
 				int currcount = movieData.records.size();
 				movieData.records.resize(currcount+1);
-				movieData.frames_flags.resize(currcount+1);
 				int preparse = fp->ftell();
 				movieData.records[currcount].parse(&movieData, fp);
 				int postparse = fp->ftell();

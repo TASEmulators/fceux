@@ -10,7 +10,6 @@
 extern TASEDIT_PROJECT project;
 extern PLAYBACK playback;
 extern int TASEdit_greenzone_capacity;
-extern bool TASEdit_bind_markers;
 extern bool TASEdit_restore_position;
 
 extern void FCEU_printf(char *format, ...);
@@ -24,11 +23,11 @@ void GREENZONE::init()
 {
 	clearGreenzone();
 
-	currMovieData.frames_flags.resize(currMovieData.records.size());
 	reset();
 }
 void GREENZONE::reset()
 {
+	lag_history.resize(currMovieData.getNumRecords());
 
 }
 void GREENZONE::update()
@@ -40,16 +39,16 @@ void GREENZONE::update()
 void GREENZONE::TryDumpIncremental(bool lagFlag)
 {
 	// if movie length is less than currFrame, pad it with empty frames
-	if((int)currMovieData.records.size() <= currFrameCounter)
-		currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
+	if(currMovieData.getNumRecords() <= currFrameCounter)
+		currMovieData.insertEmpty(-1, 1 + currFrameCounter - currMovieData.getNumRecords());
 
 	// update greenzone upper limit
 	if (greenZoneCount <= currFrameCounter)
 		greenZoneCount = currFrameCounter+1;
 	if ((int)savestates.size() < greenZoneCount)
 		savestates.resize(greenZoneCount);
-	if ((int)currMovieData.frames_flags.size() < greenZoneCount)
-		currMovieData.frames_flags.resize(greenZoneCount);
+	if ((int)lag_history.size() < greenZoneCount)
+		lag_history.resize(greenZoneCount);
 
 	// if frame changed - log savestate
 	storeTasSavestate(currFrameCounter);
@@ -58,9 +57,9 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 	{
 		// lagFlag indicates that lag was in previous frame
 		if (lagFlag)
-			currMovieData.frames_flags[currFrameCounter-1] |= LAG_FLAG_BIT;
+			lag_history[currFrameCounter-1] = 1;
 		else
-			currMovieData.frames_flags[currFrameCounter-1] &= ~LAG_FLAG_BIT;
+			lag_history[currFrameCounter-1] = 0;
 	}
 
 
@@ -70,7 +69,7 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 
 bool GREENZONE::loadTasSavestate(int frame)
 {
-	if (frame < 0 || frame >= (int)currMovieData.records.size())
+	if (frame < 0 || frame >= currMovieData.getNumRecords())
 		return false;
 	if ((int)savestates.size() <= frame || savestates[frame].empty())
 		return false;
@@ -119,15 +118,14 @@ void GREENZONE::clearGreenzone()
 	}
 	savestates.resize(0);
 	greenZoneCount = 0;
-	currMovieData.frames_flags.resize(0);
+	lag_history.resize(0);
 	// reset lua_colorings
 	// reset monitorings
 	
 }
 
-int GREENZONE::dumpGreenzone(EMUFILE *os)
+void GREENZONE::save(EMUFILE *os)
 {
-	int start = os->ftell();
 	int frame, size;
 	int last_tick = 0;
 	// write size
@@ -144,8 +142,8 @@ int GREENZONE::dumpGreenzone(EMUFILE *os)
 		}
 		if (savestates[frame].empty()) continue;
 		write32le(frame, os);
-		// write frames_flags
-		os->fwrite(&currMovieData.frames_flags[frame], 1);
+		// write lag history
+		write8le(lag_history[frame], os);
 		// write lua_colorings
 		// write monitorings
 		// write savestate
@@ -156,19 +154,15 @@ int GREENZONE::dumpGreenzone(EMUFILE *os)
 	}
 	// write -1 as eof for greenzone
 	write32le(-1, os);
-
-	int end = os->ftell();
-	return end-start;
 }
-
-bool GREENZONE::loadGreenzone(EMUFILE *is)
+bool GREENZONE::load(EMUFILE *is)
 {
 	clearGreenzone();
-	currMovieData.frames_flags.resize(currMovieData.records.size());
+	lag_history.resize(currMovieData.getNumRecords());
 	int frame = 0, prev_frame = 0, size = 0;
 	int last_tick = 0;
 	// read size
-	if (read32le((uint32 *)&size, is) && size >= 0 && size <= (int)currMovieData.records.size())
+	if (read32le((uint32 *)&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
 	{
 		greenZoneCount = size;
 		savestates.resize(greenZoneCount);
@@ -187,8 +181,8 @@ bool GREENZONE::loadGreenzone(EMUFILE *is)
 					playback.SetProgressbar(frame, greenZoneCount);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
-				// read frames_flags
-				if ((int)is->fread(&currMovieData.frames_flags[frame],1) != 1) break;
+				// read lag history
+				if (!read8le(&lag_history[frame], is)) break;
 				// read lua_colorings
 				// read monitorings
 				// read savestate
@@ -223,19 +217,21 @@ error:
 
 void GREENZONE::InvalidateGreenZone(int after)
 {
-	if (after < 0) return;
-	project.changed = true;
-	if (greenZoneCount > after+1)
+	if (after >= 0)
 	{
-		greenZoneCount = after+1;
-		currMovieData.rerecordCount++;
-		// either set playback cursor to the end of greenzone or run seeking to restore playback position
-		if (currFrameCounter >= greenZoneCount)
+		project.changed = true;
+		if (greenZoneCount > after+1)
 		{
-			if (TASEdit_restore_position)
-				playback.restorePosition();
-			else
-				playback.jump(greenZoneCount-1);
+			greenZoneCount = after+1;
+			currMovieData.rerecordCount++;
+			// either set playback cursor to the end of greenzone or run seeking to restore playback position
+			if (currFrameCounter >= greenZoneCount)
+			{
+				if (TASEdit_restore_position)
+					playback.restorePosition();
+				else
+					playback.jump(greenZoneCount-1);
+			}
 		}
 	}
 	// redraw list even if greenzone didn't change

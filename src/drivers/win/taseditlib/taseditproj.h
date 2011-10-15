@@ -5,6 +5,7 @@
 #include "inputhistory.h"
 #include "playback.h"
 #include "greenzone.h"
+#include "markers.h"
 
 class TASEDIT_PROJECT
 {

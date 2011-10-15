@@ -62,7 +62,7 @@ HWND hwndHistoryList;
 WNDPROC hwndHistoryList_oldWndProc;
 HWND hwndBookmarksList, hwndBookmarks;
 WNDPROC hwndBookmarksList_oldWndProc;
-HWND hwndProgressbar, hwndRewind, hwndForward;
+HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
 
 
@@ -78,7 +78,7 @@ TASEDIT_PROJECT project;
 INPUT_HISTORY history;
 PLAYBACK playback;
 GREENZONE greenzone;
-
+MARKERS markers;
 
 void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -162,18 +162,18 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
 				{
 					// current frame
-					if(TASEdit_show_markers && currMovieData.frames_flags[cell_y] & MARKER_FLAG_BIT)
+					if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
 						// this frame is also marked
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if(TASEdit_show_markers && currMovieData.frames_flags[cell_y] & MARKER_FLAG_BIT)
+				} else if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
 				{
 					// marked frame
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
 				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
 				{
-					if (TASEdit_show_lag_frames && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
 					{
 						// lag frame
 						msg->clrTextBk = LAG_FRAMENUM_COLOR;
@@ -196,7 +196,7 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = CUR_INPUT_COLOR1;
 				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
 				{
-					if (TASEdit_show_lag_frames && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
 					{
 						// lag frame
 						msg->clrTextBk = LAG_INPUT_COLOR1;
@@ -219,7 +219,7 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = CUR_INPUT_COLOR2;
 				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
 				{
-					if (TASEdit_show_lag_frames && (currMovieData.frames_flags[cell_y] & LAG_FLAG_BIT))
+					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
 					{
 						// lag frame
 						msg->clrTextBk = LAG_INPUT_COLOR2;
@@ -288,6 +288,8 @@ void UpdateList()
 			}
 		}
 	}
+	// also update number of items in markers array
+	markers.update();
 }
 
 void RedrawWindowCaption()
@@ -426,13 +428,10 @@ void SingleClick(LPNMITEMACTIVATE info)
 		if (info->uKeyFlags & LVKF_ALT)
 		{
 			// reverse MARKER_FLAG_BIT in pointed frame
-			if (currMovieData.frames_flags[row_index] & MARKER_FLAG_BIT)
-				currMovieData.frames_flags[row_index] &= ~MARKER_FLAG_BIT;
-			else
-				currMovieData.frames_flags[row_index] |= MARKER_FLAG_BIT;
+			markers.ToggleMarker(row_index);
 			MarkersChanged();
-			ListView_SetItemState(hwndList,row_index,0,LVIS_SELECTED);
-			//RedrawList();
+			// deselect this row, so that new marker will be seen immediately
+			ListView_SetItemState(hwndList, row_index, 0, LVIS_SELECTED);
 		}
 	}
 	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
@@ -464,7 +463,6 @@ void CloneFrames()
 	int frames = selectionFrames.size();
 
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	currMovieData.frames_flags.reserve(currMovieData.getNumRecords() + frames);
 
 	//insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
@@ -476,7 +474,9 @@ void CloneFrames()
 		if (next_it == selectionFrames.rend() || (int)*next_it < ((int)*it - 1))
 		{
 			// end of current region
-			currMovieData.cloneRegion(*it,frames);
+			currMovieData.cloneRegion(*it, frames);
+			if (TASEdit_bind_markers)
+				markers.insertEmpty(*it, frames);
 			frames = 1;
 		} else frames++;
 	}
@@ -488,11 +488,8 @@ void InsertFrames()
 {
 	int frames = selectionFrames.size();
 
-	//this is going to be slow.
-
 	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	currMovieData.frames_flags.reserve(currMovieData.getNumRecords() + frames);
 
 	//insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
@@ -505,6 +502,8 @@ void InsertFrames()
 		{
 			// end of current region
 			currMovieData.insertEmpty(*it,frames);
+			if (TASEdit_bind_markers)
+				markers.insertEmpty(*it,frames);
 			frames = 1;
 		} else frames++;
 	}
@@ -521,7 +520,7 @@ void DeleteFrames()
 	{
 		currMovieData.records.erase(currMovieData.records.begin() + *it);
 		if (TASEdit_bind_markers)
-			currMovieData.frames_flags.erase(currMovieData.frames_flags.begin() + *it);
+			markers.markers_array.erase(markers.markers_array.begin() + *it);
 	}
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
@@ -529,7 +528,14 @@ void DeleteFrames()
 	// reduce list
 	UpdateList();
 
-	greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_DELETE, start_index));
+	int result = history.RegisterInputChanges(MODTYPE_DELETE, start_index);
+	if (result >= 0)
+	{
+		greenzone.InvalidateGreenZone(result);
+	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+	{
+		greenzone.InvalidateGreenZone(currMovieData.getNumRecords()-1);
+	} else RedrawList();
 }
 
 void ClearFrames(bool cut)
@@ -557,7 +563,14 @@ void Truncate()
 	{
 		currMovieData.truncateAt(frame+1);
 		UpdateList();
-		greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_TRUNCATE, frame+1));
+		int result = history.RegisterInputChanges(MODTYPE_TRUNCATE, frame+1);
+		if (result >= 0)
+		{
+			greenzone.InvalidateGreenZone(result);
+		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+		{
+			greenzone.InvalidateGreenZone(currMovieData.getNumRecords()-1);
+		} else RedrawList();
 	}
 }
 
@@ -571,7 +584,7 @@ void ColumnSet(int column)
 		bool unset_found = false;
 		for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 		{
-			if(!(currMovieData.frames_flags[*it] & MARKER_FLAG_BIT))
+			if(!(markers.markers_array[*it] & MARKER_FLAG_BIT))
 			{
 				unset_found = true;
 				break;
@@ -581,12 +594,12 @@ void ColumnSet(int column)
 		{
 			// set all
 			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
-				currMovieData.frames_flags[*it] |= MARKER_FLAG_BIT;
+				markers.markers_array[*it] |= MARKER_FLAG_BIT;
 		} else
 		{
 			// unset all
 			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
-				currMovieData.frames_flags[*it] &= ~MARKER_FLAG_BIT;
+				markers.markers_array[*it] &= ~MARKER_FLAG_BIT;
 		}
 		MarkersChanged();
 		ClearSelection();
@@ -647,10 +660,10 @@ void SelectMidMarkers()
 	// find markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
-		if (currMovieData.frames_flags[upper_marker] & MARKER_FLAG_BIT) break;
+		if (markers.markers_array[upper_marker] & MARKER_FLAG_BIT) break;
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
-		if (currMovieData.frames_flags[lower_marker] & MARKER_FLAG_BIT) break;
+		if (markers.markers_array[lower_marker] & MARKER_FLAG_BIT) break;
 	
 	if (upper_marker == -1 && lower_marker == movie_size)
 	{
@@ -1230,6 +1243,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
 			hwndRewind = GetDlgItem(hwndDlg, TASEDIT_REWIND);
 			hwndForward = GetDlgItem(hwndDlg, TASEDIT_FORWARD);
+			hwndRewindFull = GetDlgItem(hwndDlg, TASEDIT_REWIND_FULL);
+			hwndForwardFull = GetDlgItem(hwndDlg, TASEDIT_FORWARD_FULL);
 			hwndRB_RecOff = GetDlgItem(hwndDlg, IDC_RADIO1);
 			hwndRB_RecAll = GetDlgItem(hwndDlg, IDC_RADIO2);
 			hwndRB_Rec1P = GetDlgItem(hwndDlg, IDC_RADIO3);
@@ -1399,12 +1414,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							{
 								// insert at selection
 								int index = *selectionFrames.begin();
-								currMovieData.insertEmpty(index,frames);
+								currMovieData.insertEmpty(index, frames);
+								if (TASEdit_bind_markers)
+									markers.insertEmpty(index, frames);
 								greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_INSERT, index));
 							} else
 							{
 								// insert at playback cursor
-								currMovieData.insertEmpty(currFrameCounter,frames);
+								currMovieData.insertEmpty(currFrameCounter, frames);
+								if (TASEdit_bind_markers)
+									markers.insertEmpty(currFrameCounter, frames);
 								greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_INSERT, currFrameCounter));
 							}
 						}
@@ -1421,14 +1440,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_CONTEXT_SELECTED_CLEARFRAMES:
 				if (selectionFrames.size()) ClearFrames();
 				break;
-			case TASEDIT_REWIND_FULL:
-				playback.RewindFull();
-				break;
 			case TASEDIT_PLAYSTOP:
 				playback.ToggleEmulationPause();
-				break;
-			case TASEDIT_FORWARD_FULL:
-				playback.ForwardFull();
 				break;
 			case ACCEL_CTRL_F:
 			case CHECK_FOLLOW_CURSOR:
@@ -1439,7 +1452,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				if (TASEdit_follow_playback)
 					FollowPlayback();
 				else if (selectionFrames.size())
-					ListView_EnsureVisible(hwndList,(int)*selectionFrames.begin(),FALSE);
+					FollowSelection();
 				break;
 			case ID_VIEW_SHOW_LAG_FRAMES:
 				//switch "Highlight lag frames" flag
@@ -1619,6 +1632,43 @@ void FollowUndo()
 		}
 	}
 }
+void FollowSelection()
+{
+	int list_items = listItems;
+	if (currMovieData.fourscore) list_items--;
+	int selection_start = *selectionFrames.begin();
+	int selection_end = *selectionFrames.rbegin();
+	int selection_items = 1 + selection_end - selection_start;
+	
+	if (selection_items <= list_items)
+	{
+		// selected region can fit in screen
+		int lower_border = (list_items - selection_items) / 2;
+		int upper_border = (list_items - selection_items) - lower_border;
+		int index = selection_end + lower_border;
+		if (index >= currMovieData.getNumRecords())
+			index = currMovieData.getNumRecords()-1;
+		ListView_EnsureVisible(hwndList, index, false);
+		index = selection_start - upper_border;
+		if (index < 0)
+			index = 0;
+		ListView_EnsureVisible(hwndList, index, false);
+	} else
+	{
+		// selected region is too big to fit in screen
+		// just center at selection_start
+		int lower_border = (list_items - 1) / 2;
+		int upper_border = (list_items - 1) - lower_border;
+		int index = selection_start + lower_border;
+		if (index >= currMovieData.getNumRecords())
+			index = currMovieData.getNumRecords()-1;
+		ListView_EnsureVisible(hwndList, index, false);
+		index = selection_start - upper_border;
+		if (index < 0)
+			index = 0;
+		ListView_EnsureVisible(hwndList, index, false);
+	}
+}
 
 void EnterTasEdit()
 {
@@ -1661,7 +1711,6 @@ void EnterTasEdit()
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 
 		playback.init();
-		greenzone.init();
 		// either start new movie or use current movie
 		if (movieMode == MOVIEMODE_INACTIVE)
 		{
@@ -1731,10 +1780,12 @@ void EnterTasEdit()
 		ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 
 		// init variables
+		greenzone.init();
+		greenzone.TryDumpIncremental(lagFlag != 0);
+		markers.init();
 		project.init();
 		history.init(TasEdit_undo_levels);
 		SetFocus(hwndHistoryList);
-		greenzone.TryDumpIncremental(lagFlag != 0);
 		FCEU_DispMessage("Tasedit engaged",0);
 	}
 }
@@ -1757,6 +1808,7 @@ bool ExitTasEdit()
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
 	// release memory
+	markers.free();
 	greenzone.clearGreenzone();
 	history.free();
 

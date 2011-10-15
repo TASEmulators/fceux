@@ -1,5 +1,6 @@
 //Specification file for Greenzone class
 
+//#define LAG_FLAG_BIT 1
 
 class GREENZONE
 {
@@ -9,11 +10,11 @@ public:
 	void reset();
 	void update();
 
-	void TryDumpIncremental(bool lagFlag = true);
+	void save(EMUFILE *os);
+	bool load(EMUFILE *is);
 
 	void clearGreenzone();
-	int dumpGreenzone(EMUFILE *os);
-	bool loadGreenzone(EMUFILE *is);
+	void TryDumpIncremental(bool lagFlag = true);
 
 	bool loadTasSavestate(int frame);
 	void storeTasSavestate(int frame);
@@ -27,6 +28,7 @@ public:
 	// data
 	int greenZoneCount;
 	std::vector<std::vector<uint8>> savestates;
+	std::vector<uint8> lag_history;
 
 private:
 

@@ -83,6 +83,7 @@ void InputChangedRec();
 bool CheckItemVisible(int frame);
 void FollowPlayback();
 void FollowUndo();
+void FollowSelection();
 void ClearSelection();
 void ClearRowSelection(int index);
 void AddFourscore();

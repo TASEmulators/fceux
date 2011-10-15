@@ -57,7 +57,6 @@ void INPUT_SNAPSHOT::toMovie(MovieData& md, int start)
 {
 	// write input data to movie data
 	md.records.resize(size);
-	md.frames_flags.resize(size);
 	switch(input_type)
 	{
 		case FOURSCORE:

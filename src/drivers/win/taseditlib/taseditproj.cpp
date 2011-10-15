@@ -3,9 +3,10 @@
 #include "../main.h"
 #include "taseditproj.h"
 
-extern INPUT_HISTORY history;
-extern PLAYBACK playback;
+extern MARKERS markers;
 extern GREENZONE greenzone;
+extern PLAYBACK playback;
+extern INPUT_HISTORY history;
 
 extern void FCEU_printf(char *format, ...);
 
@@ -42,11 +43,10 @@ bool TASEDIT_PROJECT::saveProject()
 	if (PFN.empty()) return false;
 	const char* filename = PFN.c_str();
 	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
-	//ofs << GetProjectName() << std::endl;
-	//ofs << GetFM2Name() << std::endl;
 	
 	currMovieData.dump(ofs, true);
-	greenzone.dumpGreenzone(ofs);
+	markers.save(ofs);
+	greenzone.save(ofs);
 	history.save(ofs);
 
 	delete ofs;
@@ -65,22 +65,25 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 
 	EMUFILE_FILE ifs(filename, "rb");
 
-	FCEU_printf("Loading project %s\n", filename);
+	FCEU_printf("Loading TASEdit project %s\n", filename);
 
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
-
-	// try to load greenzone
-	if (!greenzone.loadGreenzone(&ifs))
+	// try to load markers
+	if (markers.load(&ifs))
 	{
-		// there was some error while loading greenzone - reset playback to frame 0
-		poweron(true);
-		currFrameCounter = 0;
-		// try to load history
-		history.load(&ifs);
+		// try to load greenzone
+		if (greenzone.load(&ifs))
+		{
+			// there was some error while loading greenzone - reset playback to frame 0
+			poweron(true);
+			currFrameCounter = 0;
+			// try to load history
+			history.load(&ifs);
+		}
 	}
-
 	reset();
+	playback.updateProgressbar();
 	return true;
 }
 // -----------------------------------------------------------------

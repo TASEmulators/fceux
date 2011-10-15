@@ -9,9 +9,10 @@
 extern void ForceExecuteLuaFrameFunctions();
 #endif
 
-extern HWND hwndProgressbar, hwndList, hwndRewind, hwndForward;
+extern HWND hwndProgressbar, hwndList, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 extern void FCEU_printf(char *format, ...);
 extern bool turbo;
+extern MARKERS markers;
 extern GREENZONE greenzone;
 extern bool Tasedit_rewind_now;
 
@@ -32,6 +33,8 @@ void PLAYBACK::reset()
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
+	old_rewind_full_button_state = rewind_full_button_state = false;
+	old_forward_full_button_state = forward_full_button_state = false;
 	old_emu_paused = emu_paused = true;
 	SeekingStop();
 }
@@ -41,23 +44,6 @@ void PLAYBACK::update()
 	if(!FCEUI_EmulationPaused())
 		if(pauseframe && pauseframe <= currFrameCounter + 1)
 			SeekingStop();
-
-	// update seeking progressbar
-	old_emu_paused = emu_paused;
-	emu_paused = (FCEUI_EmulationPaused() != 0);
-	if (pauseframe && !emu_paused)
-	{
-		SetProgressbar(currFrameCounter - seeking_start_frame, pauseframe-seeking_start_frame);
-	} else if (old_emu_paused != emu_paused)
-	{
-		// emulator got paused/unpaused externally
-		if (old_emu_paused && !emu_paused)
-			// externally unpaused - progressbar should be empty
-			SetProgressbar(0, 1);
-		else
-			// externally paused - progressbar should be full
-			SetProgressbar(1, 1);
-	}
 
 	// update flashing pauseframe
 	if (old_pauseframe != pauseframe && old_pauseframe) RedrawRow(old_pauseframe-1);
@@ -71,6 +57,24 @@ void PLAYBACK::update()
 			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
 	} else show_pauseframe = false;
 	if (old_show_pauseframe != show_pauseframe) RedrawRow(pauseframe-1);
+
+	// update seeking progressbar
+	old_emu_paused = emu_paused;
+	emu_paused = (FCEUI_EmulationPaused() != 0);
+	if (pauseframe)
+	{
+		if (old_show_pauseframe != show_pauseframe)
+			SetProgressbar(currFrameCounter - seeking_start_frame, pauseframe-seeking_start_frame);
+	} else if (old_emu_paused != emu_paused)
+	{
+		// emulator got paused/unpaused externally
+		if (old_emu_paused && !emu_paused)
+			// externally unpaused - progressbar should be empty
+			SetProgressbar(0, 1);
+		else
+			// externally paused - progressbar should be full
+			SetProgressbar(1, 1);
+	}
 
 	//update the playback cursor
 	if(currFrameCounter != lastCursor)
@@ -113,6 +117,34 @@ void PLAYBACK::update()
 			}
 		}
 	}
+	// update << and >> buttons
+	old_rewind_full_button_state = rewind_full_button_state;
+	rewind_full_button_state = ((Button_GetState(hwndRewindFull) & BST_PUSHED) != 0);
+	if (rewind_full_button_state && !rewind_button_state && !forward_button_state)
+	{
+		if (!old_rewind_full_button_state)
+		{
+			button_hold_time = clock();
+			RewindFull();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			RewindFull();
+		}
+	}
+	old_forward_full_button_state = forward_full_button_state;
+	forward_full_button_state = (Button_GetState(hwndForwardFull) & BST_PUSHED) != 0;
+	if (forward_full_button_state && !rewind_button_state && !forward_button_state && !rewind_full_button_state)
+	{
+		if (!old_forward_full_button_state)
+		{
+			button_hold_time = clock();
+			ForwardFull();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			ForwardFull();
+		}
+	}
+
 }
 
 void PLAYBACK::updateProgressbar()
@@ -176,14 +208,33 @@ void PLAYBACK::ForwardFrame()
 }
 void PLAYBACK::RewindFull()
 {
-	// rewind to the beginning of greenzone
-	jump(greenzone.FindBeginningOfGreenZone());
+	// jump to previous marker
+	if (currFrameCounter > 0)
+	{
+		int index = currFrameCounter - 1;
+		for (; index >= 0; index--)
+			if (markers.markers_array[index] & MARKER_FLAG_BIT) break;
+		if (index >= 0)
+			jump(index);
+		else if (currFrameCounter > 0)
+			jump(0);
+	}
 	FollowPlayback();
 }
 void PLAYBACK::ForwardFull()
 {
-	// move to the end of greenzone
-	jump(greenzone.greenZoneCount-1);
+	// jump to next marker
+	int last_frame = currMovieData.getNumRecords()-1;
+	if (currFrameCounter < last_frame)
+	{
+		int index = currFrameCounter + 1;
+		for (; index < last_frame; ++index)
+			if (markers.markers_array[index] & MARKER_FLAG_BIT) break;
+		if (index <= last_frame)
+			jump(index);
+		else if (currFrameCounter < last_frame)
+			jump(last_frame);
+	}
 	FollowPlayback();
 }
 

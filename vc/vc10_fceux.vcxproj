@@ -421,6 +421,7 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
