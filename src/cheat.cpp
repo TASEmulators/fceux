@@ -622,7 +622,8 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 				next->val=v;
 			if(s>=0)
 				next->status=s;
-			next->compare=compare;
+			if(compare>=0)
+				next->compare=compare;
 			next->type=type;
 
 			savecheats=1;
