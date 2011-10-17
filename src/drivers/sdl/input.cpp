@@ -828,8 +828,8 @@ ButtonConfigBegin()
                     gtk_main_iteration_do(FALSE);
             
                 char SDL_windowhack[128];
-                if(gtk_widget_get_window(socket))
-					sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(socket)));
+                if(gtk_widget_get_window(evbox))
+					sprintf(SDL_windowhack, "SDL_WINDOWID=%u", (unsigned int)GDK_WINDOW_XWINDOW(gtk_widget_get_window(evbox)));
                 SDL_putenv(SDL_windowhack);
             }
 #endif
