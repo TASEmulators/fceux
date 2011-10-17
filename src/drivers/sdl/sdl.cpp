@@ -239,9 +239,6 @@ CloseGame()
 	if(filename.size()) {
 		FCEUI_EndWaveRecord();
 	}
-  // LoadGame() checks for an IP and if it finds one begins a network session
-  // clear the NetworkIP field so this doesn't happen unintentionally
-  g_config->setOption("SDL.NetworkIP", "");
 
 	InputUserActiveFix();
 	return(1);

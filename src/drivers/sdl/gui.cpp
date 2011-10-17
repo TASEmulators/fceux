@@ -1504,7 +1504,10 @@ void closeGame()
 {
 	GdkColor bg = {0, 0, 0, 0};
 	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
-	CloseGame();
+	CloseGame(); 
+  // LoadGame() checks for an IP and if it finds one begins a network session
+  // clear the NetworkIP field so this doesn't happen unintentionally
+  g_config->setOption("SDL.NetworkIP", "");
 }
 
 void loadGame ()
