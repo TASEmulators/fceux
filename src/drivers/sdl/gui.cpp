@@ -35,7 +35,7 @@ void closeGame();
 extern Config *g_config;
 
 GtkWidget* MainWindow = NULL;
-GtkWidget* socket = NULL;
+GtkWidget* evbox = NULL;
 GtkWidget* padNoCombo = NULL;
 GtkWidget* configNoCombo = NULL;
 GtkWidget* buttonMappings[10];
@@ -645,7 +645,7 @@ void resizeGtkWindow()
 		double xscale, yscale;
 		g_config->getOption("SDL.XScale", &xscale);
 		g_config->getOption("SDL.YScale", &yscale);
-		gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
+		gtk_widget_set_size_request(evbox, 256*xscale, 224*yscale);
 		GtkRequisition req;
 		gtk_widget_size_request(GTK_WIDGET(MainWindow), &req);
 		gtk_window_resize(GTK_WINDOW(MainWindow), req.width, req.height);
@@ -1503,7 +1503,7 @@ void loadNSF ()
 void closeGame()
 {
 	GdkColor bg = {0, 0, 0, 0};
-	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
+	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	CloseGame();
 }
 
@@ -2155,25 +2155,25 @@ int InitGTKSubsystem(int argc, char** argv)
 	gtk_widget_show(hbox);
 	gtk_box_pack_end (GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	
-	socket = gtk_event_box_new();
-	gtk_box_pack_start (GTK_BOX(hbox), socket, TRUE, FALSE, 0);
+	evbox = gtk_event_box_new();
+	gtk_box_pack_start (GTK_BOX(hbox), evbox, TRUE, FALSE, 0);
 	
 	double xscale, yscale;
 	g_config->getOption("SDL.XScale", &xscale);
 	g_config->getOption("SDL.YScale", &yscale);
-	gtk_widget_set_size_request(socket, 256*xscale, 224*yscale);
-	gtk_widget_realize(socket);
-	gtk_widget_show(socket);
+	gtk_widget_set_size_request(evbox, 256*xscale, 224*yscale);
+	gtk_widget_realize(evbox);
+	gtk_widget_show(evbox);
 	
 	GdkColor bg = {0, 0, 0, 0};
-	gtk_widget_modify_bg(socket, GTK_STATE_NORMAL, &bg);
+	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
 	
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
 	gtk_key_snooper_install(convertKeypress, NULL);
 
   // pass along mouse data from GTK to SDL
-  g_signal_connect(G_OBJECT(socket), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
-  g_signal_connect(G_OBJECT(socket), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
+  g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
+  g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
 	
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
