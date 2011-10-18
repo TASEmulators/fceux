@@ -65,6 +65,9 @@ else:
     env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
     env.Append(CPPDEFINES=["_GTK2"])
     env.Append(CCFLAGS = ["-D_GTK"])
+    # GTK3 Preparation compiler flags:
+    env.Append(CCFLAGS = ['-DGDK_DISABLE_DEPRECATED', '-DGTK_DISABLE_DEPRECATED', '-DGSEAL_ENABLE', '-DGTK_DISABLE_SINGLE_INCLUDES'])
+
   if env['GTK3']:
     # Add compiler and linker flags from pkg-config
     env.ParseConfig('pkg-config --cflags --libs gtk+-3.0')
@@ -76,7 +79,7 @@ else:
     env.Append(CPPDEFINES=["_S9XLUA_H"])
     if env['PLATFORM'] == 'darwin':
       # Define LUA_USE_MACOSX otherwise we can't bind external libs from lua
-      env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])      
+      env.Append(CCFLAGS = ["-DLUA_USE_MACOSX"])    
     if env['PLATFORM'] == 'posix':
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix

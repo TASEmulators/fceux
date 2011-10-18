@@ -46,8 +46,8 @@ int configGamepadButton(GtkButton* button, gpointer p)
 {
 	gint x = ((gint)(glong)(p));
 	//gint x = GPOINTER_TO_INT(p);
-	int padNo = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(padNoCombo))) - 1;
-	int configNo = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(configNoCombo))) - 1;
+	int padNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(padNoCombo))) - 1;
+	int configNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(configNoCombo))) - 1;
 		
     char buf[256];
     std::string prefix;
@@ -165,7 +165,7 @@ void loadPalette (GtkWidget* w, gpointer p)
 			"Failed to load the palette.");
 			
 			gtk_dialog_run(GTK_DIALOG(msgbox));
-			gtk_widget_hide_all(msgbox);
+			gtk_widget_hide(msgbox);
 		}
 			
 		gtk_entry_set_text(GTK_ENTRY(p), filename);
@@ -213,7 +213,7 @@ void openPaletteConfig()
 	paletteButton = gtk_button_new_from_stock(GTK_STOCK_OPEN);
 	gtk_button_set_label(GTK_BUTTON(paletteButton), "Open palette");
 	paletteEntry = gtk_entry_new();
-	gtk_entry_set_editable(GTK_ENTRY(paletteEntry), FALSE);
+	gtk_editable_set_editable(GTK_EDITABLE(paletteEntry), FALSE);
 	
 	clearButton = gtk_button_new_from_stock(GTK_STOCK_CLEAR);
 	
@@ -384,8 +384,8 @@ void openNetworkConfig()
 	
 	gtk_container_add(GTK_CONTAINER(frame), vbox);
 	
-	gtk_box_pack_start_defaults(GTK_BOX(box), userBox);
-	gtk_box_pack_start_defaults(GTK_BOX(box), frame);
+	gtk_box_pack_start(GTK_BOX(box), userBox, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box), frame, TRUE, TRUE, 0);
 	
 	gtk_widget_show_all(win);
 	
@@ -437,7 +437,7 @@ int setInputDevice(GtkWidget* w, gpointer p)
 	std::string s = "SDL.Input.";
 	s = s + (char*)p;
 	printf("%s", s.c_str());
-	g_config->setOption(s, gtk_combo_box_get_active_text(GTK_COMBO_BOX(typeCombo)));
+	g_config->setOption(s, gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(typeCombo)));
 	g_config->save();
 	
 	return 1;
@@ -453,8 +453,8 @@ void updateGamepadConfig(GtkWidget* w, gpointer p)
 {
 	int i;
 	char strBuf[128];
-	int padNo = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(padNoCombo))) - 1;
-	int configNo = atoi(gtk_combo_box_get_active_text(GTK_COMBO_BOX(configNoCombo))) - 1;
+	int padNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(padNoCombo))) - 1;
+	int configNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(configNoCombo))) - 1;
 	
 	for(i=0; i<10; i++)
 	{
@@ -504,35 +504,35 @@ void openGamepadConfig()
 	fourScoreChk = gtk_check_button_new_with_label("Enable Four Score");
 	oppositeDirChk = gtk_check_button_new_with_label("Allow Up+Down / Left+Right");
 	
-	typeCombo = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "gamepad");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "zapper");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "powerpad.0");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "powerpad.1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(typeCombo), "arkanoid");
+	typeCombo = gtk_combo_box_text_new();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(typeCombo), "gamepad");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(typeCombo), "zapper");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(typeCombo), "powerpad.0");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(typeCombo), "powerpad.1");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(typeCombo), "arkanoid");
 	
 	gtk_combo_box_set_active(GTK_COMBO_BOX(typeCombo), 0);
 	
 	
-	padNoCombo = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "3");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(padNoCombo), "4");
+	padNoCombo = gtk_combo_box_text_new();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "1");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "2");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "3");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "4");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(padNoCombo), 0);
 	g_signal_connect(GTK_OBJECT(padNoCombo), "changed", G_CALLBACK(updateGamepadConfig), NULL);
 	
-	configNoCombo = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(configNoCombo), "1");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(configNoCombo), "2");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(configNoCombo), "3");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(configNoCombo), "4");
+	configNoCombo = gtk_combo_box_text_new();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "1");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "2");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "3");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "4");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(configNoCombo), 0);
 	g_signal_connect(GTK_OBJECT(padNoCombo), "changed", G_CALLBACK(updateGamepadConfig), NULL);
 	
 	
 	g_signal_connect(GTK_OBJECT(typeCombo), "changed", G_CALLBACK(setInputDevice), 
-		gtk_combo_box_get_active_text(GTK_COMBO_BOX(typeCombo)));
+		gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(typeCombo)));
 	
 	// sync with config
 	int buf = 0;
@@ -583,7 +583,7 @@ void openGamepadConfig()
 		gtk_table_attach(GTK_TABLE(buttonTable), changeButton, 2, 3, i, i+1,
 				(GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
 		
-		gtk_signal_connect(GTK_OBJECT(changeButton), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
+		g_signal_connect(GTK_OBJECT(changeButton), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
 		buttonMappings[i] = mappedKey;
 	}
 	
@@ -613,7 +613,7 @@ int setBufSize(GtkWidget* w, gpointer p)
 
 void setRate(GtkWidget* w, gpointer p)
 {
-	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
+	char* str = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(w));
 	g_config->setOption("SDL.Sound.Rate", atoi(str));
 	// reset sound subsystem for changes to take effect
 	KillSound();
@@ -624,7 +624,7 @@ void setRate(GtkWidget* w, gpointer p)
 
 void setQuality(GtkWidget* w, gpointer p)
 {
-	char* str = gtk_combo_box_get_active_text(GTK_COMBO_BOX(w));
+	char* str = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(w));
 	if(!strcmp(str, "Very High"))
 		g_config->setOption("SDL.Sound.Quality", 2);
 	if(!strcmp(str, "High"))
@@ -743,14 +743,14 @@ void openVideoConfig()
 	// scalar widgets
 	hbox1 = gtk_hbox_new(FALSE, 3);
 	scalerLbl = gtk_label_new("Special Scaler: ");
-	scalerCombo = gtk_combo_box_new_text();
+	scalerCombo = gtk_combo_box_text_new();
 	// -Video Modes Tag-
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "none");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq2x");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale2x");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "NTSC 2x");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "hq3x");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(scalerCombo), "scale3x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "none");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "hq2x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "scale2x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "NTSC 2x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "hq3x");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(scalerCombo), "scale3x");
 	
 	// sync with cfg
 	int buf;
@@ -950,7 +950,7 @@ void openSoundConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), FALSE);
 	
-	gtk_signal_connect(GTK_OBJECT(soundChk), "clicked",
+	g_signal_connect(GTK_OBJECT(soundChk), "clicked",
 	 G_CALLBACK(toggleSound), NULL);
 	 
 
@@ -964,14 +964,14 @@ void openSoundConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), FALSE);
 	
-	gtk_signal_connect(GTK_OBJECT(lowpassChk), "clicked", G_CALLBACK(toggleLowPass), NULL);
+	g_signal_connect(GTK_OBJECT(lowpassChk), "clicked", G_CALLBACK(toggleLowPass), NULL);
 	
 	// sound quality combo box
 	hbox1 = gtk_hbox_new(FALSE, 3);
-	qualityCombo = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Low");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "High");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(qualityCombo), "Very High");
+	qualityCombo = gtk_combo_box_text_new();
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "Low");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "High");
+	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(qualityCombo), "Very High");
 
 	// sync widget with cfg 
 	g_config->getOption("SDL.Sound.Quality", &cfgBuf);
@@ -991,7 +991,7 @@ void openSoundConfig()
 	
 	// sound rate widgets
 	hbox2 = gtk_hbox_new(FALSE, 3);
-	rateCombo = gtk_combo_box_new_text();
+	rateCombo = gtk_combo_box_text_new();
 	
 	const int rates[5] = {11025, 22050, 44100, 48000, 96000};
 	
@@ -999,7 +999,7 @@ void openSoundConfig()
 	for(int i=0; i<5;i++)
 	{
 		sprintf(buf, "%d", rates[i]);
-		gtk_combo_box_append_text(GTK_COMBO_BOX(rateCombo), buf);	
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(rateCombo), buf);	
 	}
 	
 	// sync widget with cfg 
@@ -2080,7 +2080,7 @@ void showGui(bool b)
 	if(b)
 		gtk_widget_show_all(MainWindow);
 	else
-		gtk_widget_hide_all(MainWindow);
+		gtk_widget_hide(MainWindow);
 }
 
 int GtkMouseData[3] = {0,0,0};
@@ -2126,7 +2126,8 @@ int InitGTKSubsystem(int argc, char** argv)
 	GtkWidget* vbox;
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
+//	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
+    gtk_window_set_resizable(GTK_WINDOW(MainWindow), FALSE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
 	
