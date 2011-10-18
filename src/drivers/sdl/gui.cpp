@@ -1,5 +1,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#ifdef _GTK3
+#include <gdk/gdkkeysyms-compat.h>
+#endif
 #include <gdk/gdkx.h>
 
 #include <SDL/SDL.h>
@@ -275,8 +278,8 @@ void openPaletteConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), paletteFrame, FALSE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), slidersFrame, FALSE, TRUE, 5);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	
@@ -389,8 +392,8 @@ void openNetworkConfig()
 	
 	gtk_widget_show_all(win);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(netResponse), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(netResponse), NULL);
 }
 
 // creates and opens hotkey config window
@@ -520,7 +523,7 @@ void openGamepadConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "3");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(padNoCombo), "4");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(padNoCombo), 0);
-	g_signal_connect(GTK_OBJECT(padNoCombo), "changed", G_CALLBACK(updateGamepadConfig), NULL);
+	g_signal_connect(padNoCombo, "changed", G_CALLBACK(updateGamepadConfig), NULL);
 	
 	configNoCombo = gtk_combo_box_text_new();
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "1");
@@ -528,10 +531,10 @@ void openGamepadConfig()
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "3");
 	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(configNoCombo), "4");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(configNoCombo), 0);
-	g_signal_connect(GTK_OBJECT(padNoCombo), "changed", G_CALLBACK(updateGamepadConfig), NULL);
+	g_signal_connect(padNoCombo, "changed", G_CALLBACK(updateGamepadConfig), NULL);
 	
 	
-	g_signal_connect(GTK_OBJECT(typeCombo), "changed", G_CALLBACK(setInputDevice), 
+	g_signal_connect(typeCombo, "changed", G_CALLBACK(setInputDevice), 
 		gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(typeCombo)));
 	
 	// sync with config
@@ -542,7 +545,7 @@ void openGamepadConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 0);
 	
-	g_signal_connect(GTK_OBJECT(fourScoreChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.FourScore");
+	g_signal_connect(fourScoreChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.FourScore");
 	
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 5);
@@ -583,7 +586,7 @@ void openGamepadConfig()
 		gtk_table_attach(GTK_TABLE(buttonTable), changeButton, 2, 3, i, i+1,
 				(GtkAttachOptions)0, (GtkAttachOptions)0, 0, 0);
 		
-		g_signal_connect(GTK_OBJECT(changeButton), "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
+		g_signal_connect(changeButton, "clicked", G_CALLBACK(configGamepadButton), GINT_TO_POINTER(i));
 		buttonMappings[i] = mappedKey;
 	}
 	
@@ -592,8 +595,8 @@ void openGamepadConfig()
 	
 	gtk_box_pack_start(GTK_BOX(vbox), buttonFrame, TRUE, TRUE, 5);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeGamepadConfig), NULL);
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeGamepadConfig), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeGamepadConfig), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeGamepadConfig), NULL);
 	
 	gtk_widget_show_all(win);
 	
@@ -757,13 +760,13 @@ void openVideoConfig()
 	g_config->getOption("SDL.SpecialFilter", &buf);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(scalerCombo), buf);
 	
-	g_signal_connect(GTK_OBJECT(scalerCombo), "changed", G_CALLBACK(setScaler), NULL);
+	g_signal_connect(scalerCombo, "changed", G_CALLBACK(setScaler), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 5);
 	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
-	g_signal_connect(GTK_OBJECT(glChk), "clicked", G_CALLBACK(setGl), (gpointer)scalerCombo);
+	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), (gpointer)scalerCombo);
 	
 	// sync with config
 	buf = 0;
@@ -775,7 +778,7 @@ void openVideoConfig()
 	
 	// openGL linear filter check
 	linearChk = gtk_check_button_new_with_label("Enable OpenGL linear filter");
-	g_signal_connect(GTK_OBJECT(linearChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
+	g_signal_connect(linearChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.OpenGLip");
 	
 	// sync with config
 	buf = 0;
@@ -787,7 +790,7 @@ void openVideoConfig()
 		
 	// PAL check
 	palChk = gtk_check_button_new_with_label("Enable PAL mode");
-	g_signal_connect(GTK_OBJECT(palChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
+	g_signal_connect(palChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
 	
 	// sync with config
 	buf = 0;
@@ -799,7 +802,7 @@ void openVideoConfig()
 		
 	// New PPU check
 	ppuChk = gtk_check_button_new_with_label("Enable new PPU");
-	g_signal_connect(GTK_OBJECT(ppuChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
+	g_signal_connect(ppuChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NewPPU");
 	
 	// sync with config
 	buf = 0;
@@ -811,7 +814,7 @@ void openVideoConfig()
 	
 	// disable 8 sprite limit check
 	spriteLimitChk = gtk_check_button_new_with_label("Disable Sprite Limit");
-	g_signal_connect(GTK_OBJECT(spriteLimitChk), "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
+	g_signal_connect(spriteLimitChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
 	
 	// sync with config
 	buf = 0;
@@ -856,8 +859,8 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	
@@ -950,7 +953,7 @@ void openSoundConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), FALSE);
 	
-	g_signal_connect(GTK_OBJECT(soundChk), "clicked",
+	g_signal_connect(soundChk, "clicked",
 	 G_CALLBACK(toggleSound), NULL);
 	 
 
@@ -964,7 +967,7 @@ void openSoundConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lowpassChk), FALSE);
 	
-	g_signal_connect(GTK_OBJECT(lowpassChk), "clicked", G_CALLBACK(toggleLowPass), NULL);
+	g_signal_connect(lowpassChk, "clicked", G_CALLBACK(toggleLowPass), NULL);
 	
 	// sound quality combo box
 	hbox1 = gtk_hbox_new(FALSE, 3);
@@ -1072,8 +1075,8 @@ void openSoundConfig()
 	
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(win))), main_hbox, TRUE, TRUE, 0);
 	
-	g_signal_connect(GTK_OBJECT(win), "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(GTK_OBJECT(win), "response", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	

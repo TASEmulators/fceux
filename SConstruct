@@ -13,7 +13,7 @@ opts.AddVariables(
   BoolVariable('CREATE_AVI', 'Enable avi creation support (SDL only)', 1),
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
-  BoolVariable('GTK3', 'Enable GTK3 GUI (BROKEN/EXPERIMENTAL)', 0),
+  BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
 )
 
 env = Environment(options = opts)
