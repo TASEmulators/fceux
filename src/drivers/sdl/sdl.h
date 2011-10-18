@@ -8,6 +8,7 @@
 
 static void DoFun(int frameskip);
 static int isloaded = 0;
+extern int noGui;
 
 int LoadGame(const char *path);
 int CloseGame(void);

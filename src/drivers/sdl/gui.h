@@ -28,5 +28,4 @@ extern int GtkMouseData[3];
 int InitGTKSubsystem(int argc, char** argv);
 void pushOutputToGTK(const char* str);
 void showGui(bool b);
-extern int noGui;
 #endif
