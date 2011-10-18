@@ -1200,6 +1200,7 @@ void recordMovieAs ()
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER(fileChooser), ".fm2");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1241,6 +1242,7 @@ void loadMovie ()
 			
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1285,6 +1287,8 @@ void loadLua ()
 	
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterLua);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
+
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1335,6 +1339,7 @@ void loadFdsBios ()
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterDiskSys);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1426,6 +1431,7 @@ void loadGameGenie ()
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterRom);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNes);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1482,6 +1488,7 @@ void loadNSF ()
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterNSF);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterZip);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
