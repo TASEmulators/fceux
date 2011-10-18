@@ -1617,10 +1617,15 @@ ConfigDevice(int which,
 void
 InputCfg(const std::string &text)
 {
-	int nogui;
-	g_config->getOption("SDL.NoGUI", &nogui);
-	if(nogui)
-	{
+#ifdef _GTK
+    // enable noGui to prevent the gtk x11 hack from executing
+    noGui = 1;
+    // this is only called at the begininng of execution; make sure the video subsystem is initialized
+    InitVideo(GameInfo);
+#endif
+
+	if(noGui)
+    {
 		if(text.find("gamepad") != std::string::npos) {
 			int device = (text[strlen("gamepad")] - '1');
 			if(device<0 || device>3) {
@@ -1641,7 +1646,7 @@ InputCfg(const std::string &text)
 			ConfigDevice(FCFGD_QUIZKING, 0);
 		}
 	} else 
-		printf("Please run \"fceux --nogui 1\" before using --inputcfg\n");
+		printf("Please run \"fceux --nogui\" before using --inputcfg\n");
 	
 }
 

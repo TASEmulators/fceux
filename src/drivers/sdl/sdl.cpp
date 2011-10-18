@@ -581,8 +581,13 @@ int main(int argc, char *argv[])
 		g_config->save();
 	
 	std::string s;
+
 	g_config->getOption("SDL.InputCfg", &s);
-    
+    if(s.size() != 0)
+    {
+        InitVideo(GameInfo);
+        InputCfg(s);
+    }
     // set the FAMICOM PAD 2 Mic thing 
     {
         int t;
@@ -713,7 +718,7 @@ int main(int argc, char *argv[])
 		SDL_Quit();
 		return 0;
 	}
-
+   
 
 	// if we're not compiling w/ the gui, exit if a rom isn't specified
 #ifndef _GTK
@@ -828,7 +833,7 @@ int main(int argc, char *argv[])
 	g_config->getOption("SDL.Frameskip", &frameskip);
 	// loop playing the game
 #ifdef _GTK
-	if(noGui == false)
+	if(noGui == 0)
 	{
 		while(1)
 		{

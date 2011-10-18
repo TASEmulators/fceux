@@ -441,10 +441,13 @@ InitVideo(FCEUGI *gi)
     }
 
     // if the game being run has a name, set it as the window name
-    if(gi->name) {
-        SDL_WM_SetCaption((const char *)gi->name, (const char *)gi->name);
-    } else {
-        SDL_WM_SetCaption(FCEU_NAME_AND_VERSION,"FCE Ultra");
+    if(gi)
+    {
+      if(gi->name) {
+          SDL_WM_SetCaption((const char *)gi->name, (const char *)gi->name);
+      } else {
+          SDL_WM_SetCaption(FCEU_NAME_AND_VERSION,"FCE Ultra");
+      }
     }
 
     // create the surface for displaying graphical messages
