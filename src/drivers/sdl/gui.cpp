@@ -1687,6 +1687,7 @@ void saveStateAs()
 void loadStateFrom()
 {
 	GtkWidget* fileChooser;
+    GtkFileFilter* filterFcs;
 	GtkFileFilter* filterSav;
 	GtkFileFilter* filterAll;
 	
@@ -1694,6 +1695,11 @@ void loadStateFrom()
 	gtk_file_filter_add_pattern(filterSav, "*.sav");
 	gtk_file_filter_add_pattern(filterSav, "*.SAV");
 	gtk_file_filter_set_name(filterSav, "SAV files");
+	
+    filterFcs = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterFcs, "*.fc?");
+	gtk_file_filter_add_pattern(filterFcs, "*.FC?");
+	gtk_file_filter_set_name(filterFcs, "FCS files");
 	
 	filterAll = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterAll, "*");
@@ -1707,6 +1713,7 @@ void loadStateFrom()
 	g_config->getOption("SDL.LastLoadStateFrom", &last_dir);
 	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_dir);
 
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFcs);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterSav);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	
