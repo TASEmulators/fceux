@@ -708,7 +708,15 @@ void setGl(GtkWidget* w, gpointer p)
 		g_config->setOption("SDL.OpenGL", 0);
 	g_config->save();
 }
-	
+
+void setDoubleBuffering(GtkWidget* w, gpointer p)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
+		g_config->setOption("SDL.DoubleBuffering", 1);
+	else
+		g_config->setOption("SDL.DoubleBuffering", 0);
+	g_config->save();
+}
 
 void openVideoConfig()
 {
@@ -720,6 +728,7 @@ void openVideoConfig()
 	GtkWidget* scalerCombo;
 	GtkWidget* glChk;
 	GtkWidget* linearChk;
+	GtkWidget* dbChk;
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
 	GtkWidget* spriteLimitChk;
@@ -767,7 +776,7 @@ void openVideoConfig()
 	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
-	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), (gpointer)scalerCombo);
+	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), NULL);
 	
 	// sync with config
 	buf = 0;
@@ -788,7 +797,20 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(linearChk), 0);
-		
+  	
+    // DoubleBuffering check
+	dbChk = gtk_check_button_new_with_label("Enable double buffering");
+	g_signal_connect(dbChk, "clicked", G_CALLBACK(setDoubleBuffering), NULL);
+	
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.DoubleBuffering", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 0);
+	
+	
 	// PAL check
 	palChk = gtk_check_button_new_with_label("Enable PAL mode");
 	g_signal_connect(palChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.PAL");
@@ -854,6 +876,7 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), dbChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);

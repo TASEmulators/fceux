@@ -1,3 +1,4 @@
+18-octo-2011 - prg318 - gtk: new video option for double buffering
 18-octo-2011 - prg318 - sdl: GTK3 support is now functional.  Set GTK3 to 1 in the SConstruct to try it out.
 18-octo-2011 - prg318 - no longer use depreciated gtk2 functions
 18-octo-2011 - prg318 - getSDLKey tool added to assist in remapping hotkeys
