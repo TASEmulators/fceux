@@ -3,7 +3,7 @@ import sys
 import platform 
 
 opts = Variables()
-opts.AddVariables(
+opts.AddVariables( 
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
@@ -16,16 +16,23 @@ opts.AddVariables(
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
 )
 
-env = Environment(options = opts)
+#TODO
+#AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
+#prefix = GetOption('prefix')
+env = Environment(options = opts) #, prefix = prefix)
+
+#### Uncomment this for a public release ###
 # env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
+# env['DEBUG'] = 0
+############################################
 
 # LSB_FIRST must be off for PPC to compile
 if platform.system == "ppc":
   env['LSB_FIRST'] = 0
 
 # Default compiler flags:
-env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-O2', '-Isrc/lua/src'])
+env.Append(CCFLAGS = ['-Wall', '-Wno-write-strings', '-Wno-sign-compare', '-Isrc/lua/src'])
 
 if os.environ.has_key('PLATFORM'):
   env.Replace(PLATFORM = os.environ['PLATFORM'])
@@ -111,6 +118,8 @@ print "base CCFLAGS:",env['CCFLAGS']
 
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g'])
+else:
+  env.Append(CCFLAGS = ['O2'])
 
 if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
   env.Append(CPPDEFINES=["CREATE_AVI"])
@@ -118,8 +127,7 @@ else:
   env['CREATE_AVI']=0;
 
 Export('env')
-SConscript('src/SConscript')
-
+fceux = SConscript('src/SConscript')
 # Install rules
 exe_suffix = ''
 if env['PLATFORM'] == 'win32':
@@ -139,5 +147,6 @@ env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
 
 # TODO: Fix this build script to gracefully install auxlib and the man page
-#env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source=("bin/fceux", "bin/auxlib.lua")))
-env.Alias(target="install", source=env.Install(dir="/usr/local/bin/", source="bin/fceux"))
+
+env.Install("/usr/local/bin/", fceux)
+env.Alias('install', ['/usr/local/bin'])
