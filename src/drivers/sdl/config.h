@@ -19,9 +19,10 @@ enum HOTKEY { HK_CHEAT_MENU, HK_BIND_STATE, HK_LOAD_LUA, HK_TOGGLE_BG,
 	HK_TOGGLE_INPUT_DISPLAY, HK_MOVIE_TOGGLE_RW, HK_MUTE_CAPTURE, HK_QUIT, HK_FA_LAG_SKIP, HK_LAG_COUNTER_DISPLAY,
 	HK_SELECT_STATE_0, HK_SELECT_STATE_1, HK_SELECT_STATE_2, HK_SELECT_STATE_3,
 	HK_SELECT_STATE_4, HK_SELECT_STATE_5, HK_SELECT_STATE_6, HK_SELECT_STATE_7,
-	HK_SELECT_STATE_8, HK_SELECT_STATE_9};
+	HK_SELECT_STATE_8, HK_SELECT_STATE_9, 
+    HK_SELECT_STATE_NEXT, HK_SELECT_STATE_PREV};
 
-const int HK_MAX = 35;
+const int HK_MAX = 37;
 
 static const char* HotkeyStrings[HK_MAX] = {
 		"CheatMenu",
@@ -51,6 +52,6 @@ static const char* HotkeyStrings[HK_MAX] = {
 		"LagCounterDisplay",
 		"SelectState0", "SelectState1", "SelectState2", "SelectState3",
 		"SelectState4", "SelectState5", "SelectState6", "SelectState7", 
-		"SelectState8", "SelectState9"  };
+		"SelectState8", "SelectState9", "SelectStateNext", "SelectStatePrev" };
 
 #endif

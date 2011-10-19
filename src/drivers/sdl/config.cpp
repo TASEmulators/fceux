@@ -344,7 +344,9 @@ InitConfig()
 		SDLK_DELETE, // frame advance lag skip
 		SDLK_SLASH, // lag counter display
 		SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
-		SDLK_6, SDLK_7, SDLK_8, SDLK_9}; 
+		SDLK_6, SDLK_7, SDLK_8, SDLK_9,
+        SDLK_PAGEUP, // select state next
+        SDLK_PAGEDOWN}; // select state prev
 	
 	prefix = "SDL.Hotkeys.";	
     for(int i=0; i < HK_MAX; i++)

@@ -599,7 +599,15 @@ KeyboardCommands()
 #endif
 			FCEUI_SelectState(i, 1);
 		}
+
+    if(_keyonly(Hotkeys[HK_SELECT_STATE_NEXT])) {
+        FCEUI_SelectStateNext(1);
+    }
 	
+    if(_keyonly(Hotkeys[HK_SELECT_STATE_PREV])) {
+        FCEUI_SelectStateNext(-1);
+    }
+
 	if(_keyonly(Hotkeys[HK_BIND_STATE])) {
         bindSavestate ^= 1;
         FCEUI_DispMessage("Savestate binding to movie %sabled.",0,

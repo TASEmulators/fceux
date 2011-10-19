@@ -1,3 +1,4 @@
+18-octo-2011 - prg318 - sdl: new hotkeys added - statestatenext savestateprev - useful for scrolling through savestates on a gamepad.  mapped to pgup and pgdown by default
 18-octo-2011 - prg318 - gtk: new video option for double buffering and ClipSides
 18-octo-2011 - prg318 - sdl: GTK3 support is now functional.  Set GTK3 to 1 in the SConstruct to try it out.
 18-octo-2011 - prg318 - no longer use depreciated gtk2 functions
