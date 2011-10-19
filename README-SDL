@@ -1,6 +1,7 @@
-FCEUX SDL 2.1.5 SDL README
+FCEUX SDL 2.1.6 SDL README
 By Lukas Sabota (punkrockguy318)
 http://www.fceux.com
+Last Modified: October 19, 2011
 
 Table of Contents
 1.  Requirements
@@ -15,6 +16,7 @@ Table of Contents
 		version of sdl (1.2.14).
 	* scons - Required to build fceux.
 	* libgtk2.0 (optional) - recomended that you install version >= 2.18
+  * libgtk3.0 (optional) - this compiles as of fceux 2.1.6.  it has seemed stable in initial testing, but expect bugs as this is new.
 
 2. Installation
 	Fceux is installed with the scons utility.  To compile, run:
@@ -26,19 +28,25 @@ Table of Contents
 
 	sudo install -m 755 src/fceux /usr/local/bin/fceux
 
-	or by running the install.sh script which executes the same function.
+	or by running the install.sh script which executes the same function.  
+
+  You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
+
+  cp -R output/luaScripts /usr/local/some/directory/that/i/will/find/later
 
 3. Compile-time options
 	You can enable and disable certain features of fceux at build time. 
-To edit these options, edit the SConstruct file in this source directory.  The
-default options here will be fine for most users, but power users may want to
-tweak these.
+To edit these options, edit the "BoolOptions" following the "opts.AddVariables" method
+at the head of the "SConstruct" file in this source directory.  The
+default options will be fine for most users, but power users may want to
+tweak some of these options.
 
 4. GUI
 	You can enable the GTK GUI by setting GTK to 1 in the SConstruct build file. 
 	Gfceux is deprecatiated in favor of the new GTK GUI.  You can disable it at
 	run-time by passing the --nogui option, or disable it build time by setting
-	GTK to 0 in the SConstruct file.
+	GTK to 0 in the SConstruct file.  If you prefer GTK3 to GTK2, you can set the
+  GTK3 BoolVariable to 1 in the SConstruct.
 
 5.  FAQ
 
