@@ -7,7 +7,7 @@
 --local iupcontrolslua_open = package.loadlib("iupluacontrols51.dll", "iupcontrolslua_open");
 --if(iupcontrolslua_open == nil) then require("libiupluacontrols51"); end
 --iupcontrolslua_open();
-
+require("iuplua");
 --TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 --LUACALL_BEFOREEXIT use that instead of emu.OnClose below
 
