@@ -25,11 +25,13 @@ Table of Contents
 	scons
 	
 	After a sucessful compilation, the fceux binary will be generated to 
-	./src/fceux .  You can install it to your path with:
+	./src/fceux .  You can install fceux to your system with the following command:
 
-	sudo install -m 755 src/fceux /usr/local/bin/fceux
+  scons install
 
-	or by running the install.sh script which executes the same function.  
+  You can optionally define a prefix:
+
+  scons --prefix=/usr/local install
 
   You can choose to install the lua scripts (located in output/luaScripts) to a directory of your choosing:
 

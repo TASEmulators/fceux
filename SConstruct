@@ -16,11 +16,10 @@ opts.AddVariables(
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
 )
 
-#TODO
-#AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
+AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
-#prefix = GetOption('prefix')
-env = Environment(options = opts) #, prefix = prefix)
+prefix = GetOption('prefix')
+env = Environment(options = opts, prefix = prefix)
 
 #### Uncomment this for a public release ###
 # env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
@@ -147,6 +146,8 @@ env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
 
 # TODO: Fix this build script to gracefully install auxlib and the man page
+if prefix == None:
+  prefix = "/usr/local"
 
-env.Install("/usr/local/bin/", fceux)
-env.Alias('install', ['/usr/local/bin'])
+env.Install(prefix + "/bin/", fceux)
+env.Alias('install', [prefix + "/bin/"])
