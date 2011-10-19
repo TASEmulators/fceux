@@ -732,6 +732,7 @@ void openVideoConfig()
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
 	GtkWidget* spriteLimitChk;
+	GtkWidget* clipSidesChk;
 	GtkWidget* xscaleSpin;
 	GtkWidget* yscaleSpin;
 	GtkWidget* xscaleLbl;
@@ -846,6 +847,17 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 0);
+	// clip sides check
+	clipSidesChk = gtk_check_button_new_with_label("Clip Sides");
+	g_signal_connect(clipSidesChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ClipSides");
+	
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.ClipSides", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(clipSidesChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(clipSidesChk), 0);
 		
 	// xscale / yscale
 	xscaleHbox = gtk_hbox_new(FALSE, 5);
@@ -880,6 +892,7 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), clipSidesChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
 	
