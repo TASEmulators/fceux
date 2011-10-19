@@ -1324,14 +1324,17 @@ void loadLua ()
 	
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterLua);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
-
+	const char* last_file;
+  g_config->getOption("SDL.LastLoadLua", &last_file);
+  gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_file);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
+    g_config->setOption("SDL.LastLoadLua", filename);
+    g_config->save();
 		gtk_widget_destroy(fileChooser);
 		if(FCEU_LoadLuaCode(filename) == 0)
 		{

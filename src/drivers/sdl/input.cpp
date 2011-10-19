@@ -756,6 +756,8 @@ GetMouseData(uint32 (&d)[3])
     t = PtoV(x, y);
     d[0] = t & 0xFFFF;
     d[1] = (t >> 16) & 0xFFFF;
+    // debug print 
+    // printf("mouse %d %d %d\n", d[0], d[1], d[2]);
 }
 
 /**

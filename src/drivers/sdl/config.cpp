@@ -224,6 +224,7 @@ InitConfig()
     config->addOption("_laststatefrom", "SDL.LastLoadStateFrom", home_dir);
     config->addOption("_lastopennsf", "SDL.LastOpenNSF", home_dir);
     config->addOption("_lastsavestateas", "SDL.LastSaveStateAs", home_dir);
+    config->addOption("_lastloadlua", "SDL.LastLoadLua", home_dir);
     #endif
     
     // fcm -> fm2 conversion
