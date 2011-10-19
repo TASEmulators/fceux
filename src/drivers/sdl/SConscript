@@ -2,18 +2,7 @@
 # Thanks Antonio Ospite!
 Import('env')
 env.ParseConfig('pkg-config --cflags --libs x11')
-if env['GTK']:
-  # Add compiler and linker flags from pkg-config
-  env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
-  env.Append(CPPDEFINES=["_GTK2"])
-  env.Append(CCFLAGS = ["-D_GTK"])
-if env['GTK3']:
-# Add compiler and linker flags from pkg-config
-  env.ParseConfig('pkg-config --cflags --libs gtk+-3.0')
-  env.Append(CPPDEFINES=["_GTK3"])
-  env.Append(CCFLAGS = ["-D_GTK"])
 Export('env')
-
 
 my_list =  Split("""
 input.cpp
