@@ -1,4 +1,4 @@
-To compile and install FCEUX, follow these steps:
+To compile and install FCEUX for SDL, follow these steps:
 
   1.  Ensure that scons and SDL are installed on your system.
     On an ubuntu/debian system, run:
@@ -8,10 +8,9 @@ To compile and install FCEUX, follow these steps:
 
   3.  Run "scons" to build fceux.
 
-  4.  To install on Linux/BSD run 
-       sudo install -m 755 src/fceux /usr/local/bin/fceux
+  4.  To install, run "scons install".  You can optionally define a prefix with "scons --prefix=/usr install"
 
 Users of Microsoft Visual Studio can use the solution files within the vc directory.
 These solution files will compile FCEUX and some included libraries for full functionality.
 
-CMake, while it can be used to compile, is currently deprecated in favor of SCons. 
+CMake has been depreciated in favor of scons.
