@@ -24,10 +24,7 @@ Kyoro Chan Land:	Expects a sprite hit to happen, but it has sprite 0 over
   me).
 
  SDL Port:
-  Make the code better.
-  Add a GTK+ interface using GLADE, interfacing with the emulator via a
-   stdio interface.
-  Update(FIX) the SDL_net netplay code to work with the new netplay code.
+   Hotkey remap GUI
 
  Figure out a good way to add "turbo" button support and then do it.
 
