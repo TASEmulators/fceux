@@ -137,6 +137,7 @@ fceux_dst = 'bin/fceux' + exe_suffix
 
 auxlib_src = 'src/auxlib.lua'
 auxlib_dst = 'bin/auxlib.lua'
+auxlib_inst_dst = prefix + '/share/fceux/auxlib.lua'
 
 fceux_h_src = 'src/drivers/win/help/fceux.chm'
 fceux_h_dst = 'bin/fceux.chm'
@@ -145,9 +146,18 @@ env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
 env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
 
-# TODO: Fix this build script to gracefully install auxlib and the man page
 if prefix == None:
   prefix = "/usr/local"
 
+man_src = 'documentation/fceux.6'
+man_dst = prefix + '/share/man/man6/fceux.6'
+
+share_src = 'output/'
+share_dst = prefix + '/share/fceux/'
+
 env.Install(prefix + "/bin/", fceux)
-env.Alias('install', [prefix + "/bin/"])
+# TODO:  Where to put auxlib on "scons install?"
+env.Alias('install', env.Command(auxlib_inst_dst, auxlib_src, [Copy(auxlib_inst_dst, auxlib_src)]))
+env.Alias('install', env.Command(share_dst, share_src, [Copy(share_dst, share_src)]))
+env.Alias('install', env.Command(man_dst, man_src, [Copy(man_dst, man_src)]))
+env.Alias('install', (prefix + "/bin/"))
