@@ -6,6 +6,7 @@
 #include "zlib.h"
 #include "taseditproj.h"
 #include "../tasedit.h"
+#include "zlib.h"
 
 extern TASEDIT_PROJECT project;
 extern PLAYBACK playback;
@@ -13,6 +14,8 @@ extern int TASEdit_greenzone_capacity;
 extern bool TASEdit_restore_position;
 
 extern void FCEU_printf(char *format, ...);
+
+char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 
 GREENZONE::GREENZONE()
 {
@@ -22,7 +25,6 @@ GREENZONE::GREENZONE()
 void GREENZONE::init()
 {
 	clearGreenzone();
-
 	reset();
 }
 void GREENZONE::reset()
@@ -128,8 +130,18 @@ void GREENZONE::save(EMUFILE *os)
 {
 	int frame, size;
 	int last_tick = 0;
+	// write "GREENZONE" string
+	os->fwrite(greenzone_save_id, GREENZONE_ID_LEN);
 	// write size
 	write32le(greenZoneCount, os);
+	// compress and write lag history
+	int len = lag_history.size();
+	uLongf comprlen = (len>>9)+12 + len;
+	std::vector<uint8> cbuf(comprlen);
+	compress(cbuf.data(), &comprlen, lag_history.data(), len);
+	write32le(comprlen, os);
+	os->fwrite(cbuf.data(), comprlen);
+	// write playback position
 	write32le(currFrameCounter, os);
 	// write savestates
 	for (frame = 0; frame < greenZoneCount; ++frame)
@@ -142,35 +154,47 @@ void GREENZONE::save(EMUFILE *os)
 		}
 		if (savestates[frame].empty()) continue;
 		write32le(frame, os);
-		// write lag history
-		write8le(lag_history[frame], os);
 		// write lua_colorings
 		// write monitorings
 		// write savestate
 		size = savestates[frame].size();
 		write32le(size, os);
 		os->fwrite(savestates[frame].data(), size);
-
 	}
 	// write -1 as eof for greenzone
 	write32le(-1, os);
 }
+// returns true if couldn't load
 bool GREENZONE::load(EMUFILE *is)
 {
 	clearGreenzone();
-	lag_history.resize(currMovieData.getNumRecords());
-	int frame = 0, prev_frame = 0, size = 0;
+	int frame = 0, prev_frame = -1, size = 0;
 	int last_tick = 0;
+	// read "GREENZONE" string
+	char save_id[GREENZONE_ID_LEN];
+	if ((int)is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
+	if (strcmp(greenzone_save_id, save_id)) goto error;		// string is not valid
 	// read size
 	if (read32le((uint32 *)&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
 	{
 		greenZoneCount = size;
 		savestates.resize(greenZoneCount);
 		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
-
+		// read and uncompress lag history
+		lag_history.resize(greenZoneCount);
+		int comprlen;
+		uLongf destlen = greenZoneCount;
+		if (!read32le(&comprlen, is)) goto error;
+		if (comprlen <= 0) goto error;
+		std::vector<uint8> cbuf(comprlen);
+		if (is->fread(cbuf.data(), comprlen) != comprlen) goto error;
+		int e = uncompress(lag_history.data(), &destlen, cbuf.data(), comprlen);
+		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
+		// read playback position
 		if (read32le((uint32 *)&frame, is))
 		{
 			currFrameCounter = frame;
+			// read savestates
 			while(1)
 			{
 				if (!read32le((uint32 *)&frame, is)) break;
@@ -181,8 +205,6 @@ bool GREENZONE::load(EMUFILE *is)
 					playback.SetProgressbar(frame, greenZoneCount);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
-				// read lag history
-				if (!read8le(&lag_history[frame], is)) break;
 				// read lua_colorings
 				// read monitorings
 				// read savestate
@@ -200,19 +222,27 @@ bool GREENZONE::load(EMUFILE *is)
 					if (is->fseek(size,SEEK_CUR) != 0) break;
 				}
 			}
-			greenZoneCount = prev_frame+1;	// cut greenZoneCount to last good frame
-			if (frame == -1)
+			if (prev_frame+1 == greenZoneCount)
 			{
 				// everything went fine - load savestate at cursor position
+				loadTasSavestate(currFrameCounter);
+				return false;
+			}
+			// uh, okay, but maybe we managed to read at least something from the file
+			for (; prev_frame >= 0; prev_frame--)
+			{
 				if (loadTasSavestate(currFrameCounter))
-					return true;
-			} else goto error;
+				{
+					greenZoneCount = prev_frame+1;		// cut greenZoneCount to this good frame
+					currFrameCounter = prev_frame;
+					FCEU_printf("Greenzone loaded partially\n");
+					return false;
+				}
+			}
 		}
 	}
 error:
-	// there was some error while reading greenzone
-	FCEU_printf("Error loading greenzone\n");
-	return false;
+	return true;
 }
 
 void GREENZONE::InvalidateGreenZone(int after)

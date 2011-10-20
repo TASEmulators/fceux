@@ -2,6 +2,8 @@
 
 #define MARKER_FLAG_BIT 1
 
+#define MARKERS_ID_LEN 8
+
 class MARKERS
 {
 public:

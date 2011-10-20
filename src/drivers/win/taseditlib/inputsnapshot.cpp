@@ -2,11 +2,14 @@
 
 #include "movie.h"
 #include "inputsnapshot.h"
+#include "markers.h"
 #include "zlib.h"
 
 const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// 16bits for normal joypads, 32bits for fourscore
 
 extern void FCEU_printf(char *format, ...);
+
+extern MARKERS markers;
 
 INPUT_SNAPSHOT::INPUT_SNAPSHOT()
 {
@@ -15,6 +18,7 @@ INPUT_SNAPSHOT::INPUT_SNAPSHOT()
 
 void INPUT_SNAPSHOT::init(MovieData& md)
 {
+	already_compressed = false;
 	// retrieve input data from movie data
 	size = md.getNumRecords();
 	input_type = (md.fourscore)?1:0;
@@ -45,12 +49,20 @@ void INPUT_SNAPSHOT::init(MovieData& md)
 			break;
 		}
 	}
+	// make a copy of markers.markers_array
+	markers_array = markers.markers_array;
+
 	coherent = true;
 	// save time to description
 	time_t raw_time;
 	time(&raw_time);
 	struct tm * timeinfo = localtime(&raw_time);
 	strftime(description, 10, "%H:%M:%S ", timeinfo);
+}
+
+void INPUT_SNAPSHOT::toMarkers()
+{
+	markers.markers_array = markers_array;
 }
 
 void INPUT_SNAPSHOT::toMovie(MovieData& md, int start)
@@ -84,6 +96,30 @@ void INPUT_SNAPSHOT::toMovie(MovieData& md, int start)
 	}
 }
 
+void INPUT_SNAPSHOT::compress_data()
+{
+	// compress joysticks
+	int len = joysticks.size();
+	uLongf comprlen = (len>>9)+12 + len;
+	joysticks_compressed.resize(comprlen);
+	compress(joysticks_compressed.data(), &comprlen, joysticks.data(), len);
+	joysticks_compressed.resize(comprlen);
+	// compress hot_changes
+	len = hot_changes.size();
+	comprlen = (len>>9)+12 + len;
+	hot_changes_compressed.resize(comprlen);
+	compress(hot_changes_compressed.data(), &comprlen, hot_changes.data(), len);
+	hot_changes_compressed.resize(comprlen);
+	// compress markers
+	len = markers_array.size();
+	comprlen = (len>>9)+12 + len;
+	markers_array_compressed.resize(comprlen);
+	compress(markers_array_compressed.data(), &comprlen, markers_array.data(), len);
+	markers_array_compressed.resize(comprlen);
+	// don't compress anymore
+	already_compressed = true;
+}
+
 void INPUT_SNAPSHOT::save(EMUFILE *os)
 {
 	// write vars
@@ -95,22 +131,18 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 	int len = strlen(description);
 	write8le(len, os);
 	os->fwrite(&description[0], len);
-	// compress and save joysticks data
-	len = joysticks.size();
-	int comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf(comprlen);
-	int e = compress(cbuf.data(), (uLongf*)&comprlen,(uint8*)joysticks.data(),len);
-	// write size
-	write32le(comprlen, os);
-	os->fwrite(cbuf.data(), comprlen);
-	// compress and save hot_changes data
-	len = hot_changes.size();
-	comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf2(comprlen);
-	e = compress(cbuf2.data(),(uLongf*)&comprlen,(uint8*)hot_changes.data(),len);
-	// write size
-	write32le(comprlen, os);
-	os->fwrite(cbuf2.data(), comprlen);
+	// write data
+	if (!already_compressed)
+		compress_data();
+	// save joysticks data
+	write32le(joysticks_compressed.size(), os);
+	os->fwrite(joysticks_compressed.data(), joysticks_compressed.size());
+	// save hot_changes data
+	write32le(hot_changes_compressed.size(), os);
+	os->fwrite(hot_changes_compressed.data(), hot_changes_compressed.size());
+	// save markers data
+	write32le(markers_array_compressed.size(), os);
+	os->fwrite(markers_array_compressed.data(), markers_array_compressed.size());
 }
 bool INPUT_SNAPSHOT::load(EMUFILE *is)
 {
@@ -128,27 +160,41 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (tmp < 0 || tmp >= SNAPSHOT_DESC_MAX_LENGTH) return false;
 	if (is->fread(&description[0], tmp) != tmp) return false;
 	description[tmp] = 0;		// add '0' because it wasn't saved
-	// read and uncompress joysticks data
-	len = size * bytes_per_frame[input_type];
-	joysticks.resize(len);
-	// read size
+	// read data
+	already_compressed = true;
 	int comprlen;
+	uLongf destlen;
+	// read and uncompress joysticks data
+	destlen = size * bytes_per_frame[input_type];
+	joysticks.resize(destlen);
+	// read size
 	if (!read32le(&comprlen, is)) return false;
-	if (comprlen <= 0 || comprlen > len) return false;
-	std::vector<uint8> cbuf(comprlen);
-	if (is->fread(cbuf.data(),comprlen) != comprlen) return false;
-	int e = uncompress((uint8*)joysticks.data(),(uLongf*)&len,cbuf.data(),comprlen);
+	if (comprlen <= 0) return false;
+	joysticks_compressed.resize(comprlen);
+	if (is->fread(joysticks_compressed.data(), comprlen) != comprlen) return false;
+	int e = uncompress(joysticks.data(), &destlen, joysticks_compressed.data(), comprlen);
 	if (e != Z_OK && e != Z_BUF_ERROR) return false;
 	// read and uncompress hot_changes data
-	len = size * bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
-	hot_changes.resize(len);
+	destlen = size * bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+	hot_changes.resize(destlen);
 	// read size
 	if (!read32le(&comprlen, is)) return false;
-	if (comprlen <= 0 || comprlen > len) return false;
-	std::vector<uint8> cbuf2(comprlen);
-	if (is->fread(cbuf2.data(),comprlen) != comprlen) return false;
-	e = uncompress(hot_changes.data(),(uLongf*)&len,cbuf.data(),comprlen);
+	if (comprlen <= 0) return false;
+	hot_changes_compressed.resize(comprlen);
+	if (is->fread(hot_changes_compressed.data(), comprlen) != comprlen) return false;
+	e = uncompress(hot_changes.data(), &destlen, hot_changes_compressed.data(), comprlen);
 	if (e != Z_OK && e != Z_BUF_ERROR) return false;
+	// read and uncompress markers data
+	destlen = size;
+	markers_array.resize(destlen);
+	// read size
+	if (!read32le(&comprlen, is)) return false;
+	if (comprlen <= 0) return false;
+	markers_array_compressed.resize(comprlen);
+	if (is->fread(markers_array_compressed.data(), comprlen) != comprlen) return false;
+	e = uncompress(markers_array.data(), &destlen, markers_array_compressed.data(), comprlen);
+	if (e != Z_OK && e != Z_BUF_ERROR) return false;
+
 	return true;
 }
 bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
@@ -204,6 +250,24 @@ bool INPUT_SNAPSHOT::checkJoypadDiff(INPUT_SNAPSHOT& inp, int frame, int joy)
 	}
 	return false;
 }
+
+// return true if any difference in markers_array is found
+bool INPUT_SNAPSHOT::checkMarkersDiff(INPUT_SNAPSHOT& inp)
+{
+	if (size != inp.size) return true;
+	for (int i = size-1; i >= 0; i--)
+		if ((markers_array[i] - inp.markers_array[i]) & MARKER_FLAG_BIT) return true;
+	return false;
+}
+// return true if any difference in markers_array is found, comparing to markers.markers_array
+bool INPUT_SNAPSHOT::checkMarkersDiff()
+{
+	if (markers_array.size() != markers.markers_array.size()) return true;
+	for (int i = markers_array.size()-1; i >= 0; i--)
+		if ((markers_array[i] - markers.markers_array[i]) & MARKER_FLAG_BIT) return true;
+	return false;
+}
+
 // return number of first frame of difference
 int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
 {

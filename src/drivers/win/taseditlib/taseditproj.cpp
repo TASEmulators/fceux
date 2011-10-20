@@ -65,23 +65,38 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 
 	EMUFILE_FILE ifs(filename, "rb");
 
-	FCEU_printf("Loading TASEdit project %s\n", filename);
+	FCEU_printf("\nLoading TASEdit project %s\n", filename);
 
+	bool error;
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
 	// try to load markers
-	if (markers.load(&ifs))
+	error = markers.load(&ifs);
+	if (error)
+	{
+		FCEU_printf("Error loading markers\n");
+		markers.init();
+	} else
 	{
 		// try to load greenzone
-		if (greenzone.load(&ifs))
-		{
-			// there was some error while loading greenzone - reset playback to frame 0
-			poweron(true);
-			currFrameCounter = 0;
-			// try to load history
-			history.load(&ifs);
-		}
+		error = greenzone.load(&ifs);
 	}
+	if (error)
+	{
+		FCEU_printf("Error loading greenzone\n");
+		greenzone.init();
+		playback.StartFromZero();		// reset playback to frame 0
+	} else
+	{
+		// try to load history
+		error = history.load(&ifs);
+	}
+	if (error)
+	{
+		FCEU_printf("Error loading history\n");
+		history.init();
+	}
+
 	reset();
 	playback.updateProgressbar();
 	return true;

@@ -158,7 +158,10 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
+					if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
+					else
+						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
 				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
 				{
 					// current frame
@@ -376,14 +379,9 @@ void RightClick(LPNMITEMACTIVATE info)
 	RightClickMenu(info);
 }
 
-void MarkersChanged()
-{
-	project.changed = true;
-}
-
 void InputChangedRec()
 {
-	greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_RECORD, currFrameCounter, currFrameCounter));
+	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_RECORD, currFrameCounter, currFrameCounter));
 }
 
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
@@ -397,15 +395,15 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 		{
 			currMovieData.records[*it].toggleBit(joy,bit);
 		}
-		greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_CHANGE, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CHANGE, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	} else
 	{
 		//update one row
 		currMovieData.records[row_index].toggleBit(joy,bit);
 		if (currMovieData.records[row_index].checkBit(joy,bit))
-			greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_SET, row_index, row_index));
+			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
 		else
-			greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_UNSET, row_index, row_index));
+			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
 	}
 	
 }
@@ -429,9 +427,14 @@ void SingleClick(LPNMITEMACTIVATE info)
 		{
 			// reverse MARKER_FLAG_BIT in pointed frame
 			markers.ToggleMarker(row_index);
-			MarkersChanged();
+			if (markers.markers_array[row_index])
+				history.RegisterChanges(MODTYPE_MARKER_SET, row_index);
+			else
+				history.RegisterChanges(MODTYPE_MARKER_UNSET, row_index);
+			project.changed = true;
 			// deselect this row, so that new marker will be seen immediately
 			ListView_SetItemState(hwndList, row_index, 0, LVIS_SELECTED);
+			// also no need to redraw row
 		}
 	}
 	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
@@ -481,7 +484,7 @@ void CloneFrames()
 		} else frames++;
 	}
 	UpdateList();
-	greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_CLONE, *selectionFrames.begin()));
+	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CLONE, *selectionFrames.begin()));
 }
 
 void InsertFrames()
@@ -508,7 +511,7 @@ void InsertFrames()
 		} else frames++;
 	}
 	UpdateList();
-	greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_INSERT, *selectionFrames.begin()));
+	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, *selectionFrames.begin()));
 }
 
 void DeleteFrames()
@@ -528,7 +531,7 @@ void DeleteFrames()
 	// reduce list
 	UpdateList();
 
-	int result = history.RegisterInputChanges(MODTYPE_DELETE, start_index);
+	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
 	{
 		greenzone.InvalidateGreenZone(result);
@@ -546,9 +549,9 @@ void ClearFrames(bool cut)
 		currMovieData.records[*it].clear();
 	}
 	if (cut)
-		greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_CUT, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CUT, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	else
-		greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_CLEAR, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CLEAR, *selectionFrames.begin(), *selectionFrames.rbegin()));
 }
 
 void Truncate()
@@ -563,7 +566,7 @@ void Truncate()
 	{
 		currMovieData.truncateAt(frame+1);
 		UpdateList();
-		int result = history.RegisterInputChanges(MODTYPE_TRUNCATE, frame+1);
+		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
 			greenzone.InvalidateGreenZone(result);
@@ -595,15 +598,17 @@ void ColumnSet(int column)
 			// set all
 			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 				markers.markers_array[*it] |= MARKER_FLAG_BIT;
+			history.RegisterChanges(MODTYPE_MARKER_SET, *selectionFrames.begin(), *selectionFrames.rbegin());
 		} else
 		{
 			// unset all
 			for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 				markers.markers_array[*it] &= ~MARKER_FLAG_BIT;
+			history.RegisterChanges(MODTYPE_MARKER_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin());
 		}
-		MarkersChanged();
+		project.changed = true;
 		ClearSelection();
-		RedrawList();
+		// no need to RedrawList();
 	} else
 	{
 		// buttons column
@@ -624,9 +629,9 @@ void ColumnSet(int column)
 		for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 			currMovieData.records[*it].setBitValue(joy,button,newValue);
 		if (newValue)
-			greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_SET, *selectionFrames.begin(), *selectionFrames.rbegin()));
+			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_SET, *selectionFrames.begin(), *selectionFrames.rbegin()));
 		else
-			greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin()));
+			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	}
 }
 
@@ -862,7 +867,7 @@ bool Paste()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
-			greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_PASTE, *selectionFrames.begin()));
+			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_PASTE, *selectionFrames.begin()));
 			result = true;
 		}
 
@@ -1417,14 +1422,14 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								currMovieData.insertEmpty(index, frames);
 								if (TASEdit_bind_markers)
 									markers.insertEmpty(index, frames);
-								greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_INSERT, index));
+								greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, index));
 							} else
 							{
 								// insert at playback cursor
 								currMovieData.insertEmpty(currFrameCounter, frames);
 								if (TASEdit_bind_markers)
 									markers.insertEmpty(currFrameCounter, frames);
-								greenzone.InvalidateGreenZone(history.RegisterInputChanges(MODTYPE_INSERT, currFrameCounter));
+								greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, currFrameCounter));
 							}
 						}
 					}
@@ -1627,8 +1632,19 @@ void FollowUndo()
 	{
 		if (!CheckItemVisible(jump_frame))
 		{
-			ListView_EnsureVisible(hwndList, currMovieData.getNumRecords()-1, true);
-			ListView_EnsureVisible(hwndList, jump_frame, false);
+			// center list at jump_frame
+			int list_items = listItems;
+			if (currMovieData.fourscore) list_items--;
+			int lower_border = (list_items - 1) / 2;
+			int upper_border = (list_items - 1) - lower_border;
+			int index = jump_frame + lower_border;
+			if (index >= currMovieData.getNumRecords())
+				index = currMovieData.getNumRecords()-1;
+			ListView_EnsureVisible(hwndList, index, false);
+			index = jump_frame - upper_border;
+			if (index < 0)
+				index = 0;
+			ListView_EnsureVisible(hwndList, index, false);
 		}
 	}
 }
@@ -1710,6 +1726,7 @@ void EnterTasEdit()
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 
+		greenzone.init();
 		playback.init();
 		// either start new movie or use current movie
 		if (movieMode == MOVIEMODE_INACTIVE)
@@ -1722,6 +1739,7 @@ void EnterTasEdit()
 		{
 			//use current movie to create a new project
 			FCEUI_StopMovie();
+			greenzone.TryDumpIncremental(lagFlag != 0);
 		}
 		// always start work from read-only mode, ready to switch to MULTITRACK_RECORDING_ALL
 		movie_readonly = true;
@@ -1780,8 +1798,6 @@ void EnterTasEdit()
 		ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 
 		// init variables
-		greenzone.init();
-		greenzone.TryDumpIncremental(lagFlag != 0);
 		markers.init();
 		project.init();
 		history.init(TasEdit_undo_levels);
@@ -1811,6 +1827,7 @@ bool ExitTasEdit()
 	markers.free();
 	greenzone.clearGreenzone();
 	history.free();
+	playback.SeekingStop();
 
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("Tasedit disengaged",0);

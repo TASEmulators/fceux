@@ -291,7 +291,8 @@ bool PLAYBACK::JumpToFrame(int index)
 	else
 		currFrameCounter = i;
 	// continue from the frame
-	SeekingStart(index+1);
+	if (index != currFrameCounter)
+		SeekingStart(index+1);
 	return false;
 }
 

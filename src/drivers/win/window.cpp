@@ -1676,6 +1676,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				if(!LuaConsoleHWnd)
 					LuaConsoleHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_LUA), hWnd, (DLGPROC) DlgLuaScriptDialog);
 				else
+					ShowWindow(LuaConsoleHWnd, SW_SHOWNORMAL);
 					SetForegroundWindow(LuaConsoleHWnd);
 				break;
 			case FCEUX_CONTEXT_CLOSELUAWINDOWS:
@@ -1686,6 +1687,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//Recent Lua 1
 			#ifdef _S9XLUA_H
 			case FCEUX_CONTEXT_LOADLASTLUA:
+				ShowWindow(LuaConsoleHWnd, SW_SHOWNORMAL);
+				SetForegroundWindow(LuaConsoleHWnd);
 				if(recent_lua[0])
 				{
 					if (!FCEU_LoadLuaCode(recent_lua[0]))

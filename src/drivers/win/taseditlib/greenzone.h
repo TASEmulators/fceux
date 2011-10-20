@@ -2,6 +2,8 @@
 
 //#define LAG_FLAG_BIT 1
 
+#define GREENZONE_ID_LEN 10
+
 class GREENZONE
 {
 public:

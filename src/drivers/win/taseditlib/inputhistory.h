@@ -26,21 +26,25 @@
 #define MODTYPE_BRANCH_7 21
 #define MODTYPE_BRANCH_8 22
 #define MODTYPE_BRANCH_9 23
+#define MODTYPE_MARKER_SET 24
+#define MODTYPE_MARKER_UNSET 25
 
 #define HISTORY_COHERENT_COLOR 0xF9DDE6
 #define HISTORY_NORMAL_COLOR 0xFFFFFF
+
+#define HISTORY_ID_LEN 8
 
 class INPUT_HISTORY
 {
 public:
 	INPUT_HISTORY();
-	void init(int new_size);
+	void init(int new_size = 0);
 	void free();
 
 	void update();		// called every frame
 
 	void save(EMUFILE *os);
-	void load(EMUFILE *is);
+	bool load(EMUFILE *is);
 
 	int undo();
 	int redo();
@@ -48,7 +52,7 @@ public:
 
 	void AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp);
 
-	int RegisterInputChanges(int mod_type, int start = 0, int end =-1);
+	int RegisterChanges(int mod_type, int start = 0, int end =-1);
 
 	int InputChanged(int start, int end);
 	int InputInserted(int start);

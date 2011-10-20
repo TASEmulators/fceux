@@ -4,7 +4,9 @@
 #include "../common.h"
 #include "taseditproj.h"
 //#include "../tasedit.h"
+#include "zlib.h"
 
+char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
 
 MARKERS::MARKERS()
 {
@@ -29,24 +31,43 @@ void MARKERS::update()
 
 void MARKERS::save(EMUFILE *os)
 {
+	// write "MARKERS" string
+	os->fwrite(markers_save_id, MARKERS_ID_LEN);
 	// write size
 	int size = markers_array.size();
 	write32le(size, os);
-	// write array
-	os->fwrite(markers_array.data(), size);
+	// compress and write array
+	int len = markers_array.size();
+	uLongf comprlen = (len>>9)+12 + len;
+	std::vector<uint8> cbuf(comprlen);
+	compress(cbuf.data(), &comprlen, markers_array.data(), len);
+	write32le(comprlen, os);
+	os->fwrite(cbuf.data(), comprlen);
 }
+// returns true if couldn't load
 bool MARKERS::load(EMUFILE *is)
 {
 	markers_array.resize(currMovieData.getNumRecords());
+	// read "MARKERS" string
+	char save_id[MARKERS_ID_LEN];
+	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;
+	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
 	int size;
 	if (read32le((uint32 *)&size, is) && size == currMovieData.getNumRecords())
 	{
-		// read array
-		if ((int)is->fread(markers_array.data(), size) == size) return true;
+		// read and uncompress array
+		int comprlen;
+		uLongf destlen = size;
+		if (!read32le(&comprlen, is)) goto error;
+		if (comprlen <= 0) goto error;
+		std::vector<uint8> cbuf(comprlen);
+		if (is->fread(cbuf.data(), comprlen) != comprlen) goto error;
+		int e = uncompress(markers_array.data(), &destlen, cbuf.data(), comprlen);
+		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
+		return false;
 	}
 error:
-	FCEU_printf("Error loading markers\n");
-	return false;
+	return true;
 }
 // ----------------------------------------------------------
 void MARKERS::ToggleMarker(int frame)

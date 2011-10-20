@@ -3,17 +3,19 @@
 #include "movie.h"
 #include "../common.h"
 #include "../tasedit.h"
-#include "inputsnapshot.h"
-#include "inputhistory.h"
-#include "playback.h"
-#include "greenzone.h"
+#include "taseditproj.h"
+
+extern void FCEU_printf(char *format, ...);
+
+extern HWND hwndHistoryList;
+extern bool TASEdit_bind_markers;
 
 extern PLAYBACK playback;
-extern void FCEU_printf(char *format, ...);
-extern HWND hwndHistoryList;
 extern GREENZONE greenzone;
+extern TASEDIT_PROJECT project;
 
-char modCaptions[24][12] = {"Init",
+char history_save_id[HISTORY_ID_LEN] = "HISTORY";
+char modCaptions[26][12] = {"Init",
 							"Change",
 							"Set",
 							"Unset",
@@ -36,7 +38,9 @@ char modCaptions[24][12] = {"Init",
 							"Branch6",
 							"Branch7",
 							"Branch8",
-							"Branch9"};
+							"Branch9",
+							"Mark Set",
+							"Mark Unset"};
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
@@ -47,9 +51,10 @@ INPUT_HISTORY::INPUT_HISTORY()
 void INPUT_HISTORY::init(int new_size)
 {
 	// init vars
+	if (new_size > 0)
+		history_size = new_size + 1;
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
-	history_size = new_size + 1;
 	// clear snapshots history
 	history_total_items = 0;
 	input_snapshots.resize(history_size);
@@ -97,24 +102,36 @@ int INPUT_HISTORY::jump(int new_pos)
 	// if nothing is done, do not invalidate greenzone
 	if (new_pos == history_cursor_pos) return -1;
 
+	// make jump
+	int old_pos = history_cursor_pos;
+	history_cursor_pos = new_pos;
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	RedrawHistoryList();
+
 	// create undo_hint
-	if (new_pos < history_cursor_pos)
+	if (new_pos > old_pos)
 		undo_hint_pos = GetCurrentSnapshot().jump_frame;
 	else
 		undo_hint_pos = GetNextToCurrentSnapshot().jump_frame;
 	undo_hint_time = clock() + UNDO_HINT_TIME;
 	show_undo_hint = true;
 
-	// make jump
-	history_cursor_pos = new_pos;
-	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	// update markers
+	if (TASEdit_bind_markers)
+	{
+		if (input_snapshots[real_pos].checkMarkersDiff())
+		{
+			input_snapshots[real_pos].toMarkers();
+			project.changed = true;
+		}
+	}
 
-	int first_change = input_snapshots[real_pos].findFirstChange(currMovieData);
-	if (first_change < 0) return -1;	// if somehow there's no changes
-	
 	// update current movie
-	input_snapshots[real_pos].toMovie(currMovieData, first_change);
-	RedrawHistoryList();
+	int first_change = input_snapshots[real_pos].findFirstChange(currMovieData);
+	if (first_change >= 0)
+		input_snapshots[real_pos].toMovie(currMovieData, first_change);
+	else
+		RedrawList();
 
 	return first_change;
 }
@@ -145,7 +162,7 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 			// overwrite old snapshot
 			real_pos = (history_start_pos + history_cursor_pos) % history_size;
 			// compare with the snapshot we're going to overwrite, if it's different then break the chain of coherent snapshots
-			if (input_snapshots[real_pos].checkDiff(inp))
+			if (input_snapshots[real_pos].checkDiff(inp) || input_snapshots[real_pos].checkMarkersDiff(inp))
 			{
 				for (int i = history_cursor_pos+1; i < history_total_items; ++i)
 				{
@@ -167,64 +184,18 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 }
 
 // returns frame of first actual change
-int INPUT_HISTORY::RegisterInputChanges(int mod_type, int start, int end)
+int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 {
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
 	inp.init(currMovieData);
-	// check if there are differences from latest snapshot
-	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
-	if (first_changes >= 0)
+	if (mod_type == MODTYPE_MARKER_SET || mod_type == MODTYPE_MARKER_UNSET)
 	{
-		// differences found
-		// fade old hot_changes by 1
-
-		// highlight new hot changes
-
+		// special case: changed markers, but input didn't change
 		// fill description
 		strcat(inp.description, modCaptions[mod_type]);
-		switch (mod_type)
-		{
-			case MODTYPE_CHANGE:
-			case MODTYPE_SET:
-			case MODTYPE_UNSET:
-			case MODTYPE_TRUNCATE:
-			case MODTYPE_CLEAR:
-			case MODTYPE_CUT:
-			case MODTYPE_IMPORT:
-			case MODTYPE_BRANCH_0: case MODTYPE_BRANCH_1:
-			case MODTYPE_BRANCH_2: case MODTYPE_BRANCH_3:
-			case MODTYPE_BRANCH_4: case MODTYPE_BRANCH_5:
-			case MODTYPE_BRANCH_6: case MODTYPE_BRANCH_7:
-			case MODTYPE_BRANCH_8: case MODTYPE_BRANCH_9:
-			{
-				inp.jump_frame = first_changes;
-				break;
-			}
-			case MODTYPE_INSERT:
-			case MODTYPE_DELETE:
-			case MODTYPE_PASTE:
-			case MODTYPE_PASTEINSERT:
-			case MODTYPE_CLONE:
-			{
-				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
-				inp.jump_frame = start;
-				break;
-			}
-			case MODTYPE_RECORD:
-			{
-				// add info which joypads were affected
-				int num = (inp.input_type + 1) * 2;		// hacky, only for distingushing between normal2p and fourscore
-				for (int i = 0; i < num; ++i)
-				{
-					if (inp.checkJoypadDiff(input_snapshots[real_pos], first_changes, i))
-						strcat(inp.description, joypadCaptions[i]);
-				}
-				inp.jump_frame = start;
-			}
-		}
-		// add upper and lower frame to description
+		inp.jump_frame = start;
+		// add the frame to description
 		char framenum[11];
 		_itoa(start, framenum, 10);
 		strcat(inp.description, " ");
@@ -236,13 +207,83 @@ int INPUT_HISTORY::RegisterInputChanges(int mod_type, int start, int end)
 			strcat(inp.description, framenum);
 		}
 		AddInputSnapshotToHistory(inp);
+		return -1;
+	} else
+	{
+		// check if there are input differences from latest snapshot
+		int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+		int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
+		if (first_changes >= 0)
+		{
+			// differences found
+			// fade old hot_changes by 1
+
+			// highlight new hot changes
+
+			// fill description
+			strcat(inp.description, modCaptions[mod_type]);
+			switch (mod_type)
+			{
+				case MODTYPE_CHANGE:
+				case MODTYPE_SET:
+				case MODTYPE_UNSET:
+				case MODTYPE_TRUNCATE:
+				case MODTYPE_CLEAR:
+				case MODTYPE_CUT:
+				case MODTYPE_IMPORT:
+				case MODTYPE_BRANCH_0: case MODTYPE_BRANCH_1:
+				case MODTYPE_BRANCH_2: case MODTYPE_BRANCH_3:
+				case MODTYPE_BRANCH_4: case MODTYPE_BRANCH_5:
+				case MODTYPE_BRANCH_6: case MODTYPE_BRANCH_7:
+				case MODTYPE_BRANCH_8: case MODTYPE_BRANCH_9:
+				{
+					inp.jump_frame = first_changes;
+					break;
+				}
+				case MODTYPE_INSERT:
+				case MODTYPE_DELETE:
+				case MODTYPE_PASTE:
+				case MODTYPE_PASTEINSERT:
+				case MODTYPE_CLONE:
+				{
+					// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
+					inp.jump_frame = start;
+					break;
+				}
+				case MODTYPE_RECORD:
+				{
+					// add info which joypads were affected
+					int num = (inp.input_type + 1) * 2;		// hacky, only for distingushing between normal2p and fourscore
+					for (int i = 0; i < num; ++i)
+					{
+						if (inp.checkJoypadDiff(input_snapshots[real_pos], first_changes, i))
+							strcat(inp.description, joypadCaptions[i]);
+					}
+					inp.jump_frame = start;
+				}
+			}
+			// add upper and lower frame to description
+			char framenum[11];
+			_itoa(start, framenum, 10);
+			strcat(inp.description, " ");
+			strcat(inp.description, framenum);
+			if (end > start)
+			{
+				_itoa(end, framenum, 10);
+				strcat(inp.description, "-");
+				strcat(inp.description, framenum);
+			}
+			AddInputSnapshotToHistory(inp);
+		}
+		return first_changes;
 	}
-	return first_changes;
 }
 
 void INPUT_HISTORY::save(EMUFILE *os)
 {
 	int real_pos, last_tick = 0;
+	// write "HISTORY" string
+	os->fwrite(history_save_id, HISTORY_ID_LEN);
 	// write vars
 	write32le(history_cursor_pos, os);
 	write32le(history_total_items, os);
@@ -254,12 +295,17 @@ void INPUT_HISTORY::save(EMUFILE *os)
 		playback.SetProgressbar(i, history_total_items);
 	}
 }
-void INPUT_HISTORY::load(EMUFILE *is)
+// returns true if couldn't load
+bool INPUT_HISTORY::load(EMUFILE *is)
 {
 	int i = -1;
 	INPUT_SNAPSHOT inp;
 	// delete old snapshots
 	input_snapshots.resize(history_size);
+	// read "HISTORY" string
+	char save_id[HISTORY_ID_LEN];
+	if ((int)is->fread(save_id, HISTORY_ID_LEN) < HISTORY_ID_LEN) goto error;
+	if (strcmp(history_save_id, save_id)) goto error;		// string is not valid
 	// read vars
 	if (!read32le((uint32 *)&history_cursor_pos, is)) goto error;
 	if (!read32le((uint32 *)&history_total_items, is)) goto error;
@@ -301,13 +347,12 @@ void INPUT_HISTORY::load(EMUFILE *is)
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
 
+	// everything went well
 	UpdateHistoryList();
 	RedrawHistoryList();
-	return;
+	return false;
 error:
-	// couldn't load full history - reset it
-	FCEU_printf("Error loading history\n");
-	init(history_size-1);
+	return true;
 }
 // ----------------------------
 void INPUT_HISTORY::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)

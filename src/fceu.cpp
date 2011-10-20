@@ -721,7 +721,7 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 #ifdef WIN32
 	if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-		greenzone.TryDumpIncremental((bool)lagFlag);
+		greenzone.TryDumpIncremental(lagFlag != 0);
 #endif
 }
 
