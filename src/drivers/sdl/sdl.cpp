@@ -118,7 +118,7 @@ Option         Value   Description\n\
 --netkey       s       Use string 's' to create a unique session for the game loaded.\n\
 --players      x       Set the number of local players.\n\
 --rp2mic       {0,1}   Replace Port 2 Start with microphone (Famicom).\n\
---nogui                Don't load the GTK GUI\n";
+--nogui                Don't load the GTK GUI";
 
 
 // these should be moved to the man file
@@ -145,11 +145,11 @@ static void ShowUsage(char *prog)
 	printf("\nUsage is as follows:\n%s <options> filename\n\n",prog);
 	puts(DriverUsage);
 #ifdef _S9XLUA_H
-	puts ("--loadlua      f        Loads lua script from filename f.");
+	puts ("--loadlua      f       Loads lua script from filename f.");
 #endif
 #ifdef CREATE_AVI
-	puts ("--videolog     c        Calls mencoder to grab the video and audio streams to\n					   encode them. Check the documentation for more on this.");
-	puts ("--mute        {0|1}     Mutes FCEUX while still passing the audio stream to\n					   mencoder.");
+	puts ("--videolog     c       Calls mencoder to grab the video and audio streams to\n                        encode them. Check the documentation for more on this.");
+	puts ("--mute        {0|1}    Mutes FCEUX while still passing the audio stream to\n                        mencoder during avi creation.");
 #endif
 	puts("");
 	printf("Compiled with SDL version %d.%d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL );
