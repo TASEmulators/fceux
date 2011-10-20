@@ -1,3 +1,11 @@
+#
+# SConstruct - build script for the SDL port of fceux
+#
+# You can adjust the BoolVariables below to include/exclude features at compile-time
+#
+# Use "scons" to compile and "scons install" to install.
+#
+
 import os
 import sys
 import platform 
@@ -19,7 +27,7 @@ opts.AddVariables(
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
 prefix = GetOption('prefix')
-env = Environment(options = opts, prefix = prefix)
+env = Environment(options = opts)
 
 #### Uncomment this for a public release ###
 # env.Append(CPPDEFINES=["PUBLIC_RELEASE"])
@@ -66,6 +74,9 @@ else:
     print 'Did not find libSDL or SDL.lib, exiting!'
     Exit(1)
   if env['GTK']:
+    if not conf.CheckLib('gtk-x11-2.0'):
+      print 'Could not find libgtk-2.0, exiting!'
+      Exit(1)
     # Add compiler and linker flags from pkg-config
     env.ParseConfig('pkg-config --cflags --libs gtk+-2.0')
     env.Append(CPPDEFINES=["_GTK2"])
