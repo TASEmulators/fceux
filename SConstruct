@@ -128,6 +128,9 @@ else:
 Export('env')
 fceux = SConscript('src/SConscript')
 # Install rules
+if prefix == None:
+  prefix = "/usr/local"
+
 exe_suffix = ''
 if env['PLATFORM'] == 'win32':
   exe_suffix = '.exe'
@@ -145,9 +148,6 @@ fceux_h_dst = 'bin/fceux.chm'
 env.Command(fceux_h_dst, fceux_h_src, [Copy(fceux_h_dst, fceux_h_src)])
 env.Command(fceux_dst, fceux_src, [Copy(fceux_dst, fceux_src)])
 env.Command(auxlib_dst, auxlib_src, [Copy(auxlib_dst, auxlib_src)])
-
-if prefix == None:
-  prefix = "/usr/local"
 
 man_src = 'documentation/fceux.6'
 man_dst = prefix + '/share/man/man6/fceux.6'
