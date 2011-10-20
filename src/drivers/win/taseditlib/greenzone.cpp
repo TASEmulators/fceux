@@ -26,6 +26,7 @@ void GREENZONE::init()
 {
 	clearGreenzone();
 	reset();
+	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
 void GREENZONE::reset()
 {
@@ -34,7 +35,8 @@ void GREENZONE::reset()
 }
 void GREENZONE::update()
 {
-
+	if (clock() > next_cleaning_time)
+		GreenzoneCleaning();
 
 }
 
@@ -63,10 +65,6 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 		else
 			lag_history[currFrameCounter-1] = 0;
 	}
-
-
-
-	ClearGreenzoneTail();
 }
 
 bool GREENZONE::loadTasSavestate(int frame)
@@ -90,18 +88,57 @@ void GREENZONE::storeTasSavestate(int frame)
 	ms.trim();
 }
 
-void GREENZONE::ClearGreenzoneTail()
+void GREENZONE::GreenzoneCleaning()
 {
-	int tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
-
-	if (tail_frame >= currFrameCounter) tail_frame = currFrameCounter - 1;
-	for (;tail_frame >= 0; tail_frame--)
+	int i = currFrameCounter - TASEdit_greenzone_capacity;
+	if (i < 0) goto none_changed;
+	int limit;
+	// 2x of 1/2
+	limit = i - 2 * TASEdit_greenzone_capacity;
+	if (limit < -1) limit = -1;
+	for (; i > limit; i--)
 	{
-		if (savestates[tail_frame].empty()) break;
-		ClearSavestate(tail_frame);
-
-    RedrawRow(tail_frame);
+		if ((i & 0x1) && !savestates[i].empty())
+			ClearSavestate(i);
 	}
+	if (i < 0) goto finish;
+	// 4x of 1/4
+	limit = i - 4 * TASEdit_greenzone_capacity;
+	if (limit < -1) limit = -1;
+	for (; i > limit; i--)
+	{
+		if ((i & 0x3) && !savestates[i].empty())
+			ClearSavestate(i);
+	}
+	if (i < 0) goto finish;
+	// 8x of 1/8
+	limit = i - 8 * TASEdit_greenzone_capacity;
+	if (limit < -1) limit = -1;
+	for (; i > limit; i--)
+	{
+		if ((i & 0x7) && !savestates[i].empty())
+			ClearSavestate(i);
+	}
+	if (i < 0) goto finish;
+	// 16x of 1/16
+	limit = i - 16 * TASEdit_greenzone_capacity;
+	if (limit < -1) limit = -1;
+	for (; i > limit; i--)
+	{
+		if ((i & 0xF) && !savestates[i].empty())
+			ClearSavestate(i);
+	}
+	// clear all remaining
+	for (; i >= 0; i--)
+	{
+		if (!savestates[i].empty())
+			ClearSavestate(i);
+	}
+finish:
+	RedrawList();
+none_changed:
+	// shedule next cleaning
+	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
 
 void GREENZONE::ClearSavestate(int index)
@@ -109,7 +146,6 @@ void GREENZONE::ClearSavestate(int index)
     std::vector<uint8> tmp;
     savestates[index].swap(tmp);
 }
-
 
 void GREENZONE::clearGreenzone()
 {
@@ -144,6 +180,7 @@ void GREENZONE::save(EMUFILE *os)
 	// write playback position
 	write32le(currFrameCounter, os);
 	// write savestates
+	GreenzoneCleaning();
 	for (frame = 0; frame < greenZoneCount; ++frame)
 	{
 		// update TASEditor progressbar from time to time
@@ -179,7 +216,6 @@ bool GREENZONE::load(EMUFILE *is)
 	{
 		greenZoneCount = size;
 		savestates.resize(greenZoneCount);
-		int greenzone_tail_frame = greenZoneCount-1 - TASEdit_greenzone_capacity;
 		// read and uncompress lag history
 		lag_history.resize(greenZoneCount);
 		int comprlen;
@@ -194,11 +230,16 @@ bool GREENZONE::load(EMUFILE *is)
 		if (read32le((uint32 *)&frame, is))
 		{
 			currFrameCounter = frame;
+			int greenzone_tail_frame = currFrameCounter - TASEdit_greenzone_capacity;
+			int greenzone_tail_frame2 = greenzone_tail_frame - 2 * TASEdit_greenzone_capacity;
+			int greenzone_tail_frame4 = greenzone_tail_frame - 4 * TASEdit_greenzone_capacity;
+			int greenzone_tail_frame8 = greenzone_tail_frame - 8 * TASEdit_greenzone_capacity;
+			int greenzone_tail_frame16 = greenzone_tail_frame - 16 * TASEdit_greenzone_capacity;
 			// read savestates
 			while(1)
 			{
 				if (!read32le((uint32 *)&frame, is)) break;
-				if (frame == -1) break;
+				if (frame < 0) break;		// -1 = eof
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
 				{
@@ -210,16 +251,20 @@ bool GREENZONE::load(EMUFILE *is)
 				// read savestate
 				if (!read32le((uint32 *)&size, is)) break;
 				if (size < 0) break;
-				if (frame > greenzone_tail_frame || frame == currFrameCounter)
-				{
-					// load savestate
-					savestates[frame].resize(size);
-					if ((int)is->fread(savestates[frame].data(),size) < size) break;
-					prev_frame = frame;			// successfully read one greenzone frame info
-				} else
+				if (frame <= greenzone_tail_frame16
+					|| (frame <= greenzone_tail_frame8 && (frame & 0xF))
+					|| (frame <= greenzone_tail_frame4 && (frame & 0x7))
+					|| (frame <= greenzone_tail_frame2 && (frame & 0x3))
+					|| (frame <= greenzone_tail_frame && (frame & 0x1)))
 				{
 					// skip loading this savestate
-					if (is->fseek(size,SEEK_CUR) != 0) break;
+					if (is->fseek(size, SEEK_CUR) != 0) break;
+				} else
+				{
+					// load this savestate
+					savestates[frame].resize(size);
+					if ((int)is->fread(savestates[frame].data(), size) < size) break;
+					prev_frame = frame;			// successfully read one greenzone frame info
 				}
 			}
 			if (prev_frame+1 == greenZoneCount)

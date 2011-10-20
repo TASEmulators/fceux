@@ -174,17 +174,24 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// marked frame
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
-				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
+				} else if(cell_y < greenzone.greenZoneCount)
 				{
-					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+					if (!greenzone.savestates[cell_y].empty())
 					{
-						// lag frame
-						msg->clrTextBk = LAG_FRAMENUM_COLOR;
-					} else
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = LAG_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						// green zone frame
-						msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					}
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
+					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
@@ -197,17 +204,24 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
+				} else if(cell_y < greenzone.greenZoneCount)
 				{
-					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+					if (!greenzone.savestates[cell_y].empty())
 					{
-						// lag frame
-						msg->clrTextBk = LAG_INPUT_COLOR1;
-					} else
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = LAG_INPUT_COLOR1;
+						else
+							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
+					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						// green zone frame
-						msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					}
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
+						else
+							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
+					} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
@@ -220,17 +234,24 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR2;
-				} else if(cell_y < greenzone.greenZoneCount && !greenzone.savestates[cell_y].empty())
+				} else if(cell_y < greenzone.greenZoneCount)
 				{
-					if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+					if (!greenzone.savestates[cell_y].empty())
 					{
-						// lag frame
-						msg->clrTextBk = LAG_INPUT_COLOR2;
-					} else
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = LAG_INPUT_COLOR2;
+						else
+							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
+					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
+						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						// green zone frame
-						msg->clrTextBk = GREENZONE_INPUT_COLOR2;
-					}
+						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
+						else
+							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
+					} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
 			}
 		}
@@ -434,6 +455,7 @@ void SingleClick(LPNMITEMACTIVATE info)
 			project.changed = true;
 			// deselect this row, so that new marker will be seen immediately
 			ListView_SetItemState(hwndList, row_index, 0, LVIS_SELECTED);
+			ListView_SetItemState(hwndList, -1, LVIS_FOCUSED, LVIS_FOCUSED);
 			// also no need to redraw row
 		}
 	}
@@ -637,7 +659,7 @@ void ColumnSet(int column)
 
 void ClearSelection()
 {
-	ListView_SetItemState(hwndList,-1,0, LVIS_SELECTED);
+	ListView_SetItemState(hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
 void ClearRowSelection(int index)
 {
@@ -676,7 +698,8 @@ void SelectMidMarkers()
 		return;
 	}
 
-	ClearSelection();
+	//ClearSelection(); - need to clear without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
+	ListView_SetItemState(hwndList, -1, 0, LVIS_SELECTED);
 	// selecting circle:
 	if (upper_border > upper_marker+1 || lower_border < lower_marker-1 || lower_border > lower_marker)
 	{
@@ -1458,6 +1481,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					FollowPlayback();
 				else if (selectionFrames.size())
 					FollowSelection();
+				else if (playback.pauseframe)
+					FollowPauseframe();
 				break;
 			case ID_VIEW_SHOW_LAG_FRAMES:
 				//switch "Highlight lag frames" flag
@@ -1499,8 +1524,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						if (new_capacity < TASEdit_greenzone_capacity)
 						{
 							TASEdit_greenzone_capacity = new_capacity;
-							greenzone.ClearGreenzoneTail();
-							RedrawList();
+							greenzone.GreenzoneCleaning();
 						} else TASEdit_greenzone_capacity = new_capacity;
 					}
 					break;
@@ -1680,6 +1704,26 @@ void FollowSelection()
 			index = currMovieData.getNumRecords()-1;
 		ListView_EnsureVisible(hwndList, index, false);
 		index = selection_start - upper_border;
+		if (index < 0)
+			index = 0;
+		ListView_EnsureVisible(hwndList, index, false);
+	}
+}
+void FollowPauseframe()
+{
+	int jump_frame = playback.pauseframe;
+	if (jump_frame >= 0)
+	{
+		// center list at jump_frame
+		int list_items = listItems;
+		if (currMovieData.fourscore) list_items--;
+		int lower_border = (list_items - 1) / 2;
+		int upper_border = (list_items - 1) - lower_border;
+		int index = jump_frame + lower_border;
+		if (index >= currMovieData.getNumRecords())
+			index = currMovieData.getNumRecords()-1;
+		ListView_EnsureVisible(hwndList, index, false);
+		index = jump_frame - upper_border;
 		if (index < 0)
 			index = 0;
 		ListView_EnsureVisible(hwndList, index, false);

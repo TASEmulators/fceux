@@ -1,6 +1,7 @@
 //Specification file for Greenzone class
 
 //#define LAG_FLAG_BIT 1
+#define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
 
 #define GREENZONE_ID_LEN 10
 
@@ -20,7 +21,9 @@ public:
 
 	bool loadTasSavestate(int frame);
 	void storeTasSavestate(int frame);
-	void ClearGreenzoneTail();
+
+	void GreenzoneCleaning();
+	void ClearGreenzoneTail1();
 	void ClearSavestate(int index);
 
 	void InvalidateGreenZone(int after);
@@ -33,6 +36,6 @@ public:
 	std::vector<uint8> lag_history;
 
 private:
-
+	int next_cleaning_time;
 
 };

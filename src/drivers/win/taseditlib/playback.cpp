@@ -171,6 +171,7 @@ void PLAYBACK::ToggleEmulationPause()
 void PLAYBACK::PauseEmulation()
 {
 	FCEUI_SetEmulationPaused(1);
+	RedrawList();	// to show some "pale" greenzone
 	// make some additional stuff
 }
 void PLAYBACK::UnpauseEmulation()
@@ -192,12 +193,12 @@ void PLAYBACK::SeekingStop()
 	turbo = false;
 	PauseEmulation();
 	SetProgressbar(1, 1);
+	RedrawList();	// to show some "pale" greenzone
 }
 
 void PLAYBACK::RewindFrame()
 {
 	if (currFrameCounter > 0) jump(currFrameCounter-1);
-	turbo = false;
 	FollowPlayback();
 }
 void PLAYBACK::ForwardFrame()
@@ -260,7 +261,7 @@ void PLAYBACK::restorePosition()
 
 bool PLAYBACK::JumpToFrame(int index)
 {
-	// Returns true if a jump to the frame is made, false if started seeking or if nothing's done
+	// Returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 	if (index<0) return false;
 
 	if (index >= greenzone.greenZoneCount)
@@ -293,7 +294,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	// continue from the frame
 	if (index != currFrameCounter)
 		SeekingStart(index+1);
-	return false;
+	return true;
 }
 
 int PLAYBACK::GetPauseFrame()
