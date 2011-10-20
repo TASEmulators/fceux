@@ -270,17 +270,25 @@ bool GREENZONE::load(EMUFILE *is)
 			if (prev_frame+1 == greenZoneCount)
 			{
 				// everything went fine - load savestate at cursor position
-				loadTasSavestate(currFrameCounter);
+				if (loadTasSavestate(currFrameCounter))
+					return false;
+			}
+			// uh, okay, but maybe we managed to read at least something useful from the file
+			// first see if original position of currFrameCounter was read successfully
+			if (loadTasSavestate(currFrameCounter))
+			{
+				greenZoneCount = prev_frame+1;		// cut greenZoneCount to last good frame
+				FCEU_printf("Greenzone loaded partially\n");
 				return false;
 			}
-			// uh, okay, but maybe we managed to read at least something from the file
+			// then at least jump to some frame that was read successfully
 			for (; prev_frame >= 0; prev_frame--)
 			{
-				if (loadTasSavestate(currFrameCounter))
+				if (loadTasSavestate(prev_frame))
 				{
-					greenZoneCount = prev_frame+1;		// cut greenZoneCount to this good frame
 					currFrameCounter = prev_frame;
-					FCEU_printf("Greenzone loaded partially\n");
+					greenZoneCount = prev_frame+1;		// cut greenZoneCount to this good frame
+					FCEU_printf("Greenzone loaded partially, playback moved to the end of greenzone\n");
 					return false;
 				}
 			}

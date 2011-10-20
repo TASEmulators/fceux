@@ -23,7 +23,6 @@ public:
 	void storeTasSavestate(int frame);
 
 	void GreenzoneCleaning();
-	void ClearGreenzoneTail1();
 	void ClearSavestate(int index);
 
 	void InvalidateGreenZone(int after);
