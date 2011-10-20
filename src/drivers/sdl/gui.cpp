@@ -76,7 +76,6 @@ int configGamepadButton(GtkButton* button, gpointer p)
         g_config->setOption(prefix + "DeviceType", "Unknown");
     }
     g_config->setOption(prefix + "DeviceNum", GamePadConfig[padNo][x].DeviceNum[configNo]);
-    g_config->save();
     
     snprintf(buf, sizeof(buf), "<tt>%s</tt>", ButtonName(&GamePadConfig[padNo][x], configNo));
 	gtk_label_set_markup(GTK_LABEL(buttonMappings[x]), buf);
@@ -611,7 +610,6 @@ int setBufSize(GtkWidget* w, gpointer p)
 	// reset sound subsystem for changes to take effect
 	KillSound();
 	InitSound();
-	g_config->save();
 	return false;
 }
 
@@ -661,23 +659,21 @@ void setScaler(GtkWidget* w, gpointer p)
 {
 	int x = gtk_combo_box_get_active(GTK_COMBO_BOX(w));
 	g_config->setOption("SDL.SpecialFilter", x);
-	g_config->save();
 	
 	// 1 - hq2x 2 - Scale2x 3 - NTSC2x 4 - hq3x  5 - Scale3x
 	if (x >= 1 && x <= 3)
 	{
 		g_config->setOption("SDL.XScale", 2.0);
 		g_config->setOption("SDL.YScale", 2.0);
-		g_config->save();
 		resizeGtkWindow();
 	}
 	if (x >= 4 && x < 6)
 	{
 		g_config->setOption("SDL.XScale", 3.0);
 		g_config->setOption("SDL.YScale", 3.0);
-		g_config->save();
 		resizeGtkWindow();
 	}
+	g_config->save();
 	
 }
 
@@ -1129,9 +1125,10 @@ void quit ()
 	// it raises a GTK-Critical when its called
 	//gtk_main_quit();
 	FCEUI_Kill();
-  // LoadGame() checks for an IP and if it finds one begins a network session
-  // clear the NetworkIP field so this doesn't happen unintentionally
-  g_config->setOption("SDL.NetworkIP", "");
+    // LoadGame() checks for an IP and if it finds one begins a network session
+    // clear the NetworkIP field so this doesn't happen unintentionally
+    g_config->setOption("SDL.NetworkIP", "");
+    g_config->save();
 	SDL_Quit();
 	exit(0);
 }
@@ -1334,7 +1331,6 @@ void loadLua ()
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
     g_config->setOption("SDL.LastLoadLua", filename);
-    g_config->save();
 		gtk_widget_destroy(fileChooser);
 		if(FCEU_LoadLuaCode(filename) == 0)
 		{
@@ -1545,7 +1541,6 @@ void loadNSF ()
 			gtk_widget_destroy(d);
 		}
 		g_config->setOption("SDL.LastOpenNSF", filename);
-		g_config->save();
 		g_free(filename);
 	}
 	else
@@ -1626,7 +1621,6 @@ void loadGame ()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		gtk_widget_destroy (fileChooser);
 		g_config->setOption("SDL.LastOpenFile", filename);
-		g_config->save();
 		closeGame();
 		if(LoadGame(filename) == 0)
 		{
@@ -1679,7 +1673,6 @@ void saveStateAs()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		FCEUI_SaveState(filename);
 		g_config->setOption("SDL.LastSaveStateAs", filename);
-		g_config->save();
 		g_free(filename);
 	}
 	gtk_widget_destroy (fileChooser);
@@ -1727,7 +1720,6 @@ void loadStateFrom()
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		FCEUI_LoadState(filename);
 		g_config->setOption("SDL.LastLoadStateFrom", filename);
-		g_config->save();
 		g_free(filename);
 	}
 	
