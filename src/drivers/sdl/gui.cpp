@@ -32,6 +32,14 @@
 #include "../../fceulua.h"
 #endif
 
+// Fix compliation errors for older version of GTK (Ubuntu 10.04 LTS)
+#if GTK_MINOR_VERSION < 24 && GTK_MAJOR_VERSION == 2
+  #define GTK_COMBO_BOX_TEXT GTK_COMBO_BOX
+  #define gtk_combo_box_text_new gtk_combo_box_new
+  #define gtk_combo_box_text_get_active_text gtk_combo_box_get_active_text
+  #define gtk_combo_box_text_append_text gtk_combo_box_append_text
+#endif
+
 void toggleSound(GtkWidget* check, gpointer data);
 void loadGame ();
 void closeGame();
