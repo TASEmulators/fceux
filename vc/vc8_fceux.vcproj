@@ -800,10 +800,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\boards\copyfami_mmc3.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\src\boards\datalatch.cpp"
 				>
 			</File>
@@ -2294,6 +2290,46 @@
 				<Filter
 					Name="taseditlib"
 					>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\greenzone.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\greenzone.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\inputhistory.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\inputhistory.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\inputsnapshot.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\inputsnapshot.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\markers.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\markers.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\playback.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\playback.h"
+						>
+					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditlib\taseditproj.cpp"
 						>

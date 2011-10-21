@@ -174,9 +174,9 @@ void GREENZONE::save(EMUFILE *os)
 	int len = lag_history.size();
 	uLongf comprlen = (len>>9)+12 + len;
 	std::vector<uint8> cbuf(comprlen);
-	compress(cbuf.data(), &comprlen, lag_history.data(), len);
+	compress(&cbuf[0], &comprlen, &lag_history[0], len);
 	write32le(comprlen, os);
-	os->fwrite(cbuf.data(), comprlen);
+	os->fwrite(&cbuf[0], comprlen);
 	// write playback position
 	write32le(currFrameCounter, os);
 	// write savestates
@@ -196,7 +196,7 @@ void GREENZONE::save(EMUFILE *os)
 		// write savestate
 		size = savestates[frame].size();
 		write32le(size, os);
-		os->fwrite(savestates[frame].data(), size);
+		os->fwrite(&savestates[frame][0], size);
 	}
 	// write -1 as eof for greenzone
 	write32le(-1, os);
@@ -223,8 +223,8 @@ bool GREENZONE::load(EMUFILE *is)
 		if (!read32le(&comprlen, is)) goto error;
 		if (comprlen <= 0) goto error;
 		std::vector<uint8> cbuf(comprlen);
-		if (is->fread(cbuf.data(), comprlen) != comprlen) goto error;
-		int e = uncompress(lag_history.data(), &destlen, cbuf.data(), comprlen);
+		if (is->fread(&cbuf[0], comprlen) != comprlen) goto error;
+		int e = uncompress(&lag_history[0], &destlen, &cbuf[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
 		// read playback position
 		if (read32le((uint32 *)&frame, is))
@@ -263,7 +263,7 @@ bool GREENZONE::load(EMUFILE *is)
 				{
 					// load this savestate
 					savestates[frame].resize(size);
-					if ((int)is->fread(savestates[frame].data(), size) < size) break;
+					if ((int)is->fread(&savestates[frame][0], size) < size) break;
 					prev_frame = frame;			// successfully read one greenzone frame info
 				}
 			}

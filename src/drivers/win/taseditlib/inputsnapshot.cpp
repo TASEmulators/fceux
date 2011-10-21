@@ -102,19 +102,19 @@ void INPUT_SNAPSHOT::compress_data()
 	int len = joysticks.size();
 	uLongf comprlen = (len>>9)+12 + len;
 	joysticks_compressed.resize(comprlen);
-	compress(joysticks_compressed.data(), &comprlen, joysticks.data(), len);
+	compress(&joysticks_compressed[0], &comprlen, &joysticks[0], len);
 	joysticks_compressed.resize(comprlen);
 	// compress hot_changes
 	len = hot_changes.size();
 	comprlen = (len>>9)+12 + len;
 	hot_changes_compressed.resize(comprlen);
-	compress(hot_changes_compressed.data(), &comprlen, hot_changes.data(), len);
+	compress(&hot_changes_compressed[0], &comprlen, &hot_changes[0], len);
 	hot_changes_compressed.resize(comprlen);
 	// compress markers
 	len = markers_array.size();
 	comprlen = (len>>9)+12 + len;
 	markers_array_compressed.resize(comprlen);
-	compress(markers_array_compressed.data(), &comprlen, markers_array.data(), len);
+	compress(&markers_array_compressed[0], &comprlen, &markers_array[0], len);
 	markers_array_compressed.resize(comprlen);
 	// don't compress anymore
 	already_compressed = true;
@@ -136,13 +136,13 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 		compress_data();
 	// save joysticks data
 	write32le(joysticks_compressed.size(), os);
-	os->fwrite(joysticks_compressed.data(), joysticks_compressed.size());
+	os->fwrite(&joysticks_compressed[0], joysticks_compressed.size());
 	// save hot_changes data
 	write32le(hot_changes_compressed.size(), os);
-	os->fwrite(hot_changes_compressed.data(), hot_changes_compressed.size());
+	os->fwrite(&hot_changes_compressed[0], hot_changes_compressed.size());
 	// save markers data
 	write32le(markers_array_compressed.size(), os);
-	os->fwrite(markers_array_compressed.data(), markers_array_compressed.size());
+	os->fwrite(&markers_array_compressed[0], markers_array_compressed.size());
 }
 bool INPUT_SNAPSHOT::load(EMUFILE *is)
 {
@@ -171,8 +171,8 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (!read32le(&comprlen, is)) return false;
 	if (comprlen <= 0) return false;
 	joysticks_compressed.resize(comprlen);
-	if (is->fread(joysticks_compressed.data(), comprlen) != comprlen) return false;
-	int e = uncompress(joysticks.data(), &destlen, joysticks_compressed.data(), comprlen);
+	if (is->fread(&joysticks_compressed[0], comprlen) != comprlen) return false;
+	int e = uncompress(&joysticks[0], &destlen, &joysticks_compressed[0], comprlen);
 	if (e != Z_OK && e != Z_BUF_ERROR) return false;
 	// read and uncompress hot_changes data
 	destlen = size * bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
@@ -181,8 +181,8 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (!read32le(&comprlen, is)) return false;
 	if (comprlen <= 0) return false;
 	hot_changes_compressed.resize(comprlen);
-	if (is->fread(hot_changes_compressed.data(), comprlen) != comprlen) return false;
-	e = uncompress(hot_changes.data(), &destlen, hot_changes_compressed.data(), comprlen);
+	if (is->fread(&hot_changes_compressed[0], comprlen) != comprlen) return false;
+	e = uncompress(&hot_changes[0], &destlen, &hot_changes_compressed[0], comprlen);
 	if (e != Z_OK && e != Z_BUF_ERROR) return false;
 	// read and uncompress markers data
 	destlen = size;
@@ -191,8 +191,8 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (!read32le(&comprlen, is)) return false;
 	if (comprlen <= 0) return false;
 	markers_array_compressed.resize(comprlen);
-	if (is->fread(markers_array_compressed.data(), comprlen) != comprlen) return false;
-	e = uncompress(markers_array.data(), &destlen, markers_array_compressed.data(), comprlen);
+	if (is->fread(&markers_array_compressed[0], comprlen) != comprlen) return false;
+	e = uncompress(&markers_array[0], &destlen, &markers_array_compressed[0], comprlen);
 	if (e != Z_OK && e != Z_BUF_ERROR) return false;
 
 	return true;

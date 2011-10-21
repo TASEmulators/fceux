@@ -1059,6 +1059,8 @@ void OpenProject()
 	ofn.lpstrTitle="Open TASEdit Project...";
 	ofn.lpstrFilter=TPfilter;
 
+  //TODO - this is a bug, as GetRomName() returns archive.7z|game.rom and that confuses GetOpenFileName()
+  //we need to use a different function to get a friendlier name (same as savestates and fm2 and the like)
 	char nameo[2048];								//File name
 	strcpy(nameo, GetRomName());					//For now, just use ROM name
 

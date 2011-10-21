@@ -40,9 +40,9 @@ void MARKERS::save(EMUFILE *os)
 	int len = markers_array.size();
 	uLongf comprlen = (len>>9)+12 + len;
 	std::vector<uint8> cbuf(comprlen);
-	compress(cbuf.data(), &comprlen, markers_array.data(), len);
+	compress(&cbuf[0], &comprlen, &markers_array[0], len);
 	write32le(comprlen, os);
-	os->fwrite(cbuf.data(), comprlen);
+	os->fwrite(&cbuf[0], comprlen);
 }
 // returns true if couldn't load
 bool MARKERS::load(EMUFILE *is)
@@ -61,8 +61,8 @@ bool MARKERS::load(EMUFILE *is)
 		if (!read32le(&comprlen, is)) goto error;
 		if (comprlen <= 0) goto error;
 		std::vector<uint8> cbuf(comprlen);
-		if (is->fread(cbuf.data(), comprlen) != comprlen) goto error;
-		int e = uncompress(markers_array.data(), &destlen, cbuf.data(), comprlen);
+		if (is->fread(&cbuf[0], comprlen) != comprlen) goto error;
+		int e = uncompress(&markers_array[0], &destlen, &cbuf[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
 		return false;
 	}
