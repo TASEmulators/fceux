@@ -98,7 +98,8 @@ else:
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
-      env.Append(LINKFLAGS = ["-ldl", "-llua"])
+      if conf.CheckLib('lua'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua"])
   
   ### Search for gd if we're not in Windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI'] and env['LOGO']:
