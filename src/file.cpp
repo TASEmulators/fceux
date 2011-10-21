@@ -460,6 +460,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 	}
 }
 
+  #ifndef asprintf
 	#ifndef HAVE_ASPRINTF
 	static int asprintf(char **strp, const char *fmt, ...)
 	{
@@ -474,6 +475,7 @@ void FCEUI_SetDirOverride(int which, char *n)
 		return(ret);
 	}
 	#endif
+  #endif
 
 std::string  FCEU_GetPath(int type)
 {
