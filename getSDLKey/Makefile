@@ -1,13 +1,12 @@
 PREFIX  = 	/usr
 OUTFILE = 	getSDLKey
 
-CC	=	gcc
+CC	=	g++
 OBJS	=	getSDLKey.o
-LIBS = -lSDL
-
+LIBS = $(shell sdl-config --cflags --libs)
 
 all:		${OBJS}
-		${CC} -o ${OUTFILE} ${LIBS} ${OBJS}
+		${CC} -o ${OUTFILE} ${OBJS} ${LIBS}
 
 clean:
 		rm -f ${OUTFILE} ${OBJS}
