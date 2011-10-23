@@ -1,6 +1,8 @@
 # Use this SConstruct if you are using scons < 1.x
 # Just replace the SConstruct file with this one
 # cp SConstruct.old SConstruct
+#
+# or just updated scons already
 
 import os
 import sys
