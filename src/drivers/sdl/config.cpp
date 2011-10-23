@@ -169,6 +169,7 @@ InitConfig()
     config->addOption("openglip", "SDL.OpenGLip", 0);
     config->addOption("SDL.SpecialFilter", 0);
     config->addOption("SDL.SpecialFX", 0);
+    config->addOption("SDL.Vsync", 1);
 
     // network play options - netplay is broken
     config->addOption("server", "SDL.NetworkIsServer", 0);

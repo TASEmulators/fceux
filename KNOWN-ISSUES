@@ -1,4 +1,0 @@
-SDL:
-  *  Single-window mode broken in OSX
-  *  F1 in GUI mode (with no terminal attached) causes endless hang
-  *  In OSX, Zapper input is taken in GTK window rather than SDL window
