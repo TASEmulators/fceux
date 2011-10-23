@@ -12,7 +12,7 @@ clean:
 		rm -f ${OUTFILE} ${OBJS}
 
 install:
-		install -m 755 -D fceux--server ${PREFIX}/bin/fceux-server
+		install -m 755 -D fceux-net-server ${PREFIX}/bin/fceux-server
 		install -m 644 -D fceux-server.conf /etc/fceux-server.conf
 
 server.o:	server.cpp

@@ -139,6 +139,7 @@ else:
 
 Export('env')
 fceux = SConscript('src/SConscript')
+env.Program(target="fceux-net-server", source=["fceux-server/server.cpp", "fceux-server/md5.cpp", "fceux-server/throttle.cpp"])
 # Install rules
 if prefix == None:
   prefix = "/usr/local"
@@ -173,3 +174,5 @@ env.Alias('install', env.Command(auxlib_inst_dst, auxlib_src, [Copy(auxlib_inst_
 env.Alias('install', env.Command(share_dst, share_src, [Copy(share_dst, share_src)]))
 env.Alias('install', env.Command(man_dst, man_src, [Copy(man_dst, man_src)]))
 env.Alias('install', (prefix + "/bin/"))
+
+

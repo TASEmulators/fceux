@@ -10,6 +10,8 @@ To compile and install FCEUX for SDL, follow these steps:
 
   4.  To install, run "scons install".  You can optionally define a prefix with "scons --prefix=/usr install"
 
+  5.  To compile the server, run "scons fceux-server" or run "make" in the "fceux-server" directory.
+
 Users of Microsoft Visual Studio can use the solution files within the vc directory.
 These solution files will compile FCEUX and some included libraries for full functionality.
 
