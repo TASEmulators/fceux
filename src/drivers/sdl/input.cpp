@@ -303,7 +303,7 @@ std::string GetUserText(const char* title)
 		g_config->getOption("SDL.Fullscreen", &fullscreen);
 		if(fullscreen)
 			ToggleFS(); // disable fullscreen emulation
-	/*
+	
 	FILE *fpipe;
 	std::string command = "zenity --entry --title=\"";
 	command.append(title);
@@ -416,7 +416,21 @@ KeyboardCommands()
 	#else
 	if(g_keyState[SDLK_LALT] || g_keyState[SDLK_RALT])
 	#endif
+  {
 		is_alt = 1;
+    #if !SDL_VERSION_ATLEAST(1, 3, 0)
+    // workaround for GDK->SDL in GTK problems where ALT release is never getting sent
+    // i know this is sort of an ugly hack to fix this, but the bug is rather annoying
+    // prg318 10/23/11
+    int fullscreen;
+    g_config->getOption("SDL.Fullscreen", &fullscreen);
+    if(!fullscreen)
+    {
+      g_keyState[SDLK_LALT] = 0;
+      g_keyState[SDLK_RALT] = 0;
+    }
+    #endif
+  }
 	else
 		is_alt = 0;
     
