@@ -1,6 +1,6 @@
 # Use this SConstruct if you are using scons < 1.x
 # Just replace the SConstruct file with this one
-# cp SConstruct.old SConstruct
+# cp SConstruct.pre1.0 SConstruct
 #
 # or just updated scons already
 
