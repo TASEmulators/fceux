@@ -1,3 +1,14 @@
+/////////////////////////////////////////////////////////////////
+// getSDLKey.cpp
+// Lukas Sabota - October, 2011
+//
+// Prints the corresponding SDL keysym for a key pressed
+//  into a SDL window.  Useful for remapping hotkeys in they
+//  ~/.fceux/fceux.cfg config file, but may be useful for other
+//  applications as well.
+//
+/////////////////////////////////////////////////////////////////
+
 #include<SDL/SDL.h>
 
 void DisplayState(SDL_KeyboardEvent *key)
@@ -49,6 +60,7 @@ int main(int argc, char** argv)
     atexit(SDL_Quit);
  
     screen = SDL_SetVideoMode(320, 240, 0, SDL_ANYFORMAT);
+    SDL_WM_SetCaption("Get SDL Keysyms! Now 50\% off!", NULL);
     if (screen == NULL)
     {
         printf("Unable to set video mode: %s\n", SDL_GetError());
