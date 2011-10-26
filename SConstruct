@@ -130,7 +130,7 @@ print "base CCFLAGS:",env['CCFLAGS']
 if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g'])
 else:
-  env.Append(CCFLAGS = ['O2'])
+  env.Append(CCFLAGS = ['-O2'])
 
 if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
   env.Append(CPPDEFINES=["CREATE_AVI"])
