@@ -159,6 +159,16 @@
 #define IDD_PROMPT                      157
 #define IDR_RWACCELERATOR               158
 #define IDD_LUA                         159
+#define IDB_BITMAP0                     163
+#define IDB_BITMAP1                     164
+#define IDB_BITMAP2                     165
+#define IDB_BITMAP3                     166
+#define IDB_BITMAP4                     167
+#define IDB_BITMAP5                     168
+#define IDB_BITMAP6                     169
+#define IDB_BITMAP7                     170
+#define IDB_BITMAP8                     171
+#define IDB_BITMAP9                     172
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -860,6 +870,7 @@
 #define ID_CONFIG_SETMAXUNDOLEVELS      40470
 #define ID_VIEW_X                       40471
 #define ID_VIEW_JUMPWHENMAKINGUNDO      40472
+#define ID_CONFIG_BRANCHESRESTOREFULLMOVIE 40473
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -868,8 +879,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        160
-#define _APS_NEXT_COMMAND_VALUE         40473
+#define _APS_NEXT_RESOURCE_VALUE        173
+#define _APS_NEXT_COMMAND_VALUE         40474
 #define _APS_NEXT_CONTROL_VALUE         1265
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

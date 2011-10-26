@@ -1810,7 +1810,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 			case MENU_DISPLAY_LAGCOUNTER:
-				lagCounterDisplay ^= 1;
+				LagCounterToggle();
 				UpdateCheckedMenuItems();
 				break;
 			case ID_DISPLAY_FRAMECOUNTER:
@@ -1818,7 +1818,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				UpdateCheckedMenuItems();
 				break;
 			case ID_DISPLAY_RERECORDCOUNTER:
-				rerecord_display ^= 1;
+				FCEUI_MovieToggleRerecordDisplay();
 				UpdateCheckedMenuItems();
 				break;
 			case ID_DISPLAY_MOVIESTATUSICON:
@@ -2791,7 +2791,17 @@ void UpdateMenuHotkeys()
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_FRAME_DISPLAY_TOGGLE]);
 	combined = "&Frame Counter\t" + combo;
 	ChangeMenuItemText(ID_DISPLAY_FRAMECOUNTER, combined);
-	
+
+	//Rerecord Counter
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_RERECORD_DISPLAY_TOGGLE]);
+	combined = "&Rerecord Counter\t" + combo;
+	ChangeMenuItemText(ID_DISPLAY_RERECORDCOUNTER, combined);
+
+	//Movie status icon
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE]);
+	combined = "&Movie status icon\t" + combo;
+	ChangeMenuItemText(ID_DISPLAY_MOVIESTATUSICON, combined);
+
 	//Graphics: BG
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_DISPLAY_BG_TOGGLE]);
 	combined = "Graphics: &BG\t" + combo;

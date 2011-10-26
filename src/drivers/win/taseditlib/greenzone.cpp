@@ -91,7 +91,8 @@ void GREENZONE::storeTasSavestate(int frame)
 void GREENZONE::GreenzoneCleaning()
 {
 	int i = currFrameCounter - TASEdit_greenzone_capacity;
-	if (i < 0) goto none_changed;
+	bool changed = false;
+	if (i < 0) goto finish;
 	int limit;
 	// 2x of 1/2
 	limit = i - 2 * TASEdit_greenzone_capacity;
@@ -99,7 +100,10 @@ void GREENZONE::GreenzoneCleaning()
 	for (; i > limit; i--)
 	{
 		if ((i & 0x1) && !savestates[i].empty())
+		{
 			ClearSavestate(i);
+			changed = true;
+		}
 	}
 	if (i < 0) goto finish;
 	// 4x of 1/4
@@ -108,7 +112,10 @@ void GREENZONE::GreenzoneCleaning()
 	for (; i > limit; i--)
 	{
 		if ((i & 0x3) && !savestates[i].empty())
+		{
 			ClearSavestate(i);
+			changed = true;
+		}
 	}
 	if (i < 0) goto finish;
 	// 8x of 1/8
@@ -117,7 +124,10 @@ void GREENZONE::GreenzoneCleaning()
 	for (; i > limit; i--)
 	{
 		if ((i & 0x7) && !savestates[i].empty())
+		{
 			ClearSavestate(i);
+			changed = true;
+		}
 	}
 	if (i < 0) goto finish;
 	// 16x of 1/16
@@ -126,17 +136,22 @@ void GREENZONE::GreenzoneCleaning()
 	for (; i > limit; i--)
 	{
 		if ((i & 0xF) && !savestates[i].empty())
+		{
 			ClearSavestate(i);
+			changed = true;
+		}
 	}
 	// clear all remaining
 	for (; i >= 0; i--)
 	{
 		if (!savestates[i].empty())
+		{
 			ClearSavestate(i);
+			changed = true;
+		}
 	}
 finish:
-	RedrawList();
-none_changed:
+	if (changed) RedrawList();
 	// shedule next cleaning
 	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
@@ -298,7 +313,8 @@ error:
 	return true;
 }
 
-void GREENZONE::InvalidateGreenZone(int after)
+// invalidate and restore playback
+void GREENZONE::InvalidateAndCheck(int after)
 {
 	if (after >= 0)
 	{
@@ -315,6 +331,21 @@ void GREENZONE::InvalidateGreenZone(int after)
 				else
 					playback.jump(greenZoneCount-1);
 			}
+		}
+	}
+	// redraw list even if greenzone didn't change
+	RedrawList();
+}
+// This version doesn't restore playback, may be used only by Branching functions!
+void GREENZONE::Invalidate(int after)
+{
+	if (after >= 0)
+	{
+		project.changed = true;
+		if (greenZoneCount > after+1)
+		{
+			greenZoneCount = after+1;
+			currMovieData.rerecordCount++;
 		}
 	}
 	// redraw list even if greenzone didn't change

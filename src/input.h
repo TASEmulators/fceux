@@ -5,6 +5,8 @@
 
 #include "git.h"
 
+void LagCounterToggle(void);
+
 class MovieRecord;
 
 //MBG TODO - COMBINE THESE INPUTC AND INPUTCFC
@@ -229,9 +231,10 @@ enum EMUCMD
 	EMUCMD_TOOL_RAMSEARCHEQ,
 	EMUCMD_TOOL_RAMSEARCHNE,
 	EMUCMD_TOOL_OPENNTVIEW,
+	EMUCMD_TASEDIT_REWIND,
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
-	EMUCMD_TASEDIT_REWIND,
+	EMUCMD_RERECORD_DISPLAY_TOGGLE,
 
 	EMUCMD_MAX
 };

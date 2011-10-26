@@ -26,8 +26,18 @@
 #define MODTYPE_BRANCH_7 21
 #define MODTYPE_BRANCH_8 22
 #define MODTYPE_BRANCH_9 23
-#define MODTYPE_MARKER_SET 24
-#define MODTYPE_MARKER_UNSET 25
+#define MODTYPE_BRANCH_MARKERS_0 24
+#define MODTYPE_BRANCH_MARKERS_1 25
+#define MODTYPE_BRANCH_MARKERS_2 26
+#define MODTYPE_BRANCH_MARKERS_3 27
+#define MODTYPE_BRANCH_MARKERS_4 28
+#define MODTYPE_BRANCH_MARKERS_5 29
+#define MODTYPE_BRANCH_MARKERS_6 30
+#define MODTYPE_BRANCH_MARKERS_7 31
+#define MODTYPE_BRANCH_MARKERS_8 32
+#define MODTYPE_BRANCH_MARKERS_9 33
+#define MODTYPE_MARKER_SET 34
+#define MODTYPE_MARKER_UNSET 35
 
 #define HISTORY_COHERENT_COLOR 0xF9DDE6
 #define HISTORY_NORMAL_COLOR 0xFFFFFF
@@ -53,6 +63,7 @@ public:
 	void AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp);
 
 	int RegisterChanges(int mod_type, int start = 0, int end =-1);
+	void RegisterBranch(int mod_type, int first_change, char* branch_creation_time);
 
 	int InputChanged(int start, int end);
 	int InputInserted(int start);

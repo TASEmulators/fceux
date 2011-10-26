@@ -418,6 +418,8 @@
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\tasedit.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
@@ -839,8 +841,19 @@
     <ResourceCompile Include="..\src\drivers\win\res.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\drivers\win\res\bitmap1.bmp" />
     <None Include="..\src\drivers\win\res\ICON_1.ico" />
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
+    <None Include="..\src\drivers\win\res\te_0.bmp" />
+    <None Include="..\src\drivers\win\res\te_1.bmp" />
+    <None Include="..\src\drivers\win\res\te_2.bmp" />
+    <None Include="..\src\drivers\win\res\te_3.bmp" />
+    <None Include="..\src\drivers\win\res\te_4.bmp" />
+    <None Include="..\src\drivers\win\res\te_5.bmp" />
+    <None Include="..\src\drivers\win\res\te_6.bmp" />
+    <None Include="..\src\drivers\win\res\te_7.bmp" />
+    <None Include="..\src\drivers\win\res\te_8.bmp" />
+    <None Include="..\src\drivers\win\res\te_9.bmp" />
     <None Include="..\src\drivers\win\res\te_arrow.bmp" />
     <CustomBuild Include="..\src\drivers\win\help\fceux.chm">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -858,6 +871,16 @@
     </CustomBuild>
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="res\te_0.bmp" />
+    <None Include="res\te_1.bmp" />
+    <None Include="res\te_2.bmp" />
+    <None Include="res\te_3.bmp" />
+    <None Include="res\te_4.bmp" />
+    <None Include="res\te_5.bmp" />
+    <None Include="res\te_6.bmp" />
+    <None Include="res\te_7.bmp" />
+    <None Include="res\te_8.bmp" />
+    <None Include="res\te_9.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,34 +13,45 @@ extern bool TASEdit_bind_markers;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
+extern MARKERS markers;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
-char modCaptions[26][12] = {"Init",
-							"Change",
-							"Set",
-							"Unset",
-							"Insert",
-							"Delete",
-							"Truncate",
-							"Clear",
-							"Cut",
-							"Paste",
-							"PasteInsert",
-							"Clone",
-							"Record",
-							"Import",
-							"Branch0",
-							"Branch1",
-							"Branch2",
-							"Branch3",
-							"Branch4",
-							"Branch5",
-							"Branch6",
-							"Branch7",
-							"Branch8",
-							"Branch9",
-							"Mark Set",
-							"Mark Unset"};
+char modCaptions[36][20] = {" Init",
+							" Change",
+							" Set",
+							" Unset",
+							" Insert",
+							" Delete",
+							" Truncate",
+							" Clear",
+							" Cut",
+							" Paste",
+							" PasteInsert",
+							" Clone",
+							" Record",
+							" Import",
+							" Branch0 to ",
+							" Branch1 to ",
+							" Branch2 to ",
+							" Branch3 to ",
+							" Branch4 to ",
+							" Branch5 to ",
+							" Branch6 to ",
+							" Branch7 to ",
+							" Branch8 to ",
+							" Branch9 to ",
+							" Marker Branch0 to ",
+							" Marker Branch1 to ",
+							" Marker Branch2 to ",
+							" Marker Branch3 to ",
+							" Marker Branch4 to ",
+							" Marker Branch5 to ",
+							" Marker Branch6 to ",
+							" Marker Branch7 to ",
+							" Marker Branch8 to ",
+							" Marker Branch9 to ",
+							" Marker Set",
+							" Marker Unset"};
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
@@ -62,7 +73,7 @@ void INPUT_HISTORY::init(int new_size)
 	history_cursor_pos = -1;
 	// create initial snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData);
+	inp.init(currMovieData, true);
 	strcat(inp.description, modCaptions[0]);
 	inp.jump_frame = -1;
 	AddInputSnapshotToHistory(inp);
@@ -117,21 +128,28 @@ int INPUT_HISTORY::jump(int new_pos)
 	show_undo_hint = true;
 
 	// update markers
+	bool markers_changed = false;
 	if (TASEdit_bind_markers)
 	{
 		if (input_snapshots[real_pos].checkMarkersDiff())
 		{
 			input_snapshots[real_pos].toMarkers();
 			project.changed = true;
+			markers_changed = true;
 		}
 	}
 
 	// update current movie
 	int first_change = input_snapshots[real_pos].findFirstChange(currMovieData);
 	if (first_change >= 0)
+	{
+		currMovieData.records.resize(input_snapshots[real_pos].size);
 		input_snapshots[real_pos].toMovie(currMovieData, first_change);
-	else
+	} else if (markers_changed)
+	{
+		markers.update();
 		RedrawList();
+	}
 
 	return first_change;
 }
@@ -183,16 +201,17 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 	RedrawHistoryList();
 }
 
+
 // returns frame of first actual change
 int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 {
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData);
+	inp.init(currMovieData, true);
 	if (mod_type == MODTYPE_MARKER_SET || mod_type == MODTYPE_MARKER_UNSET)
 	{
 		// special case: changed markers, but input didn't change
-		// fill description
+		// fill description:
 		strcat(inp.description, modCaptions[mod_type]);
 		inp.jump_frame = start;
 		// add the frame to description
@@ -210,6 +229,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 		return -1;
 	} else
 	{
+		// all other types of modification:
 		// check if there are input differences from latest snapshot
 		int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 		int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
@@ -220,7 +240,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 
 			// highlight new hot changes
 
-			// fill description
+			// fill description:
 			strcat(inp.description, modCaptions[mod_type]);
 			switch (mod_type)
 			{
@@ -231,11 +251,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 				case MODTYPE_CLEAR:
 				case MODTYPE_CUT:
 				case MODTYPE_IMPORT:
-				case MODTYPE_BRANCH_0: case MODTYPE_BRANCH_1:
-				case MODTYPE_BRANCH_2: case MODTYPE_BRANCH_3:
-				case MODTYPE_BRANCH_4: case MODTYPE_BRANCH_5:
-				case MODTYPE_BRANCH_6: case MODTYPE_BRANCH_7:
-				case MODTYPE_BRANCH_8: case MODTYPE_BRANCH_9:
 				{
 					inp.jump_frame = first_changes;
 					break;
@@ -277,6 +292,17 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 		}
 		return first_changes;
 	}
+}
+void INPUT_HISTORY::RegisterBranch(int mod_type, int first_change, char* branch_creation_time)
+{
+	// create new input shanshot
+	INPUT_SNAPSHOT inp;
+	inp.init(currMovieData, true);
+	// fill description:
+	strcat(inp.description, modCaptions[mod_type]);
+	strcat(inp.description, branch_creation_time);
+	inp.jump_frame = first_change;
+	AddInputSnapshotToHistory(inp);
 }
 
 void INPUT_HISTORY::save(EMUFILE *os)
@@ -326,7 +352,7 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 			num_snapshots_to_skip -= num_redo_snapshots;
 			// and still need to skip some undo snapshots
 			for (i = 0; i < num_snapshots_to_skip; ++i)
-				if (!inp.skipLoad(is)) goto error;
+				if (inp.skipLoad(is)) goto error;
 			total -= num_snapshots_to_skip;
 			history_cursor_pos -= num_snapshots_to_skip;
 		}
@@ -336,12 +362,12 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 	for (i = 0; i < history_total_items; ++i)
 	{
 		// skip snapshots if current history_size is less then history_total_items
-		if (!input_snapshots[i].load(is)) goto error;
+		if (input_snapshots[i].load(is)) goto error;
 		playback.SetProgressbar(i, history_total_items);
 	}
 	// skip redo snapshots if needed
 	for (; i < total; ++i)
-		if (!inp.skipLoad(is)) goto error;
+		if (inp.skipLoad(is)) goto error;
 
 	// init vars
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
@@ -374,7 +400,6 @@ LONG INPUT_HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
 				msg->clrTextBk = HISTORY_COHERENT_COLOR;
 			else
 				msg->clrTextBk = HISTORY_NORMAL_COLOR;
-			return CDRF_DODEFAULT;
 		}
 	default:
 		return CDRF_DODEFAULT;
@@ -393,7 +418,7 @@ void INPUT_HISTORY::Click(LPNMITEMACTIVATE info)
 		{
 			UpdateList();
 			FollowUndo();
-			greenzone.InvalidateGreenZone(result);
+			greenzone.InvalidateAndCheck(result);
 			return;
 		}
 	}

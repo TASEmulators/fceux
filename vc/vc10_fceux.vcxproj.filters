@@ -912,6 +912,8 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1375,6 +1377,27 @@
     </None>
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="..\src\drivers\win\res\bitmap1.bmp" />
+    <None Include="res\te_0.bmp" />
+    <None Include="res\te_1.bmp" />
+    <None Include="res\te_2.bmp" />
+    <None Include="res\te_3.bmp" />
+    <None Include="res\te_4.bmp" />
+    <None Include="res\te_5.bmp" />
+    <None Include="res\te_6.bmp" />
+    <None Include="res\te_7.bmp" />
+    <None Include="res\te_8.bmp" />
+    <None Include="res\te_9.bmp" />
+    <None Include="..\src\drivers\win\res\te_0.bmp" />
+    <None Include="..\src\drivers\win\res\te_1.bmp" />
+    <None Include="..\src\drivers\win\res\te_2.bmp" />
+    <None Include="..\src\drivers\win\res\te_3.bmp" />
+    <None Include="..\src\drivers\win\res\te_4.bmp" />
+    <None Include="..\src\drivers\win\res\te_5.bmp" />
+    <None Include="..\src\drivers\win\res\te_6.bmp" />
+    <None Include="..\src\drivers\win\res\te_7.bmp" />
+    <None Include="..\src\drivers\win\res\te_8.bmp" />
+    <None Include="..\src\drivers\win\res\te_9.bmp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

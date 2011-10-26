@@ -37,6 +37,7 @@ bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_markers = true;
 bool TASEdit_bind_markers = true;
+bool TASEdit_branch_full_movie = true;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 extern bool muteTurbo;
@@ -52,7 +53,8 @@ char windowCaptions[6][30] = {	"TAS Editor",
 								"TAS Editor (Recording 2P)",
 								"TAS Editor (Recording 3P)",
 								"TAS Editor (Recording 4P)"};
-char bookmarksCaption[2][23] = { " Bookmarks ", " Bookmarks / Branches " };
+// hot changes color table
+COLORREF hot_changes_colors[16] = { 0x0, 0x41f2c, 0x62a3b, 0x7344a, 0x93f59, 0xb4968, 0xc5477, 0xe5e86, 0xf6995, 0x1174a4, 0x127eb3, 0x1489c2, 0x1693d1, 0x179ee0, 0x19a8ef, 0x1bb4ff };
 
 HWND hwndTasEdit = 0;
 HMENU hmenu, hrmenu;
@@ -65,6 +67,7 @@ WNDPROC hwndBookmarksList_oldWndProc;
 HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
 
+HFONT hMainListFont;
 
 typedef std::set<int> TSelectionFrames;
 static TSelectionFrames selectionFrames;
@@ -79,6 +82,7 @@ INPUT_HISTORY history;
 PLAYBACK playback;
 GREENZONE greenzone;
 MARKERS markers;
+BOOKMARKS bookmarks;
 
 void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -88,11 +92,20 @@ void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 		switch(item.iSubItem)
 		{
 			case COLUMN_ICONS:
-			if(item.iImage == I_IMAGECALLBACK && item.iItem == currFrameCounter)
-				item.iImage = 0;
-			else
-				item.iImage = -1;
-			break;
+			{
+				if(item.iImage == I_IMAGECALLBACK)
+				{
+					item.iImage = bookmarks.FindBookmarkAtFrame(item.iItem);
+					if (item.iImage < 0)
+					{
+						if (item.iItem == currFrameCounter)
+							item.iImage = ARROW_IMAGE_ID;
+						else
+							item.iImage = -1;
+					}
+				}
+				break;
+			}
 			case COLUMN_FRAMENUM:
 			case COLUMN_FRAMENUM2:
 			{
@@ -129,11 +142,6 @@ void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 	}
 }
 
-#define CDDS_SUBITEMPREPAINT       (CDDS_SUBITEM | CDDS_ITEMPREPAINT)
-#define CDDS_SUBITEMPOSTPAINT      (CDDS_SUBITEM | CDDS_ITEMPOSTPAINT)
-#define CDDS_SUBITEMPREERASE       (CDDS_SUBITEM | CDDS_ITEMPREERASE)
-#define CDDS_SUBITEMPOSTERASE      (CDDS_SUBITEM | CDDS_ITEMPOSTERASE)
-
 LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	int cell_x, cell_y;
@@ -144,7 +152,6 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 	case CDDS_ITEMPREPAINT:
 		return CDRF_NOTIFYSUBITEMDRAW;
 	case CDDS_SUBITEMPREPAINT:
-		SelectObject(msg->nmcd.hdc,debugSystem->hFixedFont);
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
 
@@ -152,6 +159,7 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 
 		if(cell_x > COLUMN_ICONS)
 		{
+			SelectObject(msg->nmcd.hdc, hMainListFont);
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
 				// frame number
@@ -255,7 +263,6 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
 			}
 		}
-		return CDRF_DODEFAULT;
 	default:
 		return CDRF_DODEFAULT;
 	}
@@ -270,6 +277,7 @@ void UpdateTasEdit()
 	
 	greenzone.update();
 	playback.update();
+	bookmarks.update();
 	history.update();
 
 	// update window caption
@@ -279,7 +287,7 @@ void UpdateTasEdit()
 
 	// update Bookmarks/Branches groupbox caption
 	if (old_movie_readonly != movie_readonly)
-		RedrawBookmarksCaption();
+		bookmarks.RedrawBookmarksCaption();
 
 	// update recording radio buttons if user used hotkey to switch R/W
 	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
@@ -335,21 +343,19 @@ void RedrawWindowCaption()
 		strcat(windowCaption, "*");
 	SetWindowText(hwndTasEdit, windowCaption);
 }
-void RedrawBookmarksCaption()
-{
-	SetWindowText(hwndBookmarks, bookmarksCaption[(movie_readonly)?0:1]);
-}
 void RedrawTasedit()
 {
-	InvalidateRect(hwndTasEdit,0,FALSE);
+	InvalidateRect(hwndTasEdit, 0, FALSE);
 }
 void RedrawList()
 {
-	InvalidateRect(hwndList,0,FALSE);
+	InvalidateRect(hwndList, 0, FALSE);
+	bookmarks.RedrawBookmarksList();
 }
 void RedrawRow(int index)
 {
-	ListView_RedrawItems(hwndList,index,index);
+	ListView_RedrawItems(hwndList, index, index);
+	bookmarks.RedrawChangedBookmarks(index);
 }
 
 enum ECONTEXTMENU
@@ -402,7 +408,7 @@ void RightClick(LPNMITEMACTIVATE info)
 
 void InputChangedRec()
 {
-	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_RECORD, currFrameCounter, currFrameCounter));
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_RECORD, currFrameCounter, currFrameCounter));
 }
 
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
@@ -416,15 +422,15 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 		{
 			currMovieData.records[*it].toggleBit(joy,bit);
 		}
-		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CHANGE, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CHANGE, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	} else
 	{
 		//update one row
 		currMovieData.records[row_index].toggleBit(joy,bit);
 		if (currMovieData.records[row_index].checkBit(joy,bit))
-			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
 		else
-			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
 	}
 	
 }
@@ -440,7 +446,6 @@ void SingleClick(LPNMITEMACTIVATE info)
 		// click on the "icons" column - jump to the frame
 		ClearSelection();
 		playback.jump(row_index);
-		RedrawList();
 	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 	{
 		// click on the "frame number" column - set marker if clicked with Alt
@@ -476,7 +481,6 @@ void DoubleClick(LPNMITEMACTIVATE info)
 		// double click sends playback to the frame
 		ClearSelection();
 		playback.jump(row_index);
-		RedrawList();
 	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 	{
 		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
@@ -506,7 +510,7 @@ void CloneFrames()
 		} else frames++;
 	}
 	UpdateList();
-	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CLONE, *selectionFrames.begin()));
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLONE, *selectionFrames.begin()));
 }
 
 void InsertFrames()
@@ -533,7 +537,7 @@ void InsertFrames()
 		} else frames++;
 	}
 	UpdateList();
-	greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, *selectionFrames.begin()));
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, *selectionFrames.begin()));
 }
 
 void DeleteFrames()
@@ -556,10 +560,10 @@ void DeleteFrames()
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
 	{
-		greenzone.InvalidateGreenZone(result);
+		greenzone.InvalidateAndCheck(result);
 	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 	{
-		greenzone.InvalidateGreenZone(currMovieData.getNumRecords()-1);
+		greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
 	} else RedrawList();
 }
 
@@ -571,9 +575,9 @@ void ClearFrames(bool cut)
 		currMovieData.records[*it].clear();
 	}
 	if (cut)
-		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CUT, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CUT, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	else
-		greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_CLEAR, *selectionFrames.begin(), *selectionFrames.rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLEAR, *selectionFrames.begin(), *selectionFrames.rbegin()));
 }
 
 void Truncate()
@@ -591,10 +595,10 @@ void Truncate()
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
-			greenzone.InvalidateGreenZone(result);
+			greenzone.InvalidateAndCheck(result);
 		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 		{
-			greenzone.InvalidateGreenZone(currMovieData.getNumRecords()-1);
+			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
 		} else RedrawList();
 	}
 }
@@ -651,9 +655,9 @@ void ColumnSet(int column)
 		for(TSelectionFrames::iterator it(selectionFrames.begin()); it != selectionFrames.end(); it++)
 			currMovieData.records[*it].setBitValue(joy,button,newValue);
 		if (newValue)
-			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_SET, *selectionFrames.begin(), *selectionFrames.rbegin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *selectionFrames.begin(), *selectionFrames.rbegin()));
 		else
-			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin()));
 	}
 }
 
@@ -890,7 +894,7 @@ bool Paste()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
-			greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_PASTE, *selectionFrames.begin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *selectionFrames.begin()));
 			result = true;
 		}
 
@@ -902,7 +906,7 @@ bool Paste()
 }
 // ---------------------------------------------------------------------------------
 //The subclass wndproc for the listview header
-LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
 	{
@@ -924,18 +928,18 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		return true;
 	}
-	return CallWindowProc(hwndHeader_oldWndproc,hWnd,msg,wParam,lParam);
+	return CallWindowProc(hwndHeader_oldWndproc, hWnd, msg, wParam, lParam);
 }
 
 //The subclass wndproc for the listview
-LRESULT APIENTRY ListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
 	{
-	case WM_CHAR:
-	case WM_KILLFOCUS:
-		return 0;
-	case WM_NOTIFY:
+		case WM_CHAR:
+		case WM_KILLFOCUS:
+			return 0;
+		case WM_NOTIFY:
 		{
 			switch (((LPNMHDR)lParam)->code)
 			{
@@ -946,22 +950,53 @@ LRESULT APIENTRY ListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			break;
 		}
-
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
 	}
-	return CallWindowProc(hwndList_oldWndProc,hWnd,msg,wParam,lParam);
+	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+}
+
+LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_CHAR:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS:
+			return 0;
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
+	}
+	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
 }
 
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	switch(msg)
 	{
-	case WM_CHAR:
-	case WM_KEYDOWN:
-	case WM_KEYUP:
-	case WM_KILLFOCUS:
-		return 0;
+		case WM_CHAR:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_KILLFOCUS:
+			return 0;
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
 	}
-	return CallWindowProc(hwndList_oldWndProc,hWnd,msg,wParam,lParam);
+	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
 }
 
 void AddFourscore()
@@ -1102,7 +1137,7 @@ void OpenProject()
 		FollowPlayback();
 		RedrawTasedit();
 		RedrawWindowCaption();
-		RedrawBookmarksCaption();
+		bookmarks.RedrawBookmarksCaption();
 	}
 }
 
@@ -1256,8 +1291,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	switch(uMsg)
 	{
 		case WM_PAINT:
-			{
-			}
 			break;
 		case WM_INITDIALOG:
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
@@ -1336,6 +1369,23 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					*/
 				}
 				break;
+			case IDC_BOOKMARKSLIST:
+				switch(((LPNMHDR)lParam)->code)
+				{
+				case NM_CUSTOMDRAW:
+					SetWindowLong(hwndDlg, DWL_MSGRESULT, bookmarks.CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					return TRUE;
+				case LVN_GETDISPINFO:
+					bookmarks.GetDispInfo((NMLVDISPINFO*)lParam);
+					break;
+				case NM_CLICK:
+				case NM_DBLCLK:
+					bookmarks.LeftClick((LPNMITEMACTIVATE)lParam);
+					break;
+				case NM_RCLICK:
+					bookmarks.RightClick((LPNMITEMACTIVATE)lParam);
+				}
+				break;
 			case IDC_HISTORYLIST:
 				switch(((LPNMHDR)lParam)->code)
 				{
@@ -1350,7 +1400,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case NM_RCLICK:
 					history.Click((LPNMITEMACTIVATE)lParam);
 					break;
-
 				}
 				break;
 			case TASEDIT_PLAYSTOP:
@@ -1447,14 +1496,14 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								currMovieData.insertEmpty(index, frames);
 								if (TASEdit_bind_markers)
 									markers.insertEmpty(index, frames);
-								greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, index));
+								greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, index));
 							} else
 							{
 								// insert at playback cursor
 								currMovieData.insertEmpty(currFrameCounter, frames);
 								if (TASEdit_bind_markers)
 									markers.insertEmpty(currFrameCounter, frames);
-								greenzone.InvalidateGreenZone(history.RegisterChanges(MODTYPE_INSERT, currFrameCounter));
+								greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, currFrameCounter));
 							}
 						}
 					}
@@ -1547,7 +1596,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							history.init(TasEdit_undo_levels);
 							// hot changes were cleared, so update list
 							RedrawList();
-							//RedrawUndoList();
 						}
 					}
 					break;
@@ -1560,6 +1608,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//switch "Bind Markers to Input" flag
 				TASEdit_bind_markers ^= 1;
 				CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
+				break;
+			case ID_CONFIG_BRANCHESRESTOREFULLMOVIE:
+				//switch "Branches restore entire Movie" flag
+				TASEdit_branch_full_movie ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
 				break;
 			case IDC_PROGRESS_BUTTON:
 				// click on progressbar - stop seeking
@@ -1612,7 +1665,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					{
 						UpdateList();
 						FollowUndo();
-						greenzone.InvalidateGreenZone(result);
+						greenzone.InvalidateAndCheck(result);
 					}
 					break;
 				}
@@ -1624,13 +1677,19 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					{
 						UpdateList();
 						FollowUndo();
-						greenzone.InvalidateGreenZone(result);
+						greenzone.InvalidateAndCheck(result);
 					}
 					break;
 				}
 
 			}
 			break;
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
 
 		default:
 			break;
@@ -1766,6 +1825,7 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOWDOTINEMPTYCELLS, TASEdit_show_dot?MF_CHECKED : MF_UNCHECKED);
@@ -1793,20 +1853,58 @@ void EnterTasEdit()
 		RecheckRecordingRadioButtons();
 		movieMode = MOVIEMODE_TASEDIT;
 
-		//prepare the main listview
-		ListView_SetExtendedListViewStyleEx(hwndList,LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES,LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-		//subclass the header
+		// create font for main listview
+		hMainListFont = CreateFont(13, 8,				/*Height,Width*/
+			0, 0,										/*escapement,orientation*/
+			FW_REGULAR, FALSE, FALSE, FALSE,			/*weight, italic, underline, strikeout*/
+			ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+			DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+			"Courier");									/*font name*/
+
+		// prepare the main listview
+		ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+		// subclass the header
 		hwndHeader = ListView_GetHeader(hwndList);
-		hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader,GWL_WNDPROC,(LONG)HeaderWndProc);
-		//subclass the whole listview
-		hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList,GWL_WNDPROC,(LONG)ListWndProc);
-		//setup images for the listview
-		HIMAGELIST himglist = ImageList_Create(8,12,ILC_COLOR8 | ILC_MASK,1,1);
-		HBITMAP bmp = LoadBitmap(fceu_hInstance,MAKEINTRESOURCE(IDB_TE_ARROW));
+		hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
+		// subclass the whole listview
+		hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LONG)ListWndProc);
+		// setup images for the listview
+		HIMAGELIST himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
+		HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
 		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
 		DeleteObject(bmp);
-		ListView_SetImageList(hwndList,himglist,LVSIL_SMALL);
-		//setup columns
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_TE_ARROW));
+		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		DeleteObject(bmp);
+		ListView_SetImageList(hwndList, himglist, LVSIL_SMALL);
+		// setup columns
 		LVCOLUMN lvc;
 		int colidx=0;
 		// icons column
@@ -1816,7 +1914,7 @@ void EnterTasEdit()
 		// frame number column
 		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 		lvc.fmt = LVCFMT_CENTER;
-		lvc.cx = 75;
+		lvc.cx = 74;
 		lvc.pszText = "Frame#";
 		ListView_InsertColumn(hwndList, colidx++, &lvc);
 		// pads columns
@@ -1834,10 +1932,30 @@ void EnterTasEdit()
 		if (currMovieData.fourscore) AddFourscore();
 		UpdateList();
 
-		//prepare the history listview
-		ListView_SetExtendedListViewStyleEx(hwndHistoryList,LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES,LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-		//subclass the whole listview
-		hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList,GWL_WNDPROC,(LONG)HistoryListWndProc);
+		// prepare bookmarks listview
+		ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+		// subclass the listview
+		hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
+		// setup same images for the listview
+		ListView_SetImageList(hwndBookmarksList, himglist, LVSIL_SMALL);
+		// setup columns
+		// icons column
+		lvc.mask = LVCF_WIDTH;
+		lvc.cx = 13;
+		ListView_InsertColumn(hwndBookmarksList, 0, &lvc);
+		// jump_frame column
+		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
+		lvc.fmt = LVCFMT_CENTER;
+		lvc.cx = 72;
+		ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
+		// time column
+		lvc.cx = 82;
+		ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
+
+		// prepare the history listview
+		ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+		// subclass the listview
+		hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
 		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 		lvc.cx = 200;
 		lvc.fmt = LVCFMT_LEFT;
@@ -1846,8 +1964,10 @@ void EnterTasEdit()
 		// init variables
 		markers.init();
 		project.init();
+		bookmarks.init();
 		history.init(TasEdit_undo_levels);
-		SetFocus(hwndHistoryList);
+		SetFocus(hwndHistoryList);		// to show darkblue cursor
+		SetFocus(hwndList);
 		FCEU_DispMessage("Tasedit engaged",0);
 	}
 }
@@ -1872,6 +1992,7 @@ bool ExitTasEdit()
 	// release memory
 	markers.free();
 	greenzone.clearGreenzone();
+	bookmarks.free();
 	history.free();
 	playback.SeekingStop();
 

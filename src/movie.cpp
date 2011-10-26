@@ -40,9 +40,9 @@
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 
+#include "./drivers/win/taseditlib/playback.h"
 extern void InputChangedRec();
-extern int TASEdit_greenzone_capacity;
-extern bool TASEdit_bind_markers;
+extern PLAYBACK playback;
 #endif
 
 using namespace std;
@@ -1409,6 +1409,11 @@ void FCEUI_MovieToggleFrameDisplay(void)
 	frame_display=!frame_display;
 }
 
+void FCEUI_MovieToggleRerecordDisplay()
+{
+	rerecord_display ^= 1;
+}
+
 void FCEUI_ToggleInputDisplay(void)
 {
 	switch(input_display)
@@ -1488,7 +1493,13 @@ void FCEUI_MovieToggleReadOnly()
 
 void FCEUI_MoviePlayFromBeginning(void)
 {
-	if (movieMode != MOVIEMODE_INACTIVE && movieMode != MOVIEMODE_TASEDIT)
+	if (movieMode == MOVIEMODE_TASEDIT)
+	{
+		movie_readonly = true;
+#ifdef WIN32
+		playback.jump(0);
+#endif
+	} else if (movieMode != MOVIEMODE_INACTIVE)
 	{
 		if (currMovieData.savestate.empty())
 		{

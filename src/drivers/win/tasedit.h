@@ -1,4 +1,7 @@
-
+#define CDDS_SUBITEMPREPAINT       (CDDS_SUBITEM | CDDS_ITEMPREPAINT)
+#define CDDS_SUBITEMPOSTPAINT      (CDDS_SUBITEM | CDDS_ITEMPOSTPAINT)
+#define CDDS_SUBITEMPREERASE       (CDDS_SUBITEM | CDDS_ITEMPREERASE)
+#define CDDS_SUBITEMPOSTERASE      (CDDS_SUBITEM | CDDS_ITEMPOSTERASE)
 
 #define NUM_JOYPADS 4
 #define NUM_JOYPAD_BUTTONS 8
@@ -55,9 +58,10 @@
 #define COLUMN_JOYPAD4_R 33
 #define COLUMN_FRAMENUM2 34
 #define DIGITS_IN_FRAMENUM 7
+#define ARROW_IMAGE_ID 10
 // listview colors
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
-#define NORMAL_INPUT_COLOR1 0xF0F0F0
+#define NORMAL_INPUT_COLOR1 0xEDEDED
 #define NORMAL_INPUT_COLOR2 0xDEDEDE
 
 #define GREENZONE_FRAMENUM_COLOR 0xDDFFDD
@@ -110,7 +114,6 @@ void ClearRowSelection(int index);
 void AddFourscore();
 void RemoveFourscore();
 void RedrawWindowCaption();
-void RedrawBookmarksCaption();
 void RedrawTasedit();
 void RedrawList();
 void RedrawRow(int index);

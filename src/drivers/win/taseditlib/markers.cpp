@@ -25,7 +25,7 @@ void MARKERS::free()
 
 void MARKERS::update()
 {
-	if (markers_array.size() < currMovieData.getNumRecords())
+	if ((int)markers_array.size() < currMovieData.getNumRecords())
 		markers_array.resize(currMovieData.getNumRecords());
 }
 

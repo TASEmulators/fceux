@@ -270,6 +270,7 @@ int FCEUI_GetMovieLength();
 int FCEUI_GetMovieRerecordCount();
 std::string FCEUI_GetMovieName(void);
 void FCEUI_MovieToggleFrameDisplay();
+void FCEUI_MovieToggleRerecordDisplay();
 void FCEUI_ToggleInputDisplay(void);
 
 void LoadSubtitles(MovieData &);

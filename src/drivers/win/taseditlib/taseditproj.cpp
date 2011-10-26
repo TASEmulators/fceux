@@ -4,6 +4,7 @@
 #include "taseditproj.h"
 
 extern MARKERS markers;
+extern BOOKMARKS bookmarks;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern INPUT_HISTORY history;
@@ -46,6 +47,7 @@ bool TASEDIT_PROJECT::saveProject()
 	
 	currMovieData.dump(ofs, true);
 	markers.save(ofs);
+	bookmarks.save(ofs);
 	greenzone.save(ofs);
 	history.save(ofs);
 
@@ -76,6 +78,15 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	{
 		FCEU_printf("Error loading markers\n");
 		markers.init();
+	} else
+	{
+		// try to load bookmarks
+		error = bookmarks.load(&ifs);
+	}
+	if (error)
+	{
+		FCEU_printf("Error loading bookmarks\n");
+		bookmarks.init();
 	} else
 	{
 		// try to load greenzone

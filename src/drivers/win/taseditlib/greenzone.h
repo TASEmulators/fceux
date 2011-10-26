@@ -25,7 +25,8 @@ public:
 	void GreenzoneCleaning();
 	void ClearSavestate(int index);
 
-	void InvalidateGreenZone(int after);
+	void InvalidateAndCheck(int after);
+	void Invalidate(int after);
 
 	int FindBeginningOfGreenZone(int starting_index = 0);
 

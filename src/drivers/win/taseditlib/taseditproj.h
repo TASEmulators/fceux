@@ -6,6 +6,7 @@
 #include "playback.h"
 #include "greenzone.h"
 #include "markers.h"
+#include "bookmarks.h"
 
 class TASEDIT_PROJECT
 {

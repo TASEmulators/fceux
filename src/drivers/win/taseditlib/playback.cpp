@@ -171,7 +171,7 @@ void PLAYBACK::ToggleEmulationPause()
 void PLAYBACK::PauseEmulation()
 {
 	FCEUI_SetEmulationPaused(1);
-	RedrawList();	// to show some "pale" greenzone
+	//RedrawList();	// to show some "pale" greenzone
 	// make some additional stuff
 }
 void PLAYBACK::UnpauseEmulation()
@@ -193,19 +193,17 @@ void PLAYBACK::SeekingStop()
 	turbo = false;
 	PauseEmulation();
 	SetProgressbar(1, 1);
-	RedrawList();	// to show some "pale" greenzone
+	//RedrawList();	// to show some "pale" greenzone
 }
 
 void PLAYBACK::RewindFrame()
 {
 	if (currFrameCounter > 0) jump(currFrameCounter-1);
-	FollowPlayback();
 }
 void PLAYBACK::ForwardFrame()
 {
 	jump(currFrameCounter+1);
 	turbo = false;
-	FollowPlayback();
 }
 void PLAYBACK::RewindFull()
 {
@@ -220,7 +218,6 @@ void PLAYBACK::RewindFull()
 		else if (currFrameCounter > 0)
 			jump(0);
 	}
-	FollowPlayback();
 }
 void PLAYBACK::ForwardFull()
 {
@@ -236,7 +233,6 @@ void PLAYBACK::ForwardFull()
 		else if (currFrameCounter < last_frame)
 			jump(last_frame);
 	}
-	FollowPlayback();
 }
 
 void PLAYBACK::StartFromZero()
@@ -249,7 +245,10 @@ void PLAYBACK::StartFromZero()
 void PLAYBACK::jump(int frame)
 {
 	if (JumpToFrame(frame))
+	{
 		ForceExecuteLuaFrameFunctions();
+		FollowPlayback();
+	}
 }
 void PLAYBACK::restorePosition()
 {
@@ -262,12 +261,12 @@ void PLAYBACK::restorePosition()
 bool PLAYBACK::JumpToFrame(int index)
 {
 	// Returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
-	if (index<0) return false;
+	if (index < 0) return false;
 
 	if (index >= greenzone.greenZoneCount)
 	{
 		// handle jump outside greenzone
-		if (JumpToFrame(greenzone.greenZoneCount-1))
+		if (currFrameCounter == greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
 			// seek from the end of greenzone
 			SeekingStart(index+1);
 		return false;
@@ -275,7 +274,6 @@ bool PLAYBACK::JumpToFrame(int index)
 	/* Handle jumps inside greenzone. */
 	if (greenzone.loadTasSavestate(index))
 	{
-		currFrameCounter = index;
 		turbo = false;
 		// if playback was seeking, pause emulation right here
 		if (pauseframe) SeekingStop();
