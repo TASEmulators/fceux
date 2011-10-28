@@ -871,6 +871,7 @@
 #define ID_VIEW_X                       40471
 #define ID_VIEW_JUMPWHENMAKINGUNDO      40472
 #define ID_CONFIG_BRANCHESRESTOREFULLMOVIE 40473
+#define ID_CONFIG_BRANCHESWORKONLYWHENRECORDING 40474
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -880,7 +881,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        173
-#define _APS_NEXT_COMMAND_VALUE         40474
+#define _APS_NEXT_COMMAND_VALUE         40475
 #define _APS_NEXT_CONTROL_VALUE         1265
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

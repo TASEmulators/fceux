@@ -179,9 +179,14 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 		{
 			// overwrite old snapshot
 			real_pos = (history_start_pos + history_cursor_pos) % history_size;
-			// compare with the snapshot we're going to overwrite, if it's different then break the chain of coherent snapshots
+			// compare with the snapshot we're going to overwrite, if it's different then truncate history after this item
 			if (input_snapshots[real_pos].checkDiff(inp) || input_snapshots[real_pos].checkMarkersDiff(inp))
 			{
+				history_total_items = history_cursor_pos+1;
+				UpdateHistoryList();
+			} else
+			{
+				// it's not different - don't truncate history, but break the chain of coherent snapshots
 				for (int i = history_cursor_pos+1; i < history_total_items; ++i)
 				{
 					real_pos = (history_start_pos + i) % history_size;
@@ -190,7 +195,7 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 			}
 		} else
 		{
-			// add new smapshot
+			// add new snapshot
 			history_total_items = history_cursor_pos+1;
 			UpdateHistoryList();
 		}
@@ -397,9 +402,9 @@ LONG INPUT_HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
 	case CDDS_ITEMPREPAINT:
 		{
 			if (GetItemCoherence(msg->nmcd.dwItemSpec))
-				msg->clrTextBk = HISTORY_COHERENT_COLOR;
+				msg->clrText = HISTORY_NORMAL_COLOR;
 			else
-				msg->clrTextBk = HISTORY_NORMAL_COLOR;
+				msg->clrText = HISTORY_INCOHERENT_COLOR;
 		}
 	default:
 		return CDRF_DODEFAULT;

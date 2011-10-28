@@ -136,3 +136,6 @@ void ColumnSet(int column);
 bool Copy();
 void Cut();
 bool Paste();
+void GotFocus();
+void LostFocus();
+

@@ -43,7 +43,7 @@ public:
 	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
 	std::vector<uint8> markers_array;	// just a copy of markers.markers_array
 
-	bool coherent;						// indicates whether this state was made by inputchange of previous state
+	bool coherent;						// indicates whether this state was made right after previous state
 	int jump_frame;						// for jumping when making undo
 	char description[SNAPSHOT_DESC_MAX_LENGTH];
 

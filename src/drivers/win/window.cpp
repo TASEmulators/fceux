@@ -2376,7 +2376,7 @@ void UpdateFCEUWindow(void)
 
 	if(!(eoptions & EO_BGRUN))
 	{
-		while(nofocus && !TASEdit_focus)
+		while(nofocus)
 		{
 
 			Sleep(75);

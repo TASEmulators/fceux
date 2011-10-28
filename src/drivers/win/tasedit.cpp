@@ -38,6 +38,7 @@ bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_markers = true;
 bool TASEdit_bind_markers = true;
 bool TASEdit_branch_full_movie = true;
+bool TASEdit_branch_only_when_rec = false;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 extern bool muteTurbo;
@@ -286,7 +287,7 @@ void UpdateTasEdit()
 	project.update();
 
 	// update Bookmarks/Branches groupbox caption
-	if (old_movie_readonly != movie_readonly)
+	if (TASEdit_branch_only_when_rec && old_movie_readonly != movie_readonly)
 		bookmarks.RedrawBookmarksCaption();
 
 	// update recording radio buttons if user used hotkey to switch R/W
@@ -1421,10 +1422,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 		case WM_ACTIVATEAPP:
 			if((BOOL)wParam)
-				TASEdit_focus = true;
+				GotFocus();
 			else
-				TASEdit_focus = false;
-			return DefWindowProc(hwndDlg,uMsg,wParam,lParam);
+				LostFocus();
+			break;
 
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
@@ -1614,6 +1615,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				TASEdit_branch_full_movie ^= 1;
 				CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
 				break;
+			case ID_CONFIG_BRANCHESWORKONLYWHENRECORDING:
+				//switch "Branches work only when Recording" flag
+				TASEdit_branch_only_when_rec ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
+				bookmarks.RedrawBookmarksCaption();
+				break;
 			case IDC_PROGRESS_BUTTON:
 				// click on progressbar - stop seeking
 				if (playback.pauseframe) playback.SeekingStop();
@@ -1800,11 +1807,9 @@ void EnterTasEdit()
 	{
 		// save "eoptions"
 		saved_eoptions = eoptions;
-		// clear "Run in background"
-		eoptions &= ~EO_BGRUN;
-		// set "Background TASEdit input"
-		KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
-		JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+		// set "Run in background"
+		eoptions |= EO_BGRUN;
+		GotFocus();
 		// "Set high-priority thread"
 		eoptions |= EO_HIGHPRIO;
 		DoPriority();
@@ -1826,6 +1831,7 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOWDOTINEMPTYCELLS, TASEdit_show_dot?MF_CHECKED : MF_UNCHECKED);
@@ -2000,5 +2006,20 @@ bool ExitTasEdit()
 	FCEU_DispMessage("Tasedit disengaged",0);
 	CreateCleanMovie();
 	return true;
+}
+
+void GotFocus()
+{
+	TASEdit_focus = true;
+	// set "Background TASEdit input"
+	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
+	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+}
+void LostFocus()
+{
+	TASEdit_focus = false;
+	// clear "Background TASEdit input"
+	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
+	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
 }
 

@@ -30,6 +30,7 @@ extern HWND hwndBookmarksList;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_branch_full_movie;
+extern bool TASEdit_branch_only_when_rec;
 
 BOOKMARKS::BOOKMARKS()
 {
@@ -90,7 +91,6 @@ void BOOKMARKS::set(int slot)
 	RedrawRow(currFrameCounter);
 
 	RedrawBookmarksRow((slot + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
-
 }
 
 void BOOKMARKS::jump(int slot)
@@ -110,7 +110,7 @@ void BOOKMARKS::jump(int slot)
 
 void BOOKMARKS::unleash(int slot)
 {
-	if (movie_readonly)
+	if (TASEdit_branch_only_when_rec && movie_readonly)
 	{
 		jump(slot);
 		return;
@@ -235,7 +235,10 @@ bool BOOKMARKS::load(EMUFILE *is)
 // ----------------------------------------------------------
 void BOOKMARKS::RedrawBookmarksCaption()
 {
-	SetWindowText(hwndBookmarks, bookmarksCaption[(movie_readonly)?0:1]);
+	if (TASEdit_branch_only_when_rec)
+		SetWindowText(hwndBookmarks, bookmarksCaption[(movie_readonly)?0:1]);
+	else
+		SetWindowText(hwndBookmarks, bookmarksCaption[1]);
 	RedrawBookmarksList();
 }
 void BOOKMARKS::RedrawBookmarksList()
@@ -300,7 +303,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 		if (bookmarks_array[cell_y].flash_phase)
 			msg->clrText = bookmark_flash_colors[bookmarks_array[cell_y].flash_type][bookmarks_array[cell_y].flash_phase];
 
-		if (cell_x == BOOKMARKS_COLUMN_FRAME || (movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
+		if (cell_x == BOOKMARKS_COLUMN_FRAME || (TASEdit_branch_only_when_rec && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
 		{
 			if (bookmarks_array[cell_y].not_empty)
 			{
@@ -374,11 +377,10 @@ void BOOKMARKS::LeftClick(LPNMITEMACTIVATE info)
 	int cell_y = info->iItem;
 	if (cell_y >= 0 && cell_x >= 0)
 	{
-		if (cell_x <= BOOKMARKS_COLUMN_FRAME || movie_readonly)
+		if (cell_x <= BOOKMARKS_COLUMN_FRAME || (TASEdit_branch_only_when_rec && movie_readonly))
 			jump((cell_y + 1) % TOTAL_BOOKMARKS);
-		else if (cell_x == BOOKMARKS_COLUMN_TIME && !movie_readonly)
+		else if (cell_x == BOOKMARKS_COLUMN_TIME && (!TASEdit_branch_only_when_rec || !movie_readonly))
 			unleash((cell_y + 1) % TOTAL_BOOKMARKS);
-		//RedrawBookmarksList();
 	}
 	// remove selection
 	ListView_SetItemState(hwndBookmarksList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
