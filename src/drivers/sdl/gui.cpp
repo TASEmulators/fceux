@@ -704,6 +704,7 @@ int setYscale(GtkWidget* w, gpointer p)
 	return 0;
 }
 
+#ifdef OPENGL
 void setGl(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -721,6 +722,7 @@ void setDoubleBuffering(GtkWidget* w, gpointer p)
 		g_config->setOption("SDL.DoubleBuffering", 0);
 	g_config->save();
 }
+#endif
 
 void openVideoConfig()
 {
@@ -778,7 +780,7 @@ void openVideoConfig()
 	g_signal_connect(scalerCombo, "changed", G_CALLBACK(setScaler), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerLbl, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(hbox1), scalerCombo, FALSE, FALSE, 5);
-	
+#ifdef OPENGL	
 	// openGL check
 	glChk = gtk_check_button_new_with_label("Enable OpenGL");
 	g_signal_connect(glChk, "clicked", G_CALLBACK(setGl), NULL);
@@ -814,6 +816,7 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(dbChk), 0);
+#endif
 	
 	
 	// PAL check
@@ -890,9 +893,11 @@ void openVideoConfig()
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
+#ifdef OPENGL
 	gtk_box_pack_start(GTK_BOX(vbox), glChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), linearChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), dbChk, FALSE, FALSE, 5);
+#endif
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);
