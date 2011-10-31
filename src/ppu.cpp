@@ -929,9 +929,7 @@ static DECLFW(B2005)
 
 static DECLFW(B2006)
 {
-	if(!newppu)
-		FCEUPPU_LineUpdate();
-
+	FCEUPPU_LineUpdate();
 
 	PPUGenLatch=V;
 	if(!vtoggle)
@@ -970,6 +968,7 @@ static DECLFW(B2007)
 	uint32 tmp=RefreshAddr&0x3FFF;
 
 	if(newppu) {
+		PPUGenLatch=V;
 		RefreshAddr = ppur.get_2007access() & 0x3FFF;
 		CALL_PPUWRITE(RefreshAddr,V);
 		//printf("%04x ",RefreshAddr);
@@ -1039,6 +1038,9 @@ static uint8 sprlinebuf[256+8];
 
 void FCEUPPU_LineUpdate(void)
 {
+	if(newppu)
+		return;
+
 #ifdef FCEUDEF_DEBUGGER
 	if(!fceuindbg)
 #endif
