@@ -656,11 +656,11 @@ void AddBreakList() {
 }
 
 void EditBreakList() {
-	if (WP_edit >= 0) {
-		SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,WP_edit,0);
-		SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,WP_edit,(LPARAM)(LPSTR)BreakToText(WP_edit));
-		SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_SETCURSEL,WP_edit,0);
-	}
+	if(WP_edit < 0) return;
+	if(WP_edit >= numWPs) return;
+	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,WP_edit,0);
+	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,WP_edit,(LPARAM)(LPSTR)BreakToText(WP_edit));
+	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_SETCURSEL,WP_edit,0);
 }
 
 void FillBreakList(HWND hwndDlg) {
@@ -683,6 +683,8 @@ void ClearBreakList(HWND hwndDlg) {
 }
 
 void EnableBreak(int sel) {
+	if(sel<0) return;
+	if(sel>=numWPs) return;
 	watchpoint[sel].flags^=WP_E;
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,sel,0);
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,sel,(LPARAM)(LPSTR)BreakToText(sel));
@@ -690,9 +692,10 @@ void EnableBreak(int sel) {
 }
 
 void DeleteBreak(int sel) {
-	int i;
+	if(sel<0) return;
+	if(sel>=numWPs) return;
 
-	for (i = sel; i < numWPs; i++) {
+	for (int i = sel; i < numWPs; i++) {
 		watchpoint[i].address = watchpoint[i+1].address;
 		watchpoint[i].endaddress = watchpoint[i+1].endaddress;
 		watchpoint[i].flags = watchpoint[i+1].flags;
@@ -1481,7 +1484,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						break;
 					case LBN_DBLCLK:
 						switch(LOWORD(wParam)) {
-							case IDC_DEBUGGER_BP_LIST: EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0)); break;
+							case IDC_DEBUGGER_BP_LIST: 
+								EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0)); 
+								break;
 // ################################## Start of SP CODE ###########################
 
 							case LIST_DEBUGGER_BOOKMARKS: GoToDebuggerBookmark(hwndDlg); break;
