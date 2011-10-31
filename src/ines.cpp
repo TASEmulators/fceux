@@ -1403,6 +1403,8 @@ static int NewiNES_Init(int num)
 					CHRRAMSize=8192;
 				}
 				if((VROM = (uint8 *)FCEU_dmalloc(CHRRAMSize)) == NULL) return 0;
+				FCEU_MemoryRand(VROM,CHRRAMSize);
+
 				UNIFchrrama=VROM;
 				SetupCartCHRMapping(0,VROM,CHRRAMSize,1);
 				AddExState(VROM,CHRRAMSize, 0, "CHRR");
