@@ -907,13 +907,27 @@
     <ClCompile Include="..\src\boards\onebus.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1358,7 +1372,9 @@
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

@@ -51,6 +51,7 @@ extern "C"
 #ifdef WIN32
 	int iuplua_open(lua_State * L);
 	int iupcontrolslua_open(lua_State * L);
+	int luaopen_winapi(lua_State * L);
 
 	//luasocket
 	int luaopen_socket_core(lua_State *L);
@@ -5109,6 +5110,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		#if defined( WIN32) && !defined(NEED_MINGW_HACKS)
 		iuplua_open(L);
 		iupcontrolslua_open(L);
+		luaopen_winapi(L);
 		
 		//luasocket - yeah, have to open this in a weird way
 		lua_pushcfunction(L,luaopen_socket_core);
