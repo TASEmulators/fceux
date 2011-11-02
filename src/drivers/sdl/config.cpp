@@ -135,7 +135,7 @@ InitConfig()
     
     config->addOption('g', "gamegenie", "SDL.GameGenie", 0);
     config->addOption("pal", "SDL.PAL", 0);
-    config->addOption("frameskip", "SDL.Frameskip", 1);
+    config->addOption("frameskip", "SDL.Frameskip", 0);
     config->addOption("clipsides", "SDL.ClipSides", 0);
     config->addOption("nospritelim", "SDL.DisableSpriteLimit", 1);
 
