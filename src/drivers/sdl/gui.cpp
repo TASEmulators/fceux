@@ -738,6 +738,7 @@ void openVideoConfig()
 	GtkWidget* palChk;
 	GtkWidget* ppuChk;
 	GtkWidget* spriteLimitChk;
+	GtkWidget* frameskipChk;
 	GtkWidget* clipSidesChk;
 	GtkWidget* xscaleSpin;
 	GtkWidget* yscaleSpin;
@@ -843,8 +844,8 @@ void openVideoConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ppuChk), 0);
 	
-	// disable 8 sprite limit check
-	spriteLimitChk = gtk_check_button_new_with_label("Disable Sprite Limit");
+  // "disable 8 sprite limit" check
+	spriteLimitChk = gtk_check_button_new_with_label("Disable sprite limit");
 	g_signal_connect(spriteLimitChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.DisableSpriteLimit");
 	
 	// sync with config
@@ -854,8 +855,22 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 0);
-	// clip sides check
-	clipSidesChk = gtk_check_button_new_with_label("Clip Sides");
+
+  // frameskip check
+	frameskipChk = gtk_check_button_new_with_label("Enable frameskip");
+	g_signal_connect(frameskipChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Frameskip");
+	
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.Frameskip", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frameskipChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frameskipChk), 0);
+
+
+		// clip sides check
+	clipSidesChk = gtk_check_button_new_with_label("Clip sides");
 	g_signal_connect(clipSidesChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ClipSides");
 	
 	// sync with config
@@ -900,6 +915,7 @@ void openVideoConfig()
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), frameskipChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), clipSidesChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);

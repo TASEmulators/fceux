@@ -1,4 +1,5 @@
-23-octo-2011 - prg319 - sdl: fix a bug where alt key would get "stuck" when alt tabbing to window
+04-novm-2011 - prg318 - gtk: added option for frameskipping and made label case consistent in gui
+23-octo-2011 - prg318 - sdl: fix a bug where alt key would get "stuck" when alt tabbing to window
 19-octo-2011 - prg318 - scons: "scons install" now installs auxlib and manpage
 19-octo-2011 - prg318 - scons: added --prefix option to build system and improved "install" target
 18-octo-2011 - prg318 - sdl: new hotkeys added - statestatenext savestateprev - useful for scrolling through savestates on a gamepad.  mapped to pgup and pgdown by default
