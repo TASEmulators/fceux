@@ -915,7 +915,9 @@ void openVideoConfig()
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), palChk, FALSE, FALSE,5);
 	gtk_box_pack_start(GTK_BOX(vbox), ppuChk, FALSE, FALSE, 5);
+#ifdef FRAMESKIP
 	gtk_box_pack_start(GTK_BOX(vbox), frameskipChk, FALSE, FALSE, 5);
+#endif 
 	gtk_box_pack_start(GTK_BOX(vbox), spriteLimitChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), clipSidesChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
