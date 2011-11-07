@@ -46,7 +46,7 @@ void PLAYBACK::update()
 			SeekingStop();
 
 	// update flashing pauseframe
-	if (old_pauseframe != pauseframe && old_pauseframe) RedrawRow(old_pauseframe-1);
+	if (old_pauseframe != pauseframe && old_pauseframe) RedrawRowAndBookmark(old_pauseframe-1);
 	old_pauseframe = pauseframe;
 	old_show_pauseframe = show_pauseframe;
 	if (pauseframe)
@@ -56,7 +56,7 @@ void PLAYBACK::update()
 		else
 			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
 	} else show_pauseframe = false;
-	if (old_show_pauseframe != show_pauseframe) RedrawRow(pauseframe-1);
+	if (old_show_pauseframe != show_pauseframe) RedrawRowAndBookmark(pauseframe-1);
 
 	// update seeking progressbar
 	old_emu_paused = emu_paused;
@@ -81,8 +81,8 @@ void PLAYBACK::update()
 	{
 		FollowPlayback();
 		//update the old and new rows
-		RedrawRow(lastCursor);
-		RedrawRow(currFrameCounter);
+		RedrawRowAndBookmark(lastCursor);
+		RedrawRowAndBookmark(currFrameCounter);
 		UpdateWindow(hwndList);
 		lastCursor = currFrameCounter;
 	}

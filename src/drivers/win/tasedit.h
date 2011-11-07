@@ -58,7 +58,7 @@
 #define COLUMN_JOYPAD4_R 33
 #define COLUMN_FRAMENUM2 34
 #define DIGITS_IN_FRAMENUM 7
-#define ARROW_IMAGE_ID 10
+#define ARROW_IMAGE_ID 20
 // listview colors
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
 #define NORMAL_INPUT_COLOR1 0xEDEDED
@@ -116,7 +116,9 @@ void RemoveFourscore();
 void RedrawWindowCaption();
 void RedrawTasedit();
 void RedrawList();
+void RedrawListAndBookmarks();
 void RedrawRow(int index);
+void RedrawRowAndBookmark(int index);
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
 void SwitchToReadOnly();
 void UncheckRecordingRadioButtons();

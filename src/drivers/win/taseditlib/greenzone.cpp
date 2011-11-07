@@ -35,9 +35,13 @@ void GREENZONE::reset()
 }
 void GREENZONE::update()
 {
+	if ((int)savestates.size() < greenZoneCount)
+		savestates.resize(greenZoneCount);
+	if ((int)lag_history.size() < greenZoneCount)
+		lag_history.resize(greenZoneCount);
+
 	if (clock() > next_cleaning_time)
 		GreenzoneCleaning();
-
 }
 
 void GREENZONE::TryDumpIncremental(bool lagFlag)
@@ -151,7 +155,7 @@ void GREENZONE::GreenzoneCleaning()
 		}
 	}
 finish:
-	if (changed) RedrawList();
+	if (changed) RedrawListAndBookmarks();
 	// shedule next cleaning
 	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
@@ -334,7 +338,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	RedrawList();
+	RedrawListAndBookmarks();
 }
 // This version doesn't restore playback, may be used only by Branching functions!
 void GREENZONE::Invalidate(int after)
@@ -349,7 +353,7 @@ void GREENZONE::Invalidate(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	RedrawList();
+	RedrawListAndBookmarks();
 }
 
 int GREENZONE::FindBeginningOfGreenZone(int starting_index)

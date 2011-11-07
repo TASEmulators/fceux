@@ -39,6 +39,7 @@ bool TASEdit_show_markers = true;
 bool TASEdit_bind_markers = true;
 bool TASEdit_branch_full_movie = true;
 bool TASEdit_branch_only_when_rec = false;
+bool TASEdit_view_branches_tree = false;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 extern bool muteTurbo;
@@ -67,6 +68,8 @@ HWND hwndBookmarksList, hwndBookmarks;
 WNDPROC hwndBookmarksList_oldWndProc;
 HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
+HWND hwndBranchesBitmap;
+WNDPROC hwndBranchesBitmap_oldWndProc;
 
 HFONT hMainListFont;
 
@@ -101,8 +104,6 @@ void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 					{
 						if (item.iItem == currFrameCounter)
 							item.iImage = ARROW_IMAGE_ID;
-						else
-							item.iImage = -1;
 					}
 				}
 				break;
@@ -274,7 +275,7 @@ void UpdateTasEdit()
 {
 	if(!hwndTasEdit) return;
 
-	UpdateList();
+	UpdateList();	// also markers are updated there
 	
 	greenzone.update();
 	playback.update();
@@ -351,9 +352,17 @@ void RedrawTasedit()
 void RedrawList()
 {
 	InvalidateRect(hwndList, 0, FALSE);
+}
+void RedrawListAndBookmarks()
+{
+	InvalidateRect(hwndList, 0, FALSE);
 	bookmarks.RedrawBookmarksList();
 }
 void RedrawRow(int index)
+{
+	ListView_RedrawItems(hwndList, index, index);
+}
+void RedrawRowAndBookmark(int index)
 {
 	ListView_RedrawItems(hwndList, index, index);
 	bookmarks.RedrawChangedBookmarks(index);
@@ -592,6 +601,8 @@ void Truncate()
 	if (currMovieData.getNumRecords() > frame+1)
 	{
 		currMovieData.truncateAt(frame+1);
+		if (TASEdit_bind_markers)
+			markers.truncateAt(frame+1);
 		UpdateList();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
@@ -981,7 +992,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
 }
 
-LRESULT APIENTRY HistoryListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
 	{
@@ -999,6 +1010,46 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPar
 	}
 	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
 }
+
+LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MOUSEMOVE:
+		{
+			if (!bookmarks.mouse_over_bitmap)
+			{
+				bookmarks.mouse_over_bitmap = true;
+				bookmarks.tme.hwndTrack = hWnd;
+				TrackMouseEvent(&bookmarks.tme);
+			}
+			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+		}
+		case WM_MOUSELEAVE:
+		{
+			bookmarks.mouse_over_bitmap = false;
+			bookmarks.MouseMove(-1, -1);
+			break;
+		}
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hWnd, &ps);
+			bookmarks.PaintBranchesBitmap(hdc);
+			EndPaint(hWnd, &ps);
+			return 0;
+		}
+	}
+	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
+}
+
 
 void AddFourscore()
 {
@@ -1138,7 +1189,6 @@ void OpenProject()
 		FollowPlayback();
 		RedrawTasedit();
 		RedrawWindowCaption();
-		bookmarks.RedrawBookmarksCaption();
 	}
 }
 
@@ -1315,6 +1365,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			hwndRB_Rec2P = GetDlgItem(hwndDlg, IDC_RADIO4);
 			hwndRB_Rec3P = GetDlgItem(hwndDlg, IDC_RADIO5);
 			hwndRB_Rec4P = GetDlgItem(hwndDlg, IDC_RADIO6);
+			hwndBranchesBitmap = GetDlgItem(hwndDlg, IDC_BRANCHES_BITMAP);
 			break; 
 
 		case WM_MOVE:
@@ -1420,8 +1471,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			ExitTasEdit();
 			break;
 
-		case WM_ACTIVATEAPP:
-			if((BOOL)wParam)
+		case WM_ACTIVATE:
+			if(LOWORD(wParam))
 				GotFocus();
 			else
 				LostFocus();
@@ -1540,7 +1591,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//switch "Highlight lag frames" flag
 				TASEdit_show_lag_frames ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-				RedrawList();
+				RedrawListAndBookmarks();
 				break;
 			case ID_VIEW_SHOW_MARKERS:
 				//switch "Show Markers" flag
@@ -1624,6 +1675,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case IDC_PROGRESS_BUTTON:
 				// click on progressbar - stop seeking
 				if (playback.pauseframe) playback.SeekingStop();
+				break;
+			case IDC_BRANCHES_BUTTON:
+				// click on "Bookmarks/Branches" - switch "View Tree of branches"
+				TASEdit_view_branches_tree ^= 1;
+				bookmarks.RedrawBookmarksCaption();
 				break;
 			case IDC_RADIO1:
 				// switch to readonly, no need to recheck radiobuttons
@@ -1838,6 +1894,7 @@ void EnterTasEdit()
 
 		SetWindowPos(hwndTasEdit,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 
+		// init modules
 		greenzone.init();
 		playback.init();
 		// either start new movie or use current movie
@@ -1877,37 +1934,67 @@ void EnterTasEdit()
 		// setup images for the listview
 		HIMAGELIST himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
 		HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP10));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP11));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP12));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP13));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP14));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP15));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP16));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP17));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP18));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+		DeleteObject(bmp);
+		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_TE_ARROW));
-		ImageList_AddMasked(himglist, bmp, 0xFF00FF);
+		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 		DeleteObject(bmp);
 		ListView_SetImageList(hwndList, himglist, LVSIL_SMALL);
 		// setup columns
@@ -1967,6 +2054,9 @@ void EnterTasEdit()
 		lvc.fmt = LVCFMT_LEFT;
 		ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 
+		// subclass BranchesBitmap
+		hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLong(hwndBranchesBitmap, GWL_WNDPROC, (LONG)BranchesBitmapWndProc);
+
 		// init variables
 		markers.init();
 		project.init();
@@ -1995,6 +2085,7 @@ bool ExitTasEdit()
 	// clear "Background TASEdit input"
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+
 	// release memory
 	markers.free();
 	greenzone.clearGreenzone();

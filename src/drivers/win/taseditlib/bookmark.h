@@ -13,7 +13,7 @@ public:
 
 	void set();
 	void jump();
-	void unleash();
+	void unleashed();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
@@ -23,8 +23,8 @@ public:
 	int flash_type;
 	INPUT_SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
-	std::vector<uint8> current_screenshot;
 	std::vector<uint8> saved_screenshot;
+	int parent_branch;
 
 private:
 

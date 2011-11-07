@@ -169,6 +169,17 @@
 #define IDB_BITMAP7                     170
 #define IDB_BITMAP8                     171
 #define IDB_BITMAP9                     172
+#define IDB_BITMAP10                    173
+#define IDB_BITMAP11                    174
+#define IDB_BITMAP12                    175
+#define IDB_BITMAP13                    176
+#define IDB_BITMAP14                    177
+#define IDB_BITMAP15                    178
+#define IDB_BITMAP16                    179
+#define IDB_BITMAP17                    180
+#define IDB_BITMAP18                    181
+#define IDB_BITMAP19                    182
+#define IDB_BRANCH_SPRITESHEET		184
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -403,11 +414,17 @@
 #define MEMW_EDIT02FORMULA              1144
 #define IDC_BUTTON7                     1145
 #define MEMW_EDIT03FORMULA              1145
+#define TASEDIT_REWIND_FULL2            1145
 #define IDC_BUTTON8                     1146
+#define TASEDIT_REWIND_FULL3            1146
 #define IDC_EDIT1                       1147
 #define IDC_BUTTON9                     1148
+#define TASEDIT_REWIND_FULL4            1148
 #define IDC_HISTORYLIST                 1149
 #define IDC_BOOKMARKSLIST               1150
+#define TASEDIT_REWIND_FULL5            1151
+#define IDC_BRANCHES_BUTTON             1152
+#define IDC_EDIT2                       1154
 #define CHECK_SOUND_MUTETURBO           1179
 #define IDC_EDIT_AUTHOR                 1180
 #define MEMW_STATIC                     1181
@@ -511,6 +528,7 @@
 #define IDC_PROGRESS1                   1262
 #define CHECK_FOLLOW_CURSOR             1263
 #define IDC_BOOKMARKS_BOX               1264
+#define IDC_BRANCHES_BITMAP             1265
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -880,9 +898,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        173
+#define _APS_NEXT_RESOURCE_VALUE        185
 #define _APS_NEXT_COMMAND_VALUE         40475
-#define _APS_NEXT_CONTROL_VALUE         1265
+#define _APS_NEXT_CONTROL_VALUE         1266
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

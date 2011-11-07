@@ -10,10 +10,11 @@ extern void FCEU_printf(char *format, ...);
 extern HWND hwndHistoryList;
 extern bool TASEdit_bind_markers;
 
+extern MARKERS markers;
+extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
-extern MARKERS markers;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char modCaptions[36][20] = {" Init",
@@ -89,7 +90,8 @@ void INPUT_HISTORY::free()
 void INPUT_HISTORY::update()
 {
 	// update undo_hint
-	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0) RedrawRow(old_undo_hint_pos);
+	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0)
+		RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
 	old_undo_hint_pos = undo_hint_pos;
 	old_show_undo_hint = show_undo_hint;
 	show_undo_hint = false;
@@ -100,7 +102,8 @@ void INPUT_HISTORY::update()
 		else
 			undo_hint_pos = -1;	// finished hinting
 	}
-	if (old_show_undo_hint != show_undo_hint) RedrawRow(undo_hint_pos);
+	if (old_show_undo_hint != show_undo_hint)
+		RedrawRow(undo_hint_pos);			// not changing bookmarks list
 
 
 
@@ -145,9 +148,11 @@ int INPUT_HISTORY::jump(int new_pos)
 	{
 		currMovieData.records.resize(input_snapshots[real_pos].size);
 		input_snapshots[real_pos].toMovie(currMovieData, first_change);
+		bookmarks.ChangesMadeSinceBranch();
 	} else if (markers_changed)
 	{
 		markers.update();
+		bookmarks.ChangesMadeSinceBranch();
 		RedrawList();
 	}
 
@@ -231,6 +236,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 			strcat(inp.description, framenum);
 		}
 		AddInputSnapshotToHistory(inp);
+		bookmarks.ChangesMadeSinceBranch();
 		return -1;
 	} else
 	{
@@ -294,6 +300,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 				strcat(inp.description, framenum);
 			}
 			AddInputSnapshotToHistory(inp);
+			bookmarks.ChangesMadeSinceBranch();
 		}
 		return first_changes;
 	}

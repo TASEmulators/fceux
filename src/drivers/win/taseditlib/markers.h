@@ -17,6 +17,7 @@ public:
 
 	void ToggleMarker(int frame);
 	void insertEmpty(int at, int frames);
+	void truncateAt(int frame);
 
 	std::vector<uint8> markers_array;
 

@@ -47,14 +47,14 @@ void MARKERS::save(EMUFILE *os)
 // returns true if couldn't load
 bool MARKERS::load(EMUFILE *is)
 {
-	markers_array.resize(currMovieData.getNumRecords());
 	// read "MARKERS" string
 	char save_id[MARKERS_ID_LEN];
 	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;
 	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
 	int size;
-	if (read32le((uint32 *)&size, is) && size == currMovieData.getNumRecords())
+	if (read32le((uint32 *)&size, is) && size >= currMovieData.getNumRecords())
 	{
+		markers_array.resize(size);
 		// read and uncompress array
 		int comprlen;
 		uLongf destlen = size;
@@ -88,4 +88,11 @@ void MARKERS::insertEmpty(int at, int frames)
 		markers_array.insert(markers_array.begin() + at, frames, 0);
 	}
 }
+
+void MARKERS::truncateAt(int frame)
+{
+	markers_array.resize(frame);
+}
+
+
 

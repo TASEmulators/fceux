@@ -1414,6 +1414,30 @@
     <None Include="..\src\drivers\win\res\te_7.bmp" />
     <None Include="..\src\drivers\win\res\te_8.bmp" />
     <None Include="..\src\drivers\win\res\te_9.bmp" />
+    <None Include="res\te_10.bmp" />
+    <None Include="res\te_11.bmp" />
+    <None Include="res\te_12.bmp" />
+    <None Include="res\te_13.bmp" />
+    <None Include="res\te_14.bmp" />
+    <None Include="res\te_15.bmp" />
+    <None Include="res\te_16.bmp" />
+    <None Include="res\te_17.bmp" />
+    <None Include="res\te_18.bmp" />
+    <None Include="res\te_19.bmp" />
+    <None Include="..\src\drivers\win\res\te_10.bmp" />
+    <None Include="..\src\drivers\win\res\te_11.bmp" />
+    <None Include="..\src\drivers\win\res\te_12.bmp" />
+    <None Include="..\src\drivers\win\res\te_13.bmp" />
+    <None Include="..\src\drivers\win\res\te_14.bmp" />
+    <None Include="..\src\drivers\win\res\te_15.bmp" />
+    <None Include="..\src\drivers\win\res\te_16.bmp" />
+    <None Include="..\src\drivers\win\res\te_17.bmp" />
+    <None Include="..\src\drivers\win\res\te_18.bmp" />
+    <None Include="..\src\drivers\win\res\te_19.bmp" />
+    <None Include="res\branch_spritesheet.png" />
+    <None Include="..\src\drivers\win\res\branch_spritesheet.png" />
+    <None Include="res\branch_spritesheet.bmp" />
+    <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
