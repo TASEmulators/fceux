@@ -179,7 +179,7 @@
 #define IDB_BITMAP17                    180
 #define IDB_BITMAP18                    181
 #define IDB_BITMAP19                    182
-#define IDB_BRANCH_SPRITESHEET		184
+#define IDB_BRANCH_SPRITESHEET          184
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -529,6 +529,7 @@
 #define CHECK_FOLLOW_CURSOR             1263
 #define IDC_BOOKMARKS_BOX               1264
 #define IDC_BRANCHES_BITMAP             1265
+#define IDC_SCREENSHOT_BITMAP           1266
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -890,6 +891,7 @@
 #define ID_VIEW_JUMPWHENMAKINGUNDO      40472
 #define ID_CONFIG_BRANCHESRESTOREFULLMOVIE 40473
 #define ID_CONFIG_BRANCHESWORKONLYWHENRECORDING 40474
+#define ID_CONFIG_HUDINBRANCHSCREENSHOTS 40475
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -899,8 +901,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        185
-#define _APS_NEXT_COMMAND_VALUE         40475
-#define _APS_NEXT_CONTROL_VALUE         1266
+#define _APS_NEXT_COMMAND_VALUE         40476
+#define _APS_NEXT_CONTROL_VALUE         1267
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

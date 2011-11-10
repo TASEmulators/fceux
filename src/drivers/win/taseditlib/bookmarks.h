@@ -81,6 +81,10 @@
 #define BOOKMARKS_ID_LEN 10
 #define TIME_DESC_LENGTH 9		// "HH:MM:SS"
 
+// screenshot bitmap
+#define SCR_BMP_PHASE_MAX 10
+
+
 class BOOKMARKS
 {
 public:
@@ -113,6 +117,7 @@ public:
 	void PaintBranchesBitmap(HDC hdc);
 
 	void MouseMove(int new_x, int new_y);
+	void CheckMousePos();
 
 	void ChangesMadeSinceBranch();
 
@@ -120,11 +125,25 @@ public:
 	void RecursiveAddHeight(int branch_num, int amount);
 	void RecursiveSetYPos(int parent, int parentY);
 
+	void ChangeScreenshotBitmap();
+	void RedrawScreenshotBitmap();
+
 	std::vector<BOOKMARK> bookmarks_array;
 
 	// not saved vars
-	bool mouse_over_bitmap;
-	TRACKMOUSEEVENT tme;
+	bool mouse_over_bitmap, mouse_over_bookmarkslist;
+	TRACKMOUSEEVENT tme, list_tme;
+	int branch_row_top;
+	int branch_row_left;
+	int branch_row_height;
+	// screenshot bmp stuff
+	LPBITMAPINFO scr_bmi;
+	HBITMAP scr_bmp;
+	uint8* scr_ptr;
+	int scr_bmp_x;
+	int scr_bmp_y;
+	int scr_bmp_phase;
+	int screenshot_currently_shown;
 
 private:
 	void SetCurrentPosTime();
@@ -140,6 +159,7 @@ private:
 	int edit_mode;
 	int animation_frame;		// 0-13
 	int next_animation_time;
+	bool must_check_item_under_mouse;
 	bool must_redraw_branches_tree;
 	bool must_recalculate_branches_tree;
 	std::vector<int> BranchX;				// in pixels
@@ -148,7 +168,7 @@ private:
 	std::vector<int> BranchPrevY;
 	std::vector<int> BranchCurrX;
 	std::vector<int> BranchCurrY;
-	int CloudX, CloudPrevX;
+	int CloudX, CloudPrevX, cloud_x;
 	int CursorX, CursorPrevX, CursorY, CursorPrevY;
 	int transition_phase;
 	int fireball_size;

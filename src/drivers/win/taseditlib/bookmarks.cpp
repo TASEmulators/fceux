@@ -9,6 +9,14 @@
 
 #pragma comment(lib, "msimg32.lib")
 
+LRESULT CALLBACK ScrBmpWndProc(HWND, UINT, WPARAM, LPARAM);
+char szClassName[] = "BmpTestApp";
+HWND hwndScrBmp, scr_bmp_pic;
+WNDCLASSEX wincl;
+BLENDFUNCTION blend;
+extern HWND hwndTasEdit;
+extern int TasEdit_wndx, TasEdit_wndy;
+
 char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
 char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 
@@ -39,6 +47,8 @@ extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
 
+extern int list_row_height;
+
 BOOKMARKS::BOOKMARKS()
 {
 	// create font
@@ -53,6 +63,42 @@ BOOKMARKS::BOOKMARKS()
 	tme.cbSize = sizeof(tme);
 	tme.dwFlags = TME_LEAVE;
 	tme.hwndTrack = hwndBranchesBitmap;
+	list_tme.cbSize = sizeof(tme);
+	list_tme.dwFlags = TME_LEAVE;
+	list_tme.hwndTrack = hwndBookmarksList;
+	
+	// create BITMAPINFO for scr_bmp
+	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));
+	scr_bmi->bmiHeader.biSize = sizeof(scr_bmi->bmiHeader);
+	scr_bmi->bmiHeader.biWidth = SCREENSHOT_WIDTH;
+	scr_bmi->bmiHeader.biHeight = -SCREENSHOT_HEIGHT;		// negative value = top-down bmp
+	scr_bmi->bmiHeader.biPlanes = 1;
+	scr_bmi->bmiHeader.biBitCount = 8;
+	scr_bmi->bmiHeader.biCompression = BI_RGB;
+	scr_bmi->bmiHeader.biSizeImage = 0;
+
+	// register ScrBmp window class
+    wincl.hInstance = fceu_hInstance;
+    wincl.lpszClassName = szClassName;
+    wincl.lpfnWndProc = ScrBmpWndProc;
+    wincl.style = CS_DBLCLKS;
+    wincl.cbSize = sizeof(WNDCLASSEX);
+    wincl.hIcon = 0;
+    wincl.hIconSm = 0;
+    wincl.hCursor = 0;
+    wincl.lpszMenuName = 0;
+    wincl.cbClsExtra = 0;
+    wincl.cbWndExtra = 0;
+    wincl.hbrBackground = 0;
+	if(!RegisterClassEx(&wincl))
+		FCEU_printf("Error registering ScrBmp window class\n");
+	// create blendfunction
+	blend.BlendOp = AC_SRC_OVER;
+	blend.BlendFlags = 0;
+	blend.AlphaFormat = 0;
+	blend.SourceConstantAlpha = 255;
+
+
 }
 
 void BOOKMARKS::init()
@@ -87,6 +133,19 @@ void BOOKMARKS::init()
 		bookmarks_array[i].init();
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
+	// find rows top/height (for mouseover hittest calculations)
+	RECT temp_rect;
+	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect))
+	{
+		branch_row_top = temp_rect.top;
+		branch_row_left = temp_rect.left;
+		branch_row_height = temp_rect.bottom - temp_rect.top;
+	} else
+	{
+		// couldn't get rect, set default values
+		branch_row_top = 0;
+		branch_row_height = 14;
+	}
 	// init GDI stuff
 	HDC win_hdc = GetWindowDC(hwndBookmarksList);
 	hBitmapDC = CreateCompatibleDC(win_hdc);
@@ -103,6 +162,16 @@ void BOOKMARKS::init()
 	// create pens
 	normal_pen = CreatePen(PS_SOLID, 1, 0x0);
 	select_pen = CreatePen(PS_SOLID, 2, 0xFF9080);
+	// prepare screenshot bitmap
+	// fill scr_bmp palette with current palette colors
+	extern PALETTEENTRY *color_palette;
+	for (int i = 0; i < 256; ++i)
+	{
+		scr_bmi->bmiColors[i].rgbRed = color_palette[i].peRed;
+		scr_bmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
+		scr_bmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
+	}
+	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
 
 	RedrawBookmarksCaption();
 	update();
@@ -111,9 +180,10 @@ void BOOKMARKS::reset()
 {
 	transition_phase = animation_frame = 0;
 	mouse_x = mouse_y = -1;
-	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	screenshot_currently_shown = item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	scr_bmp_phase = 0;
 	mouse_over_bitmap = false;
-	must_recalculate_branches_tree = must_redraw_branches_tree = true;
+	must_recalculate_branches_tree = must_redraw_branches_tree = must_check_item_under_mouse = true;
 	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
 	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
@@ -162,11 +232,18 @@ void BOOKMARKS::free()
 		DeleteObject(branchesSpritesheet);
 		branchesSpritesheet = NULL;
 	}
+	if (scr_bmp)
+	{
+		DeleteObject(scr_bmp);
+		scr_bmp = NULL;
+	}
+
+
 }
 
 void BOOKMARKS::update()
 {
-	// once per 50 milliseconds fade bookmark flashes
+	// once per 100 milliseconds fade bookmark flashes
 	if (clock() > check_flash_shedule)
 	{
 		check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
@@ -176,7 +253,7 @@ void BOOKMARKS::update()
 			{
 				bookmarks_array[i].flash_phase--;
 				RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
-				must_redraw_branches_tree = true;
+				must_redraw_branches_tree = true;		// because borders of some branch digit has changed
 			}
 		}
 	}
@@ -184,14 +261,15 @@ void BOOKMARKS::update()
 	if (must_recalculate_branches_tree)
 		RecalculateBranchesTree();
 
-	if (edit_mode == EDIT_MODE_BRANCHES)
+	// once per 50 milliseconds update branches_bitmap and scr_bmp 
+	if (clock() > next_animation_time)
 	{
-		if (clock() > next_animation_time)
+		// animate branches_bitmap
+		next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
+		animation_frame = (animation_frame + 1) % BRANCHES_ANIMATION_FRAMES;
+		if (edit_mode == EDIT_MODE_BRANCHES)
 		{
-			// animate
-			next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
-			animation_frame = (animation_frame + 1) % BRANCHES_ANIMATION_FRAMES;
-			// grow or shring fireball
+			// grow or shrink fireball size
 			if (changes_since_current_branch)
 			{
 				fireball_size++;
@@ -205,15 +283,65 @@ void BOOKMARKS::update()
 			if (transition_phase)
 			{
 				transition_phase--;
-				must_redraw_branches_tree = true;
+				must_check_item_under_mouse = must_redraw_branches_tree = true;
 			} else if (!must_redraw_branches_tree)
 			{
+				// just update sprites
 				InvalidateRect(hwndBranchesBitmap, 0, FALSE);
 			}
 		}
-		// render
+		// controls
+		if (must_check_item_under_mouse)
+			CheckMousePos();
+		// render branches_bitmap
 		if (must_redraw_branches_tree)
 			RedrawBranchesTree();
+
+		// change screenshot_bitmap alpha if needed
+		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS)
+		{
+			if (!hwndScrBmp)
+			{
+				// create window
+				hwndScrBmp = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, TasEdit_wndx + scr_bmp_x, TasEdit_wndy + scr_bmp_y, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, hwndTasEdit, NULL, fceu_hInstance, NULL);
+				RedrawScreenshotBitmap();
+				ShowWindow(hwndScrBmp, SW_SHOWNA);
+			}
+			// change screenshot_bitmap pic if needed
+			if (item_under_mouse != screenshot_currently_shown)
+			{
+				if (bookmarks_array[item_under_mouse].not_empty)
+					ChangeScreenshotBitmap();
+			}
+			if (scr_bmp_phase < SCR_BMP_PHASE_MAX)
+			{
+				scr_bmp_phase++;
+				// update alpha
+				SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * scr_bmp_phase) / SCR_BMP_PHASE_MAX, LWA_ALPHA);
+				UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+			}
+		} else
+		{
+			if (scr_bmp_phase > 0)
+			{
+				scr_bmp_phase--;
+				if (hwndScrBmp)
+				{
+					// update alpha
+					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * scr_bmp_phase) / SCR_BMP_PHASE_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+				}
+			} else
+			{
+				// destroy screenshot bitmap window
+				scr_bmp_phase = 0;
+				if (hwndScrBmp)
+				{
+					DestroyWindow(hwndScrBmp);
+					hwndScrBmp = 0;
+				}
+			}
+		}
 	}
 }
 
@@ -229,6 +357,10 @@ void BOOKMARKS::set(int slot)
 		saved_time[0] = 0;
 	
 	bookmarks_array[slot].set();
+
+	// if this screenshot is shown on screen - reinit and redraw it
+	if (screenshot_currently_shown == slot)
+		screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
 	// inherit current branch
 	if (slot != current_branch)
@@ -430,7 +562,7 @@ bool BOOKMARKS::load(EMUFILE *is)
 	// read current branch and flag of changes since it
 	uint8 tmp;
 	if (!read8le(&tmp, is)) return true;
-	current_branch = tmp;
+	current_branch = *(int8*)(&tmp);
 	if (!read8le(&tmp, is)) return true;
 	changes_since_current_branch = (tmp != 0);
 	// read current_position time
@@ -448,6 +580,7 @@ bool BOOKMARKS::load(EMUFILE *is)
 // ----------------------------------------------------------
 void BOOKMARKS::RedrawBookmarksCaption()
 {
+	int prev_edit_mode = edit_mode;
 	if (TASEdit_branch_only_when_rec && movie_readonly)
 	{
 		edit_mode = EDIT_MODE_BOOKMARKS;
@@ -466,6 +599,8 @@ void BOOKMARKS::RedrawBookmarksCaption()
 		ShowWindow(hwndBookmarksList, SW_SHOW);
 		RedrawBookmarksList();
 	}
+	if (prev_edit_mode != edit_mode)
+		must_check_item_under_mouse = true;
 	SetWindowText(hwndBookmarks, bookmarksCaption[edit_mode]);
 }
 void BOOKMARKS::RedrawBookmarksList()
@@ -488,23 +623,6 @@ void BOOKMARKS::RedrawBookmarksRow(int index)
 
 void BOOKMARKS::RedrawBranchesTree()
 {
-	// first calculate current positions of branch items
-	for (int i = 0; i <= TOTAL_BOOKMARKS; ++i)
-	{
-		BranchCurrX[i] = (BranchX[i] * (BRANCHES_TRANSITION_MAX - transition_phase) + BranchPrevX[i] * transition_phase) / BRANCHES_TRANSITION_MAX;
-		BranchCurrY[i] = (BranchY[i] * (BRANCHES_TRANSITION_MAX - transition_phase) + BranchPrevY[i] * transition_phase) / BRANCHES_TRANSITION_MAX;
-	}
-	int cloud_x = (CloudX * (BRANCHES_TRANSITION_MAX - transition_phase) + CloudPrevX * transition_phase) / BRANCHES_TRANSITION_MAX;
-	// find item under mouse
-	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
-			item_under_mouse = i;
-	if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
-		item_under_mouse = ITEM_UNDER_MOUSE_CLOUD;
-	if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
-		item_under_mouse = TOTAL_BOOKMARKS;
-
 	// draw background gradient
 	TRIVERTEX vertex[2] ;
 	vertex[0].x     = 0;
@@ -523,6 +641,7 @@ void BOOKMARKS::RedrawBranchesTree()
 	gRect.UpperLeft  = 0;
 	gRect.LowerRight = 1;
 	GradientFill(hBitmapDC, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_H);
+
 	// lines
 	int branch_x, branch_y, parent_x, parent_y, child_id;
 	SelectObject(hBitmapDC, normal_pen);
@@ -643,6 +762,29 @@ void BOOKMARKS::RedrawBranchesTree()
 	must_redraw_branches_tree = false;
 	InvalidateRect(hwndBranchesBitmap, 0, FALSE);
 }
+
+void BOOKMARKS::ChangeScreenshotBitmap()
+{
+	// uncompress
+	uLongf destlen = SCREENSHOT_SIZE;
+	int e = uncompress(&scr_ptr[0], &destlen, &bookmarks_array[item_under_mouse].saved_screenshot[0], bookmarks_array[item_under_mouse].saved_screenshot.size());
+	if (e != Z_OK && e != Z_BUF_ERROR)
+	{
+		// error decompressing
+		FCEU_printf("Error decompressing screenshot %d\n", item_under_mouse);
+		// at least fill bitmap with zeros
+		memset(&scr_ptr[0], 0, SCREENSHOT_SIZE);
+	}
+	screenshot_currently_shown = item_under_mouse;
+	RedrawScreenshotBitmap();
+}
+void BOOKMARKS::RedrawScreenshotBitmap()
+{
+	HBITMAP temp_bmp = (HBITMAP)SendMessage(scr_bmp_pic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)scr_bmp);
+	if (temp_bmp && temp_bmp != scr_bmp)
+		DeleteObject(temp_bmp);
+}
+
 // this is called by wndproc on WM_PAINT
 void BOOKMARKS::PaintBranchesBitmap(HDC hdc)
 {
@@ -692,7 +834,47 @@ void BOOKMARKS::MouseMove(int new_x, int new_y)
 {
 	mouse_x = new_x;
 	mouse_y = new_y;
-	must_redraw_branches_tree = true;
+	must_check_item_under_mouse = true;
+}
+void BOOKMARKS::CheckMousePos()
+{
+	int prev_item_under_mouse = item_under_mouse;
+	if (edit_mode == EDIT_MODE_BRANCHES)
+	{
+		// Mouse over Branches bitmap
+		// first calculate current positions of branch items
+		for (int i = 0; i <= TOTAL_BOOKMARKS; ++i)
+		{
+			BranchCurrX[i] = (BranchX[i] * (BRANCHES_TRANSITION_MAX - transition_phase) + BranchPrevX[i] * transition_phase) / BRANCHES_TRANSITION_MAX;
+			BranchCurrY[i] = (BranchY[i] * (BRANCHES_TRANSITION_MAX - transition_phase) + BranchPrevY[i] * transition_phase) / BRANCHES_TRANSITION_MAX;
+		}
+		cloud_x = (CloudX * (BRANCHES_TRANSITION_MAX - transition_phase) + CloudPrevX * transition_phase) / BRANCHES_TRANSITION_MAX;
+		// find item under mouse
+		item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+			if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
+				item_under_mouse = i;
+		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
+			item_under_mouse = ITEM_UNDER_MOUSE_CLOUD;
+		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
+			item_under_mouse = TOTAL_BOOKMARKS;
+		if (prev_item_under_mouse != item_under_mouse)
+			must_redraw_branches_tree = true;
+	} else if (edit_mode == EDIT_MODE_BOTH)
+	{
+		// Mouse over Bookmarks list
+		if (mouse_x > branch_row_left)
+		{
+			item_under_mouse = (mouse_y - branch_row_top) / branch_row_height;
+			if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS)
+			{
+				item_under_mouse = (item_under_mouse + 1) % TOTAL_BOOKMARKS;
+				if (!bookmarks_array[item_under_mouse].not_empty)
+					item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+			}
+		} else item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	} else item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	must_check_item_under_mouse = false;
 }
 // ----------------------------------------------------------------------------------------
 void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
@@ -1112,4 +1294,24 @@ void BOOKMARKS::RecursiveSetYPos(int parent, int parentY)
 		}
 	}
 }
+// ----------------------------------------------------------------------------------------
+LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch(message)
+	{
+		HWND logo;
+		case WM_CREATE:
+		{
+			scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
+			break;
+		}
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+	return 0;
+}
+
 

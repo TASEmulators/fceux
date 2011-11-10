@@ -25,7 +25,8 @@ int old_multitrack_recording_joypad, multitrack_recording_joypad;
 bool old_movie_readonly;
 bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
-int listItems;	// number of items per list page
+int listItems;			// number of items per list page
+int list_row_height;	// in pixels
 // saved FCEU config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -40,6 +41,7 @@ bool TASEdit_bind_markers = true;
 bool TASEdit_branch_full_movie = true;
 bool TASEdit_branch_only_when_rec = false;
 bool TASEdit_view_branches_tree = false;
+bool TASEdit_branch_scr_hud = true;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 extern bool muteTurbo;
@@ -302,6 +304,8 @@ void UpdateTasEdit()
 
 void UpdateList()
 {
+	// first update number of items in markers array
+	markers.update();
 	//update the number of items in the list
 	int currLVItemCount = ListView_GetItemCount(hwndList);
 	int movie_size = currMovieData.getNumRecords();
@@ -322,8 +326,6 @@ void UpdateList()
 			}
 		}
 	}
-	// also update number of items in markers array
-	markers.update();
 }
 
 void RedrawWindowCaption()
@@ -982,6 +984,23 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		case WM_SETFOCUS:
 		case WM_KILLFOCUS:
 			return 0;
+		case WM_MOUSEMOVE:
+		{
+			if (!bookmarks.mouse_over_bitmap)
+			{
+				bookmarks.mouse_over_bookmarkslist = true;
+				bookmarks.list_tme.hwndTrack = hWnd;
+				TrackMouseEvent(&bookmarks.list_tme);
+			}
+			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+		}
+		case WM_MOUSELEAVE:
+		{
+			bookmarks.mouse_over_bookmarkslist = false;
+			bookmarks.MouseMove(-1, -1);
+			break;
+		}
 		case WM_SYSKEYDOWN:
 		{
 			if (wParam == VK_F10)
@@ -1049,7 +1068,6 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 	}
 	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
 }
-
 
 void AddFourscore()
 {
@@ -1346,7 +1364,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_INITDIALOG:
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
-			SetWindowPos(hwndDlg,0,TasEdit_wndx,TasEdit_wndy,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);
+			SetWindowPos(hwndDlg, 0, TasEdit_wndx, TasEdit_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			// save references to dialog items
 			hwndList = GetDlgItem(hwndDlg, IDC_LIST1);
 			listItems = ListView_GetCountPerPage(hwndList);
@@ -1366,6 +1384,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			hwndRB_Rec3P = GetDlgItem(hwndDlg, IDC_RADIO5);
 			hwndRB_Rec4P = GetDlgItem(hwndDlg, IDC_RADIO6);
 			hwndBranchesBitmap = GetDlgItem(hwndDlg, IDC_BRANCHES_BITMAP);
+
 			break; 
 
 		case WM_MOVE:
@@ -1376,8 +1395,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					GetWindowRect(hwndDlg,&wrect);
 					TasEdit_wndx = wrect.left;
 					TasEdit_wndy = wrect.top;
-
 					WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
+					// also move screenshot bitmap if it's open
+					extern HWND hwndScrBmp;
+					if (hwndScrBmp)
+						SetWindowPos(hwndScrBmp, 0, TasEdit_wndx + bookmarks.scr_bmp_x, TasEdit_wndy + bookmarks.scr_bmp_y, 0, 0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 				}
 				break;
 			}
@@ -1672,6 +1694,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
 				bookmarks.RedrawBookmarksCaption();
 				break;
+			case ID_CONFIG_HUDINBRANCHSCREENSHOTS:
+				//switch "HUD in Branch screenshots" flag
+				TASEdit_branch_scr_hud ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
+				break;
 			case IDC_PROGRESS_BUTTON:
 				// click on progressbar - stop seeking
 				if (playback.pauseframe) playback.SeekingStop();
@@ -1888,6 +1915,7 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOWDOTINEMPTYCELLS, TASEdit_show_dot?MF_CHECKED : MF_UNCHECKED);
@@ -2024,6 +2052,12 @@ void EnterTasEdit()
 		// add pads 3 and 4 and frame_number2
 		if (currMovieData.fourscore) AddFourscore();
 		UpdateList();
+		// calculate scr_bmp coordinates (relative to the listview top-left corner
+		RECT temp_rect, parent_rect;
+		GetWindowRect(hwndTasEdit, &parent_rect);
+		GetWindowRect(hwndHeader, &temp_rect);
+		bookmarks.scr_bmp_x = temp_rect.left - parent_rect.left;
+		bookmarks.scr_bmp_y = temp_rect.bottom - parent_rect.top;
 
 		// prepare bookmarks listview
 		ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);

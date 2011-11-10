@@ -191,7 +191,7 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	has_hot_changes = (tmp != 0);
 	// read description
 	if (!read8le(&tmp, is)) return true;
-	if (tmp < 0 || tmp >= SNAPSHOT_DESC_MAX_LENGTH) return true;
+	if (tmp >= SNAPSHOT_DESC_MAX_LENGTH) return true;
 	if (is->fread(&description[0], tmp) != tmp) return true;
 	description[tmp] = 0;		// add '0' because it wasn't saved
 	// read data
@@ -255,7 +255,7 @@ bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
 	if (!read8le(&tmp1, is)) return true;
 	// read description
 	if (!read8le(&tmp1, is)) return true;
-	if (tmp1 < 0 || tmp1 >= SNAPSHOT_DESC_MAX_LENGTH) return true;
+	if (tmp1 >= SNAPSHOT_DESC_MAX_LENGTH) return true;
 	if (is->fseek(tmp1, SEEK_CUR) != 0) return true;
 	// read joysticks data
 	if (!read32le(&tmp, is)) return true;
