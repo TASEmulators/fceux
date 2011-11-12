@@ -60,39 +60,39 @@ int configGamepadButton(GtkButton* button, gpointer p)
 	int padNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(padNoCombo))) - 1;
 	int configNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(configNoCombo))) - 1;
 		
-    char buf[256];
-    std::string prefix;
+	char buf[256];
+	std::string prefix;
     
-    // only configure when the "Change" button is pressed in, not when it is unpressed
-    if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+	// only configure when the "Change" button is pressed in, not when it is unpressed
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
     	return 0;
     
-    ButtonConfigBegin();
+	ButtonConfigBegin();
     
-    snprintf(buf, sizeof(buf), "SDL.Input.GamePad.%d", padNo);
-    prefix = buf;
-    DWaitButton(NULL, &GamePadConfig[padNo][x], configNo);
+	snprintf(buf, sizeof(buf), "SDL.Input.GamePad.%d", padNo);
+	prefix = buf;
+	DWaitButton(NULL, &GamePadConfig[padNo][x], configNo);
 
-    g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[configNo]);
+	g_config->setOption(prefix + GamePadNames[x], GamePadConfig[padNo][x].ButtonNum[configNo]);
 
-    if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
-    {
+	if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_KEYBOARD)
+	{
 		g_config->setOption(prefix + "DeviceType", "Keyboard");
-    } else if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK) {
-        g_config->setOption(prefix + "DeviceType", "Joystick");
-    } else {
-        g_config->setOption(prefix + "DeviceType", "Unknown");
-    }
-    g_config->setOption(prefix + "DeviceNum", GamePadConfig[padNo][x].DeviceNum[configNo]);
+	} else if(GamePadConfig[padNo][x].ButtType[0] == BUTTC_JOYSTICK) {
+		g_config->setOption(prefix + "DeviceType", "Joystick");
+	} else {
+		g_config->setOption(prefix + "DeviceType", "Unknown");
+	}
+	g_config->setOption(prefix + "DeviceNum", GamePadConfig[padNo][x].DeviceNum[configNo]);
     
-    snprintf(buf, sizeof(buf), "<tt>%s</tt>", ButtonName(&GamePadConfig[padNo][x], configNo));
+	snprintf(buf, sizeof(buf), "<tt>%s</tt>", ButtonName(&GamePadConfig[padNo][x], configNo));
 	gtk_label_set_markup(GTK_LABEL(buttonMappings[x]), buf);
 
-    ButtonConfigEnd();
+	ButtonConfigEnd();
     
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), FALSE);
     
-    return 0;
+	return 0;
 }
 
 void closeDialog(GtkWidget* w, GdkEvent* e, gpointer p)
@@ -1240,9 +1240,9 @@ void recordMovie()
 {
 	char* movie_fname = const_cast<char*>(FCEU_MakeFName(FCEUMKF_MOVIE, 0, 0).c_str());
 	FCEUI_printf("Recording movie to %s\n", movie_fname);
-    FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
+	FCEUI_SaveMovie(movie_fname, MOVIE_FLAG_NONE, L"");
     
-    return;
+	return;
 }
 void recordMovieAs ()
 {
@@ -1315,11 +1315,11 @@ void loadMovie ()
 		
 		fname = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
 		static int pauseframe;
-        g_config->getOption("SDL.PauseFrame", &pauseframe);
-        g_config->setOption("SDL.PauseFrame", 0);
-        FCEUI_printf("Playing back movie located at %s\n", fname);
-        if(FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false) == FALSE)
-        {
+		g_config->getOption("SDL.PauseFrame", &pauseframe);
+		g_config->setOption("SDL.PauseFrame", 0);
+		FCEUI_printf("Playing back movie located at %s\n", fname);
+		if(FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false) == FALSE)
+		{
 			GtkWidget* d;
 			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
 				"Could not open the selected FM2 file.");
@@ -1353,8 +1353,8 @@ void loadLua ()
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterLua);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	const char* last_file;
-  g_config->getOption("SDL.LastLoadLua", &last_file);
-  gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_file);
+	g_config->getOption("SDL.LastLoadLua", &last_file);
+	gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(fileChooser), last_file);
 	
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
@@ -1753,10 +1753,7 @@ void loadStateFrom()
 		g_config->setOption("SDL.LastLoadStateFrom", filename);
 		g_free(filename);
 	}
-	
 	gtk_widget_destroy (fileChooser);
-	
-	
 }
 
 void quickLoad()
@@ -2122,26 +2119,26 @@ static GtkWidget* CreateMenubar( GtkWidget* window)
 	/* Add the menu items to the UIManager as a GtkActionGroup. */
 	action_group = gtk_action_group_new ("MenubarActions");
 	gtk_action_group_add_actions (action_group, normal_entries, G_N_ELEMENTS (normal_entries), NULL);
-    gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
-    gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
-    gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
+	gtk_action_group_add_toggle_actions (action_group, toggle_entries, G_N_ELEMENTS (toggle_entries), NULL);
+	gtk_action_group_add_radio_actions (action_group, radio_entries, G_N_ELEMENTS (radio_entries), 0, G_CALLBACK(changeState), NULL);
+	gtk_ui_manager_insert_action_group (ui_manager, action_group, 0);
     
-    /* Read the menu layout from the XML markup. */
-    gtk_ui_manager_add_ui_from_string (ui_manager, menuXml, -1, &error);
-    if (error)
-    {
-        fprintf (stderr, "Unable to create menu bar: %s\n", error->message);
-        g_error_free (error);
-    }
+	/* Read the menu layout from the XML markup. */
+	gtk_ui_manager_add_ui_from_string (ui_manager, menuXml, -1, &error);
+	if (error)
+	{
+		fprintf (stderr, "Unable to create menu bar: %s\n", error->message);
+		g_error_free (error);
+	}
     
-    /* Attach the new accelerator group to the window. */
-    accel_group = gtk_ui_manager_get_accel_group (ui_manager);
-    gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+	/* Attach the new accelerator group to the window. */
+	accel_group = gtk_ui_manager_get_accel_group (ui_manager);
+	gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
     
-    /* Get an action that can be used to change the active state slot selection. */
-    state = gtk_action_group_get_action (action_group, "State0Action");
-    if (state && GTK_IS_RADIO_ACTION (state))
-    	stateSlot = GTK_RADIO_ACTION (state);
+	/* Get an action that can be used to change the active state slot selection. */
+	state = gtk_action_group_get_action (action_group, "State0Action");
+	if (state && GTK_IS_RADIO_ACTION (state))
+		stateSlot = GTK_RADIO_ACTION (state);
     
 	/* Finally, return the actual menu bar created by the UIManager. */
 	return gtk_ui_manager_get_widget (ui_manager, "/Menubar");
@@ -2166,37 +2163,37 @@ int GtkMouseData[3] = {0,0,0};
 
 gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data)
 {
-  GtkMouseData[0] = ((GdkEventButton*)event)->x;
-  GtkMouseData[1] = ((GdkEventButton*)event)->y;
-  int button = ((GdkEventButton*)event)->button;
-  if(!(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS))
-    GtkMouseData[2] = 0;
-  else
-  {
-    if(button == 1)
-      GtkMouseData[2] |= 0x1;
-    if(button == 3)
-      GtkMouseData[2] |= 0x3;
-  }
-  
-  // this doesn't work because we poll the mouse position rather
-  // than use events
-  /*
-  SDL_Event sdlev;
-  sdlev.type = SDL_MOUSEBUTTONDOWN;
-  if(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS)
-    sdlev.button.type = SDL_MOUSEBUTTONDOWN;
-  else
-    sdlev.button.type = SDL_MOUSEBUTTONUP;
-  sdlev.button.button = ((GdkEventButton*)event)->button;
-  sdlev.button.state = ((GdkEventButton*)event)->state;
-  sdlev.button.x = ((GdkEventButton*)event)->x;
-  sdlev.button.y = ((GdkEventButton*)event)->y;
+	GtkMouseData[0] = ((GdkEventButton*)event)->x;
+	GtkMouseData[1] = ((GdkEventButton*)event)->y;
+	int button = ((GdkEventButton*)event)->button;
+	if(!(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS))
+		GtkMouseData[2] = 0;
+	else
+	{
+		if(button == 1)
+			GtkMouseData[2] |= 0x1;
+		if(button == 3)
+			GtkMouseData[2] |= 0x3;
+	}
 
-  SDL_PushEvent(&sdlev);
-  */
+	// this doesn't work because we poll the mouse position rather
+	// than use events
+	/*
+	SDL_Event sdlev;
+	sdlev.type = SDL_MOUSEBUTTONDOWN;
+	if(((GdkEventButton*)event)->type == GDK_BUTTON_PRESS)
+		 sdlev.button.type = SDL_MOUSEBUTTONDOWN;
+	else
+		sdlev.button.type = SDL_MOUSEBUTTONUP;
+	sdlev.button.button = ((GdkEventButton*)event)->button;
+	sdlev.button.state = ((GdkEventButton*)event)->state;
+	sdlev.button.x = ((GdkEventButton*)event)->x;
+	sdlev.button.y = ((GdkEventButton*)event)->y;
+
+	SDL_PushEvent(&sdlev);
+	*/
   
-  return 0;
+	return 0;
 }
 
 int InitGTKSubsystem(int argc, char** argv)
@@ -2206,7 +2203,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 //	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
-    gtk_window_set_resizable(GTK_WINDOW(MainWindow), FALSE);
+	gtk_window_set_resizable(GTK_WINDOW(MainWindow), FALSE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
 	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
 	
@@ -2254,11 +2251,10 @@ int InitGTKSubsystem(int argc, char** argv)
 	// set up keypress "snooper" to convert GDK keypress events into SDL keypresses
 	gtk_key_snooper_install(convertKeypress, NULL);
 
-  // pass along mouse data from GTK to SDL
-  g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
-  g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
+	// pass along mouse data from GTK to SDL
+	g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
+	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
-	
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	
 	// signal handlers
