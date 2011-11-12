@@ -2,6 +2,7 @@
 
 #include "../main.h"
 #include "taseditproj.h"
+#include "../tasedit.h"
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
@@ -10,6 +11,7 @@ extern PLAYBACK playback;
 extern INPUT_HISTORY history;
 
 extern void FCEU_printf(char *format, ...);
+extern int TASEdit_autosave_period;
 
 TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads project with default values
 {
@@ -28,14 +30,19 @@ void TASEDIT_PROJECT::init()
 }
 void TASEDIT_PROJECT::reset()
 {
-	old_changed = changed = false;
+	changed = false;
 
 }
 void TASEDIT_PROJECT::update()
 {
-	old_changed = changed;
-
-
+	// if it's time to autosave - save
+	if (changed && TASEdit_autosave_period && clock() >= next_save_shedule)
+	{
+		SaveProject();
+		// in case user pressed Cancel, postpone saving to next time
+		SheduleNextAutosave();
+	}
+	
 }
 
 bool TASEDIT_PROJECT::saveProject()
@@ -139,3 +146,22 @@ void TASEDIT_PROJECT::SetProjectFile(std::string e)
 	projectFile = e;
 }
 
+void TASEDIT_PROJECT::SetProjectChanged()
+{
+	if (!changed)
+	{
+		changed = true;
+		RedrawWindowCaption();
+		SheduleNextAutosave();
+	}
+}
+bool TASEDIT_PROJECT::GetProjectChanged()
+{
+	return changed;
+}
+
+void TASEDIT_PROJECT::SheduleNextAutosave()
+{
+	if (TASEdit_autosave_period)
+		next_save_shedule = clock() + TASEdit_autosave_period * AUTOSAVE_PERIOD_SCALE;
+}

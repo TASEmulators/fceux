@@ -26,7 +26,6 @@ bool old_movie_readonly;
 bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
 int listItems;			// number of items per list page
-int list_row_height;	// in pixels
 // saved FCEU config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -44,9 +43,10 @@ bool TASEdit_view_branches_tree = false;
 bool TASEdit_branch_scr_hud = true;
 bool TASEdit_restore_position = false;
 int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
+int TasEdit_undo_levels = UNDO_LEVELS_DEFAULT;
+int TASEdit_autosave_period = AUTOSAVE_PERIOD_DEFAULT;
 extern bool muteTurbo;
 bool TASEdit_show_dot = true;
-int TasEdit_undo_levels = UNDO_LEVELS_DEFAULT;
 bool TASEdit_jump_to_undo = true;
 
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
@@ -170,19 +170,19 @@ LONG CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
 						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
 				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
 				{
 					// current frame
-					if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
 						// this frame is also marked
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if(TASEdit_show_markers && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+				} else if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
 				{
 					// marked frame
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
@@ -283,11 +283,11 @@ void UpdateTasEdit()
 	playback.update();
 	bookmarks.update();
 	history.update();
+	project.update();
 
 	// update window caption
-	if (project.old_changed != project.changed || old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
+	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
 		RedrawWindowCaption();
-	project.update();
 
 	// update Bookmarks/Branches groupbox caption
 	if (TASEdit_branch_only_when_rec && old_movie_readonly != movie_readonly)
@@ -343,7 +343,7 @@ void RedrawWindowCaption()
 		strcat(windowCaption, projectname.c_str());
 	}
 	// and * if project has unsaved changes
-	if (project.changed)
+	if (project.GetProjectChanged())
 		strcat(windowCaption, "*");
 	SetWindowText(hwndTasEdit, windowCaption);
 }
@@ -469,7 +469,7 @@ void SingleClick(LPNMITEMACTIVATE info)
 				history.RegisterChanges(MODTYPE_MARKER_SET, row_index);
 			else
 				history.RegisterChanges(MODTYPE_MARKER_UNSET, row_index);
-			project.changed = true;
+			project.SetProjectChanged();
 			// deselect this row, so that new marker will be seen immediately
 			ListView_SetItemState(hwndList, row_index, 0, LVIS_SELECTED);
 			ListView_SetItemState(hwndList, -1, LVIS_FOCUSED, LVIS_FOCUSED);
@@ -646,7 +646,7 @@ void ColumnSet(int column)
 				markers.markers_array[*it] &= ~MARKER_FLAG_BIT;
 			history.RegisterChanges(MODTYPE_MARKER_UNSET, *selectionFrames.begin(), *selectionFrames.rbegin());
 		}
-		project.changed = true;
+		project.SetProjectChanged();
 		ClearSelection();
 		// no need to RedrawList();
 	} else
@@ -986,7 +986,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		case WM_MOUSEMOVE:
 		{
-			if (!bookmarks.mouse_over_bitmap)
+			if (!bookmarks.mouse_over_bookmarkslist)
 			{
 				bookmarks.mouse_over_bookmarkslist = true;
 				bookmarks.list_tme.hwndTrack = hWnd;
@@ -1151,9 +1151,6 @@ void RecheckRecordingRadioButtons()
 void OpenProject()
 {
 	if (!AskSaveProject()) return;
-		
-	//If OPENFILENAME dialog successful, open up a completely new project instance and scrap the old one
-	//Run the project Load() function to pull all info from the .tas file into this new project instance
 
 	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";	
 
@@ -1164,10 +1161,8 @@ void OpenProject()
 	ofn.lpstrTitle="Open TASEdit Project...";
 	ofn.lpstrFilter=TPfilter;
 
-  //TODO - this is a bug, as GetRomName() returns archive.7z|game.rom and that confuses GetOpenFileName()
-  //we need to use a different function to get a friendlier name (same as savestates and fm2 and the like)
-	char nameo[2048];								//File name
-	strcpy(nameo, GetRomName());					//For now, just use ROM name
+	char nameo[2048];
+	strcpy(nameo, mass_replace(GetRomName(),"|",".").c_str());	//convert | to . for archive filenames
 
 	ofn.lpstrFile=nameo;							
 	ofn.nMaxFile=256;
@@ -1225,10 +1220,9 @@ bool SaveProjectAs()
 	ofn.lpstrTitle="Save TASEdit Project As...";
 	ofn.lpstrFilter=TPfilter;
 
-	char nameo[2048];										//File name
-	strcpy(nameo, GetRomName());							//For now, just use ROM name
-
-	ofn.lpstrFile=nameo;									//More parameters
+	char nameo[2048];
+	strcpy(nameo, mass_replace(GetRomName(),"|",".").c_str());	//convert | to . for archive filenames
+	ofn.lpstrFile = nameo;
 	ofn.lpstrDefExt="tas";
 	ofn.nMaxFile=256;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
@@ -1265,7 +1259,7 @@ bool SaveProject()
 bool AskSaveProject()
 {
 	bool changes_found = false;
-	if (project.changed) changes_found = true;
+	if (project.GetProjectChanged()) changes_found = true;
 
 	// ask saving project
 	if (changes_found)
@@ -1638,9 +1632,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 			case ID_CONFIG_SETGREENZONECAPACITY:
 				{
-					//open input dialog
 					int new_capacity = TASEdit_greenzone_capacity;
-					if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?", new_capacity, hwndDlg) == IDOK)
+					if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hwndDlg) == IDOK)
 					{
 						if (new_capacity < GREENZONE_CAPACITY_MIN)
 							new_capacity = GREENZONE_CAPACITY_MIN;
@@ -1656,7 +1649,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				}
 			case ID_CONFIG_SETMAXUNDOLEVELS:
 				{
-					//open input dialog
 					int new_size = TasEdit_undo_levels;
 					if(CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hwndDlg) == IDOK)
 					{
@@ -1671,6 +1663,20 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							// hot changes were cleared, so update list
 							RedrawList();
 						}
+					}
+					break;
+				}
+			case ID_CONFIG_SETAUTOSAVEPERIOD:
+				{
+					int new_period = TASEdit_autosave_period;
+					if(CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hwndDlg) == IDOK)
+					{
+						if (new_period < AUTOSAVE_PERIOD_MIN)
+							new_period = AUTOSAVE_PERIOD_MIN;
+						else if (new_period > AUTOSAVE_PERIOD_MAX)
+							new_period = AUTOSAVE_PERIOD_MAX;
+						TASEdit_autosave_period = new_period;
+						project.SheduleNextAutosave();	
 					}
 					break;
 				}

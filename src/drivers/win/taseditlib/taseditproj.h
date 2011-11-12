@@ -28,10 +28,17 @@ public:
 	std::string GetProjectFile();
 	void SetProjectFile(std::string e);
 
+	void SetProjectChanged();
+	bool GetProjectChanged();
+
+	void SheduleNextAutosave();
+
 	// public vars
-	bool changed, old_changed;
 
 private:
+	bool changed;
+	int next_save_shedule;
+
 	std::string projectName;			//The TASEdit Project's name
 	std::string fm2FileName;			//The main branch ilog file (todo rename more appropriately)
 	std::string projectFile; 			//The TASEdit Project's filename (For saving purposes) //adelikat: TODO: why the hell is this different from project name??!

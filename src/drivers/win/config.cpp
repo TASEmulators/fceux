@@ -80,6 +80,7 @@ extern bool TASEdit_restore_position;
 extern bool TASEdit_show_dot;
 extern int TASEdit_greenzone_capacity;
 extern int TasEdit_undo_levels;
+extern int TASEdit_autosave_period;
 extern bool TASEdit_jump_to_undo;
 
 //window positions and sizes:
@@ -310,6 +311,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_dot),
 	AC(TASEdit_greenzone_capacity),
 	AC(TasEdit_undo_levels),
+	AC(TASEdit_autosave_period),
 	AC(TASEdit_jump_to_undo),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),

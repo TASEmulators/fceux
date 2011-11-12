@@ -31,15 +31,13 @@ void BOOKMARK::set()
 	snapshot.jump_frame = currFrameCounter;
 	savestate = greenzone.savestates[currFrameCounter];
 	// save screenshot
-	std::vector<uint8> temp_screenshot(SCREENSHOT_SIZE);
-	if (TASEdit_branch_scr_hud)
-		memcpy(&temp_screenshot[0], &XBuf[0], SCREENSHOT_SIZE);
-	else
-		memcpy(&temp_screenshot[0], &XBackBuf[0], SCREENSHOT_SIZE);
-	// compress the screenshot
 	uLongf comprlen = (SCREENSHOT_SIZE>>9)+12 + SCREENSHOT_SIZE;
 	saved_screenshot.resize(comprlen);
-	compress(&saved_screenshot[0], &comprlen, &temp_screenshot[0], SCREENSHOT_SIZE);
+	// compress screenshot data
+	if (TASEdit_branch_scr_hud)
+		compress(&saved_screenshot[0], &comprlen, XBuf, SCREENSHOT_SIZE);
+	else
+		compress(&saved_screenshot[0], &comprlen, XBackBuf, SCREENSHOT_SIZE);
 	saved_screenshot.resize(comprlen);
 
 	not_empty = true;

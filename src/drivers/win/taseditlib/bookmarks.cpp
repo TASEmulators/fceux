@@ -47,8 +47,6 @@ extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
 
-extern int list_row_height;
-
 BOOKMARKS::BOOKMARKS()
 {
 	// create font
@@ -395,7 +393,7 @@ void BOOKMARKS::set(int slot)
 		must_recalculate_branches_tree = true;
 	current_branch = slot;
 	changes_since_current_branch = false;
-	project.changed = true;
+	project.SetProjectChanged();
 
 	if (previous_frame >= 0 && previous_frame != currFrameCounter)
 		RedrawRowAndBookmark(previous_frame);
@@ -438,7 +436,7 @@ void BOOKMARKS::unleash(int slot)
 			if (bookmarks_array[slot].snapshot.checkMarkersDiff())
 			{
 				bookmarks_array[slot].snapshot.toMarkers();
-				project.changed = true;
+				project.SetProjectChanged();
 				markers_changed = true;
 			}
 		}
@@ -472,7 +470,7 @@ void BOOKMARKS::unleash(int slot)
 			if (bookmarks_array[slot].snapshot.checkMarkersDiff(jump_frame))
 			{
 				bookmarks_array[slot].snapshot.copyToMarkers(jump_frame-1);
-				project.changed = true;
+				project.SetProjectChanged();
 				markers_changed = true;
 			}
 		}
@@ -1299,19 +1297,15 @@ LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 {
 	switch(message)
 	{
-		HWND logo;
 		case WM_CREATE:
 		{
+			// create static bitmap placeholder
 			scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
-			break;
+			return 0;
 		}
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
 		default:
 			return DefWindowProc(hwnd, message, wParam, lParam);
 	}
-	return 0;
 }
 
 

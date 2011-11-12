@@ -322,7 +322,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 {
 	if (after >= 0)
 	{
-		project.changed = true;
+		project.SetProjectChanged();
 		if (greenZoneCount > after+1)
 		{
 			greenZoneCount = after+1;
@@ -345,7 +345,7 @@ void GREENZONE::Invalidate(int after)
 {
 	if (after >= 0)
 	{
-		project.changed = true;
+		project.SetProjectChanged();
 		if (greenZoneCount > after+1)
 		{
 			greenZoneCount = after+1;

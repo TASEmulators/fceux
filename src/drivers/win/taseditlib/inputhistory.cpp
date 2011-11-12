@@ -137,7 +137,7 @@ int INPUT_HISTORY::jump(int new_pos)
 		if (input_snapshots[real_pos].checkMarkersDiff())
 		{
 			input_snapshots[real_pos].toMarkers();
-			project.changed = true;
+			project.SetProjectChanged();
 			markers_changed = true;
 		}
 	}

@@ -1,16 +1,34 @@
-04-novm-2011 - prg318 - gtk: added option for frameskipping and made label case consistent in gui
-23-octo-2011 - prg318 - sdl: fix a bug where alt key would get "stuck" when alt tabbing to window
-19-octo-2011 - prg318 - scons: "scons install" now installs auxlib and manpage
-19-octo-2011 - prg318 - scons: added --prefix option to build system and improved "install" target
-18-octo-2011 - prg318 - sdl: new hotkeys added - statestatenext savestateprev - useful for scrolling through savestates on a gamepad.  mapped to pgup and pgdown by default
-18-octo-2011 - prg318 - gtk: new video option for double buffering and ClipSides
-18-octo-2011 - prg318 - sdl: GTK3 support is now functional.  Set GTK3 to 1 in the SConstruct to try it out.
-18-octo-2011 - prg318 - no longer use depreciated gtk2 functions
-18-octo-2011 - prg318 - getSDLKey tool added to assist in remapping hotkeys
-17-octo-2011 - prg318 - some segfaults fixed, also fixed some build errors
-17-octo-2011 - prg318 - sdl netplay fixed
-07-octo-2011 - prg318 - sdl: fixed some issues with --nogui .  "--nogui" no longer requires an argument and can be used like this "$ fceux --nogui rom.nes"
-07-octo-2011 - prg318 - gtk: support mouseclicks (ie zapper)
+
+12-nov-2011 - AnS - Tasedit: project autosaving
+10-nov-2011 - AnS - Tasedit: Branches show saved screenshot on mouseover (alpha-fade popup window)
+7-nov-2011 - AnS - Tasedit: Drawing Branches Tree (using GDI), animations, transitions, mouseover
+04-nov-2011 - prg318 - gtk: added option for frameskipping and made label case consistent in gui
+1-nov-2011 - zeromus - debugger - fix mysterious out of bounds condition while editing breakpoints
+31-oct-2011 - zeromus - add winapi lua library
+31-oct-2011 - zeromus - fix newppu bug; chr ram was not getting initialized to anything
+28-oct-2011 - AnS - Switching Tasedit Bg input on/off when Tasedit gets/loses focus (allows FCEUX control without "Bg input")
+27-oct-2011 - AnS - "Toggle Rerecord Display" hotkey (M), "Play Movie From Beginning" hotkey also works in Tasedit
+27-oct-2011 - AnS - Tasedit: Bookmarks/Branches
+23-oct-2011 - prg318 - sdl: fix a bug where alt key would get "stuck" when alt tabbing to window
+21-oct-2011 - AnS - Tasedit: gradual greenzone cleaning
+19-oct-2011 - prg318 - scons: "scons install" now installs auxlib and manpage
+19-oct-2011 - prg318 - scons: added --prefix option to build system and improved "install" target
+18-oct-2011 - prg318 - sdl: new hotkeys added - statestatenext savestateprev - useful for scrolling through savestates on a gamepad.  mapped to pgup and pgdown by default
+18-oct-2011 - prg318 - gtk: new video option for double buffering and ClipSides
+18-oct-2011 - prg318 - sdl: GTK3 support is now functional.  Set GTK3 to 1 in the SConstruct to try it out.
+18-oct-2011 - prg318 - no longer use depreciated gtk2 functions
+18-oct-2011 - prg318 - getSDLKey tool added to assist in remapping hotkeys
+17-oct-2011 - prg318 - some segfaults fixed, also fixed some build errors
+17-oct-2011 - prg318 - sdl netplay fixed
+15-oct-2011 - zeromus - don't lose cheat compare value when toggle cheat enables through UI
+14-oct-2011 - AnS - added rewind hotkey (~), works only in Taseditor
+14-oct-2011 - AnS - Tasedit: execute lua functions when jumping inside greenzone
+13-oct-2011 - AnS - Tasedit: major refactoring
+9-oct-2011 - AnS - Tasedit: input history, undo, redo; greenzone reduces only from the point where actual differences were found
+07-oct-2011 - prg318 - sdl: fixed some issues with --nogui .  "--nogui" no longer requires an argument and can be used like this "$ fceux --nogui rom.nes"
+07-oct-2011 - prg318 - gtk: support mouseclicks (ie zapper)
+03-oct-2011 - AnS - Tasedit: Clone Frame(s)
+02-oct-2011 - AnS - Tasedit: Markers
 30-sept-2011 - AnS - logging all display messages to Message Log
 30-sept-2011 - AnS - Tasedit: special method of inserting frames; progressbar updating when loading/saving large projects; moved "Follow cursor" checkbox from View menu to main TASEdit window
 30-sept-2011 - AnS - Tasedit: View->Show dot in empty cells; ClearFrames (Del), Cut operation clears frames instead of deleting; checking unsaved project on Exit and Open project

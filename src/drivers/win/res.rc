@@ -261,6 +261,7 @@ BEGIN
     BEGIN
         MENUITEM "Set &greenzone capacity",     ID_CONFIG_SETGREENZONECAPACITY
         MENUITEM "Set max &undo levels",        ID_CONFIG_SETMAXUNDOLEVELS
+        MENUITEM "Set &autosave period",        ID_CONFIG_SETAUTOSAVEPERIOD
         MENUITEM SEPARATOR
         MENUITEM "Branches restore entire &Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE
         MENUITEM "Branches work only when &Recording", ID_CONFIG_BRANCHESWORKONLYWHENRECORDING

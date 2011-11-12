@@ -11,6 +11,11 @@
 #define GREENZONE_CAPACITY_MIN 1
 #define GREENZONE_CAPACITY_MAX 50000
 
+#define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds
+#define AUTOSAVE_PERIOD_DEFAULT 10		// in minutes
+#define AUTOSAVE_PERIOD_MIN 0			// 0 = no autosave
+#define AUTOSAVE_PERIOD_MAX 60			// 1 hour
+
 #define UNDO_LEVELS_MIN 1
 #define UNDO_LEVELS_MAX 999
 #define UNDO_LEVELS_DEFAULT 100
