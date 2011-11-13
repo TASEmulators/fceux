@@ -12,11 +12,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Нейтральный resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1251)
+#pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -33,7 +35,7 @@ ICON_2                  ICON                    "res/ICON_2.ico"
 // Menu
 //
 
-FCEUMENU MENU
+FCEUMENU MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -215,7 +217,7 @@ BEGIN
     END
 END
 
-TASEDITMENU MENU
+TASEDITMENU MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -277,7 +279,7 @@ BEGIN
     END
 END
 
-MEMVIEWMENU MENU
+MEMVIEWMENU MENU 
 BEGIN
     POPUP "&File"
     BEGIN
@@ -320,7 +322,7 @@ BEGIN
     END
 END
 
-MEMWATCHMENU MENU
+MEMWATCHMENU MENU 
 BEGIN
     POPUP "&File  "
     BEGIN
@@ -347,7 +349,7 @@ BEGIN
     END
 END
 
-TASEDITCONTEXTMENUS MENU
+TASEDITCONTEXTMENUS MENU 
 BEGIN
     POPUP "Stray"
     BEGIN
@@ -369,7 +371,7 @@ BEGIN
     END
 END
 
-FCEUCONTEXTMENUS MENU
+FCEUCONTEXTMENUS MENU 
 BEGIN
     POPUP "Game+Movie+readonly"
     BEGIN
@@ -430,7 +432,7 @@ BEGIN
     END
 END
 
-RAMWATCH_MENU MENU
+RAMWATCH_MENU MENU 
 BEGIN
     POPUP "File"
     BEGIN
@@ -459,7 +461,7 @@ BEGIN
     END
 END
 
-CHEATCONTEXTMENUS MENU
+CHEATCONTEXTMENUS MENU 
 BEGIN
     POPUP "CheatListPopup"
     BEGIN
@@ -470,7 +472,7 @@ BEGIN
     END
 END
 
-DEBUGCONTEXTMENUS MENU
+DEBUGCONTEXTMENUS MENU 
 BEGIN
     POPUP "DebugListPopup"
     BEGIN
@@ -478,7 +480,7 @@ BEGIN
     END
 END
 
-LUAWINDOW_MENU MENU
+LUAWINDOW_MENU MENU 
 BEGIN
     POPUP "Console"
     BEGIN
@@ -538,7 +540,7 @@ BEGIN
     LTEXT           "Avi Output",IDC_STATIC,10,208,34,8
 END
 
-DWBDIALOG DIALOG 33, 99, 250, 56
+DWBDIALOG DIALOG  33, 99, 250, 56
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "DWB!"
 FONT 8, "MS Sans Serif"
@@ -548,7 +550,7 @@ BEGIN
     PUSHBUTTON      "Close",BTN_CLOSE,188,33,50,14
 END
 
-FKBDIALOG DIALOG 13, 72, 402, 194
+FKBDIALOG DIALOG  13, 72, 402, 194
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Family Keyboard Configuration"
 FONT 8, "MS Sans Serif"
@@ -728,7 +730,7 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX,174,18,142,12
 END
 
-MAHJONGDIALOG DIALOG 65510, 106, 340, 110
+MAHJONGDIALOG DIALOG  65510, 106, 340, 110
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "mahjong"
 FONT 8, "MS Sans Serif"
@@ -829,7 +831,7 @@ BEGIN
     CTEXT           "Tint",65463,123,34,85,8
 END
 
-POWERPADDIALOG DIALOG 30, 123, 131, 119
+POWERPADDIALOG DIALOG  30, 123, 131, 119
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Power Pad Configuration"
 FONT 8, "MS Sans Serif"
@@ -850,7 +852,7 @@ BEGIN
     PUSHBUTTON      "12",311,91,59,16,12
 END
 
-QUIZKINGDIALOG DIALOG 30, 123, 160, 74
+QUIZKINGDIALOG DIALOG  30, 123, 160, 74
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "quiz king"
 FONT 8, "MS Sans Serif"
@@ -1539,7 +1541,7 @@ BEGIN
     SCROLLBAR       IDC_CHEAT_SCRL_POSSIBILITIES,360,25,10,138,SBS_VERT
     PUSHBUTTON      "Reset",IDC_BTN_CHEAT_RESET,146,12,55,15
     PUSHBUTTON      "Known Value:",IDC_BTN_CHEAT_KNOWN,146,31,55,15
-    EDITTEXT        IDC_CHEAT_VAL_KNOWN,204,32,20,12,ES_UPPERCASE
+    EDITTEXT        IDC_CHEAT_VAL_KNOWN,213,32,20,12,ES_UPPERCASE
     GROUPBOX        "Previous Compare",204,139,51,114,118,WS_TABSTOP
     PUSHBUTTON      "Equal",IDC_BTN_CHEAT_EQ,146,64,55,15
     PUSHBUTTON      "Not Equal",IDC_BTN_CHEAT_NE,146,91,55,15
@@ -1551,7 +1553,7 @@ BEGIN
     EDITTEXT        IDC_CHEAT_VAL_NE_BY,228,93,20,12,ES_UPPERCASE | ES_WANTRETURN
     EDITTEXT        IDC_CHEAT_VAL_GT_BY,228,120,20,12,ES_UPPERCASE | ES_WANTRETURN
     EDITTEXT        IDC_CHEAT_VAL_LT_BY,228,147,20,12,ES_UPPERCASE | ES_WANTRETURN
-    LTEXT           "(Hex)",IDC_STATIC,226,34,19,8
+    LTEXT           "0x",IDC_STATIC,204,34,9,8
     CONTROL         "Pause when active",IDC_CHEAT_PAUSEWHENACTIVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,173,76,10
 END
 
@@ -1725,7 +1727,7 @@ BEGIN
     PUSHBUTTON      "&Cancel",IDCANCEL,120,80,50,14
 END
 
-IDD_PROMPT DIALOG 0, 0, 186, 68
+IDD_PROMPT DIALOG  0, 0, 186, 68
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Input Prompt"
 FONT 8, "Ms Shell Dlg 2"
@@ -1742,25 +1744,13 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     "DIRCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 295
         TOPMARGIN, 8
-    END
-
-    "DWBDIALOG", DIALOG
-    BEGIN
-    END
-
-    "FKBDIALOG", DIALOG
-    BEGIN
-    END
-
-    "GAMEPADDIALOG", DIALOG
-    BEGIN
     END
 
     "GUICONFIG", DIALOG
@@ -1779,14 +1769,6 @@ BEGIN
         BOTTOMMARGIN, 191
     END
 
-    "MAHJONGDIALOG", DIALOG
-    BEGIN
-    END
-
-    "MAPINPUT", DIALOG
-    BEGIN
-    END
-
     "MESSAGELOG", DIALOG
     BEGIN
         BOTTOMMARGIN, 184
@@ -1800,20 +1782,12 @@ BEGIN
         BOTTOMMARGIN, 201
     END
 
-    "NEWINPUT", DIALOG
-    BEGIN
-    END
-
     "PALCONFIG", DIALOG
     BEGIN
         LEFTMARGIN, 10
         RIGHTMARGIN, 218
         TOPMARGIN, 8
         BOTTOMMARGIN, 108
-    END
-
-    "QUIZKINGDIALOG", DIALOG
-    BEGIN
     END
 
     "SOUNDCONFIG", DIALOG
@@ -1840,10 +1814,6 @@ BEGIN
         BOTTOMMARGIN, 217
     END
 
-    "DWBDIALOGSIMPLE", DIALOG
-    BEGIN
-    END
-
     "MEMWATCH", DIALOG
     BEGIN
         RIGHTMARGIN, 260
@@ -1856,22 +1826,10 @@ BEGIN
         BOTTOMMARGIN, 318
     END
 
-    "TRACER", DIALOG
-    BEGIN
-    END
-
     "ADDBP", DIALOG
     BEGIN
         RIGHTMARGIN, 185
         BOTTOMMARGIN, 121
-    END
-
-    "ROMPATCHER", DIALOG
-    BEGIN
-    END
-
-    "GGCONV", DIALOG
-    BEGIN
     END
 
     "MONITOR", DIALOG
@@ -1898,10 +1856,6 @@ BEGIN
     "IDD_REPLAYINP", DIALOG
     BEGIN
         BOTTOMMARGIN, 198
-    END
-
-    "TASEDIT", DIALOG
-    BEGIN
     END
 
     "ASSEMBLER", DIALOG
@@ -1959,16 +1913,18 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Нейтральный resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Английский (США) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1991,7 +1947,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     "IDD_REPLAY_METADATA", DIALOG
     BEGIN
@@ -2033,7 +1989,7 @@ END
 // Accelerator
 //
 
-IDR_ACCELERATOR1 ACCELERATORS
+IDR_ACCELERATOR1 ACCELERATORS 
 BEGIN
     "A",            ACCEL_CTRL_A,           VIRTKEY, CONTROL, NOINVERT
     "C",            ACCEL_CTRL_C,           VIRTKEY, CONTROL, NOINVERT
@@ -2052,7 +2008,7 @@ BEGIN
     VK_INSERT,      ACCEL_SHIFT_INS,        VIRTKEY, SHIFT, NOINVERT
 END
 
-IDR_RWACCELERATOR ACCELERATORS
+IDR_RWACCELERATOR ACCELERATORS 
 BEGIN
     "N",            RAMMENU_FILE_NEW,       VIRTKEY, CONTROL
     "O",            RAMMENU_FILE_OPEN,      VIRTKEY, CONTROL
@@ -2094,7 +2050,7 @@ IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
 IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
-#endif    // Английский (США) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
