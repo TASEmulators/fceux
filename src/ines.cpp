@@ -566,6 +566,7 @@ static BMAPPINGLocal bmap[] = {
     {"",					153, Mapper153_Init},
 	{"",					154, Mapper154_Init},
 	{"",					155, Mapper155_Init},
+  {"",					159, Mapper159_Init},
     {"SA009",				160, SA009_Init},
 	{"",					163, Mapper163_Init},
 	{"",					164, Mapper164_Init},

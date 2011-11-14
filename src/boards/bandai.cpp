@@ -2,6 +2,7 @@
  *
  * Copyright notice for this file:
  *  Copyright (C) 2007 CaH4e3
+ *  Copyright (C) 2011 FCEUX team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,11 @@
  * Bandai mappers
  *
  */
+
+//Famicom Jump 2 should get transformed to m153
+//All other games are not supporting EEPROM saving right now. 
+//We may need to distinguish between 16 and 159 in order to know the EEPROM configuration.
+//Until then, we just return 0x00 from the EEPROM read
 
 #include "mapinc.h"
 
@@ -58,13 +64,7 @@ static void BandaiSync(void)
   if(is153)
   {
     int base=(reg[0]&1)<<4;
-    if(!UNIFchrrama) //  SD Gundam Gaiden - Knight Gundam Monogatari 2 - Hikari no Kishi (J)  uses WRAM but have CHRROM too
-    {
-     int i;
-     for(i=0; i<8; i++) setchr1(i<<10,reg[i]);
-    }
-    else
-     setchr8(0);
+    setchr8(0);
     setprg16(0x8000,(reg[8]&0x0F)|base);
     setprg16(0xC000,0x0F|base);
   }
@@ -102,11 +102,17 @@ static DECLFW(BandaiWrite)
     }
 }
 
+DECLFR(BandaiRead)
+{
+	return 0;
+}
+
 static void BandaiPower(void)
 {
   BandaiSync();
   SetReadHandler(0x8000,0xFFFF,CartBR);
   SetWriteHandler(0x6000,0xFFFF,BandaiWrite);
+  SetReadHandler(0x6000,0x7FFF,BandaiRead);
 }
 
 static void M153Power(void)
@@ -140,6 +146,12 @@ void Mapper16_Init(CartInfo *info)
   GameStateRestore=StateRestore;
   AddExState(&StateRegs, ~0, 0, 0);
 }
+
+void Mapper159_Init(CartInfo *info)
+{
+  Mapper16_Init(info);
+}
+
 
 void Mapper153_Init(CartInfo *info)
 {
