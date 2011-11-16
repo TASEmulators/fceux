@@ -9,6 +9,7 @@ extern BOOKMARKS bookmarks;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern INPUT_HISTORY history;
+extern TASEDIT_SELECTION selection;
 
 extern void FCEU_printf(char *format, ...);
 extern int TASEdit_autosave_period;
@@ -57,6 +58,7 @@ bool TASEDIT_PROJECT::saveProject()
 	bookmarks.save(ofs);
 	greenzone.save(ofs);
 	history.save(ofs);
+	selection.save(ofs);
 
 	delete ofs;
 
@@ -79,6 +81,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	bool error;
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
+	UpdateList();
 	// try to load markers
 	error = markers.load(&ifs);
 	if (error)
@@ -113,6 +116,15 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	{
 		FCEU_printf("Error loading history\n");
 		history.init();
+	} else
+	{
+		// try to load selection
+		error = selection.load(&ifs);
+	}
+	if (error)
+	{
+		FCEU_printf("Error loading selection\n");
+		selection.init();
 	}
 
 	reset();

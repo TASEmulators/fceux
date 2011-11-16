@@ -928,6 +928,7 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1375,6 +1376,7 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

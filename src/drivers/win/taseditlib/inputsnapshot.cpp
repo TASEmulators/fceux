@@ -1,8 +1,6 @@
 //Implementation file of Input Snapshot class (Undo feature)
 
-#include "movie.h"
-#include "inputsnapshot.h"
-#include "markers.h"
+#include "taseditproj.h"
 #include "zlib.h"
 
 const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// 16bits for normal joypads, 32bits for fourscore
@@ -10,10 +8,10 @@ const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// 16bits for nor
 extern void FCEU_printf(char *format, ...);
 
 extern MARKERS markers;
+extern TASEDIT_SELECTION selection;
 
 INPUT_SNAPSHOT::INPUT_SNAPSHOT()
 {
-
 }
 
 void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
@@ -64,6 +62,7 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
 	struct tm * timeinfo = localtime(&raw_time);
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
+
 // copy all stored markers to Markers
 void INPUT_SNAPSHOT::toMarkers()
 {
@@ -72,7 +71,7 @@ void INPUT_SNAPSHOT::toMarkers()
 // copy some stored markers to Markers manually, from Frame 0 to end frame (including end frame)
 void INPUT_SNAPSHOT::copyToMarkers(int end)
 {
-	if (markers.markers_array.size() <= end) markers.markers_array.resize(end+1);
+	if ((int)markers.markers_array.size() <= end) markers.markers_array.resize(end+1);
 	for (int i = end; i >= 0; i--)
 		markers.markers_array[i] = markers_array[i];
 }
@@ -178,7 +177,6 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 // returns true if couldn't load
 bool INPUT_SNAPSHOT::load(EMUFILE *is)
 {
-	int len;
 	uint8 tmp;
 	// read vars
 	if (!read32le(&size, is)) return true;
@@ -326,7 +324,7 @@ bool INPUT_SNAPSHOT::checkMarkersDiff()
 // return true only when difference is found before end frame (not including end frame)
 bool INPUT_SNAPSHOT::checkMarkersDiff(int end)
 {
-	if (markers_array.size() != markers.markers_array.size() && (markers_array.size()-1 < end || markers.markers_array.size()-1 < end)) return true;
+	if (markers_array.size() != markers.markers_array.size() && ((int)markers_array.size()-1 < end || (int)markers.markers_array.size()-1 < end)) return true;
 	for (int i = end-1; i >= 0; i--)
 		if ((markers_array[i] - markers.markers_array[i]) & MARKER_FLAG_BIT) return true;
 	return false;
@@ -338,7 +336,6 @@ int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
 	// search for differences to the specified end (or to the end of this snapshot)
 	if (end < 0 || end >= size) end = size-1;
 	int inp_end = inp.size;
-
 	switch(input_type)
 	{
 		case FOURSCORE:
@@ -391,7 +388,7 @@ int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
 		}
 	}
 	// if current size is less then previous, return size-1 as the frame of difference
-	if (size < inp.size) return size-1;
+	if (size < inp_end) return size-1;
 	// no changes were found
 	return -1;
 }
@@ -432,7 +429,214 @@ int INPUT_SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 
 	return -1;	// no changes were found
 }
+// --------------------------------------------------------
+void INPUT_SNAPSHOT::copyHotChanges(INPUT_SNAPSHOT* source_of_hotchanges, int limit_frame_of_source)
+{
+	// copy hot changes from source snapshot
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	{
+		int min = hot_changes.size();
+		if (min > (int)source_of_hotchanges->hot_changes.size())
+			min = source_of_hotchanges->hot_changes.size();
 
+		// special case for Branches: if limit_frame if specified, then copy only hotchanges from 0 to limit_frame
+		if (limit_frame_of_source >= 0)
+		{
+			if (min > limit_frame_of_source * bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY)
+				min = limit_frame_of_source * bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		}
+
+		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], min);
+	}
+} 
+void INPUT_SNAPSHOT::inheritHotChanges(INPUT_SNAPSHOT* source_of_hotchanges)
+{
+	// copy hot changes from source snapshot and fade them
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	{
+		int min = hot_changes.size();
+		if (min > (int)source_of_hotchanges->hot_changes.size())
+			min = source_of_hotchanges->hot_changes.size();
+
+		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], min);
+		FadeHotChanges();
+	}
+} 
+void INPUT_SNAPSHOT::inheritHotChanges_DeleteSelection(INPUT_SNAPSHOT* source_of_hotchanges)
+{
+	// copy hot changes from source snapshot, but omit deleted frames (which are represented by current selection)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	{
+		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		int frame = 0, pos = 0, source_pos = 0;
+		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
+		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		while (pos < this_size && source_pos < source_size)
+		{
+			if (it != selection.CurrentSelection().end() && frame == *it)
+			{
+				// this frame is selected
+				it++;
+				// omit the frame
+				source_pos += bytes;
+			} else
+			{
+				// copy hotchanges of this frame
+				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
+				pos += bytes;
+				source_pos += bytes;
+			}
+			frame++;
+		}
+		FadeHotChanges();
+	}
+} 
+void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of_hotchanges)
+{
+	// copy hot changes from source snapshot, but insert filled lines for inserted frames (which are represented by current selection)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	{
+		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		int frame = 0, region_len = 0, pos = 0, source_pos = 0;
+		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
+		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		while (pos < this_size && source_pos < source_size)
+		{
+			if (it != selection.CurrentSelection().end() && frame == *it)
+			{
+				// this frame is selected
+				it++;
+				region_len++;
+				// set filled line to the frame
+				memset(&hot_changes[pos], 0xFF, bytes);
+				pos += bytes;
+			} else
+			{
+				// this frame is not selected
+				frame -= region_len;
+				region_len = 0;
+				// copy hotchanges of this frame
+				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
+				pos += bytes;
+				source_pos += bytes;
+			}
+			frame++;
+		}
+		FadeHotChanges();
+	} else
+	{
+		// no old data, just fill selected lines
+		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		int frame = 0, region_len = 0, pos = 0;
+		int this_size = hot_changes.size();
+		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		while (pos < this_size)
+		{
+			if (it != selection.CurrentSelection().end() && frame == *it)
+			{
+				// this frame is selected
+				it++;
+				region_len++;
+				// set filled line to the frame
+				memset(&hot_changes[pos], 0xFF, bytes);
+				pos += bytes;
+				// exit loop when all selection frames are handled
+				if (it == selection.CurrentSelection().end()) break;
+			} else
+			{
+				// this frame is not selected
+				frame -= region_len;
+				region_len = 0;
+				// leave zeros in this frame
+				pos += bytes;
+			}
+			frame++;
+		}
+	}
+} 
+void INPUT_SNAPSHOT::fillHotChanges(INPUT_SNAPSHOT& inp, int start, int end)
+{
+	// search for differences to the specified end (or to the end of this snapshot)
+	if (end < 0 || end >= size) end = size-1;
+	int inp_end = inp.size;
+	switch(input_type)
+	{
+		case FOURSCORE:
+		{
+			for (int frame = start, pos = start * bytes_per_frame[input_type]; frame <= end; ++frame)
+			{
+				// set changed if found different byte, or found emptiness in inp when there's non-zero value here
+				if (frame < inp_end)
+				{
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 2, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 3, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+				} else
+				{
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos]);
+					pos++;
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos]);
+					pos++;
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 2, joysticks[pos]);
+					pos++;
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 3, joysticks[pos]);
+					pos++;
+				}
+			}
+			break;
+		}
+		case NORMAL_2JOYPADS:
+		{
+			for (int frame = start, pos = start * bytes_per_frame[input_type]; frame <= end; ++frame)
+			{
+				// set changed if found different byte, or found emptiness in inp when there's non-zero value here
+				if (frame < inp_end)
+				{
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+					if (joysticks[pos] != inp.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ inp.joysticks[pos]);
+					pos++;
+				} else
+				{
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos]);
+					pos++;
+					if (joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos]);
+					pos++;
+				}
+			}
+			break;
+		}
+	}
+}
+
+void INPUT_SNAPSHOT::SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits)
+{
+	uint8 mask = 1;
+	// check all 8 buttons and set max hot_changes for bits that are set
+	for (int i = 0; i < 8; ++i)
+	{
+		if (joy_bits & mask)
+			SetMaxHotChange(frame, joypad * 8 + i);
+		mask <<= 1;
+	}
+}
 void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 {
 	if (frame < 0 || frame >= size || !has_hot_changes) return;
@@ -444,10 +648,10 @@ void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 			// 32 buttons = 16bytes
 			if (absolute_button & 1)
 				// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-				hot_changes[(frame << 4) | (absolute_button >> 1)] &= 0xF0;
+				hot_changes[(frame << 4) | (absolute_button >> 1)] |= 0xF0;
 			else
 				// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-				hot_changes[(frame << 4) | (absolute_button >> 1)] &= 0x0F;
+				hot_changes[(frame << 4) | (absolute_button >> 1)] |= 0x0F;
 			break;
 		}
 		case NORMAL_2JOYPADS:
@@ -455,18 +659,35 @@ void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 			// 16 buttons = 8bytes
 			if (absolute_button & 1)
 				// odd buttons (B, T, D, R) - set upper 4 bits of the byte 
-				hot_changes[(frame << 3) | (absolute_button >> 1)] &= 0xF0;
+				hot_changes[(frame << 3) | (absolute_button >> 1)] |= 0xF0;
 			else
 				// even buttons (A, S, U, L) - set lower 4 bits of the byte 
-				hot_changes[(frame << 3) | (absolute_button >> 1)] &= 0x0F;
+				hot_changes[(frame << 3) | (absolute_button >> 1)] |= 0x0F;
 			break;
 		}
 	}
 }
+
+void INPUT_SNAPSHOT::FadeHotChanges()
+{
+	uint8 hi_half, low_half;
+	for (int i = hot_changes.size() - 1; i >= 0; i--)
+	{
+		if (hot_changes[i])
+		{
+			hi_half = hot_changes[i] >> 4;
+			low_half = hot_changes[i] & 15;
+			if (hi_half) hi_half--;
+			if (low_half) low_half--;
+			hot_changes[i] = (hi_half << 4) | low_half;
+		}
+	}
+}
+
 int INPUT_SNAPSHOT::GetHotChangeInfo(int frame, int absolute_button)
 {
-	if (frame < 0 || frame >= size || !has_hot_changes) return 0;
-	if (absolute_button < 0 || absolute_button > 31) return 0;
+	if (!has_hot_changes || frame < 0 || frame >= size || absolute_button < 0 || absolute_button > 31)
+		return 0;
 
 	uint8 val;
 	switch(input_type)
@@ -492,5 +713,4 @@ int INPUT_SNAPSHOT::GetHotChangeInfo(int frame, int absolute_button)
 		// even buttons (A, S, U, L) - lower 4 bits of the byte 
 		return val & 15;
 }
-
 

@@ -46,13 +46,14 @@ extern bool TASEdit_bind_markers;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
+extern bool TASEdit_show_branch_screenshots;
 
 BOOKMARKS::BOOKMARKS()
 {
 	// create font
-	hBookmarksFont = CreateFont(13, 8,				/*Height,Width*/
+	hBookmarksFont = CreateFont(15, 10,				/*Height,Width*/
 		0, 0,										/*escapement,orientation*/
-		FW_REGULAR, FALSE, FALSE, FALSE,			/*weight, italic, underline, strikeout*/
+		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Courier");									/*font name*/
@@ -292,11 +293,11 @@ void BOOKMARKS::update()
 		if (must_check_item_under_mouse)
 			CheckMousePos();
 		// render branches_bitmap
-		if (must_redraw_branches_tree)
+		if (edit_mode == EDIT_MODE_BRANCHES && must_redraw_branches_tree)
 			RedrawBranchesTree();
 
 		// change screenshot_bitmap alpha if needed
-		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS)
+		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS && TASEdit_show_branch_screenshots)
 		{
 			if (!hwndScrBmp)
 			{
@@ -315,18 +316,24 @@ void BOOKMARKS::update()
 			{
 				scr_bmp_phase++;
 				// update alpha
-				SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * scr_bmp_phase) / SCR_BMP_PHASE_MAX, LWA_ALPHA);
+				int phase_alpha = scr_bmp_phase;
+				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
+				SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
 				UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 			}
 		} else
 		{
+			// fade and finally hide screenshot
+			if (scr_bmp_phase > 0)
+				scr_bmp_phase--;
 			if (scr_bmp_phase > 0)
 			{
-				scr_bmp_phase--;
 				if (hwndScrBmp)
 				{
 					// update alpha
-					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * scr_bmp_phase) / SCR_BMP_PHASE_MAX, LWA_ALPHA);
+					int phase_alpha = scr_bmp_phase;
+					if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
+					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
 					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
 			} else
@@ -426,11 +433,11 @@ void BOOKMARKS::unleash(int slot)
 	if (!bookmarks_array[slot].not_empty) return;
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
 
-	// revert movie to the input_snapshot state
+	bool markers_changed = false;
+	// revert current movie to the input_snapshot state
 	if (TASEdit_branch_full_movie)
 	{
 		// update Markers
-		bool markers_changed = false;
 		if (TASEdit_bind_markers)
 		{
 			if (bookmarks_array[slot].snapshot.checkMarkersDiff())
@@ -448,12 +455,12 @@ void BOOKMARKS::unleash(int slot)
 			currMovieData.records.resize(bookmarks_array[slot].snapshot.size);
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
 			UpdateList();
-			history.RegisterBranch(MODTYPE_BRANCH_0 + slot, first_change, bookmarks_array[slot].snapshot.description);
+			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
-			history.RegisterBranch(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, bookmarks_array[slot].snapshot.description);
+			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
 			RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
@@ -464,7 +471,6 @@ void BOOKMARKS::unleash(int slot)
 	} else
 	{
 		// update Markers
-		bool markers_changed = false;
 		if (TASEdit_bind_markers)
 		{
 			if (bookmarks_array[slot].snapshot.checkMarkersDiff(jump_frame))
@@ -482,12 +488,12 @@ void BOOKMARKS::unleash(int slot)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
 			UpdateList();
-			history.RegisterBranch(MODTYPE_BRANCH_0 + slot, first_change, bookmarks_array[slot].snapshot.description);
+			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
-			history.RegisterBranch(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, bookmarks_array[slot].snapshot.description);
+			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
 			RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
@@ -746,15 +752,25 @@ void BOOKMARKS::RedrawBranchesTree()
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
 		}
 	}
+	// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
+	if (item_under_mouse > ITEM_UNDER_MOUSE_CLOUD)
+	{
+		char framenum_string[DIGITS_IN_FRAMENUM+1] = {0};
+		if (item_under_mouse < TOTAL_BOOKMARKS)
+			U32ToDecStr(framenum_string, bookmarks_array[item_under_mouse].snapshot.jump_frame, DIGITS_IN_FRAMENUM);
+		else
+			U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
+		TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X, BRANCHES_BITMAP_FRAMENUM_Y, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
+	}
 	// time of item under cursor
 	if (item_under_mouse > ITEM_UNDER_MOUSE_NONE)
 	{
 		if (item_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
-			TextOut(hBitmapDC, 0, 0, (LPCSTR)cloud_time, 8);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
 		else if (item_under_mouse < TOTAL_BOOKMARKS)
-			TextOut(hBitmapDC, 0, 0, (LPCSTR)bookmarks_array[item_under_mouse].snapshot.description, 8);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)bookmarks_array[item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
 		else
-			TextOut(hBitmapDC, 0, 0, (LPCSTR)current_pos_time, 8);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
 	}
 	// finished
 	must_redraw_branches_tree = false;

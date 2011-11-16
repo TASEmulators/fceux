@@ -1,14 +1,14 @@
 //Implementation file of Input History class (Undo feature)
 
-#include "movie.h"
-#include "../common.h"
-#include "../tasedit.h"
 #include "taseditproj.h"
+#include "../tasedit.h"		// just for mainlist functions, later this should be deleted
 
 extern void FCEU_printf(char *format, ...);
 
 extern HWND hwndHistoryList;
 extern bool TASEdit_bind_markers;
+extern bool TASEdit_enable_hot_changes;
+extern bool TASEdit_branch_full_movie;
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
@@ -68,13 +68,13 @@ void INPUT_HISTORY::init(int new_size)
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
 	// clear snapshots history
-	history_total_items = 0;
+	free();
 	input_snapshots.resize(history_size);
 	history_start_pos = 0;
 	history_cursor_pos = -1;
 	// create initial snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, true);
+	inp.init(currMovieData, TASEdit_enable_hot_changes);
 	strcat(inp.description, modCaptions[0]);
 	inp.jump_frame = -1;
 	AddInputSnapshotToHistory(inp);
@@ -85,6 +85,7 @@ void INPUT_HISTORY::init(int new_size)
 void INPUT_HISTORY::free()
 {
 	input_snapshots.resize(0);
+	history_total_items = 0;
 }
 
 void INPUT_HISTORY::update()
@@ -149,10 +150,15 @@ int INPUT_HISTORY::jump(int new_pos)
 		currMovieData.records.resize(input_snapshots[real_pos].size);
 		input_snapshots[real_pos].toMovie(currMovieData, first_change);
 		bookmarks.ChangesMadeSinceBranch();
+		// list will be redrawn by greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers.update();
 		bookmarks.ChangesMadeSinceBranch();
+		RedrawList();
+	} else if (TASEdit_enable_hot_changes)
+	{
+		// when using Hot Changes, list should be always redrawn, because old changes become less hot
 		RedrawList();
 	}
 
@@ -173,7 +179,7 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 	int real_pos;
 	if (history_cursor_pos+1 >= history_size)
 	{
-		// reached the end of available history_size - move history_start_pos (thus deleting older snapshot)
+		// reached the end of available history_size - move history_start_pos (thus deleting oldest snapshot)
 		history_cursor_pos = history_size-1;
 		history_start_pos = (history_start_pos + 1) % history_size;
 	} else
@@ -211,13 +217,12 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 	RedrawHistoryList();
 }
 
-
 // returns frame of first actual change
 int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 {
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, true);
+	inp.init(currMovieData, TASEdit_enable_hot_changes);
 	if (mod_type == MODTYPE_MARKER_SET || mod_type == MODTYPE_MARKER_UNSET)
 	{
 		// special case: changed markers, but input didn't change
@@ -235,6 +240,8 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 			strcat(inp.description, "-");
 			strcat(inp.description, framenum);
 		}
+		if (TASEdit_enable_hot_changes)
+			inp.copyHotChanges(&GetCurrentSnapshot());
 		AddInputSnapshotToHistory(inp);
 		bookmarks.ChangesMadeSinceBranch();
 		return -1;
@@ -247,10 +254,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 		if (first_changes >= 0)
 		{
 			// differences found
-			// fade old hot_changes by 1
-
-			// highlight new hot changes
-
 			// fill description:
 			strcat(inp.description, modCaptions[mod_type]);
 			switch (mod_type)
@@ -278,14 +281,14 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 				}
 				case MODTYPE_RECORD:
 				{
-					// add info which joypads were affected
+					inp.jump_frame = start;
+					// also add info which joypads were affected
 					int num = (inp.input_type + 1) * 2;		// hacky, only for distingushing between normal2p and fourscore
 					for (int i = 0; i < num; ++i)
 					{
 						if (inp.checkJoypadDiff(input_snapshots[real_pos], first_changes, i))
 							strcat(inp.description, joypadCaptions[i]);
 					}
-					inp.jump_frame = start;
 				}
 			}
 			// add upper and lower frame to description
@@ -299,21 +302,75 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 				strcat(inp.description, "-");
 				strcat(inp.description, framenum);
 			}
+			// set hotchanges
+			if (TASEdit_enable_hot_changes)
+			{
+				// inherit previous hotchanges and set new changes
+				switch (mod_type)
+				{
+					case MODTYPE_DELETE:
+						inp.inheritHotChanges_DeleteSelection(&input_snapshots[real_pos]);
+						break;
+					case MODTYPE_INSERT:
+					case MODTYPE_PASTEINSERT:
+					case MODTYPE_CLONE:
+						inp.inheritHotChanges_InsertSelection(&input_snapshots[real_pos]);
+						break;
+					case MODTYPE_CHANGE:
+					case MODTYPE_SET:
+					case MODTYPE_UNSET:
+					case MODTYPE_CLEAR:
+					case MODTYPE_CUT:
+					case MODTYPE_PASTE:
+					case MODTYPE_RECORD:
+						inp.inheritHotChanges(&input_snapshots[real_pos]);
+						inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
+						break;
+					case MODTYPE_TRUNCATE:
+						inp.copyHotChanges(&input_snapshots[real_pos]);
+						// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
+						break;
+					case MODTYPE_IMPORT:
+						// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
+						inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
+						break;
+				}
+			}
 			AddInputSnapshotToHistory(inp);
 			bookmarks.ChangesMadeSinceBranch();
 		}
 		return first_changes;
 	}
 }
-void INPUT_HISTORY::RegisterBranch(int mod_type, int first_change, char* branch_creation_time)
+void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 {
-	// create new input shanshot
+	// create new input snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, true);
-	// fill description:
+	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	// fill description: modification type + time of the Branch
 	strcat(inp.description, modCaptions[mod_type]);
-	strcat(inp.description, branch_creation_time);
+	strcat(inp.description, bookmarks.bookmarks_array[slot].snapshot.description);
 	inp.jump_frame = first_change;
+	if (TASEdit_enable_hot_changes)
+	{
+		if (mod_type < MODTYPE_BRANCH_MARKERS_0)
+		{
+			// input was changed
+			// copy hotchanges of the Branch
+			if (TASEdit_branch_full_movie)
+			{
+				inp.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
+			} else
+			{
+				// input was branched partially, so copy hotchanges only up to and not including jump_frame of the Branch
+				inp.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot, bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+			}
+		} else
+		{
+			// input was not changed, only Markers were changed
+			inp.copyHotChanges(&GetCurrentSnapshot());
+		}
+	}
 	AddInputSnapshotToHistory(inp);
 }
 
@@ -345,8 +402,8 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 	if ((int)is->fread(save_id, HISTORY_ID_LEN) < HISTORY_ID_LEN) goto error;
 	if (strcmp(history_save_id, save_id)) goto error;		// string is not valid
 	// read vars
-	if (!read32le((uint32 *)&history_cursor_pos, is)) goto error;
-	if (!read32le((uint32 *)&history_total_items, is)) goto error;
+	if (!read32le(&history_cursor_pos, is)) goto error;
+	if (!read32le(&history_total_items, is)) goto error;
 	if (history_cursor_pos > history_total_items) goto error;
 	history_start_pos = 0;
 	// read snapshots
@@ -373,7 +430,6 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 	// load snapshots
 	for (i = 0; i < history_total_items; ++i)
 	{
-		// skip snapshots if current history_size is less then history_total_items
 		if (input_snapshots[i].load(is)) goto error;
 		playback.SetProgressbar(i, history_total_items);
 	}

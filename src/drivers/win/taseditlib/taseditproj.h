@@ -1,12 +1,17 @@
 //Specification file for the TASEdit Project class
 
+#include <set>
+typedef std::set<int> SelectionFrames;
+
 #include "movie.h"
+#include "../common.h"
 #include "inputsnapshot.h"
 #include "inputhistory.h"
 #include "playback.h"
 #include "greenzone.h"
 #include "markers.h"
 #include "bookmarks.h"
+#include "tasedit_sel.h"
 
 class TASEDIT_PROJECT
 {

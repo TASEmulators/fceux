@@ -7,8 +7,11 @@
 #include "zlib.h"
 
 extern GREENZONE greenzone;
+extern INPUT_HISTORY history;
 
 extern bool TASEdit_branch_scr_hud;
+extern bool TASEdit_enable_hot_changes;
+
 extern uint8 *XBuf;
 extern uint8 *XBackBuf;
 
@@ -27,8 +30,12 @@ void BOOKMARK::init()
 
 void BOOKMARK::set()
 {
-	snapshot.init(currMovieData, false);
+	// copy input and hotchanges
+	snapshot.init(currMovieData, TASEdit_enable_hot_changes);
 	snapshot.jump_frame = currFrameCounter;
+	if (TASEdit_enable_hot_changes)
+		snapshot.copyHotChanges(&history.GetCurrentSnapshot());
+	// copy savestate
 	savestate = greenzone.savestates[currFrameCounter];
 	// save screenshot
 	uLongf comprlen = (SCREENSHOT_SIZE>>9)+12 + SCREENSHOT_SIZE;

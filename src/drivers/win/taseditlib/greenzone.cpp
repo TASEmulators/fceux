@@ -231,7 +231,7 @@ bool GREENZONE::load(EMUFILE *is)
 	if ((int)is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
 	if (strcmp(greenzone_save_id, save_id)) goto error;		// string is not valid
 	// read size
-	if (read32le((uint32 *)&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
+	if (read32le(&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
 	{
 		greenZoneCount = size;
 		savestates.resize(greenZoneCount);
@@ -246,7 +246,7 @@ bool GREENZONE::load(EMUFILE *is)
 		int e = uncompress(&lag_history[0], &destlen, &cbuf[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
 		// read playback position
-		if (read32le((uint32 *)&frame, is))
+		if (read32le(&frame, is))
 		{
 			currFrameCounter = frame;
 			int greenzone_tail_frame = currFrameCounter - TASEdit_greenzone_capacity;
@@ -257,7 +257,7 @@ bool GREENZONE::load(EMUFILE *is)
 			// read savestates
 			while(1)
 			{
-				if (!read32le((uint32 *)&frame, is)) break;
+				if (!read32le(&frame, is)) break;
 				if (frame < 0) break;		// -1 = eof
 				// update TASEditor progressbar from time to time
 				if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
@@ -268,7 +268,7 @@ bool GREENZONE::load(EMUFILE *is)
 				// read lua_colorings
 				// read monitorings
 				// read savestate
-				if (!read32le((uint32 *)&size, is)) break;
+				if (!read32le(&size, is)) break;
 				if (size < 0) break;
 				if (frame <= greenzone_tail_frame16
 					|| (frame <= greenzone_tail_frame8 && (frame & 0xF))

@@ -221,9 +221,10 @@ TASEDITMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Open Project...",            ID_FILE_OPENPROJECT
-        MENUITEM "&Save Project\tCtrl+S",       ID_FILE_SAVEPROJECT
-        MENUITEM "S&ave Project As...",         ID_FILE_SAVEPROJECTAS
+        MENUITEM "&Open",                       ID_FILE_OPENPROJECT
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVEPROJECT
+        MENUITEM "S&ave As",                    ID_FILE_SAVEPROJECTAS
+        MENUITEM "Save &Compact",               ID_FILE_SAVECOMPACT, INACTIVE
         MENUITEM "&Recent",                     ID_TASEDIT_FILE_RECENT
         MENUITEM SEPARATOR
         MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2, INACTIVE
@@ -233,29 +234,33 @@ BEGIN
     END
     POPUP "&Edit"
     BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
+        MENUITEM "Selection Undo\tCtrl+Q",      ID_EDIT_SELECTIONUNDO
+        MENUITEM "Selection Redo\tCtrl+W",      ID_EDIT_SELECTIONREDO
+        MENUITEM SEPARATOR
         MENUITEM "Select &All",                 ID_EDIT_SELECTALL
         MENUITEM "Select mid &Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS
+        MENUITEM "Reselect Clipboard\tCtrl+B",  ID_EDIT_RESELECTCLIPBOARD
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_TASEDIT_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_TASEDIT_PASTE
+        MENUITEM "Cu&t\tCtrl+X",                ID_TASEDIT_CUT
         MENUITEM SEPARATOR
-        MENUITEM "C&lear\tDelete",              ID_EDIT_CLEAR
+        MENUITEM "C&lear\tDel",                 ID_EDIT_CLEAR
         MENUITEM "&Delete\tCtrl+Del",           ID_TASEDIT_DELETE
         MENUITEM "&Insert\tCtrl+Ins",           ID_EDIT_INSERTFRAMES
-        MENUITEM "Insert # of Frames\tInsert",  ID_EDIT_INSERT
+        MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT
         MENUITEM "Cl&one\tShift+Ins",           ID_EDIT_CLONEFRAMES
         MENUITEM SEPARATOR
-        MENUITEM "Truncate movie\tCtrl+T",      ID_EDIT_TRUNCATE
-        MENUITEM SEPARATOR
-        MENUITEM "&Undo\tCtrl-Z",               ID_EDIT_UNDO
-        MENUITEM "&Redo\tCtrl-Y",               ID_EDIT_REDO
+        MENUITEM "Truncate\tCtrl+T",            ID_EDIT_TRUNCATE
     END
     POPUP "&View"
     BEGIN
         MENUITEM "Highlight &Lag Frames",       ID_VIEW_SHOW_LAG_FRAMES
         MENUITEM "Show &Markers",               ID_VIEW_SHOW_MARKERS
-        MENUITEM "Show &dot in empty cells",    ID_VIEW_SHOWDOTINEMPTYCELLS
+        MENUITEM "Show Branch &Screenshots",    ID_VIEW_SHOWBRANCHSCREENSHOTS
+        MENUITEM "Enable Hot &Changes",         ID_VIEW_ENABLEHOTCHANGES
         MENUITEM SEPARATOR
         MENUITEM "&Follow undo context",        ID_VIEW_JUMPWHENMAKINGUNDO
     END
@@ -275,7 +280,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&TASEdit Help...",            ID_HELP_TASEDITHELP
+        MENUITEM "&TASEdit Help",               ID_HELP_TASEDITHELP
+        MENUITEM "&About",                      ID_HELP_ABOUT
     END
 END
 
@@ -1997,15 +2003,18 @@ BEGIN
     "F",            ACCEL_CTRL_F,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ACCEL_CTRL_INSERT,      VIRTKEY, CONTROL, NOINVERT
     "P",            ACCEL_CTRL_P,           VIRTKEY, CONTROL, NOINVERT
+    "Q",            ACCEL_CTRL_Q,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
     "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
     "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
+    "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
     "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
     "Y",            ACCEL_CTRL_Y,           VIRTKEY, CONTROL, NOINVERT
     "Z",            ACCEL_CTRL_Z,           VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ACCEL_DEL,              VIRTKEY, NOINVERT
     VK_INSERT,      ACCEL_INS,              VIRTKEY, NOINVERT
     VK_INSERT,      ACCEL_SHIFT_INS,        VIRTKEY, SHIFT, NOINVERT
+    "B",            ACCEL_CTRL_B,           VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_RWACCELERATOR ACCELERATORS 

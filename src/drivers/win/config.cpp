@@ -71,13 +71,14 @@ extern int frameSkipAmt;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_markers;
+extern bool TASEdit_show_branch_screenshots;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
 extern bool TASEdit_branch_scr_hud;
 extern bool TASEdit_restore_position;
-extern bool TASEdit_show_dot;
+extern bool TASEdit_enable_hot_changes;
 extern int TASEdit_greenzone_capacity;
 extern int TasEdit_undo_levels;
 extern int TASEdit_autosave_period;
@@ -302,13 +303,14 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_follow_playback),
 	AC(TASEdit_show_lag_frames),
 	AC(TASEdit_show_markers),
+	AC(TASEdit_show_branch_screenshots),
 	AC(TASEdit_bind_markers),
 	AC(TASEdit_branch_full_movie),
 	AC(TASEdit_branch_only_when_rec),
 	AC(TASEdit_view_branches_tree),
 	AC(TASEdit_branch_scr_hud),
 	AC(TASEdit_restore_position),
-	AC(TASEdit_show_dot),
+	AC(TASEdit_enable_hot_changes),
 	AC(TASEdit_greenzone_capacity),
 	AC(TasEdit_undo_levels),
 	AC(TASEdit_autosave_period),

@@ -63,11 +63,7 @@ public:
 	void AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp);
 
 	int RegisterChanges(int mod_type, int start = 0, int end =-1);
-	void RegisterBranch(int mod_type, int first_change, char* branch_creation_time);
-
-	int InputChanged(int start, int end);
-	int InputInserted(int start);
-	int InputDeleted(int start);
+	void RegisterBranching(int mod_type, int first_change, int slot);
 
 	INPUT_SNAPSHOT& GetCurrentSnapshot();
 	INPUT_SNAPSHOT& GetNextToCurrentSnapshot();

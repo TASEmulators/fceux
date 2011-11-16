@@ -65,6 +65,8 @@
 #define DIGITS_IN_FRAMENUM 7
 #define ARROW_IMAGE_ID 20
 // listview colors
+#define NORMAL_TEXT_COLOR 0x0
+
 #define NORMAL_FRAMENUM_COLOR 0xFFFFFF
 #define NORMAL_INPUT_COLOR1 0xEDEDED
 #define NORMAL_INPUT_COLOR2 0xDEDEDE
@@ -94,7 +96,7 @@
 #define UNDOHINT_INPUT_COLOR2 0xE5B7CC
 
 #define MARKED_FRAMENUM_COLOR 0xC0FCFF
-#define CUR_MARKED_FRAMENUM_COLOR 0xDEF7F4
+#define CUR_MARKED_FRAMENUM_COLOR 0xDEF7F3
 #define MARKED_UNDOHINT_FRAMENUM_COLOR 0xE1E7EC
 
 // greenzone cleaning masks
@@ -103,6 +105,11 @@
 #define EVERY4TH 0xFFFFFFFC
 #define EVERY2ND 0xFFFFFFFE
 // -----------------------------
+enum ECONTEXTMENU
+{
+	CONTEXTMENU_STRAY = 0,
+	CONTEXTMENU_SELECTED = 1,
+};
 void EnterTasEdit();
 void InitDialog();
 bool ExitTasEdit();
@@ -114,8 +121,6 @@ void FollowPlayback();
 void FollowUndo();
 void FollowSelection();
 void FollowPauseframe();
-void ClearSelection();
-void ClearRowSelection(int index);
 void AddFourscore();
 void RemoveFourscore();
 void RedrawWindowCaption();
@@ -132,10 +137,9 @@ void OpenProject();
 bool SaveProject();
 bool SaveProjectAs();
 bool AskSaveProject();
-void SelectAll();
-void SelectMidMarkers();
 void CloneFrames();
 void InsertFrames();
+void InsertNumFrames();
 void DeleteFrames();
 void ClearFrames(bool cut = false);
 void Truncate();
