@@ -78,6 +78,8 @@ public:
 	void RedrawHistoryList();
 	void UpdateHistoryList();
 
+	HWND hwndHistoryList;
+
 private:
 	std::vector<INPUT_SNAPSHOT> input_snapshots;
 

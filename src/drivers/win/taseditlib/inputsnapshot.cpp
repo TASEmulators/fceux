@@ -470,10 +470,10 @@ void INPUT_SNAPSHOT::inheritHotChanges_DeleteSelection(INPUT_SNAPSHOT* source_of
 		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
 		while (pos < this_size && source_pos < source_size)
 		{
-			if (it != selection.CurrentSelection().end() && frame == *it)
+			if (it != selection.GetStrobedSelection().end() && frame == *it)
 			{
 				// this frame is selected
 				it++;
@@ -499,10 +499,11 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
+		SelectionFrames::iterator current_selection_end(selection.GetStrobedSelection().end());
 		while (pos < this_size && source_pos < source_size)
 		{
-			if (it != selection.CurrentSelection().end() && frame == *it)
+			if (it != current_selection_end && frame == *it)
 			{
 				// this frame is selected
 				it++;
@@ -529,10 +530,11 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0;
 		int this_size = hot_changes.size();
-		SelectionFrames::iterator it(selection.CurrentSelection().begin());
+		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
+		SelectionFrames::iterator current_selection_end(selection.GetStrobedSelection().end());
 		while (pos < this_size)
 		{
-			if (it != selection.CurrentSelection().end() && frame == *it)
+			if (it != current_selection_end && frame == *it)
 			{
 				// this frame is selected
 				it++;
@@ -541,7 +543,7 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 				memset(&hot_changes[pos], 0xFF, bytes);
 				pos += bytes;
 				// exit loop when all selection frames are handled
-				if (it == selection.CurrentSelection().end()) break;
+				if (it == current_selection_end) break;
 			} else
 			{
 				// this frame is not selected

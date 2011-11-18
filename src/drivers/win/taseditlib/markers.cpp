@@ -1,7 +1,5 @@
 //Implementation file of Markers class
 
-#include "movie.h"
-#include "../common.h"
 #include "taseditproj.h"
 //#include "../tasedit.h"
 #include "zlib.h"

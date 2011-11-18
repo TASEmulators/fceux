@@ -9,6 +9,7 @@ extern BOOKMARKS bookmarks;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern INPUT_HISTORY history;
+extern TASEDIT_LIST tasedit_list;
 extern TASEDIT_SELECTION selection;
 
 extern void FCEU_printf(char *format, ...);
@@ -81,7 +82,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	bool error;
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
-	UpdateList();
+	tasedit_list.update();
 	// try to load markers
 	error = markers.load(&ifs);
 	if (error)

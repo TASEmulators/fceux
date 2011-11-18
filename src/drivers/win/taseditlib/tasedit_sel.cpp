@@ -7,9 +7,7 @@
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 
 extern MARKERS markers;
-
-extern HWND hwndList;
-extern void RedrawList();
+extern TASEDIT_LIST tasedit_list;
 
 TASEDIT_SELECTION::TASEDIT_SELECTION()
 {
@@ -40,7 +38,7 @@ void TASEDIT_SELECTION::free()
 
 void TASEDIT_SELECTION::update()
 {
-	// keep selection within list limits
+	// keep selection within movie limits
 	if (CurrentSelection().size())
 	{
 		int delete_index;
@@ -54,13 +52,6 @@ void TASEDIT_SELECTION::update()
 		}
 	}
 
-}
-
-bool TASEDIT_SELECTION::CheckFrameSelected(int frame)
-{
-	if(CurrentSelection().find(frame) == CurrentSelection().end())
-		return false;
-	return true;
 }
 
 void TASEDIT_SELECTION::save(EMUFILE *os)
@@ -228,11 +219,6 @@ void TASEDIT_SELECTION::AddNewSelectionToHistory()
 	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
 }
 
-SelectionFrames& TASEDIT_SELECTION::CurrentSelection()
-{
-	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
-}
-
 void TASEDIT_SELECTION::jump(int new_pos)
 {
 	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
@@ -256,8 +242,8 @@ void TASEDIT_SELECTION::redo()
 
 void TASEDIT_SELECTION::MemorizeClipboardSelection()
 {
-	// copy current selection data to clipboard_selection
-	clipboard_selection = CurrentSelection();
+	// copy currently strobed selection data to clipboard_selection
+	clipboard_selection = temp_selection;
 }
 void TASEDIT_SELECTION::ReselectClipboard()
 {
@@ -272,11 +258,11 @@ void TASEDIT_SELECTION::ReselectClipboard()
 // ----------------------------------------------------------
 void TASEDIT_SELECTION::ClearSelection()
 {
-	ListView_SetItemState(hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
 void TASEDIT_SELECTION::ClearRowSelection(int index)
 {
-	ListView_SetItemState(hwndList, index, 0, LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, index, 0, LVIS_SELECTED);
 }
 
 void TASEDIT_SELECTION::EnforceSelectionToList()
@@ -285,24 +271,24 @@ void TASEDIT_SELECTION::EnforceSelectionToList()
 	ClearSelection();
 	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
 	{
-		ListView_SetItemState(hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(tasedit_list.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
 	}
 	track_selection_changes = true;
 }
  
 void TASEDIT_SELECTION::SelectAll()
 {
-	ListView_SetItemState(hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 	//RedrawList();
 }
 void TASEDIT_SELECTION::SetRowSelection(int index)
 {
-	ListView_SetItemState(hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
 }
 void TASEDIT_SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i <= end; ++i)
-		ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 }
 void TASEDIT_SELECTION::SelectMidMarkers()
 {
@@ -326,7 +312,7 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (markers.markers_array[lower_marker] & MARKER_FLAG_BIT) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
-	ListView_SetItemState(hwndList, -1, 0, LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_SELECTED);
 
 	// special case
 	if (upper_marker == -1 && lower_marker == movie_size)
@@ -341,7 +327,7 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -350,14 +336,14 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
@@ -365,22 +351,48 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	}
 }
-
-
-
-
-
-
-
+// getters
+int TASEDIT_SELECTION::GetCurrentSelectionSize()
+{
+	return selections_history[(history_start_pos + history_cursor_pos) % history_size].size();
+}
+int TASEDIT_SELECTION::GetCurrentSelectionBeginning()
+{
+	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
+		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].begin();
+	else
+		return -1;
+}
+bool TASEDIT_SELECTION::CheckFrameSelected(int frame)
+{
+	if(CurrentSelection().find(frame) == CurrentSelection().end())
+		return false;
+	return true;
+}
+SelectionFrames* TASEDIT_SELECTION::MakeStrobe()
+{
+	// copy current selection to temp_selection
+	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
+	return &temp_selection;
+}
+SelectionFrames& TASEDIT_SELECTION::GetStrobedSelection()
+{
+	return temp_selection;
+}
+// this getter is only for inside-class use
+SelectionFrames& TASEDIT_SELECTION::CurrentSelection()
+{
+	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
+}
 

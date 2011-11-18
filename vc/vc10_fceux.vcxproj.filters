@@ -929,6 +929,7 @@
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1377,6 +1378,7 @@
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

@@ -11,6 +11,7 @@ typedef std::set<int> SelectionFrames;
 #include "greenzone.h"
 #include "markers.h"
 #include "bookmarks.h"
+#include "tasedit_list.h"
 #include "tasedit_sel.h"
 
 class TASEDIT_PROJECT

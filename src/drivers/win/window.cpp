@@ -50,7 +50,6 @@
 #include "cdlogger.h"
 #include "throttle.h"
 #include "monitor.h"
-#include "tasedit.h"
 #include "keyboard.h"
 #include "joystick.h"
 #include "oldmovie.h"
@@ -1923,6 +1922,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	break;
 			//  Removing this tool since it is redundant to both 
 			case MENU_TASEDIT:
+				extern void EnterTasEdit();
 				EnterTasEdit();
 				break;
 			case MENU_CONVERT_MOVIE:

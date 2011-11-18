@@ -589,6 +589,7 @@ void FCEUI_ResetNES(void)
 		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
 	ResetFrameCounter();
+	FCEU_DispMessage("Soft reset", 0);
 }
 
 //Powers off the NES
@@ -598,6 +599,7 @@ void FCEUI_PowerNES(void)
 		return;
 	FCEU_QSimpleCommand(FCEUNPCMD_POWER);
 	ResetFrameCounter();
+	FCEU_DispMessage("Power switch", 0);
 }
 
 const char* FCEUI_CommandTypeNames[]=

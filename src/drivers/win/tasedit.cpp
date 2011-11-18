@@ -1,14 +1,13 @@
-#include <set>
+#include <set>		//
 #include <fstream>
 #include <sstream>
 
 #include "taseditlib/taseditproj.h"
-#include "fceu.h"
-#include "debugger.h"
+#include "fceu.h"	//
 #include "replay.h"
 #include "utils/xstring.h"
 #include "Win32InputBox.h"
-#include "window.h"
+#include "window.h"	//
 #include "keyboard.h"
 #include "joystick.h"
 #include "help.h"
@@ -21,14 +20,12 @@ int old_multitrack_recording_joypad, multitrack_recording_joypad;
 bool old_movie_readonly;
 bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
-int listItems;			// number of items per list page
 
 // saved FCEU config
 int saved_eoptions;
 int saved_EnableAutosave;
 extern int EnableAutosave;
 
-extern HWND hwndScrBmp;
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
 
 // vars saved in cfg file
@@ -59,22 +56,11 @@ char windowCaptions[6][30] = {	"TAS Editor",
 								"TAS Editor (Recording 2P)",
 								"TAS Editor (Recording 3P)",
 								"TAS Editor (Recording 4P)"};
-COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
 
 HWND hwndTasEdit = 0;
 HMENU hmenu, hrmenu;
-HWND hwndList, hwndHeader;
-WNDPROC hwndList_oldWndProc, hwndHeader_oldWndproc;
-HWND hwndHistoryList;
-WNDPROC hwndHistoryList_oldWndProc;
-HWND hwndBookmarksList, hwndBookmarks;
-WNDPROC hwndBookmarksList_oldWndProc;
 HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
-HWND hwndBranchesBitmap;
-WNDPROC hwndBranchesBitmap_oldWndProc;
-
-HFONT hMainListFont, hMainListSelectFont;
 
 // all Taseditor functional modules
 TASEDIT_PROJECT project;
@@ -83,202 +69,15 @@ PLAYBACK playback;
 GREENZONE greenzone;
 MARKERS markers;
 BOOKMARKS bookmarks;
+TASEDIT_LIST tasedit_list;
 TASEDIT_SELECTION selection;
 
-void GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
-{
-	LVITEM& item = nmlvDispInfo->item;
-	if(item.mask & LVIF_TEXT)
-	{
-		switch(item.iSubItem)
-		{
-			case COLUMN_ICONS:
-			{
-				if(item.iImage == I_IMAGECALLBACK)
-				{
-					item.iImage = bookmarks.FindBookmarkAtFrame(item.iItem);
-					if (item.iImage < 0)
-					{
-						if (item.iItem == currFrameCounter)
-							item.iImage = ARROW_IMAGE_ID;
-					}
-				}
-				break;
-			}
-			case COLUMN_FRAMENUM:
-			case COLUMN_FRAMENUM2:
-			{
-				U32ToDecStr(item.pszText, item.iItem, DIGITS_IN_FRAMENUM);
-				break;
-			}
-			case COLUMN_JOYPAD1_A: case COLUMN_JOYPAD1_B: case COLUMN_JOYPAD1_S: case COLUMN_JOYPAD1_T:
-			case COLUMN_JOYPAD1_U: case COLUMN_JOYPAD1_D: case COLUMN_JOYPAD1_L: case COLUMN_JOYPAD1_R:
-			case COLUMN_JOYPAD2_A: case COLUMN_JOYPAD2_B: case COLUMN_JOYPAD2_S: case COLUMN_JOYPAD2_T:
-			case COLUMN_JOYPAD2_U: case COLUMN_JOYPAD2_D: case COLUMN_JOYPAD2_L: case COLUMN_JOYPAD2_R:
-			case COLUMN_JOYPAD3_A: case COLUMN_JOYPAD3_B: case COLUMN_JOYPAD3_S: case COLUMN_JOYPAD3_T:
-			case COLUMN_JOYPAD3_U: case COLUMN_JOYPAD3_D: case COLUMN_JOYPAD3_L: case COLUMN_JOYPAD3_R:
-			case COLUMN_JOYPAD4_A: case COLUMN_JOYPAD4_B: case COLUMN_JOYPAD4_S: case COLUMN_JOYPAD4_T:
-			case COLUMN_JOYPAD4_U: case COLUMN_JOYPAD4_D: case COLUMN_JOYPAD4_L: case COLUMN_JOYPAD4_R:
-			{
-				int joy = (item.iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-				int bit = (item.iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-				uint8 data = currMovieData.records[item.iItem].joysticks[joy];
-				if(data & (1<<bit))
-				{
-					item.pszText[0] = buttonNames[bit][0];
-					item.pszText[2] = 0;
-				} else
-				{
-					if (TASEdit_enable_hot_changes && history.GetCurrentSnapshot().GetHotChangeInfo(item.iItem, item.iSubItem - COLUMN_JOYPAD1_A))
-					{
-						item.pszText[0] = 45;	// "-"
-						item.pszText[1] = 0;
-					} else item.pszText[0] = 0;
-				}
-			}
-			break;
-		}
-	}
-}
-
-LONG CustomDraw(NMLVCUSTOMDRAW* msg)
-{
-	int cell_x, cell_y;
-	switch(msg->nmcd.dwDrawStage)
-	{
-	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
-	case CDDS_ITEMPREPAINT:
-		return CDRF_NOTIFYSUBITEMDRAW;
-	case CDDS_SUBITEMPREPAINT:
-		cell_x = msg->iSubItem;
-		cell_y = msg->nmcd.dwItemSpec;
-
-		
-
-		if(cell_x > COLUMN_ICONS)
-		{
-			SelectObject(msg->nmcd.hdc, hMainListFont);
-			// text color
-			if(TASEdit_enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
-			{
-				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
-			} else msg->clrText = NORMAL_TEXT_COLOR;
-			// bg color
-			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
-			{
-				// frame number
-				if (cell_y == history.GetUndoHint())
-				{
-					// undo hint here
-					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
-						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
-					else
-						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
-				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
-				{
-					// current frame
-					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
-						// this frame is also marked
-						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
-					else
-						msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
-				{
-					// marked frame
-					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
-				} else if(cell_y < greenzone.greenZoneCount)
-				{
-					if (!greenzone.savestates[cell_y].empty())
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
-					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
-			{
-				// pad 1 or 3
-				if (cell_y == history.GetUndoHint())
-				{
-					// undo hint here
-					msg->clrTextBk = UNDOHINT_INPUT_COLOR1;
-				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
-				{
-					// current frame
-					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if(cell_y < greenzone.greenZoneCount)
-				{
-					if (!greenzone.savestates[cell_y].empty())
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = LAG_INPUT_COLOR1;
-						else
-							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
-						else
-							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
-					} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
-			{
-				// pad 2 or 4
-				if (cell_y == history.GetUndoHint())
-				{
-					// undo hint here
-					msg->clrTextBk = UNDOHINT_INPUT_COLOR2;
-				} else if (cell_y == currFrameCounter || cell_y == playback.GetPauseFrame())
-				{
-					// current frame
-					msg->clrTextBk = CUR_INPUT_COLOR2;
-				} else if(cell_y < greenzone.greenZoneCount)
-				{
-					if (!greenzone.savestates[cell_y].empty())
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = LAG_INPUT_COLOR2;
-						else
-							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
-						else
-							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
-					} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
-				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
-			}
-		}
-	default:
-		return CDRF_DODEFAULT;
-	}
-}
-
-// called from the rest of the emulator when things happen and the tasedit should change to reflect it
+// enterframe function
 void UpdateTasEdit()
 {
 	if(!hwndTasEdit) return;
 
-	UpdateList();
+	tasedit_list.update();
 	markers.update();
 	greenzone.update();
 	playback.update();
@@ -286,7 +85,6 @@ void UpdateTasEdit()
 	selection.update();
 	history.update();
 	project.update();
-	selection.update();
 
 	// update window caption
 	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
@@ -303,15 +101,6 @@ void UpdateTasEdit()
 		RecheckRecordingRadioButtons();
 	}
 
-}
-
-void UpdateList()
-{
-	//update the number of items in the list
-	int currLVItemCount = ListView_GetItemCount(hwndList);
-	int movie_size = currMovieData.getNumRecords();
-	if(currLVItemCount != movie_size)
-		ListView_SetItemCountEx(hwndList,movie_size,LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 }
 
 void RedrawWindowCaption()
@@ -337,22 +126,14 @@ void RedrawTasedit()
 {
 	InvalidateRect(hwndTasEdit, 0, FALSE);
 }
-void RedrawList()
-{
-	InvalidateRect(hwndList, 0, FALSE);
-}
 void RedrawListAndBookmarks()
 {
-	InvalidateRect(hwndList, 0, FALSE);
+	tasedit_list.RedrawList();
 	bookmarks.RedrawBookmarksList();
-}
-void RedrawRow(int index)
-{
-	ListView_RedrawItems(hwndList, index, index);
 }
 void RedrawRowAndBookmark(int index)
 {
-	ListView_RedrawItems(hwndList, index, index);
+	tasedit_list.RedrawRow(index);
 	bookmarks.RedrawChangedBookmarks(index);
 }
 
@@ -365,15 +146,15 @@ void ShowMenu(ECONTEXTMENU which, POINT& pt)
 void StrayClickMenu(LPNMITEMACTIVATE info)
 {
 	POINT pt = info->ptAction;
-	ClientToScreen(hwndList,&pt);
-	ShowMenu(CONTEXTMENU_STRAY,pt);
+	ClientToScreen(tasedit_list.hwndList, &pt);
+	ShowMenu(CONTEXTMENU_STRAY, pt);
 }
 
 void RightClickMenu(LPNMITEMACTIVATE info)
 {
 	POINT pt = info->ptAction;
-	ClientToScreen(hwndList,&pt);
-	ShowMenu(CONTEXTMENU_SELECTED,pt);
+	ClientToScreen(tasedit_list.hwndList, &pt);
+	ShowMenu(CONTEXTMENU_SELECTED, pt);
 }
 
 void RightClick(LPNMITEMACTIVATE info)
@@ -403,12 +184,14 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 	if (KeyFlags & (LVKF_SHIFT|LVKF_CONTROL))
 	{
-		//update multiple rows 
-		for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+		//update multiple rows
+		SelectionFrames* current_selection = selection.MakeStrobe();
+		SelectionFrames::iterator current_selection_end(current_selection->end());
+		for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
 		{
 			currMovieData.records[*it].toggleBit(joy,bit);
 		}
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CHANGE, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CHANGE, *current_selection->begin(), *current_selection->rbegin()));
 	} else
 	{
 		//update one row
@@ -444,9 +227,8 @@ void SingleClick(LPNMITEMACTIVATE info)
 			else
 				history.RegisterChanges(MODTYPE_MARKER_UNSET, row_index);
 			project.SetProjectChanged();
-			// deselect this row, so that new marker will be seen immediately
-			ListView_SetItemState(hwndList, row_index, 0, LVIS_SELECTED);
-			ListView_SetItemState(hwndList, -1, LVIS_FOCUSED, LVIS_FOCUSED);
+			// clear selection, so that new marker will be seen immediately
+			selection.ClearSelection();
 			// also no need to redraw row
 		}
 	}
@@ -475,19 +257,20 @@ void DoubleClick(LPNMITEMACTIVATE info)
 
 void CloneFrames()
 {
-	int frames = selection.CurrentSelection().size();
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	int frames = current_selection->size();
 	if (!frames) return;
 
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-
 	//insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
-	for(SelectionFrames::reverse_iterator it(selection.CurrentSelection().rbegin()); it != selection.CurrentSelection().rend(); it++)
+	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
 		next_it++;
-		if (next_it == selection.CurrentSelection().rend() || (int)*next_it < ((int)*it - 1))
+		if (next_it == current_selection_rend || (int)*next_it < ((int)*it - 1))
 		{
 			// end of current region
 			currMovieData.cloneRegion(*it, frames);
@@ -496,13 +279,14 @@ void CloneFrames()
 			frames = 1;
 		} else frames++;
 	}
-	UpdateList();
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLONE, *selection.CurrentSelection().begin()));
+	//tasedit_list.update();
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin()));
 }
 
 void InsertFrames()
 {
-	int frames = selection.CurrentSelection().size();
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	int frames = current_selection->size();
 	if (!frames) return;
 
 	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
@@ -511,11 +295,12 @@ void InsertFrames()
 	//insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
-	for(SelectionFrames::reverse_iterator it(selection.CurrentSelection().rbegin()); it != selection.CurrentSelection().rend(); it++)
+	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
 		next_it++;
-		if (next_it == selection.CurrentSelection().rend() || (int)*next_it < ((int)*it - 1))
+		if (next_it == current_selection_rend || (int)*next_it < ((int)*it - 1))
 		{
 			// end of current region
 			currMovieData.insertEmpty(*it,frames);
@@ -524,22 +309,23 @@ void InsertFrames()
 			frames = 1;
 		} else frames++;
 	}
-	UpdateList();
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, *selection.CurrentSelection().begin()));
+	//tasedit_list.update();
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin()));
 }
 
 void InsertNumFrames()
 {
-	int frames = selection.CurrentSelection().size();
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	int frames = current_selection->size();
 	if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, hwndTasEdit) == IDOK)
 	{
 		if (frames > 0)
 		{
 			int index;
-			if (selection.CurrentSelection().size())
+			if (current_selection->size())
 			{
 				// insert at selection
-				index = *selection.CurrentSelection().begin();
+				index = *current_selection->begin();
 				selection.ClearSelection();
 			} else
 			{
@@ -549,8 +335,8 @@ void InsertNumFrames()
 			currMovieData.insertEmpty(index, frames);
 			if (TASEdit_bind_markers)
 				markers.insertEmpty(index, frames);
-			UpdateList();
 			// select inserted rows
+			tasedit_list.update();
 			selection.SetRegionSelection(index, index + frames - 1);
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, index));
 		}
@@ -559,11 +345,14 @@ void InsertNumFrames()
 
 void DeleteFrames()
 {
-	if (selection.CurrentSelection().size() == 0) return;
-	int start_index = *selection.CurrentSelection().begin();
-	int end_index = *selection.CurrentSelection().rbegin();
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return;
+
+	int start_index = *current_selection->begin();
+	int end_index = *current_selection->rbegin();
+	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
 	//delete frames on each selection, going backwards
-	for(SelectionFrames::reverse_iterator it(selection.CurrentSelection().rbegin()); it != selection.CurrentSelection().rend(); it++)
+	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		currMovieData.records.erase(currMovieData.records.begin() + *it);
 		if (TASEdit_bind_markers)
@@ -573,7 +362,7 @@ void DeleteFrames()
 	if (!currMovieData.getNumRecords())
 		playback.StartFromZero();
 	// reduce list
-	UpdateList();
+	tasedit_list.update();
 
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
@@ -582,37 +371,42 @@ void DeleteFrames()
 	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 	{
 		greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-	} else RedrawList();
+	} else tasedit_list.RedrawList();
 }
 
-void ClearFrames(bool cut)
+void ClearFrames(SelectionFrames* current_selection)
 {
-	if (selection.CurrentSelection().size() == 0) return;
-	//clear input on each selection
-	for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+	bool cut = true;
+	if (!current_selection)
+	{
+		cut = false;
+		current_selection = selection.MakeStrobe();
+		if (current_selection->size() == 0) return;
+	}
+
+	//clear input on each selected frame
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
 	{
 		currMovieData.records[*it].clear();
 	}
 	if (cut)
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CUT, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CUT, *current_selection->begin(), *current_selection->rbegin()));
 	else
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLEAR, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin()));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLEAR, *current_selection->begin(), *current_selection->rbegin()));
 }
 
 void Truncate()
 {
-	int frame = currFrameCounter;
-	if (selection.CurrentSelection().size())
-	{
-		frame = *selection.CurrentSelection().begin();
-		selection.ClearSelection();
-	}
+	int frame = selection.GetCurrentSelectionBeginning();
+	if (frame < 0) frame = currFrameCounter;
+
 	if (currMovieData.getNumRecords() > frame+1)
 	{
 		currMovieData.truncateAt(frame+1);
 		if (TASEdit_bind_markers)
 			markers.truncateAt(frame+1);
-		UpdateList();
+		tasedit_list.update();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
@@ -620,19 +414,24 @@ void Truncate()
 		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 		{
 			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-		} else RedrawList();
+		} else tasedit_list.RedrawList();
 	}
 }
 
 //the column set operation, for setting a button/Marker for a span of selected values
 void ColumnSet(int column)
 {
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return;
+
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
 	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
 	{
 		// Markers column
-		//inspect the selected frames, if they are all set, then unset all, else set all
+		// inspect the selected frames, if they are all set, then unset all, else set all
 		bool unset_found = false;
-		for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
 			if(!(markers.markers_array[*it] & MARKER_FLAG_BIT))
 			{
@@ -643,15 +442,15 @@ void ColumnSet(int column)
 		if (unset_found)
 		{
 			// set all
-			for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 				markers.markers_array[*it] |= MARKER_FLAG_BIT;
-			history.RegisterChanges(MODTYPE_MARKER_SET, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin());
+			history.RegisterChanges(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
 		} else
 		{
 			// unset all
-			for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 				markers.markers_array[*it] &= ~MARKER_FLAG_BIT;
-			history.RegisterChanges(MODTYPE_MARKER_UNSET, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin());
+			history.RegisterChanges(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
 		}
 		project.SetProjectChanged();
 		selection.ClearSelection();
@@ -664,7 +463,7 @@ void ColumnSet(int column)
 		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 		//inspect the selected frames, if they are all set, then unset all, else set all
 		bool newValue = false;
-		for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
 			if(!(currMovieData.records[*it].checkBit(joy,button)))
 			{
@@ -673,32 +472,37 @@ void ColumnSet(int column)
 			}
 		}
 		// apply newValue
-		for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 			currMovieData.records[*it].setBitValue(joy,button,newValue);
 		if (newValue)
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
 		else
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *selection.CurrentSelection().begin(), *selection.CurrentSelection().rbegin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
 	}
 }
 
 
-bool Copy()
+bool Copy(SelectionFrames* current_selection)
 {
-	if (selection.CurrentSelection().size() == 0) return false;
+	if (!current_selection)
+	{
+		current_selection = selection.MakeStrobe();
+		if (current_selection->size() == 0) return false;
+	}
 
-	int cframe = *selection.CurrentSelection().begin()-1;
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	int cframe = (*current_selection_begin) - 1;
     try 
 	{
-		int range = *selection.CurrentSelection().rbegin() - *selection.CurrentSelection().begin()+1;
-		//std::string outbuf clipString("TAS");
+		int range = (*current_selection->rbegin() - *current_selection_begin) + 1;
 
 		std::stringstream clipString;
 		clipString << "TAS " << range << std::endl;
 
-		for(SelectionFrames::iterator it(selection.CurrentSelection().begin()); it != selection.CurrentSelection().end(); it++)
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if (*it>cframe+1)
+			if (*it > cframe+1)
 			{
 				clipString << '+' << (*it-cframe) << '|';
 			}
@@ -752,22 +556,24 @@ bool Copy()
 }
 void Cut()
 {
-	if (Copy())
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return;
+
+	if (Copy(current_selection))
 	{
-		ClearFrames(true);
+		ClearFrames(current_selection);
 	}
 }
 bool Paste()
 {
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return false;
+
+	if (!OpenClipboard(hwndTasEdit)) return false;
+
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	bool result = false;
-	if (selection.CurrentSelection().size()==0)
-		return false;
-
-	int pos = *selection.CurrentSelection().begin();
-
-	if (!OpenClipboard(hwndTasEdit))
-		return false;
-	
+	int pos = *current_selection_begin;
 	HANDLE hGlobal = GetClipboardData(CF_TEXT);
 	if (hGlobal)
 	{
@@ -832,205 +638,14 @@ bool Paste()
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *selection.CurrentSelection().begin()));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *current_selection_begin));
 			result = true;
 		}
 
 		GlobalUnlock(hGlobal);
 	}
-
 	CloseClipboard();
 	return result;
-}
-// ---------------------------------------------------------------------------------
-//The subclass wndproc for the listview header
-LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
-	case WM_SETCURSOR:
-		return true;	// no column resizing
-	case WM_LBUTTONDOWN:
-	case WM_LBUTTONDBLCLK:
-		{
-			if (selection.CurrentSelection().size())
-			{
-				//perform hit test
-				HD_HITTESTINFO info;
-				info.pt.x = GET_X_LPARAM(lParam);
-				info.pt.y = GET_Y_LPARAM(lParam);
-				SendMessage(hWnd,HDM_HITTEST,0,(LPARAM)&info);
-				if(info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
-					ColumnSet(info.iItem);
-			}
-		}
-		return true;
-	}
-	return CallWindowProc(hwndHeader_oldWndproc, hWnd, msg, wParam, lParam);
-}
-
-//The subclass wndproc for the listview
-LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
-		case WM_CHAR:
-		case WM_KILLFOCUS:
-			return 0;
-		case WM_NOTIFY:
-		{
-			switch (((LPNMHDR)lParam)->code)
-			{
-			case HDN_BEGINTRACKW:
-			case HDN_BEGINTRACKA:
-			case HDN_TRACK:
-				return true;	// no column resizing
-			}
-			break;
-		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
-	}
-	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-}
-
-LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
-		case WM_CHAR:
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		case WM_SETFOCUS:
-		case WM_KILLFOCUS:
-			return 0;
-		case WM_MOUSEMOVE:
-		{
-			if (!bookmarks.mouse_over_bookmarkslist)
-			{
-				bookmarks.mouse_over_bookmarkslist = true;
-				bookmarks.list_tme.hwndTrack = hWnd;
-				TrackMouseEvent(&bookmarks.list_tme);
-			}
-			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			break;
-		}
-		case WM_MOUSELEAVE:
-		{
-			bookmarks.mouse_over_bookmarkslist = false;
-			bookmarks.MouseMove(-1, -1);
-			break;
-		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
-	}
-	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
-}
-
-LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
-		case WM_CHAR:
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		case WM_KILLFOCUS:
-			return 0;
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
-	}
-	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
-}
-
-LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch(msg)
-	{
-		case WM_MOUSEMOVE:
-		{
-			if (!bookmarks.mouse_over_bitmap)
-			{
-				bookmarks.mouse_over_bitmap = true;
-				bookmarks.tme.hwndTrack = hWnd;
-				TrackMouseEvent(&bookmarks.tme);
-			}
-			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			break;
-		}
-		case WM_MOUSELEAVE:
-		{
-			bookmarks.mouse_over_bitmap = false;
-			bookmarks.MouseMove(-1, -1);
-			break;
-		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hWnd, &ps);
-			bookmarks.PaintBranchesBitmap(hdc);
-			EndPaint(hWnd, &ps);
-			return 0;
-		}
-	}
-	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
-}
-
-void AddFourscore()
-{
-	// add list columns
-	LVCOLUMN lvc;
-	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-	lvc.fmt = LVCFMT_CENTER;
-	lvc.cx = 21;
-	int colidx = COLUMN_JOYPAD3_A;
-	for (int joy = 0; joy < 2; ++joy)
-	{
-		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-		{
-			lvc.pszText = buttonNames[btn];
-			ListView_InsertColumn(hwndList, colidx++, &lvc);
-		}
-	}
-	// frame number column again
-	lvc.cx = 75;
-	lvc.pszText = "Frame#";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	// enable radiobuttons for 3P/4P multitracking
-	EnableWindow(hwndRB_Rec3P, true);
-	EnableWindow(hwndRB_Rec4P, true);
-	// change eoptions
-	FCEUI_SetInputFourscore(true);
-}
-void RemoveFourscore()
-{
-	// remove list columns
-	for (int i = COLUMN_FRAMENUM2; i >= COLUMN_JOYPAD3_A; --i)
-	{
-		ListView_DeleteColumn (hwndList, i);
-	}
-	// disable radiobuttons for 3P/4P multitracking
-	EnableWindow(hwndRB_Rec3P, false);
-	EnableWindow(hwndRB_Rec4P, false);
-	// change eoptions
-	FCEUI_SetInputFourscore(false);
 }
 
 void UncheckRecordingRadioButtons()
@@ -1119,10 +734,10 @@ void OpenProject()
 		project.LoadProject(project.GetProjectFile());
 		// update fourscore status
 		if (last_fourscore && !currMovieData.fourscore)
-			RemoveFourscore();
+			tasedit_list.RemoveFourscore();
 		else if (!last_fourscore && currMovieData.fourscore)
-			AddFourscore();
-		FollowPlayback();
+			tasedit_list.AddFourscore();
+		tasedit_list.FollowPlayback();
 		RedrawTasedit();
 		RedrawWindowCaption();
 	}
@@ -1235,11 +850,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
 			SetWindowPos(hwndDlg, 0, TasEdit_wndx, TasEdit_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			// save references to dialog items
-			hwndList = GetDlgItem(hwndDlg, IDC_LIST1);
-			listItems = ListView_GetCountPerPage(hwndList);
-			hwndHistoryList = GetDlgItem(hwndDlg, IDC_HISTORYLIST);
-			hwndBookmarksList = GetDlgItem(hwndDlg, IDC_BOOKMARKSLIST);
-			hwndBookmarks = GetDlgItem(hwndDlg, IDC_BOOKMARKS_BOX);
 			hwndProgressbar = GetDlgItem(hwndDlg, IDC_PROGRESS1);
 			SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
 			hwndRewind = GetDlgItem(hwndDlg, TASEDIT_REWIND);
@@ -1252,10 +862,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			hwndRB_Rec2P = GetDlgItem(hwndDlg, IDC_RADIO4);
 			hwndRB_Rec3P = GetDlgItem(hwndDlg, IDC_RADIO5);
 			hwndRB_Rec4P = GetDlgItem(hwndDlg, IDC_RADIO6);
-			hwndBranchesBitmap = GetDlgItem(hwndDlg, IDC_BRANCHES_BITMAP);
-
 			break; 
-
 		case WM_MOVE:
 			{
 				if (!IsIconic(hwndDlg))
@@ -1266,24 +873,22 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					TasEdit_wndy = wrect.top;
 					WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
 					// also move screenshot bitmap if it's open
-					if (hwndScrBmp)
-						SetWindowPos(hwndScrBmp, 0, TasEdit_wndx + bookmarks.scr_bmp_x, TasEdit_wndy + bookmarks.scr_bmp_y, 0, 0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+					if (bookmarks.hwndScrBmp)
+						SetWindowPos(bookmarks.hwndScrBmp, 0, TasEdit_wndx + bookmarks.scr_bmp_x, TasEdit_wndy + bookmarks.scr_bmp_y, 0, 0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 				}
 				break;
 			}
-
 		case WM_NOTIFY:
-
 			switch(wParam)
 			{
 			case IDC_LIST1:
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLong(hwndDlg, DWL_MSGRESULT, tasedit_list.CustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
-					GetDispInfo((NMLVDISPINFO*)lParam);
+					tasedit_list.GetDispInfo((NMLVDISPINFO*)lParam);
 					break;
 				case NM_CLICK:
 					SingleClick((LPNMITEMACTIVATE)lParam);
@@ -1355,19 +960,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 			}
 			break;
-		
 		case WM_CLOSE:
 		case WM_QUIT:
 			ExitTasEdit();
 			break;
-
 		case WM_ACTIVATE:
 			if(LOWORD(wParam))
 				GotFocus();
 			else
 				LostFocus();
 			break;
-
 		case WM_COMMAND:
 			switch(LOWORD(wParam))
 			{
@@ -1447,11 +1049,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 				// if switched off then jump to selection
 				if (TASEdit_follow_playback)
-					FollowPlayback();
-				else if (selection.CurrentSelection().size())
-					FollowSelection();
-				else if (playback.pauseframe)
-					FollowPauseframe();
+					tasedit_list.FollowPlayback();
+				else if (selection.GetCurrentSelectionSize())
+					tasedit_list.FollowSelection();
+				else if (playback.GetPauseFrame())
+					tasedit_list.FollowPauseframe();
 				break;
 			case ID_VIEW_SHOW_LAG_FRAMES:
 				//switch "Highlight lag frames" flag
@@ -1463,7 +1065,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				//switch "Show Markers" flag
 				TASEdit_show_markers ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
-				RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in main list
+				tasedit_list.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in main list
 				break;
 			case ID_VIEW_SHOWBRANCHSCREENSHOTS:
 				//switch "Show Branch Screenshots" flag
@@ -1473,7 +1075,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_VIEW_ENABLEHOTCHANGES:
 				TASEdit_enable_hot_changes ^= 1;
 				CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
-				RedrawList();		// redraw buttons text
+				tasedit_list.RedrawList();		// redraw buttons text
 				break;
 			case ID_VIEW_JUMPWHENMAKINGUNDO:
 				TASEdit_jump_to_undo ^= 1;
@@ -1517,7 +1119,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							history.init(TasEdit_undo_levels);
 							selection.init(TasEdit_undo_levels);
 							// hot changes were cleared, so update list
-							RedrawList();
+							tasedit_list.RedrawList();
 						}
 					}
 					break;
@@ -1563,7 +1165,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				break;
 			case IDC_PROGRESS_BUTTON:
 				// click on progressbar - stop seeking
-				if (playback.pauseframe) playback.SeekingStop();
+				if (playback.GetPauseFrame()) playback.SeekingStop();
 				break;
 			case IDC_BRANCHES_BUTTON:
 				// click on "Bookmarks/Branches" - switch "View Tree of branches"
@@ -1615,8 +1217,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					int result = history.undo();
 					if (result >= 0)
 					{
-						UpdateList();
-						FollowUndo();
+						tasedit_list.update();
+						tasedit_list.FollowUndo();
 						greenzone.InvalidateAndCheck(result);
 					}
 					break;
@@ -1627,8 +1229,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					int result = history.redo();
 					if (result >= 0)
 					{
-						UpdateList();
-						FollowUndo();
+						tasedit_list.update();
+						tasedit_list.FollowUndo();
 						greenzone.InvalidateAndCheck(result);
 					}
 					break;
@@ -1637,21 +1239,21 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ACCEL_CTRL_Q:
 				{
 					selection.undo();
-					FollowSelection();
+					tasedit_list.FollowSelection();
 					break;
 				}
 			case ID_EDIT_SELECTIONREDO:
 			case ACCEL_CTRL_W:
 				{
 					selection.redo();
-					FollowSelection();
+					tasedit_list.FollowSelection();
 					break;
 				}
 			case ID_EDIT_RESELECTCLIPBOARD:
 			case ACCEL_CTRL_B:
 				{
 					selection.ReselectClipboard();
-					FollowSelection();
+					tasedit_list.FollowSelection();
 					break;
 				}
 
@@ -1663,107 +1265,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				return 0;
 			break;
 		}
-
 		default:
 			break;
 	}
 	return FALSE;
-}
-
-bool CheckItemVisible(int frame)
-{
-	int top = ListView_GetTopIndex(hwndList);
-	// in fourscore there's horizontal scrollbar which takes one row for itself
-	if (frame >= top && frame < top + listItems - (currMovieData.fourscore)?1:0)
-		return true;
-	return false;
-}
-
-void FollowPlayback()
-{
-	if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
-}
-void FollowUndo()
-{
-	int jump_frame = history.GetUndoHint();
-	if (TASEdit_jump_to_undo && jump_frame >= 0)
-	{
-		if (!CheckItemVisible(jump_frame))
-		{
-			// center list at jump_frame
-			int list_items = listItems;
-			if (currMovieData.fourscore) list_items--;
-			int lower_border = (list_items - 1) / 2;
-			int upper_border = (list_items - 1) - lower_border;
-			int index = jump_frame + lower_border;
-			if (index >= currMovieData.getNumRecords())
-				index = currMovieData.getNumRecords()-1;
-			ListView_EnsureVisible(hwndList, index, false);
-			index = jump_frame - upper_border;
-			if (index < 0)
-				index = 0;
-			ListView_EnsureVisible(hwndList, index, false);
-		}
-	}
-}
-void FollowSelection()
-{
-	if (selection.CurrentSelection().size() == 0) return;
-
-	int list_items = listItems;
-	if (currMovieData.fourscore) list_items--;
-	int selection_start = *selection.CurrentSelection().begin();
-	int selection_end = *selection.CurrentSelection().rbegin();
-	int selection_items = 1 + selection_end - selection_start;
-	
-	if (selection_items <= list_items)
-	{
-		// selected region can fit in screen
-		int lower_border = (list_items - selection_items) / 2;
-		int upper_border = (list_items - selection_items) - lower_border;
-		int index = selection_end + lower_border;
-		if (index >= currMovieData.getNumRecords())
-			index = currMovieData.getNumRecords()-1;
-		ListView_EnsureVisible(hwndList, index, false);
-		index = selection_start - upper_border;
-		if (index < 0)
-			index = 0;
-		ListView_EnsureVisible(hwndList, index, false);
-	} else
-	{
-		// selected region is too big to fit in screen
-		// just center at selection_start
-		int lower_border = (list_items - 1) / 2;
-		int upper_border = (list_items - 1) - lower_border;
-		int index = selection_start + lower_border;
-		if (index >= currMovieData.getNumRecords())
-			index = currMovieData.getNumRecords()-1;
-		ListView_EnsureVisible(hwndList, index, false);
-		index = selection_start - upper_border;
-		if (index < 0)
-			index = 0;
-		ListView_EnsureVisible(hwndList, index, false);
-	}
-}
-void FollowPauseframe()
-{
-	int jump_frame = playback.pauseframe;
-	if (jump_frame >= 0)
-	{
-		// center list at jump_frame
-		int list_items = listItems;
-		if (currMovieData.fourscore) list_items--;
-		int lower_border = (list_items - 1) / 2;
-		int upper_border = (list_items - 1) - lower_border;
-		int index = jump_frame + lower_border;
-		if (index >= currMovieData.getNumRecords())
-			index = currMovieData.getNumRecords()-1;
-		ListView_EnsureVisible(hwndList, index, false);
-		index = jump_frame - upper_border;
-		if (index < 0)
-			index = 0;
-		ListView_EnsureVisible(hwndList, index, false);
-	}
 }
 
 void EnterTasEdit()
@@ -1786,8 +1291,6 @@ void EnterTasEdit()
 		// switch off autosaves
 		saved_EnableAutosave = EnableAutosave;
 		EnableAutosave = 0;
-
-
 		UpdateCheckedMenuItems();
 
 		hmenu = GetMenu(hwndTasEdit);
@@ -1807,7 +1310,6 @@ void EnterTasEdit()
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 
 		SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-
 		// init modules
 		greenzone.init();
 		playback.init();
@@ -1828,172 +1330,18 @@ void EnterTasEdit()
 		movie_readonly = true;
 		multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 		RecheckRecordingRadioButtons();
-
 		// switch to tasedit mode
 		movieMode = MOVIEMODE_TASEDIT;
-
-		// create fonts for main listview
-		hMainListFont = CreateFont(15, 10,				/*Height,Width*/
-			0, 0,										/*escapement,orientation*/
-			FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
-			ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
-			DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
-			"Courier");									/*font name*/
-		hMainListSelectFont = CreateFont(14, 7,			/*Height,Width*/
-			0, 0,										/*escapement,orientation*/
-			FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
-			ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
-			DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
-			"Arial");									/*font name*/
-
-		// prepare the main listview
-		ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-		// subclass the header
-		hwndHeader = ListView_GetHeader(hwndList);
-		hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
-		// subclass the whole listview
-		hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LONG)ListWndProc);
-		// setup images for the listview
-		HIMAGELIST himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
-		HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP10));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP11));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP12));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP13));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP14));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP15));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP16));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP17));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP18));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_TE_ARROW));
-		ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
-		DeleteObject(bmp);
-		ListView_SetImageList(hwndList, himglist, LVSIL_SMALL);
-		// setup columns
-		LVCOLUMN lvc;
-		int colidx=0;
-		// icons column
-		lvc.mask = LVCF_WIDTH;
-		lvc.cx = 13;
-		ListView_InsertColumn(hwndList, colidx++, &lvc);
-		// frame number column
-		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-		lvc.fmt = LVCFMT_CENTER;
-		lvc.cx = 75;
-		lvc.pszText = "Frame#";
-		ListView_InsertColumn(hwndList, colidx++, &lvc);
-		// pads columns
-		lvc.cx = 21;
-		// add pads 1 and 2
-		for (int joy = 0; joy < 2; ++joy)
-		{
-			for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-			{
-				lvc.pszText = buttonNames[btn];
-				ListView_InsertColumn(hwndList, colidx++, &lvc);
-			}
-		}
-		// add pads 3 and 4 and frame_number2
-		if (currMovieData.fourscore) AddFourscore();
-		UpdateList();
-		// calculate scr_bmp coordinates (relative to the listview top-left corner
-		RECT temp_rect, parent_rect;
-		GetWindowRect(hwndTasEdit, &parent_rect);
-		GetWindowRect(hwndHeader, &temp_rect);
-		bookmarks.scr_bmp_x = temp_rect.left - parent_rect.left;
-		bookmarks.scr_bmp_y = temp_rect.bottom - parent_rect.top;
-
-		// prepare bookmarks listview
-		ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-		// subclass the listview
-		hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
-		// setup same images for the listview
-		ListView_SetImageList(hwndBookmarksList, himglist, LVSIL_SMALL);
-		// setup columns
-		// icons column
-		lvc.mask = LVCF_WIDTH;
-		lvc.cx = 13;
-		ListView_InsertColumn(hwndBookmarksList, 0, &lvc);
-		// jump_frame column
-		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-		lvc.fmt = LVCFMT_CENTER;
-		lvc.cx = 74;
-		ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
-		// time column
-		lvc.cx = 80;
-		ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
-
-		// subclass BranchesBitmap
-		hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLong(hwndBranchesBitmap, GWL_WNDPROC, (LONG)BranchesBitmapWndProc);
-
-		// prepare the history listview
-		ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
-		// subclass the listview
-		hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
-		lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-		lvc.cx = 200;
-		lvc.fmt = LVCFMT_LEFT;
-		ListView_InsertColumn(hwndHistoryList, 0, &lvc);
-
 		// init variables
+		tasedit_list.init();
 		markers.init();
 		project.init();
 		bookmarks.init();
 		history.init(TasEdit_undo_levels);
 		selection.init(TasEdit_undo_levels);
-		SetFocus(hwndHistoryList);		// to show darkblue cursor
-		SetFocus(hwndList);
-		FCEU_DispMessage("Tasedit engaged",0);
+		SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
+		SetFocus(tasedit_list.hwndList);
+		FCEU_DispMessage("Tasedit engaged", 0);
 	}
 }
 
@@ -2008,23 +1356,22 @@ bool ExitTasEdit()
 	eoptions = saved_eoptions;
 	// restore autosaves
 	EnableAutosave = saved_EnableAutosave;
-
 	DoPriority();
 	UpdateCheckedMenuItems();
 	// clear "Background TASEdit input"
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
-
 	// release memory
+	tasedit_list.free();
 	markers.free();
 	greenzone.clearGreenzone();
 	bookmarks.free();
 	history.free();
 	playback.SeekingStop();
 	selection.free();
-
+	// switch off tasedit mode
 	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("Tasedit disengaged",0);
+	FCEU_DispMessage("Tasedit disengaged", 0);
 	CreateCleanMovie();
 	return true;
 }

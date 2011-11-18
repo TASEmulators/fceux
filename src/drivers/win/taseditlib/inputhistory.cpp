@@ -3,18 +3,20 @@
 #include "taseditproj.h"
 #include "../tasedit.h"		// just for mainlist functions, later this should be deleted
 
-extern void FCEU_printf(char *format, ...);
-
-extern HWND hwndHistoryList;
+extern HWND hwndTasEdit;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_enable_hot_changes;
 extern bool TASEdit_branch_full_movie;
+
+LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+WNDPROC hwndHistoryList_oldWndProc;
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
+extern TASEDIT_LIST tasedit_list;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char modCaptions[36][20] = {" Init",
@@ -57,11 +59,20 @@ char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
 {
-
 }
 
 void INPUT_HISTORY::init(int new_size)
 {
+	// prepare the history listview
+	hwndHistoryList = GetDlgItem(hwndTasEdit, IDC_HISTORYLIST);
+	ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+	// subclass the listview
+	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
+	LVCOLUMN lvc;
+	lvc.mask = LVCF_WIDTH | LVCF_FMT;
+	lvc.cx = 200;
+	lvc.fmt = LVCFMT_LEFT;
+	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 	// init vars
 	if (new_size > 0)
 		history_size = new_size + 1;
@@ -92,7 +103,7 @@ void INPUT_HISTORY::update()
 {
 	// update undo_hint
 	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0)
-		RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
+		tasedit_list.RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
 	old_undo_hint_pos = undo_hint_pos;
 	old_show_undo_hint = show_undo_hint;
 	show_undo_hint = false;
@@ -104,7 +115,7 @@ void INPUT_HISTORY::update()
 			undo_hint_pos = -1;	// finished hinting
 	}
 	if (old_show_undo_hint != show_undo_hint)
-		RedrawRow(undo_hint_pos);			// not changing bookmarks list
+		tasedit_list.RedrawRow(undo_hint_pos);			// not changing bookmarks list
 
 
 
@@ -155,11 +166,11 @@ int INPUT_HISTORY::jump(int new_pos)
 	{
 		markers.update();
 		bookmarks.ChangesMadeSinceBranch();
-		RedrawList();
+		tasedit_list.RedrawList();
 	} else if (TASEdit_enable_hot_changes)
 	{
 		// when using Hot Changes, list should be always redrawn, because old changes become less hot
-		RedrawList();
+		tasedit_list.RedrawList();
 	}
 
 	return first_change;
@@ -484,8 +495,8 @@ void INPUT_HISTORY::Click(LPNMITEMACTIVATE info)
 		int result = jump(item);
 		if (result >= 0)
 		{
-			UpdateList();
-			FollowUndo();
+			tasedit_list.update();
+			tasedit_list.FollowUndo();
 			greenzone.InvalidateAndCheck(result);
 			return;
 		}
@@ -534,4 +545,24 @@ int INPUT_HISTORY::GetUndoHint()
 	else
 		return -1;
 }
+// ---------------------------------------------------------------------------------
+LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_CHAR:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_KILLFOCUS:
+			return 0;
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
+	}
+	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
+}
+
 

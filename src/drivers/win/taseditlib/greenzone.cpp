@@ -1,11 +1,8 @@
 //Implementation file of Greenzone class
 
-#include "movie.h"
-#include "state.h"
-#include "../common.h"
-#include "zlib.h"
 #include "taseditproj.h"
 #include "../tasedit.h"
+#include "state.h"
 #include "zlib.h"
 
 extern TASEDIT_PROJECT project;

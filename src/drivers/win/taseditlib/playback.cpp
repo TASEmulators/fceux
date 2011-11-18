@@ -1,7 +1,5 @@
 //Implementation file of Playback class
 
-#include "movie.h"
-#include "../common.h"
 #include "taseditproj.h"
 #include "../tasedit.h"
 
@@ -9,16 +7,18 @@
 extern void ForceExecuteLuaFrameFunctions();
 #endif
 
-extern HWND hwndProgressbar, hwndList, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
+extern HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 extern void FCEU_printf(char *format, ...);
 extern bool turbo;
+
 extern MARKERS markers;
 extern GREENZONE greenzone;
+extern TASEDIT_LIST tasedit_list;
+
 extern bool Tasedit_rewind_now;
 
 PLAYBACK::PLAYBACK()
 {
-
 }
 
 void PLAYBACK::init()
@@ -29,7 +29,7 @@ void PLAYBACK::init()
 void PLAYBACK::reset()
 {
 	lastCursor = -1;
-	pauseframe = old_pauseframe = 0;
+	pause_frame = old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
@@ -40,31 +40,31 @@ void PLAYBACK::reset()
 }
 void PLAYBACK::update()
 {
-	// pause when seeking hit pauseframe
+	// pause when seeking hit pause_frame
 	if(!FCEUI_EmulationPaused())
-		if(pauseframe && pauseframe <= currFrameCounter + 1)
+		if(pause_frame && pause_frame <= currFrameCounter + 1)
 			SeekingStop();
 
 	// update flashing pauseframe
-	if (old_pauseframe != pauseframe && old_pauseframe) RedrawRowAndBookmark(old_pauseframe-1);
-	old_pauseframe = pauseframe;
+	if (old_pauseframe != pause_frame && old_pauseframe) RedrawRowAndBookmark(old_pauseframe-1);
+	old_pauseframe = pause_frame;
 	old_show_pauseframe = show_pauseframe;
-	if (pauseframe)
+	if (pause_frame)
 	{
 		if (emu_paused)
 			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_PAUSED) & 1;
 		else
 			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
 	} else show_pauseframe = false;
-	if (old_show_pauseframe != show_pauseframe) RedrawRowAndBookmark(pauseframe-1);
+	if (old_show_pauseframe != show_pauseframe) RedrawRowAndBookmark(pause_frame-1);
 
 	// update seeking progressbar
 	old_emu_paused = emu_paused;
 	emu_paused = (FCEUI_EmulationPaused() != 0);
-	if (pauseframe)
+	if (pause_frame)
 	{
 		if (old_show_pauseframe != show_pauseframe)
-			SetProgressbar(currFrameCounter - seeking_start_frame, pauseframe-seeking_start_frame);
+			SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
 	} else if (old_emu_paused != emu_paused)
 	{
 		// emulator got paused/unpaused externally
@@ -79,42 +79,39 @@ void PLAYBACK::update()
 	//update the playback cursor
 	if(currFrameCounter != lastCursor)
 	{
-		FollowPlayback();
+		tasedit_list.FollowPlayback();
 		//update the old and new rows
 		RedrawRowAndBookmark(lastCursor);
 		RedrawRowAndBookmark(currFrameCounter);
-		UpdateWindow(hwndList);
+		UpdateWindow(tasedit_list.hwndList);
 		lastCursor = currFrameCounter;
 	}
 	
 	// update < and > buttons
-	if(emu_paused)
+	old_rewind_button_state = rewind_button_state;
+	rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Tasedit_rewind_now);
+	if (rewind_button_state)
 	{
-		old_rewind_button_state = rewind_button_state;
-		rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Tasedit_rewind_now);
-		if (rewind_button_state)
+		if (!old_rewind_button_state)
 		{
-			if (!old_rewind_button_state)
-			{
-				button_hold_time = clock();
-				RewindFrame();
-			} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
-			{
-				RewindFrame();
-			}
+			button_hold_time = clock();
+			RewindFrame();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			RewindFrame();
 		}
-		old_forward_button_state = forward_button_state;
-		forward_button_state = (Button_GetState(hwndForward) & BST_PUSHED) != 0;
-		if (forward_button_state && !rewind_button_state)
+	}
+	old_forward_button_state = forward_button_state;
+	forward_button_state = (Button_GetState(hwndForward) & BST_PUSHED) != 0;
+	if (forward_button_state && !rewind_button_state)
+	{
+		if (!old_forward_button_state)
 		{
-			if (!old_forward_button_state)
-			{
-				button_hold_time = clock();
-				ForwardFrame();
-			} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
-			{
-				ForwardFrame();
-			}
+			button_hold_time = clock();
+			ForwardFrame();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			ForwardFrame();
 		}
 	}
 	// update << and >> buttons
@@ -149,9 +146,9 @@ void PLAYBACK::update()
 
 void PLAYBACK::updateProgressbar()
 {
-	if (pauseframe)
+	if (pause_frame)
 	{
-		SetProgressbar(currFrameCounter - seeking_start_frame, pauseframe-seeking_start_frame);
+		SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
 	} else
 	{
 		if (emu_paused)
@@ -183,13 +180,13 @@ void PLAYBACK::UnpauseEmulation()
 void PLAYBACK::SeekingStart(int finish_frame)
 {
 	seeking_start_frame = currFrameCounter;
-	pauseframe = finish_frame;
+	pause_frame = finish_frame;
 	turbo = true;
 	UnpauseEmulation();
 }
 void PLAYBACK::SeekingStop()
 {
-	pauseframe = 0;
+	pause_frame = 0;
 	turbo = false;
 	PauseEmulation();
 	SetProgressbar(1, 1);
@@ -199,10 +196,12 @@ void PLAYBACK::SeekingStop()
 void PLAYBACK::RewindFrame()
 {
 	if (currFrameCounter > 0) jump(currFrameCounter-1);
+	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
 {
 	jump(currFrameCounter+1);
+	if (!pause_frame) PauseEmulation();
 	turbo = false;
 }
 void PLAYBACK::RewindFull()
@@ -247,13 +246,13 @@ void PLAYBACK::jump(int frame)
 	if (JumpToFrame(frame))
 	{
 		ForceExecuteLuaFrameFunctions();
-		FollowPlayback();
+		tasedit_list.FollowPlayback();
 	}
 }
 void PLAYBACK::restorePosition()
 {
-	if (pauseframe)
-		jump(pauseframe-1);
+	if (pause_frame)
+		jump(pause_frame-1);
 	else
 		jump(currFrameCounter);
 }
@@ -276,7 +275,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	{
 		turbo = false;
 		// if playback was seeking, pause emulation right here
-		if (pauseframe) SeekingStop();
+		if (pause_frame) SeekingStop();
 		return true;
 	}
 	//Search for an earlier frame with savestate
@@ -298,9 +297,9 @@ bool PLAYBACK::JumpToFrame(int index)
 int PLAYBACK::GetPauseFrame()
 {
 	if (show_pauseframe)
-		return pauseframe-1;
+		return pause_frame;
 	else
-		return -1;
+		return 0;
 }
 
 void PLAYBACK::SetProgressbar(int a, int b)

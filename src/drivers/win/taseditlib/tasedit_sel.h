@@ -20,7 +20,6 @@ public:
 	void ItemChanged(NMLISTVIEW* info);
 
 	void AddNewSelectionToHistory();
-	SelectionFrames& CurrentSelection();
 
 	void undo();
 	void redo();
@@ -39,10 +38,16 @@ public:
 	void SetRegionSelection(int start, int end);
 	void SelectMidMarkers();
 
-
+	// getters
+	int GetCurrentSelectionSize();
+	int GetCurrentSelectionBeginning();
 	bool CheckFrameSelected(int frame);
+	SelectionFrames* MakeStrobe();
+	SelectionFrames& GetStrobedSelection();
 
 private:
+	SelectionFrames& CurrentSelection();
+
 	bool track_selection_changes;
 
 	std::vector<SelectionFrames> selections_history;
@@ -53,5 +58,6 @@ private:
 	int history_total_items;
 	int history_size;
 
+	SelectionFrames temp_selection;
 
 };

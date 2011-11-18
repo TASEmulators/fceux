@@ -252,7 +252,6 @@ extern bool subtitlesOnAVI;
 extern bool freshMovie;
 extern bool movie_readonly;
 extern bool autoMovieBackup;
-extern int pauseframe;
 extern bool fullSaveStateLoads;
 //--------------------------------------------------
 void FCEUI_MakeBackupMovie(bool dispMessage);

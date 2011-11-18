@@ -1,25 +1,24 @@
 //Implementation file of Bookmarks class
 
-#include "movie.h"
-#include "../common.h"
 #include "taseditproj.h"
-#include "../tasedit.h"
 #include "zlib.h"
 #include "utils/xstring.h"
 
 #pragma comment(lib, "msimg32.lib")
 
-LRESULT CALLBACK ScrBmpWndProc(HWND, UINT, WPARAM, LPARAM);
-char szClassName[] = "BmpTestApp";
-HWND hwndScrBmp, scr_bmp_pic;
-WNDCLASSEX wincl;
-BLENDFUNCTION blend;
 extern HWND hwndTasEdit;
 extern int TasEdit_wndx, TasEdit_wndy;
+extern void RedrawRowAndBookmark(int index);
 
+LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+WNDPROC hwndBookmarksList_oldWndProc, hwndBranchesBitmap_oldWndProc;
+
+// resources
+char szClassName[] = "ScrBmp";
 char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
 char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
-
 // color tables for flashing when saving/loading bookmarks
 COLORREF bookmark_flash_colors[3][FLASH_PHASE_MAX+1] = {
 	// set
@@ -36,10 +35,7 @@ extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
 extern INPUT_HISTORY history;
 extern MARKERS markers;
-
-extern HWND hwndBookmarks;
-extern HWND hwndBookmarksList;
-extern HWND hwndBranchesBitmap;
+extern TASEDIT_LIST tasedit_list;
 
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_bind_markers;
@@ -103,6 +99,34 @@ BOOKMARKS::BOOKMARKS()
 void BOOKMARKS::init()
 {
 	free();
+	hwndBookmarksList = GetDlgItem(hwndTasEdit, IDC_BOOKMARKSLIST);
+	hwndBookmarks = GetDlgItem(hwndTasEdit, IDC_BOOKMARKS_BOX);
+	hwndBranchesBitmap = GetDlgItem(hwndTasEdit, IDC_BRANCHES_BITMAP);
+
+	// prepare bookmarks listview
+	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+	// subclass the listview
+	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
+	// setup same images for the listview
+	ListView_SetImageList(hwndBookmarksList, tasedit_list.himglist, LVSIL_SMALL);
+	// setup columns
+	LVCOLUMN lvc;
+	// icons column
+	lvc.mask = LVCF_WIDTH;
+	lvc.cx = 13;
+	ListView_InsertColumn(hwndBookmarksList, 0, &lvc);
+	// jump_frame column
+	lvc.mask = LVCF_WIDTH | LVCF_FMT;
+	lvc.fmt = LVCFMT_CENTER;
+	lvc.cx = 74;
+	ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
+	// time column
+	lvc.cx = 80;
+	ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
+
+	// subclass BranchesBitmap
+	hwndBranchesBitmap_oldWndProc = (WNDPROC)SetWindowLong(hwndBranchesBitmap, GWL_WNDPROC, (LONG)BranchesBitmapWndProc);
+
 	// init arrays
 	BranchX.resize(TOTAL_BOOKMARKS+1);
 	BranchY.resize(TOTAL_BOOKMARKS+1);
@@ -134,7 +158,7 @@ void BOOKMARKS::init()
 
 	// find rows top/height (for mouseover hittest calculations)
 	RECT temp_rect;
-	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect))
+	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect) && temp_rect.bottom != temp_rect.top)
 	{
 		branch_row_top = temp_rect.top;
 		branch_row_left = temp_rect.left;
@@ -405,6 +429,8 @@ void BOOKMARKS::set(int slot)
 	if (previous_frame >= 0 && previous_frame != currFrameCounter)
 		RedrawRowAndBookmark(previous_frame);
 	RedrawRowAndBookmark(currFrameCounter);
+
+	FCEU_DispMessage("Branch %d saved.", 0, slot);
 }
 
 void BOOKMARKS::jump(int slot)
@@ -414,10 +440,10 @@ void BOOKMARKS::jump(int slot)
 	{
 		int frame = bookmarks_array[slot].snapshot.jump_frame;
 		playback.jump(frame);
-		if (playback.pauseframe)
-			FollowPauseframe();
+		if (playback.GetPauseFrame())
+			tasedit_list.FollowPauseframe();
 		else
-			FollowPlayback();
+			tasedit_list.FollowPlayback();
 		bookmarks_array[slot].jump();
 	}
 }
@@ -454,14 +480,14 @@ void BOOKMARKS::unleash(int slot)
 			// restore entire movie
 			currMovieData.records.resize(bookmarks_array[slot].snapshot.size);
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
-			UpdateList();
+			tasedit_list.update();
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			RedrawList();
+			tasedit_list.RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
 		{
@@ -487,14 +513,14 @@ void BOOKMARKS::unleash(int slot)
 			// restore movie up to and not including bookmarked frame (imitating old TASing method)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
-			UpdateList();
+			tasedit_list.update();
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			RedrawList();
+			tasedit_list.RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
 		{
@@ -532,6 +558,8 @@ void BOOKMARKS::unleash(int slot)
 	current_branch = slot;
 	changes_since_current_branch = false;
 	must_recalculate_branches_tree = true;
+
+	FCEU_DispMessage("Branch %d loaded.", 0, slot);
 }
 
 void BOOKMARKS::save(EMUFILE *os)
@@ -946,7 +974,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				// frame number
 				SelectObject(msg->nmcd.hdc, hBookmarksFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
-				if (frame == currFrameCounter || frame == playback.GetPauseFrame())
+				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
 					msg->clrTextBk = CUR_FRAMENUM_COLOR;
@@ -977,7 +1005,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				// frame number
 				SelectObject(msg->nmcd.hdc, hBookmarksFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
-				if (frame == currFrameCounter || frame == playback.GetPauseFrame())
+				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
@@ -1309,14 +1337,92 @@ void BOOKMARKS::RecursiveSetYPos(int parent, int parentY)
 	}
 }
 // ----------------------------------------------------------------------------------------
-LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	extern BOOKMARKS bookmarks;
+	switch(msg)
+	{
+		case WM_CHAR:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS:
+			return 0;
+		case WM_MOUSEMOVE:
+		{
+			if (!bookmarks.mouse_over_bookmarkslist)
+			{
+				bookmarks.mouse_over_bookmarkslist = true;
+				bookmarks.list_tme.hwndTrack = hWnd;
+				TrackMouseEvent(&bookmarks.list_tme);
+			}
+			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+		}
+		case WM_MOUSELEAVE:
+		{
+			bookmarks.mouse_over_bookmarkslist = false;
+			bookmarks.MouseMove(-1, -1);
+			break;
+		}
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
+	}
+	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	extern BOOKMARKS bookmarks;
+	switch(msg)
+	{
+		case WM_MOUSEMOVE:
+		{
+			if (!bookmarks.mouse_over_bitmap)
+			{
+				bookmarks.mouse_over_bitmap = true;
+				bookmarks.tme.hwndTrack = hWnd;
+				TrackMouseEvent(&bookmarks.tme);
+			}
+			bookmarks.MouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			break;
+		}
+		case WM_MOUSELEAVE:
+		{
+			bookmarks.mouse_over_bitmap = false;
+			bookmarks.MouseMove(-1, -1);
+			break;
+		}
+		case WM_SYSKEYDOWN:
+		{
+			if (wParam == VK_F10)
+				return 0;
+			break;
+		}
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hWnd, &ps);
+			bookmarks.PaintBranchesBitmap(hdc);
+			EndPaint(hWnd, &ps);
+			return 0;
+		}
+	}
+	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
+}
+// ----------------------------------------------------------------------------------------
+LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	extern BOOKMARKS bookmarks;
 	switch(message)
 	{
 		case WM_CREATE:
 		{
 			// create static bitmap placeholder
-			scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
+			bookmarks.scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
 			return 0;
 		}
 		default:

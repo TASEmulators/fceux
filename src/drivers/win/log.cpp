@@ -66,7 +66,7 @@ void RedoText(void)
 	}
 
 	SetDlgItemText(logwin, LBL_LOG_TEXT, textbuf);
-	SendDlgItemMessage(logwin, LBL_LOG_TEXT, EM_LINESCROLL, 0, 200);
+	SendDlgItemMessage(logwin, LBL_LOG_TEXT, EM_LINESCROLL, 0, MAXIMUM_NUMBER_OF_LOGS);
 }
 
 /**

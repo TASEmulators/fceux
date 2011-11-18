@@ -60,7 +60,6 @@
 #include "tracer.h"
 #include "cdlogger.h"
 #include "throttle.h"
-#include "tasedit.h"
 #include "replay.h"
 #include "palette.h" //For the SetPalette function
 #include "main.h"
@@ -857,6 +856,7 @@ void _updateWindow()
 	//UpdateLogWindow();	//adelikat: Moved to FCEUI_Emulate
 	UpdateMemWatch();
 	NTViewDoBlit(0);
+	extern void UpdateTasEdit();
 	UpdateTasEdit();
 }
 

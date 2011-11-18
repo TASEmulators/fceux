@@ -426,6 +426,7 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
@@ -739,6 +740,7 @@
     <ClInclude Include="..\src\drivers\win\state.h" />
     <ClInclude Include="..\src\drivers\win\tasedit.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
     <ClInclude Include="..\src\drivers\win\texthook.h" />
     <ClInclude Include="..\src\drivers\win\throttle.h" />

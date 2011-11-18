@@ -5,6 +5,12 @@
 
 #define GREENZONE_ID_LEN 10
 
+// greenzone cleaning masks
+#define EVERY16TH 0xFFFFFFF0
+#define EVERY8TH 0xFFFFFFF8
+#define EVERY4TH 0xFFFFFFFC
+#define EVERY2ND 0xFFFFFFFE
+
 class GREENZONE
 {
 public:

@@ -36,10 +36,11 @@ public:
 	int GetPauseFrame();
 	void SetProgressbar(int a, int b);
 
-	int pauseframe;
 
 private:
 	bool JumpToFrame(int index);
+
+	int pause_frame;
 
 	int lastCursor;		// for currentCursor we use external variable currFrameCounter
 	bool old_emu_paused, emu_paused;

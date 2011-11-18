@@ -135,11 +135,10 @@ public:
 	std::vector<BOOKMARK> bookmarks_array;
 
 	// not saved vars
-	bool mouse_over_bitmap, mouse_over_bookmarkslist;
-	TRACKMOUSEEVENT tme, list_tme;
 	int branch_row_top;
 	int branch_row_left;
 	int branch_row_height;
+	bool mouse_over_bitmap, mouse_over_bookmarkslist;
 	// screenshot bmp stuff
 	LPBITMAPINFO scr_bmi;
 	HBITMAP scr_bmp;
@@ -148,6 +147,10 @@ public:
 	int scr_bmp_y;
 	int scr_bmp_phase;
 	int screenshot_currently_shown;
+	HWND hwndScrBmp, scr_bmp_pic;
+	WNDCLASSEX wincl;
+	BLENDFUNCTION blend;
+	TRACKMOUSEEVENT tme, list_tme;
 
 private:
 	void SetCurrentPosTime();
@@ -178,6 +181,9 @@ private:
 	int fireball_size;
 	int mouse_x, mouse_y;
 	int item_under_mouse;
+
+	HWND hwndBookmarksList, hwndBookmarks;
+	HWND hwndBranchesBitmap;
 
 	// GDI stuff
 	HFONT hBookmarksFont;
