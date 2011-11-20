@@ -1,5 +1,7 @@
 //Specification file for Playback class
 
+#define PROGRESSBAR_WIDTH 200
+
 #define PAUSEFRAME_BLINKING_PERIOD_SEEKING 100
 #define PAUSEFRAME_BLINKING_PERIOD_PAUSED 250
 
@@ -36,6 +38,7 @@ public:
 	int GetPauseFrame();
 	void SetProgressbar(int a, int b);
 
+	HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 
 private:
 	bool JumpToFrame(int index);

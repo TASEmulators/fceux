@@ -1,15 +1,15 @@
 //Implementation file of TASEDIT_LIST class
 
 #include "taseditproj.h"
-//#include "../tasedit.h"
 #include "utils/xstring.h"
 
-extern HWND hwndTasEdit, hwndRB_Rec3P, hwndRB_Rec4P;
+extern HWND hwndTasEdit;
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
 extern void ColumnSet(int column);
 
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
+extern RECORDER recorder;
 extern GREENZONE greenzone;
 extern INPUT_HISTORY history;
 extern MARKERS markers;
@@ -20,7 +20,6 @@ extern bool TASEdit_show_markers;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_jump_to_undo;
-
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -201,8 +200,8 @@ void TASEDIT_LIST::AddFourscore()
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
 	// enable radiobuttons for 3P/4P multitracking
-	EnableWindow(hwndRB_Rec3P, true);
-	EnableWindow(hwndRB_Rec4P, true);
+	EnableWindow(recorder.hwndRB_Rec3P, true);
+	EnableWindow(recorder.hwndRB_Rec4P, true);
 	// change eoptions
 	FCEUI_SetInputFourscore(true);
 }
@@ -214,8 +213,8 @@ void TASEDIT_LIST::RemoveFourscore()
 		ListView_DeleteColumn (hwndList, i);
 	}
 	// disable radiobuttons for 3P/4P multitracking
-	EnableWindow(hwndRB_Rec3P, false);
-	EnableWindow(hwndRB_Rec4P, false);
+	EnableWindow(recorder.hwndRB_Rec3P, false);
+	EnableWindow(recorder.hwndRB_Rec4P, false);
 	// change eoptions
 	FCEUI_SetInputFourscore(false);
 }

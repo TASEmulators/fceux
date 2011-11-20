@@ -1,12 +1,12 @@
 //Implementation file of Input History class (Undo feature)
 
 #include "taseditproj.h"
-#include "../tasedit.h"		// just for mainlist functions, later this should be deleted
 
 extern HWND hwndTasEdit;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_enable_hot_changes;
 extern bool TASEdit_branch_full_movie;
+extern bool TASEdit_combine_consecutive_rec;
 
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndHistoryList_oldWndProc;
@@ -234,6 +234,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
 	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.mod_type = mod_type;
 	if (mod_type == MODTYPE_MARKER_SET || mod_type == MODTYPE_MARKER_UNSET)
 	{
 		// special case: changed markers, but input didn't change
@@ -290,17 +291,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 					inp.jump_frame = start;
 					break;
 				}
-				case MODTYPE_RECORD:
-				{
-					inp.jump_frame = start;
-					// also add info which joypads were affected
-					int num = (inp.input_type + 1) * 2;		// hacky, only for distingushing between normal2p and fourscore
-					for (int i = 0; i < num; ++i)
-					{
-						if (inp.checkJoypadDiff(input_snapshots[real_pos], first_changes, i))
-							strcat(inp.description, joypadCaptions[i]);
-					}
-				}
 			}
 			// add upper and lower frame to description
 			char framenum[11];
@@ -333,7 +323,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 					case MODTYPE_CLEAR:
 					case MODTYPE_CUT:
 					case MODTYPE_PASTE:
-					case MODTYPE_RECORD:
 						inp.inheritHotChanges(&input_snapshots[real_pos]);
 						inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
 						break;
@@ -359,6 +348,7 @@ void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 	INPUT_SNAPSHOT inp;
 	inp.init(currMovieData, TASEdit_enable_hot_changes);
 	// fill description: modification type + time of the Branch
+	inp.mod_type = mod_type;
 	strcat(inp.description, modCaptions[mod_type]);
 	strcat(inp.description, bookmarks.bookmarks_array[slot].snapshot.description);
 	inp.jump_frame = first_change;
@@ -383,6 +373,75 @@ void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 		}
 	}
 	AddInputSnapshotToHistory(inp);
+}
+void INPUT_HISTORY::RegisterRecording(int frame_of_change)
+{
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	INPUT_SNAPSHOT inp;
+	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.fillJoypadsDiff(input_snapshots[real_pos], frame_of_change);
+	inp.mod_type = MODTYPE_RECORD;
+	strcat(inp.description, modCaptions[MODTYPE_RECORD]);
+	char framenum[11];
+	// check if current snapshot is also Recording and maybe it is consecutive recording
+	if (TASEdit_combine_consecutive_rec && input_snapshots[real_pos].mod_type == MODTYPE_RECORD && input_snapshots[real_pos].rec_end_frame+1 == frame_of_change && input_snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)
+	{
+		// clone this snapshot and continue chain of recorded frames
+		inp.jump_frame = input_snapshots[real_pos].jump_frame;
+		inp.rec_end_frame = frame_of_change;
+		// add info which joypads were affected
+		int num = (inp.input_type + 1) * 2;	// = joypads_per_frame
+		uint32 current_mask = 1;
+		for (int i = 0; i < num; ++i)
+		{
+			if ((inp.rec_joypad_diff_bits & current_mask))
+				strcat(inp.description, joypadCaptions[i]);
+			current_mask <<= 1;
+		}
+		// add upper and lower frame to description
+		_itoa(inp.jump_frame, framenum, 10);
+		strcat(inp.description, " ");
+		strcat(inp.description, framenum);
+		_itoa(frame_of_change, framenum, 10);
+		strcat(inp.description, "-");
+		strcat(inp.description, framenum);
+		// set hotchanges
+		if (TASEdit_enable_hot_changes)
+		{
+			inp.copyHotChanges(&input_snapshots[real_pos]);
+			inp.fillHotChanges(input_snapshots[real_pos], frame_of_change, frame_of_change);
+		}
+		// replace current snapshot with this cloned snapshot and truncate history here
+		input_snapshots[real_pos] = inp;
+		history_total_items = history_cursor_pos+1;
+		UpdateHistoryList();
+		RedrawHistoryList();
+	} else
+	{
+		// not consecutive - add new snapshot to history
+		inp.jump_frame = inp.rec_end_frame = frame_of_change;
+		// add info which joypads were affected
+		int num = (inp.input_type + 1) * 2;	// = joypads_per_frame
+		uint32 current_mask = 1;
+		for (int i = 0; i < num; ++i)
+		{
+			if ((inp.rec_joypad_diff_bits & current_mask))
+				strcat(inp.description, joypadCaptions[i]);
+			current_mask <<= 1;
+		}
+		// add upper frame to description
+		_itoa(frame_of_change, framenum, 10);
+		strcat(inp.description, " ");
+		strcat(inp.description, framenum);
+		// set hotchanges
+		if (TASEdit_enable_hot_changes)
+		{
+			inp.inheritHotChanges(&input_snapshots[real_pos]);
+			inp.fillHotChanges(input_snapshots[real_pos], frame_of_change, frame_of_change);
+		}
+		AddInputSnapshotToHistory(inp);
+	}
+	bookmarks.ChangesMadeSinceBranch();
 }
 
 void INPUT_HISTORY::save(EMUFILE *os)

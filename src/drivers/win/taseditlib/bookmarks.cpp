@@ -1,8 +1,8 @@
 //Implementation file of Bookmarks class
 
 #include "taseditproj.h"
-#include "zlib.h"
 #include "utils/xstring.h"
+#include "zlib.h"
 
 #pragma comment(lib, "msimg32.lib")
 
@@ -197,7 +197,9 @@ void BOOKMARKS::init()
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
 
 	RedrawBookmarksCaption();
+	next_animation_time = 0;
 	update();
+	
 }
 void BOOKMARKS::reset()
 {
@@ -569,7 +571,7 @@ void BOOKMARKS::save(EMUFILE *os)
 	// write cloud time
 	os->fwrite(cloud_time, TIME_DESC_LENGTH);
 	// write current branch and flag of changes since it
-	write8le((uint8)current_branch, os);
+	write32le(current_branch, os);
 	if (changes_since_current_branch)
 		write8le((uint8)1, os);
 	else
@@ -593,8 +595,7 @@ bool BOOKMARKS::load(EMUFILE *is)
 	if ((int)is->fread(cloud_time, TIME_DESC_LENGTH) < TIME_DESC_LENGTH) return true;
 	// read current branch and flag of changes since it
 	uint8 tmp;
-	if (!read8le(&tmp, is)) return true;
-	current_branch = *(int8*)(&tmp);
+	if (!read32le(&current_branch, is)) return true;
 	if (!read8le(&tmp, is)) return true;
 	changes_since_current_branch = (tmp != 0);
 	// read current_position time

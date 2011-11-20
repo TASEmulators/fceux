@@ -1,8 +1,6 @@
 //Implementation file of TASEdit Project class
 
-#include "../main.h"
 #include "taseditproj.h"
-#include "../tasedit.h"
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
@@ -13,16 +11,17 @@ extern TASEDIT_LIST tasedit_list;
 extern TASEDIT_SELECTION selection;
 
 extern void FCEU_printf(char *format, ...);
+extern bool SaveProject();
+extern void RedrawWindowCaption();
+
 extern int TASEdit_autosave_period;
 
-TASEDIT_PROJECT::TASEDIT_PROJECT()	//Non parameterized constructor, loads project with default values
+TASEDIT_PROJECT::TASEDIT_PROJECT()
 {
-
 }
 
 void TASEDIT_PROJECT::init()
 {
-
 	// init new project
 	projectName="";
 	fm2FileName="";

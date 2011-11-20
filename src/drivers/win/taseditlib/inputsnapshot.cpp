@@ -3,7 +3,7 @@
 #include "taseditproj.h"
 #include "zlib.h"
 
-const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// 16bits for normal joypads, 32bits for fourscore
+const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// so 16bits for normal joypads, 32bits for fourscore
 
 extern void FCEU_printf(char *format, ...);
 
@@ -150,6 +150,9 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 	write8le(input_type, os);
 	if (coherent) write8le(1, os); else write8le((uint8)0, os);
 	write32le(jump_frame, os);
+	write32le(rec_end_frame, os);
+	write32le(rec_joypad_diff_bits, os);
+	write32le(mod_type, os);
 	if (has_hot_changes) write8le((uint8)1, os); else write8le((uint8)0, os);
 	// write description
 	int len = strlen(description);
@@ -185,13 +188,16 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (!read8le(&tmp, is)) return true;
 	coherent = (tmp != 0);
 	if (!read32le(&jump_frame, is)) return true;
+	if (!read32le(&rec_end_frame, is)) return true;
+	if (!read32le(&rec_joypad_diff_bits, is)) return true;
+	if (!read32le(&mod_type, is)) return true;
 	if (!read8le(&tmp, is)) return true;
 	has_hot_changes = (tmp != 0);
 	// read description
 	if (!read8le(&tmp, is)) return true;
 	if (tmp >= SNAPSHOT_DESC_MAX_LENGTH) return true;
 	if (is->fread(&description[0], tmp) != tmp) return true;
-	description[tmp] = 0;		// add '0' because it wasn't saved
+	description[tmp] = 0;		// add '0' because it wasn't saved in the file
 	// read data
 	already_compressed = true;
 	int comprlen;
@@ -283,26 +289,31 @@ bool INPUT_SNAPSHOT::checkDiff(INPUT_SNAPSHOT& inp)
 		return false;
 }
 
-// return true if joypads differ (this function is only used by "Record" modtype)
-bool INPUT_SNAPSHOT::checkJoypadDiff(INPUT_SNAPSHOT& inp, int frame, int joy)
+// fills map of bits judging on which joypads differ (this function is only used by "Record" modtype)
+void INPUT_SNAPSHOT::fillJoypadsDiff(INPUT_SNAPSHOT& inp, int frame)
 {
+	rec_joypad_diff_bits = 0;
+	uint32 current_mask = 1;
 	switch(input_type)
 	{
 		case FOURSCORE:
 		case NORMAL_2JOYPADS:
 		{
 			int pos = frame * bytes_per_frame[input_type];
-			if (pos < (inp.size * bytes_per_frame[input_type]))
+			for (int i = 0; i < bytes_per_frame[input_type]; ++i)		// this should be actually joypads_per_frame[]
 			{
-				if (joysticks[pos+joy] != inp.joysticks[pos+joy]) return true;
-			} else
-			{
-				if (joysticks[pos+joy]) return true;
+				if (pos < (inp.size * bytes_per_frame[input_type]))
+				{
+					if (joysticks[pos+i] != inp.joysticks[pos+i]) rec_joypad_diff_bits |= current_mask;
+				} else
+				{
+					if (joysticks[pos+i]) rec_joypad_diff_bits |= current_mask;
+				}
+				current_mask <<= 1;
 			}
 			break;
 		}
 	}
-	return false;
 }
 
 // return true if any difference in markers_array is found, comparing two snapshots
@@ -428,6 +439,21 @@ int INPUT_SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 	if (size != md.getNumRecords()) return end;
 
 	return -1;	// no changes were found
+}
+
+int INPUT_SNAPSHOT::GetJoystickInfo(int frame, int joy)
+{
+	if (frame < 0 || frame >= size) return 0;
+	switch(input_type)
+	{
+		case FOURSCORE:
+		case NORMAL_2JOYPADS:
+		{
+			return joysticks[frame * bytes_per_frame[input_type] + joy];
+			break;
+		}
+	}
+	return 0;
 }
 // --------------------------------------------------------
 void INPUT_SNAPSHOT::copyHotChanges(INPUT_SNAPSHOT* source_of_hotchanges, int limit_frame_of_source)

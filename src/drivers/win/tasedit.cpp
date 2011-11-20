@@ -16,10 +16,22 @@
 
 using namespace std;
 
-int old_multitrack_recording_joypad, multitrack_recording_joypad;
-bool old_movie_readonly;
+HWND hwndTasEdit = 0;
+HMENU hmenu, hrmenu;
+
 bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
+
+// all Taseditor functional modules
+TASEDIT_PROJECT project;
+INPUT_HISTORY history;
+PLAYBACK playback;
+RECORDER recorder;
+GREENZONE greenzone;
+MARKERS markers;
+BOOKMARKS bookmarks;
+TASEDIT_LIST tasedit_list;
+TASEDIT_SELECTION selection;
 
 // saved FCEU config
 int saved_eoptions;
@@ -28,13 +40,16 @@ extern int EnableAutosave;
 
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
 
-// vars saved in cfg file
+// vars saved in cfg file (need dedicated storage class?)
 int TasEdit_wndx, TasEdit_wndy;
 bool TASEdit_follow_playback = true;
 bool TASEdit_show_lag_frames = true;
 bool TASEdit_show_markers = true;
 bool TASEdit_show_branch_screenshots = true;
 bool TASEdit_bind_markers = true;
+bool TASEdit_use_1p_rec = true;
+bool TASEdit_combine_consecutive_rec = true;
+int TASEdit_superimpose = BST_UNCHECKED;
 bool TASEdit_branch_full_movie = true;
 bool TASEdit_branch_only_when_rec = false;
 bool TASEdit_view_branches_tree = false;
@@ -50,27 +65,8 @@ bool TASEdit_jump_to_undo = true;
 // resources
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-char windowCaptions[6][30] = {	"TAS Editor",
-								"TAS Editor (Recording All)",
-								"TAS Editor (Recording 1P)",
-								"TAS Editor (Recording 2P)",
-								"TAS Editor (Recording 3P)",
-								"TAS Editor (Recording 4P)"};
-
-HWND hwndTasEdit = 0;
-HMENU hmenu, hrmenu;
-HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
-HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
-
-// all Taseditor functional modules
-TASEDIT_PROJECT project;
-INPUT_HISTORY history;
-PLAYBACK playback;
-GREENZONE greenzone;
-MARKERS markers;
-BOOKMARKS bookmarks;
-TASEDIT_LIST tasedit_list;
-TASEDIT_SELECTION selection;
+char windowCaption[] = "TAS Editor";
+extern char windowCaptions[5][30];
 
 // enterframe function
 void UpdateTasEdit()
@@ -81,46 +77,30 @@ void UpdateTasEdit()
 	markers.update();
 	greenzone.update();
 	playback.update();
+	recorder.update();
 	bookmarks.update();
 	selection.update();
 	history.update();
 	project.update();
-
-	// update window caption
-	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
-		RedrawWindowCaption();
-
-	// update Bookmarks/Branches groupbox caption
-	if (TASEdit_branch_only_when_rec && old_movie_readonly != movie_readonly)
-		bookmarks.RedrawBookmarksCaption();
-
-	// update recording radio buttons if user used hotkey to switch R/W
-	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
-	{
-		UncheckRecordingRadioButtons();
-		RecheckRecordingRadioButtons();
-	}
-
 }
 
 void RedrawWindowCaption()
 {
-	char windowCaption[300];	// 260 + 30 + 1 + ...
-	if (movie_readonly)
-		strcpy(windowCaption, windowCaptions[0]);
-	else
-		strcpy(windowCaption, windowCaptions[multitrack_recording_joypad + 1]);
+	char windowCapt[300];
+	strcpy(windowCapt, windowCaption);
+	if (!movie_readonly)
+		strcat(windowCapt, windowCaptions[recorder.multitrack_recording_joypad]);
 	// add project name
 	std::string projectname = project.GetProjectName();
 	if (!projectname.empty())
 	{
-		strcat(windowCaption, " - ");
-		strcat(windowCaption, projectname.c_str());
+		strcat(windowCapt, " - ");
+		strcat(windowCapt, projectname.c_str());
 	}
 	// and * if project has unsaved changes
 	if (project.GetProjectChanged())
-		strcat(windowCaption, "*");
-	SetWindowText(hwndTasEdit, windowCaption);
+		strcat(windowCapt, "*");
+	SetWindowText(hwndTasEdit, windowCapt);
 }
 void RedrawTasedit()
 {
@@ -171,11 +151,6 @@ void RightClick(LPNMITEMACTIVATE info)
 
 	if (selection.CheckFrameSelected(index))
 		RightClickMenu(info);
-}
-
-void InputChangedRec()
-{
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_RECORD, currFrameCounter, currFrameCounter));
 }
 
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
@@ -648,45 +623,6 @@ bool Paste()
 	return result;
 }
 
-void UncheckRecordingRadioButtons()
-{
-	Button_SetCheck(hwndRB_RecOff, BST_UNCHECKED);
-	Button_SetCheck(hwndRB_RecAll, BST_UNCHECKED);
-	Button_SetCheck(hwndRB_Rec1P, BST_UNCHECKED);
-	Button_SetCheck(hwndRB_Rec2P, BST_UNCHECKED);
-	Button_SetCheck(hwndRB_Rec3P, BST_UNCHECKED);
-	Button_SetCheck(hwndRB_Rec4P, BST_UNCHECKED);
-}
-void RecheckRecordingRadioButtons()
-{
-	old_movie_readonly = movie_readonly;
-	old_multitrack_recording_joypad = multitrack_recording_joypad;
-	if (movie_readonly)
-	{
-		Button_SetCheck(hwndRB_RecOff, BST_CHECKED);
-	} else
-	{
-		switch(multitrack_recording_joypad)
-		{
-		case MULTITRACK_RECORDING_ALL:
-			Button_SetCheck(hwndRB_RecAll, BST_CHECKED);
-			break;
-		case MULTITRACK_RECORDING_1P:
-			Button_SetCheck(hwndRB_Rec1P, BST_CHECKED);
-			break;
-		case MULTITRACK_RECORDING_2P:
-			Button_SetCheck(hwndRB_Rec2P, BST_CHECKED);
-			break;
-		case MULTITRACK_RECORDING_3P:
-			Button_SetCheck(hwndRB_Rec3P, BST_CHECKED);
-			break;
-		case MULTITRACK_RECORDING_4P:
-			Button_SetCheck(hwndRB_Rec4P, BST_CHECKED);
-			break;
-		}
-	}
-}
-
 void OpenProject()
 {
 	if (!AskSaveProject()) return;
@@ -722,11 +658,7 @@ void OpenProject()
 		std::string thisfm2name = name;
 		thisfm2name.append(".fm2");
 		project.SetFM2Name(thisfm2name);
-		// switch to read-only mode, but first must uncheck radiobuttons explicitly
-		if (!movie_readonly) FCEUI_MovieToggleReadOnly();
-		multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
-		UncheckRecordingRadioButtons();
-		RecheckRecordingRadioButtons();
+		recorder.reset();
 		playback.reset();
 		// remember to update fourscore status
 		bool last_fourscore = currMovieData.fourscore;
@@ -799,7 +731,7 @@ bool AskSaveProject()
 	// ask saving project
 	if (changes_found)
 	{
-		int answer = MessageBox(hwndTasEdit, "Save Project changes?", "TAS Edit", MB_YESNOCANCEL);
+		int answer = MessageBox(hwndTasEdit, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
 		if(answer == IDYES)
 			return SaveProject();
 		return (answer != IDCANCEL);
@@ -849,19 +781,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
 			SetWindowPos(hwndDlg, 0, TasEdit_wndx, TasEdit_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			// save references to dialog items
-			hwndProgressbar = GetDlgItem(hwndDlg, IDC_PROGRESS1);
-			SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
-			hwndRewind = GetDlgItem(hwndDlg, TASEDIT_REWIND);
-			hwndForward = GetDlgItem(hwndDlg, TASEDIT_FORWARD);
-			hwndRewindFull = GetDlgItem(hwndDlg, TASEDIT_REWIND_FULL);
-			hwndForwardFull = GetDlgItem(hwndDlg, TASEDIT_FORWARD_FULL);
-			hwndRB_RecOff = GetDlgItem(hwndDlg, IDC_RADIO1);
-			hwndRB_RecAll = GetDlgItem(hwndDlg, IDC_RADIO2);
-			hwndRB_Rec1P = GetDlgItem(hwndDlg, IDC_RADIO3);
-			hwndRB_Rec2P = GetDlgItem(hwndDlg, IDC_RADIO4);
-			hwndRB_Rec3P = GetDlgItem(hwndDlg, IDC_RADIO5);
-			hwndRB_Rec4P = GetDlgItem(hwndDlg, IDC_RADIO6);
 			break; 
 		case WM_MOVE:
 			{
@@ -1159,6 +1078,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				TASEdit_bind_markers ^= 1;
 				CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 				break;
+			case ID_CONFIG_USE1PFORRECORDING:
+				//switch "Use 1P keys for single Recordings" flag
+				TASEdit_use_1p_rec ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+				break;
+			case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
+				//switch "Combine consecutive Recordings" flag
+				TASEdit_combine_consecutive_rec ^= 1;
+				CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
+				break;
 			case ID_CONFIG_MUTETURBO:
 				muteTurbo ^= 1;
 				CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
@@ -1179,27 +1108,36 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case IDC_RADIO2:
 				// switch to read+write for all, no need to recheck radiobuttons
 				if (movie_readonly) FCEUI_MovieToggleReadOnly();
-				multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
+				recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 				break;
 			case IDC_RADIO3:
 				// switch to read+write for 1P, no need to recheck radiobuttons
 				if (movie_readonly) FCEUI_MovieToggleReadOnly();
-				multitrack_recording_joypad = MULTITRACK_RECORDING_1P;
+				recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_1P;
 				break;
 			case IDC_RADIO4:
 				// switch to read+write for 2P, no need to recheck radiobuttons
 				if (movie_readonly) FCEUI_MovieToggleReadOnly();
-				multitrack_recording_joypad = MULTITRACK_RECORDING_2P;
+				recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_2P;
 				break;
 			case IDC_RADIO5:
 				// switch to read+write for 3P, no need to recheck radiobuttons
 				if (movie_readonly) FCEUI_MovieToggleReadOnly();
-				multitrack_recording_joypad = MULTITRACK_RECORDING_3P;
+				recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_3P;
 				break;
 			case IDC_RADIO6:
 				// switch to read+write for 4P, no need to recheck radiobuttons
 				if (movie_readonly) FCEUI_MovieToggleReadOnly();
-				multitrack_recording_joypad = MULTITRACK_RECORDING_4P;
+				recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_4P;
+				break;
+			case IDC_SUPERIMPOSE:
+				// 3 states of "Superimpose" checkbox
+				if (TASEdit_superimpose == BST_UNCHECKED)
+					TASEdit_superimpose = BST_CHECKED;
+				else if (TASEdit_superimpose == BST_CHECKED)
+					TASEdit_superimpose = BST_INDETERMINATE;
+				else TASEdit_superimpose = BST_UNCHECKED;
+				CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
 				break;
 			case ACCEL_CTRL_A:
 			case ID_EDIT_SELECTMIDMARKERS:
@@ -1301,13 +1239,16 @@ void EnterTasEdit()
 		CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, TASEdit_show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
+		CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
+		CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
 
 		SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		// init modules
@@ -1319,20 +1260,16 @@ void EnterTasEdit()
 			FCEUI_StopMovie();
 			CreateCleanMovie();
 			playback.StartFromZero();
-		}
-		else
+		} else
 		{
 			//use current movie to create a new project
 			FCEUI_StopMovie();
 			greenzone.TryDumpIncremental(lagFlag != 0);
 		}
-		// always start work from read-only mode, ready to switch to MULTITRACK_RECORDING_ALL
-		movie_readonly = true;
-		multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
-		RecheckRecordingRadioButtons();
 		// switch to tasedit mode
 		movieMode = MOVIEMODE_TASEDIT;
 		// init variables
+		recorder.init();
 		tasedit_list.init();
 		markers.init();
 		project.init();

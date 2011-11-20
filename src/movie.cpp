@@ -41,8 +41,9 @@
 extern void AddRecentMovieFile(const char *filename);
 
 #include "./drivers/win/taseditlib/playback.h"
-extern void InputChangedRec();
+#include "./drivers/win/taseditlib/recorder.h"
 extern PLAYBACK playback;
+extern RECORDER recorder;
 #endif
 
 using namespace std;
@@ -994,21 +995,20 @@ void FCEUMOV_AddInputState()
 		if(movie_readonly || turbo || pauseframe > currFrameCounter)
 		{
 			// do not record buttons
-			//reset if necessary
-			if(mr->command_reset()) ResetNES();
+			if(mr->command_reset())
+				ResetNES();
+			if(mr->command_fds_insert())
+				FCEU_FDSInsert();
+			if(mr->command_fds_select())
+				FCEU_FDSSelect();
 			joyports[0].load(mr);
 			joyports[1].load(mr);
-		}
-		else
+		} else
 		{
 			// record buttons
-			// TODO: multitracking
-
 			joyports[0].log(mr);
 			joyports[1].log(mr);
-			mr->commands = 0;
-
-			InputChangedRec();
+			recorder.InputChangedRec();
 		}
 	} else
 	#endif

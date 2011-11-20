@@ -1,8 +1,6 @@
 //Implementation file of TASEDIT_SELECTION class
 
-#include "../common.h"
 #include "taseditproj.h"
-//#include "../tasedit.h"
 
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 

@@ -1,14 +1,12 @@
 //Implementation file of Markers class
 
 #include "taseditproj.h"
-//#include "../tasedit.h"
 #include "zlib.h"
 
 char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
 
 MARKERS::MARKERS()
 {
-
 }
 
 void MARKERS::init()

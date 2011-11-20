@@ -1,18 +1,21 @@
 //Specification file for the TASEdit Project class
-
 #include <set>
 typedef std::set<int> SelectionFrames;
 
+#include <time.h>
 #include "movie.h"
 #include "../common.h"
 #include "inputsnapshot.h"
 #include "inputhistory.h"
 #include "playback.h"
+#include "recorder.h"
 #include "greenzone.h"
 #include "markers.h"
 #include "bookmarks.h"
 #include "tasedit_list.h"
 #include "tasedit_sel.h"
+
+#define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds
 
 class TASEDIT_PROJECT
 {

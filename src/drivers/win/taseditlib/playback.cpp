@@ -1,14 +1,15 @@
 //Implementation file of Playback class
 
 #include "taseditproj.h"
-#include "../tasedit.h"
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
 #endif
 
-extern HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
+extern HWND hwndTasEdit;
 extern void FCEU_printf(char *format, ...);
+extern void RedrawListAndBookmarks();
+extern void RedrawRowAndBookmark(int index);
 extern bool turbo;
 
 extern MARKERS markers;
@@ -23,6 +24,12 @@ PLAYBACK::PLAYBACK()
 
 void PLAYBACK::init()
 {
+	hwndProgressbar = GetDlgItem(hwndTasEdit, IDC_PROGRESS1);
+	SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
+	hwndRewind = GetDlgItem(hwndTasEdit, TASEDIT_REWIND);
+	hwndForward = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD);
+	hwndRewindFull = GetDlgItem(hwndTasEdit, TASEDIT_REWIND_FULL);
+	hwndForwardFull = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD_FULL);
 
 	reset();
 }
@@ -168,7 +175,6 @@ void PLAYBACK::ToggleEmulationPause()
 void PLAYBACK::PauseEmulation()
 {
 	FCEUI_SetEmulationPaused(1);
-	//RedrawList();	// to show some "pale" greenzone
 	// make some additional stuff
 }
 void PLAYBACK::UnpauseEmulation()
@@ -190,16 +196,17 @@ void PLAYBACK::SeekingStop()
 	turbo = false;
 	PauseEmulation();
 	SetProgressbar(1, 1);
-	//RedrawList();	// to show some "pale" greenzone
 }
 
 void PLAYBACK::RewindFrame()
 {
+	if (pause_frame && !emu_paused) return;
 	if (currFrameCounter > 0) jump(currFrameCounter-1);
 	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
 {
+	if (pause_frame && !emu_paused) return;
 	jump(currFrameCounter+1);
 	if (!pause_frame) PauseEmulation();
 	turbo = false;

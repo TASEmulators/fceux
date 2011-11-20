@@ -1,7 +1,6 @@
 //Implementation file of Greenzone class
 
 #include "taseditproj.h"
-#include "../tasedit.h"
 #include "state.h"
 #include "zlib.h"
 
@@ -11,12 +10,12 @@ extern int TASEdit_greenzone_capacity;
 extern bool TASEdit_restore_position;
 
 extern void FCEU_printf(char *format, ...);
+extern void RedrawListAndBookmarks();
 
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 
 GREENZONE::GREENZONE()
 {
-
 }
 
 void GREENZONE::init()
@@ -337,7 +336,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 	// redraw list even if greenzone didn't change
 	RedrawListAndBookmarks();
 }
-// This version doesn't restore playback, may be used only by Branching functions!
+// This version doesn't restore playback, may be used only by Branching and Recording functions!
 void GREENZONE::Invalidate(int after)
 {
 	if (after >= 0)

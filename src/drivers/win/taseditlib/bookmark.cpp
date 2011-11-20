@@ -1,9 +1,6 @@
 //Implementation file of Bookmark class
 
-#include "movie.h"
-#include "../common.h"
 #include "taseditproj.h"
-//#include "../tasedit.h"
 #include "zlib.h"
 
 extern GREENZONE greenzone;
@@ -17,7 +14,6 @@ extern uint8 *XBackBuf;
 
 BOOKMARK::BOOKMARK()
 {
-
 }
 
 void BOOKMARK::init()
@@ -70,7 +66,7 @@ void BOOKMARK::save(EMUFILE *os)
 	{
 		write8le(1, os);
 		// write parent_branch
-		write8le((uint8)parent_branch, os);
+		write32le(parent_branch, os);
 		// write snapshot
 		snapshot.save(os);
 		// write savestate
@@ -92,17 +88,16 @@ bool BOOKMARK::load(EMUFILE *is)
 	if (not_empty)
 	{
 		// read parent_branch
-		if (!read8le(&tmp, is)) return true;
-		parent_branch = *(int8*)(&tmp);
+		if (!read32le(&parent_branch, is)) return true;
 		// read snapshot
 		if (snapshot.load(is)) return true;
 		// read savestate
 		int size;
-		if (!read32le((uint32 *)&size, is)) return true;
+		if (!read32le(&size, is)) return true;
 		savestate.resize(size);
 		if ((int)is->fread(&savestate[0], size) < size) return true;
 		// read saved_screenshot
-		if (!read32le((uint32 *)&size, is)) return true;
+		if (!read32le(&size, is)) return true;
 		saved_screenshot.resize(size);
 		if ((int)is->fread(&saved_screenshot[0], size) < size) return true;
 	}

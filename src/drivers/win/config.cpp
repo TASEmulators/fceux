@@ -73,11 +73,14 @@ extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_markers;
 extern bool TASEdit_show_branch_screenshots;
 extern bool TASEdit_bind_markers;
+extern bool TASEdit_use_1p_rec;
+extern bool TASEdit_combine_consecutive_rec;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
 extern bool TASEdit_branch_scr_hud;
 extern bool TASEdit_restore_position;
+extern int TASEdit_superimpose;
 extern bool TASEdit_enable_hot_changes;
 extern int TASEdit_greenzone_capacity;
 extern int TasEdit_undo_levels;
@@ -305,11 +308,14 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_markers),
 	AC(TASEdit_show_branch_screenshots),
 	AC(TASEdit_bind_markers),
+	AC(TASEdit_use_1p_rec),
+	AC(TASEdit_combine_consecutive_rec),
 	AC(TASEdit_branch_full_movie),
 	AC(TASEdit_branch_only_when_rec),
 	AC(TASEdit_view_branches_tree),
 	AC(TASEdit_branch_scr_hud),
 	AC(TASEdit_restore_position),
+	AC(TASEdit_superimpose),
 	AC(TASEdit_enable_hot_changes),
 	AC(TASEdit_greenzone_capacity),
 	AC(TasEdit_undo_levels),

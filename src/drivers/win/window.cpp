@@ -2835,7 +2835,7 @@ void UpdateMenuHotkeys()
 
 	//Open TAS Edit
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDIT]);
-	combined = "&TAS Edit...\t" + combo;
+	combined = "&TAS Editor...\t" + combo;
 	ChangeMenuItemText(MENU_TASEDIT, combined);
 
 	//-------------------------------Debug--------------------------------------

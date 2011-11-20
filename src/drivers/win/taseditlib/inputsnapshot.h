@@ -1,7 +1,5 @@
 //Specification file for Input Snapshot class
 
-#include <time.h>
-
 #define HOTCHANGE_BYTES_PER_JOY 4
 #define SNAPSHOT_DESC_MAX_LENGTH 50
 
@@ -24,7 +22,7 @@ public:
 	bool skipLoad(EMUFILE *is);
 
 	bool checkDiff(INPUT_SNAPSHOT& inp);
-	bool checkJoypadDiff(INPUT_SNAPSHOT& inp, int frame, int joy);
+	void fillJoypadsDiff(INPUT_SNAPSHOT& inp, int frame);
 
 	bool checkMarkersDiff(INPUT_SNAPSHOT& inp);
 	bool checkMarkersDiff();
@@ -32,6 +30,8 @@ public:
 
 	int findFirstChange(INPUT_SNAPSHOT& inp, int start = 0, int end = -1);
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
+
+	int GetJoystickInfo(int frame, int joy);
 
 	void copyHotChanges(INPUT_SNAPSHOT* source_of_hotchanges, int limit_frame_of_source = -1);
 	void inheritHotChanges(INPUT_SNAPSHOT* source_of_hotchanges);
@@ -55,6 +55,9 @@ public:
 
 	bool coherent;						// indicates whether this state was made right after previous state
 	int jump_frame;						// for jumping when making undo
+	int rec_end_frame;					// for consecutive Recordings
+	uint32 rec_joypad_diff_bits;		// for consecutive Recordings
+	int mod_type;
 	char description[SNAPSHOT_DESC_MAX_LENGTH];
 	bool has_hot_changes;
 
