@@ -1,0 +1,549 @@
+#!/usr/bin/python2
+# gfceu - Graphical launcher for FCE Ultra.
+# Designed on Ubuntu, with platfrom independence in mind.
+version = "0.6.2svn"
+# Copyright (C) 2006  Lukas Sabota <punkrockguy318@comcast.net>
+##
+"""
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+"""
+
+  # # # # # # # #
+# Python imports
+
+import sys
+import os
+import pickle
+import shutil
+from optparse import OptionParser
+from subprocess import Popen
+
+  # # # # # # # #
+# Messaging Functions
+def gfceu_message(message, use_gtk=False):
+  """
+  gqfceu_message()
+  
+  This function prints messages to the user.  This is generally used for status
+  messages.  However, it can be used for important messages as well.  If a
+  GTK message_box is requried, the use_gtk flag can be enabled
+  """
+  print 'gfceu message:  '+message
+  if use_gtk:
+    msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO,
+      buttons=gtk.BUTTONS_CLOSE)
+    msgbox.set_markup(message)
+    msgbox.run()
+    msgbox.destroy()
+
+def gfceu_error(message, code, use_gtk=True, fatal=True):
+  """
+  gfceu_error()
+  
+  TODO:  This can be reworked to use the raise/except methods already defined
+  in the standard python language.  One of these days...
+  """
+  print '# # # #'
+  print 'gfceu ERROR code '+str(code)+':'
+  print message
+  print '# # # #'
+  if use_gtk:
+    msgbox = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_ERROR,
+      buttons=gtk.BUTTONS_CLOSE)
+    msgbox.set_markup('gfceu ERROR Code '+str(code)+':\n'+message)
+    msgbox.run()
+    msgbox.destroy()
+  if fatal:
+    sys.exit(code)
+  
+
+  # # # # # # # #
+# Import libraries
+try:
+  import pytgtk
+  pygtk.require("2.6")
+except:
+  pass
+try:
+  import gtk
+except ImportError:
+  gfceu_error('The PyGTK libraries cannot be found.\n\
+  Ensure that PyGTK (>=2.0) is installed on this system.\n\
+  On Debian based systems (like Ubuntu), try this command:\n\
+  sudo apt-get install python-gtk2 libgtk2.0-0', 1, False)
+
+try:
+  import gtk.glade
+except ImportError:
+  gfceu_error('The glade libraries cannot be found.\n\
+  Ensure that libglade is installed on this system.\n\
+  On Debian based systems (like Ubuntu), try this command:\n\
+  sudo apt-get install libglade2-0 python-gtk2 python-glade2', 2, False)
+  
+try:
+  import gnomevfs
+  have_gnomevfs = True
+except ImportError:
+  gfceu_error('The gnomevfs libraries cannot be found.\n\
+  To enable ROM loading over the network, ensure that gnomevfs is installed on\
+  this system.\n\
+  On Debian based systems (like Ubuntu), try this command:\n\
+  sudo apt-get install python-gtk2 libgnomevfs2-0', 5, False, False)
+  have_gnomevfs = False
+
+
+  # # # # # # # #
+# GFCEU Functions
+
+class game_options:
+  sound_check = True
+  fullscreen_check = False
+  extra_entry = ''
+  romfile = ''
+  opengl_check = False
+  join_radio = False
+  join_add = ''
+  join_port = 4046
+  join_pass = ''
+  host_radio = False
+  host_port = 4046
+  host_pass = ''
+  no_network_radio = True
+  network_rom = False
+  
+
+def load_options():
+  global options, optionsfile
+  try:
+    ifile = file(optionsfile, 'r')
+    options = pickle.load(ifile)
+    pickle.load(ifile)
+  except:
+    return
+  ifile.close()
+
+def save_options():
+  global options, optionsfile, appconfigdir
+  ofile = file(optionsfile, 'w')
+  pickle.dump(options, ofile)
+  ofile.close()
+    
+def give_widgets():
+  """
+  give_widgets()
+  
+  This function takes data from the options struct and relays it to
+  the GTK window
+  """
+  global xml, options
+  try:
+    widgets['rom_entry'].set_text(options.romfile)
+    widgets['sound_check'].set_active(options.sound_check)
+    
+    widgets['fullscreen_check'].set_active(options.fullscreen_check)
+    widgets['opengl_check'].set_active(options.opengl_check)
+    
+    widgets['extra_entry'].set_text(options.extra_entry)
+        
+    # Usability point:
+    # Users will probably not want to remember their previous network setting.
+    # Users may accidently be connecting to a remote server/hosting a game when
+    # they were unaware.
+    # No network is being set by default
+    widgets['no_network_radio'].set_active(True)
+    widgets['join_add'].set_text(options.join_add)
+    widgets['join_port'].set_value(float(options.join_port))
+    widgets['join_pass'].set_text(options.join_pass)
+    widgets['host_port'].set_value(float(options.host_port))
+    widgets['host_pass'].set_text(options.host_pass)
+
+  except AttributeError:   
+  # When new widgets are added, old pickle files might break.
+    options = game_options()
+    give_widgets() 
+  
+def setup_environment ():
+  """
+  Configures the environment if this is the first time the application
+  has been run.  For instance, it checks for the options file and creates 
+  it if it doesn't exist.  It also converts between the old version and 
+  the new version of this application, which stores the options file in 
+  a separate directory.
+  """
+       
+  global appconfigdir, old_optionsfile, optionsfile
+       
+    
+  if not os.path.exists(appconfigdir):
+    # this is the first time the application is run.
+    # create the directory
+    gfceu_message("Creating application settings directory")
+    os.mkdir(appconfigdir)
+   
+  if os.path.exists(old_optionsfile):
+    # for full backwards compatibility, this file is processed, but moved 
+    # to the new directory and filename for future compatibility
+    gfceu_message("Old version of options file found, converting to new version")
+    shutil.move(old_optionsfile,optionsfile)
+
+def set_options():
+  """ 
+  set_options()
+  
+  This function grabs all of the data from the GTK widgets
+  and stores it in the options object.
+  """
+  global xml
+  options.romfile = widgets['rom_entry'].get_text()
+  options.sound_check = widgets['sound_check'].get_active()
+  
+  options.fullscreen_check = widgets['fullscreen_check'].get_active()
+  options.opengl_check = widgets['opengl_check'].get_active()
+  
+  options.extra_entry = widgets['extra_entry'].get_text()
+  
+  options.join_radio = widgets['join_radio'].get_active()
+  options.host_radio = widgets['host_radio'].get_active()
+  options.no_network_radio = widgets['no_network_radio'].get_active()
+  options.join_add = widgets['join_add'].get_text()
+  options.join_port = widgets['join_port'].get_value()
+  options.join_pass = widgets['join_pass'].get_text()
+  options.host_port = widgets['host_port'].get_value()
+  options.host_pass = widgets['host_pass'].get_text()
+
+  
+def launch(passed, local=False):
+  global xml, options, fceu_server_binary, fceu_binary, aoss_binary
+  set_options()
+  
+  if options.sound_check:
+    sound = '-sound 1 '
+  else:
+    sound = '-sound 0 '
+    
+  if options.fullscreen_check:
+    fullscreen = '-fs 1 '
+  else:
+    fullscreen = '-fs 0 '
+    
+  if options.join_radio:
+    if options.join_pass == '':
+      netpass = ''
+    else:
+      netpass = '-netpassword ' + '"' + options.join_pass + '" '
+    network = '-connect "' + options.join_add + '"'\
+    ' -netport '+ str(options.join_port) + ' ' + netpass
+  else:
+    network = ''
+  
+  if options.host_radio:
+    if options.host_pass == '':
+      netpass = ' '
+    else:
+      netpass = ' -netpassword ' + '"' + options.host_pass + '" '
+    network = '-connect localhost -netport '+\
+    str(options.host_port) + netpass + ' '
+      
+    
+  if local:
+    network = ''
+  
+  if options.opengl_check:
+    opengl = '-opengl 1 '
+  else:
+    opengl = '-opengl 0 '
+  
+  command =  aoss_binary + ' ' + fceu_binary +' '+ sound + fullscreen +\
+  network + opengl + options.extra_entry + ' '+ passed
+  gfceu_message('Command: ' + command)
+
+  
+  if options.host_radio:
+    xterm_binary = find_binary("xterm")
+    if xterm_binary == None:
+      gfceu_error("Cannot find xterm on this system.  You will not \n\
+      be informed of server output.", 102, True, False)
+      args = [fceu_server_binary]
+    else:
+      args = [xterm_binary, "-e", fceu_server_binary]
+    args.append('--port')
+    args.append(str(options.host_port))
+    if options.host_pass:
+      args.append("--password")
+      args.append(options.host_pass)
+    pid = Popen(args).pid
+  
+  widgets['main_window'].hide()
+  
+  # os.system() is a blocker, so we must force
+  # gtk to process our events.
+  while gtk.events_pending():
+    gtk.main_iteration_do()
+  
+  os.system(command)
+  if options.host_radio:
+    os.kill(pid, 9)
+  widgets['main_window'].show()
+
+def find_binary(this_binary):
+  path = os.getenv('PATH')
+  directories= []
+  directory = ''
+  # check for '$' so last entry is processed
+  for x in path + '$':
+    if x != ':' and x != '$':
+      directory = directory + x
+    else:
+      directories.append(directory)
+      directory = ''
+
+  for x in directories:
+    if os.path.isfile(os.path.join(x, this_binary)):
+      return os.path.join(x,this_binary)
+
+  if os.path.isfile(os.path.join(os.curdir,this_binary)):
+    return os.path.join(os.curdir, this_binary)
+        
+  return None
+  
+  # # # # # # # #
+# GTK Signal Handlers
+class GladeHandlers:
+  def launch_button_clicked(arg1):
+    global xml
+    global options
+    options.romfile = widgets['rom_entry'].get_text()
+    if widgets['rom_entry'].get_text() == '':
+      gfceu_message('Please specify a ROM to open in the main tab.', True)
+      return
+    if options.network_rom:
+      try:
+        myvfs = gnomevfs.Handle(options.romfile)
+        # FIXME
+        # Smarter way of handling this?  Copying direct error information?
+      except gnomevfs.HostNotFoundError:
+        gfceu_error("Remote ROM host not found.", 7, True, False)
+        return
+      except:
+        gfceu_error("Failed to open the network ROM.", 6, True, False)
+        return
+      myfile = file('/tmp/gfceu.nes', 'wb')
+      while 1:
+        try:
+    	    myfile.write(myvfs.read(1024))
+        except gnomevfs.EOFError:
+  	      break
+        except:
+  	      gfceu_error("Failed to open the network ROM.", 10, True, False)
+  	      return
+      
+      myvfs.close()
+      myfile.close()
+      romfile = '/tmp/gfceu.nes'
+    else:
+      romfile = options.romfile
+      
+    launch('"'+romfile+'"')
+
+
+  def about_button_clicked(arg1):
+    global xml
+    widgets['about_dialog'].set_name('GNOME FCE Ultra '+version)
+    widgets['about_dialog'].run()
+    widgets['about_dialog'].hide()
+
+  def browse_button_clicked(widget):
+    global xml,options
+    set_options()
+    chooser = gtk.FileChooserDialog("Open...",  None,
+            gtk.FILE_CHOOSER_ACTION_OPEN,
+  			    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+  			     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+    if have_gnomevfs:
+      chooser.set_property("local-only", False)
+    else:
+      chooser.set_property("local-only", True)
+
+    chooser.set_default_response(gtk.RESPONSE_OK)
+    
+    filter=gtk.FileFilter()
+    filter.set_name("NES Roms")
+    filter.add_mime_type("application/x-nes-rom")
+    filter.add_mime_type("application/zip")
+    filter.add_pattern("*.nes")
+    filter.add_pattern("*.zip")
+    chooser.add_filter(filter)
+    
+    filter = gtk.FileFilter()
+    filter.set_name("All files")
+    filter.add_pattern("*")
+    chooser.add_filter(filter)
+    
+
+    
+    if options.romfile == '':
+      folder = os.getenv('HOME')
+    else:
+      folder = os.path.split(options.romfile)[0]
+      
+    chooser.set_current_folder (folder)
+    
+    response = chooser.run()
+    chooser.hide()
+    
+    if response == gtk.RESPONSE_OK:
+      if chooser.get_filename():
+        x = chooser.get_filename()
+        widgets['rom_entry'].set_text(x)
+        options.romfile = x
+        options.network_rom = False
+      elif chooser.get_uri():
+        x = chooser.get_uri()
+        widgets['rom_entry'].set_text(x)
+        options.romfile = x
+        options.network_rom = True
+
+  def gamepad_clicked(widget):
+    print widget.name
+    d = {'gp1_button' : '1',
+         'gp2_button' : '2',
+         'gp3_button' : '3',
+         'gp4_button' : '4'}
+    command = '-inputcfg gamepad' + d[widget.name] + ' /dev/null'
+    launch(command, True)
+
+  def config_help_button_clicked(arg1):
+    msgbox = gtk.MessageDialog(parent=None, flags=0,
+      type=gtk.MESSAGE_INFO, buttons=gtk.BUTTONS_CLOSE)
+    msgbox.set_markup("Once a gamepad is seleceted, a titlebar will be displayed\
+   indicating a NES button.  Press the button or key you would like to have\
+   associated with the button indicated on the titlebar.  This process\
+   will repeat until all buttons on the gamepad are configured.")
+    msgbox.run()
+    msgbox.hide()
+
+
+  def join_radio_clicked(arg1):
+    global options
+    widgets['join_frame'].set_sensitive(True)
+    widgets['host_frame'].set_sensitive(False)
+    options.join_radio = True
+    options.host_radio = False
+    options.no_network_radio = False
+    
+  def host_radio_clicked(arg1):
+    global fceu_server_binary
+    if widgets['host_radio'].get_active():
+      fceu_server_binary = find_binary('fceu-server')
+      if fceu_server_binary == None:
+        if os.name == 'nt':
+          gfceu_error("The fceu server software cannot be found. \n\
+          Ensure that it is installed in the same directory as \n\
+          GFCE Ultra.", 102, True, False)
+        else:
+          gfceu_error("The fceu server software cannot be found on \n\
+          this system.  Ensure that it is installed and in your path.",
+          101, True, False)
+        widgets['no_network_radio'].set_active(True)
+        options.no_network_radio = True
+        return False
+
+      gfceu_message("Using: "+fceu_server_binary)
+      widgets['join_frame'].set_sensitive(False)
+      widgets['host_frame'].set_sensitive(True)
+      options.join_radio = False
+      options.host_radio = True
+      options.no_network_radio = False
+
+  def no_network_radio_clicked(arg1):
+    widgets['join_frame'].set_sensitive(False)
+    widgets['host_frame'].set_sensitive(False)
+    options.join_radio = False
+    options.host_radio = False
+    options.no_network_radio = True
+  
+  def end(widget,arg=0):
+    global xml, options, optionsfile
+    set_options()
+    save_options()
+    gtk.main_quit()
+  
+##############################################################################
+# Globals
+options = None
+appconfigdir = os.getenv('HOME') + '/.gfceu'
+old_optionsfile = os.getenv('HOME')+'/.gfceu_options'
+optionsfile = appconfigdir + 'gfceu_options.dat'
+fceu_binary = None
+aoss_binary = None
+fceu_server_binary = None
+#version is defined earlier in the code
+#have_vfs is defined earlier in the code
+
+class WidgetsWrapper:
+  def __init__(self):
+    # Search for the glade file
+    # Check first in the directory of this script.
+    if os.path.isfile('gfceu.glade'):
+      glade_file = 'gfceu.glade'
+    # Then check to see if its installed on a *nix system
+    elif os.path.isfile(os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')):
+      glade_file = os.path.join(os.path.dirname(sys.executable), '../share/gfceu/gfceu.glade')
+    else:
+      print 'ERROR.'
+      print 'Could not find the glade interface file.'
+      print 'Try reinstalling the application.'
+      sys.exit(1)
+    
+    self.widgets = gtk.glade.XML(glade_file)
+    self.widgets.signal_autoconnect(GladeHandlers.__dict__)
+
+  def __getitem__(self, key):
+    return self.widgets.get_widget(key)
+
+
+  # # # # # # # #
+# main
+if __name__ == '__main__':
+  # Parse options
+  parser = OptionParser(version='%prog '+ version)
+  parser.parse_args()
+  
+  fceu_binary = find_binary('fceu')
+  if fceu_binary == None:
+    gfceu_error('Could not find the fceu binary.\n\
+    Ensure that FCE Ultra is installed and in the $PATH.\n\
+    On Debian based systems (like Ubuntu), try the following command:\n\
+    sudo apt-get install fceu', 4, True)
+  else:
+    gfceu_message('Using: '+fceu_binary)
+  aoss_binary = find_binary('aoss')
+  if aoss_binary == None:
+    gfceu_error('Could not find the the ALSA OSS wrapper.\n\
+    GFCEU will not be able to share the sound device with other applications.\n\
+    On Debian based systems (like Ubuntu), try the following command:\n\
+    sudo apt-get install alsa-oss', 76, True, False)
+
+  widgets = WidgetsWrapper()
+  widgets['main_window'].show_all()
+  setup_environment()
+
+  options = game_options()
+  load_options()
+  give_widgets()
+  try:
+    gtk.main()
+  except KeyboardInterrupt:
+    sys.exit(0)

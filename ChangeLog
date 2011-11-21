@@ -1,0 +1,113 @@
+========================== version 0.6.2 ========================
+* Minor string changes.
+========================== version 0.6.1 ========================
+* Changed some strings to reflect new email and website
+* Fixed and cleaned some stuff with the glade loading
+========================== version 0.6.0 ========================
+* Fixed evil no ROM problem.
+* Added ALSA support (sort of)
+* Fixed join/host problem.
+========================== version 0.5.2 ========================
+Cleanup:
+* Fixed silly hack when forcing GTK event processing.
+* Accepted patch from Scott Brown on improved options file system
+* Completely reworked glade handling
+========================== version 0.5.1 ========================
+Bug Fixes:
+* Updated chooser filters
+* Allow support for loading zipped ROMs
+* Network ROM loading works
+* Code cleanup
+* Strides towards platform independence
+* Fixed man page error
+========================== version 0.5.0 ========================
+Other:
+* Added man page
+* Shortened menu labels
+* General code cleanup
+* Advanced tab added
+========================== version 0.4.0 ========================
+Bug Fixes:
+* Correction:  Changed "Alt-Tab for fullscreen" to "Alt-Enter"
+Interface:
+* Accelerators added to many buttons
+* Video tab added
+* OpenGL option added in video tab
+* Fullscreen option moved into Video tab
+* Change "FCE Ultra" strings to "GFCE Ultra"
+* Cleaned gamepad buttons
+* Icon in window
+Internal:
+* Made glade interface cleaner
+* More effecient use of options struct
+* Minor code cleanup
+========================== version 0.3.2 ========================
+Bug Fixes:
+*  Fixed bug with fresh configuration
+========================== version 0.3.1  =======================
+Under the hood:
+* Switched interpreter to /usr/bin/python
+Bug Fixes:
+* Fixed bug in when gfceu wouldn't close on delete
+* Fixed bug in which icon couldn't be found when running from tarbell
+========================== version 0.3    =======================
+* No more confusing error when quitting with interrupts
+* Spin button now used for port options
+* New interface for network
+* Hosting added
+* Cleaned code to look nicer in standard size terminal
+* Cleaned up code in other minor aspects
+* Added help button to unintuitive button configuration
+* More code cleanup
+* Network passwords with spaces now execute properly
+* Initial extra parameter support
+* Some new cool scripts that make my life easier
+========================== version 0.2.6  ========================
+* Fixed error that wouldn't let "Please specify ROM to open" close
+* Fixed fatal error that wouldn't allow ROMs to open?
+========================== version 0.2.5  =========================
+* Network ROM loading properly implemented.
+* Fatal option added to error system
+========================== version 0.2.4  =========================
+* Fixed bug in which last entry in $PATH wasn't being processed
+========================== version 0.2.3  =========================
+* Option parser added
+* Erased stupid comment in desktop file
+* --version option now accepted.
+* Smarter error messages (using both GTK and command-line)
+* Detects when fceu is not install and displays error
+* Smarter and more descriptive when gtk or glade aren't available
+* Smarter glade file loading
+========================= version 0.2.2 =========================
+* Romentry now stretches!
+* Using stock icons for execute
+* Can now open ROM files via network
+========================== version 0.2.1 =========================
+* Icon provided (Thanks Jimmy Angelakos!)
+* Desktop file provided
+* Logo provied in about menu
+* Fixed chooser problem about remembering
+========================== version 0.2 ===========================
+* Changed ChangeLog format :)
+* Fixed network bug when no password was provided.
+* Overall code cleanup:  removed object to reduce the self.* headache.
+* Remembers settings on close.
+* Fullscreen option now available.
+* Fullscreen tip added.
+* Verticle resize bug fixed.
+* Filechooser checks in a smart folder
+========================== version 0.1.1 ============================
+6/12/06 - Now handles specialcharacter filenames and spaces.
+6/12/06 - ROM file no longer required for input configuration.
+
+=========================== 0.1 ====================================
+6/12/06 - Changed directories for installation and changed structure.  Made my
+life a lot easier
+6/10/06 3 - Add network functionality.
+6/10/06 2 - Cleaned up interface.  Added error when no ROM is available.
+Added chooser filter for NES ROMs.
+6/10/06 - Redesigned entire UI to use GtkNotebook for tabs.  Cleaned up code
+a lot.  Fixed it so the window is hidden when FCE Ultra starts.  Fixed ugly
+things.  Now closes on 'X'.
+6/8/06 - Added sound checkbox.  Config game works.  Run game works.  Woot
+6/7/06 - Started project.  Doesn't work yet.

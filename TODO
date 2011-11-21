@@ -1,0 +1,12 @@
+8/2/2008: I'm not going to be puttin any more effort into gfceu 0.6.  Use gfceux and fceux, it's much cleaner/newer/better code.
+
+TODO: 
+* Ensure version server >= 0.0.5
+* Resolution?
+* Windows Support
+* --last command line option
+* normal options (quiet)
+* server nick
+* no xterm
+  In progress - status_window.py started, needs to work to be functional
+* Browser?
