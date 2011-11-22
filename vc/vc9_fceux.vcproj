@@ -44,10 +44,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua/include;userconfig;defaultconfig"
 				PreprocessorDefinitions="WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX;HAS_vsnprintf;_S9XLUA_H"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				DisableLanguageExtensions="false"
@@ -1852,6 +1853,30 @@
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditlib\playback.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\recorder.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\recorder.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\tasedit_list.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\tasedit_list.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\tasedit_sel.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\tasedit_sel.h"
 						>
 					</File>
 					<File

@@ -1029,7 +1029,7 @@ void SwapSaveState()
 		redoSS = true;
 
 	FCEUI_DispMessage("%s restored",0,backup.c_str());
-	FCEUI_printf("%s restored\n",0,backup.c_str());
+	FCEUI_printf("%s restored\n",backup.c_str());
 }	
 	
 //------------------------------------------------------------------------------------------------------------------------------------------------------

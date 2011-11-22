@@ -928,9 +928,15 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1378,9 +1384,30 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\bookmark.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\bookmarks.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\inputsnapshot.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\markers.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\playback.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">
