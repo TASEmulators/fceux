@@ -66,12 +66,66 @@ error:
 	return true;
 }
 // ----------------------------------------------------------
+void MARKERS::MakeCopy(std::vector<uint8> &destination_array)
+{
+	// copy array
+	destination_array = markers_array;
+	// copy notes
+
+
+}
+void MARKERS::RestoreFromCopy(std::vector<uint8> &source_array, int until_frame)
+{
+	if (until_frame >= 0)
+	{
+		// restore array up to and including the frame
+		if ((int)markers_array.size() <= until_frame) markers_array.resize(until_frame+1);
+		for (int i = until_frame; i >= 0; i--)
+			markers_array[i] = source_array[i];
+		// restore notes
+
+	} else
+	{
+		// restore array
+		markers_array = source_array;
+		// restore notes
+
+	}
+}
+
+int MARKERS::GetMarkersSize()
+{
+	return markers_array.size();
+}
+
+bool MARKERS::GetMarker(int frame)
+{
+	if (frame >= 0 && frame < (int)markers_array.size())
+		return markers_array[frame] & MARKER_FLAG_BIT;
+	return false;
+}
+void MARKERS::SetMarker(int frame)
+{
+	markers_array[frame] |= MARKER_FLAG_BIT;
+}
+void MARKERS::ClearMarker(int frame)
+{
+	markers_array[frame] &= ~MARKER_FLAG_BIT;
+}
+void MARKERS::EraseMarker(int frame)
+{
+	// check if there's a marker, delete note if needed
+	markers_array.erase(markers_array.begin() + frame);
+}
 void MARKERS::ToggleMarker(int frame)
 {
-	if (markers_array[frame] & MARKER_FLAG_BIT)
-		markers_array[frame] &= ~MARKER_FLAG_BIT;
-	else
-		markers_array[frame] |= MARKER_FLAG_BIT;
+	if (frame >= 0 && frame < (int)markers_array.size())
+	{
+		if (markers_array[frame] & MARKER_FLAG_BIT)
+			markers_array[frame] &= ~MARKER_FLAG_BIT;
+		else
+			markers_array[frame] |= MARKER_FLAG_BIT;
+	}
 }
 
 void MARKERS::insertEmpty(int at, int frames)

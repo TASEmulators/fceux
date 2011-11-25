@@ -53,8 +53,7 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
 		}
 	}
 	// make a copy of markers.markers_array
-	markers_array = markers.markers_array;
-
+	markers.MakeCopy(markers_array);
 	coherent = true;
 	// save time to description
 	time_t raw_time;
@@ -63,19 +62,10 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
 
-// copy all stored markers to Markers
-void INPUT_SNAPSHOT::toMarkers()
-{
-	markers.markers_array = markers_array;
-}
-// copy some stored markers to Markers manually, from Frame 0 to end frame (including end frame)
 void INPUT_SNAPSHOT::copyToMarkers(int end)
 {
-	if ((int)markers.markers_array.size() <= end) markers.markers_array.resize(end+1);
-	for (int i = end; i >= 0; i--)
-		markers.markers_array[i] = markers_array[i];
+	markers.RestoreFromCopy(markers_array, end);
 }
-
 
 void INPUT_SNAPSHOT::toMovie(MovieData& md, int start, int end)
 {
@@ -327,17 +317,17 @@ bool INPUT_SNAPSHOT::checkMarkersDiff(INPUT_SNAPSHOT& inp)
 // return true if any difference in markers_array is found, comparing to markers.markers_array
 bool INPUT_SNAPSHOT::checkMarkersDiff()
 {
-	if (markers_array.size() != markers.markers_array.size()) return true;
+	if (markers_array.size() != markers.GetMarkersSize()) return true;
 	for (int i = markers_array.size()-1; i >= 0; i--)
-		if ((markers_array[i] - markers.markers_array[i]) & MARKER_FLAG_BIT) return true;
+		if ((bool)(markers_array[i] & MARKER_FLAG_BIT) != markers.GetMarker(i)) return true;
 	return false;
 }
 // return true only when difference is found before end frame (not including end frame)
 bool INPUT_SNAPSHOT::checkMarkersDiff(int end)
 {
-	if (markers_array.size() != markers.markers_array.size() && ((int)markers_array.size()-1 < end || (int)markers.markers_array.size()-1 < end)) return true;
+	if (markers_array.size() != markers.GetMarkersSize() && ((int)markers_array.size()-1 < end || (int)markers.GetMarkersSize()-1 < end)) return true;
 	for (int i = end-1; i >= 0; i--)
-		if ((markers_array[i] - markers.markers_array[i]) & MARKER_FLAG_BIT) return true;
+		if ((bool)(markers_array[i] & MARKER_FLAG_BIT) != markers.GetMarker(i)) return true;
 	return false;
 }
 
@@ -527,7 +517,7 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
 		SelectionFrames::iterator it(selection.GetStrobedSelection().begin());
 		SelectionFrames::iterator current_selection_end(selection.GetStrobedSelection().end());
-		while (pos < this_size && source_pos < source_size)
+		while (pos < this_size)
 		{
 			if (it != current_selection_end && frame == *it)
 			{
@@ -536,17 +526,16 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 				region_len++;
 				// set filled line to the frame
 				memset(&hot_changes[pos], 0xFF, bytes);
-				pos += bytes;
-			} else
+			} else if (source_pos < source_size)
 			{
 				// this frame is not selected
 				frame -= region_len;
 				region_len = 0;
 				// copy hotchanges of this frame
 				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
-				pos += bytes;
 				source_pos += bytes;
 			}
+			pos += bytes;
 			frame++;
 		}
 		FadeHotChanges();
@@ -567,7 +556,6 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 				region_len++;
 				// set filled line to the frame
 				memset(&hot_changes[pos], 0xFF, bytes);
-				pos += bytes;
 				// exit loop when all selection frames are handled
 				if (it == current_selection_end) break;
 			} else
@@ -575,6 +563,62 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 				// this frame is not selected
 				frame -= region_len;
 				region_len = 0;
+				// leave zeros in this frame
+			}
+			pos += bytes;
+			frame++;
+		}
+	}
+} 
+void INPUT_SNAPSHOT::inheritHotChanges_PasteInsert(INPUT_SNAPSHOT* source_of_hotchanges)
+{
+	// copy hot changes from source snapshot and insert filled lines for inserted frames (which are represented by inserted_set)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	{
+		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		int frame = 0, pos = 0, source_pos = 0;
+		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
+		SelectionFrames::iterator it(selection.GetInsertedSet().begin());
+		SelectionFrames::iterator inserted_set_end(selection.GetInsertedSet().end());
+		while (pos < this_size)
+		{
+			if (it != inserted_set_end && frame == *it)
+			{
+				// this frame was inserted
+				it++;
+				// set filled line to the frame
+				memset(&hot_changes[pos], 0xFF, bytes);
+			} else if (source_pos < source_size)
+			{
+				// copy hotchanges of this frame
+				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
+				source_pos += bytes;
+			}
+			pos += bytes;
+			frame++;
+		}
+		FadeHotChanges();
+	} else
+	{
+		// no old data, just fill selected lines
+		int bytes = bytes_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		int frame = 0, pos = 0;
+		int this_size = hot_changes.size();
+		SelectionFrames::iterator it(selection.GetInsertedSet().begin());
+		SelectionFrames::iterator inserted_set_end(selection.GetInsertedSet().end());
+		while (pos < this_size)
+		{
+			if (it != inserted_set_end && frame == *it)
+			{
+				// this frame was inserted
+				it++;
+				// set filled line to the frame
+				memset(&hot_changes[pos], 0xFF, bytes);
+				pos += bytes;
+				// exit loop when all inserted_set frames are handled
+				if (it == inserted_set_end) break;
+			} else
+			{
 				// leave zeros in this frame
 				pos += bytes;
 			}

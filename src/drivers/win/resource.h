@@ -415,15 +415,21 @@
 #define IDC_BUTTON7                     1145
 #define MEMW_EDIT03FORMULA              1145
 #define TASEDIT_REWIND_FULL2            1145
+#define TASEDIT_PREV_MARKER             1145
 #define IDC_BUTTON8                     1146
 #define TASEDIT_REWIND_FULL3            1146
+#define TASEDIT_FIND_BEST_MARKER        1146
 #define IDC_EDIT1                       1147
 #define IDC_BUTTON9                     1148
 #define TASEDIT_REWIND_FULL4            1148
+#define TASEDIT_FIND_NEXT_MARKER        1148
 #define IDC_HISTORYLIST                 1149
 #define IDC_BOOKMARKSLIST               1150
 #define TASEDIT_REWIND_FULL5            1151
+#define TASEDIT_NEXT_MARKER             1151
 #define IDC_BRANCHES_BUTTON             1152
+#define IDC_BRANCHES_BUTTON2            1153
+#define IDC_TEXT_SELECTION_BUTTON       1153
 #define IDC_EDIT2                       1154
 #define CHECK_SOUND_MUTETURBO           1179
 #define IDC_EDIT_AUTHOR                 1180
@@ -530,6 +536,9 @@
 #define IDC_BOOKMARKS_BOX               1264
 #define IDC_BRANCHES_BITMAP             1265
 #define IDC_SCREENSHOT_BITMAP           1266
+#define CHECK_TURBO_SEEK                1266
+#define IDC_TEXT_SELECTION              1267
+#define IDC_TEXT_CLIPBOARD              1268
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -904,6 +913,10 @@
 #define ID_CONFIG_USE1PFORRECORDING2P   40490
 #define ID_CONFIG_USE1PFORRECORDING     40491
 #define ID_CONFIG_COMBINECONSECUTIVERECORDINGS 40492
+#define ACCEL_SHIFT_V                   40493
+#define ID_EDIT_PASTEINSERT             40495
+#define ID_CONFIG_SUPERIMPOSEAFFECTSCOPY 40496
+#define ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE 40497
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -913,8 +926,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        185
-#define _APS_NEXT_COMMAND_VALUE         40493
-#define _APS_NEXT_CONTROL_VALUE         1267
+#define _APS_NEXT_COMMAND_VALUE         40498
+#define _APS_NEXT_CONTROL_VALUE         1269
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

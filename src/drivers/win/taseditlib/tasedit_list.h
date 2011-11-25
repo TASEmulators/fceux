@@ -1,4 +1,6 @@
 //Specification file for TASEDIT_LIST class
+#define LIST_ID_LEN 5
+
 #define CDDS_SUBITEMPREPAINT       (CDDS_SUBITEM | CDDS_ITEMPREPAINT)
 #define CDDS_SUBITEMPOSTPAINT      (CDDS_SUBITEM | CDDS_ITEMPOSTPAINT)
 #define CDDS_SUBITEMPREERASE       (CDDS_SUBITEM | CDDS_ITEMPREERASE)
@@ -89,6 +91,9 @@ public:
 	void init();
 	void free();
 	void update();
+
+	void save(EMUFILE *os);
+	bool load(EMUFILE *is);
 
 	void AddFourscore();
 	void RemoveFourscore();

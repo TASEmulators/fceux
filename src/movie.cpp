@@ -984,7 +984,7 @@ static int _currCommand = 0;
 //either dumps the current joystick state or loads one state from the movie
 void FCEUMOV_AddInputState()
 {
-	#ifdef _WIN32
+#ifdef _WIN32
 	if(movieMode == MOVIEMODE_TASEDIT)
 	{
 		// if movie length is less than currFrame, pad it with empty frames
@@ -992,7 +992,7 @@ void FCEUMOV_AddInputState()
 			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if(movie_readonly || turbo || pauseframe > currFrameCounter)
+		if(movie_readonly || turbo || playback.pause_frame > currFrameCounter)
 		{
 			// do not record buttons
 			if(mr->command_reset())
@@ -1008,10 +1008,11 @@ void FCEUMOV_AddInputState()
 			// record buttons
 			joyports[0].log(mr);
 			joyports[1].log(mr);
-			recorder.InputChangedRec();
+			recorder.InputChanged();
 		}
+		_currCommand = 0;
 	} else
-	#endif
+#endif
 	if(movieMode == MOVIEMODE_PLAY)
 	{
 		//stop when we run out of frames

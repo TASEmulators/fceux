@@ -148,7 +148,7 @@ int INPUT_HISTORY::jump(int new_pos)
 	{
 		if (input_snapshots[real_pos].checkMarkersDiff())
 		{
-			input_snapshots[real_pos].toMarkers();
+			input_snapshots[real_pos].copyToMarkers();
 			project.SetProjectChanged();
 			markers_changed = true;
 		}
@@ -313,9 +313,11 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 						inp.inheritHotChanges_DeleteSelection(&input_snapshots[real_pos]);
 						break;
 					case MODTYPE_INSERT:
-					case MODTYPE_PASTEINSERT:
 					case MODTYPE_CLONE:
 						inp.inheritHotChanges_InsertSelection(&input_snapshots[real_pos]);
+						break;
+					case MODTYPE_PASTEINSERT:
+						inp.inheritHotChanges_PasteInsert(&input_snapshots[real_pos]);
 						break;
 					case MODTYPE_CHANGE:
 					case MODTYPE_SET:

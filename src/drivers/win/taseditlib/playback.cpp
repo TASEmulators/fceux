@@ -1,5 +1,4 @@
 //Implementation file of Playback class
-
 #include "taseditproj.h"
 
 #ifdef _S9XLUA_H
@@ -7,16 +6,14 @@ extern void ForceExecuteLuaFrameFunctions();
 #endif
 
 extern HWND hwndTasEdit;
-extern void FCEU_printf(char *format, ...);
-extern void RedrawListAndBookmarks();
-extern void RedrawRowAndBookmark(int index);
+extern bool Tasedit_rewind_now;
 extern bool turbo;
+extern bool TASEdit_turbo_seek;
 
 extern MARKERS markers;
 extern GREENZONE greenzone;
 extern TASEDIT_LIST tasedit_list;
-
-extern bool Tasedit_rewind_now;
+extern BOOKMARKS bookmarks;
 
 PLAYBACK::PLAYBACK()
 {
@@ -35,7 +32,7 @@ void PLAYBACK::init()
 }
 void PLAYBACK::reset()
 {
-	lastCursor = -1;
+	lastCursor = currFrameCounter;
 	pause_frame = old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
@@ -53,7 +50,12 @@ void PLAYBACK::update()
 			SeekingStop();
 
 	// update flashing pauseframe
-	if (old_pauseframe != pause_frame && old_pauseframe) RedrawRowAndBookmark(old_pauseframe-1);
+	if (old_pauseframe != pause_frame && old_pauseframe)
+	{
+		// pause_frame was changed, clear old_pauseframe gfx
+		tasedit_list.RedrawRow(old_pauseframe-1);
+		bookmarks.RedrawChangedBookmarks(old_pauseframe-1);
+	}
 	old_pauseframe = pause_frame;
 	old_show_pauseframe = show_pauseframe;
 	if (pause_frame)
@@ -63,7 +65,12 @@ void PLAYBACK::update()
 		else
 			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
 	} else show_pauseframe = false;
-	if (old_show_pauseframe != show_pauseframe) RedrawRowAndBookmark(pause_frame-1);
+	if (old_show_pauseframe != show_pauseframe)
+	{
+		// update pauseframe gfx
+		tasedit_list.RedrawRow(pause_frame-1);
+		bookmarks.RedrawChangedBookmarks(pause_frame-1);
+	}
 
 	// update seeking progressbar
 	old_emu_paused = emu_paused;
@@ -83,13 +90,16 @@ void PLAYBACK::update()
 			SetProgressbar(1, 1);
 	}
 
-	//update the playback cursor
+	// update the playback cursor
 	if(currFrameCounter != lastCursor)
 	{
 		tasedit_list.FollowPlayback();
-		//update the old and new rows
-		RedrawRowAndBookmark(lastCursor);
-		RedrawRowAndBookmark(currFrameCounter);
+		// update gfx of the old and new rows
+		tasedit_list.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
+		tasedit_list.RedrawRow(currFrameCounter);
+		bookmarks.RedrawChangedBookmarks(currFrameCounter);
+		// enforce redrawing now
 		UpdateWindow(tasedit_list.hwndList);
 		lastCursor = currFrameCounter;
 	}
@@ -187,7 +197,8 @@ void PLAYBACK::SeekingStart(int finish_frame)
 {
 	seeking_start_frame = currFrameCounter;
 	pause_frame = finish_frame;
-	turbo = true;
+	if (TASEdit_turbo_seek)
+		turbo = true;
 	UnpauseEmulation();
 }
 void PLAYBACK::SeekingStop()
@@ -201,7 +212,10 @@ void PLAYBACK::SeekingStop()
 void PLAYBACK::RewindFrame()
 {
 	if (pause_frame && !emu_paused) return;
-	if (currFrameCounter > 0) jump(currFrameCounter-1);
+	if (currFrameCounter > 0)
+		jump(currFrameCounter-1);
+	else
+		tasedit_list.FollowPlayback();
 	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
@@ -214,31 +228,25 @@ void PLAYBACK::ForwardFrame()
 void PLAYBACK::RewindFull()
 {
 	// jump to previous marker
-	if (currFrameCounter > 0)
-	{
-		int index = currFrameCounter - 1;
-		for (; index >= 0; index--)
-			if (markers.markers_array[index] & MARKER_FLAG_BIT) break;
-		if (index >= 0)
-			jump(index);
-		else if (currFrameCounter > 0)
-			jump(0);
-	}
+	int index = currFrameCounter - 1;
+	for (; index >= 0; index--)
+		if (markers.GetMarker(index)) break;
+	if (index >= 0)
+		jump(index);
+	else
+		jump(0);
 }
 void PLAYBACK::ForwardFull()
 {
 	// jump to next marker
 	int last_frame = currMovieData.getNumRecords()-1;
-	if (currFrameCounter < last_frame)
-	{
-		int index = currFrameCounter + 1;
-		for (; index < last_frame; ++index)
-			if (markers.markers_array[index] & MARKER_FLAG_BIT) break;
-		if (index <= last_frame)
-			jump(index);
-		else if (currFrameCounter < last_frame)
-			jump(last_frame);
-	}
+	int index = currFrameCounter + 1;
+	for (; index <= last_frame; ++index)
+		if (markers.GetMarker(index)) break;
+	if (index <= last_frame)
+		jump(index);
+	else
+		jump(last_frame);
 }
 
 void PLAYBACK::StartFromZero()

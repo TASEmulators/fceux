@@ -1,11 +1,12 @@
 //Implementation file of TASEdit Project class
-
 #include "taseditproj.h"
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
+extern SCREENSHOT_DISPLAY screenshot_display;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
+extern RECORDER recorder;
 extern INPUT_HISTORY history;
 extern TASEDIT_LIST tasedit_list;
 extern TASEDIT_SELECTION selection;
@@ -59,6 +60,7 @@ bool TASEDIT_PROJECT::saveProject()
 	greenzone.save(ofs);
 	history.save(ofs);
 	selection.save(ofs);
+	tasedit_list.save(ofs);
 
 	delete ofs;
 
@@ -81,7 +83,6 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	bool error;
 	LoadFM2(currMovieData, &ifs, ifs.size(), false);
 	LoadSubtitles(currMovieData);
-	tasedit_list.update();
 	// try to load markers
 	error = markers.load(&ifs);
 	if (error)
@@ -125,14 +126,23 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	{
 		FCEU_printf("Error loading selection\n");
 		selection.init();
+	} else
+	{
+		// update and try to load list
+		error = tasedit_list.load(&ifs);
+	}
+	if (error)
+	{
+		FCEU_printf("Error loading list\n");
 	}
 
+	playback.reset();
+	recorder.reset();
+	screenshot_display.reset();
 	reset();
-	playback.updateProgressbar();
 	return true;
 }
 // -----------------------------------------------------------------
-//All the get/set functions...
 std::string TASEDIT_PROJECT::GetProjectName()
 {
 	return projectName;

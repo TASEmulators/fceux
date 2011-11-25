@@ -69,12 +69,14 @@ extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 extern bool TASEdit_follow_playback;
+extern bool TASEdit_turbo_seek;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_markers;
 extern bool TASEdit_show_branch_screenshots;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_use_1p_rec;
 extern bool TASEdit_combine_consecutive_rec;
+extern bool TASEdit_superimpose_affects_paste;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
@@ -304,12 +306,14 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
 	AC(TASEdit_follow_playback),
+	AC(TASEdit_turbo_seek),
 	AC(TASEdit_show_lag_frames),
 	AC(TASEdit_show_markers),
 	AC(TASEdit_show_branch_screenshots),
 	AC(TASEdit_bind_markers),
 	AC(TASEdit_use_1p_rec),
 	AC(TASEdit_combine_consecutive_rec),
+	AC(TASEdit_superimpose_affects_paste),
 	AC(TASEdit_branch_full_movie),
 	AC(TASEdit_branch_only_when_rec),
 	AC(TASEdit_view_branches_tree),

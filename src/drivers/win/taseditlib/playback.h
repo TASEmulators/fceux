@@ -38,14 +38,14 @@ public:
 	int GetPauseFrame();
 	void SetProgressbar(int a, int b);
 
+	int pause_frame;
+
 	HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 
 private:
 	bool JumpToFrame(int index);
 
-	int pause_frame;
-
-	int lastCursor;		// for currentCursor we use external variable currFrameCounter
+	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;
 	bool old_show_pauseframe, show_pauseframe;

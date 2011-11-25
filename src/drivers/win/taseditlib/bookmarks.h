@@ -1,5 +1,4 @@
 //Specification file for Bookmarks class
-
 #include "bookmark.h"
 
 #define TOTAL_BOOKMARKS 10
@@ -85,10 +84,6 @@
 #define BOOKMARKS_ID_LEN 10
 #define TIME_DESC_LENGTH 9		// "HH:MM:SS"
 
-// screenshot bitmap
-#define SCR_BMP_PHASE_MAX 11
-#define SCR_BMP_PHASE_ALPHA_MAX 8
-
 class BOOKMARKS
 {
 public:
@@ -129,9 +124,6 @@ public:
 	void RecursiveAddHeight(int branch_num, int amount);
 	void RecursiveSetYPos(int parent, int parentY);
 
-	void ChangeScreenshotBitmap();
-	void RedrawScreenshotBitmap();
-
 	std::vector<BOOKMARK> bookmarks_array;
 
 	// not saved vars
@@ -139,17 +131,7 @@ public:
 	int branch_row_left;
 	int branch_row_height;
 	bool mouse_over_bitmap, mouse_over_bookmarkslist;
-	// screenshot bmp stuff
-	LPBITMAPINFO scr_bmi;
-	HBITMAP scr_bmp;
-	uint8* scr_ptr;
-	int scr_bmp_x;
-	int scr_bmp_y;
-	int scr_bmp_phase;
-	int screenshot_currently_shown;
-	HWND hwndScrBmp, scr_bmp_pic;
-	WNDCLASSEX wincl;
-	BLENDFUNCTION blend;
+	int item_under_mouse;
 	TRACKMOUSEEVENT tme, list_tme;
 
 private:
@@ -164,7 +146,7 @@ private:
 	// not saved vars
 	int check_flash_shedule;
 	int edit_mode;
-	int animation_frame;		// 0-13
+	int animation_frame;
 	int next_animation_time;
 	bool must_check_item_under_mouse;
 	bool must_redraw_branches_tree;
@@ -180,7 +162,6 @@ private:
 	int transition_phase;
 	int fireball_size;
 	int mouse_x, mouse_y;
-	int item_under_mouse;
 
 	HWND hwndBookmarksList, hwndBookmarks;
 	HWND hwndBranchesBitmap;
@@ -193,12 +174,10 @@ private:
 	HBITMAP branches_hbitmap, hOldBitmap, buffer_hbitmap, hOldBitmap1, branchesSpritesheet, hOldBitmap2;
 	HDC hBitmapDC, hBufferDC, hSpritesheetDC;
 
-
 	// temps
 	std::vector<int> GridX;				// in grid units
 	std::vector<int> GridY;
 	std::vector<int> GridHeight;
 	std::vector<std::vector<uint8>> Children;
-
 
 };

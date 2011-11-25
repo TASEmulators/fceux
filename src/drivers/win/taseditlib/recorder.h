@@ -17,7 +17,7 @@ public:
 	void UncheckRecordingRadioButtons();
 	void RecheckRecordingRadioButtons();
 
-	void InputChangedRec();
+	void InputChanged();
 	
 	int multitrack_recording_joypad;
 	HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;

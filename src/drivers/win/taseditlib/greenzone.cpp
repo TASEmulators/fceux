@@ -6,11 +6,14 @@
 
 extern TASEDIT_PROJECT project;
 extern PLAYBACK playback;
+extern BOOKMARKS bookmarks;
+extern TASEDIT_LIST tasedit_list;
+
+
 extern int TASEdit_greenzone_capacity;
 extern bool TASEdit_restore_position;
 
 extern void FCEU_printf(char *format, ...);
-extern void RedrawListAndBookmarks();
 
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 
@@ -151,7 +154,11 @@ void GREENZONE::GreenzoneCleaning()
 		}
 	}
 finish:
-	if (changed) RedrawListAndBookmarks();
+	if (changed)
+	{
+		tasedit_list.RedrawList();
+		bookmarks.RedrawBookmarksList();
+	}
 	// shedule next cleaning
 	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
@@ -334,7 +341,8 @@ void GREENZONE::InvalidateAndCheck(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	RedrawListAndBookmarks();
+	tasedit_list.RedrawList();
+	bookmarks.RedrawBookmarksList();
 }
 // This version doesn't restore playback, may be used only by Branching and Recording functions!
 void GREENZONE::Invalidate(int after)
@@ -349,7 +357,8 @@ void GREENZONE::Invalidate(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	RedrawListAndBookmarks();
+	tasedit_list.RedrawList();
+	bookmarks.RedrawBookmarksList();
 }
 
 int GREENZONE::FindBeginningOfGreenZone(int starting_index)

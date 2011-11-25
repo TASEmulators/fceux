@@ -429,6 +429,7 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\screenshot_display.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
@@ -749,6 +750,7 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\markers.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\playback.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\screenshot_display.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
     <ClInclude Include="..\src\drivers\win\texthook.h" />

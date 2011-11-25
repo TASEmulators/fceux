@@ -7,16 +7,25 @@
 #pragma comment(lib, "msimg32.lib")
 
 extern HWND hwndTasEdit;
-extern int TasEdit_wndx, TasEdit_wndy;
-extern void RedrawRowAndBookmark(int index);
 
 LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndBookmarksList_oldWndProc, hwndBranchesBitmap_oldWndProc;
 
+extern SCREENSHOT_DISPLAY screenshot_display;
+extern PLAYBACK playback;
+extern GREENZONE greenzone;
+extern TASEDIT_PROJECT project;
+extern INPUT_HISTORY history;
+extern TASEDIT_LIST tasedit_list;
+
+extern bool TASEdit_show_lag_frames;
+extern bool TASEdit_bind_markers;
+extern bool TASEdit_branch_full_movie;
+extern bool TASEdit_branch_only_when_rec;
+extern bool TASEdit_view_branches_tree;
+
 // resources
-char szClassName[] = "ScrBmp";
 char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
 char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 // color tables for flashing when saving/loading bookmarks
@@ -29,20 +38,6 @@ COLORREF bookmark_flash_colors[3][FLASH_PHASE_MAX+1] = {
 	0x320d23, 0x341435, 0x361b48, 0x38215a, 0x39286c, 0x3b2f7f, 0x3c3691, 0x3e3ca3, 0x4043b5, 0x414ac8, 0x4351da, 0x4457ec };
 // corners cursor animation
 int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0 };
-
-extern PLAYBACK playback;
-extern GREENZONE greenzone;
-extern TASEDIT_PROJECT project;
-extern INPUT_HISTORY history;
-extern MARKERS markers;
-extern TASEDIT_LIST tasedit_list;
-
-extern bool TASEdit_show_lag_frames;
-extern bool TASEdit_bind_markers;
-extern bool TASEdit_branch_full_movie;
-extern bool TASEdit_branch_only_when_rec;
-extern bool TASEdit_view_branches_tree;
-extern bool TASEdit_show_branch_screenshots;
 
 BOOKMARKS::BOOKMARKS()
 {
@@ -61,39 +56,6 @@ BOOKMARKS::BOOKMARKS()
 	list_tme.cbSize = sizeof(tme);
 	list_tme.dwFlags = TME_LEAVE;
 	list_tme.hwndTrack = hwndBookmarksList;
-	
-	// create BITMAPINFO for scr_bmp
-	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));
-	scr_bmi->bmiHeader.biSize = sizeof(scr_bmi->bmiHeader);
-	scr_bmi->bmiHeader.biWidth = SCREENSHOT_WIDTH;
-	scr_bmi->bmiHeader.biHeight = -SCREENSHOT_HEIGHT;		// negative value = top-down bmp
-	scr_bmi->bmiHeader.biPlanes = 1;
-	scr_bmi->bmiHeader.biBitCount = 8;
-	scr_bmi->bmiHeader.biCompression = BI_RGB;
-	scr_bmi->bmiHeader.biSizeImage = 0;
-
-	// register ScrBmp window class
-    wincl.hInstance = fceu_hInstance;
-    wincl.lpszClassName = szClassName;
-    wincl.lpfnWndProc = ScrBmpWndProc;
-    wincl.style = CS_DBLCLKS;
-    wincl.cbSize = sizeof(WNDCLASSEX);
-    wincl.hIcon = 0;
-    wincl.hIconSm = 0;
-    wincl.hCursor = 0;
-    wincl.lpszMenuName = 0;
-    wincl.cbClsExtra = 0;
-    wincl.cbWndExtra = 0;
-    wincl.hbrBackground = 0;
-	if(!RegisterClassEx(&wincl))
-		FCEU_printf("Error registering ScrBmp window class\n");
-	// create blendfunction
-	blend.BlendOp = AC_SRC_OVER;
-	blend.BlendFlags = 0;
-	blend.AlphaFormat = 0;
-	blend.SourceConstantAlpha = 255;
-
-
 }
 
 void BOOKMARKS::init()
@@ -185,28 +147,16 @@ void BOOKMARKS::init()
 	// create pens
 	normal_pen = CreatePen(PS_SOLID, 1, 0x0);
 	select_pen = CreatePen(PS_SOLID, 2, 0xFF9080);
-	// prepare screenshot bitmap
-	// fill scr_bmp palette with current palette colors
-	extern PALETTEENTRY *color_palette;
-	for (int i = 0; i < 256; ++i)
-	{
-		scr_bmi->bmiColors[i].rgbRed = color_palette[i].peRed;
-		scr_bmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
-		scr_bmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
-	}
-	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
 
 	RedrawBookmarksCaption();
 	next_animation_time = 0;
 	update();
-	
 }
 void BOOKMARKS::reset()
 {
 	transition_phase = animation_frame = 0;
 	mouse_x = mouse_y = -1;
-	screenshot_currently_shown = item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-	scr_bmp_phase = 0;
+	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 	mouse_over_bitmap = false;
 	must_recalculate_branches_tree = must_redraw_branches_tree = must_check_item_under_mouse = true;
 	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
@@ -257,13 +207,6 @@ void BOOKMARKS::free()
 		DeleteObject(branchesSpritesheet);
 		branchesSpritesheet = NULL;
 	}
-	if (scr_bmp)
-	{
-		DeleteObject(scr_bmp);
-		scr_bmp = NULL;
-	}
-
-
 }
 
 void BOOKMARKS::update()
@@ -286,7 +229,7 @@ void BOOKMARKS::update()
 	if (must_recalculate_branches_tree)
 		RecalculateBranchesTree();
 
-	// once per 50 milliseconds update branches_bitmap and scr_bmp 
+	// once per 50 milliseconds update branches_bitmap
 	if (clock() > next_animation_time)
 	{
 		// animate branches_bitmap
@@ -321,58 +264,6 @@ void BOOKMARKS::update()
 		// render branches_bitmap
 		if (edit_mode == EDIT_MODE_BRANCHES && must_redraw_branches_tree)
 			RedrawBranchesTree();
-
-		// change screenshot_bitmap alpha if needed
-		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS && TASEdit_show_branch_screenshots)
-		{
-			if (!hwndScrBmp)
-			{
-				// create window
-				hwndScrBmp = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, TasEdit_wndx + scr_bmp_x, TasEdit_wndy + scr_bmp_y, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, hwndTasEdit, NULL, fceu_hInstance, NULL);
-				RedrawScreenshotBitmap();
-				ShowWindow(hwndScrBmp, SW_SHOWNA);
-			}
-			// change screenshot_bitmap pic if needed
-			if (item_under_mouse != screenshot_currently_shown)
-			{
-				if (bookmarks_array[item_under_mouse].not_empty)
-					ChangeScreenshotBitmap();
-			}
-			if (scr_bmp_phase < SCR_BMP_PHASE_MAX)
-			{
-				scr_bmp_phase++;
-				// update alpha
-				int phase_alpha = scr_bmp_phase;
-				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
-				SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-				UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
-			}
-		} else
-		{
-			// fade and finally hide screenshot
-			if (scr_bmp_phase > 0)
-				scr_bmp_phase--;
-			if (scr_bmp_phase > 0)
-			{
-				if (hwndScrBmp)
-				{
-					// update alpha
-					int phase_alpha = scr_bmp_phase;
-					if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
-					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
-				}
-			} else
-			{
-				// destroy screenshot bitmap window
-				scr_bmp_phase = 0;
-				if (hwndScrBmp)
-				{
-					DestroyWindow(hwndScrBmp);
-					hwndScrBmp = 0;
-				}
-			}
-		}
 	}
 }
 
@@ -390,8 +281,8 @@ void BOOKMARKS::set(int slot)
 	bookmarks_array[slot].set();
 
 	// if this screenshot is shown on screen - reinit and redraw it
-	if (screenshot_currently_shown == slot)
-		screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
+	if (screenshot_display.screenshot_currently_shown == slot)
+		screenshot_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
 	// inherit current branch
 	if (slot != current_branch)
@@ -421,7 +312,10 @@ void BOOKMARKS::set(int slot)
 
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
-		RedrawRowAndBookmark(bookmarks_array[current_branch].snapshot.jump_frame);
+	{
+		tasedit_list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
+	}
 	if (slot != current_branch || changes_since_current_branch)
 		must_recalculate_branches_tree = true;
 	current_branch = slot;
@@ -429,8 +323,12 @@ void BOOKMARKS::set(int slot)
 	project.SetProjectChanged();
 
 	if (previous_frame >= 0 && previous_frame != currFrameCounter)
-		RedrawRowAndBookmark(previous_frame);
-	RedrawRowAndBookmark(currFrameCounter);
+	{
+		tasedit_list.RedrawRow(previous_frame);
+		RedrawChangedBookmarks(previous_frame);
+	}
+	tasedit_list.RedrawRow(currFrameCounter);
+	RedrawChangedBookmarks(currFrameCounter);
 
 	FCEU_DispMessage("Branch %d saved.", 0, slot);
 }
@@ -470,7 +368,7 @@ void BOOKMARKS::unleash(int slot)
 		{
 			if (bookmarks_array[slot].snapshot.checkMarkersDiff())
 			{
-				bookmarks_array[slot].snapshot.toMarkers();
+				bookmarks_array[slot].snapshot.copyToMarkers();
 				project.SetProjectChanged();
 				markers_changed = true;
 			}
@@ -496,7 +394,7 @@ void BOOKMARKS::unleash(int slot)
 			// didn't restore anything
 			bookmarks_array[slot].jump();
 		}
-	} else
+	} else if (jump_frame > 0)
 	{
 		// update Markers
 		if (TASEdit_bind_markers)
@@ -554,8 +452,10 @@ void BOOKMARKS::unleash(int slot)
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
-		RedrawRowAndBookmark(bookmarks_array[current_branch].snapshot.jump_frame);
-		RedrawRowAndBookmark(bookmarks_array[slot].snapshot.jump_frame);
+		tasedit_list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
+		tasedit_list.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
+		RedrawChangedBookmarks(bookmarks_array[slot].snapshot.jump_frame);
 	}
 	current_branch = slot;
 	changes_since_current_branch = false;
@@ -804,28 +704,6 @@ void BOOKMARKS::RedrawBranchesTree()
 	// finished
 	must_redraw_branches_tree = false;
 	InvalidateRect(hwndBranchesBitmap, 0, FALSE);
-}
-
-void BOOKMARKS::ChangeScreenshotBitmap()
-{
-	// uncompress
-	uLongf destlen = SCREENSHOT_SIZE;
-	int e = uncompress(&scr_ptr[0], &destlen, &bookmarks_array[item_under_mouse].saved_screenshot[0], bookmarks_array[item_under_mouse].saved_screenshot.size());
-	if (e != Z_OK && e != Z_BUF_ERROR)
-	{
-		// error decompressing
-		FCEU_printf("Error decompressing screenshot %d\n", item_under_mouse);
-		// at least fill bitmap with zeros
-		memset(&scr_ptr[0], 0, SCREENSHOT_SIZE);
-	}
-	screenshot_currently_shown = item_under_mouse;
-	RedrawScreenshotBitmap();
-}
-void BOOKMARKS::RedrawScreenshotBitmap()
-{
-	HBITMAP temp_bmp = (HBITMAP)SendMessage(scr_bmp_pic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)scr_bmp);
-	if (temp_bmp && temp_bmp != scr_bmp)
-		DeleteObject(temp_bmp);
 }
 
 // this is called by wndproc on WM_PAINT
@@ -1413,22 +1291,6 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		}
 	}
 	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
-}
-// ----------------------------------------------------------------------------------------
-LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	extern BOOKMARKS bookmarks;
-	switch(message)
-	{
-		case WM_CREATE:
-		{
-			// create static bitmap placeholder
-			bookmarks.scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
-			return 0;
-		}
-		default:
-			return DefWindowProc(hwnd, message, wParam, lParam);
-	}
 }
 
 

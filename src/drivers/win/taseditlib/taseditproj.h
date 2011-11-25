@@ -14,6 +14,7 @@ typedef std::set<int> SelectionFrames;
 #include "bookmarks.h"
 #include "tasedit_list.h"
 #include "tasedit_sel.h"
+#include "screenshot_display.h"
 
 #define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds
 

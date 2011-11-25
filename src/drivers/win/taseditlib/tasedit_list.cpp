@@ -27,6 +27,7 @@ WNDPROC hwndList_oldWndProc, hwndHeader_oldWndproc;
 
 // resources
 COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
+char list_save_id[LIST_ID_LEN] = "LIST";
 
 TASEDIT_LIST::TASEDIT_LIST()
 {
@@ -49,7 +50,7 @@ TASEDIT_LIST::TASEDIT_LIST()
 
 void TASEDIT_LIST::init()
 {
-	//free();
+	free();
 	hwndList = GetDlgItem(hwndTasEdit, IDC_LIST1);
 
 	// prepare the main listview
@@ -153,18 +154,16 @@ void TASEDIT_LIST::init()
 	if (currMovieData.fourscore) AddFourscore();
 
 	listItems = ListView_GetCountPerPage(hwndList);
-	// calculate scr_bmp coordinates (relative to the listview top-left corner
-	RECT temp_rect, parent_rect;
-	GetWindowRect(hwndTasEdit, &parent_rect);
-	GetWindowRect(hwndHeader, &temp_rect);
-	bookmarks.scr_bmp_x = temp_rect.left - parent_rect.left;
-	bookmarks.scr_bmp_y = temp_rect.bottom - parent_rect.top;
 
 	update();
 }
 void TASEDIT_LIST::free()
 {
-
+	if (himglist)
+	{
+		ImageList_Destroy(himglist);
+		himglist = 0;
+	}
 
 }
 
@@ -177,6 +176,36 @@ void TASEDIT_LIST::update()
 		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
 
 
+}
+
+void TASEDIT_LIST::save(EMUFILE *os)
+{
+	// write "LIST" string
+	os->fwrite(list_save_id, LIST_ID_LEN);
+	// write current top item
+	int top_item = ListView_GetTopIndex(hwndList);
+	write32le(top_item, os);
+
+}
+// returns true if couldn't load
+bool TASEDIT_LIST::load(EMUFILE *is)
+{
+	update();
+	// read "LIST" string
+	char save_id[LIST_ID_LEN];
+	if ((int)is->fread(save_id, LIST_ID_LEN) < LIST_ID_LEN) goto error;
+	if (strcmp(list_save_id, save_id)) goto error;		// string is not valid
+	// read current top item and scroll list there
+	int top_item;
+	if (!read32le(&top_item, is)) goto error;
+	ListView_EnsureVisible(hwndList, currMovieData.getNumRecords() - 1, FALSE);
+	ListView_EnsureVisible(hwndList, top_item, FALSE);
+
+	return false;
+error:
+	// scroll to the beginning
+	ListView_EnsureVisible(hwndList, 0, FALSE);
+	return true;
 }
 // ----------------------------------------------------------------------
 void TASEDIT_LIST::AddFourscore()
@@ -413,19 +442,19 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+					if(TASEdit_show_markers && markers.GetMarker(cell_y))
 						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
-					if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+					if(TASEdit_show_markers && markers.GetMarker(cell_y))
 						// this frame is also marked
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if(TASEdit_show_markers && (int)markers.markers_array.size() > cell_y && (markers.markers_array[cell_y] & MARKER_FLAG_BIT))
+				} else if(TASEdit_show_markers && markers.GetMarker(cell_y))
 				{
 					// marked frame
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;

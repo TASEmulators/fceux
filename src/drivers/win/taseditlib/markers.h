@@ -15,12 +15,21 @@ public:
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
+	void MakeCopy(std::vector<uint8> &destination_array);
+	void RestoreFromCopy(std::vector<uint8> &source_array, int until_frame = -1);
+
+	bool GetMarker(int frame);
+	int GetMarkersSize();
+
+	void SetMarker(int frame);
+	void ClearMarker(int frame);
+	void EraseMarker(int frame);
 	void ToggleMarker(int frame);
+
 	void insertEmpty(int at, int frames);
 	void truncateAt(int frame);
 
-	std::vector<uint8> markers_array;
-
 private:
+	std::vector<uint8> markers_array;
 
 };

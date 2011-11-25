@@ -937,6 +937,7 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\screenshot_display.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1408,6 +1409,7 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\screenshot_display.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\src\drivers\win\res.rc">

@@ -14,7 +14,7 @@ extern bool TASEdit_use_1p_rec;
 extern int TASEdit_superimpose;
 
 // resources
-char windowCaptions[5][30] = {	" (Recording All)",
+char recordingCaptions[5][30] = {	" (Recording All)",
 								" (Recording 1P)",
 								" (Recording 2P)",
 								" (Recording 3P)",
@@ -100,7 +100,7 @@ void RECORDER::RecheckRecordingRadioButtons()
 	}
 }
 
-void RECORDER::InputChangedRec()
+void RECORDER::InputChanged()
 {
 	bool changes_made = false;
 	// take previous values from current snapshot, new input from current movie

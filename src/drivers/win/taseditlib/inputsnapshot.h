@@ -15,7 +15,7 @@ public:
 
 	void toMovie(MovieData& md, int start = 0, int end = -1);
 	void toMarkers();
-	void copyToMarkers(int end);
+	void copyToMarkers(int end = -1);
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
@@ -37,6 +37,7 @@ public:
 	void inheritHotChanges(INPUT_SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_DeleteSelection(INPUT_SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of_hotchanges);
+	void inheritHotChanges_PasteInsert(INPUT_SNAPSHOT* source_of_hotchanges);
 	void fillHotChanges(INPUT_SNAPSHOT& inp, int start = 0, int end = -1);
 
 	void SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits);

@@ -4,8 +4,20 @@
 
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 
+extern HWND hwndTasEdit;
+
 extern MARKERS markers;
 extern TASEDIT_LIST tasedit_list;
+
+// resources
+char selectionText[] = "Selection: ";
+char selectionEmptyText[] = "Selection: no";
+char numTextRow[] = "1 row, ";
+char numTextRows[] = " rows, ";
+char numTextColumn[] = "1 column";
+char numTextColumns[] = " columns";
+char clipboardText[] = "Clipboard: ";
+char clipboardEmptyText[] = "Clipboard: empty";
 
 TASEDIT_SELECTION::TASEDIT_SELECTION()
 {
@@ -13,6 +25,12 @@ TASEDIT_SELECTION::TASEDIT_SELECTION()
 
 void TASEDIT_SELECTION::init(int new_size)
 {
+	hwndPrevMarker = GetDlgItem(hwndTasEdit, TASEDIT_PREV_MARKER);
+	hwndNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_NEXT_MARKER);
+	hwndFindBestMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_BEST_MARKER);
+	hwndFindNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_NEXT_MARKER);
+	hwndTextSelection = GetDlgItem(hwndTasEdit, IDC_TEXT_SELECTION);
+	hwndTextClipboard = GetDlgItem(hwndTasEdit, IDC_TEXT_CLIPBOARD);
 	// init vars
 	if (new_size > 0)
 		history_size = new_size + 1;
@@ -23,15 +41,23 @@ void TASEDIT_SELECTION::init(int new_size)
 	history_cursor_pos = -1;
 	// create initial selection
 	AddNewSelectionToHistory();
-
 	track_selection_changes = true;
+	reset();
+	RedrawTextClipboard();
 }
 void TASEDIT_SELECTION::free()
 {
 	// clear history
 	selections_history.resize(0);
 	history_total_items = 0;
+	temp_selection.clear();
 	clipboard_selection.clear();
+}
+void TASEDIT_SELECTION::reset()
+{
+	old_prev_marker_button_state = prev_marker_button_state = false;
+	old_next_marker_button_state = next_marker_button_state = false;
+	must_redraw_text = true;
 }
 
 void TASEDIT_SELECTION::update()
@@ -49,9 +75,138 @@ void TASEDIT_SELECTION::update()
 			if (!CurrentSelection().size()) break;
 		}
 	}
+	// update << and >> buttons
+	old_prev_marker_button_state = prev_marker_button_state;
+	prev_marker_button_state = ((Button_GetState(hwndPrevMarker) & BST_PUSHED) != 0);
+	if (prev_marker_button_state)
+	{
+		if (!old_prev_marker_button_state)
+		{
+			button_hold_time = clock();
+			JumpPrevMarker();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			JumpPrevMarker();
+		}
+	}
+	old_next_marker_button_state = next_marker_button_state;
+	next_marker_button_state = (Button_GetState(hwndNextMarker) & BST_PUSHED) != 0;
+	if (next_marker_button_state)
+	{
+		if (!old_next_marker_button_state)
+		{
+			button_hold_time = clock();
+			JumpNextMarker();
+		} else if (button_hold_time + HOLD_REPEAT_DELAY < clock())
+		{
+			JumpNextMarker();
+		}
+	}
+	// redraw selection info text of needed
+	if (must_redraw_text)
+	{
+		if (CurrentSelection().size())
+		{
+			char new_text[100];
+			strcpy(new_text, selectionText);
+			char num[11];
+			// rows
+			if (CurrentSelection().size() > 1)
+			{
+				_itoa(CurrentSelection().size(), num, 10);
+				strcat(new_text, num);
+				strcat(new_text, numTextRows);
+			} else
+			{
+				strcat(new_text, numTextRow);
+			}
+			// columns
+			int columns;	// in future the number of columns will depend on selected columns
+			if (currMovieData.fourscore) columns = 32; else columns = 16;
+			if (columns > 1)
+			{
+				_itoa(columns, num, 10);
+				strcat(new_text, num);
+				strcat(new_text, numTextColumns);
+			} else
+			{
+				strcat(new_text, numTextColumn);
+			}
+			SetWindowText(hwndTextSelection, new_text);
+		} else
+			SetWindowText(hwndTextSelection, selectionEmptyText);
+		must_redraw_text = false;
+	}
 
 }
 
+void TASEDIT_SELECTION::RedrawTextClipboard()
+{
+	if (clipboard_selection.size())
+	{
+		char new_text[100];
+		strcpy(new_text, clipboardText);
+		char num[11];
+		// rows
+		if (clipboard_selection.size() > 1)
+		{
+			_itoa(clipboard_selection.size(), num, 10);
+			strcat(new_text, num);
+			strcat(new_text, numTextRows);
+		} else
+		{
+			strcat(new_text, numTextRow);
+		}
+		// columns
+		int columns;	// in future the number of columns will depend on selected columns
+		if (currMovieData.fourscore) columns = 32; else columns = 16;
+		if (columns > 1)
+		{
+			_itoa(columns, num, 10);
+			strcat(new_text, num);
+			strcat(new_text, numTextColumns);
+		} else
+		{
+			strcat(new_text, numTextColumn);
+		}
+		SetWindowText(hwndTextClipboard, new_text);
+	} else
+		SetWindowText(hwndTextClipboard, clipboardEmptyText);
+}
+
+void TASEDIT_SELECTION::JumpPrevMarker()
+{
+	// jump to previous marker
+	int index = GetCurrentSelectionBeginning();
+	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
+	for (index--; index >= 0; index--)
+		if (markers.GetMarker(index)) break;
+	if (index >= 0)
+		JumpToFrame(index);
+	else
+		JumpToFrame(0);
+}
+void TASEDIT_SELECTION::JumpNextMarker()
+{
+	// jump to next marker
+	int index = GetCurrentSelectionBeginning();
+	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
+
+	int last_frame = currMovieData.getNumRecords()-1;
+	for (++index; index <= last_frame; ++index)
+		if (markers.GetMarker(index)) break;
+	if (index <= last_frame)
+		JumpToFrame(index);
+	else
+		JumpToFrame(last_frame);
+}
+void TASEDIT_SELECTION::JumpToFrame(int frame)
+{
+	ClearSelection();
+	SetRowSelection(frame);
+	tasedit_list.FollowSelection();
+}
+// ----------------------------------------------------------
 void TASEDIT_SELECTION::save(EMUFILE *os)
 {
 	// write "SELECTION" string
@@ -114,6 +269,7 @@ bool TASEDIT_SELECTION::load(EMUFILE *is)
 	if (loadSelection(clipboard_selection, is)) goto error;
 	// all ok
 	EnforceSelectionToList();
+	reset();
 	return false;
 error:
 	return true;
@@ -162,6 +318,8 @@ void TASEDIT_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 	else
 		for(int i = info->iFrom; i <= info->iTo; ++i)
 			CurrentSelection().erase(i);
+
+	must_redraw_text = true;
 }
 void TASEDIT_SELECTION::ItemChanged(NMLISTVIEW* info)
 {
@@ -193,6 +351,8 @@ void TASEDIT_SELECTION::ItemChanged(NMLISTVIEW* info)
 		else if(OFF) 
 			CurrentSelection().erase(item);
 	}
+
+	must_redraw_text = true;
 }
 // ----------------------------------------------------------
 void TASEDIT_SELECTION::AddNewSelectionToHistory()
@@ -242,6 +402,7 @@ void TASEDIT_SELECTION::MemorizeClipboardSelection()
 {
 	// copy currently strobed selection data to clipboard_selection
 	clipboard_selection = temp_selection;
+	RedrawTextClipboard();
 }
 void TASEDIT_SELECTION::ReselectClipboard()
 {
@@ -277,7 +438,6 @@ void TASEDIT_SELECTION::EnforceSelectionToList()
 void TASEDIT_SELECTION::SelectAll()
 {
 	ListView_SetItemState(tasedit_list.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
-	//RedrawList();
 }
 void TASEDIT_SELECTION::SetRowSelection(int index)
 {
@@ -304,10 +464,10 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 	// find markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
-		if (markers.markers_array[upper_marker] & MARKER_FLAG_BIT) break;
+		if (markers.GetMarker(upper_marker)) break;
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
-		if (markers.markers_array[lower_marker] & MARKER_FLAG_BIT) break;
+		if (markers.GetMarker(lower_marker)) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
 	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_SELECTED);
@@ -387,6 +547,11 @@ SelectionFrames* TASEDIT_SELECTION::MakeStrobe()
 SelectionFrames& TASEDIT_SELECTION::GetStrobedSelection()
 {
 	return temp_selection;
+}
+
+SelectionFrames& TASEDIT_SELECTION::GetInsertedSet()
+{
+	return inserted_set;
 }
 // this getter is only for inside-class use
 SelectionFrames& TASEDIT_SELECTION::CurrentSelection()
