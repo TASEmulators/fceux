@@ -192,8 +192,8 @@ OAKRA_Voice *OAKRA_Module_OutputDS::getVoice(OAKRA_Format &format) {
 	if(voice->dead)
 	{
 		delete voice;
-	}
-	else
+		voice = 0;
+	} else
 	{
 		((Data *)data)->voices.push_back(voice);
 	}
@@ -212,7 +212,10 @@ void OAKRA_Module_OutputDS::freeVoiceInternal(OAKRA_Voice *voice, bool internal)
 	if(j!=-1)
 		data->voices.erase(data->voices.begin()+j);
 	if(!internal)
+	{
 		delete voice;
+		voice = 0;
+	}
 	unlock();
 }
 
