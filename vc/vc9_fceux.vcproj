@@ -1864,6 +1864,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\drivers\win\taseditlib\screenshot_display.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditlib\screenshot_display.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\drivers\win\taseditlib\tasedit_list.cpp"
 						>
 					</File>
