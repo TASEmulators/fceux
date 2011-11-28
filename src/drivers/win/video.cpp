@@ -432,10 +432,9 @@ bool FCEUD_ShouldDrawInputAids()
 
 static void BlitScreenWindow(uint8 *XBuf);
 static void BlitScreenFull(uint8 *XBuf);
-//static uint8 *XBSave;
-void FCEUD_BlitScreen(uint8 *XBuf)
+
+static void FCEUD_VerticalSync()
 {
-	xbsave = XBuf;
 	if(!NoWaiting)
 	{
 		int ws;
@@ -453,6 +452,12 @@ void FCEUD_BlitScreen(uint8 *XBuf)
 				Sleep(0);
 		}
 	}
+}
+
+//static uint8 *XBSave;
+void FCEUD_BlitScreen(uint8 *XBuf)
+{
+	xbsave = XBuf;
 
 	if(fullscreen)
 	{
@@ -517,6 +522,9 @@ static void BlitScreenWindow(unsigned char *XBuf)
 	Blit8ToHigh(XBuf+FSettings.FirstSLine*256+VNSCLIP,ScreenLoc, VNSWID, FSettings.TotalScanlines(), pitch,specialmul,specialmul);
 
 	IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
+
+	//aquanull 2011-11-28 fix tearing
+	FCEUD_VerticalSync();
 
 	if(IDirectDrawSurface7_Blt(lpDDSPrimary, &drect,lpDDSBack,&srect,DDBLT_ASYNC,0)!=DD_OK)
 	{
@@ -585,6 +593,9 @@ static void BlitScreenFull(uint8 *XBuf)
 		}
 		PaletteChanged=0;
 	}
+
+	//aquanull 2011-11-28 fix tearing
+	FCEUD_VerticalSync();
 
 	if(vmodes[vmod].flags&VMDF_DXBLT)
 	{

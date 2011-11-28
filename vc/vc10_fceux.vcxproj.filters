@@ -49,6 +49,9 @@
     <Filter Include="utils">
       <UniqueIdentifier>{b826cbb1-8f65-48a4-89ca-a1b691426971}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pix">
+      <UniqueIdentifier>{19ba9ddc-37b7-4962-a3d7-9eb69929a8dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\asm.cpp" />
@@ -1427,56 +1430,74 @@
     <None Include="..\src\drivers\win\res\ICON_2.ico">
       <Filter>drivers\win\res</Filter>
     </None>
-    <None Include="..\src\drivers\win\res\te_arrow.bmp">
-      <Filter>drivers\win\res</Filter>
-    </None>
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
-    <None Include="..\src\drivers\win\res\bitmap1.bmp" />
-    <None Include="res\te_0.bmp" />
-    <None Include="res\te_1.bmp" />
-    <None Include="res\te_2.bmp" />
-    <None Include="res\te_3.bmp" />
-    <None Include="res\te_4.bmp" />
-    <None Include="res\te_5.bmp" />
-    <None Include="res\te_6.bmp" />
-    <None Include="res\te_7.bmp" />
-    <None Include="res\te_8.bmp" />
-    <None Include="res\te_9.bmp" />
-    <None Include="..\src\drivers\win\res\te_0.bmp" />
-    <None Include="..\src\drivers\win\res\te_1.bmp" />
-    <None Include="..\src\drivers\win\res\te_2.bmp" />
-    <None Include="..\src\drivers\win\res\te_3.bmp" />
-    <None Include="..\src\drivers\win\res\te_4.bmp" />
-    <None Include="..\src\drivers\win\res\te_5.bmp" />
-    <None Include="..\src\drivers\win\res\te_6.bmp" />
-    <None Include="..\src\drivers\win\res\te_7.bmp" />
-    <None Include="..\src\drivers\win\res\te_8.bmp" />
-    <None Include="..\src\drivers\win\res\te_9.bmp" />
-    <None Include="res\te_10.bmp" />
-    <None Include="res\te_11.bmp" />
-    <None Include="res\te_12.bmp" />
-    <None Include="res\te_13.bmp" />
-    <None Include="res\te_14.bmp" />
-    <None Include="res\te_15.bmp" />
-    <None Include="res\te_16.bmp" />
-    <None Include="res\te_17.bmp" />
-    <None Include="res\te_18.bmp" />
-    <None Include="res\te_19.bmp" />
-    <None Include="..\src\drivers\win\res\te_10.bmp" />
-    <None Include="..\src\drivers\win\res\te_11.bmp" />
-    <None Include="..\src\drivers\win\res\te_12.bmp" />
-    <None Include="..\src\drivers\win\res\te_13.bmp" />
-    <None Include="..\src\drivers\win\res\te_14.bmp" />
-    <None Include="..\src\drivers\win\res\te_15.bmp" />
-    <None Include="..\src\drivers\win\res\te_16.bmp" />
-    <None Include="..\src\drivers\win\res\te_17.bmp" />
-    <None Include="..\src\drivers\win\res\te_18.bmp" />
-    <None Include="..\src\drivers\win\res\te_19.bmp" />
-    <None Include="res\branch_spritesheet.png" />
-    <None Include="..\src\drivers\win\res\branch_spritesheet.png" />
-    <None Include="res\branch_spritesheet.bmp" />
-    <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
+    <None Include="..\src\drivers\win\res\branch_spritesheet.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_0.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_1.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_2.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_3.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_4.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_5.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_6.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_7.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_8.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_9.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_10.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_11.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_12.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_13.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_14.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_15.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_16.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_17.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_18.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_19.bmp">
+      <Filter>pix</Filter>
+    </None>
+    <None Include="..\src\drivers\win\res\te_arrow.bmp">
+      <Filter>pix</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
