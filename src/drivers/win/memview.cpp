@@ -1688,7 +1688,7 @@ void DoMemView() {
 	//static RECT al;
 
 	if (!GameInfo) {
-		FCEUD_PrintError("You must have a game loaded before you can use the Memory Viewer.");
+		FCEUD_PrintError("You must have a game loaded before you can use the Hex Editor.");
 		return;
 	}
 	//if (GameInfo->type==GIT_NSF) {

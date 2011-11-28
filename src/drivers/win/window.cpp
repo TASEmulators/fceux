@@ -2900,13 +2900,17 @@ void SaveMovieAs()
 
 void OpenRamSearch()
 {
-	reset_address_info();
-	RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC) RamSearchProc);
+	if (GameInfo)
+	{
+		reset_address_info();
+		RamSearchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMSEARCH), MainhWnd, (DLGPROC) RamSearchProc);
+	}
 }
 
 void OpenRamWatch()
 {
-	RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, (DLGPROC) RamWatchProc);
+	if (GameInfo)
+		RamWatchHWnd = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), MainhWnd, (DLGPROC) RamWatchProc);
 }
 
 void SaveSnapshotAs()

@@ -752,7 +752,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", EMUCMDFLAG_TASEDIT },
-	{ EMUCMD_MISC_OPENTASEDIT,				EMUCMDTYPE_TOOL,	LaunchTasEdit,  0, 0, "Open TAS Edit", 0},
+	{ EMUCMD_MISC_OPENTASEDIT,				EMUCMDTYPE_TOOL,	LaunchTasEdit,  0, 0, "Open TAS Editor", 0},
 	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", 0},
 	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
@@ -776,7 +776,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,	  0, 0, "Ram Search - Greater Than or Equal", 0},
 	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,	  0, 0, "Ram Search - Equal",	  0},
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
-	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_TOOL,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (Tasedit-only)", EMUCMDFLAG_TASEDIT},
+	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_TOOL,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (TASEditor-only)", EMUCMDFLAG_TASEDIT},
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUI_MovieToggleRerecordDisplay, 0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDIT },
 };
 
@@ -1017,58 +1017,75 @@ static void LaunchRamSearch(void)
 #endif
 }
 
-
 static void RamSearchOpLT(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(0);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(0);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
 static void RamSearchOpGT(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(1);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(1);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
 static void RamSearchOpLTE(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(2);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(2);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
 static void RamSearchOpGTE(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(3);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(3);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
 static void RamSearchOpEQ(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(4);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(4);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
 static void RamSearchOpNE(void) {
 #ifdef WIN32
-	extern void SetSearchType(int SearchType);
-	extern void DoRamSearchOperation();
-	SetSearchType(5);
-	DoRamSearchOperation();
+	if (GameInfo)
+	{
+		extern void SetSearchType(int SearchType);
+		extern void DoRamSearchOperation();
+		SetSearchType(5);
+		DoRamSearchOperation();
+	}
 #endif
 }
 
