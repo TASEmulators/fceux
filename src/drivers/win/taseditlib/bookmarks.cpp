@@ -41,14 +41,6 @@ int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 1, 2, 3, 4, 5, 5, 4, 3
 
 BOOKMARKS::BOOKMARKS()
 {
-	// create font
-	hBookmarksFont = CreateFont(15, 10,				/*Height,Width*/
-		0, 0,										/*escapement,orientation*/
-		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
-		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
-		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
-		"Courier");									/*font name*/
-		
 	// fill TrackMouseEvent struct
 	tme.cbSize = sizeof(tme);
 	tme.dwFlags = TME_LEAVE;
@@ -851,7 +843,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, hBookmarksFont);
+				SelectObject(msg->nmcd.hdc, tasedit_list.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{
@@ -882,7 +874,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, hBookmarksFont);
+				SelectObject(msg->nmcd.hdc, tasedit_list.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{

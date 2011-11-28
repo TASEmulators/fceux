@@ -33,18 +33,18 @@ TASEDIT_LIST::TASEDIT_LIST()
 {
 
 	// create fonts for main listview
-	hMainListFont = CreateFont(15, 10,				/*Height,Width*/
-		0, 0,										/*escapement,orientation*/
-		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
-		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
-		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
-		"Courier");									/*font name*/
-	hMainListSelectFont = CreateFont(14, 7,			/*Height,Width*/
+	hMainListFont = CreateFont(14, 7,				/*Height,Width*/
 		0, 0,										/*escapement,orientation*/
 		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");									/*font name*/
+	hMainListSelectFont = CreateFont(15, 10,		/*Height,Width*/
+		0, 0,										/*escapement,orientation*/
+		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+		"Courier New");								/*font name*/
 
 }
 
@@ -429,13 +429,12 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 
 		if(cell_x > COLUMN_ICONS)
 		{
-			SelectObject(msg->nmcd.hdc, hMainListFont);
 			// text color
 			if(TASEdit_enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
 			{
 				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
 			} else msg->clrText = NORMAL_TEXT_COLOR;
-			// bg color
+			// bg color and text font
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
 				// frame number
@@ -443,43 +442,59 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// undo hint here
 					if(TASEdit_show_markers && markers.GetMarker(cell_y))
+					{
+						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
-					else
+					} else
+					{
+						SelectObject(msg->nmcd.hdc, hMainListFont);
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
+					}
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
 					if(TASEdit_show_markers && markers.GetMarker(cell_y))
+					{
 						// this frame is also marked
+						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
-					else
+					} else
+					{
+						SelectObject(msg->nmcd.hdc, hMainListFont);
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
+					}
 				} else if(TASEdit_show_markers && markers.GetMarker(cell_y))
 				{
 					// marked frame
+					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
-				} else if(cell_y < greenzone.greenZoneCount)
+				} else
 				{
-					if (!greenzone.savestates[cell_y].empty())
+					SelectObject(msg->nmcd.hdc, hMainListFont);
+					if(cell_y < greenzone.greenZoneCount)
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
-					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
-							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
-						else
-							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
+						if (!greenzone.savestates[cell_y].empty())
+						{
+							if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+								msg->clrTextBk = LAG_FRAMENUM_COLOR;
+							else
+								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+						} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
+							|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
+							|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
+							|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
+						{
+							if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
+							else
+								msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
+						} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
+				}
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
+				SelectObject(msg->nmcd.hdc, hMainListFont);
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
@@ -510,6 +525,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
 				// pad 2 or 4
+				SelectObject(msg->nmcd.hdc, hMainListFont);
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here

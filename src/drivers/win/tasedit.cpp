@@ -65,7 +65,7 @@ bool TASEdit_jump_to_undo = true;
 // resources
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-char windowCaption[] = "TAS Editor";
+char windowCaptioBase[] = "TAS Editor";
 extern char recordingCaptions[5][30];
 
 // enterframe function
@@ -87,21 +87,21 @@ void UpdateTasEdit()
 
 void RedrawWindowCaption()
 {
-	char windowCapt[300];
-	strcpy(windowCapt, windowCaption);
+	char new_caption[300];
+	strcpy(new_caption, windowCaptioBase);
 	if (!movie_readonly)
-		strcat(windowCapt, recordingCaptions[recorder.multitrack_recording_joypad]);
+		strcat(new_caption, recordingCaptions[recorder.multitrack_recording_joypad]);
 	// add project name
 	std::string projectname = project.GetProjectName();
 	if (!projectname.empty())
 	{
-		strcat(windowCapt, " - ");
-		strcat(windowCapt, projectname.c_str());
+		strcat(new_caption, " - ");
+		strcat(new_caption, projectname.c_str());
 	}
 	// and * if project has unsaved changes
 	if (project.GetProjectChanged())
-		strcat(windowCapt, "*");
-	SetWindowText(hwndTasEdit, windowCapt);
+		strcat(new_caption, "*");
+	SetWindowText(hwndTasEdit, new_caption);
 }
 void RedrawTasedit()
 {
@@ -193,9 +193,7 @@ void SingleClick(LPNMITEMACTIVATE info)
 			else
 				history.RegisterChanges(MODTYPE_MARKER_UNSET, row_index);
 			project.SetProjectChanged();
-			// clear selection, so that new marker will be seen immediately
-			selection.ClearSelection();
-			// also no need to redraw row
+			tasedit_list.RedrawRow(row_index);
 		}
 	}
 	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
@@ -409,17 +407,22 @@ void ColumnSet(int column)
 		{
 			// set all
 			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+			{
 				markers.SetMarker(*it);
+				tasedit_list.RedrawRow(*it);
+			}
 			history.RegisterChanges(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
 		} else
 		{
 			// unset all
 			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+			{
 				markers.ClearMarker(*it);
+				tasedit_list.RedrawRow(*it);
+			}
 			history.RegisterChanges(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
 		}
 		project.SetProjectChanged();
-		selection.ClearSelection();
 		// no need to RedrawList();
 	} else
 	{
@@ -441,9 +444,12 @@ void ColumnSet(int column)
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 			currMovieData.records[*it].setBitValue(joy,button,newValue);
 		if (newValue)
+		{
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
-		else
+		} else
+		{
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
+		}
 	}
 }
 
@@ -1376,9 +1382,17 @@ void EnterTasEdit()
 
 		SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		// init modules
+		FCEU_printf("1");
 		greenzone.init();
+		FCEU_printf("2");
 		playback.init();
 		// either start new movie or use current movie
+		if (currMovieData.savestate.size() != 0)
+		{
+			FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
+			// delete savestate, but preserve input
+			currMovieData.savestate.clear();
+		}
 		if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		{
 			FCEUI_StopMovie();
@@ -1386,7 +1400,7 @@ void EnterTasEdit()
 			playback.StartFromZero();
 		} else
 		{
-			//use current movie to create a new project
+			// use current movie to create a new project
 			FCEUI_StopMovie();
 			greenzone.TryDumpIncremental(lagFlag != 0);
 		}
