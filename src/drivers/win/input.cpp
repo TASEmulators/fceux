@@ -751,7 +751,7 @@ static char *MakeButtString(ButtConfig *bc)
 			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
 			{
 				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
-				sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]); break;
+				sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]);
 			}
 		}
 		else if(bc->ButtType[x] == BUTTC_JOYSTICK)
