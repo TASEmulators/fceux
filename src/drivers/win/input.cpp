@@ -748,16 +748,10 @@ static char *MakeButtString(ButtConfig *bc)
 		if(bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
 			strcat(tmpstr,"KB: ");
-			if(!GetKeyNameText(bc->ButtonNum[x]<<16,tmpstr+strlen(tmpstr),16))
+			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
 			{
-				switch(bc->ButtonNum[x])
-				{
-				case 200: strcpy(tmpstr+strlen(tmpstr),"Up Arrow"); break;
-				case 203: strcpy(tmpstr+strlen(tmpstr),"Left Arrow"); break;
-				case 205: strcpy(tmpstr+strlen(tmpstr),"Right Arrow"); break;
-				case 208: strcpy(tmpstr+strlen(tmpstr),"Down Arrow"); break;
-				default: sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]); break;
-				}
+				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
+				sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]); break;
 			}
 		}
 		else if(bc->ButtType[x] == BUTTC_JOYSTICK)
@@ -942,7 +936,7 @@ int DWaitButton(HWND hParent, const uint8 *text, ButtConfig *bc)
 				{
 					LPARAM tmpo;
 
-					tmpo=((msg.lParam>>16)&0x7F)|((msg.lParam>>17)&0x80);
+					tmpo = ((msg.lParam >> 16) & 0x7F) | ((msg.lParam >> 17) & 0x80);
 					PostMessage(die,WM_USER+666,0,tmpo);
 					continue;
 				}
