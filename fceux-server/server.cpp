@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include <sys/param.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
@@ -49,7 +50,7 @@
 #define DEFAULT_CONFIG "/etc/fceu-server.conf"
 
 // MSG_NOSIGNAL and SOL_TCP have been depreciated on osx
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(BSD)
 #define MSG_NOSIGNAL SO_NOSIGPIPE
 #define SOL_TCP IPPROTO_TCP
 #endif
