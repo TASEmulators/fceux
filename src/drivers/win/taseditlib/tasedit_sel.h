@@ -56,6 +56,7 @@ public:
 
 private:
 	SelectionFrames& CurrentSelection();
+	void CheckClipboard();
 
 	bool track_selection_changes;
 	bool must_redraw_text;

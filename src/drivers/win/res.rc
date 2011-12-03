@@ -275,8 +275,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Bind Markers to Input",      ID_CONFIG_BINDMARKERSTOINPUT
         MENUITEM SEPARATOR
-        MENUITEM "&Use 1P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING
         MENUITEM "&Combine consecutive Recordings", ID_CONFIG_COMBINECONSECUTIVERECORDINGS
+        MENUITEM "&Use 1P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING
         MENUITEM "&Superimpose affects copy/paste", ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE
         MENUITEM SEPARATOR
         MENUITEM "Mute &Turbo",                 ID_CONFIG_MUTETURBO
@@ -368,6 +368,8 @@ BEGIN
     END
     POPUP "Selected"
     BEGIN
+        MENUITEM "Set Marker",                  ID_SELECTED_SETMARKER
+        MENUITEM "Remove Marker",               ID_SELECTED_REMOVEMARKER
         MENUITEM "Select mid &Markers",         ID_SELECTED_SELECTMIDMARKERS
         MENUITEM SEPARATOR
         MENUITEM "C&lear",                      ID_CONTEXT_SELECTED_CLEARFRAMES

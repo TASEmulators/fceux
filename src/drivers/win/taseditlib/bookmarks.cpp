@@ -272,17 +272,18 @@ void BOOKMARKS::set(int slot)
 	
 	bookmarks_array[slot].set();
 
-	// if this screenshot is shown on screen - reinit and redraw it
+	// if this screenshot is currently shown - reinit and redraw it
 	if (screenshot_display.screenshot_currently_shown == slot)
 		screenshot_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
+	int parent;
 	// inherit current branch
 	if (slot != current_branch)
 	{
-		int parent = bookmarks_array[slot].parent_branch;
+		parent = bookmarks_array[slot].parent_branch;
 		if (parent == -1 && saved_time[0])
 		{
-			// check if this is the only child of cloud parent, if so then set cloud time to the saved_time
+			// check if this was the only child of cloud parent, if so then set cloud time to the saved_time
 			int i = 0;
 			for (; i < TOTAL_BOOKMARKS; ++i)
 			{
@@ -293,13 +294,76 @@ void BOOKMARKS::set(int slot)
 				// didn't find another child of cloud
 				strcpy(cloud_time, saved_time);
 		}
-		// before disconnecting from old parent, connect all childs to the parent
+		// before disconnecting from old parent, connect all childs to the old parent
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		{
 			if (bookmarks_array[i].not_empty && bookmarks_array[i].parent_branch == slot)
 				bookmarks_array[i].parent_branch = parent;
 		}
 		bookmarks_array[slot].parent_branch = current_branch;
+	}
+
+	// if parent is invalid (first_change < parent.jump_frame) then find better parent
+	int factor;
+	// also if parent == cloud, then try to find better parent
+	parent = bookmarks_array[slot].parent_branch;
+	if (parent >= 0)
+		factor = bookmarks_array[slot].snapshot.findFirstChange(bookmarks_array[parent].snapshot);
+	if (parent < 0 || (factor >= 0 && factor < bookmarks_array[parent].snapshot.jump_frame))
+	{
+		// find highest frame of change
+		std::vector<int> DecisiveFactor(TOTAL_BOOKMARKS);
+		int best_branch = -1;
+		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+		{
+			if (i != slot && i != parent && bookmarks_array[i].not_empty && bookmarks_array[slot].snapshot.size >= bookmarks_array[i].snapshot.jump_frame)
+			{
+				factor = bookmarks_array[slot].snapshot.findFirstChange(bookmarks_array[i].snapshot);
+				if (factor < 0)
+				{
+					// this branch is identical to this slot
+					DecisiveFactor[i] = 2 * bookmarks_array[i].snapshot.size;
+				} else if (factor >= bookmarks_array[i].snapshot.jump_frame)
+				{
+					// hey, this branch could be our new parent...
+					DecisiveFactor[i] = 2 * factor;
+				} else
+					DecisiveFactor[i] = 0;
+			} else
+			{
+				DecisiveFactor[i] = 0;
+			}
+		}
+		// add +1 as a bonus to current parents and grandparents (a bit of nepotism!)
+		while (parent >= 0)
+		{
+			if (DecisiveFactor[parent])
+				DecisiveFactor[parent]++;
+			parent = bookmarks_array[parent].parent_branch;
+		}
+		// find max
+		factor = 0;
+		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+		{
+			if (DecisiveFactor[i] && DecisiveFactor[i] > factor)
+			{
+				factor = DecisiveFactor[i];
+				best_branch = i;
+			}
+		}
+		parent = bookmarks_array[slot].parent_branch;
+		if (parent != best_branch)
+		{
+			// before disconnecting from old parent, connect all childs to the old parent
+			for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+			{
+				if (bookmarks_array[i].not_empty && bookmarks_array[i].parent_branch == slot)
+					bookmarks_array[i].parent_branch = parent;
+			}
+			// found new parent
+			bookmarks_array[slot].parent_branch = best_branch;
+			must_recalculate_branches_tree = true;
+		}
 	}
 
 	// switch current branch to this branch
@@ -1041,7 +1105,7 @@ void BOOKMARKS::RecalculateBranchesTree()
 		// also define "current_pos" GridX
 		if (current_branch >= 0)
 		{
-			if (Children[current_branch+1].size() < MAX_NUM_CHILDREN)
+			if (Children[current_branch+1].size() < MAX_NUM_CHILDREN_ON_CANVAS_HEIGHT)
 			{
 				// "current_pos" becomes a child of current_branch
 				GridX[TOTAL_BOOKMARKS] = GridX[current_branch] + 1;
@@ -1053,8 +1117,8 @@ void BOOKMARKS::RecalculateBranchesTree()
 					RecursiveAddHeight(current_branch, 1);
 			} else
 			{
-				// special case 0: if there's too many items on one level (more than canvas can show)
-				// "current_pos" becomes special branch above current_branch
+				// special case 0: if there's too many children on one level (more than canvas can show)
+				// then "current_pos" becomes special branch above current_branch
 				GridX[TOTAL_BOOKMARKS] = GridX[current_branch];
 				GridY[TOTAL_BOOKMARKS] = GridY[current_branch] - 7;
 			}
@@ -1132,6 +1196,37 @@ void BOOKMARKS::RecalculateBranchesTree()
 			{
 				GridY[Children[parent+1][i]] = pos;
 				pos += 2;
+			}
+		}
+	}
+	// special case 4: if cloud has all 10 children, then one child will be out of canvas
+	if (Children[0].size() == TOTAL_BOOKMARKS)
+	{
+		// find this child and move it to be visible
+		for (int t = TOTAL_BOOKMARKS - 1; t >= 0; t--)
+		{
+			if (GridY[t] > MAX_GRID_Y_POS)
+			{
+				GridY[t] = MAX_GRID_Y_POS;
+				GridX[t] -= 2;
+				// also move fireball to position near this branch
+				if (changes_since_current_branch && current_branch == t)
+				{
+					GridY[TOTAL_BOOKMARKS] = GridY[t];
+					GridX[TOTAL_BOOKMARKS] = GridX[t] + 1;
+				}
+				break;
+			} else if (GridY[t] < -MAX_GRID_Y_POS)
+			{
+				GridY[t] = -MAX_GRID_Y_POS;
+				GridX[t] -= 2;
+				// also move fireball to position near this branch
+				if (changes_since_current_branch && current_branch == t)
+				{
+					GridY[TOTAL_BOOKMARKS] = GridY[t];
+					GridX[TOTAL_BOOKMARKS] = GridX[t] + 1;
+				}
+				break;
 			}
 		}
 	}

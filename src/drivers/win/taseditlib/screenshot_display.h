@@ -1,7 +1,8 @@
 //Specification file for SCREENSHOT_DISPLAY class
 
-#define SCR_BMP_PHASE_MAX 13
+#define SCR_BMP_PHASE_MAX 12
 #define SCR_BMP_PHASE_ALPHA_MAX 10
+#define SCR_BMP_DX 7
 
 #define DISPLAY_UPDATE_TICK 40		// update at 25FPS
 

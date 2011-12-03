@@ -62,12 +62,12 @@ void SCREENSHOT_DISPLAY::init()
 	}
 	HDC win_hdc = GetWindowDC(tasedit_list.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
-	// calculate coordinates (relative to the listview top-left corner)
+	// calculate coordinates (relative to IDC_BOOKMARKS_BOX top-left corner)
 	RECT temp_rect, parent_rect;
 	GetWindowRect(hwndTasEdit, &parent_rect);
-	GetWindowRect(tasedit_list.hwndHeader, &temp_rect);
-	scr_bmp_x = temp_rect.left - parent_rect.left;
-	scr_bmp_y = temp_rect.bottom - parent_rect.top;
+	GetWindowRect(GetDlgItem(hwndTasEdit, IDC_BOOKMARKS_BOX), &temp_rect);
+	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
+	scr_bmp_y = ((temp_rect.bottom + temp_rect.top - SCREENSHOT_HEIGHT) / 2) - parent_rect.top;
 }
 void SCREENSHOT_DISPLAY::free()
 {

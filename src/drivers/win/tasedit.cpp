@@ -108,39 +108,53 @@ void RedrawTasedit()
 	InvalidateRect(hwndTasEdit, 0, FALSE);
 }
 
-void ShowMenu(ECONTEXTMENU which, POINT& pt)
-{
-	HMENU sub = GetSubMenu(hrmenu,(int)which);
-	TrackPopupMenu(sub,0,pt.x,pt.y,TPM_RIGHTBUTTON,hwndTasEdit,0);
-}
-
 void StrayClickMenu(LPNMITEMACTIVATE info)
 {
 	POINT pt = info->ptAction;
 	ClientToScreen(tasedit_list.hwndList, &pt);
-	ShowMenu(CONTEXTMENU_STRAY, pt);
+	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
+	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEdit, 0);
 }
-
 void RightClickMenu(LPNMITEMACTIVATE info)
 {
 	POINT pt = info->ptAction;
 	ClientToScreen(tasedit_list.hwndList, &pt);
-	ShowMenu(CONTEXTMENU_SELECTED, pt);
-}
 
-void RightClick(LPNMITEMACTIVATE info)
-{
-	int index = info->iItem;
-	int column = info->iSubItem;
-
-	//stray clicks give a context menu:
-	if(index == -1)
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0)
 	{
 		StrayClickMenu(info);
 		return;
 	}
+	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_SELECTED);
+	// inspect current selection and disable inappropriate menu items
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	bool set_found = false, unset_found = false;
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		if(markers.GetMarker(*it))
+			set_found = true;
+		else 
+			unset_found = true;
+	}
+	if (set_found)
+		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+	if (unset_found)
+		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 
-	if (selection.CheckFrameSelected(index))
+	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEdit, 0);
+}
+void RightClick(LPNMITEMACTIVATE info)
+{
+	int index = info->iItem;
+	if(index == -1)
+		StrayClickMenu(info);
+	else if (selection.CheckFrameSelected(index))
 		RightClickMenu(info);
 }
 
@@ -382,74 +396,93 @@ void Truncate()
 	}
 }
 
-//the column set operation, for setting a button/Marker for a span of selected values
 void ColumnSet(int column)
+{
+	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
+		FrameColumnSet();
+	else
+		InputColumnSet(column);
+}
+void FrameColumnSet()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return;
-
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	SelectionFrames::iterator current_selection_end(current_selection->end());
-	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
+
+	// inspect the selected frames, if they are all set, then unset all, else set all
+	bool unset_found = false, changes_made = false;
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
-		// Markers column
-		// inspect the selected frames, if they are all set, then unset all, else set all
-		bool unset_found = false;
+		if(!markers.GetMarker(*it))
+		{
+			unset_found = true;
+			break;
+		}
+	}
+	if (unset_found)
+	{
+
+		// set all
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
 			if(!markers.GetMarker(*it))
 			{
-				unset_found = true;
-				break;
-			}
-		}
-		if (unset_found)
-		{
-			// set all
-			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-			{
+				changes_made = true;
 				markers.SetMarker(*it);
 				tasedit_list.RedrawRow(*it);
 			}
+		}
+		if (changes_made)
 			history.RegisterChanges(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-		} else
+	} else
+	{
+		// unset all
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			// unset all
-			for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+			if(markers.GetMarker(*it))
 			{
+				changes_made = true;
 				markers.ClearMarker(*it);
 				tasedit_list.RedrawRow(*it);
 			}
-			history.RegisterChanges(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
 		}
+		if (changes_made)
+			history.RegisterChanges(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
+	}
+	if (changes_made)
 		project.SetProjectChanged();
-		// no need to RedrawList();
+}
+void InputColumnSet(int column)
+{
+	int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+	if (joy < 0 || joy >= NUM_JOYPADS) return;
+	int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return;
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+
+	//inspect the selected frames, if they are all set, then unset all, else set all
+	bool newValue = false;
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		if(!(currMovieData.records[*it].checkBit(joy,button)))
+		{
+			newValue = true;
+			break;
+		}
+	}
+	// apply newValue
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+		currMovieData.records[*it].setBitValue(joy,button,newValue);
+	if (newValue)
+	{
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
 	} else
 	{
-		// buttons column
-		int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-		if (joy < 0 || joy >= NUM_JOYPADS) return;
-		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-		//inspect the selected frames, if they are all set, then unset all, else set all
-		bool newValue = false;
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if(!(currMovieData.records[*it].checkBit(joy,button)))
-			{
-				newValue = true;
-				break;
-			}
-		}
-		// apply newValue
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-			currMovieData.records[*it].setBitValue(joy,button,newValue);
-		if (newValue)
-		{
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
-		} else
-		{
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
-		}
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
 	}
 }
 
@@ -551,7 +584,7 @@ bool Paste()
 	{
 		char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
 
-		// TAS recording info starts with "TAS ".
+		// TAS recording info starts with "TAS "
 		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
 		{
 			// Extract number of frames
@@ -567,12 +600,11 @@ bool Paste()
 			int joy = 0;
 			uint8 new_buttons = 0;
 			char* frame;
-
 			--pos;
 			while (pGlobal++ && *pGlobal!='\0')
 			{
+				// Detect skipped frames in paste
 				frame = pGlobal;
-				// Detect skipped frames in paste.
 				if (frame[0]=='+')
 				{
 					pos += atoi(frame+1);
@@ -653,7 +685,7 @@ bool PasteInsert()
 	{
 		char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
 
-		// TAS recording info starts with "TAS ".
+		// TAS recording info starts with "TAS "
 		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
 		{
 			// make sure markers have the same size as movie
@@ -667,14 +699,13 @@ bool PasteInsert()
 
 
 			pGlobal = strchr(pGlobal, '\n');
+			char* frame;
 			int joy=0;
 			--pos;
-			
 			while (pGlobal++ && *pGlobal!='\0')
 			{
-				char *frame = pGlobal;
-
-				// Detect skipped frames in paste.
+				// Detect skipped frames in paste
+				frame = pGlobal;
 				if (frame[0]=='+')
 				{
 					pos += atoi(frame+1);
@@ -1322,6 +1353,57 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					tasedit_list.FollowSelection();
 					break;
 				}
+			case ID_SELECTED_SETMARKER:
+				{
+					SelectionFrames* current_selection = selection.MakeStrobe();
+					if (current_selection->size())
+					{
+						SelectionFrames::iterator current_selection_begin(current_selection->begin());
+						SelectionFrames::iterator current_selection_end(current_selection->end());
+						bool changes_made = false;
+						for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+						{
+							if(!markers.GetMarker(*it))
+							{
+								changes_made = true;
+								markers.SetMarker(*it);
+								tasedit_list.RedrawRow(*it);
+							}
+						}
+						if (changes_made)
+						{
+							history.RegisterChanges(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
+							project.SetProjectChanged();
+						}
+					}
+					break;
+				}
+			case ID_SELECTED_REMOVEMARKER:
+				{
+					SelectionFrames* current_selection = selection.MakeStrobe();
+					if (current_selection->size())
+					{
+						SelectionFrames::iterator current_selection_begin(current_selection->begin());
+						SelectionFrames::iterator current_selection_end(current_selection->end());
+						bool changes_made = false;
+						for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+						{
+							if(markers.GetMarker(*it))
+							{
+								changes_made = true;
+								markers.ClearMarker(*it);
+								tasedit_list.RedrawRow(*it);
+							}
+						}
+						if (changes_made)
+						{
+							history.RegisterChanges(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
+							project.SetProjectChanged();
+						}
+					}
+					break;
+				}
+
 
 			}
 			break;
@@ -1382,17 +1464,9 @@ void EnterTasEdit()
 
 		SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		// init modules
-		FCEU_printf("1");
 		greenzone.init();
-		FCEU_printf("2");
 		playback.init();
 		// either start new movie or use current movie
-		if (currMovieData.savestate.size() != 0)
-		{
-			FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-			// delete savestate, but preserve input
-			currMovieData.savestate.clear();
-		}
 		if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		{
 			FCEUI_StopMovie();
@@ -1401,6 +1475,12 @@ void EnterTasEdit()
 		} else
 		{
 			// use current movie to create a new project
+			if (currMovieData.savestate.size() != 0)
+			{
+				FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
+				// delete savestate, but preserve input
+				currMovieData.savestate.clear();
+			}
 			FCEUI_StopMovie();
 			greenzone.TryDumpIncremental(lagFlag != 0);
 		}

@@ -36,6 +36,8 @@ void DeleteFrames();
 void ClearFrames(SelectionFrames* current_selection = 0);
 void Truncate();
 void ColumnSet(int column);
+void InputColumnSet(int column);
+void FrameColumnSet();
 bool Copy(SelectionFrames* current_selection = 0);
 void Cut();
 bool Paste();

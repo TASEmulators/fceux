@@ -43,6 +43,9 @@ void TASEDIT_SELECTION::init(int new_size)
 	AddNewSelectionToHistory();
 	track_selection_changes = true;
 	reset();
+	
+	if (clipboard_selection.empty())
+		CheckClipboard();
 	RedrawTextClipboard();
 }
 void TASEDIT_SELECTION::free()
@@ -51,7 +54,6 @@ void TASEDIT_SELECTION::free()
 	selections_history.resize(0);
 	history_total_items = 0;
 	temp_selection.clear();
-	clipboard_selection.clear();
 }
 void TASEDIT_SELECTION::reset()
 {
@@ -413,6 +415,48 @@ void TASEDIT_SELECTION::ReselectClipboard()
 	EnforceSelectionToList();
 	// also keep selection within list
 	update();
+}
+// retrieves some information from clipboard to clipboard_selection
+void TASEDIT_SELECTION::CheckClipboard()
+{
+	if (OpenClipboard(hwndTasEdit))
+	{
+		// check if clipboard contains TAS Editor input data
+		HANDLE hGlobal = GetClipboardData(CF_TEXT);
+		if (hGlobal)
+		{
+			clipboard_selection.clear();
+			int current_pos = -1;
+			char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
+			// TAS recording info starts with "TAS "
+			if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
+			{
+				// Extract number of frames
+				int range;
+				sscanf (pGlobal+3, "%d", &range);
+				pGlobal = strchr(pGlobal, '\n');
+			
+				while (pGlobal++ && *pGlobal!='\0')
+				{
+					// Detect skipped frames in paste
+					char *frame = pGlobal;
+					if (frame[0]=='+')
+					{
+						current_pos += atoi(frame+1);
+						while (*frame && *frame != '\n' && *frame != '|')
+							++frame;
+						if (*frame=='|') ++frame;
+					} else
+						current_pos++;
+					clipboard_selection.insert(current_pos);
+					// skip input
+					pGlobal = strchr(pGlobal, '\n');
+				}
+			}
+			GlobalUnlock(hGlobal);
+		}
+		CloseClipboard();
+	}
 }
 // ----------------------------------------------------------
 void TASEDIT_SELECTION::ClearSelection()
