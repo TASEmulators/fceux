@@ -225,7 +225,7 @@ BEGIN
         MENUITEM "Save &Compact",               ID_FILE_SAVECOMPACT, INACTIVE
         MENUITEM "&Recent",                     ID_TASEDIT_FILE_RECENT
         MENUITEM SEPARATOR
-        MENUITEM "&Import FM2",                 ID_FILE_IMPORTFM2, INACTIVE
+        MENUITEM "&Import",                     ID_FILE_IMPORTFM2
         MENUITEM "&Export to FM2",              ID_FILE_EXPORTFM2
         MENUITEM SEPARATOR
         MENUITEM "&Close\tAlt+F4",              ID_TASEDIT_FILE_CLOSE
@@ -1414,6 +1414,18 @@ BEGIN
     LTEXT           "Clipboard: 0 rows, 16 columns",IDC_TEXT_CLIPBOARD,316,134,114,10
 END
 
+IDD_TASEDIT_EXPORT DIALOGEX 0, 0, 122, 73
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Export to FM2"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Export",IDOK,7,52,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,65,52,50,14
+    CONTROL         " 1 player",IDC_RADIO_1PLAYER,"Button",BS_AUTORADIOBUTTON,36,8,49,10
+    CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,36,21,49,10
+    CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,37,35,47,10
+END
+
 ASSEMBLER DIALOGEX 0, 0, 202, 135
 STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Inline Assembler"
@@ -1854,6 +1866,10 @@ BEGIN
         BOTTOMMARGIN, 121
     END
 
+    "GGCONV", DIALOG
+    BEGIN
+    END
+
     "MONITOR", DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1905,6 +1921,10 @@ BEGIN
         BOTTOMMARGIN, 213
     END
 
+    "PPUVIEW", DIALOG
+    BEGIN
+    END
+
     "ARCHIVECHOOSERDIALOG", DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -1936,10 +1956,49 @@ BEGIN
         TOPMARGIN, 8
         BOTTOMMARGIN, 268
     END
+
+    IDD_PROMPT, DIALOG
+    BEGIN
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Нейтральный resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Русский (Россия) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TASEDIT_EXPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 115
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 66
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

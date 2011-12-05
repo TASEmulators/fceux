@@ -1,7 +1,7 @@
 //Specification file for Input Snapshot class
 
 #define HOTCHANGE_BYTES_PER_JOY 4
-#define SNAPSHOT_DESC_MAX_LENGTH 50
+#define SNAPSHOT_DESC_MAX_LENGTH 100
 
 #define NUM_SUPPORTED_INPUT_TYPES 2
 #define NORMAL_2JOYPADS 0
@@ -11,7 +11,7 @@ class INPUT_SNAPSHOT
 {
 public:
 	INPUT_SNAPSHOT();
-	void init(MovieData& md, bool hotchanges);
+	void init(MovieData& md, bool hotchanges, int force_input_type = -1);
 
 	void toMovie(MovieData& md, int start = 0, int end = -1);
 	void toMarkers();

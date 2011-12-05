@@ -61,6 +61,7 @@ int TASEdit_autosave_period = AUTOSAVE_PERIOD_DEFAULT;
 extern bool muteTurbo;
 bool TASEdit_enable_hot_changes = true;
 bool TASEdit_jump_to_undo = true;
+int TASEdit_last_export_type = EXPORT_TYPE_1P;
 
 // resources
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TASEdit Help page
@@ -766,7 +767,7 @@ void OpenProject()
 {
 	if (!AskSaveProject()) return;
 
-	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";	
+	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";
 
 	OPENFILENAME ofn;
 	memset(&ofn,0,sizeof(ofn));
@@ -780,10 +781,10 @@ void OpenProject()
 	strcpy(nameo, mass_replace(GetRomName(),"|",".").c_str());	//convert | to . for archive filenames
 
 	ofn.lpstrFile=nameo;							
-	ofn.nMaxFile=256;
+	ofn.nMaxFile = 2048;
 	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
-	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);	
-	ofn.lpstrInitialDir=initdir.c_str();
+	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);	
+	ofn.lpstrInitialDir = initdir.c_str();
 
 	if(GetOpenFileName(&ofn))							//If it is a valid filename
 	{							
@@ -815,24 +816,23 @@ void OpenProject()
 // Saves current project
 bool SaveProjectAs()
 {
-	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";	//Filetype filter
-
+	const char filter[]="TASEdit Project (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hwndTasEdit;
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Save TASEdit Project As...";
-	ofn.lpstrFilter=TPfilter;
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Save TASEdit Project As...";
+	ofn.lpstrFilter = filter;
 
 	char nameo[2048];
 	strcpy(nameo, mass_replace(GetRomName(),"|",".").c_str());	//convert | to . for archive filenames
 	ofn.lpstrFile = nameo;
-	ofn.lpstrDefExt="tas";
-	ofn.nMaxFile=256;
-	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	string initdir =  FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
-	ofn.lpstrInitialDir=initdir.c_str();
+	ofn.lpstrDefExt = "tas";
+	ofn.nMaxFile = 2048;
+	ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
+	ofn.lpstrInitialDir = initdir.c_str();
 
 	if(GetSaveFileName(&ofn))								//If it is a valid filename
 	{
@@ -877,36 +877,142 @@ bool AskSaveProject()
 	return true;
 }
 
+extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 void Import()
 {
+	const char filter[] = "FCEUX Movie Files, TASEdit Projects\0*.fm2;*.tas\0All Files (*.*)\0*.*\0\0";
+	OPENFILENAME ofn;
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = hwndTasEdit;
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Import";
+	ofn.lpstrFilter = filter;
+	char nameo[2048] = {0};
+	ofn.lpstrFile = nameo;							
+	ofn.nMaxFile = 2048;
+	ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
+	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);	
+	ofn.lpstrInitialDir = initdir.c_str();
 
-
+	if(GetOpenFileName(&ofn))
+	{							
+		EMUFILE_FILE ifs(nameo, "rb");
+		// Load input to temporary moviedata
+		MovieData md;
+		if (LoadFM2(md, &ifs, ifs.size(), false))
+		{
+			// loaded successfully, now register changes
+			char drv[512], dir[512], name[1024], ext[512];
+			splitpath(nameo, drv, dir, name, ext);
+			strcat(name, ext);
+			history.RegisterImport(md, name);
+		} else
+		{
+			FCEUD_PrintError("Error loading movie data!");
+		}
+	}
 }
+
+BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 100, TasEdit_wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			switch (TASEdit_last_export_type)
+			{
+			case EXPORT_TYPE_1P:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_1PLAYER), BST_CHECKED);
+					break;
+				}
+			case EXPORT_TYPE_2P:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_2PLAYERS), BST_CHECKED);
+					break;
+				}
+			case EXPORT_TYPE_FOURSCORE:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_FOURSCORE), BST_CHECKED);
+					break;
+				}
+			}
+			return TRUE;
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDC_RADIO_1PLAYER:
+					TASEdit_last_export_type = EXPORT_TYPE_1P;
+					break;
+				case IDC_RADIO_2PLAYERS:
+					TASEdit_last_export_type = EXPORT_TYPE_2P;
+					break;
+				case IDC_RADIO_FOURSCORE:
+					TASEdit_last_export_type = EXPORT_TYPE_FOURSCORE;
+					break;
+				case IDOK:
+					EndDialog(hwndDlg, 1);
+					return TRUE;
+				case IDCANCEL:
+					EndDialog(hwndDlg, 0);
+					return TRUE;
+			}
+	}
+	return FALSE; 
+} 
+
 void Export()
 {
-	//TODO: redesign this
-	//Dump project header info into file, then comments & subtitles, then input log
-	//This will require special prunctions, ::DumpHeader  ::DumpComments etc
-	const char filter[]="FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
-	char fname[2048] = {0};
-	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
-	ofn.hwndOwner = hwndTasEdit;
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Export TAS as...";
-	ofn.lpstrFilter=filter;
-	ofn.lpstrFile=fname;
-	ofn.lpstrDefExt="fm2";
-	ofn.nMaxFile=256;
-	std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
-	ofn.lpstrInitialDir=initdir.c_str();
-	if(GetSaveFileName(&ofn))
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_EXPORT), hwndTasEdit, ExportProc) > 0)
 	{
-		EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
-		currMovieData.dump(osRecordingMovie,false);
-		delete osRecordingMovie;
-		osRecordingMovie = 0;
+		const char filter[] = "FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
+		char fname[2048] = {0};
+		OPENFILENAME ofn;
+		memset(&ofn, 0, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwndTasEdit;
+		ofn.hInstance = fceu_hInstance;
+		ofn.lpstrTitle = "Export to FM2";
+		ofn.lpstrFilter = filter;
+		ofn.lpstrFile = fname;
+		ofn.lpstrDefExt = "fm2";
+		ofn.nMaxFile = 2048;
+		ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+		std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
+		ofn.lpstrInitialDir = initdir.c_str();
+		if(GetSaveFileName(&ofn))
+		{
+			EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
+			// create copy of current movie data
+			MovieData temp_md = currMovieData;
+			// modify the copy according to selected type of export
+			switch (TASEdit_last_export_type)
+			{
+			case EXPORT_TYPE_1P:
+				{
+					temp_md.fourscore = false;
+					temp_md.ports[0] = SI_GAMEPAD;
+					temp_md.ports[1] = SI_NONE;
+					break;
+				}
+			case EXPORT_TYPE_2P:
+				{
+					temp_md.fourscore = false;
+					temp_md.ports[0] = SI_GAMEPAD;
+					temp_md.ports[1] = SI_GAMEPAD;
+					break;
+				}
+			case EXPORT_TYPE_FOURSCORE:
+				{
+					temp_md.fourscore = true;
+					break;
+				}
+			}
+			temp_md.dump(osRecordingMovie, false);
+			delete osRecordingMovie;
+			osRecordingMovie = 0;
+		}
 	}
 }
 
@@ -926,10 +1032,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				if (!IsIconic(hwndDlg))
 				{
 					RECT wrect;
-					GetWindowRect(hwndDlg,&wrect);
+					GetWindowRect(hwndDlg, &wrect);
 					TasEdit_wndx = wrect.left;
 					TasEdit_wndy = wrect.top;
-					WindowBoundsCheckNoResize(TasEdit_wndx,TasEdit_wndy,wrect.right);
+					WindowBoundsCheckNoResize(TasEdit_wndx, TasEdit_wndy, wrect.right);
 					// also move screenshot display if it's open
 					screenshot_display.ParentWindowMoved();
 				}
@@ -1422,8 +1528,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 void EnterTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return;
-	// window stuff
-	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT",hAppWnd,WndprocTasEdit);
+	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
 	if(hwndTasEdit)
 	{
 		// save "eoptions"

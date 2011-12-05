@@ -70,7 +70,7 @@ void INPUT_HISTORY::init(int new_size)
 	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
 	LVCOLUMN lvc;
 	lvc.mask = LVCF_WIDTH | LVCF_FMT;
-	lvc.cx = 200;
+	lvc.cx = 500;
 	lvc.fmt = LVCFMT_LEFT;
 	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 	// init vars
@@ -158,7 +158,6 @@ int INPUT_HISTORY::jump(int new_pos)
 	int first_change = input_snapshots[real_pos].findFirstChange(currMovieData);
 	if (first_change >= 0)
 	{
-		currMovieData.records.resize(input_snapshots[real_pos].size);
 		input_snapshots[real_pos].toMovie(currMovieData, first_change);
 		bookmarks.ChangesMadeSinceBranch();
 		// list will be redrawn by greenzone invalidation
@@ -259,7 +258,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 		return -1;
 	} else
 	{
-		// all other types of modification:
+		// other types of modification:
 		// check if there are input differences from latest snapshot
 		int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 		int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
@@ -276,7 +275,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 				case MODTYPE_TRUNCATE:
 				case MODTYPE_CLEAR:
 				case MODTYPE_CUT:
-				case MODTYPE_IMPORT:
 				{
 					inp.jump_frame = first_changes;
 					break;
@@ -331,10 +329,6 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 					case MODTYPE_TRUNCATE:
 						inp.copyHotChanges(&input_snapshots[real_pos]);
 						// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
-						break;
-					case MODTYPE_IMPORT:
-						// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
-						inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
 						break;
 				}
 			}
@@ -444,6 +438,40 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 		AddInputSnapshotToHistory(inp);
 	}
 	bookmarks.ChangesMadeSinceBranch();
+}
+void INPUT_HISTORY::RegisterImport(MovieData& md, char* filename)
+{
+	// create new input snapshot
+	INPUT_SNAPSHOT inp;
+	inp.init(md, TASEdit_enable_hot_changes, (currMovieData.fourscore)?FOURSCORE:NORMAL_2JOYPADS);
+	// check if there are input differences from latest snapshot
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	int first_changes = inp.findFirstChange(input_snapshots[real_pos]);
+	if (first_changes >= 0)
+	{
+		// differences found
+		inp.mod_type = MODTYPE_IMPORT;
+		inp.jump_frame = first_changes;
+		// fill description:
+		strcat(inp.description, modCaptions[inp.mod_type]);
+		// add filename to description
+		strcat(inp.description, " ");
+		strncat(inp.description, filename, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+		if (TASEdit_enable_hot_changes)
+		{
+			// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
+			inp.fillHotChanges(input_snapshots[real_pos], first_changes);
+		}
+		AddInputSnapshotToHistory(inp);
+		inp.toMovie(currMovieData);
+		tasedit_list.update();
+		bookmarks.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
+		greenzone.InvalidateAndCheck(first_changes);
+	} else
+	{
+		MessageBox(hwndTasEdit, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
+	}
 }
 
 void INPUT_HISTORY::save(EMUFILE *os)

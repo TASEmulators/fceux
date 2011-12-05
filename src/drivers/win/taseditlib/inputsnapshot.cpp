@@ -14,17 +14,20 @@ INPUT_SNAPSHOT::INPUT_SNAPSHOT()
 {
 }
 
-void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
+void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 {
 	has_hot_changes = hotchanges;
-	already_compressed = false;
+	if (force_input_type < 0)
+		input_type = (md.fourscore)?FOURSCORE:NORMAL_2JOYPADS;
+	else
+		input_type = force_input_type;
 	// retrieve input data from movie data
 	size = md.getNumRecords();
-	input_type = (md.fourscore)?1:0;
 	joysticks.resize(bytes_per_frame[input_type] * size);		// it's much faster to have this format than have [frame][joy] or other structures
 	commands.resize(size);
 	if (has_hot_changes)
 		hot_changes.resize(bytes_per_frame[input_type] * size * HOTCHANGE_BYTES_PER_JOY);
+
 	// fill input vector
 	int pos = 0;
 	switch(input_type)
@@ -52,9 +55,14 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges)
 			break;
 		}
 	}
+
 	// make a copy of markers.markers_array
 	markers.MakeCopy(markers_array);
+	if ((int)markers_array.size() < size)
+		markers_array.resize(size);
+
 	coherent = true;
+	already_compressed = false;
 	// save time to description
 	time_t raw_time;
 	time(&raw_time);
@@ -71,6 +79,7 @@ void INPUT_SNAPSHOT::toMovie(MovieData& md, int start, int end)
 {
 	if (end < 0) end = size-1;
 	// write input data to movie data
+	md.records.resize(size);
 	switch(input_type)
 	{
 		case FOURSCORE:

@@ -65,6 +65,7 @@ public:
 	int RegisterChanges(int mod_type, int start = 0, int end =-1);
 	void RegisterBranching(int mod_type, int first_change, int slot);
 	void RegisterRecording(int frame_of_change);
+	void RegisterImport(MovieData& md, char* filename);
 
 	INPUT_SNAPSHOT& GetCurrentSnapshot();
 	INPUT_SNAPSHOT& GetNextToCurrentSnapshot();

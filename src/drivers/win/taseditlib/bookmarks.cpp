@@ -434,7 +434,6 @@ void BOOKMARKS::unleash(int slot)
 		if (first_change >= 0)
 		{
 			// restore entire movie
-			currMovieData.records.resize(bookmarks_array[slot].snapshot.size);
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
 			tasedit_list.update();
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);

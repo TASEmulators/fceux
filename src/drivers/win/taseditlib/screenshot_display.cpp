@@ -62,7 +62,7 @@ void SCREENSHOT_DISPLAY::init()
 	}
 	HDC win_hdc = GetWindowDC(tasedit_list.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
-	// calculate coordinates (relative to IDC_BOOKMARKS_BOX top-left corner)
+	// calculate coordinates (relative to IDC_BOOKMARKS_BOX)
 	RECT temp_rect, parent_rect;
 	GetWindowRect(hwndTasEdit, &parent_rect);
 	GetWindowRect(GetDlgItem(hwndTasEdit, IDC_BOOKMARKS_BOX), &temp_rect);

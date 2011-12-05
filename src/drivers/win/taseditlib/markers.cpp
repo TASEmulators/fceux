@@ -72,7 +72,6 @@ void MARKERS::MakeCopy(std::vector<uint8> &destination_array)
 	destination_array = markers_array;
 	// copy notes
 
-
 }
 void MARKERS::RestoreFromCopy(std::vector<uint8> &source_array, int until_frame)
 {
@@ -82,7 +81,7 @@ void MARKERS::RestoreFromCopy(std::vector<uint8> &source_array, int until_frame)
 		if ((int)markers_array.size() <= until_frame) markers_array.resize(until_frame+1);
 		for (int i = until_frame; i >= 0; i--)
 			markers_array[i] = source_array[i];
-		// restore notes
+		// restore some notes
 
 	} else
 	{

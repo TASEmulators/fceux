@@ -776,7 +776,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,	  0, 0, "Ram Search - Greater Than or Equal", 0},
 	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,	  0, 0, "Ram Search - Equal",	  0},
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
-	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_TOOL,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (TASEditor-only)", EMUCMDFLAG_TASEDIT},
+	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_MISC,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (TASEditor-only)", EMUCMDFLAG_TASEDIT},
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUI_MovieToggleRerecordDisplay, 0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDIT },
 };
 

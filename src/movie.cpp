@@ -349,11 +349,6 @@ void MovieRecord::dumpBinary(MovieData* md, EMUFILE* os, int index)
 
 void MovieRecord::dump(MovieData* md, EMUFILE* os, int index)
 {
-	if (false/*currMovieData.binaryFlag*/)
-	{
-		dumpBinary(md, os, index);
-		return;
-	}
 	//dump the misc commands
 	//*os << '|' << setw(1) << (int)commands;
 	os->fputc('|');
@@ -491,7 +486,7 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	if(binary)
 		os->fprintf("binary 1\n" );
 		
-	if(savestate.size() != 0)
+	if(savestate.size())
 		os->fprintf("savestate %s\n" , BytesToString(&savestate[0],savestate.size()).c_str() );
 
 	if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
@@ -502,11 +497,12 @@ int MovieData::dump(EMUFILE *os, bool binary)
 		//put one | to start the binary dump
 		os->fputc('|');
 		for(int i=0;i<(int)records.size();i++)
-			records[i].dumpBinary(this,os,i);
-	}
-	else
+			records[i].dumpBinary(this, os, i);
+	} else
+	{
 		for(int i=0;i<(int)records.size();i++)
-			records[i].dump(this,os,i);
+			records[i].dump(this, os, i);
+	}
 
 	int end = os->ftell();
 	return end-start;
@@ -994,7 +990,7 @@ void FCEUMOV_AddInputState()
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
 		if(movie_readonly || turbo || playback.pause_frame > currFrameCounter)
 		{
-			// do not record buttons
+			// replay buttons
 			if(mr->command_reset())
 				ResetNES();
 			if(mr->command_fds_insert())
@@ -1360,7 +1356,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			if (currFrameCounter > (int)tempMovieData.records.size())
 			{
 				//This is a post movie savestate, handle it differently
-				//Recplae movie contents but then switch to movie finished mode
+				//Replace movie contents but then switch to movie finished mode
 				currMovieData = tempMovieData;	
 				openRecordingMovie(curMovieFilename);
 				currMovieData.dump(osRecordingMovie, false/*currMovieData.binaryFlag*/);

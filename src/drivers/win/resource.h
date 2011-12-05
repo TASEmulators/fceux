@@ -180,6 +180,8 @@
 #define IDB_BITMAP18                    181
 #define IDB_BITMAP19                    182
 #define IDB_BRANCH_SPRITESHEET          184
+#define IDD_DIALOG4                     185
+#define IDD_TASEDIT_EXPORT              185
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -535,6 +537,9 @@
 #define CHECK_TURBO_SEEK                1266
 #define IDC_TEXT_SELECTION              1267
 #define IDC_TEXT_CLIPBOARD              1268
+#define IDC_RADIO_1PLAYER               1269
+#define IDC_RADIO_2PLAYERS              1270
+#define IDC_RADIO_FOURSCORE             1271
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -924,9 +929,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        185
+#define _APS_NEXT_RESOURCE_VALUE        186
 #define _APS_NEXT_COMMAND_VALUE         40501
-#define _APS_NEXT_CONTROL_VALUE         1269
+#define _APS_NEXT_CONTROL_VALUE         1270
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

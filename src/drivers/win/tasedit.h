@@ -10,6 +10,10 @@
 #define AUTOSAVE_PERIOD_MAX 60			// 1 hour
 #define AUTOSAVE_PERIOD_DEFAULT 10		// in minutes
 
+#define EXPORT_TYPE_1P 0
+#define EXPORT_TYPE_2P 1
+#define EXPORT_TYPE_FOURSCORE 2
+
 enum ECONTEXTMENU
 {
 	CONTEXTMENU_STRAY = 0,

@@ -70,8 +70,6 @@ bool TASEDIT_PROJECT::saveProject()
 }
 
 extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
-
-
 bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 {
 	const char* filename = PFN.c_str();
@@ -81,8 +79,14 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	FCEU_printf("\nLoading TASEdit project %s\n", filename);
 
 	bool error;
-	LoadFM2(currMovieData, &ifs, ifs.size(), false);
-	LoadSubtitles(currMovieData);
+	if (LoadFM2(currMovieData, &ifs, ifs.size(), false))
+	{
+		LoadSubtitles(currMovieData);
+	} else
+	{
+		FCEU_printf("Error loading movie data\n");
+		error = true;
+	}
 	// try to load markers
 	error = markers.load(&ifs);
 	if (error)
