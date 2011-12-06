@@ -17,12 +17,12 @@ public:
 	GREENZONE();
 	void init();
 	void reset();
+	void free();
 	void update();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
-	void clearGreenzone();
 	void TryDumpIncremental(bool lagFlag = true);
 
 	bool loadTasSavestate(int frame);

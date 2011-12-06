@@ -6,9 +6,10 @@ class TASEDIT_SELECTION
 {
 public:
 	TASEDIT_SELECTION();
-	void init(int new_size = 0);
+	void init();
 	void free();
 	void reset();
+	void reset_vars();
 	void update();
 
 	void RedrawTextClipboard();

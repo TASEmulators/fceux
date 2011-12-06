@@ -21,7 +21,7 @@ void BOOKMARK::init()
 	not_empty = false;
 	flash_type = flash_phase = 0;
 	snapshot.jump_frame = -1;
-	parent_branch = -1;		// -1 = root
+	parent_branch = -1;		// -1 = root (cloud)
 }
 
 void BOOKMARK::set()

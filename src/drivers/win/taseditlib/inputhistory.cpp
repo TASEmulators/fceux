@@ -7,6 +7,7 @@ extern bool TASEdit_bind_markers;
 extern bool TASEdit_enable_hot_changes;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_combine_consecutive_rec;
+extern int TasEdit_undo_levels;
 
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndHistoryList_oldWndProc;
@@ -61,7 +62,7 @@ INPUT_HISTORY::INPUT_HISTORY()
 {
 }
 
-void INPUT_HISTORY::init(int new_size)
+void INPUT_HISTORY::init()
 {
 	// prepare the history listview
 	hwndHistoryList = GetDlgItem(hwndTasEdit, IDC_HISTORYLIST);
@@ -73,13 +74,21 @@ void INPUT_HISTORY::init(int new_size)
 	lvc.cx = 500;
 	lvc.fmt = LVCFMT_LEFT;
 	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
+
+	reset();
+}
+void INPUT_HISTORY::free()
+{
+	input_snapshots.resize(0);
+	history_total_items = 0;
+}
+void INPUT_HISTORY::reset()
+{
+	free();
 	// init vars
-	if (new_size > 0)
-		history_size = new_size + 1;
+	history_size = TasEdit_undo_levels + 1;
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
-	// clear snapshots history
-	free();
 	input_snapshots.resize(history_size);
 	history_start_pos = 0;
 	history_cursor_pos = -1;
@@ -89,16 +98,9 @@ void INPUT_HISTORY::init(int new_size)
 	strcat(inp.description, modCaptions[0]);
 	inp.jump_frame = -1;
 	AddInputSnapshotToHistory(inp);
-
 	UpdateHistoryList();
 	RedrawHistoryList();
 }
-void INPUT_HISTORY::free()
-{
-	input_snapshots.resize(0);
-	history_total_items = 0;
-}
-
 void INPUT_HISTORY::update()
 {
 	// update undo_hint

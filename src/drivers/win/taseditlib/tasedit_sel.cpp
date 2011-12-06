@@ -5,6 +5,7 @@
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 
 extern HWND hwndTasEdit;
+extern int TasEdit_undo_levels;
 
 extern MARKERS markers;
 extern TASEDIT_LIST tasedit_list;
@@ -23,7 +24,7 @@ TASEDIT_SELECTION::TASEDIT_SELECTION()
 {
 }
 
-void TASEDIT_SELECTION::init(int new_size)
+void TASEDIT_SELECTION::init()
 {
 	hwndPrevMarker = GetDlgItem(hwndTasEdit, TASEDIT_PREV_MARKER);
 	hwndNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_NEXT_MARKER);
@@ -31,19 +32,9 @@ void TASEDIT_SELECTION::init(int new_size)
 	hwndFindNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_NEXT_MARKER);
 	hwndTextSelection = GetDlgItem(hwndTasEdit, IDC_TEXT_SELECTION);
 	hwndTextClipboard = GetDlgItem(hwndTasEdit, IDC_TEXT_CLIPBOARD);
-	// init vars
-	if (new_size > 0)
-		history_size = new_size + 1;
-	// clear selections history
-	free();
-	selections_history.resize(history_size);
-	history_start_pos = 0;
-	history_cursor_pos = -1;
-	// create initial selection
-	AddNewSelectionToHistory();
-	track_selection_changes = true;
-	reset();
 	
+	reset();
+
 	if (clipboard_selection.empty())
 		CheckClipboard();
 	RedrawTextClipboard();
@@ -57,11 +48,24 @@ void TASEDIT_SELECTION::free()
 }
 void TASEDIT_SELECTION::reset()
 {
+	free();
+	// init vars
+	history_size = TasEdit_undo_levels + 1;
+	selections_history.resize(history_size);
+	history_start_pos = 0;
+	history_cursor_pos = -1;
+	// create initial selection
+	ClearSelection();
+	AddNewSelectionToHistory();
+	track_selection_changes = true;
+	reset_vars();
+}
+void TASEDIT_SELECTION::reset_vars()
+{
 	old_prev_marker_button_state = prev_marker_button_state = false;
 	old_next_marker_button_state = next_marker_button_state = false;
 	must_redraw_text = true;
 }
-
 void TASEDIT_SELECTION::update()
 {
 	// keep selection within movie limits
@@ -271,7 +275,7 @@ bool TASEDIT_SELECTION::load(EMUFILE *is)
 	if (loadSelection(clipboard_selection, is)) goto error;
 	// all ok
 	EnforceSelectionToList();
-	reset();
+	reset_vars();
 	return false;
 error:
 	return true;

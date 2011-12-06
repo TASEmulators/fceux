@@ -9,6 +9,7 @@ class MARKERS
 public:
 	MARKERS();
 	void init();
+	void reset();
 	void free();
 	void update();
 

@@ -89,8 +89,9 @@ class BOOKMARKS
 public:
 	BOOKMARKS();
 	void init();
-	void reset();
 	void free();
+	void reset();
+	void reset_vars();
 	void update();
 
 	void save(EMUFILE *os);

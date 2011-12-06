@@ -11,6 +11,10 @@ MARKERS::MARKERS()
 
 void MARKERS::init()
 {
+	reset();
+}
+void MARKERS::reset()
+{
 	free();
 	update();
 }

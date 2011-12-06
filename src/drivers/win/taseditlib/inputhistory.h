@@ -48,9 +48,9 @@ class INPUT_HISTORY
 {
 public:
 	INPUT_HISTORY();
-	void init(int new_size = 0);
+	void init();
 	void free();
-
+	void reset();
 	void update();		// called every frame
 
 	void save(EMUFILE *os);

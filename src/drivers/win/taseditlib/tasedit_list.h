@@ -90,6 +90,7 @@ public:
 	TASEDIT_LIST();
 	void init();
 	void free();
+	void reset();
 	void update();
 
 	void save(EMUFILE *os);

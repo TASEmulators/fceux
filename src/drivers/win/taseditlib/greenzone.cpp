@@ -23,14 +23,27 @@ GREENZONE::GREENZONE()
 
 void GREENZONE::init()
 {
-	clearGreenzone();
 	reset();
 	next_cleaning_time = clock() + TIME_BETWEEN_CLEANINGS;
 }
+void GREENZONE::free()
+{
+	int size = savestates.size();
+	for (int i = 0; i < size; ++i)
+	{
+		ClearSavestate(i);
+	}
+	savestates.resize(0);
+	greenZoneCount = 0;
+	lag_history.resize(0);
+	// reset lua_colorings
+	// reset monitorings
+	
+}
 void GREENZONE::reset()
 {
+	free();
 	lag_history.resize(currMovieData.getNumRecords());
-
 }
 void GREENZONE::update()
 {
@@ -169,21 +182,6 @@ void GREENZONE::ClearSavestate(int index)
     savestates[index].swap(tmp);
 }
 
-void GREENZONE::clearGreenzone()
-{
-	int size = savestates.size();
-	for (int i = 0; i < size; ++i)
-	{
-		ClearSavestate(i);
-	}
-	savestates.resize(0);
-	greenZoneCount = 0;
-	lag_history.resize(0);
-	// reset lua_colorings
-	// reset monitorings
-	
-}
-
 void GREENZONE::save(EMUFILE *os)
 {
 	int frame, size;
@@ -226,7 +224,7 @@ void GREENZONE::save(EMUFILE *os)
 // returns true if couldn't load
 bool GREENZONE::load(EMUFILE *is)
 {
-	clearGreenzone();
+	free();
 	int frame = 0, prev_frame = -1, size = 0;
 	int last_tick = 0;
 	// read "GREENZONE" string

@@ -180,7 +180,6 @@
 #define IDB_BITMAP18                    181
 #define IDB_BITMAP19                    182
 #define IDB_BRANCH_SPRITESHEET          184
-#define IDD_DIALOG4                     185
 #define IDD_TASEDIT_EXPORT              185
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
@@ -648,7 +647,7 @@
 #define ID_Menu40175                    40175
 #define ID_Menu40176                    40176
 #define ID_EDIT_TRUNCATE                40177
-#define ID_FILE_IMPORTFM2               40178
+#define ID_FILE_IMPORT			40178
 #define ID_FILE_NEWPROJECT              40179
 #define ID_FILE_OPEN_PROJECT            40180
 #define ID_FILE_OPENPROJECT             40181

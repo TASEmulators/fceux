@@ -88,21 +88,8 @@ void BOOKMARKS::init()
 	BranchPrevY.resize(TOTAL_BOOKMARKS+1);
 	BranchCurrX.resize(TOTAL_BOOKMARKS+1);
 	BranchCurrY.resize(TOTAL_BOOKMARKS+1);
-	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
-	{
-		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
-		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
-	}
-	CursorX = CursorPrevX = CloudX = CloudPrevX = BRANCHES_CLOUD_X;
-	CursorY = CursorPrevY = BRANCHES_CLOUD_Y;
-	reset();
-	current_branch = -1;	// -1 = root
-	changes_since_current_branch = false;
-	fireball_size = 0;
 
-	// set cloud_time and current_pos_time
-	SetCurrentPosTime();
-	strcpy(cloud_time, current_pos_time);
+	reset();
 
 	// init bookmarks
 	bookmarks_array.resize(TOTAL_BOOKMARKS);
@@ -145,6 +132,24 @@ void BOOKMARKS::init()
 	update();
 }
 void BOOKMARKS::reset()
+{
+	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
+	{
+		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
+		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+	}
+	CursorX = CursorPrevX = CloudX = CloudPrevX = BRANCHES_CLOUD_X;
+	CursorY = CursorPrevY = BRANCHES_CLOUD_Y;
+	reset_vars();
+	current_branch = -1;	// -1 = root
+	changes_since_current_branch = false;
+	fireball_size = 0;
+
+	// set cloud_time and current_pos_time
+	SetCurrentPosTime();
+	strcpy(cloud_time, current_pos_time);
+}
+void BOOKMARKS::reset_vars()
 {
 	transition_phase = animation_frame = 0;
 	mouse_x = mouse_y = -1;
@@ -561,7 +566,7 @@ bool BOOKMARKS::load(EMUFILE *is)
 		if (bookmarks_array[i].load(is)) return true;
 	}
 	// all ok
-	reset();
+	reset_vars();
 	RedrawBookmarksCaption();
 	return false;
 }

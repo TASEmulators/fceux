@@ -92,7 +92,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading markers\n");
-		markers.init();
+		markers.reset();
 	} else
 	{
 		// try to load bookmarks
@@ -101,7 +101,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading bookmarks\n");
-		bookmarks.init();
+		bookmarks.reset();
 	} else
 	{
 		// try to load greenzone
@@ -110,7 +110,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading greenzone\n");
-		greenzone.init();
+		greenzone.reset();
 		playback.StartFromZero();		// reset playback to frame 0
 	} else
 	{
@@ -120,7 +120,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading history\n");
-		history.init();
+		history.reset();
 	} else
 	{
 		// try to load selection
@@ -129,7 +129,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading selection\n");
-		selection.init();
+		selection.reset();
 	} else
 	{
 		// update and try to load list
@@ -138,6 +138,7 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	if (error)
 	{
 		FCEU_printf("Error loading list\n");
+		tasedit_list.reset();
 	}
 
 	playback.reset();

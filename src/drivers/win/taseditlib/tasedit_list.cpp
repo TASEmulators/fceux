@@ -157,6 +157,7 @@ void TASEDIT_LIST::init()
 	listItems = ListView_GetCountPerPage(hwndList);
 
 	update();
+	reset();
 }
 void TASEDIT_LIST::free()
 {
@@ -167,7 +168,11 @@ void TASEDIT_LIST::free()
 	}
 
 }
-
+void TASEDIT_LIST::reset()
+{
+	// scroll to the beginning
+	ListView_EnsureVisible(hwndList, 0, FALSE);
+}
 void TASEDIT_LIST::update()
 {
 	//update the number of items in the list
@@ -181,6 +186,7 @@ void TASEDIT_LIST::update()
 
 void TASEDIT_LIST::save(EMUFILE *os)
 {
+	update();
 	// write "LIST" string
 	os->fwrite(list_save_id, LIST_ID_LEN);
 	// write current top item
@@ -204,8 +210,6 @@ bool TASEDIT_LIST::load(EMUFILE *is)
 
 	return false;
 error:
-	// scroll to the beginning
-	ListView_EnsureVisible(hwndList, 0, FALSE);
 	return true;
 }
 // ----------------------------------------------------------------------

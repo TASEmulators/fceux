@@ -767,22 +767,22 @@ void OpenProject()
 {
 	if (!AskSaveProject()) return;
 
-	const char TPfilter[]="TASEdit Project (*.tas)\0*.tas\0\0";
+	const char filter[] = "TASEdit Project (*.tas)\0*.tas\0\0";
 
 	OPENFILENAME ofn;
-	memset(&ofn,0,sizeof(ofn));
-	ofn.lStructSize=sizeof(ofn);
+	memset(&ofn, 0, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hwndTasEdit;
-	ofn.hInstance=fceu_hInstance;
-	ofn.lpstrTitle="Open TASEdit Project...";
-	ofn.lpstrFilter=TPfilter;
+	ofn.hInstance = fceu_hInstance;
+	ofn.lpstrTitle = "Open TASEdit Project...";
+	ofn.lpstrFilter = filter;
 
 	char nameo[2048];
-	strcpy(nameo, mass_replace(GetRomName(),"|",".").c_str());	//convert | to . for archive filenames
+	strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());	//convert | to . for archive filenames
 
-	ofn.lpstrFile=nameo;							
+	ofn.lpstrFile = nameo;							
 	ofn.nMaxFile = 2048;
-	ofn.Flags=OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
+	ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_FILEMUSTEXIST;
 	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);	
 	ofn.lpstrInitialDir = initdir.c_str();
 
@@ -805,9 +805,14 @@ void OpenProject()
 		project.LoadProject(project.GetProjectFile());
 		// update fourscore status
 		if (last_fourscore && !currMovieData.fourscore)
+		{
 			tasedit_list.RemoveFourscore();
-		else if (!last_fourscore && currMovieData.fourscore)
+			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+		} else if (!last_fourscore && currMovieData.fourscore)
+		{
 			tasedit_list.AddFourscore();
+			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+		}
 		RedrawTasedit();
 		RedrawWindowCaption();
 	}
@@ -1009,6 +1014,7 @@ void Export()
 					break;
 				}
 			}
+			// dump to disk
 			temp_md.dump(osRecordingMovie, false);
 			delete osRecordingMovie;
 			osRecordingMovie = 0;
@@ -1146,7 +1152,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			case ID_FILE_SAVEPROJECTAS:
 					SaveProjectAs();
 				break;
-			case ID_FILE_IMPORTFM2:
+			case ID_FILE_IMPORT:
 				Import();
 				break;
 			case ID_FILE_EXPORTFM2:
@@ -1291,8 +1297,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						if (new_size != TasEdit_undo_levels)
 						{
 							TasEdit_undo_levels = new_size;
-							history.init(TasEdit_undo_levels);
-							selection.init(TasEdit_undo_levels);
+							history.reset();
+							selection.reset();
 							// hot changes were cleared, so update list
 							tasedit_list.RedrawList();
 						}
@@ -1591,6 +1597,10 @@ void EnterTasEdit()
 		}
 		// switch to tasedit mode
 		movieMode = MOVIEMODE_TASEDIT;
+		currMovieData.ports[0] = SI_GAMEPAD;
+		currMovieData.ports[1] = SI_GAMEPAD;
+		//force the input configuration stored in the movie to apply
+		FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
 		// init variables
 		recorder.init();
 		tasedit_list.init();
@@ -1598,8 +1608,8 @@ void EnterTasEdit()
 		project.init();
 		bookmarks.init();
 		screenshot_display.init();
-		history.init(TasEdit_undo_levels);
-		selection.init(TasEdit_undo_levels);
+		history.init();
+		selection.init();
 		SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
 		SetFocus(tasedit_list.hwndList);
 		FCEU_DispMessage("Tasedit engaged", 0);
@@ -1625,7 +1635,7 @@ bool ExitTasEdit()
 	// release memory
 	tasedit_list.free();
 	markers.free();
-	greenzone.clearGreenzone();
+	greenzone.free();
 	bookmarks.free();
 	screenshot_display.free();
 	history.free();
