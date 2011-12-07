@@ -28,6 +28,8 @@ void RedrawTasedit();
 void RedrawWindowCaption();
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
 void OpenProject();
+bool LoadProject(char* fullname);
+void LoadRecentProject(int slot);
 bool SaveProject();
 bool SaveProjectAs();
 bool AskSaveProject();
@@ -49,3 +51,6 @@ bool PasteInsert();
 void GotFocus();
 void LostFocus();
 
+void UpdateRecentProjectsMenu();
+void UpdateRecentProjectsArray(const char* addString);
+void RemoveRecentProject(unsigned int which);

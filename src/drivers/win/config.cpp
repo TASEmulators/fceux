@@ -89,6 +89,7 @@ extern int TasEdit_undo_levels;
 extern int TASEdit_autosave_period;
 extern bool TASEdit_jump_to_undo;
 extern int TASEdit_last_export_type;
+extern char* recent_projects[];
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -163,6 +164,17 @@ static CFGSTRUCT fceuconfig[] = {
 	ACS(ramWatchRecent[2]),
 	ACS(ramWatchRecent[3]),
 	ACS(ramWatchRecent[4]),
+
+	ACS(recent_projects[0]),
+	ACS(recent_projects[1]),
+	ACS(recent_projects[2]),
+	ACS(recent_projects[3]),
+	ACS(recent_projects[4]),
+	ACS(recent_projects[5]),
+	ACS(recent_projects[6]),
+	ACS(recent_projects[7]),
+	ACS(recent_projects[8]),
+	ACS(recent_projects[9]),
 
 	AC(gNoBGFillColor),
 	AC(ntsccol),AC(ntsctint),AC(ntschue),

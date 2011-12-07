@@ -90,9 +90,9 @@ using namespace std;
 //Handles----------------------------------------------
 static HMENU fceumenu = 0;	  //Main menu.
 HWND pwindow;				  //Client Area
-static HMENU recentmenu;	  //Recent Menu
-static HMENU recentluamenu;   //Recent Lua Files Menu
-static HMENU recentmoviemenu; //Recent Movie Files Menu
+HMENU recentmenu;				//Recent Menu
+HMENU recentluamenu;			//Recent Lua Files Menu
+HMENU recentmoviemenu;			//Recent Movie Files Menu
 HMENU hfceuxcontext;		  //Handle to context menu
 HMENU hfceuxcontextsub;		  //Handle to context sub menu
 HWND MainhWnd;				  //Main FCEUX(Parent) window Handle.  Dialogs should use GetMainHWND() to get this
@@ -146,7 +146,7 @@ void OpenRamWatch();
 void SaveSnapshotAs();
 
 //Recent Menu Strings ------------------------------------
-char *recent_files[] = { 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 };
+char *recent_files[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 const unsigned int MENU_FIRST_RECENT_FILE = 600;
 const unsigned int MAX_NUMBER_OF_RECENT_FILES = sizeof(recent_files)/sizeof(*recent_files);
 
@@ -157,12 +157,12 @@ extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, L
 extern void UpdateLuaConsole(const char* fname);
 
 //Recent Lua Menu ----------------------------------------
-char *recent_lua[] = {0,0,0,0,0};
+char *recent_lua[] = { 0, 0, 0, 0, 0 };
 const unsigned int LUA_FIRST_RECENT_FILE = 50000;
 const unsigned int MAX_NUMBER_OF_LUA_RECENT_FILES = sizeof(recent_lua)/sizeof(*recent_lua);
 
 //Recent Movie Menu -------------------------------------
-char *recent_movie[] = {0,0,0,0,0};
+char *recent_movie[] = { 0, 0, 0, 0, 0 };
 const unsigned int MOVIE_FIRST_RECENT_FILE = 51000;
 const unsigned int MAX_NUMBER_OF_MOVIE_RECENT_FILES = sizeof(recent_movie)/sizeof(*recent_movie);
 
@@ -197,7 +197,6 @@ void SetMainWindowText()
 		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);
 }
 
-
 bool HasRecentFiles()
 {
 	for (int x = 0; x < MAX_NUMBER_OF_RECENT_FILES; x++)
@@ -205,7 +204,6 @@ bool HasRecentFiles()
 		if (recent_files[x])
 			return true;
 	}
-
 	return false;
 }
 
@@ -606,7 +604,6 @@ void RemoveRecentItem(unsigned int which, char**bufferArray, const unsigned int 
 	bufferArray[MAX-1] = 0;	//Clear out the last item since it is empty now no matter what
 }
 
-
 /// Updates recent files / recent directories menu
 /// @param menu Menu handle of the main window's menu
 /// @param strs Strings to add to the menu
@@ -745,6 +742,23 @@ void UpdateRecentArray(const char* addString, char** bufferArray, unsigned int a
 void AddRecentFile(const char *filename)
 {
 	UpdateRecentArray(filename, recent_files, MAX_NUMBER_OF_RECENT_FILES, recentmenu, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+}
+
+void LoadRecentRom(int slot)
+{
+	char*& fname = recent_files[slot];
+	if(fname)
+	{
+		if (!ALoad(fname))
+		{
+			int result = MessageBox(hAppWnd, "Remove from list?", "Could Not Open Recent File", MB_YESNO);
+			if (result == IDYES)
+			{
+				RemoveRecentItem(slot, recent_files, MAX_NUMBER_OF_RECENT_FILES);
+				UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
+			}
+		}
+	}
 }
 
 void UpdateLuaRMenu(HMENU menu, char **strs, unsigned int mitem, unsigned int baseid)
@@ -1523,26 +1537,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			wParam &= 0xFFFF;
 
 			// A menu item from the recent files menu was clicked.
-			if(wParam >= MENU_FIRST_RECENT_FILE && wParam <= MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES - 1)
+			if(wParam >= MENU_FIRST_RECENT_FILE && wParam < MENU_FIRST_RECENT_FILE + MAX_NUMBER_OF_RECENT_FILES)
 			{
-				char*& fname = recent_files[wParam - MENU_FIRST_RECENT_FILE];
-				if(fname)
-				{
-					if (!ALoad(fname))
-					{
-						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
-						if (result == IDYES)
-						{
-							RemoveRecentItem((wParam - MENU_FIRST_RECENT_FILE), recent_files, MAX_NUMBER_OF_RECENT_FILES);
-							UpdateRMenu(recentmenu, recent_files, MENU_RECENT_FILES, MENU_FIRST_RECENT_FILE);
-						}
-					}
-				}
+				LoadRecentRom(wParam - MENU_FIRST_RECENT_FILE);
 			}
 			
 			// A menu item for the recent lua files menu was clicked.
 			#ifdef _S9XLUA_H
-			if(wParam >= LUA_FIRST_RECENT_FILE && wParam <= LUA_FIRST_RECENT_FILE + MAX_NUMBER_OF_LUA_RECENT_FILES - 1)
+			if(wParam >= LUA_FIRST_RECENT_FILE && wParam < LUA_FIRST_RECENT_FILE + MAX_NUMBER_OF_LUA_RECENT_FILES)
 			{
 				char*& fname = recent_lua[wParam - LUA_FIRST_RECENT_FILE];
 				if(fname)
@@ -1563,7 +1565,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			#endif
 
 			// A menu item for the recent movie files menu was clicked.
-			if(wParam >= MOVIE_FIRST_RECENT_FILE && wParam <= MOVIE_FIRST_RECENT_FILE + MAX_NUMBER_OF_MOVIE_RECENT_FILES - 1)
+			if(wParam >= MOVIE_FIRST_RECENT_FILE && wParam < MOVIE_FIRST_RECENT_FILE + MAX_NUMBER_OF_MOVIE_RECENT_FILES)
 			{
 				char*& fname = recent_movie[wParam - MOVIE_FIRST_RECENT_FILE];
 				if(fname)
@@ -2271,7 +2273,12 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_CLOSELUAWINDOWS,MF_BYCOMMAND | (LuaConsoleHWnd?MF_ENABLED:MF_GRAYED));
-
+		if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		{
+			EnableMenuItem(fceumenu, MENU_PAL, false);
+			EnableMenuItem(fceumenu, ID_NEWPPU, false);
+			EnableMenuItem(fceumenu, ID_OLDPPU, false);
+		}
 		CheckMenuItem(fceumenu, ID_NEWPPU, newppu ? MF_CHECKED : MF_UNCHECKED);
 		CheckMenuItem(fceumenu, ID_OLDPPU, !newppu ? MF_CHECKED : MF_UNCHECKED);
 

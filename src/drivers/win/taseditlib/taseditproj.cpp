@@ -1,5 +1,6 @@
 //Implementation file of TASEdit Project class
 #include "taseditproj.h"
+#include "utils/xstring.h"
 
 extern MARKERS markers;
 extern BOOKMARKS bookmarks;
@@ -12,6 +13,7 @@ extern TASEDIT_LIST tasedit_list;
 extern TASEDIT_SELECTION selection;
 
 extern void FCEU_printf(char *format, ...);
+extern void FCEU_PrintError(char *format, ...);
 extern bool SaveProject();
 extern void RedrawWindowCaption();
 
@@ -24,9 +26,9 @@ TASEDIT_PROJECT::TASEDIT_PROJECT()
 void TASEDIT_PROJECT::init()
 {
 	// init new project
-	projectName="";
-	fm2FileName="";
-	projectFile="";
+	projectFile = "";
+	projectName = "";
+	fm2FileName = "";
 
 	reset();
 }
@@ -47,7 +49,7 @@ void TASEDIT_PROJECT::update()
 	
 }
 
-bool TASEDIT_PROJECT::saveProject()
+bool TASEDIT_PROJECT::save()
 {
 	std::string PFN = GetProjectFile();
 	if (PFN.empty()) return false;
@@ -68,17 +70,20 @@ bool TASEDIT_PROJECT::saveProject()
 	this->reset();
 	return true;
 }
-
-extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
-bool TASEDIT_PROJECT::LoadProject(std::string PFN)
+bool TASEDIT_PROJECT::load(char* fullname)
 {
-	const char* filename = PFN.c_str();
+	EMUFILE_FILE ifs(fullname, "rb");
 
-	EMUFILE_FILE ifs(filename, "rb");
+	if(ifs.fail())
+	{
+		FCEU_PrintError("Error opening %s!", fullname);
+		return false;
+	}
 
-	FCEU_printf("\nLoading TASEdit project %s\n", filename);
+	FCEU_printf("\nLoading TAS Editor project %s...\n", fullname);
 
 	bool error;
+	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 	if (LoadFM2(currMovieData, &ifs, ifs.size(), false))
 	{
 		LoadSubtitles(currMovieData);
@@ -144,33 +149,34 @@ bool TASEDIT_PROJECT::LoadProject(std::string PFN)
 	playback.reset();
 	recorder.reset();
 	screenshot_display.reset();
+
 	reset();
+	RenameProject(fullname);
 	return true;
 }
+
+void TASEDIT_PROJECT::RenameProject(char* new_fullname)
+{
+	projectFile = new_fullname;
+	char drv[512], dir[512], name[512], ext[512];		// For getting the filename
+	splitpath(new_fullname, drv, dir, name, ext);
+	projectName = name;
+	std::string thisfm2name = name;
+	thisfm2name.append(".fm2");
+	fm2FileName = thisfm2name;
+}
 // -----------------------------------------------------------------
-std::string TASEDIT_PROJECT::GetProjectName()
-{
-	return projectName;
-}
-void TASEDIT_PROJECT::SetProjectName(std::string e)
-{
-	projectName = e;
-}
-std::string TASEDIT_PROJECT::GetFM2Name()
-{
-	return fm2FileName;
-}
-void TASEDIT_PROJECT::SetFM2Name(std::string e)
-{
-	fm2FileName = e;
-}
 std::string TASEDIT_PROJECT::GetProjectFile()
 {
 	return projectFile;
 }
-void TASEDIT_PROJECT::SetProjectFile(std::string e)
+std::string TASEDIT_PROJECT::GetProjectName()
 {
-	projectFile = e;
+	return projectName;
+}
+std::string TASEDIT_PROJECT::GetFM2Name()
+{
+	return fm2FileName;
 }
 
 void TASEDIT_PROJECT::SetProjectChanged()

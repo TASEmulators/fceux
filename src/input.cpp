@@ -764,11 +764,11 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
-	{ EMUCMD_RELOADROM,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM", 0},
+	{ EMUCMD_RELOAD,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM or TAS Editor Project", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
-	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,	  0, 0, "Open Ram Watch", EMUCMDFLAG_TASEDIT},
+	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,	  0, 0, "Open Ram Watch", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,  0, 0, "Open Ram Search",		  0},
 	{ EMUCMD_TOOL_RAMSEARCHLT,				EMUCMDTYPE_TOOL,	RamSearchOpLT,	  0, 0, "Ram Search - Less Than", 0},
 	{ EMUCMD_TOOL_RAMSEARCHGT,				EMUCMDTYPE_TOOL,	RamSearchOpGT,	  0, 0, "Ram Search - Greater Than", 0},
@@ -776,7 +776,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHGTE,				EMUCMDTYPE_TOOL,	RamSearchOpGTE,	  0, 0, "Ram Search - Greater Than or Equal", 0},
 	{ EMUCMD_TOOL_RAMSEARCHEQ,				EMUCMDTYPE_TOOL,	RamSearchOpEQ,	  0, 0, "Ram Search - Equal",	  0},
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
-	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_MISC,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (TASEditor-only)", EMUCMDFLAG_TASEDIT},
+	{ EMUCMD_TASEDIT_REWIND,				EMUCMDTYPE_MISC,	TaseditRewindOn, TaseditRewindOff, 0, "Rewind Frame (TAS Editor only)", EMUCMDFLAG_TASEDIT },
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUI_MovieToggleRerecordDisplay, 0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDIT },
 };
 
@@ -1112,11 +1112,17 @@ static void CloseRom(void)
 static void ReloadRom(void)
 {
 #ifdef WIN32
-  char*& fname = recent_files[0];
-	if(fname)
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 	{
-	  ALoad(fname);
-  }
+		// load most recent project
+		extern void LoadRecentProject(int slot);
+		LoadRecentProject(0);
+	} else
+	{
+		// load most recent ROM
+		extern void LoadRecentRom(int slot);
+		LoadRecentRom(0);
+	}
 #endif
 }
 

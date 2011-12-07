@@ -1274,6 +1274,16 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		UpdateFourscoreState(hwndDlg);
 
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		{
+			// disable changing fourscore and ports
+			EnableWindow(GetDlgItem(hwndDlg, CHECK_ENABLE_FOURSCORE), false);
+			EnableWindow(GetDlgItem(hwndDlg, CHECK_ENABLE_MICROPHONE), false);
+			EnableWindow(GetDlgItem(hwndDlg, COMBO_PAD1), false);
+			EnableWindow(GetDlgItem(hwndDlg, COMBO_PAD2), false);
+			EnableWindow(GetDlgItem(hwndDlg, COMBO_FAM), false);
+		}
+
 		break;
 
 	case WM_CLOSE:

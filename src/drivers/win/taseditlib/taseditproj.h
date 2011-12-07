@@ -26,17 +26,14 @@ public:
 	void reset();
 	void update();
 
-	bool saveProject();
-	bool LoadProject(std::string PFN);
+	bool save();
+	bool load(char* fullname);
 
-	bool Export2FM2(std::string filename);	//creates a fm2 out of header, comments, subtitles, and main branch input log, return false if any errors occur
+	void RenameProject(char* new_fullname);
 
-	std::string GetProjectName();
-	void SetProjectName(std::string e);
-	std::string GetFM2Name();
-	void SetFM2Name(std::string e);
 	std::string GetProjectFile();
-	void SetProjectFile(std::string e);
+	std::string GetProjectName();
+	std::string GetFM2Name();
 
 	void SetProjectChanged();
 	bool GetProjectChanged();
@@ -49,11 +46,8 @@ private:
 	bool changed;
 	int next_save_shedule;
 
-	std::string projectName;			//The TASEdit Project's name
-	std::string fm2FileName;			//The main branch ilog file (todo rename more appropriately)
-	std::string projectFile; 			//The TASEdit Project's filename (For saving purposes) //adelikat: TODO: why the hell is this different from project name??!
-	std::vector<std::string> inputlogs;	//List of associated .ilog files
-	std::vector<std::string> comments;
-	std::vector<std::string> subtitles;
+	std::string projectFile;	// full path
+	std::string projectName;	// file name only
+	std::string fm2FileName;	// same as projectName but with .fm2 extension instead of .tas
 
 };

@@ -140,7 +140,7 @@ int TableFileLoaded;
 
 int MemView_wndx, MemView_wndy;
 int MemFind_wndx, MemFind_wndy;
-int MemViewSizeX=625,MemViewSizeY=242;
+int MemViewSizeX = 580, MemViewSizeY = 248;
 static RECT newMemViewRect;
 
 static char chartable[256];
@@ -1716,7 +1716,7 @@ void DoMemView() {
 		hMemView = CreateWindowEx(0,"MEMVIEW","Memory Editor",
 			//WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */
 			WS_SYSMENU|WS_MAXIMIZEBOX|WS_MINIMIZEBOX|WS_THICKFRAME|WS_VSCROLL,
-			CW_USEDEFAULT,CW_USEDEFAULT,625,242,  /* X,Y ; Width, Height */
+			CW_USEDEFAULT,CW_USEDEFAULT,580,248,  /* X,Y ; Width, Height */
 			NULL,NULL,fceu_hInstance,NULL ); 
 		ShowWindow (hMemView, SW_SHOW) ;
 		UpdateCaption();
