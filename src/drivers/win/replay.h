@@ -1,2 +1,2 @@
-void Replay_LoadMovie(bool tasedit);
+void Replay_LoadMovie();
 void UpdateReplayCommentsSubs(const char * fname);

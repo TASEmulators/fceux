@@ -1458,9 +1458,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						delete outf;
 						if (!GameInfo)				//If no game is loaded, load the Open Game dialog
 							LoadNewGamey(hWnd, 0);
-						FCEUI_LoadMovie(outname.c_str(), 1, false, false);
+						FCEUI_LoadMovie(outname.c_str(), 1, false);
 						FCEUX_LoadMovieExtras(outname.c_str());
-					} else {
+					} else
+					{
 						std::string msg = "Failure converting " + fileDropped + "\r\n\r\n" + EFCM_CONVERTRESULT_message(result);
 						MessageBox(hWnd,msg.c_str(),"Failure converting fcm", 0);
 					}
@@ -1481,8 +1482,24 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				{
 					if (!GameInfo)				//If no game is loaded, load the Open Game dialog
 						LoadNewGamey(hWnd, 0);
-					if (GameInfo && !(fileDropped.find(".fm2") == string::npos)) { //.fm2 is at the end of the filename so that must be the extension		
-						FCEUI_LoadMovie(ftmp, 1, false, false);		 //We are convinced it is a movie file, attempt to load it
+					if (GameInfo && !(fileDropped.find(".fm2") == string::npos))
+					{
+						//.fm2 is at the end of the filename so that must be the extension		
+						FCEUI_LoadMovie(ftmp, 1, false);		 //We are convinced it is a movie file, attempt to load it
+						FCEUX_LoadMovieExtras(ftmp);
+					}
+				}
+				//-------------------------------------------------------
+				//Check if TAS Editor file
+				//-------------------------------------------------------
+				else if (!(fileDropped.find(".tas") == string::npos) && (fileDropped.find(".tas") == fileDropped.length()-4))	 //ROM is already loaded and .tas in filename
+				{
+					if (!GameInfo)				//If no game is loaded, load the Open Game dialog
+						LoadNewGamey(hWnd, 0);
+					if (GameInfo && !(fileDropped.find(".tas") == string::npos))
+					{
+						//.tas is at the end of the filename so that must be the extension		
+						FCEUI_LoadMovie(ftmp, 1, false);		 //We are convinced it is a TAS Editor project file, attempt to load and replay it
 						FCEUX_LoadMovieExtras(ftmp);
 					}
 				}
@@ -1570,7 +1587,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				char*& fname = recent_movie[wParam - MOVIE_FIRST_RECENT_FILE];
 				if(fname)
 				{
-					if (!FCEUI_LoadMovie(fname, 1, false, false))
+					if (!FCEUI_LoadMovie(fname, 1, false))
 					{
 						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
 						if (result == IDYES)
@@ -1924,7 +1941,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	break;
 			//  Removing this tool since it is redundant to both 
 			case MENU_TASEDIT:
-				extern void EnterTasEdit();
+				extern bool EnterTasEdit();
 				EnterTasEdit();
 				break;
 			case MENU_CONVERT_MOVIE:
@@ -2082,7 +2099,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case FCEUX_CONTEXT_LOADLASTMOVIE:
 				if(recent_movie[0])
 				{
-					if (!FCEUI_LoadMovie(recent_movie[0], 1, false, false))
+					if (!FCEUI_LoadMovie(recent_movie[0], 1, false))
 					{
 						int result = MessageBox(hWnd,"Remove from list?", "Could Not Open Recent File", MB_YESNO);
 						if (result == IDYES)
@@ -2090,7 +2107,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 							RemoveRecentItem(0, recent_movie, MAX_NUMBER_OF_MOVIE_RECENT_FILES);
 							UpdateMovieRMenu(recentmoviemenu, recent_movie, MENU_MOVIE_RECENT, MOVIE_FIRST_RECENT_FILE);
 						}
-					} else {
+					} else
+					{
 						FCEUX_LoadMovieExtras(recent_movie[0]);
 					}
 				}

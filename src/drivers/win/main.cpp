@@ -748,7 +748,7 @@ int main(int argc,char *argv[])
 		if(FCEU_isFileInArchive(MovieToLoad))
 				replayReadOnlySetting = true;
 
-		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, false, replayStopFrameSetting!=0);
+		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, replayStopFrameSetting != 0);
 		FCEUX_LoadMovieExtras(MovieToLoad);
 		free(MovieToLoad);
 		MovieToLoad = NULL;

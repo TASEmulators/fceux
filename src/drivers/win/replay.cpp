@@ -7,7 +7,7 @@
 #include "archive.h"
 #include "utils/xstring.h"
 
-static const char* fm2ext[] = {"fm2",0};
+static const char* fm2ext[] = { "fm2", "tas", 0};
 
 int MetaPosX,MetaPosY;
 
@@ -502,18 +502,6 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 	case WM_INITDIALOG:
 		{
-			bool tasedit = lParam?true:false;
-
-			//some of the controls are illogical with tasedit
-			//remove them, and rename the window
-			if(tasedit)
-			{
-				SetWindowText(hwndDlg,"Load TasEdit Movie");
-				ShowWindow(GetDlgItem(hwndDlg,IDC_CHECK_READONLY),SW_HIDE);
-				ShowWindow(GetDlgItem(hwndDlg,IDC_CHECK_STOPMOVIE),SW_HIDE);
-				ShowWindow(GetDlgItem(hwndDlg,IDC_EDIT_STOPFRAME),SW_HIDE);
-			}
-			
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, replayReadOnlySetting?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
@@ -564,15 +552,16 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 						//TODO - a big copy/pasted block below. factor out extension extractor or use another one
 
-						// filter out everything that's not an extension we like *.fm2
+						// filter out everything that's not an extension we like (*.fm2 and *.tas)
 						// (because FindFirstFile is too dumb to do that)
 						{
 							std::string ext = getExtension(wfd.cFileName);
 							if(ext != "fm2")
-								if(ext != "zip")
-									if(ext != "rar")
-										if(ext != "7z")
-											continue;
+								if(ext != "tas")
+									if(ext != "zip")
+										if(ext != "rar")
+											if(ext != "7z")
+												continue;
 						}
 
 						char filename [512];
@@ -582,18 +571,23 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						SetCurrentDirectory(BaseDirectory.c_str());
 
 						ArchiveScanRecord asr = FCEUD_ScanArchive(filename);
-						if(!asr.isArchive()) {
+						if(!asr.isArchive())
+						{
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
-							if(fp) {
+							if(fp)
+							{
 								fp->stream = fp->stream->memwrap();
-								HandleScan(hwndDlg,fp ,items);
+								HandleScan(hwndDlg, fp, items);
 								delete fp;
 							}
-						} else {
+						} else
+						{
 							asr.files.FilterByExtension(fm2ext);
-							for(uint32 i=0;i<asr.files.size();i++) {
+							for(uint32 i=0;i<asr.files.size();i++)
+							{
 								FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0,asr.files[i].index);
-								if(fp) {
+								if(fp)
+								{
 									HandleScan(hwndDlg,fp, items);
 									delete fp;
 								}
@@ -671,7 +665,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2)\0*.fm2\0Archive Files (*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All Files (*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2), TAS Editor Projects (*.tas)\0*.fm2;*.tas\0FCEUX Movie Files (*.fm2)\0*.fm2\0Archive Files (*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All Files (*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;
@@ -984,18 +978,18 @@ void FCEUD_MovieRecordTo()
 }
 
 
-void Replay_LoadMovie(bool tasedit)
+void Replay_LoadMovie()
 {
 	if (suggestReadOnlyReplay)
 		replayReadOnlySetting = true;
 	else
 		replayReadOnlySetting = FCEUI_GetMovieToggleReadOnly();
 
-	char* fn = (char*)DialogBoxParam(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc, (LPARAM)(tasedit?1:0));
+	char* fn = (char*)DialogBoxParam(fceu_hInstance, "IDD_REPLAYINP", hAppWnd, ReplayDialogProc, 0);
 
 	if(fn)
 	{
-		FCEUI_LoadMovie(fn, replayReadOnlySetting, tasedit, replayStopFrameSetting);
+		FCEUI_LoadMovie(fn, replayReadOnlySetting, replayStopFrameSetting);
 
 		free(fn);
 
@@ -1010,5 +1004,5 @@ void Replay_LoadMovie(bool tasedit)
 /// Show movie replay dialog and replay the movie if necessary.
 void FCEUD_MovieReplayFrom()
 {
-	if (GameInfo) Replay_LoadMovie(false);
+	if (GameInfo) Replay_LoadMovie();
 }

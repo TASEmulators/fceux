@@ -430,52 +430,49 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
 
-		
-
 		if(cell_x > COLUMN_ICONS)
 		{
 			// text color
 			if(TASEdit_enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
-			{
 				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
-			} else msg->clrText = NORMAL_TEXT_COLOR;
+			else
+				msg->clrText = NORMAL_TEXT_COLOR;
 			// bg color and text font
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
+				// font
+				if(markers.GetMarker(cell_y))
+					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
+				else
+					SelectObject(msg->nmcd.hdc, hMainListFont);
+				// bg
 				// frame number
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if(TASEdit_show_markers && markers.GetMarker(cell_y))
+					if (TASEdit_show_markers && markers.GetMarker(cell_y))
 					{
-						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
 					{
-						SelectObject(msg->nmcd.hdc, hMainListFont);
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
 					}
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
-					if(TASEdit_show_markers && markers.GetMarker(cell_y))
+					if (TASEdit_show_markers && markers.GetMarker(cell_y))
 					{
-						// this frame is also marked
-						SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
-						SelectObject(msg->nmcd.hdc, hMainListFont);
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
 					}
-				} else if(TASEdit_show_markers && markers.GetMarker(cell_y))
+				} else if (TASEdit_show_markers && markers.GetMarker(cell_y))
 				{
 					// marked frame
-					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
 				} else
 				{
-					SelectObject(msg->nmcd.hdc, hMainListFont);
 					if(cell_y < greenzone.greenZoneCount)
 					{
 						if (!greenzone.savestates[cell_y].empty())
@@ -499,7 +496,9 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
+				// font
 				SelectObject(msg->nmcd.hdc, hMainListFont);
+				// bg
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
@@ -530,7 +529,9 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
 				// pad 2 or 4
+				// font
 				SelectObject(msg->nmcd.hdc, hMainListFont);
+				// bg
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here

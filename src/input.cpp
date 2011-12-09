@@ -939,7 +939,7 @@ void LagCounterToggle(void)
 static void LaunchTasEdit(void)
 {
 #ifdef WIN32
-	extern void EnterTasEdit();
+	extern bool EnterTasEdit();
 	EnterTasEdit();
 #endif
 }

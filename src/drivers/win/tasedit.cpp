@@ -1,6 +1,5 @@
 #include <fstream>
 #include <sstream>
-
 #include "taseditlib/taseditproj.h"
 #include "utils/xstring.h"
 #include "Win32InputBox.h"
@@ -793,7 +792,7 @@ void OpenProject()
 
 	if(GetOpenFileName(&ofn))							// If it is a valid filename
 	{
-		// If they haven't put ".tas" after it, stick it on ourselves
+		// If they haven't put ".tas", stick it on ourselves
 		if (!strstr(nameo, ".tas"))
 			strcat(nameo, ".tas");
 		LoadProject(nameo);
@@ -1038,6 +1037,7 @@ void Export()
 					break;
 				}
 			}
+			temp_md.loadFrameCount = -1;
 			// dump to disk
 			temp_md.dump(osRecordingMovie, false);
 			delete osRecordingMovie;
@@ -1269,14 +1269,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						turbo = TASEdit_turbo_seek;
 					break;
 				case ID_VIEW_SHOW_LAG_FRAMES:
-					//switch "Highlight lag frames" flag
 					TASEdit_show_lag_frames ^= 1;
 					CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 					tasedit_list.RedrawList();
 					bookmarks.RedrawBookmarksList();
 					break;
 				case ID_VIEW_SHOW_MARKERS:
-					//switch "Show Markers" flag
 					TASEdit_show_markers ^= 1;
 					CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
 					tasedit_list.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in main list
@@ -1564,9 +1562,9 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return FALSE;
 }
 
-void EnterTasEdit()
+bool EnterTasEdit()
 {
-	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return;
+	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return false;
 	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
 	if(hwndTasEdit)
 	{
@@ -1648,7 +1646,8 @@ void EnterTasEdit()
 		SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
 		SetFocus(tasedit_list.hwndList);
 		FCEU_DispMessage("TAS Editor engaged", 0);
-	}
+		return true;
+	} else return false;
 }
 
 bool ExitTasEdit()

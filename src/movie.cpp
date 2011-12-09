@@ -489,8 +489,8 @@ int MovieData::dump(EMUFILE *os, bool binary)
 	if(savestate.size())
 		os->fprintf("savestate %s\n" , BytesToString(&savestate[0],savestate.size()).c_str() );
 
-	if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-		os->fprintf("length %d\n" , this->records.size() );
+	if (this->loadFrameCount >= 0)
+		os->fprintf("length %d\n" , this->loadFrameCount);
 
 	if(binary)
 	{
@@ -593,8 +593,8 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 //yuck... another custom text parser.
 bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 {
+	// Non-TASEditor projects consume until EOF
     std::string a("length"), b("-1");
-	// Non-TAS projects consume until EOF
 	movieData.installValue(a, b);
 
 	//first, look for an fcm signature
@@ -821,9 +821,9 @@ void MovieData::dumpSavestateTo(std::vector<uint8>* buf, int compressionLevel)
 }
 
 //begin playing an existing movie
-bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _pauseframe)
+bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 {
-	if(!tasedit && !FCEU_IsValidUI(FCEUI_PLAYMOVIE))
+	if(!FCEU_IsValidUI(FCEUI_PLAYMOVIE))
 		return true;	//adelikat: file did not fail to load, so let's return true here, just do nothing
 
 	assert(fname);
@@ -866,12 +866,12 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	//fully reload the game to reinitialize everything before playing any movie
 	poweron(true);
 
-	//WE NEED TO LOAD A SAVESTATE
-	if(currMovieData.savestate.size() != 0)
+	if(currMovieData.savestate.size())
 	{
+		//WE NEED TO LOAD A SAVESTATE
 		movieFromPoweron = false;
 		bool success = MovieData::loadSavestateFrom(&currMovieData.savestate);
-		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was god?
+		if(!success) return true;	//adelikat: I guess return true here?  False is only for a bad movie filename, if it got this far the file was good?
 	} else {
 		movieFromPoweron = true;
 	}
@@ -887,24 +887,16 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, bool tasedit, int _paus
 	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
 
 	//stuff that should only happen when we're ready to positively commit to the replay
-	if(tasedit)
-	{
-		currFrameCounter = 0;
-		pauseframe = _pauseframe;
-	}
-	else
-	{
-		currFrameCounter = 0;
-		pauseframe = _pauseframe;
-		movie_readonly = _read_only;
-		movieMode = MOVIEMODE_PLAY;
-		currRerecordCount = currMovieData.rerecordCount;
+	currFrameCounter = 0;
+	pauseframe = _pauseframe;
+	movie_readonly = _read_only;
+	movieMode = MOVIEMODE_PLAY;
+	currRerecordCount = currMovieData.rerecordCount;
 
-		if(movie_readonly)
-			FCEU_DispMessage("Replay started Read-Only.",0);
-		else
-			FCEU_DispMessage("Replay started Read+Write.",0);
-	}
+	if(movie_readonly)
+		FCEU_DispMessage("Replay started Read-Only.",0);
+	else
+		FCEU_DispMessage("Replay started Read+Write.",0);
 	
 #ifdef WIN32
 	SetMainWindowText();
@@ -1068,7 +1060,8 @@ void FCEUMOV_AddInputState()
 		if (fullSaveStateLoads && (currFrameCounter < (int)currMovieData.records.size()))
 			currMovieData.truncateAt(currFrameCounter);
 
-		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());
+		mr.dump(&currMovieData, osRecordingMovie,currMovieData.records.size());	// to disk
+
 		currMovieData.records.push_back(mr);
 	}
 
@@ -1188,11 +1181,31 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 {
 	load_successful = false;
 
-	//a little rule: cant load states in read+write mode with a movie from an archive.
-	//so we are going to switch it to readonly mode in that case
-	if(!movie_readonly && FCEU_isFileInArchive(curMovieFilename)) {
-		FCEU_PrintError("Cannot loadstate in Read+Write with movie from archive. Movie is now Read-Only.");
-		movie_readonly = true;
+	if (!movie_readonly)
+	{
+		if (currMovieData.loadFrameCount >= 0)
+		{
+			#ifdef WIN32
+			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
+			if (result == IDYES)
+			{
+				extern bool EnterTasEdit();
+				extern bool LoadProject(char* fullname);
+				char fullname[512];
+				strcpy(fullname, curMovieFilename);
+				if (EnterTasEdit())
+					LoadProject(fullname);
+			}
+			#endif
+			movie_readonly = true;
+		}
+		if (FCEU_isFileInArchive(curMovieFilename))
+		{
+			//a little rule: cant load states in read+write mode with a movie from an archive.
+			//so we are going to switch it to readonly mode in that case
+			FCEU_PrintError("Cannot loadstate in Read+Write with movie from archive. Movie is now Read-Only.");
+			movie_readonly = true;
+		}
 	}
 
 	MovieData tempMovieData = MovieData();
@@ -1508,12 +1521,13 @@ void FCEUI_MoviePlayFromBeginning(void)
 		}
 		else
 		{
+			// movie starting from savestate - reload movie file
 			string str = curMovieFilename;
 			FCEUI_StopMovie();
-			if (FCEUI_LoadMovie(str.c_str(),1, 0, 0))
+			if (FCEUI_LoadMovie(str.c_str(), 1, 0))
 			{
 				movieMode = MOVIEMODE_PLAY;
-				movie_readonly=true;
+				movie_readonly = true;
 				FCEU_DispMessage("Movie is now Read-Only. Playing from beginning.",0);
 			}
 			//currMovieData.loadSavestateFrom(&currMovieData.savestate); //TODO: make something like this work instead so it doesn't have to reload

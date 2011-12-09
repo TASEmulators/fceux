@@ -56,6 +56,7 @@ bool TASEDIT_PROJECT::save()
 	const char* filename = PFN.c_str();
 	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
 	
+	currMovieData.loadFrameCount = currMovieData.records.size();
 	currMovieData.dump(ofs, true);
 	markers.save(ofs);
 	bookmarks.save(ofs);

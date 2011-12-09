@@ -20,7 +20,7 @@ enum ECONTEXTMENU
 	CONTEXTMENU_SELECTED = 1,
 };
 
-void EnterTasEdit();
+bool EnterTasEdit();
 void InitDialog();
 bool ExitTasEdit();
 void UpdateTasEdit();

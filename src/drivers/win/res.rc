@@ -256,8 +256,8 @@ BEGIN
     END
     POPUP "&View"
     BEGIN
-        MENUITEM "Highlight &Lag Frames",       ID_VIEW_SHOW_LAG_FRAMES
-        MENUITEM "Show &Markers",               ID_VIEW_SHOW_MARKERS
+        MENUITEM "Show &Lag Frames",            ID_VIEW_SHOW_LAG_FRAMES
+        MENUITEM "Highlight &Markers",          ID_VIEW_SHOW_MARKERS
         MENUITEM "Display Branch &Screenshots", ID_VIEW_SHOWBRANCHSCREENSHOTS
         MENUITEM "Enable Hot &Changes",         ID_VIEW_ENABLEHOTCHANGES
         MENUITEM SEPARATOR
@@ -1964,41 +1964,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Нейтральный resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Русский (Россия) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TASEDIT_EXPORT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 115
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 66
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

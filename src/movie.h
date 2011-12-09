@@ -183,6 +183,7 @@ public:
 
 	//was the frame data stored in binary?
 	bool binaryFlag;
+	// TAS Editor project files contain additional data after input
 	int loadFrameCount;
 
 	//which ports are defined for the movie
@@ -257,7 +258,7 @@ extern bool fullSaveStateLoads;
 void FCEUI_MakeBackupMovie(bool dispMessage);
 void FCEUI_CreateMovieFile(std::string fn);
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author);
-bool FCEUI_LoadMovie(const char *fname, bool read_only, bool tasedit, int _stopframe);
+bool FCEUI_LoadMovie(const char *fname, bool read_only, int _stopframe);
 void FCEUI_MoviePlayFromBeginning(void);
 void FCEUI_StopMovie(void);
 bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount = false);
