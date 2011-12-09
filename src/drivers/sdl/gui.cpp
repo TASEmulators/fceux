@@ -1168,7 +1168,7 @@ const char* Authors[]= {
 	" Lukas Sabota", " Soules", " Bryan Cain", " radsaq", " Shinydoofy",
 	"FceuX 2.0 Developers:",
 	" SP", " zeromus", " adelikat", " caH4e3", " qfox",
-	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit",
+	" Luke Gustafson", " _mz", " UncombedCoconut", " DwEdit", " AnS",
 	"Pre 2.0 Guys:",
 	" Bero", " Xodnizel", " Aaron Oneal", " Joe Nahmias",
 	" Paul Kuliniewicz", " Quietust", " Ben Parnell", " Parasyte & bbitmaster",
@@ -1289,9 +1289,16 @@ void loadMovie ()
 {
 	GtkWidget* fileChooser;
 	
+	GtkFileFilter* filterMovies;
 	GtkFileFilter* filterFm2;
 	GtkFileFilter* filterAll;
-	
+
+	filterMovies = gtk_file_filter_new();
+	gtk_file_filter_add_pattern(filterMovies, "*.fm2");
+	gtk_file_filter_add_pattern(filterMovies, "*.FM2f");
+	gtk_file_filter_add_pattern(filterMovies, "*.tas");
+	gtk_file_filter_set_name(filterMovies, "FM2 Movies, TAS Editor Projects");
+
 	filterFm2 = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterFm2, "*.fm2");
 	gtk_file_filter_add_pattern(filterFm2, "*.FM2f");
@@ -1305,6 +1312,7 @@ void loadMovie ()
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 			
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterMovies);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterFm2);
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(fileChooser), filterAll);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
@@ -1318,11 +1326,11 @@ void loadMovie ()
 		g_config->getOption("SDL.PauseFrame", &pauseframe);
 		g_config->setOption("SDL.PauseFrame", 0);
 		FCEUI_printf("Playing back movie located at %s\n", fname);
-		if(FCEUI_LoadMovie(fname, false, false, pauseframe ? pauseframe : false) == FALSE)
+		if(FCEUI_LoadMovie(fname, false, pauseframe ? pauseframe : false) == FALSE)
 		{
 			GtkWidget* d;
 			d = gtk_message_dialog_new(GTK_WINDOW(MainWindow), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
-				"Could not open the selected FM2 file.");
+				"Could not open the movie file.");
 			gtk_dialog_run(GTK_DIALOG(d));
 			gtk_widget_destroy(d);
 		}

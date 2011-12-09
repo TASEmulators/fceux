@@ -104,7 +104,7 @@ Option         Value   Description\n\
 --soundbufsize x       Set sound buffer size to x ms.\n\
 --volume      {0-256}  Set volume to x.\n\
 --soundrecord  f       Record sound to file f.\n\
---playmov      f       Play back a recorded FCM/FM2 movie from filename f.\n\
+--playmov      f       Play back a recorded FCM/FM2/TAS movie from filename f.\n\
 --pauseframe   x       Pause movie playback at frame x.\n\
 --fcmconvert   f       Convert fcm movie file f to fm2.\n\
 --ripsubs      f       Convert movie's subtitles to srt\n\
@@ -798,13 +798,13 @@ int main(int argc, char *argv[])
 	g_config->setOption("SDL.Movie", "");
 	if (s != "")
 	{
-		if(s.find(".fm2") != std::string::npos)
+		if(s.find(".fm2") != std::string::npos || s.find(".tas") != std::string::npos)
 		{
 			static int pauseframe;
 			g_config->getOption("SDL.PauseFrame", &pauseframe);
 			g_config->setOption("SDL.PauseFrame", 0);
 			FCEUI_printf("Playing back movie located at %s\n", s.c_str());
-			FCEUI_LoadMovie(s.c_str(), false, false, pauseframe ? pauseframe : false);
+			FCEUI_LoadMovie(s.c_str(), false, pauseframe ? pauseframe : false);
 		}
 		else
 		{

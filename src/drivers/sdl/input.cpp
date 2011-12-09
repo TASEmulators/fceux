@@ -512,14 +512,14 @@ KeyboardCommands()
                 fname = GetFilename("Open FM2 movie for playback...", false, "FM2 movies|*.fm2");
                 if(fname != "")
                 {
-                    if(fname.find(".fm2") != std::string::npos)
+                    if(fname.find(".fm2") != std::string::npos || fname.find(".tas") != std::string::npos)
                     {
 				        FCEUI_printf("Playing back movie located at %s\n", fname.c_str());
-                        FCEUI_LoadMovie(fname.c_str(), false, false, false);
+                        FCEUI_LoadMovie(fname.c_str(), false, false);
                     }
                     else
                     {
-                        FCEUI_printf("Only FM2 movies are supported.\n");
+                        FCEUI_printf("Only .fm2 and .tas movies are supported.\n");
                     }
                 }
             } else {
