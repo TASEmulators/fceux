@@ -27,6 +27,7 @@ extern bool TASEdit_view_branches_tree;
 
 // resources
 char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
+char bookmarks_skipsave_id[BOOKMARKS_ID_LEN] = "BOOKMARKX";
 char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Branches " };
 // color tables for flashing when saving/loading bookmarks
 COLORREF bookmark_flash_colors[3][FLASH_PHASE_MAX+1] = {
@@ -524,24 +525,31 @@ void BOOKMARKS::unleash(int slot)
 	FCEU_DispMessage("Branch %d loaded.", 0, slot);
 }
 
-void BOOKMARKS::save(EMUFILE *os)
+void BOOKMARKS::save(EMUFILE *os, bool really_save)
 {
-	// write "BOOKMARKS" string
-	os->fwrite(bookmarks_save_id, BOOKMARKS_ID_LEN);
-	// write cloud time
-	os->fwrite(cloud_time, TIME_DESC_LENGTH);
-	// write current branch and flag of changes since it
-	write32le(current_branch, os);
-	if (changes_since_current_branch)
-		write8le((uint8)1, os);
-	else
-		write8le((uint8)0, os);
-	// write current_position time
-	os->fwrite(current_pos_time, TIME_DESC_LENGTH);
-	// write all 10 bookmarks
-	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+	if (really_save)
 	{
-		bookmarks_array[i].save(os);
+		// write "BOOKMARKS" string
+		os->fwrite(bookmarks_save_id, BOOKMARKS_ID_LEN);
+		// write cloud time
+		os->fwrite(cloud_time, TIME_DESC_LENGTH);
+		// write current branch and flag of changes since it
+		write32le(current_branch, os);
+		if (changes_since_current_branch)
+			write8le((uint8)1, os);
+		else
+			write8le((uint8)0, os);
+		// write current_position time
+		os->fwrite(current_pos_time, TIME_DESC_LENGTH);
+		// write all 10 bookmarks
+		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+		{
+			bookmarks_array[i].save(os);
+		}
+	} else
+	{
+		// write "BOOKMARKX" string
+		os->fwrite(bookmarks_skipsave_id, BOOKMARKS_ID_LEN);
 	}
 }
 // returns true if couldn't load
@@ -549,26 +557,37 @@ bool BOOKMARKS::load(EMUFILE *is)
 {
 	// read "BOOKMARKS" string
 	char save_id[BOOKMARKS_ID_LEN];
-	if ((int)is->fread(save_id, BOOKMARKS_ID_LEN) < BOOKMARKS_ID_LEN) return true;
-	if (strcmp(bookmarks_save_id, save_id)) return true;		// string is not valid
+	if ((int)is->fread(save_id, BOOKMARKS_ID_LEN) < BOOKMARKS_ID_LEN) goto error;
+	if (!strcmp(bookmarks_skipsave_id, save_id))
+	{
+		// string says to skip loading Bookmarks
+		FCEU_printf("No bookmarks in the file\n");
+		reset();
+		return false;
+	}
+	if (strcmp(bookmarks_save_id, save_id)) goto error;		// string is not valid
 	// read cloud time
-	if ((int)is->fread(cloud_time, TIME_DESC_LENGTH) < TIME_DESC_LENGTH) return true;
+	if ((int)is->fread(cloud_time, TIME_DESC_LENGTH) < TIME_DESC_LENGTH) goto error;
 	// read current branch and flag of changes since it
 	uint8 tmp;
-	if (!read32le(&current_branch, is)) return true;
-	if (!read8le(&tmp, is)) return true;
+	if (!read32le(&current_branch, is)) goto error;
+	if (!read8le(&tmp, is)) goto error;
 	changes_since_current_branch = (tmp != 0);
 	// read current_position time
-	if ((int)is->fread(current_pos_time, TIME_DESC_LENGTH) < TIME_DESC_LENGTH) return true;
+	if ((int)is->fread(current_pos_time, TIME_DESC_LENGTH) < TIME_DESC_LENGTH) goto error;
 	// read all 10 bookmarks
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		if (bookmarks_array[i].load(is)) return true;
+		if (bookmarks_array[i].load(is)) goto error;
 	}
 	// all ok
 	reset_vars();
 	RedrawBookmarksCaption();
 	return false;
+error:
+	FCEU_printf("Error loading bookmarks\n");
+	reset();
+	return true;
 }
 // ----------------------------------------------------------
 void BOOKMARKS::RedrawBookmarksCaption()

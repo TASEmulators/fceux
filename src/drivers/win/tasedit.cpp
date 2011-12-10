@@ -61,6 +61,13 @@ extern bool muteTurbo;
 bool TASEdit_enable_hot_changes = true;
 bool TASEdit_jump_to_undo = true;
 int TASEdit_last_export_type = EXPORT_TYPE_1P;
+bool TASEdit_savecompact_binary = true;
+bool TASEdit_savecompact_markers = true;
+bool TASEdit_savecompact_bookmarks = true;
+bool TASEdit_savecompact_greenzone = false;
+bool TASEdit_savecompact_history = false;
+bool TASEdit_savecompact_selection = false;
+bool TASEdit_savecompact_list = true;
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -778,7 +785,7 @@ void OpenProject()
 	ofn.hwndOwner = hwndTasEdit;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Open TAS Editor Project";
-	const char filter[] = "TAS Editor Project (*.tas)\0*.tas\0\0";
+	const char filter[] = "TAS Editor Projects (*.tas)\0*.tas\0\0";
 	ofn.lpstrFilter = filter;
 
 	char nameo[2048];
@@ -844,7 +851,7 @@ void LoadRecentProject(int slot)
 // Saves current project
 bool SaveProjectAs()
 {
-	const char filter[] = "TAS Editor Project (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";
+	const char filter[] = "TAS Editor Projects (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -887,6 +894,94 @@ bool SaveProject()
 	return true;
 }
 
+void SaveCompact_GetCheckboxes(HWND hwndDlg)
+{
+	TASEdit_savecompact_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_greenzone = (SendDlgItemMessage(hwndDlg, IDC_CHECK_GREENZONE, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	TASEdit_savecompact_list = (SendDlgItemMessage(hwndDlg, IDC_CHECK_LIST, BM_GETCHECK, 0, 0) == BST_CHECKED);
+}
+BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 100, TasEdit_wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, TASEdit_savecompact_binary?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, TASEdit_savecompact_markers?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, TASEdit_savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_GREENZONE, TASEdit_savecompact_greenzone?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, TASEdit_savecompact_history?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, TASEdit_savecompact_selection?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LIST, TASEdit_savecompact_list?MF_CHECKED : MF_UNCHECKED);
+			return TRUE;
+		}
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+				case IDOK:
+					SaveCompact_GetCheckboxes(hwndDlg);
+					EndDialog(hwndDlg, 1);
+					return TRUE;
+				case IDCANCEL:
+					SaveCompact_GetCheckboxes(hwndDlg);
+					EndDialog(hwndDlg, 0);
+					return TRUE;
+			}
+			break;
+		}
+		case WM_CLOSE:
+		case WM_QUIT:
+		{
+			SaveCompact_GetCheckboxes(hwndDlg);
+			break;
+		}
+	}
+	return FALSE; 
+}
+
+void SaveCompact()
+{
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_SAVECOMPACT), hwndTasEdit, SaveCompactProc) > 0)
+	{
+		const char filter[] = "TAS Editor Projects (*.tas)\0*.tas\0All Files (*.*)\0*.*\0\0";
+		OPENFILENAME ofn;
+		memset(&ofn, 0, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwndTasEdit;
+		ofn.hInstance = fceu_hInstance;
+		ofn.lpstrTitle = "Save Compact";
+		ofn.lpstrFilter = filter;
+
+		char nameo[2048];
+		if (project.GetProjectName().empty())
+			// suggest ROM name for this project
+			strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());	//convert | to . for archive filenames
+		else
+			// suggest current name
+			strcpy(nameo, project.GetProjectName().c_str());
+		// add "-compact"
+		strcat(nameo, "-compact");
+
+		ofn.lpstrFile = nameo;
+		ofn.lpstrDefExt = "tas";
+		ofn.nMaxFile = 2048;
+		ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+		string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
+		ofn.lpstrInitialDir = initdir.c_str();
+
+		if(GetSaveFileName(&ofn))								//If it is a valid filename
+		{
+			project.save_compact(nameo, TASEdit_savecompact_binary, TASEdit_savecompact_markers, TASEdit_savecompact_bookmarks, TASEdit_savecompact_greenzone, TASEdit_savecompact_history, TASEdit_savecompact_selection, TASEdit_savecompact_list);
+		}
+	}
+}
+
 // returns false if user doesn't want to exit
 bool AskSaveProject()
 {
@@ -907,7 +1002,7 @@ bool AskSaveProject()
 extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 void Import()
 {
-	const char filter[] = "FCEUX Movie Files, TAS Editor Projects\0*.fm2;*.tas\0All Files (*.*)\0*.*\0\0";
+	const char filter[] = "FCEUX Movie Files (*.fm2), TAS Editor Projects (*.tas)\0*.fm2;*.tas\0All Files (*.*)\0*.*\0\0";
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -985,6 +1080,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					EndDialog(hwndDlg, 0);
 					return TRUE;
 			}
+			break;
 	}
 	return FALSE; 
 } 
@@ -1180,10 +1276,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					break;
 				case ACCEL_CTRL_S:
 				case ID_FILE_SAVEPROJECT:
-						SaveProject();
+					SaveProject();
 					break;
 				case ID_FILE_SAVEPROJECTAS:
-						SaveProjectAs();
+					SaveProjectAs();
+					break;
+				case ID_FILE_SAVECOMPACT:
+					SaveCompact();
 					break;
 				case ID_FILE_IMPORT:
 					Import();
@@ -1565,89 +1664,92 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 bool EnterTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return false;
-	if(!hwndTasEdit) hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
-	if(hwndTasEdit)
+	if(!hwndTasEdit)
 	{
-		// save "eoptions"
-		saved_eoptions = eoptions;
-		// set "Run in background"
-		eoptions |= EO_BGRUN;
-		GotFocus();
-		// "Set high-priority thread"
-		eoptions |= EO_HIGHPRIO;
-		DoPriority();
-		// clear "Disable speed throttling"
-		eoptions &= ~EO_NOTHROTTLE;
-		// switch off autosaves
-		saved_EnableAutosave = EnableAutosave;
-		EnableAutosave = 0;
-		UpdateCheckedMenuItems();
-
-		hmenu = GetMenu(hwndTasEdit);
-		hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
-		recent_projects_menu = CreateMenu();
-		UpdateRecentProjectsMenu();
-		// check option ticks
-		CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
-		CheckDlgButton(hwndTasEdit, CHECK_TURBO_SEEK, TASEdit_turbo_seek?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, TASEdit_show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
-		CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
-		CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
-
-		SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-		// init modules
-		greenzone.init();
-		playback.init();
-		// either start new movie or use current movie
-		if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
+		if(hwndTasEdit)
 		{
-			FCEUI_StopMovie();
-			CreateCleanMovie();
-			playback.StartFromZero();
-		} else
-		{
-			// use current movie to create a new project
-			if (currMovieData.savestate.size() != 0)
+			// save "eoptions"
+			saved_eoptions = eoptions;
+			// set "Run in background"
+			eoptions |= EO_BGRUN;
+			GotFocus();
+			// "Set high-priority thread"
+			eoptions |= EO_HIGHPRIO;
+			DoPriority();
+			// clear "Disable speed throttling"
+			eoptions &= ~EO_NOTHROTTLE;
+			// switch off autosaves
+			saved_EnableAutosave = EnableAutosave;
+			EnableAutosave = 0;
+			UpdateCheckedMenuItems();
+
+			hmenu = GetMenu(hwndTasEdit);
+			hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
+			recent_projects_menu = CreateMenu();
+			UpdateRecentProjectsMenu();
+			// check option ticks
+			CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndTasEdit, CHECK_TURBO_SEEK, TASEdit_turbo_seek?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, TASEdit_show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
+			CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
+
+			SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+			// init modules
+			greenzone.init();
+			playback.init();
+			// either start new movie or use current movie
+			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 			{
-				FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-				// delete savestate, but preserve input
-				currMovieData.savestate.clear();
+				FCEUI_StopMovie();
+				CreateCleanMovie();
+				playback.StartFromZero();
+			} else
+			{
+				// use current movie to create a new project
+				if (currMovieData.savestate.size() != 0)
+				{
+					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
+					// delete savestate, but preserve input
+					currMovieData.savestate.clear();
+				}
+				FCEUI_StopMovie();
+				greenzone.TryDumpIncremental(lagFlag != 0);
 			}
-			FCEUI_StopMovie();
-			greenzone.TryDumpIncremental(lagFlag != 0);
-		}
-		// switch to taseditor mode
-		movieMode = MOVIEMODE_TASEDIT;
-		currMovieData.ports[0] = SI_GAMEPAD;
-		currMovieData.ports[1] = SI_GAMEPAD;
-		//force the input configuration stored in the movie to apply
-		FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-		// init variables
-		recorder.init();
-		tasedit_list.init();
-		markers.init();
-		project.init();
-		bookmarks.init();
-		screenshot_display.init();
-		history.init();
-		selection.init();
-		SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
-		SetFocus(tasedit_list.hwndList);
-		FCEU_DispMessage("TAS Editor engaged", 0);
-		return true;
-	} else return false;
+			// switch to taseditor mode
+			movieMode = MOVIEMODE_TASEDIT;
+			currMovieData.ports[0] = SI_GAMEPAD;
+			currMovieData.ports[1] = SI_GAMEPAD;
+			//force the input configuration stored in the movie to apply
+			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+			// init variables
+			recorder.init();
+			tasedit_list.init();
+			markers.init();
+			project.init();
+			bookmarks.init();
+			screenshot_display.init();
+			history.init();
+			selection.init();
+			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
+			SetFocus(tasedit_list.hwndList);
+			FCEU_DispMessage("TAS Editor engaged", 0);
+			return true;
+		} else return false;
+	} else return true;
 }
 
 bool ExitTasEdit()

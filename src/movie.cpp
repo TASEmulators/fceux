@@ -593,9 +593,10 @@ static void LoadFM2_binarychunk(MovieData& movieData, EMUFILE* fp, int size)
 //yuck... another custom text parser.
 bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 {
+	// if there's no "binary" tag in the movie header, consider it as a movie in text format
+	movieData.binaryFlag = false;
 	// Non-TASEditor projects consume until EOF
-    std::string a("length"), b("-1");
-	movieData.installValue(a, b);
+	movieData.loadFrameCount = -1;
 
 	//first, look for an fcm signature
 	char fcmbuf[3];
@@ -636,7 +637,9 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 		{
 			LoadFM2_binarychunk(movieData, fp, size);
 			return true;
-		}
+		} else if (isnewline && movieData.loadFrameCount == movieData.records.size())
+			// exit prematurely if loaded the specified amound of records
+			return true;
 		switch(state)
 		{
 		case NEWLINE:
@@ -1196,6 +1199,8 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				if (EnterTasEdit())
 					LoadProject(fullname);
 			}
+			#else
+			FCEUI_printf("This movie is a TAS Editor project file! It can be modified in TAS Editor only.\nMovie is now Read-Only.\n");
 			#endif
 			movie_readonly = true;
 		}

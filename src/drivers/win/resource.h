@@ -181,6 +181,7 @@
 #define IDB_BITMAP19                    182
 #define IDB_BRANCH_SPRITESHEET          184
 #define IDD_TASEDIT_EXPORT              185
+#define IDD_TASEDIT_SAVECOMPACT         186
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -464,13 +465,26 @@
 #define IDC_CHEAT_PAUSEWHENACTIVE       1203
 #define IDC_FULLSAVESTATES              1203
 #define IDC_SUPERIMPOSE                 1203
+#define IDC_CHECK_BINARY                1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
+#define IDC_CHECK3                      1204
+#define IDC_CHECK_MARKERS               1204
 #define IDC_RAMLIST                     1205
+#define IDC_CHECK4                      1205
+#define IDC_CHECK_BOOKMARKS             1205
 #define IDC_C_SEARCH                    1206
+#define IDC_CHECK5                      1206
+#define IDC_CHECK_GREENZONE             1206
 #define IDC_C_ADDCHEAT                  1207
+#define IDC_CHECK6                      1207
+#define IDC_CHECK_HISTORY               1207
 #define IDC_C_WATCH                     1208
+#define IDC_CHECK7                      1208
+#define IDC_CHECK_SELECTION             1208
 #define IDC_C_RESET                     1209
+#define IDC_CHECK8                      1209
+#define IDC_CHECK_LIST                  1209
 #define IDC_C_ELIMINATE                 1210
 #define IDC_LESSTHAN                    1211
 #define IDC_MORETHAN                    1212
@@ -647,7 +661,7 @@
 #define ID_Menu40175                    40175
 #define ID_Menu40176                    40176
 #define ID_EDIT_TRUNCATE                40177
-#define ID_FILE_IMPORT			40178
+#define ID_FILE_IMPORT                  40178
 #define ID_FILE_NEWPROJECT              40179
 #define ID_FILE_OPEN_PROJECT            40180
 #define ID_FILE_OPENPROJECT             40181
@@ -928,7 +942,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        186
+#define _APS_NEXT_RESOURCE_VALUE        187
 #define _APS_NEXT_COMMAND_VALUE         40501
 #define _APS_NEXT_CONTROL_VALUE         1270
 #define _APS_NEXT_SYMED_VALUE           101

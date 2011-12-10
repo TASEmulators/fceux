@@ -3,6 +3,7 @@
 #include "taseditproj.h"
 
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
+char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
 
 extern HWND hwndTasEdit;
 extern int TasEdit_undo_levels;
@@ -55,7 +56,6 @@ void TASEDIT_SELECTION::reset()
 	history_start_pos = 0;
 	history_cursor_pos = -1;
 	// create initial selection
-	ClearSelection();
 	AddNewSelectionToHistory();
 	track_selection_changes = true;
 	reset_vars();
@@ -213,20 +213,27 @@ void TASEDIT_SELECTION::JumpToFrame(int frame)
 	tasedit_list.FollowSelection();
 }
 // ----------------------------------------------------------
-void TASEDIT_SELECTION::save(EMUFILE *os)
+void TASEDIT_SELECTION::save(EMUFILE *os, bool really_save)
 {
-	// write "SELECTION" string
-	os->fwrite(selection_save_id, SELECTION_ID_LEN);
-	// write vars
-	write32le(history_cursor_pos, os);
-	write32le(history_total_items, os);
-	// write selections starting from history_start_pos
-	for (int i = 0; i < history_total_items; ++i)
+	if (really_save)
 	{
-		saveSelection(selections_history[(history_start_pos + i) % history_size], os);
+		// write "SELECTION" string
+		os->fwrite(selection_save_id, SELECTION_ID_LEN);
+		// write vars
+		write32le(history_cursor_pos, os);
+		write32le(history_total_items, os);
+		// write selections starting from history_start_pos
+		for (int i = 0; i < history_total_items; ++i)
+		{
+			saveSelection(selections_history[(history_start_pos + i) % history_size], os);
+		}
+		// write clipboard_selection
+		saveSelection(clipboard_selection, os);
+	} else
+	{
+		// write "SELECTIOX" string
+		os->fwrite(selection_skipsave_id, SELECTION_ID_LEN);
 	}
-	// write clipboard_selection
-	saveSelection(clipboard_selection, os);
 }
 // returns true if couldn't load
 bool TASEDIT_SELECTION::load(EMUFILE *is)
@@ -234,6 +241,13 @@ bool TASEDIT_SELECTION::load(EMUFILE *is)
 	// read "SELECTION" string
 	char save_id[SELECTION_ID_LEN];
 	if ((int)is->fread(save_id, SELECTION_ID_LEN) < SELECTION_ID_LEN) goto error;
+	if (!strcmp(selection_skipsave_id, save_id))
+	{
+		// string says to skip loading Selection
+		FCEU_printf("No selection in the file\n");
+		reset();
+		return false;
+	}
 	if (strcmp(selection_save_id, save_id)) goto error;		// string is not valid
 	// read vars
 	if (!read32le(&history_cursor_pos, is)) goto error;
@@ -278,6 +292,8 @@ bool TASEDIT_SELECTION::load(EMUFILE *is)
 	reset_vars();
 	return false;
 error:
+	FCEU_printf("Error loading selection\n");
+	reset();
 	return true;
 }
 

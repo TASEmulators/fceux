@@ -27,6 +27,7 @@ public:
 	void update();
 
 	bool save();
+	bool save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_selection, bool save_list);
 	bool load(char* fullname);
 
 	void RenameProject(char* new_fullname);

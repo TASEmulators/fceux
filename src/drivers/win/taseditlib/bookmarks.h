@@ -94,7 +94,7 @@ public:
 	void reset_vars();
 	void update();
 
-	void save(EMUFILE *os);
+	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
 	void set(int slot);

@@ -4,6 +4,7 @@
 #include "zlib.h"
 
 char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
+char markers_skipsave_id[MARKERS_ID_LEN] = "MARKERX";
 
 MARKERS::MARKERS()
 {
@@ -29,20 +30,27 @@ void MARKERS::update()
 		markers_array.resize(currMovieData.getNumRecords());
 }
 
-void MARKERS::save(EMUFILE *os)
+void MARKERS::save(EMUFILE *os, bool really_save)
 {
-	// write "MARKERS" string
-	os->fwrite(markers_save_id, MARKERS_ID_LEN);
-	// write size
-	int size = markers_array.size();
-	write32le(size, os);
-	// compress and write array
-	int len = markers_array.size();
-	uLongf comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf(comprlen);
-	compress(&cbuf[0], &comprlen, &markers_array[0], len);
-	write32le(comprlen, os);
-	os->fwrite(&cbuf[0], comprlen);
+	if (really_save)
+	{
+		// write "MARKERS" string
+		os->fwrite(markers_save_id, MARKERS_ID_LEN);
+		// write size
+		int size = markers_array.size();
+		write32le(size, os);
+		// compress and write array
+		int len = markers_array.size();
+		uLongf comprlen = (len>>9)+12 + len;
+		std::vector<uint8> cbuf(comprlen);
+		compress(&cbuf[0], &comprlen, &markers_array[0], len);
+		write32le(comprlen, os);
+		os->fwrite(&cbuf[0], comprlen);
+	} else
+	{
+		// write "MARKERX" string
+		os->fwrite(markers_skipsave_id, MARKERS_ID_LEN);
+	}
 }
 // returns true if couldn't load
 bool MARKERS::load(EMUFILE *is)
@@ -50,6 +58,13 @@ bool MARKERS::load(EMUFILE *is)
 	// read "MARKERS" string
 	char save_id[MARKERS_ID_LEN];
 	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;
+	if (!strcmp(markers_skipsave_id, save_id))
+	{
+		// string says to skip loading Markers
+		FCEU_printf("No markers in the file\n");
+		reset();
+		return false;
+	}
 	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
 	int size;
 	if (read32le((uint32 *)&size, is) && size >= currMovieData.getNumRecords())
@@ -67,6 +82,8 @@ bool MARKERS::load(EMUFILE *is)
 		return false;
 	}
 error:
+	FCEU_printf("Error loading markers\n");
+	reset();
 	return true;
 }
 // ----------------------------------------------------------

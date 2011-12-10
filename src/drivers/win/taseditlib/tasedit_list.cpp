@@ -30,6 +30,7 @@ COLORREF hot_changes_colors[16] = { 0x0, 0x5c4c44, 0x854604, 0xab2500, 0xc20006,
 //COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
 
 char list_save_id[LIST_ID_LEN] = "LIST";
+char list_skipsave_id[LIST_ID_LEN] = "LISX";
 
 TASEDIT_LIST::TASEDIT_LIST()
 {
@@ -184,15 +185,21 @@ void TASEDIT_LIST::update()
 
 }
 
-void TASEDIT_LIST::save(EMUFILE *os)
+void TASEDIT_LIST::save(EMUFILE *os, bool really_save)
 {
-	update();
-	// write "LIST" string
-	os->fwrite(list_save_id, LIST_ID_LEN);
-	// write current top item
-	int top_item = ListView_GetTopIndex(hwndList);
-	write32le(top_item, os);
-
+	if (really_save)
+	{
+		update();
+		// write "LIST" string
+		os->fwrite(list_save_id, LIST_ID_LEN);
+		// write current top item
+		int top_item = ListView_GetTopIndex(hwndList);
+		write32le(top_item, os);
+	} else
+	{
+		// write "LISX" string
+		os->fwrite(list_skipsave_id, LIST_ID_LEN);
+	}
 }
 // returns true if couldn't load
 bool TASEDIT_LIST::load(EMUFILE *is)
@@ -201,15 +208,23 @@ bool TASEDIT_LIST::load(EMUFILE *is)
 	// read "LIST" string
 	char save_id[LIST_ID_LEN];
 	if ((int)is->fread(save_id, LIST_ID_LEN) < LIST_ID_LEN) goto error;
+	if (!strcmp(list_skipsave_id, save_id))
+	{
+		// string says to skip loading List
+		FCEU_printf("No list data in the file\n");
+		reset();
+		return false;
+	}
 	if (strcmp(list_save_id, save_id)) goto error;		// string is not valid
 	// read current top item and scroll list there
 	int top_item;
 	if (!read32le(&top_item, is)) goto error;
 	ListView_EnsureVisible(hwndList, currMovieData.getNumRecords() - 1, FALSE);
 	ListView_EnsureVisible(hwndList, top_item, FALSE);
-
 	return false;
 error:
+	FCEU_printf("Error loading list data\n");
+	reset();
 	return true;
 }
 // ----------------------------------------------------------------------

@@ -32,6 +32,7 @@ bool LoadProject(char* fullname);
 void LoadRecentProject(int slot);
 bool SaveProject();
 bool SaveProjectAs();
+void SaveCompact();
 bool AskSaveProject();
 void Import();
 void Export();

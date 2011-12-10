@@ -71,6 +71,24 @@ bool TASEDIT_PROJECT::save()
 	this->reset();
 	return true;
 }
+bool TASEDIT_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_selection, bool save_list)
+{
+	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
+	
+	currMovieData.loadFrameCount = currMovieData.records.size();
+	currMovieData.dump(ofs, save_binary);
+	markers.save(ofs, save_markers);
+	bookmarks.save(ofs, save_bookmarks);
+	greenzone.save(ofs, save_greenzone);
+	history.save(ofs, save_history);
+	selection.save(ofs, save_selection);
+	tasedit_list.save(ofs, save_list);
+
+	delete ofs;
+
+	playback.updateProgressbar();
+	return true;
+}
 bool TASEDIT_PROJECT::load(char* fullname)
 {
 	EMUFILE_FILE ifs(fullname, "rb");
@@ -83,74 +101,27 @@ bool TASEDIT_PROJECT::load(char* fullname)
 
 	FCEU_printf("\nLoading TAS Editor project %s...\n", fullname);
 
-	bool error;
+	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
-	if (LoadFM2(currMovieData, &ifs, ifs.size(), false))
+	if (LoadFM2(tempMovieData, &ifs, ifs.size(), false))
 	{
+		currMovieData = tempMovieData;
 		LoadSubtitles(currMovieData);
 	} else
 	{
-		FCEU_printf("Error loading movie data\n");
-		error = true;
+		FCEU_PrintError("Error loading movie data from %s!", fullname);
+		return false;
 	}
-	// try to load markers
-	error = markers.load(&ifs);
-	if (error)
-	{
-		FCEU_printf("Error loading markers\n");
-		markers.reset();
-	} else
-	{
-		// try to load bookmarks
-		error = bookmarks.load(&ifs);
-	}
-	if (error)
-	{
-		FCEU_printf("Error loading bookmarks\n");
-		bookmarks.reset();
-	} else
-	{
-		// try to load greenzone
-		error = greenzone.load(&ifs);
-	}
-	if (error)
-	{
-		FCEU_printf("Error loading greenzone\n");
-		greenzone.reset();
-		playback.StartFromZero();		// reset playback to frame 0
-	} else
-	{
-		// try to load history
-		error = history.load(&ifs);
-	}
-	if (error)
-	{
-		FCEU_printf("Error loading history\n");
-		history.reset();
-	} else
-	{
-		// try to load selection
-		error = selection.load(&ifs);
-	}
-	if (error)
-	{
-		FCEU_printf("Error loading selection\n");
-		selection.reset();
-	} else
-	{
-		// update and try to load list
-		error = tasedit_list.load(&ifs);
-	}
-	if (error)
-	{
-		FCEU_printf("Error loading list\n");
-		tasedit_list.reset();
-	}
+	markers.load(&ifs);
+	bookmarks.load(&ifs);
+	greenzone.load(&ifs);
+	history.load(&ifs);
+	selection.load(&ifs);
+	tasedit_list.load(&ifs);
 
 	playback.reset();
 	recorder.reset();
 	screenshot_display.reset();
-
 	reset();
 	RenameProject(fullname);
 	return true;

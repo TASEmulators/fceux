@@ -14,7 +14,7 @@ public:
 
 	void RedrawTextClipboard();
 
-	void save(EMUFILE *os);
+	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 	void saveSelection(SelectionFrames& selection, EMUFILE *os);
 	bool loadSelection(SelectionFrames& selection, EMUFILE *is);

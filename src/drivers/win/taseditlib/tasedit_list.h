@@ -93,7 +93,7 @@ public:
 	void reset();
 	void update();
 
-	void save(EMUFILE *os);
+	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
 	void AddFourscore();

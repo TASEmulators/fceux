@@ -20,6 +20,7 @@ extern TASEDIT_PROJECT project;
 extern TASEDIT_LIST tasedit_list;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
+char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
 char modCaptions[36][20] = {" Init",
 							" Change",
 							" Set",
@@ -476,20 +477,27 @@ void INPUT_HISTORY::RegisterImport(MovieData& md, char* filename)
 	}
 }
 
-void INPUT_HISTORY::save(EMUFILE *os)
+void INPUT_HISTORY::save(EMUFILE *os, bool really_save)
 {
-	int real_pos, last_tick = 0;
-	// write "HISTORY" string
-	os->fwrite(history_save_id, HISTORY_ID_LEN);
-	// write vars
-	write32le(history_cursor_pos, os);
-	write32le(history_total_items, os);
-	// write snapshots starting from history_start_pos
-	for (int i = 0; i < history_total_items; ++i)
+	if (really_save)
 	{
-		real_pos = (history_start_pos + i) % history_size;
-		input_snapshots[real_pos].save(os);
-		playback.SetProgressbar(i, history_total_items);
+		int real_pos, last_tick = 0;
+		// write "HISTORY" string
+		os->fwrite(history_save_id, HISTORY_ID_LEN);
+		// write vars
+		write32le(history_cursor_pos, os);
+		write32le(history_total_items, os);
+		// write snapshots starting from history_start_pos
+		for (int i = 0; i < history_total_items; ++i)
+		{
+			real_pos = (history_start_pos + i) % history_size;
+			input_snapshots[real_pos].save(os);
+			playback.SetProgressbar(i, history_total_items);
+		}
+	} else
+	{
+		// write "HISTORX" string
+		os->fwrite(history_skipsave_id, HISTORY_ID_LEN);
 	}
 }
 // returns true if couldn't load
@@ -502,6 +510,13 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 	// read "HISTORY" string
 	char save_id[HISTORY_ID_LEN];
 	if ((int)is->fread(save_id, HISTORY_ID_LEN) < HISTORY_ID_LEN) goto error;
+	if (!strcmp(history_skipsave_id, save_id))
+	{
+		// string says to skip loading History
+		FCEU_printf("No history in the file\n");
+		reset();
+		return false;
+	}
 	if (strcmp(history_save_id, save_id)) goto error;		// string is not valid
 	// read vars
 	if (!read32le(&history_cursor_pos, is)) goto error;
@@ -548,6 +563,8 @@ bool INPUT_HISTORY::load(EMUFILE *is)
 	RedrawHistoryList();
 	return false;
 error:
+	FCEU_printf("Error loading history\n");
+	reset();
 	return true;
 }
 // ----------------------------

@@ -16,6 +16,7 @@ extern bool TASEdit_restore_position;
 extern void FCEU_printf(char *format, ...);
 
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
+char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
 
 GREENZONE::GREENZONE()
 {
@@ -182,44 +183,60 @@ void GREENZONE::ClearSavestate(int index)
     savestates[index].swap(tmp);
 }
 
-void GREENZONE::save(EMUFILE *os)
+void GREENZONE::save(EMUFILE *os, bool really_save)
 {
-	int frame, size;
-	int last_tick = 0;
-	// write "GREENZONE" string
-	os->fwrite(greenzone_save_id, GREENZONE_ID_LEN);
-	// write size
-	write32le(greenZoneCount, os);
-	// compress and write lag history
-	int len = lag_history.size();
-	uLongf comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf(comprlen);
-	compress(&cbuf[0], &comprlen, &lag_history[0], len);
-	write32le(comprlen, os);
-	os->fwrite(&cbuf[0], comprlen);
-	// write playback position
-	write32le(currFrameCounter, os);
-	// write savestates
-	GreenzoneCleaning();
-	for (frame = 0; frame < greenZoneCount; ++frame)
+	if (really_save)
 	{
-		// update TASEditor progressbar from time to time
-		if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+		// write "GREENZONE" string
+		os->fwrite(greenzone_save_id, GREENZONE_ID_LEN);
+		// write size
+		write32le(greenZoneCount, os);
+		// compress and write lag history
+		int len = lag_history.size();
+		uLongf comprlen = (len>>9)+12 + len;
+		std::vector<uint8> cbuf(comprlen);
+		compress(&cbuf[0], &comprlen, &lag_history[0], len);
+		write32le(comprlen, os);
+		os->fwrite(&cbuf[0], comprlen);
+		// write playback position
+		write32le(currFrameCounter, os);
+		// write savestates
+		int frame, size;
+		int last_tick = 0;
+		GreenzoneCleaning();
+		for (frame = 0; frame < greenZoneCount; ++frame)
 		{
-			playback.SetProgressbar(frame, greenZoneCount);
-			last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+			// update TASEditor progressbar from time to time
+			if (frame / PROGRESSBAR_UPDATE_RATE > last_tick)
+			{
+				playback.SetProgressbar(frame, greenZoneCount);
+				last_tick = frame / PROGRESSBAR_UPDATE_RATE;
+			}
+			if (savestates[frame].empty()) continue;
+			write32le(frame, os);
+			// write lua_colorings
+			// write monitorings
+			// write savestate
+			size = savestates[frame].size();
+			write32le(size, os);
+			os->fwrite(&savestates[frame][0], size);
 		}
-		if (savestates[frame].empty()) continue;
-		write32le(frame, os);
-		// write lua_colorings
-		// write monitorings
-		// write savestate
-		size = savestates[frame].size();
-		write32le(size, os);
-		os->fwrite(&savestates[frame][0], size);
+		// write -1 as eof for greenzone
+		write32le(-1, os);
+	} else
+	{
+		// write "GREENZONX" string
+		os->fwrite(greenzone_skipsave_id, GREENZONE_ID_LEN);
+		// write playback position
+		write32le(currFrameCounter, os);
+		if (currFrameCounter > 0)
+		{
+			// write ONE savestate for currFrameCounter
+			int size = savestates[currFrameCounter].size();
+			write32le(size, os);
+			os->fwrite(&savestates[currFrameCounter][0], size);
+		}
 	}
-	// write -1 as eof for greenzone
-	write32le(-1, os);
 }
 // returns true if couldn't load
 bool GREENZONE::load(EMUFILE *is)
@@ -230,6 +247,41 @@ bool GREENZONE::load(EMUFILE *is)
 	// read "GREENZONE" string
 	char save_id[GREENZONE_ID_LEN];
 	if ((int)is->fread(save_id, GREENZONE_ID_LEN) < GREENZONE_ID_LEN) goto error;
+	if (!strcmp(greenzone_skipsave_id, save_id))
+	{
+		// string says to skip loading Greenzone
+		// read playback position
+		if (read32le(&frame, is))
+		{
+			currFrameCounter = frame;
+			greenZoneCount = currFrameCounter + 1;
+			savestates.resize(greenZoneCount);
+			if (currFrameCounter)
+			{
+				// there must be one savestate in the file
+				if (read32le(&size, is) && size >= 0)
+				{
+					savestates[frame].resize(size);
+					if (is->fread(&savestates[frame][0], size) == size)
+					{
+						if (loadTasSavestate(currFrameCounter))
+						{
+							FCEU_printf("No greenzone in the file\n");
+							return false;
+						}
+					}
+				}
+			} else
+			{
+				// literally no greenzone in the file, but this is still not a error
+				reset();
+				playback.StartFromZero();		// reset playback to frame 0
+				FCEU_printf("No greenzone in the file, playback at frame 0\n");
+				return false;
+			}
+		}
+		goto error;
+	}
 	if (strcmp(greenzone_save_id, save_id)) goto error;		// string is not valid
 	// read size
 	if (read32le(&size, is) && size >= 0 && size <= currMovieData.getNumRecords())
@@ -315,6 +367,9 @@ bool GREENZONE::load(EMUFILE *is)
 		}
 	}
 error:
+	FCEU_printf("Error loading greenzone\n");
+	reset();
+	playback.StartFromZero();		// reset playback to frame 0
 	return true;
 }
 

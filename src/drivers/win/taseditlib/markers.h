@@ -13,7 +13,7 @@ public:
 	void free();
 	void update();
 
-	void save(EMUFILE *os);
+	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
 	void MakeCopy(std::vector<uint8> &destination_array);

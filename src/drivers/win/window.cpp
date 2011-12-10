@@ -1498,9 +1498,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						LoadNewGamey(hWnd, 0);
 					if (GameInfo && !(fileDropped.find(".tas") == string::npos))
 					{
-						//.tas is at the end of the filename so that must be the extension		
-						FCEUI_LoadMovie(ftmp, 1, false);		 //We are convinced it is a TAS Editor project file, attempt to load and replay it
-						FCEUX_LoadMovieExtras(ftmp);
+						//.tas is at the end of the filename so that must be the extension
+						extern bool EnterTasEdit();
+						extern bool LoadProject(char* fullname);
+						if (EnterTasEdit())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
+							LoadProject(ftmp);
 					}
 				}
 				//-------------------------------------------------------
