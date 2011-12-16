@@ -7,7 +7,7 @@ const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// so 16bits for 
 
 extern void FCEU_printf(char *format, ...);
 
-extern MARKERS markers;
+extern MARKERS current_markers;
 extern TASEDIT_SELECTION selection;
 
 INPUT_SNAPSHOT::INPUT_SNAPSHOT()
@@ -56,10 +56,10 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 		}
 	}
 
-	// make a copy of markers.markers_array
-	markers.MakeCopy(markers_array);
-	if ((int)markers_array.size() < size)
-		markers_array.resize(size);
+	// make a copy of current_markers
+	my_markers.MakeCopy(current_markers);
+	if ((int)my_markers.GetMarkersSize() < size)
+		my_markers.SetMarkersSize(size);
 
 	coherent = true;
 	already_compressed = false;
@@ -72,7 +72,7 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 
 void INPUT_SNAPSHOT::copyToMarkers(int end)
 {
-	markers.RestoreFromCopy(markers_array, end);
+	current_markers.RestoreFromCopy(my_markers, end);
 }
 
 void INPUT_SNAPSHOT::toMovie(MovieData& md, int start, int end)
@@ -132,13 +132,7 @@ void INPUT_SNAPSHOT::compress_data()
 		compress(&hot_changes_compressed[0], &comprlen, &hot_changes[0], len);
 		hot_changes_compressed.resize(comprlen);
 	}
-	// compress markers
-	len = markers_array.size();
-	comprlen = (len>>9)+12 + len;
-	markers_array_compressed.resize(comprlen);
-	compress(&markers_array_compressed[0], &comprlen, &markers_array[0], len);
-	markers_array_compressed.resize(comprlen);
-	// don't compress anymore
+	// don't recompress anymore
 	already_compressed = true;
 }
 
@@ -173,8 +167,7 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 		os->fwrite(&hot_changes_compressed[0], hot_changes_compressed.size());
 	}
 	// save markers data
-	write32le(markers_array_compressed.size(), os);
-	os->fwrite(&markers_array_compressed[0], markers_array_compressed.size());
+	my_markers.save(os, true);
 }
 // returns true if couldn't load
 bool INPUT_SNAPSHOT::load(EMUFILE *is)
@@ -234,16 +227,8 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 		e = uncompress(&hot_changes[0], &destlen, &hot_changes_compressed[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) return true;
 	}
-	// read and uncompress markers data
-	destlen = size;
-	markers_array.resize(destlen);
-	// read size
-	if (!read32le(&comprlen, is)) return true;
-	if (comprlen <= 0) return true;
-	markers_array_compressed.resize(comprlen);
-	if (is->fread(&markers_array_compressed[0], comprlen) != comprlen) return true;
-	e = uncompress(&markers_array[0], &destlen, &markers_array_compressed[0], comprlen);
-	if (e != Z_OK && e != Z_BUF_ERROR) return true;
+	// load markers data
+	if (my_markers.load(is)) return true;
 	return false;
 }
 bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
@@ -251,11 +236,15 @@ bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
 	int tmp;
 	uint8 tmp1;
 	// read vars
-	if (!read32le(&tmp, is)) return true;
-	if (!read8le(&tmp1, is)) return true;
-	if (!read8le(&tmp1, is)) return true;
-	if (!read32le(&tmp, is)) return true;
-	if (!read8le(&tmp1, is)) return true;
+	if (is->fseek(sizeof(int) + // size
+				sizeof(uint8) + // input_type
+				sizeof(uint8) + // coherent
+				sizeof(int) +	// jump_frame
+				sizeof(int) +	// rec_end_frame
+				sizeof(int) +	// rec_joypad_diff_bits
+				sizeof(int) +	// mod_type
+				sizeof(uint8)	// has_hot_changes
+				, SEEK_CUR)) return true;
 	// read description
 	if (!read8le(&tmp1, is)) return true;
 	if (tmp1 >= SNAPSHOT_DESC_MAX_LENGTH) return true;
@@ -273,8 +262,7 @@ bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
 		if (is->fseek(tmp, SEEK_CUR) != 0) return true;
 	}
 	// read markers data
-	if (!read32le(&tmp, is)) return true;
-	if (is->fseek(tmp, SEEK_CUR) != 0) return true;
+	if (my_markers.skipLoad(is)) return true;
 	return false;
 }
 
@@ -313,31 +301,6 @@ void INPUT_SNAPSHOT::fillJoypadsDiff(INPUT_SNAPSHOT& inp, int frame)
 			break;
 		}
 	}
-}
-
-// return true if any difference in markers_array is found, comparing two snapshots
-bool INPUT_SNAPSHOT::checkMarkersDiff(INPUT_SNAPSHOT& inp)
-{
-	if (size != inp.size) return true;
-	for (int i = size-1; i >= 0; i--)
-		if ((markers_array[i] - inp.markers_array[i]) & MARKER_FLAG_BIT) return true;
-	return false;
-}
-// return true if any difference in markers_array is found, comparing to markers.markers_array
-bool INPUT_SNAPSHOT::checkMarkersDiff()
-{
-	if (markers_array.size() != markers.GetMarkersSize()) return true;
-	for (int i = markers_array.size()-1; i >= 0; i--)
-		if ((bool)(markers_array[i] & MARKER_FLAG_BIT) != markers.GetMarker(i)) return true;
-	return false;
-}
-// return true only when difference is found before end frame (not including end frame)
-bool INPUT_SNAPSHOT::checkMarkersDiff(int end)
-{
-	if (markers_array.size() != markers.GetMarkersSize() && ((int)markers_array.size()-1 < end || (int)markers.GetMarkersSize()-1 < end)) return true;
-	for (int i = end-1; i >= 0; i--)
-		if ((bool)(markers_array[i] & MARKER_FLAG_BIT) != markers.GetMarker(i)) return true;
-	return false;
 }
 
 // return number of first frame of difference between two snapshots

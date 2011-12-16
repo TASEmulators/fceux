@@ -182,6 +182,7 @@
 #define IDB_BRANCH_SPRITESHEET          184
 #define IDD_TASEDIT_EXPORT              185
 #define IDD_TASEDIT_SAVECOMPACT         186
+#define IDD_TASEDIT_BRANCH_NOTE         188
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -420,6 +421,7 @@
 #define IDC_BUTTON8                     1146
 #define TASEDIT_FIND_BEST_MARKER        1146
 #define IDC_EDIT1                       1147
+#define IDC_SELECTION_MARKER_EDIT       1147
 #define IDC_BUTTON9                     1148
 #define TASEDIT_FIND_NEXT_MARKER        1148
 #define IDC_HISTORYLIST                 1149
@@ -429,6 +431,7 @@
 #define IDC_BRANCHES_BUTTON2            1153
 #define IDC_TEXT_SELECTION_BUTTON       1153
 #define IDC_EDIT2                       1154
+#define IDC_PLAYBACK_MARKER_EDIT        1154
 #define CHECK_SOUND_MUTETURBO           1179
 #define IDC_EDIT_AUTHOR                 1180
 #define MEMW_STATIC                     1181
@@ -552,7 +555,10 @@
 #define IDC_TEXT_CLIPBOARD              1268
 #define IDC_RADIO_1PLAYER               1269
 #define IDC_RADIO_2PLAYERS              1270
+#define IDC_PLAYBACK_MARKER             1270
 #define IDC_RADIO_FOURSCORE             1271
+#define IDC_SELECTION_MARKER            1271
+#define IDC_NOTE_TOOLTIP_EDIT           1272
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -934,6 +940,14 @@
 #define ID_SELECTED_SETMARKER           40498
 #define ID_SELECTED_CLEARMARKER         40499
 #define ID_SELECTED_REMOVEMARKER40500   40500
+#define ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW 40501
+#define ACCEL_CTRL_PGUP                 40502
+#define ACCEL_CTRL_PGDN                 40503
+#define ACCEL_SHIFT_PGUP                40504
+#define ACCEL_SHIFT_PGDN                40505
+#define ID_ACCELERATOR40506             40506
+#define ID_VIEW_FOLLOWMARKERNOTECONTEXT 40507
+#define ID_VIEW_SHOWBRANCHTOOLTIPS      40508
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -942,9 +956,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        187
-#define _APS_NEXT_COMMAND_VALUE         40501
-#define _APS_NEXT_CONTROL_VALUE         1270
+#define _APS_NEXT_RESOURCE_VALUE        189
+#define _APS_NEXT_COMMAND_VALUE         40509
+#define _APS_NEXT_CONTROL_VALUE         1273
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

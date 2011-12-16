@@ -14,6 +14,10 @@
 #define EXPORT_TYPE_2P 1
 #define EXPORT_TYPE_FOURSCORE 2
 
+#define MARKER_NOTE_EDIT_NONE 0
+#define MARKER_NOTE_EDIT_UPPER 1
+#define MARKER_NOTE_EDIT_LOWER 2
+
 enum ECONTEXTMENU
 {
 	CONTEXTMENU_STRAY = 0,
@@ -49,8 +53,11 @@ bool Copy(SelectionFrames* current_selection = 0);
 void Cut();
 bool Paste();
 bool PasteInsert();
-void GotFocus();
-void LostFocus();
+
+void SetTaseditInput();
+void ClearTaseditInput();
+
+void UpdateMarkerNote();
 
 void UpdateRecentProjectsMenu();
 void UpdateRecentProjectsArray(const char* addString);

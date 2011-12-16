@@ -14,16 +14,18 @@ void MARKERS::init()
 {
 	reset();
 }
-void MARKERS::reset()
-{
-	free();
-	update();
-}
 void MARKERS::free()
 {
 	markers_array.resize(0);
+	notes.resize(0);
 }
-
+void MARKERS::reset()
+{
+	free();
+	notes.resize(1);
+	notes[0] = "Power on";
+	update();
+}
 void MARKERS::update()
 {
 	if ((int)markers_array.size() < currMovieData.getNumRecords())
@@ -40,12 +42,22 @@ void MARKERS::save(EMUFILE *os, bool really_save)
 		int size = markers_array.size();
 		write32le(size, os);
 		// compress and write array
-		int len = markers_array.size();
+		int len = markers_array.size() * sizeof(int);
 		uLongf comprlen = (len>>9)+12 + len;
 		std::vector<uint8> cbuf(comprlen);
-		compress(&cbuf[0], &comprlen, &markers_array[0], len);
+		compress(&cbuf[0], &comprlen, (uint8*)&markers_array[0], len);
 		write32le(comprlen, os);
 		os->fwrite(&cbuf[0], comprlen);
+		// write notes
+		size = notes.size();
+		write32le(size, os);
+		for (int i = 0; i < size; ++i)
+		{
+			len = notes[i].length() + 1;
+			if (len > MAX_NOTE_LEN) len = MAX_NOTE_LEN;
+			write32le(len, os);
+			os->fwrite(notes[i].c_str(), len);
+		}
 	} else
 	{
 		// write "MARKERX" string
@@ -67,87 +79,221 @@ bool MARKERS::load(EMUFILE *is)
 	}
 	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
 	int size;
-	if (read32le((uint32 *)&size, is) && size >= currMovieData.getNumRecords())
+	if (read32le(&size, is))
 	{
 		markers_array.resize(size);
 		// read and uncompress array
-		int comprlen;
-		uLongf destlen = size;
+		int comprlen, len;
+		uLongf destlen = size * sizeof(int);
 		if (!read32le(&comprlen, is)) goto error;
 		if (comprlen <= 0) goto error;
 		std::vector<uint8> cbuf(comprlen);
 		if (is->fread(&cbuf[0], comprlen) != comprlen) goto error;
-		int e = uncompress(&markers_array[0], &destlen, &cbuf[0], comprlen);
+		int e = uncompress((uint8*)&markers_array[0], &destlen, &cbuf[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
-		return false;
+		// read notes
+		if (read32le(&size, is) && size >= 0)
+		{
+			notes.resize(size);
+			char temp_str[MAX_NOTE_LEN];
+			for (int i = 0; i < size; ++i)
+			{
+				if (!read32le(&len, is) || len < 0) goto error;
+				if ((int)is->fread(temp_str, len) < len) goto error;
+				notes[i] = temp_str;
+			}
+			// all ok
+			return false;
+		}
 	}
 error:
 	FCEU_printf("Error loading markers\n");
 	reset();
 	return true;
 }
-// ----------------------------------------------------------
-void MARKERS::MakeCopy(std::vector<uint8> &destination_array)
+bool MARKERS::skipLoad(EMUFILE *is)
 {
-	// copy array
-	destination_array = markers_array;
-	// copy notes
-
+	// read "MARKERS" string
+	char save_id[MARKERS_ID_LEN];
+	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;
+	if (!strcmp(markers_skipsave_id, save_id))
+	{
+		// string says to skip loading Markers
+		reset();
+		return false;
+	}
+	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
+	int size;
+	if (!(is->fseek(sizeof(int), SEEK_CUR)))
+	{
+		// read array
+		int comprlen, len;
+		if (!read32le(&comprlen, is)) goto error;
+		if (is->fseek(comprlen, SEEK_CUR) != 0) goto error;
+		// read notes
+		if (read32le(&size, is) && size >= 0)
+		{
+			for (int i = 0; i < size; ++i)
+			{
+				if (!read32le(&len, is) || len < 0) goto error;
+				if (is->fseek(len, SEEK_CUR) != 0) goto error;
+			}
+			// all ok
+			return false;
+		}
+	}
+error:
+	FCEU_printf("Error skiploading markers\n");
+	return true;
 }
-void MARKERS::RestoreFromCopy(std::vector<uint8> &source_array, int until_frame)
+// ----------------------------------------------------------
+void MARKERS::MakeCopy(MARKERS& source)
+{
+	// provide references
+	source.CopyMarkersHere(markers_array, notes);
+}
+void MARKERS::CopyMarkersHere(std::vector<int>& array_for_markers, std::vector<std::string>& for_notes)
+{
+	// copy data to provided arrays
+	array_for_markers = markers_array;
+	for_notes = notes;
+}
+void MARKERS::RestoreFromCopy(MARKERS& source, int until_frame)
 {
 	if (until_frame >= 0)
 	{
-		// restore array up to and including the frame
-		if ((int)markers_array.size() <= until_frame) markers_array.resize(until_frame+1);
-		for (int i = until_frame; i >= 0; i--)
-			markers_array[i] = source_array[i];
-		// restore some notes
-
+		// restore markers up to and including the frame
+		if ((int)markers_array.size()-1 <= until_frame)
+		{
+			// only copy head of source
+			source.CopyMarkersHere(markers_array, notes);
+			markers_array.resize(until_frame+1);
+			// find last marker
+			int last_marker = GetMarkerUp(until_frame);
+			// delete all notes foolowing the note of the last marker
+			notes.resize(last_marker+1);
+		} else
+		{
+			// combine head of source and tail of destination (old markers)
+			// 1 - head
+			std::vector<int> temp_markers_array;
+			std::vector<std::string> temp_notes;
+			source.CopyMarkersHere(temp_markers_array, temp_notes);
+			temp_markers_array.resize(until_frame+1);
+			// find last marker in temp_markers_array
+			int last_marker, frame;
+			for (frame = until_frame; frame >= 0; frame--)
+				if (temp_markers_array[frame]) break;
+			if (frame >= 0)
+				last_marker = temp_markers_array[frame];
+			else
+				last_marker = 0;
+			// delete all temp_notes foolowing the note of the last marker
+			temp_notes.resize(last_marker+1);
+			// 2 - tail
+			// delete all markers (and their notes) up to and including until_frame
+			//for (int i = until_frame; i >= 0; i--)		// actually no need for that
+			//	ClearMarker(i);
+			// 3 - combine head and tail (if there are actually markers left in the tail)
+			int size = markers_array.size();
+			temp_markers_array.resize(size);
+			for (int i = until_frame+1; i < size; ++i)
+			{
+				if (markers_array[i])
+				{
+					last_marker++;
+					temp_markers_array[i] = last_marker;
+					temp_notes.push_back(notes[markers_array[i]]);
+				}
+			}
+			// 4 - save result
+			markers_array = temp_markers_array;
+			notes = temp_notes;
+		}
 	} else
 	{
-		// restore array
-		markers_array = source_array;
-		// restore notes
-
+		// frame not specified, consider this as "copy all"
+		MakeCopy(source);
 	}
 }
-
+// ----------------------------------------------------------
 int MARKERS::GetMarkersSize()
 {
 	return markers_array.size();
 }
+void MARKERS::SetMarkersSize(int new_size)
+{
+	// if we are truncating, clear markers that are gonna be erased (so that obsolete notes will be erased too)
+	for (int i = markers_array.size() - 1; i >= new_size; i--)
+		if (markers_array[i])
+			ClearMarker(i);
+	markers_array.resize(new_size);
+}
 
-bool MARKERS::GetMarker(int frame)
+int MARKERS::GetMarker(int frame)
 {
 	if (frame >= 0 && frame < (int)markers_array.size())
-		return markers_array[frame] & MARKER_FLAG_BIT;
-	return false;
+		return markers_array[frame];
+	else
+		return 0;
 }
+// finds and returns # of Marker starting from start_frame and searching up
+int MARKERS::GetMarkerUp(int start_frame)
+{
+	for (; start_frame >= 0; start_frame--)
+		if (markers_array[start_frame]) return markers_array[start_frame];
+	return 0;
+}
+// finds frame where the Marker is set
+int MARKERS::GetMarkerFrame(int marker_id)
+{
+	for (int i = markers_array.size() - 1; i >= 0; i--)
+		if (markers_array[i] == marker_id) return i;
+	// didn't find
+	return -1;
+}
+
 void MARKERS::SetMarker(int frame)
 {
-	markers_array[frame] |= MARKER_FLAG_BIT;
+	int marker_num = GetMarkerUp(frame) + 1;
+	markers_array[frame] = marker_num;
+	notes.insert(notes.begin() + marker_num, 1, "");
+	// increase following markers' ids
+	int size = markers_array.size();
+	for (frame++; frame < size; ++frame)
+		if (markers_array[frame])
+			markers_array[frame]++;
 }
 void MARKERS::ClearMarker(int frame)
 {
-	markers_array[frame] &= ~MARKER_FLAG_BIT;
-}
-void MARKERS::EraseMarker(int frame)
-{
-	// check if there's a marker, delete note if needed
-	markers_array.erase(markers_array.begin() + frame);
+	// erase corresponding note
+	notes.erase(notes.begin() + markers_array[frame]);
+	// erase marker
+	markers_array[frame] = 0;
+	// decrease following markers' ids
+	int size = markers_array.size();
+	for (frame++; frame < size; ++frame)
+		if (markers_array[frame])
+			markers_array[frame]--;
 }
 void MARKERS::ToggleMarker(int frame)
 {
 	if (frame >= 0 && frame < (int)markers_array.size())
 	{
-		if (markers_array[frame] & MARKER_FLAG_BIT)
-			markers_array[frame] &= ~MARKER_FLAG_BIT;
+		if (markers_array[frame])
+			ClearMarker(frame);
 		else
-			markers_array[frame] |= MARKER_FLAG_BIT;
+			SetMarker(frame);
 	}
 }
 
+void MARKERS::EraseMarker(int frame)
+{
+	// if there's a marker, first clear it
+	if (markers_array[frame])
+		ClearMarker(frame);
+	markers_array.erase(markers_array.begin() + frame);
+}
 void MARKERS::insertEmpty(int at, int frames)
 {
 	if(at == -1) 
@@ -159,10 +305,51 @@ void MARKERS::insertEmpty(int at, int frames)
 	}
 }
 
-void MARKERS::truncateAt(int frame)
+int MARKERS::GetNotesSize()
 {
-	markers_array.resize(frame);
+	return notes.size();
+}
+std::string MARKERS::GetNote(int index)
+{
+	if (index >= 0 && index < (int)notes.size())
+		return notes[index];
+	else return notes[0];
+}
+void MARKERS::SetNote(int index, char* new_text)
+{
+	if (index >= 0 && index < (int)notes.size())
+		notes[index] = new_text;
 }
 
-
+// ----------------------------------------------------------
+// return true if any difference in markers_array is found, comparing to markers.markers_array
+bool MARKERS::checkMarkersDiff(MARKERS& their_markers)
+{
+	if (GetMarkersSize() != their_markers.GetMarkersSize()) return true;
+	if (GetNotesSize() != their_markers.GetNotesSize()) return true;
+	for (int i = markers_array.size()-1; i >= 0; i--)
+	{
+		if (markers_array[i] != their_markers.GetMarker(i))
+			return true;
+		else if (markers_array[i] && notes[markers_array[i]].compare(their_markers.GetNote(markers_array[i])))
+			return true;
+	}
+	// also check if there's difference between 0th notes
+	if (notes[0].compare(their_markers.GetNote(0)))
+		return true;
+	return false;
+}
+// return true only when difference is found before end frame (not including end frame)
+bool MARKERS::checkMarkersDiff(MARKERS& their_markers, int end)
+{
+	if (GetMarkersSize() != their_markers.GetMarkersSize() && (GetMarkersSize()-1 < end || their_markers.GetMarkersSize()-1 < end)) return true;
+	for (int i = end-1; i >= 0; i--)
+	{
+		if (markers_array[i] != their_markers.GetMarker(i))
+			return true;
+		else if (markers_array[i] && notes[markers_array[i]].compare(their_markers.GetNote(markers_array[i])))
+			return true;
+	}
+	return false;
+}
 

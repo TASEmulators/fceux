@@ -12,7 +12,7 @@ extern PLAYBACK playback;
 extern RECORDER recorder;
 extern GREENZONE greenzone;
 extern INPUT_HISTORY history;
-extern MARKERS markers;
+extern MARKERS current_markers;
 extern TASEDIT_SELECTION selection;
 
 extern bool TASEdit_enable_hot_changes;
@@ -20,6 +20,7 @@ extern bool TASEdit_show_markers;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_jump_to_undo;
+extern bool TASEdit_keyboard_for_listview;
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -48,6 +49,19 @@ TASEDIT_LIST::TASEDIT_LIST()
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Courier New");								/*font name*/
+	// create fonts for Marker notes fields
+	hMarkersFont = CreateFont(16, 7,				/*Height,Width*/
+		0, 0,										/*escapement,orientation*/
+		FW_NORMAL, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+		"Arial");									/*font name*/
+	hMarkersEditFont = CreateFont(16, 7,			/*Height,Width*/
+		0, 0,										/*escapement,orientation*/
+		FW_NORMAL, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+		"Arial");									/*font name*/
 
 }
 
@@ -56,7 +70,7 @@ void TASEDIT_LIST::init()
 	free();
 	hwndList = GetDlgItem(hwndTasEdit, IDC_LIST1);
 	// prepare the main listview
-	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP);
 	// subclass the header
 	hwndHeader = ListView_GetHeader(hwndList);
 	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
@@ -155,8 +169,6 @@ void TASEDIT_LIST::init()
 	// add pads 3 and 4 and frame_number2
 	if (currMovieData.fourscore) AddFourscore();
 
-	listItems = ListView_GetCountPerPage(hwndList);
-
 	update();
 	reset();
 }
@@ -248,9 +260,6 @@ void TASEDIT_LIST::AddFourscore()
 	lvc.cx = 75;
 	lvc.pszText = "Frame#";
 	ListView_InsertColumn(hwndList, colidx++, &lvc);
-	// enable radiobuttons for 3P/4P multitracking
-	EnableWindow(recorder.hwndRB_Rec3P, true);
-	EnableWindow(recorder.hwndRB_Rec4P, true);
 	// change eoptions
 	FCEUI_SetInputFourscore(true);
 }
@@ -261,9 +270,6 @@ void TASEDIT_LIST::RemoveFourscore()
 	{
 		ListView_DeleteColumn (hwndList, i);
 	}
-	// disable radiobuttons for 3P/4P multitracking
-	EnableWindow(recorder.hwndRB_Rec3P, false);
-	EnableWindow(recorder.hwndRB_Rec4P, false);
 	// change eoptions
 	FCEUI_SetInputFourscore(false);
 }
@@ -283,7 +289,7 @@ bool TASEDIT_LIST::CheckItemVisible(int frame)
 {
 	int top = ListView_GetTopIndex(hwndList);
 	// in fourscore there's horizontal scrollbar which takes one row for itself
-	if (frame >= top && frame < top + listItems - (currMovieData.fourscore)?1:0)
+	if (frame >= top && frame < top + ListView_GetCountPerPage(hwndList))
 		return true;
 	return false;
 }
@@ -300,8 +306,7 @@ void TASEDIT_LIST::FollowUndo()
 		if (!CheckItemVisible(jump_frame))
 		{
 			// center list at jump_frame
-			int list_items = listItems;
-			if (currMovieData.fourscore) list_items--;
+			int list_items = ListView_GetCountPerPage(hwndList);
 			int lower_border = (list_items - 1) / 2;
 			int upper_border = (list_items - 1) - lower_border;
 			int index = jump_frame + lower_border;
@@ -320,8 +325,7 @@ void TASEDIT_LIST::FollowSelection()
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return;
 
-	int list_items = listItems;
-	if (currMovieData.fourscore) list_items--;
+	int list_items = ListView_GetCountPerPage(hwndList);
 	int selection_start = *current_selection->begin();
 	int selection_end = *current_selection->rbegin();
 	int selection_items = 1 + selection_end - selection_start;
@@ -361,8 +365,7 @@ void TASEDIT_LIST::FollowPauseframe()
 	if (jump_frame >= 0)
 	{
 		// center list at jump_frame
-		int list_items = listItems;
-		if (currMovieData.fourscore) list_items--;
+		int list_items = ListView_GetCountPerPage(hwndList);
 		int lower_border = (list_items - 1) / 2;
 		int upper_border = (list_items - 1) - lower_border;
 		int index = jump_frame + lower_border;
@@ -456,7 +459,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
 				// font
-				if(markers.GetMarker(cell_y))
+				if(current_markers.GetMarker(cell_y))
 					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 				else
 					SelectObject(msg->nmcd.hdc, hMainListFont);
@@ -465,7 +468,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if (TASEdit_show_markers && markers.GetMarker(cell_y))
+					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 					{
 						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
@@ -475,14 +478,14 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
-					if (TASEdit_show_markers && markers.GetMarker(cell_y))
+					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 					{
 						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
 					}
-				} else if (TASEdit_show_markers && markers.GetMarker(cell_y))
+				} else if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 				{
 					// marked frame
 					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
@@ -623,6 +626,12 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			case HDN_TRACK:
 				return true;	// no column resizing
 			}
+			break;
+		}
+		case WM_KEYDOWN:
+		{
+			if (!TASEdit_keyboard_for_listview)
+				return 0;
 			break;
 		}
 		case WM_SYSKEYDOWN:

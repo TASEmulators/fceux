@@ -43,6 +43,17 @@ void RECORDER::reset()
 	multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 	UncheckRecordingRadioButtons();
 	RecheckRecordingRadioButtons();
+	if (currMovieData.fourscore)
+	{
+		// enable radiobuttons for 3P/4P multitracking
+		EnableWindow(hwndRB_Rec3P, true);
+		EnableWindow(hwndRB_Rec4P, true);
+	} else
+	{
+		// disable radiobuttons for 3P/4P multitracking
+		EnableWindow(hwndRB_Rec3P, false);
+		EnableWindow(hwndRB_Rec4P, false);
+	}
 }
 void RECORDER::update()
 {

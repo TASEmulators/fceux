@@ -126,7 +126,6 @@ bool AVIdisableMovieMessages = false;
 char *md5_asciistr(uint8 digest[16]);
 static int winwidth, winheight;
 static volatile int nofocus = 0;
-extern bool TASEdit_focus;
 static int tog = 0;					//Toggle for Hide Menu
 static bool loggingSound = false;
 static LONG WindowXC=1<<30,WindowYC;
@@ -1490,19 +1489,21 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					}
 				}
 				//-------------------------------------------------------
-				//Check if TAS Editor file
+				//Check if TAS Editor project file
 				//-------------------------------------------------------
-				else if (!(fileDropped.find(".tas") == string::npos) && (fileDropped.find(".tas") == fileDropped.length()-4))	 //ROM is already loaded and .tas in filename
+				else if (!(fileDropped.find(".fm3") == string::npos) && (fileDropped.find(".fm3") == fileDropped.length()-4))	 //ROM is already loaded and .fm3 in filename
 				{
 					if (!GameInfo)				//If no game is loaded, load the Open Game dialog
 						LoadNewGamey(hWnd, 0);
-					if (GameInfo && !(fileDropped.find(".tas") == string::npos))
+					if (GameInfo && !(fileDropped.find(".fm3") == string::npos))
 					{
-						//.tas is at the end of the filename so that must be the extension
+						//.fm3 is at the end of the filename so that must be the extension
 						extern bool EnterTasEdit();
 						extern bool LoadProject(char* fullname);
+						extern bool AskSaveProject();
 						if (EnterTasEdit())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
-							LoadProject(ftmp);
+							if (AskSaveProject())		// in case there's unsaved project
+								LoadProject(ftmp);
 					}
 				}
 				//-------------------------------------------------------
@@ -2276,7 +2277,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME) && GameInfo ?MF_ENABLED:MF_GRAYED));
-		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && HasRecentFiles()) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when tasedit is not engaged
+		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && HasRecentFiles()) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when TAS Editor is not engaged
 		EnableMenuItem(fceumenu,MENU_OPEN_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECORD_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RECORDMOVIE)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_REPLAY_MOVIE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_PLAYMOVIE)?MF_ENABLED:MF_GRAYED));
@@ -2860,7 +2861,7 @@ void UpdateMenuHotkeys()
 	combined = "&Memory Watch...\t" + combo;
 	ChangeMenuItemText(MENU_MEMORY_WATCH, combined);
 
-	//Open TAS Edit
+	//Open TAS Editor
 	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDIT]);
 	combined = "&TAS Editor...\t" + combo;
 	ChangeMenuItemText(MENU_TASEDIT, combined);

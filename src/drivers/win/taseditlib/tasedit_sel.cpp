@@ -1,15 +1,21 @@
 //Implementation file of TASEDIT_SELECTION class
-
 #include "taseditproj.h"
+#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_UPPER
 
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
 
 extern HWND hwndTasEdit;
 extern int TasEdit_undo_levels;
+extern int marker_note_edit;
 
-extern MARKERS markers;
+extern MARKERS current_markers;
 extern TASEDIT_LIST tasedit_list;
+
+extern void UpdateMarkerNote();
+
+LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+WNDPROC selectionMarkerEdit_oldWndproc;
 
 // resources
 char selectionText[] = "Selection: ";
@@ -20,6 +26,7 @@ char numTextColumn[] = "1 column";
 char numTextColumns[] = " columns";
 char clipboardText[] = "Clipboard: ";
 char clipboardEmptyText[] = "Clipboard: empty";
+char lowerMarkerText[] = "Marker ";
 
 TASEDIT_SELECTION::TASEDIT_SELECTION()
 {
@@ -33,7 +40,14 @@ void TASEDIT_SELECTION::init()
 	hwndFindNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_NEXT_MARKER);
 	hwndTextSelection = GetDlgItem(hwndTasEdit, IDC_TEXT_SELECTION);
 	hwndTextClipboard = GetDlgItem(hwndTasEdit, IDC_TEXT_CLIPBOARD);
-	
+	hwndSelectionMarker = GetDlgItem(hwndTasEdit, IDC_SELECTION_MARKER);
+	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)tasedit_list.hMarkersFont, 0);
+	hwndSelectionMarkerEdit = GetDlgItem(hwndTasEdit, IDC_SELECTION_MARKER_EDIT);
+	SendMessage(hwndSelectionMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
+	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)tasedit_list.hMarkersEditFont, 0);
+	// subclass the edit control
+	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEdit, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
+
 	reset();
 
 	if (clipboard_selection.empty())
@@ -51,6 +65,9 @@ void TASEDIT_SELECTION::reset()
 {
 	free();
 	// init vars
+	must_find_current_marker = true;
+	shown_marker = 0;
+	last_selection_beginning = -1;
 	history_size = TasEdit_undo_levels + 1;
 	selections_history.resize(history_size);
 	history_start_pos = 0;
@@ -81,6 +98,7 @@ void TASEDIT_SELECTION::update()
 			if (!CurrentSelection().size()) break;
 		}
 	}
+
 	// update << and >> buttons
 	old_prev_marker_button_state = prev_marker_button_state;
 	prev_marker_button_state = ((Button_GetState(hwndPrevMarker) & BST_PUSHED) != 0);
@@ -108,6 +126,7 @@ void TASEDIT_SELECTION::update()
 			JumpNextMarker();
 		}
 	}
+
 	// redraw selection info text of needed
 	if (must_redraw_text)
 	{
@@ -142,6 +161,22 @@ void TASEDIT_SELECTION::update()
 		} else
 			SetWindowText(hwndTextSelection, selectionEmptyText);
 		must_redraw_text = false;
+	}
+
+	// track changes of selection beginning
+	if (last_selection_beginning != GetCurrentSelectionBeginning())
+	{
+		last_selection_beginning = GetCurrentSelectionBeginning();
+		must_find_current_marker = true;
+	}
+
+	// update "Selection's Marker text" if needed
+	if (must_find_current_marker)
+	{
+		UpdateMarkerNote();
+		shown_marker = current_markers.GetMarkerUp(last_selection_beginning);
+		RedrawMarker();
+		must_find_current_marker = false;
 	}
 
 }
@@ -179,6 +214,20 @@ void TASEDIT_SELECTION::RedrawTextClipboard()
 	} else
 		SetWindowText(hwndTextClipboard, clipboardEmptyText);
 }
+void TASEDIT_SELECTION::RedrawMarker()
+{
+	// redraw marker num
+	char new_text[MAX_NOTE_LEN] = {0};
+	if (shown_marker <= 99999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+		strcpy(new_text, lowerMarkerText);
+	char num[11];
+	_itoa(shown_marker, num, 10);
+	strcat(new_text, num);
+	SetWindowText(hwndSelectionMarker, new_text);
+	// change marker note
+	strcpy(new_text, current_markers.GetNote(shown_marker).c_str());
+	SetWindowText(hwndSelectionMarkerEdit, new_text);
+}
 
 void TASEDIT_SELECTION::JumpPrevMarker()
 {
@@ -186,7 +235,7 @@ void TASEDIT_SELECTION::JumpPrevMarker()
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
 	for (index--; index >= 0; index--)
-		if (markers.GetMarker(index)) break;
+		if (current_markers.GetMarker(index)) break;
 	if (index >= 0)
 		JumpToFrame(index);
 	else
@@ -200,7 +249,7 @@ void TASEDIT_SELECTION::JumpNextMarker()
 
 	int last_frame = currMovieData.getNumRecords()-1;
 	for (++index; index <= last_frame; ++index)
-		if (markers.GetMarker(index)) break;
+		if (current_markers.GetMarker(index)) break;
 	if (index <= last_frame)
 		JumpToFrame(index);
 	else
@@ -321,10 +370,9 @@ bool TASEDIT_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 }
 bool TASEDIT_SELECTION::skiploadSelection(EMUFILE *is)
 {
-	int temp_int, temp_size;
+	int temp_size;
 	if (!read32le(&temp_size, is)) return true;
-	for(; temp_size > 0; temp_size--)
-		if (!read32le(&temp_int, is)) return true;
+	if (is->fseek(temp_size * sizeof(int), SEEK_CUR)) return true;
 	return false;
 }
 // ----------------------------------------------------------
@@ -528,10 +576,10 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 	// find markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
-		if (markers.GetMarker(upper_marker)) break;
+		if (current_markers.GetMarker(upper_marker)) break;
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
-		if (markers.GetMarker(lower_marker)) break;
+		if (current_markers.GetMarker(lower_marker)) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
 	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_SELECTED);
@@ -622,4 +670,40 @@ SelectionFrames& TASEDIT_SELECTION::CurrentSelection()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
 }
+// -------------------------------------------------------------------------
+LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+	{
+		extern PLAYBACK playback;
+		extern TASEDIT_SELECTION selection;
+		switch(msg)
+		{
+		case WM_CHAR:
+		case WM_KEYDOWN:
+			switch(wParam)
+			{
+			case VK_ESCAPE:
+				// revert text to original note text
+				SetWindowText(selection.hwndSelectionMarkerEdit, current_markers.GetNote(selection.shown_marker).c_str());
+				SetFocus(tasedit_list.hwndList);
+				return 0;
+			case VK_RETURN:
+				// exit and save text changes
+				SetFocus(tasedit_list.hwndList);
+				return 0;
+			case VK_TAB:
+				// switch to upper edit control (also exit and save text changes)
+				SetFocus(playback.hwndPlaybackMarkerEdit);
+				return 0;
+			}
+			break;
+		}
+	}
+	return CallWindowProc(selectionMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
+}
+
+
+
+
 

@@ -1,5 +1,6 @@
 //Implementation file of Playback class
 #include "taseditproj.h"
+#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_UPPER
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
@@ -9,11 +10,20 @@ extern HWND hwndTasEdit;
 extern bool Tasedit_rewind_now;
 extern bool turbo;
 extern bool TASEdit_turbo_seek;
+extern int marker_note_edit;
 
-extern MARKERS markers;
+extern MARKERS current_markers;
 extern GREENZONE greenzone;
 extern TASEDIT_LIST tasedit_list;
 extern BOOKMARKS bookmarks;
+
+extern void UpdateMarkerNote();
+
+LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+WNDPROC playbackMarkerEdit_oldWndproc;
+
+// resources
+char upperMarkerText[] = "Marker ";
 
 PLAYBACK::PLAYBACK()
 {
@@ -27,12 +37,21 @@ void PLAYBACK::init()
 	hwndForward = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD);
 	hwndRewindFull = GetDlgItem(hwndTasEdit, TASEDIT_REWIND_FULL);
 	hwndForwardFull = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD_FULL);
+	hwndPlaybackMarker = GetDlgItem(hwndTasEdit, IDC_PLAYBACK_MARKER);
+	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)tasedit_list.hMarkersFont, 0);
+	hwndPlaybackMarkerEdit = GetDlgItem(hwndTasEdit, IDC_PLAYBACK_MARKER_EDIT);
+	SendMessage(hwndPlaybackMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
+	SendMessage(hwndPlaybackMarkerEdit, WM_SETFONT, (WPARAM)tasedit_list.hMarkersEditFont, 0);
+	// subclass the edit control
+	playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndPlaybackMarkerEdit, GWL_WNDPROC, (LONG)UpperMarkerEditWndProc);
 
 	reset();
 }
 void PLAYBACK::reset()
 {
-	lastCursor = currFrameCounter;
+	must_find_current_marker = true;
+	shown_marker = 0;
+	lastCursor = -1;
 	pause_frame = old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
@@ -44,6 +63,7 @@ void PLAYBACK::reset()
 }
 void PLAYBACK::update()
 {
+	jump_was_used_this_frame = false;
 	// pause when seeking hit pause_frame
 	if(!FCEUI_EmulationPaused())
 		if(pause_frame && pause_frame <= currFrameCounter + 1)
@@ -100,8 +120,26 @@ void PLAYBACK::update()
 		tasedit_list.RedrawRow(currFrameCounter);
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
 		// enforce redrawing now
-		UpdateWindow(tasedit_list.hwndList);
 		lastCursor = currFrameCounter;
+		UpdateWindow(tasedit_list.hwndList);
+		// lazy update of "Playback's Marker text"
+		int current_marker = current_markers.GetMarkerUp(currFrameCounter);
+		if (shown_marker != current_marker)
+		{
+			UpdateMarkerNote();
+			shown_marker = current_marker;
+			RedrawMarker();
+			must_find_current_marker = false;
+		}
+	}
+
+	// [non-lazy] update "Playback's Marker text" if needed
+	if (must_find_current_marker)
+	{
+		UpdateMarkerNote();
+		shown_marker = current_markers.GetMarkerUp(currFrameCounter);
+		RedrawMarker();
+		must_find_current_marker = false;
 	}
 	
 	// update < and > buttons
@@ -230,11 +268,12 @@ void PLAYBACK::RewindFull()
 	// jump to previous marker
 	int index = currFrameCounter - 1;
 	for (; index >= 0; index--)
-		if (markers.GetMarker(index)) break;
+		if (current_markers.GetMarker(index)) break;
 	if (index >= 0)
 		jump(index);
 	else
 		jump(0);
+	jump_was_used_this_frame = true;
 }
 void PLAYBACK::ForwardFull()
 {
@@ -242,11 +281,26 @@ void PLAYBACK::ForwardFull()
 	int last_frame = currMovieData.getNumRecords()-1;
 	int index = currFrameCounter + 1;
 	for (; index <= last_frame; ++index)
-		if (markers.GetMarker(index)) break;
+		if (current_markers.GetMarker(index)) break;
 	if (index <= last_frame)
 		jump(index);
 	else
 		jump(last_frame);
+}
+
+void PLAYBACK::RedrawMarker()
+{
+	// redraw marker num
+	char new_text[MAX_NOTE_LEN] = {0};
+	if (shown_marker <= 99999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+		strcpy(new_text, upperMarkerText);
+	char num[11];
+	_itoa(shown_marker, num, 10);
+	strcat(new_text, num);
+	SetWindowText(hwndPlaybackMarker, new_text);
+	// change marker note
+	strcpy(new_text, current_markers.GetNote(shown_marker).c_str());
+	SetWindowText(hwndPlaybackMarkerEdit, new_text);
 }
 
 void PLAYBACK::StartFromZero()
@@ -320,6 +374,38 @@ int PLAYBACK::GetPauseFrame()
 void PLAYBACK::SetProgressbar(int a, int b)
 {
 	SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * a / b, 0);
+}
+// -------------------------------------------------------------------------
+LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+	{
+		extern PLAYBACK playback;
+		extern TASEDIT_SELECTION selection;
+		switch(msg)
+		{
+		case WM_CHAR:
+		case WM_KEYDOWN:
+			switch(wParam)
+			{
+			case VK_ESCAPE:
+				// revert text to original note text
+				SetWindowText(playback.hwndPlaybackMarkerEdit, current_markers.GetNote(playback.shown_marker).c_str());
+				SetFocus(tasedit_list.hwndList);
+				return 0;
+			case VK_RETURN:
+				// exit and save text changes
+				SetFocus(tasedit_list.hwndList);
+				return 0;
+			case VK_TAB:
+				// switch to lower edit control (also exit and save text changes)
+				SetFocus(selection.hwndSelectionMarkerEdit);
+				return 0;
+			}
+			break;
+		}
+	}
+	return CallWindowProc(playbackMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
 }
 
 

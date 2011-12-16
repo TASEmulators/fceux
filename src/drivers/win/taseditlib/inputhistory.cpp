@@ -12,16 +12,17 @@ extern int TasEdit_undo_levels;
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndHistoryList_oldWndProc;
 
-extern MARKERS markers;
+extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
+extern TASEDIT_SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
 extern TASEDIT_LIST tasedit_list;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[36][20] = {" Init",
+char modCaptions[37][20] = {" Init",
 							" Change",
 							" Set",
 							" Unset",
@@ -56,7 +57,8 @@ char modCaptions[36][20] = {" Init",
 							" Marker Branch8 to ",
 							" Marker Branch9 to ",
 							" Marker Set",
-							" Marker Unset"};
+							" Marker Unset",
+							" Marker Rename"};
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
@@ -149,7 +151,7 @@ int INPUT_HISTORY::jump(int new_pos)
 	bool markers_changed = false;
 	if (TASEdit_bind_markers)
 	{
-		if (input_snapshots[real_pos].checkMarkersDiff())
+		if (input_snapshots[real_pos].my_markers.checkMarkersDiff(current_markers))
 		{
 			input_snapshots[real_pos].copyToMarkers();
 			project.SetProjectChanged();
@@ -166,7 +168,8 @@ int INPUT_HISTORY::jump(int new_pos)
 		// list will be redrawn by greenzone invalidation
 	} else if (markers_changed)
 	{
-		markers.update();
+		current_markers.update();
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
 		tasedit_list.RedrawList();
 	} else if (TASEdit_enable_hot_changes)
@@ -204,7 +207,7 @@ void INPUT_HISTORY::AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp)
 			// overwrite old snapshot
 			real_pos = (history_start_pos + history_cursor_pos) % history_size;
 			// compare with the snapshot we're going to overwrite, if it's different then truncate history after this item
-			if (input_snapshots[real_pos].checkDiff(inp) || input_snapshots[real_pos].checkMarkersDiff(inp))
+			if (input_snapshots[real_pos].checkDiff(inp) || input_snapshots[real_pos].my_markers.checkMarkersDiff(inp.my_markers))
 			{
 				history_total_items = history_cursor_pos+1;
 				UpdateHistoryList();
@@ -237,13 +240,38 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 	INPUT_SNAPSHOT inp;
 	inp.init(currMovieData, TASEdit_enable_hot_changes);
 	inp.mod_type = mod_type;
-	if (mod_type == MODTYPE_MARKER_SET || mod_type == MODTYPE_MARKER_UNSET)
+	// check if there are input differences from latest snapshot
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
+	if (first_changes >= 0)
 	{
-		// special case: changed markers, but input didn't change
+		// differences found
 		// fill description:
 		strcat(inp.description, modCaptions[mod_type]);
-		inp.jump_frame = start;
-		// add the frame to description
+		switch (mod_type)
+		{
+			case MODTYPE_CHANGE:
+			case MODTYPE_SET:
+			case MODTYPE_UNSET:
+			case MODTYPE_TRUNCATE:
+			case MODTYPE_CLEAR:
+			case MODTYPE_CUT:
+			{
+				inp.jump_frame = first_changes;
+				break;
+			}
+			case MODTYPE_INSERT:
+			case MODTYPE_DELETE:
+			case MODTYPE_PASTE:
+			case MODTYPE_PASTEINSERT:
+			case MODTYPE_CLONE:
+			{
+				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
+				inp.jump_frame = start;
+				break;
+			}
+		}
+		// add upper and lower frame to description
 		char framenum[11];
 		_itoa(start, framenum, 10);
 		strcat(inp.description, " ");
@@ -254,92 +282,66 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 			strcat(inp.description, "-");
 			strcat(inp.description, framenum);
 		}
+		// set hotchanges
 		if (TASEdit_enable_hot_changes)
-			inp.copyHotChanges(&GetCurrentSnapshot());
-		AddInputSnapshotToHistory(inp);
-		bookmarks.ChangesMadeSinceBranch();
-		return -1;
-	} else
-	{
-		// other types of modification:
-		// check if there are input differences from latest snapshot
-		int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-		int first_changes = inp.findFirstChange(input_snapshots[real_pos], start, end);
-		if (first_changes >= 0)
 		{
-			// differences found
-			// fill description:
-			strcat(inp.description, modCaptions[mod_type]);
+			// inherit previous hotchanges and set new changes
 			switch (mod_type)
 			{
+				case MODTYPE_DELETE:
+					inp.inheritHotChanges_DeleteSelection(&input_snapshots[real_pos]);
+					break;
+				case MODTYPE_INSERT:
+				case MODTYPE_CLONE:
+					inp.inheritHotChanges_InsertSelection(&input_snapshots[real_pos]);
+					break;
+				case MODTYPE_PASTEINSERT:
+					inp.inheritHotChanges_PasteInsert(&input_snapshots[real_pos]);
+					break;
 				case MODTYPE_CHANGE:
 				case MODTYPE_SET:
 				case MODTYPE_UNSET:
-				case MODTYPE_TRUNCATE:
 				case MODTYPE_CLEAR:
 				case MODTYPE_CUT:
-				{
-					inp.jump_frame = first_changes;
-					break;
-				}
-				case MODTYPE_INSERT:
-				case MODTYPE_DELETE:
 				case MODTYPE_PASTE:
-				case MODTYPE_PASTEINSERT:
-				case MODTYPE_CLONE:
-				{
-					// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
-					inp.jump_frame = start;
+					inp.inheritHotChanges(&input_snapshots[real_pos]);
+					inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
 					break;
-				}
+				case MODTYPE_TRUNCATE:
+					inp.copyHotChanges(&input_snapshots[real_pos]);
+					// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
+					break;
 			}
-			// add upper and lower frame to description
-			char framenum[11];
-			_itoa(start, framenum, 10);
-			strcat(inp.description, " ");
-			strcat(inp.description, framenum);
-			if (end > start)
-			{
-				_itoa(end, framenum, 10);
-				strcat(inp.description, "-");
-				strcat(inp.description, framenum);
-			}
-			// set hotchanges
-			if (TASEdit_enable_hot_changes)
-			{
-				// inherit previous hotchanges and set new changes
-				switch (mod_type)
-				{
-					case MODTYPE_DELETE:
-						inp.inheritHotChanges_DeleteSelection(&input_snapshots[real_pos]);
-						break;
-					case MODTYPE_INSERT:
-					case MODTYPE_CLONE:
-						inp.inheritHotChanges_InsertSelection(&input_snapshots[real_pos]);
-						break;
-					case MODTYPE_PASTEINSERT:
-						inp.inheritHotChanges_PasteInsert(&input_snapshots[real_pos]);
-						break;
-					case MODTYPE_CHANGE:
-					case MODTYPE_SET:
-					case MODTYPE_UNSET:
-					case MODTYPE_CLEAR:
-					case MODTYPE_CUT:
-					case MODTYPE_PASTE:
-						inp.inheritHotChanges(&input_snapshots[real_pos]);
-						inp.fillHotChanges(input_snapshots[real_pos], first_changes, end);
-						break;
-					case MODTYPE_TRUNCATE:
-						inp.copyHotChanges(&input_snapshots[real_pos]);
-						// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
-						break;
-				}
-			}
-			AddInputSnapshotToHistory(inp);
-			bookmarks.ChangesMadeSinceBranch();
 		}
-		return first_changes;
+		AddInputSnapshotToHistory(inp);
+		bookmarks.ChangesMadeSinceBranch();
 	}
+	return first_changes;
+}
+void INPUT_HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
+{
+	// create new input shanshot
+	INPUT_SNAPSHOT inp;
+	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.mod_type = mod_type;
+	// fill description:
+	strcat(inp.description, modCaptions[mod_type]);
+	inp.jump_frame = start;
+	// add the frame to description
+	char framenum[11];
+	_itoa(start, framenum, 10);
+	strcat(inp.description, " ");
+	strcat(inp.description, framenum);
+	if (end > start)
+	{
+		_itoa(end, framenum, 10);
+		strcat(inp.description, "-");
+		strcat(inp.description, framenum);
+	}
+	if (TASEdit_enable_hot_changes)
+		inp.copyHotChanges(&GetCurrentSnapshot());
+	AddInputSnapshotToHistory(inp);
+	bookmarks.ChangesMadeSinceBranch();
 }
 void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 {

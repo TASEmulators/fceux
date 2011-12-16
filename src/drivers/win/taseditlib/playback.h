@@ -32,6 +32,7 @@ public:
 	void RewindFull();
 	void ForwardFull();
 
+	void RedrawMarker();
 
 	void StartFromZero();
 
@@ -39,8 +40,14 @@ public:
 	void SetProgressbar(int a, int b);
 
 	int pause_frame;
+	bool must_find_current_marker;
+	int shown_marker;
 
 	HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
+	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
+
+	// temps
+	bool jump_was_used_this_frame;
 
 private:
 	bool JumpToFrame(int index);

@@ -13,6 +13,7 @@ public:
 	void update();
 
 	void RedrawTextClipboard();
+	void RedrawMarker();
 
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
@@ -55,12 +56,21 @@ public:
 
 	SelectionFrames& GetInsertedSet();
 
+	bool must_find_current_marker;
+	int shown_marker;
+
+	HWND hwndPrevMarker, hwndNextMarker, hwndFindBestMarker, hwndFindNextMarker;
+	HWND hwndTextSelection, hwndTextClipboard;
+	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
+
 private:
 	SelectionFrames& CurrentSelection();
 	void CheckClipboard();
 
 	bool track_selection_changes;
 	bool must_redraw_text;
+
+	int last_selection_beginning;
 
 	bool old_prev_marker_button_state, prev_marker_button_state;
 	bool old_next_marker_button_state, next_marker_button_state;
@@ -77,8 +87,5 @@ private:
 	int history_size;
 
 	SelectionFrames temp_selection;
-
-	HWND hwndPrevMarker, hwndNextMarker, hwndFindBestMarker, hwndFindNextMarker;
-	HWND hwndTextSelection, hwndTextClipboard;
 
 };

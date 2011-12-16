@@ -14,16 +14,20 @@ WNDPROC hwndBookmarksList_oldWndProc, hwndBranchesBitmap_oldWndProc;
 
 extern SCREENSHOT_DISPLAY screenshot_display;
 extern PLAYBACK playback;
+extern TASEDIT_SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDIT_PROJECT project;
 extern INPUT_HISTORY history;
 extern TASEDIT_LIST tasedit_list;
+extern MARKERS current_markers;
 
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
+
+extern void UpdateMarkerNote();
 
 // resources
 char bookmarks_save_id[BOOKMARKS_ID_LEN] = "BOOKMARKS";
@@ -32,11 +36,12 @@ char bookmarksCaption[3][23] = { " Bookmarks ", " Bookmarks / Branches ", " Bran
 // color tables for flashing when saving/loading bookmarks
 COLORREF bookmark_flash_colors[3][FLASH_PHASE_MAX+1] = {
 	// set
-	0x122330, 0x1b3541, 0x254753, 0x2e5964, 0x376b75, 0x417e87, 0x4a8f97, 0x53a1a8, 0x5db3b9, 0x66c5cb, 0x70d7dc, 0x79e9ed, 
+	//0x122330, 0x1b3541, 0x254753, 0x2e5964, 0x376b75, 0x417e87, 0x4a8f97, 0x53a1a8, 0x5db3b9, 0x66c5cb, 0x70d7dc, 0x79e9ed, 
+	0x0d1241, 0x111853, 0x161e64, 0x1a2575, 0x1f2b87, 0x233197, 0x2837a8, 0x2c3db9, 0x3144cb, 0x354adc, 0x3a50ed, 0x3f57ff, 
 	// jump
-	0x382309, 0x3c350e, 0x404814, 0x455a19, 0x486c1e, 0x4d7f23, 0x519128, 0x55a32d, 0x5ab532, 0x5ec837, 0x62da3c, 0x66ec41, 
+	0x14350f, 0x1c480f, 0x235a0f, 0x2a6c0f, 0x317f10, 0x38910f, 0x3fa30f, 0x46b50f, 0x4dc80f, 0x54da0f, 0x5bec0f, 0x63ff10, 
 	// unleash
-	0x320d23, 0x341435, 0x361b48, 0x38215a, 0x39286c, 0x3b2f7f, 0x3c3691, 0x3e3ca3, 0x4043b5, 0x414ac8, 0x4351da, 0x4457ec };
+	0x43171d, 0x541d21, 0x652325, 0x762929, 0x872f2c, 0x983530, 0xa93b34, 0xba4137, 0xcb463b, 0xdc4c3f, 0xed5243, 0xff5947 };
 // corners cursor animation
 int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0 };
 
@@ -268,6 +273,10 @@ void BOOKMARKS::update()
 void BOOKMARKS::set(int slot)
 {
 	if (slot < 0 || slot >= TOTAL_BOOKMARKS) return;
+
+	// First save edited note (in case it's being currently edited)
+	UpdateMarkerNote();
+
 	int previous_frame = bookmarks_array[slot].snapshot.jump_frame;
 	// save time of this slot before rewriting it
 	char saved_time[TIME_DESC_LENGTH];
@@ -419,6 +428,7 @@ void BOOKMARKS::unleash(int slot)
 	}
 	if (slot < 0 || slot >= TOTAL_BOOKMARKS) return;
 	if (!bookmarks_array[slot].not_empty) return;
+
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
 
 	bool markers_changed = false;
@@ -428,7 +438,7 @@ void BOOKMARKS::unleash(int slot)
 		// update Markers
 		if (TASEdit_bind_markers)
 		{
-			if (bookmarks_array[slot].snapshot.checkMarkersDiff())
+			if (bookmarks_array[slot].snapshot.my_markers.checkMarkersDiff(current_markers))
 			{
 				bookmarks_array[slot].snapshot.copyToMarkers();
 				project.SetProjectChanged();
@@ -442,11 +452,13 @@ void BOOKMARKS::unleash(int slot)
 			// restore entire movie
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
 			tasedit_list.update();
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
 			tasedit_list.RedrawList();
 			bookmarks_array[slot].unleashed();
@@ -460,7 +472,7 @@ void BOOKMARKS::unleash(int slot)
 		// update Markers
 		if (TASEdit_bind_markers)
 		{
-			if (bookmarks_array[slot].snapshot.checkMarkersDiff(jump_frame))
+			if (bookmarks_array[slot].snapshot.my_markers.checkMarkersDiff(current_markers, jump_frame))
 			{
 				bookmarks_array[slot].snapshot.copyToMarkers(jump_frame-1);
 				project.SetProjectChanged();
@@ -475,11 +487,13 @@ void BOOKMARKS::unleash(int slot)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
 			tasedit_list.update();
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].unleashed();
 		} else if (markers_changed)
 		{
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
 			tasedit_list.RedrawList();
 			bookmarks_array[slot].unleashed();

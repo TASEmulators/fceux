@@ -1,4 +1,29 @@
 
+16-dec-2011 - AnS - Tasedit: new accelerators: Ctrl-PgUp/Ctrl-PgDn/Shift-PgUp/Shift-PgDn; Config->Allow keyboard controls in Listview
+16-dec-2011 - AnS - Tasedit: View->Display Branch Tooltips
+16-dec-2011 - AnS - Tasedit: Markers notes; View->Follow Marker Note context
+16-dec-2011 - AnS - changed ".tas" extension to ".fm3"
+10-dec-2011 - AnS - loading TAS Editor projects by drag-n-drop
+10-dec-2011 - AnS - Tasedit: File->Save Compact dialog
+09-dec-2011 - AnS - Replaying TAS Editor project files in FCEUX (win32 and SDL)
+07-dec-2011 - AnS - disabled changing PPU/PAL/input_type when Taseditor is engaged
+07-dec-2011 - AnS - Tasedit: File->Recent projects
+07-dec-2011 - AnS - enhanced Reload hotkey (Ctrl-F1), now it loads last ROM or last TAS Editor project
+05-dec-2011 - AnS - Tasedit: Import input, Export to FM2
+04-dec-2011 - AnS - Tasedit: branches autofind best parent, "Set Marker"/"Remove marker" in context menu, checking clipboard at selection.init() and retrieving info
+29-nov-2011 - AnS - Tasedit: MsgBox about not working with movies starting from savestate
+26-nov-2011 - aquanull - win32: fixed graphic-tearing WITH vertical sync enabled in windowed mode. It used to wait for V-Blank too early so that the V-Blank would end too soon before the blitting could be finished.
+26-nov-2011 - AnS - Fixed crash when using machine with no sound card
+26-nov-2011 - zeromus - Fixed wrong default palette entry
+25-nov-2011 - zeromus - add nestopia palette files
+25-nov-2011 - AnS - Tasedit: selection << and >>, Turbo Seek checkbox, PasteInsert, Config->Superimpose affects copy/paste, Editing info texts
+23-nov-2011 - zeromus - fix [3441099] printf bug in SwapSaveState()
+21-nov-2011 - AnS - Tasedit: multitrack recording, "Superimpose" checkbox, Config->Use 1P keys for all single recordings, Config->Combine consecutive Recordings
+19-nov-2011 - AnS - Tasedit: selection strobe, soft reset and power switch messages, messages when saving/loading Branches
+17-nov-2011 - AnS - Tasedit: selection history, undo/redo, Reselect Clipboard, saving/loading selection history to .tas
+17-nov-2011 - AnS - Tasedit: input hotchanges
+14-nov-2011 - zeromus - straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.
+12-nov-2011 - adelikat - win32 - cheat search - slight GUI tweak
 12-nov-2011 - AnS - Tasedit: project autosaving
 10-nov-2011 - AnS - Tasedit: Branches show saved screenshot on mouseover (alpha-fade popup window)
 7-nov-2011 - AnS - Tasedit: Drawing Branches Tree (using GDI), animations, transitions, mouseover
@@ -6,7 +31,7 @@
 1-nov-2011 - zeromus - debugger - fix mysterious out of bounds condition while editing breakpoints
 31-oct-2011 - zeromus - add winapi lua library
 31-oct-2011 - zeromus - fix newppu bug; chr ram was not getting initialized to anything
-28-oct-2011 - AnS - Switching Tasedit Bg input on/off when Tasedit gets/loses focus (allows FCEUX control without "Bg input")
+28-oct-2011 - AnS - Switching Tasedit Bg input on/off when Tasedit gets/loses focus
 27-oct-2011 - AnS - "Toggle Rerecord Display" hotkey (M), "Play Movie From Beginning" hotkey also works in Tasedit
 27-oct-2011 - AnS - Tasedit: Bookmarks/Branches
 23-oct-2011 - prg318 - sdl: fix a bug where alt key would get "stuck" when alt tabbing to window
@@ -35,7 +60,7 @@
 28-sept-2011 - CaH4e3 - resetexstate crash fix
 27-sept-2011 - AnS - Fixed old bug with "Play Movie From Beginning"
 26-sept-2011 - AnS - added support for "Enable HUD recording" option to SDL version
-25-sept-2011 - AnS - Tasedit: progressbar; holding "<" and ">" buttons; Ctrl-Delete bugfix
+25-sept-2011 - AnS - Tasedit: progressbar; holding "<" and ">" buttons
 25-sept-2011 - zeromus - newppu-fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict
 24-sept-2011 - CaH4e3 - latest mapper changes; code/data logger now can log data access from the RAM code; the new button to save unused data to the code/data logger
 24-sept-2011 - AnS - Tasedit: changed control scheme to single click instead of double click
@@ -45,17 +70,19 @@
 23-sept-2011 - AnS - Config->Movie options->Always suggest Read-Only replay (for Replay dialog)
 22-sept-2011 - AnS - deleted "Lag Counter Reset" hotkey; added "Open TAS Edit" hotkey
 22-sept-2011 - AnS - fixed long "savestate" messages containing path
-22-sept-2011 - AnS - Tasedit: auto clear "Disable speed throttling" and "Run in background", auto set "Set high-priority thread" when entering TASEdit; FCEUX runs in bg when TASEdit has focus; Config->"Mute Turbo" check (same as in Config->Sound)
+22-sept-2011 - AnS - Tasedit: auto clear "Disable speed throttling" and "Run in background", auto set "Set high-priority thread" when entering TASEdit; FCEUX runs in bg when TASEdit has focus; Config->"Mute Turbo" check
 19-sept-2011 - AnS - Tasedit: accelerator table; Config->"Set greenzone capacity"; pauseframe is shown by flashing color
 18-sept-2011 - zeromus - datalatch mapper-fix bug where wramless games would be able to do something mysterious to unmapped host emulator memory
-17-sept-2011 - AnS - Tasedit: forced read-only behaviour when seeking or holding turbo; "Auto-restore last position" checkbox in playback controls; also fixed item drawing method, no more flicker and slowdowns
+17-sept-2011 - AnS - Tasedit: forced read-only behaviour when seeking or holding turbo
+17-sept-2011 - AnS - Tasedit: "Auto-restore last position" checkbox in playback controls
+17-sept-2011 - AnS - Tasedit: fixed item drawing method, no more flicker and slowdowns
 12-sept-2011 - prg318 - sdl: rename InputType to CurInputType due to variable of same name in src/movie.h
-12-sept-2011 - AnS - Tasedit: rewrote project save/load functions; various bugfixes; Added string "Tweak Count" to Replay loading dialog
-6-sept-2011 - AnS - Tasedit: red lines for lag frames; different method of accounting tweakCount
+12-sept-2011 - AnS - Tasedit: rewrote project save/load functions, various bugfixes
+6-sept-2011 - AnS - Tasedit: red lines for lag frames
 6-sept-2011 - AnS - fixed bug when trying to open Replay dialog without having ROM loaded
 3-sept-2011 - AnS - Tasedit: tweaks and bugfixes
 3-sept-2011 - CaH4e3 - fixed bus conflict emulation, no kage no densetsu bug anymore
-31-Aug-2011 - AnS - Tasedit: Added 4 pads support; also now current frame is shown by blue line; minor cleanups.
+31-Aug-2011 - AnS - Tasedit: Added 4 pads support; also now current frame is shown by blue line; minor cleanups
 30-Aug-2011 - mart0258 - Ram Search updates list when emulator is paused (on Power, or when resetting search)
 25-Aug-2011 - zeromus - win32: fix context menus to use rightclicks in context menus correctly
 19-Aug-2011 - CaH4e3 - PAL/NTSC noise fixed

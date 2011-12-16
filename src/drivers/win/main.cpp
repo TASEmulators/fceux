@@ -403,7 +403,7 @@ void DoFCEUExit()
 		return;
 
 #ifdef WIN32
-	//If user was asked to save changes in Taseditor and chose cancel, don't close FCEUX
+	//If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
 	extern bool ExitTasEdit();
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT) && !ExitTasEdit()) return;
 #endif

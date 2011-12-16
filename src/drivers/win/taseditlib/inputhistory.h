@@ -38,6 +38,7 @@
 #define MODTYPE_BRANCH_MARKERS_9 33
 #define MODTYPE_MARKER_SET 34
 #define MODTYPE_MARKER_UNSET 35
+#define MODTYPE_MARKER_RENAME 36
 
 #define HISTORY_NORMAL_COLOR 0x000000
 #define HISTORY_INCOHERENT_COLOR 0x999999
@@ -63,6 +64,7 @@ public:
 	void AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp);
 
 	int RegisterChanges(int mod_type, int start = 0, int end =-1);
+	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1);
 	void RegisterBranching(int mod_type, int first_change, int slot);
 	void RegisterRecording(int frame_of_change);
 	void RegisterImport(MovieData& md, char* filename);

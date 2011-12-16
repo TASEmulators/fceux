@@ -117,10 +117,8 @@ public:
 
 	// GDI stuff
 	HIMAGELIST himglist;
-	HFONT hMainListFont, hMainListSelectFont;
+	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont;
 
 private:
-	int listItems;			// number of items per list page
-
 
 };

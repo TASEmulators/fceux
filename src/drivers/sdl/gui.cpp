@@ -1296,7 +1296,7 @@ void loadMovie ()
 	filterMovies = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterMovies, "*.fm2");
 	gtk_file_filter_add_pattern(filterMovies, "*.FM2f");
-	gtk_file_filter_add_pattern(filterMovies, "*.tas");
+	gtk_file_filter_add_pattern(filterMovies, "*.fm3");
 	gtk_file_filter_set_name(filterMovies, "FM2 Movies, TAS Editor Projects");
 
 	filterFm2 = gtk_file_filter_new();

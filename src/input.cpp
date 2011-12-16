@@ -52,6 +52,7 @@
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
 
+#include "./drivers/win/taseditlib/markers.h"
 #include "./drivers/win/taseditlib/inputsnapshot.h"
 #include "./drivers/win/taseditlib/bookmarks.h"
 extern bool Tasedit_rewind_now;

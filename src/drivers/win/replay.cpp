@@ -7,7 +7,7 @@
 #include "archive.h"
 #include "utils/xstring.h"
 
-static const char* fm2ext[] = { "fm2", "tas", 0};
+static const char* fm2ext[] = { "fm2", "fm3", 0};
 
 int MetaPosX,MetaPosY;
 
@@ -552,12 +552,12 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 						//TODO - a big copy/pasted block below. factor out extension extractor or use another one
 
-						// filter out everything that's not an extension we like (*.fm2 and *.tas)
+						// filter out everything that's not an extension we like (*.fm2 and *.fm3)
 						// (because FindFirstFile is too dumb to do that)
 						{
 							std::string ext = getExtension(wfd.cFileName);
 							if(ext != "fm2")
-								if(ext != "tas")
+								if(ext != "fm3")
 									if(ext != "zip")
 										if(ext != "rar")
 											if(ext != "7z")
@@ -665,7 +665,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							memset(&ofn, 0, sizeof(ofn));
 							ofn.lStructSize = sizeof(ofn);
 							ofn.hwndOwner = hwndDlg;
-							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2), TAS Editor Projects (*.tas)\0*.fm2;*.tas\0FCEUX Movie Files (*.fm2)\0*.fm2\0Archive Files (*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All Files (*.*)\0*.*\0\0";
+							ofn.lpstrFilter = "FCEUX Movie Files (*.fm2), TAS Editor Projects (*.fm3)\0*.fm2;*.fm3\0FCEUX Movie Files (*.fm2)\0*.fm2\0Archive Files (*.zip,*.rar,*.7z)\0*.zip;*.rar;*.7z\0All Files (*.*)\0*.*\0\0";
 							ofn.lpstrFile = szFile;
 							ofn.nMaxFile = sizeof(szFile);
 							ofn.lpstrInitialDir = pn;

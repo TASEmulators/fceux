@@ -74,10 +74,12 @@ extern bool TASEdit_turbo_seek;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_show_markers;
 extern bool TASEdit_show_branch_screenshots;
+extern bool TASEdit_show_branch_tooltips;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_use_1p_rec;
 extern bool TASEdit_combine_consecutive_rec;
 extern bool TASEdit_superimpose_affects_paste;
+extern bool TASEdit_keyboard_for_listview;
 extern bool TASEdit_branch_full_movie;
 extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_view_branches_tree;
@@ -89,14 +91,15 @@ extern int TASEdit_greenzone_capacity;
 extern int TasEdit_undo_levels;
 extern int TASEdit_autosave_period;
 extern bool TASEdit_jump_to_undo;
+extern bool TASEdit_follow_note_context;
 extern int TASEdit_last_export_type;
 extern bool TASEdit_savecompact_binary;
 extern bool TASEdit_savecompact_markers;
 extern bool TASEdit_savecompact_bookmarks;
 extern bool TASEdit_savecompact_greenzone;
 extern bool TASEdit_savecompact_history;
-extern bool TASEdit_savecompact_selection;
 extern bool TASEdit_savecompact_list;
+extern bool TASEdit_savecompact_selection;
 extern char* recent_projects[];
 
 //window positions and sizes:
@@ -331,10 +334,12 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_lag_frames),
 	AC(TASEdit_show_markers),
 	AC(TASEdit_show_branch_screenshots),
+	AC(TASEdit_show_branch_tooltips),
 	AC(TASEdit_bind_markers),
 	AC(TASEdit_use_1p_rec),
 	AC(TASEdit_combine_consecutive_rec),
 	AC(TASEdit_superimpose_affects_paste),
+	AC(TASEdit_keyboard_for_listview),
 	AC(TASEdit_branch_full_movie),
 	AC(TASEdit_branch_only_when_rec),
 	AC(TASEdit_view_branches_tree),
@@ -346,14 +351,15 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TasEdit_undo_levels),
 	AC(TASEdit_autosave_period),
 	AC(TASEdit_jump_to_undo),
+	AC(TASEdit_follow_note_context),
 	AC(TASEdit_last_export_type),
 	AC(TASEdit_savecompact_binary),
 	AC(TASEdit_savecompact_markers),
 	AC(TASEdit_savecompact_bookmarks),
 	AC(TASEdit_savecompact_greenzone),
 	AC(TASEdit_savecompact_history),
-	AC(TASEdit_savecompact_selection),
 	AC(TASEdit_savecompact_list),
+	AC(TASEdit_savecompact_selection),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),
