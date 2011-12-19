@@ -183,6 +183,7 @@
 #define IDD_TASEDIT_EXPORT              185
 #define IDD_TASEDIT_SAVECOMPACT         186
 #define IDD_TASEDIT_BRANCH_NOTE         188
+#define IDI_ICON3                       197
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -469,10 +470,12 @@
 #define IDC_FULLSAVESTATES              1203
 #define IDC_SUPERIMPOSE                 1203
 #define IDC_CHECK_BINARY                1203
+#define IDC_NOTES_TO_SUBTITLES          1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
 #define IDC_CHECK_MARKERS               1204
+#define IDC_RECORDING                   1204
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205
 #define IDC_CHECK_BOOKMARKS             1205
@@ -948,6 +951,8 @@
 #define ID_ACCELERATOR40506             40506
 #define ID_VIEW_FOLLOWMARKERNOTECONTEXT 40507
 #define ID_VIEW_SHOWBRANCHTOOLTIPS      40508
+#define ID_CONFIG_USEINPUTKEYSFORCOLUMNSET 40509
+#define ID_CONFIG_EMPTYNEWMARKERNOTES   40510
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -956,8 +961,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        189
-#define _APS_NEXT_COMMAND_VALUE         40509
+#define _APS_NEXT_RESOURCE_VALUE        198
+#define _APS_NEXT_COMMAND_VALUE         40511
 #define _APS_NEXT_CONTROL_VALUE         1273
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

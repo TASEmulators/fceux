@@ -113,7 +113,7 @@ void PLAYBACK::update()
 	// update the playback cursor
 	if(currFrameCounter != lastCursor)
 	{
-		tasedit_list.FollowPlayback();
+		tasedit_list.FollowPlaybackIfNeeded();
 		// update gfx of the old and new rows
 		tasedit_list.RedrawRow(lastCursor);
 		bookmarks.RedrawChangedBookmarks(lastCursor);
@@ -253,7 +253,7 @@ void PLAYBACK::RewindFrame()
 	if (currFrameCounter > 0)
 		jump(currFrameCounter-1);
 	else
-		tasedit_list.FollowPlayback();
+		tasedit_list.FollowPlaybackIfNeeded();
 	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
@@ -315,7 +315,7 @@ void PLAYBACK::jump(int frame)
 	if (JumpToFrame(frame))
 	{
 		ForceExecuteLuaFrameFunctions();
-		tasedit_list.FollowPlayback();
+		tasedit_list.FollowPlaybackIfNeeded();
 	}
 }
 void PLAYBACK::restorePosition()

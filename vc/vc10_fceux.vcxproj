@@ -858,8 +858,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
+    <None Include="..\src\drivers\win\res\icon3.ico" />
+    <None Include="..\src\drivers\win\res\icon4.ico" />
     <None Include="..\src\drivers\win\res\ICON_1.ico" />
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
+    <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
     <None Include="..\src\drivers\win\res\te_0.bmp" />
     <None Include="..\src\drivers\win\res\te_1.bmp" />
     <None Include="..\src\drivers\win\res\te_10.bmp" />
@@ -897,6 +900,7 @@
     </CustomBuild>
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="res\tasedit-icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,9 @@
 //Implementation file of TASEDIT_LIST class
-
 #include "taseditproj.h"
 #include "utils/xstring.h"
+#include "uxtheme.h"
+
+#pragma comment(lib, "UxTheme.lib")
 
 extern HWND hwndTasEdit;
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
@@ -24,11 +26,12 @@ extern bool TASEdit_keyboard_for_listview;
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-WNDPROC hwndList_oldWndProc, hwndHeader_oldWndproc;
+WNDPROC hwndList_oldWndProc = 0, hwndHeader_oldWndproc = 0;
 
 // resources
 COLORREF hot_changes_colors[16] = { 0x0, 0x5c4c44, 0x854604, 0xab2500, 0xc20006, 0xd6006f, 0xd40091, 0xba00a4, 0x9500ba, 0x7a00cc, 0x5800d4, 0x0045e2, 0x0063ea, 0x0079f4, 0x0092fa, 0x00aaff };
 //COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
+COLORREF header_lights_colors[11] = { 0x0, 0x00661f, 0x008a15, 0x00a800, 0x24c700, 0x4bd600, 0x79e300, 0x97e800, 0xb4f000, 0xd6f700, 0xffff00 };
 
 char list_save_id[LIST_ID_LEN] = "LIST";
 char list_skipsave_id[LIST_ID_LEN] = "LISX";
@@ -68,6 +71,7 @@ TASEDIT_LIST::TASEDIT_LIST()
 void TASEDIT_LIST::init()
 {
 	free();
+	header_colors.resize(MAX_NUM_COLUMNS);
 	hwndList = GetDlgItem(hwndTasEdit, IDC_LIST1);
 	// prepare the main listview
 	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP);
@@ -76,6 +80,8 @@ void TASEDIT_LIST::init()
 	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
 	// subclass the whole listview
 	hwndList_oldWndProc = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LONG)ListWndProc);
+	// disable Visual Themes for header
+	SetWindowTheme(hwndHeader, L"", L"");
 	// setup images for the listview
 	himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
@@ -144,17 +150,17 @@ void TASEDIT_LIST::init()
 	ListView_SetImageList(hwndList, himglist, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
-	int colidx=0;
+	num_columns = 0;
 	// icons column
 	lvc.mask = LVCF_WIDTH;
 	lvc.cx = 13;
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	ListView_InsertColumn(hwndList, num_columns++, &lvc);
 	// frame number column
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 	lvc.fmt = LVCFMT_CENTER;
 	lvc.cx = 75;
 	lvc.pszText = "Frame#";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	ListView_InsertColumn(hwndList, num_columns++, &lvc);
 	// pads columns
 	lvc.cx = 21;
 	// add pads 1 and 2
@@ -163,14 +169,14 @@ void TASEDIT_LIST::init()
 		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 		{
 			lvc.pszText = buttonNames[btn];
-			ListView_InsertColumn(hwndList, colidx++, &lvc);
+			ListView_InsertColumn(hwndList, num_columns++, &lvc);
 		}
 	}
 	// add pads 3 and 4 and frame_number2
 	if (currMovieData.fourscore) AddFourscore();
 
-	update();
 	reset();
+	//update();
 }
 void TASEDIT_LIST::free()
 {
@@ -179,10 +185,11 @@ void TASEDIT_LIST::free()
 		ImageList_Destroy(himglist);
 		himglist = 0;
 	}
-
+	header_colors.resize(0);
 }
 void TASEDIT_LIST::reset()
 {
+	next_header_update_time = 0;
 	// scroll to the beginning
 	ListView_EnsureVisible(hwndList, 0, FALSE);
 }
@@ -194,7 +201,51 @@ void TASEDIT_LIST::update()
 	if(currLVItemCount != movie_size)
 		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
 
-
+	// once per 40 milliseconds update screenshot_bitmap alpha
+	if (clock() > next_header_update_time)
+	{
+		next_header_update_time = clock() + HEADER_LIGHT_UPDATE_TICK;
+		bool changes_made = false;
+		// 1 - update Frame# columns' heads
+		if (header_colors[COLUMN_FRAMENUM])
+		{
+			header_colors[COLUMN_FRAMENUM]--;
+			header_colors[COLUMN_FRAMENUM2] = header_colors[COLUMN_FRAMENUM];
+			changes_made = true;
+		}
+		// update input columns' heads
+		int i = num_columns-1;
+		if (i == COLUMN_FRAMENUM2) i--;
+		for (; i >= COLUMN_JOYPAD1_A; i--)
+		{
+			if (header_colors[i] > HEADER_LIGHT_HOLD)
+			{
+				header_colors[i]--;
+				changes_made = true;
+			} else
+			{
+				if (recorder.current_joy[(i - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS] & (1 << ((i - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS)))
+				{
+					// the button is held
+					if (header_colors[i] < HEADER_LIGHT_HOLD)
+					{
+						header_colors[i]++;
+						changes_made = true;
+					}
+				} else
+				{
+					// the button is released
+					if (header_colors[i])
+					{
+						header_colors[i]--;
+						changes_made = true;
+					}
+				}
+			}	
+		}
+		if (changes_made)
+			RedrawHeader();
+	}
 }
 
 void TASEDIT_LIST::save(EMUFILE *os, bool really_save)
@@ -247,29 +298,26 @@ void TASEDIT_LIST::AddFourscore()
 	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
 	lvc.fmt = LVCFMT_CENTER;
 	lvc.cx = 21;
-	int colidx = COLUMN_JOYPAD3_A;
 	for (int joy = 0; joy < 2; ++joy)
 	{
 		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 		{
 			lvc.pszText = buttonNames[btn];
-			ListView_InsertColumn(hwndList, colidx++, &lvc);
+			ListView_InsertColumn(hwndList, num_columns++, &lvc);
 		}
 	}
 	// frame number column again
 	lvc.cx = 75;
 	lvc.pszText = "Frame#";
-	ListView_InsertColumn(hwndList, colidx++, &lvc);
+	ListView_InsertColumn(hwndList, num_columns++, &lvc);
 	// change eoptions
 	FCEUI_SetInputFourscore(true);
 }
 void TASEDIT_LIST::RemoveFourscore()
 {
 	// remove list columns
-	for (int i = COLUMN_FRAMENUM2; i >= COLUMN_JOYPAD3_A; --i)
-	{
-		ListView_DeleteColumn (hwndList, i);
-	}
+	for (num_columns = COLUMN_FRAMENUM2; num_columns >= COLUMN_JOYPAD3_A; num_columns--)
+		ListView_DeleteColumn (hwndList, num_columns);
 	// change eoptions
 	FCEUI_SetInputFourscore(false);
 }
@@ -282,7 +330,10 @@ void TASEDIT_LIST::RedrawRow(int index)
 {
 	ListView_RedrawItems(hwndList, index, index);
 }
-
+void TASEDIT_LIST::RedrawHeader()
+{
+	InvalidateRect(hwndHeader, 0, FALSE);
+}
 
 // -------------------------------------------------------------------------
 bool TASEDIT_LIST::CheckItemVisible(int frame)
@@ -295,6 +346,10 @@ bool TASEDIT_LIST::CheckItemVisible(int frame)
 }
 
 void TASEDIT_LIST::FollowPlayback()
+{
+	ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
+}
+void TASEDIT_LIST::FollowPlaybackIfNeeded()
 {
 	if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
 }
@@ -376,6 +431,19 @@ void TASEDIT_LIST::FollowPauseframe()
 		if (index < 0)
 			index = 0;
 		ListView_EnsureVisible(hwndList, index, false);
+	}
+}
+
+void TASEDIT_LIST::SetHeaderColumnLight(int column, int level)
+{
+	if (column < COLUMN_FRAMENUM || column >= num_columns || level < 0 || level > HEADER_LIGHT_MAX)
+		return;
+
+	if (header_colors[column] != level)
+	{
+		header_colors[column] = level;
+		RedrawHeader();
+		next_header_update_time = clock() + HEADER_LIGHT_UPDATE_TICK;
 	}
 }
 
@@ -583,6 +651,28 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 		return CDRF_DODEFAULT;
 	}
 }
+
+LONG TASEDIT_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
+{
+	switch(msg->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		SelectObject(msg->nmcd.hdc, hMainListFont);
+		return CDRF_NOTIFYITEMDRAW;
+	case CDDS_ITEMPREPAINT:
+		{
+			int cell_x = msg->nmcd.dwItemSpec;
+			if (cell_x < num_columns)
+			{
+				int cur_color = header_colors[cell_x];
+				if (cur_color)
+					SetTextColor(msg->nmcd.hdc, header_lights_colors[cur_color]);
+			}
+		}
+	default:
+		return CDRF_DODEFAULT;
+	}
+}
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -612,6 +702,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 //The subclass wndproc for the listview
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	extern TASEDIT_LIST tasedit_list;
 	switch(msg)
 	{
 		case WM_CHAR:
@@ -619,12 +710,17 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		case WM_NOTIFY:
 		{
-			switch (((LPNMHDR)lParam)->code)
+			if (((LPNMHDR)lParam)->hwndFrom == tasedit_list.hwndHeader)
 			{
-			case HDN_BEGINTRACKW:
-			case HDN_BEGINTRACKA:
-			case HDN_TRACK:
-				return true;	// no column resizing
+				switch (((LPNMHDR)lParam)->code)
+				{
+				case HDN_BEGINTRACKW:
+				case HDN_BEGINTRACKA:
+				case HDN_TRACK:
+					return true;	// no column resizing
+				case NM_CUSTOMDRAW:
+					return tasedit_list.HeaderCustomDraw((NMLVCUSTOMDRAW*)lParam);
+				}
 			}
 			break;
 		}
@@ -643,5 +739,3 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 }
-
-

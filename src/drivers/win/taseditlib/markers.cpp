@@ -1,8 +1,10 @@
 //Implementation file of Markers class
-
 #include "taseditproj.h"
 #include "zlib.h"
 
+extern bool TASEdit_empty_marker_notes;
+
+// resources
 char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
 char markers_skipsave_id[MARKERS_ID_LEN] = "MARKERX";
 
@@ -257,7 +259,11 @@ void MARKERS::SetMarker(int frame)
 {
 	int marker_num = GetMarkerUp(frame) + 1;
 	markers_array[frame] = marker_num;
-	notes.insert(notes.begin() + marker_num, 1, "");
+	if (TASEdit_empty_marker_notes)
+		notes.insert(notes.begin() + marker_num, 1, "");
+	else
+		// copy previous marker note
+		notes.insert(notes.begin() + marker_num, 1, notes[marker_num - 1]);
 	// increase following markers' ids
 	int size = markers_array.size();
 	for (frame++; frame < size; ++frame)

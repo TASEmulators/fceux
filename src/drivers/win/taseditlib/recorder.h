@@ -20,12 +20,13 @@ public:
 	void InputChanged();
 	
 	int multitrack_recording_joypad;
+	std::vector<uint8> current_joy;
 
 private:
 	int old_multitrack_recording_joypad;
 	bool old_movie_readonly;
 
-	HWND hwndRB_RecOff, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
+	HWND hwndRecCheckbox, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;
 
 	// temps
 	std::vector<uint8> old_joy;

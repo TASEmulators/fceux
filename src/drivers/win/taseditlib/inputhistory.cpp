@@ -342,6 +342,7 @@ void INPUT_HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
 		inp.copyHotChanges(&GetCurrentSnapshot());
 	AddInputSnapshotToHistory(inp);
 	bookmarks.ChangesMadeSinceBranch();
+	project.SetProjectChanged();
 }
 void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 {

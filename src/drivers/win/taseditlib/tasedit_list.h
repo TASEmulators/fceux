@@ -9,6 +9,11 @@
 #define NUM_JOYPADS 4
 #define NUM_JOYPAD_BUTTONS 8
 
+#define HEADER_LIGHT_MAX 10
+#define HEADER_LIGHT_HOLD 5
+#define HEADER_LIGHT_UPDATE_TICK 40	// 25FPS
+
+#define MAX_NUM_COLUMNS 35
 #define COLUMN_ICONS 0
 #define COLUMN_FRAMENUM	 1
 #define COLUMN_JOYPAD1_A 2
@@ -44,6 +49,7 @@
 #define COLUMN_JOYPAD4_L 32
 #define COLUMN_JOYPAD4_R 33
 #define COLUMN_FRAMENUM2 34
+
 #define DIGITS_IN_FRAMENUM 7
 #define ARROW_IMAGE_ID 20
 
@@ -82,8 +88,6 @@
 #define CUR_MARKED_FRAMENUM_COLOR 0xDEF7F3
 #define MARKED_UNDOHINT_FRAMENUM_COLOR 0xE1E7EC
 
-
-
 class TASEDIT_LIST
 {
 public:
@@ -101,17 +105,21 @@ public:
 
 	void RedrawList();
 	void RedrawRow(int index);
+	void RedrawHeader();
 
 	bool CheckItemVisible(int frame);
 
 	void FollowPlayback();
+	void FollowPlaybackIfNeeded();
 	void FollowUndo();
 	void FollowSelection();
 	void FollowPauseframe();
 
+	void SetHeaderColumnLight(int column, int level);
+
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-
+	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
 
 	HWND hwndList, hwndHeader;
 
@@ -120,5 +128,8 @@ public:
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont;
 
 private:
+	std::vector<uint8> header_colors;
+	int num_columns;
+	int next_header_update_time;
 
 };

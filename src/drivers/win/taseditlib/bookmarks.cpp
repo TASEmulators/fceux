@@ -413,8 +413,6 @@ void BOOKMARKS::jump(int slot)
 		playback.jump(frame);
 		if (playback.GetPauseFrame())
 			tasedit_list.FollowPauseframe();
-		else
-			tasedit_list.FollowPlayback();
 		bookmarks_array[slot].jump();
 	}
 }

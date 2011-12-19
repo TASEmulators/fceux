@@ -1,6 +1,6 @@
 //Implementation file of TASEDIT_SELECTION class
 #include "taseditproj.h"
-#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_UPPER
+#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_LOWER
 
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";

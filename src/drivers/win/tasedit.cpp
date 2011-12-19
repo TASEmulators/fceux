@@ -49,10 +49,12 @@ bool TASEdit_show_markers = true;
 bool TASEdit_show_branch_screenshots = true;
 bool TASEdit_show_branch_tooltips = true;
 bool TASEdit_bind_markers = true;
-bool TASEdit_use_1p_rec = true;
+bool TASEdit_empty_marker_notes = true;
 bool TASEdit_combine_consecutive_rec = true;
-bool TASEdit_superimpose_affects_paste = true;
+bool TASEdit_use_1p_rec = true;
+bool TASEdit_columnset_by_keys = true;
 bool TASEdit_keyboard_for_listview = true;
+bool TASEdit_superimpose_affects_paste = true;
 int TASEdit_superimpose = BST_UNCHECKED;
 bool TASEdit_branch_full_movie = true;
 bool TASEdit_branch_only_when_rec = false;
@@ -67,6 +69,7 @@ bool TASEdit_enable_hot_changes = true;
 bool TASEdit_jump_to_undo = true;
 bool TASEdit_follow_note_context = true;
 int TASEdit_last_export_type = EXPORT_TYPE_1P;
+bool TASEdit_last_export_subtitles = false;
 bool TASEdit_savecompact_binary = true;
 bool TASEdit_savecompact_markers = true;
 bool TASEdit_savecompact_bookmarks = true;
@@ -86,17 +89,18 @@ string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TAS Edi
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
 char windowCaptioBase[] = "TAS Editor";
 extern char recordingCaptions[5][30];
+HICON hTaseditorIcon = 0;
 
 // enterframe function
 void UpdateTasEdit()
 {
 	if(!hwndTasEdit) return;
 
+	recorder.update();
 	tasedit_list.update();
 	current_markers.update();
 	greenzone.update();
 	playback.update();
-	recorder.update();
 	bookmarks.update();
 	screenshot_display.update();
 	selection.update();
@@ -226,7 +230,6 @@ void SingleClick(LPNMITEMACTIVATE info)
 				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
 			else
 				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-			project.SetProjectChanged();
 			tasedit_list.RedrawRow(row_index);
 		}
 	}
@@ -487,8 +490,8 @@ void FrameColumnSet()
 	}
 	if (changes_made)
 	{
-		project.SetProjectChanged();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 	}
 }
 void InputColumnSet(int column)
@@ -522,8 +525,8 @@ void InputColumnSet(int column)
 	{
 		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
 	}
+	tasedit_list.SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
 }
-
 
 bool Copy(SelectionFrames* current_selection)
 {
@@ -1087,6 +1090,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				}
 			}
+			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, TASEdit_last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
 			return TRUE;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
@@ -1099,6 +1103,10 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				case IDC_RADIO_FOURSCORE:
 					TASEdit_last_export_type = EXPORT_TYPE_FOURSCORE;
+					break;
+				case IDC_NOTES_TO_SUBTITLES:
+					TASEdit_last_export_subtitles ^= 1;
+					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, TASEdit_last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDOK:
 					EndDialog(hwndDlg, 1);
@@ -1161,6 +1169,25 @@ void Export()
 				}
 			}
 			temp_md.loadFrameCount = -1;
+			if (TASEdit_last_export_subtitles)
+			{
+				// convert Marker Notes to Movie Subtitles
+				char framenum[11];
+				std::string subtitle;
+				int marker_id;
+				for (int i = 0; i < current_markers.GetMarkersSize(); ++i)
+				{
+					marker_id = current_markers.GetMarker(i);
+					if (marker_id)
+					{
+						_itoa(i, framenum, 10);
+						strcat(framenum, " ");
+						subtitle = framenum;
+						subtitle.append(current_markers.GetNote(marker_id));
+						temp_md.subtitles.push_back(subtitle);
+					}
+				}
+			}
 			// dump to disk
 			temp_md.dump(osRecordingMovie, false);
 			delete osRecordingMovie;
@@ -1176,10 +1203,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 		case WM_PAINT:
 			break;
 		case WM_INITDIALOG:
+		{
 			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
 			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
+			SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)hTaseditorIcon);
 			SetWindowPos(hwndDlg, 0, TasEdit_wndx, TasEdit_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			break; 
+			break;
+		}
 		case WM_MOVE:
 			{
 				if (!IsIconic(hwndDlg))
@@ -1614,27 +1644,34 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case ID_CONFIG_BINDMARKERSTOINPUT:
-					//switch "Bind Markers to Input" flag
 					TASEdit_bind_markers ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 					break;
-				case ID_CONFIG_USE1PFORRECORDING:
-					//switch "Use 1P keys for single Recordings" flag
-					TASEdit_use_1p_rec ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+				case ID_CONFIG_EMPTYNEWMARKERNOTES:
+					TASEdit_empty_marker_notes ^= 1;
+					CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
 					//switch "Combine consecutive Recordings" flag
 					TASEdit_combine_consecutive_rec ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 					break;
-				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
-					TASEdit_superimpose_affects_paste ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
+				case ID_CONFIG_USE1PFORRECORDING:
+					//switch "Use 1P keys for single Recordings" flag
+					TASEdit_use_1p_rec ^= 1;
+					CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case ID_CONFIG_USEINPUTKEYSFORCOLUMNSET:
+					TASEdit_columnset_by_keys ^= 1;
+					CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW:
 					TASEdit_keyboard_for_listview ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, TASEdit_keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
+					TASEdit_superimpose_affects_paste ^= 1;
+					CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case ID_CONFIG_MUTETURBO:
 					muteTurbo ^= 1;
@@ -1649,33 +1686,24 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					TASEdit_view_branches_tree ^= 1;
 					bookmarks.RedrawBookmarksCaption();
 					break;
-				case IDC_RADIO1:
-					// switch to readonly, no need to recheck radiobuttons
-					if (!movie_readonly) FCEUI_MovieToggleReadOnly();
+				case IDC_RECORDING:
+					// toggle readonly, no need to recheck radiobuttons
+					FCEUI_MovieToggleReadOnly();
+					CheckDlgButton(hwndTasEdit, IDC_RECORDING, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 					break;
 				case IDC_RADIO2:
-					// switch to read+write for all, no need to recheck radiobuttons
-					if (movie_readonly) FCEUI_MovieToggleReadOnly();
 					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
 					break;
 				case IDC_RADIO3:
-					// switch to read+write for 1P, no need to recheck radiobuttons
-					if (movie_readonly) FCEUI_MovieToggleReadOnly();
 					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_1P;
 					break;
 				case IDC_RADIO4:
-					// switch to read+write for 2P, no need to recheck radiobuttons
-					if (movie_readonly) FCEUI_MovieToggleReadOnly();
 					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_2P;
 					break;
 				case IDC_RADIO5:
-					// switch to read+write for 3P, no need to recheck radiobuttons
-					if (movie_readonly) FCEUI_MovieToggleReadOnly();
 					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_3P;
 					break;
 				case IDC_RADIO6:
-					// switch to read+write for 4P, no need to recheck radiobuttons
-					if (movie_readonly) FCEUI_MovieToggleReadOnly();
 					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_4P;
 					break;
 				case IDC_SUPERIMPOSE:
@@ -1784,7 +1812,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							{
 								selection.must_find_current_marker = playback.must_find_current_marker = true;
 								history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-								project.SetProjectChanged();
 							}
 						}
 						break;
@@ -1810,7 +1837,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							{
 								selection.must_find_current_marker = playback.must_find_current_marker = true;
 								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
-								project.SetProjectChanged();
 							}
 						}
 						break;
@@ -1851,6 +1877,7 @@ bool EnterTasEdit()
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return false;
 	if(!hwndTasEdit)
 	{
+		hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
 		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
 		if(hwndTasEdit)
 		{
@@ -1887,10 +1914,12 @@ bool EnterTasEdit()
 			CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, TASEdit_keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
 			CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
@@ -1950,6 +1979,8 @@ bool ExitTasEdit()
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
 	TASEdit_focus = false;
+	DestroyIcon(hTaseditorIcon);
+	hTaseditorIcon = 0;
 	ClearTaseditInput();
 	// restore "eoptions"
 	eoptions = saved_eoptions;

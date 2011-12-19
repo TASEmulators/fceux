@@ -1498,6 +1498,10 @@
     <None Include="..\src\drivers\win\res\te_arrow.bmp">
       <Filter>pix</Filter>
     </None>
+    <None Include="..\src\drivers\win\res\icon3.ico" />
+    <None Include="..\src\drivers\win\res\icon4.ico" />
+    <None Include="res\tasedit-icon.ico" />
+    <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />
