@@ -63,6 +63,7 @@ uint32 ROM_size=0;
 uint32 VROM_size=0;
 char LoadedRomFName[2048]; //mbg merge 7/17/06 added
 
+static int CHRRAMSize = -1;
 static void iNESPower(void);
 static int NewiNES_Init(int num);
 
@@ -81,6 +82,28 @@ static DECLFR(TrainerRead)
 	return(trainerpoo[A&0x1FF]);
 }
 
+static void iNES_ExecPower()
+{
+	if(CHRRAMSize != -1)
+		FCEU_MemoryRand(VROM,CHRRAMSize);
+
+	if(iNESCart.Power)
+		iNESCart.Power();
+
+	if(trainerpoo)
+	{
+		int x;
+		for(x=0;x<512;x++)
+		{
+			X6502_DMW(0x7000+x,trainerpoo[x]);
+			if(X6502_DMR(0x7000+x)!=trainerpoo[x])
+			{
+				SetReadHandler(0x7000,0x71FF,TrainerRead);
+				break;
+			}
+		}
+	}
+}
 
 void iNESGI(GI h) //bbit edited: removed static keyword
 {
@@ -97,21 +120,8 @@ void iNESGI(GI h) //bbit edited: removed static keyword
 			iNESCart.Reset();
 		break;
 	case GI_POWER:
-		if(iNESCart.Power)
-			iNESCart.Power();
-		if(trainerpoo)
-		{
-			int x;
-			for(x=0;x<512;x++)
-		 {
-			 X6502_DMW(0x7000+x,trainerpoo[x]);
-			 if(X6502_DMR(0x7000+x)!=trainerpoo[x])
-			 {
-				 SetReadHandler(0x7000,0x71FF,TrainerRead);
-				 break;
-			 }
-		 }
-		}
+		iNES_ExecPower();
+	
 		break;
 	case GI_CLOSE:
 		{
@@ -1306,12 +1316,12 @@ void iNESStateRestore(int version)
 
 	if(0) switch(Mirroring)
 	{
-case 0:setmirror(MI_H);break;
-case 1:setmirror(MI_V);break;
-case 0x12:
-case 0x10:setmirror(MI_0);break;
-case 0x13:
-case 0x11:setmirror(MI_1);break;
+		case 0:setmirror(MI_H);break;
+		case 1:setmirror(MI_V);break;
+		case 0x12:
+		case 0x10:setmirror(MI_0);break;
+		case 0x13:
+		case 0x11:setmirror(MI_1);break;
 	}
 	if(MapStateRestore) MapStateRestore(version);
 }
@@ -1337,9 +1347,9 @@ static void iNESPower(void)
 	all of the iNES mapper code... */
 	IRQCount=IRQLatch=IRQa=0;
 	if(head.ROM_type&2)
-      memset(GameMemBlock+8192,0,GAME_MEM_BLOCK_SIZE-8192);
+		memset(GameMemBlock+8192,0,GAME_MEM_BLOCK_SIZE-8192);
 	else
-      memset(GameMemBlock,0,GAME_MEM_BLOCK_SIZE);
+		memset(GameMemBlock,0,GAME_MEM_BLOCK_SIZE);
 
 	NONE_init();
 	ResetExState(0,0);
@@ -1384,6 +1394,8 @@ static int NewiNES_Init(int num)
 {
 	BMAPPINGLocal *tmp=bmap;
 
+	CHRRAMSize = -1;
+
 	if(GameInfo->type == GIT_VSUNI)
 		AddExState(FCEUVSUNI_STATEINFO, ~0, 0, 0);
 
@@ -1394,7 +1406,6 @@ static int NewiNES_Init(int num)
 			UNIFchrrama=0; // need here for compatibility with UNIF mapper code
 			if(!VROM_size)
 			{
-				int CHRRAMSize;
 				if(num==13)
 				{
 					CHRRAMSize=16384;
