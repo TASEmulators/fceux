@@ -77,6 +77,7 @@ extern bool TASEdit_show_branch_screenshots;
 extern bool TASEdit_show_branch_tooltips;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_empty_marker_notes;
+extern bool TASEdit_findnote_reappear;
 extern bool TASEdit_combine_consecutive_rec;
 extern bool TASEdit_use_1p_rec;
 extern bool TASEdit_columnset_by_keys;
@@ -103,6 +104,8 @@ extern bool TASEdit_savecompact_greenzone;
 extern bool TASEdit_savecompact_history;
 extern bool TASEdit_savecompact_list;
 extern bool TASEdit_savecompact_selection;
+extern bool TASEdit_findnote_matchcase;
+extern bool TASEdit_findnote_search_up;
 extern char* recent_projects[];
 
 //window positions and sizes:
@@ -340,6 +343,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_branch_tooltips),
 	AC(TASEdit_bind_markers),
 	AC(TASEdit_empty_marker_notes),
+	AC(TASEdit_findnote_reappear),
 	AC(TASEdit_combine_consecutive_rec),
 	AC(TASEdit_use_1p_rec),
 	AC(TASEdit_columnset_by_keys),
@@ -366,6 +370,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_savecompact_history),
 	AC(TASEdit_savecompact_list),
 	AC(TASEdit_savecompact_selection),
+	AC(TASEdit_findnote_matchcase),
+	AC(TASEdit_findnote_search_up),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

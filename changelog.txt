@@ -1,4 +1,9 @@
 
+26-dec-2011 - AnS - Tasedit: Find Note dialog (Ctrl-F)
+26-dec-2011 - AnS - new Lua functions (TAS Editor library)
+19-dec-2011 - AnS - Tasedit: listview header lights
+19-dec-2011 - AnS - Tasedit: Recording checkbox instead of radiobutton; Config->Use Input keys for ColumnSet
+19-dec-2011 - AnS - Tasedit: Export dialog: "Convert Marker Notes to Movie Subtitles"
 16-dec-2011 - AnS - Tasedit: new accelerators: Ctrl-PgUp/Ctrl-PgDn/Shift-PgUp/Shift-PgDn; Config->Allow keyboard controls in Listview
 16-dec-2011 - AnS - Tasedit: View->Display Branch Tooltips
 16-dec-2011 - AnS - Tasedit: Markers notes; View->Follow Marker Note context

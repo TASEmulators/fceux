@@ -1574,6 +1574,8 @@ bool FCEUI_MovieGetInfo(FCEUFILE* fp, MOVIE_INFO& info, bool skipFrameCount)
 //This function creates an array of frame numbers and corresponding strings for displaying subtitles
 void LoadSubtitles(MovieData &moviedata)
 {
+	subtitleFrames.resize(0);
+	subtitleMessages.resize(0);
 	extern std::vector<string> subtitles;
 	for(uint32 i=0; i < moviedata.subtitles.size() ; i++)
 	{
@@ -1583,17 +1585,16 @@ void LoadSubtitles(MovieData &moviedata)
 		
 		//If we can't split them, then don't process this one
 		if(splitat == std::string::npos)
-			{
-			}
+		{
+		}
 		//Else split the subtitle into the int and string arrays
 		else
-			{
-				key = subtitle.substr(0,splitat);
-				value = subtitle.substr(splitat+1);
-
-				subtitleFrames.push_back(atoi(key.c_str()));
-				subtitleMessages.push_back(value);
-			}
+		{
+			key = subtitle.substr(0,splitat);
+			value = subtitle.substr(splitat+1);
+			subtitleFrames.push_back(atoi(key.c_str()));
+			subtitleMessages.push_back(value);
+		}
 	}
 
 }
@@ -1618,7 +1619,7 @@ void FCEU_DisplaySubtitles(char *format, ...)
 	vsnprintf(subtitleMessage.errmsg,sizeof(subtitleMessage.errmsg),format,ap);
 	va_end(ap);
 
-	subtitleMessage.howlong = 300;
+	subtitleMessage.howlong = 400;
 	subtitleMessage.isMovieMessage = subtitlesOnAVI;
 	subtitleMessage.linesFromBottom = 0;
 }

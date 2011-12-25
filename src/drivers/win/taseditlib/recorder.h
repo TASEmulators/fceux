@@ -18,6 +18,9 @@ public:
 	void RecheckRecordingRadioButtons();
 
 	void InputChanged();
+
+	const char* GetRecordingMode();
+	const char* GetRecordingCaption();
 	
 	int multitrack_recording_joypad;
 	std::vector<uint8> current_joy;

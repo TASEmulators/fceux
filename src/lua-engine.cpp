@@ -39,7 +39,14 @@
 #include "fceulua.h"
 
 #ifdef WIN32
-#include "drivers/win/common.h"
+#include "drivers/win/taseditlib/taseditproj.h"
+extern INPUT_HISTORY history;
+extern MARKERS current_markers;
+extern BOOKMARKS bookmarks;
+extern RECORDER recorder;
+extern PLAYBACK playback;
+extern TASEDIT_LIST tasedit_list;
+extern TASEDIT_SELECTION selection;
 #endif
 
 extern "C"
@@ -2603,12 +2610,15 @@ int emu_emulating(lua_State *L) {
 
 // string movie.mode()
 //
-//   "record", "playback", "finished", or nil
-int movie_mode(lua_State *L) {
-	if (FCEUMOV_IsRecording())
+// Returns "taseditor", "record", "playback", "finished" or nil
+int movie_mode(lua_State *L)
+{
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		lua_pushstring(L, "taseditor");
+	else if (FCEUMOV_IsRecording())
 		lua_pushstring(L, "record");
 	else if (FCEUMOV_IsFinished())
-		lua_pushstring(L, "finished"); //Note: this comes before plaback since playback checks for finished as well
+		lua_pushstring(L, "finished"); //Note: this comes before playback since playback checks for finished as well
 	else if (FCEUMOV_IsPlaying())
 		lua_pushstring(L, "playback");
 	else
@@ -4249,6 +4259,177 @@ static int sound_get(lua_State *L)
 	return 1;
 }
 
+// TAS Editor functions library
+
+// bool taseditor.engaged()
+static int taseditor_engaged(lua_State *L)
+{
+	lua_pushboolean(L, FCEUMOV_Mode(MOVIEMODE_TASEDIT));
+	return 1;
+}
+
+// bool taseditor.markedframe(int frame)
+static int taseditor_markedframe(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int frame = luaL_checkinteger(L, 1);
+		lua_pushboolean(L, current_markers.GetMarker(frame) != 0);
+	} else
+#endif
+	{
+		lua_pushboolean(L, false);
+	}
+	return 1;
+}
+
+// int taseditor.getmarker(int frame)
+static int taseditor_getmarker(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int frame = luaL_checkinteger(L, 1);
+		lua_pushinteger(L, current_markers.GetMarkerUp(frame));
+	} else
+#endif
+	{
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
+// int taseditor.setmarker(int frame)
+static int taseditor_setmarker(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int frame = luaL_checkinteger(L, 1);
+		int marker_id = current_markers.GetMarker(frame);
+		if(!marker_id)
+		{
+			marker_id = current_markers.SetMarker(frame);
+			if (marker_id)
+			{
+				// new marker was created - register changes in TAS Editor
+				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
+				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			}
+		}
+		lua_pushinteger(L, marker_id);
+	} else
+#endif
+	{
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
+// taseditor.clearmarker(int frame)
+static int taseditor_clearmarker(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int frame = luaL_checkinteger(L, 1);
+		if (current_markers.GetMarker(frame))
+		{
+			current_markers.ClearMarker(frame);
+			// marker was deleted - register changes in TAS Editor
+			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_UNSET, frame);
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		}
+	}
+#endif
+	return 0;
+}
+
+// string taseditor.getnote(int index)
+static int taseditor_getnote(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int index = luaL_checkinteger(L, 1);
+		lua_pushstring(L, current_markers.GetNote(index).c_str());
+	} else
+#endif
+	{
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+// taseditor.setnote(int index, string newtext)
+static int taseditor_setnote(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		int index = luaL_checkinteger(L, 1);
+		char newtext[MAX_NOTE_LEN];
+		strncpy(newtext, luaL_checkstring(L, 2), MAX_NOTE_LEN - 1);
+		if (strcmp(current_markers.GetNote(index).c_str(), newtext))
+		{
+			// text differs from old note - rename
+			current_markers.SetNote(index, newtext);
+			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, current_markers.GetMarkerFrame(index));
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
+		}
+	}
+#endif
+	return 0;
+}
+
+// int taseditor.getcurrentbranch()
+static int taseditor_getcurrentbranch(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		lua_pushinteger(L, bookmarks.GetCurrentBranch());
+	} else
+#endif
+	{
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
+// string taseditor.getrecordermode()
+static int taseditor_getrecordermode(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		lua_pushstring(L, recorder.GetRecordingMode());
+	} else
+#endif
+	{
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+// int taseditor.getplaybacktarget()
+static int taseditor_getplaybacktarget(lua_State *L)
+{
+#ifdef WIN32
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	{
+		lua_pushinteger(L, playback.pause_frame - 1);
+	} else
+#endif
+	{
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	const char *str = luaL_checkstring(L, 1);
 	const char* type = lua_type(L,2) == LUA_TSTRING ? lua_tostring(L,2) : deftype;
@@ -5005,6 +5186,21 @@ static const struct luaL_reg soundlib[] = {
 	{NULL,NULL}
 };
 
+static const struct luaL_reg taseditorlib[] = {
+	
+	{"engaged", taseditor_engaged},
+	{"markedframe", taseditor_markedframe},
+	{"getmarker", taseditor_getmarker},
+	{"setmarker", taseditor_setmarker},
+	{"clearmarker", taseditor_clearmarker},
+	{"getnote", taseditor_getnote},
+	{"setnote", taseditor_setnote},
+	{"getcurrentbranch", taseditor_getcurrentbranch},
+	{"getrecordermode", taseditor_getrecordermode},
+	{"getplaybacktarget", taseditor_getplaybacktarget},
+	{NULL,NULL}
+};
+
 void CallExitFunction() {
 	if (!L)
 		return;
@@ -5132,6 +5328,7 @@ int FCEU_LoadLuaCode(const char *filename, const char *arg) {
 		luaL_register(L, "movie", movielib);
 		luaL_register(L, "gui", guilib);
 		luaL_register(L, "sound", soundlib);
+		luaL_register(L, "taseditor", taseditorlib);
 		luaL_register(L, "bit", bit_funcs); // LuaBitOp library
 		lua_settop(L, 0);		// clean the stack, because each call to luaL_register leaves a table on top
 

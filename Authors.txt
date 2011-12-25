@@ -65,7 +65,7 @@ DWEdit
 Debugger additions
 
 AnS - ansstuff at yandex dot ru (sf:ansstuff)
-Bugfixes and additions, TASEdit v1.0
+Bugfixes and additions, TAS Editor v1.0
 
 ---------linux devvers---------
 >= 2.0 - These guys concentrated on keeping fceux the premiere 

@@ -9,6 +9,9 @@
 #include "main.h"
 #include "tasedit.h"
 #include "version.h"
+#include <Shlwapi.h>		// for StrStrI
+
+#pragma comment(lib, "Shlwapi.lib")
 
 using namespace std;
 
@@ -19,6 +22,7 @@ bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
 
 int marker_note_edit = MARKER_NOTE_EDIT_NONE;
+char findnote_string[MAX_NOTE_LEN] = {0};
 
 // all Taseditor functional modules
 TASEDIT_PROJECT project;
@@ -77,6 +81,9 @@ bool TASEdit_savecompact_greenzone = false;
 bool TASEdit_savecompact_history = false;
 bool TASEdit_savecompact_list = true;
 bool TASEdit_savecompact_selection = false;
+bool TASEdit_findnote_matchcase = false;
+bool TASEdit_findnote_search_up = false;
+bool TASEdit_findnote_reappear = true;
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -88,7 +95,6 @@ const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeo
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TAS Editor Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
 char windowCaptioBase[] = "TAS Editor";
-extern char recordingCaptions[5][30];
 HICON hTaseditorIcon = 0;
 
 // enterframe function
@@ -113,7 +119,7 @@ void RedrawWindowCaption()
 	char new_caption[300];
 	strcpy(new_caption, windowCaptioBase);
 	if (!movie_readonly)
-		strcat(new_caption, recordingCaptions[recorder.multitrack_recording_joypad]);
+		strcat(new_caption, recorder.GetRecordingCaption());
 	// add project name
 	std::string projectname = project.GetProjectName();
 	if (!projectname.empty())
@@ -466,9 +472,11 @@ void FrameColumnSet()
 		{
 			if(!current_markers.GetMarker(*it))
 			{
-				changes_made = true;
-				current_markers.SetMarker(*it);
-				tasedit_list.RedrawRow(*it);
+				if (current_markers.SetMarker(*it))
+				{
+					changes_made = true;
+					tasedit_list.RedrawRow(*it);
+				}
 			}
 		}
 		if (changes_made)
@@ -480,8 +488,8 @@ void FrameColumnSet()
 		{
 			if(current_markers.GetMarker(*it))
 			{
-				changes_made = true;
 				current_markers.ClearMarker(*it);
+				changes_made = true;
 				tasedit_list.RedrawRow(*it);
 			}
 		}
@@ -640,6 +648,7 @@ bool Paste()
 			pGlobal = strchr(pGlobal, '\n');
 			int joy = 0;
 			uint8 new_buttons = 0;
+			std::vector<uint8> flash_joy(NUM_JOYPADS);
 			char* frame;
 			--pos;
 			while (pGlobal++ && *pGlobal!='\0')
@@ -674,14 +683,19 @@ bool Paste()
 					case '|': // Joystick mark
 						// flush buttons to movie data
 						if (TASEdit_superimpose_affects_paste && (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_buttons == 0)))
+						{
+							flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 							currMovieData.records[pos].joysticks[joy] |= new_buttons;
-						else
+						} else
+						{
+							flash_joy[joy] |= new_buttons;		// highlight buttons that were added
 							currMovieData.records[pos].joysticks[joy] = new_buttons;
+						}
 						++joy;
 						new_buttons = 0;
 						break;
 					default:
-						for (int bit=0; bit<NUM_JOYPAD_BUTTONS; ++bit)
+						for (int bit = 0; bit < NUM_JOYPAD_BUTTONS; ++bit)
 						{
 							if (*frame == buttonNames[bit][0])
 							{
@@ -695,15 +709,28 @@ bool Paste()
 				}
 				// before going to next frame, flush buttons to movie data
 				if (TASEdit_superimpose_affects_paste && (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_buttons == 0)))
+				{
+					flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 					currMovieData.records[pos].joysticks[joy] |= new_buttons;
-				else
+				} else
+				{
+					flash_joy[joy] |= new_buttons;		// highlight buttons that were added
 					currMovieData.records[pos].joysticks[joy] = new_buttons;
-
+				}
 				// find CRLF
 				pGlobal = strchr(pGlobal, '\n');
 			}
 
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *current_selection_begin));
+			// flash list header columns that were changed during paste
+			for (int joy = 0; joy < NUM_JOYPADS; ++joy)
+			{
+				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
+				{
+					if (flash_joy[joy] & (1 << btn))
+						tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+				}
+			}
 			result = true;
 		}
 		GlobalUnlock(hGlobal);
@@ -742,6 +769,7 @@ bool PasteInsert()
 			pGlobal = strchr(pGlobal, '\n');
 			char* frame;
 			int joy=0;
+			std::vector<uint8> flash_joy(NUM_JOYPADS);
 			--pos;
 			while (pGlobal++ && *pGlobal!='\0')
 			{
@@ -783,6 +811,7 @@ bool PasteInsert()
 							if (*frame == buttonNames[bit][0])
 							{
 								currMovieData.records[pos].joysticks[joy] |= (1<<bit);
+								flash_joy[joy] |= (1<<bit);		// highlight buttons
 								break;
 							}
 						}
@@ -797,6 +826,15 @@ bool PasteInsert()
 			if (TASEdit_bind_markers)
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTEINSERT, *current_selection_begin));
+			// flash list header columns that were changed during paste
+			for (int joy = 0; joy < NUM_JOYPADS; ++joy)
+			{
+				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
+				{
+					if (flash_joy[joy] & (1 << btn))
+						tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+				}
+			}
 			result = true;
 		}
 		GlobalUnlock(hGlobal);
@@ -1456,7 +1494,25 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						Paste();
 					break;
 				case ACCEL_SHIFT_V:
-					PasteInsert();
+					{
+						// hack to allow entering Shift-V into edit control even though accelerator steals the input
+						char insert_v[] = "v";
+						char insert_V[] = "V";
+						if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+						{
+							if (GetKeyState(VK_CAPITAL) & 1)
+								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
+							else
+								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
+						} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+						{
+							if (GetKeyState(VK_CAPITAL) & 1)
+								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
+							else
+								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
+						} else
+							PasteInsert();
+					}
 					break;
 				case ID_EDIT_PASTEINSERT:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
@@ -1515,7 +1571,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case TASEDIT_PLAYSTOP:
 					playback.ToggleEmulationPause();
 					break;
-				case ACCEL_CTRL_F:
 				case CHECK_FOLLOW_CURSOR:
 					//switch "Follow playback" flag
 					TASEdit_follow_playback ^= 1;
@@ -1650,6 +1705,10 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case ID_CONFIG_EMPTYNEWMARKERNOTES:
 					TASEdit_empty_marker_notes ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case ID_CONFIG_REAPPEARINGFINDNOTEDIALOG:
+					TASEdit_findnote_reappear ^= 1;
+					CheckMenuItem(hmenu, ID_CONFIG_REAPPEARINGFINDNOTEDIALOG, TASEdit_findnote_reappear?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
 					//switch "Combine consecutive Recordings" flag
@@ -1803,9 +1862,11 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							{
 								if(!current_markers.GetMarker(*it))
 								{
-									changes_made = true;
-									current_markers.SetMarker(*it);
-									tasedit_list.RedrawRow(*it);
+									if (current_markers.SetMarker(*it))
+									{
+										changes_made = true;
+										tasedit_list.RedrawRow(*it);
+									}
 								}
 							}
 							if (changes_made)
@@ -1828,8 +1889,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 							{
 								if(current_markers.GetMarker(*it))
 								{
-									changes_made = true;
 									current_markers.ClearMarker(*it);
+									changes_made = true;
 									tasedit_list.RedrawRow(*it);
 								}
 							}
@@ -1854,6 +1915,17 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					break;
 				case ACCEL_CTRL_PGDN:
 					selection.JumpNextMarker();
+					break;
+				case ACCEL_CTRL_F:
+				case ID_EDIT_FINDNOTE:
+					FindNote();
+					break;
+				case TASEDIT_FIND_BEST_SIMILAR_MARKER:
+					FindSimilarMarker();
+					break;
+				case TASEDIT_FIND_NEXT_SIMILAR_MARKER:
+					// reset search_offset to 0
+					FindSimilarMarker();
 					break;
 
 
@@ -1915,6 +1987,7 @@ bool EnterTasEdit()
 			CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
+			CheckMenuItem(hmenu, ID_CONFIG_REAPPEARINGFINDNOTEDIALOG, TASEdit_findnote_reappear?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
@@ -2020,14 +2093,13 @@ void ClearTaseditInput()
 void UpdateMarkerNote()
 {
 	if (!marker_note_edit) return;
-	char old_text[MAX_NOTE_LEN], new_text[MAX_NOTE_LEN];
+	char new_text[MAX_NOTE_LEN];
 	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 	{
 		int len = SendMessage(playback.hwndPlaybackMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
 		new_text[len] = 0;
 		// check changes
-		strcpy(old_text, current_markers.GetNote(playback.shown_marker).c_str());
-		if (strcmp(old_text, new_text))
+		if (strcmp(current_markers.GetNote(playback.shown_marker).c_str(), new_text))
 		{
 			current_markers.SetNote(playback.shown_marker, new_text);
 			if (playback.shown_marker)
@@ -2043,8 +2115,7 @@ void UpdateMarkerNote()
 		int len = SendMessage(selection.hwndSelectionMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
 		new_text[len] = 0;
 		// check changes
-		strcpy(old_text, current_markers.GetNote(selection.shown_marker).c_str());
-		if (strcmp(old_text, new_text))
+		if (strcmp(current_markers.GetNote(selection.shown_marker).c_str(), new_text))
 		{
 			current_markers.SetNote(selection.shown_marker, new_text);
 			if (selection.shown_marker)
@@ -2056,6 +2127,152 @@ void UpdateMarkerNote()
 			playback.must_find_current_marker = true;
 		}
 	}
+}
+
+BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 70, TasEdit_wndy + 160, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, TASEdit_findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+			if (TASEdit_findnote_search_up)
+				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
+			else
+				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_DOWN), BST_CHECKED);
+			HWND hwndEdit = GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND);
+			SendMessage(hwndEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
+			SetWindowText(hwndEdit, findnote_string);
+			if (GetDlgCtrlID((HWND)wParam) != IDC_NOTE_TO_FIND)
+		    {
+				SetFocus(hwndEdit);
+				return false;
+			}
+			return true;
+		}
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDC_NOTE_TO_FIND:
+				{
+					if(HIWORD(wParam) == EN_CHANGE) 
+					{
+						if (GetWindowTextLength(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND)))
+							EnableWindow(GetDlgItem(hwndDlg, IDOK), true);
+						else
+							EnableWindow(GetDlgItem(hwndDlg, IDOK), false);
+					}
+					break;
+				}
+				case IDC_RADIO_UP:
+					TASEdit_findnote_search_up = true;
+					break;
+				case IDC_RADIO_DOWN:
+					TASEdit_findnote_search_up = false;
+					break;
+				case IDC_MATCH_CASE:
+					TASEdit_findnote_matchcase ^= 1;
+					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, TASEdit_findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case IDOK:
+				{
+					int len = SendMessage(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND), WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)findnote_string);
+					findnote_string[len] = 0;
+					EndDialog(hwndDlg, 1);
+					return TRUE;
+				}
+				case IDCANCEL:
+					EndDialog(hwndDlg, 0);
+					return TRUE;
+			}
+			break;
+	}
+	return FALSE; 
+} 
+
+void FindNote()
+{
+	selection.update();
+	int movie_size = currMovieData.getNumRecords();
+	int entries_found = 0;
+	int current_frame;
+	int cur_marker = 0;
+	bool result;
+
+	do
+	{
+		if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_FINDNOTE), hwndTasEdit, FindNoteProc) > 0 && strlen(findnote_string))
+		{
+			current_frame = selection.GetCurrentSelectionBeginning();
+			if (TASEdit_findnote_search_up)
+				if (current_frame < 0)
+					current_frame = movie_size;
+			while (true)
+			{
+				// move forward
+				if (TASEdit_findnote_search_up)
+				{
+					current_frame--;
+					if (current_frame < 0)
+					{
+						if (entries_found)
+							MessageBox(hwndTasEdit, "No more entries found.", "Find Note", MB_OK);
+						else
+							MessageBox(hwndTasEdit, "Nothing was found!", "Find Note", MB_OK);
+						break;
+					}
+				} else
+				{
+					current_frame++;
+					if (current_frame >= movie_size)
+					{
+						if (entries_found)
+							MessageBox(hwndTasEdit, "No more entries found.", "Find Note", MB_OK);
+						else
+							MessageBox(hwndTasEdit, "Nothing was found!", "Find Note", MB_OK);
+						break;
+					}
+				}
+				// scan marked frames
+				cur_marker = current_markers.GetMarker(current_frame);
+				if (cur_marker)
+				{
+					if (TASEdit_findnote_matchcase)
+						result = (strstr(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
+					else
+						result = (StrStrI(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
+					if (result)
+					{
+						// found note containing searched string - jump there
+						entries_found++;
+						selection.JumpToFrame(current_frame);
+						selection.update();
+						break;
+					}
+				}
+			}
+		} else break;
+	} while (TASEdit_findnote_reappear);
+}
+
+void FindSimilarMarker()
+{
+	char playback_marker_text[MAX_NOTE_LEN];
+	strcpy(playback_marker_text, current_markers.GetNote(playback.shown_marker).c_str());
+
+	// check if playback_marker_text is empty
+	if (!playback_marker_text[0])
+	{
+		MessageBox(hwndTasEdit, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
+		return;
+	}
+
+
+
+
+
+
 }
 // --------------------------------------------------------------------------------------------
 void UpdateRecentProjectsMenu()

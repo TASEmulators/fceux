@@ -519,9 +519,6 @@ void BOOKMARKS::unleash(int slot)
 	}
 	greenzone.update();
 
-	// jump to the target (bookmarked frame)
-	playback.jump(jump_frame);
-
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
@@ -533,6 +530,9 @@ void BOOKMARKS::unleash(int slot)
 	current_branch = slot;
 	changes_since_current_branch = false;
 	must_recalculate_branches_tree = true;
+
+	// jump to the target (bookmarked frame)
+	playback.jump(jump_frame);
 
 	FCEU_DispMessage("Branch %d loaded.", 0, slot);
 }
@@ -1037,6 +1037,10 @@ int BOOKMARKS::FindBookmarkAtFrame(int frame)
 		if (bookmarks_array[i].snapshot.jump_frame == frame) return i;	// green digit
 	}
 	return -1;
+}
+int BOOKMARKS::GetCurrentBranch()
+{
+	return current_branch;
 }
 
 void BOOKMARKS::ChangesMadeSinceBranch()

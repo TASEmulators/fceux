@@ -1,6 +1,6 @@
 //Specification file for Markers class
 #define MARKERS_ID_LEN 8
-#define MAX_NOTE_LEN 100
+#define MAX_NOTE_LEN 80
 
 class MARKERS
 {
@@ -26,7 +26,7 @@ public:
 	int GetMarkerUp(int start_frame);
 	int GetMarkerFrame(int marker_id);
 
-	void SetMarker(int frame);
+	int SetMarker(int frame);
 	void ClearMarker(int frame);
 	void ToggleMarker(int frame);
 
@@ -35,7 +35,7 @@ public:
 
 	int GetNotesSize();
 	std::string GetNote(int index);
-	void SetNote(int index, char* new_text);
+	void SetNote(int index, const char* new_text);
 
 	bool checkMarkersDiff(MARKERS& their_markers);
 	bool checkMarkersDiff(MARKERS& their_markers, int end);

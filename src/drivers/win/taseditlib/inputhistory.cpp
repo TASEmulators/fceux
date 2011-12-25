@@ -22,7 +22,7 @@ extern TASEDIT_LIST tasedit_list;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[37][20] = {" Init",
+char modCaptions[40][20] = {" Init",
 							" Change",
 							" Set",
 							" Unset",
@@ -58,7 +58,10 @@ char modCaptions[37][20] = {" Init",
 							" Marker Branch9 to ",
 							" Marker Set",
 							" Marker Unset",
-							" Marker Rename"};
+							" Marker Rename",
+							" LUA Marker Set",
+							" LUA Marker Unset",
+							" LUA Marker Rename" };
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
@@ -164,6 +167,7 @@ int INPUT_HISTORY::jump(int new_pos)
 	if (first_change >= 0)
 	{
 		input_snapshots[real_pos].toMovie(currMovieData, first_change);
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
 		// list will be redrawn by greenzone invalidation
 	} else if (markers_changed)
@@ -172,6 +176,7 @@ int INPUT_HISTORY::jump(int new_pos)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
 		tasedit_list.RedrawList();
+		tasedit_list.FollowUndo();
 	} else if (TASEdit_enable_hot_changes)
 	{
 		// when using Hot Changes, list should be always redrawn, because old changes become less hot

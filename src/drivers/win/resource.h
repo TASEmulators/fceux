@@ -184,6 +184,7 @@
 #define IDD_TASEDIT_SAVECOMPACT         186
 #define IDD_TASEDIT_BRANCH_NOTE         188
 #define IDI_ICON3                       197
+#define IDD_TASEDIT_FINDNOTE            198
 #define MENU_RESET                      200
 #define BUTTON_ROMS                     200
 #define TXT_PAD1                        200
@@ -407,6 +408,7 @@
 #define TASEDIT_REWIND2                 1137
 #define TASEDIT_PLAYSTOP                1137
 #define IDC_RADIO1                      1138
+#define IDC_RADIO_UP                    1138
 #define IDC_RADIO2                      1139
 #define IDC_RADIO3                      1140
 #define IDC_RADIO4                      1141
@@ -421,10 +423,13 @@
 #define TASEDIT_PREV_MARKER             1145
 #define IDC_BUTTON8                     1146
 #define TASEDIT_FIND_BEST_MARKER        1146
+#define TASEDIT_FIND_BEST_SIMILAR_MARKER 1146
 #define IDC_EDIT1                       1147
 #define IDC_SELECTION_MARKER_EDIT       1147
+#define IDC_NOTE_TO_FIND                1147
 #define IDC_BUTTON9                     1148
 #define TASEDIT_FIND_NEXT_MARKER        1148
+#define TASEDIT_FIND_NEXT_SIMILAR_MARKER 1148
 #define IDC_HISTORYLIST                 1149
 #define IDC_BOOKMARKSLIST               1150
 #define TASEDIT_NEXT_MARKER             1151
@@ -471,6 +476,7 @@
 #define IDC_SUPERIMPOSE                 1203
 #define IDC_CHECK_BINARY                1203
 #define IDC_NOTES_TO_SUBTITLES          1203
+#define IDC_MATCH_CASE                  1203
 #define IDC_VOLUMEGROUP                 1204
 #define IDC_OMITBLANK                   1204
 #define IDC_CHECK3                      1204
@@ -562,6 +568,7 @@
 #define IDC_RADIO_FOURSCORE             1271
 #define IDC_SELECTION_MARKER            1271
 #define IDC_NOTE_TOOLTIP_EDIT           1272
+#define IDC_RADIO_DOWN                  1273
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -953,6 +960,8 @@
 #define ID_VIEW_SHOWBRANCHTOOLTIPS      40508
 #define ID_CONFIG_USEINPUTKEYSFORCOLUMNSET 40509
 #define ID_CONFIG_EMPTYNEWMARKERNOTES   40510
+#define ID_EDIT_FINDNOTE                40513
+#define ID_CONFIG_REAPPEARINGFINDNOTEDIALOG 40514
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -961,9 +970,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        198
-#define _APS_NEXT_COMMAND_VALUE         40511
-#define _APS_NEXT_CONTROL_VALUE         1273
+#define _APS_NEXT_RESOURCE_VALUE        199
+#define _APS_NEXT_COMMAND_VALUE         40515
+#define _APS_NEXT_CONTROL_VALUE         1274
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

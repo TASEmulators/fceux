@@ -17,13 +17,19 @@ extern bool TASEdit_branch_only_when_rec;
 extern bool TASEdit_use_1p_rec;
 extern int TASEdit_superimpose;
 extern bool TASEdit_columnset_by_keys;
+extern bool TASEdit_focus;
 
 // resources
-char recordingCaptions[5][30] = {	" (Recording All)",
-								" (Recording 1P)",
-								" (Recording 2P)",
-								" (Recording 3P)",
-								" (Recording 4P)"};
+const char recordingModes[5][4] = {	"All",
+								"1P",
+								"2P",
+								"3P",
+								"4P"};
+const char recordingCaptions[5][17] = {	" (Recording All)",
+									" (Recording 1P)",
+									" (Recording 2P)",
+									" (Recording 3P)",
+									" (Recording 4P)"};
 RECORDER::RECORDER()
 {
 }
@@ -98,7 +104,7 @@ void RECORDER::update()
 				current_joy[i] = 0;
 	}
 	// call ColumnSet if needed
-	if (TASEdit_columnset_by_keys && movie_readonly)
+	if (TASEdit_columnset_by_keys && movie_readonly && TASEdit_focus)
 	{
 		int num_joys;
 		if (currMovieData.fourscore)
@@ -220,4 +226,12 @@ void RECORDER::InputChanged()
 	}
 }
 
+const char* RECORDER::GetRecordingMode()
+{
+	return recordingModes[multitrack_recording_joypad];
+}
+const char* RECORDER::GetRecordingCaption()
+{
+	return recordingCaptions[multitrack_recording_joypad];
+}
 

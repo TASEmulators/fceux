@@ -134,6 +134,7 @@ bool TASEDIT_PROJECT::load(char* fullname)
 	} else
 	{
 		FCEU_PrintError("Error loading movie data from %s!", fullname);
+		// do not load the project
 		return false;
 	}
 

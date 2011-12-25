@@ -65,7 +65,6 @@ void TASEDIT_SELECTION::reset()
 {
 	free();
 	// init vars
-	must_find_current_marker = true;
 	shown_marker = 0;
 	last_selection_beginning = -1;
 	history_size = TasEdit_undo_levels + 1;
@@ -82,6 +81,7 @@ void TASEDIT_SELECTION::reset_vars()
 	old_prev_marker_button_state = prev_marker_button_state = false;
 	old_next_marker_button_state = next_marker_button_state = false;
 	must_redraw_text = true;
+	must_find_current_marker = true;
 }
 void TASEDIT_SELECTION::update()
 {
@@ -553,12 +553,12 @@ void TASEDIT_SELECTION::SelectAll()
 }
 void TASEDIT_SELECTION::SetRowSelection(int index)
 {
-	ListView_SetItemState(tasedit_list.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(tasedit_list.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
 void TASEDIT_SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i <= end; ++i)
-		ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(tasedit_list.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
 void TASEDIT_SELECTION::SelectMidMarkers()
 {

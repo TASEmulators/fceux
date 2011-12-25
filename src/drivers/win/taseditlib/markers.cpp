@@ -242,6 +242,8 @@ int MARKERS::GetMarker(int frame)
 // finds and returns # of Marker starting from start_frame and searching up
 int MARKERS::GetMarkerUp(int start_frame)
 {
+	if (start_frame >= (int)markers_array.size())
+		start_frame = markers_array.size() - 1;
 	for (; start_frame >= 0; start_frame--)
 		if (markers_array[start_frame]) return markers_array[start_frame];
 	return 0;
@@ -254,9 +256,16 @@ int MARKERS::GetMarkerFrame(int marker_id)
 	// didn't find
 	return -1;
 }
-
-void MARKERS::SetMarker(int frame)
+// returns number of new marker
+int MARKERS::SetMarker(int frame)
 {
+	if (frame < 0)
+		return 0;
+	else if (frame >= (int)markers_array.size())
+		markers_array.resize(frame + 1);
+	else if (markers_array[frame])
+		return markers_array[frame];
+
 	int marker_num = GetMarkerUp(frame) + 1;
 	markers_array[frame] = marker_num;
 	if (TASEdit_empty_marker_notes)
@@ -269,18 +278,22 @@ void MARKERS::SetMarker(int frame)
 	for (frame++; frame < size; ++frame)
 		if (markers_array[frame])
 			markers_array[frame]++;
+	return marker_num;
 }
 void MARKERS::ClearMarker(int frame)
 {
-	// erase corresponding note
-	notes.erase(notes.begin() + markers_array[frame]);
-	// erase marker
-	markers_array[frame] = 0;
-	// decrease following markers' ids
-	int size = markers_array.size();
-	for (frame++; frame < size; ++frame)
-		if (markers_array[frame])
-			markers_array[frame]--;
+	if (markers_array[frame])
+	{
+		// erase corresponding note
+		notes.erase(notes.begin() + markers_array[frame]);
+		// erase marker
+		markers_array[frame] = 0;
+		// decrease following markers' ids
+		int size = markers_array.size();
+		for (frame++; frame < size; ++frame)
+			if (markers_array[frame])
+				markers_array[frame]--;
+	}
 }
 void MARKERS::ToggleMarker(int frame)
 {
@@ -321,7 +334,7 @@ std::string MARKERS::GetNote(int index)
 		return notes[index];
 	else return notes[0];
 }
-void MARKERS::SetNote(int index, char* new_text)
+void MARKERS::SetNote(int index, const char* new_text)
 {
 	if (index >= 0 && index < (int)notes.size())
 		notes[index] = new_text;

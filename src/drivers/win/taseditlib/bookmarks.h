@@ -107,6 +107,7 @@ public:
 	void RightClick(LPNMITEMACTIVATE info);
 
 	int FindBookmarkAtFrame(int frame);
+	int GetCurrentBranch();
 
 	void RedrawBookmarksCaption();
 	void RedrawBookmarksList();
