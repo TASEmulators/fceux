@@ -962,6 +962,7 @@
 #define ID_CONFIG_EMPTYNEWMARKERNOTES   40510
 #define ID_EDIT_FINDNOTE                40513
 #define ID_CONFIG_REAPPEARINGFINDNOTEDIALOG 40514
+#define ID_VIEW_FINDNOTE                40515
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -971,7 +972,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        199
-#define _APS_NEXT_COMMAND_VALUE         40515
+#define _APS_NEXT_COMMAND_VALUE         40516
 #define _APS_NEXT_CONTROL_VALUE         1274
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

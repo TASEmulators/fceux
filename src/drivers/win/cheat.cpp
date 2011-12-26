@@ -27,7 +27,7 @@
 #include "../../cart.h"
 
 static HWND pwindow = 0;	    //Handle to Cheats dialog
-HWND hCheat;				    //mbg merge 7/19/06 had to add
+HWND hCheat = 0;			    //mbg merge 7/19/06 had to add
 static HMENU hCheatcontext;     //Handle to context menu
 static HMENU hCheatcontextsub;  //Handle to context sub menu
 

@@ -77,7 +77,6 @@ extern bool TASEdit_show_branch_screenshots;
 extern bool TASEdit_show_branch_tooltips;
 extern bool TASEdit_bind_markers;
 extern bool TASEdit_empty_marker_notes;
-extern bool TASEdit_findnote_reappear;
 extern bool TASEdit_combine_consecutive_rec;
 extern bool TASEdit_use_1p_rec;
 extern bool TASEdit_columnset_by_keys;
@@ -124,6 +123,7 @@ extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
 extern int TasEdit_wndx, TasEdit_wndy;
+extern int FindNote_wndx, FindNote_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
@@ -321,6 +321,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(GGConv_wndy),
 	AC(TasEdit_wndx),
 	AC(TasEdit_wndy),
+	AC(FindNote_wndx),
+	AC(FindNote_wndy),
 	AC(TextHookerPosX),
 	AC(TextHookerPosY),
 	AC(MetaPosX),
@@ -343,7 +345,6 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(TASEdit_show_branch_tooltips),
 	AC(TASEdit_bind_markers),
 	AC(TASEdit_empty_marker_notes),
-	AC(TASEdit_findnote_reappear),
 	AC(TASEdit_combine_consecutive_rec),
 	AC(TASEdit_use_1p_rec),
 	AC(TASEdit_columnset_by_keys),

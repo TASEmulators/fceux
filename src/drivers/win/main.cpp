@@ -308,7 +308,12 @@ int BlockingCheck()
 			//other accelerator capable dialogs could be added here
 			extern HWND hwndMemWatch;
 			extern HWND hwndTasEdit;
+			extern HWND hwndFindNote;
 			int handled = 0;
+
+			if(hCheat)
+				if(IsChild(hCheat, msg.hwnd))
+					handled = IsDialogMessage(hCheat, &msg);
 			if(hwndMemWatch)
 			{
 				if(IsChild(hwndMemWatch,msg.hwnd))
@@ -330,10 +335,17 @@ int BlockingCheck()
 				}
 			}
 
+
+
 			if(!handled && hwndTasEdit)
 			{
-				if(IsChild(hwndTasEdit,msg.hwnd))
+				if(IsChild(hwndTasEdit, msg.hwnd))
 					handled = TranslateAccelerator(hwndTasEdit,fceu_hAccel,&msg);
+			}
+			if(!handled && hwndFindNote)
+			{
+				if(IsChild(hwndFindNote, msg.hwnd))
+					handled = IsDialogMessage(hwndFindNote, &msg);
 			}
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)

@@ -15,7 +15,7 @@
 
 using namespace std;
 
-HWND hwndTasEdit = 0;
+HWND hwndTasEdit = 0, hwndFindNote = 0;
 HMENU hmenu, hrmenu;
 
 bool TASEdit_focus = false;
@@ -43,9 +43,11 @@ extern int EnableAutosave;
 
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
 extern void UpdateCheckedMenuItems();
+BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 // vars saved in cfg file (need dedicated storage class?)
-int TasEdit_wndx, TasEdit_wndy;
+int TasEdit_wndx = 0, TasEdit_wndy = 0;
+int FindNote_wndx = 0, FindNote_wndy = 0;
 bool TASEdit_follow_playback = true;
 bool TASEdit_turbo_seek = true;
 bool TASEdit_show_lag_frames = true;
@@ -83,7 +85,6 @@ bool TASEdit_savecompact_list = true;
 bool TASEdit_savecompact_selection = false;
 bool TASEdit_findnote_matchcase = false;
 bool TASEdit_findnote_search_up = false;
-bool TASEdit_findnote_reappear = true;
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -1706,10 +1707,6 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					TASEdit_empty_marker_notes ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
 					break;
-				case ID_CONFIG_REAPPEARINGFINDNOTEDIALOG:
-					TASEdit_findnote_reappear ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_REAPPEARINGFINDNOTEDIALOG, TASEdit_findnote_reappear?MF_CHECKED : MF_UNCHECKED);
-					break;
 				case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
 					//switch "Combine consecutive Recordings" flag
 					TASEdit_combine_consecutive_rec ^= 1;
@@ -1917,9 +1914,14 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					selection.JumpNextMarker();
 					break;
 				case ACCEL_CTRL_F:
-				case ID_EDIT_FINDNOTE:
-					FindNote();
-					break;
+				case ID_VIEW_FINDNOTE:
+					{
+						if (hwndFindNote)
+							SetFocus(GetDlgItem(hwndFindNote, IDC_NOTE_TO_FIND));
+						else
+							hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_FINDNOTE), hwndTasEdit, FindNoteProc);
+						break;
+					}
 				case TASEDIT_FIND_BEST_SIMILAR_MARKER:
 					FindSimilarMarker();
 					break;
@@ -1950,7 +1952,7 @@ bool EnterTasEdit()
 	if(!hwndTasEdit)
 	{
 		hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
-		hwndTasEdit = CreateDialog(fceu_hInstance,"TASEDIT", hAppWnd, WndprocTasEdit);
+		hwndTasEdit = CreateDialog(fceu_hInstance, "TASEDIT", hAppWnd, WndprocTasEdit);
 		if(hwndTasEdit)
 		{
 			SetTaseditInput();
@@ -1987,7 +1989,6 @@ bool EnterTasEdit()
 			CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_REAPPEARINGFINDNOTEDIALOG, TASEdit_findnote_reappear?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 			CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
@@ -2049,6 +2050,11 @@ bool ExitTasEdit()
 {
 	if (!AskSaveProject()) return false;
 
+	if (hwndFindNote)
+	{
+		DestroyWindow(hwndFindNote);
+		hwndFindNote = 0;
+	}
 	DestroyWindow(hwndTasEdit);
 	hwndTasEdit = 0;
 	TASEdit_focus = false;
@@ -2135,7 +2141,10 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_INITDIALOG:
 		{
-			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 70, TasEdit_wndy + 160, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			if (FindNote_wndx == -32000) FindNote_wndx = 0; //Just in case
+			if (TasEdit_wndy == -32000) FindNote_wndy = 0;
+			SetWindowPos(hwndDlg, 0, FindNote_wndx, FindNote_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+
 			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, TASEdit_findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
 			if (TASEdit_findnote_search_up)
 				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
@@ -2151,7 +2160,20 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 			}
 			return true;
 		}
+		case WM_MOVE:
+		{
+			if (!IsIconic(hwndDlg))
+			{
+				RECT wrect;
+				GetWindowRect(hwndDlg, &wrect);
+				FindNote_wndx = wrect.left;
+				FindNote_wndy = wrect.top;
+				WindowBoundsCheckNoResize(FindNote_wndx, FindNote_wndy, wrect.right);
+			}
+			break;
+		}
 		case WM_COMMAND:
+		{
 			switch (LOWORD(wParam))
 			{
 				case IDC_NOTE_TO_FIND:
@@ -2179,82 +2201,68 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 				{
 					int len = SendMessage(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND), WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)findnote_string);
 					findnote_string[len] = 0;
-					EndDialog(hwndDlg, 1);
+					// scan frames from current selection to the border
+					int cur_marker = 0;
+					bool result;
+					int movie_size = currMovieData.getNumRecords();
+					int current_frame = selection.GetCurrentSelectionBeginning();
+					if (current_frame < 0 && TASEdit_findnote_search_up)
+						current_frame = movie_size;
+					while (true)
+					{
+						// move forward
+						if (TASEdit_findnote_search_up)
+						{
+							current_frame--;
+							if (current_frame < 0)
+							{
+								MessageBox(hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
+								break;
+							}
+						} else
+						{
+							current_frame++;
+							if (current_frame >= movie_size)
+							{
+								MessageBox(hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
+								break;
+							}
+						}
+						// scan marked frames
+						cur_marker = current_markers.GetMarker(current_frame);
+						if (cur_marker)
+						{
+							if (TASEdit_findnote_matchcase)
+								result = (strstr(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
+							else
+								result = (StrStrI(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
+							if (result)
+							{
+								// found note containing searched string - jump there
+								selection.JumpToFrame(current_frame);
+								break;
+							}
+						}
+					}
 					return TRUE;
 				}
 				case IDCANCEL:
-					EndDialog(hwndDlg, 0);
+					DestroyWindow(hwndFindNote);
+					hwndFindNote = 0;
 					return TRUE;
 			}
 			break;
+		}
+		case WM_CLOSE:
+		case WM_QUIT:
+		{
+			DestroyWindow(hwndFindNote);
+			hwndFindNote = 0;
+			break;
+		}
 	}
 	return FALSE; 
 } 
-
-void FindNote()
-{
-	selection.update();
-	int movie_size = currMovieData.getNumRecords();
-	int entries_found = 0;
-	int current_frame;
-	int cur_marker = 0;
-	bool result;
-
-	do
-	{
-		if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_FINDNOTE), hwndTasEdit, FindNoteProc) > 0 && strlen(findnote_string))
-		{
-			current_frame = selection.GetCurrentSelectionBeginning();
-			if (TASEdit_findnote_search_up)
-				if (current_frame < 0)
-					current_frame = movie_size;
-			while (true)
-			{
-				// move forward
-				if (TASEdit_findnote_search_up)
-				{
-					current_frame--;
-					if (current_frame < 0)
-					{
-						if (entries_found)
-							MessageBox(hwndTasEdit, "No more entries found.", "Find Note", MB_OK);
-						else
-							MessageBox(hwndTasEdit, "Nothing was found!", "Find Note", MB_OK);
-						break;
-					}
-				} else
-				{
-					current_frame++;
-					if (current_frame >= movie_size)
-					{
-						if (entries_found)
-							MessageBox(hwndTasEdit, "No more entries found.", "Find Note", MB_OK);
-						else
-							MessageBox(hwndTasEdit, "Nothing was found!", "Find Note", MB_OK);
-						break;
-					}
-				}
-				// scan marked frames
-				cur_marker = current_markers.GetMarker(current_frame);
-				if (cur_marker)
-				{
-					if (TASEdit_findnote_matchcase)
-						result = (strstr(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
-					else
-						result = (StrStrI(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
-					if (result)
-					{
-						// found note containing searched string - jump there
-						entries_found++;
-						selection.JumpToFrame(current_frame);
-						selection.update();
-						break;
-					}
-				}
-			}
-		} else break;
-	} while (TASEdit_findnote_reappear);
-}
 
 void FindSimilarMarker()
 {

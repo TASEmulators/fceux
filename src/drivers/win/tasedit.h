@@ -58,7 +58,6 @@ void SetTaseditInput();
 void ClearTaseditInput();
 
 void UpdateMarkerNote();
-void FindNote();
 void FindSimilarMarker();
 
 void UpdateRecentProjectsMenu();
