@@ -1,4 +1,6 @@
 
+27-dec-2011 - AnS - Tasedit: "About" window
+27-dec-2011 - AnS - Tasedit: searching Markers with similar Notes ("Similar" and "More" buttons)
 26-dec-2011 - AnS - Tasedit: Find Note dialog (Ctrl-F)
 26-dec-2011 - AnS - new Lua functions (TAS Editor library)
 19-dec-2011 - AnS - Tasedit: listview header lights

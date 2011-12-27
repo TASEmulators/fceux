@@ -23,6 +23,7 @@ bool Tasedit_rewind_now = false;
 
 int marker_note_edit = MARKER_NOTE_EDIT_NONE;
 char findnote_string[MAX_NOTE_LEN] = {0};
+int search_similar_marker = 0;
 
 // all Taseditor functional modules
 TASEDIT_PROJECT project;
@@ -893,12 +894,14 @@ bool LoadProject(char* fullname)
 		UpdateRecentProjectsArray(fullname);
 		RedrawTasedit();
 		RedrawWindowCaption();
+		search_similar_marker = 0;
 		return true;
 	} else
 	{
 		// failed to load
 		RedrawTasedit();
 		RedrawWindowCaption();
+		search_similar_marker = 0;
 		return false;
 	}
 }
@@ -972,6 +975,25 @@ void SaveCompact_GetCheckboxes(HWND hwndDlg)
 	TASEdit_savecompact_list = (SendDlgItemMessage(hwndDlg, IDC_CHECK_LIST, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	TASEdit_savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 }
+
+BOOL CALLBACK AboutProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+				case IDCANCEL:
+					EndDialog(hwndDlg, 0);
+					return TRUE;
+			}
+			break;
+		}
+	}
+	return FALSE; 
+}
+
 BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -1842,7 +1864,12 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						tasedit_list.FollowSelection();
 						break;
 					}
-				case IDC_TEXT_SELECTION_BUTTON:
+				case IDC_JUMP_PLAYBACK_BUTTON:
+					{
+						tasedit_list.FollowPlayback();
+						break;
+					}
+				case IDC_JUMP_SELECTION_BUTTON:
 					{
 						tasedit_list.FollowSelection();
 						break;
@@ -1923,11 +1950,16 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 						break;
 					}
 				case TASEDIT_FIND_BEST_SIMILAR_MARKER:
-					FindSimilarMarker();
+					search_similar_marker = 0;
+					current_markers.FindSimilar(search_similar_marker);
+					search_similar_marker++;
 					break;
 				case TASEDIT_FIND_NEXT_SIMILAR_MARKER:
-					// reset search_offset to 0
-					FindSimilarMarker();
+					current_markers.FindSimilar(search_similar_marker);
+					search_similar_marker++;
+					break;
+				case ID_HELP_ABOUT:
+					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_ABOUT), hwndTasEdit, AboutProc);
 					break;
 
 
@@ -2036,8 +2068,10 @@ bool EnterTasEdit()
 			screenshot_display.init();
 			history.init();
 			selection.init();
-
+			
 			marker_note_edit = MARKER_NOTE_EDIT_NONE;
+			search_similar_marker = 0;
+			
 			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
 			SetFocus(tasedit_list.hwndList);
 			FCEU_DispMessage("TAS Editor engaged", 0);
@@ -2264,24 +2298,6 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 	return FALSE; 
 } 
 
-void FindSimilarMarker()
-{
-	char playback_marker_text[MAX_NOTE_LEN];
-	strcpy(playback_marker_text, current_markers.GetNote(playback.shown_marker).c_str());
-
-	// check if playback_marker_text is empty
-	if (!playback_marker_text[0])
-	{
-		MessageBox(hwndTasEdit, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
-		return;
-	}
-
-
-
-
-
-
-}
 // --------------------------------------------------------------------------------------------
 void UpdateRecentProjectsMenu()
 {

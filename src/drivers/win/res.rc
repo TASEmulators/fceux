@@ -294,6 +294,7 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&TAS Editor Help",            ID_HELP_TASEDITHELP
+        MENUITEM SEPARATOR
         MENUITEM "&About",                      ID_HELP_ABOUT
     END
 END
@@ -1409,20 +1410,34 @@ BEGIN
     CONTROL         " 4P",IDC_RADIO6,"Button",BS_AUTORADIOBUTTON | WS_DISABLED,402,98,24,10
     CONTROL         " Superimpose",IDC_SUPERIMPOSE,"Button",BS_AUTO3STATE,372,74,55,10
     GROUPBOX        " History ",IDC_STATIC,310,255,123,116,BS_CENTER,WS_EX_RIGHT
-    EDITTEXT        IDC_SELECTION_MARKER_EDIT,65,377,240,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
     PUSHBUTTON      "<<",TASEDIT_PREV_MARKER,315,376,23,14,NOT WS_TABSTOP
     PUSHBUTTON      "Similar",TASEDIT_FIND_BEST_SIMILAR_MARKER,338,376,34,14,NOT WS_TABSTOP
     PUSHBUTTON      "More",TASEDIT_FIND_NEXT_SIMILAR_MARKER,372,376,34,14,NOT WS_TABSTOP
     PUSHBUTTON      ">>",TASEDIT_NEXT_MARKER,405,376,23,14,NOT WS_TABSTOP
-    RTEXT           "Marker 0",IDC_PLAYBACK_MARKER,3,3,60,10,0,WS_EX_RIGHT
-    RTEXT           "Marker 99999",IDC_SELECTION_MARKER,3,379,60,10,0,WS_EX_RIGHT
+    CONTROL         "",IDC_JUMP_PLAYBACK_BUTTON,"Button",BS_OWNERDRAW,5,1,59,13
     EDITTEXT        IDC_PLAYBACK_MARKER_EDIT,65,1,240,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Marker 0",IDC_PLAYBACK_MARKER,3,3,60,10,0,WS_EX_RIGHT
+    CONTROL         "",IDC_JUMP_SELECTION_BUTTON,"Button",BS_OWNERDRAW,5,377,59,13
+    EDITTEXT        IDC_SELECTION_MARKER_EDIT,65,377,240,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Marker 99999",IDC_SELECTION_MARKER,3,379,60,10,0,WS_EX_RIGHT
     CONTROL         "",IDC_BRANCHES_BITMAP,"Static",SS_OWNERDRAW | SS_NOTIFY | SS_REALSIZEIMAGE | NOT WS_VISIBLE,315,160,113,89
     CONTROL         " Turbo seek",CHECK_TURBO_SEEK,"Button",BS_AUTOCHECKBOX,379,26,50,12
-    CONTROL         "",IDC_TEXT_SELECTION_BUTTON,"Button",BS_OWNERDRAW,315,121,113,12
     LTEXT           "Selection: 0 rows, 16 columns",IDC_TEXT_SELECTION,316,123,114,10
     LTEXT           "Clipboard: 0 rows, 16 columns",IDC_TEXT_CLIPBOARD,316,134,114,10
     CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,316,74,49,10
+END
+
+IDD_TASEDIT_ABOUT DIALOGEX 0, 0, 210, 71
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDCANCEL,79,49,50,14
+    ICON            IDI_ICON4,IDC_STATIC,11,10,20,20
+    LTEXT           "TAS Editor",IDC_STATIC,48,10,49,11
+    LTEXT           "Version 1.0",IDC_STATIC,47,23,37,8
+    LTEXT           "Created by AnS in 2011",IDC_STATIC,111,10,77,8
+    LTEXT           "Based on TASEdit v0.1 made by zeromus & adelikat",IDC_STATIC,111,23,91,19,SS_NOPREFIX
 END
 
 IDD_TASEDIT_EXPORT DIALOGEX 0, 0, 158, 86
@@ -1439,18 +1454,18 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,50,141,10
 END
 
-IDD_TASEDIT_FINDNOTE DIALOGEX 0, 0, 228, 52
+IDD_TASEDIT_FINDNOTE DIALOGEX 0, 0, 228, 49
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Find Note"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Find next",IDOK,171,6,51,14
-    PUSHBUTTON      "Cancel",IDCANCEL,171,24,51,14
-    EDITTEXT        IDC_NOTE_TO_FIND,6,7,160,12,ES_AUTOHSCROLL
-    CONTROL         " Match case",IDC_MATCH_CASE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,25,53,10
-    GROUPBOX        "Direction",IDC_STATIC,82,21,83,26
-    CONTROL         " Up",IDC_RADIO_UP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,90,32,29,10
-    CONTROL         " Down",IDC_RADIO_DOWN,"Button",BS_AUTORADIOBUTTON,125,32,32,10
+    DEFPUSHBUTTON   "Find next",IDOK,171,5,51,14
+    PUSHBUTTON      "Close",IDCANCEL,171,23,51,14
+    EDITTEXT        IDC_NOTE_TO_FIND,6,6,160,12,ES_AUTOHSCROLL
+    CONTROL         " Match case",IDC_MATCH_CASE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,23,53,10
+    GROUPBOX        "Direction",IDC_STATIC,82,20,83,24,BS_CENTER
+    CONTROL         " Up",IDC_RADIO_UP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,90,30,29,10
+    CONTROL         " Down",IDC_RADIO_DOWN,"Button",BS_AUTORADIOBUTTON,125,30,32,10
 END
 
 IDD_TASEDIT_SAVECOMPACT DIALOGEX 0, 0, 122, 134
@@ -2032,6 +2047,47 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Нейтральный resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Русский (Россия) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON4               ICON                    "res\\tasedit-icon32.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_TASEDIT_ABOUT, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -59,7 +59,7 @@ public:
 	bool must_find_current_marker;
 	int shown_marker;
 
-	HWND hwndPrevMarker, hwndNextMarker, hwndFindBestMarker, hwndFindNextMarker;
+	HWND hwndPrevMarker, hwndNextMarker;
 	HWND hwndTextSelection, hwndTextClipboard;
 	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
 

@@ -11,6 +11,7 @@ extern bool Tasedit_rewind_now;
 extern bool turbo;
 extern bool TASEdit_turbo_seek;
 extern int marker_note_edit;
+extern int search_similar_marker;
 
 extern MARKERS current_markers;
 extern GREENZONE greenzone;
@@ -301,6 +302,8 @@ void PLAYBACK::RedrawMarker()
 	// change marker note
 	strcpy(new_text, current_markers.GetNote(shown_marker).c_str());
 	SetWindowText(hwndPlaybackMarkerEdit, new_text);
+	// reset search_similar_marker
+	search_similar_marker = 0;
 }
 
 void PLAYBACK::StartFromZero()

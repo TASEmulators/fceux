@@ -2,6 +2,20 @@
 #define MARKERS_ID_LEN 8
 #define MAX_NOTE_LEN 80
 
+// constants for "Find Similar Note" algorithm (may need finetuning)
+#define KEYWORD_MIN_LEN 2
+#define MAX_NUM_KEYWORDS (MAX_NOTE_LEN / (KEYWORD_MIN_LEN+1)) + 1
+#define KEYWORD_WEIGHT_BASE 2.0
+#define KEYWORD_WEIGHT_FACTOR -1.0
+#define KEYWORD_CASEINSENTITIVE_BONUS_PER_CHAR 1.0		// these two should be small, because they also work when keyword is inside another keyword, giving irrelevant results
+#define KEYWORD_CASESENTITIVE_BONUS_PER_CHAR 1.0
+#define KEYWORD_SEQUENCE_BONUS_PER_CHAR 5.0
+#define KEYWORD_PENALTY_FOR_STRANGERS 0.2
+
+#define KEYWORDS_LINE_MIN_SEQUENCE 1
+
+#define MIN_PRIORITY_TRESHOLD 5.0
+
 class MARKERS
 {
 public:
@@ -39,6 +53,8 @@ public:
 
 	bool checkMarkersDiff(MARKERS& their_markers);
 	bool checkMarkersDiff(MARKERS& their_markers, int end);
+
+	void FindSimilar(int offset);
 
 private:
 	std::vector<int> markers_array;		// Format: 0th = marker num (id) for frame 0, 1st = marker num for frame 1, ...

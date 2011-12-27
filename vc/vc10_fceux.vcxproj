@@ -863,6 +863,7 @@
     <None Include="..\src\drivers\win\res\ICON_1.ico" />
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
     <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
+    <None Include="..\src\drivers\win\res\tasedit-icon32.ico" />
     <None Include="..\src\drivers\win\res\te_0.bmp" />
     <None Include="..\src\drivers\win\res\te_1.bmp" />
     <None Include="..\src\drivers\win\res\te_10.bmp" />
@@ -901,6 +902,7 @@
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
     <None Include="res\tasedit-icon.ico" />
+    <None Include="res\tasedit-icon32.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

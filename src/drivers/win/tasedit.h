@@ -58,7 +58,6 @@ void SetTaseditInput();
 void ClearTaseditInput();
 
 void UpdateMarkerNote();
-void FindSimilarMarker();
 
 void UpdateRecentProjectsMenu();
 void UpdateRecentProjectsArray(const char* addString);

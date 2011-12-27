@@ -1502,6 +1502,8 @@
     <None Include="..\src\drivers\win\res\icon4.ico" />
     <None Include="res\tasedit-icon.ico" />
     <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
+    <None Include="res\tasedit-icon32.ico" />
+    <None Include="..\src\drivers\win\res\tasedit-icon32.ico" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

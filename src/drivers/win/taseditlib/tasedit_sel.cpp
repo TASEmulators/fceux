@@ -36,8 +36,6 @@ void TASEDIT_SELECTION::init()
 {
 	hwndPrevMarker = GetDlgItem(hwndTasEdit, TASEDIT_PREV_MARKER);
 	hwndNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_NEXT_MARKER);
-	hwndFindBestMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_BEST_MARKER);
-	hwndFindNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_FIND_NEXT_MARKER);
 	hwndTextSelection = GetDlgItem(hwndTasEdit, IDC_TEXT_SELECTION);
 	hwndTextClipboard = GetDlgItem(hwndTasEdit, IDC_TEXT_CLIPBOARD);
 	hwndSelectionMarker = GetDlgItem(hwndTasEdit, IDC_SELECTION_MARKER);

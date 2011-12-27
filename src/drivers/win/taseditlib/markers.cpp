@@ -1,12 +1,18 @@
 //Implementation file of Markers class
 #include "taseditproj.h"
 #include "zlib.h"
+#include <Shlwapi.h>		// for StrStrI
 
 extern bool TASEdit_empty_marker_notes;
+extern HWND hwndTasEdit;
+
+extern PLAYBACK playback;
+extern TASEDIT_SELECTION selection;
 
 // resources
 char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
 char markers_skipsave_id[MARKERS_ID_LEN] = "MARKERX";
+char keywordDelimiters[] = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
 MARKERS::MARKERS()
 {
@@ -370,5 +376,207 @@ bool MARKERS::checkMarkersDiff(MARKERS& their_markers, int end)
 			return true;
 	}
 	return false;
+}
+// ------------------------------------------------------------------------------------
+bool ordering(const std::pair<int, double>& d1, const std::pair<int, double>& d2)
+{
+  return d1.second < d2.second;
+}
+void MARKERS::FindSimilar(int offset)
+{
+	int i, t;
+	int sourceMarker = playback.shown_marker;
+	char sourceNote[MAX_NOTE_LEN];
+	strcpy(sourceNote, GetNote(sourceMarker).c_str());
+
+	// check if playback_marker_text is empty
+	if (!sourceNote[0])
+	{
+		MessageBox(hwndTasEdit, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
+		return;
+	}
+
+	// 0 - divide source string into keywords
+	int totalSourceKeywords = 0;
+	char sourceKeywords[MAX_NUM_KEYWORDS][MAX_NOTE_LEN] = {0};
+	int current_line_pos = 0;
+	char sourceKeywordsLine[MAX_NUM_KEYWORDS] = {0};
+	char* pch;
+	// divide into tokens
+	pch = strtok(sourceNote, keywordDelimiters);
+	while (pch != NULL)
+	{
+		if (strlen(pch) >= KEYWORD_MIN_LEN)
+		{
+			// check if same keyword already appeared in the string
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+				if (!_stricmp(sourceKeywords[t], pch)) break;
+			if (t < 0)
+			{
+				// save new keyword
+				strcpy(sourceKeywords[totalSourceKeywords], pch);
+				// also set its id into the line
+				sourceKeywordsLine[current_line_pos++] = totalSourceKeywords + 1;
+				totalSourceKeywords++;
+			} else
+			{
+				// same keyword found
+				sourceKeywordsLine[current_line_pos++] = t + 1;
+			}
+		}
+		pch = strtok(NULL, keywordDelimiters);
+	}
+	// we found the line (sequence) of keywords
+	sourceKeywordsLine[current_line_pos] = 0;
+	
+	if (!totalSourceKeywords)
+	{
+		MessageBox(hwndTasEdit, "Marker Note under Playback cursor doesn't have keywords!", "Find Similar Note", MB_OK);
+		return;
+	}
+
+	// 1 - find how frequently each keyword appears in notes
+	std::vector<int> keywordFound(totalSourceKeywords);
+	char checkedNote[MAX_NOTE_LEN];
+	for (i = notes.size() - 1; i > 0; i--)
+	{
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, notes[i].c_str());
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+				if (StrStrI(checkedNote, sourceKeywords[t]))
+					keywordFound[t]++;
+		}
+	}
+	// findmax
+	int maxFound = 0;
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		if (maxFound < keywordFound[t])
+			maxFound = keywordFound[t];
+	// and then calculate weight of each keyword: the more often it appears in markers, the less weight it has
+	std::vector<double> keywordWeight(totalSourceKeywords);
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		keywordWeight[t] = KEYWORD_WEIGHT_BASE + KEYWORD_WEIGHT_FACTOR * (keywordFound[t] / (double)maxFound);
+
+	// start accumulating priorities
+	std::vector<std::pair<int, double>> notePriority(notes.size());
+
+	// 2 - find keywords in notes (including cases when keyword appears inside another word)
+	for (i = notePriority.size() - 1; i > 0; i--)
+	{
+		notePriority[i].first = i;
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, notes[i].c_str());
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+			{
+				if (StrStrI(checkedNote, sourceKeywords[t]))
+					notePriority[i].second += KEYWORD_CASEINSENTITIVE_BONUS_PER_CHAR * keywordWeight[t] * strlen(sourceKeywords[t]);
+				if (strstr(checkedNote, sourceKeywords[t]))
+					notePriority[i].second += KEYWORD_CASESENTITIVE_BONUS_PER_CHAR * keywordWeight[t] * strlen(sourceKeywords[t]);
+			}
+		}
+	}
+
+	// 3 - search sequences of keywords from all other notes
+	current_line_pos = 0;
+	char checkedKeywordsLine[MAX_NUM_KEYWORDS] = {0};
+	int keyword_id;
+	for (i = notes.size() - 1; i > 0; i--)
+	{
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, notes[i].c_str());
+			// divide into tokens
+			pch = strtok(checkedNote, keywordDelimiters);
+			while (pch != NULL)
+			{
+				if (strlen(pch) >= KEYWORD_MIN_LEN)
+				{
+					// check if the keyword is one of sourceKeywords
+					for (t = totalSourceKeywords - 1; t >= 0; t--)
+						if (!_stricmp(sourceKeywords[t], pch)) break;
+					if (t >= 0)
+					{
+						// the keyword is one of sourceKeywords - set its id into the line
+						checkedKeywordsLine[current_line_pos++] = t + 1;
+					} else
+					{
+						// found keyword that doesn't appear in sourceNote, give penalty
+						notePriority[i].second -= KEYWORD_PENALTY_FOR_STRANGERS * strlen(pch);
+						// since the keyword breaks our sequence of coincident keywords, check if that sequence is similar to sourceKeywordsLine
+						if (current_line_pos >= KEYWORDS_LINE_MIN_SEQUENCE)
+						{
+							checkedKeywordsLine[current_line_pos] = 0;
+							// search checkedKeywordsLine in sourceKeywordsLine
+							if (strstr(sourceKeywordsLine, checkedKeywordsLine))
+							{
+								// found same sequence of keywords! add priority to this checkedNote
+								for (t = current_line_pos - 1; t >= 0; t--)
+								{
+									// add bonus for every keyword in the sequence
+									keyword_id = checkedKeywordsLine[t] - 1;
+									notePriority[i].second += current_line_pos * KEYWORD_SEQUENCE_BONUS_PER_CHAR * keywordWeight[keyword_id] * strlen(sourceKeywords[keyword_id]);
+								}
+							}
+						}
+						// clear checkedKeywordsLine
+						memset(checkedKeywordsLine, 0, MAX_NUM_KEYWORDS);
+						current_line_pos = 0;
+					}
+				}
+				pch = strtok(NULL, keywordDelimiters);
+			}
+			// finished dividing into tokens
+			if (current_line_pos >= KEYWORDS_LINE_MIN_SEQUENCE)
+			{
+				checkedKeywordsLine[current_line_pos] = 0;
+				// search checkedKeywordsLine in sourceKeywordsLine
+				if (strstr(sourceKeywordsLine, checkedKeywordsLine))
+				{
+					// found same sequence of keywords! add priority to this checkedNote
+					for (t = current_line_pos - 1; t >= 0; t--)
+					{
+						// add bonus for every keyword in the sequence
+						keyword_id = checkedKeywordsLine[t] - 1;
+						notePriority[i].second += current_line_pos * KEYWORD_SEQUENCE_BONUS_PER_CHAR * keywordWeight[keyword_id] * strlen(sourceKeywords[keyword_id]);
+					}
+				}
+			}
+			// clear checkedKeywordsLine
+			memset(checkedKeywordsLine, 0, MAX_NUM_KEYWORDS);
+			current_line_pos = 0;
+		}
+	}
+
+	// 4 - sort notePriority by second member of the pair
+	std::sort(notePriority.begin(), notePriority.end(), ordering);
+
+	/*
+	// debug trace
+	FCEU_printf("\n\n\n\n\n\n\n\n\n\n");
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		FCEU_printf("Keyword: %s, %d, %f\n", sourceKeywords[t], keywordFound[t], keywordWeight[t]);
+	for (i = notePriority.size() - 1; i > 0; i--)
+	{
+		int marker_id = notePriority[i].first;
+		FCEU_printf("Result: %s, %d, %f\n", notes[marker_id].c_str(), marker_id, notePriority[i].second);
+	}
+	*/
+
+	// Send selection to the marker found
+	if (notePriority[notePriority.size()-1 - offset].second >= MIN_PRIORITY_TRESHOLD)
+	{
+		int marker_id = notePriority[notePriority.size()-1 - offset].first;
+		int frame = GetMarkerFrame(marker_id);
+		if (frame >= 0)
+			selection.JumpToFrame(frame);
+	} else
+	{
+		if (offset)
+			MessageBox(hwndTasEdit, "Could not find more Notes similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+		else
+			MessageBox(hwndTasEdit, "Could not find anything similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+	}
 }
 
