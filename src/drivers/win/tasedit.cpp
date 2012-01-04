@@ -5,22 +5,22 @@
 #include "Win32InputBox.h"
 #include "keyboard.h"
 #include "joystick.h"
-#include "help.h"
 #include "main.h"
 #include "tasedit.h"
 #include "version.h"
+#include <htmlhelp.h>
 #include <Shlwapi.h>		// for StrStrI
 
 #pragma comment(lib, "Shlwapi.lib")
 
 using namespace std;
 
+// TAS Editor data
 HWND hwndTasEdit = 0, hwndFindNote = 0;
 HMENU hmenu, hrmenu;
-
 bool TASEdit_focus = false;
 bool Tasedit_rewind_now = false;
-
+// note editing/search (probably should be moved to separate class/module)
 int marker_note_edit = MARKER_NOTE_EDIT_NONE;
 char findnote_string[MAX_NOTE_LEN] = {0};
 int search_similar_marker = 0;
@@ -94,6 +94,7 @@ const unsigned int MENU_FIRST_RECENT_PROJECT = 55000;
 const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeof(*recent_projects);
 
 // resources
+char taseditor_help_filename[] = "\\taseditor.chm";
 string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TAS Editor Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
 char windowCaptioBase[] = "TAS Editor";
@@ -1383,6 +1384,20 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				ClearTaseditInput();
 			}
 			break;
+		case WM_CTLCOLORSTATIC:
+			if ((HWND)lParam == playback.hwndPlaybackMarker)
+			{
+				SetTextColor((HDC)wParam, PLAYBACK_MARKER_COLOR);
+				SetBkMode((HDC)wParam, TRANSPARENT);
+				return (BOOL)(tasedit_list.bg_brush);
+			} else if ((HWND)lParam == selection.hwndSelectionMarker)
+			{
+				SetTextColor((HDC)wParam, GetSysColor(COLOR_HIGHLIGHT));
+				SetBkMode((HDC)wParam, TRANSPARENT);
+				return (BOOL)tasedit_list.bg_brush;
+			}
+
+			break;
 		case WM_COMMAND:
 			{
 				unsigned int loword_wparam = LOWORD(wParam);
@@ -1535,8 +1550,8 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
 						} else
 							PasteInsert();
+						break;
 					}
-					break;
 				case ID_EDIT_PASTEINSERT:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
@@ -1557,9 +1572,13 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					Truncate();
 					break;
 				case ID_HELP_TASEDITHELP:
-					OpenHelpWindow(tasedithelp);
-					//link to TAS Editor in help menu
-					break;
+					{
+						//OpenHelpWindow(tasedithelp);
+						string helpFileName = BaseDirectory;
+						helpFileName.append(taseditor_help_filename);
+						HtmlHelp(GetDesktopWindow(), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+						break;
+					}
 				case ACCEL_INS:
 				case ID_EDIT_INSERT:
 				case MENU_CONTEXT_STRAY_INSERTFRAMES:
@@ -1599,11 +1618,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					TASEdit_follow_playback ^= 1;
 					CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
 					// if switched off then jump to selection
-					if (TASEdit_follow_playback)
-						tasedit_list.FollowPlayback();
-					else if (selection.GetCurrentSelectionSize())
-						tasedit_list.FollowSelection();
-					else if (playback.GetPauseFrame())
+					if (!TASEdit_follow_playback && playback.GetPauseFrame())
 						tasedit_list.FollowPauseframe();
 					break;
 				case CHECK_TURBO_SEEK:
@@ -1724,6 +1739,7 @@ BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 				case ID_CONFIG_BINDMARKERSTOINPUT:
 					TASEdit_bind_markers ^= 1;
 					CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
+					tasedit_list.RedrawList();
 					break;
 				case ID_CONFIG_EMPTYNEWMARKERNOTES:
 					TASEdit_empty_marker_notes ^= 1;

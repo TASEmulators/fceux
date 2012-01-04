@@ -254,6 +254,7 @@ void PLAYBACK::RewindFrame()
 	if (currFrameCounter > 0)
 		jump(currFrameCounter-1);
 	else
+		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
 		tasedit_list.FollowPlaybackIfNeeded();
 	if (!pause_frame) PauseEmulation();
 }
@@ -293,7 +294,7 @@ void PLAYBACK::RedrawMarker()
 {
 	// redraw marker num
 	char new_text[MAX_NOTE_LEN] = {0};
-	if (shown_marker <= 99999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+	if (shown_marker <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, upperMarkerText);
 	char num[11];
 	_itoa(shown_marker, num, 10);

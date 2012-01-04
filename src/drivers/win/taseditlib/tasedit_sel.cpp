@@ -216,7 +216,7 @@ void TASEDIT_SELECTION::RedrawMarker()
 {
 	// redraw marker num
 	char new_text[MAX_NOTE_LEN] = {0};
-	if (shown_marker <= 99999)		// if there's too many digits in the number then don't show the word "Marker" before the number
+	if (shown_marker <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, lowerMarkerText);
 	char num[11];
 	_itoa(shown_marker, num, 10);

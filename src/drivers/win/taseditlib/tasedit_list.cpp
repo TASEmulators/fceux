@@ -19,6 +19,7 @@ extern TASEDIT_SELECTION selection;
 
 extern bool TASEdit_enable_hot_changes;
 extern bool TASEdit_show_markers;
+extern bool TASEdit_bind_markers;
 extern bool TASEdit_show_lag_frames;
 extern bool TASEdit_follow_playback;
 extern bool TASEdit_jump_to_undo;
@@ -53,9 +54,9 @@ TASEDIT_LIST::TASEDIT_LIST()
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Courier New");								/*font name*/
 	// create fonts for Marker notes fields
-	hMarkersFont = CreateFont(16, 7,				/*Height,Width*/
+	hMarkersFont = CreateFont(16, 8,				/*Height,Width*/
 		0, 0,										/*escapement,orientation*/
-		FW_NORMAL, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		FW_BOLD, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");									/*font name*/
@@ -71,6 +72,7 @@ TASEDIT_LIST::TASEDIT_LIST()
 void TASEDIT_LIST::init()
 {
 	free();
+	bg_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 	header_colors.resize(MAX_NUM_COLUMNS);
 	hwndList = GetDlgItem(hwndTasEdit, IDC_LIST1);
 	// prepare the main listview
@@ -180,6 +182,11 @@ void TASEDIT_LIST::init()
 }
 void TASEDIT_LIST::free()
 {
+	if (bg_brush)
+	{
+		DeleteObject(bg_brush);
+		bg_brush = 0;
+	}
 	if (himglist)
 	{
 		ImageList_Destroy(himglist);
@@ -347,7 +354,18 @@ bool TASEDIT_LIST::CheckItemVisible(int frame)
 
 void TASEDIT_LIST::FollowPlayback()
 {
-	ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
+	// center list at jump_frame
+	int list_items = ListView_GetCountPerPage(hwndList);
+	int lower_border = (list_items - 1) / 2;
+	int upper_border = (list_items - 1) - lower_border;
+	int index = currFrameCounter + lower_border;
+	if (index >= currMovieData.getNumRecords())
+		index = currMovieData.getNumRecords()-1;
+	ListView_EnsureVisible(hwndList, index, false);
+	index = currFrameCounter - upper_border;
+	if (index < 0)
+		index = 0;
+	ListView_EnsureVisible(hwndList, index, false);
 }
 void TASEDIT_LIST::FollowPlaybackIfNeeded()
 {
@@ -538,7 +556,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 					// undo hint here
 					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 					{
-						msg->clrTextBk = MARKED_UNDOHINT_FRAMENUM_COLOR;
+						msg->clrTextBk = (TASEdit_bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
@@ -548,7 +566,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 					// current frame
 					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 					{
-						msg->clrTextBk = CUR_MARKED_FRAMENUM_COLOR;
+						msg->clrTextBk = (TASEdit_bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
@@ -556,7 +574,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
 				{
 					// marked frame
-					msg->clrTextBk = MARKED_FRAMENUM_COLOR;
+					msg->clrTextBk = (TASEdit_bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
 				} else
 				{
 					if(cell_y < greenzone.greenZoneCount)

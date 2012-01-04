@@ -26,6 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON3               ICON                    "res\\tasedit-icon.ico"
+IDI_ICON4               ICON                    "res\\tasedit-icon32.ico"
 ICON_1                  ICON                    "res/ICON_1.ico"
 ICON_2                  ICON                    "res/ICON_2.ico"
 
@@ -1380,7 +1381,6 @@ END
 
 TASEDIT DIALOGEX 0, 0, 438, 396
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
 CAPTION "TAS Editor"
 MENU TASEDITMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -1427,17 +1427,18 @@ BEGIN
     CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,316,74,49,10
 END
 
-IDD_TASEDIT_ABOUT DIALOGEX 0, 0, 210, 71
+IDD_TASEDIT_ABOUT DIALOGEX 0, 0, 208, 70
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDCANCEL,79,49,50,14
-    ICON            IDI_ICON4,IDC_STATIC,11,10,20,20
-    LTEXT           "TAS Editor",IDC_STATIC,48,10,49,11
-    LTEXT           "Version 1.0",IDC_STATIC,47,23,37,8
-    LTEXT           "Created by AnS in 2011",IDC_STATIC,111,10,77,8
-    LTEXT           "Based on TASEdit v0.1 made by zeromus & adelikat",IDC_STATIC,111,23,91,19,SS_NOPREFIX
+    DEFPUSHBUTTON   "OK",IDCANCEL,78,49,50,14
+    ICON            IDI_ICON4,IDC_STATIC,11,10,21,20
+    LTEXT           "TAS Editor",IDC_STATIC,46,9,49,11
+    LTEXT           "Version 1.0",IDC_STATIC,45,22,37,8
+    LTEXT           "Created by AnS in 2011",IDC_STATIC,107,9,77,8
+    LTEXT           "Based on TASEdit v0.1",IDC_STATIC,107,22,83,9,SS_NOPREFIX
+    LTEXT           "made by zeromus & adelikat",IDC_STATIC,107,31,96,9,SS_NOPREFIX
 END
 
 IDD_TASEDIT_EXPORT DIALOGEX 0, 0, 158, 86
@@ -1967,6 +1968,10 @@ BEGIN
         RIGHTMARGIN, 433
     END
 
+    IDD_TASEDIT_ABOUT, DIALOG
+    BEGIN
+    END
+
     IDD_TASEDIT_EXPORT, DIALOG
     BEGIN
     END
@@ -2047,47 +2052,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Нейтральный resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Русский (Россия) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_ICON4               ICON                    "res\\tasedit-icon32.ico"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TASEDIT_ABOUT, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Русский (Россия) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

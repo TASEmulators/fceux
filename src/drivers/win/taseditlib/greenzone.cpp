@@ -9,11 +9,8 @@ extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
 extern TASEDIT_LIST tasedit_list;
 
-
 extern int TASEdit_greenzone_capacity;
 extern bool TASEdit_restore_position;
-
-extern void FCEU_printf(char *format, ...);
 
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
