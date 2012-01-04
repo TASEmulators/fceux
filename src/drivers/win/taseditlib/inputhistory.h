@@ -3,7 +3,7 @@
 #define UNDO_HINT_TIME 200
 
 #define MODTYPE_INIT 0
-#define MODTYPE_CHANGE 1
+#define MODTYPE_CHANGE 1	// deprecated
 #define MODTYPE_SET 2
 #define MODTYPE_UNSET 3
 #define MODTYPE_INSERT 4

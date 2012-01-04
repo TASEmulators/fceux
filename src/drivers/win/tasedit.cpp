@@ -196,19 +196,31 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 	if (KeyFlags & (LVKF_SHIFT|LVKF_CONTROL))
 	{
-		//update multiple rows
+		// update multiple rows, using last row index as a flag to decide operation
 		SelectionFrames* current_selection = selection.MakeStrobe();
 		SelectionFrames::iterator current_selection_end(current_selection->end());
-		for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+		if (currMovieData.records[row_index].checkBit(joy, bit))
 		{
-			currMovieData.records[*it].toggleBit(joy,bit);
+			// clear range
+			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			{
+				currMovieData.records[*it].clearBit(joy, bit);
+			}
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection->begin(), *current_selection->rbegin()));
+		} else
+		{
+			// set range
+			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			{
+				currMovieData.records[*it].setBit(joy, bit);
+			}
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection->begin(), *current_selection->rbegin()));
 		}
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CHANGE, *current_selection->begin(), *current_selection->rbegin()));
 	} else
 	{
-		//update one row
-		currMovieData.records[row_index].toggleBit(joy,bit);
-		if (currMovieData.records[row_index].checkBit(joy,bit))
+		// update one row
+		currMovieData.records[row_index].toggleBit(joy, bit);
+		if (currMovieData.records[row_index].checkBit(joy, bit))
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
 		else
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
