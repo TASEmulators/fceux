@@ -48,7 +48,7 @@
 
 #elif DOS
 
-#define SCAN_GRAVE      0x29
+#define SCAN_TILDE      0x29
 #define SCAN_1          0x02
 #define SCAN_2          0x03
 #define SCAN_3          0x04

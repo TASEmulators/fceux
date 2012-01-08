@@ -1,193 +1,86 @@
 #include <fstream>
 #include <sstream>
-#include "taseditlib/taseditproj.h"
+#include "taseditlib/taseditor_project.h"
 #include "utils/xstring.h"
-#include "Win32InputBox.h"
 #include "keyboard.h"
 #include "joystick.h"
-#include "main.h"
+#include "main.h"			// for GetRomName
 #include "tasedit.h"
 #include "version.h"
-#include <htmlhelp.h>
 #include <Shlwapi.h>		// for StrStrI
+#include "Win32InputBox.h"
 
 #pragma comment(lib, "Shlwapi.lib")
 
 using namespace std;
 
 // TAS Editor data
-HWND hwndTasEdit = 0, hwndFindNote = 0;
-HMENU hmenu, hrmenu;
-bool TASEdit_focus = false;
-bool Tasedit_rewind_now = false;
+bool Taseditor_rewind_now = false;
+bool must_call_manual_lua_function = false;
 // note editing/search (probably should be moved to separate class/module)
 int marker_note_edit = MARKER_NOTE_EDIT_NONE;
 char findnote_string[MAX_NOTE_LEN] = {0};
 int search_similar_marker = 0;
 
 // all Taseditor functional modules
-TASEDIT_PROJECT project;
+TASEDITOR_CONFIG taseditor_config;
+TASEDITOR_WINDOW taseditor_window;
+TASEDITOR_PROJECT project;
 INPUT_HISTORY history;
 PLAYBACK playback;
 RECORDER recorder;
 GREENZONE greenzone;
 MARKERS current_markers;
 BOOKMARKS bookmarks;
-SCREENSHOT_DISPLAY screenshot_display;
-TASEDIT_LIST tasedit_list;
-TASEDIT_SELECTION selection;
+POPUP_DISPLAY popup_display;
+TASEDITOR_LIST list;
+TASEDITOR_LUA taseditor_lua;
+TASEDITOR_SELECTION selection;
 
-// saved FCEU config
+// temporarily saved FCEUX config
 int saved_eoptions;
 int saved_EnableAutosave;
 extern int EnableAutosave;
-
+// FCEUX
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
 extern void UpdateCheckedMenuItems();
-BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-
-// vars saved in cfg file (need dedicated storage class?)
-int TasEdit_wndx = 0, TasEdit_wndy = 0;
-int FindNote_wndx = 0, FindNote_wndy = 0;
-bool TASEdit_follow_playback = true;
-bool TASEdit_turbo_seek = true;
-bool TASEdit_show_lag_frames = true;
-bool TASEdit_show_markers = true;
-bool TASEdit_show_branch_screenshots = true;
-bool TASEdit_show_branch_tooltips = true;
-bool TASEdit_bind_markers = true;
-bool TASEdit_empty_marker_notes = true;
-bool TASEdit_combine_consecutive_rec = true;
-bool TASEdit_use_1p_rec = true;
-bool TASEdit_columnset_by_keys = true;
-bool TASEdit_keyboard_for_listview = true;
-bool TASEdit_superimpose_affects_paste = true;
-int TASEdit_superimpose = BST_UNCHECKED;
-bool TASEdit_branch_full_movie = true;
-bool TASEdit_branch_only_when_rec = false;
-bool TASEdit_view_branches_tree = false;
-bool TASEdit_branch_scr_hud = true;
-bool TASEdit_restore_position = false;
-int TASEdit_greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
-int TasEdit_undo_levels = UNDO_LEVELS_DEFAULT;
-int TASEdit_autosave_period = AUTOSAVE_PERIOD_DEFAULT;
-extern bool muteTurbo;
-bool TASEdit_enable_hot_changes = true;
-bool TASEdit_jump_to_undo = true;
-bool TASEdit_follow_note_context = true;
-int TASEdit_last_export_type = EXPORT_TYPE_1P;
-bool TASEdit_last_export_subtitles = false;
-bool TASEdit_savecompact_binary = true;
-bool TASEdit_savecompact_markers = true;
-bool TASEdit_savecompact_bookmarks = true;
-bool TASEdit_savecompact_greenzone = false;
-bool TASEdit_savecompact_history = false;
-bool TASEdit_savecompact_list = true;
-bool TASEdit_savecompact_selection = false;
-bool TASEdit_findnote_matchcase = false;
-bool TASEdit_findnote_search_up = false;
-
-// Recent Menu
-HMENU recent_projects_menu;
-char* recent_projects[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-const unsigned int MENU_FIRST_RECENT_PROJECT = 55000;
-const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeof(*recent_projects);
+// lua engine
+extern void TaseditorAutoFunction();
+extern void TaseditorManualFunction();
 
 // resources
-char taseditor_help_filename[] = "\\taseditor.chm";
-string tasedithelp = "{16CDE0C4-02B0-4A60-A88D-076319909A4D}"; //Name of TAS Editor Help page
 char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-char windowCaptioBase[] = "TAS Editor";
-HICON hTaseditorIcon = 0;
 
 // enterframe function
 void UpdateTasEdit()
 {
-	if(!hwndTasEdit) return;
+	if(!taseditor_window.hwndTasEditor)
+	{
+		// TAS Editor is not engaged... but we still should run Lua auto function
+		TaseditorAutoFunction();
+		return;
+	}
 
+	// update all modules that need to be updated preiodically
 	recorder.update();
-	tasedit_list.update();
+	list.update();
 	current_markers.update();
 	greenzone.update();
 	playback.update();
 	bookmarks.update();
-	screenshot_display.update();
+	popup_display.update();
 	selection.update();
 	history.update();
 	project.update();
-}
-
-void RedrawWindowCaption()
-{
-	char new_caption[300];
-	strcpy(new_caption, windowCaptioBase);
-	if (!movie_readonly)
-		strcat(new_caption, recorder.GetRecordingCaption());
-	// add project name
-	std::string projectname = project.GetProjectName();
-	if (!projectname.empty())
+	
+	// run Lua functions if needed
+	if (taseditor_config.enable_auto_function)
+		TaseditorAutoFunction();
+	if (must_call_manual_lua_function)
 	{
-		strcat(new_caption, " - ");
-		strcat(new_caption, projectname.c_str());
+		TaseditorManualFunction();
+		must_call_manual_lua_function = false;
 	}
-	// and * if project has unsaved changes
-	if (project.GetProjectChanged())
-		strcat(new_caption, "*");
-	SetWindowText(hwndTasEdit, new_caption);
-}
-void RedrawTasedit()
-{
-	InvalidateRect(hwndTasEdit, 0, FALSE);
-}
-
-void StrayClickMenu(LPNMITEMACTIVATE info)
-{
-	POINT pt = info->ptAction;
-	ClientToScreen(tasedit_list.hwndList, &pt);
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEdit, 0);
-}
-void RightClickMenu(LPNMITEMACTIVATE info)
-{
-	POINT pt = info->ptAction;
-	ClientToScreen(tasedit_list.hwndList, &pt);
-
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0)
-	{
-		StrayClickMenu(info);
-		return;
-	}
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_SELECTED);
-	// inspect current selection and disable inappropriate menu items
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	bool set_found = false, unset_found = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(current_markers.GetMarker(*it))
-			set_found = true;
-		else 
-			unset_found = true;
-	}
-	if (set_found)
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	if (unset_found)
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEdit, 0);
-}
-void RightClick(LPNMITEMACTIVATE info)
-{
-	int index = info->iItem;
-	if(index == -1)
-		StrayClickMenu(info);
-	else if (selection.CheckFrameSelected(index))
-		RightClickMenu(info);
 }
 
 void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
@@ -251,7 +144,7 @@ void SingleClick(LPNMITEMACTIVATE info)
 				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
 			else
 				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-			tasedit_list.RedrawRow(row_index);
+			list.RedrawRow(row_index);
 		}
 	}
 	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
@@ -296,12 +189,12 @@ void CloneFrames()
 		{
 			// end of current region
 			currMovieData.cloneRegion(*it, frames);
-			if (TASEdit_bind_markers)
+			if (taseditor_config.bind_markers)
 				current_markers.insertEmpty(*it, frames);
 			frames = 1;
 		} else frames++;
 	}
-	if (TASEdit_bind_markers)
+	if (taseditor_config.bind_markers)
 	{
 		current_markers.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -330,12 +223,12 @@ void InsertFrames()
 		{
 			// end of current region
 			currMovieData.insertEmpty(*it,frames);
-			if (TASEdit_bind_markers)
+			if (taseditor_config.bind_markers)
 				current_markers.insertEmpty(*it,frames);
 			frames = 1;
 		} else frames++;
 	}
-	if (TASEdit_bind_markers)
+	if (taseditor_config.bind_markers)
 	{
 		current_markers.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -347,7 +240,7 @@ void InsertNumFrames()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	int frames = current_selection->size();
-	if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, hwndTasEdit) == IDOK)
+	if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditor_window.hwndTasEditor) == IDOK)
 	{
 		if (frames > 0)
 		{
@@ -363,13 +256,13 @@ void InsertNumFrames()
 				index = currFrameCounter;
 			}
 			currMovieData.insertEmpty(index, frames);
-			if (TASEdit_bind_markers)
+			if (taseditor_config.bind_markers)
 			{
 				current_markers.insertEmpty(index, frames);
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 			}
 			// select inserted rows
-			tasedit_list.update();
+			list.update();
 			selection.SetRegionSelection(index, index + frames - 1);
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, index));
 		}
@@ -388,16 +281,16 @@ void DeleteFrames()
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		currMovieData.records.erase(currMovieData.records.begin() + *it);
-		if (TASEdit_bind_markers)
+		if (taseditor_config.bind_markers)
 			current_markers.EraseMarker(*it);
 	}
-	if (TASEdit_bind_markers)
+	if (taseditor_config.bind_markers)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
 		playback.StartFromZero();
 	// reduce list
-	tasedit_list.update();
+	list.update();
 
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
@@ -406,7 +299,7 @@ void DeleteFrames()
 	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 	{
 		greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-	} else tasedit_list.RedrawList();
+	} else list.RedrawList();
 }
 
 void ClearFrames(SelectionFrames* current_selection)
@@ -439,12 +332,12 @@ void Truncate()
 	if (currMovieData.getNumRecords() > frame+1)
 	{
 		currMovieData.truncateAt(frame+1);
-		if (TASEdit_bind_markers)
+		if (taseditor_config.bind_markers)
 		{
 			current_markers.SetMarkersSize(frame+1);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 		}
-		tasedit_list.update();
+		list.update();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
@@ -452,7 +345,7 @@ void Truncate()
 		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 		{
 			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-		} else tasedit_list.RedrawList();
+		} else list.RedrawList();
 	}
 }
 
@@ -490,7 +383,7 @@ void FrameColumnSet()
 				if (current_markers.SetMarker(*it))
 				{
 					changes_made = true;
-					tasedit_list.RedrawRow(*it);
+					list.RedrawRow(*it);
 				}
 			}
 		}
@@ -505,7 +398,7 @@ void FrameColumnSet()
 			{
 				current_markers.ClearMarker(*it);
 				changes_made = true;
-				tasedit_list.RedrawRow(*it);
+				list.RedrawRow(*it);
 			}
 		}
 		if (changes_made)
@@ -514,7 +407,7 @@ void FrameColumnSet()
 	if (changes_made)
 	{
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 	}
 }
 void InputColumnSet(int column)
@@ -548,7 +441,7 @@ void InputColumnSet(int column)
 	{
 		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
 	}
-	tasedit_list.SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+	list.SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
 }
 
 bool Copy(SelectionFrames* current_selection)
@@ -595,7 +488,7 @@ bool Copy(SelectionFrames* current_selection)
 			}
 			clipString << std::endl;
 
-			if (!OpenClipboard(hwndTasEdit))
+			if (!OpenClipboard(taseditor_window.hwndTasEditor))
 				return false;
 			EmptyClipboard();
 
@@ -638,7 +531,7 @@ bool Paste()
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return false;
 
-	if (!OpenClipboard(hwndTasEdit)) return false;
+	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
 
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	bool result = false;
@@ -681,7 +574,7 @@ bool Paste()
 					++pos;
 				}
 				
-				if (!TASEdit_superimpose_affects_paste || TASEdit_superimpose == BST_UNCHECKED)
+				if (!taseditor_config.superimpose_affects_paste || taseditor_config.superimpose == BST_UNCHECKED)
 				{
 					currMovieData.records[pos].joysticks[0] = 0;
 					currMovieData.records[pos].joysticks[1] = 0;
@@ -697,7 +590,7 @@ bool Paste()
 					{
 					case '|': // Joystick mark
 						// flush buttons to movie data
-						if (TASEdit_superimpose_affects_paste && (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_buttons == 0)))
+						if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
 						{
 							flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 							currMovieData.records[pos].joysticks[joy] |= new_buttons;
@@ -723,7 +616,7 @@ bool Paste()
 					++frame;
 				}
 				// before going to next frame, flush buttons to movie data
-				if (TASEdit_superimpose_affects_paste && (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_buttons == 0)))
+				if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
 				{
 					flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 					currMovieData.records[pos].joysticks[joy] |= new_buttons;
@@ -743,7 +636,7 @@ bool Paste()
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;
@@ -758,7 +651,7 @@ bool PasteInsert()
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return false;
 
-	if (!OpenClipboard(hwndTasEdit)) return false;
+	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
 
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	bool result = false;
@@ -808,7 +701,7 @@ bool PasteInsert()
 				
 				// insert new frame
 				currMovieData.insertEmpty(pos, 1);
-				if (TASEdit_bind_markers) current_markers.insertEmpty(pos, 1);
+				if (taseditor_config.bind_markers) current_markers.insertEmpty(pos, 1);
 				selection.GetInsertedSet().insert(pos);
 
 				// read this frame input
@@ -838,7 +731,7 @@ bool PasteInsert()
 				pGlobal = strchr(pGlobal, '\n');
 			}
 			current_markers.update();
-			if (TASEdit_bind_markers)
+			if (taseditor_config.bind_markers)
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTEINSERT, *current_selection_begin));
 			// flash list header columns that were changed during paste
@@ -847,7 +740,7 @@ bool PasteInsert()
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;
@@ -865,7 +758,7 @@ void OpenProject()
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hwndTasEdit;
+	ofn.hwndOwner = taseditor_window.hwndTasEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Open TAS Editor Project";
 	const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
@@ -888,7 +781,7 @@ void OpenProject()
 bool LoadProject(char* fullname)
 {
 	marker_note_edit = MARKER_NOTE_EDIT_NONE;
-	SetFocus(tasedit_list.hwndList);
+	SetFocus(list.hwndList);
 	// remember to update fourscore status
 	bool last_fourscore = currMovieData.fourscore;
 	// try to load project
@@ -897,38 +790,26 @@ bool LoadProject(char* fullname)
 		// update fourscore status
 		if (last_fourscore && !currMovieData.fourscore)
 		{
-			tasedit_list.RemoveFourscore();
+			list.RemoveFourscore();
 			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
 		} else if (!last_fourscore && currMovieData.fourscore)
 		{
-			tasedit_list.AddFourscore();
+			list.AddFourscore();
 			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
 		}
-		UpdateRecentProjectsArray(fullname);
-		RedrawTasedit();
-		RedrawWindowCaption();
+		taseditor_window.UpdateRecentProjectsArray(fullname);
+		taseditor_window.RedrawWindow();
+		taseditor_window.RedrawCaption();
 		search_similar_marker = 0;
 		return true;
 	} else
 	{
 		// failed to load
-		RedrawTasedit();
-		RedrawWindowCaption();
+		taseditor_window.RedrawWindow();
+		taseditor_window.RedrawCaption();
+		search_similar_marker = 0;
 		search_similar_marker = 0;
 		return false;
-	}
-}
-void LoadRecentProject(int slot)
-{
-	char*& fname = recent_projects[slot];
-	if(fname && AskSaveProject())
-	{
-		if (!LoadProject(fname))
-		{
-			int result = MessageBox(hwndTasEdit, "Remove from list?", "Could Not Open Recent Project", MB_YESNO);
-			if (result == IDYES)
-				RemoveRecentProject(slot);
-		}
 	}
 }
 
@@ -939,7 +820,7 @@ bool SaveProjectAs()
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hwndTasEdit;
+	ofn.hwndOwner = taseditor_window.hwndTasEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Save TAS Editor Project As...";
 	ofn.lpstrFilter = filter;
@@ -963,10 +844,10 @@ bool SaveProjectAs()
 	{
 		project.RenameProject(nameo);
 		project.save();
-		UpdateRecentProjectsArray(nameo);
+		taseditor_window.UpdateRecentProjectsArray(nameo);
 	} else return false;
 	// saved successfully - remove * mark from caption
-	RedrawWindowCaption();
+	taseditor_window.RedrawCaption();
 	return true;
 }
 bool SaveProject()
@@ -974,19 +855,19 @@ bool SaveProject()
 	if (!project.save())
 		return SaveProjectAs();
 	else
-		RedrawWindowCaption();
+		taseditor_window.RedrawCaption();
 	return true;
 }
 
 void SaveCompact_GetCheckboxes(HWND hwndDlg)
 {
-	TASEdit_savecompact_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_greenzone = (SendDlgItemMessage(hwndDlg, IDC_CHECK_GREENZONE, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_list = (SendDlgItemMessage(hwndDlg, IDC_CHECK_LIST, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	TASEdit_savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_binary = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BINARY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_markers = (SendDlgItemMessage(hwndDlg, IDC_CHECK_MARKERS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_greenzone = (SendDlgItemMessage(hwndDlg, IDC_CHECK_GREENZONE, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_list = (SendDlgItemMessage(hwndDlg, IDC_CHECK_LIST, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 }
 
 BOOL CALLBACK AboutProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1013,14 +894,14 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 	{
 		case WM_INITDIALOG:
 		{
-			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 100, TasEdit_wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, TASEdit_savecompact_binary?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, TASEdit_savecompact_markers?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, TASEdit_savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_GREENZONE, TASEdit_savecompact_greenzone?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, TASEdit_savecompact_history?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_LIST, TASEdit_savecompact_list?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, TASEdit_savecompact_selection?MF_CHECKED : MF_UNCHECKED);
+			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BINARY, taseditor_config.savecompact_binary?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_MARKERS, taseditor_config.savecompact_markers?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_GREENZONE, taseditor_config.savecompact_greenzone?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LIST, taseditor_config.savecompact_list?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?MF_CHECKED : MF_UNCHECKED);
 			return TRUE;
 		}
 		case WM_COMMAND:
@@ -1050,13 +931,13 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 
 void SaveCompact()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_SAVECOMPACT), hwndTasEdit, SaveCompactProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_SAVECOMPACT), taseditor_window.hwndTasEditor, SaveCompactProc) > 0)
 	{
 		const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
 		OPENFILENAME ofn;
 		memset(&ofn, 0, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = hwndTasEdit;
+		ofn.hwndOwner = taseditor_window.hwndTasEditor;
 		ofn.hInstance = fceu_hInstance;
 		ofn.lpstrTitle = "Save Compact";
 		ofn.lpstrFilter = filter;
@@ -1081,7 +962,7 @@ void SaveCompact()
 
 		if(GetSaveFileName(&ofn))								//If it is a valid filename
 		{
-			project.save_compact(nameo, TASEdit_savecompact_binary, TASEdit_savecompact_markers, TASEdit_savecompact_bookmarks, TASEdit_savecompact_greenzone, TASEdit_savecompact_history, TASEdit_savecompact_list, TASEdit_savecompact_selection);
+			project.save_compact(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_list, taseditor_config.savecompact_selection);
 		}
 	}
 }
@@ -1095,7 +976,7 @@ bool AskSaveProject()
 	// ask saving project
 	if (changes_found)
 	{
-		int answer = MessageBox(hwndTasEdit, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
+		int answer = MessageBox(taseditor_window.hwndTasEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
 		if(answer == IDYES)
 			return SaveProject();
 		return (answer != IDCANCEL);
@@ -1110,7 +991,7 @@ void Import()
 	OPENFILENAME ofn;
 	memset(&ofn, 0, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hwndTasEdit;
+	ofn.hwndOwner = taseditor_window.hwndTasEditor;
 	ofn.hInstance = fceu_hInstance;
 	ofn.lpstrTitle = "Import";
 	ofn.lpstrFilter = filter;
@@ -1145,8 +1026,8 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 		case WM_INITDIALOG:
-			SetWindowPos(hwndDlg, 0, TasEdit_wndx + 100, TasEdit_wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			switch (TASEdit_last_export_type)
+			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			switch (taseditor_config.last_export_type)
 			{
 			case EXPORT_TYPE_1P:
 				{
@@ -1164,23 +1045,23 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				}
 			}
-			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, TASEdit_last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditor_config.last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
 			return TRUE;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
 				case IDC_RADIO_1PLAYER:
-					TASEdit_last_export_type = EXPORT_TYPE_1P;
+					taseditor_config.last_export_type = EXPORT_TYPE_1P;
 					break;
 				case IDC_RADIO_2PLAYERS:
-					TASEdit_last_export_type = EXPORT_TYPE_2P;
+					taseditor_config.last_export_type = EXPORT_TYPE_2P;
 					break;
 				case IDC_RADIO_FOURSCORE:
-					TASEdit_last_export_type = EXPORT_TYPE_FOURSCORE;
+					taseditor_config.last_export_type = EXPORT_TYPE_FOURSCORE;
 					break;
 				case IDC_NOTES_TO_SUBTITLES:
-					TASEdit_last_export_subtitles ^= 1;
-					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, TASEdit_last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
+					taseditor_config.last_export_subtitles ^= 1;
+					CheckDlgButton(hwndDlg, IDC_NOTES_TO_SUBTITLES, taseditor_config.last_export_subtitles?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDOK:
 					EndDialog(hwndDlg, 1);
@@ -1196,7 +1077,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 
 void Export()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_EXPORT), hwndTasEdit, ExportProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_EXPORT), taseditor_window.hwndTasEditor, ExportProc) > 0)
 	{
 		const char filter[] = "FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 		char fname[2048];
@@ -1204,7 +1085,7 @@ void Export()
 		OPENFILENAME ofn;
 		memset(&ofn, 0, sizeof(ofn));
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = hwndTasEdit;
+		ofn.hwndOwner = taseditor_window.hwndTasEditor;
 		ofn.hInstance = fceu_hInstance;
 		ofn.lpstrTitle = "Export to FM2";
 		ofn.lpstrFilter = filter;
@@ -1220,7 +1101,7 @@ void Export()
 			// create copy of current movie data
 			MovieData temp_md = currMovieData;
 			// modify the copy according to selected type of export
-			switch (TASEdit_last_export_type)
+			switch (taseditor_config.last_export_type)
 			{
 			case EXPORT_TYPE_1P:
 				{
@@ -1243,7 +1124,7 @@ void Export()
 				}
 			}
 			temp_md.loadFrameCount = -1;
-			if (TASEdit_last_export_subtitles)
+			if (taseditor_config.last_export_subtitles)
 			{
 				// convert Marker Notes to Movie Subtitles
 				char framenum[11];
@@ -1270,750 +1151,14 @@ void Export()
 	}
 }
 
-BOOL CALLBACK WndprocTasEdit(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch(uMsg)
-	{
-		case WM_PAINT:
-			break;
-		case WM_INITDIALOG:
-		{
-			if (TasEdit_wndx==-32000) TasEdit_wndx=0; //Just in case
-			if (TasEdit_wndy==-32000) TasEdit_wndy=0;
-			SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)hTaseditorIcon);
-			SetWindowPos(hwndDlg, 0, TasEdit_wndx, TasEdit_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-			break;
-		}
-		case WM_MOVE:
-			{
-				if (!IsIconic(hwndDlg))
-				{
-					RECT wrect;
-					GetWindowRect(hwndDlg, &wrect);
-					TasEdit_wndx = wrect.left;
-					TasEdit_wndy = wrect.top;
-					WindowBoundsCheckNoResize(TasEdit_wndx, TasEdit_wndy, wrect.right);
-					// also move screenshot display if it's open
-					screenshot_display.ParentWindowMoved();
-				}
-				break;
-			}
-		case WM_NOTIFY:
-			switch(wParam)
-			{
-			case IDC_LIST1:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, tasedit_list.CustomDraw((NMLVCUSTOMDRAW*)lParam));
-					return TRUE;
-				case LVN_GETDISPINFO:
-					tasedit_list.GetDispInfo((NMLVDISPINFO*)lParam);
-					break;
-				case NM_CLICK:
-					SingleClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case NM_DBLCLK:
-					DoubleClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case NM_RCLICK:
-					RightClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case LVN_ITEMCHANGED:
-					selection.ItemChanged((LPNMLISTVIEW) lParam);
-					break;
-				case LVN_ODSTATECHANGED:
-					selection.ItemRangeChanged((LPNMLVODSTATECHANGE) lParam);
-					break;
-					/*
-				case LVN_ENDSCROLL:
-					// redraw upper and lower list rows (fix for known WinXP bug)
-					int start = ListView_GetTopIndex(hwndList);
-					ListView_RedrawItems(hwndList,start,start);
-					int end = start + listItems - 1;
-					ListView_RedrawItems(hwndList,end,end);
-					break;
-					*/
-				}
-				break;
-			case IDC_BOOKMARKSLIST:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, bookmarks.CustomDraw((NMLVCUSTOMDRAW*)lParam));
-					return TRUE;
-				case LVN_GETDISPINFO:
-					bookmarks.GetDispInfo((NMLVDISPINFO*)lParam);
-					break;
-				case NM_CLICK:
-				case NM_DBLCLK:
-					bookmarks.LeftClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case NM_RCLICK:
-					bookmarks.RightClick((LPNMITEMACTIVATE)lParam);
-					break;
-				}
-				break;
-			case IDC_HISTORYLIST:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, history.CustomDraw((NMLVCUSTOMDRAW*)lParam));
-					return TRUE;
-				case LVN_GETDISPINFO:
-					history.GetDispInfo((NMLVDISPINFO*)lParam);
-					break;
-				case NM_CLICK:
-				case NM_DBLCLK:
-				case NM_RCLICK:
-					history.Click((LPNMITEMACTIVATE)lParam);
-					break;
-				}
-				break;
-			case TASEDIT_PLAYSTOP:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CLICK:
-				case NM_DBLCLK:
-					playback.ToggleEmulationPause();
-					break;
-				}
-				break;
-			}
-			break;
-		case WM_CLOSE:
-		case WM_QUIT:
-			ExitTasEdit();
-			break;
-		case WM_ACTIVATE:
-			if(LOWORD(wParam))
-			{
-				TASEdit_focus = true;
-				SetTaseditInput();
-			} else
-			{
-				TASEdit_focus = false;
-				ClearTaseditInput();
-			}
-			break;
-		case WM_CTLCOLORSTATIC:
-			if ((HWND)lParam == playback.hwndPlaybackMarker)
-			{
-				SetTextColor((HDC)wParam, PLAYBACK_MARKER_COLOR);
-				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)(tasedit_list.bg_brush);
-			} else if ((HWND)lParam == selection.hwndSelectionMarker)
-			{
-				SetTextColor((HDC)wParam, GetSysColor(COLOR_HIGHLIGHT));
-				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)tasedit_list.bg_brush;
-			}
-
-			break;
-		case WM_COMMAND:
-			{
-				unsigned int loword_wparam = LOWORD(wParam);
-				// first check clicking Recent submenu item
-				if (loword_wparam >= MENU_FIRST_RECENT_PROJECT && loword_wparam < MENU_FIRST_RECENT_PROJECT + MAX_NUMBER_OF_RECENT_PROJECTS)
-				{
-					LoadRecentProject(loword_wparam - MENU_FIRST_RECENT_PROJECT);
-					break;
-				}
-				// finally check all other commands
-				switch(loword_wparam)
-				{
-				case IDC_PLAYBACK_MARKER_EDIT:
-					{
-						switch (HIWORD(wParam))
-						{
-						case EN_SETFOCUS:
-							{
-								marker_note_edit = MARKER_NOTE_EDIT_UPPER;
-								// enable editing
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
-								// disable FCEUX keyboard
-								ClearTaseditInput();
-								if (TASEdit_follow_note_context)
-									tasedit_list.FollowPlayback();
-								break;
-							}
-						case EN_KILLFOCUS:
-							{
-								if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-								{
-									UpdateMarkerNote();
-									marker_note_edit = MARKER_NOTE_EDIT_NONE;
-								}
-								// disable editing (make it grayed)
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
-								// enable FCEUX keyboard
-								if (TASEdit_focus)
-									SetTaseditInput();
-								break;
-							}
-						}
-						break;
-					}
-				case IDC_SELECTION_MARKER_EDIT:
-					{
-						switch (HIWORD(wParam))
-						{
-						case EN_SETFOCUS:
-							{
-								marker_note_edit = MARKER_NOTE_EDIT_LOWER;
-								// enable editing
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
-								// disable FCEUX keyboard
-								ClearTaseditInput();
-								if (TASEdit_follow_note_context)
-									tasedit_list.FollowSelection();
-								break;
-							}
-						case EN_KILLFOCUS:
-							{
-								if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-								{
-									UpdateMarkerNote();
-									marker_note_edit = MARKER_NOTE_EDIT_NONE;
-								}
-								// disable editing (make it grayed)
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
-								// enable FCEUX keyboard
-								if (TASEdit_focus)
-									SetTaseditInput();
-								break;
-							}
-						}
-						break;
-					}
-				case ID_FILE_OPENPROJECT:
-					OpenProject();
-					break;
-				case ACCEL_CTRL_S:
-				case ID_FILE_SAVEPROJECT:
-					SaveProject();
-					break;
-				case ID_FILE_SAVEPROJECTAS:
-					SaveProjectAs();
-					break;
-				case ID_FILE_SAVECOMPACT:
-					SaveCompact();
-					break;
-				case ID_FILE_IMPORT:
-					Import();
-					break;
-				case ID_FILE_EXPORTFM2:
-						Export();
-					break;
-				case ID_TASEDIT_FILE_CLOSE:
-					ExitTasEdit();
-					break;
-				case ID_EDIT_SELECTALL:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else
-						selection.SelectAll();
-					break;
-				case ACCEL_CTRL_X:
-				case ID_TASEDIT_CUT:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CUT, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_CUT, 0, 0); 
-					else
-						Cut();
-					break;
-				case ACCEL_CTRL_C:
-				case ID_TASEDIT_COPY:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_COPY, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_COPY, 0, 0); 
-					else
-						Copy();
-					break;
-				case ACCEL_CTRL_V:
-				case ID_TASEDIT_PASTE:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
-					else
-						Paste();
-					break;
-				case ACCEL_SHIFT_V:
-					{
-						// hack to allow entering Shift-V into edit control even though accelerator steals the input
-						char insert_v[] = "v";
-						char insert_V[] = "V";
-						if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						{
-							if (GetKeyState(VK_CAPITAL) & 1)
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
-							else
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
-						} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						{
-							if (GetKeyState(VK_CAPITAL) & 1)
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
-							else
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
-						} else
-							PasteInsert();
-						break;
-					}
-				case ID_EDIT_PASTEINSERT:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
-					else
-						PasteInsert();
-					break;
-				case ACCEL_CTRL_DELETE:
-				case ID_TASEDIT_DELETE:
-				case ID_CONTEXT_SELECTED_DELETEFRAMES:
-					DeleteFrames();
-					break;
-				case ACCEL_CTRL_T:
-				case ID_EDIT_TRUNCATE:
-				case ID_CONTEXT_SELECTED_TRUNCATE:
-				case ID_CONTEXT_STRAY_TRUNCATE:
-					Truncate();
-					break;
-				case ID_HELP_TASEDITHELP:
-					{
-						//OpenHelpWindow(tasedithelp);
-						string helpFileName = BaseDirectory;
-						helpFileName.append(taseditor_help_filename);
-						HtmlHelp(GetDesktopWindow(), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
-						break;
-					}
-				case ACCEL_INS:
-				case ID_EDIT_INSERT:
-				case MENU_CONTEXT_STRAY_INSERTFRAMES:
-				case ID_CONTEXT_SELECTED_INSERTFRAMES2:
-					InsertNumFrames();
-					break;
-				case ACCEL_SHIFT_INS:
-				case ID_EDIT_INSERTFRAMES:
-				case ID_CONTEXT_SELECTED_INSERTFRAMES:
-					InsertFrames();
-					break;
-				case ACCEL_DEL:
-				case ID_EDIT_CLEAR:
-				case ID_CONTEXT_SELECTED_CLEARFRAMES:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-					{
-						DWORD sel_start, sel_end;
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-						if (sel_start == sel_end)
-							SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
-						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CLEAR, 0, 0); 
-					} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-					{
-						DWORD sel_start, sel_end;
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
-						if (sel_start == sel_end)
-							SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
-						SendMessage(selection.hwndSelectionMarkerEdit, WM_CLEAR, 0, 0); 
-					} else
-						ClearFrames();
-					break;
-				case TASEDIT_PLAYSTOP:
-					playback.ToggleEmulationPause();
-					break;
-				case CHECK_FOLLOW_CURSOR:
-					//switch "Follow playback" flag
-					TASEdit_follow_playback ^= 1;
-					CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
-					// if switched off then jump to selection
-					if (!TASEdit_follow_playback && playback.GetPauseFrame())
-						tasedit_list.FollowPauseframe();
-					break;
-				case CHECK_TURBO_SEEK:
-					//switch "Turbo seek" flag
-					TASEdit_turbo_seek ^= 1;
-					CheckDlgButton(hwndTasEdit, CHECK_TURBO_SEEK, TASEdit_turbo_seek?MF_CHECKED : MF_UNCHECKED);
-					// if currently seeking, apply this option immediately
-					if (playback.pause_frame)
-						turbo = TASEdit_turbo_seek;
-					break;
-				case ID_VIEW_SHOW_LAG_FRAMES:
-					TASEdit_show_lag_frames ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-					tasedit_list.RedrawList();
-					bookmarks.RedrawBookmarksList();
-					break;
-				case ID_VIEW_SHOW_MARKERS:
-					TASEdit_show_markers ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
-					tasedit_list.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in main list
-					break;
-				case ID_VIEW_SHOWBRANCHSCREENSHOTS:
-					//switch "Show Branch Screenshots" flag
-					TASEdit_show_branch_screenshots ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, TASEdit_show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_VIEW_SHOWBRANCHTOOLTIPS:
-					//switch "Show Branch Screenshots" flag
-					TASEdit_show_branch_tooltips ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHTOOLTIPS, TASEdit_show_branch_tooltips?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_VIEW_ENABLEHOTCHANGES:
-					TASEdit_enable_hot_changes ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
-					tasedit_list.RedrawList();		// redraw buttons text
-					break;
-				case ID_VIEW_JUMPWHENMAKINGUNDO:
-					TASEdit_jump_to_undo ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_VIEW_FOLLOWMARKERNOTECONTEXT:
-					TASEdit_follow_note_context ^= 1;
-					CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, TASEdit_follow_note_context?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ACCEL_CTRL_P:
-				case CHECK_AUTORESTORE_PLAYBACK:
-					//switch "Auto-restore last playback position" flag
-					TASEdit_restore_position ^= 1;
-					CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
-					break;
-				case ID_CONFIG_SETGREENZONECAPACITY:
-					{
-						int new_capacity = TASEdit_greenzone_capacity;
-						if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hwndDlg) == IDOK)
-						{
-							if (new_capacity < GREENZONE_CAPACITY_MIN)
-								new_capacity = GREENZONE_CAPACITY_MIN;
-							else if (new_capacity > GREENZONE_CAPACITY_MAX)
-								new_capacity = GREENZONE_CAPACITY_MAX;
-							if (new_capacity < TASEdit_greenzone_capacity)
-							{
-								TASEdit_greenzone_capacity = new_capacity;
-								greenzone.GreenzoneCleaning();
-							} else TASEdit_greenzone_capacity = new_capacity;
-						}
-						break;
-					}
-				case ID_CONFIG_SETMAXUNDOLEVELS:
-					{
-						int new_size = TasEdit_undo_levels;
-						if(CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hwndDlg) == IDOK)
-						{
-							if (new_size < UNDO_LEVELS_MIN)
-								new_size = UNDO_LEVELS_MIN;
-							else if (new_size > UNDO_LEVELS_MAX)
-								new_size = UNDO_LEVELS_MAX;
-							if (new_size != TasEdit_undo_levels)
-							{
-								TasEdit_undo_levels = new_size;
-								history.reset();
-								selection.reset();
-								// hot changes were cleared, so update list
-								tasedit_list.RedrawList();
-							}
-						}
-						break;
-					}
-				case ID_CONFIG_SETAUTOSAVEPERIOD:
-					{
-						int new_period = TASEdit_autosave_period;
-						if(CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hwndDlg) == IDOK)
-						{
-							if (new_period < AUTOSAVE_PERIOD_MIN)
-								new_period = AUTOSAVE_PERIOD_MIN;
-							else if (new_period > AUTOSAVE_PERIOD_MAX)
-								new_period = AUTOSAVE_PERIOD_MAX;
-							TASEdit_autosave_period = new_period;
-							project.SheduleNextAutosave();	
-						}
-						break;
-					}
-				case ID_CONFIG_BRANCHESRESTOREFULLMOVIE:
-					//switch "Branches restore entire Movie" flag
-					TASEdit_branch_full_movie ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_BRANCHESWORKONLYWHENRECORDING:
-					//switch "Branches work only when Recording" flag
-					TASEdit_branch_only_when_rec ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
-					bookmarks.RedrawBookmarksCaption();
-					break;
-				case ID_CONFIG_HUDINBRANCHSCREENSHOTS:
-					//switch "HUD in Branch screenshots" flag
-					TASEdit_branch_scr_hud ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_BINDMARKERSTOINPUT:
-					TASEdit_bind_markers ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
-					tasedit_list.RedrawList();
-					break;
-				case ID_CONFIG_EMPTYNEWMARKERNOTES:
-					TASEdit_empty_marker_notes ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
-					//switch "Combine consecutive Recordings" flag
-					TASEdit_combine_consecutive_rec ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_USE1PFORRECORDING:
-					//switch "Use 1P keys for single Recordings" flag
-					TASEdit_use_1p_rec ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_USEINPUTKEYSFORCOLUMNSET:
-					TASEdit_columnset_by_keys ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW:
-					TASEdit_keyboard_for_listview ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, TASEdit_keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
-					TASEdit_superimpose_affects_paste ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case ID_CONFIG_MUTETURBO:
-					muteTurbo ^= 1;
-					CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case IDC_PROGRESS_BUTTON:
-					// click on progressbar - stop seeking
-					if (playback.GetPauseFrame()) playback.SeekingStop();
-					break;
-				case IDC_BRANCHES_BUTTON:
-					// click on "Bookmarks/Branches" - switch "View Tree of branches"
-					TASEdit_view_branches_tree ^= 1;
-					bookmarks.RedrawBookmarksCaption();
-					break;
-				case IDC_RECORDING:
-					// toggle readonly, no need to recheck radiobuttons
-					FCEUI_MovieToggleReadOnly();
-					CheckDlgButton(hwndTasEdit, IDC_RECORDING, movie_readonly?BST_UNCHECKED : BST_CHECKED);
-					break;
-				case IDC_RADIO2:
-					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
-					break;
-				case IDC_RADIO3:
-					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_1P;
-					break;
-				case IDC_RADIO4:
-					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_2P;
-					break;
-				case IDC_RADIO5:
-					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_3P;
-					break;
-				case IDC_RADIO6:
-					recorder.multitrack_recording_joypad = MULTITRACK_RECORDING_4P;
-					break;
-				case IDC_SUPERIMPOSE:
-					// 3 states of "Superimpose" checkbox
-					if (TASEdit_superimpose == BST_UNCHECKED)
-						TASEdit_superimpose = BST_CHECKED;
-					else if (TASEdit_superimpose == BST_CHECKED)
-						TASEdit_superimpose = BST_INDETERMINATE;
-					else TASEdit_superimpose = BST_UNCHECKED;
-					CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
-					break;
-				case ACCEL_CTRL_A:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else
-						selection.SelectMidMarkers();
-					break;
-				case ID_EDIT_SELECTMIDMARKERS:
-				case ID_SELECTED_SELECTMIDMARKERS:
-					selection.SelectMidMarkers();
-					break;
-				case ACCEL_CTRL_INSERT:
-				case ID_EDIT_CLONEFRAMES:
-				case ID_SELECTED_CLONE:
-					CloneFrames();
-					break;
-				case ACCEL_CTRL_Z:
-				case ID_EDIT_UNDO:
-					{
-						if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						{
-							SendMessage(playback.hwndPlaybackMarkerEdit, WM_UNDO, 0, 0); 
-						} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						{
-							SendMessage(selection.hwndSelectionMarkerEdit, WM_UNDO, 0, 0); 
-						} else
-						{
-							int result = history.undo();
-							if (result >= 0)
-							{
-								tasedit_list.update();
-								tasedit_list.FollowUndo();
-								greenzone.InvalidateAndCheck(result);
-							}
-						}
-						break;
-					}
-				case ACCEL_CTRL_Y:
-				case ID_EDIT_REDO:
-					{
-						int result = history.redo();
-						if (result >= 0)
-						{
-							tasedit_list.update();
-							tasedit_list.FollowUndo();
-							greenzone.InvalidateAndCheck(result);
-						}
-						break;
-					}
-				case ID_EDIT_SELECTIONUNDO:
-				case ACCEL_CTRL_Q:
-					{
-						selection.undo();
-						tasedit_list.FollowSelection();
-						break;
-					}
-				case ID_EDIT_SELECTIONREDO:
-				case ACCEL_CTRL_W:
-					{
-						selection.redo();
-						tasedit_list.FollowSelection();
-						break;
-					}
-				case ID_EDIT_RESELECTCLIPBOARD:
-				case ACCEL_CTRL_B:
-					{
-						selection.ReselectClipboard();
-						tasedit_list.FollowSelection();
-						break;
-					}
-				case IDC_JUMP_PLAYBACK_BUTTON:
-					{
-						tasedit_list.FollowPlayback();
-						break;
-					}
-				case IDC_JUMP_SELECTION_BUTTON:
-					{
-						tasedit_list.FollowSelection();
-						break;
-					}
-				case ID_SELECTED_SETMARKER:
-					{
-						SelectionFrames* current_selection = selection.MakeStrobe();
-						if (current_selection->size())
-						{
-							SelectionFrames::iterator current_selection_begin(current_selection->begin());
-							SelectionFrames::iterator current_selection_end(current_selection->end());
-							bool changes_made = false;
-							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-							{
-								if(!current_markers.GetMarker(*it))
-								{
-									if (current_markers.SetMarker(*it))
-									{
-										changes_made = true;
-										tasedit_list.RedrawRow(*it);
-									}
-								}
-							}
-							if (changes_made)
-							{
-								selection.must_find_current_marker = playback.must_find_current_marker = true;
-								history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-							}
-						}
-						break;
-					}
-				case ID_SELECTED_REMOVEMARKER:
-					{
-						SelectionFrames* current_selection = selection.MakeStrobe();
-						if (current_selection->size())
-						{
-							SelectionFrames::iterator current_selection_begin(current_selection->begin());
-							SelectionFrames::iterator current_selection_end(current_selection->end());
-							bool changes_made = false;
-							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-							{
-								if(current_markers.GetMarker(*it))
-								{
-									current_markers.ClearMarker(*it);
-									changes_made = true;
-									tasedit_list.RedrawRow(*it);
-								}
-							}
-							if (changes_made)
-							{
-								selection.must_find_current_marker = playback.must_find_current_marker = true;
-								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
-							}
-						}
-						break;
-					}
-				case ACCEL_SHIFT_PGUP:
-					if (!playback.jump_was_used_this_frame)
-						playback.RewindFull();
-					break;
-				case ACCEL_SHIFT_PGDN:
-					if (!playback.jump_was_used_this_frame)
-						playback.ForwardFull();
-					break;
-				case ACCEL_CTRL_PGUP:
-					selection.JumpPrevMarker();
-					break;
-				case ACCEL_CTRL_PGDN:
-					selection.JumpNextMarker();
-					break;
-				case ACCEL_CTRL_F:
-				case ID_VIEW_FINDNOTE:
-					{
-						if (hwndFindNote)
-							SetFocus(GetDlgItem(hwndFindNote, IDC_NOTE_TO_FIND));
-						else
-							hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_FINDNOTE), hwndTasEdit, FindNoteProc);
-						break;
-					}
-				case TASEDIT_FIND_BEST_SIMILAR_MARKER:
-					search_similar_marker = 0;
-					current_markers.FindSimilar(search_similar_marker);
-					search_similar_marker++;
-					break;
-				case TASEDIT_FIND_NEXT_SIMILAR_MARKER:
-					current_markers.FindSimilar(search_similar_marker);
-					search_similar_marker++;
-					break;
-				case ID_HELP_ABOUT:
-					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_ABOUT), hwndTasEdit, AboutProc);
-					break;
-
-
-				}
-				break;
-			}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
-		default:
-			break;
-	}
-	return FALSE;
-}
-
 bool EnterTasEdit()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return false;
-	if(!hwndTasEdit)
+	if(!taseditor_window.hwndTasEditor)
 	{
-		hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
-		hwndTasEdit = CreateDialog(fceu_hInstance, "TASEDIT", hAppWnd, WndprocTasEdit);
-		if(hwndTasEdit)
+		// start TAS Editor
+		taseditor_window.init();
+		if(taseditor_window.hwndTasEditor)
 		{
 			SetTaseditInput();
 			// save "eoptions"
@@ -2030,42 +1175,24 @@ bool EnterTasEdit()
 			EnableAutosave = 0;
 			UpdateCheckedMenuItems();
 
-			hmenu = GetMenu(hwndTasEdit);
-			hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
-			recent_projects_menu = CreateMenu();
-			UpdateRecentProjectsMenu();
-			// check option ticks
-			CheckDlgButton(hwndTasEdit, CHECK_FOLLOW_CURSOR, TASEdit_follow_playback?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndTasEdit, CHECK_TURBO_SEEK, TASEdit_turbo_seek?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, TASEdit_show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, TASEdit_show_markers?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, TASEdit_show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHTOOLTIPS, TASEdit_show_branch_tooltips?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, TASEdit_jump_to_undo?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, TASEdit_follow_note_context?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, TASEdit_enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, TASEdit_branch_full_movie?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, TASEdit_branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, TASEdit_branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, TASEdit_bind_markers?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, TASEdit_empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, TASEdit_combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, TASEdit_use_1p_rec?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, TASEdit_columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, TASEdit_keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, TASEdit_superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
-			CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndTasEdit,CHECK_AUTORESTORE_PLAYBACK,TASEdit_restore_position?BST_CHECKED:BST_UNCHECKED);
-			CheckDlgButton(hwndTasEdit, IDC_SUPERIMPOSE, TASEdit_superimpose);
-
-			SetWindowPos(hwndTasEdit, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 			// init modules
-			greenzone.init();
+			list.init();
+			selection.init();
 			playback.init();
+			greenzone.init();
+			recorder.init();
+			current_markers.init();
+			project.init();
+			bookmarks.init();
+			popup_display.init();
+			history.init();
+			taseditor_lua.init();
 			// either start new movie or use current movie
 			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 			{
+				// create new movie
 				FCEUI_StopMovie();
+				movieMode = MOVIEMODE_TASEDIT;
 				CreateCleanMovie();
 				playback.StartFromZero();
 			} else
@@ -2074,34 +1201,27 @@ bool EnterTasEdit()
 				if (currMovieData.savestate.size() != 0)
 				{
 					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-					// delete savestate, but preserve input
+					// delete savestate, but preserve input anyway
 					currMovieData.savestate.clear();
 				}
 				FCEUI_StopMovie();
+				movieMode = MOVIEMODE_TASEDIT;
 				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 				greenzone.TryDumpIncremental(lagFlag != 0);
 			}
-			// switch to taseditor mode
-			movieMode = MOVIEMODE_TASEDIT;
+			// now create initiasl snapshot in history
+			history.reset();
+			// force the input configuration stored in the movie to apply to FCEUX config
 			currMovieData.ports[0] = SI_GAMEPAD;
 			currMovieData.ports[1] = SI_GAMEPAD;
-			//force the input configuration stored in the movie to apply
 			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-			// init variables
-			recorder.init();
-			tasedit_list.init();
-			current_markers.init();
-			project.init();
-			bookmarks.init();
-			screenshot_display.init();
-			history.init();
-			selection.init();
 			
+			must_call_manual_lua_function = false;
 			marker_note_edit = MARKER_NOTE_EDIT_NONE;
 			search_similar_marker = 0;
 			
 			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
-			SetFocus(tasedit_list.hwndList);
+			SetFocus(list.hwndList);
 			FCEU_DispMessage("TAS Editor engaged", 0);
 			return true;
 		} else return false;
@@ -2112,16 +1232,18 @@ bool ExitTasEdit()
 {
 	if (!AskSaveProject()) return false;
 
-	if (hwndFindNote)
-	{
-		DestroyWindow(hwndFindNote);
-		hwndFindNote = 0;
-	}
-	DestroyWindow(hwndTasEdit);
-	hwndTasEdit = 0;
-	TASEdit_focus = false;
-	DestroyIcon(hTaseditorIcon);
-	hTaseditorIcon = 0;
+	// destroy window
+	taseditor_window.exit();
+	// release memory
+	list.free();
+	current_markers.free();
+	greenzone.free();
+	bookmarks.free();
+	popup_display.free();
+	history.free();
+	playback.SeekingStop();
+	selection.free();
+
 	ClearTaseditInput();
 	// restore "eoptions"
 	eoptions = saved_eoptions;
@@ -2129,15 +1251,6 @@ bool ExitTasEdit()
 	EnableAutosave = saved_EnableAutosave;
 	DoPriority();
 	UpdateCheckedMenuItems();
-	// release memory
-	tasedit_list.free();
-	current_markers.free();
-	greenzone.free();
-	bookmarks.free();
-	screenshot_display.free();
-	history.free();
-	playback.SeekingStop();
-	selection.free();
 	// switch off taseditor mode
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("TAS Editor disengaged", 0);
@@ -2203,12 +1316,12 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_INITDIALOG:
 		{
-			if (FindNote_wndx == -32000) FindNote_wndx = 0; //Just in case
-			if (TasEdit_wndy == -32000) FindNote_wndy = 0;
-			SetWindowPos(hwndDlg, 0, FindNote_wndx, FindNote_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+			if (taseditor_config.findnote_wndx == -32000) taseditor_config.findnote_wndx = 0; //Just in case
+			if (taseditor_config.findnote_wndy == -32000) taseditor_config.findnote_wndy = 0;
+			SetWindowPos(hwndDlg, 0, taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
-			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, TASEdit_findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
-			if (TASEdit_findnote_search_up)
+			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+			if (taseditor_config.findnote_search_up)
 				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
 			else
 				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_DOWN), BST_CHECKED);
@@ -2228,9 +1341,9 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				RECT wrect;
 				GetWindowRect(hwndDlg, &wrect);
-				FindNote_wndx = wrect.left;
-				FindNote_wndy = wrect.top;
-				WindowBoundsCheckNoResize(FindNote_wndx, FindNote_wndy, wrect.right);
+				taseditor_config.findnote_wndx = wrect.left;
+				taseditor_config.findnote_wndy = wrect.top;
+				WindowBoundsCheckNoResize(taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, wrect.right);
 			}
 			break;
 		}
@@ -2250,14 +1363,14 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 					break;
 				}
 				case IDC_RADIO_UP:
-					TASEdit_findnote_search_up = true;
+					taseditor_config.findnote_search_up = true;
 					break;
 				case IDC_RADIO_DOWN:
-					TASEdit_findnote_search_up = false;
+					taseditor_config.findnote_search_up = false;
 					break;
 				case IDC_MATCH_CASE:
-					TASEdit_findnote_matchcase ^= 1;
-					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, TASEdit_findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+					taseditor_config.findnote_matchcase ^= 1;
+					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
 					break;
 				case IDOK:
 				{
@@ -2268,17 +1381,17 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 					bool result;
 					int movie_size = currMovieData.getNumRecords();
 					int current_frame = selection.GetCurrentSelectionBeginning();
-					if (current_frame < 0 && TASEdit_findnote_search_up)
+					if (current_frame < 0 && taseditor_config.findnote_search_up)
 						current_frame = movie_size;
 					while (true)
 					{
 						// move forward
-						if (TASEdit_findnote_search_up)
+						if (taseditor_config.findnote_search_up)
 						{
 							current_frame--;
 							if (current_frame < 0)
 							{
-								MessageBox(hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
+								MessageBox(taseditor_window.hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
 								break;
 							}
 						} else
@@ -2286,7 +1399,7 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 							current_frame++;
 							if (current_frame >= movie_size)
 							{
-								MessageBox(hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
+								MessageBox(taseditor_window.hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
 								break;
 							}
 						}
@@ -2294,7 +1407,7 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 						cur_marker = current_markers.GetMarker(current_frame);
 						if (cur_marker)
 						{
-							if (TASEdit_findnote_matchcase)
+							if (taseditor_config.findnote_matchcase)
 								result = (strstr(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
 							else
 								result = (StrStrI(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
@@ -2309,8 +1422,8 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 					return TRUE;
 				}
 				case IDCANCEL:
-					DestroyWindow(hwndFindNote);
-					hwndFindNote = 0;
+					DestroyWindow(taseditor_window.hwndFindNote);
+					taseditor_window.hwndFindNote = 0;
 					return TRUE;
 			}
 			break;
@@ -2318,113 +1431,11 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 		case WM_CLOSE:
 		case WM_QUIT:
 		{
-			DestroyWindow(hwndFindNote);
-			hwndFindNote = 0;
+			DestroyWindow(taseditor_window.hwndFindNote);
+			taseditor_window.hwndFindNote = 0;
 			break;
 		}
 	}
 	return FALSE; 
 } 
 
-// --------------------------------------------------------------------------------------------
-void UpdateRecentProjectsMenu()
-{
-	MENUITEMINFO moo;
-	int x;
-	moo.cbSize = sizeof(moo);
-	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
-	GetMenuItemInfo(GetSubMenu(hmenu, 0), ID_TASEDIT_FILE_RECENT, FALSE, &moo);
-	moo.hSubMenu = recent_projects_menu;
-	moo.fState = recent_projects[0] ? MFS_ENABLED : MFS_GRAYED;
-	SetMenuItemInfo(GetSubMenu(hmenu, 0), ID_TASEDIT_FILE_RECENT, FALSE, &moo);
-
-	// Remove all recent files submenus
-	for(x = 0; x < MAX_NUMBER_OF_RECENT_PROJECTS; x++)
-	{
-		RemoveMenu(recent_projects_menu, MENU_FIRST_RECENT_PROJECT + x, MF_BYCOMMAND);
-	}
-	// Recreate the menus
-	for(x = MAX_NUMBER_OF_RECENT_PROJECTS - 1; x >= 0; x--)
-	{  
-		// Skip empty strings
-		if(!recent_projects[x]) continue;
-
-		string tmp = recent_projects[x];
-		// clamp this string to 128 chars
-		if(tmp.size() > 128)
-			tmp = tmp.substr(0, 128);
-
-		moo.cbSize = sizeof(moo);
-		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
-		// Insert the menu item
-		moo.cch = tmp.size();
-		moo.fType = 0;
-		moo.wID = MENU_FIRST_RECENT_PROJECT + x;
-		moo.dwTypeData = (LPSTR)tmp.c_str();
-		InsertMenuItem(recent_projects_menu, 0, 1, &moo);
-	}
-
-	// if recent_projects is empty, "Recent" manu should be grayed
-	int i;
-	for (i = 0; i < MAX_NUMBER_OF_RECENT_PROJECTS; ++i)
-		if (recent_projects[i]) break;
-	if (i < MAX_NUMBER_OF_RECENT_PROJECTS)
-		EnableMenuItem(hmenu, ID_TASEDIT_FILE_RECENT, MF_ENABLED);
-	else
-		EnableMenuItem(hmenu, ID_TASEDIT_FILE_RECENT, MF_GRAYED);
-
-	DrawMenuBar(hwndTasEdit);
-}
-void UpdateRecentProjectsArray(const char* addString)
-{
-	// find out if the filename is already in the recent files list
-	for(unsigned int x = 0; x < MAX_NUMBER_OF_RECENT_PROJECTS; x++)
-	{
-		if(recent_projects[x])
-		{
-			if(!strcmp(recent_projects[x], addString))    // Item is already in list
-			{
-				// If the filename is in the file list don't add it again, move it up in the list instead
-				char* tmp = recent_projects[x];			// save pointer
-				for(int y = x; y; y--)
-					// Move items down.
-					recent_projects[y] = recent_projects[y - 1];
-				// Put item on top.
-				recent_projects[0] = tmp;
-				UpdateRecentProjectsMenu();
-				return;
-			}
-		}
-	}
-	// The filename wasn't found in the list. That means we need to add it.
-	// If there's no space left in the recent files list, get rid of the last item in the list
-	if(recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1])
-		free(recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1]);
-	// Move other items down
-	for(unsigned int x = MAX_NUMBER_OF_RECENT_PROJECTS-1; x; x--)
-		recent_projects[x] = recent_projects[x-1];
-	// Add new item
-	recent_projects[0] = (char*)malloc(strlen(addString) + 1);
-	strcpy(recent_projects[0], addString);
-
-	UpdateRecentProjectsMenu();
-}
-void RemoveRecentProject(unsigned int which)
-{
-	if (which >= MAX_NUMBER_OF_RECENT_PROJECTS) return;
-	// Remove the item
-	if(recent_projects[which])
-		free(recent_projects[which]);
-	// If the item is not the last one in the list, shift the remaining ones up
-	if (which < MAX_NUMBER_OF_RECENT_PROJECTS-1)
-	{
-		// Move the remaining items up
-		for(unsigned int x = which+1; x < MAX_NUMBER_OF_RECENT_PROJECTS; ++x)
-		{
-			recent_projects[x-1] = recent_projects[x];	// Shift each remaining item up by 1
-		}
-	}
-	recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1] = 0;	// Clear out the last item since it is empty now
-
-	UpdateRecentProjectsMenu();
-}

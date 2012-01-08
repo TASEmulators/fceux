@@ -1,13 +1,10 @@
 //Implementation file of Bookmark class
-
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "zlib.h"
 
+extern TASEDITOR_CONFIG taseditor_config;
 extern GREENZONE greenzone;
 extern INPUT_HISTORY history;
-
-extern bool TASEdit_branch_scr_hud;
-extern bool TASEdit_enable_hot_changes;
 
 extern uint8 *XBuf;
 extern uint8 *XBackBuf;
@@ -27,9 +24,9 @@ void BOOKMARK::init()
 void BOOKMARK::set()
 {
 	// copy input and hotchanges
-	snapshot.init(currMovieData, TASEdit_enable_hot_changes);
+	snapshot.init(currMovieData, taseditor_config.enable_hot_changes);
 	snapshot.jump_frame = currFrameCounter;
-	if (TASEdit_enable_hot_changes)
+	if (taseditor_config.enable_hot_changes)
 		snapshot.copyHotChanges(&history.GetCurrentSnapshot());
 	// copy savestate
 	savestate = greenzone.savestates[currFrameCounter];
@@ -37,7 +34,7 @@ void BOOKMARK::set()
 	uLongf comprlen = (SCREENSHOT_SIZE>>9)+12 + SCREENSHOT_SIZE;
 	saved_screenshot.resize(comprlen);
 	// compress screenshot data
-	if (TASEdit_branch_scr_hud)
+	if (taseditor_config.branch_scr_hud)
 		compress(&saved_screenshot[0], &comprlen, XBuf, SCREENSHOT_SIZE);
 	else
 		compress(&saved_screenshot[0], &comprlen, XBackBuf, SCREENSHOT_SIZE);

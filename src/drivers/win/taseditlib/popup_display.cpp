@@ -1,16 +1,12 @@
-//Implementation file of SCREENSHOT_DISPLAY class
-
-#include "taseditproj.h"
+//Implementation file of POPUP_DISPLAY class
+#include "taseditor_project.h"
 #include "zlib.h"
 
-extern HWND hwndTasEdit;
-extern int TasEdit_wndx, TasEdit_wndy;
-extern bool TASEdit_show_branch_screenshots;
-extern bool TASEdit_show_branch_tooltips;
-
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
-extern TASEDIT_LIST tasedit_list;
+extern TASEDITOR_LIST list;
 
 LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -19,7 +15,7 @@ LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam
 char szClassName[] = "ScrBmp";
 char szClassName2[] = "MarketNoteTooltip";
 
-SCREENSHOT_DISPLAY::SCREENSHOT_DISPLAY()
+POPUP_DISPLAY::POPUP_DISPLAY()
 {
 	// create BITMAPINFO
 	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));	// 256 color in palette
@@ -70,7 +66,7 @@ SCREENSHOT_DISPLAY::SCREENSHOT_DISPLAY()
 	blend.SourceConstantAlpha = 255;
 }
 
-void SCREENSHOT_DISPLAY::init()
+void POPUP_DISPLAY::init()
 {
 	free();
 	// fill scr_bmp palette with current palette colors
@@ -81,12 +77,12 @@ void SCREENSHOT_DISPLAY::init()
 		scr_bmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
 		scr_bmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
 	}
-	HDC win_hdc = GetWindowDC(tasedit_list.hwndList);
+	HDC win_hdc = GetWindowDC(list.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
 	// calculate coordinates (relative to IDC_BOOKMARKS_BOX)
 	RECT temp_rect, parent_rect;
-	GetWindowRect(hwndTasEdit, &parent_rect);
-	GetWindowRect(GetDlgItem(hwndTasEdit, IDC_BOOKMARKS_BOX), &temp_rect);
+	GetWindowRect(taseditor_window.hwndTasEditor, &parent_rect);
+	GetWindowRect(GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX), &temp_rect);
 	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
 	//scr_bmp_y = ((temp_rect.bottom + temp_rect.top - (SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP + MARKER_NOTE_TOOLTIP_HEIGHT)) / 2) - parent_rect.top;
 	scr_bmp_y = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
@@ -94,7 +90,7 @@ void SCREENSHOT_DISPLAY::init()
 	//tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
 	tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
 }
-void SCREENSHOT_DISPLAY::free()
+void POPUP_DISPLAY::free()
 {
 	reset();
 	if (scr_bmp)
@@ -103,7 +99,7 @@ void SCREENSHOT_DISPLAY::free()
 		scr_bmp = 0;
 	}
 }
-void SCREENSHOT_DISPLAY::reset()
+void POPUP_DISPLAY::reset()
 {
 	screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 	next_update_time = scr_bmp_phase = 0;
@@ -119,7 +115,7 @@ void SCREENSHOT_DISPLAY::reset()
 	}
 }
 
-void SCREENSHOT_DISPLAY::update()
+void POPUP_DISPLAY::update()
 {
 	// once per 40 milliseconds update screenshot_bitmap alpha
 	if (clock() > next_update_time)
@@ -127,25 +123,25 @@ void SCREENSHOT_DISPLAY::update()
 		next_update_time = clock() + DISPLAY_UPDATE_TICK;
 		if (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
 		{
-			if (TASEdit_show_branch_screenshots && !hwndScrBmp)
+			if (taseditor_config.show_branch_screenshots && !hwndScrBmp)
 			{
 				// create window
-				hwndScrBmp = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, TasEdit_wndx + scr_bmp_x, TasEdit_wndy + scr_bmp_y, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, hwndTasEdit, NULL, fceu_hInstance, NULL);
+				hwndScrBmp = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName, szClassName, WS_POPUP, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, SCREENSHOT_WIDTH, SCREENSHOT_HEIGHT, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
 				RedrawScreenshotBitmap();
 				ShowWindow(hwndScrBmp, SW_SHOWNA);
 			}
-			if (TASEdit_show_branch_tooltips && !hwndMarkerNoteTooltip)
+			if (taseditor_config.show_branch_tooltips && !hwndMarkerNoteTooltip)
 			{
-				hwndMarkerNoteTooltip = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, TasEdit_wndx + tooltip_x, TasEdit_wndy + tooltip_y, MARKER_NOTE_TOOLTIP_WIDTH, MARKER_NOTE_TOOLTIP_HEIGHT, hwndTasEdit, NULL, fceu_hInstance, NULL);
+				hwndMarkerNoteTooltip = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditor_config.wndx + tooltip_x, taseditor_config.wndy + tooltip_y, MARKER_NOTE_TOOLTIP_WIDTH, MARKER_NOTE_TOOLTIP_HEIGHT, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
 				ChangeTooltipText();
 				ShowWindow(hwndMarkerNoteTooltip, SW_SHOWNA);
 			}
 			// change screenshot_bitmap pic and tooltip text if needed
 			if (screenshot_currently_shown != bookmarks.item_under_mouse)
 			{
-				if (TASEdit_show_branch_screenshots)
+				if (taseditor_config.show_branch_screenshots)
 					ChangeScreenshotBitmap();
-				if (TASEdit_show_branch_tooltips)
+				if (taseditor_config.show_branch_tooltips)
 					ChangeTooltipText();
 				screenshot_currently_shown = bookmarks.item_under_mouse;
 			}
@@ -205,7 +201,7 @@ void SCREENSHOT_DISPLAY::update()
 	}
 }
 
-void SCREENSHOT_DISPLAY::ChangeScreenshotBitmap()
+void POPUP_DISPLAY::ChangeScreenshotBitmap()
 {
 	// uncompress
 	uLongf destlen = SCREENSHOT_SIZE;
@@ -219,13 +215,13 @@ void SCREENSHOT_DISPLAY::ChangeScreenshotBitmap()
 	}
 	RedrawScreenshotBitmap();
 }
-void SCREENSHOT_DISPLAY::RedrawScreenshotBitmap()
+void POPUP_DISPLAY::RedrawScreenshotBitmap()
 {
 	HBITMAP temp_bmp = (HBITMAP)SendMessage(scr_bmp_pic, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)scr_bmp);
 	if (temp_bmp && temp_bmp != scr_bmp)
 		DeleteObject(temp_bmp);
 }
-void SCREENSHOT_DISPLAY::ChangeTooltipText()
+void POPUP_DISPLAY::ChangeTooltipText()
 {
 	// retrieve info from the pointed bookmark's markers
 	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame;
@@ -235,23 +231,23 @@ void SCREENSHOT_DISPLAY::ChangeTooltipText()
 	SetWindowText(marker_note_tooltip, new_text);
 }
 
-void SCREENSHOT_DISPLAY::ParentWindowMoved()
+void POPUP_DISPLAY::ParentWindowMoved()
 {
 	if (hwndScrBmp)
-		SetWindowPos(hwndScrBmp, 0, TasEdit_wndx + scr_bmp_x, TasEdit_wndy + scr_bmp_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+		SetWindowPos(hwndScrBmp, 0, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 	if (hwndMarkerNoteTooltip)
-		SetWindowPos(hwndMarkerNoteTooltip, 0, TasEdit_wndx + tooltip_x, TasEdit_wndy + tooltip_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+		SetWindowPos(hwndMarkerNoteTooltip, 0, taseditor_config.wndx + tooltip_x, taseditor_config.wndy + tooltip_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 }
 // ----------------------------------------------------------------------------------------
 LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	extern SCREENSHOT_DISPLAY screenshot_display;
+	extern POPUP_DISPLAY popup_display;
 	switch(message)
 	{
 		case WM_CREATE:
 		{
 			// create static bitmap placeholder
-			screenshot_display.scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
+			popup_display.scr_bmp_pic = CreateWindow(WC_STATIC, NULL, SS_BITMAP | WS_CHILD | WS_VISIBLE, 0, 0, 255, 255, hwnd, NULL, NULL, NULL);
 			return 0;
 		}
 		default:
@@ -260,13 +256,13 @@ LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 }
 LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	extern SCREENSHOT_DISPLAY screenshot_display;
+	extern POPUP_DISPLAY popup_display;
 	switch(message)
 	{
 		case WM_CREATE:
 		{
 			// create static text field
-			screenshot_display.marker_note_tooltip = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN, 1, 1, MARKER_NOTE_TOOLTIP_WIDTH - 2, MARKER_NOTE_TOOLTIP_HEIGHT - 2, hwnd, NULL, NULL, NULL);
+			popup_display.marker_note_tooltip = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN, 1, 1, MARKER_NOTE_TOOLTIP_WIDTH - 2, MARKER_NOTE_TOOLTIP_HEIGHT - 2, hwnd, NULL, NULL, NULL);
 			return 0;
 		}
 		default:

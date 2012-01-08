@@ -1,13 +1,12 @@
 //Implementation file of Markers class
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "zlib.h"
 #include <Shlwapi.h>		// for StrStrI
 
-extern bool TASEdit_empty_marker_notes;
-extern HWND hwndTasEdit;
-
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern PLAYBACK playback;
-extern TASEDIT_SELECTION selection;
+extern TASEDITOR_SELECTION selection;
 
 // resources
 char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
@@ -274,7 +273,7 @@ int MARKERS::SetMarker(int frame)
 
 	int marker_num = GetMarkerUp(frame) + 1;
 	markers_array[frame] = marker_num;
-	if (TASEdit_empty_marker_notes)
+	if (taseditor_config.empty_marker_notes)
 		notes.insert(notes.begin() + marker_num, 1, "");
 	else
 		// copy previous marker note
@@ -392,7 +391,7 @@ void MARKERS::FindSimilar(int offset)
 	// check if playback_marker_text is empty
 	if (!sourceNote[0])
 	{
-		MessageBox(hwndTasEdit, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
+		MessageBox(taseditor_window.hwndTasEditor, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
 		return;
 	}
 
@@ -431,7 +430,7 @@ void MARKERS::FindSimilar(int offset)
 	
 	if (!totalSourceKeywords)
 	{
-		MessageBox(hwndTasEdit, "Marker Note under Playback cursor doesn't have keywords!", "Find Similar Note", MB_OK);
+		MessageBox(taseditor_window.hwndTasEditor, "Marker Note under Playback cursor doesn't have keywords!", "Find Similar Note", MB_OK);
 		return;
 	}
 
@@ -574,9 +573,9 @@ void MARKERS::FindSimilar(int offset)
 	} else
 	{
 		if (offset)
-			MessageBox(hwndTasEdit, "Could not find more Notes similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+			MessageBox(taseditor_window.hwndTasEditor, "Could not find more Notes similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
 		else
-			MessageBox(hwndTasEdit, "Could not find anything similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+			MessageBox(taseditor_window.hwndTasEditor, "Could not find anything similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
 	}
 }
 

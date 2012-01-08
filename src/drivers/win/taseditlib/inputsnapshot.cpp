@@ -1,14 +1,11 @@
 //Implementation file of Input Snapshot class (Undo feature)
-
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "zlib.h"
 
 const int bytes_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {2, 4};	// so 16bits for normal joypads, 32bits for fourscore
 
-extern void FCEU_printf(char *format, ...);
-
 extern MARKERS current_markers;
-extern TASEDIT_SELECTION selection;
+extern TASEDITOR_SELECTION selection;
 
 INPUT_SNAPSHOT::INPUT_SNAPSHOT()
 {

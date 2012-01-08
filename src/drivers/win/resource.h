@@ -439,6 +439,8 @@
 #define IDC_EDIT2                       1154
 #define IDC_PLAYBACK_MARKER_EDIT        1154
 #define IDC_JUMP_SELECTION_BUTTON       1155
+#define TASEDIT_PREV_MARKER2            1156
+#define TASEDIT_RUN_MANUAL              1156
 #define CHECK_SOUND_MUTETURBO           1179
 #define IDC_EDIT_AUTHOR                 1180
 #define MEMW_STATIC                     1181
@@ -486,6 +488,8 @@
 #define IDC_RAMLIST                     1205
 #define IDC_CHECK4                      1205
 #define IDC_CHECK_BOOKMARKS             1205
+#define IDC_SUPERIMPOSE2                1205
+#define IDC_RUN_AUTO                    1205
 #define IDC_C_SEARCH                    1206
 #define IDC_CHECK5                      1206
 #define IDC_CHECK_GREENZONE             1206
@@ -965,6 +969,7 @@
 #define ID_EDIT_FINDNOTE                40513
 #define ID_CONFIG_REAPPEARINGFINDNOTEDIALOG 40514
 #define ID_VIEW_FINDNOTE                40515
+#define ID_CONFIG_SILENTAUTOSAVE        40516
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -974,7 +979,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
-#define _APS_NEXT_COMMAND_VALUE         40516
+#define _APS_NEXT_COMMAND_VALUE         40517
 #define _APS_NEXT_CONTROL_VALUE         1275
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

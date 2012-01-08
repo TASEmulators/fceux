@@ -70,6 +70,7 @@
 #include "video.h"
 #include "utils/xstring.h"
 #include <string.h>
+#include "taseditlib/taseditor_window.h"
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -307,8 +308,8 @@ int BlockingCheck()
 		{
 			//other accelerator capable dialogs could be added here
 			extern HWND hwndMemWatch;
-			extern HWND hwndTasEdit;
-			extern HWND hwndFindNote;
+			extern TASEDITOR_WINDOW taseditor_window;
+
 			int handled = 0;
 
 			if(hCheat)
@@ -337,15 +338,15 @@ int BlockingCheck()
 
 
 
-			if(!handled && hwndTasEdit)
+			if(!handled && taseditor_window.hwndTasEditor)
 			{
-				if(IsChild(hwndTasEdit, msg.hwnd))
-					handled = TranslateAccelerator(hwndTasEdit,fceu_hAccel,&msg);
+				if(IsChild(taseditor_window.hwndTasEditor, msg.hwnd))
+					handled = TranslateAccelerator(taseditor_window.hwndTasEditor, fceu_hAccel, &msg);
 			}
-			if(!handled && hwndFindNote)
+			if(!handled && taseditor_window.hwndFindNote)
 			{
-				if(IsChild(hwndFindNote, msg.hwnd))
-					handled = IsDialogMessage(hwndFindNote, &msg);
+				if(IsChild(taseditor_window.hwndFindNote, msg.hwnd))
+					handled = IsDialogMessage(taseditor_window.hwndFindNote, &msg);
 			}
 			/* //adelikat - Currently no accel keys are used in the main window.  Uncomment this block to activate them.
 			if(!handled)

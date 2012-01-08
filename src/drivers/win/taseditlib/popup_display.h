@@ -1,4 +1,4 @@
-//Specification file for SCREENSHOT_DISPLAY class
+//Specification file for POPUP_DISPLAY class
 
 #define SCR_BMP_PHASE_MAX 10
 #define SCR_BMP_PHASE_ALPHA_MAX 8
@@ -11,10 +11,10 @@
 
 #define DISPLAY_UPDATE_TICK 40		// update at 25FPS
 
-class SCREENSHOT_DISPLAY
+class POPUP_DISPLAY
 {
 public:
-	SCREENSHOT_DISPLAY();
+	POPUP_DISPLAY();
 	void init();
 	void free();
 	void reset();

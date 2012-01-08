@@ -1,4 +1,4 @@
-//Specification file for TASEDIT_LIST class
+//Specification file for TASEDITOR_LIST class
 #define LIST_ID_LEN 5
 
 #define CDDS_SUBITEMPREPAINT       (CDDS_SUBITEM | CDDS_ITEMPREPAINT)
@@ -94,10 +94,10 @@
 
 #define PLAYBACK_MARKER_COLOR 0xC9AF00
 
-class TASEDIT_LIST
+class TASEDITOR_LIST
 {
 public:
-	TASEDIT_LIST();
+	TASEDITOR_LIST();
 	void init();
 	void free();
 	void reset();

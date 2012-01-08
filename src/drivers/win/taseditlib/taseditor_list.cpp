@@ -1,29 +1,22 @@
-//Implementation file of TASEDIT_LIST class
-#include "taseditproj.h"
+//Implementation file of TASEDITOR_LIST class
+#include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "uxtheme.h"
 
 #pragma comment(lib, "UxTheme.lib")
 
-extern HWND hwndTasEdit;
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
 extern void ColumnSet(int column);
 
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
 extern RECORDER recorder;
 extern GREENZONE greenzone;
 extern INPUT_HISTORY history;
 extern MARKERS current_markers;
-extern TASEDIT_SELECTION selection;
-
-extern bool TASEdit_enable_hot_changes;
-extern bool TASEdit_show_markers;
-extern bool TASEdit_bind_markers;
-extern bool TASEdit_show_lag_frames;
-extern bool TASEdit_follow_playback;
-extern bool TASEdit_jump_to_undo;
-extern bool TASEdit_keyboard_for_listview;
+extern TASEDITOR_SELECTION selection;
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -37,9 +30,13 @@ COLORREF header_lights_colors[11] = { 0x0, 0x006311, 0x008500, 0x1dad00, 0x46d10
 char list_save_id[LIST_ID_LEN] = "LIST";
 char list_skipsave_id[LIST_ID_LEN] = "LISX";
 
-TASEDIT_LIST::TASEDIT_LIST()
+TASEDITOR_LIST::TASEDITOR_LIST()
 {
+}
 
+void TASEDITOR_LIST::init()
+{
+	free();
 	// create fonts for main listview
 	hMainListFont = CreateFont(14, 7,				/*Height,Width*/
 		0, 0,										/*escapement,orientation*/
@@ -66,15 +63,11 @@ TASEDIT_LIST::TASEDIT_LIST()
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");									/*font name*/
-
-}
-
-void TASEDIT_LIST::init()
-{
-	free();
 	bg_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
+
 	header_colors.resize(MAX_NUM_COLUMNS);
-	hwndList = GetDlgItem(hwndTasEdit, IDC_LIST1);
+
+	hwndList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_LIST1);
 	// prepare the main listview
 	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP);
 	// subclass the header
@@ -180,8 +173,28 @@ void TASEDIT_LIST::init()
 	reset();
 	//update();
 }
-void TASEDIT_LIST::free()
+void TASEDITOR_LIST::free()
 {
+	if (hMainListFont)
+	{
+		DeleteObject(hMainListFont);
+		hMainListFont = 0;
+	}
+	if (hMainListSelectFont)
+	{
+		DeleteObject(hMainListSelectFont);
+		hMainListSelectFont = 0;
+	}
+	if (hMarkersFont)
+	{
+		DeleteObject(hMarkersFont);
+		hMarkersFont = 0;
+	}
+	if (hMarkersEditFont)
+	{
+		DeleteObject(hMarkersEditFont);
+		hMarkersEditFont = 0;
+	}
 	if (bg_brush)
 	{
 		DeleteObject(bg_brush);
@@ -194,13 +207,13 @@ void TASEDIT_LIST::free()
 	}
 	header_colors.resize(0);
 }
-void TASEDIT_LIST::reset()
+void TASEDITOR_LIST::reset()
 {
 	next_header_update_time = 0;
 	// scroll to the beginning
 	ListView_EnsureVisible(hwndList, 0, FALSE);
 }
-void TASEDIT_LIST::update()
+void TASEDITOR_LIST::update()
 {
 	//update the number of items in the list
 	int currLVItemCount = ListView_GetItemCount(hwndList);
@@ -208,7 +221,7 @@ void TASEDIT_LIST::update()
 	if(currLVItemCount != movie_size)
 		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
 
-	// once per 40 milliseconds update screenshot_bitmap alpha
+	// once per 40 milliseconds update colors alpha
 	if (clock() > next_header_update_time)
 	{
 		next_header_update_time = clock() + HEADER_LIGHT_UPDATE_TICK;
@@ -255,7 +268,7 @@ void TASEDIT_LIST::update()
 	}
 }
 
-void TASEDIT_LIST::save(EMUFILE *os, bool really_save)
+void TASEDITOR_LIST::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
@@ -272,7 +285,7 @@ void TASEDIT_LIST::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool TASEDIT_LIST::load(EMUFILE *is)
+bool TASEDITOR_LIST::load(EMUFILE *is)
 {
 	update();
 	// read "LIST" string
@@ -298,7 +311,7 @@ error:
 	return true;
 }
 // ----------------------------------------------------------------------
-void TASEDIT_LIST::AddFourscore()
+void TASEDITOR_LIST::AddFourscore()
 {
 	// add list columns
 	LVCOLUMN lvc;
@@ -320,7 +333,7 @@ void TASEDIT_LIST::AddFourscore()
 	// change eoptions
 	FCEUI_SetInputFourscore(true);
 }
-void TASEDIT_LIST::RemoveFourscore()
+void TASEDITOR_LIST::RemoveFourscore()
 {
 	// remove list columns
 	for (num_columns = COLUMN_FRAMENUM2; num_columns >= COLUMN_JOYPAD3_A; num_columns--)
@@ -329,21 +342,21 @@ void TASEDIT_LIST::RemoveFourscore()
 	FCEUI_SetInputFourscore(false);
 }
 
-void TASEDIT_LIST::RedrawList()
+void TASEDITOR_LIST::RedrawList()
 {
 	InvalidateRect(hwndList, 0, FALSE);
 }
-void TASEDIT_LIST::RedrawRow(int index)
+void TASEDITOR_LIST::RedrawRow(int index)
 {
 	ListView_RedrawItems(hwndList, index, index);
 }
-void TASEDIT_LIST::RedrawHeader()
+void TASEDITOR_LIST::RedrawHeader()
 {
 	InvalidateRect(hwndHeader, 0, FALSE);
 }
 
 // -------------------------------------------------------------------------
-bool TASEDIT_LIST::CheckItemVisible(int frame)
+bool TASEDITOR_LIST::CheckItemVisible(int frame)
 {
 	int top = ListView_GetTopIndex(hwndList);
 	// in fourscore there's horizontal scrollbar which takes one row for itself
@@ -352,7 +365,7 @@ bool TASEDIT_LIST::CheckItemVisible(int frame)
 	return false;
 }
 
-void TASEDIT_LIST::FollowPlayback()
+void TASEDITOR_LIST::FollowPlayback()
 {
 	// center list at jump_frame
 	int list_items = ListView_GetCountPerPage(hwndList);
@@ -367,14 +380,14 @@ void TASEDIT_LIST::FollowPlayback()
 		index = 0;
 	ListView_EnsureVisible(hwndList, index, false);
 }
-void TASEDIT_LIST::FollowPlaybackIfNeeded()
+void TASEDITOR_LIST::FollowPlaybackIfNeeded()
 {
-	if (TASEdit_follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
+	if (taseditor_config.follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
 }
-void TASEDIT_LIST::FollowUndo()
+void TASEDITOR_LIST::FollowUndo()
 {
 	int jump_frame = history.GetUndoHint();
-	if (TASEdit_jump_to_undo && jump_frame >= 0)
+	if (taseditor_config.jump_to_undo && jump_frame >= 0)
 	{
 		if (!CheckItemVisible(jump_frame))
 		{
@@ -393,7 +406,7 @@ void TASEDIT_LIST::FollowUndo()
 		}
 	}
 }
-void TASEDIT_LIST::FollowSelection()
+void TASEDITOR_LIST::FollowSelection()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return;
@@ -432,7 +445,7 @@ void TASEDIT_LIST::FollowSelection()
 		ListView_EnsureVisible(hwndList, index, false);
 	}
 }
-void TASEDIT_LIST::FollowPauseframe()
+void TASEDITOR_LIST::FollowPauseframe()
 {
 	int jump_frame = playback.GetPauseFrame();
 	if (jump_frame >= 0)
@@ -452,7 +465,7 @@ void TASEDIT_LIST::FollowPauseframe()
 	}
 }
 
-void TASEDIT_LIST::SetHeaderColumnLight(int column, int level)
+void TASEDITOR_LIST::SetHeaderColumnLight(int column, int level)
 {
 	if (column < COLUMN_FRAMENUM || column >= num_columns || level < 0 || level > HEADER_LIGHT_MAX)
 		return;
@@ -465,7 +478,7 @@ void TASEDIT_LIST::SetHeaderColumnLight(int column, int level)
 	}
 }
 
-void TASEDIT_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
+void TASEDITOR_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
 	if(item.mask & LVIF_TEXT)
@@ -509,7 +522,7 @@ void TASEDIT_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 					item.pszText[2] = 0;
 				} else
 				{
-					if (TASEdit_enable_hot_changes && history.GetCurrentSnapshot().GetHotChangeInfo(item.iItem, item.iSubItem - COLUMN_JOYPAD1_A))
+					if (taseditor_config.enable_hot_changes && history.GetCurrentSnapshot().GetHotChangeInfo(item.iItem, item.iSubItem - COLUMN_JOYPAD1_A))
 					{
 						item.pszText[0] = 45;	// "-"
 						item.pszText[1] = 0;
@@ -521,7 +534,7 @@ void TASEDIT_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 	}
 }
 
-LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
+LONG TASEDITOR_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
@@ -537,7 +550,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 		if(cell_x > COLUMN_ICONS)
 		{
 			// text color
-			if(TASEdit_enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
+			if(taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
 				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
 			else
 				msg->clrText = NORMAL_TEXT_COLOR;
@@ -554,9 +567,9 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
+					if (taseditor_config.show_markers && current_markers.GetMarker(cell_y))
 					{
-						msg->clrTextBk = (TASEdit_bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
+						msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = UNDOHINT_FRAMENUM_COLOR;
@@ -564,24 +577,24 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetPauseFrame() - 1))
 				{
 					// current frame
-					if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
+					if (taseditor_config.show_markers && current_markers.GetMarker(cell_y))
 					{
-						msg->clrTextBk = (TASEdit_bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
+						msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
 					}
-				} else if (TASEdit_show_markers && current_markers.GetMarker(cell_y))
+				} else if (taseditor_config.show_markers && current_markers.GetMarker(cell_y))
 				{
 					// marked frame
-					msg->clrTextBk = (TASEdit_bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
+					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
 				} else
 				{
 					if(cell_y < greenzone.greenZoneCount)
 					{
 						if (!greenzone.savestates[cell_y].empty())
 						{
-							if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 								msg->clrTextBk = LAG_FRAMENUM_COLOR;
 							else
 								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -590,7 +603,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 							|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 							|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 						{
-							if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+							if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 							else
 								msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -615,7 +628,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[cell_y].empty())
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -624,7 +637,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
@@ -648,7 +661,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[cell_y].empty())
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 							msg->clrTextBk = LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
@@ -657,7 +670,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[cell_y])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[cell_y])
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
@@ -670,7 +683,7 @@ LONG TASEDIT_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-LONG TASEDIT_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
+LONG TASEDITOR_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	switch(msg->nmcd.dwDrawStage)
 	{
@@ -720,7 +733,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 //The subclass wndproc for the listview
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	extern TASEDIT_LIST tasedit_list;
+	extern TASEDITOR_LIST list;
 	switch(msg)
 	{
 		case WM_CHAR:
@@ -728,7 +741,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		case WM_NOTIFY:
 		{
-			if (((LPNMHDR)lParam)->hwndFrom == tasedit_list.hwndHeader)
+			if (((LPNMHDR)lParam)->hwndFrom == list.hwndHeader)
 			{
 				switch (((LPNMHDR)lParam)->code)
 				{
@@ -737,14 +750,14 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				case HDN_TRACK:
 					return true;	// no column resizing
 				case NM_CUSTOMDRAW:
-					return tasedit_list.HeaderCustomDraw((NMLVCUSTOMDRAW*)lParam);
+					return list.HeaderCustomDraw((NMLVCUSTOMDRAW*)lParam);
 				}
 			}
 			break;
 		}
 		case WM_KEYDOWN:
 		{
-			if (!TASEdit_keyboard_for_listview)
+			if (!taseditor_config.keyboard_for_listview)
 				return 0;
 			break;
 		}

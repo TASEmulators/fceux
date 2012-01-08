@@ -1,38 +1,29 @@
-//Implementation file of TASEdit Project class
-#include "taseditproj.h"
+//Implementation file of TASEDITOR_PROJECT class
+#include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "version.h"
 
-#define MARKERS_SAVED 1
-#define BOOKMARKS_SAVED 2
-#define GREENZONE_SAVED 4
-#define HISTORY_SAVED 8
-#define LIST_SAVED 16
-#define SELECTION_SAVED 32
-#define ALL_SAVED MARKERS_SAVED|BOOKMARKS_SAVED|GREENZONE_SAVED|HISTORY_SAVED|LIST_SAVED|SELECTION_SAVED
-
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
-extern SCREENSHOT_DISPLAY screenshot_display;
+extern POPUP_DISPLAY popup_display;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern RECORDER recorder;
 extern INPUT_HISTORY history;
-extern TASEDIT_LIST tasedit_list;
-extern TASEDIT_SELECTION selection;
+extern TASEDITOR_LIST list;
+extern TASEDITOR_SELECTION selection;
 
-extern void FCEU_printf(char *format, ...);
 extern void FCEU_PrintError(char *format, ...);
 extern bool SaveProject();
-extern void RedrawWindowCaption();
+extern bool SaveProjectAs();
 
-extern int TASEdit_autosave_period;
-
-TASEDIT_PROJECT::TASEDIT_PROJECT()
+TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 {
 }
 
-void TASEDIT_PROJECT::init()
+void TASEDITOR_PROJECT::init()
 {
 	// init new project
 	projectFile = "";
@@ -41,24 +32,27 @@ void TASEDIT_PROJECT::init()
 
 	reset();
 }
-void TASEDIT_PROJECT::reset()
+void TASEDITOR_PROJECT::reset()
 {
 	changed = false;
 
 }
-void TASEDIT_PROJECT::update()
+void TASEDITOR_PROJECT::update()
 {
-	// if it's time to autosave - save
-	if (changed && TASEdit_autosave_period && clock() >= next_save_shedule)
+	// if it's time to autosave - pop Save As dialog
+	if (changed && taseditor_config.autosave_period && clock() >= next_save_shedule)
 	{
-		SaveProject();
+		if (taseditor_config.silent_autosave)
+			SaveProject();
+		else
+			SaveProjectAs();
 		// in case user pressed Cancel, postpone saving to next time
 		SheduleNextAutosave();
 	}
 	
 }
 
-bool TASEDIT_PROJECT::save()
+bool TASEDITOR_PROJECT::save()
 {
 	std::string PFN = GetProjectFile();
 	if (PFN.empty()) return false;
@@ -75,7 +69,7 @@ bool TASEDIT_PROJECT::save()
 	bookmarks.save(ofs);
 	greenzone.save(ofs);
 	history.save(ofs);
-	tasedit_list.save(ofs);
+	list.save(ofs);
 	selection.save(ofs);
 
 	delete ofs;
@@ -84,7 +78,7 @@ bool TASEDIT_PROJECT::save()
 	this->reset();
 	return true;
 }
-bool TASEDIT_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_list, bool save_selection)
+bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_list, bool save_selection)
 {
 	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
 	
@@ -104,7 +98,7 @@ bool TASEDIT_PROJECT::save_compact(char* filename, bool save_binary, bool save_m
 	bookmarks.save(ofs, save_bookmarks);
 	greenzone.save(ofs, save_greenzone);
 	history.save(ofs, save_history);
-	tasedit_list.save(ofs, save_list);
+	list.save(ofs, save_list);
 	selection.save(ofs, save_selection);
 
 	delete ofs;
@@ -112,7 +106,7 @@ bool TASEDIT_PROJECT::save_compact(char* filename, bool save_binary, bool save_m
 	playback.updateProgressbar();
 	return true;
 }
-bool TASEDIT_PROJECT::load(char* fullname)
+bool TASEDITOR_PROJECT::load(char* fullname)
 {
 	EMUFILE_FILE ifs(fullname, "rb");
 
@@ -145,19 +139,19 @@ bool TASEDIT_PROJECT::load(char* fullname)
 	bookmarks.load(&ifs);
 	greenzone.load(&ifs);
 	history.load(&ifs);
-	tasedit_list.load(&ifs);
+	list.load(&ifs);
 	selection.load(&ifs);
 	
 
 	playback.reset();
 	recorder.reset();
-	screenshot_display.reset();
+	popup_display.reset();
 	reset();
 	RenameProject(fullname);
 	return true;
 }
 
-void TASEDIT_PROJECT::RenameProject(char* new_fullname)
+void TASEDITOR_PROJECT::RenameProject(char* new_fullname)
 {
 	projectFile = new_fullname;
 	char drv[512], dir[512], name[512], ext[512];		// For getting the filename
@@ -168,35 +162,35 @@ void TASEDIT_PROJECT::RenameProject(char* new_fullname)
 	fm2FileName = thisfm2name;
 }
 // -----------------------------------------------------------------
-std::string TASEDIT_PROJECT::GetProjectFile()
+std::string TASEDITOR_PROJECT::GetProjectFile()
 {
 	return projectFile;
 }
-std::string TASEDIT_PROJECT::GetProjectName()
+std::string TASEDITOR_PROJECT::GetProjectName()
 {
 	return projectName;
 }
-std::string TASEDIT_PROJECT::GetFM2Name()
+std::string TASEDITOR_PROJECT::GetFM2Name()
 {
 	return fm2FileName;
 }
 
-void TASEDIT_PROJECT::SetProjectChanged()
+void TASEDITOR_PROJECT::SetProjectChanged()
 {
 	if (!changed)
 	{
 		changed = true;
-		RedrawWindowCaption();
+		taseditor_window.RedrawCaption();
 		SheduleNextAutosave();
 	}
 }
-bool TASEDIT_PROJECT::GetProjectChanged()
+bool TASEDITOR_PROJECT::GetProjectChanged()
 {
 	return changed;
 }
 
-void TASEDIT_PROJECT::SheduleNextAutosave()
+void TASEDITOR_PROJECT::SheduleNextAutosave()
 {
-	if (TASEdit_autosave_period)
-		next_save_shedule = clock() + TASEdit_autosave_period * AUTOSAVE_PERIOD_SCALE;
+	if (taseditor_config.autosave_period)
+		next_save_shedule = clock() + taseditor_config.autosave_period * AUTOSAVE_PERIOD_SCALE;
 }

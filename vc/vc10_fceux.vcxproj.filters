@@ -445,9 +445,6 @@
     <ClCompile Include="..\src\drivers\win\tasedit.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditproj.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\texthook.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
@@ -931,16 +928,28 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\screenshot_display.cpp">
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_config.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_list.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_lua.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_project.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_sel.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_window.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\popup_display.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1118,9 +1127,6 @@
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\tasedit.h">
       <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditproj.h">
-      <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\texthook.h">
       <Filter>drivers\win</Filter>
@@ -1405,16 +1411,28 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\playback.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\screenshot_display.h">
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_window.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_config.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_list.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_lua.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_project.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_sel.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\popup_display.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1500,10 +1518,8 @@
     </None>
     <None Include="..\src\drivers\win\res\icon3.ico" />
     <None Include="..\src\drivers\win\res\icon4.ico" />
-    <None Include="res\tasedit-icon.ico" />
-    <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
-    <None Include="res\tasedit-icon32.ico" />
-    <None Include="..\src\drivers\win\res\tasedit-icon32.ico" />
+    <None Include="..\src\drivers\win\res\taseditor-icon.ico" />
+    <None Include="..\src\drivers\win\res\taseditor-icon32.ico" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

@@ -1,23 +1,16 @@
 //Implementation file of RECORDER class
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "zlib.h"
-
-extern HWND hwndTasEdit;
 
 extern uint32 GetGamepadPressedImmediate();
 extern void ColumnSet(int column);
 
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
 extern INPUT_HISTORY history;
 extern GREENZONE greenzone;
-extern TASEDIT_LIST tasedit_list;
-
-extern void RedrawWindowCaption();
-extern bool TASEdit_branch_only_when_rec;
-extern bool TASEdit_use_1p_rec;
-extern int TASEdit_superimpose;
-extern bool TASEdit_columnset_by_keys;
-extern bool TASEdit_focus;
+extern TASEDITOR_LIST list;
 
 // resources
 const char recordingModes[5][4] = {	"All",
@@ -36,12 +29,12 @@ RECORDER::RECORDER()
 
 void RECORDER::init()
 {
-	hwndRecCheckbox = GetDlgItem(hwndTasEdit, IDC_RECORDING);
-	hwndRB_RecAll = GetDlgItem(hwndTasEdit, IDC_RADIO2);
-	hwndRB_Rec1P = GetDlgItem(hwndTasEdit, IDC_RADIO3);
-	hwndRB_Rec2P = GetDlgItem(hwndTasEdit, IDC_RADIO4);
-	hwndRB_Rec3P = GetDlgItem(hwndTasEdit, IDC_RADIO5);
-	hwndRB_Rec4P = GetDlgItem(hwndTasEdit, IDC_RADIO6);
+	hwndRecCheckbox = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RECORDING);
+	hwndRB_RecAll = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO2);
+	hwndRB_Rec1P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO3);
+	hwndRB_Rec2P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO4);
+	hwndRB_Rec3P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO5);
+	hwndRB_Rec4P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO6);
 	reset();
 	old_multitrack_recording_joypad = multitrack_recording_joypad;
 	old_movie_readonly = movie_readonly;
@@ -71,9 +64,9 @@ void RECORDER::update()
 {
 	// update window caption if needed
 	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
-		RedrawWindowCaption();
+		taseditor_window.RedrawCaption();
 	// update Bookmarks/Branches groupbox caption if needed
-	if (TASEdit_branch_only_when_rec && old_movie_readonly != movie_readonly)
+	if (taseditor_config.branch_only_when_rec && old_movie_readonly != movie_readonly)
 		bookmarks.RedrawBookmarksCaption();
 	// update recording radio buttons if user used hotkey to switch R/W
 	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
@@ -96,7 +89,7 @@ void RECORDER::update()
 	{
 		int joy = multitrack_recording_joypad - 1;
 		// substitute target joypad with 1p joypad
-		if (multitrack_recording_joypad > MULTITRACK_RECORDING_1P && TASEdit_use_1p_rec)
+		if (multitrack_recording_joypad > MULTITRACK_RECORDING_1P && taseditor_config.use_1p_rec)
 			current_joy[joy] = current_joy[0];
 		// clear all other joypads (pressing them does not count)
 		for (int i = 0; i < NUM_JOYPADS; ++i)
@@ -104,7 +97,7 @@ void RECORDER::update()
 				current_joy[i] = 0;
 	}
 	// call ColumnSet if needed
-	if (TASEdit_columnset_by_keys && movie_readonly && TASEdit_focus)
+	if (taseditor_config.columnset_by_keys && movie_readonly && taseditor_window.TASEditor_focus)
 	{
 		int num_joys;
 		if (currMovieData.fourscore)
@@ -178,7 +171,7 @@ void RECORDER::InputChanged()
 		for (; i >= 0; i--)
 		{
 			// superimpose (bitwise OR) if needed
-			if (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_joy[i] == 0))
+			if (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_joy[i] == 0))
 				new_joy[i] |= old_joy[i];
 			// change this joystick
 			currMovieData.records[currFrameCounter].joysticks[i] = new_joy[i];
@@ -188,17 +181,17 @@ void RECORDER::InputChanged()
 				// set lights for changed buttons
 				for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 					if ((new_joy[i] & (1 << button)) && !(old_joy[i] & (1 << button)))
-						tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 			}
 		}
 	} else
 	{
 		int joy = multitrack_recording_joypad - 1;
 		// substitute target joypad with 1p joypad
-		if (multitrack_recording_joypad > MULTITRACK_RECORDING_1P && TASEdit_use_1p_rec)
+		if (multitrack_recording_joypad > MULTITRACK_RECORDING_1P && taseditor_config.use_1p_rec)
 			new_joy[joy] = new_joy[0];
 		// superimpose (bitwise OR) if needed
-		if (TASEdit_superimpose == BST_CHECKED || (TASEdit_superimpose == BST_INDETERMINATE && new_joy[joy] == 0))
+		if (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_joy[joy] == 0))
 			new_joy[joy] |= old_joy[joy];
 		// other joysticks should not be changed
 		currMovieData.records[currFrameCounter].joysticks[0] = old_joy[0];
@@ -216,7 +209,7 @@ void RECORDER::InputChanged()
 			// set lights for changed buttons
 			for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 				if ((new_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					tasedit_list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+					list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 		}
 	}
 	if (changes_made)

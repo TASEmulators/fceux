@@ -396,6 +396,7 @@ MovieData::MovieData()
 	, PPUflag(false)
 	, rerecordCount(0)
 	, binaryFlag(false)
+	, loadFrameCount(-1)
 	, microphone(false)
 {
 	memset(&romChecksum,0,sizeof(MD5DATA));

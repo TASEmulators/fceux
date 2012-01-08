@@ -1,21 +1,21 @@
 //Implementation file of Playback class
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_UPPER
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
 #endif
 
-extern HWND hwndTasEdit;
-extern bool Tasedit_rewind_now;
+extern bool Taseditor_rewind_now;
 extern bool turbo;
-extern bool TASEdit_turbo_seek;
 extern int marker_note_edit;
 extern int search_similar_marker;
 
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
 extern GREENZONE greenzone;
-extern TASEDIT_LIST tasedit_list;
+extern TASEDITOR_LIST list;
 extern BOOKMARKS bookmarks;
 
 extern void UpdateMarkerNote();
@@ -32,17 +32,17 @@ PLAYBACK::PLAYBACK()
 
 void PLAYBACK::init()
 {
-	hwndProgressbar = GetDlgItem(hwndTasEdit, IDC_PROGRESS1);
+	hwndProgressbar = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PROGRESS1);
 	SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
-	hwndRewind = GetDlgItem(hwndTasEdit, TASEDIT_REWIND);
-	hwndForward = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD);
-	hwndRewindFull = GetDlgItem(hwndTasEdit, TASEDIT_REWIND_FULL);
-	hwndForwardFull = GetDlgItem(hwndTasEdit, TASEDIT_FORWARD_FULL);
-	hwndPlaybackMarker = GetDlgItem(hwndTasEdit, IDC_PLAYBACK_MARKER);
-	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)tasedit_list.hMarkersFont, 0);
-	hwndPlaybackMarkerEdit = GetDlgItem(hwndTasEdit, IDC_PLAYBACK_MARKER_EDIT);
+	hwndRewind = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_REWIND);
+	hwndForward = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_FORWARD);
+	hwndRewindFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_REWIND_FULL);
+	hwndForwardFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_FORWARD_FULL);
+	hwndPlaybackMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER);
+	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
+	hwndPlaybackMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER_EDIT);
 	SendMessage(hwndPlaybackMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	SendMessage(hwndPlaybackMarkerEdit, WM_SETFONT, (WPARAM)tasedit_list.hMarkersEditFont, 0);
+	SendMessage(hwndPlaybackMarkerEdit, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
 	// subclass the edit control
 	playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndPlaybackMarkerEdit, GWL_WNDPROC, (LONG)UpperMarkerEditWndProc);
 
@@ -74,7 +74,7 @@ void PLAYBACK::update()
 	if (old_pauseframe != pause_frame && old_pauseframe)
 	{
 		// pause_frame was changed, clear old_pauseframe gfx
-		tasedit_list.RedrawRow(old_pauseframe-1);
+		list.RedrawRow(old_pauseframe-1);
 		bookmarks.RedrawChangedBookmarks(old_pauseframe-1);
 	}
 	old_pauseframe = pause_frame;
@@ -89,7 +89,7 @@ void PLAYBACK::update()
 	if (old_show_pauseframe != show_pauseframe)
 	{
 		// update pauseframe gfx
-		tasedit_list.RedrawRow(pause_frame-1);
+		list.RedrawRow(pause_frame-1);
 		bookmarks.RedrawChangedBookmarks(pause_frame-1);
 	}
 
@@ -114,15 +114,15 @@ void PLAYBACK::update()
 	// update the playback cursor
 	if(currFrameCounter != lastCursor)
 	{
-		tasedit_list.FollowPlaybackIfNeeded();
+		list.FollowPlaybackIfNeeded();
 		// update gfx of the old and new rows
-		tasedit_list.RedrawRow(lastCursor);
+		list.RedrawRow(lastCursor);
 		bookmarks.RedrawChangedBookmarks(lastCursor);
-		tasedit_list.RedrawRow(currFrameCounter);
+		list.RedrawRow(currFrameCounter);
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
 		// enforce redrawing now
 		lastCursor = currFrameCounter;
-		UpdateWindow(tasedit_list.hwndList);
+		UpdateWindow(list.hwndList);
 		// lazy update of "Playback's Marker text"
 		int current_marker = current_markers.GetMarkerUp(currFrameCounter);
 		if (shown_marker != current_marker)
@@ -145,7 +145,7 @@ void PLAYBACK::update()
 	
 	// update < and > buttons
 	old_rewind_button_state = rewind_button_state;
-	rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Tasedit_rewind_now);
+	rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Taseditor_rewind_now);
 	if (rewind_button_state)
 	{
 		if (!old_rewind_button_state)
@@ -236,7 +236,7 @@ void PLAYBACK::SeekingStart(int finish_frame)
 {
 	seeking_start_frame = currFrameCounter;
 	pause_frame = finish_frame;
-	if (TASEdit_turbo_seek)
+	if (taseditor_config.turbo_seek)
 		turbo = true;
 	UnpauseEmulation();
 }
@@ -255,7 +255,7 @@ void PLAYBACK::RewindFrame()
 		jump(currFrameCounter-1);
 	else
 		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
-		tasedit_list.FollowPlaybackIfNeeded();
+		list.FollowPlaybackIfNeeded();
 	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
@@ -319,7 +319,7 @@ void PLAYBACK::jump(int frame)
 	if (JumpToFrame(frame))
 	{
 		ForceExecuteLuaFrameFunctions();
-		tasedit_list.FollowPlaybackIfNeeded();
+		list.FollowPlaybackIfNeeded();
 	}
 }
 void PLAYBACK::restorePosition()
@@ -385,7 +385,7 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 	{
 		extern PLAYBACK playback;
-		extern TASEDIT_SELECTION selection;
+		extern TASEDITOR_SELECTION selection;
 		switch(msg)
 		{
 		case WM_CHAR:
@@ -395,11 +395,11 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			case VK_ESCAPE:
 				// revert text to original note text
 				SetWindowText(playback.hwndPlaybackMarkerEdit, current_markers.GetNote(playback.shown_marker).c_str());
-				SetFocus(tasedit_list.hwndList);
+				SetFocus(list.hwndList);
 				return 0;
 			case VK_RETURN:
 				// exit and save text changes
-				SetFocus(tasedit_list.hwndList);
+				SetFocus(list.hwndList);
 				return 0;
 			case VK_TAB:
 				// switch to lower edit control (also exit and save text changes)

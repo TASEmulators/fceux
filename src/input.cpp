@@ -52,11 +52,13 @@
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
 
+#include "./drivers/win/taseditlib/taseditor_window.h"
 #include "./drivers/win/taseditlib/markers.h"
 #include "./drivers/win/taseditlib/inputsnapshot.h"
 #include "./drivers/win/taseditlib/bookmarks.h"
-extern bool Tasedit_rewind_now;
+extern bool Taseditor_rewind_now;
 extern BOOKMARKS bookmarks;
+extern TASEDITOR_WINDOW taseditor_window;
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -1116,8 +1118,7 @@ static void ReloadRom(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
 	{
 		// load most recent project
-		extern void LoadRecentProject(int slot);
-		LoadRecentProject(0);
+		taseditor_window.LoadRecentProject(0);
 	} else
 	{
 		// load most recent ROM
@@ -1166,13 +1167,13 @@ static void ToggleFullscreen(void)
 static void TaseditRewindOn(void)
 {
 #ifdef WIN32
-	Tasedit_rewind_now = true;
+	Taseditor_rewind_now = true;
 #endif
 }
 static void TaseditRewindOff(void)
 {
 #ifdef WIN32
-	Tasedit_rewind_now = false;
+	Taseditor_rewind_now = false;
 #endif
 }
 

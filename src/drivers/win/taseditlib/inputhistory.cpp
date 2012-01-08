@@ -1,28 +1,22 @@
 //Implementation file of Input History class (Undo feature)
-
-#include "taseditproj.h"
-
-extern HWND hwndTasEdit;
-extern bool TASEdit_bind_markers;
-extern bool TASEdit_enable_hot_changes;
-extern bool TASEdit_branch_full_movie;
-extern bool TASEdit_combine_consecutive_rec;
-extern int TasEdit_undo_levels;
+#include "taseditor_project.h"
 
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndHistoryList_oldWndProc;
 
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
-extern TASEDIT_SELECTION selection;
+extern TASEDITOR_SELECTION selection;
 extern GREENZONE greenzone;
-extern TASEDIT_PROJECT project;
-extern TASEDIT_LIST tasedit_list;
+extern TASEDITOR_PROJECT project;
+extern TASEDITOR_LIST list;
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[40][20] = {" Init",
+char modCaptions[41][20] = {" Init",
 							" Change",
 							" Set",
 							" Unset",
@@ -61,7 +55,8 @@ char modCaptions[40][20] = {" Init",
 							" Marker Rename",
 							" LUA Marker Set",
 							" LUA Marker Unset",
-							" LUA Marker Rename" };
+							" LUA Marker Rename",
+							" LUA Change" };
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
 INPUT_HISTORY::INPUT_HISTORY()
@@ -71,7 +66,7 @@ INPUT_HISTORY::INPUT_HISTORY()
 void INPUT_HISTORY::init()
 {
 	// prepare the history listview
-	hwndHistoryList = GetDlgItem(hwndTasEdit, IDC_HISTORYLIST);
+	hwndHistoryList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_HISTORYLIST);
 	ListView_SetExtendedListViewStyleEx(hwndHistoryList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
 	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
@@ -80,8 +75,6 @@ void INPUT_HISTORY::init()
 	lvc.cx = 500;
 	lvc.fmt = LVCFMT_LEFT;
 	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
-
-	reset();
 }
 void INPUT_HISTORY::free()
 {
@@ -92,7 +85,7 @@ void INPUT_HISTORY::reset()
 {
 	free();
 	// init vars
-	history_size = TasEdit_undo_levels + 1;
+	history_size = taseditor_config.undo_levels + 1;
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
 	input_snapshots.resize(history_size);
@@ -100,7 +93,7 @@ void INPUT_HISTORY::reset()
 	history_cursor_pos = -1;
 	// create initial snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	strcat(inp.description, modCaptions[0]);
 	inp.jump_frame = -1;
 	AddInputSnapshotToHistory(inp);
@@ -111,7 +104,7 @@ void INPUT_HISTORY::update()
 {
 	// update undo_hint
 	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0)
-		tasedit_list.RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
+		list.RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
 	old_undo_hint_pos = undo_hint_pos;
 	old_show_undo_hint = show_undo_hint;
 	show_undo_hint = false;
@@ -123,7 +116,7 @@ void INPUT_HISTORY::update()
 			undo_hint_pos = -1;	// finished hinting
 	}
 	if (old_show_undo_hint != show_undo_hint)
-		tasedit_list.RedrawRow(undo_hint_pos);			// not changing bookmarks list
+		list.RedrawRow(undo_hint_pos);			// not changing bookmarks list
 
 
 
@@ -152,7 +145,7 @@ int INPUT_HISTORY::jump(int new_pos)
 
 	// update markers
 	bool markers_changed = false;
-	if (TASEdit_bind_markers)
+	if (taseditor_config.bind_markers)
 	{
 		if (input_snapshots[real_pos].my_markers.checkMarkersDiff(current_markers))
 		{
@@ -175,12 +168,12 @@ int INPUT_HISTORY::jump(int new_pos)
 		current_markers.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
-		tasedit_list.RedrawList();
-		tasedit_list.FollowUndo();
-	} else if (TASEdit_enable_hot_changes)
+		list.RedrawList();
+		list.FollowUndo();
+	} else if (taseditor_config.enable_hot_changes)
 	{
 		// when using Hot Changes, list should be always redrawn, because old changes become less hot
-		tasedit_list.RedrawList();
+		list.RedrawList();
 	}
 
 	return first_change;
@@ -243,7 +236,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 {
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	inp.mod_type = mod_type;
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
@@ -288,7 +281,7 @@ int INPUT_HISTORY::RegisterChanges(int mod_type, int start, int end)
 			strcat(inp.description, framenum);
 		}
 		// set hotchanges
-		if (TASEdit_enable_hot_changes)
+		if (taseditor_config.enable_hot_changes)
 		{
 			// inherit previous hotchanges and set new changes
 			switch (mod_type)
@@ -327,7 +320,7 @@ void INPUT_HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
 {
 	// create new input shanshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	inp.mod_type = mod_type;
 	// fill description:
 	strcat(inp.description, modCaptions[mod_type]);
@@ -343,7 +336,7 @@ void INPUT_HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
 		strcat(inp.description, "-");
 		strcat(inp.description, framenum);
 	}
-	if (TASEdit_enable_hot_changes)
+	if (taseditor_config.enable_hot_changes)
 		inp.copyHotChanges(&GetCurrentSnapshot());
 	AddInputSnapshotToHistory(inp);
 	bookmarks.ChangesMadeSinceBranch();
@@ -353,19 +346,19 @@ void INPUT_HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 {
 	// create new input snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	// fill description: modification type + time of the Branch
 	inp.mod_type = mod_type;
 	strcat(inp.description, modCaptions[mod_type]);
 	strcat(inp.description, bookmarks.bookmarks_array[slot].snapshot.description);
 	inp.jump_frame = first_change;
-	if (TASEdit_enable_hot_changes)
+	if (taseditor_config.enable_hot_changes)
 	{
 		if (mod_type < MODTYPE_BRANCH_MARKERS_0)
 		{
 			// input was changed
 			// copy hotchanges of the Branch
-			if (TASEdit_branch_full_movie)
+			if (taseditor_config.branch_full_movie)
 			{
 				inp.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
 			} else
@@ -385,13 +378,13 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 {
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	INPUT_SNAPSHOT inp;
-	inp.init(currMovieData, TASEdit_enable_hot_changes);
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	inp.fillJoypadsDiff(input_snapshots[real_pos], frame_of_change);
 	inp.mod_type = MODTYPE_RECORD;
 	strcat(inp.description, modCaptions[MODTYPE_RECORD]);
 	char framenum[11];
 	// check if current snapshot is also Recording and maybe it is consecutive recording
-	if (TASEdit_combine_consecutive_rec && input_snapshots[real_pos].mod_type == MODTYPE_RECORD && input_snapshots[real_pos].rec_end_frame+1 == frame_of_change && input_snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)
+	if (taseditor_config.combine_consecutive_rec && input_snapshots[real_pos].mod_type == MODTYPE_RECORD && input_snapshots[real_pos].rec_end_frame+1 == frame_of_change && input_snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)
 	{
 		// clone this snapshot and continue chain of recorded frames
 		inp.jump_frame = input_snapshots[real_pos].jump_frame;
@@ -413,7 +406,7 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 		strcat(inp.description, "-");
 		strcat(inp.description, framenum);
 		// set hotchanges
-		if (TASEdit_enable_hot_changes)
+		if (taseditor_config.enable_hot_changes)
 		{
 			inp.copyHotChanges(&input_snapshots[real_pos]);
 			inp.fillHotChanges(input_snapshots[real_pos], frame_of_change, frame_of_change);
@@ -441,7 +434,7 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 		strcat(inp.description, " ");
 		strcat(inp.description, framenum);
 		// set hotchanges
-		if (TASEdit_enable_hot_changes)
+		if (taseditor_config.enable_hot_changes)
 		{
 			inp.inheritHotChanges(&input_snapshots[real_pos]);
 			inp.fillHotChanges(input_snapshots[real_pos], frame_of_change, frame_of_change);
@@ -454,7 +447,7 @@ void INPUT_HISTORY::RegisterImport(MovieData& md, char* filename)
 {
 	// create new input snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(md, TASEdit_enable_hot_changes, (currMovieData.fourscore)?FOURSCORE:NORMAL_2JOYPADS);
+	inp.init(md, taseditor_config.enable_hot_changes, (currMovieData.fourscore)?FOURSCORE:NORMAL_2JOYPADS);
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = inp.findFirstChange(input_snapshots[real_pos]);
@@ -468,20 +461,20 @@ void INPUT_HISTORY::RegisterImport(MovieData& md, char* filename)
 		// add filename to description
 		strcat(inp.description, " ");
 		strncat(inp.description, filename, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
-		if (TASEdit_enable_hot_changes)
+		if (taseditor_config.enable_hot_changes)
 		{
 			// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
 			inp.fillHotChanges(input_snapshots[real_pos], first_changes);
 		}
 		AddInputSnapshotToHistory(inp);
 		inp.toMovie(currMovieData);
-		tasedit_list.update();
+		list.update();
 		bookmarks.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 		greenzone.InvalidateAndCheck(first_changes);
 	} else
 	{
-		MessageBox(hwndTasEdit, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
+		MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
 	}
 }
 
@@ -611,8 +604,8 @@ void INPUT_HISTORY::Click(LPNMITEMACTIVATE info)
 		int result = jump(item);
 		if (result >= 0)
 		{
-			tasedit_list.update();
-			tasedit_list.FollowUndo();
+			list.update();
+			list.FollowUndo();
 			greenzone.InvalidateAndCheck(result);
 			return;
 		}

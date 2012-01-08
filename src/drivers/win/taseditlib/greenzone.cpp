@@ -1,16 +1,13 @@
 //Implementation file of Greenzone class
-
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "state.h"
 #include "zlib.h"
 
-extern TASEDIT_PROJECT project;
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_PROJECT project;
 extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
-extern TASEDIT_LIST tasedit_list;
-
-extern int TASEdit_greenzone_capacity;
-extern bool TASEdit_restore_position;
+extern TASEDITOR_LIST list;
 
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
@@ -104,12 +101,12 @@ void GREENZONE::storeTasSavestate(int frame)
 
 void GREENZONE::GreenzoneCleaning()
 {
-	int i = currFrameCounter - TASEdit_greenzone_capacity;
+	int i = currFrameCounter - taseditor_config.greenzone_capacity;
 	bool changed = false;
 	if (i < 0) goto finish;
 	int limit;
 	// 2x of 1/2
-	limit = i - 2 * TASEdit_greenzone_capacity;
+	limit = i - 2 * taseditor_config.greenzone_capacity;
 	if (limit < -1) limit = -1;
 	for (; i > limit; i--)
 	{
@@ -121,7 +118,7 @@ void GREENZONE::GreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 4x of 1/4
-	limit = i - 4 * TASEdit_greenzone_capacity;
+	limit = i - 4 * taseditor_config.greenzone_capacity;
 	if (limit < -1) limit = -1;
 	for (; i > limit; i--)
 	{
@@ -133,7 +130,7 @@ void GREENZONE::GreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 8x of 1/8
-	limit = i - 8 * TASEdit_greenzone_capacity;
+	limit = i - 8 * taseditor_config.greenzone_capacity;
 	if (limit < -1) limit = -1;
 	for (; i > limit; i--)
 	{
@@ -145,7 +142,7 @@ void GREENZONE::GreenzoneCleaning()
 	}
 	if (i < 0) goto finish;
 	// 16x of 1/16
-	limit = i - 16 * TASEdit_greenzone_capacity;
+	limit = i - 16 * taseditor_config.greenzone_capacity;
 	if (limit < -1) limit = -1;
 	for (; i > limit; i--)
 	{
@@ -167,7 +164,7 @@ void GREENZONE::GreenzoneCleaning()
 finish:
 	if (changed)
 	{
-		tasedit_list.RedrawList();
+		list.RedrawList();
 		bookmarks.RedrawBookmarksList();
 	}
 	// shedule next cleaning
@@ -299,11 +296,11 @@ bool GREENZONE::load(EMUFILE *is)
 		if (read32le(&frame, is))
 		{
 			currFrameCounter = frame;
-			int greenzone_tail_frame = currFrameCounter - TASEdit_greenzone_capacity;
-			int greenzone_tail_frame2 = greenzone_tail_frame - 2 * TASEdit_greenzone_capacity;
-			int greenzone_tail_frame4 = greenzone_tail_frame - 4 * TASEdit_greenzone_capacity;
-			int greenzone_tail_frame8 = greenzone_tail_frame - 8 * TASEdit_greenzone_capacity;
-			int greenzone_tail_frame16 = greenzone_tail_frame - 16 * TASEdit_greenzone_capacity;
+			int greenzone_tail_frame = currFrameCounter - taseditor_config.greenzone_capacity;
+			int greenzone_tail_frame2 = greenzone_tail_frame - 2 * taseditor_config.greenzone_capacity;
+			int greenzone_tail_frame4 = greenzone_tail_frame - 4 * taseditor_config.greenzone_capacity;
+			int greenzone_tail_frame8 = greenzone_tail_frame - 8 * taseditor_config.greenzone_capacity;
+			int greenzone_tail_frame16 = greenzone_tail_frame - 16 * taseditor_config.greenzone_capacity;
 			// read savestates
 			while(1)
 			{
@@ -383,7 +380,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 			// either set playback cursor to the end of greenzone or run seeking to restore playback position
 			if (currFrameCounter >= greenZoneCount)
 			{
-				if (TASEdit_restore_position)
+				if (taseditor_config.restore_position)
 					playback.restorePosition();
 				else
 					playback.jump(greenZoneCount-1);
@@ -391,7 +388,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	tasedit_list.RedrawList();
+	list.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
 // This version doesn't restore playback, may be used only by Branching and Recording functions!
@@ -407,7 +404,7 @@ void GREENZONE::Invalidate(int after)
 		}
 	}
 	// redraw list even if greenzone didn't change
-	tasedit_list.RedrawList();
+	list.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
 

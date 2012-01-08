@@ -1,31 +1,24 @@
 //Implementation file of Bookmarks class
-
-#include "taseditproj.h"
+#include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "zlib.h"
 
 #pragma comment(lib, "msimg32.lib")
 
-extern HWND hwndTasEdit;
-
 LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndBookmarksList_oldWndProc, hwndBranchesBitmap_oldWndProc;
 
-extern SCREENSHOT_DISPLAY screenshot_display;
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
+extern POPUP_DISPLAY popup_display;
 extern PLAYBACK playback;
-extern TASEDIT_SELECTION selection;
+extern TASEDITOR_SELECTION selection;
 extern GREENZONE greenzone;
-extern TASEDIT_PROJECT project;
+extern TASEDITOR_PROJECT project;
 extern INPUT_HISTORY history;
-extern TASEDIT_LIST tasedit_list;
+extern TASEDITOR_LIST list;
 extern MARKERS current_markers;
-
-extern bool TASEdit_show_lag_frames;
-extern bool TASEdit_bind_markers;
-extern bool TASEdit_branch_full_movie;
-extern bool TASEdit_branch_only_when_rec;
-extern bool TASEdit_view_branches_tree;
 
 extern void UpdateMarkerNote();
 
@@ -59,16 +52,16 @@ BOOKMARKS::BOOKMARKS()
 void BOOKMARKS::init()
 {
 	free();
-	hwndBookmarksList = GetDlgItem(hwndTasEdit, IDC_BOOKMARKSLIST);
-	hwndBookmarks = GetDlgItem(hwndTasEdit, IDC_BOOKMARKS_BOX);
-	hwndBranchesBitmap = GetDlgItem(hwndTasEdit, IDC_BRANCHES_BITMAP);
+	hwndBookmarksList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKSLIST);
+	hwndBookmarks = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX);
+	hwndBranchesBitmap = GetDlgItem(taseditor_window.hwndTasEditor, IDC_BRANCHES_BITMAP);
 
 	// prepare bookmarks listview
 	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
 	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
 	// setup same images for the listview
-	ListView_SetImageList(hwndBookmarksList, tasedit_list.himglist, LVSIL_SMALL);
+	ListView_SetImageList(hwndBookmarksList, list.himglist, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
 	// icons column
@@ -288,8 +281,8 @@ void BOOKMARKS::set(int slot)
 	bookmarks_array[slot].set();
 
 	// if this screenshot is currently shown - reinit and redraw it
-	if (screenshot_display.screenshot_currently_shown == slot)
-		screenshot_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
+	if (popup_display.screenshot_currently_shown == slot)
+		popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
 	int parent;
 	// inherit current branch
@@ -384,7 +377,7 @@ void BOOKMARKS::set(int slot)
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
-		tasedit_list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
 	}
 	if (slot != current_branch || changes_since_current_branch)
@@ -395,10 +388,10 @@ void BOOKMARKS::set(int slot)
 
 	if (previous_frame >= 0 && previous_frame != currFrameCounter)
 	{
-		tasedit_list.RedrawRow(previous_frame);
+		list.RedrawRow(previous_frame);
 		RedrawChangedBookmarks(previous_frame);
 	}
-	tasedit_list.RedrawRow(currFrameCounter);
+	list.RedrawRow(currFrameCounter);
 	RedrawChangedBookmarks(currFrameCounter);
 
 	FCEU_DispMessage("Branch %d saved.", 0, slot);
@@ -412,14 +405,14 @@ void BOOKMARKS::jump(int slot)
 		int frame = bookmarks_array[slot].snapshot.jump_frame;
 		playback.jump(frame);
 		if (playback.GetPauseFrame())
-			tasedit_list.FollowPauseframe();
+			list.FollowPauseframe();
 		bookmarks_array[slot].jump();
 	}
 }
 
 void BOOKMARKS::unleash(int slot)
 {
-	if (TASEdit_branch_only_when_rec && movie_readonly)
+	if (taseditor_config.branch_only_when_rec && movie_readonly)
 	{
 		jump(slot);
 		return;
@@ -431,10 +424,10 @@ void BOOKMARKS::unleash(int slot)
 
 	bool markers_changed = false;
 	// revert current movie to the input_snapshot state
-	if (TASEdit_branch_full_movie)
+	if (taseditor_config.branch_full_movie)
 	{
 		// update Markers
-		if (TASEdit_bind_markers)
+		if (taseditor_config.bind_markers)
 		{
 			if (bookmarks_array[slot].snapshot.my_markers.checkMarkersDiff(current_markers))
 			{
@@ -449,7 +442,7 @@ void BOOKMARKS::unleash(int slot)
 		{
 			// restore entire movie
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
-			tasedit_list.update();
+			list.update();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
@@ -458,7 +451,7 @@ void BOOKMARKS::unleash(int slot)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			tasedit_list.RedrawList();
+			list.RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
 		{
@@ -468,7 +461,7 @@ void BOOKMARKS::unleash(int slot)
 	} else if (jump_frame > 0)
 	{
 		// update Markers
-		if (TASEdit_bind_markers)
+		if (taseditor_config.bind_markers)
 		{
 			if (bookmarks_array[slot].snapshot.my_markers.checkMarkersDiff(current_markers, jump_frame))
 			{
@@ -484,7 +477,7 @@ void BOOKMARKS::unleash(int slot)
 			// restore movie up to and not including bookmarked frame (imitating old TASing method)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
-			tasedit_list.update();
+			list.update();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
@@ -493,7 +486,7 @@ void BOOKMARKS::unleash(int slot)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			tasedit_list.RedrawList();
+			list.RedrawList();
 			bookmarks_array[slot].unleashed();
 		} else
 		{
@@ -522,9 +515,9 @@ void BOOKMARKS::unleash(int slot)
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
-		tasedit_list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
-		tasedit_list.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
+		list.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[slot].snapshot.jump_frame);
 	}
 	current_branch = slot;
@@ -605,13 +598,13 @@ error:
 void BOOKMARKS::RedrawBookmarksCaption()
 {
 	int prev_edit_mode = edit_mode;
-	if (TASEdit_branch_only_when_rec && movie_readonly)
+	if (taseditor_config.branch_only_when_rec && movie_readonly)
 	{
 		edit_mode = EDIT_MODE_BOOKMARKS;
 		ShowWindow(hwndBranchesBitmap, SW_HIDE);
 		ShowWindow(hwndBookmarksList, SW_SHOW);
 		RedrawBookmarksList();
-	} else if (TASEdit_view_branches_tree)
+	} else if (taseditor_config.view_branches_tree)
 	{
 		edit_mode = EDIT_MODE_BRANCHES;
 		ShowWindow(hwndBookmarksList, SW_HIDE);
@@ -937,12 +930,12 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 		if (bookmarks_array[cell_y].flash_phase)
 			msg->clrText = bookmark_flash_colors[bookmarks_array[cell_y].flash_type][bookmarks_array[cell_y].flash_phase];
 
-		if (cell_x == BOOKMARKS_COLUMN_FRAME || (TASEdit_branch_only_when_rec && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
+		if (cell_x == BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
 		{
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, tasedit_list.hMainListFont);
+				SelectObject(msg->nmcd.hdc, list.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{
@@ -952,7 +945,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -961,7 +954,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -973,7 +966,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, tasedit_list.hMainListFont);
+				SelectObject(msg->nmcd.hdc, list.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetPauseFrame() - 1))
 				{
@@ -983,7 +976,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -992,7 +985,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (TASEdit_show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
@@ -1011,9 +1004,9 @@ void BOOKMARKS::LeftClick(LPNMITEMACTIVATE info)
 	int cell_y = info->iItem;
 	if (cell_y >= 0 && cell_x >= 0)
 	{
-		if (cell_x <= BOOKMARKS_COLUMN_FRAME || (TASEdit_branch_only_when_rec && movie_readonly))
+		if (cell_x <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
 			jump((cell_y + 1) % TOTAL_BOOKMARKS);
-		else if (cell_x == BOOKMARKS_COLUMN_TIME && (!TASEdit_branch_only_when_rec || !movie_readonly))
+		else if (cell_x == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
 			unleash((cell_y + 1) % TOTAL_BOOKMARKS);
 	}
 	// remove selection

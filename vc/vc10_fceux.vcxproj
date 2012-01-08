@@ -428,10 +428,14 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\popup_display.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\screenshot_display.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_list.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditlib\tasedit_sel.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_config.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_list.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_lua.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_project.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_sel.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_window.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
     <ClCompile Include="..\src\drivers\win\timing.cpp" />
@@ -506,7 +510,6 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditproj.cpp" />
     <ClCompile Include="..\src\emufile.cpp" />
     <ClCompile Include="..\src\input\arkanoid.cpp" />
     <ClCompile Include="..\src\input\bworld.cpp">
@@ -749,10 +752,14 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\inputsnapshot.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\markers.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\playback.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\popup_display.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\screenshot_display.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_list.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\tasedit_sel.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_config.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_list.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_lua.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_project.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_sel.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_window.h" />
     <ClInclude Include="..\src\drivers\win\texthook.h" />
     <ClInclude Include="..\src\drivers\win\throttle.h" />
     <ClInclude Include="..\src\drivers\win\timing.h" />
@@ -766,7 +773,6 @@
     <ClInclude Include="..\src\drivers\win\lua\include\lua.hpp" />
     <ClInclude Include="..\src\drivers\win\lua\include\luaconf.h" />
     <ClInclude Include="..\src\drivers\win\lua\include\lualib.h" />
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditproj.h" />
     <ClInclude Include="..\src\emufile.h" />
     <ClInclude Include="..\src\fir\c44100ntsc.h" />
     <ClInclude Include="..\src\fir\c44100pal.h" />
@@ -862,8 +868,8 @@
     <None Include="..\src\drivers\win\res\icon4.ico" />
     <None Include="..\src\drivers\win\res\ICON_1.ico" />
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
-    <None Include="..\src\drivers\win\res\tasedit-icon.ico" />
-    <None Include="..\src\drivers\win\res\tasedit-icon32.ico" />
+    <None Include="..\src\drivers\win\res\taseditor-icon.ico" />
+    <None Include="..\src\drivers\win\res\taseditor-icon32.ico" />
     <None Include="..\src\drivers\win\res\te_0.bmp" />
     <None Include="..\src\drivers\win\res\te_1.bmp" />
     <None Include="..\src\drivers\win\res\te_10.bmp" />
@@ -901,8 +907,6 @@
     </CustomBuild>
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
-    <None Include="res\tasedit-icon.ico" />
-    <None Include="res\tasedit-icon32.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

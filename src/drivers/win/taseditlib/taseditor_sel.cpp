@@ -1,16 +1,13 @@
-//Implementation file of TASEDIT_SELECTION class
-#include "taseditproj.h"
+//Implementation file of TASEDITOR_SELECTION class
+#include "taseditor_project.h"
 #include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_LOWER
 
-char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
-char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
-
-extern HWND hwndTasEdit;
-extern int TasEdit_undo_levels;
-extern int marker_note_edit;
-
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
-extern TASEDIT_LIST tasedit_list;
+extern TASEDITOR_LIST list;
+
+extern int marker_note_edit;
 
 extern void UpdateMarkerNote();
 
@@ -18,6 +15,9 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 WNDPROC selectionMarkerEdit_oldWndproc;
 
 // resources
+char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
+char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
+
 char selectionText[] = "Selection: ";
 char selectionEmptyText[] = "Selection: no";
 char numTextRow[] = "1 row, ";
@@ -28,21 +28,21 @@ char clipboardText[] = "Clipboard: ";
 char clipboardEmptyText[] = "Clipboard: empty";
 char lowerMarkerText[] = "Marker ";
 
-TASEDIT_SELECTION::TASEDIT_SELECTION()
+TASEDITOR_SELECTION::TASEDITOR_SELECTION()
 {
 }
 
-void TASEDIT_SELECTION::init()
+void TASEDITOR_SELECTION::init()
 {
-	hwndPrevMarker = GetDlgItem(hwndTasEdit, TASEDIT_PREV_MARKER);
-	hwndNextMarker = GetDlgItem(hwndTasEdit, TASEDIT_NEXT_MARKER);
-	hwndTextSelection = GetDlgItem(hwndTasEdit, IDC_TEXT_SELECTION);
-	hwndTextClipboard = GetDlgItem(hwndTasEdit, IDC_TEXT_CLIPBOARD);
-	hwndSelectionMarker = GetDlgItem(hwndTasEdit, IDC_SELECTION_MARKER);
-	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)tasedit_list.hMarkersFont, 0);
-	hwndSelectionMarkerEdit = GetDlgItem(hwndTasEdit, IDC_SELECTION_MARKER_EDIT);
+	hwndPrevMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_PREV_MARKER);
+	hwndNextMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_NEXT_MARKER);
+	hwndTextSelection = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_SELECTION);
+	hwndTextClipboard = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_CLIPBOARD);
+	hwndSelectionMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER);
+	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
+	hwndSelectionMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER_EDIT);
 	SendMessage(hwndSelectionMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)tasedit_list.hMarkersEditFont, 0);
+	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
 	// subclass the edit control
 	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEdit, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
 
@@ -52,20 +52,20 @@ void TASEDIT_SELECTION::init()
 		CheckClipboard();
 	RedrawTextClipboard();
 }
-void TASEDIT_SELECTION::free()
+void TASEDITOR_SELECTION::free()
 {
 	// clear history
 	selections_history.resize(0);
 	history_total_items = 0;
 	temp_selection.clear();
 }
-void TASEDIT_SELECTION::reset()
+void TASEDITOR_SELECTION::reset()
 {
 	free();
 	// init vars
 	shown_marker = 0;
 	last_selection_beginning = -1;
-	history_size = TasEdit_undo_levels + 1;
+	history_size = taseditor_config.undo_levels + 1;
 	selections_history.resize(history_size);
 	history_start_pos = 0;
 	history_cursor_pos = -1;
@@ -74,14 +74,14 @@ void TASEDIT_SELECTION::reset()
 	track_selection_changes = true;
 	reset_vars();
 }
-void TASEDIT_SELECTION::reset_vars()
+void TASEDITOR_SELECTION::reset_vars()
 {
 	old_prev_marker_button_state = prev_marker_button_state = false;
 	old_next_marker_button_state = next_marker_button_state = false;
 	must_redraw_text = true;
 	must_find_current_marker = true;
 }
-void TASEDIT_SELECTION::update()
+void TASEDITOR_SELECTION::update()
 {
 	// keep selection within movie limits
 	if (CurrentSelection().size())
@@ -179,7 +179,7 @@ void TASEDIT_SELECTION::update()
 
 }
 
-void TASEDIT_SELECTION::RedrawTextClipboard()
+void TASEDITOR_SELECTION::RedrawTextClipboard()
 {
 	if (clipboard_selection.size())
 	{
@@ -212,7 +212,7 @@ void TASEDIT_SELECTION::RedrawTextClipboard()
 	} else
 		SetWindowText(hwndTextClipboard, clipboardEmptyText);
 }
-void TASEDIT_SELECTION::RedrawMarker()
+void TASEDITOR_SELECTION::RedrawMarker()
 {
 	// redraw marker num
 	char new_text[MAX_NOTE_LEN] = {0};
@@ -227,7 +227,7 @@ void TASEDIT_SELECTION::RedrawMarker()
 	SetWindowText(hwndSelectionMarkerEdit, new_text);
 }
 
-void TASEDIT_SELECTION::JumpPrevMarker()
+void TASEDITOR_SELECTION::JumpPrevMarker()
 {
 	// jump to previous marker
 	int index = GetCurrentSelectionBeginning();
@@ -239,7 +239,7 @@ void TASEDIT_SELECTION::JumpPrevMarker()
 	else
 		JumpToFrame(0);
 }
-void TASEDIT_SELECTION::JumpNextMarker()
+void TASEDITOR_SELECTION::JumpNextMarker()
 {
 	// jump to next marker
 	int index = GetCurrentSelectionBeginning();
@@ -253,14 +253,14 @@ void TASEDIT_SELECTION::JumpNextMarker()
 	else
 		JumpToFrame(last_frame);
 }
-void TASEDIT_SELECTION::JumpToFrame(int frame)
+void TASEDITOR_SELECTION::JumpToFrame(int frame)
 {
 	ClearSelection();
 	SetRowSelection(frame);
-	tasedit_list.FollowSelection();
+	list.FollowSelection();
 }
 // ----------------------------------------------------------
-void TASEDIT_SELECTION::save(EMUFILE *os, bool really_save)
+void TASEDITOR_SELECTION::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
@@ -283,7 +283,7 @@ void TASEDIT_SELECTION::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool TASEDIT_SELECTION::load(EMUFILE *is)
+bool TASEDITOR_SELECTION::load(EMUFILE *is)
 {
 	// read "SELECTION" string
 	char save_id[SELECTION_ID_LEN];
@@ -344,7 +344,7 @@ error:
 	return true;
 }
 
-void TASEDIT_SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
+void TASEDITOR_SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
 {
 	write32le(selection.size(), os);
 	if (selection.size())
@@ -353,7 +353,7 @@ void TASEDIT_SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
 			write32le(*it, os);
 	}
 }
-bool TASEDIT_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
+bool TASEDITOR_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 {
 	int temp_int, temp_size;
 	selection.clear();
@@ -366,7 +366,7 @@ bool TASEDIT_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 	}
 	return false;
 }
-bool TASEDIT_SELECTION::skiploadSelection(EMUFILE *is)
+bool TASEDITOR_SELECTION::skiploadSelection(EMUFILE *is)
 {
 	int temp_size;
 	if (!read32le(&temp_size, is)) return true;
@@ -375,7 +375,7 @@ bool TASEDIT_SELECTION::skiploadSelection(EMUFILE *is)
 }
 // ----------------------------------------------------------
 //used to track selection
-void TASEDIT_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
+void TASEDITOR_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 {
 	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
 	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
@@ -389,7 +389,7 @@ void TASEDIT_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 
 	must_redraw_text = true;
 }
-void TASEDIT_SELECTION::ItemChanged(NMLISTVIEW* info)
+void TASEDITOR_SELECTION::ItemChanged(NMLISTVIEW* info)
 {
 	int item = info->iItem;
 	
@@ -423,7 +423,7 @@ void TASEDIT_SELECTION::ItemChanged(NMLISTVIEW* info)
 	must_redraw_text = true;
 }
 // ----------------------------------------------------------
-void TASEDIT_SELECTION::AddNewSelectionToHistory()
+void TASEDITOR_SELECTION::AddNewSelectionToHistory()
 {
 	// create new empty selection
 	SelectionFrames selectionFrames;
@@ -445,7 +445,7 @@ void TASEDIT_SELECTION::AddNewSelectionToHistory()
 	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
 }
 
-void TASEDIT_SELECTION::jump(int new_pos)
+void TASEDITOR_SELECTION::jump(int new_pos)
 {
 	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
 	if (new_pos == history_cursor_pos) return;
@@ -457,22 +457,22 @@ void TASEDIT_SELECTION::jump(int new_pos)
 	// also keep  selection within list
 	update();
 }
-void TASEDIT_SELECTION::undo()
+void TASEDITOR_SELECTION::undo()
 {
 	jump(history_cursor_pos - 1);
 }
-void TASEDIT_SELECTION::redo()
+void TASEDITOR_SELECTION::redo()
 {
 	jump(history_cursor_pos + 1);
 }
 
-void TASEDIT_SELECTION::MemorizeClipboardSelection()
+void TASEDITOR_SELECTION::MemorizeClipboardSelection()
 {
 	// copy currently strobed selection data to clipboard_selection
 	clipboard_selection = temp_selection;
 	RedrawTextClipboard();
 }
-void TASEDIT_SELECTION::ReselectClipboard()
+void TASEDITOR_SELECTION::ReselectClipboard()
 {
 	if (clipboard_selection.size() == 0) return;
 
@@ -483,9 +483,9 @@ void TASEDIT_SELECTION::ReselectClipboard()
 	update();
 }
 // retrieves some information from clipboard to clipboard_selection
-void TASEDIT_SELECTION::CheckClipboard()
+void TASEDITOR_SELECTION::CheckClipboard()
 {
-	if (OpenClipboard(hwndTasEdit))
+	if (OpenClipboard(taseditor_window.hwndTasEditor))
 	{
 		// check if clipboard contains TAS Editor input data
 		HANDLE hGlobal = GetClipboardData(CF_TEXT);
@@ -525,40 +525,40 @@ void TASEDIT_SELECTION::CheckClipboard()
 	}
 }
 // ----------------------------------------------------------
-void TASEDIT_SELECTION::ClearSelection()
+void TASEDITOR_SELECTION::ClearSelection()
 {
-	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(list.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDIT_SELECTION::ClearRowSelection(int index)
+void TASEDITOR_SELECTION::ClearRowSelection(int index)
 {
-	ListView_SetItemState(tasedit_list.hwndList, index, 0, LVIS_SELECTED);
+	ListView_SetItemState(list.hwndList, index, 0, LVIS_SELECTED);
 }
 
-void TASEDIT_SELECTION::EnforceSelectionToList()
+void TASEDITOR_SELECTION::EnforceSelectionToList()
 {
 	track_selection_changes = false;
 	ClearSelection();
 	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
 	{
-		ListView_SetItemState(tasedit_list.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(list.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
 	}
 	track_selection_changes = true;
 }
  
-void TASEDIT_SELECTION::SelectAll()
+void TASEDITOR_SELECTION::SelectAll()
 {
-	ListView_SetItemState(tasedit_list.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(list.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
-void TASEDIT_SELECTION::SetRowSelection(int index)
+void TASEDITOR_SELECTION::SetRowSelection(int index)
 {
-	ListView_SetItemState(tasedit_list.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(list.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDIT_SELECTION::SetRegionSelection(int start, int end)
+void TASEDITOR_SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i <= end; ++i)
-		ListView_SetItemState(tasedit_list.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(list.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDIT_SELECTION::SelectMidMarkers()
+void TASEDITOR_SELECTION::SelectMidMarkers()
 {
 	int center, upper_border, lower_border;
 	int upper_marker, lower_marker;
@@ -580,7 +580,7 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (current_markers.GetMarker(lower_marker)) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
-	ListView_SetItemState(tasedit_list.hwndList, -1, 0, LVIS_SELECTED);
+	ListView_SetItemState(list.hwndList, -1, 0, LVIS_SELECTED);
 
 	// special case
 	if (upper_marker == -1 && lower_marker == movie_size)
@@ -595,7 +595,7 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -604,14 +604,14 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
@@ -619,52 +619,52 @@ void TASEDIT_SELECTION::SelectMidMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(tasedit_list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	}
 }
 // getters
-int TASEDIT_SELECTION::GetCurrentSelectionSize()
+int TASEDITOR_SELECTION::GetCurrentSelectionSize()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size].size();
 }
-int TASEDIT_SELECTION::GetCurrentSelectionBeginning()
+int TASEDITOR_SELECTION::GetCurrentSelectionBeginning()
 {
 	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
 		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].begin();
 	else
 		return -1;
 }
-bool TASEDIT_SELECTION::CheckFrameSelected(int frame)
+bool TASEDITOR_SELECTION::CheckFrameSelected(int frame)
 {
 	if(CurrentSelection().find(frame) == CurrentSelection().end())
 		return false;
 	return true;
 }
-SelectionFrames* TASEDIT_SELECTION::MakeStrobe()
+SelectionFrames* TASEDITOR_SELECTION::MakeStrobe()
 {
 	// copy current selection to temp_selection
 	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
 	return &temp_selection;
 }
-SelectionFrames& TASEDIT_SELECTION::GetStrobedSelection()
+SelectionFrames& TASEDITOR_SELECTION::GetStrobedSelection()
 {
 	return temp_selection;
 }
 
-SelectionFrames& TASEDIT_SELECTION::GetInsertedSet()
+SelectionFrames& TASEDITOR_SELECTION::GetInsertedSet()
 {
 	return inserted_set;
 }
 // this getter is only for inside-class use
-SelectionFrames& TASEDIT_SELECTION::CurrentSelection()
+SelectionFrames& TASEDITOR_SELECTION::CurrentSelection()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
 }
@@ -674,7 +674,7 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 	{
 		extern PLAYBACK playback;
-		extern TASEDIT_SELECTION selection;
+		extern TASEDITOR_SELECTION selection;
 		switch(msg)
 		{
 		case WM_CHAR:
@@ -684,11 +684,11 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			case VK_ESCAPE:
 				// revert text to original note text
 				SetWindowText(selection.hwndSelectionMarkerEdit, current_markers.GetNote(selection.shown_marker).c_str());
-				SetFocus(tasedit_list.hwndList);
+				SetFocus(list.hwndList);
 				return 0;
 			case VK_RETURN:
 				// exit and save text changes
-				SetFocus(tasedit_list.hwndList);
+				SetFocus(list.hwndList);
 				return 0;
 			case VK_TAB:
 				// switch to upper edit control (also exit and save text changes)

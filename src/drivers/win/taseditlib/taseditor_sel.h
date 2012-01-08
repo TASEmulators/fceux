@@ -1,11 +1,11 @@
-//Specification file for TASEDIT_SELECTION class
+//Specification file for TASEDITOR_SELECTION class
 
 #define SELECTION_ID_LEN 10
 
-class TASEDIT_SELECTION
+class TASEDITOR_SELECTION
 {
 public:
-	TASEDIT_SELECTION();
+	TASEDITOR_SELECTION();
 	void init();
 	void free();
 	void reset();

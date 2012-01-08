@@ -38,6 +38,7 @@
 #include "movieoptions.h"
 #include "ramwatch.h"
 #include "debugger.h"
+#include "taseditlib/taseditor_config.h"
 
 #include "../../state.h"	//adelikat: For bool backupSavestates
 
@@ -69,42 +70,7 @@ extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
 
-extern bool TASEdit_follow_playback;
-extern bool TASEdit_turbo_seek;
-extern bool TASEdit_show_lag_frames;
-extern bool TASEdit_show_markers;
-extern bool TASEdit_show_branch_screenshots;
-extern bool TASEdit_show_branch_tooltips;
-extern bool TASEdit_bind_markers;
-extern bool TASEdit_empty_marker_notes;
-extern bool TASEdit_combine_consecutive_rec;
-extern bool TASEdit_use_1p_rec;
-extern bool TASEdit_columnset_by_keys;
-extern bool TASEdit_keyboard_for_listview;
-extern bool TASEdit_superimpose_affects_paste;
-extern bool TASEdit_branch_full_movie;
-extern bool TASEdit_branch_only_when_rec;
-extern bool TASEdit_view_branches_tree;
-extern bool TASEdit_branch_scr_hud;
-extern bool TASEdit_restore_position;
-extern int TASEdit_superimpose;
-extern bool TASEdit_enable_hot_changes;
-extern int TASEdit_greenzone_capacity;
-extern int TasEdit_undo_levels;
-extern int TASEdit_autosave_period;
-extern bool TASEdit_jump_to_undo;
-extern bool TASEdit_follow_note_context;
-extern int TASEdit_last_export_type;
-extern bool TASEdit_last_export_subtitles;
-extern bool TASEdit_savecompact_binary;
-extern bool TASEdit_savecompact_markers;
-extern bool TASEdit_savecompact_bookmarks;
-extern bool TASEdit_savecompact_greenzone;
-extern bool TASEdit_savecompact_history;
-extern bool TASEdit_savecompact_list;
-extern bool TASEdit_savecompact_selection;
-extern bool TASEdit_findnote_matchcase;
-extern bool TASEdit_findnote_search_up;
+extern TASEDITOR_CONFIG taseditor_config;
 extern char* recent_projects[];
 
 //window positions and sizes:
@@ -122,8 +88,6 @@ extern int Monitor_wndx, Monitor_wndy;
 extern int Tracer_wndx, Tracer_wndy;
 extern int CDLogger_wndx, CDLogger_wndy;
 extern int GGConv_wndx, GGConv_wndy;
-extern int TasEdit_wndx, TasEdit_wndy;
-extern int FindNote_wndx, FindNote_wndy;
 extern int MetaPosX,MetaPosY;
 extern int MLogPosX,MLogPosY;
 
@@ -319,10 +283,6 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(CDLogger_wndy),
 	AC(GGConv_wndx),
 	AC(GGConv_wndy),
-	AC(TasEdit_wndx),
-	AC(TasEdit_wndy),
-	AC(FindNote_wndx),
-	AC(FindNote_wndy),
 	AC(TextHookerPosX),
 	AC(TextHookerPosY),
 	AC(MetaPosX),
@@ -337,42 +297,47 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(AFoff),
 	AC(AutoFireOffset),
 	AC(DesynchAutoFire),
-	AC(TASEdit_follow_playback),
-	AC(TASEdit_turbo_seek),
-	AC(TASEdit_show_lag_frames),
-	AC(TASEdit_show_markers),
-	AC(TASEdit_show_branch_screenshots),
-	AC(TASEdit_show_branch_tooltips),
-	AC(TASEdit_bind_markers),
-	AC(TASEdit_empty_marker_notes),
-	AC(TASEdit_combine_consecutive_rec),
-	AC(TASEdit_use_1p_rec),
-	AC(TASEdit_columnset_by_keys),
-	AC(TASEdit_keyboard_for_listview),
-	AC(TASEdit_superimpose_affects_paste),
-	AC(TASEdit_branch_full_movie),
-	AC(TASEdit_branch_only_when_rec),
-	AC(TASEdit_view_branches_tree),
-	AC(TASEdit_branch_scr_hud),
-	AC(TASEdit_restore_position),
-	AC(TASEdit_superimpose),
-	AC(TASEdit_enable_hot_changes),
-	AC(TASEdit_greenzone_capacity),
-	AC(TasEdit_undo_levels),
-	AC(TASEdit_autosave_period),
-	AC(TASEdit_jump_to_undo),
-	AC(TASEdit_follow_note_context),
-	AC(TASEdit_last_export_type),
-	AC(TASEdit_last_export_subtitles),
-	AC(TASEdit_savecompact_binary),
-	AC(TASEdit_savecompact_markers),
-	AC(TASEdit_savecompact_bookmarks),
-	AC(TASEdit_savecompact_greenzone),
-	AC(TASEdit_savecompact_history),
-	AC(TASEdit_savecompact_list),
-	AC(TASEdit_savecompact_selection),
-	AC(TASEdit_findnote_matchcase),
-	AC(TASEdit_findnote_search_up),
+	AC(taseditor_config.wndx),
+	AC(taseditor_config.wndy),
+	AC(taseditor_config.findnote_wndx),
+	AC(taseditor_config.findnote_wndy),
+	AC(taseditor_config.follow_playback),
+	AC(taseditor_config.turbo_seek),
+	AC(taseditor_config.show_lag_frames),
+	AC(taseditor_config.show_markers),
+	AC(taseditor_config.show_branch_screenshots),
+	AC(taseditor_config.show_branch_tooltips),
+	AC(taseditor_config.bind_markers),
+	AC(taseditor_config.empty_marker_notes),
+	AC(taseditor_config.combine_consecutive_rec),
+	AC(taseditor_config.use_1p_rec),
+	AC(taseditor_config.columnset_by_keys),
+	AC(taseditor_config.keyboard_for_listview),
+	AC(taseditor_config.superimpose_affects_paste),
+	AC(taseditor_config.branch_full_movie),
+	AC(taseditor_config.branch_only_when_rec),
+	AC(taseditor_config.view_branches_tree),
+	AC(taseditor_config.branch_scr_hud),
+	AC(taseditor_config.restore_position),
+	AC(taseditor_config.superimpose),
+	AC(taseditor_config.enable_auto_function),
+	AC(taseditor_config.enable_hot_changes),
+	AC(taseditor_config.greenzone_capacity),
+	AC(taseditor_config.undo_levels),
+	AC(taseditor_config.autosave_period),
+	AC(taseditor_config.jump_to_undo),
+	AC(taseditor_config.follow_note_context),
+	AC(taseditor_config.last_export_type),
+	AC(taseditor_config.last_export_subtitles),
+	AC(taseditor_config.savecompact_binary),
+	AC(taseditor_config.savecompact_markers),
+	AC(taseditor_config.savecompact_bookmarks),
+	AC(taseditor_config.savecompact_greenzone),
+	AC(taseditor_config.savecompact_history),
+	AC(taseditor_config.savecompact_list),
+	AC(taseditor_config.savecompact_selection),
+	AC(taseditor_config.findnote_matchcase),
+	AC(taseditor_config.findnote_search_up),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),

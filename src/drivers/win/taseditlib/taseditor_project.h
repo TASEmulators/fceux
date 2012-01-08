@@ -1,10 +1,12 @@
-//Specification file for the TASEdit Project class
+//Specification file for the TASEDITOR_PROJECT class
 #include <set>
 typedef std::set<int> SelectionFrames;
 
 #include <time.h>
 #include "movie.h"
 #include "../common.h"
+#include "taseditor_config.h"
+#include "taseditor_window.h"
 #include "markers.h"
 #include "inputsnapshot.h"
 #include "inputhistory.h"
@@ -12,16 +14,25 @@ typedef std::set<int> SelectionFrames;
 #include "recorder.h"
 #include "greenzone.h"
 #include "bookmarks.h"
-#include "tasedit_list.h"
-#include "tasedit_sel.h"
-#include "screenshot_display.h"
+#include "taseditor_list.h"
+#include "taseditor_lua.h"
+#include "taseditor_sel.h"
+#include "popup_display.h"
 
 #define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds
 
-class TASEDIT_PROJECT
+#define MARKERS_SAVED 1
+#define BOOKMARKS_SAVED 2
+#define GREENZONE_SAVED 4
+#define HISTORY_SAVED 8
+#define LIST_SAVED 16
+#define SELECTION_SAVED 32
+#define ALL_SAVED MARKERS_SAVED|BOOKMARKS_SAVED|GREENZONE_SAVED|HISTORY_SAVED|LIST_SAVED|SELECTION_SAVED
+
+class TASEDITOR_PROJECT
 {
 public:
-	TASEDIT_PROJECT();
+	TASEDITOR_PROJECT();
 	void init();
 	void reset();
 	void update();

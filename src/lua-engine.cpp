@@ -39,14 +39,9 @@
 #include "fceulua.h"
 
 #ifdef WIN32
-#include "drivers/win/taseditlib/taseditproj.h"
-extern INPUT_HISTORY history;
-extern MARKERS current_markers;
-extern BOOKMARKS bookmarks;
-extern RECORDER recorder;
-extern PLAYBACK playback;
-extern TASEDIT_LIST tasedit_list;
-extern TASEDIT_SELECTION selection;
+#include "drivers/win/common.h"
+#include "drivers/win/taseditlib/taseditor_lua.h"
+extern TASEDITOR_LUA taseditor_lua;
 #endif
 
 extern "C"
@@ -127,6 +122,7 @@ extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, L
 extern void PrintToWindowConsole(int hDlgAsInt, const char* str);
 extern void WinLuaOnStart(int hDlgAsInt);
 extern void WinLuaOnStop(int hDlgAsInt);
+void TaseditorUpdateManualFunctionStatus();
 #endif
 
 static lua_State *L;
@@ -200,6 +196,9 @@ static const char* luaCallIDStrings [] =
 	"CALL_BEFOREEXIT",
 	"CALL_BEFORESAVE",
 	"CALL_AFTERLOAD",
+	"CALL_TASEDITOR_AUTO",
+	"CALL_TASEDITOR_MANUAL",
+
 };
 
 //make sure we have the right number of strings
@@ -237,6 +236,9 @@ static void FCEU_LuaOnStop() {
 	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
 	FCEUD_TurboOff();	//Turn off turbo
+#ifdef WIN32
+	TaseditorUpdateManualFunctionStatus();
+#endif
 }
 
 
@@ -374,6 +376,12 @@ static int emu_frameadvance(lua_State *L) {
 	// It's actually rather disappointing...
 }
 
+// bool emu.paused() (getter)
+static int emu_paused(lua_State *L)
+{
+	lua_pushboolean(L, FCEUI_EmulationPaused() != 0);
+	return 1;
+}
 
 // emu.pause()
 //
@@ -1882,6 +1890,32 @@ void ForceExecuteLuaFrameFunctions()
 	FCEU_LuaFrameBoundary();
 	CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+}
+
+void TaseditorAutoFunction()
+{
+	CallRegisteredLuaFunctions(LUACALL_TASEDITOR_AUTO);
+}
+
+void TaseditorManualFunction()
+{
+	CallRegisteredLuaFunctions(LUACALL_TASEDITOR_MANUAL);
+}
+
+void TaseditorUpdateManualFunctionStatus()
+{
+#ifdef WIN32
+	if (L)
+	{
+		// check if LUACALL_TASEDITOR_MANUAL function is not nil
+		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
+		if (lua_isfunction(L, -1))
+			taseditor_lua.EnableRunFunction();
+		else 
+			taseditor_lua.DisableRunFunction();
+		lua_pop(L, 1);
+	} else taseditor_lua.DisableRunFunction();
+#endif
 }
 
 // Not for the signed versions though
@@ -4261,10 +4295,42 @@ static int sound_get(lua_State *L)
 
 // TAS Editor functions library
 
+// bool taseditor.registerauto()
+static int taseditor_registerauto(lua_State *L)
+{
+	if (!lua_isnil(L,1))
+		luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_settop(L,1);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_AUTO]);
+	lua_insert(L,1);
+	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_AUTO]);
+	//StopScriptIfFinished(luaStateToUIDMap[L]);
+	return 1;
+}
+
+// bool taseditor.registermanual()
+static int taseditor_registermanual(lua_State *L)
+{
+	if (!lua_isnil(L,1))
+		luaL_checktype(L, 1, LUA_TFUNCTION);
+	lua_settop(L,1);
+	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
+	lua_insert(L,1);
+	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
+#ifdef WIN32
+	TaseditorUpdateManualFunctionStatus();
+#endif
+	return 1;
+}
+
 // bool taseditor.engaged()
 static int taseditor_engaged(lua_State *L)
 {
-	lua_pushboolean(L, FCEUMOV_Mode(MOVIEMODE_TASEDIT));
+#ifdef WIN32
+	lua_pushboolean(L, taseditor_lua.engaged());
+#else
+	lua_pushboolean(L, false);
+#endif
 	return 1;
 }
 
@@ -4272,15 +4338,10 @@ static int taseditor_engaged(lua_State *L)
 static int taseditor_markedframe(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int frame = luaL_checkinteger(L, 1);
-		lua_pushboolean(L, current_markers.GetMarker(frame) != 0);
-	} else
+	lua_pushboolean(L, taseditor_lua.markedframe(luaL_checkinteger(L, 1)));
+#else
+	lua_pushboolean(L, false);
 #endif
-	{
-		lua_pushboolean(L, false);
-	}
 	return 1;
 }
 
@@ -4288,15 +4349,10 @@ static int taseditor_markedframe(lua_State *L)
 static int taseditor_getmarker(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int frame = luaL_checkinteger(L, 1);
-		lua_pushinteger(L, current_markers.GetMarkerUp(frame));
-	} else
+	lua_pushinteger(L, taseditor_lua.getmarker(luaL_checkinteger(L, 1)));
+#else
+	lua_pushinteger(L, -1);
 #endif
-	{
-		lua_pushinteger(L, -1);
-	}
 	return 1;
 }
 
@@ -4304,27 +4360,10 @@ static int taseditor_getmarker(lua_State *L)
 static int taseditor_setmarker(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int frame = luaL_checkinteger(L, 1);
-		int marker_id = current_markers.GetMarker(frame);
-		if(!marker_id)
-		{
-			marker_id = current_markers.SetMarker(frame);
-			if (marker_id)
-			{
-				// new marker was created - register changes in TAS Editor
-				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
-				tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-			}
-		}
-		lua_pushinteger(L, marker_id);
-	} else
+	lua_pushinteger(L, taseditor_lua.setmarker(luaL_checkinteger(L, 1)));
+#else
+	lua_pushinteger(L, -1);
 #endif
-	{
-		lua_pushinteger(L, -1);
-	}
 	return 1;
 }
 
@@ -4332,18 +4371,7 @@ static int taseditor_setmarker(lua_State *L)
 static int taseditor_clearmarker(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int frame = luaL_checkinteger(L, 1);
-		if (current_markers.GetMarker(frame))
-		{
-			current_markers.ClearMarker(frame);
-			// marker was deleted - register changes in TAS Editor
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_UNSET, frame);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			tasedit_list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-		}
-	}
+	taseditor_lua.clearmarker(luaL_checkinteger(L, 1));
 #endif
 	return 0;
 }
@@ -4352,15 +4380,10 @@ static int taseditor_clearmarker(lua_State *L)
 static int taseditor_getnote(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int index = luaL_checkinteger(L, 1);
-		lua_pushstring(L, current_markers.GetNote(index).c_str());
-	} else
+	lua_pushstring(L, taseditor_lua.getnote(luaL_checkinteger(L, 1)));
+#else
+	lua_pushnil(L);
 #endif
-	{
-		lua_pushnil(L);
-	}
 	return 1;
 }
 
@@ -4368,19 +4391,7 @@ static int taseditor_getnote(lua_State *L)
 static int taseditor_setnote(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		int index = luaL_checkinteger(L, 1);
-		char newtext[MAX_NOTE_LEN];
-		strncpy(newtext, luaL_checkstring(L, 2), MAX_NOTE_LEN - 1);
-		if (strcmp(current_markers.GetNote(index).c_str(), newtext))
-		{
-			// text differs from old note - rename
-			current_markers.SetNote(index, newtext);
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, current_markers.GetMarkerFrame(index));
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-		}
-	}
+	taseditor_lua.setnote(luaL_checkinteger(L, 1), luaL_checkstring(L, 2));
 #endif
 	return 0;
 }
@@ -4389,14 +4400,10 @@ static int taseditor_setnote(lua_State *L)
 static int taseditor_getcurrentbranch(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		lua_pushinteger(L, bookmarks.GetCurrentBranch());
-	} else
+	lua_pushinteger(L, taseditor_lua.getcurrentbranch());
+#else
+	lua_pushinteger(L, -1);
 #endif
-	{
-		lua_pushinteger(L, -1);
-	}
 	return 1;
 }
 
@@ -4404,14 +4411,10 @@ static int taseditor_getcurrentbranch(lua_State *L)
 static int taseditor_getrecordermode(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		lua_pushstring(L, recorder.GetRecordingMode());
-	} else
+	lua_pushstring(L, taseditor_lua.getrecordermode());
+#else
+	lua_pushnil(L);
 #endif
-	{
-		lua_pushnil(L);
-	}
 	return 1;
 }
 
@@ -4419,16 +4422,34 @@ static int taseditor_getrecordermode(lua_State *L)
 static int taseditor_getplaybacktarget(lua_State *L)
 {
 #ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
-	{
-		lua_pushinteger(L, playback.pause_frame - 1);
-	} else
+	lua_pushinteger(L, taseditor_lua.getplaybacktarget());
+#else
+	lua_pushinteger(L, -1);
 #endif
-	{
-		lua_pushinteger(L, -1);
-	}
 	return 1;
 }
+
+// taseditor.setplayback(int frame)
+static int taseditor_setplayback(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.setplayback(luaL_checkinteger(L, 1));
+#endif
+	return 0;
+}
+
+// taseditor.stopseeking()
+static int taseditor_stopseeking(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.stopseeking();
+#endif
+	return 0;
+}
+
+
+
+
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 	const char *str = luaL_checkstring(L, 1);
@@ -5018,6 +5039,7 @@ static const struct luaL_reg emulib [] = {
 	{"softreset", emu_softreset},
 	{"speedmode", emu_speedmode},
 	{"frameadvance", emu_frameadvance},
+	{"paused", emu_paused},
 	{"pause", emu_pause},
 	{"unpause", emu_unpause},
 	{"exec_count", emu_exec_count},
@@ -5188,6 +5210,8 @@ static const struct luaL_reg soundlib[] = {
 
 static const struct luaL_reg taseditorlib[] = {
 	
+	{"registerauto", taseditor_registerauto},
+	{"registermanual", taseditor_registermanual},
 	{"engaged", taseditor_engaged},
 	{"markedframe", taseditor_markedframe},
 	{"getmarker", taseditor_getmarker},
@@ -5198,6 +5222,8 @@ static const struct luaL_reg taseditorlib[] = {
 	{"getcurrentbranch", taseditor_getcurrentbranch},
 	{"getrecordermode", taseditor_getrecordermode},
 	{"getplaybacktarget", taseditor_getplaybacktarget},
+	{"setplayback", taseditor_setplayback},
+	{"stopseeking", taseditor_stopseeking},
 	{NULL,NULL}
 };
 
