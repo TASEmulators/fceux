@@ -1,4 +1,4 @@
-
+08-jan-2011 - prg - switched advance one frame key from "\" to "`"
 27-dec-2011 - AnS - Tasedit: "About" window
 27-dec-2011 - AnS - Tasedit: searching Markers with similar Notes ("Similar" and "More" buttons)
 26-dec-2011 - AnS - Tasedit: Find Note dialog (Ctrl-F)

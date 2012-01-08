@@ -337,7 +337,7 @@ InitConfig()
 		SDLK_PAUSE, // pause
 		SDLK_MINUS, // speed++
 		SDLK_EQUALS, // speed--
-		SDLK_BACKSLASH, //frame advnace
+		SDLK_BACKQUOTE, //frame advnace
 		SDLK_TAB, // turbo
 		SDLK_COMMA, // toggle input display
 		SDLK_q, // toggle movie RW
