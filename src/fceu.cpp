@@ -53,7 +53,7 @@
 #ifdef WIN32
 #include "drivers/win/pref.h"
 
-#include "drivers/win/taseditlib/greenzone.h"
+#include "drivers/win/taseditor/greenzone.h"
 extern GREENZONE greenzone;
 #endif
 

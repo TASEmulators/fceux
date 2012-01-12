@@ -40,7 +40,7 @@
 
 #ifdef WIN32
 #include "drivers/win/common.h"
-#include "drivers/win/taseditlib/taseditor_lua.h"
+#include "drivers/win/taseditor/taseditor_lua.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
 

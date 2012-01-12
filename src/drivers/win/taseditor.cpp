@@ -1,5 +1,5 @@
 #include <fstream>
-#include "taseditlib/taseditor_project.h"
+#include "taseditor/taseditor_project.h"
 #include "utils/xstring.h"
 #include "keyboard.h"
 #include "joystick.h"
@@ -848,7 +848,6 @@ bool ExitTasEditor()
 	history.free();
 	playback.SeekingStop();
 	selection.free();
-	splicer.free();
 
 	ClearTaseditInput();
 	// restore "eoptions"

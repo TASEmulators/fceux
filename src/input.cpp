@@ -52,10 +52,10 @@
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
 
-#include "./drivers/win/taseditlib/taseditor_window.h"
-#include "./drivers/win/taseditlib/markers.h"
-#include "./drivers/win/taseditlib/inputsnapshot.h"
-#include "./drivers/win/taseditlib/bookmarks.h"
+#include "./drivers/win/taseditor/taseditor_window.h"
+#include "./drivers/win/taseditor/markers.h"
+#include "./drivers/win/taseditor/inputsnapshot.h"
+#include "./drivers/win/taseditor/bookmarks.h"
 extern bool Taseditor_rewind_now;
 extern BOOKMARKS bookmarks;
 extern TASEDITOR_WINDOW taseditor_window;

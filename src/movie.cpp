@@ -40,8 +40,8 @@
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 
-#include "./drivers/win/taseditlib/playback.h"
-#include "./drivers/win/taseditlib/recorder.h"
+#include "./drivers/win/taseditor/playback.h"
+#include "./drivers/win/taseditor/recorder.h"
 extern PLAYBACK playback;
 extern RECORDER recorder;
 #endif

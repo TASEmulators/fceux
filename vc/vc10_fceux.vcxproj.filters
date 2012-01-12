@@ -25,9 +25,6 @@
     <Filter Include="drivers\win\res">
       <UniqueIdentifier>{008e1f62-e23f-4235-bee7-a45a466678e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="drivers\win\taseditlib">
-      <UniqueIdentifier>{cfac36a2-cdfd-4c0a-be8e-353b1303a909}</UniqueIdentifier>
-    </Filter>
     <Filter Include="drivers\win\zlib">
       <UniqueIdentifier>{7279627e-c72f-441f-bb8b-48ef8412f051}</UniqueIdentifier>
     </Filter>
@@ -51,6 +48,9 @@
     </Filter>
     <Filter Include="pix">
       <UniqueIdentifier>{19ba9ddc-37b7-4962-a3d7-9eb69929a8dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drivers\win\taseditor">
+      <UniqueIdentifier>{cfac36a2-cdfd-4c0a-be8e-353b1303a909}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -904,56 +904,56 @@
     <ClCompile Include="..\src\boards\onebus.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\inputhistory.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\inputsnapshot.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\markers.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_config.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_list.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_lua.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_project.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_sel.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_window.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\popup_display.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditlib\splicer.cpp">
-      <Filter>drivers\win\taseditlib</Filter>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_config.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_list.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_lua.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_project.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_sel.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_window.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\recorder.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\splicer.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\bookmark.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\bookmarks.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\inputhistory.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\inputsnapshot.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\playback.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\popup_display.cpp">
+      <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1393,53 +1393,56 @@
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\bookmark.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\bookmarks.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\inputsnapshot.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\markers.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\playback.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_window.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_config.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_list.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_lua.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_project.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_sel.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\popup_display.h">
-      <Filter>drivers\win\taseditlib</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditlib\splicer.h">
-      <Filter>drivers\win\taseditlib</Filter>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_config.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_list.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_lua.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_project.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_sel.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_window.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\recorder.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\splicer.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\bookmark.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\bookmarks.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\inputhistory.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\inputsnapshot.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\markers.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\playback.h">
+      <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

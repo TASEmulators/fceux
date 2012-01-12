@@ -70,7 +70,7 @@
 #include "video.h"
 #include "utils/xstring.h"
 #include <string.h>
-#include "taseditlib/taseditor_window.h"
+#include "taseditor/taseditor_window.h"
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox

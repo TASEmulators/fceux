@@ -38,7 +38,7 @@
 #include "movieoptions.h"
 #include "ramwatch.h"
 #include "debugger.h"
-#include "taseditlib/taseditor_config.h"
+#include "taseditor/taseditor_config.h"
 
 #include "../../state.h"	//adelikat: For bool backupSavestates
 
