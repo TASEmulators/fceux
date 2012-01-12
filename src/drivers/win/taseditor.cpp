@@ -1,14 +1,12 @@
 #include <fstream>
-#include <sstream>
 #include "taseditlib/taseditor_project.h"
 #include "utils/xstring.h"
 #include "keyboard.h"
 #include "joystick.h"
 #include "main.h"			// for GetRomName
-#include "tasedit.h"
+#include "taseditor.h"
 #include "version.h"
 #include <Shlwapi.h>		// for StrStrI
-#include "Win32InputBox.h"
 
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -36,7 +34,9 @@ POPUP_DISPLAY popup_display;
 TASEDITOR_LIST list;
 TASEDITOR_LUA taseditor_lua;
 TASEDITOR_SELECTION selection;
+SPLICER splicer;
 
+extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 // temporarily saved FCEUX config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -48,11 +48,8 @@ extern void UpdateCheckedMenuItems();
 extern void TaseditorAutoFunction();
 extern void TaseditorManualFunction();
 
-// resources
-char buttonNames[NUM_JOYPAD_BUTTONS][2] = {"A", "B", "S", "T", "U", "D", "L", "R"};
-
 // enterframe function
-void UpdateTasEdit()
+void UpdateTasEditor()
 {
 	if(!taseditor_window.hwndTasEditor)
 	{
@@ -61,7 +58,7 @@ void UpdateTasEdit()
 		return;
 	}
 
-	// update all modules that need to be updated preiodically
+	// update all modules that need to be updated every frame
 	recorder.update();
 	list.update();
 	current_markers.update();
@@ -70,6 +67,7 @@ void UpdateTasEdit()
 	bookmarks.update();
 	popup_display.update();
 	selection.update();
+	splicer.update();
 	history.update();
 	project.update();
 	
@@ -80,6 +78,54 @@ void UpdateTasEdit()
 	{
 		TaseditorManualFunction();
 		must_call_manual_lua_function = false;
+	}
+}
+
+void SingleClick(LPNMITEMACTIVATE info)
+{
+	int row_index = info->iItem;
+	if(row_index == -1) return;
+	int column_index = info->iSubItem;
+
+	if(column_index == COLUMN_ICONS)
+	{
+		// click on the "icons" column - jump to the frame
+		selection.ClearSelection();
+		playback.jump(row_index);
+	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+	{
+		// click on the "frame number" column - set marker if clicked with Alt
+		if (info->uKeyFlags & LVKF_ALT)
+		{
+			// reverse MARKER_FLAG_BIT in pointed frame
+			current_markers.ToggleMarker(row_index);
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			if (current_markers.GetMarker(row_index))
+				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
+			else
+				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
+			list.RedrawRow(row_index);
+		}
+	}
+	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+	{
+		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
+	}
+}
+void DoubleClick(LPNMITEMACTIVATE info)
+{
+	int row_index = info->iItem;
+	if(row_index == -1) return;
+	int column_index = info->iSubItem;
+
+	if(column_index == COLUMN_ICONS || column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+	{
+		// double click sends playback to the frame
+		selection.ClearSelection();
+		playback.jump(row_index);
+	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+	{
+		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
 	}
 }
 
@@ -119,234 +165,6 @@ void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
 	}
 	
-}
-
-void SingleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS)
-	{
-		// click on the "icons" column - jump to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// click on the "frame number" column - set marker if clicked with Alt
-		if (info->uKeyFlags & LVKF_ALT)
-		{
-			// reverse MARKER_FLAG_BIT in pointed frame
-			current_markers.ToggleMarker(row_index);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			if (current_markers.GetMarker(row_index))
-				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
-			else
-				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-			list.RedrawRow(row_index);
-		}
-	}
-	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-
-void DoubleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS || column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// double click sends playback to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-
-void CloneFrames()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	int frames = current_selection->size();
-	if (!frames) return;
-
-	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	//insert frames before each selection, but consecutive selection lines are accounted as single region
-	frames = 1;
-	SelectionFrames::reverse_iterator next_it;
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
-	{
-		next_it = it;
-		next_it++;
-		if (next_it == current_selection_rend || (int)*next_it < ((int)*it - 1))
-		{
-			// end of current region
-			currMovieData.cloneRegion(*it, frames);
-			if (taseditor_config.bind_markers)
-				current_markers.insertEmpty(*it, frames);
-			frames = 1;
-		} else frames++;
-	}
-	if (taseditor_config.bind_markers)
-	{
-		current_markers.update();
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin()));
-}
-
-void InsertFrames()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	int frames = current_selection->size();
-	if (!frames) return;
-
-	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
-	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-
-	//insert frames before each selection, but consecutive selection lines are accounted as single region
-	frames = 1;
-	SelectionFrames::reverse_iterator next_it;
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
-	{
-		next_it = it;
-		next_it++;
-		if (next_it == current_selection_rend || (int)*next_it < ((int)*it - 1))
-		{
-			// end of current region
-			currMovieData.insertEmpty(*it,frames);
-			if (taseditor_config.bind_markers)
-				current_markers.insertEmpty(*it,frames);
-			frames = 1;
-		} else frames++;
-	}
-	if (taseditor_config.bind_markers)
-	{
-		current_markers.update();
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin()));
-}
-
-void InsertNumFrames()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	int frames = current_selection->size();
-	if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditor_window.hwndTasEditor) == IDOK)
-	{
-		if (frames > 0)
-		{
-			int index;
-			if (current_selection->size())
-			{
-				// insert at selection
-				index = *current_selection->begin();
-				selection.ClearSelection();
-			} else
-			{
-				// insert at playback cursor
-				index = currFrameCounter;
-			}
-			currMovieData.insertEmpty(index, frames);
-			if (taseditor_config.bind_markers)
-			{
-				current_markers.insertEmpty(index, frames);
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
-			}
-			// select inserted rows
-			list.update();
-			selection.SetRegionSelection(index, index + frames - 1);
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, index));
-		}
-	}
-}
-
-void DeleteFrames()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
-
-	int start_index = *current_selection->begin();
-	int end_index = *current_selection->rbegin();
-	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
-	//delete frames on each selection, going backwards
-	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
-	{
-		currMovieData.records.erase(currMovieData.records.begin() + *it);
-		if (taseditor_config.bind_markers)
-			current_markers.EraseMarker(*it);
-	}
-	if (taseditor_config.bind_markers)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-	// check if user deleted all frames
-	if (!currMovieData.getNumRecords())
-		playback.StartFromZero();
-	// reduce list
-	list.update();
-
-	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
-	if (result >= 0)
-	{
-		greenzone.InvalidateAndCheck(result);
-	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
-	{
-		greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-	} else list.RedrawList();
-}
-
-void ClearFrames(SelectionFrames* current_selection)
-{
-	bool cut = true;
-	if (!current_selection)
-	{
-		cut = false;
-		current_selection = selection.MakeStrobe();
-		if (current_selection->size() == 0) return;
-	}
-
-	//clear input on each selected frame
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-	{
-		currMovieData.records[*it].clear();
-	}
-	if (cut)
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CUT, *current_selection->begin(), *current_selection->rbegin()));
-	else
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLEAR, *current_selection->begin(), *current_selection->rbegin()));
-}
-
-void Truncate()
-{
-	int frame = selection.GetCurrentSelectionBeginning();
-	if (frame < 0) frame = currFrameCounter;
-
-	if (currMovieData.getNumRecords() > frame+1)
-	{
-		currMovieData.truncateAt(frame+1);
-		if (taseditor_config.bind_markers)
-		{
-			current_markers.SetMarkersSize(frame+1);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-		}
-		list.update();
-		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
-		if (result >= 0)
-		{
-			greenzone.InvalidateAndCheck(result);
-		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
-		{
-			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-		} else list.RedrawList();
-	}
 }
 
 void ColumnSet(int column)
@@ -413,7 +231,7 @@ void FrameColumnSet()
 void InputColumnSet(int column)
 {
 	int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-	if (joy < 0 || joy >= NUM_JOYPADS) return;
+	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return;
 	int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 
 	SelectionFrames* current_selection = selection.MakeStrobe();
@@ -444,311 +262,124 @@ void InputColumnSet(int column)
 	list.SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
 }
 
-bool Copy(SelectionFrames* current_selection)
+BOOL CALLBACK NewProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (!current_selection)
+	static struct NewProjectParameters* p = NULL;
+	switch (message)
 	{
-		current_selection = selection.MakeStrobe();
-		if (current_selection->size() == 0) return false;
+		case WM_INITDIALOG:
+			p = (struct NewProjectParameters*)lParam;
+			p->input_type = GetInputType(currMovieData);
+			p->copy_current_input = p->copy_current_markers = false;
+			if (strlen(taseditor_config.last_author))
+			{
+				// convert UTF8 char* string to Unicode wstring
+				wchar_t saved_author_name[AUTHOR_MAX_LEN] = {0};
+				MultiByteToWideChar(CP_UTF8, 0, taseditor_config.last_author, -1, saved_author_name, AUTHOR_MAX_LEN);
+				p->author_name = saved_author_name;
+			} else
+			{
+				p->author_name = L"";
+			}
+			switch (p->input_type)
+			{
+			case INPUT_TYPE_1P:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_1PLAYER), BST_CHECKED);
+					break;
+				}
+			case INPUT_TYPE_2P:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_2PLAYERS), BST_CHECKED);
+					break;
+				}
+			case INPUT_TYPE_FOURSCORE:
+				{
+					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_FOURSCORE), BST_CHECKED);
+					break;
+				}
+			}
+			SendMessage(GetDlgItem(hwndDlg, IDC_EDIT_AUTHOR), CCM_SETUNICODEFORMAT, TRUE, 0);
+			SetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPCWSTR)(p->author_name.c_str()));
+			return 0;
+		case WM_COMMAND:
+			switch (LOWORD(wParam))
+			{
+				case IDC_RADIO_1PLAYER:
+					p->input_type = INPUT_TYPE_1P;
+					break;
+				case IDC_RADIO_2PLAYERS:
+					p->input_type = INPUT_TYPE_2P;
+					break;
+				case IDC_RADIO_FOURSCORE:
+					p->input_type = INPUT_TYPE_FOURSCORE;
+					break;
+				case IDC_COPY_INPUT:
+					p->copy_current_input ^= 1;
+					CheckDlgButton(hwndDlg, IDC_COPY_INPUT, p->copy_current_input?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case IDC_COPY_MARKERS:
+					p->copy_current_markers ^= 1;
+					CheckDlgButton(hwndDlg, IDC_COPY_MARKERS, p->copy_current_markers?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case IDOK:
+				{
+					// save author name in params and in taseditor_config (converted to multibyte char*)
+					wchar_t author_name[AUTHOR_MAX_LEN] = {0};
+					GetDlgItemTextW(hwndDlg, IDC_EDIT_AUTHOR, (LPWSTR)author_name, AUTHOR_MAX_LEN);
+					p->author_name = author_name;
+					if (p->author_name == L"")
+						taseditor_config.last_author[0] = 0;
+					else
+						// convert Unicode wstring to UTF8 char* string
+						WideCharToMultiByte(CP_UTF8, 0, (p->author_name).c_str(), -1, taseditor_config.last_author, AUTHOR_MAX_LEN, 0, 0);
+					EndDialog(hwndDlg, 1);
+					return TRUE;
+				}
+				case IDCANCEL:
+					EndDialog(hwndDlg, 0);
+					return TRUE;
+			}
+			break;
 	}
+	return FALSE; 
+}
 
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	int cframe = (*current_selection_begin) - 1;
-    try 
+void NewProject()
+{
+	if (!AskSaveProject()) return;
+
+	static struct NewProjectParameters params;
+	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditor_window.hwndTasEditor, NewProjectProc, (LPARAM)&params) > 0)
 	{
-		int range = (*current_selection->rbegin() - *current_selection_begin) + 1;
-
-		std::stringstream clipString;
-		clipString << "TAS " << range << std::endl;
-
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if (*it > cframe+1)
-			{
-				clipString << '+' << (*it-cframe) << '|';
-			}
-			cframe=*it;
-
-			int cjoy=0;
-			for (int joy = 0; joy < NUM_JOYPADS; ++joy)
-			{
-				while (currMovieData.records[*it].joysticks[joy] && cjoy<joy) 
-				{
-					clipString << '|';
-					++cjoy;
-				}
-				for (int bit=0; bit<NUM_JOYPAD_BUTTONS; ++bit)
-				{
-					if (currMovieData.records[*it].joysticks[joy] & (1<<bit))
-					{
-						clipString << buttonNames[bit];
-					}
-				}
-			}
-			clipString << std::endl;
-
-			if (!OpenClipboard(taseditor_window.hwndTasEditor))
-				return false;
-			EmptyClipboard();
-
-			HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, clipString.str().size()+1);
-
-			if (hGlobal==INVALID_HANDLE_VALUE)
-			{
-				CloseClipboard();
-				return false;
-			}
-			char *pGlobal = (char*)GlobalLock(hGlobal);
-			strcpy(pGlobal, clipString.str().c_str());
-			GlobalUnlock(hGlobal);
-			SetClipboardData(CF_TEXT, hGlobal);
-
-			CloseClipboard();
-		}
+		CreateCleanMovie();
 		
+		// apply selected options
+		SetInputType(currMovieData, params.input_type);
+		if (params.copy_current_input)
+			// copy input from current snapshot (from history)
+			history.GetCurrentSnapshot().toMovie(currMovieData);
+		if (!params.copy_current_markers)
+			current_markers.reset();
+		if(params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
+		
+		// reset Taseditor
+		greenzone.reset();
+		playback.reset();
+		playback.StartFromZero();
+		bookmarks.reset();
+		history.reset();
+		list.reset();
+		selection.reset();
+		splicer.reset();
+		recorder.reset();
+		popup_display.reset();
+		project.reset();
+		taseditor_window.RedrawTaseditor();
+		taseditor_window.UpdateCaption();
+		search_similar_marker = 0;
+		marker_note_edit = MARKER_NOTE_EDIT_NONE;
 	}
-	catch (std::bad_alloc e)
-	{
-		return false;
-	}
-	// copied successfully
-	selection.MemorizeClipboardSelection();
-	return true;
-}
-void Cut()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
-
-	if (Copy(current_selection))
-	{
-		ClearFrames(current_selection);
-	}
-}
-bool Paste()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-
-	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
-
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	bool result = false;
-	int pos = *current_selection_begin;
-	HANDLE hGlobal = GetClipboardData(CF_TEXT);
-	if (hGlobal)
-	{
-		char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
-
-		// TAS recording info starts with "TAS "
-		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
-		{
-			// Extract number of frames
-			int range;
-			sscanf (pGlobal+3, "%d", &range);
-			if (currMovieData.getNumRecords() < pos+range)
-			{
-				currMovieData.insertEmpty(currMovieData.getNumRecords(),pos+range-currMovieData.getNumRecords());
-				current_markers.update();
-			}
-
-			pGlobal = strchr(pGlobal, '\n');
-			int joy = 0;
-			uint8 new_buttons = 0;
-			std::vector<uint8> flash_joy(NUM_JOYPADS);
-			char* frame;
-			--pos;
-			while (pGlobal++ && *pGlobal!='\0')
-			{
-				// Detect skipped frames in paste
-				frame = pGlobal;
-				if (frame[0]=='+')
-				{
-					pos += atoi(frame+1);
-					while (*frame && *frame != '\n' && *frame!='|')
-						++frame;
-					if (*frame=='|') ++frame;
-				} else
-				{
-					++pos;
-				}
-				
-				if (!taseditor_config.superimpose_affects_paste || taseditor_config.superimpose == BST_UNCHECKED)
-				{
-					currMovieData.records[pos].joysticks[0] = 0;
-					currMovieData.records[pos].joysticks[1] = 0;
-					currMovieData.records[pos].joysticks[2] = 0;
-					currMovieData.records[pos].joysticks[3] = 0;
-				}
-				// read this frame input
-				joy = 0;
-				new_buttons = 0;
-				while (*frame && *frame != '\n' && *frame !='\r')
-				{
-					switch (*frame)
-					{
-					case '|': // Joystick mark
-						// flush buttons to movie data
-						if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
-						{
-							flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
-							currMovieData.records[pos].joysticks[joy] |= new_buttons;
-						} else
-						{
-							flash_joy[joy] |= new_buttons;		// highlight buttons that were added
-							currMovieData.records[pos].joysticks[joy] = new_buttons;
-						}
-						++joy;
-						new_buttons = 0;
-						break;
-					default:
-						for (int bit = 0; bit < NUM_JOYPAD_BUTTONS; ++bit)
-						{
-							if (*frame == buttonNames[bit][0])
-							{
-								new_buttons |= (1<<bit);
-								break;
-							}
-						}
-						break;
-					}
-					++frame;
-				}
-				// before going to next frame, flush buttons to movie data
-				if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
-				{
-					flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
-					currMovieData.records[pos].joysticks[joy] |= new_buttons;
-				} else
-				{
-					flash_joy[joy] |= new_buttons;		// highlight buttons that were added
-					currMovieData.records[pos].joysticks[joy] = new_buttons;
-				}
-				// find CRLF
-				pGlobal = strchr(pGlobal, '\n');
-			}
-
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *current_selection_begin));
-			// flash list header columns that were changed during paste
-			for (int joy = 0; joy < NUM_JOYPADS; ++joy)
-			{
-				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-				{
-					if (flash_joy[joy] & (1 << btn))
-						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
-				}
-			}
-			result = true;
-		}
-		GlobalUnlock(hGlobal);
-	}
-	CloseClipboard();
-	return result;
-}
-bool PasteInsert()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-
-	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
-
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	bool result = false;
-	int pos = *current_selection_begin;
-	HANDLE hGlobal = GetClipboardData(CF_TEXT);
-	if (hGlobal)
-	{
-		char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
-
-		// TAS recording info starts with "TAS "
-		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
-		{
-			// make sure markers have the same size as movie
-			current_markers.update();
-			// init inserted_set (for input history hot changes)
-			selection.GetInsertedSet().clear();
-
-			// Extract number of frames
-			int range;
-			sscanf (pGlobal+3, "%d", &range);
-
-
-			pGlobal = strchr(pGlobal, '\n');
-			char* frame;
-			int joy=0;
-			std::vector<uint8> flash_joy(NUM_JOYPADS);
-			--pos;
-			while (pGlobal++ && *pGlobal!='\0')
-			{
-				// Detect skipped frames in paste
-				frame = pGlobal;
-				if (frame[0]=='+')
-				{
-					pos += atoi(frame+1);
-					if (currMovieData.getNumRecords() < pos)
-					{
-						currMovieData.insertEmpty(currMovieData.getNumRecords(), pos - currMovieData.getNumRecords());
-						current_markers.update();
-					}
-					while (*frame && *frame != '\n' && *frame != '|')
-						++frame;
-					if (*frame=='|') ++frame;
-				} else
-				{
-					++pos;
-				}
-				
-				// insert new frame
-				currMovieData.insertEmpty(pos, 1);
-				if (taseditor_config.bind_markers) current_markers.insertEmpty(pos, 1);
-				selection.GetInsertedSet().insert(pos);
-
-				// read this frame input
-				int joy = 0;
-				while (*frame && *frame != '\n' && *frame !='\r')
-				{
-					switch (*frame)
-					{
-					case '|': // Joystick mark
-						++joy;
-						break;
-					default:
-						for (int bit = 0; bit < NUM_JOYPAD_BUTTONS; ++bit)
-						{
-							if (*frame == buttonNames[bit][0])
-							{
-								currMovieData.records[pos].joysticks[joy] |= (1<<bit);
-								flash_joy[joy] |= (1<<bit);		// highlight buttons
-								break;
-							}
-						}
-						break;
-					}
-					++frame;
-				}
-
-				pGlobal = strchr(pGlobal, '\n');
-			}
-			current_markers.update();
-			if (taseditor_config.bind_markers)
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTEINSERT, *current_selection_begin));
-			// flash list header columns that were changed during paste
-			for (int joy = 0; joy < NUM_JOYPADS; ++joy)
-			{
-				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-				{
-					if (flash_joy[joy] & (1 << btn))
-						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
-				}
-			}
-			result = true;
-		}
-		GlobalUnlock(hGlobal);
-	}
-	CloseClipboard();
-	return result;
 }
 
 void OpenProject()
@@ -782,32 +413,22 @@ bool LoadProject(char* fullname)
 {
 	marker_note_edit = MARKER_NOTE_EDIT_NONE;
 	SetFocus(list.hwndList);
-	// remember to update fourscore status
-	bool last_fourscore = currMovieData.fourscore;
 	// try to load project
 	if (project.load(fullname))
 	{
-		// update fourscore status
-		if (last_fourscore && !currMovieData.fourscore)
-		{
-			list.RemoveFourscore();
-			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-		} else if (!last_fourscore && currMovieData.fourscore)
-		{
-			list.AddFourscore();
-			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-		}
+		// update FCEUX input config
+		FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+		// add new file to Recent menu
 		taseditor_window.UpdateRecentProjectsArray(fullname);
-		taseditor_window.RedrawWindow();
-		taseditor_window.RedrawCaption();
+		taseditor_window.RedrawTaseditor();
+		taseditor_window.UpdateCaption();
 		search_similar_marker = 0;
 		return true;
 	} else
 	{
 		// failed to load
-		taseditor_window.RedrawWindow();
-		taseditor_window.RedrawCaption();
-		search_similar_marker = 0;
+		taseditor_window.RedrawTaseditor();
+		taseditor_window.UpdateCaption();
 		search_similar_marker = 0;
 		return false;
 	}
@@ -847,7 +468,7 @@ bool SaveProjectAs()
 		taseditor_window.UpdateRecentProjectsArray(nameo);
 	} else return false;
 	// saved successfully - remove * mark from caption
-	taseditor_window.RedrawCaption();
+	taseditor_window.UpdateCaption();
 	return true;
 }
 bool SaveProject()
@@ -855,7 +476,7 @@ bool SaveProject()
 	if (!project.save())
 		return SaveProjectAs();
 	else
-		taseditor_window.RedrawCaption();
+		taseditor_window.UpdateCaption();
 	return true;
 }
 
@@ -931,7 +552,7 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 
 void SaveCompact()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_SAVECOMPACT), taseditor_window.hwndTasEditor, SaveCompactProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_SAVECOMPACT), taseditor_window.hwndTasEditor, SaveCompactProc) > 0)
 	{
 		const char filter[] = "TAS Editor Projects (*.fm3)\0*.fm3\0All Files (*.*)\0*.*\0\0";
 		OPENFILENAME ofn;
@@ -1029,17 +650,17 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 			SetWindowPos(hwndDlg, 0, taseditor_config.wndx + 100, taseditor_config.wndy + 200, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			switch (taseditor_config.last_export_type)
 			{
-			case EXPORT_TYPE_1P:
+			case INPUT_TYPE_1P:
 				{
 					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_1PLAYER), BST_CHECKED);
 					break;
 				}
-			case EXPORT_TYPE_2P:
+			case INPUT_TYPE_2P:
 				{
 					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_2PLAYERS), BST_CHECKED);
 					break;
 				}
-			case EXPORT_TYPE_FOURSCORE:
+			case INPUT_TYPE_FOURSCORE:
 				{
 					Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_FOURSCORE), BST_CHECKED);
 					break;
@@ -1051,13 +672,13 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 			switch (LOWORD(wParam))
 			{
 				case IDC_RADIO_1PLAYER:
-					taseditor_config.last_export_type = EXPORT_TYPE_1P;
+					taseditor_config.last_export_type = INPUT_TYPE_1P;
 					break;
 				case IDC_RADIO_2PLAYERS:
-					taseditor_config.last_export_type = EXPORT_TYPE_2P;
+					taseditor_config.last_export_type = INPUT_TYPE_2P;
 					break;
 				case IDC_RADIO_FOURSCORE:
-					taseditor_config.last_export_type = EXPORT_TYPE_FOURSCORE;
+					taseditor_config.last_export_type = INPUT_TYPE_FOURSCORE;
 					break;
 				case IDC_NOTES_TO_SUBTITLES:
 					taseditor_config.last_export_subtitles ^= 1;
@@ -1077,7 +698,7 @@ BOOL CALLBACK ExportProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPara
 
 void Export()
 {
-	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_EXPORT), taseditor_window.hwndTasEditor, ExportProc) > 0)
+	if (DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_EXPORT), taseditor_window.hwndTasEditor, ExportProc) > 0)
 	{
 		const char filter[] = "FCEUX Movie File (*.fm2)\0*.fm2\0All Files (*.*)\0*.*\0\0";
 		char fname[2048];
@@ -1101,29 +722,9 @@ void Export()
 			// create copy of current movie data
 			MovieData temp_md = currMovieData;
 			// modify the copy according to selected type of export
-			switch (taseditor_config.last_export_type)
-			{
-			case EXPORT_TYPE_1P:
-				{
-					temp_md.fourscore = false;
-					temp_md.ports[0] = SI_GAMEPAD;
-					temp_md.ports[1] = SI_NONE;
-					break;
-				}
-			case EXPORT_TYPE_2P:
-				{
-					temp_md.fourscore = false;
-					temp_md.ports[0] = SI_GAMEPAD;
-					temp_md.ports[1] = SI_GAMEPAD;
-					break;
-				}
-			case EXPORT_TYPE_FOURSCORE:
-				{
-					temp_md.fourscore = true;
-					break;
-				}
-			}
+			SetInputType(temp_md, taseditor_config.last_export_type);
 			temp_md.loadFrameCount = -1;
+			// also add subtitles if needed
 			if (taseditor_config.last_export_subtitles)
 			{
 				// convert Marker Notes to Movie Subtitles
@@ -1151,9 +752,9 @@ void Export()
 	}
 }
 
-bool EnterTasEdit()
+bool EnterTasEditor()
 {
-	if(!FCEU_IsValidUI(FCEUI_TASEDIT)) return false;
+	if(!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
 	if(!taseditor_window.hwndTasEditor)
 	{
 		// start TAS Editor
@@ -1178,6 +779,7 @@ bool EnterTasEdit()
 			// init modules
 			list.init();
 			selection.init();
+			splicer.init();
 			playback.init();
 			greenzone.init();
 			recorder.init();
@@ -1192,7 +794,7 @@ bool EnterTasEdit()
 			{
 				// create new movie
 				FCEUI_StopMovie();
-				movieMode = MOVIEMODE_TASEDIT;
+				movieMode = MOVIEMODE_TASEDITOR;
 				CreateCleanMovie();
 				playback.StartFromZero();
 			} else
@@ -1205,17 +807,20 @@ bool EnterTasEdit()
 					currMovieData.savestate.clear();
 				}
 				FCEUI_StopMovie();
-				movieMode = MOVIEMODE_TASEDIT;
+				movieMode = MOVIEMODE_TASEDITOR;
 				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 				greenzone.TryDumpIncremental(lagFlag != 0);
 			}
-			// now create initiasl snapshot in history
-			history.reset();
+			// ensure that movie has correct set of ports/fourscore
+			SetInputType(currMovieData, GetInputType(currMovieData));
 			// force the input configuration stored in the movie to apply to FCEUX config
-			currMovieData.ports[0] = SI_GAMEPAD;
-			currMovieData.ports[1] = SI_GAMEPAD;
 			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-			
+			// reset some modules that need MovidData info
+			list.reset();
+			recorder.reset();
+			// create initial snapshot in history
+			history.reset();
+			// reset Taseditor variables
 			must_call_manual_lua_function = false;
 			marker_note_edit = MARKER_NOTE_EDIT_NONE;
 			search_similar_marker = 0;
@@ -1228,7 +833,7 @@ bool EnterTasEdit()
 	} else return true;
 }
 
-bool ExitTasEdit()
+bool ExitTasEditor()
 {
 	if (!AskSaveProject()) return false;
 
@@ -1243,6 +848,7 @@ bool ExitTasEdit()
 	history.free();
 	playback.SeekingStop();
 	selection.free();
+	splicer.free();
 
 	ClearTaseditInput();
 	// restore "eoptions"
@@ -1258,17 +864,54 @@ bool ExitTasEdit()
 	return true;
 }
 
+int GetInputType(MovieData& md)
+{
+	if (md.fourscore)
+		return INPUT_TYPE_FOURSCORE;
+	else if (md.ports[0] == md.ports[1] == SI_GAMEPAD)
+		return INPUT_TYPE_2P;
+	else
+		return INPUT_TYPE_1P;
+}
+void SetInputType(MovieData& md, int new_input_type)
+{
+	switch (new_input_type)
+	{
+		case INPUT_TYPE_1P:
+		{
+			md.fourscore = false;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_NONE;
+			break;
+		}
+		case INPUT_TYPE_2P:
+		{
+			md.fourscore = false;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_GAMEPAD;
+			break;
+		}
+		case INPUT_TYPE_FOURSCORE:
+		{
+			md.fourscore = true;
+			md.ports[0] = SI_GAMEPAD;
+			md.ports[1] = SI_GAMEPAD;
+			break;
+		}
+	}
+}
+
 void SetTaseditInput()
 {
 	// set "Background TAS Editor input"
-	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
-	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
 void ClearTaseditInput()
 {
 	// clear "Background TAS Editor input"
-	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDIT);
-	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDIT);
+	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
 
 void UpdateMarkerNote()

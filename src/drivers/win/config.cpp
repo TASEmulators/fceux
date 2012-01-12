@@ -72,6 +72,8 @@ extern int frameSkipAmt;
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern char* recent_projects[];
+// Hacky fix for taseditor_config.last_author
+char* taseditor_config_last_author;
 
 //window positions and sizes:
 extern int ChtPosX,ChtPosY;
@@ -299,6 +301,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(DesynchAutoFire),
 	AC(taseditor_config.wndx),
 	AC(taseditor_config.wndy),
+	AC(taseditor_config.wndwidth),
+	AC(taseditor_config.wndheight),
 	AC(taseditor_config.findnote_wndx),
 	AC(taseditor_config.findnote_wndy),
 	AC(taseditor_config.follow_playback),
@@ -338,6 +342,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(taseditor_config.savecompact_selection),
 	AC(taseditor_config.findnote_matchcase),
 	AC(taseditor_config.findnote_search_up),
+	ACS(taseditor_config_last_author),
 	AC(lagCounterDisplay),
 	AC(oldInputDisplay),
 	AC(movieSubtitles),
@@ -387,6 +392,8 @@ void SaveConfig(const char *filename)
 	{
 		ramWatchRecent[x] = rw_recent_files[x];
 	}
+	// Hacky fix for taseditor_config.last_author
+	taseditor_config_last_author = taseditor_config.last_author;
 	//-----------------------------------
 
 	SaveFCEUConfig(filename,fceuconfig);
@@ -414,6 +421,11 @@ void LoadConfig(const char *filename)
 			rw_recent_files[x][0] = 0;
 		}
 	}
+	// Hacky fix for taseditor_config.last_author
+	if (taseditor_config_last_author)
+		strncpy(taseditor_config.last_author, taseditor_config_last_author, AUTHOR_MAX_LEN-1);
+	else
+		taseditor_config.last_author[0] = 0;
 	//-----------------------------------
 }
 

@@ -1902,9 +1902,9 @@ void TaseditorManualFunction()
 	CallRegisteredLuaFunctions(LUACALL_TASEDITOR_MANUAL);
 }
 
+#ifdef WIN32
 void TaseditorUpdateManualFunctionStatus()
 {
-#ifdef WIN32
 	if (L)
 	{
 		// check if LUACALL_TASEDITOR_MANUAL function is not nil
@@ -1915,8 +1915,8 @@ void TaseditorUpdateManualFunctionStatus()
 			taseditor_lua.DisableRunFunction();
 		lua_pop(L, 1);
 	} else taseditor_lua.DisableRunFunction();
-#endif
 }
+#endif
 
 // Not for the signed versions though
 static int memory_readbytesigned(lua_State *L) {
@@ -2647,7 +2647,7 @@ int emu_emulating(lua_State *L) {
 // Returns "taseditor", "record", "playback", "finished" or nil
 int movie_mode(lua_State *L)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		lua_pushstring(L, "taseditor");
 	else if (FCEUMOV_IsRecording())
 		lua_pushstring(L, "record");

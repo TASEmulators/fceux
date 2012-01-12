@@ -19,7 +19,7 @@ void UpdateJoysticks(void);
 int DTestButtonJoy(ButtConfig *bc);
 
 #define JOYBACKACCESS_OLDSTYLE 1
-#define JOYBACKACCESS_TASEDIT 2
+#define JOYBACKACCESS_TASEDITOR 2
 void JoystickSetBackgroundAccessBit(int bit);
 void JoystickClearBackgroundAccessBit(int bit);
 void JoystickSetBackgroundAccess(bool on);

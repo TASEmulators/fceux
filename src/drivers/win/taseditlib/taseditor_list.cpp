@@ -5,6 +5,7 @@
 
 #pragma comment(lib, "UxTheme.lib")
 
+extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
 extern void ColumnSet(int column);
 
@@ -17,6 +18,8 @@ extern GREENZONE greenzone;
 extern INPUT_HISTORY history;
 extern MARKERS current_markers;
 extern TASEDITOR_SELECTION selection;
+
+extern int GetInputType(MovieData& md);
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -143,35 +146,12 @@ void TASEDITOR_LIST::init()
 	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
 	ListView_SetImageList(hwndList, himglist, LVSIL_SMALL);
-	// setup columns
+	// setup 0th column
 	LVCOLUMN lvc;
-	num_columns = 0;
 	// icons column
 	lvc.mask = LVCF_WIDTH;
-	lvc.cx = 13;
-	ListView_InsertColumn(hwndList, num_columns++, &lvc);
-	// frame number column
-	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-	lvc.fmt = LVCFMT_CENTER;
-	lvc.cx = 75;
-	lvc.pszText = "Frame#";
-	ListView_InsertColumn(hwndList, num_columns++, &lvc);
-	// pads columns
-	lvc.cx = 21;
-	// add pads 1 and 2
-	for (int joy = 0; joy < 2; ++joy)
-	{
-		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-		{
-			lvc.pszText = buttonNames[btn];
-			ListView_InsertColumn(hwndList, num_columns++, &lvc);
-		}
-	}
-	// add pads 3 and 4 and frame_number2
-	if (currMovieData.fourscore) AddFourscore();
-
-	reset();
-	//update();
+	lvc.cx = COLUMN_ICONS_WIDTH;
+	ListView_InsertColumn(hwndList, 0, &lvc);
 }
 void TASEDITOR_LIST::free()
 {
@@ -210,8 +190,36 @@ void TASEDITOR_LIST::free()
 void TASEDITOR_LIST::reset()
 {
 	next_header_update_time = 0;
-	// scroll to the beginning
-	ListView_EnsureVisible(hwndList, 0, FALSE);
+	// delete all columns except 0th
+	while (ListView_DeleteColumn(hwndList, 1)) {}
+	// setup columns
+	LVCOLUMN lvc;
+	num_columns = 1;
+	// frame number column
+	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
+	lvc.fmt = LVCFMT_CENTER;
+	lvc.cx = COLUMN_FRAMENUM_WIDTH;
+	lvc.pszText = "Frame#";
+	ListView_InsertColumn(hwndList, num_columns++, &lvc);
+	// pads columns
+	lvc.cx = COLUMN_BUTTON_WIDTH;
+	int num_joysticks = joysticks_per_frame[GetInputType(currMovieData)];
+	for (int joy = 0; joy < num_joysticks; ++joy)
+	{
+		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
+		{
+			lvc.pszText = buttonNames[btn];
+			ListView_InsertColumn(hwndList, num_columns++, &lvc);
+		}
+	}
+	// add 2nd frame number column if needed
+	if (num_columns >= NUM_COLUMNS_NEED_2ND_FRAMENUM)
+	{
+		
+		lvc.cx = COLUMN_FRAMENUM_WIDTH;
+		lvc.pszText = "Frame#";
+		ListView_InsertColumn(hwndList, num_columns++, &lvc);
+	}
 }
 void TASEDITOR_LIST::update()
 {
@@ -287,6 +295,7 @@ void TASEDITOR_LIST::save(EMUFILE *os, bool really_save)
 // returns true if couldn't load
 bool TASEDITOR_LIST::load(EMUFILE *is)
 {
+	reset();
 	update();
 	// read "LIST" string
 	char save_id[LIST_ID_LEN];
@@ -295,7 +304,8 @@ bool TASEDITOR_LIST::load(EMUFILE *is)
 	{
 		// string says to skip loading List
 		FCEU_printf("No list data in the file\n");
-		reset();
+		// scroll to the beginning
+		ListView_EnsureVisible(hwndList, 0, FALSE);
 		return false;
 	}
 	if (strcmp(list_save_id, save_id)) goto error;		// string is not valid
@@ -307,41 +317,11 @@ bool TASEDITOR_LIST::load(EMUFILE *is)
 	return false;
 error:
 	FCEU_printf("Error loading list data\n");
-	reset();
+	// scroll to the beginning
+	ListView_EnsureVisible(hwndList, 0, FALSE);
 	return true;
 }
 // ----------------------------------------------------------------------
-void TASEDITOR_LIST::AddFourscore()
-{
-	// add list columns
-	LVCOLUMN lvc;
-	lvc.mask = LVCF_WIDTH | LVCF_TEXT | LVCF_FMT;
-	lvc.fmt = LVCFMT_CENTER;
-	lvc.cx = 21;
-	for (int joy = 0; joy < 2; ++joy)
-	{
-		for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
-		{
-			lvc.pszText = buttonNames[btn];
-			ListView_InsertColumn(hwndList, num_columns++, &lvc);
-		}
-	}
-	// frame number column again
-	lvc.cx = 75;
-	lvc.pszText = "Frame#";
-	ListView_InsertColumn(hwndList, num_columns++, &lvc);
-	// change eoptions
-	FCEUI_SetInputFourscore(true);
-}
-void TASEDITOR_LIST::RemoveFourscore()
-{
-	// remove list columns
-	for (num_columns = COLUMN_FRAMENUM2; num_columns >= COLUMN_JOYPAD3_A; num_columns--)
-		ListView_DeleteColumn (hwndList, num_columns);
-	// change eoptions
-	FCEUI_SetInputFourscore(false);
-}
-
 void TASEDITOR_LIST::RedrawList()
 {
 	InvalidateRect(hwndList, 0, FALSE);
@@ -515,7 +495,7 @@ void TASEDITOR_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 			{
 				int joy = (item.iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int bit = (item.iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-				uint8 data = currMovieData.records[item.iItem].joysticks[joy];
+				uint8 data = ((int)currMovieData.records.size() > item.iItem) ? currMovieData.records[item.iItem].joysticks[joy] : 0;
 				if(data & (1<<bit))
 				{
 					item.pszText[0] = buttonNames[bit][0];

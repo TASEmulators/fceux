@@ -17,6 +17,7 @@ typedef std::set<int> SelectionFrames;
 #include "taseditor_list.h"
 #include "taseditor_lua.h"
 #include "taseditor_sel.h"
+#include "splicer.h"
 #include "popup_display.h"
 
 #define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds

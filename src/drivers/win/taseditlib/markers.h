@@ -1,6 +1,6 @@
 //Specification file for Markers class
 #define MARKERS_ID_LEN 8
-#define MAX_NOTE_LEN 80
+#define MAX_NOTE_LEN 100
 
 // constants for "Find Similar Note" algorithm (may need finetuning)
 #define KEYWORD_MIN_LEN 2

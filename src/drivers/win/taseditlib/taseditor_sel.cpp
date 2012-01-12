@@ -1,14 +1,15 @@
 //Implementation file of TASEDITOR_SELECTION class
 #include "taseditor_project.h"
-#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_LOWER
+#include "..\taseditor.h"		// only for MARKER_NOTE_EDIT_LOWER
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS current_markers;
 extern TASEDITOR_LIST list;
+extern SPLICER splicer;
 
 extern int marker_note_edit;
-
+extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern void UpdateMarkerNote();
 
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -17,15 +18,6 @@ WNDPROC selectionMarkerEdit_oldWndproc;
 // resources
 char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
-
-char selectionText[] = "Selection: ";
-char selectionEmptyText[] = "Selection: no";
-char numTextRow[] = "1 row, ";
-char numTextRows[] = " rows, ";
-char numTextColumn[] = "1 column";
-char numTextColumns[] = " columns";
-char clipboardText[] = "Clipboard: ";
-char clipboardEmptyText[] = "Clipboard: empty";
 char lowerMarkerText[] = "Marker ";
 
 TASEDITOR_SELECTION::TASEDITOR_SELECTION()
@@ -34,10 +26,8 @@ TASEDITOR_SELECTION::TASEDITOR_SELECTION()
 
 void TASEDITOR_SELECTION::init()
 {
-	hwndPrevMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_PREV_MARKER);
-	hwndNextMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_NEXT_MARKER);
-	hwndTextSelection = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_SELECTION);
-	hwndTextClipboard = GetDlgItem(taseditor_window.hwndTasEditor, IDC_TEXT_CLIPBOARD);
+	hwndPrevMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_PREV_MARKER);
+	hwndNextMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_NEXT_MARKER);
 	hwndSelectionMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER);
 	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
 	hwndSelectionMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER_EDIT);
@@ -47,10 +37,6 @@ void TASEDITOR_SELECTION::init()
 	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEdit, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
 
 	reset();
-
-	if (clipboard_selection.empty())
-		CheckClipboard();
-	RedrawTextClipboard();
 }
 void TASEDITOR_SELECTION::free()
 {
@@ -78,7 +64,6 @@ void TASEDITOR_SELECTION::reset_vars()
 {
 	old_prev_marker_button_state = prev_marker_button_state = false;
 	old_next_marker_button_state = next_marker_button_state = false;
-	must_redraw_text = true;
 	must_find_current_marker = true;
 }
 void TASEDITOR_SELECTION::update()
@@ -125,42 +110,6 @@ void TASEDITOR_SELECTION::update()
 		}
 	}
 
-	// redraw selection info text of needed
-	if (must_redraw_text)
-	{
-		if (CurrentSelection().size())
-		{
-			char new_text[100];
-			strcpy(new_text, selectionText);
-			char num[11];
-			// rows
-			if (CurrentSelection().size() > 1)
-			{
-				_itoa(CurrentSelection().size(), num, 10);
-				strcat(new_text, num);
-				strcat(new_text, numTextRows);
-			} else
-			{
-				strcat(new_text, numTextRow);
-			}
-			// columns
-			int columns;	// in future the number of columns will depend on selected columns
-			if (currMovieData.fourscore) columns = 32; else columns = 16;
-			if (columns > 1)
-			{
-				_itoa(columns, num, 10);
-				strcat(new_text, num);
-				strcat(new_text, numTextColumns);
-			} else
-			{
-				strcat(new_text, numTextColumn);
-			}
-			SetWindowText(hwndTextSelection, new_text);
-		} else
-			SetWindowText(hwndTextSelection, selectionEmptyText);
-		must_redraw_text = false;
-	}
-
 	// track changes of selection beginning
 	if (last_selection_beginning != GetCurrentSelectionBeginning())
 	{
@@ -179,39 +128,6 @@ void TASEDITOR_SELECTION::update()
 
 }
 
-void TASEDITOR_SELECTION::RedrawTextClipboard()
-{
-	if (clipboard_selection.size())
-	{
-		char new_text[100];
-		strcpy(new_text, clipboardText);
-		char num[11];
-		// rows
-		if (clipboard_selection.size() > 1)
-		{
-			_itoa(clipboard_selection.size(), num, 10);
-			strcat(new_text, num);
-			strcat(new_text, numTextRows);
-		} else
-		{
-			strcat(new_text, numTextRow);
-		}
-		// columns
-		int columns;	// in future the number of columns will depend on selected columns
-		if (currMovieData.fourscore) columns = 32; else columns = 16;
-		if (columns > 1)
-		{
-			_itoa(columns, num, 10);
-			strcat(new_text, num);
-			strcat(new_text, numTextColumns);
-		} else
-		{
-			strcat(new_text, numTextColumn);
-		}
-		SetWindowText(hwndTextClipboard, new_text);
-	} else
-		SetWindowText(hwndTextClipboard, clipboardEmptyText);
-}
 void TASEDITOR_SELECTION::RedrawMarker()
 {
 	// redraw marker num
@@ -275,7 +191,7 @@ void TASEDITOR_SELECTION::save(EMUFILE *os, bool really_save)
 			saveSelection(selections_history[(history_start_pos + i) % history_size], os);
 		}
 		// write clipboard_selection
-		saveSelection(clipboard_selection, os);
+		saveSelection(splicer.GetClipboardSelection(), os);
 	} else
 	{
 		// write "SELECTIOX" string
@@ -333,7 +249,7 @@ bool TASEDITOR_SELECTION::load(EMUFILE *is)
 		if (skiploadSelection(is)) goto error;
 	
 	// read clipboard_selection
-	if (loadSelection(clipboard_selection, is)) goto error;
+	if (loadSelection(splicer.GetClipboardSelection(), is)) goto error;
 	// all ok
 	EnforceSelectionToList();
 	reset_vars();
@@ -387,7 +303,7 @@ void TASEDITOR_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 		for(int i = info->iFrom; i <= info->iTo; ++i)
 			CurrentSelection().erase(i);
 
-	must_redraw_text = true;
+	splicer.must_redraw_selection_text = true;
 }
 void TASEDITOR_SELECTION::ItemChanged(NMLISTVIEW* info)
 {
@@ -420,7 +336,7 @@ void TASEDITOR_SELECTION::ItemChanged(NMLISTVIEW* info)
 			CurrentSelection().erase(item);
 	}
 
-	must_redraw_text = true;
+	splicer.must_redraw_selection_text = true;
 }
 // ----------------------------------------------------------
 void TASEDITOR_SELECTION::AddNewSelectionToHistory()
@@ -465,65 +381,6 @@ void TASEDITOR_SELECTION::redo()
 {
 	jump(history_cursor_pos + 1);
 }
-
-void TASEDITOR_SELECTION::MemorizeClipboardSelection()
-{
-	// copy currently strobed selection data to clipboard_selection
-	clipboard_selection = temp_selection;
-	RedrawTextClipboard();
-}
-void TASEDITOR_SELECTION::ReselectClipboard()
-{
-	if (clipboard_selection.size() == 0) return;
-
-	ClearSelection();
-	CurrentSelection() = clipboard_selection;
-	EnforceSelectionToList();
-	// also keep selection within list
-	update();
-}
-// retrieves some information from clipboard to clipboard_selection
-void TASEDITOR_SELECTION::CheckClipboard()
-{
-	if (OpenClipboard(taseditor_window.hwndTasEditor))
-	{
-		// check if clipboard contains TAS Editor input data
-		HANDLE hGlobal = GetClipboardData(CF_TEXT);
-		if (hGlobal)
-		{
-			clipboard_selection.clear();
-			int current_pos = -1;
-			char *pGlobal = (char*)GlobalLock((HGLOBAL)hGlobal);
-			// TAS recording info starts with "TAS "
-			if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
-			{
-				// Extract number of frames
-				int range;
-				sscanf (pGlobal+3, "%d", &range);
-				pGlobal = strchr(pGlobal, '\n');
-			
-				while (pGlobal++ && *pGlobal!='\0')
-				{
-					// Detect skipped frames in paste
-					char *frame = pGlobal;
-					if (frame[0]=='+')
-					{
-						current_pos += atoi(frame+1);
-						while (*frame && *frame != '\n' && *frame != '|')
-							++frame;
-						if (*frame=='|') ++frame;
-					} else
-						current_pos++;
-					clipboard_selection.insert(current_pos);
-					// skip input
-					pGlobal = strchr(pGlobal, '\n');
-				}
-			}
-			GlobalUnlock(hGlobal);
-		}
-		CloseClipboard();
-	}
-}
 // ----------------------------------------------------------
 void TASEDITOR_SELECTION::ClearSelection()
 {
@@ -558,7 +415,7 @@ void TASEDITOR_SELECTION::SetRegionSelection(int start, int end)
 	for (int i = start; i <= end; ++i)
 		ListView_SetItemState(list.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDITOR_SELECTION::SelectMidMarkers()
+void TASEDITOR_SELECTION::SelectBetweenMarkers()
 {
 	int center, upper_border, lower_border;
 	int upper_marker, lower_marker;
@@ -630,6 +487,18 @@ void TASEDITOR_SELECTION::SelectMidMarkers()
 		}
 	}
 }
+void TASEDITOR_SELECTION::ReselectClipboard()
+{
+	SelectionFrames clipboard_selection = splicer.GetClipboardSelection();
+	if (clipboard_selection.size() == 0) return;
+
+	ClearSelection();
+	CurrentSelection() = clipboard_selection;
+	EnforceSelectionToList();
+	// also keep selection within list
+	update();
+}
+
 // getters
 int TASEDITOR_SELECTION::GetCurrentSelectionSize()
 {
@@ -700,8 +569,4 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	return CallWindowProc(selectionMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
 }
-
-
-
-
 

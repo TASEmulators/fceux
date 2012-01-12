@@ -394,6 +394,12 @@ void MARKERS::FindSimilar(int offset)
 		MessageBox(taseditor_window.hwndTasEditor, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
 		return;
 	}
+	// check if there's at least one note (not counting zeroth note)
+	if (notes.size() <= 0)
+	{
+		MessageBox(taseditor_window.hwndTasEditor, "This project doesn't have any Markers!", "Find Similar Note", MB_OK);
+		return;
+	}
 
 	// 0 - divide source string into keywords
 	int totalSourceKeywords = 0;
@@ -564,9 +570,10 @@ void MARKERS::FindSimilar(int offset)
 	*/
 
 	// Send selection to the marker found
-	if (notePriority[notePriority.size()-1 - offset].second >= MIN_PRIORITY_TRESHOLD)
+	int index = notePriority.size()-1 - offset;
+	if (index >= 0 && notePriority[index].second >= MIN_PRIORITY_TRESHOLD)
 	{
-		int marker_id = notePriority[notePriority.size()-1 - offset].first;
+		int marker_id = notePriority[index].first;
 		int frame = GetMarkerFrame(marker_id);
 		if (frame >= 0)
 			selection.JumpToFrame(frame);

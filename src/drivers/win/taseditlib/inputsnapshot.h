@@ -1,11 +1,17 @@
 //Specification file for Input Snapshot class
+enum Input_types
+{
+	INPUT_TYPE_1P,
+	INPUT_TYPE_2P,
+	INPUT_TYPE_FOURSCORE,
 
-#define HOTCHANGE_BYTES_PER_JOY 4
+	NUM_SUPPORTED_INPUT_TYPES
+};
+
+#define BYTES_PER_JOYSTICK 1		// 1 byte per 1 joystick (8 buttons)
+#define HOTCHANGE_BYTES_PER_JOY 4		// 4 bytes per 8 buttons
+
 #define SNAPSHOT_DESC_MAX_LENGTH 100
-
-#define NUM_SUPPORTED_INPUT_TYPES 2
-#define NORMAL_2JOYPADS 0
-#define FOURSCORE 1
 
 class INPUT_SNAPSHOT
 {
@@ -43,7 +49,7 @@ public:
 	int GetHotChangeInfo(int frame, int absolute_button);
 
 	int size;							// in frames
-	int input_type;						// 0=normal, 1=fourscore; theoretically TAS Editor can support other input types, although some stuff may be unintentionally hardcoded
+	int input_type;						// theoretically TAS Editor can support any other input types
 	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
 	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
 	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...

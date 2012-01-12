@@ -1,4 +1,12 @@
-08-jan-2011 - prg - switched advance one frame key from "\" to "`"
+
+12-jan-2012 - AnS - Tasedit: File->New Project, INPUT_TYPE_1P
+12-jan-2012 - AnS - Tasedit: resizing TAS Editor window
+08-jan-2012 - prg - sdl: switched advance one frame key from "\" to "`"
+08-jan-2012 - AnS - changed default mapping of Frame Advance to Tilde
+08-jan-2012 - AnS - fixed recording bug where "length" tag appeared in fm2s
+08-jan-2012 - AnS - Tasedit: Lua panel; 5 new Lua functions
+08-jan-2012 - AnS - Tasedit: refactoring; Config->Silent autosave
+04-jan-2012 - AnS - Tasedit: colored marker captions; pale yellow and bright yellow when "Bind Markers" is off/on
 27-dec-2011 - AnS - Tasedit: "About" window
 27-dec-2011 - AnS - Tasedit: searching Markers with similar Notes ("Similar" and "More" buttons)
 26-dec-2011 - AnS - Tasedit: Find Note dialog (Ctrl-F)

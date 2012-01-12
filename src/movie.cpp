@@ -977,7 +977,7 @@ static int _currCommand = 0;
 void FCEUMOV_AddInputState()
 {
 #ifdef _WIN32
-	if(movieMode == MOVIEMODE_TASEDIT)
+	if(movieMode == MOVIEMODE_TASEDITOR)
 	{
 		// if movie length is less than currFrame, pad it with empty frames
 		if((int)currMovieData.records.size() <= currFrameCounter)
@@ -1108,7 +1108,7 @@ void FCEU_DrawMovies(uint8 *XBuf)
 		{
 			sprintf(counterbuf,"%d/%d (finished)",currFrameCounter,currMovieData.records.size());
 			color = 0x17; //Show red to get attention
-		} else if(movieMode == MOVIEMODE_TASEDIT)
+		} else if(movieMode == MOVIEMODE_TASEDITOR)
 		{
 			sprintf(counterbuf,"%d",currFrameCounter);
 		} else
@@ -1193,11 +1193,11 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
 			if (result == IDYES)
 			{
-				extern bool EnterTasEdit();
+				extern bool EnterTasEditor();
 				extern bool LoadProject(char* fullname);
 				char fullname[512];
 				strcpy(fullname, curMovieFilename);
-				if (EnterTasEdit())
+				if (EnterTasEditor())
 					LoadProject(fullname);
 			}
 			#else
@@ -1414,7 +1414,7 @@ void FCEUMOV_PreLoad(void)
 
 bool FCEUMOV_PostLoad(void)
 {
-	if(movieMode == MOVIEMODE_INACTIVE || movieMode == MOVIEMODE_TASEDIT)
+	if(movieMode == MOVIEMODE_INACTIVE || movieMode == MOVIEMODE_TASEDITOR)
 		return true;
 	else
 		return load_successful;
@@ -1509,7 +1509,7 @@ void FCEUI_MovieToggleReadOnly()
 
 void FCEUI_MoviePlayFromBeginning(void)
 {
-	if (movieMode == MOVIEMODE_TASEDIT)
+	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
 		movie_readonly = true;
 #ifdef WIN32

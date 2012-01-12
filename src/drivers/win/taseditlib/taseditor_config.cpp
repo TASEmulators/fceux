@@ -7,6 +7,8 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	// set default values
 	wndx = 0;
 	wndy = 0;
+	wndwidth = 0;
+	wndheight = 0;
 	findnote_wndx = 0;
 	findnote_wndy = 0;
 	follow_playback = true;
@@ -34,7 +36,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 	undo_levels = UNDO_LEVELS_DEFAULT;
 	autosave_period = AUTOSAVE_PERIOD_DEFAULT;
-	last_export_type = EXPORT_TYPE_1P;
+	last_export_type = 0;			// INPUT_TYPE_1P
 	last_export_subtitles = false;
 	savecompact_binary = true;
 	savecompact_markers = true;
@@ -47,6 +49,8 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_search_up = false;
 	enable_auto_function = true;
 	silent_autosave = true;
+	// empty name
+	last_author[0] = 0;
 
 }
 

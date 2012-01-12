@@ -14,6 +14,9 @@ extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
 extern TASEDITOR_LIST list;
 
+extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
+extern int GetInputType(MovieData& md);
+
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
 char modCaptions[41][20] = {" Init",
@@ -384,13 +387,16 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 	strcat(inp.description, modCaptions[MODTYPE_RECORD]);
 	char framenum[11];
 	// check if current snapshot is also Recording and maybe it is consecutive recording
-	if (taseditor_config.combine_consecutive_rec && input_snapshots[real_pos].mod_type == MODTYPE_RECORD && input_snapshots[real_pos].rec_end_frame+1 == frame_of_change && input_snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)
+	if (taseditor_config.combine_consecutive_rec
+		&& input_snapshots[real_pos].mod_type == MODTYPE_RECORD							// a) also Recording
+		&& input_snapshots[real_pos].rec_end_frame+1 == frame_of_change					// b) consecutive
+		&& input_snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)	// c) recorded same set of joysticks
 	{
 		// clone this snapshot and continue chain of recorded frames
 		inp.jump_frame = input_snapshots[real_pos].jump_frame;
 		inp.rec_end_frame = frame_of_change;
 		// add info which joypads were affected
-		int num = (inp.input_type + 1) * 2;	// = joypads_per_frame
+		int num = joysticks_per_frame[inp.input_type];
 		uint32 current_mask = 1;
 		for (int i = 0; i < num; ++i)
 		{
@@ -421,7 +427,7 @@ void INPUT_HISTORY::RegisterRecording(int frame_of_change)
 		// not consecutive - add new snapshot to history
 		inp.jump_frame = inp.rec_end_frame = frame_of_change;
 		// add info which joypads were affected
-		int num = (inp.input_type + 1) * 2;	// = joypads_per_frame
+		int num = joysticks_per_frame[inp.input_type];
 		uint32 current_mask = 1;
 		for (int i = 0; i < num; ++i)
 		{
@@ -447,7 +453,7 @@ void INPUT_HISTORY::RegisterImport(MovieData& md, char* filename)
 {
 	// create new input snapshot
 	INPUT_SNAPSHOT inp;
-	inp.init(md, taseditor_config.enable_hot_changes, (currMovieData.fourscore)?FOURSCORE:NORMAL_2JOYPADS);
+	inp.init(md, taseditor_config.enable_hot_changes, GetInputType(currMovieData));
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = inp.findFirstChange(input_snapshots[real_pos]);

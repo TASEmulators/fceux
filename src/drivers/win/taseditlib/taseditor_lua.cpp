@@ -18,7 +18,7 @@ TASEDITOR_LUA::TASEDITOR_LUA()
 
 void TASEDITOR_LUA::init()
 {
-	hwndRunFunction = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_RUN_MANUAL);
+	hwndRunFunction = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_RUN_MANUAL);
 	TaseditorUpdateManualFunctionStatus();
 	reset();
 }
@@ -45,13 +45,13 @@ void TASEDITOR_LUA::DisableRunFunction()
 // bool taseditor.engaged()
 bool TASEDITOR_LUA::engaged()
 {
-	return FCEUMOV_Mode(MOVIEMODE_TASEDIT);
+	return FCEUMOV_Mode(MOVIEMODE_TASEDITOR);
 }
 
 // bool taseditor.markedframe(int frame)
 bool TASEDITOR_LUA::markedframe(int frame)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return current_markers.GetMarker(frame) != 0;
 	else
 		return false;
@@ -60,7 +60,7 @@ bool TASEDITOR_LUA::markedframe(int frame)
 // int taseditor.getmarker(int frame)
 int TASEDITOR_LUA::getmarker(int frame)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return current_markers.GetMarkerUp(frame);
 	else
 		return -1;
@@ -69,7 +69,7 @@ int TASEDITOR_LUA::getmarker(int frame)
 // int taseditor.setmarker(int frame)
 int TASEDITOR_LUA::setmarker(int frame)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		int marker_id = current_markers.GetMarker(frame);
 		if(!marker_id)
@@ -91,7 +91,7 @@ int TASEDITOR_LUA::setmarker(int frame)
 // taseditor.clearmarker(int frame)
 void TASEDITOR_LUA::clearmarker(int frame)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		if (current_markers.GetMarker(frame))
 		{
@@ -107,7 +107,7 @@ void TASEDITOR_LUA::clearmarker(int frame)
 // string taseditor.getnote(int index)
 const char* TASEDITOR_LUA::getnote(int index)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return current_markers.GetNote(index).c_str();
 	else
 		return NULL;
@@ -116,7 +116,7 @@ const char* TASEDITOR_LUA::getnote(int index)
 // taseditor.setnote(int index, string newtext)
 void TASEDITOR_LUA::setnote(int index, const char* newtext)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		// rename only if newtext is different from old text
 		char text[MAX_NOTE_LEN];
@@ -134,7 +134,7 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 // int taseditor.getcurrentbranch()
 int TASEDITOR_LUA::getcurrentbranch()
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return bookmarks.GetCurrentBranch();
 	else
 		return -1;
@@ -143,7 +143,7 @@ int TASEDITOR_LUA::getcurrentbranch()
 // string taseditor.getrecordermode()
 const char* TASEDITOR_LUA::getrecordermode()
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return recorder.GetRecordingMode();
 	else
 		return NULL;
@@ -152,7 +152,7 @@ const char* TASEDITOR_LUA::getrecordermode()
 // int taseditor.getplaybacktarget()
 int TASEDITOR_LUA::getplaybacktarget()
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		return playback.pause_frame - 1;
 	else
 		return -1;
@@ -161,14 +161,14 @@ int TASEDITOR_LUA::getplaybacktarget()
 // taseditor.setplayback()
 void TASEDITOR_LUA::setplayback(int frame)
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		playback.JumpToFrame(frame);	// do not trigger lua functions after jump
 }
 
 // taseditor.stopseeking()
 void TASEDITOR_LUA::stopseeking()
 {
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		playback.SeekingStop();
 }
 

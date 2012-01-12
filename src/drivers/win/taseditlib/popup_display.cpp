@@ -79,16 +79,8 @@ void POPUP_DISPLAY::init()
 	}
 	HDC win_hdc = GetWindowDC(list.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
-	// calculate coordinates (relative to IDC_BOOKMARKS_BOX)
-	RECT temp_rect, parent_rect;
-	GetWindowRect(taseditor_window.hwndTasEditor, &parent_rect);
-	GetWindowRect(GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX), &temp_rect);
-	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
-	//scr_bmp_y = ((temp_rect.bottom + temp_rect.top - (SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP + MARKER_NOTE_TOOLTIP_HEIGHT)) / 2) - parent_rect.top;
-	scr_bmp_y = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
-	tooltip_x = scr_bmp_x + SCREENSHOT_WIDTH - MARKER_NOTE_TOOLTIP_WIDTH;
-	//tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
-	tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
+	// calculate coordinates
+	ParentWindowMoved();
 }
 void POPUP_DISPLAY::free()
 {
@@ -233,6 +225,15 @@ void POPUP_DISPLAY::ChangeTooltipText()
 
 void POPUP_DISPLAY::ParentWindowMoved()
 {
+	// calculate new positions relative to IDC_BOOKMARKS_BOX
+	RECT temp_rect, parent_rect;
+	GetWindowRect(taseditor_window.hwndTasEditor, &parent_rect);
+	GetWindowRect(GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX), &temp_rect);
+	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
+	scr_bmp_y = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
+	tooltip_x = scr_bmp_x + (SCREENSHOT_WIDTH - MARKER_NOTE_TOOLTIP_WIDTH) / 2;
+	tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
+	// if popup windows are currently shown, update their positions
 	if (hwndScrBmp)
 		SetWindowPos(hwndScrBmp, 0, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 	if (hwndMarkerNoteTooltip)
@@ -263,6 +264,7 @@ LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam
 		{
 			// create static text field
 			popup_display.marker_note_tooltip = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN, 1, 1, MARKER_NOTE_TOOLTIP_WIDTH - 2, MARKER_NOTE_TOOLTIP_HEIGHT - 2, hwnd, NULL, NULL, NULL);
+			SendMessage(popup_display.marker_note_tooltip, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
 			return 0;
 		}
 		default:

@@ -1274,7 +1274,7 @@ BOOL CALLBACK InputConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		UpdateFourscoreState(hwndDlg);
 
-		if(FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		if(FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		{
 			// disable changing fourscore and ports
 			EnableWindow(GetDlgItem(hwndDlg, CHECK_ENABLE_FOURSCORE), false);
@@ -1535,7 +1535,7 @@ int FCEUD_TestCommandState(int c)
 		//		else
 		//			keys_nr=GetKeyboard_nr();
 	}
-	else if(c != EMUCMD_SPEED_TURBO && c != EMUCMD_TASEDIT_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
+	else if(c != EMUCMD_SPEED_TURBO && c != EMUCMD_TASEDITOR_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
 	{
 		keys=GetKeyboard_jd();
 		keys_nr=GetKeyboard_nr(); 

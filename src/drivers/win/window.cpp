@@ -1498,10 +1498,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					if (GameInfo && !(fileDropped.find(".fm3") == string::npos))
 					{
 						//.fm3 is at the end of the filename so that must be the extension
-						extern bool EnterTasEdit();
+						extern bool EnterTasEditor();
 						extern bool LoadProject(char* fullname);
 						extern bool AskSaveProject();
-						if (EnterTasEdit())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
+						if (EnterTasEditor())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
 							if (AskSaveProject())		// in case there's unsaved project
 								LoadProject(ftmp);
 					}
@@ -1943,9 +1943,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	DoByteMonitor(); 
 			//	break;
 			//  Removing this tool since it is redundant to both 
-			case MENU_TASEDIT:
-				extern bool EnterTasEdit();
-				EnterTasEdit();
+			case MENU_TASEDITOR:
+				extern bool EnterTasEditor();
+				EnterTasEditor();
 				break;
 			case MENU_CONVERT_MOVIE:
 				ConvertFCM(hWnd);
@@ -2275,7 +2275,7 @@ adelikat: Outsourced this to a remappable hotkey
 		UpdateMenuHotkeys();
 		EnableMenuItem(fceumenu,MENU_RESET,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_RESET)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_POWER,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_POWER)?MF_ENABLED:MF_GRAYED));
-		EnableMenuItem(fceumenu,MENU_TASEDIT,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDIT)?MF_ENABLED:MF_GRAYED));
+		EnableMenuItem(fceumenu,MENU_TASEDITOR,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_TASEDITOR)?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_CLOSE_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_CLOSEGAME) && GameInfo ?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_RECENT_FILES,MF_BYCOMMAND | ((FCEU_IsValidUI(FCEUI_OPENGAME) && HasRecentFiles()) ?MF_ENABLED:MF_GRAYED)); //adelikat - added && recent_files, otherwise this line prevents recent from ever being gray when TAS Editor is not engaged
 		EnableMenuItem(fceumenu,MENU_OPEN_FILE,MF_BYCOMMAND | (FCEU_IsValidUI(FCEUI_OPENGAME)?MF_ENABLED:MF_GRAYED));
@@ -2294,7 +2294,7 @@ adelikat: Outsourced this to a remappable hotkey
 		EnableMenuItem(fceumenu,MENU_STOP_AVI,MF_BYCOMMAND | (FCEUI_AviIsRecording()?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,MENU_STOP_WAV,MF_BYCOMMAND | (loggingSound?MF_ENABLED:MF_GRAYED));
 		EnableMenuItem(fceumenu,ID_FILE_CLOSELUAWINDOWS,MF_BYCOMMAND | (LuaConsoleHWnd?MF_ENABLED:MF_GRAYED));
-		if (FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		{
 			EnableMenuItem(fceumenu, MENU_PAL, false);
 			EnableMenuItem(fceumenu, ID_NEWPPU, false);
@@ -2862,9 +2862,9 @@ void UpdateMenuHotkeys()
 	ChangeMenuItemText(MENU_MEMORY_WATCH, combined);
 
 	//Open TAS Editor
-	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDIT]);
+	combo = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_MISC_OPENTASEDITOR]);
 	combined = "&TAS Editor...\t" + combo;
-	ChangeMenuItemText(MENU_TASEDIT, combined);
+	ChangeMenuItemText(MENU_TASEDITOR, combined);
 
 	//-------------------------------Debug--------------------------------------
 	//Open Debugger

@@ -375,9 +375,9 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	{
 		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
 
-		//MBG tasedit HACK HACK HACK!
-		//do not save the movie state if we are in tasedit! that is a huge waste of time and space!
-		if(!FCEUMOV_Mode(MOVIEMODE_TASEDIT))
+		//MBG TAS Editor HACK HACK HACK!
+		//do not save the movie state if we are in Taseditor! That would be a huge waste of time and space!
+		if(!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		{
 			os->fseek(5,SEEK_CUR);
 			int size = FCEUMOV_WriteState(os);

@@ -89,11 +89,6 @@ void BOOKMARKS::init()
 	BranchCurrY.resize(TOTAL_BOOKMARKS+1);
 
 	reset();
-
-	// init bookmarks
-	bookmarks_array.resize(TOTAL_BOOKMARKS);
-	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		bookmarks_array[i].init();
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
 	// find rows top/height (for mouseover hittest calculations)
@@ -129,34 +124,6 @@ void BOOKMARKS::init()
 	RedrawBookmarksCaption();
 	next_animation_time = 0;
 	update();
-}
-void BOOKMARKS::reset()
-{
-	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
-	{
-		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
-		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
-	}
-	CursorX = CursorPrevX = CloudX = CloudPrevX = BRANCHES_CLOUD_X;
-	CursorY = CursorPrevY = BRANCHES_CLOUD_Y;
-	reset_vars();
-	current_branch = -1;	// -1 = root
-	changes_since_current_branch = false;
-	fireball_size = 0;
-
-	// set cloud_time and current_pos_time
-	SetCurrentPosTime();
-	strcpy(cloud_time, current_pos_time);
-}
-void BOOKMARKS::reset_vars()
-{
-	transition_phase = animation_frame = 0;
-	mouse_x = mouse_y = -1;
-	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-	mouse_over_bitmap = false;
-	must_recalculate_branches_tree = must_redraw_branches_tree = must_check_item_under_mouse = true;
-	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
-	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
 void BOOKMARKS::free()
 {
@@ -203,6 +170,40 @@ void BOOKMARKS::free()
 		DeleteObject(branchesSpritesheet);
 		branchesSpritesheet = NULL;
 	}
+}
+void BOOKMARKS::reset()
+{
+	// init bookmarks
+	bookmarks_array.resize(0);
+	bookmarks_array.resize(TOTAL_BOOKMARKS);
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+		bookmarks_array[i].init();
+
+	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
+	{
+		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
+		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+	}
+	CursorX = CursorPrevX = CloudX = CloudPrevX = BRANCHES_CLOUD_X;
+	CursorY = CursorPrevY = BRANCHES_CLOUD_Y;
+	reset_vars();
+	current_branch = -1;	// -1 = root
+	changes_since_current_branch = false;
+	fireball_size = 0;
+
+	// set cloud_time and current_pos_time
+	SetCurrentPosTime();
+	strcpy(cloud_time, current_pos_time);
+}
+void BOOKMARKS::reset_vars()
+{
+	transition_phase = animation_frame = 0;
+	mouse_x = mouse_y = -1;
+	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	mouse_over_bitmap = false;
+	must_recalculate_branches_tree = must_redraw_branches_tree = must_check_item_under_mouse = true;
+	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
+	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
 
 void BOOKMARKS::update()

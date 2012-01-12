@@ -2,7 +2,7 @@
 #include "taseditor_project.h"
 #include "../main.h"
 #include "../Win32InputBox.h"
-#include "../tasedit.h"
+#include "../taseditor.h"
 #include <htmlhelp.h>
 
 extern TASEDITOR_CONFIG taseditor_config;
@@ -12,6 +12,7 @@ extern RECORDER recorder;
 extern TASEDITOR_PROJECT project;
 extern TASEDITOR_LIST list;
 extern TASEDITOR_SELECTION selection;
+extern SPLICER splicer;
 extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
 extern INPUT_HISTORY history;
@@ -36,6 +37,59 @@ const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeo
 // resources
 char windowCaptioBase[] = "TAS Editor";
 char taseditor_help_filename[] = "\\taseditor.chm";
+// all items of the window (used for resising) and their default x,y,w,h
+// actual x,y,w,h are calculated at the beginning from screen
+static struct 
+{
+	int id;
+	int x;
+	int y;
+	int width;
+	int height;
+} window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
+	IDC_PROGRESS_BUTTON, -1, 0, 0, 0,
+	IDC_BRANCHES_BUTTON, -1, 0, 0, 0,
+	IDC_LIST1, 0, 0, -1, -1,
+	IDC_PLAYBACK_BOX, -1, 0, 0, 0,
+	IDC_RECORDER_BOX, -1, 0, 0, 0,
+	IDC_SPLICER_BOX, -1, 0, 0, 0,
+	IDC_LUA_BOX, -1, 0, 0, 0,
+	IDC_BOOKMARKS_BOX, -1, 0, 0, 0,
+	IDC_HISTORY_BOX, -1, 0, 0, -1,
+	TASEDITOR_REWIND_FULL, -1, 0, 0, 0,
+	TASEDITOR_REWIND, -1, 0, 0, 0,
+	TASEDITOR_PLAYSTOP, -1, 0, 0, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0,
+	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0,
+	IDC_PROGRESS1, -1, 0, 0, 0,
+	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0,
+	IDC_BOOKMARKSLIST, -1, 0, 0, 0,
+	IDC_HISTORYLIST, -1, 0, 0, -1,
+	IDC_RADIO_ALL, -1, 0, 0, 0,
+	IDC_RADIO_1P, -1, 0, 0, 0,
+	IDC_RADIO_2P, -1, 0, 0, 0,
+	IDC_RADIO_3P, -1, 0, 0, 0,
+	IDC_RADIO_4P, -1, 0, 0, 0,
+	IDC_SUPERIMPOSE, -1, 0, 0, 0,
+	TASEDITOR_PREV_MARKER, -1, -1, 0, -1,
+	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1,
+	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1,
+	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1,
+	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0,
+	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0,
+	IDC_PLAYBACK_MARKER, 0, 0, 0, 0,
+	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1,
+	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1,
+	IDC_SELECTION_MARKER, 0, -1, 0, -1,
+	IDC_BRANCHES_BITMAP, -1, 0, 0, 0,
+	CHECK_TURBO_SEEK, -1, 0, 0, 0,
+	IDC_TEXT_SELECTION, -1, 0, 0, 0,
+	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0,
+	IDC_RECORDING, -1, 0, 0, 0,
+	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0,
+	IDC_RUN_AUTO, -1, 0, 0, 0,
+};
 
 TASEDITOR_WINDOW::TASEDITOR_WINDOW()
 {
@@ -43,18 +97,27 @@ TASEDITOR_WINDOW::TASEDITOR_WINDOW()
 	hwndFindNote = 0;
 	hTaseditorIcon = 0;
 	TASEditor_focus = false;
+	ready_for_resizing = false;
+	min_width = 0;
+	min_height = 0;
 
 }
 
 void TASEDITOR_WINDOW::init()
 {
+	ready_for_resizing = false;
 	hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
-	hwndTasEditor = CreateDialog(fceu_hInstance, "TASEDIT", hAppWnd, WndprocTasEditor);
+	hwndTasEditor = CreateDialog(fceu_hInstance, "TASEDITOR", hAppWnd, WndprocTasEditor);
+	CalculateItems();
+	// restore position and size from config, also bring the window on top
+	//RECT desiredRect = {0, 0, taseditor_config.wndwidth, taseditor_config.wndheight};
+	//AdjustWindowRectEx(&desiredRect, GetWindowLong(hwndTasEditor, GWL_STYLE), true, GetWindowLong(hwndTasEditor, GWL_EXSTYLE));
+	SetWindowPos(hwndTasEditor, HWND_TOP, taseditor_config.wndx, taseditor_config.wndy, taseditor_config.wndwidth, taseditor_config.wndheight, SWP_NOOWNERZORDER);
+
 	hmenu = GetMenu(hwndTasEditor);
-	hrmenu = LoadMenu(fceu_hInstance,"TASEDITCONTEXTMENUS");
+	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
 
 	UpdateCheckedItems();
-	SetWindowPos(hwndTasEditor, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
@@ -89,7 +152,114 @@ void TASEDITOR_WINDOW::update()
 
 }
 // --------------------------------------------------------------------------------
-void TASEDITOR_WINDOW::RedrawCaption()
+void TASEDITOR_WINDOW::CalculateItems()
+{
+	RECT r, main_r;
+	POINT p;
+	HWND hCtrl;
+
+	// set min size to current size
+	GetWindowRect(hwndTasEditor, &main_r);
+	min_width = main_r.right - main_r.left;
+	min_height = main_r.bottom - main_r.top;
+	// check if wndwidth and wndheight weren't initialized
+	if (taseditor_config.wndwidth < min_width)
+		taseditor_config.wndwidth = min_width;
+	if (taseditor_config.wndheight < min_height)
+		taseditor_config.wndheight = min_height;
+	// find current client area of Taseditor window
+	int main_width = main_r.right - main_r.left;
+	int main_height = main_r.bottom - main_r.top;
+
+	// calculate current positions for all items
+	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+	{
+		hCtrl = GetDlgItem(hwndTasEditor, window_items[i].id);
+
+		GetWindowRect(hCtrl, &r);
+		p.x = r.left;
+		p.y = r.top;
+		ScreenToClient(hwndTasEditor, &p);
+		if (window_items[i].x < 0)
+			// right-aligned
+			window_items[i].x = -(main_width - p.x);
+		else
+			// left-aligned
+			window_items[i].x = p.x;
+		if (window_items[i].y < 0)
+			// bottom-aligned
+			window_items[i].y = -(main_height - p.y);
+		else
+			// top-aligned
+			window_items[i].y = p.y;
+		if (window_items[i].width < 0)
+			// width is right-aligned (may be dynamic width)
+			window_items[i].width = -(main_width - (p.x + (r.right - r.left)));
+		else
+			// normal width
+			window_items[i].width = r.right - r.left;
+		if (window_items[i].height < 0)
+			// height is bottom-aligned (may be dynamic height)
+			window_items[i].height = -(main_height - (p.y + (r.bottom - r.top)));
+		else
+			// normal height
+			window_items[i].height = r.bottom - r.top;
+	}
+	ready_for_resizing = true;
+}
+void TASEDITOR_WINDOW::ResizeItems()
+{
+	HWND hCtrl;
+	int x, y, width, height;
+	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+	{
+		hCtrl = GetDlgItem(hwndTasEditor, window_items[i].id);
+		if (window_items[i].x < 0)
+			// right-aligned
+			x = taseditor_config.wndwidth + window_items[i].x;
+		else
+			// left-aligned
+			x = window_items[i].x;
+		if (window_items[i].y < 0)
+			// bottom-aligned
+			y = taseditor_config.wndheight + window_items[i].y;
+		else
+			// top-aligned
+			y = window_items[i].y;
+		if (window_items[i].width < 0)
+			// width is right-aligned (may be dynamic width)
+			width = (taseditor_config.wndwidth + window_items[i].width) - x;
+		else
+			// normal width
+			width = window_items[i].width;
+		if (window_items[i].height < 0)
+			// height is bottom-aligned (may be dynamic height)
+			height = (taseditor_config.wndheight + window_items[i].height) - y;
+		else
+			// normal height
+			height = window_items[i].height;
+		SetWindowPos(hCtrl, 0, x, y, width, height, SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOREDRAW);
+	}
+	RedrawTaseditor();
+	//RedrawWindow(hwndTasEditor, NULL, NULL, RDW_INVALIDATE);
+}
+
+void TASEDITOR_WINDOW::WindowMovedOrResized()
+{
+	RECT wrect;
+	GetWindowRect(hwndTasEditor, &wrect);
+	taseditor_config.wndx = wrect.left;
+	taseditor_config.wndy = wrect.top;
+	WindowBoundsCheckNoResize(taseditor_config.wndx, taseditor_config.wndy, wrect.right);
+	taseditor_config.wndwidth = wrect.right - wrect.left;
+	if (taseditor_config.wndwidth < min_width)
+		taseditor_config.wndwidth = min_width;
+	taseditor_config.wndheight = wrect.bottom - wrect.top;
+	if (taseditor_config.wndheight < min_height)
+		taseditor_config.wndheight = min_height;
+}
+
+void TASEDITOR_WINDOW::UpdateCaption()
 {
 	char new_caption[300];
 	strcpy(new_caption, windowCaptioBase);
@@ -107,7 +277,7 @@ void TASEDITOR_WINDOW::RedrawCaption()
 		strcat(new_caption, "*");
 	SetWindowText(hwndTasEditor, new_caption);
 }
-void TASEDITOR_WINDOW::RedrawWindow()
+void TASEDITOR_WINDOW::RedrawTaseditor()
 {
 	InvalidateRect(hwndTasEditor, 0, FALSE);
 }
@@ -201,10 +371,10 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsMenu()
 	int x;
 	moo.cbSize = sizeof(moo);
 	moo.fMask = MIIM_SUBMENU | MIIM_STATE;
-	GetMenuItemInfo(GetSubMenu(hmenu, 0), ID_TASEDIT_FILE_RECENT, FALSE, &moo);
+	GetMenuItemInfo(GetSubMenu(hmenu, 0), ID_FILE_RECENT, FALSE, &moo);
 	moo.hSubMenu = recent_projects_menu;
 	moo.fState = recent_projects[0] ? MFS_ENABLED : MFS_GRAYED;
-	SetMenuItemInfo(GetSubMenu(hmenu, 0), ID_TASEDIT_FILE_RECENT, FALSE, &moo);
+	SetMenuItemInfo(GetSubMenu(hmenu, 0), ID_FILE_RECENT, FALSE, &moo);
 
 	// Remove all recent files submenus
 	for(x = 0; x < MAX_NUMBER_OF_RECENT_PROJECTS; x++)
@@ -237,9 +407,9 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsMenu()
 	for (i = 0; i < MAX_NUMBER_OF_RECENT_PROJECTS; ++i)
 		if (recent_projects[i]) break;
 	if (i < MAX_NUMBER_OF_RECENT_PROJECTS)
-		EnableMenuItem(hmenu, ID_TASEDIT_FILE_RECENT, MF_ENABLED);
+		EnableMenuItem(hmenu, ID_FILE_RECENT, MF_ENABLED);
 	else
-		EnableMenuItem(hmenu, ID_TASEDIT_FILE_RECENT, MF_GRAYED);
+		EnableMenuItem(hmenu, ID_FILE_RECENT, MF_GRAYED);
 
 	DrawMenuBar(hwndTasEditor);
 }
@@ -324,23 +494,41 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			if (taseditor_config.wndx == -32000) taseditor_config.wndx = 0;	//Just in case
 			if (taseditor_config.wndy == -32000) taseditor_config.wndy = 0;
 			SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)taseditor_window.hTaseditorIcon);
-			SetWindowPos(hwndDlg, 0, taseditor_config.wndx, taseditor_config.wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 			break;
 		}
-		case WM_MOVE:
+		case WM_WINDOWPOSCHANGED:
+		{
+			WINDOWPOS* windowpos = (WINDOWPOS*)lParam;
+			if (!(windowpos->flags & SWP_NOSIZE))
 			{
+				// window was resized
 				if (!IsIconic(hwndDlg))
 				{
-					RECT wrect;
-					GetWindowRect(hwndDlg, &wrect);
-					taseditor_config.wndx = wrect.left;
-					taseditor_config.wndy = wrect.top;
-					WindowBoundsCheckNoResize(taseditor_config.wndx, taseditor_config.wndy, wrect.right);
-					// also move popup display if it's open
+					taseditor_window.WindowMovedOrResized();
+					if (taseditor_window.ready_for_resizing)
+						taseditor_window.ResizeItems();
+					// also change coordinates of popup display (and move if it's open)
 					popup_display.ParentWindowMoved();
 				}
-				break;
+			} else if (!(windowpos->flags & SWP_NOMOVE))
+			{
+				// window was moved
+				if (!IsIconic(hwndDlg) && !IsZoomed(hwndDlg))
+					taseditor_window.WindowMovedOrResized();
+				// also change coordinates of popup display (and move if it's open)
+				popup_display.ParentWindowMoved();
 			}
+			break;
+		}
+		case WM_GETMINMAXINFO:
+		{
+			if (taseditor_window.ready_for_resizing)
+			{
+				((MINMAXINFO*)lParam)->ptMinTrackSize.x = taseditor_window.min_width;
+				((MINMAXINFO*)lParam)->ptMinTrackSize.y = taseditor_window.min_height;
+			}
+			break;
+		}
 		case WM_NOTIFY:
 			switch(wParam)
 			{
@@ -413,7 +601,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				}
 				break;
-			case TASEDIT_PLAYSTOP:
+			case TASEDITOR_PLAYSTOP:
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CLICK:
@@ -426,7 +614,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
-			ExitTasEdit();
+			ExitTasEditor();
 			break;
 		case WM_ACTIVATE:
 			if(LOWORD(wParam))
@@ -529,6 +717,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						}
 						break;
 					}
+				case ID_FILE_NEW:
+					NewProject();
+					break;
 				case ID_FILE_OPENPROJECT:
 					OpenProject();
 					break;
@@ -548,8 +739,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_FILE_EXPORTFM2:
 						Export();
 					break;
-				case ID_TASEDIT_FILE_CLOSE:
-					ExitTasEdit();
+				case ID_FILE_CLOSE:
+					ExitTasEditor();
 					break;
 				case ID_EDIT_SELECTALL:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
@@ -560,31 +751,31 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						selection.SelectAll();
 					break;
 				case ACCEL_CTRL_X:
-				case ID_TASEDIT_CUT:
+				case ID_EDIT_CUT:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CUT, 0, 0); 
 					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_CUT, 0, 0); 
 					else
-						Cut();
+						splicer.Cut();
 					break;
 				case ACCEL_CTRL_C:
-				case ID_TASEDIT_COPY:
+				case ID_EDIT_COPY:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_COPY, 0, 0); 
 					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_COPY, 0, 0); 
 					else
-						Copy();
+						splicer.Copy();
 					break;
 				case ACCEL_CTRL_V:
-				case ID_TASEDIT_PASTE:
+				case ID_EDIT_PASTE:
 					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
 					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
 					else
-						Paste();
+						splicer.Paste();
 					break;
 				case ACCEL_SHIFT_V:
 					{
@@ -604,7 +795,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							else
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
 						} else
-							PasteInsert();
+							splicer.PasteInsert();
 						break;
 					}
 				case ID_EDIT_PASTEINSERT:
@@ -613,18 +804,18 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
 					else
-						PasteInsert();
+						splicer.PasteInsert();
 					break;
 				case ACCEL_CTRL_DELETE:
-				case ID_TASEDIT_DELETE:
+				case ID_EDIT_DELETE:
 				case ID_CONTEXT_SELECTED_DELETEFRAMES:
-					DeleteFrames();
+					splicer.DeleteFrames();
 					break;
 				case ACCEL_CTRL_T:
 				case ID_EDIT_TRUNCATE:
 				case ID_CONTEXT_SELECTED_TRUNCATE:
 				case ID_CONTEXT_STRAY_TRUNCATE:
-					Truncate();
+					splicer.Truncate();
 					break;
 				case ID_HELP_TASEDITHELP:
 					{
@@ -638,12 +829,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_EDIT_INSERT:
 				case MENU_CONTEXT_STRAY_INSERTFRAMES:
 				case ID_CONTEXT_SELECTED_INSERTFRAMES2:
-					InsertNumFrames();
+					splicer.InsertNumFrames();
 					break;
 				case ACCEL_SHIFT_INS:
 				case ID_EDIT_INSERTFRAMES:
 				case ID_CONTEXT_SELECTED_INSERTFRAMES:
-					InsertFrames();
+					splicer.InsertFrames();
 					break;
 				case ACCEL_DEL:
 				case ID_EDIT_CLEAR:
@@ -663,9 +854,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_CLEAR, 0, 0); 
 					} else
-						ClearFrames();
+						splicer.ClearFrames();
 					break;
-				case TASEDIT_PLAYSTOP:
+				case TASEDITOR_PLAYSTOP:
 					playback.ToggleEmulationPause();
 					break;
 				case CHECK_FOLLOW_CURSOR:
@@ -718,7 +909,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_config.follow_note_context ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ACCEL_CTRL_P:
 				case CHECK_AUTORESTORE_PLAYBACK:
 					//switch "Auto-restore last playback position" flag
 					taseditor_config.restore_position ^= 1;
@@ -874,16 +1064,16 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
 					else
-						selection.SelectMidMarkers();
+						selection.SelectBetweenMarkers();
 					break;
 				case ID_EDIT_SELECTMIDMARKERS:
 				case ID_SELECTED_SELECTMIDMARKERS:
-					selection.SelectMidMarkers();
+					selection.SelectBetweenMarkers();
 					break;
 				case ACCEL_CTRL_INSERT:
 				case ID_EDIT_CLONEFRAMES:
 				case ID_SELECTED_CLONE:
-					CloneFrames();
+					splicer.CloneFrames();
 					break;
 				case ACCEL_CTRL_Z:
 				case ID_EDIT_UNDO:
@@ -1021,22 +1211,22 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						if (taseditor_window.hwndFindNote)
 							SetFocus(GetDlgItem(taseditor_window.hwndFindNote, IDC_NOTE_TO_FIND));
 						else
-							taseditor_window.hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_FINDNOTE), taseditor_window.hwndTasEditor, FindNoteProc);
+							taseditor_window.hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_FINDNOTE), taseditor_window.hwndTasEditor, FindNoteProc);
 						break;
 					}
-				case TASEDIT_FIND_BEST_SIMILAR_MARKER:
+				case TASEDITOR_FIND_BEST_SIMILAR_MARKER:
 					search_similar_marker = 0;
 					current_markers.FindSimilar(search_similar_marker);
 					search_similar_marker++;
 					break;
-				case TASEDIT_FIND_NEXT_SIMILAR_MARKER:
+				case TASEDITOR_FIND_NEXT_SIMILAR_MARKER:
 					current_markers.FindSimilar(search_similar_marker);
 					search_similar_marker++;
 					break;
 				case ID_HELP_ABOUT:
-					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDIT_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
+					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
 					break;
-				case TASEDIT_RUN_MANUAL:
+				case TASEDITOR_RUN_MANUAL:
 					// the function will be called in next window update
 					must_call_manual_lua_function = true;
 					break;

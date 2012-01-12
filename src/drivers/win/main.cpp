@@ -417,8 +417,8 @@ void DoFCEUExit()
 
 #ifdef WIN32
 	//If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
-	extern bool ExitTasEdit();
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDIT) && !ExitTasEdit()) return;
+	extern bool ExitTasEditor();
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !ExitTasEditor()) return;
 #endif
 
 	if (CloseMemoryWatch() && AskSave())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
@@ -869,8 +869,8 @@ void _updateWindow()
 	//UpdateLogWindow();	//adelikat: Moved to FCEUI_Emulate
 	UpdateMemWatch();
 	NTViewDoBlit(0);
-	extern void UpdateTasEdit();
-	UpdateTasEdit();
+	extern void UpdateTasEditor();
+	UpdateTasEditor();
 }
 
 void win_debuggerLoop()

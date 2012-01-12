@@ -442,9 +442,6 @@
     <ClCompile Include="..\src\drivers\win\state.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\tasedit.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\texthook.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
@@ -952,6 +949,12 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\popup_display.cpp">
       <Filter>drivers\win\taseditlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditlib\splicer.cpp">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1123,9 +1126,6 @@
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\state.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\tasedit.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\texthook.h">
@@ -1433,6 +1433,12 @@
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditlib\popup_display.h">
+      <Filter>drivers\win\taseditlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor.h">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditlib\splicer.h">
       <Filter>drivers\win\taseditlib</Filter>
     </ClInclude>
   </ItemGroup>

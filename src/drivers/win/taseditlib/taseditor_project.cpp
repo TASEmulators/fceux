@@ -14,10 +14,13 @@ extern RECORDER recorder;
 extern INPUT_HISTORY history;
 extern TASEDITOR_LIST list;
 extern TASEDITOR_SELECTION selection;
+extern SPLICER splicer;
 
 extern void FCEU_PrintError(char *format, ...);
 extern bool SaveProject();
 extern bool SaveProjectAs();
+extern int GetInputType(MovieData& md);
+extern void SetInputType(MovieData& md, int new_input_type);
 
 TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 {
@@ -25,17 +28,14 @@ TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 
 void TASEDITOR_PROJECT::init()
 {
-	// init new project
-	projectFile = "";
-	projectName = "";
-	fm2FileName = "";
-
 	reset();
 }
 void TASEDITOR_PROJECT::reset()
 {
 	changed = false;
-
+	projectFile = "";
+	projectName = "";
+	fm2FileName = "";
 }
 void TASEDITOR_PROJECT::update()
 {
@@ -132,6 +132,9 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 		return false;
 	}
 
+	// ensure that movie has correct set of ports/fourscore
+	SetInputType(currMovieData, GetInputType(currMovieData));
+
 	// load modules
 	unsigned int saved_stuff;
 	read32le(&saved_stuff, &ifs);
@@ -142,9 +145,10 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	list.load(&ifs);
 	selection.load(&ifs);
 	
-
+	// reset other modules
 	playback.reset();
 	recorder.reset();
+	splicer.reset();
 	popup_display.reset();
 	reset();
 	RenameProject(fullname);
@@ -180,7 +184,7 @@ void TASEDITOR_PROJECT::SetProjectChanged()
 	if (!changed)
 	{
 		changed = true;
-		taseditor_window.RedrawCaption();
+		taseditor_window.UpdateCaption();
 		SheduleNextAutosave();
 	}
 }

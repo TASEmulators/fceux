@@ -420,7 +420,6 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\tasedit.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\bookmark.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\bookmarks.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\greenzone.cpp" />
@@ -430,12 +429,14 @@
     <ClCompile Include="..\src\drivers\win\taseditlib\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\popup_display.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\recorder.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditlib\splicer.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_config.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_list.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_lua.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_project.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_sel.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditlib\taseditor_window.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor.cpp" />
     <ClCompile Include="..\src\drivers\win\texthook.cpp" />
     <ClCompile Include="..\src\drivers\win\throttle.cpp" />
     <ClCompile Include="..\src\drivers\win\timing.cpp" />
@@ -745,7 +746,6 @@
     <ClInclude Include="..\src\drivers\win\resource.h" />
     <ClInclude Include="..\src\drivers\win\sound.h" />
     <ClInclude Include="..\src\drivers\win\state.h" />
-    <ClInclude Include="..\src\drivers\win\tasedit.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\bookmark.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\bookmarks.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\inputhistory.h" />
@@ -754,12 +754,14 @@
     <ClInclude Include="..\src\drivers\win\taseditlib\playback.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\popup_display.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\recorder.h" />
+    <ClInclude Include="..\src\drivers\win\taseditlib\splicer.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_config.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_list.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_lua.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_project.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_sel.h" />
     <ClInclude Include="..\src\drivers\win\taseditlib\taseditor_window.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor.h" />
     <ClInclude Include="..\src\drivers\win\texthook.h" />
     <ClInclude Include="..\src\drivers\win\throttle.h" />
     <ClInclude Include="..\src\drivers\win\timing.h" />

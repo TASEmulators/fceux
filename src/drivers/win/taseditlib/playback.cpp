@@ -1,6 +1,6 @@
 //Implementation file of Playback class
 #include "taseditor_project.h"
-#include "..\tasedit.h"		// only for MARKER_NOTE_EDIT_UPPER
+#include "..\taseditor.h"		// only for MARKER_NOTE_EDIT_UPPER
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
@@ -34,10 +34,10 @@ void PLAYBACK::init()
 {
 	hwndProgressbar = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PROGRESS1);
 	SendMessage(hwndProgressbar, PBM_SETRANGE, 0, MAKELPARAM(0, PROGRESSBAR_WIDTH)); 
-	hwndRewind = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_REWIND);
-	hwndForward = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_FORWARD);
-	hwndRewindFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_REWIND_FULL);
-	hwndForwardFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDIT_FORWARD_FULL);
+	hwndRewind = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_REWIND);
+	hwndForward = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_FORWARD);
+	hwndRewindFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_REWIND_FULL);
+	hwndForwardFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_FORWARD_FULL);
 	hwndPlaybackMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER);
 	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
 	hwndPlaybackMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER_EDIT);

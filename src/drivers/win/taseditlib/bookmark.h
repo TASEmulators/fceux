@@ -1,9 +1,12 @@
 //Specification file for Bookmark class
 
 #define FLASH_PHASE_MAX 11
-#define FLASH_TYPE_SET 0
-#define FLASH_TYPE_JUMP 1
-#define FLASH_TYPE_UNLEASH 2
+enum
+{
+	FLASH_TYPE_SET = 0,
+	FLASH_TYPE_JUMP = 1,
+	FLASH_TYPE_UNLEASH = 2,
+};
 
 #define SCREENSHOT_WIDTH 256
 #define SCREENSHOT_HEIGHT 240

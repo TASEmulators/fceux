@@ -12,7 +12,6 @@ public:
 	void reset_vars();
 	void update();
 
-	void RedrawTextClipboard();
 	void RedrawMarker();
 
 	void save(EMUFILE *os, bool really_save = true);
@@ -30,9 +29,6 @@ public:
 	void redo();
 	void jump(int new_pos);
 
-	void MemorizeClipboardSelection();
-	void ReselectClipboard();
-
 	void ClearSelection();
 	void ClearRowSelection(int index);
 
@@ -41,7 +37,8 @@ public:
 	void SelectAll();
 	void SetRowSelection(int index);
 	void SetRegionSelection(int start, int end);
-	void SelectMidMarkers();
+	void SelectBetweenMarkers();
+	void ReselectClipboard();
 
 	void JumpPrevMarker();
 	void JumpNextMarker();
@@ -60,16 +57,12 @@ public:
 	int shown_marker;
 
 	HWND hwndPrevMarker, hwndNextMarker;
-	HWND hwndTextSelection, hwndTextClipboard;
 	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
 
 private:
 	SelectionFrames& CurrentSelection();
-	void CheckClipboard();
 
 	bool track_selection_changes;
-	bool must_redraw_text;
-
 	int last_selection_beginning;
 
 	bool old_prev_marker_button_state, prev_marker_button_state;
@@ -77,7 +70,6 @@ private:
 	int button_hold_time;
 
 	std::vector<SelectionFrames> selections_history;
-	SelectionFrames clipboard_selection;
 
 	SelectionFrames inserted_set;
 
