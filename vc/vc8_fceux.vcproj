@@ -1687,11 +1687,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\win\tasedit.cpp"
+					RelativePath="..\src\drivers\win\taseditor.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\win\tasedit.h"
+					RelativePath="..\src\drivers\win\taseditor.h"
 					>
 				</File>
 				<File
@@ -2288,102 +2288,134 @@
 					</Filter>
 				</Filter>
 				<Filter
-					Name="taseditlib"
+					Name="taseditor"
 					>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\bookmark.cpp"
+						RelativePath="..\src\drivers\win\taseditor\bookmark.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\bookmark.h"
+						RelativePath="..\src\drivers\win\taseditor\bookmark.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\bookmarks.cpp"
+						RelativePath="..\src\drivers\win\taseditor\bookmarks.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\bookmarks.h"
+						RelativePath="..\src\drivers\win\taseditor\bookmarks.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\greenzone.cpp"
+						RelativePath="..\src\drivers\win\taseditor\greenzone.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\greenzone.h"
+						RelativePath="..\src\drivers\win\taseditor\greenzone.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\inputhistory.cpp"
+						RelativePath="..\src\drivers\win\taseditor\inputhistory.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\inputhistory.h"
+						RelativePath="..\src\drivers\win\taseditor\inputhistory.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\inputsnapshot.cpp"
+						RelativePath="..\src\drivers\win\taseditor\inputsnapshot.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\inputsnapshot.h"
+						RelativePath="..\src\drivers\win\taseditor\inputsnapshot.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\markers.cpp"
+						RelativePath="..\src\drivers\win\taseditor\markers.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\markers.h"
+						RelativePath="..\src\drivers\win\taseditor\markers.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\playback.cpp"
+						RelativePath="..\src\drivers\win\taseditor\playback.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\playback.h"
+						RelativePath="..\src\drivers\win\taseditor\playback.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\recorder.cpp"
+						RelativePath="..\src\drivers\win\taseditor\popup_display.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\recorder.h"
+						RelativePath="..\src\drivers\win\taseditor\popup_display.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\screenshot_display.cpp"
+						RelativePath="..\src\drivers\win\taseditor\recorder.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\screenshot_display.h"
+						RelativePath="..\src\drivers\win\taseditor\recorder.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\tasedit_list.cpp"
+						RelativePath="..\src\drivers\win\taseditor\splicer.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\tasedit_list.h"
+						RelativePath="..\src\drivers\win\taseditor\splicer.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\tasedit_sel.cpp"
+						RelativePath="..\src\drivers\win\taseditor\taseditor_config.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\tasedit_sel.h"
+						RelativePath="..\src\drivers\win\taseditor\taseditor_config.h"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\taseditproj.cpp"
+						RelativePath="..\src\drivers\win\taseditor\taseditor_list.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditlib\taseditproj.h"
+						RelativePath="..\src\drivers\win\taseditor\taseditor_list.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_lua.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_lua.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_project.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_project.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_sel.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_sel.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_window.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\taseditor_window.h"
 						>
 					</File>
 				</Filter>
