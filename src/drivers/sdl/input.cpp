@@ -181,6 +181,38 @@ void setHotKeys()
 	return;
 }
 
+/***
+  * This function is a wrapper for FCEUI_ToggleEmulationPause that handles
+  * releasing/capturing mouse pointer during pause toggles
+  * */
+void TogglePause()
+{
+	FCEUI_ToggleEmulationPause();
+	int x;
+	g_config->getOption("SDL.Fullscreen", &x);
+	
+	if(x == 0)
+		return;
+
+	g_config->getOption("SDL.NoFullscreenCursor", &x);
+
+	if(x == 1)
+		return;
+
+	if (FCEUI_EmulationPaused() == 0)
+	{
+		SDL_ShowCursor(0);
+		SDL_WM_GrabInput (SDL_GRAB_ON);
+	}
+	else
+	{
+		SDL_ShowCursor(1);
+		SDL_WM_GrabInput (SDL_GRAB_OFF);
+	}
+
+	return;
+}
+
 /*** 
  * This function opens a file chooser dialog and returns the filename the 
  * user selected.
@@ -559,7 +591,10 @@ KeyboardCommands()
     #endif
 
     if(_keyonly(Hotkeys[HK_PAUSE])) {
-        FCEUI_ToggleEmulationPause();
+        //FCEUI_ToggleEmulationPause(); 
+		// use the wrapper function instead of the fceui function directly
+		// so we can handle cursor grabbage
+		TogglePause();
     }
     
     // Toggle throttling
@@ -792,7 +827,7 @@ UpdatePhysicalInput()
         case SDL_FCEU_HOTKEY_EVENT:
             switch(event.user.code) {
                 case HK_PAUSE:
-                    FCEUI_ToggleEmulationPause();
+					TogglePause();
                     break;
                 default:
                     FCEU_printf("Warning: unknown hotkey event %d\n", event.user.code);
