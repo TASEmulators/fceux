@@ -206,7 +206,7 @@ InitConfig()
 	
 	config->addOption("fourscore", "SDL.FourScore", 0);
 
-	config->addOption("nofscursor", "SDL.NoFullscreenCursor", 0);
+	config->addOption("nofscursor", "SDL.NoFullscreenCursor", 1);
     
     #ifdef _S9XLUA_H
     // load lua script
