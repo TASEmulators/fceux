@@ -627,10 +627,15 @@ KeyboardCommands()
     //if(_keyonly(Hotkeys[HK_POWER])) {
     //    FCEUI_PowerNES();
     //}
-	
-    if(_keyonly(Hotkeys[HK_QUIT])) {
-        CloseGame();
+    
+    // TODO add comment i'm on the phone
+    if(noGui == 1)
+    {
+        if(_keyonly(Hotkeys[HK_QUIT])) {
+           CloseGame();
+        }
     }
+
     #ifdef _S9XLUA_H
     if(_keyonly(Hotkeys[HK_LOAD_LUA])) {
         std::string fname;
