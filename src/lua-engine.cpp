@@ -40,6 +40,9 @@
 
 #ifdef WIN32
 #include "drivers/win/common.h"
+#include "drivers/win/taseditor/taseditor_sel.h"
+#include "drivers/win/taseditor/markers.h"
+#include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"
 extern TASEDITOR_LUA taseditor_lua;
 #endif
@@ -2709,7 +2712,7 @@ int movie_isplaying (lua_State *L) {
 //
 //returns the rerecord count of the current movie
 static int movie_rerecordcount (lua_State *L) {
-	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		luaL_error(L, "No movie loaded.");
 
 	lua_pushinteger(L, FCEUI_GetMovieRerecordCount());
@@ -2722,7 +2725,7 @@ static int movie_rerecordcount (lua_State *L) {
 //returns an int value representing the total length of the current movie loaded
 
 static int movie_getlength (lua_State *L) {
-	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		luaL_error(L, "No movie loaded.");
 
 	lua_pushinteger(L, FCEUI_GetMovieLength());
@@ -2754,7 +2757,7 @@ static int movie_setreadonly (lua_State *L) {
 //returns the filename of the movie loaded
 static int movie_getname (lua_State *L) {
 
-	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		luaL_error(L, "No movie loaded.");
 	
 	std::string name = FCEUI_GetMovieName();
@@ -2767,7 +2770,7 @@ static int movie_getname (lua_State *L) {
 //returns the filename of movie loaded with no path
 static int movie_getfilename (lua_State *L) {
 	
-	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying())
+	if (!FCEUMOV_IsRecording() && !FCEUMOV_IsPlaying() && !FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		luaL_error(L, "No movie loaded.");
 	
 	std::string name = FCEUI_GetMovieName();
@@ -4418,6 +4421,17 @@ static int taseditor_getrecordermode(lua_State *L)
 	return 1;
 }
 
+// int taseditor.getlostplayback()
+static int taseditor_getlostplayback(lua_State *L)
+{
+#ifdef WIN32
+	lua_pushinteger(L, taseditor_lua.getlostplayback());
+#else
+	lua_pushinteger(L, -1);
+#endif
+	return 1;
+}
+
 // int taseditor.getplaybacktarget()
 static int taseditor_getplaybacktarget(lua_State *L)
 {
@@ -4447,8 +4461,124 @@ static int taseditor_stopseeking(lua_State *L)
 	return 0;
 }
 
+// table taseditor.getselection()
+static int taseditor_getselection(lua_State *L)
+{
+#ifdef WIN32
+	// create temp vector and provide its reference to TAS Editor for filling the vector with data
+	std::vector<int> cur_set;
+	taseditor_lua.getselection(cur_set);
+	int size = cur_set.size();
+	if (size)
+	{
+		lua_createtable(L, size, 0);
+		for (int i = 0; i < size; ++i)
+		{
+			lua_pushinteger(L, cur_set[i]);
+			lua_rawseti(L, -2, i + 1);
+		}
+	} else
+	{
+		lua_pushnil(L);
+	}
+#else
+	lua_pushnil(L);
+#endif
+	return 1;
+}
 
+// taseditor.setselection(table new_set)
+static int taseditor_setselection(lua_State *L)
+{
+#ifdef WIN32
+	std::vector<int> cur_set;
+	// retrieve new_set data from table to vector
+	if (!lua_isnil(L, 1))
+	{
+		luaL_checktype(L, 1, LUA_TTABLE);
+		int max_index = luaL_getn(L, 1);
+		int i = 1;
+		while (i <= max_index)
+		{
+			lua_rawgeti(L, 1, i);
+			cur_set.push_back(lua_tonumber(L, -1));
+			lua_pop(L, 1);
+			i++;
+		}
+	}
+	// and provide its reference to TAS Editor for changing selection
+	taseditor_lua.setselection(cur_set);
+#endif
+	return 0;
+}
 
+// int taseditor.getinput(int frame, int joypad)
+static int taseditor_getinput(lua_State *L)
+{
+#ifdef WIN32
+	lua_pushinteger(L, taseditor_lua.getinput(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2)));
+#else
+	lua_pushinteger(L, -1);
+#endif
+	return 1;
+}
+
+// taseditor.submitinputchange(int frame, int joypad, int input)
+static int taseditor_submitinputchange(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.submitinputchange(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
+#endif
+	return 0;
+}
+
+// taseditor.submitinsertframes(int frame, int joypad, int input)
+static int taseditor_submitinsertframes(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.submitinsertframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+#endif
+	return 0;
+}
+
+// taseditor.submitdeleteframes(int frame, int joypad, int input)
+static int taseditor_submitdeleteframes(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.submitdeleteframes(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+#endif
+	return 0;
+}
+
+// int taseditor.applyinputchanges([string name])
+static int taseditor_applyinputchanges(lua_State *L)
+{
+#ifdef WIN32
+	if (lua_isnil(L, 1))
+	{
+		lua_pushinteger(L, taseditor_lua.applyinputchanges(""));
+	} else
+	{
+		const char* name = lua_tostring(L, 1);
+		if (name)
+			lua_pushinteger(L, taseditor_lua.applyinputchanges(name));
+		else
+			lua_pushinteger(L, taseditor_lua.applyinputchanges(""));
+	}
+#else
+	lua_pushinteger(L, -1);
+#endif
+	return 1;
+}
+
+// taseditor.clearinputchanges()
+static int taseditor_clearinputchanges(lua_State *L)
+{
+#ifdef WIN32
+	taseditor_lua.clearinputchanges();
+#endif
+	return 0;
+}
 
 
 static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
@@ -5221,9 +5351,18 @@ static const struct luaL_reg taseditorlib[] = {
 	{"setnote", taseditor_setnote},
 	{"getcurrentbranch", taseditor_getcurrentbranch},
 	{"getrecordermode", taseditor_getrecordermode},
+	{"getlostplayback", taseditor_getlostplayback},
 	{"getplaybacktarget", taseditor_getplaybacktarget},
 	{"setplayback", taseditor_setplayback},
 	{"stopseeking", taseditor_stopseeking},
+	{"getselection", taseditor_getselection},
+	{"setselection", taseditor_setselection},
+	{"getinput", taseditor_getinput},
+	{"submitinputchange", taseditor_submitinputchange},
+	{"submitinsertframes", taseditor_submitinsertframes},
+	{"submitdeleteframes", taseditor_submitdeleteframes},
+	{"applyinputchanges", taseditor_applyinputchanges},
+	{"clearinputchanges", taseditor_clearinputchanges},
 	{NULL,NULL}
 };
 

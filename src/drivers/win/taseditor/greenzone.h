@@ -1,10 +1,8 @@
 //Specification file for Greenzone class
 
-//#define LAG_FLAG_BIT 1
-#define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
-
 #define GREENZONE_ID_LEN 10
 
+#define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
 // greenzone cleaning masks
 #define EVERY16TH 0xFFFFFFF0
 #define EVERY8TH 0xFFFFFFF8
@@ -23,7 +21,7 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
-	void TryDumpIncremental(bool lagFlag = true);
+	void CollectCurrentState();
 
 	bool loadTasSavestate(int frame);
 	void storeTasSavestate(int frame);

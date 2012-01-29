@@ -1,22 +1,19 @@
 //Specification file for the TASEDITOR_PROJECT class
-#include <set>
-typedef std::set<int> SelectionFrames;
-
 #include <time.h>
 #include "movie.h"
 #include "../common.h"
 #include "taseditor_config.h"
 #include "taseditor_window.h"
-#include "markers.h"
-#include "inputsnapshot.h"
-#include "inputhistory.h"
+#include "taseditor_sel.h"
+#include "markers_manager.h"
+#include "snapshot.h"
+#include "history.h"
 #include "playback.h"
 #include "recorder.h"
 #include "greenzone.h"
 #include "bookmarks.h"
 #include "taseditor_list.h"
 #include "taseditor_lua.h"
-#include "taseditor_sel.h"
 #include "splicer.h"
 #include "popup_display.h"
 

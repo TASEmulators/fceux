@@ -1,19 +1,19 @@
-//Implementation file of Input Snapshot class (Undo feature)
+//Implementation file of Snapshot class (Undo feature)
 #include "taseditor_project.h"
 #include "zlib.h"
 
 int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {1, 2, 4};
 
-extern MARKERS current_markers;
+extern MARKERS_MANAGER markers_manager;
 extern TASEDITOR_SELECTION selection;
 
 extern int GetInputType(MovieData& md);
 
-INPUT_SNAPSHOT::INPUT_SNAPSHOT()
+SNAPSHOT::SNAPSHOT()
 {
 }
 
-void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
+void SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 {
 	has_hot_changes = hotchanges;
 	if (force_input_type < 0)
@@ -64,12 +64,11 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 		}
 	}
 
-	// make a copy of current_markers
-	my_markers.MakeCopy(current_markers);
-	if ((int)my_markers.GetMarkersSize() < size)
-		my_markers.SetMarkersSize(size);
+	// make a copy of markers_manager.markers
+	markers_manager.MakeCopyTo(my_markers);
+	if ((int)my_markers.markers_array.size() < size)
+		my_markers.markers_array.resize(size);
 
-	coherent = true;
 	already_compressed = false;
 	// save current time to description
 	time_t raw_time;
@@ -78,12 +77,20 @@ void INPUT_SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
 
-void INPUT_SNAPSHOT::copyToMarkers(int end)
+bool SNAPSHOT::MarkersDifferFromCurrent(int end)
 {
-	current_markers.RestoreFromCopy(my_markers, end);
+	return markers_manager.checkMarkersDiff(my_markers, end);
+}
+void SNAPSHOT::copyToMarkers(int end)
+{
+	markers_manager.RestoreFromCopy(my_markers, end);
+}
+MARKERS& SNAPSHOT::GetMarkers()
+{
+	return my_markers;
 }
 
-void INPUT_SNAPSHOT::toMovie(MovieData& md, int start, int end)
+void SNAPSHOT::toMovie(MovieData& md, int start, int end)
 {
 	if (end < 0) end = size-1;
 	// write input data to movie data
@@ -127,7 +134,7 @@ void INPUT_SNAPSHOT::toMovie(MovieData& md, int start, int end)
 	}
 }
 
-void INPUT_SNAPSHOT::compress_data()
+void SNAPSHOT::compress_data()
 {
 	// compress joysticks
 	int len = joysticks.size();
@@ -154,12 +161,11 @@ void INPUT_SNAPSHOT::compress_data()
 	already_compressed = true;
 }
 
-void INPUT_SNAPSHOT::save(EMUFILE *os)
+void SNAPSHOT::save(EMUFILE *os)
 {
 	// write vars
 	write32le(size, os);
 	write8le(input_type, os);
-	if (coherent) write8le(1, os); else write8le((uint8)0, os);
 	write32le(jump_frame, os);
 	write32le(rec_end_frame, os);
 	write32le(rec_joypad_diff_bits, os);
@@ -185,18 +191,16 @@ void INPUT_SNAPSHOT::save(EMUFILE *os)
 		os->fwrite(&hot_changes_compressed[0], hot_changes_compressed.size());
 	}
 	// save markers data
-	my_markers.save(os, true);
+	my_markers.save(os);
 }
 // returns true if couldn't load
-bool INPUT_SNAPSHOT::load(EMUFILE *is)
+bool SNAPSHOT::load(EMUFILE *is)
 {
 	uint8 tmp;
 	// read vars
 	if (!read32le(&size, is)) return true;
 	if (!read8le(&tmp, is)) return true;
 	input_type = tmp;
-	if (!read8le(&tmp, is)) return true;
-	coherent = (tmp != 0);
 	if (!read32le(&jump_frame, is)) return true;
 	if (!read32le(&rec_end_frame, is)) return true;
 	if (!read32le(&rec_joypad_diff_bits, is)) return true;
@@ -249,14 +253,13 @@ bool INPUT_SNAPSHOT::load(EMUFILE *is)
 	if (my_markers.load(is)) return true;
 	return false;
 }
-bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
+bool SNAPSHOT::skipLoad(EMUFILE *is)
 {
 	int tmp;
 	uint8 tmp1;
 	// read vars
 	if (is->fseek(sizeof(int) + // size
 				sizeof(uint8) + // input_type
-				sizeof(uint8) + // coherent
 				sizeof(int) +	// jump_frame
 				sizeof(int) +	// rec_end_frame
 				sizeof(int) +	// rec_joypad_diff_bits
@@ -285,7 +288,7 @@ bool INPUT_SNAPSHOT::skipLoad(EMUFILE *is)
 }
 
 // return true if any difference is found
-bool INPUT_SNAPSHOT::checkDiff(INPUT_SNAPSHOT& inp)
+bool SNAPSHOT::checkDiff(SNAPSHOT& inp)
 {
 	if (size != inp.size) return true;
 	if (findFirstChange(inp) >= 0)
@@ -295,7 +298,7 @@ bool INPUT_SNAPSHOT::checkDiff(INPUT_SNAPSHOT& inp)
 }
 
 // fills map of bits judging on which joypads differ (this function is only used by "Record" modtype)
-void INPUT_SNAPSHOT::fillJoypadsDiff(INPUT_SNAPSHOT& inp, int frame)
+void SNAPSHOT::fillJoypadsDiff(SNAPSHOT& inp, int frame)
 {
 	rec_joypad_diff_bits = 0;
 	uint32 current_mask = 1;
@@ -323,8 +326,12 @@ void INPUT_SNAPSHOT::fillJoypadsDiff(INPUT_SNAPSHOT& inp, int frame)
 }
 
 // return number of first frame of difference between two snapshots
-int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
+int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
 {
+	// if these two snapshots have different input_type (abnormal situation) then refuse to search and return the beginning
+	if (inp.input_type != input_type)
+		return start;
+
 	// search for differences to the specified end (or to the end of this snapshot)
 	if (end < 0 || end >= size) end = size-1;
 	int inp_end = inp.size;
@@ -402,8 +409,8 @@ int INPUT_SNAPSHOT::findFirstChange(INPUT_SNAPSHOT& inp, int start, int end)
 	// no changes were found
 	return -1;
 }
-// return number of first frame of difference between this input_snapshot and MovieData
-int INPUT_SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
+// return number of first frame of difference between this snapshot and MovieData
+int SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 {
 	// search for differences to the specified end (or to the end of this snapshot / to the end of the movie)
 	if (end < 0 || end >= size) end = size-1;
@@ -449,7 +456,7 @@ int INPUT_SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 	return -1;	// no changes were found
 }
 
-int INPUT_SNAPSHOT::GetJoystickInfo(int frame, int joy)
+int SNAPSHOT::GetJoystickInfo(int frame, int joy)
 {
 	if (frame < 0 || frame >= size) return 0;
 	switch(input_type)
@@ -463,11 +470,63 @@ int INPUT_SNAPSHOT::GetJoystickInfo(int frame, int joy)
 	}
 	return 0;
 }
+
+void SNAPSHOT::insertFrames(int at, int frames)
+{
+	size += frames;
+	if(at == -1) 
+	{
+		// append frames to the end
+		commands.resize(size);
+		joysticks.resize(BYTES_PER_JOYSTICK * joysticks_per_frame[input_type] * size);
+		if (has_hot_changes)
+		{
+			hot_changes.resize(joysticks_per_frame[input_type] * size * HOTCHANGE_BYTES_PER_JOY);
+			// fill new hotchanges with max value
+			int lower_limit = joysticks_per_frame[input_type] * (size - frames) * HOTCHANGE_BYTES_PER_JOY;
+			for (int i = hot_changes.size() - 1; i >= lower_limit; i--)
+				hot_changes[i] = 0xFF;
+		}
+	} else
+	{
+		// insert frames
+		// insert 1 byte of commands
+		commands.insert(commands.begin() + at, frames, 0);
+		// insert X bytes of joystics
+		int bytes = BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
+		joysticks.insert(joysticks.begin() + (at * bytes), frames * bytes, 0);
+		if (has_hot_changes)
+		{
+			// insert X bytes of hot_changes
+			bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+			hot_changes.insert(hot_changes.begin() + (at * bytes), frames * bytes, 0xFF);
+		}
+	}
+	// data was changed
+	already_compressed = false;
+}
+void SNAPSHOT::eraseFrame(int frame)
+{
+	// erase 1 byte of commands
+	commands.erase(commands.begin() + frame);
+	// erase X bytes of joystics
+	int bytes = BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
+	joysticks.erase(joysticks.begin() + (frame * bytes), joysticks.begin() + ((frame + 1) * bytes));
+	if (has_hot_changes)
+	{
+		// erase X bytes of hot_changes
+		bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+		hot_changes.erase(hot_changes.begin() + (frame * bytes), hot_changes.begin() + ((frame + 1) * bytes));
+	}
+	size--;
+	// data was changed
+	already_compressed = false;
+}
 // --------------------------------------------------------
-void INPUT_SNAPSHOT::copyHotChanges(INPUT_SNAPSHOT* source_of_hotchanges, int limit_frame_of_source)
+void SNAPSHOT::copyHotChanges(SNAPSHOT* source_of_hotchanges, int limit_frame_of_source)
 {
 	// copy hot changes from source snapshot
-	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int min = hot_changes.size();
 		if (min > (int)source_of_hotchanges->hot_changes.size())
@@ -483,10 +542,10 @@ void INPUT_SNAPSHOT::copyHotChanges(INPUT_SNAPSHOT* source_of_hotchanges, int li
 		memcpy(&hot_changes[0], &source_of_hotchanges->hot_changes[0], min);
 	}
 } 
-void INPUT_SNAPSHOT::inheritHotChanges(INPUT_SNAPSHOT* source_of_hotchanges)
+void SNAPSHOT::inheritHotChanges(SNAPSHOT* source_of_hotchanges)
 {
 	// copy hot changes from source snapshot and fade them
-	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int min = hot_changes.size();
 		if (min > (int)source_of_hotchanges->hot_changes.size())
@@ -496,10 +555,10 @@ void INPUT_SNAPSHOT::inheritHotChanges(INPUT_SNAPSHOT* source_of_hotchanges)
 		FadeHotChanges();
 	}
 } 
-void INPUT_SNAPSHOT::inheritHotChanges_DeleteSelection(INPUT_SNAPSHOT* source_of_hotchanges)
+void SNAPSHOT::inheritHotChanges_DeleteSelection(SNAPSHOT* source_of_hotchanges)
 {
 	// copy hot changes from source snapshot, but omit deleted frames (which are represented by current selection)
-	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0, source_pos = 0;
@@ -525,10 +584,10 @@ void INPUT_SNAPSHOT::inheritHotChanges_DeleteSelection(INPUT_SNAPSHOT* source_of
 		FadeHotChanges();
 	}
 } 
-void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of_hotchanges)
+void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 {
 	// copy hot changes from source snapshot, but insert filled lines for inserted frames (which are represented by current selection)
-	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, region_len = 0, pos = 0, source_pos = 0;
@@ -588,16 +647,16 @@ void INPUT_SNAPSHOT::inheritHotChanges_InsertSelection(INPUT_SNAPSHOT* source_of
 		}
 	}
 } 
-void INPUT_SNAPSHOT::inheritHotChanges_PasteInsert(INPUT_SNAPSHOT* source_of_hotchanges)
+void SNAPSHOT::inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set)
 {
 	// copy hot changes from source snapshot and insert filled lines for inserted frames (which are represented by inserted_set)
-	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes)
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0, source_pos = 0;
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(selection.GetInsertedSet().begin());
-		SelectionFrames::iterator inserted_set_end(selection.GetInsertedSet().end());
+		SelectionFrames::iterator it(inserted_set.begin());
+		SelectionFrames::iterator inserted_set_end(inserted_set.end());
 		while (pos < this_size)
 		{
 			if (it != inserted_set_end && frame == *it)
@@ -622,8 +681,8 @@ void INPUT_SNAPSHOT::inheritHotChanges_PasteInsert(INPUT_SNAPSHOT* source_of_hot
 		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 		int frame = 0, pos = 0;
 		int this_size = hot_changes.size();
-		SelectionFrames::iterator it(selection.GetInsertedSet().begin());
-		SelectionFrames::iterator inserted_set_end(selection.GetInsertedSet().end());
+		SelectionFrames::iterator it(inserted_set.begin());
+		SelectionFrames::iterator inserted_set_end(inserted_set.end());
 		while (pos < this_size)
 		{
 			if (it != inserted_set_end && frame == *it)
@@ -644,9 +703,13 @@ void INPUT_SNAPSHOT::inheritHotChanges_PasteInsert(INPUT_SNAPSHOT* source_of_hot
 		}
 	}
 } 
-void INPUT_SNAPSHOT::fillHotChanges(INPUT_SNAPSHOT& inp, int start, int end)
+void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 {
-	// search for differences to the specified end (or to the end of this snapshot)
+	// if these two snapshots have different input_type (abnormal situation) then refuse to compare
+	if (inp.input_type != input_type)
+		return;
+
+	// compare snapshots to the specified end (or to the end of this snapshot)
 	if (end < 0 || end >= size) end = size-1;
 	int inp_end = inp.size;
 	switch(input_type)
@@ -735,7 +798,7 @@ void INPUT_SNAPSHOT::fillHotChanges(INPUT_SNAPSHOT& inp, int start, int end)
 	}
 }
 
-void INPUT_SNAPSHOT::SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits)
+void SNAPSHOT::SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits)
 {
 	uint8 mask = 1;
 	// check all 8 buttons and set max hot_changes for bits that are set
@@ -746,7 +809,7 @@ void INPUT_SNAPSHOT::SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits)
 		mask <<= 1;
 	}
 }
-void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
+void SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 {
 	if (frame < 0 || frame >= size || !has_hot_changes) return;
 	// set max value (15) to the button hotness
@@ -788,7 +851,7 @@ void INPUT_SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 	}
 }
 
-void INPUT_SNAPSHOT::FadeHotChanges()
+void SNAPSHOT::FadeHotChanges()
 {
 	uint8 hi_half, low_half;
 	for (int i = hot_changes.size() - 1; i >= 0; i--)
@@ -804,7 +867,7 @@ void INPUT_SNAPSHOT::FadeHotChanges()
 	}
 }
 
-int INPUT_SNAPSHOT::GetHotChangeInfo(int frame, int absolute_button)
+int SNAPSHOT::GetHotChangeInfo(int frame, int absolute_button)
 {
 	if (!has_hot_changes || frame < 0 || frame >= size || absolute_button < 0 || absolute_button >= NUM_JOYPAD_BUTTONS * joysticks_per_frame[input_type])
 		return 0;

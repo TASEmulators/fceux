@@ -10,6 +10,14 @@ enum
 	EDIT_MODE_BRANCHES = 2,
 };
 
+enum COMMANDS
+{
+	COMMAND_SET = 0,
+	COMMAND_JUMP = 1,
+	COMMAND_DEPLOY = 2,
+	COMMAND_DELETE = 3,			// not implemented, probably useless
+};
+
 #define ITEM_UNDER_MOUSE_NONE -2
 #define ITEM_UNDER_MOUSE_CLOUD -1
 
@@ -90,6 +98,8 @@ enum
 #define BOOKMARKS_ID_LEN 10
 #define TIME_DESC_LENGTH 9		// "HH:MM:SS"
 
+#define DEFAULT_BOOKMARK 1
+
 class BOOKMARKS
 {
 public:
@@ -103,9 +113,7 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
-	void set(int slot);
-	void jump(int slot);
-	void unleash(int slot);
+	void command(int command_id, int slot);
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
@@ -132,6 +140,7 @@ public:
 	void RecursiveAddHeight(int branch_num, int amount);
 	void RecursiveSetYPos(int parent, int parentY);
 
+	// saved vars
 	std::vector<BOOKMARK> bookmarks_array;
 
 	// not saved vars
@@ -143,6 +152,10 @@ public:
 	TRACKMOUSEEVENT tme, list_tme;
 
 private:
+	void set(int slot);
+	void jump(int slot);
+	void deploy(int slot);
+
 	void SetCurrentPosTime();
 
 	// also saved vars
@@ -152,6 +165,7 @@ private:
 	char current_pos_time[TIME_DESC_LENGTH];
 
 	// not saved vars
+	std::vector<int> commands;
 	int check_flash_shedule;
 	int edit_mode;
 	int animation_frame;

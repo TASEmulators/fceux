@@ -1,6 +1,5 @@
 //Implementation file of Playback class
 #include "taseditor_project.h"
-#include "..\taseditor.h"		// only for MARKER_NOTE_EDIT_UPPER
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
@@ -8,17 +7,13 @@ extern void ForceExecuteLuaFrameFunctions();
 
 extern bool Taseditor_rewind_now;
 extern bool turbo;
-extern int marker_note_edit;
-extern int search_similar_marker;
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
-extern MARKERS current_markers;
+extern MARKERS_MANAGER markers_manager;
 extern GREENZONE greenzone;
 extern TASEDITOR_LIST list;
 extern BOOKMARKS bookmarks;
-
-extern void UpdateMarkerNote();
 
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC playbackMarkerEdit_oldWndproc;
@@ -53,7 +48,7 @@ void PLAYBACK::reset()
 	must_find_current_marker = true;
 	shown_marker = 0;
 	lastCursor = -1;
-	pause_frame = old_pauseframe = 0;
+	lost_position_frame = pause_frame = old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
@@ -65,6 +60,11 @@ void PLAYBACK::reset()
 void PLAYBACK::update()
 {
 	jump_was_used_this_frame = false;
+
+	// forget lost_position_frame when the position is restored
+	if (currFrameCounter + 1 == lost_position_frame)
+		lost_position_frame = 0;
+
 	// pause when seeking hit pause_frame
 	if(!FCEUI_EmulationPaused())
 		if(pause_frame && pause_frame <= currFrameCounter + 1)
@@ -124,10 +124,10 @@ void PLAYBACK::update()
 		lastCursor = currFrameCounter;
 		UpdateWindow(list.hwndList);
 		// lazy update of "Playback's Marker text"
-		int current_marker = current_markers.GetMarkerUp(currFrameCounter);
+		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
 		if (shown_marker != current_marker)
 		{
-			UpdateMarkerNote();
+			markers_manager.UpdateMarkerNote();
 			shown_marker = current_marker;
 			RedrawMarker();
 			must_find_current_marker = false;
@@ -137,8 +137,8 @@ void PLAYBACK::update()
 	// [non-lazy] update "Playback's Marker text" if needed
 	if (must_find_current_marker)
 	{
-		UpdateMarkerNote();
-		shown_marker = current_markers.GetMarkerUp(currFrameCounter);
+		markers_manager.UpdateMarkerNote();
+		shown_marker = markers_manager.GetMarkerUp(currFrameCounter);
 		RedrawMarker();
 		must_find_current_marker = false;
 	}
@@ -270,7 +270,7 @@ void PLAYBACK::RewindFull()
 	// jump to previous marker
 	int index = currFrameCounter - 1;
 	for (; index >= 0; index--)
-		if (current_markers.GetMarker(index)) break;
+		if (markers_manager.GetMarker(index)) break;
 	if (index >= 0)
 		jump(index);
 	else
@@ -283,7 +283,7 @@ void PLAYBACK::ForwardFull()
 	int last_frame = currMovieData.getNumRecords()-1;
 	int index = currFrameCounter + 1;
 	for (; index <= last_frame; ++index)
-		if (current_markers.GetMarker(index)) break;
+		if (markers_manager.GetMarker(index)) break;
 	if (index <= last_frame)
 		jump(index);
 	else
@@ -301,17 +301,18 @@ void PLAYBACK::RedrawMarker()
 	strcat(new_text, num);
 	SetWindowText(hwndPlaybackMarker, new_text);
 	// change marker note
-	strcpy(new_text, current_markers.GetNote(shown_marker).c_str());
+	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());
 	SetWindowText(hwndPlaybackMarkerEdit, new_text);
-	// reset search_similar_marker
-	search_similar_marker = 0;
+	// reset search_similar_marker, because source marker changed
+	markers_manager.search_similar_marker = 0;
 }
 
 void PLAYBACK::StartFromZero()
 {
 	poweron(true);
 	currFrameCounter = 0;
-	greenzone.TryDumpIncremental();
+	if(currMovieData.getNumRecords() == 0)
+		currMovieData.insertEmpty(-1, 1);
 }
 
 void PLAYBACK::jump(int frame)
@@ -327,7 +328,7 @@ void PLAYBACK::restorePosition()
 	if (pause_frame)
 		jump(pause_frame-1);
 	else
-		jump(currFrameCounter);
+		jump(lost_position_frame-1);
 }
 
 bool PLAYBACK::JumpToFrame(int index)
@@ -367,7 +368,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	return true;
 }
 
-int PLAYBACK::GetPauseFrame()
+int PLAYBACK::GetFlashingPauseFrame()
 {
 	if (show_pauseframe)
 		return pause_frame;
@@ -382,7 +383,7 @@ void PLAYBACK::SetProgressbar(int a, int b)
 // -------------------------------------------------------------------------
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 	{
 		extern PLAYBACK playback;
 		extern TASEDITOR_SELECTION selection;
@@ -394,7 +395,7 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			{
 			case VK_ESCAPE:
 				// revert text to original note text
-				SetWindowText(playback.hwndPlaybackMarkerEdit, current_markers.GetNote(playback.shown_marker).c_str());
+				SetWindowText(playback.hwndPlaybackMarkerEdit, markers_manager.GetNote(playback.shown_marker).c_str());
 				SetFocus(list.hwndList);
 				return 0;
 			case VK_RETURN:

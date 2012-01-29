@@ -1,5 +1,7 @@
 //Specification file for TASEDITOR_WINDOW class
 #define TASEDITOR_WINDOW_TOTAL_ITEMS 42
+#define TOOLTIP_TEXT_MAX_LEN 80
+#define TOOLTIPS_AUTOPOP_TIMEOUT 30000
 
 enum ECONTEXTMENU
 {
@@ -16,10 +18,10 @@ public:
 	void reset();
 	void update();
 
-	void CalculateItems();
 	void ResizeItems();
-
 	void WindowMovedOrResized();
+
+	void UpdateTooltips();
 
 	void UpdateCaption();
 	void RedrawTaseditor();
@@ -36,13 +38,16 @@ public:
 	void LoadRecentProject(int slot);
 
 	HWND hwndTasEditor, hwndFindNote;
-	HMENU hmenu, hrmenu;
-	HICON hTaseditorIcon;
 	bool TASEditor_focus;
 	bool ready_for_resizing;
 	int min_width;
 	int min_height;
 
 private:
+	void CalculateItems();
+
+	HWND hToolTipWnd;
+	HMENU hmenu, hrmenu;
+	HICON hTaseditorIcon;
 
 };

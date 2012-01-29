@@ -5,7 +5,7 @@ enum
 {
 	FLASH_TYPE_SET = 0,
 	FLASH_TYPE_JUMP = 1,
-	FLASH_TYPE_UNLEASH = 2,
+	FLASH_TYPE_DEPLOY = 2,
 };
 
 #define SCREENSHOT_WIDTH 256
@@ -19,8 +19,8 @@ public:
 	void init();
 
 	void set();
-	void jump();
-	void unleashed();
+	void jumped();
+	void deployed();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
@@ -28,7 +28,7 @@ public:
 	bool not_empty;
 	int flash_phase;
 	int flash_type;
-	INPUT_SNAPSHOT snapshot;
+	SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
 	std::vector<uint8> saved_screenshot;
 	int parent_branch;

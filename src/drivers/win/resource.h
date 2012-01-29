@@ -234,6 +234,8 @@
 #define IDC_DEBUGGER_FLAG_D             204
 #define IDC_NETMOO_KEY                  205
 #define IDC_DEBUGGER_FLAG_I             205
+#define IDB_BITMAP20                    205
+#define IDB_TE_GREEN_ARROW              205
 #define IDC_NETMOO_PASS                 206
 #define IDC_DEBUGGER_FLAG_Z             206
 #define IDC_DEBUGGER_FLAG_C             207
@@ -977,6 +979,11 @@
 #define ID_HELP_TASEDITORHELP           40523
 #define MENU_TASEDITOR                  40524
 #define ID_FILE_NEW                     40525
+#define ID_HELP_SHOWTOOLTIPS            40526
+#define ID_HELP_TOOLTIPS                40527
+#define ID_STRAY_UNPAUSEEMULATOR        40528
+#define ID_STRAY_UNPAUSE                40529
+#define ID_STRAY_TRUNCATE40530          40530
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -985,8 +992,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        203
-#define _APS_NEXT_COMMAND_VALUE         40526
+#define _APS_NEXT_RESOURCE_VALUE        206
+#define _APS_NEXT_COMMAND_VALUE         40531
 #define _APS_NEXT_CONTROL_VALUE         1280
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

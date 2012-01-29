@@ -255,8 +255,7 @@ BEGIN
         MENUITEM "&Insert\tShift+Ins",          ID_EDIT_INSERTFRAMES
         MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT
         MENUITEM SEPARATOR
-        MENUITEM "Truncate\tCtrl+T",            ID_EDIT_TRUNCATE
-        MENUITEM SEPARATOR
+        MENUITEM "Truncate movie",              ID_EDIT_TRUNCATE
     END
     POPUP "&View"
     BEGIN
@@ -296,7 +295,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&TAS Editor Help",            ID_HELP_TASEDITORHELP
+        MENUITEM "TAS Editor &Help",            ID_HELP_TASEDITORHELP
+        MENUITEM "Enable &Tooltips",            ID_HELP_TOOLTIPS
         MENUITEM SEPARATOR
         MENUITEM "&About",                      ID_HELP_ABOUT
     END
@@ -376,15 +376,16 @@ TASEDITORCONTEXTMENUS MENU
 BEGIN
     POPUP "Stray"
     BEGIN
-        MENUITEM "Insert # of Frames",          MENU_CONTEXT_STRAY_INSERTFRAMES
+        MENUITEM "Unpause emulator",            ID_STRAY_UNPAUSE
         MENUITEM SEPARATOR
-        MENUITEM "Truncate movie",              ID_CONTEXT_STRAY_TRUNCATE
+        MENUITEM "Insert # of Frames",          MENU_CONTEXT_STRAY_INSERTFRAMES
+        MENUITEM "Truncate movie",              ID_STRAY_TRUNCATE
     END
     POPUP "Selected"
     BEGIN
         MENUITEM "Set Marker",                  ID_SELECTED_SETMARKER
         MENUITEM "Remove Marker",               ID_SELECTED_REMOVEMARKER
-        MENUITEM "Select mid &Markers",         ID_SELECTED_SELECTMIDMARKERS
+        MENUITEM "Select between &Markers",     ID_SELECTED_SELECTMIDMARKERS
         MENUITEM SEPARATOR
         MENUITEM "C&lear",                      ID_CONTEXT_SELECTED_CLEARFRAMES
         MENUITEM "&Delete",                     ID_CONTEXT_SELECTED_DELETEFRAMES
@@ -1649,6 +1650,7 @@ END
 
 IDD_LUA DIALOGEX 0, 0, 270, 150
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
 CAPTION "Lua Script"
 MENU LUAWINDOW_MENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -2189,7 +2191,6 @@ BEGIN
     VK_PRIOR,       ACCEL_CTRL_PGUP,        VIRTKEY, CONTROL, NOINVERT
     "Q",            ACCEL_CTRL_Q,           VIRTKEY, CONTROL, NOINVERT
     "S",            ACCEL_CTRL_S,           VIRTKEY, CONTROL, NOINVERT
-    "T",            ACCEL_CTRL_T,           VIRTKEY, CONTROL, NOINVERT
     "V",            ACCEL_CTRL_V,           VIRTKEY, CONTROL, NOINVERT
     "W",            ACCEL_CTRL_W,           VIRTKEY, CONTROL, NOINVERT
     "X",            ACCEL_CTRL_X,           VIRTKEY, CONTROL, NOINVERT
@@ -2243,7 +2244,8 @@ IDB_BITMAP16            BITMAP                  "res\\te_16.bmp"
 IDB_BITMAP17            BITMAP                  "res\\te_17.bmp"
 IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
-IDB_TE_ARROW            BITMAP                  "res/te_arrow.bmp"
+IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
+IDB_TE_GREEN_ARROW      BITMAP                  "res\\te_green_arrow.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 #endif    // Английский (США) resources
 /////////////////////////////////////////////////////////////////////////////

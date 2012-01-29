@@ -17,8 +17,8 @@ pads = {
 buttons = {
 	A      = {x=30,y=5,w=3,h=3},
 	B      = {x=24,y=5,w=3,h=3},
-	start  = {x=12,y=7,w=3,h=1},
 	select = {x=18,y=7,w=3,h=1},
+	start  = {x=12,y=7,w=3,h=1},
 	up     = {x=4, y=1,w=2,h=2},
 	down   = {x=4, y=7,w=2,h=2},
 	left   = {x=1, y=4,w=2,h=2},

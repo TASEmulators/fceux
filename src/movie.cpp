@@ -979,9 +979,9 @@ void FCEUMOV_AddInputState()
 #ifdef _WIN32
 	if(movieMode == MOVIEMODE_TASEDITOR)
 	{
-		// if movie length is less than currFrame, pad it with empty frames
-		if((int)currMovieData.records.size() <= currFrameCounter)
-			currMovieData.insertEmpty(-1, 1 + currFrameCounter - (int)currMovieData.records.size());
+		// if movie length is less or equal to currFrame, pad it with empty frames
+		if((int)currMovieData.records.size()-1 <= currFrameCounter)
+			currMovieData.insertEmpty(-1, 2 + currFrameCounter - (int)currMovieData.records.size());
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
 		if(movie_readonly || turbo || playback.pause_frame > currFrameCounter)
@@ -1001,6 +1001,9 @@ void FCEUMOV_AddInputState()
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			recorder.InputChanged();
+			// return data from movie to joyports in case Recorder changed it (for example, by applying Superimpose)
+			joyports[0].load(mr);
+			joyports[1].load(mr);
 		}
 		_currCommand = 0;
 	} else

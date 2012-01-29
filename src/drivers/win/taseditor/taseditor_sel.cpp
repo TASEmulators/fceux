@@ -1,16 +1,13 @@
 //Implementation file of TASEDITOR_SELECTION class
 #include "taseditor_project.h"
-#include "..\taseditor.h"		// only for MARKER_NOTE_EDIT_LOWER
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
-extern MARKERS current_markers;
+extern MARKERS_MANAGER markers_manager;
 extern TASEDITOR_LIST list;
 extern SPLICER splicer;
 
-extern int marker_note_edit;
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
-extern void UpdateMarkerNote();
 
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC selectionMarkerEdit_oldWndproc;
@@ -120,8 +117,8 @@ void TASEDITOR_SELECTION::update()
 	// update "Selection's Marker text" if needed
 	if (must_find_current_marker)
 	{
-		UpdateMarkerNote();
-		shown_marker = current_markers.GetMarkerUp(last_selection_beginning);
+		markers_manager.UpdateMarkerNote();
+		shown_marker = markers_manager.GetMarkerUp(last_selection_beginning);
 		RedrawMarker();
 		must_find_current_marker = false;
 	}
@@ -139,7 +136,7 @@ void TASEDITOR_SELECTION::RedrawMarker()
 	strcat(new_text, num);
 	SetWindowText(hwndSelectionMarker, new_text);
 	// change marker note
-	strcpy(new_text, current_markers.GetNote(shown_marker).c_str());
+	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());
 	SetWindowText(hwndSelectionMarkerEdit, new_text);
 }
 
@@ -149,7 +146,7 @@ void TASEDITOR_SELECTION::JumpPrevMarker()
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
 	for (index--; index >= 0; index--)
-		if (current_markers.GetMarker(index)) break;
+		if (markers_manager.GetMarker(index)) break;
 	if (index >= 0)
 		JumpToFrame(index);
 	else
@@ -163,7 +160,7 @@ void TASEDITOR_SELECTION::JumpNextMarker()
 
 	int last_frame = currMovieData.getNumRecords()-1;
 	for (++index; index <= last_frame; ++index)
-		if (current_markers.GetMarker(index)) break;
+		if (markers_manager.GetMarker(index)) break;
 	if (index <= last_frame)
 		JumpToFrame(index);
 	else
@@ -431,10 +428,10 @@ void TASEDITOR_SELECTION::SelectBetweenMarkers()
 	// find markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
-		if (current_markers.GetMarker(upper_marker)) break;
+		if (markers_manager.GetMarker(upper_marker)) break;
 	// searching down starting from center+1
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
-		if (current_markers.GetMarker(lower_marker)) break;
+		if (markers_manager.GetMarker(lower_marker)) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
 	ListView_SetItemState(list.hwndList, -1, 0, LVIS_SELECTED);
@@ -528,11 +525,7 @@ SelectionFrames& TASEDITOR_SELECTION::GetStrobedSelection()
 	return temp_selection;
 }
 
-SelectionFrames& TASEDITOR_SELECTION::GetInsertedSet()
-{
-	return inserted_set;
-}
-// this getter is only for inside-class use
+// this getter is private
 SelectionFrames& TASEDITOR_SELECTION::CurrentSelection()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
@@ -540,7 +533,7 @@ SelectionFrames& TASEDITOR_SELECTION::CurrentSelection()
 // -------------------------------------------------------------------------
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 	{
 		extern PLAYBACK playback;
 		extern TASEDITOR_SELECTION selection;
@@ -552,7 +545,7 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			{
 			case VK_ESCAPE:
 				// revert text to original note text
-				SetWindowText(selection.hwndSelectionMarkerEdit, current_markers.GetNote(selection.shown_marker).c_str());
+				SetWindowText(selection.hwndSelectionMarkerEdit, markers_manager.GetNote(selection.shown_marker).c_str());
 				SetFocus(list.hwndList);
 				return 0;
 			case VK_RETURN:

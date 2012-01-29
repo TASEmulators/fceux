@@ -9,6 +9,8 @@ extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
 extern TASEDITOR_LIST list;
 
+extern char lagFlag;
+
 char greenzone_save_id[GREENZONE_ID_LEN] = "GREENZONE";
 char greenzone_skipsave_id[GREENZONE_ID_LEN] = "GREENZONX";
 
@@ -31,7 +33,6 @@ void GREENZONE::free()
 	savestates.resize(0);
 	greenZoneCount = 0;
 	lag_history.resize(0);
-	// reset lua_colorings
 	// reset monitorings
 	
 }
@@ -42,24 +43,21 @@ void GREENZONE::reset()
 }
 void GREENZONE::update()
 {
-	if ((int)savestates.size() < greenZoneCount)
-		savestates.resize(greenZoneCount);
-	if ((int)lag_history.size() < greenZoneCount)
-		lag_history.resize(greenZoneCount);
+	// keep memorizing savestates, this function should be called at the end of every frame
+	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || savestates[currFrameCounter].empty())
+		CollectCurrentState();
 
+	// run cleaning from time to time
 	if (clock() > next_cleaning_time)
 		GreenzoneCleaning();
 }
 
-void GREENZONE::TryDumpIncremental(bool lagFlag)
+void GREENZONE::CollectCurrentState()
 {
-	// if movie length is less than currFrame, pad it with empty frames
-	if(currMovieData.getNumRecords() <= currFrameCounter)
-		currMovieData.insertEmpty(-1, 1 + currFrameCounter - currMovieData.getNumRecords());
-
-	// update greenzone upper limit
+	// update greenzone upper limit if needed
 	if (greenZoneCount <= currFrameCounter)
 		greenZoneCount = currFrameCounter+1;
+
 	if ((int)savestates.size() < greenZoneCount)
 		savestates.resize(greenZoneCount);
 	if ((int)lag_history.size() < greenZoneCount)
@@ -67,7 +65,7 @@ void GREENZONE::TryDumpIncremental(bool lagFlag)
 
 	// if frame changed - log savestate
 	storeTasSavestate(currFrameCounter);
-	// also log frame_flags
+	// also log lag frames
 	if (currFrameCounter > 0)
 	{
 		// lagFlag indicates that lag was in previous frame
@@ -91,8 +89,8 @@ bool GREENZONE::loadTasSavestate(int frame)
 
 void GREENZONE::storeTasSavestate(int frame)
 {
-	if ((int)savestates.size()<=frame)
-		savestates.resize(frame+1);
+	if ((int)savestates.size() <= frame)
+		savestates.resize(frame + 1);
 
 	EMUFILE_MEMORY ms(&savestates[frame]);
 	FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
@@ -103,11 +101,11 @@ void GREENZONE::GreenzoneCleaning()
 {
 	int i = currFrameCounter - taseditor_config.greenzone_capacity;
 	bool changed = false;
-	if (i < 0) goto finish;
+	if (i <= 0) goto finish;	// zeroth frame should not be cleaned
 	int limit;
 	// 2x of 1/2
 	limit = i - 2 * taseditor_config.greenzone_capacity;
-	if (limit < -1) limit = -1;
+	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
 		if ((i & 0x1) && !savestates[i].empty())
@@ -119,7 +117,7 @@ void GREENZONE::GreenzoneCleaning()
 	if (i < 0) goto finish;
 	// 4x of 1/4
 	limit = i - 4 * taseditor_config.greenzone_capacity;
-	if (limit < -1) limit = -1;
+	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
 		if ((i & 0x3) && !savestates[i].empty())
@@ -131,7 +129,7 @@ void GREENZONE::GreenzoneCleaning()
 	if (i < 0) goto finish;
 	// 8x of 1/8
 	limit = i - 8 * taseditor_config.greenzone_capacity;
-	if (limit < -1) limit = -1;
+	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
 		if ((i & 0x7) && !savestates[i].empty())
@@ -143,7 +141,7 @@ void GREENZONE::GreenzoneCleaning()
 	if (i < 0) goto finish;
 	// 16x of 1/16
 	limit = i - 16 * taseditor_config.greenzone_capacity;
-	if (limit < -1) limit = -1;
+	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
 		if ((i & 0xF) && !savestates[i].empty())
@@ -153,7 +151,7 @@ void GREENZONE::GreenzoneCleaning()
 		}
 	}
 	// clear all remaining
-	for (; i >= 0; i--)
+	for (; i > 0; i--)
 	{
 		if (!savestates[i].empty())
 		{
@@ -208,7 +206,6 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 			}
 			if (savestates[frame].empty()) continue;
 			write32le(frame, os);
-			// write lua_colorings
 			// write monitorings
 			// write savestate
 			size = savestates[frame].size();
@@ -312,7 +309,6 @@ bool GREENZONE::load(EMUFILE *is)
 					playback.SetProgressbar(frame, greenZoneCount);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
-				// read lua_colorings
 				// read monitorings
 				// read savestate
 				if (!read32le(&size, is)) break;
@@ -380,6 +376,10 @@ void GREENZONE::InvalidateAndCheck(int after)
 			// either set playback cursor to the end of greenzone or run seeking to restore playback position
 			if (currFrameCounter >= greenZoneCount)
 			{
+				// remember the lost position
+				if (playback.lost_position_frame-1 < currFrameCounter)
+					playback.lost_position_frame = currFrameCounter + 1;
+				// auto-restore position if needed
 				if (taseditor_config.restore_position)
 					playback.restorePosition();
 				else

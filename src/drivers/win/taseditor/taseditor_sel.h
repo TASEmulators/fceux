@@ -1,4 +1,6 @@
 //Specification file for TASEDITOR_SELECTION class
+#include <set>
+typedef std::set<int> SelectionFrames;
 
 #define SELECTION_ID_LEN 10
 
@@ -27,7 +29,6 @@ public:
 
 	void undo();
 	void redo();
-	void jump(int new_pos);
 
 	void ClearSelection();
 	void ClearRowSelection(int index);
@@ -51,8 +52,6 @@ public:
 	SelectionFrames* MakeStrobe();
 	SelectionFrames& GetStrobedSelection();
 
-	SelectionFrames& GetInsertedSet();
-
 	bool must_find_current_marker;
 	int shown_marker;
 
@@ -60,6 +59,8 @@ public:
 	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
 
 private:
+	void jump(int new_pos);
+
 	SelectionFrames& CurrentSelection();
 
 	bool track_selection_changes;
@@ -70,8 +71,6 @@ private:
 	int button_hold_time;
 
 	std::vector<SelectionFrames> selections_history;
-
-	SelectionFrames inserted_set;
 
 	int history_cursor_pos;
 	int history_start_pos;

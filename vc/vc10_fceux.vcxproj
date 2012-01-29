@@ -424,12 +424,13 @@
     <ClCompile Include="..\src\drivers\win\taseditor\bookmark.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\bookmarks.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditor\inputhistory.cpp" />
-    <ClCompile Include="..\src\drivers\win\taseditor\inputsnapshot.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\history.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\markers_manager.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\playback.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\popup_display.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\recorder.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\snapshot.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\splicer.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_config.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_list.cpp" />
@@ -750,12 +751,13 @@
     <ClInclude Include="..\src\drivers\win\taseditor\bookmark.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\bookmarks.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h" />
-    <ClInclude Include="..\src\drivers\win\taseditor\inputhistory.h" />
-    <ClInclude Include="..\src\drivers\win\taseditor\inputsnapshot.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\history.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\markers.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\markers_manager.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\playback.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\recorder.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\snapshot.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\splicer.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_config.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_list.h" />
@@ -866,6 +868,8 @@
     <ResourceCompile Include="..\src\drivers\win\res.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\tasedit\psd\bmp\te_green_arrow.bmp" />
+    <None Include="..\src\drivers\win\res\bitmap20.bmp" />
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
     <None Include="..\src\drivers\win\res\icon3.ico" />
     <None Include="..\src\drivers\win\res\icon4.ico" />
@@ -908,6 +912,7 @@
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)auxlib.lua;%(Outputs)</Outputs>
     </CustomBuild>
+    <None Include="..\src\drivers\win\res\te_green_arrow.bmp" />
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>

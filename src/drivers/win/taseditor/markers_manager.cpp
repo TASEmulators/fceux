@@ -1,0 +1,714 @@
+//Implementation file of Markers_manager class
+#include "taseditor_project.h"
+#include <Shlwapi.h>		// for StrStrI
+
+#pragma comment(lib, "Shlwapi.lib")
+
+extern TASEDITOR_CONFIG taseditor_config;
+extern TASEDITOR_WINDOW taseditor_window;
+extern PLAYBACK playback;
+extern TASEDITOR_SELECTION selection;
+extern HISTORY history;
+
+// resources
+char markers_save_id[MARKERS_ID_LEN] = "MARKERS";
+char markers_skipsave_id[MARKERS_ID_LEN] = "MARKERX";
+char keywordDelimiters[] = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+MARKERS_MANAGER::MARKERS_MANAGER()
+{
+	memset(findnote_string, 0, MAX_NOTE_LEN);
+}
+
+void MARKERS_MANAGER::init()
+{
+	reset();
+}
+void MARKERS_MANAGER::free()
+{
+	markers.markers_array.resize(0);
+	markers.notes.resize(0);
+}
+void MARKERS_MANAGER::reset()
+{
+	free();
+	marker_note_edit = MARKER_NOTE_EDIT_NONE;
+	search_similar_marker = 0;
+	markers.notes.resize(1);
+	markers.notes[0] = "Power on";
+	update();
+}
+void MARKERS_MANAGER::update()
+{
+	if ((int)markers.markers_array.size() < currMovieData.getNumRecords())
+		markers.markers_array.resize(currMovieData.getNumRecords());
+}
+
+void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
+{
+	if (really_save)
+	{
+		// write "MARKERS" string
+		os->fwrite(markers_save_id, MARKERS_ID_LEN);
+		markers.save(os);
+	} else
+	{
+		// write "MARKERX" string, meaning that markers are not saved
+		os->fwrite(markers_skipsave_id, MARKERS_ID_LEN);
+	}
+}
+// returns true if couldn't load
+bool MARKERS_MANAGER::load(EMUFILE *is)
+{
+	// read "MARKERS" string
+	char save_id[MARKERS_ID_LEN];
+	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;
+	if (!strcmp(markers_skipsave_id, save_id))
+	{
+		// string says to skip loading Markers
+		FCEU_printf("No markers in the file\n");
+		reset();
+		return false;
+	}
+	if (strcmp(markers_save_id, save_id)) goto error;		// string is not valid
+	if (markers.load(is)) goto error;
+	// all ok
+	return false;
+error:
+	FCEU_printf("Error loading markers\n");
+	reset();
+	return true;
+}
+// -----------------------------------------------------------------------------------------
+int MARKERS_MANAGER::GetMarkersSize()
+{
+	return markers.markers_array.size();
+}
+void MARKERS_MANAGER::SetMarkersSize(int new_size)
+{
+	// if we are truncating, clear markers that are gonna be erased (so that obsolete notes will be erased too)
+	for (int i = markers.markers_array.size() - 1; i >= new_size; i--)
+		if (markers.markers_array[i])
+			ClearMarker(i);
+	markers.markers_array.resize(new_size);
+}
+
+int MARKERS_MANAGER::GetMarker(int frame)
+{
+	if (frame >= 0 && frame < (int)markers.markers_array.size())
+		return markers.markers_array[frame];
+	else
+		return 0;
+}
+// finds and returns # of Marker starting from start_frame and searching up
+int MARKERS_MANAGER::GetMarkerUp(int start_frame)
+{
+	if (start_frame >= (int)markers.markers_array.size())
+		start_frame = markers.markers_array.size() - 1;
+	for (; start_frame >= 0; start_frame--)
+		if (markers.markers_array[start_frame]) return markers.markers_array[start_frame];
+	return 0;
+}
+// special version of the function
+int MARKERS_MANAGER::GetMarkerUp(MARKERS& target_markers, int start_frame)
+{
+	if (start_frame >= (int)target_markers.markers_array.size())
+		start_frame = target_markers.markers_array.size() - 1;
+	for (; start_frame >= 0; start_frame--)
+		if (target_markers.markers_array[start_frame]) return target_markers.markers_array[start_frame];
+	return 0;
+}
+// finds frame where the Marker is set
+int MARKERS_MANAGER::GetMarkerFrame(int marker_id)
+{
+	for (int i = markers.markers_array.size() - 1; i >= 0; i--)
+		if (markers.markers_array[i] == marker_id) return i;
+	// didn't find
+	return -1;
+}
+// returns number of new marker
+int MARKERS_MANAGER::SetMarker(int frame)
+{
+	if (frame < 0)
+		return 0;
+	else if (frame >= (int)markers.markers_array.size())
+		markers.markers_array.resize(frame + 1);
+	else if (markers.markers_array[frame])
+		return markers.markers_array[frame];
+
+	int marker_num = GetMarkerUp(frame) + 1;
+	markers.markers_array[frame] = marker_num;
+	if (taseditor_config.empty_marker_notes)
+		markers.notes.insert(markers.notes.begin() + marker_num, 1, "");
+	else
+		// copy previous marker note
+		markers.notes.insert(markers.notes.begin() + marker_num, 1, markers.notes[marker_num - 1]);
+	// increase following markers' ids
+	int size = markers.markers_array.size();
+	for (frame++; frame < size; ++frame)
+		if (markers.markers_array[frame])
+			markers.markers_array[frame]++;
+	return marker_num;
+}
+void MARKERS_MANAGER::ClearMarker(int frame)
+{
+	if (markers.markers_array[frame])
+	{
+		// erase corresponding note
+		markers.notes.erase(markers.notes.begin() + markers.markers_array[frame]);
+		// erase marker
+		markers.markers_array[frame] = 0;
+		// decrease following markers' ids
+		int size = markers.markers_array.size();
+		for (frame++; frame < size; ++frame)
+			if (markers.markers_array[frame])
+				markers.markers_array[frame]--;
+	}
+}
+void MARKERS_MANAGER::ToggleMarker(int frame)
+{
+	if (frame >= 0 && frame < (int)markers.markers_array.size())
+	{
+		if (markers.markers_array[frame])
+			ClearMarker(frame);
+		else
+			SetMarker(frame);
+	}
+}
+
+void MARKERS_MANAGER::EraseMarker(int frame)
+{
+	if (frame < (int)markers.markers_array.size())
+	{
+		// if there's a marker, first clear it
+		if (markers.markers_array[frame])
+			ClearMarker(frame);
+		markers.markers_array.erase(markers.markers_array.begin() + frame);
+	}
+}
+void MARKERS_MANAGER::insertEmpty(int at, int frames)
+{
+	if(at == -1) 
+	{
+		markers.markers_array.resize(markers.markers_array.size() + frames);
+	} else
+	{
+		markers.markers_array.insert(markers.markers_array.begin() + at, frames, 0);
+	}
+}
+
+int MARKERS_MANAGER::GetNotesSize()
+{
+	return markers.notes.size();
+}
+std::string MARKERS_MANAGER::GetNote(int index)
+{
+	if (index >= 0 && index < (int)markers.notes.size())
+		return markers.notes[index];
+	else
+		return markers.notes[0];
+}
+// special version of the function
+std::string MARKERS_MANAGER::GetNote(MARKERS& target_markers, int index)
+{
+	if (index >= 0 && index < (int)target_markers.notes.size())
+		return target_markers.notes[index];
+	else
+		return target_markers.notes[0];
+}
+void MARKERS_MANAGER::SetNote(int index, const char* new_text)
+{
+	if (index >= 0 && index < (int)markers.notes.size())
+		markers.notes[index] = new_text;
+}
+// ---------------------------------------------------------------------------------------
+void MARKERS_MANAGER::MakeCopyTo(MARKERS& destination)
+{
+	destination.markers_array = markers.markers_array;
+	destination.notes = markers.notes;
+}
+void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source, int until_frame)
+{
+	if (until_frame >= 0)
+	{
+		// restore markers up to and not including the frame
+		if ((int)markers.markers_array.size() <= until_frame)
+		{
+			// only copy head of source
+			markers.markers_array = source.markers_array;
+			markers.markers_array.resize(until_frame);
+			markers.notes = source.notes;
+			// find last marker
+			int last_marker = GetMarkerUp(until_frame-1);
+			// delete all notes following the note of the last marker
+			markers.notes.resize(last_marker+1);
+		} else
+		{
+			// combine head of source and tail of destination (old markers)
+			// 1 - head = part of source markers
+			std::vector<int> temp_markers_array;
+			std::vector<std::string> temp_notes;
+			temp_markers_array = source.markers_array;
+			temp_markers_array.resize(until_frame);
+			temp_notes = source.notes;
+			// find last marker in temp_markers_array
+			int last_marker, frame;
+			for (frame = until_frame-1; frame >= 0; frame--)
+				if (temp_markers_array[frame]) break;
+			if (frame >= 0)
+				last_marker = temp_markers_array[frame];
+			else
+				last_marker = 0;
+			// delete all temp_notes foolowing the note of the last marker
+			temp_notes.resize(last_marker+1);
+			// 2 - tail = part of old (current) markers
+			// delete all markers (and their notes) up to and not including until_frame
+			//for (int i = until_frame-1; i >= 0; i--)		// actually no need for that
+			//	ClearMarker(i);
+			// 3 - combine head and tail (if there are actually markers left in the tail)
+			int size = markers.markers_array.size();
+			temp_markers_array.resize(size);
+			for (int i = until_frame; i < size; ++i)
+			{
+				if (markers.markers_array[i])
+				{
+					last_marker++;	// make new id for old marker
+					temp_markers_array[i] = last_marker;
+					temp_notes.push_back(markers.notes[markers.markers_array[i]]);	// take note from old markers and add it to the end of the head
+				}
+			}
+			// 4 - save result
+			markers.markers_array = temp_markers_array;
+			markers.notes = temp_notes;
+		}
+	} else
+	{
+		// end frame was not specified, consider this as "copy all"
+		markers.markers_array = source.markers_array;
+		markers.notes = source.notes;
+	}
+}
+
+// return true if any difference in markers_array is found, comparing to markers.markers_array
+bool MARKERS_MANAGER::checkMarkersDiff(MARKERS& their_markers)
+{
+	if (GetMarkersSize() != their_markers.markers_array.size()) return true;
+	if (GetNotesSize() != their_markers.notes.size()) return true;
+	for (int i = markers.markers_array.size()-1; i >= 0; i--)
+	{
+		if (markers.markers_array[i] != their_markers.markers_array[i])
+			return true;
+		else if (markers.markers_array[i] && markers.notes[markers.markers_array[i]].compare(their_markers.notes[their_markers.markers_array[i]]))
+			return true;
+	}
+	// also check if there's difference between 0th notes
+	if (markers.notes[0].compare(their_markers.notes[0]))
+		return true;
+	return false;
+}
+// return true only when difference is found before end frame (not including end frame)
+bool MARKERS_MANAGER::checkMarkersDiff(MARKERS& their_markers, int end)
+{
+	if (end < 0)
+		return checkMarkersDiff(their_markers);
+
+	if (markers.markers_array.size() != their_markers.markers_array.size() && ((int)markers.markers_array.size()-1 < end || (int)their_markers.markers_array.size()-1 < end)) return true;
+	for (int i = end-1; i >= 0; i--)
+	{
+		if (markers.markers_array[i] != their_markers.markers_array[i])
+			return true;
+		else if (markers.markers_array[i] && markers.notes[markers.markers_array[i]].compare(their_markers.notes[their_markers.markers_array[i]]))
+			return true;
+	}
+	return false;
+}
+// ------------------------------------------------------------------------------------
+// ordering function, used by std::sort
+bool ordering(const std::pair<int, double>& d1, const std::pair<int, double>& d2)
+{
+  return d1.second < d2.second;
+}
+
+void MARKERS_MANAGER::FindSimilar()
+{
+	search_similar_marker = 0;
+	FindNextSimilar();
+}
+void MARKERS_MANAGER::FindNextSimilar()
+{
+	int i, t;
+	int sourceMarker = playback.shown_marker;
+	char sourceNote[MAX_NOTE_LEN];
+	strcpy(sourceNote, GetNote(sourceMarker).c_str());
+
+	// check if playback_marker_text is empty
+	if (!sourceNote[0])
+	{
+		MessageBox(taseditor_window.hwndTasEditor, "Marker Note under Playback cursor is empty!", "Find Similar Note", MB_OK);
+		return;
+	}
+	// check if there's at least one note (not counting zeroth note)
+	if (markers.notes.size() <= 0)
+	{
+		MessageBox(taseditor_window.hwndTasEditor, "This project doesn't have any Markers!", "Find Similar Note", MB_OK);
+		return;
+	}
+
+	// 0 - divide source string into keywords
+	int totalSourceKeywords = 0;
+	char sourceKeywords[MAX_NUM_KEYWORDS][MAX_NOTE_LEN] = {0};
+	int current_line_pos = 0;
+	char sourceKeywordsLine[MAX_NUM_KEYWORDS] = {0};
+	char* pch;
+	// divide into tokens
+	pch = strtok(sourceNote, keywordDelimiters);
+	while (pch != NULL)
+	{
+		if (strlen(pch) >= KEYWORD_MIN_LEN)
+		{
+			// check if same keyword already appeared in the string
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+				if (!_stricmp(sourceKeywords[t], pch)) break;
+			if (t < 0)
+			{
+				// save new keyword
+				strcpy(sourceKeywords[totalSourceKeywords], pch);
+				// also set its id into the line
+				sourceKeywordsLine[current_line_pos++] = totalSourceKeywords + 1;
+				totalSourceKeywords++;
+			} else
+			{
+				// same keyword found
+				sourceKeywordsLine[current_line_pos++] = t + 1;
+			}
+		}
+		pch = strtok(NULL, keywordDelimiters);
+	}
+	// we found the line (sequence) of keywords
+	sourceKeywordsLine[current_line_pos] = 0;
+	
+	if (!totalSourceKeywords)
+	{
+		MessageBox(taseditor_window.hwndTasEditor, "Marker Note under Playback cursor doesn't have keywords!", "Find Similar Note", MB_OK);
+		return;
+	}
+
+	// 1 - find how frequently each keyword appears in notes
+	std::vector<int> keywordFound(totalSourceKeywords);
+	char checkedNote[MAX_NOTE_LEN];
+	for (i = markers.notes.size() - 1; i > 0; i--)
+	{
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, markers.notes[i].c_str());
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+				if (StrStrI(checkedNote, sourceKeywords[t]))
+					keywordFound[t]++;
+		}
+	}
+	// findmax
+	int maxFound = 0;
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		if (maxFound < keywordFound[t])
+			maxFound = keywordFound[t];
+	// and then calculate weight of each keyword: the more often it appears in markers, the less weight it has
+	std::vector<double> keywordWeight(totalSourceKeywords);
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		keywordWeight[t] = KEYWORD_WEIGHT_BASE + KEYWORD_WEIGHT_FACTOR * (keywordFound[t] / (double)maxFound);
+
+	// start accumulating priorities
+	std::vector<std::pair<int, double>> notePriority(markers.notes.size());
+
+	// 2 - find keywords in notes (including cases when keyword appears inside another word)
+	for (i = notePriority.size() - 1; i > 0; i--)
+	{
+		notePriority[i].first = i;
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, markers.notes[i].c_str());
+			for (t = totalSourceKeywords - 1; t >= 0; t--)
+			{
+				if (StrStrI(checkedNote, sourceKeywords[t]))
+					notePriority[i].second += KEYWORD_CASEINSENTITIVE_BONUS_PER_CHAR * keywordWeight[t] * strlen(sourceKeywords[t]);
+				if (strstr(checkedNote, sourceKeywords[t]))
+					notePriority[i].second += KEYWORD_CASESENTITIVE_BONUS_PER_CHAR * keywordWeight[t] * strlen(sourceKeywords[t]);
+			}
+		}
+	}
+
+	// 3 - search sequences of keywords from all other notes
+	current_line_pos = 0;
+	char checkedKeywordsLine[MAX_NUM_KEYWORDS] = {0};
+	int keyword_id;
+	for (i = markers.notes.size() - 1; i > 0; i--)
+	{
+		if (i != sourceMarker)
+		{
+			strcpy(checkedNote, markers.notes[i].c_str());
+			// divide into tokens
+			pch = strtok(checkedNote, keywordDelimiters);
+			while (pch != NULL)
+			{
+				if (strlen(pch) >= KEYWORD_MIN_LEN)
+				{
+					// check if the keyword is one of sourceKeywords
+					for (t = totalSourceKeywords - 1; t >= 0; t--)
+						if (!_stricmp(sourceKeywords[t], pch)) break;
+					if (t >= 0)
+					{
+						// the keyword is one of sourceKeywords - set its id into the line
+						checkedKeywordsLine[current_line_pos++] = t + 1;
+					} else
+					{
+						// found keyword that doesn't appear in sourceNote, give penalty
+						notePriority[i].second -= KEYWORD_PENALTY_FOR_STRANGERS * strlen(pch);
+						// since the keyword breaks our sequence of coincident keywords, check if that sequence is similar to sourceKeywordsLine
+						if (current_line_pos >= KEYWORDS_LINE_MIN_SEQUENCE)
+						{
+							checkedKeywordsLine[current_line_pos] = 0;
+							// search checkedKeywordsLine in sourceKeywordsLine
+							if (strstr(sourceKeywordsLine, checkedKeywordsLine))
+							{
+								// found same sequence of keywords! add priority to this checkedNote
+								for (t = current_line_pos - 1; t >= 0; t--)
+								{
+									// add bonus for every keyword in the sequence
+									keyword_id = checkedKeywordsLine[t] - 1;
+									notePriority[i].second += current_line_pos * KEYWORD_SEQUENCE_BONUS_PER_CHAR * keywordWeight[keyword_id] * strlen(sourceKeywords[keyword_id]);
+								}
+							}
+						}
+						// clear checkedKeywordsLine
+						memset(checkedKeywordsLine, 0, MAX_NUM_KEYWORDS);
+						current_line_pos = 0;
+					}
+				}
+				pch = strtok(NULL, keywordDelimiters);
+			}
+			// finished dividing into tokens
+			if (current_line_pos >= KEYWORDS_LINE_MIN_SEQUENCE)
+			{
+				checkedKeywordsLine[current_line_pos] = 0;
+				// search checkedKeywordsLine in sourceKeywordsLine
+				if (strstr(sourceKeywordsLine, checkedKeywordsLine))
+				{
+					// found same sequence of keywords! add priority to this checkedNote
+					for (t = current_line_pos - 1; t >= 0; t--)
+					{
+						// add bonus for every keyword in the sequence
+						keyword_id = checkedKeywordsLine[t] - 1;
+						notePriority[i].second += current_line_pos * KEYWORD_SEQUENCE_BONUS_PER_CHAR * keywordWeight[keyword_id] * strlen(sourceKeywords[keyword_id]);
+					}
+				}
+			}
+			// clear checkedKeywordsLine
+			memset(checkedKeywordsLine, 0, MAX_NUM_KEYWORDS);
+			current_line_pos = 0;
+		}
+	}
+
+	// 4 - sort notePriority by second member of the pair
+	std::sort(notePriority.begin(), notePriority.end(), ordering);
+
+	/*
+	// debug trace
+	FCEU_printf("\n\n\n\n\n\n\n\n\n\n");
+	for (t = totalSourceKeywords - 1; t >= 0; t--)
+		FCEU_printf("Keyword: %s, %d, %f\n", sourceKeywords[t], keywordFound[t], keywordWeight[t]);
+	for (i = notePriority.size() - 1; i > 0; i--)
+	{
+		int marker_id = notePriority[i].first;
+		FCEU_printf("Result: %s, %d, %f\n", notes[marker_id].c_str(), marker_id, notePriority[i].second);
+	}
+	*/
+
+	// Send selection to the marker found
+	int index = notePriority.size()-1 - search_similar_marker;
+	if (index >= 0 && notePriority[index].second >= MIN_PRIORITY_TRESHOLD)
+	{
+		int marker_id = notePriority[index].first;
+		int frame = GetMarkerFrame(marker_id);
+		if (frame >= 0)
+			selection.JumpToFrame(frame);
+	} else
+	{
+		if (search_similar_marker)
+			MessageBox(taseditor_window.hwndTasEditor, "Could not find more Notes similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+		else
+			MessageBox(taseditor_window.hwndTasEditor, "Could not find anything similar to Marker Note under Playback cursor!", "Find Similar Note", MB_OK);
+	}
+
+	// increase search_similar_marker so that next time we'll find another note
+	search_similar_marker++;
+}
+// ------------------------------------------------------------------------------------
+void MARKERS_MANAGER::UpdateMarkerNote()
+{
+	if (!marker_note_edit) return;
+	char new_text[MAX_NOTE_LEN];
+	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+	{
+		int len = SendMessage(playback.hwndPlaybackMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
+		new_text[len] = 0;
+		// check changes
+		if (strcmp(GetNote(playback.shown_marker).c_str(), new_text))
+		{
+			SetNote(playback.shown_marker, new_text);
+			if (playback.shown_marker)
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(playback.shown_marker));
+			else
+				// zeroth marker - just assume it's set on frame 0
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
+			// notify selection to change text in lower marker (in case both are showing same marker)
+			selection.must_find_current_marker = true;
+		}
+	} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+	{
+		int len = SendMessage(selection.hwndSelectionMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
+		new_text[len] = 0;
+		// check changes
+		if (strcmp(GetNote(selection.shown_marker).c_str(), new_text))
+		{
+			SetNote(selection.shown_marker, new_text);
+			if (selection.shown_marker)
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(selection.shown_marker));
+			else
+				// zeroth marker - just assume it's set on frame 0
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
+			// notify playback to change text in upper marker (in case both are showing same marker)
+			playback.must_find_current_marker = true;
+		}
+	}
+}
+// ------------------------------------------------------------------------------------
+BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	extern MARKERS_MANAGER markers_manager;
+	switch (message)
+	{
+		case WM_INITDIALOG:
+		{
+			if (taseditor_config.findnote_wndx == -32000) taseditor_config.findnote_wndx = 0; //Just in case
+			if (taseditor_config.findnote_wndy == -32000) taseditor_config.findnote_wndy = 0;
+			SetWindowPos(hwndDlg, 0, taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+
+			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+			if (taseditor_config.findnote_search_up)
+				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
+			else
+				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_DOWN), BST_CHECKED);
+			HWND hwndEdit = GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND);
+			SendMessage(hwndEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
+			SetWindowText(hwndEdit, markers_manager.findnote_string);
+			if (GetDlgCtrlID((HWND)wParam) != IDC_NOTE_TO_FIND)
+		    {
+				SetFocus(hwndEdit);
+				return false;
+			}
+			return true;
+		}
+		case WM_MOVE:
+		{
+			if (!IsIconic(hwndDlg))
+			{
+				RECT wrect;
+				GetWindowRect(hwndDlg, &wrect);
+				taseditor_config.findnote_wndx = wrect.left;
+				taseditor_config.findnote_wndy = wrect.top;
+				WindowBoundsCheckNoResize(taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, wrect.right);
+			}
+			break;
+		}
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+				case IDC_NOTE_TO_FIND:
+				{
+					if(HIWORD(wParam) == EN_CHANGE) 
+					{
+						if (GetWindowTextLength(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND)))
+							EnableWindow(GetDlgItem(hwndDlg, IDOK), true);
+						else
+							EnableWindow(GetDlgItem(hwndDlg, IDOK), false);
+					}
+					break;
+				}
+				case IDC_RADIO_UP:
+					taseditor_config.findnote_search_up = true;
+					break;
+				case IDC_RADIO_DOWN:
+					taseditor_config.findnote_search_up = false;
+					break;
+				case IDC_MATCH_CASE:
+					taseditor_config.findnote_matchcase ^= 1;
+					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
+					break;
+				case IDOK:
+				{
+					int len = SendMessage(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND), WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)markers_manager.findnote_string);
+					markers_manager.findnote_string[len] = 0;
+					// scan frames from current selection to the border
+					int cur_marker = 0;
+					bool result;
+					int movie_size = currMovieData.getNumRecords();
+					int current_frame = selection.GetCurrentSelectionBeginning();
+					if (current_frame < 0 && taseditor_config.findnote_search_up)
+						current_frame = movie_size;
+					while (true)
+					{
+						// move forward
+						if (taseditor_config.findnote_search_up)
+						{
+							current_frame--;
+							if (current_frame < 0)
+							{
+								MessageBox(taseditor_window.hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
+								break;
+							}
+						} else
+						{
+							current_frame++;
+							if (current_frame >= movie_size)
+							{
+								MessageBox(taseditor_window.hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
+								break;
+							}
+						}
+						// scan marked frames
+						cur_marker = markers_manager.GetMarker(current_frame);
+						if (cur_marker)
+						{
+							if (taseditor_config.findnote_matchcase)
+								result = (strstr(markers_manager.GetNote(cur_marker).c_str(), markers_manager.findnote_string) != 0);
+							else
+								result = (StrStrI(markers_manager.GetNote(cur_marker).c_str(), markers_manager.findnote_string) != 0);
+							if (result)
+							{
+								// found note containing searched string - jump there
+								selection.JumpToFrame(current_frame);
+								break;
+							}
+						}
+					}
+					return TRUE;
+				}
+				case IDCANCEL:
+					DestroyWindow(taseditor_window.hwndFindNote);
+					taseditor_window.hwndFindNote = 0;
+					return TRUE;
+			}
+			break;
+		}
+		case WM_CLOSE:
+		case WM_QUIT:
+		{
+			DestroyWindow(taseditor_window.hwndFindNote);
+			taseditor_window.hwndFindNote = 0;
+			break;
+		}
+	}
+	return FALSE; 
+} 
+
+

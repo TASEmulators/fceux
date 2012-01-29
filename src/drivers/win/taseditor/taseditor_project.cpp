@@ -5,13 +5,13 @@
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
-extern MARKERS current_markers;
+extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
 extern POPUP_DISPLAY popup_display;
 extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern RECORDER recorder;
-extern INPUT_HISTORY history;
+extern HISTORY history;
 extern TASEDITOR_LIST list;
 extern TASEDITOR_SELECTION selection;
 extern SPLICER splicer;
@@ -28,14 +28,14 @@ TASEDITOR_PROJECT::TASEDITOR_PROJECT()
 
 void TASEDITOR_PROJECT::init()
 {
+	projectFile = "";
+	projectName = "";
+	fm2FileName = "";
 	reset();
 }
 void TASEDITOR_PROJECT::reset()
 {
 	changed = false;
-	projectFile = "";
-	projectName = "";
-	fm2FileName = "";
 }
 void TASEDITOR_PROJECT::update()
 {
@@ -65,7 +65,7 @@ bool TASEDITOR_PROJECT::save()
 	// save all modules
 	unsigned int saved_stuff = ALL_SAVED;
 	write32le(saved_stuff, ofs);
-	current_markers.save(ofs);
+	markers_manager.save(ofs);
 	bookmarks.save(ofs);
 	greenzone.save(ofs);
 	history.save(ofs);
@@ -94,7 +94,7 @@ bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save
 	if (save_list) saved_stuff |= LIST_SAVED;
 	if (save_selection) saved_stuff |= SELECTION_SAVED;
 	write32le(saved_stuff, ofs);
-	current_markers.save(ofs, save_markers);
+	markers_manager.save(ofs, save_markers);
 	bookmarks.save(ofs, save_bookmarks);
 	greenzone.save(ofs, save_greenzone);
 	history.save(ofs, save_history);
@@ -138,7 +138,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	// load modules
 	unsigned int saved_stuff;
 	read32le(&saved_stuff, &ifs);
-	current_markers.load(&ifs);
+	markers_manager.load(&ifs);
 	bookmarks.load(&ifs);
 	greenzone.load(&ifs);
 	history.load(&ifs);

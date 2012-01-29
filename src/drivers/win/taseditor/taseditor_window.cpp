@@ -4,6 +4,7 @@
 #include "../Win32InputBox.h"
 #include "../taseditor.h"
 #include <htmlhelp.h>
+#include "../../input.h"	// for EMUCMD
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern PLAYBACK playback;
@@ -13,20 +14,21 @@ extern TASEDITOR_PROJECT project;
 extern TASEDITOR_LIST list;
 extern TASEDITOR_SELECTION selection;
 extern SPLICER splicer;
-extern MARKERS current_markers;
+extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
-extern INPUT_HISTORY history;
+extern HISTORY history;
 extern POPUP_DISPLAY popup_display;
 
 extern bool turbo;
 extern bool muteTurbo;
-extern int marker_note_edit;
-extern int search_similar_marker;
 extern bool must_call_manual_lua_function;
 
-BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern char* GetKeyComboName(int c);
+
 extern BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL CALLBACK AboutProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
+BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -46,49 +48,54 @@ static struct
 	int y;
 	int width;
 	int height;
+	char tooltip_text_base[TOOLTIP_TEXT_MAX_LEN];
+	char tooltip_text[TOOLTIP_TEXT_MAX_LEN];
+	bool static_rect;
+	int hotkey_emucmd;
+	HWND tooltip_hwnd;
 } window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
-	IDC_PROGRESS_BUTTON, -1, 0, 0, 0,
-	IDC_BRANCHES_BUTTON, -1, 0, 0, 0,
-	IDC_LIST1, 0, 0, -1, -1,
-	IDC_PLAYBACK_BOX, -1, 0, 0, 0,
-	IDC_RECORDER_BOX, -1, 0, 0, 0,
-	IDC_SPLICER_BOX, -1, 0, 0, 0,
-	IDC_LUA_BOX, -1, 0, 0, 0,
-	IDC_BOOKMARKS_BOX, -1, 0, 0, 0,
-	IDC_HISTORY_BOX, -1, 0, 0, -1,
-	TASEDITOR_REWIND_FULL, -1, 0, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0,
-	TASEDITOR_PLAYSTOP, -1, 0, 0, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0,
-	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0,
-	IDC_PROGRESS1, -1, 0, 0, 0,
-	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0,
-	IDC_BOOKMARKSLIST, -1, 0, 0, 0,
-	IDC_HISTORYLIST, -1, 0, 0, -1,
-	IDC_RADIO_ALL, -1, 0, 0, 0,
-	IDC_RADIO_1P, -1, 0, 0, 0,
-	IDC_RADIO_2P, -1, 0, 0, 0,
-	IDC_RADIO_3P, -1, 0, 0, 0,
-	IDC_RADIO_4P, -1, 0, 0, 0,
-	IDC_SUPERIMPOSE, -1, 0, 0, 0,
-	TASEDITOR_PREV_MARKER, -1, -1, 0, -1,
-	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1,
-	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1,
-	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1,
-	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0,
-	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0,
-	IDC_PLAYBACK_MARKER, 0, 0, 0, 0,
-	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1,
-	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1,
-	IDC_SELECTION_MARKER, 0, -1, 0, -1,
-	IDC_BRANCHES_BITMAP, -1, 0, 0, 0,
-	CHECK_TURBO_SEEK, -1, 0, 0, 0,
-	IDC_TEXT_SELECTION, -1, 0, 0, 0,
-	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0,
-	IDC_RECORDING, -1, 0, 0, 0,
-	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0,
-	IDC_RUN_AUTO, -1, 0, 0, 0,
+	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here whenever you want to abort seeking", "", false, 0, 0,
+	IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
+	IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
+	IDC_PLAYBACK_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RECORDER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_SPLICER_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_LUA_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
+	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (hotkey: Shift+PageUp)", "", false, 0, 0,
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame", "", false, EMUCMD_TASEDITOR_REWIND, 0,
+	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation", "", false, EMUCMD_PAUSE, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame", "", false, EMUCMD_FRAME_ADVANCE, 0,
+	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (hotkey: Shift+PageDown)", "", false, 0, 0,
+	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
+	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The List will follow Playback cursor movements", "", false, 0, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "If you change input above Playback, cursor will run where it was before change", "", false, 0, 0,
+	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
+	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert movie back to that time", "", false, 0, 0,
+	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RADIO_1P, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RADIO_2P, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RADIO_3P, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RADIO_4P, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old input with new buttons, instead of overwriting", "", false, 0, 0,
+	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (hotkey: Ctrl+PageUp)", "", false, 0, 0,
+	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
+	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
+	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (hotkey: Ctrl+PageDown)", "", false, 0, 0,
+	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll the List to Playback cursor", "", false, 0, 0,
+	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
+	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "", "", false, 0, 0,
+	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll the List to Selection", "", false, 0, 0,
+	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
+	IDC_SELECTION_MARKER, 0, -1, 0, -1, "", "", false, 0, 0,
+	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "This window visualizes the hierarchy of your Branches", "", false, 0, 0,
+	CHECK_TURBO_SEEK, -1, 0, 0, 0, "Uncheck when you need to watch seeking in slow motion", "", false, 0, 0,
+	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", true, 0, 0,
+	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", true, 0, 0,
+	IDC_RECORDING, -1, 0, 0, 0, "Switch Input Recording on/off", "", false, EMUCMD_MOVIE_READONLY_TOGGLE, 0,
+	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, 0, 0,
+	IDC_RUN_AUTO, -1, 0, 0, 0, "Enable Lua Auto Function (but first it must be registered by Lua script)", "", false, 0, 0,
 };
 
 TASEDITOR_WINDOW::TASEDITOR_WINDOW()
@@ -108,17 +115,73 @@ void TASEDITOR_WINDOW::init()
 	ready_for_resizing = false;
 	hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
 	hwndTasEditor = CreateDialog(fceu_hInstance, "TASEDITOR", hAppWnd, WndprocTasEditor);
+	SendMessage(hwndTasEditor, WM_SETICON, ICON_SMALL, (LPARAM)hTaseditorIcon);
 	CalculateItems();
 	// restore position and size from config, also bring the window on top
-	//RECT desiredRect = {0, 0, taseditor_config.wndwidth, taseditor_config.wndheight};
-	//AdjustWindowRectEx(&desiredRect, GetWindowLong(hwndTasEditor, GWL_STYLE), true, GetWindowLong(hwndTasEditor, GWL_EXSTYLE));
 	SetWindowPos(hwndTasEditor, HWND_TOP, taseditor_config.wndx, taseditor_config.wndy, taseditor_config.wndwidth, taseditor_config.wndheight, SWP_NOOWNERZORDER);
-
+	// menus and checked items
 	hmenu = GetMenu(hwndTasEditor);
 	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
-
 	UpdateCheckedItems();
-
+	// tooltips
+	int x = 0;
+	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+	{
+		if (window_items[i].tooltip_text_base[0])
+		{
+			// Create the tooltip. g_hInst is the global instance handle
+			window_items[i].tooltip_hwnd = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
+									  WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON,
+									  CW_USEDEFAULT, CW_USEDEFAULT,
+									  CW_USEDEFAULT, CW_USEDEFAULT,
+									  hwndTasEditor, NULL, 
+									  fceu_hInstance, NULL);
+			if (window_items[i].tooltip_hwnd)
+			{
+				// Associate the tooltip with the tool
+				TOOLINFO toolInfo = {0};
+				toolInfo.cbSize = sizeof(toolInfo);
+				toolInfo.hwnd = hwndTasEditor;
+				toolInfo.uId = (UINT_PTR)GetDlgItem(hwndTasEditor, window_items[i].id);
+				if (window_items[i].static_rect)
+				{
+					// for static text we specify rectangle
+					toolInfo.uFlags = TTF_SUBCLASS;
+					RECT tool_rect;
+					GetWindowRect(GetDlgItem(hwndTasEditor, window_items[i].id), &tool_rect);
+					POINT pt;
+					pt.x = tool_rect.left;
+					pt.y = tool_rect.top;
+					ScreenToClient(hwndTasEditor, &pt);
+					toolInfo.rect.left = pt.x;
+					toolInfo.rect.right = toolInfo.rect.left + (tool_rect.right - tool_rect.left);
+					toolInfo.rect.top = pt.y;
+					toolInfo.rect.bottom = toolInfo.rect.top + (tool_rect.bottom - tool_rect.top);
+				} else
+				{
+					// for other controls we provide hwnd
+					toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+				}
+				// add hotkey mapping if needed
+				if (window_items[i].hotkey_emucmd && FCEUD_CommandMapping[window_items[i].hotkey_emucmd])
+				{
+					window_items[i].tooltip_text[0] = 0;
+					strcpy(window_items[i].tooltip_text, window_items[i].tooltip_text_base);
+					strcat(window_items[i].tooltip_text, " (hotkey: ");
+					strncat(window_items[i].tooltip_text, GetKeyComboName(FCEUD_CommandMapping[window_items[i].hotkey_emucmd]), TOOLTIP_TEXT_MAX_LEN - strlen(window_items[i].tooltip_text) - 1);
+					strncat(window_items[i].tooltip_text, ")", TOOLTIP_TEXT_MAX_LEN - strlen(window_items[i].tooltip_text) - 1);
+					toolInfo.lpszText = window_items[i].tooltip_text;
+				} else
+				{
+					toolInfo.lpszText = window_items[i].tooltip_text_base;
+				}
+				SendMessage(window_items[i].tooltip_hwnd, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
+				SendMessage(window_items[i].tooltip_hwnd, TTM_SETDELAYTIME, TTDT_AUTOPOP, TOOLTIPS_AUTOPOP_TIMEOUT);
+			}
+		}
+	}
+	UpdateTooltips();
+	// recent projects submenu
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
 
@@ -126,6 +189,14 @@ void TASEDITOR_WINDOW::init()
 }
 void TASEDITOR_WINDOW::exit()
 {
+	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+	{
+		if (window_items[i].tooltip_hwnd)
+		{
+			DestroyWindow(window_items[i].tooltip_hwnd);
+			window_items[i].tooltip_hwnd = 0;
+		}
+	}
 	if (hwndFindNote)
 	{
 		DestroyWindow(hwndFindNote);
@@ -238,12 +309,10 @@ void TASEDITOR_WINDOW::ResizeItems()
 		else
 			// normal height
 			height = window_items[i].height;
-		SetWindowPos(hCtrl, 0, x, y, width, height, SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOREDRAW);
+		SetWindowPos(hCtrl, 0, x, y, width, height, SWP_NOZORDER | SWP_NOOWNERZORDER);
 	}
 	RedrawTaseditor();
-	//RedrawWindow(hwndTasEditor, NULL, NULL, RDW_INVALIDATE);
 }
-
 void TASEDITOR_WINDOW::WindowMovedOrResized()
 {
 	RECT wrect;
@@ -257,6 +326,25 @@ void TASEDITOR_WINDOW::WindowMovedOrResized()
 	taseditor_config.wndheight = wrect.bottom - wrect.top;
 	if (taseditor_config.wndheight < min_height)
 		taseditor_config.wndheight = min_height;
+}
+
+void TASEDITOR_WINDOW::UpdateTooltips()
+{
+	if (taseditor_config.tooltips)
+	{
+		for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+		{
+			if (window_items[i].tooltip_hwnd)
+				SendMessage(window_items[i].tooltip_hwnd, TTM_ACTIVATE, true, 0);
+		}
+	} else
+	{
+		for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
+		{
+			if (window_items[i].tooltip_hwnd)
+				SendMessage(window_items[i].tooltip_hwnd, TTM_ACTIVATE, false, 0);
+		}
+	}
 }
 
 void TASEDITOR_WINDOW::UpdateCaption()
@@ -315,7 +403,7 @@ void TASEDITOR_WINDOW::RightClickMenu(LPNMITEMACTIVATE info)
 	bool set_found = false, unset_found = false;
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
-		if(current_markers.GetMarker(*it))
+		if(markers_manager.GetMarker(*it))
 			set_found = true;
 		else 
 			unset_found = true;
@@ -359,7 +447,8 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
-	
+	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
+
 }
 
 
@@ -493,7 +582,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		{
 			if (taseditor_config.wndx == -32000) taseditor_config.wndx = 0;	//Just in case
 			if (taseditor_config.wndy == -32000) taseditor_config.wndy = 0;
-			SendMessage(hwndDlg, WM_SETICON, ICON_SMALL, (LPARAM)taseditor_window.hTaseditorIcon);
 			break;
 		}
 		case WM_WINDOWPOSCHANGED:
@@ -542,10 +630,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					list.GetDispInfo((NMLVDISPINFO*)lParam);
 					break;
 				case NM_CLICK:
-					SingleClick((LPNMITEMACTIVATE)lParam);
+					list.SingleClick((LPNMITEMACTIVATE)lParam);
 					break;
 				case NM_DBLCLK:
-					DoubleClick((LPNMITEMACTIVATE)lParam);
+					list.DoubleClick((LPNMITEMACTIVATE)lParam);
 					break;
 				case NM_RCLICK:
 					taseditor_window.RightClick((LPNMITEMACTIVATE)lParam);
@@ -610,6 +698,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				}
 				break;
+			case ID_STRAY_UNPAUSE:
+				playback.UnpauseEmulation();
+				break;
 			}
 			break;
 		case WM_CLOSE:
@@ -620,11 +711,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			if(LOWORD(wParam))
 			{
 				taseditor_window.TASEditor_focus = true;
-				SetTaseditInput();
+				SetTaseditorInput();
 			} else
 			{
 				taseditor_window.TASEditor_focus = false;
-				ClearTaseditInput();
+				ClearTaseditorInput();
 			}
 			break;
 		case WM_CTLCOLORSTATIC:
@@ -659,27 +750,27 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						{
 						case EN_SETFOCUS:
 							{
-								marker_note_edit = MARKER_NOTE_EDIT_UPPER;
+								markers_manager.marker_note_edit = MARKER_NOTE_EDIT_UPPER;
 								// enable editing
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
 								// disable FCEUX keyboard
-								ClearTaseditInput();
+								ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
 									list.FollowPlayback();
 								break;
 							}
 						case EN_KILLFOCUS:
 							{
-								if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+								if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 								{
-									UpdateMarkerNote();
-									marker_note_edit = MARKER_NOTE_EDIT_NONE;
+									markers_manager.UpdateMarkerNote();
+									markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
 								}
 								// disable editing (make it grayed)
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
 								// enable FCEUX keyboard
 								if (taseditor_window.TASEditor_focus)
-									SetTaseditInput();
+									SetTaseditorInput();
 								break;
 							}
 						}
@@ -691,27 +782,27 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						{
 						case EN_SETFOCUS:
 							{
-								marker_note_edit = MARKER_NOTE_EDIT_LOWER;
+								markers_manager.marker_note_edit = MARKER_NOTE_EDIT_LOWER;
 								// enable editing
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
 								// disable FCEUX keyboard
-								ClearTaseditInput();
+								ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
 									list.FollowSelection();
 								break;
 							}
 						case EN_KILLFOCUS:
 							{
-								if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+								if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 								{
-									UpdateMarkerNote();
-									marker_note_edit = MARKER_NOTE_EDIT_NONE;
+									markers_manager.UpdateMarkerNote();
+									markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
 								}
 								// disable editing (make it grayed)
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
 								// enable FCEUX keyboard
 								if (taseditor_window.TASEditor_focus)
-									SetTaseditInput();
+									SetTaseditorInput();
 								break;
 							}
 						}
@@ -743,36 +834,36 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					ExitTasEditor();
 					break;
 				case ID_EDIT_SELECTALL:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
 					else
 						selection.SelectAll();
 					break;
 				case ACCEL_CTRL_X:
 				case ID_EDIT_CUT:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CUT, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_CUT, 0, 0); 
 					else
 						splicer.Cut();
 					break;
 				case ACCEL_CTRL_C:
 				case ID_EDIT_COPY:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_COPY, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_COPY, 0, 0); 
 					else
 						splicer.Copy();
 					break;
 				case ACCEL_CTRL_V:
 				case ID_EDIT_PASTE:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
 					else
 						splicer.Paste();
@@ -782,13 +873,13 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						// hack to allow entering Shift-V into edit control even though accelerator steals the input message
 						char insert_v[] = "v";
 						char insert_V[] = "V";
-						if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+						if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						{
 							if (GetKeyState(VK_CAPITAL) & 1)
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
 							else
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
-						} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+						} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						{
 							if (GetKeyState(VK_CAPITAL) & 1)
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
@@ -799,9 +890,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 					}
 				case ID_EDIT_PASTEINSERT:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_PASTE, 0, 0); 
 					else
 						splicer.PasteInsert();
@@ -811,20 +902,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_CONTEXT_SELECTED_DELETEFRAMES:
 					splicer.DeleteFrames();
 					break;
-				case ACCEL_CTRL_T:
 				case ID_EDIT_TRUNCATE:
 				case ID_CONTEXT_SELECTED_TRUNCATE:
-				case ID_CONTEXT_STRAY_TRUNCATE:
+				case ID_STRAY_TRUNCATE:
 					splicer.Truncate();
 					break;
-				case ID_HELP_TASEDITHELP:
-					{
-						//OpenHelpWindow(tasedithelp);
-						std::string helpFileName = BaseDirectory;
-						helpFileName.append(taseditor_help_filename);
-						HtmlHelp(GetDesktopWindow(), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
-						break;
-					}
 				case ACCEL_INS:
 				case ID_EDIT_INSERT:
 				case MENU_CONTEXT_STRAY_INSERTFRAMES:
@@ -839,14 +921,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ACCEL_DEL:
 				case ID_EDIT_CLEAR:
 				case ID_CONTEXT_SELECTED_CLEARFRAMES:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 					{
 						DWORD sel_start, sel_end;
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
 						if (sel_start == sel_end)
 							SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_CLEAR, 0, 0); 
-					} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 					{
 						DWORD sel_start, sel_end;
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_GETSEL, (WPARAM)&sel_start, (LPARAM)&sel_end);
@@ -864,7 +946,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_config.follow_playback ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					// if switched off then maybe jump to target frame
-					if (!taseditor_config.follow_playback && playback.GetPauseFrame())
+					if (!taseditor_config.follow_playback && playback.pause_frame)
 						list.FollowPauseframe();
 					break;
 				case CHECK_TURBO_SEEK:
@@ -1022,7 +1104,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case IDC_PROGRESS_BUTTON:
 					// click on progressbar - stop seeking
-					if (playback.GetPauseFrame()) playback.SeekingStop();
+					if (playback.pause_frame) playback.SeekingStop();
 					break;
 				case IDC_BRANCHES_BUTTON:
 					// click on "Bookmarks/Branches" - switch "View Tree of branches"
@@ -1059,9 +1141,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ACCEL_CTRL_A:
-					if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
-					else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
 					else
 						selection.SelectBetweenMarkers();
@@ -1078,10 +1160,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ACCEL_CTRL_Z:
 				case ID_EDIT_UNDO:
 					{
-						if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+						if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						{
 							SendMessage(playback.hwndPlaybackMarkerEdit, WM_UNDO, 0, 0); 
-						} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+						} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						{
 							SendMessage(selection.hwndSelectionMarkerEdit, WM_UNDO, 0, 0); 
 						} else
@@ -1149,9 +1231,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							bool changes_made = false;
 							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 							{
-								if(!current_markers.GetMarker(*it))
+								if(!markers_manager.GetMarker(*it))
 								{
-									if (current_markers.SetMarker(*it))
+									if (markers_manager.SetMarker(*it))
 									{
 										changes_made = true;
 										list.RedrawRow(*it);
@@ -1176,9 +1258,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							bool changes_made = false;
 							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 							{
-								if(current_markers.GetMarker(*it))
+								if(markers_manager.GetMarker(*it))
 								{
-									current_markers.ClearMarker(*it);
+									markers_manager.ClearMarker(*it);
 									changes_made = true;
 									list.RedrawRow(*it);
 								}
@@ -1215,16 +1297,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 					}
 				case TASEDITOR_FIND_BEST_SIMILAR_MARKER:
-					search_similar_marker = 0;
-					current_markers.FindSimilar(search_similar_marker);
-					search_similar_marker++;
+					markers_manager.FindSimilar();
 					break;
 				case TASEDITOR_FIND_NEXT_SIMILAR_MARKER:
-					current_markers.FindSimilar(search_similar_marker);
-					search_similar_marker++;
-					break;
-				case ID_HELP_ABOUT:
-					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
+					markers_manager.FindNextSimilar();
 					break;
 				case TASEDITOR_RUN_MANUAL:
 					// the function will be called in next window update
@@ -1233,6 +1309,21 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case IDC_RUN_AUTO:
 					taseditor_config.enable_auto_function ^= 1;
 					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_HELP_TASEDITHELP:
+					{
+						std::string helpFileName = BaseDirectory;
+						helpFileName.append(taseditor_help_filename);
+						HtmlHelp(GetDesktopWindow(), helpFileName.c_str(), HH_DISPLAY_TOPIC, (DWORD)NULL);
+						break;
+					}
+				case ID_HELP_TOOLTIPS:
+					taseditor_config.tooltips ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					taseditor_window.UpdateTooltips();
+					break;
+				case ID_HELP_ABOUT:
+					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
 					break;
 
 
@@ -1250,22 +1341,5 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 	}
 	return FALSE;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

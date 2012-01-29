@@ -46,14 +46,13 @@ enum
 	MODTYPE_LUA_CHANGE = 40,
 };
 #define HISTORY_NORMAL_COLOR 0x000000
-#define HISTORY_INCOHERENT_COLOR 0x999999
 
 #define HISTORY_ID_LEN 8
 
-class INPUT_HISTORY
+class HISTORY
 {
 public:
-	INPUT_HISTORY();
+	HISTORY();
 	void init();
 	void free();
 	void reset();
@@ -66,18 +65,17 @@ public:
 	int redo();
 	int jump(int new_pos);
 
-	void AddInputSnapshotToHistory(INPUT_SNAPSHOT &inp);
-
 	int RegisterChanges(int mod_type, int start = 0, int end =-1);
+	int RegisterPasteInsert(int start, SelectionFrames& inserted_set);
 	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1);
 	void RegisterBranching(int mod_type, int first_change, int slot);
 	void RegisterRecording(int frame_of_change);
 	void RegisterImport(MovieData& md, char* filename);
+	int RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made);
 
-	INPUT_SNAPSHOT& GetCurrentSnapshot();
-	INPUT_SNAPSHOT& GetNextToCurrentSnapshot();
+	SNAPSHOT& GetCurrentSnapshot();
+	SNAPSHOT& GetNextToCurrentSnapshot();
 	char* GetItemDesc(int pos);
-	bool GetItemCoherence(int pos);
 	int GetUndoHint();
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
@@ -90,7 +88,9 @@ public:
 	HWND hwndHistoryList;
 
 private:
-	std::vector<INPUT_SNAPSHOT> input_snapshots;
+	void AddSnapshotToHistory(SNAPSHOT &inp);
+
+	std::vector<SNAPSHOT> snapshots;
 
 	int history_cursor_pos;
 	int history_start_pos;

@@ -232,9 +232,10 @@ enum EMUCMD
 	EMUCMD_TOOL_RAMSEARCHNE,
 	EMUCMD_TOOL_OPENNTVIEW,
 	EMUCMD_TASEDITOR_REWIND,
+	EMUCMD_RERECORD_DISPLAY_TOGGLE,
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
-	EMUCMD_RERECORD_DISPLAY_TOGGLE,
+	EMUCMD_TASEDITOR_RESTORE_PLAYBACK,
 
 	EMUCMD_MAX
 };

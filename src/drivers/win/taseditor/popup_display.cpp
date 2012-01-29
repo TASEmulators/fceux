@@ -4,9 +4,9 @@
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
-extern MARKERS current_markers;
 extern BOOKMARKS bookmarks;
 extern TASEDITOR_LIST list;
+extern MARKERS_MANAGER markers_manager;
 
 LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -217,9 +217,9 @@ void POPUP_DISPLAY::ChangeTooltipText()
 {
 	// retrieve info from the pointed bookmark's markers
 	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame;
-	int marker_id = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.my_markers.GetMarkerUp(frame);
+	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), frame);
 	char new_text[MAX_NOTE_LEN];
-	strcpy(new_text, bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.my_markers.GetNote(marker_id).c_str());
+	strcpy(new_text, markers_manager.GetNote(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), marker_id).c_str());
 	SetWindowText(marker_note_tooltip, new_text);
 }
 

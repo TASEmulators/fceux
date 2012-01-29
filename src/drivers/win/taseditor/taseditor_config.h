@@ -1,4 +1,6 @@
 //Specification file for TASEDITOR_CONFIG class
+// --------------------------------------------------------
+
 #define GREENZONE_CAPACITY_MIN 1
 #define GREENZONE_CAPACITY_MAX 50000
 #define GREENZONE_CAPACITY_DEFAULT 10000
@@ -63,6 +65,7 @@ public:
 	bool findnote_search_up;
 	bool enable_auto_function;
 	bool silent_autosave;
+	bool tooltips;
 	char last_author[AUTHOR_MAX_LEN];
 
 private:

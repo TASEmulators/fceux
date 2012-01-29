@@ -51,7 +51,7 @@ enum
 	COLUMN_JOYPAD4_R,
 	COLUMN_FRAMENUM2,
 
-	MAX_NUM_COLUMNS
+	TOTAL_COLUMNS
 };
 
 // when there's too many button columns, there's need for 2nd Frame# column at the end
@@ -59,6 +59,7 @@ enum
 
 #define DIGITS_IN_FRAMENUM 7
 #define ARROW_IMAGE_ID 20
+#define GREEN_ARROW_IMAGE_ID 21
 
 #define COLUMN_ICONS_WIDTH 13
 #define COLUMN_FRAMENUM_WIDTH 75
@@ -134,6 +135,15 @@ public:
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
 	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
+
+	void SingleClick(LPNMITEMACTIVATE info);
+	void DoubleClick(LPNMITEMACTIVATE info);
+
+	void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
+	void ColumnSet(int column);
+	void InputColumnSet(int column);
+	void FrameColumnSet();
+
 
 	HWND hwndList, hwndHeader;
 

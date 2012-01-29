@@ -940,12 +940,6 @@
     <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\inputhistory.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\inputsnapshot.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
@@ -953,6 +947,15 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\popup_display.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\history.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\snapshot.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\markers_manager.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1432,16 +1435,19 @@
     <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\inputhistory.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\inputsnapshot.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\markers.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\playback.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\history.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\snapshot.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\markers_manager.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1529,6 +1535,9 @@
     <None Include="..\src\drivers\win\res\icon4.ico" />
     <None Include="..\src\drivers\win\res\taseditor-icon.ico" />
     <None Include="..\src\drivers\win\res\taseditor-icon32.ico" />
+    <None Include="..\src\drivers\win\res\bitmap20.bmp" />
+    <None Include="..\..\..\tasedit\psd\bmp\te_green_arrow.bmp" />
+    <None Include="..\src\drivers\win\res\te_green_arrow.bmp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

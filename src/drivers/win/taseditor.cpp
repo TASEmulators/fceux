@@ -6,29 +6,22 @@
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
 #include "version.h"
-#include <Shlwapi.h>		// for StrStrI
-
-#pragma comment(lib, "Shlwapi.lib")
 
 using namespace std;
 
 // TAS Editor data
 bool Taseditor_rewind_now = false;
 bool must_call_manual_lua_function = false;
-// note editing/search (probably should be moved to separate class/module)
-int marker_note_edit = MARKER_NOTE_EDIT_NONE;
-char findnote_string[MAX_NOTE_LEN] = {0};
-int search_similar_marker = 0;
 
 // all Taseditor functional modules
 TASEDITOR_CONFIG taseditor_config;
 TASEDITOR_WINDOW taseditor_window;
 TASEDITOR_PROJECT project;
-INPUT_HISTORY history;
+HISTORY history;
 PLAYBACK playback;
 RECORDER recorder;
 GREENZONE greenzone;
-MARKERS current_markers;
+MARKERS_MANAGER markers_manager;
 BOOKMARKS bookmarks;
 POPUP_DISPLAY popup_display;
 TASEDITOR_LIST list;
@@ -61,7 +54,7 @@ void UpdateTasEditor()
 	// update all modules that need to be updated every frame
 	recorder.update();
 	list.update();
-	current_markers.update();
+	markers_manager.update();
 	greenzone.update();
 	playback.update();
 	bookmarks.update();
@@ -79,187 +72,6 @@ void UpdateTasEditor()
 		TaseditorManualFunction();
 		must_call_manual_lua_function = false;
 	}
-}
-
-void SingleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS)
-	{
-		// click on the "icons" column - jump to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// click on the "frame number" column - set marker if clicked with Alt
-		if (info->uKeyFlags & LVKF_ALT)
-		{
-			// reverse MARKER_FLAG_BIT in pointed frame
-			current_markers.ToggleMarker(row_index);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			if (current_markers.GetMarker(row_index))
-				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
-			else
-				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-			list.RedrawRow(row_index);
-		}
-	}
-	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-void DoubleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS || column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// double click sends playback to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-
-void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
-{
-	int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-	if (KeyFlags & (LVKF_SHIFT|LVKF_CONTROL))
-	{
-		// update multiple rows, using last row index as a flag to decide operation
-		SelectionFrames* current_selection = selection.MakeStrobe();
-		SelectionFrames::iterator current_selection_end(current_selection->end());
-		if (currMovieData.records[row_index].checkBit(joy, bit))
-		{
-			// clear range
-			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-			{
-				currMovieData.records[*it].clearBit(joy, bit);
-			}
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection->begin(), *current_selection->rbegin()));
-		} else
-		{
-			// set range
-			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-			{
-				currMovieData.records[*it].setBit(joy, bit);
-			}
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection->begin(), *current_selection->rbegin()));
-		}
-	} else
-	{
-		// update one row
-		currMovieData.records[row_index].toggleBit(joy, bit);
-		if (currMovieData.records[row_index].checkBit(joy, bit))
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
-		else
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
-	}
-	
-}
-
-void ColumnSet(int column)
-{
-	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
-		FrameColumnSet();
-	else
-		InputColumnSet(column);
-}
-void FrameColumnSet()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-
-	// inspect the selected frames, if they are all set, then unset all, else set all
-	bool unset_found = false, changes_made = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(!current_markers.GetMarker(*it))
-		{
-			unset_found = true;
-			break;
-		}
-	}
-	if (unset_found)
-	{
-		// set all
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if(!current_markers.GetMarker(*it))
-			{
-				if (current_markers.SetMarker(*it))
-				{
-					changes_made = true;
-					list.RedrawRow(*it);
-				}
-			}
-		}
-		if (changes_made)
-			history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-	} else
-	{
-		// unset all
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if(current_markers.GetMarker(*it))
-			{
-				current_markers.ClearMarker(*it);
-				changes_made = true;
-				list.RedrawRow(*it);
-			}
-		}
-		if (changes_made)
-			history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
-	}
-	if (changes_made)
-	{
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-	}
-}
-void InputColumnSet(int column)
-{
-	int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return;
-	int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-
-	//inspect the selected frames, if they are all set, then unset all, else set all
-	bool newValue = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(!(currMovieData.records[*it].checkBit(joy,button)))
-		{
-			newValue = true;
-			break;
-		}
-	}
-	// apply newValue
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		currMovieData.records[*it].setBitValue(joy,button,newValue);
-	if (newValue)
-	{
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
-	} else
-	{
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
-	}
-	list.SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
 }
 
 BOOL CALLBACK NewProjectProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -360,10 +172,11 @@ void NewProject()
 			// copy input from current snapshot (from history)
 			history.GetCurrentSnapshot().toMovie(currMovieData);
 		if (!params.copy_current_markers)
-			current_markers.reset();
+			markers_manager.reset();
 		if(params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
 		
 		// reset Taseditor
+		project.init();			// new project has blank name
 		greenzone.reset();
 		playback.reset();
 		playback.StartFromZero();
@@ -374,11 +187,8 @@ void NewProject()
 		splicer.reset();
 		recorder.reset();
 		popup_display.reset();
-		project.reset();
 		taseditor_window.RedrawTaseditor();
 		taseditor_window.UpdateCaption();
-		search_similar_marker = 0;
-		marker_note_edit = MARKER_NOTE_EDIT_NONE;
 	}
 }
 
@@ -411,8 +221,6 @@ void OpenProject()
 }
 bool LoadProject(char* fullname)
 {
-	marker_note_edit = MARKER_NOTE_EDIT_NONE;
-	SetFocus(list.hwndList);
 	// try to load project
 	if (project.load(fullname))
 	{
@@ -422,14 +230,12 @@ bool LoadProject(char* fullname)
 		taseditor_window.UpdateRecentProjectsArray(fullname);
 		taseditor_window.RedrawTaseditor();
 		taseditor_window.UpdateCaption();
-		search_similar_marker = 0;
 		return true;
 	} else
 	{
 		// failed to load
 		taseditor_window.RedrawTaseditor();
 		taseditor_window.UpdateCaption();
-		search_similar_marker = 0;
 		return false;
 	}
 }
@@ -731,15 +537,15 @@ void Export()
 				char framenum[11];
 				std::string subtitle;
 				int marker_id;
-				for (int i = 0; i < current_markers.GetMarkersSize(); ++i)
+				for (int i = 0; i < markers_manager.GetMarkersSize(); ++i)
 				{
-					marker_id = current_markers.GetMarker(i);
+					marker_id = markers_manager.GetMarker(i);
 					if (marker_id)
 					{
 						_itoa(i, framenum, 10);
 						strcat(framenum, " ");
 						subtitle = framenum;
-						subtitle.append(current_markers.GetNote(marker_id));
+						subtitle.append(markers_manager.GetNote(marker_id));
 						temp_md.subtitles.push_back(subtitle);
 					}
 				}
@@ -761,7 +567,7 @@ bool EnterTasEditor()
 		taseditor_window.init();
 		if(taseditor_window.hwndTasEditor)
 		{
-			SetTaseditInput();
+			SetTaseditorInput();
 			// save "eoptions"
 			saved_eoptions = eoptions;
 			// set "Run in background"
@@ -783,7 +589,7 @@ bool EnterTasEditor()
 			playback.init();
 			greenzone.init();
 			recorder.init();
-			current_markers.init();
+			markers_manager.init();
 			project.init();
 			bookmarks.init();
 			popup_display.init();
@@ -809,7 +615,6 @@ bool EnterTasEditor()
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
 				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
-				greenzone.TryDumpIncremental(lagFlag != 0);
 			}
 			// ensure that movie has correct set of ports/fourscore
 			SetInputType(currMovieData, GetInputType(currMovieData));
@@ -822,12 +627,11 @@ bool EnterTasEditor()
 			history.reset();
 			// reset Taseditor variables
 			must_call_manual_lua_function = false;
-			marker_note_edit = MARKER_NOTE_EDIT_NONE;
-			search_similar_marker = 0;
 			
 			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
 			SetFocus(list.hwndList);
 			FCEU_DispMessage("TAS Editor engaged", 0);
+			taseditor_window.RedrawTaseditor();
 			return true;
 		} else return false;
 	} else return true;
@@ -841,7 +645,7 @@ bool ExitTasEditor()
 	taseditor_window.exit();
 	// release memory
 	list.free();
-	current_markers.free();
+	markers_manager.free();
 	greenzone.free();
 	bookmarks.free();
 	popup_display.free();
@@ -849,7 +653,7 @@ bool ExitTasEditor()
 	playback.SeekingStop();
 	selection.free();
 
-	ClearTaseditInput();
+	ClearTaseditorInput();
 	// restore "eoptions"
 	eoptions = saved_eoptions;
 	// restore autosaves
@@ -900,184 +704,16 @@ void SetInputType(MovieData& md, int new_input_type)
 	}
 }
 
-void SetTaseditInput()
+void SetTaseditorInput()
 {
 	// set "Background TAS Editor input"
 	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
-void ClearTaseditInput()
+void ClearTaseditorInput()
 {
 	// clear "Background TAS Editor input"
 	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
-
-void UpdateMarkerNote()
-{
-	if (!marker_note_edit) return;
-	char new_text[MAX_NOTE_LEN];
-	if (marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-	{
-		int len = SendMessage(playback.hwndPlaybackMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
-		new_text[len] = 0;
-		// check changes
-		if (strcmp(current_markers.GetNote(playback.shown_marker).c_str(), new_text))
-		{
-			current_markers.SetNote(playback.shown_marker, new_text);
-			if (playback.shown_marker)
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, current_markers.GetMarkerFrame(playback.shown_marker));
-			else
-				// zeroth marker - just assume it's set on frame 0
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
-			// notify selection to change text in lower marker (in case both are showing same marker)
-			selection.must_find_current_marker = true;
-		}
-	} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-	{
-		int len = SendMessage(selection.hwndSelectionMarkerEdit, WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)new_text);
-		new_text[len] = 0;
-		// check changes
-		if (strcmp(current_markers.GetNote(selection.shown_marker).c_str(), new_text))
-		{
-			current_markers.SetNote(selection.shown_marker, new_text);
-			if (selection.shown_marker)
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, current_markers.GetMarkerFrame(selection.shown_marker));
-			else
-				// zeroth marker - just assume it's set on frame 0
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
-			// notify playback to change text in upper marker (in case both are showing same marker)
-			playback.must_find_current_marker = true;
-		}
-	}
-}
-
-BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-		case WM_INITDIALOG:
-		{
-			if (taseditor_config.findnote_wndx == -32000) taseditor_config.findnote_wndx = 0; //Just in case
-			if (taseditor_config.findnote_wndy == -32000) taseditor_config.findnote_wndy = 0;
-			SetWindowPos(hwndDlg, 0, taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-
-			CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
-			if (taseditor_config.findnote_search_up)
-				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_UP), BST_CHECKED);
-			else
-				Button_SetCheck(GetDlgItem(hwndDlg, IDC_RADIO_DOWN), BST_CHECKED);
-			HWND hwndEdit = GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND);
-			SendMessage(hwndEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-			SetWindowText(hwndEdit, findnote_string);
-			if (GetDlgCtrlID((HWND)wParam) != IDC_NOTE_TO_FIND)
-		    {
-				SetFocus(hwndEdit);
-				return false;
-			}
-			return true;
-		}
-		case WM_MOVE:
-		{
-			if (!IsIconic(hwndDlg))
-			{
-				RECT wrect;
-				GetWindowRect(hwndDlg, &wrect);
-				taseditor_config.findnote_wndx = wrect.left;
-				taseditor_config.findnote_wndy = wrect.top;
-				WindowBoundsCheckNoResize(taseditor_config.findnote_wndx, taseditor_config.findnote_wndy, wrect.right);
-			}
-			break;
-		}
-		case WM_COMMAND:
-		{
-			switch (LOWORD(wParam))
-			{
-				case IDC_NOTE_TO_FIND:
-				{
-					if(HIWORD(wParam) == EN_CHANGE) 
-					{
-						if (GetWindowTextLength(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND)))
-							EnableWindow(GetDlgItem(hwndDlg, IDOK), true);
-						else
-							EnableWindow(GetDlgItem(hwndDlg, IDOK), false);
-					}
-					break;
-				}
-				case IDC_RADIO_UP:
-					taseditor_config.findnote_search_up = true;
-					break;
-				case IDC_RADIO_DOWN:
-					taseditor_config.findnote_search_up = false;
-					break;
-				case IDC_MATCH_CASE:
-					taseditor_config.findnote_matchcase ^= 1;
-					CheckDlgButton(hwndDlg, IDC_MATCH_CASE, taseditor_config.findnote_matchcase?MF_CHECKED : MF_UNCHECKED);
-					break;
-				case IDOK:
-				{
-					int len = SendMessage(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND), WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)findnote_string);
-					findnote_string[len] = 0;
-					// scan frames from current selection to the border
-					int cur_marker = 0;
-					bool result;
-					int movie_size = currMovieData.getNumRecords();
-					int current_frame = selection.GetCurrentSelectionBeginning();
-					if (current_frame < 0 && taseditor_config.findnote_search_up)
-						current_frame = movie_size;
-					while (true)
-					{
-						// move forward
-						if (taseditor_config.findnote_search_up)
-						{
-							current_frame--;
-							if (current_frame < 0)
-							{
-								MessageBox(taseditor_window.hwndFindNote, "Nothing was found.", "Find Note", MB_OK);
-								break;
-							}
-						} else
-						{
-							current_frame++;
-							if (current_frame >= movie_size)
-							{
-								MessageBox(taseditor_window.hwndFindNote, "Nothing was found!", "Find Note", MB_OK);
-								break;
-							}
-						}
-						// scan marked frames
-						cur_marker = current_markers.GetMarker(current_frame);
-						if (cur_marker)
-						{
-							if (taseditor_config.findnote_matchcase)
-								result = (strstr(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
-							else
-								result = (StrStrI(current_markers.GetNote(cur_marker).c_str(), findnote_string) != 0);
-							if (result)
-							{
-								// found note containing searched string - jump there
-								selection.JumpToFrame(current_frame);
-								break;
-							}
-						}
-					}
-					return TRUE;
-				}
-				case IDCANCEL:
-					DestroyWindow(taseditor_window.hwndFindNote);
-					taseditor_window.hwndFindNote = 0;
-					return TRUE;
-			}
-			break;
-		}
-		case WM_CLOSE:
-		case WM_QUIT:
-		{
-			DestroyWindow(taseditor_window.hwndFindNote);
-			taseditor_window.hwndFindNote = 0;
-			break;
-		}
-	}
-	return FALSE; 
-} 
 

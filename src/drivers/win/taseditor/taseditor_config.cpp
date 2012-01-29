@@ -49,6 +49,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_search_up = false;
 	enable_auto_function = true;
 	silent_autosave = true;
+	tooltips = true;
 	// empty name
 	last_author[0] = 0;
 

@@ -1,17 +1,15 @@
 //Implementation file of RECORDER class
 #include "taseditor_project.h"
-#include "zlib.h"
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 
 extern uint32 GetGamepadPressedImmediate();
-extern void ColumnSet(int column);
 extern int GetInputType(MovieData& md);
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
-extern INPUT_HISTORY history;
+extern HISTORY history;
 extern GREENZONE greenzone;
 extern TASEDITOR_LIST list;
 
@@ -131,7 +129,7 @@ void RECORDER::update()
 			{
 				// if the button was pressed right now
 				if ((current_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button);
+					list.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button);
 			}
 		}
 	}

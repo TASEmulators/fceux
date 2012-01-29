@@ -718,11 +718,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 
 	if (movieSubtitles)
 		ProcessSubtitles();
-
-#ifdef WIN32
-	if(FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		greenzone.TryDumpIncremental(lagFlag != 0);
-#endif
 }
 
 void FCEUI_CloseGame(void)

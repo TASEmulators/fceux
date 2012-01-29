@@ -36,11 +36,12 @@ public:
 
 	void StartFromZero();
 
-	int GetPauseFrame();
+	int GetFlashingPauseFrame();
 	void SetProgressbar(int a, int b);
 
 	bool JumpToFrame(int index);
 
+	int lost_position_frame;
 	int pause_frame;
 	bool must_find_current_marker;
 	int shown_marker;

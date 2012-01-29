@@ -4,7 +4,7 @@
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern GREENZONE greenzone;
-extern INPUT_HISTORY history;
+extern HISTORY history;
 
 extern uint8 *XBuf;
 extern uint8 *XBackBuf;
@@ -45,16 +45,16 @@ void BOOKMARK::set()
 	flash_type = FLASH_TYPE_SET;
 }
 
-void BOOKMARK::jump()
+void BOOKMARK::jumped()
 {
 	flash_phase = FLASH_PHASE_MAX;
 	flash_type = FLASH_TYPE_JUMP;
 }
 
-void BOOKMARK::unleashed()
+void BOOKMARK::deployed()
 {
 	flash_phase = FLASH_PHASE_MAX;
-	flash_type = FLASH_TYPE_UNLEASH;
+	flash_type = FLASH_TYPE_DEPLOY;
 }
 
 void BOOKMARK::save(EMUFILE *os)
