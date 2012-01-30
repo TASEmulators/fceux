@@ -698,9 +698,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				}
 				break;
-			case ID_STRAY_UNPAUSE:
-				playback.UnpauseEmulation();
-				break;
 			}
 			break;
 		case WM_CLOSE:
@@ -1324,6 +1321,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case ID_HELP_ABOUT:
 					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
+					break;
+				case ID_STRAY_UNPAUSE:
+					playback.UnpauseEmulation();
 					break;
 
 
