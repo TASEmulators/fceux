@@ -1,3 +1,12 @@
+
+02-feb-2012 - AnS - updated fceux.chm and online documentation, uploaded HelpNDoc3 project file
+02-feb-2012 - AnS - added Lua scripts demonstrating some TAS Editor library functions
+02-feb-2012 - AnS - new Lua function in TAS Editor library: getsuperimpose()
+02-feb-2012 - AnS - new Lua function in Joypad library: getimmediate()
+30-jan-2012 - AnS - Taseditor: 9 new Lua functions in TAS Editor library
+30-jan-2012 - AnS - Taseditor: Added "Restore Playback (TAS Editor)" hotkey (Enter by default)
+30-jan-2012 - AnS - Taseditor: Help->Show Tooltips
+30-jan-2012 - AnS - Taseditor: quicksave/quickload hotkeys save/load current branch
 23-jan-2012 - prg - sdl: pause will now show/ungrab cursor in fullscreen.  this can be disabled with the SDL.NoFullscreenCursor option
 12-jan-2012 - AnS - Tasedit: File->New Project, INPUT_TYPE_1P
 12-jan-2012 - AnS - Tasedit: resizing TAS Editor window

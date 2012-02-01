@@ -379,7 +379,7 @@ static int emu_frameadvance(lua_State *L) {
 	// It's actually rather disappointing...
 }
 
-// bool emu.paused() (getter)
+// bool emu.paused()
 static int emu_paused(lua_State *L)
 {
 	lua_pushboolean(L, FCEUI_EmulationPaused() != 0);
@@ -2274,8 +2274,6 @@ static int joy_get_internal(lua_State *L, bool reportUp, bool reportDown) {
 	}
 	
 	// Use the OS-specific code to do the reading.
-	/*extern void FCEUD_UpdateInput(void);	FatRatKnight: What's this call doing here?
-	FCEUD_UpdateInput();					I commented it out. Should we delete it?*/
 	extern SFORMAT FCEUCTRL_STATEINFO[];
 	uint8 buttons = ((uint8 *) FCEUCTRL_STATEINFO[1].v)[which - 1];
 	
@@ -2312,6 +2310,32 @@ static int joypad_getdown(lua_State *L)
 static int joypad_getup(lua_State *L)
 {
 	return joy_get_internal(L, true, false);
+}
+
+// table joypad.getimmediate(int which)
+// Reads immediate state of joypads (at the moment of calling)
+static int joypad_getimmediate(lua_State *L)
+{
+	int which = luaL_checkinteger(L,1);
+	if (which < 1 || which > 4)
+	{
+		luaL_error(L,"Invalid input port (valid range 1-4, specified %d)", which);
+	}
+	// Currently only supports Windows, sorry...
+#ifdef WIN32
+	extern uint32 GetGamepadPressedImmediate();
+	uint8 buttons = GetGamepadPressedImmediate() >> ((which - 1) * 8);
+	
+	lua_newtable(L);
+	for (int i = 0; i < 8; ++i)
+	{
+		lua_pushboolean(L, (buttons & (1 << i)) != 0);
+		lua_setfield(L, -2, button_mappings[i]);
+	}
+#else
+	lua_pushnil(L);
+#endif
+	return 1;
 }
 
 
@@ -4153,6 +4177,7 @@ static int gui_register(lua_State *L) {
 
 }
 
+// table sound.get()
 static int sound_get(lua_State *L)
 {	
 	extern ENVUNIT EnvUnits[3];
@@ -4417,6 +4442,17 @@ static int taseditor_getrecordermode(lua_State *L)
 	lua_pushstring(L, taseditor_lua.getrecordermode());
 #else
 	lua_pushnil(L);
+#endif
+	return 1;
+}
+
+// int taseditor.getsuperimpose()
+static int taseditor_getsuperimpose(lua_State *L)
+{
+#ifdef WIN32
+	lua_pushinteger(L, taseditor_lua.getsuperimpose());
+#else
+	lua_pushinteger(L, -1);
 #endif
 	return 1;
 }
@@ -5230,12 +5266,14 @@ static const struct luaL_reg joypadlib[] = {
 	{"get", joypad_get},
 	{"getdown", joypad_getdown},
 	{"getup", joypad_getup},
+	{"getimmediate", joypad_getimmediate},
 	{"set", joypad_set},
 	// alternative names
 	{"read", joypad_get},
 	{"write", joypad_set},
 	{"readdown", joypad_getdown},
 	{"readup", joypad_getup},
+	{"readimmediate", joypad_getimmediate},
 	{NULL,NULL}
 };
 
@@ -5351,6 +5389,7 @@ static const struct luaL_reg taseditorlib[] = {
 	{"setnote", taseditor_setnote},
 	{"getcurrentbranch", taseditor_getcurrentbranch},
 	{"getrecordermode", taseditor_getrecordermode},
+	{"getsuperimpose", taseditor_getsuperimpose},
 	{"getlostplayback", taseditor_getlostplayback},
 	{"getplaybacktarget", taseditor_getplaybacktarget},
 	{"setplayback", taseditor_setplayback},

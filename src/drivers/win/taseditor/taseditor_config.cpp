@@ -26,7 +26,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	use_1p_rec = true;
 	columnset_by_keys = true;
 	keyboard_for_listview = true;
-	superimpose = BST_UNCHECKED;
+	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
 	superimpose_affects_paste = true;
 	branch_full_movie = true;
 	branch_only_when_rec = false;

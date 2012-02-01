@@ -425,7 +425,12 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	// check option ticks
 	CheckDlgButton(hwndTasEditor, CHECK_FOLLOW_CURSOR, taseditor_config.follow_playback?MF_CHECKED : MF_UNCHECKED);
 	CheckDlgButton(hwndTasEditor,CHECK_AUTORESTORE_PLAYBACK,taseditor_config.restore_position?BST_CHECKED:BST_UNCHECKED);
-	CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, taseditor_config.superimpose);
+	if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
+		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_UNCHECKED);
+	else if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED)
+		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_CHECKED);
+	else
+		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_INDETERMINATE);
 	CheckDlgButton(hwndTasEditor, IDC_RUN_AUTO, taseditor_config.enable_auto_function);
 	CheckDlgButton(hwndTasEditor, CHECK_TURBO_SEEK, taseditor_config.turbo_seek?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, taseditor_config.show_lag_frames?MF_CHECKED : MF_UNCHECKED);
@@ -1130,11 +1135,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case IDC_SUPERIMPOSE:
 					// 3 states of "Superimpose" checkbox
-					if (taseditor_config.superimpose == BST_UNCHECKED)
-						taseditor_config.superimpose = BST_CHECKED;
-					else if (taseditor_config.superimpose == BST_CHECKED)
-						taseditor_config.superimpose = BST_INDETERMINATE;
-					else taseditor_config.superimpose = BST_UNCHECKED;
+					if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
+						taseditor_config.superimpose = SUPERIMPOSE_CHECKED;
+					else if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED)
+						taseditor_config.superimpose = SUPERIMPOSE_INDETERMINATE;
+					else taseditor_config.superimpose = SUPERIMPOSE_UNCHECKED;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ACCEL_CTRL_A:

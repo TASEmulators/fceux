@@ -396,7 +396,7 @@ bool SPLICER::Paste()
 					++pos;
 				}
 				
-				if (!taseditor_config.superimpose_affects_paste || taseditor_config.superimpose == BST_UNCHECKED)
+				if (!taseditor_config.superimpose_affects_paste || taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
 				{
 					currMovieData.records[pos].joysticks[0] = 0;
 					currMovieData.records[pos].joysticks[1] = 0;
@@ -412,7 +412,7 @@ bool SPLICER::Paste()
 					{
 					case '|': // Joystick mark
 						// flush buttons to movie data
-						if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
+						if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0)))
 						{
 							flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 							currMovieData.records[pos].joysticks[joy] |= new_buttons;
@@ -438,7 +438,7 @@ bool SPLICER::Paste()
 					++frame;
 				}
 				// before going to next frame, flush buttons to movie data
-				if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_buttons == 0)))
+				if (taseditor_config.superimpose_affects_paste && (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0)))
 				{
 					flash_joy[joy] |= (new_buttons & (~currMovieData.records[pos].joysticks[joy]));		// highlight buttons that are new
 					currMovieData.records[pos].joysticks[joy] |= new_buttons;

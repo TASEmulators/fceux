@@ -186,6 +186,15 @@ const char* TASEDITOR_LUA::getrecordermode()
 		return NULL;
 }
 
+// int taseditor.getsuperimpose()
+int TASEDITOR_LUA::getsuperimpose()
+{
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		return taseditor_config.superimpose;
+	else
+		return -1;
+}
+
 // int taseditor.getlostplayback()
 int TASEDITOR_LUA::getlostplayback()
 {

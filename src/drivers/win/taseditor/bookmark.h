@@ -25,13 +25,16 @@ public:
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
+	// saved vars
 	bool not_empty;
-	int flash_phase;
-	int flash_type;
 	SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
 	std::vector<uint8> saved_screenshot;
 	int parent_branch;
+
+	// not saved vars
+	int flash_phase;
+	int flash_type;
 
 private:
 

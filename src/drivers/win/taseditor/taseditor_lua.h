@@ -48,6 +48,7 @@ public:
 	void setnote(int index, const char* newtext);
 	int getcurrentbranch();
 	const char* getrecordermode();
+	int getsuperimpose();
 	int getlostplayback();
 	int getplaybacktarget();
 	void setplayback(int frame);

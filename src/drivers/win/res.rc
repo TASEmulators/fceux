@@ -962,14 +962,14 @@ BEGIN
     CONTROL         "Automatically backup movies",IDC_MOVIE_AUTOBACKUP,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,122,114,10
     CONTROL         "Load full savestate-movies:",IDC_FULLSAVESTATES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,141,110,10
-    LTEXT           "Loading states in record mode",IDC_STATIC,24,153,106,8
-    LTEXT           "does not immediately truncate",IDC_STATIC,23,163,107,8
-    LTEXT           "movie, next frame input does it",IDC_STATIC,23,173,108,8
+    LTEXT           "Loading states in record mode",IDC_STATIC,25,153,106,8
+    LTEXT           "will not immediately truncate",IDC_STATIC,25,163,107,8
+    LTEXT           "movie, next frame input will.",IDC_STATIC,25,173,108,8
     CONTROL         "Close after playback",IDC_MOVIE_CLOSEAFTERPLAYBACK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,45,89,10
     CONTROL         "Always suggest Read-Only replay",IDC_MOVIE_SUGGEST_READONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,8,125,10
-    LTEXT           "(VBA-rr and SNES9x style)",IDC_STATIC,24,184,93,8
+    LTEXT           "(VBA-rr and SNES9x style)",IDC_STATIC,25,184,93,8
 END
 
 DWBDIALOGSIMPLE DIALOGEX 33, 99, 250, 39

@@ -184,7 +184,7 @@ void RECORDER::InputChanged()
 		for (int i = num_joys-1; i >= 0; i--)
 		{
 			// superimpose (bitwise OR) if needed
-			if (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_joy[i] == 0))
+			if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_joy[i] == 0))
 				new_joy[i] |= old_joy[i];
 			// change this joystick
 			currMovieData.records[currFrameCounter].joysticks[i] = new_joy[i];
@@ -204,7 +204,7 @@ void RECORDER::InputChanged()
 		if (multitrack_recording_joypad > MULTITRACK_RECORDING_1P && taseditor_config.use_1p_rec)
 			new_joy[joy] = new_joy[0];
 		// superimpose (bitwise OR) if needed
-		if (taseditor_config.superimpose == BST_CHECKED || (taseditor_config.superimpose == BST_INDETERMINATE && new_joy[joy] == 0))
+		if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_joy[joy] == 0))
 			new_joy[joy] |= old_joy[joy];
 		// other joysticks should not be changed
 		for (int i = num_joys-1; i >= 0; i--)
