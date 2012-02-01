@@ -243,11 +243,11 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>Unpauses the emulator.</span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts14>emu.exec_count(int count)</span></p>
+<p><span class=rvts14>int emu.exec_count(int count)</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11><br></span></p>
-<p><span class=rvts15>emu.exec_time(int count)</span></p>
+<p><span class=rvts15>int emu.exec_time(int count)</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11><br></span></p>
@@ -274,6 +274,10 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts14>bool emu.emulating()</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>Returns true if emulation has started, or false otherwise. Certain operations such as using savestates are invalid to attempt before emulation has started. You probably won't need to use this function unless you want to make your script extra-robust to being started too early.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>bool emu.paused()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns true if emulator is paused, false otherwise.</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts14>bool emu.readonly()</span></p>
 <p><span class=rvts11>Alias: movie.readonly</span></p>
@@ -427,6 +431,13 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11>Where a Lua truthvalue true means that the button is set, false means the button is unset. Note that only "false" and "nil" are considered a false value by Lua.&nbsp; Anything else is true, even the number 0.</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>joypad.read left in for backwards compatibility with older versions of FCEU/FCEUX.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table joypad.getimmediate(int player)</span></p>
+<p><span class=rvts15>table joypad.readimmediate(</span><span class=rvts14>int player</span><span class=rvts15>)</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns a table of every game button, where each entry is true if that button is held at the moment of calling the function, or false if it is not held. This function polls keyboard input immediately, allowing Lua to interact with user even when emulator is paused.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>As of FCEUX 2.1.6, the function only works in Windows. In Linux this function will return nil.</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts14>table joypad.getdown(int player)</span></p>
 <p><span class=rvts14>table joypad.readdown(int player)</span></p>
@@ -728,6 +739,96 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>Linux users might want to install xmessage to perform the work. Otherwise the dialog will appear on the shell and that's less noticeable.</span></p>
 <p><span class=rvts11><br></span></p>
+
+<p><span class=rvts12>Sound Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>table sound.get()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>Returns current state of PSG channels in a big array.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>table:<br>
+{<br>
+&nbsp;&nbsp;rp2a03:<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;square1:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;duty,        -- 0:12.5% 1:25% 2:50% 3:75%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;square2:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;duty,        -- 0:12.5% 1:25% 2:50% 3:75%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;triangle:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127 (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dpcm:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;volume,      -- 0.0-1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency,   -- in hertz (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;midikey,     -- 0-127 (correct?)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcaddress,  -- start position of the sample<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcsize,     -- size of the sample, in bytes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcloop,     -- true:looped sample, false:oneshot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dmcseed,     -- InitialRawDALatch<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regs:        -- raw register values<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;frequency  -- raw freq register value<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br></span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts12>TAS Editor Library</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts14>taseditor.registerauto(function func)</span></p>
+<p><span class=rvts14>taseditor.registermanual(function func)</span></p>
+<p><span class=rvts14>bool taseditor.engaged()</span></p>
+<p><span class=rvts14>bool taseditor.markedframe(int frame)</span></p>
+<p><span class=rvts14>int taseditor.getmarker(int frame)</span></p>
+<p><span class=rvts14>int taseditor.setmarker(int frame)</span></p>
+<p><span class=rvts14>taseditor.clearmarker(int frame)</span></p>
+<p><span class=rvts14>string taseditor.getnote(int index)</span></p>
+<p><span class=rvts14>taseditor.setnote(int index, string newtext)</span></p>
+<p><span class=rvts14>int taseditor.getcurrentbranch()</span></p>
+<p><span class=rvts14>string taseditor.getrecordermode()</span></p>
+<p><span class=rvts14>int taseditor.getsuperimpose()</span></p>
+<p><span class=rvts14>int taseditor.getlostplayback()</span></p>
+<p><span class=rvts14>int taseditor.getplaybacktarget()</span></p>
+<p><span class=rvts14>taseditor.setplayback(int frame)</span></p>
+<p><span class=rvts14>taseditor.stopseeking()</span></p>
+<p><span class=rvts14>taseditor.getselection()</span></p>
+<p><span class=rvts14>taseditor.setselection()</span></p>
+<p><span class=rvts14>int taseditor.getinput(int frame, int joypad)</span></p>
+<p><span class=rvts14>taseditor.submitinputchange(int frame, int joypad, int input)</span></p>
+<p><span class=rvts14>taseditor.submitinsertframes(int frame, int number)</span></p>
+<p><span class=rvts14>taseditor.submitdeleteframes(int frame, int number)</span></p>
+<p><span class=rvts14>int taseditor.applyinputchanges([string name])</span></p>
+<p><span class=rvts14>taseditor.clearinputchanges()</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11>For full description of these functions refer to TAS Editor Manual.</span></p>
+<p><span class=rvts11><br></span></p>
+<p><span class=rvts11><br></span></p>
 <p><span class=rvts12>Bitwise Operations</span></p>
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>All the following functions are left for backward compatibility, since </span><a class=rvts23 href="http://bitop.luajit.org/">LuaBitOp</a><span class=rvts11> is embedded in FCEUX.</span></p>
@@ -771,7 +872,7 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11><br></span></p>
 <p><span class=rvts11>For transparancy use "clear".</span></p>
 <p><span class=rvts11><br></span></p>
-<p class=rvps3><span class=rvts25>2008</span></p>
+<p class=rvps3><span class=rvts25>2012</span></p>
 <p class=rvps4><span class=rvts26>This help file has been generated by the freeware version of </span><a class=rvts27 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
 
 </body></html>

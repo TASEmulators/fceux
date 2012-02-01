@@ -183,7 +183,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p><span class=rvts11>Hide Menu</span></p>
 <p><br></p>
-<p>Hides the Menu commands on the FCEUX main window.&nbsp; Pres ESC to unhide the menu.</p>
+<p>Hides the Menu commands on the FCEUX main window.&nbsp; Press ESC to unhide the menu.</p>
 <p><br></p>
 <p><br></p>
 <p><span class=rvts11>Game Genie</span></p>
@@ -221,7 +221,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p><span class=rvts11>Auto-savestates</span></p>
 <p><br></p>
-<p>Enables the Auto-save feature.&nbsp; If enabled, FCEUX will make periodic savestates as you play (or play/record a movie).&nbsp; You can right-click and select the "load last auto-save" in the context menu or press the Auto-save <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">hotkey</a> to back up to the last auto-save savestate.</p>
+<p>Enables the Auto-save feature.&nbsp; If enabled, FCEUX will make periodic savestates (once per every 256 frames) as you play or record a movie.&nbsp; You can right-click and select the "load last auto-save" in the context menu or press "Load Last Auto-save" <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">hotkey</a> to rewind to the last auto-save savestate.</p>
 <p><br></p>
 <p><br></p>
 <p><span class=rvts13>Frame Adv. - Skip Lag</span></p>
@@ -236,7 +236,7 @@ p,ul,ol /* Paragraph Style */
 <p>Enabled by default.&nbsp; This option allows for savestate &amp; loadstate Undo (&amp; redo). <span class=rvts18> (see </span><a class=rvts19 href="{3BB85A6B-4C1E-4136-A7FF-A8A6E4894F80}.htm">context menu</a><span class=rvts18>)</span></p>
 <p><br></p>
 <p><br></p>
-<p><span class=rvts13>Compression Savestates</span></p>
+<p><span class=rvts13>Compress Savestates</span></p>
 <p><br></p>
 <p>Enabled by default.&nbsp; This option compresses non movie savestates.</p>
 <p><br></p>
@@ -248,7 +248,7 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>When input comes from a movie file rather than then user, it is displayed in a different color (silver)</p>
 <p><br></p>
-<p>The input display can also be toggled by hotkey/&nbsp; The default key for toggling the Input display is the "," (comma) key.&nbsp; (This can be re-mapped in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>).</p>
+<p>The input display can also be toggled by hotkey.&nbsp; The default key for toggling the Input display is the "," (comma) key.&nbsp; (This can be re-mapped in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>).</p>
 <p><br></p>
 <p><br></p>
 <p><span class=rvts11>Lag Counter</span></p>
@@ -257,21 +257,34 @@ p,ul,ol /* Paragraph Style */
 <p><br></p>
 <p>The lag counter value is stored in savestates.&nbsp;&nbsp;&nbsp; </p>
 <p><br></p>
-<p>Displaying the lag counter can be done by hotkey as well.&nbsp; It must be mapped to a hotkey in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hokeys Menu</a>.</p>
-<p>It can be reset to 0 by mapping the reset lag counter hokey in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>.</p>
+<p>Displaying the lag counter can also be toggled by hotkey.&nbsp; The default key is the "/" (slash) key.&nbsp; (This can be re-mapped in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>).</p>
 <p><br></p>
 <p><br></p>
 <p><span class=rvts11>Frame Counter</span></p>
 <p><br></p>
 <p>Toggles the display of the frame counter.&nbsp; The frame counter will increment once per frame.</p>
 <p><br></p>
+<p>The frame counter display can also be toggled by hotkey.&nbsp; The default key is the "." (period) key.&nbsp; (This can be re-mapped in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>).</p>
 <p><br></p>
-<p><span class=rvts11>Display BG</span></p>
+<p><br></p>
+<p><span class=rvts11>Rerecord Counter</span></p>
+<p><br></p>
+<p>Toggles the display of the number of Rerecords done when making a movie.&nbsp; The Rerecord counter will increment every time you load a savestate in Recording mode.</p>
+<p><br></p>
+<p>The rerecord counter display can also be toggled by hotkey.&nbsp; The default key is the "M" key.&nbsp; (This can be re-mapped in the <a class=rvts12 href="{EA4D684B-BEDB-4395-AF94-C9ACAF0B6561}.htm">Map Hotkeys Menu</a>).</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Movie status icon</span></p>
+<p><br></p>
+<p>Toggles the display of "pause", "play" or "record" icons in the lower right corner.</p>
+<p><br></p>
+<p><br></p>
+<p><span class=rvts11>Graphics: BG</span></p>
 <p>Turning this off will turn off the backgrounds in the game.</p>
 <p><br></p>
 <p><br></p>
-<p><span class=rvts11>Display OBJ</span></p>
-<p>Turning this off will turn off the objects in the game.</p>
+<p><span class=rvts11>Graphics: OBJ</span></p>
+<p>Turning this off will turn off the objects (sprites) in the game.</p>
 <p><br></p>
 <p>Note: You can set the default color when the Backgrounds are turned off.&nbsp; To do so, open fceux.cfg and change the value of the entry named: <span class=rvts16>gNoBGFillColor </span></p>
 <p><span class=rvts16><br></span></p>
@@ -279,7 +292,7 @@ p,ul,ol /* Paragraph Style */
 <p><span class=rvts11>Save Config File</span></p>
 <p><span class=rvts16><br></span></p>
 <p><span class=rvts16>Saves current settings to fceux.cfg.&nbsp; Normally settings are not saved until FCEUX is closed.</span></p>
-<p class=rvps3><span class=rvts21>2008</span></p>
+<p class=rvps3><span class=rvts21>2012</span></p>
 <p class=rvps4><span class=rvts22>This help file has been generated by the freeware version of </span><a class=rvts23 href="http://www.ibe-software.com/products/software/helpndoc/" target="_blank">HelpNDoc</a></p>
 
 </body></html>
