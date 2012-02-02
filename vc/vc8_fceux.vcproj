@@ -2315,19 +2315,11 @@
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditor\inputhistory.cpp"
+						RelativePath="..\src\drivers\win\taseditor\history.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditor\inputhistory.h"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\taseditor\inputsnapshot.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\taseditor\inputsnapshot.h"
+						RelativePath="..\src\drivers\win\taseditor\history.h"
 						>
 					</File>
 					<File
@@ -2336,6 +2328,14 @@
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditor\markers.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\markers_manager.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\markers_manager.h"
 						>
 					</File>
 					<File
@@ -2360,6 +2360,14 @@
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditor\recorder.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\snapshot.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\snapshot.h"
 						>
 					</File>
 					<File
