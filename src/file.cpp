@@ -310,7 +310,7 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, char *mode, char *ext
 				if(magic==0x088b1f) {
 					 // maybe gzip... 
 
-					void* gzfile = gzopen(fileToOpen.c_str(),"rb");
+					gzFile gzfile = gzopen(fileToOpen.c_str(),"rb");
 					if(gzfile) {
 						delete fp;
 
