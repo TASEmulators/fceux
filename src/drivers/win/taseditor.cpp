@@ -717,3 +717,10 @@ void ClearTaseditorInput()
 	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
 
+// this getter contains formula to decide whether to record or replay movie
+bool TaseditorIsRecording()
+{
+	if (movie_readonly || turbo || playback.pause_frame > currFrameCounter)
+		return false;		// replay
+	return true;			// record
+}

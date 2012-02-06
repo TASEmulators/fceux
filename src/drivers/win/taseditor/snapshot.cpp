@@ -470,6 +470,11 @@ int SNAPSHOT::GetJoystickInfo(int frame, int joy)
 	}
 	return 0;
 }
+int SNAPSHOT::GetCommandsInfo(int frame)
+{
+	if (frame < 0 || frame >= size) return 0;
+	return commands[frame];
+}
 
 void SNAPSHOT::insertFrames(int at, int frames)
 {

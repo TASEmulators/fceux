@@ -44,6 +44,8 @@ extern void AddRecentMovieFile(const char *filename);
 #include "./drivers/win/taseditor/recorder.h"
 extern PLAYBACK playback;
 extern RECORDER recorder;
+
+extern bool TaseditorIsRecording();
 #endif
 
 using namespace std;
@@ -984,27 +986,27 @@ void FCEUMOV_AddInputState()
 			currMovieData.insertEmpty(-1, 2 + currFrameCounter - (int)currMovieData.records.size());
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if(movie_readonly || turbo || playback.pause_frame > currFrameCounter)
+		if(TaseditorIsRecording())
 		{
-			// replay buttons
-			if(mr->command_reset())
-				ResetNES();
-			if(mr->command_fds_insert())
-				FCEU_FDSInsert();
-			if(mr->command_fds_select())
-				FCEU_FDSSelect();
-			joyports[0].load(mr);
-			joyports[1].load(mr);
-		} else
-		{
-			// record buttons
+			// record commands and buttons
+			mr->commands |= _currCommand;
 			joyports[0].log(mr);
 			joyports[1].log(mr);
 			recorder.InputChanged();
-			// return data from movie to joyports in case Recorder changed it (for example, by applying Superimpose)
-			joyports[0].load(mr);
-			joyports[1].load(mr);
+			// replay buttons even when Recording - return data from movie to joyports in case Recorder changed it (for example, by applying Superimpose)
 		}
+		// replay buttons
+		joyports[0].load(mr);
+		joyports[1].load(mr);
+		// replay commands
+		if(mr->command_power())
+			PowerNES();
+		if(mr->command_reset())
+			ResetNES();
+		if(mr->command_fds_insert())
+			FCEU_FDSInsert();
+		if(mr->command_fds_select())
+			FCEU_FDSSelect();
 		_currCommand = 0;
 	} else
 #endif
@@ -1022,13 +1024,10 @@ void FCEUMOV_AddInputState()
 			//reset and power cycle if necessary
 			if(mr->command_power())
 				PowerNES();
-
 			if(mr->command_reset())
 				ResetNES();
-
 			if(mr->command_fds_insert())
 				FCEU_FDSInsert();
-			
 			if(mr->command_fds_select())
 				FCEU_FDSSelect();
 
@@ -1083,7 +1082,7 @@ void FCEUMOV_AddInputState()
 void FCEUMOV_AddCommand(int cmd)
 {
 	// do nothing if not recording a movie
-	if(movieMode != MOVIEMODE_RECORD)
+	if(movieMode != MOVIEMODE_RECORD && movieMode != MOVIEMODE_TASEDITOR)
 		return;
 
 	//NOTE: EMOVIECMD matches FCEUNPCMD_RESET and FCEUNPCMD_POWER

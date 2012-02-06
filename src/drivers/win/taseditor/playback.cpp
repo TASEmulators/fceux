@@ -120,9 +120,10 @@ void PLAYBACK::update()
 		bookmarks.RedrawChangedBookmarks(lastCursor);
 		list.RedrawRow(currFrameCounter);
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
-		// enforce redrawing now
 		lastCursor = currFrameCounter;
-		UpdateWindow(list.hwndList);
+		if (taseditor_config.follow_playback && !turbo)
+			// enforce redrawing now
+			UpdateWindow(list.hwndList);
 		// lazy update of "Playback's Marker text"
 		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
 		if (shown_marker != current_marker)
@@ -379,6 +380,19 @@ int PLAYBACK::GetFlashingPauseFrame()
 void PLAYBACK::SetProgressbar(int a, int b)
 {
 	SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * a / b, 0);
+}
+void PLAYBACK::ClickOnProgressbar()
+{
+	// delete lost_position pointer (green arrow)
+	if (lost_position_frame)
+	{
+		int temp = lost_position_frame - 1;
+		lost_position_frame = 0;
+		list.RedrawRow(temp);
+	}
+	// and stop seeking
+	if (pause_frame)
+		SeekingStop();
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

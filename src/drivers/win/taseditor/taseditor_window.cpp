@@ -1105,8 +1105,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case IDC_PROGRESS_BUTTON:
-					// click on progressbar - stop seeking
-					if (playback.pause_frame) playback.SeekingStop();
+					playback.ClickOnProgressbar();
 					break;
 				case IDC_BRANCHES_BUTTON:
 					// click on "Bookmarks/Branches" - switch "View Tree of branches"

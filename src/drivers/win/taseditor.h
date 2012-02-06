@@ -28,3 +28,5 @@ void SetInputType(MovieData& md, int new_input_type);
 
 void SetTaseditorInput();
 void ClearTaseditorInput();
+
+bool TaseditorIsRecording();

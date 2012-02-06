@@ -13,6 +13,7 @@
 -- Run the script, unpause emulation (or simply Frame Advance once).
 -- Now you can select several frames of input data and then
 -- press "Run function" button to swap inputs of 1P and 2P.
+-- You can easily modify the script to swap any other joypads.
 ---------------------------------------------------------------------------
 
 function swap()

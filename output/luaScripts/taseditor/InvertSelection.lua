@@ -34,7 +34,7 @@ function invert_selection()
 	end
 
 	if (selection_table ~= nil) then
-		-- Substract current selection from new selection set
+		-- Substract old selection from new selection set
 		for i = #old_sel, 1, -1 do
 			selected_frame = old_sel[i];
 			-- we're taking advantage of the fact that "old_sel" is sorted in ascending order

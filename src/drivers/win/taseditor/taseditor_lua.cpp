@@ -116,6 +116,7 @@ int TASEDITOR_LUA::setmarker(int frame)
 				// new marker was created - register changes in TAS Editor
 				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				list.RedrawRow(frame);
 				list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
@@ -135,6 +136,7 @@ void TASEDITOR_LUA::clearmarker(int frame)
 			// marker was deleted - register changes in TAS Editor
 			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_UNSET, frame);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			list.RedrawRow(frame);
 			list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 		}
 	}

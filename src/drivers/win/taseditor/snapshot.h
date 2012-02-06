@@ -36,6 +36,7 @@ public:
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
 
 	int GetJoystickInfo(int frame, int joy);
+	int GetCommandsInfo(int frame);
 
 	void insertFrames(int at, int frames);
 	void eraseFrame(int frame);

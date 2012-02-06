@@ -11,8 +11,8 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	wndheight = 0;
 	findnote_wndx = 0;
 	findnote_wndy = 0;
-	follow_playback = true;
-	turbo_seek = true;
+	follow_playback = false;
+	turbo_seek = false;
 	show_lag_frames = true;
 	show_markers = true;
 	show_branch_screenshots = true;

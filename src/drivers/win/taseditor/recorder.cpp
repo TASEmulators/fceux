@@ -220,6 +220,15 @@ void RECORDER::InputChanged()
 					list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 		}
 	}
+
+	if (!changes_made)
+	{
+		// check if new commands were recorded
+		if (currMovieData.records[currFrameCounter].commands != history.GetCurrentSnapshot().GetCommandsInfo(currFrameCounter))
+			changes_made = true;
+	}
+
+	// register changes
 	if (changes_made)
 	{
 		history.RegisterRecording(currFrameCounter);

@@ -38,6 +38,7 @@ public:
 
 	int GetFlashingPauseFrame();
 	void SetProgressbar(int a, int b);
+	void ClickOnProgressbar();
 
 	bool JumpToFrame(int index);
 

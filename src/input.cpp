@@ -553,22 +553,30 @@ void FCEU_QSimpleCommand(int cmd)
 		FCEUNET_SendCommand(cmd, 0);
 	else
 	{
-		FCEU_DoSimpleCommand(cmd);
-		if(FCEUMOV_Mode(MOVIEMODE_RECORD))
+		if(!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))		// TAS Editor will do the command himself
+			FCEU_DoSimpleCommand(cmd);
+		if(FCEUMOV_Mode(MOVIEMODE_RECORD|MOVIEMODE_TASEDITOR))
 			FCEUMOV_AddCommand(cmd);
 	}
 }
 
 void FCEUI_FDSSelect(void)
 {
+	if(!FCEU_IsValidUI(FCEUI_SWITCH_DISK))
+		return;
+
+	FCEU_DispMessage("Command: Switch disk side", 0);
 	FCEU_QSimpleCommand(FCEUNPCMD_FDSSELECT);
 }
 
 void FCEUI_FDSInsert(void)
 {
+	if(!FCEU_IsValidUI(FCEUI_EJECT_DISK))
+		return;
+
+	FCEU_DispMessage("Command: Insert/Eject disk", 0);
 	FCEU_QSimpleCommand(FCEUNPCMD_FDSINSERT);
 }
-
 
 void FCEUI_VSUniToggleDIP(int w)
 {
@@ -593,9 +601,10 @@ void FCEUI_ResetNES(void)
 {
 	if(!FCEU_IsValidUI(FCEUI_RESET))
 		return;
+
+	FCEU_DispMessage("Command: Soft reset", 0);
 	FCEU_QSimpleCommand(FCEUNPCMD_RESET);
 	ResetFrameCounter();
-	FCEU_DispMessage("Soft reset", 0);
 }
 
 //Powers off the NES
@@ -603,9 +612,10 @@ void FCEUI_PowerNES(void)
 {
 	if(!FCEU_IsValidUI(FCEUI_POWER))
 		return;
+
+	FCEU_DispMessage("Command: Power switch", 0);
 	FCEU_QSimpleCommand(FCEUNPCMD_POWER);
 	ResetFrameCounter();
-	FCEU_DispMessage("Power switch", 0);
 }
 
 const char* FCEUI_CommandTypeNames[]=
@@ -663,8 +673,8 @@ static void TaseditorRestorePlayback(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
-	{ EMUCMD_POWER,							EMUCMDTYPE_MISC,	FCEUI_PowerNES,		  0, 0, "Power", 0 },
-	{ EMUCMD_RESET,							EMUCMDTYPE_MISC,	FCEUI_ResetNES,		  0, 0, "Reset", 0 },
+	{ EMUCMD_POWER,							EMUCMDTYPE_MISC,	FCEUI_PowerNES,		  0, 0, "Power", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_RESET,							EMUCMDTYPE_MISC,	FCEUI_ResetNES,		  0, 0, "Reset", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_PAUSE,							EMUCMDTYPE_MISC,	FCEUI_ToggleEmulationPause, 0, 0, "Pause", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDITOR },
@@ -737,8 +747,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_AVI_RECORD_AS,					EMUCMDTYPE_AVI,		FCEUD_AviRecordTo, 0, 0, "Record AVI As...", 0 },
 	{ EMUCMD_AVI_STOP,						EMUCMDTYPE_AVI,		FCEUD_AviStop, 0, 0, "Stop AVI", 0 },
 
-	{ EMUCMD_FDS_EJECT_INSERT,				EMUCMDTYPE_FDS,		FCEUI_FDSInsert, 0, 0, "Eject or Insert FDS Disk", 0 },
-	{ EMUCMD_FDS_SIDE_SELECT,				EMUCMDTYPE_FDS,		FCEUI_FDSSelect, 0, 0, "Switch FDS Disk Side", 0 },
+	{ EMUCMD_FDS_EJECT_INSERT,				EMUCMDTYPE_FDS,		FCEUI_FDSInsert, 0, 0, "Eject or Insert FDS Disk", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_FDS_SIDE_SELECT,				EMUCMDTYPE_FDS,		FCEUI_FDSSelect, 0, 0, "Switch FDS Disk Side", EMUCMDFLAG_TASEDITOR },
 
 	{ EMUCMD_VSUNI_COIN,					EMUCMDTYPE_VSUNI,	FCEUI_VSUniCoin, 0, 0, "Insert Coin", 0 },
 	{ EMUCMD_VSUNI_TOGGLE_DIP_0,			EMUCMDTYPE_VSUNI,	CommandToggleDip, 0, 0, "Toggle Dipswitch 0", 0 },
@@ -759,7 +769,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_MISC_OPENTASEDITOR,				EMUCMDTYPE_TOOL,	LaunchTasEditor,  0, 0, "Open TAS Editor", 0},
+	{ EMUCMD_MISC_OPENTASEDITOR,			EMUCMDTYPE_TOOL,	LaunchTasEditor,  0, 0, "Open TAS Editor", 0},
 	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", 0},
 	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
