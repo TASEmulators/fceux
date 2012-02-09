@@ -51,8 +51,9 @@ if os.environ.has_key('WINDRES'):
   env.Replace(WINDRES = os.environ['WINDRES'])
 if os.environ.has_key('CFLAGS'):
   env.Append(CCFLAGS = os.environ['CFLAGS'].split())
-if os.environ.has_key('LDFLAGS'):
-  env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
+# Uncomment the next two lines if you would like to use the $LDFLAG variable from the environment
+#if os.environ.has_key('LDFLAGS'):
+#  env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
 
 print "platform: ", env['PLATFORM']
 
