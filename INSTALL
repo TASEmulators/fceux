@@ -1,16 +1,6 @@
-To compile and install FCEUX for SDL, follow these steps:
+To compile and install FCEUX for SDL, follow the instructions in the README-SDL file.
 
-  1.  Ensure that scons and SDL are installed on your system.
-    On an ubuntu/debian system, run:
-      sudo apt-get install scons libsdl1.2-dev libsdl1.2debian-all
-
-  2.  Enable options you would like to enable/disable in SConstruct file.
-
-  3.  Run "scons" to build fceux.
-
-  4.  To install, run "scons install".  You can optionally define a prefix with "scons --prefix=/usr install"
-
-  5.  To compile the server, run "scons fceux-server" or run "make" in the "fceux-server" directory.
+To compile the netplay server, run "scons fceux-server" or run "make" in the "fceux-server" directory.
 
 Users of Microsoft Visual Studio can use the solution files within the vc directory.
 These solution files will compile FCEUX and some included libraries for full functionality.
