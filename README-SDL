@@ -1,7 +1,7 @@
 FCEUX SDL 2.1.6 SDL README
 By Lukas Sabota (punkrockguy318)
 http://www.fceux.com
-Last Modified: October 19, 2011
+Last Modified: February 20, 2012
 
 Table of Contents
 1.  Requirements
@@ -17,10 +17,10 @@ Table of Contents
 		version of sdl (1.2.15 at the time of writing).
 	* scons - Required to build fceux.
 	* libgtk2.0 (optional) - version >= 2.24 recommended
-  * libgtk3.0 (optional) - this compiles as of fceux 2.1.6.  it has seemed stable in initial testing, but expect bugs as this is new.
+	* libgtk3.0 (optional) - this compiles as of fceux 2.1.6.
 
 2. Installation
-	Fceux is installed with the scons utility.  To compile, run:
+	Fceux can be compiled and built using the scons build system.  To compile, run:
 
 	scons
 	
