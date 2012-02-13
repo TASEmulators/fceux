@@ -129,6 +129,7 @@ public:
 	void FollowUndo();
 	void FollowSelection();
 	void FollowPauseframe();
+	void FollowMarker(int marker_id);
 
 	void SetHeaderColumnLight(int column, int level);
 
@@ -153,6 +154,8 @@ public:
 	HBRUSH bg_brush;
 
 private:
+	void CenterListAt(int frame);
+
 	std::vector<uint8> header_colors;
 	int num_columns;
 	int next_header_update_time;

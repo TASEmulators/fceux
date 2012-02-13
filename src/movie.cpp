@@ -601,14 +601,18 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 	// Non-TASEditor projects consume until EOF
 	movieData.loadFrameCount = -1;
 
-	//first, look for an fcm signature
-	char fcmbuf[3];
 	std::ios::pos_type curr = fp->ftell();
-	fp->fread(fcmbuf,3);
-	fp->fseek(curr,SEEK_SET);
-	if(!strncmp(fcmbuf,"FCM",3)) {
-		FCEU_PrintError("FCM File format is no longer supported. Please use Tools > Convert FCM");
-		return false;
+
+	if (!stopAfterHeader)
+	{
+		// first, look for an fcm signature
+		char fcmbuf[3];
+		fp->fread(fcmbuf,3);
+		fp->fseek(curr,SEEK_SET);
+		if(!strncmp(fcmbuf,"FCM",3)) {
+			FCEU_PrintError("FCM File format is no longer supported. Please use Tools > Convert FCM");
+			return false;
+		}
 	}
 
 	//movie must start with "version 3"

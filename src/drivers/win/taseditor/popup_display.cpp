@@ -122,7 +122,7 @@ void POPUP_DISPLAY::update()
 				RedrawScreenshotBitmap();
 				ShowWindow(hwndScrBmp, SW_SHOWNA);
 			}
-			if (taseditor_config.show_branch_tooltips && !hwndMarkerNoteTooltip)
+			if (taseditor_config.show_branch_descr && !hwndMarkerNoteTooltip)
 			{
 				hwndMarkerNoteTooltip = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditor_config.wndx + tooltip_x, taseditor_config.wndy + tooltip_y, MARKER_NOTE_TOOLTIP_WIDTH, MARKER_NOTE_TOOLTIP_HEIGHT, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
 				ChangeTooltipText();
@@ -133,7 +133,7 @@ void POPUP_DISPLAY::update()
 			{
 				if (taseditor_config.show_branch_screenshots)
 					ChangeScreenshotBitmap();
-				if (taseditor_config.show_branch_tooltips)
+				if (taseditor_config.show_branch_descr)
 					ChangeTooltipText();
 				screenshot_currently_shown = bookmarks.item_under_mouse;
 			}

@@ -264,7 +264,7 @@ BEGIN
         MENUITEM "Show &Lag Frames",            ID_VIEW_SHOW_LAG_FRAMES
         MENUITEM "Highlight &Markers",          ID_VIEW_SHOW_MARKERS
         MENUITEM "Display Branch &Screenshots", ID_VIEW_SHOWBRANCHSCREENSHOTS
-        MENUITEM "Display Branch &Tooltips",    ID_VIEW_SHOWBRANCHTOOLTIPS
+        MENUITEM "Display Branch &Descriptions", ID_VIEW_SHOWBRANCHTOOLTIPS
         MENUITEM "Enable Hot &Changes",         ID_VIEW_ENABLEHOTCHANGES
         MENUITEM SEPARATOR
         MENUITEM "Follow &undo context",        ID_VIEW_JUMPWHENMAKINGUNDO
@@ -272,9 +272,9 @@ BEGIN
     END
     POPUP "&Config"
     BEGIN
-        MENUITEM "Set &greenzone capacity",     ID_CONFIG_SETGREENZONECAPACITY
+        MENUITEM "Set &Greenzone capacity",     ID_CONFIG_SETGREENZONECAPACITY
         MENUITEM "Set max &undo levels",        ID_CONFIG_SETMAXUNDOLEVELS
-        MENUITEM "Set &autosave period",        ID_CONFIG_SETAUTOSAVEPERIOD
+        MENUITEM "Set &Autosave period",        ID_CONFIG_SETAUTOSAVEPERIOD
         MENUITEM SEPARATOR
         MENUITEM "Branches restore entire &Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE
         MENUITEM "Branches work only when &Recording", ID_CONFIG_BRANCHESWORKONLYWHENRECORDING
@@ -285,13 +285,12 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Combine consecutive Recordings", ID_CONFIG_COMBINECONSECUTIVERECORDINGS
         MENUITEM "Use 1&P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING
-        MENUITEM "Use &Input keys for ColumnSet", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET
-        MENUITEM SEPARATOR
-        MENUITEM "Allow &keyboard controls in Listview", ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW
+        MENUITEM "Use &Input keys for Column Set", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET
+        MENUITEM "Allow &keyboard controls in Piano Roll", ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW
         MENUITEM "&Superimpose affects copy/paste", ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE
         MENUITEM SEPARATOR
+        MENUITEM "Silent Autosave",             ID_CONFIG_SILENTAUTOSAVE
         MENUITEM "Mute &Turbo",                 ID_CONFIG_MUTETURBO
-        MENUITEM "Silent autosave",             ID_CONFIG_SILENTAUTOSAVE
     END
     POPUP "&Help"
     BEGIN
@@ -1487,7 +1486,7 @@ BEGIN
     CONTROL         " Bookmarks",IDC_CHECK_BOOKMARKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,37,67,10
     CONTROL         " Greenzone",IDC_CHECK_GREENZONE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,52,67,10
     CONTROL         " History",IDC_CHECK_HISTORY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,67,67,10
-    CONTROL         " List data",IDC_CHECK_LIST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,82,67,10
+    CONTROL         " Piano Roll",IDC_CHECK_LIST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,82,67,10
     CONTROL         " Selection",IDC_CHECK_SELECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,35,97,67,10
 END
 

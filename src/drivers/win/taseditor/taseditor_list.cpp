@@ -346,20 +346,24 @@ bool TASEDITOR_LIST::CheckItemVisible(int frame)
 	return false;
 }
 
-void TASEDITOR_LIST::FollowPlayback()
+void TASEDITOR_LIST::CenterListAt(int frame)
 {
-	// center list at jump_frame
 	int list_items = ListView_GetCountPerPage(hwndList);
 	int lower_border = (list_items - 1) / 2;
 	int upper_border = (list_items - 1) - lower_border;
-	int index = currFrameCounter + lower_border;
+	int index = frame + lower_border;
 	if (index >= currMovieData.getNumRecords())
 		index = currMovieData.getNumRecords()-1;
 	ListView_EnsureVisible(hwndList, index, false);
-	index = currFrameCounter - upper_border;
+	index = frame - upper_border;
 	if (index < 0)
 		index = 0;
 	ListView_EnsureVisible(hwndList, index, false);
+}
+
+void TASEDITOR_LIST::FollowPlayback()
+{
+	CenterListAt(currFrameCounter);
 }
 void TASEDITOR_LIST::FollowPlaybackIfNeeded()
 {
@@ -371,20 +375,7 @@ void TASEDITOR_LIST::FollowUndo()
 	if (taseditor_config.jump_to_undo && jump_frame >= 0)
 	{
 		if (!CheckItemVisible(jump_frame))
-		{
-			// center list at jump_frame
-			int list_items = ListView_GetCountPerPage(hwndList);
-			int lower_border = (list_items - 1) / 2;
-			int upper_border = (list_items - 1) - lower_border;
-			int index = jump_frame + lower_border;
-			if (index >= currMovieData.getNumRecords())
-				index = currMovieData.getNumRecords()-1;
-			ListView_EnsureVisible(hwndList, index, false);
-			index = jump_frame - upper_border;
-			if (index < 0)
-				index = 0;
-			ListView_EnsureVisible(hwndList, index, false);
-		}
+			CenterListAt(jump_frame);
 	}
 }
 void TASEDITOR_LIST::FollowSelection()
@@ -413,36 +404,25 @@ void TASEDITOR_LIST::FollowSelection()
 	} else
 	{
 		// selected region is too big to fit in screen
-		// just center at selection_start
-		int lower_border = (list_items - 1) / 2;
-		int upper_border = (list_items - 1) - lower_border;
-		int index = selection_start + lower_border;
-		if (index >= currMovieData.getNumRecords())
-			index = currMovieData.getNumRecords()-1;
-		ListView_EnsureVisible(hwndList, index, false);
-		index = selection_start - upper_border;
-		if (index < 0)
-			index = 0;
-		ListView_EnsureVisible(hwndList, index, false);
+		// oh well, just center at selection_start
+		CenterListAt(selection_start);
 	}
 }
 void TASEDITOR_LIST::FollowPauseframe()
 {
-	int jump_frame = playback.pause_frame;
-	if (jump_frame >= 0)
+	if (playback.pause_frame > 0)
+		CenterListAt(playback.pause_frame - 1);
+}
+void TASEDITOR_LIST::FollowMarker(int marker_id)
+{
+	if (marker_id > 0)
 	{
-		// center list at jump_frame
-		int list_items = ListView_GetCountPerPage(hwndList);
-		int lower_border = (list_items - 1) / 2;
-		int upper_border = (list_items - 1) - lower_border;
-		int index = jump_frame + lower_border;
-		if (index >= currMovieData.getNumRecords())
-			index = currMovieData.getNumRecords()-1;
-		ListView_EnsureVisible(hwndList, index, false);
-		index = jump_frame - upper_border;
-		if (index < 0)
-			index = 0;
-		ListView_EnsureVisible(hwndList, index, false);
+		int frame = markers_manager.GetMarkerFrame(marker_id);
+		if (frame >= 0)
+			CenterListAt(frame);
+	} else
+	{
+		ListView_EnsureVisible(hwndList, 0, false);
 	}
 }
 

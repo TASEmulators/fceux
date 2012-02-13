@@ -436,7 +436,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, taseditor_config.show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, taseditor_config.show_markers?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, taseditor_config.show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHTOOLTIPS, taseditor_config.show_branch_tooltips?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHTOOLTIPS, taseditor_config.show_branch_descr?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, taseditor_config.jump_to_undo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, taseditor_config.follow_note_context?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, taseditor_config.enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
@@ -758,7 +758,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// disable FCEUX keyboard
 								ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
-									list.FollowPlayback();
+									list.FollowMarker(playback.shown_marker);
 								break;
 							}
 						case EN_KILLFOCUS:
@@ -790,7 +790,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// disable FCEUX keyboard
 								ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
-									list.FollowSelection();
+									list.FollowMarker(selection.shown_marker);
 								break;
 							}
 						case EN_KILLFOCUS:
@@ -977,7 +977,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case ID_VIEW_SHOWBRANCHTOOLTIPS:
 					//switch "Show Branch Screenshots" flag
-					taseditor_config.show_branch_tooltips ^= 1;
+					taseditor_config.show_branch_descr ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_VIEW_ENABLEHOTCHANGES:

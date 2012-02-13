@@ -254,11 +254,16 @@ bool SaveProjectAs()
 
 	char nameo[2048];
 	if (project.GetProjectName().empty())
+	{
 		// suggest ROM name for this project
 		strcpy(nameo, mass_replace(GetRomName(), "|", ".").c_str());	//convert | to . for archive filenames
-	else
+		// add .fm3 extension
+		strncat(nameo, ".fm3", 2047);
+	} else
+	{
 		// suggest current name
 		strncpy(nameo, project.GetProjectName().c_str(), 2047);
+	}
 
 	ofn.lpstrFile = nameo;
 	ofn.lpstrDefExt = "fm3";

@@ -16,7 +16,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	show_lag_frames = true;
 	show_markers = true;
 	show_branch_screenshots = true;
-	show_branch_tooltips = true;
+	show_branch_descr = true;
 	enable_hot_changes = true;
 	jump_to_undo = true;
 	follow_note_context = true;
@@ -24,7 +24,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	empty_marker_notes = true;
 	combine_consecutive_rec = true;
 	use_1p_rec = true;
-	columnset_by_keys = true;
+	columnset_by_keys = false;
 	keyboard_for_listview = true;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
 	superimpose_affects_paste = true;

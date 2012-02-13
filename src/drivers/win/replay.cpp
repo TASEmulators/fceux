@@ -576,7 +576,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							FCEUFILE* fp = FCEU_fopen(filename,0,"rb",0);
 							if(fp)
 							{
-								fp->stream = fp->stream->memwrap();
+								//fp->stream = fp->stream->memwrap(); - no need to load whole movie to memory! We only need to read movie header!
 								HandleScan(hwndDlg, fp, items);
 								delete fp;
 							}

@@ -29,7 +29,7 @@
 -- so that Markers will be created using new set of rules.
 ---------------------------------------------------------------------------
 
-NOISE_VOL_FACTOR = 3.0;
+NOISE_VOL_THRESHOLD = 0.35;
 
 function track_changes()
 	if (taseditor.engaged()) then
@@ -38,12 +38,12 @@ function track_changes()
 			-- Playback has moved
 			-- Get current value of indicator for current_frame
 			snd = sound.get();
-			indicator = NOISE_VOL_FACTOR * snd.rp2a03.noise.volume;
+			indicator = snd.rp2a03.noise.volume;
 			-- If Playback moved 1 frame forward, this was probably Frame Advance
 			if (last_frame == current_frame - 1) then
 				-- Looks like we advanced one frame from the last time
 				-- Decide whether to set Marker
-				if (indicator >= 1 and last_frame_indicator_value == 0) then
+				if (indicator > NOISE_VOL_THRESHOLD and last_frame_indicator_value == 0) then
 					-- this was a peak in volume! ____/\____
 					-- Set Marker and show frequency of noise+triangle in its Note
 					SetSoundMarker(current_frame - 1, "Sound: " .. (snd.rp2a03.noise.regs.frequency + snd.rp2a03.triangle.regs.frequency));

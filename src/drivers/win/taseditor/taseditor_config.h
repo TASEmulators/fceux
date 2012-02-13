@@ -32,7 +32,7 @@ public:
 	bool show_lag_frames;
 	bool show_markers;
 	bool show_branch_screenshots;
-	bool show_branch_tooltips;
+	bool show_branch_descr;
 	bool enable_hot_changes;
 	bool jump_to_undo;
 	bool follow_note_context;
