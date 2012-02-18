@@ -57,7 +57,7 @@ bool TASEDITOR_PROJECT::save()
 	std::string PFN = GetProjectFile();
 	if (PFN.empty()) return false;
 	const char* filename = PFN.c_str();
-	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
+	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename, "wb");
 	
 	currMovieData.loadFrameCount = currMovieData.records.size();
 	currMovieData.dump(ofs, true);
@@ -80,7 +80,7 @@ bool TASEDITOR_PROJECT::save()
 }
 bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_list, bool save_selection)
 {
-	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename,"wb");
+	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename, "wb");
 	
 	currMovieData.loadFrameCount = currMovieData.records.size();
 	currMovieData.dump(ofs, save_binary);

@@ -25,6 +25,11 @@ public:
 	int wndy;
 	int wndwidth;
 	int wndheight;
+	int saved_wndx;
+	int saved_wndy;
+	int saved_wndwidth;
+	int saved_wndheight;
+	bool wndmaximized;
 	int findnote_wndx;
 	int findnote_wndy;
 	bool follow_playback;
@@ -66,6 +71,9 @@ public:
 	bool enable_auto_function;
 	bool silent_autosave;
 	bool tooltips;
+	int current_pattern;
+	bool pattern_skips_lag;
+	bool pattern_recording;
 	char last_author[AUTHOR_MAX_LEN];
 
 private:

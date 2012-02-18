@@ -6,6 +6,9 @@ extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern uint32 GetGamepadPressedImmediate();
 extern int GetInputType(MovieData& md);
 
+extern std::vector<std::vector<uint8>> autofire_patterns;
+extern char lagFlag;
+
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
@@ -14,6 +17,9 @@ extern GREENZONE greenzone;
 extern TASEDITOR_LIST list;
 
 // resources
+const char recordingCheckbox[10] = "Recording";
+const char recordingCheckboxBlankPattern[16] = "Recording blank";
+
 const char recordingModes[5][4] = {	"All",
 								"1P",
 								"2P",
@@ -37,6 +43,8 @@ void RECORDER::init()
 	hwndRB_Rec3P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO_3P);
 	hwndRB_Rec4P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO_4P);
 	old_multitrack_recording_joypad = multitrack_recording_joypad;
+	old_pattern_offset = 0;
+	must_increase_pattern_offset = false;
 	old_movie_readonly = movie_readonly;
 	old_joy.resize(MAX_NUM_JOYPADS);
 	new_joy.resize(MAX_NUM_JOYPADS);
@@ -46,6 +54,8 @@ void RECORDER::reset()
 {
 	movie_readonly = true;
 	multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
+	pattern_offset = 0;
+	must_increase_pattern_offset = false;
 	UncheckRecordingRadioButtons();
 	RecheckRecordingRadioButtons();
 	switch (GetInputType(currMovieData))
@@ -89,8 +99,36 @@ void RECORDER::update()
 	// update Bookmarks/Branches groupbox caption if needed
 	if (taseditor_config.branch_only_when_rec && old_movie_readonly != movie_readonly)
 		bookmarks.RedrawBookmarksCaption();
-	// update recording radio buttons if user used hotkey to switch R/W
-	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
+	// update "Recording" checkbox state
+	if (old_movie_readonly != movie_readonly)
+	{
+		Button_SetCheck(hwndRecCheckbox, movie_readonly?BST_UNCHECKED : BST_CHECKED);
+		old_movie_readonly = movie_readonly;
+	}
+	// increase pattern_offset if needed
+	if (must_increase_pattern_offset)
+	{
+		must_increase_pattern_offset = false;
+		if (!taseditor_config.pattern_skips_lag || lagFlag == 0)
+		{
+			pattern_offset++;
+			if (pattern_offset >= (int)autofire_patterns[taseditor_config.current_pattern].size())
+				pattern_offset -= autofire_patterns[taseditor_config.current_pattern].size();
+		}
+	}
+	// update "Recording" checkbox text
+	if (old_pattern_offset != pattern_offset)
+	{
+		if (!taseditor_config.pattern_recording || autofire_patterns[taseditor_config.current_pattern][pattern_offset])
+			// either not using Patterns or current pattern has 1 in current offset
+			SetWindowText(hwndRecCheckbox, recordingCheckbox);
+		else
+			// current pattern has 0 in current offset, this means next recorded frame will be blank
+			SetWindowText(hwndRecCheckbox, recordingCheckboxBlankPattern);
+		old_pattern_offset = pattern_offset;
+	}
+	// update recording radio buttons if user changed multitrack_recording_joypad
+	if (old_multitrack_recording_joypad != multitrack_recording_joypad)
 	{
 		UncheckRecordingRadioButtons();
 		RecheckRecordingRadioButtons();
@@ -123,13 +161,14 @@ void RECORDER::update()
 	// call ColumnSet if needed
 	if (taseditor_config.columnset_by_keys && movie_readonly && taseditor_window.TASEditor_focus)
 	{
+		bool alt_pressed = ((GetAsyncKeyState(VK_MENU) & 0x8000) != 0);
 		for (int joy = 0; joy < num_joys; ++joy)
 		{
 			for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 			{
 				// if the button was pressed right now
 				if ((current_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					list.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button);
+					list.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, alt_pressed);
 			}
 		}
 	}
@@ -145,9 +184,7 @@ void RECORDER::UncheckRecordingRadioButtons()
 }
 void RECORDER::RecheckRecordingRadioButtons()
 {
-	old_movie_readonly = movie_readonly;
 	old_multitrack_recording_joypad = multitrack_recording_joypad;
-	Button_SetCheck(hwndRecCheckbox, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 	switch(multitrack_recording_joypad)
 	{
 	case MULTITRACK_RECORDING_ALL:
@@ -176,8 +213,14 @@ void RECORDER::InputChanged()
 	for (int i = 0; i < num_joys; ++i)
 	{
 		old_joy[i] = history.GetCurrentSnapshot().GetJoystickInfo(currFrameCounter, i);
-		new_joy[i] = currMovieData.records[currFrameCounter].joysticks[i];
+		if (!taseditor_config.pattern_recording || autofire_patterns[taseditor_config.current_pattern][pattern_offset])
+			new_joy[i] = currMovieData.records[currFrameCounter].joysticks[i];
+		else
+			new_joy[i] = 0;		// blank
 	}
+	if (taseditor_config.pattern_recording)
+		// postpone incrementing pattern_offset to the end of the frame (when lagFlag will be known)
+		must_increase_pattern_offset = true;
 	// combine old and new data (superimpose) and filter out joystics that should not be recorded
 	if (multitrack_recording_joypad == MULTITRACK_RECORDING_ALL)
 	{

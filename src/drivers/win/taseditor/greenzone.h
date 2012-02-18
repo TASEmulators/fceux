@@ -34,6 +34,8 @@ public:
 
 	int FindBeginningOfGreenZone(int starting_index = 0);
 
+	bool GetLagHistoryAtFrame(int frame);
+
 	// data
 	int greenZoneCount;
 	std::vector<std::vector<uint8>> savestates;

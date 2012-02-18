@@ -1410,12 +1410,6 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			bookmarks.MouseMove(-1, -1);
 			break;
 		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
 	}
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
 }
@@ -1439,12 +1433,6 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		{
 			bookmarks.mouse_over_bitmap = false;
 			bookmarks.MouseMove(-1, -1);
-			break;
-		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
 			break;
 		}
 		case WM_PAINT:

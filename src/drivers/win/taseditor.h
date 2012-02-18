@@ -26,7 +26,6 @@ void Export();
 int GetInputType(MovieData& md);
 void SetInputType(MovieData& md, int new_input_type);
 
-void SetTaseditorInput();
-void ClearTaseditorInput();
-
 bool TaseditorIsRecording();
+
+bool ReadString(EMUFILE *is, std::string& dest);

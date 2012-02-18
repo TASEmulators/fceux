@@ -34,7 +34,7 @@ public:
 	bool load(EMUFILE *is);
 
 	int GetMarkersSize();
-	void SetMarkersSize(int new_size);
+	bool SetMarkersSize(int new_size);
 
 	int GetMarker(int frame);
 	int GetMarkerUp(int start_frame);
@@ -45,8 +45,8 @@ public:
 	void ClearMarker(int frame);
 	void ToggleMarker(int frame);
 
-	void EraseMarker(int frame);
-	void insertEmpty(int at, int frames);
+	bool EraseMarker(int frame);
+	bool insertEmpty(int at, int frames);
 
 	int GetNotesSize();
 	std::string GetNote(int index);

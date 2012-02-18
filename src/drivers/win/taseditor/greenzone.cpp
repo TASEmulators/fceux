@@ -417,6 +417,14 @@ int GREENZONE::FindBeginningOfGreenZone(int starting_index)
 	return starting_index;
 }
 
+// getter
+bool GREENZONE::GetLagHistoryAtFrame(int frame)
+{
+	if (frame < greenZoneCount && frame < (int)lag_history.size())
+		return lag_history[frame] != 0;
+	else
+		return false;
+}
 
 
 

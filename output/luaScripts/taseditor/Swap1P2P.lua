@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------
 -- Swap 1P and 2P buttons at Selected frames
+-- by AnS, 2012
 ---------------------------------------------------------------------------
 -- Showcases following functions:
 -- * taseditor.getselection()

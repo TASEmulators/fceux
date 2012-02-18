@@ -499,6 +499,7 @@
 #define IDC_C_SEARCH                    1206
 #define IDC_CHECK5                      1206
 #define IDC_CHECK_GREENZONE             1206
+#define IDC_USEPATTERN                  1206
 #define IDC_C_ADDCHEAT                  1207
 #define IDC_CHECK6                      1207
 #define IDC_CHECK_HISTORY               1207
@@ -574,6 +575,7 @@
 #define IDC_TEXT_SELECTION              1267
 #define IDC_TEXT_CLIPBOARD              1268
 #define IDC_RADIO_1PLAYER               1269
+#define IDC_TEXT_SELECTION2             1269
 #define IDC_RADIO_2PLAYERS              1270
 #define IDC_PLAYBACK_MARKER             1270
 #define IDC_RADIO_FOURSCORE             1271
@@ -984,6 +986,11 @@
 #define ID_STRAY_UNPAUSEEMULATOR        40528
 #define ID_STRAY_UNPAUSE                40529
 #define ID_STRAY_TRUNCATE40530          40530
+#define ID_PATTERN                      40531
+#define ID_PATTERN_TESTPATTERN          40532
+#define ID_PATTERN40533                 40533
+#define ID_PATTERN_TEST                 40534
+#define ID_CONFIG_COLUMNSETPATTERNSKIPSLAG 40535
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -993,7 +1000,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40531
+#define _APS_NEXT_COMMAND_VALUE         40536
 #define _APS_NEXT_CONTROL_VALUE         1280
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

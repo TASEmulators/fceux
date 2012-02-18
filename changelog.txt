@@ -1,4 +1,13 @@
 
+
+18-feb-2012 - AnS - PATTERNS menu, loading data from "tools\taseditor_patterns.txt"
+18-feb-2012 - AnS - "Use pattern" checkbox in Recorder; Config->ColumnSet Pattern skips Lag
+18-feb-2012 - AnS - Taseditor: "Frame#" lights when Alt key is being held, not entering menu by Alt
+18-feb-2012 - AnS - Changed some checkboxes to radiobuttons in FCEUX menu
+13-feb-2012 - AnS - Taseditor: when clicking text fields, Piano Roll scrolls to corresponding Marker, not to cursor
+13-feb-2012 - AnS - Replay dialog speedup, now movie is not loaded into memory when checking md5
+06-feb-2012 - AnS - new Lua scripts: SoundDisplay.lua, TrackNoise.lua
+06-feb-2012 - AnS - refined Recording, now can safely record commands (Power, Reset, Insert, Switch)
 02-feb-2012 - AnS - updated fceux.chm and online documentation, uploaded HelpNDoc3 project file
 02-feb-2012 - AnS - added Lua scripts demonstrating some TAS Editor library functions
 02-feb-2012 - AnS - new Lua function in TAS Editor library: getsuperimpose()

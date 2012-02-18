@@ -8,6 +8,9 @@
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
 
+extern std::vector<std::string> autofire_patterns_names;
+extern std::vector<std::vector<uint8>> autofire_patterns;
+
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
@@ -236,12 +239,31 @@ void TASEDITOR_LIST::update()
 		next_header_update_time = clock() + HEADER_LIGHT_UPDATE_TICK;
 		bool changes_made = false;
 		// 1 - update Frame# columns' heads
-		if (header_colors[COLUMN_FRAMENUM])
+		if (header_colors[COLUMN_FRAMENUM] > HEADER_LIGHT_HOLD)
 		{
 			header_colors[COLUMN_FRAMENUM]--;
-			header_colors[COLUMN_FRAMENUM2] = header_colors[COLUMN_FRAMENUM];
 			changes_made = true;
+		} else
+		{
+			if ((GetAsyncKeyState(VK_MENU) & 0x8000))
+			{
+				// Alt key is held
+				if (header_colors[COLUMN_FRAMENUM] < HEADER_LIGHT_HOLD)
+				{
+					header_colors[COLUMN_FRAMENUM]++;
+					changes_made = true;
+				}
+			} else
+			{
+				// Alt key is released
+				if (header_colors[COLUMN_FRAMENUM])
+				{
+					header_colors[COLUMN_FRAMENUM]--;
+					changes_made = true;
+				}
+			}
 		}
+		header_colors[COLUMN_FRAMENUM2] = header_colors[COLUMN_FRAMENUM];
 		// update input columns' heads
 		int i = num_columns-1;
 		if (i == COLUMN_FRAMENUM2) i--;
@@ -754,17 +776,86 @@ void TASEDITOR_LIST::ToggleJoypadBit(int column_index, int row_index, UINT KeyFl
 	
 }
 
-void TASEDITOR_LIST::ColumnSet(int column)
+void TASEDITOR_LIST::ColumnSet(int column, bool alt_pressed)
 {
 	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
-		FrameColumnSet();
-	else
-		InputColumnSet(column);
+	{
+		// user clicked on "Frame#" - apply ColumnSet to Markers
+		if (alt_pressed)
+		{
+			if (FrameColumnSetPattern())
+				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		} else
+		{
+			if (FrameColumnSet())
+				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		}
+	} else
+	{
+		// user clicked on Input column - apply ColumnSet to Input
+		int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+		if (alt_pressed)
+		{
+			if (InputColumnSetPattern(joy, button))
+				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+		} else
+		{
+			if (InputColumnSet(joy, button))
+				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+		}
+	}
 }
-void TASEDITOR_LIST::FrameColumnSet()
+
+bool TASEDITOR_LIST::FrameColumnSetPattern()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
+	if (current_selection->size() == 0) return false;
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
+	bool changes_made = false;
+
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		// skip lag frames
+		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
+			continue;
+		if (autofire_patterns[current_pattern][pattern_offset])
+		{
+			if(!markers_manager.GetMarker(*it))
+			{
+				if (markers_manager.SetMarker(*it))
+				{
+					changes_made = true;
+					RedrawRow(*it);
+				}
+			}
+		} else
+		{
+			if(markers_manager.GetMarker(*it))
+			{
+				markers_manager.ClearMarker(*it);
+				changes_made = true;
+				RedrawRow(*it);
+			}
+		}
+		pattern_offset++;
+		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
+			pattern_offset -= autofire_patterns[current_pattern].size();
+	}
+	if (changes_made)
+	{
+		history.RegisterMarkersChange(MODTYPE_MARKER_PATTERN, *current_selection_begin, *current_selection->rbegin(), autofire_patterns_names[current_pattern].c_str());
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		return true;
+	} else
+		return false;
+}
+bool TASEDITOR_LIST::FrameColumnSet()
+{
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return false;
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	SelectionFrames::iterator current_selection_end(current_selection->end());
 
@@ -810,19 +901,43 @@ void TASEDITOR_LIST::FrameColumnSet()
 			history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
 	}
 	if (changes_made)
-	{
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-	}
+	return changes_made;
 }
-void TASEDITOR_LIST::InputColumnSet(int column)
+bool TASEDITOR_LIST::InputColumnSetPattern(int joy, int button)
 {
-	int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return;
-	int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
 
 	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return;
+	if (current_selection->size() == 0) return false;
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
+
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		// skip lag frames
+		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
+			continue;
+		currMovieData.records[*it].setBitValue(joy, button, autofire_patterns[current_pattern][pattern_offset] != 0);
+		pattern_offset++;
+		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
+			pattern_offset -= autofire_patterns[current_pattern].size();
+	}
+	int first_changes = history.RegisterChanges(MODTYPE_PATTERN, *current_selection_begin, *current_selection->rbegin(), autofire_patterns_names[current_pattern].c_str());
+	if (first_changes >= 0)
+	{
+		greenzone.InvalidateAndCheck(first_changes);
+		return true;
+	} else
+		return false;
+}
+bool TASEDITOR_LIST::InputColumnSet(int joy, int button)
+{
+	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
+
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0) return false;
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	SelectionFrames::iterator current_selection_end(current_selection->end());
 
@@ -839,14 +954,21 @@ void TASEDITOR_LIST::InputColumnSet(int column)
 	// apply newValue
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		currMovieData.records[*it].setBitValue(joy,button,newValue);
+
+	int first_changes;
 	if (newValue)
 	{
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin()));
+		first_changes = history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin());
 	} else
 	{
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin()));
+		first_changes = history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin());
 	}
-	SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+	if (first_changes >= 0)
+	{
+		greenzone.InvalidateAndCheck(first_changes);
+		return true;
+	} else
+		return false;
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -867,7 +989,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				info.pt.y = GET_Y_LPARAM(lParam);
 				SendMessage(hWnd,HDM_HITTEST,0,(LPARAM)&info);
 				if(info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
-					list.ColumnSet(info.iItem);
+					list.ColumnSet(info.iItem, (GetKeyState(VK_MENU) < 0));
 			}
 		}
 		return true;
@@ -903,12 +1025,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_KEYDOWN:
 		{
 			if (!taseditor_config.keyboard_for_listview)
-				return 0;
-			break;
-		}
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
 				return 0;
 			break;
 		}

@@ -531,6 +531,9 @@ std::string  FCEU_GetPath(int type)
 				return "";		//adelikat - 03/02/09 - if no override, should return null and allow the last directory to be used intead
 				//return BaseDirectory + PSS + "tools";
 			break;
+		case FCEUMKF_TASEDITOR:
+			return BaseDirectory + PSS + "tools";
+
 	}
 
 	return ret;

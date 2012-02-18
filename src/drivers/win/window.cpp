@@ -403,7 +403,6 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, ID_NES_TURBO, turbo ? MF_CHECKED : MF_UNCHECKED);
 
 	//Config Menu
-//	CheckMenuItem(fceumenu, MENU_PAUSEAFTERPLAYBACK, pauseAfterPlayback ? MF_CHECKED : MF_UNCHECKED); // no more
 	CheckMenuItem(fceumenu, MENU_RUN_IN_BACKGROUND, eoptions & EO_BGRUN ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_BACKGROUND_INPUT, EnableBackgroundInput ? MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, EnableAutosave ? MF_CHECKED : MF_UNCHECKED);
@@ -421,79 +420,28 @@ void UpdateCheckedMenuItems()
 	CheckMenuItem(fceumenu, MENU_DISPLAY_OBJ, spr?MF_CHECKED:MF_UNCHECKED);
 	CheckMenuItem(fceumenu, ID_INPUTDISPLAY_OLDSTYLEDISP, oldInputDisplay?MF_CHECKED:MF_UNCHECKED);
 
-	//Config - Movie Options, no longer in menu
-	//CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES, movieSubtitles?MF_CHECKED:MF_UNCHECKED);
-	//CheckMenuItem(fceumenu, ID_DISPLAY_MOVIESUBTITLES_AVI, subtitlesOnAVI?MF_CHECKED:MF_UNCHECKED);
-
-	//Tools Menu
+	// Tools Menu
 	CheckMenuItem(fceumenu, MENU_ALTERNATE_AB, GetAutoFireDesynch() ? MF_CHECKED : MF_UNCHECKED);
-
-	//AutoFire Patterns
-	int AutoFirePatternIDs[] = {
-		MENU_AUTOFIRE_PATTERN_1,
-		MENU_AUTOFIRE_PATTERN_2,
-		MENU_AUTOFIRE_PATTERN_3,
-		MENU_AUTOFIRE_PATTERN_4,
-		MENU_AUTOFIRE_PATTERN_5,
-		MENU_AUTOFIRE_PATTERN_6,
-		MENU_AUTOFIRE_PATTERN_7,
-		MENU_AUTOFIRE_PATTERN_8,
-		MENU_AUTOFIRE_PATTERN_9,
-		MENU_AUTOFIRE_PATTERN_10,
-		MENU_AUTOFIRE_PATTERN_11,
-		MENU_AUTOFIRE_PATTERN_12,
-		MENU_AUTOFIRE_PATTERN_13,
-		MENU_AUTOFIRE_PATTERN_14,
-		MENU_AUTOFIRE_PATTERN_15,
-		0};
-
-	int AutoFireOffsetIDs[] = {
-		MENU_AUTOFIRE_OFFSET_1,
-		MENU_AUTOFIRE_OFFSET_2,
-		MENU_AUTOFIRE_OFFSET_3,
-		MENU_AUTOFIRE_OFFSET_4,
-		MENU_AUTOFIRE_OFFSET_5,
-		MENU_AUTOFIRE_OFFSET_6,
-		0};
-
-	x = 0;
 	CheckedAutoFirePattern = GetCheckedAutoFirePattern();
-	CheckedAutoFireOffset =  GetCheckedAutoFireOffset();
-	while(AutoFirePatternIDs[x])
-	{
-		CheckMenuItem(fceumenu, AutoFirePatternIDs[x],
-			AutoFirePatternIDs[x] == CheckedAutoFirePattern ? MF_CHECKED : MF_UNCHECKED);
-		x++;
-	}
+	CheckMenuRadioItem(fceumenu, MENU_AUTOFIRE_PATTERN_1, MENU_AUTOFIRE_PATTERN_15, CheckedAutoFirePattern, MF_BYCOMMAND);
+	CheckedAutoFireOffset = GetCheckedAutoFireOffset();
+	CheckMenuRadioItem(fceumenu, MENU_AUTOFIRE_OFFSET_1, MENU_AUTOFIRE_OFFSET_6, CheckedAutoFireOffset, MF_BYCOMMAND);
 
-	x = 0;
-
-	while(AutoFireOffsetIDs[x])
-	{
-		CheckMenuItem(fceumenu, AutoFireOffsetIDs[x],
-			AutoFireOffsetIDs[x] == CheckedAutoFireOffset ? MF_CHECKED : MF_UNCHECKED);
-		x++;
-	}
-
-	//Check input display
-	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_UNCHECKED);
-	CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_UNCHECKED);
+	// Check input display
 	switch (input_display)
 	{
-		case 0: //Off
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_0, MF_CHECKED);
+		case 0: // Off
+			CheckMenuRadioItem(fceumenu, MENU_INPUTDISPLAY_0, MENU_INPUTDISPLAY_4, MENU_INPUTDISPLAY_0, MF_BYCOMMAND);
 			break;
-		case 1: //1 player
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_1, MF_CHECKED);
+		case 1: // 1 player
+			CheckMenuRadioItem(fceumenu, MENU_INPUTDISPLAY_0, MENU_INPUTDISPLAY_4, MENU_INPUTDISPLAY_1, MF_BYCOMMAND);
 			break;
-		case 2: //2 player
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_2, MF_CHECKED);
+		case 2: // 2 player
+			CheckMenuRadioItem(fceumenu, MENU_INPUTDISPLAY_0, MENU_INPUTDISPLAY_4, MENU_INPUTDISPLAY_2, MF_BYCOMMAND);
 			break;
-		//note: input display can actually have a 3 player display option but is skipped in the hotkey toggle so it is skipped here as well
-		case 4: //4 player
-			CheckMenuItem(fceumenu, MENU_INPUTDISPLAY_4, MF_CHECKED);
+		// note: input display can actually have a 3 player display option but is skipped in the hotkey toggle so it is skipped here as well
+		case 4: // 4 player
+			CheckMenuRadioItem(fceumenu, MENU_INPUTDISPLAY_0, MENU_INPUTDISPLAY_4, MENU_INPUTDISPLAY_4, MF_BYCOMMAND);
 			break;
 		default:
 			break;
@@ -2302,8 +2250,7 @@ adelikat: Outsourced this to a remappable hotkey
 			EnableMenuItem(fceumenu, ID_NEWPPU, false);
 			EnableMenuItem(fceumenu, ID_OLDPPU, false);
 		}
-		CheckMenuItem(fceumenu, ID_NEWPPU, newppu ? MF_CHECKED : MF_UNCHECKED);
-		CheckMenuItem(fceumenu, ID_OLDPPU, !newppu ? MF_CHECKED : MF_UNCHECKED);
+		CheckMenuRadioItem(fceumenu, ID_NEWPPU, ID_OLDPPU, newppu ? ID_NEWPPU : ID_OLDPPU, MF_BYCOMMAND);
 
 	default:
 proco:

@@ -84,13 +84,20 @@ int MARKERS_MANAGER::GetMarkersSize()
 {
 	return markers.markers_array.size();
 }
-void MARKERS_MANAGER::SetMarkersSize(int new_size)
+bool MARKERS_MANAGER::SetMarkersSize(int new_size)
 {
 	// if we are truncating, clear markers that are gonna be erased (so that obsolete notes will be erased too)
+	bool markers_changed = false;
 	for (int i = markers.markers_array.size() - 1; i >= new_size; i--)
+	{
 		if (markers.markers_array[i])
+		{
 			ClearMarker(i);
+			markers_changed = true;
+		}
+	}
 	markers.markers_array.resize(new_size);
+	return markers_changed;
 }
 
 int MARKERS_MANAGER::GetMarker(int frame)
@@ -176,24 +183,55 @@ void MARKERS_MANAGER::ToggleMarker(int frame)
 	}
 }
 
-void MARKERS_MANAGER::EraseMarker(int frame)
+bool MARKERS_MANAGER::EraseMarker(int frame)
 {
+	bool markers_changed = false;
 	if (frame < (int)markers.markers_array.size())
 	{
 		// if there's a marker, first clear it
 		if (markers.markers_array[frame])
+		{
 			ClearMarker(frame);
+			markers_changed = true;
+		}
+		// erase 1 frame
 		markers.markers_array.erase(markers.markers_array.begin() + frame);
+		if (!markers_changed)
+		{
+			// check if there were some Markers after this frame
+			for (int i = markers.markers_array.size() - 1; i >= frame; i--)
+			{
+				if (markers.markers_array[i])
+				{
+					markers_changed = true;		// Markers moved
+					break;
+				}
+			}
+		}
 	}
+	return markers_changed;
 }
-void MARKERS_MANAGER::insertEmpty(int at, int frames)
+bool MARKERS_MANAGER::insertEmpty(int at, int frames)
 {
 	if(at == -1) 
 	{
+		// append blank frames
 		markers.markers_array.resize(markers.markers_array.size() + frames);
+		return false;
 	} else
 	{
+		bool markers_changed = false;
+		// first check if there are Markers after the frame
+		for (int i = markers.markers_array.size() - 1; i >= at; i--)
+		{
+			if (markers.markers_array[i])
+			{
+				markers_changed = true;		// Markers moved
+				break;
+			}
+		}
 		markers.markers_array.insert(markers.markers_array.begin() + at, frames, 0);
+		return markers_changed;
 	}
 }
 
@@ -555,10 +593,10 @@ void MARKERS_MANAGER::UpdateMarkerNote()
 		{
 			SetNote(playback.shown_marker, new_text);
 			if (playback.shown_marker)
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(playback.shown_marker));
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(playback.shown_marker), -1, new_text);
 			else
 				// zeroth marker - just assume it's set on frame 0
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
 			// notify selection to change text in lower marker (in case both are showing same marker)
 			selection.must_find_current_marker = true;
 		}
@@ -571,10 +609,10 @@ void MARKERS_MANAGER::UpdateMarkerNote()
 		{
 			SetNote(selection.shown_marker, new_text);
 			if (selection.shown_marker)
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(selection.shown_marker));
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(selection.shown_marker), -1, new_text);
 			else
 				// zeroth marker - just assume it's set on frame 0
-				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0);
+				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
 			// notify playback to change text in upper marker (in case both are showing same marker)
 			playback.must_find_current_marker = true;
 		}

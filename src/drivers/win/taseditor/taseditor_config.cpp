@@ -9,6 +9,11 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	wndy = 0;
 	wndwidth = 0;
 	wndheight = 0;
+	saved_wndx = 0;
+	saved_wndy = 0;
+	saved_wndwidth = 0;
+	saved_wndheight = 0;
+	wndmaximized = false;
 	findnote_wndx = 0;
 	findnote_wndy = 0;
 	follow_playback = false;
@@ -50,8 +55,10 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	enable_auto_function = true;
 	silent_autosave = true;
 	tooltips = true;
-	// empty name
-	last_author[0] = 0;
+	current_pattern = 0;
+	pattern_skips_lag = false;
+	pattern_recording = false;
+	last_author[0] = 0;			// empty name
 
 }
 

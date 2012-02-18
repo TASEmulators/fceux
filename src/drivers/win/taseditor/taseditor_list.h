@@ -141,10 +141,7 @@ public:
 	void DoubleClick(LPNMITEMACTIVATE info);
 
 	void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
-	void ColumnSet(int column);
-	void InputColumnSet(int column);
-	void FrameColumnSet();
-
+	void ColumnSet(int column, bool alt_pressed);
 
 	HWND hwndList, hwndHeader;
 
@@ -155,6 +152,11 @@ public:
 
 private:
 	void CenterListAt(int frame);
+
+	bool FrameColumnSetPattern();
+	bool FrameColumnSet();
+	bool InputColumnSetPattern(int joy, int button);
+	bool InputColumnSet(int joy, int button);
 
 	std::vector<uint8> header_colors;
 	int num_columns;

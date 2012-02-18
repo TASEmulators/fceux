@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------
 -- Recording Input while Rewinding Playback frame-by-frame
+-- by AnS, 2012
 ---------------------------------------------------------------------------
 -- Showcases following functions:
+-- * joypad.getimmediate()
 -- * taseditor.getrecordermode()
 -- * taseditor.getsuperimpose()
 -- * taseditor.getinput()
@@ -14,7 +16,7 @@
 -- Now you can hold some joypad buttons and press "Rewind Frame" hotkey
 -- to Record those buttons into PREVIOUS frame.
 -- Try using this crazy method alongside with Frame Advance Recording.
--- This script supports multitracking and superimpose.
+-- This script supports multitracking and superimpose. Doesn't support Patterns.
 ---------------------------------------------------------------------------
 
 -- This function reads joypad input table and converts it to single byte

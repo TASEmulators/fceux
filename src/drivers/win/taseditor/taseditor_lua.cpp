@@ -164,7 +164,7 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 		{
 			// text differs from old note - rename
 			markers_manager.SetNote(index, text);
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, markers_manager.GetMarkerFrame(index));
+			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, markers_manager.GetMarkerFrame(index), -1, text);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 		}
 	}

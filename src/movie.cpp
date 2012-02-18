@@ -629,10 +629,10 @@ bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader)
 		NEWLINE, KEY, SEPARATOR, VALUE, RECORD, COMMENT, SUBTITLE
 	} state = NEWLINE;
 	bool bail = false;
+	bool iswhitespace, isrecchar, isnewline;
+	int c;
 	for(;;)
 	{
-		bool iswhitespace, isrecchar, isnewline;
-		int c;
 		if(size--<=0) goto bail;
 		c = fp->fgetc();
 		if(c == -1)

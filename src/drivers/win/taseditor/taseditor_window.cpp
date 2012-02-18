@@ -5,6 +5,8 @@
 #include "../taseditor.h"
 #include <htmlhelp.h>
 #include "../../input.h"	// for EMUCMD
+#include "../keyboard.h"
+#include "../joystick.h"
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern PLAYBACK playback;
@@ -22,6 +24,8 @@ extern POPUP_DISPLAY popup_display;
 extern bool turbo;
 extern bool muteTurbo;
 extern bool must_call_manual_lua_function;
+extern std::vector<std::string> autofire_patterns_names;
+extern std::vector<std::vector<uint8>> autofire_patterns;
 
 extern char* GetKeyComboName(int c);
 
@@ -35,9 +39,12 @@ HMENU recent_projects_menu;
 char* recent_projects[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 const unsigned int MENU_FIRST_RECENT_PROJECT = 55000;
 const unsigned int MAX_NUMBER_OF_RECENT_PROJECTS = sizeof(recent_projects)/sizeof(*recent_projects);
+// Patterns Menu
+const unsigned int MENU_FIRST_PATTERN = MENU_FIRST_RECENT_PROJECT + MAX_NUMBER_OF_RECENT_PROJECTS;
 
 // resources
 char windowCaptioBase[] = "TAS Editor";
+char patterns_menu_prefix[] = "Pattern: ";
 char taseditor_help_filename[] = "\\taseditor.chm";
 // all items of the window (used for resising) and their default x,y,w,h
 // actual x,y,w,h are calculated at the beginning from screen
@@ -79,6 +86,7 @@ static struct
 	IDC_RADIO_3P, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_RADIO_4P, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old input with new buttons, instead of overwriting", "", false, 0, 0,
+	IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to input recording", "", false, 0, 0,
 	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (hotkey: Ctrl+PageUp)", "", false, 0, 0,
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
@@ -113,15 +121,19 @@ TASEDITOR_WINDOW::TASEDITOR_WINDOW()
 void TASEDITOR_WINDOW::init()
 {
 	ready_for_resizing = false;
+	bool wndmaximized = taseditor_config.wndmaximized;
 	hTaseditorIcon = (HICON)LoadImage(fceu_hInstance, MAKEINTRESOURCE(IDI_ICON3), IMAGE_ICON, 16, 16, LR_DEFAULTSIZE);
 	hwndTasEditor = CreateDialog(fceu_hInstance, "TASEDITOR", hAppWnd, WndprocTasEditor);
 	SendMessage(hwndTasEditor, WM_SETICON, ICON_SMALL, (LPARAM)hTaseditorIcon);
 	CalculateItems();
 	// restore position and size from config, also bring the window on top
-	SetWindowPos(hwndTasEditor, HWND_TOP, taseditor_config.wndx, taseditor_config.wndy, taseditor_config.wndwidth, taseditor_config.wndheight, SWP_NOOWNERZORDER);
+	SetWindowPos(hwndTasEditor, HWND_TOP, taseditor_config.saved_wndx, taseditor_config.saved_wndy, taseditor_config.saved_wndwidth, taseditor_config.saved_wndheight, SWP_NOOWNERZORDER);
+	if (wndmaximized)
+		ShowWindow(hwndTasEditor, SW_SHOWMAXIMIZED);
 	// menus and checked items
 	hmenu = GetMenu(hwndTasEditor);
 	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
+	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	UpdateCheckedItems();
 	// tooltips
 	int x = 0;
@@ -181,10 +193,13 @@ void TASEDITOR_WINDOW::init()
 		}
 	}
 	UpdateTooltips();
-	// recent projects submenu
+	// create "Recent" submenu
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
+	// create "Patterns" menu
+	UpdatePatternsMenu();
 
+	SetTaseditorInput();
 	reset();
 }
 void TASEDITOR_WINDOW::exit()
@@ -213,6 +228,7 @@ void TASEDITOR_WINDOW::exit()
 		DestroyIcon(hTaseditorIcon);
 		hTaseditorIcon = 0;
 	}
+	ClearTaseditorInput();
 }
 void TASEDITOR_WINDOW::reset()
 {
@@ -238,6 +254,10 @@ void TASEDITOR_WINDOW::CalculateItems()
 		taseditor_config.wndwidth = min_width;
 	if (taseditor_config.wndheight < min_height)
 		taseditor_config.wndheight = min_height;
+	if (taseditor_config.saved_wndwidth < min_width)
+		taseditor_config.saved_wndwidth = min_width;
+	if (taseditor_config.saved_wndheight < min_height)
+		taseditor_config.saved_wndheight = min_height;
 	// find current client area of Taseditor window
 	int main_width = main_r.right - main_r.left;
 	int main_height = main_r.bottom - main_r.top;
@@ -326,6 +346,18 @@ void TASEDITOR_WINDOW::WindowMovedOrResized()
 	taseditor_config.wndheight = wrect.bottom - wrect.top;
 	if (taseditor_config.wndheight < min_height)
 		taseditor_config.wndheight = min_height;
+
+	if (IsZoomed(hwndTasEditor))
+	{
+		taseditor_config.wndmaximized = true;
+	} else
+	{
+		taseditor_config.wndmaximized = false;
+		taseditor_config.saved_wndx = taseditor_config.wndx;
+		taseditor_config.saved_wndy = taseditor_config.wndy;
+		taseditor_config.saved_wndwidth = taseditor_config.wndwidth;
+		taseditor_config.saved_wndheight = taseditor_config.wndheight;
+	}
 }
 
 void TASEDITOR_WINDOW::UpdateTooltips()
@@ -423,7 +455,7 @@ void TASEDITOR_WINDOW::RightClickMenu(LPNMITEMACTIVATE info)
 void TASEDITOR_WINDOW::UpdateCheckedItems()
 {
 	// check option ticks
-	CheckDlgButton(hwndTasEditor, CHECK_FOLLOW_CURSOR, taseditor_config.follow_playback?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, CHECK_FOLLOW_CURSOR, taseditor_config.follow_playback?BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndTasEditor,CHECK_AUTORESTORE_PLAYBACK,taseditor_config.restore_position?BST_CHECKED:BST_UNCHECKED);
 	if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
 		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_UNCHECKED);
@@ -431,8 +463,9 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_CHECKED);
 	else
 		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_INDETERMINATE);
-	CheckDlgButton(hwndTasEditor, IDC_RUN_AUTO, taseditor_config.enable_auto_function);
-	CheckDlgButton(hwndTasEditor, CHECK_TURBO_SEEK, taseditor_config.turbo_seek?MF_CHECKED : MF_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, IDC_USEPATTERN, taseditor_config.pattern_recording?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, IDC_RUN_AUTO, taseditor_config.enable_auto_function?BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, CHECK_TURBO_SEEK, taseditor_config.turbo_seek?BST_CHECKED : BST_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, taseditor_config.show_lag_frames?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, taseditor_config.show_markers?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, taseditor_config.show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
@@ -450,13 +483,25 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, taseditor_config.columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, taseditor_config.keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
 
 }
 
-
+void TASEDITOR_WINDOW::SetTaseditorInput()
+{
+	// set "Background TAS Editor input"
+	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+}
+void TASEDITOR_WINDOW::ClearTaseditorInput()
+{
+	// clear "Background TAS Editor input"
+	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+}
 
 // --------------------------------------------------------------------------------------------
 void TASEDITOR_WINDOW::UpdateRecentProjectsMenu()
@@ -481,19 +526,16 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsMenu()
 		// Skip empty strings
 		if(!recent_projects[x]) continue;
 
+		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
+		moo.fType = 0;
+		moo.wID = MENU_FIRST_RECENT_PROJECT + x;
 		std::string tmp = recent_projects[x];
 		// clamp this string to 128 chars
 		if(tmp.size() > 128)
 			tmp = tmp.substr(0, 128);
-
-		moo.cbSize = sizeof(moo);
-		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
-		// Insert the menu item
 		moo.cch = tmp.size();
-		moo.fType = 0;
-		moo.wID = MENU_FIRST_RECENT_PROJECT + x;
 		moo.dwTypeData = (LPSTR)tmp.c_str();
-		InsertMenuItem(recent_projects_menu, 0, 1, &moo);
+		InsertMenuItem(recent_projects_menu, 0, true, &moo);
 	}
 
 	// if recent_projects is empty, "Recent" manu should be grayed
@@ -574,6 +616,54 @@ void TASEDITOR_WINDOW::LoadRecentProject(int slot)
 	}
 }
 
+void TASEDITOR_WINDOW::UpdatePatternsMenu()
+{
+	MENUITEMINFO moo;
+	int x;
+	moo.cbSize = sizeof(moo);
+
+	// Remove old items from the menu
+	for(x = GetMenuItemCount(patterns_menu); x > 0 ; x--)
+		RemoveMenu(patterns_menu, 0, MF_BYPOSITION);
+	// Fill the menu
+	for(x = autofire_patterns.size() - 1; x >= 0; x--)
+	{  
+		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
+		moo.fType = 0;
+		moo.wID = MENU_FIRST_PATTERN + x;
+		std::string tmp = autofire_patterns_names[x];
+		// clamp this string to 50 chars
+		if(tmp.size() > PATTERNS_MAX_VISIBLE_NAME)
+			tmp = tmp.substr(0, PATTERNS_MAX_VISIBLE_NAME);
+		moo.dwTypeData = (LPSTR)tmp.c_str();
+		moo.cch = tmp.size();
+		InsertMenuItem(patterns_menu, 0, true, &moo);
+	}
+	RecheckPatternsMenu();
+}
+void TASEDITOR_WINDOW::RecheckPatternsMenu()
+{
+	CheckMenuRadioItem(patterns_menu, MENU_FIRST_PATTERN, MENU_FIRST_PATTERN + GetMenuItemCount(patterns_menu) - 1, MENU_FIRST_PATTERN + taseditor_config.current_pattern, MF_BYCOMMAND);
+	// change menu title ("Patterns")
+	MENUITEMINFO moo;
+	memset(&moo, 0, sizeof(moo));
+	moo.cbSize = sizeof(moo);
+	moo.fMask = MIIM_TYPE;
+	moo.fType = MFT_STRING;
+	moo.cch = PATTERNMENU_MAX_VISIBLE_NAME;
+	int x;
+	x = GetMenuItemInfo(hmenu, PATTERNS_MENU_POS, true, &moo);
+	std::string tmp = patterns_menu_prefix;
+	tmp += autofire_patterns_names[taseditor_config.current_pattern];
+	// clamp this string
+	if(tmp.size() > PATTERNMENU_MAX_VISIBLE_NAME)
+		tmp = tmp.substr(0, PATTERNMENU_MAX_VISIBLE_NAME);
+	moo.dwTypeData = (LPSTR)tmp.c_str();
+	moo.cch = tmp.size();
+	x = SetMenuItemInfo(hmenu, PATTERNS_MENU_POS, true, &moo);
+
+	DrawMenuBar(hwndTasEditor);
+}
 
 // ====================================================================================================
 BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -713,11 +803,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			if(LOWORD(wParam))
 			{
 				taseditor_window.TASEditor_focus = true;
-				SetTaseditorInput();
+				taseditor_window.SetTaseditorInput();
 			} else
 			{
 				taseditor_window.TASEditor_focus = false;
-				ClearTaseditorInput();
+				taseditor_window.ClearTaseditorInput();
 			}
 			break;
 		case WM_CTLCOLORSTATIC:
@@ -743,6 +833,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.LoadRecentProject(loword_wparam - MENU_FIRST_RECENT_PROJECT);
 					break;
 				}
+				// then check clicking Patterns menu item
+				if (loword_wparam >= MENU_FIRST_PATTERN && loword_wparam < MENU_FIRST_PATTERN + autofire_patterns.size())
+				{
+					taseditor_config.current_pattern = loword_wparam - MENU_FIRST_PATTERN;
+					recorder.pattern_offset = 0;
+					taseditor_window.RecheckPatternsMenu();
+					break;
+				}
 				// finally check all other commands
 				switch(loword_wparam)
 				{
@@ -756,7 +854,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// enable editing
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
 								// disable FCEUX keyboard
-								ClearTaseditorInput();
+								taseditor_window.ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
 									list.FollowMarker(playback.shown_marker);
 								break;
@@ -772,7 +870,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
 								// enable FCEUX keyboard
 								if (taseditor_window.TASEditor_focus)
-									SetTaseditorInput();
+									taseditor_window.SetTaseditorInput();
 								break;
 							}
 						}
@@ -788,7 +886,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// enable editing
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
 								// disable FCEUX keyboard
-								ClearTaseditorInput();
+								taseditor_window.ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
 									list.FollowMarker(selection.shown_marker);
 								break;
@@ -804,7 +902,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
 								// enable FCEUX keyboard
 								if (taseditor_window.TASEditor_focus)
-									SetTaseditorInput();
+									taseditor_window.SetTaseditorInput();
 								break;
 							}
 						}
@@ -1096,12 +1194,16 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_config.superimpose_affects_paste ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_CONFIG_MUTETURBO:
-					muteTurbo ^= 1;
+				case ID_CONFIG_COLUMNSETPATTERNSKIPSLAG:
+					taseditor_config.pattern_skips_lag ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_SILENTAUTOSAVE:
 					taseditor_config.silent_autosave ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_CONFIG_MUTETURBO:
+					muteTurbo ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case IDC_PROGRESS_BUTTON:
@@ -1139,6 +1241,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					else if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED)
 						taseditor_config.superimpose = SUPERIMPOSE_INDETERMINATE;
 					else taseditor_config.superimpose = SUPERIMPOSE_UNCHECKED;
+					taseditor_window.UpdateCheckedItems();
+					break;
+				case IDC_USEPATTERN:
+					taseditor_config.pattern_recording ^= 1;
+					recorder.pattern_offset = 0;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ACCEL_CTRL_A:
@@ -1334,12 +1441,17 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 				break;
 			}
-		case WM_SYSKEYDOWN:
+		case WM_SYSCOMMAND:
 		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
+			switch (wParam)
+	        {
+				// Disable entering menu by Alt or F10
+			    case SC_KEYMENU:
+		            return true;
+			}
+	        break;
 		}
+
 		default:
 			break;
 	}

@@ -1,7 +1,11 @@
 //Specification file for TASEDITOR_WINDOW class
-#define TASEDITOR_WINDOW_TOTAL_ITEMS 42
+#define TASEDITOR_WINDOW_TOTAL_ITEMS 43
 #define TOOLTIP_TEXT_MAX_LEN 80
 #define TOOLTIPS_AUTOPOP_TIMEOUT 30000
+
+#define PATTERNS_MENU_POS 5
+#define PATTERNS_MAX_VISIBLE_NAME 50
+#define PATTERNMENU_MAX_VISIBLE_NAME PATTERNS_MAX_VISIBLE_NAME + 6		// + "Pattern: "
 
 enum ECONTEXTMENU
 {
@@ -37,6 +41,12 @@ public:
 	void RemoveRecentProject(unsigned int which);
 	void LoadRecentProject(int slot);
 
+	void UpdatePatternsMenu();
+	void RecheckPatternsMenu();
+
+	void SetTaseditorInput();
+	void ClearTaseditorInput();
+
 	HWND hwndTasEditor, hwndFindNote;
 	bool TASEditor_focus;
 	bool ready_for_resizing;
@@ -46,8 +56,9 @@ public:
 private:
 	void CalculateItems();
 
+
 	HWND hToolTipWnd;
-	HMENU hmenu, hrmenu;
+	HMENU hmenu, hrmenu, patterns_menu;
 	HICON hTaseditorIcon;
 
 };

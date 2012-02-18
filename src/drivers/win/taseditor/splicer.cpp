@@ -91,8 +91,9 @@ void SPLICER::CloneFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
+	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	//insert frames before each selection, but consecutive selection lines are accounted as single region
+	// insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
@@ -105,16 +106,25 @@ void SPLICER::CloneFrames()
 			// end of current region
 			currMovieData.cloneRegion(*it, frames);
 			if (taseditor_config.bind_markers)
-				markers_manager.insertEmpty(*it, frames);
+			{
+				// markers are not cloned
+				if (markers_manager.insertEmpty(*it,frames))
+					markers_changed = true;
+			}
 			frames = 1;
 		} else frames++;
 	}
-	if (taseditor_config.bind_markers)
+	int first_changes = history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin());
+	if (first_changes >= 0)
 	{
-		markers_manager.update();
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		greenzone.InvalidateAndCheck(first_changes);
+	} else if (markers_changed)
+	{
+		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+		list.RedrawList();
 	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin()));
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 
 void SPLICER::InsertFrames()
@@ -123,10 +133,9 @@ void SPLICER::InsertFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
-	//to keep this from being even slower than it would otherwise be, go ahead and reserve records
+	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-
-	//insert frames before each selection, but consecutive selection lines are accounted as single region
+	// insert frames before each selection, but consecutive selection lines are accounted as single region
 	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
@@ -139,16 +148,24 @@ void SPLICER::InsertFrames()
 			// end of current region
 			currMovieData.insertEmpty(*it,frames);
 			if (taseditor_config.bind_markers)
-				markers_manager.insertEmpty(*it,frames);
+			{
+				if (markers_manager.insertEmpty(*it,frames))
+					markers_changed = true;
+			}
 			frames = 1;
 		} else frames++;
 	}
-	if (taseditor_config.bind_markers)
+	int first_changes = history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin());
+	if (first_changes >= 0)
 	{
-		markers_manager.update();
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		greenzone.InvalidateAndCheck(first_changes);
+	} else if (markers_changed)
+	{
+		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+		list.RedrawList();
 	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin()));
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 
 void SPLICER::InsertNumFrames()
@@ -159,6 +176,7 @@ void SPLICER::InsertNumFrames()
 	{
 		if (frames > 0)
 		{
+			bool markers_changed = false;
 			int index;
 			if (current_selection->size())
 			{
@@ -173,13 +191,23 @@ void SPLICER::InsertNumFrames()
 			currMovieData.insertEmpty(index, frames);
 			if (taseditor_config.bind_markers)
 			{
-				markers_manager.insertEmpty(index, frames);
-				selection.must_find_current_marker = playback.must_find_current_marker = true;
+				if (markers_manager.insertEmpty(index, frames))
+					markers_changed = true;
 			}
 			// select inserted rows
 			list.update();
 			selection.SetRegionSelection(index, index + frames - 1);
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_INSERT, index));
+			int first_changes = history.RegisterChanges(MODTYPE_INSERT, index);
+			if (first_changes >= 0)
+			{
+				greenzone.InvalidateAndCheck(first_changes);
+			} else if (markers_changed)
+			{
+				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, index);
+				list.RedrawList();
+			}
+			if (markers_changed)
+				selection.must_find_current_marker = playback.must_find_current_marker = true;
 		}
 	}
 }
@@ -189,17 +217,21 @@ void SPLICER::DeleteFrames()
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return;
 
+	bool markers_changed = false;
 	int start_index = *current_selection->begin();
 	int end_index = *current_selection->rbegin();
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
-	//delete frames on each selection, going backwards
+	// delete frames on each selection, going backwards
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		currMovieData.records.erase(currMovieData.records.begin() + *it);
 		if (taseditor_config.bind_markers)
-			markers_manager.EraseMarker(*it);
+		{
+			if (markers_manager.EraseMarker(*it))
+				markers_changed = true;
+		}
 	}
-	if (taseditor_config.bind_markers)
+	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
@@ -211,10 +243,16 @@ void SPLICER::DeleteFrames()
 	if (result >= 0)
 	{
 		greenzone.InvalidateAndCheck(result);
-	} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+	} else
 	{
-		greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-	} else list.RedrawList();
+		// check special case: user deleted a bunch of empty frames the end of the movie
+		if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
+		else
+			list.RedrawList();
+		if (markers_changed)
+			history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, start_index);
+	}
 }
 
 void SPLICER::ClearFrames(SelectionFrames* current_selection)
@@ -246,21 +284,32 @@ void SPLICER::Truncate()
 
 	if (currMovieData.getNumRecords() > frame+1)
 	{
+		int last_frame_was = currMovieData.getNumRecords() - 1;
 		currMovieData.truncateAt(frame+1);
+		bool markers_changed = false;
 		if (taseditor_config.bind_markers)
 		{
-			markers_manager.SetMarkersSize(frame+1);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			if (markers_manager.SetMarkersSize(frame+1))
+			{
+				markers_changed = true;
+				selection.must_find_current_marker = playback.must_find_current_marker = true;
+			}
 		}
 		list.update();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
 			greenzone.InvalidateAndCheck(result);
-		} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+		} else
 		{
-			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-		} else list.RedrawList();
+			// check special case: user truncated empty frames of the movie
+			if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
+				greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
+			else
+				list.RedrawList();
+			if (markers_changed)
+				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, frame+1, last_frame_was);
+		}
 	}
 }
 
@@ -478,6 +527,7 @@ bool SPLICER::PasteInsert()
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	int num_joypads = joysticks_per_frame[GetInputType(currMovieData)];
 	bool result = false;
+	bool markers_changed = false;
 	int pos = *current_selection_begin;
 	HANDLE hGlobal = GetClipboardData(CF_TEXT);
 	if (hGlobal)
@@ -523,7 +573,11 @@ bool SPLICER::PasteInsert()
 				
 				// insert new frame
 				currMovieData.insertEmpty(pos, 1);
-				if (taseditor_config.bind_markers) markers_manager.insertEmpty(pos, 1);
+				if (taseditor_config.bind_markers)
+				{
+					if (markers_manager.insertEmpty(pos, 1))
+						markers_changed = true;
+				}
 				inserted_set.insert(pos);
 
 				// read this frame input
@@ -553,9 +607,17 @@ bool SPLICER::PasteInsert()
 				pGlobal = strchr(pGlobal, '\n');
 			}
 			markers_manager.update();
-			if (taseditor_config.bind_markers)
+			int first_changes = history.RegisterPasteInsert(*current_selection_begin, inserted_set);
+			if (first_changes >= 0)
+			{
+				greenzone.InvalidateAndCheck(first_changes);
+			} else if (markers_changed)
+			{
+				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+				list.RedrawList();
+			}
+			if (markers_changed)
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
-			greenzone.InvalidateAndCheck(history.RegisterPasteInsert(*current_selection_begin, inserted_set));
 			// flash list header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{

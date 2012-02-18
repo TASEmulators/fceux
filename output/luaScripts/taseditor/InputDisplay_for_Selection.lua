@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------
 -- Display Input at Selection cursor
+-- by AnS, 2012
 ---------------------------------------------------------------------------
 -- Showcases following functions:
 -- * taseditor.getselection()

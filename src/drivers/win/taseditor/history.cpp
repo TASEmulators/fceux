@@ -20,10 +20,11 @@ extern int GetInputType(MovieData& md);
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[41][20] = {" Init",
+char modCaptions[MODTYPES_TOTAL][20] = {" Init",
 							" Change",
 							" Set",
 							" Unset",
+							" Pattern",
 							" Insert",
 							" Delete",
 							" Truncate",
@@ -56,7 +57,9 @@ char modCaptions[41][20] = {" Init",
 							" Marker Branch9 to ",
 							" Marker Set",
 							" Marker Unset",
+							" Marker Pattern",
 							" Marker Rename",
+							" Marker Move",
 							" LUA Marker Set",
 							" LUA Marker Unset",
 							" LUA Marker Rename",
@@ -211,7 +214,7 @@ void HISTORY::AddSnapshotToHistory(SNAPSHOT &inp)
 }
 
 // returns frame of first actual change
-int HISTORY::RegisterChanges(int mod_type, int start, int end)
+int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comment)
 {
 	// create new shanshot
 	SNAPSHOT inp;
@@ -241,6 +244,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end)
 			case MODTYPE_DELETE:
 			case MODTYPE_PASTE:
 			case MODTYPE_CLONE:
+			case MODTYPE_PATTERN:
 			{
 				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
 				inp.jump_frame = start;
@@ -257,6 +261,12 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end)
 			_itoa(end, framenum, 10);
 			strcat(inp.description, "-");
 			strcat(inp.description, framenum);
+		}
+		// add comment if there is one specified
+		if (comment)
+		{
+			strcat(inp.description, " ");
+			strncat(inp.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
 		}
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
@@ -277,6 +287,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end)
 				case MODTYPE_CLEAR:
 				case MODTYPE_CUT:
 				case MODTYPE_PASTE:
+				case MODTYPE_PATTERN:
 					inp.inheritHotChanges(&snapshots[real_pos]);
 					inp.fillHotChanges(snapshots[real_pos], first_changes, end);
 					break;
@@ -320,7 +331,7 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 	}
 	return first_changes;
 }
-void HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
+void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char* comment)
 {
 	// create new shanshot
 	SNAPSHOT inp;
@@ -340,6 +351,13 @@ void HISTORY::RegisterMarkersChange(int mod_type, int start, int end)
 		strcat(inp.description, "-");
 		strcat(inp.description, framenum);
 	}
+	// add comment if there is one specified
+	if (comment)
+	{
+		strcat(inp.description, " ");
+		strncat(inp.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+	}
+	// input hotchanges aren't changed
 	if (taseditor_config.enable_hot_changes)
 		inp.copyHotChanges(&GetCurrentSnapshot());
 	AddSnapshotToHistory(inp);
@@ -726,12 +744,6 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		case WM_KEYUP:
 		case WM_KILLFOCUS:
 			return 0;
-		case WM_SYSKEYDOWN:
-		{
-			if (wParam == VK_F10)
-				return 0;
-			break;
-		}
 	}
 	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
 }

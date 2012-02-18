@@ -217,87 +217,92 @@ BEGIN
     END
 END
 
-TASEDITORMENU MENU
+TASEDITORMENU MENUEX
 BEGIN
-    POPUP "&File"
+    POPUP "File",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "&New",                        ID_FILE_NEW
-        MENUITEM "&Open",                       ID_FILE_OPENPROJECT
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVEPROJECT
-        MENUITEM "S&ave As",                    ID_FILE_SAVEPROJECTAS
-        MENUITEM "Save &Compact",               ID_FILE_SAVECOMPACT
-        MENUITEM "&Recent",                     ID_FILE_RECENT
-        MENUITEM SEPARATOR
-        MENUITEM "&Import",                     ID_FILE_IMPORT
-        MENUITEM "&Export to FM2",              ID_FILE_EXPORTFM2
-        MENUITEM SEPARATOR
-        MENUITEM "&Close\tAlt+F4",              ID_FILE_CLOSE
+        MENUITEM "New",                         ID_FILE_NEW,MFT_STRING,MFS_ENABLED
+        MENUITEM "Open",                        ID_FILE_OPENPROJECT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save\tCtrl+S",                ID_FILE_SAVEPROJECT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save As",                     ID_FILE_SAVEPROJECTAS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Save Compact",                ID_FILE_SAVECOMPACT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Recent",                      ID_FILE_RECENT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Import",                      ID_FILE_IMPORT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Close\tAlt+F4",               ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
     END
-    POPUP "&Edit"
+    POPUP "Edit",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
-        MENUITEM "Selection Undo\tCtrl+Q",      ID_EDIT_SELECTIONUNDO
-        MENUITEM "Selection Redo\tCtrl+W",      ID_EDIT_SELECTIONREDO
-        MENUITEM SEPARATOR
-        MENUITEM "Select &All",                 ID_EDIT_SELECTALL
-        MENUITEM "Select between &Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS
-        MENUITEM "Reselect Clipboard\tCtrl+B",  ID_EDIT_RESELECTCLIPBOARD
-        MENUITEM SEPARATOR
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
-        MENUITEM "PasteInsert\tShift+V",        ID_EDIT_PASTEINSERT
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM SEPARATOR
-        MENUITEM "C&lear\tDel",                 ID_EDIT_CLEAR
-        MENUITEM "&Delete\tCtrl+Del",           ID_EDIT_DELETE
-        MENUITEM "Cl&one\tCtrl+Ins",            ID_EDIT_CLONEFRAMES
-        MENUITEM "&Insert\tShift+Ins",          ID_EDIT_INSERTFRAMES
-        MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT
-        MENUITEM SEPARATOR
-        MENUITEM "Truncate movie",              ID_EDIT_TRUNCATE
+        MENUITEM "Undo\tCtrl+Z",                ID_EDIT_UNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Redo\tCtrl+Y",                ID_EDIT_REDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Selection Undo\tCtrl+Q",      ID_EDIT_SELECTIONUNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Selection Redo\tCtrl+W",      ID_EDIT_SELECTIONREDO,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Select All",                  ID_EDIT_SELECTALL,MFT_STRING,MFS_ENABLED
+        MENUITEM "Select between Markers\tCtrl+A", ID_EDIT_SELECTMIDMARKERS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Reselect Clipboard\tCtrl+B",  ID_EDIT_RESELECTCLIPBOARD,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Copy\tCtrl+C",                ID_EDIT_COPY,MFT_STRING,MFS_ENABLED
+        MENUITEM "Paste\tCtrl+V",               ID_EDIT_PASTE,MFT_STRING,MFS_ENABLED
+        MENUITEM "PasteInsert\tShift+V",        ID_EDIT_PASTEINSERT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Cut\tCtrl+X",                 ID_EDIT_CUT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Clear\tDel",                  ID_EDIT_CLEAR,MFT_STRING,MFS_ENABLED
+        MENUITEM "Delete\tCtrl+Del",            ID_EDIT_DELETE,MFT_STRING,MFS_ENABLED
+        MENUITEM "Clone\tCtrl+Ins",             ID_EDIT_CLONEFRAMES,MFT_STRING,MFS_ENABLED
+        MENUITEM "Insert\tShift+Ins",           ID_EDIT_INSERTFRAMES,MFT_STRING,MFS_ENABLED
+        MENUITEM "Insert # of Frames\tIns",     ID_EDIT_INSERT,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Truncate movie",              ID_EDIT_TRUNCATE,MFT_STRING,MFS_ENABLED
     END
-    POPUP "&View"
+    POPUP "View",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "&Find Note window\tCtrl+F",   ID_VIEW_FINDNOTE
-        MENUITEM SEPARATOR
-        MENUITEM "Show &Lag Frames",            ID_VIEW_SHOW_LAG_FRAMES
-        MENUITEM "Highlight &Markers",          ID_VIEW_SHOW_MARKERS
-        MENUITEM "Display Branch &Screenshots", ID_VIEW_SHOWBRANCHSCREENSHOTS
-        MENUITEM "Display Branch &Descriptions", ID_VIEW_SHOWBRANCHTOOLTIPS
-        MENUITEM "Enable Hot &Changes",         ID_VIEW_ENABLEHOTCHANGES
-        MENUITEM SEPARATOR
-        MENUITEM "Follow &undo context",        ID_VIEW_JUMPWHENMAKINGUNDO
-        MENUITEM "Follow Marker &Note context", ID_VIEW_FOLLOWMARKERNOTECONTEXT
+        MENUITEM "Find Note window\tCtrl+F",    ID_VIEW_FINDNOTE,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Show Lag Frames",             ID_VIEW_SHOW_LAG_FRAMES,MFT_STRING,MFS_ENABLED
+        MENUITEM "Highlight Markers",           ID_VIEW_SHOW_MARKERS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Display Branch Screenshots",  ID_VIEW_SHOWBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Display Branch Descriptions", ID_VIEW_SHOWBRANCHTOOLTIPS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Enable Hot Changes",          ID_VIEW_ENABLEHOTCHANGES,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Follow Undo context",         ID_VIEW_JUMPWHENMAKINGUNDO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Follow Marker Note context",  ID_VIEW_FOLLOWMARKERNOTECONTEXT,MFT_STRING,MFS_ENABLED
     END
-    POPUP "&Config"
+    POPUP "Config",                         65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "Set &Greenzone capacity",     ID_CONFIG_SETGREENZONECAPACITY
-        MENUITEM "Set max &undo levels",        ID_CONFIG_SETMAXUNDOLEVELS
-        MENUITEM "Set &Autosave period",        ID_CONFIG_SETAUTOSAVEPERIOD
-        MENUITEM SEPARATOR
-        MENUITEM "Branches restore entire &Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE
-        MENUITEM "Branches work only when &Recording", ID_CONFIG_BRANCHESWORKONLYWHENRECORDING
-        MENUITEM "&HUD in Branch screenshots",  ID_CONFIG_HUDINBRANCHSCREENSHOTS
-        MENUITEM SEPARATOR
-        MENUITEM "&Bind Markers to Input",      ID_CONFIG_BINDMARKERSTOINPUT
-        MENUITEM "&Empty new Marker Notes",     ID_CONFIG_EMPTYNEWMARKERNOTES
-        MENUITEM SEPARATOR
-        MENUITEM "&Combine consecutive Recordings", ID_CONFIG_COMBINECONSECUTIVERECORDINGS
-        MENUITEM "Use 1&P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING
-        MENUITEM "Use &Input keys for Column Set", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET
-        MENUITEM "Allow &keyboard controls in Piano Roll", ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW
-        MENUITEM "&Superimpose affects copy/paste", ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE
-        MENUITEM SEPARATOR
-        MENUITEM "Silent Autosave",             ID_CONFIG_SILENTAUTOSAVE
-        MENUITEM "Mute &Turbo",                 ID_CONFIG_MUTETURBO
+        MENUITEM "Set Greenzone capacity",      ID_CONFIG_SETGREENZONECAPACITY,MFT_STRING,MFS_ENABLED
+        MENUITEM "Set max Undo levels",         ID_CONFIG_SETMAXUNDOLEVELS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Set Autosave period",         ID_CONFIG_SETAUTOSAVEPERIOD,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Branches restore entire Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE,MFT_STRING,MFS_ENABLED
+        MENUITEM "Branches work only when Recording", ID_CONFIG_BRANCHESWORKONLYWHENRECORDING,MFT_STRING,MFS_ENABLED
+        MENUITEM "HUD in Branch screenshots",   ID_CONFIG_HUDINBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Bind Markers to Input",       ID_CONFIG_BINDMARKERSTOINPUT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Empty new Marker Notes",      ID_CONFIG_EMPTYNEWMARKERNOTES,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Combine consecutive Recordings", ID_CONFIG_COMBINECONSECUTIVERECORDINGS,MFT_STRING,MFS_ENABLED
+        MENUITEM "Use 1P keys for all single Recordings", ID_CONFIG_USE1PFORRECORDING,MFT_STRING,MFS_ENABLED
+        MENUITEM "Use Input keys for Column Set", ID_CONFIG_USEINPUTKEYSFORCOLUMNSET,MFT_STRING,MFS_ENABLED
+        MENUITEM "Allow keyboard controls in Piano Roll", ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW,MFT_STRING,MFS_ENABLED
+        MENUITEM "Superimpose affects copy/paste", ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE,MFT_STRING,MFS_ENABLED
+        MENUITEM "ColumnSet Pattern skips Lag", ID_CONFIG_COLUMNSETPATTERNSKIPSLAG,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "Silent Autosave",             ID_CONFIG_SILENTAUTOSAVE,MFT_STRING,MFS_ENABLED
+        MENUITEM "Mute Turbo",                  ID_CONFIG_MUTETURBO,MFT_STRING,MFS_ENABLED
     END
-    POPUP "&Help"
+    POPUP "Help",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "TAS Editor &Help",            ID_HELP_TASEDITORHELP
-        MENUITEM "Enable &Tooltips",            ID_HELP_TOOLTIPS
-        MENUITEM SEPARATOR
-        MENUITEM "&About",                      ID_HELP_ABOUT
+        MENUITEM "TAS Editor Help",             ID_HELP_TASEDITORHELP,MFT_STRING,MFS_ENABLED
+        MENUITEM "Enable Tooltips",             ID_HELP_TOOLTIPS,MFT_STRING,MFS_ENABLED
+        MENUITEM MFT_SEPARATOR
+        MENUITEM "About",                       ID_HELP_ABOUT,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "Pattern",                        65535,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    BEGIN
+        MENUITEM "Dummy",                       ID_PATTERN_TEST,MFT_STRING,MFS_ENABLED
     END
 END
 
@@ -384,13 +389,13 @@ BEGIN
     BEGIN
         MENUITEM "Set Marker",                  ID_SELECTED_SETMARKER
         MENUITEM "Remove Marker",               ID_SELECTED_REMOVEMARKER
-        MENUITEM "Select between &Markers",     ID_SELECTED_SELECTMIDMARKERS
+        MENUITEM "Select between Markers",      ID_SELECTED_SELECTMIDMARKERS
         MENUITEM SEPARATOR
-        MENUITEM "C&lear",                      ID_CONTEXT_SELECTED_CLEARFRAMES
-        MENUITEM "&Delete",                     ID_CONTEXT_SELECTED_DELETEFRAMES
-        MENUITEM "&Insert",                     ID_CONTEXT_SELECTED_INSERTFRAMES
+        MENUITEM "Clear",                       ID_CONTEXT_SELECTED_CLEARFRAMES
+        MENUITEM "Delete",                      ID_CONTEXT_SELECTED_DELETEFRAMES
+        MENUITEM "Insert",                      ID_CONTEXT_SELECTED_INSERTFRAMES
         MENUITEM "Insert # of Frames",          ID_CONTEXT_SELECTED_INSERTFRAMES2
-        MENUITEM "Cl&one",                      ID_SELECTED_CLONE
+        MENUITEM "Clone",                       ID_SELECTED_CLONE
         MENUITEM SEPARATOR
         MENUITEM "Truncate movie",              ID_CONTEXT_SELECTED_TRUNCATE
     END
@@ -1407,12 +1412,12 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX,202,48,105,12
     CONTROL         "",IDC_BOOKMARKSLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSCROLL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | NOT WS_VISIBLE | WS_BORDER,201,178,113,89
     CONTROL         "",IDC_HISTORYLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER,201,282,113,42
-    CONTROL         " All",IDC_RADIO_ALL,"Button",BS_AUTORADIOBUTTON,202,84,27,10
-    CONTROL         " 1P",IDC_RADIO_1P,"Button",BS_AUTORADIOBUTTON,258,84,25,10
-    CONTROL         " 2P",IDC_RADIO_2P,"Button",BS_AUTORADIOBUTTON,288,84,24,10
-    CONTROL         " 3P",IDC_RADIO_3P,"Button",BS_AUTORADIOBUTTON,258,96,25,10
-    CONTROL         " 4P",IDC_RADIO_4P,"Button",BS_AUTORADIOBUTTON,288,96,24,10
-    CONTROL         " Superimpose",IDC_SUPERIMPOSE,"Button",BS_AUTO3STATE,258,72,55,10
+    CONTROL         " All",IDC_RADIO_ALL,"Button",BS_AUTORADIOBUTTON,289,71,24,10
+    CONTROL         " 1P",IDC_RADIO_1P,"Button",BS_AUTORADIOBUTTON,202,83,25,10
+    CONTROL         " 2P",IDC_RADIO_2P,"Button",BS_AUTORADIOBUTTON,231,83,24,10
+    CONTROL         " 3P",IDC_RADIO_3P,"Button",BS_AUTORADIOBUTTON,260,83,25,10
+    CONTROL         " 4P",IDC_RADIO_4P,"Button",BS_AUTORADIOBUTTON,289,83,24,10
+    CONTROL         " Superimpose",IDC_SUPERIMPOSE,"Button",BS_AUTO3STATE,202,96,54,10
     PUSHBUTTON      "<<",TASEDITOR_PREV_MARKER,201,332,23,14,NOT WS_TABSTOP
     PUSHBUTTON      "Similar",TASEDITOR_FIND_BEST_SIMILAR_MARKER,224,332,34,14,NOT WS_TABSTOP
     PUSHBUTTON      "More",TASEDITOR_FIND_NEXT_SIMILAR_MARKER,258,332,34,14,NOT WS_TABSTOP
@@ -1427,9 +1432,10 @@ BEGIN
     CONTROL         " Turbo seek",CHECK_TURBO_SEEK,"Button",BS_AUTOCHECKBOX,202,25,50,12
     LTEXT           "Selection: 0 rows, 16 columns",IDC_TEXT_SELECTION,203,118,112,10
     LTEXT           "Clipboard: 0 rows, 16 columns",IDC_TEXT_CLIPBOARD,202,128,114,10
-    CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,202,72,49,10
+    CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,202,71,64,10
     PUSHBUTTON      "Run function",TASEDITOR_RUN_MANUAL,201,150,54,14,WS_DISABLED | NOT WS_TABSTOP
-    CONTROL         "Auto function",IDC_RUN_AUTO,"Button",BS_AUTO3STATE,260,152,55,10
+    CONTROL         "Auto function",IDC_RUN_AUTO,"Button",BS_AUTOCHECKBOX,260,152,55,10
+    CONTROL         " Use pattern",IDC_USEPATTERN,"Button",BS_AUTOCHECKBOX,260,96,54,10
 END
 
 IDD_TASEDITOR_ABOUT DIALOGEX 0, 0, 208, 70

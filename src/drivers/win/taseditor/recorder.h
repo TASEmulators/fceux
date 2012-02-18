@@ -32,10 +32,13 @@ public:
 	const char* GetRecordingCaption();
 	
 	int multitrack_recording_joypad;
+	int pattern_offset;
 	std::vector<uint8> current_joy;
 
 private:
 	int old_multitrack_recording_joypad;
+	int old_pattern_offset;
+	bool must_increase_pattern_offset;
 	bool old_movie_readonly;
 
 	HWND hwndRecCheckbox, hwndRB_RecAll, hwndRB_Rec1P, hwndRB_Rec2P, hwndRB_Rec3P, hwndRB_Rec4P;

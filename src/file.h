@@ -162,4 +162,5 @@ void FCEU_SplitArchiveFilename(std::string src, std::string& archive, std::strin
 #define FCEUMKF_INPUT        19
 #define FCEUMKF_LUA          20
 #define FCEUMKF_AVI			 21
+#define FCEUMKF_TASEDITOR    22
 #endif
