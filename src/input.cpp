@@ -1201,7 +1201,7 @@ static void TaseditorRewindOff(void)
 static void TaseditorRestorePlayback(void)
 {
 #ifdef WIN32
-	playback.restorePosition();
+	playback.RestorePosition();
 #endif
 }
 

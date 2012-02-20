@@ -121,7 +121,7 @@ void PLAYBACK::update()
 		list.RedrawRow(currFrameCounter);
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
 		lastCursor = currFrameCounter;
-		if (taseditor_config.follow_playback && !turbo)
+		if (!turbo)
 			// enforce redrawing now
 			UpdateWindow(list.hwndList);
 		// lazy update of "Playback's Marker text"
@@ -232,6 +232,28 @@ void PLAYBACK::UnpauseEmulation()
 	FCEUI_SetEmulationPaused(0);
 	// make some additional stuff
 }
+void PLAYBACK::RestorePosition()
+{
+	if (pause_frame)
+		jump(pause_frame-1);
+	else
+		jump(lost_position_frame-1);
+}
+void PLAYBACK::MiddleButtonClick()
+{
+	if (emu_paused)
+	{
+		if (pause_frame)
+			jump(pause_frame-1);
+		else if (lost_position_frame)
+			jump(lost_position_frame-1);
+		else
+			UnpauseEmulation();
+	} else
+	{
+		PauseEmulation();
+	}
+}
 
 void PLAYBACK::SeekingStart(int finish_frame)
 {
@@ -266,29 +288,44 @@ void PLAYBACK::ForwardFrame()
 	if (!pause_frame) PauseEmulation();
 	turbo = false;
 }
-void PLAYBACK::RewindFull()
+void PLAYBACK::RewindFull(int speed)
 {
-	// jump to previous marker
-	int index = currFrameCounter - 1;
-	for (; index >= 0; index--)
-		if (markers_manager.GetMarker(index)) break;
-	if (index >= 0)
-		jump(index);
-	else
-		jump(0);
-	jump_was_used_this_frame = true;
+	if (!jump_was_used_this_frame)
+	{
+		int index = currFrameCounter - 1;
+		// jump trough "speed" amount of previous markers
+		while (speed > 0)
+		{
+			for (; index >= 0; index--)
+				if (markers_manager.GetMarker(index)) break;
+			speed--;
+		}
+		if (index >= 0)
+			jump(index);
+		else
+			jump(0);
+		jump_was_used_this_frame = true;
+	}
 }
-void PLAYBACK::ForwardFull()
+void PLAYBACK::ForwardFull(int speed)
 {
-	// jump to next marker
-	int last_frame = currMovieData.getNumRecords()-1;
-	int index = currFrameCounter + 1;
-	for (; index <= last_frame; ++index)
-		if (markers_manager.GetMarker(index)) break;
-	if (index <= last_frame)
-		jump(index);
-	else
-		jump(last_frame);
+	if (!jump_was_used_this_frame)
+	{
+		int last_frame = currMovieData.getNumRecords()-1;
+		int index = currFrameCounter + 1;
+		// jump trough "speed" amount of next markers
+		while (speed > 0)
+		{
+			for (; index <= last_frame; ++index)
+				if (markers_manager.GetMarker(index)) break;
+			speed--;
+		}
+		if (index <= last_frame)
+			jump(index);
+		else
+			jump(last_frame);
+		jump_was_used_this_frame = true;
+	}
 }
 
 void PLAYBACK::RedrawMarker()
@@ -323,13 +360,6 @@ void PLAYBACK::jump(int frame)
 		ForceExecuteLuaFrameFunctions();
 		list.FollowPlaybackIfNeeded();
 	}
-}
-void PLAYBACK::restorePosition()
-{
-	if (pause_frame)
-		jump(pause_frame-1);
-	else
-		jump(lost_position_frame-1);
 }
 
 bool PLAYBACK::JumpToFrame(int index)

@@ -17,7 +17,6 @@ public:
 	void update();
 
 	void jump(int frame);
-	void restorePosition();
 
 	void updateProgressbar();
 
@@ -26,11 +25,13 @@ public:
 	void ToggleEmulationPause();
 	void PauseEmulation();
 	void UnpauseEmulation();
+	void RestorePosition();
+	void MiddleButtonClick();
 
 	void RewindFrame();
 	void ForwardFrame();
-	void RewindFull();
-	void ForwardFull();
+	void RewindFull(int speed = 1);
+	void ForwardFull(int speed = 1);
 
 	void RedrawMarker();
 
@@ -50,9 +51,6 @@ public:
 	HWND hwndProgressbar, hwndRewind, hwndForward, hwndRewindFull, hwndForwardFull;
 	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
 
-	// temps
-	bool jump_was_used_this_frame;
-
 private:
 
 	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
@@ -65,5 +63,8 @@ private:
 	bool old_forward_full_button_state, forward_full_button_state;
 	int button_hold_time;
 	int seeking_start_frame;
+
+	// temps
+	bool jump_was_used_this_frame;
 
 };

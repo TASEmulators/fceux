@@ -156,6 +156,9 @@ void TASEDITOR_LIST::init()
 	lvc.mask = LVCF_WIDTH;
 	lvc.cx = COLUMN_ICONS_WIDTH;
 	ListView_InsertColumn(hwndList, 0, &lvc);
+
+	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
+
 }
 void TASEDITOR_LIST::free()
 {
@@ -970,6 +973,55 @@ bool TASEDITOR_LIST::InputColumnSet(int joy, int button)
 	} else
 		return false;
 }
+// ----------------------------------------------------
+void TASEDITOR_LIST::RightClick(LVHITTESTINFO& info)
+{
+	int index = info.iItem;
+	if(index == -1)
+		StrayClickMenu(info);
+	else
+		RightClickMenu(info);
+}
+void TASEDITOR_LIST::StrayClickMenu(LVHITTESTINFO& info)
+{
+	POINT pt = info.pt;
+	ClientToScreen(hwndList, &pt);
+	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
+	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
+}
+void TASEDITOR_LIST::RightClickMenu(LVHITTESTINFO& info)
+{
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size() == 0)
+	{
+		StrayClickMenu(info);
+		return;
+	}
+	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_SELECTED);
+	// inspect current selection and disable inappropriate menu items
+	SelectionFrames::iterator current_selection_begin(current_selection->begin());
+	SelectionFrames::iterator current_selection_end(current_selection->end());
+	bool set_found = false, unset_found = false;
+	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	{
+		if(markers_manager.GetMarker(*it))
+			set_found = true;
+		else 
+			unset_found = true;
+	}
+	if (set_found)
+		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+	if (unset_found)
+		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
+	else
+		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+
+	POINT pt = info.pt;
+	ClientToScreen(hwndList, &pt);
+	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
+}
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -983,7 +1035,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		{
 			if (selection.GetCurrentSelectionSize())
 			{
-				//perform hit test
+				// perform hit test
 				HD_HITTESTINFO info;
 				info.pt.x = GET_X_LPARAM(lParam);
 				info.pt.y = GET_Y_LPARAM(lParam);
@@ -1028,6 +1080,61 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return 0;
 			break;
 		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			playback.MiddleButtonClick();
+			return 0;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			int fwKeys = GET_KEYSTATE_WPARAM(wParam);
+			int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+			if (fwKeys & MK_SHIFT)
+			{
+				// Shift + scroll = Playback rewind full(speed)/forward full(speed)
+				if (zDelta < 0)
+					playback.ForwardFull(-zDelta / 120);
+				else if (zDelta > 0)
+					playback.RewindFull(zDelta / 120);
+				return 0;
+			} else if (fwKeys & MK_CONTROL)
+			{
+				// Ctrl + scroll = Selection rewind full(speed)/forward full(speed)
+				if (zDelta < 0)
+					selection.JumpNextMarker(-zDelta / 120);
+				else if (zDelta > 0)
+					selection.JumpPrevMarker(zDelta / 120);
+				return 0;
+			} else if (fwKeys & MK_RBUTTON)
+			{
+				// Right button + scroll = rewind/forward
+				int destination_frame = currFrameCounter - (zDelta / 120);
+				if (destination_frame < 0) destination_frame = 0;
+				playback.jump(destination_frame);
+				return 0;
+			}
+			break;
+		}
+		case WM_RBUTTONDOWN:
+			if (GetFocus() != list.hwndList)
+				SetFocus(list.hwndList);
+			return 0;
+		case WM_RBUTTONDBLCLK:
+			return 0;
+		case WM_RBUTTONUP:
+		{
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+			// show context menu
+			if(info.iSubItem <= COLUMN_FRAMENUM || info.iSubItem >= COLUMN_FRAMENUM2)
+				list.RightClick(info);
+			return 0;
+		}
+
 	}
 	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 }

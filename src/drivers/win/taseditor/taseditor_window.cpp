@@ -70,11 +70,11 @@ static struct
 	IDC_LUA_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
-	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame", "", false, EMUCMD_TASEDITOR_REWIND, 0,
-	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame", "", false, EMUCMD_FRAME_ADVANCE, 0,
-	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (hotkey: Shift+PageDown)", "", false, 0, 0,
+	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame (mouse: Right button+Wheel up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
+	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame  (mouse: Right button+Wheel down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
+	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The List will follow Playback cursor movements", "", false, 0, 0,
 	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "If you change input above Playback, cursor will run where it was before change", "", false, 0, 0,
@@ -87,10 +87,10 @@ static struct
 	IDC_RADIO_4P, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old input with new buttons, instead of overwriting", "", false, 0, 0,
 	IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to input recording", "", false, 0, 0,
-	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (hotkey: Ctrl+PageUp)", "", false, 0, 0,
+	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)", "", false, 0, 0,
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
-	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (hotkey: Ctrl+PageDown)", "", false, 0, 0,
+	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
 	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll the List to Playback cursor", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "", "", false, 0, 0,
@@ -132,7 +132,6 @@ void TASEDITOR_WINDOW::init()
 		ShowWindow(hwndTasEditor, SW_SHOWMAXIMIZED);
 	// menus and checked items
 	hmenu = GetMenu(hwndTasEditor);
-	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
 	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	UpdateCheckedItems();
 	// tooltips
@@ -400,56 +399,6 @@ void TASEDITOR_WINDOW::UpdateCaption()
 void TASEDITOR_WINDOW::RedrawTaseditor()
 {
 	InvalidateRect(hwndTasEditor, 0, FALSE);
-}
-
-void TASEDITOR_WINDOW::RightClick(LPNMITEMACTIVATE info)
-{
-	int index = info->iItem;
-	if(index == -1)
-		StrayClickMenu(info);
-	else if (selection.CheckFrameSelected(index))
-		RightClickMenu(info);
-}
-void TASEDITOR_WINDOW::StrayClickMenu(LPNMITEMACTIVATE info)
-{
-	POINT pt = info->ptAction;
-	ClientToScreen(list.hwndList, &pt);
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEditor, 0);
-}
-void TASEDITOR_WINDOW::RightClickMenu(LPNMITEMACTIVATE info)
-{
-	POINT pt = info->ptAction;
-	ClientToScreen(list.hwndList, &pt);
-
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0)
-	{
-		StrayClickMenu(info);
-		return;
-	}
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_SELECTED);
-	// inspect current selection and disable inappropriate menu items
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	bool set_found = false, unset_found = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(markers_manager.GetMarker(*it))
-			set_found = true;
-		else 
-			unset_found = true;
-	}
-	if (set_found)
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	if (unset_found)
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, hwndTasEditor, 0);
 }
 
 void TASEDITOR_WINDOW::UpdateCheckedItems()
@@ -730,9 +679,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case NM_DBLCLK:
 					list.DoubleClick((LPNMITEMACTIVATE)lParam);
 					break;
-				case NM_RCLICK:
-					taseditor_window.RightClick((LPNMITEMACTIVATE)lParam);
-					break;
 				case LVN_ITEMCHANGED:
 					selection.ItemChanged((LPNMLISTVIEW) lParam);
 					break;
@@ -779,7 +725,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case NM_CLICK:
 				case NM_DBLCLK:
-				case NM_RCLICK:
 					history.Click((LPNMITEMACTIVATE)lParam);
 					break;
 				}
@@ -1382,12 +1327,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 					}
 				case ACCEL_SHIFT_PGUP:
-					if (!playback.jump_was_used_this_frame)
-						playback.RewindFull();
+					playback.RewindFull();
 					break;
 				case ACCEL_SHIFT_PGDN:
-					if (!playback.jump_was_used_this_frame)
-						playback.ForwardFull();
+					playback.ForwardFull();
 					break;
 				case ACCEL_CTRL_PGUP:
 					selection.JumpPrevMarker();
@@ -1451,6 +1394,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 	        break;
 		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			playback.MiddleButtonClick();
+			break;
+		}
+		case WM_MOUSEWHEEL:
+			return SendMessage(list.hwndList, uMsg, wParam, lParam);
 
 		default:
 			break;

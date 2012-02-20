@@ -30,10 +30,6 @@ public:
 	void UpdateCaption();
 	void RedrawTaseditor();
 
-	void RightClick(LPNMITEMACTIVATE info);
-	void StrayClickMenu(LPNMITEMACTIVATE info);
-	void RightClickMenu(LPNMITEMACTIVATE info);
-
 	void UpdateCheckedItems();
 
 	void UpdateRecentProjectsMenu();
@@ -58,7 +54,7 @@ private:
 
 
 	HWND hToolTipWnd;
-	HMENU hmenu, hrmenu, patterns_menu;
+	HMENU hmenu, patterns_menu;
 	HICON hTaseditorIcon;
 
 };

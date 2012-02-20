@@ -41,8 +41,8 @@ public:
 	void SelectBetweenMarkers();
 	void ReselectClipboard();
 
-	void JumpPrevMarker();
-	void JumpNextMarker();
+	void JumpPrevMarker(int speed = 1);
+	void JumpNextMarker(int speed = 1);
 	void JumpToFrame(int frame);
 
 	// getters

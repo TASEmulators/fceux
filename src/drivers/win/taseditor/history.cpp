@@ -744,6 +744,25 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		case WM_KEYUP:
 		case WM_KILLFOCUS:
 			return 0;
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			playback.MiddleButtonClick();
+			return 0;
+		}
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+			return 0;
+		case WM_MOUSEWHEEL:
+		{
+			// right button/Ctrl/Shift + wheel -> send the message to Piano Roll
+			// but if just wheel - use default scrolling here
+			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL))
+				return SendMessage(list.hwndList, msg, wParam, lParam);
+			
+		}
+
+
 	}
 	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);
 }

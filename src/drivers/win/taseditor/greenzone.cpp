@@ -381,7 +381,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 					playback.lost_position_frame = currFrameCounter + 1;
 				// auto-restore position if needed
 				if (taseditor_config.restore_position)
-					playback.restorePosition();
+					playback.RestorePosition();
 				else
 					playback.jump(greenZoneCount-1);
 			}

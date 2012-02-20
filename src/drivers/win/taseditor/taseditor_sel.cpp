@@ -140,27 +140,36 @@ void TASEDITOR_SELECTION::RedrawMarker()
 	SetWindowText(hwndSelectionMarkerEdit, new_text);
 }
 
-void TASEDITOR_SELECTION::JumpPrevMarker()
+void TASEDITOR_SELECTION::JumpPrevMarker(int speed)
 {
-	// jump to previous marker
+	// if nothing is selected, consider playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
-	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
-	for (index--; index >= 0; index--)
-		if (markers_manager.GetMarker(index)) break;
+	if (index < 0) index = currFrameCounter;
+	// jump trough "speed" amount of previous markers
+	while (speed > 0)
+	{
+		for (index--; index >= 0; index--)
+			if (markers_manager.GetMarker(index)) break;
+		speed--;
+	}
 	if (index >= 0)
 		JumpToFrame(index);
 	else
 		JumpToFrame(0);
 }
-void TASEDITOR_SELECTION::JumpNextMarker()
+void TASEDITOR_SELECTION::JumpNextMarker(int speed)
 {
-	// jump to next marker
+	// if nothing is selected, consider playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
-	if (index < 0) index = currFrameCounter;		// if nothing is selected, consider playback cursor as current selection
-
+	if (index < 0) index = currFrameCounter;
 	int last_frame = currMovieData.getNumRecords()-1;
-	for (++index; index <= last_frame; ++index)
-		if (markers_manager.GetMarker(index)) break;
+	// jump trough "speed" amount of previous markers
+	while (speed > 0)
+	{
+		for (++index; index <= last_frame; ++index)
+			if (markers_manager.GetMarker(index)) break;
+		speed--;
+	}
 	if (index <= last_frame)
 		JumpToFrame(index);
 	else

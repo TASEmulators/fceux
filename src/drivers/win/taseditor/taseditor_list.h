@@ -140,6 +140,10 @@ public:
 	void SingleClick(LPNMITEMACTIVATE info);
 	void DoubleClick(LPNMITEMACTIVATE info);
 
+	void RightClick(LVHITTESTINFO& info);
+	void StrayClickMenu(LVHITTESTINFO& info);
+	void RightClickMenu(LVHITTESTINFO& info);
+
 	void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
 	void ColumnSet(int column, bool alt_pressed);
 
@@ -162,4 +166,5 @@ private:
 	int num_columns;
 	int next_header_update_time;
 
+	HMENU hrmenu;
 };

@@ -1410,6 +1410,15 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			bookmarks.MouseMove(-1, -1);
 			break;
 		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			playback.MiddleButtonClick();
+			return 0;
+		}
+		case WM_MOUSEWHEEL:
+			return SendMessage(list.hwndList, msg, wParam, lParam);
+
 	}
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
 }
@@ -1443,6 +1452,15 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			EndPaint(hWnd, &ps);
 			return 0;
 		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			playback.MiddleButtonClick();
+			return 0;
+		}
+		case WM_MOUSEWHEEL:
+			return SendMessage(list.hwndList, msg, wParam, lParam);
+
 	}
 	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
 }
