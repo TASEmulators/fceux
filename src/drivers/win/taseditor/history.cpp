@@ -755,13 +755,11 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			return 0;
 		case WM_MOUSEWHEEL:
 		{
-			// right button/Ctrl/Shift + wheel -> send the message to Piano Roll
+			// Right button/Ctrl/Shift/Alt + wheel -> send the message to Piano Roll
 			// but if just wheel - use default scrolling here
-			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL))
+			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL) || (GetKeyState(VK_MENU) < 0))
 				return SendMessage(list.hwndList, msg, wParam, lParam);
-			
 		}
-
 
 	}
 	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);

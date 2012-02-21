@@ -71,12 +71,12 @@ static struct
 	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
 	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame (mouse: Right button+Wheel up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame (mouse: Right button+Wheel up) (Alt+Wheel up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
 	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame  (mouse: Right button+Wheel down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame  (mouse: Right button+Wheel down) (Alt+Wheel down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
-	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The List will follow Playback cursor movements", "", false, 0, 0,
+	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
 	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "If you change input above Playback, cursor will run where it was before change", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
 	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert movie back to that time", "", false, 0, 0,
@@ -91,10 +91,10 @@ static struct
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
 	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
-	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll the List to Playback cursor", "", false, 0, 0,
+	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll the Piano Roll to Playback cursor", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "", "", false, 0, 0,
-	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll the List to Selection", "", false, 0, 0,
+	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll the Piano Roll to Selection", "", false, 0, 0,
 	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
 	IDC_SELECTION_MARKER, 0, -1, 0, -1, "", "", false, 0, 0,
 	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "This window visualizes the hierarchy of your Branches", "", false, 0, 0,
@@ -672,12 +672,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					return TRUE;
 				case LVN_GETDISPINFO:
 					list.GetDispInfo((NMLVDISPINFO*)lParam);
-					break;
-				case NM_CLICK:
-					list.SingleClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case NM_DBLCLK:
-					list.DoubleClick((LPNMITEMACTIVATE)lParam);
 					break;
 				case LVN_ITEMCHANGED:
 					selection.ItemChanged((LPNMLISTVIEW) lParam);

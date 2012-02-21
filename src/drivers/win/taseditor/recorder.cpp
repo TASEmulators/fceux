@@ -43,7 +43,7 @@ void RECORDER::init()
 	hwndRB_Rec3P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO_3P);
 	hwndRB_Rec4P = GetDlgItem(taseditor_window.hwndTasEditor, IDC_RADIO_4P);
 	old_multitrack_recording_joypad = multitrack_recording_joypad;
-	old_pattern_offset = 0;
+	old_current_pattern = old_pattern_offset = 0;
 	must_increase_pattern_offset = false;
 	old_movie_readonly = movie_readonly;
 	old_joy.resize(MAX_NUM_JOYPADS);
@@ -105,6 +105,9 @@ void RECORDER::update()
 		Button_SetCheck(hwndRecCheckbox, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 		old_movie_readonly = movie_readonly;
 	}
+	// reset pattern_offset if current_pattern has changed
+	if (old_current_pattern != taseditor_config.current_pattern)
+		pattern_offset = 0;
 	// increase pattern_offset if needed
 	if (must_increase_pattern_offset)
 	{
@@ -112,20 +115,21 @@ void RECORDER::update()
 		if (!taseditor_config.pattern_skips_lag || lagFlag == 0)
 		{
 			pattern_offset++;
-			if (pattern_offset >= (int)autofire_patterns[taseditor_config.current_pattern].size())
-				pattern_offset -= autofire_patterns[taseditor_config.current_pattern].size();
+			if (pattern_offset >= (int)autofire_patterns[old_current_pattern].size())
+				pattern_offset -= autofire_patterns[old_current_pattern].size();
 		}
 	}
-	// update "Recording" checkbox text
-	if (old_pattern_offset != pattern_offset)
+	// update "Recording" checkbox text if something changed in pattern
+	if (old_current_pattern != taseditor_config.current_pattern || old_pattern_offset != pattern_offset)
 	{
-		if (!taseditor_config.pattern_recording || autofire_patterns[taseditor_config.current_pattern][pattern_offset])
+		old_current_pattern = taseditor_config.current_pattern;
+		old_pattern_offset = pattern_offset;
+		if (!taseditor_config.pattern_recording || autofire_patterns[old_current_pattern][pattern_offset])
 			// either not using Patterns or current pattern has 1 in current offset
 			SetWindowText(hwndRecCheckbox, recordingCheckbox);
 		else
 			// current pattern has 0 in current offset, this means next recorded frame will be blank
 			SetWindowText(hwndRecCheckbox, recordingCheckboxBlankPattern);
-		old_pattern_offset = pattern_offset;
 	}
 	// update recording radio buttons if user changed multitrack_recording_joypad
 	if (old_multitrack_recording_joypad != multitrack_recording_joypad)
@@ -213,7 +217,7 @@ void RECORDER::InputChanged()
 	for (int i = 0; i < num_joys; ++i)
 	{
 		old_joy[i] = history.GetCurrentSnapshot().GetJoystickInfo(currFrameCounter, i);
-		if (!taseditor_config.pattern_recording || autofire_patterns[taseditor_config.current_pattern][pattern_offset])
+		if (!taseditor_config.pattern_recording || autofire_patterns[old_current_pattern][pattern_offset])
 			new_joy[i] = currMovieData.records[currFrameCounter].joysticks[i];
 		else
 			new_joy[i] = 0;		// blank

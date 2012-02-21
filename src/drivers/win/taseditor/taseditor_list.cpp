@@ -32,7 +32,7 @@ char list_save_id[LIST_ID_LEN] = "LIST";
 char list_skipsave_id[LIST_ID_LEN] = "LISX";
 COLORREF hot_changes_colors[16] = { 0x0, 0x5c4c44, 0x854604, 0xab2500, 0xc20006, 0xd6006f, 0xd40091, 0xba00a4, 0x9500ba, 0x7a00cc, 0x5800d4, 0x0045e2, 0x0063ea, 0x0079f4, 0x0092fa, 0x00aaff };
 //COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
-COLORREF header_lights_colors[11] = { 0x0, 0x006311, 0x008500, 0x1dad00, 0x46d100, 0x6ee300, 0x97e800, 0xb8f000, 0xdaf700, 0xffff7e, 0xffffb7 };
+COLORREF header_lights_colors[11] = { 0x0, 0x007313, 0x009100, 0x1daf00, 0x42c700, 0x65d900, 0x91e500, 0xb0f000, 0xdaf700, 0xf0fc7c, 0xfcffba };
 
 TASEDITOR_LIST::TASEDITOR_LIST()
 {
@@ -68,8 +68,6 @@ void TASEDITOR_LIST::init()
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");									/*font name*/
 	bg_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
-
-	header_colors.resize(TOTAL_COLUMNS);
 
 	hwndList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_LIST1);
 	// prepare the main listview
@@ -158,6 +156,11 @@ void TASEDITOR_LIST::init()
 	ListView_InsertColumn(hwndList, 0, &lvc);
 
 	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
+	header_colors.resize(TOTAL_COLUMNS);
+	// fill TrackMouseEvent struct
+	tme.cbSize = sizeof(tme);
+	tme.dwFlags = TME_LEAVE;
+	tme.hwndTrack = hwndHeader;
 
 }
 void TASEDITOR_LIST::free()
@@ -196,7 +199,7 @@ void TASEDITOR_LIST::free()
 }
 void TASEDITOR_LIST::reset()
 {
-	next_header_update_time = 0;
+	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
 	// setup columns
@@ -241,62 +244,43 @@ void TASEDITOR_LIST::update()
 	{
 		next_header_update_time = clock() + HEADER_LIGHT_UPDATE_TICK;
 		bool changes_made = false;
+		int light_value = 0;
 		// 1 - update Frame# columns' heads
-		if (header_colors[COLUMN_FRAMENUM] > HEADER_LIGHT_HOLD)
+		if (GetAsyncKeyState(VK_MENU) & 0x8000)
+			light_value = HEADER_LIGHT_HOLD;
+		else if (header_item_under_mouse == COLUMN_FRAMENUM || header_item_under_mouse == COLUMN_FRAMENUM2)
+			light_value = (selection.GetCurrentSelectionSize() > 0) ? HEADER_LIGHT_MOUSEOVER_SEL : HEADER_LIGHT_MOUSEOVER;
+		if (header_colors[COLUMN_FRAMENUM] < light_value)
+		{
+			header_colors[COLUMN_FRAMENUM]++;
+			changes_made = true;
+		} else if (header_colors[COLUMN_FRAMENUM] > light_value)
 		{
 			header_colors[COLUMN_FRAMENUM]--;
 			changes_made = true;
-		} else
-		{
-			if ((GetAsyncKeyState(VK_MENU) & 0x8000))
-			{
-				// Alt key is held
-				if (header_colors[COLUMN_FRAMENUM] < HEADER_LIGHT_HOLD)
-				{
-					header_colors[COLUMN_FRAMENUM]++;
-					changes_made = true;
-				}
-			} else
-			{
-				// Alt key is released
-				if (header_colors[COLUMN_FRAMENUM])
-				{
-					header_colors[COLUMN_FRAMENUM]--;
-					changes_made = true;
-				}
-			}
 		}
 		header_colors[COLUMN_FRAMENUM2] = header_colors[COLUMN_FRAMENUM];
-		// update input columns' heads
+		// 2 - update input columns' heads
 		int i = num_columns-1;
 		if (i == COLUMN_FRAMENUM2) i--;
 		for (; i >= COLUMN_JOYPAD1_A; i--)
 		{
-			if (header_colors[i] > HEADER_LIGHT_HOLD)
+			light_value = 0;
+			if (recorder.current_joy[(i - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS] & (1 << ((i - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS)))
+				light_value = HEADER_LIGHT_HOLD;
+			else if (header_item_under_mouse == i)
+				light_value = (selection.GetCurrentSelectionSize() > 0) ? HEADER_LIGHT_MOUSEOVER_SEL : HEADER_LIGHT_MOUSEOVER;
+			if (header_colors[i] < light_value)
+			{
+				header_colors[i]++;
+				changes_made = true;
+			} else if (header_colors[i] > light_value)
 			{
 				header_colors[i]--;
 				changes_made = true;
-			} else
-			{
-				if (recorder.current_joy[(i - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS] & (1 << ((i - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS)))
-				{
-					// the button is held
-					if (header_colors[i] < HEADER_LIGHT_HOLD)
-					{
-						header_colors[i]++;
-						changes_made = true;
-					}
-				} else
-				{
-					// the button is released
-					if (header_colors[i])
-					{
-						header_colors[i]--;
-						changes_made = true;
-					}
-				}
-			}	
+			}
 		}
+		// 3 - redraw
 		if (changes_made)
 			RedrawHeader();
 	}
@@ -693,79 +677,34 @@ LONG TASEDITOR_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void TASEDITOR_LIST::SingleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS)
-	{
-		// click on the "icons" column - jump to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// click on the "frame number" column - set marker if clicked with Alt
-		if (info->uKeyFlags & LVKF_ALT)
-		{
-			// reverse MARKER_FLAG_BIT in pointed frame
-			markers_manager.ToggleMarker(row_index);
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			if (markers_manager.GetMarker(row_index))
-				history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
-			else
-				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-			RedrawRow(row_index);
-		}
-	}
-	else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-void TASEDITOR_LIST::DoubleClick(LPNMITEMACTIVATE info)
-{
-	int row_index = info->iItem;
-	if(row_index == -1) return;
-	int column_index = info->iSubItem;
-
-	if(column_index == COLUMN_ICONS || column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-	{
-		// double click sends playback to the frame
-		selection.ClearSelection();
-		playback.jump(row_index);
-	} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-	{
-		ToggleJoypadBit(column_index, row_index, info->uKeyFlags);
-	}
-}
-
 void TASEDITOR_LIST::ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 {
 	int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-	if (KeyFlags & (LVKF_SHIFT|LVKF_CONTROL))
+	if (KeyFlags & (MK_SHIFT|MK_CONTROL))
 	{
 		// update multiple rows, using last row index as a flag to decide operation
 		SelectionFrames* current_selection = selection.MakeStrobe();
 		SelectionFrames::iterator current_selection_end(current_selection->end());
-		if (currMovieData.records[row_index].checkBit(joy, bit))
+		if (current_selection->size())
 		{
-			// clear range
-			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			if (currMovieData.records[row_index].checkBit(joy, bit))
 			{
-				currMovieData.records[*it].clearBit(joy, bit);
-			}
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection->begin(), *current_selection->rbegin()));
-		} else
-		{
-			// set range
-			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+				// clear range
+				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+				{
+					currMovieData.records[*it].clearBit(joy, bit);
+				}
+				greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection->begin(), *current_selection->rbegin()));
+			} else
 			{
-				currMovieData.records[*it].setBit(joy, bit);
+				// set range
+				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+				{
+					currMovieData.records[*it].setBit(joy, bit);
+				}
+				greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection->begin(), *current_selection->rbegin()));
 			}
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection->begin(), *current_selection->rbegin()));
 		}
 	} else
 	{
@@ -1029,7 +968,26 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	switch(msg)
 	{
 	case WM_SETCURSOR:
-		return true;	// no column resizing
+		// no column resizing cursor, always show arrow
+		SetCursor(LoadCursor(0, IDC_ARROW));
+		return true;
+	case WM_MOUSEMOVE:
+	{
+		// perform hit test
+		HD_HITTESTINFO info;
+		info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
+		info.pt.y = GET_Y_LPARAM(lParam);
+		SendMessage(hWnd, HDM_HITTEST, 0, (LPARAM)&info);
+		list.header_item_under_mouse = info.iItem;
+		// ensure that WM_MOUSELEAVE will be catched
+		TrackMouseEvent(&list.tme);
+		break;
+	}
+	case WM_MOUSELEAVE:
+	{
+		list.header_item_under_mouse = -1;
+		break;
+	}
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONDBLCLK:
 		{
@@ -1037,9 +995,9 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			{
 				// perform hit test
 				HD_HITTESTINFO info;
-				info.pt.x = GET_X_LPARAM(lParam);
+				info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
 				info.pt.y = GET_Y_LPARAM(lParam);
-				SendMessage(hWnd,HDM_HITTEST,0,(LPARAM)&info);
+				SendMessage(hWnd, HDM_HITTEST, 0, (LPARAM)&info);
 				if(info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
 					list.ColumnSet(info.iItem, (GetKeyState(VK_MENU) < 0));
 			}
@@ -1080,6 +1038,69 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return 0;
 			break;
 		}
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		{
+			bool alt_pressed = (GetKeyState(VK_MENU) < 0);
+			int fwKeys = GET_KEYSTATE_WPARAM(wParam);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+			int row_index = info.iItem;
+			int column_index = info.iSubItem;
+			if(row_index >= 0)
+			{
+				if(column_index == COLUMN_ICONS)
+				{
+					// click on the "icons" column - jump to the frame
+					selection.ClearSelection();
+					playback.jump(row_index);
+				} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+				{
+					// clicked on the "Frame#" column
+					if (msg == WM_LBUTTONDBLCLK && !alt_pressed)
+					{
+						// doubleclick - jump to the frame
+						selection.ClearSelection();
+						playback.jump(row_index);
+					} else
+					{
+						// set marker if clicked with Alt
+						if (alt_pressed)
+						{
+							markers_manager.ToggleMarker(row_index);
+							selection.must_find_current_marker = playback.must_find_current_marker = true;
+							if (markers_manager.GetMarker(row_index))
+								history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
+							else
+								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
+							list.RedrawRow(row_index);
+						}
+						// also select the row
+						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+					}
+				} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+				{
+					// clicked on input
+					// first call old wndproc to set selection on the row
+					if (alt_pressed)
+					{
+						// Alt should select region, just like Shift
+						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam|MK_SHIFT, lParam);
+						int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+						int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+						list.InputColumnSetPattern(joy, button);
+					} else
+					{
+						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+						list.ToggleJoypadBit(column_index, row_index, GET_KEYSTATE_WPARAM(wParam));
+					}
+				}
+			}
+			return 0;
+		}
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
@@ -1088,11 +1109,12 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_MOUSEWHEEL:
 		{
+			bool alt_pressed = (GetKeyState(VK_MENU) < 0);
 			int fwKeys = GET_KEYSTATE_WPARAM(wParam);
 			int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			if (fwKeys & MK_SHIFT)
 			{
-				// Shift + scroll = Playback rewind full(speed)/forward full(speed)
+				// Shift + wheel = Playback rewind full(speed)/forward full(speed)
 				if (zDelta < 0)
 					playback.ForwardFull(-zDelta / 120);
 				else if (zDelta > 0)
@@ -1100,15 +1122,18 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return 0;
 			} else if (fwKeys & MK_CONTROL)
 			{
-				// Ctrl + scroll = Selection rewind full(speed)/forward full(speed)
+				// Ctrl + wheel = Selection rewind full(speed)/forward full(speed)
 				if (zDelta < 0)
 					selection.JumpNextMarker(-zDelta / 120);
 				else if (zDelta > 0)
 					selection.JumpPrevMarker(zDelta / 120);
 				return 0;
-			} else if (fwKeys & MK_RBUTTON)
+			} else if (alt_pressed || fwKeys & MK_RBUTTON)
 			{
-				// Right button + scroll = rewind/forward
+				// Right button + wheel = Alt + wheel = rewind/forward
+				// if both Right button and Alt are pressed, move 2x faster
+				if (alt_pressed && fwKeys & MK_RBUTTON)
+					zDelta *= BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED;
 				int destination_frame = currFrameCounter - (zDelta / 120);
 				if (destination_frame < 0) destination_frame = 0;
 				playback.jump(destination_frame);
@@ -1134,7 +1159,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				list.RightClick(info);
 			return 0;
 		}
-
 	}
 	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 }

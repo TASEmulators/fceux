@@ -37,7 +37,7 @@ public:
 
 private:
 	int old_multitrack_recording_joypad;
-	int old_pattern_offset;
+	int old_current_pattern, old_pattern_offset;
 	bool must_increase_pattern_offset;
 	bool old_movie_readonly;
 

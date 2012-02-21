@@ -10,8 +10,13 @@
 #define NUM_JOYPAD_BUTTONS 8
 
 #define HEADER_LIGHT_MAX 10
-#define HEADER_LIGHT_HOLD 4
+#define HEADER_LIGHT_HOLD 5
+#define HEADER_LIGHT_MOUSEOVER 2
+#define HEADER_LIGHT_MOUSEOVER_SEL 3
 #define HEADER_LIGHT_UPDATE_TICK 40	// 25FPS
+#define HEADER_DX_FIX 4
+
+#define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 2
 
 enum
 {
@@ -137,18 +142,20 @@ public:
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
 	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
 
-	void SingleClick(LPNMITEMACTIVATE info);
-	void DoubleClick(LPNMITEMACTIVATE info);
-
 	void RightClick(LVHITTESTINFO& info);
 	void StrayClickMenu(LVHITTESTINFO& info);
 	void RightClickMenu(LVHITTESTINFO& info);
 
 	void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
 	void ColumnSet(int column, bool alt_pressed);
+	bool FrameColumnSetPattern();
+	bool FrameColumnSet();
+	bool InputColumnSetPattern(int joy, int button);
+	bool InputColumnSet(int joy, int button);
 
+	int header_item_under_mouse;
 	HWND hwndList, hwndHeader;
-
+	TRACKMOUSEEVENT tme;
 	// GDI stuff
 	HIMAGELIST himglist;
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont;
@@ -156,11 +163,6 @@ public:
 
 private:
 	void CenterListAt(int frame);
-
-	bool FrameColumnSetPattern();
-	bool FrameColumnSet();
-	bool InputColumnSetPattern(int joy, int button);
-	bool InputColumnSet(int joy, int button);
 
 	std::vector<uint8> header_colors;
 	int num_columns;

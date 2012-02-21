@@ -44,6 +44,7 @@ extern void TaseditorManualFunction();
 
 // resources
 char patternsFilename[] = "\\taseditor_patterns.txt";
+char autofire_patterns_flagpress = 49;	//	"1"
 
 // enterframe function
 void UpdateTasEditor()
@@ -615,12 +616,11 @@ bool EnterTasEditor()
 					// save the name
 					autofire_patterns_names.push_back(tempstr1);
 					// parse 2nd string to sequence of 1s and 0s
-					char flagpress = tempstr2[0];
 					autofire_patterns.resize(total_patterns);
 					autofire_patterns[total_patterns - 1].resize(tempstr2.size());
 					for (int i = tempstr2.size() - 1; i >= 0; i--)
 					{
-						if (tempstr2[i] == flagpress)
+						if (tempstr2[i] == autofire_patterns_flagpress)
 							autofire_patterns[total_patterns - 1][i] = 1;
 						else
 							autofire_patterns[total_patterns - 1][i] = 0;
