@@ -1,9 +1,14 @@
-// ---------------------------------------------------------------------------------
-// Implementation file of Snapshot class
-// (C) 2011-2012 AnS
-// ---------------------------------------------------------------------------------
-/*
+/* ---------------------------------------------------------------------------------
+Implementation file of Snapshot class
+Copyright (c) 2011-2012 AnS
+
+(The MIT License)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------
 Snapshot - Snapshot of all edited data
+
 * stores the data of specific snapshot of the movie: size, input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, type and description of the snapshot (including the time of creation)
 * also stores info about sequential recording of input
 * optionally can store map of Hot Changes
@@ -14,8 +19,7 @@ Snapshot - Snapshot of all edited data
 * implements searching of first mismatch comparing two snapshots ot comparing snapshot to a movie
 * provides interface for reading certain data: reading input of any certain frame, reading value at any point of Hot Changes map
 * implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing input of two snapshots
-*/
-// ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 #include "zlib.h"

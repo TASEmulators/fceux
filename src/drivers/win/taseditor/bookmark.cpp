@@ -1,15 +1,19 @@
-// ---------------------------------------------------------------------------------
-// Implementation file of Bookmark class
-// (C) 2011-2012 AnS
-// ---------------------------------------------------------------------------------
-/*
+/* ---------------------------------------------------------------------------------
+Implementation file of Bookmark class
+Copyright (c) 2011-2012 AnS
+
+(The MIT License)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------
 Bookmark - Single Bookmark data
+
 * stores all info of one specific Bookmark-Branch: movie snapshot, a savestate of 1 frame, a screenshot of the frame, an info about relations of this Branch, a state of flashing for this Bookmark's row
 * saves and loads the data from a project file. On error: sends warning to caller
 * implements procedure of "Bookmark set": creating movie snapshot, setting key frame on current Playback position, copying savestate from Greenzone, making and compressing screenshot, launching flashing animation
 * launches respective flashings for "Bookmark jump" and "Branch deploy"
-*/
-// ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 #include "zlib.h"

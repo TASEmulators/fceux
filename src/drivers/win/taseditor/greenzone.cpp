@@ -1,10 +1,15 @@
-// ---------------------------------------------------------------------------------
-// Implementation file of Greenzone class
-// (C) 2011-2012 AnS
-// ---------------------------------------------------------------------------------
-/*
+/* ---------------------------------------------------------------------------------
+Implementation file of Greenzone class
+Copyright (c) 2011-2012 AnS
+
+(The MIT License)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------
 Greenzone - Access zone
 [Singleton]
+
 * stores array of savestates, used for faster movie navigation by Playback cursor
 * also stores the frame-by-frame log of lag appearance
 * saves and loads the data from a project file. On error: truncates Greenzone to last successfully read savestate
@@ -12,8 +17,7 @@ Greenzone - Access zone
 * regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates
 * on demand: (when movie input was changed) truncates the size of Greenzone, óäàëÿÿ ñýéâû, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
 * stores resources: save id, properties of gradual cleaning, timing of cleaning
-*/
-// ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 #include "state.h"

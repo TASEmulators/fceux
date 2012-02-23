@@ -1,10 +1,15 @@
-// ---------------------------------------------------------------------------------
-// Implementation file of Bookmarks class
-// (C) 2011-2012 AnS
-// ---------------------------------------------------------------------------------
-/*
+/* ---------------------------------------------------------------------------------
+Implementation file of Bookmarks class
+Copyright (c) 2011-2012 AnS
+
+(The MIT License)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------
 Bookmarks/Branches - Manager of Bookmarks
 [Singleton]
+
 * stores 10 Bookmarks, info about their relations and the position of current Branch
 * also stores the time of the last modification (see fireball) and the time of the root of Branches Tree (see cloudlet)
 * implements all operations with Bookmarks: initialization, setting Bookmarks, jumping to Bookmarks, loading Branches
@@ -15,8 +20,7 @@ Bookmarks/Branches - Manager of Bookmarks
 * regularly updates flashings in Bookmarks List and animations in Branches Tree
 * on demand: updates colors of rows in Bookmarks List, reflecting conditions of respective Piano Roll rows
 * stores resources: save id, ids of commands, captions for panel, gradients for flashings, coordinates for building Branches Tree, animation timings, id of default slot
-*/
-// ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 #include "utils/xstring.h"

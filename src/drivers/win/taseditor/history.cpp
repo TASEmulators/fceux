@@ -1,10 +1,15 @@
-// ---------------------------------------------------------------------------------
-// Implementation file of History class
-// (C) 2011-2012 AnS
-// ---------------------------------------------------------------------------------
-/*
+/* ---------------------------------------------------------------------------------
+Implementation file of History class
+Copyright (c) 2011-2012 AnS
+
+(The MIT License)
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+------------------------------------------------------------------------------------
 History - History of movie modifications
 [Singleton]
+
 * stores array of snapshots and pointer to current (last) snapshot
 * saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data
 * on demand: checks the difference between the last snapshot and current movie, and makes a decision to create new point of rollback. In special cases it can create a point of rollback without checking the difference, assuming that caller already checked it
@@ -13,8 +18,7 @@ History - History of movie modifications
 * regularly updates the state of "undo pointer"
 * implements the working of History List: creating, redrawing, clicks, auto-scrolling
 * stores resources: save id, ids and names of all possible types of modification, timings of "undo pointer"
-*/
-// ---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 
