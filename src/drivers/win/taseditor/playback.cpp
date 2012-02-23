@@ -1,4 +1,21 @@
-//Implementation file of Playback class
+// ---------------------------------------------------------------------------------
+// Implementation file of Playback class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Playback - Player of emulation states
+[Singleton]
+* implements the working of movie player: show any frame (jump), run/cancel seekng. pause, rewinding
+* regularly tracks and controls emulation process, prompts redrawing of Piano Roll List rows, finishes seeking when reaching target frame, animates target frame, makes Piano Roll follow Playback cursor, detects if Playback cursor moved to another Marker and updates Note in the upper text field
+* implements the working of upper buttons << and >> (jumping on Markers)
+* implements the working of buttons < and > (frame-by-frame movement)
+* implements the working of button || (pause) and middle mouse button, also reacts on external changes of emulation pause
+* implements the working of progressbar: init, reset, set value, click (cancel seeking)
+* also here's the code of upper text field (for editing Marker Notes)
+* stores resources: upper text field prefix, timings of target frame animation, response times of GUI buttons, progressbar scale
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 
 #ifdef _S9XLUA_H
@@ -12,7 +29,7 @@ extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS_MANAGER markers_manager;
 extern GREENZONE greenzone;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 extern BOOKMARKS bookmarks;
 
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -34,10 +51,10 @@ void PLAYBACK::init()
 	hwndRewindFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_REWIND_FULL);
 	hwndForwardFull = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_FORWARD_FULL);
 	hwndPlaybackMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER);
-	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
+	SendMessage(hwndPlaybackMarker, WM_SETFONT, (WPARAM)piano_roll.hMarkersFont, 0);
 	hwndPlaybackMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_PLAYBACK_MARKER_EDIT);
 	SendMessage(hwndPlaybackMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	SendMessage(hwndPlaybackMarkerEdit, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
+	SendMessage(hwndPlaybackMarkerEdit, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
 	// subclass the edit control
 	playbackMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndPlaybackMarkerEdit, GWL_WNDPROC, (LONG)UpperMarkerEditWndProc);
 
@@ -74,7 +91,7 @@ void PLAYBACK::update()
 	if (old_pauseframe != pause_frame && old_pauseframe)
 	{
 		// pause_frame was changed, clear old_pauseframe gfx
-		list.RedrawRow(old_pauseframe-1);
+		piano_roll.RedrawRow(old_pauseframe-1);
 		bookmarks.RedrawChangedBookmarks(old_pauseframe-1);
 	}
 	old_pauseframe = pause_frame;
@@ -89,7 +106,7 @@ void PLAYBACK::update()
 	if (old_show_pauseframe != show_pauseframe)
 	{
 		// update pauseframe gfx
-		list.RedrawRow(pause_frame-1);
+		piano_roll.RedrawRow(pause_frame-1);
 		bookmarks.RedrawChangedBookmarks(pause_frame-1);
 	}
 
@@ -114,16 +131,16 @@ void PLAYBACK::update()
 	// update the playback cursor
 	if(currFrameCounter != lastCursor)
 	{
-		list.FollowPlaybackIfNeeded();
+		piano_roll.FollowPlaybackIfNeeded();
 		// update gfx of the old and new rows
-		list.RedrawRow(lastCursor);
+		piano_roll.RedrawRow(lastCursor);
 		bookmarks.RedrawChangedBookmarks(lastCursor);
-		list.RedrawRow(currFrameCounter);
+		piano_roll.RedrawRow(currFrameCounter);
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
 		lastCursor = currFrameCounter;
 		if (!turbo)
 			// enforce redrawing now
-			UpdateWindow(list.hwndList);
+			UpdateWindow(piano_roll.hwndList);
 		// lazy update of "Playback's Marker text"
 		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
 		if (shown_marker != current_marker)
@@ -278,7 +295,7 @@ void PLAYBACK::RewindFrame()
 		jump(currFrameCounter-1);
 	else
 		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
-		list.FollowPlaybackIfNeeded();
+		piano_roll.FollowPlaybackIfNeeded();
 	if (!pause_frame) PauseEmulation();
 }
 void PLAYBACK::ForwardFrame()
@@ -358,7 +375,7 @@ void PLAYBACK::jump(int frame)
 	if (JumpToFrame(frame))
 	{
 		ForceExecuteLuaFrameFunctions();
-		list.FollowPlaybackIfNeeded();
+		piano_roll.FollowPlaybackIfNeeded();
 	}
 }
 
@@ -418,7 +435,7 @@ void PLAYBACK::ClickOnProgressbar()
 	{
 		int temp = lost_position_frame - 1;
 		lost_position_frame = 0;
-		list.RedrawRow(temp);
+		piano_roll.RedrawRow(temp);
 	}
 	// and stop seeking
 	if (pause_frame)
@@ -430,7 +447,7 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 	{
 		extern PLAYBACK playback;
-		extern TASEDITOR_SELECTION selection;
+		extern SELECTION selection;
 		switch(msg)
 		{
 		case WM_CHAR:
@@ -440,11 +457,11 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			case VK_ESCAPE:
 				// revert text to original note text
 				SetWindowText(playback.hwndPlaybackMarkerEdit, markers_manager.GetNote(playback.shown_marker).c_str());
-				SetFocus(list.hwndList);
+				SetFocus(piano_roll.hwndList);
 				return 0;
 			case VK_RETURN:
 				// exit and save text changes
-				SetFocus(list.hwndList);
+				SetFocus(piano_roll.hwndList);
 				return 0;
 			case VK_TAB:
 				// switch to lower edit control (also exit and save text changes)

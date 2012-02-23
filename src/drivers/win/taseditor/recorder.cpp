@@ -1,4 +1,17 @@
-//Implementation file of RECORDER class
+// ---------------------------------------------------------------------------------
+// Implementation file of RECORDER class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Recorder - Tool for input recording
+[Singleton]
+* at the moment of recording movie input (at the beginning of a frame) by emulator's call the Recorder intercepts input data and applies its filters (multitracking/etc), then reflects input changes into History and Greenzone
+* regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)
+* implements input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)
+* stores resources: ids and names of multitracking modes, suffixes for TAS Editor window caption
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
@@ -14,7 +27,7 @@ extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
 extern HISTORY history;
 extern GREENZONE greenzone;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 
 // resources
 const char recordingCheckbox[10] = "Recording";
@@ -144,7 +157,7 @@ void RECORDER::update()
 	old_joy[1] = current_joy[1];
 	old_joy[2] = current_joy[2];
 	old_joy[3] = current_joy[3];
-	// fill current_joy data for listview header lights
+	// fill current_joy data for Piano Roll header lights
 	uint32 joypads = GetGamepadPressedImmediate();
 	current_joy[0] = (joypads & 0xFF);
 	current_joy[1] = ((joypads >> 8) & 0xFF);
@@ -172,7 +185,7 @@ void RECORDER::update()
 			{
 				// if the button was pressed right now
 				if ((current_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					list.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, alt_pressed);
+					piano_roll.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, alt_pressed);
 			}
 		}
 	}
@@ -241,7 +254,7 @@ void RECORDER::InputChanged()
 				// set lights for changed buttons
 				for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 					if ((new_joy[i] & (1 << button)) && !(old_joy[i] & (1 << button)))
-						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+						piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + i * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 			}
 		}
 	} else
@@ -264,7 +277,7 @@ void RECORDER::InputChanged()
 			// set lights for changed buttons
 			for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
 				if ((new_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
+					piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, HEADER_LIGHT_MAX);
 		}
 	}
 

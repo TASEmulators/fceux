@@ -1,4 +1,4 @@
-//Specification file for Greenzone class
+// Specification file for Greenzone class
 
 #define GREENZONE_ID_LEN 10
 

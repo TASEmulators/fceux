@@ -1,11 +1,29 @@
-//Implementation file of Snapshot class (Undo feature)
+// ---------------------------------------------------------------------------------
+// Implementation file of Snapshot class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Snapshot - Snapshot of all edited data
+* stores the data of specific snapshot of the movie: size, input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, type and description of the snapshot (including the time of creation)
+* also stores info about sequential recording of input
+* optionally can store map of Hot Changes
+* implements snapshot creation: copying input, copying Hot Changes, copying Markers, setting time of creation
+* implements full/partial restoring of data from snapshot: input, Hot Changes, Markers
+* implements compression and decompression of stored data
+* saves and loads the data from a project file. On error: sends warning to caller
+* implements searching of first mismatch comparing two snapshots ot comparing snapshot to a movie
+* provides interface for reading certain data: reading input of any certain frame, reading value at any point of Hot Changes map
+* implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing input of two snapshots
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "zlib.h"
 
 int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES] = {1, 2, 4};
 
 extern MARKERS_MANAGER markers_manager;
-extern TASEDITOR_SELECTION selection;
+extern SELECTION selection;
 
 extern int GetInputType(MovieData& md);
 

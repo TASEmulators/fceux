@@ -1,4 +1,5 @@
-//Specification file for TASEDITOR_WINDOW class
+// Specification file for TASEDITOR_WINDOW class
+
 #define TASEDITOR_WINDOW_TOTAL_ITEMS 43
 #define TOOLTIP_TEXT_MAX_LEN 80
 #define TOOLTIPS_AUTOPOP_TIMEOUT 30000

@@ -1,4 +1,16 @@
-//Implementation file of Bookmark class
+// ---------------------------------------------------------------------------------
+// Implementation file of Bookmark class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Bookmark - Single Bookmark data
+* stores all info of one specific Bookmark-Branch: movie snapshot, a savestate of 1 frame, a screenshot of the frame, an info about relations of this Branch, a state of flashing for this Bookmark's row
+* saves and loads the data from a project file. On error: sends warning to caller
+* implements procedure of "Bookmark set": creating movie snapshot, setting key frame on current Playback position, copying savestate from Greenzone, making and compressing screenshot, launching flashing animation
+* launches respective flashings for "Bookmark jump" and "Branch deploy"
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "zlib.h"
 

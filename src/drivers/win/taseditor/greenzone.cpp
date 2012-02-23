@@ -1,4 +1,20 @@
-//Implementation file of Greenzone class
+// ---------------------------------------------------------------------------------
+// Implementation file of Greenzone class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Greenzone - Access zone
+[Singleton]
+* stores array of savestates, used for faster movie navigation by Playback cursor
+* also stores the frame-by-frame log of lag appearance
+* saves and loads the data from a project file. On error: truncates Greenzone to last successfully read savestate
+* regularly checks if there's a savestate of current emulation state, if there's no such savestate in array then creates one and updates lag info for previous frame
+* regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates
+* on demand: (when movie input was changed) truncates the size of Greenzone, óäàëÿÿ ñýéâû, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
+* stores resources: save id, properties of gradual cleaning, timing of cleaning
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "state.h"
 #include "zlib.h"
@@ -7,7 +23,7 @@ extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_PROJECT project;
 extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 
 extern char lagFlag;
 
@@ -162,7 +178,7 @@ void GREENZONE::GreenzoneCleaning()
 finish:
 	if (changed)
 	{
-		list.RedrawList();
+		piano_roll.RedrawList();
 		bookmarks.RedrawBookmarksList();
 	}
 	// shedule next cleaning
@@ -387,8 +403,8 @@ void GREENZONE::InvalidateAndCheck(int after)
 			}
 		}
 	}
-	// redraw list even if greenzone didn't change
-	list.RedrawList();
+	// redraw Piano Roll even if greenzone didn't change
+	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
 // This version doesn't restore playback, may be used only by Branching and Recording functions!
@@ -403,8 +419,8 @@ void GREENZONE::Invalidate(int after)
 			currMovieData.rerecordCount++;
 		}
 	}
-	// redraw list even if greenzone didn't change
-	list.RedrawList();
+	// redraw Piano Roll even if greenzone didn't change
+	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
 

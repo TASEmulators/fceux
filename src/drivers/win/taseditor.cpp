@@ -1,3 +1,19 @@
+// ---------------------------------------------------------------------------------
+// Main TAS Editor file
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Main - Logical center of the program
+[Singleton]
+* the point of launching TAS Editor from emulator
+* the point of quitting from TAS Editor
+* regularly (at the end of every frame) updates all modules that need regular update
+* implements operations of the "File" menu: creating New project, opening a file, saving, compact saving, import, export
+* stores Autofire Patterns data and their loading/generating code
+* stores resources: patterns filename, id of buttonpresses in patterns
+*/
+// ---------------------------------------------------------------------------------
+
 #include <fstream>
 #include "taseditor/taseditor_project.h"
 #include "utils/xstring.h"
@@ -24,9 +40,9 @@ GREENZONE greenzone;
 MARKERS_MANAGER markers_manager;
 BOOKMARKS bookmarks;
 POPUP_DISPLAY popup_display;
-TASEDITOR_LIST list;
+PIANO_ROLL piano_roll;
 TASEDITOR_LUA taseditor_lua;
-TASEDITOR_SELECTION selection;
+SELECTION selection;
 SPLICER splicer;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
@@ -46,7 +62,212 @@ extern void TaseditorManualFunction();
 char patternsFilename[] = "\\taseditor_patterns.txt";
 char autofire_patterns_flagpress = 49;	//	"1"
 
-// enterframe function
+bool EnterTasEditor()
+{
+	if(!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
+	if(!taseditor_window.hwndTasEditor)
+	{
+		// start TAS Editor
+
+		// init/load autofire_patterns
+		int total_patterns = 0;
+		autofire_patterns.resize(total_patterns);
+		autofire_patterns_names.resize(total_patterns);
+		char nameo[2048];
+		strncpy(nameo, FCEU_GetPath(FCEUMKF_TASEDITOR).c_str(), 2047);
+		strncat(nameo, patternsFilename, 2047 - strlen(nameo));
+		EMUFILE_FILE ifs(nameo, "rb");
+		if(!ifs.fail())
+		{
+			std::string tempstr1, tempstr2;
+			while (ReadString(&ifs, tempstr1))
+			{
+				if (ReadString(&ifs, tempstr2))
+				{
+					total_patterns++;
+					// save the name
+					autofire_patterns_names.push_back(tempstr1);
+					// parse 2nd string to sequence of 1s and 0s
+					autofire_patterns.resize(total_patterns);
+					autofire_patterns[total_patterns - 1].resize(tempstr2.size());
+					for (int i = tempstr2.size() - 1; i >= 0; i--)
+					{
+						if (tempstr2[i] == autofire_patterns_flagpress)
+							autofire_patterns[total_patterns - 1][i] = 1;
+						else
+							autofire_patterns[total_patterns - 1][i] = 0;
+					}
+				}
+			}
+		} else
+		{
+			FCEU_printf("Could not load tools\\taseditor_patterns.txt!\n");
+		}
+		if (autofire_patterns.size() == 0)
+		{
+			FCEU_printf("Will be using default set of patterns...\n");
+			autofire_patterns.resize(4);
+			autofire_patterns_names.resize(4);
+			// Default Pattern 0: Alternating (1010...)
+			autofire_patterns_names[0] = "Alternating (1010...)";
+			autofire_patterns[0].resize(2);
+			autofire_patterns[0][0] = 1;
+			autofire_patterns[0][1] = 0;
+			// Default Pattern 1: Alternating at 30FPS (11001100...)
+			autofire_patterns_names[1] = "Alternating at 30FPS (11001100...)";
+			autofire_patterns[1].resize(4);
+			autofire_patterns[1][0] = 1;
+			autofire_patterns[1][1] = 1;
+			autofire_patterns[1][2] = 0;
+			autofire_patterns[1][3] = 0;
+			// Default Pattern 2: One Quarter (10001000...)
+			autofire_patterns_names[2] = "One Quarter (10001000...)";
+			autofire_patterns[2].resize(4);
+			autofire_patterns[2][0] = 1;
+			autofire_patterns[2][1] = 0;
+			autofire_patterns[2][2] = 0;
+			autofire_patterns[2][3] = 0;
+			// Default Pattern 3: Tap'n'Hold (1011111111111111111111111111111111111...)
+			autofire_patterns_names[3] = "Tap'n'Hold (101111111...)";
+			autofire_patterns[3].resize(1000);
+			autofire_patterns[3][0] = 1;
+			autofire_patterns[3][1] = 0;
+			for (int i = 2; i < 1000; ++i)
+				autofire_patterns[3][i] = 1;
+		}
+		// reset current_pattern if it's outside the range
+		if (taseditor_config.current_pattern < 0 || taseditor_config.current_pattern >= (int)autofire_patterns.size())
+			taseditor_config.current_pattern = 0;
+
+		// create window
+		taseditor_window.init();
+		if(taseditor_window.hwndTasEditor)
+		{
+			// save "eoptions"
+			saved_eoptions = eoptions;
+			// set "Run in background"
+			eoptions |= EO_BGRUN;
+			// "Set high-priority thread"
+			eoptions |= EO_HIGHPRIO;
+			DoPriority();
+			// clear "Disable speed throttling"
+			eoptions &= ~EO_NOTHROTTLE;
+			// switch off autosaves
+			saved_EnableAutosave = EnableAutosave;
+			EnableAutosave = 0;
+			UpdateCheckedMenuItems();
+			
+			// init modules
+			piano_roll.init();
+			selection.init();
+			splicer.init();
+			playback.init();
+			greenzone.init();
+			recorder.init();
+			markers_manager.init();
+			project.init();
+			bookmarks.init();
+			popup_display.init();
+			history.init();
+			taseditor_lua.init();
+			// either start new movie or use current movie
+			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+			{
+				// create new movie
+				FCEUI_StopMovie();
+				movieMode = MOVIEMODE_TASEDITOR;
+				CreateCleanMovie();
+				playback.StartFromZero();
+			} else
+			{
+				// use current movie to create a new project
+				if (currMovieData.savestate.size() != 0)
+				{
+					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
+					// delete savestate, but preserve input anyway
+					currMovieData.savestate.clear();
+				}
+				FCEUI_StopMovie();
+				movieMode = MOVIEMODE_TASEDITOR;
+				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
+			}
+			// ensure that movie has correct set of ports/fourscore
+			SetInputType(currMovieData, GetInputType(currMovieData));
+			// force the input configuration stored in the movie to apply to FCEUX config
+			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+			// reset some modules that need MovidData info
+			piano_roll.reset();
+			recorder.reset();
+			// create initial snapshot in history
+			history.reset();
+			// reset Taseditor variables
+			must_call_manual_lua_function = false;
+			
+			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
+			SetFocus(piano_roll.hwndList);
+			FCEU_DispMessage("TAS Editor engaged", 0);
+			taseditor_window.RedrawTaseditor();
+			return true;
+		} else return false;
+	} else return true;
+}
+// returns false if couldn't real a string containing at least one char
+bool ReadString(EMUFILE *is, std::string& dest)
+{
+	dest.resize(0);
+	int c;
+	while (true)
+	{
+		c = is->fgetc();
+		if (c < 0) break;
+		if (c == 10 || c == 13)		// end of line
+		{
+			if (dest.size())
+				break;		// already collected at least one char
+			else
+				continue;	// skip the char and continue searching
+		} else
+		{
+			dest.push_back(c);
+		}
+	}
+	return dest.size() != 0;
+}
+
+bool ExitTasEditor()
+{
+	if (!AskSaveProject()) return false;
+
+	// free autofire_patterns
+	autofire_patterns.resize(0);
+	autofire_patterns_names.resize(0);
+
+	// destroy window
+	taseditor_window.exit();
+	// release memory
+	piano_roll.free();
+	markers_manager.free();
+	greenzone.free();
+	bookmarks.free();
+	popup_display.free();
+	history.free();
+	playback.SeekingStop();
+	selection.free();
+
+	// restore "eoptions"
+	eoptions = saved_eoptions;
+	// restore autosaves
+	EnableAutosave = saved_EnableAutosave;
+	DoPriority();
+	UpdateCheckedMenuItems();
+	// switch off taseditor mode
+	movieMode = MOVIEMODE_INACTIVE;
+	FCEU_DispMessage("TAS Editor disengaged", 0);
+	CreateCleanMovie();
+	return true;
+}
+
+// everyframe function
 void UpdateTasEditor()
 {
 	if(!taseditor_window.hwndTasEditor)
@@ -58,7 +279,7 @@ void UpdateTasEditor()
 
 	// update all modules that need to be updated every frame
 	recorder.update();
-	list.update();
+	piano_roll.update();
 	markers_manager.update();
 	greenzone.update();
 	playback.update();
@@ -187,7 +408,7 @@ void NewProject()
 		playback.StartFromZero();
 		bookmarks.reset();
 		history.reset();
-		list.reset();
+		piano_roll.reset();
 		selection.reset();
 		splicer.reset();
 		recorder.reset();
@@ -303,7 +524,7 @@ void SaveCompact_GetCheckboxes(HWND hwndDlg)
 	taseditor_config.savecompact_bookmarks = (SendDlgItemMessage(hwndDlg, IDC_CHECK_BOOKMARKS, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_greenzone = (SendDlgItemMessage(hwndDlg, IDC_CHECK_GREENZONE, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_history = (SendDlgItemMessage(hwndDlg, IDC_CHECK_HISTORY, BM_GETCHECK, 0, 0) == BST_CHECKED);
-	taseditor_config.savecompact_list = (SendDlgItemMessage(hwndDlg, IDC_CHECK_LIST, BM_GETCHECK, 0, 0) == BST_CHECKED);
+	taseditor_config.savecompact_piano_roll = (SendDlgItemMessage(hwndDlg, IDC_CHECK_PIANO_ROLL, BM_GETCHECK, 0, 0) == BST_CHECKED);
 	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 }
 
@@ -337,7 +558,7 @@ BOOL CALLBACK SaveCompactProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM 
 			CheckDlgButton(hwndDlg, IDC_CHECK_BOOKMARKS, taseditor_config.savecompact_bookmarks?MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_GREENZONE, taseditor_config.savecompact_greenzone?MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_HISTORY, taseditor_config.savecompact_history?MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_CHECK_LIST, taseditor_config.savecompact_list?MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_PIANO_ROLL, taseditor_config.savecompact_piano_roll?MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndDlg, IDC_CHECK_SELECTION, taseditor_config.savecompact_selection?MF_CHECKED : MF_UNCHECKED);
 			return TRUE;
 		}
@@ -399,7 +620,7 @@ void SaveCompact()
 
 		if(GetSaveFileName(&ofn))								//If it is a valid filename
 		{
-			project.save_compact(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_list, taseditor_config.savecompact_selection);
+			project.save_compact(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 		}
 	}
 }
@@ -566,211 +787,6 @@ void Export()
 			osRecordingMovie = 0;
 		}
 	}
-}
-
-// returns false if couldn't real a string containing at least one char
-bool ReadString(EMUFILE *is, std::string& dest)
-{
-	dest.resize(0);
-	int c;
-	while (true)
-	{
-		c = is->fgetc();
-		if (c < 0) break;
-		if (c == 10 || c == 13)		// end of line
-		{
-			if (dest.size())
-				break;		// already collected at least one char
-			else
-				continue;	// skip the char and continue searching
-		} else
-		{
-			dest.push_back(c);
-		}
-	}
-	return dest.size() != 0;
-}
-bool EnterTasEditor()
-{
-	if(!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
-	if(!taseditor_window.hwndTasEditor)
-	{
-		// start TAS Editor
-
-		// init/load autofire_patterns
-		int total_patterns = 0;
-		autofire_patterns.resize(total_patterns);
-		autofire_patterns_names.resize(total_patterns);
-		char nameo[2048];
-		strncpy(nameo, FCEU_GetPath(FCEUMKF_TASEDITOR).c_str(), 2047);
-		strncat(nameo, patternsFilename, 2047 - strlen(nameo));
-		EMUFILE_FILE ifs(nameo, "rb");
-		if(!ifs.fail())
-		{
-			std::string tempstr1, tempstr2;
-			while (ReadString(&ifs, tempstr1))
-			{
-				if (ReadString(&ifs, tempstr2))
-				{
-					total_patterns++;
-					// save the name
-					autofire_patterns_names.push_back(tempstr1);
-					// parse 2nd string to sequence of 1s and 0s
-					autofire_patterns.resize(total_patterns);
-					autofire_patterns[total_patterns - 1].resize(tempstr2.size());
-					for (int i = tempstr2.size() - 1; i >= 0; i--)
-					{
-						if (tempstr2[i] == autofire_patterns_flagpress)
-							autofire_patterns[total_patterns - 1][i] = 1;
-						else
-							autofire_patterns[total_patterns - 1][i] = 0;
-					}
-				}
-			}
-		} else
-		{
-			FCEU_printf("Could not load tools\\taseditor_patterns.txt!\n");
-		}
-		if (autofire_patterns.size() == 0)
-		{
-			FCEU_printf("Will be using default set of patterns...\n");
-			autofire_patterns.resize(4);
-			autofire_patterns_names.resize(4);
-			// Default Pattern 0: Alternating (1010...)
-			autofire_patterns_names[0] = "Alternating (1010...)";
-			autofire_patterns[0].resize(2);
-			autofire_patterns[0][0] = 1;
-			autofire_patterns[0][1] = 0;
-			// Default Pattern 1: Alternating at 30FPS (11001100...)
-			autofire_patterns_names[1] = "Alternating at 30FPS (11001100...)";
-			autofire_patterns[1].resize(4);
-			autofire_patterns[1][0] = 1;
-			autofire_patterns[1][1] = 1;
-			autofire_patterns[1][2] = 0;
-			autofire_patterns[1][3] = 0;
-			// Default Pattern 2: One Quarter (10001000...)
-			autofire_patterns_names[2] = "One Quarter (10001000...)";
-			autofire_patterns[2].resize(4);
-			autofire_patterns[2][0] = 1;
-			autofire_patterns[2][1] = 0;
-			autofire_patterns[2][2] = 0;
-			autofire_patterns[2][3] = 0;
-			// Default Pattern 3: Tap'n'Hold (1011111111111111111111111111111111111...)
-			autofire_patterns_names[3] = "Tap'n'Hold (101111111...)";
-			autofire_patterns[3].resize(1000);
-			autofire_patterns[3][0] = 1;
-			autofire_patterns[3][1] = 0;
-			for (int i = 2; i < 1000; ++i)
-				autofire_patterns[3][i] = 1;
-		}
-		// reset current_pattern if it's outside the range
-		if (taseditor_config.current_pattern < 0 || taseditor_config.current_pattern >= (int)autofire_patterns.size())
-			taseditor_config.current_pattern = 0;
-
-		// create window
-		taseditor_window.init();
-		if(taseditor_window.hwndTasEditor)
-		{
-			// save "eoptions"
-			saved_eoptions = eoptions;
-			// set "Run in background"
-			eoptions |= EO_BGRUN;
-			// "Set high-priority thread"
-			eoptions |= EO_HIGHPRIO;
-			DoPriority();
-			// clear "Disable speed throttling"
-			eoptions &= ~EO_NOTHROTTLE;
-			// switch off autosaves
-			saved_EnableAutosave = EnableAutosave;
-			EnableAutosave = 0;
-			UpdateCheckedMenuItems();
-			
-			// init modules
-			list.init();
-			selection.init();
-			splicer.init();
-			playback.init();
-			greenzone.init();
-			recorder.init();
-			markers_manager.init();
-			project.init();
-			bookmarks.init();
-			popup_display.init();
-			history.init();
-			taseditor_lua.init();
-			// either start new movie or use current movie
-			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
-			{
-				// create new movie
-				FCEUI_StopMovie();
-				movieMode = MOVIEMODE_TASEDITOR;
-				CreateCleanMovie();
-				playback.StartFromZero();
-			} else
-			{
-				// use current movie to create a new project
-				if (currMovieData.savestate.size() != 0)
-				{
-					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-					// delete savestate, but preserve input anyway
-					currMovieData.savestate.clear();
-				}
-				FCEUI_StopMovie();
-				movieMode = MOVIEMODE_TASEDITOR;
-				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
-			}
-			// ensure that movie has correct set of ports/fourscore
-			SetInputType(currMovieData, GetInputType(currMovieData));
-			// force the input configuration stored in the movie to apply to FCEUX config
-			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-			// reset some modules that need MovidData info
-			list.reset();
-			recorder.reset();
-			// create initial snapshot in history
-			history.reset();
-			// reset Taseditor variables
-			must_call_manual_lua_function = false;
-			
-			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
-			SetFocus(list.hwndList);
-			FCEU_DispMessage("TAS Editor engaged", 0);
-			taseditor_window.RedrawTaseditor();
-			return true;
-		} else return false;
-	} else return true;
-}
-
-bool ExitTasEditor()
-{
-	if (!AskSaveProject()) return false;
-
-	// free autofire_patterns
-	autofire_patterns.resize(0);
-	autofire_patterns_names.resize(0);
-
-	// destroy window
-	taseditor_window.exit();
-	// release memory
-	list.free();
-	markers_manager.free();
-	greenzone.free();
-	bookmarks.free();
-	popup_display.free();
-	history.free();
-	playback.SeekingStop();
-	selection.free();
-
-	// restore "eoptions"
-	eoptions = saved_eoptions;
-	// restore autosaves
-	EnableAutosave = saved_EnableAutosave;
-	DoPriority();
-	UpdateCheckedMenuItems();
-	// switch off taseditor mode
-	movieMode = MOVIEMODE_INACTIVE;
-	FCEU_DispMessage("TAS Editor disengaged", 0);
-	CreateCleanMovie();
-	return true;
 }
 
 int GetInputType(MovieData& md)

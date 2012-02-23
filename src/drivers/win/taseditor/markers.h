@@ -1,4 +1,5 @@
-//Specification file for Markers class
+// Specification file for Markers class
+
 #define MAX_NOTE_LEN 100
 
 class MARKERS

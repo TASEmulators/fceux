@@ -1,5 +1,6 @@
-//Specification file for TASEDITOR_LIST class
-#define LIST_ID_LEN 5
+// Specification file for PIANO_ROLL class
+
+#define PIANO_ROLL_ID_LEN 11
 
 #define CDDS_SUBITEMPREPAINT       (CDDS_SUBITEM | CDDS_ITEMPREPAINT)
 #define CDDS_SUBITEMPOSTPAINT      (CDDS_SUBITEM | CDDS_ITEMPOSTPAINT)
@@ -111,10 +112,10 @@ enum
 
 #define PLAYBACK_MARKER_COLOR 0xC9AF00
 
-class TASEDITOR_LIST
+class PIANO_ROLL
 {
 public:
-	TASEDITOR_LIST();
+	PIANO_ROLL();
 	void init();
 	void free();
 	void reset();

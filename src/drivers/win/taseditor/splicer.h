@@ -1,4 +1,4 @@
-//Specification file for SPLICER class
+// Specification file for SPLICER class
 
 class SPLICER
 {

@@ -910,16 +910,10 @@
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_config.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_list.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_lua.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_project.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_sel.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\taseditor_window.cpp">
@@ -956,6 +950,12 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\taseditor\markers_manager.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\piano_roll.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\selection.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1402,16 +1402,10 @@
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_config.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_list.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_lua.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_project.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_sel.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_window.h">
@@ -1448,6 +1442,12 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\markers_manager.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\piano_roll.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\selection.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>

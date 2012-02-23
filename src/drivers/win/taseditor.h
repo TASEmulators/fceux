@@ -1,4 +1,4 @@
-// main TAS Editor file
+// Header file for Main TAS Editor file
 
 struct NewProjectParameters
 {
@@ -9,6 +9,7 @@ struct NewProjectParameters
 };
 
 bool EnterTasEditor();
+bool ReadString(EMUFILE *is, std::string& dest);
 bool ExitTasEditor();
 void UpdateTasEditor();
 
@@ -28,4 +29,3 @@ void SetInputType(MovieData& md, int new_input_type);
 
 bool TaseditorIsRecording();
 
-bool ReadString(EMUFILE *is, std::string& dest);

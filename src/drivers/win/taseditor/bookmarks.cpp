@@ -1,4 +1,23 @@
-//Implementation file of Bookmarks class
+// ---------------------------------------------------------------------------------
+// Implementation file of Bookmarks class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Bookmarks/Branches - Manager of Bookmarks
+[Singleton]
+* stores 10 Bookmarks, info about their relations and the position of current Branch
+* also stores the time of the last modification (see fireball) and the time of the root of Branches Tree (see cloudlet)
+* implements all operations with Bookmarks: initialization, setting Bookmarks, jumping to Bookmarks, loading Branches
+* saves and loads the data from a project file. On error: clears all Bookmarks
+* implements the working of Bookmarks List: creating, redrawing, mouseover, clicks
+* implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover
+* on demand: reacts on project changes and recalculates Branches Tree
+* regularly updates flashings in Bookmarks List and animations in Branches Tree
+* on demand: updates colors of rows in Bookmarks List, reflecting conditions of respective Piano Roll rows
+* stores resources: save id, ids of commands, captions for panel, gradients for flashings, coordinates for building Branches Tree, animation timings, id of default slot
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "zlib.h"
@@ -13,11 +32,11 @@ extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern POPUP_DISPLAY popup_display;
 extern PLAYBACK playback;
-extern TASEDITOR_SELECTION selection;
+extern SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
 extern HISTORY history;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 extern MARKERS_MANAGER markers_manager;
 
 // resources
@@ -59,7 +78,7 @@ void BOOKMARKS::init()
 	// subclass the listview
 	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
 	// setup same images for the listview
-	ListView_SetImageList(hwndBookmarksList, list.himglist, LVSIL_SMALL);
+	ListView_SetImageList(hwndBookmarksList, piano_roll.himglist, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
 	// icons column
@@ -424,7 +443,7 @@ void BOOKMARKS::set(int slot)
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
-		list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		piano_roll.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
 	}
 	if (slot != current_branch || changes_since_current_branch)
@@ -435,10 +454,10 @@ void BOOKMARKS::set(int slot)
 
 	if (previous_frame >= 0 && previous_frame != currFrameCounter)
 	{
-		list.RedrawRow(previous_frame);
+		piano_roll.RedrawRow(previous_frame);
 		RedrawChangedBookmarks(previous_frame);
 	}
-	list.RedrawRow(currFrameCounter);
+	piano_roll.RedrawRow(currFrameCounter);
 	RedrawChangedBookmarks(currFrameCounter);
 
 	FCEU_DispMessage("Branch %d saved.", 0, slot);
@@ -452,7 +471,7 @@ void BOOKMARKS::jump(int slot)
 		int frame = bookmarks_array[slot].snapshot.jump_frame;
 		playback.jump(frame);
 		if (playback.pause_frame)
-			list.FollowPauseframe();
+			piano_roll.FollowPauseframe();
 		bookmarks_array[slot].jumped();
 	}
 }
@@ -489,7 +508,7 @@ void BOOKMARKS::deploy(int slot)
 		{
 			// restore entire movie
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
-			list.update();
+			piano_roll.update();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
@@ -498,7 +517,7 @@ void BOOKMARKS::deploy(int slot)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			list.RedrawList();
+			piano_roll.RedrawList();
 			bookmarks_array[slot].deployed();
 		} else
 		{
@@ -524,7 +543,7 @@ void BOOKMARKS::deploy(int slot)
 			// restore movie up to and not including bookmarked frame (imitating old TASing method)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
-			list.update();
+			piano_roll.update();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
@@ -533,7 +552,7 @@ void BOOKMARKS::deploy(int slot)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
-			list.RedrawList();
+			piano_roll.RedrawList();
 			bookmarks_array[slot].deployed();
 		} else
 		{
@@ -562,9 +581,9 @@ void BOOKMARKS::deploy(int slot)
 	// switch current branch to this branch
 	if (slot != current_branch && current_branch >= 0)
 	{
-		list.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
+		piano_roll.RedrawRow(bookmarks_array[current_branch].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[current_branch].snapshot.jump_frame);
-		list.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
+		piano_roll.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[slot].snapshot.jump_frame);
 	}
 	current_branch = slot;
@@ -982,7 +1001,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, list.hMainListFont);
+				SelectObject(msg->nmcd.hdc, piano_roll.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetFlashingPauseFrame() - 1))
 				{
@@ -1013,7 +1032,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 			if (bookmarks_array[cell_y].not_empty)
 			{
 				// frame number
-				SelectObject(msg->nmcd.hdc, list.hMainListFont);
+				SelectObject(msg->nmcd.hdc, piano_roll.hMainListFont);
 				int frame = bookmarks_array[cell_y].snapshot.jump_frame;
 				if (frame == currFrameCounter || frame == (playback.GetFlashingPauseFrame() - 1))
 				{
@@ -1417,7 +1436,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
-			return SendMessage(list.hwndList, msg, wParam, lParam);
+			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 
 	}
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
@@ -1459,7 +1478,7 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
-			return SendMessage(list.hwndList, msg, wParam, lParam);
+			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 
 	}
 	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);

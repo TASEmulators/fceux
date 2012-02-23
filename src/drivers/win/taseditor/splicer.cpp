@@ -1,4 +1,18 @@
-//Implementation file of SPLICER class
+// ---------------------------------------------------------------------------------
+// Implementation file of SPLICER class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Splicer - Tool for montage
+[Singleton]
+* implements operations of mass-changing input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating
+* stores data about the selection used in last "Copy to Clipboard" operation
+* regularly checks the state of current selection and displays info on GUI, also displays info about input in Clipboard
+* when launching TAS Editor, it checks Clipboard contents
+* stores resources: mnemonics of buttons, texts for selection/clipboard info on GUI
+*/
+// ---------------------------------------------------------------------------------
+
 #include <sstream>
 #include "taseditor_project.h"
 #include "../Win32InputBox.h"
@@ -9,8 +23,8 @@ extern HISTORY history;
 extern MARKERS_MANAGER markers_manager;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
-extern TASEDITOR_LIST list;
-extern TASEDITOR_SELECTION selection;
+extern PIANO_ROLL piano_roll;
+extern SELECTION selection;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern int GetInputType(MovieData& md);
@@ -121,7 +135,7 @@ void SPLICER::CloneFrames()
 	} else if (markers_changed)
 	{
 		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
-		list.RedrawList();
+		piano_roll.RedrawList();
 	}
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -162,7 +176,7 @@ void SPLICER::InsertFrames()
 	} else if (markers_changed)
 	{
 		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
-		list.RedrawList();
+		piano_roll.RedrawList();
 	}
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -195,7 +209,7 @@ void SPLICER::InsertNumFrames()
 					markers_changed = true;
 			}
 			// select inserted rows
-			list.update();
+			piano_roll.update();
 			selection.SetRegionSelection(index, index + frames - 1);
 			int first_changes = history.RegisterChanges(MODTYPE_INSERT, index);
 			if (first_changes >= 0)
@@ -204,7 +218,7 @@ void SPLICER::InsertNumFrames()
 			} else if (markers_changed)
 			{
 				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, index);
-				list.RedrawList();
+				piano_roll.RedrawList();
 			}
 			if (markers_changed)
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -236,8 +250,8 @@ void SPLICER::DeleteFrames()
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
 		playback.StartFromZero();
-	// reduce list
-	list.update();
+	// reduce Piano Roll
+	piano_roll.update();
 
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
@@ -249,7 +263,7 @@ void SPLICER::DeleteFrames()
 		if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
 		else
-			list.RedrawList();
+			piano_roll.RedrawList();
 		if (markers_changed)
 			history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, start_index);
 	}
@@ -295,7 +309,7 @@ void SPLICER::Truncate()
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 			}
 		}
-		list.update();
+		piano_roll.update();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
@@ -306,7 +320,7 @@ void SPLICER::Truncate()
 			if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 				greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
 			else
-				list.RedrawList();
+				piano_roll.RedrawList();
 			if (markers_changed)
 				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, frame+1, last_frame_was);
 		}
@@ -501,13 +515,13 @@ bool SPLICER::Paste()
 			}
 
 			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *current_selection_begin));
-			// flash list header columns that were changed during paste
+			// flash Piano Roll header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;
@@ -614,17 +628,17 @@ bool SPLICER::PasteInsert()
 			} else if (markers_changed)
 			{
 				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
-				list.RedrawList();
+				piano_roll.RedrawList();
 			}
 			if (markers_changed)
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
-			// flash list header columns that were changed during paste
+			// flash Piano Roll header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{
 				for (int btn = 0; btn < NUM_JOYPAD_BUTTONS; ++btn)
 				{
 					if (flash_joy[joy] & (1 << btn))
-						list.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
+						piano_roll.SetHeaderColumnLight(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + btn, HEADER_LIGHT_MAX);
 				}
 			}
 			result = true;

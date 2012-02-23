@@ -1,11 +1,24 @@
-//Implementation file of POPUP_DISPLAY class
+// ---------------------------------------------------------------------------------
+// Implementation file of POPUP_DISPLAY class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Popup display - Manager of popup windows
+[Singleton]
+* implements all operations with popup windows: initialization, redrawing, centering, screenshot decompression and conversion
+* regularly inspects changes of Bookmarks Manager and shows/updates/hides popup windows
+* on demend: updates contents of popup windows
+* stores resources: coordinates and appearance of popup windows, timings of fade in/out
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "zlib.h"
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 extern MARKERS_MANAGER markers_manager;
 
 LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -77,7 +90,7 @@ void POPUP_DISPLAY::init()
 		scr_bmi->bmiColors[i].rgbGreen = color_palette[i].peGreen;
 		scr_bmi->bmiColors[i].rgbBlue = color_palette[i].peBlue;
 	}
-	HDC win_hdc = GetWindowDC(list.hwndList);
+	HDC win_hdc = GetWindowDC(piano_roll.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
 	// calculate coordinates
 	ParentWindowMoved();
@@ -264,7 +277,7 @@ LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam
 		{
 			// create static text field
 			popup_display.marker_note_tooltip = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN, 1, 1, MARKER_NOTE_TOOLTIP_WIDTH - 2, MARKER_NOTE_TOOLTIP_HEIGHT - 2, hwnd, NULL, NULL, NULL);
-			SendMessage(popup_display.marker_note_tooltip, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
+			SendMessage(popup_display.marker_note_tooltip, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
 			return 0;
 		}
 		default:

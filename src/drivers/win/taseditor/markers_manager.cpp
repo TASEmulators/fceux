@@ -1,4 +1,22 @@
-//Implementation file of Markers_manager class
+// ---------------------------------------------------------------------------------
+// Implementation file of Markers_manager class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Markers_manager - Manager of Markers
+[Singleton]
+* stores one snapshot of Markers, representing current state of Markers in the project
+* saves and loads the data from a project file. On error: clears the data
+* regularly ensures that the size of current Markers array is not less than the number of frames in current input
+* implements all operations with Markers: setting Marker to a frame, removing Marker, inserting/deleting frames between Markers, truncating Markers array, changing Notes, finding frame for any given Marker, access to the data of Snapshot of Markers state
+* implements full/partial copying of data between two Snapshots of Markers state, and searching for first difference between two Snapshots of Markers state
+* also here's the code of searching for "similar" Notes
+* also here's the code of editing Marker Notes
+* also here's the code of Find Note dialog 
+* stores resources: save id, properties of searching for similar Notes
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include <Shlwapi.h>		// for StrStrI
 
@@ -7,7 +25,7 @@
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern PLAYBACK playback;
-extern TASEDITOR_SELECTION selection;
+extern SELECTION selection;
 extern HISTORY history;
 
 // resources

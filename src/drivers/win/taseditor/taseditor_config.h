@@ -1,5 +1,4 @@
-//Specification file for TASEDITOR_CONFIG class
-// --------------------------------------------------------
+// Specification file for TASEDITOR_CONFIG class
 
 #define GREENZONE_CAPACITY_MIN 1
 #define GREENZONE_CAPACITY_MAX 50000
@@ -46,7 +45,7 @@ public:
 	bool combine_consecutive_rec;
 	bool use_1p_rec;
 	bool columnset_by_keys;
-	bool keyboard_for_listview;
+	bool keyboard_for_piano_roll;
 	int superimpose;
 	bool superimpose_affects_paste;
 	bool branch_full_movie;
@@ -64,7 +63,7 @@ public:
 	bool savecompact_bookmarks;
 	bool savecompact_greenzone;
 	bool savecompact_history;
-	bool savecompact_list;
+	bool savecompact_piano_roll;
 	bool savecompact_selection;
 	bool findnote_matchcase;
 	bool findnote_search_up;

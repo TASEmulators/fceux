@@ -1,4 +1,5 @@
-//Specification file for Input Snapshot class
+// Specification file for Snapshot class
+
 enum Input_types
 {
 	INPUT_TYPE_1P,

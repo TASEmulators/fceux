@@ -1,4 +1,17 @@
-//Implementation file of TASEDITOR_CONFIG class
+// ---------------------------------------------------------------------------------
+// Implementation file of TASEDITOR_CONFIG class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Config - Current settings
+[Singleton]
+* stores current state of all TAS Editor settings
+* all TAS Editor modules can get or set any data within Config
+* when launching FCEUX, the emulator writes data from fceux.cfg file to the Config, when exiting it reads the data back to fceux.cfg
+* stores resources: default values of all settings, min/max values of settings
+*/
+// ---------------------------------------------------------------------------------
+
 #include "../common.h"
 #include "taseditor_config.h"
 
@@ -30,7 +43,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	combine_consecutive_rec = true;
 	use_1p_rec = true;
 	columnset_by_keys = false;
-	keyboard_for_listview = true;
+	keyboard_for_piano_roll = true;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
 	superimpose_affects_paste = true;
 	branch_full_movie = true;
@@ -48,7 +61,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	savecompact_bookmarks = true;
 	savecompact_greenzone = false;
 	savecompact_history = false;
-	savecompact_list = true;
+	savecompact_piano_roll = true;
 	savecompact_selection = false;
 	findnote_matchcase = false;
 	findnote_search_up = false;

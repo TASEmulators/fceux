@@ -508,7 +508,7 @@
 #define IDC_CHECK_SELECTION             1208
 #define IDC_C_RESET                     1209
 #define IDC_CHECK8                      1209
-#define IDC_CHECK_LIST                  1209
+#define IDC_CHECK_PIANO_ROLL		1209
 #define IDC_C_ELIMINATE                 1210
 #define IDC_LESSTHAN                    1211
 #define IDC_MORETHAN                    1212
@@ -960,7 +960,7 @@
 #define ID_SELECTED_SETMARKER           40498
 #define ID_SELECTED_CLEARMARKER         40499
 #define ID_SELECTED_REMOVEMARKER40500   40500
-#define ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW 40501
+#define ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL 40501
 #define ACCEL_CTRL_PGUP                 40502
 #define ACCEL_CTRL_PGDN                 40503
 #define ACCEL_SHIFT_PGUP                40504

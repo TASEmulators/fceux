@@ -1,4 +1,22 @@
-//Implementation file of TASEDITOR_LIST class
+// ---------------------------------------------------------------------------------
+// Implementation file of PIANO_ROLL class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Piano Roll - Piano Roll interface
+[Singleton]
+* implements the working of Piano Roll List: creating, redrawing, scrolling, clicks
+* on demand: scrolls visible area of the List to any given item: to Playback Cursor, to Selection Cursor, to "undo pointer", to a Marker
+* saves and loads current position of vertical scrolling from a project file. On error: scrolls the List to the beginning
+* implements the working of Piano Roll List Header: creating, redrawing, animating, mouseover, clicks
+* on demand: launches flashes in the List Header
+* regularly updates the size of the List according to current movie input, also updates lights in the List Header according to button presses data from Recorder and Alt key state
+* implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement
+* implements context menu on Right-click
+* stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "uxtheme.h"
@@ -19,7 +37,7 @@ extern RECORDER recorder;
 extern GREENZONE greenzone;
 extern HISTORY history;
 extern MARKERS_MANAGER markers_manager;
-extern TASEDITOR_SELECTION selection;
+extern SELECTION selection;
 
 extern int GetInputType(MovieData& md);
 
@@ -28,17 +46,17 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC hwndList_oldWndProc = 0, hwndHeader_oldWndproc = 0;
 
 // resources
-char list_save_id[LIST_ID_LEN] = "LIST";
-char list_skipsave_id[LIST_ID_LEN] = "LISX";
+char piano_roll_save_id[PIANO_ROLL_ID_LEN] = "PIANO_ROLL";
+char piano_roll_skipsave_id[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
 COLORREF hot_changes_colors[16] = { 0x0, 0x5c4c44, 0x854604, 0xab2500, 0xc20006, 0xd6006f, 0xd40091, 0xba00a4, 0x9500ba, 0x7a00cc, 0x5800d4, 0x0045e2, 0x0063ea, 0x0079f4, 0x0092fa, 0x00aaff };
 //COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
 COLORREF header_lights_colors[11] = { 0x0, 0x007313, 0x009100, 0x1daf00, 0x42c700, 0x65d900, 0x91e500, 0xb0f000, 0xdaf700, 0xf0fc7c, 0xfcffba };
 
-TASEDITOR_LIST::TASEDITOR_LIST()
+PIANO_ROLL::PIANO_ROLL()
 {
 }
 
-void TASEDITOR_LIST::init()
+void PIANO_ROLL::init()
 {
 	free();
 	// create fonts for main listview
@@ -163,7 +181,7 @@ void TASEDITOR_LIST::init()
 	tme.hwndTrack = hwndHeader;
 
 }
-void TASEDITOR_LIST::free()
+void PIANO_ROLL::free()
 {
 	if (hMainListFont)
 	{
@@ -197,7 +215,7 @@ void TASEDITOR_LIST::free()
 	}
 	header_colors.resize(0);
 }
-void TASEDITOR_LIST::reset()
+void PIANO_ROLL::reset()
 {
 	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
@@ -231,7 +249,7 @@ void TASEDITOR_LIST::reset()
 		ListView_InsertColumn(hwndList, num_columns++, &lvc);
 	}
 }
-void TASEDITOR_LIST::update()
+void PIANO_ROLL::update()
 {
 	//update the number of items in the list
 	int currLVItemCount = ListView_GetItemCount(hwndList);
@@ -286,67 +304,67 @@ void TASEDITOR_LIST::update()
 	}
 }
 
-void TASEDITOR_LIST::save(EMUFILE *os, bool really_save)
+void PIANO_ROLL::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
 		update();
-		// write "LIST" string
-		os->fwrite(list_save_id, LIST_ID_LEN);
+		// write "PIANO_ROLL" string
+		os->fwrite(piano_roll_save_id, PIANO_ROLL_ID_LEN);
 		// write current top item
 		int top_item = ListView_GetTopIndex(hwndList);
 		write32le(top_item, os);
 	} else
 	{
-		// write "LISX" string
-		os->fwrite(list_skipsave_id, LIST_ID_LEN);
+		// write "PIANO_ROLX" string
+		os->fwrite(piano_roll_skipsave_id, PIANO_ROLL_ID_LEN);
 	}
 }
 // returns true if couldn't load
-bool TASEDITOR_LIST::load(EMUFILE *is)
+bool PIANO_ROLL::load(EMUFILE *is)
 {
 	reset();
 	update();
-	// read "LIST" string
-	char save_id[LIST_ID_LEN];
-	if ((int)is->fread(save_id, LIST_ID_LEN) < LIST_ID_LEN) goto error;
-	if (!strcmp(list_skipsave_id, save_id))
+	// read "PIANO_ROLL" string
+	char save_id[PIANO_ROLL_ID_LEN];
+	if ((int)is->fread(save_id, PIANO_ROLL_ID_LEN) < PIANO_ROLL_ID_LEN) goto error;
+	if (!strcmp(piano_roll_skipsave_id, save_id))
 	{
-		// string says to skip loading List
-		FCEU_printf("No list data in the file\n");
+		// string says to skip loading Piano Roll
+		FCEU_printf("No Piano Roll data in the file\n");
 		// scroll to the beginning
 		ListView_EnsureVisible(hwndList, 0, FALSE);
 		return false;
 	}
-	if (strcmp(list_save_id, save_id)) goto error;		// string is not valid
-	// read current top item and scroll list there
+	if (strcmp(piano_roll_save_id, save_id)) goto error;		// string is not valid
+	// read current top item and scroll Piano Roll there
 	int top_item;
 	if (!read32le(&top_item, is)) goto error;
 	ListView_EnsureVisible(hwndList, currMovieData.getNumRecords() - 1, FALSE);
 	ListView_EnsureVisible(hwndList, top_item, FALSE);
 	return false;
 error:
-	FCEU_printf("Error loading list data\n");
+	FCEU_printf("Error loading Piano Roll data\n");
 	// scroll to the beginning
 	ListView_EnsureVisible(hwndList, 0, FALSE);
 	return true;
 }
 // ----------------------------------------------------------------------
-void TASEDITOR_LIST::RedrawList()
+void PIANO_ROLL::RedrawList()
 {
 	InvalidateRect(hwndList, 0, FALSE);
 }
-void TASEDITOR_LIST::RedrawRow(int index)
+void PIANO_ROLL::RedrawRow(int index)
 {
 	ListView_RedrawItems(hwndList, index, index);
 }
-void TASEDITOR_LIST::RedrawHeader()
+void PIANO_ROLL::RedrawHeader()
 {
 	InvalidateRect(hwndHeader, 0, FALSE);
 }
 
 // -------------------------------------------------------------------------
-bool TASEDITOR_LIST::CheckItemVisible(int frame)
+bool PIANO_ROLL::CheckItemVisible(int frame)
 {
 	int top = ListView_GetTopIndex(hwndList);
 	// in fourscore there's horizontal scrollbar which takes one row for itself
@@ -355,7 +373,7 @@ bool TASEDITOR_LIST::CheckItemVisible(int frame)
 	return false;
 }
 
-void TASEDITOR_LIST::CenterListAt(int frame)
+void PIANO_ROLL::CenterListAt(int frame)
 {
 	int list_items = ListView_GetCountPerPage(hwndList);
 	int lower_border = (list_items - 1) / 2;
@@ -370,15 +388,15 @@ void TASEDITOR_LIST::CenterListAt(int frame)
 	ListView_EnsureVisible(hwndList, index, false);
 }
 
-void TASEDITOR_LIST::FollowPlayback()
+void PIANO_ROLL::FollowPlayback()
 {
 	CenterListAt(currFrameCounter);
 }
-void TASEDITOR_LIST::FollowPlaybackIfNeeded()
+void PIANO_ROLL::FollowPlaybackIfNeeded()
 {
 	if (taseditor_config.follow_playback) ListView_EnsureVisible(hwndList,currFrameCounter,FALSE);
 }
-void TASEDITOR_LIST::FollowUndo()
+void PIANO_ROLL::FollowUndo()
 {
 	int jump_frame = history.GetUndoHint();
 	if (taseditor_config.jump_to_undo && jump_frame >= 0)
@@ -387,7 +405,7 @@ void TASEDITOR_LIST::FollowUndo()
 			CenterListAt(jump_frame);
 	}
 }
-void TASEDITOR_LIST::FollowSelection()
+void PIANO_ROLL::FollowSelection()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return;
@@ -417,12 +435,12 @@ void TASEDITOR_LIST::FollowSelection()
 		CenterListAt(selection_start);
 	}
 }
-void TASEDITOR_LIST::FollowPauseframe()
+void PIANO_ROLL::FollowPauseframe()
 {
 	if (playback.pause_frame > 0)
 		CenterListAt(playback.pause_frame - 1);
 }
-void TASEDITOR_LIST::FollowMarker(int marker_id)
+void PIANO_ROLL::FollowMarker(int marker_id)
 {
 	if (marker_id > 0)
 	{
@@ -435,7 +453,7 @@ void TASEDITOR_LIST::FollowMarker(int marker_id)
 	}
 }
 
-void TASEDITOR_LIST::SetHeaderColumnLight(int column, int level)
+void PIANO_ROLL::SetHeaderColumnLight(int column, int level)
 {
 	if (column < COLUMN_FRAMENUM || column >= num_columns || level < 0 || level > HEADER_LIGHT_MAX)
 		return;
@@ -448,7 +466,7 @@ void TASEDITOR_LIST::SetHeaderColumnLight(int column, int level)
 	}
 }
 
-void TASEDITOR_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
+void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
 	if(item.mask & LVIF_TEXT)
@@ -506,7 +524,7 @@ void TASEDITOR_LIST::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 	}
 }
 
-LONG TASEDITOR_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
+LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	int cell_x, cell_y;
 	switch(msg->nmcd.dwDrawStage)
@@ -655,7 +673,7 @@ LONG TASEDITOR_LIST::CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-LONG TASEDITOR_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
+LONG PIANO_ROLL::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 {
 	switch(msg->nmcd.dwDrawStage)
 	{
@@ -677,7 +695,7 @@ LONG TASEDITOR_LIST::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void TASEDITOR_LIST::ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
+void PIANO_ROLL::ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
 {
 	int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
@@ -718,7 +736,7 @@ void TASEDITOR_LIST::ToggleJoypadBit(int column_index, int row_index, UINT KeyFl
 	
 }
 
-void TASEDITOR_LIST::ColumnSet(int column, bool alt_pressed)
+void PIANO_ROLL::ColumnSet(int column, bool alt_pressed)
 {
 	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
 	{
@@ -749,7 +767,7 @@ void TASEDITOR_LIST::ColumnSet(int column, bool alt_pressed)
 	}
 }
 
-bool TASEDITOR_LIST::FrameColumnSetPattern()
+bool PIANO_ROLL::FrameColumnSetPattern()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return false;
@@ -794,7 +812,7 @@ bool TASEDITOR_LIST::FrameColumnSetPattern()
 	} else
 		return false;
 }
-bool TASEDITOR_LIST::FrameColumnSet()
+bool PIANO_ROLL::FrameColumnSet()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0) return false;
@@ -846,7 +864,7 @@ bool TASEDITOR_LIST::FrameColumnSet()
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 	return changes_made;
 }
-bool TASEDITOR_LIST::InputColumnSetPattern(int joy, int button)
+bool PIANO_ROLL::InputColumnSetPattern(int joy, int button)
 {
 	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
 
@@ -874,7 +892,7 @@ bool TASEDITOR_LIST::InputColumnSetPattern(int joy, int button)
 	} else
 		return false;
 }
-bool TASEDITOR_LIST::InputColumnSet(int joy, int button)
+bool PIANO_ROLL::InputColumnSet(int joy, int button)
 {
 	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
 
@@ -913,7 +931,7 @@ bool TASEDITOR_LIST::InputColumnSet(int joy, int button)
 		return false;
 }
 // ----------------------------------------------------
-void TASEDITOR_LIST::RightClick(LVHITTESTINFO& info)
+void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 {
 	int index = info.iItem;
 	if(index == -1)
@@ -921,14 +939,14 @@ void TASEDITOR_LIST::RightClick(LVHITTESTINFO& info)
 	else
 		RightClickMenu(info);
 }
-void TASEDITOR_LIST::StrayClickMenu(LVHITTESTINFO& info)
+void PIANO_ROLL::StrayClickMenu(LVHITTESTINFO& info)
 {
 	POINT pt = info.pt;
 	ClientToScreen(hwndList, &pt);
 	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
 	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
 }
-void TASEDITOR_LIST::RightClickMenu(LVHITTESTINFO& info)
+void PIANO_ROLL::RightClickMenu(LVHITTESTINFO& info)
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0)
@@ -964,7 +982,7 @@ void TASEDITOR_LIST::RightClickMenu(LVHITTESTINFO& info)
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	extern TASEDITOR_LIST list;
+	extern PIANO_ROLL piano_roll;
 	switch(msg)
 	{
 	case WM_SETCURSOR:
@@ -978,14 +996,14 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
 		info.pt.y = GET_Y_LPARAM(lParam);
 		SendMessage(hWnd, HDM_HITTEST, 0, (LPARAM)&info);
-		list.header_item_under_mouse = info.iItem;
+		piano_roll.header_item_under_mouse = info.iItem;
 		// ensure that WM_MOUSELEAVE will be catched
-		TrackMouseEvent(&list.tme);
+		TrackMouseEvent(&piano_roll.tme);
 		break;
 	}
 	case WM_MOUSELEAVE:
 	{
-		list.header_item_under_mouse = -1;
+		piano_roll.header_item_under_mouse = -1;
 		break;
 	}
 	case WM_LBUTTONDOWN:
@@ -999,7 +1017,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				info.pt.y = GET_Y_LPARAM(lParam);
 				SendMessage(hWnd, HDM_HITTEST, 0, (LPARAM)&info);
 				if(info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
-					list.ColumnSet(info.iItem, (GetKeyState(VK_MENU) < 0));
+					piano_roll.ColumnSet(info.iItem, (GetKeyState(VK_MENU) < 0));
 			}
 		}
 		return true;
@@ -1007,10 +1025,10 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 	return CallWindowProc(hwndHeader_oldWndproc, hWnd, msg, wParam, lParam);
 }
 
-//The subclass wndproc for the listview
+// The subclass wndproc for the listview
 LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	extern TASEDITOR_LIST list;
+	extern PIANO_ROLL piano_roll;
 	switch(msg)
 	{
 		case WM_CHAR:
@@ -1018,7 +1036,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		case WM_NOTIFY:
 		{
-			if (((LPNMHDR)lParam)->hwndFrom == list.hwndHeader)
+			if (((LPNMHDR)lParam)->hwndFrom == piano_roll.hwndHeader)
 			{
 				switch (((LPNMHDR)lParam)->code)
 				{
@@ -1027,14 +1045,14 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				case HDN_TRACK:
 					return true;	// no column resizing
 				case NM_CUSTOMDRAW:
-					return list.HeaderCustomDraw((NMLVCUSTOMDRAW*)lParam);
+					return piano_roll.HeaderCustomDraw((NMLVCUSTOMDRAW*)lParam);
 				}
 			}
 			break;
 		}
 		case WM_KEYDOWN:
 		{
-			if (!taseditor_config.keyboard_for_listview)
+			if (!taseditor_config.keyboard_for_piano_roll)
 				return 0;
 			break;
 		}
@@ -1076,7 +1094,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
 							else
 								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-							list.RedrawRow(row_index);
+							piano_roll.RedrawRow(row_index);
 						}
 						// also select the row
 						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
@@ -1091,11 +1109,11 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam|MK_SHIFT, lParam);
 						int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 						int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-						list.InputColumnSetPattern(joy, button);
+						piano_roll.InputColumnSetPattern(joy, button);
 					} else
 					{
 						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-						list.ToggleJoypadBit(column_index, row_index, GET_KEYSTATE_WPARAM(wParam));
+						piano_roll.ToggleJoypadBit(column_index, row_index, GET_KEYSTATE_WPARAM(wParam));
 					}
 				}
 			}
@@ -1142,8 +1160,8 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case WM_RBUTTONDOWN:
-			if (GetFocus() != list.hwndList)
-				SetFocus(list.hwndList);
+			if (GetFocus() != piano_roll.hwndList)
+				SetFocus(piano_roll.hwndList);
 			return 0;
 		case WM_RBUTTONDBLCLK:
 			return 0;
@@ -1156,7 +1174,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
 			// show context menu
 			if(info.iSubItem <= COLUMN_FRAMENUM || info.iSubItem >= COLUMN_FRAMENUM2)
-				list.RightClick(info);
+				piano_roll.RightClick(info);
 			return 0;
 		}
 	}

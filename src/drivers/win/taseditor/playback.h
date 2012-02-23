@@ -1,4 +1,4 @@
-//Specification file for Playback class
+// Specification file for Playback class
 
 #define PROGRESSBAR_WIDTH 200
 

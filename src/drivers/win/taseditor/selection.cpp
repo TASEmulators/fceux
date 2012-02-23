@@ -1,10 +1,29 @@
-//Implementation file of TASEDITOR_SELECTION class
+// ---------------------------------------------------------------------------------
+// Implementation file of SELECTION class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Selection - Manager of selections
+[Singleton]
+* contains definition of the type "Set of selected frames"
+* stores array of Sets of selected frames (History of selections)
+* saves and loads the data from a project file. On error: clears the array and starts new history by making empty selection
+* constantly tracks changes in selected rows of Piano Roll List, and makes a decision to create new point of selection rollback
+* implements all selection restoring operations: undo, redo
+* on demand: changes current selection: remove selection, jump to a frame with Selection cursor, select region, select all, select between Markers, reselect clipboard
+* regularly ensures that selection doesn't go beyond curent Piano Roll limits, detects if selection moved to another Marker and updates Note in the lower text field
+* implements the working of lower buttons << and >> (jumping on Markers)
+* also here's the code of lower text field (for editing Marker Notes)
+* stores resource: save id, lower text field prefix
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS_MANAGER markers_manager;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 extern SPLICER splicer;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
@@ -17,32 +36,32 @@ char selection_save_id[SELECTION_ID_LEN] = "SELECTION";
 char selection_skipsave_id[SELECTION_ID_LEN] = "SELECTIOX";
 char lowerMarkerText[] = "Marker ";
 
-TASEDITOR_SELECTION::TASEDITOR_SELECTION()
+SELECTION::SELECTION()
 {
 }
 
-void TASEDITOR_SELECTION::init()
+void SELECTION::init()
 {
 	hwndPrevMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_PREV_MARKER);
 	hwndNextMarker = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_NEXT_MARKER);
 	hwndSelectionMarker = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER);
-	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)list.hMarkersFont, 0);
+	SendMessage(hwndSelectionMarker, WM_SETFONT, (WPARAM)piano_roll.hMarkersFont, 0);
 	hwndSelectionMarkerEdit = GetDlgItem(taseditor_window.hwndTasEditor, IDC_SELECTION_MARKER_EDIT);
 	SendMessage(hwndSelectionMarkerEdit, EM_SETLIMITTEXT, MAX_NOTE_LEN - 1, 0);
-	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)list.hMarkersEditFont, 0);
+	SendMessage(hwndSelectionMarkerEdit, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
 	// subclass the edit control
 	selectionMarkerEdit_oldWndproc = (WNDPROC)SetWindowLong(hwndSelectionMarkerEdit, GWL_WNDPROC, (LONG)LowerMarkerEditWndProc);
 
 	reset();
 }
-void TASEDITOR_SELECTION::free()
+void SELECTION::free()
 {
 	// clear history
 	selections_history.resize(0);
 	history_total_items = 0;
 	temp_selection.clear();
 }
-void TASEDITOR_SELECTION::reset()
+void SELECTION::reset()
 {
 	free();
 	// init vars
@@ -57,13 +76,13 @@ void TASEDITOR_SELECTION::reset()
 	track_selection_changes = true;
 	reset_vars();
 }
-void TASEDITOR_SELECTION::reset_vars()
+void SELECTION::reset_vars()
 {
 	old_prev_marker_button_state = prev_marker_button_state = false;
 	old_next_marker_button_state = next_marker_button_state = false;
 	must_find_current_marker = true;
 }
-void TASEDITOR_SELECTION::update()
+void SELECTION::update()
 {
 	// keep selection within movie limits
 	if (CurrentSelection().size())
@@ -125,7 +144,7 @@ void TASEDITOR_SELECTION::update()
 
 }
 
-void TASEDITOR_SELECTION::RedrawMarker()
+void SELECTION::RedrawMarker()
 {
 	// redraw marker num
 	char new_text[MAX_NOTE_LEN] = {0};
@@ -140,7 +159,7 @@ void TASEDITOR_SELECTION::RedrawMarker()
 	SetWindowText(hwndSelectionMarkerEdit, new_text);
 }
 
-void TASEDITOR_SELECTION::JumpPrevMarker(int speed)
+void SELECTION::JumpPrevMarker(int speed)
 {
 	// if nothing is selected, consider playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
@@ -157,7 +176,7 @@ void TASEDITOR_SELECTION::JumpPrevMarker(int speed)
 	else
 		JumpToFrame(0);
 }
-void TASEDITOR_SELECTION::JumpNextMarker(int speed)
+void SELECTION::JumpNextMarker(int speed)
 {
 	// if nothing is selected, consider playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
@@ -175,14 +194,14 @@ void TASEDITOR_SELECTION::JumpNextMarker(int speed)
 	else
 		JumpToFrame(last_frame);
 }
-void TASEDITOR_SELECTION::JumpToFrame(int frame)
+void SELECTION::JumpToFrame(int frame)
 {
 	ClearSelection();
 	SetRowSelection(frame);
-	list.FollowSelection();
+	piano_roll.FollowSelection();
 }
 // ----------------------------------------------------------
-void TASEDITOR_SELECTION::save(EMUFILE *os, bool really_save)
+void SELECTION::save(EMUFILE *os, bool really_save)
 {
 	if (really_save)
 	{
@@ -205,7 +224,7 @@ void TASEDITOR_SELECTION::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool TASEDITOR_SELECTION::load(EMUFILE *is)
+bool SELECTION::load(EMUFILE *is)
 {
 	// read "SELECTION" string
 	char save_id[SELECTION_ID_LEN];
@@ -266,7 +285,7 @@ error:
 	return true;
 }
 
-void TASEDITOR_SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
+void SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
 {
 	write32le(selection.size(), os);
 	if (selection.size())
@@ -275,7 +294,7 @@ void TASEDITOR_SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
 			write32le(*it, os);
 	}
 }
-bool TASEDITOR_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
+bool SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 {
 	int temp_int, temp_size;
 	selection.clear();
@@ -288,7 +307,7 @@ bool TASEDITOR_SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 	}
 	return false;
 }
-bool TASEDITOR_SELECTION::skiploadSelection(EMUFILE *is)
+bool SELECTION::skiploadSelection(EMUFILE *is)
 {
 	int temp_size;
 	if (!read32le(&temp_size, is)) return true;
@@ -297,7 +316,7 @@ bool TASEDITOR_SELECTION::skiploadSelection(EMUFILE *is)
 }
 // ----------------------------------------------------------
 //used to track selection
-void TASEDITOR_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
+void SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 {
 	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
 	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
@@ -311,7 +330,7 @@ void TASEDITOR_SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 
 	splicer.must_redraw_selection_text = true;
 }
-void TASEDITOR_SELECTION::ItemChanged(NMLISTVIEW* info)
+void SELECTION::ItemChanged(NMLISTVIEW* info)
 {
 	int item = info->iItem;
 	
@@ -345,7 +364,7 @@ void TASEDITOR_SELECTION::ItemChanged(NMLISTVIEW* info)
 	splicer.must_redraw_selection_text = true;
 }
 // ----------------------------------------------------------
-void TASEDITOR_SELECTION::AddNewSelectionToHistory()
+void SELECTION::AddNewSelectionToHistory()
 {
 	// create new empty selection
 	SelectionFrames selectionFrames;
@@ -367,61 +386,61 @@ void TASEDITOR_SELECTION::AddNewSelectionToHistory()
 	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
 }
 
-void TASEDITOR_SELECTION::jump(int new_pos)
+void SELECTION::jump(int new_pos)
 {
 	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
 	if (new_pos == history_cursor_pos) return;
 
 	// make jump
 	history_cursor_pos = new_pos;
-	// update list items
+	// update Piano Roll items
 	EnforceSelectionToList();
-	// also keep  selection within list
+	// also keep selection within Piano Roll
 	update();
 }
-void TASEDITOR_SELECTION::undo()
+void SELECTION::undo()
 {
 	jump(history_cursor_pos - 1);
 }
-void TASEDITOR_SELECTION::redo()
+void SELECTION::redo()
 {
 	jump(history_cursor_pos + 1);
 }
 // ----------------------------------------------------------
-void TASEDITOR_SELECTION::ClearSelection()
+void SELECTION::ClearSelection()
 {
-	ListView_SetItemState(list.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDITOR_SELECTION::ClearRowSelection(int index)
+void SELECTION::ClearRowSelection(int index)
 {
-	ListView_SetItemState(list.hwndList, index, 0, LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_SELECTED);
 }
 
-void TASEDITOR_SELECTION::EnforceSelectionToList()
+void SELECTION::EnforceSelectionToList()
 {
 	track_selection_changes = false;
 	ClearSelection();
 	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
 	{
-		ListView_SetItemState(list.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(piano_roll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
 	}
 	track_selection_changes = true;
 }
  
-void TASEDITOR_SELECTION::SelectAll()
+void SELECTION::SelectAll()
 {
-	ListView_SetItemState(list.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
-void TASEDITOR_SELECTION::SetRowSelection(int index)
+void SELECTION::SetRowSelection(int index)
 {
-	ListView_SetItemState(list.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDITOR_SELECTION::SetRegionSelection(int start, int end)
+void SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i <= end; ++i)
-		ListView_SetItemState(list.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void TASEDITOR_SELECTION::SelectBetweenMarkers()
+void SELECTION::SelectBetweenMarkers()
 {
 	int center, upper_border, lower_border;
 	int upper_marker, lower_marker;
@@ -443,7 +462,7 @@ void TASEDITOR_SELECTION::SelectBetweenMarkers()
 		if (markers_manager.GetMarker(lower_marker)) break;
 
 	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
-	ListView_SetItemState(list.hwndList, -1, 0, LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_SELECTED);
 
 	// special case
 	if (upper_marker == -1 && lower_marker == movie_size)
@@ -458,7 +477,7 @@ void TASEDITOR_SELECTION::SelectBetweenMarkers()
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -467,14 +486,14 @@ void TASEDITOR_SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
@@ -482,18 +501,18 @@ void TASEDITOR_SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(list.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	}
 }
-void TASEDITOR_SELECTION::ReselectClipboard()
+void SELECTION::ReselectClipboard()
 {
 	SelectionFrames clipboard_selection = splicer.GetClipboardSelection();
 	if (clipboard_selection.size() == 0) return;
@@ -501,41 +520,41 @@ void TASEDITOR_SELECTION::ReselectClipboard()
 	ClearSelection();
 	CurrentSelection() = clipboard_selection;
 	EnforceSelectionToList();
-	// also keep selection within list
+	// also keep selection within Piano Roll
 	update();
 }
 
 // getters
-int TASEDITOR_SELECTION::GetCurrentSelectionSize()
+int SELECTION::GetCurrentSelectionSize()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size].size();
 }
-int TASEDITOR_SELECTION::GetCurrentSelectionBeginning()
+int SELECTION::GetCurrentSelectionBeginning()
 {
 	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
 		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].begin();
 	else
 		return -1;
 }
-bool TASEDITOR_SELECTION::CheckFrameSelected(int frame)
+bool SELECTION::CheckFrameSelected(int frame)
 {
 	if(CurrentSelection().find(frame) == CurrentSelection().end())
 		return false;
 	return true;
 }
-SelectionFrames* TASEDITOR_SELECTION::MakeStrobe()
+SelectionFrames* SELECTION::MakeStrobe()
 {
 	// copy current selection to temp_selection
 	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
 	return &temp_selection;
 }
-SelectionFrames& TASEDITOR_SELECTION::GetStrobedSelection()
+SelectionFrames& SELECTION::GetStrobedSelection()
 {
 	return temp_selection;
 }
 
 // this getter is private
-SelectionFrames& TASEDITOR_SELECTION::CurrentSelection()
+SelectionFrames& SELECTION::CurrentSelection()
 {
 	return selections_history[(history_start_pos + history_cursor_pos) % history_size];
 }
@@ -545,7 +564,7 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 	{
 		extern PLAYBACK playback;
-		extern TASEDITOR_SELECTION selection;
+		extern SELECTION selection;
 		switch(msg)
 		{
 		case WM_CHAR:
@@ -555,11 +574,11 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			case VK_ESCAPE:
 				// revert text to original note text
 				SetWindowText(selection.hwndSelectionMarkerEdit, markers_manager.GetNote(selection.shown_marker).c_str());
-				SetFocus(list.hwndList);
+				SetFocus(piano_roll.hwndList);
 				return 0;
 			case VK_RETURN:
 				// exit and save text changes
-				SetFocus(list.hwndList);
+				SetFocus(piano_roll.hwndList);
 				return 0;
 			case VK_TAB:
 				// switch to upper edit control (also exit and save text changes)

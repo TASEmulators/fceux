@@ -1,4 +1,5 @@
-//Specification file for RECORDER class
+// Specification file for RECORDER class
+
 enum
 {
 	MULTITRACK_RECORDING_ALL = 0,

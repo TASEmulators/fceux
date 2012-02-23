@@ -1,4 +1,4 @@
-//Specification file for Bookmark class
+// Specification file for Bookmark class
 
 #define FLASH_PHASE_MAX 11
 enum

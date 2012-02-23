@@ -1,4 +1,17 @@
-//Implementation file of TASEDITOR_PROJECT class
+// ---------------------------------------------------------------------------------
+// Implementation file of TASEDITOR_PROJECT class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Project - Header of working project
+[Singleton]
+* stores the info about current project filename and about having unsaved changes
+* implements saving and loading project files from filesystem
+* implements autosave function
+* stores resources: autosave period scale, default filename
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "version.h"
@@ -12,8 +25,8 @@ extern GREENZONE greenzone;
 extern PLAYBACK playback;
 extern RECORDER recorder;
 extern HISTORY history;
-extern TASEDITOR_LIST list;
-extern TASEDITOR_SELECTION selection;
+extern PIANO_ROLL piano_roll;
+extern SELECTION selection;
 extern SPLICER splicer;
 
 extern void FCEU_PrintError(char *format, ...);
@@ -69,7 +82,7 @@ bool TASEDITOR_PROJECT::save()
 	bookmarks.save(ofs);
 	greenzone.save(ofs);
 	history.save(ofs);
-	list.save(ofs);
+	piano_roll.save(ofs);
 	selection.save(ofs);
 
 	delete ofs;
@@ -78,7 +91,7 @@ bool TASEDITOR_PROJECT::save()
 	this->reset();
 	return true;
 }
-bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_list, bool save_selection)
+bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
 {
 	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename, "wb");
 	
@@ -91,14 +104,14 @@ bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save
 	if (save_bookmarks) saved_stuff |= BOOKMARKS_SAVED;
 	if (save_greenzone) saved_stuff |= GREENZONE_SAVED;
 	if (save_history) saved_stuff |= HISTORY_SAVED;
-	if (save_list) saved_stuff |= LIST_SAVED;
+	if (save_piano_roll) saved_stuff |= PIANO_ROLL_SAVED;
 	if (save_selection) saved_stuff |= SELECTION_SAVED;
 	write32le(saved_stuff, ofs);
 	markers_manager.save(ofs, save_markers);
 	bookmarks.save(ofs, save_bookmarks);
 	greenzone.save(ofs, save_greenzone);
 	history.save(ofs, save_history);
-	list.save(ofs, save_list);
+	piano_roll.save(ofs, save_piano_roll);
 	selection.save(ofs, save_selection);
 
 	delete ofs;
@@ -142,7 +155,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	bookmarks.load(&ifs);
 	greenzone.load(&ifs);
 	history.load(&ifs);
-	list.load(&ifs);
+	piano_roll.load(&ifs);
 	selection.load(&ifs);
 	
 	// reset other modules

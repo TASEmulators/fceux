@@ -1,4 +1,19 @@
-//Implementation file of TASEDITOR_WINDOW class
+// ---------------------------------------------------------------------------------
+// Implementation file of TASEDITOR_WINDOW class
+// ---------------------------------------------------------------------------------
+/*
+Window - User Interface
+[Singleton]
+* implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks
+* processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)
+* switches off/on emulator's keyboard input when the window loses/gains focus
+* on demand: updates the window caption
+* updates all checkboxes and menu items when some settings change
+* stores info about 10 last projects (File->Recent) and updates it when saving/loading files
+* stores resources: window caption, help filename, size and other properties of all GUI items
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 #include "../main.h"
 #include "../Win32InputBox.h"
@@ -13,8 +28,8 @@ extern PLAYBACK playback;
 extern GREENZONE greenzone;
 extern RECORDER recorder;
 extern TASEDITOR_PROJECT project;
-extern TASEDITOR_LIST list;
-extern TASEDITOR_SELECTION selection;
+extern PIANO_ROLL piano_roll;
+extern SELECTION selection;
 extern SPLICER splicer;
 extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
@@ -430,7 +445,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, taseditor_config.combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, taseditor_config.use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, taseditor_config.columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW, taseditor_config.keyboard_for_listview?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL, taseditor_config.keyboard_for_piano_roll?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
@@ -668,10 +683,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, list.CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLong(hwndDlg, DWL_MSGRESULT, piano_roll.CustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
-					list.GetDispInfo((NMLVDISPINFO*)lParam);
+					piano_roll.GetDispInfo((NMLVDISPINFO*)lParam);
 					break;
 				case LVN_ITEMCHANGED:
 					selection.ItemChanged((LPNMLISTVIEW) lParam);
@@ -679,15 +694,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case LVN_ODSTATECHANGED:
 					selection.ItemRangeChanged((LPNMLVODSTATECHANGE) lParam);
 					break;
-					/*
-				case LVN_ENDSCROLL:
-					// redraw upper and lower list rows (fix for known WinXP bug)
-					int start = ListView_GetTopIndex(hwndList);
-					ListView_RedrawItems(hwndList,start,start);
-					int end = start + listItems - 1;
-					ListView_RedrawItems(hwndList,end,end);
-					break;
-					*/
 				}
 				break;
 			case IDC_BOOKMARKSLIST:
@@ -754,12 +760,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			{
 				SetTextColor((HDC)wParam, PLAYBACK_MARKER_COLOR);
 				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)(list.bg_brush);
+				return (BOOL)(piano_roll.bg_brush);
 			} else if ((HWND)lParam == selection.hwndSelectionMarker)
 			{
 				SetTextColor((HDC)wParam, GetSysColor(COLOR_HIGHLIGHT));
 				SetBkMode((HDC)wParam, TRANSPARENT);
-				return (BOOL)list.bg_brush;
+				return (BOOL)piano_roll.bg_brush;
 			}
 
 			break;
@@ -795,7 +801,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// disable FCEUX keyboard
 								taseditor_window.ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
-									list.FollowMarker(playback.shown_marker);
+									piano_roll.FollowMarker(playback.shown_marker);
 								break;
 							}
 						case EN_KILLFOCUS:
@@ -827,7 +833,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								// disable FCEUX keyboard
 								taseditor_window.ClearTaseditorInput();
 								if (taseditor_config.follow_note_context)
-									list.FollowMarker(selection.shown_marker);
+									piano_roll.FollowMarker(selection.shown_marker);
 								break;
 							}
 						case EN_KILLFOCUS:
@@ -986,7 +992,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.UpdateCheckedItems();
 					// if switched off then maybe jump to target frame
 					if (!taseditor_config.follow_playback && playback.pause_frame)
-						list.FollowPauseframe();
+						piano_roll.FollowPauseframe();
 					break;
 				case CHECK_TURBO_SEEK:
 					//switch "Turbo seek" flag
@@ -999,13 +1005,13 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_VIEW_SHOW_LAG_FRAMES:
 					taseditor_config.show_lag_frames ^= 1;
 					taseditor_window.UpdateCheckedItems();
-					list.RedrawList();
+					piano_roll.RedrawList();
 					bookmarks.RedrawBookmarksList();
 					break;
 				case ID_VIEW_SHOW_MARKERS:
 					taseditor_config.show_markers ^= 1;
 					taseditor_window.UpdateCheckedItems();
-					list.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in main list
+					piano_roll.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in Piano Roll
 					break;
 				case ID_VIEW_SHOWBRANCHSCREENSHOTS:
 					//switch "Show Branch Screenshots" flag
@@ -1020,7 +1026,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_VIEW_ENABLEHOTCHANGES:
 					taseditor_config.enable_hot_changes ^= 1;
 					taseditor_window.UpdateCheckedItems();
-					list.RedrawList();		// redraw buttons text
+					piano_roll.RedrawList();		// redraw buttons text
 					break;
 				case ID_VIEW_JUMPWHENMAKINGUNDO:
 					taseditor_config.jump_to_undo ^= 1;
@@ -1066,8 +1072,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								taseditor_config.undo_levels = new_size;
 								history.reset();
 								selection.reset();
-								// hot changes were cleared, so update list
-								list.RedrawList();
+								// hot changes were cleared, so update Piano Roll
+								piano_roll.RedrawList();
 							}
 						}
 						break;
@@ -1105,7 +1111,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_CONFIG_BINDMARKERSTOINPUT:
 					taseditor_config.bind_markers ^= 1;
 					taseditor_window.UpdateCheckedItems();
-					list.RedrawList();
+					piano_roll.RedrawList();
 					break;
 				case ID_CONFIG_EMPTYNEWMARKERNOTES:
 					taseditor_config.empty_marker_notes ^= 1;
@@ -1125,8 +1131,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_config.columnset_by_keys ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_CONFIG_KEYBOARDCONTROLSINLISTVIEW:
-					taseditor_config.keyboard_for_listview ^= 1;
+				case ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL:
+					taseditor_config.keyboard_for_piano_roll ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
@@ -1218,8 +1224,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							int result = history.undo();
 							if (result >= 0)
 							{
-								list.update();
-								list.FollowUndo();
+								piano_roll.update();
+								piano_roll.FollowUndo();
 								greenzone.InvalidateAndCheck(result);
 							}
 						}
@@ -1231,8 +1237,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						int result = history.redo();
 						if (result >= 0)
 						{
-							list.update();
-							list.FollowUndo();
+							piano_roll.update();
+							piano_roll.FollowUndo();
 							greenzone.InvalidateAndCheck(result);
 						}
 						break;
@@ -1241,31 +1247,31 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ACCEL_CTRL_Q:
 					{
 						selection.undo();
-						list.FollowSelection();
+						piano_roll.FollowSelection();
 						break;
 					}
 				case ID_EDIT_SELECTIONREDO:
 				case ACCEL_CTRL_W:
 					{
 						selection.redo();
-						list.FollowSelection();
+						piano_roll.FollowSelection();
 						break;
 					}
 				case ID_EDIT_RESELECTCLIPBOARD:
 				case ACCEL_CTRL_B:
 					{
 						selection.ReselectClipboard();
-						list.FollowSelection();
+						piano_roll.FollowSelection();
 						break;
 					}
 				case IDC_JUMP_PLAYBACK_BUTTON:
 					{
-						list.FollowPlayback();
+						piano_roll.FollowPlayback();
 						break;
 					}
 				case IDC_JUMP_SELECTION_BUTTON:
 					{
-						list.FollowSelection();
+						piano_roll.FollowSelection();
 						break;
 					}
 				case ID_SELECTED_SETMARKER:
@@ -1283,7 +1289,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 									if (markers_manager.SetMarker(*it))
 									{
 										changes_made = true;
-										list.RedrawRow(*it);
+										piano_roll.RedrawRow(*it);
 									}
 								}
 							}
@@ -1309,7 +1315,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								{
 									markers_manager.ClearMarker(*it);
 									changes_made = true;
-									list.RedrawRow(*it);
+									piano_roll.RedrawRow(*it);
 								}
 							}
 							if (changes_made)
@@ -1395,7 +1401,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			break;
 		}
 		case WM_MOUSEWHEEL:
-			return SendMessage(list.hwndList, uMsg, wParam, lParam);
+			return SendMessage(piano_roll.hwndList, uMsg, wParam, lParam);
 
 		default:
 			break;

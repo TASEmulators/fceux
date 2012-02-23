@@ -1,4 +1,17 @@
-//Implementation file of TASEDITOR_LUA class
+// ---------------------------------------------------------------------------------
+// Implementation file of TASEDITOR_LUA class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Lua - Manager of Lua features
+[Singleton]
+* implements logic of all functions of "taseditor" Lua library
+* stores the list of pending input changes
+* on demend: (from FCEUX Lua engine) updates GUI items on "Lua" panel of TAS Editor window
+* stores resources: ids of joypads for input changes, max length of a name for applychanges()
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 
 extern TASEDITOR_CONFIG taseditor_config;
@@ -9,8 +22,8 @@ extern BOOKMARKS bookmarks;
 extern RECORDER recorder;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
-extern TASEDITOR_LIST list;
-extern TASEDITOR_SELECTION selection;
+extern PIANO_ROLL piano_roll;
+extern SELECTION selection;
 
 extern void TaseditorUpdateManualFunctionStatus();
 
@@ -116,8 +129,8 @@ int TASEDITOR_LUA::setmarker(int frame)
 				// new marker was created - register changes in TAS Editor
 				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
-				list.RedrawRow(frame);
-				list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+				piano_roll.RedrawRow(frame);
+				piano_roll.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 			}
 		}
 		return marker_id;
@@ -136,8 +149,8 @@ void TASEDITOR_LUA::clearmarker(int frame)
 			// marker was deleted - register changes in TAS Editor
 			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_UNSET, frame);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			list.RedrawRow(frame);
-			list.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+			piano_roll.RedrawRow(frame);
+			piano_roll.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 		}
 	}
 }
@@ -409,8 +422,8 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 			// check if user deleted all frames
 			if (!currMovieData.getNumRecords())
 				playback.StartFromZero();
-			// reduce list
-			list.update();
+			// reduce Piano Roll
+			piano_roll.update();
 			// check actual changes
 			int result = history.RegisterLuaChanges(name, start_index, InsertionDeletion_was_made);
 			if (result >= 0)
@@ -419,7 +432,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 			} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
 			{
 				greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-			} else list.RedrawList();
+			} else piano_roll.RedrawList();
 
 			pending_changes.resize(0);
 			return result;

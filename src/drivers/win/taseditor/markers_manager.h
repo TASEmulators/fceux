@@ -1,4 +1,5 @@
-//Specification file for Markers_manager class
+// Specification file for Markers_manager class
+
 #include "markers.h"
 
 #define MARKERS_ID_LEN 8

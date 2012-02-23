@@ -1,13 +1,14 @@
-//Specification file for TASEDITOR_SELECTION class
+// Specification file for SELECTION class
+
 #include <set>
 typedef std::set<int> SelectionFrames;
 
 #define SELECTION_ID_LEN 10
 
-class TASEDITOR_SELECTION
+class SELECTION
 {
 public:
-	TASEDITOR_SELECTION();
+	SELECTION();
 	void init();
 	void free();
 	void reset();

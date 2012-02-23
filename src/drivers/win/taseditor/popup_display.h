@@ -1,4 +1,4 @@
-//Specification file for POPUP_DISPLAY class
+// Specification file for POPUP_DISPLAY class
 
 #define SCR_BMP_PHASE_MAX 10
 #define SCR_BMP_PHASE_ALPHA_MAX 8

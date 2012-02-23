@@ -54,7 +54,7 @@
 
 #include "./drivers/win/taseditor/taseditor_window.h"
 #include "./drivers/win/taseditor/markers.h"
-#include "./drivers/win/taseditor/taseditor_sel.h"
+#include "./drivers/win/taseditor/selection.h"
 #include "./drivers/win/taseditor/snapshot.h"
 #include "./drivers/win/taseditor/bookmarks.h"
 #include "./drivers/win/taseditor/playback.h"

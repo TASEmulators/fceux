@@ -1,4 +1,5 @@
-//Specification file for TASEDITOR_LUA class
+// Specification file for TASEDITOR_LUA class
+
 #define LUACHANGES_NAME_MAX_LEN 70			// custom name of operation should not be longer than 70 letters
 
 struct PENDING_CHANGES

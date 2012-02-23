@@ -1,4 +1,5 @@
-//Specification file for Input History class
+// Specification file for History class
+
 #define UNDO_HINT_TIME 200
 
 enum

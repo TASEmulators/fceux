@@ -1,4 +1,5 @@
-//Specification file for Bookmarks class
+// Specification file for Bookmarks class
+
 #include "bookmark.h"
 
 #define TOTAL_BOOKMARKS 10

@@ -1,4 +1,21 @@
-//Implementation file of History class (Undo feature)
+// ---------------------------------------------------------------------------------
+// Implementation file of History class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+History - History of movie modifications
+[Singleton]
+* stores array of snapshots and pointer to current (last) snapshot
+* saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data
+* on demand: checks the difference between the last snapshot and current movie, and makes a decision to create new point of rollback. In special cases it can create a point of rollback without checking the difference, assuming that caller already checked it
+* implements all restoring operations: undo, redo, revert to any snapshot from the array
+* also stores the state of "undo pointer"
+* regularly updates the state of "undo pointer"
+* implements the working of History List: creating, redrawing, clicks, auto-scrolling
+* stores resources: save id, ids and names of all possible types of modification, timings of "undo pointer"
+*/
+// ---------------------------------------------------------------------------------
+
 #include "taseditor_project.h"
 
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -9,10 +26,10 @@ extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
 extern PLAYBACK playback;
-extern TASEDITOR_SELECTION selection;
+extern SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
-extern TASEDITOR_LIST list;
+extern PIANO_ROLL piano_roll;
 extern TASEDITOR_LUA taseditor_lua;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
@@ -112,7 +129,7 @@ void HISTORY::update()
 {
 	// update undo_hint
 	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0)
-		list.RedrawRow(old_undo_hint_pos);		// not changing bookmarks list
+		piano_roll.RedrawRow(old_undo_hint_pos);		// not changing Bookmarks List
 	old_undo_hint_pos = undo_hint_pos;
 	old_show_undo_hint = show_undo_hint;
 	show_undo_hint = false;
@@ -124,7 +141,7 @@ void HISTORY::update()
 			undo_hint_pos = -1;	// finished hinting
 	}
 	if (old_show_undo_hint != show_undo_hint)
-		list.RedrawRow(undo_hint_pos);			// not changing bookmarks list
+		piano_roll.RedrawRow(undo_hint_pos);			// not changing Bookmarks List
 }
 
 // returns frame of first input change (for greenzone invalidation)
@@ -167,18 +184,18 @@ int HISTORY::jump(int new_pos)
 		snapshots[real_pos].toMovie(currMovieData, first_change);
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
-		// list will be redrawn by greenzone invalidation
+		// and Piano Roll will be redrawn by greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
 		bookmarks.ChangesMadeSinceBranch();
-		list.RedrawList();
-		list.FollowUndo();
+		piano_roll.RedrawList();
+		piano_roll.FollowUndo();
 	} else if (taseditor_config.enable_hot_changes)
 	{
-		// when using Hot Changes, list should be always redrawn, because old changes become less hot
-		list.RedrawList();
+		// when using Hot Changes, Piano Roll should be always redrawn, because old changes become less hot
+		piano_roll.RedrawList();
 	}
 
 	return first_change;
@@ -493,7 +510,7 @@ void HISTORY::RegisterImport(MovieData& md, char* filename)
 		}
 		AddSnapshotToHistory(inp);
 		inp.toMovie(currMovieData);
-		list.update();
+		piano_roll.update();
 		bookmarks.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 		greenzone.InvalidateAndCheck(first_changes);
@@ -688,8 +705,8 @@ void HISTORY::Click(LPNMITEMACTIVATE info)
 		int result = jump(item);
 		if (result >= 0)
 		{
-			list.update();
-			list.FollowUndo();
+			piano_roll.update();
+			piano_roll.FollowUndo();
 			greenzone.InvalidateAndCheck(result);
 			return;
 		}
@@ -758,7 +775,7 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			// Right button/Ctrl/Shift/Alt + wheel -> send the message to Piano Roll
 			// but if just wheel - use default scrolling here
 			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL) || (GetKeyState(VK_MENU) < 0))
-				return SendMessage(list.hwndList, msg, wParam, lParam);
+				return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 		}
 
 	}

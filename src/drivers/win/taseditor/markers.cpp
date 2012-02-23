@@ -1,4 +1,15 @@
-//Implementation file of Markers class
+// ---------------------------------------------------------------------------------
+// Implementation file of Markers class
+// (C) 2011-2012 AnS
+// ---------------------------------------------------------------------------------
+/*
+Markers - Snapshot of Markers state
+* stores the data about Markers state: array of distributing Markers among movie frames, and array of Notes
+* saves and loads the data from a project file. On error: sends warning to caller
+* stores resources: max length of a Note
+*/
+// ---------------------------------------------------------------------------------
+
 #include "../common.h"
 #include "markers.h"
 #include "zlib.h"
