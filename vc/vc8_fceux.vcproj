@@ -2339,6 +2339,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\drivers\win\taseditor\piano_roll.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\piano_roll.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\drivers\win\taseditor\playback.cpp"
 						>
 					</File>
@@ -2360,6 +2368,14 @@
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditor\recorder.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\selection.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\selection.h"
 						>
 					</File>
 					<File
@@ -2387,14 +2403,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\src\drivers\win\taseditor\taseditor_list.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\taseditor\taseditor_list.h"
-						>
-					</File>
-					<File
 						RelativePath="..\src\drivers\win\taseditor\taseditor_lua.cpp"
 						>
 					</File>
@@ -2408,14 +2416,6 @@
 					</File>
 					<File
 						RelativePath="..\src\drivers\win\taseditor\taseditor_project.h"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\taseditor\taseditor_sel.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\src\drivers\win\taseditor\taseditor_sel.h"
 						>
 					</File>
 					<File
