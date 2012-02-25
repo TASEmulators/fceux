@@ -80,91 +80,6 @@ void PLAYBACK::reset()
 }
 void PLAYBACK::update()
 {
-	jump_was_used_this_frame = false;
-
-	// forget lost_position_frame when the position is restored
-	if (currFrameCounter + 1 == lost_position_frame)
-		lost_position_frame = 0;
-
-	// pause when seeking hit pause_frame
-	if(!FCEUI_EmulationPaused())
-		if(pause_frame && pause_frame <= currFrameCounter + 1)
-			SeekingStop();
-
-	// update flashing pauseframe
-	if (old_pauseframe != pause_frame && old_pauseframe)
-	{
-		// pause_frame was changed, clear old_pauseframe gfx
-		piano_roll.RedrawRow(old_pauseframe-1);
-		bookmarks.RedrawChangedBookmarks(old_pauseframe-1);
-	}
-	old_pauseframe = pause_frame;
-	old_show_pauseframe = show_pauseframe;
-	if (pause_frame)
-	{
-		if (emu_paused)
-			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_PAUSED) & 1;
-		else
-			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
-	} else show_pauseframe = false;
-	if (old_show_pauseframe != show_pauseframe)
-	{
-		// update pauseframe gfx
-		piano_roll.RedrawRow(pause_frame-1);
-		bookmarks.RedrawChangedBookmarks(pause_frame-1);
-	}
-
-	// update seeking progressbar
-	old_emu_paused = emu_paused;
-	emu_paused = (FCEUI_EmulationPaused() != 0);
-	if (pause_frame)
-	{
-		if (old_show_pauseframe != show_pauseframe)
-			SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
-	} else if (old_emu_paused != emu_paused)
-	{
-		// emulator got paused/unpaused externally
-		if (old_emu_paused && !emu_paused)
-			// externally unpaused - progressbar should be empty
-			SetProgressbar(0, 1);
-		else
-			// externally paused - progressbar should be full
-			SetProgressbar(1, 1);
-	}
-
-	// update the playback cursor
-	if(currFrameCounter != lastCursor)
-	{
-		piano_roll.FollowPlaybackIfNeeded();
-		// update gfx of the old and new rows
-		piano_roll.RedrawRow(lastCursor);
-		bookmarks.RedrawChangedBookmarks(lastCursor);
-		piano_roll.RedrawRow(currFrameCounter);
-		bookmarks.RedrawChangedBookmarks(currFrameCounter);
-		lastCursor = currFrameCounter;
-		if (!turbo)
-			// enforce redrawing now
-			UpdateWindow(piano_roll.hwndList);
-		// lazy update of "Playback's Marker text"
-		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
-		if (shown_marker != current_marker)
-		{
-			markers_manager.UpdateMarkerNote();
-			shown_marker = current_marker;
-			RedrawMarker();
-			must_find_current_marker = false;
-		}
-	}
-
-	// [non-lazy] update "Playback's Marker text" if needed
-	if (must_find_current_marker)
-	{
-		markers_manager.UpdateMarkerNote();
-		shown_marker = markers_manager.GetMarkerUp(currFrameCounter);
-		RedrawMarker();
-		must_find_current_marker = false;
-	}
-	
 	// update < and > buttons
 	old_rewind_button_state = rewind_button_state;
 	rewind_button_state = ((Button_GetState(hwndRewind) & BST_PUSHED) != 0 || Taseditor_rewind_now);
@@ -220,6 +135,88 @@ void PLAYBACK::update()
 		}
 	}
 
+	// forget lost_position_frame when the position is restored
+	if (currFrameCounter + 1 == lost_position_frame)
+		lost_position_frame = 0;
+
+	// pause when seeking hit pause_frame
+	if(!FCEUI_EmulationPaused())
+		if(pause_frame && pause_frame <= currFrameCounter + 1)
+			SeekingStop();
+
+	// update flashing pauseframe
+	if (old_pauseframe != pause_frame && old_pauseframe)
+	{
+		// pause_frame was changed, clear old_pauseframe gfx
+		piano_roll.RedrawRow(old_pauseframe-1);
+		bookmarks.RedrawChangedBookmarks(old_pauseframe-1);
+	}
+	old_pauseframe = pause_frame;
+	old_show_pauseframe = show_pauseframe;
+	if (pause_frame)
+	{
+		if (emu_paused)
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_PAUSED) & 1;
+		else
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
+	} else show_pauseframe = false;
+	if (old_show_pauseframe != show_pauseframe)
+	{
+		// update pauseframe gfx
+		piano_roll.RedrawRow(pause_frame-1);
+		bookmarks.RedrawChangedBookmarks(pause_frame-1);
+	}
+
+	// update seeking progressbar
+	old_emu_paused = emu_paused;
+	emu_paused = (FCEUI_EmulationPaused() != 0);
+	if (pause_frame)
+	{
+		if (old_show_pauseframe != show_pauseframe)
+			SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
+	} else if (old_emu_paused != emu_paused)
+	{
+		// emulator got paused/unpaused externally
+		if (old_emu_paused && !emu_paused)
+			// externally unpaused - progressbar should be empty
+			SetProgressbar(0, 1);
+		else
+			// externally paused - progressbar should be full
+			SetProgressbar(1, 1);
+	}
+
+	// update the playback cursor
+	if(currFrameCounter != lastCursor)
+	{
+		// update gfx of the old and new rows
+		piano_roll.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
+		piano_roll.RedrawRow(currFrameCounter);
+		bookmarks.RedrawChangedBookmarks(currFrameCounter);
+		lastCursor = currFrameCounter;
+		piano_roll.FollowPlaybackIfNeeded();
+		if (!turbo)
+			// enforce redrawing now
+			UpdateWindow(piano_roll.hwndList);
+		// lazy update of "Playback's Marker text"
+		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
+		if (shown_marker != current_marker)
+		{
+			markers_manager.UpdateMarkerNote();
+			shown_marker = current_marker;
+			RedrawMarker();
+			must_find_current_marker = false;
+		}
+	}
+
+	// [non-lazy] update "Playback's Marker text" if needed
+	if (must_find_current_marker)
+	{
+		markers_manager.UpdateMarkerNote();
+		shown_marker = markers_manager.GetMarkerUp(currFrameCounter);
+		RedrawMarker();
+		must_find_current_marker = false;
+	}
 }
 
 void PLAYBACK::updateProgressbar()
@@ -311,41 +308,47 @@ void PLAYBACK::ForwardFrame()
 }
 void PLAYBACK::RewindFull(int speed)
 {
-	if (!jump_was_used_this_frame)
+	int index = currFrameCounter - 1;
+	// jump trough "speed" amount of previous markers
+	while (speed > 0)
 	{
-		int index = currFrameCounter - 1;
-		// jump trough "speed" amount of previous markers
-		while (speed > 0)
-		{
-			for (; index >= 0; index--)
-				if (markers_manager.GetMarker(index)) break;
-			speed--;
-		}
-		if (index >= 0)
-			jump(index);
-		else
-			jump(0);
-		jump_was_used_this_frame = true;
+		for (; index >= 0; index--)
+			if (markers_manager.GetMarker(index)) break;
+		speed--;
+	}
+	int lastCursor = currFrameCounter;
+	if (index >= 0)
+		jump(index);
+	else
+		jump(0);
+	if (lastCursor != currFrameCounter)
+	{
+		// redraw row where Playback cursor was (in case there's two or more RewindFulls before playback.update())
+		piano_roll.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
 	}
 }
 void PLAYBACK::ForwardFull(int speed)
 {
-	if (!jump_was_used_this_frame)
+	int last_frame = currMovieData.getNumRecords()-1;
+	int index = currFrameCounter + 1;
+	// jump trough "speed" amount of next markers
+	while (speed > 0)
 	{
-		int last_frame = currMovieData.getNumRecords()-1;
-		int index = currFrameCounter + 1;
-		// jump trough "speed" amount of next markers
-		while (speed > 0)
-		{
-			for (; index <= last_frame; ++index)
-				if (markers_manager.GetMarker(index)) break;
-			speed--;
-		}
-		if (index <= last_frame)
-			jump(index);
-		else
-			jump(last_frame);
-		jump_was_used_this_frame = true;
+		for (; index <= last_frame; ++index)
+			if (markers_manager.GetMarker(index)) break;
+		speed--;
+	}
+	int lastCursor = currFrameCounter;
+	if (index <= last_frame)
+		jump(index);
+	else
+		jump(last_frame);
+	if (lastCursor != currFrameCounter)
+	{
+		// redraw row where Playback cursor was (in case there's two or more ForwardFulls before playback.update())
+		piano_roll.RedrawRow(lastCursor);
+		bookmarks.RedrawChangedBookmarks(lastCursor);
 	}
 }
 

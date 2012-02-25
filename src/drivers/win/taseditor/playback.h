@@ -64,7 +64,4 @@ private:
 	int button_hold_time;
 	int seeking_start_frame;
 
-	// temps
-	bool jump_was_used_this_frame;
-
 };

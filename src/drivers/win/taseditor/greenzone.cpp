@@ -15,7 +15,7 @@ Greenzone - Access zone
 * saves and loads the data from a project file. On error: truncates Greenzone to last successfully read savestate
 * regularly checks if there's a savestate of current emulation state, if there's no such savestate in array then creates one and updates lag info for previous frame
 * regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates
-* on demand: (when movie input was changed) truncates the size of Greenzone, ףהאכÿÿ ס‎יגû, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
+* on demand: (when movie input was changed) truncates the size of Greenzone, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
 * stores resources: save id, properties of gradual cleaning, timing of cleaning
 ------------------------------------------------------------------------------------ */
 

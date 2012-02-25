@@ -321,6 +321,7 @@ void TASEDITOR_LUA::submitinputchange(int frame, int joypad, int input)
 	}
 }
 
+// taseditor.submitinsertframes(int frame, int number)
 void TASEDITOR_LUA::submitinsertframes(int frame, int number)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
@@ -337,6 +338,7 @@ void TASEDITOR_LUA::submitinsertframes(int frame, int number)
 	}
 }
 
+// taseditor.submitdeleteframes(int frame, int number)
 void TASEDITOR_LUA::submitdeleteframes(int frame, int number)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
@@ -458,24 +460,5 @@ void TASEDITOR_LUA::clearinputchanges()
 		pending_changes.resize(0);
 	}
 }
-
-	
-
-
-
-
 // --------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
 

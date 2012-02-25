@@ -9,6 +9,8 @@
 #define EVERY4TH 0xFFFFFFFC
 #define EVERY2ND 0xFFFFFFFE
 
+#define PROGRESSBAR_UPDATE_RATE 1000	// progressbar is updated after every 1000 savestates loaded from fm3
+
 class GREENZONE
 {
 public:

@@ -53,9 +53,6 @@
 #ifdef WIN32
 #include "drivers/win/pref.h"
 
-#include "drivers/win/taseditor/greenzone.h"
-extern GREENZONE greenzone;
-
 extern bool TaseditorIsRecording();
 #endif
 

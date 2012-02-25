@@ -417,7 +417,7 @@ void SELECTION::ClearSelection()
 }
 void SELECTION::ClearRowSelection(int index)
 {
-	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
 
 void SELECTION::EnforceSelectionToList()
@@ -442,7 +442,7 @@ void SELECTION::SetRowSelection(int index)
 void SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i <= end; ++i)
-		ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SelectBetweenMarkers()
 {
@@ -465,8 +465,7 @@ void SELECTION::SelectBetweenMarkers()
 	for (lower_marker = center+1; lower_marker < movie_size; ++lower_marker)
 		if (markers_manager.GetMarker(lower_marker)) break;
 
-	// clear selection without clearing focused, because otherwise there's strange bug when quickly pressing Ctrl+A right after clicking on already selected row
-	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_SELECTED);
+	ClearSelection();
 
 	// special case
 	if (upper_marker == -1 && lower_marker == movie_size)

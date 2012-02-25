@@ -187,6 +187,7 @@ void PIANO_ROLL::init()
 }
 void PIANO_ROLL::free()
 {
+	auto_mouseup_timer = 0;
 	if (hMainListFont)
 	{
 		DeleteObject(hMainListFont);
@@ -221,6 +222,7 @@ void PIANO_ROLL::free()
 }
 void PIANO_ROLL::reset()
 {
+	auto_mouseup_timer = 0;
 	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
@@ -1060,6 +1062,12 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return 0;
 			break;
 		}
+		case WM_TIMER:
+			// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
+			if (piano_roll.auto_mouseup_timer)
+				PostMessage(hWnd, WM_LBUTTONUP, 0, 0);
+			// also disable timer of entering edit mode (there's no edit mode anyway)
+			return 0;
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
 		{
@@ -1100,23 +1108,43 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
 							piano_roll.RedrawRow(row_index);
 						}
-						// also select the row
+						// also select the row by calling hwndList_oldWndProc
+						// WARNING: incredible hack incoming!
+						// This allows to intercept normal behaviour of ListView while still using it for setting selection
+						// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
+						piano_roll.auto_mouseup_timer = SetTimer(0, 0, TIME_TO_GENERATE_AUTO_MOUSEUP, 0);
 						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+						KillTimer(0, piano_roll.auto_mouseup_timer);
+						piano_roll.auto_mouseup_timer = 0;
 					}
 				} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 				{
 					// clicked on input
 					// first call old wndproc to set selection on the row
 					if (alt_pressed)
+						wParam |= MK_SHIFT;		// Alt should select region, just like Shift
+					// WARNING: incredible hack incoming!
+					// This allows to intercept normal behaviour of ListView while still using it for setting selection
+					if (msg == WM_LBUTTONDOWN)
 					{
-						// Alt should select region, just like Shift
-						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam|MK_SHIFT, lParam);
+						// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
+						piano_roll.auto_mouseup_timer = SetTimer(0, 0, TIME_TO_GENERATE_AUTO_MOUSEUP, 0);
+						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+						KillTimer(0, piano_roll.auto_mouseup_timer);
+						piano_roll.auto_mouseup_timer = 0;
+						// ehh... normally we should not even call oldWndProc with WM_LBUTTONDOWN, but we need it for setting selection
+					} else
+					{
+						// as for WM_LBUTTONDBLCLK, it won't freeze the window, so no need for hacks with SetTimer
+						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+					}
+					if (alt_pressed)
+					{
 						int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 						int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 						piano_roll.InputColumnSetPattern(joy, button);
 					} else
 					{
-						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 						piano_roll.ToggleJoypadBit(column_index, row_index, GET_KEYSTATE_WPARAM(wParam));
 					}
 				}
@@ -1158,7 +1186,14 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					zDelta *= BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED;
 				int destination_frame = currFrameCounter - (zDelta / 120);
 				if (destination_frame < 0) destination_frame = 0;
+				int lastCursor = currFrameCounter;
 				playback.jump(destination_frame);
+				if (lastCursor != currFrameCounter)
+				{
+					// redraw row where Playback cursor was (in case there's two or more WM_MOUSEWHEEL messages before playback.update())
+					piano_roll.RedrawRow(lastCursor);
+					bookmarks.RedrawChangedBookmarks(lastCursor);
+				}
 				return 0;
 			}
 			break;

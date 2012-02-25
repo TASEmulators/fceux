@@ -679,7 +679,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_FRAME_ADVANCE,					EMUCMDTYPE_MISC,	FCEUI_FrameAdvance, FCEUI_FrameAdvanceEnd, 0, "Frame Advance", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SCREENSHOT,					EMUCMDTYPE_MISC,	FCEUI_SaveSnapshot,	  0, 0, "Screenshot", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_HIDE_MENU_TOGGLE,				EMUCMDTYPE_MISC,	FCEUD_HideMenuToggle, 0, 0, "Hide Menu Toggle", 0 },
-	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	FCEUI_DoExit,			  0, 0, "Exit", 0},
+	{ EMUCMD_EXIT,							EMUCMDTYPE_MISC,	FCEUI_DoExit,			  0, 0, "Exit", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SPEED_SLOWEST,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Slowest Speed", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SPEED_SLOWER,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Speed Down", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SPEED_NORMAL,					EMUCMDTYPE_SPEED,	CommandEmulationSpeed, 0, 0, "Normal Speed", EMUCMDFLAG_TASEDITOR },
@@ -736,16 +736,16 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MOVIE_ICON_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUD_ToggleStatusIcon, 0, 0, "Toggle Status Icon", EMUCMDFLAG_TASEDITOR },
 
 	#ifdef _S9XLUA_H
-	{ EMUCMD_SCRIPT_RELOAD,					EMUCMDTYPE_MISC,	FCEU_ReloadLuaCode, 0, 0, "Reload current Lua script", 0 },
+	{ EMUCMD_SCRIPT_RELOAD,					EMUCMDTYPE_MISC,	FCEU_ReloadLuaCode, 0, 0, "Reload current Lua script", EMUCMDFLAG_TASEDITOR },
 	#endif
 
 	{ EMUCMD_SOUND_TOGGLE,					EMUCMDTYPE_SOUND,	FCEUD_SoundToggle, 0, 0, "Sound Mute Toggle", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_SOUND_VOLUME_UP,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Up", 0 },
-	{ EMUCMD_SOUND_VOLUME_DOWN,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Down", 0 },
-	{ EMUCMD_SOUND_VOLUME_NORMAL,			EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Normal", 0 },
+	{ EMUCMD_SOUND_VOLUME_UP,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Up", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_SOUND_VOLUME_DOWN,				EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Down", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_SOUND_VOLUME_NORMAL,			EMUCMDTYPE_SOUND,	CommandSoundAdjust, 0, 0, "Sound Volume Normal", EMUCMDFLAG_TASEDITOR },
 
-	{ EMUCMD_AVI_RECORD_AS,					EMUCMDTYPE_AVI,		FCEUD_AviRecordTo, 0, 0, "Record AVI As...", 0 },
-	{ EMUCMD_AVI_STOP,						EMUCMDTYPE_AVI,		FCEUD_AviStop, 0, 0, "Stop AVI", 0 },
+	{ EMUCMD_AVI_RECORD_AS,					EMUCMDTYPE_AVI,		FCEUD_AviRecordTo, 0, 0, "Record AVI As...", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_AVI_STOP,						EMUCMDTYPE_AVI,		FCEUD_AviStop, 0, 0, "Stop AVI", EMUCMDFLAG_TASEDITOR },
 
 	{ EMUCMD_FDS_EJECT_INSERT,				EMUCMDTYPE_FDS,		FCEUI_FDSInsert, 0, 0, "Eject or Insert FDS Disk", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_FDS_SIDE_SELECT,				EMUCMDTYPE_FDS,		FCEUI_FDSSelect, 0, 0, "Switch FDS Disk Side", EMUCMDFLAG_TASEDITOR },
@@ -766,27 +766,27 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_MISC_USE_INPUT_PRESET_1,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 1", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_2,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 2", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_USE_INPUT_PRESET_3,		EMUCMDTYPE_MISC,	CommandUsePreset, 0, 0, "Use Input Preset 3", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", 0 },
-	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", 0 },
+	{ EMUCMD_MISC_DISPLAY_BG_TOGGLE,		EMUCMDTYPE_MISC,	BackgroundDisplayToggle, 0, 0, "Toggle Background Display", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_MISC_DISPLAY_OBJ_TOGGLE,		EMUCMDTYPE_MISC,	ObjectDisplayToggle, 0, 0, "Toggle Object Display", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_DISPLAY_LAGCOUNTER_TOGGLE,EMUCMDTYPE_MISC,	LagCounterToggle, 0, 0, "Lag Counter Toggle", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_OPENTASEDITOR,			EMUCMDTYPE_TOOL,	LaunchTasEditor,  0, 0, "Open TAS Editor", 0},
 	{ EMUCMD_TOOL_OPENMEMORYWATCH,			EMUCMDTYPE_TOOL,	LaunchMemoryWatch,0, 0, "Open Memory Watch", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", 0},
-	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", 0},
-	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", 0},
-	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", 0},
-	{ EMUCMD_TOOL_OPENNTVIEW,				EMUCMDTYPE_TOOL,	LaunchNTView,		  0, 0, "Open Name Table Viewer", 0},
-	{ EMUCMD_TOOL_OPENTRACELOGGER,			EMUCMDTYPE_TOOL,	LaunchTraceLogger, 0, 0, "Open Trace Logger", 0},
-	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", 0},
-	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", 0},
+	{ EMUCMD_TOOL_OPENCHEATS,				EMUCMDTYPE_TOOL,	LaunchCheats,	  0, 0, "Open Cheats", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENDEBUGGER,				EMUCMDTYPE_TOOL,	LaunchDebugger,   0, 0, "Open Debugger", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENHEX,					EMUCMDTYPE_TOOL,	LaunchHex,		  0, 0, "Open Hex Editor", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENPPU,					EMUCMDTYPE_TOOL,	LaunchPPU,		  0, 0, "Open PPU Viewer", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENNTVIEW,				EMUCMDTYPE_TOOL,	LaunchNTView,		  0, 0, "Open Name Table Viewer", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENTRACELOGGER,			EMUCMDTYPE_TOOL,	LaunchTraceLogger, 0, 0, "Open Trace Logger", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TOOL_OPENCDLOGGER,				EMUCMDTYPE_TOOL,	LaunchCodeDataLogger, 0, 0, "Open Code/Data Logger", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_FRAMEADV_SKIPLAG,				EMUCMDTYPE_MISC,	FA_SkipLag,		  0, 0,  "Frame Adv.-Skip Lag", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_OPENROM,						EMUCMDTYPE_TOOL,	OpenRom,		  0, 0,  "Open ROM", 0},
 	{ EMUCMD_CLOSEROM,						EMUCMDTYPE_TOOL,	CloseRom,		  0, 0,	 "Close ROM", 0},
 	{ EMUCMD_RELOAD,						EMUCMDTYPE_TOOL,	ReloadRom,		  0, 0,	 "Reload ROM or TAS Editor Project", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", 0},
+	{ EMUCMD_MISC_DISPLAY_MOVIESUBTITLES,	EMUCMDTYPE_MISC,	MovieSubtitleToggle,0,0,"Toggle Movie Subtitles", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,		EMUCMDTYPE_MISC,	UndoRedoSavestate,  0,0,"Undo/Redo Savestate",    0},
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,			EMUCMDTYPE_MISC,	ToggleFullscreen, 0, 0, "Toggle Fullscreen",	  0},
 	{ EMUCMD_TOOL_OPENRAMWATCH,				EMUCMDTYPE_TOOL,	LaunchRamWatch,	  0, 0, "Open Ram Watch", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,  0, 0, "Open Ram Search",		  0},
+	{ EMUCMD_TOOL_OPENRAMSEARCH,			EMUCMDTYPE_TOOL,	LaunchRamSearch,  0, 0, "Open Ram Search", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TOOL_RAMSEARCHLT,				EMUCMDTYPE_TOOL,	RamSearchOpLT,	  0, 0, "Ram Search - Less Than", 0},
 	{ EMUCMD_TOOL_RAMSEARCHGT,				EMUCMDTYPE_TOOL,	RamSearchOpGT,	  0, 0, "Ram Search - Greater Than", 0},
 	{ EMUCMD_TOOL_RAMSEARCHLTE,				EMUCMDTYPE_TOOL,	RamSearchOpLTE,	  0, 0, "Ram Search - Less Than or Equal", 0},
@@ -811,7 +811,7 @@ void FCEUI_HandleEmuCommands(TestCommandState* testfn)
 		int old_state = FCEUI_CommandTable[i].state;
 		execcmd = FCEUI_CommandTable[i].cmd;
 		new_state = (*testfn)(execcmd);
-		// in TAS Editor mode forbid commands without the taseditor flag
+		// in TAS Editor mode forbid commands without EMUCMDFLAG_TASEDITOR flag
 		bool allow = true;
 		if(taseditor && !(FCEUI_CommandTable[i].flags & EMUCMDFLAG_TASEDITOR))
 			allow = false;
