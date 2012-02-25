@@ -82,6 +82,11 @@ bool internalSaveLoad = false;
 bool backupSavestates = true;
 bool compressSavestates = true;  //By default FCEUX compresses savestates when a movie is inactive.
 
+// a temp memory stream. We'll be dumping some data here and then compress
+EMUFILE_MEMORY memory_savestate;
+// temporary buffer for compressed data of a savestate
+std::vector<uint8> compressed_buf;
+
 #define SFMDATA_SIZE (64)
 static SFORMAT SFMDATA[SFMDATA_SIZE];
 static int SFEXINDEX;
@@ -355,11 +360,10 @@ extern int geniestage;
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
-	//a temp memory stream. we'll dump some data here and then compress
-	//TODO - support dumping directly without compressing to save a buffer copy
+	// reset memory_savestate
+	memory_savestate.set_len(0);
 
-	EMUFILE_MEMORY ms;
-	EMUFILE* os = &ms;
+	EMUFILE* os = &memory_savestate;
 
 	uint32 totalsize = 0;
 
@@ -404,7 +408,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	if(SPreSave) SPostSave();
 
 	//save the length of the file
-	int len = ms.size();
+	int len = memory_savestate.size();
 
 	//sanity check: len and totalsize should be the same
 	if(len != totalsize)
@@ -414,15 +418,16 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	}
 
 	int error = Z_OK;
-	uint8* cbuf = (uint8*)ms.buf();
+	uint8* cbuf = (uint8*)memory_savestate.buf();
 	uLongf comprlen = -1;
 	if(compressionLevel != Z_NO_COMPRESSION && compressSavestates)
 	{
-		//worst case compression.
-		//zlib says "0.1% larger than sourceLen plus 12 bytes"
+		// worst case compression: zlib says "0.1% larger than sourceLen plus 12 bytes"
 		comprlen = (len>>9)+12 + len;
-		cbuf = new uint8[comprlen];
-		error = compress2(cbuf,&comprlen,(uint8*)ms.buf(),len,compressionLevel);
+		if (compressed_buf.size() < comprlen) compressed_buf.resize(comprlen);
+		cbuf = &compressed_buf[0];
+		// do compression
+		error = compress2(cbuf, &comprlen, (uint8*)memory_savestate.buf(), len, compressionLevel);
 	}
 
 	//dump the header
@@ -435,7 +440,6 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	outstream->fwrite((char*)header,16);
 	outstream->fwrite((char*)cbuf,comprlen==-1?totalsize:comprlen);
 
-	if(cbuf != (uint8*)ms.buf()) delete[] cbuf;
 	return error == Z_OK;
 }
 
@@ -644,30 +648,31 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	int stateversion = FCEU_de32lsb(header + 8);
 	int comprlen = FCEU_de32lsb(header + 12);
 
-	std::vector<uint8> buf(totalsize);
+	// memory_savestate is global variable which already has its vector of bytes
+	if ((int)(memory_savestate.get_vec())->size() < totalsize)
+		(memory_savestate.get_vec())->resize(totalsize);
+	memory_savestate.set_len(totalsize);
+	memory_savestate.fseek(0, SEEK_SET);
 
-	//not compressed:
 	if(comprlen != -1)
 	{
-		//load the compressed chunk and decompress
-		std::vector<char> cbuf(comprlen);
-		is->fread((char*)&cbuf[0],comprlen);
+		// the savestate is compressed: read from is to compressed_buf, then decompress from compressed_buf to memory_savestate.vec
+		if ((int)compressed_buf.size() < comprlen) compressed_buf.resize(comprlen);
+		is->fread(&compressed_buf[0], comprlen);
 
 		uLongf uncomprlen = totalsize;
-		int error = uncompress((uint8*)&buf[0],&uncomprlen,(uint8*)&cbuf[0],comprlen);
+		int error = uncompress(memory_savestate.buf(), &uncomprlen, &compressed_buf[0], comprlen);
 		if(error != Z_OK || uncomprlen != totalsize)
-			return false;
-		//we dont need to restore the backup here because we havent messed with the emulator state yet
-	}
-	else
+			return false;	// we dont need to restore the backup here because we havent messed with the emulator state yet
+	} else
 	{
-		is->fread((char*)&buf[0],totalsize);
+		// the savestate is not compressed: just read from is to memory_savestate.vec
+		is->fread(memory_savestate.buf(), totalsize);
 	}
 
 	FCEUMOV_PreLoad();
 
-	EMUFILE_MEMORY mstemp(&buf);
-	bool x = ReadStateChunks(&mstemp,totalsize)!=0;
+	bool x = (ReadStateChunks(&memory_savestate, totalsize) != 0);
 
 	//mbg 5/24/08 - we don't support old states, so this shouldnt matter.
 	//if(read_sfcpuc && stateversion<9500)
@@ -677,14 +682,13 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	{
 		GameStateRestore(stateversion);
 	}
-	if(x)
+	if (x)
 	{
 		FCEUPPU_LoadState(stateversion);
 		FCEUSND_LoadState(stateversion);
 		x=FCEUMOV_PostLoad();
-	}
-
-	if(!x && backup) {
+	} else if (backup)
+	{
 		msBackupSavestate.fseek(0,SEEK_SET);
 		FCEUSS_LoadFP(&msBackupSavestate,SSLOADPARAM_NOBACKUP);
 	}
