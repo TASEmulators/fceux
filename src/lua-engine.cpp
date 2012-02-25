@@ -84,6 +84,8 @@ extern "C"
 extern void AddRecentLuaFile(const char *filename);
 #endif
 
+extern bool turbo;
+
 struct LuaSaveState {
 	std::string filename;
 	EMUFILE_MEMORY *data;
@@ -238,7 +240,8 @@ static void FCEU_LuaOnStop() {
 	//	FCEUI_ToggleEmulationPause();
 	FCEUD_SetEmulationSpeed(EMUSPEED_NORMAL);		//TODO: Ideally lua returns the speed to the speed the user set before running the script
 													//rather than returning it to normal, and turbo off.  Perhaps some flags and a FCEUD_GetEmulationSpeed function
-	FCEUD_TurboOff();	//Turn off turbo
+	turbo = false;
+	//FCEUD_TurboOff();
 #ifdef WIN32
 	TaseditorUpdateManualFunctionStatus();
 #endif

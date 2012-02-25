@@ -700,13 +700,12 @@ LONG HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
 
 }
 
-void HISTORY::Click(LPNMITEMACTIVATE info)
+void HISTORY::Click(int row_index)
 {
 	// jump to pointed snapshot
-	int item = info->iItem;
-	if (item >= 0)
+	if (row_index >= 0)
 	{
-		int result = jump(item);
+		int result = jump(row_index);
 		if (result >= 0)
 		{
 			piano_roll.update();
@@ -758,6 +757,7 @@ int HISTORY::GetUndoHint()
 // ---------------------------------------------------------------------------------
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	extern HISTORY history;
 	switch(msg)
 	{
 		case WM_CHAR:
@@ -765,6 +765,19 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		case WM_KEYUP:
 		case WM_KILLFOCUS:
 			return 0;
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+			history.Click(info.iItem);
+			return 0;
+		}
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
@@ -773,6 +786,8 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		}
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONDBLCLK:
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			return 0;
 		case WM_MOUSEWHEEL:
 		{
@@ -781,6 +796,10 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL) || (GetKeyState(VK_MENU) < 0))
 				return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 		}
+        case WM_MOUSEACTIVATE:
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+            break;
 
 	}
 	return CallWindowProc(hwndHistoryList_oldWndProc, hWnd, msg, wParam, lParam);

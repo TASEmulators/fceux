@@ -93,7 +93,7 @@ void PIANO_ROLL::init()
 
 	hwndList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_LIST1);
 	// prepare the main listview
-	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES|LVS_EX_INFOTIP);
+	ListView_SetExtendedListViewStyleEx(hwndList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the header
 	hwndHeader = ListView_GetHeader(hwndList);
 	hwndHeader_oldWndproc = (WNDPROC)SetWindowLong(hwndHeader, GWL_WNDPROC, (LONG)HeaderWndProc);
@@ -187,7 +187,6 @@ void PIANO_ROLL::init()
 }
 void PIANO_ROLL::free()
 {
-	auto_mouseup_timer = 0;
 	if (hMainListFont)
 	{
 		DeleteObject(hMainListFont);
@@ -222,7 +221,6 @@ void PIANO_ROLL::free()
 }
 void PIANO_ROLL::reset()
 {
-	auto_mouseup_timer = 0;
 	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
@@ -1063,10 +1061,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case WM_TIMER:
-			// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
-			if (piano_roll.auto_mouseup_timer)
-				PostMessage(hWnd, WM_LBUTTONUP, 0, 0);
-			// also disable timer of entering edit mode (there's no edit mode anyway)
+			// disable timer of entering edit mode (there's no edit mode anyway)
 			return 0;
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
@@ -1109,13 +1104,8 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							piano_roll.RedrawRow(row_index);
 						}
 						// also select the row by calling hwndList_oldWndProc
-						// WARNING: incredible hack incoming!
-						// This allows to intercept normal behaviour of ListView while still using it for setting selection
-						// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
-						piano_roll.auto_mouseup_timer = SetTimer(0, 0, TIME_TO_GENERATE_AUTO_MOUSEUP, 0);
+						PostMessage(hWnd, WM_LBUTTONUP, 0, 0);		// ensure that oldWndProc will exit its modal message loop immediately
 						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-						KillTimer(0, piano_roll.auto_mouseup_timer);
-						piano_roll.auto_mouseup_timer = 0;
 					}
 				} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 				{
@@ -1123,21 +1113,9 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// first call old wndproc to set selection on the row
 					if (alt_pressed)
 						wParam |= MK_SHIFT;		// Alt should select region, just like Shift
-					// WARNING: incredible hack incoming!
-					// This allows to intercept normal behaviour of ListView while still using it for setting selection
 					if (msg == WM_LBUTTONDOWN)
-					{
-						// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
-						piano_roll.auto_mouseup_timer = SetTimer(0, 0, TIME_TO_GENERATE_AUTO_MOUSEUP, 0);
-						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-						KillTimer(0, piano_roll.auto_mouseup_timer);
-						piano_roll.auto_mouseup_timer = 0;
-						// ehh... normally we should not even call oldWndProc with WM_LBUTTONDOWN, but we need it for setting selection
-					} else
-					{
-						// as for WM_LBUTTONDBLCLK, it won't freeze the window, so no need for hacks with SetTimer
-						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-					}
+						PostMessage(hWnd, WM_LBUTTONUP, 0, 0);		// ensure that oldWndProc will exit its modal message loop immediately
+					CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 					if (alt_pressed)
 					{
 						int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
@@ -1199,10 +1177,9 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case WM_RBUTTONDOWN:
-			if (GetFocus() != piano_roll.hwndList)
-				SetFocus(piano_roll.hwndList);
-			return 0;
 		case WM_RBUTTONDBLCLK:
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			return 0;
 		case WM_RBUTTONUP:
 		{
@@ -1211,11 +1188,16 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-			// show context menu
+			// show context menu if user right-clicked on Frame#
 			if(info.iSubItem <= COLUMN_FRAMENUM || info.iSubItem >= COLUMN_FRAMENUM2)
 				piano_roll.RightClick(info);
 			return 0;
 		}
+        case WM_MOUSEACTIVATE:
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+            break;
+
 	}
 	return CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
 }

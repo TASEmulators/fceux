@@ -86,7 +86,7 @@ public:
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	void Click(LPNMITEMACTIVATE info);
+	void Click(int row_index);
 
 	void RedrawHistoryList();
 	void UpdateHistoryList();

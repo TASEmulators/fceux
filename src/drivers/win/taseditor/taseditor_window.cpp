@@ -728,10 +728,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case LVN_GETDISPINFO:
 					history.GetDispInfo((NMLVDISPINFO*)lParam);
 					break;
-				case NM_CLICK:
-				case NM_DBLCLK:
-					history.Click((LPNMITEMACTIVATE)lParam);
-					break;
 				}
 				break;
 			case TASEDITOR_PLAYSTOP:

@@ -18,7 +18,6 @@
 #define HEADER_DX_FIX 4
 
 #define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 2
-#define TIME_TO_GENERATE_AUTO_MOUSEUP 20		// in milliseconds
 
 enum
 {
@@ -162,9 +161,6 @@ public:
 	HIMAGELIST himglist;
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont;
 	HBRUSH bg_brush;
-
-	// very hacky way to force exit from modal message loop used by ListView's WM_LBUTTONDOWN handler
-	UINT_PTR auto_mouseup_timer;
 
 private:
 	void CenterListAt(int frame);
