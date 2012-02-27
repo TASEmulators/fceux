@@ -118,8 +118,8 @@ public:
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	void LeftClick(LPNMITEMACTIVATE info);
-	void RightClick(LPNMITEMACTIVATE info);
+	void LeftClick(int column_index, int row_index);
+	void RightClick(int column_index, int row_index);
 
 	int FindBookmarkAtFrame(int frame);
 	int GetCurrentBranch();

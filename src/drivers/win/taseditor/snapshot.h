@@ -46,13 +46,14 @@ public:
 	void inheritHotChanges(SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_DeleteSelection(SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges);
+	void inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames);
 	void inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set);
 	void fillHotChanges(SNAPSHOT& inp, int start = 0, int end = -1);
 
 	void SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits);
 	void SetMaxHotChange(int frame, int absolute_button);
 
-	void FadeHotChanges();
+	void FadeHotChanges(int start_byte = 0, int end_byte = -1);
 
 	int GetHotChangeInfo(int frame, int absolute_button);
 

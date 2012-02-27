@@ -5,11 +5,12 @@
 enum
 {
 	MODTYPE_INIT,
-	MODTYPE_CHANGE,		// deprecated
+	MODTYPE_UNDEFINED,
 	MODTYPE_SET,
 	MODTYPE_UNSET,
 	MODTYPE_PATTERN,
 	MODTYPE_INSERT,
+	MODTYPE_INSERTNUM,
 	MODTYPE_DELETE,
 	MODTYPE_TRUNCATE,
 	MODTYPE_CLEAR,
@@ -67,11 +68,13 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
 
-	int undo();
-	int redo();
 	int jump(int new_pos);
 
+	void undo();
+	void redo();
+
 	int RegisterChanges(int mod_type, int start = 0, int end =-1, const char* comment = 0);
+	int RegisterInsertNum(int start, int frames);
 	int RegisterPasteInsert(int start, SelectionFrames& inserted_set);
 	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1, const char* comment = 0);
 	void RegisterBranching(int mod_type, int first_change, int slot);

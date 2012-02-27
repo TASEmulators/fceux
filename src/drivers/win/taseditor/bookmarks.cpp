@@ -1068,27 +1068,21 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void BOOKMARKS::LeftClick(LPNMITEMACTIVATE info)
+void BOOKMARKS::LeftClick(int column_index, int row_index)
 {
-	int cell_x = info->iSubItem;
-	int cell_y = info->iItem;
-	if (cell_y >= 0 && cell_x >= 0)
+	if (row_index >= 0 && column_index >= 0)
 	{
-		if (cell_x <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
-			command(COMMAND_JUMP, (cell_y + 1) % TOTAL_BOOKMARKS);
-		else if (cell_x == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
-			command(COMMAND_DEPLOY, (cell_y + 1) % TOTAL_BOOKMARKS);
+		if (column_index <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
+			command(COMMAND_JUMP, (row_index + 1) % TOTAL_BOOKMARKS);
+		else if (column_index == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
+			command(COMMAND_DEPLOY, (row_index + 1) % TOTAL_BOOKMARKS);
 	}
-	// remove selection
-	ListView_SetItemState(hwndBookmarksList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
 }
-void BOOKMARKS::RightClick(LPNMITEMACTIVATE info)
+void BOOKMARKS::RightClick(int column_index, int row_index)
 {
-	int cell_y = info->iItem;
-	if (cell_y >= 0)
-		command(COMMAND_SET, (cell_y + 1) % TOTAL_BOOKMARKS);
-	// remove selection
-	ListView_SetItemState(hwndBookmarksList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	// set Bookmark
+	if (row_index >= 0)
+		command(COMMAND_SET, (row_index + 1) % TOTAL_BOOKMARKS);
 }
 
 int BOOKMARKS::FindBookmarkAtFrame(int frame)
@@ -1433,9 +1427,37 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			bookmarks.MouseMove(-1, -1);
 			break;
 		}
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+			bookmarks.LeftClick(info.iSubItem, info.iItem);
+			return 0;
+		}
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+			bookmarks.RightClick(info.iSubItem, info.iItem);
+			return 0;
+		}
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}
@@ -1475,9 +1497,20 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			EndPaint(hWnd, &ps);
 			return 0;
 		}
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			return 0;
+		}
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}

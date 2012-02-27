@@ -89,6 +89,13 @@ void PIANO_ROLL::init()
 		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
 		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
 		"Arial");									/*font name*/
+	hTaseditorAboutFont = CreateFont(24, 10,		/*Height,Width*/
+		0, 0,										/*escapement,orientation*/
+		FW_NORMAL, FALSE, FALSE, FALSE,				/*weight, italic, underline, strikeout*/
+		ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_MASK,	/*charset, precision, clipping*/
+		DEFAULT_QUALITY, DEFAULT_PITCH,				/*quality, and pitch*/
+		"Arial");								/*font name*/
+
 	bg_brush = CreateSolidBrush(GetSysColor(COLOR_BTNFACE));
 
 	hwndList = GetDlgItem(taseditor_window.hwndTasEditor, IDC_LIST1);
@@ -206,6 +213,11 @@ void PIANO_ROLL::free()
 	{
 		DeleteObject(hMarkersEditFont);
 		hMarkersEditFont = 0;
+	}
+	if (hTaseditorAboutFont)
+	{
+		DeleteObject(hTaseditorAboutFont);
+		hTaseditorAboutFont = 0;
 	}
 	if (bg_brush)
 	{
@@ -1132,6 +1144,8 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}

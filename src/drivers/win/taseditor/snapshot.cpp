@@ -637,12 +637,12 @@ void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 				region_len = 0;
 				// copy hotchanges of this frame
 				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
+				FadeHotChanges(pos, pos + bytes);
 				source_pos += bytes;
 			}
 			pos += bytes;
 			frame++;
 		}
-		FadeHotChanges();
 	} else
 	{
 		// no old data, just fill selected lines
@@ -673,7 +673,30 @@ void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 			frame++;
 		}
 	}
-} 
+}
+void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
+{
+	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+	// copy hot changes from source snapshot up to "start" and from "start+frames" to end
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
+	{
+		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
+		int bytes_to_copy = bytes * start;
+		int dest_pos = 0, source_pos = 0;
+		if (bytes_to_copy > source_size)
+			bytes_to_copy = source_size;
+		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
+		dest_pos += bytes_to_copy + bytes * frames;
+		source_pos += bytes_to_copy;
+		bytes_to_copy = this_size - dest_pos;
+		if (bytes_to_copy > source_size - source_pos)
+			bytes_to_copy = source_size - source_pos;
+		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
+		FadeHotChanges();
+	}
+	// now set filled lines on frames from start to start+frames
+	memset(&hot_changes[bytes * start], 0xFF, bytes * frames);
+}
 void SNAPSHOT::inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set)
 {
 	// copy hot changes from source snapshot and insert filled lines for inserted frames (which are represented by inserted_set)
@@ -696,12 +719,12 @@ void SNAPSHOT::inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, Sel
 			{
 				// copy hotchanges of this frame
 				memcpy(&hot_changes[pos], &source_of_hotchanges->hot_changes[source_pos], bytes);
+				FadeHotChanges(pos, pos + bytes);
 				source_pos += bytes;
 			}
 			pos += bytes;
 			frame++;
 		}
-		FadeHotChanges();
 	} else
 	{
 		// no old data, just fill selected lines
@@ -745,7 +768,7 @@ void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// set changed if found different byte, or found emptiness in inp when there's non-zero value here
+				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
 				if (frame < inp_end)
 				{
 					if (joysticks[pos] != inp.joysticks[pos])
@@ -782,7 +805,7 @@ void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// set changed if found different byte, or found emptiness in inp when there's non-zero value here
+				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
 				if (frame < inp_end)
 				{
 					if (joysticks[pos] != inp.joysticks[pos])
@@ -807,7 +830,7 @@ void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// set changed if found different byte, or found emptiness in inp when there's non-zero value here
+				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
 				if (frame < inp_end)
 				{
 					if (joysticks[pos] != inp.joysticks[pos])
@@ -878,10 +901,12 @@ void SNAPSHOT::SetMaxHotChange(int frame, int absolute_button)
 	}
 }
 
-void SNAPSHOT::FadeHotChanges()
+void SNAPSHOT::FadeHotChanges(int start_byte, int end_byte)
 {
 	uint8 hi_half, low_half;
-	for (int i = hot_changes.size() - 1; i >= 0; i--)
+	if (end_byte < 0)
+		end_byte = hot_changes.size();
+	for (int i = end_byte - 1; i >= start_byte; i--)
 	{
 		if (hot_changes[i])
 		{

@@ -42,11 +42,12 @@ extern int GetInputType(MovieData& md);
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
 char modCaptions[MODTYPES_TOTAL][20] = {" Init",
-							" Change",
+							" Undefined",
 							" Set",
 							" Unset",
 							" Pattern",
 							" Insert",
+							" Insert#",
 							" Delete",
 							" Truncate",
 							" Clear",
@@ -204,13 +205,28 @@ int HISTORY::jump(int new_pos)
 
 	return first_change;
 }
-int HISTORY::undo()
+
+void HISTORY::undo()
 {
-	return jump(history_cursor_pos - 1);
+	int result = jump(history_cursor_pos - 1);
+	if (result >= 0)
+	{
+		piano_roll.update();
+		piano_roll.FollowUndo();
+		greenzone.InvalidateAndCheck(result);
+	}
+	return;
 }
-int HISTORY::redo()
+void HISTORY::redo()
 {
-	return jump(history_cursor_pos + 1);
+	int result = jump(history_cursor_pos + 1);
+	if (result >= 0)
+	{
+		piano_roll.update();
+		piano_roll.FollowUndo();
+		greenzone.InvalidateAndCheck(result);
+	}
+	return;
 }
 // ----------------------------
 void HISTORY::AddSnapshotToHistory(SNAPSHOT &inp)
@@ -251,7 +267,6 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 		strcat(inp.description, modCaptions[mod_type]);
 		switch (mod_type)
 		{
-			case MODTYPE_CHANGE:
 			case MODTYPE_SET:
 			case MODTYPE_UNSET:
 			case MODTYPE_TRUNCATE:
@@ -302,7 +317,6 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 				case MODTYPE_CLONE:
 					inp.inheritHotChanges_InsertSelection(&snapshots[real_pos]);
 					break;
-				case MODTYPE_CHANGE:
 				case MODTYPE_SET:
 				case MODTYPE_UNSET:
 				case MODTYPE_CLEAR:
@@ -318,6 +332,37 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 					break;
 			}
 		}
+		AddSnapshotToHistory(inp);
+		bookmarks.ChangesMadeSinceBranch();
+	}
+	return first_changes;
+}
+int HISTORY::RegisterInsertNum(int start, int frames)
+{
+	// create new shanshot
+	SNAPSHOT inp;
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	inp.mod_type = MODTYPE_INSERTNUM;
+	// check if there are input differences from latest snapshot
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	int first_changes = inp.findFirstChange(snapshots[real_pos], start);
+	if (first_changes >= 0)
+	{
+		// differences found
+		// fill description:
+		strcat(inp.description, modCaptions[inp.mod_type]);
+		inp.jump_frame = start;
+		char framenum[11];
+		// add number of inserted frames to description
+		_itoa(frames, framenum, 10);
+		strcat(inp.description, framenum);
+		// add upper frame to description
+		_itoa(start, framenum, 10);
+		strcat(inp.description, " ");
+		strcat(inp.description, framenum);
+		// set hotchanges
+		if (taseditor_config.enable_hot_changes)
+			inp.inheritHotChanges_InsertNum(&snapshots[real_pos], start, frames);
 		AddSnapshotToHistory(inp);
 		bookmarks.ChangesMadeSinceBranch();
 	}
@@ -781,6 +826,8 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}

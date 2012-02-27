@@ -532,16 +532,21 @@ void SaveCompact_GetCheckboxes(HWND hwndDlg)
 	taseditor_config.savecompact_selection = (SendDlgItemMessage(hwndDlg, IDC_CHECK_SELECTION, BM_GETCHECK, 0, 0) == BST_CHECKED);
 }
 
-BOOL CALLBACK AboutProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+		case WM_INITDIALOG:
+		{
+			SendMessage(GetDlgItem(hWnd, IDC_TASEDITOR_NAME), WM_SETFONT, (WPARAM)piano_roll.hTaseditorAboutFont, 0);
+			break;
+		}
 		case WM_COMMAND:
 		{
 			switch (LOWORD(wParam))
 			{
 				case IDCANCEL:
-					EndDialog(hwndDlg, 0);
+					EndDialog(hWnd, 0);
 					return TRUE;
 			}
 			break;
@@ -833,7 +838,7 @@ void SetInputType(MovieData& md, int new_input_type)
 // this getter contains formula to decide whether to record or replay movie
 bool TaseditorIsRecording()
 {
-	if (movie_readonly || turbo || playback.pause_frame > currFrameCounter)
+	if (movie_readonly || playback.pause_frame > currFrameCounter)
 		return false;		// replay
 	return true;			// record
 }

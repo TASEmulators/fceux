@@ -508,7 +508,7 @@
 #define IDC_CHECK_SELECTION             1208
 #define IDC_C_RESET                     1209
 #define IDC_CHECK8                      1209
-#define IDC_CHECK_PIANO_ROLL		1209
+#define IDC_CHECK_PIANO_ROLL            1209
 #define IDC_C_ELIMINATE                 1210
 #define IDC_LESSTHAN                    1211
 #define IDC_MORETHAN                    1212
@@ -588,6 +588,7 @@
 #define IDC_SPLICER_BOX                 1277
 #define IDC_LUA_BOX                     1278
 #define IDC_HISTORY_BOX                 1279
+#define IDC_TASEDITOR_NAME              1280
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -991,6 +992,8 @@
 #define ID_PATTERN40533                 40533
 #define ID_PATTERN_TEST                 40534
 #define ID_CONFIG_COLUMNSETPATTERNSKIPSLAG 40535
+#define ID_EDIT_DESELECT                40536
+#define ID_SELECTED_DESELECT            40537
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1000,8 +1003,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40536
-#define _APS_NEXT_CONTROL_VALUE         1280
+#define _APS_NEXT_COMMAND_VALUE         40538
+#define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

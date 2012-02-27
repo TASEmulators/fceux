@@ -441,7 +441,7 @@ void SELECTION::SetRowSelection(int index)
 }
 void SELECTION::SetRegionSelection(int start, int end)
 {
-	for (int i = start; i <= end; ++i)
+	for (int i = start; i < end; ++i)
 		ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SelectBetweenMarkers()
@@ -564,31 +564,67 @@ SelectionFrames& SELECTION::CurrentSelection()
 // -------------------------------------------------------------------------
 LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+	extern PLAYBACK playback;
+	extern SELECTION selection;
+	switch(msg)
 	{
-		extern PLAYBACK playback;
-		extern SELECTION selection;
-		switch(msg)
+		case WM_SETFOCUS:
 		{
+			markers_manager.marker_note_edit = MARKER_NOTE_EDIT_LOWER;
+			// enable editing
+			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
+			// disable FCEUX keyboard
+			taseditor_window.ClearTaseditorInput();
+			// scroll to the Marker
+			if (taseditor_config.follow_note_context)
+				piano_roll.FollowMarker(selection.shown_marker);
+			break;
+		}
+		case WM_KILLFOCUS:
+		{
+			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+			{
+				markers_manager.UpdateMarkerNote();
+				markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
+			}
+			// disable editing (make the bg grayed)
+			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
+			// enable FCEUX keyboard
+			if (taseditor_window.TASEditor_focus)
+				taseditor_window.SetTaseditorInput();
+			break;
+		}
 		case WM_CHAR:
 		case WM_KEYDOWN:
-			switch(wParam)
+		{
+			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 			{
-			case VK_ESCAPE:
-				// revert text to original note text
-				SetWindowText(selection.hwndSelectionMarkerEdit, markers_manager.GetNote(selection.shown_marker).c_str());
-				SetFocus(piano_roll.hwndList);
-				return 0;
-			case VK_RETURN:
-				// exit and save text changes
-				SetFocus(piano_roll.hwndList);
-				return 0;
-			case VK_TAB:
-				// switch to upper edit control (also exit and save text changes)
-				SetFocus(playback.hwndPlaybackMarkerEdit);
-				return 0;
+				switch(wParam)
+				{
+					case VK_ESCAPE:
+						// revert text to original note text
+						SetWindowText(selection.hwndSelectionMarkerEdit, markers_manager.GetNote(selection.shown_marker).c_str());
+						SetFocus(piano_roll.hwndList);
+						return 0;
+					case VK_RETURN:
+						// exit and save text changes
+						SetFocus(piano_roll.hwndList);
+						return 0;
+					case VK_TAB:
+						// switch to upper edit control (also exit and save text changes)
+						SetFocus(playback.hwndPlaybackMarkerEdit);
+						return 0;
+				}
 			}
 			break;
+		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			playback.MiddleButtonClick();
+			return 0;
 		}
 	}
 	return CallWindowProc(selectionMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);

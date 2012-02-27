@@ -159,7 +159,7 @@ public:
 	TRACKMOUSEEVENT tme;
 	// GDI stuff
 	HIMAGELIST himglist;
-	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont;
+	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
 	HBRUSH bg_brush;
 
 private:

@@ -109,12 +109,14 @@ void SPLICER::CloneFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
+	selection.ClearSelection();			// selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive selection lines are accounted as single region
-	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	int shift = frames;
+	frames = 1;
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
@@ -129,9 +131,13 @@ void SPLICER::CloneFrames()
 				if (markers_manager.insertEmpty(*it,frames))
 					markers_changed = true;
 			}
+			selection.SetRegionSelection((*it) + shift, (*it) + shift + frames);
+			shift -= frames;
+			// start accumulating next region
 			frames = 1;
 		} else frames++;
 	}
+	// check and register changes
 	int first_changes = history.RegisterChanges(MODTYPE_CLONE, *current_selection->begin());
 	if (first_changes >= 0)
 	{
@@ -151,12 +157,14 @@ void SPLICER::InsertFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
+	selection.ClearSelection();			// selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive selection lines are accounted as single region
-	frames = 1;
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
+	int shift = frames;
+	frames = 1;
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		next_it = it;
@@ -164,15 +172,19 @@ void SPLICER::InsertFrames()
 		if (next_it == current_selection_rend || (int)*next_it < ((int)*it - 1))
 		{
 			// end of current region
-			currMovieData.insertEmpty(*it,frames);
+			currMovieData.insertEmpty(*it, frames);
 			if (taseditor_config.bind_markers)
 			{
-				if (markers_manager.insertEmpty(*it,frames))
+				if (markers_manager.insertEmpty(*it, frames))
 					markers_changed = true;
 			}
+			selection.SetRegionSelection((*it) + shift, (*it) + shift + frames);
+			shift -= frames;
+			// start accumulating next region
 			frames = 1;
 		} else frames++;
 	}
+	// check and register changes
 	int first_changes = history.RegisterChanges(MODTYPE_INSERT, *current_selection->begin());
 	if (first_changes >= 0)
 	{
@@ -200,7 +212,6 @@ void SPLICER::InsertNumFrames()
 			{
 				// insert at selection
 				index = *current_selection->begin();
-				selection.ClearSelection();
 			} else
 			{
 				// insert at playback cursor
@@ -212,10 +223,17 @@ void SPLICER::InsertNumFrames()
 				if (markers_manager.insertEmpty(index, frames))
 					markers_changed = true;
 			}
-			// select inserted rows
-			piano_roll.update();
-			selection.SetRegionSelection(index, index + frames - 1);
-			int first_changes = history.RegisterChanges(MODTYPE_INSERT, index);
+			if (current_selection->size())
+			{
+				// shift selection down, so that same frames are selected
+				piano_roll.update();
+				selection.ClearSelection();
+				SelectionFrames::iterator current_selection_end = current_selection->end();
+				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+					selection.SetRowSelection((*it) + frames);
+			}
+			// check and register changes
+			int first_changes = history.RegisterInsertNum(index, frames);
 			if (first_changes >= 0)
 			{
 				greenzone.InvalidateAndCheck(first_changes);
@@ -256,7 +274,7 @@ void SPLICER::DeleteFrames()
 		playback.StartFromZero();
 	// reduce Piano Roll
 	piano_roll.update();
-
+	// check and register changes
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
 	{

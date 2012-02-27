@@ -451,31 +451,68 @@ void PLAYBACK::ClickOnProgressbar()
 // -------------------------------------------------------------------------
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+	extern PLAYBACK playback;
+	extern SELECTION selection;
+	switch(msg)
 	{
-		extern PLAYBACK playback;
-		extern SELECTION selection;
-		switch(msg)
+		case WM_SETFOCUS:
 		{
+			markers_manager.marker_note_edit = MARKER_NOTE_EDIT_UPPER;
+			// enable editing
+			SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
+			// disable FCEUX keyboard
+			taseditor_window.ClearTaseditorInput();
+			// scroll to the Marker
+			if (taseditor_config.follow_note_context)
+				piano_roll.FollowMarker(playback.shown_marker);
+			break;
+		}
+		case WM_KILLFOCUS:
+		{
+			// if we were editing, save and finish editing
+			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+			{
+				markers_manager.UpdateMarkerNote();
+				markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
+			}
+			// disable editing (make the bg grayed)
+			SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
+			// enable FCEUX keyboard
+			if (taseditor_window.TASEditor_focus)
+				taseditor_window.SetTaseditorInput();
+			break;
+		}
 		case WM_CHAR:
 		case WM_KEYDOWN:
-			switch(wParam)
+		{
+			if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 			{
-			case VK_ESCAPE:
-				// revert text to original note text
-				SetWindowText(playback.hwndPlaybackMarkerEdit, markers_manager.GetNote(playback.shown_marker).c_str());
-				SetFocus(piano_roll.hwndList);
-				return 0;
-			case VK_RETURN:
-				// exit and save text changes
-				SetFocus(piano_roll.hwndList);
-				return 0;
-			case VK_TAB:
-				// switch to lower edit control (also exit and save text changes)
-				SetFocus(selection.hwndSelectionMarkerEdit);
-				return 0;
+				switch(wParam)
+				{
+					case VK_ESCAPE:
+						// revert text to original note text
+						SetWindowText(playback.hwndPlaybackMarkerEdit, markers_manager.GetNote(playback.shown_marker).c_str());
+						SetFocus(piano_roll.hwndList);
+						return 0;
+					case VK_RETURN:
+						// exit and save text changes
+						SetFocus(piano_roll.hwndList);
+						return 0;
+					case VK_TAB:
+						// switch to lower edit control (also exit and save text changes)
+						SetFocus(selection.hwndSelectionMarkerEdit);
+						return 0;
+				}
 			}
 			break;
+		}
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			playback.MiddleButtonClick();
+			return 0;
 		}
 	}
 	return CallWindowProc(playbackMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);

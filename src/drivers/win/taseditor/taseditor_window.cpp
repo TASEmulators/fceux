@@ -49,10 +49,10 @@ extern std::vector<std::vector<uint8>> autofire_patterns;
 
 extern char* GetKeyComboName(int c);
 
-extern BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-extern BOOL CALLBACK AboutProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+extern BOOL CALLBACK FindNoteProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+extern BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -635,7 +635,7 @@ void TASEDITOR_WINDOW::RecheckPatternsMenu()
 }
 
 // ====================================================================================================
-BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	extern TASEDITOR_WINDOW taseditor_window;
 	switch(uMsg)
@@ -654,7 +654,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			if (!(windowpos->flags & SWP_NOSIZE))
 			{
 				// window was resized
-				if (!IsIconic(hwndDlg))
+				if (!IsIconic(hWnd))
 				{
 					taseditor_window.WindowMovedOrResized();
 					if (taseditor_window.ready_for_resizing)
@@ -665,7 +665,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			} else if (!(windowpos->flags & SWP_NOMOVE))
 			{
 				// window was moved
-				if (!IsIconic(hwndDlg) && !IsZoomed(hwndDlg))
+				if (!IsIconic(hWnd) && !IsZoomed(hWnd))
 					taseditor_window.WindowMovedOrResized();
 				// also change coordinates of popup display (and move if it's open)
 				popup_display.ParentWindowMoved();
@@ -688,7 +688,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, piano_roll.CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLong(hWnd, DWL_MSGRESULT, piano_roll.CustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					piano_roll.GetDispInfo((NMLVDISPINFO*)lParam);
@@ -705,17 +705,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, bookmarks.CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLong(hWnd, DWL_MSGRESULT, bookmarks.CustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					bookmarks.GetDispInfo((NMLVDISPINFO*)lParam);
-					break;
-				case NM_CLICK:
-				case NM_DBLCLK:
-					bookmarks.LeftClick((LPNMITEMACTIVATE)lParam);
-					break;
-				case NM_RCLICK:
-					bookmarks.RightClick((LPNMITEMACTIVATE)lParam);
 					break;
 				}
 				break;
@@ -723,7 +716,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				switch(((LPNMHDR)lParam)->code)
 				{
 				case NM_CUSTOMDRAW:
-					SetWindowLong(hwndDlg, DWL_MSGRESULT, history.CustomDraw((NMLVCUSTOMDRAW*)lParam));
+					SetWindowLong(hWnd, DWL_MSGRESULT, history.CustomDraw((NMLVCUSTOMDRAW*)lParam));
 					return TRUE;
 				case LVN_GETDISPINFO:
 					history.GetDispInfo((NMLVDISPINFO*)lParam);
@@ -757,6 +750,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 			break;
 		case WM_CTLCOLORSTATIC:
+			// change color of static text fields
 			if ((HWND)lParam == playback.hwndPlaybackMarker)
 			{
 				SetTextColor((HDC)wParam, PLAYBACK_MARKER_COLOR);
@@ -768,7 +762,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				SetBkMode((HDC)wParam, TRANSPARENT);
 				return (BOOL)piano_roll.bg_brush;
 			}
-
 			break;
 		case WM_COMMAND:
 			{
@@ -790,70 +783,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				// finally check all other commands
 				switch(loword_wparam)
 				{
-				case IDC_PLAYBACK_MARKER_EDIT:
-					{
-						switch (HIWORD(wParam))
-						{
-						case EN_SETFOCUS:
-							{
-								markers_manager.marker_note_edit = MARKER_NOTE_EDIT_UPPER;
-								// enable editing
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
-								// disable FCEUX keyboard
-								taseditor_window.ClearTaseditorInput();
-								if (taseditor_config.follow_note_context)
-									piano_roll.FollowMarker(playback.shown_marker);
-								break;
-							}
-						case EN_KILLFOCUS:
-							{
-								if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-								{
-									markers_manager.UpdateMarkerNote();
-									markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
-								}
-								// disable editing (make it grayed)
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
-								// enable FCEUX keyboard
-								if (taseditor_window.TASEditor_focus)
-									taseditor_window.SetTaseditorInput();
-								break;
-							}
-						}
-						break;
-					}
-				case IDC_SELECTION_MARKER_EDIT:
-					{
-						switch (HIWORD(wParam))
-						{
-						case EN_SETFOCUS:
-							{
-								markers_manager.marker_note_edit = MARKER_NOTE_EDIT_LOWER;
-								// enable editing
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
-								// disable FCEUX keyboard
-								taseditor_window.ClearTaseditorInput();
-								if (taseditor_config.follow_note_context)
-									piano_roll.FollowMarker(selection.shown_marker);
-								break;
-							}
-						case EN_KILLFOCUS:
-							{
-								if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-								{
-									markers_manager.UpdateMarkerNote();
-									markers_manager.marker_note_edit = MARKER_NOTE_EDIT_NONE;
-								}
-								// disable editing (make it grayed)
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
-								// enable FCEUX keyboard
-								if (taseditor_window.TASEditor_focus)
-									taseditor_window.SetTaseditorInput();
-								break;
-							}
-						}
-						break;
-					}
 				case ID_FILE_NEW:
 					NewProject();
 					break;
@@ -878,6 +807,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					break;
 				case ID_FILE_CLOSE:
 					ExitTasEditor();
+					break;
+				case ID_EDIT_DESELECT:
+				case ID_SELECTED_DESELECT:
+					selection.ClearSelection();
 					break;
 				case ID_EDIT_SELECTALL:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
@@ -988,7 +921,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					playback.ToggleEmulationPause();
 					break;
 				case CHECK_FOLLOW_CURSOR:
-					//switch "Follow playback" flag
 					taseditor_config.follow_playback ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					// if switched off then maybe jump to target frame
@@ -996,7 +928,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						piano_roll.FollowPauseframe();
 					break;
 				case CHECK_TURBO_SEEK:
-					//switch "Turbo seek" flag
 					taseditor_config.turbo_seek ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					// if currently seeking, apply this option immediately
@@ -1015,12 +946,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					piano_roll.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in Piano Roll
 					break;
 				case ID_VIEW_SHOWBRANCHSCREENSHOTS:
-					//switch "Show Branch Screenshots" flag
 					taseditor_config.show_branch_screenshots ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_VIEW_SHOWBRANCHTOOLTIPS:
-					//switch "Show Branch Screenshots" flag
 					taseditor_config.show_branch_descr ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
@@ -1038,14 +967,13 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case CHECK_AUTORESTORE_PLAYBACK:
-					//switch "Auto-restore last playback position" flag
 					taseditor_config.restore_position ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_SETGREENZONECAPACITY:
 					{
 						int new_capacity = taseditor_config.greenzone_capacity;
-						if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hwndDlg) == IDOK)
+						if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hWnd) == IDOK)
 						{
 							if (new_capacity < GREENZONE_CAPACITY_MIN)
 								new_capacity = GREENZONE_CAPACITY_MIN;
@@ -1062,7 +990,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_CONFIG_SETMAXUNDOLEVELS:
 					{
 						int new_size = taseditor_config.undo_levels;
-						if(CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hwndDlg) == IDOK)
+						if(CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hWnd) == IDOK)
 						{
 							if (new_size < UNDO_LEVELS_MIN)
 								new_size = UNDO_LEVELS_MIN;
@@ -1082,7 +1010,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				case ID_CONFIG_SETAUTOSAVEPERIOD:
 					{
 						int new_period = taseditor_config.autosave_period;
-						if(CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hwndDlg) == IDOK)
+						if(CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hWnd) == IDOK)
 						{
 							if (new_period < AUTOSAVE_PERIOD_MIN)
 								new_period = AUTOSAVE_PERIOD_MIN;
@@ -1094,18 +1022,15 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 						break;
 					}
 				case ID_CONFIG_BRANCHESRESTOREFULLMOVIE:
-					//switch "Branches restore entire Movie" flag
 					taseditor_config.branch_full_movie ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_BRANCHESWORKONLYWHENRECORDING:
-					//switch "Branches work only when Recording" flag
 					taseditor_config.branch_only_when_rec ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					bookmarks.RedrawBookmarksCaption();
 					break;
 				case ID_CONFIG_HUDINBRANCHSCREENSHOTS:
-					//switch "HUD in Branch screenshots" flag
 					taseditor_config.branch_scr_hud ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
@@ -1119,12 +1044,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_COMBINECONSECUTIVERECORDINGS:
-					//switch "Combine consecutive Recordings" flag
 					taseditor_config.combine_consecutive_rec ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_USE1PFORRECORDING:
-					//switch "Use 1P keys for single Recordings" flag
 					taseditor_config.use_1p_rec ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
@@ -1156,12 +1079,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 					playback.ClickOnProgressbar();
 					break;
 				case IDC_BRANCHES_BUTTON:
-					// click on "Bookmarks/Branches" - switch "View Tree of branches"
+					// click on "Bookmarks/Branches" - switch between Bookmarks List and Branches Tree
 					taseditor_config.view_branches_tree ^= 1;
 					bookmarks.RedrawBookmarksCaption();
 					break;
 				case IDC_RECORDING:
-					// toggle readonly, no need to recheck radiobuttons
 					FCEUI_MovieToggleReadOnly();
 					CheckDlgButton(taseditor_window.hwndTasEditor, IDC_RECORDING, movie_readonly?BST_UNCHECKED : BST_CHECKED);
 					break;
@@ -1222,26 +1144,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							SendMessage(selection.hwndSelectionMarkerEdit, WM_UNDO, 0, 0); 
 						} else
 						{
-							int result = history.undo();
-							if (result >= 0)
-							{
-								piano_roll.update();
-								piano_roll.FollowUndo();
-								greenzone.InvalidateAndCheck(result);
-							}
+							history.undo();
 						}
 						break;
 					}
 				case ACCEL_CTRL_Y:
 				case ID_EDIT_REDO:
 					{
-						int result = history.redo();
-						if (result >= 0)
-						{
-							piano_roll.update();
-							piano_roll.FollowUndo();
-							greenzone.InvalidateAndCheck(result);
-						}
+						history.redo();
 						break;
 					}
 				case ID_EDIT_SELECTIONUNDO:
@@ -1395,9 +1305,20 @@ BOOL CALLBACK WndprocTasEditor(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			}
 	        break;
 		}
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONDBLCLK:
+		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			break;
+		}
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			break;
 		}
