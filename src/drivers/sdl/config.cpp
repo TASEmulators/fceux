@@ -321,6 +321,8 @@ InitConfig()
     config->addOption("rp2mic", prefix + "EnableMic", 0);
     
 
+	// this is really hacky 
+	// TODO clean this up; clean config.h as well
     const int Hotkeys[HK_MAX] = {
 		SDLK_F1, // cheat menu
 		SDLK_F2, // bind state
