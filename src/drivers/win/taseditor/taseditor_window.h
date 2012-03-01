@@ -8,6 +8,20 @@
 #define PATTERNS_MAX_VISIBLE_NAME 50
 #define PATTERNMENU_MAX_VISIBLE_NAME PATTERNS_MAX_VISIBLE_NAME + 6		// + "Pattern: "
 
+struct Window_items_struct
+{
+	int id;
+	int x;
+	int y;
+	int width;
+	int height;
+	char tooltip_text_base[TOOLTIP_TEXT_MAX_LEN];
+	char tooltip_text[TOOLTIP_TEXT_MAX_LEN];
+	bool static_rect;
+	int hotkey_emucmd;
+	HWND tooltip_hwnd;
+};
+
 enum ECONTEXTMENU
 {
 	CONTEXTMENU_STRAY = 0,

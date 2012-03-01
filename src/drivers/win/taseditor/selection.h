@@ -15,6 +15,8 @@ public:
 	void reset_vars();
 	void update();
 
+	void HistorySizeChanged();
+
 	void RedrawMarker();
 
 	void save(EMUFILE *os, bool really_save = true);

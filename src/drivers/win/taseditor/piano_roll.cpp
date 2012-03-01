@@ -1187,6 +1187,9 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					bookmarks.RedrawChangedBookmarks(lastCursor);
 				}
 				return 0;
+			} else if (history.CursorOverHistoryList())
+			{
+				return SendMessage(history.hwndHistoryList, WM_MOUSEWHEEL_RESENT, wParam, lParam);
 			}
 			break;
 		}

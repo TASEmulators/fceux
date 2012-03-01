@@ -148,6 +148,36 @@ void SELECTION::update()
 
 }
 
+void SELECTION::HistorySizeChanged()
+{
+	int new_history_size = taseditor_config.undo_levels + 1;
+	std::vector<SelectionFrames> new_selections_history(new_history_size);
+	int pos = history_cursor_pos, source_pos = history_cursor_pos;
+	if (pos >= new_history_size)
+		pos = new_history_size - 1;
+	int new_history_cursor_pos = pos;
+	// copy old "undo" snapshots
+	while (pos >= 0)
+	{
+		new_selections_history[pos] = selections_history[(history_start_pos + source_pos) % history_size];
+		pos--;
+		source_pos--;
+	}
+	// copy old "redo" snapshots
+	int num_redo_snapshots = history_total_items - (history_cursor_pos + 1);
+	int space_available = new_history_size - (new_history_cursor_pos + 1);
+	int i = (num_redo_snapshots <= space_available) ? num_redo_snapshots : space_available;
+	int new_history_total_items = new_history_cursor_pos + i + 1;
+	for (; i > 0; i--)
+		new_selections_history[new_history_cursor_pos + i] = selections_history[(history_start_pos + history_cursor_pos + i) % history_size];
+	// finish
+	selections_history = new_selections_history;
+	history_size = new_history_size;
+	history_start_pos = 0;
+	history_cursor_pos = new_history_cursor_pos;
+	history_total_items = new_history_total_items;
+}
+
 void SELECTION::RedrawMarker()
 {
 	// redraw marker num

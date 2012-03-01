@@ -348,6 +348,8 @@ void updateGameDependentMenus(unsigned int enable)
 {
 	const int menu_ids[]= {
 		MENU_CLOSE_FILE,
+		ID_FILE_SCREENSHOT,
+		ID_FILE_SAVESCREENSHOTAS,
 		MENU_RESET,
 		MENU_POWER,
 		MENU_INSERT_COIN,

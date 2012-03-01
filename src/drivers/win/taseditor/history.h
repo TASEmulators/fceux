@@ -54,6 +54,9 @@ enum
 };
 #define HISTORY_NORMAL_COLOR 0x000000
 
+#define HISTORYLIST_IN_WINDOWITEMS 18
+#define WM_MOUSEWHEEL_RESENT WM_APP+123
+
 #define HISTORY_ID_LEN 8
 
 class HISTORY
@@ -64,6 +67,8 @@ public:
 	void free();
 	void reset();
 	void update();		// called every frame
+
+	void HistorySizeChanged();
 
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is);
@@ -93,6 +98,8 @@ public:
 
 	void RedrawHistoryList();
 	void UpdateHistoryList();
+
+	bool CursorOverHistoryList();
 
 	HWND hwndHistoryList;
 

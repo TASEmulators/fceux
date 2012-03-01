@@ -39,9 +39,11 @@ extern TASEDITOR_LUA taseditor_lua;
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern int GetInputType(MovieData& md);
 
+extern Window_items_struct window_items[];
+
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[MODTYPES_TOTAL][20] = {" Init",
+char modCaptions[MODTYPES_TOTAL][20] = {" Init Project",
 							" Undefined",
 							" Set",
 							" Unset",
@@ -124,7 +126,7 @@ void HISTORY::reset()
 	// create initial snapshot
 	SNAPSHOT inp;
 	inp.init(currMovieData, taseditor_config.enable_hot_changes);
-	strcat(inp.description, modCaptions[0]);
+	strcat(inp.description, modCaptions[MODTYPE_INIT]);
 	inp.jump_frame = -1;
 	AddSnapshotToHistory(inp);
 	UpdateHistoryList();
@@ -147,6 +149,38 @@ void HISTORY::update()
 	}
 	if (old_show_undo_hint != show_undo_hint)
 		piano_roll.RedrawRow(undo_hint_pos);			// not changing Bookmarks List
+}
+
+void HISTORY::HistorySizeChanged()
+{
+	int new_history_size = taseditor_config.undo_levels + 1;
+	std::vector<SNAPSHOT> new_snapshots(new_history_size);
+	int pos = history_cursor_pos, source_pos = history_cursor_pos;
+	if (pos >= new_history_size)
+		pos = new_history_size - 1;
+	int new_history_cursor_pos = pos;
+	// copy old "undo" snapshots
+	while (pos >= 0)
+	{
+		new_snapshots[pos] = snapshots[(history_start_pos + source_pos) % history_size];
+		pos--;
+		source_pos--;
+	}
+	// copy old "redo" snapshots
+	int num_redo_snapshots = history_total_items - (history_cursor_pos + 1);
+	int space_available = new_history_size - (new_history_cursor_pos + 1);
+	int i = (num_redo_snapshots <= space_available) ? num_redo_snapshots : space_available;
+	int new_history_total_items = new_history_cursor_pos + i + 1;
+	for (; i > 0; i--)
+		new_snapshots[new_history_cursor_pos + i] = snapshots[(history_start_pos + history_cursor_pos + i) % history_size];
+	// finish
+	snapshots = new_snapshots;
+	history_size = new_history_size;
+	history_start_pos = 0;
+	history_cursor_pos = new_history_cursor_pos;
+	history_total_items = new_history_total_items;
+	UpdateHistoryList();
+	RedrawHistoryList();
 }
 
 // returns frame of first input change (for greenzone invalidation)
@@ -232,7 +266,7 @@ void HISTORY::redo()
 void HISTORY::AddSnapshotToHistory(SNAPSHOT &inp)
 {
 	// history uses conveyor of snapshots (vector with fixed size) to aviod resizing which is awfully expensive with such large objects as SNAPSHOT
-	if (history_cursor_pos+1 >= history_size)
+	if (history_total_items >= history_size)
 	{
 		// reached the end of available history_size - move history_start_pos (thus deleting oldest snapshot)
 		history_cursor_pos = history_size-1;
@@ -583,12 +617,12 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 		// fill description:
 		if (name[0])
 		{
-			// custom name of operation
+			// user provided custom name of operation
 			strcat(inp.description, LuaCaptionPrefix);
 			strncat(inp.description, name, LUACHANGES_NAME_MAX_LEN);
 		} else
 		{
-			// default name
+			// set default name
 			strcat(inp.description, modCaptions[inp.mod_type]);
 		}
 		inp.jump_frame = first_changes;
@@ -799,6 +833,17 @@ int HISTORY::GetUndoHint()
 	else
 		return -1;
 }
+bool HISTORY::CursorOverHistoryList()
+{
+	POINT p;
+	if (GetCursorPos(&p))
+	{
+		ScreenToClient(hwndHistoryList, &p);
+		if (p.x >= 0 && p.y >= 0 && p.x < window_items[HISTORYLIST_IN_WINDOWITEMS].width && p.y < (taseditor_config.wndheight + window_items[HISTORYLIST_IN_WINDOWITEMS].height - window_items[HISTORYLIST_IN_WINDOWITEMS].y))
+			return true;
+	}
+	return false;
+}
 // ---------------------------------------------------------------------------------
 LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -838,10 +883,17 @@ LRESULT APIENTRY HistoryListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 			return 0;
 		case WM_MOUSEWHEEL:
 		{
-			// Right button/Ctrl/Shift/Alt + wheel -> send the message to Piano Roll
-			// but if just wheel - use default scrolling here
-			if (GET_KEYSTATE_WPARAM(wParam) & (MK_RBUTTON|MK_SHIFT|MK_CONTROL) || (GetKeyState(VK_MENU) < 0))
+			if (!history.CursorOverHistoryList())
 				return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
+			break;
+		}
+		case WM_MOUSEWHEEL_RESENT:
+		{
+			// this is message from Piano Roll
+			// it means that cursor is currently over History List, and user scrolls the wheel (although focus may be on some other window)
+			// ensure that wParam's low-order word is 0 (so fwKeys = 0)
+			CallWindowProc(hwndHistoryList_oldWndProc, hWnd, WM_MOUSEWHEEL, wParam & ~(LOWORD(-1)), lParam);
+			return 0;
 		}
         case WM_MOUSEACTIVATE:
 			if (GetFocus() != hWnd)

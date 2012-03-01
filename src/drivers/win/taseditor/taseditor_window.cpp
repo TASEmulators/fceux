@@ -68,19 +68,7 @@ char patterns_menu_prefix[] = "Pattern: ";
 char taseditor_help_filename[] = "\\taseditor.chm";
 // all items of the window (used for resising) and their default x,y,w,h
 // actual x,y,w,h are calculated at the beginning from screen
-static struct 
-{
-	int id;
-	int x;
-	int y;
-	int width;
-	int height;
-	char tooltip_text_base[TOOLTIP_TEXT_MAX_LEN];
-	char tooltip_text[TOOLTIP_TEXT_MAX_LEN];
-	bool static_rect;
-	int hotkey_emucmd;
-	HWND tooltip_hwnd;
-} window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
+Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here whenever you want to abort seeking", "", false, 0, 0,
 	IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
 	IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
@@ -999,10 +987,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 							if (new_size != taseditor_config.undo_levels)
 							{
 								taseditor_config.undo_levels = new_size;
-								history.reset();
-								selection.reset();
-								// hot changes were cleared, so update Piano Roll
-								piano_roll.RedrawList();
+								history.HistorySizeChanged();
+								selection.HistorySizeChanged();
 							}
 						}
 						break;
