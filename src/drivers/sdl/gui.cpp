@@ -509,7 +509,7 @@ void openGamepadConfig()
 	// GTK 2.24 required for this dialog
 	if (checkGTKVersion(2, 24) == false)
 	{
-		printf("GTK >= 2.24 required for this dialog.  To set the gamepads, use \"--inputcfg\" from the command line (ie: \"fceux --inputcfg gamepad1\").\n");
+		printf(" Warning: GTK >= 2.24 required for this dialog.\nTo configure the gamepads, use \"--inputcfg\" from the command line (ie: \"fceux --inputcfg gamepad1\").\n");
 		return;
 	}
 
