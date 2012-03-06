@@ -53,7 +53,7 @@ GtkWidget* buttonMappings[10];
 GtkRadioAction* stateSlot = NULL;
 
 // check to see if a particular GTK version is available
-// 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,4);
+// 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,24);
 bool checkGTKVersion(int major_required, int minor_required)
 {
 	int major = GTK_MAJOR_VERSION;
@@ -81,6 +81,12 @@ bool checkGTKVersion(int major_required, int minor_required)
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
+	// GTK 2.24 required for
+	if ( checkGTKVersion(2, 24) == false)
+	{
+		printf("GTK >= 2.24 required for this dialog.  To set the gamepads, use \"--inputcfg\" from the command line (ie: \"fceux --inputcfg gamepad1\").\n");
+		return 0;
+	}
 	gint x = ((gint)(glong)(p));
 	//gint x = GPOINTER_TO_INT(p);
 	int padNo = atoi(gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(padNoCombo))) - 1;
