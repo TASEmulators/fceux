@@ -56,7 +56,7 @@ LoadCPalette(const std::string &file)
 static void
 CreateDirs(const std::string &dir)
 {
-    char *subs[7]={"fcs","snaps","gameinfo","sav","cheats","movies"};
+    char *subs[8]={"fcs","snaps","gameinfo","sav","cheats","movies","cfg.d"};
     std::string subdir;
     int x;
 
@@ -105,7 +105,8 @@ GetBaseDirectory(std::string &dir)
     }
 }
 
-
+// returns a config structure with default options
+// also creates config base directory (ie: /home/user/.fceux as well as subdirs
 Config *
 InitConfig()
 {

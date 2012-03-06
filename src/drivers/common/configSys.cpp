@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 #include "../../types.h"
 #include "configSys.h"
@@ -557,6 +558,33 @@ Config::parse(int argc,
     if(error) {
         return error;
     }
+
+	// try to read cfg.d/*
+	std::string cfgd_dir_name = _dir + "/" + "cfg.d/";
+	DIR *d;
+	struct dirent *dir;
+	d = opendir(cfgd_dir_name.c_str());
+	if (d)
+	{
+		while ((dir = readdir(d)) != NULL)
+		{
+			// dont load "." or ".."
+			if(strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
+			{
+				continue;
+			}
+						
+			// TODO  0 = good -1 = bad
+			std::string fname = cfgd_dir_name + dir->d_name;
+			printf("Loading configuration file at %s\n", fname.c_str());
+			if (_loadFile(fname.c_str()) != 0)
+			{
+				printf("Failed to parse configuration at %s\n", fname.c_str());
+			}
+		}
+
+		closedir(d);
+	}
 
     // parse the arguments
     return _parseArgs(argc, argv);
