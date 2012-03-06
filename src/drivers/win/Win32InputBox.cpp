@@ -232,7 +232,7 @@ INT_PTR CWin32InputBox::GetInteger(
   WIN32INPUTBOX_PARAM param;
 
   char szResult[20];
-  itoa(result,szResult,10);
+  _itoa(result,szResult,10);
   param.szTitle = szTitle;
   param.szPrompt = szPrompt;
   param.szResult = szResult;

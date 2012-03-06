@@ -91,7 +91,7 @@
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua/include;userconfig;defaultconfig;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua/include;userconfig;defaultconfig;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX;HAS_vsnprintf;_S9XLUA_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -135,7 +135,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua/include;userconfig;defaultconfig;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../src/drivers/win/zlib;../src/drivers/win/directx;../src;../src/drivers/win/lua/include;userconfig;defaultconfig;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;MSVC;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINDOWS=0x0410;WINVER=0x0410;NETWORK;LSB_FIRST;_USE_32BIT_TIME_T;FCEUDEF_DEBUGGER;_USE_SHARED_MEMORY_;NOMINMAX;HAS_vsnprintf;_S9XLUA_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>

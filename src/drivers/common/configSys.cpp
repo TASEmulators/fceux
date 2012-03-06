@@ -609,7 +609,7 @@ int
 Config::_load()
 {
 	std::string configFile = _dir + "/" + cfgFile;
-	bool success = Config::_loadFile(configFile.c_str());
+	bool success = Config::_loadFile(configFile.c_str())!=0;
 
 	return success;
 }	
