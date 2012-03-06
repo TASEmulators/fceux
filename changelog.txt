@@ -1,3 +1,4 @@
+06-mar-2012 - prg - fceux no longer segfaults when opening gamepadconfig with GTK < 2.24 - a message is printed to the console
 06-mar-2012 - prg - supports loading of configuration files in $FCEUXDIR/cfg.d/*
 18-feb-2012 - AnS - PATTERNS menu, loading data from "tools\taseditor_patterns.txt"
 18-feb-2012 - AnS - "Use pattern" checkbox in Recorder; Config->ColumnSet Pattern skips Lag

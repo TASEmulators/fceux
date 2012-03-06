@@ -14,11 +14,15 @@ BUGS
 	* Go to game genie with clip sides enabled or save a state to see
 	* Ensure no clip sides is only being enabled during fullscreen
 
-	Gamepad dialog and others segfault on Ubuntu 10.04 (and older GTK versions)
-	---------------------------------------------------------------------------
+	DONE! Gamepad dialog and others segfault on Ubuntu 10.04 (and older GTK versions)
+	---------------------------------------------------------------------------------
 	* Not planning on using legacy code here (especially with Ubuntu 12.04 on its way) but perhaps 
 	a messagebox can be displayed recommending the user to upgrade their GTK version to prevent
 	the frustrating segfault.  Segfaults need to be avoided like the plague.
+
+	* This is fixed in r2447.  FceuX will print a warning to the console that the GTK version is old, and 
+	provide instructions on how to configure the gamepad.
+		* Maybe we should also provide a GTK MessageBox with this info?
 
 FEATURES
 ========
@@ -53,9 +57,9 @@ TESTING
 	------------
 	* Compiles/builds without issue.
 	* No issues found in gameplay.
-	* TODO Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesn't occur? (bug added).
-		* Wrote CheckGTKVersion(), which will be used like CheckGTKVersion(2, 24) to check the GTK version before segfaulting on dialogs
-		* TODO: Implement a check for the dialogs that would bomb -- (a hook in init; makes all items under Options inacessible besides fullscreen if under 2.24)
+	* DONE Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesn't occur? (bug added).
+		* DONE Wrote CheckGTKVersion(), which will be used like CheckGTKVersion(2, 24) to check the GTK version before segfaulting on dialogs
+		* DONE Implement a check for the dialogs that would bomb -- (a hook in init; makes all items under Options inacessible besides fullscreen if under 2.24)
 
 	openSUSE 12.1
 	-------------
