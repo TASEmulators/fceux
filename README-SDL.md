@@ -89,7 +89,7 @@ The "iup" libraries are admittedly time-consuming, difficult, and an overall pai
 6 - FAQ
 -------
 
-* Q.  I'm having issues with my sound!
+* Q.  Im having issues with my sound!
 * A.  First of all, for the best sound quality be sure you are using SDL 1.2.14 or later.  Versions 1.2.13 and earlier are known to have problems with fceux!  Next, try different SDL audio drivers to see if this makes any difference.  You can do this by using this command before running fceux:
 
 	export SDL_AUDIODRIVER=driver
