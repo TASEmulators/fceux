@@ -57,9 +57,15 @@ TESTING
 	------------
 	* Compiles/builds without issue.
 	* No issues found in gameplay.
-	* DONE Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesn't occur? (bug added).
+	* DONE Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesnt occur? (bug added).
 		* DONE Wrote CheckGTKVersion(), which will be used like CheckGTKVersion(2, 24) to check the GTK version before segfaulting on dialogs
 		* DONE Implement a check for the dialogs that would bomb -- (a hook in init; makes all items under Options inacessible besides fullscreen if under 2.24)
+
+	Ubuntu 12.04 Beta
+	-----------------
+	* Compiles/builds without issue.
+	* GTK3 preferred for Unity
+	* No issues AFAICS
 
 	openSUSE 12.1
 	-------------
