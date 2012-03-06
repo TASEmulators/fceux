@@ -27,7 +27,8 @@
  <p>
  <b>Table of Contents:</b>
  <ul>
-  <li /><a href="#intro">Introduction</a>
+   <li /><a href="#intro">Introduction</a>
+   <li /><a href="#config">Configuration</a>
    <li /><a href="#features-input">Input</a>
    <li /><a href="#features-expansion-fds">Famicom Disk System</a>
    <li /><a href="#features-expansion-genie">Game Genie</a>
@@ -65,6 +66,16 @@
  FCEUX stores configuration, savestates, movies, screenshots, amount other things
  in "~/.fceux".  This is referred to as the "base directory".
  </p>
+ <a name="config"><h2>Configuration</h2></a>
+ <p>FCEUX stores configuration files (.cfg), savestates (fcs), movies (.fm2), screenshots (snaps), 
+ and other information within "~/.fceux/".  This is referred to as the "base directory" throughout 
+ this documentation.  The primary configuration file is "fceux.cfg", located within the base 
+ directory.</p>
+ <p>As of FCEUX 2.1.6, configuration files can be stored within the "cfg.d" directory.  They will be 
+ parsed in alphabetical order (or numberical order -- ie: 10-gamepad_stuff.cfg; 20-xbmc.cfg; 30-sound.cfg).  
+ These files will <strong>not</strong> be modified by fceuX -- fceuX only writes configuration to "fceux.cfg".  
+ You can store device/game/scenario specific configuration files in the "cfg.d" directory.  You can enable/disable 
+ these configuration files by enabling/disabling read permisions to the scripts (ie: chmod a-r 15-myconfig.cfg).</p>
  <hr width="90%">
  <a name="features-input"><h2>Input</h2></a>
  <p>
@@ -307,8 +318,9 @@ necessarily 100% accurate or complete):
  <p>
  <table border width="100%">
   <tr><th>Name:</th><th>Contribution(s):</th></tr>
+  <tr><td>Unknown</td><td>Original Author</td></tr>
   <tr><td><a href="mailto:ltsmooth42 _at_ gmail _dot_ com">Lukas Sabota</a></td>
-  <td>FCEUX SDL Documentation rewrite.</td></tr>
+  <td>FCEUX SDL documentation revival.</td></tr>
  </table>
  </p>
 </div>
@@ -318,7 +330,7 @@ necessarily 100% accurate or complete):
 	<a href="documentation.html">Documentation</a> | <a href="version.html">
 	Version History</a> | <a href="contact.html">Contact</a> | <a href="links.html">Links</a>
 		<br/>We are in no way affiliated or endorsed by Nintendo or Nintendo of America. "Nintendo" is a registered trademark of Nintendo of America Inc. 
-		<br/>©2009 adelikat
+		<br/>©2012 adelikat
 </div>
 
  </body>
