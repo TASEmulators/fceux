@@ -8,5 +8,5 @@ bool FCEUI_AviEnableHUDrecording();
 void FCEUI_SetAviEnableHUDrecording(bool enable);
 bool FCEUI_AviDisableMovieMessages();
 void FCEUI_SetAviDisableMovieMessages(bool disable);
-
 #endif
+

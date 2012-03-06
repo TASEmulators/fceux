@@ -30,12 +30,12 @@ bool MaxSpeed = false;
 void
 RefreshThrottleFPS()
 {
-    uint64 fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
-    desired_frametime = 16777216.0l / (fps * g_fpsScale);
+	uint64 fps = FCEUI_GetDesiredFPS(); // Do >> 24 to get in Hz
+	desired_frametime = 16777216.0l / (fps * g_fpsScale);
 
-    Lasttime=0;   
-    Nexttime=0;
-    InFrame=0;
+	Lasttime=0;   
+	Nexttime=0;
+	InFrame=0;
 }
 
 /**
@@ -44,47 +44,47 @@ RefreshThrottleFPS()
 int
 SpeedThrottle()
 {
-    if(g_fpsScale >= 32)
-    {
-        return 0; /* Done waiting */
-    }
-    uint64 time_left;
-    uint64 cur_time;
+	if(g_fpsScale >= 32)
+	{
+		return 0; /* Done waiting */
+	}
+	uint64 time_left;
+	uint64 cur_time;
     
-    if(!Lasttime)
-        Lasttime = SDL_GetTicks();
+	if(!Lasttime)
+		Lasttime = SDL_GetTicks();
     
-    if(!InFrame)
-    {
-        InFrame = 1;
-        Nexttime = Lasttime + desired_frametime * 1000;
-    }
+	if(!InFrame)
+	{
+		InFrame = 1;
+		Nexttime = Lasttime + desired_frametime * 1000;
+	}
     
-    cur_time  = SDL_GetTicks();
-    if(cur_time >= Nexttime)
-        time_left = 0;
-    else
-        time_left = Nexttime - cur_time;
+	cur_time  = SDL_GetTicks();
+	if(cur_time >= Nexttime)
+		time_left = 0;
+	else
+		time_left = Nexttime - cur_time;
     
-    if(time_left > 50)
-    {
-        time_left = 50;
-        /* In order to keep input responsive, don't wait too long at once */
-        /* 50 ms wait gives us a 20 Hz responsetime which is nice. */
-    }
-    else
-        InFrame = 0;
+	if(time_left > 50)
+	{
+		time_left = 50;
+		/* In order to keep input responsive, don't wait too long at once */
+		/* 50 ms wait gives us a 20 Hz responsetime which is nice. */
+	}
+	else
+		InFrame = 0;
     
-    /*fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
-        time_left, InFrame?"no":"yes");*/
-    SDL_Delay(time_left);
+	/*fprintf(stderr, "attempting to sleep %Ld ms, frame complete=%s\n",
+		time_left, InFrame?"no":"yes");*/
+	SDL_Delay(time_left);
     
-    if(!InFrame)
-    {
-        Lasttime = SDL_GetTicks();
-        return 0; /* Done waiting */
-    }
-    return 1; /* Must still wait some more */
+	if(!InFrame)
+	{
+		Lasttime = SDL_GetTicks();
+		return 0; /* Done waiting */
+	}
+	return 1; /* Must still wait some more */
 }
 
 /**
@@ -92,13 +92,13 @@ SpeedThrottle()
  */
 void IncreaseEmulationSpeed(void)
 {
-    g_fpsScale *= LOGMUL;
+	g_fpsScale *= LOGMUL;
     
-    if(g_fpsScale > Fastest) g_fpsScale = Fastest;
+	if(g_fpsScale > Fastest) g_fpsScale = Fastest;
 
-    RefreshThrottleFPS();
+	RefreshThrottleFPS();
      
-    FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
+	FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
 
 /**
@@ -106,13 +106,13 @@ void IncreaseEmulationSpeed(void)
  */
 void DecreaseEmulationSpeed(void)
 {
-    g_fpsScale /= LOGMUL;
-    if(g_fpsScale < Slowest)
-        g_fpsScale = Slowest;
+	g_fpsScale /= LOGMUL;
+	if(g_fpsScale < Slowest)
+		g_fpsScale = Slowest;
 
-    RefreshThrottleFPS();
+	RefreshThrottleFPS();
 
-    FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
+	FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
 }
 
 /**
@@ -121,30 +121,30 @@ void DecreaseEmulationSpeed(void)
 void
 FCEUD_SetEmulationSpeed(int cmd)
 {
-    MaxSpeed = false;
+	MaxSpeed = false;
     
-    switch(cmd) {
-    case EMUSPEED_SLOWEST:
-        g_fpsScale = Slowest;
-        break;
-    case EMUSPEED_SLOWER:
-        DecreaseEmulationSpeed();
-        break;
-    case EMUSPEED_NORMAL:
-        g_fpsScale = Normal;
-        break;
-    case EMUSPEED_FASTER:
-        IncreaseEmulationSpeed();
-        break;
-    case EMUSPEED_FASTEST:
-        g_fpsScale = Fastest;
-        MaxSpeed = true;
-        break;
-    default:
-        return;
-    }
+	switch(cmd) {
+	case EMUSPEED_SLOWEST:
+		g_fpsScale = Slowest;
+		break;
+	case EMUSPEED_SLOWER:
+		DecreaseEmulationSpeed();
+		break;
+	case EMUSPEED_NORMAL:
+		g_fpsScale = Normal;
+		break;
+	case EMUSPEED_FASTER:
+		IncreaseEmulationSpeed();
+		break;
+	case EMUSPEED_FASTEST:
+		g_fpsScale = Fastest;
+		MaxSpeed = true;
+		break;
+	default:
+		return;
+	}
 
-    RefreshThrottleFPS();
+	RefreshThrottleFPS();
 
-    FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
+	FCEU_DispMessage("emulation speed %.1f%%",0, g_fpsScale*100.0);
 }

@@ -5,10 +5,10 @@
 
 #define MAXBUTTCONFIG   4
 typedef struct {
-        uint8  ButtType[MAXBUTTCONFIG];
-        uint8  DeviceNum[MAXBUTTCONFIG];
-        uint16 ButtonNum[MAXBUTTCONFIG];
-        uint32 NumC;
+	uint8  ButtType[MAXBUTTCONFIG];
+	uint8  DeviceNum[MAXBUTTCONFIG];
+	uint16 ButtonNum[MAXBUTTCONFIG];
+	uint32 NumC;
 	//uint64 DeviceID[MAXBUTTCONFIG];	/* TODO */
 } ButtConfig;
 
@@ -54,5 +54,5 @@ void InputCfg(const std::string &);
 
 std::string GetUserText(const char* title);
 const char* ButtonName(const ButtConfig* bc, int which);
-
 #endif
+
