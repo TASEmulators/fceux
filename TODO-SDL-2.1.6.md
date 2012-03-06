@@ -24,9 +24,23 @@ FEATURES
 	* If .fceux exists, display a warning message but use .fceux
 	* Don't move around people's config files without asking (or at all in this case)
 
+input.cpp
+=========
+	* This code is a fscking mess!  However, now is not the time to clean it.  Perhaps set a goal to clean this file up for
+	2.1.7, but cleaning this for 2.1.6 is not realistic (and would break too many things and require more testing time)
+
 TESTING
 =======
-	TODO
-	----
+	Distro Test
+	-----------
+	* Arch Linux 64 bit - compiles; runs
+	* Debian 6
+	* Ubuntu 10.04 / 11.04
+	* ???
 
+PROJECT STUFF
+=============
+	* Contact debian package management
+	* Create a sane release procedure script that generates a release ready tarball
+	* Create markdown file of README
 
