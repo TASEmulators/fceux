@@ -579,12 +579,29 @@ char* Config::getConfigDirectory()
 int
 Config::_load()
 {
+	std::string configFile = _dir + "/" + cfgFile;
+	bool success = Config::_loadFile(configFile.c_str());
+
+	return success;
+}	
+
+int
+Config::_loadFile(const char* fname)
+{
     signed int pos, eqPos;
     std::fstream config;
     std::map<std::string, int>::iterator int_i;
     std::map<std::string, double>::iterator dbl_i;
     std::map<std::string, std::string>::iterator str_i;
-    std::string configFile = _dir + "/" + cfgFile;
+	std::string configFile;
+	// if no filename argument was passed, parse the default configuration file
+	if(fname == NULL)
+	{
+		configFile = _dir + "/" + cfgFile;
+	} else
+	{
+		configFile = fname;
+	}
     std::string line, name, value;
     char buf[1024];
 

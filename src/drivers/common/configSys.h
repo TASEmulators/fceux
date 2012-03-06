@@ -20,6 +20,7 @@ private:
     int _addOption(char, const std::string &, const std::string &, int);
     int _addOption(const std::string &, const std::string &, int);
     int _load(void);
+	int _loadFile(const char* fname);
     int _parseArgs(int, char **);
 
 public:
