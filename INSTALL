@@ -1,4 +1,4 @@
-To compile and install FCEUX for SDL, follow the instructions in the README-SDL file.
+To compile and install FCEUX for SDL, follow the instructions in the README-SDL.md file.
 
 To compile the netplay server, run "scons fceux-server" or run "make" in the "fceux-server" directory.
 

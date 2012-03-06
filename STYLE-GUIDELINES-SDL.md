@@ -10,5 +10,5 @@ Hard tabs only!  Please!  src/drivers/sdl/* entirely consists of hard tabbed cod
 
 Return Statements
 -----------------
-Please use the "return 0;" style return statements instead of the "return(0)" style return statements.
+Please use the "return 0;" style return statements instead of the "return(0);" style return statements.
 
