@@ -17,7 +17,6 @@ uint32 GetWriteSound(void);
 
 void SilenceSound(int s); /* DOS and SDL */
 
-
 int InitJoysticks(void);
 int KillJoysticks(void);
 uint32 *GetJSOr(void);
@@ -36,5 +35,4 @@ void Giggles(int);
 void DoFun(void);
 
 int FCEUD_NetworkConnect(void);
-
 

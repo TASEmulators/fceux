@@ -1,15 +1,16 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <gdk/gdkx.h>
+
 #ifdef _GTK3
 #include <gdk/gdkkeysyms-compat.h>
 #endif
-#include <gdk/gdkx.h>
-
-#include <SDL/SDL.h>
 
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+
+#include <SDL/SDL.h>
 
 #include "../../types.h"
 #include "../../fceu.h"
@@ -18,9 +19,8 @@
 #include "../../movie.h"
 #include "../../palette.h"
 #include "../../fds.h"
-
-
 #include "../common/configSys.h"
+
 #include "sdl.h"
 #include "gui.h"
 #include "dface.h"
@@ -65,7 +65,7 @@ int configGamepadButton(GtkButton* button, gpointer p)
     
 	// only configure when the "Change" button is pressed in, not when it is unpressed
 	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    	return 0;
+		return 0;
     
 	ButtonConfigBegin();
     
@@ -113,7 +113,6 @@ void toggleLowPass(GtkWidget* w, gpointer p)
 		FCEUI_SetLowPass(0);
 	}
 	g_config->save();
-	
 }
 
 // Wrapper for pushing GTK options into the config file
@@ -160,8 +159,8 @@ void loadPalette (GtkWidget* w, gpointer p)
 	fileChooser = gtk_file_chooser_dialog_new ("Open NES Palette", GTK_WINDOW(MainWindow),
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
-	
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(fileChooser), getcwd(NULL, 0));
+
 	if (gtk_dialog_run (GTK_DIALOG (fileChooser)) ==GTK_RESPONSE_ACCEPT)
 	{
 		char* filename;
@@ -178,7 +177,7 @@ void loadPalette (GtkWidget* w, gpointer p)
 			gtk_dialog_run(GTK_DIALOG(msgbox));
 			gtk_widget_hide(msgbox);
 		}
-			
+		
 		gtk_entry_set_text(GTK_ENTRY(p), filename);
 		
 	}
@@ -235,15 +234,12 @@ void openPaletteConfig()
 	g_signal_connect(paletteButton, "clicked", G_CALLBACK(loadPalette), paletteEntry);
 	g_signal_connect(clearButton, "clicked", G_CALLBACK(clearPalette), paletteEntry);
 	
-	
-	
 	// sync with config
 	std::string fn;
 	g_config->getOption("SDL.Palette", &fn);
 	gtk_entry_set_text(GTK_ENTRY(paletteEntry), fn.c_str());
 	
 	// ntsc color check
-	
 	ntscColorChk = gtk_check_button_new_with_label("Use NTSC palette");
 	
 	g_signal_connect(ntscColorChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.NTSCpalette");
@@ -255,8 +251,7 @@ void openPaletteConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ntscColorChk), 0);
-	
-	
+
 	// color / tint / hue sliders
 	slidersFrame = gtk_frame_new("NTSC palette controls");
 	slidersVbox = gtk_vbox_new(FALSE, 2);
@@ -360,7 +355,6 @@ void openNetworkConfig()
 	
 	g_signal_connect(userEntry, "changed", G_CALLBACK(setUsername), NULL);
 
-	
 	frame = gtk_frame_new("Network options");
 	vbox = gtk_vbox_new(FALSE, 5);
 	ipBox = gtk_hbox_new(FALSE, 5);
@@ -970,7 +964,6 @@ int mixerChanged(GtkWidget* w, gpointer p)
 	
 	return 0;
 }
-	
 
 void openSoundConfig()
 {
@@ -992,20 +985,17 @@ void openSoundConfig()
 	GtkWidget* mixerHbox;
 	GtkWidget* mixers[6];
 	GtkWidget* mixerFrames[6];
-	
-	
+
 	win = gtk_dialog_new_with_buttons("Sound Preferences",
-									  GTK_WINDOW(MainWindow),
-									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-									  GTK_STOCK_CLOSE,
-									  GTK_RESPONSE_OK,
-									  NULL);
+										GTK_WINDOW(MainWindow),
+										(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+										GTK_STOCK_CLOSE,
+										GTK_RESPONSE_OK,
+										NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "audio-x-generic");
 	main_hbox = gtk_hbox_new(FALSE, 15);
 	vbox = gtk_vbox_new(False, 5);
-	//gtk_widget_set_size_request(win, 300, 200);
-	
-	
+
 	// sound enable check
 	soundChk = gtk_check_button_new_with_label("Enable sound");
 	
@@ -1017,9 +1007,7 @@ void openSoundConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundChk), FALSE);
 	
-	g_signal_connect(soundChk, "clicked",
-	 G_CALLBACK(toggleSound), NULL);
-	 
+	g_signal_connect(soundChk, "clicked", G_CALLBACK(toggleSound), NULL);
 
 	// low pass filter check
 	lowpassChk = gtk_check_button_new_with_label("Enable low pass filter");
@@ -1076,8 +1064,7 @@ void openSoundConfig()
 			gtk_combo_box_set_active(GTK_COMBO_BOX(rateCombo), i);
 		
 	g_signal_connect(rateCombo, "changed", G_CALLBACK(setRate), NULL);
-	
-	
+		
 	// sound rate widgets
 	rateLbl = gtk_label_new("Rate (Hz): ");
 	
@@ -1087,15 +1074,13 @@ void openSoundConfig()
 	hbox3 = gtk_hbox_new(FALSE, 2);
 	bufferHscale = gtk_hscale_new_with_range(15, 200, 2);
 	bufferLbl = gtk_label_new("Buffer size (in ms)");
-	
 
 	// sync widget with cfg 
 	g_config->getOption("SDL.Sound.BufSize", &cfgBuf);
 	gtk_range_set_value(GTK_RANGE(bufferHscale), cfgBuf);
 	
 	g_signal_connect(bufferHscale, "button-release-event", G_CALLBACK(setBufSize), NULL);
-	
-	
+
 	// mixer
 	mixerFrame = gtk_frame_new("Mixer:");
 	mixerHbox = gtk_hbox_new(TRUE, 5);
@@ -1156,10 +1141,10 @@ void quit ()
 	// it raises a GTK-Critical when its called
 	//gtk_main_quit();
 	FCEUI_Kill();
-    // LoadGame() checks for an IP and if it finds one begins a network session
-    // clear the NetworkIP field so this doesn't happen unintentionally
-    g_config->setOption("SDL.NetworkIP", "");
-    g_config->save();
+	// LoadGame() checks for an IP and if it finds one begins a network session
+	// clear the NetworkIP field so this doesn't happen unintentionally
+	g_config->setOption("SDL.NetworkIP", "");
+	g_config->save();
 	SDL_Quit();
 	exit(0);
 }
@@ -1229,7 +1214,6 @@ void hardReset ()
 		resizeGtkWindow();
 	}
 }
-		
 
 void enableFullscreen ()
 {
@@ -1369,7 +1353,7 @@ void loadLua ()
 		char* filename;
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fileChooser));
-    g_config->setOption("SDL.LastLoadLua", filename);
+		g_config->setOption("SDL.LastLoadLua", filename);
 		gtk_widget_destroy(fileChooser);
 		if(FCEU_LoadLuaCode(filename) == 0)
 		{
@@ -1523,7 +1507,7 @@ void loadGameGenie ()
 			"Game Genie ROM copied to ~/.fceux/gg.rom.");
 		gtk_dialog_run(GTK_DIALOG(d));
 		gtk_widget_destroy(d);
-	
+
 		f2<<f1.rdbuf();
 		g_free(filename);
 	}
@@ -1722,7 +1706,7 @@ void saveStateAs()
 void loadStateFrom()
 {
 	GtkWidget* fileChooser;
-    GtkFileFilter* filterFcs;
+	GtkFileFilter* filterFcs;
 	GtkFileFilter* filterSav;
 	GtkFileFilter* filterAll;
 	
@@ -1731,7 +1715,7 @@ void loadStateFrom()
 	gtk_file_filter_add_pattern(filterSav, "*.SAV");
 	gtk_file_filter_set_name(filterSav, "SAV files");
 	
-    filterFcs = gtk_file_filter_new();
+	filterFcs = gtk_file_filter_new();
 	gtk_file_filter_add_pattern(filterFcs, "*.fc?");
 	gtk_file_filter_add_pattern(filterFcs, "*.FC?");
 	gtk_file_filter_set_name(filterFcs, "FCS files");
