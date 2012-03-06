@@ -773,14 +773,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\drivers\common\configSys.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\src\drivers\common\configSys.h"
-					>
-				</File>
-				<File
 					RelativePath="..\src\drivers\common\hq2x.cpp"
 					>
 				</File>

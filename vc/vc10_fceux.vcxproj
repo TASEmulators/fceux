@@ -322,7 +322,6 @@
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
     <ClCompile Include="..\src\drivers\common\config.cpp" />
-    <ClCompile Include="..\src\drivers\common\configSys.cpp" />
     <ClCompile Include="..\src\drivers\common\hq2x.cpp" />
     <ClCompile Include="..\src\drivers\common\hq3x.cpp" />
     <ClCompile Include="..\src\drivers\common\nes_ntsc.c" />
@@ -702,7 +701,6 @@
     <ClInclude Include="..\src\drivers\common\args.h" />
     <ClInclude Include="..\src\drivers\common\cheat.h" />
     <ClInclude Include="..\src\drivers\common\config.h" />
-    <ClInclude Include="..\src\drivers\common\configSys.h" />
     <ClInclude Include="..\src\drivers\common\hq2x.h" />
     <ClInclude Include="..\src\drivers\common\hq3x.h" />
     <ClInclude Include="..\src\drivers\common\nes_ntsc.h" />

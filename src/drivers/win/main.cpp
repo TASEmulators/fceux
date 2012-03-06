@@ -149,7 +149,7 @@ int frameSkipCounter = 0; //Counter for managing frame skip
 // Contains the names of the overridden standard directories
 // in the order roms, nonvol, states, fdsrom, snaps, cheats, movies, memwatch, macro, input presets, lua scripts, base
 char *directory_names[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
+std::string cfgFile = "fceux.cfg";
 //Handle of the main window.
 HWND hAppWnd = 0;
 

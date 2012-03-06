@@ -313,9 +313,6 @@
     <ClCompile Include="..\src\drivers\common\config.cpp">
       <Filter>drivers\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\common\configSys.cpp">
-      <Filter>drivers\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\common\hq2x.cpp">
       <Filter>drivers\common</Filter>
     </ClCompile>
@@ -988,9 +985,6 @@
       <Filter>drivers\common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\common\config.h">
-      <Filter>drivers\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\common\configSys.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\common\hq2x.h">
