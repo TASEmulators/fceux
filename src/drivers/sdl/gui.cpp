@@ -52,6 +52,32 @@ GtkWidget* configNoCombo = NULL;
 GtkWidget* buttonMappings[10];
 GtkRadioAction* stateSlot = NULL;
 
+// check to see if a particular GTK version is available
+// 2.24 is required for most of the dialogs -- ie: checkGTKVersion(2,4);
+bool checkGTKVersion(int major_required, int minor_required)
+{
+	int major = GTK_MAJOR_VERSION;
+	int minor = GTK_MINOR_VERSION;
+
+	if(major > major_required)
+	{
+		return true;
+	} else if (major == major_required)
+	{
+		if(minor >= minor_required)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	} else
+	{
+		return false;
+	}
+}
+
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {

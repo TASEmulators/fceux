@@ -43,15 +43,28 @@ TESTING
 	* Debian 6
 	* Ubuntu 10.04 / 11.04
 	* ???
+
+	Arch Linux 64 bit
+	-----------------
+	Flawless installation from fceux-svn in [aur].  No issues other than the ones already 
+	noted.
+
 	Ubuntu 10.04
 	------------
 	* Compiles/builds without issue.
 	* No issues found in gameplay.
 	* TODO Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesn't occur? (bug added).
+		* Wrote CheckGTKVersion(), which will be used like CheckGTKVersion(2, 24) to check the GTK version before segfaulting on dialogs
+		* TODO: Implement a check for the dialogs that would bomb -- (a hook in init; makes all items under Options inacessible besides fullscreen if under 2.24)
+
+	openSUSE 12.1
+	-------------
+	* scons bombs out because can't find libgtk; I can't find gtk headers package
 
 PROJECT STUFF
 =============
 	* Contact debian package management
 	* Create a sane release procedure script that generates a release ready tarball
-	* Create markdown file of README
+	* DONE - Create markdown file of README
+	* Locate important features and summarize them.
 
