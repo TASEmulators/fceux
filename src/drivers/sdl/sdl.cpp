@@ -509,11 +509,11 @@ int main(int argc, char *argv[])
   // these six lines will still print the help output
 	if(argc > 1)
 	{
-            if(!strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
-    	    {
-	        ShowUsage(argv[0]);
-                return 0;
-            }
+		if(!strcmp(argv[1], "--help") || !strcmp(argv[1],"-h"))
+		{
+	       ShowUsage(argv[0]);
+			return 0;
+		}
 	}
 
 	int error, frameskip;
@@ -563,10 +563,10 @@ int main(int argc, char *argv[])
 		}
 #ifdef _GTK
 		else if(strcmp(argv[i], "--nogui") == 0)
-    {
+	{
 			noGui = 1;
-      argv[i] = "";
-    }
+			argv[i] = "";
+	}
 #endif
 	}
 	int romIndex = g_config->parse(argc, argv);
@@ -583,17 +583,17 @@ int main(int argc, char *argv[])
 	std::string s;
 
 	g_config->getOption("SDL.InputCfg", &s);
-    if(s.size() != 0)
-    {
-        InitVideo(GameInfo);
-        InputCfg(s);
-    }
-    // set the FAMICOM PAD 2 Mic thing 
-    {
-        int t;
-        g_config->getOption("SDL.Input.FamicomPad2.EnableMic", &t);
-		if (t)	
-        	replaceP2StartWithMicrophone = t;
+	if(s.size() != 0)
+	{
+	InitVideo(GameInfo);
+	InputCfg(s);
+	}
+	// set the FAMICOM PAD 2 Mic thing 
+	{
+	int t;
+	g_config->getOption("SDL.Input.FamicomPad2.EnableMic", &t);
+		if(t)
+			replaceP2StartWithMicrophone = t;
 	}
 
     // update the input devices
