@@ -14,6 +14,12 @@ BUGS
 	* Go to game genie with clip sides enabled or save a state to see
 	* Ensure no clip sides is only being enabled during fullscreen
 
+	Gamepad dialog and others segfault on Ubuntu 10.04 (and older GTK versions)
+	---------------------------------------------------------------------------
+	* Not planning on using legacy code here (especially with Ubuntu 12.04 on its way) but perhaps 
+	a messagebox can be displayed recommending the user to upgrade their GTK version to prevent
+	the frustrating segfault.  Segfaults need to be avoided like the plague.
+
 FEATURES
 ========
 	XDG Standardization of Config
@@ -37,6 +43,11 @@ TESTING
 	* Debian 6
 	* Ubuntu 10.04 / 11.04
 	* ???
+	Ubuntu 10.04
+	------------
+	* Compiles/builds without issue.
+	* No issues found in gameplay.
+	* TODO Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesn't occur? (bug added).
 
 PROJECT STUFF
 =============
