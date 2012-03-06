@@ -537,8 +537,7 @@ int main(int argc, char *argv[])
 
 	// Initialize the configuration system
 	g_config = InitConfig();
-	
-	
+		
 	if(!g_config) {
 		SDL_Quit();
 		return -1;
@@ -563,10 +562,10 @@ int main(int argc, char *argv[])
 		}
 #ifdef _GTK
 		else if(strcmp(argv[i], "--nogui") == 0)
-	{
+		{
 			noGui = 1;
 			argv[i] = "";
-	}
+		}
 #endif
 	}
 	int romIndex = g_config->parse(argc, argv);
