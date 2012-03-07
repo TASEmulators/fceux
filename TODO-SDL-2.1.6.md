@@ -40,6 +40,21 @@ input.cpp
 
 DISTRO TESTING
 ==============
+Summary
+-------
+* Out of box working distros:
+	* Arch Linux
+	* Ubuntu 10.04
+	* Ubuntu 12.04
+* Works, but needs patching:
+	* Fedora Core 16
+* Couldn't get working
+	* openSUSE
+* Untested:
+	* Linux Mint
+	* Debian
+
+
 Arch Linux 64 bit
 -----------------
 * Flawless installation from fceux-svn in [aur].  No issues other than the ones already noted.
@@ -63,7 +78,7 @@ Ubuntu 12.04 Beta
 
 Fedora Core 16
 --------------
-* Dependencies: subversion, scons, SDL-devel, gtk2-devel/gtk3-devel, gcc
+* Dependencies: subversion, scons, SDL-devel, gtk2-devel/gtk3-devel, gcc, [glib-devel?]
 * You also need to install the "Development Tools" group:
 
 		yum groupinstall "Development Tools"
@@ -76,6 +91,19 @@ Fedora Core 16
 		collect2: ld returned 1 exit status
 		scons: *** [src/fceux] Error 1
 		scons: building terminated because of errors.
+
+	* This was fixed by forcing "-ldl" to the linker command line.  This can be done by adding the following
+	to line 92 of the SConstruct:
+
+		env.Append(LINKFLAGS = ["-ldl"])
+	
+	* TODO Answer some questions:
+		1. Is -ldl necessary everywhere?
+		2.  Should we always use it?  If not what can we test for for when to use it?
+	
+	* Check the code circa line 92 in SConstruct for a Fedora resolution.
+
+	* Tested with GTK2, runs smoothly in VirtualBox.
 
 openSUSE 12.1
 -------------
