@@ -50,12 +50,14 @@ TESTING
 
 	Arch Linux 64 bit
 	-----------------
-	Flawless installation from fceux-svn in [aur].  No issues other than the ones already 
+	* Flawless installation from fceux-svn in [aur].  No issues other than the ones already 
 	noted.
+	* Dpendencies: sdl, gtk2, scons libz
 
 	Ubuntu 10.04
 	------------
 	* Compiles/builds without issue.
+	* Build deps: libsdl1.2-dev, scons, libgtk2.0-dev, zlib-dev, build-essentials
 	* No issues found in gameplay.
 	* DONE Some dialogs with segfault FCEUX due to an older version of GTK.  Perhaps we can detect the old version of GTK and just prevent the dialog from being opened so the segfault doesnt occur? (bug added).
 		* DONE Wrote CheckGTKVersion(), which will be used like CheckGTKVersion(2, 24) to check the GTK version before segfaulting on dialogs
@@ -65,7 +67,13 @@ TESTING
 	-----------------
 	* Compiles/builds without issue.
 	* GTK3 preferred for Unity
+	* Build deps: libsdl1.2-dev, scons, libgtk-3-dev, zlib-dev, build-essentials
 	* No issues AFAICS
+
+	Fedora Core 16
+	--------------
+	* Dependencies: subversion, scons, SDL-devel, gtk2-devel/gtk3-devel
+	* BUG Scons issues?
 
 	openSUSE 12.1
 	-------------
