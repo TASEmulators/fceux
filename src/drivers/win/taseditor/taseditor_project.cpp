@@ -33,6 +33,8 @@ extern PIANO_ROLL piano_roll;
 extern SELECTION selection;
 extern SPLICER splicer;
 
+extern FCEUGI *GameInfo;
+
 extern void FCEU_PrintError(char *format, ...);
 extern bool SaveProject();
 extern bool SaveProjectAs();
@@ -70,59 +72,85 @@ void TASEDITOR_PROJECT::update()
 	
 }
 
-bool TASEDITOR_PROJECT::save()
+bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
 {
-	std::string PFN = GetProjectFile();
-	if (PFN.empty()) return false;
-	const char* filename = PFN.c_str();
-	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename, "wb");
+	if (!different_name && GetProjectFile().empty())
+		// no different name specified, and there's no current filename of the project
+		return false;
 	
-	currMovieData.loadFrameCount = currMovieData.records.size();
-	currMovieData.dump(ofs, true);
-
-	// save all modules
-	unsigned int saved_stuff = ALL_SAVED;
-	write32le(saved_stuff, ofs);
-	markers_manager.save(ofs);
-	bookmarks.save(ofs);
-	greenzone.save(ofs);
-	history.save(ofs);
-	piano_roll.save(ofs);
-	selection.save(ofs);
-
-	delete ofs;
-
-	playback.updateProgressbar();
-	this->reset();
-	return true;
-}
-bool TASEDITOR_PROJECT::save_compact(char* filename, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
-{
-	EMUFILE_FILE* ofs = FCEUD_UTF8_fstream(filename, "wb");
-	
-	currMovieData.loadFrameCount = currMovieData.records.size();
-	currMovieData.dump(ofs, save_binary);
-
-	// save specified modules
-	unsigned int saved_stuff = 0;
-	if (save_markers) saved_stuff |= MARKERS_SAVED;
-	if (save_bookmarks) saved_stuff |= BOOKMARKS_SAVED;
-	if (save_greenzone) saved_stuff |= GREENZONE_SAVED;
-	if (save_history) saved_stuff |= HISTORY_SAVED;
-	if (save_piano_roll) saved_stuff |= PIANO_ROLL_SAVED;
-	if (save_selection) saved_stuff |= SELECTION_SAVED;
-	write32le(saved_stuff, ofs);
-	markers_manager.save(ofs, save_markers);
-	bookmarks.save(ofs, save_bookmarks);
-	greenzone.save(ofs, save_greenzone);
-	history.save(ofs, save_history);
-	piano_roll.save(ofs, save_piano_roll);
-	selection.save(ofs, save_selection);
-
-	delete ofs;
-
-	playback.updateProgressbar();
-	return true;
+	// check MD5
+	char md5_movie[256];
+	char md5_rom[256];
+	strcpy(md5_movie, md5_asciistr(currMovieData.romChecksum));
+	strcpy(md5_rom, md5_asciistr(GameInfo->MD5));
+	if(strcmp(md5_movie, md5_rom))
+	{
+		// checksums mismatch, check if they both aren't zero
+		unsigned int k, count1 = 0, count2 = 0;
+		for(k = 0; k < strlen(md5_movie); k++) count1 += md5_movie[k] - '0';
+		for(k = 0; k < strlen(md5_rom); k++) count2 += md5_rom[k] - '0';
+		if(count1 && count2)
+		{
+			// ask user if he wants to fix the checksum before saving
+			char message[2048];
+			strcpy(message, "Movie ROM:\n");
+			strncat(message, currMovieData.romFilename.c_str(), 2047 - strlen(message));
+			strncat(message, "\nMD5: ", 2047 - strlen(message));
+			strncat(message, md5_movie, 2047 - strlen(message));
+			strncat(message, "\n\nCurrent ROM: \n", 2047 - strlen(message));
+			strncat(message, GameInfo->filename, 2047 - strlen(message));
+			strncat(message, "\nMD5: ", 2047 - strlen(message));
+			strncat(message, md5_rom, 2047 - strlen(message));
+			strncat(message, "\n\nFix the movie header before saving? ", 2047 - strlen(message));
+			int answer = MessageBox(taseditor_window.hwndTasEditor, message, "ROM Checksum Mismatch", MB_YESNOCANCEL);
+			if (answer == IDCANCEL)
+			{
+				// cancel saving
+				return false;
+			} else if (answer == IDYES)
+			{
+				// change ROM data in the movie to current ROM
+				currMovieData.romFilename = GameInfo->filename;
+				currMovieData.romChecksum = GameInfo->MD5;
+			}
+		}
+	}
+	// open file for write
+	EMUFILE_FILE* ofs = 0;
+	if (different_name)
+		ofs = FCEUD_UTF8_fstream(different_name, "wb");
+	else
+		ofs = FCEUD_UTF8_fstream(GetProjectFile().c_str(), "wb");
+	if (ofs)
+	{
+		currMovieData.loadFrameCount = currMovieData.records.size();
+		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
+		currMovieData.dump(ofs, save_binary);
+		// save specified modules
+		unsigned int saved_stuff = 0;
+		if (save_markers) saved_stuff |= MARKERS_SAVED;
+		if (save_bookmarks) saved_stuff |= BOOKMARKS_SAVED;
+		if (save_greenzone) saved_stuff |= GREENZONE_SAVED;
+		if (save_history) saved_stuff |= HISTORY_SAVED;
+		if (save_piano_roll) saved_stuff |= PIANO_ROLL_SAVED;
+		if (save_selection) saved_stuff |= SELECTION_SAVED;
+		write32le(saved_stuff, ofs);
+		markers_manager.save(ofs, save_markers);
+		bookmarks.save(ofs, save_bookmarks);
+		greenzone.save(ofs, save_greenzone);
+		history.save(ofs, save_history);
+		piano_roll.save(ofs, save_piano_roll);
+		selection.save(ofs, save_selection);
+		delete ofs;
+		playback.updateProgressbar();
+		// also reset autosave period if we saved the project to its current filename
+		if (!different_name)
+			this->reset();
+		return true;
+	} else
+	{
+		return false;
+	}
 }
 bool TASEDITOR_PROJECT::load(char* fullname)
 {
@@ -134,14 +162,43 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 		return false;
 	}
 
-	FCEU_printf("\nLoading TAS Editor project %s...\n", fullname);
-
 	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 	if (LoadFM2(tempMovieData, &ifs, ifs.size(), false))
 	{
+		// check MD5
+		char md5_original[256];
+		char md5_current[256];
+		strcpy(md5_original, md5_asciistr(tempMovieData.romChecksum));
+		strcpy(md5_current, md5_asciistr(GameInfo->MD5));
+		if(strcmp(md5_original, md5_current))
+		{
+			// checksums mismatch, check if they both aren't zero
+			unsigned int k, count1 = 0, count2 = 0;
+			for(k = 0; k < strlen(md5_original); k++) count1 += md5_original[k] - '0';
+			for(k = 0; k < strlen(md5_current); k++) count2 += md5_current[k] - '0';
+			if(count1 && count2)
+			{
+				// ask user if he really wants to load the project
+				char message[2048];
+				strcpy(message, "This project was made using different ROM!\n\n");
+				strcat(message, "Original ROM:\n");
+				strncat(message, tempMovieData.romFilename.c_str(), 2047 - strlen(message));
+				strncat(message, "\nMD5: ", 2047 - strlen(message));
+				strncat(message, md5_original, 2047 - strlen(message));
+				strncat(message, "\n\nCurrent ROM: \n", 2047 - strlen(message));
+				strncat(message, GameInfo->filename, 2047 - strlen(message));
+				strncat(message, "\nMD5: ", 2047 - strlen(message));
+				strncat(message, md5_current, 2047 - strlen(message));
+				strncat(message, "\n\nLoad the project anyway? ", 2047 - strlen(message));
+				int answer = MessageBox(taseditor_window.hwndTasEditor, message, "ROM Checksum Mismatch", MB_YESNO);
+				if(answer == IDNO)
+					return false;
+			}
+		}
+		FCEU_printf("\nLoading TAS Editor project %s...\n", fullname);
+		// save data to currMovieData and continue loading
 		currMovieData = tempMovieData;
-		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 		LoadSubtitles(currMovieData);
 	} else
 	{

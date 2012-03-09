@@ -68,6 +68,7 @@ public:
 	bool findnote_matchcase;
 	bool findnote_search_up;
 	bool enable_auto_function;
+	bool deselect_on_doubleclick;
 	bool silent_autosave;
 	bool tooltips;
 	int current_pattern;

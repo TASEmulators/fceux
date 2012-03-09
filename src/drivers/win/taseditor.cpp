@@ -23,11 +23,11 @@ Main - Logical center of the program
 #include "utils/xstring.h"
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
-#include "version.h"
 
 using namespace std;
 
 // TAS Editor data
+bool emulator_must_run_taseditor = false;
 bool Taseditor_rewind_now = false;
 bool must_call_manual_lua_function = false;
 std::vector<std::string> autofire_patterns_names;
@@ -193,7 +193,6 @@ bool EnterTasEditor()
 				}
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
-				currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 			}
 			// ensure that movie has correct set of ports/fourscore
 			SetInputType(currMovieData, GetInputType(currMovieData));
@@ -278,6 +277,14 @@ void UpdateTasEditor()
 	{
 		// TAS Editor is not engaged... but we still should run Lua auto function
 		TaseditorAutoFunction();
+		if (emulator_must_run_taseditor)
+		{
+			char fullname[512];
+			strcpy(fullname, curMovieFilename);
+			if (EnterTasEditor())
+				LoadProject(fullname);
+			emulator_must_run_taseditor = false;
+		}
 		return;
 	}
 
@@ -514,10 +521,14 @@ bool SaveProjectAs()
 }
 bool SaveProject()
 {
-	if (!project.save())
+	if (project.GetProjectFile().empty())
+	{
 		return SaveProjectAs();
-	else
+	} else
+	{
+		project.save();
 		taseditor_window.UpdateCaption();
+	}
 	return true;
 }
 
@@ -628,9 +639,7 @@ void SaveCompact()
 		ofn.lpstrInitialDir = initdir.c_str();
 
 		if(GetSaveFileName(&ofn))								//If it is a valid filename
-		{
-			project.save_compact(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
-		}
+			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 	}
 }
 

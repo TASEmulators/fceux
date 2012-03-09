@@ -547,6 +547,9 @@ bool SPLICER::Paste()
 				}
 			}
 			result = true;
+		} else
+		{
+			SetWindowText(hwndTextClipboard, clipboardEmptyText);
 		}
 		GlobalUnlock(hGlobal);
 	}
@@ -664,6 +667,9 @@ bool SPLICER::PasteInsert()
 				}
 			}
 			result = true;
+		} else
+		{
+			SetWindowText(hwndTextClipboard, clipboardEmptyText);
 		}
 		GlobalUnlock(hGlobal);
 	}

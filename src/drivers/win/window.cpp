@@ -73,6 +73,9 @@
 #include <sstream>
 #include <cmath>
 
+#include "taseditor/taseditor_window.h"
+extern TASEDITOR_WINDOW taseditor_window;
+
 using namespace std;
 
 //----Context Menu - Some dynamically added menu items
@@ -1225,50 +1228,46 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		mouseb=wParam;
 		goto proco;
 
+	case WM_MOUSEWHEEL:
+	{
+		// send the message to TAS Editor
+		if (taseditor_window.hwndTasEditor)
+			SendMessage(taseditor_window.hwndTasEditor, msg, wParam, lParam);
+		return 0;
+	}
+
 	case WM_RBUTTONUP:
 	{
-		if (rightClickEnabled)
+		// If TAS Editor is engaged, rightclick shouldn't popup menus, because right button is used with wheel input for TAS Editor's own purposes
+		if (!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		{
-			hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
+			if (rightClickEnabled)
+			{
+				//If There is a movie loaded in read only
+				if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && movie_readonly)
+					whichContext = 0; // Game+Movie+readonly
+				//If there is a movie loaded in read+write
+				else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && !movie_readonly)
+					whichContext = 3; // Game+Movie+readwrite
+				//If there is a ROM loaded but no movie
+				else if (GameInfo)
+					whichContext = 1; // Game+NoMovie
+				//Else no ROM
+				else
+					whichContext = 2; // NoGame
 
-			//If There is a movie loaded in read only
-			if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && movie_readonly)
+				hfceuxcontext = LoadMenu(fceu_hInstance,"FCEUCONTEXTMENUS");
+				hfceuxcontextsub = GetSubMenu(hfceuxcontext, whichContext);
+				UpdateContextMenuItems(hfceuxcontextsub, whichContext);
+				pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
+				pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
+				ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
+				TrackPopupMenu(hfceuxcontextsub,TPM_RIGHTBUTTON,(pt.x),(pt.y),0,hWnd,0);	//Create menu
+			} else
 			{
-				hfceuxcontextsub = GetSubMenu(hfceuxcontext,0); 
-				whichContext = 0; // Game+Movie+readonly
+				mouseb=wParam;
 			}
-			
-			//If there is a movie loaded in read+write
-			else if (GameInfo && FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED) && !movie_readonly)
-			{
-				hfceuxcontextsub = GetSubMenu(hfceuxcontext,3);
-				whichContext = 3; // Game+Movie+readwrite
-			}
-
-			
-			//If there is a ROM loaded but no movie
-			else if (GameInfo)
-			{
-				hfceuxcontextsub = GetSubMenu(hfceuxcontext,1);
-				whichContext = 1; // Game+NoMovie
-			}
-			
-			//Else no ROM
-			else
-			{
-				hfceuxcontextsub = GetSubMenu(hfceuxcontext,2);
-				whichContext = 2; // NoGame
-			}
-			UpdateContextMenuItems(hfceuxcontextsub, whichContext);
-			pt.x = LOWORD(lParam);		//Get mouse x in terms of client area
-			pt.y = HIWORD(lParam);		//Get mouse y in terms of client area
-			ClientToScreen(hAppWnd, (LPPOINT) &pt);	//Convert client area x,y to screen x,y
-			TrackPopupMenu(hfceuxcontextsub,TPM_RIGHTBUTTON,(pt.x),(pt.y),0,hWnd,0);	//Create menu
 		}
-        else
-        {
-            mouseb=wParam;
-        }
 	}
 
 	case WM_MOVE: 

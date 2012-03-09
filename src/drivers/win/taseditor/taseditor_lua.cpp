@@ -179,7 +179,7 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 		strncpy(text, newtext, MAX_NOTE_LEN - 1);
 		if (strcmp(markers_manager.GetNote(index).c_str(), text))
 		{
-			// text differs from old note - rename
+			// text differs from old Note - rename
 			markers_manager.SetNote(index, text);
 			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_RENAME, markers_manager.GetMarkerFrame(index), -1, text);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;

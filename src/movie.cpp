@@ -44,7 +44,7 @@ extern void AddRecentMovieFile(const char *filename);
 #include "./drivers/win/taseditor/recorder.h"
 extern PLAYBACK playback;
 extern RECORDER recorder;
-
+extern bool emulator_must_run_taseditor;
 extern bool TaseditorIsRecording();
 #endif
 
@@ -1195,20 +1195,13 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 	{
 		if (currMovieData.loadFrameCount >= 0)
 		{
-			#ifdef WIN32
+#ifdef WIN32
 			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
 			if (result == IDYES)
-			{
-				extern bool EnterTasEditor();
-				extern bool LoadProject(char* fullname);
-				char fullname[512];
-				strcpy(fullname, curMovieFilename);
-				if (EnterTasEditor())
-					LoadProject(fullname);
-			}
-			#else
+				emulator_must_run_taseditor = true;
+#else
 			FCEUI_printf("This movie is a TAS Editor project file! It can be modified in TAS Editor only.\nMovie is now Read-Only.\n");
-			#endif
+#endif
 			movie_readonly = true;
 		}
 		if (FCEU_isFileInArchive(curMovieFilename))

@@ -360,8 +360,10 @@ extern int geniestage;
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
-	// reset memory_savestate
-	memory_savestate.set_len(0);
+	// reinit memory_savestate
+	// memory_savestate is global variable which already has its vector of bytes, so no need to allocate memory every time we use save/loadstate
+	memory_savestate.set_len(0);	// this also seeks to the beginning
+	memory_savestate.unfail();
 
 	EMUFILE* os = &memory_savestate;
 
@@ -648,10 +650,12 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	int stateversion = FCEU_de32lsb(header + 8);
 	int comprlen = FCEU_de32lsb(header + 12);
 
-	// memory_savestate is global variable which already has its vector of bytes
+	// reinit memory_savestate
+	// memory_savestate is global variable which already has its vector of bytes, so no need to allocate memory every time we use save/loadstate
 	if ((int)(memory_savestate.get_vec())->size() < totalsize)
 		(memory_savestate.get_vec())->resize(totalsize);
 	memory_savestate.set_len(totalsize);
+	memory_savestate.unfail();
 	memory_savestate.fseek(0, SEEK_SET);
 
 	if(comprlen != -1)

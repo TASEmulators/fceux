@@ -441,10 +441,10 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL, taseditor_config.keyboard_for_piano_roll?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_DESELECTONDOUBLECLICK, taseditor_config.deselect_on_doubleclick?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
-
 }
 
 void TASEDITOR_WINDOW::SetTaseditorInput()
@@ -1051,6 +1051,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_CONFIG_COLUMNSETPATTERNSKIPSLAG:
 					taseditor_config.pattern_skips_lag ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_CONFIG_DESELECTONDOUBLECLICK:
+					taseditor_config.deselect_on_doubleclick ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_SILENTAUTOSAVE:

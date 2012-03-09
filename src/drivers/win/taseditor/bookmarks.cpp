@@ -344,9 +344,13 @@ void BOOKMARKS::set(int slot)
 	// save time of this slot before rewriting it
 	char saved_time[TIME_DESC_LENGTH];
 	if (bookmarks_array[slot].not_empty)
-		strncpy(saved_time, bookmarks_array[slot].snapshot.description, TIME_DESC_LENGTH-1);
-	else
+	{
+		strncpy(saved_time, bookmarks_array[slot].snapshot.description, TIME_DESC_LENGTH - 1);
+		saved_time[TIME_DESC_LENGTH - 1] = 0;
+	} else
+	{
 		saved_time[0] = 0;
+	}
 	
 	bookmarks_array[slot].set();
 
@@ -369,7 +373,7 @@ void BOOKMARKS::set(int slot)
 					break;
 			}
 			if (i >= TOTAL_BOOKMARKS)
-				// didn't find another child of cloud
+				// didn't find another child of cloud, change cloud's time, sice "root" has shifted
 				strcpy(cloud_time, saved_time);
 		}
 		// before disconnecting from old parent, connect all childs to the old parent

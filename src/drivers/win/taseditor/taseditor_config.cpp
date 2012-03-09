@@ -70,6 +70,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_matchcase = false;
 	findnote_search_up = false;
 	enable_auto_function = true;
+	deselect_on_doubleclick = true;
 	silent_autosave = true;
 	tooltips = true;
 	current_pattern = 0;

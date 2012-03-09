@@ -182,14 +182,18 @@ void RECORDER::update()
 	// call ColumnSet if needed
 	if (taseditor_config.columnset_by_keys && movie_readonly && taseditor_window.TASEditor_focus)
 	{
-		bool alt_pressed = ((GetAsyncKeyState(VK_MENU) & 0x8000) != 0);
-		for (int joy = 0; joy < num_joys; ++joy)
+		// if Ctrl or Shift is held, do not call ColumnSet, because maybe this is accelerator
+		if ((GetAsyncKeyState(VK_CONTROL) >= 0) && (GetAsyncKeyState(VK_SHIFT) >= 0))
 		{
-			for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
+			bool alt_pressed = ((GetAsyncKeyState(VK_MENU) & 0x8000) != 0);
+			for (int joy = 0; joy < num_joys; ++joy)
 			{
-				// if the button was pressed right now
-				if ((current_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
-					piano_roll.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, alt_pressed);
+				for (int button = 0; button < NUM_JOYPAD_BUTTONS; ++button)
+				{
+					// if the button was pressed right now
+					if ((current_joy[joy] & (1 << button)) && !(old_joy[joy] & (1 << button)))
+						piano_roll.ColumnSet(COLUMN_JOYPAD1_A + joy * NUM_JOYPAD_BUTTONS + button, alt_pressed);
+				}
 			}
 		}
 	}

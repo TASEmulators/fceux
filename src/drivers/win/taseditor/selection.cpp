@@ -463,7 +463,8 @@ void SELECTION::EnforceSelectionToList()
  
 void SELECTION::SelectAll()
 {
-	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
+	// select all, but remove "focused" from all
+	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_FOCUSED|LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SetRowSelection(int index)
 {
@@ -472,7 +473,7 @@ void SELECTION::SetRowSelection(int index)
 void SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i < end; ++i)
-		ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 }
 void SELECTION::SelectBetweenMarkers()
 {
@@ -510,7 +511,7 @@ void SELECTION::SelectBetweenMarkers()
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -519,14 +520,14 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
@@ -534,14 +535,14 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
 		}
 	}
 }

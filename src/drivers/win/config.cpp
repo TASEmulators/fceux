@@ -347,6 +347,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(taseditor_config.savecompact_selection),
 	AC(taseditor_config.findnote_matchcase),
 	AC(taseditor_config.findnote_search_up),
+	AC(taseditor_config.deselect_on_doubleclick),
 	AC(taseditor_config.silent_autosave),
 	AC(taseditor_config.tooltips),
 	AC(taseditor_config.current_pattern),

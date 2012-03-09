@@ -619,8 +619,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
-				// font
-				SelectObject(msg->nmcd.hdc, hMainListFont);
+				// font: empty cells have "SelectFont", non-empty have normal font
+				int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				if ((int)currMovieData.records.size() <= cell_y ||
+					((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
+					SelectObject(msg->nmcd.hdc, hMainListFont);
+				else
+					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 				// bg
 				if (cell_y == history.GetUndoHint())
 				{
@@ -652,8 +658,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
 				// pad 2 or 4
-				// font
-				SelectObject(msg->nmcd.hdc, hMainListFont);
+				// font: empty cells have "SelectFont", non-empty have normal font
+				int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+				int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+				if ((int)currMovieData.records.size() <= cell_y ||
+					((currMovieData.records[cell_y].joysticks[joy]) & (1<<bit)) )
+					SelectObject(msg->nmcd.hdc, hMainListFont);
+				else
+					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 				// bg
 				if (cell_y == history.GetUndoHint())
 				{
@@ -1092,7 +1104,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if(column_index == COLUMN_ICONS)
 				{
 					// click on the "icons" column - jump to the frame
-					selection.ClearSelection();
 					playback.jump(row_index);
 				} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 				{
@@ -1100,7 +1111,8 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					if (msg == WM_LBUTTONDBLCLK && !alt_pressed)
 					{
 						// doubleclick - jump to the frame
-						selection.ClearSelection();
+						if (taseditor_config.deselect_on_doubleclick)
+							selection.ClearSelection();
 						playback.jump(row_index);
 					} else
 					{
