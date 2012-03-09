@@ -1080,9 +1080,11 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case WM_KEYDOWN:
 		{
-			if (!taseditor_config.keyboard_for_piano_roll)
+			// only allow 8 keys
+			if (taseditor_config.keyboard_for_piano_roll && (wParam == VK_LEFT || wParam == VK_UP || wParam == VK_RIGHT || wParam == VK_DOWN || wParam == VK_END || wParam == VK_HOME || wParam == VK_PRIOR || wParam == VK_NEXT))
+				break;
+			else
 				return 0;
-			break;
 		}
 		case WM_TIMER:
 			// disable timer of entering edit mode (there's no edit mode anyway)
