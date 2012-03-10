@@ -261,12 +261,9 @@ void PLAYBACK::MiddleButtonClick()
 {
 	if (emu_paused)
 	{
-		if (pause_frame)
-			jump(pause_frame-1);
-		else if (lost_position_frame)
-			jump(lost_position_frame-1);
-		else
-			UnpauseEmulation();
+		if (!pause_frame && lost_position_frame)
+			pause_frame = lost_position_frame;
+		UnpauseEmulation();
 	} else
 	{
 		PauseEmulation();

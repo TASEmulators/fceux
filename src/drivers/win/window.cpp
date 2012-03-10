@@ -74,7 +74,9 @@
 #include <cmath>
 
 #include "taseditor/taseditor_window.h"
+#include "taseditor/playback.h"
 extern TASEDITOR_WINDOW taseditor_window;
+extern PLAYBACK playback;
 
 using namespace std;
 
@@ -1236,6 +1238,13 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return 0;
 	}
 
+	case WM_MBUTTONDOWN:
+	{
+		if (taseditor_window.hwndTasEditor)
+			playback.MiddleButtonClick();
+		return 0;
+	}
+
 	case WM_RBUTTONUP:
 	{
 		// If TAS Editor is engaged, rightclick shouldn't popup menus, because right button is used with wheel input for TAS Editor's own purposes
@@ -1268,6 +1277,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				mouseb=wParam;
 			}
 		}
+		goto proco;
 	}
 
 	case WM_MOVE: 
@@ -1282,16 +1292,16 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		WindowBoundsCheckNoResize(MainWindow_wndx,MainWindow_wndy,wrect.right);
 		#endif
 		}
+		goto proco;
 	}
 
 	case WM_MOUSEMOVE:
 	{
 		mousex=LOWORD(lParam);
 		mousey=HIWORD(lParam);
-	}
 		goto proco;
+	}
 
-	
 	case WM_ERASEBKGND:
 		if(xbsave)
 			return(0);

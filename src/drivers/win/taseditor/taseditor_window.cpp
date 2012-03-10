@@ -99,10 +99,10 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
 	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
-	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll the Piano Roll to Playback cursor", "", false, 0, 0,
+	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "", "", false, 0, 0,
-	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll the Piano Roll to Selection", "", false, 0, 0,
+	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", false, 0, 0,
 	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
 	IDC_SELECTION_MARKER, 0, -1, 0, -1, "", "", false, 0, 0,
 	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "This window visualizes the hierarchy of your Branches", "", false, 0, 0,
@@ -243,7 +243,14 @@ void TASEDITOR_WINDOW::reset()
 }
 void TASEDITOR_WINDOW::update()
 {
-
+	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_NONE)
+	{
+		HWND cur_focus = GetFocus();
+		if (cur_focus != piano_roll.hwndList && cur_focus != hwndFindNote)
+			// set focus to Piano Roll when Shift or Ctrl are held
+			if ((GetAsyncKeyState(VK_CONTROL) < 0) || (GetAsyncKeyState(VK_SHIFT) < 0))
+				SetFocus(piano_roll.hwndList);
+	}
 }
 // --------------------------------------------------------------------------------
 void TASEDITOR_WINDOW::CalculateItems()
@@ -1243,7 +1250,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_VIEW_FINDNOTE:
 					{
 						if (taseditor_window.hwndFindNote)
-							SetFocus(GetDlgItem(taseditor_window.hwndFindNote, IDC_NOTE_TO_FIND));
+							SendMessage(taseditor_window.hwndFindNote, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(taseditor_window.hwndFindNote, IDC_NOTE_TO_FIND), true);
 						else
 							taseditor_window.hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_FINDNOTE), taseditor_window.hwndTasEditor, FindNoteProc);
 						break;

@@ -233,6 +233,7 @@ void PIANO_ROLL::free()
 }
 void PIANO_ROLL::reset()
 {
+	vk_shift_release_time = vk_control_release_time = 0;
 	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
@@ -1078,8 +1079,27 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
+		case WM_KEYUP:
+		{
+			if (wParam == VK_SHIFT)
+				piano_roll.vk_shift_release_time = clock();
+			else if (wParam == VK_CONTROL)
+				piano_roll.vk_control_release_time = clock();
+			break;
+		}
 		case WM_KEYDOWN:
 		{
+			if (wParam == VK_SHIFT)
+			{
+				// double-tap of Shift key
+				if (piano_roll.vk_shift_release_time + GetDoubleClickTime() > clock())
+					piano_roll.FollowPlayback();
+			} else if (wParam == VK_CONTROL)
+			{
+				// double-tap of Ctrl key
+				if (piano_roll.vk_control_release_time + GetDoubleClickTime() > clock())
+					piano_roll.FollowSelection();
+			}
 			// only allow 8 keys
 			if (taseditor_config.keyboard_for_piano_roll && (wParam == VK_LEFT || wParam == VK_UP || wParam == VK_RIGHT || wParam == VK_DOWN || wParam == VK_END || wParam == VK_HOME || wParam == VK_PRIOR || wParam == VK_NEXT))
 				break;

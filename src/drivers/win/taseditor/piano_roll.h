@@ -12,8 +12,8 @@
 
 #define HEADER_LIGHT_MAX 10
 #define HEADER_LIGHT_HOLD 5
-#define HEADER_LIGHT_MOUSEOVER 1
 #define HEADER_LIGHT_MOUSEOVER_SEL 3
+#define HEADER_LIGHT_MOUSEOVER 0
 #define HEADER_LIGHT_UPDATE_TICK 40	// 25FPS
 #define HEADER_DX_FIX 4
 
@@ -67,7 +67,7 @@ enum
 #define ARROW_IMAGE_ID 20
 #define GREEN_ARROW_IMAGE_ID 21
 
-#define COLUMN_ICONS_WIDTH 13
+#define COLUMN_ICONS_WIDTH 16
 #define COLUMN_FRAMENUM_WIDTH 75
 #define COLUMN_BUTTON_WIDTH 21
 
@@ -157,6 +157,10 @@ public:
 	int header_item_under_mouse;
 	HWND hwndList, hwndHeader;
 	TRACKMOUSEEVENT tme;
+
+	int vk_shift_release_time;
+	int vk_control_release_time;
+
 	// GDI stuff
 	HIMAGELIST himglist;
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
