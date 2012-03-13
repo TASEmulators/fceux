@@ -420,7 +420,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	if (index >= greenzone.greenZoneCount)
 	{
 		// handle jump outside greenzone
-		if (currFrameCounter >= greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
+		if (currFrameCounter == greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
 			// seek from the end of greenzone
 			SeekingStart(index+1);
 		return false;
