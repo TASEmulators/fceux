@@ -60,7 +60,7 @@ void TASEDITOR_PROJECT::reset()
 void TASEDITOR_PROJECT::update()
 {
 	// if it's time to autosave - pop Save As dialog
-	if (changed && taseditor_config.autosave_period && clock() >= next_save_shedule)
+	if (changed && taseditor_config.autosave_period && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
 	{
 		if (taseditor_config.silent_autosave)
 			SaveProject();
@@ -123,6 +123,8 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		ofs = FCEUD_UTF8_fstream(GetProjectFile().c_str(), "wb");
 	if (ofs)
 	{
+		// change cursor to hourglass
+		SetCursor(LoadCursor(0, IDC_WAIT));
 		currMovieData.loadFrameCount = currMovieData.records.size();
 		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 		currMovieData.dump(ofs, save_binary);
@@ -146,6 +148,8 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		// also reset autosave period if we saved the project to its current filename
 		if (!different_name)
 			this->reset();
+		// restore cursor
+		piano_roll.must_check_item_under_mouse = true;
 		return true;
 	} else
 	{
@@ -162,6 +166,8 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 		return false;
 	}
 
+	// change cursor to hourglass
+	SetCursor(LoadCursor(0, IDC_WAIT));
 	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 	if (LoadFM2(tempMovieData, &ifs, ifs.size(), false))
@@ -227,6 +233,8 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	popup_display.reset();
 	reset();
 	RenameProject(fullname);
+	// restore cursor
+	piano_roll.must_check_item_under_mouse = true;
 	return true;
 }
 

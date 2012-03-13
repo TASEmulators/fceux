@@ -83,7 +83,9 @@ char modCaptions[MODTYPES_TOTAL][20] = {" Init Project",
 							" Marker Unset",
 							" Marker Pattern",
 							" Marker Rename",
-							" Marker Move",
+							" Marker Drag",
+							" Marker Swap",
+							" Marker Shift",
 							" LUA Marker Set",
 							" LUA Marker Unset",
 							" LUA Marker Rename",
@@ -445,10 +447,15 @@ void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char
 	_itoa(start, framenum, 10);
 	strcat(inp.description, " ");
 	strcat(inp.description, framenum);
-	if (end > start)
+	if (end > start || mod_type == MODTYPE_MARKER_DRAG || mod_type == MODTYPE_MARKER_SWAP)
 	{
+		if (mod_type == MODTYPE_MARKER_DRAG)
+			strcat(inp.description, "=>");
+		else if (mod_type == MODTYPE_MARKER_SWAP)
+			strcat(inp.description, "<=>");
+		else
+			strcat(inp.description, "-");
 		_itoa(end, framenum, 10);
-		strcat(inp.description, "-");
 		strcat(inp.description, framenum);
 	}
 	// add comment if there is one specified
@@ -838,8 +845,13 @@ bool HISTORY::CursorOverHistoryList()
 	POINT p;
 	if (GetCursorPos(&p))
 	{
+		RECT wrect;
+		GetWindowRect(hwndHistoryList, &wrect);
 		ScreenToClient(hwndHistoryList, &p);
-		if (p.x >= 0 && p.y >= 0 && p.x < window_items[HISTORYLIST_IN_WINDOWITEMS].width && p.y < (taseditor_config.wndheight + window_items[HISTORYLIST_IN_WINDOWITEMS].height - window_items[HISTORYLIST_IN_WINDOWITEMS].y))
+		if (p.x >= 0
+			&& p.y >= 0
+			&& p.x < window_items[HISTORYLIST_IN_WINDOWITEMS].width
+			&& p.y < (wrect.bottom - wrect.top))
 			return true;
 	}
 	return false;

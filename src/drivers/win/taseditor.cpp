@@ -290,10 +290,10 @@ void UpdateTasEditor()
 
 	// update all modules that need to be updated every frame
 	taseditor_window.update();
+	greenzone.update();
 	recorder.update();
 	piano_roll.update();
 	markers_manager.update();
-	greenzone.update();
 	playback.update();
 	bookmarks.update();
 	popup_display.update();

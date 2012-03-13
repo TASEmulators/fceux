@@ -12,6 +12,7 @@ Window - User Interface
 
 * implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks
 * processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)
+* regularly checks if Shift or Ctrl key is held and sets keyboard focus to Piano Roll
 * switches off/on emulator's keyboard input when the window loses/gains focus
 * on demand: updates the window caption
 * updates all checkboxes and menu items when some settings change
@@ -449,6 +450,8 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_DESELECTONDOUBLECLICK, taseditor_config.deselect_on_doubleclick?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_DOUBLECLICKONFRAME, taseditor_config.doubleclick_affects_playback?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_DRAWINPUTBYDRAGGING, taseditor_config.draw_input?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
@@ -693,6 +696,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case LVN_ODSTATECHANGED:
 					selection.ItemRangeChanged((LPNMLVODSTATECHANGE) lParam);
+					break;
+				case LVN_ENDSCROLL:
+					piano_roll.must_check_item_under_mouse = true;
 					break;
 				}
 				break;
@@ -1064,6 +1070,14 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.deselect_on_doubleclick ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
+				case ID_CONFIG_DOUBLECLICKONFRAME:
+					taseditor_config.doubleclick_affects_playback ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
+				case ID_CONFIG_DRAWINPUTBYDRAGGING:
+					taseditor_config.draw_input ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
 				case ID_CONFIG_SILENTAUTOSAVE:
 					taseditor_config.silent_autosave ^= 1;
 					taseditor_window.UpdateCheckedItems();
@@ -1304,6 +1318,26 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		}
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
+		{
+			// if user clicked on a narrow space to the left of Piano Roll
+			// consider this as a "misclick" on Piano Roll's first column
+			int x = GET_X_LPARAM(lParam);
+			int y = GET_Y_LPARAM(lParam);
+			RECT wrect;
+			GetWindowRect(piano_roll.hwndList, &wrect);
+			if (x > 0
+				&& x <= window_items[PIANOROLL_IN_WINDOWITEMS].x
+				&& y > window_items[PIANOROLL_IN_WINDOWITEMS].y
+				&& y < window_items[PIANOROLL_IN_WINDOWITEMS].y + (wrect.bottom - wrect.top))
+			{
+				piano_roll.DragPlaybackCursor();
+				if (piano_roll.drag_mode == DRAG_MODE_NONE)
+					piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
+			}
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			break;
+		}
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONDBLCLK:
 		{

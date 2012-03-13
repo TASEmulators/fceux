@@ -26,7 +26,7 @@ extern PIANO_ROLL piano_roll;
 extern MARKERS_MANAGER markers_manager;
 
 LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // resources
 char szClassName[] = "ScrBmp";
@@ -34,6 +34,8 @@ char szClassName2[] = "MarketNoteTooltip";
 
 POPUP_DISPLAY::POPUP_DISPLAY()
 {
+	hwndScrBmp = 0;
+	hwndMarkerNoteTooltip = 0;
 	// create BITMAPINFO
 	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));	// 256 color in palette
 	scr_bmi->bmiHeader.biSize = sizeof(scr_bmi->bmiHeader);
@@ -44,7 +46,7 @@ POPUP_DISPLAY::POPUP_DISPLAY()
 	scr_bmi->bmiHeader.biCompression = BI_RGB;
 	scr_bmi->bmiHeader.biSizeImage = 0;
 
-	// register MarketNoteTooltip window class
+	// register SCREENSHOT_DISPLAY window class
 	wincl1.hInstance = fceu_hInstance;
 	wincl1.lpszClassName = szClassName;
 	wincl1.lpfnWndProc = ScrBmpWndProc;
@@ -60,10 +62,10 @@ POPUP_DISPLAY::POPUP_DISPLAY()
 	if(!RegisterClassEx(&wincl1))
 		FCEU_printf("Error registering SCREENSHOT_DISPLAY window class\n");
 
-	// register ScrBmp window class
+	// register MARKER_NOTE_DESCRIPTION window class
 	wincl2.hInstance = fceu_hInstance;
 	wincl2.lpszClassName = szClassName2;
-	wincl2.lpfnWndProc = MarkerNoteTooltipWndProc;
+	wincl2.lpfnWndProc = MarkerNoteDescrWndProc;
 	wincl2.style = CS_DBLCLKS;
 	wincl2.cbSize = sizeof(WNDCLASSEX);
 	wincl2.hIcon = 0;
@@ -74,7 +76,7 @@ POPUP_DISPLAY::POPUP_DISPLAY()
 	wincl2.cbWndExtra = 0;
 	wincl2.hbrBackground = 0;
 	if(!RegisterClassEx(&wincl2))
-		FCEU_printf("Error registering MARKER_NOTE_TOOLTIP window class\n");
+		FCEU_printf("Error registering MARKER_NOTE_DESCRIPTION window class\n");
 
 	// create blendfunction
 	blend.BlendOp = AC_SRC_OVER;
@@ -272,7 +274,7 @@ LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 			return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 }
-LRESULT APIENTRY MarkerNoteTooltipWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	extern POPUP_DISPLAY popup_display;
 	switch(message)

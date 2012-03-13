@@ -19,6 +19,9 @@
 
 #define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 4
 
+#define MARKER_DRAG_BOX_ALPHA 175
+#define DRAWING_MIN_LINE_LEN 14		// = min(list_row_width, list_row_height) in pixels
+
 enum
 {
 	COLUMN_ICONS,
@@ -58,6 +61,16 @@ enum
 	COLUMN_FRAMENUM2,
 
 	TOTAL_COLUMNS
+};
+
+enum DRAG_MODES
+{
+	DRAG_MODE_NONE,
+	DRAG_MODE_OBSERVE,
+	DRAG_MODE_PLAYBACK,
+	DRAG_MODE_MARKER,
+	DRAG_MODE_SET,
+	DRAG_MODE_UNSET,
 };
 
 // when there's too many button columns, there's need for 2nd Frame# column at the end
@@ -139,6 +152,11 @@ public:
 
 	void SetHeaderColumnLight(int column, int level);
 
+	void DragPlaybackCursor();
+	void FinishDrag();
+
+	void AcceleratorDispatched();
+
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
 	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
@@ -158,13 +176,22 @@ public:
 	HWND hwndList, hwndHeader;
 	TRACKMOUSEEVENT tme;
 
+	unsigned int drag_mode;
+	int list_row_top, list_row_height;
+	int marker_drag_box_dx, marker_drag_box_dy;
+	int marker_drag_framenum;
+	int drawing_last_x, drawing_last_y;
+
+	bool must_check_item_under_mouse;
+
 	int vk_shift_release_time;
 	int vk_control_release_time;
 
+	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff
 	HIMAGELIST himglist;
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
-	HBRUSH bg_brush;
+	HBRUSH bg_brush, marker_drag_box_brush, marker_drag_box_brush_bind;
 
 private:
 	void CenterListAt(int frame);
@@ -174,5 +201,8 @@ private:
 	int next_header_update_time;
 
 	HMENU hrmenu;
+
+	WNDCLASSEX wincl;
+	BLENDFUNCTION blend;
 
 };

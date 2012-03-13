@@ -69,6 +69,8 @@ public:
 	bool findnote_search_up;
 	bool enable_auto_function;
 	bool deselect_on_doubleclick;
+	bool doubleclick_affects_playback;
+	bool draw_input;
 	bool silent_autosave;
 	bool tooltips;
 	int current_pattern;

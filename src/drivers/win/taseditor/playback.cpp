@@ -68,7 +68,7 @@ void PLAYBACK::reset()
 {
 	must_find_current_marker = true;
 	shown_marker = 0;
-	lastCursor = -1;
+	lastCursor = currFrameCounter;
 	lost_position_frame = pause_frame = old_pauseframe = 0;
 	old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
@@ -172,17 +172,29 @@ void PLAYBACK::update()
 	emu_paused = (FCEUI_EmulationPaused() != 0);
 	if (pause_frame)
 	{
-		if (old_show_pauseframe != show_pauseframe)
+		if (old_show_pauseframe != show_pauseframe)		// update progressbar from time to time
 			SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
 	} else if (old_emu_paused != emu_paused)
 	{
 		// emulator got paused/unpaused externally
 		if (old_emu_paused && !emu_paused)
-			// externally unpaused - progressbar should be empty
-			SetProgressbar(0, 1);
-		else
+		{
+			// externally unpaused
+			if (currFrameCounter < currMovieData.getNumRecords()-1)
+			{
+				// don't forget to stop at the end of the movie
+				pause_frame = currMovieData.getNumRecords();
+				seeking_start_frame = currFrameCounter;
+			} else
+			{
+				// unlimited emulation, appending the movie - progressbar should be empty
+				SetProgressbar(0, 1);
+			}
+		} else
+		{
 			// externally paused - progressbar should be full
 			SetProgressbar(1, 1);
+		}
 	}
 
 	// update the playback cursor
@@ -278,6 +290,17 @@ void PLAYBACK::SeekingStart(int finish_frame)
 		turbo = true;
 	UnpauseEmulation();
 }
+void PLAYBACK::SeekingContinue()
+{
+	if (pause_frame)
+	{
+		if (taseditor_config.turbo_seek)
+			turbo = true;
+		UnpauseEmulation();
+	}
+}
+
+
 void PLAYBACK::SeekingStop()
 {
 	pause_frame = 0;
@@ -388,10 +411,16 @@ bool PLAYBACK::JumpToFrame(int index)
 	// Returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 	if (index < 0) return false;
 
+	if (index+1 == pause_frame && emu_paused)
+	{
+		SeekingContinue();
+		return false;
+	}
+
 	if (index >= greenzone.greenZoneCount)
 	{
 		// handle jump outside greenzone
-		if (currFrameCounter == greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
+		if (currFrameCounter >= greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
 			// seek from the end of greenzone
 			SeekingStart(index+1);
 		return false;

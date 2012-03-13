@@ -995,6 +995,8 @@
 #define ID_EDIT_DESELECT                40536
 #define ID_SELECTED_DESELECT            40537
 #define ID_CONFIG_DESELECTONDOUBLECLICK 40538
+#define ID_CONFIG_DRAWINPUTBYDRAGGING   40539
+#define ID_CONFIG_DOUBLECLICKONFRAME    40540
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1004,7 +1006,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40539
+#define _APS_NEXT_COMMAND_VALUE         40541
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -21,6 +21,7 @@ public:
 	void updateProgressbar();
 
 	void SeekingStart(int finish_frame);
+	void SeekingContinue();
 	void SeekingStop();
 	void ToggleEmulationPause();
 	void PauseEmulation();
@@ -43,6 +44,7 @@ public:
 
 	bool JumpToFrame(int index);
 
+	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
 	int lost_position_frame;
 	int pause_frame;
 	bool must_find_current_marker;
@@ -53,7 +55,6 @@ public:
 
 private:
 
-	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;
 	bool old_show_pauseframe, show_pauseframe;

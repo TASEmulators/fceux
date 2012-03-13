@@ -185,7 +185,7 @@ void MARKERS_MANAGER::ClearMarker(int frame)
 	{
 		// erase corresponding note
 		markers.notes.erase(markers.notes.begin() + markers.markers_array[frame]);
-		// erase marker
+		// clear marker
 		markers.markers_array[frame] = 0;
 		// decrease following markers' ids
 		int size = markers.markers_array.size();

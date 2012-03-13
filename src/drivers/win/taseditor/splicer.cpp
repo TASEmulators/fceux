@@ -144,7 +144,7 @@ void SPLICER::CloneFrames()
 		greenzone.InvalidateAndCheck(first_changes);
 	} else if (markers_changed)
 	{
-		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+		history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
 		piano_roll.RedrawList();
 	}
 	if (markers_changed)
@@ -191,7 +191,7 @@ void SPLICER::InsertFrames()
 		greenzone.InvalidateAndCheck(first_changes);
 	} else if (markers_changed)
 	{
-		history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+		history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
 		piano_roll.RedrawList();
 	}
 	if (markers_changed)
@@ -239,7 +239,7 @@ void SPLICER::InsertNumFrames()
 				greenzone.InvalidateAndCheck(first_changes);
 			} else if (markers_changed)
 			{
-				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, index);
+				history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, index);
 				piano_roll.RedrawList();
 			}
 			if (markers_changed)
@@ -287,7 +287,7 @@ void SPLICER::DeleteFrames()
 		else
 			piano_roll.RedrawList();
 		if (markers_changed)
-			history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, start_index);
+			history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, start_index);
 	}
 }
 
@@ -652,7 +652,7 @@ bool SPLICER::PasteInsert()
 				greenzone.InvalidateAndCheck(first_changes);
 			} else if (markers_changed)
 			{
-				history.RegisterMarkersChange(MODTYPE_MARKER_MOVE, *current_selection->begin());
+				history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, *current_selection->begin());
 				piano_roll.RedrawList();
 			}
 			if (markers_changed)
