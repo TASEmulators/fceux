@@ -770,7 +770,7 @@ void BOOKMARKS::RedrawBranchesTree()
 		branch = bookmarks_array[branch].parent_branch;
 		if (branch >= 0)
 		{
-			branch_x = BranchCurrX[branch];
+	 		branch_x = BranchCurrX[branch];
 			branch_y = BranchCurrY[branch];
 		} else
 		{
@@ -839,6 +839,7 @@ void BOOKMARKS::RedrawBranchesTree()
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
 		}
 	}
+	SetBkMode(hBitmapDC, TRANSPARENT);
 	// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
 	if (item_under_mouse > ITEM_UNDER_MOUSE_CLOUD)
 	{
@@ -847,17 +848,34 @@ void BOOKMARKS::RedrawBranchesTree()
 			U32ToDecStr(framenum_string, bookmarks_array[item_under_mouse].snapshot.jump_frame, DIGITS_IN_FRAMENUM);
 		else
 			U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
+		SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+		TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X + 1, BRANCHES_BITMAP_FRAMENUM_Y + 1, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
+		SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
 		TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X, BRANCHES_BITMAP_FRAMENUM_Y, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
 	}
 	// time of item under cursor
 	if (item_under_mouse > ITEM_UNDER_MOUSE_NONE)
 	{
 		if (item_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
+		{
+			// draw shadow of text
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
 			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
-		else if (item_under_mouse < TOTAL_BOOKMARKS)
+		} else if (item_under_mouse < TOTAL_BOOKMARKS)
+		{
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)bookmarks_array[item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
 			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)bookmarks_array[item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
-		else
+		} else	// fireball - current_pos_time
+		{
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
+			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
 			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
+		}
 	}
 	// finished
 	must_redraw_branches_tree = false;
@@ -931,11 +949,11 @@ void BOOKMARKS::CheckMousePos()
 		// find item under mouse
 		item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-			if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
+			if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
 				item_under_mouse = i;
 		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
 			item_under_mouse = ITEM_UNDER_MOUSE_CLOUD;
-		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH + DIGIT_RECT_WIDTH && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT + DIGIT_RECT_HEIGHT)
+		if (item_under_mouse == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
 			item_under_mouse = TOTAL_BOOKMARKS;
 		if (prev_item_under_mouse != item_under_mouse)
 			must_redraw_branches_tree = true;

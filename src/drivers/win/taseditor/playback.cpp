@@ -207,9 +207,8 @@ void PLAYBACK::update()
 		bookmarks.RedrawChangedBookmarks(currFrameCounter);
 		lastCursor = currFrameCounter;
 		piano_roll.FollowPlaybackIfNeeded();
-		if (!turbo)
-			// enforce redrawing now
-			UpdateWindow(piano_roll.hwndList);
+		// enforce redrawing now
+		UpdateWindow(piano_roll.hwndList);
 		// lazy update of "Playback's Marker text"
 		int current_marker = markers_manager.GetMarkerUp(currFrameCounter);
 		if (shown_marker != current_marker)

@@ -4,10 +4,7 @@
 #define SCR_BMP_PHASE_ALPHA_MAX 8
 #define SCR_BMP_DX 7
 
-#define SCR_BMP_TOOLTIP_GAP 2
-
-#define MARKER_NOTE_TOOLTIP_WIDTH 360
-#define MARKER_NOTE_TOOLTIP_HEIGHT 20
+#define SCR_BMP_DESCR_GAP 2
 
 #define DISPLAY_UPDATE_TICK 40		// update at 25FPS
 
@@ -22,12 +19,12 @@ public:
 
 	void ChangeScreenshotBitmap();
 	void RedrawScreenshotBitmap();
-	void ChangeTooltipText();
+	void ChangeDescrText();
 
 	void ParentWindowMoved();
 
 	int screenshot_currently_shown;
-	HWND hwndScrBmp, scr_bmp_pic, hwndMarkerNoteTooltip, marker_note_tooltip;
+	HWND hwndScrBmp, scr_bmp_pic, hwndMarkerNoteDescr, marker_note_descr;
 	
 private:
 	int scr_bmp_x;
@@ -35,8 +32,8 @@ private:
 	int scr_bmp_phase;
 	int next_update_time;
 
-	int tooltip_x;
-	int tooltip_y;
+	int descr_x;
+	int descr_y;
 	
 	WNDCLASSEX wincl1, wincl2;
 	BLENDFUNCTION blend;

@@ -17,10 +17,14 @@
 #define HEADER_LIGHT_UPDATE_TICK 40	// 25FPS
 #define HEADER_DX_FIX 4
 
+#define PIANO_ROLL_SCROLLING_BOOST 2
 #define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 4
 
 #define MARKER_DRAG_BOX_ALPHA 175
 #define DRAWING_MIN_LINE_LEN 14		// = min(list_row_width, list_row_height) in pixels
+
+#define SCROLLING_BORDER_SIZE 8		// in pixels
+
 
 enum
 {
@@ -176,8 +180,9 @@ public:
 	HWND hwndList, hwndHeader;
 	TRACKMOUSEEVENT tme;
 
+	int list_row_top, list_row_height, list_header_height;
 	unsigned int drag_mode;
-	int list_row_top, list_row_height;
+	bool rbutton_drag_mode;
 	int marker_drag_box_dx, marker_drag_box_dy;
 	int marker_drag_framenum;
 	int drawing_last_x, drawing_last_y;

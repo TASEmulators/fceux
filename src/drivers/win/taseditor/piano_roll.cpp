@@ -227,6 +227,12 @@ void PIANO_ROLL::init()
 		list_row_height = 14;
 	}
 	ListView_SetItemCountEx(hwndList, 0, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
+	// find header height
+	RECT wrect;
+	if (GetWindowRect(hwndHeader, &wrect))
+		list_header_height = wrect.bottom - wrect.top;
+	else
+		list_header_height = 20;
 
 	hrmenu = LoadMenu(fceu_hInstance,"TASEDITORCONTEXTMENUS");
 	header_colors.resize(TOTAL_COLUMNS);
@@ -235,6 +241,7 @@ void PIANO_ROLL::init()
 	tme.dwFlags = TME_LEAVE;
 	tme.hwndTrack = hwndHeader;
 	drag_mode = DRAG_MODE_NONE;
+	rbutton_drag_mode = false;
 }
 void PIANO_ROLL::free()
 {
@@ -341,24 +348,30 @@ void PIANO_ROLL::update()
 		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_RBUTTON : VK_LBUTTON) >= 0)
 			FinishDrag();
 	}
-	// also scroll Piano Roll if user is dragging cursor outside
-	if (drag_mode != DRAG_MODE_NONE)
+	if (rbutton_drag_mode)
+	{
+		// check if user released right button
+		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_LBUTTON : VK_RBUTTON) >= 0)
+			rbutton_drag_mode = false;
+	}
+	// scroll Piano Roll if user is dragging cursor outside
+	if (drag_mode != DRAG_MODE_NONE || rbutton_drag_mode)
 	{
 		POINT p;
 		if (GetCursorPos(&p))
 		{
-			int scroll_dx = 0, scroll_dy = 0;
-			RECT wrect;
-			GetWindowRect(hwndList, &wrect);
 			ScreenToClient(hwndList, &p);
-			if (p.x < 0)
-				scroll_dx = p.x;
-			else if (p.x > (wrect.right - wrect.left))
-				scroll_dx = p.x - (wrect.right - wrect.left);
-			if (p.y < 0)
-				scroll_dy = p.y;
-			else if (p.y > (wrect.bottom - wrect.top))
-				scroll_dy = p.y - (wrect.bottom - wrect.top);
+			RECT wrect;
+			GetClientRect(hwndList, &wrect);
+			int scroll_dx = 0, scroll_dy = 0;
+			if (p.x < SCROLLING_BORDER_SIZE)
+				scroll_dx = p.x - SCROLLING_BORDER_SIZE;
+			else if (p.x > (wrect.right - wrect.left - SCROLLING_BORDER_SIZE))
+				scroll_dx = p.x - (wrect.right - wrect.left - SCROLLING_BORDER_SIZE);
+			if (p.y < (list_header_height + SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (list_header_height + SCROLLING_BORDER_SIZE);
+			else if (p.y > (wrect.bottom - wrect.top - SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (wrect.bottom - wrect.top - SCROLLING_BORDER_SIZE);
 			if (scroll_dx || scroll_dy)
 				ListView_Scroll(hwndList, scroll_dx, scroll_dy);
 		}
@@ -368,8 +381,7 @@ void PIANO_ROLL::update()
 	{
 		case DRAG_MODE_PLAYBACK:
 		{
-			if (!playback.pause_frame)
-				DragPlaybackCursor();
+			DragPlaybackCursor();
 			break;
 		}
 		case DRAG_MODE_MARKER:
@@ -411,8 +423,6 @@ void PIANO_ROLL::update()
 			POINT p;
 			if (GetCursorPos(&p))
 			{
-				RECT wrect;
-				GetWindowRect(hwndList, &wrect);
 				ScreenToClient(hwndList, &p);
 				int drawing_current_x = p.x + GetScrollPos(hwndList, SB_HORZ);
 				int drawing_current_y = p.y + GetScrollPos(hwndList, SB_VERT) * list_row_height;
@@ -521,10 +531,10 @@ void PIANO_ROLL::update()
 				POINT p;
 				if (GetCursorPos(&p))
 				{
-					RECT wrect;
-					GetWindowRect(hwndList, &wrect);
 					ScreenToClient(hwndList, &p);
-					if (p.x >= 0 && p.y >= 0 && p.x < (wrect.right - wrect.left) && p.y < (wrect.bottom - wrect.top))
+					RECT wrect;
+					GetClientRect(hwndList, &wrect);
+					if (p.x >= 0 && p.y >= list_header_height && p.x < (wrect.right - wrect.left) && p.y < (wrect.bottom - wrect.top))
 					{
 						// perform hit test
 						LVHITTESTINFO info;
@@ -1466,11 +1476,22 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if ((int)(piano_roll.vk_control_release_time + GetDoubleClickTime()) > clock())
 					piano_roll.FollowSelection();
 			}
-			// only allow 8 keys
-			if (taseditor_config.keyboard_for_piano_roll && (wParam == VK_LEFT || wParam == VK_UP || wParam == VK_RIGHT || wParam == VK_DOWN || wParam == VK_END || wParam == VK_HOME || wParam == VK_PRIOR || wParam == VK_NEXT))
+			if (taseditor_config.keyboard_for_piano_roll)
 			{
-				piano_roll.must_check_item_under_mouse = true;
-				break;
+				// only allow 8 keys, and change behaviour of Right and Left keys
+				if (wParam == VK_LEFT)
+				{
+					// faster speed of horizontal scrolling, and don't scroll vertically to the selection
+					ListView_Scroll(piano_roll.hwndList, -COLUMN_BUTTON_WIDTH, 0);
+				} else if (wParam == VK_RIGHT)
+				{
+					ListView_Scroll(piano_roll.hwndList, COLUMN_BUTTON_WIDTH, 0);
+				} else if (wParam == VK_UP || wParam == VK_DOWN || wParam == VK_END || wParam == VK_HOME || wParam == VK_PRIOR || wParam == VK_NEXT)
+				{
+					// these 6 keys will be handled by hwndList_oldWndProc
+					piano_roll.must_check_item_under_mouse = true;
+					break;
+				}
 			}
 			return 0;
 		}
@@ -1492,7 +1513,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if(column_index == COLUMN_ICONS)
 			{
 				// click on the "icons" column
-				piano_roll.DragPlaybackCursor();
 				if (piano_roll.drag_mode == DRAG_MODE_NONE)
 					piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
 			} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
@@ -1504,11 +1524,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					if (taseditor_config.deselect_on_doubleclick)
 						selection.ClearSelection();
 					if (taseditor_config.doubleclick_affects_playback)
-					{
 						piano_roll.DragPlaybackCursor();
-						if (piano_roll.drag_mode == DRAG_MODE_NONE)
-							piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
-					}
 				} else
 				{
 					if (row_index >= 0)
@@ -1611,23 +1627,23 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				// Shift + wheel = Playback rewind full(speed)/forward full(speed)
 				if (zDelta < 0)
-					playback.ForwardFull(-zDelta / 120);
+					playback.ForwardFull(-zDelta / WHEEL_DELTA);
 				else if (zDelta > 0)
-					playback.RewindFull(zDelta / 120);
+					playback.RewindFull(zDelta / WHEEL_DELTA);
 			} else if (fwKeys & MK_CONTROL)
 			{
 				// Ctrl + wheel = Selection rewind full(speed)/forward full(speed)
 				if (zDelta < 0)
-					selection.JumpNextMarker(-zDelta / 120);
+					selection.JumpNextMarker(-zDelta / WHEEL_DELTA);
 				else if (zDelta > 0)
-					selection.JumpPrevMarker(zDelta / 120);
+					selection.JumpPrevMarker(zDelta / WHEEL_DELTA);
 			} else if (alt_pressed || fwKeys & MK_RBUTTON)
 			{
 				// Right button + wheel = Alt + wheel = rewind/forward
-				// if both Right button and Alt are pressed, move 2x faster
+				// if both Right button and Alt are pressed, move 4x faster
 				if (alt_pressed && fwKeys & MK_RBUTTON)
 					zDelta *= BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED;
-				int destination_frame = currFrameCounter - (zDelta / 120);
+				int destination_frame = currFrameCounter - (zDelta / WHEEL_DELTA);
 				if (destination_frame < 0) destination_frame = 0;
 				int lastCursor = currFrameCounter;
 				playback.jump(destination_frame);
@@ -1642,13 +1658,14 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return SendMessage(history.hwndHistoryList, WM_MOUSEWHEEL_RESENT, wParam, lParam);
 			} else
 			{
-				// normal scrolling
-				CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
+				// normal scrolling - make it 2x faster than usual
+				CallWindowProc(hwndList_oldWndProc, hWnd, msg, MAKELONG(fwKeys, zDelta * PIANO_ROLL_SCROLLING_BOOST), lParam);
 			}
 			return 0;
 		}
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONDBLCLK:
+			piano_roll.rbutton_drag_mode = true;
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);
 			return 0;
@@ -1676,7 +1693,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					// user clicked on left border of the Piano Roll
 					// consider this as a "misclick" on Piano Roll's first column
-					piano_roll.DragPlaybackCursor();
 					if (piano_roll.drag_mode == DRAG_MODE_NONE)
 						piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
 					return 0;
@@ -1692,7 +1708,35 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case LVM_ENSUREVISIBLE:
 		{
+			// Piano Roll probably scrolls
 			piano_roll.must_check_item_under_mouse = true;
+			break;
+		}
+		case WM_VSCROLL:
+		{
+			// fix for known WinXP bug
+			if (LOWORD(wParam) == SB_LINEUP)
+			{
+				ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height);
+				return 0;
+			} else if (LOWORD(wParam) == SB_LINEDOWN)
+			{
+				ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height);
+				return 0;
+			}
+			break;
+		}
+		case WM_HSCROLL:
+		{
+			if (LOWORD(wParam) == SB_LINELEFT)
+			{
+				ListView_Scroll(piano_roll.hwndList, -COLUMN_BUTTON_WIDTH, 0);
+				return 0;
+			} else if (LOWORD(wParam) == SB_LINERIGHT)
+			{
+				ListView_Scroll(piano_roll.hwndList, COLUMN_BUTTON_WIDTH, 0);
+				return 0;
+			}
 			break;
 		}
 

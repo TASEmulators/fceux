@@ -1330,7 +1330,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				&& y > window_items[PIANOROLL_IN_WINDOWITEMS].y
 				&& y < window_items[PIANOROLL_IN_WINDOWITEMS].y + (wrect.bottom - wrect.top))
 			{
-				piano_roll.DragPlaybackCursor();
 				if (piano_roll.drag_mode == DRAG_MODE_NONE)
 					piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
 			}

@@ -24,18 +24,19 @@ extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
 extern PIANO_ROLL piano_roll;
 extern MARKERS_MANAGER markers_manager;
+extern PLAYBACK playback;
 
 LRESULT CALLBACK ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // resources
 char szClassName[] = "ScrBmp";
-char szClassName2[] = "MarketNoteTooltip";
+char szClassName2[] = "MarketNoteDescr";
 
 POPUP_DISPLAY::POPUP_DISPLAY()
 {
 	hwndScrBmp = 0;
-	hwndMarkerNoteTooltip = 0;
+	hwndMarkerNoteDescr = 0;
 	// create BITMAPINFO
 	scr_bmi = (LPBITMAPINFO)malloc(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD));	// 256 color in palette
 	scr_bmi->bmiHeader.biSize = sizeof(scr_bmi->bmiHeader);
@@ -119,10 +120,10 @@ void POPUP_DISPLAY::reset()
 		DestroyWindow(hwndScrBmp);
 		hwndScrBmp = 0;
 	}
-	if (hwndMarkerNoteTooltip)
+	if (hwndMarkerNoteDescr)
 	{
-		DestroyWindow(hwndMarkerNoteTooltip);
-		hwndMarkerNoteTooltip = 0;
+		DestroyWindow(hwndMarkerNoteDescr);
+		hwndMarkerNoteDescr = 0;
 	}
 }
 
@@ -141,19 +142,22 @@ void POPUP_DISPLAY::update()
 				RedrawScreenshotBitmap();
 				ShowWindow(hwndScrBmp, SW_SHOWNA);
 			}
-			if (taseditor_config.show_branch_descr && !hwndMarkerNoteTooltip)
+			if (taseditor_config.show_branch_descr && !hwndMarkerNoteDescr)
 			{
-				hwndMarkerNoteTooltip = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditor_config.wndx + tooltip_x, taseditor_config.wndy + tooltip_y, MARKER_NOTE_TOOLTIP_WIDTH, MARKER_NOTE_TOOLTIP_HEIGHT, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
-				ChangeTooltipText();
-				ShowWindow(hwndMarkerNoteTooltip, SW_SHOWNA);
+				RECT wrect;
+				GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
+				descr_x = scr_bmp_x + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
+				hwndMarkerNoteDescr = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, szClassName2, szClassName2, WS_POPUP, taseditor_config.wndx + descr_x, taseditor_config.wndy + descr_y, wrect.right - wrect.left, wrect.bottom - wrect.top, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
+				ChangeDescrText();
+				ShowWindow(hwndMarkerNoteDescr, SW_SHOWNA);
 			}
-			// change screenshot_bitmap pic and tooltip text if needed
+			// change screenshot_bitmap pic and description text if needed
 			if (screenshot_currently_shown != bookmarks.item_under_mouse)
 			{
 				if (taseditor_config.show_branch_screenshots)
 					ChangeScreenshotBitmap();
 				if (taseditor_config.show_branch_descr)
-					ChangeTooltipText();
+					ChangeDescrText();
 				screenshot_currently_shown = bookmarks.item_under_mouse;
 			}
 			if (scr_bmp_phase < SCR_BMP_PHASE_MAX)
@@ -167,10 +171,10 @@ void POPUP_DISPLAY::update()
 					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
 					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
-				if (hwndMarkerNoteTooltip)
+				if (hwndMarkerNoteDescr)
 				{
-					SetLayeredWindowAttributes(hwndMarkerNoteTooltip, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndMarkerNoteTooltip, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndMarkerNoteDescr, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndMarkerNoteDescr, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
 			}
 		} else
@@ -188,10 +192,10 @@ void POPUP_DISPLAY::update()
 					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
 					UpdateLayeredWindow(hwndScrBmp, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
-				if (hwndMarkerNoteTooltip)
+				if (hwndMarkerNoteDescr)
 				{
-					SetLayeredWindowAttributes(hwndMarkerNoteTooltip, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
-					UpdateLayeredWindow(hwndMarkerNoteTooltip, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+					SetLayeredWindowAttributes(hwndMarkerNoteDescr, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
+					UpdateLayeredWindow(hwndMarkerNoteDescr, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 				}
 			} else
 			{
@@ -202,10 +206,10 @@ void POPUP_DISPLAY::update()
 					DestroyWindow(hwndScrBmp);
 					hwndScrBmp = 0;
 				}
-				if (hwndMarkerNoteTooltip)
+				if (hwndMarkerNoteDescr)
 				{
-					DestroyWindow(hwndMarkerNoteTooltip);
-					hwndMarkerNoteTooltip = 0;
+					DestroyWindow(hwndMarkerNoteDescr);
+					hwndMarkerNoteDescr = 0;
 				}
 			}
 		}
@@ -232,14 +236,14 @@ void POPUP_DISPLAY::RedrawScreenshotBitmap()
 	if (temp_bmp && temp_bmp != scr_bmp)
 		DeleteObject(temp_bmp);
 }
-void POPUP_DISPLAY::ChangeTooltipText()
+void POPUP_DISPLAY::ChangeDescrText()
 {
 	// retrieve info from the pointed bookmark's markers
 	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame;
 	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), frame);
 	char new_text[MAX_NOTE_LEN];
 	strcpy(new_text, markers_manager.GetNote(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), marker_id).c_str());
-	SetWindowText(marker_note_tooltip, new_text);
+	SetWindowText(marker_note_descr, new_text);
 }
 
 void POPUP_DISPLAY::ParentWindowMoved()
@@ -250,13 +254,15 @@ void POPUP_DISPLAY::ParentWindowMoved()
 	GetWindowRect(GetDlgItem(taseditor_window.hwndTasEditor, IDC_BOOKMARKS_BOX), &temp_rect);
 	scr_bmp_x = temp_rect.left - SCREENSHOT_WIDTH - SCR_BMP_DX - parent_rect.left;
 	scr_bmp_y = (temp_rect.bottom - SCREENSHOT_HEIGHT) - parent_rect.top;
-	tooltip_x = scr_bmp_x + (SCREENSHOT_WIDTH - MARKER_NOTE_TOOLTIP_WIDTH) / 2;
-	tooltip_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_TOOLTIP_GAP;
+	RECT wrect;
+	GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
+	descr_x = scr_bmp_x + (SCREENSHOT_WIDTH - (wrect.right - wrect.left)) / 2;
+	descr_y = scr_bmp_y + SCREENSHOT_HEIGHT + SCR_BMP_DESCR_GAP;
 	// if popup windows are currently shown, update their positions
 	if (hwndScrBmp)
 		SetWindowPos(hwndScrBmp, 0, taseditor_config.wndx + scr_bmp_x, taseditor_config.wndy + scr_bmp_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
-	if (hwndMarkerNoteTooltip)
-		SetWindowPos(hwndMarkerNoteTooltip, 0, taseditor_config.wndx + tooltip_x, taseditor_config.wndy + tooltip_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+	if (hwndMarkerNoteDescr)
+		SetWindowPos(hwndMarkerNoteDescr, 0, taseditor_config.wndx + descr_x, taseditor_config.wndy + descr_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 }
 // ----------------------------------------------------------------------------------------
 LRESULT APIENTRY ScrBmpWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -282,8 +288,10 @@ LRESULT APIENTRY MarkerNoteDescrWndProc(HWND hwnd, UINT message, WPARAM wParam, 
 		case WM_CREATE:
 		{
 			// create static text field
-			popup_display.marker_note_tooltip = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_SUNKEN, 1, 1, MARKER_NOTE_TOOLTIP_WIDTH - 2, MARKER_NOTE_TOOLTIP_HEIGHT - 2, hwnd, NULL, NULL, NULL);
-			SendMessage(popup_display.marker_note_tooltip, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
+			RECT wrect;
+			GetWindowRect(playback.hwndPlaybackMarkerEdit, &wrect);
+			popup_display.marker_note_descr = CreateWindow(WC_STATIC, NULL, WS_CHILD | WS_VISIBLE | SS_CENTER | SS_ENDELLIPSIS | SS_SUNKEN, 1, 1, wrect.right - wrect.left - 2, wrect.bottom - wrect.top - 2, hwnd, NULL, NULL, NULL);
+			SendMessage(popup_display.marker_note_descr, WM_SETFONT, (WPARAM)piano_roll.hMarkersEditFont, 0);
 			return 0;
 		}
 		default:
