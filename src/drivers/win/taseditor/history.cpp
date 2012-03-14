@@ -845,12 +845,12 @@ bool HISTORY::CursorOverHistoryList()
 	POINT p;
 	if (GetCursorPos(&p))
 	{
+		ScreenToClient(hwndHistoryList, &p);
 		RECT wrect;
 		GetWindowRect(hwndHistoryList, &wrect);
-		ScreenToClient(hwndHistoryList, &p);
 		if (p.x >= 0
 			&& p.y >= 0
-			&& p.x < window_items[HISTORYLIST_IN_WINDOWITEMS].width
+			&& p.x < (wrect.right - wrect.left)
 			&& p.y < (wrect.bottom - wrect.top))
 			return true;
 	}

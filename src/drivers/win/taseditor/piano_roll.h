@@ -156,8 +156,7 @@ public:
 
 	void SetHeaderColumnLight(int column, int level);
 
-	void DragPlaybackCursor();
-	void FinishDrag();
+	void StartDraggingPlaybackCursor();
 
 	void AcceleratorDispatched();
 
@@ -183,6 +182,7 @@ public:
 	int list_row_top, list_row_height, list_header_height;
 	unsigned int drag_mode;
 	bool rbutton_drag_mode;
+	bool can_drag_when_seeking;
 	int marker_drag_box_dx, marker_drag_box_dy;
 	int marker_drag_framenum;
 	int drawing_last_x, drawing_last_y;
@@ -200,6 +200,9 @@ public:
 
 private:
 	void CenterListAt(int frame);
+
+	void DragPlaybackCursor();
+	void FinishDrag();
 
 	std::vector<uint8> header_colors;
 	int num_columns;

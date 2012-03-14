@@ -44,7 +44,6 @@ extern HISTORY history;
 extern MARKERS_MANAGER markers_manager;
 extern SELECTION selection;
 
-extern Window_items_struct window_items[];
 extern int GetInputType(MovieData& md);
 
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -285,11 +284,6 @@ void PIANO_ROLL::free()
 		DeleteObject(marker_drag_box_brush_bind);
 		marker_drag_box_brush_bind = 0;
 	}
-	if (bg_brush)
-	{
-		DeleteObject(bg_brush);
-		bg_brush = 0;
-	}
 	if (himglist)
 	{
 		ImageList_Destroy(himglist);
@@ -381,7 +375,12 @@ void PIANO_ROLL::update()
 	{
 		case DRAG_MODE_PLAYBACK:
 		{
-			DragPlaybackCursor();
+			if (!playback.pause_frame || can_drag_when_seeking)
+			{
+				DragPlaybackCursor();
+				// after first seeking is finished (if there was any seeking), it now becomes possible to drag when seeking
+				can_drag_when_seeking = true;
+			}
 			break;
 		}
 		case DRAG_MODE_MARKER:
@@ -428,6 +427,13 @@ void PIANO_ROLL::update()
 				int drawing_current_y = p.y + GetScrollPos(hwndList, SB_VERT) * list_row_height;
 				// draw (or erase) line from [drawing_current_x, drawing_current_y] to (drawing_last_x, drawing_last_y)
 				int total_dx = drawing_last_x - drawing_current_x, total_dy = drawing_last_y - drawing_current_y;
+				if (GetAsyncKeyState(VK_SHIFT) < 0)
+				{
+					// when user is holding Shift, draw vertical line
+					total_dx = 0;
+					drawing_current_x = drawing_last_x;
+					p.x = drawing_current_x - GetScrollPos(hwndList, SB_HORZ);
+				}
 				double total_len = sqrt((double)(total_dx * total_dx + total_dy * total_dy));
 				LVHITTESTINFO info;
 				int row_index, column_index, joy, bit;
@@ -733,6 +739,16 @@ void PIANO_ROLL::SetHeaderColumnLight(int column, int level)
 	}
 }
 
+void PIANO_ROLL::StartDraggingPlaybackCursor()
+{
+	if (drag_mode == DRAG_MODE_NONE)
+	{
+		drag_mode = DRAG_MODE_PLAYBACK;
+		can_drag_when_seeking = false;
+		// call it once
+		DragPlaybackCursor();
+	}
+}
 void PIANO_ROLL::DragPlaybackCursor()
 {
 	POINT p;
@@ -1513,8 +1529,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if(column_index == COLUMN_ICONS)
 			{
 				// click on the "icons" column
-				if (piano_roll.drag_mode == DRAG_MODE_NONE)
-					piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
+				piano_roll.StartDraggingPlaybackCursor();
 			} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 			{
 				// clicked on the "Frame#" column
@@ -1524,7 +1539,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					if (taseditor_config.deselect_on_doubleclick)
 						selection.ClearSelection();
 					if (taseditor_config.doubleclick_affects_playback)
-						piano_roll.DragPlaybackCursor();
+						piano_roll.StartDraggingPlaybackCursor();
 				} else
 				{
 					if (row_index >= 0)
@@ -1693,8 +1708,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					// user clicked on left border of the Piano Roll
 					// consider this as a "misclick" on Piano Roll's first column
-					if (piano_roll.drag_mode == DRAG_MODE_NONE)
-						piano_roll.drag_mode = DRAG_MODE_PLAYBACK;
+					piano_roll.StartDraggingPlaybackCursor();
 					return 0;
 				}
 			}
