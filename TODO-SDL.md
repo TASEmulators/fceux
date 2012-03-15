@@ -1,5 +1,6 @@
 Features
 ========
+	* autosave/autoload for xbmc
 	* SDL.Vsync
 		* let's wait on this -- there's no simple way to use the OS default in SDL unless we just don't touch it, which might be the best thing to do here.
   
