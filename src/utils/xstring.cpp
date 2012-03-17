@@ -91,7 +91,7 @@ int str_rtrim(char *str, int flags) {
 	while (strl = strlen(str)) {
 		if ((flags & STRIP_SP) && (str[0] == ' ')) {
 			i++;
-			str[str] = 0;
+			str[strl] = 0;
 		} else if ((flags & STRIP_TAB) && (str[0] == '\t')) {
 			i++;
 			str[strl] = 0;
