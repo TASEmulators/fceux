@@ -21,10 +21,17 @@
 #define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 4
 
 #define MARKER_DRAG_BOX_ALPHA 175
+#define MARKER_DRAG_COUNTDOWN_MAX 14
+#define MARKER_DRAG_ALPHA_PER_TICK 13
+#define MARKER_DRAG_MAX_SPEED 70
+#define MARKER_DRAG_GRAVITY 2
+
 #define DRAWING_MIN_LINE_LEN 14		// = min(list_row_width, list_row_height) in pixels
 
-#define SCROLLING_BORDER_SIZE 8		// in pixels
+#define DRAG_SCROLLING_BORDER_SIZE 10		// in pixels
 
+#define DOUBLETAP_COUNT 3			// 1:quick press, 2 - quick release, 3 - quick press
+#define ROW_LAST_CLICKED_BLINKING_PERIOD 200
 
 enum
 {
@@ -75,6 +82,7 @@ enum DRAG_MODES
 	DRAG_MODE_MARKER,
 	DRAG_MODE_SET,
 	DRAG_MODE_UNSET,
+	DRAG_MODE_SELECTION,
 };
 
 // when there's too many button columns, there's need for 2nd Frame# column at the end
@@ -145,6 +153,7 @@ public:
 	void RedrawRow(int index);
 	void RedrawHeader();
 
+	void UpdateItemCount();
 	bool CheckItemVisible(int frame);
 
 	void FollowPlayback();
@@ -154,43 +163,46 @@ public:
 	void FollowPauseframe();
 	void FollowMarker(int marker_id);
 
+	void ColumnSet(int column, bool alt_pressed);
+
 	void SetHeaderColumnLight(int column, int level);
 
 	void StartDraggingPlaybackCursor();
-
-	void AcceleratorDispatched();
+	void StartDraggingMarker(int mouse_x, int mouse_y, int row_index, int column_index);
+	void StartSelectingDrag(int start_frame);
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
 	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
 
 	void RightClick(LVHITTESTINFO& info);
-	void StrayClickMenu(LVHITTESTINFO& info);
-	void RightClickMenu(LVHITTESTINFO& info);
-
-	void ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags);
-	void ColumnSet(int column, bool alt_pressed);
-	bool FrameColumnSetPattern();
-	bool FrameColumnSet();
-	bool InputColumnSetPattern(int joy, int button);
-	bool InputColumnSet(int joy, int button);
 
 	int header_item_under_mouse;
 	HWND hwndList, hwndHeader;
 	TRACKMOUSEEVENT tme;
 
 	int list_row_top, list_row_height, list_header_height;
+
+	bool must_check_item_under_mouse;
+	int row_under_mouse, real_row_under_mouse, column_under_mouse;
+
 	unsigned int drag_mode;
 	bool rbutton_drag_mode;
 	bool can_drag_when_seeking;
 	int marker_drag_box_dx, marker_drag_box_dy;
+	int marker_drag_box_x, marker_drag_box_y;
+	int marker_drag_countdown;
 	int marker_drag_framenum;
 	int drawing_last_x, drawing_last_y;
+	int drag_selection_starting_frame;
+	int drag_selection_ending_frame;
 
-	bool must_check_item_under_mouse;
+	int row_last_clicked;
+	int row_last_clicked_blinking_phase_shift;
 
-	int vk_shift_release_time;
-	int vk_control_release_time;
+	bool shift_held, ctrl_held, alt_held;
+	int shift_timer, ctrl_timer;
+	int shift_count, ctrl_count;
 
 	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff

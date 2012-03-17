@@ -4398,11 +4398,11 @@ static int taseditor_setmarker(lua_State *L)
 	return 1;
 }
 
-// taseditor.clearmarker(int frame)
-static int taseditor_clearmarker(lua_State *L)
+// taseditor.removemarker(int frame)
+static int taseditor_removemarker(lua_State *L)
 {
 #ifdef WIN32
-	taseditor_lua.clearmarker(luaL_checkinteger(L, 1));
+	taseditor_lua.removemarker(luaL_checkinteger(L, 1));
 #endif
 	return 0;
 }
@@ -5387,7 +5387,7 @@ static const struct luaL_reg taseditorlib[] = {
 	{"markedframe", taseditor_markedframe},
 	{"getmarker", taseditor_getmarker},
 	{"setmarker", taseditor_setmarker},
-	{"clearmarker", taseditor_clearmarker},
+	{"removemarker", taseditor_removemarker},
 	{"getnote", taseditor_getnote},
 	{"setnote", taseditor_setnote},
 	{"getcurrentbranch", taseditor_getcurrentbranch},

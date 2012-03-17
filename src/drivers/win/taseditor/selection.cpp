@@ -29,6 +29,8 @@ extern TASEDITOR_WINDOW taseditor_window;
 extern MARKERS_MANAGER markers_manager;
 extern PIANO_ROLL piano_roll;
 extern SPLICER splicer;
+extern EDITOR editor;
+extern GREENZONE greenzone;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 
@@ -441,39 +443,59 @@ void SELECTION::redo()
 	jump(history_cursor_pos + 1);
 }
 // ----------------------------------------------------------
+bool SELECTION::GetRowSelection(int index)
+{
+	return ListView_GetItemState(piano_roll.hwndList, index, LVIS_SELECTED) != 0;
+}
+
 void SELECTION::ClearSelection()
 {
-	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, -1, 0, LVIS_SELECTED);
 }
 void SELECTION::ClearRowSelection(int index)
 {
-	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, index, 0, LVIS_SELECTED);
+}
+void SELECTION::ClearRegionSelection(int start, int end)
+{
+	for (int i = start; i < end; ++i)
+		ListView_SetItemState(piano_roll.hwndList, i, 0, LVIS_SELECTED);
 }
 
-void SELECTION::EnforceSelectionToList()
-{
-	track_selection_changes = false;
-	ClearSelection();
-	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
-	{
-		ListView_SetItemState(piano_roll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
-	}
-	track_selection_changes = true;
-}
- 
 void SELECTION::SelectAll()
 {
 	// select all, but remove "focused" from all
-	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_FOCUSED|LVIS_SELECTED, LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SetRowSelection(int index)
 {
-	ListView_SetItemState(piano_roll.hwndList, index, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+	ListView_SetItemState(piano_roll.hwndList, index, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SetRegionSelection(int start, int end)
 {
 	for (int i = start; i < end; ++i)
-		ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+		ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+}
+
+void SELECTION::SetRegionSelectionPattern(int start, int end)
+{
+	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
+	for (int i = start; i <= end; ++i)
+	{
+		// skip lag frames
+		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(i))
+			continue;
+		if (editor.autofire_patterns[current_pattern][pattern_offset])
+		{
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
+		} else
+		{
+			ListView_SetItemState(piano_roll.hwndList, i, 0, LVIS_SELECTED);
+		}
+		pattern_offset++;
+		if (pattern_offset >= (int)editor.autofire_patterns[current_pattern].size())
+			pattern_offset -= editor.autofire_patterns[current_pattern].size();
+	}
 }
 void SELECTION::SelectBetweenMarkers()
 {
@@ -511,7 +533,7 @@ void SELECTION::SelectBetweenMarkers()
 		// default: select all between markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
@@ -520,14 +542,14 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border <= upper_marker && lower_border >= lower_marker)
 	{
 		// selected all between markers and both markers selected too - now deselect lower marker
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
@@ -535,14 +557,14 @@ void SELECTION::SelectBetweenMarkers()
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
 		// selected all between markers and lower marker selected too - now deselect lower marker (return to "selected all between markers")
 		for (int i = upper_marker + 1; i < lower_marker; ++i)
 		{
-			ListView_SetItemState(piano_roll.hwndList, i, LVIS_FOCUSED|LVIS_SELECTED, LVIS_FOCUSED|LVIS_SELECTED);
+			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	}
 }
@@ -558,6 +580,48 @@ void SELECTION::ReselectClipboard()
 	update();
 }
 
+void SELECTION::Transpose(int shift)
+{
+	if (!shift) return;
+	SelectionFrames* current_selection = MakeStrobe();
+	if (current_selection->size())
+	{
+		ClearSelection();
+		int pos;
+		if (shift > 0)
+		{
+			int movie_size = currMovieData.getNumRecords();
+			SelectionFrames::reverse_iterator current_selection_rend(current_selection->rend());
+			for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
+			{
+				pos = (*it) + shift;
+				if (pos < movie_size)
+					ListView_SetItemState(piano_roll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+			}
+		} else
+		{
+			SelectionFrames::iterator current_selection_end(current_selection->end());
+			for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
+			{
+				pos = (*it) + shift;
+				if (pos >= 0)
+					ListView_SetItemState(piano_roll.hwndList, pos, LVIS_SELECTED, LVIS_SELECTED);
+			}
+		}
+	}
+}
+
+void SELECTION::EnforceSelectionToList()
+{
+	track_selection_changes = false;
+	ClearSelection();
+	for(SelectionFrames::reverse_iterator it(CurrentSelection().rbegin()); it != CurrentSelection().rend(); it++)
+	{
+		ListView_SetItemState(piano_roll.hwndList, *it, LVIS_SELECTED, LVIS_SELECTED);
+	}
+	track_selection_changes = true;
+}
+
 // getters
 int SELECTION::GetCurrentSelectionSize()
 {
@@ -567,6 +631,13 @@ int SELECTION::GetCurrentSelectionBeginning()
 {
 	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
 		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].begin();
+	else
+		return -1;
+}
+int SELECTION::GetCurrentSelectionEnd()
+{
+	if (selections_history[(history_start_pos + history_cursor_pos) % history_size].size())
+		return *selections_history[(history_start_pos + history_cursor_pos) % history_size].rbegin();
 	else
 		return -1;
 }

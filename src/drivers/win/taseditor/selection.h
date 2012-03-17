@@ -33,16 +33,23 @@ public:
 	void undo();
 	void redo();
 
+	bool GetRowSelection(int index);
+
 	void ClearSelection();
 	void ClearRowSelection(int index);
-
-	void EnforceSelectionToList();
+	void ClearRegionSelection(int start, int end);
 
 	void SelectAll();
 	void SetRowSelection(int index);
 	void SetRegionSelection(int start, int end);
+
+	void SetRegionSelectionPattern(int start, int end);
 	void SelectBetweenMarkers();
 	void ReselectClipboard();
+
+	void Transpose(int shift);
+
+	void EnforceSelectionToList();
 
 	void JumpPrevMarker(int speed = 1);
 	void JumpNextMarker(int speed = 1);
@@ -51,6 +58,7 @@ public:
 	// getters
 	int GetCurrentSelectionSize();
 	int GetCurrentSelectionBeginning();
+	int GetCurrentSelectionEnd();
 	bool CheckFrameSelected(int frame);
 	SelectionFrames* MakeStrobe();
 	SelectionFrames& GetStrobedSelection();

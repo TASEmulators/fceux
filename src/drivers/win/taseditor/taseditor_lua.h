@@ -44,7 +44,7 @@ public:
 	bool markedframe(int frame);
 	int getmarker(int frame);
 	int setmarker(int frame);
-	void clearmarker(int frame);
+	void removemarker(int frame);
 	const char* getnote(int index);
 	void setnote(int index, const char* newtext);
 	int getcurrentbranch();

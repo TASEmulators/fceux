@@ -98,6 +98,7 @@
 #define BTN_CDLOGGER_SAVE_STRIPPED      108
 #define IDC_CHEAT_VAL_NE_BY             108
 #define IDC_DEBUGGER_SEEK_PC            108
+#define IDR_TASEDITOR_ACCELERATORS      108
 #define IDC_CHEAT_VAL_GT_BY             109
 #define IDC_DEBUGGER_SEEK_TO            109
 #define IDC_ROMPATCHER_PATCH_DATA       109
@@ -997,6 +998,23 @@
 #define ID_CONFIG_DESELECTONDOUBLECLICK 40538
 #define ID_CONFIG_DRAWINPUTBYDRAGGING   40539
 #define ID_CONFIG_DOUBLECLICKONFRAME    40540
+#define ACCEL_CTRL_UP                   40541
+#define ACCEL_CTRL_DOWN                 40542
+#define ACCEL_CTRL_LEFT                 40543
+#define ACCEL_CTRL_RIGHT                40544
+#define ACCEL_HOME                      40545
+#define ACCEL_END                       40546
+#define ACCEL_PGUP                      40547
+#define ACCEL_PGDN                      40548
+#define ACCEL_CTRL_HOME                 40550
+#define ACCEL_CTRL_END                  40551
+#define ACCEL_SHIFT_HOME                40552
+#define ACCEL_SHIFT_END                 40553
+#define ACCEL_SHIFT_UP                  40554
+#define ACCEL_SHIFT_DOWN                40555
+#define ACCEL_SHIFT_LEFT                40556
+#define ID_ACCELERATOR40557             40557
+#define ACCEL_SHIFT_RIGHT               40557
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1006,7 +1024,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40541
+#define _APS_NEXT_COMMAND_VALUE         40559
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -142,8 +142,8 @@ int TASEDITOR_LUA::setmarker(int frame)
 		return -1;
 }
 
-// taseditor.clearmarker(int frame)
-void TASEDITOR_LUA::clearmarker(int frame)
+// taseditor.removemarker(int frame)
+void TASEDITOR_LUA::removemarker(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
@@ -151,7 +151,7 @@ void TASEDITOR_LUA::clearmarker(int frame)
 		{
 			markers_manager.ClearMarker(frame);
 			// marker was deleted - register changes in TAS Editor
-			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_UNSET, frame);
+			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_REMOVE, frame);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			piano_roll.RedrawRow(frame);
 			piano_roll.SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
@@ -429,7 +429,7 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 			if (!currMovieData.getNumRecords())
 				playback.StartFromZero();
 			// reduce Piano Roll
-			piano_roll.update();
+			piano_roll.UpdateItemCount();
 			// check actual changes
 			int result = history.RegisterLuaChanges(name, start_index, InsertionDeletion_was_made);
 			if (result >= 0)

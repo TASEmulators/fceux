@@ -16,6 +16,7 @@
 #include "piano_roll.h"
 #include "taseditor_lua.h"
 #include "splicer.h"
+#include "editor.h"
 #include "popup_display.h"
 
 #define AUTOSAVE_PERIOD_SCALE 60000		// = 1 minute in milliseconds

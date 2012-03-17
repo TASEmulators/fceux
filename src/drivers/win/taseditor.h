@@ -9,7 +9,6 @@ struct NewProjectParameters
 };
 
 bool EnterTasEditor();
-bool ReadString(EMUFILE *is, std::string& dest);
 bool ExitTasEditor();
 void UpdateTasEditor();
 

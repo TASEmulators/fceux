@@ -226,7 +226,7 @@ void SPLICER::InsertNumFrames()
 			if (current_selection->size())
 			{
 				// shift selection down, so that same frames are selected
-				piano_roll.update();
+				piano_roll.UpdateItemCount();
 				selection.ClearSelection();
 				SelectionFrames::iterator current_selection_end = current_selection->end();
 				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
@@ -273,7 +273,7 @@ void SPLICER::DeleteFrames()
 	if (!currMovieData.getNumRecords())
 		playback.StartFromZero();
 	// reduce Piano Roll
-	piano_roll.update();
+	piano_roll.UpdateItemCount();
 	// check and register changes
 	int result = history.RegisterChanges(MODTYPE_DELETE, start_index);
 	if (result >= 0)
@@ -331,7 +331,7 @@ void SPLICER::Truncate()
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 			}
 		}
-		piano_roll.update();
+		piano_roll.UpdateItemCount();
 		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
 		if (result >= 0)
 		{
@@ -344,7 +344,7 @@ void SPLICER::Truncate()
 			else
 				piano_roll.RedrawList();
 			if (markers_changed)
-				history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, frame+1, last_frame_was);
+				history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, frame+1, last_frame_was);
 		}
 	}
 }

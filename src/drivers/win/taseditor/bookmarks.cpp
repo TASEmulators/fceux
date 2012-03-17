@@ -516,7 +516,7 @@ void BOOKMARKS::deploy(int slot)
 		{
 			// restore entire movie
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
-			piano_roll.update();
+			piano_roll.UpdateItemCount();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);
@@ -551,7 +551,7 @@ void BOOKMARKS::deploy(int slot)
 			// restore movie up to and not including bookmarked frame (imitating old TASing method)
 			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
-			piano_roll.update();
+			piano_roll.UpdateItemCount();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
 			greenzone.Invalidate(first_change);

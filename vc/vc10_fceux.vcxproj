@@ -422,6 +422,7 @@
     <ClCompile Include="..\src\drivers\win\taseditor.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\bookmark.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\bookmarks.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\editor.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\history.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp" />
@@ -748,6 +749,7 @@
     <ClInclude Include="..\src\drivers\win\taseditor.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\bookmark.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\bookmarks.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\editor.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\history.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\markers.h" />

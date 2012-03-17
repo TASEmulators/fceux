@@ -71,10 +71,8 @@
 #include "utils/xstring.h"
 #include <string.h>
 #include "taseditor/taseditor_window.h"
-#include "taseditor/piano_roll.h"
 
 extern TASEDITOR_WINDOW taseditor_window;
-extern PIANO_ROLL piano_roll;
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -342,11 +340,7 @@ int BlockingCheck()
 			if(!handled && taseditor_window.hwndTasEditor)
 			{
 				if(IsChild(taseditor_window.hwndTasEditor, msg.hwnd))
-				{
 					handled = TranslateAccelerator(taseditor_window.hwndTasEditor, fceu_hAccel, &msg);
-					if (handled)
-						piano_roll.AcceleratorDispatched();
-				}
 			}
 			if(!handled && taseditor_window.hwndFindNote)
 			{

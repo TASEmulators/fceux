@@ -14,8 +14,6 @@ Main - Logical center of the program
 * the point of quitting from TAS Editor
 * regularly (at the end of every frame) updates all modules that need regular update
 * implements operations of the "File" menu: creating New project, opening a file, saving, compact saving, import, export
-* stores Autofire Patterns data and their loading/generating code
-* stores resources: patterns filename, id of buttonpresses in patterns
 ------------------------------------------------------------------------------------ */
 
 #include <fstream>
@@ -30,8 +28,6 @@ using namespace std;
 bool emulator_must_run_taseditor = false;
 bool Taseditor_rewind_now = false;
 bool must_call_manual_lua_function = false;
-std::vector<std::string> autofire_patterns_names;
-std::vector<std::vector<uint8>> autofire_patterns;
 
 // all Taseditor functional modules
 TASEDITOR_CONFIG taseditor_config;
@@ -48,6 +44,7 @@ PIANO_ROLL piano_roll;
 TASEDITOR_LUA taseditor_lua;
 SELECTION selection;
 SPLICER splicer;
+EDITOR editor;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern bool turbo;
@@ -62,87 +59,12 @@ extern void UpdateCheckedMenuItems();
 extern void TaseditorAutoFunction();
 extern void TaseditorManualFunction();
 
-// resources
-char patternsFilename[] = "\\taseditor_patterns.txt";
-char autofire_patterns_flagpress = 49;	//	"1"
-
 bool EnterTasEditor()
 {
 	if(!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
 	if(!taseditor_window.hwndTasEditor)
 	{
 		// start TAS Editor
-
-		// init/load autofire_patterns
-		int total_patterns = 0;
-		autofire_patterns.resize(total_patterns);
-		autofire_patterns_names.resize(total_patterns);
-		char nameo[2048];
-		strncpy(nameo, FCEU_GetPath(FCEUMKF_TASEDITOR).c_str(), 2047);
-		strncat(nameo, patternsFilename, 2047 - strlen(nameo));
-		EMUFILE_FILE ifs(nameo, "rb");
-		if(!ifs.fail())
-		{
-			std::string tempstr1, tempstr2;
-			while (ReadString(&ifs, tempstr1))
-			{
-				if (ReadString(&ifs, tempstr2))
-				{
-					total_patterns++;
-					// save the name
-					autofire_patterns_names.push_back(tempstr1);
-					// parse 2nd string to sequence of 1s and 0s
-					autofire_patterns.resize(total_patterns);
-					autofire_patterns[total_patterns - 1].resize(tempstr2.size());
-					for (int i = tempstr2.size() - 1; i >= 0; i--)
-					{
-						if (tempstr2[i] == autofire_patterns_flagpress)
-							autofire_patterns[total_patterns - 1][i] = 1;
-						else
-							autofire_patterns[total_patterns - 1][i] = 0;
-					}
-				}
-			}
-		} else
-		{
-			FCEU_printf("Could not load tools\\taseditor_patterns.txt!\n");
-		}
-		if (autofire_patterns.size() == 0)
-		{
-			FCEU_printf("Will be using default set of patterns...\n");
-			autofire_patterns.resize(4);
-			autofire_patterns_names.resize(4);
-			// Default Pattern 0: Alternating (1010...)
-			autofire_patterns_names[0] = "Alternating (1010...)";
-			autofire_patterns[0].resize(2);
-			autofire_patterns[0][0] = 1;
-			autofire_patterns[0][1] = 0;
-			// Default Pattern 1: Alternating at 30FPS (11001100...)
-			autofire_patterns_names[1] = "Alternating at 30FPS (11001100...)";
-			autofire_patterns[1].resize(4);
-			autofire_patterns[1][0] = 1;
-			autofire_patterns[1][1] = 1;
-			autofire_patterns[1][2] = 0;
-			autofire_patterns[1][3] = 0;
-			// Default Pattern 2: One Quarter (10001000...)
-			autofire_patterns_names[2] = "One Quarter (10001000...)";
-			autofire_patterns[2].resize(4);
-			autofire_patterns[2][0] = 1;
-			autofire_patterns[2][1] = 0;
-			autofire_patterns[2][2] = 0;
-			autofire_patterns[2][3] = 0;
-			// Default Pattern 3: Tap'n'Hold (1011111111111111111111111111111111111...)
-			autofire_patterns_names[3] = "Tap'n'Hold (101111111...)";
-			autofire_patterns[3].resize(1000);
-			autofire_patterns[3][0] = 1;
-			autofire_patterns[3][1] = 0;
-			for (int i = 2; i < 1000; ++i)
-				autofire_patterns[3][i] = 1;
-		}
-		// reset current_pattern if it's outside the range
-		if (taseditor_config.current_pattern < 0 || taseditor_config.current_pattern >= (int)autofire_patterns.size())
-			taseditor_config.current_pattern = 0;
-
 		// create window
 		taseditor_window.init();
 		if(taseditor_window.hwndTasEditor)
@@ -162,6 +84,7 @@ bool EnterTasEditor()
 			UpdateCheckedMenuItems();
 			
 			// init modules
+			editor.init();
 			piano_roll.init();
 			selection.init();
 			splicer.init();
@@ -214,40 +137,15 @@ bool EnterTasEditor()
 		} else return false;
 	} else return true;
 }
-// returns false if couldn't real a string containing at least one char
-bool ReadString(EMUFILE *is, std::string& dest)
-{
-	dest.resize(0);
-	int c;
-	while (true)
-	{
-		c = is->fgetc();
-		if (c < 0) break;
-		if (c == 10 || c == 13)		// end of line
-		{
-			if (dest.size())
-				break;		// already collected at least one char
-			else
-				continue;	// skip the char and continue searching
-		} else
-		{
-			dest.push_back(c);
-		}
-	}
-	return dest.size() != 0;
-}
 
 bool ExitTasEditor()
 {
 	if (!AskSaveProject()) return false;
 
-	// free autofire_patterns
-	autofire_patterns.resize(0);
-	autofire_patterns_names.resize(0);
-
 	// destroy window
 	taseditor_window.exit();
 	// release memory
+	editor.free();
 	piano_roll.free();
 	markers_manager.free();
 	greenzone.free();
@@ -422,6 +320,7 @@ void NewProject()
 		history.reset();
 		piano_roll.reset();
 		selection.reset();
+		editor.reset();
 		splicer.reset();
 		recorder.reset();
 		popup_display.reset();
@@ -852,3 +751,4 @@ bool TaseditorIsRecording()
 		return false;		// replay
 	return true;			// record
 }
+

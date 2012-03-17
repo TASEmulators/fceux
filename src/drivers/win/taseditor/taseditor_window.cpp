@@ -12,7 +12,6 @@ Window - User Interface
 
 * implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks
 * processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)
-* regularly checks if Shift or Ctrl key is held and sets keyboard focus to Piano Roll
 * switches off/on emulator's keyboard input when the window loses/gains focus
 * on demand: updates the window caption
 * updates all checkboxes and menu items when some settings change
@@ -36,6 +35,7 @@ extern RECORDER recorder;
 extern TASEDITOR_PROJECT project;
 extern PIANO_ROLL piano_roll;
 extern SELECTION selection;
+extern EDITOR editor;
 extern SPLICER splicer;
 extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
@@ -45,8 +45,6 @@ extern POPUP_DISPLAY popup_display;
 extern bool turbo;
 extern bool muteTurbo;
 extern bool must_call_manual_lua_function;
-extern std::vector<std::string> autofire_patterns_names;
-extern std::vector<std::vector<uint8>> autofire_patterns;
 
 extern char* GetKeyComboName(int c);
 
@@ -141,8 +139,8 @@ void TASEDITOR_WINDOW::init()
 		ShowWindow(hwndTasEditor, SW_SHOWMAXIMIZED);
 	// menus and checked items
 	hmenu = GetMenu(hwndTasEditor);
-	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	UpdateCheckedItems();
+	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	// tooltips
 	int x = 0;
 	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
@@ -204,8 +202,6 @@ void TASEDITOR_WINDOW::init()
 	// create "Recent" submenu
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
-	// create "Patterns" menu
-	UpdatePatternsMenu();
 
 	SetTaseditorInput();
 	reset();
@@ -244,14 +240,6 @@ void TASEDITOR_WINDOW::reset()
 }
 void TASEDITOR_WINDOW::update()
 {
-	if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_NONE)
-	{
-		HWND cur_focus = GetFocus();
-		if (cur_focus != piano_roll.hwndList && cur_focus != hwndFindNote)
-			// set focus to Piano Roll when Shift or Ctrl are held
-			if ((GetAsyncKeyState(VK_CONTROL) < 0) || (GetAsyncKeyState(VK_SHIFT) < 0))
-				SetFocus(piano_roll.hwndList);
-	}
 }
 // --------------------------------------------------------------------------------
 void TASEDITOR_WINDOW::CalculateItems()
@@ -446,11 +434,9 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, taseditor_config.combine_consecutive_rec?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, taseditor_config.use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, taseditor_config.columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL, taseditor_config.keyboard_for_piano_roll?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_DESELECTONDOUBLECLICK, taseditor_config.deselect_on_doubleclick?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_DOUBLECLICKONFRAME, taseditor_config.doubleclick_affects_playback?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_DRAWINPUTBYDRAGGING, taseditor_config.draw_input?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
@@ -593,12 +579,12 @@ void TASEDITOR_WINDOW::UpdatePatternsMenu()
 	for(x = GetMenuItemCount(patterns_menu); x > 0 ; x--)
 		RemoveMenu(patterns_menu, 0, MF_BYPOSITION);
 	// Fill the menu
-	for(x = autofire_patterns.size() - 1; x >= 0; x--)
+	for(x = editor.autofire_patterns.size() - 1; x >= 0; x--)
 	{  
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
 		moo.fType = 0;
 		moo.wID = MENU_FIRST_PATTERN + x;
-		std::string tmp = autofire_patterns_names[x];
+		std::string tmp = editor.autofire_patterns_names[x];
 		// clamp this string to 50 chars
 		if(tmp.size() > PATTERNS_MAX_VISIBLE_NAME)
 			tmp = tmp.substr(0, PATTERNS_MAX_VISIBLE_NAME);
@@ -621,7 +607,7 @@ void TASEDITOR_WINDOW::RecheckPatternsMenu()
 	int x;
 	x = GetMenuItemInfo(hmenu, PATTERNS_MENU_POS, true, &moo);
 	std::string tmp = patterns_menu_prefix;
-	tmp += autofire_patterns_names[taseditor_config.current_pattern];
+	tmp += editor.autofire_patterns_names[taseditor_config.current_pattern];
 	// clamp this string
 	if(tmp.size() > PATTERNMENU_MAX_VISIBLE_NAME)
 		tmp = tmp.substr(0, PATTERNMENU_MAX_VISIBLE_NAME);
@@ -774,7 +760,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				}
 				// then check clicking Patterns menu item
-				if (loword_wparam >= MENU_FIRST_PATTERN && loword_wparam < MENU_FIRST_PATTERN + autofire_patterns.size())
+				if (loword_wparam >= MENU_FIRST_PATTERN && loword_wparam < MENU_FIRST_PATTERN + editor.autofire_patterns.size())
 				{
 					taseditor_config.current_pattern = loword_wparam - MENU_FIRST_PATTERN;
 					recorder.pattern_offset = 0;
@@ -811,14 +797,15 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_EDIT_DESELECT:
 				case ID_SELECTED_DESELECT:
-					selection.ClearSelection();
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						selection.ClearSelection();
 					break;
 				case ID_EDIT_SELECTALL:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
 					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else
+					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 						selection.SelectAll();
 					break;
 				case ACCEL_CTRL_X:
@@ -1054,10 +1041,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.columnset_by_keys ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_CONFIG_KEYBOARDCONTROLSINPIANOROLL:
-					taseditor_config.keyboard_for_piano_roll ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
 				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
 					taseditor_config.superimpose_affects_paste ^= 1;
 					taseditor_window.UpdateCheckedItems();
@@ -1068,10 +1051,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_CONFIG_DESELECTONDOUBLECLICK:
 					taseditor_config.deselect_on_doubleclick ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
-				case ID_CONFIG_DOUBLECLICKONFRAME:
-					taseditor_config.doubleclick_affects_playback ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_DRAWINPUTBYDRAGGING:
@@ -1132,12 +1111,13 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
 					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
 						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
-					else
+					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 						selection.SelectBetweenMarkers();
 					break;
 				case ID_EDIT_SELECTMIDMARKERS:
 				case ID_SELECTED_SELECTMIDMARKERS:
-					selection.SelectBetweenMarkers();
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						selection.SelectBetweenMarkers();
 					break;
 				case ACCEL_CTRL_INSERT:
 				case ID_EDIT_CLONEFRAMES:
@@ -1168,22 +1148,31 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_EDIT_SELECTIONUNDO:
 				case ACCEL_CTRL_Q:
 					{
-						selection.undo();
-						piano_roll.FollowSelection();
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						{
+							selection.undo();
+							piano_roll.FollowSelection();
+						}
 						break;
 					}
 				case ID_EDIT_SELECTIONREDO:
 				case ACCEL_CTRL_W:
 					{
-						selection.redo();
-						piano_roll.FollowSelection();
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						{
+							selection.redo();
+							piano_roll.FollowSelection();
+						}
 						break;
 					}
 				case ID_EDIT_RESELECTCLIPBOARD:
 				case ACCEL_CTRL_B:
 					{
-						selection.ReselectClipboard();
-						piano_roll.FollowSelection();
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						{
+							selection.ReselectClipboard();
+							piano_roll.FollowSelection();
+						}
 						break;
 					}
 				case IDC_JUMP_PLAYBACK_BUTTON:
@@ -1193,7 +1182,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 				case IDC_JUMP_SELECTION_BUTTON:
 					{
-						piano_roll.FollowSelection();
+						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+							piano_roll.FollowSelection();
 						break;
 					}
 				case ID_SELECTED_SETMARKER:
@@ -1243,23 +1233,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 							if (changes_made)
 							{
 								selection.must_find_current_marker = playback.must_find_current_marker = true;
-								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
+								history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
 							}
 						}
 						break;
 					}
-				case ACCEL_SHIFT_PGUP:
-					playback.RewindFull();
-					break;
-				case ACCEL_SHIFT_PGDN:
-					playback.ForwardFull();
-					break;
-				case ACCEL_CTRL_PGUP:
-					selection.JumpPrevMarker();
-					break;
-				case ACCEL_CTRL_PGDN:
-					selection.JumpNextMarker();
-					break;
 				case ACCEL_CTRL_F:
 				case ID_VIEW_FINDNOTE:
 					{
@@ -1298,10 +1276,106 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_HELP_ABOUT:
 					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
 					break;
-				case ID_STRAY_UNPAUSE:
-					playback.UnpauseEmulation();
+				case ACCEL_HOME:
+					// scroll Piano Roll to the beginning
+					ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetTopIndex(piano_roll.hwndList));
 					break;
-
+				case ACCEL_END:
+					// scroll Piano Roll to the end
+					ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * currMovieData.getNumRecords());
+					break;
+				case ACCEL_PGUP:
+					// scroll Piano Roll 1 page up
+					ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetCountPerPage(piano_roll.hwndList));
+					break;
+				case ACCEL_PGDN:
+					// scroll Piano Roll 1 page up
+					ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * ListView_GetCountPerPage(piano_roll.hwndList));
+					break;
+				case ACCEL_CTRL_HOME:
+				{
+					// transpose Selection to the beginning and scroll to it
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					{
+						int selection_beginning = selection.GetCurrentSelectionBeginning();
+						if (selection_beginning >= 0)
+						{
+							selection.Transpose(-selection_beginning);
+							piano_roll.FollowSelection();
+						}
+					}
+					break;
+				}
+				case ACCEL_CTRL_END:
+				{
+					// transpose Selection to the end and scroll to it
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					{
+						int selection_end = selection.GetCurrentSelectionEnd();
+						if (selection_end >= 0)
+						{
+							selection.Transpose(currMovieData.getNumRecords() - 1 - selection_end);
+							piano_roll.FollowSelection();
+						}
+					}
+					break;
+				}
+				case ACCEL_CTRL_PGUP:
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						selection.JumpPrevMarker();
+					break;
+				case ACCEL_CTRL_PGDN:
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+						selection.JumpNextMarker();
+					break;
+				case ACCEL_CTRL_UP:
+					// transpose Selection 1 frame up and scroll to it
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					{
+						selection.Transpose(-1);
+						piano_roll.FollowSelection();
+					}
+					break;
+				case ACCEL_CTRL_DOWN:
+					// transpose Selection 1 frame down and scroll to it
+					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+					{
+						selection.Transpose(1);
+						piano_roll.FollowSelection();
+					}
+					break;
+				case ACCEL_CTRL_LEFT:
+				case ACCEL_SHIFT_LEFT:
+					// scroll Piano Roll horizontally to the left
+					ListView_Scroll(piano_roll.hwndList, -COLUMN_BUTTON_WIDTH, 0);
+					break;
+				case ACCEL_CTRL_RIGHT:
+				case ACCEL_SHIFT_RIGHT:
+					// scroll Piano Roll horizontally to the right
+					ListView_Scroll(piano_roll.hwndList, COLUMN_BUTTON_WIDTH, 0);
+					break;
+				case ACCEL_SHIFT_HOME:
+					// send Playback to the beginning
+					playback.jump(0);
+					break;
+				case ACCEL_SHIFT_END:
+					// send Playback to the end
+					playback.jump(currMovieData.getNumRecords() - 1);
+					break;
+				case ACCEL_SHIFT_PGUP:
+					playback.RewindFull();
+					break;
+				case ACCEL_SHIFT_PGDN:
+					playback.ForwardFull();
+					break;
+				case ACCEL_SHIFT_UP:
+					// rewind 1 frame
+					playback.RewindFrame();
+					break;
+				case ACCEL_SHIFT_DOWN:
+					// step forward 1 frame
+					playback.ForwardFrame();
+					break;
 
 				}
 				break;

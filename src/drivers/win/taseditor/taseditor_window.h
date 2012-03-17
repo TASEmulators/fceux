@@ -24,12 +24,6 @@ struct Window_items_struct
 	HWND tooltip_hwnd;
 };
 
-enum ECONTEXTMENU
-{
-	CONTEXTMENU_STRAY = 0,
-	CONTEXTMENU_SELECTED = 1,
-};
-
 class TASEDITOR_WINDOW
 {
 public:

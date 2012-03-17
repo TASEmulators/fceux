@@ -47,7 +47,6 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	combine_consecutive_rec = true;
 	use_1p_rec = true;
 	columnset_by_keys = false;
-	keyboard_for_piano_roll = true;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
 	superimpose_affects_paste = true;
 	branch_full_movie = true;
@@ -71,7 +70,6 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_search_up = false;
 	enable_auto_function = true;
 	deselect_on_doubleclick = true;
-	doubleclick_affects_playback = false;
 	draw_input = true;
 	silent_autosave = true;
 	tooltips = true;

@@ -31,9 +31,6 @@ Piano Roll - Piano Roll interface
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern char buttonNames[NUM_JOYPAD_BUTTONS][2];
 
-extern std::vector<std::string> autofire_patterns_names;
-extern std::vector<std::vector<uint8>> autofire_patterns;
-
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
@@ -43,6 +40,7 @@ extern GREENZONE greenzone;
 extern HISTORY history;
 extern MARKERS_MANAGER markers_manager;
 extern SELECTION selection;
+extern EDITOR editor;
 
 extern int GetInputType(MovieData& md);
 
@@ -58,6 +56,7 @@ char piano_roll_skipsave_id[PIANO_ROLL_ID_LEN] = "PIANO_ROLX";
 COLORREF hot_changes_colors[16] = { 0x0, 0x5c4c44, 0x854604, 0xab2500, 0xc20006, 0xd6006f, 0xd40091, 0xba00a4, 0x9500ba, 0x7a00cc, 0x5800d4, 0x0045e2, 0x0063ea, 0x0079f4, 0x0092fa, 0x00aaff };
 //COLORREF hot_changes_colors[16] = { 0x0, 0x661212, 0x842B4E, 0x652C73, 0x48247D, 0x383596, 0x2947AE, 0x1E53C1, 0x135DD2, 0x116EDA, 0x107EE3, 0x0F8EEB, 0x209FF4, 0x3DB1FD, 0x51C2FF, 0x4DCDFF };
 COLORREF header_lights_colors[11] = { 0x0, 0x007313, 0x009100, 0x1daf00, 0x42c700, 0x65d900, 0x91e500, 0xb0f000, 0xdaf700, 0xf0fc7c, 0xfcffba };
+
 char markerDragBoxClassName[] = "MarkerDragBox";
 
 PIANO_ROLL::PIANO_ROLL()
@@ -294,7 +293,9 @@ void PIANO_ROLL::free()
 void PIANO_ROLL::reset()
 {
 	must_check_item_under_mouse = true;
-	vk_shift_release_time = vk_control_release_time = 0;
+	row_last_clicked = 0;
+	shift_held = ctrl_held = alt_held = false;
+	shift_timer = ctrl_timer = shift_count = ctrl_count = 0;
 	next_header_update_time = header_item_under_mouse = 0;
 	// delete all columns except 0th
 	while (ListView_DeleteColumn(hwndList, 1)) {}
@@ -329,11 +330,117 @@ void PIANO_ROLL::reset()
 }
 void PIANO_ROLL::update()
 {
-	//update the number of items in the list
-	int currLVItemCount = ListView_GetItemCount(hwndList);
-	int movie_size = currMovieData.getNumRecords();
-	if(currLVItemCount != movie_size)
-		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
+	UpdateItemCount();
+
+	if (must_check_item_under_mouse)
+	{
+		// find row and column
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			ScreenToClient(hwndList, &p);
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = p.x;
+			info.pt.y = p.y;
+			ListView_SubItemHitTest(hwndList, &info);
+			row_under_mouse = info.iItem;
+			real_row_under_mouse = row_under_mouse;
+			if (real_row_under_mouse < 0)
+			{
+				real_row_under_mouse = ListView_GetTopIndex(hwndList) + (p.y - list_row_top) / list_row_height;
+				if (real_row_under_mouse < 0) real_row_under_mouse--;
+			}
+			column_under_mouse = info.iSubItem;
+		}
+		// change mouse cursor depending on what it points at
+		LPCSTR cursor_icon = IDC_ARROW;
+		switch (drag_mode)
+		{
+			case DRAG_MODE_NONE:
+			{
+				// normal mouseover
+				if (row_under_mouse >= 0
+					&& (column_under_mouse == COLUMN_FRAMENUM || column_under_mouse == COLUMN_FRAMENUM2)
+					&& markers_manager.GetMarker(row_under_mouse))
+					cursor_icon = IDC_SIZEALL;
+				break;
+			}
+			case DRAG_MODE_PLAYBACK:
+			{
+				// dragging Playback cursor - show either normal arrow or arrow+wait
+				if (playback.pause_frame)
+					cursor_icon = IDC_APPSTARTING;
+				break;
+			}
+			case DRAG_MODE_MARKER:
+			case DRAG_MODE_OBSERVE:
+			case DRAG_MODE_SET:
+			case DRAG_MODE_UNSET:
+			case DRAG_MODE_SELECTION:
+				// show normal arrow
+				break;
+		}
+		SetCursor(LoadCursor(0, cursor_icon));
+		// and don't check until mouse moves or Piano Roll scrolls
+		must_check_item_under_mouse = false;
+	}
+	
+	// update state of Shift/Ctrl/Alt holding
+	bool last_shift_held = shift_held, last_ctrl_held = ctrl_held, last_alt_held = alt_held;
+	shift_held = (GetAsyncKeyState(VK_SHIFT) < 0);
+	ctrl_held = (GetAsyncKeyState(VK_CONTROL) < 0);
+	alt_held = (GetAsyncKeyState(VK_MENU) < 0);
+	// check doubletap of Shift/Ctrl
+	if (last_shift_held != shift_held)
+	{
+		if ((int)(shift_timer + GetDoubleClickTime()) > clock())
+		{
+			shift_count++;
+			if (shift_count >= DOUBLETAP_COUNT)
+			{
+				FollowPlayback();
+				shift_count = ctrl_count = 0;
+			}
+		} else
+		{
+			shift_count = 0;
+		}
+		shift_timer = clock();
+	}
+	if (last_ctrl_held != ctrl_held)
+	{
+		if ((int)(ctrl_timer + GetDoubleClickTime()) > clock())
+		{
+			ctrl_count++;
+			if (ctrl_count >= DOUBLETAP_COUNT)
+			{
+				FollowSelection();
+				ctrl_count = shift_count = 0;
+			}
+		} else
+		{
+			ctrl_count = 0;
+		}
+		ctrl_timer = clock();
+	}
+	// show/hide "focused" rectangle on row_last_clicked
+	if (shift_held || alt_held)
+	{
+		if ((shift_held && !last_shift_held) || (alt_held && !last_alt_held))
+			row_last_clicked_blinking_phase_shift = ROW_LAST_CLICKED_BLINKING_PERIOD + (clock() % (2 * ROW_LAST_CLICKED_BLINKING_PERIOD));
+		bool show_row_last_clicked = (((clock() - row_last_clicked_blinking_phase_shift) / ROW_LAST_CLICKED_BLINKING_PERIOD) & 1) != 0;
+		if (show_row_last_clicked)
+		{
+			ListView_SetItemState(hwndList, row_last_clicked, LVIS_FOCUSED, LVIS_FOCUSED);
+		} else
+		{
+			ListView_SetItemState(hwndList, row_last_clicked, 0, LVIS_FOCUSED);
+		}
+	} else if (last_shift_held || last_alt_held)
+	{
+		ListView_SetItemState(hwndList, row_last_clicked, 0, LVIS_FOCUSED);
+	}
 
 	// update dragging
 	if (drag_mode != DRAG_MODE_NONE)
@@ -358,14 +465,17 @@ void PIANO_ROLL::update()
 			RECT wrect;
 			GetClientRect(hwndList, &wrect);
 			int scroll_dx = 0, scroll_dy = 0;
-			if (p.x < SCROLLING_BORDER_SIZE)
-				scroll_dx = p.x - SCROLLING_BORDER_SIZE;
-			else if (p.x > (wrect.right - wrect.left - SCROLLING_BORDER_SIZE))
-				scroll_dx = p.x - (wrect.right - wrect.left - SCROLLING_BORDER_SIZE);
-			if (p.y < (list_header_height + SCROLLING_BORDER_SIZE))
-				scroll_dy = p.y - (list_header_height + SCROLLING_BORDER_SIZE);
-			else if (p.y > (wrect.bottom - wrect.top - SCROLLING_BORDER_SIZE))
-				scroll_dy = p.y - (wrect.bottom - wrect.top - SCROLLING_BORDER_SIZE);
+			if (drag_mode != DRAG_MODE_MARKER)		// in DRAG_MODE_MARKER user can't scroll Piano Roll horizontally
+			{
+				if (p.x < DRAG_SCROLLING_BORDER_SIZE)
+					scroll_dx = p.x - DRAG_SCROLLING_BORDER_SIZE;
+				else if (p.x > (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE))
+					scroll_dx = p.x - (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE);
+			}
+			if (p.y < (list_header_height + DRAG_SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (list_header_height + DRAG_SCROLLING_BORDER_SIZE);
+			else if (p.y > (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE);
 			if (scroll_dx || scroll_dy)
 				ListView_Scroll(hwndList, scroll_dx, scroll_dy);
 		}
@@ -399,21 +509,18 @@ void PIANO_ROLL::update()
 			// when dragging, always show semi-transparent yellow rectangle under mouse
 			POINT p = {0, 0};
 			GetCursorPos(&p);
-			int window_x = p.x - marker_drag_box_dx;
-			int window_y = p.y - marker_drag_box_dy;
+			marker_drag_box_x = p.x - marker_drag_box_dx;
+			marker_drag_box_y = p.y - marker_drag_box_dy;
 			if (!hwndMarkerDragBox)
 			{
-				hwndMarkerDragBox = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, markerDragBoxClassName, markerDragBoxClassName, WS_POPUP, window_x, window_y, COLUMN_FRAMENUM_WIDTH, list_row_height, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
+				hwndMarkerDragBox = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT, markerDragBoxClassName, markerDragBoxClassName, WS_POPUP, marker_drag_box_x, marker_drag_box_y, COLUMN_FRAMENUM_WIDTH, list_row_height, taseditor_window.hwndTasEditor, NULL, fceu_hInstance, NULL);
 				ShowWindow(hwndMarkerDragBox, SW_SHOWNA);
-				SetLayeredWindowAttributes(hwndMarkerDragBox, 0, MARKER_DRAG_BOX_ALPHA, LWA_ALPHA);
-				UpdateLayeredWindow(hwndMarkerDragBox, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 			} else
 			{
-				SetWindowPos(hwndMarkerDragBox, 0, window_x, window_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+				SetWindowPos(hwndMarkerDragBox, 0, marker_drag_box_x, marker_drag_box_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 			}
-			// force dragging cursor icon
-			SetCursor(LoadCursor(0, IDC_ARROW));
-			must_check_item_under_mouse = false;
+			SetLayeredWindowAttributes(hwndMarkerDragBox, 0, MARKER_DRAG_BOX_ALPHA, LWA_ALPHA);
+			UpdateLayeredWindow(hwndMarkerDragBox, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
 			break;
 		}
 		case DRAG_MODE_SET:
@@ -478,7 +585,68 @@ void PIANO_ROLL::update()
 			}
 			break;
 		}
+		case DRAG_MODE_SELECTION:
+		{
+			int new_drag_selection_ending_frame = row_under_mouse;
+			// if trying to select above Piano Roll, select from frame 0
+			if (new_drag_selection_ending_frame < 0 && real_row_under_mouse < 0)
+				new_drag_selection_ending_frame = 0;
+			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != drag_selection_ending_frame)
+			{
+				// change selection shape
+				if (new_drag_selection_ending_frame >= drag_selection_starting_frame)
+				{
+					// selecting from upper to lower
+					if (drag_selection_ending_frame < drag_selection_starting_frame)
+					{
+						selection.ClearRegionSelection(drag_selection_ending_frame, drag_selection_starting_frame);
+						selection.SetRegionSelection(drag_selection_starting_frame, new_drag_selection_ending_frame + 1);
+					} else	// both ending_frame and new_ending_frame are >= starting_frame
+					{
+						if (drag_selection_ending_frame > new_drag_selection_ending_frame)
+							selection.ClearRegionSelection(new_drag_selection_ending_frame + 1, drag_selection_ending_frame + 1);
+						else
+							selection.SetRegionSelection(drag_selection_ending_frame + 1, new_drag_selection_ending_frame + 1);
+					}
+				} else
+				{
+					// selecting from lower to upper
+					if (drag_selection_ending_frame > drag_selection_starting_frame)
+					{
+						selection.ClearRegionSelection(drag_selection_starting_frame + 1, drag_selection_ending_frame + 1);
+						selection.SetRegionSelection(new_drag_selection_ending_frame, drag_selection_starting_frame);
+					} else	// both ending_frame and new_ending_frame are <= starting_frame
+					{
+						if (drag_selection_ending_frame < new_drag_selection_ending_frame)
+							selection.ClearRegionSelection(drag_selection_ending_frame, new_drag_selection_ending_frame);
+						else
+							selection.SetRegionSelection(new_drag_selection_ending_frame, drag_selection_ending_frame);
+					}
+				}
+				drag_selection_ending_frame = new_drag_selection_ending_frame;
+			}
+			break;
+		}
 	}
+	// update MarkerDragBox when it's flying away
+	if (hwndMarkerDragBox && drag_mode != DRAG_MODE_MARKER)
+	{
+		marker_drag_countdown--;
+		if (marker_drag_countdown > 0)
+		{
+			marker_drag_box_dy += MARKER_DRAG_GRAVITY;
+			marker_drag_box_x += marker_drag_box_dx;
+			marker_drag_box_y += marker_drag_box_dy;
+			SetWindowPos(hwndMarkerDragBox, 0, marker_drag_box_x, marker_drag_box_y, 0, 0, SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+			SetLayeredWindowAttributes(hwndMarkerDragBox, 0, marker_drag_countdown * MARKER_DRAG_ALPHA_PER_TICK, LWA_ALPHA);
+			UpdateLayeredWindow(hwndMarkerDragBox, 0, 0, 0, 0, 0, 0, &blend, ULW_ALPHA);
+		} else
+		{
+			DestroyWindow(hwndMarkerDragBox);
+			hwndMarkerDragBox = 0;
+		}
+	}
+
 	// once per 40 milliseconds update colors alpha in the Header
 	if (clock() > next_header_update_time)
 	{
@@ -486,9 +654,8 @@ void PIANO_ROLL::update()
 		bool changes_made = false;
 		int light_value = 0;
 		// 1 - update Frame# columns' heads
-		if (GetAsyncKeyState(VK_MENU) & 0x8000)
-			light_value = HEADER_LIGHT_HOLD;
-		else if (drag_mode == DRAG_MODE_NONE && (header_item_under_mouse == COLUMN_FRAMENUM || header_item_under_mouse == COLUMN_FRAMENUM2))
+		//if (GetAsyncKeyState(VK_MENU) & 0x8000) light_value = HEADER_LIGHT_HOLD; else
+		if (drag_mode == DRAG_MODE_NONE && (header_item_under_mouse == COLUMN_FRAMENUM || header_item_under_mouse == COLUMN_FRAMENUM2))
 			light_value = (selection.GetCurrentSelectionSize() > 0) ? HEADER_LIGHT_MOUSEOVER_SEL : HEADER_LIGHT_MOUSEOVER;
 		if (header_colors[COLUMN_FRAMENUM] < light_value)
 		{
@@ -525,55 +692,6 @@ void PIANO_ROLL::update()
 			RedrawHeader();
 	}
 
-	// change mouse cursor depending on what it points at
-	if (must_check_item_under_mouse)
-	{
-		LPCSTR cursor_icon = IDC_ARROW;
-		switch (drag_mode)
-		{
-			case DRAG_MODE_NONE:
-			{
-				// normal mouseover
-				POINT p;
-				if (GetCursorPos(&p))
-				{
-					ScreenToClient(hwndList, &p);
-					RECT wrect;
-					GetClientRect(hwndList, &wrect);
-					if (p.x >= 0 && p.y >= list_header_height && p.x < (wrect.right - wrect.left) && p.y < (wrect.bottom - wrect.top))
-					{
-						// perform hit test
-						LVHITTESTINFO info;
-						info.pt.x = p.x;
-						info.pt.y = p.y;
-						ListView_SubItemHitTest(hwndList, &info);
-						int row_index = info.iItem;
-						int column_index = info.iSubItem;
-						if (row_index >= 0
-							&& (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
-							&& markers_manager.GetMarker(row_index))
-							cursor_icon = IDC_SIZEALL;
-					}
-				}
-				break;
-			}
-			case DRAG_MODE_PLAYBACK:
-			{
-				// dragging Playback cursor - show either normal arrow or arrow+wait
-				if (playback.pause_frame)
-					cursor_icon = IDC_APPSTARTING;
-				break;
-			}
-			case DRAG_MODE_MARKER:
-			case DRAG_MODE_OBSERVE:
-			case DRAG_MODE_SET:
-			case DRAG_MODE_UNSET:
-				// show normal arrow
-				break;
-		}
-		SetCursor(LoadCursor(0, cursor_icon));
-		must_check_item_under_mouse = false;
-	}
 }
 
 void PIANO_ROLL::save(EMUFILE *os, bool really_save)
@@ -637,6 +755,14 @@ void PIANO_ROLL::RedrawHeader()
 }
 
 // -------------------------------------------------------------------------
+void PIANO_ROLL::UpdateItemCount()
+{
+	// update the number of items in the list
+	int currLVItemCount = ListView_GetItemCount(hwndList);
+	int movie_size = currMovieData.getNumRecords();
+	if(currLVItemCount != movie_size)
+		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
+}
 bool PIANO_ROLL::CheckItemVisible(int frame)
 {
 	int top = ListView_GetTopIndex(hwndList);
@@ -726,6 +852,37 @@ void PIANO_ROLL::FollowMarker(int marker_id)
 	}
 }
 
+void PIANO_ROLL::ColumnSet(int column, bool alt_pressed)
+{
+	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
+	{
+		// user clicked on "Frame#" - apply ColumnSet to Markers
+		if (alt_pressed)
+		{
+			if (editor.FrameColumnSetPattern())
+				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		} else
+		{
+			if (editor.FrameColumnSet())
+				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+		}
+	} else
+	{
+		// user clicked on Input column - apply ColumnSet to Input
+		int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+		if (alt_pressed)
+		{
+			if (editor.InputColumnSetPattern(joy, button))
+				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+		} else
+		{
+			if (editor.InputColumnSet(joy, button))
+				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
+		}
+	}
+}
+
 void PIANO_ROLL::SetHeaderColumnLight(int column, int level)
 {
 	if (column < COLUMN_FRAMENUM || column >= num_columns || level < 0 || level > HEADER_LIGHT_MAX)
@@ -749,31 +906,52 @@ void PIANO_ROLL::StartDraggingPlaybackCursor()
 		DragPlaybackCursor();
 	}
 }
+void PIANO_ROLL::StartDraggingMarker(int mouse_x, int mouse_y, int row_index, int column_index)
+{
+	if (drag_mode == DRAG_MODE_NONE)
+	{
+		// start dragging the Marker
+		drag_mode = DRAG_MODE_MARKER;
+		marker_drag_framenum = row_index;
+		marker_drag_countdown = MARKER_DRAG_COUNTDOWN_MAX;
+		RECT temp_rect;
+		if (ListView_GetSubItemRect(hwndList, row_index, column_index, LVIR_BOUNDS, &temp_rect))
+		{
+			marker_drag_box_dx = mouse_x - temp_rect.left;
+			marker_drag_box_dy = mouse_y - temp_rect.top;
+		} else
+		{
+			marker_drag_box_dx = 0;
+			marker_drag_box_dy = 0;
+		}
+		// redraw the row to show that Marker was lifted
+		RedrawRow(row_index);
+	}
+}
+void PIANO_ROLL::StartSelectingDrag(int start_frame)
+{
+	if (drag_mode == DRAG_MODE_NONE)
+	{
+		drag_mode = DRAG_MODE_SELECTION;
+		drag_selection_starting_frame = start_frame;
+		drag_selection_ending_frame = drag_selection_starting_frame;	// assuming that start_frame is already selected
+	}
+}
+
 void PIANO_ROLL::DragPlaybackCursor()
 {
-	POINT p;
-	if (GetCursorPos(&p))
+	int target_frame = real_row_under_mouse;
+	if (target_frame < 0)
+		target_frame = 0;
+	if (currFrameCounter != target_frame)
 	{
-		ScreenToClient(hwndList, &p);
-		// perform hit test
-		LVHITTESTINFO info;
-		info.pt.x = p.x;
-		info.pt.y = p.y;
-		ListView_SubItemHitTest(hwndList, &info);
-		int row_index = info.iItem;
-		if (row_index < 0)
-			row_index = ListView_GetTopIndex(hwndList) + (p.y - list_row_top) / list_row_height;
-		// send Playback there
-		if (currFrameCounter != row_index)
+		int lastCursor = currFrameCounter;
+		playback.jump(target_frame);
+		if (lastCursor != currFrameCounter)
 		{
-			int lastCursor = currFrameCounter;
-			playback.jump(row_index);
-			if (lastCursor != currFrameCounter)
-			{
-				// redraw row where Playback cursor was (in case there's two or more drags before playback.update())
-				RedrawRow(lastCursor);
-				bookmarks.RedrawChangedBookmarks(lastCursor);
-			}
+			// redraw row where Playback cursor was (in case there's two or more drags before playback.update())
+			RedrawRow(lastCursor);
+			bookmarks.RedrawChangedBookmarks(lastCursor);
 		}
 	}
 }
@@ -787,23 +965,43 @@ void PIANO_ROLL::FinishDrag()
 			// place Marker here
 			if (markers_manager.GetMarker(marker_drag_framenum))
 			{
-				POINT p;
-				if (GetCursorPos(&p))
+				POINT p = {0, 0};
+				GetCursorPos(&p);
+				int mouse_x = p.x, mouse_y = p.y;
+				ScreenToClient(hwndList, &p);
+				RECT wrect;
+				GetClientRect(hwndList, &wrect);
+				if (p.x < 0 || p.x > (wrect.right - wrect.left) || p.y < 0 || p.y > (wrect.bottom - wrect.top))
 				{
-					ScreenToClient(hwndList, &p);
-					// perform hit test
-					LVHITTESTINFO info;
-					info.pt.x = p.x;
-					info.pt.y = p.y;
-					ListView_SubItemHitTest(hwndList, &info);
-					int row_index = info.iItem;
-					int column_index = info.iSubItem;
-					if (row_index >= 0 && row_index != marker_drag_framenum && (column_index <= COLUMN_FRAMENUM || column_index >= COLUMN_FRAMENUM2))
+					// user threw the Marker away
+					markers_manager.ClearMarker(marker_drag_framenum);
+					RedrawRow(marker_drag_framenum);
+					history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, marker_drag_framenum);
+					selection.must_find_current_marker = playback.must_find_current_marker = true;
+					// calculate vector of movement
+					POINT p = {0, 0};
+					GetCursorPos(&p);
+					marker_drag_box_dx = (mouse_x - marker_drag_box_dx) - marker_drag_box_x;
+					marker_drag_box_dy = (mouse_y - marker_drag_box_dy) - marker_drag_box_y;
+					if (marker_drag_box_dx || marker_drag_box_dy)
 					{
-						if (markers_manager.GetMarker(row_index))
+						// limit max speed
+						double marker_drag_box_speed = sqrt((double)(marker_drag_box_dx * marker_drag_box_dx + marker_drag_box_dy * marker_drag_box_dy));
+						if (marker_drag_box_speed > MARKER_DRAG_MAX_SPEED)
+						{
+							marker_drag_box_dx *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
+							marker_drag_box_dy *= MARKER_DRAG_MAX_SPEED / marker_drag_box_speed;
+						}
+					}
+					marker_drag_countdown = MARKER_DRAG_COUNTDOWN_MAX;
+				} else
+				{
+					if (row_under_mouse >= 0 && row_under_mouse != marker_drag_framenum && (column_under_mouse <= COLUMN_FRAMENUM || column_under_mouse >= COLUMN_FRAMENUM2))
+					{
+						if (markers_manager.GetMarker(row_under_mouse))
 						{
 							int dragged_marker_id = markers_manager.GetMarker(marker_drag_framenum);
-							int destination_marker_id = markers_manager.GetMarker(row_index);
+							int destination_marker_id = markers_manager.GetMarker(row_under_mouse);
 							// swap Notes of these Markers
 							char dragged_marker_note[MAX_NOTE_LEN];
 							strcpy(dragged_marker_note, markers_manager.GetNote(dragged_marker_id).c_str());
@@ -812,46 +1010,47 @@ void PIANO_ROLL::FinishDrag()
 								// notes are different, swap them
 								markers_manager.SetNote(dragged_marker_id, markers_manager.GetNote(destination_marker_id).c_str());
 								markers_manager.SetNote(destination_marker_id, dragged_marker_note);
-								history.RegisterMarkersChange(MODTYPE_MARKER_SWAP, marker_drag_framenum, row_index);
+								history.RegisterMarkersChange(MODTYPE_MARKER_SWAP, marker_drag_framenum, row_under_mouse);
 								selection.must_find_current_marker = playback.must_find_current_marker = true;
 								SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
 							}
 						} else
 						{
 							// move Marker
-							int new_marker_id = markers_manager.SetMarker(row_index);
+							int new_marker_id = markers_manager.SetMarker(row_under_mouse);
 							if (new_marker_id)
 							{
 								markers_manager.SetNote(new_marker_id, markers_manager.GetNote(markers_manager.GetMarker(marker_drag_framenum)).c_str());
 								// and delete it from old frame
 								markers_manager.ClearMarker(marker_drag_framenum);
-								RedrawRow(marker_drag_framenum);
-								RedrawRow(row_index);
-								history.RegisterMarkersChange(MODTYPE_MARKER_DRAG, marker_drag_framenum, row_index, markers_manager.GetNote(markers_manager.GetMarker(row_index)).c_str());
+								history.RegisterMarkersChange(MODTYPE_MARKER_DRAG, marker_drag_framenum, row_under_mouse, markers_manager.GetNote(markers_manager.GetMarker(row_under_mouse)).c_str());
 								selection.must_find_current_marker = playback.must_find_current_marker = true;
 								SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
+								RedrawRow(row_under_mouse);
 							}
 						}
 					}
+					RedrawRow(marker_drag_framenum);
+					if (hwndMarkerDragBox)
+					{
+						DestroyWindow(hwndMarkerDragBox);
+						hwndMarkerDragBox = 0;
+					}
 				}
-			}
-
-			if (hwndMarkerDragBox)
+			} else
 			{
-				DestroyWindow(hwndMarkerDragBox);
-				hwndMarkerDragBox = 0;
+				// abort drag
+				if (hwndMarkerDragBox)
+				{
+					DestroyWindow(hwndMarkerDragBox);
+					hwndMarkerDragBox = 0;
+				}
 			}
 			break;
 		}
 	}
 	drag_mode = DRAG_MODE_NONE;
 	must_check_item_under_mouse = true;
-}
-
-void PIANO_ROLL::AcceleratorDispatched()
-{
-	// hack for tapping Ctrl twice - if first was accelerator, then it won't count as first tap
-	vk_control_release_time = -1;
 }
 
 void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
@@ -945,7 +1144,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y))
+					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 					{
 						msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
@@ -955,14 +1154,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 				{
 					// current frame
-					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y))
+					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 					{
 						msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
 					}
-				} else if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y))
+				} else if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 				{
 					// marked frame
 					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
@@ -1095,266 +1294,14 @@ LONG PIANO_ROLL::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void PIANO_ROLL::ToggleJoypadBit(int column_index, int row_index, UINT KeyFlags)
-{
-	int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-	int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-	if (KeyFlags & (MK_SHIFT|MK_CONTROL))
-	{
-		// update multiple rows, using last row index as a flag to decide operation
-		SelectionFrames* current_selection = selection.MakeStrobe();
-		SelectionFrames::iterator current_selection_end(current_selection->end());
-		if (current_selection->size())
-		{
-			if (currMovieData.records[row_index].checkBit(joy, bit))
-			{
-				// clear range
-				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-				{
-					currMovieData.records[*it].clearBit(joy, bit);
-				}
-				greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, *current_selection->begin(), *current_selection->rbegin()));
-			} else
-			{
-				// set range
-				for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
-				{
-					currMovieData.records[*it].setBit(joy, bit);
-				}
-				greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, *current_selection->begin(), *current_selection->rbegin()));
-			}
-		}
-	} else
-	{
-		// update one row
-		currMovieData.records[row_index].toggleBit(joy, bit);
-		if (currMovieData.records[row_index].checkBit(joy, bit))
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, row_index, row_index));
-		else
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, row_index, row_index));
-	}
-	
-}
-
-void PIANO_ROLL::ColumnSet(int column, bool alt_pressed)
-{
-	if (column == COLUMN_FRAMENUM || column == COLUMN_FRAMENUM2)
-	{
-		// user clicked on "Frame#" - apply ColumnSet to Markers
-		if (alt_pressed)
-		{
-			if (FrameColumnSetPattern())
-				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-		} else
-		{
-			if (FrameColumnSet())
-				SetHeaderColumnLight(COLUMN_FRAMENUM, HEADER_LIGHT_MAX);
-		}
-	} else
-	{
-		// user clicked on Input column - apply ColumnSet to Input
-		int joy = (column - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-		int button = (column - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-		if (alt_pressed)
-		{
-			if (InputColumnSetPattern(joy, button))
-				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
-		} else
-		{
-			if (InputColumnSet(joy, button))
-				SetHeaderColumnLight(column, HEADER_LIGHT_MAX);
-		}
-	}
-}
-
-bool PIANO_ROLL::FrameColumnSetPattern()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
-	bool changes_made = false;
-
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
-			continue;
-		if (autofire_patterns[current_pattern][pattern_offset])
-		{
-			if(!markers_manager.GetMarker(*it))
-			{
-				if (markers_manager.SetMarker(*it))
-				{
-					changes_made = true;
-					RedrawRow(*it);
-				}
-			}
-		} else
-		{
-			if(markers_manager.GetMarker(*it))
-			{
-				markers_manager.ClearMarker(*it);
-				changes_made = true;
-				RedrawRow(*it);
-			}
-		}
-		pattern_offset++;
-		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
-			pattern_offset -= autofire_patterns[current_pattern].size();
-	}
-	if (changes_made)
-	{
-		history.RegisterMarkersChange(MODTYPE_MARKER_PATTERN, *current_selection_begin, *current_selection->rbegin(), autofire_patterns_names[current_pattern].c_str());
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		return true;
-	} else
-		return false;
-}
-bool PIANO_ROLL::FrameColumnSet()
-{
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-
-	// inspect the selected frames, if they are all set, then unset all, else set all
-	bool unset_found = false, changes_made = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(!markers_manager.GetMarker(*it))
-		{
-			unset_found = true;
-			break;
-		}
-	}
-	if (unset_found)
-	{
-		// set all
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if(!markers_manager.GetMarker(*it))
-			{
-				if (markers_manager.SetMarker(*it))
-				{
-					changes_made = true;
-					RedrawRow(*it);
-				}
-			}
-		}
-		if (changes_made)
-			history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-	} else
-	{
-		// unset all
-		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		{
-			if(markers_manager.GetMarker(*it))
-			{
-				markers_manager.ClearMarker(*it);
-				changes_made = true;
-				RedrawRow(*it);
-			}
-		}
-		if (changes_made)
-			history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, *current_selection_begin, *current_selection->rbegin());
-	}
-	if (changes_made)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-	return changes_made;
-}
-bool PIANO_ROLL::InputColumnSetPattern(int joy, int button)
-{
-	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
-
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
-
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
-			continue;
-		currMovieData.records[*it].setBitValue(joy, button, autofire_patterns[current_pattern][pattern_offset] != 0);
-		pattern_offset++;
-		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
-			pattern_offset -= autofire_patterns[current_pattern].size();
-	}
-	int first_changes = history.RegisterChanges(MODTYPE_PATTERN, *current_selection_begin, *current_selection->rbegin(), autofire_patterns_names[current_pattern].c_str());
-	if (first_changes >= 0)
-	{
-		greenzone.InvalidateAndCheck(first_changes);
-		return true;
-	} else
-		return false;
-}
-bool PIANO_ROLL::InputColumnSet(int joy, int button)
-{
-	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return false;
-
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0) return false;
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-
-	//inspect the selected frames, if they are all set, then unset all, else set all
-	bool newValue = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-	{
-		if(!(currMovieData.records[*it].checkBit(joy,button)))
-		{
-			newValue = true;
-			break;
-		}
-	}
-	// apply newValue
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-		currMovieData.records[*it].setBitValue(joy,button,newValue);
-
-	int first_changes;
-	if (newValue)
-	{
-		first_changes = history.RegisterChanges(MODTYPE_SET, *current_selection_begin, *current_selection->rbegin());
-	} else
-	{
-		first_changes = history.RegisterChanges(MODTYPE_UNSET, *current_selection_begin, *current_selection->rbegin());
-	}
-	if (first_changes >= 0)
-	{
-		greenzone.InvalidateAndCheck(first_changes);
-		return true;
-	} else
-		return false;
-}
 // ----------------------------------------------------
 void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 {
-	int index = info.iItem;
-	if(index == -1)
-		StrayClickMenu(info);
-	else
-		RightClickMenu(info);
-}
-void PIANO_ROLL::StrayClickMenu(LVHITTESTINFO& info)
-{
-	POINT pt = info.pt;
-	ClientToScreen(hwndList, &pt);
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_STRAY);
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
-}
-void PIANO_ROLL::RightClickMenu(LVHITTESTINFO& info)
-{
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	if (current_selection->size() == 0)
-	{
-		StrayClickMenu(info);
 		return;
-	}
-	HMENU sub = GetSubMenu(hrmenu, CONTEXTMENU_SELECTED);
+
+	HMENU sub = GetSubMenu(hrmenu, 0);
 	// inspect current selection and disable inappropriate menu items
 	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	SelectionFrames::iterator current_selection_end(current_selection->end());
@@ -1391,7 +1338,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		return true;
 	case WM_MOUSEMOVE:
 	{
-		// perform hit test
+		// perform hit test on header items
 		HD_HITTESTINFO info;
 		info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
 		info.pt.y = GET_Y_LPARAM(lParam);
@@ -1411,7 +1358,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		{
 			if (selection.GetCurrentSelectionSize())
 			{
-				// perform hit test
+				// perform hit test on header items
 				HD_HITTESTINFO info;
 				info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
 				info.pt.y = GET_Y_LPARAM(lParam);
@@ -1462,63 +1409,16 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
-		case WM_KEYUP:
-		{
-			if (wParam == VK_SHIFT)
-			{
-				if (piano_roll.vk_shift_release_time >= 0)
-					piano_roll.vk_shift_release_time = clock();
-				else	// this was accelerator
-					piano_roll.vk_shift_release_time = 0;
-			} else if (wParam == VK_CONTROL)
-			{
-				if (piano_roll.vk_control_release_time >= 0)
-					piano_roll.vk_control_release_time = clock();
-				else	// this was accelerator
-					piano_roll.vk_control_release_time = 0;
-			}
-			break;
-		}
 		case WM_KEYDOWN:
-		{
-			if (wParam == VK_SHIFT)
-			{
-				// double-tap of Shift key
-				if ((int)(piano_roll.vk_shift_release_time + GetDoubleClickTime()) > clock())
-					piano_roll.FollowPlayback();
-			} else if (wParam == VK_CONTROL)
-			{
-				// double-tap of Ctrl key
-				if ((int)(piano_roll.vk_control_release_time + GetDoubleClickTime()) > clock())
-					piano_roll.FollowSelection();
-			}
-			if (taseditor_config.keyboard_for_piano_roll)
-			{
-				// only allow 8 keys, and change behaviour of Right and Left keys
-				if (wParam == VK_LEFT)
-				{
-					// faster speed of horizontal scrolling, and don't scroll vertically to the selection
-					ListView_Scroll(piano_roll.hwndList, -COLUMN_BUTTON_WIDTH, 0);
-				} else if (wParam == VK_RIGHT)
-				{
-					ListView_Scroll(piano_roll.hwndList, COLUMN_BUTTON_WIDTH, 0);
-				} else if (wParam == VK_UP || wParam == VK_DOWN || wParam == VK_END || wParam == VK_HOME || wParam == VK_PRIOR || wParam == VK_NEXT)
-				{
-					// these 6 keys will be handled by hwndList_oldWndProc
-					piano_roll.must_check_item_under_mouse = true;
-					break;
-				}
-			}
 			return 0;
-		}
 		case WM_TIMER:
 			// disable timer of entering edit mode (there's no edit mode anyway)
 			return 0;
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
 		{
-			bool alt_pressed = (GetKeyState(VK_MENU) < 0);
 			int fwKeys = GET_KEYSTATE_WPARAM(wParam);
+			bool alt_pressed = (GetKeyState(VK_MENU) < 0);
 			// perform hit test
 			LVHITTESTINFO info;
 			info.pt.x = GET_X_LPARAM(lParam);
@@ -1526,100 +1426,94 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			ListView_SubItemHitTest(hWnd, &info);
 			int row_index = info.iItem;
 			int column_index = info.iSubItem;
-			if(column_index == COLUMN_ICONS)
+			if (column_index == COLUMN_ICONS)
 			{
-				// click on the "icons" column
+				// clicked on the "icons" column
 				piano_roll.StartDraggingPlaybackCursor();
 			} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 			{
 				// clicked on the "Frame#" column
-				if (msg == WM_LBUTTONDBLCLK && !alt_pressed)
-				{
-					// doubleclick - jump to the frame
-					if (taseditor_config.deselect_on_doubleclick)
-						selection.ClearSelection();
-					if (taseditor_config.doubleclick_affects_playback)
-						piano_roll.StartDraggingPlaybackCursor();
-				} else
-				{
-					if (row_index >= 0)
-					{
-						// set marker if clicked with Alt
-						if (alt_pressed)
-						{
-							markers_manager.ToggleMarker(row_index);
-							selection.must_find_current_marker = playback.must_find_current_marker = true;
-							if (markers_manager.GetMarker(row_index))
-								history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
-							else
-								history.RegisterMarkersChange(MODTYPE_MARKER_UNSET, row_index);
-							piano_roll.RedrawRow(row_index);
-						} else if (piano_roll.drag_mode == DRAG_MODE_NONE)
-						{
-							// check if user clicked on a Marker
-							if (markers_manager.GetMarker(row_index))
-							{
-								// start dragging the Marker
-								RECT temp_rect;
-								if (ListView_GetSubItemRect(piano_roll.hwndList, row_index, column_index, LVIR_BOUNDS, &temp_rect))
-								{
-									piano_roll.marker_drag_box_dx = GET_X_LPARAM(lParam) - temp_rect.left;
-									piano_roll.marker_drag_box_dy = GET_Y_LPARAM(lParam) - temp_rect.top;
-								} else
-								{
-									piano_roll.marker_drag_box_dx = 0;
-									piano_roll.marker_drag_box_dy = 0;
-								}
-								piano_roll.drag_mode = DRAG_MODE_MARKER;
-								piano_roll.marker_drag_framenum = row_index;
-							} else
-							{
-								piano_roll.drag_mode = DRAG_MODE_OBSERVE;
-							}
-						}
-						// also select the row by calling hwndList_oldWndProc
-						PostMessage(hWnd, WM_LBUTTONUP, 0, 0);		// ensure that oldWndProc will exit its modal message loop immediately
-						CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-					}
-				}
-			} else if(column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
-			{
-				// clicked on input
 				if (row_index >= 0)
 				{
-					// first call old wndproc to set selection on the row
-					if (alt_pressed)
-						wParam |= MK_SHIFT;		// Alt should select region, just like Shift
-					if (msg == WM_LBUTTONDOWN)
-						PostMessage(hWnd, WM_LBUTTONUP, 0, 0);		// ensure that oldWndProc will exit its modal message loop immediately
-					CallWindowProc(hwndList_oldWndProc, hWnd, msg, wParam, lParam);
-					if (alt_pressed)
+					if (msg == WM_LBUTTONDBLCLK)
 					{
-						int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-						int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-						piano_roll.InputColumnSetPattern(joy, button);
-					} else
-					{
-						piano_roll.ToggleJoypadBit(column_index, row_index, GET_KEYSTATE_WPARAM(wParam));
-						if (piano_roll.drag_mode == DRAG_MODE_NONE)
+						// doubleclick - set Marker and start dragging it
+						if (!markers_manager.GetMarker(row_index))
 						{
-							if (taseditor_config.draw_input)
+							if (markers_manager.SetMarker(row_index))
 							{
-								// if clicked on empty cell - start drawing, else start erasing
-								int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-								int bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-								if (currMovieData.records[row_index].checkBit(joy, bit))
-									piano_roll.drag_mode = DRAG_MODE_SET;
-								else
-									piano_roll.drag_mode = DRAG_MODE_UNSET;
-								piano_roll.drawing_last_x = GET_X_LPARAM(lParam) + GetScrollPos(piano_roll.hwndList, SB_HORZ);
-								piano_roll.drawing_last_y = GET_Y_LPARAM(lParam) + GetScrollPos(piano_roll.hwndList, SB_VERT) * piano_roll.list_row_height;
-							} else
-							{
-								piano_roll.drag_mode = DRAG_MODE_OBSERVE;
+								selection.must_find_current_marker = playback.must_find_current_marker = true;
+								history.RegisterMarkersChange(MODTYPE_MARKER_SET, row_index);
+								piano_roll.RedrawRow(row_index);
 							}
 						}
-
+						piano_roll.StartDraggingMarker(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), row_index, column_index);
+						// also clear selection
+						if (taseditor_config.deselect_on_doubleclick)
+							selection.ClearSelection();
+					} else
+					{
+						if (fwKeys & MK_SHIFT)
+						{
+							// select region from row_last_clicked to row_index
+							if (piano_roll.row_last_clicked < row_index)
+								selection.SetRegionSelection(piano_roll.row_last_clicked, row_index + 1);
+							else
+								selection.SetRegionSelection(row_index, piano_roll.row_last_clicked + 1);
+						} else if (alt_pressed)
+						{
+							// make selection by Pattern
+							if (piano_roll.row_last_clicked < row_index)
+								selection.SetRegionSelectionPattern(piano_roll.row_last_clicked, row_index);
+							else
+								selection.SetRegionSelectionPattern(row_index, piano_roll.row_last_clicked);
+						} else if (fwKeys & MK_CONTROL)
+						{
+							if (selection.GetRowSelection(row_index))
+								selection.ClearRowSelection(row_index);
+							else
+								selection.SetRowSelection(row_index);
+							piano_roll.row_last_clicked = row_index;
+						} else	// just click
+						{
+							selection.ClearSelection();
+							selection.SetRowSelection(row_index);
+							piano_roll.row_last_clicked = row_index;
+						}
+						piano_roll.StartSelectingDrag(row_index);
+					}
+				}
+			} else if (column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+			{
+				// clicked on Input
+				if (row_index >= 0)
+				{
+					if (!alt_pressed && !(fwKeys & MK_SHIFT))
+						// clicked without Shift/Alt - set "row_last_clicked" here
+						piano_roll.row_last_clicked = row_index;
+					// toggle input
+					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+					if (alt_pressed)
+						editor.InputSetPattern(piano_roll.row_last_clicked, row_index, joy, button);
+					else
+						editor.InputToggle(piano_roll.row_last_clicked, row_index, joy, button);
+					// and start dragging/drawing
+					if (piano_roll.drag_mode == DRAG_MODE_NONE)
+					{
+						if (taseditor_config.draw_input)
+						{
+							// if clicked this click created buttonpress, then start painting, else start erasing
+							if (currMovieData.records[row_index].checkBit(joy, button))
+								piano_roll.drag_mode = DRAG_MODE_SET;
+							else
+								piano_roll.drag_mode = DRAG_MODE_UNSET;
+							piano_roll.drawing_last_x = GET_X_LPARAM(lParam) + GetScrollPos(piano_roll.hwndList, SB_HORZ);
+							piano_roll.drawing_last_y = GET_Y_LPARAM(lParam) + GetScrollPos(piano_roll.hwndList, SB_VERT) * piano_roll.list_row_height;
+						} else
+						{
+							piano_roll.drag_mode = DRAG_MODE_OBSERVE;
+						}
 					}
 				}
 			}

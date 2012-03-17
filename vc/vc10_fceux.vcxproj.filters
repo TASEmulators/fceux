@@ -955,6 +955,9 @@
     <ClCompile Include="..\src\drivers\win\taseditor\selection.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\editor.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1442,6 +1445,9 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\selection.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\editor.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>

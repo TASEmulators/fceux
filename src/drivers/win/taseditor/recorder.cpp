@@ -23,7 +23,6 @@ extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern uint32 GetGamepadPressedImmediate();
 extern int GetInputType(MovieData& md);
 
-extern std::vector<std::vector<uint8>> autofire_patterns;
 extern char lagFlag;
 
 extern TASEDITOR_CONFIG taseditor_config;
@@ -32,6 +31,7 @@ extern BOOKMARKS bookmarks;
 extern HISTORY history;
 extern GREENZONE greenzone;
 extern PIANO_ROLL piano_roll;
+extern EDITOR editor;
 
 // resources
 const char recordingCheckbox[10] = "Recording";
@@ -132,8 +132,8 @@ void RECORDER::update()
 		if (!taseditor_config.pattern_skips_lag || lagFlag == 0)
 		{
 			pattern_offset++;
-			if (pattern_offset >= (int)autofire_patterns[old_current_pattern].size())
-				pattern_offset -= autofire_patterns[old_current_pattern].size();
+			if (pattern_offset >= (int)editor.autofire_patterns[old_current_pattern].size())
+				pattern_offset -= editor.autofire_patterns[old_current_pattern].size();
 		}
 	}
 	// update "Recording" checkbox text if something changed in pattern
@@ -141,7 +141,7 @@ void RECORDER::update()
 	{
 		old_current_pattern = taseditor_config.current_pattern;
 		old_pattern_offset = pattern_offset;
-		if (!taseditor_config.pattern_recording || autofire_patterns[old_current_pattern][pattern_offset])
+		if (!taseditor_config.pattern_recording || editor.autofire_patterns[old_current_pattern][pattern_offset])
 			// either not using Patterns or current pattern has 1 in current offset
 			SetWindowText(hwndRecCheckbox, recordingCheckbox);
 		else
@@ -238,7 +238,7 @@ void RECORDER::InputChanged()
 	for (int i = 0; i < num_joys; ++i)
 	{
 		old_joy[i] = history.GetCurrentSnapshot().GetJoystickInfo(currFrameCounter, i);
-		if (!taseditor_config.pattern_recording || autofire_patterns[old_current_pattern][pattern_offset])
+		if (!taseditor_config.pattern_recording || editor.autofire_patterns[old_current_pattern][pattern_offset])
 			new_joy[i] = currMovieData.records[currFrameCounter].joysticks[i];
 		else
 			new_joy[i] = 0;		// blank

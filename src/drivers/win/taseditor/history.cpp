@@ -80,14 +80,14 @@ char modCaptions[MODTYPES_TOTAL][20] = {" Init Project",
 							" Marker Branch8 to ",
 							" Marker Branch9 to ",
 							" Marker Set",
-							" Marker Unset",
+							" Marker Remove",
 							" Marker Pattern",
 							" Marker Rename",
 							" Marker Drag",
 							" Marker Swap",
 							" Marker Shift",
 							" LUA Marker Set",
-							" LUA Marker Unset",
+							" LUA Marker Remove",
 							" LUA Marker Rename",
 							" LUA Change" };
 char LuaCaptionPrefix[6] = " LUA ";
@@ -247,7 +247,7 @@ void HISTORY::undo()
 	int result = jump(history_cursor_pos - 1);
 	if (result >= 0)
 	{
-		piano_roll.update();
+		piano_roll.UpdateItemCount();
 		piano_roll.FollowUndo();
 		greenzone.InvalidateAndCheck(result);
 	}
@@ -258,7 +258,7 @@ void HISTORY::redo()
 	int result = jump(history_cursor_pos + 1);
 	if (result >= 0)
 	{
-		piano_roll.update();
+		piano_roll.UpdateItemCount();
 		piano_roll.FollowUndo();
 		greenzone.InvalidateAndCheck(result);
 	}
@@ -600,7 +600,7 @@ void HISTORY::RegisterImport(MovieData& md, char* filename)
 		}
 		AddSnapshotToHistory(inp);
 		inp.toMovie(currMovieData);
-		piano_roll.update();
+		piano_roll.UpdateItemCount();
 		bookmarks.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
 		greenzone.InvalidateAndCheck(first_changes);
@@ -794,7 +794,7 @@ void HISTORY::Click(int row_index)
 		int result = jump(row_index);
 		if (result >= 0)
 		{
-			piano_roll.update();
+			piano_roll.UpdateItemCount();
 			piano_roll.FollowUndo();
 			greenzone.InvalidateAndCheck(result);
 			return;
