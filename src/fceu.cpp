@@ -89,7 +89,7 @@ FCEUGI::FCEUGI()
 : filename(0)
 , archiveFilename(0)
 {
-	printf("%08x",opsize);
+	//printf("%08x",opsize); // WTF?!
 }
 
 FCEUGI::~FCEUGI()
@@ -177,7 +177,7 @@ static void FCEU_CloseGame(void)
 		CloseGenie();
 
 		delete GameInfo;
-		GameInfo = 0;
+		GameInfo = NULL;
 				
 		currFrameCounter = 0;
 
@@ -196,7 +196,7 @@ static void FCEU_CloseGame(void)
 uint64 timestampbase;
 
 
-FCEUGI *GameInfo = 0;
+FCEUGI *GameInfo = NULL;
 
 void (*GameInterface)(GI h);
 void (*GameStateRestore)(int version);

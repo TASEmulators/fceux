@@ -462,7 +462,7 @@ void UpdateContextMenuItems(HMENU context, int whichContext)
 	string undoSavestate = "Undo savestate";
 	string redoSavestate = "Redo savestate";
 
-	CheckMenuItem(context,ID_CONTEXT_FULLSAVESTATES,MF_BYCOMMAND | fullSaveStateLoads?MF_CHECKED:MF_UNCHECKED);
+	CheckMenuItem(context,ID_CONTEXT_FULLSAVESTATES,MF_BYCOMMAND | (fullSaveStateLoads ? MF_CHECKED : MF_UNCHECKED));
 
 	//Undo Loadstate
 	if (CheckBackupSaveStateExist() && (undoLS || redoLS))
@@ -1005,8 +1005,8 @@ void CloseGame()
 	{
 		FCEUI_CloseGame();
 		KillMemView();
-		updateGameDependentMenus(GameInfo != 0);
-		updateGameDependentMenusDebugger(GameInfo != 0);
+		updateGameDependentMenus(1);
+		updateGameDependentMenusDebugger(1);
 		SetMainWindowText();
 	}
 }
@@ -1067,7 +1067,7 @@ bool ALoad(char *nameo, char* innerFilename)
 
 	updateGameDependentMenus(GameInfo != 0);
 	updateGameDependentMenusDebugger(GameInfo != 0);
-  EmulationPaused = oldPaused;
+	EmulationPaused = oldPaused;
 	return true;
 }
 

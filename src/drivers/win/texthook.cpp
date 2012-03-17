@@ -345,8 +345,8 @@ void TextHookerUnloadTableFile(){
 
 	//clear the selections hash holder
 	if ( hashholder != NULL ) {
-		memset( hashholder, 0, sizeof( hashholder ) );
 		free( hashholder );
+		hashholder = NULL;
 	}
 
 	//if there are words...
@@ -739,7 +739,7 @@ int TextHookerSaveTableFile(){
 
 	//write the selection hashes to the file
 	for ( i = 0; i < numselections; i++ ) {
-		memset( str, 0, 365 ); //init str
+		memset( str, 0, sizeof( str ) ); //init str
 		SendDlgItemMessage(hTextHooker,109,CB_GETLBTEXT,i,(LPARAM)(LPTSTR)str); //get the selection name
 		fputs( str, FP ); //write the name
 		fputs( "=", FP ); //write the =
@@ -797,8 +797,8 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 	int	si;
 	int saveFileErrorCheck = 0; //used to display error message that may have arised from saving a file
 	
-	memset( str, 0, sizeof( char ) * 2048 );
-	memset( bufferstr, 0, sizeof( char ) * 10240 );
+	memset( str, 0, sizeof( str ) );
+	memset( bufferstr, 0, sizeof( bufferstr ));
 
 	switch(uMsg) {
 		case WM_INITDIALOG:
@@ -854,7 +854,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 					 else 
 						sprintf( str, "Table is not Loaded!\r\nError on line: %d", result );
 					//store the current text into the buffer
-					GetDlgItemText(hwndDlg,102,bufferstr,10240);
+					GetDlgItemText(hwndDlg,102,bufferstr,sizeof( bufferstr ));
 					strcat( bufferstr, "\r\n" ); //add a newline
 					strcat( bufferstr, str ); //add the status message to the buffer
 					SetDlgItemText(hwndDlg,102,bufferstr); //display the buffer
@@ -995,7 +995,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 							}
 
 							//store the current text into the buffer
-							GetDlgItemText(hwndDlg,102,bufferstr,10240);
+							GetDlgItemText(hwndDlg,102,bufferstr,sizeof( bufferstr ));
 							strcat( bufferstr, "\r\n" ); //add a newline
 							strcat( bufferstr, str ); //add the status message to the buffer
 							SetDlgItemText(hwndDlg,102,bufferstr); //display the buffer
@@ -1103,7 +1103,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 								current = words->next; //get the first word
 								while ( current != NULL ) { //while there's still words to check
 									found = strstr( str, current->ja ); //search the buffer for the word
-									memset( bufferstrtemp, 0, sizeof( str ) ); //init the temp buffer
+									memset( bufferstrtemp, 0, sizeof( bufferstrtemp ) ); //init the temp buffer
 									if ( found ) { //if we found it, replace it
 										//add a null byte after the first half
 										strcpy( (char*)found, "\0" ); 
@@ -1130,7 +1130,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 
 							//store the current text into the buffer
-							GetDlgItemText(hwndDlg,102,bufferstr,10240);
+							GetDlgItemText(hwndDlg,102,bufferstr,sizeof( bufferstr ));
 							strcat( bufferstr, "\r\n" ); //add a newline
 							strcat( bufferstr, str ); //add the hooked text to the buffer
 							SetDlgItemText(hwndDlg,102,bufferstr); //display the buffer
@@ -1175,7 +1175,7 @@ BOOL CALLBACK TextHookerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 								if ( !found ) {
 									found = strstr( str, "\r\n" ); //and also for newlines
 								}
-								memset( bufferstrtemp, 0, sizeof( str ) ); //init the temp buffer
+								memset( bufferstrtemp, 0, sizeof( bufferstrtemp ) ); //init the temp buffer
 								if ( found ) { //found something to replace!
 									//add a null byte after the first half
 									strcpy( (char*)found, "\0" ); 

@@ -11,30 +11,30 @@
 void CenterWindow(HWND hwndDlg)
 {
 	//TODO: This function should probably moved into the generic Win32 window file
-    //move the window relative to its parent
-    HWND hwndParent = GetParent(hwndDlg);
+	//move the window relative to its parent
+	HWND hwndParent = GetParent(hwndDlg);
 	RECT rect;
 	RECT rectP;
 
-    GetWindowRect(hwndDlg, &rect);
-    GetWindowRect(hwndParent, &rectP);
+	GetWindowRect(hwndDlg, &rect);
+	GetWindowRect(hwndParent, &rectP);
 
-    unsigned int width  = rect.right  - rect.left;
-    unsigned height = rect.bottom - rect.top;
+	int width  = rect.right  - rect.left;
+	int height = rect.bottom - rect.top;
 
-    unsigned x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
-    unsigned y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
+	int x = ((rectP.right-rectP.left) -  width) / 2 + rectP.left;
+	int y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
 
-    unsigned int screenwidth  = GetSystemMetrics(SM_CXSCREEN);
-    unsigned int screenheight = GetSystemMetrics(SM_CYSCREEN);
+	int screenwidth  = GetSystemMetrics(SM_CXSCREEN);
+	int screenheight = GetSystemMetrics(SM_CYSCREEN);
 
-    //make sure that the dialog box never moves outside of the screen
-    if(x < 0) x = 0;
-    if(y < 0) y = 0;
-    if(x + width  > screenwidth)  x = screenwidth  - width;
-    if(y + height > screenheight) y = screenheight - height;
+	//make sure that the dialog box never moves outside of the screen
+	if(x < 0) x = 0;
+	if(y < 0) y = 0;
+	if(x + width  > screenwidth)  x = screenwidth  - width;
+	if(y + height > screenheight) y = screenheight - height;
 
-    MoveWindow(hwndDlg, x, y, width, height, FALSE);
+	MoveWindow(hwndDlg, x, y, width, height, FALSE);
 }
 
 /**

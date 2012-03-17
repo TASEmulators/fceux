@@ -228,7 +228,7 @@ int getBank(int offs)
 }
 
 int GetNesFileAddress(int A){
-	unsigned int result;
+	int result;
 	if((A < 0x8000) || (A > 0xFFFF))return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
 	if((result > PRGsize[0]) || (result < 0))return -1;

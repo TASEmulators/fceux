@@ -478,7 +478,7 @@ int *GetEditHexData(HWND hwndDlg, int id){
 	int i,j, k;
 
 	GetDlgItemText(hwndDlg,id,str,60);
-	memset(data,0,30*sizeof(int));
+	memset(data,0,31*sizeof(int));
 	j=0;
 	for(i = 0;i < 60;i++){
 		if(str[i] == 0)break;

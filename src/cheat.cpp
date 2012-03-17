@@ -608,7 +608,7 @@ int FCEUI_SetCheat(uint32 which, const char *name, int32 a, int32 v, int compare
 			{
 				char *t;
 
-				if((t=(char *)realloc(next->name,strlen(name+1))))
+				if((t=(char *)realloc(next->name,strlen(name)+1)))
 				{
 					next->name=t;
 					strcpy(next->name,name);

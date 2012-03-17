@@ -1691,22 +1691,21 @@ static void PresetImport(int preset)
 	{
 		//Save the directory
 		if(ofn.nFileOffset < 1024)
-			if(ofn.nFileOffset < 1024)
-			{
-				free(InputPresetDir);
-				InputPresetDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
-				strcpy(InputPresetDir,ofn.lpstrFile);
-				InputPresetDir[ofn.nFileOffset]=0;
-			}
+		{
+			free(InputPresetDir);
+			InputPresetDir=(char*)malloc(strlen(ofn.lpstrFile)+1);
+			strcpy(InputPresetDir,ofn.lpstrFile);
+			InputPresetDir[ofn.nFileOffset]=0;
+		}
 
-			FILE *fp=FCEUD_UTF8fopen(nameo,"r");
-			switch(preset)
-			{
-			case 1: fread(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;
-			case 2: fread(GamePadPreset2,1,sizeof(GamePadPreset2),fp); break;
-			case 3: fread(GamePadPreset3,1,sizeof(GamePadPreset3),fp); break;
-			}
-			fclose(fp);
+		FILE *fp=FCEUD_UTF8fopen(nameo,"r");
+		switch(preset)
+		{
+		case 1: fread(GamePadPreset1,1,sizeof(GamePadPreset1),fp); break;
+		case 2: fread(GamePadPreset2,1,sizeof(GamePadPreset2),fp); break;
+		case 3: fread(GamePadPreset3,1,sizeof(GamePadPreset3),fp); break;
+		}
+		fclose(fp);
 	}
 }
 

@@ -333,7 +333,6 @@ void SELECTION::saveSelection(SelectionFrames& selection, EMUFILE *os)
 bool SELECTION::loadSelection(SelectionFrames& selection, EMUFILE *is)
 {
 	int temp_int, temp_size;
-	selection.clear();
 	if (!read32le(&temp_size, is)) return true;
 	selection.clear();
 	for(; temp_size > 0; temp_size--)

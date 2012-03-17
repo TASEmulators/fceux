@@ -114,7 +114,7 @@ BOOL updateResults(HWND hwndDlg, int rule)
 		
 		if ( chosen_rules[i] == RULE_EXACT || chosen_rules[i] == RULE_EXACT_NOT )
 		{
-			SendDlgItemMessage( hwndDlg, RULE_INPUT_1 + i, WM_GETTEXT, sizeof(buff - 1), (LPARAM) input_buff );
+			SendDlgItemMessage( hwndDlg, RULE_INPUT_1 + i, WM_GETTEXT, sizeof(buff) - 1, (LPARAM) input_buff );
 			
 			unsigned int len = strlen(input_buff);
 			

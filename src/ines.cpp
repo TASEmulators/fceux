@@ -881,12 +881,10 @@ int iNesSaveAs(char* name)
 	FILE *fp;
 
 	if(GameInfo->type != GIT_CART)return 0;
-	if(GameInterface!=iNESGI)return 0;
+	if(GameInterface != iNESGI)return 0;
 
 	fp = fopen(name,"wb");
-	int x = 0;
-	if (!fp)
-		int x = 1;
+
 	if(fwrite(&head,1,16,fp)!=16)
 	{
 		fclose(fp);

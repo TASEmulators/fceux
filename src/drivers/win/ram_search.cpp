@@ -50,7 +50,7 @@ bool IsHardwareAddressValid(HWAddressType address)
 	if (!GameInfo)
 		return false;
 
-	if ((address >= 0x0000 && address <= 0x07ff) || (address >= 0x6000 && address <= 0x7FFF))
+	if ((address <= 0x07ff) || (address >= 0x6000 && address <= 0x7FFF))
 		return true;
 	else
 		return false;
@@ -874,10 +874,10 @@ bool Set_RS_Val()
 			appliedSize = 'w', appliedSign = 'u';
 		if(rs_c == 'a')
 			appliedSize = 'd', appliedSign = 'u';
-		if((appliedSize == 'b' && appliedSize == 's' && (rs_param < -128 || rs_param > 127)) ||
-		   (appliedSize == 'b' && appliedSize != 's' && (rs_param < 0 || rs_param > 255)) ||
-		   (appliedSize == 'w' && appliedSize == 's' && (rs_param < -32768 || rs_param > 32767)) ||
-		   (appliedSize == 'w' && appliedSize != 's' && (rs_param < 0 || rs_param > 65535)))
+		if((appliedSize == 'b' && appliedSign == 's' && (rs_param < -128 || rs_param > 127)) ||
+		   (appliedSize == 'b' && appliedSign != 's' && (rs_param < 0 || rs_param > 255)) ||
+		   (appliedSize == 'w' && appliedSign == 's' && (rs_param < -32768 || rs_param > 32767)) ||
+		   (appliedSize == 'w' && appliedSign != 's' && (rs_param < 0 || rs_param > 65535)))
 		   return false;
 	}
 

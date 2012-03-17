@@ -62,24 +62,20 @@ int str_ltrim(char *str, int flags) {
 	unsigned int i=0; //mbg merge 7/17/06 changed to unsigned int
 
 	while (str[0]) {
-		if ((str[0] != ' ') || (str[0] != '\t') || (str[0] != '\r') || (str[0] != '\n')) break;
-
 		if ((flags & STRIP_SP) && (str[0] == ' ')) {
 			i++;
 			strcpy(str,str+1);
-		}
-		if ((flags & STRIP_TAB) && (str[0] == '\t')) {
+		} else if ((flags & STRIP_TAB) && (str[0] == '\t')) {
 			i++;
 			strcpy(str,str+1);
-		}
-		if ((flags & STRIP_CR) && (str[0] == '\r')) {
+		} else if ((flags & STRIP_CR) && (str[0] == '\r')) {
 			i++;
 			strcpy(str,str+1);
-		}
-		if ((flags & STRIP_LF) && (str[0] == '\n')) {
+		} else if ((flags & STRIP_LF) && (str[0] == '\n')) {
 			i++;
 			strcpy(str,str+1);
-		}
+		} else
+			break;
 	}
 	return i;
 }
@@ -90,30 +86,23 @@ int str_ltrim(char *str, int flags) {
 ///Removes whitespace from right side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
 ///Returns number of characters removed
 int str_rtrim(char *str, int flags) {
-	unsigned int i=0; //mbg merge 7/17/06 changed to unsigned int
+	unsigned int i=0, strl; //mbg merge 7/17/06 changed to unsigned int
 
-	while (strlen(str)) {
-		if ((str[strlen(str)-1] != ' ') ||
-			(str[strlen(str)-1] != '\t') ||
-			(str[strlen(str)-1] != '\r') ||
-			(str[strlen(str)-1] != '\n')) break;
-
+	while (strl = strlen(str)) {
 		if ((flags & STRIP_SP) && (str[0] == ' ')) {
 			i++;
-			str[strlen(str)-1] = 0;
-		}
-		if ((flags & STRIP_TAB) && (str[0] == '\t')) {
+			str[str] = 0;
+		} else if ((flags & STRIP_TAB) && (str[0] == '\t')) {
 			i++;
-			str[strlen(str)-1] = 0;
-		}
-		if ((flags & STRIP_CR) && (str[0] == '\r')) {
+			str[strl] = 0;
+		} else if ((flags & STRIP_CR) && (str[0] == '\r')) {
 			i++;
-			str[strlen(str)-1] = 0;
-		}
-		if ((flags & STRIP_LF) && (str[0] == '\n')) {
+			str[strl] = 0;
+		} else if ((flags & STRIP_LF) && (str[0] == '\n')) {
 			i++;
-			str[strlen(str)-1] = 0;
-		}
+			str[strl] = 0;
+		} else
+			break;
 	}
 	return i;
 }
@@ -441,7 +430,7 @@ void splitpath(const char* path, char* drv, char* dir, char* name, char* ext)
 		*name = '\0';
 	} else
 		for(s=p; s<end; )
-			*s++;
+			s++;
 
 	if (dir) {
 		for(s=path; s<p; )

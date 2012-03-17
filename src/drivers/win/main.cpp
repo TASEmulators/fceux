@@ -608,7 +608,7 @@ int main(int argc,char *argv[])
 
 	SetThreadAffinityMask(GetCurrentThread(),1);
 
-	printf("%08x",opsize);
+	//printf("%08x",opsize); //AGAIN?!
 
 	char *t;
 
@@ -832,7 +832,7 @@ doloopy:
 			if(closeGame)
 			{
 				FCEUI_CloseGame();
-				GameInfo = 0;
+				GameInfo = NULL;
 			}
 
 		}

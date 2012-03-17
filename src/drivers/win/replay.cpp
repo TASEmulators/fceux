@@ -965,7 +965,7 @@ void FCEUD_MovieRecordTo()
 				if(loadStateFailed)
 				{
 					char str [1024];
-					sprintf(str, "Failed to load save state \"%s\".\nRecording from current state instead...", p.szSavestateFilename);
+					sprintf(str, "Failed to load save state \"%s\".\nRecording from current state instead...", p.szSavestateFilename.c_str());
 					FCEUD_PrintError(str);
 				}
 			}

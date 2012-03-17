@@ -15,8 +15,8 @@ int Assemble(unsigned char *output, int addr, char *str) {
 	//unsigned char opcode[3] = { 0,0,0 };
 	output[0] = output[1] = output[2] = 0;
 	char astr[128],ins[4];
-
-	if ((!strlen(str)) || (strlen(str) > 0x127)) return 1;
+	int len = strlen(str); 
+	if ((!len) || (len > 0x127)) return 1;
 
 	strcpy(astr,str);
 	str_ucase(astr);
@@ -211,7 +211,7 @@ int Assemble(unsigned char *output, int addr, char *str) {
 								output[2] = (tmpint >> 8);
 							}
 							else { //Zero Page
-								if ((output[0] != 0x86) || (output[0] != 0xA2)) return 1; //only STX and LDX Absolute,Y!
+								if ((output[0] != 0x86) && (output[0] != 0xA2)) return 1; //only STX and LDX Absolute,Y!
 								output[0] |= 0x10;
 								output[1] = (tmpint & 0xFF);
 							}

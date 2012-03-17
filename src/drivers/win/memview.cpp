@@ -683,7 +683,7 @@ void UnfreezeAllRam() {
 		// would be added by the freeze command. Manual unfreeze should let them
 		// make that mistake once or twice, in case they like it that way.
 		FCEUI_GetCheat(i,&Cname,&Caddr,NULL,NULL,NULL,&Ctype);
-		if ((Cname[0] == '\0') && (((Caddr >= 0) && (Caddr < 0x2000)) || ((Caddr >= 0x6000) && (Caddr < 0x8000))) && (Ctype == 1)) {
+		if ((Cname[0] == '\0') && ((Caddr < 0x2000) || ((Caddr >= 0x6000) && (Caddr < 0x8000))) && (Ctype == 1)) {
 			// Already Added, so consider it a success
 			FreezeRam(Caddr,-1,1);
 

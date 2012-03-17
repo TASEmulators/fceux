@@ -81,7 +81,7 @@ static uint8 *diskdata[8]={0,0,0,0,0,0,0,0};
 static int TotalSides; //mbg merge 7/17/06 - unsignedectomy
 static uint8 DiskWritten=0;    /* Set to 1 if disk was written to. */
 static uint8 writeskip;
-static uint32 DiskPtr;
+static int32 DiskPtr;
 static int32 DiskSeekIRQ;
 static uint8 SelectDisk,InDisk;
 

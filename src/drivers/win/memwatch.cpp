@@ -708,7 +708,7 @@ static BOOL CALLBACK MemWatchCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 	switch(uMsg)
 	{
 	case WM_ENTERMENULOOP:
-		EnableMenuItem(memwmenu,MEMW_FILE_SAVE,MF_BYCOMMAND | fileChanged ? MF_ENABLED:MF_GRAYED);
+		EnableMenuItem(memwmenu,MEMW_FILE_SAVE,MF_BYCOMMAND | (fileChanged ? MF_ENABLED : MF_GRAYED));
 		break;
 	case WM_MOVE: {
 		if (!IsIconic(hwndDlg)) {
