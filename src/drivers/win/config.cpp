@@ -349,6 +349,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(taseditor_config.deselect_on_doubleclick),
 	AC(taseditor_config.draw_input),
 	AC(taseditor_config.silent_autosave),
+	AC(taseditor_config.autopause_at_finish),
 	AC(taseditor_config.tooltips),
 	AC(taseditor_config.current_pattern),
 	AC(taseditor_config.pattern_skips_lag),

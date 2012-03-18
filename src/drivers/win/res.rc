@@ -295,6 +295,7 @@ BEGIN
         MENUITEM MFT_SEPARATOR
         MENUITEM "Silent Autosave",             ID_CONFIG_SILENTAUTOSAVE,MFT_STRING,MFS_ENABLED
         MENUITEM "Mute Turbo",                  ID_CONFIG_MUTETURBO,MFT_STRING,MFS_ENABLED
+        MENUITEM "Autopause at the end of Movie", ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE,MFT_STRING,MFS_ENABLED
     END
     POPUP "Help",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
@@ -383,8 +384,8 @@ TASEDITORCONTEXTMENUS MENU
 BEGIN
     POPUP "Selected"
     BEGIN
-        MENUITEM "Set Markers",                 ID_SELECTED_SETMARKER
-        MENUITEM "Remove Markers",              ID_SELECTED_REMOVEMARKER
+        MENUITEM "Set Markers",                 ID_SELECTED_SETMARKERS
+        MENUITEM "Remove Markers",              ID_SELECTED_REMOVEMARKERS
         MENUITEM SEPARATOR
         MENUITEM "Deselect",                    ID_SELECTED_DESELECT
         MENUITEM "Select between Markers",      ID_SELECTED_SELECTMIDMARKERS

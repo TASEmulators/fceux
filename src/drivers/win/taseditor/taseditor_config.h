@@ -70,6 +70,7 @@ public:
 	bool deselect_on_doubleclick;
 	bool draw_input;
 	bool silent_autosave;
+	bool autopause_at_finish;
 	bool tooltips;
 	int current_pattern;
 	bool pattern_skips_lag;

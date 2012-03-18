@@ -33,7 +33,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	wndmaximized = false;
 	findnote_wndx = 0;
 	findnote_wndy = 0;
-	follow_playback = false;
+	follow_playback = true;
 	turbo_seek = false;
 	show_lag_frames = true;
 	show_markers = true;
@@ -44,7 +44,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	follow_note_context = true;
 	bind_markers = true;
 	empty_marker_notes = true;
-	combine_consecutive_rec = true;
+	combine_consecutive_rec = false;
 	use_1p_rec = true;
 	columnset_by_keys = false;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
@@ -72,6 +72,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	deselect_on_doubleclick = true;
 	draw_input = true;
 	silent_autosave = true;
+	autopause_at_finish = true;
 	tooltips = true;
 	current_pattern = 0;
 	pattern_skips_lag = false;

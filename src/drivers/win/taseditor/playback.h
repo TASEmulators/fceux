@@ -21,7 +21,6 @@ public:
 	void updateProgressbar();
 
 	void SeekingStart(int finish_frame);
-	void SeekingContinue();
 	void SeekingStop();
 	void ToggleEmulationPause();
 	void PauseEmulation();
@@ -40,7 +39,7 @@ public:
 
 	int GetFlashingPauseFrame();
 	void SetProgressbar(int a, int b);
-	void ClickOnProgressbar();
+	void CancelSeeking();
 
 	bool JumpToFrame(int index);
 
@@ -54,7 +53,7 @@ public:
 	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
 
 private:
-
+	bool autopause_at_the_end;
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;
 	bool old_show_pauseframe, show_pauseframe;

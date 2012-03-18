@@ -66,6 +66,7 @@ void PLAYBACK::init()
 }
 void PLAYBACK::reset()
 {
+	autopause_at_the_end = false;
 	must_find_current_marker = true;
 	shown_marker = 0;
 	lastCursor = currFrameCounter;
@@ -140,9 +141,10 @@ void PLAYBACK::update()
 		lost_position_frame = 0;
 
 	// pause when seeking hit pause_frame
-	if(!FCEUI_EmulationPaused())
-		if(pause_frame && pause_frame <= currFrameCounter + 1)
-			SeekingStop();
+	if(pause_frame && pause_frame <= currFrameCounter + 1)
+		SeekingStop();
+	else if (!lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
+		PauseEmulation();
 
 	// update flashing pauseframe
 	if (old_pauseframe != pause_frame && old_pauseframe)
@@ -173,27 +175,24 @@ void PLAYBACK::update()
 	if (pause_frame)
 	{
 		if (old_show_pauseframe != show_pauseframe)		// update progressbar from time to time
+			// display seeking progress
 			SetProgressbar(currFrameCounter - seeking_start_frame, pause_frame - seeking_start_frame);
 	} else if (old_emu_paused != emu_paused)
 	{
 		// emulator got paused/unpaused externally
 		if (old_emu_paused && !emu_paused)
 		{
-			// externally unpaused
+			// externally unpaused - show empty progressbar
+			SetProgressbar(0, 1);
 			if (currFrameCounter < currMovieData.getNumRecords()-1)
-			{
-				// don't forget to stop at the end of the movie
-				pause_frame = currMovieData.getNumRecords();
-				seeking_start_frame = currFrameCounter;
-			} else
-			{
-				// unlimited emulation, appending the movie - progressbar should be empty
-				SetProgressbar(0, 1);
-			}
+				autopause_at_the_end = true;
+			else
+				autopause_at_the_end = false;
 		} else
 		{
 			// externally paused - progressbar should be full
 			SetProgressbar(1, 1);
+			autopause_at_the_end = false;
 		}
 	}
 
@@ -283,22 +282,15 @@ void PLAYBACK::MiddleButtonClick()
 
 void PLAYBACK::SeekingStart(int finish_frame)
 {
-	seeking_start_frame = currFrameCounter;
-	pause_frame = finish_frame;
+	if (pause_frame != finish_frame)
+	{
+		seeking_start_frame = currFrameCounter;
+		pause_frame = finish_frame;
+	}
 	if (taseditor_config.turbo_seek)
 		turbo = true;
 	UnpauseEmulation();
 }
-void PLAYBACK::SeekingContinue()
-{
-	if (pause_frame)
-	{
-		if (taseditor_config.turbo_seek)
-			turbo = true;
-		UnpauseEmulation();
-	}
-}
-
 
 void PLAYBACK::SeekingStop()
 {
@@ -409,13 +401,6 @@ bool PLAYBACK::JumpToFrame(int index)
 {
 	// Returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 	if (index < 0) return false;
-
-	if (index+1 == pause_frame && emu_paused)
-	{
-		SeekingContinue();
-		return false;
-	}
-
 	if (index >= greenzone.greenZoneCount)
 	{
 		// handle jump outside greenzone
@@ -460,7 +445,7 @@ void PLAYBACK::SetProgressbar(int a, int b)
 {
 	SendMessage(hwndProgressbar, PBM_SETPOS, PROGRESSBAR_WIDTH * a / b, 0);
 }
-void PLAYBACK::ClickOnProgressbar()
+void PLAYBACK::CancelSeeking()
 {
 	// delete lost_position pointer (green arrow)
 	if (lost_position_frame)

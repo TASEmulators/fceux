@@ -10,13 +10,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Editor - Interface for editing Input and Markers
 [Singleton]
 
-* implements operations of changing Input: 
-* implements operations of changing Markers: 
-
-
+* implements operations of changing Input: toggle input in region, set input by pattern, toggle selected region, apply pattern to input selection
+* implements operations of changing Markers: toggle Markers in selection, apply patern to Markers in selection, mark/unmark all selected frames
 * stores Autofire Patterns data and their loading/generating code
 * stores resources: patterns filename, id of buttonpresses in patterns
-
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
@@ -379,6 +376,56 @@ bool EDITOR::InputColumnSetPattern(int joy, int button)
 		return true;
 	} else
 		return false;
+}
+void EDITOR::SetMarkers()
+{
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size())
+	{
+		SelectionFrames::iterator current_selection_begin(current_selection->begin());
+		SelectionFrames::iterator current_selection_end(current_selection->end());
+		bool changes_made = false;
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if(!markers_manager.GetMarker(*it))
+			{
+				if (markers_manager.SetMarker(*it))
+				{
+					changes_made = true;
+					piano_roll.RedrawRow(*it);
+				}
+			}
+		}
+		if (changes_made)
+		{
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
+}
+void EDITOR::RemoveMarkers()
+{
+	SelectionFrames* current_selection = selection.MakeStrobe();
+	if (current_selection->size())
+	{
+		SelectionFrames::iterator current_selection_begin(current_selection->begin());
+		SelectionFrames::iterator current_selection_end(current_selection->end());
+		bool changes_made = false;
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if(markers_manager.GetMarker(*it))
+			{
+				markers_manager.ClearMarker(*it);
+				changes_made = true;
+				piano_roll.RedrawRow(*it);
+			}
+		}
+		if (changes_made)
+		{
+			selection.must_find_current_marker = playback.must_find_current_marker = true;
+			history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
+		}
+	}
 }
 // ----------------------------------------------------------------------------------------------
 

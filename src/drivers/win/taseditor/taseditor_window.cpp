@@ -68,7 +68,7 @@ char taseditor_help_filename[] = "\\taseditor.chm";
 // all items of the window (used for resising) and their default x,y,w,h
 // actual x,y,w,h are calculated at the beginning from screen
 Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
-	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here whenever you want to abort seeking", "", false, 0, 0,
+	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here whenever you want to abort seeking", "", false, EMUCMD_TASEDITOR_CANCEL_SEEKING, 0,
 	IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
 	IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
 	IDC_PLAYBACK_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
@@ -78,9 +78,9 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
 	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind one frame (mouse: Right button+Wheel up) (Alt+Wheel up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (Alt+Wheel up) (hotkey: Shift+Up)", "", false, 0, 0,			// EMUCMD_TASEDITOR_REWIND
 	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance one frame  (mouse: Right button+Wheel down) (Alt+Wheel down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance (mouse: Right button+Wheel down) (Alt+Wheel down) (hotkey: Shift+Down)", "", false, 0, 0,
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
@@ -440,6 +440,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_DRAWINPUTBYDRAGGING, taseditor_config.draw_input?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE, taseditor_config.autopause_at_finish?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
 }
 
@@ -871,12 +872,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_EDIT_TRUNCATE:
 				case ID_CONTEXT_SELECTED_TRUNCATE:
-				case ID_STRAY_TRUNCATE:
 					splicer.Truncate();
 					break;
 				case ACCEL_INS:
 				case ID_EDIT_INSERT:
-				case MENU_CONTEXT_STRAY_INSERTFRAMES:
 				case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 					splicer.InsertNumFrames();
 					break;
@@ -911,9 +910,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case CHECK_FOLLOW_CURSOR:
 					taseditor_config.follow_playback ^= 1;
 					taseditor_window.UpdateCheckedItems();
-					// if switched off then maybe jump to target frame
-					if (!taseditor_config.follow_playback && playback.pause_frame)
-						piano_roll.FollowPauseframe();
 					break;
 				case CHECK_TURBO_SEEK:
 					taseditor_config.turbo_seek ^= 1;
@@ -1065,8 +1061,12 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					muteTurbo ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
+				case ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE:
+					taseditor_config.autopause_at_finish ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
 				case IDC_PROGRESS_BUTTON:
-					playback.ClickOnProgressbar();
+					playback.CancelSeeking();
 					break;
 				case IDC_BRANCHES_BUTTON:
 					// click on "Bookmarks/Branches" - switch between Bookmarks List and Branches Tree
@@ -1186,62 +1186,21 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 							piano_roll.FollowSelection();
 						break;
 					}
-				case ID_SELECTED_SETMARKER:
+				case ID_SELECTED_SETMARKERS:
 					{
-						SelectionFrames* current_selection = selection.MakeStrobe();
-						if (current_selection->size())
-						{
-							SelectionFrames::iterator current_selection_begin(current_selection->begin());
-							SelectionFrames::iterator current_selection_end(current_selection->end());
-							bool changes_made = false;
-							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-							{
-								if(!markers_manager.GetMarker(*it))
-								{
-									if (markers_manager.SetMarker(*it))
-									{
-										changes_made = true;
-										piano_roll.RedrawRow(*it);
-									}
-								}
-							}
-							if (changes_made)
-							{
-								selection.must_find_current_marker = playback.must_find_current_marker = true;
-								history.RegisterMarkersChange(MODTYPE_MARKER_SET, *current_selection_begin, *current_selection->rbegin());
-							}
-						}
+						editor.SetMarkers();
 						break;
 					}
-				case ID_SELECTED_REMOVEMARKER:
+				case ID_SELECTED_REMOVEMARKERS:
 					{
-						SelectionFrames* current_selection = selection.MakeStrobe();
-						if (current_selection->size())
-						{
-							SelectionFrames::iterator current_selection_begin(current_selection->begin());
-							SelectionFrames::iterator current_selection_end(current_selection->end());
-							bool changes_made = false;
-							for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
-							{
-								if(markers_manager.GetMarker(*it))
-								{
-									markers_manager.ClearMarker(*it);
-									changes_made = true;
-									piano_roll.RedrawRow(*it);
-								}
-							}
-							if (changes_made)
-							{
-								selection.must_find_current_marker = playback.must_find_current_marker = true;
-								history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, *current_selection_begin, *current_selection->rbegin());
-							}
-						}
+						editor.RemoveMarkers();
 						break;
 					}
 				case ACCEL_CTRL_F:
 				case ID_VIEW_FINDNOTE:
 					{
 						if (taseditor_window.hwndFindNote)
+							// set focus to the text field
 							SendMessage(taseditor_window.hwndFindNote, WM_NEXTDLGCTL, (WPARAM)GetDlgItem(taseditor_window.hwndFindNote, IDC_NOTE_TO_FIND), true);
 						else
 							taseditor_window.hwndFindNote = CreateDialog(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_FINDNOTE), taseditor_window.hwndTasEditor, FindNoteProc);

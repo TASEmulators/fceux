@@ -360,10 +360,8 @@ void PIANO_ROLL::update()
 			case DRAG_MODE_NONE:
 			{
 				// normal mouseover
-				if (row_under_mouse >= 0
-					&& (column_under_mouse == COLUMN_FRAMENUM || column_under_mouse == COLUMN_FRAMENUM2)
-					&& markers_manager.GetMarker(row_under_mouse))
-					cursor_icon = IDC_SIZEALL;
+				//if (row_under_mouse >= 0 && (column_under_mouse == COLUMN_FRAMENUM || column_under_mouse == COLUMN_FRAMENUM2) && markers_manager.GetMarker(row_under_mouse))
+				//	cursor_icon = IDC_SIZEALL;
 				break;
 			}
 			case DRAG_MODE_PLAYBACK:
@@ -374,6 +372,11 @@ void PIANO_ROLL::update()
 				break;
 			}
 			case DRAG_MODE_MARKER:
+			{
+				// dragging Marker
+				cursor_icon = IDC_SIZEALL;
+				break;
+			}
 			case DRAG_MODE_OBSERVE:
 			case DRAG_MODE_SET:
 			case DRAG_MODE_UNSET:
@@ -534,9 +537,9 @@ void PIANO_ROLL::update()
 				int drawing_current_y = p.y + GetScrollPos(hwndList, SB_VERT) * list_row_height;
 				// draw (or erase) line from [drawing_current_x, drawing_current_y] to (drawing_last_x, drawing_last_y)
 				int total_dx = drawing_last_x - drawing_current_x, total_dy = drawing_last_y - drawing_current_y;
-				if (GetAsyncKeyState(VK_SHIFT) < 0)
+				if (!shift_held)
 				{
-					// when user is holding Shift, draw vertical line
+					// when user is not holding Shift, draw only vertical lines
 					total_dx = 0;
 					drawing_current_x = drawing_last_x;
 					p.x = drawing_current_x - GetScrollPos(hwndList, SB_HORZ);
@@ -1489,8 +1492,22 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (row_index >= 0)
 				{
 					if (!alt_pressed && !(fwKeys & MK_SHIFT))
+					{
 						// clicked without Shift/Alt - set "row_last_clicked" here
 						piano_roll.row_last_clicked = row_index;
+						// and change Selection to this row
+						if (fwKeys & MK_CONTROL)
+						{
+							if (selection.GetRowSelection(row_index))
+								selection.ClearRowSelection(row_index);
+							else
+								selection.SetRowSelection(row_index);
+						} else
+						{
+							selection.ClearSelection();
+							selection.SetRowSelection(row_index);
+						}
+					}
 					// toggle input
 					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;

@@ -670,6 +670,7 @@ static void ToggleFullscreen(void);
 static void TaseditorRewindOn(void);
 static void TaseditorRewindOff(void);
 static void TaseditorRestorePlayback(void);
+static void TaseditorCancelSeeking(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -796,6 +797,7 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TASEDITOR_REWIND,				EMUCMDTYPE_MISC,	TaseditorRewindOn, TaseditorRewindOff, 0, "Rewind Frame (TAS Editor)", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUI_MovieToggleRerecordDisplay, 0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TASEDITOR_RESTORE_PLAYBACK,	EMUCMDTYPE_MISC,	TaseditorRestorePlayback, 0, 0, "Restore Playback (TAS Editor)", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_CANCEL_SEEKING,		EMUCMDTYPE_MISC,	TaseditorCancelSeeking, 0, 0, "Cancel Seeking (TAS Editor)", EMUCMDFLAG_TASEDITOR },
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -1205,3 +1207,9 @@ static void TaseditorRestorePlayback(void)
 #endif
 }
 
+static void TaseditorCancelSeeking(void)
+{
+#ifdef WIN32
+	playback.CancelSeeking();
+#endif
+}

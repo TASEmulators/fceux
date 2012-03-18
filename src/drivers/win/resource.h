@@ -1013,8 +1013,10 @@
 #define ACCEL_SHIFT_UP                  40554
 #define ACCEL_SHIFT_DOWN                40555
 #define ACCEL_SHIFT_LEFT                40556
-#define ID_ACCELERATOR40557             40557
 #define ACCEL_SHIFT_RIGHT               40557
+#define ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE 40559
+#define ID_SELECTED_SETMARKERS          40560
+#define ID_SELECTED_REMOVEMARKERS       40561
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1024,7 +1026,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40559
+#define _APS_NEXT_COMMAND_VALUE         40562
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

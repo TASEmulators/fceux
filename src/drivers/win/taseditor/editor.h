@@ -16,8 +16,8 @@ public:
 	bool FrameColumnSetPattern();
 	bool InputColumnSet(int joy, int button);
 	bool InputColumnSetPattern(int joy, int button);
-
-
+	void SetMarkers();
+	void RemoveMarkers();
 
 	std::vector<std::string> autofire_patterns_names;
 	std::vector<std::vector<uint8>> autofire_patterns;
