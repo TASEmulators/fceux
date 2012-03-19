@@ -1005,8 +1005,8 @@ void CloseGame()
 	{
 		FCEUI_CloseGame();
 		KillMemView();
-		updateGameDependentMenus(1);
-		updateGameDependentMenusDebugger(1);
+		updateGameDependentMenus(GameInfo != 0);
+		updateGameDependentMenusDebugger(GameInfo != 0);
 		SetMainWindowText();
 	}
 }
