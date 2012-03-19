@@ -28,6 +28,12 @@ Window - User Interface
 #include "../keyboard.h"
 #include "../joystick.h"
 
+//compile for windows 2000 target
+#if (_WIN32_WINNT < 0x501)
+#define LVN_BEGINSCROLL          (LVN_FIRST-80)          
+#define LVN_ENDSCROLL            (LVN_FIRST-81)
+#endif
+
 extern TASEDITOR_CONFIG taseditor_config;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;

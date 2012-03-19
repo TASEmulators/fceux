@@ -25,6 +25,7 @@ Piano Roll - Piano Roll interface
 #include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "uxtheme.h"
+#include <math.h>
 
 #pragma comment(lib, "UxTheme.lib")
 
