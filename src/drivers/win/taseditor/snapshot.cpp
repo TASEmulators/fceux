@@ -9,8 +9,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ------------------------------------------------------------------------------------
 Snapshot - Snapshot of all edited data
 
-* stores the data of specific snapshot of the movie: size, input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, type and description of the snapshot (including the time of creation)
-* also stores info about sequential recording of input
+* stores the data of specific snapshot of the movie: size, input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, start and end frame of operation, type of operation and description of the snapshot (including the time of creation)
+* also stores info about sequential recording/drawing of input
 * optionally can store map of Hot Changes
 * implements snapshot creation: copying input, copying Hot Changes, copying Markers, setting time of creation
 * implements full/partial restoring of data from snapshot: input, Hot Changes, Markers
@@ -189,7 +189,9 @@ void SNAPSHOT::save(EMUFILE *os)
 	write32le(size, os);
 	write8le(input_type, os);
 	write32le(jump_frame, os);
-	write32le(rec_end_frame, os);
+	write32le(start_frame, os);
+	write32le(end_frame, os);
+	write32le(consecutive_tag, os);
 	write32le(rec_joypad_diff_bits, os);
 	write32le(mod_type, os);
 	if (has_hot_changes) write8le((uint8)1, os); else write8le((uint8)0, os);
@@ -224,7 +226,9 @@ bool SNAPSHOT::load(EMUFILE *is)
 	if (!read8le(&tmp, is)) return true;
 	input_type = tmp;
 	if (!read32le(&jump_frame, is)) return true;
-	if (!read32le(&rec_end_frame, is)) return true;
+	if (!read32le(&start_frame, is)) return true;
+	if (!read32le(&end_frame, is)) return true;
+	if (!read32le(&consecutive_tag, is)) return true;
 	if (!read32le(&rec_joypad_diff_bits, is)) return true;
 	if (!read32le(&mod_type, is)) return true;
 	if (!read8le(&tmp, is)) return true;
@@ -283,7 +287,9 @@ bool SNAPSHOT::skipLoad(EMUFILE *is)
 	if (is->fseek(sizeof(int) + // size
 				sizeof(uint8) + // input_type
 				sizeof(int) +	// jump_frame
-				sizeof(int) +	// rec_end_frame
+				sizeof(int) +	// start_frame
+				sizeof(int) +	// end_frame
+				sizeof(int) +	// consecutive_tag
 				sizeof(int) +	// rec_joypad_diff_bits
 				sizeof(int) +	// mod_type
 				sizeof(uint8)	// has_hot_changes

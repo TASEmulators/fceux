@@ -44,7 +44,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	follow_note_context = true;
 	bind_markers = true;
 	empty_marker_notes = true;
-	combine_consecutive_rec = false;
+	combine_consecutive = false;
 	use_1p_rec = true;
 	columnset_by_keys = false;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED

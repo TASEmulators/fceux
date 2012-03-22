@@ -876,7 +876,7 @@ static void CommandStateSave(void)
 	{
 #ifdef WIN32
 		if (execcmd == EMUCMD_SAVE_STATE)
-			bookmarks.command(COMMAND_SET, bookmarks.GetCurrentBranch());
+			bookmarks.command(COMMAND_SET);
 		else if(execcmd >= EMUCMD_SAVE_STATE_SLOT_0 && execcmd <= EMUCMD_SAVE_STATE_SLOT_9)
 			bookmarks.command(COMMAND_SET, execcmd - EMUCMD_SAVE_STATE_SLOT_0);
 #endif
@@ -900,7 +900,7 @@ static void CommandStateLoad(void)
 	{
 #ifdef WIN32
 		if (execcmd == EMUCMD_LOAD_STATE)
-			bookmarks.command(COMMAND_DEPLOY, bookmarks.GetCurrentBranch());
+			bookmarks.command(COMMAND_DEPLOY);
 		else if(execcmd >= EMUCMD_LOAD_STATE_SLOT_0 && execcmd <= EMUCMD_LOAD_STATE_SLOT_9)
 			bookmarks.command(COMMAND_DEPLOY, execcmd - EMUCMD_LOAD_STATE_SLOT_0);
 #endif

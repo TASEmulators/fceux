@@ -13,6 +13,7 @@
 #include "recorder.h"
 #include "greenzone.h"
 #include "bookmarks.h"
+#include "branches.h"
 #include "piano_roll.h"
 #include "taseditor_lua.h"
 #include "splicer.h"

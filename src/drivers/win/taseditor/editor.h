@@ -9,8 +9,8 @@ public:
 	void reset();
 	void update();
 
-	void InputToggle(int start, int end, int joy, int button);
-	void InputSetPattern(int start, int end, int joy, int button);
+	void InputToggle(int start, int end, int joy, int button, int consecutive_tag = 0);
+	void InputSetPattern(int start, int end, int joy, int button, int consecutive_tag = 0);
 
 	bool FrameColumnSet();
 	bool FrameColumnSetPattern();

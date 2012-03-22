@@ -39,6 +39,7 @@ RECORDER recorder;
 GREENZONE greenzone;
 MARKERS_MANAGER markers_manager;
 BOOKMARKS bookmarks;
+BRANCHES branches;
 POPUP_DISPLAY popup_display;
 PIANO_ROLL piano_roll;
 TASEDITOR_LUA taseditor_lua;
@@ -94,6 +95,7 @@ bool EnterTasEditor()
 			markers_manager.init();
 			project.init();
 			bookmarks.init();
+			branches.init();
 			popup_display.init();
 			history.init();
 			taseditor_lua.init();
@@ -150,6 +152,7 @@ bool ExitTasEditor()
 	markers_manager.free();
 	greenzone.free();
 	bookmarks.free();
+	branches.free();
 	popup_display.free();
 	history.free();
 	playback.SeekingStop();
@@ -194,6 +197,7 @@ void UpdateTasEditor()
 	markers_manager.update();
 	playback.update();
 	bookmarks.update();
+	branches.update();
 	popup_display.update();
 	selection.update();
 	splicer.update();
@@ -317,6 +321,7 @@ void NewProject()
 		playback.reset();
 		playback.StartFromZero();
 		bookmarks.reset();
+		branches.reset();
 		history.reset();
 		piano_roll.reset();
 		selection.reset();

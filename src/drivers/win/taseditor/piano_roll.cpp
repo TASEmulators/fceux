@@ -550,7 +550,8 @@ void PIANO_ROLL::update()
 				int row_index, column_index, joy, bit;
 				int min_row_index = currMovieData.getNumRecords(), max_row_index = -1;
 				bool changes_made = false;
-				for (double len = 0; len < total_len; len += DRAWING_MIN_LINE_LEN)
+				int drawing_min_line_len = list_row_height;		// = min(list_row_width, list_row_height) in pixels
+				for (double len = 0; len < total_len; len += drawing_min_line_len)
 				{
 					// perform hit test
 					info.pt.x = p.x + (len / total_len) * total_dx;
@@ -580,9 +581,9 @@ void PIANO_ROLL::update()
 				if (changes_made)
 				{
 					if (drag_mode == DRAG_MODE_SET)
-						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index));
+						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index, NULL, drawing_start_time));
 					else
-						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index));
+						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index, NULL, drawing_start_time));
 				}
 				drawing_last_x = drawing_current_x;
 				drawing_last_y = drawing_current_y;
@@ -1301,34 +1302,34 @@ LONG PIANO_ROLL::HeaderCustomDraw(NMLVCUSTOMDRAW* msg)
 // ----------------------------------------------------
 void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 {
-	SelectionFrames* current_selection = selection.MakeStrobe();
-	if (current_selection->size() == 0)
-		return;
-
-	HMENU sub = GetSubMenu(hrmenu, 0);
-	// inspect current selection and disable inappropriate menu items
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
-	SelectionFrames::iterator current_selection_end(current_selection->end());
-	bool set_found = false, unset_found = false;
-	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+	if (selection.CheckFrameSelected(info.iItem))
 	{
-		if(markers_manager.GetMarker(*it))
-			set_found = true;
-		else 
-			unset_found = true;
-	}
-	if (set_found)
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-	if (unset_found)
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
-	else
-		EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		SelectionFrames* current_selection = selection.MakeStrobe();
+		HMENU sub = GetSubMenu(hrmenu, 0);
+		// inspect current selection and disable inappropriate menu items
+		SelectionFrames::iterator current_selection_begin(current_selection->begin());
+		SelectionFrames::iterator current_selection_end(current_selection->end());
+		bool set_found = false, unset_found = false;
+		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
+		{
+			if(markers_manager.GetMarker(*it))
+				set_found = true;
+			else 
+				unset_found = true;
+		}
+		if (set_found)
+			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
+		else
+			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		if (unset_found)
+			EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
+		else
+			EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 
-	POINT pt = info.pt;
-	ClientToScreen(hwndList, &pt);
-	TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
+		POINT pt = info.pt;
+		ClientToScreen(hwndList, &pt);
+		TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
+	}
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1510,12 +1511,13 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						}
 					}
 					// toggle input
+					piano_roll.drawing_start_time = clock();
 					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 					if (alt_pressed)
-						editor.InputSetPattern(piano_roll.row_last_clicked, row_index, joy, button);
+						editor.InputSetPattern(piano_roll.row_last_clicked, row_index, joy, button, piano_roll.drawing_start_time);
 					else
-						editor.InputToggle(piano_roll.row_last_clicked, row_index, joy, button);
+						editor.InputToggle(piano_roll.row_last_clicked, row_index, joy, button, piano_roll.drawing_start_time);
 					// and start dragging/drawing
 					if (piano_roll.drag_mode == DRAG_MODE_NONE)
 					{

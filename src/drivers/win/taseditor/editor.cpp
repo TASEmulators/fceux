@@ -152,7 +152,7 @@ bool EDITOR::ReadString(EMUFILE *is, std::string& dest)
 }
 // ----------------------------------------------------------------------------------------------
 // following functions use function parameters to determine range of frames
-void EDITOR::InputToggle(int start, int end, int joy, int button)
+void EDITOR::InputToggle(int start, int end, int joy, int button, int consecutive_tag)
 {
 	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return;
 
@@ -173,16 +173,16 @@ void EDITOR::InputToggle(int start, int end, int joy, int button)
 		// clear range
 		for (int i = start; i <= end; ++i)
 			currMovieData.records[i].clearBit(joy, button);
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, start, end));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, start, end, NULL, consecutive_tag));
 	} else
 	{
 		// set range
 		for (int i = start; i <= end; ++i)
 			currMovieData.records[i].setBit(joy, button);
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, start, end));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, start, end, NULL, consecutive_tag));
 	}
 }
-void EDITOR::InputSetPattern(int start, int end, int joy, int button)
+void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consecutive_tag)
 {
 	if (joy < 0 || joy >= joysticks_per_frame[GetInputType(currMovieData)]) return;
 
@@ -209,7 +209,7 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button)
 		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
 			pattern_offset -= autofire_patterns[current_pattern].size();
 	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str()));
+	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
 }
 
 // following functions use current Selection to determine range of frames

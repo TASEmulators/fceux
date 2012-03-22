@@ -30,7 +30,8 @@ public:
 	SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
 	std::vector<uint8> saved_screenshot;
-	int parent_branch;
+
+	//int parent_branch;
 
 	// not saved vars
 	int flash_phase;

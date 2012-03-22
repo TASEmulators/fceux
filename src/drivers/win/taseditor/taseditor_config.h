@@ -42,7 +42,7 @@ public:
 	bool follow_note_context;
 	bool bind_markers;
 	bool empty_marker_notes;
-	bool combine_consecutive_rec;
+	bool combine_consecutive;
 	bool use_1p_rec;
 	bool columnset_by_keys;
 	int superimpose;

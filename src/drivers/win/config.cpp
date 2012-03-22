@@ -318,7 +318,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(taseditor_config.show_branch_descr),
 	AC(taseditor_config.bind_markers),
 	AC(taseditor_config.empty_marker_notes),
-	AC(taseditor_config.combine_consecutive_rec),
+	AC(taseditor_config.combine_consecutive),
 	AC(taseditor_config.use_1p_rec),
 	AC(taseditor_config.columnset_by_keys),
 	AC(taseditor_config.superimpose_affects_paste),

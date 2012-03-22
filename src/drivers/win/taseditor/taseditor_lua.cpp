@@ -23,6 +23,7 @@ extern TASEDITOR_WINDOW taseditor_window;
 extern HISTORY history;
 extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
+extern BRANCHES branches;
 extern RECORDER recorder;
 extern PLAYBACK playback;
 extern GREENZONE greenzone;
@@ -191,7 +192,7 @@ void TASEDITOR_LUA::setnote(int index, const char* newtext)
 int TASEDITOR_LUA::getcurrentbranch()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return bookmarks.GetCurrentBranch();
+		return branches.GetCurrentBranch();
 	else
 		return -1;
 }

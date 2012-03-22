@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ------------------------------------------------------------------------------------
 Bookmark - Single Bookmark data
 
-* stores all info of one specific Bookmark-Branch: movie snapshot, a savestate of 1 frame, a screenshot of the frame, an info about relations of this Branch, a state of flashing for this Bookmark's row
+* stores all info of one specific Bookmark: movie snapshot, a savestate of 1 frame, a screenshot of the frame, a state of flashing for this Bookmark's row
 * saves and loads the data from a project file. On error: sends warning to caller
 * implements procedure of "Bookmark set": creating movie snapshot, setting key frame on current Playback position, copying savestate from Greenzone, making and compressing screenshot, launching flashing animation
 * launches respective flashings for "Bookmark jump" and "Branch deploy"
@@ -34,7 +34,6 @@ void BOOKMARK::init()
 	not_empty = false;
 	flash_type = flash_phase = 0;
 	snapshot.jump_frame = -1;
-	parent_branch = -1;		// -1 = root (cloud)
 }
 
 void BOOKMARK::set()
@@ -78,8 +77,6 @@ void BOOKMARK::save(EMUFILE *os)
 	if (not_empty)
 	{
 		write8le(1, os);
-		// write parent_branch
-		write32le(parent_branch, os);
 		// write snapshot
 		snapshot.save(os);
 		// write savestate
@@ -100,8 +97,6 @@ bool BOOKMARK::load(EMUFILE *is)
 	not_empty = tmp != 0;
 	if (not_empty)
 	{
-		// read parent_branch
-		if (!read32le(&parent_branch, is)) return true;
 		// read snapshot
 		if (snapshot.load(is)) return true;
 		// read savestate

@@ -64,7 +64,11 @@ public:
 	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
 	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
 	int jump_frame;						// for jumping when making undo
-	int rec_end_frame;					// for consecutive Recordings
+
+	int start_frame;					// for consecutive Draws
+	int end_frame;						// for consecutive Draws
+
+	int consecutive_tag;				// for consecutive Recordings and Draws
 	uint32 rec_joypad_diff_bits;		// for consecutive Recordings
 	int mod_type;
 	char description[SNAPSHOT_DESC_MAX_LENGTH];

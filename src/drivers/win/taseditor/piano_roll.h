@@ -26,8 +26,6 @@
 #define MARKER_DRAG_MAX_SPEED 70
 #define MARKER_DRAG_GRAVITY 2
 
-#define DRAWING_MIN_LINE_LEN 14		// = min(list_row_width, list_row_height) in pixels
-
 #define DRAG_SCROLLING_BORDER_SIZE 10		// in pixels
 
 #define DOUBLETAP_COUNT 3			// 1:quick press, 2 - quick release, 3 - quick press
@@ -194,6 +192,7 @@ public:
 	int marker_drag_countdown;
 	int marker_drag_framenum;
 	int drawing_last_x, drawing_last_y;
+	int drawing_start_time;
 	int drag_selection_starting_frame;
 	int drag_selection_ending_frame;
 

@@ -958,6 +958,9 @@
     <ClCompile Include="..\src\drivers\win\taseditor\editor.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\branches.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1408,9 +1411,6 @@
     <ClInclude Include="..\src\drivers\win\taseditor\taseditor_window.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\recorder.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
@@ -1448,6 +1448,12 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\editor.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\branches.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,31 @@
+
+22-Mar-2012 - AnS - Config->Combine consecutive Recordings/Draws
+18-Mar-2012 - AnS - new hotkey "Cancel Seeking (TAS Editor)" (Esc)
+18-Mar-2012 - AnS - Taseditor: Config->Autopause at the end of Movie
+17-Mar-2012 - CaH4e3 - varous bugfixes, xstring trimming functions logic bugs, etc
+17-Mar-2012 - AnS - Taseditor: showing row_last_clicked when Shift or Alt is held
+17-Mar-2012 - AnS - Taseditor: no more "allow keys in Piano Roll"; new accelerators: Ctrl + arrows, Shift + arrows, Home/End/Page Up/Page Down, Ctrl + Home/End, Shift + Home/End
+17-Mar-2012 - AnS - Taseditor: selection by dragging from Frame#
+17-Mar-2012 - AnS - Taseditor: set/pick Markers by doubleclick, throw Markers away
+14-Mar-2012 - AnS - Taseditor: drawing input; holding Shift when drawing
+14-Mar-2012 - AnS - Taseditor: fixed known WinXP bug with scrollbar arrows
+14-Mar-2012 - AnS - Taseditor: moving Markers by drag'n'drop, "Marker Drag" and "Marker Swap" operations
+14-Mar-2012 - AnS - Taseditor: dragging blue arrow (moving Playback cursor)
+14-Mar-2012 - AnS - Taseditor: observing Piano Roll by dragging cursor outside
+11-Mar-2012 - AnS - Taseditor: double-tapping Shift/Ctrl scrolls Piano Roll to respective cursor
+09-Mar-2012 - AnS - Taseditor: Config->Deselect on doubleclick
+09-Mar-2012 - AnS - Taseditor: checking ROM checksum when saving/loading projects
+09-Mar-2012 - AnS - Taseditor: TAS Editor can have mouse wheel input even when keyboard focus is on FCEUX window
+09-Mar-2012 - AnS - disabled FCEUX context menu when TAS Editor is engaged
 06-mar-2012 - prg - fceux no longer segfaults when opening gamepadconfig with GTK < 2.24 - a message is printed to the console
 06-mar-2012 - prg - supports loading of configuration files in $FCEUXDIR/cfg.d/*
+01-Mar-2012 - AnS - Taseditor: changing history size doesn't reset history
+28-feb-2012 - AnS - Taseditor: "Deselect" option in menus
+26-feb-2012 - AnS - Small save/load state speedup, noticeable only in TAS Editor or lua bots
+21-feb-2012 - AnS - Taseditor: header lights on mouseover
+21-feb-2012 - AnS - Taseditor: registering click at buttondown; Alt+click on input = set pattern
+20-feb-2012 - AnS - Taseditor: Right button + wheel = Playback rewind/forward; Shift/Ctrl + wheel = jump via Markers with Playback/Selection cursor
+20-feb-2012 - AnS - Taseditor: middle button pauses/unpauses emulation
 18-feb-2012 - AnS - PATTERNS menu, loading data from "tools\taseditor_patterns.txt"
 18-feb-2012 - AnS - "Use pattern" checkbox in Recorder; Config->ColumnSet Pattern skips Lag
 18-feb-2012 - AnS - Taseditor: "Frame#" lights when Alt key is being held, not entering menu by Alt
