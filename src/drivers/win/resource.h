@@ -931,6 +931,7 @@
 #define ID_EDIT_CLONEFRAME              40459
 #define ID_EDIT_CLONEFRAMES             40460
 #define ACCEL_SHIFT_INS                 40461
+#define ACCEL_CTRL_SHIFT_INS            40461
 #define ID_SELECTED_CLONE               40463
 #define ID_CONFIG_Q                     40464
 #define ACCEL_CTRL_Z                    40465
@@ -1026,7 +1027,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40562
+#define _APS_NEXT_COMMAND_VALUE         40563
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

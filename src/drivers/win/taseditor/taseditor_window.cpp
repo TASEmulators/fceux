@@ -842,27 +842,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					else
 						splicer.Paste();
 					break;
-				case ACCEL_SHIFT_V:
-					{
-						// hack to allow entering Shift-V into edit control even though accelerator steals the input message
-						char insert_v[] = "v";
-						char insert_V[] = "V";
-						if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						{
-							if (GetKeyState(VK_CAPITAL) & 1)
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
-							else
-								SendMessage(playback.hwndPlaybackMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
-						} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						{
-							if (GetKeyState(VK_CAPITAL) & 1)
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_v);
-							else
-								SendMessage(selection.hwndSelectionMarkerEdit, EM_REPLACESEL, true, (LPARAM)insert_V);
-						} else
-							splicer.PasteInsert();
-						break;
-					}
+				case ACCEL_CTRL_SHIFT_V:
 				case ID_EDIT_PASTEINSERT:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 						SendMessage(playback.hwndPlaybackMarkerEdit, WM_PASTE, 0, 0); 
@@ -885,7 +865,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_CONTEXT_SELECTED_INSERTFRAMES2:
 					splicer.InsertNumFrames();
 					break;
-				case ACCEL_SHIFT_INS:
+				case ACCEL_CTRL_SHIFT_INS:
 				case ID_EDIT_INSERTFRAMES:
 				case ID_CONTEXT_SELECTED_INSERTFRAMES:
 					splicer.InsertFrames();

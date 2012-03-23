@@ -75,7 +75,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	autopause_at_finish = true;
 	tooltips = true;
 	current_pattern = 0;
-	pattern_skips_lag = false;
+	pattern_skips_lag = true;
 	pattern_recording = false;
 	last_author[0] = 0;			// empty name
 
