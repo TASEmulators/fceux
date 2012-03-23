@@ -1,0 +1,159 @@
+﻿<html>
+	
+<head>
+	<title>What's New? 2.1.6 (changelog)</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript"><!--
+		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+		if (top.frames.length == 0)
+			top.location.href = "fceux.html?" + sTopicId
+		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			top.FrameTOC.SelectTocItem(sTopicId);
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>What's New? 2.1.6 (changelog)</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Intro.html">Introduction</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Intro.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="FCEUltraVersionHistory.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="WhatsNew215.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p><span class="rvts17">What's New? </span><span class="rvts21">2.1.6</span></p>
+<p>Released -- ???? 2012</p>
+<p><br></p>
+<p><br></p>
+<p>The 2.1.6 release fixes many bugs and adds new features to the prior 2.1.5 release. The most significant feature is new TAS Editor v1.0, created to boost efficiency and ease of Tool-Assisted Speedrunning.</p>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">Common </span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Fixed crash when using machine with no sound card</span></li>
+<li><span class="rvts22">Fixed long savestate messages containing path</span></li>
+<li><span class="rvts22">Soft reset and power switch messages</span></li>
+<li><span class="rvts22">All onscreen messages are now logged to Message Log</span></li>
+<li><span class="rvts22">Improved hud text rendering wrapping</span></li>
+<li><span class="rvts22">Fixed wrong default palette entry</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts24">Emulation</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">A bit of latest mapper changes from fceu-mm</span></li>
+<li><span class="rvts22">PAL/NTSC noise bug fixed</span></li>
+<li><span class="rvts22">Fixed bus conflict emulation, no kage no densetsu bug anymore</span></li>
+<li><span class="rvts22">Straighten out bandai m159/m016 handling and add valid null-EEPROM emulation to get those games booting.</span></li>
+<li><span class="rvts22">Fixed newppu bug which prevented metroid from booting, CHR RAM was not getting initialized to anything</span></li>
+<li><span class="rvts22">Newppu - fix bug in scroll reg logic causing mis-scrolls in p'radikus conflict</span></li>
+<li><span class="rvts22">Datalatch mapper - fix bug where wramless games would be able to do something to unmapped host emulator memory</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts24">Movies</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
+<li><span class="rvts22">Straighten out binary format support for fm2/fm3</span></li>
+<li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
+<li><span class="rvts22">Rerecord counter display</span></li>
+<li><span class="rvts22">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
+<li><span class="rvts22">Removed "Lag Counter Reset" hotkey, as it was obsolete since FCEUX 2.0.2</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts24">Lua</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Fixed lua drawing alpha blending</span></li>
+<li><span class="rvts22">New library: taseditor (Windows-only) - contains 24 functions, see taseditor.chm</span></li>
+</ul>
+<p><span class="rvts22"><br></span></p>
+<p><span class="rvts22">New Lua functions</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">emu.paused()</span></li>
+<li><span class="rvts22">joypad.getimmediate()</span></li>
+</ul>
+<p><span class="rvts22"><br></span></p>
+<p><span class="rvts22">New scripts:</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">ButtonCount.lua</span></li>
+<li><span class="rvts22">RBIBaseball.lua</span></li>
+<li><span class="rvts22">SoundDisplay.lua</span></li>
+<li><span class="rvts22">SoundDisplay2.lua</span></li>
+<li><span class="rvts22">taseditor\InputDisplay_for_Selection.lua</span></li>
+<li><span class="rvts22">taseditor\InvertSelection.lua</span></li>
+<li><span class="rvts22">taseditor\RecordBackwards.lua</span></li>
+<li><span class="rvts22">taseditor\ShowNotes.lua</span></li>
+<li><span class="rvts22">taseditor\Swap1P2P.lua</span></li>
+<li><span class="rvts22">taseditor\TrackNoise.lua</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts24">Win32</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Lua console now gets proper file path when selecting a file from the recent menu</span></li>
+<li><span class="rvts22">Fixed graphic tearing with vertical sync enabled in windowed mode</span></li>
+<li><span class="rvts22">Fixed crashes and bugs caused by 2.1.5 allowing hotkeys without ROM loaded</span></li>
+<li><span class="rvts22">Fixed context menus to use rightclicks in context menus correctly</span></li>
+<li><span class="rvts22">Reload hotkey now also supports removing invalid filenames in Recent ROMs</span></li>
+<li><span class="rvts22">Replay dialog speedup</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">Debugger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Fixed mysterious out of bounds condition while editing breakpoints</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">Cheats</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Don't lose cheat compare value when toggle cheat enables through UI</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">Ram Watch / Ram Search</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Updating list when emulator is paused (on Power or when resetting search)</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">TAS Editor</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Completely rewritten tool with brand new architecture and design. Too many changes to enlist, see taseditor.chm</span></li>
+</ul>
+<p><span class="rvts24"><br></span></p>
+<p><span class="rvts23">GUI</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Loading TAS Editor projects (*.fm3) by Drag &amp; Drop</span></li>
+<li><span class="rvts22">Fixed bug with Input Config not displaying some key names</span></li>
+<li><span class="rvts22">Changed some checkboxes to radiobuttons in menu</span></li>
+<li><span class="rvts22">Launch tools hotkeys shown in menu</span></li>
+</ul>
+<p><span class="rvts22"><br></span></p>
+<p><span class="rvts22"><br></span></p>
+<p><span class="rvts22"><br></span></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Easy CHM and documentation editor</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2012</div>
+		</div>
+	</body>
+	
+</html>
+

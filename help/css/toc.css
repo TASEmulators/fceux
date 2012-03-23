@@ -1,0 +1,65 @@
+/* UI Tabs */
+
+.ui-tabs-nav {
+	border-top: 0;
+	border-right: 0;
+	border-left: 0;
+}
+
+/* TreeView */
+
+.treeview, .treeview ul { 
+	list-style: none;
+}
+
+.treeview ul {
+	margin-top: 4px;
+}
+
+.treeview .hitarea {
+	background: url(../img/treeview-default.gif) -64px -25px no-repeat;
+	height: 16px;
+	width: 16px;
+	margin-left: -16px;
+	float: left;
+	cursor: pointer;
+}
+/* fix for IE6 */
+* html .hitarea {
+	display: inline;
+	float:none;
+}
+
+.treeview li { 
+	margin: 0;
+	padding: 3px 0pt 3px 16px;
+}
+
+.filetree  a{ text-decoration: none; }
+
+.filetree  a:hover { text-decoration: underline; }
+
+#treecontrol { margin: 1em 0; display: none; }
+
+.treeview li { background: url(../img/treeview-default-line.gif) 0 0 no-repeat; }
+.treeview li.collapsable, .treeview li.expandable { background-position: 0 -176px; }
+
+.treeview .expandable-hitarea { background-position: -80px -3px; }
+
+.treeview li.last { background-position: 0 -1766px }
+.treeview li.lastCollapsable, .treeview li.lastExpandable { background-image: url(../img/treeview-default.gif); }  
+.treeview li.lastCollapsable { background-position: 0 -111px }
+.treeview li.lastExpandable { background-position: -32px -67px }
+
+.treeview div.lastCollapsable-hitarea, .treeview div.lastExpandable-hitarea { background-position: 0; }
+
+.filetree li { padding: 3px 0 2px 16px; }
+.filetree span.folder, .filetree span.file, .filetree a.folder, .filetree a.file { padding: 1px 0 1px 20px; display: block; }
+
+.toctree span.folder, .toctree a.folder { background: url(../img/book.png) 0 0 no-repeat; }
+.toctree li.expandable span.folder, .toctree li.expandable a.folder { background: url(../img/book-closed.png) 0 0 no-repeat; }
+.toctree span.file, .toctree a.file { background: url(../img/topic.png) 0 0 no-repeat; }
+
+.indextree span.folder, .indextree a.folder { background: url(../img/topic.png) 0 0 no-repeat; }
+.indextree li.expandable span.folder, .indextree li.expandable a.folder { background: url(../img/topic.png) 0 0 no-repeat; }
+.indextree span.file, .indextree a.file { background: url(../img/topic.png) 0 0 no-repeat; }

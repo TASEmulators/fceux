@@ -1,0 +1,209 @@
+﻿<html>
+	
+<head>
+	<title>.fm2</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript"><!--
+		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+		if (top.frames.length == 0)
+			top.location.href = "fceux.html?" + sTopicId
+		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+			top.FrameTOC.SelectTocItem(sTopicId);
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>.fm2</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Technicalinformation.html">Technical Information</a> &rsaquo;&rsaquo; <a href="Movieformats.html">Movie &amp; Savestate formats</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Movieformats.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Movieformats.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="fcm.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p><span class="rvts12">FCEUX Movie File format</span></p>
+<p>designed by: Zeromus</p>
+<p><br></p>
+<p>FCEUX uses a new movie file format - .fm2.</p>
+<p><br></p>
+<p>This differs from the previous FCE Ultra movie format (.fcm) in the following ways:</p>
+<p><br></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>It is text based; allowing easy movie editing/splicing</li>
+<li>An imbedded GUID so FCEUX can tell if a savestate belongs to a movie file</li>
+<li>Movies recorded from Start (Power-on) no longer have a redundant savestate</li>
+<li>Contains mouse input for recording the Zapper &amp; Arkanoid Paddle</li>
+</ul>
+<p><br></p>
+<p><br></p>
+<p><span class="rvts16">Format</span></p>
+<p><br></p>
+<p>FM2 is ASCII plain text. &nbsp;It consists of several key-value pairs followed by an input log section.</p>
+<p><br></p>
+<p>The input log section can be identified by its starting with a | (pipe).</p>
+<p>The input log section terminates at EOF.</p>
+<p>Newlines may be \r\n or \n</p>
+<p><br></p>
+<p>Key-value pairs consist of a key identifier, followed by a space separator, followed by the value text.</p>
+<p>Value text is always terminated by a newline, which the value text will not include.</p>
+<p>The value text is parsed differently depending on the type of the key.</p>
+<p>The key-value pairs may be in any order, except that the first key must be version.</p>
+<p><br></p>
+<p>Integer keys (also used for booleans, with a 1 or 0) will have a value that is a simple integer not to exceed 32bits</p>
+<p> <span class="rvts39">- version</span> (required) - the version of the movie file format; for now it is always 3</p>
+<p> <span class="rvts39">- emuVersion</span> (required) - the version of the emulator used to produce the movie</p>
+<p> <span class="rvts39">- rerecordCount</span> (optional) - the rerecord count</p>
+<p> -<span class="rvts39"> palFlag</span> (bool) (optional) - true if the movie uses pal timing</p>
+<p> -<span class="rvts39"> NewPPU</span> (bool) (optional) - true if the movie uses New PPU</p>
+<p> <span class="rvts39">- fourscore</span> (bool) (<a class="rvts18" href="fm2.html#note-c">*note C</a>) - true if a fourscore was used</p>
+<p> <span class="rvts39">- FDS</span> (bool) (optional) - true if movie was recorded on a Famicom Disk System (FDS) game</p>
+<p> <span class="rvts39">- port0</span>, <span class="rvts39">port1</span> (<a class="rvts18" href="fm2.html#note-c">*note C</a>) - indicates the types of input devices. Supported values are:</p>
+<p> &nbsp; &nbsp; SI_GAMEPAD = 1,</p>
+<p> &nbsp; &nbsp; SI_ZAPPER = 2</p>
+<p><span class="rvts39"> - port2</span> (required) - indicates the type of the FCExp port device which was attached. Supported values are:</p>
+<p> &nbsp; &nbsp; SIFC_NONE = 0</p>
+<p><br></p>
+<p><br></p>
+<p><span class="rvts16">Header</span></p>
+<p><br></p>
+<p>String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.</p>
+<p><br></p>
+<p><span class="rvts39"> - romFilename</span> (required) - the name of the file used to record the movie</p>
+<p><br></p>
+<p><span class="rvts39"> - comment </span>(optional) - simply a memo.</p>
+<ul style="text-indent: 0px; margin-left: 36px; list-style-position: outside;">
+<li>by convention, the first token in the comment value is the subject of the comment.</li>
+<li>by convention, subsequent comments with the same subject will have their ordering preserved and may be used to approximate multi-line comments.</li>
+<li>by convention, the author of the movie should be stored in comment(s) with a subject of: <span class="rvts39">author</span></li>
+</ul>
+<p>Example:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>comment author adelikat</li>
+</ul>
+<p><br></p>
+<p><span class="rvts39"> - subtitle </span>(optional) - a message that will be displayed on screen when movie is played back (unless Subtitles are turned off, see <a class="rvts18" href="MovieOptions.html">Movie options</a>).</p>
+<ul style="text-indent: 0px; margin-left: 36px; list-style-position: outside;">
+<li>by convention, subtitles will begin with the word "subtitle"</li>
+<li>by convention, an integer value will proceed which will indicate the frame that the subtitle will be displayed</li>
+<li>by convention, a string of text will follow which will be the string displayed</li>
+</ul>
+<p>Example:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>subtitle 1000 Level Two</li>
+</ul>
+<p>At frame 1000 the words "Level Two" will be displayed on the screen</p>
+<p><br></p>
+<p><span class="rvts39"> - guid </span>(required) a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie.</p>
+<p>GUID keys have a value which is in the standard guide format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B</p>
+<p><span class="rvts39"><br></span></p>
+<p><span class="rvts39"> - romChecksum </span>(required) - the MD5 hash of the ROM which was used to record the movie</p>
+<p><span class="rvts39"> - savestate </span>(optional) - a <a class="rvts18" href="fcs.html">fcs</a> savestate blob, in case a movie was recorded from savestate </p>
+<p><br></p>
+<p>Hex string keys (used for binary blobs) will have a value that is like 0x0123456789ABCDEF...</p>
+<p><br></p>
+<p><br></p>
+<p><span class="rvts16">Input log</span></p>
+<p><br></p>
+<p>The input log section consists of lines beginning and ending with a | (pipe).</p>
+<p>The fields are as follows, except as noted in <a class="rvts18" href="fm2.html#note-c">note C</a>.</p>
+<p><span class="rvts43">|c|port0|port1|port2|</span></p>
+<p><br></p>
+<p>Field <span class="rvts39">c</span> is a variable length decimal integer which is a bit field corresponding to miscellaneous input states which are valid at the start of the frame. Current values for this are:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>1 = Soft Reset</li>
+<li>2 = Hard Reset (Power)</li>
+<li>4 = FDS Disk Insert</li>
+<li>8 = FDS Disk Select</li>
+</ul>
+<p><br></p>
+<p>The format of port0, port1, port2 depends on which types of devices were attached.</p>
+<p><br></p>
+<p>SI_GAMEPAD:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>the field consists of eight characters which constitute a bit field.</li>
+<li>any character other than ' ' or '.' means that the button was pressed.</li>
+<li>by convention, the following mnemonics will be used in a column to remind us of which button corresponds to which column: <span class="rvts39">RLDUTSBA</span> (Right, Left, Down, Up, sTart, Select, B, A)</li>
+</ul>
+<p><br></p>
+<p>SI_ZAPPER:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts39">XXX YYY B Q Z</span></li>
+</ul>
+<p><span class="rvts39">XXX: </span>%03d, the x position of the mouse</p>
+<p><span class="rvts39">YYY: </span>%03d, the y position of the mouse</p>
+<p><span class="rvts39">B: </span>%1d, 1 if the mouse button is pressed; 0 if not</p>
+<p><span class="rvts39">Q: </span>%1d, an internal value used by the emulator's zapper code (this is most unfortunate..)</p>
+<p><span class="rvts39">Z: </span>%d, a variable-length decimal integer; an internal value used by the emulator's zapper code (this is even more unfortunate..)</p>
+<p><br></p>
+<p>SIFC_NONE:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>the field must always be empty.</li>
+</ul>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p><span class="rvts43">Notes:</span></p>
+<p><span class="rvts43"><br></span></p>
+<p><a name="note-a"></a>
+A. There is no key-value pair that indicates the length of the movie. This must be read by scanning the input log and counting the number of lines.</p>
+<p><br></p>
+<p><a name="note-b"></a>
+B. All movies start from power-on, unless a savestate key-value is present.</p>
+<p><br></p>
+<p><a name="note-c"></a>
+C. </p>
+<p>If a fourscore is used, then port0 and port1 are irrelevant and ignored.</p>
+<p>The input types must all be gamepads, and the input log will be in the following format:</p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li>{player1 &nbsp;player2 &nbsp;player3 &nbsp;player4}</li>
+</ul>
+<p><span class="rvts39">|c|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
+<p><span class="rvts39"><br></span></p>
+<p>If a fourscore is not used, then port0 and port1 are required.</p>
+<p><br></p>
+<p><a name="note-d"></a>
+D. The emulator uses these framerate constants</p>
+<p> &nbsp;- NTSC: 1008307711 /256/65536 = 60.099822938442230224609375</p>
+<p> &nbsp;- PAL : 838977920 &nbsp;/256/65536 = 50.00698089599609375</p>
+<p><br></p>
+<p><a name="note-e"></a>
+E. The author of this format is curious about what people think of it. Please let him know!</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Full featured Documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				2012</div>
+		</div>
+	</body>
+	
+</html>
+
