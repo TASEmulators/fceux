@@ -55,6 +55,8 @@ function ShowNotes()
 			note = taseditor.getnote(taseditor.getmarker(selection_position));
 			DisplayText(1, 190, note, 50);
 		end
+	else
+		gui.text(1, 9, "TAS Editor is not engaged.");
 	end
 end
 

@@ -487,6 +487,7 @@ void BOOKMARKS::MouseMove(int new_x, int new_y)
 }
 void BOOKMARKS::FindItemUnderMouse()
 {
+	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 	if (mouse_x > list_row_left)
 	{
 		item_under_mouse = (mouse_y - list_row_top) / list_row_height;

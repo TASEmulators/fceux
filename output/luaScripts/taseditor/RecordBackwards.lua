@@ -88,6 +88,8 @@ function reversed_recorder()
 			end
 		end
 		playback_last_position = playback_position;
+	else
+		gui.text(1, 9, "TAS Editor is not engaged.");
 	end
 end
 

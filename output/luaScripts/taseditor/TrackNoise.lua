@@ -53,6 +53,8 @@ function track_changes()
 			last_frame = current_frame;
 			last_frame_indicator_value = indicator;
 		end
+	else
+		gui.text(1, 9, "TAS Editor is not engaged.");
 	end
 end
 

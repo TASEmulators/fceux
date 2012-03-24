@@ -21,6 +21,8 @@ function display_selection()
 		else
 			gui.text(0, 10, "Selection: no");
 		end
+	else
+		gui.text(1, 9, "TAS Editor is not engaged.");
 	end
 end
 

@@ -17,10 +17,10 @@
 ---------------------------------------------------------------------------
 
 pads = {
-	{num=1, on=true, color="red", x=9, y=200, w=34, h=10},
-	{num=2, on=false, color="yellow", x=54, y=200, w=34, h=10},
-	{num=3, on=false, color="green", x=99, y=200, w=34, h=10},
-	{num=4, on=false, color="orange", x=144, y=200, w=34, h=10}
+	{num=1, on=true, color="red", x=50, y=200, w=34, h=10},
+	{num=2, on=true, color="yellow", x=90, y=200, w=34, h=10},
+	{num=3, on=false, color="green", x=130, y=200, w=34, h=10},
+	{num=4, on=false, color="orange", x=170, y=200, w=34, h=10}
 }
 
 buttons = {
@@ -54,6 +54,8 @@ function draw_joypads()
 				end
 			end
 		end
+	else
+		gui.text(1, 9, "TAS Editor is not engaged.");
 	end
 end
 
