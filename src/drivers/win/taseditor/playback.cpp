@@ -137,7 +137,7 @@ void PLAYBACK::update()
 	}
 
 	// forget lost_position_frame when the position is restored
-	if (currFrameCounter + 1 == lost_position_frame)
+	if (currFrameCounter + 1 >= lost_position_frame)
 		lost_position_frame = 0;
 
 	// pause when seeking hit pause_frame
