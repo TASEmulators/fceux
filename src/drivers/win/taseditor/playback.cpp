@@ -141,7 +141,7 @@ void PLAYBACK::update()
 		lost_position_frame = 0;
 
 	// pause when seeking hit pause_frame
-	if(pause_frame && pause_frame <= currFrameCounter + 1)
+	if(pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
 	else if (!lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
 		PauseEmulation();

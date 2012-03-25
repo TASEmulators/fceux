@@ -1,4 +1,6 @@
 
+25-Mar-2012 - AnS - returned default mapping of Frame Advance hotkey to Backslash
+25-Mar-2012 - AnS - Taseditor: BookmarksList clicks apply on buttonup only
 22-Mar-2012 - AnS - Config->Combine consecutive Recordings/Draws
 18-Mar-2012 - AnS - new hotkey "Cancel Seeking (TAS Editor)" (Esc)
 18-Mar-2012 - AnS - Taseditor: Config->Autopause at the end of Movie
@@ -34,7 +36,7 @@
 13-feb-2012 - AnS - Replay dialog speedup, now movie is not loaded into memory when checking md5
 06-feb-2012 - AnS - new Lua scripts: SoundDisplay.lua, TrackNoise.lua
 06-feb-2012 - AnS - refined Recording, now can safely record commands (Power, Reset, Insert, Switch)
-02-feb-2012 - AnS - updated fceux.chm and online documentation, uploaded HelpNDoc3 project file
+02-feb-2012 - AnS - uploaded HelpNDoc3 project file
 02-feb-2012 - AnS - added Lua scripts demonstrating some TAS Editor library functions
 02-feb-2012 - AnS - new Lua function in TAS Editor library: getsuperimpose()
 02-feb-2012 - AnS - new Lua function in Joypad library: getimmediate()

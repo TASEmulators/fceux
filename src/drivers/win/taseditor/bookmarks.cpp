@@ -82,15 +82,15 @@ void BOOKMARKS::init()
 	LVCOLUMN lvc;
 	// icons column
 	lvc.mask = LVCF_WIDTH;
-	lvc.cx = 13;
+	lvc.cx = BOOKMARKSLIST_COLUMN_ICONS_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 0, &lvc);
 	// jump_frame column
 	lvc.mask = LVCF_WIDTH | LVCF_FMT;
 	lvc.fmt = LVCFMT_CENTER;
-	lvc.cx = 74;
+	lvc.cx = BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 1, &lvc);
 	// time column
-	lvc.cx = 80;
+	lvc.cx = BOOKMARKSLIST_COLUMN_TIME_WIDTH;
 	ListView_InsertColumn(hwndBookmarksList, 2, &lvc);
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
@@ -106,6 +106,7 @@ void BOOKMARKS::init()
 	{
 		// couldn't get rect, set default values
 		list_row_top = 0;
+		list_row_left = BOOKMARKSLIST_COLUMN_ICONS_WIDTH + BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH;
 		list_row_height = 14;
 	}
 	RedrawBookmarksCaption();
@@ -131,6 +132,7 @@ void BOOKMARKS::reset_vars()
 	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 	mouse_over_bitmap = false;
 	must_check_item_under_mouse = true;
+	bookmark_leftclicked = bookmark_rightclicked = -1;
 	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
 }
 
@@ -156,17 +158,28 @@ void BOOKMARKS::update()
 	}
 	commands.resize(0);
 
-	// once per 100 milliseconds fade bookmark flashes
+	// once per 100 milliseconds update bookmark flashes
 	if (clock() > check_flash_shedule)
 	{
 		check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
 		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		{
-			if (bookmarks_array[i].flash_phase)
+			if (bookmark_rightclicked == i || bookmark_leftclicked == i)
 			{
-				bookmarks_array[i].flash_phase--;
-				RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
-				branches.must_redraw_branches_tree = true;		// because border of some branch digit has changed
+				if (bookmarks_array[i].flash_phase != FLASH_PHASE_BUTTONHELD)
+				{
+					bookmarks_array[i].flash_phase = FLASH_PHASE_BUTTONHELD;
+					RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
+				}
+			} else
+			{
+				if (bookmarks_array[i].flash_phase > 0)
+				{
+					bookmarks_array[i].flash_phase--;
+					RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
+				}
 			}
 		}
 	}
@@ -488,7 +501,9 @@ void BOOKMARKS::MouseMove(int new_x, int new_y)
 void BOOKMARKS::FindItemUnderMouse()
 {
 	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-	if (mouse_x > list_row_left)
+	RECT wrect;
+	GetClientRect(hwndBookmarksList, &wrect);
+	if (mouse_x >= list_row_left && mouse_x < wrect.right - wrect.left && mouse_y >= list_row_top && mouse_y < wrect.bottom - wrect.top)
 	{
 		item_under_mouse = (mouse_y - list_row_top) / list_row_height;
 		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS)
@@ -616,21 +631,17 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 	}
 }
 
-void BOOKMARKS::LeftClick(int column_index, int row_index)
+void BOOKMARKS::LeftClick()
 {
-	if (row_index >= 0 && column_index >= 0)
-	{
-		if (column_index <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
-			command(COMMAND_JUMP, (row_index + 1) % TOTAL_BOOKMARKS);
-		else if (column_index == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
-			command(COMMAND_DEPLOY, (row_index + 1) % TOTAL_BOOKMARKS);
-	}
+	if (column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
+		command(COMMAND_JUMP, bookmark_leftclicked);
+	else if (column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
+		command(COMMAND_DEPLOY, bookmark_leftclicked);
 }
-void BOOKMARKS::RightClick(int column_index, int row_index)
+void BOOKMARKS::RightClick()
 {
-	// set Bookmark
-	if (row_index >= 0)
-		command(COMMAND_SET, (row_index + 1) % TOTAL_BOOKMARKS);
+	if (bookmark_rightclicked >= 0)
+		command(COMMAND_SET, bookmark_rightclicked);
 }
 
 int BOOKMARKS::FindBookmarkAtFrame(int frame)
@@ -678,12 +689,37 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		{
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);
-			// perform hit test
 			LVHITTESTINFO info;
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-			bookmarks.LeftClick(info.iSubItem, info.iItem);
+			if (info.iItem >= 0 && bookmarks.bookmark_rightclicked < 0)
+			{
+				bookmarks.bookmark_leftclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
+				bookmarks.column_clicked = info.iSubItem;
+				if (bookmarks.column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
+					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_JUMP;
+				else if (bookmarks.column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
+					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_DEPLOY;
+				SetCapture(hWnd);
+			}
+			return 0;
+		}
+		case WM_LBUTTONUP:
+		{
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			RECT wrect;
+			GetClientRect(hWnd, &wrect);
+			if (info.pt.x >= 0 && info.pt.x < wrect.right - wrect.left && info.pt.y >= 0 && info.pt.y < wrect.bottom - wrect.top)
+			{
+				ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+				if (bookmarks.bookmark_leftclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.column_clicked == info.iSubItem)
+					bookmarks.LeftClick();
+			}
+			ReleaseCapture();
+			bookmarks.bookmark_leftclicked = -1;
 			return 0;
 		}
 		case WM_RBUTTONDOWN:
@@ -691,12 +727,34 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		{
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);
-			// perform hit test
 			LVHITTESTINFO info;
 			info.pt.x = GET_X_LPARAM(lParam);
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, (LPARAM)&info);
-			bookmarks.RightClick(info.iSubItem, info.iItem);
+			if (info.iItem >= 0 && bookmarks.bookmark_leftclicked < 0)
+			{
+				bookmarks.bookmark_rightclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
+				bookmarks.column_clicked = info.iSubItem;
+				bookmarks.bookmarks_array[bookmarks.bookmark_rightclicked].flash_type = FLASH_TYPE_SET;
+				SetCapture(hWnd);
+			}
+			return 0;
+		}
+		case WM_RBUTTONUP:
+		{
+			LVHITTESTINFO info;
+			info.pt.x = GET_X_LPARAM(lParam);
+			info.pt.y = GET_Y_LPARAM(lParam);
+			RECT wrect;
+			GetClientRect(hWnd, &wrect);
+			if (info.pt.x >= 0 && info.pt.x < wrect.right - wrect.left && info.pt.y >= 0 && info.pt.y < wrect.bottom - wrect.top)
+			{
+				ListView_SubItemHitTest(hWnd, (LPARAM)&info);
+				if (bookmarks.bookmark_rightclicked == (info.iItem + 1) % TOTAL_BOOKMARKS && bookmarks.column_clicked == info.iSubItem)
+					bookmarks.RightClick();
+			}
+			ReleaseCapture();
+			bookmarks.bookmark_rightclicked = -1;
 			return 0;
 		}
 		case WM_MBUTTONDOWN:
@@ -708,6 +766,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
+			bookmarks.bookmark_rightclicked = -1;
 			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 
 	}

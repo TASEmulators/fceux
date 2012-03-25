@@ -21,6 +21,10 @@ enum COMMANDS
 	TOTAL_COMMANDS
 };
 
+#define BOOKMARKSLIST_COLUMN_ICONS_WIDTH 13
+#define BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH 74
+#define BOOKMARKSLIST_COLUMN_TIME_WIDTH 82
+
 #define ITEM_UNDER_MOUSE_NONE -2
 #define ITEM_UNDER_MOUSE_CLOUD -1
 
@@ -56,8 +60,8 @@ public:
 
 	void GetDispInfo(NMLVDISPINFO* nmlvDispInfo);
 	LONG CustomDraw(NMLVCUSTOMDRAW* msg);
-	void LeftClick(int column_index, int row_index);
-	void RightClick(int column_index, int row_index);
+	void LeftClick();
+	void RightClick();
 
 	int FindBookmarkAtFrame(int frame);
 
@@ -78,6 +82,11 @@ public:
 	bool mouse_over_bitmap, mouse_over_bookmarkslist;
 	int item_under_mouse;
 	TRACKMOUSEEVENT tme, list_tme;
+	int bookmark_leftclicked, bookmark_rightclicked, column_clicked;
+	int list_row_top;
+	int list_row_left;
+	int list_row_height;
+
 	HWND hwndBookmarksList, hwndBranchesBitmap, hwndBookmarks;
 
 private:
@@ -89,9 +98,6 @@ private:
 	std::vector<int> commands;
 	int check_flash_shedule;
 	int mouse_x, mouse_y;
-	int list_row_top;
-	int list_row_left;
-	int list_row_height;
 
 	// GDI stuff
 	HFONT hBookmarksFont;

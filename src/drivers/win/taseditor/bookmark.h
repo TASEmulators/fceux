@@ -1,6 +1,8 @@
 // Specification file for Bookmark class
 
 #define FLASH_PHASE_MAX 11
+#define FLASH_PHASE_BUTTONHELD 6
+
 enum
 {
 	FLASH_TYPE_SET = 0,
@@ -30,8 +32,6 @@ public:
 	SNAPSHOT snapshot;
 	std::vector<uint8> savestate;
 	std::vector<uint8> saved_screenshot;
-
-	//int parent_branch;
 
 	// not saved vars
 	int flash_phase;
