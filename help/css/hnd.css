@@ -333,6 +333,39 @@ span.rvts62
  font-family: 'Lucida Console', 'Monaco', monospace;
  text-decoration: underline;
 }
+span.rvts63
+{
+ font-style: italic;
+ font-weight: bold;
+}
+span.rvts64
+{
+ font-weight: bold;
+ text-decoration: underline;
+}
+span.rvts65
+{
+ font-size: 11pt;
+ text-decoration: underline;
+}
+span.rvts66
+{
+ font-size: 5pt;
+}
+span.rvts67
+{
+ font-size: 4pt;
+}
+span.rvts68
+{
+ font-size: 4pt;
+ font-weight: bold;
+}
+span.rvts69
+{
+ font-size: 5pt;
+ font-weight: bold;
+}
 /* ========== Para Styles ========== */
 p,ul,ol /* Paragraph Style */
 {
