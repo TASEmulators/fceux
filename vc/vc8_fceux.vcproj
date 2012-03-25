@@ -2299,6 +2299,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\drivers\win\taseditor\branches.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\branches.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\drivers\win\taseditor\editor.cpp"
 						>
 					</File>
