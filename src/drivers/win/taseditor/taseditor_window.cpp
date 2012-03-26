@@ -84,15 +84,15 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
 	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (Alt+Wheel up) (hotkey: Shift+Up)", "", false, 0, 0,			// EMUCMD_TASEDITOR_REWIND
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)", "", false, 0, 0,			// EMUCMD_TASEDITOR_REWIND
 	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance (mouse: Right button+Wheel down) (Alt+Wheel down) (hotkey: Shift+Down)", "", false, 0, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)", "", false, 0, 0,
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
 	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "If you change input above Playback, cursor will run where it was before change", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
-	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert movie back to that time", "", false, 0, 0,
+	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the movie back to that time", "", false, 0, 0,
 	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_RADIO_1P, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_RADIO_2P, -1, 0, 0, 0, "", "", false, 0, 0,
@@ -1246,7 +1246,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						if (selection_beginning >= 0)
 						{
 							selection.Transpose(-selection_beginning);
-							piano_roll.FollowSelection();
+							piano_roll.EnsureVisible(0);
 						}
 					}
 					break;
@@ -1260,7 +1260,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						if (selection_end >= 0)
 						{
 							selection.Transpose(currMovieData.getNumRecords() - 1 - selection_end);
-							piano_roll.FollowSelection();
+							piano_roll.EnsureVisible(currMovieData.getNumRecords() - 1);
 						}
 					}
 					break;
@@ -1278,7 +1278,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 					{
 						selection.Transpose(-1);
-						piano_roll.FollowSelection();
+						int selection_beginning = selection.GetCurrentSelectionBeginning();
+						if (selection_beginning >= 0)
+							piano_roll.EnsureVisible(selection_beginning);
 					}
 					break;
 				case ACCEL_CTRL_DOWN:
@@ -1286,7 +1288,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 					{
 						selection.Transpose(1);
-						piano_roll.FollowSelection();
+						int selection_end = selection.GetCurrentSelectionEnd();
+						if (selection_end >= 0)
+							piano_roll.EnsureVisible(selection_end);
 					}
 					break;
 				case ACCEL_CTRL_LEFT:

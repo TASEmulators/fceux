@@ -18,7 +18,6 @@
 #define HEADER_DX_FIX 4
 
 #define PIANO_ROLL_SCROLLING_BOOST 2
-#define BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED 4
 
 #define MARKER_DRAG_BOX_ALPHA 175
 #define MARKER_DRAG_COUNTDOWN_MAX 14
@@ -160,6 +159,7 @@ public:
 	void FollowSelection();
 	void FollowPauseframe();
 	void FollowMarker(int marker_id);
+	void EnsureVisible(int row_index);
 
 	void ColumnSet(int column, bool alt_pressed);
 
@@ -174,6 +174,8 @@ public:
 	LONG HeaderCustomDraw(NMLVCUSTOMDRAW* msg);
 
 	void RightClick(LVHITTESTINFO& info);
+
+	void CrossGaps(int zDelta);
 
 	int header_item_under_mouse;
 	HWND hwndList, hwndHeader;

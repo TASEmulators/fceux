@@ -766,7 +766,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
-			bookmarks.bookmark_rightclicked = -1;
+			bookmarks.bookmark_rightclicked = -1;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
 			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
 
 	}

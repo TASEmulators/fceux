@@ -11,12 +11,13 @@ Piano Roll - Piano Roll interface
 [Singleton]
 
 * implements the working of Piano Roll List: creating, redrawing, scrolling, mouseover, clicks, drag
+* regularly updates the size of the List according to current movie input
 * on demand: scrolls visible area of the List to any given item: to Playback Cursor, to Selection Cursor, to "undo pointer", to a Marker
 * saves and loads current position of vertical scrolling from a project file. On error: scrolls the List to the beginning
 * implements the working of Piano Roll List Header: creating, redrawing, animating, mouseover, clicks
-* on demand: launches flashes in the List Header
-* regularly updates the size of the List according to current movie input, also updates lights in the List Header according to button presses data from Recorder and Alt key state
-* implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement
+* regularly updates lights in the Header according to button presses data from Recorder and Alt key state
+* on demand: launches flashes in the Header
+* implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps in Input/markers
 * implements context menu on Right-click
 * updates mouse cursor icon depending on item under cursor
 * stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images
@@ -856,6 +857,10 @@ void PIANO_ROLL::FollowMarker(int marker_id)
 		ListView_EnsureVisible(hwndList, 0, false);
 	}
 }
+void PIANO_ROLL::EnsureVisible(int row_index)
+{
+	ListView_EnsureVisible(hwndList, row_index, false);
+}
 
 void PIANO_ROLL::ColumnSet(int column, bool alt_pressed)
 {
@@ -1331,6 +1336,113 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 		TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);
 	}
 }
+
+void PIANO_ROLL::CrossGaps(int zDelta)
+{
+	POINT p;
+	if (GetCursorPos(&p))
+	{
+		ScreenToClient(hwndList, &p);
+		RECT wrect;
+		GetClientRect(hwndList, &wrect);
+		if (p.x >= 0 && p.x < wrect.right - wrect.left && p.y >= list_row_top && p.y < wrect.bottom - wrect.top)
+		{
+			// perform hit test
+			LVHITTESTINFO info;
+			info.pt.x = p.x;
+			info.pt.y = p.y;
+			ListView_SubItemHitTest(hwndList, &info);
+			int row_index = info.iItem;
+			int column_index = info.iSubItem;
+			if (row_index >= 0 && column_index >= COLUMN_FRAMENUM && column_index <= COLUMN_FRAMENUM2)
+			{
+				if (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+				{
+					// cross gaps in Markers
+					if (zDelta < 0)
+					{
+						// search down
+						int last_frame = currMovieData.getNumRecords() - 1;
+						if (row_index < last_frame)
+						{
+							int frame = row_index + 1;
+							bool result_of_closest_frame = (markers_manager.GetMarker(frame) != 0);
+							while ((++frame) <= last_frame)
+							{
+								if ((markers_manager.GetMarker(frame) != 0) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					} else
+					{
+						// search up
+						int first_frame = 0;
+						if (row_index > first_frame)
+						{
+							int frame = row_index - 1;
+							bool result_of_closest_frame = (markers_manager.GetMarker(frame) != 0);
+							while ((--frame) >= first_frame)
+							{
+								if ((markers_manager.GetMarker(frame) != 0) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					}
+				} else
+				{
+					// cross gaps in Input
+					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+					if (zDelta < 0)
+					{
+						// search down
+						int last_frame = currMovieData.getNumRecords() - 1;
+						if (row_index < last_frame)
+						{
+							int frame = row_index + 1;
+							bool result_of_closest_frame = currMovieData.records[frame].checkBit(joy, button);
+							while ((++frame) <= last_frame)
+							{
+								if (currMovieData.records[frame].checkBit(joy, button) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					} else
+					{
+						// search up
+						int first_frame = 0;
+						if (row_index > first_frame)
+						{
+							int frame = row_index - 1;
+							bool result_of_closest_frame = currMovieData.records[frame].checkBit(joy, button);
+							while ((--frame) >= first_frame)
+							{
+								if (currMovieData.records[frame].checkBit(joy, button) != result_of_closest_frame)
+								{
+									// found different result, so we crossed the gap
+									ListView_Scroll(hwndList, 0, list_row_height * (frame - row_index));
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}	
+}
 // -------------------------------------------------------------------------
 LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1566,12 +1678,9 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					selection.JumpNextMarker(-zDelta / WHEEL_DELTA);
 				else if (zDelta > 0)
 					selection.JumpPrevMarker(zDelta / WHEEL_DELTA);
-			} else if (alt_pressed || fwKeys & MK_RBUTTON)
+			} else if (fwKeys & MK_RBUTTON)
 			{
-				// Right button + wheel = Alt + wheel = rewind/forward
-				// if both Right button and Alt are pressed, move 4x faster
-				if (alt_pressed && fwKeys & MK_RBUTTON)
-					zDelta *= BOOST_WHEN_BOTH_RIGHTBUTTON_AND_ALT_PRESSED;
+				// Right button + wheel = rewind/forward
 				int destination_frame = currFrameCounter - (zDelta / WHEEL_DELTA);
 				if (destination_frame < 0) destination_frame = 0;
 				int lastCursor = currFrameCounter;
@@ -1585,6 +1694,10 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			} else if (history.CursorOverHistoryList())
 			{
 				return SendMessage(history.hwndHistoryList, WM_MOUSEWHEEL_RESENT, wParam, lParam);
+			} else if (alt_pressed)
+			{
+				// cross gaps in input/Markers
+				piano_roll.CrossGaps(zDelta);
 			} else
 			{
 				// normal scrolling - make it 2x faster than usual
