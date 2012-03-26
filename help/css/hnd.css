@@ -366,6 +366,11 @@ span.rvts69
  font-size: 5pt;
  font-weight: bold;
 }
+span.rvts70
+{
+ font-size: 11pt;
+ font-weight: bold;
+}
 /* ========== Para Styles ========== */
 p,ul,ol /* Paragraph Style */
 {
