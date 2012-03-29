@@ -26,9 +26,10 @@ BUGS
 	* Zipped rom support borked?
 	* F1 from terminal-less gui fceux process hangs fceux (since input is required from console in cheat editor)
 
-OSX
-===
-	* Single window mode does not work (the XWINDOWID hack does not work in Apple's X11 server, so this may never get fixed).
+OS X
+====
+	* Single window mode does not work (the XWINDOWID hack does not work in Apples X11 server, so this may never get fixed).
+		* It is possible to use GTK to build native OS X menus: http://developer.gnome.org/gtk3/3.4/GtkApplication.html .  It would be awesome to do this and hide the main GTK window if the top bar is available
 	* Zapper input is taken from GTK window instead of X11 window (a workaround could be implemented to resolve with with some #ifdef APPLE etc)
 	* Not an "official" target, but testing should be done before release on OS X
 
