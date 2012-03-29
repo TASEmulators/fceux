@@ -32,6 +32,10 @@ OS X
 		* It is possible to use GTK to build native OS X menus: http://developer.gnome.org/gtk3/3.4/GtkApplication.html .  It would be awesome to do this and hide the main GTK window if the top bar is available
 	* Zapper input is taken from GTK window instead of X11 window (a workaround could be implemented to resolve with with some #ifdef APPLE etc)
 	* Not an "official" target, but testing should be done before release on OS X
+	* DMG Static binary download for Intel OS X
+		* Include needful libaries
+		* Adjust scons to produce static binary/libraries with an option
+			* http://www.scons.org/wiki/StaticallyLink
 
 DOCS
 ====
