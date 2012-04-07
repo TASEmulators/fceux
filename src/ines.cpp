@@ -272,7 +272,7 @@ void CheckBad(uint64 md5partial)
 	{
 		if(BadROMImages[x].md5partial == md5partial)
 		{
-			FCEU_PrintError("The copy game you have loaded, \"%s\", is bad, and will not work properly on FCE Ultra.", BadROMImages[x].name);
+			FCEU_PrintError("The copy game you have loaded, \"%s\", is bad, and will not work properly in FCEUX.", BadROMImages[x].name);
 			return;
 		}
 		x++;
