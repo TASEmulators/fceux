@@ -8,12 +8,12 @@
 #include "selection.h"
 #include "markers_manager.h"
 #include "snapshot.h"
+#include "bookmarks.h"
+#include "branches.h"
 #include "history.h"
 #include "playback.h"
 #include "recorder.h"
 #include "greenzone.h"
-#include "bookmarks.h"
-#include "branches.h"
 #include "piano_roll.h"
 #include "taseditor_lua.h"
 #include "splicer.h"
@@ -28,6 +28,8 @@
 #define HISTORY_SAVED 8
 #define PIANO_ROLL_SAVED 16
 #define SELECTION_SAVED 32
+
+#define PROJECT_FILE_CURRENT_VERSION 1
 
 class TASEDITOR_PROJECT
 {

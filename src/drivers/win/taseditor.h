@@ -26,5 +26,7 @@ void Export();
 int GetInputType(MovieData& md);
 void SetInputType(MovieData& md, int new_input_type);
 
+void ApplyMovieInputConfig();
+
 bool TaseditorIsRecording();
 

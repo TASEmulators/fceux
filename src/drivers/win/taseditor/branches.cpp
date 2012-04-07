@@ -11,18 +11,19 @@ Branches - Manager of Branches
 [Singleton]
 
 * stores info about Branches (relations of Bookmarks) and the id of current Branch
-* also stores the time of the last modification (see fireball) and the time of the root of Branches Tree (see cloudlet)
-* finds best place for every new Bookmark in the Branches Tree
+* also stores the time of the last modification (see fireball) and the time of project beginning (see cloudlet)
+* also caches data used in calculations (cached_first_difference, cached_timelines)
 * saves and loads the data from a project file. On error: sends warning to caller
 * implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover
-* on demand: reacts on project changes and recalculates Branches Tree
-* regularly updates animations in Branches Tree
+* on demand: reacts on Bookmarks/current Movie changes and recalculates the Branches Tree
+* regularly updates animations in Branches Tree and calculates Playback cursor position on the Tree
 * stores resources: coordinates for building Branches Tree, animation timings
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
 #include "utils/xstring.h"
 #include "zlib.h"
+#include <math.h>
 
 #pragma comment(lib, "msimg32.lib")
 
@@ -81,6 +82,7 @@ void BRANCHES::init()
 	hOldBitmap2 = (HBITMAP)SelectObject(hSpritesheetDC, branchesSpritesheet);
 	// create pens
 	normal_pen = CreatePen(PS_SOLID, 1, 0x0);
+	timeline_pen = CreatePen(PS_SOLID, 1, 0x0020E0);
 	select_pen = CreatePen(PS_SOLID, 2, 0xFF9080);
 
 	reset();
@@ -91,6 +93,8 @@ void BRANCHES::init()
 void BRANCHES::free()
 {
 	parents.resize(0);
+	cached_first_difference.resize(0);
+	cached_timelines.resize(0);
 	BranchX.resize(0);
 	BranchY.resize(0);
 	BranchPrevX.resize(0);
@@ -131,6 +135,21 @@ void BRANCHES::free()
 		DeleteObject(branchesSpritesheet);
 		branchesSpritesheet = NULL;
 	}
+	if (normal_pen)
+	{
+		DeleteObject(normal_pen);
+		normal_pen = 0;
+	}
+	if (timeline_pen)
+	{
+		DeleteObject(normal_pen);
+		timeline_pen = 0;
+	}
+	if (select_pen)
+	{
+		DeleteObject(normal_pen);
+		select_pen = 0;
+	}
 }
 void BRANCHES::reset()
 {
@@ -138,14 +157,24 @@ void BRANCHES::reset()
 	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
 		parents[i] = ITEM_UNDER_MOUSE_CLOUD;
 
+	cached_timelines.resize(TOTAL_BOOKMARKS);
+	cached_first_difference.resize(TOTAL_BOOKMARKS);
+	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+	{
+		cached_timelines[i] = ITEM_UNDER_MOUSE_CLOUD;
+		cached_first_difference[i].resize(TOTAL_BOOKMARKS);
+		for (int t = TOTAL_BOOKMARKS-1; t >= 0; t--)
+			cached_first_difference[i][t] = FIRST_DIFFERENCE_UNKNOWN;
+	}
+
 	// set positions of slots to default coordinates
 	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
 	{
 		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
 		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 	}
-	CursorX = CursorPrevX = CloudX = CloudPrevX = BRANCHES_CLOUD_X;
-	CursorY = CursorPrevY = BRANCHES_CLOUD_Y;
+	CloudX = CloudPrevX = BRANCHES_CLOUD_X;
+	cursor_x = cursor_y = 0;
 
 	reset_vars();
 
@@ -160,6 +189,7 @@ void BRANCHES::reset()
 void BRANCHES::reset_vars()
 {
 	transition_phase = animation_frame = 0;
+	playback_x = playback_y = -50;
 	must_recalculate_branches_tree = must_redraw_branches_tree = true;
 	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
@@ -205,6 +235,92 @@ void BRANCHES::update()
 				// just update sprites
 				InvalidateRect(bookmarks.hwndBranchesBitmap, 0, FALSE);
 			}
+			// calculate playback position
+			int branch, branch_x, branch_y, parent, parent_x, parent_y, upper_frame, lower_frame;
+			double distance;
+			if (current_branch != ITEM_UNDER_MOUSE_CLOUD)
+			{
+				if (changes_since_current_branch)
+					parent = TOTAL_BOOKMARKS;
+				else
+					parent = FindFullTimelineForBranch(current_branch);
+				do
+				{
+					branch = parent;
+					if (branch == TOTAL_BOOKMARKS)
+						parent = current_branch;
+					else
+						parent = parents[branch];
+					if (parent == ITEM_UNDER_MOUSE_CLOUD)
+						lower_frame = -1;
+					else
+						lower_frame = bookmarks.bookmarks_array[parent].snapshot.jump_frame;
+				} while (parent != ITEM_UNDER_MOUSE_CLOUD && currFrameCounter < lower_frame);
+				if (branch == TOTAL_BOOKMARKS)
+					upper_frame = currMovieData.getNumRecords() - 1;
+				else
+					upper_frame = bookmarks.bookmarks_array[branch].snapshot.jump_frame;
+				branch_x = BranchCurrX[branch];
+				branch_y = BranchCurrY[branch];
+				if (parent == ITEM_UNDER_MOUSE_CLOUD)
+				{
+					parent_x = cloud_x;
+					parent_y = BRANCHES_CLOUD_Y;
+				} else
+				{
+	 				parent_x = BranchCurrX[parent];
+					parent_y = BranchCurrY[parent];
+				}
+				if (upper_frame != lower_frame)
+					distance = (double)(currFrameCounter - lower_frame) / (double)(upper_frame - lower_frame);
+				else
+					distance = 0;
+				if (distance > 1.0) distance = 1.0;
+				playback_x = parent_x + distance * (branch_x - parent_x);
+				playback_y = parent_y + distance * (branch_y - parent_y);
+			} else
+			{
+				if (changes_since_current_branch)
+				{
+					// special case: there's only cloud + fireball
+					upper_frame = currMovieData.getNumRecords() - 1;
+					lower_frame = 0;
+					parent_x = cloud_x;
+					parent_y = BRANCHES_CLOUD_Y;
+					branch_x = BranchCurrX[TOTAL_BOOKMARKS];
+					branch_y = BranchCurrY[TOTAL_BOOKMARKS];
+					if (upper_frame != lower_frame)
+						distance = (double)(currFrameCounter - lower_frame) / (double)(upper_frame - lower_frame);
+					else
+						distance = 0;
+					if (distance > 1.0) distance = 1.0;
+					playback_x = parent_x + distance * (branch_x - parent_x);
+					playback_y = parent_y + distance * (branch_y - parent_y);
+				} else
+				{
+					// special case: there's only cloud
+					playback_x = cloud_x;
+					playback_y = BRANCHES_CLOUD_Y;
+				}
+			}
+			// move cursor to playback position
+			double dx = playback_x - cursor_x;
+			double dy = playback_y - cursor_y;
+			distance = sqrt(dx*dx + dy*dy);
+			if (distance < CURSOR_MIN_DISTANCE || distance > CURSOR_MAX_DISTANCE)
+			{
+				// teleport
+				cursor_x = playback_x;
+				cursor_y = playback_y;
+			} else
+			{
+				// advance
+				double speed = sqrt(distance);
+				if (speed < CURSOR_MIN_SPEED)
+					speed = CURSOR_MIN_SPEED;
+				cursor_x += dx * speed / distance;
+				cursor_y += dy * speed / distance;
+			}
 			if (must_redraw_branches_tree)
 				RedrawBranchesTree();
 		}
@@ -226,6 +342,12 @@ void BRANCHES::save(EMUFILE *os)
 	// write all 10 parents
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		write32le(parents[i], os);
+	// write cached_timelines
+	os->fwrite(&cached_timelines[0], TOTAL_BOOKMARKS);
+	// write cached_first_difference
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+		for (int t = 0; t < TOTAL_BOOKMARKS; ++t)
+			write32le(cached_first_difference[i][t], os);
 }
 // returns true if couldn't load
 bool BRANCHES::load(EMUFILE *is)
@@ -242,6 +364,12 @@ bool BRANCHES::load(EMUFILE *is)
 	// read all 10 parents
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 		if (!read32le(&parents[i], is)) goto error;
+	// read cached_timelines
+	if ((int)is->fread(&cached_timelines[0], TOTAL_BOOKMARKS) < TOTAL_BOOKMARKS) goto error;
+	// read cached_first_difference
+	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+		for (int t = 0; t < TOTAL_BOOKMARKS; ++t)
+			if (!read32le(&cached_first_difference[i][t], is)) goto error;
 	// all ok
 	reset_vars();
 	return false;
@@ -272,7 +400,7 @@ void BRANCHES::RedrawBranchesTree()
 	GradientFill(hBitmapDC, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_H);
 
 	// lines
-	int branch_x, branch_y, parent_x, parent_y, child_id;
+	int branch, branch_x, branch_y, parent_x, parent_y, child_id;
 	SelectObject(hBitmapDC, normal_pen);
 	for (int t = Children.size() - 1; t >= 0; t--)
 	{
@@ -295,40 +423,72 @@ void BRANCHES::RedrawBranchesTree()
 			}
 		}
 	}
-	// lines for item under mouse
-	SelectObject(hBitmapDC, select_pen);
-	int branch = bookmarks.item_under_mouse;
-	if (branch == TOTAL_BOOKMARKS)
-		branch = current_branch;
-	while (branch >= 0)
+	// lines for current timeline
+	if (current_branch != ITEM_UNDER_MOUSE_CLOUD)
 	{
-		branch_x = BranchCurrX[branch];
-		branch_y = BranchCurrY[branch];
-		MoveToEx(hBitmapDC, branch_x, branch_y, 0);
-		branch = parents[branch];
-		if (branch >= 0)
+		SelectObject(hBitmapDC, timeline_pen);
+		if (changes_since_current_branch)
+			branch = current_branch;
+		else
+			branch = FindFullTimelineForBranch(current_branch);
+		while (branch >= 0)
 		{
-	 		branch_x = BranchCurrX[branch];
+			branch_x = BranchCurrX[branch];
 			branch_y = BranchCurrY[branch];
-		} else
-		{
-			branch_x = cloud_x;
-			branch_y = BRANCHES_CLOUD_Y;
+			MoveToEx(hBitmapDC, branch_x, branch_y, 0);
+			branch = parents[branch];
+			if (branch == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				branch_x = cloud_x;
+				branch_y = BRANCHES_CLOUD_Y;
+			} else
+			{
+	 			branch_x = BranchCurrX[branch];
+				branch_y = BranchCurrY[branch];
+			}
+			LineTo(hBitmapDC, branch_x, branch_y);
 		}
-		LineTo(hBitmapDC, branch_x, branch_y);
+	}
+	// lines for item under mouse
+	if (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse <= TOTAL_BOOKMARKS)
+	{
+		SelectObject(hBitmapDC, select_pen);
+		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
+			branch = current_branch;
+		else
+			branch = FindFullTimelineForBranch(bookmarks.item_under_mouse);
+		while (branch >= 0)
+		{
+			branch_x = BranchCurrX[branch];
+			branch_y = BranchCurrY[branch];
+			MoveToEx(hBitmapDC, branch_x, branch_y, 0);
+			branch = parents[branch];
+			if (branch == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				branch_x = cloud_x;
+				branch_y = BRANCHES_CLOUD_Y;
+			} else
+			{
+	 			branch_x = BranchCurrX[branch];
+				branch_y = BranchCurrY[branch];
+			}
+			LineTo(hBitmapDC, branch_x, branch_y);
+		}
 	}
 	if (changes_since_current_branch)
 	{
-		if (bookmarks.item_under_mouse != TOTAL_BOOKMARKS)
-			SelectObject(hBitmapDC, normal_pen);
-		if (current_branch >= 0)
-		{
-			parent_x = BranchCurrX[current_branch];
-			parent_y = BranchCurrY[current_branch];
-		} else
+		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
+			SelectObject(hBitmapDC, select_pen);
+		else
+			SelectObject(hBitmapDC, timeline_pen);
+		if (current_branch == ITEM_UNDER_MOUSE_CLOUD)
 		{
 			parent_x = cloud_x;
 			parent_y = BRANCHES_CLOUD_Y;
+		} else
+		{
+			parent_x = BranchCurrX[current_branch];
+			parent_y = BranchCurrY[current_branch];
 		}
 		MoveToEx(hBitmapDC, parent_x, parent_y, 0);
 		branch_x = BranchCurrX[TOTAL_BOOKMARKS];
@@ -440,26 +600,27 @@ void BRANCHES::PaintBranchesBitmap(HDC hdc)
 			TransparentBlt(hBufferDC, branch_x, branch_y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, hSpritesheetDC, BRANCHES_FIREBALL_SPRITESHEET_END_X - fireball_size * BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_SPRITESHEET_Y, BRANCHES_FIREBALL_WIDTH, BRANCHES_FIREBALL_HEIGHT, 0x00FF00);
 		}
 	}
+	// blinking Playback cursor point
+	if (animation_frame & 1)
+		TransparentBlt(hBufferDC, playback_x - BRANCHES_MINIARROW_HALFWIDTH, playback_y - BRANCHES_MINIARROW_HALFHEIGHT, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, hSpritesheetDC, BRANCHES_MINIARROW_SPRITESHEET_X, BRANCHES_MINIARROW_SPRITESHEET_Y, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, 0x00FF00);
 	// corners cursor
-	branch_x = (CursorX * (BRANCHES_TRANSITION_MAX - transition_phase) + CursorPrevX * transition_phase) / BRANCHES_TRANSITION_MAX;
-	branch_y = (CursorY * (BRANCHES_TRANSITION_MAX - transition_phase) + CursorPrevY * transition_phase) / BRANCHES_TRANSITION_MAX;
 	int current_corners_cursor_shift = BRANCHES_CORNER_BASE_SHIFT + corners_cursor_shift[animation_frame];
 	int corner_x, corner_y;
 	// upper left
-	corner_x = branch_x - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-	corner_y = branch_y - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
+	corner_x = cursor_x - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
+	corner_y = cursor_y - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
 	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER1_SPRITESHEET_X, BRANCHES_CORNER1_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// upper right
-	corner_x = branch_x + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-	corner_y = branch_y - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
+	corner_x = cursor_x + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
+	corner_y = cursor_y - current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
 	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER2_SPRITESHEET_X, BRANCHES_CORNER2_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// lower left
-	corner_x = branch_x - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-	corner_y = branch_y + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
+	corner_x = cursor_x - current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
+	corner_y = cursor_y + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
 	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER3_SPRITESHEET_X, BRANCHES_CORNER3_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// lower right
-	corner_x = branch_x + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
-	corner_y = branch_y + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
+	corner_x = cursor_x + current_corners_cursor_shift - BRANCHES_CORNER_HALFWIDTH;
+	corner_y = cursor_y + current_corners_cursor_shift - BRANCHES_CORNER_HALFHEIGHT;
 	TransparentBlt(hBufferDC, corner_x, corner_y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, hSpritesheetDC, BRANCHES_CORNER4_SPRITESHEET_X, BRANCHES_CORNER4_SPRITESHEET_Y, BRANCHES_CORNER_WIDTH, BRANCHES_CORNER_HEIGHT, 0x00FF00);
 	// finish - paste buffer bitmap to screen
 	BitBlt(hdc, 0, 0, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT, hBufferDC, 0, 0, SRCCOPY);
@@ -469,110 +630,120 @@ int BRANCHES::GetCurrentBranch()
 {
 	return current_branch;
 }
-
-// this function finds best place for a new Bookmark in the Branches Tree
-void BRANCHES::HandleBookmarkSet(int slot, char* slot_time)
+bool BRANCHES::GetChangesSinceCurrentBranch()
 {
-	if (slot != current_branch)
-	{
-		// inherit current branch, forget previous parent
-		int parent = parents[slot];
-		if (parent == ITEM_UNDER_MOUSE_CLOUD && slot_time[0])
-		{
-			// check if this was the only child of cloud parent, if so then set cloud time to the saved_time
-			int i = 0;
-			for (; i < TOTAL_BOOKMARKS; ++i)
-			{
-				if (bookmarks.bookmarks_array[i].not_empty && parents[i] == ITEM_UNDER_MOUSE_CLOUD && i != slot)
-					break;
-			}
-			if (i >= TOTAL_BOOKMARKS)
-				// didn't find another child of cloud, so after this slot disconnects, cloud will have 0 children
-				// it will mean that old cloud  disappears and new cloud is formed where the slot was
-				strcpy(cloud_time, slot_time);
-		}
-		// before disconnecting from old parent, connect all childs to the old parent
-		for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		{
-			if (bookmarks.bookmarks_array[i].not_empty && parents[i] == slot)
-				parents[i] = parent;
-		}
-		parents[slot] = current_branch;
-	}
+	return changes_since_current_branch;
+}
 
-	// if parent is invalid (first_change < parent.jump_frame) then find better parent
-	int factor = 0;
-	// also if parent == cloud, then try to find better parent
-	int parent = parents[slot];
-	if (parent != ITEM_UNDER_MOUSE_CLOUD)
-		factor = bookmarks.bookmarks_array[slot].snapshot.findFirstChange(bookmarks.bookmarks_array[parent].snapshot);
-	if (parent == ITEM_UNDER_MOUSE_CLOUD || (factor >= 0 && factor < bookmarks.bookmarks_array[parent].snapshot.jump_frame))
-	{
-		// find highest frame of change
-		std::vector<int> DecisiveFactor(TOTAL_BOOKMARKS);
-		int best_branch = ITEM_UNDER_MOUSE_CLOUD;
-		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
-		{
-			if (i != slot && i != parent && bookmarks.bookmarks_array[i].not_empty && bookmarks.bookmarks_array[slot].snapshot.size >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
-			{
-				factor = bookmarks.bookmarks_array[slot].snapshot.findFirstChange(bookmarks.bookmarks_array[i].snapshot);
-				if (factor < 0)
-				{
-					// this branch is identical to this slot
-					DecisiveFactor[i] = 2 * bookmarks.bookmarks_array[i].snapshot.size;
-				} else if (factor >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
-				{
-					// hey, this branch could be our new parent...
-					DecisiveFactor[i] = 2 * factor;
-				} else
-					DecisiveFactor[i] = 0;
-			} else
-			{
-				DecisiveFactor[i] = 0;
-			}
-		}
-		// add +1 as a bonus to current parents and grandparents (a bit of nepotism here)
-		while (parent >= 0)
-		{
-			if (DecisiveFactor[parent])
-				DecisiveFactor[parent]++;
-			parent = parents[parent];
-		}
-		// find max
-		factor = 0;
-		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
-		{
-			if (DecisiveFactor[i] && DecisiveFactor[i] > factor)
-			{
-				factor = DecisiveFactor[i];
-				best_branch = i;
-			}
-		}
-		parent = parents[slot];
-		if (parent != best_branch)
-		{
-			// before disconnecting from old parent, connect all childs to the old parent
-			for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-			{
-				if (bookmarks.bookmarks_array[i].not_empty && parents[i] == slot)
-					parents[i] = parent;
-			}
-			// found new parent
-			parents[slot] = best_branch;
-			must_recalculate_branches_tree = true;
-		}
-	}
-	// switch current branch to this branch
-	if (slot != current_branch || changes_since_current_branch)
-		must_recalculate_branches_tree = true;
+void BRANCHES::HandleBookmarkSet(int slot)
+{
+	// new Branch is written into the slot
+	InvalidateBranchSlot(slot);
+	RecalculateParents();
 	current_branch = slot;
 	changes_since_current_branch = false;
+	must_recalculate_branches_tree = true;
 }
 void BRANCHES::HandleBookmarkDeploy(int slot)
 {
 	current_branch = slot;
 	changes_since_current_branch = false;
 	must_recalculate_branches_tree = true;
+}
+void BRANCHES::HandleHistoryJump(int new_current_branch, bool new_changes_since_current_branch)
+{
+	RecalculateParents();
+	current_branch = new_current_branch;
+	changes_since_current_branch = new_changes_since_current_branch;
+	if (new_changes_since_current_branch)
+		SetCurrentPosTime();
+	must_recalculate_branches_tree = true;
+}
+
+void BRANCHES::InvalidateBranchSlot(int slot)
+{
+	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+	{
+		cached_timelines[i] = ITEM_UNDER_MOUSE_CLOUD;
+		cached_first_difference[i][slot] = FIRST_DIFFERENCE_UNKNOWN;
+		cached_first_difference[slot][i] = FIRST_DIFFERENCE_UNKNOWN;
+		parents[i] = ITEM_UNDER_MOUSE_CLOUD;
+	}
+}
+// returns the frame of first difference between snapshots of two Branches
+int BRANCHES::GetFirstDifference(int first_branch, int second_branch)
+{
+	if (first_branch == second_branch)
+		return bookmarks.bookmarks_array[first_branch].snapshot.size;
+
+	if (cached_first_difference[first_branch][second_branch] == FIRST_DIFFERENCE_UNKNOWN)
+	{
+		if (bookmarks.bookmarks_array[first_branch].not_empty && bookmarks.bookmarks_array[second_branch].not_empty)
+		{	
+			int frame = bookmarks.bookmarks_array[first_branch].snapshot.findFirstChange(bookmarks.bookmarks_array[second_branch].snapshot);
+			if (frame < 0)
+				frame = bookmarks.bookmarks_array[first_branch].snapshot.size;
+			cached_first_difference[first_branch][second_branch] = frame;
+			cached_first_difference[second_branch][first_branch] = frame;
+			return frame;
+		} else return 0;
+	} else
+		return cached_first_difference[first_branch][second_branch];
+}
+
+int BRANCHES::FindFullTimelineForBranch(int branch_num)
+{
+	if (cached_timelines[branch_num] == ITEM_UNDER_MOUSE_CLOUD)
+	{
+		cached_timelines[branch_num] = branch_num;		// by default
+		std::vector<int> candidates;
+		int temp_jump_frame, temp_parent, max_jump_frame, max_first_difference;
+		// 1 - find max_first_difference among Branches that are in the same timeline
+		max_first_difference = -1;
+		int first_diff;
+		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+		{
+			if (i != branch_num && bookmarks.bookmarks_array[i].not_empty)
+			{
+				first_diff = GetFirstDifference(branch_num, i);
+				if (first_diff >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
+					if (max_first_difference < first_diff)
+						max_first_difference = first_diff;
+			}
+		}
+		// 2 - find max_jump_frame among those Branches whose first_diff >= max_first_difference
+		max_jump_frame = -1;
+		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+		{
+			if (bookmarks.bookmarks_array[i].not_empty)
+			{
+				if (i != branch_num && GetFirstDifference(branch_num, i) >= max_first_difference && GetFirstDifference(branch_num, i) >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
+				{
+					// ensure that this candidate belongs to children/grandchildren of current_branch
+					temp_parent = parents[i];
+					while (temp_parent != ITEM_UNDER_MOUSE_CLOUD && temp_parent != branch_num)
+						temp_parent = parents[temp_parent];
+					if (temp_parent == branch_num)
+					{
+						candidates.push_back(i);
+						temp_jump_frame = bookmarks.bookmarks_array[i].snapshot.jump_frame;
+						if (max_jump_frame < temp_jump_frame)
+							max_jump_frame = temp_jump_frame;
+					}
+				}
+			}
+		}
+		// 3 - remove those candidates who have jump_frame < max_jump_frame
+		for (int i = candidates.size()-1; i >= 0; i--)
+		{
+			if (bookmarks.bookmarks_array[candidates[i]].snapshot.jump_frame < max_jump_frame)
+				candidates.erase(candidates.begin() + i);
+		}
+		// 4 - get first of candidates (if there are many then it will be the Branch with highest id number)
+		if (candidates.size())
+			cached_timelines[branch_num] = candidates[0];
+	}
+	return cached_timelines[branch_num];
 }
 
 void BRANCHES::ChangesMadeSinceBranch()
@@ -592,7 +763,7 @@ void BRANCHES::FindItemUnderMouse(int mouse_x, int mouse_y)
 	int prev_item_under_mouse = bookmarks.item_under_mouse;
 	bookmarks.item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+		if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && bookmarks.bookmarks_array[i].not_empty && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
 			bookmarks.item_under_mouse = i;
 	if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
 		bookmarks.item_under_mouse = ITEM_UNDER_MOUSE_CLOUD;
@@ -610,6 +781,62 @@ void BRANCHES::SetCurrentPosTime()
 	strftime(current_pos_time, TIME_DESC_LENGTH, "%H:%M:%S", timeinfo);
 }
 
+void BRANCHES::RecalculateParents()
+{
+	// find best parent for every Branch
+	std::vector<int> candidates;
+	int temp_jump_frame, temp_parent, max_jump_frame, max_first_difference;
+	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+	{
+		if (bookmarks.bookmarks_array[i].not_empty)
+		{
+			int jump_frame = bookmarks.bookmarks_array[i].snapshot.jump_frame;
+			// 1 - find all candidates and max_jump_frame among them
+			candidates.resize(0);
+			max_jump_frame = -1;
+			for (int t = TOTAL_BOOKMARKS-1; t >= 0; t--)
+			{
+				temp_jump_frame = bookmarks.bookmarks_array[t].snapshot.jump_frame;
+				if (t != i && bookmarks.bookmarks_array[t].not_empty && temp_jump_frame <= jump_frame && GetFirstDifference(t, i) >= temp_jump_frame)
+				{
+					// ensure that this candidate doesn't belong to children/grandchildren of this Branch
+					temp_parent = parents[t];
+					while (temp_parent != ITEM_UNDER_MOUSE_CLOUD && temp_parent != i)
+						temp_parent = parents[temp_parent];
+					if (temp_parent == ITEM_UNDER_MOUSE_CLOUD)
+					{
+						// all ok, this is a good candidate for being the parent of the Branch
+						candidates.push_back(t);
+						if (max_jump_frame < temp_jump_frame)
+							max_jump_frame = temp_jump_frame;
+					}
+				}
+			}
+			if (candidates.size())
+			{
+				// 2 - remove those candidates who have jump_frame < max_jump_frame
+				// and for those who have jump_frame == max_jump_frame, find max_first_difference
+				max_first_difference = -1;
+				for (int t = candidates.size()-1; t >= 0; t--)
+				{
+					if (bookmarks.bookmarks_array[candidates[t]].snapshot.jump_frame < max_jump_frame)
+						candidates.erase(candidates.begin() + t);
+					else if (max_first_difference < GetFirstDifference(candidates[t], i))
+						max_first_difference = GetFirstDifference(candidates[t], i);
+				}
+				// 3 - remove those candidates who have FirstDifference < max_first_difference
+				for (int t = candidates.size()-1; t >= 0; t--)
+				{
+					if (GetFirstDifference(candidates[t], i) < max_first_difference)
+						candidates.erase(candidates.begin() + t);
+				}
+				// 4 - get first of candidates (if there are many then it will be the Branch with highest id number)
+				if (candidates.size())
+					parents[i] = candidates[0];
+			}
+		}
+	}
+}
 void BRANCHES::RecalculateBranchesTree()
 {
 	// save previous values
@@ -619,8 +846,6 @@ void BRANCHES::RecalculateBranchesTree()
 		BranchPrevY[i] = (BranchY[i] * (BRANCHES_TRANSITION_MAX - transition_phase) + BranchPrevY[i] * transition_phase) / BRANCHES_TRANSITION_MAX;
 	}
 	CloudPrevX = (CloudX * (BRANCHES_TRANSITION_MAX - transition_phase) + CloudPrevX * transition_phase) / BRANCHES_TRANSITION_MAX;
-	CursorPrevX = (CursorX * (BRANCHES_TRANSITION_MAX - transition_phase) + CursorPrevX * transition_phase) / BRANCHES_TRANSITION_MAX;
-	CursorPrevY = (CursorY * (BRANCHES_TRANSITION_MAX - transition_phase) + CursorPrevY * transition_phase) / BRANCHES_TRANSITION_MAX;
 	transition_phase = BRANCHES_TRANSITION_MAX;
 
 	// 0. Prepare arrays
@@ -853,9 +1078,6 @@ void BRANCHES::RecalculateBranchesTree()
 		if (bookmarks.bookmarks_array[i].not_empty)
 			BranchX[i] += CloudX;
 	BranchX[TOTAL_BOOKMARKS] += CloudX;
-	// target cursor
-	CursorX = BranchX[TOTAL_BOOKMARKS];
-	CursorY = BranchY[TOTAL_BOOKMARKS];
 	// finished recalculating
 	must_recalculate_branches_tree = false;
 	must_redraw_branches_tree = true;
@@ -887,6 +1109,7 @@ void BRANCHES::RecursiveSetYPos(int parent, int parentY)
 		}
 	}
 }
+
 // ----------------------------------------------------------------------------------------
 LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {

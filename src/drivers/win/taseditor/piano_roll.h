@@ -144,9 +144,9 @@ public:
 	void update();
 
 	void save(EMUFILE *os, bool really_save = true);
-	bool load(EMUFILE *is);
+	bool load(EMUFILE *is, bool really_load = true);
 
-	void RedrawList();
+	void RedrawList(bool erase_bg = true);
 	void RedrawRow(int index);
 	void RedrawHeader();
 

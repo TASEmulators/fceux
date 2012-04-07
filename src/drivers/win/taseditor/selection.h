@@ -20,7 +20,7 @@ public:
 	void RedrawMarker();
 
 	void save(EMUFILE *os, bool really_save = true);
-	bool load(EMUFILE *is);
+	bool load(EMUFILE *is, bool really_load = true);
 	void saveSelection(SelectionFrames& selection, EMUFILE *os);
 	bool loadSelection(SelectionFrames& selection, EMUFILE *is);
 	bool skiploadSelection(EMUFILE *is);

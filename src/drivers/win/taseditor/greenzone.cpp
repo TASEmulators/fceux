@@ -64,7 +64,7 @@ void GREENZONE::reset()
 void GREENZONE::update()
 {
 	// keep memorizing savestates, this function should be called at the end of every frame
-	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || savestates[currFrameCounter].empty())
+	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || savestates[currFrameCounter].empty() || (int)lag_history.size() <= currFrameCounter)
 		CollectCurrentState();
 
 	// run cleaning from time to time
@@ -250,9 +250,15 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool GREENZONE::load(EMUFILE *is)
+bool GREENZONE::load(EMUFILE *is, bool really_load)
 {
 	free();
+	if (!really_load)
+	{
+		reset();
+		playback.StartFromZero();		// reset playback to frame 0
+		return false;
+	}
 	int frame = 0, prev_frame = -1, size = 0;
 	int last_tick = 0;
 	// read "GREENZONE" string

@@ -2,6 +2,9 @@
 
 #define BRANCHES_ANIMATION_TICK 50		// animate at 20FPS
 #define BRANCHES_TRANSITION_MAX 8
+#define CURSOR_MIN_DISTANCE 1.0
+#define CURSOR_MAX_DISTANCE 256.0
+#define CURSOR_MIN_SPEED 1.0
 
 // branches bitmap
 #define BRANCHES_BITMAP_WIDTH 170
@@ -70,7 +73,15 @@
 #define BRANCHES_CORNER3_SPRITESHEET_Y 7
 #define BRANCHES_CORNER4_SPRITESHEET_X 213
 #define BRANCHES_CORNER4_SPRITESHEET_Y 7
-#define BRANCHES_CORNER_BASE_SHIFT 6
+#define BRANCHES_CORNER_BASE_SHIFT 5
+#define BRANCHES_MINIARROW_SPRITESHEET_X 180
+#define BRANCHES_MINIARROW_SPRITESHEET_Y 15
+#define BRANCHES_MINIARROW_WIDTH 3
+#define BRANCHES_MINIARROW_HALFWIDTH BRANCHES_MINIARROW_WIDTH/2
+#define BRANCHES_MINIARROW_HEIGHT 5
+#define BRANCHES_MINIARROW_HALFHEIGHT BRANCHES_MINIARROW_HEIGHT/2
+
+#define FIRST_DIFFERENCE_UNKNOWN -2
 
 class BRANCHES
 {
@@ -86,19 +97,27 @@ public:
 	bool load(EMUFILE *is);
 
 	int GetCurrentBranch();
+	bool GetChangesSinceCurrentBranch();
 
 	void RedrawBranchesTree();
 	void PaintBranchesBitmap(HDC hdc);
 
-	void HandleBookmarkSet(int slot, char* slot_time);
+	void HandleBookmarkSet(int slot);
 	void HandleBookmarkDeploy(int slot);
+	void HandleHistoryJump(int new_current_branch, bool new_changes_since_current_branch);
+
+	void InvalidateBranchSlot(int slot);
+	int GetFirstDifference(int first_branch, int second_branch);
+	int FindFullTimelineForBranch(int branch_num);
 	void ChangesMadeSinceBranch();
 
 	void FindItemUnderMouse(int mouse_x, int mouse_y);
 
+	void RecalculateParents();
 	void RecalculateBranchesTree();
 	void RecursiveAddHeight(int branch_num, int amount);
 	void RecursiveSetYPos(int parent, int parentY);
+
 
 	// saved vars
 	std::vector<int> parents;
@@ -115,10 +134,14 @@ private:
 	bool changes_since_current_branch;
 	char cloud_time[TIME_DESC_LENGTH];
 	char current_pos_time[TIME_DESC_LENGTH];
+	std::vector<std::vector<int>> cached_first_difference;
+	std::vector<int8> cached_timelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/frandchild that shares the same input
 
 	// not saved vars
 	int animation_frame;
 	int next_animation_time;
+	int playback_x, playback_y;
+	double cursor_x, cursor_y;
 	std::vector<int> BranchX;				// in pixels
 	std::vector<int> BranchY;
 	std::vector<int> BranchPrevX;
@@ -126,14 +149,13 @@ private:
 	std::vector<int> BranchCurrX;
 	std::vector<int> BranchCurrY;
 	int CloudX, CloudPrevX, cloud_x;
-	int CursorX, CursorPrevX, CursorY, CursorPrevY;
 	int transition_phase;
 	int fireball_size;
 
 	// GDI stuff
 	HBRUSH normal_brush;
 	RECT temp_rect;
-	HPEN normal_pen, select_pen;
+	HPEN normal_pen, timeline_pen, select_pen;
 	HBITMAP branches_hbitmap, hOldBitmap, buffer_hbitmap, hOldBitmap1, branchesSpritesheet, hOldBitmap2;
 	HDC hBitmapDC, hBufferDC, hSpritesheetDC;
 

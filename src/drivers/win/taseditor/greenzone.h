@@ -2,7 +2,7 @@
 
 #define GREENZONE_ID_LEN 10
 
-#define TIME_BETWEEN_CLEANINGS 15000	// in milliseconds
+#define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
 // greenzone cleaning masks
 #define EVERY16TH 0xFFFFFFF0
 #define EVERY8TH 0xFFFFFFF8
@@ -21,7 +21,7 @@ public:
 	void update();
 
 	void save(EMUFILE *os, bool really_save = true);
-	bool load(EMUFILE *is);
+	bool load(EMUFILE *is, bool really_load = true);
 
 	void CollectCurrentState();
 
@@ -38,12 +38,15 @@ public:
 
 	bool GetLagHistoryAtFrame(int frame);
 
-	// data
+	// saved data
 	int greenZoneCount;
 	std::vector<std::vector<uint8>> savestates;
-	std::vector<uint8> lag_history;
 
 private:
+	// saved data
+	std::vector<uint8> lag_history;
+
+	// not saved data
 	int next_cleaning_time;
 
 };

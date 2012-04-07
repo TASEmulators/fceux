@@ -54,7 +54,7 @@ public:
 	void update();
 
 	void save(EMUFILE *os, bool really_save = true);
-	bool load(EMUFILE *is);
+	bool load(EMUFILE *is, bool really_load = true);
 
 	void command(int command_id, int slot = -1);
 
@@ -66,9 +66,10 @@ public:
 	int FindBookmarkAtFrame(int frame);
 
 	void RedrawBookmarksCaption();
-	void RedrawBookmarksList();
+	void RedrawBookmarksList(bool erase_bg = false);
 	void RedrawChangedBookmarks(int frame);
-	void RedrawBookmarksRow(int index);
+	void RedrawBookmark(int bookmark_number);
+	void RedrawListRow(int row_index);
 
 	void MouseMove(int new_x, int new_y);
 	void FindItemUnderMouse();

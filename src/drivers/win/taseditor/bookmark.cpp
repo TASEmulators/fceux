@@ -27,13 +27,40 @@ extern uint8 *XBackBuf;
 
 BOOKMARK::BOOKMARK()
 {
+	not_empty = false;
 }
 
 void BOOKMARK::init()
 {
+	free();
+}
+void BOOKMARK::free()
+{
 	not_empty = false;
 	flash_type = flash_phase = 0;
-	snapshot.jump_frame = -1;
+	SNAPSHOT tmp;
+	snapshot = tmp;
+	savestate.resize(0);
+	saved_screenshot.resize(0);
+}
+
+bool BOOKMARK::checkDiffFromCurrent()
+{
+	// check if the Bookmark data differs from current project/MovieData/Markers/settings
+	if (not_empty && snapshot.jump_frame == currFrameCounter)
+	{
+		if (snapshot.size == currMovieData.getNumRecords() && snapshot.findFirstChange(currMovieData) < 0)
+		{
+			if (!snapshot.MarkersDifferFromCurrent())
+			{
+				if (snapshot.has_hot_changes == taseditor_config.enable_hot_changes)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 void BOOKMARK::set()
@@ -94,7 +121,7 @@ bool BOOKMARK::load(EMUFILE *is)
 {
 	uint8 tmp;
 	if (!read8le(&tmp, is)) return true;
-	not_empty = tmp != 0;
+	not_empty = (tmp != 0);
 	if (not_empty)
 	{
 		// read snapshot
@@ -108,9 +135,31 @@ bool BOOKMARK::load(EMUFILE *is)
 		if (!read32le(&size, is)) return true;
 		saved_screenshot.resize(size);
 		if ((int)is->fread(&saved_screenshot[0], size) < size) return true;
+	} else
+	{
+		free();
 	}
 	// all ok
 	flash_type = flash_phase = 0;
+	return false;
+}
+bool BOOKMARK::skipLoad(EMUFILE *is)
+{
+	uint8 tmp;
+	if (!read8le(&tmp, is)) return true;
+	if (tmp != 0)
+	{
+		// read snapshot
+		if (snapshot.skipLoad(is)) return true;
+		// read savestate
+		int size;
+		if (!read32le(&size, is)) return true;
+		if (is->fseek(size, SEEK_CUR)) return true;
+		// read saved_screenshot
+		if (!read32le(&size, is)) return true;
+		if (is->fseek(size, SEEK_CUR)) return true;
+	}
+	// all ok
 	return false;
 }
 // ----------------------------------------------------------

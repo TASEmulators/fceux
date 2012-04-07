@@ -80,8 +80,13 @@ void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool MARKERS_MANAGER::load(EMUFILE *is)
+bool MARKERS_MANAGER::load(EMUFILE *is, bool really_load)
 {
+	if (!really_load)
+	{
+		reset();
+		return false;
+	}
 	// read "MARKERS" string
 	char save_id[MARKERS_ID_LEN];
 	if ((int)is->fread(save_id, MARKERS_ID_LEN) < MARKERS_ID_LEN) goto error;

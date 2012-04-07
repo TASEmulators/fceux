@@ -169,7 +169,7 @@ void BOOKMARKS::update()
 				if (bookmarks_array[i].flash_phase != FLASH_PHASE_BUTTONHELD)
 				{
 					bookmarks_array[i].flash_phase = FLASH_PHASE_BUTTONHELD;
-					RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+					RedrawBookmark(i);
 					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
 				}
 			} else
@@ -177,7 +177,7 @@ void BOOKMARKS::update()
 				if (bookmarks_array[i].flash_phase > 0)
 				{
 					bookmarks_array[i].flash_phase--;
-					RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+					RedrawBookmark(i);
 					branches.must_redraw_branches_tree = true;		// because border of branch digit has changed
 				}
 			}
@@ -233,41 +233,36 @@ void BOOKMARKS::set(int slot)
 	markers_manager.UpdateMarkerNote();
 
 	int previous_frame = bookmarks_array[slot].snapshot.jump_frame;
-	// save time of this slot before rewriting it
-	char saved_time[TIME_DESC_LENGTH];
-	if (bookmarks_array[slot].not_empty)
+	if (bookmarks_array[slot].checkDiffFromCurrent())
 	{
-		strncpy(saved_time, bookmarks_array[slot].snapshot.description, TIME_DESC_LENGTH - 1);
-		saved_time[TIME_DESC_LENGTH - 1] = 0;
-	} else
-	{
-		saved_time[0] = 0;
-	}
-	// write current MovieData to the slot
-	bookmarks_array[slot].set();
-	// find its new place in Branches Tree
-	int old_current_branch = branches.GetCurrentBranch();
-	branches.HandleBookmarkSet(slot, saved_time);
-	if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
-	{
-		// current_branch was switched to slot, redraw Bookmarks List to change the color of digits
-		piano_roll.RedrawRow(bookmarks_array[old_current_branch].snapshot.jump_frame);
-		RedrawChangedBookmarks(bookmarks_array[old_current_branch].snapshot.jump_frame);
-	}
-	// also redraw List rows
-	if (previous_frame >= 0 && previous_frame != currFrameCounter)
-	{
-		piano_roll.RedrawRow(previous_frame);
-		RedrawChangedBookmarks(previous_frame);
-	}
-	piano_roll.RedrawRow(currFrameCounter);
-	RedrawChangedBookmarks(currFrameCounter);
-	// if screenshot of the slot is currently shown - reinit and redraw the picture
-	if (popup_display.screenshot_currently_shown == slot)
-		popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
+		BOOKMARK backup_copy(bookmarks_array[slot]);
+		bookmarks_array[slot].set();
+		// rebuild Branches Tree
+		int old_current_branch = branches.GetCurrentBranch();
+		branches.HandleBookmarkSet(slot);
+		if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
+		{
+			// current_branch was switched to slot, redraw Bookmarks List to change the color of digits
+			piano_roll.RedrawRow(bookmarks_array[old_current_branch].snapshot.jump_frame);
+			RedrawChangedBookmarks(bookmarks_array[old_current_branch].snapshot.jump_frame);
+		}
+		// also redraw List rows
+		if (previous_frame >= 0 && previous_frame != currFrameCounter)
+		{
+			piano_roll.RedrawRow(previous_frame);
+			RedrawChangedBookmarks(previous_frame);
+		}
+		piano_roll.RedrawRow(currFrameCounter);
+		RedrawChangedBookmarks(currFrameCounter);
+		// if screenshot of the slot is currently shown - reinit and redraw the picture
+		if (popup_display.screenshot_currently_shown == slot)
+			popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
-	project.SetProjectChanged();
-	FCEU_DispMessage("Branch %d saved.", 0, slot);
+		history.RegisterBookmarkSet(slot, backup_copy, old_current_branch);
+		project.SetProjectChanged();
+		must_check_item_under_mouse = true;
+		FCEU_DispMessage("Branch %d saved.", 0, slot);
+	}
 }
 
 void BOOKMARKS::jump(int slot)
@@ -294,7 +289,7 @@ void BOOKMARKS::deploy(int slot)
 	if (!bookmarks_array[slot].not_empty) return;
 
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
-
+	int old_current_branch = branches.GetCurrentBranch();
 	bool markers_changed = false;
 	// revert current movie to the snapshot state
 	if (taseditor_config.branch_full_movie)
@@ -317,13 +312,13 @@ void BOOKMARKS::deploy(int slot)
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
 			piano_roll.UpdateItemCount();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
+			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot, old_current_branch);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].deployed();
 		} else if (markers_changed)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
+			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot, old_current_branch);
 			piano_roll.RedrawList();
 			bookmarks_array[slot].deployed();
 		} else
@@ -352,13 +347,13 @@ void BOOKMARKS::deploy(int slot)
 			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
 			piano_roll.UpdateItemCount();
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot);
+			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot, old_current_branch);
 			greenzone.Invalidate(first_change);
 			bookmarks_array[slot].deployed();
 		} else if (markers_changed)
 		{
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot);
+			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot, old_current_branch);
 			piano_roll.RedrawList();
 			bookmarks_array[slot].deployed();
 		} else
@@ -369,24 +364,20 @@ void BOOKMARKS::deploy(int slot)
 	}
 
 	// if greenzone reduced so much that we can't jump immediately - substitute target frame greenzone with our savestate
-	if (greenzone.greenZoneCount <= jump_frame || greenzone.savestates[jump_frame].empty())
+	if (greenzone.greenZoneCount <= jump_frame)
 	{
 		if ((int)greenzone.savestates.size() <= jump_frame)
 			greenzone.savestates.resize(jump_frame+1);
 		// clear old savestates: from current end of greenzone to new end of greenzone
-		if (greenzone.greenZoneCount <= jump_frame)
-		{
-			for (int i = greenzone.greenZoneCount; i < jump_frame; ++i)
-				greenzone.ClearSavestate(i);
-			greenzone.greenZoneCount = jump_frame+1;
-		}
+		for (int i = greenzone.greenZoneCount; i <= jump_frame; ++i)
+			greenzone.ClearSavestate(i);
+		greenzone.greenZoneCount = jump_frame+1;
+	}
+	if (greenzone.savestates[jump_frame].empty())
 		// restore savestate for immediate jump
 		greenzone.savestates[jump_frame] = bookmarks_array[slot].savestate;
-	}
-	greenzone.update();
 
 	// switch current branch to this branch
-	int old_current_branch = branches.GetCurrentBranch();
 	branches.HandleBookmarkDeploy(slot);
 	if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
 	{
@@ -419,8 +410,14 @@ void BOOKMARKS::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool BOOKMARKS::load(EMUFILE *is)
+bool BOOKMARKS::load(EMUFILE *is, bool really_load)
 {
+	if (!really_load)
+	{
+		reset();
+		branches.reset();
+		return false;
+	}
 	// read "BOOKMARKS" string
 	char save_id[BOOKMARKS_ID_LEN];
 	if ((int)is->fread(save_id, BOOKMARKS_ID_LEN) < BOOKMARKS_ID_LEN) goto error;
@@ -474,22 +471,26 @@ void BOOKMARKS::RedrawBookmarksCaption()
 		must_check_item_under_mouse = true;
 	SetWindowText(hwndBookmarks, bookmarksCaption[edit_mode]);
 }
-void BOOKMARKS::RedrawBookmarksList()
+void BOOKMARKS::RedrawBookmarksList(bool erase_bg)
 {
 	if (edit_mode != EDIT_MODE_BRANCHES)
-		InvalidateRect(hwndBookmarksList, 0, FALSE);
+		InvalidateRect(hwndBookmarksList, 0, erase_bg);
 }
 void BOOKMARKS::RedrawChangedBookmarks(int frame)
 {
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
 		if (bookmarks_array[i].snapshot.jump_frame == frame)
-			RedrawBookmarksRow((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+			RedrawBookmark(i);
 	}
 }
-void BOOKMARKS::RedrawBookmarksRow(int index)
+void BOOKMARKS::RedrawBookmark(int bookmark_number)
 {
-	ListView_RedrawItems(hwndBookmarksList, index, index);
+	RedrawListRow((bookmark_number + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+}
+void BOOKMARKS::RedrawListRow(int row_index)
+{
+	ListView_RedrawItems(hwndBookmarksList, row_index, row_index);
 }
 
 void BOOKMARKS::MouseMove(int new_x, int new_y)
@@ -578,7 +579,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -587,7 +588,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -609,7 +610,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -618,7 +619,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.lag_history[frame])
+						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
@@ -651,7 +652,8 @@ int BOOKMARKS::FindBookmarkAtFrame(int frame)
 		return current_branch + TOTAL_BOOKMARKS;	// blue digit has highest priority when drawing
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		if (bookmarks_array[i].snapshot.jump_frame == frame) return i;	// green digit
+		if (bookmarks_array[i].not_empty && bookmarks_array[i].snapshot.jump_frame == frame)
+			return i;	// green digit
 	}
 	return -1;		// no Bookmarks at the frame
 }

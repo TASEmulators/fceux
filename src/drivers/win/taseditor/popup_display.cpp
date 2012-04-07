@@ -133,7 +133,7 @@ void POPUP_DISPLAY::update()
 	if (clock() > next_update_time)
 	{
 		next_update_time = clock() + DISPLAY_UPDATE_TICK;
-		if (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
+		if (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty)
 		{
 			if (taseditor_config.show_branch_screenshots && !hwndScrBmp)
 			{

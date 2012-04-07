@@ -19,13 +19,16 @@ class BOOKMARK
 public:
 	BOOKMARK();
 	void init();
+	void free();
 
+	bool checkDiffFromCurrent();
 	void set();
 	void jumped();
 	void deployed();
 
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
+	bool skipLoad(EMUFILE *is);
 
 	// saved vars
 	bool not_empty;

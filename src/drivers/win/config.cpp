@@ -62,8 +62,8 @@ extern uint8 gNoBGFillColor;
 extern bool rightClickEnabled;
 extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
-extern bool AVIenableHUDrecording;
-extern bool AVIdisableMovieMessages;
+extern bool enableHUDrecording;
+extern bool disableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
 extern bool SingleInstanceOnly;
 extern bool oldInputDisplay;
@@ -389,8 +389,8 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(backupSavestates),
 	AC(compressSavestates),
 	AC(pauseWhileActive),
-	AC(AVIenableHUDrecording),
-	AC(AVIdisableMovieMessages),
+	AC(enableHUDrecording),
+	AC(disableMovieMessages),
 	AC(replaceP2StartWithMicrophone),
 	AC(SingleInstanceOnly),
 

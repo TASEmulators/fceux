@@ -49,6 +49,10 @@ EDITOR editor;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
 extern bool turbo;
+extern int pal_emulation;
+extern int newppu;
+extern void PushCurrentVideoSettings();
+extern void RefreshThrottleFPS();
 // temporarily saved FCEUX config
 int saved_eoptions;
 int saved_EnableAutosave;
@@ -122,8 +126,8 @@ bool EnterTasEditor()
 			// ensure that movie has correct set of ports/fourscore
 			SetInputType(currMovieData, GetInputType(currMovieData));
 			// force the input configuration stored in the movie to apply to FCEUX config
-			FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
-			// reset some modules that need MovidData info
+			ApplyMovieInputConfig();
+			// reset some modules that need MovieData info
 			piano_roll.reset();
 			recorder.reset();
 			// create initial snapshot in history
@@ -366,8 +370,8 @@ bool LoadProject(char* fullname)
 	// try to load project
 	if (project.load(fullname))
 	{
-		// update FCEUX input config
-		FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+		// loaded successfully
+		ApplyMovieInputConfig();
 		// add new file to Recent menu
 		taseditor_window.UpdateRecentProjectsArray(fullname);
 		taseditor_window.RedrawTaseditor();
@@ -747,6 +751,19 @@ void SetInputType(MovieData& md, int new_input_type)
 			break;
 		}
 	}
+}
+
+void ApplyMovieInputConfig()
+{
+	// update FCEUX input config
+	FCEUD_SetInput(currMovieData.fourscore, currMovieData.microphone, (ESI)currMovieData.ports[0], (ESI)currMovieData.ports[1], (ESIFC)currMovieData.ports[2]);
+	// update PAL flag
+	pal_emulation = currMovieData.palFlag;
+	FCEUI_SetVidSystem(pal_emulation);
+	RefreshThrottleFPS();
+	PushCurrentVideoSettings();
+	// update PPU type
+	newppu = currMovieData.PPUflag;
 }
 
 // this getter contains formula to decide whether to record or replay movie

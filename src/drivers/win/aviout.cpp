@@ -434,28 +434,20 @@ bool FCEUI_AviIsRecording()
 {
 	if(avi_file)
 		return true;
-
 	return false;
 }
 
 bool FCEUI_AviEnableHUDrecording()
 {
-	if (enableHUDrecording)
-		return true;
-
-	return false;
+	return enableHUDrecording;
 }
 void FCEUI_SetAviEnableHUDrecording(bool enable)
 {
 	enableHUDrecording = enable;
 }
-
 bool FCEUI_AviDisableMovieMessages()
 {
-	if (disableMovieMessages)
-		return true;
-
-	return false;
+	return disableMovieMessages;
 }
 void FCEUI_SetAviDisableMovieMessages(bool disable)
 {

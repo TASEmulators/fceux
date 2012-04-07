@@ -422,7 +422,7 @@ bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 	int error = Z_OK;
 	uint8* cbuf = (uint8*)memory_savestate.buf();
 	uLongf comprlen = -1;
-	if(compressionLevel != Z_NO_COMPRESSION && compressSavestates)
+	if(compressionLevel != Z_NO_COMPRESSION && (compressSavestates || FCEUMOV_Mode(MOVIEMODE_TASEDITOR)))
 	{
 		// worst case compression: zlib says "0.1% larger than sourceLen plus 12 bytes"
 		comprlen = (len>>9)+12 + len;

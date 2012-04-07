@@ -432,7 +432,7 @@ int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
 			break;
 		}
 	}
-	// if current size is less then previous, return size-1 as the frame of difference
+	// if current size is less then previous, return last frame (=size-1) as the frame of difference
 	if (size < inp_end) return size-1;
 	// no changes were found
 	return -1;

@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 History - History of movie modifications
 [Singleton]
 
-* stores array of snapshots and pointer to current (last) snapshot
+* stores array of History items (snapshots, backup_bookmarks, backup_current_branch) and pointer to current snapshot
 * saves and loads the data from a project file. On error: clears the array and starts new history by making snapshot of current movie data
 * on demand: checks the difference between the last snapshot and current movie, and makes a decision to create new point of rollback. In special cases it can create a point of rollback without checking the difference, assuming that caller already checked it
 * implements all restoring operations: undo, redo, revert to any snapshot from the array
@@ -35,6 +35,7 @@ extern SELECTION selection;
 extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
 extern PIANO_ROLL piano_roll;
+extern POPUP_DISPLAY popup_display;
 extern TASEDITOR_LUA taseditor_lua;
 
 extern int joysticks_per_frame[NUM_SUPPORTED_INPUT_TYPES];
@@ -44,53 +45,63 @@ extern Window_items_struct window_items[];
 
 char history_save_id[HISTORY_ID_LEN] = "HISTORY";
 char history_skipsave_id[HISTORY_ID_LEN] = "HISTORX";
-char modCaptions[MODTYPES_TOTAL][20] = {" Init Project",
-							" Undefined",
-							" Set",
-							" Unset",
-							" Pattern",
-							" Insert",
-							" Insert#",
-							" Delete",
-							" Truncate",
-							" Clear",
-							" Cut",
-							" Paste",
-							" PasteInsert",
-							" Clone",
-							" Record",
-							" Import",
-							" Branch0 to ",
-							" Branch1 to ",
-							" Branch2 to ",
-							" Branch3 to ",
-							" Branch4 to ",
-							" Branch5 to ",
-							" Branch6 to ",
-							" Branch7 to ",
-							" Branch8 to ",
-							" Branch9 to ",
-							" Marker Branch0 to ",
-							" Marker Branch1 to ",
-							" Marker Branch2 to ",
-							" Marker Branch3 to ",
-							" Marker Branch4 to ",
-							" Marker Branch5 to ",
-							" Marker Branch6 to ",
-							" Marker Branch7 to ",
-							" Marker Branch8 to ",
-							" Marker Branch9 to ",
-							" Marker Set",
-							" Marker Remove",
-							" Marker Pattern",
-							" Marker Rename",
-							" Marker Drag",
-							" Marker Swap",
-							" Marker Shift",
-							" LUA Marker Set",
-							" LUA Marker Remove",
-							" LUA Marker Rename",
-							" LUA Change" };
+char modCaptions[MODTYPES_TOTAL][20] = {" Initialization",
+										" Undefined",
+										" Set",
+										" Unset",			
+										" Pattern",
+										" Insert",
+										" Insert#",
+										" Delete",
+										" Truncate",
+										" Clear",
+										" Cut",
+										" Paste",
+										" PasteInsert",
+										" Clone",
+										" Record",
+										" Import",
+										" Bookmark0",
+										" Bookmark1",
+										" Bookmark2",
+										" Bookmark3",
+										" Bookmark4",
+										" Bookmark5",
+										" Bookmark6",
+										" Bookmark7",
+										" Bookmark8",
+										" Bookmark9",
+										" Branch0 to ",
+										" Branch1 to ",
+										" Branch2 to ",
+										" Branch3 to ",
+										" Branch4 to ",
+										" Branch5 to ",
+										" Branch6 to ",
+										" Branch7 to ",
+										" Branch8 to ",
+										" Branch9 to ",
+										" Marker Branch0 to ",
+										" Marker Branch1 to ",
+										" Marker Branch2 to ",
+										" Marker Branch3 to ",
+										" Marker Branch4 to ",
+										" Marker Branch5 to ",
+										" Marker Branch6 to ",
+										" Marker Branch7 to ",
+										" Marker Branch8 to ",
+										" Marker Branch9 to ",
+										" Marker Set",
+										" Marker Remove",
+										" Marker Pattern",
+										" Marker Rename",
+										" Marker Drag",
+										" Marker Swap",
+										" Marker Shift",
+										" LUA Marker Set",
+										" LUA Marker Remove",
+										" LUA Marker Rename",
+										" LUA Change" };
 char LuaCaptionPrefix[6] = " LUA ";
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
@@ -114,6 +125,8 @@ void HISTORY::init()
 void HISTORY::free()
 {
 	snapshots.resize(0);
+	backup_bookmarks.resize(0);
+	backup_current_branch.resize(0);
 	history_total_items = 0;
 }
 void HISTORY::reset()
@@ -124,6 +137,8 @@ void HISTORY::reset()
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
 	snapshots.resize(history_size);
+	backup_bookmarks.resize(history_size);
+	backup_current_branch.resize(history_size);
 	history_start_pos = 0;
 	history_cursor_pos = -1;
 	// create initial snapshot
@@ -133,7 +148,7 @@ void HISTORY::reset()
 	inp.jump_frame = -1;
 	inp.start_frame = 0;
 	inp.end_frame = inp.size - 1;
-	AddSnapshotToHistory(inp);
+	AddItemToHistory(inp);
 	UpdateHistoryList();
 	RedrawHistoryList();
 }
@@ -160,26 +175,36 @@ void HISTORY::HistorySizeChanged()
 {
 	int new_history_size = taseditor_config.undo_levels + 1;
 	std::vector<SNAPSHOT> new_snapshots(new_history_size);
+	std::vector<BOOKMARK> new_backup_bookmarks(new_history_size);
+	std::vector<int8> new_backup_current_branch(new_history_size);
 	int pos = history_cursor_pos, source_pos = history_cursor_pos;
 	if (pos >= new_history_size)
 		pos = new_history_size - 1;
 	int new_history_cursor_pos = pos;
-	// copy old "undo" snapshots
+	// copy old "undo" items
 	while (pos >= 0)
 	{
 		new_snapshots[pos] = snapshots[(history_start_pos + source_pos) % history_size];
+		new_backup_bookmarks[pos] = backup_bookmarks[(history_start_pos + source_pos) % history_size];
+		new_backup_current_branch[pos] = backup_current_branch[(history_start_pos + source_pos) % history_size];
 		pos--;
 		source_pos--;
 	}
-	// copy old "redo" snapshots
-	int num_redo_snapshots = history_total_items - (history_cursor_pos + 1);
+	// copy old "redo" items
+	int num_redo_items = history_total_items - (history_cursor_pos + 1);
 	int space_available = new_history_size - (new_history_cursor_pos + 1);
-	int i = (num_redo_snapshots <= space_available) ? num_redo_snapshots : space_available;
+	int i = (num_redo_items <= space_available) ? num_redo_items : space_available;
 	int new_history_total_items = new_history_cursor_pos + i + 1;
 	for (; i > 0; i--)
+	{
 		new_snapshots[new_history_cursor_pos + i] = snapshots[(history_start_pos + history_cursor_pos + i) % history_size];
+		new_backup_bookmarks[new_history_cursor_pos + i] = backup_bookmarks[(history_start_pos + history_cursor_pos + i) % history_size];
+		new_backup_current_branch[new_history_cursor_pos + i] = backup_current_branch[(history_start_pos + history_cursor_pos + i) % history_size];
+	}
 	// finish
 	snapshots = new_snapshots;
+	backup_bookmarks = new_backup_bookmarks;
+	backup_current_branch = new_backup_current_branch;
 	history_size = new_history_size;
 	history_start_pos = 0;
 	history_cursor_pos = new_history_cursor_pos;
@@ -198,18 +223,119 @@ int HISTORY::jump(int new_pos)
 	// make jump
 	int old_pos = history_cursor_pos;
 	history_cursor_pos = new_pos;
-	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	RedrawHistoryList();
+
+	int real_pos, mod_type, slot, current_branch = branches.GetCurrentBranch();
+	bool bookmarks_changed = false, changes_since_current_branch = false;
+	bool old_changes_since_current_branch = branches.GetChangesSinceCurrentBranch();
+	// restore Bookmarks/Branches
+	std::vector<uint8> bookmarks_to_redraw;
+	std::vector<int> frames_to_redraw;
+	if (new_pos > old_pos)
+	{
+		// redo
+		for (int i = old_pos + 1; i <= new_pos; ++i)
+		{
+			real_pos = (history_start_pos + i) % history_size;
+			mod_type = snapshots[real_pos].mod_type;
+			if (mod_type >= MODTYPE_BOOKMARK_0 && mod_type <= MODTYPE_BRANCH_MARKERS_9)
+			{
+				current_branch = (mod_type - MODTYPE_BOOKMARK_0) % TOTAL_BOOKMARKS;
+				changes_since_current_branch = false;
+			} else
+			{
+				changes_since_current_branch = true;
+			}
+			if (mod_type >= MODTYPE_BOOKMARK_0 && mod_type <= MODTYPE_BOOKMARK_9)
+			{
+				// swap Bookmark and its backup version
+				slot = (mod_type - MODTYPE_BOOKMARK_0) % TOTAL_BOOKMARKS;
+				BOOKMARK temp_bookmark(bookmarks.bookmarks_array[slot]);
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+				bookmarks.bookmarks_array[slot] = backup_bookmarks[real_pos];
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+				bookmarks_to_redraw.push_back(slot);
+				backup_bookmarks[real_pos] = temp_bookmark;
+				branches.InvalidateBranchSlot(slot);
+				bookmarks_changed = true;
+			}
+		}
+	} else
+	{
+		// undo
+		for (int i = old_pos; i > new_pos; i--)
+		{
+			real_pos = (history_start_pos + i) % history_size;
+			mod_type = snapshots[real_pos].mod_type;
+			if (mod_type >= MODTYPE_BOOKMARK_0 && mod_type <= MODTYPE_BRANCH_MARKERS_9)
+				current_branch = backup_current_branch[real_pos];
+			if (mod_type >= MODTYPE_BOOKMARK_0 && mod_type <= MODTYPE_BOOKMARK_9)
+			{
+				// swap Bookmark and its backup version
+				slot = (mod_type - MODTYPE_BOOKMARK_0) % TOTAL_BOOKMARKS;
+				BOOKMARK temp_bookmark(bookmarks.bookmarks_array[slot]);
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+				bookmarks.bookmarks_array[slot] = backup_bookmarks[real_pos];
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+				bookmarks_to_redraw.push_back(slot);
+				backup_bookmarks[real_pos] = temp_bookmark;
+				branches.InvalidateBranchSlot(slot);
+				bookmarks_changed = true;
+			}
+		}
+		real_pos = (history_start_pos + new_pos) % history_size;
+		mod_type = snapshots[real_pos].mod_type;
+		if (mod_type >= MODTYPE_BOOKMARK_0 && mod_type <= MODTYPE_BRANCH_MARKERS_9)
+		{
+			current_branch = (mod_type - MODTYPE_BOOKMARK_0) % TOTAL_BOOKMARKS;
+			changes_since_current_branch = false;
+		} else if (GetCategoryOfOperation(mod_type) != CATEGORY_OTHER)
+		{
+			changes_since_current_branch = true;
+		}
+	}
+	int old_current_branch = branches.GetCurrentBranch();
+	if (bookmarks_changed || current_branch != old_current_branch || changes_since_current_branch != old_changes_since_current_branch)
+	{
+		branches.HandleHistoryJump(current_branch, changes_since_current_branch);
+		if (current_branch != old_current_branch)
+		{
+			// current_branch was switched, redraw Bookmarks List to change the color of digits
+			if (old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
+			{
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[old_current_branch].snapshot.jump_frame);
+				bookmarks_to_redraw.push_back(old_current_branch);
+			}
+			if (current_branch != ITEM_UNDER_MOUSE_CLOUD)
+			{
+				frames_to_redraw.push_back(bookmarks.bookmarks_array[current_branch].snapshot.jump_frame);
+				bookmarks_to_redraw.push_back(current_branch);
+			}
+		}
+		bookmarks.must_check_item_under_mouse = true;
+		project.SetProjectChanged();
+	}
+	// redraw Piano Roll rows and Bookmarks List rows
+	for (int i = frames_to_redraw.size() - 1; i >= 0; i--)
+		piano_roll.RedrawRow(frames_to_redraw[i]);
+	for (int i = bookmarks_to_redraw.size() - 1; i >= 0; i--)
+	{
+		bookmarks.RedrawBookmark(bookmarks_to_redraw[i]);
+		// if screenshot of the slot is currently shown - reinit and redraw the picture
+		if (popup_display.screenshot_currently_shown == bookmarks_to_redraw[i])
+			popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
+	}
 
 	// create undo_hint
 	if (new_pos > old_pos)
-		undo_hint_pos = GetCurrentSnapshot().jump_frame;
+		undo_hint_pos = GetCurrentSnapshot().jump_frame;		// redo
 	else
-		undo_hint_pos = GetNextToCurrentSnapshot().jump_frame;
+		undo_hint_pos = GetNextToCurrentSnapshot().jump_frame;	// undo
 	undo_hint_time = clock() + UNDO_HINT_TIME;
 	show_undo_hint = true;
 
-	// update markers
+	real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	// update Markers
 	bool markers_changed = false;
 	if (taseditor_config.bind_markers)
 	{
@@ -221,27 +347,26 @@ int HISTORY::jump(int new_pos)
 		}
 	}
 
-	// update current movie
+	// update current movie data
 	int first_change = snapshots[real_pos].findFirstChange(currMovieData);
 	if (first_change >= 0)
 	{
 		snapshots[real_pos].toMovie(currMovieData, first_change);
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		branches.ChangesMadeSinceBranch();
-		// and Piano Roll will be redrawn by greenzone invalidation
+		// Piano Roll Redraw and ProjectChanged will be called by greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		branches.ChangesMadeSinceBranch();
 		piano_roll.RedrawList();
-		piano_roll.FollowUndo();
+		project.SetProjectChanged();
 	} else if (taseditor_config.enable_hot_changes)
 	{
 		// when using Hot Changes, Piano Roll should be always redrawn, because old changes become less hot
 		piano_roll.RedrawList();
 	}
-
+	piano_roll.UpdateItemCount();
+	piano_roll.FollowUndo();
 	return first_change;
 }
 
@@ -249,28 +374,20 @@ void HISTORY::undo()
 {
 	int result = jump(history_cursor_pos - 1);
 	if (result >= 0)
-	{
-		piano_roll.UpdateItemCount();
-		piano_roll.FollowUndo();
 		greenzone.InvalidateAndCheck(result);
-	}
 	return;
 }
 void HISTORY::redo()
 {
 	int result = jump(history_cursor_pos + 1);
 	if (result >= 0)
-	{
-		piano_roll.UpdateItemCount();
-		piano_roll.FollowUndo();
 		greenzone.InvalidateAndCheck(result);
-	}
 	return;
 }
 // ----------------------------
-void HISTORY::AddSnapshotToHistory(SNAPSHOT &inp)
+void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch)
 {
-	// history uses conveyor of snapshots (vector with fixed size) to aviod resizing which is awfully expensive with such large objects as SNAPSHOT
+	// history uses conveyor of items (vector with fixed size) to aviod frequent resizing, which would be awfully expensive with such large objects as SNAPSHOT and BOOKMARK
 	if (history_total_items >= history_size)
 	{
 		// reached the end of available history_size - move history_start_pos (thus deleting oldest snapshot)
@@ -283,9 +400,33 @@ void HISTORY::AddSnapshotToHistory(SNAPSHOT &inp)
 		history_total_items = history_cursor_pos+1;
 		UpdateHistoryList();
 	}
-	// write snapshot
+	// write data
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	snapshots[real_pos] = inp;
+	backup_bookmarks[real_pos].free();
+	backup_current_branch[real_pos] = cur_branch;
+	RedrawHistoryList();
+}
+void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch, BOOKMARK &bookm)
+{
+	// history uses conveyor of items (vector with fixed size) to aviod frequent resizing, which would be awfully expensive with such large objects as SNAPSHOT and BOOKMARK
+	if (history_total_items >= history_size)
+	{
+		// reached the end of available history_size - move history_start_pos (thus deleting oldest snapshot)
+		history_cursor_pos = history_size-1;
+		history_start_pos = (history_start_pos + 1) % history_size;
+	} else
+	{
+		// didn't reach the end of history yet
+		history_cursor_pos++;
+		history_total_items = history_cursor_pos+1;
+		UpdateHistoryList();
+	}
+	// write data
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	snapshots[real_pos] = inp;
+	backup_bookmarks[real_pos] = bookm;
+	backup_current_branch[real_pos] = cur_branch;
 	RedrawHistoryList();
 }
 
@@ -414,7 +555,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 						break;
 				}
 			}
-			AddSnapshotToHistory(inp);
+			AddItemToHistory(inp);
 		}
 		branches.ChangesMadeSinceBranch();
 	}
@@ -448,7 +589,7 @@ int HISTORY::RegisterInsertNum(int start, int frames)
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
 			inp.inheritHotChanges_InsertNum(&snapshots[real_pos], start, frames);
-		AddSnapshotToHistory(inp);
+		AddItemToHistory(inp);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -479,7 +620,7 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
 			inp.inheritHotChanges_PasteInsert(&snapshots[real_pos], inserted_set);
-		AddSnapshotToHistory(inp);
+		AddItemToHistory(inp);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -520,18 +661,35 @@ void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char
 	// input hotchanges aren't changed
 	if (taseditor_config.enable_hot_changes)
 		inp.copyHotChanges(&GetCurrentSnapshot());
-	AddSnapshotToHistory(inp);
+	AddItemToHistory(inp);
 	branches.ChangesMadeSinceBranch();
 	project.SetProjectChanged();
 }
-void HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
+void HISTORY::RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch)
+{
+	// create new snapshot
+	SNAPSHOT inp;
+	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	// fill description: modification type + jump_frame of the Bookmark
+	inp.mod_type = MODTYPE_BOOKMARK_0 + slot;
+	strcat(inp.description, modCaptions[inp.mod_type]);
+	inp.start_frame = inp.end_frame = inp.jump_frame = bookmarks.bookmarks_array[slot].snapshot.jump_frame;
+	char framenum[11];
+	strcat(inp.description, " ");
+	_itoa(inp.jump_frame, framenum, 10);
+	strcat(inp.description, framenum);
+	if (taseditor_config.enable_hot_changes)
+		inp.copyHotChanges(&GetCurrentSnapshot());
+	AddItemToHistory(inp, old_current_branch, backup_copy);
+}
+void HISTORY::RegisterBranching(int mod_type, int first_change, int slot, int old_current_branch)
 {
 	// create new snapshot
 	SNAPSHOT inp;
 	inp.init(currMovieData, taseditor_config.enable_hot_changes);
 	// fill description: modification type + time of the Branch
 	inp.mod_type = mod_type;
-	strcat(inp.description, modCaptions[mod_type]);
+	strcat(inp.description, modCaptions[inp.mod_type]);
 	strcat(inp.description, bookmarks.bookmarks_array[slot].snapshot.description);
 	inp.jump_frame = first_change;
 	inp.start_frame = first_change;
@@ -556,7 +714,7 @@ void HISTORY::RegisterBranching(int mod_type, int first_change, int slot)
 			inp.copyHotChanges(&GetCurrentSnapshot());
 		}
 	}
-	AddSnapshotToHistory(inp);
+	AddItemToHistory(inp, old_current_branch);
 }
 void HISTORY::RegisterRecording(int frame_of_change)
 {
@@ -629,7 +787,7 @@ void HISTORY::RegisterRecording(int frame_of_change)
 			inp.inheritHotChanges(&snapshots[real_pos]);
 			inp.fillHotChanges(snapshots[real_pos], frame_of_change, frame_of_change);
 		}
-		AddSnapshotToHistory(inp);
+		AddItemToHistory(inp);
 	}
 	branches.ChangesMadeSinceBranch();
 }
@@ -658,7 +816,7 @@ void HISTORY::RegisterImport(MovieData& md, char* filename)
 			// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
 			inp.fillHotChanges(snapshots[real_pos], first_changes);
 		}
-		AddSnapshotToHistory(inp);
+		AddItemToHistory(inp);
 		inp.toMovie(currMovieData);
 		piano_roll.UpdateItemCount();
 		branches.ChangesMadeSinceBranch();
@@ -730,7 +888,7 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 				inp.fillHotChanges(snapshots[real_pos], first_changes);
 			}
 		}
-		AddSnapshotToHistory(inp);
+		AddItemToHistory(inp);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -746,11 +904,13 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 		// write vars
 		write32le(history_cursor_pos, os);
 		write32le(history_total_items, os);
-		// write snapshots starting from history_start_pos
+		// write items starting from history_start_pos
 		for (int i = 0; i < history_total_items; ++i)
 		{
 			real_pos = (history_start_pos + i) % history_size;
 			snapshots[real_pos].save(os);
+			backup_bookmarks[real_pos].save(os);
+			os->fwrite(&backup_current_branch[real_pos], 1);
 			playback.SetProgressbar(i, history_total_items);
 		}
 	} else
@@ -760,12 +920,16 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 	}
 }
 // returns true if couldn't load
-bool HISTORY::load(EMUFILE *is)
+bool HISTORY::load(EMUFILE *is, bool really_load)
 {
+	if (!really_load)
+	{
+		reset();
+		return false;
+	}
 	int i = -1;
 	SNAPSHOT inp;
-	// delete old snapshots
-	snapshots.resize(history_size);
+	BOOKMARK bookm;
 	// read "HISTORY" string
 	char save_id[HISTORY_ID_LEN];
 	if ((int)is->fread(save_id, HISTORY_ID_LEN) < HISTORY_ID_LEN) goto error;
@@ -777,47 +941,60 @@ bool HISTORY::load(EMUFILE *is)
 		return false;
 	}
 	if (strcmp(history_save_id, save_id)) goto error;		// string is not valid
+	// delete old items
+	snapshots.resize(history_size);
+	backup_bookmarks.resize(history_size);
+	backup_current_branch.resize(history_size);
 	// read vars
 	if (!read32le(&history_cursor_pos, is)) goto error;
 	if (!read32le(&history_total_items, is)) goto error;
 	if (history_cursor_pos > history_total_items) goto error;
 	history_start_pos = 0;
-	// read snapshots
+	// read items
 	int total = history_total_items;
 	if (history_total_items > history_size)
 	{
-		// user can't afford that much undo levels, skip some snapshots
-		int num_snapshots_to_skip = history_total_items - history_size;
-		// first try to skip snapshots over history_cursor_pos (future snapshots), because "redo" is less important than "undo"
-		int num_redo_snapshots = history_total_items-1 - history_cursor_pos;
-		if (num_snapshots_to_skip >= num_redo_snapshots)
+		// user can't afford that much undo levels, skip some items
+		int num_items_to_skip = history_total_items - history_size;
+		// first try to skip items over history_cursor_pos (future items), because "redo" is less important than "undo"
+		int num_redo_items = history_total_items-1 - history_cursor_pos;
+		if (num_items_to_skip >= num_redo_items)
 		{
-			// skip all redo snapshots
+			// skip all redo items
 			history_total_items = history_cursor_pos+1;
-			num_snapshots_to_skip -= num_redo_snapshots;
-			// and still need to skip some undo snapshots
-			for (i = 0; i < num_snapshots_to_skip; ++i)
+			num_items_to_skip -= num_redo_items;
+			// and still need to skip some undo items
+			for (i = 0; i < num_items_to_skip; ++i)
+			{
 				if (inp.skipLoad(is)) goto error;
-			total -= num_snapshots_to_skip;
-			history_cursor_pos -= num_snapshots_to_skip;
+				if (bookm.skipLoad(is)) goto error;
+				if (is->fseek(1, SEEK_CUR)) goto error;		// backup_current_branch
+			}
+			total -= num_items_to_skip;
+			history_cursor_pos -= num_items_to_skip;
 		}
-		history_total_items -= num_snapshots_to_skip;
+		history_total_items -= num_items_to_skip;
 	}
-	// load snapshots
+	// load items
 	for (i = 0; i < history_total_items; ++i)
 	{
 		if (snapshots[i].load(is)) goto error;
+		if (backup_bookmarks[i].load(is)) goto error;
+		if (is->fread(&backup_current_branch[i], 1) != 1) goto error;
 		playback.SetProgressbar(i, history_total_items);
 	}
-	// skip redo snapshots if needed
+	// skip redo items if needed
 	for (; i < total; ++i)
+	{
 		if (inp.skipLoad(is)) goto error;
+		if (bookm.skipLoad(is)) goto error;
+		if (is->fseek(1, SEEK_CUR)) goto error;		// backup_current_branch
+	}
 
+	// everything went well
 	// init vars
 	undo_hint_pos = old_undo_hint_pos = undo_hint_time = -1;
 	old_show_undo_hint = show_undo_hint = false;
-
-	// everything went well
 	UpdateHistoryList();
 	RedrawHistoryList();
 	return false;
@@ -855,14 +1032,8 @@ void HISTORY::Click(int row_index)
 	{
 		int result = jump(row_index);
 		if (result >= 0)
-		{
-			piano_roll.UpdateItemCount();
-			piano_roll.FollowUndo();
 			greenzone.InvalidateAndCheck(result);
-			return;
-		}
 	}
-	RedrawHistoryList();
 }
 
 void HISTORY::UpdateHistoryList()
@@ -880,6 +1051,82 @@ void HISTORY::RedrawHistoryList()
 	InvalidateRect(hwndHistoryList, 0, FALSE);
 }
 // ----------------------------
+int HISTORY::GetCategoryOfOperation(int mod_type)
+{
+	switch (mod_type)
+	{
+		case MODTYPE_INIT:
+		case MODTYPE_UNDEFINED:
+			return CATEGORY_OTHER;
+		case MODTYPE_SET:
+		case MODTYPE_UNSET:
+		case MODTYPE_PATTERN:
+			return CATEGORY_INPUT_CHANGE;
+		case MODTYPE_INSERT:
+		case MODTYPE_INSERTNUM:
+		case MODTYPE_DELETE:
+		case MODTYPE_TRUNCATE:
+			return CATEGORY_INPUT_MARKERS_CHANGE;
+		case MODTYPE_CLEAR:
+		case MODTYPE_CUT:
+		case MODTYPE_PASTE:
+			return CATEGORY_INPUT_CHANGE;
+		case MODTYPE_PASTEINSERT:
+		case MODTYPE_CLONE:
+			return CATEGORY_INPUT_MARKERS_CHANGE;
+		case MODTYPE_RECORD:
+		case MODTYPE_IMPORT:
+			return CATEGORY_INPUT_CHANGE;
+		case MODTYPE_BOOKMARK_0:
+		case MODTYPE_BOOKMARK_1:
+		case MODTYPE_BOOKMARK_2:
+		case MODTYPE_BOOKMARK_3:
+		case MODTYPE_BOOKMARK_4:
+		case MODTYPE_BOOKMARK_5:
+		case MODTYPE_BOOKMARK_6:
+		case MODTYPE_BOOKMARK_7:
+		case MODTYPE_BOOKMARK_8:
+		case MODTYPE_BOOKMARK_9:
+			return CATEGORY_OTHER;
+		case MODTYPE_BRANCH_0:
+		case MODTYPE_BRANCH_1:
+		case MODTYPE_BRANCH_2:
+		case MODTYPE_BRANCH_3:
+		case MODTYPE_BRANCH_4:
+		case MODTYPE_BRANCH_5:
+		case MODTYPE_BRANCH_6:
+		case MODTYPE_BRANCH_7:
+		case MODTYPE_BRANCH_8:
+		case MODTYPE_BRANCH_9:
+			return CATEGORY_INPUT_MARKERS_CHANGE;
+		case MODTYPE_BRANCH_MARKERS_0:
+		case MODTYPE_BRANCH_MARKERS_1:
+		case MODTYPE_BRANCH_MARKERS_2:
+		case MODTYPE_BRANCH_MARKERS_3:
+		case MODTYPE_BRANCH_MARKERS_4:
+		case MODTYPE_BRANCH_MARKERS_5:
+		case MODTYPE_BRANCH_MARKERS_6:
+		case MODTYPE_BRANCH_MARKERS_7:
+		case MODTYPE_BRANCH_MARKERS_8:
+		case MODTYPE_BRANCH_MARKERS_9:
+		case MODTYPE_MARKER_SET:
+		case MODTYPE_MARKER_REMOVE:
+		case MODTYPE_MARKER_PATTERN:
+		case MODTYPE_MARKER_RENAME:
+		case MODTYPE_MARKER_DRAG:
+		case MODTYPE_MARKER_SWAP:
+		case MODTYPE_MARKER_SHIFT:
+		case MODTYPE_LUA_MARKER_SET:
+		case MODTYPE_LUA_MARKER_REMOVE:
+		case MODTYPE_LUA_MARKER_RENAME:
+			return CATEGORY_MARKERS_CHANGE;
+		case MODTYPE_LUA_CHANGE:
+			return CATEGORY_INPUT_MARKERS_CHANGE;
+	}
+	// if undefined
+	return CATEGORY_OTHER;
+}
+
 SNAPSHOT& HISTORY::GetCurrentSnapshot()
 {
 	return snapshots[(history_start_pos + history_cursor_pos) % history_size];
