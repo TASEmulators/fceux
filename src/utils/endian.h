@@ -98,10 +98,10 @@ int writele(T *Bufo, EMUFILE*os)
 {
 	CTASSERT(sizeof(T)==1||sizeof(T)==2||sizeof(T)==4||sizeof(T)==8);
 	switch(sizeof(T)) {
-		case 1: return write8le((uint8*)Bufo,os);
-		case 2: return write16le((uint16*)Bufo,os);
-		case 4: return write32le((uint32*)Bufo,os);
-		case 8: return write64le((uint64*)Bufo,os);
+		case 1: return write8le(*(uint8*)Bufo,os);
+		case 2: return write16le(*(uint16*)Bufo,os);
+		case 4: return write32le(*(uint32*)Bufo,os);
+		case 8: return write64le(*(uint64*)Bufo,os);
 		default:
 			return 0;
 	}
