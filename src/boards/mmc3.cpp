@@ -806,10 +806,10 @@ void Mapper114_Init(CartInfo *info)
 
 static void M115PW(uint32 A, uint8 V)
 {
-  if(EXPREGS[0]&0x80)
-    setprg32(0x8000,(EXPREGS[0]&7)>>1);
-  else
-    setprg8(A,V);
+	//zero 09-apr-2012 - #3515357 - changed to support Bao Qing Tian (mapper 248) which was missing BG gfx. 115 game(s?) seem still to work OK.
+	GENPWRAP(A,V);
+	if(A==0x8000 && EXPREGS[0]&0x80)
+		setprg16(0x8000,(EXPREGS[0]&0xF));
 }
 
 static void M115CW(uint32 A, uint8 V)
