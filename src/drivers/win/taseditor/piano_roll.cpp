@@ -19,7 +19,6 @@ Piano Roll - Piano Roll interface
 * on demand: launches flashes in the Header
 * implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps in Input/markers
 * implements context menu on Right-click
-* updates mouse cursor icon depending on item under cursor
 * stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images
 ------------------------------------------------------------------------------------ */
 
@@ -355,40 +354,9 @@ void PIANO_ROLL::update()
 			}
 			column_under_mouse = info.iSubItem;
 		}
-		// change mouse cursor depending on what it points at
-		LPCSTR cursor_icon = IDC_ARROW;
-		switch (drag_mode)
-		{
-			case DRAG_MODE_NONE:
-			{
-				// normal mouseover
-				//if (row_under_mouse >= 0 && (column_under_mouse == COLUMN_FRAMENUM || column_under_mouse == COLUMN_FRAMENUM2) && markers_manager.GetMarker(row_under_mouse))
-				//	cursor_icon = IDC_SIZEALL;
-				break;
-			}
-			case DRAG_MODE_PLAYBACK:
-			{
-				// dragging Playback cursor - show either normal arrow or arrow+wait
-				if (playback.pause_frame)
-					cursor_icon = IDC_APPSTARTING;
-				break;
-			}
-			case DRAG_MODE_MARKER:
-			{
-				// dragging Marker
-				cursor_icon = IDC_SIZEALL;
-				break;
-			}
-			case DRAG_MODE_OBSERVE:
-			case DRAG_MODE_SET:
-			case DRAG_MODE_UNSET:
-			case DRAG_MODE_SELECTION:
-				// show normal arrow
-				break;
-		}
-		SetCursor(LoadCursor(0, cursor_icon));
 		// and don't check until mouse moves or Piano Roll scrolls
 		must_check_item_under_mouse = false;
+		taseditor_window.must_update_mouse_cursor = true;
 	}
 	
 	// update state of Shift/Ctrl/Alt holding
@@ -1819,5 +1787,4 @@ LRESULT APIENTRY MarkerDragBoxWndProc(HWND hwnd, UINT message, WPARAM wParam, LP
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
-
 

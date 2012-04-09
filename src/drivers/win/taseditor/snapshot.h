@@ -30,10 +30,10 @@ public:
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
-	bool checkDiff(SNAPSHOT& inp);
-	void fillJoypadsDiff(SNAPSHOT& inp, int frame);
+	bool checkDiff(SNAPSHOT& snap);
+	void fillJoypadsDiff(SNAPSHOT& snap, int frame);
 
-	int findFirstChange(SNAPSHOT& inp, int start = 0, int end = -1);
+	int findFirstChange(SNAPSHOT& snap, int start = 0, int end = -1);
 	int findFirstChange(MovieData& md, int start = 0, int end = -1);
 
 	int GetJoystickInfo(int frame, int joy);
@@ -48,7 +48,7 @@ public:
 	void inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames);
 	void inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set);
-	void fillHotChanges(SNAPSHOT& inp, int start = 0, int end = -1);
+	void fillHotChanges(SNAPSHOT& snap, int start = 0, int end = -1);
 
 	void SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits);
 	void SetMaxHotChange(int frame, int absolute_button);

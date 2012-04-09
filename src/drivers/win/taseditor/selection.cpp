@@ -189,6 +189,7 @@ void SELECTION::RedrawMarker()
 	char num[11];
 	_itoa(shown_marker, num, 10);
 	strcat(new_text, num);
+	strcat(new_text, " ");
 	SetWindowText(hwndSelectionMarker, new_text);
 	// change marker note
 	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());

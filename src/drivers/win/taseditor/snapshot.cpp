@@ -316,17 +316,17 @@ bool SNAPSHOT::skipLoad(EMUFILE *is)
 }
 
 // return true if any difference is found
-bool SNAPSHOT::checkDiff(SNAPSHOT& inp)
+bool SNAPSHOT::checkDiff(SNAPSHOT& snap)
 {
-	if (size != inp.size) return true;
-	if (findFirstChange(inp) >= 0)
+	if (size != snap.size) return true;
+	if (findFirstChange(snap) >= 0)
 		return true;
 	else
 		return false;
 }
 
 // fills map of bits judging on which joypads differ (this function is only used by "Record" modtype)
-void SNAPSHOT::fillJoypadsDiff(SNAPSHOT& inp, int frame)
+void SNAPSHOT::fillJoypadsDiff(SNAPSHOT& snap, int frame)
 {
 	rec_joypad_diff_bits = 0;
 	uint32 current_mask = 1;
@@ -339,9 +339,9 @@ void SNAPSHOT::fillJoypadsDiff(SNAPSHOT& inp, int frame)
 			int pos = frame * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type];
 			for (int i = 0; i < BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; ++i)
 			{
-				if (pos < (inp.size * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]))
+				if (pos < (snap.size * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]))
 				{
-					if (joysticks[pos+i] != inp.joysticks[pos+i]) rec_joypad_diff_bits |= current_mask;
+					if (joysticks[pos+i] != snap.joysticks[pos+i]) rec_joypad_diff_bits |= current_mask;
 				} else
 				{
 					if (joysticks[pos+i]) rec_joypad_diff_bits |= current_mask;
@@ -354,33 +354,33 @@ void SNAPSHOT::fillJoypadsDiff(SNAPSHOT& inp, int frame)
 }
 
 // return number of first frame of difference between two snapshots
-int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
+int SNAPSHOT::findFirstChange(SNAPSHOT& snap, int start, int end)
 {
 	// if these two snapshots have different input_type (abnormal situation) then refuse to search and return the beginning
-	if (inp.input_type != input_type)
+	if (snap.input_type != input_type)
 		return start;
 
 	// search for differences to the specified end (or to the end of this snapshot)
 	if (end < 0 || end >= size) end = size-1;
-	int inp_end = inp.size;
+	int snap_end = snap.size;
 	switch(input_type)
 	{
 		case INPUT_TYPE_FOURSCORE:
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// return the frame if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// return the frame if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (commands[frame] != inp.commands[frame]) return frame;
+					if (commands[frame] != snap.commands[frame]) return frame;
 				} else
 				{
 					if (joysticks[pos++]) return frame;
@@ -396,14 +396,14 @@ int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// return the frame if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// return the frame if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (commands[frame] != inp.commands[frame]) return frame;
+					if (commands[frame] != snap.commands[frame]) return frame;
 				} else
 				{
 					if (joysticks[pos++]) return frame;
@@ -417,12 +417,12 @@ int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// return the frame if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// return the frame if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos]) return frame;
+					if (joysticks[pos] != snap.joysticks[pos]) return frame;
 					pos++;
-					if (commands[frame] != inp.commands[frame]) return frame;
+					if (commands[frame] != snap.commands[frame]) return frame;
 				} else
 				{
 					if (joysticks[pos++]) return frame;
@@ -433,7 +433,7 @@ int SNAPSHOT::findFirstChange(SNAPSHOT& inp, int start, int end)
 		}
 	}
 	// if current size is less then previous, return last frame (=size-1) as the frame of difference
-	if (size < inp_end) return size-1;
+	if (size < snap_end) return size-1;
 	// no changes were found
 	return -1;
 }
@@ -759,35 +759,35 @@ void SNAPSHOT::inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, Sel
 		}
 	}
 } 
-void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
+void SNAPSHOT::fillHotChanges(SNAPSHOT& snap, int start, int end)
 {
 	// if these two snapshots have different input_type (abnormal situation) then refuse to compare
-	if (inp.input_type != input_type)
+	if (snap.input_type != input_type)
 		return;
 
 	// compare snapshots to the specified end (or to the end of this snapshot)
 	if (end < 0 || end >= size) end = size-1;
-	int inp_end = inp.size;
+	int snap_end = snap.size;
 	switch(input_type)
 	{
 		case INPUT_TYPE_FOURSCORE:
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// consider changed if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 2, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 2, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 3, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 3, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
 				} else
 				{
@@ -811,14 +811,14 @@ void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// consider changed if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 1, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
 				} else
 				{
@@ -836,11 +836,11 @@ void SNAPSHOT::fillHotChanges(SNAPSHOT& inp, int start, int end)
 		{
 			for (int frame = start, pos = start * BYTES_PER_JOYSTICK * joysticks_per_frame[input_type]; frame <= end; ++frame)
 			{
-				// consider changed if found different byte, or found emptiness in inp when there's non-zero value here
-				if (frame < inp_end)
+				// consider changed if found different byte, or found emptiness in the snap when there's non-zero value here
+				if (frame < snap_end)
 				{
-					if (joysticks[pos] != inp.joysticks[pos])
-						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ inp.joysticks[pos]);
+					if (joysticks[pos] != snap.joysticks[pos])
+						SetMaxHotChange_Bits(frame, 0, joysticks[pos] ^ snap.joysticks[pos]);
 					pos++;
 				} else
 				{

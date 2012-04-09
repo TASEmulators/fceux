@@ -1,4 +1,11 @@
 
+09-Apr-2012 - AnS - Taseditor: all GUI buttons fire off at mousedown; disabled Spacebar and enabled Middle mouse button on GUI buttons
+09-Apr-2012 - AnS - Taseditor: clicks in Branches Tree
+07-Apr-2012 - AnS - Taseditor: version data in fm3
+07-Apr-2012 - AnS - Taseditor: much better way of calculating Branches Tree; hinting full timelines; miniarrow showing current Playback cursor position in Branches Tree; "Bookmark#" modtype, undo/redo works for Bookmarks
+07-Apr-2012 - AnS - Taseditor: applying PAL and PPU flags when loading projects
+05-apr-2012 - zeromus - fix mapper 242 (dragon quest 8 UNL)
+26-Mar-2012 - AnS - Taseditor: Alt+Wheel = jump across gaps in Input/Markers
 25-Mar-2012 - AnS - returned default mapping of Frame Advance hotkey to Backslash
 25-Mar-2012 - AnS - Taseditor: BookmarksList clicks apply on buttonup only
 22-Mar-2012 - AnS - Config->Combine consecutive Recordings/Draws

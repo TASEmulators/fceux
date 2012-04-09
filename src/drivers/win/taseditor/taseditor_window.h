@@ -3,7 +3,7 @@
 #define TASEDITOR_WINDOW_TOTAL_ITEMS 43
 #define PIANOROLL_IN_WINDOWITEMS 2
 
-#define TOOLTIP_TEXT_MAX_LEN 82
+#define TOOLTIP_TEXT_MAX_LEN 100
 #define TOOLTIPS_AUTOPOP_TIMEOUT 30000
 
 #define PATTERNS_MENU_POS 5
@@ -59,6 +59,8 @@ public:
 	bool ready_for_resizing;
 	int min_width;
 	int min_height;
+
+	bool must_update_mouse_cursor;
 
 private:
 	void CalculateItems();

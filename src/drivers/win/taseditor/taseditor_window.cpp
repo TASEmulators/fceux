@@ -11,9 +11,10 @@ Window - User Interface
 [Singleton]
 
 * implements all operations with TAS Editor window: creating, redrawing, resizing, moving, tooltips, clicks
+* subclasses all buttons and checkboxes in TAS Editor window GUI in order to disable Spacebar key and process Middle clicks
 * processes OS messages and sends signals from user to TAS Editor modules (also implements some minor commands on-site, like Greenzone capacity dialog and such)
 * switches off/on emulator's keyboard input when the window loses/gains focus
-* on demand: updates the window caption
+* on demand: updates the window caption; updates mouse cursor icon
 * updates all checkboxes and menu items when some settings change
 * stores info about 10 last projects (File->Recent) and updates it when saving/loading files
 * stores resources: window caption, help filename, size and other properties of all GUI items
@@ -45,6 +46,7 @@ extern EDITOR editor;
 extern SPLICER splicer;
 extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
+extern BRANCHES branches;
 extern HISTORY history;
 extern POPUP_DISPLAY popup_display;
 
@@ -57,7 +59,63 @@ extern char* GetKeyComboName(int c);
 extern BOOL CALLBACK FindNoteProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 extern BOOL CALLBACK AboutProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+// main window wndproc
 BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+// wndprocs for "Marker X" text fields
+LRESULT APIENTRY IDC_PLAYBACK_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_SELECTION_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+WNDPROC IDC_PLAYBACK_MARKER_oldWndProc = 0, IDC_SELECTION_MARKER_oldWndProc = 0;
+// wndprocs for all buttons and checkboxes
+LRESULT APIENTRY IDC_PROGRESS_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_BRANCHES_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_REWIND_FULL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_REWIND_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_PLAYSTOP_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_FORWARD_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_FORWARD_FULL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY CHECK_FOLLOW_CURSOR_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY CHECK_AUTORESTORE_PLAYBACK_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RADIO_ALL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RADIO_1P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RADIO_2P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RADIO_3P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RADIO_4P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_SUPERIMPOSE_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_USEPATTERN_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_PREV_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_FIND_BEST_SIMILAR_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_FIND_NEXT_SIMILAR_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_NEXT_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY CHECK_TURBO_SEEK_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RECORDING_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY TASEDITOR_RUN_MANUAL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY IDC_RUN_AUTO_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+// variables storing old wndprocs
+WNDPROC
+	IDC_PROGRESS_BUTTON_oldWndProc = 0, 
+	IDC_BRANCHES_BUTTON_oldWndProc = 0, 
+	TASEDITOR_REWIND_FULL_oldWndProc = 0, 
+	TASEDITOR_REWIND_oldWndProc = 0, 
+	TASEDITOR_PLAYSTOP_oldWndProc = 0, 
+	TASEDITOR_FORWARD_oldWndProc = 0, 
+	TASEDITOR_FORWARD_FULL_oldWndProc = 0, 
+	CHECK_FOLLOW_CURSOR_oldWndProc = 0, 
+	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = 0, 
+	IDC_RADIO_ALL_oldWndProc = 0, 
+	IDC_RADIO_1P_oldWndProc = 0, 
+	IDC_RADIO_2P_oldWndProc = 0, 
+	IDC_RADIO_3P_oldWndProc = 0, 
+	IDC_RADIO_4P_oldWndProc = 0, 
+	IDC_SUPERIMPOSE_oldWndProc = 0, 
+	IDC_USEPATTERN_oldWndProc = 0, 
+	TASEDITOR_PREV_MARKER_oldWndProc = 0, 
+	TASEDITOR_FIND_BEST_SIMILAR_MARKER_oldWndProc = 0, 
+	TASEDITOR_FIND_NEXT_SIMILAR_MARKER_oldWndProc = 0, 
+	TASEDITOR_NEXT_MARKER_oldWndProc = 0, 
+	CHECK_TURBO_SEEK_oldWndProc = 0, 
+	IDC_RECORDING_oldWndProc = 0, 
+	TASEDITOR_RUN_MANUAL_oldWndProc = 0, 
+	IDC_RUN_AUTO_oldWndProc = 0;
 
 // Recent Menu
 HMENU recent_projects_menu;
@@ -84,15 +142,15 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_BOOKMARKS_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_HISTORY_BOX, -1, 0, 0, -1, "", "", false, 0, 0,
 	TASEDITOR_REWIND_FULL, -1, 0, 0, 0, "Send Playback to previous Marker (mouse: Shift+Wheel up) (hotkey: Shift+PageUp)", "", false, 0, 0,
-	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)", "", false, 0, 0,			// EMUCMD_TASEDITOR_REWIND
+	TASEDITOR_REWIND, -1, 0, 0, 0, "Rewind 1 frame (mouse: Right button+Wheel up) (hotkey: Shift+Up)", "", false, EMUCMD_TASEDITOR_REWIND, 0,
 	TASEDITOR_PLAYSTOP, -1, 0, 0, 0, "Pause/Unpause Emulation (mouse: Middle button)", "", false, EMUCMD_PAUSE, 0,
-	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)", "", false, 0, 0,
+	TASEDITOR_FORWARD, -1, 0, 0, 0, "Advance 1 frame (mouse: Right button+Wheel down) (hotkey: Shift+Down)", "", false, EMUCMD_FRAME_ADVANCE, 0,
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "If you change input above Playback, cursor will run to where it was before change", "", false, 0, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "When you change input above Playback cursor, the cursor returns to where it was before the change", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
-	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the movie back to that time", "", false, 0, 0,
+	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
 	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_RADIO_1P, -1, 0, 0, 0, "", "", false, 0, 0,
 	IDC_RADIO_2P, -1, 0, 0, 0, "", "", false, 0, 0,
@@ -104,13 +162,11 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
 	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
-	IDC_JUMP_PLAYBACK_BUTTON, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
-	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "", "", false, 0, 0,
-	IDC_JUMP_SELECTION_BUTTON, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", false, 0, 0,
+	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", true, 0, 0,
 	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
-	IDC_SELECTION_MARKER, 0, -1, 0, -1, "", "", false, 0, 0,
-	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "This window visualizes the hierarchy of your Branches", "", false, 0, 0,
+	IDC_SELECTION_MARKER, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", true, 0, 0,
+	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "Click on a Bookmark to send Playback cursor there, double-click to load its Branch", "", false, 0, 0,
 	CHECK_TURBO_SEEK, -1, 0, 0, 0, "Uncheck when you need to watch seeking in slow motion", "", false, 0, 0,
 	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", true, 0, 0,
 	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", true, 0, 0,
@@ -205,6 +261,34 @@ void TASEDITOR_WINDOW::init()
 		}
 	}
 	UpdateTooltips();
+	// subclass "Marker X" text fields
+	IDC_PLAYBACK_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PLAYBACK_MARKER), GWL_WNDPROC, (LONG)IDC_PLAYBACK_MARKER_WndProc);
+	IDC_SELECTION_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SELECTION_MARKER), GWL_WNDPROC, (LONG)IDC_SELECTION_MARKER_WndProc);
+	// subclass all buttons
+	IDC_PROGRESS_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PROGRESS_BUTTON), GWL_WNDPROC, (LONG)IDC_PROGRESS_BUTTON_WndProc);
+	IDC_BRANCHES_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_BRANCHES_BUTTON), GWL_WNDPROC, (LONG)IDC_BRANCHES_BUTTON_WndProc);
+	TASEDITOR_REWIND_FULL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_REWIND_FULL), GWL_WNDPROC, (LONG)TASEDITOR_REWIND_FULL_WndProc);
+	TASEDITOR_REWIND_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_REWIND), GWL_WNDPROC, (LONG)TASEDITOR_REWIND_WndProc);
+	TASEDITOR_PLAYSTOP_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_PLAYSTOP), GWL_WNDPROC, (LONG)TASEDITOR_PLAYSTOP_WndProc);
+	TASEDITOR_FORWARD_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_FORWARD), GWL_WNDPROC, (LONG)TASEDITOR_FORWARD_WndProc);
+	TASEDITOR_FORWARD_FULL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_FORWARD_FULL), GWL_WNDPROC, (LONG)TASEDITOR_FORWARD_FULL_WndProc);
+	CHECK_FOLLOW_CURSOR_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_FOLLOW_CURSOR), GWL_WNDPROC, (LONG)CHECK_FOLLOW_CURSOR_WndProc);
+	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_AUTORESTORE_PLAYBACK), GWL_WNDPROC, (LONG)CHECK_AUTORESTORE_PLAYBACK_WndProc);
+	IDC_RADIO_ALL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_ALL), GWL_WNDPROC, (LONG)IDC_RADIO_ALL_WndProc);
+	IDC_RADIO_1P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_1P), GWL_WNDPROC, (LONG)IDC_RADIO_1P_WndProc);
+	IDC_RADIO_2P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_2P), GWL_WNDPROC, (LONG)IDC_RADIO_2P_WndProc);
+	IDC_RADIO_3P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_3P), GWL_WNDPROC, (LONG)IDC_RADIO_3P_WndProc);
+	IDC_RADIO_4P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_4P), GWL_WNDPROC, (LONG)IDC_RADIO_4P_WndProc);
+	IDC_SUPERIMPOSE_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SUPERIMPOSE), GWL_WNDPROC, (LONG)IDC_SUPERIMPOSE_WndProc);
+	IDC_USEPATTERN_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_USEPATTERN), GWL_WNDPROC, (LONG)IDC_USEPATTERN_WndProc);
+	TASEDITOR_PREV_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_PREV_MARKER), GWL_WNDPROC, (LONG)TASEDITOR_PREV_MARKER_WndProc);
+	TASEDITOR_FIND_BEST_SIMILAR_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_FIND_BEST_SIMILAR_MARKER), GWL_WNDPROC, (LONG)TASEDITOR_FIND_BEST_SIMILAR_MARKER_WndProc);
+	TASEDITOR_FIND_NEXT_SIMILAR_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_FIND_NEXT_SIMILAR_MARKER), GWL_WNDPROC, (LONG)TASEDITOR_FIND_NEXT_SIMILAR_MARKER_WndProc);
+	TASEDITOR_NEXT_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_NEXT_MARKER), GWL_WNDPROC, (LONG)TASEDITOR_NEXT_MARKER_WndProc);
+	CHECK_TURBO_SEEK_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_TURBO_SEEK), GWL_WNDPROC, (LONG)CHECK_TURBO_SEEK_WndProc);
+	IDC_RECORDING_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RECORDING), GWL_WNDPROC, (LONG)IDC_RECORDING_WndProc);
+	TASEDITOR_RUN_MANUAL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_RUN_MANUAL), GWL_WNDPROC, (LONG)TASEDITOR_RUN_MANUAL_WndProc);
+	IDC_RUN_AUTO_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RUN_AUTO), GWL_WNDPROC, (LONG)IDC_RUN_AUTO_WndProc);
 	// create "Recent" submenu
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
@@ -242,10 +326,67 @@ void TASEDITOR_WINDOW::exit()
 }
 void TASEDITOR_WINDOW::reset()
 {
-
+	must_update_mouse_cursor = true;
 }
 void TASEDITOR_WINDOW::update()
 {
+	if (must_update_mouse_cursor)
+	{
+		// change mouse cursor depending on what it points at
+		LPCSTR cursor_icon = IDC_ARROW;
+		switch (piano_roll.drag_mode)
+		{
+			case DRAG_MODE_NONE:
+			{
+				// normal mouseover
+				if (bookmarks.edit_mode == EDIT_MODE_BRANCHES)
+				{
+					int branch_under_mouse = bookmarks.item_under_mouse;
+					if (branch_under_mouse >= 0 && branch_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[branch_under_mouse].not_empty)
+					{
+						int current_branch = branches.GetCurrentBranch();
+						if (current_branch >= 0 && current_branch < TOTAL_BOOKMARKS)
+						{
+							// find if the Branch belongs to the current timeline
+							int timeline_branch = branches.FindFullTimelineForBranch(current_branch);
+							while (timeline_branch != ITEM_UNDER_MOUSE_CLOUD)
+							{
+								if (timeline_branch == branch_under_mouse)
+									break;
+								timeline_branch = branches.parents[timeline_branch];
+							}
+							if (timeline_branch == ITEM_UNDER_MOUSE_CLOUD)
+								// branch_under_mouse wasn't found in current timeline
+								cursor_icon = IDC_HELP;
+						}
+					}
+				}
+
+				break;
+			}
+			case DRAG_MODE_PLAYBACK:
+			{
+				// user is dragging Playback cursor - show either normal arrow or arrow+wait
+				if (playback.pause_frame)
+					cursor_icon = IDC_APPSTARTING;
+				break;
+			}
+			case DRAG_MODE_MARKER:
+			{
+				// user is dragging Marker
+				cursor_icon = IDC_SIZEALL;
+				break;
+			}
+			case DRAG_MODE_OBSERVE:
+			case DRAG_MODE_SET:
+			case DRAG_MODE_UNSET:
+			case DRAG_MODE_SELECTION:
+				// user is drawing/selecting - show normal arrow
+				break;
+		}
+		SetCursor(LoadCursor(0, cursor_icon));
+		must_update_mouse_cursor = false;
+	}
 }
 // --------------------------------------------------------------------------------
 void TASEDITOR_WINDOW::CalculateItems()
@@ -717,15 +858,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				}
 				break;
-			case TASEDITOR_PLAYSTOP:
-				switch(((LPNMHDR)lParam)->code)
-				{
-				case NM_CLICK:
-				case NM_DBLCLK:
-					playback.ToggleEmulationPause();
-					break;
-				}
-				break;
 			}
 			break;
 		case WM_CLOSE:
@@ -889,9 +1021,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_CLEAR, 0, 0); 
 					} else
 						splicer.ClearFrames();
-					break;
-				case TASEDITOR_PLAYSTOP:
-					playback.ToggleEmulationPause();
 					break;
 				case CHECK_FOLLOW_CURSOR:
 					taseditor_config.follow_playback ^= 1;
@@ -1161,17 +1290,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}
 						break;
 					}
-				case IDC_JUMP_PLAYBACK_BUTTON:
-					{
-						piano_roll.FollowPlayback();
-						break;
-					}
-				case IDC_JUMP_SELECTION_BUTTON:
-					{
-						if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
-							piano_roll.FollowSelection();
-						break;
-					}
 				case ID_SELECTED_SETMARKERS:
 					{
 						editor.SetMarkers();
@@ -1382,5 +1500,347 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 	return FALSE;
 }
-
+// -----------------------------------------------------------------------------------------------
+// implementation of wndprocs for "Marker X" text
+LRESULT APIENTRY IDC_PLAYBACK_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			piano_roll.FollowPlayback();
+			break;
+	}
+	return CallWindowProc(IDC_PLAYBACK_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_SELECTION_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
+				piano_roll.FollowSelection();
+			break;
+	}
+	return CallWindowProc(IDC_SELECTION_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+// -----------------------------------------------------------------------------------------------
+// implementation of wndprocs for all buttons and checkboxes
+LRESULT APIENTRY IDC_PROGRESS_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_PROGRESS_BUTTON_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_BRANCHES_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_BRANCHES_BUTTON_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_REWIND_FULL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_REWIND_FULL_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_REWIND_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_REWIND_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_PLAYSTOP_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			playback.ToggleEmulationPause();
+			break;
+	}
+	return CallWindowProc(TASEDITOR_PLAYSTOP_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_FORWARD_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_FORWARD_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_FORWARD_FULL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_FORWARD_FULL_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY CHECK_FOLLOW_CURSOR_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(CHECK_FOLLOW_CURSOR_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY CHECK_AUTORESTORE_PLAYBACK_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(CHECK_AUTORESTORE_PLAYBACK_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RADIO_ALL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RADIO_ALL_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RADIO_1P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RADIO_1P_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RADIO_2P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RADIO_2P_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RADIO_3P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RADIO_3P_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RADIO_4P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RADIO_4P_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_SUPERIMPOSE_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_SUPERIMPOSE_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_USEPATTERN_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_USEPATTERN_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_PREV_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_PREV_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_FIND_BEST_SIMILAR_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_FIND_BEST_SIMILAR_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_FIND_NEXT_SIMILAR_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_FIND_NEXT_SIMILAR_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_NEXT_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_NEXT_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY CHECK_TURBO_SEEK_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(CHECK_TURBO_SEEK_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RECORDING_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RECORDING_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY TASEDITOR_RUN_MANUAL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(TASEDITOR_RUN_MANUAL_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY IDC_RUN_AUTO_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(IDC_RUN_AUTO_oldWndProc, hWnd, msg, wParam, lParam);
+}
 

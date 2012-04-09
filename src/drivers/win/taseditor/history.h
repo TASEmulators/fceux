@@ -129,8 +129,8 @@ public:
 	HWND hwndHistoryList;
 
 private:
-	void AddItemToHistory(SNAPSHOT &inp, int cur_branch = 0);
-	void AddItemToHistory(SNAPSHOT &inp, int cur_branch, BOOKMARK &bookm);
+	void AddItemToHistory(SNAPSHOT &snap, int cur_branch = 0);
+	void AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm);
 
 	std::vector<SNAPSHOT> snapshots;
 	std::vector<BOOKMARK> backup_bookmarks;

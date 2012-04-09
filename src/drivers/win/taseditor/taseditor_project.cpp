@@ -125,6 +125,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 	{
 		// change cursor to hourglass
 		SetCursor(LoadCursor(0, IDC_WAIT));
+
 		currMovieData.loadFrameCount = currMovieData.records.size();
 		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 		currMovieData.dump(ofs, save_binary);
@@ -151,7 +152,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		if (!different_name)
 			this->reset();
 		// restore cursor
-		piano_roll.must_check_item_under_mouse = true;
+		taseditor_window.must_update_mouse_cursor = true;
 		return true;
 	} else
 	{
@@ -171,6 +172,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 
 	// change cursor to hourglass
 	SetCursor(LoadCursor(0, IDC_WAIT));
+
 	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 	if (LoadFM2(tempMovieData, &ifs, ifs.size(), false))
@@ -270,7 +272,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	reset();
 	RenameProject(fullname);
 	// restore mouse cursor shape
-	piano_roll.must_check_item_under_mouse = true;
+	taseditor_window.must_update_mouse_cursor = true;
 	return true;
 }
 

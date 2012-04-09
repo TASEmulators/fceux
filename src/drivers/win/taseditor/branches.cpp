@@ -14,7 +14,7 @@ Branches - Manager of Branches
 * also stores the time of the last modification (see fireball) and the time of project beginning (see cloudlet)
 * also caches data used in calculations (cached_first_difference, cached_timelines)
 * saves and loads the data from a project file. On error: sends warning to caller
-* implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover
+* implements the working of Branches Tree: creating, recalculating relations, animating, redrawing, mouseover, clicks
 * on demand: reacts on Bookmarks/current Movie changes and recalculates the Branches Tree
 * regularly updates animations in Branches Tree and calculates Playback cursor position on the Tree
 * stores resources: coordinates for building Branches Tree, animation timings
@@ -189,7 +189,7 @@ void BRANCHES::reset()
 void BRANCHES::reset_vars()
 {
 	transition_phase = animation_frame = 0;
-	playback_x = playback_y = -50;
+	playback_x = playback_y = 0;
 	must_recalculate_branches_tree = must_redraw_branches_tree = true;
 	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
@@ -1116,6 +1116,11 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 	extern BRANCHES branches;
 	switch(msg)
 	{
+		case WM_SETCURSOR:
+		{
+			taseditor_window.must_update_mouse_cursor = true;
+			return true;
+		}
 		case WM_MOUSEMOVE:
 		{
 			if (!bookmarks.mouse_over_bitmap)
@@ -1141,7 +1146,41 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			return 0;
 		}
 		case WM_LBUTTONDOWN:
+		{
+			// single click on Branches Tree = send playback to the Bookmark
+			int branch_under_mouse = bookmarks.item_under_mouse;
+			if (branch_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				playback.jump(0);
+			} else if (branch_under_mouse >= 0 && branch_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[branch_under_mouse].not_empty)
+			{
+				bookmarks.command(COMMAND_JUMP, branch_under_mouse);
+			} else if (branch_under_mouse == TOTAL_BOOKMARKS)
+			{
+				playback.jump(currMovieData.getNumRecords() - 1);
+			}
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			return 0;
+		}
 		case WM_LBUTTONDBLCLK:
+		{
+			// double click on Branches Tree = deploy the Branch
+			int branch_under_mouse = bookmarks.item_under_mouse;
+			if (branch_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				playback.jump(0);
+			} else if (branch_under_mouse >= 0 && branch_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[branch_under_mouse].not_empty)
+			{
+				bookmarks.command(COMMAND_DEPLOY, branch_under_mouse);
+			} else if (branch_under_mouse == TOTAL_BOOKMARKS)
+			{
+				playback.jump(currMovieData.getNumRecords() - 1);
+			}
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			return 0;
+		}
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONDBLCLK:
 		{

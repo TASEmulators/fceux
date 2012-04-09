@@ -120,7 +120,7 @@ void ApplyDefaultCommandMapping(void);
 // Internal variables
 int frameSkipAmt = 18;
 uint8 *xbsave = NULL;
-int eoptions = EO_BGRUN | EO_FORCEISCALE;
+int eoptions = EO_BGRUN | EO_NOSPRLIM | EO_FORCEISCALE;
 
 //global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;

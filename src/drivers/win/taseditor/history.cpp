@@ -142,13 +142,13 @@ void HISTORY::reset()
 	history_start_pos = 0;
 	history_cursor_pos = -1;
 	// create initial snapshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
-	strcat(inp.description, modCaptions[MODTYPE_INIT]);
-	inp.jump_frame = -1;
-	inp.start_frame = 0;
-	inp.end_frame = inp.size - 1;
-	AddItemToHistory(inp);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
+	strcat(snap.description, modCaptions[MODTYPE_INIT]);
+	snap.jump_frame = -1;
+	snap.start_frame = 0;
+	snap.end_frame = snap.size - 1;
+	AddItemToHistory(snap);
 	UpdateHistoryList();
 	RedrawHistoryList();
 }
@@ -385,7 +385,7 @@ void HISTORY::redo()
 	return;
 }
 // ----------------------------
-void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch)
+void HISTORY::AddItemToHistory(SNAPSHOT &snap, int cur_branch)
 {
 	// history uses conveyor of items (vector with fixed size) to aviod frequent resizing, which would be awfully expensive with such large objects as SNAPSHOT and BOOKMARK
 	if (history_total_items >= history_size)
@@ -402,12 +402,12 @@ void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch)
 	}
 	// write data
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	snapshots[real_pos] = inp;
+	snapshots[real_pos] = snap;
 	backup_bookmarks[real_pos].free();
 	backup_current_branch[real_pos] = cur_branch;
 	RedrawHistoryList();
 }
-void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch, BOOKMARK &bookm)
+void HISTORY::AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm)
 {
 	// history uses conveyor of items (vector with fixed size) to aviod frequent resizing, which would be awfully expensive with such large objects as SNAPSHOT and BOOKMARK
 	if (history_total_items >= history_size)
@@ -424,7 +424,7 @@ void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch, BOOKMARK &bookm)
 	}
 	// write data
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	snapshots[real_pos] = inp;
+	snapshots[real_pos] = snap;
 	backup_bookmarks[real_pos] = bookm;
 	backup_current_branch[real_pos] = cur_branch;
 	RedrawHistoryList();
@@ -434,17 +434,17 @@ void HISTORY::AddItemToHistory(SNAPSHOT &inp, int cur_branch, BOOKMARK &bookm)
 int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comment, int consecutive_tag)
 {
 	// create new shanshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(snapshots[real_pos], start, end);
+	int first_changes = snap.findFirstChange(snapshots[real_pos], start, end);
 	if (first_changes >= 0)
 	{
 		// differences found
 		// fill description:
-		inp.mod_type = mod_type;
-		strcat(inp.description, modCaptions[inp.mod_type]);
+		snap.mod_type = mod_type;
+		strcat(snap.description, modCaptions[snap.mod_type]);
 		switch (mod_type)
 		{
 			case MODTYPE_SET:
@@ -453,7 +453,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			case MODTYPE_CLEAR:
 			case MODTYPE_CUT:
 			{
-				inp.jump_frame = first_changes;
+				snap.jump_frame = first_changes;
 				break;
 			}
 			case MODTYPE_INSERT:
@@ -463,47 +463,47 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			case MODTYPE_PATTERN:
 			{
 				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
-				inp.jump_frame = start;
+				snap.jump_frame = start;
 				break;
 			}
 		}
-		inp.start_frame = start;
-		inp.end_frame = end;
-		inp.consecutive_tag = consecutive_tag;
-		if (consecutive_tag && taseditor_config.combine_consecutive && snapshots[real_pos].mod_type == inp.mod_type && snapshots[real_pos].consecutive_tag == inp.consecutive_tag)
+		snap.start_frame = start;
+		snap.end_frame = end;
+		snap.consecutive_tag = consecutive_tag;
+		if (consecutive_tag && taseditor_config.combine_consecutive && snapshots[real_pos].mod_type == snap.mod_type && snapshots[real_pos].consecutive_tag == snap.consecutive_tag)
 		{
 			// combine with previous snapshot
-			if (inp.jump_frame > snapshots[real_pos].jump_frame)
-				inp.jump_frame = snapshots[real_pos].jump_frame;
-			if (inp.start_frame > snapshots[real_pos].start_frame)
-				inp.start_frame = snapshots[real_pos].start_frame;
-			if (inp.end_frame < snapshots[real_pos].end_frame)
-				inp.end_frame = snapshots[real_pos].end_frame;
+			if (snap.jump_frame > snapshots[real_pos].jump_frame)
+				snap.jump_frame = snapshots[real_pos].jump_frame;
+			if (snap.start_frame > snapshots[real_pos].start_frame)
+				snap.start_frame = snapshots[real_pos].start_frame;
+			if (snap.end_frame < snapshots[real_pos].end_frame)
+				snap.end_frame = snapshots[real_pos].end_frame;
 			// add upper and lower frame to description
 			char framenum[11];
-			strcat(inp.description, " ");
-			_itoa(inp.start_frame, framenum, 10);
-			strcat(inp.description, framenum);
-			if (inp.end_frame > inp.start_frame)
+			strcat(snap.description, " ");
+			_itoa(snap.start_frame, framenum, 10);
+			strcat(snap.description, framenum);
+			if (snap.end_frame > snap.start_frame)
 			{
-				strcat(inp.description, "-");
-				_itoa(inp.end_frame, framenum, 10);
-				strcat(inp.description, framenum);
+				strcat(snap.description, "-");
+				_itoa(snap.end_frame, framenum, 10);
+				strcat(snap.description, framenum);
 			}
 			// add comment if there is one specified
 			if (comment)
 			{
-				strcat(inp.description, " ");
-				strncat(inp.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+				strcat(snap.description, " ");
+				strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 			}
 			// set hotchanges
 			if (taseditor_config.enable_hot_changes)
 			{
-				inp.copyHotChanges(&snapshots[real_pos]);
-				inp.fillHotChanges(snapshots[real_pos], first_changes, end);
+				snap.copyHotChanges(&snapshots[real_pos]);
+				snap.fillHotChanges(snapshots[real_pos], first_changes, end);
 			}
 			// replace current snapshot with this cloned snapshot and truncate history here
-			snapshots[real_pos] = inp;
+			snapshots[real_pos] = snap;
 			history_total_items = history_cursor_pos+1;
 			UpdateHistoryList();
 			RedrawHistoryList();
@@ -512,20 +512,20 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			// don't combine
 			// add upper and lower frame to description
 			char framenum[11];
-			strcat(inp.description, " ");
-			_itoa(inp.start_frame, framenum, 10);
-			strcat(inp.description, framenum);
-			if (inp.end_frame > inp.start_frame)
+			strcat(snap.description, " ");
+			_itoa(snap.start_frame, framenum, 10);
+			strcat(snap.description, framenum);
+			if (snap.end_frame > snap.start_frame)
 			{
-				strcat(inp.description, "-");
-				_itoa(inp.end_frame, framenum, 10);
-				strcat(inp.description, framenum);
+				strcat(snap.description, "-");
+				_itoa(snap.end_frame, framenum, 10);
+				strcat(snap.description, framenum);
 			}
 			// add comment if there is one specified
 			if (comment)
 			{
-				strcat(inp.description, " ");
-				strncat(inp.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+				strcat(snap.description, " ");
+				strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 			}
 			// set hotchanges
 			if (taseditor_config.enable_hot_changes)
@@ -534,11 +534,11 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 				switch (mod_type)
 				{
 					case MODTYPE_DELETE:
-						inp.inheritHotChanges_DeleteSelection(&snapshots[real_pos]);
+						snap.inheritHotChanges_DeleteSelection(&snapshots[real_pos]);
 						break;
 					case MODTYPE_INSERT:
 					case MODTYPE_CLONE:
-						inp.inheritHotChanges_InsertSelection(&snapshots[real_pos]);
+						snap.inheritHotChanges_InsertSelection(&snapshots[real_pos]);
 						break;
 					case MODTYPE_SET:
 					case MODTYPE_UNSET:
@@ -546,16 +546,16 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 					case MODTYPE_CUT:
 					case MODTYPE_PASTE:
 					case MODTYPE_PATTERN:
-						inp.inheritHotChanges(&snapshots[real_pos]);
-						inp.fillHotChanges(snapshots[real_pos], first_changes, end);
+						snap.inheritHotChanges(&snapshots[real_pos]);
+						snap.fillHotChanges(snapshots[real_pos], first_changes, end);
 						break;
 					case MODTYPE_TRUNCATE:
-						inp.copyHotChanges(&snapshots[real_pos]);
+						snap.copyHotChanges(&snapshots[real_pos]);
 						// do not add new hotchanges and do not fade old hotchanges, because there was nothing added
 						break;
 				}
 			}
-			AddItemToHistory(inp);
+			AddItemToHistory(snap);
 		}
 		branches.ChangesMadeSinceBranch();
 	}
@@ -564,32 +564,32 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 int HISTORY::RegisterInsertNum(int start, int frames)
 {
 	// create new shanshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(snapshots[real_pos], start);
+	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)
 	{
 		// differences found
 		// fill description:
-		inp.mod_type = MODTYPE_INSERTNUM;
-		strcat(inp.description, modCaptions[inp.mod_type]);
-		inp.jump_frame = start;
-		inp.start_frame = start;
-		inp.end_frame = start + frames - 1;
+		snap.mod_type = MODTYPE_INSERTNUM;
+		strcat(snap.description, modCaptions[snap.mod_type]);
+		snap.jump_frame = start;
+		snap.start_frame = start;
+		snap.end_frame = start + frames - 1;
 		char framenum[11];
 		// add number of inserted frames to description
 		_itoa(frames, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, framenum);
 		// add upper frame to description
-		strcat(inp.description, " ");
-		_itoa(inp.start_frame, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, " ");
+		_itoa(snap.start_frame, framenum, 10);
+		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
-			inp.inheritHotChanges_InsertNum(&snapshots[real_pos], start, frames);
-		AddItemToHistory(inp);
+			snap.inheritHotChanges_InsertNum(&snapshots[real_pos], start, frames);
+		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -597,30 +597,30 @@ int HISTORY::RegisterInsertNum(int start, int frames)
 int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 {
 	// create new shanshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(snapshots[real_pos], start);
+	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)
 	{
 		// differences found
 		// fill description:
-		inp.mod_type = MODTYPE_PASTEINSERT;
-		strcat(inp.description, modCaptions[inp.mod_type]);
+		snap.mod_type = MODTYPE_PASTEINSERT;
+		strcat(snap.description, modCaptions[snap.mod_type]);
 		// for PasteInsert user prefers to see frame of attempted change (selection beginning), not frame of actual differences
-		inp.jump_frame = start;
-		inp.start_frame = start;
-		inp.end_frame = -1;
+		snap.jump_frame = start;
+		snap.start_frame = start;
+		snap.end_frame = -1;
 		// add upper frame to description
 		char framenum[11];
-		strcat(inp.description, " ");
-		_itoa(inp.start_frame, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, " ");
+		_itoa(snap.start_frame, framenum, 10);
+		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
-			inp.inheritHotChanges_PasteInsert(&snapshots[real_pos], inserted_set);
-		AddItemToHistory(inp);
+			snap.inheritHotChanges_PasteInsert(&snapshots[real_pos], inserted_set);
+		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -628,72 +628,72 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char* comment)
 {
 	// create new shanshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// fill description:
-	inp.mod_type = mod_type;
-	strcat(inp.description, modCaptions[mod_type]);
-	inp.jump_frame = start;
-	inp.start_frame = start;
-	inp.end_frame = end;
+	snap.mod_type = mod_type;
+	strcat(snap.description, modCaptions[mod_type]);
+	snap.jump_frame = start;
+	snap.start_frame = start;
+	snap.end_frame = end;
 	// add the frame to description
 	char framenum[11];
-	strcat(inp.description, " ");
-	_itoa(inp.start_frame, framenum, 10);
-	strcat(inp.description, framenum);
-	if (inp.end_frame > inp.start_frame || mod_type == MODTYPE_MARKER_DRAG || mod_type == MODTYPE_MARKER_SWAP)
+	strcat(snap.description, " ");
+	_itoa(snap.start_frame, framenum, 10);
+	strcat(snap.description, framenum);
+	if (snap.end_frame > snap.start_frame || mod_type == MODTYPE_MARKER_DRAG || mod_type == MODTYPE_MARKER_SWAP)
 	{
 		if (mod_type == MODTYPE_MARKER_DRAG)
-			strcat(inp.description, "=>");
+			strcat(snap.description, "=>");
 		else if (mod_type == MODTYPE_MARKER_SWAP)
-			strcat(inp.description, "<=>");
+			strcat(snap.description, "<=>");
 		else
-			strcat(inp.description, "-");
-		_itoa(inp.end_frame, framenum, 10);
-		strcat(inp.description, framenum);
+			strcat(snap.description, "-");
+		_itoa(snap.end_frame, framenum, 10);
+		strcat(snap.description, framenum);
 	}
 	// add comment if there is one specified
 	if (comment)
 	{
-		strcat(inp.description, " ");
-		strncat(inp.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+		strcat(snap.description, " ");
+		strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 	}
 	// input hotchanges aren't changed
 	if (taseditor_config.enable_hot_changes)
-		inp.copyHotChanges(&GetCurrentSnapshot());
-	AddItemToHistory(inp);
+		snap.copyHotChanges(&GetCurrentSnapshot());
+	AddItemToHistory(snap);
 	branches.ChangesMadeSinceBranch();
 	project.SetProjectChanged();
 }
 void HISTORY::RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch)
 {
 	// create new snapshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// fill description: modification type + jump_frame of the Bookmark
-	inp.mod_type = MODTYPE_BOOKMARK_0 + slot;
-	strcat(inp.description, modCaptions[inp.mod_type]);
-	inp.start_frame = inp.end_frame = inp.jump_frame = bookmarks.bookmarks_array[slot].snapshot.jump_frame;
+	snap.mod_type = MODTYPE_BOOKMARK_0 + slot;
+	strcat(snap.description, modCaptions[snap.mod_type]);
+	snap.start_frame = snap.end_frame = snap.jump_frame = bookmarks.bookmarks_array[slot].snapshot.jump_frame;
 	char framenum[11];
-	strcat(inp.description, " ");
-	_itoa(inp.jump_frame, framenum, 10);
-	strcat(inp.description, framenum);
+	strcat(snap.description, " ");
+	_itoa(snap.jump_frame, framenum, 10);
+	strcat(snap.description, framenum);
 	if (taseditor_config.enable_hot_changes)
-		inp.copyHotChanges(&GetCurrentSnapshot());
-	AddItemToHistory(inp, old_current_branch, backup_copy);
+		snap.copyHotChanges(&GetCurrentSnapshot());
+	AddItemToHistory(snap, old_current_branch, backup_copy);
 }
 void HISTORY::RegisterBranching(int mod_type, int first_change, int slot, int old_current_branch)
 {
 	// create new snapshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// fill description: modification type + time of the Branch
-	inp.mod_type = mod_type;
-	strcat(inp.description, modCaptions[inp.mod_type]);
-	strcat(inp.description, bookmarks.bookmarks_array[slot].snapshot.description);
-	inp.jump_frame = first_change;
-	inp.start_frame = first_change;
-	inp.end_frame = -1;
+	snap.mod_type = mod_type;
+	strcat(snap.description, modCaptions[snap.mod_type]);
+	strcat(snap.description, bookmarks.bookmarks_array[slot].snapshot.description);
+	snap.jump_frame = first_change;
+	snap.start_frame = first_change;
+	snap.end_frame = -1;
 	if (taseditor_config.enable_hot_changes)
 	{
 		if (mod_type < MODTYPE_BRANCH_MARKERS_0)
@@ -702,122 +702,122 @@ void HISTORY::RegisterBranching(int mod_type, int first_change, int slot, int ol
 			// copy hotchanges of the Branch
 			if (taseditor_config.branch_full_movie)
 			{
-				inp.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
+				snap.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
 			} else
 			{
 				// input was branched partially, so copy hotchanges only up to and not including jump_frame of the Branch
-				inp.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot, bookmarks.bookmarks_array[slot].snapshot.jump_frame);
+				snap.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot, bookmarks.bookmarks_array[slot].snapshot.jump_frame);
 			}
 		} else
 		{
 			// input was not changed, only Markers were changed
-			inp.copyHotChanges(&GetCurrentSnapshot());
+			snap.copyHotChanges(&GetCurrentSnapshot());
 		}
 	}
-	AddItemToHistory(inp, old_current_branch);
+	AddItemToHistory(snap, old_current_branch);
 }
 void HISTORY::RegisterRecording(int frame_of_change)
 {
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
-	inp.fillJoypadsDiff(snapshots[real_pos], frame_of_change);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
+	snap.fillJoypadsDiff(snapshots[real_pos], frame_of_change);
 	// fill description:
-	inp.mod_type = MODTYPE_RECORD;
-	strcat(inp.description, modCaptions[MODTYPE_RECORD]);
+	snap.mod_type = MODTYPE_RECORD;
+	strcat(snap.description, modCaptions[MODTYPE_RECORD]);
 	char framenum[11];
 	// check if current snapshot is also Recording and maybe it is consecutive recording
 	if (taseditor_config.combine_consecutive
 		&& snapshots[real_pos].mod_type == MODTYPE_RECORD							// a) also Recording
 		&& snapshots[real_pos].consecutive_tag == frame_of_change - 1				// b) consecutive (previous frame)
-		&& snapshots[real_pos].rec_joypad_diff_bits == inp.rec_joypad_diff_bits)	// c) recorded same set of joysticks
+		&& snapshots[real_pos].rec_joypad_diff_bits == snap.rec_joypad_diff_bits)	// c) recorded same set of joysticks
 	{
 		// clone this snapshot and continue chain of recorded frames
-		inp.jump_frame = snapshots[real_pos].jump_frame;
-		inp.start_frame = snapshots[real_pos].jump_frame;
-		inp.end_frame = frame_of_change;
-		inp.consecutive_tag = frame_of_change;
+		snap.jump_frame = snapshots[real_pos].jump_frame;
+		snap.start_frame = snapshots[real_pos].jump_frame;
+		snap.end_frame = frame_of_change;
+		snap.consecutive_tag = frame_of_change;
 		// add info which joypads were affected
-		int num = joysticks_per_frame[inp.input_type];
+		int num = joysticks_per_frame[snap.input_type];
 		uint32 current_mask = 1;
 		for (int i = 0; i < num; ++i)
 		{
-			if ((inp.rec_joypad_diff_bits & current_mask))
-				strcat(inp.description, joypadCaptions[i]);
+			if ((snap.rec_joypad_diff_bits & current_mask))
+				strcat(snap.description, joypadCaptions[i]);
 			current_mask <<= 1;
 		}
 		// add upper and lower frame to description
-		strcat(inp.description, " ");
-		_itoa(inp.start_frame, framenum, 10);
-		strcat(inp.description, framenum);
-		strcat(inp.description, "-");
-		_itoa(inp.end_frame, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, " ");
+		_itoa(snap.start_frame, framenum, 10);
+		strcat(snap.description, framenum);
+		strcat(snap.description, "-");
+		_itoa(snap.end_frame, framenum, 10);
+		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
 		{
-			inp.copyHotChanges(&snapshots[real_pos]);
-			inp.fillHotChanges(snapshots[real_pos], frame_of_change, frame_of_change);
+			snap.copyHotChanges(&snapshots[real_pos]);
+			snap.fillHotChanges(snapshots[real_pos], frame_of_change, frame_of_change);
 		}
 		// replace current snapshot with this cloned snapshot and truncate history here
-		snapshots[real_pos] = inp;
+		snapshots[real_pos] = snap;
 		history_total_items = history_cursor_pos+1;
 		UpdateHistoryList();
 		RedrawHistoryList();
 	} else
 	{
 		// not consecutive - add new snapshot to history
-		inp.jump_frame = inp.start_frame = inp.end_frame = inp.consecutive_tag = frame_of_change;
+		snap.jump_frame = snap.start_frame = snap.end_frame = snap.consecutive_tag = frame_of_change;
 		// add info which joypads were affected
-		int num = joysticks_per_frame[inp.input_type];
+		int num = joysticks_per_frame[snap.input_type];
 		uint32 current_mask = 1;
 		for (int i = 0; i < num; ++i)
 		{
-			if ((inp.rec_joypad_diff_bits & current_mask))
-				strcat(inp.description, joypadCaptions[i]);
+			if ((snap.rec_joypad_diff_bits & current_mask))
+				strcat(snap.description, joypadCaptions[i]);
 			current_mask <<= 1;
 		}
 		// add upper frame to description
-		strcat(inp.description, " ");
+		strcat(snap.description, " ");
 		_itoa(frame_of_change, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
 		{
-			inp.inheritHotChanges(&snapshots[real_pos]);
-			inp.fillHotChanges(snapshots[real_pos], frame_of_change, frame_of_change);
+			snap.inheritHotChanges(&snapshots[real_pos]);
+			snap.fillHotChanges(snapshots[real_pos], frame_of_change, frame_of_change);
 		}
-		AddItemToHistory(inp);
+		AddItemToHistory(snap);
 	}
 	branches.ChangesMadeSinceBranch();
 }
 void HISTORY::RegisterImport(MovieData& md, char* filename)
 {
 	// create new snapshot
-	SNAPSHOT inp;
-	inp.init(md, taseditor_config.enable_hot_changes, GetInputType(currMovieData));
+	SNAPSHOT snap;
+	snap.init(md, taseditor_config.enable_hot_changes, GetInputType(currMovieData));
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(snapshots[real_pos]);
+	int first_changes = snap.findFirstChange(snapshots[real_pos]);
 	if (first_changes >= 0)
 	{
 		// differences found
-		inp.jump_frame = first_changes;
-		inp.start_frame = 0;
-		inp.end_frame = inp.size - 1;
+		snap.jump_frame = first_changes;
+		snap.start_frame = 0;
+		snap.end_frame = snap.size - 1;
 		// fill description:
-		inp.mod_type = MODTYPE_IMPORT;
-		strcat(inp.description, modCaptions[inp.mod_type]);
+		snap.mod_type = MODTYPE_IMPORT;
+		strcat(snap.description, modCaptions[snap.mod_type]);
 		// add filename to description
-		strcat(inp.description, " ");
-		strncat(inp.description, filename, SNAPSHOT_DESC_MAX_LENGTH - strlen(inp.description) - 1);
+		strcat(snap.description, " ");
+		strncat(snap.description, filename, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 		if (taseditor_config.enable_hot_changes)
 		{
 			// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
-			inp.fillHotChanges(snapshots[real_pos], first_changes);
+			snap.fillHotChanges(snapshots[real_pos], first_changes);
 		}
-		AddItemToHistory(inp);
-		inp.toMovie(currMovieData);
+		AddItemToHistory(snap);
+		snap.toMovie(currMovieData);
 		piano_roll.UpdateItemCount();
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
@@ -830,41 +830,41 @@ void HISTORY::RegisterImport(MovieData& md, char* filename)
 int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made)
 {
 	// create new shanshot
-	SNAPSHOT inp;
-	inp.init(currMovieData, taseditor_config.enable_hot_changes);
+	SNAPSHOT snap;
+	snap.init(currMovieData, taseditor_config.enable_hot_changes);
 	// check if there are input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
-	int first_changes = inp.findFirstChange(snapshots[real_pos], start);
+	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)
 	{
 		// differences found
 		// fill description:
-		inp.mod_type = MODTYPE_LUA_CHANGE;
+		snap.mod_type = MODTYPE_LUA_CHANGE;
 		if (name[0])
 		{
 			// user provided custom name of operation
-			strcat(inp.description, LuaCaptionPrefix);
-			strncat(inp.description, name, LUACHANGES_NAME_MAX_LEN);
+			strcat(snap.description, LuaCaptionPrefix);
+			strncat(snap.description, name, LUACHANGES_NAME_MAX_LEN);
 		} else
 		{
 			// set default name
-			strcat(inp.description, modCaptions[inp.mod_type]);
+			strcat(snap.description, modCaptions[snap.mod_type]);
 		}
-		inp.jump_frame = first_changes;
-		inp.start_frame = start;
-		inp.end_frame = -1;
+		snap.jump_frame = first_changes;
+		snap.start_frame = start;
+		snap.end_frame = -1;
 		// add upper frame to description
 		char framenum[11];
-		strcat(inp.description, " ");
+		strcat(snap.description, " ");
 		_itoa(first_changes, framenum, 10);
-		strcat(inp.description, framenum);
+		strcat(snap.description, framenum);
 		// set hotchanges
 		if (taseditor_config.enable_hot_changes)
 		{
 			if (InsertionDeletion_was_made)
 			{
-				// do it hard way: take old hot_changes and insert/delete rows to create a snapshot that is comparable to inp
-				if (inp.input_type == snapshots[real_pos].input_type)
+				// do it hard way: take old hot_changes and insert/delete rows to create a snapshot that is comparable to the snap
+				if (snap.input_type == snapshots[real_pos].input_type)
 				{
 					// create temp copy of current snapshot (we need it as a container for hot_changes)
 					SNAPSHOT hotchanges_snapshot = snapshots[real_pos];
@@ -874,21 +874,21 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 					} else
 					{
 						hotchanges_snapshot.has_hot_changes = true;
-						hotchanges_snapshot.hot_changes.resize(joysticks_per_frame[inp.input_type] * hotchanges_snapshot.size * HOTCHANGE_BYTES_PER_JOY);
+						hotchanges_snapshot.hot_changes.resize(joysticks_per_frame[snap.input_type] * hotchanges_snapshot.size * HOTCHANGE_BYTES_PER_JOY);
 					}
-					// insert/delete frames in hotchanges_snapshot, so that it will be the same size as inp
+					// insert/delete frames in hotchanges_snapshot, so that it will be the same size as the snap
 					taseditor_lua.InsertDelete_rows_to_Snaphot(hotchanges_snapshot);
-					inp.copyHotChanges(&hotchanges_snapshot);
-					inp.fillHotChanges(hotchanges_snapshot, first_changes);
+					snap.copyHotChanges(&hotchanges_snapshot);
+					snap.fillHotChanges(hotchanges_snapshot, first_changes);
 				}
 			} else
 			{
-				// easy way: inp.size is equal to currentsnapshot.size, so we can simply inherit hotchanges
-				inp.inheritHotChanges(&snapshots[real_pos]);
-				inp.fillHotChanges(snapshots[real_pos], first_changes);
+				// easy way: snap.size is equal to currentsnapshot.size, so we can simply inherit hotchanges
+				snap.inheritHotChanges(&snapshots[real_pos]);
+				snap.fillHotChanges(snapshots[real_pos], first_changes);
 			}
 		}
-		AddItemToHistory(inp);
+		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
 	}
 	return first_changes;
@@ -928,7 +928,7 @@ bool HISTORY::load(EMUFILE *is, bool really_load)
 		return false;
 	}
 	int i = -1;
-	SNAPSHOT inp;
+	SNAPSHOT snap;
 	BOOKMARK bookm;
 	// read "HISTORY" string
 	char save_id[HISTORY_ID_LEN];
@@ -966,7 +966,7 @@ bool HISTORY::load(EMUFILE *is, bool really_load)
 			// and still need to skip some undo items
 			for (i = 0; i < num_items_to_skip; ++i)
 			{
-				if (inp.skipLoad(is)) goto error;
+				if (snap.skipLoad(is)) goto error;
 				if (bookm.skipLoad(is)) goto error;
 				if (is->fseek(1, SEEK_CUR)) goto error;		// backup_current_branch
 			}
@@ -986,7 +986,7 @@ bool HISTORY::load(EMUFILE *is, bool really_load)
 	// skip redo items if needed
 	for (; i < total; ++i)
 	{
-		if (inp.skipLoad(is)) goto error;
+		if (snap.skipLoad(is)) goto error;
 		if (bookm.skipLoad(is)) goto error;
 		if (is->fseek(1, SEEK_CUR)) goto error;		// backup_current_branch
 	}
