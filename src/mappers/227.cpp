@@ -41,7 +41,10 @@ static void DoSync(uint32 A)
  }
  if(A&0x80)
  {
-  PPUCHRRAM=0;
+  //zero 09-apr-2012 - re #3515350
+  //removed this to fix [NJXXX] Xiang Shuai Chuan Qi which wouldnt be able to write any of its vram otherwise
+  //if this needs to be here for some other reason, then we'll have to learn how to decide when to do it
+  //PPUCHRRAM=0;
  }
  else
  {
