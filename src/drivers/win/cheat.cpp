@@ -361,7 +361,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 				if (selcheat >= 0) {
 					// Open IDC_LIST_CHEATS Context Menu
 					hCheatcontextsub = GetSubMenu(hCheatcontext,0);
-					
+					SetMenuDefaultItem(hCheatcontextsub, CHEAT_CONTEXT_TOGGLECHEAT, false);
 					if (lParam != -1)
 						TrackPopupMenu(hCheatcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
 					else { // Handle the context menu keyboard key

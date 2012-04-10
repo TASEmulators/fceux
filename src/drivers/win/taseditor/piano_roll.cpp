@@ -1282,6 +1282,7 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 	{
 		SelectionFrames* current_selection = selection.MakeStrobe();
 		HMENU sub = GetSubMenu(hrmenu, 0);
+		SetMenuDefaultItem(sub, ID_SELECTED_SETMARKERS, false);
 		// inspect current selection and disable inappropriate menu items
 		SelectionFrames::iterator current_selection_begin(current_selection->begin());
 		SelectionFrames::iterator current_selection_end(current_selection->end());
@@ -1293,15 +1294,14 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 			else 
 				unset_found = true;
 		}
-		if (set_found)
-			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_ENABLED);
-		else
-			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		if (unset_found)
-			EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_ENABLED);
+			EnableMenuItem(sub, ID_SELECTED_SETMARKERS, MF_BYCOMMAND | MF_ENABLED);
 		else
-			EnableMenuItem(sub, ID_SELECTED_SETMARKER, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-
+			EnableMenuItem(sub, ID_SELECTED_SETMARKERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		if (set_found)
+			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKERS, MF_BYCOMMAND | MF_ENABLED);
+		else
+			EnableMenuItem(sub, ID_SELECTED_REMOVEMARKERS, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 		POINT pt = info.pt;
 		ClientToScreen(hwndList, &pt);
 		TrackPopupMenu(sub, 0, pt.x, pt.y, 0, taseditor_window.hwndTasEditor, 0);

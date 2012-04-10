@@ -1197,7 +1197,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0) {
 						// Open IDC_LIST_CHEATS Context Menu
 						hDebugcontextsub = GetSubMenu(hDebugcontext,0);
-
+						SetMenuDefaultItem(hDebugcontextsub, DEBUGGER_CONTEXT_TOGGLEBREAK, false);
 						if (lParam != -1)
 							TrackPopupMenu(hDebugcontextsub,TPM_RIGHTBUTTON,LOWORD(lParam),HIWORD(lParam),0,hwndDlg,0);	//Create menu
 						else { // Handle the context menu keyboard key
