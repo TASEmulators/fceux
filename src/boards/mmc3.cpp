@@ -398,6 +398,8 @@ void Mapper12_Init(CartInfo *info)
 {
  GenMMC3_Init(info, 512, 256, 8, info->battery);
  cwrap=M12CW;
+ isRevB=0;
+
  info->Power=M12Power;
  AddExState(EXPREGS, 2, 0, "EXPR");
 }
