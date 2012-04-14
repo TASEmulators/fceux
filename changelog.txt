@@ -1,4 +1,9 @@
 
+14-Apr-2012 - AnS - Taseditor: rightclicks in Branches Tree
+14-Apr-2012 - AnS - "Play Movie" dialog doesn't search in fceux root folder anymore
+10-Apr-2012 - AnS - bold items in some context menus
+10-apr-2012 - zeromus - fix mapper 115 (actually to fix mapper 248 for Bao Qing Tian)
+09-apr-2012 - zeromus - remove vram protection from mapper 227
 09-Apr-2012 - AnS - Taseditor: all GUI buttons fire off at mousedown; disabled Spacebar and enabled Middle mouse button on GUI buttons
 09-Apr-2012 - AnS - Taseditor: clicks in Branches Tree
 07-Apr-2012 - AnS - Taseditor: version data in fm3

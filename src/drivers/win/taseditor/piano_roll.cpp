@@ -293,7 +293,7 @@ void PIANO_ROLL::free()
 }
 void PIANO_ROLL::reset()
 {
-	must_check_item_under_mouse = true;
+	must_redraw_list = must_check_item_under_mouse = true;
 	row_last_clicked = 0;
 	shift_held = ctrl_held = alt_held = false;
 	shift_timer = ctrl_timer = shift_count = ctrl_count = 0;
@@ -428,31 +428,6 @@ void PIANO_ROLL::update()
 		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_LBUTTON : VK_RBUTTON) >= 0)
 			rbutton_drag_mode = false;
 	}
-	// scroll Piano Roll if user is dragging cursor outside
-	if (drag_mode != DRAG_MODE_NONE || rbutton_drag_mode)
-	{
-		POINT p;
-		if (GetCursorPos(&p))
-		{
-			ScreenToClient(hwndList, &p);
-			RECT wrect;
-			GetClientRect(hwndList, &wrect);
-			int scroll_dx = 0, scroll_dy = 0;
-			if (drag_mode != DRAG_MODE_MARKER)		// in DRAG_MODE_MARKER user can't scroll Piano Roll horizontally
-			{
-				if (p.x < DRAG_SCROLLING_BORDER_SIZE)
-					scroll_dx = p.x - DRAG_SCROLLING_BORDER_SIZE;
-				else if (p.x > (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE))
-					scroll_dx = p.x - (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE);
-			}
-			if (p.y < (list_header_height + DRAG_SCROLLING_BORDER_SIZE))
-				scroll_dy = p.y - (list_header_height + DRAG_SCROLLING_BORDER_SIZE);
-			else if (p.y > (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE))
-				scroll_dy = p.y - (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE);
-			if (scroll_dx || scroll_dy)
-				ListView_Scroll(hwndList, scroll_dx, scroll_dy);
-		}
-	}
 	// perform drag
 	switch (drag_mode)
 	{
@@ -527,6 +502,11 @@ void PIANO_ROLL::update()
 					info.pt.y = p.y + (len / total_len) * total_dy;
 					ListView_SubItemHitTest(hwndList, &info);
 					row_index = info.iItem;
+					if (row_index < 0)
+						row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - list_row_top) / list_row_height;
+					// pad movie size if user tries to draw below Piano Roll limit
+					if (row_index >= currMovieData.getNumRecords())
+						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
 					column_index = info.iSubItem;
 					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 					{
@@ -561,10 +541,12 @@ void PIANO_ROLL::update()
 		}
 		case DRAG_MODE_SELECTION:
 		{
-			int new_drag_selection_ending_frame = row_under_mouse;
+			int new_drag_selection_ending_frame = real_row_under_mouse;
 			// if trying to select above Piano Roll, select from frame 0
-			if (new_drag_selection_ending_frame < 0 && real_row_under_mouse < 0)
+			if (new_drag_selection_ending_frame < 0)
 				new_drag_selection_ending_frame = 0;
+			else if (new_drag_selection_ending_frame >= currMovieData.getNumRecords())
+				new_drag_selection_ending_frame = currMovieData.getNumRecords() - 1;
 			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != drag_selection_ending_frame)
 			{
 				// change selection shape
@@ -619,6 +601,37 @@ void PIANO_ROLL::update()
 			DestroyWindow(hwndMarkerDragBox);
 			hwndMarkerDragBox = 0;
 		}
+	}
+	// scroll Piano Roll if user is dragging cursor outside
+	if (drag_mode != DRAG_MODE_NONE || rbutton_drag_mode)
+	{
+		POINT p;
+		if (GetCursorPos(&p))
+		{
+			ScreenToClient(hwndList, &p);
+			RECT wrect;
+			GetClientRect(hwndList, &wrect);
+			int scroll_dx = 0, scroll_dy = 0;
+			if (drag_mode != DRAG_MODE_MARKER)		// in DRAG_MODE_MARKER user can't scroll Piano Roll horizontally
+			{
+				if (p.x < DRAG_SCROLLING_BORDER_SIZE)
+					scroll_dx = p.x - DRAG_SCROLLING_BORDER_SIZE;
+				else if (p.x > (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE))
+					scroll_dx = p.x - (wrect.right - wrect.left - DRAG_SCROLLING_BORDER_SIZE);
+			}
+			if (p.y < (list_header_height + DRAG_SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (list_header_height + DRAG_SCROLLING_BORDER_SIZE);
+			else if (p.y > (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE))
+				scroll_dy = p.y - (wrect.bottom - wrect.top - DRAG_SCROLLING_BORDER_SIZE);
+			if (scroll_dx || scroll_dy)
+				ListView_Scroll(hwndList, scroll_dx, scroll_dy);
+		}
+	}
+	// redraw list if needed
+	if (must_redraw_list)
+	{
+		InvalidateRect(hwndList, 0, false);
+		must_redraw_list = false;
 	}
 
 	// once per 40 milliseconds update colors alpha in the Header
@@ -720,9 +733,9 @@ error:
 	return true;
 }
 // ----------------------------------------------------------------------
-void PIANO_ROLL::RedrawList(bool erase_bg)
+void PIANO_ROLL::RedrawList()
 {
-	InvalidateRect(hwndList, 0, erase_bg);
+	must_redraw_list = true;
 	must_check_item_under_mouse = true;
 }
 void PIANO_ROLL::RedrawRow(int index)

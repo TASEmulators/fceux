@@ -63,6 +63,8 @@ bool autoMovieBackup = false; //Toggle that determines if movies should be backe
 bool freshMovie = false;	  //True when a movie loads, false when movie is altered.  Used to determine if a movie has been altered since opening
 bool movieFromPoweron = true;
 
+static int _currCommand = 0;
+
 // Function declarations------------------------
 
 
@@ -794,7 +796,7 @@ void poweron(bool shouldDisableBatteryLoading)
 	disableBatteryLoading = 0;
 }
 
-void CreateCleanMovie()
+void FCEUMOV_CreateCleanMovie()
 {
 	currMovieData = MovieData();
 	currMovieData.palFlag = FCEUI_GetCurrentVidSystem(0,0)!=0;
@@ -803,14 +805,15 @@ void CreateCleanMovie()
 	currMovieData.guid.newGuid();
 	currMovieData.fourscore = FCEUI_GetInputFourscore();
 	currMovieData.microphone = FCEUI_GetInputMicrophone();
-	//currMovieData.ports[0] = InputType[0];
-	//currMovieData.ports[1] = InputType[1];
-	//currMovieData.ports[2] = InputType[2];
 	currMovieData.ports[0] = joyports[0].type;
 	currMovieData.ports[1] = joyports[1].type;
 	currMovieData.ports[2] = portFC.type;
 	currMovieData.fds = isFDS;
 	currMovieData.PPUflag = (newppu != 0);
+}
+void FCEUMOV_ClearCommands()
+{
+	_currCommand = 0;
 }
 
 bool FCEUMOV_FromPoweron()
@@ -951,9 +954,8 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 
 	currFrameCounter = 0;
 	LagCounterReset();
-	CreateCleanMovie();
+	FCEUMOV_CreateCleanMovie();
 	if(author != L"") currMovieData.comments.push_back(L"author " + author);
-
 
 	if(flags & MOVIE_FLAG_FROM_POWERON)
 	{
@@ -966,6 +968,8 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 		MovieData::dumpSavestateTo(&currMovieData.savestate,Z_BEST_COMPRESSION);
 	}
 
+	FCEUMOV_ClearCommands();
+
 	//we are going to go ahead and dump the header. from now on we will only be appending frames
 	currMovieData.dump(osRecordingMovie, false);
 
@@ -976,7 +980,6 @@ void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 	FCEU_DispMessage("Movie recording started.",0);
 }
 
-static int _currCommand = 0;
 
 //the main interaction point between the emulator and the movie system.
 //either dumps the current joystick state or loads one state from the movie

@@ -37,7 +37,7 @@ void BOOKMARK::init()
 void BOOKMARK::free()
 {
 	not_empty = false;
-	flash_type = flash_phase = 0;
+	flash_type = flash_phase = floating_phase = 0;
 	SNAPSHOT tmp;
 	snapshot = tmp;
 	savestate.resize(0);
@@ -139,8 +139,8 @@ bool BOOKMARK::load(EMUFILE *is)
 	{
 		free();
 	}
-	// all ok
-	flash_type = flash_phase = 0;
+	// all ok - reset vars
+	flash_type = flash_phase = floating_phase = 0;
 	return false;
 }
 bool BOOKMARK::skipLoad(EMUFILE *is)

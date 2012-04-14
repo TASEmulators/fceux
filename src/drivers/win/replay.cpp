@@ -505,12 +505,13 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_READONLY, BM_SETCHECK, replayReadOnlySetting?BST_CHECKED:BST_UNCHECKED, 0);
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_STOPMOVIE,BM_SETCHECK, BST_UNCHECKED, 0);
 
-			char* findGlob[2] = {strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0).c_str()),
-								 strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB2, 0, 0).c_str())};
+#define NUM_OF_MOVIEGLOB_PATHS 1
+
+			char* findGlob[NUM_OF_MOVIEGLOB_PATHS] = {strdup(FCEU_MakeFName(FCEUMKF_MOVIEGLOB, 0, 0).c_str())};
 
 			int items=0;
 
-			for(int j=0;j<2;j++)
+			for(int j = 0;j < NUM_OF_MOVIEGLOB_PATHS; j++)
 			{
 				char* temp=0;
 				do {
@@ -524,10 +525,7 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 //					findGlob[j][i] = tolower(findGlob[j][i]);
 			}
 
-//			FCEU_PrintError(findGlob[0]);
-//			FCEU_PrintError(findGlob[1]);
-
-			for(int j=0;j<2;j++)
+			for(int j = 0;j < NUM_OF_MOVIEGLOB_PATHS; j++)
 			{
 				// if the two directories are the same, only look through one of them to avoid adding everything twice
 				if(j==1 && !strnicmp(findGlob[0],findGlob[1],MAX(strlen(findGlob[0]),strlen(findGlob[1]))-6))
@@ -599,8 +597,8 @@ BOOL CALLBACK ReplayDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 			}
 
-			free(findGlob[0]);
-			free(findGlob[1]);
+			for(int j = 0; j < NUM_OF_MOVIEGLOB_PATHS; j++)
+				free(findGlob[j]);
 
 			if(items>0)
 				SendDlgItemMessage(hwndDlg, IDC_COMBO_FILENAME, CB_SETCURSEL, items-1, 0);

@@ -39,6 +39,7 @@ public:
 	// not saved vars
 	int flash_phase;
 	int flash_type;
+	int floating_phase;
 
 private:
 

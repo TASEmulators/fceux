@@ -760,14 +760,15 @@ void hand(X6502 *X, int type, unsigned int A)
 
 }
 
-int suppressAddPowerCommand=0; // hack... yeah, I know...
+//int suppressAddPowerCommand=0; // hack... yeah, I know...
 void PowerNES(void)
 {
 	//void MapperInit();
 	//MapperInit();
 
-	if(!suppressAddPowerCommand)
+	//if(!suppressAddPowerCommand)
 		FCEUMOV_AddCommand(FCEUNPCMD_POWER);
+
 	if(!GameInfo) return;
 
 	FCEU_CheatResetRAM();

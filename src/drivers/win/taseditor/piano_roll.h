@@ -22,7 +22,7 @@
 #define MARKER_DRAG_BOX_ALPHA 175
 #define MARKER_DRAG_COUNTDOWN_MAX 14
 #define MARKER_DRAG_ALPHA_PER_TICK 13
-#define MARKER_DRAG_MAX_SPEED 70
+#define MARKER_DRAG_MAX_SPEED 72
 #define MARKER_DRAG_GRAVITY 2
 
 #define DRAG_SCROLLING_BORDER_SIZE 10		// in pixels
@@ -146,7 +146,7 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, bool really_load = true);
 
-	void RedrawList(bool erase_bg = true);
+	void RedrawList();
 	void RedrawRow(int index);
 	void RedrawHeader();
 
@@ -220,6 +220,8 @@ private:
 	std::vector<uint8> header_colors;
 	int num_columns;
 	int next_header_update_time;
+
+	bool must_redraw_list;
 
 	HMENU hrmenu;
 

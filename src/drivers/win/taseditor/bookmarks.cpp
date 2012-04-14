@@ -132,7 +132,7 @@ void BOOKMARKS::reset_vars()
 	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 	mouse_over_bitmap = false;
 	must_check_item_under_mouse = true;
-	bookmark_leftclicked = bookmark_rightclicked = -1;
+	bookmark_leftclicked = bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;
 	check_flash_shedule = clock() + BOOKMARKS_FLASH_TICK;
 }
 
@@ -188,9 +188,9 @@ void BOOKMARKS::update()
 	if (must_check_item_under_mouse)
 	{
 		if (edit_mode == EDIT_MODE_BRANCHES)
-			branches.FindItemUnderMouse(mouse_x, mouse_y);
+			item_under_mouse = branches.FindItemUnderMouse(mouse_x, mouse_y);
 		else if (edit_mode == EDIT_MODE_BOTH)
-			FindItemUnderMouse();
+			item_under_mouse = FindItemUnderMouse();
 		else
 			item_under_mouse = ITEM_UNDER_MOUSE_NONE;
 		must_check_item_under_mouse = false;
@@ -499,21 +499,26 @@ void BOOKMARKS::MouseMove(int new_x, int new_y)
 	mouse_y = new_y;
 	must_check_item_under_mouse = true;
 }
-void BOOKMARKS::FindItemUnderMouse()
+int BOOKMARKS::FindItemUnderMouse()
 {
-	item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	int item = ITEM_UNDER_MOUSE_NONE;
 	RECT wrect;
 	GetClientRect(hwndBookmarksList, &wrect);
 	if (mouse_x >= list_row_left && mouse_x < wrect.right - wrect.left && mouse_y >= list_row_top && mouse_y < wrect.bottom - wrect.top)
 	{
-		item_under_mouse = (mouse_y - list_row_top) / list_row_height;
-		if (item_under_mouse >= 0 && item_under_mouse < TOTAL_BOOKMARKS)
-		{
-			item_under_mouse = (item_under_mouse + 1) % TOTAL_BOOKMARKS;
-			if (!bookmarks_array[item_under_mouse].not_empty)
-				item_under_mouse = ITEM_UNDER_MOUSE_NONE;
-		}
+		int row_under_mouse = (mouse_y - list_row_top) / list_row_height;
+		if (row_under_mouse >= 0 && row_under_mouse < TOTAL_BOOKMARKS)
+			item = (row_under_mouse + 1) % TOTAL_BOOKMARKS;
 	}
+	return item;
+}
+
+// this getter contains formula to decide whether it's safe to show Bookmarks Data now
+bool BOOKMARKS::IsSafeToShowBookmarksData()
+{
+	if (edit_mode == EDIT_MODE_BRANCHES && branches.transition_phase)
+		return false;		// can't show data when Branches Tree is transforming
+	return true;
 }
 // ----------------------------------------------------------------------------------------
 void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
@@ -756,7 +761,7 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 					bookmarks.RightClick();
 			}
 			ReleaseCapture();
-			bookmarks.bookmark_rightclicked = -1;
+			bookmarks.bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;
 			return 0;
 		}
 		case WM_MBUTTONDOWN:
@@ -768,9 +773,10 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
-			bookmarks.bookmark_rightclicked = -1;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
+		{
+			bookmarks.bookmark_rightclicked = ITEM_UNDER_MOUSE_NONE;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
 			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
-
+		}
 	}
 	return CallWindowProc(hwndBookmarksList_oldWndProc, hWnd, msg, wParam, lParam);
 }

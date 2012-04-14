@@ -109,7 +109,7 @@ bool EnterTasEditor()
 				// create new movie
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
-				CreateCleanMovie();
+				FCEUMOV_CreateCleanMovie();
 				playback.StartFromZero();
 			} else
 			{
@@ -171,7 +171,7 @@ bool ExitTasEditor()
 	// switch off taseditor mode
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("TAS Editor disengaged", 0);
-	CreateCleanMovie();
+	FCEUMOV_CreateCleanMovie();
 	return true;
 }
 
@@ -308,7 +308,7 @@ void NewProject()
 	static struct NewProjectParameters params;
 	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditor_window.hwndTasEditor, NewProjectProc, (LPARAM)&params) > 0)
 	{
-		CreateCleanMovie();
+		FCEUMOV_CreateCleanMovie();
 		
 		// apply selected options
 		SetInputType(currMovieData, params.input_type);

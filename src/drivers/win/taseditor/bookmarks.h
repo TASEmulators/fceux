@@ -72,7 +72,9 @@ public:
 	void RedrawListRow(int row_index);
 
 	void MouseMove(int new_x, int new_y);
-	void FindItemUnderMouse();
+	int FindItemUnderMouse();
+
+	bool IsSafeToShowBookmarksData();
 
 	// saved vars
 	std::vector<BOOKMARK> bookmarks_array;

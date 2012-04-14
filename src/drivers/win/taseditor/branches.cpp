@@ -46,7 +46,7 @@ extern COLORREF bookmark_flash_colors[TOTAL_COMMANDS][FLASH_PHASE_MAX+1];
 
 // resources
 // corners cursor animation
-int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0 };
+int corners_cursor_shift[BRANCHES_ANIMATION_FRAMES] = {0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0 };
 
 BRANCHES::BRANCHES()
 {
@@ -85,7 +85,14 @@ void BRANCHES::init()
 	timeline_pen = CreatePen(PS_SOLID, 1, 0x0020E0);
 	select_pen = CreatePen(PS_SOLID, 2, 0xFF9080);
 
+	// set positions of slots to default coordinates
+	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
+	{
+		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X_BASE;
+		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+	}
 	reset();
+	cursor_x = cursor_y = 0;
 	next_animation_time = 0;
 
 	update();
@@ -167,16 +174,18 @@ void BRANCHES::reset()
 			cached_first_difference[i][t] = FIRST_DIFFERENCE_UNKNOWN;
 	}
 
+	reset_vars();
 	// set positions of slots to default coordinates
 	for (int i = TOTAL_BOOKMARKS; i >= 0; i--)
 	{
-		BranchX[i] = BranchPrevX[i] = BranchCurrX[i] = EMPTY_BRANCHES_X;
-		BranchY[i] = BranchPrevY[i] = BranchCurrY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
+		BranchPrevX[i] = BranchCurrX[i];
+		BranchPrevY[i] = BranchCurrY[i];
+		BranchX[i] = EMPTY_BRANCHES_X_BASE;
+		BranchY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 	}
-	CloudX = CloudPrevX = BRANCHES_CLOUD_X;
-	cursor_x = cursor_y = 0;
-
-	reset_vars();
+	CloudPrevX = cloud_x;
+	CloudX = cloud_x = BRANCHES_CLOUD_X;
+	transition_phase = BRANCHES_TRANSITION_MAX;
 
 	current_branch = ITEM_UNDER_MOUSE_CLOUD;
 	changes_since_current_branch = false;
@@ -190,6 +199,7 @@ void BRANCHES::reset_vars()
 {
 	transition_phase = animation_frame = 0;
 	playback_x = playback_y = 0;
+	branch_rightclicked = latest_drawn_item_under_mouse = -1;
 	must_recalculate_branches_tree = must_redraw_branches_tree = true;
 	next_animation_time = clock() + BRANCHES_ANIMATION_TICK;
 }
@@ -199,7 +209,7 @@ void BRANCHES::update()
 	if (must_recalculate_branches_tree)
 		RecalculateBranchesTree();
 
-	// once per 50 milliseconds update branches_bitmap
+	// once per 40 milliseconds update branches_bitmap
 	if (clock() > next_animation_time)
 	{
 		// animate branches_bitmap
@@ -207,6 +217,27 @@ void BRANCHES::update()
 		animation_frame = (animation_frame + 1) % BRANCHES_ANIMATION_FRAMES;
 		if (bookmarks.edit_mode == EDIT_MODE_BRANCHES)
 		{
+			// update floating "empty" branches
+			int floating_phase_target;
+			for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
+			{
+				if (!bookmarks.bookmarks_array[i].not_empty)
+				{
+					if (i == bookmarks.item_under_mouse)
+						floating_phase_target = MAX_FLOATING_PHASE;
+					else
+						floating_phase_target = 0;
+					if (bookmarks.bookmarks_array[i].floating_phase > floating_phase_target)
+					{
+						bookmarks.bookmarks_array[i].floating_phase--;
+						must_redraw_branches_tree = true;
+					} else if (bookmarks.bookmarks_array[i].floating_phase < floating_phase_target)
+					{
+						bookmarks.bookmarks_array[i].floating_phase++;
+						must_redraw_branches_tree = true;
+					}
+				}
+			}
 			// grow or shrink fireball size
 			if (changes_since_current_branch)
 			{
@@ -320,6 +351,12 @@ void BRANCHES::update()
 					speed = CURSOR_MIN_SPEED;
 				cursor_x += dx * speed / distance;
 				cursor_y += dy * speed / distance;
+			}
+
+			if (latest_drawn_item_under_mouse != bookmarks.item_under_mouse)
+			{
+				must_redraw_branches_tree = true;
+				latest_drawn_item_under_mouse = bookmarks.item_under_mouse;
 			}
 			if (must_redraw_branches_tree)
 				RedrawBranchesTree();
@@ -449,35 +486,38 @@ void BRANCHES::RedrawBranchesTree()
 			LineTo(hBitmapDC, branch_x, branch_y);
 		}
 	}
-	// lines for item under mouse
-	if (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse <= TOTAL_BOOKMARKS)
+	if (bookmarks.IsSafeToShowBookmarksData())
 	{
-		SelectObject(hBitmapDC, select_pen);
-		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
-			branch = current_branch;
-		else
-			branch = FindFullTimelineForBranch(bookmarks.item_under_mouse);
-		while (branch >= 0)
+		// lines for item under mouse
+		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS || (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty))
 		{
-			branch_x = BranchCurrX[branch];
-			branch_y = BranchCurrY[branch];
-			MoveToEx(hBitmapDC, branch_x, branch_y, 0);
-			branch = parents[branch];
-			if (branch == ITEM_UNDER_MOUSE_CLOUD)
+			SelectObject(hBitmapDC, select_pen);
+			if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
+				branch = current_branch;
+			else
+				branch = FindFullTimelineForBranch(bookmarks.item_under_mouse);
+			while (branch >= 0)
 			{
-				branch_x = cloud_x;
-				branch_y = BRANCHES_CLOUD_Y;
-			} else
-			{
-	 			branch_x = BranchCurrX[branch];
+				branch_x = BranchCurrX[branch];
 				branch_y = BranchCurrY[branch];
+				MoveToEx(hBitmapDC, branch_x, branch_y, 0);
+				branch = parents[branch];
+				if (branch == ITEM_UNDER_MOUSE_CLOUD)
+				{
+					branch_x = cloud_x;
+					branch_y = BRANCHES_CLOUD_Y;
+				} else
+				{
+	 				branch_x = BranchCurrX[branch];
+					branch_y = BranchCurrY[branch];
+				}
+				LineTo(hBitmapDC, branch_x, branch_y);
 			}
-			LineTo(hBitmapDC, branch_x, branch_y);
 		}
 	}
 	if (changes_since_current_branch)
 	{
-		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
+		if (bookmarks.IsSafeToShowBookmarksData() && bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
 			SelectObject(hBitmapDC, select_pen);
 		else
 			SelectObject(hBitmapDC, timeline_pen);
@@ -506,6 +546,11 @@ void BRANCHES::RedrawBranchesTree()
 		temp_rect.top = BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT;
 		temp_rect.right = temp_rect.left + DIGIT_RECT_WIDTH;
 		temp_rect.bottom = temp_rect.top + DIGIT_RECT_HEIGHT;
+		if (!bookmarks.bookmarks_array[i].not_empty && bookmarks.bookmarks_array[i].floating_phase > 0)
+		{
+			temp_rect.left += bookmarks.bookmarks_array[i].floating_phase;
+			temp_rect.right += bookmarks.bookmarks_array[i].floating_phase;
+		}
 		if (bookmarks.bookmarks_array[i].flash_phase)
 		{
 			// draw colored rect
@@ -523,7 +568,7 @@ void BRANCHES::RedrawBranchesTree()
 	{
 		branch_x = BranchCurrX[i] - DIGIT_BITMAP_HALFWIDTH;
 		branch_y = BranchCurrY[i] - DIGIT_BITMAP_HALFHEIGHT;
-		if(i == current_branch)
+		if (i == current_branch)
 		{
 			if (i == bookmarks.item_under_mouse)
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
@@ -531,48 +576,53 @@ void BRANCHES::RedrawBranchesTree()
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH + BLUE_DIGITS_SPRITESHEET_DX, 0, SRCCOPY);
 		} else
 		{
+			if (!bookmarks.bookmarks_array[i].not_empty && bookmarks.bookmarks_array[i].floating_phase > 0)
+				branch_x += bookmarks.bookmarks_array[i].floating_phase;
 			if (i == bookmarks.item_under_mouse)
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, MOUSEOVER_DIGITS_SPRITESHEET_DY, SRCCOPY);
 			else
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
 		}
 	}
-	SetBkMode(hBitmapDC, TRANSPARENT);
-	// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
-	if (bookmarks.item_under_mouse > ITEM_UNDER_MOUSE_CLOUD)
+	if (bookmarks.IsSafeToShowBookmarksData())
 	{
-		char framenum_string[DIGITS_IN_FRAMENUM+1] = {0};
-		if (bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
-			U32ToDecStr(framenum_string, bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame, DIGITS_IN_FRAMENUM);
-		else
-			U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
-		SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-		TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X + 1, BRANCHES_BITMAP_FRAMENUM_Y + 1, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
-		SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-		TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X, BRANCHES_BITMAP_FRAMENUM_Y, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
-	}
-	// time of item under cursor
-	if (bookmarks.item_under_mouse > ITEM_UNDER_MOUSE_NONE)
-	{
-		if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
+		SetBkMode(hBitmapDC, TRANSPARENT);
+		// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
+		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS || (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty))
 		{
-			// draw shadow of text
+			char framenum_string[DIGITS_IN_FRAMENUM+1] = {0};
+			if (bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
+				U32ToDecStr(framenum_string, bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame, DIGITS_IN_FRAMENUM);
+			else
+				U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
 			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
+			TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X + 1, BRANCHES_BITMAP_FRAMENUM_Y + 1, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
 			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
-		} else if (bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
+			TextOut(hBitmapDC, BRANCHES_BITMAP_FRAMENUM_X, BRANCHES_BITMAP_FRAMENUM_Y, (LPCSTR)framenum_string, DIGITS_IN_FRAMENUM);
+		}
+		// time of item under cursor
+		if (bookmarks.item_under_mouse > ITEM_UNDER_MOUSE_NONE)
 		{
-			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
-			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
-		} else	// fireball - current_pos_time
-		{
-			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
-			SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
-			TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
+			if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
+			{
+				// draw shadow of text
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)cloud_time, TIME_DESC_LENGTH-1);
+			} else if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS)	// fireball - show current_pos_time
+			{
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)current_pos_time, TIME_DESC_LENGTH-1);
+			} else if (bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty)
+			{
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X + 1, BRANCHES_BITMAP_TIME_Y + 1, (LPCSTR)bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
+				SetTextColor(hBitmapDC, BRANCHES_TEXT_COLOR);
+				TextOut(hBitmapDC, BRANCHES_BITMAP_TIME_X, BRANCHES_BITMAP_TIME_Y, (LPCSTR)bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.description, TIME_DESC_LENGTH-1);
+			}
 		}
 	}
 	// finished
@@ -601,7 +651,7 @@ void BRANCHES::PaintBranchesBitmap(HDC hdc)
 		}
 	}
 	// blinking Playback cursor point
-	if (animation_frame & 1)
+	if (animation_frame % 3)
 		TransparentBlt(hBufferDC, playback_x - BRANCHES_MINIARROW_HALFWIDTH, playback_y - BRANCHES_MINIARROW_HALFHEIGHT, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, hSpritesheetDC, BRANCHES_MINIARROW_SPRITESHEET_X, BRANCHES_MINIARROW_SPRITESHEET_Y, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, 0x00FF00);
 	// corners cursor
 	int current_corners_cursor_shift = BRANCHES_CORNER_BASE_SHIFT + corners_cursor_shift[animation_frame];
@@ -758,19 +808,17 @@ void BRANCHES::ChangesMadeSinceBranch()
 		must_redraw_branches_tree = true;	// to redraw fireball's time
 }
 
-void BRANCHES::FindItemUnderMouse(int mouse_x, int mouse_y)
+int BRANCHES::FindItemUnderMouse(int mouse_x, int mouse_y)
 {
-	int prev_item_under_mouse = bookmarks.item_under_mouse;
-	bookmarks.item_under_mouse = ITEM_UNDER_MOUSE_NONE;
+	int item = ITEM_UNDER_MOUSE_NONE;
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
-		if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && bookmarks.bookmarks_array[i].not_empty && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
-			bookmarks.item_under_mouse = i;
-	if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
-		bookmarks.item_under_mouse = ITEM_UNDER_MOUSE_CLOUD;
-	if (bookmarks.item_under_mouse == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
-		bookmarks.item_under_mouse = TOTAL_BOOKMARKS;
-	if (prev_item_under_mouse != bookmarks.item_under_mouse)
-		must_redraw_branches_tree = true;
+		if (item == ITEM_UNDER_MOUSE_NONE && mouse_x >= BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[i] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[i] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+			item = i;
+	if (item == ITEM_UNDER_MOUSE_NONE && mouse_x >= cloud_x - BRANCHES_CLOUD_HALFWIDTH && mouse_x < cloud_x - BRANCHES_CLOUD_HALFWIDTH + BRANCHES_CLOUD_WIDTH && mouse_y >= BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT && mouse_y < BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT + BRANCHES_CLOUD_HEIGHT)
+		item = ITEM_UNDER_MOUSE_CLOUD;
+	if (item == ITEM_UNDER_MOUSE_NONE && changes_since_current_branch && mouse_x >= BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION && mouse_x < BranchCurrX[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFWIDTH_COLLISION + DIGIT_RECT_WIDTH_COLLISION && mouse_y >= BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION && mouse_y < BranchCurrY[TOTAL_BOOKMARKS] - DIGIT_RECT_HALFHEIGHT_COLLISION + DIGIT_RECT_HEIGHT_COLLISION)
+		item = TOTAL_BOOKMARKS;
+	return item;
 }
 
 void BRANCHES::SetCurrentPosTime()
@@ -786,16 +834,18 @@ void BRANCHES::RecalculateParents()
 	// find best parent for every Branch
 	std::vector<int> candidates;
 	int temp_jump_frame, temp_parent, max_jump_frame, max_first_difference;
-	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
+	for (int i1 = TOTAL_BOOKMARKS-1; i1 >= 0; i1--)
 	{
+		int i = (i1 + 1) % TOTAL_BOOKMARKS;
 		if (bookmarks.bookmarks_array[i].not_empty)
 		{
 			int jump_frame = bookmarks.bookmarks_array[i].snapshot.jump_frame;
 			// 1 - find all candidates and max_jump_frame among them
 			candidates.resize(0);
 			max_jump_frame = -1;
-			for (int t = TOTAL_BOOKMARKS-1; t >= 0; t--)
+			for (int t1 = TOTAL_BOOKMARKS-1; t1 >= 0; t1--)
 			{
+				int t = (t1 + 1) % TOTAL_BOOKMARKS;
 				temp_jump_frame = bookmarks.bookmarks_array[t].snapshot.jump_frame;
 				if (t != i && bookmarks.bookmarks_array[t].not_empty && temp_jump_frame <= jump_frame && GetFirstDifference(t, i) >= temp_jump_frame)
 				{
@@ -865,9 +915,9 @@ void BRANCHES::RecalculateBranchesTree()
 	std::vector<std::vector<int>> BranchesLevels;
 
 	std::vector<uint8> UndistributedBranches;
-	UndistributedBranches.resize(TOTAL_BOOKMARKS);
+	UndistributedBranches.resize(TOTAL_BOOKMARKS);	// 1, 2, 3, 4, 5, 6, 7, 8, 9, 0
 	for (int i = UndistributedBranches.size()-1; i >= 0; i--)
-		UndistributedBranches[i] = i;
+		UndistributedBranches[i] = (i + 1) % TOTAL_BOOKMARKS;
 	// remove all empty branches
 	for (int i = UndistributedBranches.size()-1; i >= 0; i--)
 	{
@@ -979,7 +1029,7 @@ void BRANCHES::RecalculateBranchesTree()
 			GridY[TOTAL_BOOKMARKS] -= 2;
 		}
 	}
-	// special case 3: if some branch crosses upper or lower border
+	// special case 3: if some branch crosses upper or lower border of canvas
 	int parent;
 	for (int t = TOTAL_BOOKMARKS; t >= 0; t--)
 	{
@@ -1051,7 +1101,7 @@ void BRANCHES::RecalculateBranchesTree()
 			BranchY[i] = BRANCHES_CLOUD_Y + GridY[i] * grid_halfheight;
 		} else
 		{
-			BranchX[i] = EMPTY_BRANCHES_X;
+			BranchX[i] = EMPTY_BRANCHES_X_BASE;
 			BranchY[i] = EMPTY_BRANCHES_Y_BASE + EMPTY_BRANCHES_Y_FACTOR * ((i + TOTAL_BOOKMARKS - 1) % TOTAL_BOOKMARKS);
 		}
 		if (max_x < BranchX[i]) max_x = BranchX[i];
@@ -1072,8 +1122,9 @@ void BRANCHES::RecalculateBranchesTree()
 	}
 	if (max_x < BranchX[TOTAL_BOOKMARKS]) max_x = BranchX[TOTAL_BOOKMARKS];
 	// align whole tree horizontally
-	CloudX = (BRANCHES_BITMAP_WIDTH + 1 - max_x) / 2;
-	if (CloudX < 0) CloudX = 0;
+	CloudX = (BRANCHES_BITMAP_WIDTH + BASE_HORIZONTAL_SHIFT - max_x) / 2;
+	if (CloudX < MIN_CLOUD_X)
+		CloudX = MIN_CLOUD_X;
 	for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
 		if (bookmarks.bookmarks_array[i].not_empty)
 			BranchX[i] += CloudX;
@@ -1186,6 +1237,18 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		{
 			if (GetFocus() != hWnd)
 				SetFocus(hWnd);
+			branches.branch_rightclicked = branches.FindItemUnderMouse(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			if (branches.branch_rightclicked >= 0 && branches.branch_rightclicked < TOTAL_BOOKMARKS)
+				SetCapture(hWnd);
+			return 0;
+		}
+		case WM_RBUTTONUP:
+		{
+			if (branches.branch_rightclicked >= 0 && branches.branch_rightclicked < TOTAL_BOOKMARKS
+				&& branches.branch_rightclicked == branches.FindItemUnderMouse(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)))
+				bookmarks.command(COMMAND_SET, branches.branch_rightclicked);
+			ReleaseCapture();
+			branches.branch_rightclicked = ITEM_UNDER_MOUSE_NONE;
 			return 0;
 		}
 		case WM_MBUTTONDOWN:
@@ -1197,8 +1260,10 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			return 0;
 		}
 		case WM_MOUSEWHEEL:
+		{
+			branches.branch_rightclicked = ITEM_UNDER_MOUSE_NONE;	// ensure that accidental rightclick on BookmarksList won't set Bookmarks when user does rightbutton + wheel
 			return SendMessage(piano_roll.hwndList, msg, wParam, lParam);
-
+		}
 	}
 	return CallWindowProc(hwndBranchesBitmap_oldWndProc, hWnd, msg, wParam, lParam);
 }

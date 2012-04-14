@@ -384,6 +384,7 @@ void PLAYBACK::RedrawMarker()
 void PLAYBACK::StartFromZero()
 {
 	poweron(true);
+	FCEUMOV_ClearCommands();		// clear POWER SWITCH command caused by poweron()
 	currFrameCounter = 0;
 	if(currMovieData.getNumRecords() == 0)
 		currMovieData.insertEmpty(-1, 1);
