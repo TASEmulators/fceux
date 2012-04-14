@@ -248,5 +248,7 @@
    {0x4f2f1846,-1,1}, /* Famista '89 - Kaimaku Han!! (J) */
    {0x6c71feae,45,-1}, /* Kunio 8-in-1 */
 //   {0xbdbe3c96,238,-1}, /* Contra Fighter iNES version */
+
+	 {0xd97c31b0,4,1}, //Rasaaru Ishii no Childs Quest (J)
    
    {0,-1,-1}
