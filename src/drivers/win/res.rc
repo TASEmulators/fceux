@@ -384,7 +384,7 @@ TASEDITORCONTEXTMENUS MENU
 BEGIN
     POPUP "Selected"
     BEGIN
-        MENUITEM "Set Markers\tDbl-Clk",	ID_SELECTED_SETMARKERS
+        MENUITEM "Set Markers\tDbl-Clk",        ID_SELECTED_SETMARKERS
         MENUITEM "Remove Markers",              ID_SELECTED_REMOVEMARKERS
         MENUITEM SEPARATOR
         MENUITEM "Deselect",                    ID_SELECTED_DESELECT

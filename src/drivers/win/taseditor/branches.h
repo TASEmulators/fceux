@@ -31,7 +31,7 @@
 #define BASE_HORIZONTAL_SHIFT 10
 #define BRANCHES_GRID_MIN_HALFHEIGHT 8
 #define BRANCHES_GRID_MAX_HALFHEIGHT 12
-#define EMPTY_BRANCHES_X_BASE 3
+#define EMPTY_BRANCHES_X_BASE 4
 #define EMPTY_BRANCHES_Y_BASE 9
 #define EMPTY_BRANCHES_Y_FACTOR 14
 #define MAX_NUM_CHILDREN_ON_CANVAS_HEIGHT 9
@@ -160,11 +160,14 @@ private:
 	int latest_drawn_item_under_mouse;
 
 	// GDI stuff
-	HBRUSH normal_brush;
+	HBRUSH normal_brush, border_brush;
 	RECT temp_rect;
 	HPEN normal_pen, timeline_pen, select_pen;
 	HBITMAP branches_hbitmap, hOldBitmap, buffer_hbitmap, hOldBitmap1, branchesSpritesheet, hOldBitmap2;
 	HDC hBitmapDC, hBufferDC, hSpritesheetDC;
+	TRIVERTEX vertex[2];
+	GRADIENT_RECT gRect;
+	RECT branches_bitmap_rect;
 
 	// temps
 	std::vector<int> GridX;				// in grid units

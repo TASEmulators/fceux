@@ -70,12 +70,32 @@ void BRANCHES::init()
 	// init GDI stuff
 	HDC win_hdc = GetWindowDC(bookmarks.hwndBranchesBitmap);
 	hBitmapDC = CreateCompatibleDC(win_hdc);
-	branches_hbitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_WIDTH);
+	branches_hbitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT);
 	hOldBitmap = (HBITMAP)SelectObject(hBitmapDC, branches_hbitmap);
 	hBufferDC = CreateCompatibleDC(win_hdc);
-	buffer_hbitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_WIDTH);
+	buffer_hbitmap = CreateCompatibleBitmap(win_hdc, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT);
 	hOldBitmap1 = (HBITMAP)SelectObject(hBufferDC, buffer_hbitmap);
 	normal_brush = CreateSolidBrush(0x000000);
+	border_brush = CreateSolidBrush(0xb99d7f);
+	// prepare bg gradient
+	vertex[0].x     = 0;
+	vertex[0].y     = 0;
+	vertex[0].Red   = 0xBF00;
+	vertex[0].Green = 0xE200;
+	vertex[0].Blue  = 0xEF00;
+	vertex[0].Alpha = 0x0000;
+	vertex[1].x     = BRANCHES_BITMAP_WIDTH;
+	vertex[1].y     = BRANCHES_BITMAP_HEIGHT;
+	vertex[1].Red   = 0xE500;
+	vertex[1].Green = 0xFB00;
+	vertex[1].Blue  = 0xFF00;
+	vertex[1].Alpha = 0x0000;
+	gRect.UpperLeft  = 0;
+	gRect.LowerRight = 1;
+	branches_bitmap_rect.left = 0;
+	branches_bitmap_rect.top = 0;
+	branches_bitmap_rect.right = BRANCHES_BITMAP_WIDTH;
+	branches_bitmap_rect.bottom = BRANCHES_BITMAP_HEIGHT;
 	// prepare branches spritesheet
 	branchesSpritesheet = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BRANCH_SPRITESHEET));
 	hSpritesheetDC = CreateCompatibleDC(win_hdc);
@@ -141,6 +161,16 @@ void BRANCHES::free()
 	{
 		DeleteObject(branchesSpritesheet);
 		branchesSpritesheet = NULL;
+	}
+	if (normal_brush)
+	{
+		DeleteObject(normal_brush);
+		normal_brush = 0;
+	}
+	if (border_brush)
+	{
+		DeleteObject(border_brush);
+		border_brush = 0;
 	}
 	if (normal_pen)
 	{
@@ -417,25 +447,8 @@ error:
 // ----------------------------------------------------------
 void BRANCHES::RedrawBranchesTree()
 {
-	// draw background gradient
-	TRIVERTEX vertex[2] ;
-	vertex[0].x     = 0;
-	vertex[0].y     = 0;
-	vertex[0].Red   = 0xC700;
-	vertex[0].Green = 0xE700;
-	vertex[0].Blue  = 0xF300;
-	vertex[0].Alpha = 0x0000;
-	vertex[1].x     = BRANCHES_BITMAP_WIDTH;
-	vertex[1].y     = BRANCHES_BITMAP_HEIGHT;
-	vertex[1].Red   = 0xEB00;
-	vertex[1].Green = 0xFA00;
-	vertex[1].Blue  = 0xF800;
-	vertex[1].Alpha = 0x0000;
-	GRADIENT_RECT gRect;
-	gRect.UpperLeft  = 0;
-	gRect.LowerRight = 1;
+	// draw background
 	GradientFill(hBitmapDC, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_H);
-
 	// lines
 	int branch, branch_x, branch_y, parent_x, parent_y, child_id;
 	SelectObject(hBitmapDC, normal_pen);
@@ -535,10 +548,8 @@ void BRANCHES::RedrawBranchesTree()
 		branch_y = BranchCurrY[TOTAL_BOOKMARKS];
 		LineTo(hBitmapDC, branch_x, branch_y);
 	}
-
 	// cloud
 	TransparentBlt(hBitmapDC, cloud_x - BRANCHES_CLOUD_HALFWIDTH, BRANCHES_CLOUD_Y - BRANCHES_CLOUD_HALFHEIGHT, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, hSpritesheetDC, BRANCHES_CLOUD_SPRITESHEET_X, BRANCHES_CLOUD_SPRITESHEET_Y, BRANCHES_CLOUD_WIDTH, BRANCHES_CLOUD_HEIGHT, 0x00FF00);
-	
 	// branches rectangles
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
@@ -555,12 +566,12 @@ void BRANCHES::RedrawBranchesTree()
 		{
 			// draw colored rect
 			HBRUSH color_brush = CreateSolidBrush(bookmark_flash_colors[bookmarks.bookmarks_array[i].flash_type][bookmarks.bookmarks_array[i].flash_phase]);
-			FillRect(hBitmapDC, &temp_rect, color_brush);
+			FrameRect(hBitmapDC, &temp_rect, color_brush);
 			DeleteObject(color_brush);
 		} else
 		{
 			// draw black rect
-			FillRect(hBitmapDC, &temp_rect, normal_brush);
+			FrameRect(hBitmapDC, &temp_rect, normal_brush);
 		}
 	}
 	// digits
@@ -625,6 +636,8 @@ void BRANCHES::RedrawBranchesTree()
 			}
 		}
 	}
+	// draw border of canvas
+	FrameRect(hBitmapDC, &branches_bitmap_rect, border_brush);
 	// finished
 	must_redraw_branches_tree = false;
 	InvalidateRect(bookmarks.hwndBranchesBitmap, 0, FALSE);

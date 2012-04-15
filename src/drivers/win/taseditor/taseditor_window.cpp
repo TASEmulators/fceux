@@ -92,29 +92,29 @@ LRESULT APIENTRY TASEDITOR_RUN_MANUAL_WndProc(HWND hWnd, UINT msg, WPARAM wParam
 LRESULT APIENTRY IDC_RUN_AUTO_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // variables storing old wndprocs
 WNDPROC
-	IDC_PROGRESS_BUTTON_oldWndProc = 0, 
-	IDC_BRANCHES_BUTTON_oldWndProc = 0, 
-	TASEDITOR_REWIND_FULL_oldWndProc = 0, 
-	TASEDITOR_REWIND_oldWndProc = 0, 
-	TASEDITOR_PLAYSTOP_oldWndProc = 0, 
-	TASEDITOR_FORWARD_oldWndProc = 0, 
-	TASEDITOR_FORWARD_FULL_oldWndProc = 0, 
-	CHECK_FOLLOW_CURSOR_oldWndProc = 0, 
-	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = 0, 
-	IDC_RADIO_ALL_oldWndProc = 0, 
-	IDC_RADIO_1P_oldWndProc = 0, 
-	IDC_RADIO_2P_oldWndProc = 0, 
-	IDC_RADIO_3P_oldWndProc = 0, 
-	IDC_RADIO_4P_oldWndProc = 0, 
-	IDC_SUPERIMPOSE_oldWndProc = 0, 
-	IDC_USEPATTERN_oldWndProc = 0, 
-	TASEDITOR_PREV_MARKER_oldWndProc = 0, 
-	TASEDITOR_FIND_BEST_SIMILAR_MARKER_oldWndProc = 0, 
-	TASEDITOR_FIND_NEXT_SIMILAR_MARKER_oldWndProc = 0, 
-	TASEDITOR_NEXT_MARKER_oldWndProc = 0, 
-	CHECK_TURBO_SEEK_oldWndProc = 0, 
-	IDC_RECORDING_oldWndProc = 0, 
-	TASEDITOR_RUN_MANUAL_oldWndProc = 0, 
+	IDC_PROGRESS_BUTTON_oldWndProc = 0,
+	IDC_BRANCHES_BUTTON_oldWndProc = 0,
+	TASEDITOR_REWIND_FULL_oldWndProc = 0,
+	TASEDITOR_REWIND_oldWndProc = 0,
+	TASEDITOR_PLAYSTOP_oldWndProc = 0,
+	TASEDITOR_FORWARD_oldWndProc = 0,
+	TASEDITOR_FORWARD_FULL_oldWndProc = 0,
+	CHECK_FOLLOW_CURSOR_oldWndProc = 0,
+	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = 0,
+	IDC_RADIO_ALL_oldWndProc = 0,
+	IDC_RADIO_1P_oldWndProc = 0,
+	IDC_RADIO_2P_oldWndProc = 0,
+	IDC_RADIO_3P_oldWndProc = 0,
+	IDC_RADIO_4P_oldWndProc = 0,
+	IDC_SUPERIMPOSE_oldWndProc = 0,
+	IDC_USEPATTERN_oldWndProc = 0,
+	TASEDITOR_PREV_MARKER_oldWndProc = 0,
+	TASEDITOR_FIND_BEST_SIMILAR_MARKER_oldWndProc = 0,
+	TASEDITOR_FIND_NEXT_SIMILAR_MARKER_oldWndProc = 0,
+	TASEDITOR_NEXT_MARKER_oldWndProc = 0,
+	CHECK_TURBO_SEEK_oldWndProc = 0,
+	IDC_RECORDING_oldWndProc = 0,
+	TASEDITOR_RUN_MANUAL_oldWndProc = 0,
 	IDC_RUN_AUTO_oldWndProc = 0;
 
 // Recent Menu
@@ -1003,8 +1003,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					splicer.InsertFrames();
 					break;
 				case ACCEL_DEL:
-				case ID_EDIT_CLEAR:
-				case ID_CONTEXT_SELECTED_CLEARFRAMES:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
 					{
 						DWORD sel_start, sel_end;
@@ -1020,6 +1018,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 							SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, sel_start, sel_start + 1);
 						SendMessage(selection.hwndSelectionMarkerEdit, WM_CLEAR, 0, 0); 
 					} else
+						splicer.ClearFrames();
+					break;
+				case ID_EDIT_CLEAR:
+				case ID_CONTEXT_SELECTED_CLEARFRAMES:
 						splicer.ClearFrames();
 					break;
 				case CHECK_FOLLOW_CURSOR:
@@ -1180,14 +1182,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.autopause_at_finish ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case IDC_PROGRESS_BUTTON:
-					playback.CancelSeeking();
-					break;
-				case IDC_BRANCHES_BUTTON:
-					// click on "Bookmarks/Branches" - switch between Bookmarks List and Branches Tree
-					taseditor_config.view_branches_tree ^= 1;
-					bookmarks.RedrawBookmarksCaption();
-					break;
 				case IDC_RECORDING:
 					FCEUI_MovieToggleReadOnly();
 					CheckDlgButton(taseditor_window.hwndTasEditor, IDC_RECORDING, movie_readonly?BST_UNCHECKED : BST_CHECKED);
@@ -1340,13 +1334,33 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					DialogBox(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_ABOUT), taseditor_window.hwndTasEditor, AboutProc);
 					break;
 				case ACCEL_HOME:
-					// scroll Piano Roll to the beginning
-					ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetTopIndex(piano_roll.hwndList));
+				{
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, 0); 
+					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, 0); 
+					else
+						// scroll Piano Roll to the beginning
+						ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetTopIndex(piano_roll.hwndList));
 					break;
+				}
 				case ACCEL_END:
-					// scroll Piano Roll to the end
-					ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * currMovieData.getNumRecords());
+				{
+					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
+					{
+						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
+						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, -1, -1); 
+					} else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
+					{
+						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
+						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, -1, -1); 
+					} else
+					{
+						// scroll Piano Roll to the end
+						ListView_Scroll(piano_roll.hwndList, 0, piano_roll.list_row_height * currMovieData.getNumRecords());
+					}
 					break;
+				}
 				case ACCEL_PGUP:
 					// scroll Piano Roll 1 page up
 					ListView_Scroll(piano_roll.hwndList, 0, -piano_roll.list_row_height * ListView_GetCountPerPage(piano_roll.hwndList));
@@ -1531,6 +1545,10 @@ LRESULT APIENTRY IDC_PROGRESS_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam,
 {
 	switch(msg)
 	{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			playback.CancelSeeking();
+			return 0;
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 			playback.MiddleButtonClick();
@@ -1544,6 +1562,12 @@ LRESULT APIENTRY IDC_BRANCHES_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam,
 {
 	switch(msg)
 	{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+			// click on "Bookmarks/Branches" - switch between Bookmarks List and Branches Tree
+			taseditor_config.view_branches_tree ^= 1;
+			bookmarks.RedrawBookmarksCaption();
+			return 0;
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 			playback.MiddleButtonClick();

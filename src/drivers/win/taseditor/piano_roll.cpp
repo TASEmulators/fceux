@@ -1593,15 +1593,9 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					{
 						// clicked without Shift/Alt - set "row_last_clicked" here
 						piano_roll.row_last_clicked = row_index;
-						// and change Selection to this row
-						if (fwKeys & MK_CONTROL)
+						if (!(fwKeys & MK_CONTROL))
 						{
-							if (selection.GetRowSelection(row_index))
-								selection.ClearRowSelection(row_index);
-							else
-								selection.SetRowSelection(row_index);
-						} else
-						{
+							// change Selection to this row
 							selection.ClearSelection();
 							selection.SetRowSelection(row_index);
 						}

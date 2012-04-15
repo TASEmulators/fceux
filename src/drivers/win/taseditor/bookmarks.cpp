@@ -652,13 +652,14 @@ void BOOKMARKS::RightClick()
 
 int BOOKMARKS::FindBookmarkAtFrame(int frame)
 {
-	int current_branch = branches.GetCurrentBranch();
-	if (current_branch >= 0 && bookmarks_array[current_branch].snapshot.jump_frame == frame)
-		return current_branch + TOTAL_BOOKMARKS;	// blue digit has highest priority when drawing
+	int cur_bookmark = branches.GetCurrentBranch();
+	if (cur_bookmark >= 0 && bookmarks_array[cur_bookmark].snapshot.jump_frame == frame)
+		return cur_bookmark + TOTAL_BOOKMARKS;	// blue digit has highest priority when drawing
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{
-		if (bookmarks_array[i].not_empty && bookmarks_array[i].snapshot.jump_frame == frame)
-			return i;	// green digit
+		cur_bookmark = (i + 1) % TOTAL_BOOKMARKS;
+		if (bookmarks_array[cur_bookmark].not_empty && bookmarks_array[cur_bookmark].snapshot.jump_frame == frame)
+			return cur_bookmark;	// green digit
 	}
 	return -1;		// no Bookmarks at the frame
 }
