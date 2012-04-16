@@ -72,6 +72,7 @@ void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
 	{
 		// write "MARKERS" string
 		os->fwrite(markers_save_id, MARKERS_ID_LEN);
+		markers.Set_already_compressed(false);		// must recompress data, because it has changed, probably
 		markers.save(os);
 	} else
 	{
@@ -291,6 +292,7 @@ void MARKERS_MANAGER::MakeCopyTo(MARKERS& destination)
 {
 	destination.markers_array = markers.markers_array;
 	destination.notes = markers.notes;
+	destination.Set_already_compressed(false);
 }
 void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source, int until_frame)
 {

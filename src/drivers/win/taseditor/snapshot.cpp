@@ -181,6 +181,13 @@ void SNAPSHOT::compress_data()
 	}
 	// don't recompress anymore
 	already_compressed = true;
+	// also see if we can compress my_markers
+	if (!my_markers.Get_already_compressed())
+		my_markers.compress_data();
+}
+bool SNAPSHOT::Get_already_compressed()
+{
+	return already_compressed;
 }
 
 void SNAPSHOT::save(EMUFILE *os)

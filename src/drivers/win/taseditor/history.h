@@ -2,6 +2,9 @@
 
 #define UNDO_HINT_TIME 200
 
+#define SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE 10
+#define TIME_BETWEEN_AUTOCOMPRESSIONS 500		// in milliseconds
+
 enum MOD_TYPES
 {
 	MODTYPE_INIT,
@@ -132,18 +135,21 @@ private:
 	void AddItemToHistory(SNAPSHOT &snap, int cur_branch = 0);
 	void AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm);
 
+	// saved variables
 	std::vector<SNAPSHOT> snapshots;
 	std::vector<BOOKMARK> backup_bookmarks;
 	std::vector<int8> backup_current_branch;
-
 	int history_cursor_pos;
-	int history_start_pos;
 	int history_total_items;
+
+	// not saved variables
+	int history_start_pos;
 	int history_size;
 
 	int undo_hint_pos, old_undo_hint_pos;
 	int undo_hint_time;
 	bool old_show_undo_hint, show_undo_hint;
+	int next_autocompress_time;
 
 };
 

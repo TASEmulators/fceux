@@ -30,6 +30,9 @@ public:
 	bool load(EMUFILE *is);
 	bool skipLoad(EMUFILE *is);
 
+	void compress_data();
+	bool Get_already_compressed();
+
 	bool checkDiff(SNAPSHOT& snap);
 	void fillJoypadsDiff(SNAPSHOT& snap, int frame);
 
@@ -60,22 +63,21 @@ public:
 	// saved data
 	int size;							// in frames
 	int input_type;						// theoretically TAS Editor can support any other input types
-	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
-	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
-	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
 	int jump_frame;						// for jumping when making undo
-
 	int start_frame;					// for consecutive Draws
 	int end_frame;						// for consecutive Draws
-
 	int consecutive_tag;				// for consecutive Recordings and Draws
 	uint32 rec_joypad_diff_bits;		// for consecutive Recordings
 	int mod_type;
 	char description[SNAPSHOT_DESC_MAX_LENGTH];
 	bool has_hot_changes;
 
+	// not saved data
+	std::vector<uint8> joysticks;		// Format: joy0-for-frame0, joy1-for-frame0, joy2-for-frame0, joy3-for-frame0, joy0-for-frame1, joy1-for-frame1, ...
+	std::vector<uint8> commands;		// Format: commands-for-frame0, commands-for-frame1, ...
+	std::vector<uint8> hot_changes;		// Format: buttons01joy0-for-frame0, buttons23joy0-for-frame0, buttons45joy0-for-frame0, buttons67joy0-for-frame0, buttons01joy1-for-frame0, ...
+
 private:
-	void compress_data();
 	
 	// also saved data
 	MARKERS my_markers;

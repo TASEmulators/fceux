@@ -16,6 +16,7 @@ History - History of movie modifications
 * implements all restoring operations: undo, redo, revert to any snapshot from the array
 * also stores the state of "undo pointer"
 * regularly updates the state of "undo pointer"
+* regularly (when emulator is paused) searches for uncompressed items in the History Log and compresses first found item
 * implements the working of History List: creating, redrawing, clicks, auto-scrolling
 * stores resources: save id, ids and names of all possible types of modification, timings of "undo pointer"
 ------------------------------------------------------------------------------------ */
@@ -121,6 +122,8 @@ void HISTORY::init()
 	lvc.cx = 500;
 	lvc.fmt = LVCFMT_LEFT;
 	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
+	// shedule first autocompression
+	next_autocompress_time = clock() + TIME_BETWEEN_AUTOCOMPRESSIONS;
 }
 void HISTORY::free()
 {
@@ -169,6 +172,30 @@ void HISTORY::update()
 	}
 	if (old_show_undo_hint != show_undo_hint)
 		piano_roll.RedrawRow(undo_hint_pos);			// not changing Bookmarks List
+
+	// when cpu is idle, compress items from time to time
+	if (clock() > next_autocompress_time)
+	{
+		if (FCEUI_EmulationPaused())
+		{
+			// search for first occurence of an item with snapshot that is not compressed yet
+			int real_pos;
+			for (int i = history_total_items - 1; i >= 0; i--)
+			{
+				real_pos = (history_start_pos + i) % history_size;
+				if (!snapshots[real_pos].Get_already_compressed())
+				{
+					snapshots[real_pos].compress_data();
+					break;
+				} else if (backup_bookmarks[real_pos].not_empty && backup_bookmarks[real_pos].snapshot.Get_already_compressed())
+				{
+					backup_bookmarks[real_pos].snapshot.compress_data();
+					break;
+				}
+			}
+		}
+		next_autocompress_time = clock() + TIME_BETWEEN_AUTOCOMPRESSIONS;
+	}
 }
 
 void HISTORY::HistorySizeChanged()
@@ -911,7 +938,11 @@ void HISTORY::save(EMUFILE *os, bool really_save)
 			snapshots[real_pos].save(os);
 			backup_bookmarks[real_pos].save(os);
 			os->fwrite(&backup_current_branch[real_pos], 1);
-			playback.SetProgressbar(i, history_total_items);
+			if (i / SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE > last_tick)
+			{
+				playback.SetProgressbar(i, history_total_items);
+				last_tick = i / PROGRESSBAR_UPDATE_RATE;
+			}
 		}
 	} else
 	{

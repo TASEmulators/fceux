@@ -10,6 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Markers - Snapshot of Markers state
 
 * stores the data about Markers state: array of distributing Markers among movie frames, and array of Notes
+* implements compression and decompression of stored data
 * saves and loads the data from a project file. On error: sends warning to caller
 * stores resources: max length of a Note
 ------------------------------------------------------------------------------------ */
@@ -20,20 +21,20 @@ Markers - Snapshot of Markers state
 
 MARKERS::MARKERS()
 {
+	already_compressed = false;
 }
 
 void MARKERS::save(EMUFILE *os)
 {
 	// write size
 	int size = markers_array.size();
+	int len;
 	write32le(size, os);
-	// compress and write array
-	int len = markers_array.size() * sizeof(int);
-	uLongf comprlen = (len>>9)+12 + len;
-	std::vector<uint8> cbuf(comprlen);
-	compress(&cbuf[0], &comprlen, (uint8*)&markers_array[0], len);
-	write32le(comprlen, os);
-	os->fwrite(&cbuf[0], comprlen);
+	// write array
+	if (!already_compressed)
+		compress_data();
+	write32le(markers_array_compressed.size(), os);
+	os->fwrite(&markers_array_compressed[0], markers_array_compressed.size());
 	// write notes
 	size = notes.size();
 	write32le(size, os);
@@ -53,13 +54,14 @@ bool MARKERS::load(EMUFILE *is)
 	{
 		markers_array.resize(size);
 		// read and uncompress array
+		already_compressed = true;
 		int comprlen, len;
 		uLongf destlen = size * sizeof(int);
 		if (!read32le(&comprlen, is)) return true;
 		if (comprlen <= 0) return true;
-		std::vector<uint8> cbuf(comprlen);
-		if (is->fread(&cbuf[0], comprlen) != comprlen) return true;
-		int e = uncompress((uint8*)&markers_array[0], &destlen, &cbuf[0], comprlen);
+		markers_array_compressed.resize(comprlen);
+		if (is->fread(&markers_array_compressed[0], comprlen) != comprlen) return true;
+		int e = uncompress((uint8*)&markers_array[0], &destlen, &markers_array_compressed[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) return true;
 		// read notes
 		if (read32le(&size, is) && size >= 0)
@@ -101,3 +103,22 @@ bool MARKERS::skipLoad(EMUFILE *is)
 	}
 	return true;
 }
+
+void MARKERS::compress_data()
+{
+	int len = markers_array.size() * sizeof(int);
+	uLongf comprlen = (len>>9)+12 + len;
+	markers_array_compressed.resize(comprlen);
+	compress(&markers_array_compressed[0], &comprlen, (uint8*)&markers_array[0], len);
+	markers_array_compressed.resize(comprlen);
+	already_compressed = true;
+}
+bool MARKERS::Get_already_compressed()
+{
+	return already_compressed;
+}
+void MARKERS::Set_already_compressed(bool value)
+{
+	already_compressed = value;
+}
+
