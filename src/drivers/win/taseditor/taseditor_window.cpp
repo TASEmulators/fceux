@@ -163,13 +163,13 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
 	TASEDITOR_NEXT_MARKER, -1, -1, 0, -1, "Send Selection to next Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageDown)", "", false, 0, 0,
 	IDC_PLAYBACK_MARKER_EDIT, 0, 0, -1, 0, "Click to edit text", "", false, 0, 0,
-	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", true, 0, 0,
+	IDC_PLAYBACK_MARKER, 0, 0, 0, 0, "Click here to scroll Piano Roll to Playback cursor (hotkey: tap Shift twice)", "", false, 0, 0,
 	IDC_SELECTION_MARKER_EDIT, 0, -1, -1, -1, "Click to edit text", "", false, 0, 0,
-	IDC_SELECTION_MARKER, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", true, 0, 0,
-	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "Click on a Bookmark to send Playback cursor there, double-click to load its Branch", "", false, 0, 0,
+	IDC_SELECTION_MARKER, 0, -1, 0, -1, "Click here to scroll Piano Roll to Selection (hotkey: tap Ctrl twice)", "", false, 0, 0,
+	IDC_BRANCHES_BITMAP, -1, 0, 0, 0, "Right click = set Bookmark, single Left click = jump to Bookmark, double Left click = load Branch", "", false, 0, 0,
 	CHECK_TURBO_SEEK, -1, 0, 0, 0, "Uncheck when you need to watch seeking in slow motion", "", false, 0, 0,
-	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", true, 0, 0,
-	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", true, 0, 0,
+	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", false, 0, 0,
+	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", false, 0, 0,
 	IDC_RECORDING, -1, 0, 0, 0, "Switch Input Recording on/off", "", false, EMUCMD_MOVIE_READONLY_TOGGLE, 0,
 	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, 0, 0,
 	IDC_RUN_AUTO, -1, 0, 0, 0, "Enable Lua Auto Function (but first it must be registered by Lua script)", "", false, 0, 0,
@@ -209,7 +209,6 @@ void TASEDITOR_WINDOW::init()
 	{
 		if (window_items[i].tooltip_text_base[0])
 		{
-			// Create the tooltip. g_hInst is the global instance handle
 			window_items[i].tooltip_hwnd = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
 									  WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON,
 									  CW_USEDEFAULT, CW_USEDEFAULT,
@@ -255,15 +254,15 @@ void TASEDITOR_WINDOW::init()
 				{
 					toolInfo.lpszText = window_items[i].tooltip_text_base;
 				}
-				SendMessage(window_items[i].tooltip_hwnd, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
-				SendMessage(window_items[i].tooltip_hwnd, TTM_SETDELAYTIME, TTDT_AUTOPOP, TOOLTIPS_AUTOPOP_TIMEOUT);
+				x = SendMessage(window_items[i].tooltip_hwnd, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
+				x = SendMessage(window_items[i].tooltip_hwnd, TTM_SETDELAYTIME, TTDT_AUTOPOP, TOOLTIPS_AUTOPOP_TIMEOUT);
 			}
 		}
 	}
 	UpdateTooltips();
 	// subclass "Marker X" text fields
-	IDC_PLAYBACK_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PLAYBACK_MARKER), GWL_WNDPROC, (LONG)IDC_PLAYBACK_MARKER_WndProc);
-	IDC_SELECTION_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SELECTION_MARKER), GWL_WNDPROC, (LONG)IDC_SELECTION_MARKER_WndProc);
+	//IDC_PLAYBACK_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PLAYBACK_MARKER), GWL_WNDPROC, (LONG)IDC_PLAYBACK_MARKER_WndProc);
+	//IDC_SELECTION_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SELECTION_MARKER), GWL_WNDPROC, (LONG)IDC_SELECTION_MARKER_WndProc);
 	// subclass all buttons
 	IDC_PROGRESS_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PROGRESS_BUTTON), GWL_WNDPROC, (LONG)IDC_PROGRESS_BUTTON_WndProc);
 	IDC_BRANCHES_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_BRANCHES_BUTTON), GWL_WNDPROC, (LONG)IDC_BRANCHES_BUTTON_WndProc);
