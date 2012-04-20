@@ -204,7 +204,6 @@ void TASEDITOR_WINDOW::init()
 	UpdateCheckedItems();
 	patterns_menu = GetSubMenu(hmenu, PATTERNS_MENU_POS);
 	// tooltips
-	int x = 0;
 	for (int i = 0; i < TASEDITOR_WINDOW_TOTAL_ITEMS; ++i)
 	{
 		if (window_items[i].tooltip_text_base[0])
@@ -254,15 +253,15 @@ void TASEDITOR_WINDOW::init()
 				{
 					toolInfo.lpszText = window_items[i].tooltip_text_base;
 				}
-				x = SendMessage(window_items[i].tooltip_hwnd, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
-				x = SendMessage(window_items[i].tooltip_hwnd, TTM_SETDELAYTIME, TTDT_AUTOPOP, TOOLTIPS_AUTOPOP_TIMEOUT);
+				SendMessage(window_items[i].tooltip_hwnd, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
+				SendMessage(window_items[i].tooltip_hwnd, TTM_SETDELAYTIME, TTDT_AUTOPOP, TOOLTIPS_AUTOPOP_TIMEOUT);
 			}
 		}
 	}
 	UpdateTooltips();
 	// subclass "Marker X" text fields
-	//IDC_PLAYBACK_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PLAYBACK_MARKER), GWL_WNDPROC, (LONG)IDC_PLAYBACK_MARKER_WndProc);
-	//IDC_SELECTION_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SELECTION_MARKER), GWL_WNDPROC, (LONG)IDC_SELECTION_MARKER_WndProc);
+	IDC_PLAYBACK_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PLAYBACK_MARKER), GWL_WNDPROC, (LONG)IDC_PLAYBACK_MARKER_WndProc);
+	IDC_SELECTION_MARKER_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_SELECTION_MARKER), GWL_WNDPROC, (LONG)IDC_SELECTION_MARKER_WndProc);
 	// subclass all buttons
 	IDC_PROGRESS_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_PROGRESS_BUTTON), GWL_WNDPROC, (LONG)IDC_PROGRESS_BUTTON_WndProc);
 	IDC_BRANCHES_BUTTON_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_BRANCHES_BUTTON), GWL_WNDPROC, (LONG)IDC_BRANCHES_BUTTON_WndProc);
