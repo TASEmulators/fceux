@@ -259,7 +259,6 @@ void BOOKMARKS::set(int slot)
 			popup_display.screenshot_currently_shown = ITEM_UNDER_MOUSE_NONE;
 
 		history.RegisterBookmarkSet(slot, backup_copy, old_current_branch);
-		project.SetProjectChanged();
 		must_check_item_under_mouse = true;
 		FCEU_DispMessage("Branch %d saved.", 0, slot);
 	}
@@ -289,78 +288,46 @@ void BOOKMARKS::deploy(int slot)
 	if (!bookmarks_array[slot].not_empty) return;
 
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
-	int old_current_branch = branches.GetCurrentBranch();
 	bool markers_changed = false;
-	// revert current movie to the snapshot state
+	// update Markers
+	if (taseditor_config.bind_markers)
+	{
+		if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
+		{
+			bookmarks_array[slot].snapshot.copyToMarkers();
+			markers_changed = true;
+		}
+	}
+	// revert current movie data to the Bookmarked state
 	if (taseditor_config.branch_full_movie)
 	{
-		// update Markers
-		if (taseditor_config.bind_markers)
-		{
-			if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
-			{
-				bookmarks_array[slot].snapshot.copyToMarkers();
-				project.SetProjectChanged();
-				markers_changed = true;
-			}
-		}
-		// update current movie
-		int first_change = bookmarks_array[slot].snapshot.findFirstChange(currMovieData);
-		if (first_change >= 0)
-		{
-			// restore entire movie
-			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change);
-			piano_roll.UpdateItemCount();
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot, old_current_branch);
-			greenzone.Invalidate(first_change);
-			bookmarks_array[slot].deployed();
-		} else if (markers_changed)
-		{
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot, old_current_branch);
-			piano_roll.RedrawList();
-			bookmarks_array[slot].deployed();
-		} else
-		{
-			// didn't restore anything
-			bookmarks_array[slot].jumped();
-		}
-	} else if (jump_frame > 0)
+		bookmarks_array[slot].snapshot.toMovie(currMovieData);
+	} else
 	{
-		// update Markers
-		if (taseditor_config.bind_markers)
-		{
-			if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent(jump_frame))
-			{
-				bookmarks_array[slot].snapshot.copyToMarkers(jump_frame);
-				project.SetProjectChanged();
-				markers_changed = true;
-			}
-		}
-		// update current movie
-		int first_change = bookmarks_array[slot].snapshot.findFirstChange(currMovieData, 0, jump_frame);
-		if (first_change >= 0 && first_change < jump_frame)
-		{
-			// restore movie up to and not including bookmarked frame (imitating old TASing method)
-			if (currMovieData.getNumRecords() <= jump_frame) currMovieData.records.resize(jump_frame+1);	// but if old movie is shorter, include last frame as blank frame
-			bookmarks_array[slot].snapshot.toMovie(currMovieData, first_change, jump_frame-1);
-			piano_roll.UpdateItemCount();
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_0 + slot, first_change, slot, old_current_branch);
-			greenzone.Invalidate(first_change);
-			bookmarks_array[slot].deployed();
-		} else if (markers_changed)
-		{
-			selection.must_find_current_marker = playback.must_find_current_marker = true;
-			history.RegisterBranching(MODTYPE_BRANCH_MARKERS_0 + slot, first_change, slot, old_current_branch);
-			piano_roll.RedrawList();
-			bookmarks_array[slot].deployed();
-		} else
-		{
-			// didn't restore anything
-			bookmarks_array[slot].jumped();
-		}
+		// restore movie up to and not including bookmarked frame (simulating old TASing method)
+		if (jump_frame)
+			bookmarks_array[slot].snapshot.toMovie(currMovieData, 0, jump_frame - 1);
+		else
+			currMovieData.truncateAt(0);
+		// add empty frame at the end (at jump_frame)
+		currMovieData.insertEmpty(-1, 1);
+	}
+	int first_change = history.RegisterBranching(slot, markers_changed);
+	if (first_change >= 0)
+	{
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		piano_roll.UpdateItemCount();
+		greenzone.Invalidate(first_change);
+		bookmarks_array[slot].deployed();
+	} else if (markers_changed)
+	{
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+		piano_roll.RedrawList();
+		bookmarks_array[slot].deployed();
+	} else
+	{
+		// didn't restore anything
+		bookmarks_array[slot].jumped();
 	}
 
 	// if greenzone reduced so much that we can't jump immediately - substitute target frame greenzone with our savestate
@@ -378,6 +345,7 @@ void BOOKMARKS::deploy(int slot)
 		greenzone.savestates[jump_frame] = bookmarks_array[slot].savestate;
 
 	// switch current branch to this branch
+	int old_current_branch = branches.GetCurrentBranch();
 	branches.HandleBookmarkDeploy(slot);
 	if (slot != old_current_branch && old_current_branch != ITEM_UNDER_MOUSE_CLOUD)
 	{
@@ -584,7 +552,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
+						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -593,7 +561,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
+						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -615,7 +583,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[frame].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
+						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -624,7 +592,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
 						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(frame))
+						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;

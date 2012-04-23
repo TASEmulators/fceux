@@ -51,7 +51,6 @@ extern HISTORY history;
 extern POPUP_DISPLAY popup_display;
 
 extern bool turbo;
-extern bool muteTurbo;
 extern bool must_call_manual_lua_function;
 
 extern char* GetKeyComboName(int c);
@@ -564,8 +563,6 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckDlgButton(hwndTasEditor, IDC_USEPATTERN, taseditor_config.pattern_recording?BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndTasEditor, IDC_RUN_AUTO, taseditor_config.enable_auto_function?BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(hwndTasEditor, CHECK_TURBO_SEEK, taseditor_config.turbo_seek?BST_CHECKED : BST_UNCHECKED);
-	CheckMenuItem(hmenu, ID_VIEW_SHOW_LAG_FRAMES, taseditor_config.show_lag_frames?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_VIEW_SHOW_MARKERS, taseditor_config.show_markers?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHSCREENSHOTS, taseditor_config.show_branch_screenshots?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_SHOWBRANCHTOOLTIPS, taseditor_config.show_branch_descr?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_JUMPWHENMAKINGUNDO, taseditor_config.jump_to_undo?MF_CHECKED : MF_UNCHECKED);
@@ -579,12 +576,9 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_COMBINECONSECUTIVERECORDINGS, taseditor_config.combine_consecutive?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USE1PFORRECORDING, taseditor_config.use_1p_rec?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_USEINPUTKEYSFORCOLUMNSET, taseditor_config.columnset_by_keys?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE, taseditor_config.superimpose_affects_paste?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_COLUMNSETPATTERNSKIPSLAG, taseditor_config.pattern_skips_lag?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_DESELECTONDOUBLECLICK, taseditor_config.deselect_on_doubleclick?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_DRAWINPUTBYDRAGGING, taseditor_config.draw_input?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_MUTETURBO, muteTurbo?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE, taseditor_config.autopause_at_finish?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
 }
@@ -1033,17 +1027,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if (playback.pause_frame)
 						turbo = taseditor_config.turbo_seek;
 					break;
-				case ID_VIEW_SHOW_LAG_FRAMES:
-					taseditor_config.show_lag_frames ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					piano_roll.RedrawList();
-					bookmarks.RedrawBookmarksList();
-					break;
-				case ID_VIEW_SHOW_MARKERS:
-					taseditor_config.show_markers ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					piano_roll.RedrawList();		// no need to redraw Bookmarks, as Markers are only shown in Piano Roll
-					break;
 				case ID_VIEW_SHOWBRANCHSCREENSHOTS:
 					taseditor_config.show_branch_screenshots ^= 1;
 					taseditor_window.UpdateCheckedItems();
@@ -1152,16 +1135,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.columnset_by_keys ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_CONFIG_SUPERIMPOSE_AFFECTS_PASTE:
-					taseditor_config.superimpose_affects_paste ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
 				case ID_CONFIG_COLUMNSETPATTERNSKIPSLAG:
 					taseditor_config.pattern_skips_lag ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
-				case ID_CONFIG_DESELECTONDOUBLECLICK:
-					taseditor_config.deselect_on_doubleclick ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_DRAWINPUTBYDRAGGING:
@@ -1170,10 +1145,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ID_CONFIG_SILENTAUTOSAVE:
 					taseditor_config.silent_autosave ^= 1;
-					taseditor_window.UpdateCheckedItems();
-					break;
-				case ID_CONFIG_MUTETURBO:
-					muteTurbo ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE:

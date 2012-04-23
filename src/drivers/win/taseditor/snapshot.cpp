@@ -114,9 +114,9 @@ MARKERS& SNAPSHOT::GetMarkers()
 
 void SNAPSHOT::toMovie(MovieData& md, int start, int end)
 {
-	if (end < 0) end = size-1;
+	if (end < 0 || end >= size) end = size - 1;
 	// write input data to movie data
-	md.records.resize(size);
+	md.records.resize(end + 1);
 	switch(input_type)
 	{
 		case INPUT_TYPE_FOURSCORE:
@@ -486,7 +486,10 @@ int SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 		}
 	}
 	// if sizes differ, return last frame from the lesser of them
-	if (size != md.getNumRecords()) return end;
+	if (size < md.getNumRecords() && end >= size-1)
+		return size-1;
+	else if (size > md.getNumRecords() && end >= md.getNumRecords()-1)
+		return md.getNumRecords()-1;
 
 	return -1;	// no changes were found
 }

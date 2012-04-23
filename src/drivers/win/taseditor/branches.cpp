@@ -1056,6 +1056,8 @@ void BRANCHES::RecalculateBranchesTree()
 			for (int i = 0; i < (int)Children[parent+1].size(); ++i)
 			{
 				GridY[Children[parent+1][i]] = pos;
+				if (Children[parent+1][i] == current_branch)
+					GridY[TOTAL_BOOKMARKS] = pos;
 				pos -= 2;
 			}
 		} else if (GridY[t] < -MAX_GRID_Y_POS)
@@ -1068,6 +1070,8 @@ void BRANCHES::RecalculateBranchesTree()
 			for (int i = Children[parent+1].size()-1; i >= 0; i--)
 			{
 				GridY[Children[parent+1][i]] = pos;
+				if (Children[parent+1][i] == current_branch)
+					GridY[TOTAL_BOOKMARKS] = pos;
 				pos += 2;
 			}
 		}

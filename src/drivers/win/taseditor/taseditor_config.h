@@ -33,8 +33,6 @@ public:
 	int findnote_wndy;
 	bool follow_playback;
 	bool turbo_seek;
-	bool show_lag_frames;
-	bool show_markers;
 	bool show_branch_screenshots;
 	bool show_branch_descr;
 	bool enable_hot_changes;
@@ -46,7 +44,6 @@ public:
 	bool use_1p_rec;
 	bool columnset_by_keys;
 	int superimpose;
-	bool superimpose_affects_paste;
 	bool branch_full_movie;
 	bool branch_only_when_rec;
 	bool view_branches_tree;
@@ -67,7 +64,6 @@ public:
 	bool findnote_matchcase;
 	bool findnote_search_up;
 	bool enable_auto_function;
-	bool deselect_on_doubleclick;
 	bool draw_input;
 	bool silent_autosave;
 	bool autopause_at_finish;

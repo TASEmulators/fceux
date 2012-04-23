@@ -38,7 +38,7 @@ static int bits;
 #include "oakra.h"
 
 OAKRA_Module_OutputDS *dsout;
-bool muteTurbo=false;
+bool muteTurbo = true;
 
 //prototypes
 void UpdateSoundChannelQualityMode(HWND hwndDlg);	//Updates the sound channel volume sliders, disables and renames them for low quality

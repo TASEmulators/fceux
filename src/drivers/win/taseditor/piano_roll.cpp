@@ -1138,7 +1138,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				if (cell_y == history.GetUndoHint())
 				{
 					// undo hint here
-					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+					if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 					{
 						msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_UNDOHINT_FRAMENUM_COLOR : MARKED_UNDOHINT_FRAMENUM_COLOR;
 					} else
@@ -1148,14 +1148,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 				{
 					// current frame
-					if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+					if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 					{
 						msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
 					} else
 					{
 						msg->clrTextBk = CUR_FRAMENUM_COLOR;
 					}
-				} else if (taseditor_config.show_markers && markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
+				} else if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 				{
 					// marked frame
 					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
@@ -1165,7 +1165,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					{
 						if (!greenzone.savestates[cell_y].empty())
 						{
-							if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+							if (greenzone.GetLagHistoryAtFrame(cell_y))
 								msg->clrTextBk = LAG_FRAMENUM_COLOR;
 							else
 								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -1174,7 +1174,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 							|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 							|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 						{
-							if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+							if (greenzone.GetLagHistoryAtFrame(cell_y))
 								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 							else
 								msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
@@ -1205,7 +1205,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[cell_y].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -1214,7 +1214,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
@@ -1244,7 +1244,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					if (!greenzone.savestates[cell_y].empty())
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
@@ -1253,7 +1253,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
 						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
 					{
-						if (taseditor_config.show_lag_frames && greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
@@ -1549,9 +1549,6 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							}
 						}
 						piano_roll.StartDraggingMarker(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), row_index, column_index);
-						// also clear selection
-						if (taseditor_config.deselect_on_doubleclick)
-							selection.ClearSelection();
 					} else
 					{
 						if (fwKeys & MK_SHIFT)

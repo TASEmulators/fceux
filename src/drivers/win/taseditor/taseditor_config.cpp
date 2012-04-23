@@ -35,8 +35,6 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_wndy = 0;
 	follow_playback = true;
 	turbo_seek = false;
-	show_lag_frames = true;
-	show_markers = true;
 	show_branch_screenshots = true;
 	show_branch_descr = true;
 	enable_hot_changes = true;
@@ -48,7 +46,6 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	use_1p_rec = true;
 	columnset_by_keys = false;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
-	superimpose_affects_paste = true;
 	branch_full_movie = true;
 	branch_only_when_rec = false;
 	view_branches_tree = false;
@@ -69,7 +66,6 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	findnote_matchcase = false;
 	findnote_search_up = false;
 	enable_auto_function = true;
-	deselect_on_doubleclick = true;
 	draw_input = true;
 	silent_autosave = true;
 	autopause_at_finish = true;

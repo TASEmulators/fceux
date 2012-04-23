@@ -108,7 +108,7 @@ public:
 	int RegisterPasteInsert(int start, SelectionFrames& inserted_set);
 	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1, const char* comment = 0);
 	void RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch);
-	void RegisterBranching(int mod_type, int first_change, int slot, int old_current_branch);
+	int RegisterBranching(int slot, bool markers_changed);
 	void RegisterRecording(int frame_of_change);
 	void RegisterImport(MovieData& md, char* filename);
 	int RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made);

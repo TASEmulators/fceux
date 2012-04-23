@@ -364,14 +364,11 @@ int HISTORY::jump(int new_pos)
 	real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	// update Markers
 	bool markers_changed = false;
-	if (taseditor_config.bind_markers)
+	if (snapshots[real_pos].MarkersDifferFromCurrent())
 	{
-		if (snapshots[real_pos].MarkersDifferFromCurrent())
-		{
-			snapshots[real_pos].copyToMarkers();
-			project.SetProjectChanged();
-			markers_changed = true;
-		}
+		snapshots[real_pos].copyToMarkers();
+		project.SetProjectChanged();
+		markers_changed = true;
 	}
 
 	// update current movie data
@@ -708,40 +705,47 @@ void HISTORY::RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_curre
 	if (taseditor_config.enable_hot_changes)
 		snap.copyHotChanges(&GetCurrentSnapshot());
 	AddItemToHistory(snap, old_current_branch, backup_copy);
+	project.SetProjectChanged();
 }
-void HISTORY::RegisterBranching(int mod_type, int first_change, int slot, int old_current_branch)
+int HISTORY::RegisterBranching(int slot, bool markers_changed)
 {
 	// create new snapshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// fill description: modification type + time of the Branch
-	snap.mod_type = mod_type;
-	strcat(snap.description, modCaptions[snap.mod_type]);
-	strcat(snap.description, bookmarks.bookmarks_array[slot].snapshot.description);
-	snap.jump_frame = first_change;
-	snap.start_frame = first_change;
-	snap.end_frame = -1;
-	if (taseditor_config.enable_hot_changes)
+	// check if there are input differences from latest snapshot
+	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
+	int first_changes = snap.findFirstChange(snapshots[real_pos]);
+	if (first_changes >= 0)
 	{
-		if (mod_type < MODTYPE_BRANCH_MARKERS_0)
-		{
-			// input was changed
+		// differences found
+		// fill description: modification type + time of the Branch
+		snap.mod_type = MODTYPE_BRANCH_0 + slot;
+		strcat(snap.description, modCaptions[snap.mod_type]);
+		strcat(snap.description, bookmarks.bookmarks_array[slot].snapshot.description);
+		snap.jump_frame = first_changes;
+		snap.start_frame = first_changes;
+		snap.end_frame = -1;
+		if (taseditor_config.enable_hot_changes)
 			// copy hotchanges of the Branch
-			if (taseditor_config.branch_full_movie)
-			{
-				snap.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
-			} else
-			{
-				// input was branched partially, so copy hotchanges only up to and not including jump_frame of the Branch
-				snap.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot, bookmarks.bookmarks_array[slot].snapshot.jump_frame);
-			}
-		} else
-		{
-			// input was not changed, only Markers were changed
+			snap.copyHotChanges(&bookmarks.bookmarks_array[slot].snapshot);
+		AddItemToHistory(snap, branches.GetCurrentBranch());
+		project.SetProjectChanged();
+	} else if (markers_changed)
+	{
+		// fill description: modification type + time of the Branch
+		snap.mod_type = MODTYPE_BRANCH_MARKERS_0 + slot;
+		strcat(snap.description, modCaptions[snap.mod_type]);
+		strcat(snap.description, bookmarks.bookmarks_array[slot].snapshot.description);
+		snap.jump_frame = bookmarks.bookmarks_array[slot].snapshot.jump_frame;
+		snap.start_frame = 0;
+		snap.end_frame = -1;
+		// input was not changed, only Markers were changed
+		if (taseditor_config.enable_hot_changes)
 			snap.copyHotChanges(&GetCurrentSnapshot());
-		}
+		AddItemToHistory(snap, branches.GetCurrentBranch());
+		project.SetProjectChanged();
 	}
-	AddItemToHistory(snap, old_current_branch);
+	return first_changes;
 }
 void HISTORY::RegisterRecording(int frame_of_change)
 {
