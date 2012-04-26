@@ -415,12 +415,12 @@ bool SaveProjectAs()
 	ofn.lpstrDefExt = "fm3";
 	ofn.nMaxFile = 2048;
 	ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
+	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			// initial directory
 	ofn.lpstrInitialDir = initdir.c_str();
 
-	if(GetSaveFileName(&ofn))								//If it is a valid filename
+	if(GetSaveFileName(&ofn))								// if it is a valid filename
 	{
-		project.RenameProject(nameo);
+		project.RenameProject(nameo, true);
 		project.save();
 		taseditor_window.UpdateRecentProjectsArray(nameo);
 	} else return false;
@@ -544,10 +544,10 @@ void SaveCompact()
 		ofn.lpstrDefExt = "fm3";
 		ofn.nMaxFile = 2048;
 		ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
-		string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			//Initial directory
+		string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			// initial directory
 		ofn.lpstrInitialDir = initdir.c_str();
 
-		if(GetSaveFileName(&ofn))								//If it is a valid filename
+		if(GetSaveFileName(&ofn))								// if it is a valid filename
 			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 	}
 }

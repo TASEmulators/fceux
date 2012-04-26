@@ -270,13 +270,13 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	splicer.reset();
 	popup_display.reset();
 	reset();
-	RenameProject(fullname);
+	RenameProject(fullname, load_all);
 	// restore mouse cursor shape
 	taseditor_window.must_update_mouse_cursor = true;
 	return true;
 }
 
-void TASEDITOR_PROJECT::RenameProject(char* new_fullname)
+void TASEDITOR_PROJECT::RenameProject(char* new_fullname, bool filename_is_correct)
 {
 	projectFile = new_fullname;
 	char drv[512], dir[512], name[512], ext[512];		// For getting the filename
@@ -285,6 +285,9 @@ void TASEDITOR_PROJECT::RenameProject(char* new_fullname)
 	std::string thisfm2name = name;
 	thisfm2name.append(".fm2");
 	fm2FileName = thisfm2name;
+	// if filename is not correct (for example, user opened a corrupted FM3) clear the filename, so on Ctrl+S user will be forwarded to SaveAs
+	if (!filename_is_correct)
+		projectFile.clear();
 }
 // -----------------------------------------------------------------
 std::string TASEDITOR_PROJECT::GetProjectFile()
