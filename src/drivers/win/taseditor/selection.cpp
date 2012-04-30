@@ -209,16 +209,16 @@ void SELECTION::JumpPrevMarker(int speed)
 		speed--;
 	}
 	if (index >= 0)
-		JumpToFrame(index);
+		JumpToFrame(index);							// jump to the Marker
 	else
-		JumpToFrame(0);
+		JumpToFrame(0);								// jump to the beginning of Piano Roll
 }
 void SELECTION::JumpNextMarker(int speed)
 {
 	// if nothing is selected, consider playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
-	int last_frame = currMovieData.getNumRecords()-1;
+	int last_frame = markers_manager.GetMarkersSize() - 1;
 	// jump trough "speed" amount of previous markers
 	while (speed > 0)
 	{
@@ -227,9 +227,9 @@ void SELECTION::JumpNextMarker(int speed)
 		speed--;
 	}
 	if (index <= last_frame)
-		JumpToFrame(index);
+		JumpToFrame(index);								// jump to Marker
 	else
-		JumpToFrame(last_frame);
+		JumpToFrame(currMovieData.getNumRecords() - 1);	// jump to the end of Piano Roll
 }
 void SELECTION::JumpToFrame(int frame)
 {

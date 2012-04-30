@@ -372,7 +372,8 @@ void PIANO_ROLL::update()
 			shift_count++;
 			if (shift_count >= DOUBLETAP_COUNT)
 			{
-				FollowPlayback();
+				if (taseditor_window.TASEditor_focus)
+					FollowPlayback();
 				shift_count = ctrl_count = 0;
 			}
 		} else
@@ -388,7 +389,8 @@ void PIANO_ROLL::update()
 			ctrl_count++;
 			if (ctrl_count >= DOUBLETAP_COUNT)
 			{
-				FollowSelection();
+				if (taseditor_window.TASEditor_focus)
+					FollowSelection();
 				ctrl_count = shift_count = 0;
 			}
 		} else

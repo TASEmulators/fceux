@@ -31,6 +31,7 @@ extern bool turbo;
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
+extern SELECTION selection;
 extern MARKERS_MANAGER markers_manager;
 extern GREENZONE greenzone;
 extern PIANO_ROLL piano_roll;
@@ -271,9 +272,38 @@ void PLAYBACK::MiddleButtonClick()
 {
 	if (emu_paused)
 	{
-		if (!pause_frame && lost_position_frame)
-			pause_frame = lost_position_frame;
-		UnpauseEmulation();
+		// check if right mouse button is released
+		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_LBUTTON : VK_RBUTTON) >= 0)
+		{
+			if (GetAsyncKeyState(VK_SHIFT) < 0)
+			{
+				// if Shift is held, set pause_frame to nearest Marker
+				int last_frame = markers_manager.GetMarkersSize() - 1;
+				int target_frame = currFrameCounter + 1;
+				for (; target_frame <= last_frame; ++target_frame)
+					if (markers_manager.GetMarker(target_frame)) break;
+				if (target_frame <= last_frame)
+				{
+					seeking_start_frame = currFrameCounter;
+					pause_frame = target_frame + 1;		// stop at the Marker
+				}
+			} else if (GetAsyncKeyState(VK_CONTROL) < 0)
+			{
+				// if Ctrl is held, set pause_frame to Selection cursor
+				int selection_beginning = selection.GetCurrentSelectionBeginning();
+				if (selection_beginning > currFrameCounter)
+				{
+					seeking_start_frame = currFrameCounter;
+					pause_frame = selection_beginning + 1;
+				}
+			}
+			if (!pause_frame && lost_position_frame)
+			{
+				seeking_start_frame = currFrameCounter;
+				pause_frame = lost_position_frame;
+			}
+			UnpauseEmulation();
+		}
 	} else
 	{
 		PauseEmulation();
@@ -329,9 +359,9 @@ void PLAYBACK::RewindFull(int speed)
 	}
 	int lastCursor = currFrameCounter;
 	if (index >= 0)
-		jump(index);
+		jump(index);						// jump to the Marker
 	else
-		jump(0);
+		jump(0);							// jump to the beginning of Piano Roll
 	if (lastCursor != currFrameCounter)
 	{
 		// redraw row where Playback cursor was (in case there's two or more RewindFulls before playback.update())
@@ -341,7 +371,7 @@ void PLAYBACK::RewindFull(int speed)
 }
 void PLAYBACK::ForwardFull(int speed)
 {
-	int last_frame = currMovieData.getNumRecords()-1;
+	int last_frame = markers_manager.GetMarkersSize() - 1;
 	int index = currFrameCounter + 1;
 	// jump trough "speed" amount of next markers
 	while (speed > 0)
@@ -352,9 +382,9 @@ void PLAYBACK::ForwardFull(int speed)
 	}
 	int lastCursor = currFrameCounter;
 	if (index <= last_frame)
-		jump(index);
+		jump(index);								// jump to Marker
 	else
-		jump(last_frame);
+		jump(currMovieData.getNumRecords() - 1);	// jump to the end of Piano Roll
 	if (lastCursor != currFrameCounter)
 	{
 		// redraw row where Playback cursor was (in case there's two or more ForwardFulls before playback.update())
@@ -399,9 +429,9 @@ void PLAYBACK::jump(int frame)
 	}
 }
 
+// returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 bool PLAYBACK::JumpToFrame(int index)
 {
-	// Returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 	if (index < 0) return false;
 	if (index >= greenzone.greenZoneCount)
 	{
@@ -411,7 +441,7 @@ bool PLAYBACK::JumpToFrame(int index)
 			SeekingStart(index+1);
 		return false;
 	}
-	/* Handle jumps inside greenzone. */
+	// handle jumps inside greenzone
 	if (greenzone.loadTasSavestate(index))
 	{
 		turbo = false;
@@ -419,7 +449,7 @@ bool PLAYBACK::JumpToFrame(int index)
 		if (pause_frame) SeekingStop();
 		return true;
 	}
-	//Search for an earlier frame with savestate
+	// search for an earlier frame with savestate
 	int i = (index>0)? index-1 : 0;
 	for (; i > 0; i--)
 	{

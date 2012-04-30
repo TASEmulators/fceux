@@ -208,7 +208,7 @@ void TASEDITOR_WINDOW::init()
 		if (window_items[i].tooltip_text_base[0])
 		{
 			window_items[i].tooltip_hwnd = CreateWindowEx(NULL, TOOLTIPS_CLASS, NULL,
-									  WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON,
+									  WS_POPUP | TTS_ALWAYSTIP | TTS_BALLOON | TTS_NOANIMATE | TTS_NOFADE,
 									  CW_USEDEFAULT, CW_USEDEFAULT,
 									  CW_USEDEFAULT, CW_USEDEFAULT,
 									  hwndTasEditor, NULL, 
@@ -1470,8 +1470,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
-			if (GetFocus() != hWnd)
-				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			break;
 		}
@@ -1492,7 +1490,13 @@ LRESULT APIENTRY IDC_PLAYBACK_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam,
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
 			piano_roll.FollowPlayback();
-			break;
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			return 0;
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
 	}
 	return CallWindowProc(IDC_PLAYBACK_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
 }
@@ -1504,7 +1508,13 @@ LRESULT APIENTRY IDC_SELECTION_MARKER_WndProc(HWND hWnd, UINT msg, WPARAM wParam
 		case WM_LBUTTONDBLCLK:
 			if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 				piano_roll.FollowSelection();
-			break;
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
+			return 0;
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
 	}
 	return CallWindowProc(IDC_SELECTION_MARKER_oldWndProc, hWnd, msg, wParam, lParam);
 }
@@ -1517,6 +1527,8 @@ LRESULT APIENTRY IDC_PROGRESS_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam,
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONDBLCLK:
 			playback.CancelSeeking();
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			return 0;
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
@@ -1536,6 +1548,8 @@ LRESULT APIENTRY IDC_BRANCHES_BUTTON_WndProc(HWND hWnd, UINT msg, WPARAM wParam,
 			// click on "Bookmarks/Branches" - switch between Bookmarks List and Branches Tree
 			taseditor_config.view_branches_tree ^= 1;
 			bookmarks.RedrawBookmarksCaption();
+			if (GetFocus() != hWnd)
+				SetFocus(hWnd);
 			return 0;
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
