@@ -391,45 +391,22 @@ static int emu_paused(lua_State *L)
 
 // emu.pause()
 //
-//  Pauses the emulator, function "waits" until the user unpauses.
-//  This function MAY be called from a non-frame boundary, but the frame
-//  finishes executing anwyays. In this case, the function returns immediately.
-static int emu_pause(lua_State *L) {
-	
+//  Pauses the emulator. Returns immediately.
+static int emu_pause(lua_State *L)
+{
 	if (!FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
-	speedmode = SPEED_NORMAL;
-
-	// Return control if we're midway through a frame. We can't pause here.
-	if (frameAdvanceWaiting) {
-		return 0;
-	}
-
-	// If it's on a frame boundary, we also yield.	
-	frameAdvanceWaiting = TRUE;
-	return lua_yield(L, 0);
-	
+	return 0;
 }
 
 //emu.unpause()
 //
-//adelikat:  Why wasn't this added sooner?
-//Gives the user a way to unpause the emulator via lua
-static int emu_unpause(lua_State *L) {
-	
+//  Unpauses the emulator. Returns immediately.
+static int emu_unpause(lua_State *L)
+{
 	if (FCEUI_EmulationPaused())
 		FCEUI_ToggleEmulationPause();
-	speedmode = SPEED_NORMAL;
-
-	// Return control if we're midway through a frame. We can't pause here.
-	if (frameAdvanceWaiting) {
-		return 0;
-	}
-
-	// If it's on a frame boundary, we also yield.	
-	frameAdvanceWaiting = TRUE;
-	return lua_yield(L, 0);
-	
+	return 0;
 }
 
 

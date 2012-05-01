@@ -1,15 +1,24 @@
 
+01-May-2012 - AnS - Lua functions emu.pause() and emu.unpause() don't yield and don't reset emulator speed anymore
+30-Apr-2012 - AnS - Taseditor: Ctrl + mid click = run to Selection cursor; Shift + mid click = run to nearest Marker
+26-Apr-2012 - AnS - Taseditor: fixed filename logic when user creates project from an fm2 or a corrupted fm3
+23-Apr-2012 - AnS - Taseditor: menus overhaul
+19-Apr-2012 - AnS - RAM Watch: fixed loading Data Size and Data Type from a .wch, now corrupted .wch won't crash
+17-Apr-2012 - zeromus - fix bug in mapper 164 savestates which caused wram to be lost, also make mapper 164 sram work
+17-Apr-2012 - AnS - Taseditor: gradual History Log autocompression when idle
+14-Apr-2012 - zeromus - add hash database entry for Rasaaru Ishii no Childs Quest (J), whose extant roms specify both the wrong mapper and the wrong mirroring
+14-Apr-2012 - zeromus - change mapper 12 (mmc3 variant) to specify MMC3A chip version
 14-Apr-2012 - AnS - Taseditor: rightclicks in Branches Tree
 14-Apr-2012 - AnS - "Play Movie" dialog doesn't search in fceux root folder anymore
 10-Apr-2012 - AnS - bold items in some context menus
-10-apr-2012 - zeromus - fix mapper 115 (actually to fix mapper 248 for Bao Qing Tian)
-09-apr-2012 - zeromus - remove vram protection from mapper 227
+10-Apr-2012 - zeromus - fix mapper 115 (actually to fix mapper 248 for Bao Qing Tian)
+09-Apr-2012 - zeromus - remove vram protection from mapper 227
 09-Apr-2012 - AnS - Taseditor: all GUI buttons fire off at mousedown; disabled Spacebar and enabled Middle mouse button on GUI buttons
 09-Apr-2012 - AnS - Taseditor: clicks in Branches Tree
 07-Apr-2012 - AnS - Taseditor: version data in fm3
 07-Apr-2012 - AnS - Taseditor: much better way of calculating Branches Tree; hinting full timelines; miniarrow showing current Playback cursor position in Branches Tree; "Bookmark#" modtype, undo/redo works for Bookmarks
 07-Apr-2012 - AnS - Taseditor: applying PAL and PPU flags when loading projects
-05-apr-2012 - zeromus - fix mapper 242 (dragon quest 8 UNL)
+05-Apr-2012 - zeromus - fix mapper 242 (dragon quest 8 UNL)
 26-Mar-2012 - AnS - Taseditor: Alt+Wheel = jump across gaps in Input/Markers
 25-Mar-2012 - AnS - returned default mapping of Frame Advance hotkey to Backslash
 25-Mar-2012 - AnS - Taseditor: BookmarksList clicks apply on buttonup only
