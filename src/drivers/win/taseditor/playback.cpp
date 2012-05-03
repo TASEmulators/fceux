@@ -264,45 +264,58 @@ void PLAYBACK::UnpauseEmulation()
 void PLAYBACK::RestorePosition()
 {
 	if (pause_frame)
-		jump(pause_frame-1);
-	else
-		jump(lost_position_frame-1);
+	{
+		// continue seeking
+		if (taseditor_config.turbo_seek)
+			turbo = true;
+		UnpauseEmulation();
+	} else if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
+	{
+		// start seeking from here to lost_position_frame
+		pause_frame = lost_position_frame;
+		seeking_start_frame = currFrameCounter;
+		if (taseditor_config.turbo_seek)
+			turbo = true;
+		UnpauseEmulation();
+	}
 }
 void PLAYBACK::MiddleButtonClick()
 {
 	if (emu_paused)
 	{
-		// check if right mouse button is released
+		// if right mouse button is released, either just unpause or start seeking
 		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_LBUTTON : VK_RBUTTON) >= 0)
 		{
 			if (GetAsyncKeyState(VK_SHIFT) < 0)
 			{
-				// if Shift is held, set pause_frame to nearest Marker
-				int last_frame = markers_manager.GetMarkersSize() - 1;
+				// if Shift is held, seek to nearest Marker
+				int last_frame = markers_manager.GetMarkersSize() - 1;	// the end of movie Markers
 				int target_frame = currFrameCounter + 1;
 				for (; target_frame <= last_frame; ++target_frame)
 					if (markers_manager.GetMarker(target_frame)) break;
 				if (target_frame <= last_frame)
 				{
+					// start seeking to the Marker
 					seeking_start_frame = currFrameCounter;
-					pause_frame = target_frame + 1;		// stop at the Marker
+					pause_frame = target_frame + 1;
+					if (taseditor_config.turbo_seek)
+						turbo = true;
 				}
 			} else if (GetAsyncKeyState(VK_CONTROL) < 0)
 			{
-				// if Ctrl is held, set pause_frame to Selection cursor
+				// if Ctrl is held, seek to Selection cursor
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
 				{
+					// start seeking to selection_beginning
 					seeking_start_frame = currFrameCounter;
 					pause_frame = selection_beginning + 1;
+					if (taseditor_config.turbo_seek)
+						turbo = true;
 				}
 			}
-			if (!pause_frame && lost_position_frame)
-			{
-				seeking_start_frame = currFrameCounter;
-				pause_frame = lost_position_frame;
-			}
-			UnpauseEmulation();
+			UnpauseEmulation();		// in case RestorePosition doesn't unpause it
+			RestorePosition();
 		}
 	} else
 	{
@@ -371,7 +384,7 @@ void PLAYBACK::RewindFull(int speed)
 }
 void PLAYBACK::ForwardFull(int speed)
 {
-	int last_frame = markers_manager.GetMarkersSize() - 1;
+	int last_frame = markers_manager.GetMarkersSize() - 1;	// the end of movie Markers
 	int index = currFrameCounter + 1;
 	// jump trough "speed" amount of next markers
 	while (speed > 0)
@@ -436,7 +449,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	if (index >= greenzone.greenZoneCount)
 	{
 		// handle jump outside greenzone
-		if (currFrameCounter == greenzone.greenZoneCount-1 || JumpToFrame(greenzone.greenZoneCount-1))
+		if (currFrameCounter == greenzone.greenZoneCount - 1 || JumpToFrame(greenzone.greenZoneCount - 1))
 			// seek from the end of greenzone
 			SeekingStart(index+1);
 		return false;
@@ -450,7 +463,7 @@ bool PLAYBACK::JumpToFrame(int index)
 		return true;
 	}
 	// search for an earlier frame with savestate
-	int i = (index>0)? index-1 : 0;
+	int i = (index > 0)? index-1 : 0;
 	for (; i > 0; i--)
 	{
 		if (greenzone.loadTasSavestate(i)) break;
@@ -461,7 +474,7 @@ bool PLAYBACK::JumpToFrame(int index)
 		currFrameCounter = i;
 	// continue from the frame
 	if (index != currFrameCounter)
-		SeekingStart(index+1);
+		SeekingStart(index + 1);
 	return true;
 }
 
@@ -479,16 +492,16 @@ void PLAYBACK::SetProgressbar(int a, int b)
 }
 void PLAYBACK::CancelSeeking()
 {
-	// delete lost_position pointer (green arrow)
-	if (lost_position_frame)
-	{
-		int temp = lost_position_frame - 1;
-		lost_position_frame = 0;
-		piano_roll.RedrawRow(temp);
-	}
-	// and stop seeking
 	if (pause_frame)
+	{
 		SeekingStop();
+		// also invalidate lost_position_frame if user cancelled seeking to it
+		if (lost_position_frame == pause_frame)
+		{
+			piano_roll.RedrawRow(lost_position_frame - 1);
+			lost_position_frame = 0;
+		}
+	}
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

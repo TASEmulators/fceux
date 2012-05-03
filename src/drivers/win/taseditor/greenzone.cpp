@@ -403,14 +403,23 @@ void GREENZONE::InvalidateAndCheck(int after)
 			if (currFrameCounter >= greenZoneCount)
 			{
 				// remember the lost position
-				if (playback.lost_position_frame && playback.lost_position_frame != currFrameCounter + 1)
-					piano_roll.RedrawRow(playback.lost_position_frame - 1);
-				playback.lost_position_frame = currFrameCounter + 1;
+				if (playback.lost_position_frame < currFrameCounter + 1)
+				{
+					if (playback.lost_position_frame)
+						piano_roll.RedrawRow(playback.lost_position_frame - 1);
+					playback.lost_position_frame = currFrameCounter + 1;
+				}
 				// auto-restore position if needed
 				if (taseditor_config.restore_position)
-					playback.RestorePosition();
-				else
+				{
+					if (playback.pause_frame)
+						playback.jump(playback.pause_frame - 1);
+					else
+						playback.jump(currFrameCounter);
+				} else
+				{
 					playback.jump(greenZoneCount-1);
+				}
 			}
 		}
 	}
