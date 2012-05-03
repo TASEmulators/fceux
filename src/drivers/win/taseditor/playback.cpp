@@ -277,6 +277,9 @@ void PLAYBACK::RestorePosition()
 		if (taseditor_config.turbo_seek)
 			turbo = true;
 		UnpauseEmulation();
+		// delete lost_position_frame
+		piano_roll.RedrawRow(lost_position_frame - 1);
+		lost_position_frame = 0;
 	}
 }
 void PLAYBACK::MiddleButtonClick()
