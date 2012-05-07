@@ -403,11 +403,12 @@ void GREENZONE::InvalidateAndCheck(int after)
 			if (currFrameCounter >= greenZoneCount)
 			{
 				// remember the lost position
-				if (playback.lost_position_frame < currFrameCounter + 1)
+				if ((playback.lost_position_frame < currFrameCounter + 1) || (playback.lost_position_frame > currFrameCounter + 1 && !playback.lost_position_must_be_fixed))
 				{
 					if (playback.lost_position_frame)
 						piano_roll.RedrawRow(playback.lost_position_frame - 1);
 					playback.lost_position_frame = currFrameCounter + 1;
+					playback.lost_position_must_be_fixed = true;
 				}
 				// auto-restore position if needed
 				if (taseditor_config.restore_position)

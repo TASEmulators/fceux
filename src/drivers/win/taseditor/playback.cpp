@@ -72,7 +72,7 @@ void PLAYBACK::reset()
 	shown_marker = 0;
 	lastCursor = currFrameCounter;
 	lost_position_frame = pause_frame = old_pauseframe = 0;
-	old_show_pauseframe = show_pauseframe = false;
+	lost_position_must_be_fixed = old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
 	old_rewind_full_button_state = rewind_full_button_state = false;
@@ -228,6 +228,10 @@ void PLAYBACK::update()
 		RedrawMarker();
 		must_find_current_marker = false;
 	}
+
+	if (!emu_paused)
+		// when emulating, lost_position_frame becomes unfixed
+		lost_position_must_be_fixed = false;
 }
 
 void PLAYBACK::updateProgressbar()
@@ -486,15 +490,7 @@ void PLAYBACK::SetProgressbar(int a, int b)
 void PLAYBACK::CancelSeeking()
 {
 	if (pause_frame)
-	{
-		// also invalidate lost_position_frame if user cancelled seeking to it
-		if (lost_position_frame == pause_frame)
-		{
-			piano_roll.RedrawRow(lost_position_frame - 1);
-			lost_position_frame = 0;
-		}
 		SeekingStop();
-	}
 }
 // -------------------------------------------------------------------------
 LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

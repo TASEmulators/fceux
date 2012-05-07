@@ -45,6 +45,7 @@ public:
 
 	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
 	int lost_position_frame;
+	bool lost_position_must_be_fixed;	// when Greenzone invalidates several times, but the end of current segment must remain the same
 	int pause_frame;
 	bool must_find_current_marker;
 	int shown_marker;
