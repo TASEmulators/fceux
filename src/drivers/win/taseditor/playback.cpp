@@ -263,13 +263,7 @@ void PLAYBACK::UnpauseEmulation()
 }
 void PLAYBACK::RestorePosition()
 {
-	if (pause_frame)
-	{
-		// continue seeking
-		if (taseditor_config.turbo_seek)
-			turbo = true;
-		UnpauseEmulation();
-	} else if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
+	if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
 	{
 		// start seeking from here to lost_position_frame
 		pause_frame = lost_position_frame;
@@ -277,9 +271,6 @@ void PLAYBACK::RestorePosition()
 		if (taseditor_config.turbo_seek)
 			turbo = true;
 		UnpauseEmulation();
-		// delete lost_position_frame
-		piano_roll.RedrawRow(lost_position_frame - 1);
-		lost_position_frame = 0;
 	}
 }
 void PLAYBACK::MiddleButtonClick()
@@ -317,8 +308,7 @@ void PLAYBACK::MiddleButtonClick()
 						turbo = true;
 				}
 			}
-			UnpauseEmulation();		// in case RestorePosition doesn't unpause it
-			RestorePosition();
+			UnpauseEmulation();
 		}
 	} else
 	{
@@ -497,13 +487,13 @@ void PLAYBACK::CancelSeeking()
 {
 	if (pause_frame)
 	{
-		SeekingStop();
 		// also invalidate lost_position_frame if user cancelled seeking to it
 		if (lost_position_frame == pause_frame)
 		{
 			piano_roll.RedrawRow(lost_position_frame - 1);
 			lost_position_frame = 0;
 		}
+		SeekingStop();
 	}
 }
 // -------------------------------------------------------------------------
