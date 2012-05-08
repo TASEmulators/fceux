@@ -413,7 +413,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 				// auto-restore position if needed
 				if (taseditor_config.restore_position)
 				{
-					if (playback.pause_frame)
+					if (playback.pause_frame && playback.pause_frame_must_be_fixed)
 						playback.jump(playback.pause_frame - 1);
 					else
 						playback.jump(currFrameCounter);
