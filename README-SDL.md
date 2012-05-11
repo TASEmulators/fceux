@@ -62,13 +62,13 @@ GTK3 BoolVariable to 1 in the SConstruct.
 
 5 - LUA Scripting
 -----------------
-FCEUX comes equipped with a LUA scripting engine that opens up endless in-game scripting capabilities.  You can enable LUA at build time by enabling the "LUA" BoolVariable in the SConstruct file.
+FCEUX provides a LUA engine that allows for in-game scripting capabilities.  LUA can be enabled or disabled at build time by adjusting the "LUA" BoolVariable in the SConstruct file.
 
-The LUA scripts that are shipped with fceux are located in:
+A collection of LUA scripts are provided with the source distribuition in the output directory:
 
 	$source_directory/output/luaScripts
 
-You should be able to run most of the scripts in this directory out of the box.  However, some of the the lua scripts require functionality from the "auxlib.lua" library.  This file can be found in "./bin/auxlib.lua" or "./src/auxlib.lua".  You will need to place this file in the LUA library search path if a script bombs out looking for auxlib.lua, it will let you know where it looking for it (/usr/local/lib/lua/5.1/ on my particular system).  You can simply copy the auxlib to a preferred location to utilize the functions in the auxiliary lua library. 
+You should be able to run most of the scripts in this directory out of the box.  However, some of the the lua scripts require functionality from the "auxlib.lua" library.  This file can be copied from "./bin/auxlib.lua" or "./src/auxlib.lua".  You will need to place this file in the LUA library search path if a script bombs out looking for auxlib.lua. If the script bombs out, the console output will let you know what the search path are (/usr/local/lib/lua/5.1/ on my particular system).  You can simply copy the auxlib to a preferred location to utilize the functions in the auxiliary lua library. 
 
 In addition, some of the lua scripts require functionality from the "iup" GUI library.  You can obtain binaries and source for "iup" upstream (http://www.tecgraf.puc-rio.br/iup/), but I would recommend obtaining packages from your Linux distribution if you are able, as it can be difficult to compile or get the binaries working correctly on a given system.
 
@@ -76,15 +76,15 @@ You will need to add the location that the libiup*.so files to the LUA_CPATH.  T
 
 	export LUA_CPATH="/path/to/iup/lib/lib?51.so;"
 
-On my Arch Linux system, it turned out to be the following:
+For example, if libiuplua51.so is located in '/usr/lib', you can run the following command before executing fceux to place the library in the search path:
 
-	export LUA_CPATH="/usr/local/lib/lua/5.1/lib?51.so;"
+	export LUA_CPATH="/usr/lib/lib?51.so;"
 
 Finally, if any scripts complaints about "attempt to index global 'iup' (a nil value)", this means that "iup" needs to be explicitly loaded into the script.  You can add the following line to the head of script to manually load "iup":
 
 	require("iuplua")
 
-The "iup" libraries are admittedly time-consuming, difficult, and an overall pain-in-the-ass to install and configure on a Linux system.  However, if you follow the above steps you should be able to achieve iup functionality (GUI elements) in fceux lua scripts if you so desire.
+The latest version of iup (3.5 at the time of writing) is recomended.
 
 6 - FAQ
 -------
