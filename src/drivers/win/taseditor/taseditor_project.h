@@ -53,8 +53,6 @@ public:
 
 	void SheduleNextAutosave();
 
-	// public vars
-
 private:
 	bool changed;
 	int next_save_shedule;

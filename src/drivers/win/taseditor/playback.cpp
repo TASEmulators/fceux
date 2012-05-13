@@ -141,10 +141,11 @@ void PLAYBACK::update()
 	if (currFrameCounter + 1 >= lost_position_frame)
 		lost_position_frame = 0;
 
-	// pause when seeking hit pause_frame
+	// pause when seeking hits pause_frame
 	if(pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
 	else if (!lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
+		// pause at the end of the movie
 		PauseEmulation();
 
 	// update flashing pauseframe
@@ -159,15 +160,15 @@ void PLAYBACK::update()
 	if (pause_frame)
 	{
 		if (emu_paused)
-			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_PAUSED) & 1;
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED) & 1;
 		else
-			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_SEEKING) & 1;
+			show_pauseframe = (int)(clock() / PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING) & 1;
 	} else show_pauseframe = false;
 	if (old_show_pauseframe != show_pauseframe)
 	{
 		// update pauseframe gfx
-		piano_roll.RedrawRow(pause_frame-1);
-		bookmarks.RedrawChangedBookmarks(pause_frame-1);
+		piano_roll.RedrawRow(pause_frame - 1);
+		bookmarks.RedrawChangedBookmarks(pause_frame - 1);
 	}
 
 	// update seeking progressbar
@@ -198,7 +199,7 @@ void PLAYBACK::update()
 	}
 
 	// update the playback cursor
-	if(currFrameCounter != lastCursor)
+	if (currFrameCounter != lastCursor)
 	{
 		// update gfx of the old and new rows
 		piano_roll.RedrawRow(lastCursor);
@@ -245,8 +246,10 @@ void PLAYBACK::updateProgressbar()
 	} else
 	{
 		if (emu_paused)
+			// full progressbar
 			SetProgressbar(1, 1);
 		else
+			// cleared progressbar
 			SetProgressbar(0, 1);
 	}
 }
@@ -271,21 +274,14 @@ void PLAYBACK::UnpauseEmulation()
 void PLAYBACK::RestorePosition()
 {
 	if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
-	{
-		// start seeking from here to lost_position_frame
-		pause_frame = lost_position_frame;
-		pause_frame_must_be_fixed = true;
-		seeking_start_frame = currFrameCounter;
-		if (taseditor_config.turbo_seek)
-			turbo = true;
-		UnpauseEmulation();
-	}
+		SeekingStart(lost_position_frame);
 }
 void PLAYBACK::MiddleButtonClick()
 {
 	if (emu_paused)
 	{
-		// if right mouse button is released, either just unpause or start seeking
+		// Unpause or start seeking
+		// works only when right mouse button is released
 		if (GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) ? VK_LBUTTON : VK_RBUTTON) >= 0)
 		{
 			if (GetAsyncKeyState(VK_SHIFT) < 0)
@@ -296,29 +292,17 @@ void PLAYBACK::MiddleButtonClick()
 				for (; target_frame <= last_frame; ++target_frame)
 					if (markers_manager.GetMarker(target_frame)) break;
 				if (target_frame <= last_frame)
-				{
-					// start seeking to the Marker
-					seeking_start_frame = currFrameCounter;
-					pause_frame = target_frame + 1;
-					pause_frame_must_be_fixed = true;
-					if (taseditor_config.turbo_seek)
-						turbo = true;
-				}
+					SeekingStart(target_frame + 1);
 			} else if (GetAsyncKeyState(VK_CONTROL) < 0)
 			{
 				// if Ctrl is held, seek to Selection cursor
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
-				{
-					// start seeking to selection_beginning
-					seeking_start_frame = currFrameCounter;
-					pause_frame = selection_beginning + 1;
-					pause_frame_must_be_fixed = true;
-					if (taseditor_config.turbo_seek)
-						turbo = true;
-				}
+					SeekingStart(selection_beginning + 1);
+			} else
+			{
+				UnpauseEmulation();
 			}
-			UnpauseEmulation();
 		}
 	} else
 	{
@@ -332,13 +316,12 @@ void PLAYBACK::SeekingStart(int finish_frame)
 	{
 		seeking_start_frame = currFrameCounter;
 		pause_frame = finish_frame;
-		pause_frame_must_be_fixed = true;
 	}
+	pause_frame_must_be_fixed = true;
 	if (taseditor_config.turbo_seek)
 		turbo = true;
 	UnpauseEmulation();
 }
-
 void PLAYBACK::SeekingStop()
 {
 	pause_frame = 0;
@@ -352,7 +335,7 @@ void PLAYBACK::RewindFrame()
 {
 	if (pause_frame && !emu_paused) return;
 	if (currFrameCounter > 0)
-		jump(currFrameCounter-1);
+		jump(currFrameCounter - 1);
 	else
 		// cursor is at frame 0 - can't rewind, but still must make cursor visible if needed
 		piano_roll.FollowPlaybackIfNeeded();
@@ -361,7 +344,7 @@ void PLAYBACK::RewindFrame()
 void PLAYBACK::ForwardFrame()
 {
 	if (pause_frame && !emu_paused) return;
-	jump(currFrameCounter+1);
+	jump(currFrameCounter + 1);
 	if (!pause_frame) PauseEmulation();
 	turbo = false;
 }
@@ -434,49 +417,50 @@ void PLAYBACK::StartFromZero()
 	poweron(true);
 	FCEUMOV_ClearCommands();		// clear POWER SWITCH command caused by poweron()
 	currFrameCounter = 0;
+	// if there's no frames in current movie, create initial frame record
 	if(currMovieData.getNumRecords() == 0)
 		currMovieData.insertEmpty(-1, 1);
 }
 
-void PLAYBACK::jump(int frame)
+// external interface for sending Playback cursor
+void PLAYBACK::jump(int frame, bool execute_lua, bool follow_cursor)
 {
+	if (frame < 0) return;
 	if (JumpToFrame(frame))
 	{
-		ForceExecuteLuaFrameFunctions();
-		piano_roll.FollowPlaybackIfNeeded();
+		if (execute_lua)
+			ForceExecuteLuaFrameFunctions();
+		if (follow_cursor)
+			piano_roll.FollowPlaybackIfNeeded();
 	}
 }
 
 // returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
 bool PLAYBACK::JumpToFrame(int index)
 {
-	if (index < 0) return false;
-	if (index >= greenzone.greenZoneCount)
+	if (index >= greenzone.GetSize())
 	{
-		// handle jump outside greenzone
-		if (currFrameCounter == greenzone.greenZoneCount - 1 || JumpToFrame(greenzone.greenZoneCount - 1))
-			// seek from the end of greenzone
+		// make jump outside greenzone
+		if (currFrameCounter == greenzone.GetSize() - 1 || JumpToFrame(greenzone.GetSize() - 1))
+			// seek there from the end of greenzone
 			SeekingStart(index+1);
 		return false;
 	}
-	// handle jumps inside greenzone
+	// make jump inside greenzone
 	if (greenzone.loadTasSavestate(index))
 	{
-		turbo = false;
+		// successfully restored emulator state at this frame
 		// if playback was seeking, pause emulation right here
-		if (pause_frame) SeekingStop();
+		if (pause_frame)
+			SeekingStop();
 		return true;
 	}
 	// search for an earlier frame with savestate
-	int i = (index > 0)? index-1 : 0;
+	int i = (index > 0) ? index-1 : 0;
 	for (; i > 0; i--)
-	{
 		if (greenzone.loadTasSavestate(i)) break;
-	}
-	if (!i)
-		StartFromZero();
-	else
-		currFrameCounter = i;
+	if (i > 0)
+		StartFromZero();	// couldn't find a savestate
 	// continue from the frame
 	if (index != currFrameCounter)
 		SeekingStart(index + 1);
@@ -561,17 +545,10 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
-			if (GetFocus() != hWnd)
-				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}
 	}
 	return CallWindowProc(playbackMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
 }
-
-
-
-
-
 

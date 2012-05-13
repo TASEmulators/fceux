@@ -71,7 +71,7 @@ void BOOKMARK::set()
 	if (taseditor_config.enable_hot_changes)
 		snapshot.copyHotChanges(&history.GetCurrentSnapshot());
 	// copy savestate
-	savestate = greenzone.savestates[currFrameCounter];
+	savestate = greenzone.GetSavestate(currFrameCounter);
 	// save screenshot
 	uLongf comprlen = (SCREENSHOT_SIZE>>9)+12 + SCREENSHOT_SIZE;
 	saved_screenshot.resize(comprlen);

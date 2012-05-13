@@ -22,7 +22,6 @@ public:
 	std::vector<std::string> autofire_patterns_names;
 	std::vector<std::vector<uint8>> autofire_patterns;
 
-
 private:
 	bool ReadString(EMUFILE *is, std::string& dest);
 

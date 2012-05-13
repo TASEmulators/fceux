@@ -1163,18 +1163,18 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
 				} else
 				{
-					if(cell_y < greenzone.greenZoneCount)
+					if(cell_y < greenzone.GetSize())
 					{
-						if (!greenzone.savestates[cell_y].empty())
+						if (!greenzone.SavestateIsEmpty(cell_y))
 						{
 							if (greenzone.GetLagHistoryAtFrame(cell_y))
 								msg->clrTextBk = LAG_FRAMENUM_COLOR;
 							else
 								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-						} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-							|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-							|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-							|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
+						} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 						{
 							if (greenzone.GetLagHistoryAtFrame(cell_y))
 								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
@@ -1203,18 +1203,18 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if(cell_y < greenzone.greenZoneCount)
+				} else if(cell_y < greenzone.GetSize())
 				{
-					if (!greenzone.savestates[cell_y].empty())
+					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
+					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
@@ -1242,18 +1242,18 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR2;
-				} else if(cell_y < greenzone.greenZoneCount)
+				} else if(cell_y < greenzone.GetSize())
 				{
-					if (!greenzone.savestates[cell_y].empty())
+					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
-					} else if ((!greenzone.savestates[cell_y & EVERY16TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0xF) + 1 && !greenzone.savestates[(cell_y | 0xF) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY8TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x7) + 1 && !greenzone.savestates[(cell_y | 0x7) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY4TH].empty() && (int)greenzone.savestates.size() > (cell_y | 0x3) + 1 && !greenzone.savestates[(cell_y | 0x3) + 1].empty())
-						|| (!greenzone.savestates[cell_y & EVERY2ND].empty() && !greenzone.savestates[(cell_y | 0x1) + 1].empty()))
+					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;

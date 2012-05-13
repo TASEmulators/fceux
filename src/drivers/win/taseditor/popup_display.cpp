@@ -22,6 +22,7 @@ Popup display - Manager of popup windows
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
 extern BOOKMARKS bookmarks;
+extern BRANCHES branches;
 extern PIANO_ROLL piano_roll;
 extern MARKERS_MANAGER markers_manager;
 extern PLAYBACK playback;
@@ -99,7 +100,7 @@ void POPUP_DISPLAY::init()
 	}
 	HDC win_hdc = GetWindowDC(piano_roll.hwndList);
 	scr_bmp = CreateDIBSection(win_hdc, scr_bmi, DIB_RGB_COLORS, (void**)&scr_ptr, 0, 0);
-	// calculate coordinates
+	// calculate coordinates of popup windows (relative to TAS Editor window)
 	ParentWindowMoved();
 }
 void POPUP_DISPLAY::free()
@@ -129,11 +130,11 @@ void POPUP_DISPLAY::reset()
 
 void POPUP_DISPLAY::update()
 {
-	// once per 40 milliseconds update screenshot_bitmap alpha
+	// once per 40 milliseconds update popup windows alpha
 	if (clock() > next_update_time)
 	{
 		next_update_time = clock() + DISPLAY_UPDATE_TICK;
-		if (bookmarks.IsSafeToShowBookmarksData() && bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty)
+		if (branches.IsSafeToShowBranchesData() && bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty)
 		{
 			if (taseditor_config.show_branch_screenshots && !hwndScrBmp)
 			{
@@ -186,7 +187,10 @@ void POPUP_DISPLAY::update()
 			{
 				// update alpha
 				int phase_alpha = scr_bmp_phase;
-				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX) phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
+				if (phase_alpha > SCR_BMP_PHASE_ALPHA_MAX)
+					phase_alpha = SCR_BMP_PHASE_ALPHA_MAX;
+				else if (phase_alpha < 0)
+					phase_alpha = 0;
 				if (hwndScrBmp)
 				{
 					SetLayeredWindowAttributes(hwndScrBmp, 0, (255 * phase_alpha) / SCR_BMP_PHASE_ALPHA_MAX, LWA_ALPHA);
@@ -199,7 +203,7 @@ void POPUP_DISPLAY::update()
 				}
 			} else
 			{
-				// destroy screenshot bitmap window
+				// destroy popup windows
 				scr_bmp_phase = 0;
 				if (hwndScrBmp)
 				{
@@ -211,6 +215,8 @@ void POPUP_DISPLAY::update()
 					DestroyWindow(hwndMarkerNoteDescr);
 					hwndMarkerNoteDescr = 0;
 				}
+				// immediately redraw the window below those
+				UpdateWindow(taseditor_window.hwndTasEditor);
 			}
 		}
 	}

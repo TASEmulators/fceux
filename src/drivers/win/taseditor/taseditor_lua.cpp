@@ -40,12 +40,11 @@ void TASEDITOR_LUA::init()
 {
 	pending_changes.resize(0);
 	hwndRunFunction = GetDlgItem(taseditor_window.hwndTasEditor, TASEDITOR_RUN_MANUAL);
-	TaseditorUpdateManualFunctionStatus();
 	reset();
 }
 void TASEDITOR_LUA::reset()
 {
-
+	TaseditorUpdateManualFunctionStatus();
 }
 void TASEDITOR_LUA::update()
 {
@@ -237,7 +236,7 @@ int TASEDITOR_LUA::getplaybacktarget()
 void TASEDITOR_LUA::setplayback(int frame)
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		playback.JumpToFrame(frame);	// do not trigger lua functions after jump
+		playback.jump(frame, false, true);
 }
 
 // taseditor.stopseeking()
@@ -434,12 +433,10 @@ int TASEDITOR_LUA::applyinputchanges(const char* name)
 			// check actual changes
 			int result = history.RegisterLuaChanges(name, start_index, InsertionDeletion_was_made);
 			if (result >= 0)
-			{
 				greenzone.InvalidateAndCheck(result);
-			} else if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
-			{
-				greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-			} else piano_roll.RedrawList();
+			else
+				// check for special case: user deleted empty frames of the movie
+				greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
 
 			pending_changes.resize(0);
 			return result;

@@ -15,6 +15,8 @@ public:
 	void reset_vars();
 	void update();
 
+	void UpdateSelectionSize();
+
 	void HistorySizeChanged();
 
 	void RedrawMarker();
@@ -49,8 +51,6 @@ public:
 
 	void Transpose(int shift);
 
-	void EnforceSelectionToList();
-
 	void JumpPrevMarker(int speed = 1);
 	void JumpNextMarker(int speed = 1);
 	void JumpToFrame(int frame);
@@ -70,7 +70,9 @@ public:
 	HWND hwndSelectionMarker, hwndSelectionMarkerEdit;
 
 private:
-	void jump(int new_pos);
+	void JumpInTime(int new_pos);
+
+	void EnforceSelectionToList();
 
 	SelectionFrames& CurrentSelection();
 

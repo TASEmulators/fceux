@@ -289,7 +289,7 @@ void BOOKMARKS::deploy(int slot)
 
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
 	bool markers_changed = false;
-	// update Markers
+	// revert Markers to the Bookmarked state
 	if (taseditor_config.bind_markers)
 	{
 		if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
@@ -326,24 +326,12 @@ void BOOKMARKS::deploy(int slot)
 		bookmarks_array[slot].deployed();
 	} else
 	{
-		// didn't restore anything
+		// didn't change anything in current movie
 		bookmarks_array[slot].jumped();
 	}
-
-	// if greenzone reduced so much that we can't jump immediately - substitute target frame greenzone with our savestate
-	if (greenzone.greenZoneCount <= jump_frame)
-	{
-		if ((int)greenzone.savestates.size() <= jump_frame)
-			greenzone.savestates.resize(jump_frame+1);
-		// clear old savestates: from current end of greenzone to new end of greenzone
-		for (int i = greenzone.greenZoneCount; i <= jump_frame; ++i)
-			greenzone.ClearSavestate(i);
-		greenzone.greenZoneCount = jump_frame+1;
-	}
-	if (greenzone.savestates[jump_frame].empty())
-		// restore savestate for immediate jump
-		greenzone.savestates[jump_frame] = bookmarks_array[slot].savestate;
-
+	// jump to the target (bookmarked frame)
+	greenzone.WriteSavestate(jump_frame, bookmarks_array[slot].savestate);
+	playback.jump(jump_frame);
 	// switch current branch to this branch
 	int old_current_branch = branches.GetCurrentBranch();
 	branches.HandleBookmarkDeploy(slot);
@@ -351,12 +339,9 @@ void BOOKMARKS::deploy(int slot)
 	{
 		piano_roll.RedrawRow(bookmarks_array[old_current_branch].snapshot.jump_frame);
 		RedrawChangedBookmarks(bookmarks_array[old_current_branch].snapshot.jump_frame);
-		piano_roll.RedrawRow(bookmarks_array[slot].snapshot.jump_frame);
-		RedrawChangedBookmarks(bookmarks_array[slot].snapshot.jump_frame);
+		piano_roll.RedrawRow(jump_frame);
+		RedrawChangedBookmarks(jump_frame);
 	}
-
-	// jump to the target (bookmarked frame)
-	playback.jump(jump_frame);
 	FCEU_DispMessage("Branch %d loaded.", 0, slot);
 }
 
@@ -480,14 +465,6 @@ int BOOKMARKS::FindItemUnderMouse()
 	}
 	return item;
 }
-
-// this getter contains formula to decide whether it's safe to show Bookmarks Data now
-bool BOOKMARKS::IsSafeToShowBookmarksData()
-{
-	if (edit_mode == EDIT_MODE_BRANCHES && branches.transition_phase)
-		return false;		// can't show data when Branches Tree is transforming
-	return true;
-}
 // ----------------------------------------------------------------------------------------
 void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -548,18 +525,18 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_FRAMENUM_COLOR;
-				} else if (frame < greenzone.greenZoneCount)
+				} else if (frame < greenzone.GetSize())
 				{
-					if (!greenzone.savestates[frame].empty())
+					if (!greenzone.SavestateIsEmpty(frame))
 					{
 						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-					} else if ((!greenzone.savestates[frame & EVERY16TH].empty() && (int)greenzone.savestates.size() > (frame | 0xF) + 1 && !greenzone.savestates[(frame | 0xF) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY8TH].empty() && (int)greenzone.savestates.size() > (frame | 0x7) + 1 && !greenzone.savestates[(frame | 0x7) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
+					} else if ((!greenzone.SavestateIsEmpty(frame & EVERY16TH) && !greenzone.SavestateIsEmpty((frame & EVERY16TH) + 16))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY8TH) && !greenzone.SavestateIsEmpty((frame & EVERY8TH) + 8))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
 					{
 						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
@@ -579,18 +556,18 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 				{
 					// current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if (frame < greenzone.greenZoneCount)
+				} else if (frame < greenzone.GetSize())
 				{
-					if (!greenzone.savestates[frame].empty())
+					if (!greenzone.SavestateIsEmpty(frame))
 					{
 						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
-					} else if ((!greenzone.savestates[frame & EVERY16TH].empty() && (int)greenzone.savestates.size() > (frame | 0xF) + 1 && !greenzone.savestates[(frame | 0xF) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY8TH].empty() && (int)greenzone.savestates.size() > (frame | 0x7) + 1 && !greenzone.savestates[(frame | 0x7) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY4TH].empty() && (int)greenzone.savestates.size() > (frame | 0x3) + 1 && !greenzone.savestates[(frame | 0x3) + 1].empty())
-						|| (!greenzone.savestates[frame & EVERY2ND].empty() && !greenzone.savestates[(frame | 0x1) + 1].empty()))
+					} else if ((!greenzone.SavestateIsEmpty(frame & EVERY16TH) && !greenzone.SavestateIsEmpty((frame & EVERY16TH) + 16))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY8TH) && !greenzone.SavestateIsEmpty((frame & EVERY8TH) + 8))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY4TH) && !greenzone.SavestateIsEmpty((frame & EVERY4TH) + 4))
+						|| (!greenzone.SavestateIsEmpty(frame & EVERY2ND) && !greenzone.SavestateIsEmpty((frame & EVERY2ND) + 2)))
 					{
 						if (greenzone.GetLagHistoryAtFrame(frame))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;

@@ -119,7 +119,7 @@ void HISTORY::init()
 	hwndHistoryList_oldWndProc = (WNDPROC)SetWindowLong(hwndHistoryList, GWL_WNDPROC, (LONG)HistoryListWndProc);
 	LVCOLUMN lvc;
 	lvc.mask = LVCF_WIDTH | LVCF_FMT;
-	lvc.cx = 500;
+	lvc.cx = HISTORY_LIST_WIDTH;
 	lvc.fmt = LVCFMT_LEFT;
 	ListView_InsertColumn(hwndHistoryList, 0, &lvc);
 	// shedule first autocompression
@@ -147,7 +147,8 @@ void HISTORY::reset()
 	// create initial snapshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	strcat(snap.description, modCaptions[MODTYPE_INIT]);
+	snap.mod_type = MODTYPE_INIT;
+	strcat(snap.description, modCaptions[snap.mod_type]);
 	snap.jump_frame = -1;
 	snap.start_frame = 0;
 	snap.end_frame = snap.size - 1;
@@ -157,9 +158,9 @@ void HISTORY::reset()
 }
 void HISTORY::update()
 {
-	// update undo_hint
+	// Update undo_hint
 	if (old_undo_hint_pos != undo_hint_pos && old_undo_hint_pos >= 0)
-		piano_roll.RedrawRow(old_undo_hint_pos);		// not changing Bookmarks List
+		piano_roll.RedrawRow(old_undo_hint_pos);
 	old_undo_hint_pos = undo_hint_pos;
 	old_show_undo_hint = show_undo_hint;
 	show_undo_hint = false;
@@ -168,17 +169,17 @@ void HISTORY::update()
 		if ((int)clock() < undo_hint_time)
 			show_undo_hint = true;
 		else
-			undo_hint_pos = -1;	// finished hinting
+			undo_hint_pos = -1;		// finished hinting
 	}
 	if (old_show_undo_hint != show_undo_hint)
-		piano_roll.RedrawRow(undo_hint_pos);			// not changing Bookmarks List
+		piano_roll.RedrawRow(undo_hint_pos);
 
-	// when cpu is idle, compress items from time to time
+	// When cpu is idle, compress items from time to time
 	if (clock() > next_autocompress_time)
 	{
 		if (FCEUI_EmulationPaused())
 		{
-			// search for first occurence of an item with snapshot that is not compressed yet
+			// search for first occurence of an item containing non-compressed snapshot
 			int real_pos;
 			for (int i = history_total_items - 1; i >= 0; i--)
 			{
@@ -240,10 +241,13 @@ void HISTORY::HistorySizeChanged()
 	RedrawHistoryList();
 }
 
-// returns frame of first input change (for greenzone invalidation)
-int HISTORY::jump(int new_pos)
+// returns frame of first input change (for Greenzone invalidation)
+int HISTORY::JumpInTime(int new_pos)
 {
-	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
+	if (new_pos < 0)
+		new_pos = 0;
+	else if (new_pos >= history_total_items)
+		new_pos = history_total_items-1;
 	// if nothing is done, do not invalidate greenzone
 	if (new_pos == history_cursor_pos) return -1;
 
@@ -396,14 +400,14 @@ int HISTORY::jump(int new_pos)
 
 void HISTORY::undo()
 {
-	int result = jump(history_cursor_pos - 1);
+	int result = JumpInTime(history_cursor_pos - 1);
 	if (result >= 0)
 		greenzone.InvalidateAndCheck(result);
 	return;
 }
 void HISTORY::redo()
 {
-	int result = jump(history_cursor_pos + 1);
+	int result = JumpInTime(history_cursor_pos + 1);
 	if (result >= 0)
 		greenzone.InvalidateAndCheck(result);
 	return;
@@ -1062,10 +1066,10 @@ LONG HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
 
 void HISTORY::Click(int row_index)
 {
-	// jump to pointed snapshot
+	// jump in time to pointed item
 	if (row_index >= 0)
 	{
-		int result = jump(row_index);
+		int result = JumpInTime(row_index);
 		if (result >= 0)
 			greenzone.InvalidateAndCheck(result);
 	}

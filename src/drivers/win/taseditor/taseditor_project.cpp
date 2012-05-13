@@ -125,7 +125,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 	{
 		// change cursor to hourglass
 		SetCursor(LoadCursor(0, IDC_WAIT));
-
+		// save fm2 data to the project file
 		currMovieData.loadFrameCount = currMovieData.records.size();
 		currMovieData.emuVersion = FCEU_VERSION_NUMERIC;
 		currMovieData.dump(ofs, save_binary);
@@ -172,7 +172,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 
 	// change cursor to hourglass
 	SetCursor(LoadCursor(0, IDC_WAIT));
-
+	// load fm2 data from the project file
 	MovieData tempMovieData = MovieData();
 	extern bool LoadFM2(MovieData& movieData, EMUFILE* fp, int size, bool stopAfterHeader);
 	if (LoadFM2(tempMovieData, &ifs, ifs.size(), false))
@@ -322,3 +322,4 @@ void TASEDITOR_PROJECT::SheduleNextAutosave()
 	if (taseditor_config.autosave_period)
 		next_save_shedule = clock() + taseditor_config.autosave_period * AUTOSAVE_PERIOD_SCALE;
 }
+

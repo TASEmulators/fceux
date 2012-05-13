@@ -23,27 +23,30 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, bool really_load = true);
 
-	void CollectCurrentState();
-
 	bool loadTasSavestate(int frame);
-	void storeTasSavestate(int frame);
 
-	void GreenzoneCleaning();
+	void RunGreenzoneCleaning();
 	void ClearSavestate(int index);
+
+	void WriteSavestate(int frame, std::vector<uint8>& savestate);
 
 	void InvalidateAndCheck(int after);
 	void Invalidate(int after);
 
 	int FindBeginningOfGreenZone(int starting_index = 0);
 
+	int GetSize();
 	bool GetLagHistoryAtFrame(int frame);
+	std::vector<uint8>& GetSavestate(int frame);
+	bool SavestateIsEmpty(int frame);
+
+private:
+	void CollectCurrentState();
+	void storeTasSavestate(int frame);
 
 	// saved data
 	int greenZoneCount;
 	std::vector<std::vector<uint8>> savestates;
-
-private:
-	// saved data
 	std::vector<uint8> lag_history;
 
 	// not saved data

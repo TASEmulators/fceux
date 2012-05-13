@@ -90,19 +90,7 @@ void SELECTION::reset_vars()
 }
 void SELECTION::update()
 {
-	// keep selection within movie limits
-	if (CurrentSelection().size())
-	{
-		int delete_index;
-		int movie_size = currMovieData.getNumRecords();
-		while(1)
-		{
-			delete_index = *CurrentSelection().rbegin();
-			if (delete_index < movie_size) break;
-			CurrentSelection().erase(delete_index);
-			if (!CurrentSelection().size()) break;
-		}
-	}
+	UpdateSelectionSize();
 
 	// update << and >> buttons
 	old_prev_marker_button_state = prev_marker_button_state;
@@ -148,6 +136,23 @@ void SELECTION::update()
 		must_find_current_marker = false;
 	}
 
+}
+
+void SELECTION::UpdateSelectionSize()
+{
+	// keep selection within Piano Roll limits
+	if (CurrentSelection().size())
+	{
+		int delete_index;
+		int movie_size = currMovieData.getNumRecords();
+		while (true)
+		{
+			delete_index = *CurrentSelection().rbegin();
+			if (delete_index < movie_size) break;
+			CurrentSelection().erase(delete_index);
+			if (!CurrentSelection().size()) break;
+		}
+	}
 }
 
 void SELECTION::HistorySizeChanged()
@@ -198,7 +203,7 @@ void SELECTION::RedrawMarker()
 
 void SELECTION::JumpPrevMarker(int speed)
 {
-	// if nothing is selected, consider playback cursor as current selection
+	// if nothing is selected, consider Playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
 	// jump trough "speed" amount of previous markers
@@ -215,7 +220,7 @@ void SELECTION::JumpPrevMarker(int speed)
 }
 void SELECTION::JumpNextMarker(int speed)
 {
-	// if nothing is selected, consider playback cursor as current selection
+	// if nothing is selected, consider Playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
 	int last_frame = currMovieData.getNumRecords() - 1;		// the end of Piano Roll
@@ -356,7 +361,7 @@ bool SELECTION::skiploadSelection(EMUFILE *is)
 	return false;
 }
 // ----------------------------------------------------------
-//used to track selection
+// used to track selection
 void SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 {
 	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
@@ -390,9 +395,7 @@ void SELECTION::ItemChanged(NMLISTVIEW* info)
 		{
 			// select all
 			for(int i = currMovieData.getNumRecords() - 1; i >= 0; i--)
-			{
 				CurrentSelection().insert(i);
-			}
 		}
 	} else
 	{
@@ -427,7 +430,7 @@ void SELECTION::AddNewSelectionToHistory()
 	selections_history[(history_start_pos + history_cursor_pos) % history_size] = selectionFrames;
 }
 
-void SELECTION::jump(int new_pos)
+void SELECTION::JumpInTime(int new_pos)
 {
 	if (new_pos < 0) new_pos = 0; else if (new_pos >= history_total_items) new_pos = history_total_items-1;
 	if (new_pos == history_cursor_pos) return;
@@ -437,15 +440,15 @@ void SELECTION::jump(int new_pos)
 	// update Piano Roll items
 	EnforceSelectionToList();
 	// also keep selection within Piano Roll
-	update();
+	UpdateSelectionSize();
 }
 void SELECTION::undo()
 {
-	jump(history_cursor_pos - 1);
+	JumpInTime(history_cursor_pos - 1);
 }
 void SELECTION::redo()
 {
-	jump(history_cursor_pos + 1);
+	JumpInTime(history_cursor_pos + 1);
 }
 // ----------------------------------------------------------
 bool SELECTION::GetRowSelection(int index)
@@ -469,7 +472,6 @@ void SELECTION::ClearRegionSelection(int start, int end)
 
 void SELECTION::SelectAll()
 {
-	// select all, but remove "focused" from all
 	ListView_SetItemState(piano_roll.hwndList, -1, LVIS_SELECTED, LVIS_SELECTED);
 }
 void SELECTION::SetRowSelection(int index)
@@ -508,7 +510,7 @@ void SELECTION::SelectBetweenMarkers()
 	int upper_marker, lower_marker;
 	int movie_size = currMovieData.getNumRecords();
 
-	// if selection size=0 then playback cursor is selected and serves as center
+	// if nothing is selected then Playback cursor serves as Selection cursor
 	if (CurrentSelection().size())
 	{
 		upper_border = center = *CurrentSelection().begin();
@@ -584,7 +586,7 @@ void SELECTION::ReselectClipboard()
 	CurrentSelection() = clipboard_selection;
 	EnforceSelectionToList();
 	// also keep selection within Piano Roll
-	update();
+	UpdateSelectionSize();
 }
 
 void SELECTION::Transpose(int shift)
@@ -730,8 +732,6 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONDBLCLK:
 		{
-			if (GetFocus() != hWnd)
-				SetFocus(hWnd);
 			playback.MiddleButtonClick();
 			return 0;
 		}

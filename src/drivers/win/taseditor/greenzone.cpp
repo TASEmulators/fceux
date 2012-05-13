@@ -53,8 +53,6 @@ void GREENZONE::free()
 	savestates.resize(0);
 	greenZoneCount = 0;
 	lag_history.resize(0);
-	// reset monitorings
-	
 }
 void GREENZONE::reset()
 {
@@ -69,7 +67,7 @@ void GREENZONE::update()
 
 	// run cleaning from time to time
 	if (clock() > next_cleaning_time)
-		GreenzoneCleaning();
+		RunGreenzoneCleaning();
 }
 
 void GREENZONE::CollectCurrentState()
@@ -117,7 +115,7 @@ void GREENZONE::storeTasSavestate(int frame)
 	ms.trim();
 }
 
-void GREENZONE::GreenzoneCleaning()
+void GREENZONE::RunGreenzoneCleaning()
 {
 	int i = currFrameCounter - taseditor_config.greenzone_capacity;
 	bool changed = false;
@@ -194,6 +192,21 @@ void GREENZONE::ClearSavestate(int index)
     std::vector<uint8> tmp;
     savestates[index].swap(tmp);
 }
+// this function is used by Bookmark Unleash procedure
+void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
+{
+	if ((int)savestates.size() <= frame)
+		savestates.resize(frame + 1);
+	if (greenZoneCount <= frame)
+	{
+		// clear old savestates: from current end of greenzone to new end of greenzone
+		for (int i = greenZoneCount; i <= frame; ++i)
+			ClearSavestate(i);
+		greenZoneCount = frame + 1;
+	}
+	if (savestates[frame].empty())
+		savestates[frame] = savestate;
+}
 
 void GREENZONE::save(EMUFILE *os, bool really_save)
 {
@@ -215,7 +228,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		// write savestates
 		int frame, size;
 		int last_tick = 0;
-		GreenzoneCleaning();
+		RunGreenzoneCleaning();
 		for (frame = 0; frame < greenZoneCount; ++frame)
 		{
 			// update TASEditor progressbar from time to time
@@ -226,7 +239,6 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 			}
 			if (savestates[frame].empty()) continue;
 			write32le(frame, os);
-			// write monitorings
 			// write savestate
 			size = savestates[frame].size();
 			write32le(size, os);
@@ -335,7 +347,6 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 					playback.SetProgressbar(frame, greenZoneCount);
 					last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 				}
-				// read monitorings
 				// read savestate
 				if (!read32le(&size, is)) break;
 				if (size < 0) break;
@@ -388,7 +399,7 @@ error:
 	playback.StartFromZero();		// reset playback to frame 0
 	return true;
 }
-
+// -------------------------------------------------------------------------------------------------
 // invalidate and restore playback
 void GREENZONE::InvalidateAndCheck(int after)
 {
@@ -444,7 +455,7 @@ void GREENZONE::Invalidate(int after)
 	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
-
+// -------------------------------------------------------------------------------------------------
 int GREENZONE::FindBeginningOfGreenZone(int starting_index)
 {
 	for (int i = starting_index; i < greenZoneCount; ++i)
@@ -453,8 +464,11 @@ int GREENZONE::FindBeginningOfGreenZone(int starting_index)
 	}
 	return starting_index;
 }
-
-// getter
+// getters
+int GREENZONE::GetSize()
+{
+	return greenZoneCount;
+}
 bool GREENZONE::GetLagHistoryAtFrame(int frame)
 {
 	if (frame < greenZoneCount && frame < (int)lag_history.size())
@@ -462,7 +476,15 @@ bool GREENZONE::GetLagHistoryAtFrame(int frame)
 	else
 		return false;
 }
-
-
-
+std::vector<uint8>& GREENZONE::GetSavestate(int frame)
+{
+	return savestates[frame];
+}
+bool GREENZONE::SavestateIsEmpty(int frame)
+{
+	if (frame < greenZoneCount && frame < (int)savestates.size())
+		return savestates[frame].empty();
+	else
+		return true;
+}
 

@@ -1,9 +1,11 @@
 // Specification file for History class
 
-#define UNDO_HINT_TIME 200
+#define UNDO_HINT_TIME 200						// in milliseconds
 
 #define SAVING_HISTORY_PROGRESSBAR_UPDATE_RATE 10
 #define TIME_BETWEEN_AUTOCOMPRESSIONS 500		// in milliseconds
+
+#define HISTORY_LIST_WIDTH 500
 
 enum MOD_TYPES
 {
@@ -98,8 +100,6 @@ public:
 	void save(EMUFILE *os, bool really_save = true);
 	bool load(EMUFILE *is, bool really_load = true);
 
-	int jump(int new_pos);
-
 	void undo();
 	void redo();
 
@@ -132,6 +132,8 @@ public:
 	HWND hwndHistoryList;
 
 private:
+	int JumpInTime(int new_pos);
+
 	void AddItemToHistory(SNAPSHOT &snap, int cur_branch = 0);
 	void AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm);
 

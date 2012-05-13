@@ -350,7 +350,7 @@ void TASEDITOR_WINDOW::update()
 							{
 								if (timeline_branch == branch_under_mouse)
 									break;
-								timeline_branch = branches.parents[timeline_branch];
+								timeline_branch = branches.GetParentOf(timeline_branch);
 							}
 							if (timeline_branch == ITEM_UNDER_MOUSE_CLOUD)
 								// branch_under_mouse wasn't found in current timeline
@@ -358,7 +358,6 @@ void TASEDITOR_WINDOW::update()
 						}
 					}
 				}
-
 				break;
 			}
 			case DRAG_MODE_PLAYBACK:
@@ -1064,7 +1063,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 							if (new_capacity < taseditor_config.greenzone_capacity)
 							{
 								taseditor_config.greenzone_capacity = new_capacity;
-								greenzone.GreenzoneCleaning();
+								greenzone.RunGreenzoneCleaning();
 							} else taseditor_config.greenzone_capacity = new_capacity;
 						}
 						break;

@@ -281,11 +281,8 @@ void SPLICER::DeleteFrames()
 		greenzone.InvalidateAndCheck(result);
 	} else
 	{
-		// check special case: user deleted a bunch of empty frames the end of the movie
-		if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
-			greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-		else
-			piano_roll.RedrawList();
+		// check for special case: user deleted a bunch of empty frames the end of the movie
+		greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
 		if (markers_changed)
 			history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, start_index);
 	}
@@ -338,11 +335,8 @@ void SPLICER::Truncate()
 			greenzone.InvalidateAndCheck(result);
 		} else
 		{
-			// check special case: user truncated empty frames of the movie
-			if (greenzone.greenZoneCount >= currMovieData.getNumRecords())
-				greenzone.InvalidateAndCheck(currMovieData.getNumRecords()-1);
-			else
-				piano_roll.RedrawList();
+			// check for special case: user truncated empty frames of the movie
+			greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
 			if (markers_changed)
 				history.RegisterMarkersChange(MODTYPE_MARKER_REMOVE, frame+1, last_frame_was);
 		}

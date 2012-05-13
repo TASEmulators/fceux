@@ -101,8 +101,11 @@ public:
 	void save(EMUFILE *os);
 	bool load(EMUFILE *is);
 
+	int GetParentOf(int child);
 	int GetCurrentBranch();
 	bool GetChangesSinceCurrentBranch();
+
+	bool IsSafeToShowBranchesData();
 
 	void RedrawBranchesTree();
 	void PaintBranchesBitmap(HDC hdc);
@@ -118,25 +121,21 @@ public:
 
 	int FindItemUnderMouse(int mouse_x, int mouse_y);
 
+	// not saved vars
+	bool must_redraw_branches_tree;
+	bool must_recalculate_branches_tree;
+	int branch_rightclicked;
+
+private:
+	void SetCurrentPosTime();
+
 	void RecalculateParents();
 	void RecalculateBranchesTree();
 	void RecursiveAddHeight(int branch_num, int amount);
 	void RecursiveSetYPos(int parent, int parentY);
 
-
 	// saved vars
 	std::vector<int> parents;
-
-	// not saved vars
-	bool must_redraw_branches_tree;
-	bool must_recalculate_branches_tree;
-	int branch_rightclicked;
-	int transition_phase;
-
-private:
-	void SetCurrentPosTime();
-
-	// also saved vars
 	int current_branch;
 	bool changes_since_current_branch;
 	char cloud_time[TIME_DESC_LENGTH];
@@ -145,6 +144,7 @@ private:
 	std::vector<int8> cached_timelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/frandchild that shares the same input
 
 	// not saved vars
+	int transition_phase;
 	int animation_frame;
 	int next_animation_time;
 	int playback_x, playback_y;

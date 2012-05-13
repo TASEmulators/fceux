@@ -2,8 +2,8 @@
 
 #define PROGRESSBAR_WIDTH 200
 
-#define PAUSEFRAME_BLINKING_PERIOD_SEEKING 100
-#define PAUSEFRAME_BLINKING_PERIOD_PAUSED 250
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_SEEKING 100
+#define PAUSEFRAME_BLINKING_PERIOD_WHEN_PAUSED 250
 
 #define HOLD_REPEAT_DELAY 250			// in milliseconds
 
@@ -16,15 +16,17 @@ public:
 	void reset();
 	void update();
 
-	void jump(int frame);
+	void jump(int frame, bool execute_lua = true, bool follow_cursor = true);
 
 	void updateProgressbar();
 
 	void SeekingStart(int finish_frame);
 	void SeekingStop();
+
 	void ToggleEmulationPause();
 	void PauseEmulation();
 	void UnpauseEmulation();
+
 	void RestorePosition();
 	void MiddleButtonClick();
 
@@ -41,8 +43,6 @@ public:
 	void SetProgressbar(int a, int b);
 	void CancelSeeking();
 
-	bool JumpToFrame(int index);
-
 	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
 	int lost_position_frame;
 	bool lost_position_must_be_fixed;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
@@ -55,6 +55,8 @@ public:
 	HWND hwndPlaybackMarker, hwndPlaybackMarkerEdit;
 
 private:
+	bool JumpToFrame(int index);
+
 	bool autopause_at_the_end;
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;

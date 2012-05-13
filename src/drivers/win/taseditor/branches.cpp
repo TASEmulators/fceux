@@ -499,7 +499,7 @@ void BRANCHES::RedrawBranchesTree()
 			LineTo(hBitmapDC, branch_x, branch_y);
 		}
 	}
-	if (bookmarks.IsSafeToShowBookmarksData())
+	if (IsSafeToShowBranchesData())
 	{
 		// lines for item under mouse
 		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS || (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty))
@@ -530,7 +530,7 @@ void BRANCHES::RedrawBranchesTree()
 	}
 	if (changes_since_current_branch)
 	{
-		if (bookmarks.IsSafeToShowBookmarksData() && bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
+		if (IsSafeToShowBranchesData() && bookmarks.item_under_mouse == TOTAL_BOOKMARKS)
 			SelectObject(hBitmapDC, select_pen);
 		else
 			SelectObject(hBitmapDC, timeline_pen);
@@ -595,7 +595,7 @@ void BRANCHES::RedrawBranchesTree()
 				BitBlt(hBitmapDC, branch_x, branch_y, DIGIT_BITMAP_WIDTH, DIGIT_BITMAP_HEIGHT, hSpritesheetDC, i * DIGIT_BITMAP_WIDTH, 0, SRCCOPY);
 		}
 	}
-	if (bookmarks.IsSafeToShowBookmarksData())
+	if (IsSafeToShowBranchesData())
 	{
 		SetBkMode(hBitmapDC, TRANSPARENT);
 		// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
@@ -689,6 +689,11 @@ void BRANCHES::PaintBranchesBitmap(HDC hdc)
 	BitBlt(hdc, 0, 0, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT, hBufferDC, 0, 0, SRCCOPY);
 }
 // ----------------------------------------------------------------------------------------
+// getters
+int BRANCHES::GetParentOf(int child)
+{
+	return parents[child];
+}
 int BRANCHES::GetCurrentBranch()
 {
 	return current_branch;
@@ -696,6 +701,13 @@ int BRANCHES::GetCurrentBranch()
 bool BRANCHES::GetChangesSinceCurrentBranch()
 {
 	return changes_since_current_branch;
+}
+// this getter contains formula to decide whether it's safe to show Branches Data now
+bool BRANCHES::IsSafeToShowBranchesData()
+{
+	if (bookmarks.edit_mode == EDIT_MODE_BRANCHES && transition_phase)
+		return false;		// can't show data when Branches Tree is transforming
+	return true;
 }
 
 void BRANCHES::HandleBookmarkSet(int slot)
