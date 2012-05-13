@@ -24,6 +24,7 @@ Table of Contents
 * scons - Required to build fceux.
 * libgtk2.0 (optional) - version >= 2.24 recommended
 * libgtk3.0 (optional) - this compiles as of fceux 2.1.6.
+* g++ - fceux requires g++ from the gcc.  llvm-clang is known to not compile fceux (patches welcome).
 
 2 - Installation
 ----------------
