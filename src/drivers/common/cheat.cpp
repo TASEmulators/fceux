@@ -422,20 +422,42 @@ static int ShowShortList(char *moe[], int n, int def)
  }
 }
 
+#define ASK_NONE 0
+#define ASK_V1 1
+#define ASK_V2 2
+
 static void DoSearch(void)
 {
  static int v1=0,v2=0;
  static int method=0;
- char *m[6]={"O==V1 && C==V2","O==V1 && |O-C|==V2","|O-C|==V2","O!=C","Value decreased","Value increased"};
+ char *m[9]={"O==V1 && C==V2",
+   "O==V1 && |O-C|==V2",
+   "|O-C|==V2",
+   "O!=C",
+   "C==V1",
+   "Value increased (O<C)",
+   "Value decreased (O>C)",
+   "Value increased by V2 (|C-O|==V2)",
+   "Value decreased by V2 (|O-C|==V2)"};
+ int av[9]={ASK_V1|ASK_V2,
+   ASK_V1|ASK_V2,
+   ASK_V2,
+   ASK_NONE,
+   ASK_V1,
+   ASK_NONE,
+   ASK_NONE,
+   ASK_V2,
+   ASK_V2};
+ 
  printf("\nSearch Filter:\n");
 
- method=ShowShortList(m,6,method);
- if(method<=1)
+ method=ShowShortList(m,9,method);
+ if(av[method]&ASK_V1)
  {
   printf("V1 [%03d]: ",v1);
   v1=Get8(v1);
  }
- if(method<=2)
+ if(av[method]&ASK_V2)
  {
   printf("V2 [%03d]: ",v2);
   v2=Get8(v2);
