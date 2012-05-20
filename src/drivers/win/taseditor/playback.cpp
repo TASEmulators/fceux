@@ -299,6 +299,10 @@ void PLAYBACK::MiddleButtonClick()
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
 					SeekingStart(selection_beginning + 1);
+			} else if (GetAsyncKeyState(VK_MENU) < 0)
+			{
+				// if Alt is held, Restore Playback
+				RestorePosition();
 			} else
 			{
 				UnpauseEmulation();
