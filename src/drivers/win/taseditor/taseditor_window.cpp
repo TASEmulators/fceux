@@ -1048,6 +1048,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case CHECK_AUTORESTORE_PLAYBACK:
+				case ACCEL_CTRL_SPACE:
 					taseditor_config.restore_position ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;

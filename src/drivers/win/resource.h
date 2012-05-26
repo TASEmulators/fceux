@@ -1011,6 +1011,8 @@
 #define ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE 40559
 #define ID_SELECTED_SETMARKERS          40560
 #define ID_SELECTED_REMOVEMARKERS       40561
+#define ACCEL_CTRL_SPACEBAR             40563
+#define ACCEL_CTRL_SPACE                40563
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1020,7 +1022,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         40563
+#define _APS_NEXT_COMMAND_VALUE         40564
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

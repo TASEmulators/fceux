@@ -274,7 +274,12 @@ void PLAYBACK::UnpauseEmulation()
 void PLAYBACK::RestorePosition()
 {
 	if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
-		SeekingStart(lost_position_frame);
+	{
+		if (emu_paused)
+			SeekingStart(lost_position_frame);
+		else
+			PauseEmulation();
+	}
 }
 void PLAYBACK::MiddleButtonClick()
 {
@@ -299,9 +304,8 @@ void PLAYBACK::MiddleButtonClick()
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
 					SeekingStart(selection_beginning + 1);
-			} else if (GetAsyncKeyState(VK_MENU) < 0)
+			} else if (lost_position_frame && lost_position_frame > currFrameCounter + 1)	// (GetAsyncKeyState(VK_MENU) < 0)
 			{
-				// if Alt is held, Restore Playback
 				RestorePosition();
 			} else
 			{
