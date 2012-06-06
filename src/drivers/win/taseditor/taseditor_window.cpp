@@ -131,7 +131,7 @@ char taseditor_help_filename[] = "\\taseditor.chm";
 // all items of the window (used for resising) and their default x,y,w,h
 // actual x,y,w,h are calculated at the beginning from screen
 Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
-	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here whenever you want to abort seeking", "", false, EMUCMD_TASEDITOR_CANCEL_SEEKING, 0,
+	IDC_PROGRESS_BUTTON, -1, 0, 0, 0, "Click here when you want to abort seeking", "", false, EMUCMD_TASEDITOR_CANCEL_SEEKING, 0,
 	IDC_BRANCHES_BUTTON, -1, 0, 0, 0, "Click here to switch between Bookmarks List and Branches Tree", "", false, 0, 0,
 	IDC_LIST1, 0, 0, -1, -1, "", "", false, 0, 0,
 	IDC_PLAYBACK_BOX, -1, 0, 0, 0, "", "", false, 0, 0,
@@ -147,7 +147,7 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "When you change input above Playback cursor, the cursor returns to where it was before the change", "", false, 0, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change input above Playback cursor, the cursor returns to where it was before the change (hotkey: Ctrl+Spacebar)", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
 	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
 	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,

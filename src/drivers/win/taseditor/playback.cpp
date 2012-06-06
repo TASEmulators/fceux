@@ -465,9 +465,9 @@ bool PLAYBACK::JumpToFrame(int index)
 	}
 	// search for an earlier frame with savestate
 	int i = (index > 0) ? index-1 : 0;
-	for (; i > 0; i--)
+	for (; i >= 0; i--)
 		if (greenzone.loadTasSavestate(i)) break;
-	if (i > 0)
+	if (i < 0)
 		StartFromZero();	// couldn't find a savestate
 	// continue from the frame
 	if (index != currFrameCounter)

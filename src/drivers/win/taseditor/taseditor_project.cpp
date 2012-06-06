@@ -60,7 +60,7 @@ void TASEDITOR_PROJECT::reset()
 void TASEDITOR_PROJECT::update()
 {
 	// if it's time to autosave - pop Save As dialog
-	if (changed && taseditor_window.TASEditor_focus && taseditor_config.autosave_period && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
+	if (changed && taseditor_window.TASEditor_focus && taseditor_config.autosave_period && !projectFile.empty() && clock() >= next_save_shedule && piano_roll.drag_mode == DRAG_MODE_NONE)
 	{
 		if (taseditor_config.silent_autosave)
 			SaveProject();
@@ -69,7 +69,6 @@ void TASEDITOR_PROJECT::update()
 		// in case user pressed Cancel, postpone saving to next time
 		SheduleNextAutosave();
 	}
-	
 }
 
 bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool save_markers, bool save_bookmarks, bool save_greenzone, bool save_history, bool save_piano_roll, bool save_selection)
@@ -148,9 +147,9 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		selection.save(ofs, save_selection);
 		delete ofs;
 		playback.updateProgressbar();
-		// also reset autosave period if we saved the project to its current filename
+		// also set project.changed to false, unless it was SaveCompact
 		if (!different_name)
-			this->reset();
+			reset();
 		// restore cursor
 		taseditor_window.must_update_mouse_cursor = true;
 		return true;

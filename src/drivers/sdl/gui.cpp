@@ -1201,7 +1201,7 @@ void openAbout ()
 	gtk_show_about_dialog(GTK_WINDOW(MainWindow),
 		"program-name", "fceuX",
 		"version", FCEU_VERSION_STRING,
-		"copyright", "© 2011 FceuX development team",
+		"copyright", "© 2012 FceuX development team",
 		"license", "GPL-2; See COPYING",
 		//"license-type", GTK_LICENSE_GPL_2_0,
 		"website", "http://fceux.com",
