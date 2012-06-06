@@ -40,6 +40,12 @@ static void BMCFK23CCW(uint32 A, uint8 V)
   }
 }
 
+//some games are wired differently, and this will need to be changed.
+//for instance, WAIXING176 needs prg_bonus=1, and cah4e3's 4-in-1's need prg_bonus=0
+static int prg_bonus = 0;
+static int prg_mask = 0x7F>>(prg_bonus);
+
+//PRG wrapper
 static void BMCFK23CPW(uint32 A, uint8 V)
 {
   if((EXPREGS[0]&7)==4)
@@ -52,9 +58,17 @@ static void BMCFK23CPW(uint32 A, uint8 V)
   else
   { 
     if(EXPREGS[0]&3)
-      setprg8(A,(V&(0x3F>>(EXPREGS[0]&3)))|(EXPREGS[1]<<1));
-    else
+		{
+			uint32 blocksize = (6+prg_bonus)-(EXPREGS[0]&3);
+			uint32 mask = (1<<blocksize)-1;
+			V &= mask;
+			V &= 63;
+			V |= (EXPREGS[1]<<1);
       setprg8(A,V);
+		}
+    else
+      setprg8(A,V & prg_mask);
+
     if(EXPREGS[3]&2)
     {
       setprg8(0xC000,EXPREGS[4]);
@@ -63,6 +77,7 @@ static void BMCFK23CPW(uint32 A, uint8 V)
   }
 }
 
+//PRG handler ($8000-$FFFF)
 static DECLFW(BMCFK23CHiWrite)
 {
   if(EXPREGS[0]&0x40)
@@ -91,8 +106,10 @@ static DECLFW(BMCFK23CHiWrite)
   }
 }
 
+//EXP handler ($5000-$5FFF)
 static DECLFW(BMCFK23CWrite)
 {
+	printf("%04X = $%02X\n",A,V);
   if(A&(1<<(dipswitch+4)))
   {
     EXPREGS[A&3]=V;
@@ -103,8 +120,10 @@ static DECLFW(BMCFK23CWrite)
 
 static void BMCFK23CReset(void)
 {
+	//this little hack makes sure that we try all the dip switch settings eventually, if we reset enough
   dipswitch++;
   dipswitch&=7;
+
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
   MMC3RegReset();

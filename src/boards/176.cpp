@@ -48,7 +48,7 @@ static void Sync(void)
 
 static DECLFW(M176Write_5001)
 { 
-	if(sbw) 
+	if(sbw)
 	{
 		prg[0] = V*4;
 		prg[1] = V*4+1;
@@ -120,17 +120,8 @@ static void M176Power(void)
 	sbw = 0;
 	prg[0] = 0;
 	prg[1] = 1;
-	if(ROM_size > 32)
-	{
-		prg[2] = ROM_size-2;
-		prg[3] = ROM_size-1;
-	}
-	else
-	{
-		prg[2] = ROM_size*2-2;
-		prg[3] = ROM_size*2-1;
-	}
-
+	prg[2] = (ROM_size-2)&63;
+	prg[3] = (ROM_size-1)&63;
   Sync();
 }
 
