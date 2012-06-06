@@ -598,7 +598,7 @@ void BOOKMARKS::RightClick()
 int BOOKMARKS::FindBookmarkAtFrame(int frame)
 {
 	int cur_bookmark = branches.GetCurrentBranch();
-	if (cur_bookmark >= 0 && bookmarks_array[cur_bookmark].snapshot.jump_frame == frame)
+	if (cur_bookmark != ITEM_UNDER_MOUSE_CLOUD && bookmarks_array[cur_bookmark].snapshot.jump_frame == frame)
 		return cur_bookmark + TOTAL_BOOKMARKS;	// blue digit has highest priority when drawing
 	for (int i = 0; i < TOTAL_BOOKMARKS; ++i)
 	{

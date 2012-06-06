@@ -302,9 +302,14 @@ void BRANCHES::update()
 			if (current_branch != ITEM_UNDER_MOUSE_CLOUD)
 			{
 				if (changes_since_current_branch)
+				{
 					parent = TOTAL_BOOKMARKS;
-				else
+				} else
+				{
 					parent = FindFullTimelineForBranch(current_branch);
+					if (parent != current_branch && bookmarks.bookmarks_array[parent].snapshot.jump_frame == bookmarks.bookmarks_array[current_branch].snapshot.jump_frame)
+						parent = current_branch;
+				}
 				do
 				{
 					branch = parent;
@@ -333,10 +338,13 @@ void BRANCHES::update()
 					parent_y = BranchCurrY[parent];
 				}
 				if (upper_frame != lower_frame)
+				{
 					distance = (double)(currFrameCounter - lower_frame) / (double)(upper_frame - lower_frame);
-				else
-					distance = 0;
-				if (distance > 1.0) distance = 1.0;
+					if (distance > 1.0) distance = 1.0;
+				} else
+				{
+					distance = 1.0;
+				}
 				playback_x = parent_x + distance * (branch_x - parent_x);
 				playback_y = parent_y + distance * (branch_y - parent_y);
 			} else

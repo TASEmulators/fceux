@@ -1203,13 +1203,15 @@ static void TaseditorRewindOff(void)
 static void TaseditorRestorePlayback(void)
 {
 #ifdef WIN32
-	playback.RestorePosition();
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		playback.RestorePosition();
 #endif
 }
 
 static void TaseditorCancelSeeking(void)
 {
 #ifdef WIN32
-	playback.CancelSeeking();
+	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+		playback.CancelSeeking();
 #endif
 }

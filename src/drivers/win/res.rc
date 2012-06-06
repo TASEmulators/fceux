@@ -228,7 +228,7 @@ BEGIN
         MENUITEM "Save Compact",                ID_FILE_SAVECOMPACT,MFT_STRING,MFS_ENABLED
         MENUITEM "Recent",                      ID_FILE_RECENT,MFT_STRING,MFS_ENABLED
         MENUITEM MFT_SEPARATOR
-        MENUITEM "Import input",                ID_FILE_IMPORT,MFT_STRING,MFS_ENABLED
+        MENUITEM "Import Input",                ID_FILE_IMPORT,MFT_STRING,MFS_ENABLED
         MENUITEM "Export to FM2",               ID_FILE_EXPORTFM2,MFT_STRING,MFS_ENABLED
         MENUITEM MFT_SEPARATOR
         MENUITEM "Close\tAlt+F4",               ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
@@ -1455,7 +1455,7 @@ BEGIN
     CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,8,21,47,10
     CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,8,35,47,10
     CONTROL         " Convert Marker Notes to Movie Subtitles",IDC_NOTES_TO_SUBTITLES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,50,141,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,50,146,10
 END
 
 IDD_TASEDITOR_FINDNOTE DIALOGEX 0, 0, 228, 49

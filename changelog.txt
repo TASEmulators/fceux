@@ -1,4 +1,10 @@
 
+
+06-Jun-2012 - AnS - Taseditor: small fix for Branches Tree - among bookmarks with equal jump_frame the cursor must be pointing at current branch
+06-Jun-2012 - zeromus - support mapper 176. mapper 176 no longer maps to BMCFK23C. BMCFK23C is still accessible through crc or unif? test case would be welcome. it is unclear to me why mapper 176 control was removed from 176.cpp and given to BMCFK23C
+06-Jun-2012 - AnS - Taseditor: autosave works only when project has a filename
+26-May-2012 - AnS - Taseditor: Ctrl+Space accelerator = toggle "Auto-restore last position" checkbox; remapped "Restore Playback" hotkey to Spacebar; "Restore Playback" also pauses seeking; mid-click = "Restore Playback" when possible
+08-May-2012 - AnS - Taseditor: changed "lost_position" logic
 01-May-2012 - AnS - Lua functions emu.pause() and emu.unpause() don't yield and don't reset emulator speed anymore
 30-Apr-2012 - AnS - Taseditor: Ctrl + mid click = run to Selection cursor; Shift + mid click = run to nearest Marker
 26-Apr-2012 - AnS - Taseditor: fixed filename logic when user creates project from an fm2 or a corrupted fm3
