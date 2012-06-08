@@ -38,6 +38,7 @@
 #include "utils/memory.h"
 #include "utils/crc32.h"
 #include "utils/md5.h"
+#include "utils/xstring.h"
 #include "cheat.h"
 #include "vsuni.h"
 #include "driver.h"
@@ -285,6 +286,7 @@ struct CHINF {
 	uint32 crc32;
 	int32 mapper;
 	int32 mirror;
+	const char* params;
 };
 
 void MapperInit()
@@ -304,6 +306,14 @@ void MapperInit()
 	}
 }
 
+static const TMasterRomInfo sMasterRomInfo[] = {
+	{ 0x62b51b108a01d2beLL, "bonus=0" }, //4-in-1 (FK23C8021)[p1][!].nes
+	{ 0x8bb48490d8d22711LL, "bonus=0" }, //4-in-1 (FK23C8033)[p1][!].nes
+	{ 0xc75888d7b48cd378LL, "bonus=0" }, //4-in-1 (FK23C8043)[p1][!].nes
+	{ 0xf81a376fa54fdd69LL, "bonus=0" }, //4-in-1 (FK23Cxxxx, S-0210A PCB)[p1][!].nes
+};
+const TMasterRomInfo* MasterRomInfo;
+std::map<std::string,std::string> MasterRomInfoParams;
 
 static void CheckHInfo(void)
 {
@@ -381,6 +391,26 @@ static void CheckHInfo(void)
 		//printf("%16llx\n",partialmd5);
 	}
 	CheckBad(partialmd5);
+
+	MasterRomInfo = NULL;
+	MasterRomInfoParams = std::map<std::string,std::string>();
+	for(int i=0;i<ARRAY_SIZE(sMasterRomInfo);i++)
+	{
+		const TMasterRomInfo& info = sMasterRomInfo[i];
+		if(info.md5lower != partialmd5)
+			continue;
+		
+		MasterRomInfo = &info;
+		if(!info.params) break;
+		
+		std::vector<std::string> toks = tokenize_str(info.params,",");
+		for(int j=0;j<(int)toks.size();j++)
+		{
+			std::vector<std::string> parts = tokenize_str(toks[j],"=");
+			MasterRomInfoParams[parts[0]] = parts[1];
+		}
+		break;
+	}
 
 	x=0;
 

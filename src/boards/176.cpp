@@ -48,6 +48,7 @@ static void Sync(void)
 
 static DECLFW(M176Write_5001)
 { 
+	printf("%04X = $%02X\n",A,V);
 	if(sbw)
 	{
 		prg[0] = V*4;
@@ -60,12 +61,14 @@ static DECLFW(M176Write_5001)
 
 static DECLFW(M176Write_5010)
 { 
+	printf("%04X = $%02X\n",A,V);
 	if(V == 0x24) sbw = 1;
   Sync();
 }
 
 static DECLFW(M176Write_5011)
 { 
+	printf("%04X = $%02X\n",A,V);
 	V >>= 1;
 	if(sbw)
 	{
@@ -79,6 +82,7 @@ static DECLFW(M176Write_5011)
 
 static DECLFW(M176Write_5FF1)
 { 
+	printf("%04X = $%02X\n",A,V);
   V >>= 1;
 	prg[0] = V*4;
 	prg[1] = V*4+1;
@@ -89,6 +93,7 @@ static DECLFW(M176Write_5FF1)
 
 static DECLFW(M176Write_5FF2)
 { 
+	printf("%04X = $%02X\n",A,V);
   chr = V;
   Sync();
 }

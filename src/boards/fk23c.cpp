@@ -1,4 +1,4 @@
-/* FCE Ultra - NES/Famicom Emulator
+﻿/* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
  *  Copyright (C) 2006 CaH4e3
@@ -20,6 +20,7 @@
 
 #include "mapinc.h"
 #include "mmc3.h"
+#include "../ines.h"
 
 static uint8 unromchr;
 static uint32 dipswitch;
@@ -41,9 +42,35 @@ static void BMCFK23CCW(uint32 A, uint8 V)
 }
 
 //some games are wired differently, and this will need to be changed.
-//for instance, WAIXING176 needs prg_bonus=1, and cah4e3's 4-in-1's need prg_bonus=0
-static int prg_bonus = 0;
-static int prg_mask = 0x7F>>(prg_bonus);
+//all the WXN games require prg_bonus = 1, and cah4e3's multicarts require prg_bonus = 0
+//we'll populate this from a game database
+static int prg_bonus;
+static int prg_mask;
+
+//prg_bonus = 0
+//4-in-1 (FK23C8021)[p1][!].nes
+//4-in-1 (FK23C8033)[p1][!].nes
+//4-in-1 (FK23C8043)[p1][!].nes
+//4-in-1 (FK23Cxxxx, S-0210A PCB)[p1][!].nes
+
+//prg_bonus = 1
+//[m176]大富翁2-上海大亨.wxn.nes
+//[m176]宠物翡翠.fix.nes
+//[m176]格兰帝亚.wxn.nes
+//[m176]梦幻之星.wxn.nes
+//[m176]水浒神兽.fix.nes
+//[m176]西楚霸王.fix.nes
+//[m176]超级大富翁.wxn.nes
+//[m176]雄霸天下.wxn.nes
+
+//works as-is under virtuanes m176
+//[m176]三侠五义.wxn.nes
+//[m176]口袋金.fix.nes
+//[m176]爆笑三国.fix.nes
+
+//needs other tweaks
+//[m176]三国忠烈传.wxn.nes
+//[m176]破釜沉舟.fix.nes
 
 //PRG wrapper
 static void BMCFK23CPW(uint32 A, uint8 V)
@@ -62,7 +89,7 @@ static void BMCFK23CPW(uint32 A, uint8 V)
 			uint32 blocksize = (6+prg_bonus)-(EXPREGS[0]&3);
 			uint32 mask = (1<<blocksize)-1;
 			V &= mask;
-			V &= 63;
+			//V &= 63; //? is this a good idea?
 			V |= (EXPREGS[1]<<1);
       setprg8(A,V);
 		}
@@ -109,13 +136,34 @@ static DECLFW(BMCFK23CHiWrite)
 //EXP handler ($5000-$5FFF)
 static DECLFW(BMCFK23CWrite)
 {
-	printf("%04X = $%02X\n",A,V);
   if(A&(1<<(dipswitch+4)))
   {
+		//printf("+ ");
     EXPREGS[A&3]=V;
-    FixMMC3PRG(MMC3_cmd);
-    FixMMC3CHR(MMC3_cmd);
-  }
+
+		bool remap = false;
+
+		//sometimes writing to reg0 causes remappings to occur. we think the 2 signifies this. 
+		//if not, 0x24 is a value that is known to work
+		//however, the low 4 bits are known to control the mapping mode, so 0x20 is more likely to be the immediate remap flag
+		remap |= ((EXPREGS[0]&0xF0)==0x20); 
+
+		//this is an actual mapping reg. i think reg0 controls what happens when reg1 is written. anyway, we have to immediately remap these
+		remap |= (A&3)==1; 
+
+		//don't think this will end up being necessary
+		//remap |= (A&3)==2; 
+
+		if(remap)
+		{
+			FixMMC3PRG(MMC3_cmd);
+			FixMMC3CHR(MMC3_cmd);
+		}
+  } 
+	//else printf("- ");
+	//printf("%04X = $%02X\n",A,V);
+
+	//printf("%02X %02X %02X %02X\n",EXPREGS[0],EXPREGS[1],EXPREGS[2],EXPREGS[3]);
 }
 
 static void BMCFK23CReset(void)
@@ -123,6 +171,7 @@ static void BMCFK23CReset(void)
 	//this little hack makes sure that we try all the dip switch settings eventually, if we reset enough
   dipswitch++;
   dipswitch&=7;
+	printf("BMCFK23C dipswitch set to %d\n",dipswitch);
 
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
@@ -133,6 +182,7 @@ static void BMCFK23CReset(void)
 
 static void BMCFK23CPower(void)
 {
+	dipswitch = 0;
   GenMMC3Power();
   EXPREGS[0]=EXPREGS[1]=EXPREGS[2]=EXPREGS[3]=0;
   EXPREGS[4]=EXPREGS[5]=EXPREGS[6]=EXPREGS[7]=0xFF;
@@ -141,6 +191,7 @@ static void BMCFK23CPower(void)
   SetWriteHandler(0x8000,0xFFFF,BMCFK23CHiWrite);
   FixMMC3PRG(MMC3_cmd);
   FixMMC3CHR(MMC3_cmd);
+
 }
 
 void BMCFK23C_Init(CartInfo *info)
@@ -153,4 +204,10 @@ void BMCFK23C_Init(CartInfo *info)
   AddExState(EXPREGS, 8, 0, "EXPR");
   AddExState(&unromchr, 1, 0, "UNCHR");
   AddExState(&dipswitch, 1, 0, "DIPSW");
+
+	prg_bonus = 1;
+	if(MasterRomInfoParams.find("bonus") != MasterRomInfoParams.end())
+		prg_bonus = atoi(MasterRomInfoParams["bonus"].c_str());
+
+	prg_mask = 0x7F>>(prg_bonus);
 }

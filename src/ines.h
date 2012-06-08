@@ -23,6 +23,7 @@
 #define _INES_H_
 #include <stdlib.h>
 #include <string.h>
+#include <map>
 #ifdef INESPRIV
 
 void iNESStateRestore(int version);
@@ -68,6 +69,12 @@ extern uint8 iNESIRQa;
 #else
 #endif
 
+struct TMasterRomInfo
+{
+	uint64 md5lower;
+	const char* params;
+};
+
 //mbg merge 6/29/06
 extern uint8 *ROM;
 extern uint8 *VROM;
@@ -76,6 +83,8 @@ extern uint32 ROM_size;
 extern int iNesSave(); //bbit Edited: line added
 extern int iNesSaveAs(char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added
+extern const TMasterRomInfo* MasterRomInfo;
+extern std::map<std::string,std::string> MasterRomInfoParams;
 
 //mbg merge 7/19/06 changed to c++ decl format
 struct iNES_HEADER {
