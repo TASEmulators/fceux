@@ -20,9 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "emufile.h"
-
 #include <vector>
+#include "emufile.h"
+#include "utils/xstring.h"
 
 bool EMUFILE::readAllBytes(std::vector<u8>* dstbuf, const std::string& fname)
 {
@@ -58,6 +58,24 @@ size_t EMUFILE_MEMORY::_fread(const void *ptr, size_t bytes){
 		failbit = true;
 	return todo;
 }
+
+void EMUFILE_FILE::open(const char* fname, const char* mode)
+{
+	fp = fopen(fname,mode);
+	if(!fp)
+	{
+#ifdef _MSC_VER
+		std::wstring wfname = mbstowcs((std::string)fname);
+		std::wstring wfmode = mbstowcs((std::string)mode);
+		fp = _wfopen(wfname.c_str(),wfmode.c_str());
+#endif
+		if(!fp)
+			failbit = true;
+	}
+	this->fname = fname;
+	strcpy(this->mode,mode);
+}
+
 
 void EMUFILE_FILE::truncate(s32 length)
 {

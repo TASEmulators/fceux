@@ -158,7 +158,7 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 		return false;
 	}
 }
-bool TASEDITOR_PROJECT::load(char* fullname)
+bool TASEDITOR_PROJECT::load(const char* fullname)
 {
 	bool load_all = true;
 	EMUFILE_FILE ifs(fullname, "rb");
@@ -275,7 +275,7 @@ bool TASEDITOR_PROJECT::load(char* fullname)
 	return true;
 }
 
-void TASEDITOR_PROJECT::RenameProject(char* new_fullname, bool filename_is_correct)
+void TASEDITOR_PROJECT::RenameProject(const char* new_fullname, bool filename_is_correct)
 {
 	projectFile = new_fullname;
 	char drv[512], dir[512], name[512], ext[512];		// For getting the filename

@@ -18,6 +18,8 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+//http://www.nubaria.com/en/blog/?p=289
+
 // File description: Everything relevant for the main window should go here. This
 //                   does not include functions relevant for dialog windows.
 
@@ -1009,7 +1011,7 @@ void CloseGame()
 	}
 }
 
-bool ALoad(char *nameo, char* innerFilename)
+bool ALoad(const char *nameo, char* innerFilename)
 {
   int oldPaused = EmulationPaused;
 
@@ -1374,13 +1376,14 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_DROPFILES:
 		{
 			UINT len;
-			char *ftmp;
 
-			len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
-			if((ftmp=(char*)malloc(len))) 
+			len=DragQueryFileW((HDROP)wParam,0,0,0)+1; 
+			wchar_t* wftmp;
+			wftmp=new wchar_t[len];
 			{
-				DragQueryFile((HDROP)wParam,0,ftmp,len); 
-				string fileDropped = ftmp;
+				DragQueryFileW((HDROP)wParam,0,wftmp,len); 
+				std::string fileDropped = wcstombs(wftmp);
+				delete[] wftmp;
 				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
 				
 				//-------------------------------------------------------
@@ -1441,8 +1444,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					if (GameInfo && !(fileDropped.find(".fm2") == string::npos))
 					{
 						//.fm2 is at the end of the filename so that must be the extension		
-						FCEUI_LoadMovie(ftmp, 1, false);		 //We are convinced it is a movie file, attempt to load it
-						FCEUX_LoadMovieExtras(ftmp);
+						FCEUI_LoadMovie(fileDropped.c_str(), 1, false);		 //We are convinced it is a movie file, attempt to load it
+						FCEUX_LoadMovieExtras(fileDropped.c_str());
 					}
 				}
 				//-------------------------------------------------------
@@ -1456,11 +1459,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					{
 						//.fm3 is at the end of the filename so that must be the extension
 						extern bool EnterTasEditor();
-						extern bool LoadProject(char* fullname);
+						extern bool LoadProject(const char* fullname);
 						extern bool AskSaveProject();
 						if (EnterTasEditor())					//We are convinced it is a TAS Editor project file, attempt to load in TAS Editor
 							if (AskSaveProject())		// in case there's unsaved project
-								LoadProject(ftmp);
+								LoadProject(fileDropped.c_str());
 					}
 				}
 				//-------------------------------------------------------
@@ -1482,7 +1485,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				#ifdef _S9XLUA_H
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 				{
-					FCEU_LoadLuaCode(ftmp);
+					FCEU_LoadLuaCode(fileDropped.c_str());
 					UpdateLuaConsole(fileDropped.c_str());
 				}
 				#endif
@@ -1500,10 +1503,9 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				else
 				{
-				ALoad(ftmp);
-				free(ftmp);
+					ALoad(fileDropped.c_str());
 				}	
-			}            
+			}
 		}
 		break;
 

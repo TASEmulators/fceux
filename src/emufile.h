@@ -268,14 +268,7 @@ protected:
 	char mode[16];
 
 private:
-	void open(const char* fname, const char* mode)
-	{
-		fp = fopen(fname,mode);
-		if(!fp)
-			failbit = true;
-		this->fname = fname;
-		strcpy(this->mode,mode);
-	}
+	void open(const char* fname, const char* mode);
 
 public:
 

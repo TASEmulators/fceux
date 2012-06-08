@@ -365,7 +365,7 @@ void OpenProject()
 		LoadProject(nameo);
 	}
 }
-bool LoadProject(char* fullname)
+bool LoadProject(const char* fullname)
 {
 	// try to load project
 	if (project.load(fullname))

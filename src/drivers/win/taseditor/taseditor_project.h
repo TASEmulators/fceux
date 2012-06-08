@@ -40,9 +40,9 @@ public:
 	void update();
 
 	bool save(const char* different_name = 0, bool save_binary = true, bool save_markers = true, bool save_bookmarks = true, bool save_greenzone = true, bool save_history = true, bool save_piano_roll = true, bool save_selection = true);
-	bool load(char* fullname);
+	bool load(const char* fullname);
 
-	void RenameProject(char* new_fullname, bool filename_is_correct);
+	void RenameProject(const char* new_fullname, bool filename_is_correct);
 
 	std::string GetProjectFile();
 	std::string GetProjectName();

@@ -14,7 +14,7 @@ void UpdateTasEditor();
 
 void NewProject();
 void OpenProject();
-bool LoadProject(char* fullname);
+bool LoadProject(const char* fullname);
 bool SaveProject();
 bool SaveProjectAs();
 void SaveCompact();
