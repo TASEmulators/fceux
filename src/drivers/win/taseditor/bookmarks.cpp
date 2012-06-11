@@ -76,8 +76,69 @@ void BOOKMARKS::init()
 	ListView_SetExtendedListViewStyleEx(hwndBookmarksList, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES, LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
 	// subclass the listview
 	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
-	// setup same images for the listview
-	ListView_SetImageList(hwndBookmarksList, piano_roll.himglist, LVSIL_SMALL);
+	// setup images for the listview
+	himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
+	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP3));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP4));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP5));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP6));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP7));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP8));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP9));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP10));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP11));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP12));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP13));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP14));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP15));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP16));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP17));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP18));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	ListView_SetImageList(hwndBookmarksList, himglist, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
 	// icons column
@@ -114,6 +175,11 @@ void BOOKMARKS::init()
 void BOOKMARKS::free()
 {
 	bookmarks_array.resize(0);
+	if (himglist)
+	{
+		ImageList_Destroy(himglist);
+		himglist = 0;
+	}
 }
 void BOOKMARKS::reset()
 {
@@ -402,17 +468,17 @@ error:
 void BOOKMARKS::RedrawBookmarksCaption()
 {
 	int prev_edit_mode = edit_mode;
-	if (taseditor_config.branch_only_when_rec && movie_readonly)
+	if (taseditor_config.view_branches_tree)
+	{
+		edit_mode = EDIT_MODE_BRANCHES;
+		ShowWindow(hwndBookmarksList, SW_HIDE);
+		ShowWindow(hwndBranchesBitmap, SW_SHOW);
+	} else if (taseditor_config.branch_only_when_rec && movie_readonly)
 	{
 		edit_mode = EDIT_MODE_BOOKMARKS;
 		ShowWindow(hwndBranchesBitmap, SW_HIDE);
 		ShowWindow(hwndBookmarksList, SW_SHOW);
 		RedrawBookmarksList();
-	} else if (taseditor_config.view_branches_tree)
-	{
-		edit_mode = EDIT_MODE_BRANCHES;
-		ShowWindow(hwndBookmarksList, SW_HIDE);
-		ShowWindow(hwndBranchesBitmap, SW_SHOW);
 	} else
 	{
 		edit_mode = EDIT_MODE_BOTH;

@@ -1444,6 +1444,23 @@ BEGIN
     LTEXT           "made by zeromus & adelikat",IDC_STATIC,138,35,96,9,SS_NOPREFIX
 END
 
+IDD_TASEDITOR_NEWPROJECT DIALOGEX 0, 0, 171, 100
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create New Project"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,80,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,114,80,50,14
+    CONTROL         " Copy current input",IDC_COPY_INPUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,14,75,10
+    CONTROL         " 1 player",IDC_RADIO_1PLAYER,"Button",BS_AUTORADIOBUTTON,16,14,45,10
+    CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,16,27,45,10
+    CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,16,40,45,10
+    CONTROL         " Copy current markers",IDC_COPY_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,27,83,10
+    GROUPBOX        "Input type",IDC_STATIC,5,3,67,52,BS_CENTER
+    EDITTEXT        IDC_EDIT_AUTHOR,36,61,127,13,ES_AUTOHSCROLL
+    LTEXT           "Author:",IDC_STATIC,8,63,26,9
+END
+
 IDD_TASEDITOR_EXPORT DIALOGEX 0, 0, 158, 86
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Export to FM2"
@@ -1977,6 +1994,10 @@ BEGIN
     BEGIN
     END
 
+    IDD_TASEDITOR_NEWPROJECT, DIALOG
+    BEGIN
+    END
+
     IDD_TASEDITOR_EXPORT, DIALOG
     BEGIN
     END
@@ -2058,55 +2079,6 @@ END
 
 #endif    // Нейтральный resources
 /////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Русский (Россия) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-#pragma code_page(1251)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_TASEDITOR_NEWPROJECT DIALOGEX 0, 0, 171, 100
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Create New Project"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,7,80,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,114,80,50,14
-    CONTROL         " Copy current input",IDC_COPY_INPUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,14,75,10
-    CONTROL         " 1 player",IDC_RADIO_1PLAYER,"Button",BS_AUTORADIOBUTTON,16,14,45,10
-    CONTROL         " 2 players",IDC_RADIO_2PLAYERS,"Button",BS_AUTORADIOBUTTON,16,27,45,10
-    CONTROL         " Fourscore",IDC_RADIO_FOURSCORE,"Button",BS_AUTORADIOBUTTON,16,40,45,10
-    CONTROL         " Copy current markers",IDC_COPY_MARKERS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,80,27,83,10
-    GROUPBOX        "Input type",IDC_STATIC,5,3,67,52,BS_CENTER
-    EDITTEXT        IDC_EDIT_AUTHOR,36,61,127,13,ES_AUTOHSCROLL
-    LTEXT           "Author:",IDC_STATIC,8,63,26,9
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_TASEDITOR_NEWPROJECT, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Русский (Россия) resources
-/////////////////////////////////////////////////////////////////////////////
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Английский (США) resources
@@ -2262,6 +2234,67 @@ IDB_BITMAP18            BITMAP                  "res\\te_18.bmp"
 IDB_BITMAP19            BITMAP                  "res\\te_19.bmp"
 IDB_TE_ARROW            BITMAP                  "res\\te_arrow.bmp"
 IDB_TE_GREEN_ARROW      BITMAP                  "res\\te_green_arrow.bmp"
+IDB_TE_GREEN_BLUE_ARROW BITMAP                  "res\\te_green_blue_arrow.bmp"
+IDB_PIANO_0             BITMAP                  "res\\te_piano_0.bmp"
+IDB_PIANO_1             BITMAP                  "res\\te_piano_1.bmp"
+IDB_PIANO_2             BITMAP                  "res\\te_piano_2.bmp"
+IDB_PIANO_3             BITMAP                  "res\\te_piano_3.bmp"
+IDB_PIANO_4             BITMAP                  "res\\te_piano_4.bmp"
+IDB_PIANO_5             BITMAP                  "res\\te_piano_5.bmp"
+IDB_PIANO_6             BITMAP                  "res\\te_piano_6.bmp"
+IDB_PIANO_7             BITMAP                  "res\\te_piano_7.bmp"
+IDB_PIANO_8             BITMAP                  "res\\te_piano_8.bmp"
+IDB_PIANO_9             BITMAP                  "res\\te_piano_9.bmp"
+IDB_PIANO_10            BITMAP                  "res\\te_piano_10.bmp"
+IDB_PIANO_11            BITMAP                  "res\\te_piano_11.bmp"
+IDB_PIANO_12            BITMAP                  "res\\te_piano_12.bmp"
+IDB_PIANO_13            BITMAP                  "res\\te_piano_13.bmp"
+IDB_PIANO_14            BITMAP                  "res\\te_piano_14.bmp"
+IDB_PIANO_15            BITMAP                  "res\\te_piano_15.bmp"
+IDB_PIANO_16            BITMAP                  "res\\te_piano_16.bmp"
+IDB_PIANO_17            BITMAP                  "res\\te_piano_17.bmp"
+IDB_PIANO_18            BITMAP                  "res\\te_piano_18.bmp"
+IDB_PIANO_19            BITMAP                  "res\\te_piano_19.bmp"
+IDB_PIANO_PLAYBACK_0             BITMAP                  "res\\te_piano_0_playback.bmp"
+IDB_PIANO_PLAYBACK_1             BITMAP                  "res\\te_piano_1_playback.bmp"
+IDB_PIANO_PLAYBACK_2             BITMAP                  "res\\te_piano_2_playback.bmp"
+IDB_PIANO_PLAYBACK_3             BITMAP                  "res\\te_piano_3_playback.bmp"
+IDB_PIANO_PLAYBACK_4             BITMAP                  "res\\te_piano_4_playback.bmp"
+IDB_PIANO_PLAYBACK_5             BITMAP                  "res\\te_piano_5_playback.bmp"
+IDB_PIANO_PLAYBACK_6             BITMAP                  "res\\te_piano_6_playback.bmp"
+IDB_PIANO_PLAYBACK_7             BITMAP                  "res\\te_piano_7_playback.bmp"
+IDB_PIANO_PLAYBACK_8             BITMAP                  "res\\te_piano_8_playback.bmp"
+IDB_PIANO_PLAYBACK_9             BITMAP                  "res\\te_piano_9_playback.bmp"
+IDB_PIANO_PLAYBACK_10            BITMAP                  "res\\te_piano_10_playback.bmp"
+IDB_PIANO_PLAYBACK_11            BITMAP                  "res\\te_piano_11_playback.bmp"
+IDB_PIANO_PLAYBACK_12            BITMAP                  "res\\te_piano_12_playback.bmp"
+IDB_PIANO_PLAYBACK_13            BITMAP                  "res\\te_piano_13_playback.bmp"
+IDB_PIANO_PLAYBACK_14            BITMAP                  "res\\te_piano_14_playback.bmp"
+IDB_PIANO_PLAYBACK_15            BITMAP                  "res\\te_piano_15_playback.bmp"
+IDB_PIANO_PLAYBACK_16            BITMAP                  "res\\te_piano_16_playback.bmp"
+IDB_PIANO_PLAYBACK_17            BITMAP                  "res\\te_piano_17_playback.bmp"
+IDB_PIANO_PLAYBACK_18            BITMAP                  "res\\te_piano_18_playback.bmp"
+IDB_PIANO_PLAYBACK_19            BITMAP                  "res\\te_piano_19_playback.bmp"
+IDB_PIANO_LOSTPOS_0             BITMAP                  "res\\te_piano_0_lostpos.bmp"
+IDB_PIANO_LOSTPOS_1             BITMAP                  "res\\te_piano_1_lostpos.bmp"
+IDB_PIANO_LOSTPOS_2             BITMAP                  "res\\te_piano_2_lostpos.bmp"
+IDB_PIANO_LOSTPOS_3             BITMAP                  "res\\te_piano_3_lostpos.bmp"
+IDB_PIANO_LOSTPOS_4             BITMAP                  "res\\te_piano_4_lostpos.bmp"
+IDB_PIANO_LOSTPOS_5             BITMAP                  "res\\te_piano_5_lostpos.bmp"
+IDB_PIANO_LOSTPOS_6             BITMAP                  "res\\te_piano_6_lostpos.bmp"
+IDB_PIANO_LOSTPOS_7             BITMAP                  "res\\te_piano_7_lostpos.bmp"
+IDB_PIANO_LOSTPOS_8             BITMAP                  "res\\te_piano_8_lostpos.bmp"
+IDB_PIANO_LOSTPOS_9             BITMAP                  "res\\te_piano_9_lostpos.bmp"
+IDB_PIANO_LOSTPOS_10            BITMAP                  "res\\te_piano_10_lostpos.bmp"
+IDB_PIANO_LOSTPOS_11            BITMAP                  "res\\te_piano_11_lostpos.bmp"
+IDB_PIANO_LOSTPOS_12            BITMAP                  "res\\te_piano_12_lostpos.bmp"
+IDB_PIANO_LOSTPOS_13            BITMAP                  "res\\te_piano_13_lostpos.bmp"
+IDB_PIANO_LOSTPOS_14            BITMAP                  "res\\te_piano_14_lostpos.bmp"
+IDB_PIANO_LOSTPOS_15            BITMAP                  "res\\te_piano_15_lostpos.bmp"
+IDB_PIANO_LOSTPOS_16            BITMAP                  "res\\te_piano_16_lostpos.bmp"
+IDB_PIANO_LOSTPOS_17            BITMAP                  "res\\te_piano_17_lostpos.bmp"
+IDB_PIANO_LOSTPOS_18            BITMAP                  "res\\te_piano_18_lostpos.bmp"
+IDB_PIANO_LOSTPOS_19            BITMAP                  "res\\te_piano_19_lostpos.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 #endif    // Английский (США) resources
 /////////////////////////////////////////////////////////////////////////////

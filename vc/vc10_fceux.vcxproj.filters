@@ -1544,6 +1544,9 @@
     <None Include="..\src\drivers\win\res\bitmap20.bmp" />
     <None Include="..\..\..\tasedit\psd\bmp\te_green_arrow.bmp" />
     <None Include="..\src\drivers\win\res\te_green_arrow.bmp" />
+    <None Include="..\src\drivers\win\res\bitmap21.bmp" />
+    <None Include="..\src\drivers\win\res\bitmap22.bmp" />
+    <None Include="..\src\drivers\win\res\te_green_blue_arrow.bmp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\auxlib.lua" />

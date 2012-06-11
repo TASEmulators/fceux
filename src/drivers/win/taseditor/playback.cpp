@@ -137,14 +137,10 @@ void PLAYBACK::update()
 		}
 	}
 
-	// forget lost_position_frame when the position is restored
-	if (currFrameCounter + 1 >= lost_position_frame)
-		lost_position_frame = 0;
-
 	// pause when seeking hits pause_frame
 	if(pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
-	else if (!lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
+	else if (currFrameCounter + 1 > lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
 		// pause at the end of the movie
 		PauseEmulation();
 
@@ -273,7 +269,7 @@ void PLAYBACK::UnpauseEmulation()
 }
 void PLAYBACK::RestorePosition()
 {
-	if (lost_position_frame && lost_position_frame > currFrameCounter + 1)
+	if (lost_position_frame > currFrameCounter + 1)
 	{
 		if (emu_paused)
 			SeekingStart(lost_position_frame);
@@ -304,7 +300,7 @@ void PLAYBACK::MiddleButtonClick()
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
 					SeekingStart(selection_beginning + 1);
-			} else if (lost_position_frame && lost_position_frame > currFrameCounter + 1)	// (GetAsyncKeyState(VK_MENU) < 0)
+			} else if (lost_position_frame > currFrameCounter + 1)
 			{
 				RestorePosition();
 			} else

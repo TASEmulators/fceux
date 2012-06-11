@@ -872,6 +872,8 @@
   <ItemGroup>
     <None Include="..\..\..\tasedit\psd\bmp\te_green_arrow.bmp" />
     <None Include="..\src\drivers\win\res\bitmap20.bmp" />
+    <None Include="..\src\drivers\win\res\bitmap21.bmp" />
+    <None Include="..\src\drivers\win\res\bitmap22.bmp" />
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
     <None Include="..\src\drivers\win\res\icon3.ico" />
     <None Include="..\src\drivers\win\res\icon4.ico" />
@@ -915,6 +917,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)auxlib.lua;%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="..\src\drivers\win\res\te_green_arrow.bmp" />
+    <None Include="..\src\drivers\win\res\te_green_blue_arrow.bmp" />
     <None Include="..\src\pputile.inc" />
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>

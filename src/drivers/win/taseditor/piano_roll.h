@@ -86,10 +86,14 @@ enum DRAG_MODES
 #define NUM_COLUMNS_NEED_2ND_FRAMENUM COLUMN_JOYPAD4_R
 
 #define DIGITS_IN_FRAMENUM 7
-#define ARROW_IMAGE_ID 20
-#define GREEN_ARROW_IMAGE_ID 21
 
-#define COLUMN_ICONS_WIDTH 16
+#define BOOKMARKS_WITH_BLUE_ARROW 20
+#define BOOKMARKS_WITH_GREEN_ARROW 40
+#define BLUE_ARROW_IMAGE_ID 60
+#define GREEN_ARROW_IMAGE_ID 61
+#define GREEN_BLUE_ARROW_IMAGE_ID 62
+
+#define COLUMN_ICONS_WIDTH 17
 #define COLUMN_FRAMENUM_WIDTH 75
 #define COLUMN_BUTTON_WIDTH 21
 
@@ -207,7 +211,6 @@ public:
 
 	HWND hwndMarkerDragBox, hwndMarkerDragBoxText;
 	// GDI stuff
-	HIMAGELIST himglist;
 	HFONT hMainListFont, hMainListSelectFont, hMarkersFont, hMarkersEditFont, hTaseditorAboutFont;
 	HBRUSH bg_brush, marker_drag_box_brush, marker_drag_box_brush_bind;
 
@@ -224,6 +227,9 @@ private:
 	bool must_redraw_list;
 
 	HMENU hrmenu;
+
+	// GDI stuff
+	HIMAGELIST himglist;
 
 	WNDCLASSEX wincl;
 	BLENDFUNCTION blend;
