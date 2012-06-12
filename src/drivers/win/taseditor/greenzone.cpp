@@ -28,6 +28,7 @@ extern TASEDITOR_PROJECT project;
 extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
 extern PIANO_ROLL piano_roll;
+extern EDITOR editor;
 
 extern char lagFlag;
 
@@ -74,7 +75,7 @@ void GREENZONE::CollectCurrentState()
 {
 	// update greenzone upper limit if needed
 	if (greenZoneCount <= currFrameCounter)
-		greenZoneCount = currFrameCounter+1;
+		greenZoneCount = currFrameCounter + 1;
 
 	if ((int)savestates.size() < greenZoneCount)
 		savestates.resize(greenZoneCount);
@@ -87,10 +88,24 @@ void GREENZONE::CollectCurrentState()
 	if (currFrameCounter > 0)
 	{
 		// lagFlag indicates that lag was in previous frame
+		int old_lagFlag = lag_history[currFrameCounter - 1];
 		if (lagFlag)
-			lag_history[currFrameCounter-1] = 1;
+			lag_history[currFrameCounter - 1] = 1;
 		else
-			lag_history[currFrameCounter-1] = 0;
+			lag_history[currFrameCounter - 1] = 0;
+		// Auto-adjust Input due to lag
+		if (taseditor_config.adjust_input_due_to_lag)
+		{
+			if (old_lagFlag && !lagFlag)
+			{
+				// there's no more lag on previous frame - shift input up
+				editor.AdjustUp(currFrameCounter - 1);
+			} else if (!old_lagFlag && lagFlag)
+			{
+				// there's new lag on previous frame - shift input down
+				editor.AdjustDown(currFrameCounter - 1);
+			}
+		}
 	}
 }
 
@@ -410,27 +425,30 @@ void GREENZONE::InvalidateAndCheck(int after)
 		{
 			greenZoneCount = after+1;
 			currMovieData.rerecordCount++;
-			// either set playback cursor to the end of greenzone or run seeking to restore playback position
+			// either set Playback cursor to the end of Greenzone or run seeking to restore playback position
 			if (currFrameCounter >= greenZoneCount)
 			{
-				// remember the lost position
-				if ((playback.lost_position_frame < currFrameCounter + 1) || (playback.lost_position_frame > currFrameCounter + 1 && !playback.lost_position_must_be_fixed))
-				{
-					if (playback.lost_position_frame)
-						piano_roll.RedrawRow(playback.lost_position_frame - 1);
-					playback.lost_position_frame = currFrameCounter + 1;
-					playback.lost_position_must_be_fixed = true;
-				}
 				// auto-restore position if needed
 				if (taseditor_config.restore_position)
 				{
 					if (playback.pause_frame && playback.pause_frame_must_be_fixed)
+					{
 						playback.jump(playback.pause_frame - 1);
-					else
+					} else
+					{
+						playback.SetLostPosition(currFrameCounter);
 						playback.jump(currFrameCounter);
+					}
 				} else
 				{
-					playback.jump(greenZoneCount-1);
+					if (playback.pause_frame && playback.pause_frame_must_be_fixed)
+					{
+						playback.jump(playback.pause_frame - 1);
+					} else
+					{
+						playback.SetLostPosition(currFrameCounter);
+						playback.jump(greenZoneCount-1);
+					}
 				}
 			}
 		}

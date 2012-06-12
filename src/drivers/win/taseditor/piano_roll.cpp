@@ -1188,7 +1188,7 @@ void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 				if (item.iImage < 0)
 				{
 					// no bookmark at this frame
-					if (item.iItem == playback.lost_position_frame - 1)
+					if (item.iItem == playback.GetLostPosition())
 					{
 						if (item.iItem == currFrameCounter)
 							item.iImage = GREEN_BLUE_ARROW_IMAGE_ID;
@@ -1201,7 +1201,7 @@ void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 				} else
 				{
 					// bookmark at this frame
-					if (item.iItem == playback.lost_position_frame - 1)
+					if (item.iItem == playback.GetLostPosition())
 						item.iImage += BOOKMARKS_WITH_GREEN_ARROW;
 					else if (item.iItem == currFrameCounter)
 						item.iImage += BOOKMARKS_WITH_BLUE_ARROW;

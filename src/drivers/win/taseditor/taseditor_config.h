@@ -45,10 +45,11 @@ public:
 	bool columnset_by_keys;
 	int superimpose;
 	bool branch_full_movie;
-	bool branch_only_when_rec;
+	bool old_branching_controls;
 	bool view_branches_tree;
 	bool branch_scr_hud;
 	bool restore_position;
+	bool adjust_input_due_to_lag;
 	int greenzone_capacity;
 	int undo_levels;
 	int autosave_period;

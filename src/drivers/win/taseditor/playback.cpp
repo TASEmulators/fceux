@@ -471,6 +471,21 @@ bool PLAYBACK::JumpToFrame(int index)
 	return true;
 }
 
+void PLAYBACK::SetLostPosition(int frame)
+{
+	if ((lost_position_frame < frame + 1) || (lost_position_frame > frame + 1 && !lost_position_must_be_fixed))
+	{
+		if (lost_position_frame)
+			piano_roll.RedrawRow(lost_position_frame - 1);
+		lost_position_frame = frame + 1;
+		lost_position_must_be_fixed = true;
+	}
+}
+int PLAYBACK::GetLostPosition()
+{
+	return lost_position_frame - 1;
+}
+
 int PLAYBACK::GetFlashingPauseFrame()
 {
 	if (show_pauseframe)

@@ -690,10 +690,31 @@ void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 		}
 	}
 }
-void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
+void SNAPSHOT::inheritHotChanges_DeleteNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
 {
 	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 	// copy hot changes from source snapshot up to "start" and from "start+frames" to end
+	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
+	{
+		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
+		int bytes_to_copy = bytes * start;
+		int dest_pos = 0, source_pos = 0;
+		if (bytes_to_copy > source_size)
+			bytes_to_copy = source_size;
+		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
+		dest_pos += bytes_to_copy;
+		source_pos += bytes_to_copy + bytes * frames;
+		bytes_to_copy = this_size - dest_pos;
+		if (bytes_to_copy > source_size - source_pos)
+			bytes_to_copy = source_size - source_pos;
+		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
+		FadeHotChanges();
+	}
+} 
+void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
+{
+	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+	// copy hot changes from source snapshot up to "start", then make a gap, then copy from "start+frames" to end
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
 		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
@@ -710,7 +731,7 @@ void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int s
 		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
 		FadeHotChanges();
 	}
-	// now set filled lines on frames from start to start+frames
+	// fill the gap with max_hot lines on frames from "start" to "start+frames"
 	memset(&hot_changes[bytes * start], 0xFF, bytes * frames);
 }
 void SNAPSHOT::inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set)

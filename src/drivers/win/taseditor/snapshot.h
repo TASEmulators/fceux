@@ -49,6 +49,7 @@ public:
 	void inheritHotChanges(SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_DeleteSelection(SNAPSHOT* source_of_hotchanges);
 	void inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges);
+	void inheritHotChanges_DeleteNum(SNAPSHOT* source_of_hotchanges, int start, int frames);
 	void inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames);
 	void inheritHotChanges_PasteInsert(SNAPSHOT* source_of_hotchanges, SelectionFrames& inserted_set);
 	void fillHotChanges(SNAPSHOT& snap, int start = 0, int end = -1);

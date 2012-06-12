@@ -7,13 +7,14 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------------
-Main - Logical center of the program
+Main - Main gate between emulator and Taseditor
 [Singleton]
 
 * the point of launching TAS Editor from emulator
 * the point of quitting from TAS Editor
 * regularly (at the end of every frame) updates all modules that need regular update
 * implements operations of the "File" menu: creating New project, opening a file, saving, compact saving, import, export
+* handles some FCEUX hotkeys
 ------------------------------------------------------------------------------------ */
 
 #include <fstream>
@@ -21,6 +22,7 @@ Main - Logical center of the program
 #include "utils/xstring.h"
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
+#include "../../input.h"
 
 using namespace std;
 
@@ -773,4 +775,84 @@ bool TaseditorIsRecording()
 		return false;		// replay
 	return true;			// record
 }
+
+// this gate handles FCEUX hotkeys (EMUCMD)
+void Taseditor_EMUCMD(int command)
+{
+	switch (command)
+	{
+		case EMUCMD_SAVE_SLOT_0:
+		case EMUCMD_SAVE_SLOT_1:
+		case EMUCMD_SAVE_SLOT_2:
+		case EMUCMD_SAVE_SLOT_3:
+		case EMUCMD_SAVE_SLOT_4:
+		case EMUCMD_SAVE_SLOT_5:
+		case EMUCMD_SAVE_SLOT_6:
+		case EMUCMD_SAVE_SLOT_7:
+		case EMUCMD_SAVE_SLOT_8:
+		case EMUCMD_SAVE_SLOT_9:
+		{
+			if (taseditor_config.old_branching_controls)
+				bookmarks.command(COMMAND_SELECT, command - EMUCMD_SAVE_SLOT_0);
+			else
+				bookmarks.command(COMMAND_JUMP, command - EMUCMD_SAVE_SLOT_0);
+			break;
+		}
+		case EMUCMD_SAVE_SLOT_NEXT:
+		{
+			int slot = bookmarks.GetSelectedSlot() + 1;
+			if (slot >= TOTAL_BOOKMARKS) slot = 0;
+			bookmarks.command(COMMAND_SELECT, slot);
+			break;
+		}
+		case EMUCMD_SAVE_SLOT_PREV:
+		{
+			int slot = bookmarks.GetSelectedSlot() - 1;
+			if (slot < 0) slot = TOTAL_BOOKMARKS - 1;
+			bookmarks.command(COMMAND_SELECT, slot);
+			break;
+		}
+		case EMUCMD_SAVE_STATE:
+			bookmarks.command(COMMAND_SET);
+			break;
+		case EMUCMD_SAVE_STATE_SLOT_0:
+		case EMUCMD_SAVE_STATE_SLOT_1:
+		case EMUCMD_SAVE_STATE_SLOT_2:
+		case EMUCMD_SAVE_STATE_SLOT_3:
+		case EMUCMD_SAVE_STATE_SLOT_4:
+		case EMUCMD_SAVE_STATE_SLOT_5:
+		case EMUCMD_SAVE_STATE_SLOT_6:
+		case EMUCMD_SAVE_STATE_SLOT_7:
+		case EMUCMD_SAVE_STATE_SLOT_8:
+		case EMUCMD_SAVE_STATE_SLOT_9:
+			bookmarks.command(COMMAND_SET, command - EMUCMD_SAVE_STATE_SLOT_0);
+			break;
+		case EMUCMD_LOAD_STATE:
+			bookmarks.command(COMMAND_DEPLOY);
+			break;
+		case EMUCMD_LOAD_STATE_SLOT_0:
+		case EMUCMD_LOAD_STATE_SLOT_1:
+		case EMUCMD_LOAD_STATE_SLOT_2:
+		case EMUCMD_LOAD_STATE_SLOT_3:
+		case EMUCMD_LOAD_STATE_SLOT_4:
+		case EMUCMD_LOAD_STATE_SLOT_5:
+		case EMUCMD_LOAD_STATE_SLOT_6:
+		case EMUCMD_LOAD_STATE_SLOT_7:
+		case EMUCMD_LOAD_STATE_SLOT_8:
+		case EMUCMD_LOAD_STATE_SLOT_9:
+			bookmarks.command(COMMAND_DEPLOY, command - EMUCMD_LOAD_STATE_SLOT_0);
+			break;
+		case EMUCMD_RELOAD:
+			taseditor_window.LoadRecentProject(0);
+			break;
+		case EMUCMD_TASEDITOR_RESTORE_PLAYBACK:
+			playback.RestorePosition();
+			break;
+		case EMUCMD_TASEDITOR_CANCEL_SEEKING:
+			playback.CancelSeeking();
+			break;
+
+	}
+}
+
 

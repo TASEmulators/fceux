@@ -267,8 +267,6 @@ void SPLICER::DeleteFrames()
 				markers_changed = true;
 		}
 	}
-	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
 	// check if user deleted all frames
 	if (!currMovieData.getNumRecords())
 		playback.StartFromZero();
@@ -286,6 +284,8 @@ void SPLICER::DeleteFrames()
 		if (markers_changed)
 			history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, start_index);
 	}
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 
 void SPLICER::ClearFrames(SelectionFrames* current_selection)

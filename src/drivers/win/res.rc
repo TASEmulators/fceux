@@ -286,7 +286,7 @@ BEGIN
         MENUITEM "Bind Markers to Input",       ID_CONFIG_BINDMARKERSTOINPUT,MFT_STRING,MFS_ENABLED
         MENUITEM "Empty new Marker Notes",      ID_CONFIG_EMPTYNEWMARKERNOTES,MFT_STRING,MFS_ENABLED
         MENUITEM MFT_SEPARATOR
-        MENUITEM "Branches work only when Recording", ID_CONFIG_BRANCHESWORKONLYWHENRECORDING,MFT_STRING,MFS_ENABLED
+        MENUITEM "Old control scheme for Branching", ID_CONFIG_OLDBRANCHINGCONTROLS,MFT_STRING,MFS_ENABLED
         MENUITEM "Branches restore entire Movie", ID_CONFIG_BRANCHESRESTOREFULLMOVIE,MFT_STRING,MFS_ENABLED
         MENUITEM "HUD in Branch screenshots",   ID_CONFIG_HUDINBRANCHSCREENSHOTS,MFT_STRING,MFS_ENABLED
         MENUITEM MFT_SEPARATOR
@@ -294,7 +294,7 @@ BEGIN
     END
     POPUP "Help",                           65535,MFT_STRING,MFS_ENABLED
     BEGIN
-        MENUITEM "TAS Editor Help",             ID_HELP_TASEDITORHELP,MFT_STRING,MFS_ENABLED
+        MENUITEM "Open TAS Editor Manual",      ID_HELP_TASEDITORHELP,MFT_STRING,MFS_ENABLED
         MENUITEM "Enable Tooltips",             ID_HELP_TOOLTIPS,MFT_STRING,MFS_ENABLED
         MENUITEM MFT_SEPARATOR
         MENUITEM "About",                       ID_HELP_ABOUT,MFT_STRING,MFS_ENABLED
@@ -1380,21 +1380,21 @@ BEGIN
     EDITTEXT        IDC_LABEL_NEWPPUUSED,76,166,155,12,ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
 END
 
-TASEDITOR DIALOGEX 0, 0, 325, 353
+TASEDITOR DIALOGEX 0, 0, 326, 359
 STYLE DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "TAS Editor"
 MENU TASEDITORMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_PROGRESS_BUTTON,"Button",BS_OWNERDRAW,200,36,116,12
-    CONTROL         "",IDC_BRANCHES_BUTTON,"Button",BS_OWNERDRAW,207,167,104,11
-    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER,5,13,187,320
-    GROUPBOX        " Playback ",IDC_PLAYBACK_BOX,197,0,123,62,BS_CENTER,WS_EX_RIGHT
-    GROUPBOX        " Recorder ",IDC_RECORDER_BOX,197,63,123,46,BS_CENTER,WS_EX_RIGHT
-    GROUPBOX        " Splicer ",IDC_SPLICER_BOX,197,110,123,30,BS_CENTER,WS_EX_RIGHT
-    GROUPBOX        " Lua ",IDC_LUA_BOX,197,141,123,26,BS_CENTER,WS_EX_RIGHT
-    GROUPBOX        " Bookmarks ",IDC_BOOKMARKS_BOX,197,169,123,102,BS_CENTER,WS_EX_RIGHT
-    GROUPBOX        " History ",IDC_HISTORY_BOX,197,272,123,56,BS_CENTER,WS_EX_RIGHT
+    CONTROL         "",IDC_BRANCHES_BUTTON,"Button",BS_OWNERDRAW,207,179,104,10
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSORTHEADER | WS_BORDER,5,13,187,328
+    GROUPBOX        " Playback ",IDC_PLAYBACK_BOX,197,0,123,75,BS_CENTER,WS_EX_RIGHT
+    GROUPBOX        " Recorder ",IDC_RECORDER_BOX,197,75,123,46,BS_CENTER,WS_EX_RIGHT
+    GROUPBOX        " Splicer ",IDC_SPLICER_BOX,197,122,123,30,BS_CENTER,WS_EX_RIGHT
+    GROUPBOX        " Lua ",IDC_LUA_BOX,197,153,123,26,BS_CENTER,WS_EX_RIGHT
+    GROUPBOX        " Bookmarks ",IDC_BOOKMARKS_BOX,197,180,123,102,BS_CENTER,WS_EX_RIGHT
+    GROUPBOX        " History ",IDC_HISTORY_BOX,197,283,123,52,BS_CENTER,WS_EX_RIGHT
     PUSHBUTTON      "<<",TASEDITOR_REWIND_FULL,201,9,23,14,NOT WS_TABSTOP
     PUSHBUTTON      "<",TASEDITOR_REWIND,224,9,23,14,NOT WS_TABSTOP
     PUSHBUTTON      "||",TASEDITOR_PLAYSTOP,247,9,23,14,NOT WS_TABSTOP
@@ -1403,31 +1403,33 @@ BEGIN
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | WS_BORDER,201,39,115,6
     CONTROL         " Follow cursor",CHECK_FOLLOW_CURSOR,"Button",BS_AUTOCHECKBOX,203,25,56,12
     CONTROL         " Auto-restore last position",CHECK_AUTORESTORE_PLAYBACK,
-                    "Button",BS_AUTOCHECKBOX,203,48,105,12
-    CONTROL         "",IDC_BOOKMARKSLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSCROLL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | NOT WS_VISIBLE | WS_BORDER,202,178,113,89
-    CONTROL         "",IDC_HISTORYLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER,202,282,113,42
-    CONTROL         " All",IDC_RADIO_ALL,"Button",BS_AUTORADIOBUTTON,291,71,24,10
-    CONTROL         " 1P",IDC_RADIO_1P,"Button",BS_AUTORADIOBUTTON,203,83,25,10
-    CONTROL         " 2P",IDC_RADIO_2P,"Button",BS_AUTORADIOBUTTON,232,83,25,10
-    CONTROL         " 3P",IDC_RADIO_3P,"Button",BS_AUTORADIOBUTTON,262,83,24,10
-    CONTROL         " 4P",IDC_RADIO_4P,"Button",BS_AUTORADIOBUTTON,291,83,24,10
-    CONTROL         " Superimpose",IDC_SUPERIMPOSE,"Button",BS_AUTO3STATE,203,96,55,10
-    PUSHBUTTON      "<<",TASEDITOR_PREV_MARKER,202,332,23,14,NOT WS_TABSTOP
-    PUSHBUTTON      "Similar",TASEDITOR_FIND_BEST_SIMILAR_MARKER,225,332,34,14,NOT WS_TABSTOP
-    PUSHBUTTON      "More",TASEDITOR_FIND_NEXT_SIMILAR_MARKER,259,332,34,14,NOT WS_TABSTOP
-    PUSHBUTTON      ">>",TASEDITOR_NEXT_MARKER,292,332,23,14,NOT WS_TABSTOP
+                    "Button",BS_AUTOCHECKBOX,203,48,109,12
+    CONTROL         "",IDC_BOOKMARKSLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOSCROLL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | NOT WS_VISIBLE | WS_BORDER,202,189,113,89
+    CONTROL         "",IDC_HISTORYLIST,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_ALIGNLEFT | LVS_OWNERDATA | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER,202,292,113,39
+    CONTROL         " All",IDC_RADIO_ALL,"Button",BS_AUTORADIOBUTTON,291,83,24,10
+    CONTROL         " 1P",IDC_RADIO_1P,"Button",BS_AUTORADIOBUTTON,203,95,25,10
+    CONTROL         " 2P",IDC_RADIO_2P,"Button",BS_AUTORADIOBUTTON,232,95,25,10
+    CONTROL         " 3P",IDC_RADIO_3P,"Button",BS_AUTORADIOBUTTON,262,95,24,10
+    CONTROL         " 4P",IDC_RADIO_4P,"Button",BS_AUTORADIOBUTTON,291,95,24,10
+    CONTROL         " Superimpose",IDC_SUPERIMPOSE,"Button",BS_AUTO3STATE,203,108,55,10
+    PUSHBUTTON      "<<",TASEDITOR_PREV_MARKER,202,340,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "Similar",TASEDITOR_FIND_BEST_SIMILAR_MARKER,225,340,34,14,NOT WS_TABSTOP
+    PUSHBUTTON      "More",TASEDITOR_FIND_NEXT_SIMILAR_MARKER,259,340,34,14,NOT WS_TABSTOP
+    PUSHBUTTON      ">>",TASEDITOR_NEXT_MARKER,292,340,23,14,NOT WS_TABSTOP
     EDITTEXT        IDC_PLAYBACK_MARKER_EDIT,65,0,127,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Marker 0",IDC_PLAYBACK_MARKER,4,2,60,10,SS_NOTIFY,WS_EX_RIGHT
-    EDITTEXT        IDC_SELECTION_MARKER_EDIT,65,333,127,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
-    RTEXT           "Marker 99999",IDC_SELECTION_MARKER,4,335,60,10,SS_NOTIFY,WS_EX_RIGHT
-    CONTROL         "",IDC_BRANCHES_BITMAP,"Static",SS_OWNERDRAW | SS_NOTIFY | SS_REALSIZEIMAGE | NOT WS_VISIBLE,202,178,113,89
+    EDITTEXT        IDC_SELECTION_MARKER_EDIT,65,341,127,13,ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Marker 99999",IDC_SELECTION_MARKER,4,343,60,10,SS_NOTIFY,WS_EX_RIGHT
+    CONTROL         "",IDC_BRANCHES_BITMAP,"Static",SS_OWNERDRAW | SS_NOTIFY | SS_REALSIZEIMAGE | NOT WS_VISIBLE,202,189,113,89
     CONTROL         " Turbo seek",CHECK_TURBO_SEEK,"Button",BS_AUTOCHECKBOX,263,25,50,12
-    LTEXT           "Selection: 0 rows, 16 columns",IDC_TEXT_SELECTION,204,118,112,10,SS_NOTIFY
-    LTEXT           "Clipboard: 0 rows, 16 columns",IDC_TEXT_CLIPBOARD,203,128,114,10,SS_NOTIFY
-    CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,203,71,64,10
-    PUSHBUTTON      "Run function",TASEDITOR_RUN_MANUAL,202,150,54,14,WS_DISABLED | NOT WS_TABSTOP
-    CONTROL         "Auto function",IDC_RUN_AUTO,"Button",BS_AUTOCHECKBOX,261,152,55,10
-    CONTROL         " Use pattern",IDC_USEPATTERN,"Button",BS_AUTOCHECKBOX,262,96,53,10
+    LTEXT           "Selection: 0 rows, 16 columns",IDC_TEXT_SELECTION,204,130,112,10,SS_NOTIFY
+    LTEXT           "Clipboard: 0 rows, 16 columns",IDC_TEXT_CLIPBOARD,203,140,114,10,SS_NOTIFY
+    CONTROL         " Recording",IDC_RECORDING,"Button",BS_AUTO3STATE,203,83,64,10
+    PUSHBUTTON      "Run function",TASEDITOR_RUN_MANUAL,202,162,54,14,WS_DISABLED | NOT WS_TABSTOP
+    CONTROL         "Auto function",IDC_RUN_AUTO,"Button",BS_AUTOCHECKBOX,261,164,55,10
+    CONTROL         " Use pattern",IDC_USEPATTERN,"Button",BS_AUTOCHECKBOX,262,108,53,10
+    CONTROL         " Auto-adjust Input due to lag",CHECK_AUTOADJUSTINPUTDUETOLAG,
+                    "Button",BS_AUTOCHECKBOX,203,61,109,12
 END
 
 IDD_TASEDITOR_ABOUT DIALOGEX 0, 0, 238, 78
@@ -1986,8 +1988,6 @@ BEGIN
 
     "TASEDITOR", DIALOG
     BEGIN
-        RIGHTMARGIN, 323
-        BOTTOMMARGIN, 351
     END
 
     IDD_TASEDITOR_ABOUT, DIALOG
@@ -2079,6 +2079,7 @@ END
 
 #endif    // Нейтральный resources
 /////////////////////////////////////////////////////////////////////////////
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Английский (США) resources
@@ -2255,46 +2256,66 @@ IDB_PIANO_16            BITMAP                  "res\\te_piano_16.bmp"
 IDB_PIANO_17            BITMAP                  "res\\te_piano_17.bmp"
 IDB_PIANO_18            BITMAP                  "res\\te_piano_18.bmp"
 IDB_PIANO_19            BITMAP                  "res\\te_piano_19.bmp"
-IDB_PIANO_PLAYBACK_0             BITMAP                  "res\\te_piano_0_playback.bmp"
-IDB_PIANO_PLAYBACK_1             BITMAP                  "res\\te_piano_1_playback.bmp"
-IDB_PIANO_PLAYBACK_2             BITMAP                  "res\\te_piano_2_playback.bmp"
-IDB_PIANO_PLAYBACK_3             BITMAP                  "res\\te_piano_3_playback.bmp"
-IDB_PIANO_PLAYBACK_4             BITMAP                  "res\\te_piano_4_playback.bmp"
-IDB_PIANO_PLAYBACK_5             BITMAP                  "res\\te_piano_5_playback.bmp"
-IDB_PIANO_PLAYBACK_6             BITMAP                  "res\\te_piano_6_playback.bmp"
-IDB_PIANO_PLAYBACK_7             BITMAP                  "res\\te_piano_7_playback.bmp"
-IDB_PIANO_PLAYBACK_8             BITMAP                  "res\\te_piano_8_playback.bmp"
-IDB_PIANO_PLAYBACK_9             BITMAP                  "res\\te_piano_9_playback.bmp"
-IDB_PIANO_PLAYBACK_10            BITMAP                  "res\\te_piano_10_playback.bmp"
-IDB_PIANO_PLAYBACK_11            BITMAP                  "res\\te_piano_11_playback.bmp"
-IDB_PIANO_PLAYBACK_12            BITMAP                  "res\\te_piano_12_playback.bmp"
-IDB_PIANO_PLAYBACK_13            BITMAP                  "res\\te_piano_13_playback.bmp"
-IDB_PIANO_PLAYBACK_14            BITMAP                  "res\\te_piano_14_playback.bmp"
-IDB_PIANO_PLAYBACK_15            BITMAP                  "res\\te_piano_15_playback.bmp"
-IDB_PIANO_PLAYBACK_16            BITMAP                  "res\\te_piano_16_playback.bmp"
-IDB_PIANO_PLAYBACK_17            BITMAP                  "res\\te_piano_17_playback.bmp"
-IDB_PIANO_PLAYBACK_18            BITMAP                  "res\\te_piano_18_playback.bmp"
-IDB_PIANO_PLAYBACK_19            BITMAP                  "res\\te_piano_19_playback.bmp"
-IDB_PIANO_LOSTPOS_0             BITMAP                  "res\\te_piano_0_lostpos.bmp"
-IDB_PIANO_LOSTPOS_1             BITMAP                  "res\\te_piano_1_lostpos.bmp"
-IDB_PIANO_LOSTPOS_2             BITMAP                  "res\\te_piano_2_lostpos.bmp"
-IDB_PIANO_LOSTPOS_3             BITMAP                  "res\\te_piano_3_lostpos.bmp"
-IDB_PIANO_LOSTPOS_4             BITMAP                  "res\\te_piano_4_lostpos.bmp"
-IDB_PIANO_LOSTPOS_5             BITMAP                  "res\\te_piano_5_lostpos.bmp"
-IDB_PIANO_LOSTPOS_6             BITMAP                  "res\\te_piano_6_lostpos.bmp"
-IDB_PIANO_LOSTPOS_7             BITMAP                  "res\\te_piano_7_lostpos.bmp"
-IDB_PIANO_LOSTPOS_8             BITMAP                  "res\\te_piano_8_lostpos.bmp"
-IDB_PIANO_LOSTPOS_9             BITMAP                  "res\\te_piano_9_lostpos.bmp"
-IDB_PIANO_LOSTPOS_10            BITMAP                  "res\\te_piano_10_lostpos.bmp"
-IDB_PIANO_LOSTPOS_11            BITMAP                  "res\\te_piano_11_lostpos.bmp"
-IDB_PIANO_LOSTPOS_12            BITMAP                  "res\\te_piano_12_lostpos.bmp"
-IDB_PIANO_LOSTPOS_13            BITMAP                  "res\\te_piano_13_lostpos.bmp"
-IDB_PIANO_LOSTPOS_14            BITMAP                  "res\\te_piano_14_lostpos.bmp"
-IDB_PIANO_LOSTPOS_15            BITMAP                  "res\\te_piano_15_lostpos.bmp"
-IDB_PIANO_LOSTPOS_16            BITMAP                  "res\\te_piano_16_lostpos.bmp"
-IDB_PIANO_LOSTPOS_17            BITMAP                  "res\\te_piano_17_lostpos.bmp"
-IDB_PIANO_LOSTPOS_18            BITMAP                  "res\\te_piano_18_lostpos.bmp"
-IDB_PIANO_LOSTPOS_19            BITMAP                  "res\\te_piano_19_lostpos.bmp"
+IDB_PIANO_PLAYBACK_0    BITMAP                  "res\\te_piano_0_playback.bmp"
+IDB_PIANO_PLAYBACK_1    BITMAP                  "res\\te_piano_1_playback.bmp"
+IDB_PIANO_PLAYBACK_2    BITMAP                  "res\\te_piano_2_playback.bmp"
+IDB_PIANO_PLAYBACK_3    BITMAP                  "res\\te_piano_3_playback.bmp"
+IDB_PIANO_PLAYBACK_4    BITMAP                  "res\\te_piano_4_playback.bmp"
+IDB_PIANO_PLAYBACK_5    BITMAP                  "res\\te_piano_5_playback.bmp"
+IDB_PIANO_PLAYBACK_6    BITMAP                  "res\\te_piano_6_playback.bmp"
+IDB_PIANO_PLAYBACK_7    BITMAP                  "res\\te_piano_7_playback.bmp"
+IDB_PIANO_PLAYBACK_8    BITMAP                  "res\\te_piano_8_playback.bmp"
+IDB_PIANO_PLAYBACK_9    BITMAP                  "res\\te_piano_9_playback.bmp"
+IDB_PIANO_PLAYBACK_10   BITMAP                  "res\\te_piano_10_playback.bmp"
+IDB_PIANO_PLAYBACK_11   BITMAP                  "res\\te_piano_11_playback.bmp"
+IDB_PIANO_PLAYBACK_12   BITMAP                  "res\\te_piano_12_playback.bmp"
+IDB_PIANO_PLAYBACK_13   BITMAP                  "res\\te_piano_13_playback.bmp"
+IDB_PIANO_PLAYBACK_14   BITMAP                  "res\\te_piano_14_playback.bmp"
+IDB_PIANO_PLAYBACK_15   BITMAP                  "res\\te_piano_15_playback.bmp"
+IDB_PIANO_PLAYBACK_16   BITMAP                  "res\\te_piano_16_playback.bmp"
+IDB_PIANO_PLAYBACK_17   BITMAP                  "res\\te_piano_17_playback.bmp"
+IDB_PIANO_PLAYBACK_18   BITMAP                  "res\\te_piano_18_playback.bmp"
+IDB_PIANO_PLAYBACK_19   BITMAP                  "res\\te_piano_19_playback.bmp"
+IDB_PIANO_LOSTPOS_0     BITMAP                  "res\\te_piano_0_lostpos.bmp"
+IDB_PIANO_LOSTPOS_1     BITMAP                  "res\\te_piano_1_lostpos.bmp"
+IDB_PIANO_LOSTPOS_2     BITMAP                  "res\\te_piano_2_lostpos.bmp"
+IDB_PIANO_LOSTPOS_3     BITMAP                  "res\\te_piano_3_lostpos.bmp"
+IDB_PIANO_LOSTPOS_4     BITMAP                  "res\\te_piano_4_lostpos.bmp"
+IDB_PIANO_LOSTPOS_5     BITMAP                  "res\\te_piano_5_lostpos.bmp"
+IDB_PIANO_LOSTPOS_6     BITMAP                  "res\\te_piano_6_lostpos.bmp"
+IDB_PIANO_LOSTPOS_7     BITMAP                  "res\\te_piano_7_lostpos.bmp"
+IDB_PIANO_LOSTPOS_8     BITMAP                  "res\\te_piano_8_lostpos.bmp"
+IDB_PIANO_LOSTPOS_9     BITMAP                  "res\\te_piano_9_lostpos.bmp"
+IDB_PIANO_LOSTPOS_10    BITMAP                  "res\\te_piano_10_lostpos.bmp"
+IDB_PIANO_LOSTPOS_11    BITMAP                  "res\\te_piano_11_lostpos.bmp"
+IDB_PIANO_LOSTPOS_12    BITMAP                  "res\\te_piano_12_lostpos.bmp"
+IDB_PIANO_LOSTPOS_13    BITMAP                  "res\\te_piano_13_lostpos.bmp"
+IDB_PIANO_LOSTPOS_14    BITMAP                  "res\\te_piano_14_lostpos.bmp"
+IDB_PIANO_LOSTPOS_15    BITMAP                  "res\\te_piano_15_lostpos.bmp"
+IDB_PIANO_LOSTPOS_16    BITMAP                  "res\\te_piano_16_lostpos.bmp"
+IDB_PIANO_LOSTPOS_17    BITMAP                  "res\\te_piano_17_lostpos.bmp"
+IDB_PIANO_LOSTPOS_18    BITMAP                  "res\\te_piano_18_lostpos.bmp"
+IDB_PIANO_LOSTPOS_19    BITMAP                  "res\\te_piano_19_lostpos.bmp"
+IDB_BITMAP_SELECTED0    BITMAP                  "res\\te_0_selected.bmp"
+IDB_BITMAP_SELECTED1    BITMAP                  "res\\te_1_selected.bmp"
+IDB_BITMAP_SELECTED2    BITMAP                  "res\\te_2_selected.bmp"
+IDB_BITMAP_SELECTED3    BITMAP                  "res\\te_3_selected.bmp"
+IDB_BITMAP_SELECTED4    BITMAP                  "res\\te_4_selected.bmp"
+IDB_BITMAP_SELECTED5    BITMAP                  "res\\te_5_selected.bmp"
+IDB_BITMAP_SELECTED6    BITMAP                  "res\\te_6_selected.bmp"
+IDB_BITMAP_SELECTED7    BITMAP                  "res\\te_7_selected.bmp"
+IDB_BITMAP_SELECTED8    BITMAP                  "res\\te_8_selected.bmp"
+IDB_BITMAP_SELECTED9    BITMAP                  "res\\te_9_selected.bmp"
+IDB_BITMAP_SELECTED10   BITMAP                  "res\\te_10_selected.bmp"
+IDB_BITMAP_SELECTED11   BITMAP                  "res\\te_11_selected.bmp"
+IDB_BITMAP_SELECTED12   BITMAP                  "res\\te_12_selected.bmp"
+IDB_BITMAP_SELECTED13   BITMAP                  "res\\te_13_selected.bmp"
+IDB_BITMAP_SELECTED14   BITMAP                  "res\\te_14_selected.bmp"
+IDB_BITMAP_SELECTED15   BITMAP                  "res\\te_15_selected.bmp"
+IDB_BITMAP_SELECTED16   BITMAP                  "res\\te_16_selected.bmp"
+IDB_BITMAP_SELECTED17   BITMAP                  "res\\te_17_selected.bmp"
+IDB_BITMAP_SELECTED18   BITMAP                  "res\\te_18_selected.bmp"
+IDB_BITMAP_SELECTED19   BITMAP                  "res\\te_19_selected.bmp"
 IDB_BRANCH_SPRITESHEET  BITMAP                  "res\\branch_spritesheet.bmp"
 #endif    // Английский (США) resources
 /////////////////////////////////////////////////////////////////////////////

@@ -77,7 +77,7 @@ void BOOKMARKS::init()
 	// subclass the listview
 	hwndBookmarksList_oldWndProc = (WNDPROC)SetWindowLong(hwndBookmarksList, GWL_WNDPROC, (LONG)BookmarksListWndProc);
 	// setup images for the listview
-	himglist = ImageList_Create(9, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
+	himglist = ImageList_Create(11, 13, ILC_COLOR8 | ILC_MASK, 1, 1);
 	HBITMAP bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP0));
 	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
@@ -138,6 +138,66 @@ void BOOKMARKS::init()
 	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP19));
 	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
 	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED0));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED1));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED2));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED3));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED4));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED5));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED6));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED7));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED8));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED9));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED10));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED11));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED12));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED13));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED14));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED15));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED16));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED17));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED18));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
+	bmp = LoadBitmap(fceu_hInstance, MAKEINTRESOURCE(IDB_BITMAP_SELECTED19));
+	ImageList_AddMasked(himglist, bmp, 0xFFFFFF);
+	DeleteObject(bmp);
 	ListView_SetImageList(hwndBookmarksList, himglist, LVSIL_SMALL);
 	// setup columns
 	LVCOLUMN lvc;
@@ -156,6 +216,7 @@ void BOOKMARKS::init()
 	ListView_SetItemCountEx(hwndBookmarksList, TOTAL_BOOKMARKS, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 
 	reset();
+	selected_slot = DEFAULT_SLOT;
 	// find rows top/height (for mouseover hittest calculations)
 	RECT temp_rect;
 	if (ListView_GetSubItemRect(hwndBookmarksList, 0, 2, LVIR_BOUNDS, &temp_rect) && temp_rect.bottom != temp_rect.top)
@@ -220,6 +281,15 @@ void BOOKMARKS::update()
 			case COMMAND_DEPLOY:
 				deploy(slot);
 				break;
+			case COMMAND_SELECT:
+				if (selected_slot != slot)
+				{
+					int old_selected_slot = selected_slot;
+					selected_slot = slot;
+					RedrawBookmark(old_selected_slot);
+					RedrawBookmark(selected_slot);
+				}
+				break;
 		}
 	}
 	commands.resize(0);
@@ -267,27 +337,11 @@ void BOOKMARKS::update()
 void BOOKMARKS::command(int command_id, int slot)
 {
 	if (slot < 0)
-		slot = branches.GetCurrentBranch();
-	switch (command_id)
+		slot = selected_slot;
+	if (slot >= 0 && slot < TOTAL_BOOKMARKS)
 	{
-		case COMMAND_SET:
-		{
-			if (slot < 0 || slot >= TOTAL_BOOKMARKS)
-				slot = DEFAULT_BOOKMARK;
-			commands.push_back(command_id);
-			commands.push_back(slot);
-			break;
-		}
-		case COMMAND_JUMP:
-		case COMMAND_DEPLOY:
-		{
-			if (slot >= 0 && slot < TOTAL_BOOKMARKS)
-			{
-				commands.push_back(command_id);
-				commands.push_back(slot);
-			}
-			break;
-		}
+		commands.push_back(command_id);
+		commands.push_back(slot);
 	}
 }
 
@@ -345,7 +399,7 @@ void BOOKMARKS::jump(int slot)
 
 void BOOKMARKS::deploy(int slot)
 {
-	if (taseditor_config.branch_only_when_rec && movie_readonly)
+	if (taseditor_config.old_branching_controls && movie_readonly)
 	{
 		jump(slot);
 		return;
@@ -473,7 +527,7 @@ void BOOKMARKS::RedrawBookmarksCaption()
 		edit_mode = EDIT_MODE_BRANCHES;
 		ShowWindow(hwndBookmarksList, SW_HIDE);
 		ShowWindow(hwndBranchesBitmap, SW_SHOW);
-	} else if (taseditor_config.branch_only_when_rec && movie_readonly)
+	} else if (taseditor_config.old_branching_controls && movie_readonly)
 	{
 		edit_mode = EDIT_MODE_BOOKMARKS;
 		ShowWindow(hwndBranchesBitmap, SW_HIDE);
@@ -531,6 +585,11 @@ int BOOKMARKS::FindItemUnderMouse()
 	}
 	return item;
 }
+
+int BOOKMARKS::GetSelectedSlot()
+{
+	return selected_slot;
+}
 // ----------------------------------------------------------------------------------------
 void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
@@ -545,6 +604,11 @@ void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 					item.iImage = ((item.iItem + 1) % TOTAL_BOOKMARKS) + TOTAL_BOOKMARKS;
 				else
 					item.iImage = (item.iItem + 1) % TOTAL_BOOKMARKS;
+				if (taseditor_config.old_branching_controls)
+				{
+					if ((item.iItem + 1) % TOTAL_BOOKMARKS == selected_slot)
+						item.iImage += BOOKMARKS_SELECTED;
+				}
 				break;
 			}
 			case BOOKMARKS_COLUMN_FRAME:
@@ -580,7 +644,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 		if (bookmarks_array[cell_y].flash_phase)
 			msg->clrText = bookmark_flash_colors[bookmarks_array[cell_y].flash_type][bookmarks_array[cell_y].flash_phase];
 
-		if (cell_x == BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
+		if (cell_x == BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly && cell_x == BOOKMARKS_COLUMN_TIME))
 		{
 			if (bookmarks_array[cell_y].not_empty)
 			{
@@ -650,9 +714,9 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 
 void BOOKMARKS::LeftClick()
 {
-	if (column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
+	if (column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly))
 		command(COMMAND_JUMP, bookmark_leftclicked);
-	else if (column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
+	else if (column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.old_branching_controls || !movie_readonly))
 		command(COMMAND_DEPLOY, bookmark_leftclicked);
 }
 void BOOKMARKS::RightClick()
@@ -716,9 +780,9 @@ LRESULT APIENTRY BookmarksListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			{
 				bookmarks.bookmark_leftclicked = (info.iItem + 1) % TOTAL_BOOKMARKS;
 				bookmarks.column_clicked = info.iSubItem;
-				if (bookmarks.column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.branch_only_when_rec && movie_readonly))
+				if (bookmarks.column_clicked <= BOOKMARKS_COLUMN_FRAME || (taseditor_config.old_branching_controls && movie_readonly))
 					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_JUMP;
-				else if (bookmarks.column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.branch_only_when_rec || !movie_readonly))
+				else if (bookmarks.column_clicked == BOOKMARKS_COLUMN_TIME && (!taseditor_config.old_branching_controls || !movie_readonly))
 					bookmarks.bookmarks_array[bookmarks.bookmark_leftclicked].flash_type = FLASH_TYPE_DEPLOY;
 				SetCapture(hWnd);
 			}

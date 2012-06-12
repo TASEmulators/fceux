@@ -114,7 +114,7 @@ void RECORDER::update()
 	if (old_movie_readonly != movie_readonly || old_multitrack_recording_joypad != multitrack_recording_joypad)
 		taseditor_window.UpdateCaption();
 	// update Bookmarks/Branches groupbox caption if needed
-	if (taseditor_config.branch_only_when_rec && old_movie_readonly != movie_readonly)
+	if (taseditor_config.old_branching_controls && old_movie_readonly != movie_readonly)
 		bookmarks.RedrawBookmarksCaption();
 	// update "Recording" checkbox state
 	if (old_movie_readonly != movie_readonly)

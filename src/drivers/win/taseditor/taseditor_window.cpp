@@ -74,6 +74,7 @@ LRESULT APIENTRY TASEDITOR_FORWARD_WndProc(HWND hWnd, UINT msg, WPARAM wParam, L
 LRESULT APIENTRY TASEDITOR_FORWARD_FULL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY CHECK_FOLLOW_CURSOR_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY CHECK_AUTORESTORE_PLAYBACK_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT APIENTRY CHECK_AUTOADJUSTINPUTDUETOLAG_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY IDC_RADIO_ALL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY IDC_RADIO_1P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT APIENTRY IDC_RADIO_2P_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -100,6 +101,7 @@ WNDPROC
 	TASEDITOR_FORWARD_FULL_oldWndProc = 0,
 	CHECK_FOLLOW_CURSOR_oldWndProc = 0,
 	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = 0,
+	CHECK_AUTOADJUSTINPUTDUETOLAG_oldWndProc = 0,
 	IDC_RADIO_ALL_oldWndProc = 0,
 	IDC_RADIO_1P_oldWndProc = 0,
 	IDC_RADIO_2P_oldWndProc = 0,
@@ -148,6 +150,7 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
 	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change input above Playback cursor, the cursor returns to where it was before the change (hotkey: Ctrl+Spacebar)", "", false, 0, 0,
+	CHECK_AUTOADJUSTINPUTDUETOLAG, -1, 0, 0, 0, "TAS Editor will adjust Input when new lag frames appear or old lag frames disappear while emulating", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
 	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
 	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,
@@ -271,6 +274,7 @@ void TASEDITOR_WINDOW::init()
 	TASEDITOR_FORWARD_FULL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, TASEDITOR_FORWARD_FULL), GWL_WNDPROC, (LONG)TASEDITOR_FORWARD_FULL_WndProc);
 	CHECK_FOLLOW_CURSOR_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_FOLLOW_CURSOR), GWL_WNDPROC, (LONG)CHECK_FOLLOW_CURSOR_WndProc);
 	CHECK_AUTORESTORE_PLAYBACK_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_AUTORESTORE_PLAYBACK), GWL_WNDPROC, (LONG)CHECK_AUTORESTORE_PLAYBACK_WndProc);
+	CHECK_AUTOADJUSTINPUTDUETOLAG_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, CHECK_AUTOADJUSTINPUTDUETOLAG), GWL_WNDPROC, (LONG)CHECK_AUTOADJUSTINPUTDUETOLAG_WndProc);
 	IDC_RADIO_ALL_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_ALL), GWL_WNDPROC, (LONG)IDC_RADIO_ALL_WndProc);
 	IDC_RADIO_1P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_1P), GWL_WNDPROC, (LONG)IDC_RADIO_1P_WndProc);
 	IDC_RADIO_2P_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndTasEditor, IDC_RADIO_2P), GWL_WNDPROC, (LONG)IDC_RADIO_2P_WndProc);
@@ -552,7 +556,8 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 {
 	// check option ticks
 	CheckDlgButton(hwndTasEditor, CHECK_FOLLOW_CURSOR, taseditor_config.follow_playback?BST_CHECKED : BST_UNCHECKED);
-	CheckDlgButton(hwndTasEditor,CHECK_AUTORESTORE_PLAYBACK,taseditor_config.restore_position?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, CHECK_AUTORESTORE_PLAYBACK, taseditor_config.restore_position?BST_CHECKED:BST_UNCHECKED);
+	CheckDlgButton(hwndTasEditor, CHECK_AUTOADJUSTINPUTDUETOLAG, taseditor_config.adjust_input_due_to_lag?BST_CHECKED:BST_UNCHECKED);
 	if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
 		CheckDlgButton(hwndTasEditor, IDC_SUPERIMPOSE, BST_UNCHECKED);
 	else if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED)
@@ -568,7 +573,7 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_VIEW_FOLLOWMARKERNOTECONTEXT, taseditor_config.follow_note_context?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_VIEW_ENABLEHOTCHANGES, taseditor_config.enable_hot_changes?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_BRANCHESRESTOREFULLMOVIE, taseditor_config.branch_full_movie?MF_CHECKED : MF_UNCHECKED);
-	CheckMenuItem(hmenu, ID_CONFIG_BRANCHESWORKONLYWHENRECORDING, taseditor_config.branch_only_when_rec?MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(hmenu, ID_CONFIG_OLDBRANCHINGCONTROLS, taseditor_config.old_branching_controls?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_HUDINBRANCHSCREENSHOTS, taseditor_config.branch_scr_hud?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_BINDMARKERSTOINPUT, taseditor_config.bind_markers?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_EMPTYNEWMARKERNOTES, taseditor_config.empty_marker_notes?MF_CHECKED : MF_UNCHECKED);
@@ -1052,6 +1057,10 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.restore_position ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
+				case CHECK_AUTOADJUSTINPUTDUETOLAG:
+					taseditor_config.adjust_input_due_to_lag ^= 1;
+					taseditor_window.UpdateCheckedItems();
+					break;
 				case ID_CONFIG_SETGREENZONECAPACITY:
 					{
 						int new_capacity = taseditor_config.greenzone_capacity;
@@ -1105,8 +1114,8 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.branch_full_movie ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_CONFIG_BRANCHESWORKONLYWHENRECORDING:
-					taseditor_config.branch_only_when_rec ^= 1;
+				case ID_CONFIG_OLDBRANCHINGCONTROLS:
+					taseditor_config.old_branching_controls ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					bookmarks.RedrawBookmarksCaption();
 					break;
@@ -1654,6 +1663,19 @@ LRESULT APIENTRY CHECK_AUTORESTORE_PLAYBACK_WndProc(HWND hWnd, UINT msg, WPARAM 
 			return 0;		// disable Spacebar
 	}
 	return CallWindowProc(CHECK_AUTORESTORE_PLAYBACK_oldWndProc, hWnd, msg, wParam, lParam);
+}
+LRESULT APIENTRY CHECK_AUTOADJUSTINPUTDUETOLAG_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONDBLCLK:
+			playback.MiddleButtonClick();
+			return 0;
+		case WM_KEYDOWN:
+			return 0;		// disable Spacebar
+	}
+	return CallWindowProc(CHECK_AUTOADJUSTINPUTDUETOLAG_oldWndProc, hWnd, msg, wParam, lParam);
 }
 LRESULT APIENTRY IDC_RADIO_ALL_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {

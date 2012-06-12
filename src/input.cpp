@@ -51,17 +51,8 @@
 #include "drivers/win/memview.h"
 #include "drivers/win/window.h"
 #include "drivers/win/ntview.h"
-
-#include "./drivers/win/taseditor/taseditor_window.h"
-#include "./drivers/win/taseditor/markers.h"
-#include "./drivers/win/taseditor/selection.h"
-#include "./drivers/win/taseditor/snapshot.h"
-#include "./drivers/win/taseditor/bookmarks.h"
-#include "./drivers/win/taseditor/playback.h"
+#include "drivers/win/taseditor.h"
 extern bool Taseditor_rewind_now;
-extern BOOKMARKS bookmarks;
-extern TASEDITOR_WINDOW taseditor_window;
-extern PLAYBACK playback;
 #endif // WIN32
 
 //it is easier to declare these input drivers extern here than include a bunch of files
@@ -699,8 +690,8 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_SAVE_SLOT_7,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 7", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SAVE_SLOT_8,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 8", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SAVE_SLOT_9,					EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Savestate Slot 9", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_SAVE_SLOT_NEXT,				EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Next Savestate Slot", 0 },
-	{ EMUCMD_SAVE_SLOT_PREV,				EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Previous Savestate Slot", 0 },
+	{ EMUCMD_SAVE_SLOT_NEXT,				EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Next Savestate Slot", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_SAVE_SLOT_PREV,				EMUCMDTYPE_STATE,	CommandSelectSaveSlot, 0, 0, "Previous Savestate Slot", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SAVE_STATE,					EMUCMDTYPE_STATE,	CommandStateSave, 0, 0, "Save State", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_SAVE_STATE_AS,					EMUCMDTYPE_STATE,	FCEUD_SaveStateAs, 0, 0, "Save State As...", 0 },
 	{ EMUCMD_SAVE_STATE_SLOT_0,				EMUCMDTYPE_STATE,	CommandStateSave, 0, 0, "Save State to Slot 0", EMUCMDFLAG_TASEDITOR },
@@ -857,7 +848,7 @@ static void CommandSelectSaveSlot(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		bookmarks.command(COMMAND_JUMP, execcmd - EMUCMD_SAVE_SLOT_0);
+		Taseditor_EMUCMD(execcmd);
 #endif
 	} else
 	{
@@ -875,10 +866,7 @@ static void CommandStateSave(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		if (execcmd == EMUCMD_SAVE_STATE)
-			bookmarks.command(COMMAND_SET);
-		else if(execcmd >= EMUCMD_SAVE_STATE_SLOT_0 && execcmd <= EMUCMD_SAVE_STATE_SLOT_9)
-			bookmarks.command(COMMAND_SET, execcmd - EMUCMD_SAVE_STATE_SLOT_0);
+		Taseditor_EMUCMD(execcmd);
 #endif
 	} else
 	{
@@ -899,10 +887,7 @@ static void CommandStateLoad(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 #ifdef WIN32
-		if (execcmd == EMUCMD_LOAD_STATE)
-			bookmarks.command(COMMAND_DEPLOY);
-		else if(execcmd >= EMUCMD_LOAD_STATE_SLOT_0 && execcmd <= EMUCMD_LOAD_STATE_SLOT_9)
-			bookmarks.command(COMMAND_DEPLOY, execcmd - EMUCMD_LOAD_STATE_SLOT_0);
+		Taseditor_EMUCMD(execcmd);
 #endif
 	} else
 	{
@@ -1141,7 +1126,7 @@ static void ReloadRom(void)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		// load most recent project
-		taseditor_window.LoadRecentProject(0);
+		Taseditor_EMUCMD(execcmd);
 	} else
 	{
 		// load most recent ROM
@@ -1204,14 +1189,13 @@ static void TaseditorRestorePlayback(void)
 {
 #ifdef WIN32
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		playback.RestorePosition();
+		Taseditor_EMUCMD(execcmd);
 #endif
 }
-
 static void TaseditorCancelSeeking(void)
 {
 #ifdef WIN32
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		playback.CancelSeeking();
+		Taseditor_EMUCMD(execcmd);
 #endif
 }

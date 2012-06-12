@@ -102,7 +102,9 @@ char modCaptions[MODTYPES_TOTAL][20] = {" Initialization",
 										" LUA Marker Set",
 										" LUA Marker Remove",
 										" LUA Marker Rename",
-										" LUA Change" };
+										" LUA Change",
+										" AdjustUp",
+										" AdjustDown" };
 char LuaCaptionPrefix[6] = " LUA ";
 char joypadCaptions[4][5] = {"(1P)", "(2P)", "(3P)", "(4P)"};
 
@@ -489,6 +491,8 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			case MODTYPE_PASTE:
 			case MODTYPE_CLONE:
 			case MODTYPE_PATTERN:
+			case MODTYPE_ADJUST_UP:
+			case MODTYPE_ADJUST_DOWN:
 			{
 				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
 				snap.jump_frame = start;
@@ -567,6 +571,12 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 					case MODTYPE_INSERT:
 					case MODTYPE_CLONE:
 						snap.inheritHotChanges_InsertSelection(&snapshots[real_pos]);
+						break;
+					case MODTYPE_ADJUST_UP:
+						snap.inheritHotChanges_DeleteNum(&snapshots[real_pos], start, 1);
+						break;
+					case MODTYPE_ADJUST_DOWN:
+						snap.inheritHotChanges_InsertNum(&snapshots[real_pos], start, 1);
 						break;
 					case MODTYPE_SET:
 					case MODTYPE_UNSET:

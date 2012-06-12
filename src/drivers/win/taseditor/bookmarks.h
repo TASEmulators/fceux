@@ -16,14 +16,17 @@ enum COMMANDS
 	COMMAND_SET = 0,
 	COMMAND_JUMP = 1,
 	COMMAND_DEPLOY = 2,
-	COMMAND_DELETE = 3,			// not implemented, probably useless
+	COMMAND_SELECT = 3,
+	COMMAND_DELETE = 4,			// not implemented, probably useless
 
 	TOTAL_COMMANDS
 };
 
-#define BOOKMARKSLIST_COLUMN_ICONS_WIDTH 14
+#define BOOKMARKSLIST_COLUMN_ICONS_WIDTH 15
 #define BOOKMARKSLIST_COLUMN_FRAMENUM_WIDTH 74
-#define BOOKMARKSLIST_COLUMN_TIME_WIDTH 82
+#define BOOKMARKSLIST_COLUMN_TIME_WIDTH 80
+
+#define BOOKMARKS_SELECTED 20
 
 #define ITEM_UNDER_MOUSE_NONE -2
 #define ITEM_UNDER_MOUSE_CLOUD -1
@@ -41,7 +44,7 @@ enum
 #define BOOKMARKS_ID_LEN 10
 #define TIME_DESC_LENGTH 9		// "HH:MM:SS"
 
-#define DEFAULT_BOOKMARK 1
+#define DEFAULT_SLOT 1
 
 class BOOKMARKS
 {
@@ -74,7 +77,7 @@ public:
 	void MouseMove(int new_x, int new_y);
 	int FindItemUnderMouse();
 
-	bool IsSafeToShowBookmarksData();
+	int GetSelectedSlot();
 
 	// saved vars
 	std::vector<BOOKMARK> bookmarks_array;
@@ -99,6 +102,7 @@ private:
 
 	// not saved vars
 	std::vector<int> commands;
+	int selected_slot;
 	int check_flash_shedule;
 	int mouse_x, mouse_y;
 

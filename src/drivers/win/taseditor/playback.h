@@ -39,13 +39,13 @@ public:
 
 	void StartFromZero();
 
+	void SetLostPosition(int frame);
+	int GetLostPosition();		// actually returns lost_position_frame-1
+
 	int GetFlashingPauseFrame();
 	void SetProgressbar(int a, int b);
 	void CancelSeeking();
 
-	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
-	int lost_position_frame;
-	bool lost_position_must_be_fixed;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 	int pause_frame;
 	bool pause_frame_must_be_fixed;		// for "Auto-restore last position"
 	bool must_find_current_marker;
@@ -61,6 +61,9 @@ private:
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;
 	bool old_show_pauseframe, show_pauseframe;
+	int lastCursor;		// but for currentCursor we use external variable currFrameCounter
+	int lost_position_frame;
+	bool lost_position_must_be_fixed;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 	bool old_rewind_button_state, rewind_button_state;
 	bool old_forward_button_state, forward_button_state;
 	bool old_rewind_full_button_state, rewind_full_button_state;

@@ -30,3 +30,5 @@ void ApplyMovieInputConfig();
 
 bool TaseditorIsRecording();
 
+void Taseditor_EMUCMD(int command);
+

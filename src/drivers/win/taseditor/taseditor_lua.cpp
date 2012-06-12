@@ -218,7 +218,7 @@ int TASEDITOR_LUA::getsuperimpose()
 int TASEDITOR_LUA::getlostplayback()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return playback.lost_position_frame - 1;
+		return playback.GetLostPosition();
 	else
 		return -1;
 }

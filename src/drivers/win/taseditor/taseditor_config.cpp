@@ -47,10 +47,11 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	columnset_by_keys = false;
 	superimpose = 0;			// SUPERIMPOSE_UNCHECKED
 	branch_full_movie = true;
-	branch_only_when_rec = false;
+	old_branching_controls = false;
 	view_branches_tree = false;
 	branch_scr_hud = true;
 	restore_position = false;
+	adjust_input_due_to_lag = false;
 	greenzone_capacity = GREENZONE_CAPACITY_DEFAULT;
 	undo_levels = UNDO_LEVELS_DEFAULT;
 	autosave_period = AUTOSAVE_PERIOD_DEFAULT;

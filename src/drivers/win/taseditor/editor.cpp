@@ -212,6 +212,64 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consec
 	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
 }
 
+void EDITOR::AdjustUp(int at)
+{
+	if (at < 0)
+		return;
+	bool markers_changed = false;
+	// delete one frame
+	currMovieData.records.erase(currMovieData.records.begin() + at);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.EraseMarker(at))
+			markers_changed = true;
+	}
+	// check if user deleted all frames
+	if (!currMovieData.getNumRecords())
+		playback.StartFromZero();
+	// reduce Piano Roll
+	piano_roll.UpdateItemCount();
+	// check and register changes
+	int result = history.RegisterChanges(MODTYPE_ADJUST_UP, at);
+	if (result >= 0)
+	{
+		greenzone.InvalidateAndCheck(result);
+	} else
+	{
+		// check for special case: user deleted a bunch of empty frames the end of the movie
+		greenzone.InvalidateAndCheck(currMovieData.getNumRecords() - 1);
+		if (markers_changed)
+			history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, at);
+	}
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+}
+void EDITOR::AdjustDown(int at)
+{
+	if (at < 0)
+		return;
+	bool markers_changed = false;
+	// insert blank frame
+	currMovieData.insertEmpty(at, 1);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.insertEmpty(at, 1))
+			markers_changed = true;
+	}
+	// check and register changes
+	int first_changes = history.RegisterChanges(MODTYPE_ADJUST_DOWN, at);
+	if (first_changes >= 0)
+	{
+		greenzone.InvalidateAndCheck(first_changes);
+	} else if (markers_changed)
+	{
+		history.RegisterMarkersChange(MODTYPE_MARKER_SHIFT, at);
+		piano_roll.RedrawList();
+	}
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+}
+
 // following functions use current Selection to determine range of frames
 bool EDITOR::FrameColumnSet()
 {
