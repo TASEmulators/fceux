@@ -82,13 +82,13 @@ bool TASEDITOR_PROJECT::save(const char* different_name, bool save_binary, bool 
 	char md5_rom[256];
 	strcpy(md5_movie, md5_asciistr(currMovieData.romChecksum));
 	strcpy(md5_rom, md5_asciistr(GameInfo->MD5));
-	if(strcmp(md5_movie, md5_rom))
+	if (strcmp(md5_movie, md5_rom))
 	{
 		// checksums mismatch, check if they both aren't zero
 		unsigned int k, count1 = 0, count2 = 0;
 		for(k = 0; k < strlen(md5_movie); k++) count1 += md5_movie[k] - '0';
 		for(k = 0; k < strlen(md5_rom); k++) count2 += md5_rom[k] - '0';
-		if(count1 && count2)
+		if (count1 && count2)
 		{
 			// ask user if he wants to fix the checksum before saving
 			char message[2048] = {0};
@@ -163,7 +163,7 @@ bool TASEDITOR_PROJECT::load(const char* fullname)
 	bool load_all = true;
 	EMUFILE_FILE ifs(fullname, "rb");
 
-	if(ifs.fail())
+	if (ifs.fail())
 	{
 		FCEU_PrintError("Error opening %s!", fullname);
 		return false;
@@ -181,13 +181,13 @@ bool TASEDITOR_PROJECT::load(const char* fullname)
 		char md5_current[256];
 		strcpy(md5_original, md5_asciistr(tempMovieData.romChecksum));
 		strcpy(md5_current, md5_asciistr(GameInfo->MD5));
-		if(strcmp(md5_original, md5_current))
+		if (strcmp(md5_original, md5_current))
 		{
 			// checksums mismatch, check if they both aren't zero
 			unsigned int k, count1 = 0, count2 = 0;
 			for(k = 0; k < strlen(md5_original); k++) count1 += md5_original[k] - '0';
 			for(k = 0; k < strlen(md5_current); k++) count2 += md5_current[k] - '0';
-			if(count1 && count2)
+			if (count1 && count2)
 			{
 				// ask user if he really wants to load the project
 				char message[2048] = {0};

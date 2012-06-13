@@ -517,7 +517,7 @@ int SNAPSHOT::GetCommandsInfo(int frame)
 void SNAPSHOT::insertFrames(int at, int frames)
 {
 	size += frames;
-	if(at == -1) 
+	if (at == -1) 
 	{
 		// append frames to the end
 		commands.resize(size);

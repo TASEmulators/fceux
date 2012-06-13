@@ -241,7 +241,7 @@ bool MARKERS_MANAGER::EraseMarker(int frame)
 }
 bool MARKERS_MANAGER::insertEmpty(int at, int frames)
 {
-	if(at == -1) 
+	if (at == -1) 
 	{
 		// append blank frames
 		markers.markers_array.resize(markers.markers_array.size() + frames);
@@ -692,7 +692,7 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				case IDC_NOTE_TO_FIND:
 				{
-					if(HIWORD(wParam) == EN_CHANGE) 
+					if (HIWORD(wParam) == EN_CHANGE) 
 					{
 						if (GetWindowTextLength(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND)))
 							EnableWindow(GetDlgItem(hwndDlg, IDOK), true);

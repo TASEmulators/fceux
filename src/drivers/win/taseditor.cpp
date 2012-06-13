@@ -68,13 +68,13 @@ extern void TaseditorManualFunction();
 
 bool EnterTasEditor()
 {
-	if(!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
-	if(!taseditor_window.hwndTasEditor)
+	if (!FCEU_IsValidUI(FCEUI_TASEDITOR)) return false;
+	if (!taseditor_window.hwndTasEditor)
 	{
 		// start TAS Editor
 		// create window
 		taseditor_window.init();
-		if(taseditor_window.hwndTasEditor)
+		if (taseditor_window.hwndTasEditor)
 		{
 			// save "eoptions"
 			saved_eoptions = eoptions;
@@ -180,7 +180,7 @@ bool ExitTasEditor()
 // everyframe function
 void UpdateTasEditor()
 {
-	if(!taseditor_window.hwndTasEditor)
+	if (!taseditor_window.hwndTasEditor)
 	{
 		// TAS Editor is not engaged... but we still should run Lua auto function
 		TaseditorAutoFunction();
@@ -311,15 +311,15 @@ void NewProject()
 	if (DialogBoxParam(fceu_hInstance, MAKEINTRESOURCE(IDD_TASEDITOR_NEWPROJECT), taseditor_window.hwndTasEditor, NewProjectProc, (LPARAM)&params) > 0)
 	{
 		FCEUMOV_CreateCleanMovie();
-		
 		// apply selected options
 		SetInputType(currMovieData, params.input_type);
+		ApplyMovieInputConfig();
 		if (params.copy_current_input)
 			// copy input from current snapshot (from history)
 			history.GetCurrentSnapshot().toMovie(currMovieData);
 		if (!params.copy_current_markers)
 			markers_manager.reset();
-		if(params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
+		if (params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
 		
 		// reset Taseditor
 		project.init();			// new project has blank name
@@ -362,7 +362,7 @@ void OpenProject()
 	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);	
 	ofn.lpstrInitialDir = initdir.c_str();
 
-	if(GetOpenFileName(&ofn))							// If it is a valid filename
+	if (GetOpenFileName(&ofn))							// If it is a valid filename
 	{
 		LoadProject(nameo);
 	}
@@ -420,7 +420,7 @@ bool SaveProjectAs()
 	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			// initial directory
 	ofn.lpstrInitialDir = initdir.c_str();
 
-	if(GetSaveFileName(&ofn))								// if it is a valid filename
+	if (GetSaveFileName(&ofn))								// if it is a valid filename
 	{
 		project.RenameProject(nameo, true);
 		project.save();
@@ -549,7 +549,7 @@ void SaveCompact()
 		string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			// initial directory
 		ofn.lpstrInitialDir = initdir.c_str();
 
-		if(GetSaveFileName(&ofn))								// if it is a valid filename
+		if (GetSaveFileName(&ofn))								// if it is a valid filename
 			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
 	}
 }
@@ -564,7 +564,7 @@ bool AskSaveProject()
 	if (changes_found)
 	{
 		int answer = MessageBox(taseditor_window.hwndTasEditor, "Save Project changes?", "TAS Editor", MB_YESNOCANCEL);
-		if(answer == IDYES)
+		if (answer == IDYES)
 			return SaveProject();
 		return (answer != IDCANCEL);
 	}
@@ -589,7 +589,7 @@ void Import()
 	string initdir = FCEU_GetPath(FCEUMKF_MOVIE);	
 	ofn.lpstrInitialDir = initdir.c_str();
 
-	if(GetOpenFileName(&ofn))
+	if (GetOpenFileName(&ofn))
 	{							
 		EMUFILE_FILE ifs(nameo, "rb");
 		// Load input to temporary moviedata
@@ -682,7 +682,7 @@ void Export()
 		ofn.Flags = OFN_EXPLORER|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 		std::string initdir = FCEU_GetPath(FCEUMKF_MOVIE);
 		ofn.lpstrInitialDir = initdir.c_str();
-		if(GetSaveFileName(&ofn))
+		if (GetSaveFileName(&ofn))
 		{
 			EMUFILE* osRecordingMovie = FCEUD_UTF8_fstream(fname, "wb");
 			// create copy of current movie data

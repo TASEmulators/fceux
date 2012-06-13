@@ -47,7 +47,7 @@ void EDITOR::init()
 	strncpy(nameo, FCEU_GetPath(FCEUMKF_TASEDITOR).c_str(), 2047);
 	strncat(nameo, patternsFilename, 2047 - strlen(nameo));
 	EMUFILE_FILE ifs(nameo, "rb");
-	if(!ifs.fail())
+	if (!ifs.fail())
 	{
 		std::string tempstr1, tempstr2;
 		while (ReadString(&ifs, tempstr1))
@@ -282,7 +282,7 @@ bool EDITOR::FrameColumnSet()
 	bool unset_found = false, changes_made = false;
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
-		if(!markers_manager.GetMarker(*it))
+		if (!markers_manager.GetMarker(*it))
 		{
 			unset_found = true;
 			break;
@@ -293,7 +293,7 @@ bool EDITOR::FrameColumnSet()
 		// set all
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if(!markers_manager.GetMarker(*it))
+			if (!markers_manager.GetMarker(*it))
 			{
 				if (markers_manager.SetMarker(*it))
 				{
@@ -309,7 +309,7 @@ bool EDITOR::FrameColumnSet()
 		// unset all
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if(markers_manager.GetMarker(*it))
+			if (markers_manager.GetMarker(*it))
 			{
 				markers_manager.ClearMarker(*it);
 				changes_made = true;
@@ -339,7 +339,7 @@ bool EDITOR::FrameColumnSetPattern()
 			continue;
 		if (autofire_patterns[current_pattern][pattern_offset])
 		{
-			if(!markers_manager.GetMarker(*it))
+			if (!markers_manager.GetMarker(*it))
 			{
 				if (markers_manager.SetMarker(*it))
 				{
@@ -349,7 +349,7 @@ bool EDITOR::FrameColumnSetPattern()
 			}
 		} else
 		{
-			if(markers_manager.GetMarker(*it))
+			if (markers_manager.GetMarker(*it))
 			{
 				markers_manager.ClearMarker(*it);
 				changes_made = true;
@@ -382,7 +382,7 @@ bool EDITOR::InputColumnSet(int joy, int button)
 	bool newValue = false;
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
-		if(!(currMovieData.records[*it].checkBit(joy,button)))
+		if (!(currMovieData.records[*it].checkBit(joy,button)))
 		{
 			newValue = true;
 			break;
@@ -445,7 +445,7 @@ void EDITOR::SetMarkers()
 		bool changes_made = false;
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if(!markers_manager.GetMarker(*it))
+			if (!markers_manager.GetMarker(*it))
 			{
 				if (markers_manager.SetMarker(*it))
 				{
@@ -471,7 +471,7 @@ void EDITOR::RemoveMarkers()
 		bool changes_made = false;
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if(markers_manager.GetMarker(*it))
+			if (markers_manager.GetMarker(*it))
 			{
 				markers_manager.ClearMarker(*it);
 				changes_made = true;

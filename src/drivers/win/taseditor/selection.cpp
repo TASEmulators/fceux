@@ -367,7 +367,7 @@ void SELECTION::ItemRangeChanged(NMLVODSTATECHANGE* info)
 	bool ON = !(info->uOldState & LVIS_SELECTED) && (info->uNewState & LVIS_SELECTED);
 	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
 
-	if(ON)
+	if (ON)
 		for(int i = info->iFrom; i <= info->iTo; ++i)
 			CurrentSelection().insert(i);
 	else
@@ -384,9 +384,9 @@ void SELECTION::ItemChanged(NMLISTVIEW* info)
 	bool OFF = (info->uOldState & LVIS_SELECTED) && !(info->uNewState & LVIS_SELECTED);
 
 	//if the item is -1, apply the change to all items
-	if(item == -1)
+	if (item == -1)
 	{
-		if(OFF)
+		if (OFF)
 		{
 			// clear all (actually add new empty selection to history)
 			if (CurrentSelection().size() && track_selection_changes)
@@ -399,9 +399,9 @@ void SELECTION::ItemChanged(NMLISTVIEW* info)
 		}
 	} else
 	{
-		if(ON)
+		if (ON)
 			CurrentSelection().insert(item);
-		else if(OFF) 
+		else if (OFF) 
 			CurrentSelection().erase(item);
 	}
 
@@ -652,7 +652,7 @@ int SELECTION::GetCurrentSelectionEnd()
 }
 bool SELECTION::CheckFrameSelected(int frame)
 {
-	if(CurrentSelection().find(frame) == CurrentSelection().end())
+	if (CurrentSelection().find(frame) == CurrentSelection().end())
 		return false;
 	return true;
 }

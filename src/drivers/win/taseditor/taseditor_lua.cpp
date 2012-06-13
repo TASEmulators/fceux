@@ -125,7 +125,7 @@ int TASEDITOR_LUA::setmarker(int frame)
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 	{
 		int marker_id = markers_manager.GetMarker(frame);
-		if(!marker_id)
+		if (!marker_id)
 		{
 			marker_id = markers_manager.SetMarker(frame);
 			if (marker_id)

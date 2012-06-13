@@ -61,7 +61,7 @@ POPUP_DISPLAY::POPUP_DISPLAY()
 	wincl1.cbClsExtra = 0;
 	wincl1.cbWndExtra = 0;
 	wincl1.hbrBackground = 0;
-	if(!RegisterClassEx(&wincl1))
+	if (!RegisterClassEx(&wincl1))
 		FCEU_printf("Error registering SCREENSHOT_DISPLAY window class\n");
 
 	// register MARKER_NOTE_DESCRIPTION window class
@@ -77,7 +77,7 @@ POPUP_DISPLAY::POPUP_DISPLAY()
 	wincl2.cbClsExtra = 0;
 	wincl2.cbWndExtra = 0;
 	wincl2.hbrBackground = 0;
-	if(!RegisterClassEx(&wincl2))
+	if (!RegisterClassEx(&wincl2))
 		FCEU_printf("Error registering MARKER_NOTE_DESCRIPTION window class\n");
 
 	// create blendfunction

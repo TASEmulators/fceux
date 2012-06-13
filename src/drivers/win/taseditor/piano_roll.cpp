@@ -76,7 +76,7 @@ PIANO_ROLL::PIANO_ROLL()
 	wincl.cbClsExtra = 0;
 	wincl.cbWndExtra = 0;
 	wincl.hbrBackground = 0;
-	if(!RegisterClassEx(&wincl))
+	if (!RegisterClassEx(&wincl))
 		FCEU_printf("Error registering MARKER_DRAG_BOX window class\n");
 
 	// create blendfunction
@@ -878,7 +878,7 @@ void PIANO_ROLL::UpdateItemCount()
 	// update the number of items in the list
 	int currLVItemCount = ListView_GetItemCount(hwndList);
 	int movie_size = currMovieData.getNumRecords();
-	if(currLVItemCount != movie_size)
+	if (currLVItemCount != movie_size)
 		ListView_SetItemCountEx(hwndList, movie_size, LVSICF_NOSCROLL|LVSICF_NOINVALIDATEALL);
 }
 bool PIANO_ROLL::CheckItemVisible(int frame)
@@ -1178,7 +1178,7 @@ void PIANO_ROLL::FinishDrag()
 void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
-	if(item.mask & LVIF_TEXT)
+	if (item.mask & LVIF_TEXT)
 	{
 		switch(item.iSubItem)
 		{
@@ -1226,7 +1226,7 @@ void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 				int joy = (item.iSubItem - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int bit = (item.iSubItem - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				uint8 data = ((int)currMovieData.records.size() > item.iItem) ? currMovieData.records[item.iItem].joysticks[joy] : 0;
-				if(data & (1<<bit))
+				if (data & (1<<bit))
 				{
 					item.pszText[0] = buttonNames[bit][0];
 					item.pszText[2] = 0;
@@ -1256,19 +1256,18 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 	case CDDS_SUBITEMPREPAINT:
 		cell_x = msg->iSubItem;
 		cell_y = msg->nmcd.dwItemSpec;
-
-		if(cell_x > COLUMN_ICONS)
+		if (cell_x > COLUMN_ICONS)
 		{
 			// text color
-			if(taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
+			if (taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
 				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
 			else
 				msg->clrText = NORMAL_TEXT_COLOR;
 			// bg color and text font
-			if(cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
+			if (cell_x == COLUMN_FRAMENUM || cell_x == COLUMN_FRAMENUM2)
 			{
 				// font
-				if(markers_manager.GetMarker(cell_y))
+				if (markers_manager.GetMarker(cell_y))
 					SelectObject(msg->nmcd.hdc, hMainListSelectFont);
 				else
 					SelectObject(msg->nmcd.hdc, hMainListFont);
@@ -1286,7 +1285,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					}
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 				{
-					// current frame
+					// this is current frame
 					if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 					{
 						msg->clrTextBk = (taseditor_config.bind_markers) ? CUR_BINDMARKED_FRAMENUM_COLOR : CUR_MARKED_FRAMENUM_COLOR;
@@ -1296,31 +1295,44 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					}
 				} else if (markers_manager.GetMarker(cell_y) && (drag_mode != DRAG_MODE_MARKER || marker_drag_framenum != cell_y))
 				{
-					// marked frame
+					// this is marked frame
 					msg->clrTextBk = (taseditor_config.bind_markers) ? BINDMARKED_FRAMENUM_COLOR : MARKED_FRAMENUM_COLOR;
+				} else if (cell_y < greenzone.GetSize())
+				{
+					if (!greenzone.SavestateIsEmpty(cell_y))
+					{
+						// the frame is normal Greenzone frame
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
+							msg->clrTextBk = LAG_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
+					} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
+						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
+					{
+						// the frame is in a gap (in Greenzone tail)
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
+							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
+					} else 
+					{
+						// the frame is above Greenzone tail
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
+							msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
+						else
+							msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
+					}
 				} else
 				{
-					if(cell_y < greenzone.GetSize())
-					{
-						if (!greenzone.SavestateIsEmpty(cell_y))
-						{
-							if (greenzone.GetLagHistoryAtFrame(cell_y))
-								msg->clrTextBk = LAG_FRAMENUM_COLOR;
-							else
-								msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
-						} else if ((!greenzone.SavestateIsEmpty(cell_y & EVERY16TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY16TH) + 16))
-							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY8TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY8TH) + 8))
-							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
-							|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
-						{
-							if (greenzone.GetLagHistoryAtFrame(cell_y))
-								msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
-							else
-								msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
-						} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
+					// the frame is below Greenzone head
+					if (greenzone.GetLagHistoryAtFrame(cell_y))
+						msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
+					else
+						msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
 				}
-			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
+			} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
 				// font: empty cells have "SelectFont", non-empty have normal font
@@ -1338,12 +1350,13 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = UNDOHINT_INPUT_COLOR1;
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 				{
-					// current frame
+					// this is current frame
 					msg->clrTextBk = CUR_INPUT_COLOR1;
-				} else if(cell_y < greenzone.GetSize())
+				} else if (cell_y < greenzone.GetSize())
 				{
 					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
+						// the frame is normal Greenzone frame
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
@@ -1353,13 +1366,28 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
+						// the frame is in a gap (in Greenzone tail)
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
-					} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-			} else if((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
+					} else
+					{
+						// the frame is above Greenzone tail
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
+							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
+						else
+							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
+					}
+				} else
+				{
+					// the frame is below Greenzone head
+					if (greenzone.GetLagHistoryAtFrame(cell_y))
+						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
+					else
+						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
+				}
+			} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 1 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 3)
 			{
 				// pad 2 or 4
 				// font: empty cells have "SelectFont", non-empty have normal font
@@ -1377,12 +1405,13 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					msg->clrTextBk = UNDOHINT_INPUT_COLOR2;
 				} else if (cell_y == currFrameCounter || cell_y == (playback.GetFlashingPauseFrame() - 1))
 				{
-					// current frame
+					// this is current frame
 					msg->clrTextBk = CUR_INPUT_COLOR2;
-				} else if(cell_y < greenzone.GetSize())
+				} else if (cell_y < greenzone.GetSize())
 				{
 					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
+						// the frame is normal Greenzone frame
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR2;
 						else
@@ -1392,12 +1421,27 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY4TH) && !greenzone.SavestateIsEmpty((cell_y & EVERY4TH) + 4))
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
+						// the frame is in a gap (in Greenzone tail)
 						if (greenzone.GetLagHistoryAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
-					} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
-				} else msg->clrTextBk = NORMAL_INPUT_COLOR2;
+					} else
+					{
+						// the frame is above Greenzone tail
+						if (greenzone.GetLagHistoryAtFrame(cell_y))
+							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
+						else
+							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
+					}
+				} else
+				{
+					// the frame is below Greenzone head
+					if (greenzone.GetLagHistoryAtFrame(cell_y))
+						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
+					else
+						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
+				}
 			}
 		}
 	default:
@@ -1441,7 +1485,7 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 		bool set_found = false, unset_found = false;
 		for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 		{
-			if(markers_manager.GetMarker(*it))
+			if (markers_manager.GetMarker(*it))
 				set_found = true;
 			else 
 				unset_found = true;
@@ -1603,7 +1647,7 @@ LRESULT APIENTRY HeaderWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				info.pt.x = GET_X_LPARAM(lParam) + HEADER_DX_FIX;
 				info.pt.y = GET_Y_LPARAM(lParam);
 				SendMessage(hWnd, HDM_HITTEST, 0, (LPARAM)&info);
-				if(info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
+				if (info.iItem >= COLUMN_FRAMENUM && info.iItem <= COLUMN_FRAMENUM2)
 					piano_roll.ColumnSet(info.iItem, (GetKeyState(VK_MENU) < 0));
 			}
 		}
@@ -1670,7 +1714,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				// clicked on the "icons" column
 				piano_roll.StartDraggingPlaybackCursor();
-			} else if(column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
+			} else if (column_index == COLUMN_FRAMENUM || column_index == COLUMN_FRAMENUM2)
 			{
 				// clicked on the "Frame#" column
 				if (row_index >= 0)
@@ -1833,7 +1877,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			info.pt.y = GET_Y_LPARAM(lParam);
 			ListView_SubItemHitTest(hWnd, &info);
 			// show context menu if user right-clicked on Frame#
-			if(info.iSubItem <= COLUMN_FRAMENUM || info.iSubItem >= COLUMN_FRAMENUM2)
+			if (info.iSubItem <= COLUMN_FRAMENUM || info.iSubItem >= COLUMN_FRAMENUM2)
 				piano_roll.RightClick(info);
 			return 0;
 		}

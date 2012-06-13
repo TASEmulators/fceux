@@ -58,7 +58,6 @@ void GREENZONE::free()
 void GREENZONE::reset()
 {
 	free();
-	lag_history.resize(currMovieData.getNumRecords());
 }
 void GREENZONE::update()
 {
@@ -80,7 +79,7 @@ void GREENZONE::CollectCurrentState()
 	if ((int)savestates.size() < greenZoneCount)
 		savestates.resize(greenZoneCount);
 	if ((int)lag_history.size() < greenZoneCount)
-		lag_history.resize(greenZoneCount);
+		lag_history.resize(greenZoneCount, 0);
 
 	// if frame changed - log savestate
 	storeTasSavestate(currFrameCounter);
@@ -89,22 +88,30 @@ void GREENZONE::CollectCurrentState()
 	{
 		// lagFlag indicates that lag was in previous frame
 		int old_lagFlag = lag_history[currFrameCounter - 1];
-		if (lagFlag)
-			lag_history[currFrameCounter - 1] = 1;
-		else
-			lag_history[currFrameCounter - 1] = 0;
+		int saved_currFrameCounter = currFrameCounter;
 		// Auto-adjust Input due to lag
 		if (taseditor_config.adjust_input_due_to_lag)
 		{
 			if (old_lagFlag && !lagFlag)
 			{
 				// there's no more lag on previous frame - shift input up
+				lag_history.erase(lag_history.begin() + (currFrameCounter - 1));
 				editor.AdjustUp(currFrameCounter - 1);
+				// make sure the Playback cursor always rewinds too
+				if (currFrameCounter == saved_currFrameCounter)
+					InvalidateAndCheck(currFrameCounter - 1);
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift input down
+				lag_history.insert(lag_history.begin() + (currFrameCounter - 1), 1);
 				editor.AdjustDown(currFrameCounter - 1);
 			}
+		} else
+		{
+			if (lagFlag)
+				lag_history[currFrameCounter - 1] = 1;
+			else
+				lag_history[currFrameCounter - 1] = 0;
 		}
 	}
 }
@@ -207,7 +214,7 @@ void GREENZONE::ClearSavestate(int index)
     std::vector<uint8> tmp;
     savestates[index].swap(tmp);
 }
-// this function is used by Bookmark Unleash procedure
+// this function is used by Bookmark Deploy procedure
 void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
 {
 	if ((int)savestates.size() <= frame)
@@ -233,6 +240,8 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		write32le(greenZoneCount, os);
 		// compress and write lag history
 		int len = lag_history.size();
+		if (len > currMovieData.getNumRecords())
+			len = currMovieData.getNumRecords();
 		uLongf comprlen = (len>>9)+12 + len;
 		std::vector<uint8> cbuf(comprlen);
 		compress(&cbuf[0], &comprlen, &lag_history[0], len);
@@ -333,9 +342,9 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 		greenZoneCount = size;
 		savestates.resize(greenZoneCount);
 		// read and uncompress lag history
-		lag_history.resize(greenZoneCount);
+		uLongf destlen = currMovieData.getNumRecords();
+		lag_history.resize(destlen, 0);
 		int comprlen;
-		uLongf destlen = greenZoneCount;
 		if (!read32le(&comprlen, is)) goto error;
 		if (comprlen <= 0) goto error;
 		std::vector<uint8> cbuf(comprlen);
@@ -489,7 +498,7 @@ int GREENZONE::GetSize()
 }
 bool GREENZONE::GetLagHistoryAtFrame(int frame)
 {
-	if (frame < greenZoneCount && frame < (int)lag_history.size())
+	if (frame < (int)lag_history.size())
 		return lag_history[frame] != 0;
 	else
 		return false;

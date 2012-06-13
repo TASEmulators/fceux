@@ -621,14 +621,14 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsMenu()
 	for(x = MAX_NUMBER_OF_RECENT_PROJECTS - 1; x >= 0; x--)
 	{  
 		// Skip empty strings
-		if(!recent_projects[x]) continue;
+		if (!recent_projects[x]) continue;
 
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
 		moo.fType = 0;
 		moo.wID = MENU_FIRST_RECENT_PROJECT + x;
 		std::string tmp = recent_projects[x];
 		// clamp this string to 128 chars
-		if(tmp.size() > 128)
+		if (tmp.size() > 128)
 			tmp = tmp.substr(0, 128);
 		moo.cch = tmp.size();
 		moo.dwTypeData = (LPSTR)tmp.c_str();
@@ -651,9 +651,9 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsArray(const char* addString)
 	// find out if the filename is already in the recent files list
 	for(unsigned int x = 0; x < MAX_NUMBER_OF_RECENT_PROJECTS; x++)
 	{
-		if(recent_projects[x])
+		if (recent_projects[x])
 		{
-			if(!strcmp(recent_projects[x], addString))    // Item is already in list
+			if (!strcmp(recent_projects[x], addString))    // Item is already in list
 			{
 				// If the filename is in the file list don't add it again, move it up in the list instead
 				char* tmp = recent_projects[x];			// save pointer
@@ -669,7 +669,7 @@ void TASEDITOR_WINDOW::UpdateRecentProjectsArray(const char* addString)
 	}
 	// The filename wasn't found in the list. That means we need to add it.
 	// If there's no space left in the recent files list, get rid of the last item in the list
-	if(recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1])
+	if (recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1])
 		free(recent_projects[MAX_NUMBER_OF_RECENT_PROJECTS-1]);
 	// Move other items down
 	for(unsigned int x = MAX_NUMBER_OF_RECENT_PROJECTS-1; x; x--)
@@ -684,7 +684,7 @@ void TASEDITOR_WINDOW::RemoveRecentProject(unsigned int which)
 {
 	if (which >= MAX_NUMBER_OF_RECENT_PROJECTS) return;
 	// Remove the item
-	if(recent_projects[which])
+	if (recent_projects[which])
 		free(recent_projects[which]);
 	// If the item is not the last one in the list, shift the remaining ones up
 	if (which < MAX_NUMBER_OF_RECENT_PROJECTS-1)
@@ -702,7 +702,7 @@ void TASEDITOR_WINDOW::RemoveRecentProject(unsigned int which)
 void TASEDITOR_WINDOW::LoadRecentProject(int slot)
 {
 	char*& fname = recent_projects[slot];
-	if(fname && AskSaveProject())
+	if (fname && AskSaveProject())
 	{
 		if (!LoadProject(fname))
 		{
@@ -730,7 +730,7 @@ void TASEDITOR_WINDOW::UpdatePatternsMenu()
 		moo.wID = MENU_FIRST_PATTERN + x;
 		std::string tmp = editor.autofire_patterns_names[x];
 		// clamp this string to 50 chars
-		if(tmp.size() > PATTERNS_MAX_VISIBLE_NAME)
+		if (tmp.size() > PATTERNS_MAX_VISIBLE_NAME)
 			tmp = tmp.substr(0, PATTERNS_MAX_VISIBLE_NAME);
 		moo.dwTypeData = (LPSTR)tmp.c_str();
 		moo.cch = tmp.size();
@@ -753,7 +753,7 @@ void TASEDITOR_WINDOW::RecheckPatternsMenu()
 	std::string tmp = patterns_menu_prefix;
 	tmp += editor.autofire_patterns_names[taseditor_config.current_pattern];
 	// clamp this string
-	if(tmp.size() > PATTERNMENU_MAX_VISIBLE_NAME)
+	if (tmp.size() > PATTERNMENU_MAX_VISIBLE_NAME)
 		tmp = tmp.substr(0, PATTERNMENU_MAX_VISIBLE_NAME);
 	moo.dwTypeData = (LPSTR)tmp.c_str();
 	moo.cch = tmp.size();
@@ -861,7 +861,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 			ExitTasEditor();
 			break;
 		case WM_ACTIVATE:
-			if(LOWORD(wParam))
+			if (LOWORD(wParam))
 			{
 				taseditor_window.TASEditor_focus = true;
 				taseditor_window.SetTaseditorInput();
@@ -1064,7 +1064,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_CONFIG_SETGREENZONECAPACITY:
 					{
 						int new_capacity = taseditor_config.greenzone_capacity;
-						if(CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hWnd) == IDOK)
+						if (CWin32InputBox::GetInteger("Greenzone capacity", "Keep savestates for how many frames?\n(actual limit of savestates can be 5 times more than the number provided)", new_capacity, hWnd) == IDOK)
 						{
 							if (new_capacity < GREENZONE_CAPACITY_MIN)
 								new_capacity = GREENZONE_CAPACITY_MIN;
@@ -1081,7 +1081,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_CONFIG_SETMAXUNDOLEVELS:
 					{
 						int new_size = taseditor_config.undo_levels;
-						if(CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hWnd) == IDOK)
+						if (CWin32InputBox::GetInteger("Max undo levels", "Keep history of how many changes?", new_size, hWnd) == IDOK)
 						{
 							if (new_size < UNDO_LEVELS_MIN)
 								new_size = UNDO_LEVELS_MIN;
@@ -1099,7 +1099,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case ID_CONFIG_SETAUTOSAVEPERIOD:
 					{
 						int new_period = taseditor_config.autosave_period;
-						if(CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hWnd) == IDOK)
+						if (CWin32InputBox::GetInteger("Autosave period", "How many minutes may the project stay not saved after being changed?\n(0 = no autosaves)", new_period, hWnd) == IDOK)
 						{
 							if (new_period < AUTOSAVE_PERIOD_MIN)
 								new_period = AUTOSAVE_PERIOD_MIN;

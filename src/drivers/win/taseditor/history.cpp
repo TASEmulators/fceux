@@ -1056,7 +1056,7 @@ error:
 void HISTORY::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
-	if(item.mask & LVIF_TEXT)
+	if (item.mask & LVIF_TEXT)
 		strcpy(item.pszText, GetItemDesc(item.iItem));
 }
 
@@ -1089,7 +1089,7 @@ void HISTORY::UpdateHistoryList()
 {
 	//update the number of items in the history list
 	int currLVItemCount = ListView_GetItemCount(hwndHistoryList);
-	if(currLVItemCount != history_total_items)
+	if (currLVItemCount != history_total_items)
 		ListView_SetItemCountEx(hwndHistoryList, history_total_items, LVSICF_NOSCROLL | LVSICF_NOINVALIDATEALL);
 }
 

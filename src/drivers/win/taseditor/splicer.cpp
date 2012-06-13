@@ -202,7 +202,7 @@ void SPLICER::InsertNumFrames()
 {
 	SelectionFrames* current_selection = selection.MakeStrobe();
 	int frames = current_selection->size();
-	if(CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditor_window.hwndTasEditor) == IDOK)
+	if (CWin32InputBox::GetInteger("Insert number of Frames", "How many frames?", frames, taseditor_window.hwndTasEditor) == IDOK)
 	{
 		if (frames > 0)
 		{

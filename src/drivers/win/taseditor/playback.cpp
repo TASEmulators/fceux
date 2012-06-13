@@ -138,7 +138,7 @@ void PLAYBACK::update()
 	}
 
 	// pause when seeking hits pause_frame
-	if(pause_frame && currFrameCounter + 1 >= pause_frame)
+	if (pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
 	else if (currFrameCounter + 1 > lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
 		// pause at the end of the movie
@@ -422,7 +422,7 @@ void PLAYBACK::StartFromZero()
 	FCEUMOV_ClearCommands();		// clear POWER SWITCH command caused by poweron()
 	currFrameCounter = 0;
 	// if there's no frames in current movie, create initial frame record
-	if(currMovieData.getNumRecords() == 0)
+	if (currMovieData.getNumRecords() == 0)
 		currMovieData.insertEmpty(-1, 1);
 }
 

@@ -594,7 +594,7 @@ int BOOKMARKS::GetSelectedSlot()
 void BOOKMARKS::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 {
 	LVITEM& item = nmlvDispInfo->item;
-	if(item.mask & LVIF_TEXT)
+	if (item.mask & LVIF_TEXT)
 	{
 		switch(item.iSubItem)
 		{
