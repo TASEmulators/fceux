@@ -690,7 +690,7 @@ void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 		}
 	}
 }
-void SNAPSHOT::inheritHotChanges_DeleteNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
+void SNAPSHOT::inheritHotChanges_DeleteNum(SNAPSHOT* source_of_hotchanges, int start, int frames, bool fade_old)
 {
 	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 	// copy hot changes from source snapshot up to "start" and from "start+frames" to end
@@ -708,10 +708,11 @@ void SNAPSHOT::inheritHotChanges_DeleteNum(SNAPSHOT* source_of_hotchanges, int s
 		if (bytes_to_copy > source_size - source_pos)
 			bytes_to_copy = source_size - source_pos;
 		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
-		FadeHotChanges();
+		if (fade_old)
+			FadeHotChanges();
 	}
 } 
-void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames)
+void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int start, int frames, bool fade_old)
 {
 	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
 	// copy hot changes from source snapshot up to "start", then make a gap, then copy from "start+frames" to end
@@ -729,7 +730,8 @@ void SNAPSHOT::inheritHotChanges_InsertNum(SNAPSHOT* source_of_hotchanges, int s
 		if (bytes_to_copy > source_size - source_pos)
 			bytes_to_copy = source_size - source_pos;
 		memcpy(&hot_changes[dest_pos], &source_of_hotchanges->hot_changes[source_pos], bytes_to_copy);
-		FadeHotChanges();
+		if (fade_old)
+			FadeHotChanges();
 	}
 	// fill the gap with max_hot lines on frames from "start" to "start+frames"
 	memset(&hot_changes[bytes * start], 0xFF, bytes * frames);
