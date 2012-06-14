@@ -88,7 +88,6 @@ void GREENZONE::CollectCurrentState()
 	{
 		// lagFlag indicates that lag was in previous frame
 		int old_lagFlag = lag_history[currFrameCounter - 1];
-		int saved_currFrameCounter = currFrameCounter;
 		// Auto-adjust Input due to lag
 		if (taseditor_config.adjust_input_due_to_lag)
 		{
@@ -97,14 +96,21 @@ void GREENZONE::CollectCurrentState()
 				// there's no more lag on previous frame - shift input up
 				lag_history.erase(lag_history.begin() + (currFrameCounter - 1));
 				editor.AdjustUp(currFrameCounter - 1);
-				// make sure the Playback cursor always rewinds too
-				if (currFrameCounter == saved_currFrameCounter)
-					InvalidateAndCheck(currFrameCounter - 1);
+				// since AdjustUp didn't restore Playback cursor, we must rewind here
+				int pause_frame = playback.pause_frame;
+				playback.jump(currFrameCounter - 1);	// rewind
+				if (pause_frame)
+					playback.SeekingStart(pause_frame);
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift input down
 				lag_history.insert(lag_history.begin() + (currFrameCounter - 1), 1);
 				editor.AdjustDown(currFrameCounter - 1);
+				// since AdjustDown didn't restore Playback cursor, we must rewind here
+				int pause_frame = playback.pause_frame;
+				playback.jump(currFrameCounter - 1);	// rewind
+				if (pause_frame)
+					playback.SeekingStart(pause_frame);
 			}
 		} else
 		{
@@ -437,27 +443,16 @@ void GREENZONE::InvalidateAndCheck(int after)
 			// either set Playback cursor to the end of Greenzone or run seeking to restore playback position
 			if (currFrameCounter >= greenZoneCount)
 			{
-				// auto-restore position if needed
-				if (taseditor_config.restore_position)
+				if (playback.pause_frame && playback.pause_frame_must_be_fixed)
 				{
-					if (playback.pause_frame && playback.pause_frame_must_be_fixed)
-					{
-						playback.jump(playback.pause_frame - 1);
-					} else
-					{
-						playback.SetLostPosition(currFrameCounter);
-						playback.jump(currFrameCounter);
-					}
+					playback.jump(playback.pause_frame - 1);
 				} else
 				{
-					if (playback.pause_frame && playback.pause_frame_must_be_fixed)
-					{
-						playback.jump(playback.pause_frame - 1);
-					} else
-					{
-						playback.SetLostPosition(currFrameCounter);
-						playback.jump(greenZoneCount-1);
-					}
+					playback.SetLostPosition(currFrameCounter);
+					if (taseditor_config.restore_position)
+						playback.jump(currFrameCounter);
+					else
+						playback.jump(greenZoneCount - 1);
 				}
 			}
 		}
@@ -466,7 +461,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
-// This version doesn't restore playback, may be used only by Branching and Recording functions!
+// This version doesn't restore playback, may be used only by Branching, Recording and Adjusting functions!
 void GREENZONE::Invalidate(int after)
 {
 	if (after >= 0)
