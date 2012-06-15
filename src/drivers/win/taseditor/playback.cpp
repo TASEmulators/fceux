@@ -296,10 +296,19 @@ void PLAYBACK::MiddleButtonClick()
 					SeekingStart(target_frame + 1);
 			} else if (GetAsyncKeyState(VK_CONTROL) < 0)
 			{
-				// if Ctrl is held, seek to Selection cursor
+				// if Ctrl is held, seek to Selection cursor or replay from Selection cursor
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
+				{
 					SeekingStart(selection_beginning + 1);
+				} else if (selection_beginning < currFrameCounter)
+				{
+					int saved_currFrameCounter = currFrameCounter;
+					if (selection_beginning < 0)
+						selection_beginning = 0;
+					jump(selection_beginning);
+					SeekingStart(saved_currFrameCounter + 1);
+				}
 			} else if (lost_position_frame > currFrameCounter + 1)
 			{
 				RestorePosition();
