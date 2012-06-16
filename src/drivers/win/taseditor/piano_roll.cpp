@@ -417,7 +417,6 @@ void PIANO_ROLL::free()
 void PIANO_ROLL::reset()
 {
 	must_redraw_list = must_check_item_under_mouse = true;
-	row_last_clicked = 0;
 	shift_held = ctrl_held = alt_held = false;
 	shift_timer = ctrl_timer = shift_count = ctrl_count = 0;
 	next_header_update_time = header_item_under_mouse = 0;
@@ -522,23 +521,6 @@ void PIANO_ROLL::update()
 		}
 		ctrl_timer = clock();
 	}
-	// show/hide "focused" rectangle on row_last_clicked
-	if (shift_held || alt_held)
-	{
-		if ((shift_held && !last_shift_held) || (alt_held && !last_alt_held))
-			row_last_clicked_blinking_phase_shift = ROW_LAST_CLICKED_BLINKING_PERIOD + (clock() % (2 * ROW_LAST_CLICKED_BLINKING_PERIOD));
-		bool show_row_last_clicked = (((clock() - row_last_clicked_blinking_phase_shift) / ROW_LAST_CLICKED_BLINKING_PERIOD) & 1) != 0;
-		if (show_row_last_clicked)
-		{
-			ListView_SetItemState(hwndList, row_last_clicked, LVIS_FOCUSED, LVIS_FOCUSED);
-		} else
-		{
-			ListView_SetItemState(hwndList, row_last_clicked, 0, LVIS_FOCUSED);
-		}
-	} else if (last_shift_held || last_alt_held)
-	{
-		ListView_SetItemState(hwndList, row_last_clicked, 0, LVIS_FOCUSED);
-	}
 
 	// update dragging
 	if (drag_mode != DRAG_MODE_NONE)
@@ -614,50 +596,77 @@ void PIANO_ROLL::update()
 					drawing_current_x = drawing_last_x;
 					p.x = drawing_current_x - GetScrollPos(hwndList, SB_HORZ);
 				}
-				double total_len = sqrt((double)(total_dx * total_dx + total_dy * total_dy));
 				LVHITTESTINFO info;
 				int row_index, column_index, joy, bit;
 				int min_row_index = currMovieData.getNumRecords(), max_row_index = -1;
 				bool changes_made = false;
-				int drawing_min_line_len = list_row_height;		// = min(list_row_width, list_row_height) in pixels
-				for (double len = 0; len < total_len; len += drawing_min_line_len)
+				if (alt_held)
 				{
-					// perform hit test
-					info.pt.x = p.x + (len / total_len) * total_dx;
-					info.pt.y = p.y + (len / total_len) * total_dy;
-					ListView_SubItemHitTest(hwndList, &info);
-					row_index = info.iItem;
-					if (row_index < 0)
-						row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - list_row_top) / list_row_height;
-					// pad movie size if user tries to draw below Piano Roll limit
-					if (row_index >= currMovieData.getNumRecords())
-						currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
-					column_index = info.iSubItem;
-					if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+					// special mode: draw pattern
+					int selection_beginning = selection.GetCurrentSelectionBeginning();
+					if (selection_beginning >= 0)
 					{
-						joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
-						bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-						if (drag_mode == DRAG_MODE_SET && !currMovieData.records[row_index].checkBit(joy, bit))
+						// perform hit test
+						info.pt.x = p.x;
+						info.pt.y = p.y;
+						ListView_SubItemHitTest(hwndList, &info);
+						row_index = info.iItem;
+						if (row_index < 0)
+							row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - list_row_top) / list_row_height;
+						// pad movie size if user tries to draw pattern below Piano Roll limit
+						if (row_index >= currMovieData.getNumRecords())
+							currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
+						column_index = info.iSubItem;
+						if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
 						{
-							currMovieData.records[row_index].setBit(joy, bit);
-							changes_made = true;
-							if (min_row_index > row_index) min_row_index = row_index;
-							if (max_row_index < row_index) max_row_index = row_index;
-						} else if (drag_mode == DRAG_MODE_UNSET && currMovieData.records[row_index].checkBit(joy, bit))
-						{
-							currMovieData.records[row_index].clearBit(joy, bit);
-							changes_made = true;
-							if (min_row_index > row_index) min_row_index = row_index;
-							if (max_row_index < row_index) max_row_index = row_index;
+							joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+							bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+							editor.InputSetPattern(selection_beginning, row_index, joy, bit, drawing_start_time);
 						}
 					}
-				}
-				if (changes_made)
+				} else
 				{
-					if (drag_mode == DRAG_MODE_SET)
-						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index, NULL, drawing_start_time));
-					else
-						greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index, NULL, drawing_start_time));
+					double total_len = sqrt((double)(total_dx * total_dx + total_dy * total_dy));
+					int drawing_min_line_len = list_row_height;		// = min(list_row_width, list_row_height) in pixels
+					for (double len = 0; len < total_len; len += drawing_min_line_len)
+					{
+						// perform hit test
+						info.pt.x = p.x + (len / total_len) * total_dx;
+						info.pt.y = p.y + (len / total_len) * total_dy;
+						ListView_SubItemHitTest(hwndList, &info);
+						row_index = info.iItem;
+						if (row_index < 0)
+							row_index = ListView_GetTopIndex(hwndList) + (info.pt.y - list_row_top) / list_row_height;
+						// pad movie size if user tries to draw below Piano Roll limit
+						if (row_index >= currMovieData.getNumRecords())
+							currMovieData.insertEmpty(-1, row_index + 1 - currMovieData.getNumRecords());
+						column_index = info.iSubItem;
+						if (row_index >= 0 && column_index >= COLUMN_JOYPAD1_A && column_index <= COLUMN_JOYPAD4_R)
+						{
+							joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
+							bit = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
+							if (drag_mode == DRAG_MODE_SET && !currMovieData.records[row_index].checkBit(joy, bit))
+							{
+								currMovieData.records[row_index].setBit(joy, bit);
+								changes_made = true;
+								if (min_row_index > row_index) min_row_index = row_index;
+								if (max_row_index < row_index) max_row_index = row_index;
+							} else if (drag_mode == DRAG_MODE_UNSET && currMovieData.records[row_index].checkBit(joy, bit))
+							{
+								currMovieData.records[row_index].clearBit(joy, bit);
+								changes_made = true;
+								if (min_row_index > row_index) min_row_index = row_index;
+								if (max_row_index < row_index) max_row_index = row_index;
+							}
+						}
+					}
+					if (changes_made)
+					{
+						if (drag_mode == DRAG_MODE_SET)
+							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index, NULL, drawing_start_time));
+						else
+							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index, NULL, drawing_start_time));
+					}
 				}
 				drawing_last_x = drawing_current_x;
 				drawing_last_y = drawing_current_y;
@@ -1736,30 +1745,37 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					{
 						if (fwKeys & MK_SHIFT)
 						{
-							// select region from row_last_clicked to row_index
-							if (piano_roll.row_last_clicked < row_index)
-								selection.SetRegionSelection(piano_roll.row_last_clicked, row_index + 1);
-							else
-								selection.SetRegionSelection(row_index, piano_roll.row_last_clicked + 1);
+							// select region from selection_beginning to row_index
+							int selection_beginning = selection.GetCurrentSelectionBeginning();
+							if (selection_beginning >= 0)
+							{
+								if (selection_beginning < row_index)
+									selection.SetRegionSelection(selection_beginning, row_index + 1);
+								else
+									selection.SetRegionSelection(row_index, selection_beginning + 1);
+							}
 						} else if (alt_pressed)
 						{
 							// make selection by Pattern
-							if (piano_roll.row_last_clicked < row_index)
-								selection.SetRegionSelectionPattern(piano_roll.row_last_clicked, row_index);
-							else
-								selection.SetRegionSelectionPattern(row_index, piano_roll.row_last_clicked);
+							int selection_beginning = selection.GetCurrentSelectionBeginning();
+							if (selection_beginning >= 0)
+							{
+								selection.ClearSelection();
+								if (selection_beginning < row_index)
+									selection.SetRegionSelectionPattern(selection_beginning, row_index);
+								else
+									selection.SetRegionSelectionPattern(row_index, selection_beginning);
+							}
 						} else if (fwKeys & MK_CONTROL)
 						{
 							if (selection.GetRowSelection(row_index))
 								selection.ClearRowSelection(row_index);
 							else
 								selection.SetRowSelection(row_index);
-							piano_roll.row_last_clicked = row_index;
 						} else	// just click
 						{
 							selection.ClearSelection();
 							selection.SetRowSelection(row_index);
-							piano_roll.row_last_clicked = row_index;
 						}
 						piano_roll.StartSelectingDrag(row_index);
 					}
@@ -1771,23 +1787,21 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					if (!alt_pressed && !(fwKeys & MK_SHIFT))
 					{
-						// clicked without Shift/Alt - set "row_last_clicked" here
-						piano_roll.row_last_clicked = row_index;
-						if (!(fwKeys & MK_CONTROL))
-						{
-							// change Selection to this row
-							selection.ClearSelection();
-							selection.SetRowSelection(row_index);
-						}
+						// clicked without Shift/Alt - bring Selection cursor to this row
+						selection.ClearSelection();
+						selection.SetRowSelection(row_index);
 					}
 					// toggle input
 					piano_roll.drawing_start_time = clock();
 					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
-					if (alt_pressed)
-						editor.InputSetPattern(piano_roll.row_last_clicked, row_index, joy, button, piano_roll.drawing_start_time);
+					int selection_beginning = selection.GetCurrentSelectionBeginning();
+					if (alt_pressed && selection_beginning >= 0)
+						editor.InputSetPattern(selection_beginning, row_index, joy, button, piano_roll.drawing_start_time);
+					else if ((fwKeys & MK_SHIFT) && selection_beginning >= 0)
+						editor.InputToggle(selection_beginning, row_index, joy, button, piano_roll.drawing_start_time);
 					else
-						editor.InputToggle(piano_roll.row_last_clicked, row_index, joy, button, piano_roll.drawing_start_time);
+						editor.InputToggle(row_index, row_index, joy, button, piano_roll.drawing_start_time);
 					// and start dragging/drawing
 					if (piano_roll.drag_mode == DRAG_MODE_NONE)
 					{

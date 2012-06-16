@@ -198,18 +198,26 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consec
 		return;
 
 	int pattern_offset = 0, current_pattern = taseditor_config.current_pattern;
+	bool changes_made = false;
+	bool value;
 
 	for (int i = start; i <= end; ++i)
 	{
 		// skip lag frames
 		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(i))
 			continue;
-		currMovieData.records[i].setBitValue(joy, button, autofire_patterns[current_pattern][pattern_offset] != 0);
+		value = (autofire_patterns[current_pattern][pattern_offset] != 0);
+		if (currMovieData.records[i].checkBit(joy, button) != value)
+		{
+			changes_made = true;
+			currMovieData.records[i].setBitValue(joy, button, value);
+		}
 		pattern_offset++;
 		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
 			pattern_offset -= autofire_patterns[current_pattern].size();
 	}
-	greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
+	if (changes_made)
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
 }
 
 // following functions use current Selection to determine range of frames

@@ -210,9 +210,6 @@ public:
 	int drag_selection_starting_frame;
 	int drag_selection_ending_frame;
 
-	int row_last_clicked;
-	int row_last_clicked_blinking_phase_shift;
-
 	bool shift_held, ctrl_held, alt_held;
 	int shift_timer, ctrl_timer;
 	int shift_count, ctrl_count;

@@ -534,6 +534,8 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			// add "consecutive_tag" to description
 			char framenum[11];
 			strcat(snap.description, " [");
+			if (snap.consecutive_tag > 0)
+				strcat(snap.description, "+");
 			_itoa(snap.consecutive_tag, framenum, 10);
 			strcat(snap.description, framenum);
 			strcat(snap.description, "] ");
