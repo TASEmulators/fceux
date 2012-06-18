@@ -112,7 +112,7 @@ public:
 	void RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch);
 	int RegisterBranching(int slot, bool markers_changed);
 	void RegisterRecording(int frame_of_change);
-	void RegisterImport(MovieData& md, char* filename);
+	int RegisterImport(MovieData& md, char* filename);
 	int RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made);
 
 	int GetCategoryOfOperation(int mod_type);

@@ -660,6 +660,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			}
 		}
 		branches.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
 	}
 	return first_changes;
 }
@@ -693,6 +694,7 @@ int HISTORY::RegisterInsertNum(int start, int frames)
 			snap.inheritHotChanges_InsertNum(&snapshots[real_pos], start, frames, true);
 		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
 	}
 	return first_changes;
 }
@@ -724,6 +726,7 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 			snap.inheritHotChanges_PasteInsert(&snapshots[real_pos], inserted_set);
 		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
 	}
 	return first_changes;
 }
@@ -899,8 +902,9 @@ void HISTORY::RegisterRecording(int frame_of_change)
 		AddItemToHistory(snap);
 	}
 	branches.ChangesMadeSinceBranch();
+	project.SetProjectChanged();
 }
-void HISTORY::RegisterImport(MovieData& md, char* filename)
+int HISTORY::RegisterImport(MovieData& md, char* filename)
 {
 	// create new snapshot
 	SNAPSHOT snap;
@@ -930,11 +934,8 @@ void HISTORY::RegisterImport(MovieData& md, char* filename)
 		piano_roll.UpdateItemCount();
 		branches.ChangesMadeSinceBranch();
 		project.SetProjectChanged();
-		greenzone.InvalidateAndCheck(first_changes);
-	} else
-	{
-		MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
 	}
+	return first_changes;
 }
 int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDeletion_was_made)
 {
@@ -999,6 +1000,7 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 		}
 		AddItemToHistory(snap);
 		branches.ChangesMadeSinceBranch();
+		project.SetProjectChanged();
 	}
 	return first_changes;
 }

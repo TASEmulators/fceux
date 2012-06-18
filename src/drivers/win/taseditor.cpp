@@ -600,7 +600,11 @@ void Import()
 			char drv[512], dir[512], name[1024], ext[512];
 			splitpath(nameo, drv, dir, name, ext);
 			strcat(name, ext);
-			history.RegisterImport(md, name);
+			int result = history.RegisterImport(md, name);
+			if (result >= 0)
+				greenzone.InvalidateAndCheck(result);
+			else
+				MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
 		} else
 		{
 			FCEUD_PrintError("Error loading movie data!");
