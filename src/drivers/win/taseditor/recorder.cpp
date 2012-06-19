@@ -227,6 +227,10 @@ void RECORDER::RecheckRecordingRadioButtons()
 	case MULTITRACK_RECORDING_4P:
 		Button_SetCheck(hwndRB_Rec4P, BST_CHECKED);
 		break;
+	default:
+		multitrack_recording_joypad = MULTITRACK_RECORDING_ALL;
+		Button_SetCheck(hwndRB_RecAll, BST_CHECKED);
+		break;
 	}
 }
 
@@ -304,6 +308,7 @@ void RECORDER::InputChanged()
 	}
 }
 
+// getters
 const char* RECORDER::GetRecordingMode()
 {
 	return recordingModes[multitrack_recording_joypad];

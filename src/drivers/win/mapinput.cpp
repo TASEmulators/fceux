@@ -73,10 +73,12 @@ static struct
 	{ EMUCMD_RELOAD,					SCAN_F1 | CMD_KEY_CTRL ,	},
 	{ EMUCMD_MISC_UNDOREDOSAVESTATE,	SCAN_Z | CMD_KEY_CTRL, },
 	{ EMUCMD_MISC_TOGGLEFULLSCREEN,		SCAN_ENTER | CMD_KEY_ALT, },
-	{ EMUCMD_TASEDITOR_REWIND,			SCAN_BACKSPACE, },
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,	SCAN_M,	},
+	{ EMUCMD_TASEDITOR_REWIND,			SCAN_BACKSPACE, },
 	{ EMUCMD_TASEDITOR_RESTORE_PLAYBACK,	SCAN_SPACE,	},
 	{ EMUCMD_TASEDITOR_CANCEL_SEEKING,	SCAN_ESCAPE, },
+	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,	SCAN_SPACE | CMD_KEY_CTRL, },
+	{ EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,	SCAN_W, },
 };
 
 #define NUM_DEFAULT_MAPPINGS		(sizeof(DefaultCommandMapping)/sizeof(DefaultCommandMapping[0]))
@@ -569,7 +571,7 @@ HWND InitializeListView(HWND hwndDlg)
 	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
 	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Type";
-	lv.cx = 40;
+	lv.cx = 80;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)0, (LPARAM)&lv);
 
@@ -577,7 +579,7 @@ HWND InitializeListView(HWND hwndDlg)
 	lv.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
 	lv.fmt = LVCFMT_LEFT;
 	lv.pszText = "Command";
-	lv.cx = 180;
+	lv.cx = 240;
 
 	SendMessage(hwndListView, LVM_INSERTCOLUMN, (WPARAM)1, (LPARAM)&lv);
 

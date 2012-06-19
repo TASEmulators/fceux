@@ -234,9 +234,11 @@ enum EMUCMD
 	EMUCMD_TASEDITOR_REWIND,
 	EMUCMD_RERECORD_DISPLAY_TOGGLE,
 	EMUCMD_TASEDITOR_RESTORE_PLAYBACK,
+	EMUCMD_TASEDITOR_CANCEL_SEEKING,
+	EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,
 	//-----------------------------
 	//keep adding these in order of newness or else the hotkey binding configs will get messed up...
-	EMUCMD_TASEDITOR_CANCEL_SEEKING,
+	EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,
 
 	EMUCMD_MAX
 };
@@ -252,6 +254,7 @@ enum EMUCMDTYPE
 	EMUCMDTYPE_FDS,
 	EMUCMDTYPE_VSUNI,
 	EMUCMDTYPE_TOOL,  //All Tools type are currenty windows only programs
+	EMUCMDTYPE_TASEDITOR,	// Windows-only as well
 
 	EMUCMDTYPE_MAX
 };

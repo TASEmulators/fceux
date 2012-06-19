@@ -149,17 +149,17 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change input above Playback cursor, the cursor returns to where it was before the change (hotkey: Ctrl+Spacebar)", "", false, 0, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change input above Playback cursor, the cursor returns to where it was before the change", "", false, EMUCMD_TASEDITOR_SWITCH_AUTORESTORING, 0,
 	CHECK_AUTOADJUSTINPUTDUETOLAG, -1, 0, 0, 0, "TAS Editor will adjust Input when new lag frames appear or old lag frames disappear while emulating", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
 	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
-	IDC_RADIO_ALL, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_RADIO_1P, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_RADIO_2P, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_RADIO_3P, -1, 0, 0, 0, "", "", false, 0, 0,
-	IDC_RADIO_4P, -1, 0, 0, 0, "", "", false, 0, 0,
+	IDC_RADIO_ALL, -1, 0, 0, 0, "Switch off Multitracking", "", false, 0, 0,
+	IDC_RADIO_1P, -1, 0, 0, 0, "Select Joypad 1 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	IDC_RADIO_2P, -1, 0, 0, 0, "Select Joypad 2 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	IDC_RADIO_3P, -1, 0, 0, 0, "Select Joypad 3 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
+	IDC_RADIO_4P, -1, 0, 0, 0, "Select Joypad 4 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
 	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old input with new buttons, instead of overwriting", "", false, 0, 0,
-	IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to input recording", "", false, 0, 0,
+		IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to input recording", "", false, 0, 0,
 	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)", "", false, 0, 0,
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
@@ -1053,7 +1053,6 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_window.UpdateCheckedItems();
 					break;
 				case CHECK_AUTORESTORE_PLAYBACK:
-				case ACCEL_CTRL_SPACE:
 					taseditor_config.restore_position ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;

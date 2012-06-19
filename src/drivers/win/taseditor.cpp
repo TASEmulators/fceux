@@ -855,6 +855,15 @@ void Taseditor_EMUCMD(int command)
 		case EMUCMD_TASEDITOR_CANCEL_SEEKING:
 			playback.CancelSeeking();
 			break;
+		case EMUCMD_TASEDITOR_SWITCH_AUTORESTORING:
+			taseditor_config.restore_position ^= 1;
+			taseditor_window.UpdateCheckedItems();
+			break;
+		case EMUCMD_TASEDITOR_SWITCH_MULTITRACKING:
+			recorder.multitrack_recording_joypad++;
+			if (recorder.multitrack_recording_joypad > joysticks_per_frame[GetInputType(currMovieData)])
+				recorder.multitrack_recording_joypad = 0;
+			break;
 
 	}
 }

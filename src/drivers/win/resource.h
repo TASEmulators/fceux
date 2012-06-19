@@ -658,7 +658,6 @@
 #define IDC_TEXT_CLIPBOARD              1268
 #define IDC_RADIO_1PLAYER               1269
 #define IDC_TEXT_SELECTION2             1269
-#define CHECK_AUTORESTORE_PLAYBACK2     1269
 #define CHECK_AUTOADJUSTINPUTDUETOLAG   1269
 #define IDC_RADIO_2PLAYERS              1270
 #define IDC_PLAYBACK_MARKER             1270
