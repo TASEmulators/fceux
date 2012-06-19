@@ -842,6 +842,25 @@ void ResetExState(void (*PreSave)(void), void (*PostSave)(void))
 
 void AddExState(void *v, uint32 s, int type, char *desc)
 {
+	if(s==~0)
+	{
+		SFORMAT* sf = (SFORMAT*)v;
+		std::map<std::string,bool> names;
+		while(sf->v)
+		{
+			char tmp[5] = {0};
+			memcpy(tmp,sf->desc,4);
+			std::string desc = tmp;
+			if(names.find(desc) != names.end())
+			{
+				printf("OH NO!!! YOU HAVE AN INVALID SFORMAT! POST A BUG TICKET ALONG WITH INFO ON THE ROM YOURE USING\n");
+				exit(0);
+			}
+			names[desc] = true;
+			sf++;
+		}
+	}
+
 	if(desc)
 	{
 		SFMDATA[SFEXINDEX].desc=(char *)FCEU_malloc(strlen(desc)+1);

@@ -27,8 +27,8 @@ static uint8 *WRAM=NULL;
 static uint32 WRAMSIZE;
 static SFORMAT StateRegs[]=
 {
-  {&latchea, 2, "LATCHEA"},
-  {&latched, 1, "LATCHED"},
+  {&latchea, 2, "AREG"},
+  {&latched, 1, "DREG"},
   {0}
 };
 
@@ -64,6 +64,7 @@ static DECLFW(M15Write)
 {
   latchea=A;
   latched=V;
+	printf("%04X = %02X\n",A,V);
   Sync();
 }
 
