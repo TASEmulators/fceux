@@ -243,6 +243,9 @@
    {0x4e7729ff,114,-1}, /* Super Donkey Kong */
    
    {0x02c41438,176,-1}, /* Xing He Zhan Shi (C) */
+   {0xfb2b6b10,241,-1}, /* Fan Kong Jing Ying (Ch) */
+   {0xb5e83c9a,241,-1}, /* Xing Ji Zheng Ba (Ch) */
+   {0x081caaff,163,-1}, /* Commandos (Ch) */
    
    {0x0da5e32e,101,-1}, /* new Uruusey Yatsura */
    {0x4f2f1846,-1,1}, /* Famista '89 - Kaimaku Han!! (J) */
