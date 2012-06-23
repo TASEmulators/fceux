@@ -39,8 +39,8 @@
 static uint8 mode;
 static uint8 vrc2_chr[8], vrc2_prg[2], vrc2_mirr;
 static uint8 mmc3_regs[10], mmc3_ctrl, mmc3_mirr;
-static uint8 IRQCount,IRQLatch,IRQa;
-static uint8 IRQReload;
+extern uint8 IRQCount,IRQLatch,IRQa;
+extern uint8 IRQReload;
 static uint8 mmc1_regs[4], mmc1_buffer, mmc1_shift;
 
 static SFORMAT StateRegs[]=
