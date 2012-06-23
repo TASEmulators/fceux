@@ -231,6 +231,7 @@
     <ClCompile Include="..\src\boards\106.cpp" />
     <ClCompile Include="..\src\boards\108.cpp" />
     <ClCompile Include="..\src\boards\112.cpp" />
+    <ClCompile Include="..\src\boards\116.cpp" />
     <ClCompile Include="..\src\boards\117.cpp" />
     <ClCompile Include="..\src\boards\120.cpp" />
     <ClCompile Include="..\src\boards\121.cpp" />

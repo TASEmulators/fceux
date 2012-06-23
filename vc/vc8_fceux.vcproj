@@ -570,6 +570,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\boards\116.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\117.cpp"
 				>
 			</File>

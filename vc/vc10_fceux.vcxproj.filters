@@ -961,6 +961,9 @@
     <ClCompile Include="..\src\drivers\win\taseditor\branches.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\boards\116.cpp">
+      <Filter>boards</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">

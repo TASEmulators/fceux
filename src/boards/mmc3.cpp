@@ -851,39 +851,6 @@ void Mapper115_Init(CartInfo *info)
  AddExState(EXPREGS, 2, 0, "EXPR");
 }
 
-// ---------------------------- Mapper 116 ------------------------------
-
-static void M116CW(uint32 A, uint8 V)
-{
-// setchr1(A,V|((EXPREGS[0]&0x4)<<6));
- if(EXPREGS[0]&2)
-    setchr8r(0x10,0);
- else
-    setchr1(A,V);
-}
-
-static DECLFW(M116Write)
-{
- EXPREGS[0]=V;
- FixMMC3CHR(MMC3_cmd);
-}
-
-static void M116Power(void)
-{
- GenMMC3Power();
- SetWriteHandler(0x4100,0x4100,M116Write);
-}
-
-void Mapper116_Init(CartInfo *info)
-{
- GenMMC3_Init(info, 128, 512, 0, 0);
- cwrap=M116CW;
- info->Power=M116Power;
- CHRRAM = (uint8*)FCEU_gmalloc(8192);
- SetupCartCHRMapping(0x10, CHRRAM, 8192, 1);
- AddExState(EXPREGS, 4, 0, "EXPR");
-}
-
 // ---------------------------- Mapper 118 ------------------------------
 
 static uint8 PPUCHRBus;
