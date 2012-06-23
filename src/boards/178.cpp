@@ -35,7 +35,7 @@ static void Sync(void)
   setmirror(reg[0]);
   setprg8r(0x10,0x6000,0);
   setchr8(0);
-  setprg32(0x8000,(reg[1]+reg[2])&0xf);
+  setprg32(0x8000,(reg[1]|reg[2]));
 }
 
 static DECLFW(M178Write0)
@@ -52,7 +52,7 @@ static DECLFW(M178Write1)
 
 static DECLFW(M178Write2)
 {
-  reg[2]=(V<<2)&0xf;
+  reg[2]=(V<<2);
   Sync();
 }
 
