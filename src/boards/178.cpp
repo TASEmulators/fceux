@@ -35,7 +35,7 @@ static void Sync(void)
   setmirror(reg[0]);
   setprg8r(0x10,0x6000,0);
   setchr8(0);
-  setprg32(0x8000,(reg[1]|reg[2]));
+  setprg32(0x8000,(reg[1]+reg[2]));
 }
 
 static DECLFW(M178Write0)
