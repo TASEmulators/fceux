@@ -102,6 +102,7 @@ else:
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
       if conf.CheckLib('lua'):
         env.Append(LINKFLAGS = ["-ldl", "-llua"])
+  env.Append(LINKFLAGS=['-Wl,--as-needed'])
   
   ### Search for gd if we're not in Windows
   if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI'] and env['LOGO']:
