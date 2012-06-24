@@ -19,7 +19,7 @@
  */
 
 #include "mapinc.h"
-#include "ines.h"
+#include "../ines.h"
 
 static uint8 latche, latcheinit, bus_conflict;
 static uint16 addrreg0, addrreg1;
