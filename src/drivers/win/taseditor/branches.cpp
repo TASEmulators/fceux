@@ -77,6 +77,7 @@ void BRANCHES::init()
 	hOldBitmap1 = (HBITMAP)SelectObject(hBufferDC, buffer_hbitmap);
 	normal_brush = CreateSolidBrush(0x000000);
 	border_brush = CreateSolidBrush(0xb99d7f);
+	selected_slot_brush = CreateSolidBrush(0x6161E4);
 	// prepare bg gradient
 	vertex[0].x     = 0;
 	vertex[0].y     = 0;
@@ -171,6 +172,11 @@ void BRANCHES::free()
 	{
 		DeleteObject(border_brush);
 		border_brush = 0;
+	}
+	if (selected_slot_brush)
+	{
+		DeleteObject(selected_slot_brush);
+		selected_slot_brush = 0;
 	}
 	if (normal_pen)
 	{
@@ -658,6 +664,17 @@ void BRANCHES::PaintBranchesBitmap(HDC hdc)
 	// "bg"
 	BitBlt(hBufferDC, 0, 0, BRANCHES_BITMAP_WIDTH, BRANCHES_BITMAP_HEIGHT, hBitmapDC, 0, 0, SRCCOPY);
 	// "sprites"
+	// blinking red frame on selected slot
+	if (taseditor_config.old_branching_controls && ((animation_frame + 1) % 6))
+	{
+		int selected_slot = bookmarks.GetSelectedSlot();
+		temp_rect.left = BranchCurrX[selected_slot] + BRANCHES_SELECTED_SLOT_DX;
+		temp_rect.left += bookmarks.bookmarks_array[selected_slot].floating_phase;
+		temp_rect.top = BranchCurrY[selected_slot] + BRANCHES_SELECTED_SLOT_DY;
+		temp_rect.right = temp_rect.left + BRANCHES_SELECTED_SLOT_WIDTH;
+		temp_rect.bottom = temp_rect.top + BRANCHES_SELECTED_SLOT_HEIGHT;
+		FrameRect(hBufferDC, &temp_rect, selected_slot_brush);
+	}
 	// fireball
 	if (fireball_size)
 	{
@@ -672,7 +689,7 @@ void BRANCHES::PaintBranchesBitmap(HDC hdc)
 		}
 	}
 	// blinking Playback cursor point
-	if (animation_frame % 3)
+	if (animation_frame % 4)
 		TransparentBlt(hBufferDC, playback_x - BRANCHES_MINIARROW_HALFWIDTH, playback_y - BRANCHES_MINIARROW_HALFHEIGHT, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, hSpritesheetDC, BRANCHES_MINIARROW_SPRITESHEET_X, BRANCHES_MINIARROW_SPRITESHEET_Y, BRANCHES_MINIARROW_WIDTH, BRANCHES_MINIARROW_HEIGHT, 0x00FF00);
 	// corners cursor
 	int current_corners_cursor_shift = BRANCHES_CORNER_BASE_SHIFT + corners_cursor_shift[animation_frame];

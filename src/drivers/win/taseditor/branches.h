@@ -86,6 +86,11 @@
 #define BRANCHES_MINIARROW_HEIGHT 5
 #define BRANCHES_MINIARROW_HALFHEIGHT BRANCHES_MINIARROW_HEIGHT/2
 
+#define BRANCHES_SELECTED_SLOT_DX -6
+#define BRANCHES_SELECTED_SLOT_DY -6
+#define BRANCHES_SELECTED_SLOT_WIDTH 13
+#define BRANCHES_SELECTED_SLOT_HEIGHT 13
+
 #define FIRST_DIFFERENCE_UNKNOWN -2
 
 class BRANCHES
@@ -160,7 +165,7 @@ private:
 	int latest_drawn_item_under_mouse;
 
 	// GDI stuff
-	HBRUSH normal_brush, border_brush;
+	HBRUSH normal_brush, border_brush, selected_slot_brush;
 	RECT temp_rect;
 	HPEN normal_pen, timeline_pen, select_pen;
 	HBITMAP branches_hbitmap, hOldBitmap, buffer_hbitmap, hOldBitmap1, branchesSpritesheet, hOldBitmap2;

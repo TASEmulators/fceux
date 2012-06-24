@@ -425,9 +425,9 @@ bool SaveProjectAs()
 		project.RenameProject(nameo, true);
 		project.save();
 		taseditor_window.UpdateRecentProjectsArray(nameo);
+		// saved successfully - remove * mark from caption
+		taseditor_window.UpdateCaption();
 	} else return false;
-	// saved successfully - remove * mark from caption
-	taseditor_window.UpdateCaption();
 	return true;
 }
 bool SaveProject()
@@ -549,8 +549,11 @@ void SaveCompact()
 		string initdir = FCEU_GetPath(FCEUMKF_MOVIE);			// initial directory
 		ofn.lpstrInitialDir = initdir.c_str();
 
-		if (GetSaveFileName(&ofn))								// if it is a valid filename
+		if (GetSaveFileName(&ofn))
+		{
 			project.save(nameo, taseditor_config.savecompact_binary, taseditor_config.savecompact_markers, taseditor_config.savecompact_bookmarks, taseditor_config.savecompact_greenzone, taseditor_config.savecompact_history, taseditor_config.savecompact_piano_roll, taseditor_config.savecompact_selection);
+			taseditor_window.UpdateCaption();
+		}
 	}
 }
 
