@@ -24,6 +24,7 @@ Table of Contents
 * scons - Required to build fceux.
 * libgtk2.0 (optional) - version >= 2.24 recommended
 * libgtk3.0 (optional) - this compiles as of fceux 2.1.6.
+* liblua5.1 (optional)
 * g++ - fceux requires g++ from the gcc.  llvm-clang is known to not compile fceux (patches welcome).
 
 2 - Installation
@@ -63,7 +64,7 @@ GTK3 BoolVariable to 1 in the SConstruct.
 
 5 - LUA Scripting
 -----------------
-FCEUX provides a LUA engine that allows for in-game scripting capabilities.  LUA can be enabled or disabled at build time by adjusting the "LUA" BoolVariable in the SConstruct file.
+FCEUX provides a LUA 5.1 engine that allows for in-game scripting capabilities.  LUA can be enabled or disabled at build time by adjusting the "LUA" BoolVariable in the SConstruct file.
 
 A collection of LUA scripts are provided with the source distribuition in the output directory:
 

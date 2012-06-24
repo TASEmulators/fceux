@@ -73,6 +73,8 @@ if env['PLATFORM'] == 'win32':
   env.Append(LIBS = ["rpcrt4", "comctl32", "vfw32", "winmm", "ws2_32", "comdlg32", "ole32", "gdi32", "htmlhelp"])
 else:
   conf = Configure(env)
+  if conf.CheckFunc('asprintf'):
+    conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   assert conf.CheckLibWithHeader('z', 'zlib.h', 'c', 'inflate;', 1), "please install: zlib"
   if not conf.CheckLib('SDL'):
     print 'Did not find libSDL or SDL.lib, exiting!'
@@ -102,7 +104,9 @@ else:
       # If we're POSIX, we use LUA_USE_LINUX since that combines usual lua posix defines with dlfcn calls for dynamic library loading.
       # Should work on any *nix
       env.Append(CCFLAGS = ["-DLUA_USE_LINUX"])
-      if conf.CheckLib('lua'):
+      if conf.CheckLib('lua5.1'):
+        env.Append(LINKFLAGS = ["-ldl", "-llua5.1"])
+      elif conf.CheckLib('lua'):
         env.Append(LINKFLAGS = ["-ldl", "-llua"])
   env.Append(LINKFLAGS=['-Wl,--as-needed'])
   
@@ -113,8 +117,6 @@ else:
       env['LOGO'] = 0
       print 'Did not find libgd, you won\'t be able to create a logo screen for your avis.'
    
-  if conf.CheckFunc('asprintf'):
-    conf.env.Append(CCFLAGS = "-DHAVE_ASPRINTF")
   if env['OPENGL'] and conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', autoadd=1):
     conf.env.Append(CCFLAGS = "-DOPENGL")
   conf.env.Append(CPPDEFINES = ['PSS_STYLE=1'])
