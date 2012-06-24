@@ -311,9 +311,10 @@ static const TMasterRomInfo sMasterRomInfo[] = {
 	{ 0x8bb48490d8d22711LL, "bonus=0" }, //4-in-1 (FK23C8033)[p1][!].nes
 	{ 0xc75888d7b48cd378LL, "bonus=0" }, //4-in-1 (FK23C8043)[p1][!].nes
 	{ 0xf81a376fa54fdd69LL, "bonus=0" }, //4-in-1 (FK23Cxxxx, S-0210A PCB)[p1][!].nes
+	{ 0x164eea6097a1e313LL, "busc=1" }, //Cybernoid - The Fighting Machine (U)[!].nes -- needs bus conflict emulation
 };
 const TMasterRomInfo* MasterRomInfo;
-std::map<std::string,std::string> MasterRomInfoParams;
+TMasterRomInfoParams MasterRomInfoParams;
 
 static void CheckHInfo(void)
 {
@@ -393,7 +394,7 @@ static void CheckHInfo(void)
 	CheckBad(partialmd5);
 
 	MasterRomInfo = NULL;
-	MasterRomInfoParams = std::map<std::string,std::string>();
+	MasterRomInfoParams = TMasterRomInfoParams();
 	for(int i=0;i<ARRAY_SIZE(sMasterRomInfo);i++)
 	{
 		const TMasterRomInfo& info = sMasterRomInfo[i];

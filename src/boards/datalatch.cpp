@@ -19,6 +19,7 @@
  */
 
 #include "mapinc.h"
+#include "ines.h"
 
 static uint8 latche, latcheinit, bus_conflict;
 static uint16 addrreg0, addrreg1;
@@ -133,7 +134,8 @@ static void CNROMSync(void)
 
 void CNROM_Init(CartInfo *info)
 {
-  Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF, 1, 1);
+	bool busc = MasterRomInfoParams.ContainsKey("busc");
+	Latch_Init(info, CNROMSync, 0, 0x8000, 0xFFFF, 1, busc?1:0);
 }
 
 //------------------ ANROM ---------------------------

@@ -75,6 +75,12 @@ struct TMasterRomInfo
 	const char* params;
 };
 
+class TMasterRomInfoParams : public std::map<std::string,std::string> 
+{
+public:
+	bool ContainsKey(const std::string& key) { return find(key) != end(); }
+};
+
 //mbg merge 6/29/06
 extern uint8 *ROM;
 extern uint8 *VROM;
@@ -84,7 +90,7 @@ extern int iNesSave(); //bbit Edited: line added
 extern int iNesSaveAs(char* name);
 extern char LoadedRomFName[2048]; //bbit Edited: line added
 extern const TMasterRomInfo* MasterRomInfo;
-extern std::map<std::string,std::string> MasterRomInfoParams;
+extern TMasterRomInfoParams MasterRomInfoParams;
 
 //mbg merge 7/19/06 changed to c++ decl format
 struct iNES_HEADER {
