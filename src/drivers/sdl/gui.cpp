@@ -2083,7 +2083,9 @@ static GtkActionEntry normal_entries[] = {
 	{"QuitAction", GTK_STOCK_QUIT, "_Quit", "<control>Q", NULL, G_CALLBACK(quit)},
 	
 	{"OptionsMenuAction", NULL, "_Options"},
+#if GTK_MAJOR_VERSION == 3 || (GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 24)
 	{"GamepadConfigAction", "input-gaming", "_Gamepad Config", NULL, NULL, G_CALLBACK(openGamepadConfig)},
+#endif
 	{"SoundConfigAction", "audio-x-generic", "_Sound Config", NULL, NULL, G_CALLBACK(openSoundConfig)},
 	{"VideoConfigAction", "video-display", "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
 	{"PaletteConfigAction", GTK_STOCK_SELECT_COLOR, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
