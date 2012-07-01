@@ -1,5 +1,19 @@
 
 
+
+24-Jun-2012 - zeromus - add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)
+23-Jun-2012 - zeromus - add m116 from fceu-mm; fix mapper 178 big PRG support
+20-Jun-2012 - zeromus - fix savestate engine to throw errors when a buggy SFORMAT is passed to AddExState, and fix those errors in m015 and m253
+19-Jun-2012 - AnS - added TASEDITOR type of hotkeys
+19-Jun-2012 - AnS - Taseditor: 2 new hotkeys: "Switch Auto-restoring" (Ctrl+Spacebar), "Switch current Multitracking mode" (W)
+16-Jun-2012 - AnS - Taseditor: drawing patterns with Alt held; no more row_last_clicked
+15-Jun-2012 - AnS - Taseditor: added "rewatch from Selection to Playback" feature for Ctrl+middle click action
+14-Jun-2012 - AnS - Taseditor: combining consecutive AdjustLag operations
+13-Jun-2012 - AnS - Taseditor: truncated Greenzone is drawn by pale colors, not just white
+12-Jun-2012 - AnS - Taseditor: "Auto-adjust Input due to lag" checkbox
+11-Jun-2012 - AnS - Taseditor: green arrow doesn't disappear when Playback cursor goes through it
+11-Jun-2012 - AnS - Taseditor: changed icons column in Piano Roll, now can show both Bookmark and arrow
+09-Jun-2012 - zeromus - win32-support funny languages for opening roms, through drag&drop, at least
 06-Jun-2012 - AnS - Taseditor: small fix for Branches Tree - among bookmarks with equal jump_frame the cursor must be pointing at current branch
 06-Jun-2012 - zeromus - support mapper 176. mapper 176 no longer maps to BMCFK23C. BMCFK23C is still accessible through crc or unif? test case would be welcome. it is unclear to me why mapper 176 control was removed from 176.cpp and given to BMCFK23C
 06-Jun-2012 - AnS - Taseditor: autosave works only when project has a filename

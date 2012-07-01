@@ -244,7 +244,7 @@ void POPUP_DISPLAY::RedrawScreenshotBitmap()
 }
 void POPUP_DISPLAY::ChangeDescrText()
 {
-	// retrieve info from the pointed bookmark's markers
+	// retrieve info from the pointed bookmark's Markers
 	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame;
 	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), frame);
 	char new_text[MAX_NOTE_LEN];

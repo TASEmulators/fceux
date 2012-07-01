@@ -12,7 +12,7 @@ Markers_manager - Manager of Markers
 
 * stores one snapshot of Markers, representing current state of Markers in the project
 * saves and loads the data from a project file. On error: clears the data
-* regularly ensures that the size of current Markers array is not less than the number of frames in current input
+* regularly ensures that the size of current Markers array is not less than the number of frames in current Input
 * implements all operations with Markers: setting Marker to a frame, removing Marker, inserting/deleting frames between Markers, truncating Markers array, changing Notes, finding frame for any given Marker, access to the data of Snapshot of Markers state
 * implements full/partial copying of data between two Snapshots of Markers state, and searching for first difference between two Snapshots of Markers state
 * also here's the code of searching for "similar" Notes
@@ -62,6 +62,7 @@ void MARKERS_MANAGER::reset()
 }
 void MARKERS_MANAGER::update()
 {
+	// the size of current markers_array must be no less then the size of Input
 	if ((int)markers.markers_array.size() < currMovieData.getNumRecords())
 		markers.markers_array.resize(currMovieData.getNumRecords());
 }
@@ -72,11 +73,11 @@ void MARKERS_MANAGER::save(EMUFILE *os, bool really_save)
 	{
 		// write "MARKERS" string
 		os->fwrite(markers_save_id, MARKERS_ID_LEN);
-		markers.Set_already_compressed(false);		// must recompress data, because it has changed, probably
+		markers.Set_already_compressed(false);		// must recompress data, because most likely it has changed since last compression
 		markers.save(os);
 	} else
 	{
-		// write "MARKERX" string, meaning that markers are not saved
+		// write "MARKERX" string, meaning that Markers are not saved
 		os->fwrite(markers_skipsave_id, MARKERS_ID_LEN);
 	}
 }
@@ -94,7 +95,7 @@ bool MARKERS_MANAGER::load(EMUFILE *is, bool really_load)
 	if (!strcmp(markers_skipsave_id, save_id))
 	{
 		// string says to skip loading Markers
-		FCEU_printf("No markers in the file\n");
+		FCEU_printf("No Markers in the file\n");
 		reset();
 		return false;
 	}
@@ -103,7 +104,7 @@ bool MARKERS_MANAGER::load(EMUFILE *is, bool really_load)
 	// all ok
 	return false;
 error:
-	FCEU_printf("Error loading markers\n");
+	FCEU_printf("Error loading Markers\n");
 	reset();
 	return true;
 }
@@ -114,7 +115,7 @@ int MARKERS_MANAGER::GetMarkersSize()
 }
 bool MARKERS_MANAGER::SetMarkersSize(int new_size)
 {
-	// if we are truncating, clear markers that are gonna be erased (so that obsolete notes will be erased too)
+	// if we are truncating, clear Markers that are gonna be erased (so that obsolete notes will be erased too)
 	bool markers_changed = false;
 	for (int i = markers.markers_array.size() - 1; i >= new_size; i--)
 	{
@@ -161,7 +162,7 @@ int MARKERS_MANAGER::GetMarkerFrame(int marker_id)
 	// didn't find
 	return -1;
 }
-// returns number of new marker
+// returns number of new Marker
 int MARKERS_MANAGER::SetMarker(int frame)
 {
 	if (frame < 0)
@@ -176,9 +177,9 @@ int MARKERS_MANAGER::SetMarker(int frame)
 	if (taseditor_config.empty_marker_notes)
 		markers.notes.insert(markers.notes.begin() + marker_num, 1, "");
 	else
-		// copy previous marker note
+		// copy previous Marker note
 		markers.notes.insert(markers.notes.begin() + marker_num, 1, markers.notes[marker_num - 1]);
-	// increase following markers' ids
+	// increase following Markers' ids
 	int size = markers.markers_array.size();
 	for (frame++; frame < size; ++frame)
 		if (markers.markers_array[frame])
@@ -191,9 +192,9 @@ void MARKERS_MANAGER::ClearMarker(int frame)
 	{
 		// erase corresponding note
 		markers.notes.erase(markers.notes.begin() + markers.markers_array[frame]);
-		// clear marker
+		// clear Marker
 		markers.markers_array[frame] = 0;
-		// decrease following markers' ids
+		// decrease following Markers' ids
 		int size = markers.markers_array.size();
 		for (frame++; frame < size; ++frame)
 			if (markers.markers_array[frame])
@@ -216,7 +217,7 @@ bool MARKERS_MANAGER::EraseMarker(int frame)
 	bool markers_changed = false;
 	if (frame < (int)markers.markers_array.size())
 	{
-		// if there's a marker, first clear it
+		// if there's a Marker, first clear it
 		if (markers.markers_array[frame])
 		{
 			ClearMarker(frame);
@@ -298,27 +299,27 @@ void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source, int until_frame)
 {
 	if (until_frame >= 0)
 	{
-		// restore markers up to and not including the frame
+		// restore Markers up to and not including the frame
 		if ((int)markers.markers_array.size() <= until_frame)
 		{
 			// only copy head of source
 			markers.markers_array = source.markers_array;
 			markers.markers_array.resize(until_frame);
 			markers.notes = source.notes;
-			// find last marker
+			// find last Marker
 			int last_marker = GetMarkerUp(until_frame-1);
-			// delete all notes following the note of the last marker
+			// delete all notes following the note of the last Marker
 			markers.notes.resize(last_marker+1);
 		} else
 		{
-			// combine head of source and tail of destination (old markers)
-			// 1 - head = part of source markers
+			// combine head of source and tail of destination (old Markers)
+			// 1 - head = part of source Markers
 			std::vector<int> temp_markers_array;
 			std::vector<std::string> temp_notes;
 			temp_markers_array = source.markers_array;
 			temp_markers_array.resize(until_frame);
 			temp_notes = source.notes;
-			// find last marker in temp_markers_array
+			// find last Marker in temp_markers_array
 			int last_marker, frame;
 			for (frame = until_frame-1; frame >= 0; frame--)
 				if (temp_markers_array[frame]) break;
@@ -326,22 +327,22 @@ void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source, int until_frame)
 				last_marker = temp_markers_array[frame];
 			else
 				last_marker = 0;
-			// delete all temp_notes foolowing the note of the last marker
+			// delete all temp_notes foolowing the note of the last Marker
 			temp_notes.resize(last_marker+1);
-			// 2 - tail = part of old (current) markers
-			// delete all markers (and their notes) up to and not including until_frame
+			// 2 - tail = part of old (current) Markers
+			// delete all Markers (and their notes) up to and not including until_frame
 			//for (int i = until_frame-1; i >= 0; i--)		// actually no need for that
 			//	ClearMarker(i);
-			// 3 - combine head and tail (if there are actually markers left in the tail)
+			// 3 - combine head and tail (if there are actually Markers left in the tail)
 			int size = markers.markers_array.size();
 			temp_markers_array.resize(size);
 			for (int i = until_frame; i < size; ++i)
 			{
 				if (markers.markers_array[i])
 				{
-					last_marker++;	// make new id for old marker
+					last_marker++;	// make new id for old Marker
 					temp_markers_array[i] = last_marker;
-					temp_notes.push_back(markers.notes[markers.markers_array[i]]);	// take note from old markers and add it to the end of the head
+					temp_notes.push_back(markers.notes[markers.markers_array[i]]);	// take note from old Markers and add it to the end of the head
 				}
 			}
 			// 4 - save result
@@ -390,7 +391,7 @@ bool MARKERS_MANAGER::checkMarkersDiff(MARKERS& their_markers, int end)
 	return false;
 }
 // ------------------------------------------------------------------------------------
-// ordering function, used by std::sort
+// custom ordering function, used by std::sort
 bool ordering(const std::pair<int, double>& d1, const std::pair<int, double>& d2)
 {
   return d1.second < d2.second;
@@ -478,7 +479,7 @@ void MARKERS_MANAGER::FindNextSimilar()
 	for (t = totalSourceKeywords - 1; t >= 0; t--)
 		if (maxFound < keywordFound[t])
 			maxFound = keywordFound[t];
-	// and then calculate weight of each keyword: the more often it appears in markers, the less weight it has
+	// and then calculate weight of each keyword: the more often it appears in Markers, the less weight it has
 	std::vector<double> keywordWeight(totalSourceKeywords);
 	for (t = totalSourceKeywords - 1; t >= 0; t--)
 		keywordWeight[t] = KEYWORD_WEIGHT_BASE + KEYWORD_WEIGHT_FACTOR * (keywordFound[t] / (double)maxFound);
@@ -589,7 +590,7 @@ void MARKERS_MANAGER::FindNextSimilar()
 	}
 	*/
 
-	// Send selection to the marker found
+	// Send Selection to the Marker found
 	int index = notePriority.size()-1 - search_similar_marker;
 	if (index >= 0 && notePriority[index].second >= MIN_PRIORITY_TRESHOLD)
 	{
@@ -624,9 +625,9 @@ void MARKERS_MANAGER::UpdateMarkerNote()
 			if (playback.shown_marker)
 				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(playback.shown_marker), -1, new_text);
 			else
-				// zeroth marker - just assume it's set on frame 0
+				// zeroth Marker - just assume it's set on frame 0
 				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
-			// notify selection to change text in lower marker (in case both are showing same marker)
+			// notify Selection to change text in the lower Marker (in case both are showing same Marker)
 			selection.must_find_current_marker = true;
 		}
 	} else if (marker_note_edit == MARKER_NOTE_EDIT_LOWER)
@@ -640,9 +641,9 @@ void MARKERS_MANAGER::UpdateMarkerNote()
 			if (selection.shown_marker)
 				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, GetMarkerFrame(selection.shown_marker), -1, new_text);
 			else
-				// zeroth marker - just assume it's set on frame 0
+				// zeroth Marker - just assume it's set on frame 0
 				history.RegisterMarkersChange(MODTYPE_MARKER_RENAME, 0, -1, new_text);
-			// notify playback to change text in upper marker (in case both are showing same marker)
+			// notify Playback to change text in upper Marker (in case both are showing same Marker)
 			playback.must_find_current_marker = true;
 		}
 	}
@@ -715,7 +716,7 @@ BOOL CALLBACK FindNoteProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lPa
 				{
 					int len = SendMessage(GetDlgItem(hwndDlg, IDC_NOTE_TO_FIND), WM_GETTEXT, MAX_NOTE_LEN, (LPARAM)markers_manager.findnote_string);
 					markers_manager.findnote_string[len] = 0;
-					// scan frames from current selection to the border
+					// scan frames from current Selection to the border
 					int cur_marker = 0;
 					bool result;
 					int movie_size = currMovieData.getNumRecords();

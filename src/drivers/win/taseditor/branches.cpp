@@ -39,7 +39,6 @@ extern GREENZONE greenzone;
 extern TASEDITOR_PROJECT project;
 extern HISTORY history;
 extern PIANO_ROLL piano_roll;
-extern MARKERS_MANAGER markers_manager;
 extern BOOKMARKS bookmarks;
 
 extern COLORREF bookmark_flash_colors[TOTAL_COMMANDS][FLASH_PHASE_MAX+1];
@@ -302,7 +301,7 @@ void BRANCHES::update()
 				// just update sprites
 				InvalidateRect(bookmarks.hwndBranchesBitmap, 0, FALSE);
 			}
-			// calculate playback position
+			// calculate Playback cursor position
 			int branch, branch_x, branch_y, parent, parent_x, parent_y, upper_frame, lower_frame;
 			double distance;
 			if (current_branch != ITEM_UNDER_MOUSE_CLOUD)
@@ -378,7 +377,7 @@ void BRANCHES::update()
 					playback_y = BRANCHES_CLOUD_Y;
 				}
 			}
-			// move cursor to playback position
+			// move corners cursor to Playback cursor position
 			double dx = playback_x - cursor_x;
 			double dy = playback_y - cursor_y;
 			distance = sqrt(dx*dx + dy*dy);
@@ -905,7 +904,7 @@ void BRANCHES::RecalculateParents()
 						temp_parent = parents[temp_parent];
 					if (temp_parent == ITEM_UNDER_MOUSE_CLOUD)
 					{
-						// all ok, this is a good candidate for being the parent of the Branch
+						// all ok, this is good candidate for being the parent of the Branch
 						candidates.push_back(t);
 						if (max_jump_frame < temp_jump_frame)
 							max_jump_frame = temp_jump_frame;
@@ -1252,7 +1251,7 @@ LRESULT APIENTRY BranchesBitmapWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		}
 		case WM_LBUTTONDOWN:
 		{
-			// single click on Branches Tree = send playback to the Bookmark
+			// single click on Branches Tree = send Playback to the Bookmark
 			int branch_under_mouse = bookmarks.item_under_mouse;
 			if (branch_under_mouse == ITEM_UNDER_MOUSE_CLOUD)
 			{

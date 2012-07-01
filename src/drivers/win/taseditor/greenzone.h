@@ -3,7 +3,7 @@
 #define GREENZONE_ID_LEN 10
 
 #define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
-// greenzone cleaning masks
+// Greenzone cleaning masks
 #define EVERY16TH 0xFFFFFFF0
 #define EVERY8TH 0xFFFFFFF8
 #define EVERY4TH 0xFFFFFFFC

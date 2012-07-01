@@ -265,8 +265,8 @@ void BOOKMARKS::reset_vars()
 
 void BOOKMARKS::update()
 {
-	// execute all commands if needed
-	for (int i = 0; (i + 1) < (int)commands.size(); )
+	// execute all commands accumulated during last frame
+	for (int i = 0; (i + 1) < (int)commands.size(); )	// FIFO
 	{
 		int command_id = commands[i++];
 		int slot = commands[i++];
@@ -391,7 +391,7 @@ void BOOKMARKS::jump(int slot)
 	{
 		int frame = bookmarks_array[slot].snapshot.jump_frame;
 		playback.jump(frame);
-		if (playback.pause_frame)
+		if (playback.GetPauseFrame())
 			piano_roll.FollowPauseframe();
 		bookmarks_array[slot].jumped();
 	}
@@ -674,7 +674,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
 					} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
 				} else msg->clrTextBk = NORMAL_FRAMENUM_COLOR;
-			} else msg->clrTextBk = 0xFFFFFF;		// empty bookmark
+			} else msg->clrTextBk = NORMAL_BACKGROUND_COLOR;	// empty bookmark
 		} else if (cell_x == BOOKMARKS_COLUMN_TIME)
 		{
 			if (bookmarks_array[cell_y].not_empty)
@@ -705,7 +705,7 @@ LONG BOOKMARKS::CustomDraw(NMLVCUSTOMDRAW* msg)
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
 					} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
 				} else msg->clrTextBk = NORMAL_INPUT_COLOR1;
-			} else msg->clrTextBk = 0xFFFFFF;		// empty bookmark
+			} else msg->clrTextBk = NORMAL_BACKGROUND_COLOR;		// empty bookmark
 		}
 	default:
 		return CDRF_DODEFAULT;

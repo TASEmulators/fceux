@@ -17,12 +17,13 @@ Main - Main gate between emulator and Taseditor
 * handles some FCEUX hotkeys
 ------------------------------------------------------------------------------------ */
 
-#include <fstream>
 #include "taseditor/taseditor_project.h"
 #include "utils/xstring.h"
 #include "main.h"			// for GetRomName
 #include "taseditor.h"
 #include "../../input.h"
+#include "../keyboard.h"
+#include "../joystick.h"
 
 using namespace std;
 
@@ -76,6 +77,7 @@ bool EnterTasEditor()
 		taseditor_window.init();
 		if (taseditor_window.hwndTasEditor)
 		{
+			SetTaseditorInput();
 			// save "eoptions"
 			saved_eoptions = eoptions;
 			// set "Run in background"
@@ -119,7 +121,7 @@ bool EnterTasEditor()
 				if (currMovieData.savestate.size() != 0)
 				{
 					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-					// delete savestate, but preserve input anyway
+					// delete savestate, but preserve Input anyway
 					currMovieData.savestate.clear();
 				}
 				FCEUI_StopMovie();
@@ -137,7 +139,7 @@ bool EnterTasEditor()
 			// reset Taseditor variables
 			must_call_manual_lua_function = false;
 			
-			SetFocus(history.hwndHistoryList);		// set focus only once, to show selection cursor
+			SetFocus(history.hwndHistoryList);		// set focus only once, to show blue selection cursor
 			SetFocus(piano_roll.hwndList);
 			FCEU_DispMessage("TAS Editor engaged", 0);
 			taseditor_window.RedrawTaseditor();
@@ -152,6 +154,7 @@ bool ExitTasEditor()
 
 	// destroy window
 	taseditor_window.exit();
+	ClearTaseditorInput();
 	// release memory
 	editor.free();
 	piano_roll.free();
@@ -170,7 +173,7 @@ bool ExitTasEditor()
 	EnableAutosave = saved_EnableAutosave;
 	DoPriority();
 	UpdateCheckedMenuItems();
-	// switch off taseditor mode
+	// switch off TAS Editor mode
 	movieMode = MOVIEMODE_INACTIVE;
 	FCEU_DispMessage("TAS Editor disengaged", 0);
 	FCEUMOV_CreateCleanMovie();
@@ -192,31 +195,31 @@ void UpdateTasEditor()
 				LoadProject(fullname);
 			emulator_must_run_taseditor = false;
 		}
-		return;
-	}
-
-	// update all modules that need to be updated every frame
-	taseditor_window.update();
-	greenzone.update();
-	recorder.update();
-	piano_roll.update();
-	markers_manager.update();
-	playback.update();
-	bookmarks.update();
-	branches.update();
-	popup_display.update();
-	selection.update();
-	splicer.update();
-	history.update();
-	project.update();
-	
-	// run Lua functions if needed
-	if (taseditor_config.enable_auto_function)
-		TaseditorAutoFunction();
-	if (must_call_manual_lua_function)
+	} else
 	{
-		TaseditorManualFunction();
-		must_call_manual_lua_function = false;
+		// update all modules that need to be updated every frame
+		taseditor_window.update();
+		greenzone.update();
+		recorder.update();
+		piano_roll.update();
+		markers_manager.update();
+		playback.update();
+		bookmarks.update();
+		branches.update();
+		popup_display.update();
+		selection.update();
+		splicer.update();
+		history.update();
+		project.update();
+	
+		// run Lua functions if needed
+		if (taseditor_config.enable_auto_function)
+			TaseditorAutoFunction();
+		if (must_call_manual_lua_function)
+		{
+			TaseditorManualFunction();
+			must_call_manual_lua_function = false;
+		}
 	}
 }
 
@@ -315,7 +318,7 @@ void NewProject()
 		SetInputType(currMovieData, params.input_type);
 		ApplyMovieInputConfig();
 		if (params.copy_current_input)
-			// copy input from current snapshot (from history)
+			// copy Input from current snapshot (from history)
 			history.GetCurrentSnapshot().toMovie(currMovieData);
 		if (!params.copy_current_markers)
 			markers_manager.reset();
@@ -595,11 +598,11 @@ void Import()
 	if (GetOpenFileName(&ofn))
 	{							
 		EMUFILE_FILE ifs(nameo, "rb");
-		// Load input to temporary moviedata
+		// Load Input to temporary moviedata
 		MovieData md;
 		if (LoadFM2(md, &ifs, ifs.size(), false))
 		{
-			// loaded successfully, now register input changes
+			// loaded successfully, now register Input changes
 			char drv[512], dir[512], name[1024], ext[512];
 			splitpath(nameo, drv, dir, name, ext);
 			strcat(name, ext);
@@ -607,7 +610,7 @@ void Import()
 			if (result >= 0)
 				greenzone.InvalidateAndCheck(result);
 			else
-				MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same input.\nNo changes were made.", "TAS Editor", MB_OK);
+				MessageBox(taseditor_window.hwndTasEditor, "Imported movie has the same Input.\nNo changes were made.", "TAS Editor", MB_OK);
 		} else
 		{
 			FCEUD_PrintError("Error loading movie data!");
@@ -778,12 +781,16 @@ void ApplyMovieInputConfig()
 // this getter contains formula to decide whether to record or replay movie
 bool TaseditorIsRecording()
 {
-	if (movie_readonly || playback.pause_frame > currFrameCounter)
+	if (movie_readonly || playback.GetPauseFrame() > currFrameCounter)
 		return false;		// replay
 	return true;			// record
 }
+void Taseditor_RecordInput()
+{
+	recorder.InputChanged();
+}
 
-// this gate handles FCEUX hotkeys (EMUCMD)
+// this gate handles some FCEUX hotkeys (EMUCMD)
 void Taseditor_EMUCMD(int command)
 {
 	switch (command)
@@ -849,6 +856,10 @@ void Taseditor_EMUCMD(int command)
 		case EMUCMD_LOAD_STATE_SLOT_9:
 			bookmarks.command(COMMAND_DEPLOY, command - EMUCMD_LOAD_STATE_SLOT_0);
 			break;
+		case EMUCMD_MOVIE_PLAY_FROM_BEGINNING:
+			movie_readonly = true;
+			playback.jump(0);
+			break;
 		case EMUCMD_RELOAD:
 			taseditor_window.LoadRecentProject(0);
 			break;
@@ -867,8 +878,23 @@ void Taseditor_EMUCMD(int command)
 			if (recorder.multitrack_recording_joypad > joysticks_per_frame[GetInputType(currMovieData)])
 				recorder.multitrack_recording_joypad = 0;
 			break;
+		case EMUCMD_TASEDITOR_RUN_MANUAL_LUA:
+			// the function will be called in next window update
+			must_call_manual_lua_function = true;
+			break;
 
 	}
 }
-
-
+// these functions allow/disallow some FCEUX hotkeys
+void SetTaseditorInput()
+{
+	// set "Background TAS Editor input"
+	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+}
+void ClearTaseditorInput()
+{
+	// clear "Background TAS Editor input"
+	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
+	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
+}

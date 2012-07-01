@@ -9,16 +9,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ------------------------------------------------------------------------------------
 Snapshot - Snapshot of all edited data
 
-* stores the data of specific snapshot of the movie: size, input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, start and end frame of operation, type of operation and description of the snapshot (including the time of creation)
-* also stores info about sequential recording/drawing of input
+* stores the data of specific snapshot of the movie: size, Input data (commands and joysticks), Markers at the moment of creating the snapshot, keyframe, start and end frame of operation, type of operation and description of the snapshot (including the time of creation)
+* also stores info about sequential recording/drawing of Input
 * optionally can store map of Hot Changes
-* implements snapshot creation: copying input, copying Hot Changes, copying Markers, setting time of creation
-* implements full/partial restoring of data from snapshot: input, Hot Changes, Markers
+* implements snapshot creation: copying Input, copying Hot Changes, copying Markers, setting time of creation
+* implements full/partial restoring of data from snapshot: Input, Hot Changes, Markers
 * implements compression and decompression of stored data
 * saves and loads the data from a project file. On error: sends warning to caller
 * implements searching of first mismatch comparing two snapshots ot comparing snapshot to a movie
-* provides interface for reading certain data: reading input of any certain frame, reading value at any point of Hot Changes map
-* implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing input of two snapshots
+* provides interface for reading certain data: reading Input of any certain frame, reading value at any point of Hot Changes map
+* implements all operations with Hot Changes maps: copying (full/partial), updating/fading, setting new hot places by comparing Input of two snapshots
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
@@ -42,14 +42,14 @@ void SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 		input_type = GetInputType(md);
 	else
 		input_type = force_input_type;
-	// retrieve input data from movie data
+	// retrieve Input data from movie data
 	size = md.getNumRecords();
 	joysticks.resize(BYTES_PER_JOYSTICK * joysticks_per_frame[input_type] * size);		// it's much faster to have this format than have [frame][joy] or other structures
 	commands.resize(size);				// commands take 1 byte per frame
 	if (has_hot_changes)
 		hot_changes.resize(joysticks_per_frame[input_type] * size * HOTCHANGE_BYTES_PER_JOY);
 
-	// fill input vector
+	// fill Input vector
 	int pos = 0;
 	switch(input_type)
 	{
@@ -115,7 +115,7 @@ MARKERS& SNAPSHOT::GetMarkers()
 void SNAPSHOT::toMovie(MovieData& md, int start, int end)
 {
 	if (end < 0 || end >= size) end = size - 1;
-	// write input data to movie data
+	// write Input data to movie data
 	md.records.resize(end + 1);
 	switch(input_type)
 	{
@@ -221,7 +221,7 @@ void SNAPSHOT::save(EMUFILE *os)
 		write32le(hot_changes_compressed.size(), os);
 		os->fwrite(&hot_changes_compressed[0], hot_changes_compressed.size());
 	}
-	// save markers data
+	// save Markers data
 	my_markers.save(os);
 }
 // returns true if couldn't load
@@ -282,7 +282,7 @@ bool SNAPSHOT::load(EMUFILE *is)
 		e = uncompress(&hot_changes[0], &destlen, &hot_changes_compressed[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) return true;
 	}
-	// load markers data
+	// load Markers data
 	if (my_markers.load(is)) return true;
 	return false;
 }
@@ -317,7 +317,7 @@ bool SNAPSHOT::skipLoad(EMUFILE *is)
 		if (!read32le(&tmp, is)) return true;
 		if (is->fseek(tmp, SEEK_CUR) != 0) return true;
 	}
-	// read markers data
+	// read Markers data
 	if (my_markers.skipLoad(is)) return true;
 	return false;
 }
@@ -676,7 +676,7 @@ void SNAPSHOT::inheritHotChanges_InsertSelection(SNAPSHOT* source_of_hotchanges)
 				region_len++;
 				// set filled line to the frame
 				memset(&hot_changes[pos], 0xFF, bytes);
-				// exit loop when all selection frames are handled
+				// exit loop when all frames in the Selection are handled
 				if (it == current_selection_end) break;
 			} else
 			{

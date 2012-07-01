@@ -26,8 +26,6 @@ Window - User Interface
 #include "../taseditor.h"
 #include <htmlhelp.h>
 #include "../../input.h"	// for EMUCMD
-#include "../keyboard.h"
-#include "../joystick.h"
 
 //compile for windows 2000 target
 #if (_WIN32_WINNT < 0x501)
@@ -149,7 +147,7 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	TASEDITOR_FORWARD_FULL, -1, 0, 0, 0, "Send Playback to next Marker (mouse: Shift+Wheel down) (hotkey: Shift+PageDown)", "", false, 0, 0,
 	IDC_PROGRESS1, -1, 0, 0, 0, "", "", false, 0, 0,
 	CHECK_FOLLOW_CURSOR, -1, 0, 0, 0, "The Piano Roll will follow Playback cursor movements", "", false, 0, 0,
-	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change input above Playback cursor, the cursor returns to where it was before the change", "", false, EMUCMD_TASEDITOR_SWITCH_AUTORESTORING, 0,
+	CHECK_AUTORESTORE_PLAYBACK, -1, 0, 0, 0, "Whenever you change Input above Playback cursor, the cursor returns to where it was before the change", "", false, EMUCMD_TASEDITOR_SWITCH_AUTORESTORING, 0,
 	CHECK_AUTOADJUSTINPUTDUETOLAG, -1, 0, 0, 0, "TAS Editor will adjust Input when new lag frames appear or old lag frames disappear while emulating", "", false, 0, 0,
 	IDC_BOOKMARKSLIST, -1, 0, 0, 0, "Right click = set Bookmark, Left click = jump to Bookmark or load Branch", "", false, 0, 0,
 	IDC_HISTORYLIST, -1, 0, 0, -1, "Click to revert the project back to that time", "", false, 0, 0,
@@ -158,8 +156,8 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_RADIO_2P, -1, 0, 0, 0, "Select Joypad 2 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
 	IDC_RADIO_3P, -1, 0, 0, 0, "Select Joypad 3 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
 	IDC_RADIO_4P, -1, 0, 0, 0, "Select Joypad 4 as current", "", false, EMUCMD_TASEDITOR_SWITCH_MULTITRACKING, 0,
-	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old input with new buttons, instead of overwriting", "", false, 0, 0,
-		IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to input recording", "", false, 0, 0,
+	IDC_SUPERIMPOSE, -1, 0, 0, 0, "Allows to superimpose old Input with new buttons, instead of overwriting", "", false, 0, 0,
+		IDC_USEPATTERN, -1, 0, 0, 0, "Applies current Autofire Pattern to Input recording", "", false, 0, 0,
 	TASEDITOR_PREV_MARKER, -1, -1, 0, -1, "Send Selection to previous Marker (mouse: Ctrl+Wheel up) (hotkey: Ctrl+PageUp)", "", false, 0, 0,
 	TASEDITOR_FIND_BEST_SIMILAR_MARKER, -1, -1, 0, -1, "Auto-search for Marker Note", "", false, 0, 0,
 	TASEDITOR_FIND_NEXT_SIMILAR_MARKER, -1, -1, 0, -1, "Continue Auto-search", "", false, 0, 0,
@@ -173,7 +171,7 @@ Window_items_struct window_items[TASEDITOR_WINDOW_TOTAL_ITEMS] = {
 	IDC_TEXT_SELECTION, -1, 0, 0, 0, "Current size of Selection", "", false, 0, 0,
 	IDC_TEXT_CLIPBOARD, -1, 0, 0, 0, "Current size of Input in the Clipboard", "", false, 0, 0,
 	IDC_RECORDING, -1, 0, 0, 0, "Switch Input Recording on/off", "", false, EMUCMD_MOVIE_READONLY_TOGGLE, 0,
-	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, 0, 0,
+	TASEDITOR_RUN_MANUAL, -1, 0, 0, 0, "Press the button to execute Lua Manual Function", "", false, EMUCMD_TASEDITOR_RUN_MANUAL_LUA, 0,
 	IDC_RUN_AUTO, -1, 0, 0, 0, "Enable Lua Auto Function (but first it must be registered by Lua script)", "", false, 0, 0,
 };
 
@@ -294,7 +292,6 @@ void TASEDITOR_WINDOW::init()
 	recent_projects_menu = CreateMenu();
 	UpdateRecentProjectsMenu();
 
-	SetTaseditorInput();
 	reset();
 }
 void TASEDITOR_WINDOW::exit()
@@ -323,7 +320,6 @@ void TASEDITOR_WINDOW::exit()
 		DestroyIcon(hTaseditorIcon);
 		hTaseditorIcon = 0;
 	}
-	ClearTaseditorInput();
 }
 void TASEDITOR_WINDOW::reset()
 {
@@ -367,7 +363,7 @@ void TASEDITOR_WINDOW::update()
 			case DRAG_MODE_PLAYBACK:
 			{
 				// user is dragging Playback cursor - show either normal arrow or arrow+wait
-				if (playback.pause_frame)
+				if (playback.GetPauseFrame())
 					cursor_icon = IDC_APPSTARTING;
 				break;
 			}
@@ -585,19 +581,6 @@ void TASEDITOR_WINDOW::UpdateCheckedItems()
 	CheckMenuItem(hmenu, ID_CONFIG_SILENTAUTOSAVE, taseditor_config.silent_autosave?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_CONFIG_AUTOPAUSEATTHEENDOFMOVIE, taseditor_config.autopause_at_finish?MF_CHECKED : MF_UNCHECKED);
 	CheckMenuItem(hmenu, ID_HELP_TOOLTIPS, taseditor_config.tooltips?MF_CHECKED : MF_UNCHECKED);
-}
-
-void TASEDITOR_WINDOW::SetTaseditorInput()
-{
-	// set "Background TAS Editor input"
-	KeyboardSetBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
-	JoystickSetBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
-}
-void TASEDITOR_WINDOW::ClearTaseditorInput()
-{
-	// clear "Background TAS Editor input"
-	KeyboardClearBackgroundAccessBit(KEYBACKACCESS_TASEDITOR);
-	JoystickClearBackgroundAccessBit(JOYBACKACCESS_TASEDITOR);
 }
 
 // --------------------------------------------------------------------------------------------
@@ -864,11 +847,11 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 			if (LOWORD(wParam))
 			{
 				taseditor_window.TASEditor_focus = true;
-				taseditor_window.SetTaseditorInput();
+				SetTaseditorInput();
 			} else
 			{
 				taseditor_window.TASEditor_focus = false;
-				taseditor_window.ClearTaseditorInput();
+				ClearTaseditorInput();
 			}
 			break;
 		case WM_CTLCOLORSTATIC:
@@ -1028,7 +1011,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.turbo_seek ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					// if currently seeking, apply this option immediately
-					if (playback.pause_frame)
+					if (playback.GetPauseFrame())
 						turbo = taseditor_config.turbo_seek;
 					break;
 				case ID_VIEW_SHOWBRANCHSCREENSHOTS:
@@ -1295,7 +1278,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.enable_auto_function ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					break;
-				case ID_HELP_TASEDITHELP:
+				case ID_HELP_OPEN_MANUAL:
 					{
 						std::string helpFileName = BaseDirectory;
 						helpFileName.append(taseditor_help_filename);

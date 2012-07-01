@@ -243,7 +243,7 @@ void HISTORY::HistorySizeChanged()
 	RedrawHistoryList();
 }
 
-// returns frame of first input change (for Greenzone invalidation)
+// returns frame of first Input change (for Greenzone invalidation)
 int HISTORY::JumpInTime(int new_pos)
 {
 	if (new_pos < 0)
@@ -383,7 +383,7 @@ int HISTORY::JumpInTime(int new_pos)
 	{
 		snapshots[real_pos].toMovie(currMovieData, first_change);
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		// Piano Roll Redraw and ProjectChanged will be called by greenzone invalidation
+		// Piano Roll Redraw and ProjectChanged will be called by Greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers_manager.update();
@@ -459,6 +459,8 @@ void HISTORY::AddItemToHistory(SNAPSHOT &snap, int cur_branch, BOOKMARK &bookm)
 	backup_current_branch[real_pos] = cur_branch;
 	RedrawHistoryList();
 }
+// --------------------------------------------------------------------
+// Here goes the set of functions that register project changes and log them into History log
 
 // returns frame of first actual change
 int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comment, int consecutive_tag)
@@ -466,7 +468,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 	// create new shanshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos], start, end);
 	if (first_changes >= 0)
@@ -495,7 +497,7 @@ int HISTORY::RegisterChanges(int mod_type, int start, int end, const char* comme
 			case MODTYPE_ADJUST_UP:
 			case MODTYPE_ADJUST_DOWN:
 			{
-				// for these changes user prefers to see frame of attempted change (selection beginning), not frame of actual differences
+				// for these changes user prefers to see frame of attempted change (Selection cursor position), not frame of actual differences
 				snap.jump_frame = start;
 				break;
 			}
@@ -669,7 +671,7 @@ int HISTORY::RegisterInsertNum(int start, int frames)
 	// create new shanshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)
@@ -703,7 +705,7 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 	// create new shanshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)
@@ -712,7 +714,7 @@ int HISTORY::RegisterPasteInsert(int start, SelectionFrames& inserted_set)
 		// fill description:
 		snap.mod_type = MODTYPE_PASTEINSERT;
 		strcat(snap.description, modCaptions[snap.mod_type]);
-		// for PasteInsert user prefers to see frame of attempted change (selection beginning), not frame of actual differences
+		// for PasteInsert user prefers to see frame of attempted change (Selection cursor position), not frame of actual differences
 		snap.jump_frame = start;
 		snap.start_frame = start;
 		snap.end_frame = -1;
@@ -763,7 +765,7 @@ void HISTORY::RegisterMarkersChange(int mod_type, int start, int end, const char
 		strcat(snap.description, " ");
 		strncat(snap.description, comment, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 	}
-	// input hotchanges aren't changed
+	// Hotchanges aren't changed
 	if (taseditor_config.enable_hot_changes)
 		snap.copyHotChanges(&GetCurrentSnapshot());
 	AddItemToHistory(snap);
@@ -793,7 +795,7 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 	// create new snapshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos]);
 	if (first_changes >= 0)
@@ -820,7 +822,7 @@ int HISTORY::RegisterBranching(int slot, bool markers_changed)
 		snap.jump_frame = bookmarks.bookmarks_array[slot].snapshot.jump_frame;
 		snap.start_frame = 0;
 		snap.end_frame = -1;
-		// input was not changed, only Markers were changed
+		// Input was not changed, only Markers were changed
 		if (taseditor_config.enable_hot_changes)
 			snap.copyHotChanges(&GetCurrentSnapshot());
 		AddItemToHistory(snap, branches.GetCurrentBranch());
@@ -909,7 +911,7 @@ int HISTORY::RegisterImport(MovieData& md, char* filename)
 	// create new snapshot
 	SNAPSHOT snap;
 	snap.init(md, taseditor_config.enable_hot_changes, GetInputType(currMovieData));
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos]);
 	if (first_changes >= 0)
@@ -926,7 +928,7 @@ int HISTORY::RegisterImport(MovieData& md, char* filename)
 		strncat(snap.description, filename, SNAPSHOT_DESC_MAX_LENGTH - strlen(snap.description) - 1);
 		if (taseditor_config.enable_hot_changes)
 		{
-			// do not inherit old hotchanges, because imported input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
+			// do not inherit old hotchanges, because imported Input (most likely) doesn't have direct connection with recent edits, so old hotchanges are irrelevant and should not be copied
 			snap.fillHotChanges(snapshots[real_pos], first_changes);
 		}
 		AddItemToHistory(snap);
@@ -942,7 +944,7 @@ int HISTORY::RegisterLuaChanges(const char* name, int start, bool InsertionDelet
 	// create new shanshot
 	SNAPSHOT snap;
 	snap.init(currMovieData, taseditor_config.enable_hot_changes);
-	// check if there are input differences from latest snapshot
+	// check if there are Input differences from latest snapshot
 	int real_pos = (history_start_pos + history_cursor_pos) % history_size;
 	int first_changes = snap.findFirstChange(snapshots[real_pos], start);
 	if (first_changes >= 0)

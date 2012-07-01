@@ -63,7 +63,7 @@ public:
 
 	// saved data
 	int size;							// in frames
-	int input_type;						// theoretically TAS Editor can support any other input types
+	int input_type;						// theoretically TAS Editor can support any other Input types
 	int jump_frame;						// for jumping when making undo
 	int start_frame;					// for consecutive Draws
 	int end_frame;						// for consecutive Draws

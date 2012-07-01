@@ -65,7 +65,7 @@ bool BOOKMARK::checkDiffFromCurrent()
 
 void BOOKMARK::set()
 {
-	// copy input and hotchanges
+	// copy Input and Hotchanges
 	snapshot.init(currMovieData, taseditor_config.enable_hot_changes);
 	snapshot.jump_frame = currFrameCounter;
 	if (taseditor_config.enable_hot_changes)

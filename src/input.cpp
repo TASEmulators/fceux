@@ -661,10 +661,7 @@ static void FCEUI_DoExit(void);
 static void ToggleFullscreen(void);
 static void TaseditorRewindOn(void);
 static void TaseditorRewindOff(void);
-static void TaseditorRestorePlayback(void);
-static void TaseditorCancelSeeking(void);
-static void TaseditorSwitchAutoRestoring(void);
-static void TaseditorSwitchMultitracking(void);
+static void TaseditorCommand(void);
 
 struct EMUCMDTABLE FCEUI_CommandTable[]=
 {
@@ -790,10 +787,11 @@ struct EMUCMDTABLE FCEUI_CommandTable[]=
 	{ EMUCMD_TOOL_RAMSEARCHNE,				EMUCMDTYPE_TOOL,	RamSearchOpNE,	  0, 0, "Ram Search - Not Equal", 0},
 	{ EMUCMD_RERECORD_DISPLAY_TOGGLE,		EMUCMDTYPE_MISC,	FCEUI_MovieToggleRerecordDisplay, 0, 0, "Toggle Rerecord Display", EMUCMDFLAG_TASEDITOR },
 	{ EMUCMD_TASEDITOR_REWIND,				EMUCMDTYPE_TASEDITOR,	TaseditorRewindOn, TaseditorRewindOff, 0, "Frame Rewind", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TASEDITOR_RESTORE_PLAYBACK,	EMUCMDTYPE_TASEDITOR,	TaseditorRestorePlayback, 0, 0, "Restore Playback", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TASEDITOR_CANCEL_SEEKING,		EMUCMDTYPE_TASEDITOR,	TaseditorCancelSeeking, 0, 0, "Cancel Seeking", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,		EMUCMDTYPE_TASEDITOR,	TaseditorSwitchAutoRestoring, 0, 0, "Switch Auto-restore last position", EMUCMDFLAG_TASEDITOR },
-	{ EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,		EMUCMDTYPE_TASEDITOR,	TaseditorSwitchMultitracking, 0, 0, "Switch current Multitracking mode", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_RESTORE_PLAYBACK,	EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Restore Playback", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_CANCEL_SEEKING,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Cancel Seeking", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_SWITCH_AUTORESTORING,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Switch Auto-restore last position", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_SWITCH_MULTITRACKING,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Switch current Multitracking mode", EMUCMDFLAG_TASEDITOR },
+	{ EMUCMD_TASEDITOR_RUN_MANUAL_LUA,		EMUCMDTYPE_TASEDITOR,	TaseditorCommand, 0, 0, "Run Manual Lua function", EMUCMDFLAG_TASEDITOR },
 };
 
 #define NUM_EMU_CMDS		(sizeof(FCEUI_CommandTable)/sizeof(FCEUI_CommandTable[0]))
@@ -1190,33 +1188,10 @@ static void TaseditorRewindOff(void)
 #endif
 }
 
-static void TaseditorRestorePlayback(void)
+static void TaseditorCommand(void)
 {
 #ifdef WIN32
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 		Taseditor_EMUCMD(execcmd);
 #endif
 }
-static void TaseditorCancelSeeking(void)
-{
-#ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		Taseditor_EMUCMD(execcmd);
-#endif
-}
-static void TaseditorSwitchAutoRestoring(void)
-{
-#ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		Taseditor_EMUCMD(execcmd);
-#endif
-}
-static void TaseditorSwitchMultitracking(void)
-{
-#ifdef WIN32
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		Taseditor_EMUCMD(execcmd);
-#endif
-}
-
-

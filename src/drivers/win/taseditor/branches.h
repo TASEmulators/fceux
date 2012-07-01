@@ -146,7 +146,7 @@ private:
 	char cloud_time[TIME_DESC_LENGTH];
 	char current_pos_time[TIME_DESC_LENGTH];
 	std::vector<std::vector<int>> cached_first_difference;
-	std::vector<int8> cached_timelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/frandchild that shares the same input
+	std::vector<int8> cached_timelines;		// stores id of the last branch on the timeline of every Branch. Sometimes it's the id of the Branch itself, but sometimes it's an id of its child/grandchild that shares the same Input
 
 	// not saved vars
 	int transition_phase;

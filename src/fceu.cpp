@@ -982,7 +982,7 @@ void UpdateAutosave(void)
 
 void FCEUI_Autosave(void)
 {
-	if(!EnableAutosave || !AutoSS || FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
+	if(!EnableAutosave || !AutoSS)
 		return;
 
 	if(AutosaveStatus[AutosaveIndex] == 1)

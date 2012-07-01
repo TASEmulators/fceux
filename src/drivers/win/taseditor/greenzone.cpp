@@ -16,7 +16,7 @@ Greenzone - Access zone
 * regularly checks if there's a savestate of current emulation state, if there's no such savestate in array then creates one and updates lag info for previous frame
 * implements the working of "Auto-adjust Input due to lag"
 * regularly runs gradual cleaning of the savestates array (for memory saving), deleting oldest savestates
-* on demand: (when movie input was changed) truncates the size of Greenzone, deleting savestates that became irrelevant because of new input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
+* on demand: (when movie Input was changed) truncates the size of Greenzone, deleting savestates that became irrelevant because of new Input. After truncating it may also move Playback cursor (which must always reside within Greenzone) and may launch Playback seeking
 * stores resources: save id, properties of gradual cleaning, timing of cleaning
 ------------------------------------------------------------------------------------ */
 
@@ -73,7 +73,7 @@ void GREENZONE::update()
 
 void GREENZONE::CollectCurrentState()
 {
-	// update greenzone upper limit if needed
+	// update Greenzone upper limit if needed
 	if (greenZoneCount <= currFrameCounter)
 		greenZoneCount = currFrameCounter + 1;
 
@@ -94,21 +94,21 @@ void GREENZONE::CollectCurrentState()
 		{
 			if (old_lagFlag && !lagFlag)
 			{
-				// there's no more lag on previous frame - shift input up
+				// there's no more lag on previous frame - shift Input up
 				lag_history.erase(lag_history.begin() + (currFrameCounter - 1));
 				editor.AdjustUp(currFrameCounter - 1);
 				// since AdjustUp didn't restore Playback cursor, we must rewind here
-				int pause_frame = playback.pause_frame;
+				int pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
 				if (pause_frame)
 					playback.SeekingStart(pause_frame);
 			} else if (!old_lagFlag && lagFlag)
 			{
-				// there's new lag on previous frame - shift input down
+				// there's new lag on previous frame - shift Input down
 				lag_history.insert(lag_history.begin() + (currFrameCounter - 1), 1);
 				editor.AdjustDown(currFrameCounter - 1);
 				// since AdjustDown didn't restore Playback cursor, we must rewind here
-				int pause_frame = playback.pause_frame;
+				int pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
 				if (pause_frame)
 					playback.SeekingStart(pause_frame);
@@ -228,7 +228,7 @@ void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
 		savestates.resize(frame + 1);
 	if (greenZoneCount <= frame)
 	{
-		// clear old savestates: from current end of greenzone to new end of greenzone
+		// clear old savestates: from current end of Greenzone to new end of Greenzone
 		for (int i = greenZoneCount; i <= frame; ++i)
 			ClearSavestate(i);
 		greenZoneCount = frame + 1;
@@ -254,7 +254,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 		compress(&cbuf[0], &comprlen, &lag_history[0], len);
 		write32le(comprlen, os);
 		os->fwrite(&cbuf[0], comprlen);
-		// write playback position
+		// write Playback cursor position
 		write32le(currFrameCounter, os);
 		// write savestates
 		int frame, size;
@@ -281,7 +281,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 	{
 		// write "GREENZONX" string
 		os->fwrite(greenzone_skipsave_id, GREENZONE_ID_LEN);
-		// write playback position
+		// write Playback cursor position
 		write32le(currFrameCounter, os);
 		if (currFrameCounter > 0)
 		{
@@ -299,7 +299,7 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 	if (!really_load)
 	{
 		reset();
-		playback.StartFromZero();		// reset playback to frame 0
+		playback.StartFromZero();		// reset Playback cursor to frame 0
 		return false;
 	}
 	int frame = 0, prev_frame = -1, size = 0;
@@ -310,7 +310,7 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 	if (!strcmp(greenzone_skipsave_id, save_id))
 	{
 		// string says to skip loading Greenzone
-		// read playback position
+		// read Playback cursor position
 		if (read32le(&frame, is))
 		{
 			currFrameCounter = frame;
@@ -326,17 +326,17 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 					{
 						if (loadTasSavestate(currFrameCounter))
 						{
-							FCEU_printf("No greenzone in the file\n");
+							FCEU_printf("No Greenzone in the file\n");
 							return false;
 						}
 					}
 				}
 			} else
 			{
-				// literally no greenzone in the file, but this is still not a error
+				// literally no Greenzone in the file, but this is still not a error
 				reset();
-				playback.StartFromZero();		// reset playback to frame 0
-				FCEU_printf("No greenzone in the file, playback at frame 0\n");
+				playback.StartFromZero();		// reset Playback cursor to frame 0
+				FCEU_printf("No Greenzone in the file, Playback at frame 0\n");
 				return false;
 			}
 		}
@@ -358,7 +358,7 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 		if (is->fread(&cbuf[0], comprlen) != comprlen) goto error;
 		int e = uncompress(&lag_history[0], &destlen, &cbuf[0], comprlen);
 		if (e != Z_OK && e != Z_BUF_ERROR) goto error;
-		// read playback position
+		// read Playback cursor position
 		if (read32le(&frame, is))
 		{
 			currFrameCounter = frame;
@@ -394,7 +394,7 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 					// load this savestate
 					savestates[frame].resize(size);
 					if ((int)is->fread(&savestates[frame][0], size) < size) break;
-					prev_frame = frame;			// successfully read one greenzone frame info
+					prev_frame = frame;			// successfully read one Greenzone frame info
 				}
 			}
 			if (prev_frame+1 == greenZoneCount)
@@ -418,16 +418,16 @@ bool GREENZONE::load(EMUFILE *is, bool really_load)
 				{
 					currFrameCounter = prev_frame;
 					greenZoneCount = prev_frame+1;		// cut greenZoneCount to this good frame
-					FCEU_printf("Greenzone loaded partially, playback moved to the end of greenzone\n");
+					FCEU_printf("Greenzone loaded partially, Playback moved to the end of greenzone\n");
 					return false;
 				}
 			}
 		}
 	}
 error:
-	FCEU_printf("Error loading greenzone\n");
+	FCEU_printf("Error loading Greenzone\n");
 	reset();
-	playback.StartFromZero();		// reset playback to frame 0
+	playback.StartFromZero();		// reset Playback cursor to frame 0
 	return true;
 }
 // -------------------------------------------------------------------------------------------------
@@ -440,12 +440,12 @@ void GREENZONE::InvalidateAndCheck(int after)
 		{
 			greenZoneCount = after+1;
 			currMovieData.rerecordCount++;
-			// either set Playback cursor to the end of Greenzone or run seeking to restore playback position
+			// either set Playback cursor to the end of Greenzone or run seeking to restore Playback cursor position
 			if (currFrameCounter >= greenZoneCount)
 			{
-				if (playback.pause_frame && playback.pause_frame_must_be_fixed)
+				if (playback.GetFixedPauseFrame())
 				{
-					playback.jump(playback.pause_frame - 1);
+					playback.jump(playback.GetPauseFrame() - 1);
 				} else
 				{
 					playback.SetLostPosition(currFrameCounter);
@@ -457,7 +457,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 			}
 		}
 	}
-	// redraw Piano Roll even if greenzone didn't change
+	// redraw Piano Roll even if Greenzone didn't change
 	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
@@ -472,7 +472,7 @@ void GREENZONE::Invalidate(int after)
 			currMovieData.rerecordCount++;
 		}
 	}
-	// redraw Piano Roll even if greenzone didn't change
+	// redraw Piano Roll even if Greenzone didn't change
 	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }

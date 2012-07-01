@@ -13,16 +13,17 @@ Selection - Manager of selections
 * contains definition of the type "Set of selected frames"
 * stores array of Sets of selected frames (History of selections)
 * saves and loads the data from a project file. On error: clears the array and starts new history by making empty selection
-* constantly tracks changes in selected rows of Piano Roll List, and makes a decision to create new point of selection rollback
-* implements all selection restoring operations: undo, redo
+* constantly tracks changes in selected rows of Piano Roll List, and makes a decision to create new point of Selection rollback
+* implements all Selection restoring operations: undo, redo
 * on demand: changes current selection: remove selection, jump to a frame with Selection cursor, select region, select all, select between Markers, reselect clipboard
-* regularly ensures that selection doesn't go beyond curent Piano Roll limits, detects if selection moved to another Marker and updates Note in the lower text field
+* regularly ensures that Selection doesn't go beyond curent Piano Roll limits, detects if Selection moved to another Marker and updates Note in the lower text field
 * implements the working of lower buttons << and >> (jumping on Markers)
 * also here's the code of lower text field (for editing Marker Notes)
 * stores resource: save id, lower text field prefix
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
+#include "../taseditor.h"
 
 extern TASEDITOR_CONFIG taseditor_config;
 extern TASEDITOR_WINDOW taseditor_window;
@@ -120,7 +121,7 @@ void SELECTION::update()
 		}
 	}
 
-	// track changes of selection beginning
+	// track changes of Selection beginning (Selection cursor)
 	if (last_selection_beginning != GetCurrentSelectionBeginning())
 	{
 		last_selection_beginning = GetCurrentSelectionBeginning();
@@ -140,7 +141,7 @@ void SELECTION::update()
 
 void SELECTION::UpdateSelectionSize()
 {
-	// keep selection within Piano Roll limits
+	// keep Selection within Piano Roll limits
 	if (CurrentSelection().size())
 	{
 		int delete_index;
@@ -187,7 +188,7 @@ void SELECTION::HistorySizeChanged()
 
 void SELECTION::RedrawMarker()
 {
-	// redraw marker num
+	// redraw Marker num
 	char new_text[MAX_NOTE_LEN] = {0};
 	if (shown_marker <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, lowerMarkerText);
@@ -196,7 +197,7 @@ void SELECTION::RedrawMarker()
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	SetWindowText(hwndSelectionMarker, new_text);
-	// change marker note
+	// change Marker Note
 	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());
 	SetWindowText(hwndSelectionMarkerEdit, new_text);
 }
@@ -206,7 +207,7 @@ void SELECTION::JumpPrevMarker(int speed)
 	// if nothing is selected, consider Playback cursor as current selection
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
-	// jump trough "speed" amount of previous markers
+	// jump trough "speed" amount of previous Markers
 	while (speed > 0)
 	{
 		for (index--; index >= 0; index--)
@@ -224,7 +225,7 @@ void SELECTION::JumpNextMarker(int speed)
 	int index = GetCurrentSelectionBeginning();
 	if (index < 0) index = currFrameCounter;
 	int last_frame = currMovieData.getNumRecords() - 1;		// the end of Piano Roll
-	// jump trough "speed" amount of previous markers
+	// jump trough "speed" amount of previous Markers
 	while (speed > 0)
 	{
 		for (++index; index <= last_frame; ++index)
@@ -279,7 +280,7 @@ bool SELECTION::load(EMUFILE *is, bool really_load)
 	if (!strcmp(selection_skipsave_id, save_id))
 	{
 		// string says to skip loading Selection
-		FCEU_printf("No selection in the file\n");
+		FCEU_printf("No Selection in the file\n");
 		reset();
 		return false;
 	}
@@ -327,7 +328,7 @@ bool SELECTION::load(EMUFILE *is, bool really_load)
 	reset_vars();
 	return false;
 error:
-	FCEU_printf("Error loading selection\n");
+	FCEU_printf("Error loading Selection\n");
 	reset();
 	return true;
 }
@@ -388,7 +389,7 @@ void SELECTION::ItemChanged(NMLISTVIEW* info)
 	{
 		if (OFF)
 		{
-			// clear all (actually add new empty selection to history)
+			// clear all (actually add new empty Selection to history)
 			if (CurrentSelection().size() && track_selection_changes)
 				AddNewSelectionToHistory();
 		} else if (ON)
@@ -439,7 +440,7 @@ void SELECTION::JumpInTime(int new_pos)
 	history_cursor_pos = new_pos;
 	// update Piano Roll items
 	EnforceSelectionToList();
-	// also keep selection within Piano Roll
+	// also keep Selection within Piano Roll
 	UpdateSelectionSize();
 }
 void SELECTION::undo()
@@ -517,7 +518,7 @@ void SELECTION::SelectBetweenMarkers()
 		lower_border = *CurrentSelection().rbegin();
 	} else lower_border = upper_border = center = currFrameCounter;
 
-	// find markers
+	// find Markers
 	// searching up starting from center-0
 	for (upper_marker = center; upper_marker >= 0; upper_marker--)
 		if (markers_manager.GetMarker(upper_marker)) break;
@@ -537,7 +538,7 @@ void SELECTION::SelectBetweenMarkers()
 	// selecting circle: 1-2-3-4-1-2-3-4...
 	if (upper_border > upper_marker+1 || lower_border < lower_marker-1 || lower_border > lower_marker)
 	{
-		// 1 - default: select all between markers, not including lower marker
+		// 1 - default: select all between Markers, not including lower Marker
 		if (upper_marker < 0) upper_marker = 0;
 		for (int i = upper_marker; i < lower_marker; ++i)
 		{
@@ -545,14 +546,14 @@ void SELECTION::SelectBetweenMarkers()
 		}
 	} else if (upper_border == upper_marker && lower_border == lower_marker-1)
 	{
-		// 2 - selected all between markers and upper marker selected too: select all between markers, not including markers
+		// 2 - selected all between Markers and upper Marker selected too: select all between Markers, not including Markers
 		for (int i = upper_marker+1; i < lower_marker; ++i)
 		{
 			ListView_SetItemState(piano_roll.hwndList, i, LVIS_SELECTED, LVIS_SELECTED);
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker-1)
 	{
-		// 3 - selected all between markers, nut including markers: select all between markers, not including upper marker
+		// 3 - selected all between Markers, nut including Markers: select all between Markers, not including upper Marker
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker+1; i <= lower_marker; ++i)
 		{
@@ -560,7 +561,7 @@ void SELECTION::SelectBetweenMarkers()
 		}
 	} else if (upper_border == upper_marker+1 && lower_border == lower_marker)
 	{
-		// 4 - selected all between markers and lower marker selected too: select all bertween markers, including markers
+		// 4 - selected all between Markers and lower Marker selected too: select all bertween Markers, including Markers
 		if (upper_marker < 0) upper_marker = 0;
 		if (lower_marker >= movie_size) lower_marker = movie_size - 1;
 		for (int i = upper_marker; i <= lower_marker; ++i)
@@ -585,7 +586,7 @@ void SELECTION::ReselectClipboard()
 	ClearSelection();
 	CurrentSelection() = clipboard_selection;
 	EnforceSelectionToList();
-	// also keep selection within Piano Roll
+	// also keep Selection within Piano Roll
 	UpdateSelectionSize();
 }
 
@@ -658,7 +659,7 @@ bool SELECTION::CheckFrameSelected(int frame)
 }
 SelectionFrames* SELECTION::MakeStrobe()
 {
-	// copy current selection to temp_selection
+	// copy current Selection to temp_selection
 	temp_selection = selections_history[(history_start_pos + history_cursor_pos) % history_size];
 	return &temp_selection;
 }
@@ -685,7 +686,7 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			// enable editing
 			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
 			// disable FCEUX keyboard
-			taseditor_window.ClearTaseditorInput();
+			ClearTaseditorInput();
 			// scroll to the Marker
 			if (taseditor_config.follow_note_context)
 				piano_roll.FollowMarker(selection.shown_marker);
@@ -702,7 +703,7 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, true, 0); 
 			// enable FCEUX keyboard
 			if (taseditor_window.TASEditor_focus)
-				taseditor_window.SetTaseditorInput();
+				SetTaseditorInput();
 			break;
 		}
 		case WM_CHAR:

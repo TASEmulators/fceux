@@ -11,9 +11,9 @@ Lua - Manager of Lua features
 [Singleton]
 
 * implements logic of all functions of "taseditor" Lua library
-* stores the list of pending input changes
+* stores the list of pending Input changes
 * on demend: (from FCEUX Lua engine) updates GUI items on "Lua" panel of TAS Editor window
-* stores resources: ids of joypads for input changes, max length of a name for applychanges()
+* stores resources: ids of joypads for Input changes, max length of a name for applychanges()
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
@@ -130,7 +130,7 @@ int TASEDITOR_LUA::setmarker(int frame)
 			marker_id = markers_manager.SetMarker(frame);
 			if (marker_id)
 			{
-				// new marker was created - register changes in TAS Editor
+				// new Marker was created - register changes in TAS Editor
 				history.RegisterMarkersChange(MODTYPE_LUA_MARKER_SET, frame);
 				selection.must_find_current_marker = playback.must_find_current_marker = true;
 				piano_roll.RedrawRow(frame);
@@ -150,7 +150,7 @@ void TASEDITOR_LUA::removemarker(int frame)
 		if (markers_manager.GetMarker(frame))
 		{
 			markers_manager.ClearMarker(frame);
-			// marker was deleted - register changes in TAS Editor
+			// Marker was deleted - register changes in TAS Editor
 			history.RegisterMarkersChange(MODTYPE_LUA_MARKER_REMOVE, frame);
 			selection.must_find_current_marker = playback.must_find_current_marker = true;
 			piano_roll.RedrawRow(frame);
@@ -227,7 +227,7 @@ int TASEDITOR_LUA::getlostplayback()
 int TASEDITOR_LUA::getplaybacktarget()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return playback.pause_frame - 1;
+		return playback.GetPauseFrame() - 1;
 	else
 		return -1;
 }

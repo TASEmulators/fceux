@@ -40,12 +40,8 @@
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
 
-#include "./drivers/win/taseditor/playback.h"
-#include "./drivers/win/taseditor/recorder.h"
-extern PLAYBACK playback;
-extern RECORDER recorder;
+#include "./drivers/win/taseditor.h"
 extern bool emulator_must_run_taseditor;
-extern bool TaseditorIsRecording();
 #endif
 
 using namespace std;
@@ -993,14 +989,13 @@ void FCEUMOV_AddInputState()
 			currMovieData.insertEmpty(-1, 2 + currFrameCounter - (int)currMovieData.records.size());
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if(TaseditorIsRecording())
+		if (TaseditorIsRecording())
 		{
 			// record commands and buttons
 			mr->commands |= _currCommand;
 			joyports[0].log(mr);
 			joyports[1].log(mr);
-			recorder.InputChanged();
-			// replay buttons even when Recording - return data from movie to joyports in case Recorder changed it (for example, by applying Superimpose)
+			Taseditor_RecordInput();
 		}
 		// replay buttons
 		joyports[0].load(mr);
@@ -1513,9 +1508,8 @@ void FCEUI_MoviePlayFromBeginning(void)
 {
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
-		movie_readonly = true;
 #ifdef WIN32
-		playback.jump(0);
+		Taseditor_EMUCMD(EMUCMD_MOVIE_PLAY_FROM_BEGINNING);
 #endif
 	} else if (movieMode != MOVIEMODE_INACTIVE)
 	{

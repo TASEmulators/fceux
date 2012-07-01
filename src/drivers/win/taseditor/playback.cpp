@@ -21,6 +21,7 @@ Playback - Player of emulation states
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
+#include "../taseditor.h"
 
 #ifdef _S9XLUA_H
 extern void ForceExecuteLuaFrameFunctions();
@@ -194,7 +195,7 @@ void PLAYBACK::update()
 		}
 	}
 
-	// update the playback cursor
+	// update the Playback cursor
 	if (currFrameCounter != lastCursor)
 	{
 		// update gfx of the old and new rows
@@ -226,6 +227,7 @@ void PLAYBACK::update()
 		must_find_current_marker = false;
 	}
 
+	// This logic is very important for adequate "green arrow" and "Restore position"
 	if (emu_paused)
 		// when paused, pause_frame becomes unfixed
 		pause_frame_must_be_fixed = false;
@@ -260,12 +262,10 @@ void PLAYBACK::ToggleEmulationPause()
 void PLAYBACK::PauseEmulation()
 {
 	FCEUI_SetEmulationPaused(1);
-	// make some additional stuff
 }
 void PLAYBACK::UnpauseEmulation()
 {
 	FCEUI_SetEmulationPaused(0);
-	// make some additional stuff
 }
 void PLAYBACK::RestorePosition()
 {
@@ -364,7 +364,7 @@ void PLAYBACK::ForwardFrame()
 void PLAYBACK::RewindFull(int speed)
 {
 	int index = currFrameCounter - 1;
-	// jump trough "speed" amount of previous markers
+	// jump trough "speed" amount of previous Markers
 	while (speed > 0)
 	{
 		for (; index >= 0; index--)
@@ -387,7 +387,7 @@ void PLAYBACK::ForwardFull(int speed)
 {
 	int last_frame = markers_manager.GetMarkersSize() - 1;	// the end of movie Markers
 	int index = currFrameCounter + 1;
-	// jump trough "speed" amount of next markers
+	// jump trough "speed" amount of next Markers
 	while (speed > 0)
 	{
 		for (; index <= last_frame; ++index)
@@ -409,7 +409,7 @@ void PLAYBACK::ForwardFull(int speed)
 
 void PLAYBACK::RedrawMarker()
 {
-	// redraw marker num
+	// redraw Marker num
 	char new_text[MAX_NOTE_LEN] = {0};
 	if (shown_marker <= 9999)		// if there's too many digits in the number then don't show the word "Marker" before the number
 		strcpy(new_text, upperMarkerText);
@@ -418,10 +418,10 @@ void PLAYBACK::RedrawMarker()
 	strcat(new_text, num);
 	strcat(new_text, " ");
 	SetWindowText(hwndPlaybackMarker, new_text);
-	// change marker note
+	// change Marker Note
 	strcpy(new_text, markers_manager.GetNote(shown_marker).c_str());
 	SetWindowText(hwndPlaybackMarkerEdit, new_text);
-	// reset search_similar_marker, because source marker changed
+	// reset search_similar_marker, because source Marker changed
 	markers_manager.search_similar_marker = 0;
 }
 
@@ -447,13 +447,13 @@ void PLAYBACK::jump(int frame, bool execute_lua, bool follow_cursor)
 			piano_roll.FollowPlaybackIfNeeded();
 	}
 }
-
-// returns true if a jump to the frame is made, false if started seeking outside greenzone or if nothing's done
+// internal interface
+// returns true if a jump to the frame is made, false if started seeking outside Greenzone or if nothing's done
 bool PLAYBACK::JumpToFrame(int index)
 {
 	if (index >= greenzone.GetSize())
 	{
-		// make jump outside greenzone
+		// make jump outside Greenzone
 		if (currFrameCounter == greenzone.GetSize() - 1 || JumpToFrame(greenzone.GetSize() - 1))
 			// seek there from the end of greenzone
 			SeekingStart(index+1);
@@ -463,7 +463,7 @@ bool PLAYBACK::JumpToFrame(int index)
 	if (greenzone.loadTasSavestate(index))
 	{
 		// successfully restored emulator state at this frame
-		// if playback was seeking, pause emulation right here
+		// if Playback was seeking, pause emulation right here
 		if (pause_frame)
 			SeekingStop();
 		return true;
@@ -495,9 +495,20 @@ int PLAYBACK::GetLostPosition()
 	return lost_position_frame - 1;
 }
 
+int PLAYBACK::GetPauseFrame()
+{
+	return pause_frame;
+}
 int PLAYBACK::GetFlashingPauseFrame()
 {
 	if (show_pauseframe)
+		return pause_frame;
+	else
+		return 0;
+}
+int PLAYBACK::GetFixedPauseFrame()
+{
+	if (pause_frame_must_be_fixed)
 		return pause_frame;
 	else
 		return 0;
@@ -525,7 +536,7 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			// enable editing
 			SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, false, 0);
 			// disable FCEUX keyboard
-			taseditor_window.ClearTaseditorInput();
+			ClearTaseditorInput();
 			// scroll to the Marker
 			if (taseditor_config.follow_note_context)
 				piano_roll.FollowMarker(playback.shown_marker);
@@ -543,7 +554,7 @@ LRESULT APIENTRY UpperMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETREADONLY, true, 0);
 			// enable FCEUX keyboard
 			if (taseditor_window.TASEditor_focus)
-				taseditor_window.SetTaseditorInput();
+				SetTaseditorInput();
 			break;
 		}
 		case WM_CHAR:

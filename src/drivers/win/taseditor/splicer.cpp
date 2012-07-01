@@ -10,9 +10,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Splicer - Tool for montage
 [Singleton]
 
-* implements operations of mass-changing input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating
-* stores data about the selection used in last "Copy to Clipboard" operation
-* regularly checks the state of current selection and displays info on GUI, also displays info about input in Clipboard
+* implements operations of mass-changing Input: copy/paste, cloning, clearing region, insertion and deletion of frames, truncating
+* stores data about the Selection used in last "Copy to Clipboard" operation
+* regularly checks the state of current Selection and displays info on GUI, also displays info about Input in Clipboard
 * when launching TAS Editor, it checks Clipboard contents
 * stores resources: mnemonics of buttons, texts for selection/clipboard info on GUI
 ------------------------------------------------------------------------------------ */
@@ -64,7 +64,7 @@ void SPLICER::reset()
 }
 void SPLICER::update()
 {
-	// redraw selection info text of needed
+	// redraw Selection info text of needed
 	if (must_redraw_selection_text)
 	{
 		int size = selection.GetCurrentSelectionSize();
@@ -109,10 +109,10 @@ void SPLICER::CloneFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
-	selection.ClearSelection();			// selection will be moved down, so that same frames are selected
+	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	// insert frames before each selection, but consecutive selection lines are accounted as single region
+	// insert frames before each selection, but consecutive Selection lines are accounted as single region
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
 	int shift = frames;
@@ -127,7 +127,7 @@ void SPLICER::CloneFrames()
 			currMovieData.cloneRegion(*it, frames);
 			if (taseditor_config.bind_markers)
 			{
-				// markers are not cloned
+				// Markers are not cloned
 				if (markers_manager.insertEmpty(*it,frames))
 					markers_changed = true;
 			}
@@ -157,10 +157,10 @@ void SPLICER::InsertFrames()
 	int frames = current_selection->size();
 	if (!frames) return;
 
-	selection.ClearSelection();			// selection will be moved down, so that same frames are selected
+	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
-	// insert frames before each selection, but consecutive selection lines are accounted as single region
+	// insert frames before each selection, but consecutive Selection lines are accounted as single region
 	SelectionFrames::reverse_iterator next_it;
 	SelectionFrames::reverse_iterator current_selection_rend = current_selection->rend();
 	int shift = frames;
@@ -214,7 +214,7 @@ void SPLICER::InsertNumFrames()
 				index = *current_selection->begin();
 			} else
 			{
-				// insert at playback cursor
+				// insert at Playback cursor
 				index = currFrameCounter;
 			}
 			currMovieData.insertEmpty(index, frames);
@@ -225,7 +225,7 @@ void SPLICER::InsertNumFrames()
 			}
 			if (current_selection->size())
 			{
-				// shift selection down, so that same frames are selected
+				// shift Selection down, so that same frames are selected
 				piano_roll.UpdateItemCount();
 				selection.ClearSelection();
 				SelectionFrames::iterator current_selection_end = current_selection->end();
@@ -298,7 +298,7 @@ void SPLICER::ClearFrames(SelectionFrames* current_selection)
 		if (current_selection->size() == 0) return;
 	}
 
-	//clear input on each selected frame
+	// clear Input on each selected frame
 	SelectionFrames::iterator current_selection_end(current_selection->end());
 	for(SelectionFrames::iterator it(current_selection->begin()); it != current_selection_end; it++)
 	{
@@ -411,7 +411,7 @@ bool SPLICER::Copy(SelectionFrames* current_selection)
 		return false;
 	}
 	// copied successfully
-	// memorize currently strobed selection data to clipboard_selection
+	// memorize currently strobed Selection data to clipboard_selection
 	clipboard_selection = *current_selection;
 	RedrawTextClipboard();
 	return true;
@@ -482,7 +482,7 @@ bool SPLICER::Paste()
 					currMovieData.records[pos].joysticks[2] = 0;
 					currMovieData.records[pos].joysticks[3] = 0;
 				}
-				// read this frame input
+				// read this frame Input
 				joy = 0;
 				new_buttons = 0;
 				while (*frame && *frame != '\n' && *frame !='\r')
@@ -570,9 +570,9 @@ bool SPLICER::PasteInsert()
 		// TAS recording info starts with "TAS "
 		if (pGlobal[0]=='T' && pGlobal[1]=='A' && pGlobal[2]=='S')
 		{
-			// make sure markers have the same size as movie
+			// make sure Markers have the same size as movie
 			markers_manager.update();
-			// create inserted_set (for input history hot changes)
+			// create inserted_set (for Input history hot changes)
 			SelectionFrames inserted_set;
 
 			// Extract number of frames
@@ -613,7 +613,7 @@ bool SPLICER::PasteInsert()
 				}
 				inserted_set.insert(pos);
 
-				// read this frame input
+				// read this frame Input
 				int joy = 0;
 				while (*frame && *frame != '\n' && *frame !='\r')
 				{
@@ -676,7 +676,7 @@ void SPLICER::CheckClipboard()
 {
 	if (OpenClipboard(taseditor_window.hwndTasEditor))
 	{
-		// check if clipboard contains TAS Editor input data
+		// check if clipboard contains TAS Editor Input data
 		HANDLE hGlobal = GetClipboardData(CF_TEXT);
 		if (hGlobal)
 		{
@@ -704,7 +704,7 @@ void SPLICER::CheckClipboard()
 					} else
 						current_pos++;
 					clipboard_selection.insert(current_pos);
-					// skip input
+					// skip Input
 					pGlobal = strchr(pGlobal, '\n');
 				}
 			}

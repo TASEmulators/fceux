@@ -11,13 +11,13 @@ Piano Roll - Piano Roll interface
 [Singleton]
 
 * implements the working of Piano Roll List: creating, redrawing, scrolling, mouseover, clicks, drag
-* regularly updates the size of the List according to current movie input
+* regularly updates the size of the List according to current movie Input
 * on demand: scrolls visible area of the List to any given item: to Playback Cursor, to Selection Cursor, to "undo pointer", to a Marker
 * saves and loads current position of vertical scrolling from a project file. On error: scrolls the List to the beginning
 * implements the working of Piano Roll List Header: creating, redrawing, animating, mouseover, clicks
 * regularly updates lights in the Header according to button presses data from Recorder and Alt key state
 * on demand: launches flashes in the Header
-* implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps in Input/markers
+* implements the working of mouse wheel: List scrolling, Playback cursor movement, Selection cursor movement, scrolling across gaps in Input/Markers
 * implements context menu on Right-click
 * stores resources: save id, ids of columns, widths of columns, tables of colors, gradient of Hot Changes, gradient of Header flashings, timings of flashes, all fonts used in TAS Editor, images
 ------------------------------------------------------------------------------------ */
@@ -540,7 +540,7 @@ void PIANO_ROLL::update()
 	{
 		case DRAG_MODE_PLAYBACK:
 		{
-			if (!playback.pause_frame || can_drag_when_seeking)
+			if (!playback.GetPauseFrame() || can_drag_when_seeking)
 			{
 				DragPlaybackCursor();
 				// after first seeking is finished (if there was any seeking), it now becomes possible to drag when seeking
@@ -683,7 +683,7 @@ void PIANO_ROLL::update()
 				new_drag_selection_ending_frame = currMovieData.getNumRecords() - 1;
 			if (new_drag_selection_ending_frame >= 0 && new_drag_selection_ending_frame != drag_selection_ending_frame)
 			{
-				// change selection shape
+				// change Selection shape
 				if (new_drag_selection_ending_frame >= drag_selection_starting_frame)
 				{
 					// selecting from upper to lower
@@ -788,7 +788,7 @@ void PIANO_ROLL::update()
 			changes_made = true;
 		}
 		header_colors[COLUMN_FRAMENUM2] = header_colors[COLUMN_FRAMENUM];
-		// 2 - update input columns' heads
+		// 2 - update Input columns' heads
 		int i = num_columns-1;
 		if (i == COLUMN_FRAMENUM2) i--;
 		for (; i >= COLUMN_JOYPAD1_A; i--)
@@ -963,8 +963,8 @@ void PIANO_ROLL::FollowSelection()
 }
 void PIANO_ROLL::FollowPauseframe()
 {
-	if (playback.pause_frame > 0)
-		CenterListAt(playback.pause_frame - 1);
+	if (playback.GetPauseFrame() > 0)
+		CenterListAt(playback.GetPauseFrame() - 1);
 }
 void PIANO_ROLL::FollowMarker(int marker_id)
 {
@@ -1344,7 +1344,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 			} else if ((cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 0 || (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS == 2)
 			{
 				// pad 1 or 3
-				// font: empty cells have "SelectFont", non-empty have normal font
+				// font: empty cells have "SelectFont" (so that "-" is wide), non-empty have normal font
 				int joy = (cell_x - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 				int bit = (cell_x - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
 				if ((int)currMovieData.records.size() <= cell_y ||
@@ -1488,7 +1488,7 @@ void PIANO_ROLL::RightClick(LVHITTESTINFO& info)
 		SelectionFrames* current_selection = selection.MakeStrobe();
 		HMENU sub = GetSubMenu(hrmenu, 0);
 		SetMenuDefaultItem(sub, ID_SELECTED_SETMARKERS, false);
-		// inspect current selection and disable inappropriate menu items
+		// inspect current Selection and disable inappropriate menu items
 		SelectionFrames::iterator current_selection_begin(current_selection->begin());
 		SelectionFrames::iterator current_selection_end(current_selection->end());
 		bool set_found = false, unset_found = false;
@@ -1756,7 +1756,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							}
 						} else if (alt_pressed)
 						{
-							// make selection by Pattern
+							// make Selection by Pattern
 							int selection_beginning = selection.GetCurrentSelectionBeginning();
 							if (selection_beginning >= 0)
 							{
@@ -1791,7 +1791,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						selection.ClearSelection();
 						selection.SetRowSelection(row_index);
 					}
-					// toggle input
+					// toggle Input
 					piano_roll.drawing_start_time = clock();
 					int joy = (column_index - COLUMN_JOYPAD1_A) / NUM_JOYPAD_BUTTONS;
 					int button = (column_index - COLUMN_JOYPAD1_A) % NUM_JOYPAD_BUTTONS;
@@ -1868,7 +1868,7 @@ LRESULT APIENTRY ListWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				return SendMessage(history.hwndHistoryList, WM_MOUSEWHEEL_RESENT, wParam, lParam);
 			} else if (alt_pressed)
 			{
-				// cross gaps in input/Markers
+				// cross gaps in Input/Markers
 				piano_roll.CrossGaps(zDelta);
 			} else
 			{

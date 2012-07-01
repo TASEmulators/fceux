@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Editor - Interface for editing Input and Markers
 [Singleton]
 
-* implements operations of changing Input: toggle input in region, set input by pattern, toggle selected region, apply pattern to input selection
+* implements operations of changing Input: toggle Input in region, set Input by pattern, toggle selected region, apply pattern to Input selection
 * implements operations of changing Markers: toggle Markers in selection, apply patern to Markers in selection, mark/unmark all selected frames
 * stores Autofire Patterns data and their loading/generating code
 * stores resources: patterns filename, id of buttonpresses in patterns
@@ -128,7 +128,7 @@ void EDITOR::update()
 
 }
 // ----------------------------------------------------------------------------------------------
-// returns false if couldn't real a string containing at least one char
+// returns false if couldn't read a string containing at least one char
 bool EDITOR::ReadString(EMUFILE *is, std::string& dest)
 {
 	dest.resize(0);

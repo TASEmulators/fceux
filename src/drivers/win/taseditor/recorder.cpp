@@ -7,12 +7,12 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------------
-Recorder - Tool for input recording
+Recorder - Tool for Input recording
 [Singleton]
 
-* at the moment of recording movie input (at the beginning of a frame) by emulator's call the Recorder intercepts input data and applies its filters (multitracking/etc), then reflects input changes into History and Greenzone
+* at the moment of recording movie Input (at the beginning of a frame) by emulator's call the Recorder intercepts Input data and applies its filters (multitracking/etc), then reflects Input changes into History and Greenzone
 * regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)
-* implements input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)
+* implements Input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)
 * stores resources: ids and names of multitracking modes, suffixes for TAS Editor window caption
 ------------------------------------------------------------------------------------ */
 
@@ -238,7 +238,7 @@ void RECORDER::InputChanged()
 {
 	bool changes_made = false;
 	int num_joys = joysticks_per_frame[GetInputType(currMovieData)];
-	// take previous values from current snapshot, new input from current movie
+	// take previous values from current snapshot, new Input from current movie
 	for (int i = 0; i < num_joys; ++i)
 	{
 		old_joy[i] = history.GetCurrentSnapshot().GetJoystickInfo(currFrameCounter, i);

@@ -29,6 +29,9 @@ void SetInputType(MovieData& md, int new_input_type);
 void ApplyMovieInputConfig();
 
 bool TaseditorIsRecording();
+void Taseditor_RecordInput();
 
 void Taseditor_EMUCMD(int command);
+void SetTaseditorInput();
+void ClearTaseditorInput();
 

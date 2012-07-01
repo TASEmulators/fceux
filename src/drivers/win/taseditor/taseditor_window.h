@@ -51,9 +51,6 @@ public:
 	void UpdatePatternsMenu();
 	void RecheckPatternsMenu();
 
-	void SetTaseditorInput();
-	void ClearTaseditorInput();
-
 	HWND hwndTasEditor, hwndFindNote;
 	bool TASEditor_focus;
 	bool ready_for_resizing;

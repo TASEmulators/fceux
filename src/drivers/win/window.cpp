@@ -1240,7 +1240,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 	case WM_MBUTTONDOWN:
 	{
-		if (taseditor_window.hwndTasEditor)
+		if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
 			playback.MiddleButtonClick();
 		return 0;
 	}
@@ -2265,11 +2265,17 @@ adelikat: Outsourced this to a remappable hotkey
 			EnableMenuItem(fceumenu, MENU_PAL, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_NEWPPU, MF_GRAYED);
 			EnableMenuItem(fceumenu, ID_OLDPPU, MF_GRAYED);
+			EnableMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, MF_GRAYED);
+			EnableMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, MF_GRAYED);
+			EnableMenuItem(fceumenu, ID_ENABLE_COMPRESSSAVESTATES, MF_GRAYED);
 		} else
 		{
 			EnableMenuItem(fceumenu, MENU_PAL, MF_ENABLED);
 			EnableMenuItem(fceumenu, ID_NEWPPU, MF_ENABLED);
 			EnableMenuItem(fceumenu, ID_OLDPPU, MF_ENABLED);
+			EnableMenuItem(fceumenu, MENU_ENABLE_AUTOSAVE, MF_ENABLED);
+			EnableMenuItem(fceumenu, ID_ENABLE_BACKUPSAVESTATES, MF_ENABLED);
+			EnableMenuItem(fceumenu, ID_ENABLE_COMPRESSSAVESTATES, MF_ENABLED);
 		}
 		CheckMenuRadioItem(fceumenu, ID_NEWPPU, ID_OLDPPU, newppu ? ID_NEWPPU : ID_OLDPPU, MF_BYCOMMAND);
 
