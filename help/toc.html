@@ -1,4 +1,4 @@
-﻿<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 
 <head>
@@ -7,20 +7,28 @@
     <meta name="generator" content="HelpNDoc">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
     <link type="text/css" rel="stylesheet" media="all" href="css/toc.css" />
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#tabs .ui-widget-header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
     <script type="text/javascript" src="js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="js/jquery.treeview.min.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.8.12.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery.dynatree.min.js"></script>
 	<script type="text/javascript" src="js/hndjsse.js"></script>
 	<script type="text/javascript">
 	
 		var bSearchDataLoaded = false;
+		var sHelpIdToActivate = '';
 	
 		$(document).ready(function()
 		{
@@ -28,22 +36,75 @@
 			var nSelectedTab = 0;
 			if (sAnchorName == '_index') nSelectedTab = 1
 			else if (sAnchorName == '_search') nSelectedTab = 2;			
-			$("#tabs").tabs({selected: nSelectedTab});
-			$("#toc").treeview({collapsed: true});
-			$("#keywords").treeview({collapsed: true});
+			$("#tabs").tabs({
+				selected: nSelectedTab,
+				select: function(event, ui) { HideKwPopup(); }
+			});
+			
+			// Toc
+			$("#tab-toc").dynatree({
+				clickFolderMode: 1,
+				debugLevel: 0,
+				imagePath: 'css/dynatree/chm/',
+				onActivate: function(node){
+					if ($("#tab-keywords") && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+						$("#tab-keywords").dynatree("getTree").activateKey(null);
+					if(node.data.href && node.data.href != '#'){
+						window.open(node.data.href, node.data.target);
+					}
+				}
+			});
+			// Expand all nodes if required
+			$("#tab-toc").dynatree("getRoot").visit(function(node){
+					node.expand(true);
+				});
+			// Select the active help id
+			if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			
+			// Keywords
+			$("#tab-keywords").dynatree({
+				clickFolderMode: 1,
+				debugLevel: 0,
+				imagePath: 'css/dynatree/chm/',
+				onClick: function(node, event){
+					HideKwPopup();
+					if (node.data && node.data.click)
+					{
+						var aRefList = null;
+						eval('aRefList=' + node.data.click);
+						if (ShowKwPopup(node.li, aRefList))
+						{
+							if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+								$("#tab-toc").dynatree("getTree").activateKey(null);
+							if(node.data.href && node.data.href != '#'){
+								window.open(node.data.href, node.data.target);
+							}
+						}
+					}
+				}
+			});
+			// Expand all nodes if required
+			$("#tab-keywords").dynatree("getRoot").visit(function(node){
+					node.expand(true);
+				});
 			// Load search data
 			$.getScript("js/searchdata.js",	function() {
 				bSearchDataLoaded = true;
 			});
 		});
 		
-		function SelectTocItem(sLinkHref)
+		$('body').click(function() {
+			HideKwPopup();
+		});
+		
+		function SelectTocItem(sHelpId)
 		{
-			$("#toc a").each(function()
-			{
-				if ($.inArray(sLinkHref + '.htm', this.href) > -1) $(this).css('font-weight', 'bold')
-				else $(this).css('font-weight', '');
-			});
+			if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
+			}
+			else {
+				sHelpIdToActivate = sHelpId;
+			}
 		}
 		
 		function HideKwPopup()
@@ -95,13 +156,25 @@
 			}
 			else
 			{
-				$("#search_results").html('');
-				var oUl = $("#search_results").append("<ul id='lr'></ul>").find("ul");
+				$("#search_results").html('<div id="search_results_content"></div>');
+				var oUl = $("#search_results_content").append("<ul id='lr'></ul>").find("ul");
 				for (var nCnt = 0; nCnt < oSearchEngine.aResults.length; nCnt++)
 				{
 					oUl.append("<li><a href='" + aTl[oSearchEngine.aResults[nCnt]][0] + "?search=" + escape(sValue) + "' target='FrameMain'>" + unescape(aTl[oSearchEngine.aResults[nCnt]][1]) + "</a></li>");
 				}
-				$("#lr").treeview({collapsed: false});
+				// Tree
+				$("#search_results_content").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#search_results_content") && $("#search_results_content").dynatree && $("#search_results_content").dynatree("getTree") && $("#search_results_content").dynatree("getTree").activateKey)
+							$("#search_results_content").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
+					}
+				});
 			}
 		}
 	</script>
@@ -114,1457 +187,1283 @@
 			<li><a href="#tab-toc">Contents</a></li>
 			<li><a href="#tab-keywords">Index</a></li>
 			<li><a href="#tab-search">Search</a></li>
-		</ul>
+			</ul>
 		<div id="tab-toc">
-			<ul id="toc" class="filetree toctree">
+			<ul id="toc" class="">
 
-				<li>
+				<li class="folder" id="Intro" data="">
 							<a
 							href="Intro.html"
-							class="folder"
 							target="FrameMain">
 								Introduction</a>
 
-				<ul><li>
+				<ul><li class="" id="Introduction" data="">
 							<a
 							href="Introduction.html"
-							class="file"
 							target="FrameMain">
 								Introduction</a>
 
-				</li><li>
+				</li><li class="" id="Overview" data="">
 							<a
 							href="Overview.html"
-							class="file"
 							target="FrameMain">
 								Overview</a>
 
-				</li><li>
+				</li><li class="" id="FCEUltraVersionHistory" data="">
 							<a
 							href="FCEUltraVersionHistory.html"
-							class="file"
 							target="FrameMain">
 								FCE Ultra Version History</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew216" data="">
 							<a
 							href="WhatsNew216.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.6 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew215" data="">
 							<a
 							href="WhatsNew215.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.5 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew214" data="">
 							<a
 							href="WhatsNew214.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.4 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew213" data="">
 							<a
 							href="WhatsNew213.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.3 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew212" data="">
 							<a
 							href="WhatsNew212.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.2 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew211" data="">
 							<a
 							href="WhatsNew211.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1.1 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew210" data="">
 							<a
 							href="WhatsNew210.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.1 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew203" data="">
 							<a
 							href="WhatsNew203.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.0.3 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew202" data="">
 							<a
 							href="WhatsNew202.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.0.2 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew201" data="">
 							<a
 							href="WhatsNew201.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.0.1 (changelog)</a>
 
-				</li><li>
+				</li><li class="" id="WhatsNew200" data="">
 							<a
 							href="WhatsNew200.html"
-							class="file"
 							target="FrameMain">
 								What's New? 2.0.0</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="General" data="">
 							<a
 							href="General.html"
-							class="folder"
 							target="FrameMain">
 								General</a>
 
-				<ul><li>
+				<ul><li class="" id="Gettingstarted" data="">
 							<a
 							href="Gettingstarted.html"
-							class="file"
 							target="FrameMain">
 								Getting Started</a>
 
-				</li><li>
+				</li><li class="" id="Gamefilecompatibility" data="">
 							<a
 							href="Gamefilecompatibility.html"
-							class="file"
 							target="FrameMain">
 								Game file compatibility</a>
 
-				</li><li>
+				</li><li class="" id="CommandLineOptions" data="">
 							<a
 							href="CommandLineOptions.html"
-							class="file"
 							target="FrameMain">
 								Command Line Options</a>
 
-				</li><li>
+				</li><li class="" id="CustomizingthroughtheConfigFil" data="">
 							<a
 							href="CustomizingthroughtheConfigFil.html"
-							class="file"
 							target="FrameMain">
 								Customizing through the Config File</a>
 
-				</li><li>
+				</li><li class="" id="FamicomDiskSytem" data="">
 							<a
 							href="FamicomDiskSytem.html"
-							class="file"
 							target="FrameMain">
 								Famicom Disk Sytem</a>
 
-				</li><li>
+				</li><li class="" id="AVICapturing" data="">
 							<a
 							href="AVICapturing.html"
-							class="file"
 							target="FrameMain">
 								AVI Capturing</a>
 
-				</li><li>
+				</li><li class="" id="MovieRecording" data="">
 							<a
 							href="MovieRecording.html"
-							class="file"
 							target="FrameMain">
 								Movie Recording</a>
 
-				</li><li>
+				</li><li class="" id="NES" data="">
 							<a
 							href="NES.html"
-							class="file"
 							target="FrameMain">
 								NES Menu</a>
 
-				</li><li>
+				</li><li class="" id="PaletteOptions" data="">
 							<a
 							href="PaletteOptions.html"
-							class="file"
 							target="FrameMain">
 								Palette Options</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="Config" data="">
 							<a
 							href="Config.html"
-							class="folder"
 							target="FrameMain">
 								Config</a>
 
-				<ul><li>
+				<ul><li class="" id="ToggleSwitchesHideMenuetc" data="">
 							<a
 							href="ToggleSwitchesHideMenuetc.html"
-							class="file"
 							target="FrameMain">
 								Menu Items &amp; Submenus</a>
 
-				</li><li>
+				</li><li class="" id="Directories" data="">
 							<a
 							href="Directories.html"
-							class="file"
 							target="FrameMain">
 								Directories</a>
 
-				</li><li>
+				</li><li class="" id="GUI" data="">
 							<a
 							href="GUI.html"
-							class="file"
 							target="FrameMain">
 								GUI</a>
 
-				</li><li>
+				</li><li class="" id="Input" data="">
 							<a
 							href="Input.html"
-							class="file"
 							target="FrameMain">
 								Input</a>
 
-				</li><li>
+				</li><li class="" id="NetworkPlay" data="">
 							<a
 							href="NetworkPlay.html"
-							class="file"
 							target="FrameMain">
 								Network Play</a>
 
-				</li><li>
+				</li><li class="" id="Palette" data="">
 							<a
 							href="Palette.html"
-							class="file"
 							target="FrameMain">
 								Palette</a>
 
-				</li><li>
+				</li><li class="" id="SoundOptions" data="">
 							<a
 							href="SoundOptions.html"
-							class="file"
 							target="FrameMain">
 								Sound</a>
 
-				</li><li>
+				</li><li class="" id="Timing" data="">
 							<a
 							href="Timing.html"
-							class="file"
 							target="FrameMain">
 								Timing</a>
 
-				</li><li>
+				</li><li class="" id="Video" data="">
 							<a
 							href="Video.html"
-							class="file"
 							target="FrameMain">
 								Video</a>
 
-				</li><li>
+				</li><li class="" id="MovieOptions" data="">
 							<a
 							href="MovieOptions.html"
-							class="file"
 							target="FrameMain">
 								Movie Options</a>
 
-				</li><li>
+				</li><li class="" id="MapHotkeys" data="">
 							<a
 							href="MapHotkeys.html"
-							class="file"
 							target="FrameMain">
 								Map Hotkeys</a>
 
-				</li><li>
+				</li><li class="" id="ContextMenuItems" data="">
 							<a
 							href="ContextMenuItems.html"
-							class="file"
 							target="FrameMain">
 								Context Menu Items</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="Tools2" data="">
 							<a
 							href="Tools2.html"
-							class="folder"
 							target="FrameMain">
 								Tools</a>
 
-				<ul><li>
+				<ul><li class="" id="CheatSearch" data="">
 							<a
 							href="CheatSearch.html"
-							class="file"
 							target="FrameMain">
 								Cheat Search</a>
 
-				</li><li>
+				</li><li class="" id="RAMSearch" data="">
 							<a
 							href="RAMSearch.html"
-							class="file"
 							target="FrameMain">
 								RAM Search</a>
 
-				</li><li>
+				</li><li class="" id="RAMWatch" data="">
 							<a
 							href="RAMWatch.html"
-							class="file"
 							target="FrameMain">
 								RAM Watch</a>
 
-				</li><li>
+				</li><li class="" id="MemoryWatch" data="">
 							<a
 							href="MemoryWatch.html"
-							class="file"
 							target="FrameMain">
 								Memory Watch</a>
 
-				</li><li>
+				</li><li class="" id="TASEditor" data="">
 							<a
 							href="TASEditor.html"
-							class="file"
 							target="FrameMain">
 								TAS Editor</a>
 
-				</li><li>
+				</li><li class="" id="Covertfcm" data="">
 							<a
 							href="Covertfcm.html"
-							class="file"
 							target="FrameMain">
 								Convert fcm</a>
 
-				</li><li>
+				</li><li class="" id="AutoFireConfigurations" data="">
 							<a
 							href="AutoFireConfigurations.html"
-							class="file"
 							target="FrameMain">
 								Auto Fire Settings</a>
 
-				</li><li>
+				</li><li class="" id="ExternalInput" data="">
 							<a
 							href="ExternalInput.html"
-							class="file"
 							target="FrameMain">
 								External Input</a>
 
-				</li><li>
+				</li><li class="" id="TextHooker" data="">
 							<a
 							href="TextHooker.html"
-							class="file"
 							target="FrameMain">
 								Text Hooker</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="Debug" data="">
 							<a
 							href="Debug.html"
-							class="folder"
 							target="FrameMain">
 								Debug</a>
 
-				<ul><li>
+				<ul><li class="" id="Debugger" data="">
 							<a
 							href="Debugger.html"
-							class="file"
 							target="FrameMain">
 								Debugger</a>
 
-				</li><li>
+				</li><li class="" id="PPUViewer" data="">
 							<a
 							href="PPUViewer.html"
-							class="file"
 							target="FrameMain">
 								PPU Viewer</a>
 
-				</li><li>
+				</li><li class="" id="NameTableViewer" data="">
 							<a
 							href="NameTableViewer.html"
-							class="file"
 							target="FrameMain">
 								Name Table Viewer</a>
 
-				</li><li>
+				</li><li class="" id="HexEditor" data="">
 							<a
 							href="HexEditor.html"
-							class="file"
 							target="FrameMain">
 								Hex Editor</a>
 
-				</li><li>
+				</li><li class="" id="TraceLogger" data="">
 							<a
 							href="TraceLogger.html"
-							class="file"
 							target="FrameMain">
 								Trace Logger</a>
 
-				</li><li>
+				</li><li class="" id="CodeDataLogger" data="">
 							<a
 							href="CodeDataLogger.html"
-							class="file"
 							target="FrameMain">
 								Code/Data Logger</a>
 
-				</li><li>
+				</li><li class="" id="GameGenieEncoderDecoder" data="">
 							<a
 							href="GameGenieEncoderDecoder.html"
-							class="file"
 							target="FrameMain">
 								Game Genie Encoder/Decoder</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="LuaScripting" data="">
 							<a
 							href="LuaScripting.html"
-							class="folder"
 							target="FrameMain">
 								Lua Scripting</a>
 
-				<ul><li>
+				<ul><li class="" id="LuaGettingStarted" data="">
 							<a
 							href="LuaGettingStarted.html"
-							class="file"
 							target="FrameMain">
 								Getting Started</a>
 
-				</li><li>
+				</li><li class="" id="LuaFunctionsList" data="">
 							<a
 							href="LuaFunctionsList.html"
-							class="file"
 							target="FrameMain">
 								Lua Functions List</a>
 
-				</li><li>
+				</li><li class="" id="Commands" data="">
 							<a
 							href="Commands.html"
-							class="file"
 							target="FrameMain">
 								Using Lua</a>
 
-				</li><li>
+				</li><li class="" id="LuaBot" data="">
 							<a
 							href="LuaBot.html"
-							class="file"
 							target="FrameMain">
 								Lua Bot</a>
 
-				</li><li>
+				</li><li class="" id="OverviewofIncludedScripts" data="">
 							<a
 							href="OverviewofIncludedScripts.html"
-							class="file"
 							target="FrameMain">
 								Overview of Included Scripts</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="FAQGuides" data="">
 							<a
 							href="FAQGuides.html"
-							class="folder"
 							target="FrameMain">
 								FAQ / Guides</a>
 
-				<ul><li>
+				<ul><li class="" id="Troubleshooting" data="">
 							<a
 							href="Troubleshooting.html"
-							class="file"
 							target="FrameMain">
 								Troubleshooting</a>
 
-				</li><li>
+				</li><li class="" id="ToolAssistedSpeedruns" data="">
 							<a
 							href="ToolAssistedSpeedruns.html"
-							class="file"
 							target="FrameMain">
 								Tool Assisted Speedruns</a>
 
-				</li><li>
+				</li><li class="" id="ROMHacking" data="">
 							<a
 							href="ROMHacking.html"
-							class="file"
 							target="FrameMain">
 								ROM Hacking</a>
 
-				</li><li>
+				</li><li class="" id="NESRAMMappingFindingValues" data="">
 							<a
 							href="NESRAMMappingFindingValues.html"
-							class="file"
 							target="FrameMain">
 								NES RAM (Mapping/Finding Values)</a>
 
-				</li><li>
+				</li><li class="" id="DebuggerUsageIntermediate" data="">
 							<a
 							href="DebuggerUsageIntermediate.html"
-							class="file"
 							target="FrameMain">
 								Debugger Usage Guide (Intermediate)</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="Technicalinformation" data="">
 							<a
 							href="Technicalinformation.html"
-							class="folder"
 							target="FrameMain">
 								Technical Information</a>
 
-				<ul><li>
+				<ul><li class="folder" id="Movieformats" data="">
 							<a
 							href="Movieformats.html"
-							class="folder"
 							target="FrameMain">
 								Movie &amp; Savestate formats</a>
 
-				<ul><li>
+				<ul><li class="" id="fm2" data="">
 							<a
 							href="fm2.html"
-							class="file"
 							target="FrameMain">
 								.fm2</a>
 
-				</li><li>
+				</li><li class="" id="fcm" data="">
 							<a
 							href="fcm.html"
-							class="file"
 							target="FrameMain">
 								.fcm</a>
 
-				</li><li>
+				</li><li class="" id="fcs" data="">
 							<a
 							href="fcs.html"
-							class="file"
 							target="FrameMain">
 								Savestate (.fcs)</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="Sound" data="">
 							<a
 							href="Sound.html"
-							class="folder"
 							target="FrameMain">
 								Sound</a>
 
-				<ul><li>
+				<ul><li class="" id="NSFFormat" data="">
 							<a
 							href="NSFFormat.html"
-							class="file"
 							target="FrameMain">
 								NSF Format</a>
 
-				</li><li>
+				</li><li class="" id="NESSound" data="">
 							<a
 							href="NESSound.html"
-							class="file"
 							target="FrameMain">
 								NES Sound</a>
 
-				</li></ul></li><li>
+				</li></ul></li><li class="folder" id="NESProcessor" data="">
 							<a
 							href="NESProcessor.html"
-							class="folder"
 							target="FrameMain">
 								NES Processing</a>
 
-				<ul><li>
+				<ul><li class="" id="6502CPU" data="">
 							<a
 							href="6502CPU.html"
-							class="file"
 							target="FrameMain">
 								CPU - 6502</a>
 
-				</li><li>
+				</li><li class="" id="PPU" data="">
 							<a
 							href="PPU.html"
-							class="file"
 							target="FrameMain">
 								PPU - 2C02</a>
 
-				</li><li>
+				</li><li class="" id="NESScrolling1" data="">
 							<a
 							href="NESScrolling1.html"
-							class="file"
 							target="FrameMain">
 								NES Scrolling 1</a>
 
-				</li><li>
+				</li><li class="" id="NESScrolling2" data="">
 							<a
 							href="NESScrolling2.html"
-							class="file"
 							target="FrameMain">
 								NES Scrolling 2</a>
 
 				</li></ul></li></ul></li></ul>
 		</div>
+		
 		<div id="tab-keywords">
-			<ul id="keywords" class="filetree indextree">
+			<ul id="keywords">
 
-				<li>
+				<li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								"Can't find FDS Bios image when I attempt to load a .fds game!"</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								"Directdraw: Error creating secondary surface"</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]);"
+								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
 								>
 								2C02 PPU memory map</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Auto Fire Settings','AutoFireConfigurations.html']]);"
+								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
 								>
 								Alternate A and B</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Arkanoid Paddle</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Auto Fire Settings','AutoFireConfigurations.html']]);"
+								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
 								>
 								Autofire Offset</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Auto Fire Settings','AutoFireConfigurations.html']]);"
+								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
 								>
 								Autofire Pattern</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Auto-Hold</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[]'">
 							<a
-								href=""
-								class="file"
+								href="#"
 								target="FrameMain"
-								onClick="return false;"
+								onClick="[]"
 								>
 								Basic Bot</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'AVI Capturing\',\'AVICapturing.html\']]'">
 							<a
 								href="AVICapturing.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['AVI Capturing','AVICapturing.html']]);"
+								onClick="[[\'AVI Capturing\',\'AVICapturing.html\']]"
 								>
 								Capturing a Movie File</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Cheat Search\',\'CheatSearch.html\']]'">
 							<a
 								href="CheatSearch.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Cheat Search','CheatSearch.html']]);"
+								onClick="[[\'Cheat Search\',\'CheatSearch.html\']]"
 								>
 								Cheat Guide</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Code/Data Logger\',\'CodeDataLogger.html\']]'">
 							<a
 								href="CodeDataLogger.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Code/Data Logger','CodeDataLogger.html']]);"
+								onClick="[[\'Code/Data Logger\',\'CodeDataLogger.html\']]"
 								>
 								Code/Data Logger</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Command Line Options\',\'CommandLineOptions.html\']]'">
 							<a
 								href="CommandLineOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Command Line Options','CommandLineOptions.html']]);"
+								onClick="[[\'Command Line Options\',\'CommandLineOptions.html\']]"
 								>
 								Command Line Options</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]'">
 							<a
 								href="GUI.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['GUI','GUI.html'],['Context Menu Items','ContextMenuItems.html']]);"
+								onClick="[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]"
 								>
 								context menu</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Convert fcm\',\'Covertfcm.html\']]'">
 							<a
 								href="Covertfcm.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Convert fcm','Covertfcm.html']]);"
+								onClick="[[\'Convert fcm\',\'Covertfcm.html\']]"
 								>
 								Converting .fcm</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								crash</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Debugger','Debugger.html']]);"
+								onClick="[[\'Debugger\',\'Debugger.html\']]"
 								>
 								Debugger</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								desyncs</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Directdraw</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Directories\',\'Directories.html\']]'">
 							<a
 								href="Directories.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Directories','Directories.html']]);"
+								onClick="[[\'Directories\',\'Directories.html\']]"
 								>
 								Directory Overrides</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Disable left+right/up+down</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								disksys.rom</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES Menu','NES.html']]);"
+								onClick="[[\'NES Menu\',\'NES.html\']]"
 								>
 								Eject/Insert Disk</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Enable Background Input</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Enable Rewind</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Enable Run in Background</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								error</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Famicom Controllers</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]'">
 							<a
 								href="FamicomDiskSytem.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Famicom Disk Sytem','FamicomDiskSytem.html']]);"
+								onClick="[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]"
 								>
 								Famicom Disk System</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Palette Options','PaletteOptions.html']]);"
+								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
 								>
 								FCEU-13-default_nitsuja.pal</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Palette Options','PaletteOptions.html']]);"
+								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
 								>
 								FCEU-15-nitsuja-new.pal</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'.fm2\',\'fm2.html\']]'">
 							<a
 								href="fm2.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['.fm2','fm2.html']]);"
+								onClick="[[\'.fm2\',\'fm2.html\']]"
 								>
 								FCEUX Movie File format</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Palette Options','PaletteOptions.html']]);"
+								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
 								>
 								FCEUX.pal</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'.fcm\',\'fcm.html\']]'">
 							<a
 								href="fcm.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['.fcm','fcm.html']]);"
+								onClick="[[\'.fcm\',\'fcm.html\']]"
 								>
 								FCM</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								fds</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								FDS Bios</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								fm2</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Full screen</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Game Genie</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
 							<a
 								href="GameGenieEncoderDecoder.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]);"
+								onClick="[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]"
 								>
 								Game Genie Decoder/Encoder</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]);"
+								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
 								>
 								Game RAM Details</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Getting Started','Gettingstarted.html']]);"
+								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
 								>
 								Getting Started</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\']]'">
 							<a
 								href="GUI.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['GUI','GUI.html']]);"
+								onClick="[[\'GUI\',\'GUI.html\']]"
 								>
 								GUI</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
 							<a
 								href="Gamefilecompatibility.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Game file compatibility','Gamefilecompatibility.html']]);"
+								onClick="[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]"
 								>
 								Hacked Games</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Hex Editor\',\'HexEditor.html\']]'">
 							<a
 								href="HexEditor.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Hex Editor','HexEditor.html']]);"
+								onClick="[[\'Hex Editor\',\'HexEditor.html\']]"
 								>
 								Hex Editor</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Hide Menu</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]'">
 							<a
 								href="FCEUltraVersionHistory.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['FCE Ultra Version History','FCEUltraVersionHistory.html']]);"
+								onClick="[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]"
 								>
 								History of FCEUX / FCE Ultra</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Debugger','Debugger.html']]);"
+								onClick="[[\'Debugger\',\'Debugger.html\']]"
 								>
 								Inline Assembler</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Input Configuration</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Input Presets</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES Menu','NES.html']]);"
+								onClick="[[\'NES Menu\',\'NES.html\']]"
 								>
 								Insert Coin</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Getting Started','Gettingstarted.html']]);"
+								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
 								>
 								Loadstate</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Lua</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Lua Functions List\',\'LuaFunctionsList.html\']]'">
 							<a
 								href="LuaFunctionsList.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Lua Functions List','LuaFunctionsList.html']]);"
+								onClick="[[\'Lua Functions List\',\'LuaFunctionsList.html\']]"
 								>
 								Lua Functions</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[]'">
 							<a
-								href=""
-								class="file"
+								href="#"
 								target="FrameMain"
-								onClick="return false;"
+								onClick="[]"
 								>
 								Lua Scripting</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
 							<a
 								href="GameGenieEncoderDecoder.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]);"
+								onClick="[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]"
 								>
 								Making Game Genie codes</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Map Hotkeys\',\'MapHotkeys.html\']]'">
 							<a
 								href="MapHotkeys.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Map Hotkeys','MapHotkeys.html']]);"
+								onClick="[[\'Map Hotkeys\',\'MapHotkeys.html\']]"
 								>
 								Map Hotkeys</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]);"
+								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
 								>
 								Memory Map</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Memory Watch\',\'MemoryWatch.html\']]'">
 							<a
 								href="MemoryWatch.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Memory Watch','MemoryWatch.html']]);"
+								onClick="[[\'Memory Watch\',\'MemoryWatch.html\']]"
 								>
 								Memory Watch</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Movie Recording\',\'MovieRecording.html\']]'">
 							<a
 								href="MovieRecording.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Movie Recording','MovieRecording.html']]);"
+								onClick="[[\'Movie Recording\',\'MovieRecording.html\']]"
 								>
 								Movie Recording</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Sound','SoundOptions.html']]);"
+								onClick="[[\'Sound\',\'SoundOptions.html\']]"
 								>
 								Mute frame advance</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Name Table Viewer\',\'NameTableViewer.html\']]'">
 							<a
 								href="NameTableViewer.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Name Table Viewer','NameTableViewer.html']]);"
+								onClick="[[\'Name Table Viewer\',\'NameTableViewer.html\']]"
 								>
 								Name Table Viewer</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]);"
+								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
 								>
 								NES Mapping</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Palette Options','PaletteOptions.html']]);"
+								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
 								>
 								Nestopia</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Network Play\',\'NetworkPlay.html\']]'">
 							<a
 								href="NetworkPlay.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Network Play','NetworkPlay.html']]);"
+								onClick="[[\'Network Play\',\'NetworkPlay.html\']]"
 								>
 								Network Play</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								PAL Emulation</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Palette.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Palette','Palette.html'],['Palette Options','PaletteOptions.html'],['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Palette</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Pause After Movie Playback</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES Menu','NES.html']]);"
+								onClick="[[\'NES Menu\',\'NES.html\']]"
 								>
 								Power</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Power Pad</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'PPU Viewer\',\'PPUViewer.html\']]'">
 							<a
 								href="PPUViewer.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['PPU Viewer','PPUViewer.html']]);"
+								onClick="[[\'PPU Viewer\',\'PPUViewer.html\']]"
 								>
 								PPU Viewer</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[]'">
 							<a
-								href=""
-								class="file"
+								href="#"
 								target="FrameMain"
-								onClick="return false;"
+								onClick="[]"
 								>
 								RAM Filter</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES Menu','NES.html']]);"
+								onClick="[[\'NES Menu\',\'NES.html\']]"
 								>
 								Reset</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\']]'">
 							<a
 								href="GUI.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['GUI','GUI.html']]);"
+								onClick="[[\'GUI\',\'GUI.html\']]"
 								>
 								right-click</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'ROM Hacking\',\'ROMHacking.html\']]'">
 							<a
 								href="ROMHacking.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['ROM Hacking','ROMHacking.html']]);"
+								onClick="[[\'ROM Hacking\',\'ROMHacking.html\']]"
 								>
 								ROM Hacking</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Getting Started','Gettingstarted.html']]);"
+								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
 								>
 								Savestates</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Setting up controllers</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Menu Items & Submenus','ToggleSwitchesHideMenuetc.html']]);"
+								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
 								>
 								Show Movie Status Icon</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Video.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Video','Video.html'],['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								slow emulation</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Sound','SoundOptions.html']]);"
+								onClick="[[\'Sound\',\'SoundOptions.html\']]"
 								>
 								Sound Configuration</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Sound crackle</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['NES Menu','NES.html']]);"
+								onClick="[[\'NES Menu\',\'NES.html\']]"
 								>
 								Switch Disk Side</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Debugger','Debugger.html']]);"
+								onClick="[[\'Debugger\',\'Debugger.html\']]"
 								>
 								Symbolic Debugging</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'TAS Editor\',\'TASEditor.html\']]'">
 							<a
 								href="TASEditor.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['TAS Editor','TASEditor.html']]);"
+								onClick="[[\'TAS Editor\',\'TASEditor.html\']]"
 								>
 								TAS Edit</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Timing\',\'Timing.html\']]'">
 							<a
 								href="Timing.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Timing','Timing.html']]);"
+								onClick="[[\'Timing\',\'Timing.html\']]"
 								>
 								Timings</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]'">
 							<a
 								href="ToolAssistedSpeedruns.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Tool Assisted Speedruns','ToolAssistedSpeedruns.html']]);"
+								onClick="[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]"
 								>
 								Tool Assisted Speedruns</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Trace Logger\',\'TraceLogger.html\']]'">
 							<a
 								href="TraceLogger.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Trace Logger','TraceLogger.html']]);"
+								onClick="[[\'Trace Logger\',\'TraceLogger.html\']]"
 								>
 								Trace Logger</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Troubleshooting</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Getting Started','Gettingstarted.html']]);"
+								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
 								>
 								Undo</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'External Input\',\'ExternalInput.html\']]'">
 							<a
 								href="ExternalInput.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['External Input','ExternalInput.html']]);"
+								onClick="[[\'External Input\',\'ExternalInput.html\']]"
 								>
 								Use External Input</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
 							<a
 								href="Gamefilecompatibility.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Game file compatibility','Gamefilecompatibility.html']]);"
+								onClick="[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]"
 								>
 								Valid Game Types</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Video\',\'Video.html\']]'">
 							<a
 								href="Video.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Video','Video.html']]);"
+								onClick="[[\'Video\',\'Video.html\']]"
 								>
 								Video Configuration</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Troubleshooting','Troubleshooting.html']]);"
+								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
 								>
 								Vista</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Sound','SoundOptions.html']]);"
+								onClick="[[\'Sound\',\'SoundOptions.html\']]"
 								>
 								Volume</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'What\'s New? 2.0.0\',\'WhatsNew200.html\']]'">
 							<a
 								href="WhatsNew200.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['What\'s New? 2.0.0','WhatsNew200.html']]);"
+								onClick="[[\'What\'s New? 2.0.0\',\'WhatsNew200.html\']]"
 								>
 								What's New?</a>
 
-				</li><li>
+				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
-								class="file"
 								target="FrameMain"
-								onClick="return ShowKwPopup(this, [['Input','Input.html']]);"
+								onClick="[[\'Input\',\'Input.html\']]"
 								>
 								Zapper</a>
 
 				</li></ul>
 		</div>
+		
 		<div id="tab-search">
 			<form onsubmit="PerformSearch(); return false;">
 				<label for="search_value">Search:</label>
 				<input id="search_value" name="search_value"></input>
-				<input type="submit" value="search"/>
+				<input type="submit" value="Search"/>
 			</form>
 			<div id="search_results"></div>
 		</div>
-	</div>
+		
+		</div>
     
 </body>
 

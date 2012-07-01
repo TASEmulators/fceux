@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("NESSound");
+		}
 	</script>
 </head>
 
@@ -245,18 +255,18 @@
 <p>************************</p>
 <p> This section will describe the internal components making up each individual channel. Each component will then be described in full detail.</p>
 <p><br></p>
-<p><span class="rvts59">Device</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> Triangle Noise &nbsp;Square</span></p>
-<p><span class="rvts59">------</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> -------- ------ ------</span></p>
-<p><span class="rvts59">triangle step generator</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59">X</span></p>
-<p><span class="rvts59">linear counter</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59">X</span></p>
-<p><span class="rvts59">programmable timer</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts59">length counter</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts59">4-bit DAC</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts59">volume/envelope decay unit</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> X &nbsp; &nbsp; &nbsp;X</span></p>
-<p><span class="rvts59">sweep unit</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp;X</span></p>
-<p><span class="rvts59">duty cycle generator</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp;X</span></p>
-<p><span class="rvts59">wavelength converter</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> X</span></p>
-<p><span class="rvts59">random number generator</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts59"> X</span></p>
+<p><span class="rvts57">Device</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> Triangle Noise &nbsp;Square</span></p>
+<p><span class="rvts57">------</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> -------- ------ ------</span></p>
+<p><span class="rvts57">triangle step generator</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57">X</span></p>
+<p><span class="rvts57">linear counter</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57">X</span></p>
+<p><span class="rvts57">programmable timer</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class="rvts57">length counter</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class="rvts57">4-bit DAC</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57">X &nbsp; &nbsp; &nbsp;X &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class="rvts57">volume/envelope decay unit</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> X &nbsp; &nbsp; &nbsp;X</span></p>
+<p><span class="rvts57">sweep unit</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp;X</span></p>
+<p><span class="rvts57">duty cycle generator</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp;X</span></p>
+<p><span class="rvts57">wavelength converter</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> X</span></p>
+<p><span class="rvts57">random number generator</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="rvts57"> X</span></p>
 <p><br></p>
 <p><br></p>
 <p>+-------------------------+</p>

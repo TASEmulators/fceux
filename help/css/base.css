@@ -24,7 +24,7 @@ body {
 /* Backgrounds */
 
 #topic_header {
-	background: #fff url(../img/header-bg.png) repeat-x left bottom;
+	background: #fff url(../img/header-bg.png) repeat-x left top;
 	border-bottom: 1px solid #ccc;
 	margin-bottom: 15px;
 }
@@ -74,11 +74,6 @@ body {
 
 #topic_breadcrumb {
 	font-size: 11px;
-	/*padding: 5px 0 0 0;*/
-}
-
-#topic_content {
-
 }
 
 /* Popup */
@@ -98,40 +93,8 @@ body {
 	padding: 5px 5px 2px 5px;
 }
 
-/* Toc */
-
-#toc_header {
-	padding-bottom: 0;
-}
-
-#tabs .ui-tabs-nav {
-	border-bottom: 1px solid #ccc;
-	padding-top: 19px;
-	position: fixed;
-	width: 100%;
-}
-
-#tabs .ui-widget-header{
-	background: #fff url(../img/header-bg.png) left bottom repeat-x;
-}
-
-#tabs .ui-tabs-panel {
-	padding-top: 55px;
-	padding-bottom: 20px;
-}
-
-/* Search */
-
-#search_value {
-	width: 140px;
-}
-
-#search_results {
-	padding-top: 10px;
-}
-
 /* Search highlight */
 
 .highlight {
-	background-color: yellow
+	background-color: yellow;
 }

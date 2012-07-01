@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("WhatsNew200");
+		}
 	</script>
 </head>
 
@@ -96,9 +106,9 @@
 <p><br></p>
 <p><span class="rvts21">New Tools</span></p>
 <p><br></p>
-<p><a class="rvts28" href="TASEditor.html">TAS Edit</a> - a revolutionary new way of making TAS movies.</p>
+<p><a class="rvts26" href="TASEditor.html">TAS Edit</a> - a revolutionary new way of making TAS movies.</p>
 <p><br></p>
-<p><a class="rvts28" href="Input.html">Input Presets</a> - a system for quickly toggling different input configurations.</p>
+<p><a class="rvts26" href="Input.html">Input Presets</a> - a system for quickly toggling different input configurations.</p>
 <p><br></p>
 <p><br></p>
 <p><span class="rvts21">Tool Upgrades</span></p>

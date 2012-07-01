@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("WhatsNew215");
+		}
 	</script>
 </head>
 
@@ -49,73 +59,76 @@
 <p>The 2.1.5 release fixes a lot of bugs and brings various improvements to the prior 2.1.4a release. In addition, the SDL port has improved signficantly; completely overhauling the GTK2 GUI, fixing many sound issues, and fixing a variety of bugs.</p>
 <p><br></p>
 <p><span class="rvts23">Common </span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed compatibility issue with Young Indiana Jones Chronicals.</span></li>
-<li><span class="rvts22">Fixed bug in new PPU that made some intensify bits not get applied to output (fixed flashing siren screen in Werefolf).</span></li>
-<li><span class="rvts22">Fix many segmentation faults related to file handling.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed compatibility issue with Young Indiana Jones Chronicals.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed bug in new PPU that made some intensify bits not get applied to output (fixed flashing siren screen in Werefolf).</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fix many segmentation faults related to file handling.</span></p>
 <p><span class="rvts24"><br></span></p>
 <p><span class="rvts24">Movies</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Slight performance increase when loading movies.</span></li>
-<li><span class="rvts22">Fixed read-only loadstate error messages and logic.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Slight performance increase when loading movies.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed read-only loadstate error messages and logic.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts24">Lua</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Lua socket added to built-in lua library.</span></li>
-<li><span class="rvts22">Fixed speed.mode() function so that normal turns off turbo.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua socket added to built-in lua library.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed speed.mode() function so that normal turns off turbo.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts22">New Lua functions</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">gui.savescreenshotas()</span></li>
-<li><span class="rvts22">sound.get()</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">gui.savescreenshotas()</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">sound.get()</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts24">Win32</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed bug where PPU toggling toggled the Game Genie as well</span></li>
-<li><span class="rvts22">Fixed some minor GUI issues.</span></li>
-<li><span class="rvts22">Added avi capture commandline argument and related parameters.</span></li>
-<li><span class="rvts22">Fix input selection for Famicom Expansion port.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed bug where PPU toggling toggled the Game Genie as well</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed some minor GUI issues.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added avi capture commandline argument and related parameters.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fix input selection for Famicom Expansion port.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Debugger</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed Ram Search to only display valid RAM addresses (0000-07FF and 6000-7FFF).</span></li>
-<li><span class="rvts22">Fixed crash when re-opening debugging window.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed Ram Search to only display valid RAM addresses (0000-07FF and 6000-7FFF).</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed crash when re-opening debugging window.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Hex Editor</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Added a confirmation prompt before removing all bookmarks.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added a confirmation prompt before removing all bookmarks.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Ram Watch / Ram Search</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed the multiple selection of watches.</span></li>
-<li><span class="rvts22">Added support for Multiple selection of addresses in RamWatch Fixed issue with restoration of the selection range in RamWatch.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed the multiple selection of watches.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added support for Multiple selection of addresses in RamWatch Fixed issue with restoration of the selection range in RamWatch.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">TasEdit</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">General cleanup.</span></li>
-<li><span class="rvts22">Fixed crash when truncating while turbo was enabled.</span></li>
-<li><span class="rvts22">Invalidate greenzone when re-recording earlier portions of a movie.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">General cleanup.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed crash when truncating while turbo was enabled.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Invalidate greenzone when re-recording earlier portions of a movie.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">GUI</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Added "SaveStateAs" menu item.</span></li>
-<li><span class="rvts22">Display movie name at the top of the main window.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added "SaveStateAs" menu item.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Display movie name at the top of the main window.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts22"><br></span></p>

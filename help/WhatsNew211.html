@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("WhatsNew211");
+		}
 	</script>
 </head>
 
@@ -51,78 +61,105 @@
 <p><span class="rvts22">The 2.1 new release fixes some bugs of 2.1.0a, improves the accuracy of the sound core, and adds useability enhancements to the windows port.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Common - Bug fixes</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)</span></li>
-<li><span class="rvts22">Made default save slot 0 instead of 1</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed reported issue 2746924 (md5_asciistr() doesn't produce correct string)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Made default save slot 0 instead of 1</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Improved Sound core/PPU</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesn't work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. </span></li>
-<li><span class="rvts22">Updated with the correct values for the noise and DMC table, </span></li>
-<li><span class="rvts22">Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more &nbsp;opcode test from blargg's cpu.nes test.</span></li>
-<li><span class="rvts22">Square 1 &amp; square 2 volume controls no longer backwards</span></li>
-<li><span class="rvts22">Length counters for APU now correct variables</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed the noise value, it seems that the noise logic was shifting the values to the left by 1 when reloading, but this doesn't work for PAL since one of the PAL reload value is odd, so fix the logic and used the old tables. Revert a stupid CPU ignore logic in PPU. Sorry about that. </span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Updated with the correct values for the noise and DMC table, </span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed the CPU unofficial opcode ATX, ORing with correct constant $FF instead of $EE, as tested by blargg's. These fixes passes the IRQ flags test from blargg, and also one more &nbsp;opcode test from blargg's cpu.nes test.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Square 1 &amp; square 2 volume controls no longer backwards</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Length counters for APU now correct variables</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">NewPPU</span><span class="rvts22"> (still experimental, enabled by setting newppu 1 in the config file)</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.</span></li>
-<li><span class="rvts22">Added palette reading cases for the new PPU.</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added experimental $2004 reading support to play micro machines with (little) shakes, and fixed some timing in the new PPU.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added palette reading cases for the new PPU.</span></p>
 <p><span class="rvts24"><br></span></p>
 <p><span class="rvts24">Win32</span></p>
 <p><span class="rvts24"><br></span></p>
 <p><span class="rvts23">Minor Bug fixes</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number</span></li>
-<li><span class="rvts22">Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor</span></li>
-<li><span class="rvts22">Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full</span></li>
-<li><span class="rvts22">Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.</span></li>
-<li><span class="rvts22">"Disable screen saver" gui option now also diables the monitor powersave</span></li>
-<li><span class="rvts22">Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list</span></li>
-<li><span class="rvts22">Sound Config Dialog - When sound is off, all controls are grayed out</span></li>
-<li><span class="rvts22">Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item</span></li>
-<li><span class="rvts22">Memory Watch - save menu item is grayed if file hasn't changed</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Replay movie dialog - Stop movie at frame x feature - fixed off by 1 error on the stop frame number</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Hex Editor - changed ROM values again dsiplay as red, saved in the config as RomFreezeColor</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed bug in memory watch that would make the first watch value drawn in the wrong place if watch file was full</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Debugger - Step type functions now update other dialogs such as ppu, nametable, code/data, trace logger, etc.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">"Disable screen saver" gui option now also diables the monitor powersave</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Recent menus - no longer crash if item no longer exists, instead it ask the user if they want to remove the item from the list</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Sound Config Dialog - When sound is off, all controls are grayed out</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Memory Watch - fixed a regression made in 2.0.1 that broke the Save As menu item</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Memory Watch - save menu item is grayed if file hasn't changed</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">GUI/Enhancements</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Last save slot used is stored in the config file</span></li>
-<li><span class="rvts22">Made fullscreen toggle (Alt+Enter) remappable</span></li>
-<li><span class="rvts22">Hex editor - Reverted fixedFontHeight to 13 instead of 14. &nbsp;Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file</span></li>
-<li><span class="rvts22">Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file</span></li>
-<li><span class="rvts22">Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)</span></li>
-<li><span class="rvts22">Hex Editor - Save Rom As... menu option enabled and implemented</span></li>
-<li><span class="rvts22">Window caption shows the name of the ROM loaded</span></li>
-<li><span class="rvts22">Recent Movie Menu added</span></li>
-<li><span class="rvts22">Load Last Movie context menu item added</span></li>
-<li><span class="rvts22">Save Movie As... context menu item (for when a movie is loaded in read+write mode)</span></li>
-<li><span class="rvts22">Drag &amp; Drop support for all files related to FCEUX including:</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Last save slot used is stored in the config file</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Made fullscreen toggle (Alt+Enter) remappable</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Hex editor - Reverted fixedFontHeight to 13 instead of 14. &nbsp;Gave the option of adjusting the height by modifying RowHeightBorder in the .cfg file</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Hex Editor - allowed the user to customize the color scheme by use of RGB values stored in the .cfg file</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Hex editor - freeze/unfreeze ram addresses now causes the colors to update immediately, but only with groups of addresses highlighted at once (single ones still don't yet update)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Hex Editor - Save Rom As... menu option enabled and implemented</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Window caption shows the name of the ROM loaded</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Recent Movie Menu added</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Load Last Movie context menu item added</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Save Movie As... context menu item (for when a movie is loaded in read+write mode)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Drag &amp; Drop support for all files related to FCEUX including:</span></p>
 <p><span class="rvts22"> &nbsp; &nbsp;.fcm (autoconverts to .fm2 and begins movie playback)</span></p>
 <p><span class="rvts22"> &nbsp; &nbsp;Savestates</span></p>
 <p><span class="rvts22"> &nbsp; &nbsp;Palette files (.pal)</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Commandline - -palette commandline option</span></li>
-<li><span class="rvts22">Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Commandline - -palette commandline option</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Memory Watch - option to bind to main window, if checked it gives GENS dialog style control, where there is no extra task bar item, and it minimizes when FCEUX is minimized</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts24">SDL</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">added --subtitles</span></li>
-<li><span class="rvts22">fixed Four Score movie playback</span></li>
-<li><span class="rvts22">added --ripsubs for converting fm2 movie subtitles to an srt file</span></li>
-<li><span class="rvts22">Lua is optional again, fixed the real issue</span></li>
-<li><span class="rvts22">Lua is NO longer optional, so the SConscripts have been updated to reflect that change. &nbsp;This fixes the mysterious non-working input issue.</span></li>
-<li><span class="rvts22">implemented saving/loading a savestate from a specific file on Alt+S/L</span></li>
-<li><span class="rvts22">implemented starting an FM2 movie on Alt+R</span></li>
-<li><span class="rvts22">added --pauseframe to pause movie playback on frame x</span></li>
-<li><span class="rvts22">dropped UTFConverter.c from SDL build</span></li>
-<li><span class="rvts22">added hotkey Q for toggling read-only/read+write movie playback</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">added --subtitles</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">fixed Four Score movie playback</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">added --ripsubs for converting fm2 movie subtitles to an srt file</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua is optional again, fixed the real issue</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua is NO longer optional, so the SConscripts have been updated to reflect that change. &nbsp;This fixes the mysterious non-working input issue.</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">implemented saving/loading a savestate from a specific file on Alt+S/L</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">implemented starting an FM2 movie on Alt+R</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">added --pauseframe to pause movie playback on frame x</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">dropped UTFConverter.c from SDL build</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">added hotkey Q for toggling read-only/read+write movie playback</span></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
 </div>
 	

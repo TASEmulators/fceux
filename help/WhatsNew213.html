@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("WhatsNew213");
+		}
 	</script>
 </head>
 
@@ -49,56 +59,82 @@
 <p><span class="rvts22">The 2.1.3 release fixes some bugs of 2.1.2, increases game compatibility, and adds usability enhancements to the windows port and adds a GUI to the SDL port.</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts23">Common </span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Fixed mappers 82, 25, 21, and 18. &nbsp;Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable</span></li>
-<li><span class="rvts22">Fixes for mappers 253 &amp; 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)</span></li>
-<li><span class="rvts22">Fix crashing on game loading for any battery backed ROMs with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</span></li>
-<li><span class="rvts22">FDS - show name of missing bios file in error message</span></li>
-<li><span class="rvts22">NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix</span></li>
-<li><span class="rvts22">.fm2 file format header now has an FDS flag</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixed mappers 82, 25, 21, and 18. &nbsp;Games such as SD Kiji Blader, Ganbare Goemon Gaiden, and Ganbare Goemon Gaiden 2, Jajamaru Gekimadden are now playable</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fixes for mappers 253 &amp; 226 - fixes games such as Fire Emblem (J) and Fire Emblem Gaiden (J)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Fix crashing on game loading for any battery backed ROMs with mappers from MapInitTab (fixes Esper Dream 2 - Aratanaru Tatakai (J)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">FDS - show name of missing bios file in error message</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">NewPPU - fixed sprite hit before 255 and for non transparent hits only, thanks to dwedit for providing the fix</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">.fm2 file format header now has an FDS flag</span></p>
 <p><span class="rvts24"><br></span></p>
 <p><span class="rvts24">SDL</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">A GUI! &nbsp;A graphic user interface (using GTK) with many basic menu options</span></li>
-<li><span class="rvts22">ported to SDL 1.3; compatibility maintained with 1.2</span></li>
-<li><span class="rvts22">unix netplay is now functional; gtk network gui created</span></li>
-<li><span class="rvts22">now prints the name of the mapper on ROM load</span></li>
-<li><span class="rvts22">fixed dpad/joyhat support</span></li>
-<li><span class="rvts22">VS unisystem keys now configable</span></li>
-<li><span class="rvts22">changed default hotkeys and keys to match Win32</span></li>
-<li><span class="rvts22">disallow --inputcfg gamepad0 and gamepad5</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">A GUI! &nbsp;A graphic user interface (using GTK) with many basic menu options</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">ported to SDL 1.3; compatibility maintained with 1.2</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">unix netplay is now functional; gtk network gui created</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">now prints the name of the mapper on ROM load</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">fixed dpad/joyhat support</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">VS unisystem keys now configable</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">changed default hotkeys and keys to match Win32</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">disallow --inputcfg gamepad0 and gamepad5</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts24">Win32</span></p>
 <p><span class="rvts22"><br></span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Made savestate backups optional (config - enable - backup savestates)</span></li>
-<li><span class="rvts22">Made savestate compression togglable (config - enable - compress savestates)</span></li>
-<li><span class="rvts22">Cheats dialog - Pause while active checkbox</span></li>
-<li><span class="rvts22">Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count</span></li>
-<li><span class="rvts22">Debugger - added an auto-load feature</span></li>
-<li><span class="rvts22">Debugger - Fix so it doesn't crash if unminimized with no game loaded </span></li>
-<li><span class="rvts22">Closing minimized windows no longer moves them the next time they get opened</span></li>
-<li><span class="rvts22">Lua console - added a menu</span></li>
-<li><span class="rvts22">Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked</span></li>
-<li><span class="rvts22">Name Table Viewer - Fix for use with New PPU</span></li>
-<li><span class="rvts22">Trace Logger - Trace logger now logs the values of the stack pointer register</span></li>
-<li><span class="rvts22">If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear</span></li>
-<li><span class="rvts22">disable movie messages menu item</span></li>
-<li><span class="rvts22">Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too</span></li>
-<li><span class="rvts22">TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Made savestate backups optional (config - enable - backup savestates)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Made savestate compression togglable (config - enable - compress savestates)</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Cheats dialog - Pause while active checkbox</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Cheats dialog - Toggling a cheat in the cheats list now updates the active cheats count</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Debugger - added an auto-load feature</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Debugger - Fix so it doesn't crash if unminimized with no game loaded </span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Closing minimized windows no longer moves them the next time they get opened</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua console - added a menu</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua console - filename updates when lua scripts are dragged to emulator or recent filenames invoked</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Name Table Viewer - Fix for use with New PPU</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Trace Logger - Trace logger now logs the values of the stack pointer register</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">If a .fm2 file is drag and dropped with no ROM load, the open ROM dialog will appear</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">disable movie messages menu item</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Added more window positions bounds checks. Accounts for -32000 positions and less out-of-range too</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">TASEdit - Added interface functionality (save/load, running TASEdit mid-movie, etc.)</span></p>
 <p><span class="rvts22"><br></span></p>
 <p><span class="rvts24">Lua</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</span></li>
-<li><span class="rvts22">Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording</span></li>
-<li><span class="rvts22">fixed zapper.read() to read movie data if a movie is playing. &nbsp;Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</span></li>
-<li><span class="rvts22">gui.text() now has out of bounds checking</span></li>
-<li><span class="rvts22">Lua no longer unpauses the emulator when a script is loaded</span></li>
-</ul>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">New lua functions: gui.parsecolor(), joypad.getup(), joypad.getdown(), emu.emulating()</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Change gui.line, gui.box, joypad.get to function consistently with other lua emulators such as GENS rerecording</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">fixed zapper.read() to read movie data if a movie is playing. &nbsp;Also changed the struct values to x,y,fire. This breaks lua scripts that used it previous, sorry</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">gui.text() now has out of bounds checking</span></p>
+<p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
+<span class="rvts22">Lua no longer unpauses the emulator when a script is loaded</span></p>
 <p><span class="rvts22"><br></span></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Create iPhone web-based documentation</a></p>
 </div>

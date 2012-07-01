@@ -10,14 +10,24 @@
 	<!--[if lte IE 8]>
 		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
 	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
 	<script type="text/javascript"><!--
-		var sTopicId = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
 		if (top.frames.length == 0)
-			top.location.href = "fceux.html?" + sTopicId
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "fceux.html?" + sTopicUrl;
+		}
 		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
-			top.FrameTOC.SelectTocItem(sTopicId);
+		{
+			top.FrameTOC.SelectTocItem("CheatSearch");
+		}
 	</script>
 </head>
 
@@ -74,7 +84,7 @@
 <p><br></p>
 <p>All addresses listed in the cheat search windows are in unsigned 16-bit hexadecimal format and all values in these windows are in an unsigned 8-bit decimal format(the range for values is 0 through 255).</p>
 <p><br></p>
-<p><span class="rvts30">Active Cheats</span></p>
+<p><span class="rvts28">Active Cheats</span></p>
 <p><br></p>
 <p>The Active cheats window on the left contains the list of cheats for the currently loaded game. Existing cheats can be selected, edited, and updated using the "Update" button.</p>
 <p><br></p>
@@ -91,7 +101,7 @@
 <p>Poke Cheat Value is like turning the cheat on, but in this case there's no off switch. If the code is on when you use this, then when the code is turned off, it will revert to the value last used. Good for one time life refills, if you want that sort of thing.</p>
 <p>Goto in Hex Editor opens the Hex Editor window, and puts the cursor on the address shown. It's somewhat similar to how Bookmarks work in the Hex Editor.</p>
 <p><br></p>
-<p><span class="rvts30">Cheat Search</span></p>
+<p><span class="rvts28">Cheat Search</span></p>
 <p><br></p>
 <p>The cheat search is used to find a specific value in the games RAM by process of elimination.</p>
 <p><br></p>
@@ -120,22 +130,22 @@
 <p>Any value in the possibilities list can be sent to memory watch by double clicking it. &nbsp;</p>
 <p>Highlighting it and hitting the "Add" button under the Active cheats window will automatically activate it as a cheat with the value set to its current value.</p>
 <p><br></p>
-<p><span class="rvts30">Example</span></p>
+<p><span class="rvts28">Example</span></p>
 <p><br></p>
 <p>Here is an example of cheat search in action.</p>
 <p><br></p>
 <p>Let's say I am playing Mega man 3 and I want to find Mega man's energy level in the game's ram. &nbsp;I will start by opening the ROM and selecting a level. &nbsp;At this point, I know Mega man's energy address is active. &nbsp;So I will pause the game and open the cheat search and hit the reset button. &nbsp;The game uses SRAM so the possibilities window will say 10240 "possibilities". &nbsp;</p>
 <p>Next I will frame advance (or briefly unpause) the game. &nbsp;At this point I know Mega man's energy level is still the same as it was. &nbsp;So I click the "equal" button. &nbsp; Next I want to take damage. &nbsp;I know for sure now that the energy level has decreased so after the "ouch" animation, I click the "Less than button". &nbsp;This will cut the possibilities down significantly. &nbsp;Next I will advance some more and click the "Equal" button since I know the value is still the previous value. &nbsp;I will repeat this cycle until I am down to 1 or just a few values. &nbsp;From there I can double click the values to send them to memory watch to monitor them more closely to weed them out. &nbsp;(Note: &nbsp;Mega man's energy is located in $00A2).</p>
 <p><br></p>
-<p><span class="rvts30">Context Menu</span></p>
+<p><span class="rvts28">Context Menu</span></p>
 <p><br></p>
 <p>Right-clicking in the active cheats list brings up the context menu.</p>
 <p><br></p>
-<p><span class="rvts40">Toggle Cheat</span> - does the same thing as double clicking</p>
+<p><span class="rvts38">Toggle Cheat</span> - does the same thing as double clicking</p>
 <p><br></p>
-<p><span class="rvts40">Poke cheat value</span> - has a different affect that normal freezing, this makes a one time write of that value as opposed to freezing it temporarily to that value and having it restored later. &nbsp;It has the same affect as typing in values in the <a class="rvts18" href="HexEditor.html">Hex Editor</a>.</p>
+<p><span class="rvts38">Poke cheat value</span> - has a different affect that normal freezing, this makes a one time write of that value as opposed to freezing it temporarily to that value and having it restored later. &nbsp;It has the same affect as typing in values in the <a class="rvts18" href="HexEditor.html">Hex Editor</a>.</p>
 <p><br></p>
-<p><span class="rvts40">Goto In Hex Editor</span> - Opens the <a class="rvts18" href="HexEditor.html">Hex editor</a> dialog to the position of the selected RAM value.</p>
+<p><span class="rvts38">Goto In Hex Editor</span> - Opens the <a class="rvts18" href="HexEditor.html">Hex editor</a> dialog to the position of the selected RAM value.</p>
 <p><br></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Easily create iPhone documentation</a></p>
 </div>
