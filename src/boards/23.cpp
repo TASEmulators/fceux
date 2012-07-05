@@ -38,8 +38,8 @@ static SFORMAT StateRegs[]=
   {&regcmd, 1, "REGCMD"},
   {&irqcmd, 1, "IRQCMD"},
   {&mirr, 1, "MIRR"},
-  {&big_bank, 1, "MIRR"},
-  {&IRQCount, 2, "IRQC"},
+  {&big_bank, 1, "BIGB"},
+  {&IRQCount, 2, "IRCN"},
   {&IRQLatch, 1, "IRQL"},
   {&IRQa, 1, "IRQA"},
   {0}

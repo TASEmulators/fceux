@@ -853,7 +853,11 @@ void AddExState(void *v, uint32 s, int type, char *desc)
 			std::string desc = tmp;
 			if(names.find(desc) != names.end())
 			{
+#ifdef _MSC_VER
+				MessageBox(NULL,"OH NO!!! YOU HAVE AN INVALID SFORMAT! POST A BUG TICKET ALONG WITH INFO ON THE ROM YOURE USING\n","OOPS",MB_OK);
+#else
 				printf("OH NO!!! YOU HAVE AN INVALID SFORMAT! POST A BUG TICKET ALONG WITH INFO ON THE ROM YOURE USING\n");
+#endif
 				exit(0);
 			}
 			names[desc] = true;
