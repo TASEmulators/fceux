@@ -6,7 +6,7 @@ While you may think having style guidelines specific to a directory in a sourcet
 
 Tabs
 ----
-Hard tabs only!  Please!  src/drivers/sdl/* entirely consists of hard tabbed code.  Please continue to use this contention.  Consult the documentation of your text editor documentation for instructions on how to this with your editor.
+Hard tabs only!  Please!  src/drivers/sdl/* entirely consists of hard tabbed code.  Please continue to use this convention.  Consult the documentation of your text editor documentation for instructions on how to this with your editor.
 
 Return Statements
 -----------------
