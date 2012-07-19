@@ -127,7 +127,7 @@ extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, L
 extern void PrintToWindowConsole(int hDlgAsInt, const char* str);
 extern void WinLuaOnStart(int hDlgAsInt);
 extern void WinLuaOnStop(int hDlgAsInt);
-void TaseditorUpdateManualFunctionStatus();
+void TaseditorDisableManualFunctionIfNeeded();
 #endif
 
 static lua_State *L;
@@ -243,7 +243,7 @@ static void FCEU_LuaOnStop() {
 	turbo = false;
 	//FCEUD_TurboOff();
 #ifdef WIN32
-	TaseditorUpdateManualFunctionStatus();
+	TaseditorDisableManualFunctionIfNeeded();
 #endif
 }
 
@@ -1886,15 +1886,13 @@ void TaseditorManualFunction()
 }
 
 #ifdef WIN32
-void TaseditorUpdateManualFunctionStatus()
+void TaseditorDisableManualFunctionIfNeeded()
 {
 	if (L)
 	{
 		// check if LUACALL_TASEDITOR_MANUAL function is not nil
 		lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
-		if (lua_isfunction(L, -1))
-			taseditor_lua.EnableRunFunction();
-		else 
+		if (!lua_isfunction(L, -1))
 			taseditor_lua.DisableRunFunction();
 		lua_pop(L, 1);
 	} else taseditor_lua.DisableRunFunction();
@@ -4316,17 +4314,22 @@ static int taseditor_registerauto(lua_State *L)
 	return 1;
 }
 
-// bool taseditor.registermanual()
+// bool taseditor.registermanual(string caption)
 static int taseditor_registermanual(lua_State *L)
 {
 	if (!lua_isnil(L,1))
 		luaL_checktype(L, 1, LUA_TFUNCTION);
+
+	const char* caption = NULL;
+	if (!lua_isnil(L, 2))
+		caption = lua_tostring(L, 2);
+
 	lua_settop(L,1);
 	lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 	lua_insert(L,1);
 	lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[LUACALL_TASEDITOR_MANUAL]);
 #ifdef WIN32
-	TaseditorUpdateManualFunctionStatus();
+	taseditor_lua.EnableRunFunction(caption);
 #endif
 	return 1;
 }

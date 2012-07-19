@@ -8,7 +8,7 @@
 ---------------------------------------------------------------------------
 -- Usage:
 -- Run the script, unpause emulation (or simply Frame Advance once).
--- Now you can press "Run function" button to invert current Selection.
+-- Now you can press "Invert Selection" button to invert current Selection.
 -- Previously selected frames become deselected, all other frames become selected.
 ---------------------------------------------------------------------------
 
@@ -51,5 +51,5 @@ function invert_selection()
 end
 
 taseditor.registerauto(display_selection);
-taseditor.registermanual(invert_selection);
+taseditor.registermanual(invert_selection, "Invert Selection");
 

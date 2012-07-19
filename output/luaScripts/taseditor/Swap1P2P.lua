@@ -13,7 +13,7 @@
 -- Use the script when you want to exchange recorded input between joypads.
 -- Run the script, unpause emulation (or simply Frame Advance once).
 -- Now you can select several frames of input data and then
--- press "Run function" button to swap inputs of 1P and 2P.
+-- press "Swap 1P/2P" button to swap Input of 1P and 2P in selected frames.
 -- You can easily modify the script to swap any other joypads.
 ---------------------------------------------------------------------------
 
@@ -32,16 +32,6 @@ function swap()
 	end
 end
 
-taseditor.registermanual(swap);
-
-
-
-
-
-
-
-
-
-
+taseditor.registermanual(swap, "Swap 1P/2P");
 
 

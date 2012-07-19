@@ -391,8 +391,7 @@ void BOOKMARKS::jump(int slot)
 	{
 		int frame = bookmarks_array[slot].snapshot.jump_frame;
 		playback.jump(frame);
-		if (playback.GetPauseFrame())
-			piano_roll.FollowPauseframe();
+		piano_roll.FollowPauseframe();
 		bookmarks_array[slot].jumped();
 	}
 }
@@ -410,7 +409,7 @@ void BOOKMARKS::deploy(int slot)
 	int jump_frame = bookmarks_array[slot].snapshot.jump_frame;
 	bool markers_changed = false;
 	// revert Markers to the Bookmarked state
-	if (taseditor_config.bind_markers)
+	//if (taseditor_config.bind_markers)
 	{
 		if (bookmarks_array[slot].snapshot.MarkersDifferFromCurrent())
 		{

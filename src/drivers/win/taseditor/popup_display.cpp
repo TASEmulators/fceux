@@ -12,7 +12,7 @@ Popup display - Manager of popup windows
 
 * implements all operations with popup windows: initialization, redrawing, centering, screenshot decompression and conversion
 * regularly inspects changes of Bookmarks Manager and shows/updates/hides popup windows
-* on demend: updates contents of popup windows
+* on demand: updates contents of popup windows
 * stores resources: coordinates and appearance of popup windows, timings of fade in/out
 ------------------------------------------------------------------------------------ */
 

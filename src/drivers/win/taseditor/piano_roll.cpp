@@ -540,7 +540,7 @@ void PIANO_ROLL::update()
 	{
 		case DRAG_MODE_PLAYBACK:
 		{
-			if (!playback.GetPauseFrame() || can_drag_when_seeking)
+			if (playback.GetPauseFrame() < 0 || can_drag_when_seeking)
 			{
 				DragPlaybackCursor();
 				// after first seeking is finished (if there was any seeking), it now becomes possible to drag when seeking
@@ -963,8 +963,8 @@ void PIANO_ROLL::FollowSelection()
 }
 void PIANO_ROLL::FollowPauseframe()
 {
-	if (playback.GetPauseFrame() > 0)
-		CenterListAt(playback.GetPauseFrame() - 1);
+	if (playback.GetPauseFrame() >= 0)
+		CenterListAt(playback.GetPauseFrame());
 }
 void PIANO_ROLL::FollowMarker(int marker_id)
 {

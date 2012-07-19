@@ -363,7 +363,7 @@ void TASEDITOR_WINDOW::update()
 			case DRAG_MODE_PLAYBACK:
 			{
 				// user is dragging Playback cursor - show either normal arrow or arrow+wait
-				if (playback.GetPauseFrame())
+				if (playback.GetPauseFrame() >= 0)
 					cursor_icon = IDC_APPSTARTING;
 				break;
 			}
@@ -1011,7 +1011,7 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					taseditor_config.turbo_seek ^= 1;
 					taseditor_window.UpdateCheckedItems();
 					// if currently seeking, apply this option immediately
-					if (playback.GetPauseFrame())
+					if (playback.GetPauseFrame() >= 0)
 						turbo = taseditor_config.turbo_seek;
 					break;
 				case ID_VIEW_SHOWBRANCHSCREENSHOTS:

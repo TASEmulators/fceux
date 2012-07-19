@@ -34,7 +34,7 @@ public:
 	void reset();
 	void update();
 
-	void EnableRunFunction();
+	void EnableRunFunction(const char* caption = NULL);
 	void DisableRunFunction();
 
 	void InsertDelete_rows_to_Snaphot(SNAPSHOT& snapshot);

@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Recorder - Tool for Input recording
 [Singleton]
 
-* at the moment of recording movie Input (at the beginning of a frame) by emulator's call the Recorder intercepts Input data and applies its filters (multitracking/etc), then reflects Input changes into History and Greenzone
+* at the moment of recording movie Input (at the very end of a frame) by emulator's call the Recorder intercepts Input data and applies its filters (multitracking/etc), then reflects Input changes into History and Greenzone
 * regularly tracks virtual joypad buttonpresses and provides data for Piano Roll List Header lights. Also reacts on external changes of Recording status, and updates GUI (Recorder panel and Bookmarks/Branches caption)
 * implements Input editing in Read-only mode (ColumnSet by pressing buttons on virtual joypad)
 * stores resources: ids and names of multitracking modes, suffixes for TAS Editor window caption

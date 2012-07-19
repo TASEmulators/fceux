@@ -5,7 +5,7 @@ Copyright (c) 2011-2012 AnS
 (The MIT License)
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVID	ED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------------
 Main - Main gate between emulator and Taseditor
 [Singleton]
@@ -108,8 +108,10 @@ bool EnterTasEditor()
 			history.init();
 			taseditor_lua.init();
 			// either start new movie or use current movie
-			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE))
+			if (FCEUMOV_Mode(MOVIEMODE_INACTIVE) || currMovieData.savestate.size() != 0)
 			{
+				if (currMovieData.savestate.size() != 0)
+					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
 				// create new movie
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
@@ -118,12 +120,6 @@ bool EnterTasEditor()
 			} else
 			{
 				// use current movie to create a new project
-				if (currMovieData.savestate.size() != 0)
-				{
-					FCEUD_PrintError("This version of TAS Editor doesn't work with movies starting from savestate.");
-					// delete savestate, but preserve Input anyway
-					currMovieData.savestate.clear();
-				}
 				FCEUI_StopMovie();
 				movieMode = MOVIEMODE_TASEDITOR;
 			}
@@ -781,7 +777,7 @@ void ApplyMovieInputConfig()
 // this getter contains formula to decide whether to record or replay movie
 bool TaseditorIsRecording()
 {
-	if (movie_readonly || playback.GetPauseFrame() > currFrameCounter)
+	if (movie_readonly || playback.GetPauseFrame() >= 0)
 		return false;		// replay
 	return true;			// record
 }

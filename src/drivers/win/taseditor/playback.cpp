@@ -141,7 +141,7 @@ void PLAYBACK::update()
 	// pause when seeking hits pause_frame
 	if (pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
-	else if (currFrameCounter + 1 > lost_position_frame && currFrameCounter >= currMovieData.getNumRecords()-1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
+	else if (currFrameCounter >= GetLostPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
 		// pause at the end of the movie
 		PauseEmulation();
 
@@ -269,10 +269,10 @@ void PLAYBACK::UnpauseEmulation()
 }
 void PLAYBACK::RestorePosition()
 {
-	if (lost_position_frame > currFrameCounter + 1)
+	if (GetLostPosition() > currFrameCounter)
 	{
 		if (emu_paused)
-			SeekingStart(lost_position_frame);
+			SeekingStart(GetLostPosition());
 		else
 			PauseEmulation();
 	}
@@ -293,23 +293,23 @@ void PLAYBACK::MiddleButtonClick()
 				for (; target_frame <= last_frame; ++target_frame)
 					if (markers_manager.GetMarker(target_frame)) break;
 				if (target_frame <= last_frame)
-					SeekingStart(target_frame + 1);
+					SeekingStart(target_frame);
 			} else if (GetAsyncKeyState(VK_CONTROL) < 0)
 			{
 				// if Ctrl is held, seek to Selection cursor or replay from Selection cursor
 				int selection_beginning = selection.GetCurrentSelectionBeginning();
 				if (selection_beginning > currFrameCounter)
 				{
-					SeekingStart(selection_beginning + 1);
+					SeekingStart(selection_beginning);
 				} else if (selection_beginning < currFrameCounter)
 				{
 					int saved_currFrameCounter = currFrameCounter;
 					if (selection_beginning < 0)
 						selection_beginning = 0;
 					jump(selection_beginning);
-					SeekingStart(saved_currFrameCounter + 1);
+					SeekingStart(saved_currFrameCounter);
 				}
-			} else if (lost_position_frame > currFrameCounter + 1)
+			} else if (GetLostPosition() > currFrameCounter)
 			{
 				RestorePosition();
 			} else
@@ -325,10 +325,10 @@ void PLAYBACK::MiddleButtonClick()
 
 void PLAYBACK::SeekingStart(int finish_frame)
 {
-	if (pause_frame != finish_frame)
+	if ((pause_frame - 1) != finish_frame)
 	{
 		seeking_start_frame = currFrameCounter;
-		pause_frame = finish_frame;
+		pause_frame = finish_frame + 1;
 	}
 	pause_frame_must_be_fixed = true;
 	if (taseditor_config.turbo_seek)
@@ -456,7 +456,7 @@ bool PLAYBACK::JumpToFrame(int index)
 		// make jump outside Greenzone
 		if (currFrameCounter == greenzone.GetSize() - 1 || JumpToFrame(greenzone.GetSize() - 1))
 			// seek there from the end of greenzone
-			SeekingStart(index+1);
+			SeekingStart(index);
 		return false;
 	}
 	// make jump inside greenzone
@@ -476,13 +476,13 @@ bool PLAYBACK::JumpToFrame(int index)
 		StartFromZero();	// couldn't find a savestate
 	// continue from the frame
 	if (index != currFrameCounter)
-		SeekingStart(index + 1);
+		SeekingStart(index);
 	return true;
 }
 
 void PLAYBACK::SetLostPosition(int frame)
 {
-	if ((lost_position_frame < frame + 1) || (lost_position_frame > frame + 1 && !lost_position_must_be_fixed))
+	if ((lost_position_frame - 1 < frame) || (lost_position_frame - 1 > frame && !lost_position_must_be_fixed))
 	{
 		if (lost_position_frame)
 			piano_roll.RedrawRow(lost_position_frame - 1);
@@ -497,7 +497,7 @@ int PLAYBACK::GetLostPosition()
 
 int PLAYBACK::GetPauseFrame()
 {
-	return pause_frame;
+	return pause_frame - 1;
 }
 int PLAYBACK::GetFlashingPauseFrame()
 {

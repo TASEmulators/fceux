@@ -98,20 +98,20 @@ void GREENZONE::CollectCurrentState()
 				lag_history.erase(lag_history.begin() + (currFrameCounter - 1));
 				editor.AdjustUp(currFrameCounter - 1);
 				// since AdjustUp didn't restore Playback cursor, we must rewind here
-				int pause_frame = playback.GetPauseFrame();
+				int saved_pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
-				if (pause_frame)
-					playback.SeekingStart(pause_frame);
+				if (saved_pause_frame >= 0)
+					playback.SeekingStart(saved_pause_frame);
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
 				lag_history.insert(lag_history.begin() + (currFrameCounter - 1), 1);
 				editor.AdjustDown(currFrameCounter - 1);
 				// since AdjustDown didn't restore Playback cursor, we must rewind here
-				int pause_frame = playback.GetPauseFrame();
+				int saved_pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
-				if (pause_frame)
-					playback.SeekingStart(pause_frame);
+				if (saved_pause_frame >= 0)
+					playback.SeekingStart(saved_pause_frame);
 			}
 		} else
 		{
@@ -436,21 +436,23 @@ void GREENZONE::InvalidateAndCheck(int after)
 {
 	if (after >= 0)
 	{
-		if (greenZoneCount > after+1)
+		if (greenZoneCount > after + 1)
 		{
-			greenZoneCount = after+1;
+			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
 			// either set Playback cursor to the end of Greenzone or run seeking to restore Playback cursor position
 			if (currFrameCounter >= greenZoneCount)
 			{
 				if (playback.GetFixedPauseFrame())
 				{
-					playback.jump(playback.GetPauseFrame() - 1);
+					// continue seeking
+					playback.jump(playback.GetPauseFrame());
 				} else
 				{
 					playback.SetLostPosition(currFrameCounter);
 					if (taseditor_config.restore_position)
-						playback.jump(currFrameCounter);
+						// start seeking
+						playback.jump(playback.GetLostPosition());
 					else
 						playback.jump(greenZoneCount - 1);
 				}
@@ -461,14 +463,14 @@ void GREENZONE::InvalidateAndCheck(int after)
 	piano_roll.RedrawList();
 	bookmarks.RedrawBookmarksList();
 }
-// This version doesn't restore playback, may be used only by Branching, Recording and Adjusting functions!
+// This version doesn't restore playback, may be used only by Branching, Recording and AdjustLag functions!
 void GREENZONE::Invalidate(int after)
 {
 	if (after >= 0)
 	{
-		if (greenZoneCount > after+1)
+		if (greenZoneCount > after + 1)
 		{
-			greenZoneCount = after+1;
+			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
 		}
 	}

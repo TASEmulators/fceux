@@ -12,8 +12,8 @@ Lua - Manager of Lua features
 
 * implements logic of all functions of "taseditor" Lua library
 * stores the list of pending Input changes
-* on demend: (from FCEUX Lua engine) updates GUI items on "Lua" panel of TAS Editor window
-* stores resources: ids of joypads for Input changes, max length of a name for applychanges()
+* on demand: (from FCEUX Lua engine) updates "Run function" button
+* stores resources: ids of joypads for Input changes, max length of a name for applychanges(), default caption for "Run function" button
 ------------------------------------------------------------------------------------ */
 
 #include "taseditor_project.h"
@@ -30,7 +30,9 @@ extern GREENZONE greenzone;
 extern PIANO_ROLL piano_roll;
 extern SELECTION selection;
 
-extern void TaseditorUpdateManualFunctionStatus();
+extern void TaseditorDisableManualFunctionIfNeeded();
+
+const char defaultRunFunctionCaption[] = "Run function";
 
 TASEDITOR_LUA::TASEDITOR_LUA()
 {
@@ -44,19 +46,24 @@ void TASEDITOR_LUA::init()
 }
 void TASEDITOR_LUA::reset()
 {
-	TaseditorUpdateManualFunctionStatus();
+	TaseditorDisableManualFunctionIfNeeded();
 }
 void TASEDITOR_LUA::update()
 {
 
 }
 
-void TASEDITOR_LUA::EnableRunFunction()
+void TASEDITOR_LUA::EnableRunFunction(const char* caption)
 {
+	if (caption)
+		SetWindowText(hwndRunFunction, caption);
+	else
+		SetWindowText(hwndRunFunction, defaultRunFunctionCaption);
 	EnableWindow(hwndRunFunction, true);
 }
 void TASEDITOR_LUA::DisableRunFunction()
 {
+	SetWindowText(hwndRunFunction, defaultRunFunctionCaption);
 	EnableWindow(hwndRunFunction, false);
 }
 
@@ -227,7 +234,7 @@ int TASEDITOR_LUA::getlostplayback()
 int TASEDITOR_LUA::getplaybacktarget()
 {
 	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		return playback.GetPauseFrame() - 1;
+		return playback.GetPauseFrame();
 	else
 		return -1;
 }
