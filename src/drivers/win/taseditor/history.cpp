@@ -1239,6 +1239,10 @@ int HISTORY::GetCategoryOfOperation(int mod_type)
 			return CATEGORY_MARKERS_CHANGE;
 		case MODTYPE_LUA_CHANGE:
 			return CATEGORY_INPUT_MARKERS_CHANGE;
+		case MODTYPE_ADJUST_UP:
+		case MODTYPE_ADJUST_DOWN:
+			return CATEGORY_INPUT_MARKERS_CHANGE;
+
 	}
 	// if undefined
 	return CATEGORY_OTHER;

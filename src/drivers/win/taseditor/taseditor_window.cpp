@@ -730,14 +730,14 @@ void TASEDITOR_WINDOW::RecheckPatternsMenu()
 	moo.cbSize = sizeof(moo);
 	moo.fMask = MIIM_TYPE;
 	moo.fType = MFT_STRING;
-	moo.cch = PATTERNMENU_MAX_VISIBLE_NAME;
+	moo.cch = PATTERNS_MAX_VISIBLE_NAME;
 	int x;
 	x = GetMenuItemInfo(hmenu, PATTERNS_MENU_POS, true, &moo);
 	std::string tmp = patterns_menu_prefix;
 	tmp += editor.autofire_patterns_names[taseditor_config.current_pattern];
 	// clamp this string
-	if (tmp.size() > PATTERNMENU_MAX_VISIBLE_NAME)
-		tmp = tmp.substr(0, PATTERNMENU_MAX_VISIBLE_NAME);
+	if (tmp.size() > PATTERNS_MAX_VISIBLE_NAME)
+		tmp = tmp.substr(0, PATTERNS_MAX_VISIBLE_NAME);
 	moo.dwTypeData = (LPSTR)tmp.c_str();
 	moo.cch = tmp.size();
 	x = SetMenuItemInfo(hmenu, PATTERNS_MENU_POS, true, &moo);

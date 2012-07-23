@@ -40,7 +40,7 @@ TASEDITOR_CONFIG::TASEDITOR_CONFIG()
 	enable_hot_changes = true;
 	jump_to_undo = true;
 	follow_note_context = true;
-	bind_markers = false;
+	bind_markers = true;
 	empty_marker_notes = true;
 	combine_consecutive = false;
 	use_1p_rec = true;

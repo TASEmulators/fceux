@@ -1,6 +1,8 @@
 
 
-
+19-Jul-2012 - AnS - Taseditor: Lua registermanual allows changing the "Run function" button caption; Markers are always restored when deploying Bookmarks
+01-Jul-2012 - AnS - new hotkey "Run Manual Lua function"
+24-Jun-2012 - AnS - Taseditor: drawing selected_slot border in Branches Tree
 24-Jun-2012 - zeromus - add ability for CNROM games to choose whether they have bus conflicts (fixes Colorful Dragon (Unl) (Sachen), since it flakes out if bus conflicts are emulated)
 23-Jun-2012 - zeromus - add m116 from fceu-mm; fix mapper 178 big PRG support
 20-Jun-2012 - zeromus - fix savestate engine to throw errors when a buggy SFORMAT is passed to AddExState, and fix those errors in m015 and m253

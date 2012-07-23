@@ -8,7 +8,6 @@
 
 #define PATTERNS_MENU_POS 5
 #define PATTERNS_MAX_VISIBLE_NAME 50
-#define PATTERNMENU_MAX_VISIBLE_NAME PATTERNS_MAX_VISIBLE_NAME + 6		// + "Pattern: "
 
 struct Window_items_struct
 {
