@@ -329,38 +329,24 @@ span.rvts61
 }
 span.rvts62
 {
- font-style: italic;
- font-weight: bold;
-}
-span.rvts63
-{
  font-weight: bold;
  text-decoration: underline;
 }
-span.rvts64
+span.rvts63
 {
  font-size: 11pt;
  text-decoration: underline;
 }
+span.rvts64
+{
+ font-size: 5pt;
+}
 span.rvts65
 {
  font-size: 5pt;
+ font-weight: bold;
 }
 span.rvts66
-{
- font-size: 4pt;
-}
-span.rvts67
-{
- font-size: 4pt;
- font-weight: bold;
-}
-span.rvts68
-{
- font-size: 5pt;
- font-weight: bold;
-}
-span.rvts69
 {
  font-size: 11pt;
  font-weight: bold;

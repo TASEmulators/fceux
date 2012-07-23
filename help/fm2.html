@@ -88,41 +88,41 @@ Contains mouse input for recording the Zapper &amp; Arkanoid Paddle</p>
 <p>Integer keys (also used for booleans, with a 1 for true and 0 for false) must have a value that can be stored as int32:</p>
 <p><br></p>
 <p> <span class="rvts38">- version</span> (required) - the version of the movie file format; for now it is always 3</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- emuVersion</span> (required) - the version of the emulator used to produce the movie</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- rerecordCount</span> (optional) - the rerecord count</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> -<span class="rvts38"> palFlag</span> (bool) (optional) - true if the movie uses PAL timing</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> -<span class="rvts38"> NewPPU</span> (bool) (optional) - true if the movie uses New PPU</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- FDS</span> (bool) (optional) - true if movie was recorded on a Famicom Disk System (FDS) game</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- fourscore</span> (bool) - true if a fourscore was used. If fourscore is not used, then port0 and port1 are required</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- port0 </span>- indicates the type of input device attached to the port 0. Supported values are:</p>
 <p> &nbsp; &nbsp; SI_NONE = 0</p>
 <p> &nbsp; &nbsp; SI_GAMEPAD = 1</p>
 <p> &nbsp; &nbsp; SI_ZAPPER = 2</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- port1</span> - indicates the type of input device attached to the port 1. Supported values are:</p>
 <p> &nbsp; &nbsp; SI_NONE = 0</p>
 <p> &nbsp; &nbsp; SI_GAMEPAD = 1</p>
 <p> &nbsp; &nbsp; SI_ZAPPER = 2</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p><span class="rvts38"> - port2</span> (required) - indicates the type of the FCExp port device which was attached. Supported values are:</p>
 <p> &nbsp; &nbsp; SIFC_NONE = 0</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p> <span class="rvts38">- binary</span> (bool) (optional) - true if input log is stored in binary format</p>
-<p><span class="rvts65"><br></span></p>
-<p> <span class="rvts38">- length</span> (optional) - movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the input log ends after specified number of records, and any remaining data should not be parsed. This key is used in <span class="rvts63">fm3</span> format to allow storing extra data after the end of input log</p>
+<p><span class="rvts64"><br></span></p>
+<p> <span class="rvts38">- length</span> (optional) - movie size (number of frames in the input log). If this key is specified and the number is &gt;= 0, the input log ends after specified number of records, and any remaining data should not be parsed. This key is used in <span class="rvts62">fm3</span> format to allow storing extra data after the end of input log</p>
 <p><br></p>
 <p><br></p>
 <p>String keys have values that consist of the remainder of the key-value pair line. As a consequence, string values cannot contain newlines.</p>
 <p><br></p>
 <p><span class="rvts38"> - romFilename</span> (required) - the name of the file used to record the movie</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p><span class="rvts38"> - comment </span>(optional) - simply a memo</p>
 <p style=" text-indent: -16px; padding-left: 16px; margin-left: 20px;"><span style="font-size: 10pt; font-family: 'Courier New'; color: #000000;">o</span>
 by convention, the first token in the comment value is the subject of the comment</p>
@@ -133,7 +133,7 @@ by convention, the author of the movie should be stored in comment(s) with a sub
 <p>Example:</p>
 <p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">♦</span>
 comment author adelikat</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p><span class="rvts38"> - subtitle </span>(optional) - a message that will be displayed on screen when movie is played back (unless Subtitles are turned off, see <a class="rvts18" href="MovieOptions.html">Movie options</a>)</p>
 <p style=" text-indent: -16px; padding-left: 16px; margin-left: 20px;"><span style="font-size: 10pt; font-family: 'Courier New'; color: #000000;">o</span>
 by convention, subtitles begin with the word "subtitle"</p>
@@ -145,12 +145,12 @@ by convention, any remaining text after the integer is considered to be the stri
 <p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">♦</span>
 subtitle 1000 Level Two</p>
 <p>At frame 1000 the words "Level Two" will be displayed on the screen</p>
-<p><span class="rvts65"><br></span></p>
+<p><span class="rvts64"><br></span></p>
 <p><span class="rvts38"> - guid </span>(required) - a unique identifier for a movie, generated when the movie is created, which is used when loading a savestate to make sure it belongs to the current movie</p>
 <p>GUID keys have a value which is in the standard guide format: 452DE2C3-EF43-2FA9-77AC-0677FC51543B</p>
-<p><span class="rvts68"><br></span></p>
-<p><span class="rvts38"> - romChecksum </span>(required) - the MD5 hash of the ROM which was used to record the movie</p>
 <p><span class="rvts65"><br></span></p>
+<p><span class="rvts38"> - romChecksum </span>(required) - the base64 of the hexified MD5 hash of the ROM which was used to record the movie</p>
+<p><span class="rvts64"><br></span></p>
 <p><span class="rvts38"> - savestate </span>(optional) - a <a class="rvts18" href="fcs.html">fcs</a> savestate blob, in case a movie was recorded from savestate &nbsp;</p>
 <p>Hex string keys (used for binary blobs) have a value that is like 0x0123456789ABCDEF...</p>
 <p><br></p>
@@ -160,11 +160,11 @@ subtitle 1000 Level Two</p>
 <p>The input log section consists of movie records either in the form of text lines or in the form of binary data.</p>
 <p><br></p>
 <p><br></p>
-<p><span class="rvts64">Text format (default format):</span></p>
+<p><span class="rvts63">Text format (default format):</span></p>
 <p><br></p>
 <p>Every frame of the movie is represented by line of text beginning and ending with a | (pipe).</p>
 <p>The fields in the line are as follows, except when fourscore is used.</p>
-<p><span class="rvts69">|commands|port0|port1|port2|</span></p>
+<p><span class="rvts66">|commands|port0|port1|port2|</span></p>
 <p><br></p>
 <p>Field <span class="rvts38">commands</span> is a variable length decimal integer which is interpreted as a bit field corresponding to miscellaneous input states which are valid at the start of the frame. Current values for this are:</p>
 <p style=" text-indent: -24px; padding-left: 24px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000;">●</span>
@@ -201,11 +201,11 @@ the field must be empty</p>
 <p><br></p>
 <p>If a <span class="rvts38">fourscore</span> is used, then port0 and port1 are irrelevant and ignored.</p>
 <p>The input types must all be gamepads, and each input log record must be in the following format:</p>
-<p><span class="rvts69">|commands|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
+<p><span class="rvts66">|commands|RLDUTSBA|RLDUTSBA|RLDUTSBA|RLDUTSBA|port2|</span></p>
 <p>{commands, player1, player2, player3, player4, port2}</p>
 <p><br></p>
 <p><br></p>
-<p><span class="rvts64">Binary format:</span></p>
+<p><span class="rvts63">Binary format:</span></p>
 <p><br></p>
 <p>Input log section starts with a | (pipe).</p>
 <p>Every frame of the movie is represented by a record of a fixed length which can be determined by the devices on port0 and port1.</p>
