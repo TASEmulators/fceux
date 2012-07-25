@@ -1127,9 +1127,17 @@ void PIANO_ROLL::FinishDrag()
 					marker_drag_countdown = MARKER_DRAG_COUNTDOWN_MAX;
 				} else
 				{
-					if (row_under_mouse >= 0 && row_under_mouse != marker_drag_framenum && (column_under_mouse <= COLUMN_FRAMENUM || column_under_mouse >= COLUMN_FRAMENUM2))
+					if (row_under_mouse >= 0 && (column_under_mouse <= COLUMN_FRAMENUM || column_under_mouse >= COLUMN_FRAMENUM2))
 					{
-						if (markers_manager.GetMarker(row_under_mouse))
+						if (row_under_mouse == marker_drag_framenum)
+						{
+							// it was just double-click and release
+							// set focus to lower Note edit field
+							int dragged_marker_id = markers_manager.GetMarker(marker_drag_framenum);
+							int selection_marker_id = markers_manager.GetMarkerUp(selection.GetCurrentSelectionBeginning());
+							if (dragged_marker_id == selection_marker_id)
+								SetFocus(selection.hwndSelectionMarkerEdit);
+						} else if (markers_manager.GetMarker(row_under_mouse))
 						{
 							int dragged_marker_id = markers_manager.GetMarker(marker_drag_framenum);
 							int destination_marker_id = markers_manager.GetMarker(row_under_mouse);

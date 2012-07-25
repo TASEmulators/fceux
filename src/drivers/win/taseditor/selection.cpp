@@ -687,9 +687,6 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			SendMessage(selection.hwndSelectionMarkerEdit, EM_SETREADONLY, false, 0); 
 			// disable FCEUX keyboard
 			ClearTaseditorInput();
-			// scroll to the Marker
-			if (taseditor_config.follow_note_context)
-				piano_roll.FollowMarker(selection.shown_marker);
 			break;
 		}
 		case WM_KILLFOCUS:
@@ -723,9 +720,14 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 						SetFocus(piano_roll.hwndList);
 						return 0;
 					case VK_TAB:
+					{
 						// switch to upper edit control (also exit and save text changes)
 						SetFocus(playback.hwndPlaybackMarkerEdit);
+						// scroll to the Marker
+						if (taseditor_config.follow_note_context)
+							piano_roll.FollowMarker(playback.shown_marker);
 						return 0;
+					}
 				}
 			}
 			break;
@@ -735,6 +737,14 @@ LRESULT APIENTRY LowerMarkerEditWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		{
 			playback.MiddleButtonClick();
 			return 0;
+		}
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		{
+			// scroll to the Marker
+			if (taseditor_config.follow_note_context)
+				piano_roll.FollowMarker(selection.shown_marker);
+			break;
 		}
 	}
 	return CallWindowProc(selectionMarkerEdit_oldWndproc, hWnd, msg, wParam, lParam);
