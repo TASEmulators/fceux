@@ -73,7 +73,7 @@ void PLAYBACK::reset()
 	shown_marker = 0;
 	lastCursor = currFrameCounter;
 	lost_position_frame = pause_frame = old_pauseframe = 0;
-	lost_position_must_be_fixed = pause_frame_must_be_fixed = old_show_pauseframe = show_pauseframe = false;
+	lost_position_is_stable = old_show_pauseframe = show_pauseframe = false;
 	old_rewind_button_state = rewind_button_state = false;
 	old_forward_button_state = forward_button_state = false;
 	old_rewind_full_button_state = rewind_full_button_state = false;
@@ -228,12 +228,9 @@ void PLAYBACK::update()
 	}
 
 	// This logic is very important for adequate "green arrow" and "Restore position"
-	if (emu_paused)
-		// when paused, pause_frame becomes unfixed
-		pause_frame_must_be_fixed = false;
-	else
-		// when emulating, lost_position_frame becomes unfixed
-		lost_position_must_be_fixed = false;
+	if (!emu_paused)
+		// when emulating, lost_position_frame becomes unstable
+		lost_position_is_stable = false;
 }
 
 void PLAYBACK::updateProgressbar()
@@ -330,7 +327,6 @@ void PLAYBACK::SeekingStart(int finish_frame)
 		seeking_start_frame = currFrameCounter;
 		pause_frame = finish_frame + 1;
 	}
-	pause_frame_must_be_fixed = true;
 	if (taseditor_config.turbo_seek)
 		turbo = true;
 	UnpauseEmulation();
@@ -338,7 +334,6 @@ void PLAYBACK::SeekingStart(int finish_frame)
 void PLAYBACK::SeekingStop()
 {
 	pause_frame = 0;
-	pause_frame_must_be_fixed = false;
 	turbo = false;
 	PauseEmulation();
 	SetProgressbar(1, 1);
@@ -482,12 +477,12 @@ bool PLAYBACK::JumpToFrame(int index)
 
 void PLAYBACK::SetLostPosition(int frame)
 {
-	if ((lost_position_frame - 1 < frame) || (lost_position_frame - 1 > frame && !lost_position_must_be_fixed))
+	if ((lost_position_frame - 1 < frame) || (lost_position_frame - 1 > frame && !lost_position_is_stable))
 	{
 		if (lost_position_frame)
 			piano_roll.RedrawRow(lost_position_frame - 1);
 		lost_position_frame = frame + 1;
-		lost_position_must_be_fixed = true;
+		lost_position_is_stable = true;
 	}
 }
 int PLAYBACK::GetLostPosition()
@@ -502,13 +497,6 @@ int PLAYBACK::GetPauseFrame()
 int PLAYBACK::GetFlashingPauseFrame()
 {
 	if (show_pauseframe)
-		return pause_frame;
-	else
-		return 0;
-}
-int PLAYBACK::GetFixedPauseFrame()
-{
-	if (pause_frame_must_be_fixed)
 		return pause_frame;
 	else
 		return 0;

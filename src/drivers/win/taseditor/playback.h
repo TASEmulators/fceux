@@ -44,7 +44,6 @@ public:
 
 	int GetPauseFrame();
 	int GetFlashingPauseFrame();
-	int GetFixedPauseFrame();
 
 	void SetProgressbar(int a, int b);
 	void CancelSeeking();
@@ -59,9 +58,8 @@ private:
 	bool JumpToFrame(int index);
 
 	int pause_frame;
-	bool pause_frame_must_be_fixed;		// for "Auto-restore last position"
 	int lost_position_frame;
-	bool lost_position_must_be_fixed;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
+	bool lost_position_is_stable;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 
 	bool autopause_at_the_end;
 	bool old_emu_paused, emu_paused;

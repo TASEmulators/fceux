@@ -1132,11 +1132,15 @@ void PIANO_ROLL::FinishDrag()
 						if (row_under_mouse == marker_drag_framenum)
 						{
 							// it was just double-click and release
-							// set focus to lower Note edit field
+							// if Selection points at dragged Marker, set focus to lower Note edit field
 							int dragged_marker_id = markers_manager.GetMarker(marker_drag_framenum);
 							int selection_marker_id = markers_manager.GetMarkerUp(selection.GetCurrentSelectionBeginning());
 							if (dragged_marker_id == selection_marker_id)
+							{
 								SetFocus(selection.hwndSelectionMarkerEdit);
+								// select all text in case user wants to overwrite it
+								SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
+							}
 						} else if (markers_manager.GetMarker(row_under_mouse))
 						{
 							int dragged_marker_id = markers_manager.GetMarker(marker_drag_framenum);

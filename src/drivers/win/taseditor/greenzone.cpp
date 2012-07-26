@@ -98,20 +98,26 @@ void GREENZONE::CollectCurrentState()
 				lag_history.erase(lag_history.begin() + (currFrameCounter - 1));
 				editor.AdjustUp(currFrameCounter - 1);
 				// since AdjustUp didn't restore Playback cursor, we must rewind here
+				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 				int saved_pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
 				if (saved_pause_frame >= 0)
 					playback.SeekingStart(saved_pause_frame);
+				if (emu_was_paused)
+					playback.PauseEmulation();
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
 				lag_history.insert(lag_history.begin() + (currFrameCounter - 1), 1);
 				editor.AdjustDown(currFrameCounter - 1);
 				// since AdjustDown didn't restore Playback cursor, we must rewind here
+				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 				int saved_pause_frame = playback.GetPauseFrame();
 				playback.jump(currFrameCounter - 1);	// rewind
 				if (saved_pause_frame >= 0)
 					playback.SeekingStart(saved_pause_frame);
+				if (emu_was_paused)
+					playback.PauseEmulation();
 			}
 		} else
 		{
@@ -443,9 +449,9 @@ void GREENZONE::InvalidateAndCheck(int after)
 			// either set Playback cursor to the end of Greenzone or run seeking to restore Playback cursor position
 			if (currFrameCounter >= greenZoneCount)
 			{
-				if (playback.GetFixedPauseFrame())
+				if (playback.GetPauseFrame() >= 0 && !FCEUI_EmulationPaused())
 				{
-					// continue seeking
+					// emulator was running, so continue seeking
 					playback.jump(playback.GetPauseFrame());
 				} else
 				{

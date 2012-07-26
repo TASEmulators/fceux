@@ -1,5 +1,6 @@
 
 
+25-Jul-2012 - AnS - Taseditor: auto-starting Note editing when creating Marker by double-click
 19-Jul-2012 - AnS - Taseditor: Lua registermanual allows changing the "Run function" button caption; Markers are always restored when deploying Bookmarks
 01-Jul-2012 - AnS - new hotkey "Run Manual Lua function"
 24-Jun-2012 - AnS - Taseditor: drawing selected_slot border in Branches Tree
