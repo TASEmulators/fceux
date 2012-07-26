@@ -1,0 +1,71 @@
+/* -- Body -- */
+
+body {
+	overflow: hidden;
+}
+
+/* -- UI Tabs -- */
+
+ul.dynatree-container {
+	line-height: 1.5em;
+}
+
+.ui-tabs {
+	position: static;
+}
+
+#toc_header {
+	padding-bottom: 0;
+}
+
+#tabs .ui-tabs-nav {
+	border: 0;
+	border-bottom: 1px solid #ccc;
+	padding-top: 19px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+}
+
+#tabs .ui-widget-header{
+	background: #fff url(../img/header-bg.png) left bottom repeat-x;
+}
+
+#tabs .ui-tabs-panel {
+	overflow: auto;
+	position: absolute;
+	top: 43px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+/* Search */
+
+#search_value {
+	width: 140px;
+}
+
+#search_results {
+	padding-top: 10px;
+}
+
+/* -- Tree -- */
+
+ul.dynatree-container {
+	border: 0;
+	font-family: inherit;
+	overflow: visible;
+	padding: 0;
+}
+
+/* Selection color */
+span.dynatree-active a {
+    background-color: #999999 !important;
+}
+
+/* Remove folder boldness */
+span.dynatree-folder a {
+	font-weight: normal;
+}

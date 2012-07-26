@@ -1,0 +1,174 @@
+﻿<html>
+	
+<head>
+	<title>4.3. Полуавтоматический ТАСинг</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript"><!--
+		if (top.frames.length == 0)
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "index.html?" + sTopicUrl;
+		}
+		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+		{
+			top.FrameTOC.SelectTocItem("SemiautomaticTASing");
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>4.3. Полуавтоматический ТАСинг</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="BeginnersGuide.html">Курс для новичка</a> &rsaquo;&rsaquo; <a href="TASingMethodology.html">4. Методология ТАСинга</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="TASingMethodology.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="NonlinearTASing.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="ProgramCustomization.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p><span class="rvts20">Полуавтоматический ТАСинг</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><img align="right" border="0" alt hspace="6" vspace="6" src="lib/toolbox-method3.png"></p>
+<p class="rvps10"><span class="rvts22">Этот метод является дальнейшим развитием идей нелинейного метода ТАСинга.</span></p>
+<p class="rvps10"><span class="rvts22">Во многих случаях ТАСеру требуется сразу видеть результат своих изменений </span><span class="rvts22">Ввод</span><span class="rvts22">а. В идеале он должен осознавать последствия своего решения одновременно с принятием решения. Но в реальности драгоценные мгновенья уходят на введение своего решения в компьютер и последующую навигацию Курсором Проигрывателя от кадра изменения </span><span class="rvts22">Ввод</span><span class="rvts22">а до кадра конца участка.</span></p>
+<p class="rvps10"><span class="rvts22">Третий метод ТАСинга позволяет переложить навигацию Курсором Проигрывателя на Тасэдитор и сосредоточить внимание только на редактировании. Тасэдитор будет мгновенно реагировать на каждое изменение </span><span class="rvts22">Ввод</span><span class="rvts22">а и сразу отображать его результат на экране FCEUX. Благодаря тому, что вы ощущаете воздействие каждого щелчка на игровой процесс, достигается высочайший уровень взаимосвязи между ТАСером и игрой. При таком тесном взаимодействии не только ТАСер управляет игрой, но и игра направляет действия ТАСера в нужное русло.</span></p>
+<p class="rvps10"><span class="rvts22">На практике такой высокий уровень взаимозависимости между ТАСером и игрой требуется далеко не всегда. Ведь это суживает спектр мыслей ТАСера, не позволяя взглянуть на игру свысока и применить к ней логику из других игр или других сфер жизни. Однако, когда текущий участок небольшой, и все факторы оптимальности известны (требуется только найти их идеальное сочетание), можно отвлечься от всего остального и полностью сфокусироваться на переборе вариантов.</span></p>
+<p class="rvps10"><span class="rvts22">Этот метод ТАСинга назван полуавтоматическим, потому что получилось нечто среднее между использованием автоматических ботов и ручным ТАСингом. Само по себе использование ботов не обладает высокой степенью гибкости, присущей человеческому мышлению. С другой стороны, ручной перебор (зацикленное тестирование множества однотипных вариантов </span><span class="rvts22">Ввод</span><span class="rvts22">а) угнетает своей рутинностью.</span></p>
+<p class="rvps10"><span class="rvts22">Идея третьего метода ТАСинга в том, что вы редактируете </span><span class="rvts22">Ввод</span><span class="rvts22">, а Тасэдитор запускает и останавливает просмотр участка. Курсор Проигрывателя автоматически возвращается на то место, откуда его сбросило в момент усечения Гринзоны.</span></p>
+<p class="rvps10"><span class="rvts22">Режим Записи и галочка "Follow cursor" должны быть выключены. Галочка "Auto-restore last position" должна быть включена. Галочка "Turbo seek" по умолчанию отключена и включается при необходимости.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">Основное занятие ТАСера:</span></p>
+<p class="rvps10"><span class="rvts53"><br></span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">1.</span>
+<span class="rvts22">Проскроллировать Piano Roll к началу редактируемого участка мувика, доставить сюда Курсор Проигрывателя, определиться с целью. Полезно также отметить начало участка Маркером.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">2.</span>
+<span class="rvts22">Приблизительно прикинуть кадр конца участка, доставить Курсор Проигрывателя на этот кадр и оставить его там, даже если на участке пока отсутствует Ввод, необходимый для достижения конечного события.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">3.</span>
+<span class="rvts22">Предположить наличие ошибки на участке, взвесить имеющиеся факторы оптимальности и прикинуть способ исправления ошибки (как именно требуется изменить </span><span class="rvts22">Ввод</span><span class="rvts22">, на каких кадрах и т.д.</span><span class="rvts22">).</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">4.</span>
+<span class="rvts22">Н</span><span class="rvts22">авигация курсором мыши к любому кадру мувика осуществляется почти мгновенно.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">5.</span>
+<span class="rvts22">Редактировать участок мышью. </span><span class="rvts22">После каждого вносимого изменения Курсор Проигрывателя будет автоматически проигрывать участок от первого изменённого кадра до текущего конца участка. При необходимости можно передвигать текущий конец участка, перемещая Курсор Проигрывателя вручную (колесом).</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">6.</span>
+<span class="rvts22">Продолжать редактирование, возвращаясь к пункту 4 или 3, пока целевое событие не наступит в рамках участка.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">7.</span>
+<span class="rvts22">[</span><span class="rvts37">необязательный пункт</span><span class="rvts22">] С</span><span class="rvts22">охранить полученный вариант прохождения участка в любую свободную Закладку.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">8.</span>
+<span class="rvts22">Сравнить </span><span class="rvts22">полученный результат с лучшим результатом, используя критерий оптимальности. Если новый вариант оказался лучше&nbsp;</span><span class="rvts22"> (или если это ваш первый вариант прохождения участка), </span><span class="rvts31">рекомендуется</span><span class="rvts22"> сохранить результат в Закладку 9. </span><span class="rvts22">Слот 9 будет отвечать за хранение самого лучшего результата шлифовки участка. Если не сохранять лучший вариант в Закладку, он останется только в текущем мувике и в Журнале Истории.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">9.</span>
+<span class="rvts22">Вернуться к пункту 3 и опробовать ещё варианты, до тех пор пока не иссякнут идеи по данному участку.</span></p>
+<p class="rvps15" style="text-indent: 25px; margin-left: 5px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">10.</span>
+<span class="rvts22">Когда идеи полностью иссякли, восстановить лучший вариант прохождения из Журнала Истории или из Закладки 9</span><span class="rvts22"> в текущий мувик</span><span class="rvts22">, определиться со следующим участком и вернуться к пункту 1.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Основное отличие этого метода от простого нелинейного в том, что при редактировании участка Курсор Проигрывателя находится в конце участка, а не где-то в начале. При каждом усечении Гринзоны Курсор Проигрывателя автоматически добегает к концу участка, точнее, к тому месту, где был конец участка до изменения Ввода. Если после изменения Ввода кадр конца участка изменился, достаточно слегка передвинуть </span><span class="rvts22">голубой курсор колесом мыши на пару кадров выше или ниже. А во многих случаях даже это не требуется, так как ТАСеру не всегда нужно знать конечный кадр участка, порой надо только увидеть цепочку событий, происходящих на участке в результате изменённого Ввода.</span></p>
+<p class="rvps10"><span class="rvts22">Просмотр участка запускается после каждого промежуточного изменения Ввода, даже если вы ещё не закончили свою мысль и не собираетесь сравнивать итоговый результат с результатом предыдущего способа прохождения участка. Обычно во время увлечённого редактирования ТАСер не смотрит на экран FCEUX, продолжая щёлкать по Piano Roll, пока не воплотит свою мысль в виде большой кнопочной комбинации. А когда </span><span class="rvts22">Ввод</span><span class="rvts22"> участка уже представляет интерес, ТАСер обращает внимание на экран эмулятора или Memory Watch, которые продолжают обновляться при каждом изменении Ввода на участке.</span></p>
+<p class="rvps10"><span class="rvts22">Например, чтобы осуществить прыжок через яму, вы сначала рисуете длинное зажатие </span><span class="rvts32">R</span><span class="rvts22"> на участке и даже не смотрите на экран FCEUX, где в это время Марио на бегу проваливается в яму. Вы дорисовываете нажатие кнопки </span><span class="rvts32">A</span><span class="rvts22">, а затем уже смотрите на экран эмулятора и стираете/дорисовываете дополнительные нажатия </span><span class="rvts32">A</span><span class="rvts22">, перемещая начало и длительность прыжка и наблюдая траекторию прыгающего персонажа.</span></p>
+<p class="rvps10"><span class="rvts22">Таким образом, процесс шлифовки </span><span class="rvts22">Ввод</span><span class="rvts22">а в данном методе представляет собой одновременный просмотр и редактирование участка. </span><span class="rvts22">Так как ТАСер каждый раз мгновенно видит в эмуляторе результат своих действий, он почти сразу входит в тесный информационный контакт с игрой и начинает мыслить синхронно с её регулярными откликами. Игра начинает помогать ТАСеру принимать и отфильтровывать решения, начинает играть вместе с ним, а иногда даже за него. </span><span class="rvts22">В результате можно потерять беспристрастность ума и пойти на поводу очевидных решений, поощряемых самой игрой. Поэтому не стоит использовать этот метод ТАСинга постоянно, рекомендуется чередовать его с предыдущим.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Как и в предыдущем методе, здесь можно менять скорость добегания, получая различные вариации метода:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">1)</span>
+<span class="rvts22">редактирование в реальном времени с постоянным тестированием изменений</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">2)</span>
+<span class="rvts22">редактирование при замедленной эмуляции с постоянным тестированием изменений</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 15px;">3)</span>
+<span class="rvts22">редактирование с мгновенным просмотром итога (турбо)</span></p>
+<p class="rvps10"><a name="turbo-seeking"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Как и в третьей вариации нелинейного ТАСинга, здесь турбо создаёт психологическую ассоциацию между двумя отдалёнными событиями (началом и концом участка). Но теперь эта ассоциация многократно усиляется благодаря окончательному убиранию посредников – скоростной просмотр участка запускается ещё до отпускания кнопки мыши. Едва ТАСер щёлкает по какому-то кадру Piano Roll, он уже видит результат, который вообще-то наступает в игре через несколько секунд после нажатия кнопки.</span></p>
+<p class="rvps10"><a name="FindStartButtonPress"></a>
+<span class="rvts22">В качестве примера можно привести поиск первого кадра для нажатия кнопки </span><span class="rvts32">Start</span><span class="rvts22">. Во многих играх нажать эту кнопку можно раньше, чем отобразится графика на экране. Кроме того, нередко после срабатывания </span><span class="rvts32">Start</span><span class="rvts22"> игра на некоторое время задумывается, ничем не подавая вид, что нажатие сработало. Только через секунду или две мы видим смену заставки и тем самым узнаём, что нажатие </span><span class="rvts32">Start</span><span class="rvts22"> сработало.</span></p>
+<p class="rvps10"><span class="rvts22">В традиционном методе на поиск самого первого кадра уйдёт 5-10 минут. В Тасэдиторе на это уходит менее минуты.</span></p>
+<p class="rvps10"><span class="rvts22">Делается это так:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Включаете галочку </span><span class="rvts22">"Auto-restore last position" и </span><span class="rvts22">"Turbo seek". </span><span class="rvts22">Отключаете галочку "Follow cursor", чтобы Piano Roll не убегал вслед за Курсором Проигрывателя.</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Ставите пробное нажатие </span><span class="rvts32">Start</span><span class="rvts22"> на кадре, где оно точно сработает, например, на кадр 100.</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Просматриваете срабатывание кнопки до момента, когда по изображению на экране уже понятно, что </span><span class="rvts32">Start </span><span class="rvts22">сработал (например, появился экран World 1-1). Допустим, это кадр 200. Оставляете Курсор Проигрывателя на этом месте – это и будет конец участка.</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Теперь удаляете своё пробное нажатие </span><span class="rvts32">Start</span><span class="rvts22"> (в окне FCEUX тут же мигнёт и исчезнет экран </span><span class="rvts22">World 1-1,</span><span class="rvts22"> и останется экран заставки, так как нажатия </span><span class="rvts32">Start</span><span class="rvts22"> больше нет).</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Ставите нажатие </span><span class="rvts32">Start</span><span class="rvts22"> на первый или второй кадр мувика, ещё до того, когда приставка начинает опрашивать джойстик. В окне FCEUX ничего не меняется, так как это нажатие не сработало.</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Зажимаете одной рукой </span><span class="rvts34">Ctrl + Shift</span><span class="rvts22">, другой начинаете периодически (раз в секунду или чаще – это зависит от мощности вашего компьютера) нажимать </span><span class="rvts34">Insert</span><span class="rvts22">. После каждого нажатия </span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22"> символ кнопки </span><span class="rvts32">Start </span><span class="rvts22">отодвигается на один кадр вперёд, а в окне FCEUX вы видите, повлияло ли это нажатие на состояние игры в кадре 200, или не повлияло. Если у вас быстрый компьютер, то добегание голубого курсора до кадра 200 будет почти мгновенным, если же компьютер медленный, то придётся подождать около полсекунды (процесс добегания можно отслеживать по прогрессбару в разделе Playback).</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Пока нажатие </span><span class="rvts32">Start</span><span class="rvts22">, методично сдвигаемое вами вниз, не доходит до искомого кадра, окно FCEUX будет показывать заставку, но когда очередное нажатие </span><span class="rvts34">Ctrl + Shift + Insert</span><span class="rvts22"> передвинуло </span><span class="rvts32">Start</span><span class="rvts22"> на нужный кадр, в окне FCEUX появится экран </span><span class="rvts22">World 1-1</span><span class="rvts22">.</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">Таким образом, вы обнаружили самый первый возможный кадр для нажатия </span><span class="rvts32">Start</span><span class="rvts22">. Номер этого кадра, скорее всего, будет намного меньше 100. Для уверенности можно тут же нажать </span><span class="rvts34">Ctrl + Delete</span><span class="rvts22">, чтобы сместить нажатие </span><span class="rvts32">Start</span><span class="rvts22"> на предыдущий кадр и увидеть в окне FCEUX экран заставки, а затем нажать </span><span class="rvts34">Ctrl + Z</span><span class="rvts22">, чтобы вернуть </span><span class="rvts32">Start </span><span class="rvts22">на место и увидеть </span><span class="rvts22">World 1-1.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Точно так же можно очень быстро находить оптимальную длительность зажатия кнопки </span><span class="rvts32">A</span><span class="rvts22"> для изменения высоты прыжка и приземления в нужной точке. Можно легко манипулировать удачей во многих играх. И вообще, удобство автоматического турбо-добегания наглядно проявляется в ситуациях, когда на участке действует всего один фактор оптимальности, и требуется быстро перебрать пару сотен однотипных вариантов.</span></p>
+<p class="rvps10"><span class="rvts22">Полуавтоматический ТАСинг стимулирует меньше думать и больше экспериментировать. Во многих видеоиграх именно такой подход приводит к успеху, однако постарайтесь не увлечься комфортностью этого метода, забыв про остальные.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Плюсы полуавтоматического ТАСинга:</span></p>
+<p class="rvps15"><span class="rvts23">+ </span><span class="rvts22">Постоянная отдача позволяет на ходу корректировать свои решения и заранее отсекать в уме заведомо ошибочные комбинации </span><span class="rvts22">Ввод</span><span class="rvts22">а. Это уменьшает количество требуемых исправлений и ускоряет рабочий процесс.</span></p>
+<p class="rvps15"><span class="rvts23">+ </span><span class="rvts22">Мгновенная навигация к месту редактирования.</span></p>
+<p class="rvps15"><span class="rvts23">+ </span><span class="rvts22">Возможность пропускать ненужные сцены и ассоциировать действие с итогом.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Минусы метода:</span></p>
+<p class="rvps15"><span class="rvts23">– </span><span class="rvts22">Упор на мышиное управление.</span></p>
+<p class="rvps15"><span class="rvts23">– </span><span class="rvts22">Настойчивая отдача провоцирует ТАСера отсекать некоторые нелогичные, но потенциально выигрышные комбинации.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts26">Когда использовать:</span><span class="rvts22"> </span><span class="rvts22">когда нужно отшлифовать участок, для которого уже известны все факторы оптимальности.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Теперь вы изучили главные принципы работы в Тасэдиторе и уже можете начинать ТАСить свою любимую игру. </span><span class="rvts22">Лучше всего обучает практика, и только в процессе реальной разработки своего личного ТАСа вы сможете освоить все премудрости.</span></p>
+<p class="rvps10"><span class="rvts22">После пары недель практического ТАСинга рекомендуется заново перечитать третью и четвёртую главу данного Курса, чтобы усвоить текст на более глубоком уровне, ведь во время первого чтения вы наверняка многое поняли не до конца.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">В следующей главе: </span><a class="rvts28" href="ProgramCustomization.html">настройка программы для максимально комфортной работы</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<div class="rvps10"><table width="100%" border="1" cellpadding="6" cellspacing="2" style="border-color: #000000; border-style: solid;">
+<tr valign="top">
+<td style="border-color: #000000; border-style: solid;"><p class="rvps10"><span class="rvts26">ПРАКТИЧЕСКОЕ ЗАДАНИЕ: </span><span class="rvts22">Хорошенько отшлифуйте </span><span class="rvts22">Ввод</span><span class="rvts22"> в распланированных участках своего тестового мувика. Если пробное разбиение Маркерами оказалось неудачным – переразбивайте на ходу.</span></p>
+<p class="rvps10"><span class="rvts22">Постарайтесь использовать только второй и третий методы ТАСинга, не прибегая к традиционному методу. Попробуйте также воспользоваться турбо в нужных местах. Если на оптимизацию целого игрового уровня вам не хватит терпения, постарайтесь хоть как-то завершить оставшийся промежуток уровня, даже если он будет не слишком оптимальным.</span></p>
+<p class="rvps10"><span class="rvts26">Примерное время выполнения: </span><span class="rvts22">30-60 минут.</span></p>
+</td>
+</tr>
+</table>
+</div>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				Copyright &copy; 2011-2012 АнС</div>
+		</div>
+	</body>
+	
+</html>
+

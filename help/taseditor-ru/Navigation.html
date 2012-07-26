@@ -1,0 +1,361 @@
+﻿<html>
+	
+<head>
+	<title>Навигация</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc">
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript"><!--
+		if (top.frames.length == 0)
+		{
+			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+			top.location.href = "index.html?" + sTopicUrl;
+		}
+		else if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+		{
+			top.FrameTOC.SelectTocItem("Navigation");
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="topic_header">
+			<div id="topic_header_content">
+				<h1>Навигация</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Reference.html">Справочник</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Reference.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Controls.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Operations.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p><span class="rvts20">Навигация</span></p>
+<p class="rvps2"><span class="rvts6"><br></span></p>
+<p class="rvps2"><span class="rvts6"><br></span></p>
+<p class="rvps10"><span class="rvts22">Экран FCEUX может отображать лишь события одного кадра. Piano Roll может отображать в окне содержимое нескольких десятков кадров. </span><span class="rvts22">Но мувик среднестатистического ТАСа содержит десятки тысяч кадров. Поэтому ТАСеру постоянно необходимо перемещаться по мувику вверх и вниз, чтобы отобразить в окне Piano Roll интересующий его участок мувика, либо чтобы отобразить на экране FCEUX события интересующего кадра мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Эта деятельность называется навигацией по мувику. Во время ТАСинга на неё тратится много времени, и её можно значительно оптимизировать.</span></p>
+<p class="rvps10"><span class="rvts22">В Тасэдиторе предусмотрено множество способов навигации. В зависимости от конкретной ситуации более удобным будет являться тот или иной способ, поэтому для максимальной эффективности ТАСинга необходимо в совершенстве овладеть всеми. В идеале все навыки навигации должны переместиться в моторную память, тогда вы сможете молниеносно появляться в нужной точке мувика, при этом не переставая обдумывать текущую задачу.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">Все способы навигации по мувику:</span></p>
+<p class="rvps10"><span class="rvts57"><br></span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<a class="rvts60" href="Navigation.html#scrolling-piano-roll">Скроллинг Piano Roll</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">1.</span>
+<a class="rvts60" href="Navigation.html#scrollbar-drag">Перетаскивание скроллбара</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">2.</span>
+<a class="rvts60" href="Navigation.html#wheel">Скроллинг колесом</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">3.</span>
+<a class="rvts60" href="Navigation.html#jumping-by-pages">Листание страниц</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">4.</span>
+<a class="rvts60" href="Navigation.html#jump-home-end">Прыжок в начало/конец мувика</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">5.</span>
+<a class="rvts60" href="Navigation.html#scroll-to-playback">Прыжок к Курсору Проигрывателя</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">6.</span>
+<a class="rvts60" href="Navigation.html#scroll-to-selection">Прыжок к Курсору Выделения</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">7.</span>
+<a class="rvts60" href="Navigation.html#scroll-to-playback-marker">Прыжок к Маркеру над Курсором Проигрывателя</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">8.</span>
+<a class="rvts60" href="Navigation.html#scroll-to-selection-marker">Прыжок к Маркеру над Курсором Выделения</a></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<a class="rvts61" href="Navigation.html#playback-cursor">Навигация Курсором Проигрывателя</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">1.</span>
+<a class="rvts60" href="Navigation.html#frame-advance-rewind">Покадровое перемещение</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">2.</span>
+<a class="rvts60" href="Navigation.html#rewinding-by-wheel">Перемотка колесом мыши</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">3.</span>
+<a class="rvts64" href="Navigation.html#drag-playback">Перетаскивание Курсора Проигрывателя</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">4.</span>
+<a class="rvts60" href="Navigation.html#playback-jumping-markers">Прыжки по Маркерам</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">5.</span>
+<a class="rvts60" href="Navigation.html#jump-bookmark">Прыжки по Закладкам</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">6.</span>
+<a class="rvts60" href="Navigation.html#playback-home-end">Прыжок в начало/конец мувика</a></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<a class="rvts63" href="Navigation.html#selection-cursor">Навигация Курсором Выделения</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">1.</span>
+<a class="rvts60" href="Navigation.html#selection-up-down">Смещение Выделения стрелками</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">2.</span>
+<a class="rvts60" href="Navigation.html#selection-home-end">Смещение Выделения в начало/конец мувика</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">3.</span>
+<a class="rvts60" href="Navigation.html#selection-jumping-markers">Прыжки по Маркерам</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">4.</span>
+<a class="rvts60" href="Navigation.html#selection-history">Откаты истории Выделения</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">5.</span>
+<a class="rvts60" href="Navigation.html#reselect-clipboard">Прыжок на место последнего копирования в Буфер Обмена</a></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<a class="rvts62" href="Navigation.html#special">Особые способы навигации</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">1.</span>
+<a class="rvts60" href="Navigation.html#crossing-gaps">Пересечение промежутков во Вводе и Маркерах</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">2.</span>
+<a class="rvts60" href="Navigation.html#find-note">Прыжок на Маркер с искомой Заметкой</a></p>
+<p class="rvps15" style="text-indent: 32px; margin-left: 20px;"><span style="font-size: 8pt; font-family: 'Arial'; color: #000000; width: 18px;">3.</span>
+<a class="rvts60" href="Navigation.html#similar-note">Прыжок на Маркер с похожей Заметкой</a></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><a name="scrolling-piano-roll"></a>
+<span class="rvts22"><br></span></p>
+<p><span class="rvts58">Скроллинг Piano Roll</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><a name="scrollbar-drag"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">1. Перетаскивание скроллбара</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">С помощью скроллбара можно скроллировать Список Piano Roll, просматривая содержимое мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Курсор Проигрывателя и Выделение останутся на своих местах, и при необходимости можно будет либо вернуться к ним, либо наоборот, перенести их в новое место мувика (одинарный щелчок меняет Выделение, двойной щелчок перемещает Курсор Проигрывателя).</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно попасть в дальнюю точку мувика, рядом с которой нет Закладки или Маркера. Одним махом можно проскроллировать Piano Roll на сотню тысяч кадров вперёд или назад</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">при ручном поиске нужного участка </span><span class="rvts22">Ввод</span><span class="rvts22">а, расположение которого не известно и может быть где угодно в мувике</span></p>
+<p class="rvps10"><a name="wheel"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">2. Скроллинг колесом</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">С помощью колеса можно также скроллировать содержимое Piano Roll, но скорость скроллинга будет ограничена (в отличие от скроллбара), поэтому этот способ больше подходит для внимательного просмотра данных в окрестностях одного участка.</span></p>
+<p class="rvps10"><span class="rvts22">Курсор мыши при скроллировании может быть где угодно, кроме Журнала Истории.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">при ручном поиске нужного участка </span><span class="rvts22">Ввод</span><span class="rvts22">а, расположение которого может быть где угодно поблизости</span></p>
+<p class="rvps10"><a name="jumping-by-pages"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">3. Листание страниц</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие клавиш</span><span class="rvts22"> </span><span class="rvts34">Page Up</span><span class="rvts22"> и </span><span class="rvts34">Page Down</span><span class="rvts22"> скроллирует содержимое Piano Roll вверх и вниз на целую страницу (зависит от размера окна Piano Roll).</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">при ручном поиске нужного участка </span><span class="rvts22">Ввод</span><span class="rvts22">а, расположение которого может быть где угодно поблизости</span></p>
+<p class="rvps10"><a name="jump-home-end"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">4. Прыжок в начало/конец мувика</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие клавиш</span><span class="rvts22"> </span><span class="rvts34">Home</span><span class="rvts22"> и </span><span class="rvts34">End</span><span class="rvts22"> скроллирует содержимое Piano Roll в начало и конец мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно попасть в начало или конец мувика</span></p>
+<p class="rvps10"><a name="scroll-to-playback"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">5. Прыжок к Курсору Проигрывателя</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При щелчке левой кнопкой мыши по верхнему номеру Маркера Piano Roll автоматически скроллируется к Курсору Проигрывателя. Кроме того, вместо щелчка можно быстро дважды нажать клавишу </span><span class="rvts34">Shift</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно осмотреть контекст текущего кадра в мувике</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться к проигрываемому участку издалека</span></p>
+<p class="rvps10"><a name="scroll-to-selection"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">6. Прыжок к Курсору Выделения</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При щелчке левой кнопкой мыши по нижнему номеру Маркера Piano Roll автоматически скроллируется к началу Выделения.</span><span class="rvts22"> Кроме того, вместо щелчка можно быстро дважды нажать клавишу </span><span class="rvts34">Ctrl</span><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться к редактируемому участку</span></p>
+<p class="rvps10"><a name="scroll-to-playback-marker"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">7. Прыжок к Маркеру над Курсором Проигрывателя</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При щелчке по верхнему полю для редактирования Заметок Piano Roll автоматически скроллируется к Маркеру, Заметка которого сейчас будет редактироваться.</span></p>
+<p class="rvps10"><span class="rvts22">Работает, только если установлена галочка </span><a class="rvts28" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно увидеть начало просматриваемого участка (при условии, что там стоит Маркер)</span></p>
+<p class="rvps15"><a name="scroll-to-selection-marker"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">8. Прыжок к Маркеру над Курсором Выделения</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При щелчке по нижнему полю для редактирования Заметок Piano Roll автоматически скроллируется к Маркеру, Заметка которого сейчас будет редактироваться.</span></p>
+<p class="rvps10"><span class="rvts22">Работает, только если установлена галочка </span><a class="rvts28" href="ProgramCustomization.html#FollowMarkerNotecontext">View -&gt; Follow Marker Note context</a><span class="rvts22">.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно увидеть начало редактируемого участка (при условии, что там стоит Маркер)</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><a name="playback-cursor"></a>
+<span class="rvts22"><br></span></p>
+<p><span class="rvts58">Навигация Курсором Проигрывателя</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Курсор Проигрывателя привязан к событиям игры. При его перемещении будет изменяться изображение на экране FCEUX. Он не всегда может мгновенно переместиться в указанный кадр, иногда может потребоваться добегание.</span></p>
+<p class="rvps10"><span class="rvts22">Если в панели Playback установлена галочка "Follow cursor", то Piano Roll автоматически скроллируется вслед за Курсором Проигрывателя.</span></p>
+<p class="rvps10"><a name="frame-advance-rewind"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">1. Покадровое перемещение</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие кнопок </span><span class="rvts32">&lt;</span><span class="rvts22"> и </span><span class="rvts32">&gt;</span><span class="rvts22"> в панели Playback, либо нажатие акселераторов </span><span class="rvts34">Shift + Вверх</span><span class="rvts22"> и </span><span class="rvts34">Shift + Вниз</span><span class="rvts22">, либо нажатие хоткеев </span><span class="rvts27">Frame Rewind </span><span class="rvts22">и </span><span class="rvts27">Frame Advance</span><span class="rvts22"> перемещает Курсор Проигрывателя на 1 кадр назад и вперёд.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно тщательно просматривать события каждого кадра на маленьком участке</span></p>
+<p class="rvps10"><a name="rewinding-by-wheel"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">2. Перемотка колесом мыши</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При зажатой правой кнопке мыши колесо мыши вместо скроллинга Piano Roll будет перемещать Курсор Проигрывателя вверх или вниз.</span></p>
+<p class="rvps10"><span class="rvts22">В этом способе сочетается покадровая точность перемещения и возможность гибко варьировать скорость перемещения, вращая колесо быстрее или медленнее.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно просматривать события каждого кадра на участке</span></p>
+<p class="rvps10"><a name="drag-playback"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts51">3. Перетаскивание Курсора Проигрывателя</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">С помощью курсора мыши можно перетаскивать Курсор Проигрывателя вверх и вниз по мувику. Для этого нужно щёлкнуть левой кнопкой по любой клетке в самом левом столбце Piano Roll (колонка с иконками) и, не отпуская левую кнопку, переместить курсор мыши вверх или вниз. Этот способ позволяет не только смотреть события игры на экране FCEUX, но и скроллировать Piano Roll.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">при поиске игровых событий в мувике</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">при ручном поиске нужного участка </span><span class="rvts22">Ввод</span><span class="rvts22">а, расположение которого может быть где угодно</span></p>
+<p class="rvps10"><a name="playback-jumping-markers"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">4. Прыжки по Маркерам</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие кнопок </span><span class="rvts32">&lt;&lt;</span><span class="rvts22"> и </span><span class="rvts32">&gt;&gt;</span><span class="rvts22"> в панели Playback, либо нажатие акселераторов </span><span class="rvts34">Shift + Page Up</span><span class="rvts22"> и </span><span class="rvts34">Shift + Page Down</span><span class="rvts22"> перемещает Курсор Проигрывателя на Маркер вверх и вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Аналогично можно вращать колесо мыши с зажатой клавишей </span><span class="rvts34">Shift</span><span class="rvts22"> – Курсор Проигрывателя будет прыгать по Маркерам.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться на начало просматриваемого участка (при условии, что там стоит Маркер)</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно быстро перейти на соседние участки, чтобы просмотреть их события</span></p>
+<p class="rvps10"><a name="jump-bookmark"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">5. Прыжки по Закладкам</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие хоткея, соответствующего номеру Закладки (</span><span class="rvts27">0-9</span><span class="rvts22">), посылает Курсор Проигрывателя на кадр этой Закладки.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно просмотреть события мувика, на которых была оставлена Закладка (например, начало текущего уровня)</span></p>
+<p class="rvps10"><a name="playback-home-end"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">6. Прыжок в начало/конец мувика</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие </span><span class="rvts22">акселераторов</span><span class="rvts22"> </span><span class="rvts34">Shift + </span><span class="rvts34">Home</span><span class="rvts22"> и </span><span class="rvts34">Shift + </span><span class="rvts34">End</span><span class="rvts22"> перемещает </span><span class="rvts22">Курсор Проигрывателя</span><span class="rvts22"> в начало и в конец мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Также при нажатии хоткея "</span><span class="rvts27">Play movie from the beginning</span><span class="rvts22">" (по умолчанию </span><span class="rvts27">Shift + R</span><span class="rvts22">) Курсор Проигрывателя прыгает на начальный кадр мувика.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно просмотреть события мувика с самого начала</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно заполнить весь мувик Гринзоной до конца</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><a name="selection-cursor"></a>
+<span class="rvts22"><br></span></p>
+<p><span class="rvts58">Навигация Курсором Выделения</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Курсор Выделения всегда может переместиться в указанный кадр.</span></p>
+<p class="rvps10"><span class="rvts22">Когда в Piano Roll выделено более одной строки, Курсором Выделения считается самая верхняя из них.</span></p>
+<p class="rvps10"><a name="selection-up-down"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">1. Смещение Выделения стрелками</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие клавиатурных акселераторов </span><span class="rvts34">Ctrl + </span><span class="rvts34">Вверх</span><span class="rvts22"> и </span><span class="rvts34">Ctrl + </span><span class="rvts34">Вниз</span><span class="rvts22"> перемещает Выделение на 1 кадр вверх и вниз. Piano Roll автоматически скроллируется вслед за ним.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно передвинуть Курсор Выделения чуть выше или чуть ниже</span></p>
+<p class="rvps10"><a name="selection-home-end"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">2. Смещение Выделения в начало/конец мувика</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие </span><span class="rvts22">акселераторов</span><span class="rvts22"> </span><span class="rvts34">Ctrl + </span><span class="rvts34">Home</span><span class="rvts22"> и </span><span class="rvts34">Ctrl + </span><span class="rvts34">End</span><span class="rvts22"> перемещает Выделение в начало и в конец мувика. Piano Roll автоматически скроллируется вслед за ним.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно выделить регион в начале или конце мувика</span></p>
+<p class="rvps10"><a name="selection-jumping-markers"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">3. Прыжки по Маркерам</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие кнопок </span><span class="rvts32">&lt;&lt;</span><span class="rvts22"> и </span><span class="rvts32">&gt;&gt;</span><span class="rvts22"> в самом низу Панели Инструментов, либо нажатие акселераторов </span><span class="rvts34">Ctrl + Page Up</span><span class="rvts22"> и </span><span class="rvts34">Ctrl + Page Down</span><span class="rvts22"> перемещает Курсор Выделения на Маркер вверх и вниз. Piano Roll автоматически скроллируется вслед за ним.</span></p>
+<p class="rvps10"><span class="rvts22">Аналогично можно вращать колесо мыши с зажатой клавишей </span><span class="rvts34">Ctrl</span><span class="rvts22"> – Курсор Выделения будет прыгать по Маркерам.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться на начало редактируемого участка (при условии, что там стоит Маркер)</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно быстро перейти на соседние участки, чтобы просмотреть или отредактировать их </span><span class="rvts22">Ввод</span></p>
+<p class="rvps10"><a name="selection-history"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">4. Откаты истории Выделения</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие акселераторов </span><span class="rvts34">Ctrl + Q</span><span class="rvts22"> и </span><span class="rvts34">Ctrl + W</span><span class="rvts22"> возвращает Выделение на состояние, предшествующее текущему или следующее за текущим. Piano Roll автоматически скроллируется вслед за ним.</span></p>
+<p class="rvps10"><span class="rvts22">Это уникальный способ навигации, позволяющий вернуться к ранее отредактированным участкам и напомнить всю последовательность редактирования.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться к недавно отредактированному участку, точное расположение которого уже забыто</span></p>
+<p class="rvps10"><a name="reselect-clipboard"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">5. Прыжок на место последнего копирования в Буфер Обмена</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Нажатие акселератора </span><span class="rvts34">Ctrl + B</span><span class="rvts22"> возвращает Выделение на место последнего копирования в Буфер Обмена. Piano Roll автоматически скроллируется вслед за ним.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно вернуться на место, откуда был недавно скопирован </span><span class="rvts22">Ввод</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><a name="special"></a>
+<span class="rvts22"><br></span></p>
+<p><span class="rvts58">Особые способы навигации</span></p>
+<p><a name="crossing-gaps"></a>
+<span class="rvts65"><br></span></p>
+<p class="rvps10"><span class="rvts23">1. Пересечение промежутков во Вводе и Маркерах</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Если навести курсор мыши на любую клетку </span><span class="rvts22">Ввод</span><span class="rvts22">а, зажать </span><span class="rvts34">Alt</span><span class="rvts22"> и прокрутить колесо мыши вверх, Piano Roll проскроллируется вверх таким образом, чтобы курсор мыши указывал на вышестоящее нажатие указанной кнопки либо на первое встреченное "отсутствие нажатия" указанной кнопки. Если прокрутить колесо вниз, Piano Roll проскроллируется вниз таким образом, чтобы курсор мыши указывал на нижестоящее нажатие указанной кнопки либо на первое встреченное "отсутствие нажатия" указанной кнопки.</span></p>
+<p class="rvps10"><span class="rvts22">Если навести курсор мыши на колонку с номерами кадров, зажать </span><span class="rvts34">Alt</span><span class="rvts22"> и прокрутить колесо мыши вверх, Piano Roll проскроллируется вверх таким образом, чтобы курсор мыши указывал на вышестоящий Маркер. Если прокрутить колесо вниз, Piano Roll проскроллируется вниз таким образом, чтобы курсор мыши указывал на нижестоящий Маркер.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно найти начало или конец длинного ряда нажатий</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно найти вышестоящее или нижестоящее нажатие кнопки</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно найти вышестоящий или нижестоящий Маркер</span></p>
+<p class="rvps10"><a name="find-note"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">2. Прыжок на Маркер с искомой Заметкой</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При нажатии кнопки "</span><span class="rvts32">Find next</span><span class="rvts22">" (или клавиши </span><span class="rvts45">Enter</span><span class="rvts22">) в окне </span><span class="rvts26">Find Note</span><span class="rvts22"> Piano Roll автоматически скроллируется к первому найденному Маркеру, Заметка которого включает искомый текст. Искать можно либо вверх от текущего положения Курсора Выделения, либо вниз.</span></p>
+<p class="rvps10"><span class="rvts22">Курсор Выделения будет установлен на найденный Маркер, чтобы в нижнем текстовом поле была видна его Заметка.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно найти участок, расположение которого не известно и может быть где угодно в мувике, но известна часть текста из Заметки Маркера, стоящего рядом с этим участком</span></p>
+<p class="rvps10"><a name="similar-note"></a>
+<span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts23">3. Прыжок на Маркер с похожей Заметкой</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">При щелчке по кнопке "</span><span class="rvts32">Similar</span><span class="rvts22">" или "</span><span class="rvts32">More</span><span class="rvts22">" Piano Roll автоматически скроллируется к Маркеру, Заметка которого очень похожа на Заметку у текущего просматриваемого участка.</span></p>
+<p class="rvps10"><span class="rvts22">Курсор Выделения будет установлен на этот Маркер, чтобы в нижнем текстовом поле была видна Заметка.</span></p>
+<p class="rvps10"><span class="rvts22">Этот способ описан в главе </span><a class="rvts28" href="AdvancedFeatures.html">Продвинутые возможности</a><span class="rvts22">. Он работает только в проектах, где ТАСер прилежно ставит Маркеры и кратко описывает в Заметках суть </span><span class="rvts22">Ввод</span><span class="rvts22">а под каждым Маркером.</span></p>
+<p class="rvps10"><span class="rvts22">Когда предпочтительнее использовать:</span></p>
+<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
+<span class="rvts22">когда нужно быстро найти участок, расположение которого не известно и может быть где угодно в мувике, но известно, что суть </span><span class="rvts22">Ввод</span><span class="rvts22">а на том участке выражается теми же словами, что и суть </span><span class="rvts22">Ввод</span><span class="rvts22">а на текущем просматриваемом участке.</span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/help-authoring-tool">Free help authoring environment</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				Copyright &copy; 2011-2012 АнС</div>
+		</div>
+	</body>
+	
+</html>
+
