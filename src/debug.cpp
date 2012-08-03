@@ -489,8 +489,9 @@ void BreakHit(int bp_num, bool force = false)
 	
 	//MBG TODO - was this commented out before the gnu refactoring?
 	//if((!logtofile) && (logging))PauseLoggingSequence();
-	
+#ifdef WIN32	
 	FCEUD_DebugBreakpoint(bp_num);
+#endif
 }
 
 uint8 StackAddrBackup = X.S;
