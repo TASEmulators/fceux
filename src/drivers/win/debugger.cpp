@@ -78,10 +78,9 @@ bool debuggerSaveLoadDEBFiles = true;
 #define MAX_NAME_SIZE 200
 #define MAX_CONDITION_SIZE 200
 
-void UpdateDebuggingDialogs()
+void UpdateOtherDebuggingDialogs()
 {
 	//adelikat: This updates all the other dialogs such as ppu, nametable, logger, etc in one function, should be applied to all the step type buttons
-	UpdateDebugger();		//Debugger 
 	NTViewDoBlit(0);		//Nametable Viewer
 	UpdateLogWindow();		//Trace Logger
 	UpdateCDLogger();		//Code/Data Logger
@@ -526,10 +525,24 @@ void UpdateRegs(HWND hwndDlg) {
 ///indicates whether we're under the control of the debugger
 bool inDebugger = false;
 
-//this code enters the debugger.
-void FCEUD_DebugBreakpoint() {
-	UpdateDebuggingDialogs(); //Keeps the debugging windows updating smoothly when stepping
-	void win_debuggerLoop(); //HACK
+//this code enters the debugger when a breakpoint was hit
+void FCEUD_DebugBreakpoint(int bp_num)
+{
+	UpdateDebugger();
+	// highlight bp_num item in IDC_DEBUGGER_BP_LIST
+	if (bp_num >= 0)
+	{
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, (WPARAM)bp_num, 0);
+		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_DEL), TRUE);
+		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_EDIT), TRUE);
+	} else
+	{
+		SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, (WPARAM)(-1), 0);
+		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_DEL), FALSE);
+		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_EDIT), FALSE);
+	}
+	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
+	void win_debuggerLoop(); // HACK to let user interact with the Debugger while emulator isn't updating
 	win_debuggerLoop();
 }
 
@@ -694,7 +707,13 @@ void EnableBreak(int sel) {
 void DeleteBreak(int sel) {
 	if(sel<0) return;
 	if(sel>=numWPs) return;
-
+	if (watchpoint[sel].cond)
+		freeTree(watchpoint[sel].cond);
+	if (watchpoint[sel].condText)
+		free(watchpoint[sel].condText);
+	if (watchpoint[sel].desc)
+		free(watchpoint[sel].desc);
+	// move all BP items up in the list
 	for (int i = sel; i < numWPs; i++) {
 		watchpoint[i].address = watchpoint[i+1].address;
 		watchpoint[i].endaddress = watchpoint[i+1].endaddress;
@@ -705,6 +724,13 @@ void DeleteBreak(int sel) {
 		watchpoint[i].desc = watchpoint[i+1].desc;
 // ################################## End of SP CODE ###########################
 	}
+	// erase last BP item
+	watchpoint[numWPs].address = 0;
+	watchpoint[numWPs].endaddress = 0;
+	watchpoint[numWPs].flags = 0;
+	watchpoint[numWPs].cond = 0;
+	watchpoint[numWPs].condText = 0;
+	watchpoint[numWPs].desc = 0;
 	numWPs--;
 // ################################## Start of SP CODE ###########################
 	myNumWPs--;
@@ -1378,7 +1404,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								}
 								FCEUI_Debugger().step = true;
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebuggingDialogs();
+								UpdateOtherDebuggingDialogs();
 								
 								break;
 							case IDC_DEBUGGER_RUN_LINE:
@@ -1395,7 +1421,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									FCEUI_Debugger().runline_end_time=ts;
 								}
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebuggingDialogs();
+								UpdateOtherDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_RUN_FRAME2:
 								if (FCEUI_EmulationPaused()) {
@@ -1411,7 +1437,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 									//else vblankScanLines = 0;
 								}
 								FCEUI_SetEmulationPaused(0);
-								UpdateDebuggingDialogs();
+								UpdateOtherDebuggingDialogs();
 								break;
 							case IDC_DEBUGGER_STEP_OUT:
 								//mbg merge 7/18/06 changed pausing check and set
@@ -1503,11 +1529,21 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}
 						break;
 					case LBN_SELCHANGE:
-						switch(LOWORD(wParam)) {
+						switch(LOWORD(wParam))
+						{
 							case IDC_DEBUGGER_BP_LIST:
-								EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),TRUE);
-								EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),TRUE);
+							{
+								if (SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0) >= 0)
+								{
+									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),TRUE);
+									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),TRUE);
+								} else
+								{
+									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_DEL),FALSE);
+									EnableWindow(GetDlgItem(hwndDlg,IDC_DEBUGGER_BP_EDIT),FALSE);
+								}
 								break;
+							}
 						}
 						break;
 				}

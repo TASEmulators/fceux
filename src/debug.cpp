@@ -231,7 +231,7 @@ int GetNesFileAddress(int A){
 	int result;
 	if((A < 0x8000) || (A > 0xFFFF))return -1;
 	result = &Page[A>>11][A]-PRGptr[0];
-	if((result > PRGsize[0]) || (result < 0))return -1;
+	if((result > (int)(PRGsize[0])) || (result < 0))return -1;
 	else return result+16; //16 bytes for the header remember
 }
 
@@ -462,8 +462,8 @@ static DebuggerState dbgstate;
 
 DebuggerState &FCEUI_Debugger() { return dbgstate; }
 
-void BreakHit(bool force = false) {
-
+void BreakHit(int bp_num, bool force = false)
+{
 	if(!force) {
 		
 		//check to see whether we fall in any forbid zone
@@ -490,7 +490,7 @@ void BreakHit(bool force = false) {
 	//MBG TODO - was this commented out before the gnu refactoring?
 	//if((!logtofile) && (logging))PauseLoggingSequence();
 	
-	FCEUD_DebugBreakpoint();
+	FCEUD_DebugBreakpoint(bp_num);
 }
 
 uint8 StackAddrBackup = X.S;
@@ -508,7 +508,7 @@ void breakpoint() {
 	opcode[0] = GetMem(_PC);
 
 	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
-	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit(true);
+	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit(-1, true);
 
 	//if we're stepping out, track the nest level
 	if (dbgstate.stepout) {
@@ -526,7 +526,7 @@ void breakpoint() {
 	//if we're stepping, then we'll always want to break
 	if (dbgstate.step) {
 		dbgstate.step = false;
-		BreakHit(true);
+		BreakHit(-1, true);
 		return;
 	}
 	//if we're running for a scanline, we want to check if we've hit the cycle limit
@@ -538,7 +538,7 @@ void breakpoint() {
 		if (diff<=0)
 		{
 			dbgstate.runline=false;
-			BreakHit(true);
+			BreakHit(-1, true);
 			return;
 		}
 	}
@@ -546,7 +546,7 @@ void breakpoint() {
 	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
 		watchpoint[64].address = 0;
 		watchpoint[64].flags = 0;
-		BreakHit(true);
+		BreakHit(-1, true);
 		return;
 	}
 
@@ -590,28 +590,28 @@ void breakpoint() {
 			if (watchpoint[i].flags & BT_P) { //PPU Mem breaks
 				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7)) {
 					if (watchpoint[i].endaddress) {
-						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr)) BreakHit();
+						if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr)) BreakHit(i);
 					}
-					else if (watchpoint[i].address == RefreshAddr) BreakHit();
+					else if (watchpoint[i].address == RefreshAddr) BreakHit(i);
 				}
 			}
 			else if (watchpoint[i].flags & BT_S) { //Sprite Mem breaks
 				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 4)) {
 					if (watchpoint[i].endaddress) {
-						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3])) BreakHit();
+						if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3])) BreakHit(i);
 					}
-					else if (watchpoint[i].address == PPU[3]) BreakHit();
+					else if (watchpoint[i].address == PPU[3]) BreakHit(i);
 				}
-				else if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & WP_W) && (A == 0x4014)) BreakHit(); //Sprite DMA! :P
+				else if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & WP_W) && (A == 0x4014)) BreakHit(i); //Sprite DMA! :P
 			}
 			else { //CPU mem breaks
 				if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type)) {
 					if (watchpoint[i].endaddress) {
 						if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
-							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit();
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit(i);
 					}
 					else if (((watchpoint[i].flags & (WP_R | WP_W)) && (watchpoint[i].address == A)) ||
-							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
+							((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit(i);
 				}
 				else if (watchpoint[i].flags & WP_E) {
 					//brk_type independant coding
@@ -623,9 +623,9 @@ void breakpoint() {
 						if (watchpoint[i].flags & stackop) {
 							for (j = (stackopstartaddr|0x0100); j <= (stackopendaddr|0x0100); j++) {
 								if (watchpoint[i].endaddress) {
-									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+									if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
 								}
-								else if (watchpoint[i].address == j) BreakHit();
+								else if (watchpoint[i].address == j) BreakHit(i);
 							}
 						}
 					}
@@ -640,9 +640,9 @@ void breakpoint() {
 							if (watchpoint[i].flags & WP_W) {
 								for (j = (X.S|0x0100); j < (StackAddrBackup|0x0100); j++) {
 									if (watchpoint[i].endaddress) {
-										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
 									}
-									else if (watchpoint[i].address == j) BreakHit();
+									else if (watchpoint[i].address == j) BreakHit(i);
 								}
 							}
 						}
@@ -651,9 +651,9 @@ void breakpoint() {
 							if (watchpoint[i].flags & WP_R) {
 								for (j = (StackAddrBackup|0x0100); j < (X.S|0x0100); j++) {
 									if (watchpoint[i].endaddress) {
-										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit();
+										if ((watchpoint[i].address <= j) && (watchpoint[i].endaddress >= j)) BreakHit(i);
 									}
-									else if (watchpoint[i].address == j) BreakHit();
+									else if (watchpoint[i].address == j) BreakHit(i);
 								}
 							}
 						}

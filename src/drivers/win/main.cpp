@@ -70,6 +70,7 @@
 #include "video.h"
 #include "utils/xstring.h"
 #include <string.h>
+#include "taseditor.h"
 #include "taseditor/taseditor_window.h"
 
 extern TASEDITOR_WINDOW taseditor_window;
@@ -868,8 +869,7 @@ void _updateWindow()
 	//UpdateLogWindow();	//adelikat: Moved to FCEUI_Emulate
 	UpdateMemWatch();
 	NTViewDoBlit(0);
-	extern void UpdateTasEditor();
-	UpdateTasEditor();
+	//UpdateTasEditor();	//AnS: moved to FCEUD_Update
 }
 
 void win_debuggerLoop()
@@ -881,6 +881,15 @@ void win_debuggerLoop()
 		Sleep(50);
 		FCEUD_UpdateInput();
 		_updateWindow();
+		// HACK: break when Frame Advance is pressed
+		extern bool frameAdvanceRequested;
+		extern int frameAdvanceDelay;
+		if (frameAdvanceRequested && frameAdvanceDelay==0)
+		{
+			//FCEUI_SetEmulationPaused(0);
+			frameAdvanceDelay++;
+			break;
+		}
 	}
 	int zzz=9;
 }
@@ -901,6 +910,8 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//update debugging displays
 	_updateWindow();
+	// update TAS Editor
+	UpdateTasEditor();
 
 	extern bool JustFrameAdvanced;
 

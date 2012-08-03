@@ -312,7 +312,7 @@ void FCEUD_CmdOpen(void);
 //new merge-era driver routines here:
 
 ///signals that the cpu core hit a breakpoint. this function should not return until the core is ready for the next cycle
-void FCEUD_DebugBreakpoint();
+void FCEUD_DebugBreakpoint(int bp_num);
 
 ///the driver should log the current instruction, if it wants (we should move the code in the win driver that does this to the shared area)
 void FCEUD_TraceInstruction();
