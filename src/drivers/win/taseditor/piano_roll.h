@@ -19,7 +19,7 @@
 
 #define PIANO_ROLL_SCROLLING_BOOST 2
 
-#define MARKER_DRAG_BOX_ALPHA 175
+#define MARKER_DRAG_BOX_ALPHA 180
 #define MARKER_DRAG_COUNTDOWN_MAX 14
 #define MARKER_DRAG_ALPHA_PER_TICK 13
 #define MARKER_DRAG_MAX_SPEED 72
@@ -28,7 +28,6 @@
 #define DRAG_SCROLLING_BORDER_SIZE 10		// in pixels
 
 #define DOUBLETAP_COUNT 3			// 1:quick press, 2 - quick release, 3 - quick press
-#define ROW_LAST_CLICKED_BLINKING_PERIOD 200
 
 enum
 {
