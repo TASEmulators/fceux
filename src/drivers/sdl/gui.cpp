@@ -580,8 +580,14 @@ void openGamepadConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 1);
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(fourScoreChk), 0);
+	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(oppositeDirChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(oppositeDirChk), 0);
 	
 	g_signal_connect(fourScoreChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.FourScore");
+	g_signal_connect(oppositeDirChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Input.EnableOppositeDirectionals");
 	
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoLabel, TRUE, TRUE, 5);
 	gtk_box_pack_start(GTK_BOX(hboxPadNo), padNoCombo, TRUE, TRUE, 5);
@@ -591,7 +597,7 @@ void openGamepadConfig()
 	//gtk_box_pack_start_defaults(GTK_BOX(vbox), typeCombo);
 	
 	gtk_box_pack_start(GTK_BOX(vbox), fourScoreChk, FALSE, TRUE, 5);
-	//gtk_box_pack_start(GTK_BOX(vbox), oppositeDirChk, FALSE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), oppositeDirChk, FALSE, TRUE, 5);
 	
 	
 	// create gamepad buttons
