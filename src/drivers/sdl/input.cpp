@@ -1127,14 +1127,31 @@ UpdateGamepad (void)
 
 	rapid ^= 1;
 
+	int opposite_dirs;
+	g_config->getOption("SDL.Input.EnableOppositeDirectionals", &opposite_dirs);
+
 	// go through each of the four game pads
 	for (wg = 0; wg < 4; wg++)
-	{	
-		// the 4 directional buttons, start, select, a, b
+	{
+		bool left = false;
+		bool up = false;
+		// a, b, select, start, up, down, left, right
 		for (x = 0; x < 8; x++)
 		{
 			if (DTestButton (&GamePadConfig[wg][x]))
 			{
+				if(opposite_dirs == 0)
+				{
+					// test for left+right and up+down
+					if(x == 4)
+						up = true;
+					if((x == 5) && (up == true))
+						continue;
+					if(x == 6)
+						left = true;
+					if((x == 7) && (left == true))
+						continue;
+				}
 				JS |= (1 << x) << (wg << 3);
 			}
 		}

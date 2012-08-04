@@ -192,6 +192,9 @@ InitConfig()
     
 	// display input
 	config->addOption("inputdisplay", "SDL.InputDisplay", 0);
+
+	// enable / disable opposite directionals (left + right or up + down simultaneously)
+	config->addOption("opposite-directionals", "SDL.Input.EnableOppositeDirectionals", 1);
     
 	// pause movie playback at frame x
 	config->addOption("pauseframe", "SDL.PauseFrame", 0);
