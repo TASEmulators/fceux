@@ -1,4 +1,4 @@
-
+08-Aug-2012 - prg - all: updated FSF address
 08-Aug-2012 - prg - sdl: added SDL.Input.EnableOppositeDirectional option.  allows/disallows simultaneous right+left / up+down.
 25-Jul-2012 - AnS - Taseditor: auto-starting Note editing when creating Marker by double-click
 19-Jul-2012 - AnS - Taseditor: Lua registermanual allows changing the "Run function" button caption; Markers are always restored when deploying Bookmarks
