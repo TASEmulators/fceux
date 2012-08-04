@@ -269,7 +269,9 @@ void FCEU_LoadGameCheats(FILE *override)
 				namebuf[x]=0;
 				break;
 			}
-			else if(namebuf[x]<0x20) namebuf[x]=' ';
+			//else if(namebuf[x]<0x20) namebuf[x]=' ';
+			else if(namebuf[x] > 0x00 && namebuf[x] < 0x20) 
+				namebuf[x]=0x20;
 		}
 
 		AddCheatEntry(namebuf,addr,val,doc?compare:-1,status,type);
