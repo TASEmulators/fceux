@@ -319,6 +319,8 @@ std::string GetUserText (const char *title)
 #ifdef _GTK
 /*	prg318 - 10/13/11 - this is broken in recent build and causes segfaults/very weird behavior
 	i'd rather remove it for now than it cause accidental segfaults
+	TODO fix it
+
 	GtkWidget* d;
 	GtkWidget* entry;
 	
@@ -1112,52 +1114,52 @@ ButtConfig GamePadConfig[4][10] = {
 static void
 UpdateGamepad (void)
 {
-  // don't update during movie playback
-  if (FCEUMOV_Mode (MOVIEMODE_PLAY))
-    {
-      return;
-    }
-
-  static int rapid = 0;
-  uint32 JS = 0;
-  int x;
-  int wg;
-
-  rapid ^= 1;
-
-  // go through each of the four game pads
-  for (wg = 0; wg < 4; wg++)
-    {
-      // the 4 directional buttons, start, select, a, b
-      for (x = 0; x < 8; x++)
+	// don't update during movie playback
+	if (FCEUMOV_Mode (MOVIEMODE_PLAY))
 	{
-	  if (DTestButton (&GamePadConfig[wg][x]))
-	    {
-	      JS |= (1 << x) << (wg << 3);
-	    }
-	}
+		return;
+	 }
 
-      // rapid-fire a, rapid-fire b
-      if (rapid)
-	{
-	  for (x = 0; x < 2; x++)
-	    {
-	      if (DTestButton (&GamePadConfig[wg][8 + x]))
+	static int rapid = 0;
+	uint32 JS = 0;
+	int x;
+	int wg;
+
+	rapid ^= 1;
+
+	// go through each of the four game pads
+	for (wg = 0; wg < 4; wg++)
+	{	
+		// the 4 directional buttons, start, select, a, b
+		for (x = 0; x < 8; x++)
 		{
-		  JS |= (1 << x) << (wg << 3);
+			if (DTestButton (&GamePadConfig[wg][x]))
+			{
+				JS |= (1 << x) << (wg << 3);
+			}
 		}
-	    }
+
+		// rapid-fire a, rapid-fire b
+		if (rapid)
+		{
+			for (x = 0; x < 2; x++)
+			{
+				if (DTestButton (&GamePadConfig[wg][8 + x]))
+				{
+					JS |= (1 << x) << (wg << 3);
+				}
+			}
+		}
 	}
-    }
 
-  //  for(x=0;x<32;x+=8)      /* Now, test to see if anything weird(up+down at same time)
-  //                     is happening, and correct */
-  //  {
-  //   if((JS & (0xC0<<x) ) == (0xC0<<x) ) JS&=~(0xC0<<x);
-  //   if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
-  //  }
+//  for(x=0;x<32;x+=8)      /* Now, test to see if anything weird(up+down at same time)
+//                     is happening, and correct */
+//  {
+//   if((JS & (0xC0<<x) ) == (0xC0<<x) ) JS&=~(0xC0<<x);
+//   if((JS & (0x30<<x) ) == (0x30<<x) ) JS&=~(0x30<<x);
+//  }
 
-  JSreturn = JS;
+	JSreturn = JS;
 }
 
 static ButtConfig powerpadsc[2][12] = {
