@@ -54,6 +54,17 @@ extern int vblankScanLines;
 extern int vblankPixel;
 extern bool DebuggerWasUpdated;
 
+extern unsigned long int total_cycles_base;
+extern unsigned long int delta_cycles_base;
+extern bool break_on_cycles;
+extern unsigned long int break_cycles_limit;
+extern unsigned long int total_instructions;
+extern unsigned long int delta_instructions;
+extern bool break_on_instructions;
+extern unsigned long int break_instructions_limit;
+extern void ResetDebugStatisticsCounters();
+extern void ResetDebugStatisticsDeltaCounters();
+
 int childwnd;
 
 extern readfunc ARead[0x10000];
@@ -529,21 +540,30 @@ bool inDebugger = false;
 void FCEUD_DebugBreakpoint(int bp_num)
 {
 	UpdateDebugger();
-	// highlight bp_num item in IDC_DEBUGGER_BP_LIST
+	
 	if (bp_num >= 0)
 	{
+		// highlight bp_num item in IDC_DEBUGGER_BP_LIST
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, (WPARAM)bp_num, 0);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_DEL), TRUE);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_EDIT), TRUE);
 	} else
 	{
+		// remove any selection from IDC_DEBUGGER_BP_LIST
 		SendDlgItemMessage(hDebug, IDC_DEBUGGER_BP_LIST, LB_SETCURSEL, (WPARAM)(-1), 0);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_DEL), FALSE);
 		EnableWindow(GetDlgItem(hDebug, IDC_DEBUGGER_BP_EDIT), FALSE);
+		// select IDC_DEBUGGER_VAL_CYCLES_COUNT or IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT if needed
+		if (bp_num == BREAK_TYPE_CYCLES_EXCEED)
+			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT), EM_SETSEL, 0, -1);
+		else if (bp_num == BREAK_TYPE_INSTRUCTIONS_EXCEED)
+			SendMessage(GetDlgItem(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT), EM_SETSEL, 0, -1);
 	}
 	UpdateOtherDebuggingDialogs(); // Keeps the debugging windows updating smoothly when stepping
 	void win_debuggerLoop(); // HACK to let user interact with the Debugger while emulator isn't updating
 	win_debuggerLoop();
+	// since we unfreezed emulation, reset delta_cycles counter
+	ResetDebugStatisticsDeltaCounters();
 }
 
 void UpdateDebugger()
@@ -555,7 +575,7 @@ void UpdateDebugger()
 	//but if the debugger IS visible, then focus it
 	SetActiveWindow(hDebug);
 
-	char str[256]={0},chr[8];
+	char str[512] = {0}, str2[512] = {0}, chr[8];
 	int tmp,ret,i;
 
 	Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, X.PC);
@@ -582,27 +602,60 @@ void UpdateDebugger()
 	if (ppupixel>341)	//maximum number of pixels per scanline
 		ppupixel = 0;	//Currently pixel display is borked until Run 128 lines is clicked, this keeps garbage from displaying
 
-	//If not in the 0-239 pixel range, make special cases for display
+	// If not in the 0-239 pixel range, make special cases for display
 	if (scanline == 240 && vblankScanLines < (PAL?72:22))
 	{
-		if (!vblankScanLines)								//Idle scanline (240)
-			sprintf(str, "Idle %d\t       %d",scanline,vblankPixel);
-		else if (scanline + vblankScanLines == (PAL?311:261))
-			sprintf(str, "Prerender -1  %d", vblankPixel);	//Pre-render
-		else
-			sprintf(str, "Vblank %d    %d", scanline+vblankScanLines,vblankPixel);	//Vblank lines (241-260/310)
+		if (!vblankScanLines)
+		{
+			// Idle scanline (240)
+			sprintf(str, "%d", scanline);	// was "Idle %d"
+		} else if (scanline + vblankScanLines == (PAL?311:261))
+		{
+			// Pre-render
+			sprintf(str, "-1");	// was "Prerender -1"
+		} else
+		{
+			// Vblank lines (241-260/310)
+			sprintf(str, "%d", scanline + vblankScanLines);	// was "Vblank %d"
+		}
+		sprintf(str2, "%d", vblankPixel);
+	} else
+	{
+		// Scanlines 0 - 239
+		sprintf(str, "%d", scanline);
+		sprintf(str2, "%d", ppupixel);
 	}
-	else	
-		sprintf(str, "%d\t        %d", scanline,ppupixel);	//Scanlines 0 - 239
-	
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_SLINE, str);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_PPUPIXEL, str2);
+
+	// update counters
+	unsigned long int counter_value = timestampbase + timestamp - total_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf(str, "%lu", counter_value);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT, str);
+	counter_value = timestampbase + timestamp - delta_cycles_base;
+	if (counter_value < 0)	// sanity check
+	{
+		ResetDebugStatisticsCounters();
+		counter_value = 0;
+	}
+	sprintf(str, "(+%lu)", counter_value);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_CYCLES_COUNT2, str);
+	sprintf(str, "%lu", total_instructions);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT, str);
+	sprintf(str, "(+%lu)", delta_instructions);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT2, str);
 
 	tmp = X.S|0x0100;
 	sprintf(str, "Stack $%04X", tmp);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_S, str);
 	tmp = ((tmp+1)|0x0100)&0x01FF;
 	sprintf(str, "%02X", GetMem(tmp));
-	for (i = 1; i < 28; i++) {
+	for (i = 1; i < 128; i++) {
 		tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
 		if ((i%4) == 0) sprintf(chr, ",\r\n%02X", GetMem(tmp));
 		else sprintf(chr, ",%02X", GetMem(tmp));
@@ -788,9 +841,13 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 			EndDialog(hwndDlg,0);
 			break;
 		case WM_COMMAND:
-			switch (HIWORD(wParam)) {
+		{
+			switch (HIWORD(wParam))
+			{
 				case BN_CLICKED:
-					switch (LOWORD(wParam)) {
+				{
+					switch (LOWORD(wParam))
+					{
 						case IDC_ASSEMBLER_APPLY:
 							if (patchlen) {
 								ptr = GetNesPRGPointer(GetNesFileAddress(iaPC)-16);
@@ -867,8 +924,10 @@ BOOL CALLBACK AssemblerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					}
 					SetFocus(GetDlgItem(hwndDlg,IDC_ASSEMBLER_HISTORY)); //set focus to combo box after anything is pressed!
 					break;
+				}
 			}
 			break;
+		}
 	}
 	return FALSE;
 }
@@ -1038,15 +1097,26 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
 
 BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	RECT wrect;
-	char str[256]={0},*ptr,dotdot[4];
+	char str[256] = {0}, *ptr, dotdot[4];
 	int tmp,tmp2;
 	int mouse_x,mouse_y;
 	int ret,i;
 	//FILE *fp;
 
 	//these messages get handled at any time
-	switch(uMsg) {
-		case WM_INITDIALOG: {
+	switch(uMsg)
+	{
+		case WM_INITDIALOG:
+		{
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? MF_CHECKED : MF_UNCHECKED);
+			sprintf(str, "%d", break_cycles_limit);
+			SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
+			sprintf(str, "%d", break_instructions_limit);
+			SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
+
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? MF_CHECKED : MF_UNCHECKED);
+
 			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? MF_CHECKED : MF_UNCHECKED);
 			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? MF_CHECKED : MF_UNCHECKED);
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
@@ -1071,15 +1141,15 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
+			//SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,WM_SETFONT,(WPARAM)debugSystem->hFixedFont,FALSE);
 
 			//text limits
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_A,EM_SETLIMITTEXT,2,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_X,EM_SETLIMITTEXT,2,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_Y,EM_SETLIMITTEXT,2,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PC,EM_SETLIMITTEXT,4,0);
-			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,EM_SETLIMITTEXT,83,0);
+			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_STACK_CONTENTS,EM_SETLIMITTEXT,383,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_PPU,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_VAL_SPR,EM_SETLIMITTEXT,2,0);
@@ -1101,7 +1171,6 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			// Enable Context Sub-Menus
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
 
-			FCEUI_Debugger().badopbreak = false;
 			debugger_open = 1;
 			inDebugger = true;
 			break;
@@ -1162,6 +1231,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		//adelikat:  Buttons that don't need a rom loaded to do something, such as autoload
 		case WM_COMMAND:
+		{
 			switch(LOWORD(wParam))
 			{
 				case DEBUGAUTOLOAD:
@@ -1170,8 +1240,27 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				case DEBUGLOADDEB:
 					debuggerSaveLoadDEBFiles = !debuggerSaveLoadDEBFiles;
 					break;
-
+				case IDC_DEBUGGER_CYCLES_EXCEED:
+				{
+					if (HIWORD(wParam) == EN_CHANGE)
+					{
+						GetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str, 16);
+						break_cycles_limit = strtoul(str, NULL, 10);
+					}
+					break;
+				}
+				case IDC_DEBUGGER_INSTRUCTIONS_EXCEED:
+				{
+					if (HIWORD(wParam) == EN_CHANGE)
+					{
+						GetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str, 16);
+						break_instructions_limit = strtoul(str, NULL, 10);
+					}
+					break;
+				}
 			}
+			break;
+		}
 	}
 
 	//these messages only get handled when a game is loaded
@@ -1283,19 +1372,24 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}
 						tmp--;
 					}
-					if (i >= 0x8000) {
+					if (i >= 0x8000)
+					{
 						dotdot[0] = 0;
 						if (!(ptr = iNesShortFName())) ptr = "...";
 						if (strlen(ptr) > 60) strcpy(dotdot,"...");
 						if (GetNesFileAddress(i) == -1) sprintf(str,"CPU Address $%04X, Error retreiving ROM File Address!",i);
 // ################################## Start of SP CODE ###########################
-						else sprintf(str,"CPU Address %02X:%04X, Offset 0x%06X in file \"%.20s%s\" (NL file: %X)",getBank(i),i,GetNesFileAddress(i),ptr,dotdot,getBank(i));
+						else sprintf(str,"CPU Address %02X:%04X, Offset 0x%06X in file \"%.40s%s\" (NL file: %X)",getBank(i),i,GetNesFileAddress(i),ptr,dotdot,getBank(i));
 // ################################## End of SP CODE ###########################
 						SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,str);
+					} else
+					{
+						SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"...");
 					}
-					else SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"");
+				} else
+				{
+					SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"Hover the mouse over the left pane to see the ROM address of the data. Also leftclick/rightclick.");
 				}
-				else SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"");
 				break;
 			}
 
@@ -1484,7 +1578,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								break;
 
 							case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode
-								FCEUI_Debugger().badopbreak ^=1;
+								FCEUI_Debugger().badopbreak ^= 1;
 								break;
 							case IDC_DEBUGGER_FLAG_N: X.P^=N_FLAG; UpdateDebugger(); break;
 							case IDC_DEBUGGER_FLAG_V: X.P^=V_FLAG; UpdateDebugger(); break;
@@ -1494,6 +1588,24 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							case IDC_DEBUGGER_FLAG_I: X.P^=I_FLAG; UpdateDebugger(); break;
 							case IDC_DEBUGGER_FLAG_Z: X.P^=Z_FLAG; UpdateDebugger(); break;
 							case IDC_DEBUGGER_FLAG_C: X.P^=C_FLAG; UpdateDebugger(); break;
+
+							case IDC_DEBUGGER_RESET_COUNTERS:
+							{
+								ResetDebugStatisticsCounters();
+								UpdateDebugger();
+								break;
+							}
+							case IDC_DEBUGGER_BREAK_ON_CYCLES:
+							{
+								break_on_cycles ^= 1;
+								break;
+							}
+							case IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS:
+							{
+								break_on_instructions ^= 1;
+								break;
+							}
+
 // ################################## Start of SP CODE ###########################
 
 							case IDC_DEBUGGER_RELOAD_SYMS: lastBank = loadedBank = -1; loadNameFiles(); UpdateDebugger(); break;
@@ -1604,7 +1716,7 @@ void updateGameDependentMenusDebugger(unsigned int enable) {
 	if (!hDebug)
 		return;
 
-	EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
+	//EnableWindow(GetDlgItem(hDebug,DEBUGLOADDEB),(enable ? 0 : 1));
 }
 
 void DoDebug(uint8 halt) {

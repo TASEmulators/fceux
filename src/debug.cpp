@@ -17,6 +17,7 @@
 
 int vblankScanLines = 0;	//Used to calculate scanlines 240-261 (vblank)
 int vblankPixel = 0;		//Used to calculate the pixels in vblank
+
 int offsetStringToInt(unsigned int type, const char* offsetBuffer)
 {
 	int offset = 0;
@@ -458,9 +459,35 @@ int u; //deleteme
 int skipdebug; //deleteme
 int numWPs; 
 
+// for CPU cycles and Instructions counters
+unsigned long int total_cycles_base = 0;
+unsigned long int delta_cycles_base = 0;
+bool break_on_cycles = false;
+unsigned long int break_cycles_limit = 0;
+unsigned long int total_instructions = 0;
+unsigned long int delta_instructions = 0;
+bool break_on_instructions = false;
+unsigned long int break_instructions_limit = 0;
+
 static DebuggerState dbgstate;
 
 DebuggerState &FCEUI_Debugger() { return dbgstate; }
+
+void ResetDebugStatisticsCounters()
+{
+	total_cycles_base = delta_cycles_base = timestampbase + timestamp;
+	total_instructions = delta_instructions = 0;
+}
+void ResetDebugStatisticsDeltaCounters()
+{
+	delta_cycles_base = timestampbase + timestamp;
+	delta_instructions = 0;
+}
+void IncrementInstructionsCounters()
+{
+	total_instructions++;
+	delta_instructions++;
+}
 
 void BreakHit(int bp_num, bool force = false)
 {
@@ -498,18 +525,25 @@ uint8 StackAddrBackup = X.S;
 uint16 StackNextIgnorePC = 0xFFFF;
 
 ///fires a breakpoint
-void breakpoint() {
+void breakpoint()
+{
 	int i,j;
 	uint16 A=0;
 	uint8 brk_type,opcode[3] = {0};
 	uint8 stackop=0;
 	uint8 stackopstartaddr,stackopendaddr;
 
+	if (break_on_cycles && (timestampbase + timestamp - total_cycles_base > break_cycles_limit))
+		BreakHit(BREAK_TYPE_CYCLES_EXCEED, true);
+	if (break_on_instructions && (total_instructions > break_instructions_limit))
+		BreakHit(BREAK_TYPE_INSTRUCTIONS_EXCEED, true);
+
 	//inspect the current opcode
 	opcode[0] = GetMem(_PC);
 
 	//if the current instruction is bad, and we are breaking on bad opcodes, then hit the breakpoint
-	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0)) BreakHit(-1, true);
+	if(dbgstate.badopbreak && (opsize[opcode[0]] == 0))
+		BreakHit(BREAK_TYPE_STEP, true);
 
 	//if we're stepping out, track the nest level
 	if (dbgstate.stepout) {
@@ -527,7 +561,7 @@ void breakpoint() {
 	//if we're stepping, then we'll always want to break
 	if (dbgstate.step) {
 		dbgstate.step = false;
-		BreakHit(-1, true);
+		BreakHit(BREAK_TYPE_STEP, true);
 		return;
 	}
 	//if we're running for a scanline, we want to check if we've hit the cycle limit
@@ -539,7 +573,7 @@ void breakpoint() {
 		if (diff<=0)
 		{
 			dbgstate.runline=false;
-			BreakHit(-1, true);
+			BreakHit(BREAK_TYPE_STEP, true);
 			return;
 		}
 	}
@@ -547,7 +581,7 @@ void breakpoint() {
 	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
 		watchpoint[64].address = 0;
 		watchpoint[64].flags = 0;
-		BreakHit(-1, true);
+		BreakHit(BREAK_TYPE_STEP, true);
 		return;
 	}
 
@@ -674,8 +708,14 @@ void breakpoint() {
 
 int debug_tracing;
 
-void DebugCycle() {
-	
+void DebugCycle()
+{
+
+#ifdef WIN32
+	// since this function is called once for every instruction, we can use it for keeping statistics
+	IncrementInstructionsCounters();
+#endif
+
 	if (scanline == 240)
 	{
 		vblankScanLines = (PAL?int((double)timestamp / ((double)341 / (double)3.2)):timestamp / 114);	//114 approximates the number of timestamps per scanline during vblank.  Approx 2508. NTSC: (341 / 3.0) PAL: (341 / 3.2). Uses (3.? * cpu_cycles) / 341.0, and assumes 1 cpu cycle.
@@ -691,8 +731,9 @@ void DebugCycle() {
 		if ((_PC >= 0x3801) && (_PC <= 0x3824)) return;
 	}
 
-	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak) 
+	if (numWPs || dbgstate.step || dbgstate.runline || dbgstate.stepout || watchpoint[64].flags || dbgstate.badopbreak || break_on_cycles || break_on_instructions)
 		breakpoint();
+
 	if(debug_loggingCD) LogCDData();
 	
 	//mbg 6/30/06 - this was commented out when i got here. i dont understand it anyway
@@ -704,4 +745,5 @@ void DebugCycle() {
 	extern volatile int logging; //UGETAB: This is required to be an extern, because the info isn't set here
 	if(logging) FCEUD_TraceInstruction();
 #endif
+
 }

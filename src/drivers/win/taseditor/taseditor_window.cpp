@@ -1177,9 +1177,9 @@ BOOL CALLBACK WndprocTasEditor(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 					break;
 				case ACCEL_CTRL_A:
 					if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_UPPER)
-						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1); 
+						SendMessage(playback.hwndPlaybackMarkerEdit, EM_SETSEL, 0, -1);
 					else if (markers_manager.marker_note_edit == MARKER_NOTE_EDIT_LOWER)
-						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1); 
+						SendMessage(selection.hwndSelectionMarkerEdit, EM_SETSEL, 0, -1);
 					else if (piano_roll.drag_mode != DRAG_MODE_SELECTION)
 						selection.SelectBetweenMarkers();
 					break;

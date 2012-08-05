@@ -884,11 +884,12 @@ void win_debuggerLoop()
 		// HACK: break when Frame Advance is pressed
 		extern bool frameAdvanceRequested;
 		extern int frameAdvanceDelay;
-		if (frameAdvanceRequested && frameAdvanceDelay==0)
+		if (frameAdvanceRequested)
 		{
-			//FCEUI_SetEmulationPaused(0);
-			frameAdvanceDelay++;
-			break;
+			if (frameAdvanceDelay==0 || frameAdvanceDelay >= 10)
+				FCEUI_SetEmulationPaused(2);
+			if (frameAdvanceDelay < 10)
+				frameAdvanceDelay++;
 		}
 	}
 	int zzz=9;

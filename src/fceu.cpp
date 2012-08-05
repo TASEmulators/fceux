@@ -53,6 +53,8 @@
 #ifdef WIN32
 #include "drivers/win/pref.h"
 
+extern void ResetDebugStatisticsCounters();
+
 extern bool TaseditorIsRecording();
 #endif
 
@@ -802,12 +804,11 @@ void PowerNES(void)
 	if(disableBatteryLoading)
 		GameInterface(GI_RESETSAVE);
 
-
-	timestampbase=0;
-	LagCounterReset();
-
+	timestampbase = 0;
 	X6502_Power();
+	ResetDebugStatisticsCounters();
 	FCEU_PowerCheats();
+	LagCounterReset();
 	// clear back baffer
 	extern uint8 *XBackBuf;
 	memset(XBackBuf,0,256*256);
@@ -815,6 +816,7 @@ void PowerNES(void)
 #ifdef WIN32
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 #endif
+
 	FCEU_DispMessage("Power on", 0);
 }
 

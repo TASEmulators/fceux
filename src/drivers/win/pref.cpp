@@ -28,6 +28,11 @@
 #include "debugger.h"
 #include "../../debug.h"
 
+extern bool break_on_cycles;
+extern unsigned long int break_cycles_limit;
+extern bool break_on_instructions;
+extern unsigned long int break_instructions_limit;
+
 extern char symbDebugEnabled;
 
 /**
@@ -39,6 +44,7 @@ extern char symbDebugEnabled;
 int storeDebuggerPreferences(FILE* f)
 {
 	int i;
+	uint8 tmp;
 
 	// Flag that says whether symbolic debugging should be enabled
 	if (fwrite(&symbDebugEnabled, 1, 1, f) != 1) return 1;
@@ -81,6 +87,26 @@ int storeDebuggerPreferences(FILE* f)
 			if (fwrite(watchpoint[i].desc, 1, len, f) != len) return 1;
 		}
 	}
+
+	// write "Break on Bad Opcode" flag
+	if (FCEUI_Debugger().badopbreak)
+		tmp = 1;
+	else
+		tmp = 0;
+	if (fwrite(&tmp, 1, 1, f) != 1) return 1;
+	// write "Break when exceed" data
+	if (break_on_cycles)
+		tmp = 1;
+	else
+		tmp = 0;
+	if (fwrite(&tmp, 1, 1, f) != 1) return 1;
+	if (fwrite(&break_cycles_limit, sizeof(break_cycles_limit), 1, f) != 1) return 1;
+	if (break_on_instructions)
+		tmp = 1;
+	else
+		tmp = 0;
+	if (fwrite(&tmp, 1, 1, f) != 1) return 1;
+	if (fwrite(&break_instructions_limit, sizeof(break_instructions_limit), 1, f) != 1) return 1;
 	
 	return 0;
 }
@@ -204,6 +230,7 @@ int loadDebugDataFailed = 0;
 int loadDebuggerPreferences(FILE* f)
 {
 	unsigned int i;
+	uint8 tmp;
 
 	// Read flag that says if symbolic debugging is enabled
 	if (fread(&symbDebugEnabled, sizeof(symbDebugEnabled), 1, f) != 1) return 1;
@@ -294,8 +321,18 @@ int loadDebuggerPreferences(FILE* f)
 
 			myNumWPs++;
 		}
-		
 	}
+
+	// Read "Break on Bad Opcode" flag
+	if (fread(&tmp, 1, 1, f) != 1) return 1;
+	FCEUI_Debugger().badopbreak = (tmp != 0);
+	// Read "Break when exceed" data
+	if (fread(&tmp, 1, 1, f) != 1) return 1;
+	break_on_cycles = (tmp != 0);
+	if (fread(&break_cycles_limit, sizeof(break_cycles_limit), 1, f) != 1) return 1;
+	if (fread(&tmp, 1, 1, f) != 1) return 1;
+	break_on_instructions = (tmp != 0);
+	if (fread(&break_instructions_limit, sizeof(break_instructions_limit), 1, f) != 1) return 1;
 
 	return 0;
 }
