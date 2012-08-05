@@ -1378,8 +1378,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			UINT len;
 
 			len=DragQueryFileW((HDROP)wParam,0,0,0)+1; 
-			wchar_t* wftmp;
-			wftmp=new wchar_t[len];
+			wchar_t* wftmp = new wchar_t[len];
 			{
 				DragQueryFileW((HDROP)wParam,0,wftmp,len); 
 				std::string fileDropped = wcstombs(wftmp);
@@ -1482,13 +1481,22 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				//-------------------------------------------------------
 				//Check if Lua file
 				//-------------------------------------------------------
-				#ifdef _S9XLUA_H
+#ifdef _S9XLUA_H
 				else if (!(fileDropped.find(".lua") == string::npos) && (fileDropped.find(".lua") == fileDropped.length()-4))	
 				{
+					// HACK because luaL_loadfile doesn't work with multibyte paths
+					char *ftmp;
+					len = DragQueryFile((HDROP)wParam, 0, 0, 0) + 1; 
+					if ((ftmp=(char*)malloc(len))) 
+					{
+						DragQueryFile((HDROP)wParam, 0, ftmp, len); 
+						fileDropped = ftmp;
+						free(ftmp);
+					}
 					FCEU_LoadLuaCode(fileDropped.c_str());
 					UpdateLuaConsole(fileDropped.c_str());
 				}
-				#endif
+#endif
 				//-------------------------------------------------------
 				//Check if Ram Watch file
 				//-------------------------------------------------------
