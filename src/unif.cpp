@@ -484,7 +484,7 @@ int LoadUNIFChunks(FCEUFILE *fp)
 			x++;
 		}
 		if(!t)
-			if(FCEU_fseek(fp,uchead.info,SEEK_CUR))
+			if(FCEU_fseek(fp,uchead.info,SEEK_CUR)<0)
 				return(0);
 	}
 }
