@@ -679,6 +679,15 @@ static int InitCheatComp(void)
 void FCEUI_CheatSearchSetCurrentAsOriginal(void)
 {
 	uint32 x;
+
+	if(!CheatComp)
+	{
+		if(InitCheatComp())
+		{
+			CheatMemErr();
+			return;
+		}
+	}
 	for(x=0x000;x<0x10000;x++)
 		if(!(CheatComp[x]&CHEATC_NOSHOW))
 		{
