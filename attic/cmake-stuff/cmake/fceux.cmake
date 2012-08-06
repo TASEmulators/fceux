@@ -33,6 +33,7 @@ set(SRC_CORE
   ${CMAKE_SOURCE_DIR}/src/fceu.cpp
   ${CMAKE_SOURCE_DIR}/src/fds.cpp
   ${CMAKE_SOURCE_DIR}/src/file.cpp
+  ${CMAKE_SOURCE_DIR}/src/emufile.cpp
   ${CMAKE_SOURCE_DIR}/src/filter.cpp
   ${CMAKE_SOURCE_DIR}/src/ines.cpp
   ${CMAKE_SOURCE_DIR}/src/input.cpp
@@ -99,8 +100,7 @@ set(SRC_CORE
   ${CMAKE_SOURCE_DIR}/src/boards/bmc70in1.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/bonza.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/bs-5.cpp
-  ${CMAKE_SOURCE_DIR}/src/boards/copyfami_mmc3.cpp
-  ${CMAKE_SOURCE_DIR}/src/boards/dance.cpp
+  ${CMAKE_SOURCE_DIR}/src/boards/onebus.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/datalatch.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/deirom.cpp
   ${CMAKE_SOURCE_DIR}/src/boards/dream.cpp
@@ -240,6 +240,7 @@ set(SRC_DRIVERS_COMMON
   ${CMAKE_SOURCE_DIR}/src/drivers/common/scale3x.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/common/scalebit.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/common/vidblit.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/common/nes_ntsc.c
 )
 
 set(SRC_DRIVERS_SDL
@@ -328,6 +329,13 @@ set(SRC_DRIVERS_WIN
   ${CMAKE_SOURCE_DIR}/src/drivers/win/state.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/tasedit.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/taseditproj.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/greenzone.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/bookmark.cpp  
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/bookmarks.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/inputhistory.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/inputsnapshot.cpp
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/playback.cpp  
+  ${CMAKE_SOURCE_DIR}/src/drivers/win/taseditlib/markers.cpp   
   ${CMAKE_SOURCE_DIR}/src/drivers/win/texthook.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/throttle.cpp
   ${CMAKE_SOURCE_DIR}/src/drivers/win/timing.cpp
@@ -366,6 +374,7 @@ if(WIN32)
     -D_USE_SHARED_MEMORY_
     -DPSS_STYLE=2
     -DNOMINMAX
+	-D_S9XLUA_H
   )
   link_directories( ${CMAKE_SOURCE_DIR}/src/drivers/win/directx )
 else(WIN32)
@@ -393,7 +402,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "debug")
   add_definitions( -D_DEBUG )
 endif(CMAKE_BUILD_TYPE STREQUAL "debug")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-write-strings -Wno-sign-compare")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wno-write-strings -Wno-sign-compare")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 if(FCEUX_FRAMESKIP)
@@ -445,7 +454,7 @@ if(WIN32)
   add_dependencies( ${FCEUX_EXE_NAME} BuildResourceFileFor${FCEUX_EXE_NAME} )
   set_property(
     TARGET ${FCEUX_EXE_NAME}
-    PROPERTY LINK_FLAGS ${OUTPUT_RES_RC_O}
+    PROPERTY LINK_FLAGS "${OUTPUT_RES_RC_O} -mwindows"
   )
 
   target_link_libraries( ${FCEUX_EXE_NAME} rpcrt4 comctl32 vfw32 winmm ws2_32
