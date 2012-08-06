@@ -806,7 +806,9 @@ void PowerNES(void)
 
 	timestampbase = 0;
 	X6502_Power();
+#ifdef WIN32
 	ResetDebugStatisticsCounters();
+#endif
 	FCEU_PowerCheats();
 	LagCounterReset();
 	// clear back baffer
