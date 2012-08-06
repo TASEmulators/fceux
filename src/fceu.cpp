@@ -217,7 +217,7 @@ bool frameAdvanceRequested=false;
 int frameAdvanceDelay;
 
 //indicates that the emulation core just frame advanced (consumed the frame advance state and paused)
-bool JustFrameAdvanced=false;
+bool JustFrameAdvanced = false;
 
 static int *AutosaveStatus; //is it safe to load Auto-savestate
 static int AutosaveIndex = 0; //which Auto-savestate we're on
@@ -624,6 +624,11 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	//skip initiates frame skip if 1, or frame skip and sound skip if 2
 	int r,ssize;
 
+#ifdef WIN32
+	UpdateLogWindow();
+#endif
+
+
 	JustFrameAdvanced = false;
 
 	if (frameAdvanceRequested)
@@ -676,7 +681,6 @@ void FCEUI_Emulate(uint8 **pXBuf, int32 **SoundBuf, int32 *SoundBufSize, int ski
 	UpdateTextHooker();
 	Update_RAM_Search(); // Update_RAM_Watch() is also called.
 	RamChange();
-	UpdateLogWindow();
 	//FCEUI_AviVideoUpdate(XBuf);
 	extern int KillFCEUXonFrame;
 	if (KillFCEUXonFrame && (FCEUMOV_GetFrame() >= KillFCEUXonFrame))

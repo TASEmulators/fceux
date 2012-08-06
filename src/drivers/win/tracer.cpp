@@ -44,7 +44,7 @@ using namespace std;
 //#define LOG_ADD_PERIODS 8
 
 //int logaxy = 1, logopdata = 1; //deleteme
-int logging_options = -1;
+int logging_options = LOG_REGISTERS | LOG_PROCESSOR_STATUS;
 int log_update_window = 0;
 //int tracer_open=0;
 volatile int logtofile = 0, logging = 0;
@@ -61,6 +61,10 @@ int tracelogbufsize, tracelogbufpos;
 int tracelogbufusedsize;
 
 bool tracer_lines_tabbing = true;
+bool tracer_statuses_to_the_left = false;
+
+bool old_emu_paused = false;	// thus the window only updates once after the game is paused
+extern bool JustFrameAdvanced;
 
 FILE *LOG_FP;
 
@@ -127,21 +131,12 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 			CheckDlgButton(hwndDlg, IDC_CHECK_LINES_TABBING, tracer_lines_tabbing ? BST_CHECKED : BST_UNCHECKED);
-			if(logging_options == -1)
-			{
-				logging_options = (LOG_REGISTERS | LOG_PROCESSOR_STATUS);
-				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
-				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);
-			} else
-			{
-				if(logging_options&LOG_REGISTERS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
-				if(logging_options&LOG_PROCESSOR_STATUS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);				
-			}
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_STATUSES_TO_THE_LEFT, tracer_statuses_to_the_left ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, (logging_options & LOG_REGISTERS) ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, (logging_options & LOG_PROCESSOR_STATUS) ? BST_CHECKED : BST_UNCHECKED);
 			EnableWindow(GetDlgItem(hwndDlg,IDC_TRACER_LOG_SIZE),TRUE);
 			EnableWindow(GetDlgItem(hwndDlg,IDC_BTN_LOG_BROWSE),FALSE);
-
-			if(log_update_window)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, BST_CHECKED);
-
+			CheckDlgButton(hwndDlg, IDC_CHECK_LOG_UPDATE_WINDOW, log_update_window ? BST_CHECKED : BST_UNCHECKED);
 			EnableTracerMenuItems();
 			break;
 		case WM_CLOSE:
@@ -174,6 +169,9 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_CHECK_LOG_PROCESSOR_STATUS:
 							logging_options ^= LOG_PROCESSOR_STATUS;
+							break;
+						case IDC_CHECK_LOG_STATUSES_TO_THE_LEFT:
+							tracer_statuses_to_the_left ^= 1;
 							break;
 						case IDC_CHECK_LINES_TABBING:
 							tracer_lines_tabbing ^= 1;
@@ -260,6 +258,7 @@ void BeginLoggingSequence(void){
 
 	if(logtofile){
 		if(logfilename == NULL) ShowLogDirDialog();
+		if (!logfilename) return;
 		LOG_FP = fopen(logfilename,"w");
 		if(LOG_FP == NULL){
 			sprintf(str,"Error Opening File %s",logfilename);
@@ -329,7 +328,7 @@ done:
 void FCEUD_TraceInstruction(){
 	if(!logging) return;
 
-	char address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
+	char str_tabs[LOG_TABS_MAX_LEN], address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
 	char str[LOG_LINE_MAX_LEN];
 	int addr=X.PC;
 	int size, j;
@@ -357,11 +356,14 @@ void FCEUD_TraceInstruction(){
 	axystate[0] = str[0] = 0;
 	size = opsize[GetMem(addr)];
 
-	if ((addr+size) > 0xFFFF){
+	if ((addr+size) > 0xFFFF)
+	{
 		sprintf(data, "%02X        ", GetMem(addr&0xFFFF));
 		sprintf(disassembly,"OVERFLOW");
-	} else {
-	switch(size){
+	} else
+	{
+		switch(size)
+		{
 			case 0:
 				sprintf(data, "%02X        ", GetMem(addr));
 				sprintf(disassembly,"UNDEFINED");
@@ -387,7 +389,8 @@ void FCEUD_TraceInstruction(){
 		}
 	}
 	//stretch the disassembly string out if we have to output other stuff.
-	if(logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)){
+	if((logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)) && !tracer_statuses_to_the_left)
+	{
 		for(j = strlen(disassembly);j < LOG_DISASSEMBLY_MAX_LEN - 1;j++)disassembly[j] = ' ';
 		disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
@@ -410,23 +413,43 @@ void FCEUD_TraceInstruction(){
 			);
 	}
 
+	if (tracer_statuses_to_the_left)
+	{
+		if (logging_options & LOG_REGISTERS)
+			strcat(str, axystate);
+		if ((logging_options & LOG_REGISTERS) && (logging_options & LOG_PROCESSOR_STATUS))
+			strcat(str, " ");
+		if (logging_options & LOG_PROCESSOR_STATUS)
+			strcat(str, procstatus);
+		if ((logging_options & LOG_REGISTERS) || (logging_options & LOG_PROCESSOR_STATUS))
+			strcat(str, " ");
+	}
+
 	if (tracer_lines_tabbing)
 	{
 		// add spaces at the beginning of the line according to stack pointer
 		int spaces = 0xFF - X.S;
-		if (spaces > LOG_TABS_MAX_LEN)
-			spaces = LOG_TABS_MAX_LEN;
+		if (spaces >= LOG_TABS_MAX_LEN)
+			spaces = LOG_TABS_MAX_LEN - 1;
 		for (int i = 0; i < spaces; i++)
-			str[i] = ' ';
-		str[spaces] = 0;
+			str_tabs[i] = ' ';
+		str_tabs[spaces] = 0;
+		strcat(str, str_tabs);
 	}
 
-	strcat(str,address);
-	strcat(str,data);
-	strcat(str,disassembly);
-	if(logging_options & LOG_REGISTERS)strcat(str,axystate);
-	if((logging_options & LOG_REGISTERS) && (logging_options & LOG_PROCESSOR_STATUS))strcat(str," ");
-	if(logging_options & LOG_PROCESSOR_STATUS)strcat(str,procstatus);
+	strcat(str, address);
+	strcat(str, data);
+	strcat(str, disassembly);
+
+	if (!tracer_statuses_to_the_left)
+	{
+		if (logging_options & LOG_REGISTERS)
+			strcat(str,axystate);
+		if ((logging_options & LOG_REGISTERS) && (logging_options & LOG_PROCESSOR_STATUS))
+			strcat(str," ");
+		if (logging_options & LOG_PROCESSOR_STATUS)
+			strcat(str,procstatus);
+	}
 
 	OutputLogLine(str);
 
@@ -481,12 +504,18 @@ void UpdateLogWindow(void){
 	//
 	
 	//we don't want to continue if the trace logger isn't logging, or if its logging to  a file.
-	if((!logging) || logtofile)return; 
+	if ((!logging) || logtofile)
+		return; 
 
-	//if the game isn't paused, and the option to update the log window while running isn't checked, then halt here.
-	if(!FCEUI_EmulationPaused() && !log_update_window){ //mbg merge 7/19/06 changd to use EmulationPaused()
+	// only update the window when some emulation occured
+	// and only update the window when emulator is paused or log_update_window=true
+	bool emu_paused = (FCEUI_EmulationPaused() != 0);
+	if ((!emu_paused && !log_update_window) || (old_emu_paused && !JustFrameAdvanced))	//mbg merge 7/19/06 changd to use EmulationPaused()
+	{
+		old_emu_paused = emu_paused;
 		return;
 	}
+	old_emu_paused = emu_paused;
 
 	tracesi.cbSize = sizeof(SCROLLINFO);
 	tracesi.fMask = SIF_ALL;
@@ -535,33 +564,29 @@ void EnableTracerMenuItems(void){
 		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
 	//}
 
-	if(logging){
+	if(logging)
+	{
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_REGISTERS),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_PROCESSOR_STATUS),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),FALSE);
-		//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_DATA),FALSE);
 		return;
 	}
 
 	EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_LAST),TRUE);
 	EnableWindow(GetDlgItem(hTracer,IDC_RADIO_LOG_TO_FILE),TRUE);
 	EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),TRUE);
-	//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_REGISTERS),TRUE);
-	//EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_PROCESSOR_STATUS),TRUE); //uncomment me
 	EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
 	EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_NEW_INSTRUCTIONS),TRUE);
 
-	if(logtofile){
+	if(logtofile)
+	{
 		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),TRUE);
-		CheckDlgButton(hTracer, IDC_CHECK_LOG_UPDATE_WINDOW, BST_UNCHECKED);
 		log_update_window = 0;
 		EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),FALSE);
-	} else{
+	} else
+	{
 		EnableWindow(GetDlgItem(hTracer,IDC_TRACER_LOG_SIZE),TRUE);
 		EnableWindow(GetDlgItem(hTracer,IDC_BTN_LOG_BROWSE),FALSE);
 		EnableWindow(GetDlgItem(hTracer,IDC_CHECK_LOG_UPDATE_WINDOW),TRUE);
