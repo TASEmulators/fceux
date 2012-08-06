@@ -425,41 +425,66 @@ void openNetworkConfig()
 }
 
 // creates and opens hotkey config window
-/*void openHotkeyConfig()
+void openHotkeyConfig()
 {
 	std::string prefix = "SDL.Hotkeys.";
-	GtkWidget* win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget* win = gtk_dialog_new_with_buttons("Hotkey Configuration",
+			GTK_WINDOW(MainWindow),
+			(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+			GTK_STOCK_CLOSE,
+			GTK_RESPONSE_OK,
+			NULL);
+	GtkWidget *tree;
+	GtkWidget *vbox;
+
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	enum
 	{
-	COMMAND_COLUMN,
-	KEY_COLUMN,
-	N_COLUMNS
+		COMMAND_COLUMN,
+//		ACTION_COLUMN,
+		KEY_COLUMN,
+		N_COLUMNS
 	};
-	GtkListStore* store = gtk_list_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
-	GtkTreeIter iter;
+	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT);
+	GtkTreeIter iter; // parent
+	GtkTreeIter iter2; // child
 	
-	gtk_list_store_append(store, &iter); // aquire iter
+	gtk_tree_store_append(store, &iter, NULL); // aquire iter
 	
 	
-		int buf;
+	int keycode;
 	for(int i=0; i<HK_MAX; i++)
 	{
-		//g_config->getOption(prefix + HotkeyStrings[i], &buf);
-		gtk_list_store_set(store, &iter, 
-				COMMAND_COLUMN, prefix + HotkeyStrings[i], 
-				KEY_COLUMN, "TODO", -1);
+		const char* optionName = (prefix + HotkeyStrings[i]).c_str();
+		g_config->getOption(optionName, &keycode);
+		gtk_tree_store_set(store, &iter, 
+				COMMAND_COLUMN, optionName,
+//				ACTION_COLUMN, "This hotkey does this.",
+				KEY_COLUMN, keycode, 
+				-1);
+		gtk_tree_store_append(store, &iter, NULL); // acquire child iterator
 	}
-	GtkWidget* tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 	GtkCellRenderer *renderer;
-	GtkTreeViewColumn *column;
+	GtkTreeViewColumn* column;
+
 	
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", 0, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", COMMAND_COLUMN, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+//	column = gtk_tree_view_column_new_with_attributes("Action", renderer, "text", ACTION_COLUMN, NULL);
+//	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", KEY_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
-	gtk_container_add(GTK_CONTAINER(win),tree);
+	gtk_container_add(GTK_CONTAINER(win),vbox);
+	gtk_box_pack_start(GTK_BOX(vbox), tree , TRUE, TRUE, 5);
 	gtk_widget_show_all(win);
-}*/
+
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+    g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+}
+
 GtkWidget* 	typeCombo;
 
 // TODO: finish this
@@ -472,12 +497,6 @@ int setInputDevice(GtkWidget* w, gpointer p)
 	g_config->save();
 	
 	return 1;
-}
-
-gboolean closeGamepadConfig(GtkWidget* w, GdkEvent* event, gpointer p)
-{
-	gtk_widget_destroy(w);
-	return FALSE;
 }
 
 void updateGamepadConfig(GtkWidget* w, gpointer p)
@@ -637,8 +656,8 @@ void openGamepadConfig()
 	
 	gtk_box_pack_start(GTK_BOX(vbox), buttonFrame, TRUE, TRUE, 5);
 	
-	g_signal_connect(win, "delete-event", G_CALLBACK(closeGamepadConfig), NULL);
-	g_signal_connect(win, "response", G_CALLBACK(closeGamepadConfig), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
 	
 	gtk_widget_show_all(win);
 	
@@ -2034,6 +2053,7 @@ static char* menuXml =
 	"    </menu>"
 	"    <menu action='OptionsMenuAction'>"
 	"      <menuitem action='GamepadConfigAction' />"
+//	"      <menuitem action='HotkeyConfigAction' />"
 	"      <menuitem action='SoundConfigAction' />"
 	"      <menuitem action='VideoConfigAction' />"
 	"      <menuitem action='PaletteConfigAction' />"
@@ -2092,6 +2112,7 @@ static GtkActionEntry normal_entries[] = {
 #if GTK_MAJOR_VERSION == 3 || (GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 24)
 	{"GamepadConfigAction", "input-gaming", "_Gamepad Config", NULL, NULL, G_CALLBACK(openGamepadConfig)},
 #endif
+//	{"HotkeyConfigAction", "input", "_Hotkey Config", NULL, NULL, G_CALLBACK(openHotkeyConfig)},
 	{"SoundConfigAction", "audio-x-generic", "_Sound Config", NULL, NULL, G_CALLBACK(openSoundConfig)},
 	{"VideoConfigAction", "video-display", "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
 	{"PaletteConfigAction", GTK_STOCK_SELECT_COLOR, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
