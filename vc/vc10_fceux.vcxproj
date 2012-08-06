@@ -872,10 +872,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\tasedit\psd\bmp\te_green_arrow.bmp" />
-    <None Include="..\src\drivers\win\res\bitmap20.bmp" />
     <None Include="..\src\drivers\win\res\branch_spritesheet.bmp" />
-    <None Include="..\src\drivers\win\res\icon3.ico" />
-    <None Include="..\src\drivers\win\res\icon4.ico" />
     <None Include="..\src\drivers\win\res\ICON_1.ico" />
     <None Include="..\src\drivers\win\res\ICON_2.ico" />
     <None Include="..\src\drivers\win\res\taseditor-icon.ico" />

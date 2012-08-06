@@ -60,6 +60,8 @@ char **tracelogbuf;
 int tracelogbufsize, tracelogbufpos;
 int tracelogbufusedsize;
 
+bool tracer_lines_tabbing = true;
+
 FILE *LOG_FP;
 
 int Tracer_wndx=0, Tracer_wndy=0;
@@ -123,11 +125,15 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(hwndDlg, IDC_TRACER_LOG, "Welcome to the Trace Logger.");
 			logtofile = 0;
 
-			if(logging_options == -1){
+
+			CheckDlgButton(hwndDlg, IDC_CHECK_LINES_TABBING, tracer_lines_tabbing ? BST_CHECKED : BST_UNCHECKED);
+			if(logging_options == -1)
+			{
 				logging_options = (LOG_REGISTERS | LOG_PROCESSOR_STATUS);
 				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
 				CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);
-			} else{
+			} else
+			{
 				if(logging_options&LOG_REGISTERS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_REGISTERS, BST_CHECKED);
 				if(logging_options&LOG_PROCESSOR_STATUS)CheckDlgButton(hwndDlg, IDC_CHECK_LOG_PROCESSOR_STATUS, BST_CHECKED);				
 			}
@@ -168,7 +174,10 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							break;
 						case IDC_CHECK_LOG_PROCESSOR_STATUS:
 							logging_options ^= LOG_PROCESSOR_STATUS;
-							break; 
+							break;
+						case IDC_CHECK_LINES_TABBING:
+							tracer_lines_tabbing ^= 1;
+							break;
 						case IDC_CHECK_LOG_NEW_INSTRUCTIONS:
 							logging_options ^= LOG_NEW_INSTRUCTIONS;
 							if(logging && (!PromptForCDLogger())){
@@ -264,10 +273,10 @@ void BeginLoggingSequence(void){
 		tracelogbufsize = j = log_optn_intlst[SendDlgItemMessage(hTracer,IDC_TRACER_LOG_SIZE,CB_GETCURSEL,0,0)];
 		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
 		for(i = 0;i < j;i++){
-			tracelogbuf[i] = (char*)malloc(80); //mbg merge 7/19/06 added cast
+			tracelogbuf[i] = (char*)malloc(LOG_LINE_MAX_LEN); //mbg merge 7/19/06 added cast
 			tracelogbuf[i][0] = 0;
 		}
-		sprintf(str2,"%d Bytes Allocated...\r\n",j*80);
+		sprintf(str2, "%d Bytes Allocated...\r\n", j * LOG_LINE_MAX_LEN);
 		strcat(str,str2);
 		strcat(str,pauseMessage.c_str());
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
@@ -320,8 +329,8 @@ done:
 void FCEUD_TraceInstruction(){
 	if(!logging) return;
 
-	char address[7], data[11], disassembly[28], axystate[21], procstatus[12];
-	char str[96];
+	char address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
+	char str[LOG_LINE_MAX_LEN];
 	int addr=X.PC;
 	int size, j;
 	uint8 opcode[3], tmp;
@@ -379,8 +388,8 @@ void FCEUD_TraceInstruction(){
 	}
 	//stretch the disassembly string out if we have to output other stuff.
 	if(logging_options & (LOG_REGISTERS|LOG_PROCESSOR_STATUS)){
-		for(j = strlen(disassembly);j < 27;j++)disassembly[j] = ' ';
-		disassembly[27] = 0;
+		for(j = strlen(disassembly);j < LOG_DISASSEMBLY_MAX_LEN - 1;j++)disassembly[j] = ' ';
+		disassembly[LOG_DISASSEMBLY_MAX_LEN - 1] = 0;
 	}
 
 	if(logging_options & LOG_REGISTERS){
@@ -401,6 +410,16 @@ void FCEUD_TraceInstruction(){
 			);
 	}
 
+	if (tracer_lines_tabbing)
+	{
+		// add spaces at the beginning of the line according to stack pointer
+		int spaces = 0xFF - X.S;
+		if (spaces > LOG_TABS_MAX_LEN)
+			spaces = LOG_TABS_MAX_LEN;
+		for (int i = 0; i < spaces; i++)
+			str[i] = ' ';
+		str[spaces] = 0;
+	}
 
 	strcat(str,address);
 	strcat(str,data);
@@ -421,7 +440,8 @@ void OutputLogLine(char *str){
 		fflush(LOG_FP);
 	}else{
 		strcat(str,"\r\n");
-		if(strlen(str) < 80)strcpy(tracelogbuf[tracelogbufpos],str);
+		if(strlen(str) < LOG_LINE_MAX_LEN)
+			strcpy(tracelogbuf[tracelogbufpos],str);
 		tracelogbufpos++;
 		if(tracelogbufusedsize < tracelogbufsize)tracelogbufusedsize++;
 		tracelogbufpos%=tracelogbufsize;
