@@ -462,37 +462,31 @@ void flushGtkEvents()
 	return;
 }
 
-enum
-{
-	COMMAND_COLUMN,
-	KEY_COLUMN,
-	N_COLUMNS
-};
-
-
-int populate_hotkey_tree_store()
-{
-	return 0;
-}
-
 GtkWidget* HotkeyWin;
 
 // creates and opens hotkey config window
 void openHotkeyConfig()
 {
+	enum
+	{
+		COMMAND_COLUMN,
+		KEY_COLUMN,
+		N_COLUMNS
+	};
 	GtkWidget* win = gtk_dialog_new_with_buttons("Hotkey Configuration",
-			GTK_WINDOW(MainWindow),
-			(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+			GTK_WINDOW(MainWindow), (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
 			GTK_STOCK_CLOSE,
 			GTK_RESPONSE_OK,
 			NULL);
 	HotkeyWin = win;
 	GtkWidget *tree;
 	GtkWidget *vbox;
+	GtkWidget *scrollbar;
+
 
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
 	
-	GtkTreeStore *hotkey_store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT);
+	GtkTreeStore *hotkey_store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 
 	std::string prefix = "SDL.Hotkeys.";
     GtkTreeIter iter; // parent
@@ -507,7 +501,7 @@ void openHotkeyConfig()
         g_config->getOption(optionName, &keycode);
         gtk_tree_store_set(hotkey_store, &iter, 
                 COMMAND_COLUMN, optionName,
-                KEY_COLUMN, keycode, 
+                KEY_COLUMN, SDL_GetKeyName((SDLKey)keycode),
                 -1);
         gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child     iterator
     }                      
@@ -522,9 +516,9 @@ void openHotkeyConfig()
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", KEY_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	
-//	gtk_container_add(GTK_CONTAINER(win),vbox);
-	gtk_box_pack_start(GTK_BOX(vbox), tree , TRUE, TRUE, 5);
+	GtkAdjustment* adj =  gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(tree));
+	scrollbar = gtk_vscrollbar_new(adj);
+	gtk_box_pack_start(GTK_BOX(vbox), tree, TRUE, TRUE, 5);
 	gtk_widget_show_all(win);
 
 	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
