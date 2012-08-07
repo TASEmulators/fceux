@@ -478,10 +478,12 @@ void openHotkeyConfig()
 			GTK_STOCK_CLOSE,
 			GTK_RESPONSE_OK,
 			NULL);
+	gtk_window_set_default_size(GTK_WINDOW(win), 400, 800);
 	HotkeyWin = win;
 	GtkWidget *tree;
 	GtkWidget *vbox;
-	GtkWidget *scrollbar;
+	GtkWidget *scroll;
+
 
 
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
@@ -516,15 +518,13 @@ void openHotkeyConfig()
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", KEY_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-	GtkAdjustment* adj =  gtk_tree_view_get_vadjustment(GTK_TREE_VIEW(tree));
-	scrollbar = gtk_vscrollbar_new(adj);
-	gtk_box_pack_start(GTK_BOX(vbox), tree, TRUE, TRUE, 5);
+	scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(scroll), tree);
+	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 5);
 	gtk_widget_show_all(win);
 
 	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
     g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
-
-	// prototype for selection handler callback
 
 	GtkTreeSelection *select;
 
