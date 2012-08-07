@@ -532,6 +532,7 @@ void openHotkeyConfig()
 	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
 	g_signal_connect ( G_OBJECT (select), "changed", G_CALLBACK (tree_selection_changed_cb),
 			NULL);
+	gtk_tree_selection_unselect_all (select);
 }
 
 static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
