@@ -973,7 +973,6 @@ ButtonConfigBegin ()
     {
       SDL_QuitSubSystem (SDL_INIT_VIDEO);
       bcpv = KillVideo ();
-      printf ("test");
     }
 
 #else

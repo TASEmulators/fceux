@@ -78,6 +78,33 @@ bool checkGTKVersion(int major_required, int minor_required)
 	}
 }
 
+// This function configures a single hotkey
+int configHotkey(char* hotkeyString)
+{
+	SDL_Surface *screen;
+	SDL_Event event;
+	KillVideo();
+	screen = SDL_SetVideoMode(420, 200, 8, 0);
+	//SDL_WM_SetCaption("Press a key to bind...", 0);
+
+	int newkey = 0;
+	while(1)
+	{
+		SDL_WaitEvent(&event);
+	
+		switch (event.type)
+		{
+			case SDL_KEYDOWN:
+				newkey = event.key.keysym.sym;
+				g_config->setOption(hotkeyString, newkey);
+				extern FCEUGI *GameInfo;
+				InitVideo(GameInfo);
+				return 0;
+		}
+	}	
+	
+	return 0;
+}
 // This function configures a single button on a gamepad
 int configGamepadButton(GtkButton* button, gpointer p)
 {
@@ -424,47 +451,68 @@ void openNetworkConfig()
 	g_signal_connect(win, "response", G_CALLBACK(netResponse), NULL);
 }
 
+// handler prototype
+static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data);
+
+void flushGtkEvents()
+{
+	while (gtk_events_pending ())
+		gtk_main_iteration_do (FALSE);
+
+	return;
+}
+
+enum
+{
+	COMMAND_COLUMN,
+	KEY_COLUMN,
+	N_COLUMNS
+};
+
+
+int populate_hotkey_tree_store()
+{
+	return 0;
+}
+
+GtkWidget* HotkeyWin;
+
 // creates and opens hotkey config window
 void openHotkeyConfig()
 {
-	std::string prefix = "SDL.Hotkeys.";
 	GtkWidget* win = gtk_dialog_new_with_buttons("Hotkey Configuration",
 			GTK_WINDOW(MainWindow),
 			(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
 			GTK_STOCK_CLOSE,
 			GTK_RESPONSE_OK,
 			NULL);
+	HotkeyWin = win;
 	GtkWidget *tree;
 	GtkWidget *vbox;
 
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(win));
-	enum
-	{
-		COMMAND_COLUMN,
-//		ACTION_COLUMN,
-		KEY_COLUMN,
-		N_COLUMNS
-	};
-	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT);
-	GtkTreeIter iter; // parent
-	GtkTreeIter iter2; // child
 	
-	gtk_tree_store_append(store, &iter, NULL); // aquire iter
-	
-	
-	int keycode;
-	for(int i=0; i<HK_MAX; i++)
-	{
-		const char* optionName = (prefix + HotkeyStrings[i]).c_str();
-		g_config->getOption(optionName, &keycode);
-		gtk_tree_store_set(store, &iter, 
-				COMMAND_COLUMN, optionName,
-//				ACTION_COLUMN, "This hotkey does this.",
-				KEY_COLUMN, keycode, 
-				-1);
-		gtk_tree_store_append(store, &iter, NULL); // acquire child iterator
-	}
-	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	GtkTreeStore *hotkey_store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_INT);
+
+	std::string prefix = "SDL.Hotkeys.";
+    GtkTreeIter iter; // parent
+    GtkTreeIter iter2; // child
+    
+    gtk_tree_store_append(hotkey_store, &iter, NULL); // aquire iter
+     
+    int keycode;
+    for(int i=0; i<HK_MAX; i++)
+    {
+        const char* optionName = (prefix + HotkeyStrings[i]).c_str();
+        g_config->getOption(optionName, &keycode);
+        gtk_tree_store_set(hotkey_store, &iter, 
+                COMMAND_COLUMN, optionName,
+                KEY_COLUMN, keycode, 
+                -1);
+        gtk_tree_store_append(hotkey_store, &iter, NULL); // acquire child     iterator
+    }                      
+
+	tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(hotkey_store));
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn* column;
 
@@ -472,17 +520,49 @@ void openHotkeyConfig()
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("Command", renderer, "text", COMMAND_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
-//	column = gtk_tree_view_column_new_with_attributes("Action", renderer, "text", ACTION_COLUMN, NULL);
-//	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	column = gtk_tree_view_column_new_with_attributes("Key", renderer, "text", KEY_COLUMN, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
 	
-	gtk_container_add(GTK_CONTAINER(win),vbox);
+//	gtk_container_add(GTK_CONTAINER(win),vbox);
 	gtk_box_pack_start(GTK_BOX(vbox), tree , TRUE, TRUE, 5);
 	gtk_widget_show_all(win);
 
 	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
     g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+
+	// prototype for selection handler callback
+
+	GtkTreeSelection *select;
+
+	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+	gtk_tree_selection_set_mode(select, GTK_SELECTION_SINGLE);
+	g_signal_connect ( G_OBJECT (select), "changed", G_CALLBACK (tree_selection_changed_cb),
+			NULL);
+}
+
+static void tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
+{
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	char* hotkey;
+
+	if (gtk_tree_selection_get_selected (selection, &model, &iter))
+	{
+		gtk_tree_model_get (model, &iter, 0, &hotkey, -1);
+
+		gtk_widget_hide(HotkeyWin);
+
+		flushGtkEvents();
+
+		configHotkey(hotkey);
+
+		g_signal_emit_by_name(HotkeyWin, "destroy-event");
+
+		openHotkeyConfig();
+
+		g_free (hotkey);
+
+	}
 }
 
 GtkWidget* 	typeCombo;
@@ -2053,7 +2133,7 @@ static char* menuXml =
 	"    </menu>"
 	"    <menu action='OptionsMenuAction'>"
 	"      <menuitem action='GamepadConfigAction' />"
-//	"      <menuitem action='HotkeyConfigAction' />"
+	"      <menuitem action='HotkeyConfigAction' />"
 	"      <menuitem action='SoundConfigAction' />"
 	"      <menuitem action='VideoConfigAction' />"
 	"      <menuitem action='PaletteConfigAction' />"
@@ -2112,7 +2192,7 @@ static GtkActionEntry normal_entries[] = {
 #if GTK_MAJOR_VERSION == 3 || (GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 24)
 	{"GamepadConfigAction", "input-gaming", "_Gamepad Config", NULL, NULL, G_CALLBACK(openGamepadConfig)},
 #endif
-//	{"HotkeyConfigAction", "input", "_Hotkey Config", NULL, NULL, G_CALLBACK(openHotkeyConfig)},
+	{"HotkeyConfigAction", "input", "_Hotkey Config", NULL, NULL, G_CALLBACK(openHotkeyConfig)},
 	{"SoundConfigAction", "audio-x-generic", "_Sound Config", NULL, NULL, G_CALLBACK(openSoundConfig)},
 	{"VideoConfigAction", "video-display", "_Video Config", NULL, NULL, G_CALLBACK(openVideoConfig)},
 	{"PaletteConfigAction", GTK_STOCK_SELECT_COLOR, "_Palette Config", NULL, NULL, G_CALLBACK(openPaletteConfig)},
