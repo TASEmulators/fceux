@@ -2,9 +2,9 @@
 <html>
 
 <head>
-	<title>TAS Editor Manual- Table of Contents</title>
+	<title>TAS Editor Manual Rus- Table of Contents</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
@@ -42,51 +42,57 @@
 			});
 			
 			// Toc
-			$("#tab-toc").dynatree({
-				clickFolderMode: 1,
-				debugLevel: 0,
-				imagePath: 'css/dynatree/chm/',
-				onActivate: function(node){
-					if ($("#tab-keywords") && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
-						$("#tab-keywords").dynatree("getTree").activateKey(null);
-					if(node.data.href && node.data.href != '#'){
-						window.open(node.data.href, node.data.target);
+			if ($("#tab-toc").length) {
+				$("#tab-toc").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+							$("#tab-keywords").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
 					}
-				}
-			});
-			// Expand all nodes if required
-			$("#tab-toc").dynatree("getRoot").visit(function(node){
-					node.expand(true);
 				});
-			// Select the active help id
-			if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+				// Expand all nodes if required
+				$("#tab-toc").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				// Select the active help id
+				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			}
 			
 			// Keywords
-			$("#tab-keywords").dynatree({
-				clickFolderMode: 1,
-				debugLevel: 0,
-				imagePath: 'css/dynatree/chm/',
-				onClick: function(node, event){
-					HideKwPopup();
-					if (node.data && node.data.click)
-					{
-						var aRefList = null;
-						eval('aRefList=' + node.data.click);
-						if (ShowKwPopup(node.li, aRefList))
+			
+			if ($("#tab-keywords").length) {
+				$("#tab-keywords").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onClick: function(node, event){
+						HideKwPopup();
+						if (node.data && node.data.click)
 						{
-							if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
-								$("#tab-toc").dynatree("getTree").activateKey(null);
-							if(node.data.href && node.data.href != '#'){
-								window.open(node.data.href, node.data.target);
+							var aRefList = null;
+							eval('aRefList=' + node.data.click);
+							if (ShowKwPopup(node.li, aRefList))
+							{
+								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+									$("#tab-toc").dynatree("getTree").activateKey(null);
+								if(node.data.href && node.data.href != '#'){
+									window.open(node.data.href, node.data.target);
+								}
 							}
 						}
 					}
-				}
-			});
-			// Expand all nodes if required
-			$("#tab-keywords").dynatree("getRoot").visit(function(node){
-					node.expand(true);
 				});
+				// Expand all nodes if required
+				$("#tab-keywords").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				}
+			
 			// Load search data
 			$.getScript("js/searchdata.js",	function() {
 				bSearchDataLoaded = true;
@@ -99,7 +105,7 @@
 		
 		function SelectTocItem(sHelpId)
 		{
-			if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
 				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
 			}
 			else {
@@ -122,6 +128,14 @@
 				var oParentDiv = document.createElement("DIV");
 				oParentDiv.id = "popupMenu";
 				var oLink = null;
+				// Close button
+				oLink = document.createElement("SPAN");
+				oLink.className = "close-button";
+				oLink.innerHTML = "X";
+				oLink.href = "#";
+				oLink.onclick = HideKwPopup;
+				oParentDiv.appendChild(oLink);
+				// Items
 				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
 				{
 					oLink = document.createElement("A");

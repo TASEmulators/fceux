@@ -3,7 +3,7 @@
 <head>
 	<title>Реализация</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -18,7 +18,7 @@
 	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript"><!--
+	<script type="text/javascript">
 		if (top.frames.length == 0)
 		{
 			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
@@ -53,430 +53,335 @@
 	<div id="topic_content">
 		
 <p><span class="rvts20">Реализация</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Первоначально TAS Editor базировался на коде экспериментального инструмента TASEdit из FCEUX 2.1.5.</span></p>
 <p class="rvps10"><span class="rvts22">TASEdit представлял из себя редактор Ввода (в духе TAS Movie Editor), встроенный в эмулятор, чтобы сократить время между редактированием и просмотром участков. Так как при разработке TASEdit не проводилось исследование принципов и закономерностей ТАСинга, у авторов TASEdit не было чёткого видения финального инструмента, и имеющийся код не был расширяемым. Поэтому вскоре после начала разработки TAS Editor его код был полностью переписан, чтобы облегчить дальнейшее расширение функционала.</span></p>
 <p class="rvps10"><span class="rvts22">Архитектура Тасэдитора спроектирована, исходя из авторских представлений о методическом ТАСинге и о необходимом функционале для облегчения такого ТАСинга.</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts78">Программные модули (классы)</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Main - главный шлюз между эмулятором и Тасэдитором (Main gate between emulator and Taseditor)</span></p>
+<p class="rvps10"><span class="rvts22">Main – главный шлюз между эмулятором и Тасэдитором (Main gate between emulator and Taseditor)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">точка запуска Тасэдитора эмулятором</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">точка выхода из Тасэдитора</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно (раз в кадр) вызывает обновление всех модулей, требующих регулярного обновления</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует функции раздела File: создание нового проекта, открытие файла, сохранение, компактное сохранение, импорт, экспорт</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">обрабатывает некоторые хоткеи FCEUX</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">точка запуска Тасэдитора эмулятором</span></li>
+<li class="rvps15"><span class="rvts22">точка выхода из Тасэдитора</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно (раз в кадр) вызывает обновление всех модулей, требующих регулярного обновления</span></li>
+<li class="rvps15"><span class="rvts22">реализует функции раздела File: создание нового проекта, открытие файла, сохранение, компактное сохранение, импорт, экспорт</span></li>
+<li class="rvps15"><span class="rvts22">обрабатывает некоторые хоткеи FCEUX</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_window.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Window - пользовательский интерфейс (User Interface)</span></p>
+<p class="rvps10"><span class="rvts22">Window – пользовательский интерфейс (User Interface)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с окном Тасэдитора: создание, перерисовка, изменение размера, перетаскивание окна, всплывающие подсказки, щелчки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует обработчики для всех кнопок и чекбоксов в GUI Тасэдитора, чтобы запретить срабатывание клавиши Пробел, а также обрабатывать щелчок средней кнопкой мыши</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">обрабатывает системные сообщения и передаёт сигналы от пользователя другим модулям Тасэдитора (а для некоторых простейших команд реализует логику на месте, например, диалог ввода настроек Greenzone capacity и т.п.)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">включает/выключает передачу клавиатурного управления эмулятору при получении/потере фокуса окна</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: обновляет текст заголовка окна; обновляет иконку курсора мыши</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">обновляет состояние галочек при изменении соответствующих настроек</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит информацию о 10 последних проектах (File-&gt;Recent) и обновляет её при загрузках/сохранениях файлов</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: текст заголовка окна, имя файла справки, размер, координаты и другие свойства всех элементов GUI</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует все операции с окном Тасэдитора: создание, перерисовка, изменение размера, перетаскивание окна, всплывающие подсказки, щелчки</span></li>
+<li class="rvps15"><span class="rvts22">реализует обработчики для всех кнопок и чекбоксов в GUI Тасэдитора, чтобы запретить срабатывание клавиши Пробел, а также обрабатывать щелчок средней кнопкой мыши</span></li>
+<li class="rvps15"><span class="rvts22">обрабатывает системные сообщения и передаёт сигналы от пользователя другим модулям Тасэдитора (а для некоторых простейших команд реализует логику на месте, например, диалог ввода настроек Greenzone capacity и т.п.)</span></li>
+<li class="rvps15"><span class="rvts22">включает/выключает передачу клавиатурного управления эмулятору при получении/потере фокуса окна</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: обновляет текст заголовка окна; обновляет иконку курсора мыши</span></li>
+<li class="rvps15"><span class="rvts22">обновляет состояние галочек при изменении соответствующих настроек</span></li>
+<li class="rvps15"><span class="rvts22">хранит информацию о 10 последних проектах (File-&gt;Recent) и обновляет её при загрузках/сохранениях файлов</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: текст заголовка окна, имя файла справки, размер, координаты и другие свойства всех элементов GUI</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">bookmarks.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Bookmarks - Менеджер Закладок (Manager of Bookmarks)</span></p>
+<p class="rvps10"><span class="rvts22">Bookmarks – Менеджер Закладок (Manager of Bookmarks)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит 10 Закладок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с Закладками: ининициализация, установка Закладки, прыжок на Закладку, загрузка Ответвления Закладки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает данные всех Закладок из файла проекта. При ошибке: сбрасывает список Закладок и Ответвлений</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует всю логику работы Списка Закладок: создание, перерисовка, наведение мышью, щелчки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно обновляет состояние анимированных вспышек в Списке Закладок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: обновляет расцветку строк Списка закладок, поддерживая актуальное состояние каждой ячейки Списка</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы команд по работе с Закладками, текст заголовка панели, градиенты анимированных вспышек, номер слота по умолчанию</span></p>
-<p class="rvps15"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит 10 Закладок</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции с Закладками: ининициализация, установка Закладки, прыжок на Закладку, загрузка Ответвления Закладки</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает данные всех Закладок из файла проекта. При ошибке: сбрасывает список Закладок и Ответвлений</span></li>
+<li class="rvps15"><span class="rvts22">реализует всю логику работы Списка Закладок: создание, перерисовка, наведение мышью, щелчки</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно обновляет состояние анимированных вспышек в Списке Закладок</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: обновляет расцветку строк Списка закладок, поддерживая актуальное состояние каждой ячейки Списка</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы команд по работе с Закладками, текст заголовка панели, градиенты анимированных вспышек, номер слота по умолчанию</span></li>
+</ul>
+<p class="rvps15"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">branches.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Branches - Менеджер Ответвлений (Manager of Branches)</span></p>
+<p class="rvps10"><span class="rvts22">Branches – Менеджер Ответвлений (Manager of Branches)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит информацию об Ответвлениях (родственных связах Закладок), а также номер текущего Ответвления</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">дополнительно хранит время последнего изменения проекта (см. файерболл), а также время начала проекта (см. тучка)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">кеширует и хранит данные, использованные при рассчётах (кадр первого расхождения нпута для каждой пары Закладок; номер самой дальней Закладки, соответвтвующей хронологии определённой Закладки)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает свои данные из файла проекта. При ошибке: передаёт сигнал выше</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует всю логику работы Дерева Ответвлений: создание, пересчёт связей, анимация, перерисовка, наведение мышью, щелчки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: реагирует на изменение Закладок или текущего мувика, изменяя структуру Дерева Ответвлений</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно анимирует Дерево Ответвлений и рассчитывает положение Курсора Проигрывателя на этом Дереве</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: координаты элементов Дерева Ответвлений, тайминги анимаций</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит информацию об Ответвлениях (родственных связах Закладок), а также номер текущего Ответвления</span></li>
+<li class="rvps15"><span class="rvts22">дополнительно хранит время последнего изменения проекта (см. файерболл), а также время начала проекта (см. тучка)</span></li>
+<li class="rvps15"><span class="rvts22">кеширует и хранит данные, использованные при рассчётах (кадр первого расхождения нпута для каждой пары Закладок; номер самой дальней Закладки, соответвтвующей хронологии определённой Закладки)</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта. При ошибке: передаёт сигнал выше</span></li>
+<li class="rvps15"><span class="rvts22">реализует всю логику работы Дерева Ответвлений: создание, пересчёт связей, анимация, перерисовка, наведение мышью, щелчки</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: реагирует на изменение Закладок или текущего мувика, изменяя структуру Дерева Ответвлений</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно анимирует Дерево Ответвлений и рассчитывает положение Курсора Проигрывателя на этом Дереве</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: координаты элементов Дерева Ответвлений, тайминги анимаций</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">bookmark.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Bookmark - данные одной Закладки (Single Bookmark data)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит всю информацию одной конкретной Закладки: снимок состояния мувика, копию сэйва одного кадра Гринзоны, скриншот этого кадра, состояние вспышки данной Закладки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает свои данные из файла проекта. При ошибке: передаёт сигнал выше</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует процедуру установки Закладки: создание снимка мувика, установка ключевого кадра снимка на текущее положение Проигрывателя, копирование сэйва из Гринзоны, взятие и компрессия скриншота с экрана, запуск анимации вспышки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">запускает соответствующие вспышки при прыжке на Закладку и при загрузке Ответвления</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Bookmark – данные одной Закладки (Single Bookmark data)</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит всю информацию одной конкретной Закладки: снимок состояния мувика, копию сэйва одного кадра Гринзоны, скриншот этого кадра, состояние вспышки данной Закладки</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта. При ошибке: передаёт сигнал выше</span></li>
+<li class="rvps15"><span class="rvts22">реализует процедуру установки Закладки: создание снимка мувика, установка ключевого кадра снимка на текущее положение Проигрывателя, копирование сэйва из Гринзоны, взятие и компрессия скриншота с экрана, запуск анимации вспышки</span></li>
+<li class="rvps15"><span class="rvts22">запускает соответствующие вспышки при прыжке на Закладку и при загрузке Ответвления</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">snapshot.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Snapshot - Моментальный снимок всех редактируемых данных (Snapshot of all edited data)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит всю информацию одного снимка мувика: размер и содержимое инпута (инпут = кнопочные нажатия + команды), снимок состояния Маркеров на момент создания снимка, номер ключевого кадра, начальный и конечный кадр операции, тип операции и текстовое описание снимка (включая время создания)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">дополнительно хранит информацию о последовательной Записи/рисовании инпута</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">опционально может хранить или не хранить карту Горячих Правок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует детали создания снимка: копирование инпута, опциональное копирование карты горячих правок, копирование Маркеров, запоминание времени создания</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует детали полного/частичного восстановления данных из снимка: инпута, карты горячих правок, Маркеров</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует поиск первого несовпадения в содержимом двух снимков или в содержимом данного снимка и текущего состояния мувика</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">предоставляет интерфейс для чтения отдельно взятых данных: чтение инпута отдельного кадра, чтение любой ячейки карты горячих правок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с картами Горячих Правок: копирование, частичное копирование, обновление/угасание, установка новых точек на карте горячих правок, сравнением инпута двух снимков</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Snapshot – Моментальный снимок всех редактируемых данных (Snapshot of all edited data)</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит всю информацию одного снимка мувика: размер и содержимое Ввода (Ввод = кнопочные нажатия + команды), снимок состояния Маркеров на момент создания снимка, номер ключевого кадра, начальный и конечный кадр операции, тип операции и текстовое описание снимка (включая время создания)</span></li>
+<li class="rvps15"><span class="rvts22">дополнительно хранит информацию о последовательной Записи/рисовании Ввода</span></li>
+<li class="rvps15"><span class="rvts22">опционально может хранить или не хранить карту Горячих Правок</span></li>
+<li class="rvps15"><span class="rvts22">реализует детали создания снимка: копирование Ввода, опциональное копирование карты горячих правок, копирование Маркеров, запоминание времени создания</span></li>
+<li class="rvps15"><span class="rvts22">реализует детали полного/частичного восстановления данных из снимка: Ввода, карты горячих правок, Маркеров</span></li>
+<li class="rvps15"><span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></li>
+<li class="rvps15"><span class="rvts22">реализует поиск первого несовпадения в содержимом двух снимков или в содержимом данного снимка и текущего состояния мувика</span></li>
+<li class="rvps15"><span class="rvts22">предоставляет интерфейс для чтения отдельно взятых данных: чтение Ввода отдельного кадра, чтение любой ячейки карты горячих правок</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции с картами Горячих Правок: копирование, частичное копирование, обновление/угасание, установка новых точек на карте горячих правок, сравнением Ввода двух снимков</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">markers.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Markers - Моментальный снимок состояния маркеров (Snapshot of Markers state)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит данные о состоянии Маркеров: массив распределения Маркеров по кадрам и массив Заметок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: максимальная длина Заметки</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22">Markers – Моментальный снимок состояния маркеров (Snapshot of Markers state)</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит данные о состоянии Маркеров: массив распределения Маркеров по кадрам и массив Заметок</span></li>
+<li class="rvps15"><span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: максимальная длина Заметки</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">popup_display.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Popup display - Менеджер всплывающих окон (Manager of popup windows)</span></p>
+<p class="rvps10"><span class="rvts22">Popup display – Менеджер всплывающих окон (Manager of popup windows)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с всплывающими окнами: инициализацию, перерисовку, центрирование, декомпрессию и конвертирование скриншотов</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно отслеживает изменения Менеджера закладок и запускает/обновляет/закрывает всплывающие окна</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: обновляет содержимое всплывающих окон</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: координаты и внешний вид всплывающих окон, тайминги всплывания/исчезания</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует все операции с всплывающими окнами: инициализацию, перерисовку, центрирование, декомпрессию и конвертирование скриншотов</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно отслеживает изменения Менеджера закладок и запускает/обновляет/закрывает всплывающие окна</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: обновляет содержимое всплывающих окон</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: координаты и внешний вид всплывающих окон, тайминги всплывания/исчезания</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">history.cpp</span></p>
-<p class="rvps10"><span class="rvts22">History - История изменений мувика (History of movie modifications)</span></p>
+<p class="rvps10"><span class="rvts22">History – История изменений мувика (History of movie modifications)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит массив записей в Журнал Истории (снимки мувика, резервные копии Закладок, резервные копии номера текущей Закладки) и указатель на текущий снимок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает массив снимков из файла проекта, при ошибке загрузки очищает массив и начинает новую историю со снимка текущего состояния мувика</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: проверяет различия между последним снимком и текущим мувиком, принимает решение о необходимости создания новой точки отката. А в особых случаях может создать точку отката без проверки изменений, полагаясь, что вызывающий модуль сам проверил различия</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции восстановления состояния мувика: откат (undo), повторение (redo), возврат на произвольный снимок из массива</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">дополнительно хранит состояние курсора-указки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно следит за обновлением состояние курсора-указки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно (во время паузы эмулятора) ищет в Журнале несжатые пункты и сжимает первый попавшийся</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует всю логику работы Списка истории: создание, перерисовка, щелчки, автоскроллинг</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы и текстовые обозначения всех возможных типов изменения мувика, тайминг указки</span></p>
-<p class="rvps15"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит массив записей в Журнал Истории (снимки мувика, резервные копии Закладок, резервные копии номера текущей Закладки) и указатель на текущий снимок</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает массив снимков из файла проекта, при ошибке загрузки очищает массив и начинает новую историю со снимка текущего состояния мувика</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: проверяет различия между последним снимком и текущим мувиком, принимает решение о необходимости создания новой точки отката. А в особых случаях может создать точку отката без проверки изменений, полагаясь, что вызывающий модуль сам проверил различия</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции восстановления состояния мувика: откат (undo), повторение (redo), возврат на произвольный снимок из массива</span></li>
+<li class="rvps15"><span class="rvts22">дополнительно хранит состояние курсора-указки</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно следит за обновлением состояние курсора-указки</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно (во время паузы эмулятора) ищет в Журнале несжатые пункты и сжимает первый попавшийся</span></li>
+<li class="rvps15"><span class="rvts22">реализует всю логику работы Списка истории: создание, перерисовка, щелчки, автоскроллинг</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы и текстовые обозначения всех возможных типов изменения мувика, тайминг указки</span></li>
+</ul>
+<p class="rvps15"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">piano_roll.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Piano Roll - интерфейс в виде перфоленты (Piano Roll interface)</span></p>
+<p class="rvps10"><span class="rvts22">Piano Roll – интерфейс в виде перфоленты (Piano Roll interface)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует всю логику работы Списка Piano Roll: создание, перерисовка, скроллинг, наведение, щелчки, перетаскивание</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">регулярно обновляет размер Списка в соответствии с размером инпута мувика</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: скроллирует видимую область Списка к указанному элементу или позиции: к Курсору Проигрывателя, к Курсору Выделения, к курсору-указке, к целевому кадру Проигрывателя, к Маркеру</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает текущую позицию вертикального скроллинга из файла проекта, при ошибке загрузки скроллирует список в начало</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с Заголовком Списка: создание, перерисовка, анимация, наведение мышью, щелчки</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">регулярно подсвечивает символы Заголовка в соответствии с текущими данными от Рекордера</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: запускает вспышки символов Заголовка</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует всю логику работы колеса мыши: скроллинг Списка, навигация Курсором Проигрывателя, навигация Курсором Выделения, пересечение пустот колесом</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует контекстное меню по правому щелчку</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы колонок списка, ширины колонок списка, таблицы цветов ячеек, градиент карты Горячих Правок, градиент вспышек символов Заголовка, тайминги вспышек, все шрифты Тасэдитора, изображения</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует всю логику работы Списка Piano Roll: создание, перерисовка, скроллинг, наведение, щелчки, перетаскивание</span></li>
+<li class="rvps15"><span class="rvts22">регулярно обновляет размер Списка в соответствии с размером Ввода мувика</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: скроллирует видимую область Списка к указанному элементу или позиции: к Курсору Проигрывателя, к Курсору Выделения, к курсору-указке, к целевому кадру Проигрывателя, к Маркеру</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает текущую позицию вертикального скроллинга из файла проекта, при ошибке загрузки скроллирует список в начало</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции с Заголовком Списка: создание, перерисовка, анимация, наведение мышью, щелчки</span></li>
+<li class="rvps15"><span class="rvts22">регулярно подсвечивает символы Заголовка в соответствии с текущими данными от Рекордера</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: запускает вспышки символов Заголовка</span></li>
+<li class="rvps15"><span class="rvts22">реализует всю логику работы колеса мыши: скроллинг Списка, навигация Курсором Проигрывателя, навигация Курсором Выделения, пересечение пустот колесом</span></li>
+<li class="rvps15"><span class="rvts22">реализует контекстное меню по правому щелчку</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, идентификаторы колонок списка, ширины колонок списка, таблицы цветов ячеек, градиент карты Горячих Правок, градиент вспышек символов Заголовка, тайминги вспышек, все шрифты Тасэдитора, изображения</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">selection.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Selection - Менеджер выделений (Manager of selections)</span></p>
+<p class="rvps10"><span class="rvts22">Selection – Менеджер выделений (Manager of selections)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">содержит определение типа данных "Набор выделенных кадров"</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит массив наборов выделенных кадров ("история выделений")</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает массив выделений из файла проекта, при ошибке загрузки очищает массив и начинает новую историю с пустого выделения</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">постоянно отслеживает изменения выделенных строк в Списке и принимает решение о необходимости создания новой точки отката выделений</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции восстановления состояния выделения: откат выделения (selection undo), повторение выделения (selection redo)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: изменяет текущее выделение: очистить выделение, прыгнуть Курсором Выделения на указанный кадр, выделить регион, выделить всё, выделить между Маркерами, выделить содержимое Буфера Обмена</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно проверяет выход текущего выделения за рамки Списка и при необходимости корректирует текущее выделение, определяет факт перехода выделения на другой Маркер и обновляет Заметку в нижнем текстовом поле</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует логику работы нижних кнопок &lt;&lt; и &gt;&gt; (прыжки Курсора Выделения по Маркерам)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">здесь же размещается код нижнего текстового поля для редактирования Заметок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, префикс подписи к нижнему полю</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">содержит определение типа данных "Набор выделенных кадров"</span></li>
+<li class="rvps15"><span class="rvts22">хранит массив наборов выделенных кадров ("история выделений")</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает массив выделений из файла проекта, при ошибке загрузки очищает массив и начинает новую историю с пустого выделения</span></li>
+<li class="rvps15"><span class="rvts22">постоянно отслеживает изменения выделенных строк в Списке и принимает решение о необходимости создания новой точки отката выделений</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции восстановления состояния выделения: откат выделения (selection undo), повторение выделения (selection redo)</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: изменяет текущее выделение: очистить выделение, прыгнуть Курсором Выделения на указанный кадр, выделить регион, выделить всё, выделить между Маркерами, выделить содержимое Буфера Обмена</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно проверяет выход текущего выделения за рамки Списка и при необходимости корректирует текущее выделение, определяет факт перехода выделения на другой Маркер и обновляет Заметку в нижнем текстовом поле</span></li>
+<li class="rvps15"><span class="rvts22">реализует логику работы нижних кнопок &lt;&lt; и &gt;&gt; (прыжки Курсора Выделения по Маркерам)</span></li>
+<li class="rvps15"><span class="rvts22">здесь же размещается код нижнего текстового поля для редактирования Заметок</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, префикс подписи к нижнему полю</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">editor.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Editor - Инструмент для редактирования (Tool for editing)</span></p>
+<p class="rvps10"><span class="rvts22">Editor – Инструмент для редактирования (Tool for editing)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует операции изменения инпута: установка/снятие инпута на заданном участке, установка по шаблону, установка в Выделении, установка по шаблону в Выделении</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует операции изменения Маркеров: установка/снятие в Выделении, установка по шаблону в Выделении, установка всех в Выделении, снятие всех в Выделении</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит данные Шаблонов и код их загрузки/генерации</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: имя файла шаблонов, идентификатор нажатия кнопки в шаблонах</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует операции изменения Ввода: установка/снятие Ввода на заданном участке, установка по шаблону, установка в Выделении, установка по шаблону в Выделении</span></li>
+<li class="rvps15"><span class="rvts22">реализует операции изменения Маркеров: установка/снятие в Выделении, установка по шаблону в Выделении, установка всех в Выделении, снятие всех в Выделении</span></li>
+<li class="rvps15"><span class="rvts22">Хранит данные Шаблонов и код их загрузки/генерации</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: имя файла шаблонов, идентификатор нажатия кнопки в шаблонах</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">splicer.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Splicer - Инструмент для монтажа (Tool for montage)</span></p>
+<p class="rvps10"><span class="rvts22">Splicer – Инструмент для монтажа (Tool for montage)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции массового редактирования инпута: копипаст, клонирование, очистка региона, вставка и удаление кадров, обрезка</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит данные о выделении, использованном при последнем копировании в Буфер Обмена</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно проверяет состояние текущего выделения и выводит информацию о нём на панель, также выводит информацию о данных в Буфере Обмена</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">при запуске Тасэдитора проверяет содержимое Буфера Обмена</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: символьные коды кнопок инпута, текст для информационной панели Splicer</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует все операции массового редактирования Ввода: копипаст, клонирование, очистка региона, вставка и удаление кадров, обрезка</span></li>
+<li class="rvps15"><span class="rvts22">хранит данные о выделении, использованном при последнем копировании в Буфер Обмена</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно проверяет состояние текущего выделения и выводит информацию о нём на панель, также выводит информацию о данных в Буфере Обмена</span></li>
+<li class="rvps15"><span class="rvts22">при запуске Тасэдитора проверяет содержимое Буфера Обмена</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: символьные коды кнопок Ввода, текст для информационной панели Splicer</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_config.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Config - текущая конфигурация (Current settings)</span></p>
+<p class="rvps10"><span class="rvts22">Config – текущая конфигурация (Current settings)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит состояние всех настроек Тасэдитора</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">все модули Тасэдитора могут обращаться к этому классу для получения или изменения текущих настроек</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">при запуске FCEUX эмулятор записывает данные из файла fceux.cfg в этот класс, при выходе считывает данные из этого класса в файл fceux.cfg</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: значения настроек по умолчанию, предельные значения настроек</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит состояние всех настроек Тасэдитора</span></li>
+<li class="rvps15"><span class="rvts22">все модули Тасэдитора могут обращаться к этому классу для получения или изменения текущих настроек</span></li>
+<li class="rvps15"><span class="rvts22">при запуске FCEUX эмулятор записывает данные из файла fceux.cfg в этот класс, при выходе считывает данные из этого класса в файл fceux.cfg</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: значения настроек по умолчанию, предельные значения настроек</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">playback.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Playback - проигрыватель состояний эмулятора (Player of emulation states)</span></p>
+<p class="rvps10"><span class="rvts22">Playback – проигрыватель состояний эмулятора (Player of emulation states)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует функции проигрывателя мувика: показ любого кадра (прыжок), запуск/отмена добегания к указанному кадру, пауза, перемотка</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно следит за изменениями текущего кадра эмуляции (и управляет эмулятором), вызывает перерисовку соответствующих ячеек Списка, останавливает добегание при достижении цели, анимирует перерисовку кадра цели, обеспечивает следование Списка за курсором, определяет факт перехода курсора на другой маркер и обновляет текст в верхнем поле</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует логику работы верхних кнопок &lt;&lt; и &gt;&gt; (прыжки курсора по маркерам)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует логику работы кнопок &lt; и &gt; (покадровое перемещение курсора)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует логику работы кнопки || (пауза) и средней кнопки мыши, а также реагирует на внешние изменения паузы эмуляции</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с прогрессбаром: сброс, установка значений, щелчки (отмена добегания)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">здесь же размещается код верхнего поля для редактирования Заметок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: префикс подписи к верхнему полю, тайминги анимации кадра цели, длительность задержки перед повторным срабатыванием зажатых кнопок GUI, масштаб прогрессбара</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует функции проигрывателя мувика: показ любого кадра (прыжок), запуск/отмена добегания к указанному кадру, пауза, перемотка</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно следит за изменениями текущего кадра эмуляции (и управляет эмулятором), вызывает перерисовку соответствующих ячеек Списка, останавливает добегание при достижении цели, анимирует перерисовку кадра цели, обеспечивает следование Списка за курсором, определяет факт перехода курсора на другой маркер и обновляет текст в верхнем поле</span></li>
+<li class="rvps15"><span class="rvts22">реализует логику работы верхних кнопок &lt;&lt; и &gt;&gt; (прыжки курсора по маркерам)</span></li>
+<li class="rvps15"><span class="rvts22">реализует логику работы кнопок &lt; и &gt; (покадровое перемещение курсора)</span></li>
+<li class="rvps15"><span class="rvts22">реализует логику работы кнопки || (пауза) и средней кнопки мыши, а также реагирует на внешние изменения паузы эмуляции</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции с прогрессбаром: сброс, установка значений, щелчки (отмена добегания)</span></li>
+<li class="rvps15"><span class="rvts22">здесь же размещается код верхнего поля для редактирования Заметок</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: префикс подписи к верхнему полю, тайминги анимации кадра цели, длительность задержки перед повторным срабатыванием зажатых кнопок GUI, масштаб прогрессбара</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">greenzone.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Greenzone - зона доступа (Access zone)</span></p>
+<p class="rvps10"><span class="rvts22">Greenzone – зона доступа (Access zone)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит массив сэйвов, используемых для ускорения перехода Проигрывателя на любой указанный кадр</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">также хранит журнал проявлений лага в кадрах</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает массив сэйвов и историю лага из файла проекта, при ошибке загрузки гринзона усекается до последнего успешно загруженного сэйва</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно проверяет наличие сэйва для текущего кадра в своём массиве, при отсутствии создаёт его, а также записывает информацию о проявлении лага в предыдущем кадре</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует авто-подгонку Ввода по лагу</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно производит постепенную очистку массива сэйвов для экономии памяти, удаляя самые старые сэйвы</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию: (при изменении инпута мувика) усекает размеры гринзоны, удаляя сэйвы, ставшие неактуальными вследствие изменения инпута. После усечения может также переместить Курсор Проигрывателя (который обязан всегда находиться внутри Гринзоны), а также запустить добегание к цели</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, настройки постепенной очистки, тайминг очистки</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит массив сэйвов, используемых для ускорения перехода Проигрывателя на любой указанный кадр</span></li>
+<li class="rvps15"><span class="rvts22">также хранит журнал проявлений лага в кадрах</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает массив сэйвов и историю лага из файла проекта, при ошибке загрузки гринзона усекается до последнего успешно загруженного сэйва</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно проверяет наличие сэйва для текущего кадра в своём массиве, при отсутствии создаёт его, а также записывает информацию о проявлении лага в предыдущем кадре</span></li>
+<li class="rvps15"><span class="rvts22">реализует авто-подгонку Ввода по лагу</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно производит постепенную очистку массива сэйвов для экономии памяти, удаляя самые старые сэйвы</span></li>
+<li class="rvps15"><span class="rvts22">по требованию: (при изменении Ввода мувика) усекает размеры Гринзоны, удаляя сэйвы, ставшие неактуальными вследствие изменения Ввода. После усечения может также переместить Курсор Проигрывателя (который обязан всегда находиться внутри Гринзоны), а также запустить добегание к цели</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, настройки постепенной очистки, тайминг очистки</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">recorder.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Recorder - инструмент для записи инпута (Tool for input recording)</span></p>
+<p class="rvps10"><span class="rvts22">Recorder – инструмент для записи Ввода (Tool for input recording)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">в момент записи кнопочных нажатий в мувик (в самом конце кадра) по сигналу эмулятора перехватывает запись и накладывает свои фильтры мультитрекинга, а затем отражает изменения инпута в Истории и Гринзоне</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно отслеживает нажатые кнопки виртуальных джойстиков и предоставляет данные для подсветки символов Заголовка Списка. Также реагирует на использование хоткея Switch Read Only и обновляет элементы интерфейса на панели Recorder и заголовок панели Закладок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует функцию редактирования инпута в режиме Read Only (ColumnSet кнопками виртуального джойстика)</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификаторы и текстовые обозначения режимов мультитрекинга, суффиксы для заголовка окна TAS Editor</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">в момент записи кнопочных нажатий в мувик (в самом конце кадра) по сигналу эмулятора перехватывает запись и накладывает свои фильтры мультитрекинга, а затем отражает изменения Ввода в Истории и Гринзоне</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно отслеживает нажатые кнопки виртуальных джойстиков и предоставляет данные для подсветки символов Заголовка Списка. Также реагирует на использование хоткея Switch Read Only и обновляет элементы интерфейса на панели Recorder и заголовок панели Закладок</span></li>
+<li class="rvps15"><span class="rvts22">реализует функцию редактирования Ввода в режиме Read Only (ColumnSet кнопками виртуального джойстика)</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификаторы и текстовые обозначения режимов мультитрекинга, суффиксы для заголовка окна TAS Editor</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">markers_manager.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Markers_manager - Менеджер Маркеров (Manager of Markers)</span></p>
+<p class="rvps10"><span class="rvts22">Markers_manager – Менеджер Маркеров (Manager of Markers)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит один снимок состояния Маркеров, отвечающий за текущее (актуальное) состояние Маркеров в проекте</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки очищает данные</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Регулярно следит, чтобы размер массива Маркеров был не меньше количества кадров в мувике</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует все операции с Маркерами: установка Маркера на кадр, удаление Маркера, вставка и удаление кадров между Маркерами, усечение массива Маркеров, изменение Заметок, поиск кадра по номеру Маркера, интерфейс доступа к данным внутри снимка состояния Маркеров</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует копирование данных между снимками состояния Маркеров (в том числе частичное копирование) и поиск первого несовпадения в содержимом двух снимков состояния Маркеров</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">здесь же размещается код поиска "похожих" Заметок</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">здесь же размещается код редактирования Заметок к Маркерам</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">здесь же размещается код диалога Find Note</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификатор сохранения, настройки поиска похожих Заметок</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит один снимок состояния Маркеров, отвечающий за текущее (актуальное) состояние Маркеров в проекте</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки очищает данные</span></li>
+<li class="rvps15"><span class="rvts22">Регулярно следит, чтобы размер массива Маркеров был не меньше количества кадров в мувике</span></li>
+<li class="rvps15"><span class="rvts22">реализует все операции с Маркерами: установка Маркера на кадр, удаление Маркера, вставка и удаление кадров между Маркерами, усечение массива Маркеров, изменение Заметок, поиск кадра по номеру Маркера, интерфейс доступа к данным внутри снимка состояния Маркеров</span></li>
+<li class="rvps15"><span class="rvts22">реализует копирование данных между снимками состояния Маркеров (в том числе частичное копирование) и поиск первого несовпадения в содержимом двух снимков состояния Маркеров</span></li>
+<li class="rvps15"><span class="rvts22">здесь же размещается код поиска "похожих" Заметок</span></li>
+<li class="rvps15"><span class="rvts22">здесь же размещается код редактирования Заметок к Маркерам</span></li>
+<li class="rvps15"><span class="rvts22">здесь же размещается код диалога Find Note</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификатор сохранения, настройки поиска похожих Заметок</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_lua.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Lua - Менеджер возможностей Луа (Manager of Lua features)</span></p>
+<p class="rvps10"><span class="rvts22">Lua – Менеджер возможностей Луа (Manager of Lua features)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует логику всех функций Lua-библиотеки taseditor</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">содержит список отложенных изменений инпута</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">по требованию (от FCEUX Lua engine): обновляет кнопку "Run function"</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: идентификаторы джойпадов для изменений инпута, максимальная длина имени для функции </span><span class="rvts21">applychanges()</span><span class="rvts22">, текст для кнопки "Run function" по умолчанию</span></p>
-<p class="rvps15"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">реализует логику всех функций Lua-библиотеки taseditor</span></li>
+<li class="rvps15"><span class="rvts22">содержит список отложенных изменений Ввода</span></li>
+<li class="rvps15"><span class="rvts22">по требованию (от FCEUX Lua engine): обновляет кнопку "</span><span class="rvts32">Run function</span><span class="rvts22">"</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: идентификаторы джойпадов для изменений Ввода, максимальная длина имени для функции </span><span class="rvts21">applychanges()</span><span class="rvts22">, текст для кнопки "</span><span class="rvts32">Run function</span><span class="rvts22">" по умолчанию</span></li>
+</ul>
+<p class="rvps15"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor_project.cpp</span></p>
-<p class="rvps10"><span class="rvts22">Project - заголовок рабочего проекта (Header of working project)</span></p>
+<p class="rvps10"><span class="rvts22">Project – Менеджер рабочего проекта (Manager of working project)</span></p>
 <p class="rvps10"><span class="rvts44">[единичный экземпляр]</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">хранит информацию о файловом имени проекта и о наличии несохранённых изменений</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует сохранение и загрузку проектов из файловой системы</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">реализует функцию автоматического сохранения проекта</span></p>
-<p class="rvps15" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">Хранит ресурсы: масштаб настройки автосохранения, имя проекта по умолчанию</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит информацию о файловом имени проекта и о наличии несохранённых изменений</span></li>
+<li class="rvps15"><span class="rvts22">реализует сохранение и загрузку проектов из файловой системы</span></li>
+<li class="rvps15"><span class="rvts22">реализует функцию автоматического сохранения проекта</span></li>
+<li class="rvps15"><span class="rvts22">Хранит ресурсы: масштаб настройки автосохранения, имя проекта по умолчанию</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts78">Модификация эмулятора</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Тасэдитор требует внесения следующих модификаций в код самого эмулятора.</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модули </span><span class="rvts26">Main</span><span class="rvts22">/</span><span class="rvts26">Window</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">вызывать центральную функцию Тасэдитора после эмуляции каждого кадра, а также, когда эмулятор на паузе. Частота вызова должна быть не менее 20 раз в секунду (это требуется для плавности анимаций)</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">передавать системные сообщения окну Тасэдитора. Также передавать Тасэдитору сообщения таблицы клавиатурных акселераторов</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">если эмулятор не использует колесо мыши, он должен пересылать WM_MOUSEWHEEL Тасэдитору, а не игнорировать это сообщение. То же самое с обработкой средней кнопки</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts74">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">вызывать центральную функцию Тасэдитора после эмуляции каждого кадра, а также, когда эмулятор на паузе. Частота вызова должна быть не менее 20 раз в секунду (это требуется для плавности анимаций)</span></li>
+<li class="rvps10"><span class="rvts22">передавать системные сообщения окну Тасэдитора, в том числе сообщения клавиатурных акселераторов</span></li>
+<li class="rvps10"><span class="rvts22">если эмулятор не использует колесо мыши, он должен пересылать WM_MOUSEWHEEL Тасэдитору, а не игнорировать это сообщение. То же самое с обработкой средней кнопки</span></li>
+<li class="rvps10"><span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts74">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Movie</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">предоставлять полный доступ к данным текущего мувика (создание/чтение/запись/любая модификация). Мувик должен быть промежуточным слоем между пользовательским вводом (генерируемым с помощью виртуальных джойстиков) и эмулируемой игрой. Игра ни на каком этапе эмуляции не должна брать инпут напрямую из виртуальных джойстиков. Альтернатива (как реализовано в FCEUX): при любом изменении Ввода мувика на текущем кадре эмулятор должен изменять состояние виртуальных джойстиков, используя данные из мувика. В любом случае, Тасэдитор взаимодействует с игрой, модифицируя данные мувика, и ничего не знает про виртуальные джойстики. В Piano Roll отображаются данные из текущего мувика (хотя у Тасэдитора есть и своё внутреннее представление инпута - класс "Snapshot"), и при редактировании Ввода изменяются данные текущего мувика</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">в режиме Записи в начале каждого кадра (сразу после чтения данных из виртуальных джойстиков в мувик) отправлять сигнал Рекордеру; быть готовым, что Рекордер изменит данные этого кадра в мувике</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">предоставлять полный доступ к данным текущего мувика (создание/чтение/запись/любая модификация). Мувик должен быть промежуточным слоем между пользовательским вводом (генерируемым с помощью виртуальных джойстиков) и эмулируемой игрой. Игра ни на каком этапе эмуляции не должна брать Ввод напрямую из виртуальных джойстиков. Альтернатива (как реализовано в FCEUX): при любом изменении Ввода мувика на текущем кадре эмулятор должен изменять состояние виртуальных джойстиков, используя данные из мувика. В любом случае, Тасэдитор взаимодействует с игрой, читая и модифицируя данные мувика, и не опрашивает виртуальные джойстики. В Piano Roll отображаются данные из текущего мувика, и при редактировании Ввода изменяются данные текущего мувика</span></li>
+<li class="rvps10"><span class="rvts22">в режиме Записи в начале каждого кадра (сразу после чтения данных из виртуальных джойстиков в мувик) отправлять сигнал Рекордеру (и Рекордер может изменить данные этого кадра в мувике)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Input</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">предоставлять интерфейс для чтения нажатых в данный момент кнопок виртуального джойстика</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">когда запущен Тасэдитор, сброс/выключение и другие команды эмулируемой платформы не должны срабатывать сразу по команде пользователя. Они должны лишь подавать сигнал Рекордеру (в начале кадра - вместе с новым инпутом), и он сам применит их после записи соответствующих данных в мувик. А когда режим Записи отключен, у пользователя вообще не должно быть возможности вызвать команды эмулируемой платформы</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">предоставлять интерфейс для чтения нажатых в данный момент кнопок виртуального джойстика</span></li>
+<li class="rvps10"><span class="rvts22">Сброс/выключение и другие команды эмулируемой платформы не должны срабатывать сразу по команде пользователя. Они должны работать подобно копкам виртуальных джойстиков, чтобы у Тасэдитора была возможность разрешить или запретить выполнение вызванной команды. А когда режим Записи отключен, у пользователя вообще не должно быть возможности вызвать команды эмулируемой платформы</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Output</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">предоставлять доступ к текущему значению флага лага (в конце каждого кадра)</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">иметь функцию записи скриншота в память (в том числе с записью HUD)</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">предоставлять доступ к текущему значению флага лага (в конце каждого кадра)</span></li>
+<li class="rvps10"><span class="rvts22">иметь функцию записи текущего скриншота в память (в том числе с наложенным HUD и Lua-вывода)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">SaveStates</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сэйвы должны восстанавливать состояние игры в точности</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">сохранение и загрузка сэйва не должны занимать много процессорного времени, так как Гринзона автоматически создаёт сэйв в конце каждого кадра, и это не должно быть заметным для пользователя</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">объём сэйва (в сжатом состоянии) не должен занимать слишком много места, так как для комфортной работы в Тасэдиторе требуется хранить Гринзону как минимум для 1000 ближайших кадров</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">в отличие от традиционных сэйвов, в сэйвах Гринзоны не должно быть мувика (это лишняя трата места)</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">иметь функцию создания сэйва в памяти и функцию загрузки состояния игры из сэйва в памяти</span></li>
+<li class="rvps10"><span class="rvts22">сэйвы должны восстанавливать состояние игры в точности</span></li>
+<li class="rvps10"><span class="rvts22">сохранение и загрузка сэйва не должны занимать много процессорного времени, так как Гринзона автоматически создаёт сэйв для каждого кадра, и это не должно быть заметным для пользователя</span></li>
+<li class="rvps10"><span class="rvts22">сэйвы должны храниться в сжатом виде, чтобы объём сэйва не занимал слишком много места, так как для комфортной работы в Тасэдиторе требуется хранить Гринзону как минимум для 1000 ближайших кадров</span></li>
+<li class="rvps10"><span class="rvts22">в сэйвах Гринзоны не должно быть данных текущего мувика (это лишняя трата места)</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Config</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать Taseditor_config (тогда в нём останутся настроки по умолчанию)</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать </span><span class="rvts74">taseditor_config</span><span class="rvts22"> (тогда в нём останутся настроки по умолчанию)</span></li>
+<li class="rvps10"><span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Lua engine</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">поддерживать библиотеку </span><span class="rvts21">taseditor</span><span class="rvts22">. Логика функций реализуется самим Тасэдитором, а от эмулятора требуется брать входные данные из стека и передавать их соответствующей функции Тасэдитора, а затем принимать выходные данные и помещать их в стек Луа</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">поддерживать регистрацию не более одной </span><a class="rvts28" href="LuaAPI.html#registermanual">Manual-функции</a><span class="rvts22"> и как минимум одной </span><a class="rvts28" href="LuaAPI.html#registerauto">Автофункции</a></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">подавать сигнал Тасэдитору об изменении статуса Manual-функции (регистрация/удаление), чтобы тот изменял состояние кнопки "Run function"</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">поддерживать библиотеку </span><span class="rvts21">taseditor</span><span class="rvts22">. Логика функций реализуется самим Тасэдитором, а от эмулятора требуется брать входные данные из стека и передавать их соответствующей функции Тасэдитора, а затем принимать выходные данные и помещать их в стек Луа</span></li>
+<li class="rvps10"><span class="rvts22">поддерживать регистрацию не более одной </span><a class="rvts28" href="LuaAPI.html#registermanual">Manual-функции</a><span class="rvts22"> и как минимум одной </span><a class="rvts28" href="LuaAPI.html#registerauto">Автофункции</a></li>
+<li class="rvps10"><span class="rvts22">подавать сигнал Тасэдитору об изменении статуса Manual-функции (регистрация/удаление), чтобы тот изменял состояние кнопки "</span><span class="rvts32">Run function</span><span class="rvts22">"</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Replay</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">эмулятор должен уметь проигрывать проекты Тасэдитора как обычные мувики, игнорируя дополнительные данные в конце файла</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">так как размеры проектов Тасэдитора могут быть огромными, при открытии файла не нужно загружать их в память полностью</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">определять тип проигрываемого мувика (обычный мувик или мувик с данными Тасэдитора в конце). Если это проект Тасэдитора, то при попытке редактирования его содержимого (при загрузке сэйва в режиме Read+Write) эмулятор должен отказываться от редактирования и предлагать запуск Тасэдитора, а в случае запуска сразу передавать Тасэдитору ссылку на проигрываемый файл</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">эмулятор должен уметь проигрывать проекты Тасэдитора как обычные мувики, игнорируя дополнительные данные в конце файла</span></li>
+<li class="rvps10"><span class="rvts22">так как размеры проектов Тасэдитора могут быть огромными, при открытии файла не нужно загружать их в память полностью</span></li>
+<li class="rvps10"><span class="rvts22">определять тип проигрываемого мувика (обычный мувик или мувик с данными Тасэдитора в конце). Если это проект Тасэдитора, то при попытке редактирования его содержимого (при загрузке сэйва в режиме Read+Write) эмулятор должен отказываться от редактирования и предлагать запуск Тасэдитора, а в случае запуска сразу передавать Тасэдитору ссылку на проигрываемый файл</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts26">Остальное</span><span class="rvts22">:</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">эмулятор обязан быть стабильным и детерминированным. Основой работы Проигрывателя Тасэдитора является строгая детерминированность игрового процесса. Если при загрузках сэйвов состояние игры будет хоть немного отличаться от состояния в момент сохранения, это повлечёт много проблем, в частности, навигация Курсором Проигрывателя будет неадекватной</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">необходимо учесть все пункты </span><a class="rvts28" href="MistakeProofing.html">Защиты от ошибок</a><span class="rvts22">, относящиеся к модификации эмулятора. В частности при запуске Тасэдитор должен иметь возможность временно отключать ряд настроек эмулятора и восстанавливать их значение при выходе. Эмулятор должен обеспечить невозможность редактирования пользователем этих настроек во время работы Тасэдитора</span></p>
-<p class="rvps10" style="text-indent: 30px; margin-left: 0px;"><span style="font-size: 10pt; font-family: 'Arial Unicode MS', 'Lucida Sans Unicode', 'Arial'; color: #000000; width: 15px;">●</span>
-<span class="rvts22">желательна высокая производительность эмуляции, позволяющая ускорять эмуляцию (функция "турбо") во много раз. Неплохо также иметь возможность автоматически отключать звук при турбо-эмуляции.</span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
-<p class="rvps10"><span class="rvts22"><br></span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps10"><span class="rvts22">эмулятор обязан быть стабильным и детерминированным. Основой работы Проигрывателя Тасэдитора является строгая детерминированность игрового процесса. Если при загрузках сэйвов состояние игры будет хоть немного отличаться от состояния в момент сохранения, это повлечёт много проблем, в частности, навигация Курсором Проигрывателя будет неадекватной</span></li>
+<li class="rvps10"><span class="rvts22">необходимо учесть все пункты </span><a class="rvts28" href="MistakeProofing.html">Защиты от ошибок</a><span class="rvts22">, относящиеся к модификации эмулятора. В частности при запуске Тасэдитор должен иметь возможность временно отключать ряд настроек эмулятора и восстанавливать их значение при выходе. Эмулятор должен обеспечить невозможность редактирования пользователем этих настроек во время работы Тасэдитора</span></li>
+<li class="rvps10"><span class="rvts22">желательна высокая производительность эмуляции, позволяющая ускорять эмуляцию (функция "турбо") во много раз. Неплохо также иметь возможность автоматически отключать звук при турбо-эмуляции.</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps8"><span class="rvts18">Created with the Personal Edition of HelpNDoc: </span><a class="rvts19" href="http://www.helpndoc.com/help-authoring-tool">Single source CHM, PDF, DOC and HTML Help creation</a></p>
 </div>
 	
