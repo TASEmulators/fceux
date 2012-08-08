@@ -60,6 +60,7 @@ extern void RefreshThrottleFPS();
 int saved_eoptions;
 int saved_EnableAutosave;
 extern int EnableAutosave;
+int saved_frame_display;
 // FCEUX
 extern EMOVIEMODE movieMode;	// maybe we need normal setter for movieMode, to encapsulate it
 extern void UpdateCheckedMenuItems();
@@ -90,6 +91,9 @@ bool EnterTasEditor()
 			// switch off autosaves
 			saved_EnableAutosave = EnableAutosave;
 			EnableAutosave = 0;
+			// switch on frame_display
+			saved_frame_display = frame_display;
+			frame_display = 1;
 			UpdateCheckedMenuItems();
 			
 			// init modules
@@ -168,6 +172,8 @@ bool ExitTasEditor()
 	// restore autosaves
 	EnableAutosave = saved_EnableAutosave;
 	DoPriority();
+	// restore frame_display
+	frame_display = saved_frame_display;
 	UpdateCheckedMenuItems();
 	// switch off TAS Editor mode
 	movieMode = MOVIEMODE_INACTIVE;

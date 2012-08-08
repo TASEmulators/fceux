@@ -457,7 +457,7 @@ int iaPC;
 uint32 iapoffset; //mbg merge 7/18/06 changed from int
 int u; //deleteme
 int skipdebug; //deleteme
-int numWPs; 
+int numWPs;
 
 // for CPU cycles and Instructions counters
 unsigned long int total_cycles_base = 0;

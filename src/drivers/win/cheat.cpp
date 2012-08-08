@@ -485,7 +485,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 							SetDlgItemText(hwndDlg,IDC_CHEAT_VAL,(LPTSTR)U8ToStr(v));
 							if(hMemView)UpdateColorTable(); //if the memory viewer is open then update any blue freeze locations in it as well
 							break;
-                                                case IDC_BTN_CHEAT_RESET:
+						case IDC_BTN_CHEAT_RESET:
 							FCEUI_CheatSearchBegin();
 							ShowResults(hwndDlg);
 							EnableCheatButtons(hwndDlg,TRUE);

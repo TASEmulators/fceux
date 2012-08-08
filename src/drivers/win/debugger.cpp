@@ -76,6 +76,7 @@ uint8 debugger_open=0;
 HWND hDebug;
 static HMENU hDebugcontext;     //Handle to context menu
 static HMENU hDebugcontextsub;  //Handle to context sub menu
+WNDPROC IDC_DEBUGGER_DISASSEMBLY_oldWndProc = 0;
 
 static HFONT hFont;
 static SCROLLINFO si;
@@ -210,7 +211,7 @@ static void UpdateDialog(HWND hwndDlg) {
 
 BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	char str[8]={0};
+	char str[8] = {0};
 	int tmp;
 				
 	switch(uMsg) {
@@ -218,7 +219,8 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CenterWindow(hwndDlg);
 			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_START,EM_SETLIMITTEXT,4,0);
 			SendDlgItemMessage(hwndDlg,IDC_ADDBP_ADDR_END,EM_SETLIMITTEXT,4,0);
-			if (WP_edit >= 0) {
+			if (WP_edit >= 0)
+			{
 				SetWindowText(hwndDlg,"Edit Breakpoint...");
 						
 				sprintf(str,"%04X",watchpoint[WP_edit].address);
@@ -266,8 +268,17 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				
 // ################################## End of SP CODE ###########################
+			} else
+			{
+				CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_CPU, BST_CHECKED);
+				// if lParam is not 0 then we should suggest to add PC breakpoint
+				if (lParam)
+				{
+					CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_X, BST_CHECKED);
+					sprintf(str, "%04X", lParam);
+					SetDlgItemText(hwndDlg,IDC_ADDBP_ADDR_START,str);
+				}
 			}
-			else CheckDlgButton(hwndDlg, IDC_ADDBP_MEM_CPU, BST_CHECKED);
 			break;
 		case WM_CLOSE:
 		case WM_QUIT:
@@ -330,9 +341,11 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 // Changed size of str (TODO: Better calculation of max size)
 // Changed the buffer size of str to 35000
 
+	symbDebugEnabled = IsDlgButtonChecked(hWnd, IDC_DEBUGGER_ENABLE_SYMBOLIC);
+
 // ################################## End of SP CODE ###########################
 
-	char str[35000]={0},chr[34]={0};
+	char str[35000] = {0}, chr[40] = {0};
 	int size;
 	uint8 opcode[3];
 	
@@ -347,20 +360,25 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 
 	//figure out how many lines we can draw
 	RECT rect;
-	GetWindowRect(hWnd,&rect);
-	int lines = (rect.bottom-rect.top)/13;
+	GetClientRect(hWnd,&rect);
+	int lines = (rect.bottom-rect.top)/14;
 
-
-	for (int i = 0; i < lines; i++) {
+	for (int i = 0; i < lines; i++)
+	{
+		// PC pointer
 		if (addr > 0xFFFF) break;
+
+		if (addr == X.PC)
+			strcat(str, ">");
+		else
+			strcat(str, " ");
+
 		if(addr >= 0x8000)
 			sprintf(chr, "%02X:%04X", getBank(addr), addr);
 		else sprintf(chr, "  :%04X", addr);
 		
 // ################################## Start of SP CODE ###########################
 
-		symbDebugEnabled = IsDlgButtonChecked(hWnd, IDC_DEBUGGER_ENABLE_SYMBOLIC);
-		
 		decorateAddress(addr, str, chr, symbDebugEnabled);
 		
 // ################################## End of SP CODE ###########################
@@ -566,6 +584,18 @@ void FCEUD_DebugBreakpoint(int bp_num)
 	ResetDebugStatisticsDeltaCounters();
 }
 
+void UpdateBreakpointsCaption()
+{
+	char str[32];
+	// calculate the number of enabled breakpoints
+	int tmp = 0;
+	for (int i = 0; i < numWPs; i++)
+		if (watchpoint[i].flags & WP_E)
+			tmp++;
+	sprintf(str, "Breakpoints %02X of %02X", tmp, numWPs);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_BREAKPOINTS, str);
+}
+
 void UpdateDebugger()
 {
 	//don't do anything if the debugger is not visible
@@ -650,16 +680,28 @@ void UpdateDebugger()
 	sprintf(str, "(+%lu)", delta_instructions);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_INSTRUCTIONS_COUNT2, str);
 
+	UpdateBreakpointsCaption();
+
 	tmp = X.S|0x0100;
 	sprintf(str, "Stack $%04X", tmp);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_S, str);
-	tmp = ((tmp+1)|0x0100)&0x01FF;
-	sprintf(str, "%02X", GetMem(tmp));
-	for (i = 1; i < 128; i++) {
-		tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
-		if ((i%4) == 0) sprintf(chr, ",\r\n%02X", GetMem(tmp));
-		else sprintf(chr, ",%02X", GetMem(tmp));
-		strcat(str,chr);
+	str[0] = 0;
+	tmp++;
+	if (tmp <= 0x1FF)
+	{
+		sprintf(str, "%02X", GetMem(tmp));
+		for (i = 1; i < 128; i++)
+		{
+			//tmp = ((tmp+1)|0x0100)&0x01FF;  //increment and fix pointer to $0100-$01FF range
+			tmp++;
+			if (tmp > 0x1FF)
+				break;
+			if ((i%4) == 0)
+				sprintf(chr, ",\r\n%02X", GetMem(tmp));
+			else
+				sprintf(chr, ",%02X", GetMem(tmp));
+			strcat(str, chr);
+		}
 	}
 	SetDlgItemText(hDebug, IDC_DEBUGGER_STACK_CONTENTS, str);
 
@@ -748,16 +790,19 @@ void ClearBreakList(HWND hwndDlg) {
 	numWPs = 0;
 }
 
-void EnableBreak(int sel) {
+void EnableBreak(int sel)
+{
 	if(sel<0) return;
 	if(sel>=numWPs) return;
 	watchpoint[sel].flags^=WP_E;
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,sel,0);
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_INSERTSTRING,sel,(LPARAM)(LPSTR)BreakToText(sel));
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_SETCURSEL,sel,0);
+	UpdateBreakpointsCaption();
 }
 
-void DeleteBreak(int sel) {
+void DeleteBreak(int sel)
+{
 	if(sel<0) return;
 	if(sel>=numWPs) return;
 	if (watchpoint[sel].cond)
@@ -791,6 +836,7 @@ void DeleteBreak(int sel) {
 	SendDlgItemMessage(hDebug,IDC_DEBUGGER_BP_LIST,LB_DELETESTRING,sel,0);
 	EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_DEL),FALSE);
 	EnableWindow(GetDlgItem(hDebug,IDC_DEBUGGER_BP_EDIT),FALSE);
+	UpdateBreakpointsCaption();
 }
 
 void KillDebugger() {
@@ -1095,7 +1141,42 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
 	FillBreakList(hwndDlg);
 }
 
-BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+BOOL CALLBACK IDC_DEBUGGER_DISASSEMBLY_WndProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch(uMsg)
+	{
+		case WM_LBUTTONDBLCLK:
+		{
+			// select the text
+			CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
+			int mouse_y = GET_Y_LPARAM(lParam);
+			int tmp = mouse_y / 14, tmp2;
+			int i = si.nPos;
+			while (tmp > 0)
+			{
+				tmp2 = opsize[GetMem(i)];
+				if (tmp2 == 0) tmp2++;
+				if ((i += tmp2) > 0xFFFF)
+				{
+					i = 0xFFFF;
+					return 0;
+				}
+				tmp--;
+			}
+			// prompt "Add PC breakpoint"
+			childwnd = 1;
+			if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, i))
+				AddBreakList();
+			childwnd = 0;
+			UpdateDebugger();
+			return 0;
+		}
+	}
+	return CallWindowProc(IDC_DEBUGGER_DISASSEMBLY_oldWndProc, hwndDlg, uMsg, wParam, lParam);
+}
+
+BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
 	RECT wrect;
 	char str[256] = {0}, *ptr, dotdot[4];
 	int tmp,tmp2;
@@ -1170,6 +1251,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 			// Enable Context Sub-Menus
 			hDebugcontext = LoadMenu(fceu_hInstance,"DEBUGCONTEXTMENUS");
+
+			// subclass editfield
+			IDC_DEBUGGER_DISASSEMBLY_oldWndProc = (WNDPROC)SetWindowLong(GetDlgItem(hwndDlg, IDC_DEBUGGER_DISASSEMBLY), GWL_WNDPROC, (LONG)IDC_DEBUGGER_DISASSEMBLY_WndProc);
 
 			debugger_open = 1;
 			inDebugger = true;
@@ -1346,7 +1430,8 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				//}
 				break;
 
-			case WM_MOUSEMOVE: {
+			case WM_MOUSEMOVE:
+			{
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 
@@ -1388,12 +1473,12 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 				} else
 				{
-					SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"Hover the mouse over the left pane to see the ROM address of the data. Also leftclick/rightclick.");
+					SetDlgItemText(hwndDlg,IDC_DEBUGGER_ADDR_LINE,"Hover the mouse over the left pane to see the ROM address of the code. Also leftclick/midclick/rightclick.");
 				}
 				break;
 			}
-
 			case WM_LBUTTONDOWN:
+			{
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 // ################################## Start of SP CODE ###########################
@@ -1401,8 +1486,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	// mouse_y < 538
 	// > 33) tmp = 33
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538)) {
-					if ((tmp=((mouse_y - 10) / 13)) > 33) tmp = 33;
+				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
+				{
+					tmp = (mouse_y - 10) / 14;
 // ################################## End of SP CODE ###########################
 					i = si.nPos;
 					while (tmp > 0) {
@@ -1421,13 +1507,14 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					}
 				}
 				break;
+			}
 			case WM_RBUTTONDOWN:
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338)) 
+				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338))
 				{
-					if ((tmp=((mouse_y - 10) / 13)) > 24) tmp = 24;
+					tmp = (mouse_y - 10) / 14;
 					i = si.nPos;
 					while (tmp > 0) {
 						if ((tmp2=opsize[GetMem(i)]) == 0) tmp2++;
@@ -1437,16 +1524,21 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						}
 						tmp--;
 					}
-					ChangeMemViewFocus(2,GetNesFileAddress(i),-1);
+					if (i >= 0x8000)
+						// show ROM data in Hexeditor
+						ChangeMemViewFocus(2, GetNesFileAddress(i), -1);
+					else
+						// show RAM data in Hexeditor
+						ChangeMemViewFocus(0, i, -1);
 				}
 				break;
 			case WM_MBUTTONDOWN:
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338)) 
+				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338))
 				{
-					if ((tmp=((mouse_y - 10) / 13)) > 24) tmp = 24;
+					tmp = (mouse_y - 10) / 14;
 					i = si.nPos;
 					while (tmp > 0) {
 						if ((tmp2=opsize[GetMem(i)]) == 0) tmp2++;
@@ -1471,7 +1563,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								break;
 							case IDC_DEBUGGER_BP_ADD:
 								childwnd = 1;
-								if (DialogBox(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB)) AddBreakList();
+								if (DialogBoxParam(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB, 0)) AddBreakList();
 								childwnd = 0;
 								UpdateDebugger();
 								break;
@@ -1480,7 +1572,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								break;
 							case IDC_DEBUGGER_BP_EDIT:
 								WP_edit = SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0);
-								if (DialogBox(fceu_hInstance,"ADDBP",hwndDlg,AddbpCallB)) EditBreakList();
+								if (DialogBoxParam(fceu_hInstance, "ADDBP", hwndDlg, AddbpCallB, 0)) EditBreakList();
 								WP_edit = -1;
 								UpdateDebugger();
 								break;
@@ -1623,7 +1715,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					case LBN_DBLCLK:
 						switch(LOWORD(wParam)) {
 							case IDC_DEBUGGER_BP_LIST: 
-								EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0)); 
+								EnableBreak(SendDlgItemMessage(hwndDlg,IDC_DEBUGGER_BP_LIST,LB_GETCURSEL,0,0));
 								break;
 // ################################## Start of SP CODE ###########################
 
@@ -1725,7 +1817,8 @@ void DoDebug(uint8 halt) {
 		if(DbgSizeX != -1 && DbgSizeY != -1)
 			SetWindowPos(hDebug,0,0,0,DbgSizeX,DbgSizeY,SWP_NOMOVE|SWP_NOZORDER|SWP_NOOWNERZORDER);
 	}
-	if (hDebug) {
+	if (hDebug)
+	{
 		SetWindowPos(hDebug,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
 		
 		updateGameDependentMenusDebugger(GameInfo != 0);

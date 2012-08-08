@@ -63,7 +63,7 @@ int tracelogbufusedsize;
 bool tracer_lines_tabbing = true;
 bool tracer_statuses_to_the_left = false;
 
-bool old_emu_paused = false;	// thus the window only updates once after the game is paused
+bool old_emu_paused = true;		// thanks to this flag the window only updates once after the game is paused
 extern bool JustFrameAdvanced;
 
 FILE *LOG_FP;
@@ -81,13 +81,8 @@ void UpdateLogText(void);
 void EnableTracerMenuItems(void);
 int PromptForCDLogger(void);
 
-BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	//Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
-	string m1 = "Press " ;
-	string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-	string m3 = " to pause the game, or snap \r\nthe debugger to update this window.\r\n";
-	string message = m1+m2+m3;
-	
+BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
 	int i;
 	LOGFONT lf;
 	switch(uMsg) {
@@ -113,7 +108,7 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//setup font
 			hlogFont = (HFONT)SendMessage(hwndDlg, WM_GETFONT, 0, 0);
 			GetObject(hlogFont, sizeof(LOGFONT), &lf);
-			strcpy(lf.lfFaceName,"Courier");
+			strcpy(lf.lfFaceName,"Courier New");
 			hlogNewFont = CreateFontIndirect(&lf);
 			SendDlgItemMessage(hwndDlg,IDC_TRACER_LOG,WM_SETFONT,(WPARAM)hlogNewFont,FALSE);
 			
@@ -192,12 +187,21 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 							}
 							break;
 						case IDC_CHECK_LOG_UPDATE_WINDOW:
+						{
 							//todo: if this gets unchecked then we need to clear out the window
 							log_update_window ^= 1;
-							if(!FCEUI_EmulationPaused() && !log_update_window) //mbg merge 7/19/06 changed to use EmulationPaused()
-								SetDlgItemText(hTracer, IDC_TRACER_LOG, message.c_str());
+							if(!FCEUI_EmulationPaused() && !log_update_window)
+							{
+								// Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
+								string m1 = "Pause the game (press ";
+								string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+								string m3 = " key or snap the Debugger) to update this window.\r\n";
+								string pauseMessage = m1 + m2 + m3;
+								SetDlgItemText(hTracer, IDC_TRACER_LOG, pauseMessage.c_str());
+							}
 							//PauseLoggingSequence();
 							break;
+						}
 						case IDC_BTN_LOG_BROWSE:
 							ShowLogDirDialog();
 							break;
@@ -244,19 +248,15 @@ BOOL CALLBACK TracerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-void BeginLoggingSequence(void){
-	//Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
-	string m1 = "Press ";
-	string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
-	string m3 = " to pause the game, or snap \r\nthe debugger to update this window.\r\n";
-	string pauseMessage = m1 + m2 + m3;
-	
+void BeginLoggingSequence(void)
+{
 	char str[2048], str2[100];
 	int i, j;
 
 	if(!PromptForCDLogger())return; //do nothing if user selected no and CD Logger is needed
 
-	if(logtofile){
+	if(logtofile)
+	{
 		if(logfilename == NULL) ShowLogDirDialog();
 		if (!logfilename) return;
 		LOG_FP = fopen(logfilename,"w");
@@ -266,18 +266,25 @@ void BeginLoggingSequence(void){
 			return;
 		}
 		fprintf(LOG_FP,FCEU_NAME_AND_VERSION" - Trace Log File\n"); //mbg merge 7/19/06 changed string
-	} else {
+	} else
+	{
 		strcpy(str,"Allocating Memory...\r\n");
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
 		tracelogbufsize = j = log_optn_intlst[SendDlgItemMessage(hTracer,IDC_TRACER_LOG_SIZE,CB_GETCURSEL,0,0)];
 		tracelogbuf = (char**)malloc(j*sizeof(char *)); //mbg merge 7/19/06 added cast
-		for(i = 0;i < j;i++){
+		for(i = 0;i < j;i++)
+		{
 			tracelogbuf[i] = (char*)malloc(LOG_LINE_MAX_LEN); //mbg merge 7/19/06 added cast
 			tracelogbuf[i][0] = 0;
 		}
 		sprintf(str2, "%d Bytes Allocated...\r\n", j * LOG_LINE_MAX_LEN);
 		strcat(str,str2);
-		strcat(str,pauseMessage.c_str());
+		// Assemble the message to pause the game.  Uses the current hotkey mapping dynamically
+		string m1 = "Pause the game (press ";
+		string m2 = GetKeyComboName(FCEUD_CommandMapping[EMUCMD_PAUSE]);
+		string m3 = " key or snap the Debugger) to update this window.\r\n";
+		string pauseMessage = m1 + m2 + m3;
+		strcat(str, pauseMessage.c_str());
 		SetDlgItemText(hTracer, IDC_TRACER_LOG, str);
 		tracelogbufpos = tracelogbufusedsize = 0;
 	}
@@ -489,20 +496,8 @@ void EndLoggingSequence(void){
 }
 
 //void PauseLoggingSequence(void){
-void UpdateLogWindow(void){
-
-	//if((tracelogbufpos == 0) || (tracelogbuf[tracelogbufpos][0]))
-	//	tracesi.nMax = tracelogbufsize;
-	//else tracesi.nMax = tracelogbufpos;
-
-	//todo: fix this up.
-	//if(!log_update_window && !userpause){
-	//	SetDlgItemText(hTracer, IDC_TRACER_LOG, "Press F2 to pause the game, or snap \r\nthe debugger to update this window.\r\n");
-	//	return;
-	//}
-	
-	//
-	
+void UpdateLogWindow(void)
+{
 	//we don't want to continue if the trace logger isn't logging, or if its logging to  a file.
 	if ((!logging) || logtofile)
 		return; 
