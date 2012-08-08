@@ -3,7 +3,7 @@
 <head>
 	<title>What's New? 2.0.2 (changelog)</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
@@ -18,7 +18,7 @@
 	</style>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/hnd.js"></script>
-	<script type="text/javascript"><!--
+	<script type="text/javascript">
 		if (top.frames.length == 0)
 		{
 			var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
@@ -54,20 +54,20 @@
 		
 <p><span class="rvts17">What's New? </span><span class="rvts21">2.0.2</span></p>
 <p>Released August 14, 2008</p>
-<p><br></p>
+<p><br/></p>
 <p>This release includes a large number of bug fixes, feature enhancements, and new features.</p>
-<p><br></p>
-<p><br></p>
+<p><br/></p>
+<p><br/></p>
 <p><span class="rvts16">Fixed Crashing Bugs</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* restore savestate error recovery functionality. &nbsp;Will prevent crashes after savestate error messages</p>
 <p>* Fixed - Low speeds (1%) crash FCEUX</p>
 <p>* fixes bug where palflag 1 in .fm2 files crashes fceux</p>
 <p>* FCEUX no longer crashes when attempting to open a non movie file</p>
 <p>* Buffer overflow (change vsprintf to vsnprintf)</p>
-<p><br></p>
+<p><br/></p>
 <p><span class="rvts16">Minor Bug fixes</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* SRAM not wiped on power cycle (during movies)</p>
 <p>* Moviefilenames without extension now automatically get fm2</p>
 <p>* auto-fill .fcs extension in save state as dialog</p>
@@ -81,49 +81,49 @@
 <p>* Ctrl+X now works in the memory watch dialog</p>
 <p>* Dialog window positions won't "disappear" (-32000 protection on all dialogs that remember x,y)</p>
 <p>* fixed View Slots bug - will now always show the used slots</p>
-<p><br></p>
+<p><br/></p>
 <p>* added shift+L as default hotkey for reload lua script</p>
 <p>* added input display to the FCEUX main menu</p>
 <p>* change config filename from fceu98.cfg to fceux.cfg</p>
-<p><br></p>
+<p><br/></p>
 <p><span class="rvts16">New Features</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* restore IPS patching capability which was lost when archive support was added</p>
 <p>* restore ungzipping (and unzipping in sdl) capability which was lost when archive support was added</p>
 <p>* re-enable an "author" text field in the record movie dialog</p>
 <p>* re-enable support for old-format savestates. (Note: can not be loaded into a movie!)</p>
-<p><br></p>
+<p><br/></p>
 <p>* Added new toggle - frame adv. - lag skip (menu item + hotkey mapping + saved in config), will cause frame adv. to skip frames where input is not read</p>
 <p>* Added support for loading movies from archives (just like ROM files). &nbsp;Note: Movies loaded from an archive file will be read-only.</p>
 <p>* movie replay dialog displays fractions of a second on movie length</p>
-<p><br></p>
+<p><br/></p>
 <p>* Savestates now save the Lagcounter information.</p>
 <p>* added a mute turbo option in sound config</p>
-<p><br></p>
+<p><br/></p>
 <p>* add an option to pick a constant color to draw in place of BG when BG rendering is disabled (look for gNoBGFillColor in config).</p>
-<p><br></p>
+<p><br/></p>
 <p><span class="rvts16">Mappers</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* remove cnrom chr rom size limit for homebrew roms</p>
 <p>* mmc5 - 64KB WRAM games now work correctly</p>
 <p>* mmc5 - use of chr A regs for BG in sprite 8x8 mode is fixed</p>
 <p>* upgrade to cah4e3's latest mapper 163&amp;164 code to fix a crash in a game</p>
-<p><br></p>
-<p><br></p>
+<p><br/></p>
+<p><br/></p>
 <p><span class="rvts16">Debugging Tools</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* Debugger - restore snap functionality</p>
 <p>* Debugger - add FORBID breakpoints - regions which block breakpoints from happening if they contain the PC</p>
 <p>* Debugger - debugger window is now resizeable</p>
 <p>* nametable viewer &nbsp;will display correct NT,CHR,ATTR data in more cases (specifically, including some exotic mmc5 cases).</p>
-<p><br></p>
+<p><br/></p>
 <p><span class="rvts16">Lua</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* Savestates remember Lua painting</p>
 <p>* add memory.readbyterange to emulua</p>
-<p><br></p>
+<p><br/></p>
 <p><span class="rvts16">SDL only</span></p>
-<p><br></p>
+<p><br/></p>
 <p>* SDL: fixed --input(1-4) options. &nbsp;input1 and 2 are regular inputs, input3 and 4 are famicom expansion inputs</p>
 <p>* SDL fix configfile woes. configfile now goes to ~/.fceux/fceux.cfg</p>
 <p>* SDL: fixed segfault when opening .fcm files</p>
@@ -143,28 +143,28 @@
 <p>* SDL: New default hotkeys to more closely match win32 defaults</p>
 <p>* SDL: Added lua script loading hotkey (f3). &nbsp;Non win32 SDL requires zenity for this to function.</p>
 <p>* SDL: Build script cleanup; also added option for DEBUG builds.</p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p><br></p>
-<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free HTML Help documentation generator</a></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Produce Kindle eBooks easily</a></p>
 </div>
 	
 	<div id="topic_footer">

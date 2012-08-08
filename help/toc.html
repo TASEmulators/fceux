@@ -4,7 +4,7 @@
 <head>
 	<title>FCEUX Help- Table of Contents</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="generator" content="HelpNDoc">
+    <meta name="generator" content="HelpNDoc Personal Edition 3.6.0.345">
 	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/silver-theme/jquery-ui-1.8.12.custom.css" />
 	<link type="text/css" rel="stylesheet" media="all" href="css/dynatree/chm/ui.dynatree.css" />
@@ -42,51 +42,57 @@
 			});
 			
 			// Toc
-			$("#tab-toc").dynatree({
-				clickFolderMode: 1,
-				debugLevel: 0,
-				imagePath: 'css/dynatree/chm/',
-				onActivate: function(node){
-					if ($("#tab-keywords") && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
-						$("#tab-keywords").dynatree("getTree").activateKey(null);
-					if(node.data.href && node.data.href != '#'){
-						window.open(node.data.href, node.data.target);
+			if ($("#tab-toc").length) {
+				$("#tab-toc").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onActivate: function(node){
+						if ($("#tab-keywords").length && $("#tab-keywords").dynatree && $("#tab-keywords").dynatree("getTree") && $("#tab-keywords").dynatree("getTree").activateKey)
+							$("#tab-keywords").dynatree("getTree").activateKey(null);
+						if(node.data.href && node.data.href != '#'){
+							window.open(node.data.href, node.data.target);
+						}
 					}
-				}
-			});
-			// Expand all nodes if required
-			$("#tab-toc").dynatree("getRoot").visit(function(node){
-					node.expand(true);
 				});
-			// Select the active help id
-			if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+				// Expand all nodes if required
+				$("#tab-toc").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				// Select the active help id
+				if (sHelpIdToActivate != '') $("#tab-toc").dynatree("getTree").activateKey(sHelpIdToActivate);
+			}
 			
 			// Keywords
-			$("#tab-keywords").dynatree({
-				clickFolderMode: 1,
-				debugLevel: 0,
-				imagePath: 'css/dynatree/chm/',
-				onClick: function(node, event){
-					HideKwPopup();
-					if (node.data && node.data.click)
-					{
-						var aRefList = null;
-						eval('aRefList=' + node.data.click);
-						if (ShowKwPopup(node.li, aRefList))
+			
+			if ($("#tab-keywords").length) {
+				$("#tab-keywords").dynatree({
+					clickFolderMode: 1,
+					debugLevel: 0,
+					imagePath: 'css/dynatree/chm/',
+					onClick: function(node, event){
+						HideKwPopup();
+						if (node.data && node.data.click)
 						{
-							if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
-								$("#tab-toc").dynatree("getTree").activateKey(null);
-							if(node.data.href && node.data.href != '#'){
-								window.open(node.data.href, node.data.target);
+							var aRefList = null;
+							eval('aRefList=' + node.data.click);
+							if (ShowKwPopup(node.li, aRefList))
+							{
+								if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").activateKey)
+									$("#tab-toc").dynatree("getTree").activateKey(null);
+								if(node.data.href && node.data.href != '#'){
+									window.open(node.data.href, node.data.target);
+								}
 							}
 						}
 					}
-				}
-			});
-			// Expand all nodes if required
-			$("#tab-keywords").dynatree("getRoot").visit(function(node){
-					node.expand(true);
 				});
+				// Expand all nodes if required
+				$("#tab-keywords").dynatree("getRoot").visit(function(node){
+						node.expand(true);
+					});
+				}
+			
 			// Load search data
 			$.getScript("js/searchdata.js",	function() {
 				bSearchDataLoaded = true;
@@ -99,7 +105,7 @@
 		
 		function SelectTocItem(sHelpId)
 		{
-			if ($("#tab-toc") && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
+			if ($("#tab-toc").length && $("#tab-toc").dynatree && $("#tab-toc").dynatree("getTree") && $("#tab-toc").dynatree("getTree").getNodeByKey) {
 				$("#tab-toc").dynatree("getTree").getNodeByKey(sHelpId).activateSilently();
 			}
 			else {
@@ -122,6 +128,14 @@
 				var oParentDiv = document.createElement("DIV");
 				oParentDiv.id = "popupMenu";
 				var oLink = null;
+				// Close button
+				oLink = document.createElement("SPAN");
+				oLink.className = "close-button";
+				oLink.innerHTML = "X";
+				oLink.href = "#";
+				oLink.onclick = HideKwPopup;
+				oParentDiv.appendChild(oLink);
+				// Items
 				for (var nCnt=0; nCnt<aLinks.length; nCnt++)
 				{
 					oLink = document.createElement("A");
@@ -683,71 +697,71 @@
 		<div id="tab-keywords">
 			<ul id="keywords">
 
-				<li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				<li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								"Can't find FDS Bios image when I attempt to load a .fds game!"</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								"Directdraw: Error creating secondary surface"</a>
 
-				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
 								target="FrameMain"
-								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
 								>
 								2C02 PPU memory map</a>
 
-				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
 								target="FrameMain"
-								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
 								>
 								Alternate A and B</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Arkanoid Paddle</a>
 
-				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
 								target="FrameMain"
-								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
 								>
 								Autofire Offset</a>
 
-				</li><li class="file" data="click: '[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
+				</li><li class="file" data="click:'[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]'">
 							<a
 								href="AutoFireConfigurations.html"
 								target="FrameMain"
-								onClick="[[\'Auto Fire Settings\',\'AutoFireConfigurations.html\']]"
+								onClick="[['Auto Fire Settings','AutoFireConfigurations.html']]"
 								>
 								Autofire Pattern</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Auto-Hold</a>
 
-				</li><li class="file" data="click: '[]'">
+				</li><li class="file" data="click:'[]'">
 							<a
 								href="#"
 								target="FrameMain"
@@ -755,367 +769,367 @@
 								>
 								Basic Bot</a>
 
-				</li><li class="file" data="click: '[[\'AVI Capturing\',\'AVICapturing.html\']]'">
+				</li><li class="file" data="click:'[[\'AVI Capturing\',\'AVICapturing.html\']]'">
 							<a
 								href="AVICapturing.html"
 								target="FrameMain"
-								onClick="[[\'AVI Capturing\',\'AVICapturing.html\']]"
+								onClick="[['AVI Capturing','AVICapturing.html']]"
 								>
 								Capturing a Movie File</a>
 
-				</li><li class="file" data="click: '[[\'Cheat Search\',\'CheatSearch.html\']]'">
+				</li><li class="file" data="click:'[[\'Cheat Search\',\'CheatSearch.html\']]'">
 							<a
 								href="CheatSearch.html"
 								target="FrameMain"
-								onClick="[[\'Cheat Search\',\'CheatSearch.html\']]"
+								onClick="[['Cheat Search','CheatSearch.html']]"
 								>
 								Cheat Guide</a>
 
-				</li><li class="file" data="click: '[[\'Code/Data Logger\',\'CodeDataLogger.html\']]'">
+				</li><li class="file" data="click:'[[\'Code/Data Logger\',\'CodeDataLogger.html\']]'">
 							<a
 								href="CodeDataLogger.html"
 								target="FrameMain"
-								onClick="[[\'Code/Data Logger\',\'CodeDataLogger.html\']]"
+								onClick="[['Code/Data Logger','CodeDataLogger.html']]"
 								>
 								Code/Data Logger</a>
 
-				</li><li class="file" data="click: '[[\'Command Line Options\',\'CommandLineOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Command Line Options\',\'CommandLineOptions.html\']]'">
 							<a
 								href="CommandLineOptions.html"
 								target="FrameMain"
-								onClick="[[\'Command Line Options\',\'CommandLineOptions.html\']]"
+								onClick="[['Command Line Options','CommandLineOptions.html']]"
 								>
 								Command Line Options</a>
 
-				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]'">
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]'">
 							<a
 								href="GUI.html"
 								target="FrameMain"
-								onClick="[[\'GUI\',\'GUI.html\'],[\'Context Menu Items\',\'ContextMenuItems.html\']]"
+								onClick="[['GUI','GUI.html'],['Context Menu Items','ContextMenuItems.html']]"
 								>
 								context menu</a>
 
-				</li><li class="file" data="click: '[[\'Convert fcm\',\'Covertfcm.html\']]'">
+				</li><li class="file" data="click:'[[\'Convert fcm\',\'Covertfcm.html\']]'">
 							<a
 								href="Covertfcm.html"
 								target="FrameMain"
-								onClick="[[\'Convert fcm\',\'Covertfcm.html\']]"
+								onClick="[['Convert fcm','Covertfcm.html']]"
 								>
 								Converting .fcm</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								crash</a>
 
-				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
 								target="FrameMain"
-								onClick="[[\'Debugger\',\'Debugger.html\']]"
+								onClick="[['Debugger','Debugger.html']]"
 								>
 								Debugger</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								desyncs</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Directdraw</a>
 
-				</li><li class="file" data="click: '[[\'Directories\',\'Directories.html\']]'">
+				</li><li class="file" data="click:'[[\'Directories\',\'Directories.html\']]'">
 							<a
 								href="Directories.html"
 								target="FrameMain"
-								onClick="[[\'Directories\',\'Directories.html\']]"
+								onClick="[['Directories','Directories.html']]"
 								>
 								Directory Overrides</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Disable left+right/up+down</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								disksys.rom</a>
 
-				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
 								target="FrameMain"
-								onClick="[[\'NES Menu\',\'NES.html\']]"
+								onClick="[['NES Menu','NES.html']]"
 								>
 								Eject/Insert Disk</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Enable Background Input</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Enable Rewind</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Enable Run in Background</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								error</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Famicom Controllers</a>
 
-				</li><li class="file" data="click: '[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]'">
+				</li><li class="file" data="click:'[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]'">
 							<a
 								href="FamicomDiskSytem.html"
 								target="FrameMain"
-								onClick="[[\'Famicom Disk Sytem\',\'FamicomDiskSytem.html\']]"
+								onClick="[['Famicom Disk Sytem','FamicomDiskSytem.html']]"
 								>
 								Famicom Disk System</a>
 
-				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
 								target="FrameMain"
-								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
+								onClick="[['Palette Options','PaletteOptions.html']]"
 								>
 								FCEU-13-default_nitsuja.pal</a>
 
-				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
 								target="FrameMain"
-								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
+								onClick="[['Palette Options','PaletteOptions.html']]"
 								>
 								FCEU-15-nitsuja-new.pal</a>
 
-				</li><li class="file" data="click: '[[\'.fm2\',\'fm2.html\']]'">
+				</li><li class="file" data="click:'[[\'.fm2\',\'fm2.html\']]'">
 							<a
 								href="fm2.html"
 								target="FrameMain"
-								onClick="[[\'.fm2\',\'fm2.html\']]"
+								onClick="[['.fm2','fm2.html']]"
 								>
 								FCEUX Movie File format</a>
 
-				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
 								target="FrameMain"
-								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
+								onClick="[['Palette Options','PaletteOptions.html']]"
 								>
 								FCEUX.pal</a>
 
-				</li><li class="file" data="click: '[[\'.fcm\',\'fcm.html\']]'">
+				</li><li class="file" data="click:'[[\'.fcm\',\'fcm.html\']]'">
 							<a
 								href="fcm.html"
 								target="FrameMain"
-								onClick="[[\'.fcm\',\'fcm.html\']]"
+								onClick="[['.fcm','fcm.html']]"
 								>
 								FCM</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								fds</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								FDS Bios</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								fm2</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Full screen</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Game Genie</a>
 
-				</li><li class="file" data="click: '[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
+				</li><li class="file" data="click:'[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
 							<a
 								href="GameGenieEncoderDecoder.html"
 								target="FrameMain"
-								onClick="[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]"
+								onClick="[['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]"
 								>
 								Game Genie Decoder/Encoder</a>
 
-				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
 								target="FrameMain"
-								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
 								>
 								Game RAM Details</a>
 
-				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
 								target="FrameMain"
-								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
+								onClick="[['Getting Started','Gettingstarted.html']]"
 								>
 								Getting Started</a>
 
-				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\']]'">
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\']]'">
 							<a
 								href="GUI.html"
 								target="FrameMain"
-								onClick="[[\'GUI\',\'GUI.html\']]"
+								onClick="[['GUI','GUI.html']]"
 								>
 								GUI</a>
 
-				</li><li class="file" data="click: '[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
+				</li><li class="file" data="click:'[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
 							<a
 								href="Gamefilecompatibility.html"
 								target="FrameMain"
-								onClick="[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]"
+								onClick="[['Game file compatibility','Gamefilecompatibility.html']]"
 								>
 								Hacked Games</a>
 
-				</li><li class="file" data="click: '[[\'Hex Editor\',\'HexEditor.html\']]'">
+				</li><li class="file" data="click:'[[\'Hex Editor\',\'HexEditor.html\']]'">
 							<a
 								href="HexEditor.html"
 								target="FrameMain"
-								onClick="[[\'Hex Editor\',\'HexEditor.html\']]"
+								onClick="[['Hex Editor','HexEditor.html']]"
 								>
 								Hex Editor</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Hide Menu</a>
 
-				</li><li class="file" data="click: '[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]'">
+				</li><li class="file" data="click:'[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]'">
 							<a
 								href="FCEUltraVersionHistory.html"
 								target="FrameMain"
-								onClick="[[\'FCE Ultra Version History\',\'FCEUltraVersionHistory.html\']]"
+								onClick="[['FCE Ultra Version History','FCEUltraVersionHistory.html']]"
 								>
 								History of FCEUX / FCE Ultra</a>
 
-				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
 								target="FrameMain"
-								onClick="[[\'Debugger\',\'Debugger.html\']]"
+								onClick="[['Debugger','Debugger.html']]"
 								>
 								Inline Assembler</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Input Configuration</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Input Presets</a>
 
-				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
 								target="FrameMain"
-								onClick="[[\'NES Menu\',\'NES.html\']]"
+								onClick="[['NES Menu','NES.html']]"
 								>
 								Insert Coin</a>
 
-				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
 								target="FrameMain"
-								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
+								onClick="[['Getting Started','Gettingstarted.html']]"
 								>
 								Loadstate</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Lua</a>
 
-				</li><li class="file" data="click: '[[\'Lua Functions List\',\'LuaFunctionsList.html\']]'">
+				</li><li class="file" data="click:'[[\'Lua Functions List\',\'LuaFunctionsList.html\']]'">
 							<a
 								href="LuaFunctionsList.html"
 								target="FrameMain"
-								onClick="[[\'Lua Functions List\',\'LuaFunctionsList.html\']]"
+								onClick="[['Lua Functions List','LuaFunctionsList.html']]"
 								>
 								Lua Functions</a>
 
-				</li><li class="file" data="click: '[]'">
+				</li><li class="file" data="click:'[]'">
 							<a
 								href="#"
 								target="FrameMain"
@@ -1123,135 +1137,135 @@
 								>
 								Lua Scripting</a>
 
-				</li><li class="file" data="click: '[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
+				</li><li class="file" data="click:'[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]'">
 							<a
 								href="GameGenieEncoderDecoder.html"
 								target="FrameMain"
-								onClick="[[\'Game Genie Encoder/Decoder\',\'GameGenieEncoderDecoder.html\']]"
+								onClick="[['Game Genie Encoder/Decoder','GameGenieEncoderDecoder.html']]"
 								>
 								Making Game Genie codes</a>
 
-				</li><li class="file" data="click: '[[\'Map Hotkeys\',\'MapHotkeys.html\']]'">
+				</li><li class="file" data="click:'[[\'Map Hotkeys\',\'MapHotkeys.html\']]'">
 							<a
 								href="MapHotkeys.html"
 								target="FrameMain"
-								onClick="[[\'Map Hotkeys\',\'MapHotkeys.html\']]"
+								onClick="[['Map Hotkeys','MapHotkeys.html']]"
 								>
 								Map Hotkeys</a>
 
-				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
 								target="FrameMain"
-								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
 								>
 								Memory Map</a>
 
-				</li><li class="file" data="click: '[[\'Memory Watch\',\'MemoryWatch.html\']]'">
+				</li><li class="file" data="click:'[[\'Memory Watch\',\'MemoryWatch.html\']]'">
 							<a
 								href="MemoryWatch.html"
 								target="FrameMain"
-								onClick="[[\'Memory Watch\',\'MemoryWatch.html\']]"
+								onClick="[['Memory Watch','MemoryWatch.html']]"
 								>
 								Memory Watch</a>
 
-				</li><li class="file" data="click: '[[\'Movie Recording\',\'MovieRecording.html\']]'">
+				</li><li class="file" data="click:'[[\'Movie Recording\',\'MovieRecording.html\']]'">
 							<a
 								href="MovieRecording.html"
 								target="FrameMain"
-								onClick="[[\'Movie Recording\',\'MovieRecording.html\']]"
+								onClick="[['Movie Recording','MovieRecording.html']]"
 								>
 								Movie Recording</a>
 
-				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
 								target="FrameMain"
-								onClick="[[\'Sound\',\'SoundOptions.html\']]"
+								onClick="[['Sound','SoundOptions.html']]"
 								>
 								Mute frame advance</a>
 
-				</li><li class="file" data="click: '[[\'Name Table Viewer\',\'NameTableViewer.html\']]'">
+				</li><li class="file" data="click:'[[\'Name Table Viewer\',\'NameTableViewer.html\']]'">
 							<a
 								href="NameTableViewer.html"
 								target="FrameMain"
-								onClick="[[\'Name Table Viewer\',\'NameTableViewer.html\']]"
+								onClick="[['Name Table Viewer','NameTableViewer.html']]"
 								>
 								Name Table Viewer</a>
 
-				</li><li class="file" data="click: '[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
+				</li><li class="file" data="click:'[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]'">
 							<a
 								href="NESRAMMappingFindingValues.html"
 								target="FrameMain"
-								onClick="[[\'NES RAM (Mapping/Finding Values)\',\'NESRAMMappingFindingValues.html\']]"
+								onClick="[['NES RAM (Mapping/Finding Values)','NESRAMMappingFindingValues.html']]"
 								>
 								NES Mapping</a>
 
-				</li><li class="file" data="click: '[[\'Palette Options\',\'PaletteOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Palette Options\',\'PaletteOptions.html\']]'">
 							<a
 								href="PaletteOptions.html"
 								target="FrameMain"
-								onClick="[[\'Palette Options\',\'PaletteOptions.html\']]"
+								onClick="[['Palette Options','PaletteOptions.html']]"
 								>
 								Nestopia</a>
 
-				</li><li class="file" data="click: '[[\'Network Play\',\'NetworkPlay.html\']]'">
+				</li><li class="file" data="click:'[[\'Network Play\',\'NetworkPlay.html\']]'">
 							<a
 								href="NetworkPlay.html"
 								target="FrameMain"
-								onClick="[[\'Network Play\',\'NetworkPlay.html\']]"
+								onClick="[['Network Play','NetworkPlay.html']]"
 								>
 								Network Play</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								PAL Emulation</a>
 
-				</li><li class="file" data="click: '[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Palette.html"
 								target="FrameMain"
-								onClick="[[\'Palette\',\'Palette.html\'],[\'Palette Options\',\'PaletteOptions.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Palette','Palette.html'],['Palette Options','PaletteOptions.html'],['Troubleshooting','Troubleshooting.html']]"
 								>
 								Palette</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Pause After Movie Playback</a>
 
-				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
 								target="FrameMain"
-								onClick="[[\'NES Menu\',\'NES.html\']]"
+								onClick="[['NES Menu','NES.html']]"
 								>
 								Power</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Power Pad</a>
 
-				</li><li class="file" data="click: '[[\'PPU Viewer\',\'PPUViewer.html\']]'">
+				</li><li class="file" data="click:'[[\'PPU Viewer\',\'PPUViewer.html\']]'">
 							<a
 								href="PPUViewer.html"
 								target="FrameMain"
-								onClick="[[\'PPU Viewer\',\'PPUViewer.html\']]"
+								onClick="[['PPU Viewer','PPUViewer.html']]"
 								>
 								PPU Viewer</a>
 
-				</li><li class="file" data="click: '[]'">
+				</li><li class="file" data="click:'[]'">
 							<a
 								href="#"
 								target="FrameMain"
@@ -1259,195 +1273,195 @@
 								>
 								RAM Filter</a>
 
-				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
 								target="FrameMain"
-								onClick="[[\'NES Menu\',\'NES.html\']]"
+								onClick="[['NES Menu','NES.html']]"
 								>
 								Reset</a>
 
-				</li><li class="file" data="click: '[[\'GUI\',\'GUI.html\']]'">
+				</li><li class="file" data="click:'[[\'GUI\',\'GUI.html\']]'">
 							<a
 								href="GUI.html"
 								target="FrameMain"
-								onClick="[[\'GUI\',\'GUI.html\']]"
+								onClick="[['GUI','GUI.html']]"
 								>
 								right-click</a>
 
-				</li><li class="file" data="click: '[[\'ROM Hacking\',\'ROMHacking.html\']]'">
+				</li><li class="file" data="click:'[[\'ROM Hacking\',\'ROMHacking.html\']]'">
 							<a
 								href="ROMHacking.html"
 								target="FrameMain"
-								onClick="[[\'ROM Hacking\',\'ROMHacking.html\']]"
+								onClick="[['ROM Hacking','ROMHacking.html']]"
 								>
 								ROM Hacking</a>
 
-				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
 								target="FrameMain"
-								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
+								onClick="[['Getting Started','Gettingstarted.html']]"
 								>
 								Savestates</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Setting up controllers</a>
 
-				</li><li class="file" data="click: '[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
+				</li><li class="file" data="click:'[[\'Menu Items &amp; Submenus\',\'ToggleSwitchesHideMenuetc.html\']]'">
 							<a
 								href="ToggleSwitchesHideMenuetc.html"
 								target="FrameMain"
-								onClick="[[\'Menu Items & Submenus\',\'ToggleSwitchesHideMenuetc.html\']]"
+								onClick="[['Menu Items &amp; Submenus','ToggleSwitchesHideMenuetc.html']]"
 								>
 								Show Movie Status Icon</a>
 
-				</li><li class="file" data="click: '[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Video.html"
 								target="FrameMain"
-								onClick="[[\'Video\',\'Video.html\'],[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Video','Video.html'],['Troubleshooting','Troubleshooting.html']]"
 								>
 								slow emulation</a>
 
-				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
 								target="FrameMain"
-								onClick="[[\'Sound\',\'SoundOptions.html\']]"
+								onClick="[['Sound','SoundOptions.html']]"
 								>
 								Sound Configuration</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Sound crackle</a>
 
-				</li><li class="file" data="click: '[[\'NES Menu\',\'NES.html\']]'">
+				</li><li class="file" data="click:'[[\'NES Menu\',\'NES.html\']]'">
 							<a
 								href="NES.html"
 								target="FrameMain"
-								onClick="[[\'NES Menu\',\'NES.html\']]"
+								onClick="[['NES Menu','NES.html']]"
 								>
 								Switch Disk Side</a>
 
-				</li><li class="file" data="click: '[[\'Debugger\',\'Debugger.html\']]'">
+				</li><li class="file" data="click:'[[\'Debugger\',\'Debugger.html\']]'">
 							<a
 								href="Debugger.html"
 								target="FrameMain"
-								onClick="[[\'Debugger\',\'Debugger.html\']]"
+								onClick="[['Debugger','Debugger.html']]"
 								>
 								Symbolic Debugging</a>
 
-				</li><li class="file" data="click: '[[\'TAS Editor\',\'TASEditor.html\']]'">
+				</li><li class="file" data="click:'[[\'TAS Editor\',\'TASEditor.html\']]'">
 							<a
 								href="TASEditor.html"
 								target="FrameMain"
-								onClick="[[\'TAS Editor\',\'TASEditor.html\']]"
+								onClick="[['TAS Editor','TASEditor.html']]"
 								>
 								TAS Edit</a>
 
-				</li><li class="file" data="click: '[[\'Timing\',\'Timing.html\']]'">
+				</li><li class="file" data="click:'[[\'Timing\',\'Timing.html\']]'">
 							<a
 								href="Timing.html"
 								target="FrameMain"
-								onClick="[[\'Timing\',\'Timing.html\']]"
+								onClick="[['Timing','Timing.html']]"
 								>
 								Timings</a>
 
-				</li><li class="file" data="click: '[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]'">
+				</li><li class="file" data="click:'[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]'">
 							<a
 								href="ToolAssistedSpeedruns.html"
 								target="FrameMain"
-								onClick="[[\'Tool Assisted Speedruns\',\'ToolAssistedSpeedruns.html\']]"
+								onClick="[['Tool Assisted Speedruns','ToolAssistedSpeedruns.html']]"
 								>
 								Tool Assisted Speedruns</a>
 
-				</li><li class="file" data="click: '[[\'Trace Logger\',\'TraceLogger.html\']]'">
+				</li><li class="file" data="click:'[[\'Trace Logger\',\'TraceLogger.html\']]'">
 							<a
 								href="TraceLogger.html"
 								target="FrameMain"
-								onClick="[[\'Trace Logger\',\'TraceLogger.html\']]"
+								onClick="[['Trace Logger','TraceLogger.html']]"
 								>
 								Trace Logger</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Troubleshooting</a>
 
-				</li><li class="file" data="click: '[[\'Getting Started\',\'Gettingstarted.html\']]'">
+				</li><li class="file" data="click:'[[\'Getting Started\',\'Gettingstarted.html\']]'">
 							<a
 								href="Gettingstarted.html"
 								target="FrameMain"
-								onClick="[[\'Getting Started\',\'Gettingstarted.html\']]"
+								onClick="[['Getting Started','Gettingstarted.html']]"
 								>
 								Undo</a>
 
-				</li><li class="file" data="click: '[[\'External Input\',\'ExternalInput.html\']]'">
+				</li><li class="file" data="click:'[[\'External Input\',\'ExternalInput.html\']]'">
 							<a
 								href="ExternalInput.html"
 								target="FrameMain"
-								onClick="[[\'External Input\',\'ExternalInput.html\']]"
+								onClick="[['External Input','ExternalInput.html']]"
 								>
 								Use External Input</a>
 
-				</li><li class="file" data="click: '[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
+				</li><li class="file" data="click:'[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]'">
 							<a
 								href="Gamefilecompatibility.html"
 								target="FrameMain"
-								onClick="[[\'Game file compatibility\',\'Gamefilecompatibility.html\']]"
+								onClick="[['Game file compatibility','Gamefilecompatibility.html']]"
 								>
 								Valid Game Types</a>
 
-				</li><li class="file" data="click: '[[\'Video\',\'Video.html\']]'">
+				</li><li class="file" data="click:'[[\'Video\',\'Video.html\']]'">
 							<a
 								href="Video.html"
 								target="FrameMain"
-								onClick="[[\'Video\',\'Video.html\']]"
+								onClick="[['Video','Video.html']]"
 								>
 								Video Configuration</a>
 
-				</li><li class="file" data="click: '[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
+				</li><li class="file" data="click:'[[\'Troubleshooting\',\'Troubleshooting.html\']]'">
 							<a
 								href="Troubleshooting.html"
 								target="FrameMain"
-								onClick="[[\'Troubleshooting\',\'Troubleshooting.html\']]"
+								onClick="[['Troubleshooting','Troubleshooting.html']]"
 								>
 								Vista</a>
 
-				</li><li class="file" data="click: '[[\'Sound\',\'SoundOptions.html\']]'">
+				</li><li class="file" data="click:'[[\'Sound\',\'SoundOptions.html\']]'">
 							<a
 								href="SoundOptions.html"
 								target="FrameMain"
-								onClick="[[\'Sound\',\'SoundOptions.html\']]"
+								onClick="[['Sound','SoundOptions.html']]"
 								>
 								Volume</a>
 
-				</li><li class="file" data="click: '[[\'What\'s New? 2.0.0\',\'WhatsNew200.html\']]'">
+				</li><li class="file" data="click:'[[\'What\\\'s New? 2.0.0\',\'WhatsNew200.html\']]'">
 							<a
 								href="WhatsNew200.html"
 								target="FrameMain"
-								onClick="[[\'What\'s New? 2.0.0\',\'WhatsNew200.html\']]"
+								onClick="[['What\'s New? 2.0.0','WhatsNew200.html']]"
 								>
 								What's New?</a>
 
-				</li><li class="file" data="click: '[[\'Input\',\'Input.html\']]'">
+				</li><li class="file" data="click:'[[\'Input\',\'Input.html\']]'">
 							<a
 								href="Input.html"
 								target="FrameMain"
-								onClick="[[\'Input\',\'Input.html\']]"
+								onClick="[['Input','Input.html']]"
 								>
 								Zapper</a>
 

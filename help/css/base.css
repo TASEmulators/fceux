@@ -90,7 +90,18 @@ body {
 
 #popupMenu a{
 	display: block;
-	padding: 5px 5px 2px 5px;
+	margin: 5px 10px 2px 5px;
+}
+
+.close-button{
+	color: #666;
+	cursor: hand;
+	cursor: pointer;
+	float: right;
+	font-size: 10px;
+	position: relative;
+	top: -5px;
+	right: -3px;
 }
 
 /* Search highlight */
