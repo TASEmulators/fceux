@@ -2,12 +2,12 @@ Features
 ========
 	* autosave/autoload for xbmc
 	* SDL.Vsync
-		* let's wait on this -- there's no simple way to use the OS default in SDL unless we just don't touch it, which might be the best thing to do here.
+		* lets wait on this -- theres no simple way to use the OS default in SDL unless we just dont touch it, which might be the best thing to do here.
   
 GTK
 ===
 	* Better on-the-fly video resizing with window resize / video config
-	* Hotkey remapping GUI
+	Done! * Hotkey remapping GUI
 	* Smarter video config (disable widgets that are incompatible with openGL)
 	* Options to investigate:
 		* bpp
@@ -18,7 +18,7 @@ SDL 1.3
 =======
 	* segfaults when opening a second game
 	* segfaults on fullscreen entry
-	* haven't tested this in a while
+	* havent tested this in a while
 	* not a 2.1.6 target
 
 BUGS

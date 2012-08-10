@@ -24,4 +24,4 @@ Apparently, F5 on my system is SDL keysym 286.  If you wanted to remap this to a
 You can report any issues with this tool in the FCEUX SourceForge bugtracker.  Alternatively, you can contact me directly at LTsmooth42 _at_ gmail _dot_ com.
 
 6. Future
-I plan to implement a GUI for remapping these keys so you don't have to do this in the future, but we're all very busy people, aren't we?
+I plan to implement a GUI for remapping these keys so you dont have to do this in the future, but were all very busy people, arent we?
