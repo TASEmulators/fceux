@@ -101,10 +101,9 @@ void UpdateOtherDebuggingDialogs()
 
 void RestoreSize(HWND hwndDlg)
 {
-	//As of the writing of this function (revision 1137) the Debugger default width = 821 and height of 523
 	//If the dialog dimensions are changed those changes need to be reflected here.  - adelikat
-	const int DEFAULT_WIDTH = 821;	//Original width
-	const int DEFAULT_HEIGHT = 549;	//Original height
+	const int DEFAULT_WIDTH = 816;	//Original width
+	const int DEFAULT_HEIGHT = 554;	//Original height
 	
 	SetWindowPos(hwndDlg,HWND_TOP,DbgPosX,DbgPosY,DEFAULT_WIDTH,DEFAULT_HEIGHT,SWP_SHOWWINDOW);
 }
@@ -609,6 +608,9 @@ void UpdateDebugger()
 	int tmp,ret,i;
 
 	Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, X.PC);
+	// "Address Bookmark Add" follows the address
+	sprintf(str,"%04X", X.PC);
+	SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 
 	sprintf(str, "%02X", X.A);
 	SetDlgItemText(hDebug, IDC_DEBUGGER_VAL_A, str);
@@ -730,7 +732,6 @@ void UpdateDebugger()
 	if (tmp & C_FLAG) CheckDlgButton(hDebug, IDC_DEBUGGER_FLAG_C, BST_CHECKED);
 
 	DebuggerWasUpdated = true;
-	
 }
 
 char *BreakToText(unsigned int num) {
@@ -1069,17 +1070,23 @@ BOOL CALLBACK DebuggerEnumWindowsProc(HWND hwnd, LPARAM lParam)
 	HWND addrline = GetDlgItem(hDebug,IDC_DEBUGGER_ADDR_LINE);		//Get handle of address line (text area under the disassembly
 	HWND vscr = GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR);	//Get handle for disassembly Vertical Scrollbar
 
+	char str[8] = {0};
+
 	RECT crect;
 	GetWindowRect(hwnd,&crect);					//Get rect of current child to be resized
 	ScreenToClient(hDebug,(LPPOINT)&crect);		//Convert rect coordinates to client area coordinates
 	ScreenToClient(hDebug,((LPPOINT)&crect)+1);
 
-	if(hwnd == editbox) {
+	if(hwnd == editbox)
+	{
 		crect.right += dx;
 		crect.bottom += dy;
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
 		GetScrollInfo(GetDlgItem(hDebug,IDC_DEBUGGER_DISASSEMBLY_VSCR),SB_CTL,&si);
 		Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+		// "Address Bookmark Add" follows the address
+		sprintf(str,"%04X", si.nPos);
+		SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 	} else if(hwnd == icontray) {
 		crect.bottom += dy;
 		SetWindowPos(hwnd,0,0,0,crect.right-crect.left,crect.bottom-crect.top,SWP_NOZORDER | SWP_NOMOVE);
@@ -1384,6 +1391,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage; //mbg merge 7/18/06 added cast
 					SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
 					Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+					// "Address Bookmark Add" follows the address
+					sprintf(str,"%04X", si.nPos);
+					SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 				}
 				break;
 
@@ -1419,6 +1429,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				if ((si.nPos+(int)si.nPage) > si.nMax) si.nPos = si.nMax-si.nPage; //mbg merge 7/18/06 added cast
 				SetScrollInfo((HWND)lParam,SB_CTL,&si,TRUE);
 				Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, si.nPos);
+				// "Address Bookmark Add" follows the address
+				sprintf(str,"%04X", si.nPos);
+				SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 				break;
 
 			case WM_KEYDOWN:
@@ -1667,6 +1680,9 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 								sprintf(str,"%04X",tmp);
 								SetDlgItemText(hwndDlg,IDC_DEBUGGER_VAL_PCSEEK,str);
 								Disassemble(hDebug, IDC_DEBUGGER_DISASSEMBLY, IDC_DEBUGGER_DISASSEMBLY_VSCR, tmp);
+								// "Address Bookmark Add" follows the address
+								sprintf(str,"%04X", si.nPos);
+								SetDlgItemText(hDebug, IDC_DEBUGGER_BOOKMARK, str);
 								break;
 
 							case IDC_DEBUGGER_BREAK_ON_BAD_OP: //Break on bad opcode

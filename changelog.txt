@@ -1,6 +1,23 @@
+
+10-Aug-2012 - AnS - Debugger: "Address Bookmark Add" field follows disassembly window scrolling position
+08-Aug-2012 - AnS - Taseditor: frame counter display is auto-on when Taseditor launches
+08-Aug-2012 - AnS - Debugger: improved stack display
+08-Aug-2012 - AnS - Debugger: doubleclick on the disassembly prompts "Add Execute breakpoint" dialog
+08-Aug-2012 - AnS - Debugger: fixed RAM peek by a rightclick on left pane
+08-Aug-2012 - AnS - Debugger: ">" shows current line in disassembly
+08-Aug-2012 - AnS - Debugger: show the number of breakpoints (enabled and total) above the breakpoints list
+06-Aug-2012 - CaH4e3 - fixed bug when loading UNF games (#525 )
+06-Aug-2012 - AnS - Tracer also updates its window when user pauses the game, not just when Debugger snaps
+06-Aug-2012 - AnS - Tracer: added "Use Stack Pointer for lines tabbing" option and added "To the left from disassembly text" option
+05-Aug-2012 - AnS - Debugger: .DEB file now also stores the state of "Break on Bad Opcode" and "Break when exceed" checkboxes/editfields
+05-Aug-2012 - AnS - Debugger: added "CPU cycles" and "Instructions" counters (request #527) and added "Break when exceed" breakpoints
+05-Aug-2012 - AnS - Debugger: window layout cleanup
 06-Aug-2012 - prg - gtk: added hotkey gui config
 04-Aug-2012 - prg - all: updated FSF address
 04-Aug-2012 - prg - sdl: added SDL.Input.EnableOppositeDirectional option.  allows/disallows simultaneous right+left / up+down.
+03-Aug-2012 - AnS - Debugger: highlighting breakpoint item in BPs list when it's triggered
+03-Aug-2012 - AnS - Debugger: allow Frame Advancing when Debugger is in breakpoint state
+03-Aug-2012 - AnS - Debugger: don't update Debugger window at the beginning of Step command (it will update at at the end of Step) - fixes #528
 25-Jul-2012 - AnS - Taseditor: auto-starting Note editing when creating Marker by double-click
 19-Jul-2012 - AnS - Taseditor: Lua registermanual allows changing the "Run function" button caption; Markers are always restored when deploying Bookmarks
 01-Jul-2012 - AnS - new hotkey "Run Manual Lua function"
