@@ -164,6 +164,7 @@ InitConfig()
 	config->addOption("ystretch", "SDL.YStretch", 0);
 	config->addOption("noframe", "SDL.NoFrame", 0);
 	config->addOption("special", "SDL.SpecialFilter", 0);
+	config->addOption("showfps", "SDL.ShowFPS", 0);
 
 	// OpenGL options
 	config->addOption("opengl", "SDL.OpenGL", 0);

@@ -130,13 +130,10 @@ int FCEU_InitVirtualVideo(void)
 
 #ifdef FRAMESKIP
 
-//#define SHOWFPS
 void ShowFPS(void);
 void FCEU_PutImageDummy(void)
 {
-#ifdef SHOWFPS
 	ShowFPS();
-#endif
 	if(GameInfo->type!=GIT_NSF)
 	{
 		FCEU_DrawNTSCControlBars(XBuf);
@@ -170,9 +167,7 @@ static void ReallySnap(void)
 
 void FCEU_PutImage(void)
 {
-#ifdef SHOWFPS
 	ShowFPS();
-#endif
 	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
 		char nameo[512];
@@ -744,16 +739,22 @@ PNGerr:
 		fclose(pp);
 	return(0);
 }
-//TODO mbg - this needs to be implemented in a better way
-#ifdef SHOWFPS
 uint64 FCEUD_GetTime(void);
 uint64 FCEUD_GetTimeFreq(void);
+bool Show_FPS = false;
+// Control whether the frames per second of the emulation is rendered.
+void FCEUI_ShowFPS(bool showFPS)
+{
+	Show_FPS = showFPS;
+}	
 
 static uint64 boop[60];
 static int boopcount = 0;
 
 void ShowFPS(void)
 { 
+	if(Show_FPS == false)
+		return;
 	uint64 da = FCEUD_GetTime() - boop[boopcount];
 	char fpsmsg[16];
 	int booplimit = PAL?50:60;
@@ -764,4 +765,3 @@ void ShowFPS(void)
 	// It's not averaging FPS over exactly 1 second, but it's close enough.
 	boopcount = (boopcount + 1) % booplimit;
 }
-#endif

@@ -30,6 +30,7 @@
 #include "../common/vidblit.h"
 #include "../../fceu.h"
 #include "../../version.h"
+#include "../../video.h"
 
 #include "../../utils/memory.h"
 
@@ -156,7 +157,7 @@ InitVideo(FCEUGI *gi)
 	// XXX soules - const?  is this necessary?
 	const SDL_VideoInfo *vinf;
 	int error, flags = 0;
-	int doublebuf, xstretch, ystretch, xres, yres; 
+	int doublebuf, xstretch, ystretch, xres, yres, show_fps;
 
 	FCEUI_printf("Initializing video...");
 
@@ -173,6 +174,7 @@ InitVideo(FCEUGI *gi)
 	g_config->getOption("SDL.YResolution", &yres);
 	g_config->getOption("SDL.ClipSides", &s_clipSides);
 	g_config->getOption("SDL.NoFrame", &noframe);
+	g_config->getOption("SDL.ShowFPS", &show_fps);
 
 	// check the starting, ending, and total scan lines
 	FCEUI_GetCurrentVidSystem(&s_srendline, &s_erendline);
@@ -211,6 +213,9 @@ InitVideo(FCEUGI *gi)
 	if(s_nativeHeight < 0) {
 		s_nativeHeight = vinf->current_h;
 	}
+
+	// check to see if we are showing FPS
+	FCEUI_ShowFPS(show_fps);
     
 	// check if we are rendering fullscreen
 	if(s_fullscreen) {

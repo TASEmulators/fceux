@@ -1,3 +1,5 @@
+#ifndef _VIDEO_H_
+#define _VIDEO_H_
 int FCEU_InitVirtualVideo(void);
 void FCEU_KillVirtualVideo(void);
 int SaveSnapshot(void);
@@ -29,4 +31,6 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);
 
 std::string FCEUI_GetSnapshotAsName();
 void FCEUI_SetSnapshotAsName(std::string name);
+void FCEUI_ShowFPS(bool showFPS);
 void snapAVI();
+#endif
