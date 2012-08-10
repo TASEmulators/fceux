@@ -1,4 +1,4 @@
-
+10-Aug-2012 - prg - sdl: fix and enable SHOWFPS build option (TODO: make runtime option)
 10-Aug-2012 - AnS - Debugger: "Address Bookmark Add" field follows disassembly window scrolling position
 08-Aug-2012 - AnS - Taseditor: frame counter display is auto-on when Taseditor launches
 08-Aug-2012 - AnS - Debugger: improved stack display

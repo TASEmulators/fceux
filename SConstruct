@@ -15,6 +15,7 @@ opts.AddVariables(
   BoolVariable('FRAMESKIP', 'Enable frameskipping', 1),
   BoolVariable('OPENGL',    'Enable OpenGL support', 1),
   BoolVariable('LSB_FIRST', 'Least signficant byte first (non-PPC)', 1),
+  BoolVariable('SHOWFPS', 'Show the running frames per second.)', 0), # TODO: move this to runtime configuration option
   BoolVariable('DEBUG',     'Build with debugging symbols', 1),
   BoolVariable('LUA',       'Enable Lua support', 1),
   BoolVariable('NEWPPU',    'Enable new PPU core', 1),
@@ -140,6 +141,9 @@ if env['DEBUG']:
   env.Append(CPPDEFINES=["_DEBUG"], CCFLAGS = ['-g'])
 else:
   env.Append(CCFLAGS = ['-O2'])
+
+if env['SHOWFPS']:
+  env.Append(CPPDEFINES=["SHOWFPS"])
 
 if env['PLATFORM'] != 'win32' and env['PLATFORM'] != 'cygwin' and env['CREATE_AVI']:
   env.Append(CPPDEFINES=["CREATE_AVI"])
