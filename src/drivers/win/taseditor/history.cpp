@@ -383,13 +383,14 @@ int HISTORY::JumpInTime(int new_pos)
 	{
 		snapshots[real_pos].toMovie(currMovieData, first_change);
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		// Piano Roll Redraw and ProjectChanged will be called by Greenzone invalidation
+		project.SetProjectChanged();
+		// Piano Roll Redraw will be called by Greenzone invalidation
 	} else if (markers_changed)
 	{
 		markers_manager.update();
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
-		piano_roll.RedrawList();
 		project.SetProjectChanged();
+		piano_roll.RedrawList();
 	} else if (taseditor_config.enable_hot_changes)
 	{
 		// when using Hot Changes, Piano Roll should be always redrawn, because old changes become less hot

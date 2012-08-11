@@ -55,10 +55,9 @@ public:
 	void SetNote(int index, const char* new_text);
 
 	void MakeCopyTo(MARKERS& destination);
-	void RestoreFromCopy(MARKERS& source, int until_frame = -1);
+	void RestoreFromCopy(MARKERS& source);
 
 	bool checkMarkersDiff(MARKERS& their_markers);
-	bool checkMarkersDiff(MARKERS& their_markers, int end);
 
 	void FindSimilar();
 	void FindNextSimilar();

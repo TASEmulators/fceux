@@ -47,11 +47,6 @@ void GREENZONE::init()
 }
 void GREENZONE::free()
 {
-	int size = savestates.size();
-	for (int i = 0; i < size; ++i)
-	{
-		ClearSavestate(i);
-	}
 	savestates.resize(0);
 	greenZoneCount = 0;
 	lag_history.resize(0);
@@ -63,7 +58,7 @@ void GREENZONE::reset()
 void GREENZONE::update()
 {
 	// keep memorizing savestates, this function should be called at the end of every frame
-	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || savestates[currFrameCounter].empty() || (int)lag_history.size() <= currFrameCounter)
+	if (greenZoneCount <= currFrameCounter || (int)savestates.size() <= currFrameCounter || !savestates[currFrameCounter].size() || (int)lag_history.size() <= currFrameCounter)
 		CollectCurrentState();
 
 	// run cleaning from time to time
@@ -83,7 +78,10 @@ void GREENZONE::CollectCurrentState()
 		lag_history.resize(greenZoneCount, 0);
 
 	// if frame changed - log savestate
-	storeTasSavestate(currFrameCounter);
+	EMUFILE_MEMORY ms(&savestates[currFrameCounter]);
+	FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
+	ms.trim();
+
 	// also log lag frames
 	if (currFrameCounter > 0)
 	{
@@ -133,21 +131,11 @@ bool GREENZONE::loadTasSavestate(int frame)
 {
 	if (frame < 0 || frame >= currMovieData.getNumRecords())
 		return false;
-	if ((int)savestates.size() <= frame || savestates[frame].empty())
+	if ((int)savestates.size() <= frame || !savestates[frame].size())
 		return false;
 
 	EMUFILE_MEMORY ms(&savestates[frame]);
 	return FCEUSS_LoadFP(&ms, SSLOADPARAM_NOBACKUP);
-}
-
-void GREENZONE::storeTasSavestate(int frame)
-{
-	if ((int)savestates.size() <= frame)
-		savestates.resize(frame + 1);
-
-	EMUFILE_MEMORY ms(&savestates[frame]);
-	FCEUSS_SaveMS(&ms, Z_DEFAULT_COMPRESSION);
-	ms.trim();
 }
 
 void GREENZONE::RunGreenzoneCleaning()
@@ -161,7 +149,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x1) && !savestates[i].empty())
+		if ((i & 0x1) && savestates[i].size())
 		{
 			ClearSavestate(i);
 			changed = true;
@@ -173,7 +161,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x3) && !savestates[i].empty())
+		if ((i & 0x3) && savestates[i].size())
 		{
 			ClearSavestate(i);
 			changed = true;
@@ -185,7 +173,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0x7) && !savestates[i].empty())
+		if ((i & 0x7) && savestates[i].size())
 		{
 			ClearSavestate(i);
 			changed = true;
@@ -197,7 +185,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	if (limit < 0) limit = 0;
 	for (; i > limit; i--)
 	{
-		if ((i & 0xF) && !savestates[i].empty())
+		if ((i & 0xF) && savestates[i].size())
 		{
 			ClearSavestate(i);
 			changed = true;
@@ -206,7 +194,7 @@ void GREENZONE::RunGreenzoneCleaning()
 	// clear all remaining
 	for (; i > 0; i--)
 	{
-		if (!savestates[i].empty())
+		if (savestates[i].size())
 		{
 			ClearSavestate(i);
 			changed = true;
@@ -224,23 +212,7 @@ finish:
 
 void GREENZONE::ClearSavestate(int index)
 {
-    std::vector<uint8> tmp;
-    savestates[index].swap(tmp);
-}
-// this function is used by Bookmark Deploy procedure
-void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
-{
-	if ((int)savestates.size() <= frame)
-		savestates.resize(frame + 1);
-	if (greenZoneCount <= frame)
-	{
-		// clear old savestates: from current end of Greenzone to new end of Greenzone
-		for (int i = greenZoneCount; i <= frame; ++i)
-			ClearSavestate(i);
-		greenZoneCount = frame + 1;
-	}
-	if (savestates[frame].empty())
-		savestates[frame] = savestate;
+    savestates[index].resize(0);
 }
 
 void GREENZONE::save(EMUFILE *os, bool really_save)
@@ -274,7 +246,7 @@ void GREENZONE::save(EMUFILE *os, bool really_save)
 				playback.SetProgressbar(frame, greenZoneCount);
 				last_tick = frame / PROGRESSBAR_UPDATE_RATE;
 			}
-			if (savestates[frame].empty()) continue;
+			if (!savestates[frame].size()) continue;
 			write32le(frame, os);
 			// write savestate
 			size = savestates[frame].size();
@@ -442,8 +414,16 @@ void GREENZONE::InvalidateAndCheck(int after)
 {
 	if (after >= 0)
 	{
+		if (after >= currMovieData.getNumRecords())
+			after = currMovieData.getNumRecords() - 1;
 		if (greenZoneCount > after + 1)
 		{
+			// clear all savestates that became irrelevant
+			for (int i = greenZoneCount - 1; i > after; i--)
+			{
+				if (savestates[i].size())
+					ClearSavestate(i);
+			}
 			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
 			// either set Playback cursor to the end of Greenzone or run seeking to restore Playback cursor position
@@ -474,8 +454,16 @@ void GREENZONE::Invalidate(int after)
 {
 	if (after >= 0)
 	{
+		if (after >= currMovieData.getNumRecords())
+			after = currMovieData.getNumRecords() - 1;
 		if (greenZoneCount > after + 1)
 		{
+			// clear all savestates that became irrelevant
+			for (int i = greenZoneCount - 1; i > after; i--)
+			{
+				if (savestates[i].size())
+					ClearSavestate(i);
+			}
 			greenZoneCount = after + 1;
 			currMovieData.rerecordCount++;
 		}
@@ -488,11 +476,10 @@ void GREENZONE::Invalidate(int after)
 int GREENZONE::FindBeginningOfGreenZone(int starting_index)
 {
 	for (int i = starting_index; i < greenZoneCount; ++i)
-	{
-		if (!savestates[i].empty()) return i;
-	}
-	return starting_index;
+		if (savestates[i].size()) return i;
+	return -1;	// error
 }
+
 // getters
 int GREENZONE::GetSize()
 {
@@ -505,14 +492,26 @@ bool GREENZONE::GetLagHistoryAtFrame(int frame)
 	else
 		return false;
 }
+
+// this should only be used by Bookmark Set procedure
 std::vector<uint8>& GREENZONE::GetSavestate(int frame)
 {
 	return savestates[frame];
 }
+// this function should only be used by Bookmark Deploy procedure
+void GREENZONE::WriteSavestate(int frame, std::vector<uint8>& savestate)
+{
+	if ((int)savestates.size() <= frame)
+		savestates.resize(frame + 1);
+	savestates[frame] = savestate;
+	if (greenZoneCount <= frame)
+		greenZoneCount = frame + 1;
+}
+
 bool GREENZONE::SavestateIsEmpty(int frame)
 {
-	if (frame < greenZoneCount && frame < (int)savestates.size())
-		return savestates[frame].empty();
+	if (frame < greenZoneCount && frame < (int)savestates.size() && savestates[frame].size())
+		return false;
 	else
 		return true;
 }

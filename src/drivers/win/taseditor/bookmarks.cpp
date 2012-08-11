@@ -449,7 +449,8 @@ void BOOKMARKS::deploy(int slot)
 		bookmarks_array[slot].jumped();
 	}
 	// jump to the target (bookmarked frame)
-	greenzone.WriteSavestate(jump_frame, bookmarks_array[slot].savestate);
+	if (greenzone.SavestateIsEmpty(jump_frame))
+		greenzone.WriteSavestate(jump_frame, bookmarks_array[slot].savestate);
 	playback.jump(jump_frame);
 	// switch current branch to this branch
 	int old_current_branch = branches.GetCurrentBranch();

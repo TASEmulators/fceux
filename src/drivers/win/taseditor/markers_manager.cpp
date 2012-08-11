@@ -295,99 +295,45 @@ void MARKERS_MANAGER::MakeCopyTo(MARKERS& destination)
 	destination.notes = markers.notes;
 	destination.Set_already_compressed(false);
 }
-void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source, int until_frame)
+void MARKERS_MANAGER::RestoreFromCopy(MARKERS& source)
 {
-	if (until_frame >= 0)
-	{
-		// restore Markers up to and not including the frame
-		if ((int)markers.markers_array.size() <= until_frame)
-		{
-			// only copy head of source
-			markers.markers_array = source.markers_array;
-			markers.markers_array.resize(until_frame);
-			markers.notes = source.notes;
-			// find last Marker
-			int last_marker = GetMarkerUp(until_frame-1);
-			// delete all notes following the note of the last Marker
-			markers.notes.resize(last_marker+1);
-		} else
-		{
-			// combine head of source and tail of destination (old Markers)
-			// 1 - head = part of source Markers
-			std::vector<int> temp_markers_array;
-			std::vector<std::string> temp_notes;
-			temp_markers_array = source.markers_array;
-			temp_markers_array.resize(until_frame);
-			temp_notes = source.notes;
-			// find last Marker in temp_markers_array
-			int last_marker, frame;
-			for (frame = until_frame-1; frame >= 0; frame--)
-				if (temp_markers_array[frame]) break;
-			if (frame >= 0)
-				last_marker = temp_markers_array[frame];
-			else
-				last_marker = 0;
-			// delete all temp_notes foolowing the note of the last Marker
-			temp_notes.resize(last_marker+1);
-			// 2 - tail = part of old (current) Markers
-			// delete all Markers (and their notes) up to and not including until_frame
-			//for (int i = until_frame-1; i >= 0; i--)		// actually no need for that
-			//	ClearMarker(i);
-			// 3 - combine head and tail (if there are actually Markers left in the tail)
-			int size = markers.markers_array.size();
-			temp_markers_array.resize(size);
-			for (int i = until_frame; i < size; ++i)
-			{
-				if (markers.markers_array[i])
-				{
-					last_marker++;	// make new id for old Marker
-					temp_markers_array[i] = last_marker;
-					temp_notes.push_back(markers.notes[markers.markers_array[i]]);	// take note from old Markers and add it to the end of the head
-				}
-			}
-			// 4 - save result
-			markers.markers_array = temp_markers_array;
-			markers.notes = temp_notes;
-		}
-	} else
-	{
-		// end frame was not specified, consider this as "copy all"
-		markers.markers_array = source.markers_array;
-		markers.notes = source.notes;
-	}
+	markers.markers_array = source.markers_array;
+	markers.notes = source.notes;
 }
 
-// return true if any difference in markers_array is found, comparing to markers.markers_array
+// return true only when difference is found before end frame (not including end frame)
 bool MARKERS_MANAGER::checkMarkersDiff(MARKERS& their_markers)
 {
-	if (GetMarkersSize() != their_markers.markers_array.size()) return true;
-	if (GetNotesSize() != their_markers.notes.size()) return true;
-	for (int i = markers.markers_array.size()-1; i >= 0; i--)
+	int end_my = GetMarkersSize() - 1;
+	int end_their = their_markers.markers_array.size() - 1;
+	int min_end = end_my;
+	int i;
+	// 1 - check if there are any Markers after min_end
+	if (end_my < end_their)
+	{
+		for (i = end_their; i > min_end; i--)
+			if (their_markers.markers_array[i])
+				return true;
+	} else if (end_my > end_their)
+	{
+		min_end = end_their;
+		for (i = end_my; i > min_end; i--)
+			if (markers.markers_array[i])
+				return true;
+	}
+	// 2 - check if there's any difference before min_end
+	for (i = min_end; i >= 0; i--)
 	{
 		if (markers.markers_array[i] != their_markers.markers_array[i])
 			return true;
-		else if (markers.markers_array[i] && markers.notes[markers.markers_array[i]].compare(their_markers.notes[their_markers.markers_array[i]]))
+		else if (markers.markers_array[i] &&	// not empty
+			markers.notes[markers.markers_array[i]].compare(their_markers.notes[their_markers.markers_array[i]]))	// notes differ
 			return true;
 	}
-	// also check if there's difference between 0th notes
+	// 3 - check if there's difference between 0th Notes
 	if (markers.notes[0].compare(their_markers.notes[0]))
 		return true;
-	return false;
-}
-// return true only when difference is found before end frame (not including end frame)
-bool MARKERS_MANAGER::checkMarkersDiff(MARKERS& their_markers, int end)
-{
-	if (end < 0)
-		return checkMarkersDiff(their_markers);
-
-	if (markers.markers_array.size() != their_markers.markers_array.size() && ((int)markers.markers_array.size()-1 < end || (int)their_markers.markers_array.size()-1 < end)) return true;
-	for (int i = end-1; i >= 0; i--)
-	{
-		if (markers.markers_array[i] != their_markers.markers_array[i])
-			return true;
-		else if (markers.markers_array[i] && markers.notes[markers.markers_array[i]].compare(their_markers.notes[their_markers.markers_array[i]]))
-			return true;
-	}
+	// no difference found
 	return false;
 }
 // ------------------------------------------------------------------------------------

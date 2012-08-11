@@ -28,8 +28,6 @@ public:
 	void RunGreenzoneCleaning();
 	void ClearSavestate(int index);
 
-	void WriteSavestate(int frame, std::vector<uint8>& savestate);
-
 	void InvalidateAndCheck(int after);
 	void Invalidate(int after);
 
@@ -38,11 +36,11 @@ public:
 	int GetSize();
 	bool GetLagHistoryAtFrame(int frame);
 	std::vector<uint8>& GetSavestate(int frame);
+	void WriteSavestate(int frame, std::vector<uint8>& savestate);
 	bool SavestateIsEmpty(int frame);
 
 private:
 	void CollectCurrentState();
-	void storeTasSavestate(int frame);
 
 	// saved data
 	int greenZoneCount;

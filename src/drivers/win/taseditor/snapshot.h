@@ -20,8 +20,8 @@ public:
 	SNAPSHOT();
 	void init(MovieData& md, bool hotchanges, int force_input_type = -1);
 
-	bool MarkersDifferFromCurrent(int end = -1);
-	void copyToMarkers(int end = -1);
+	bool MarkersDifferFromCurrent();
+	void copyToMarkers();
 	MARKERS& GetMarkers();
 
 	void toMovie(MovieData& md, int start = 0, int end = -1);

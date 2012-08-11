@@ -99,13 +99,13 @@ void SNAPSHOT::init(MovieData& md, bool hotchanges, int force_input_type)
 	strftime(description, 10, "%H:%M:%S", timeinfo);
 }
 
-bool SNAPSHOT::MarkersDifferFromCurrent(int end)
+bool SNAPSHOT::MarkersDifferFromCurrent()
 {
-	return markers_manager.checkMarkersDiff(my_markers, end);
+	return markers_manager.checkMarkersDiff(my_markers);
 }
-void SNAPSHOT::copyToMarkers(int end)
+void SNAPSHOT::copyToMarkers()
 {
-	markers_manager.RestoreFromCopy(my_markers, end);
+	markers_manager.RestoreFromCopy(my_markers);
 }
 MARKERS& SNAPSHOT::GetMarkers()
 {
@@ -439,8 +439,8 @@ int SNAPSHOT::findFirstChange(SNAPSHOT& snap, int start, int end)
 			break;
 		}
 	}
-	// if current size is less then previous, return last frame (=size-1) as the frame of difference
-	if (size < snap_end) return size-1;
+	// if my_size is less then their_size, return last frame + 1 (= size) as the frame of difference
+	if (size < snap_end) return size;
 	// no changes were found
 	return -1;
 }
@@ -485,11 +485,11 @@ int SNAPSHOT::findFirstChange(MovieData& md, int start, int end)
 			break;
 		}
 	}
-	// if sizes differ, return last frame from the lesser of them
+	// if sizes differ, return last frame + 1 from the lesser of them
 	if (size < md.getNumRecords() && end >= size-1)
-		return size-1;
+		return size;
 	else if (size > md.getNumRecords() && end >= md.getNumRecords()-1)
-		return md.getNumRecords()-1;
+		return md.getNumRecords();
 
 	return -1;	// no changes were found
 }
