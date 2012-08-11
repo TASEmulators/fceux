@@ -127,10 +127,9 @@ int FCEU_InitVirtualVideo(void)
 		return 1;
 }
 
+void ShowFPS(void);
 
 #ifdef FRAMESKIP
-
-void ShowFPS(void);
 void FCEU_PutImageDummy(void)
 {
 	ShowFPS();
