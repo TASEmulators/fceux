@@ -2350,6 +2350,9 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
   
 	return 0;
 }
+// NES resolution = 256x240
+const int NES_WIDTH=256;
+const int NES_HEIGHT=240;
 
 void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 {
@@ -2357,11 +2360,42 @@ void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
 	// this should handle resizing so the emulation takes up as much
 	// of the GTK window as possible
 
+
 	// get new window width/height
 	int width, height;
 	width = event->configure.width;
 	height = event->configure.height;
-	//printf("DEBUG: new window size: %dx%d\n", width, height);
+	printf("DEBUG: new window size: %dx%d\n", width, height);
+
+	// get width/height multipliers
+	double xscale = width / (double)NES_WIDTH;
+	double yscale = height / (double)NES_HEIGHT;
+
+	// TODO check KeepRatio (where is this)
+	// do this to keep aspect ratio
+	if(xscale > yscale)
+		xscale = yscale;
+	if(yscale > xscale)
+		yscale = xscale;
+
+	//TODO if openGL make these integers
+	g_config->setOption("SDL.XScale", xscale);
+	g_config->setOption("SDL.YScale", yscale);
+    //gtk_widget_realize(evbox);
+	flushGtkEvents();
+	if(GameInfo != 0)
+	{
+		KillVideo();
+		InitVideo(GameInfo);
+	}
+	gtk_widget_set_size_request(evbox, (int)(NES_WIDTH*xscale), (int)(NES_HEIGHT*yscale));
+	GdkColor black;
+	black.red = 0;
+	black.green = 0;
+	black.blue = 0;
+//	gtk_widget_modify_bg(GTK_WIDGET(win), GTK_STATE_NORMAL, &black);
+
+	printf("DEBUG: new xscale: %f yscale: %f\n", xscale, yscale);
 
 	return;
 }
@@ -2373,9 +2407,9 @@ int InitGTKSubsystem(int argc, char** argv)
 	
 	MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 //	gtk_window_set_policy (GTK_WINDOW (MainWindow), FALSE, FALSE, TRUE);
-	gtk_window_set_resizable(GTK_WINDOW(MainWindow), FALSE);
+	gtk_window_set_resizable(GTK_WINDOW(MainWindow), TRUE);
 	gtk_window_set_title(GTK_WINDOW(MainWindow), FCEU_NAME_AND_VERSION);
-	gtk_window_set_default_size(GTK_WINDOW(MainWindow), 256, 224);
+	gtk_window_set_default_size(GTK_WINDOW(MainWindow), NES_WIDTH, NES_HEIGHT);
 	
 	GdkPixbuf* icon = gdk_pixbuf_new_from_xpm_data(icon_xpm);
 	gtk_window_set_default_icon(icon);
@@ -2401,19 +2435,18 @@ int InitGTKSubsystem(int argc, char** argv)
 	// 1/24/11
 	//
 	// prg - Bryan Cain, you are the man!
-	GtkWidget* hbox = gtk_hbox_new(FALSE, 0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_end (GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	
 	evbox = gtk_event_box_new();
-	gtk_box_pack_start (GTK_BOX(hbox), evbox, TRUE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX(vbox), evbox, TRUE, TRUE, 0);
 	
 	double xscale, yscale;
 	g_config->getOption("SDL.XScale", &xscale);
 	g_config->getOption("SDL.YScale", &yscale);
-	gtk_widget_set_size_request(evbox, 256*xscale, 224*yscale);
+
+	gtk_widget_set_size_request(evbox, NES_WIDTH*xscale, NES_HEIGHT*yscale);
 	gtk_widget_realize(evbox);
 	gtk_widget_show(evbox);
+	gtk_widget_show_all(vbox);
 	
 	GdkColor bg = {0, 0, 0, 0};
 	gtk_widget_modify_bg(evbox, GTK_STATE_NORMAL, &bg);
@@ -2430,7 +2463,7 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
 	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	// resize handler
-	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
+//	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
 	
 	gtk_widget_show_all(MainWindow);
 	
