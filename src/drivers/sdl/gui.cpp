@@ -2351,6 +2351,21 @@ gint handleMouseClick(GtkWidget* widget, GdkEvent *event, gpointer callback_data
 	return 0;
 }
 
+void handle_resize(GtkWindow* win, GdkEvent* event, gpointer data)
+{
+	// TODO this is a stub atm
+	// this should handle resizing so the emulation takes up as much
+	// of the GTK window as possible
+
+	// get new window width/height
+	int width, height;
+	width = event->configure.width;
+	height = event->configure.height;
+	//printf("DEBUG: new window size: %dx%d\n", width, height);
+
+	return;
+}
+
 int InitGTKSubsystem(int argc, char** argv)
 {
 	GtkWidget* Menubar;
@@ -2410,10 +2425,12 @@ int InitGTKSubsystem(int argc, char** argv)
 	g_signal_connect(G_OBJECT(evbox), "button-press-event", G_CALLBACK(handleMouseClick), NULL);
 	g_signal_connect(G_OBJECT(evbox), "button-release-event", G_CALLBACK(handleMouseClick), NULL);
 
-	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
 	
 	// signal handlers
 	g_signal_connect(MainWindow, "delete-event", quit, NULL);
+	g_signal_connect(MainWindow, "destroy-event", quit, NULL);
+	// resize handler
+	g_signal_connect(MainWindow, "configure-event", G_CALLBACK(handle_resize), NULL);
 	
 	gtk_widget_show_all(MainWindow);
 	
