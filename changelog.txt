@@ -1,3 +1,5 @@
+10-Aug-2012 - prg - gtk: reset video on video dialog close
+10-Aug-2012 - prg - gtk: add gui option for showfps
 10-Aug-2012 - prg - sdl: add runtime option for controling drawing fps (SDL.ShowFPS)
 10-Aug-2012 - prg - core: move showfps from build option to runtime option
 10-Aug-2012 - prg - sdl: fix and enable SHOWFPS build option (TODO: make runtime option)

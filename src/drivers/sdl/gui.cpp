@@ -148,11 +148,22 @@ int configGamepadButton(GtkButton* button, gpointer p)
 	return 0;
 }
 
+void resetVideo()
+{
+	KillVideo();
+	InitVideo(GameInfo);
+}
+
+void closeVideoWin(GtkWidget* w, GdkEvent* e, gpointer p)
+{
+	resetVideo();
+	gtk_widget_destroy(w);
+}
+
 void closeDialog(GtkWidget* w, GdkEvent* e, gpointer p)
 {
 	gtk_widget_destroy(w);
 }
-
 void toggleLowPass(GtkWidget* w, gpointer p)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w)))
@@ -177,6 +188,7 @@ void toggleOption(GtkWidget* w, gpointer p)
 		g_config->setOption((char*)p, 1);
 	else
 		g_config->setOption((char*)p, 0);
+	
 	g_config->save();
 	UpdateEMUCore(g_config);
 }
@@ -876,14 +888,12 @@ void openVideoConfig()
 	GtkWidget* yscaleLbl;
 	GtkWidget* xscaleHbox;
 	GtkWidget* yscaleHbox;
-	
-	
+	GtkWidget* showFpsChk;
+		
 	win = gtk_dialog_new_with_buttons("Video Preferences",
-									  GTK_WINDOW(MainWindow),
-									  (GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
-									  GTK_STOCK_CLOSE,
-									  GTK_RESPONSE_OK,
-									  NULL);
+				GTK_WINDOW(MainWindow),
+				(GtkDialogFlags)(GTK_DIALOG_DESTROY_WITH_PARENT),
+				GTK_STOCK_CLOSE, GTK_RESPONSE_OK, NULL);
 	gtk_window_set_icon_name(GTK_WINDOW(win), "video-display");
 	//gtk_widget_set_size_request(win, 250, 250);
 	
@@ -986,7 +996,7 @@ void openVideoConfig()
 	else
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(spriteLimitChk), 0);
 
-  // frameskip check
+	// frameskip check
 	frameskipChk = gtk_check_button_new_with_label("Enable frameskip");
 	g_signal_connect(frameskipChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.Frameskip");
 	
@@ -999,7 +1009,7 @@ void openVideoConfig()
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(frameskipChk), 0);
 
 
-		// clip sides check
+	// clip sides check
 	clipSidesChk = gtk_check_button_new_with_label("Clip sides");
 	g_signal_connect(clipSidesChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ClipSides");
 	
@@ -1033,8 +1043,20 @@ void openVideoConfig()
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(xscaleSpin), f);
 	g_config->getOption("SDL.YScale", &f);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(yscaleSpin), f);
-	
 
+	// show FPS check
+	showFpsChk = gtk_check_button_new_with_label("Show FPS");
+	g_signal_connect(showFpsChk, "clicked", G_CALLBACK(toggleOption), (gpointer)"SDL.ShowFPS");
+
+	// sync with config
+	buf = 0;
+	g_config->getOption("SDL.ShowFPS", &buf);
+	if(buf)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(showFpsChk), 1);
+	else
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(showFpsChk), 0);
+
+	
 	
 	gtk_box_pack_start(GTK_BOX(vbox), lbl, FALSE, FALSE, 5);	
 	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 5);
@@ -1052,9 +1074,10 @@ void openVideoConfig()
 	gtk_box_pack_start(GTK_BOX(vbox), clipSidesChk, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), xscaleHbox, FALSE, FALSE, 5);
 	gtk_box_pack_start(GTK_BOX(vbox), yscaleHbox, FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(vbox), showFpsChk, FALSE, FALSE, 5);
 	
-	g_signal_connect(win, "delete-event", G_CALLBACK(closeDialog), NULL);
-	g_signal_connect(win, "response", G_CALLBACK(closeDialog), NULL);
+	g_signal_connect(win, "delete-event", G_CALLBACK(closeVideoWin), NULL);
+	g_signal_connect(win, "response", G_CALLBACK(closeVideoWin), NULL);
 	
 	gtk_widget_show_all(win);
 	
