@@ -22,8 +22,8 @@ opts.AddVariables(
   BoolVariable('LOGO', 'Enable a logoscreen when creating avis (SDL only)', '1'),
   BoolVariable('GTK', 'Enable GTK2 GUI (SDL only)', 1),
   BoolVariable('GTK3', 'Enable GTK3 GUI (SDL only)', 0),
+  BoolVariable('CLANG', 'Compile with llvm-clang instead of gcc', 0)
 )
-
 AddOption('--prefix', dest='prefix', type='string', nargs=1, action='store', metavar='DIR', help='installation prefix')
 
 prefix = GetOption('prefix')
@@ -59,6 +59,11 @@ if os.environ.has_key('LDFLAGS'):
   env.Append(LINKFLAGS = os.environ['LDFLAGS'].split())
 
 print "platform: ", env['PLATFORM']
+
+# compile with clang
+if env['CLANG']:
+  env.Replace(CC='clang')
+  env.Replace(CXX='clang++')
 
 # special flags for cygwin
 # we have to do this here so that the function and lib checks will go through mingw
