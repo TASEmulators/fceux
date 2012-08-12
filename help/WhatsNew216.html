@@ -56,7 +56,7 @@
 <p>Released -- ???? 2012</p>
 <p><br/></p>
 <p><br/></p>
-<p>The 2.1.6 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. The most significant feature of Windows version is TAS Editor v1.0, created to boost efficiency and ease of Tool-Assisted Speedrunning. Debugging tools were also improved.</p>
+<p>The 2.1.6 release fixes a lot of bugs and adds many new features to prior releases, <span class="rvts22">increasing game compatibility and enhancing usability of both Windows and SDL ports</span>. The most significant feature of Windows version is TAS Editor v1.0, created to boost efficiency and ease of Tool-Assisted Speedrunning. Debugging tools were also substantially improved.</p>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Common </span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
@@ -67,6 +67,7 @@
 <li><span class="rvts22">Improved HUD text rendering wrapping</span></li>
 <li><span class="rvts22">Fixed wrong default palette entry</span></li>
 <li><span class="rvts22">Fixed bug when loading UNF games</span></li>
+<li><span class="rvts22">Display FPS option</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts24">Emulation</span></p>
@@ -87,7 +88,7 @@
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
 <li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
-<li><span class="rvts22">Rerecord counter display</span></li>
+<li><span class="rvts22">Rerecords counter display</span></li>
 <li><span class="rvts22">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
 <li><span class="rvts22">Removed "Lag Counter Reset" hotkey, as it was obsolete since FCEUX 2.0.2</span></li>
 </ul>
@@ -145,6 +146,7 @@
 <li><span class="rvts22">Added "CPU cycles" and "Instructions" counters (cumulative and delta) useful for profiling</span></li>
 <li><span class="rvts22">Added "Cycles counter exceeds N" and "Instructions counter exceeds N" type of breakpoints</span></li>
 <li><span class="rvts22">Doubleclick on the disassembly prompts "Add Execute breakpoint here" dialog</span></li>
+<li><span class="rvts22">"Display ROM offsets" option shows real ROM addresses in the Disassembly window</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Trace Logger</span></p>
@@ -153,6 +155,12 @@
 <li><span class="rvts22">Added "To the left from disassembly text" option for log format customization</span></li>
 <li><span class="rvts22">Fixed bug with trying to log to file without choosing a filename</span></li>
 <li><span class="rvts22">Tracer now also updates its window when user pauses the game, not just when Debugger snaps</span></li>
+</ul>
+<p><span class="rvts24"><br/></span></p>
+<p><span class="rvts23">Code/Data Logger</span></p>
+<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
+<li><span class="rvts22">Now can log data access from RAM code</span></li>
+<li><span class="rvts22">"Save Unused Data" button complements "Save Stripped iNes Rom" feature</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">Ram Watch / Ram Search</span></p>

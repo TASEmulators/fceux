@@ -84,6 +84,8 @@
 <p><br/></p>
 <p>1E:(80E5) is the address that the data that follows is being read from. The banking stated above allows the same address to show different data, but (1E:80E5) will always be the same address on the same page of data.</p>
 <p><br/></p>
+<p>If you check the "Display ROM offsets" checkbox, you'll see real ROM addresses instead of bank:address format.</p>
+<p><br/></p>
 <p>1E:80E5:(66 FF &nbsp; &nbsp; ROR $00FF) is the byte code for ROR, followed by the parameter that tells it to use $00FF. After that is the interpreted assembly code. Note that just because code can be interpreted doesn't mean that it can be run. Even data that's for graphics will inevitable look like code to a certain degree to the disassembly window.</p>
 <p><br/></p>
 <p>1E:80E5:66 FF &nbsp; &nbsp; ROR $00FF( = #$9A) tells you what the value of $00FF is. $00FF refers to 00FF in RAM, and the value is 0x9A. If the program points to an address in ROM instead of RAM, it still shows the value for you.</p>
