@@ -66,6 +66,7 @@ extern bool enableHUDrecording;
 extern bool disableMovieMessages;
 extern bool replaceP2StartWithMicrophone;
 extern bool SingleInstanceOnly;
+extern bool Show_FPS;
 extern bool oldInputDisplay;
 extern bool fullSaveStateLoads;
 extern int frameSkipAmt;
@@ -256,6 +257,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(debuggerAutoload),
 	AC(allowUDLR),
 	AC(debuggerSaveLoadDEBFiles),
+	AC(debuggerDisplayROMoffsets),
 	AC(fullSaveStateLoads),
 	AC(frameSkipAmt),
 
@@ -396,6 +398,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(disableMovieMessages),
 	AC(replaceP2StartWithMicrophone),
 	AC(SingleInstanceOnly),
+	AC(Show_FPS),
 
 	ENDCFGSTRUCT
 };

@@ -31,6 +31,7 @@ void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);
 
 std::string FCEUI_GetSnapshotAsName();
 void FCEUI_SetSnapshotAsName(std::string name);
-void FCEUI_ShowFPS(bool showFPS);
+bool FCEUI_ShowFPS();
+void FCEUI_SetShowFPS(bool showFPS);
 void snapAVI();
 #endif

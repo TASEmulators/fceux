@@ -1,3 +1,7 @@
+12-Aug-2012 - AnS - Debugger: "Display ROM offsets" option
+12-Aug-2012 - AnS - Debugger: double-click breakpoint also adds current bank number to breakpoint condition
+12-Aug-2012 - AnS - Added FPS display to Win32 port (Config->Display->FPS)
+
 10-Aug-2012 - prg - gtk: reset video on video dialog close
 10-Aug-2012 - prg - gtk: add gui option for showfps
 10-Aug-2012 - prg - sdl: add runtime option for controling drawing fps (SDL.ShowFPS)

@@ -251,6 +251,8 @@
 #define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define IDB_TE_GREEN_BLUE_ARROW         208
 #define IDB_PIANO_0                     209
+#define IDC_DEBUGGER_ENABLE_SYMBOLIC2   209
+#define IDC_DEBUGGER_ROM_OFFSETS        209
 #define IDB_PIANO_1                     210
 #define IDB_PIANO_2                     211
 #define IDB_PIANO_3                     212
@@ -1114,6 +1116,7 @@
 #define ACCEL_CTRL_SPACEBAR             40563
 #define ACCEL_CTRL_SPACE                40563
 #define ID_HELP_OPEN_MANUAL             40564
+#define ID_DISPLAY_FPS                  40565
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1123,7 +1126,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40565
+#define _APS_NEXT_COMMAND_VALUE         40566
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

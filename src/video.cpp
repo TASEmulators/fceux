@@ -128,7 +128,6 @@ int FCEU_InitVirtualVideo(void)
 }
 
 void ShowFPS(void);
-
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void)
 {
@@ -742,7 +741,11 @@ uint64 FCEUD_GetTime(void);
 uint64 FCEUD_GetTimeFreq(void);
 bool Show_FPS = false;
 // Control whether the frames per second of the emulation is rendered.
-void FCEUI_ShowFPS(bool showFPS)
+bool FCEUI_ShowFPS()
+{
+	return Show_FPS;
+}	
+void FCEUI_SetShowFPS(bool showFPS)
 {
 	Show_FPS = showFPS;
 }	
@@ -759,8 +762,8 @@ void ShowFPS(void)
 	int booplimit = PAL?50:60;
 	boop[boopcount] = FCEUD_GetTime();
 
-	sprintf(fpsmsg, "%8.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
-	DrawTextTrans(ClipSidesOffset+XBuf + (256-8-8*8) + (FSettings.FirstSLine+4)*256,256, (uint8*)fpsmsg ,4);
+	sprintf(fpsmsg, "%7.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
+	DrawTextTrans(ClipSidesOffset + XBuf + (256 - 7*8) + (FSettings.FirstSLine+4)*256, 256, (uint8*)fpsmsg, 4);
 	// It's not averaging FPS over exactly 1 second, but it's close enough.
 	boopcount = (boopcount + 1) % booplimit;
 }

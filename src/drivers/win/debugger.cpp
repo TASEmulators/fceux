@@ -83,6 +83,7 @@ static SCROLLINFO si;
 
 bool debuggerAutoload = false;
 bool debuggerSaveLoadDEBFiles = true;
+bool debuggerDisplayROMoffsets = false;
 
 #define INVALID_START_OFFSET 1
 #define INVALID_END_OFFSET 2
@@ -276,6 +277,9 @@ BOOL CALLBACK AddbpCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					CheckDlgButton(hwndDlg, IDC_ADDBP_MODE_X, BST_CHECKED);
 					sprintf(str, "%04X", lParam);
 					SetDlgItemText(hwndDlg,IDC_ADDBP_ADDR_START,str);
+					// also set the condition to only break at this Bank
+					sprintf(str, "K==#%02X", getBank(lParam));
+					SetDlgItemText(hwndDlg, IDC_ADDBP_CONDITION, str);
 				}
 			}
 			break;
@@ -372,9 +376,19 @@ void Disassemble(HWND hWnd, int id, int scrollid, unsigned int addr) {
 		else
 			strcat(str, " ");
 
-		if(addr >= 0x8000)
-			sprintf(chr, "%02X:%04X", getBank(addr), addr);
-		else sprintf(chr, "  :%04X", addr);
+		if (addr >= 0x8000)
+		{
+			if (debuggerDisplayROMoffsets && GetNesFileAddress(addr) != -1)
+			{
+				sprintf(chr, " %06X", GetNesFileAddress(addr));
+			} else
+			{
+				sprintf(chr, "%02X:%04X", getBank(addr), addr);
+			}
+		} else
+		{
+			sprintf(chr, "  :%04X", addr);
+		}
 		
 // ################################## Start of SP CODE ###########################
 
@@ -1522,10 +1536,11 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				break;
 			}
 			case WM_RBUTTONDOWN:
+			{
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338))
+				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
 				{
 					tmp = (mouse_y - 10) / 14;
 					i = si.nPos;
@@ -1545,11 +1560,13 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						ChangeMemViewFocus(0, i, -1);
 				}
 				break;
+			}
 			case WM_MBUTTONDOWN:
+			{
 				mouse_x = GET_X_LPARAM(lParam);
 				mouse_y = GET_Y_LPARAM(lParam);
 				//mbg merge 7/18/06 changed pausing check
-				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 338))
+				if (FCEUI_EmulationPaused() && (mouse_x > 8) && (mouse_x < 22) && (mouse_y > 10) && (mouse_y < 538))
 				{
 					tmp = (mouse_y - 10) / 14;
 					i = si.nPos;
@@ -1564,6 +1581,7 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					SetGGConvFocus(i,GetMem(i));
 				}
 				break;
+			}
 			case WM_INITMENUPOPUP:
 			case WM_INITMENU:
 				break;
@@ -1723,6 +1741,12 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							
 // ################################## End of SP CODE ###########################
 							
+							case IDC_DEBUGGER_ROM_OFFSETS:
+							{
+								debuggerDisplayROMoffsets ^= 1;
+								UpdateDebugger();
+								break;
+							}
 							case IDC_DEBUGGER_ROM_PATCHER: DoPatcher(-1,hwndDlg); break;
 							case DEBUGGER_CONTEXT_TOGGLEBREAK: DebuggerCallB(hwndDlg, WM_COMMAND, (LBN_DBLCLK * 0x10000) | (IDC_DEBUGGER_BP_LIST), lParam); break;
 						}

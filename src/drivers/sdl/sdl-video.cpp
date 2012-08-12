@@ -215,7 +215,7 @@ InitVideo(FCEUGI *gi)
 	}
 
 	// check to see if we are showing FPS
-	FCEUI_ShowFPS(show_fps);
+	FCEUI_SetShowFPS(show_fps);
     
 	// check if we are rendering fullscreen
 	if(s_fullscreen) {
