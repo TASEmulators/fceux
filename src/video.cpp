@@ -127,7 +127,6 @@ int FCEU_InitVirtualVideo(void)
 		return 1;
 }
 
-void ShowFPS(void);
 #ifdef FRAMESKIP
 void FCEU_PutImageDummy(void)
 {
@@ -153,7 +152,6 @@ void FCEUI_SaveSnapshotAs(void)
 	dosnapsave=2;
 }
 
-
 static void ReallySnap(void)
 {
 	int x=SaveSnapshot();
@@ -165,7 +163,6 @@ static void ReallySnap(void)
 
 void FCEU_PutImage(void)
 {
-	ShowFPS();
 	if(dosnapsave==2)	//Save screenshot as, currently only flagged & run by the Win32 build. //TODO SDL: implement this?
 	{
 		char nameo[512];
@@ -219,6 +216,7 @@ void FCEU_PutImage(void)
 		FCEU_DrawLagCounter(XBuf);
 		FCEU_DrawNTSCControlBars(XBuf);
 		FCEU_DrawRecordingStatus(XBuf);
+		ShowFPS();
 	}
 
 	if(FCEUD_ShouldDrawInputAids())

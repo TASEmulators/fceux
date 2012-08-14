@@ -200,6 +200,7 @@ void UpdateTasEditor()
 	} else
 	{
 		// update all modules that need to be updated every frame
+		// the order is somewhat important, e.g. Greenzone must update before Bookmark Set, Piano Roll must update before Selection
 		taseditor_window.update();
 		greenzone.update();
 		recorder.update();
