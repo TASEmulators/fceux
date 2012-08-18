@@ -209,7 +209,7 @@
 <tr valign="middle">
 <td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 байта</span></p>
 </td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">unsigned int32</span></p>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts82">unsigned int32</span></p>
 </td>
 <td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">FM3 version</span></p>
 </td>
@@ -217,7 +217,7 @@
 <tr valign="middle">
 <td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 104px;"><p class="rvps5"><span class="rvts6">4 байта</span></p>
 </td>
-<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts6">unsigned int32</span></p>
+<td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 146px;"><p class="rvps5"><span class="rvts82">unsigned int32</span></p>
 </td>
 <td style="border-color: #000000; border-style: solid; border-right: none; border-bottom: none; width: 192px;"><p class="rvps5"><span class="rvts6">saved modules</span></p>
 </td>
@@ -288,8 +288,8 @@
 <li class="rvps10"><span class="rvts22">бит 5 – в файле сохранена История Выделений</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts22"> При сохранении проекта Тасэдитор поочерёдно вызывает все модули, требующие сохранения данных. В зависимости от настроек компактного сохранения каждый модуль осуществляет выборочную сериализацию своих данных в файловый поток. Порядок сохранения модулей всегда одинаков (Маркеры, Закладки, Гринзона, История, Piano Roll, Выделение). При загрузке проекта Тасэдитор вызывает модули в той же очерёдности, и они загружают свои данные из файлового потока, перемещая вперёд указатель на текущую позицию в файле.</span></p>
-<p class="rvps10"><span class="rvts22">Чтобы оценить целостность загружаемых данных, каждый модуль при сохранении записывает в файл строку-идентификатор своих данных. И если перед началом загрузки своих данных модуль не обнаружит эту строку на текущей позиции в файловом потоке, он откажется от загрузки и создаст данные по умолчанию, передав тасэдитору сообщение об ошибке загрузки. Кроме того, если вместо строки-идентификатора сохранения он обнаружит строку-идентификатор отсутствия данных, он откажется от загрузки и создаст данные по умолчанию, без генерации сообщения об ошибке.</span></p>
+<p class="rvps10"><span class="rvts22">При сохранении проекта Тасэдитор поочерёдно вызывает все модули, требующие сохранения данных. В зависимости от настроек компактного сохранения каждый модуль осуществляет выборочную сериализацию своих данных в файловый поток. Порядок сохранения модулей всегда одинаков (Маркеры, Закладки, Гринзона, История, Piano Roll, Выделение). При загрузке проекта Тасэдитор вызывает модули в той же очерёдности, и они загружают свои данные из файлового потока, перемещая вперёд указатель на текущую позицию в файле.</span></p>
+<p class="rvps10"><span class="rvts22">Чтобы оценить целостность загружаемых данных, каждый модуль при сохранении записывает в файл строку-идентификатор своих данных. И если перед началом загрузки своих данных модуль не обнаружит эту строку на текущей позиции в файловом потоке, он откажется от загрузки и создаст данные по умолчанию, передав Тасэдитору сообщение об ошибке загрузки. Кроме того, если вместо строки-идентификатора сохранения он обнаружит строку-идентификатор отсутствия данных, он откажется от загрузки и создаст данные по умолчанию, без генерации сообщения об ошибке.</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <div class="rvps21"><table width="450" border="1" cellpadding="0" cellspacing="0" style="border-color: #ffffff #000000 #000000 #ffffff; border-style: solid;">
 <tr valign="middle">
