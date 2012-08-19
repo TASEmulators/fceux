@@ -1,3 +1,4 @@
+19-Aug-2012 - AnS - win32: "Maintain aspect ratio (best fit)" option in Video config
 12-Aug-2012 - AnS - Debugger: "Display ROM offsets" option
 12-Aug-2012 - AnS - Debugger: double-click breakpoint also adds current bank number to breakpoint condition
 12-Aug-2012 - AnS - Added FPS display to Win32 port (Config->Display->FPS)

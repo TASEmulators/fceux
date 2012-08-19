@@ -1354,8 +1354,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				winsizemulx*= (double)w/winwidth;
 			if(how & 2)
 				winsizemuly*= (double)h/winheight;
-			if(how & 1) FixWXY(0);
-			else FixWXY(1);
+			if(how & 1)
+				FixWXY(0);
+			else
+				FixWXY(1);
 
 			CalcWindowSize(&srect);
 			winwidth=srect.right;
@@ -2314,13 +2316,16 @@ void FixWXY(int pref)
 
 		if(!pref)
 		{
-			winsizemuly = winsizemulx * 256 / FSettings.TotalScanlines() * 3 / 4 * saspectw / saspecth;
+			winsizemuly = winsizemulx * (saspecth / saspectw);
 		}
 		else
 		{
-			winsizemulx = winsizemuly * FSettings.TotalScanlines() / 256 * 4 / 3 * saspecth / saspectw;
+			winsizemulx = winsizemuly * (saspectw / saspecth);
 		}
 	}
+
+	// AnS: removed unnecessary restrictions of window size
+	/*
 	if(winspecial)
 	{
 		// -Video Modes Tag-
@@ -2352,6 +2357,7 @@ void FixWXY(int pref)
 				winsizemuly = mult;
 		}
 	}
+	*/
 
 	if(winsizemulx<0.1)
 		winsizemulx=0.1;
@@ -2487,8 +2493,7 @@ void SetMainWindowStuff()
 		winheight = tmp.bottom - tmp.top;
 
 		ShowWindow(hAppWnd, SW_SHOWMAXIMIZED);
-	}
-	else
+	} else
 	{
 		RECT srect;
 
@@ -2524,6 +2529,10 @@ void SetMainWindowStuff()
 
 		ShowWindow(hAppWnd, SW_SHOWNORMAL);
 	}
+	if (eoptions & EO_BESTFIT)
+	{
+		RecreateResizableSurface();
+	}
 }
 
 /// @return Flag that indicates failure (0) or success (1).
@@ -2540,18 +2549,18 @@ int GetClientAbsRect(LPRECT lpRect)
 	lpRect->top = point.y;
 	lpRect->left = point.x;
 
-	if(ismaximized)
-	{
+	//if(ismaximized)
+	//{
 		RECT al;
 		GetClientRect(hAppWnd, &al);
 		lpRect->right = point.x + al.right;
 		lpRect->bottom = point.y + al.bottom;
-	}
-	else
-	{
-		lpRect->right = point.x + VNSWID * winsizemulx;
-		lpRect->bottom = point.y + FSettings.TotalScanlines() * winsizemuly;
-	}
+	//}
+	//else
+	//{
+	//	lpRect->right = point.x + VNSWID * winsizemulx;
+	//	lpRect->bottom = point.y + FSettings.TotalScanlines() * winsizemuly;
+	//}
 	return 1;
 }
 

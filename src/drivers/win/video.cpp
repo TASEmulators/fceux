@@ -69,11 +69,19 @@ LPDIRECTDRAW7 lpDD7=0;
 LPDIRECTDRAWPALETTE lpddpal = 0;
 
 DDSURFACEDESC2 ddsd;
+DDSURFACEDESC2 ddsdback;
+DDSURFACEDESC2 ddsd_Resizable;
 
-DDSURFACEDESC2        ddsdback;
 LPDIRECTDRAWSURFACE7  lpDDSPrimary=0;
 LPDIRECTDRAWSURFACE7  lpDDSDBack=0;
 LPDIRECTDRAWSURFACE7  lpDDSBack=0;
+LPDIRECTDRAWSURFACE7  lpDDSResizable=0;
+
+DDBLTFX blitfx = { sizeof(DDBLTFX) };
+
+RECT resizable_surface_rect = {0};
+
+#define RELEASE(x) if(x) { x->Release(); x = 0; }
 
 static void ShowDDErr(char *s)
 {
@@ -84,12 +92,15 @@ static void ShowDDErr(char *s)
 
 int RestoreDD(int w)
 {
-	if(w)
+	if (w == 2)	// lpDDSResizable
+	{
+		if(!lpDDSResizable) return 0;
+		if(IDirectDrawSurface7_Restore(lpDDSResizable)!=DD_OK) return 0;
+	} else if (w == 1)	// lpDDSBack
 	{
 		if(!lpDDSBack) return 0;
 		if(IDirectDrawSurface7_Restore(lpDDSBack)!=DD_OK) return 0;
-	}
-	else
+	} else	// 0 means lpDDSPrimary
 	{
 		if(!lpDDSPrimary) return 0;
 		if(IDirectDrawSurface7_Restore(lpDDSPrimary)!=DD_OK) return 0;
@@ -215,10 +226,72 @@ static int InitBPPStuff(int fs)
 	return 1;
 }
 
+int RecreateResizableSurface()
+{
+	if (!lpDD7)
+		return 1;	// DirectDraw isn't initialized yet
+
+	// check if new size is the same as old
+
+
+	// delete old surface
+	RELEASE(lpDDSResizable);
+	// create new surface
+	memset(&ddsd_Resizable, 0, sizeof(ddsd_Resizable));
+	ddsd_Resizable.dwSize = sizeof(ddsd_Resizable);
+	ddsd_Resizable.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+	ddsd_Resizable.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+	RECT client_recr;
+	GetClientRect(hAppWnd, &client_recr);
+	int width = client_recr.right - client_recr.left;
+	int height = client_recr.bottom - client_recr.top;
+	ddsd_Resizable.dwWidth = width;
+	ddsd_Resizable.dwHeight = height;
+	ddrval = IDirectDraw7_CreateSurface(lpDD7, &ddsd_Resizable, &lpDDSResizable, (IUnknown FAR*)NULL);
+	if (ddrval != DD_OK)
+	{
+		void FCEU_PrintError(char *format, ...);
+		FCEU_PrintError("%08x, %d\n", ddrval, lpDD7);
+		ShowDDErr("Error creating resizable surface.");
+		return 1;
+	}
+	// fill the surface with black color
+	blitfx.dwFillColor = 0;
+	ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &blitfx);
+	// calculate resizable_surface_rect
+	double current_aspectratio = (double)width / (double)height;
+	double needed_aspectratio = (double)(VNSWID) / (double)(FSettings.TotalScanlines());
+	if (current_aspectratio == needed_aspectratio)
+	{
+		resizable_surface_rect.left = 0;
+		resizable_surface_rect.right = width;
+		resizable_surface_rect.top = 0;
+		resizable_surface_rect.bottom = height;
+	} else if (current_aspectratio > needed_aspectratio)
+	{
+		// the window is wider than emulated screen
+		resizable_surface_rect.top = 0;
+		resizable_surface_rect.bottom = height;
+		int center_x = width / 2;
+		width = (double)((double)height * needed_aspectratio);
+		resizable_surface_rect.left = center_x - (width / 2);
+		resizable_surface_rect.right = center_x + (width / 2);
+	} else
+	{
+		// the window is taller than emulated screen
+		resizable_surface_rect.left = 0;
+		resizable_surface_rect.right = width;
+		int center_y = height / 2;
+		height = (double)((double)width / needed_aspectratio);
+		resizable_surface_rect.top = center_y - (height / 2);
+		resizable_surface_rect.bottom = center_y + (height / 2);
+	}
+	return 1;	// all ok
+}
+
 int SetVideoMode(int fs)
 {
 	int specmul = 1;    // Special scaler size multiplier
-
 
 	if(fs)
 		if(!vmod)
@@ -291,7 +364,7 @@ int SetVideoMode(int fs)
 			ShowDDErr("Error creating secondary surface.");
 			return 0;
 		}
-
+		
 		if(!GetBPP())
 			return 0;
 
@@ -480,7 +553,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 	int pitch;
 	unsigned char *ScreenLoc;
 	static RECT srect;
-	RECT drect;
+	RECT wrect;
 	int specialmul;
 
 	if (!lpDDSBack) return;
@@ -502,7 +575,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
 		PaletteChanged=0;
 	}
 
-	if(!GetClientAbsRect(&drect)) return;
+	if(!GetClientAbsRect(&wrect)) return;
 
 	ddrval=IDirectDrawSurface7_Lock(lpDDSBack,NULL,&ddsdback, 0, NULL);
 	if(ddrval!=DD_OK)
@@ -523,20 +596,53 @@ static void BlitScreenWindow(unsigned char *XBuf)
 
 	IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
 
-	//aquanull 2011-11-28 fix tearing
-	FCEUD_VerticalSync();
-
-	if(IDirectDrawSurface7_Blt(lpDDSPrimary, &drect,lpDDSBack,&srect,DDBLT_ASYNC,0)!=DD_OK)
+	if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left))
 	{
-		ddrval=IDirectDrawSurface7_Blt(lpDDSPrimary, &drect,lpDDSBack,&srect,DDBLT_WAIT,0);
-		if(ddrval!=DD_OK)
+		// blit from lpDDSBack to lpDDSResizable using best fit
+		if (IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
 		{
-			if(ddrval==DDERR_SURFACELOST)
+			ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_WAIT, 0);
+			if(ddrval != DD_OK)
 			{
-				RestoreDD(1);
-				RestoreDD(0);
+				if(ddrval == DDERR_SURFACELOST)
+				{
+					RestoreDD(2);
+					RestoreDD(1);
+				}
+				return;
 			}
-			return;
+		}
+		// blit from lpDDSResizable to screen (lpDDSPrimary)
+		FCEUD_VerticalSync();		// aquanull 2011-11-28 fix tearing
+		if (IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSResizable, NULL, DDBLT_ASYNC, 0) != DD_OK)
+		{
+			ddrval = IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSResizable, NULL, DDBLT_WAIT, 0);
+			if(ddrval != DD_OK)
+			{
+				if(ddrval == DDERR_SURFACELOST)
+				{
+					RestoreDD(2);
+					RestoreDD(0);
+				}
+				return;
+			}
+		}
+	} else
+	{
+		// blit directly from lpDDSBack to screen (lpDDSPrimary)
+		FCEUD_VerticalSync();		// aquanull 2011-11-28 fix tearing
+		if(IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
+		{
+			ddrval = IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSBack, &srect, DDBLT_WAIT, 0);
+			if(ddrval != DD_OK)
+			{
+				if(ddrval == DDERR_SURFACELOST)
+				{
+					RestoreDD(1);
+					RestoreDD(0);
+				}
+				return;
+			}
 		}
 	}
 }
@@ -842,8 +948,6 @@ static void BlitScreenFull(uint8 *XBuf)
 	}
 }
 
-#define RELEASE(x) if(x) { x->Release(); x = 0; }
-
 void ResetVideo(void)
 {
 	ShowCursorAbs(1);
@@ -858,6 +962,7 @@ void ResetVideo(void)
 	RELEASE(lpddpal);
 	RELEASE(lpDDSBack);
 	RELEASE(lpDDSPrimary);
+	RELEASE(lpDDSResizable);
 	RELEASE(lpClipper);
 	RELEASE(lpDD7);
 }
@@ -1026,6 +1131,9 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(eoptions&EO_CLIPSIDES)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES,BST_CHECKED);
 
+		if(eoptions&EO_BESTFIT)
+			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_BESTFIT, BST_CHECKED);
+
 		if(disvaccel&1)
 			CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN,BST_CHECKED);
 
@@ -1086,6 +1194,11 @@ gornk:
 					eoptions&=~EO_CLIPSIDES;
 					ClipSidesOffset = 0;
 				}
+
+				if (IsDlgButtonChecked(hwndDlg, IDC_VIDEOCONFIG_BESTFIT) == BST_CHECKED)
+					eoptions |= EO_BESTFIT;
+				else
+					eoptions &= ~EO_BESTFIT;
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_NO8LIM)==BST_CHECKED)
 					eoptions|=EO_NOSPRLIM;

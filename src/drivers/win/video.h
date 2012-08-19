@@ -49,6 +49,7 @@ extern int winsync;
 void SetFSVideoMode();
 void FCEUD_BlitScreen(uint8 *XBuf);
 void ConfigVideo();
+int RecreateResizableSurface();
 int SetVideoMode(int fs);
 void DoVideoConfigFix();
 void FCEUD_BlitScreen(uint8 *XBuf);

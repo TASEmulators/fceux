@@ -94,6 +94,8 @@
 #define IDC_DEBUGGER_STEP_OVER          107
 #define IDC_ADDBP_MEM_SPR               107
 #define IDC_ROMPATCHER_DISASSEMBLY      107
+#define IDC_VIDEOCONFIG_MAINTAIN_ASPECT_RATIO 107
+#define IDC_VIDEOCONFIG_BESTFIT         107
 #define IDR_ACCELERATOR1                108
 #define BTN_CDLOGGER_SAVE_STRIPPED      108
 #define IDC_CHEAT_VAL_NE_BY             108
@@ -251,7 +253,6 @@
 #define IDC_DEBUGGER_ENABLE_SYMBOLIC    208
 #define IDB_TE_GREEN_BLUE_ARROW         208
 #define IDB_PIANO_0                     209
-#define IDC_DEBUGGER_ENABLE_SYMBOLIC2   209
 #define IDC_DEBUGGER_ROM_OFFSETS        209
 #define IDB_PIANO_1                     210
 #define IDB_PIANO_2                     211
