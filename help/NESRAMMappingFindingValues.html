@@ -60,16 +60,16 @@
 <p><br/></p>
 <p><span class="rvts12">Contents</span></p>
 <p><br/></p>
-<p><span class="rvts42">Memory Map</span></p>
+<p><span class="rvts41">Memory Map</span></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;Gives a diagram of the 2A03 CPU memory map .</p>
 <p><br/></p>
-<p><span class="rvts42">2C02 PPU memory map</span></p>
+<p><span class="rvts41">2C02 PPU memory map</span></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;Gives more detailed info about each section of the Memory map diagram</p>
 <p><br/></p>
-<p><span class="rvts42">Game Ram Details</span></p>
+<p><span class="rvts41">Game Ram Details</span></p>
 <p> &nbsp; &nbsp; &nbsp; &nbsp;On board RAM Map ($000-$07FF) Map (gives specific info on the how NES games typically layout their ram values)</p>
 <p><br/></p>
-<p><span class="rvts42">Online Resources</span></p>
+<p><span class="rvts41">Online Resources</span></p>
 <p><a class="rvts18" href="http://en.wikibooks.org/wiki/NES_Programming">NES Programming - Wikipedia</a></p>
 <p><a class="rvts18" href="http://everything2.com/e2node/NES%2520memory%2520map">NES Memory Map</a></p>
 <p><br/></p>
@@ -167,7 +167,7 @@
 <p><br/></p>
 <p>Most games use the basic on board ram. &nbsp;The address range of this ram is $0000-$07FF. &nbsp;This translates to 2048 possible ram values.</p>
 <p><br/></p>
-<p><span class="rvts42">Pages</span></p>
+<p><span class="rvts41">Pages</span></p>
 <p><br/></p>
 <p>This ram is broken down into 8 pages. &nbsp;A "page" is a block of 256 ram values.</p>
 <p><br/></p>
@@ -203,8 +203,8 @@
 <p><br/></p>
 <p>These values rarely (if at all) reside outside blocks 1, 3, 4, or 5. &nbsp;This knowledge already reduces your search possibilities in half!</p>
 <p><br/></p>
-<p><span class="rvts42">Rows </span></p>
-<p><span class="rvts42"><br/></span></p>
+<p><span class="rvts41">Rows </span></p>
+<p><span class="rvts41"><br/></span></p>
 <p>Each block is broken down into 16 "rows" of addresses. &nbsp;For example, in block 3, the first row is $030x ($0300-$030F).</p>
 <p><br/></p>
 <p>Each row of 16* will contain similar data. &nbsp;For instance all x coordinates will generally be in the same row. &nbsp;So xxx0 might be the main characters x position. &nbsp;xxxx1 would be "enemy 1" (1st enemy loaded onto the screen), and so on.</p>
@@ -213,7 +213,7 @@
 <p><br/></p>
 <p>*Super Mario Bros. 2 (U) is a rare example that uses rows of 10</p>
 <p><br/></p>
-<p><span class="rvts42">Columns</span></p>
+<p><span class="rvts41">Columns</span></p>
 <p><br/></p>
 <p>A column would be all the values of a block that share the same last digit. &nbsp;So a column would be 16 addresses such as $0300, $0310, $0320, etc.</p>
 <p><br/></p>
@@ -223,7 +223,7 @@
 <p><br/></p>
 <p>If the next row ($031x) is x positions. &nbsp;$0310 would be the player's x position. &nbsp;The remaining positions of that row would correspond to the other player/enemy x positions in line with the hp values of the previous row.</p>
 <p><br/></p>
-<p><span class="rvts42">Example</span></p>
+<p><span class="rvts41">Example</span></p>
 <p><br/></p>
 <p>These distinctions are easier to see in a visual example. &nbsp;This is the enemy/player stats as they are mapped in the game <span class="rvts30">Teenage Mutant Ninja Turtles</span>.</p>
 <p><br/></p>

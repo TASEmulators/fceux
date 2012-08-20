@@ -205,18 +205,18 @@ a.rvts40, span.rvts40
  text-decoration: underline;
 }
 a.rvts40:hover { color: #0000ff; }
-a.rvts41, span.rvts41
+span.rvts41
+{
+ font-size: 12pt;
+ font-weight: bold;
+}
+a.rvts42, span.rvts42
 {
  font-size: 12pt;
  color: #0000ff;
  text-decoration: underline;
 }
-a.rvts41:hover { color: #0000ff; }
-span.rvts42
-{
- font-size: 12pt;
- font-weight: bold;
-}
+a.rvts42:hover { color: #0000ff; }
 span.rvts43
 {
  font-size: 12pt;

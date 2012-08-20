@@ -59,16 +59,19 @@
 <p><br/></p>
 <p><span class="rvts12">Full Screen Settings</span></p>
 <p><br/></p>
-<p><span class="rvts10">Full Screen</span></p>
+<p><span class="rvts41">Full Screen</span></p>
 <p>If checked, FCEUX will enter full screen mode when it is loaded.</p>
 <p><br/></p>
-<p><span class="rvts10">Enter Full Screen Mode after file is loaded</span></p>
+<p><span class="rvts41">Enter Full Screen Mode after file is loaded</span></p>
 <p>If checked, FCEUX will only enter full screen mode when a game is loaded.</p>
 <p><br/></p>
-<p><span class="rvts10">Video Mode:</span></p>
-<p>Sets the image size while in full mode. &nbsp;If custom is selected, FCEUX will use the settings under "Custom Video Mode".</p>
+<p><span class="rvts41">Hide mouse cursor</span></p>
+<p>If checked, FCEUX will hide mouse cursor when entering full screen mode.</p>
 <p><br/></p>
-<p><span class="rvts10">Sync Method:</span></p>
+<p><span class="rvts41">Video Mode</span></p>
+<p>Sets the image size while in full mode. If custom is selected, FCEUX will use the settings under "Custom Video Mode".</p>
+<p><br/></p>
+<p><span class="rvts41">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother.</p>
 <p><br/></p>
 <p><span class="rvts10">Disable Hardware Acceleration</span></p>
@@ -76,61 +79,74 @@
 <p><br/></p>
 <p><span class="rvts28">Custom Video Mode</span></p>
 <p><br/></p>
-<p><span class="rvts10">Mode:</span></p>
-<p>Sets the image size during full screen mode, if custom is selected under Full Screen Settings.</p>
+<p><span class="rvts41">Mode</span></p>
+<p>Sets the image size during full screen mode, if Custom is selected under Full Screen Settings. By default this is automatically set to math current display resolution.</p>
 <p><br/></p>
 <p><span class="rvts16">Image Size Transform</span></p>
 <p><br/></p>
-<p><span class="rvts10">Special Scaler</span></p>
+<p><span class="rvts41">Special Scaler</span></p>
 <p>Within this box is four options: Hq2x, Scale2x, Hq3x, and Scale3x. </p>
 <p>- Scale2x/3x just attempts to render out the corners of the pixels to make them look a bit rounder. "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
 <p>- Hq2x/3x does a much better job than scale2x/3x by smearing the pixels together with a slight blur. However, Hq2x/3x requires a faster computer for decent speed (at least 1 GHz and above). "2x" means two times bigger than 1x1 and "3x" means three times bigger than 1x1.</p>
 <p><br/></p>
-<p><span class="rvts10">Scale Dimensions by:</span></p>
-<p>Takes the image size and multiplies the x and y by a specific amount.</p>
+<p><span class="rvts41">Stretch to Fill Screen</span></p>
+<p>Stretches the image to fill the screen during full screen mode.</p>
 <p><br/></p>
-<p><span class="rvts10">Stretch to Fill Screen</span></p>
-<p>Stretches the image to fill the screen during full screen mode. (may not be the best choice depending on your screen size).</p>
+<p><span class="rvts41">Scale Dimensions by:</span></p>
+<p>Takes the image size and multiplies the X and Y by a specific amount.</p>
+<p><br/></p>
 <p><br/></p>
 <p><span class="rvts12">Windowed Settings</span></p>
 <p><br/></p>
-<p><span class="rvts10">Size Multiplier</span></p>
-<p>Takes the image size and multiples the x and y by a specific amount. &nbsp;You can also set these by clicking and dragging the FCEUX window.</p>
+<p><span class="rvts41">Size Multiplier</span></p>
+<p>Takes the image size and multiples the X and Y by a specific amount. You can also change these by clicking and dragging the FCEUX window.</p>
 <p><br/></p>
-<p><span class="rvts10">Force Integral Scaling Factors</span></p>
+<p><span class="rvts41">Force Integral Scaling Factors</span></p>
 <p>If checked, &nbsp;FCEUX can only be stretched by even amounts (1x, 2x, 3x, etc.). &nbsp;If unchecked, it can be stretched by any amount.</p>
 <p><br/></p>
-<p><span class="rvts10">Force Aspect Ratio Correction</span></p>
+<p><span class="rvts41">Force Aspect Ratio Correction</span></p>
 <p>Checking this will only allow the correct aspect ratio while stretching the window.</p>
 <p><br/></p>
-<p><span class="rvts10">Maintain Aspect Ratio (Best Fit)</span></p>
-<p>Checking this will automatically maintain correct aspect ratio for any size of the window.</p>
-<p><br/></p>
-<p><span class="rvts10">Current Pixel Aspect Ratio</span></p>
+<p><span class="rvts41">Current Pixel Aspect Ratio</span></p>
 <p>Displays the current Aspect Ratio</p>
 <p><br/></p>
-<p><span class="rvts10">Sync Method</span></p>
+<p><span class="rvts41">Sync Method</span></p>
 <p>If the emulator is running poorly, trying out these sync options can help make it run smoother.</p>
 <p><br/></p>
-<p><span class="rvts10">Disable Hardware Acceleration</span></p>
-<p>This is checked by default. &nbsp;Slower computers may experience slow emulation and should uncheck this option. The video will be blurred somewhat with this option checked.</p>
+<p><span class="rvts41">Disable Hardware Acceleration</span></p>
+<p>This is checked by default. Slower computers may experience slow emulation and should uncheck this option. The video will be blurred somewhat with this option checked.</p>
+<p><br/></p>
+<p><br/></p>
+<p><span class="rvts28">Best Fit</span></p>
+<p><br/></p>
+<p><span class="rvts41">Always maintain correct aspect ratio</span></p>
+<p>Checking this will automatically maintain correct aspect ratio for any size of the window.</p>
+<p><br/></p>
+<p><span class="rvts41">Use console BG color for empty areas</span></p>
+<p>When window size is larger wider or taller than image size, empty areas of the window will be colored black by default. Checking this option will color these areas according to current "background" color of NES palette.</p>
 <p><br/></p>
 <p><br/></p>
 <p><span class="rvts28">Drawing Area</span></p>
 <p><br/></p>
-<p><span class="rvts10">First Line</span></p>
-<p>Sets the first scan line for NTSC and PAL Modes. &nbsp;This should be left on the default of 8.</p>
+<p><span class="rvts41">First Line</span></p>
+<p>Sets the first scan line for NTSC and PAL Modes. This should be left on the default of 8 for NTSC and 0 for PAL.</p>
 <p><br/></p>
-<p><span class="rvts10">Last Line</span></p>
-<p>Sets the last scan line for NTSC and PAL Modes. &nbsp;This should be left on the default of 231.</p>
+<p><span class="rvts41">Last Line</span></p>
+<p>Sets the last scan line for NTSC and PAL Modes. This should be left on the default of 231 for NTSC and 239 for PAL.</p>
 <p><br/></p>
-<p><span class="rvts10">Clip Left and Right Sides</span> (8 columns each)</p>
-<p>If enabled, 8 pixels from each side of the windows will be removed. &nbsp;Who knows why you would want to!</p>
+<p><span class="rvts41">Clip Left and Right Sides</span><span class="rvts38"> (8 columns each)</span></p>
+<p>If enabled, 8 pixels from each side of the windows will be removed. Some NES games (even on real hardware) show grapical artifacts on the sides of screen when scrolling, so you may hide those artifacts by checking the option.</p>
+<p><br/></p>
 <p><br/></p>
 <p><span class="rvts28">Emulation</span></p>
 <p><br/></p>
 <p><span class="rvts10">Allow More than 8 sprites per scanline.</span></p>
-<p>On real NES hardware, more than 8 sprites on the screen causes flickering. &nbsp;Enabling this can cause less flickering by allowing more sprites to be visible at once. &nbsp;If you prefer to say "true" to NES hardware, this should not be checked.</p>
+<p>On real NES hardware, more than 8 sprites on the screen causes flickering. &nbsp;Enabling this can cause less flickering by allowing more sprites to be visible at once. &nbsp;If you prefer to stay "true" to NES hardware, this should not be checked.</p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
+<p><br/></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com/feature-tour/iphone-website-generation">Create iPhone web-based documentation</a></p>
 </div>
 	
