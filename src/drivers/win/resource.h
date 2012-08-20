@@ -57,6 +57,7 @@
 #define IDC_ADDBP_MODE_W                103
 #define IDC_ROMPATCHER_BTN_EDIT         103
 #define IDC_NTVIEW_PROPERTIES_LINE_1    103
+#define IDC_VIDEOCONFIG_HIDEMOUSE       103
 #define CB_AUTO_HIDE_MENU               104
 #define COMBO_PAD1                      104
 #define BTN_CDLOGGER_LOAD               104
@@ -94,13 +95,13 @@
 #define IDC_DEBUGGER_STEP_OVER          107
 #define IDC_ADDBP_MEM_SPR               107
 #define IDC_ROMPATCHER_DISASSEMBLY      107
-#define IDC_VIDEOCONFIG_MAINTAIN_ASPECT_RATIO 107
 #define IDC_VIDEOCONFIG_BESTFIT         107
 #define IDR_ACCELERATOR1                108
 #define BTN_CDLOGGER_SAVE_STRIPPED      108
 #define IDC_CHEAT_VAL_NE_BY             108
 #define IDC_DEBUGGER_SEEK_PC            108
 #define IDR_TASEDITOR_ACCELERATORS      108
+#define IDC_VIDEOCONFIG_CONSOLE_BGCOLOR 108
 #define IDC_CHEAT_VAL_GT_BY             109
 #define IDC_DEBUGGER_SEEK_TO            109
 #define IDC_ROMPATCHER_PATCH_DATA       109
@@ -669,6 +670,7 @@
 #define IDC_C_WATCH_SEPARATE            1259
 #define IDC_TWEAKCOUNT                  1260
 #define CHECK_AUTORESTORE_PLAYBACK      1261
+#define CB_FS_BY_DOUBLECLICK            1261
 #define IDC_PROGRESS1                   1262
 #define CHECK_FOLLOW_CURSOR             1263
 #define IDC_BOOKMARKS_BOX               1264
@@ -693,6 +695,7 @@
 #define IDC_LUA_BOX                     1278
 #define IDC_HISTORY_BOX                 1279
 #define IDC_TASEDITOR_NAME              1280
+#define ID_CANCEL                       1281
 #define MENU_NETWORK                    40040
 #define MENU_PALETTE                    40041
 #define MENU_SOUND                      40042
@@ -1128,7 +1131,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
 #define _APS_NEXT_COMMAND_VALUE         40566
-#define _APS_NEXT_CONTROL_VALUE         1281
+#define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

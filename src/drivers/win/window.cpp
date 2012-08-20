@@ -80,6 +80,8 @@
 extern TASEDITOR_WINDOW taseditor_window;
 extern PLAYBACK playback;
 
+//extern void ToggleFullscreen();
+
 using namespace std;
 
 //----Context Menu - Some dynamically added menu items
@@ -140,6 +142,7 @@ static int vchanged = 0;
 int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 bool rightClickEnabled = true;		//If set to false, the right click context menu will be disabled.
+bool fullscreenByDoubleclick = true;
 
 //Function Prototypes
 void ChangeMenuItemText(int menuitem, string text);			//Alters a menu item name
@@ -1224,6 +1227,21 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		}
 		break;
+
+	case WM_LBUTTONDBLCLK:
+	{
+		if (fullscreenByDoubleclick)
+		{
+			extern void ToggleFullscreen();
+			ToggleFullscreen();
+			return 0;
+		} else
+		{
+			mouseb=wParam;
+			goto proco;
+		}
+		break;
+	}
 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
@@ -2426,7 +2444,7 @@ int CreateMainWindow()
 
 	memset(&winclass, 0, sizeof(winclass));
 	winclass.cbSize = sizeof(WNDCLASSEX);
-	winclass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_SAVEBITS;
+	winclass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_SAVEBITS | CS_DBLCLKS;
 	winclass.lpfnWndProc = AppWndProc;
 	winclass.cbClsExtra = 0;
 	winclass.cbWndExtra = 0;
@@ -2529,9 +2547,11 @@ void SetMainWindowStuff()
 
 		ShowWindow(hAppWnd, SW_SHOWNORMAL);
 	}
-	if (eoptions & EO_BESTFIT)
+	if (eoptions & EO_BESTFIT && !windowedfailed)
 	{
-		RecreateResizableSurface();
+		RECT client_recr;
+		GetClientRect(hAppWnd, &client_recr);
+		RecreateResizableSurface(client_recr.right - client_recr.left, client_recr.bottom - client_recr.top);
 	}
 }
 

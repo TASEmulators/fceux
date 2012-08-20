@@ -658,7 +658,7 @@ static void ReloadRom(void);
 static void MovieSubtitleToggle(void);
 static void UndoRedoSavestate(void);
 static void FCEUI_DoExit(void);
-static void ToggleFullscreen(void);
+void ToggleFullscreen();
 static void TaseditorRewindOn(void);
 static void TaseditorRewindOff(void);
 static void TaseditorCommand(void);
@@ -1159,7 +1159,7 @@ static void FCEUI_DoExit(void)
 #endif
 }
 
-static void ToggleFullscreen(void)
+void ToggleFullscreen()
 {
 #ifdef WIN32
 	extern int SetVideoMode(int fs);		//adelikat: Yeah, I know, hacky

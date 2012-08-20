@@ -49,11 +49,13 @@ extern int winsync;
 void SetFSVideoMode();
 void FCEUD_BlitScreen(uint8 *XBuf);
 void ConfigVideo();
-int RecreateResizableSurface();
+void RecreateResizableSurface(int width, int height);
+void RecolorResizableSurface();
 int SetVideoMode(int fs);
 void DoVideoConfigFix();
 void FCEUD_BlitScreen(uint8 *XBuf);
 void ResetVideo();
 void SetFSVideoMode();
 void PushCurrentVideoSettings();
+void ResetCustomMode();
 #endif

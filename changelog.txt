@@ -1,3 +1,6 @@
+20-Aug-2012 - AnS - "Switch fullscreen by double-click" option in GUI config
+20-Aug-2012 - AnS - "Hide mouse cursor" and "Use console BG color for empty areas" options
+20-Aug-2012 - AnS - total revamp of Video config stuff, Best Fit also works for fullscreen mode
 19-Aug-2012 - AnS - win32: "Maintain aspect ratio (best fit)" option in Video config
 12-Aug-2012 - AnS - Debugger: "Display ROM offsets" option
 12-Aug-2012 - AnS - Debugger: double-click breakpoint also adds current bank number to breakpoint condition

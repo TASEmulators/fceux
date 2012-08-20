@@ -60,6 +60,7 @@ extern int PPUViewRefresh;
 extern int NTViewRefresh;
 extern uint8 gNoBGFillColor;
 extern bool rightClickEnabled;
+extern bool fullscreenByDoubleclick;
 extern int CurrentState;
 extern bool pauseWhileActive; //adelikat: Cheats dialog
 extern bool enableHUDrecording;
@@ -370,6 +371,7 @@ static CFGSTRUCT fceuconfig[] = {
 	AC(PPUViewRefresh),
 	AC(NTViewRefresh),
 	AC(rightClickEnabled),
+	AC(fullscreenByDoubleclick),
 	AC(CurrentState),
 	AC(HexRowHeightBorder),
 	AC(HexBackColorR),

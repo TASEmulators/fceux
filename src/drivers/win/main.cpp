@@ -121,7 +121,7 @@ void ApplyDefaultCommandMapping(void);
 // Internal variables
 int frameSkipAmt = 18;
 uint8 *xbsave = NULL;
-int eoptions = EO_BGRUN | EO_NOSPRLIM | EO_FORCEISCALE | EO_BESTFIT;
+int eoptions = EO_BGRUN | EO_NOSPRLIM | EO_FORCEISCALE | EO_BESTFIT | EO_BGCOLOR;
 
 //global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
@@ -383,17 +383,13 @@ void FCEUD_PrintError(const char *errormsg)
 {
 	AddLogText(errormsg, 1);
 
-	if(fullscreen)
-	{
+	if (fullscreen && (eoptions & EO_HIDEMOUSE))
 		ShowCursorAbs(1);
-	}
 
 	MessageBox(0, errormsg, FCEU_NAME" Error", MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
 
-	if(fullscreen)
-	{
+	if (fullscreen && (eoptions & EO_HIDEMOUSE))
 		ShowCursorAbs(0);
-	}
 }
 
 ///Generates a compiler identification string.
@@ -481,9 +477,11 @@ void DoPriority()
 int DriverInitialize()
 {
 	if(soundo)
-	{
 		soundo = InitSound();
-	}
+
+	// AnS: forcing the resolution of fullscreen to be the same as current display resolution
+	vmod = 0;
+	ResetCustomMode();
 
 	SetVideoMode(fullscreen);
 	InitInputStuff();             /* Initialize DInput interfaces. */

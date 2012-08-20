@@ -3,6 +3,7 @@
 #include "gui.h"
 
 extern bool rightClickEnabled;	//Declared in window.cpp and only an extern here
+extern bool fullscreenByDoubleclick;
 extern bool SingleInstanceOnly;
 char ManifestFilePath[2048];
 
@@ -59,24 +60,19 @@ void CloseGuiDialog(HWND hwndDlg)
 	}
 
 	if(IsDlgButtonChecked(hwndDlg, CB_ENABLECONTEXTMENU)==BST_CHECKED)
-	{
 		rightClickEnabled = true;
-	}
-
 	else
-	{
 		rightClickEnabled = false;
-	}
+
+	if(IsDlgButtonChecked(hwndDlg, CB_FS_BY_DOUBLECLICK)==BST_CHECKED)
+		fullscreenByDoubleclick = true;
+	else
+		fullscreenByDoubleclick = false;
 
 	if(IsDlgButtonChecked(hwndDlg, IDC_SINGLEINSTANCE)==BST_CHECKED)
-	{
 		SingleInstanceOnly = true;
-	}
-
 	else
-	{
 		SingleInstanceOnly = false;
-	}
 
 	if(IsDlgButtonChecked(hwndDlg, CB_PARTIALVISUALTHEME)==BST_CHECKED)
 	{
@@ -126,9 +122,10 @@ BOOL CALLBACK GUIConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 
 			if(rightClickEnabled)
-			{
 				CheckDlgButton(hwndDlg, CB_ENABLECONTEXTMENU, BST_CHECKED);
-			}
+
+			if(fullscreenByDoubleclick)
+				CheckDlgButton(hwndDlg, CB_FS_BY_DOUBLECLICK, BST_CHECKED);
 
 			GetModuleFileName(0, ManifestFilePath, 2048);
 

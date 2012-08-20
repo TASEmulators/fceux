@@ -46,7 +46,7 @@ int NTSCwinspecial = 0;
 int vmod = 0;
 
 vmdef vmodes[11]={
-	{320,240,8,0,1,1,0}, //0
+	{0,0,0,VMDF_DXBLT|VMDF_STRFS,1,1,0},	// Custom - set to current resolution at first run
 	{320,240,8,0,1,1,0}, //1
 	{512,384,8,0,1,1,0}, //2
 	{640,480,8,0,1,1,0}, //3
@@ -58,6 +58,8 @@ vmdef vmodes[11]={
 	{1600,1200,8,VMDF_DXBLT,6,5,0}, //9
 	{800,600,8,VMDF_DXBLT|VMDF_STRFS,0,0}    //10
 };
+
+extern uint8 PALRAM[0x20];
 
 PALETTEENTRY *color_palette;
 
@@ -226,14 +228,10 @@ static int InitBPPStuff(int fs)
 	return 1;
 }
 
-int RecreateResizableSurface()
+void RecreateResizableSurface(int width, int height)
 {
 	if (!lpDD7)
-		return 1;	// DirectDraw isn't initialized yet
-
-	// check if new size is the same as old
-
-
+		return;	// DirectDraw isn't initialized yet
 	// delete old surface
 	RELEASE(lpDDSResizable);
 	// create new surface
@@ -241,10 +239,6 @@ int RecreateResizableSurface()
 	ddsd_Resizable.dwSize = sizeof(ddsd_Resizable);
 	ddsd_Resizable.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
 	ddsd_Resizable.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
-	RECT client_recr;
-	GetClientRect(hAppWnd, &client_recr);
-	int width = client_recr.right - client_recr.left;
-	int height = client_recr.bottom - client_recr.top;
 	ddsd_Resizable.dwWidth = width;
 	ddsd_Resizable.dwHeight = height;
 	ddrval = IDirectDraw7_CreateSurface(lpDD7, &ddsd_Resizable, &lpDDSResizable, (IUnknown FAR*)NULL);
@@ -253,11 +247,9 @@ int RecreateResizableSurface()
 		void FCEU_PrintError(char *format, ...);
 		FCEU_PrintError("%08x, %d\n", ddrval, lpDD7);
 		ShowDDErr("Error creating resizable surface.");
-		return 1;
+		return;
 	}
-	// fill the surface with black color
-	blitfx.dwFillColor = 0;
-	ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &blitfx);
+	RecolorResizableSurface();
 	// calculate resizable_surface_rect
 	double current_aspectratio = (double)width / (double)height;
 	double needed_aspectratio = (double)(VNSWID) / (double)(FSettings.TotalScanlines());
@@ -286,7 +278,23 @@ int RecreateResizableSurface()
 		resizable_surface_rect.top = center_y - (height / 2);
 		resizable_surface_rect.bottom = center_y + (height / 2);
 	}
-	return 1;	// all ok
+}
+
+void RecolorResizableSurface()
+{
+	if (eoptions & EO_BGCOLOR)
+	{
+		// fill the surface using BG color from PPU
+		unsigned char r, g, b;
+		FCEUD_GetPalette(0x80 + PALRAM[0], &r, &g, &b);
+		blitfx.dwFillColor = (r << 16) + (g << 8) + b;
+		ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
+	} else
+	{
+		// fill the surface with black color
+		blitfx.dwFillColor = 0;
+		ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &blitfx);
+	}
 }
 
 int SetVideoMode(int fs)
@@ -399,11 +407,11 @@ int SetVideoMode(int fs)
 
 		windowedfailed=0;
 		SetMainWindowStuff();
-	}
-	else    //Following is full-screen
+	} else
 	{
-		if(vmod == 0)
-		{         
+		//Following is full-screen
+		if(vmod == 0)	// Custom mode
+		{
 			// -Video Modes Tag-
 			if(vmodes[0].special <= 3 && vmodes[0].special >= 1)
 				specmul = 2;
@@ -413,6 +421,17 @@ int SetVideoMode(int fs)
 				specmul = 1;
 		}
 		HideFWindow(1);
+
+		if ((vmodes[vmod].flags & VMDF_DXBLT) && (eoptions & EO_BESTFIT))
+		{
+			ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd, DDSCL_NORMAL);
+			if (ddrval != DD_OK)
+			{
+				ShowDDErr("Error setting cooperative level.");
+				return 0;
+			}
+			RecreateResizableSurface(vmodes[vmod].x, vmodes[vmod].y);
+		}
 
 		ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd,DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_ALLOWREBOOT);
 		if (ddrval != DD_OK)
@@ -490,7 +509,9 @@ int SetVideoMode(int fs)
 			return 0;
 
 		mustrestore=1;
-		ShowCursorAbs(0);
+
+		if (eoptions & EO_HIDEMOUSE)
+			ShowCursorAbs(0);
 	}
 
 	fullscreen=fs;
@@ -598,6 +619,9 @@ static void BlitScreenWindow(unsigned char *XBuf)
 
 	if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left))
 	{
+		// clear lpDDSResizable surface 
+		if (eoptions & EO_BGCOLOR)
+			RecolorResizableSurface();
 		// blit from lpDDSBack to lpDDSResizable using best fit
 		if (IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
 		{
@@ -700,12 +724,10 @@ static void BlitScreenFull(uint8 *XBuf)
 		PaletteChanged=0;
 	}
 
-	//aquanull 2011-11-28 fix tearing
-	FCEUD_VerticalSync();
-
 	if(vmodes[vmod].flags&VMDF_DXBLT)
 	{
-		ddrval=IDirectDrawSurface7_Lock(lpDDSBack,NULL,&ddsdback, 0, NULL);
+		// start rendering into backbuffer
+ 		ddrval=IDirectDrawSurface7_Lock(lpDDSBack,NULL,&ddsdback, 0, NULL);
 		if(ddrval!=DD_OK)
 		{
 			if(ddrval==DDERR_SURFACELOST) RestoreDD(1);
@@ -753,9 +775,10 @@ static void BlitScreenFull(uint8 *XBuf)
 			DD_FillRect(lpDDSVPrimary,left,bottom,right,fullScreen.bottom,RGB(255,0,255)); //bottomcenter
 			DD_FillRect(lpDDSVPrimary,right,bottom,fullScreen.right,fullScreen.bottom,RGB(0,255,255)); //bottomright
 		}
-	}
-	else
+	} else
 	{
+		// start rendering directly to screen
+		FCEUD_VerticalSync();
 		ddrval=IDirectDrawSurface7_Lock(lpDDSVPrimary,NULL,&ddsd, 0, NULL);
 		if(ddrval!=DD_OK)
 		{
@@ -914,33 +937,75 @@ static void BlitScreenFull(uint8 *XBuf)
 	{ 
 		IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
 
-		if(veflags&2)
+		if (eoptions & EO_BESTFIT && (resizable_surface_rect.top || resizable_surface_rect.left) && !vmod)
 		{
-			if(IDirectDrawSurface7_Lock(lpDDSVPrimary,NULL,&ddsd, 0, NULL)==DD_OK)
+			// clear lpDDSResizable surface 
+			RecolorResizableSurface();
+			// blit from lpDDSBack to lpDDSResizable using best fit
+			if (IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
 			{
-				memset(ddsd.lpSurface,0,ddsd.lPitch*vmodes[vmod].y); //mbg merge 7/17/06 removing dummyunion stuff
-				IDirectDrawSurface7_Unlock(lpDDSVPrimary, NULL);
-				veflags&=~2;
-			}
-		}
-
-		if(IDirectDrawSurface7_Blt(lpDDSVPrimary, &drect,lpDDSBack,&srect,DDBLT_ASYNC,0)!=DD_OK)
-		{
-			ddrval=IDirectDrawSurface7_Blt(lpDDSVPrimary, &drect,lpDDSBack,&srect,DDBLT_WAIT,0);
-			if(ddrval!=DD_OK)
-			{
-				if(ddrval==DDERR_SURFACELOST)
+				ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, &resizable_surface_rect, lpDDSBack, &srect, DDBLT_WAIT, 0);
+				if(ddrval != DD_OK)
 				{
-					RestoreDD(0);
-					RestoreDD(1);
+					if(ddrval == DDERR_SURFACELOST)
+					{
+						RestoreDD(2);
+						RestoreDD(1);
+					}
+					return;
 				}
-				return;
 			}
-
+			// blit from lpDDSResizable to screen
+			RECT fullScreen;
+			fullScreen.left = fullScreen.top = 0;
+			fullScreen.right = vmodes[vmod].x;
+			fullScreen.bottom = vmodes[vmod].y;
+			FCEUD_VerticalSync();
+			if (IDirectDrawSurface7_Blt(lpDDSVPrimary, &fullScreen, lpDDSResizable, &fullScreen, DDBLT_ASYNC, 0) != DD_OK)
+			{
+				ddrval = IDirectDrawSurface7_Blt(lpDDSVPrimary, &fullScreen, lpDDSResizable, &fullScreen, DDBLT_WAIT, 0);
+				if(ddrval != DD_OK)
+				{
+					if(ddrval == DDERR_SURFACELOST)
+					{
+						RestoreDD(2);
+						RestoreDD(0);
+					}
+					return;
+				}
+			}
+		} else
+		{
+			// blit directly from lpDDSBack to screen
+			FCEUD_VerticalSync();
+			if(veflags&2)
+			{
+				// clear screen surface (is that really necessary?)
+				if(IDirectDrawSurface7_Lock(lpDDSVPrimary,NULL,&ddsd, 0, NULL)==DD_OK)
+				{
+					memset(ddsd.lpSurface,0,ddsd.lPitch*vmodes[vmod].y); //mbg merge 7/17/06 removing dummyunion stuff
+					IDirectDrawSurface7_Unlock(lpDDSVPrimary, NULL);
+					veflags&=~2;
+				}
+			}
+			if(IDirectDrawSurface7_Blt(lpDDSVPrimary, &drect,lpDDSBack,&srect,DDBLT_ASYNC,0)!=DD_OK)
+			{
+				ddrval=IDirectDrawSurface7_Blt(lpDDSVPrimary, &drect,lpDDSBack,&srect,DDBLT_WAIT,0);
+				if(ddrval!=DD_OK)
+				{
+					if(ddrval==DDERR_SURFACELOST)
+					{
+						RestoreDD(0);
+						RestoreDD(1);
+					}
+					return;
+				}
+			}
 		}
-	}
-	else
+	} else
+	{
 		IDirectDrawSurface7_Unlock(lpDDSVPrimary, NULL);
+	}
 	if(fssync==3)
 	{
 		IDirectDrawSurface7_Flip(lpDDSPrimary,0,0);
@@ -969,18 +1034,39 @@ void ResetVideo(void)
 
 int specialmlut[5] = {1,2,2,3,3};
 
+void ResetCustomMode()
+{
+	// use current display settings
+	if (!lpDD7)
+		return;
+
+	vmdef *cmode = &vmodes[0];
+
+	DDSURFACEDESC2 temp_ddsd;
+	temp_ddsd.dwSize = sizeof(DDSURFACEDESC2);
+	IDirectDraw7_GetDisplayMode(lpDD7, &temp_ddsd);
+	if (FAILED(ddrval))
+		return;
+	cmode->x = temp_ddsd.dwWidth;
+	cmode->y = temp_ddsd.dwHeight;
+	cmode->bpp = temp_ddsd.ddpfPixelFormat.dwRGBBitCount;
+	cmode->xscale = cmode->yscale = 1;
+	cmode->flags = VMDF_DXBLT|VMDF_STRFS;
+}
+
 static int RecalcCustom(void)
 {
 	vmdef *cmode = &vmodes[0];
 
-	cmode->flags&=~VMDF_DXBLT;
+	if ((cmode->x <= 0) || (cmode->y <= 0))
+		ResetCustomMode();
 
 	if(cmode->flags&VMDF_STRFS)
 	{
-		cmode->flags|=VMDF_DXBLT;
-	}
-	else if(cmode->xscale!=1 || cmode->yscale!=1 || cmode->special) 
+		cmode->flags |= VMDF_DXBLT;
+	} else if(cmode->xscale!=1 || cmode->yscale!=1 || cmode->special) 
 	{
+		cmode->flags &= ~VMDF_DXBLT;
 		if(cmode->special)
 		{
 			int mult = specialmlut[cmode->special];
@@ -1128,11 +1214,17 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(eoptions&EO_FSAFTERLOAD)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS,BST_CHECKED);
 
+		if(eoptions&EO_HIDEMOUSE)
+			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_HIDEMOUSE,BST_CHECKED);
+
 		if(eoptions&EO_CLIPSIDES)
 			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES,BST_CHECKED);
 
 		if(eoptions&EO_BESTFIT)
 			CheckDlgButton(hwndDlg, IDC_VIDEOCONFIG_BESTFIT, BST_CHECKED);
+
+		if(eoptions&EO_BGCOLOR)
+			CheckDlgButton(hwndDlg,IDC_VIDEOCONFIG_CONSOLE_BGCOLOR,BST_CHECKED);
 
 		if(disvaccel&1)
 			CheckDlgButton(hwndDlg,IDC_DISABLE_HW_ACCEL_WIN,BST_CHECKED);
@@ -1181,7 +1273,7 @@ BOOL CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		if(!(wParam>>16))
 			switch(wParam&0xFFFF)
 		{
-			case BTN_CLOSE:
+			case ID_CANCEL:
 gornk:
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_CLIPSIDES)==BST_CHECKED)
@@ -1199,6 +1291,11 @@ gornk:
 					eoptions |= EO_BESTFIT;
 				else
 					eoptions &= ~EO_BESTFIT;
+
+				if (IsDlgButtonChecked(hwndDlg, IDC_VIDEOCONFIG_CONSOLE_BGCOLOR) == BST_CHECKED)
+					eoptions |= EO_BGCOLOR;
+				else
+					eoptions &= ~EO_BGCOLOR;
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_NO8LIM)==BST_CHECKED)
 					eoptions|=EO_NOSPRLIM;
@@ -1246,17 +1343,22 @@ gornk:
 					fullscreen=1;
 				else
 					fullscreen=0;
+
 				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_AUTO_FS)==BST_CHECKED)
 					eoptions|=EO_FSAFTERLOAD;
 				else
 					eoptions&=~EO_FSAFTERLOAD;
+
+				if(IsDlgButtonChecked(hwndDlg,IDC_VIDEOCONFIG_HIDEMOUSE)==BST_CHECKED)
+					eoptions|=EO_HIDEMOUSE;
+				else
+					eoptions&=~EO_HIDEMOUSE;
 
 				eoptions &= ~(EO_FORCEISCALE | EO_FORCEASPECT);
 				if(IsDlgButtonChecked(hwndDlg,IDC_FORCE_INT_VIDEO_SCALARS)==BST_CHECKED)
 					eoptions|=EO_FORCEISCALE;
 				if(IsDlgButtonChecked(hwndDlg,IDC_FORCE_ASPECT_CORRECTION)==BST_CHECKED)
 					eoptions|=EO_FORCEASPECT;
-
 
 				winsizemulx=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_X);
 				winsizemuly=GetDlgItemDouble(hwndDlg, IDC_WINSIZE_MUL_Y);
@@ -1299,22 +1401,19 @@ void PushCurrentVideoSettings()
 		changerecursive = 1;
 		SetVideoMode(0);
 		changerecursive = 0;
+		//SetMainWindowStuff();		// it's already called inside SetVideoMode()
 	}
-
-	SetMainWindowStuff();
 }
-
 
 //Shows the Video configuration dialog.
 void ConfigVideo(void)
 {
 	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 
 	DoVideoConfigFix();
-
 	PushCurrentVideoSettings();
 }
 
-
-void FCEUD_VideoChanged() {
+void FCEUD_VideoChanged()
+{
 	PushCurrentVideoSettings();
 }
