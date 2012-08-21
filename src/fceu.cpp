@@ -479,9 +479,7 @@ endlseq:
 		extern int loadDebugDataFailed;
 
 		if ((loadDebugDataFailed = loadPreferences(LoadedRomFName)))
-		{
-			FCEUD_PrintError("Couldn't load debugging data");
-		}
+			FCEU_printf("Couldn't load debugging data.\n");
 
 // ################################## End of SP CODE ###########################
 #endif

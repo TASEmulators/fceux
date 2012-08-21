@@ -481,7 +481,7 @@ int DriverInitialize()
 
 	// AnS: forcing the resolution of fullscreen to be the same as current display resolution
 	vmod = 0;
-	ResetCustomMode();
+	vmodes[0].y = 0;
 
 	SetVideoMode(fullscreen);
 	InitInputStuff();             /* Initialize DInput interfaces. */

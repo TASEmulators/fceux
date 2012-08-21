@@ -49,14 +49,14 @@ vmdef vmodes[11]={
 	{0,0,0,VMDF_DXBLT|VMDF_STRFS,1,1,0},	// Custom - set to current resolution at first run
 	{320,240,8,0,1,1,0}, //1
 	{512,384,8,0,1,1,0}, //2
-	{640,480,8,0,1,1,0}, //3
-	{640,480,8,0,1,1,0}, //4
-	{640,480,8,0,1,1,0}, //5
-	{640,480,8,VMDF_DXBLT,2,2,0}, //6
-	{1024,768,8,VMDF_DXBLT,4,3,0}, //7
-	{1280,1024,8,VMDF_DXBLT,5,4,0}, //8
-	{1600,1200,8,VMDF_DXBLT,6,5,0}, //9
-	{800,600,8,VMDF_DXBLT|VMDF_STRFS,0,0}    //10
+	{640,480,32,0,1,1,0}, //3
+	{640,480,32,0,1,1,0}, //4
+	{640,480,32,0,1,1,0}, //5
+	{640,480,32,VMDF_DXBLT,2,2,0}, //6
+	{1024,768,32,VMDF_DXBLT,4,3,0}, //7
+	{1280,1024,32,VMDF_DXBLT,5,4,0}, //8
+	{1600,1200,32,VMDF_DXBLT,6,5,0}, //9
+	{800,600,32,VMDF_DXBLT|VMDF_STRFS,0,0}    //10
 };
 
 extern uint8 PALRAM[0x20];
@@ -139,7 +139,8 @@ static int InitializeDDraw(int fs)
 	ddrval = DirectDrawCreate((disvaccel&(1<<(fs?1:0)))?(GUID FAR *)DDCREATE_EMULATIONONLY:NULL, &lpDD, NULL);
 	if (ddrval != DD_OK)
 	{
-		ShowDDErr("Error creating DirectDraw object.");
+		//ShowDDErr("Error creating DirectDraw object.");
+		FCEU_printf("Error creating DirectDraw object.\n");
 		return 0;
 	}
 
@@ -150,14 +151,16 @@ static int InitializeDDraw(int fs)
 
 	if (ddrval != DD_OK)
 	{
-		ShowDDErr("Error querying interface.");
+		//ShowDDErr("Error querying interface.");
+		FCEU_printf("Error querying interface.\n");
 		return 0;
 	}
 
 	caps.dwSize=sizeof(caps);
 	if(IDirectDraw7_GetCaps(lpDD7,&caps,0)!=DD_OK)
 	{
-		ShowDDErr("Error getting capabilities.");
+		//ShowDDErr("Error getting capabilities.");
+		FCEU_printf("Error getting capabilities.\n");
 		return 0;
 	}
 	return 1;
@@ -173,7 +176,8 @@ static int GetBPP(void)
 	ddrval=IDirectDrawSurface7_GetPixelFormat(lpDDSPrimary,&ddpix);
 	if (ddrval != DD_OK)
 	{
-		ShowDDErr("Error getting primary surface pixel format.");
+		//ShowDDErr("Error getting primary surface pixel format.");
+		FCEU_printf("Error getting primary surface pixel format.\n");
 		return 0;
 	}
 
@@ -187,7 +191,8 @@ static int GetBPP(void)
 	}
 	else
 	{
-		ShowDDErr("RGB data not valid.");
+		//ShowDDErr("RGB data not valid.");
+		FCEU_printf("RGB data not valid.\n");
 		return 0;
 	}
 	if(bpp==15) bpp=16;
@@ -215,13 +220,15 @@ static int InitBPPStuff(int fs)
 		ddrval=IDirectDraw7_CreatePalette( lpDD7, DDPCAPS_8BIT|DDPCAPS_ALLOW256|DDPCAPS_INITIALIZE,color_palette,&lpddpal,NULL);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error creating palette object.");
+			//ShowDDErr("Error creating palette object.");
+			FCEU_printf("Error creating palette object.\n");
 			return 0;
 		}
 		ddrval=IDirectDrawSurface7_SetPalette(lpDDSPrimary, lpddpal);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error setting palette object.");
+			//ShowDDErr("Error setting palette object.");
+			FCEU_printf("Error setting palette object.\n");
 			return 0;
 		}
 	}
@@ -244,9 +251,8 @@ void RecreateResizableSurface(int width, int height)
 	ddrval = IDirectDraw7_CreateSurface(lpDD7, &ddsd_Resizable, &lpDDSResizable, (IUnknown FAR*)NULL);
 	if (ddrval != DD_OK)
 	{
-		void FCEU_PrintError(char *format, ...);
-		FCEU_PrintError("%08x, %d\n", ddrval, lpDD7);
-		ShowDDErr("Error creating resizable surface.");
+		//ShowDDErr("Error creating resizable surface.");
+		FCEU_printf("Error creating resizable surface.\n");
 		return;
 	}
 	RecolorResizableSurface();
@@ -333,7 +339,8 @@ int SetVideoMode(int fs)
 		ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd, DDSCL_NORMAL);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error setting cooperative level.");
+			//ShowDDErr("Error setting cooperative level.");
+			FCEU_printf("Error setting cooperative level.\n");
 			return 1;
 		}
 
@@ -346,9 +353,8 @@ int SetVideoMode(int fs)
 		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsd, &lpDDSPrimary,(IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
 		{
-			void FCEU_PrintError(char *format, ...);
-			FCEU_PrintError("%08x, %d\n",ddrval,lpDD7);
-			ShowDDErr("Error creating primary surface.");
+			//ShowDDErr("Error creating primary surface.");
+			FCEU_printf("Error creating primary surface.\n");
 			return 1;
 		}
 
@@ -369,7 +375,8 @@ int SetVideoMode(int fs)
 		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error creating secondary surface.");
+			//ShowDDErr("Error creating secondary surface.");
+			FCEU_printf("Error creating secondary surface.\n");
 			return 0;
 		}
 		
@@ -378,7 +385,8 @@ int SetVideoMode(int fs)
 
 		if(bpp!=16 && bpp!=24 && bpp!=32)
 		{
-			ShowDDErr("Current bit depth not supported!");
+			//ShowDDErr("Current bit depth not supported!");
+			FCEU_printf("Current bit depth not supported!\n");
 			return 0;
 		}
 
@@ -388,20 +396,23 @@ int SetVideoMode(int fs)
 		ddrval=IDirectDraw7_CreateClipper(lpDD7,0,&lpClipper,0);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error creating clipper.");
+			//ShowDDErr("Error creating clipper.");
+			FCEU_printf("Error creating clipper.\n");
 			return 0;
 		}
 
 		ddrval=IDirectDrawClipper_SetHWnd(lpClipper,0,hAppWnd);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error setting clipper window.");
+			//ShowDDErr("Error setting clipper window.");
+			FCEU_printf("Error setting clipper window.\n");
 			return 0;
 		}
 		ddrval=IDirectDrawSurface7_SetClipper(lpDDSPrimary,lpClipper);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error attaching clipper to primary surface.");
+			//ShowDDErr("Error attaching clipper to primary surface.");
+			FCEU_printf("Error attaching clipper to primary surface.\n");
 			return 0;
 		}
 
@@ -422,12 +433,13 @@ int SetVideoMode(int fs)
 		}
 		HideFWindow(1);
 
-		if ((vmodes[vmod].flags & VMDF_DXBLT) && (eoptions & EO_BESTFIT))
+		if ((vmodes[vmod].flags & VMDF_STRFS) && (eoptions & EO_BESTFIT))
 		{
 			ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd, DDSCL_NORMAL);
 			if (ddrval != DD_OK)
 			{
-				ShowDDErr("Error setting cooperative level.");
+				//ShowDDErr("Error setting cooperative level.");
+				FCEU_printf("Error setting cooperative level.\n");
 				return 0;
 			}
 			RecreateResizableSurface(vmodes[vmod].x, vmodes[vmod].y);
@@ -436,14 +448,16 @@ int SetVideoMode(int fs)
 		ddrval = IDirectDraw7_SetCooperativeLevel ( lpDD7, hAppWnd,DDSCL_EXCLUSIVE | DDSCL_FULLSCREEN | DDSCL_ALLOWREBOOT);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error setting cooperative level.");
+			//ShowDDErr("Error setting cooperative level.");
+			FCEU_printf("Error setting cooperative level.\n");
 			return 0;
 		}
 
 		ddrval = IDirectDraw7_SetDisplayMode(lpDD7, vmodes[vmod].x, vmodes[vmod].y,vmodes[vmod].bpp,0,0);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error setting display mode.");
+			//ShowDDErr("Error setting display mode.");
+			FCEU_printf("Error setting display mode.\n");
 			return 0;
 		}
 		if(vmodes[vmod].flags&VMDF_DXBLT)
@@ -462,7 +476,8 @@ int SetVideoMode(int fs)
 			ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsdback, &lpDDSBack, (IUnknown FAR*)NULL);
 			if(ddrval!=DD_OK)
 			{
-				ShowDDErr("Error creating secondary surface.");
+				//ShowDDErr("Error creating secondary surface.");
+				FCEU_printf("Error creating secondary surface.\n");
 				return 0;
 			}
 		}
@@ -485,7 +500,8 @@ int SetVideoMode(int fs)
 		ddrval = IDirectDraw7_CreateSurface ( lpDD7, &ddsd, &lpDDSPrimary,(IUnknown FAR*)NULL);
 		if (ddrval != DD_OK)
 		{
-			ShowDDErr("Error creating primary surface.");
+			//ShowDDErr("Error creating primary surface.");
+			FCEU_printf("Error creating primary surface.\n");
 			return 0;
 		} 
 
@@ -498,7 +514,8 @@ int SetVideoMode(int fs)
 
 			if(IDirectDrawSurface7_GetAttachedSurface(lpDDSPrimary,&tmp,&lpDDSDBack)!=DD_OK)
 			{
-				ShowDDErr("Error getting attached surface.");
+				//ShowDDErr("Error getting attached surface.");
+				FCEU_printf("Error getting attached surface.\n");
 				return 0;
 			}
 		}
@@ -1006,10 +1023,10 @@ static void BlitScreenFull(uint8 *XBuf)
 	{
 		IDirectDrawSurface7_Unlock(lpDDSVPrimary, NULL);
 	}
+
 	if(fssync==3)
 	{
 		IDirectDrawSurface7_Flip(lpDDSPrimary,0,0);
-
 	}
 }
 
@@ -1317,9 +1334,9 @@ gornk:
 				UpdateRendBounds();
 
 				if(IsDlgButtonChecked(hwndDlg,IDC_RADIO_STRETCH)==BST_CHECKED)
-					vmodes[0].flags|=VMDF_STRFS;
+					vmodes[0].flags |= VMDF_STRFS|VMDF_DXBLT;
 				else
-					vmodes[0].flags&=~VMDF_STRFS;
+					vmodes[0].flags &= ~(VMDF_STRFS|VMDF_DXBLT);
 
 				vmod=SendDlgItemMessage(hwndDlg,IDC_VIDEOCONFIG_MODE,CB_GETCURSEL,0,(LPARAM)(LPSTR)0);
 				vmodes[0].x=GetDlgItemInt(hwndDlg,IDC_VIDEOCONFIG_XRES,0,0);
@@ -1408,6 +1425,8 @@ void PushCurrentVideoSettings()
 //Shows the Video configuration dialog.
 void ConfigVideo(void)
 {
+	if ((vmodes[0].x <= 0) || (vmodes[0].y <= 0))
+		ResetCustomMode();
 	DialogBox(fceu_hInstance, "VIDEOCONFIG", hAppWnd, VideoConCallB); 
 	DoVideoConfigFix();
 	PushCurrentVideoSettings();
