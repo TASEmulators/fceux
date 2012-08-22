@@ -233,6 +233,7 @@ void PLAYBACK::update()
 		lost_position_is_stable = false;
 }
 
+// called after saving the project, because saving uses the progressbar for itself
 void PLAYBACK::updateProgressbar()
 {
 	if (pause_frame)
@@ -247,6 +248,7 @@ void PLAYBACK::updateProgressbar()
 			// cleared progressbar
 			SetProgressbar(0, 1);
 	}
+	RedrawWindow(hwndProgressbar, NULL, NULL, RDW_INVALIDATE);
 }
 
 void PLAYBACK::ToggleEmulationPause()

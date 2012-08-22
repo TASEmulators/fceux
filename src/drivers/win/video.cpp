@@ -292,7 +292,7 @@ void RecolorResizableSurface()
 	{
 		// fill the surface using BG color from PPU
 		unsigned char r, g, b;
-		FCEUD_GetPalette(0x80 + PALRAM[0], &r, &g, &b);
+		FCEUD_GetPalette(0x80 | PALRAM[0], &r, &g, &b);
 		blitfx.dwFillColor = (r << 16) + (g << 8) + b;
 		ddrval = IDirectDrawSurface7_Blt(lpDDSResizable, NULL, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
 	} else

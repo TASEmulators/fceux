@@ -416,7 +416,7 @@ void GREENZONE::InvalidateAndCheck(int after)
 	{
 		if (after >= currMovieData.getNumRecords())
 			after = currMovieData.getNumRecords() - 1;
-		if (greenZoneCount > after + 1)
+		if (greenZoneCount > after + 1 || currFrameCounter > after)
 		{
 			// clear all savestates that became irrelevant
 			for (int i = greenZoneCount - 1; i > after; i--)

@@ -183,7 +183,7 @@ public:
 		if(incr<256) 
 		{
 			 //sanity check: should never be less than 256
-			printf("OHNO -- %d -- shouldnt be less than 256!\n",incr);
+			FCEU_printf("OHNO -- %d -- shouldnt be less than 256!\n", incr);
 		}
 
 		incr = (incr*scale)>>8; //apply scaling factor

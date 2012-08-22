@@ -5,6 +5,9 @@
 #define CLOSE_BUTTON                    1
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
+#define IDB_CLOSE_LOG                   1
+#define IDB_CLOSE_LOG2                  2
+#define IDB_CLEAR_LOG                   2
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROMS                       100
 #define LBL_LOG_TEXT                    100
