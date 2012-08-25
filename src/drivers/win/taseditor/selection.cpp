@@ -491,7 +491,7 @@ void SELECTION::SetRegionSelectionPattern(int start, int end)
 	for (int i = start; i <= end; ++i)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(i))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(i))
 			continue;
 		if (editor.autofire_patterns[current_pattern][pattern_offset])
 		{

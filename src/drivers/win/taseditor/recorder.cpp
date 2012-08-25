@@ -241,7 +241,7 @@ void RECORDER::InputChanged()
 	// take previous values from current snapshot, new Input from current movie
 	for (int i = 0; i < num_joys; ++i)
 	{
-		old_joy[i] = history.GetCurrentSnapshot().GetJoystickInfo(currFrameCounter, i);
+		old_joy[i] = history.GetCurrentSnapshot().inputlog.GetJoystickInfo(currFrameCounter, i);
 		if (!taseditor_config.pattern_recording || editor.autofire_patterns[old_current_pattern][pattern_offset])
 			new_joy[i] = currMovieData.records[currFrameCounter].joysticks[i];
 		else
@@ -296,7 +296,7 @@ void RECORDER::InputChanged()
 	if (!changes_made)
 	{
 		// check if new commands were recorded
-		if (currMovieData.records[currFrameCounter].commands != history.GetCurrentSnapshot().GetCommandsInfo(currFrameCounter))
+		if (currMovieData.records[currFrameCounter].commands != history.GetCurrentSnapshot().inputlog.GetCommandsInfo(currFrameCounter))
 			changes_made = true;
 	}
 

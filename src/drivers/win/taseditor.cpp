@@ -322,7 +322,7 @@ void NewProject()
 		ApplyMovieInputConfig();
 		if (params.copy_current_input)
 			// copy Input from current snapshot (from history)
-			history.GetCurrentSnapshot().toMovie(currMovieData);
+			history.GetCurrentSnapshot().inputlog.toMovie(currMovieData);
 		if (!params.copy_current_markers)
 			markers_manager.reset();
 		if (params.author_name != L"") currMovieData.comments.push_back(L"author " + params.author_name);
@@ -330,6 +330,9 @@ void NewProject()
 		// reset Taseditor
 		project.init();			// new project has blank name
 		greenzone.reset();
+		if (params.copy_current_input)
+			// copy LagLog from current snapshot (from history)
+			greenzone.laglog = history.GetCurrentSnapshot().laglog;
 		playback.reset();
 		playback.StartFromZero();
 		bookmarks.reset();

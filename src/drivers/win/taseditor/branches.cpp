@@ -312,7 +312,7 @@ void BRANCHES::update()
 				} else
 				{
 					parent = FindFullTimelineForBranch(current_branch);
-					if (parent != current_branch && bookmarks.bookmarks_array[parent].snapshot.jump_frame == bookmarks.bookmarks_array[current_branch].snapshot.jump_frame)
+					if (parent != current_branch && bookmarks.bookmarks_array[parent].snapshot.keyframe == bookmarks.bookmarks_array[current_branch].snapshot.keyframe)
 						parent = current_branch;
 				}
 				do
@@ -325,12 +325,12 @@ void BRANCHES::update()
 					if (parent == ITEM_UNDER_MOUSE_CLOUD)
 						lower_frame = -1;
 					else
-						lower_frame = bookmarks.bookmarks_array[parent].snapshot.jump_frame;
+						lower_frame = bookmarks.bookmarks_array[parent].snapshot.keyframe;
 				} while (parent != ITEM_UNDER_MOUSE_CLOUD && currFrameCounter < lower_frame);
 				if (branch == TOTAL_BOOKMARKS)
 					upper_frame = currMovieData.getNumRecords() - 1;
 				else
-					upper_frame = bookmarks.bookmarks_array[branch].snapshot.jump_frame;
+					upper_frame = bookmarks.bookmarks_array[branch].snapshot.keyframe;
 				branch_x = BranchCurrX[branch];
 				branch_y = BranchCurrY[branch];
 				if (parent == ITEM_UNDER_MOUSE_CLOUD)
@@ -611,12 +611,12 @@ void BRANCHES::RedrawBranchesTree()
 	if (IsSafeToShowBranchesData())
 	{
 		SetBkMode(hBitmapDC, TRANSPARENT);
-		// jump_frame of item under cursor (except cloud - it doesn't have particular frame)
+		// keyframe of item under cursor (except cloud - it doesn't have particular frame)
 		if (bookmarks.item_under_mouse == TOTAL_BOOKMARKS || (bookmarks.item_under_mouse >= 0 && bookmarks.item_under_mouse < TOTAL_BOOKMARKS && bookmarks.bookmarks_array[bookmarks.item_under_mouse].not_empty))
 		{
 			char framenum_string[DIGITS_IN_FRAMENUM+1] = {0};
 			if (bookmarks.item_under_mouse < TOTAL_BOOKMARKS)
-				U32ToDecStr(framenum_string, bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame, DIGITS_IN_FRAMENUM);
+				U32ToDecStr(framenum_string, bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.keyframe, DIGITS_IN_FRAMENUM);
 			else
 				U32ToDecStr(framenum_string, currFrameCounter, DIGITS_IN_FRAMENUM);
 			SetTextColor(hBitmapDC, BRANCHES_TEXT_SHADOW_COLOR);
@@ -769,19 +769,19 @@ void BRANCHES::InvalidateBranchSlot(int slot)
 		parents[i] = ITEM_UNDER_MOUSE_CLOUD;
 	}
 }
-// returns the frame of first difference between snapshots of two Branches
+// returns the frame of first difference between InputLogs of snapshots of two Branches
 int BRANCHES::GetFirstDifference(int first_branch, int second_branch)
 {
 	if (first_branch == second_branch)
-		return bookmarks.bookmarks_array[first_branch].snapshot.size;
+		return bookmarks.bookmarks_array[first_branch].snapshot.inputlog.size;
 
 	if (cached_first_difference[first_branch][second_branch] == FIRST_DIFFERENCE_UNKNOWN)
 	{
 		if (bookmarks.bookmarks_array[first_branch].not_empty && bookmarks.bookmarks_array[second_branch].not_empty)
 		{	
-			int frame = bookmarks.bookmarks_array[first_branch].snapshot.findFirstChange(bookmarks.bookmarks_array[second_branch].snapshot);
+			int frame = bookmarks.bookmarks_array[first_branch].snapshot.inputlog.findFirstChange(bookmarks.bookmarks_array[second_branch].snapshot.inputlog);
 			if (frame < 0)
-				frame = bookmarks.bookmarks_array[first_branch].snapshot.size;
+				frame = bookmarks.bookmarks_array[first_branch].snapshot.inputlog.size;
 			cached_first_difference[first_branch][second_branch] = frame;
 			cached_first_difference[second_branch][first_branch] = frame;
 			return frame;
@@ -796,7 +796,7 @@ int BRANCHES::FindFullTimelineForBranch(int branch_num)
 	{
 		cached_timelines[branch_num] = branch_num;		// by default
 		std::vector<int> candidates;
-		int temp_jump_frame, temp_parent, max_jump_frame, max_first_difference;
+		int temp_keyframe, temp_parent, max_keyframe, max_first_difference;
 		// 1 - find max_first_difference among Branches that are in the same timeline
 		max_first_difference = -1;
 		int first_diff;
@@ -805,18 +805,18 @@ int BRANCHES::FindFullTimelineForBranch(int branch_num)
 			if (i != branch_num && bookmarks.bookmarks_array[i].not_empty)
 			{
 				first_diff = GetFirstDifference(branch_num, i);
-				if (first_diff >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
+				if (first_diff >= bookmarks.bookmarks_array[i].snapshot.keyframe)
 					if (max_first_difference < first_diff)
 						max_first_difference = first_diff;
 			}
 		}
-		// 2 - find max_jump_frame among those Branches whose first_diff >= max_first_difference
-		max_jump_frame = -1;
+		// 2 - find max_keyframe among those Branches whose first_diff >= max_first_difference
+		max_keyframe = -1;
 		for (int i = TOTAL_BOOKMARKS-1; i >= 0; i--)
 		{
 			if (bookmarks.bookmarks_array[i].not_empty)
 			{
-				if (i != branch_num && GetFirstDifference(branch_num, i) >= max_first_difference && GetFirstDifference(branch_num, i) >= bookmarks.bookmarks_array[i].snapshot.jump_frame)
+				if (i != branch_num && GetFirstDifference(branch_num, i) >= max_first_difference && GetFirstDifference(branch_num, i) >= bookmarks.bookmarks_array[i].snapshot.keyframe)
 				{
 					// ensure that this candidate belongs to children/grandchildren of current_branch
 					temp_parent = parents[i];
@@ -825,17 +825,17 @@ int BRANCHES::FindFullTimelineForBranch(int branch_num)
 					if (temp_parent == branch_num)
 					{
 						candidates.push_back(i);
-						temp_jump_frame = bookmarks.bookmarks_array[i].snapshot.jump_frame;
-						if (max_jump_frame < temp_jump_frame)
-							max_jump_frame = temp_jump_frame;
+						temp_keyframe = bookmarks.bookmarks_array[i].snapshot.keyframe;
+						if (max_keyframe < temp_keyframe)
+							max_keyframe = temp_keyframe;
 					}
 				}
 			}
 		}
-		// 3 - remove those candidates who have jump_frame < max_jump_frame
+		// 3 - remove those candidates who have keyframe < max_keyframe
 		for (int i = candidates.size()-1; i >= 0; i--)
 		{
-			if (bookmarks.bookmarks_array[candidates[i]].snapshot.jump_frame < max_jump_frame)
+			if (bookmarks.bookmarks_array[candidates[i]].snapshot.keyframe < max_keyframe)
 				candidates.erase(candidates.begin() + i);
 		}
 		// 4 - get first of candidates (if there are many then it will be the Branch with highest id number)
@@ -882,21 +882,21 @@ void BRANCHES::RecalculateParents()
 {
 	// find best parent for every Branch
 	std::vector<int> candidates;
-	int temp_jump_frame, temp_parent, max_jump_frame, max_first_difference;
+	int temp_keyframe, temp_parent, max_keyframe, max_first_difference;
 	for (int i1 = TOTAL_BOOKMARKS-1; i1 >= 0; i1--)
 	{
 		int i = (i1 + 1) % TOTAL_BOOKMARKS;
 		if (bookmarks.bookmarks_array[i].not_empty)
 		{
-			int jump_frame = bookmarks.bookmarks_array[i].snapshot.jump_frame;
-			// 1 - find all candidates and max_jump_frame among them
+			int keyframe = bookmarks.bookmarks_array[i].snapshot.keyframe;
+			// 1 - find all candidates and max_keyframe among them
 			candidates.resize(0);
-			max_jump_frame = -1;
+			max_keyframe = -1;
 			for (int t1 = TOTAL_BOOKMARKS-1; t1 >= 0; t1--)
 			{
 				int t = (t1 + 1) % TOTAL_BOOKMARKS;
-				temp_jump_frame = bookmarks.bookmarks_array[t].snapshot.jump_frame;
-				if (t != i && bookmarks.bookmarks_array[t].not_empty && temp_jump_frame <= jump_frame && GetFirstDifference(t, i) >= temp_jump_frame)
+				temp_keyframe = bookmarks.bookmarks_array[t].snapshot.keyframe;
+				if (t != i && bookmarks.bookmarks_array[t].not_empty && temp_keyframe <= keyframe && GetFirstDifference(t, i) >= temp_keyframe)
 				{
 					// ensure that this candidate doesn't belong to children/grandchildren of this Branch
 					temp_parent = parents[t];
@@ -906,19 +906,19 @@ void BRANCHES::RecalculateParents()
 					{
 						// all ok, this is good candidate for being the parent of the Branch
 						candidates.push_back(t);
-						if (max_jump_frame < temp_jump_frame)
-							max_jump_frame = temp_jump_frame;
+						if (max_keyframe < temp_keyframe)
+							max_keyframe = temp_keyframe;
 					}
 				}
 			}
 			if (candidates.size())
 			{
-				// 2 - remove those candidates who have jump_frame < max_jump_frame
-				// and for those who have jump_frame == max_jump_frame, find max_first_difference
+				// 2 - remove those candidates who have keyframe < max_keyframe
+				// and for those who have keyframe == max_keyframe, find max_first_difference
 				max_first_difference = -1;
 				for (int t = candidates.size()-1; t >= 0; t--)
 				{
-					if (bookmarks.bookmarks_array[candidates[t]].snapshot.jump_frame < max_jump_frame)
+					if (bookmarks.bookmarks_array[candidates[t]].snapshot.keyframe < max_keyframe)
 						candidates.erase(candidates.begin() + t);
 					else if (max_first_difference < GetFirstDifference(candidates[t], i))
 						max_first_difference = GetFirstDifference(candidates[t], i);

@@ -964,6 +964,12 @@
     <ClCompile Include="..\src\boards\116.cpp">
       <Filter>boards</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\inputlog.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\taseditor\laglog.cpp">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
@@ -1457,6 +1463,12 @@
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\inputlog.h">
+      <Filter>drivers\win\taseditor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\taseditor\laglog.h">
       <Filter>drivers\win\taseditor</Filter>
     </ClInclude>
   </ItemGroup>

@@ -245,10 +245,10 @@ void POPUP_DISPLAY::RedrawScreenshotBitmap()
 void POPUP_DISPLAY::ChangeDescrText()
 {
 	// retrieve info from the pointed bookmark's Markers
-	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.jump_frame;
-	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), frame);
+	int frame = bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.keyframe;
+	int marker_id = markers_manager.GetMarkerUp(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.markers, frame);
 	char new_text[MAX_NOTE_LEN];
-	strcpy(new_text, markers_manager.GetNote(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.GetMarkers(), marker_id).c_str());
+	strcpy(new_text, markers_manager.GetNote(bookmarks.bookmarks_array[bookmarks.item_under_mouse].snapshot.markers, marker_id).c_str());
 	SetWindowText(marker_note_descr, new_text);
 }
 

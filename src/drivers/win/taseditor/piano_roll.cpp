@@ -924,11 +924,11 @@ void PIANO_ROLL::FollowPlaybackIfNeeded()
 }
 void PIANO_ROLL::FollowUndo()
 {
-	int jump_frame = history.GetUndoHint();
-	if (taseditor_config.jump_to_undo && jump_frame >= 0)
+	int keyframe = history.GetUndoHint();
+	if (taseditor_config.jump_to_undo && keyframe >= 0)
 	{
-		if (!CheckItemVisible(jump_frame))
-			CenterListAt(jump_frame);
+		if (!CheckItemVisible(keyframe))
+			CenterListAt(keyframe);
 	}
 }
 void PIANO_ROLL::FollowSelection()
@@ -1253,7 +1253,7 @@ void PIANO_ROLL::GetDispInfo(NMLVDISPINFO* nmlvDispInfo)
 					item.pszText[2] = 0;
 				} else
 				{
-					if (taseditor_config.enable_hot_changes && history.GetCurrentSnapshot().GetHotChangeInfo(item.iItem, item.iSubItem - COLUMN_JOYPAD1_A))
+					if (taseditor_config.enable_hot_changes && history.GetCurrentSnapshot().inputlog.GetHotChangeInfo(item.iItem, item.iSubItem - COLUMN_JOYPAD1_A))
 					{
 						item.pszText[0] = 45;	// "-"
 						item.pszText[1] = 0;
@@ -1281,7 +1281,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 		{
 			// text color
 			if (taseditor_config.enable_hot_changes && cell_x >= COLUMN_JOYPAD1_A && cell_x <= COLUMN_JOYPAD4_R)
-				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
+				msg->clrText = hot_changes_colors[history.GetCurrentSnapshot().inputlog.GetHotChangeInfo(cell_y, cell_x - COLUMN_JOYPAD1_A)];
 			else
 				msg->clrText = NORMAL_TEXT_COLOR;
 			// bg color and text font
@@ -1323,7 +1323,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
 						// the frame is normal Greenzone frame
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = GREENZONE_FRAMENUM_COLOR;
@@ -1333,14 +1333,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
 						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = PALE_GREENZONE_FRAMENUM_COLOR;
 					} else 
 					{
 						// the frame is above Greenzone tail
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
 						else
 							msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
@@ -1348,7 +1348,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else
 				{
 					// the frame is below Greenzone head
-					if (greenzone.GetLagHistoryAtFrame(cell_y))
+					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 						msg->clrTextBk = VERY_PALE_LAG_FRAMENUM_COLOR;
 					else
 						msg->clrTextBk = VERY_PALE_GREENZONE_FRAMENUM_COLOR;
@@ -1378,7 +1378,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
 						// the frame is normal Greenzone frame
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR1;
@@ -1388,14 +1388,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
 						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR1;
 					} else
 					{
 						// the frame is above Greenzone tail
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
 						else
 							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
@@ -1403,7 +1403,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else
 				{
 					// the frame is below Greenzone head
-					if (greenzone.GetLagHistoryAtFrame(cell_y))
+					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR1;
 					else
 						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR1;
@@ -1433,7 +1433,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 					if (!greenzone.SavestateIsEmpty(cell_y))
 					{
 						// the frame is normal Greenzone frame
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = GREENZONE_INPUT_COLOR2;
@@ -1443,14 +1443,14 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 						|| (!greenzone.SavestateIsEmpty(cell_y & EVERY2ND) && !greenzone.SavestateIsEmpty((cell_y & EVERY2ND) + 2)))
 					{
 						// the frame is in a gap (in Greenzone tail)
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = PALE_LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = PALE_GREENZONE_INPUT_COLOR2;
 					} else
 					{
 						// the frame is above Greenzone tail
-						if (greenzone.GetLagHistoryAtFrame(cell_y))
+						if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 							msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
 						else
 							msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;
@@ -1458,7 +1458,7 @@ LONG PIANO_ROLL::CustomDraw(NMLVCUSTOMDRAW* msg)
 				} else
 				{
 					// the frame is below Greenzone head
-					if (greenzone.GetLagHistoryAtFrame(cell_y))
+					if (greenzone.laglog.GetLagInfoAtFrame(cell_y))
 						msg->clrTextBk = VERY_PALE_LAG_INPUT_COLOR2;
 					else
 						msg->clrTextBk = VERY_PALE_GREENZONE_INPUT_COLOR2;

@@ -61,7 +61,7 @@ private:
 	int lost_position_frame;
 	bool lost_position_is_stable;	// for when Greenzone invalidates several times, but the end of current segment must remain the same
 
-	bool autopause_at_the_end;
+	bool must_autopause_at_the_end;
 	bool old_emu_paused, emu_paused;
 	int old_pauseframe;
 	bool old_show_pauseframe, show_pauseframe;

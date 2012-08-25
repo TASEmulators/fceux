@@ -427,6 +427,8 @@
     <ClCompile Include="..\src\drivers\win\taseditor\editor.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\history.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\inputlog.cpp" />
+    <ClCompile Include="..\src\drivers\win\taseditor\laglog.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\markers_manager.cpp" />
     <ClCompile Include="..\src\drivers\win\taseditor\piano_roll.cpp" />
@@ -755,6 +757,8 @@
     <ClInclude Include="..\src\drivers\win\taseditor\editor.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\history.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\inputlog.h" />
+    <ClInclude Include="..\src\drivers\win\taseditor\laglog.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\markers.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\markers_manager.h" />
     <ClInclude Include="..\src\drivers\win\taseditor\piano_roll.h" />

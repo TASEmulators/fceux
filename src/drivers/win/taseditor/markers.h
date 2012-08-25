@@ -13,7 +13,7 @@ public:
 
 	void compress_data();
 	bool Get_already_compressed();
-	void Set_already_compressed(bool value);
+	void Reset_already_compressed();
 
 	// saved data
 	std::vector<std::string> notes;		// Format: 0th - note for intro (Marker 0), 1st - note for Marker1, 2nd - note for Marker2, ...

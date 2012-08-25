@@ -1,5 +1,7 @@
 // Specification file for Greenzone class
 
+#include "laglog.h"
+
 #define GREENZONE_ID_LEN 10
 
 #define TIME_BETWEEN_CLEANINGS 10000	// in milliseconds
@@ -34,10 +36,12 @@ public:
 	int FindBeginningOfGreenZone(int starting_index = 0);
 
 	int GetSize();
-	bool GetLagHistoryAtFrame(int frame);
 	std::vector<uint8>& GetSavestate(int frame);
 	void WriteSavestate(int frame, std::vector<uint8>& savestate);
 	bool SavestateIsEmpty(int frame);
+
+	// saved data
+	LAGLOG laglog;
 
 private:
 	void CollectCurrentState();
@@ -45,9 +49,8 @@ private:
 	// saved data
 	int greenZoneCount;
 	std::vector<std::vector<uint8>> savestates;
-	std::vector<uint8> lag_history;
 
 	// not saved data
 	int next_cleaning_time;
-
+	
 };

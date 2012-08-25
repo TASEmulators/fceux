@@ -5,6 +5,7 @@
 #include "../common.h"
 #include "taseditor_config.h"
 #include "taseditor_window.h"
+#include "greenzone.h"
 #include "selection.h"
 #include "markers_manager.h"
 #include "snapshot.h"
@@ -13,7 +14,6 @@
 #include "history.h"
 #include "playback.h"
 #include "recorder.h"
-#include "greenzone.h"
 #include "piano_roll.h"
 #include "taseditor_lua.h"
 #include "splicer.h"
@@ -29,7 +29,7 @@
 #define PIANO_ROLL_SAVED 16
 #define SELECTION_SAVED 32
 
-#define PROJECT_FILE_CURRENT_VERSION 1
+#define PROJECT_FILE_CURRENT_VERSION 2
 
 class TASEDITOR_PROJECT
 {

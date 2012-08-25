@@ -75,22 +75,22 @@ void TASEDITOR_LUA::InsertDelete_rows_to_Snaphot(SNAPSHOT& snapshot)
 		// apply changes to given snapshot (only insertion/deletion)
 		for (int i = 0; i < size; ++i)
 		{
-			if (pending_changes[i].frame >= snapshot.size)
+			if (pending_changes[i].frame >= snapshot.inputlog.size)
 				// expand snapshot to fit the frame
-				snapshot.insertFrames(-1, 1 + pending_changes[i].frame - snapshot.size);
+				snapshot.inputlog.insertFrames(-1, 1 + pending_changes[i].frame - snapshot.inputlog.size);
 			switch (pending_changes[i].type)
 			{
 				case LUA_CHANGE_TYPE_INSERTFRAMES:
 				{
-					snapshot.insertFrames(pending_changes[i].frame, pending_changes[i].data);
+					snapshot.inputlog.insertFrames(pending_changes[i].frame, pending_changes[i].data);
 					break;
 				}
 				case LUA_CHANGE_TYPE_DELETEFRAMES:
 				{
 					for (int t = pending_changes[i].data; t > 0; t--)
 					{
-						if (pending_changes[i].frame < snapshot.size)
-							snapshot.eraseFrame(pending_changes[i].frame);
+						if (pending_changes[i].frame < snapshot.inputlog.size)
+							snapshot.inputlog.eraseFrame(pending_changes[i].frame);
 					}
 					break;
 				}

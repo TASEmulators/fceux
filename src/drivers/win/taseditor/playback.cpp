@@ -68,7 +68,7 @@ void PLAYBACK::init()
 }
 void PLAYBACK::reset()
 {
-	autopause_at_the_end = false;
+	must_autopause_at_the_end = true;
 	must_find_current_marker = true;
 	shown_marker = 0;
 	lastCursor = currFrameCounter;
@@ -141,7 +141,7 @@ void PLAYBACK::update()
 	// pause when seeking hits pause_frame
 	if (pause_frame && currFrameCounter + 1 >= pause_frame)
 		SeekingStop();
-	else if (currFrameCounter >= GetLostPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && autopause_at_the_end && taseditor_config.autopause_at_finish)
+	else if (currFrameCounter >= GetLostPosition() && currFrameCounter >= currMovieData.getNumRecords() - 1 && must_autopause_at_the_end && taseditor_config.autopause_at_finish)
 		// pause at the end of the movie
 		PauseEmulation();
 
@@ -183,16 +183,20 @@ void PLAYBACK::update()
 		{
 			// externally unpaused - show empty progressbar
 			SetProgressbar(0, 1);
-			if (currFrameCounter < currMovieData.getNumRecords()-1)
-				autopause_at_the_end = true;
-			else
-				autopause_at_the_end = false;
 		} else
 		{
 			// externally paused - progressbar should be full
 			SetProgressbar(1, 1);
-			autopause_at_the_end = false;
 		}
+	}
+
+	// prepare to stop at the end of the movie if user unpauses emulator
+	if (emu_paused)
+	{
+		if (currFrameCounter < currMovieData.getNumRecords() - 1)
+			must_autopause_at_the_end = true;
+		else
+			must_autopause_at_the_end = false;
 	}
 
 	// update the Playback cursor

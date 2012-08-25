@@ -41,6 +41,7 @@
 #ifdef WIN32
 #include "drivers/win/common.h"
 #include "drivers/win/taseditor/selection.h"
+#include "drivers/win/taseditor/laglog.h"
 #include "drivers/win/taseditor/markers.h"
 #include "drivers/win/taseditor/snapshot.h"
 #include "drivers/win/taseditor/taseditor_lua.h"

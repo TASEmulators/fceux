@@ -204,7 +204,7 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consec
 	for (int i = start; i <= end; ++i)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(i))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(i))
 			continue;
 		value = (autofire_patterns[current_pattern][pattern_offset] != 0);
 		if (currMovieData.records[i].checkBit(joy, button) != value)
@@ -285,7 +285,7 @@ bool EDITOR::FrameColumnSetPattern()
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it))
 			continue;
 		if (autofire_patterns[current_pattern][pattern_offset])
 		{
@@ -370,7 +370,7 @@ bool EDITOR::InputColumnSetPattern(int joy, int button)
 	for(SelectionFrames::iterator it(current_selection_begin); it != current_selection_end; it++)
 	{
 		// skip lag frames
-		if (taseditor_config.pattern_skips_lag && greenzone.GetLagHistoryAtFrame(*it))
+		if (taseditor_config.pattern_skips_lag && greenzone.laglog.GetLagInfoAtFrame(*it))
 			continue;
 		currMovieData.records[*it].setBitValue(joy, button, autofire_patterns[current_pattern][pattern_offset] != 0);
 		pattern_offset++;
@@ -455,7 +455,7 @@ void EDITOR::AdjustUp(int at)
 	// reduce Piano Roll
 	piano_roll.UpdateItemCount();
 	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_UP, at);
+	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, NULL, -1);
 	greenzone.Invalidate(at);
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;
@@ -473,7 +473,7 @@ void EDITOR::AdjustDown(int at)
 			markers_changed = true;
 	}
 	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_DOWN, at);
+	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, NULL, 1);
 	greenzone.Invalidate(at);
 	if (markers_changed)
 		selection.must_find_current_marker = playback.must_find_current_marker = true;

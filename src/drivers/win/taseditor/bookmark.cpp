@@ -47,13 +47,13 @@ void BOOKMARK::free()
 bool BOOKMARK::checkDiffFromCurrent()
 {
 	// check if the Bookmark data differs from current project/MovieData/Markers/settings
-	if (not_empty && snapshot.jump_frame == currFrameCounter)
+	if (not_empty && snapshot.keyframe == currFrameCounter)
 	{
-		if (snapshot.size == currMovieData.getNumRecords() && snapshot.findFirstChange(currMovieData) < 0)
+		if (snapshot.inputlog.size == currMovieData.getNumRecords() && snapshot.inputlog.findFirstChange(currMovieData) < 0)
 		{
 			if (!snapshot.MarkersDifferFromCurrent())
 			{
-				if (snapshot.has_hot_changes == taseditor_config.enable_hot_changes)
+				if (snapshot.inputlog.has_hot_changes == taseditor_config.enable_hot_changes)
 				{
 					return false;
 				}
@@ -67,9 +67,9 @@ void BOOKMARK::set()
 {
 	// copy Input and Hotchanges
 	snapshot.init(currMovieData, taseditor_config.enable_hot_changes);
-	snapshot.jump_frame = currFrameCounter;
+	snapshot.keyframe = currFrameCounter;
 	if (taseditor_config.enable_hot_changes)
-		snapshot.copyHotChanges(&history.GetCurrentSnapshot());
+		snapshot.inputlog.copyHotChanges(&history.GetCurrentSnapshot().inputlog);
 	// copy savestate
 	savestate = greenzone.GetSavestate(currFrameCounter);
 	// save screenshot
@@ -163,6 +163,4 @@ bool BOOKMARK::skipLoad(EMUFILE *is)
 	return false;
 }
 // ----------------------------------------------------------
-
-
 
