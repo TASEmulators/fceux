@@ -61,7 +61,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts78">Программные модули (классы)</span></p>
+<p class="rvps10"><span class="rvts79">Программные модули (классы)</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">taseditor.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Main – главный шлюз между эмулятором и Тасэдитором (Main gate between emulator and Taseditor)</span></p>
@@ -127,16 +127,34 @@
 <p class="rvps10"><span class="rvts21">snapshot.cpp</span></p>
 <p class="rvps10"><span class="rvts22">Snapshot – Моментальный снимок всех редактируемых данных (Snapshot of all edited data)</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps15"><span class="rvts22">хранит всю информацию одного снимка мувика: размер и содержимое Ввода (Ввод = кнопочные нажатия + команды), снимок состояния Маркеров на момент создания снимка, номер ключевого кадра, начальный и конечный кадр операции, тип операции и текстовое описание снимка (включая время создания)</span></li>
+<li class="rvps15"><span class="rvts22">хранит всю информацию одного снимка мувика: :Журнал Ввода, Журнал Лага на момент создания снимка, номер ключевого кадра, начальный и конечный кадр операции, тип операции и текстовое описание снимка (включая время создания)</span></li>
 <li class="rvps15"><span class="rvts22">дополнительно хранит информацию о последовательной Записи/рисовании Ввода</span></li>
+<li class="rvps15"><span class="rvts22">организует создание снимка: копирование Ввода из мувика, копирование Маркеров из Менеджера Маркеров, запоминание времени создания</span></li>
+<li class="rvps15"><span class="rvts22">организует восстановление Маркеров из снимка</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></li>
+</ul>
+<p class="rvps10"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts21">inputlog.cpp</span></p>
+<p class="rvps10"><span class="rvts22">InputLog – Журнал Ввода (Log of Input)</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит снимок Ввода мувика: размер и содержимое Ввода для всех кадров (кнопочные нажатия и команды)</span></li>
 <li class="rvps15"><span class="rvts22">опционально может хранить или не хранить карту Горячих Правок</span></li>
-<li class="rvps15"><span class="rvts22">реализует детали создания снимка: копирование Ввода, опциональное копирование карты горячих правок, копирование Маркеров, запоминание времени создания</span></li>
-<li class="rvps15"><span class="rvts22">реализует детали полного/частичного восстановления данных из снимка: Ввода, карты горячих правок, Маркеров</span></li>
+<li class="rvps15"><span class="rvts22">реализует копирование Ввода из мувика себе в Журнал, а также опциональное копирование карты Горячих Правок</span></li>
+<li class="rvps15"><span class="rvts22">реализует детали полного/частичного восстановления данных из снимка: Ввода, карты Горячих Правок</span></li>
 <li class="rvps15"><span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></li>
 <li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></li>
 <li class="rvps15"><span class="rvts22">реализует поиск первого несовпадения в содержимом двух снимков или в содержимом данного снимка и текущего состояния мувика</span></li>
 <li class="rvps15"><span class="rvts22">предоставляет интерфейс для чтения отдельно взятых данных: чтение Ввода отдельного кадра, чтение любой ячейки карты горячих правок</span></li>
 <li class="rvps15"><span class="rvts22">реализует все операции с картами Горячих Правок: копирование, частичное копирование, обновление/угасание, установка новых точек на карте горячих правок, сравнением Ввода двух снимков</span></li>
+</ul>
+<p class="rvps15"><span class="rvts22"><br/></span></p>
+<p class="rvps10"><span class="rvts21">laglog.cpp</span></p>
+<p class="rvps10"><span class="rvts22">LagLog – :Журнал лага (Log og Lag appearance)</span></p>
+<ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
+<li class="rvps15"><span class="rvts22">хранит данные о наличии/отсутствии лага для каждого кадра мувика</span></li>
+<li class="rvps15"><span class="rvts22">реализует компрессию и декомпрессию хранимых данных</span></li>
+<li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки передаёт сигнал выше</span></li>
+<li class="rvps15"><span class="rvts22">предоставляет интерфейс для чтения и записи в Журнал лага</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts21">markers.cpp</span></p>
@@ -282,7 +300,7 @@
 <li class="rvps15"><span class="rvts22">сохраняет и загружает свои данные из файла проекта, при ошибке загрузки очищает данные</span></li>
 <li class="rvps15"><span class="rvts22">Регулярно следит, чтобы размер массива Маркеров был не меньше количества кадров в мувике</span></li>
 <li class="rvps15"><span class="rvts22">реализует все операции с Маркерами: установка Маркера на кадр, удаление Маркера, вставка и удаление кадров между Маркерами, усечение массива Маркеров, изменение Заметок, поиск кадра по номеру Маркера, интерфейс доступа к данным внутри снимка состояния Маркеров</span></li>
-<li class="rvps15"><span class="rvts22">реализует копирование данных между снимками состояния Маркеров (в том числе частичное копирование) и поиск первого несовпадения в содержимом двух снимков состояния Маркеров</span></li>
+<li class="rvps15"><span class="rvts22">реализует копирование данных между снимками состояния Маркеров, а также поиск первого несовпадения в содержимом двух снимков состояния Маркеров</span></li>
 <li class="rvps15"><span class="rvts22">здесь же размещается код поиска "похожих" Заметок</span></li>
 <li class="rvps15"><span class="rvts22">здесь же размещается код редактирования Заметок к Маркерам</span></li>
 <li class="rvps15"><span class="rvts22">здесь же размещается код диалога Find Note</span></li>
@@ -311,7 +329,7 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;"/>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
-<p class="rvps10"><span class="rvts78">Модификация эмулятора</span></p>
+<p class="rvps10"><span class="rvts79">Модификация эмулятора</span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">Тасэдитор требует внесения следующих модификаций в код самого эмулятора.</span></p>
@@ -321,7 +339,7 @@
 <li class="rvps10"><span class="rvts22">вызывать центральную функцию Тасэдитора после эмуляции каждого кадра, а также, когда эмулятор на паузе. Частота вызова должна быть не менее 20 раз в секунду (это требуется для плавности анимаций)</span></li>
 <li class="rvps10"><span class="rvts22">передавать системные сообщения окну Тасэдитора, в том числе сообщения клавиатурных акселераторов</span></li>
 <li class="rvps10"><span class="rvts22">если эмулятор не использует колесо мыши, он должен пересылать WM_MOUSEWHEEL Тасэдитору, а не игнорировать это сообщение. То же самое с обработкой средней кнопки</span></li>
-<li class="rvps10"><span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts74">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></li>
+<li class="rvps10"><span class="rvts22">при выходе из эмулятора, если запущен Тасэдитор, необходимо вызывать функцию AskSave(), чтобы Тасэдитор проверил наличие несохранённых изменений и позволил пользователю сохранить их. Если функция AskSave() возвращает </span><span class="rvts75">false</span><span class="rvts22">, отменять выход из эмулятора (это означает, что пользователь выбрал Отмену)</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Movie</span><span class="rvts22">:</span></p>
@@ -353,8 +371,8 @@
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Config</span><span class="rvts22">:</span></p>
 <ul style="text-indent: 30px; margin-left: 0px; list-style-position: inside;">
-<li class="rvps10"><span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать </span><span class="rvts74">taseditor_config</span><span class="rvts22"> (тогда в нём останутся настроки по умолчанию)</span></li>
-<li class="rvps10"><span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts74">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></li>
+<li class="rvps10"><span class="rvts22">при запуске эмулятор должен загружать данные </span><span class="rvts75">taseditor_config</span><span class="rvts22"> из файла общих настроек эмулятора, если же файл не найден, не трогать </span><span class="rvts75">taseditor_config</span><span class="rvts22"> (тогда в нём останутся настроки по умолчанию)</span></li>
+<li class="rvps10"><span class="rvts22">при выходе эмулятор должен сохранять данные </span><span class="rvts75">taseditor_config</span><span class="rvts22"> в файл общих настроек</span></li>
 </ul>
 <p class="rvps10"><span class="rvts22"><br/></span></p>
 <p class="rvps10"><span class="rvts22">В модуль, ответственный за </span><span class="rvts26">Lua engine</span><span class="rvts22">:</span></p>
