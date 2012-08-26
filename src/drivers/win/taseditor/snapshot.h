@@ -25,8 +25,8 @@ public:
 	LAGLOG laglog;
 	MARKERS markers;
 	int keyframe;						// for jumping when making undo
-	int start_frame;					// for consecutive Draws
-	int end_frame;						// for consecutive Draws
+	int start_frame;					// for consecutive Draws and "Related items highlighting"
+	int end_frame;						// for consecutive Draws and "Related items highlighting"
 	int consecutive_tag;				// for consecutive Recordings and Draws
 	uint32 rec_joypad_diff_bits;		// for consecutive Recordings
 	int mod_type;

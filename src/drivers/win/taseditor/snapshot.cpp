@@ -86,7 +86,8 @@ void SNAPSHOT::save(EMUFILE *os)
 	os->fwrite(&description[0], len);
 	// save InputLog data
 	inputlog.save(os);
-
+	// save LagLog data
+	laglog.save(os);
 	// save Markers data
 	markers.save(os);
 }
@@ -108,7 +109,8 @@ bool SNAPSHOT::load(EMUFILE *is)
 	description[tmp] = 0;		// add '0' because it wasn't saved in the file
 	// load InputLog data
 	if (inputlog.load(is)) return true;
-
+	// load LagLog data
+	if (laglog.load(is)) return true;
 	// load Markers data
 	if (markers.load(is)) return true;
 	return false;
@@ -130,7 +132,8 @@ bool SNAPSHOT::skipLoad(EMUFILE *is)
 	if (is->fseek(tmp1, SEEK_CUR) != 0) return true;
 	// skip InputLog data
 	if (inputlog.skipLoad(is)) return true;
-
+	// skip LagLog data
+	if (laglog.skipLoad(is)) return true;
 	// skip Markers data
 	if (markers.skipLoad(is)) return true;
 	return false;

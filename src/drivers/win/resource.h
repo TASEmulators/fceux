@@ -1124,6 +1124,9 @@
 #define ACCEL_CTRL_SPACE                40563
 #define ID_HELP_OPEN_MANUAL             40564
 #define ID_DISPLAY_FPS                  40565
+#define ID_CONFIG_AUTO                  40566
+#define ID_CONFIG_ADJUSTLAG             40567
+#define ID_CONFIG_PATTERNSKIPSLAG       40568
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1133,7 +1136,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40566
+#define _APS_NEXT_COMMAND_VALUE         40569
 #define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

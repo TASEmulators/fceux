@@ -1151,7 +1151,46 @@ LONG HISTORY::CustomDraw(NMLVCUSTOMDRAW* msg)
 	case CDDS_PREPAINT:
 		return CDRF_NOTIFYITEMDRAW;
 	case CDDS_ITEMPREPAINT:
+	{
 		msg->clrText = HISTORY_NORMAL_COLOR;
+		msg->clrTextBk = HISTORY_NORMAL_BG_COLOR;
+		// if this row is not "current History item" then check if it's "related" to current
+		int row = msg->nmcd.dwItemSpec;
+		if (row != history_cursor_pos)
+		{
+			int current_start_frame = snapshots[(history_start_pos + history_cursor_pos) % history_size].start_frame;
+			int current_end_frame = snapshots[(history_start_pos + history_cursor_pos) % history_size].end_frame;
+			int row_start_frame = snapshots[(history_start_pos + row) % history_size].start_frame;
+			int row_end_frame = snapshots[(history_start_pos + row) % history_size].end_frame;
+			if (current_end_frame >= 0)
+			{
+				if (row_end_frame >= 0)
+				{
+					// both items have defined ends, check if they intersect
+					if (row_start_frame <= current_end_frame && row_end_frame >= current_start_frame)
+						msg->clrTextBk = HISTORY_RELATED_BG_COLOR;
+				} else
+				{
+					// current item has defined end, check if the row item falls into the segment
+					if (row_start_frame >= current_start_frame && row_start_frame <= current_end_frame)
+						msg->clrTextBk = HISTORY_RELATED_BG_COLOR;
+				}
+			} else
+			{
+				if (row_end_frame >= 0)
+				{
+					// row item has defined end, check if current item falls into the segment
+					if (current_start_frame >= row_start_frame && current_start_frame <= row_end_frame)
+						msg->clrTextBk = HISTORY_RELATED_BG_COLOR;
+				} else
+				{
+					// both items don't have defined ends, check if they are at the same frame
+					if (row_start_frame == current_start_frame)
+						msg->clrTextBk = HISTORY_RELATED_BG_COLOR;
+				}
+			}
+		}
+	}
 	default:
 		return CDRF_DODEFAULT;
 	}

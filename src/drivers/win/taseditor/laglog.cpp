@@ -32,10 +32,17 @@ void LAGLOG::reset()
 void LAGLOG::compress_data()
 {
 	int len = lag_log.size() * sizeof(uint8);
-	uLongf comprlen = (len>>9)+12 + len;
-	lag_log_compressed.resize(comprlen);
-	compress(&lag_log_compressed[0], &comprlen, (uint8*)&lag_log[0], len);
-	lag_log_compressed.resize(comprlen);
+	if (len)
+	{
+		uLongf comprlen = (len>>9)+12 + len;
+		lag_log_compressed.resize(comprlen);
+		compress(&lag_log_compressed[0], &comprlen, (uint8*)&lag_log[0], len);
+		lag_log_compressed.resize(comprlen);
+	} else
+	{
+		// LagLog can be empty
+		lag_log_compressed.resize(0);
+	}
 	already_compressed = true;
 }
 bool LAGLOG::Get_already_compressed()
@@ -52,11 +59,14 @@ void LAGLOG::save(EMUFILE *os)
 	// write size
 	int size = lag_log.size();
 	write32le(size, os);
-	// write array
-	if (!already_compressed)
-		compress_data();
-	write32le(lag_log_compressed.size(), os);
-	os->fwrite(&lag_log_compressed[0], lag_log_compressed.size());
+	if (size)
+	{
+		// write array
+		if (!already_compressed)
+			compress_data();
+		write32le(lag_log_compressed.size(), os);
+		os->fwrite(&lag_log_compressed[0], lag_log_compressed.size());
+	}
 }
 // returns true if couldn't load
 bool LAGLOG::load(EMUFILE *is)
@@ -64,17 +74,23 @@ bool LAGLOG::load(EMUFILE *is)
 	int size;
 	if (read32le(&size, is))
 	{
-		lag_log.resize(size);
-		// read and uncompress array
 		already_compressed = true;
-		int comprlen;
-		uLongf destlen = size * sizeof(int);
-		if (!read32le(&comprlen, is)) return true;
-		if (comprlen <= 0) return true;
-		lag_log_compressed.resize(comprlen);
-		if (is->fread(&lag_log_compressed[0], comprlen) != comprlen) return true;
-		int e = uncompress((uint8*)&lag_log[0], &destlen, &lag_log_compressed[0], comprlen);
-		if (e != Z_OK && e != Z_BUF_ERROR) return true;
+		lag_log.resize(size);
+		if (size)
+		{
+			// read and uncompress array
+			int comprlen;
+			uLongf destlen = size * sizeof(int);
+			if (!read32le(&comprlen, is)) return true;
+			if (comprlen <= 0) return true;
+			lag_log_compressed.resize(comprlen);
+			if (is->fread(&lag_log_compressed[0], comprlen) != comprlen) return true;
+			int e = uncompress((uint8*)&lag_log[0], &destlen, &lag_log_compressed[0], comprlen);
+			if (e != Z_OK && e != Z_BUF_ERROR) return true;
+		} else
+		{
+			lag_log_compressed.resize(0);
+		}
 		// all ok
 		return false;
 	}
@@ -82,12 +98,15 @@ bool LAGLOG::load(EMUFILE *is)
 }
 bool LAGLOG::skipLoad(EMUFILE *is)
 {
-	if (!(is->fseek(sizeof(int), SEEK_CUR)))
+	int size;
+	if (read32le(&size, is))
 	{
-		// read array
-		int comprlen;
-		if (!read32le(&comprlen, is)) return true;
-		if (is->fseek(comprlen, SEEK_CUR) != 0) return true;
+		if (size)
+		{
+			// skip array
+			if (!read32le(&size, is)) return true;
+			if (is->fseek(size, SEEK_CUR) != 0) return true;
+		}
 		// all ok
 		return false;
 	}
