@@ -6,8 +6,6 @@
 #define BUTTON_CLOSE                    1
 #define BTN_CLOSE                       1
 #define IDB_CLOSE_LOG                   1
-#define IDB_CLOSE_LOG2                  2
-#define IDB_CLEAR_LOG                   2
 #define MENU_OPEN_FILE                  100
 #define EDIT_ROMS                       100
 #define LBL_LOG_TEXT                    100
@@ -1127,6 +1125,8 @@
 #define ID_CONFIG_AUTO                  40566
 #define ID_CONFIG_ADJUSTLAG             40567
 #define ID_CONFIG_PATTERNSKIPSLAG       40568
+#define CLEAR_LOG						40569
+#define CLOSE_LOG						40570
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426
@@ -1136,7 +1136,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        289
-#define _APS_NEXT_COMMAND_VALUE         40569
+#define _APS_NEXT_COMMAND_VALUE         40571
 #define _APS_NEXT_CONTROL_VALUE         1282
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

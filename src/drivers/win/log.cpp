@@ -97,10 +97,10 @@ BOOL CALLBACK LogCon(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			if (HIWORD(wParam) == BN_CLICKED)
 			{
-				if (LOWORD(wParam) == IDB_CLEAR_LOG)
+				if (LOWORD(wParam) == CLEAR_LOG)
 				{
 					ClearLog();
-				} else if (LOWORD(wParam) == IDB_CLOSE_LOG)
+				} else
 				{
 					DestroyWindow(hwndDlg);
 					// Clear the handle
