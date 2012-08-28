@@ -87,7 +87,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>defaultconfig\SubWCRev.bat</Command>
+      <Command>SubWCRev.bat</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -127,7 +127,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>defaultconfig\SubWCRev.bat</Command>
+      <Command>SubWCRev.bat</Command>
+      <Message>write current revision number to placeholders</Message>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Full</Optimization>

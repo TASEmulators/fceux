@@ -1,3 +1,6 @@
+26-Aug-2012 - AnS - Taseditor: History Log highlights items related to current item
+25-Aug-2012 - AnS - Taseditor: fixed AdjustLag feature and changed fm3 version to v2
+22-Aug-2012 - AnS - added "Clear" button to Message Log
 20-Aug-2012 - AnS - "Switch fullscreen by double-click" option in GUI config
 20-Aug-2012 - AnS - "Hide mouse cursor" and "Use console BG color for empty areas" options
 20-Aug-2012 - AnS - total revamp of Video config stuff, Best Fit also works for fullscreen mode

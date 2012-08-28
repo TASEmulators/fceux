@@ -27,7 +27,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="defaultconfig\SubWCRev.bat"
+				CommandLine="SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -197,7 +197,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="defaultconfig\SubWCRev.bat"
+				CommandLine="SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -369,7 +369,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="defaultconfig\SubWCRev.bat"
+				CommandLine="SubWCRev.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
