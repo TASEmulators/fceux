@@ -1844,6 +1844,22 @@
 						>
 					</File>
 					<File
+						RelativePath="..\src\drivers\win\taseditor\inputlog.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\inputlog.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\laglog.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\drivers\win\taseditor\laglog.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\drivers\win\taseditor\markers.cpp"
 						>
 					</File>
