@@ -46,6 +46,8 @@ static int ntsccol=0;
 static int ntsctint=46+10;
 static int ntschue=72;
 
+bool force_grayscale = false;
+
 /* These are dynamically filled/generated palettes: */
 pal palettei[64];       // Custom palette for an individual game.
 pal palettec[64];       // Custom "global" palette.  

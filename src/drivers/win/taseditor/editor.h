@@ -19,9 +19,6 @@ public:
 	void SetMarkers();
 	void RemoveMarkers();
 
-	void AdjustUp(int at);
-	void AdjustDown(int at);
-
 	std::vector<std::string> autofire_patterns_names;
 	std::vector<std::vector<uint8>> autofire_patterns;
 

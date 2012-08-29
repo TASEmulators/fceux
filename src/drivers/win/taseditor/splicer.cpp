@@ -110,6 +110,7 @@ void SPLICER::CloneFrames()
 	if (!frames) return;
 
 	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
+	int i;
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive Selection lines are accounted as single region
@@ -125,6 +126,7 @@ void SPLICER::CloneFrames()
 		{
 			// end of current region
 			currMovieData.cloneRegion(*it, frames);
+			greenzone.laglog.InsertFrame(*it, false, frames);
 			if (taseditor_config.bind_markers)
 			{
 				// Markers are not cloned
@@ -173,6 +175,7 @@ void SPLICER::InsertFrames()
 		{
 			// end of current region
 			currMovieData.insertEmpty(*it, frames);
+			greenzone.laglog.InsertFrame(*it, false, frames);
 			if (taseditor_config.bind_markers)
 			{
 				if (markers_manager.insertEmpty(*it, frames))
@@ -218,6 +221,7 @@ void SPLICER::InsertNumFrames()
 				index = currFrameCounter;
 			}
 			currMovieData.insertEmpty(index, frames);
+			greenzone.laglog.InsertFrame(index, false, frames);
 			if (taseditor_config.bind_markers)
 			{
 				if (markers_manager.insertEmpty(index, frames))
@@ -233,7 +237,7 @@ void SPLICER::InsertNumFrames()
 					selection.SetRowSelection((*it) + frames);
 			}
 			// check and register changes
-			int first_changes = history.RegisterInsertNum(index, frames);
+			int first_changes = history.RegisterChanges(MODTYPE_INSERTNUM, index, -1, frames);
 			if (first_changes >= 0)
 			{
 				greenzone.InvalidateAndCheck(first_changes);
@@ -261,6 +265,7 @@ void SPLICER::DeleteFrames()
 	for(SelectionFrames::reverse_iterator it(current_selection->rbegin()); it != current_selection_rend; it++)
 	{
 		currMovieData.records.erase(currMovieData.records.begin() + *it);
+		greenzone.laglog.EraseFrame(*it);
 		if (taseditor_config.bind_markers)
 		{
 			if (markers_manager.EraseMarker(*it))
@@ -329,7 +334,7 @@ void SPLICER::Truncate()
 			}
 		}
 		piano_roll.UpdateItemCount();
-		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame+1);
+		int result = history.RegisterChanges(MODTYPE_TRUNCATE, frame + 1);
 		if (result >= 0)
 		{
 			greenzone.InvalidateAndCheck(result);
@@ -433,10 +438,9 @@ bool SPLICER::Paste()
 
 	if (!OpenClipboard(taseditor_window.hwndTasEditor)) return false;
 
-	SelectionFrames::iterator current_selection_begin(current_selection->begin());
 	int num_joypads = joysticks_per_frame[GetInputType(currMovieData)];
 	bool result = false;
-	int pos = *current_selection_begin;
+	int pos = *(current_selection->begin());
 	HANDLE hGlobal = GetClipboardData(CF_TEXT);
 	if (hGlobal)
 	{
@@ -459,7 +463,7 @@ bool SPLICER::Paste()
 			uint8 new_buttons = 0;
 			std::vector<uint8> flash_joy(num_joypads);
 			char* frame;
-			--pos;
+			pos--;
 			while (pGlobal++ && *pGlobal!='\0')
 			{
 				// Detect skipped frames in paste
@@ -472,7 +476,7 @@ bool SPLICER::Paste()
 					if (*frame=='|') ++frame;
 				} else
 				{
-					++pos;
+					pos++;
 				}
 				
 				if (taseditor_config.superimpose == SUPERIMPOSE_UNCHECKED)
@@ -500,7 +504,7 @@ bool SPLICER::Paste()
 							flash_joy[joy] |= new_buttons;		// highlight buttons that were added
 							currMovieData.records[pos].joysticks[joy] = new_buttons;
 						}
-						++joy;
+						joy++;
 						new_buttons = 0;
 						break;
 					default:
@@ -514,7 +518,7 @@ bool SPLICER::Paste()
 						}
 						break;
 					}
-					++frame;
+					frame++;
 				}
 				// before going to next frame, flush buttons to movie data
 				if (taseditor_config.superimpose == SUPERIMPOSE_CHECKED || (taseditor_config.superimpose == SUPERIMPOSE_INDETERMINATE && new_buttons == 0))
@@ -530,7 +534,7 @@ bool SPLICER::Paste()
 				pGlobal = strchr(pGlobal, '\n');
 			}
 
-			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *current_selection_begin));
+			greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PASTE, *(current_selection->begin()), pos));
 			// flash Piano Roll header columns that were changed during paste
 			for (int joy = 0; joy < num_joypads; ++joy)
 			{
@@ -583,7 +587,7 @@ bool SPLICER::PasteInsert()
 			char* frame;
 			int joy=0;
 			std::vector<uint8> flash_joy(num_joypads);
-			--pos;
+			pos--;
 			while (pGlobal++ && *pGlobal!='\0')
 			{
 				// Detect skipped frames in paste
@@ -601,11 +605,12 @@ bool SPLICER::PasteInsert()
 					if (*frame=='|') ++frame;
 				} else
 				{
-					++pos;
+					pos++;
 				}
 				
 				// insert new frame
 				currMovieData.insertEmpty(pos, 1);
+				greenzone.laglog.InsertFrame(pos, false, 1);
 				if (taseditor_config.bind_markers)
 				{
 					if (markers_manager.insertEmpty(pos, 1))
@@ -620,7 +625,7 @@ bool SPLICER::PasteInsert()
 					switch (*frame)
 					{
 					case '|': // Joystick mark
-						++joy;
+						joy++;
 						break;
 					default:
 						for (int bit = 0; bit < NUM_JOYPAD_BUTTONS; ++bit)
@@ -634,13 +639,13 @@ bool SPLICER::PasteInsert()
 						}
 						break;
 					}
-					++frame;
+					frame++;
 				}
 
 				pGlobal = strchr(pGlobal, '\n');
 			}
 			markers_manager.update();
-			int first_changes = history.RegisterPasteInsert(*current_selection_begin, inserted_set);
+			int first_changes = history.RegisterChanges(MODTYPE_PASTEINSERT, *current_selection_begin, -1, 0, NULL, 0, &inserted_set);
 			if (first_changes >= 0)
 			{
 				greenzone.InvalidateAndCheck(first_changes);
@@ -669,6 +674,51 @@ bool SPLICER::PasteInsert()
 	}
 	CloseClipboard();
 	return result;
+}
+
+// these two functions don't restore Playback cursor, they only invalidate Greenzone
+void SPLICER::AdjustUp(int at)
+{
+	if (at < 0)
+		return;
+	bool markers_changed = false;
+	// delete one frame of lag
+	currMovieData.records.erase(currMovieData.records.begin() + at);
+	greenzone.laglog.EraseFrame(at);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.EraseMarker(at))
+			markers_changed = true;
+	}
+	// check if user deleted all frames
+	if (!currMovieData.getNumRecords())
+		playback.StartFromZero();
+	// reduce Piano Roll
+	piano_roll.UpdateItemCount();
+	// check and register changes
+	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, -1);
+	greenzone.Invalidate(at);
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
+}
+void SPLICER::AdjustDown(int at)
+{
+	if (at < 0)
+		return;
+	bool markers_changed = false;
+	// insert blank frame with lag
+	currMovieData.insertEmpty(at, 1);
+	greenzone.laglog.InsertFrame(at, true, 1);
+	if (taseditor_config.bind_markers)
+	{
+		if (markers_manager.insertEmpty(at, 1))
+			markers_changed = true;
+	}
+	// check and register changes
+	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, 1);
+	greenzone.Invalidate(at);
+	if (markers_changed)
+		selection.must_find_current_marker = playback.must_find_current_marker = true;
 }
 // ----------------------------------------------------------------------------------------------
 // retrieves some information from clipboard to clipboard_selection

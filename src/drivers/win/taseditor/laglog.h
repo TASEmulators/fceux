@@ -15,8 +15,8 @@ public:
 	bool skipLoad(EMUFILE *is);
 
 	void SetLagInfo(int frame, bool lagFlag);
-	void EraseLagFrame(int frame);
-	void InsertLagFrame(int frame);
+	void EraseFrame(int frame);
+	void InsertFrame(int frame, bool lagFlag, int frames = 1);
 
 	int GetSize();
 	bool GetLagInfoAtFrame(int frame);

@@ -104,6 +104,7 @@ extern int srendlinep;
 extern int erendlinep;
 
 extern int ntsccol, ntsctint, ntschue;
+extern bool force_grayscale;
 
 //mbg merge 7/17/06 did these have to be unsigned?
 //static int srendline, erendline;

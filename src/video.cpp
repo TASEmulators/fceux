@@ -761,7 +761,7 @@ void ShowFPS(void)
 	boop[boopcount] = FCEUD_GetTime();
 
 	sprintf(fpsmsg, "%7.1f",(double)booplimit / ((double)da / FCEUD_GetTimeFreq()));
-	DrawTextTrans(ClipSidesOffset + XBuf + ((256 - 2 * ClipSidesOffset) -  7 * 8) + (FSettings.FirstSLine+4)*256, 256, (uint8*)fpsmsg, 4);
+	DrawTextTrans(ClipSidesOffset + XBuf + ((256 - 2 * ClipSidesOffset) -  7 * 8) + (FSettings.FirstSLine+4)*256, 256, (uint8*)fpsmsg, 7);
 	// It's not averaging FPS over exactly 1 second, but it's close enough.
 	boopcount = (boopcount + 1) % booplimit;
 }

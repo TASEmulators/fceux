@@ -67,9 +67,7 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 		case WM_INITDIALOG:
 
 			if(ntsccol)
-			{
 				CheckDlgButton(hwndDlg, CHECK_PALETTE_ENABLED, BST_CHECKED);
-			}
 
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
 			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETRANGE, 1, MAKELONG(0, 128));
@@ -78,6 +76,9 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 			SendDlgItemMessage(hwndDlg, CTL_TINT_TRACKBAR, TBM_SETPOS, 1, ntsctint);
 			SendDlgItemMessage(hwndDlg, CTL_HUE_TRACKBAR, TBM_SETPOS, 1, ntschue);
+
+			if(force_grayscale)
+				CheckDlgButton(hwndDlg, CHECK_PALETTE_GRAYSCALE, BST_CHECKED);
 
 			EnableWindow(GetDlgItem(hwndDlg, BTN_PALETTE_RESET), (eoptions & EO_CPALETTE) ? 1 : 0);
 
@@ -102,6 +103,11 @@ BOOL CALLBACK PaletteConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				{
 					case CHECK_PALETTE_ENABLED:
 						ntsccol ^= 1;
+						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
+						break;
+
+					case CHECK_PALETTE_GRAYSCALE:
+						force_grayscale ^= 1;
 						FCEUI_SetNTSCTH(ntsccol, ntsctint, ntschue);
 						break;
 

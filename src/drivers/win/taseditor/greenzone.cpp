@@ -29,7 +29,7 @@ extern TASEDITOR_PROJECT project;
 extern PLAYBACK playback;
 extern BOOKMARKS bookmarks;
 extern PIANO_ROLL piano_roll;
-extern EDITOR editor;
+extern SPLICER splicer;
 
 extern char lagFlag;
 
@@ -91,8 +91,7 @@ void GREENZONE::CollectCurrentState()
 			if (old_lagFlag && !lagFlag)
 			{
 				// there's no more lag on previous frame - shift Input up
-				laglog.EraseLagFrame(currFrameCounter - 1);
-				editor.AdjustUp(currFrameCounter - 1);
+				splicer.AdjustUp(currFrameCounter - 1);
 				// since AdjustUp didn't restore Playback cursor, we must rewind here
 				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 				int saved_pause_frame = playback.GetPauseFrame();
@@ -104,8 +103,7 @@ void GREENZONE::CollectCurrentState()
 			} else if (!old_lagFlag && lagFlag)
 			{
 				// there's new lag on previous frame - shift Input down
-				laglog.InsertLagFrame(currFrameCounter - 1);
-				editor.AdjustDown(currFrameCounter - 1);
+				splicer.AdjustDown(currFrameCounter - 1);
 				// since AdjustDown didn't restore Playback cursor, we must rewind here
 				bool emu_was_paused = (FCEUI_EmulationPaused() != 0);
 				int saved_pause_frame = playback.GetPauseFrame();

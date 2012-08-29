@@ -19,6 +19,9 @@ public:
 	bool Paste();
 	bool PasteInsert();
 
+	void AdjustUp(int at);
+	void AdjustDown(int at);
+
 	void RedrawTextClipboard();
 
 	SelectionFrames& GetClipboardSelection();

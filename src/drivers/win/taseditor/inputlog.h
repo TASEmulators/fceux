@@ -42,7 +42,7 @@ public:
 	void inheritHotChanges_InsertSelection(INPUTLOG* source_of_hotchanges);
 	void inheritHotChanges_DeleteNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
 	void inheritHotChanges_InsertNum(INPUTLOG* source_of_hotchanges, int start, int frames, bool fade_old);
-	void inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames& inserted_set);
+	void inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames* inserted_set);
 	void fillHotChanges(INPUTLOG& their_log, int start = 0, int end = -1);
 
 	void SetMaxHotChange_Bits(int frame, int joypad, uint8 joy_bits);

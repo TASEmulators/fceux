@@ -62,13 +62,15 @@ void SNAPSHOT::compress_data()
 {
 	if (!inputlog.Get_already_compressed())
 		inputlog.compress_data();
+	if (!laglog.Get_already_compressed())
+		laglog.compress_data();
 	if (!markers.Get_already_compressed())
 		markers.compress_data();
 }
 bool SNAPSHOT::Get_already_compressed()
 {
 	// only consider this snapshot fully compressed when all of InputLog, LagLog and Markers are compressed
-	return (inputlog.Get_already_compressed() && markers.Get_already_compressed());
+	return (inputlog.Get_already_compressed() && laglog.Get_already_compressed() && markers.Get_already_compressed());
 }
 
 void SNAPSHOT::save(EMUFILE *os)

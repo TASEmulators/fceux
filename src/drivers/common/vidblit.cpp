@@ -191,8 +191,7 @@ int InitBlitToHigh(int b, uint32 rmask, uint32 gmask, uint32 bmask, int efx, int
    palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
   else if(Bpp>=3)
    palettetranslate=(uint32 *)FCEU_dmalloc(65536*4);
- }
- else
+ } else
  {
   if(Bpp==2)
    palettetranslate=(uint32*)FCEU_dmalloc(65536*4);

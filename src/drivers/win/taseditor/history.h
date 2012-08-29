@@ -106,11 +106,11 @@ public:
 	void undo();
 	void redo();
 
-	int RegisterChanges(int mod_type, int start = 0, int end =-1, const char* comment = NULL, int consecutive_tag = 0);
-	int RegisterInsertNum(int start, int frames);
-	int RegisterPasteInsert(int start, SelectionFrames& inserted_set);
+	int RegisterChanges(int mod_type, int start = 0, int end =-1, int size = 0, const char* comment = NULL, int consecutive_tag = 0, SelectionFrames* frameset = NULL);
 	void RegisterMarkersChange(int mod_type, int start = 0, int end =-1, const char* comment = 0);
+
 	void RegisterBookmarkSet(int slot, BOOKMARK& backup_copy, int old_current_branch);
+	
 	int RegisterBranching(int slot, bool markers_changed);
 	void RegisterRecording(int frame_of_change);
 	int RegisterImport(MovieData& md, char* filename);

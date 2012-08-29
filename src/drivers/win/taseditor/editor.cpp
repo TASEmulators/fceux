@@ -173,13 +173,13 @@ void EDITOR::InputToggle(int start, int end, int joy, int button, int consecutiv
 		// clear range
 		for (int i = start; i <= end; ++i)
 			currMovieData.records[i].clearBit(joy, button);
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, start, end, NULL, consecutive_tag));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, start, end, 0, NULL, consecutive_tag));
 	} else
 	{
 		// set range
 		for (int i = start; i <= end; ++i)
 			currMovieData.records[i].setBit(joy, button);
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, start, end, NULL, consecutive_tag));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, start, end, 0, NULL, consecutive_tag));
 	}
 }
 void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consecutive_tag)
@@ -217,7 +217,7 @@ void EDITOR::InputSetPattern(int start, int end, int joy, int button, int consec
 			pattern_offset -= autofire_patterns[current_pattern].size();
 	}
 	if (changes_made)
-		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
+		greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_PATTERN, start, end, 0, autofire_patterns_names[current_pattern].c_str(), consecutive_tag));
 }
 
 // following functions use current Selection to determine range of frames
@@ -377,7 +377,7 @@ bool EDITOR::InputColumnSetPattern(int joy, int button)
 		if (pattern_offset >= (int)autofire_patterns[current_pattern].size())
 			pattern_offset -= autofire_patterns[current_pattern].size();
 	}
-	int first_changes = history.RegisterChanges(MODTYPE_PATTERN, *current_selection_begin, *current_selection->rbegin(), autofire_patterns_names[current_pattern].c_str());
+	int first_changes = history.RegisterChanges(MODTYPE_PATTERN, *current_selection_begin, *current_selection->rbegin(), 0, autofire_patterns_names[current_pattern].c_str());
 	if (first_changes >= 0)
 	{
 		greenzone.InvalidateAndCheck(first_changes);
@@ -435,50 +435,5 @@ void EDITOR::RemoveMarkers()
 		}
 	}
 }
-
-// these two functions don't restore Playback cursor, they only invalidate Greenzone
-void EDITOR::AdjustUp(int at)
-{
-	if (at < 0)
-		return;
-	bool markers_changed = false;
-	// delete one frame
-	currMovieData.records.erase(currMovieData.records.begin() + at);
-	if (taseditor_config.bind_markers)
-	{
-		if (markers_manager.EraseMarker(at))
-			markers_changed = true;
-	}
-	// check if user deleted all frames
-	if (!currMovieData.getNumRecords())
-		playback.StartFromZero();
-	// reduce Piano Roll
-	piano_roll.UpdateItemCount();
-	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, NULL, -1);
-	greenzone.Invalidate(at);
-	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-}
-void EDITOR::AdjustDown(int at)
-{
-	if (at < 0)
-		return;
-	bool markers_changed = false;
-	// insert blank frame
-	currMovieData.insertEmpty(at, 1);
-	if (taseditor_config.bind_markers)
-	{
-		if (markers_manager.insertEmpty(at, 1))
-			markers_changed = true;
-	}
-	// check and register changes
-	history.RegisterChanges(MODTYPE_ADJUST_LAG, at, -1, NULL, 1);
-	greenzone.Invalidate(at);
-	if (markers_changed)
-		selection.must_find_current_marker = playback.must_find_current_marker = true;
-}
 // ----------------------------------------------------------------------------------------------
-
-
 

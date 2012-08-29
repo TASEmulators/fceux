@@ -49,6 +49,8 @@
 #define IDC_ROMPATCHER_OFFSET           102
 #define IDC_NTVIEW_SCANLINE             102
 #define IDC_ASSEMBLER_PATCH_DISASM      102
+#define CHECK_PALETTE_ENABLED2          102
+#define CHECK_PALETTE_GRAYSCALE         102
 #define BTN_CDLOGGER_RESET              103
 #define LBL_PPUVIEW_TILE1               103
 #define IDC_CHEAT_VAL                   103
@@ -1125,8 +1127,8 @@
 #define ID_CONFIG_AUTO                  40566
 #define ID_CONFIG_ADJUSTLAG             40567
 #define ID_CONFIG_PATTERNSKIPSLAG       40568
-#define CLEAR_LOG						40569
-#define CLOSE_LOG						40570
+#define CLEAR_LOG                       40569
+#define CLOSE_LOG                       40570
 #define IDC_DEBUGGER_ICONTRAY           55535
 #define MW_ValueLabel2                  65423
 #define MW_ValueLabel1                  65426

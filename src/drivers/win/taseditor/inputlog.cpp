@@ -664,16 +664,19 @@ void INPUTLOG::inheritHotChanges_InsertNum(INPUTLOG* source_of_hotchanges, int s
 	// fill the gap with max_hot lines on frames from "start" to "start+frames"
 	memset(&hot_changes[bytes * start], 0xFF, bytes * frames);
 }
-void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames& inserted_set)
+void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, SelectionFrames* inserted_set)
 {
 	// copy hot changes from source InputLog and insert filled lines for inserted frames (which are represented by inserted_set)
+	int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
+	int frame = 0, pos = 0;
+	int this_size = hot_changes.size();
+	SelectionFrames::iterator it(inserted_set->begin());
+	SelectionFrames::iterator inserted_set_end(inserted_set->end());
+
 	if (source_of_hotchanges && source_of_hotchanges->has_hot_changes && source_of_hotchanges->input_type == input_type)
 	{
-		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
-		int frame = 0, pos = 0, source_pos = 0;
-		int this_size = hot_changes.size(), source_size = source_of_hotchanges->hot_changes.size();
-		SelectionFrames::iterator it(inserted_set.begin());
-		SelectionFrames::iterator inserted_set_end(inserted_set.end());
+		int source_pos = 0;
+		int source_size = source_of_hotchanges->hot_changes.size();
 		while (pos < this_size)
 		{
 			if (it != inserted_set_end && frame == *it)
@@ -695,11 +698,6 @@ void INPUTLOG::inheritHotChanges_PasteInsert(INPUTLOG* source_of_hotchanges, Sel
 	} else
 	{
 		// no old data, just fill selected lines
-		int bytes = joysticks_per_frame[input_type] * HOTCHANGE_BYTES_PER_JOY;
-		int frame = 0, pos = 0;
-		int this_size = hot_changes.size();
-		SelectionFrames::iterator it(inserted_set.begin());
-		SelectionFrames::iterator inserted_set_end(inserted_set.end());
 		while (pos < this_size)
 		{
 			if (it != inserted_set_end && frame == *it)

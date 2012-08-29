@@ -663,9 +663,9 @@ void PIANO_ROLL::update()
 					if (changes_made)
 					{
 						if (drag_mode == DRAG_MODE_SET)
-							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index, NULL, drawing_start_time));
+							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_SET, min_row_index, max_row_index, 0, NULL, drawing_start_time));
 						else
-							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index, NULL, drawing_start_time));
+							greenzone.InvalidateAndCheck(history.RegisterChanges(MODTYPE_UNSET, min_row_index, max_row_index, 0, NULL, drawing_start_time));
 					}
 				}
 				drawing_last_x = drawing_current_x;
