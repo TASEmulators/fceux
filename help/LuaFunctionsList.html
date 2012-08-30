@@ -59,13 +59,13 @@
 <p><br/></p>
 <p><span class="rvts49">Emu library</span></p>
 <p><br/></p>
-<p><span class="rvts58">emu.poweron()</span></p>
-<p><span class="rvts57"><br/></span></p>
-<p><span class="rvts57">Executes a power cycle.</span></p>
-<p><span class="rvts57"><br/></span></p>
-<p><span class="rvts58">emu.softreset()</span></p>
-<p><span class="rvts57"><br/></span></p>
-<p><span class="rvts57">Executes a (soft) reset.</span></p>
+<p><span class="rvts57">emu.poweron()</span></p>
+<p><span class="rvts56"><br/></span></p>
+<p><span class="rvts56">Executes a power cycle.</span></p>
+<p><span class="rvts56"><br/></span></p>
+<p><span class="rvts57">emu.softreset()</span></p>
+<p><span class="rvts56"><br/></span></p>
+<p><span class="rvts56">Executes a (soft) reset.</span></p>
 <p><br/></p>
 <p><span class="rvts50">emu.speedmode(string mode)</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -190,11 +190,13 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">You can avoid getting LUA data by putting the data into a function, and feeding the function name to emu.registerbefore.</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37"><br/></span></p>
 <p><span class="rvts49">FCEU library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">The FCEU library is the same as the emu library. It is left in for backwards compatibility. However, the emu library is preferred.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts52">ROM Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts59">ROM Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">rom.readbyte(int address)</span></p>
 <p><span class="rvts50">rom.readbyteunsigned(int address)</span></p>
@@ -209,7 +211,8 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">This includes the header! It's the same as opening the file in a hex-editor.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts52">Memory Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts59">Memory Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">memory.readbyte(int address)</span></p>
 <p><span class="rvts50">memory.readbyteunsigned(int address)</span></p>
@@ -249,6 +252,8 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Registers a function to be called immediately whenever the given memory address range is written to.</span></p>
 <p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37">address is the address in CPU address space (0x0000 - 0xFFFF).</span></p>
+<p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">size is the number of bytes to "watch". For example, if size is 100 and address is 0x0200, then you will register the function across all 100 bytes from 0x0200 to 0x0263. A write to any of those bytes will trigger the function. Having callbacks on a large range of memory addresses can be expensive, so try to use the smallest range that's necessary for whatever it is you're trying to do. If you don't specify any size then it defaults to 1.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">The callback function will receive two arguments, (address, size) indicating what write operation triggered the callback. If you don't care about that extra information then you can ignore it and define your callback function to not take any arguments. The value that was written is NOT passed into the callback function, but you can easily use any of the memory.read functions to retrieve it.</span></p>
@@ -263,9 +268,12 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Registers a function to be called immediately whenever the emulated system runs code located in the given memory address range.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37">Besides that, most of the information about memory.register applies to this function as well.</span></p>
+<p><span class="rvts37">Since "address" is the address in CPU address space (0x0000 - 0xFFFF), this doesn't take ROM banking into account, so the callback will be called for any bank, and in some cases you'll have to check current bank in your callback function.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts52">Joypad Library</span></p>
+<p><span class="rvts37">The information about memory.register applies to this function as well.</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p><span class="rvts37"><br/></span></p>
+<p class="rvps4"><span class="rvts60">Joypad Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">table joypad.get(int player)</span></p>
 <p><span class="rvts51">table joypad.read(</span><span class="rvts50">int player</span><span class="rvts51">)</span></p>
@@ -315,7 +323,7 @@
 <p><span class="rvts37">joypad.write left in for backwards compatibility with older versions of FCEU/FCEUX.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">Zapper Library</span></p>
+<p class="rvps4"><span class="rvts60">Zapper Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts51">table zapper.read()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -330,7 +338,7 @@
 <p><span class="rvts37">Note: The zapper is always controller 2 on the NES so there is no player argument to this function.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">Input Library</span></p>
+<p class="rvps4"><span class="rvts60">Input Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">table input.get()</span></p>
 <p><span class="rvts50">table input.read()</span></p>
@@ -343,7 +351,8 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Requests input from the user using a multiple-option message box. See gui.popup for complete usage and returns.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">Savestate Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p class="rvps4"><span class="rvts60">Savestate Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts51">object savestate.object(int slot = nil)</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -390,7 +399,7 @@
 <p><span class="rvts37">Returns the data associated with the given savestate (data that was earlier returned by a registered save callback) without actually loading the rest of that savestate or calling any callbacks. location should be a save slot number.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts52">Movie Library</span></p>
+<p class="rvps4"><span class="rvts60">Movie Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">bool movie.active()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -491,7 +500,8 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Returns the state of read-only. True if in playback mode, false if in record mode.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">GUI Library</span></p>
+<p><span class="rvts37"><br/></span></p>
+<p class="rvps4"><span class="rvts60">GUI Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">gui.pixel(int x, int y, type color)</span></p>
 <p><span class="rvts50">gui.drawpixel(int x, int y, type color)</span></p>
@@ -544,7 +554,7 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">This function is provided so as to allow FCEUX to not carry a copy of the gd library itself. If you want raw RGB32 access, skip the first 11 bytes (header) and then read pixels as Alpha (always 0), Red, Green, Blue, left to right then top to bottom, range is 0-255 for all colors.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts56">Warning:</span><span class="rvts37"> Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.</span></p>
+<p><span class="rvts55">Warning:</span><span class="rvts37"> Storing screen shots in memory is not recommended. Memory usage will blow up pretty quick. One screen shot string eats around 230 KB of RAM.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">gui.gdoverlay([int dx=0, int dy=0,] string str [, sx=0, sy=0, sw, sh] [, float alphamul=1.0])</span></p>
 <p><span class="rvts50">gui.image([int dx=0, int dy=0,] string str [, sx=0, sy=0, sw, sh] [, float alphamul=1.0])</span></p>
@@ -590,7 +600,7 @@
 <p><span class="rvts37">Linux users might want to install xmessage to perform the work. Otherwise the dialog will appear on the shell and that's less noticeable.</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">Sound Library</span></p>
+<p class="rvps4"><span class="rvts60">Sound Library</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts50">table sound.get()</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -661,7 +671,7 @@
 <p><span class="rvts37">}</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts48">TAS Editor Library</span></p>
+<p class="rvps4"><span class="rvts60">TAS Editor Library</span></p>
 <p><span class="rvts50"><br/></span></p>
 <p><span class="rvts50">taseditor.registerauto(function func)</span></p>
 <p><span class="rvts50">taseditor.registermanual(function func)</span></p>
@@ -693,27 +703,27 @@
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts48">Bitwise Operations</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts37">All the following functions are left for backward compatibility, since </span><a class="rvts59" href="http://bitop.luajit.org/">LuaBitOp</a><span class="rvts37"> is embedded in FCEUX.</span></p>
+<p><span class="rvts37">All the following functions are left for backward compatibility, since </span><a class="rvts58" href="http://bitop.luajit.org/">LuaBitOp</a><span class="rvts37"> is embedded in FCEUX.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts53">int AND(int n1, int n2, ..., int nn)</span></p>
-<p><span class="rvts53"><br/></span></p>
+<p><span class="rvts52">int AND(int n1, int n2, ..., int nn)</span></p>
+<p><span class="rvts52"><br/></span></p>
 <p><span class="rvts37">Binary logical AND of all the given integers. This function compensates for Lua's lack of it.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts53">int OR(int n1, int n2, ..., int nn)</span></p>
+<p><span class="rvts52">int OR(int n1, int n2, ..., int nn)</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Binary logical OR of all the given integers. This function compensates for Lua's lack of it.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts53">int XOR(int n1, int n2, ..., int nn)</span></p>
+<p><span class="rvts52">int XOR(int n1, int n2, ..., int nn)</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Binary logical XOR of all the given integers. This function compensates for Lua's lack of it.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts53">int BIT(int n1, int n2, ..., int nn)</span></p>
+<p><span class="rvts52">int BIT(int n1, int n2, ..., int nn)</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Returns an integer with the given bits turned on. Parameters should be smaller than 31.</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts54">Appendix</span></p>
+<p><span class="rvts53">Appendix</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts55">On drawing</span></p>
+<p><span class="rvts54">On drawing</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">A general warning about drawing is that it is always one frame behind unless you use gui.register. This is because you tell the emulator to paint something but it will actually paint it when generating the image for the next frame. So you see your painting, except it will be on the image of the next frame. You can prevent this with gui.register because it gives you a quick chance to paint before blitting.</span></p>
 <p><span class="rvts37"><br/></span></p>
@@ -721,7 +731,7 @@
 <p><span class="rvts37">--320x239, 8bit color (confirm?)</span></p>
 <p><span class="rvts37">256x224, 8bit color (confirm?)</span></p>
 <p><span class="rvts37"><br/></span></p>
-<p><span class="rvts55">On colors</span></p>
+<p><span class="rvts54">On colors</span></p>
 <p><span class="rvts37"><br/></span></p>
 <p><span class="rvts37">Colors can be of a few types.</span></p>
 <p><span class="rvts37">Int: use the a formula to compose the color as a number (depends on color depth)</span></p>

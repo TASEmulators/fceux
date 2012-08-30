@@ -64,9 +64,9 @@
 <li><span class="rvts22">Fixed long savestate messages containing path</span></li>
 <li><span class="rvts22">Soft reset and power switch messages</span></li>
 <li><span class="rvts22">All onscreen messages are now logged to Message Log</span></li>
-<li><span class="rvts22">Improved HUD text rendering wrapping</span></li>
 <li><span class="rvts22">Fixed wrong default palette entry</span></li>
 <li><span class="rvts22">Fixed bug when loading UNF games</span></li>
+<li><span class="rvts22">Improved HUD text rendering wrapping</span></li>
 <li><span class="rvts22">Display FPS option</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
@@ -87,6 +87,7 @@
 <p><span class="rvts24">Movies</span></p>
 <ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
 <li><span class="rvts22">Fixed old bug in "Play Movie From Beginning"</span></li>
+<li><span class="rvts22">Fixed savestates filenaming bug when working with a movie</span></li>
 <li><span class="rvts22">Added support for HUD recording in AVI dumping</span></li>
 <li><span class="rvts22">Rerecords counter display</span></li>
 <li><span class="rvts22">Config-&gt;Movie options-&gt;Always suggest Read-Only replay (for Replay dialog). No more accidental rewrites!</span></li>
@@ -126,11 +127,17 @@
 <li><span class="rvts22">Added "Maintain aspect ratio" option to Video config</span></li>
 <li><span class="rvts22">Added "Hide mouse cursor" and "Use console BG color for empty areas" options to Video config</span></li>
 <li><span class="rvts22">Added "Switch fullscreen by double-click" option to GUI config</span></li>
+<li><span class="rvts22">Added "Force Grayscale" option to Palette config</span></li>
 <li><span class="rvts22">Fixed crashes and bugs caused by 2.1.5 allowing hotkeys without ROM loaded</span></li>
 <li><span class="rvts22">Lua console now gets proper file path when selecting a file from the recent menu</span></li>
 <li><span class="rvts22">Fixed context menus to use rightclicks in context menus correctly</span></li>
 <li><span class="rvts22">Reload hotkey now also supports removing invalid filenames in Recent ROMs</span></li>
 <li><span class="rvts22">Replay dialog speedup, it doesn't search for movies in fceux root folder anymore</span></li>
+<li><span class="rvts22">Support multibyte languages for opening files through drag&amp;drop (except for Lua files)</span></li>
+<li><span class="rvts22">Loading TAS Editor projects (*.fm3) by drag&amp;drop</span></li>
+<li><span class="rvts22">Fixed bug with Input Config not displaying some key names</span></li>
+<li><span class="rvts22">Launch tools hotkeys shown in menu; general cleanup of menu/settings, changed some checkboxes to radiobuttons</span></li>
+<li><span class="rvts22">Added "Clear" button to Message Log</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
 <p><span class="rvts23">TAS Editor</span></p>
@@ -180,16 +187,6 @@
 <li><span class="rvts22">Parse cheat files with non-ASCII characters properly</span></li>
 </ul>
 <p><span class="rvts24"><br/></span></p>
-<p><span class="rvts23">GUI</span></p>
-<ul style="text-indent: 0px; margin-left: 24px; list-style-position: outside;">
-<li><span class="rvts22">Support multibyte languages for opening files through drag&amp;drop (except for Lua files)</span></li>
-<li><span class="rvts22">Loading TAS Editor projects (*.fm3) by drag&amp;drop</span></li>
-<li><span class="rvts22">Fixed bug with Input Config not displaying some key names</span></li>
-<li><span class="rvts22">Launch tools hotkeys shown in menu; general cleanup of menu/settings, changed some checkboxes to radiobuttons</span></li>
-</ul>
-<p><span class="rvts22"><br/></span></p>
-<p><span class="rvts22"><br/></span></p>
-<p><span class="rvts22"><br/></span></p>
 <p><span class="rvts22"><br/></span></p>
 <p><span class="rvts22"><br/></span></p>
 <p class="rvps2"><span class="rvts13">Created with the Personal Edition of HelpNDoc: </span><a class="rvts14" href="http://www.helpndoc.com">Free Web Help generator</a></p>
