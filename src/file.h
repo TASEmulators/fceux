@@ -1,6 +1,8 @@
 #ifndef _FCEU_FILE_H_
 #define _FCEU_FILE_H_
 
+#define MAX_MOVIEFILENAME_LEN 80
+
 #include <string>
 #include <iostream>
 #include "types.h"

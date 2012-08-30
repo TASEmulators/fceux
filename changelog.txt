@@ -1,3 +1,4 @@
+30-Aug-2012 - AnS - fixed savestates filenaming bug when working with a movie
 29-Aug-2012 - AnS - added "Force Grayscale" checkbox to Palette config
 26-Aug-2012 - AnS - Taseditor: History Log highlights items related to current item
 25-Aug-2012 - AnS - Taseditor: fixed AdjustLag feature and changed fm3 version to v2

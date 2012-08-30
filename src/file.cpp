@@ -566,7 +566,7 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 	char ret[FILENAME_MAX] = "";
 	struct stat tmpstat;
 	std::string mfnString;
-	const char* mfn;
+	const char* mfn;	// the movie filename
 
 	switch(type)
 	{
@@ -582,19 +582,21 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 			break;
 		case FCEUMKF_STATE:
 			{
-				if (bindSavestate) mfnString = GetMfn();
-				else mfnString = "";
+				if (bindSavestate)
+					mfnString = GetMfn();
+				else
+					mfnString = "";
 				
-				if (mfnString.length() < 60)	//This caps the movie filename length before adding it to the savestate filename.  
-					mfn = mfnString.c_str();	//This helps prevent possible crashes from savestate filenames of excessive length.
-					
-				else 
-					{
-					std::string mfnStringTemp = mfnString.substr(0,60);
-					mfn = mfnStringTemp.c_str();	//mfn is the movie filename
-					}
-				
-				
+				if (mfnString.length() <= MAX_MOVIEFILENAME_LEN)
+				{
+					mfn = mfnString.c_str();	
+				} else
+				{
+					//This caps the movie filename length before adding it to the savestate filename.  
+					//This helps prevent possible crashes from savestate filenames of excessive length.
+					mfnString = mfnString.substr(0, MAX_MOVIEFILENAME_LEN);
+					mfn = mfnString.c_str();
+				}
 				
 				if(odirs[FCEUIOD_STATES])
 				{
