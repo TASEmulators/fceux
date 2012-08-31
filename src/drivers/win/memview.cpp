@@ -1670,7 +1670,7 @@ LRESULT CALLBACK MemViewCallB(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		return 0;
 				  }
 
-	case WM_DESTROY :
+	case WM_CLOSE:
 		KillMemView();
 		//ReleaseDC (hwnd, mDC) ;
 		//DestroyWindow(hMemView);
