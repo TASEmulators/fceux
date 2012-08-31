@@ -590,6 +590,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\mappers\156.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\src\boards\164.cpp"
 				>
 			</File>

@@ -536,6 +536,7 @@
     <ClCompile Include="..\src\input\toprider.cpp" />
     <ClCompile Include="..\src\input\zapper.cpp" />
     <ClCompile Include="..\src\mappers\151.cpp" />
+    <ClCompile Include="..\src\mappers\156.cpp" />
     <ClCompile Include="..\src\mappers\16.cpp" />
     <ClCompile Include="..\src\mappers\17.cpp" />
     <ClCompile Include="..\src\mappers\18.cpp" />

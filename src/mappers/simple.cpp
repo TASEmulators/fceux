@@ -86,19 +86,3 @@ void Mapper96_init(void)
 // DIS23C01 Open Soft, Korea
 // Metal Force (K)
 // Buzz and Waldog (K)
-
-static DECLFW(M156Write)
-{
- if(A>=0xc000 && A<=0xC003)
-  VROM_BANK1((A&3)*1024,V);
- else if(A>=0xc008 &&  A<=0xc00b)
-  VROM_BANK1(0x1000+(A&3)*1024,V);
- if(A==0xc010) ROM_BANK16(0x8000,V);
-// printf("$%04x:$%02x\n",A,V);
-}
-
-void Mapper156_init(void)
-{
- onemir(0);
- SetWriteHandler(0xc000,0xc010,M156Write);
-}

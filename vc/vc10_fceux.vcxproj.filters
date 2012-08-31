@@ -970,6 +970,9 @@
     <ClCompile Include="..\src\drivers\win\taseditor\laglog.cpp">
       <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\mappers\156.cpp">
+      <Filter>mappers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\cart.h">
