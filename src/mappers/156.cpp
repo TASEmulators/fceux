@@ -77,12 +77,26 @@ static DECLFW(M156Write)
   }
 }
 
+static void M1566Reset()
+{
+	for(int i=0;i<8;i++)
+	{
+		chrlo[i]=0;
+		chrhi[8]=0;
+	}
+	prg=0;
+	mirr=0;
+	mirrisused = 0;
+}
+
 static void M156Power(void)
 {
   Sync();
   SetReadHandler(0x6000,0xFFFF,CartBR);
   SetWriteHandler(0x6000,0x7FFF,CartBW);
   SetWriteHandler(0xC000,0xCFFF,M156Write);
+
+	M1566Reset();
 }
 
 static void M156Close(void)
