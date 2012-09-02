@@ -127,12 +127,12 @@ void LAGLOG::SetLagInfo(int frame, bool lagFlag)
 }
 void LAGLOG::EraseFrame(int frame)
 {
-	if (lag_log.size() > frame)
+	if (frame < (int)lag_log.size())
 		lag_log.erase(lag_log.begin() + (currFrameCounter - 1));
 }
 void LAGLOG::InsertFrame(int frame, bool lagFlag, int frames)
 {
-	if (lag_log.size() > frame)
+	if (frame < lag_log.size())
 		// insert
 		lag_log.insert(lag_log.begin() + frame, frames, (lagFlag) ? 1 : 0);
 	else

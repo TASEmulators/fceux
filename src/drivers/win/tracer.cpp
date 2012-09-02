@@ -527,7 +527,7 @@ void UpdateLogWindow(void)
 
 void UpdateLogText(void){
 	int i, j;
-	char str[2048];
+	char str[3000];
 	str[0] = 0;
 	/*
 	for(i = 21;i > 0;i--){

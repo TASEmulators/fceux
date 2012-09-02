@@ -518,7 +518,8 @@ void UpdateMemoryView(int draw_all)
 	return;
 }
 
-void UpdateCaption(){
+void UpdateCaption()
+{
 	char str[100];
 	char EditString[3][20] = {"RAM","PPU Memory","ROM"};
 
@@ -1696,7 +1697,8 @@ void DoMemView() {
 	//	return;
 	//}
 
-	if (!hMemView){
+	if (!hMemView)
+	{
 		memset(&wndclass,0,sizeof(wndclass));
 		wndclass.cbSize=sizeof(WNDCLASSEX);
 		wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
@@ -1720,11 +1722,16 @@ void DoMemView() {
 			NULL,NULL,fceu_hInstance,NULL ); 
 		ShowWindow (hMemView, SW_SHOW) ;
 		UpdateCaption();
+	} else
+	{
+		SetWindowPos(hMemView, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
+		UpdateCaption();
 	}
 
 	DragAcceptFiles(hMemView, 1);
 
-	if (hMemView) {
+	if (hMemView)
+	{
 		//UpdateMemView(0);
 		//MemViewDoBlit();
 	}

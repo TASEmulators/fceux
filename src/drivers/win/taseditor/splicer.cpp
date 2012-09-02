@@ -110,7 +110,6 @@ void SPLICER::CloneFrames()
 	if (!frames) return;
 
 	selection.ClearSelection();			// Selection will be moved down, so that same frames are selected
-	int i;
 	bool markers_changed = false;
 	currMovieData.records.reserve(currMovieData.getNumRecords() + frames);
 	// insert frames before each selection, but consecutive Selection lines are accounted as single region

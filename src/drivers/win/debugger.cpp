@@ -1144,11 +1144,6 @@ void LoadGameDebuggerData(HWND hwndDlg = hDebug) {
 			}
 		}
 		
-		if (symbDebugEnabled)
-		{
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, BST_CHECKED);
-		}
-		
 		ClearBreakList(hwndDlg);
 
 		numWPs = myNumWPs;
@@ -1210,17 +1205,20 @@ BOOL CALLBACK DebuggerCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	{
 		case WM_INITDIALOG:
 		{
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_CYCLES, break_on_cycles ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_INSTRUCTIONS, break_on_instructions ? BST_CHECKED : BST_UNCHECKED);
 			sprintf(str, "%d", break_cycles_limit);
 			SetDlgItemText(hwndDlg, IDC_DEBUGGER_CYCLES_EXCEED, str);
 			sprintf(str, "%d", break_instructions_limit);
 			SetDlgItemText(hwndDlg, IDC_DEBUGGER_INSTRUCTIONS_EXCEED, str);
 
-			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_BREAK_ON_BAD_OP, FCEUI_Debugger().badopbreak ? BST_CHECKED : BST_UNCHECKED);
 
-			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? MF_CHECKED : MF_UNCHECKED);
-			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? MF_CHECKED : MF_UNCHECKED);
+			CheckDlgButton(hwndDlg, DEBUGLOADDEB, debuggerSaveLoadDEBFiles ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, DEBUGAUTOLOAD, debuggerAutoload ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ROM_OFFSETS, debuggerDisplayROMoffsets ? BST_CHECKED : BST_UNCHECKED);
+			CheckDlgButton(hwndDlg, IDC_DEBUGGER_ENABLE_SYMBOLIC, symbDebugEnabled ? BST_CHECKED : BST_UNCHECKED);
+
 			if (DbgPosX==-32000) DbgPosX=0; //Just in case
 			if (DbgPosY==-32000) DbgPosY=0;
 			SetWindowPos(hwndDlg,0,DbgPosX,DbgPosY,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOOWNERZORDER);

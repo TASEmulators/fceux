@@ -1,3 +1,5 @@
+01-Sep-2012 - AnS - fixed movie savestates logic, loading post-movie savestates is not allowed in read-only
+31-Aug-2012 - zeromus - update mapper 156 from fceu-mm sources
 30-Aug-2012 - AnS - fixed savestates filenaming bug when working with a movie
 29-Aug-2012 - AnS - added "Force Grayscale" checkbox to Palette config
 26-Aug-2012 - AnS - Taseditor: History Log highlights items related to current item

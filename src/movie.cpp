@@ -1301,8 +1301,7 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 				return false;
 			} else if (movieMode == MOVIEMODE_FINISHED
 				&& currFrameCounter > (int)currMovieData.records.size()
-				&& currMovieData.records.size() == tempMovieData.records.size()
-				&& frame_of_mismatch < 0)
+				&& currMovieData.records.size() == tempMovieData.records.size())
 			{
 				// special case (in MOVIEMODE_FINISHED mode)
 				// allow loading post-movie savestates that were made after finishing current movie
