@@ -335,7 +335,7 @@ done:
 void FCEUD_TraceInstruction(){
 	if(!logging) return;
 
-	char str_tabs[LOG_TABS_MAX_LEN], address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
+	char str_tabs[LOG_TABS_MASK+1], address[7], data[11], disassembly[LOG_DISASSEMBLY_MAX_LEN], axystate[21], procstatus[12];
 	char str[LOG_LINE_MAX_LEN];
 	int addr=X.PC;
 	int size, j;
@@ -435,9 +435,7 @@ void FCEUD_TraceInstruction(){
 	if (tracer_lines_tabbing)
 	{
 		// add spaces at the beginning of the line according to stack pointer
-		int spaces = 0xFF - X.S;
-		if (spaces >= LOG_TABS_MAX_LEN)
-			spaces = LOG_TABS_MAX_LEN - 1;
+		int spaces = (0xFF - X.S) & LOG_TABS_MASK;
 		for (int i = 0; i < spaces; i++)
 			str_tabs[i] = ' ';
 		str_tabs[spaces] = 0;

@@ -5,7 +5,7 @@
 #define LOG_NEW_DATA          8
 
 #define LOG_LINE_MAX_LEN 120
-#define LOG_TABS_MAX_LEN 40
+#define LOG_TABS_MASK 31
 #define LOG_DISASSEMBLY_MAX_LEN 30
 
 extern HWND hTracer;

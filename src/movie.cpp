@@ -1143,18 +1143,13 @@ int CheckTimelines(MovieData& stateMovie, MovieData& currMovie)
 	if (end_frame > currFrameCounter)
 		end_frame = currFrameCounter;
 
-	int x = 0;
-	for (; x < end_frame; x++)
+	for (int x = 0; x < end_frame; x++)
 	{
 		if (!stateMovie.records[x].Compare(currMovie.records[x]))
-			break;
+			return x;
 	}
-
-	if (x < end_frame)
-	{
-		return x;
-	} else
-		return -1;	// no mismatch found
+	// no mismatch found
+	return -1;
 }
 
 
