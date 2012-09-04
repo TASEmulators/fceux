@@ -82,7 +82,7 @@ static void M1566Reset()
 	for(int i=0;i<8;i++)
 	{
 		chrlo[i]=0;
-		chrhi[8]=0;
+		chrhi[i]=0;
 	}
 	prg=0;
 	mirr=0;
