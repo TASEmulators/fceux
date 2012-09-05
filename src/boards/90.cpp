@@ -50,17 +50,17 @@ static uint16 names[4];
 static uint8 tekker;
 
 static SFORMAT Tek_StateRegs[]={
-  {&IRQMode, 1, "IRQMODE"},
-  {&IRQPre, 1, "IRQPRE"},
-  {&IRQPreSize, 1, "IRQPRESIZE"},
+  {&IRQMode, 1, "IRQM"},
+  {&IRQPre, 1, "IRQP"},
+  {&IRQPreSize, 1, "IRQS"},
   {&IRQCount, 1, "IRQC"},
-  {&IRQXOR, 1, "IRQXOR"},
+  {&IRQXOR, 1, "IRQX"},
   {&IRQa, 1, "IRQa"},
   {mul, 2, "MUL"},
   {&regie, 1, "REGI"},
   {tkcom, 4, "TKCO"},
   {prgb, 4, "PRGB"},
-  {chr, 2, "CHRLATCH"},
+  {chr, 2, "CHRA"},
   {chrlow, 4, "CHRL"},
   {chrhigh, 8, "CHRH"},
   {&names[0], 2|FCEUSTATE_RLSB, "NMS0"},
