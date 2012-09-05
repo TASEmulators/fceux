@@ -313,6 +313,7 @@ static int LoadCHR(FCEUFILE *fp)
 #define BMCFLAG_FORCE4 1
 #define BMCFLAG_16KCHRR  2
 #define BMCFLAG_32KCHRR  4
+#define BMCFLAG_EXPCHRR 8
 
 static BMAPPING bmap[] = {
 
@@ -438,6 +439,9 @@ static BMAPPING bmap[] = {
 
 	{ "TEK90", Mapper90_Init,0},
 
+ { "FK23C", BMCFK23C_Init,BMCFLAG_EXPCHRR},
+ { "FK23CA", BMCFK23CA_Init,BMCFLAG_EXPCHRR},
+
 	{0,0,0}
 };
 
@@ -501,10 +505,14 @@ static int InitializeBoard(void)
 		{
 			if(!malloced[16])
 			{
-				if(bmap[x].flags & BMCFLAG_16KCHRR)
-					CHRRAMSize = 16384;
-				else
-					CHRRAMSize = 8192;
+      if(bmap[x].flags & BMCFLAG_16KCHRR)
+        CHRRAMSize = 16384;
+      else if(bmap[x].flags & BMCFLAG_32KCHRR)
+        CHRRAMSize = 32768;
+      else if(bmap[x].flags & BMCFLAG_EXPCHRR)
+        CHRRAMSize = 128 * 1024;
+      else
+        CHRRAMSize = 8192;
 				if((UNIFchrrama=(uint8 *)FCEU_malloc(CHRRAMSize)))
 				{
 					SetupCartCHRMapping(0,UNIFchrrama,CHRRAMSize,1);

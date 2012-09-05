@@ -89,6 +89,7 @@ void BMC70in1B_Init(CartInfo *info);
 void BMC13in1JY110_Init(CartInfo *info);
 void BMCT262_Init(CartInfo *info);
 void BMCFK23C_Init(CartInfo *info);
+void BMCFK23CA_Init(CartInfo *info);
 void BMCD1038_Init(CartInfo *info);
 void BMCA65AS_Init(CartInfo *info);
 void BMCGK192_Init(CartInfo *info);

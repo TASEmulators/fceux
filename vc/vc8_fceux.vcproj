@@ -592,6 +592,14 @@
 			<File
 				RelativePath="..\src\mappers\156.cpp"
 				>
+				<FileConfiguration
+					Name="Release Fastbuild|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarningLevel="4"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\boards\164.cpp"
